@@ -64,7 +64,7 @@
         'T...wwwwwwwwww....T........rr.S................p..T....T', // 30 cartello Benvenuti
         'T...wwwwwwwwww.............rr..........................T', // 31
         'T..........................rr..........................T', // 32
-        'T..........................rr..........................T', // 33 (spawn 28,33)
+        'T..........................rr..........................T', // 33
         'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 34
         'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT'  // 35
       ],

@@ -20,6 +20,16 @@
   var WALL_H = 0.95, ROOF_H = 0.85, EAVE = 0.25, IWALL_H = 1.25;
   var CAM_UP = 13.5, CAM_BACK = 9.2, CAM_FOV = 38;
   var BORDER = 8;
+  var REF_ASPECT = 1.5; // aspect di riferimento (landscape) per cui CAM_FOV e' tarato
+
+  // su schermi stretti (mobile ritratto) un FOV verticale fisso restringe troppo
+  // il FOV orizzontale (world piu' "zoomato"): lo alziamo per tenere costante
+  // il campo visivo orizzontale rispetto al riferimento landscape.
+  function fovForAspect(aspect) {
+    var baseH = 2 * Math.atan(Math.tan(CAM_FOV * Math.PI / 360) * REF_ASPECT);
+    var v = 2 * Math.atan(Math.tan(baseH / 2) / aspect) * 180 / Math.PI;
+    return Math.max(CAM_FOV, Math.min(v, 80));
+  }
 
   var worlds = {};
   var cur = null, curId = null;
@@ -682,7 +692,8 @@
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(glCanvas.width, glCanvas.height, false);
-    camera = new THREE.PerspectiveCamera(CAM_FOV, glCanvas.width / glCanvas.height, 0.1, 300);
+    var aspect0 = glCanvas.width / glCanvas.height;
+    camera = new THREE.PerspectiveCamera(fovForAspect(aspect0), aspect0, 0.1, 300);
     return true;
   };
 
@@ -691,6 +702,7 @@
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
+    camera.fov = fovForAspect(w / h);
     camera.updateProjectionMatrix();
   };
 
