@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>TWIN PEAKS — Il Mistero di Laura Palmer</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #000; height: 100%; overflow: hidden; touch-action: none; }
+  #stage { position: fixed; inset: 0; touch-action: none; }
+  #stage canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  #gl { background: #000; }
+  #game { background: transparent; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl" width="960" height="640"></canvas>
+  <canvas id="game" width="480" height="320"></canvas>
+</div>
+<!-- Script classici, nessun modulo ES: funziona da file:// -->
+<script src="js/vendor/three.min.js"></script>
+<script src="js/tiles.js"></script>
+<script src="js/chars.js"></script>
+<script src="js/houses.js"></script>
+<script src="js/maps.js"></script>
+<script src="js/data.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/render3d.js"></script>
+<script src="js/glue.js"></script>
+<script src="js/main.js"></script>
+<script src="js/touch.js"></script>
+</body>
+</html>
