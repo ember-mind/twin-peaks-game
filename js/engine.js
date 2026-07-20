@@ -588,15 +588,15 @@
     text('Il Mistero di Laura Palmer', UW / 2, 66, '#c8c8d8', '8px monospace', 'center');
     if (hasSave()) { // con un salvataggio il prompt E' la scelta: niente riga in piu'
       if (Math.floor(tGlobal / 500) % 2 === 0) {
-        text(touch ? 'TOCCA: CONTINUA' : 'INVIO: CONTINUA', UW / 2, 92, '#ffe9a8', '8px monospace', 'center');
+        text(touch ? 'TOCCA: CONTINUA' : 'INVIO: CONTINUA', UW / 2, 90, '#ffe9a8', '8px monospace', 'center');
       }
-      text(touch ? 'Pulsante B: nuova partita' : 'N: nuova partita', UW / 2, 106, '#8a8ab0', '8px monospace', 'center');
+      text(touch ? 'Pulsante B: nuova partita' : 'N: nuova partita', UW / 2, 103, '#8a8ab0', '8px monospace', 'center');
     } else if (Math.floor(tGlobal / 500) % 2 === 0) {
-      text(touch ? 'TOCCA PER INIZIARE' : 'PREMI INVIO', UW / 2, 92, '#ffe9a8', '8px monospace', 'center');
+      text(touch ? 'TOCCA PER INIZIARE' : 'PREMI INVIO', UW / 2, 90, '#ffe9a8', '8px monospace', 'center');
     }
     text(touch ? 'D-pad: muovi   A: parla   B: indizi'
                : 'Frecce: muovi   Z/Invio: parla   X: indizi',
-         UW / 2, 120, '#8a8ab0', '8px monospace', 'center');
+         UW / 2, 116, '#8a8ab0', '8px monospace', 'center'); // 116+8 = 124: 4px di margine dalla tenda
   }
 
   function drawIntro() {
