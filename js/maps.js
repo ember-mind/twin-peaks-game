@@ -89,7 +89,8 @@
         { type: 'landmark', kind: 'tracks', x: 53, y: 1, w: 2, h: 33, dialogue: 'landmark_tracks' },
         { type: 'landmark', kind: 'welcomesign', x: 30, y: 30, dialogue: 'sign_town' }
       ],
-      gate: { x: 50, y: 0, to: 'woods', tx: 14, ty: 20, dir: 'up' }
+      gate: { x: 50, y: 0, to: 'woods', tx: 14, ty: 20, dir: 'up' },
+      onEnter: { dialogue: 'town_arrivo', once: 'intro_town' }
     },
 
     sheriff: {

@@ -562,4 +562,48 @@
         break;
     }
   };
+
+  // props d'arredo interni non collidenti (pianta in vaso, appendiabiti, lampada
+  // da terra): icone a sfondo trasparente su una griglia logica 16x24 (più alta
+  // di un tile, come le insegne), stessa palette a blocchi piatti dei tile sopra.
+  S.drawProp = function (ctx, kind, x, y) {
+    switch (kind) {
+      case 'plant': // vaso in terracotta + fogliame (palette del cespuglio 'n')
+        R(ctx, x + 3, y + 18, 10, 5, '#a8683a');
+        R(ctx, x + 3, y + 18, 10, 1, '#c8865a');
+        R(ctx, x + 3, y + 22, 10, 1, '#7a4a26');
+        R(ctx, x + 4, y + 8, 8, 8, '#2e5e34');
+        R(ctx, x + 5, y + 9, 6, 6, '#3d7a42');
+        R(ctx, x + 5, y + 9, 2, 3, '#57a05a');
+        R(ctx, x + 7, y + 2, 2, 7, '#3d7a42');
+        R(ctx, x + 7, y + 2, 1, 4, '#57a05a');
+        R(ctx, x + 3, y + 4, 2, 6, '#2e5e34');
+        R(ctx, x + 11, y + 4, 2, 6, '#2e5e34');
+        break;
+      case 'coatrack': // palo di legno + 3 ganci + un cappotto appeso
+        R(ctx, x + 5, y + 21, 6, 2, '#3a2818');
+        R(ctx, x + 6, y + 22, 4, 1, '#241408');
+        R(ctx, x + 7, y + 3, 2, 19, '#5a4636');
+        R(ctx, x + 7, y + 3, 1, 19, '#7a6248');
+        R(ctx, x + 6, y + 1, 4, 2, '#3a2818');
+        R(ctx, x + 9, y + 6, 3, 1, '#3a2818');
+        R(ctx, x + 4, y + 9, 3, 1, '#3a2818');
+        R(ctx, x + 9, y + 12, 3, 1, '#3a2818');
+        R(ctx, x + 2, y + 9, 3, 7, '#2a2e3a');
+        R(ctx, x + 2, y + 9, 3, 1, '#3a3e4a');
+        R(ctx, x + 3, y + 16, 1, 2, '#1e222c');
+        break;
+      case 'lamp': // lampada da terra: base + palo + paralume acceso dall'interno
+        R(ctx, x + 5, y + 21, 6, 2, '#2e2e2e');
+        R(ctx, x + 6, y + 22, 4, 1, '#1c1c1c');
+        R(ctx, x + 7, y + 9, 2, 12, '#242424');
+        R(ctx, x + 7, y + 9, 1, 12, '#3e3e3e');
+        R(ctx, x + 6, y + 8, 4, 1, '#3e3e3e');
+        R(ctx, x + 3, y + 2, 10, 7, '#e8d8a8');
+        R(ctx, x + 3, y + 2, 10, 1, '#f8ecc8');
+        R(ctx, x + 4, y + 8, 8, 1, '#c8b078');
+        R(ctx, x + 6, y + 4, 4, 3, '#fff6d0');
+        break;
+    }
+  };
 })();

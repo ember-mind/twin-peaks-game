@@ -144,7 +144,9 @@
 
     Maps[id] = {
       id: id, rows: src.rows, width: src.width, height: src.height,
-      doors: doors, objects: objects, npcs: NPCS[id] || []
+      indoor: !!src.indoor,
+      doors: doors, objects: objects, npcs: NPCS[id] || [],
+      onEnter: src.onEnter
     };
   });
 

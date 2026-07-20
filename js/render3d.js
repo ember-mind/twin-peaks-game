@@ -18,6 +18,11 @@
   var renderer = null, camera = null;
   var TILE = 16;
   var WALL_H = 0.95, ROOF_H = 0.85, EAVE = 0.25, IWALL_H = 1.25;
+  // interni: parete anchor (fila sud, verso la camera) piu' bassa per non
+  // nascondere il giocatore vicino alla porta; tutte le altre pareti interne
+  // (perimetro nord, colonne laterali, partizioni) piu' alte per leggere bene
+  // la texture ricca. Gli esterni restano su IWALL_H, invariato.
+  var IWALL_SOUTH_H = 0.9, IWALL_TALL_H = 2.1;
   var CAM_UP = 13.5, CAM_BACK = 9.2, CAM_FOV = 38;
   var BORDER = 8;
   var REF_ASPECT = 1.5; // aspect di riferimento (landscape) per cui CAM_FOV e' tarato
@@ -1099,16 +1104,161 @@ var currentCamBack = CAM_BACK;
     c.fillRect(0, 2, w, 1);
   }
 
+  /* ---------------- muri interni: facciata ricca per stanza ---------------- */
+  /* Ogni interno ha una palette propria (legno caldo dello sceriffo, carta da
+   * parati fiorita dei Palmer, scacchiera del diner, piastrelle dell'ospedale,
+   * verde/oro del Great Northern, rosso del casinò, assi scure del roadhouse).
+   * La Loggia Nera resta la tenda 'R' esistente. Le mappe non elencate (es. il
+   * vagone) ricadono su WPAL_DEFAULT, vicino ai vecchi colori piatti. */
+  var WPAL = {
+    sheriff:   { base: '#8a6a48', wain: '#5a4230', wainLite: '#7a5c3e', wallC: '#c8a878', wallLite: '#dcbf94', trim: '#4a3320', pattern: 'plank', decal: 'frame' },
+    palmer:    { base: '#c8b088', wain: '#a88a5e', wainLite: '#bda072', wallC: '#e8d8c0', wallLite: '#f2e6d4', trim: '#8a6a48', pattern: 'floral', decal: 'frame' },
+    diner:     { base: '#2e5c58', wain: '#1c3e3a', wainLite: '#3a726c', wallC: '#e8e0c8', wallLite: '#f4ecd8', trim: '#b8bcc0', pattern: 'checker', decal: 'clock' },
+    hospital:  { base: '#c8ccd0', wain: '#aeb4ba', wainLite: '#d8dce0', wallC: '#eef0f0', wallLite: '#ffffff', trim: '#8a98a8', pattern: 'tile', decal: null },
+    hotel_gn:  { base: '#284830', wain: '#1c3220', wainLite: '#3a5c3e', wallC: '#284830', wallLite: '#38603e', trim: '#c8a848', pattern: 'stripe', decal: 'frame' },
+    oej:       { base: '#5a1018', wain: '#3a0a10', wainLite: '#701420', wallC: '#701018', wallLite: '#8a1c24', trim: '#c8a848', pattern: 'damask', decal: 'clock' },
+    roadhouse: { base: '#3a2e26', wain: '#241a12', wainLite: '#4a3a2c', wallC: '#3a2e26', wallLite: '#4a3a2c', trim: '#1c130c', pattern: 'plank', decal: null }
+  };
+  var WPAL_DEFAULT = { base: '#4a3636', wain: '#3a2828', wainLite: '#5a4242', wallC: '#4a3636', wallLite: '#5a4242', trim: '#241a1a', pattern: 'plain', decal: null };
+
+  function drawWainscot(c, pal, w, y0, hgt) {
+    var x;
+    c.fillStyle = pal.wainLite;
+    for (x = 0; x < w; x += 16) c.fillRect(x + 2, y0 + 2, 12, 1);
+    c.fillStyle = pal.trim;
+    for (x = 0; x < w; x += 16) c.fillRect(x, y0, 1, hgt);
+  }
+
+  function drawWallpaperPattern(c, pal, w, hgt, h) {
+    var x, y;
+    function F(xx, yy, ww, hh, col) { c.fillStyle = col; c.fillRect(xx, yy, ww, hh); }
+    switch (pal.pattern) {
+      case 'plank': // assi verticali chiare/scure (sceriffo, roadhouse)
+        for (x = 0; x < w; x += 16) { F(x, 0, 1, hgt, pal.wallLite); F(x + 15, 0, 1, hgt, pal.wain); }
+        break;
+      case 'floral': // carta da parati Palmer: fiorellini a griglia
+        for (y = 8; y < hgt; y += 16) {
+          for (x = 8; x < w; x += 16) {
+            if (h(x, y) % 3 === 0) { F(x - 1, y, 3, 3, pal.trim); F(x, y - 2, 1, 2, '#7a9e58'); }
+          }
+        }
+        break;
+      case 'checker': // scacchiera bassa da diner + fascia cromata in alto
+        var cs = 8;
+        for (y = hgt - cs * 2; y < hgt; y += cs) {
+          for (x = 0; x < w; x += cs) {
+            if (((x / cs) + (y / cs)) % 2 === 0) F(x, Math.max(0, y), cs, cs, pal.wallLite);
+          }
+        }
+        F(0, 4, w, 3, '#c8ccd0'); F(0, 4, w, 1, '#eef0f0');
+        break;
+      case 'tile': // piastrelle bianche dell'ospedale
+        for (x = 0; x < w; x += 16) F(x, 0, 1, hgt, pal.trim);
+        for (y = 0; y < hgt; y += 10) F(0, y, w, 1, pal.trim);
+        break;
+      case 'stripe': // righe dorate verticali del Great Northern
+        for (x = 6; x < w; x += 20) F(x, 0, 3, hgt, pal.trim);
+        break;
+      case 'damask': // motivo a losanghe di One Eyed Jacks
+        for (y = 6; y < hgt; y += 12) {
+          for (x = (Math.floor(y / 12) % 2) * 6; x < w; x += 12) F(x + 3, y, 2, 2, pal.trim);
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  function drawFrameDecal(c, cx, cy, pal, hh) {
+    var w = 14, hgt = 18;
+    c.fillStyle = pal.trim; c.fillRect(cx - w / 2 - 1, cy - hgt / 2 - 1, w + 2, hgt + 2);
+    c.fillStyle = hh % 2 ? '#c8a860' : '#7a8a98';
+    c.fillRect(cx - w / 2, cy - hgt / 2, w, hgt);
+    c.fillStyle = 'rgba(0,0,0,0.25)';
+    c.fillRect(cx - w / 2, cy + hgt / 2 - 3, w, 3);
+  }
+
+  function drawClockDecal(c, cx, cy) {
+    var r = 8;
+    c.fillStyle = '#2a1a10'; c.beginPath(); c.arc(cx, cy, r + 1, 0, 6.2832); c.fill();
+    c.fillStyle = '#f0e6cc'; c.beginPath(); c.arc(cx, cy, r, 0, 6.2832); c.fill();
+    c.fillStyle = '#2a1a10';
+    c.fillRect(cx - 1, cy - r + 2, 1, r - 2);
+    c.fillRect(cx, cy, 4, 1);
+  }
+
+  // texture della faccia sud della parete (quella che il giocatore vede): battiscopa
+  // + zoccolo/wainscot + carta da parati/pattern, con quadro/orologio opzionale.
+  // Cache per (mappa, larghezza del run, altezza del muro) cosi' le pareti lunghe
+  // restano nitide e non si rigenera la stessa texture piu' volte. L'altezza e'
+  // parametrica (non piu' legata a IWALL_H): 32px/unita' mondo in entrambi gli assi,
+  // cosi' zoccolo/carta da parati restano proporzionali e i quadri non si stirano.
+  function wallFaceTexture(map, runW, hgt) {
+    var key = 'wallface_' + map.id + '_' + runW + '_' + hgt;
+    if (texCache[key]) return texCache[key];
+    var pal = WPAL[map.id] || WPAL_DEFAULT;
+    var wpx = runW * TILE * 2, hpx = Math.round(TILE * 2 * hgt);
+    var cv = document.createElement('canvas');
+    cv.width = wpx; cv.height = hpx;
+    var c = cv.getContext('2d');
+    function F(x, y, ww, hh, col) { c.fillStyle = col; c.fillRect(x, y, ww, hh); }
+    var baseH = Math.round(hpx * 0.13), wainH = Math.round(hpx * 0.34);
+    var wainY0 = hpx - baseH - wainH, wpY1 = wainY0;
+    // seed deterministico dalla mappa (niente Math.random legato al tempo)
+    var seed = 5, i;
+    for (i = 0; i < map.id.length; i++) seed = (seed * 31 + map.id.charCodeAt(i)) & 0x7fffffff;
+    function h(px, py) { return (seed + px * 7 + py * 13) % 97; }
+
+    F(0, 0, wpx, wpY1, pal.wallC);
+    drawWallpaperPattern(c, pal, wpx, wpY1, h);
+
+    F(0, wainY0, wpx, wainH, pal.wain);
+    drawWainscot(c, pal, wpx, wainY0, wainH);
+
+    F(0, wainY0 - 2, wpx, 2, pal.trim);
+    F(0, wainY0 - 2, wpx, 1, 'rgba(255,255,255,0.12)');
+
+    F(0, hpx - baseH, wpx, baseH, pal.trim);
+    F(0, hpx - baseH, wpx, 1, 'rgba(255,255,255,0.10)');
+
+    if (pal.decal && runW >= 3) {
+      var slots = Math.max(1, Math.floor(runW / 4));
+      for (i = 0; i < slots; i++) {
+        var cx = wpx * (i + 1) / (slots + 1), cy = wpY1 * 0.5;
+        if (pal.decal === 'clock') drawClockDecal(c, cx, cy);
+        else drawFrameDecal(c, cx, cy, pal, h(i, 0));
+      }
+    }
+
+    var t = makeTex(cv);
+    texCache[key] = t;
+    return t;
+  }
+
+  // altezza di un run di muro interno per riga: esterni restano su IWALL_H;
+  // interni sono alti (2.1) ovunque tranne la fila sud (verso la camera, y ===
+  // map.height-1), tenuta bassa (0.9) per non nascondere il giocatore vicino
+  // alla porta. Le tende della Loggia Nera ('R') restano sempre alte, riga sud
+  // inclusa: sono un fondale, non nascondono nulla in primo piano. Condivisa
+  // tra extrudeWalls (assegna l'altezza al run) e addDoorFrames (deve
+  // combaciare con l'altezza del run in cui la porta e' ritagliata).
+  function wallRunHeight(map, ch, y) {
+    if (!map.indoor) return IWALL_H;
+    if (ch === 'R') return IWALL_TALL_H;
+    return (y === map.height - 1) ? IWALL_SOUTH_H : IWALL_TALL_H;
+  }
+
   /* ---------------- muri estrusi / mobili ---------------- */
 
   function extrudeWalls(map, scene) {
     var y, x, ch, run, runCh;
-    var wallSide = new THREE.MeshLambertMaterial({ color: '#4a3636' });
+    var pal = WPAL[map.id] || WPAL_DEFAULT;
     var wallTop = new THREE.MeshLambertMaterial({ color: '#5a4242' });
     var wallDark = new THREE.MeshLambertMaterial({ color: '#3a2828' });
-    var matI = [wallSide, wallSide, wallTop, wallDark, wallDark, wallDark];
+    var plainSide = new THREE.MeshLambertMaterial({ color: pal.wain });
+    var plainFace = new THREE.MeshLambertMaterial({ color: pal.base });
     var curtainTexBase = null;
-    function curtain(repeatX) {
+    function curtain(repeatX, repeatY) {
       if (!curtainTexBase) {
         var cv = document.createElement('canvas');
         cv.width = 32; cv.height = 32;
@@ -1119,18 +1269,41 @@ var currentCamBack = CAM_BACK;
       }
       var t = makeTex(curtainTexBase);
       t.wrapS = THREE.RepeatWrapping;
-      t.repeat.set(repeatX, 1);
+      t.wrapT = THREE.RepeatWrapping;
+      t.repeat.set(repeatX, repeatY);
       return t;
     }
-    function flush(x0, x1, y2, c2) {
-      var w = x1 - x0, mesh;
-      if (c2 === 'R') {
-        mesh = new THREE.Mesh(new THREE.BoxGeometry(w, IWALL_H, 1),
-          new THREE.MeshLambertMaterial({ map: curtain(w) }));
-      } else {
-        mesh = new THREE.Mesh(new THREE.BoxGeometry(w, IWALL_H, 1), matI);
+    // vero solo per il muro il cui lato sud e' il pavimento di una stanza (la
+    // parete "di fondo" che la camera, rivolta a nord, vede sempre): li' la
+    // faccia +z riceve la texture ricca; altrove (pilastri laterali est/ovest,
+    // muro perimetrale sud dietro la porta) resta un colore piatto per mappa.
+    function rowAt(xx, yy) {
+      if (yy < 0 || yy >= map.height) return ' ';
+      var r = map.rows[yy];
+      if (xx < 0 || xx >= r.length) return ' ';
+      return r.charAt(xx);
+    }
+    function isAnchorRun(x0, x1, y2) {
+      // basta UNA colonna del run con pavimento a sud: i run perimetrali
+      // partono dall'angolo (sotto c'e' il muro laterale) ma restano di fondo
+      for (var xx = x0; xx < x1; xx++) {
+        if (INDOOR_FLOOR[rowAt(xx, y2 + 1)] === 1) return true;
       }
-      mesh.position.set(x0 + w / 2, IWALL_H / 2, y2 + 0.5);
+      return false;
+    }
+    function flush(x0, x1, y2, c2) {
+      var w = x1 - x0, mesh, mats, hgt = wallRunHeight(map, c2, y2);
+      if (c2 === 'R') {
+        mesh = new THREE.Mesh(new THREE.BoxGeometry(w, hgt, 1),
+          new THREE.MeshLambertMaterial({ map: curtain(w, hgt) }));
+      } else {
+        var southMat = isAnchorRun(x0, x1, y2)
+          ? new THREE.MeshLambertMaterial({ map: wallFaceTexture(map, w, hgt) })
+          : plainFace;
+        mats = [plainSide, plainSide, wallTop, wallDark, southMat, wallDark];
+        mesh = new THREE.Mesh(new THREE.BoxGeometry(w, hgt, 1), mats);
+      }
+      mesh.position.set(x0 + w / 2, hgt / 2, y2 + 0.5);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
       scene.add(mesh);
@@ -1149,28 +1322,223 @@ var currentCamBack = CAM_BACK;
     }
   }
 
+  /* ---------------- porte incorniciate ---------------- */
+  /* Ogni gap 'D' dentro un muro perimetrale diventa una soglia leggibile:
+   * architrave in alto, due stipiti sottili ai lati, incasso scuro dietro.
+   * Le porte stanno solo su righe perimetrali (bordo mappa o bordo stanza),
+   * quindi la posizione e' deterministica dai bordi del gap. Elementi solo
+   * grafici: nessuna voce di collisione, la geometria dei muri resta invariata. */
+  function addDoorFrames(map, scene) {
+    var jambMat = new THREE.MeshLambertMaterial({ color: '#2a1a10' });
+    var lintelMat = new THREE.MeshLambertMaterial({ color: '#3a2818' });
+    var recessMat = new THREE.MeshBasicMaterial({ color: '#120a06', side: THREE.DoubleSide });
+    var lintelH = 0.18, jambW = 0.09;
+    // il telaio deve combaciare con l'altezza del run di muro in cui la porta e'
+    // ritagliata: guarda il carattere di parete ('i' o 'R') subito a sinistra o a
+    // destra del varco 'D' e riusa la stessa altezza che extrudeWalls gli ha dato.
+    function flankWallCh(y2, x0, x1) {
+      var row = map.rows[y2];
+      var l = x0 > 0 ? row.charAt(x0 - 1) : '';
+      if (l === 'i' || l === 'R') return l;
+      var r = x1 < row.length ? row.charAt(x1) : '';
+      if (r === 'i' || r === 'R') return r;
+      return 'i';
+    }
+    function addFrame(x0, x1, y2) {
+      var w = x1 - x0, z = y2 + 0.5;
+      var wallH = wallRunHeight(map, flankWallCh(y2, x0, x1), y2);
+      var openH = wallH - lintelH;
+      var lintel = new THREE.Mesh(new THREE.BoxGeometry(w, lintelH, 1), lintelMat);
+      lintel.position.set(x0 + w / 2, wallH - lintelH / 2, z);
+      lintel.castShadow = true;
+      scene.add(lintel);
+      var j1 = new THREE.Mesh(new THREE.BoxGeometry(jambW, openH, 1), jambMat);
+      j1.position.set(x0 + jambW / 2, openH / 2, z);
+      scene.add(j1);
+      var j2 = new THREE.Mesh(new THREE.BoxGeometry(jambW, openH, 1), jambMat);
+      j2.position.set(x1 - jambW / 2, openH / 2, z);
+      scene.add(j2);
+      var recess = new THREE.Mesh(
+        new THREE.PlaneGeometry(Math.max(0.1, w - jambW * 2), openH),
+        recessMat
+      );
+      recess.position.set(x0 + w / 2, openH / 2, z);
+      scene.add(recess);
+    }
+    var y, x, run;
+    for (y = 0; y < map.height; y++) {
+      run = -1;
+      for (x = 0; x <= map.width; x++) {
+        var ch = x < map.width ? map.rows[y].charAt(x) : null;
+        if (ch === 'D' && run < 0) run = x;
+        else if (run >= 0 && ch !== 'D') { addFrame(run, x, y); run = -1; }
+      }
+    }
+  }
+
   var FURN = { C: 0.55, t: 0.45, h: 0.4, K: 0.42, U: 0.6 };
+
+  // faccia superiore dell'arredo: stessa pixel-art 2D (tiles.js), a 2x, in cache
+  // per carattere — floorWood()/i case C,t,h,K,U non variano con la posizione.
+  var furnTopMatCache = {};
+  function furnTopMaterial(ch) {
+    if (furnTopMatCache[ch]) return furnTopMatCache[ch];
+    var key = 'furntop_' + ch;
+    var tex = texCache[key];
+    if (!tex) {
+      var cv = document.createElement('canvas');
+      cv.width = 32; cv.height = 32;
+      var c = cv.getContext('2d');
+      c.setTransform(2, 0, 0, 2, 0, 0);
+      Sp.drawTile(c, ch, 0, 0, 0, 0, 0, {});
+      tex = texCache[key] = makeTex(cv);
+    }
+    furnTopMatCache[ch] = new THREE.MeshLambertMaterial({ map: tex });
+    return furnTopMatCache[ch];
+  }
+
+  // facciata frontale (+z, verso la camera) di banconi/comò: pannello con cassetti
+  // e pomelli, stessa palette del case 'U' in tiles.js. Sostituisce il flat #6a4a2e
+  // solo sulla faccia frontale; le altre restano piatte.
+  var furnFrontMatCache = {};
+  function furnFrontMaterial(ch) {
+    if (furnFrontMatCache[ch]) return furnFrontMatCache[ch];
+    var key = 'furnfront_' + ch;
+    var tex = texCache[key];
+    if (!tex) {
+      var cv = document.createElement('canvas');
+      cv.width = 64; cv.height = 64;
+      var c = cv.getContext('2d');
+      function F(x, y, w, h, col) { c.fillStyle = col; c.fillRect(x * 2, y * 2, w * 2, h * 2); }
+      F(0, 0, 32, 32, '#8a5c30');
+      F(0, 0, 32, 1, '#a67840');
+      F(0, 11, 32, 1, '#5a3c1e');
+      F(0, 21, 32, 1, '#5a3c1e');
+      F(14, 5, 4, 1, '#d8b878');
+      F(14, 15, 4, 1, '#d8b878');
+      F(14, 25, 4, 1, '#d8b878');
+      F(0, 31, 32, 1, '#4a3018');
+      tex = texCache[key] = makeTex(cv);
+    }
+    furnFrontMatCache[ch] = new THREE.MeshLambertMaterial({ map: tex });
+    return furnFrontMatCache[ch];
+  }
+
+  // arredo come oggetti veri, non casse: stesso ingombro (0.96x0.96) e stessa
+  // altezza totale di FURN[ch] (la collisione resta a griglia, invariata) ma con
+  // gambe/schienale/telaio scomposti in mesh separate.
   function furniture(map, scene) {
-    var y, x, ch;
-    var side = new THREE.MeshLambertMaterial({ color: '#6a4a2e' });
+    var y, x, ch, hgt, cx, cz, corners, i, s, mesh;
+    var flat = new THREE.MeshLambertMaterial({ color: '#6a4a2e' });
     for (y = 0; y < map.height; y++) {
       for (x = 0; x < map.width; x++) {
         ch = map.rows[y].charAt(x);
         if (!FURN[ch]) continue;
-        var cv = document.createElement('canvas');
-        cv.width = 32; cv.height = 32;
-        var c = cv.getContext('2d');
-        c.setTransform(2, 0, 0, 2, 0, 0);
-        Sp.drawTile(c, ch, 0, 0, x, y, 0, { map: map });
-        var mats = [side, side, new THREE.MeshLambertMaterial({ map: makeTex(cv) }), side, side, side];
-        var hgt = FURN[ch];
-        var mesh = new THREE.Mesh(new THREE.BoxGeometry(0.96, hgt, 0.96), mats);
-        mesh.position.set(x + 0.5, hgt / 2, y + 0.5);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        scene.add(mesh);
+        hgt = FURN[ch];
+        cx = x + 0.5; cz = y + 0.5;
+        var topMat = furnTopMaterial(ch);
+
+        if (ch === 't') { // tavolo: piano sottile + 4 gambe
+          var topH = 0.08, legH = hgt - topH;
+          mesh = new THREE.Mesh(new THREE.BoxGeometry(0.86, topH, 0.86),
+            [flat, flat, topMat, flat, flat, flat]);
+          mesh.position.set(cx, legH + topH / 2, cz);
+          mesh.castShadow = true; mesh.receiveShadow = true;
+          scene.add(mesh);
+          corners = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
+          for (i = 0; i < corners.length; i++) {
+            s = corners[i];
+            mesh = new THREE.Mesh(new THREE.BoxGeometry(0.08, legH, 0.08), flat);
+            mesh.position.set(cx + s[0] * 0.36, legH / 2, cz + s[1] * 0.36);
+            mesh.castShadow = true;
+            scene.add(mesh);
+          }
+        } else if (ch === 'h') { // sedia: seduta + schienale a nord (-z) + 4 gambe corte
+          var seatH = 0.22, seatT = 0.08;
+          mesh = new THREE.Mesh(new THREE.BoxGeometry(0.62, seatT, 0.62),
+            [flat, flat, topMat, flat, flat, flat]);
+          mesh.position.set(cx, seatH, cz);
+          mesh.castShadow = true; mesh.receiveShadow = true;
+          scene.add(mesh);
+          mesh = new THREE.Mesh(new THREE.BoxGeometry(0.62, hgt - seatH, 0.08), flat);
+          mesh.position.set(cx, seatH + (hgt - seatH) / 2, cz - 0.27);
+          mesh.castShadow = true;
+          scene.add(mesh);
+          corners = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
+          for (i = 0; i < corners.length; i++) {
+            s = corners[i];
+            mesh = new THREE.Mesh(new THREE.BoxGeometry(0.06, seatH, 0.06), flat);
+            mesh.position.set(cx + s[0] * 0.26, seatH / 2, cz + s[1] * 0.26);
+            mesh.castShadow = true;
+            scene.add(mesh);
+          }
+        } else if (ch === 'K') { // letto: telaio basso + materasso
+          var frameH = 0.12;
+          mesh = new THREE.Mesh(new THREE.BoxGeometry(0.92, frameH, 0.92), flat);
+          mesh.position.set(cx, frameH / 2, cz);
+          mesh.castShadow = true; mesh.receiveShadow = true;
+          scene.add(mesh);
+          var mattH = hgt - frameH;
+          mesh = new THREE.Mesh(new THREE.BoxGeometry(0.86, mattH, 0.86),
+            [flat, flat, topMat, flat, flat, flat]);
+          mesh.position.set(cx, frameH + mattH / 2, cz);
+          mesh.castShadow = true; mesh.receiveShadow = true;
+          scene.add(mesh);
+        } else { // C, U: bancone/comò — box intero, ma con facciata frontale disegnata
+          mesh = new THREE.Mesh(new THREE.BoxGeometry(0.96, hgt, 0.96),
+            [flat, flat, topMat, flat, furnFrontMaterial(ch), flat]);
+          mesh.position.set(cx, hgt / 2, cz);
+          mesh.castShadow = true; mesh.receiveShadow = true;
+          scene.add(mesh);
+        }
       }
     }
+  }
+
+  /* ---------------- props d'arredo interni ---------------- */
+  /* decorazioni non collidenti (pianta, appendiabiti, lampada da terra): icone
+   * disegnate in tiles.js (S.drawProp), montate come billboard + blob-shadow
+   * come le altre sculture/arredi urbani. Iniettate render-side: non toccano
+   * le griglie di maps.js né M.SOLID. */
+
+  function propTexture(kind) {
+    var key = 'prop_' + kind;
+    if (texCache[key]) return texCache[key];
+    var cv = document.createElement('canvas');
+    cv.width = 32; cv.height = 48; // 16x24 logico, a 2x
+    var c = cv.getContext('2d');
+    c.setTransform(2, 0, 0, 2, 0, 0);
+    Sp.drawProp(c, kind, 0, 0);
+    texCache[key] = makeTex(cv);
+    return texCache[key];
+  }
+
+  var PROP_SIZE = { // [larghezza, altezza] del billboard in unità mondo
+    plant: [0.55, 0.75],
+    coatrack: [0.42, 0.85],
+    lamp: [0.42, 0.85]
+  };
+
+  // celle di pavimento (f/c) in angoli lontani da porte, NPC e dalla linea
+  // diretta porta<->NPC — vedi le griglie in maps.js per la verifica cella per cella.
+  var PROPS = {
+    sheriff: [{ kind: 'plant', x: 1, y: 3 }, { kind: 'coatrack', x: 12, y: 7 }],
+    palmer: [{ kind: 'plant', x: 13, y: 2 }, { kind: 'lamp', x: 2, y: 9 }],
+    hotel_gn: [{ kind: 'plant', x: 16, y: 2 }, { kind: 'coatrack', x: 1, y: 9 }],
+    hospital: [{ kind: 'plant', x: 9, y: 2 }, { kind: 'lamp', x: 1, y: 7 }],
+    diner: [{ kind: 'coatrack', x: 12, y: 1 }, { kind: 'plant', x: 1, y: 8 }],
+    oej: [{ kind: 'lamp', x: 1, y: 1 }, { kind: 'plant', x: 14, y: 1 }],
+    roadhouse: [{ kind: 'plant', x: 1, y: 2 }, { kind: 'lamp', x: 14, y: 6 }]
+  };
+
+  function addProps(map, scene) {
+    var list = PROPS[map.id];
+    if (!list) return;
+    list.forEach(function (p) {
+      var size = PROP_SIZE[p.kind];
+      scene.add(billboard(propTexture(p.kind), size[0], size[1], p.x + 0.5, p.y + 0.5, 0.01));
+      blobShadow(scene, p.x + 0.5, p.y + 0.62, 0.22);
+    });
   }
 
   /* ---------------- landmark 3D ---------------- */
@@ -1408,6 +1776,10 @@ var currentCamBack = CAM_BACK;
     }
     for (y = -BORDER; y < map.height + BORDER; y++) {
       for (x = -BORDER; x < map.width + BORDER; x++) {
+        // indoor: chAt clamps out-of-bounds reads to the map edge, which would
+        // paint the border ring beyond a door column as floor; only true
+        // in-bounds cells may paint on indoor maps (everything else stays void).
+        if (map.indoor && (x < 0 || y < 0 || x >= map.width || y >= map.height)) continue;
         ch = chAt(map, x, y);
         if (map.indoor && !INDOOR_FLOOR[ch]) continue; // fuori dalla stanza o muro: resta vuoto
         if (SKIP_BAKE[ch]) ch = base;
@@ -1416,7 +1788,7 @@ var currentCamBack = CAM_BACK;
       }
     }
     world.groundCtx = c;
-    decorateGround(c, map);
+    if (!map.indoor) decorateGround(c, map); // interni: nessuna decorazione stile prato nel vuoto
     world.groundTex = makeTex(cv);
     var geo = new THREE.PlaneGeometry(map.width + BORDER * 2, map.height + BORDER * 2);
     var mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: world.groundTex }));
@@ -1456,6 +1828,16 @@ var currentCamBack = CAM_BACK;
     sun.shadow.bias = -0.0004;
     sun.shadow.normalBias = 0.03;
     world.scene.add(sun);
+
+    // riempimento caldo al centro della stanza: solleva la parete "anchor" (a
+    // sud, verso la camera) senza toccare il budget hemi+sun (~1.14 qui sotto
+    // ~1.3, il tetto oltre cui Lambert clippa). Fioco e locale: non conta nel
+    // budget perché la sua intensità decade rapidamente con la distanza.
+    if (indoor && !red) {
+      var fill = new THREE.PointLight(0xffe0b0, 0.22, Math.max(map.width, map.height) * 1.4, 2);
+      fill.position.set(cx, IWALL_H - 0.05, cz);
+      world.scene.add(fill);
+    }
   }
 
   function buildWorld(S) {
@@ -1546,7 +1928,9 @@ var currentCamBack = CAM_BACK;
       }
     });
     extrudeWalls(map, world.scene);
+    addDoorFrames(map, world.scene);
     furniture(map, world.scene);
+    addProps(map, world.scene);
 
     (map.objects || []).forEach(function (o) {
       if (o.type === 'sparkle' && typeof o.dialogue === 'string') {

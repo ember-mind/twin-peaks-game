@@ -73,8 +73,21 @@ const start = { mapId: E.state.mapId, x: E.state.player.tx, y: E.state.player.ty
 
 const simSt = { clues: [], flags: {} }; // stesso shape di S: {clues:[], flags:{}}
 const trace = [];       // {type:'clue'|'flag'|'done', id, map}
+const objTrace = [];    // testo di GAME.Data.objectiveFor a ogni acquisizione (esattore)
 const mapEntries = [];  // {mapId, clues} al momento della prima scoperta
 let endReached = false;
+
+// esattore delle tasse: a ogni acquisizione, l'obiettivo corrente deve esistere
+// e essere non vuoto. Fallisce rumorosamente indicando lo step incriminato.
+function pushTrace(entry) {
+  trace.push(entry);
+  const objText = GAME.Data.objectiveFor(simSt, E.checkCond);
+  if (!objText) {
+    console.error(`ERRORE: objectiveFor vuoto allo step ${trace.length} (${entry.type}:${entry.id})`);
+    process.exit(1);
+  }
+  objTrace.push(objText);
+}
 
 function firstIndex(type, id) {
   for (let i = 0; i < trace.length; i++) if (trace[i].type === type && trace[i].id === id) return i;
@@ -147,15 +160,15 @@ function applyDialogue(dialogueField, mapId) {
   if (!def) return false;
   if (def.give) {
     def.give.forEach((c) => {
-      if (simSt.clues.indexOf(c) < 0) { simSt.clues.push(c); trace.push({ type: 'clue', id: c, map: mapId }); }
+      if (simSt.clues.indexOf(c) < 0) { simSt.clues.push(c); pushTrace({ type: 'clue', id: c, map: mapId }); }
     });
   }
   if (def.setFlag && !simSt.flags[def.setFlag]) {
     simSt.flags[def.setFlag] = true;
-    trace.push({ type: 'flag', id: def.setFlag, map: mapId });
+    pushTrace({ type: 'flag', id: def.setFlag, map: mapId });
   }
   simSt.flags['done_' + id] = true;
-  trace.push({ type: 'done', id: id, map: mapId });
+  pushTrace({ type: 'done', id: id, map: mapId });
   if (def.end) endReached = true;
   return true;
 }
@@ -207,9 +220,35 @@ mapEntries.forEach((e) => console.log('  ' + e.mapId + '  (indizi: ' + e.clues +
 console.log('\n--- TRACCIA ACQUISIZIONI (ordine) ---');
 trace.forEach((e, i) => console.log('  ' + (i + 1) + '. ' + e.type + ':' + e.id + '  [' + e.map + ']'));
 
+console.log('\n--- OBIETTIVO (variazioni lungo la traccia) ---');
+let lastObj = null;
+objTrace.forEach((t, i) => {
+  if (t !== lastObj) { console.log('  @' + (i + 1) + '. ' + t); lastObj = t; }
+});
+
 /* ---------------- assertion ---------------- */
 
 const failures = [];
+
+// esattore delle tasse (obiettivo): la sequenza deve partire dalla voce di default,
+// cambiare almeno una volta per ogni ponte d'atto e finire sulla voce leland_morto.
+const defaultObjective = GAME.Data.objectives[GAME.Data.objectives.length - 1].text;
+const finalObjective = GAME.Data.objectives.find((o) => o.cond === 'flag:leland_morto').text;
+if (objTrace.length === 0) {
+  failures.push('obiettivo: nessuna acquisizione, la traccia e\' vuota');
+} else {
+  if (objTrace[0] !== defaultObjective) {
+    failures.push(`obiettivo: la sequenza non parte dalla voce di default ("${objTrace[0]}" invece di "${defaultObjective}")`);
+  }
+  let objChanges = 0;
+  for (let i = 1; i < objTrace.length; i++) if (objTrace[i] !== objTrace[i - 1]) objChanges++;
+  if (objChanges < 6) {
+    failures.push(`obiettivo: solo ${objChanges} cambi rilevati nella traccia (richiesti >= 6)`);
+  }
+  if (objTrace[objTrace.length - 1] !== finalObjective) {
+    failures.push(`obiettivo: l'ultima voce non e' quella di leland_morto ("${objTrace[objTrace.length - 1]}")`);
+  }
+}
 
 if (!endReached) failures.push('nessun dialogo con end:true raggiunto dalla simulazione');
 

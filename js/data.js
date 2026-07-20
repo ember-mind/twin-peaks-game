@@ -46,6 +46,12 @@
 
     /* ---------------- citta' ---------------- */
 
+    // monologo d'arrivo, una tantum (vedi onEnter su town in maps.js): niente
+    // give/setFlag qui, il flag "una volta sola" lo mette l'hook dell'engine.
+    town_arrivo: { pages: [
+      { name: 'COOPER', text: 'Diane, sono arrivato. Prima tappa: la centrale dello sceriffo, a ovest. Harry Truman mi aspetta col fascicolo.' }
+    ] },
+
     sign_town: { pages: [
       { name: 'COOPER', text: '"Benvenuti a Twin Peaks. Popolazione: 51.201".' },
       { name: 'COOPER', text: 'Diane, annota: cinquantunomiladuecentuno abitanti. Una cifra sospettosamente precisa.' }
@@ -615,5 +621,36 @@
       ],
       end: true
     }
+  };
+
+  /* ---------------- obiettivo corrente (menu indizi) ----------------
+   * Scala dall'alto: vince la prima condizione vera (stessa sintassi di
+   * checkCond: 'flag:nome' / 'cluesN'), rispecchia la cascata di Truman
+   * in glue.js (NPCS.sheriff.truman) cosi' l'obiettivo indica sempre il
+   * prossimo passo verso il ponte narrativo successivo. L'ultima voce,
+   * senza cond, e' il default di inizio partita. */
+  D.objectives = [
+    { cond: 'flag:leland_morto', text: 'Torna alla Loggia (Glastonbury Grove).' },
+    { cond: 'flag:atto5', text: 'Interroga Leland Palmer alla centrale.' },
+    { cond: 'flag:maddy_trovata', text: 'Riferisci a Truman alla centrale.' },
+    { cond: 'flag:gigante2', text: 'Casa Palmer. Poi il lago.' },
+    { cond: 'flag:atto4', text: 'Stasera: il Roadhouse.' },
+    { cond: 'flag:gigante1', text: 'Riferisci a Truman alla centrale.' },
+    { cond: 'flag:atto3', text: 'La strada a est: il vagone del treno.' },
+    { cond: 'clues6', text: 'Riferisci a Truman alla centrale.' },
+    // corretto rispetto alla bozza originale: il sesto indizio (cuore_intero)
+    // lo da' James al Double R, non l'hotel. Senza "diner" qui il giocatore
+    // rischia di girare a vuoto tra Truman e Great Northern senza raggiungere
+    // mai i 6 indizi che sbloccano l'Atto 3.
+    { cond: 'flag:sogno_fatto', text: 'Ospedale, diner e hotel. Poi Truman.' },
+    { cond: null, text: 'Parla con lo sceriffo Truman (a ovest).' }
+  ];
+
+  D.objectiveFor = function (st, checkCond) {
+    for (var i = 0; i < D.objectives.length; i++) {
+      var o = D.objectives[i];
+      if (!o.cond || checkCond(o.cond, st)) return o.text;
+    }
+    return '';
   };
 })();

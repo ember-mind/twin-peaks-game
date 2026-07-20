@@ -112,6 +112,14 @@ for (const [id, def] of Object.entries(GAME.Data.dialogues)) {
 }
 ok(true, 'tutte le pagine di dialogo entrano nel box (<= 129 caratteri)');
 
+// obiettivo del menu indizi: una riga sola, e il dialogo d'arrivo di town.onEnter esiste
+for (const o of GAME.Data.objectives) {
+  assert(o.text.length <= 48, `obiettivo "${o.text}" troppo lungo (${o.text.length} > 48)`);
+}
+ok(true, 'tutte le voci di D.objectives entrano in una riga (<= 48 caratteri)');
+ok(GAME.Maps.town.onEnter && GAME.Data.dialogues[GAME.Maps.town.onEnter.dialogue],
+   'town.onEnter punta a un dialogo esistente');
+
 /* ---------------- 2. partita completa ---------------- */
 
 console.log('# partita');

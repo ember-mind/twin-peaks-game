@@ -89,6 +89,14 @@
     p.dir = dir || 'down'; p.moving = false;
     camSnap = true;
     if (S.mode === 'play') saveGame(); // porta attraversata in partita: persisti la posizione
+    // arrivo su una mappa con monologo d'apertura una tantum (solo browser, solo in partita,
+    // solo la prima volta: il flag "once" viene salvato con S.flags dal saveGame qui sopra)
+    var oe = S.map.onEnter;
+    if (oe && oe.dialogue && oe.once && typeof document !== 'undefined' &&
+        S.mode === 'play' && !S.flags[oe.once]) {
+      S.flags[oe.once] = true;
+      startDialogue(oe.dialogue);
+    }
   }
 
   /* ---------------- salvataggio (localStorage) ---------------- */
@@ -218,7 +226,13 @@
     }
     if (S.mode === 'intro') {
       S.introPage++;
-      if (S.introPage >= GAME.Data.intro.length) S.mode = 'play';
+      if (S.introPage >= GAME.Data.intro.length) {
+        S.mode = 'play';
+        // la mappa iniziale e' stata caricata da E.start() mentre si era ancora al
+        // titolo (onEnter non poteva scattare, mode non era 'play'): ricarica ora
+        // che si e' davvero in partita, cosi' il monologo d'arrivo puo' partire.
+        loadMap(S.mapId, S.player.tx, S.player.ty, S.player.dir);
+      }
       return;
     }
     if (S.mode === 'end') { S = E.state = freshState(); loadMap('town', 28, 22, 'up'); return; }
@@ -552,18 +566,22 @@
   function drawMenu() {
     ctx.fillStyle = 'rgba(0,0,0,0.45)';
     ctx.fillRect(0, 0, UW, VH);
-    var mx = Math.floor((UW - 180) / 2);
-    box(mx, 24, 180, 112);
-    text('INDIZI (' + S.clues.length + ')', mx + 12, 34, '#ffe9a8');
+    // 240 di larghezza: la riga obiettivo (fino a ~44 caratteri a ~5px l'uno)
+    // deve starci senza sbordare; 180 la tagliava.
+    var mw = Math.min(UW - 16, 240);
+    var mx = Math.floor((UW - mw) / 2);
+    box(mx, 24, mw, 125); // +13 di altezza per la riga obiettivo in cima
+    text(GAME.Data.objectiveFor(S, checkCond), mx + 12, 34, '#ffe9a8');
+    text('INDIZI (' + S.clues.length + ')', mx + 12, 47, '#ffe9a8');
     if (!S.clues.length) {
-      text('Nessun indizio raccolto.', mx + 12, 52, '#c8c8d8');
+      text('Nessun indizio raccolto.', mx + 12, 65, '#c8c8d8');
     } else {
       for (var i = 0; i < S.clues.length; i++) {
         var c = GAME.Data.clues[S.clues[i]];
-        text('• ' + (c ? c.name : S.clues[i]), mx + 12, 52 + i * 13, '#ffffff');
+        text('• ' + (c ? c.name : S.clues[i]), mx + 12, 65 + i * 13, '#ffffff');
       }
     }
-    text('X / ESC: chiudi', mx + 12, 124, '#8a8ab0');
+    text('X / ESC: chiudi', mx + 12, 137, '#8a8ab0');
   }
 
   function curtainRows(yTop, n) {
