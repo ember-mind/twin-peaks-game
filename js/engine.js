@@ -229,6 +229,7 @@
   }
 
   function pressB() {
+    if (S.mode === 'title') { pressN(); return; } // su touch il tasto B = nuova partita
     if (S.mode !== 'play' || S.fadePhase !== 0 || S.dialogue) return;
     S.menu = !S.menu;
   }
@@ -580,15 +581,22 @@
     ctx.fillRect(0, 0, UW, VH);
     curtainRows(0, 2);
     curtainRows(VH - 32, 2);
-    text('TWIN PEAKS', UW / 2, 52, '#f0f0f0', 'bold 16px monospace', 'center');
-    text('Il Mistero di Laura Palmer', UW / 2, 74, '#c8c8d8', '8px monospace', 'center');
-    if (Math.floor(tGlobal / 500) % 2 === 0) {
-      text('PREMI INVIO', UW / 2, 102, '#ffe9a8', '8px monospace', 'center');
+    // Le tende occupano y 0-32 e VH-32..VH: tutto il testo sta dentro 36..122,
+    // ben distanziato (le righe si accavallavano e finivano sotto la tenda).
+    var touch = !!GAME.touchMode;
+    text('TWIN PEAKS', UW / 2, 44, '#f0f0f0', 'bold 16px monospace', 'center');
+    text('Il Mistero di Laura Palmer', UW / 2, 66, '#c8c8d8', '8px monospace', 'center');
+    if (hasSave()) { // con un salvataggio il prompt E' la scelta: niente riga in piu'
+      if (Math.floor(tGlobal / 500) % 2 === 0) {
+        text(touch ? 'TOCCA: CONTINUA' : 'INVIO: CONTINUA', UW / 2, 92, '#ffe9a8', '8px monospace', 'center');
+      }
+      text(touch ? 'Pulsante B: nuova partita' : 'N: nuova partita', UW / 2, 106, '#8a8ab0', '8px monospace', 'center');
+    } else if (Math.floor(tGlobal / 500) % 2 === 0) {
+      text(touch ? 'TOCCA PER INIZIARE' : 'PREMI INVIO', UW / 2, 92, '#ffe9a8', '8px monospace', 'center');
     }
-    if (hasSave()) {
-      text('INVIO: continua · N: nuova partita', UW / 2, 114, '#8a8ab0', '8px monospace', 'center');
-    }
-    text('Frecce: muovi  Z/Invio: parla  X: indizi', UW / 2, 126, '#8a8ab0', '8px monospace', 'center');
+    text(touch ? 'D-pad: muovi   A: parla   B: indizi'
+               : 'Frecce: muovi   Z/Invio: parla   X: indizi',
+         UW / 2, 120, '#8a8ab0', '8px monospace', 'center');
   }
 
   function drawIntro() {

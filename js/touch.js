@@ -9,6 +9,10 @@
   var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
   if (!isTouch) return;
 
+  // segnala al motore che i comandi sono touch: il titolo mostra le scritte giuste
+  window.GAME = window.GAME || {};
+  window.GAME.touchMode = true;
+
   var DIR_CODE = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
   var DEAD = 24;              // raggio morto al centro del d-pad (px)
   var TAP_MAX_MS = 300;       // durata massima di un "tap" (per l'avanzamento dialoghi)
