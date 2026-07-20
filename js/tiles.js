@@ -554,6 +554,14 @@
         R(ctx, x + 11, y + 11, 1, 1, '#1c3a22');
         break;
       }
+      case 'G': // lapide del cimitero (top-down: base in pietra + ombra)
+        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        R(ctx, x + 3, y + 12, 10, 2, 'rgba(0,0,0,0.22)');
+        R(ctx, x + 4, y + 3, 8, 9, '#8a8d88');
+        R(ctx, x + 5, y + 2, 6, 1, '#a5a8a0');
+        R(ctx, x + 5, y + 4, 6, 6, '#a5a8a0');
+        R(ctx, x + 6, y + 6, 4, 1, '#6a6d68');
+        break;
       case 'v':
         R(ctx, x, y, 16, 16, '#000000');
         break;

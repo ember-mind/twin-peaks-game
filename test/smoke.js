@@ -33,6 +33,7 @@ require(J('maps.js'));
 require(J('data.js'));
 require(J('engine.js'));
 require(J('glue.js'));
+require(J('render3d.js')); // window e' globale (riga sopra): CONFIG si popola anche senza THREE
 
 const GAME = global.GAME;
 const E = GAME.Engine;

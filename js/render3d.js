@@ -10,22 +10,67 @@
  * 1 tile = 1 unità mondo; x → x, riga mappa → z.
  */
 (function () {
-  if (typeof window === 'undefined' || typeof THREE === 'undefined') return;
+  if (typeof window === 'undefined') return;
   var GAME = window.GAME = window.GAME || {};
   var Sp = GAME.sprites;
+
+  /* CONFIG — tunables del renderer 3D raggruppati in un solo punto: da qui si
+   * calibra tutto (camera, luci, nebbia, muri, terreno, palette edifici). E'
+   * il seam naturale per un eventuale secondo gioco che riusi questo motore.
+   * Esposto anche se THREE manca (vedi sotto), cosi' i test in node possono
+   * leggerlo senza montare WebGL. */
+  var CONFIG = {
+    camera: {
+      up: 13.5, back: 9.2, fov: 38, refAspect: 1.5, maxFov: 80
+    },
+    walls: {
+      wallH: 0.95, roofH: 0.85, eave: 0.25,
+      iwallH: 1.25, iwallSouthH: 0.9, iwallTallH: 2.1
+    },
+    terrain: {
+      border: 8,
+      skipBake: {
+        '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1, D: 1, i: 1, R: 1, T: 1, Y: 1, S: 1, X: 1, M: 1, w: 1, o: 1,
+        L: 1, P: 1, B: 1, F: 1, A: 1, H: 1, E: 1, n: 1, G: 1
+      }
+    },
+    lighting: {
+      redroom: { hemiSky: 0xff6858, hemiGround: 0x401014, hemiIntensity: 0.8, sunColor: 0xffd0c0, sunIntensity: 0.4 },
+      indoor: { hemiSky: 0xfff2dc, hemiGround: 0x6a5a48, hemiIntensity: 0.72, sunColor: 0xffeecc, sunIntensity: 0.42 },
+      outdoor: { hemiSky: 0xd0e4ff, hemiGround: 0x8a7c60, hemiIntensity: 0.6, sunColor: 0xfff0d0, sunIntensity: 0.68 },
+      fill: { color: 0xffe0b0, intensity: 0.22, distanceMult: 1.4, decay: 2 },
+      shadow: { mapSize: 2048, near: 1, farMult: 3, bias: -0.0004, normalBias: 0.03 }
+    },
+    fog: {
+      town: { near: 22, far: 55 },
+      woods: { near: 14, far: 42 },
+      redroom: { near: 10, far: 32 }
+    },
+    palettes: {
+      '1': { rf: '#7c94b0', rb: '#43566e', rr: '#a8bccc', wall: '#c8a878', wd: '#a88858', wl: '#dcc094', trim: '#8a6a48', kind: 'sheriff' },
+      '2': { rf: '#5a88c4', rb: '#2e5688', rr: '#9cc0e8', wall: '#b08858', wd: '#8a6238', wl: '#c8a070', trim: '#6a4a28', sign: '#a81828', kind: 'diner' },
+      '3': { rf: '#a87c5c', rb: '#5e4230', rr: '#d0a888', wall: '#d0b888', wd: '#a88a58', wl: '#e4d0a4', trim: '#8a6a48', kind: 'palmer' },
+      '4': { rf: '#52704e', rb: '#284030', rr: '#7c9878', wall: '#9c7a4e', wd: '#6e5230', wl: '#b08e5e', trim: '#4e3a20', kind: 'hotel' },
+      '5': { rf: '#93a5b5', rb: '#5a6a78', rr: '#c5d1db', wall: '#e6e6e0', wd: '#b8b8b0', wl: '#f4f4ee', trim: '#8a98a8', kind: 'hospital' },
+      '6': { rf: '#4a3a2e', rb: '#241a12', rr: '#6a5646', wall: '#5a4636', wd: '#3a2e26', wl: '#7a6248', trim: '#241a12', sign: '#a81828', kind: 'roadhouse' }
+    }
+  };
+  GAME.Render3DConfig = CONFIG;
+
+  if (typeof THREE === 'undefined') return;
 
   var R = {};
   var renderer = null, camera = null;
   var TILE = 16;
-  var WALL_H = 0.95, ROOF_H = 0.85, EAVE = 0.25, IWALL_H = 1.25;
+  var WALL_H = CONFIG.walls.wallH, ROOF_H = CONFIG.walls.roofH, EAVE = CONFIG.walls.eave, IWALL_H = CONFIG.walls.iwallH;
   // interni: parete anchor (fila sud, verso la camera) piu' bassa per non
   // nascondere il giocatore vicino alla porta; tutte le altre pareti interne
   // (perimetro nord, colonne laterali, partizioni) piu' alte per leggere bene
   // la texture ricca. Gli esterni restano su IWALL_H, invariato.
-  var IWALL_SOUTH_H = 0.9, IWALL_TALL_H = 2.1;
-  var CAM_UP = 13.5, CAM_BACK = 9.2, CAM_FOV = 38;
-  var BORDER = 8;
-  var REF_ASPECT = 1.5; // aspect di riferimento (landscape) per cui CAM_FOV e' tarato
+  var IWALL_SOUTH_H = CONFIG.walls.iwallSouthH, IWALL_TALL_H = CONFIG.walls.iwallTallH;
+  var CAM_UP = CONFIG.camera.up, CAM_BACK = CONFIG.camera.back, CAM_FOV = CONFIG.camera.fov;
+  var BORDER = CONFIG.terrain.border;
+  var REF_ASPECT = CONFIG.camera.refAspect; // aspect di riferimento (landscape) per cui CAM_FOV e' tarato
 
   // su schermi stretti (mobile ritratto) un FOV verticale fisso restringe troppo
   // il FOV orizzontale (world piu' "zoomato"): lo alziamo per tenere costante
@@ -33,7 +78,7 @@
   function fovForAspect(aspect) {
     var baseH = 2 * Math.atan(Math.tan(CAM_FOV * Math.PI / 360) * REF_ASPECT);
     var v = 2 * Math.atan(Math.tan(baseH / 2) / aspect) * 180 / Math.PI;
-    return Math.max(CAM_FOV, Math.min(v, 80));
+    return Math.max(CAM_FOV, Math.min(v, CONFIG.camera.maxFov));
   }
 
   var worlds = {};
@@ -49,14 +94,7 @@ var dustParts = [];
 var leadX = 0, leadZ = 0;
 
   /* palette edifici */
-  var BPAL = {
-    '1': { rf: '#7c94b0', rb: '#43566e', rr: '#a8bccc', wall: '#c8a878', wd: '#a88858', wl: '#dcc094', trim: '#8a6a48', kind: 'sheriff' },
-    '2': { rf: '#5a88c4', rb: '#2e5688', rr: '#9cc0e8', wall: '#b08858', wd: '#8a6238', wl: '#c8a070', trim: '#6a4a28', sign: '#a81828', kind: 'diner' },
-    '3': { rf: '#a87c5c', rb: '#5e4230', rr: '#d0a888', wall: '#d0b888', wd: '#a88a58', wl: '#e4d0a4', trim: '#8a6a48', kind: 'palmer' },
-    '4': { rf: '#52704e', rb: '#284030', rr: '#7c9878', wall: '#9c7a4e', wd: '#6e5230', wl: '#b08e5e', trim: '#4e3a20', kind: 'hotel' },
-    '5': { rf: '#93a5b5', rb: '#5a6a78', rr: '#c5d1db', wall: '#e6e6e0', wd: '#b8b8b0', wl: '#f4f4ee', trim: '#8a98a8', kind: 'hospital' },
-    '6': { rf: '#4a3a2e', rb: '#241a12', rr: '#6a5646', wall: '#5a4636', wd: '#3a2e26', wl: '#7a6248', trim: '#241a12', sign: '#a81828', kind: 'roadhouse' }
-  };
+  var BPAL = CONFIG.palettes;
 
   function makeTex(cv) {
     var t = new THREE.CanvasTexture(cv);
@@ -984,10 +1022,7 @@ var leadX = 0, leadZ = 0;
   }
 
   var BUILD_CH = { '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1 };
-  var SKIP_BAKE = {
-    '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1, D: 1, i: 1, R: 1, T: 1, Y: 1, S: 1, X: 1, M: 1, w: 1, o: 1,
-    L: 1, P: 1, B: 1, F: 1, A: 1, H: 1, E: 1, n: 1
-  };
+  var SKIP_BAKE = CONFIG.terrain.skipBake;
 
   function baseCharOf(map) {
     var counts = {}, best = '.', n = 0, y, x, ch;
@@ -1635,58 +1670,59 @@ var leadX = 0, leadZ = 0;
   // la camera), terreno delimitato da un prato piu' cupo e un recinto in ferro
   // basso con varco a sud. La versione precedente spargeva ~38 blocchetti
   // chiari a caso: sembravano sassi, non tombe.
+  // materiali/mesh delle tombe, condivisi: usati dal tile 'G' (lapidi solide
+  // piazzate dalla mappa) e dal landmark (prato+recinto)
+  var graveStoneMat = null, graveStoneLightMat = null;
+  function graveMats() {
+    if (!graveStoneMat) {
+      graveStoneMat = new THREE.MeshLambertMaterial({ color: '#8a8d88', flatShading: true });
+      graveStoneLightMat = new THREE.MeshLambertMaterial({ color: '#a5a8a0', flatShading: true });
+    }
+  }
+  function graveShadows(g) {
+    g.traverse(function (m) { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
+    return g;
+  }
+  function graveStone(px, pz) { // lapide ad arco: corpo + sommita' + basamento
+    graveMats();
+    var g = new THREE.Group();
+    var body = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.42, 0.1), graveStoneLightMat);
+    body.position.set(px, 0.21, pz);
+    var top = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.1, 0.1), graveStoneLightMat);
+    top.position.set(px, 0.46, pz);
+    var base = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.08, 0.18), graveStoneMat);
+    base.position.set(px, 0.04, pz);
+    g.add(body); g.add(top); g.add(base);
+    return graveShadows(g);
+  }
+  function graveCross(px, pz) { // croce alta e sottile
+    graveMats();
+    var g = new THREE.Group();
+    var v = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.72, 0.1), graveStoneLightMat);
+    v.position.set(px, 0.36, pz);
+    var o = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.1, 0.1), graveStoneLightMat);
+    o.position.set(px, 0.52, pz);
+    var base = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.08, 0.18), graveStoneMat);
+    base.position.set(px, 0.04, pz);
+    g.add(v); g.add(o); g.add(base);
+    return graveShadows(g);
+  }
+
+  // Landmark cimitero: SOLO prato consacrato + recinto in ferro con cancello a
+  // sud. Le lapidi non si generano piu' qui: sono tile 'G' della mappa (solidi,
+  // in file ordinate), cosi' non ci si cammina attraverso.
   function landmarkCemetery(x, z, w, h, scene) {
-    var stone = new THREE.MeshLambertMaterial({ color: '#8a8d88', flatShading: true });
-    var stoneLight = new THREE.MeshLambertMaterial({ color: '#a5a8a0', flatShading: true });
     var iron = new THREE.MeshLambertMaterial({ color: '#2e2e30', flatShading: true });
 
     // prato consacrato: piano appena piu' scuro che definisce l'area
     var lawn = new THREE.Mesh(
       new THREE.PlaneGeometry(w, h),
-      new THREE.MeshLambertMaterial({ color: '#7d9464', transparent: true, opacity: 0.55 })
+      new THREE.MeshLambertMaterial({ color: '#5d7446', transparent: true, opacity: 0.3 })
     );
     lawn.rotation.x = -Math.PI / 2;
     lawn.position.set(x + w / 2, 0.015, z + h / 2);
     lawn.receiveShadow = true;
     scene.add(lawn);
-
-    function tombstone(px, pz) { // lapide ad arco: corpo + sommita' arrotondata
-      var g = new THREE.Group();
-      var body = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.42, 0.1), stoneLight);
-      body.position.set(px, 0.21, pz);
-      var top = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.1, 0.1), stoneLight);
-      top.position.set(px, 0.46, pz);
-      var base = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.08, 0.18), stone);
-      base.position.set(px, 0.04, pz);
-      g.add(body); g.add(top); g.add(base);
-      return g;
-    }
-    function cross(px, pz) { // croce alta e sottile, proporzioni da croce
-      var g = new THREE.Group();
-      var v = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.72, 0.1), stoneLight);
-      v.position.set(px, 0.36, pz);
-      var o = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.1, 0.1), stoneLight);
-      o.position.set(px, 0.52, pz);
-      var base = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.08, 0.18), stone);
-      base.position.set(px, 0.04, pz);
-      g.add(v); g.add(o); g.add(base);
-      return g;
-    }
-
-    // file ordinate: passo 1.6 in x, 2.0 in z, jitter minimo deterministico
-    var seed = x * 17 + z * 31, row = 0, col, mesh, px, pz, jx;
-    for (var rz = z + 1.2; rz < z + h - 0.6; rz += 2.0, row++) {
-      col = 0;
-      for (var rx = x + 1.0; rx < x + w - 0.6; rx += 1.6, col++) {
-        seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-        jx = ((seed % 100) / 100 - 0.5) * 0.25;
-        px = rx + jx; pz = rz;
-        mesh = ((row + col) % 3 === 0) ? cross(px, pz) : tombstone(px, pz);
-        mesh.traverse(function (m) { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
-        scene.add(mesh);
-        blobShadow(scene, px, pz + 0.06, 0.2);
-      }
-    }
 
     // recinto in ferro basso sul perimetro, con varco di 2 unita' al centro sud
     function rail(cx2, cz2, len, horiz) {
@@ -1850,17 +1886,10 @@ var leadX = 0, leadZ = 0;
   function addLights(map, world) {
     var indoor = !!map.indoor;
     var red = map.id === 'redroom';
-    var hemi, sun;
-    if (red) {
-      hemi = new THREE.HemisphereLight(0xff6858, 0x401014, 0.8);
-      sun = new THREE.DirectionalLight(0xffd0c0, 0.4);
-    } else if (indoor) {
-      hemi = new THREE.HemisphereLight(0xfff2dc, 0x6a5a48, 0.72);
-      sun = new THREE.DirectionalLight(0xffeecc, 0.42);
-    } else {
-      hemi = new THREE.HemisphereLight(0xd0e4ff, 0x8a7c60, 0.6);
-      sun = new THREE.DirectionalLight(0xfff0d0, 0.68);
-    }
+    var LC = CONFIG.lighting;
+    var lp = red ? LC.redroom : (indoor ? LC.indoor : LC.outdoor);
+    var hemi = new THREE.HemisphereLight(lp.hemiSky, lp.hemiGround, lp.hemiIntensity);
+    var sun = new THREE.DirectionalLight(lp.sunColor, lp.sunIntensity);
     world.scene.add(hemi);
     var cx = map.width / 2, cz = map.height / 2;
     sun.position.set(cx - map.width * 0.6, Math.max(map.width, map.height) * 0.9, cz - map.height * 0.35);
@@ -1868,14 +1897,14 @@ var leadX = 0, leadZ = 0;
     world.scene.add(sun.target);
     sun.castShadow = true;
     var d = Math.max(map.width, map.height) / 2 + 6;
-    sun.shadow.mapSize.width = 2048;
-    sun.shadow.mapSize.height = 2048;
-    sun.shadow.camera.near = 1;
-    sun.shadow.camera.far = Math.max(map.width, map.height) * 3;
+    sun.shadow.mapSize.width = LC.shadow.mapSize;
+    sun.shadow.mapSize.height = LC.shadow.mapSize;
+    sun.shadow.camera.near = LC.shadow.near;
+    sun.shadow.camera.far = Math.max(map.width, map.height) * LC.shadow.farMult;
     sun.shadow.camera.left = -d; sun.shadow.camera.right = d;
     sun.shadow.camera.top = d; sun.shadow.camera.bottom = -d;
-    sun.shadow.bias = -0.0004;
-    sun.shadow.normalBias = 0.03;
+    sun.shadow.bias = LC.shadow.bias;
+    sun.shadow.normalBias = LC.shadow.normalBias;
     world.scene.add(sun);
 
     // riempimento caldo al centro della stanza: solleva la parete "anchor" (a
@@ -1883,7 +1912,7 @@ var leadX = 0, leadZ = 0;
     // ~1.3, il tetto oltre cui Lambert clippa). Fioco e locale: non conta nel
     // budget perché la sua intensità decade rapidamente con la distanza.
     if (indoor && !red) {
-      var fill = new THREE.PointLight(0xffe0b0, 0.22, Math.max(map.width, map.height) * 1.4, 2);
+      var fill = new THREE.PointLight(LC.fill.color, LC.fill.intensity, Math.max(map.width, map.height) * LC.fill.distanceMult, LC.fill.decay);
       fill.position.set(cx, IWALL_H - 0.05, cz);
       world.scene.add(fill);
     }
@@ -1898,13 +1927,8 @@ var leadX = 0, leadZ = 0;
     else bg = 0x1a1816;
     world.scene.background = new THREE.Color(bg);
     // nebbia atmosferica: PNW umido, più densa nel bosco
-    if (map.id === 'town') {
-      world.scene.fog = new THREE.Fog(bg, 22, 55);
-    } else if (map.id === 'woods') {
-      world.scene.fog = new THREE.Fog(bg, 14, 42);
-    } else if (map.id === 'redroom') {
-      world.scene.fog = new THREE.Fog(bg, 10, 32);
-    }
+    var fogCfg = CONFIG.fog[map.id];
+    if (fogCfg) world.scene.fog = new THREE.Fog(bg, fogCfg.near, fogCfg.far);
     world.base = baseCharOf(map);
     bakeGround(map, world, { woodsOpen: S.clues.length >= 3 });
     addLights(map, world);
@@ -1924,6 +1948,10 @@ var leadX = 0, leadZ = 0;
           tree3D(ch, x + 0.5, y + 0.6, world.scene);
         } else if (ch === 'S' && !welcomeSigns[x + ',' + y]) {
           sign3D(x + 0.5, y + 0.5, world.scene, SIGN_LABELS[map.id + ':' + x + ',' + y]);
+        } else if (ch === 'G') {
+          var gv = (x * 31 + y * 17) % 3;
+          world.scene.add(gv === 0 ? graveCross(x + 0.5, y + 0.5) : graveStone(x + 0.5, y + 0.5));
+          blobShadow(world.scene, x + 0.5, y + 0.62, 0.24);
         } else if (ch === 'M') {
           world.scene.add(billboard(statueTexture(), 1, 1, x + 0.5, y + 0.55));
           blobShadow(world.scene, x + 0.5, y + 0.6, 0.3);

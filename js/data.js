@@ -129,6 +129,17 @@
       { name: 'AUDREY', text: 'Se le serve aiuto, mi trovi al Great Northern. Io so essere... molto convincente.' }
     ] },
 
+    tomba_laura: {
+      pages: [
+        { name: '', text: 'Una lapide nuova. La terra e\' ancora smossa. "LAURA PALMER, 1972-1989".' },
+        { name: '', text: 'Qualcuno ha lasciato una rosa. Non c\'e\' biglietto.' },
+        { name: 'COOPER', text: 'Diane... diciassette anni. Chiunque sia stato, la risposta e\' in questa citta\'.' }
+      ],
+      again: { pages: [
+        { name: 'COOPER', text: 'Riposa, Laura. Ci penso io.' }
+      ] }
+    },
+
     /* ---------------- distretto dello sceriffo ---------------- */
 
     truman: {

@@ -75,8 +75,14 @@ rect(t, 23, 7, 23, 13, 'p');
 rect(t, 44, 26, 51, 28, '6'); t[28][47] = 'D';
 rect(t, 47, 29, 47, 30, 'p');
 
+// cimitero: angolo est, siepe alle spalle (nord), due file sfalsate di
+// lapidi solide 'G', cancello del recinto (landmark) a sud in colonna 50-51
+rect(t, 48, 21, 53, 21, 'T');
+[[48, 22], [50, 22], [52, 22], [49, 24], [51, 24], [53, 24]]
+  .forEach(([x, y]) => { t[y][x] = 'G'; });
+
 // alberi sparsi
-[[20, 9], [33, 9], [21, 25], [35, 27], [48, 26], [50, 30], [18, 30], [3, 22], [52, 22], [24, 21]]
+[[20, 9], [33, 9], [21, 25], [35, 27], [48, 26], [50, 30], [18, 30], [3, 22], [24, 21]]
   .forEach(([x, y]) => { if (t[y][x] === '.') t[y][x] = 'T'; });
 
 /* ---------------- arredo urbano ---------------- */
@@ -143,6 +149,7 @@ function nearDoor(x, y) { return DOORS.some(([dx, dy]) => Math.abs(dx - x) <= 1 
 for (let y = 1; y < H - 1; y++) {
   for (let x = 1; x < W - 1; x++) {
     if (t[y][x] !== '.' || nearDoor(x, y) || FROZEN.has(x + ',' + y)) continue;
+    if (x >= 48 && x <= 53 && y >= 21 && y <= 25) continue; // camposanto
     const hb = (x * 31 + y * 17) % 94;
     const hf = (x * 19 + y * 23) % 67;
     if (hb === 5) t[y][x] = 'n';
@@ -191,7 +198,8 @@ if (wd[19][17] === 'g') wd[19][17] = 'B';
 /* ---------------- validazione ---------------- */
 const SOLID = {
   T: 1, S: 1, w: 1, '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1, i: 1, C: 1, t: 1, h: 1, K: 1, U: 1, Y: 1, R: 1, M: 1, v: 1, o: 1,
-  L: 1, P: 1, B: 1, F: 1, A: 1, H: 1, E: 1, n: 1 // arredo urbano
+  L: 1, P: 1, B: 1, F: 1, A: 1, H: 1, E: 1, n: 1, // arredo urbano
+  G: 1 // lapide del cimitero
 };
 function bfs(g, sx, sy) {
   const h = g.length, w = g[0].length;
@@ -235,6 +243,8 @@ assertChar(42, 20, 'D', 'porta diner');
 assertChar(50, 0, 'X', 'transenna bosco');
 assertChar(30, 30, 'S', 'cartello');
 assertWalkable(28, 31, 'spawn');
+reach(seenT, 50, 23, 'corridoio cimitero');
+reach(seenT, 50, 22, 'tomba di Laura');
 assertWalkable(W - 1, 14, 'uscita est (vagone)');
 assertWalkable(W - 1, 15, 'uscita est (vagone)');
 for (let ly = 26; ly <= 31; ly++) for (let lx = 4; lx <= 13; lx++) {

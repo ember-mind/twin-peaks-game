@@ -24,7 +24,7 @@
     T: 1, S: 1, w: 1,
     '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1,
     i: 1, C: 1, t: 1, h: 1, K: 1, U: 1,
-    Y: 1, R: 1, M: 1, v: 1,
+    Y: 1, R: 1, M: 1, v: 1, G: 1,
     L: 1, P: 1, B: 1, F: 1, A: 1, H: 1, E: 1, n: 1
   };
   M.isSolid = function (ch) { return !ch || !!M.SOLID[ch]; };
@@ -56,10 +56,10 @@
         'T......11111111111........=rr=.......22222222222.......T', // 18
         'T......11111111111........=rr=.......22222222222H......T', // 19 idrante vicino al diner
         'T......11111D11111........=rr=.......22222D22222.......T', // 20 distretto / Double R
-        'T..........ApA........n.T.=rr=...........ApA...........T', // 21 aiuole distretto/diner
-        'T.,T........p.............=rr=............p.........T..T', // 22
+        'T..........ApA........n.T.=rr=...........ApA....TTTTTT.T', // 21 aiuole distretto/diner
+        'T.,T........p.............=rr=............p.....G.G.G..T', // 22
         'T...........p.............=rr=n...........p............T', // 23
-        'T.........................=rr=.........................T', // 24
+        'T.........................=rr=...................G.G.G.T', // 24
         'T....................T....=rr=........n................T', // 25
         'T...wwwwwwwwwwF...........=rr=.............,66666666...T', // 26 lago / roadhouse, staccionata riva est
         'T..,wwwwwwwwwwF...........=rr=.....T........66666666...T', // 27
@@ -82,10 +82,10 @@
         '55,14': { to: 'traincar', tx: 2, ty: 7, dir: 'right', needsFlag: 'atto3', blockedMsg: 'est_bloccato' },
         '55,15': { to: 'traincar', tx: 2, ty: 7, dir: 'right', needsFlag: 'atto3', blockedMsg: 'est_bloccato' }
       },
-      interact: { '30,30': 'cartello', '15,28': 'lago_riva' },
+      interact: { '30,30': 'cartello', '15,28': 'lago_riva', '50,22': 'tomba_laura' },
       objects: [
         { type: 'landmark', kind: 'waterfall', x: 8, y: 0, w: 6, h: 2, dialogue: 'landmark_waterfall' },
-        { type: 'landmark', kind: 'cemetery', x: 30, y: 7, w: 12, h: 7, dialogue: 'landmark_cemetery' },
+        { type: 'landmark', kind: 'cemetery', x: 48, y: 21, w: 6, h: 4, dialogue: 'landmark_cemetery' },
         { type: 'landmark', kind: 'tracks', x: 53, y: 1, w: 2, h: 33, dialogue: 'landmark_tracks' },
         { type: 'landmark', kind: 'welcomesign', x: 30, y: 30, dialogue: 'sign_town' }
       ],

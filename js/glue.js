@@ -96,6 +96,7 @@
     cameraLaura: 'laura_room',
     olio: 'olio',
     cartelloBosco: 'sign_grove',
+    tomba_laura: 'tomba_laura',
     specchio315: [
       { cond: 'flag:gigante1', then: 'specchio_dopo' },
       { cond: 'flag:jacques_morto', then: 'gigante1_dlg' },
@@ -113,9 +114,20 @@
   };
   var SPARKLE = { cameraLaura: 1, olio: 1, mucchio_terra: 1, anello_interact: 1 };
 
+  GAME.INTERACT_DLG = INTERACT_DLG; // esposto per test/smoke.js (guardia interact -> dialogo)
+
   /* ---------------- GAME.Maps: mappe normalizzate + helper ------------- */
 
   var Maps = GAME.Maps = {};
+
+  // campi di un oggetto mappa (maps.js) che vengono RIMODELLATI (non copiati
+  // 1:1) qui sotto: doors/gate confluiscono in un unico "doors", objects/
+  // interact confluiscono in un unico "objects". Ogni altro campo presente
+  // sull'oggetto src (rows, width, height, indoor, onEnter, id, ...) viene
+  // copiato cosi' com'e': un campo nuovo aggiunto a maps.js arriva qui senza
+  // bisogno di toccare questo file. test/smoke.js verifica che nessun campo
+  // src venga perso in silenzio.
+  var TRANSFORMED_KEYS = { doors: 1, gate: 1, interact: 1, objects: 1 };
 
   Object.keys(Mp.maps).forEach(function (id) {
     var src = Mp.maps[id];
@@ -142,12 +154,11 @@
       };
     }));
 
-    Maps[id] = {
-      id: id, rows: src.rows, width: src.width, height: src.height,
-      indoor: !!src.indoor,
-      doors: doors, objects: objects, npcs: NPCS[id] || [],
-      onEnter: src.onEnter
-    };
+    var m = Maps[id] = { doors: doors, objects: objects, npcs: NPCS[id] || [] };
+    Object.keys(src).forEach(function (k) {
+      if (!TRANSFORMED_KEYS[k]) m[k] = src[k];
+    });
+    m.indoor = !!src.indoor; // normalizza a booleano anche quando assente in src
   });
 
   Maps.doorAt = function (mapId, x, y) {
