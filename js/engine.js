@@ -583,20 +583,22 @@
     curtainRows(VH - 32, 2);
     // Le tende occupano y 0-32 e VH-32..VH: tutto il testo sta dentro 36..122,
     // ben distanziato (le righe si accavallavano e finivano sotto la tenda).
+    // NB: una riga da 8px occupa ~17px logici (ascendenti+discendenti), non 8:
+    // misurato sui pixel del canvas. Da qui il passo di 20-24px fra le righe e
+    // l'ultima riga a 108 (finisce a ~125, la tenda inferiore inizia a 131).
     var touch = !!GAME.touchMode;
-    text('TWIN PEAKS', UW / 2, 44, '#f0f0f0', 'bold 16px monospace', 'center');
-    text('Il Mistero di Laura Palmer', UW / 2, 66, '#c8c8d8', '8px monospace', 'center');
-    if (hasSave()) { // con un salvataggio il prompt E' la scelta: niente riga in piu'
-      if (Math.floor(tGlobal / 500) % 2 === 0) {
-        text(touch ? 'TOCCA: CONTINUA' : 'INVIO: CONTINUA', UW / 2, 90, '#ffe9a8', '8px monospace', 'center');
-      }
-      text(touch ? 'Pulsante B: nuova partita' : 'N: nuova partita', UW / 2, 103, '#8a8ab0', '8px monospace', 'center');
-    } else if (Math.floor(tGlobal / 500) % 2 === 0) {
-      text(touch ? 'TOCCA PER INIZIARE' : 'PREMI INVIO', UW / 2, 90, '#ffe9a8', '8px monospace', 'center');
+    var save = hasSave();
+    text('TWIN PEAKS', UW / 2, 40, '#f0f0f0', 'bold 16px monospace', 'center');
+    text('Il Mistero di Laura Palmer', UW / 2, 64, '#c8c8d8', '8px monospace', 'center');
+    if (Math.floor(tGlobal / 500) % 2 === 0) {
+      text(save ? (touch ? 'TOCCA: CONTINUA' : 'INVIO: CONTINUA')
+                : (touch ? 'TOCCA PER INIZIARE' : 'PREMI INVIO'),
+           UW / 2, 88, '#ffe9a8', '8px monospace', 'center');
     }
-    text(touch ? 'D-pad: muovi   A: parla   B: indizi'
-               : 'Frecce: muovi   Z/Invio: parla   X: indizi',
-         UW / 2, 116, '#8a8ab0', '8px monospace', 'center'); // 116+8 = 124: 4px di margine dalla tenda
+    var hint;
+    if (touch) hint = save ? 'B: nuova partita   D-pad: muovi   A: parla' : 'D-pad: muovi   A: parla   B: indizi';
+    else hint = save ? 'N: nuova partita   Frecce: muovi   X: indizi' : 'Frecce: muovi   Z/Invio: parla   X: indizi';
+    text(hint, UW / 2, 108, '#8a8ab0', '8px monospace', 'center');
   }
 
   function drawIntro() {
