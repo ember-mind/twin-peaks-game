@@ -1,6 +1,7 @@
-/* chars.js — sprite personaggi disegnati con fillRect, stile Pokémon B/W (DS):
-   testoni grandi, corpo compatto, contorno scuro 1px, ~16x20 (da y-4 a y+16).
-   (split da sprites.js; i tile del mondo sono in tiles.js) */
+/* chars.js — sprite personaggi stile chibi moderno, 24x30 logical (canvas 48x60).
+ * 4 frame di camminata, idle con respiro + blink, accessori iconici.
+ * (zero asset, procedurale con fillRect)
+ */
 (function () {
   var G = (typeof window !== 'undefined' ? window : globalThis);
   G.GAME = G.GAME || {};
@@ -9,25 +10,23 @@
 
   function R(ctx, x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }
 
-  /* Personaggi: testoni chibi composti da rettangoli, contorno scuro.
-     flag: hat / long / dress / glasses / log / tie / shadow / short / bun / onearm / grin */
   S.CHARS = {
-    cooper:  { skin: '#f0c8a0', hair: '#282828', shirt: '#2a2a30', pants: '#2a2a30', tie: '#a02020' },
-    truman:  { skin: '#e8b88a', hair: '#4a3018', shirt: '#b0925a', pants: '#7a6238', hat: '#5a4222' },
-    lucy:    { skin: '#f0c8a0', hair: '#e8d060', shirt: '#e080a0', pants: '#8a5a7a', long: true, bun: true },
-    andy:    { skin: '#e8b88a', hair: '#6a4a20', shirt: '#b0925a', pants: '#7a6238' },
-    hawk:    { skin: '#a06838', hair: '#181818', shirt: '#4060a0', pants: '#2a3a5a', long: true },
-    sarah:   { skin: '#f0c8a0', hair: '#402818', shirt: '#704080', pants: '#704080', long: true, dress: true },
-    leland:  { skin: '#e8b88a', hair: '#c8c8c8', shirt: '#404048', pants: '#303038' },
-    norma:   { skin: '#f0c8a0', hair: '#5a3820', shirt: '#3a7d6e', pants: '#3a7d6e', dress: true },
-    shelly:  { skin: '#f0c8a0', hair: '#e8d060', shirt: '#e07898', pants: '#e07898', dress: true },
-    loglady: { skin: '#d8b090', hair: '#7a6a5a', shirt: '#7a4030', pants: '#4a3020', long: true, log: true },
-    bobby:   { skin: '#e8b88a', hair: '#181818', shirt: '#282828', pants: '#30508a' },
-    donna:   { skin: '#f0c8a0', hair: '#6a4a20', shirt: '#8a3040', pants: '#4a4a5a', long: true },
-    jacoby:  { skin: '#d8a880', hair: '#b0a890', shirt: '#e8e8e8', pants: '#8a8a8a', glasses: true },
-    audrey:  { skin: '#f0c8a0', hair: '#181818', shirt: '#c02030', pants: '#403020' },
-    mfap:    { skin: '#e8c8a8', hair: '#181818', shirt: '#c01020', pants: '#c01020', short: true },
-    laura:   { skin: '#e8d8c8', hair: '#e8d878', shirt: '#9090a0', pants: '#606070', long: true, shadow: true },
+    cooper:   { skin: '#f0c8a0', hair: '#282828', shirt: '#2a2a30', pants: '#2a2a30', tie: '#a02020' },
+    truman:   { skin: '#e8b88a', hair: '#4a3018', shirt: '#b0925a', pants: '#7a6238', hat: '#5a4222', badge: '#e8c840' },
+    lucy:     { skin: '#f0c8a0', hair: '#e8d060', shirt: '#e080a0', pants: '#8a5a7a', long: true, bun: true },
+    andy:     { skin: '#e8b88a', hair: '#6a4a20', shirt: '#b0925a', pants: '#7a6238' },
+    hawk:     { skin: '#a06838', hair: '#181818', shirt: '#4060a0', pants: '#2a3a5a', long: true },
+    sarah:    { skin: '#f0c8a0', hair: '#402818', shirt: '#704080', pants: '#704080', long: true, dress: true },
+    leland:   { skin: '#e8b88a', hair: '#c8c8c8', shirt: '#404048', pants: '#303038' },
+    norma:    { skin: '#f0c8a0', hair: '#5a3820', shirt: '#3a7d6e', pants: '#3a7d6e', dress: true },
+    shelly:   { skin: '#f0c8a0', hair: '#e8d060', shirt: '#e07898', pants: '#e07898', dress: true },
+    loglady:  { skin: '#d8b090', hair: '#7a6a5a', shirt: '#7a4030', pants: '#4a3020', long: true, log: true },
+    bobby:    { skin: '#e8b88a', hair: '#181818', shirt: '#282828', pants: '#30508a' },
+    donna:    { skin: '#f0c8a0', hair: '#6a4a20', shirt: '#8a3040', pants: '#4a4a5a', long: true },
+    jacoby:   { skin: '#d8a880', hair: '#b0a890', shirt: '#e8e8e8', pants: '#8a8a8a', glasses: true },
+    audrey:   { skin: '#f0c8a0', hair: '#181818', shirt: '#c02030', pants: '#403020' },
+    mfap:     { skin: '#e8c8a8', hair: '#181818', shirt: '#c01020', pants: '#c01020', short: true },
+    laura:    { skin: '#e8d8c8', hair: '#e8d878', shirt: '#9090a0', pants: '#606070', long: true, shadow: true },
     gerard:   { skin: '#c89868', hair: '#6a5a48', shirt: '#5a5040', pants: '#4a4030', onearm: 'left' },
     benhorne: { skin: '#e8b88a', hair: '#101010', shirt: '#282838', pants: '#202028', tie: '#7a1818' },
     giant:    { skin: '#f8f0e8', hair: '#e0e0e0', shirt: '#484850', pants: '#181818', tie: '#0a0a0a' },
@@ -38,175 +37,185 @@
     ronette:  { skin: '#f4e0d0', hair: '#e8d060', shirt: '#d8d8d8', pants: '#d8d8d8', long: true, dress: true }
   };
 
-  S.drawChar = function (ctx, name, x, y, dir, frame, moving) {
+  S.drawChar = function (ctx, name, x, y, dir, frame, moving, t) {
     var c = S.CHARS[name] || S.CHARS.cooper;
     var sh = !!c.shadow;
     function C(col) { return sh ? '#26262f' : col; }
     var skin = C(c.skin), hair = C(c.hair), shirt = C(c.shirt), pants = C(c.pants);
-    var OL = C('#202028');      // contorno scuro (firma stile B/W)
+    var OL = C('#202028');
     var eye = C('#12121a');
     var shoe = C('#1a1a22');
     var white = C('#f4f4f4');
-    var isShort = !!c.short;    // mfap: più basso di tutti
-    var bob = (moving && frame) ? -1 : 0;  // rimbalzo di 1px di testa+busto
+    var isShort = !!c.short;
+    t = t || 0;
 
-    // rettangolo con contorno scuro 1px (contorno sotto, riempimento sopra)
-    function OR(ox, oy, w, h, fill) {
-      R(ctx, x + ox - 1, y + oy - 1, w + 2, h + 2, OL);
-      R(ctx, x + ox, y + oy, w, h, fill);
-    }
+    var breathPx = moving ? 0 : Math.round(Math.sin(t / 350) * 1.2);
+    var blink = !moving && ((t % 4200) > 3900);
+    var bob = moving ? ((frame === 1 || frame === 3) ? -1 : 0) : breathPx;
 
-    // blocco a spigoli arrotondati (testone B/W): contorno scuro che segue la
-    // sagoma, angoli superiori/inferiori intaccati di 1px così legge tondo.
-    function RB(ox, oy, w, h, fill) {
-      R(ctx, x + ox + 1, y + oy - 1, w - 2, 1, OL);       // contorno sopra
-      R(ctx, x + ox + 1, y + oy + h, w - 2, 1, OL);       // contorno sotto
-      R(ctx, x + ox - 1, y + oy + 1, 1, h - 2, OL);       // contorno sinistra
-      R(ctx, x + ox + w, y + oy + 1, 1, h - 2, OL);       // contorno destra
-      R(ctx, x + ox + 1, y + oy, w - 2, 1, fill);         // riga alta rientrata
-      R(ctx, x + ox, y + oy + 1, w, h - 2, fill);         // corpo
-      R(ctx, x + ox + 1, y + oy + h - 1, w - 2, 1, fill); // riga bassa rientrata
-    }
-    // calotta capelli con top arrotondato (segue la testa)
-    function RBtop(ox, oy, w, hh, fill) {
-      R(ctx, x + ox + 1, y + oy, w - 2, 1, fill);
-      R(ctx, x + ox, y + oy + 1, w, hh - 1, fill);
-    }
+    var cx = x + 12; // centro personaggio (canvas logico 48x60, char 24 wide)
+    var footY = y + 52;
 
-    // layout verticale (offset rispetto a y). Testa ~45% dell'altezza totale.
-    var hsT = isShort ? 1 : -2;   // top pelle testa
-    var hsH = isShort ? 6 : 9;    // altezza testa (grande, chibi)
-    var eyeY = isShort ? 4 : 3;   // riga occhi (terzo basso della testa)
-    var hcH = isShort ? 2 : 4;    // altezza calotta capelli
-    var bT = 7;                   // top busto
-    var bH = 4;                   // altezza busto
-    var armY = 8;
-    var legT = 11;                // gambe piantate a terra (piedi a y+16)
-    var hT = hsT + bob;           // top testa col rimbalzo
+    // ombra morbida a terra
+    R(ctx, x + 10, footY + 1, 24, 4, 'rgba(0,0,0,0.18)');
+    R(ctx, x + 14, footY, 16, 4, 'rgba(0,0,0,0.18)');
 
-    // ombra ellittica sotto i piedi
-    R(ctx, x + 2, y + 14, 12, 2, 'rgba(0,0,0,0.28)');
-
-    // capelli lunghi dietro le spalle (dietro a tutto)
+    // capelli lunghi dietro
     if (c.long && !isShort) {
-      R(ctx, x + 1, y - 3, 14, 12, OL);
-      R(ctx, x + 2, y - 3, 12, 10, hair);
+      R(ctx, x + 4, y + 6, 4, 32, OL);
+      R(ctx, x + 40, y + 6, 4, 32, OL);
+      R(ctx, x + 6, y + 8, 2, 28, hair);
+      R(ctx, x + 40, y + 8, 2, 28, hair);
     }
 
-    /* ---- gambe / vestito (disegnate per prime, il busto le copre in alto) ---- */
+    /* ---- gambe ---- */
+    var legTop = y + 32 + bob;
+    var legLen = 14;
+    var pantsCol = c.dress ? shirt : pants;
+    var shoeCol = shoe;
+    var leftLeg, rightLeg;
+
     if (c.dress) {
-      R(ctx, x + 4, y + 11, 8, 2, OL);          // vita gonna (stretta)
-      R(ctx, x + 3, y + 13, 10, 2, OL);         // orlo gonna (svasato 1px per lato)
-      R(ctx, x + 4, y + 11, 8, 2, shirt);
-      R(ctx, x + 3, y + 13, 10, 1, shirt);
-      R(ctx, x + 5, y + 14, 2, 1, skin);
-      R(ctx, x + 9, y + 14, 2, 1, skin);
-      R(ctx, x + 5, y + 15, 2, 1, shoe);
-      R(ctx, x + 9, y + 15, 2, 1, shoe);
+      R(ctx, x + 12, legTop, 24, 4, OL);   // vita
+      R(ctx, x + 10, legTop + 4, 28, 4, OL); // gonna svasata
+      R(ctx, x + 13, legTop, 22, 3, shirt);
+      R(ctx, x + 11, legTop + 4, 26, 3, shirt);
+      R(ctx, x + 18, legTop + 8, 4, 8, skin);  // gambe nude
+      R(ctx, x + 26, legTop + 8, 4, 8, skin);
+      R(ctx, x + 18, footY - 3, 4, 3, shoeCol);
+      R(ctx, x + 26, footY - 3, 4, 3, shoeCol);
+    } else if (isShort) {
+      // MFAP: gambe corte
+      R(ctx, x + 18, legTop + 4, 4, 6, OL); R(ctx, x + 19, legTop + 5, 2, 4, pants);
+      R(ctx, x + 26, legTop + 4, 4, 6, OL); R(ctx, x + 27, legTop + 5, 2, 4, pants);
+      R(ctx, x + 18, footY - 3, 4, 3, shoeCol); R(ctx, x + 26, footY - 3, 4, 3, shoeCol);
     } else if (moving) {
-      R(ctx, x + 4, y + legT, 8, 5, OL);        // un unico blocco di contorno
-      if (frame) {
-        R(ctx, x + 5, y + legT, 2, 3, pants);      R(ctx, x + 5, y + legT + 3, 2, 1, shoe);
-        R(ctx, x + 9, y + legT, 2, 2, pants);      R(ctx, x + 9, y + legT + 2, 2, 1, shoe);
-      } else {
-        R(ctx, x + 5, y + legT, 2, 2, pants);      R(ctx, x + 5, y + legT + 2, 2, 1, shoe);
-        R(ctx, x + 9, y + legT, 2, 3, pants);      R(ctx, x + 9, y + legT + 3, 2, 1, shoe);
-      }
+      // 4 frame: alterna gambe in avanti/indietro
+      var off = [0, 3, 0, -3]; // offset Y piedi per sinistra
+      var leftF  = off[frame];
+      var rightF = off[(frame + 2) % 4];
+      // sinistra
+      R(ctx, x + 17, legTop, 5, legLen + leftF, OL);
+      R(ctx, x + 18, legTop + 1, 3, legLen + leftF - 2, pantsCol);
+      R(ctx, x + 17, legTop + legLen + leftF, 5, 3, shoeCol);
+      // destra
+      R(ctx, x + 26, legTop, 5, legLen + rightF, OL);
+      R(ctx, x + 27, legTop + 1, 3, legLen + rightF - 2, pantsCol);
+      R(ctx, x + 26, legTop + legLen + rightF, 5, 3, shoeCol);
     } else {
-      R(ctx, x + 4, y + legT, 8, 5, OL);
-      R(ctx, x + 5, y + legT, 2, 3, pants);        R(ctx, x + 5, y + legT + 3, 2, 1, shoe);
-      R(ctx, x + 9, y + legT, 2, 3, pants);        R(ctx, x + 9, y + legT + 3, 2, 1, shoe);
+      R(ctx, x + 17, legTop, 5, legLen, OL); R(ctx, x + 18, legTop + 1, 3, legLen - 2, pantsCol); R(ctx, x + 17, legTop + legLen, 5, 3, shoeCol);
+      R(ctx, x + 26, legTop, 5, legLen, OL); R(ctx, x + 27, legTop + 1, 3, legLen - 2, pantsCol); R(ctx, x + 26, legTop + legLen, 5, 3, shoeCol);
     }
 
     /* ---- busto ---- */
-    OR(4, bT + bob, 8, bH, shirt);
-    if (c.tie) {                                    // Cooper: camicia bianca + cravatta
-      R(ctx, x + 6, y + bT + bob, 4, 1, white);     // colletto
-      R(ctx, x + 7, y + bT + bob, 2, bH, C(c.tie)); // cravatta
+    var bodyTop = y + 18 + bob;
+    R(ctx, x + 14, bodyTop, 20, 16, OL);   // contorno
+    R(ctx, x + 15, bodyTop + 1, 18, 14, shirt);
+    if (c.tie) {
+      R(ctx, x + 22, bodyTop + 2, 4, 12, C(c.tie)); // cravatta
+      R(ctx, x + 21, bodyTop + 1, 6, 2, white);       // colletto
+    }
+    if (c.badge && dir !== 'up') { // stellina da sceriffo sul petto
+      var bx = x + ((dir === 'right') ? 28 : 17), by2 = bodyTop + 3;
+      R(ctx, bx + 1, by2, 2, 1, C(c.badge));
+      R(ctx, bx, by2 + 1, 4, 2, C(c.badge));
+      R(ctx, bx + 1, by2 + 3, 2, 1, C(c.badge));
+      R(ctx, bx + 1, by2 + 1, 2, 1, C('#f8ecb0')); // riflesso
     }
 
-    /* ---- braccia sottili 2px (nei profili una sola, davanti) ---- */
-    var noArm = c.onearm === 'left';                // Gerard/MIKE: braccio sinistro assente
+    /* ---- braccia ---- */
+    var armY = y + 22 + bob;
+    var noArm = c.onearm === 'left';
     if (dir === 'left' || dir === 'right') {
-      var af = moving ? (frame ? 1 : 0) : 0;
-      var ax = (dir === 'left') ? 3 : 11;
-      if (!(noArm && dir === 'left')) OR(ax, armY + bob + af, 2, 3, shirt);
+      var ax = (dir === 'left') ? 10 : 34;
+      if (!(noArm && dir === 'left')) {
+        R(ctx, x + ax, armY, 4, 12, OL); R(ctx, x + ax + 1, armY + 1, 2, 10, shirt);
+      }
     } else {
-      var aoL = moving ? (frame ? 1 : 0) : 0;       // fase opposta: braccio-swing
-      var aoR = moving ? (frame ? 0 : 1) : 0;
-      if (!noArm) OR(3, armY + bob + aoL, 2, 3, shirt);
-      OR(11, armY + bob + aoR, 2, 3, shirt);
+      var swingL = moving ? (frame % 2 === 1 ? 2 : -1) : 0;
+      var swingR = moving ? (frame % 2 === 0 ? 2 : -1) : 0;
+      if (!noArm) { R(ctx, x + 10, armY + swingL, 4, 12, OL); R(ctx, x + 11, armY + 1 + swingL, 2, 10, shirt); }
+      R(ctx, x + 34, armY + swingR, 4, 12, OL); R(ctx, x + 35, armY + 1 + swingR, 2, 10, shirt);
     }
 
-    /* ---- testa (testone tondo) ---- */
-    RB(3, hT, 10, hsH, (dir === 'up') ? hair : skin);
-
-    // capelli / cappello / nuca
-    if (dir === 'up') {
-      /* vista da dietro: la testa è già tutta capelli */
-    } else if (c.hat) {
-      var ht = C(c.hat);                             // Truman: cappello da ranger
-      R(ctx, x + 4, y + hT - 1, 8, 1, OL);
-      R(ctx, x + 4, y + hT, 8, 2, ht);               // cupola
-      R(ctx, x + 1, y + hT + 2, 14, 1, OL);          // tesa larga
-      R(ctx, x + 2, y + hT + 2, 12, 1, ht);
-      R(ctx, x + 11, y + eyeY + bob, 1, 3, C('#3a2a14')); // sottogola 1px
-    } else {
-      RBtop(3, hT, 10, hcH, hair);                   // calotta arrotondata
-      R(ctx, x + 3, y + hT + hcH, 1, 2, hair);       // tempia sinistra
-      R(ctx, x + 12, y + hT + hcH, 1, 2, hair);      // tempia destra
-      R(ctx, x + 5, y + hT + hcH, 1, 1, hair);       // ciuffo/frangetta 1px
-      R(ctx, x + 8, y + hT + hcH, 2, 1, hair);       // ciuffo/frangetta 2px
-      if (c.tie) R(ctx, x + 9, y + hT, 1, 3, C('#4a4a52')); // Cooper: riga laterale
-    }
-
-    // crocchia (Lucy): blocco 2x2 in alto-dietro
-    if (c.bun) {
-      R(ctx, x + 5, y + hT - 1, 6, 2, OL);
-      R(ctx, x + 6, y + hT - 1, 4, 2, hair);
-    }
-
-    // viso: occhi 1x2 grandi + catchlight bianco 1px accanto (niente bocca, stile B/W)
-    if (dir !== 'up') {
-      if (dir === 'left') {
-        R(ctx, x + 4, y + eyeY + bob, 1, 2, eye);
-        if (!sh) R(ctx, x + 5, y + eyeY + bob, 1, 1, white);
-      } else if (dir === 'right') {
-        R(ctx, x + 11, y + eyeY + bob, 1, 2, eye);
-        if (!sh) R(ctx, x + 10, y + eyeY + bob, 1, 1, white);
-      } else {
-        R(ctx, x + 5, y + eyeY + bob, 1, 2, eye);
-        R(ctx, x + 10, y + eyeY + bob, 1, 2, eye);
-        if (!sh) {
-          R(ctx, x + 6, y + eyeY + bob, 1, 1, white);
-          R(ctx, x + 9, y + eyeY + bob, 1, 1, white);
-        }
-      }
-      if (c.glasses) {                               // Jacoby: lenti rossa/blu, 3px alte
-        var gc = c.glassesColor;                      // Maddy: stessa tinta scura su entrambe
-        R(ctx, x + 4, y + eyeY - 1 + bob, 4, 3, gc ? C(gc) : C('#c03030'));
-        R(ctx, x + 8, y + eyeY - 1 + bob, 4, 3, gc ? C(gc) : C('#3050c0'));
-      }
-      if (c.grin) {                                  // BOB: ghigno feroce, denti a vista
-        if (dir === 'left') {
-          R(ctx, x + 4, y + eyeY + 2 + bob, 2, 1, white);
-        } else if (dir === 'right') {
-          R(ctx, x + 10, y + eyeY + 2 + bob, 2, 1, white);
-        } else {
-          R(ctx, x + 6, y + eyeY + 2 + bob, 4, 1, white);
-        }
-      }
-    }
-
-    /* ---- ceppo della Log Lady, tenuto davanti con entrambe le mani ---- */
+    // tronco della Log Lady
     if (c.log) {
-      R(ctx, x + 1, y + 9, 14, 4, OL);
-      R(ctx, x + 2, y + 9, 12, 2, C('#6a4526'));
-      R(ctx, x + 2, y + 11, 12, 1, C('#8a5c36'));
-      R(ctx, x + 2, y + 9, 2, 3, C('#4a2f18'));
-      R(ctx, x + 12, y + 9, 2, 3, C('#4a2f18'));
-      R(ctx, x + 4, y + 9, 1, 1, skin);              // mano sinistra sul ceppo
-      R(ctx, x + 11, y + 9, 1, 1, skin);             // mano destra sul ceppo
+      R(ctx, x + 8, armY + 2, 32, 10, OL);
+      R(ctx, x + 9, armY + 3, 30, 6, C('#6a4526'));
+      R(ctx, x + 9, armY + 9, 30, 2, C('#8a5c36'));
+      R(ctx, x + 14, armY + 4, 2, 3, skin);
+      R(ctx, x + 32, armY + 4, 2, 3, skin);
+    }
+
+    /* ---- testa ---- */
+    var headTop = y + 2 + bob;
+    var headW = 22, headH = 18;
+    var hx = x + 13;
+    // testa con contorno arrotondato
+    R(ctx, hx, headTop, headW, headH, OL);
+    R(ctx, hx + 1, headTop + 1, headW - 2, headH - 2, skin);
+    R(ctx, hx + 2, headTop, headW - 4, 1, skin);
+    R(ctx, hx + 2, headTop + headH - 1, headW - 4, 1, skin);
+    R(ctx, hx, headTop + 2, 1, headH - 4, skin);
+    R(ctx, hx + headW - 1, headTop + 2, 1, headH - 4, skin);
+
+    // capelli / cappello
+    if (dir === 'up') {
+      R(ctx, hx + 1, headTop + 1, headW - 2, headH - 2, hair);
+      R(ctx, hx + 2, headTop + headH - 2, headW - 4, 2, hair);
+    } else if (c.hat) {
+      var ht = C(c.hat);
+      R(ctx, hx + 2, headTop - 2, headW - 4, 4, OL);
+      R(ctx, hx + 3, headTop - 1, headW - 6, 3, ht);
+      R(ctx, hx - 2, headTop + 2, headW + 4, 2, OL);
+      R(ctx, hx - 1, headTop + 3, headW + 2, 1, ht);
+      R(ctx, hx + headW - 2, headTop + 4, 2, 4, C('#3a2a14'));
+    } else {
+      R(ctx, hx + 2, headTop - 2, headW - 4, 5, hair);   // calotta
+      R(ctx, hx + 1, headTop + 2, 2, 6, hair);          // tempia sx
+      R(ctx, hx + headW - 3, headTop + 2, 2, 6, hair);   // tempia dx
+      R(ctx, hx + 4, headTop + 2, 4, 2, hair);          // ciuffo
+      R(ctx, hx + 12, headTop + 2, 5, 2, hair);
+    }
+
+    // crocchia (Lucy)
+    if (c.bun) {
+      R(ctx, hx + 6, headTop - 4, 10, 4, OL);
+      R(ctx, hx + 7, headTop - 3, 8, 2, hair);
+    }
+
+    // viso
+    if (dir !== 'up') {
+      var eyeY = headTop + 7;
+      var drawEyes = function (ex, ey, blinkState) {
+        if (blinkState) {
+          R(ctx, ex, ey + 1, 3, 1, eye);
+        } else {
+          R(ctx, ex, ey, 2, 3, eye);
+          R(ctx, ex + 1, ey + 1, 1, 1, white);
+        }
+      };
+      if (dir === 'left') {
+        drawEyes(hx + 3, eyeY, blink);
+      } else if (dir === 'right') {
+        drawEyes(hx + headW - 6, eyeY, blink);
+      } else {
+        drawEyes(hx + 4, eyeY, blink);
+        drawEyes(hx + headW - 7, eyeY, blink);
+        // bocca/naso
+        R(ctx, hx + 9, headTop + 12, 4, 1, C('#c8a890'));
+      }
+
+      if (c.glasses) {
+        var gc = c.glassesColor ? C(c.glassesColor) : C('#c03030');
+        R(ctx, hx + 2, eyeY - 1, 7, 5, gc);
+        R(ctx, hx + headW - 10, eyeY - 1, 7, 5, gc);
+        R(ctx, hx + 9, eyeY + 1, 4, 1, gc);
+      }
+      if (c.grin) {
+        R(ctx, hx + 7, headTop + 13, 8, 2, OL);
+        R(ctx, hx + 8, headTop + 14, 6, 1, white);
+      }
     }
   };
 })();

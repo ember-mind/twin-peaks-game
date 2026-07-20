@@ -44,6 +44,9 @@
 var camSnap = true;
 var lastWater = -9999;
 var currentCamBack = CAM_BACK;
+var wasMoving = false;
+var dustParts = [];
+var leadX = 0, leadZ = 0;
 
   /* palette edifici */
   var BPAL = {
@@ -247,6 +250,14 @@ var currentCamBack = CAM_BACK;
       F(4, 9, 9, 3, 'rgba(190,196,208,0.62)');
       F(6, 6, 4, 3, 'rgba(200,206,216,0.55)');
       F(6, 9, 3, 2, 'rgba(228,232,240,0.75)');
+    });
+  }
+
+  function dustTexture() {
+    return simpleTex('dust', 12, 12, function (F) {
+      F(4, 5, 4, 3, 'rgba(200,200,190,0.55)');
+      F(3, 6, 6, 2, 'rgba(220,220,210,0.45)');
+      F(5, 4, 2, 5, 'rgba(180,180,170,0.35)');
     });
   }
 
@@ -461,14 +472,13 @@ var currentCamBack = CAM_BACK;
     return t;
   }
 
-  function charTex(name, dir, frame) {
-    var key = name + '_' + dir + '_' + frame;
+  function charTex(name, dir, frame, moving, t) {
+    var key = name + '_' + dir + '_' + frame + '_' + (!!moving ? 1 : 0) + '_' + Math.floor((t || 0) / 80);
     if (charTexCache[key]) return charTexCache[key];
     var cv = document.createElement('canvas');
-    cv.width = 32; cv.height = 48;
+    cv.width = 48; cv.height = 60;
     var c = cv.getContext('2d');
-    c.setTransform(2, 0, 0, 2, 0, 0);
-    Sp.drawChar(c, name, 0, 4, dir, frame, frame === 1);
+    Sp.drawChar(c, name, 0, 2, dir, frame, !!moving, t || 0);
     charTexCache[key] = makeTex(cv);
     return charTexCache[key];
   }
@@ -1621,45 +1631,84 @@ var currentCamBack = CAM_BACK;
     return group;
   }
 
+  // Cimitero leggibile: file ORDINATE di lapidi e croci rivolte a sud (verso
+  // la camera), terreno delimitato da un prato piu' cupo e un recinto in ferro
+  // basso con varco a sud. La versione precedente spargeva ~38 blocchetti
+  // chiari a caso: sembravano sassi, non tombe.
   function landmarkCemetery(x, z, w, h, scene) {
-    var stone = new THREE.MeshLambertMaterial({ color: '#9a9a92', flatShading: true });
-    var dark = new THREE.MeshLambertMaterial({ color: '#6a6a64', flatShading: true });
-    var seed = x * 17 + z * 31;
-    function rnd() { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; }
-    for (var i = 0; i < Math.floor(w * h * 0.45); i++) {
-      var px = x + 0.5 + rnd() * (w - 1);
-      var pz = z + 0.5 + rnd() * (h - 1);
-      var kind = rnd();
-      var mesh;
-      if (kind < 0.25) { // croce
-        mesh = new THREE.Group();
-        var v = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.55, 0.12), stone);
-        v.position.set(px, 0.35, pz);
-        var h2 = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.12, 0.12), stone);
-        h2.position.set(px, 0.55, pz);
-        mesh.add(v); mesh.add(h2);
-      } else if (kind < 0.65) { // lapide rettangolare
-        mesh = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.45, 0.12), stone);
-        mesh.position.set(px, 0.22, pz);
-        mesh.rotation.y = (rnd() - 0.5) * 0.35;
-      } else { // cippo basso
-        mesh = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.25, 0.2), dark);
-        mesh.position.set(px, 0.12, pz);
-        mesh.rotation.y = (rnd() - 0.5) * 0.6;
-      }
-      mesh.traverse(function (m) { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
-      scene.add(mesh);
-      blobShadow(scene, px, pz, 0.25);
+    var stone = new THREE.MeshLambertMaterial({ color: '#8a8d88', flatShading: true });
+    var stoneLight = new THREE.MeshLambertMaterial({ color: '#a5a8a0', flatShading: true });
+    var iron = new THREE.MeshLambertMaterial({ color: '#2e2e30', flatShading: true });
+
+    // prato consacrato: piano appena piu' scuro che definisce l'area
+    var lawn = new THREE.Mesh(
+      new THREE.PlaneGeometry(w, h),
+      new THREE.MeshLambertMaterial({ color: '#7d9464', transparent: true, opacity: 0.55 })
+    );
+    lawn.rotation.x = -Math.PI / 2;
+    lawn.position.set(x + w / 2, 0.015, z + h / 2);
+    lawn.receiveShadow = true;
+    scene.add(lawn);
+
+    function tombstone(px, pz) { // lapide ad arco: corpo + sommita' arrotondata
+      var g = new THREE.Group();
+      var body = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.42, 0.1), stoneLight);
+      body.position.set(px, 0.21, pz);
+      var top = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.1, 0.1), stoneLight);
+      top.position.set(px, 0.46, pz);
+      var base = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.08, 0.18), stone);
+      base.position.set(px, 0.04, pz);
+      g.add(body); g.add(top); g.add(base);
+      return g;
     }
-    // recinto: piccoli pilastri alle 4 estremità col filo
-    var postMat = new THREE.MeshLambertMaterial({ color: '#4a4a44', flatShading: true });
-    for (var cx = 0; cx <= 1; cx += 1) {
-      for (var cz = 0; cz <= 1; cz += 1) {
-        var post = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.8, 0.12), postMat);
-        post.position.set(x + cx * w, 0.4, z + cz * h);
-        post.castShadow = true;
-        scene.add(post);
+    function cross(px, pz) { // croce alta e sottile, proporzioni da croce
+      var g = new THREE.Group();
+      var v = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.72, 0.1), stoneLight);
+      v.position.set(px, 0.36, pz);
+      var o = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.1, 0.1), stoneLight);
+      o.position.set(px, 0.52, pz);
+      var base = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.08, 0.18), stone);
+      base.position.set(px, 0.04, pz);
+      g.add(v); g.add(o); g.add(base);
+      return g;
+    }
+
+    // file ordinate: passo 1.6 in x, 2.0 in z, jitter minimo deterministico
+    var seed = x * 17 + z * 31, row = 0, col, mesh, px, pz, jx;
+    for (var rz = z + 1.2; rz < z + h - 0.6; rz += 2.0, row++) {
+      col = 0;
+      for (var rx = x + 1.0; rx < x + w - 0.6; rx += 1.6, col++) {
+        seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+        jx = ((seed % 100) / 100 - 0.5) * 0.25;
+        px = rx + jx; pz = rz;
+        mesh = ((row + col) % 3 === 0) ? cross(px, pz) : tombstone(px, pz);
+        mesh.traverse(function (m) { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
+        scene.add(mesh);
+        blobShadow(scene, px, pz + 0.06, 0.2);
       }
+    }
+
+    // recinto in ferro basso sul perimetro, con varco di 2 unita' al centro sud
+    function rail(cx2, cz2, len, horiz) {
+      var r = new THREE.Mesh(
+        new THREE.BoxGeometry(horiz ? len : 0.06, 0.3, horiz ? 0.06 : len), iron);
+      r.position.set(cx2, 0.3, cz2);
+      r.castShadow = true;
+      scene.add(r);
+    }
+    var gate = 1.0; // semi-larghezza del varco
+    var midX = x + w / 2;
+    rail(x + w / 2, z, w, true);                                     // nord
+    rail(x, z + h / 2, h, false);                                    // ovest
+    rail(x + w, z + h / 2, h, false);                                // est
+    rail((x + (midX - gate)) / 2, z + h, (midX - gate) - x, true);   // sud sx
+    rail(((midX + gate) + (x + w)) / 2, z + h, (x + w) - (midX + gate), true); // sud dx
+    var p, gx;
+    for (gx = 0; gx <= 1; gx++) { // paletti del cancello
+      p = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.55, 0.1), iron);
+      p.position.set(midX + (gx ? gate : -gate), 0.28, z + h);
+      p.castShadow = true;
+      scene.add(p);
     }
   }
 
@@ -1842,7 +1891,7 @@ var currentCamBack = CAM_BACK;
 
   function buildWorld(S) {
     var map = S.map;
-    var world = { scene: new THREE.Scene(), liquids: [], sparkles: [], npcs: [], tape: [], smokes: [] };
+    var world = { scene: new THREE.Scene(), liquids: [], sparkles: [], npcs: [], tape: [], smokes: [], dust: [] };
     var bg;
     if (map.id === 'redroom') bg = 0x2a0a0e;
     else if (map.id === 'town' || map.id === 'woods') bg = 0x2a3a40;
@@ -1947,7 +1996,7 @@ var currentCamBack = CAM_BACK;
     });
 
     S.npcs.forEach(function (n) {
-      var m = new THREE.SpriteMaterial({ map: charTex(n.sprite, n.dir, 0), transparent: true, alphaTest: 0.05 });
+      var m = new THREE.SpriteMaterial({ map: charTex(n.sprite, n.dir, 0, false, 0), transparent: true, alphaTest: 0.05 });
       if (n.sprite === 'laura') m.opacity = 0.85;
       var s = new THREE.Sprite(m);
       s.center.set(0.5, 0.08);
@@ -1997,7 +2046,7 @@ var currentCamBack = CAM_BACK;
       curId = S.mapId;
       camSnap = true;
       if (!playerSprite) {
-        var m = new THREE.SpriteMaterial({ map: charTex('cooper', 'down', 0), transparent: true, alphaTest: 0.05 });
+        var m = new THREE.SpriteMaterial({ map: charTex('cooper', 'down', 0, false, 0), transparent: true, alphaTest: 0.05 });
         playerSprite = new THREE.Sprite(m);
         playerSprite.center.set(0.5, 0.08);
         playerSprite.scale.set(1.0, 1.5, 1);
@@ -2017,16 +2066,45 @@ var currentCamBack = CAM_BACK;
 
     var p = S.player;
     var px = p.x / TILE + 0.5, pz = p.y / TILE + 1.0;
-    var fr = p.moving ? (Math.floor(t / 120) % 2) : 0;
-    playerSprite.material.map = charTex('cooper', p.dir, fr);
+    var pframe = p.moving ? (Math.floor(t / 90) % 4) : 0;
+    playerSprite.material.map = charTex('cooper', p.dir, pframe, p.moving, t);
     playerSprite.position.set(px, 0.01, pz);
     playerBlob.position.set(px, 0.012, pz - 0.05);
+
+    // dust: spawn all'inizio di ogni passo
+    if (p.moving && !wasMoving) {
+      var pmat = new THREE.SpriteMaterial({ map: dustTexture(), transparent: true, opacity: 0.5, depthWrite: false });
+      var puff = new THREE.Sprite(pmat);
+      puff.center.set(0.5, 0.02);
+      puff.scale.set(0.4, 0.4, 1);
+      puff.position.set(px - 0.1, 0.05, pz - 0.05);
+      cur.scene.add(puff);
+      cur.dust.push({ s: puff, age: 0, x: px - 0.1, y: 0.05, z: pz - 0.05 });
+    }
+    wasMoving = p.moving;
+
+    // aggiorna dust
+    for (i = cur.dust.length - 1; i >= 0; i--) {
+      var d = cur.dust[i];
+      d.age += dt;
+      var life = 360;
+      if (d.age > life) {
+        cur.scene.remove(d.s); d.s.material.dispose(); cur.dust.splice(i, 1); continue;
+      }
+      var a = d.age / life;
+      d.s.position.y = d.y + a * 0.35;
+      var sc = 0.35 + a * 0.55;
+      d.s.scale.set(sc, sc, 1);
+      d.s.material.opacity = 0.45 * (1 - a * a);
+    }
 
     var i, s;
     for (i = 0; i < cur.npcs.length; i++) {
       s = cur.npcs[i];
-      s.material.map = charTex(s.userData.npc.sprite, s.userData.npc.dir, 0);
-      s.visible = GAME.Engine.npcActive(s.userData.npc);
+      var npc = s.userData.npc;
+      var nframe = npc.moving ? (Math.floor(t / 90) % 4) : 0;
+      s.material.map = charTex(npc.sprite, npc.dir, nframe, npc.moving, t);
+      s.visible = GAME.Engine.npcActive(npc);
     }
     for (i = 0; i < cur.sparkles.length; i++) {
       s = cur.sparkles[i];

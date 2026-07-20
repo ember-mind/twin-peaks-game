@@ -67,7 +67,7 @@
     return {
       mode: 'title',           // title | intro | play | end
       mapId: 'town', map: null, npcs: [],
-      player: { tx: 28, ty: 22, x: 28 * TILE, y: 22 * TILE, dir: 'up', moving: false, mx: 0, my: 0 },
+      player: { tx: 28, ty: 31, x: 28 * TILE, y: 31 * TILE, dir: 'up', moving: false, mx: 0, my: 0 },
       clues: [], flags: {},
       introPage: 0,
       dialogue: null,          // {id, def, pages, i, replay}
@@ -146,7 +146,7 @@
       octx = offCv.getContext('2d');
       octx.imageSmoothingEnabled = false;
       entCv = document.createElement('canvas'); // scratch per i billboard dei personaggi
-      entCv.width = 32; entCv.height = 48;
+      entCv.width = 48; entCv.height = 60;
       ectx = entCv.getContext('2d');
       ectx.imageSmoothingEnabled = false;
       buildWarp(VH * SCALE);
@@ -176,7 +176,7 @@
   };
 
   E.start = function () {
-    loadMap('town', 28, 22, 'up');
+    loadMap('town', 28, 31, 'up');
     last = (typeof performance !== 'undefined') ? performance.now() : Date.now();
     requestAnimationFrame(loop);
     // fallback: se il rAF è sospeso (tab nascosta/occlusa) il gioco continua via timer
@@ -235,7 +235,7 @@
       }
       return;
     }
-    if (S.mode === 'end') { S = E.state = freshState(); loadMap('town', 28, 22, 'up'); return; }
+    if (S.mode === 'end') { S = E.state = freshState(); loadMap('town', 28, 31, 'up'); return; }
     if (S.mode !== 'play') return;
     if (S.dialogue) { advanceDialogue(); return; }
     if (S.menu) { S.menu = false; return; }
@@ -354,8 +354,10 @@
     if (door && door.needsClues && S.clues.length < door.needsClues) { bumpMsg(door.blockedMsg || 'woods_blocked'); return; }
     if (GAME.Maps.isSolid(S.mapId, nx, ny, S)) return;
     if (npcAt(nx, ny)) return;
-    if (GAME.Maps.objectAt(S.mapId, nx, ny)) return;
     p.mx = nx; p.my = ny; p.moving = true;
+    p.moveStartX = p.tx; p.moveStartY = p.ty;
+    p.moveT = 0;
+    // dust: spawn later in render3d
   }
 
   function onArrive() {
@@ -386,16 +388,17 @@
     if (S.mode !== 'play' || S.dialogue || S.menu || S.fadePhase !== 0) return;
     var p = S.player;
     if (p.moving) {
-      var step = SPEED * dt;
       var tx = p.mx * TILE, ty = p.my * TILE;
-      var dx = tx - p.x, dy = ty - p.y;
-      var dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist <= step || dist === 0) {
+      var dx = tx - p.moveStartX * TILE, dy = ty - p.moveStartY * TILE;
+      var total = TILE; // sempre un tile alla volta
+      p.moveT += dt * SPEED / total;
+      if (p.moveT >= 1) {
         p.x = tx; p.y = ty; p.tx = p.mx; p.ty = p.my; p.moving = false;
         onArrive();
       } else {
-        p.x += dx / dist * step;
-        p.y += dy / dist * step;
+        var e = p.moveT * p.moveT * (3 - 2 * p.moveT); // smoothstep
+        p.x = p.moveStartX * TILE + dx * e;
+        p.y = p.moveStartY * TILE + dy * e;
       }
     } else if (held.length) {
       var d = held[held.length - 1];
@@ -467,10 +470,10 @@
     var p = S.player;
     var ents = S.npcs.filter(function (n) { return E.npcActive(n); }).map(function (n) {
       return { wx: n.x * TILE, wy: n.y * TILE, sprite: n.sprite, dir: n.dir, fr: 0,
-               alpha: n.sprite === 'laura' ? 0.85 : 1 };
+               moving: n.moving || false, alpha: n.sprite === 'laura' ? 0.85 : 1 };
     });
     ents.push({ wx: Math.round(p.x), wy: Math.round(p.y), sprite: 'cooper', dir: p.dir,
-                fr: p.moving ? (Math.floor(tGlobal / 120) % 2) : 0, alpha: 1 });
+                fr: p.moving ? (Math.floor(tGlobal / 90) % 4) : 0, moving: p.moving, alpha: 1 });
     ents.sort(function (a, b) { return a.wy - b.wy; });
     return ents;
   }
@@ -480,7 +483,7 @@
     paintGround(g, cx, cy, vw, vh);
     entityList().forEach(function (e) {
       var pal = GAME.Sprites.CHARS[e.sprite] || GAME.Sprites.CHARS.cooper;
-      GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, pal, e.dir, e.fr, e.alpha);
+      GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, pal, e.dir, e.fr, e.alpha, e.moving, tGlobal);
     });
   }
 
@@ -528,18 +531,17 @@
       if (footOff < 0 || footOff >= OFF_H) return;
       var di = destOf[Math.floor(footOff)];             // riga schermo
       var s = warpS[di];                                // scala prospettica a quella riga
-      // sprite 16x24 (da y-4 a y+16+4 margine) disegnato 2x sullo scratch
+      // sprite 24x30 disegnato 1x sullo scratch 48x60
       ectx.setTransform(1, 0, 0, 1, 0, 0);
-      ectx.clearRect(0, 0, 32, 48);
-      ectx.setTransform(2, 0, 0, 2, 0, 0);
+      ectx.clearRect(0, 0, 48, 60);
       var pal = GAME.Sprites.CHARS[e.sprite] || GAME.Sprites.CHARS.cooper;
-      GAME.Sprites.drawChar(ectx, 0, 4, pal, e.dir, e.fr, 1); // piedi a y scratch 40
+      GAME.Sprites.drawChar(ectx, 0, 0, pal, e.dir, e.fr, 1, e.moving, tGlobal); // piedi a y ~52
       // posizione schermo: centro X proiettato alla scala della riga
-      var offX = (e.wx + 8 - cxr) * 2;
+      var offX = (e.wx + 12 - cxr) * 2;
       var scrX = (offX - (OFF_W - warpSW[di]) / 2) * s;
-      var dw = 32 * s, dh = 48 * s;
+      var dw = 48 * s, dh = 60 * s;
       if (e.alpha < 1) ctx.globalAlpha = e.alpha;
-      ctx.drawImage(entCv, scrX - dw / 2, di - 40 * s, dw, dh);
+      ctx.drawImage(entCv, scrX - dw / 2, di - 52 * s, dw, dh);
       ctx.globalAlpha = 1;
     });
   }

@@ -22,6 +22,11 @@ border(t, 'T');
 // doppio bordo alberato nord/sud per profondità
 rect(t, 1, 1, W - 2, 1, 'T');
 rect(t, 1, H - 2, W - 2, H - 2, 'T');
+// varco d'ingresso sud: la fila interna (riga 34) si dirada attorno alla
+// piazza del cartello, così la camera allo spawn (28,31) vede il giocatore
+// oltre la sola fila di confine (riga 35), che resta sotto la linea di vista.
+rect(t, 21, H - 2, 35, H - 2, '.');
+t[H - 2][22] = 'n'; t[H - 2][25] = 'n'; t[H - 2][31] = ','; t[H - 2][34] = 'n';
 
 // sentiero del bosco (transennato) in alto a destra
 t[0][50] = 'X'; t[1][50] = 'p';
@@ -81,7 +86,7 @@ const FROZEN = new Set([
   '9,6', '23,6', '42,6', '12,20', '42,20', '47,28', // porte
   '50,0', // transenna bosco
   '30,30', // cartello benvenuti
-  '28,22', // spawn
+  '28,31', // spawn
   (W - 1) + ',14', (W - 1) + ',15', // uscite est
   '15,28', // riva del lago
   '25,16', '44,10', '12,9', '16,25' // npc: bobby, donna, audrey, jacoby
@@ -221,7 +226,7 @@ function assertWalkable(x, y, label) {
   console.log('  ok invariato (calpestabile) ' + label);
 }
 
-const seenT = bfs(t, 28, 22);
+const seenT = bfs(t, 28, 31);
 console.log('# town — invarianti (coordinate preesistenti)');
 assertChar(9, 6, 'D', 'porta hotel');
 assertChar(42, 6, 'D', 'porta palmer');
@@ -229,7 +234,7 @@ assertChar(12, 20, 'D', 'porta sceriffo');
 assertChar(42, 20, 'D', 'porta diner');
 assertChar(50, 0, 'X', 'transenna bosco');
 assertChar(30, 30, 'S', 'cartello');
-assertWalkable(28, 22, 'spawn');
+assertWalkable(28, 31, 'spawn');
 assertWalkable(W - 1, 14, 'uscita est (vagone)');
 assertWalkable(W - 1, 15, 'uscita est (vagone)');
 for (let ly = 26; ly <= 31; ly++) for (let lx = 4; lx <= 13; lx++) {

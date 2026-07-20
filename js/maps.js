@@ -44,7 +44,7 @@
         'T....4444D44444.....555D5555.........33333D3333...p....T', // 6  hotel / ospedale / casa Palmer
         'T.......ApA...........ApA............FFFFFpFFFF...p....T', // 7  aiuole hotel/ospedale, staccionata giardino Palmer
         'T........p.......n.....p..,...............p.......p....T', // 8
-        'T........p..........T..p.........T........p.......p....T', // 9
+        'T........p..........T..p.........T........p.......p..,.T', // 9
         'T........p...,.........p.n................p.......p....T', // 10
         'T........p.............p................,.p.......p....T', // 11
         'T........p.............p.........n........p.......p....T', // 12
@@ -69,7 +69,7 @@
         'T...wwwwwwwwwwF...........=rr==B............,..........T', // 31 piazza: panchina
         'T...,..............n......=rr=.........................T', // 32
         'T.........................=rr=.,.......................T', // 33
-        'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 34
+        'TTTTTTTTTTTTTTTTTTTTT.n..n.n...,..n.TTTTTTTTTTTTTTTTTTTT', // 34
         'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT'  // 35
       ],
       doors: {

@@ -187,10 +187,15 @@
     return 'cooper';
   }
 
-  Spr.drawChar = function (ctx, x, y, pal, dir, frame, alpha) {
-    if (alpha != null && alpha < 1) ctx.globalAlpha = alpha;
-    Sp.drawChar(ctx, nameOf(pal), x, y, dir, frame, frame === 1);
-    ctx.globalAlpha = 1;
+  Spr.drawChar = function (ctx, x, y, pal, dir, frame, alpha, moving, t) {
+    if (alpha != null && alpha < 1) {
+      var old = ctx.globalAlpha;
+      ctx.globalAlpha = alpha;
+      Sp.drawChar(ctx, nameOf(pal), x, y, dir, frame, !!moving, t || 0);
+      ctx.globalAlpha = old;
+    } else {
+      Sp.drawChar(ctx, nameOf(pal), x, y, dir, frame, !!moving, t || 0);
+    }
   };
 
   Spr.drawSparkle = function (ctx, x, y, t) {
