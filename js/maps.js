@@ -94,6 +94,7 @@
 
     sheriff: {
       id: 'sheriff',
+      indoor: true,
       rows: [
         'iiiiiiiiiiiiii', // 0
         'iffffffffffffi', // 1 Andy(2,1) Truman(9,1)
@@ -115,6 +116,7 @@
 
     palmer: {
       id: 'palmer',
+      indoor: true,
       rows: [
         'iiiiiiiiiiiiiiii', // 0
         'iKKfffUffffffffi', // 1 camera di Laura: letto, comò (6,1) da ispezionare
@@ -138,6 +140,7 @@
 
     hotel_gn: {
       id: 'hotel_gn',
+      indoor: true,
       rows: [
         'iiiiiiiiiiiiiiiiii', // 0
         'ifffffffffffiKKUfi', // 1  stanza 315: letto, comò (15,1) da ispezionare
@@ -161,6 +164,7 @@
 
     hospital: {
       id: 'hospital',
+      indoor: true,
       rows: [
         'iiiiiiiiiiii', // 0
         'iKKffffffffi', // 1  letto di Ronette (2,1) da ispezionare
@@ -182,6 +186,7 @@
 
     diner: {
       id: 'diner',
+      indoor: true,
       rows: [
         'iiiiiiiiiiiiii', // 0
         'iffffffffffffi', // 1 Norma(5,1)
@@ -238,6 +243,7 @@
 
     redroom: {
       id: 'redroom',
+      indoor: true,
       rows: [
         'RRRRRRRRRRRRRRRR', // 0
         'RZZZZZZZZZZZZZZR', // 1
@@ -295,6 +301,7 @@
 
     oej: {
       id: 'oej',
+      indoor: true,
       rows: [
         'iiiiiiiiiiiiiiii', // 0
         'iffffffffffffffi', // 1
@@ -318,6 +325,7 @@
 
     roadhouse: {
       id: 'roadhouse',
+      indoor: true,
       rows: [
         'iiiiiiiiiiiiiiii', // 0
         'iCCCCCCCCCCCCCCi', // 1  palco, bordo solido (Gigante, seconda apparizione: 8,1)

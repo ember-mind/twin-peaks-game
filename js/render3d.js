@@ -36,8 +36,9 @@
   var playerSprite = null, playerBlob = null;
   var charTexCache = {};
   var texCache = {};
-  var camSnap = true;
-  var lastWater = -9999;
+var camSnap = true;
+var lastWater = -9999;
+var currentCamBack = CAM_BACK;
 
   /* palette edifici */
   var BPAL = {
@@ -90,24 +91,66 @@
     return grp;
   }
 
-  function sign3D(x, z, scene) {
+  // Testo dei cartelli, per mappa e posizione. Un tabellone vuoto letto
+  // dall'alto sembra un tavolo: il testo e' cio' che lo rende un cartello.
+  var SIGN_LABELS = {
+    'woods:11,14': ['GLASTONBURY', 'GROVE'],
+    'traincar:5,6': ['PONTE'],
+    'traincar:20,2': ['ONE EYED JACKS']
+  };
+
+  // tavola di legno con scritta incisa; rapporto 320x142 = quello del board
+  function signBoardTexture(lines) {
+    var key = 'signboard_' + lines.join('|');
+    if (texCache[key]) return texCache[key];
+    var cv = document.createElement('canvas');
+    cv.width = 320; cv.height = 142;
+    var c = cv.getContext('2d');
+    c.fillStyle = '#b89060'; c.fillRect(0, 0, 320, 142);
+    c.fillStyle = '#d0aa78'; c.fillRect(0, 0, 320, 6);        // luce sul bordo alto
+    c.fillStyle = '#6a4520';                                   // cornice
+    c.fillRect(0, 0, 320, 5); c.fillRect(0, 137, 320, 5);
+    c.fillRect(0, 0, 5, 142); c.fillRect(315, 0, 5, 142);
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillStyle = '#3a2a18';
+    if (lines.length > 1) {
+      c.font = 'bold 34px monospace';
+      c.fillText(lines[0], 160, 52);
+      c.fillText(lines[1], 160, 94);
+    } else {
+      c.font = 'bold 42px monospace';
+      c.fillText(lines[0], 160, 71);
+    }
+    texCache[key] = makeTex(cv);
+    return texCache[key];
+  }
+
+  function sign3D(x, z, scene, label) {
     var grp = new THREE.Group();
     var postMat = new THREE.MeshLambertMaterial({ color: '#6a4520', flatShading: true });
-    var boardMat = new THREE.MeshLambertMaterial({ color: '#b89060', flatShading: true });
-    var post = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.1, 0.12), postMat);
-    post.position.set(x - 0.32, 0.55, z);
+    var woodMat = new THREE.MeshLambertMaterial({ color: '#a07c48', flatShading: true });
+    // pali piu' stretti e ravvicinati: cosi' non sembrano gambe di un tavolo
+    var post = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.1, 0.1), postMat);
+    post.position.set(x - 0.22, 0.55, z);
     post.castShadow = true; post.receiveShadow = true;
     grp.add(post);
-    post = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.1, 0.12), postMat);
-    post.position.set(x + 0.32, 0.55, z);
+    post = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.1, 0.1), postMat);
+    post.position.set(x + 0.22, 0.55, z);
     post.castShadow = true; post.receiveShadow = true;
     grp.add(post);
-    var board = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.42, 0.08), boardMat);
-    board.position.set(x, 0.84, z);
+    var faceMat = label
+      ? new THREE.MeshLambertMaterial({ map: signBoardTexture(label) })
+      : woodMat;
+    // ordine materiali BoxGeometry: +x,-x,+y,-y,+z,-z; la camera guarda la faccia +z
+    var board = new THREE.Mesh(
+      new THREE.BoxGeometry(0.95, 0.42, 0.08),
+      [woodMat, woodMat, woodMat, woodMat, faceMat, woodMat]
+    );
+    board.position.set(x, 0.9, z + 0.02);
     board.castShadow = true; board.receiveShadow = true;
     grp.add(board);
     scene.add(grp);
-    blobShadow(scene, x, z, 0.36);
+    blobShadow(scene, x, z, 0.3);
     return grp;
   }
 
@@ -1132,24 +1175,52 @@
 
   /* ---------------- landmark 3D ---------------- */
 
+  // tabellone del benvenuto: 512x192 = rapporto 1.6x0.6 del pannello
+  function welcomeSignTexture() {
+    if (texCache.welcomeboard) return texCache.welcomeboard;
+    var cv = document.createElement('canvas');
+    cv.width = 512; cv.height = 192;
+    var c = cv.getContext('2d');
+    c.fillStyle = '#e8e4d8'; c.fillRect(0, 0, 512, 192);
+    c.fillStyle = '#6a4520';                                    // cornice intagliata
+    c.fillRect(0, 0, 512, 9); c.fillRect(0, 183, 512, 9);
+    c.fillRect(0, 0, 9, 192); c.fillRect(503, 0, 9, 192);
+    c.fillStyle = '#c8bfa8'; c.fillRect(9, 9, 494, 4);          // ombra interna
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillStyle = '#5a4228';
+    c.font = 'bold 30px monospace'; c.fillText('BENVENUTI A', 256, 48);
+    c.fillStyle = '#2e5c36';
+    c.font = 'bold 62px monospace'; c.fillText('TWIN PEAKS', 256, 104);
+    c.fillStyle = '#5a4228';
+    c.font = '24px monospace'; c.fillText('Popolazione 51.201', 256, 156);
+    texCache.welcomeboard = makeTex(cv);
+    return texCache.welcomeboard;
+  }
+
   function landmarkWelcomesign(x, z, scene) {
     var grp = new THREE.Group();
     var postMat = new THREE.MeshLambertMaterial({ color: '#6a4520', flatShading: true });
-    var boardMat = new THREE.MeshLambertMaterial({ color: '#e8e4d8', flatShading: true });
-    var post = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.8, 0.18), postMat);
-    post.position.set(x - 0.55, 0.9, z);
+    var frameMat = new THREE.MeshLambertMaterial({ color: '#8a6a48', flatShading: true });
+    var post = new THREE.Mesh(new THREE.BoxGeometry(0.16, 1.8, 0.16), postMat);
+    post.position.set(x - 0.62, 0.9, z);
     post.castShadow = true; post.receiveShadow = true;
     grp.add(post);
-    post = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.8, 0.18), postMat);
-    post.position.set(x + 0.55, 0.9, z);
+    post = new THREE.Mesh(new THREE.BoxGeometry(0.16, 1.8, 0.16), postMat);
+    post.position.set(x + 0.62, 0.9, z);
     post.castShadow = true; post.receiveShadow = true;
     grp.add(post);
-    var board = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 0.12), boardMat);
-    board.position.set(x, 1.45, z);
+    // faccia +z (verso la camera) col testo; le altre restano legno
+    var face = new THREE.MeshLambertMaterial({ map: welcomeSignTexture() });
+    var board = new THREE.Mesh(
+      new THREE.BoxGeometry(1.6, 0.6, 0.12),
+      [frameMat, frameMat, frameMat, frameMat, face, frameMat]
+    );
+    board.position.set(x, 1.45, z + 0.03);
     board.castShadow = true; board.receiveShadow = true;
     grp.add(board);
-    var cap = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.08, 0.18), postMat);
-    cap.position.set(x, 1.78, z);
+    var cap = new THREE.Mesh(new THREE.BoxGeometry(1.75, 0.09, 0.2), postMat);
+    cap.position.set(x, 1.8, z);
+    cap.castShadow = true;
     grp.add(cap);
     scene.add(grp);
     blobShadow(scene, x, z, 0.7);
@@ -1251,6 +1322,26 @@
     return group;
   }
 
+  function createRain(scene) {
+    var count = 1400;
+    var geo = new THREE.BufferGeometry();
+    var pos = new Float32Array(count * 3);
+    for (var i = 0; i < count; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 24;
+      pos[i * 3 + 1] = Math.random() * 16;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 24;
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    var mat = new THREE.PointsMaterial({
+      color: 0xb8d4f0, size: 0.13, transparent: true, opacity: 0.75,
+      sizeAttenuation: true, depthWrite: false
+    });
+    var mesh = new THREE.Points(geo, mat);
+    mesh.position.set(0, 0, 0);
+    scene.add(mesh);
+    return { mesh: mesh, count: count, speed: 0.012 };
+  }
+
   /* ---------------- terreno + luci ---------------- */
 
   /* decorazioni del terreno: chiazze grandi + fiori/ciottoli/ciocche,
@@ -1299,6 +1390,11 @@
     }
   }
 
+  // celle interne (pavimento/tappeto/arredo/porta/statua) da dipingere sulle mappe indoor;
+  // le altre celle (muri i/R e tutto ciò che sta oltre il perimetro) restano nel vuoto scenico
+  var INDOOR_FLOOR = { f: 1, c: 1, C: 1, t: 1, h: 1, K: 1, U: 1, D: 1, Z: 1, M: 1 };
+  var VOID_COLOR = '#101820';
+
   function bakeGround(map, world, opts) {
     var w = (map.width + BORDER * 2) * TILE, h = (map.height + BORDER * 2) * TILE;
     var cv = document.createElement('canvas');
@@ -1306,9 +1402,14 @@
     var c = cv.getContext('2d');
     var base = world.base;
     var x, y, ch;
+    if (map.indoor) {
+      c.fillStyle = VOID_COLOR;
+      c.fillRect(0, 0, w, h);
+    }
     for (y = -BORDER; y < map.height + BORDER; y++) {
       for (x = -BORDER; x < map.width + BORDER; x++) {
         ch = chAt(map, x, y);
+        if (map.indoor && !INDOOR_FLOOR[ch]) continue; // fuori dalla stanza o muro: resta vuoto
         if (SKIP_BAKE[ch]) ch = base;
         Sp.drawTile(c, ch, (x + BORDER) * TILE, (y + BORDER) * TILE,
                     Math.abs(x), Math.abs(y), 0, { map: map, woodsOpen: opts.woodsOpen });
@@ -1326,7 +1427,7 @@
   }
 
   function addLights(map, world) {
-    var indoor = map.id === 'sheriff' || map.id === 'palmer' || map.id === 'diner';
+    var indoor = !!map.indoor;
     var red = map.id === 'redroom';
     var hemi, sun;
     if (red) {
@@ -1376,6 +1477,7 @@
     world.base = baseCharOf(map);
     bakeGround(map, world, { woodsOpen: S.clues.length >= 3 });
     addLights(map, world);
+    if (map.id === 'town' || map.id === 'woods') world.rain = createRain(world.scene);
 
     // posizioni dei landmark speciali da non renderizzare come tile normali
     var welcomeSigns = {};
@@ -1390,7 +1492,7 @@
         if (ch === 'T' || ch === 'Y') {
           tree3D(ch, x + 0.5, y + 0.6, world.scene);
         } else if (ch === 'S' && !welcomeSigns[x + ',' + y]) {
-          sign3D(x + 0.5, y + 0.5, world.scene);
+          sign3D(x + 0.5, y + 0.5, world.scene, SIGN_LABELS[map.id + ':' + x + ',' + y]);
         } else if (ch === 'M') {
           world.scene.add(billboard(statueTexture(), 1, 1, x + 0.5, y + 0.55));
           blobShadow(world.scene, x + 0.5, y + 0.6, 0.3);
@@ -1567,9 +1669,29 @@
       }
     }
 
-    var tx = px, ty = CAM_UP, tz = pz + CAM_BACK;
+    if (cur.rain) {
+      var r = cur.rain;
+      r.mesh.position.set(camera.position.x, 0, camera.position.z);
+      var pos = r.mesh.geometry.attributes.position.array;
+      for (i = 0; i < r.count; i++) {
+        pos[i * 3 + 1] -= r.speed * dt;
+        if (pos[i * 3 + 1] < 0) {
+          pos[i * 3 + 1] = 12 + Math.random() * 4;
+          pos[i * 3] = (Math.random() - 0.5) * 24;
+          pos[i * 3 + 2] = (Math.random() - 0.5) * 24;
+        }
+      }
+      r.mesh.geometry.attributes.position.needsUpdate = true;
+    }
+
+    var targetBack = S.dialogue ? 7.0 : CAM_BACK;
+    var kb = 1 - Math.exp(-dt * 0.006);
+    currentCamBack += (targetBack - currentCamBack) * kb;
+
+    var tx = px, ty = CAM_UP, tz = pz + currentCamBack;
     if (camSnap) {
       camera.position.set(tx, ty, tz);
+      currentCamBack = targetBack;
       camSnap = false;
     } else {
       var k = 1 - Math.exp(-dt * 0.008);
