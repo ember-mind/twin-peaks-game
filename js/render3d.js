@@ -54,10 +54,62 @@
     t.magFilter = THREE.NearestFilter;
     t.minFilter = THREE.NearestFilter;
     t.generateMipmaps = false;
+    t.encoding = THREE.sRGBEncoding;
     return t;
   }
 
   /* ---------------- texture billboard ---------------- */
+
+  function tree3D(kind, x, z, scene) {
+    // albero a 2 piani incrociati (90°): mantiene il pixel art del billboard
+    // ma ha vero volume, si vede diverso da ogni angolo.
+    var tex = treeTexture(kind, 0);
+    var mat = new THREE.MeshLambertMaterial({
+      map: tex, transparent: true, alphaTest: 0.05, side: THREE.DoubleSide
+    });
+    var grp = new THREE.Group();
+    var w = 1.5, h = 2.0;
+    var p1 = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+    p1.position.set(x, h * 0.5, z);
+    p1.castShadow = true; // le Plane non proiettano ombre in GL di default; tronco sì
+    grp.add(p1);
+    var p2 = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+    p2.rotation.y = Math.PI / 2;
+    p2.position.set(x, h * 0.5, z);
+    grp.add(p2);
+    // tronco sottile per ombre di contatto
+    var trunk = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.1, 0.12, 0.45, 6),
+      new THREE.MeshLambertMaterial({ color: kind === 'Y' ? '#d8d0c0' : '#5a3a22', flatShading: true })
+    );
+    trunk.position.set(x, 0.22, z);
+    trunk.castShadow = true; trunk.receiveShadow = true;
+    grp.add(trunk);
+    scene.add(grp);
+    blobShadow(scene, x, z, 0.45);
+    return grp;
+  }
+
+  function sign3D(x, z, scene) {
+    var grp = new THREE.Group();
+    var postMat = new THREE.MeshLambertMaterial({ color: '#6a4520', flatShading: true });
+    var boardMat = new THREE.MeshLambertMaterial({ color: '#b89060', flatShading: true });
+    var post = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.1, 0.12), postMat);
+    post.position.set(x - 0.32, 0.55, z);
+    post.castShadow = true; post.receiveShadow = true;
+    grp.add(post);
+    post = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.1, 0.12), postMat);
+    post.position.set(x + 0.32, 0.55, z);
+    post.castShadow = true; post.receiveShadow = true;
+    grp.add(post);
+    var board = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.42, 0.08), boardMat);
+    board.position.set(x, 0.84, z);
+    board.castShadow = true; board.receiveShadow = true;
+    grp.add(board);
+    scene.add(grp);
+    blobShadow(scene, x, z, 0.36);
+    return grp;
+  }
 
   function treeTexture(kind, variant) {
     var key = 'tree_' + kind + '_' + variant;
@@ -1078,6 +1130,127 @@
     }
   }
 
+  /* ---------------- landmark 3D ---------------- */
+
+  function landmarkWelcomesign(x, z, scene) {
+    var grp = new THREE.Group();
+    var postMat = new THREE.MeshLambertMaterial({ color: '#6a4520', flatShading: true });
+    var boardMat = new THREE.MeshLambertMaterial({ color: '#e8e4d8', flatShading: true });
+    var post = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.8, 0.18), postMat);
+    post.position.set(x - 0.55, 0.9, z);
+    post.castShadow = true; post.receiveShadow = true;
+    grp.add(post);
+    post = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.8, 0.18), postMat);
+    post.position.set(x + 0.55, 0.9, z);
+    post.castShadow = true; post.receiveShadow = true;
+    grp.add(post);
+    var board = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 0.12), boardMat);
+    board.position.set(x, 1.45, z);
+    board.castShadow = true; board.receiveShadow = true;
+    grp.add(board);
+    var cap = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.08, 0.18), postMat);
+    cap.position.set(x, 1.78, z);
+    grp.add(cap);
+    scene.add(grp);
+    blobShadow(scene, x, z, 0.7);
+    return grp;
+  }
+
+  function landmarkTracks(x, z, w, h, scene) {
+    var wood = new THREE.MeshLambertMaterial({ color: '#5a4a36', flatShading: true });
+    var steel = new THREE.MeshLambertMaterial({ color: '#7a8290', flatShading: true });
+    var ballast = new THREE.MeshLambertMaterial({ color: '#4a4a48', flatShading: true });
+    var group = new THREE.Group();
+    var bed = new THREE.Mesh(new THREE.BoxGeometry(w, 0.08, h), ballast);
+    bed.position.set(x + w / 2, 0.04, z + h / 2);
+    bed.receiveShadow = true;
+    group.add(bed);
+    var railX = 0.25;
+    for (var i = 0; i < h; i += 1.2) {
+      var tie = new THREE.Mesh(new THREE.BoxGeometry(w, 0.06, 0.35), wood);
+      tie.position.set(x + w / 2, 0.08, z + i + 0.6);
+      tie.receiveShadow = true;
+      group.add(tie);
+    }
+    var rail1 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, h), steel);
+    rail1.position.set(x + railX, 0.16, z + h / 2);
+    group.add(rail1);
+    var rail2 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, h), steel);
+    rail2.position.set(x + w - railX, 0.16, z + h / 2);
+    group.add(rail2);
+    scene.add(group);
+    return group;
+  }
+
+  function landmarkCemetery(x, z, w, h, scene) {
+    var stone = new THREE.MeshLambertMaterial({ color: '#9a9a92', flatShading: true });
+    var dark = new THREE.MeshLambertMaterial({ color: '#6a6a64', flatShading: true });
+    var seed = x * 17 + z * 31;
+    function rnd() { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; }
+    for (var i = 0; i < Math.floor(w * h * 0.45); i++) {
+      var px = x + 0.5 + rnd() * (w - 1);
+      var pz = z + 0.5 + rnd() * (h - 1);
+      var kind = rnd();
+      var mesh;
+      if (kind < 0.25) { // croce
+        mesh = new THREE.Group();
+        var v = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.55, 0.12), stone);
+        v.position.set(px, 0.35, pz);
+        var h2 = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.12, 0.12), stone);
+        h2.position.set(px, 0.55, pz);
+        mesh.add(v); mesh.add(h2);
+      } else if (kind < 0.65) { // lapide rettangolare
+        mesh = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.45, 0.12), stone);
+        mesh.position.set(px, 0.22, pz);
+        mesh.rotation.y = (rnd() - 0.5) * 0.35;
+      } else { // cippo basso
+        mesh = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.25, 0.2), dark);
+        mesh.position.set(px, 0.12, pz);
+        mesh.rotation.y = (rnd() - 0.5) * 0.6;
+      }
+      mesh.traverse(function (m) { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
+      scene.add(mesh);
+      blobShadow(scene, px, pz, 0.25);
+    }
+    // recinto: piccoli pilastri alle 4 estremità col filo
+    var postMat = new THREE.MeshLambertMaterial({ color: '#4a4a44', flatShading: true });
+    for (var cx = 0; cx <= 1; cx += 1) {
+      for (var cz = 0; cz <= 1; cz += 1) {
+        var post = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.8, 0.12), postMat);
+        post.position.set(x + cx * w, 0.4, z + cz * h);
+        post.castShadow = true;
+        scene.add(post);
+      }
+    }
+  }
+
+  function landmarkWaterfall(x, z, w, h, scene) {
+    var group = new THREE.Group();
+    var rock = new THREE.MeshLambertMaterial({ color: '#4a5a60', flatShading: true });
+    var water = new THREE.MeshLambertMaterial({ color: '#7ab4e8', transparent: true, opacity: 0.85 });
+    // parete rocciosa alta
+    var wall = new THREE.Mesh(new THREE.BoxGeometry(w, 3.0, 0.8), rock);
+    wall.position.set(x + w / 2, 1.5, z + 0.4);
+    wall.castShadow = true; wall.receiveShadow = true;
+    group.add(wall);
+    // cascata (3 strisce)
+    for (var i = 0; i < 3; i++) {
+      var fall = new THREE.Mesh(new THREE.BoxGeometry(w / 4, 2.8, 0.12), water);
+      fall.position.set(x + w / 2 + (i - 1) * (w / 5), 1.4, z + 0.85);
+      group.add(fall);
+    }
+    // vasca sottostante
+    var pool = new THREE.Mesh(new THREE.BoxGeometry(w, 0.12, 1.2), water);
+    pool.position.set(x + w / 2, 0.06, z + 1.0);
+    group.add(pool);
+    // schiuma bianca in cima
+    var foam = new THREE.Mesh(new THREE.BoxGeometry(w, 0.15, 0.25), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 }));
+    foam.position.set(x + w / 2, 2.95, z + 0.85);
+    group.add(foam);
+    scene.add(group);
+    return group;
+  }
+
   /* ---------------- terreno + luci ---------------- */
 
   /* decorazioni del terreno: chiazze grandi + fiori/ciottoli/ciocche,
@@ -1187,27 +1360,37 @@
   function buildWorld(S) {
     var map = S.map;
     var world = { scene: new THREE.Scene(), liquids: [], sparkles: [], npcs: [], tape: [], smokes: [] };
-    var bg = map.id === 'redroom' ? 0x2a0a0e : 0x101820;
+    var bg;
+    if (map.id === 'redroom') bg = 0x2a0a0e;
+    else if (map.id === 'town' || map.id === 'woods') bg = 0x2a3a40;
+    else bg = 0x1a1816;
     world.scene.background = new THREE.Color(bg);
-    // nebbia leggera per profondità negli esterni
-    if (map.id === 'town' || map.id === 'woods') {
-      world.scene.fog = new THREE.Fog(bg, 38, 80);
+    // nebbia atmosferica: PNW umido, più densa nel bosco
+    if (map.id === 'town') {
+      world.scene.fog = new THREE.Fog(bg, 22, 55);
+    } else if (map.id === 'woods') {
+      world.scene.fog = new THREE.Fog(bg, 14, 42);
+    } else if (map.id === 'redroom') {
+      world.scene.fog = new THREE.Fog(bg, 10, 32);
     }
     world.base = baseCharOf(map);
     bakeGround(map, world, { woodsOpen: S.clues.length >= 3 });
     addLights(map, world);
+
+    // posizioni dei landmark speciali da non renderizzare come tile normali
+    var welcomeSigns = {};
+    (map.objects || []).forEach(function (o) {
+      if (o.type === 'landmark' && o.kind === 'welcomesign') welcomeSigns[o.x + ',' + o.y] = true;
+    });
 
     var x, y, ch;
     for (y = 0; y < map.height; y++) {
       for (x = 0; x < map.width; x++) {
         ch = map.rows[y].charAt(x);
         if (ch === 'T' || ch === 'Y') {
-          var vr = ((x * 31 + y * 17) % 97) % 2;
-          world.scene.add(billboard(treeTexture(ch, vr), 1.6, 2.1, x + 0.5, y + 0.62));
-          blobShadow(world.scene, x + 0.5, y + 0.68, 0.5);
-        } else if (ch === 'S') {
-          world.scene.add(billboard(signTexture(), 1, 1, x + 0.5, y + 0.55));
-          blobShadow(world.scene, x + 0.5, y + 0.6, 0.34);
+          tree3D(ch, x + 0.5, y + 0.6, world.scene);
+        } else if (ch === 'S' && !welcomeSigns[x + ',' + y]) {
+          sign3D(x + 0.5, y + 0.5, world.scene);
         } else if (ch === 'M') {
           world.scene.add(billboard(statueTexture(), 1, 1, x + 0.5, y + 0.55));
           blobShadow(world.scene, x + 0.5, y + 0.6, 0.3);
@@ -1269,6 +1452,11 @@
         sp.userData.dialogue = o.dialogue;
         world.scene.add(sp);
         world.sparkles.push(sp);
+      } else if (o.type === 'landmark') {
+        if (o.kind === 'welcomesign') landmarkWelcomesign(o.x + 0.5, o.y + 0.5, world.scene);
+        else if (o.kind === 'tracks') landmarkTracks(o.x, o.y, o.w, o.h, world.scene);
+        else if (o.kind === 'cemetery') landmarkCemetery(o.x, o.y, o.w, o.h, world.scene);
+        else if (o.kind === 'waterfall') landmarkWaterfall(o.x, o.y, o.w, o.h, world.scene);
       }
     });
 
@@ -1297,6 +1485,9 @@
     } catch (e) { return false; }
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(glCanvas.width, glCanvas.height, false);
     var aspect0 = glCanvas.width / glCanvas.height;

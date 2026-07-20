@@ -48,7 +48,7 @@
   }
 
   // colore erba del vicino, per bordi organici di sentiero/strada; null se non è erba
-  function grassColorOf(ch) { return ch === 'g' ? '#35553a' : (ch === '.' ? '#a8b878' : null); }
+  function grassColorOf(ch) { return ch === 'g' ? '#35553a' : (ch === '.' ? '#7a9e58' : null); }
 
   // bordo dithered 2px verso i lati erbosi: pixel alternati di erba sopra il path
   function organicEdge(ctx, flags, tx, ty, x, y) {
@@ -157,7 +157,7 @@
     var i, j;
     switch (ch) {
       case '.':
-        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h, { tuft: 1 });
+        grass(ctx, x, y, '#7a9e58', '#9ab670', '#5e7e42', '#8aac68', h, { tuft: 1 });
         break;
       case 'g':
         grass(ctx, x, y, '#2f4d34', '#456249', '#233828', '#557555', h, { dapple: '#c0d078' });
@@ -209,7 +209,7 @@
         break;
       }
       case ',': { // erba fiorita: stessa erba di '.' con 3-5 fiorellini deterministici
-        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h, { tuft: 1 });
+        grass(ctx, x, y, '#7a9e58', '#9ab670', '#5e7e42', '#8aac68', h, { tuft: 1 });
         var flowerColors = ['#ffffff', '#f0d048', '#f0a0c0'];
         var nFlowers = 3 + (h % 3);
         for (i = 0; i < nFlowers; i++) {

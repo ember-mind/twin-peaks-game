@@ -78,6 +78,21 @@
       { name: '', text: 'Chiuso. Dalla porta filtra un giro di basso... "Stasera niente musica", dice un cartello.' }
     ] },
 
+    landmark_waterfall: { pages: [
+      { name: 'COOPER', text: 'Le cascate dietro il Great Northern. L\'acqua cade come un respiro lungo, bianca e fredda.' },
+      { name: 'COOPER', text: 'Laura fu vista qui, l\'ultima pomeriggio. Diane, il luogo sa di addio.' }
+    ] },
+
+    landmark_cemetery: { pages: [
+      { name: '', text: 'Cimitero di Twin Peaks. Le lapidi sono piccole, umide, inclinate come domande.' },
+      { name: 'COOPER', text: 'Qui riposa Laura Palmer. O almeno, ciò che ne hanno trovato.' }
+    ] },
+
+    landmark_tracks: { pages: [
+      { name: '', text: 'I binari tagliano il paese verso est, oltre il confine.' },
+      { name: 'COOPER', text: 'Da questa parte, il 12 febbraio, un vagone. E un cuore.' }
+    ] },
+
     hospital_locked: { pages: [
       { name: '', text: 'L\'ingresso e\' presidiato.' },
       { name: '', text: '"Nessuna visita, per ora. Ordini dello sceriffo," dice l\'infermiera al banco.' }

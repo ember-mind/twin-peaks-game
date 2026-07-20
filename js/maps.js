@@ -83,6 +83,12 @@
         '55,15': { to: 'traincar', tx: 2, ty: 7, dir: 'right', needsFlag: 'atto3', blockedMsg: 'est_bloccato' }
       },
       interact: { '30,30': 'cartello', '15,28': 'lago_riva' },
+      objects: [
+        { type: 'landmark', kind: 'waterfall', x: 8, y: 0, w: 6, h: 2, dialogue: 'landmark_waterfall' },
+        { type: 'landmark', kind: 'cemetery', x: 30, y: 7, w: 12, h: 7, dialogue: 'landmark_cemetery' },
+        { type: 'landmark', kind: 'tracks', x: 53, y: 1, w: 2, h: 33, dialogue: 'landmark_tracks' },
+        { type: 'landmark', kind: 'welcomesign', x: 30, y: 30, dialogue: 'sign_town' }
+      ],
       gate: { x: 50, y: 0, to: 'woods', tx: 14, ty: 20, dir: 'up' }
     },
 

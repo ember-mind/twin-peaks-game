@@ -132,7 +132,7 @@
       };
     }
 
-    var objects = Object.keys(src.interact || {}).map(function (k) {
+    var objects = (src.objects || []).concat(Object.keys(src.interact || {}).map(function (k) {
       var xy = k.split(',');
       var key = src.interact[k];
       return {
@@ -140,7 +140,7 @@
         dialogue: INTERACT_DLG[key] || key,
         type: SPARKLE[key] ? 'sparkle' : 'plain'
       };
-    });
+    }));
 
     Maps[id] = {
       id: id, rows: src.rows, width: src.width, height: src.height,

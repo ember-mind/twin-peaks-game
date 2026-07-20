@@ -65,6 +65,17 @@ Canvas 480×320 (CSS 960×640). Storia: engine+data scritti in una prima session
 - Repo: `ember-mind/twin-peaks-game` (privato) — deploy key read-only generata da Coolify. Il codice sorgente canonico vive QUI nel vault; per pubblicare: `rsync` verso `~/Code/solo/projects/twin-peaks-game`, commit, push (account ember-mind), poi Deploy dalla dashboard Coolify (niente webhook: deploy key, non GitHub App).
 - Mobile: touch.js — D-pad + A/B + tap-to-advance.
 
+## Audio
+
+`js/audio.js` — colonna sonora **originale** sintetizzata in WebAudio (zero file audio, come tutta la grafica). Scritta nell'idioma di Badalamenti (tempi lenti, armonia estesa maj7/9, Rhodes, pad, riverbero lungo) ma **nessuna sua composizione è trascritta o citata**: sono materiali nuovi.
+
+- 5 brani in loop: `title` (Am(maj7), 54bpm) · `town` (C lidio, 58) · `interior` (Dm lounge, 56) · `woods` (drone E + tritono, 50) · `lodge` (triadi aumentate simmetriche + vibrato largo, 48). Definiti come dati (bar/beat/notes) in cima al file, editabili.
+- Grafo: voci (rhodes/pad/bass/bell) → chorus → dry+riverbero a convoluzione con impulso generato proceduralmente (~3s) → lowpass 3.5k → master 0.35.
+- Selezione brano: polling di `GAME.Engine.state` ogni 300ms + cross-fade 1.5s. **Nessuna modifica a engine.js** (audio.js è autonomo).
+- Avvio: AudioContext creato solo al primo gesto utente (policy autoplay). I listener restano attivi finché lo stato non è davvero `running` — su iOS il primo `resume()` può fallire in silenzio.
+- Mute: tasto **M**, pulsante altoparlante su touch, preferenza in `localStorage['tp_mute']`. API: `GAME.Audio.{toggleMute,setVolume,isMuted,state,cue}`.
+- Nota di test: in tab nascosta Chrome limita i `setInterval` (fino a 1/minuto), quindi il cambio brano sembra non avvenire — non è un bug, verificare con la finestra in primo piano.
+
 ## MEMORY
 
 - [2026-07-20] Decision: insegne edifici montate sul BORDO FRONTALE DEL TETTO (sopra la porta, davanti alla gronda, y = WALL_H+0.34+h/2, z = southZ+0.34), non sulla facciata: la facciata è alta un solo tile e la gronda la mette in ombra — lì il testo non si legge. Provata anche la posizione sul colmo: leggibile ma esce dall'inquadratura quando il giocatore arriva da sud. Ogni edificio pubblico ha targa con nome + icona (SHERIFF/stella, OSPEDALE/croce, GREAT NORTHERN/pino, ROADHOUSE/neon+nota); il Double R tiene la sua insegna da diner sul colmo; casa Palmer ha un cartello da giardino su palo (è una casa privata, non un'attività). L'ospedale ha tetto piatto con croce a terra visibile dall'alto.
