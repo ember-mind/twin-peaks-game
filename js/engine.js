@@ -67,7 +67,7 @@
     return {
       mode: 'title',           // title | intro | play | end
       mapId: 'town', map: null, npcs: [],
-      player: { tx: 30, ty: 32, x: 30 * TILE, y: 32 * TILE, dir: 'up', moving: false, mx: 0, my: 0 },
+      player: { tx: 28, ty: 22, x: 28 * TILE, y: 22 * TILE, dir: 'up', moving: false, mx: 0, my: 0 },
       clues: [], flags: {},
       introPage: 0,
       dialogue: null,          // {id, def, pages, i, replay}
@@ -168,7 +168,7 @@
   };
 
   E.start = function () {
-    loadMap('town', 30, 32, 'up');
+    loadMap('town', 28, 22, 'up');
     last = (typeof performance !== 'undefined') ? performance.now() : Date.now();
     requestAnimationFrame(loop);
     // fallback: se il rAF è sospeso (tab nascosta/occlusa) il gioco continua via timer
@@ -221,7 +221,7 @@
       if (S.introPage >= GAME.Data.intro.length) S.mode = 'play';
       return;
     }
-    if (S.mode === 'end') { S = E.state = freshState(); loadMap('town', 30, 32, 'up'); return; }
+    if (S.mode === 'end') { S = E.state = freshState(); loadMap('town', 28, 22, 'up'); return; }
     if (S.mode !== 'play') return;
     if (S.dialogue) { advanceDialogue(); return; }
     if (S.menu) { S.menu = false; return; }

@@ -44,7 +44,7 @@ Canvas 480×320 (CSS 960×640). Storia: engine+data scritti in una prima session
 
 ## Note tecniche v3D
 
-- Mappe grandi (2026-07-19): town 56×36, woods 28×22 — generate e validate con `test/genmaps.js` (BFS: ogni porta/NPC/oggetto raggiungibile dallo spawn). Per modificarle: rigenerare con lo script, non a mano. Spawn town (30,32), rivolto verso il cartello "Benvenuti" (30,30) invece che addossato alla siepe di confine sud (2026-07-19).
+- Mappe grandi (2026-07-19): town 56×36, woods 28×22 — generate e validate con `test/genmaps.js` (BFS: ogni porta/NPC/oggetto raggiungibile dallo spawn). Per modificarle: rigenerare con lo script, non a mano. Spawn town **(28,22)**, sulla strada verticale con la città davanti. REGOLA: la camera sta a `pz + CAM_BACK` (9.2) a sud del giocatore, quindi qualsiasi cosa fra quel punto e il player finisce in primo piano e lo copre. Con il bordo alberato sud a riga 34, lo spawn deve stare a riga ≤ 23 (34 − 9.2 ≈ 24.8). Gli spawn a (28,33), (30,32) e (30,31) erano tutti dentro la barriera d'alberi: il giocatore appariva nascosto dietro le chiome (fix definitivo 2026-07-20). Vale per ogni futuro punto di comparsa in esterni.
 - Camera: CAM_UP 13.5 / CAM_BACK 9.2, FOV 38° tarato su aspect 1.5 (landscape); su schermi stretti (mobile ritratto) il FOV verticale sale dinamicamente (`fovForAspect` in render3d.js) per non restringere troppo l'orizzontale — altrimenti il mondo appare più "zoomato" su mobile. Nebbia 38→80.
 
 - Fullscreen: canvas WebGL = finestra intera; canvas UI logico 160px di altezza × larghezza proporzionale (`UW` dinamico in engine.js), SCALE 2.

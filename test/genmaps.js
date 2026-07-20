@@ -81,7 +81,7 @@ const FROZEN = new Set([
   '9,6', '23,6', '42,6', '12,20', '42,20', '47,28', // porte
   '50,0', // transenna bosco
   '30,30', // cartello benvenuti
-  '28,33', // spawn
+  '28,22', // spawn
   (W - 1) + ',14', (W - 1) + ',15', // uscite est
   '15,28', // riva del lago
   '25,16', '44,10', '12,9', '16,25' // npc: bobby, donna, audrey, jacoby
@@ -221,7 +221,7 @@ function assertWalkable(x, y, label) {
   console.log('  ok invariato (calpestabile) ' + label);
 }
 
-const seenT = bfs(t, 28, 33);
+const seenT = bfs(t, 28, 22);
 console.log('# town — invarianti (coordinate preesistenti)');
 assertChar(9, 6, 'D', 'porta hotel');
 assertChar(42, 6, 'D', 'porta palmer');
@@ -229,7 +229,7 @@ assertChar(12, 20, 'D', 'porta sceriffo');
 assertChar(42, 20, 'D', 'porta diner');
 assertChar(50, 0, 'X', 'transenna bosco');
 assertChar(30, 30, 'S', 'cartello');
-assertWalkable(28, 33, 'spawn');
+assertWalkable(28, 22, 'spawn');
 assertWalkable(W - 1, 14, 'uscita est (vagone)');
 assertWalkable(W - 1, 15, 'uscita est (vagone)');
 for (let ly = 26; ly <= 31; ly++) for (let lx = 4; lx <= 13; lx++) {
