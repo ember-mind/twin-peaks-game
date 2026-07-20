@@ -74,6 +74,83 @@ rect(t, 47, 29, 47, 30, 'p');
 [[20, 9], [33, 9], [21, 25], [35, 27], [48, 26], [50, 30], [18, 30], [3, 22], [52, 22], [24, 21]]
   .forEach(([x, y]) => { if (t[y][x] === '.') t[y][x] = 'T'; });
 
+/* ---------------- arredo urbano ---------------- */
+// coordinate congelate: l'arredo non deve mai coprirle (porte, transenna,
+// cartello, spawn, uscite est, riva del lago, npc)
+const FROZEN = new Set([
+  '9,6', '23,6', '42,6', '12,20', '42,20', '47,28', // porte
+  '50,0', // transenna bosco
+  '30,30', // cartello benvenuti
+  '28,33', // spawn
+  (W - 1) + ',14', (W - 1) + ',15', // uscite est
+  '15,28', // riva del lago
+  '25,16', '44,10', '12,9', '16,25' // npc: bobby, donna, audrey, jacoby
+]);
+function open(x, y) { return t[y] && (t[y][x] === '.' || t[y][x] === '=' || t[y][x] === ','); }
+function place(x, y, ch) {
+  if (!open(x, y) || FROZEN.has(x + ',' + y)) return;
+  t[y][x] = ch;
+}
+
+// 1. marciapiedi che incorniciano la strada orizzontale e quella verticale
+for (let x = 1; x < W - 1; x++) {
+  if (t[13][x] === '.') t[13][x] = '=';
+  if (t[16][x] === '.') t[16][x] = '=';
+}
+for (let y = 16; y <= H - 3; y++) {
+  if (t[y][26] === '.') t[y][26] = '=';
+  if (t[y][29] === '.') t[y][29] = '=';
+}
+
+// 2. strisce pedonali dove i vialetti incontrano la strada, e all'incrocio
+[[9, 10], [12, 13], [42, 43], [27, 28]].forEach(([x1, x2]) => {
+  t[14][x1] = '-'; t[14][x2] = '-';
+  t[15][x1] = '-'; t[15][x2] = '-';
+});
+
+// 3. lampioni lungo i marciapiedi, lati alternati, ogni 6 tile (~9 totali)
+[[4, 13], [16, 13], [28, 13], [40, 13], [52, 13],
+  [10, 16], [22, 16], [34, 16], [46, 16]]
+  .forEach(([x, y]) => place(x, y, 'L'));
+
+// 4. pali del telefono, un solo lato del marciapiede, ogni ~12 tile
+[[6, 16], [18, 16], [32, 16], [44, 16]].forEach(([x, y]) => place(x, y, 'P'));
+
+// 5. staccionata bianca: giardino di casa Palmer (varco sul vialetto) + riva est del lago
+for (let x = 37; x <= 46; x++) if (x !== 42) place(x, 7, 'F');
+for (let y = 26; y <= 31; y++) place(14, y, 'F');
+
+// 6. aiuole fiorite ai lati delle porte (hotel, ospedale, distretto, diner)
+[[8, 7], [10, 7], [22, 7], [24, 7], [11, 21], [13, 21], [41, 21], [43, 21]]
+  .forEach(([x, y]) => place(x, y, 'A'));
+
+// 7. idranti vicino alla piazza e al diner
+place(32, 30, 'H');
+place(48, 19, 'H');
+
+// 8. cassette postali davanti ai vialetti di casa Palmer e dell'hotel
+place(10, 13, 'E');
+place(43, 13, 'E');
+
+// 9/10. cespugli ed erba fiorita sparsi sull'erba aperta, deterministico (hash x,y)
+const DOORS = [[9, 6], [23, 6], [42, 6], [12, 20], [42, 20], [47, 28]];
+function nearDoor(x, y) { return DOORS.some(([dx, dy]) => Math.abs(dx - x) <= 1 && Math.abs(dy - y) <= 1); }
+for (let y = 1; y < H - 1; y++) {
+  for (let x = 1; x < W - 1; x++) {
+    if (t[y][x] !== '.' || nearDoor(x, y) || FROZEN.has(x + ',' + y)) continue;
+    const hb = (x * 31 + y * 17) % 94;
+    const hf = (x * 19 + y * 23) % 67;
+    if (hb === 5) t[y][x] = 'n';
+    else if (hf === 8) t[y][x] = ',';
+  }
+}
+
+// 11. piccola piazza attorno al cartello di benvenuto: anello di marciapiede,
+// due panchine ai lati e un'aiuola, senza toccare le 4 celle cardinali del cartello
+[[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
+  .forEach(([dx, dy]) => { if (t[30 + dy][30 + dx] === '.') t[30 + dy][30 + dx] = '='; });
+t[29][29] = 'B'; t[31][31] = 'B'; t[29][31] = 'A';
+
 /* ---------------- WOODS 28x22 ---------------- */
 const WW = 28, WH = 22;
 const wd = grid(WW, WH, 'g');
@@ -101,9 +178,16 @@ for (let y = cy - 3; y <= cy + 3; y++) for (let x = cx - 4; x <= cx + 4; x++) {
 // cartello Glastonbury Grove
 wd[14][11] = 'S';
 if (wd[14][12] === 'T') wd[14][12] = 'g';
+// un po' di arredo al sentiero verso l'uscita sud, senza toccare il sentiero (x14)
+if (wd[20][12] === 'g') wd[20][12] = 'n';
+if (wd[20][16] === 'g') wd[20][16] = 'n';
+if (wd[19][17] === 'g') wd[19][17] = 'B';
 
 /* ---------------- validazione ---------------- */
-const SOLID = { T: 1, S: 1, w: 1, '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1, i: 1, C: 1, t: 1, h: 1, K: 1, U: 1, Y: 1, R: 1, M: 1, v: 1, o: 1 };
+const SOLID = {
+  T: 1, S: 1, w: 1, '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1, i: 1, C: 1, t: 1, h: 1, K: 1, U: 1, Y: 1, R: 1, M: 1, v: 1, o: 1,
+  L: 1, P: 1, B: 1, F: 1, A: 1, H: 1, E: 1, n: 1 // arredo urbano
+};
 function bfs(g, sx, sy) {
   const h = g.length, w = g[0].length;
   const seen = new Set([sx + ',' + sy]);

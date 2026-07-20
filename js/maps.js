@@ -8,8 +8,11 @@
    C bancone(X)  t tavolo(X)  h sedia(X)  K letto(X)  U comò(X)
    o olio        R tenda rossa(X)      Z zig-zag     M statua(X)
    v vuoto(X)    X transenna (apre con 3 indizi -> gate)
+   arredo urbano (town): = marciapiede    - strisce pedonali  , erba fiorita
+   L lampione(X)  P palo telefono(X)  B panchina(X)  F staccionata(X)
+   A aiuola fiorita(X)  H idrante(X)  E cassetta postale(X)  n cespuglio(X)
    (X) = solido
-   Town/woods generate e validate con scratchpad/genmaps.js (BFS su porte/npc). */
+   Town/woods generate e validate con test/genmaps.js (BFS su porte/npc). */
 (function () {
   var G = (typeof window !== 'undefined' ? window : globalThis);
   G.GAME = G.GAME || {};
@@ -21,7 +24,8 @@
     T: 1, S: 1, w: 1,
     '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1,
     i: 1, C: 1, t: 1, h: 1, K: 1, U: 1,
-    Y: 1, R: 1, M: 1, v: 1
+    Y: 1, R: 1, M: 1, v: 1,
+    L: 1, P: 1, B: 1, F: 1, A: 1, H: 1, E: 1, n: 1
   };
   M.isSolid = function (ch) { return !ch || !!M.SOLID[ch]; };
 
@@ -35,36 +39,36 @@
         'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTpTTTTT', // 1
         'T.................................................p....T', // 2
         'T....TTTTTTTTTT....TTTTTTTTTT........TTTTTTTTTT...p....T', // 3  siepi dietro hotel/ospedale/palmer
-        'T....4444444444.....55555555.........3333333333...p....T', // 4
-        'T....4444444444.....55555555.........3333333333...p....T', // 5
+        'Tn...4444444444.....55555555.........3333333333...p.,..T', // 4
+        'T....4444444444.....55555555.........3333333333...p.n..T', // 5
         'T....4444D44444.....555D5555.........33333D3333...p....T', // 6  hotel / ospedale / casa Palmer
-        'T........p.............p..................p.......p....T', // 7
-        'T........p.............p..................p.......p....T', // 8
+        'T.......ApA...........ApA............FFFFFpFFFF...p....T', // 7  aiuole hotel/ospedale, staccionata giardino Palmer
+        'T........p.......n.....p..,...............p.......p....T', // 8
         'T........p..........T..p.........T........p.......p....T', // 9
-        'T........p.............p..................p.......p....T', // 10
-        'T........p.............p..................p.......p....T', // 11
-        'T........p.............p..................p.......p....T', // 12
-        'T........p.............p..................p.......p....T', // 13
-        'Trrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr', // 14 uscita est -> vagone (Atto 3)
-        'Trrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr', // 15 uscita est -> vagone (Atto 3)
-        'T..........................rr..........................T', // 16
-        'T......TTTTTTTTTTT.........rr........TTTTTTTTTTT.......T', // 17 siepi dietro distretto/diner
-        'T......11111111111.........rr........22222222222.......T', // 18
-        'T......11111111111.........rr........22222222222.......T', // 19
-        'T......11111D11111.........rr........22222D22222.......T', // 20 distretto / Double R
-        'T...........p...........T..rr.............p............T', // 21
-        'T..T........p..............rr.............p.........T..T', // 22
-        'T...........p..............rr.............p............T', // 23
-        'T..........................rr..........................T', // 24
-        'T....................T.....rr..........................T', // 25
-        'T...wwwwwwwwww.............rr...............66666666...T', // 26 lago / roadhouse
-        'T...wwwwwwwwww.............rr......T........66666666...T', // 27
-        'T...wwwwwwwwww.............rr...............666D6666...T', // 28 porta roadhouse
-        'T...wwwwwwwwww.............rr..................p.......T', // 29
-        'T...wwwwwwwwww....T........rr.S................p..T....T', // 30 cartello Benvenuti
-        'T...wwwwwwwwww.............rr..........................T', // 31
-        'T..........................rr..........................T', // 32
-        'T..........................rr..........................T', // 33
+        'T........p...,.........p.n................p.......p....T', // 10
+        'T........p.............p................,.p.......p....T', // 11
+        'T........p.............p.........n........p.......p....T', // 12
+        'T===L====pE=====L======p====L===========L=pE======p=L==T', // 13 marciapiede nord, lampioni, cassette postali
+        'Trrrrrrrr--r--rrrrrrrrrrrrr--rrrrrrrrrrrrr--rrrrrrrrrrrr', // 14 uscita est -> vagone (Atto 3), strisce pedonali
+        'Trrrrrrrr--r--rrrrrrrrrrrrr--rrrrrrrrrrrrr--rrrrrrrrrrrr', // 15 uscita est -> vagone (Atto 3), strisce pedonali
+        'T=====P===L=======P===L====rr===P=L=========P=L========T', // 16 marciapiede sud, pali del telefono, lampioni
+        'T,....nTTTTTTTTTTT........=rr=.......TTTTTTTTTTT.......T', // 17 siepi dietro distretto/diner
+        'T......11111111111........=rr=.......22222222222.......T', // 18
+        'T......11111111111........=rr=.......22222222222H......T', // 19 idrante vicino al diner
+        'T......11111D11111........=rr=.......22222D22222.......T', // 20 distretto / Double R
+        'T..........ApA........n.T.=rr=...........ApA...........T', // 21 aiuole distretto/diner
+        'T.,T........p.............=rr=............p.........T..T', // 22
+        'T...........p.............=rr=n...........p............T', // 23
+        'T.........................=rr=.........................T', // 24
+        'T....................T....=rr=........n................T', // 25
+        'T...wwwwwwwwwwF...........=rr=.............,66666666...T', // 26 lago / roadhouse, staccionata riva est
+        'T..,wwwwwwwwwwF...........=rr=.....T........66666666...T', // 27
+        'T..nwwwwwwwwwwF...........=rr=,.............666D6666...T', // 28 porta roadhouse
+        'T...wwwwwwwwwwF...........=rrB=A...............p......nT', // 29 piazza: panchina/aiuola
+        'T...wwwwwwwwwwF..,T.......=rr=S=H..............p..T....T', // 30 cartello Benvenuti, piazza, idrante
+        'T...wwwwwwwwwwF...........=rr==B............,..........T', // 31 piazza: panchina
+        'T...,..............n......=rr=.........................T', // 32
+        'T.........................=rr=.,.......................T', // 33
         'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 34
         'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT'  // 35
       ],
@@ -215,8 +219,8 @@
         'TggggTggggggTgpggggTggggggTT', // 16
         'TgggTggggggTggpgggTggggggTgT', // 17
         'TggTggggggTgggpggTggggggTggT', // 18
-        'TgTggggggTggggpgTggggggTgggT', // 19
-        'TTggggggTgggggpTggggggTggggT', // 20 (spawn 14,20)
+        'TgTggggggTggggpgTBgggggTgggT', // 19 panchina al sentiero (17,19)
+        'TTggggggTgggngpTngggggTggggT', // 20 (spawn 14,20), cespugli al sentiero
         'TTTTTTTTTTTTTTpTTTTTTTTTTTTT'  // 21 uscita sud -> città
       ],
       doors: {

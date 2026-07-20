@@ -141,6 +141,187 @@
     });
   }
 
+  function smokeTexture() {
+    return simpleTex('smoke', 16, 16, function (F) {
+      F(5, 8, 7, 5, 'rgba(190,196,208,0.72)');
+      F(4, 9, 9, 3, 'rgba(190,196,208,0.62)');
+      F(6, 6, 4, 3, 'rgba(200,206,216,0.55)');
+      F(6, 9, 3, 2, 'rgba(228,232,240,0.75)');
+    });
+  }
+
+  /* ---------------- insegne facciata: rendono ogni edificio riconoscibile ---------------- */
+
+  // pittogrammi disegnati a percorso (non a blocchi come le altre texture) sul pannello dell'insegna
+  function iconPine(c, cx, cy) {
+    c.fillStyle = '#2a4a30';
+    c.beginPath();
+    c.moveTo(cx, cy - 26); c.lineTo(cx + 18, cy - 2); c.lineTo(cx + 10, cy - 2);
+    c.lineTo(cx + 22, cy + 16); c.lineTo(cx - 22, cy + 16); c.lineTo(cx - 10, cy - 2); c.lineTo(cx - 18, cy - 2);
+    c.closePath(); c.fill();
+    c.fillStyle = '#5a3a24';
+    c.fillRect(cx - 4, cy + 16, 8, 10);
+  }
+
+  function iconCup(c, cx, cy) {
+    c.fillStyle = '#f0e8d8';
+    c.fillRect(cx - 16, cy - 8, 28, 22);
+    c.fillStyle = '#a81828';
+    c.fillRect(cx - 16, cy - 8, 28, 5);
+    c.strokeStyle = '#f0e8d8'; c.lineWidth = 4;
+    c.beginPath(); c.arc(cx + 16, cy + 2, 8, -1.2, 1.2); c.stroke();
+    c.fillStyle = 'rgba(240,232,216,0.7)';
+    c.fillRect(cx - 10, cy - 22, 3, 12);
+    c.fillRect(cx - 2, cy - 26, 3, 16);
+    c.fillRect(cx + 6, cy - 22, 3, 12);
+  }
+
+  function iconStar(c, cx, cy) {
+    c.fillStyle = '#d8b430';
+    c.beginPath();
+    for (var i = 0; i < 10; i++) {
+      var ang = -Math.PI / 2 + i * Math.PI / 5;
+      var rad = i % 2 === 0 ? 26 : 11;
+      var px = cx + Math.cos(ang) * rad, py = cy + Math.sin(ang) * rad;
+      if (i === 0) c.moveTo(px, py); else c.lineTo(px, py);
+    }
+    c.closePath(); c.fill();
+  }
+
+  function iconCross(c, cx, cy) {
+    c.fillStyle = '#c81820';
+    c.fillRect(cx - 6, cy - 24, 12, 48);
+    c.fillRect(cx - 24, cy - 6, 48, 12);
+  }
+
+  function iconNote(c, cx, cy) {
+    c.fillStyle = '#f8c8e0';
+    c.beginPath(); c.arc(cx - 10, cy + 14, 8, 0, 6.2832); c.fill();
+    c.fillRect(cx - 2, cy - 24, 4, 38);
+    c.beginPath();
+    c.moveTo(cx - 2, cy - 24); c.quadraticCurveTo(cx + 14, cy - 20, cx + 12, cy - 6);
+    c.quadraticCurveTo(cx + 6, cy - 12, cx - 2, cy - 8);
+    c.closePath(); c.fill();
+  }
+
+  // targa per edificio: bordo, pannello interno, vite agli angoli, icona + nome in monospace
+  var SIGN_SPEC = {
+    '1': { label: 'SHERIFF', border: '#5a4228', plate: '#8a6a48', inner: '#c8a878', text: '#3a2810', icon: iconStar },
+    '2': { label: 'DOUBLE R DINER', border: '#4a1418', plate: '#a81828', inner: '#f0e4d0', text: '#701018', icon: iconCup },
+    '4': { label: 'GREAT NORTHERN', border: '#1c2e1c', plate: '#284030', inner: '#7c9878', text: '#e8d888', icon: iconPine },
+    '5': { label: 'OSPEDALE', border: '#8a98a8', plate: '#ffffff', inner: '#e6e6e0', text: '#a81820', icon: iconCross },
+    '6': { label: 'ROADHOUSE', border: '#241a12', plate: '#3a2e26', inner: '#5a4636', text: '#ff58c8', glow: '#ff58c8', icon: iconNote }
+  };
+
+  function signboardTexture(ch) {
+    var key = 'plate_' + ch;
+    if (texCache[key]) return texCache[key];
+    var spec = SIGN_SPEC[ch];
+    var cv = document.createElement('canvas');
+    cv.width = 512; cv.height = 96;
+    var c = cv.getContext('2d');
+    c.fillStyle = spec.border; c.fillRect(0, 0, 512, 96);
+    c.fillStyle = spec.plate; c.fillRect(8, 8, 496, 80);
+    c.fillStyle = spec.inner; c.fillRect(16, 16, 480, 64);
+    c.fillStyle = spec.border; // vite agli angoli
+    c.fillRect(14, 14, 6, 6); c.fillRect(492, 14, 6, 6);
+    c.fillRect(14, 76, 6, 6); c.fillRect(492, 76, 6, 6);
+    spec.icon(c, 62, 48);
+    c.font = 'bold 34px monospace';
+    c.textBaseline = 'middle'; c.textAlign = 'left';
+    if (spec.glow) { c.shadowColor = spec.glow; c.shadowBlur = 14; }
+    c.fillStyle = spec.text;
+    c.fillText(spec.label, 112, 50);
+    texCache[key] = makeTex(cv);
+    return texCache[key];
+  }
+
+  // targhetta bassa dei Palmer: nessuna insegna commerciale, solo il cognome
+  function palmerPlateTexture() {
+    var key = 'plate_palmer';
+    if (texCache[key]) return texCache[key];
+    var cv = document.createElement('canvas');
+    cv.width = 256; cv.height = 96;
+    var c = cv.getContext('2d');
+    c.fillStyle = '#8a8478'; c.fillRect(0, 0, 256, 96);
+    c.fillStyle = '#f4f0e6'; c.fillRect(6, 6, 244, 84);
+    c.fillStyle = '#2a2420';
+    c.font = 'bold 40px monospace';
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText('PALMER', 128, 50);
+    texCache[key] = makeTex(cv);
+    return texCache[key];
+  }
+
+  // insegna sul colmo del tetto del Double R, come i classici diner americani
+  function dinerRoofTexture() {
+    var key = 'roofsign_diner';
+    if (texCache[key]) return texCache[key];
+    var cv = document.createElement('canvas');
+    cv.width = 512; cv.height = 128;
+    var c = cv.getContext('2d');
+    c.fillStyle = '#701018'; c.fillRect(0, 0, 512, 128);
+    c.fillStyle = '#a81828'; c.fillRect(6, 6, 500, 116);
+    c.fillStyle = '#f0e0c0';
+    c.font = 'bold 56px monospace';
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText('DOUBLE R', 256, 64);
+    texCache[key] = makeTex(cv);
+    return texCache[key];
+  }
+
+  function hospitalCrossTexture() {
+    return simpleTex('hosp_cross', 16, 16, function (F) {
+      F(6, 1, 4, 14, '#c81820');
+      F(1, 6, 14, 4, '#c81820');
+    });
+  }
+
+  function flagTexture() {
+    return simpleTex('flag', 16, 10, function (F) {
+      F(0, 0, 16, 10, '#a81828');
+      F(0, 0, 7, 5, '#20305a');
+      F(0, 1, 2, 1, '#e8e8e8'); F(3, 1, 2, 1, '#e8e8e8');
+      F(0, 3, 2, 1, '#e8e8e8'); F(3, 3, 2, 1, '#e8e8e8');
+      F(0, 2, 16, 1, '#e8e8e8'); F(0, 6, 16, 1, '#e8e8e8'); F(0, 8, 16, 1, '#e8e8e8');
+    });
+  }
+
+  function neonTexture() {
+    return simpleTex('neon', 4, 16, function (F) {
+      F(1, 0, 2, 16, '#ff58c8');
+      F(0, 1, 4, 1, '#c8f8ff');
+      F(0, 8, 4, 1, '#c8f8ff');
+    });
+  }
+
+  /* comignolo sul colmo del tetto; ritorna la posizione del camino per il fumo */
+  function addChimney(rc, scene) {
+    var x1 = rc.bx + rc.bw + EAVE;
+    var z0 = rc.by - EAVE, z1 = rc.by + rc.bh + EAVE;
+    var inset = Math.min((z1 - z0) / 2, (x1 - (rc.bx - EAVE)) * 0.25);
+    var cx = x1 - inset - 0.7, cz = (z0 + z1) / 2;
+    var yTop = WALL_H + ROOF_H;
+    var body = new THREE.Mesh(
+      new THREE.BoxGeometry(0.3, 0.65, 0.3),
+      new THREE.MeshLambertMaterial({ color: '#8a4a38' })
+    );
+    body.position.set(cx, yTop + 0.18, cz);
+    body.castShadow = true;
+    var cap = new THREE.Mesh(
+      new THREE.BoxGeometry(0.38, 0.08, 0.38),
+      new THREE.MeshLambertMaterial({ color: '#5a2e22' })
+    );
+    cap.position.set(cx, yTop + 0.52, cz);
+    var hole = new THREE.Mesh(
+      new THREE.BoxGeometry(0.18, 0.03, 0.18),
+      new THREE.MeshLambertMaterial({ color: '#180c08' })
+    );
+    hole.position.set(cx, yTop + 0.56, cz);
+    scene.add(body); scene.add(cap); scene.add(hole);
+    return { x: cx, y: yTop + 0.62, z: cz };
+  }
+
   function shingleTexture(pal) {
     var key = 'sh_' + pal.rf;
     if (texCache[key]) return texCache[key];
@@ -315,6 +496,175 @@
     return grp;
   }
 
+  // tetto piatto dell'ospedale: parapetto + croce rossa piatta vista dall'alto
+  function flatRoof(rc, pal) {
+    var x0 = rc.bx - EAVE, x1 = rc.bx + rc.bw + EAVE;
+    var z0 = rc.by - EAVE, z1 = rc.by + rc.bh + EAVE;
+    var yE = WALL_H;
+    var grp = new THREE.Group();
+    var par = new THREE.Mesh(
+      new THREE.BoxGeometry(x1 - x0, 0.18, z1 - z0),
+      new THREE.MeshLambertMaterial({ color: pal.wall })
+    );
+    par.position.set((x0 + x1) / 2, yE + 0.09, (z0 + z1) / 2);
+    par.castShadow = true;
+    par.receiveShadow = true;
+    var edge = new THREE.Mesh( // bordo scuro sul filo superiore del parapetto
+      new THREE.BoxGeometry(x1 - x0, 0.03, z1 - z0),
+      new THREE.MeshLambertMaterial({ color: pal.rb })
+    );
+    edge.position.set((x0 + x1) / 2, yE + 0.185, (z0 + z1) / 2);
+    var side = Math.min(x1 - x0, z1 - z0) * 0.6;
+    var cross = new THREE.Mesh(
+      new THREE.PlaneGeometry(side, side),
+      new THREE.MeshBasicMaterial({ map: hospitalCrossTexture(), transparent: true })
+    );
+    cross.rotation.x = -Math.PI / 2;
+    cross.position.set((x0 + x1) / 2, yE + 0.2, (z0 + z1) / 2);
+    grp.add(par); grp.add(edge); grp.add(cross);
+    return grp;
+  }
+
+  // insegna montata sulla facciata sud, sopra la porta; ritorna posizione/dimensioni
+  // per chi deve agganciarsi (es. le luci al neon del roadhouse)
+  // Insegna dell'edificio. Sul TETTO, non sulla facciata: la facciata e' alta un
+  // solo tile e la gronda la mette in ombra, li' il testo non si legge. Sopra il
+  // colmo invece l'insegna e' in pieno campo visivo (la lezione del Double R).
+  function addBuildingSign(rc, grp) {
+    var doorX = rc.doors.length ? rc.doors[0].x + 0.5 : rc.bx + rc.bw / 2;
+    var southZ = rc.by + rc.bh; // bordo sud: la faccia rivolta verso la camera
+
+    if (rc.ch === '3') {
+      // casa privata: niente insegna sul tetto, un cartello da giardino sul palo
+      var pw = 1.6, ph = pw * 96 / 256;
+      var plate = new THREE.Mesh(
+        new THREE.PlaneGeometry(pw, ph),
+        new THREE.MeshBasicMaterial({ map: palmerPlateTexture(), transparent: true })
+      );
+      var yardX = doorX + 1.6, yardZ = southZ + 0.9;
+      plate.position.set(yardX, 0.92, yardZ);
+      grp.add(plate);
+      var stake = new THREE.Mesh(
+        new THREE.BoxGeometry(0.08, 0.85, 0.08),
+        new THREE.MeshLambertMaterial({ color: '#6a4a2e' })
+      );
+      stake.position.set(yardX, 0.42, yardZ);
+      stake.castShadow = true;
+      grp.add(stake);
+      return null;
+    }
+
+    // Montata sul bordo FRONTALE del tetto, sopra la porta e davanti alla gronda:
+    // abbastanza in alto da non essere in ombra, abbastanza bassa da restare in
+    // quadro quando il giocatore arriva da sud.
+    var w = Math.min(rc.bw * 0.72, 6.4), h = w * 96 / 512; // rapporto della texture
+    var y = WALL_H + 0.34 + h / 2;
+    var z = southZ + 0.34;                                 // proud della gronda (EAVE 0.25)
+    var backing = new THREE.Mesh(                           // spessore scuro dietro la targa
+      new THREE.BoxGeometry(w + 0.1, h + 0.1, 0.08),
+      new THREE.MeshLambertMaterial({ color: '#241a12' })
+    );
+    backing.position.set(doorX, y, z - 0.05);
+    backing.castShadow = true;
+    grp.add(backing);
+    var mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(w, h),
+      new THREE.MeshBasicMaterial({ map: signboardTexture(rc.ch), transparent: true })
+    );
+    mesh.position.set(doorX, y, z);
+    grp.add(mesh);
+    // due bracci di sostegno che tornano verso la facciata
+    var armMat = new THREE.MeshLambertMaterial({ color: '#241a12' });
+    var pi, px;
+    for (pi = -1; pi <= 1; pi += 2) {
+      px = doorX + pi * w * 0.36;
+      var arm = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.07, 0.42), armMat);
+      arm.position.set(px, y - h / 2 + 0.05, z - 0.25);
+      grp.add(arm);
+    }
+    return { x: doorX, y: y, w: w, z: z };
+  }
+
+  // insegna sul colmo del tetto del Double R: il classico rooftop sign da diner americano
+  function addDinerRoofSign(rc, grp) {
+    var x0 = rc.bx - EAVE, x1 = rc.bx + rc.bw + EAVE;
+    var z0 = rc.by - EAVE, z1 = rc.by + rc.bh + EAVE;
+    var inset = Math.min((z1 - z0) / 2, (x1 - x0) * 0.25);
+    var rx0 = x0 + inset, rx1 = x1 - inset, rz = (z0 + z1) / 2;
+    var w = rx1 - rx0, h = w / 4; // stesso rapporto della texture 512x128
+    var plane = new THREE.Mesh(
+      new THREE.PlaneGeometry(w, h),
+      new THREE.MeshBasicMaterial({ map: dinerRoofTexture(), transparent: true })
+    );
+    plane.position.set((rx0 + rx1) / 2, WALL_H + ROOF_H + 0.45, rz);
+    grp.add(plane);
+    var post = new THREE.Mesh( // palo di sostegno fra il colmo e l'insegna
+      new THREE.BoxGeometry(0.1, ROOF_H * 0.4, 0.1),
+      new THREE.MeshLambertMaterial({ color: '#3a2a1a' })
+    );
+    post.position.set((rx0 + rx1) / 2, WALL_H + ROOF_H + 0.15, rz);
+    grp.add(post);
+  }
+
+  // pennone dello sceriffo accanto alla porta, con bandierina in cima
+  function addFlagpole(rc, grp) {
+    var doorX = rc.doors.length ? rc.doors[0].x + 0.5 : rc.bx + rc.bw / 2;
+    var px = Math.min(rc.bx + rc.bw + 0.3, doorX + 0.9);
+    var pz = rc.by + rc.bh + 0.15;
+    var pole = new THREE.Mesh(
+      new THREE.BoxGeometry(0.08, 1.8, 0.08),
+      new THREE.MeshLambertMaterial({ color: '#5a4a38' })
+    );
+    pole.position.set(px, 0.9, pz);
+    pole.castShadow = true;
+    grp.add(pole);
+    var flag = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.5, 0.32),
+      new THREE.MeshBasicMaterial({ map: flagTexture(), transparent: true, side: THREE.DoubleSide })
+    );
+    flag.position.set(px + 0.27, 1.65, pz);
+    grp.add(flag);
+  }
+
+  // due barre "al neon" che affiancano l'insegna del roadhouse
+  function addNeonBars(rc, grp, sign) {
+    var z = rc.by + rc.bh + 0.06;
+    var tex = neonTexture();
+    var left = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.14, 0.55),
+      new THREE.MeshBasicMaterial({ map: tex, transparent: true })
+    );
+    left.position.set(sign.x - sign.w / 2 - 0.22, sign.y, z);
+    grp.add(left);
+    var right = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.14, 0.55),
+      new THREE.MeshBasicMaterial({ map: tex, transparent: true })
+    );
+    right.position.set(sign.x + sign.w / 2 + 0.22, sign.y, z);
+    grp.add(right);
+  }
+
+  // tettoia coperta sopra la porta del Great Northern
+  function addAwning(rc, pal, grp) {
+    var doorX = rc.doors.length ? rc.doors[0].x + 0.5 : rc.bx + rc.bw / 2;
+    var southZ = rc.by + rc.bh;
+    var awning = new THREE.Mesh(
+      new THREE.BoxGeometry(1.2, 0.08, 0.35),
+      new THREE.MeshLambertMaterial({ color: pal.rb })
+    );
+    awning.position.set(doorX, WALL_H - 0.05, southZ + 0.15);
+    awning.castShadow = true;
+    grp.add(awning);
+    var postH = WALL_H - 0.1;
+    var postMat = new THREE.MeshLambertMaterial({ color: pal.trim });
+    var post1 = new THREE.Mesh(new THREE.BoxGeometry(0.06, postH, 0.06), postMat);
+    post1.position.set(doorX - 0.45, postH / 2, southZ + 0.28);
+    grp.add(post1);
+    var post2 = new THREE.Mesh(new THREE.BoxGeometry(0.06, postH, 0.06), postMat);
+    post2.position.set(doorX + 0.45, postH / 2, southZ + 0.28);
+    grp.add(post2);
+  }
+
   function buildingGroup(rc) {
     var pal = BPAL[rc.ch];
     var grp = new THREE.Group();
@@ -328,7 +678,15 @@
     box.castShadow = true;
     box.receiveShadow = true;
     grp.add(box);
-    grp.add(hipRoof(rc, pal));
+    grp.add(rc.ch === '5' ? flatRoof(rc, pal) : hipRoof(rc, pal));
+
+    // insegna + dettagli che rendono l'edificio riconoscibile a colpo d'occhio
+    // il Double R ha la sua insegna da diner sul colmo: niente targa generica
+    var sign = (rc.ch === '2') ? null : addBuildingSign(rc, grp);
+    if (rc.ch === '2') addDinerRoofSign(rc, grp);
+    if (rc.ch === '1') addFlagpole(rc, grp);
+    if (rc.ch === '6' && sign) addNeonBars(rc, grp, sign);
+    if (rc.ch === '4') addAwning(rc, pal, grp);
     return grp;
   }
 
@@ -352,8 +710,174 @@
     return m;
   }
 
+  /* ---------------- arredo urbano: lampioni, pali, panchine, staccionate... ---------------- */
+  /* palette allineata a tiles.js (versione 2D) per coerenza fra i due motori di rendering */
+
+  function lampPost(x, z) {
+    var grp = new THREE.Group();
+    var post = new THREE.Mesh(
+      new THREE.BoxGeometry(0.09, 2.2, 0.09),
+      new THREE.MeshLambertMaterial({ color: '#242424' })
+    );
+    post.position.set(x, 1.1, z);
+    post.castShadow = true;
+    var arm = new THREE.Mesh(
+      new THREE.BoxGeometry(0.4, 0.06, 0.06),
+      new THREE.MeshLambertMaterial({ color: '#242424' })
+    );
+    arm.position.set(x + 0.18, 2.05, z);
+    var head = new THREE.Mesh( // testa accesa: MeshBasicMaterial per leggerla come "illuminata" senza luci vere
+      new THREE.BoxGeometry(0.18, 0.14, 0.14),
+      new THREE.MeshBasicMaterial({ color: '#ffe9a8' })
+    );
+    head.position.set(x + 0.34, 1.98, z);
+    var glow = new THREE.Mesh( // alone morbido, molto economico: un piano semitrasparente
+      new THREE.PlaneGeometry(0.5, 0.5),
+      new THREE.MeshBasicMaterial({ color: '#ffe9a8', transparent: true, opacity: 0.28, depthWrite: false })
+    );
+    glow.position.set(x + 0.34, 1.98, z + 0.01);
+    var base = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.11, 0.13, 0.06, 8),
+      new THREE.MeshLambertMaterial({ color: '#2e2e2e' })
+    );
+    base.position.set(x, 0.03, z);
+    grp.add(post); grp.add(arm); grp.add(head); grp.add(glow); grp.add(base);
+    return grp;
+  }
+
+  function telephonePole(x, z) {
+    var grp = new THREE.Group();
+    var pole = new THREE.Mesh(
+      new THREE.BoxGeometry(0.13, 3.0, 0.13),
+      new THREE.MeshLambertMaterial({ color: '#3a2818' })
+    );
+    pole.position.set(x, 1.5, z);
+    pole.castShadow = true;
+    var arm = new THREE.Mesh(
+      new THREE.BoxGeometry(0.7, 0.08, 0.08),
+      new THREE.MeshLambertMaterial({ color: '#2e2014' })
+    );
+    arm.position.set(x, 2.7, z);
+    grp.add(pole); grp.add(arm);
+    var offs = [-0.28, 0, 0.28], insMat = new THREE.MeshLambertMaterial({ color: '#d8d0c0' });
+    for (var i = 0; i < offs.length; i++) {
+      var ins = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.06), insMat);
+      ins.position.set(x + offs[i], 2.78, z);
+      grp.add(ins);
+    }
+    return grp;
+  }
+
+  function benchMesh(x, z) {
+    var grp = new THREE.Group();
+    var wood = new THREE.MeshLambertMaterial({ color: '#8a5f36' });
+    var dark = new THREE.MeshLambertMaterial({ color: '#3a2410' });
+    var seat = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.06, 0.32), wood);
+    seat.position.set(x, 0.34, z);
+    seat.castShadow = true;
+    var back = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.38, 0.06), new THREE.MeshLambertMaterial({ color: '#4a3018' }));
+    back.position.set(x, 0.56, z - 0.14);
+    back.castShadow = true;
+    var leg1 = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.34, 0.06), dark);
+    leg1.position.set(x - 0.38, 0.17, z + 0.1);
+    var leg2 = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.34, 0.06), dark);
+    leg2.position.set(x + 0.38, 0.17, z + 0.1);
+    grp.add(seat); grp.add(back); grp.add(leg1); grp.add(leg2);
+    return grp;
+  }
+
+  // staccionata bianca a stecche (white picket, come la versione 2D in tiles.js):
+  // stecche verticali + corrimano che arriva ai bordi del tile, cosi' i 'F'
+  // adiacenti formano una recinzione continua.
+  var fenceMats = null;
+  function fenceMesh(x, z) {
+    if (!fenceMats) {
+      fenceMats = {
+        white: new THREE.MeshLambertMaterial({ color: '#eae6da' }),
+        shade: new THREE.MeshLambertMaterial({ color: '#c2beb2' })
+      };
+    }
+    var grp = new THREE.Group();
+    var i, px, picket, tip;
+    for (i = 0; i < 5; i++) {                       // 5 stecche con punta
+      px = x - 0.4 + i * 0.2;
+      picket = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.5, 0.07), fenceMats.white);
+      picket.position.set(px, 0.25, z);
+      picket.castShadow = true;
+      grp.add(picket);
+      tip = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.07, 0.07), fenceMats.white);
+      tip.position.set(px, 0.53, z);
+      grp.add(tip);
+    }
+    var rail = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.07, 0.05), fenceMats.shade);
+    rail.position.set(x, 0.3, z + 0.02);            // corrimano da bordo a bordo
+    rail.castShadow = true;
+    grp.add(rail);
+    return grp;
+  }
+
+  function flowerbedTopTexture() {
+    return simpleTex('flowerbed_top', 16, 16, function (F) {
+      F(1, 1, 14, 14, '#3a2818');
+      var fc = ['#d83030', '#f0d048', '#ffffff'];
+      var spots = [[2, 2], [7, 1], [12, 3], [3, 7], [9, 8], [13, 9], [1, 12], [6, 13], [11, 13]];
+      for (var i = 0; i < spots.length; i++) F(spots[i][0], spots[i][1], 1, 1, fc[i % 3]);
+    });
+  }
+
+  function flowerbedMesh(x, z) {
+    var side = new THREE.MeshLambertMaterial({ color: '#d8d0c0' }); // cordolo chiaro
+    var top = new THREE.MeshLambertMaterial({ map: flowerbedTopTexture() });
+    var mats = [side, side, top, side, side, side];
+    var mesh = new THREE.Mesh(new THREE.BoxGeometry(0.94, 0.18, 0.94), mats);
+    mesh.position.set(x, 0.09, z);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    return mesh;
+  }
+
+  function hydrantTexture() {
+    return simpleTex('hydrant', 8, 12, function (F) {
+      F(2, 2, 4, 8, '#a81c1c');
+      F(2, 2, 1, 8, '#c83a3a');
+      F(5, 2, 1, 8, '#7a1010');
+      F(1, 0, 6, 2, '#7a1010');
+      F(0, 4, 1, 2, '#8a1414'); F(7, 4, 1, 2, '#8a1414');
+    });
+  }
+
+  function mailboxTexture() {
+    return simpleTex('mailbox', 10, 16, function (F) {
+      F(3, 9, 1, 7, '#4a4a52');
+      F(1, 2, 8, 6, '#5a6a7a');
+      F(1, 2, 8, 1, '#7a8a98');
+      F(1, 7, 8, 1, '#3a4650');
+      F(8, 3, 2, 2, '#c83030');
+    });
+  }
+
+  function bushTexture() {
+    var key = 'bush';
+    if (texCache[key]) return texCache[key];
+    var cv = document.createElement('canvas');
+    cv.width = 32; cv.height = 32;
+    var c = cv.getContext('2d');
+    function F(x, y, w, h, col) { c.fillStyle = col; c.fillRect(x * 2, y * 2, w * 2, h * 2); }
+    F(4, 4, 8, 8, '#2e5e34');
+    F(3, 6, 1, 4, '#2e5e34'); F(12, 6, 1, 4, '#2e5e34');
+    F(6, 3, 4, 1, '#2e5e34'); F(6, 11, 4, 1, '#2e5e34');
+    F(5, 5, 6, 6, '#3d7a42');
+    F(5, 5, 3, 2, '#57a05a');
+    F(9, 9, 2, 2, '#183018');
+    texCache[key] = makeTex(cv);
+    return texCache[key];
+  }
+
   var BUILD_CH = { '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1 };
-  var SKIP_BAKE = { '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1, D: 1, i: 1, R: 1, T: 1, Y: 1, S: 1, X: 1, M: 1, w: 1, o: 1 };
+  var SKIP_BAKE = {
+    '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1, D: 1, i: 1, R: 1, T: 1, Y: 1, S: 1, X: 1, M: 1, w: 1, o: 1,
+    L: 1, P: 1, B: 1, F: 1, A: 1, H: 1, E: 1, n: 1
+  };
 
   function baseCharOf(map) {
     var counts = {}, best = '.', n = 0, y, x, ch;
@@ -556,6 +1080,52 @@
 
   /* ---------------- terreno + luci ---------------- */
 
+  /* decorazioni del terreno: chiazze grandi + fiori/ciottoli/ciocche,
+   * deterministiche (seed dall'id mappa) per rompere la monotonia dei prati */
+  function decorateGround(c, map) {
+    var seed = 7;
+    for (var i = 0; i < map.id.length; i++) seed = (seed * 31 + map.id.charCodeAt(i)) & 0x7fffffff;
+    function rnd() { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; }
+    var w = (map.width + BORDER * 2) * TILE, h = (map.height + BORDER * 2) * TILE;
+    // chiazze morbide grandi (luce/ombra) su tutta l'area
+    for (i = 0; i < 26; i++) {
+      var bx = rnd() * w, by = rnd() * h, br = 24 + rnd() * 56;
+      c.fillStyle = rnd() < 0.5 ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.045)';
+      c.beginPath(); c.arc(bx, by, br, 0, 6.2832); c.fill();
+    }
+    // dettagli puntuali solo sui tile d'erba
+    function grassAt(px, py) {
+      var tx = Math.floor(px / TILE) - BORDER, ty = Math.floor(py / TILE) - BORDER;
+      var ch = chAt(map, tx, ty);
+      return ch === '.' || ch === 'g';
+    }
+    var dark = map.id === 'woods';
+    var n = Math.floor(map.width * map.height * 0.09);
+    for (i = 0; i < n; i++) {
+      var px = Math.floor(rnd() * w), py = Math.floor(rnd() * h);
+      if (!grassAt(px, py)) continue;
+      var kind = rnd();
+      if (kind < 0.42) { // ciocca d'erba: due fili verticali
+        c.fillStyle = dark ? '#1e3323' : '#7a9450';
+        c.fillRect(px, py - 2, 1, 3); c.fillRect(px + 2, py - 1, 1, 2);
+        c.fillStyle = dark ? '#557555' : '#c4cc94';
+        c.fillRect(px + 1, py - 3, 1, 2);
+      } else if (kind < 0.62) { // ciottolo
+        c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(px, py + 1, 3, 1);
+        c.fillStyle = dark ? '#6a6a62' : '#9a9a8e'; c.fillRect(px, py, 2, 2);
+        c.fillStyle = dark ? '#8a8a80' : '#babaaa'; c.fillRect(px, py, 1, 1);
+      } else if (kind < 0.82) { // fiorellino
+        var fc = ['#e8e8f0', '#f0d048', '#e890b8', '#c8d8f0'][Math.floor(rnd() * 4)];
+        c.fillStyle = dark ? '#1e3323' : '#7a9450'; c.fillRect(px + 1, py + 1, 1, 2);
+        c.fillStyle = fc;
+        c.fillRect(px, py, 2, 1); c.fillRect(px + 1, py - 1, 1, 1); c.fillRect(px + 1, py + 1, 1, 1);
+      } else { // foglia/muschio scuro
+        c.fillStyle = dark ? 'rgba(0,0,0,0.22)' : 'rgba(90,110,60,0.35)';
+        c.fillRect(px, py, 3, 2);
+      }
+    }
+  }
+
   function bakeGround(map, world, opts) {
     var w = (map.width + BORDER * 2) * TILE, h = (map.height + BORDER * 2) * TILE;
     var cv = document.createElement('canvas');
@@ -572,6 +1142,7 @@
       }
     }
     world.groundCtx = c;
+    decorateGround(c, map);
     world.groundTex = makeTex(cv);
     var geo = new THREE.PlaneGeometry(map.width + BORDER * 2, map.height + BORDER * 2);
     var mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: world.groundTex }));
@@ -615,7 +1186,7 @@
 
   function buildWorld(S) {
     var map = S.map;
-    var world = { scene: new THREE.Scene(), liquids: [], sparkles: [], npcs: [], tape: [] };
+    var world = { scene: new THREE.Scene(), liquids: [], sparkles: [], npcs: [], tape: [], smokes: [] };
     var bg = map.id === 'redroom' ? 0x2a0a0e : 0x101820;
     world.scene.background = new THREE.Color(bg);
     // nebbia leggera per profondità negli esterni
@@ -644,6 +1215,30 @@
           var tp = billboard(tapeTexture(), 1, 1, x + 0.5, y + 0.55);
           world.scene.add(tp);
           world.tape.push({ sprite: tp, x: x, y: y });
+        } else if (ch === 'L') {
+          world.scene.add(lampPost(x + 0.5, y + 0.5));
+          blobShadow(world.scene, x + 0.5, y + 0.62, 0.22);
+        } else if (ch === 'P') {
+          world.scene.add(telephonePole(x + 0.5, y + 0.5));
+          blobShadow(world.scene, x + 0.5, y + 0.6, 0.2);
+        } else if (ch === 'B') {
+          world.scene.add(benchMesh(x + 0.5, y + 0.6));
+          blobShadow(world.scene, x + 0.5, y + 0.75, 0.32);
+        } else if (ch === 'F') {
+          world.scene.add(fenceMesh(x + 0.5, y + 0.5));
+          blobShadow(world.scene, x + 0.5, y + 0.58, 0.4);
+        } else if (ch === 'A') {
+          world.scene.add(flowerbedMesh(x + 0.5, y + 0.5));
+          blobShadow(world.scene, x + 0.5, y + 0.62, 0.42);
+        } else if (ch === 'H') {
+          world.scene.add(billboard(hydrantTexture(), 0.42, 0.55, x + 0.5, y + 0.55));
+          blobShadow(world.scene, x + 0.5, y + 0.6, 0.2);
+        } else if (ch === 'E') {
+          world.scene.add(billboard(mailboxTexture(), 0.4, 0.75, x + 0.5, y + 0.55));
+          blobShadow(world.scene, x + 0.5, y + 0.6, 0.2);
+        } else if (ch === 'n') {
+          world.scene.add(billboard(bushTexture(), 0.8, 0.7, x + 0.5, y + 0.5));
+          blobShadow(world.scene, x + 0.5, y + 0.58, 0.32);
         }
       }
     }
@@ -652,7 +1247,19 @@
     tileRects(map, 'w').forEach(function (rc) { waterMesh(rc, 'w', world); });
     tileRects(map, 'o').forEach(function (rc) { waterMesh(rc, 'o', world); });
 
-    scanBuildings(map).forEach(function (rc) { world.scene.add(buildingGroup(rc)); });
+    scanBuildings(map).forEach(function (rc) {
+      world.scene.add(buildingGroup(rc));
+      if (map.id === 'town') { // comignoli fumanti solo negli esterni
+        var chm = addChimney(rc, world.scene);
+        for (var pi = 0; pi < 3; pi++) {
+          var pmat = new THREE.SpriteMaterial({ map: smokeTexture(), transparent: true, opacity: 0, depthWrite: false });
+          var puff = new THREE.Sprite(pmat);
+          puff.position.set(chm.x, chm.y, chm.z);
+          world.scene.add(puff);
+          world.smokes.push({ s: puff, x: chm.x, y: chm.y, z: chm.z, ph: pi / 3 + (rc.bx % 7) * 0.11 });
+        }
+      }
+    });
     extrudeWalls(map, world.scene);
     furniture(map, world.scene);
 
@@ -686,7 +1293,7 @@
   R.init = function (glCanvas) {
     if (!Sp) return false;
     try {
-      renderer = new THREE.WebGLRenderer({ canvas: glCanvas, antialias: false });
+      renderer = new THREE.WebGLRenderer({ canvas: glCanvas, antialias: true });
     } catch (e) { return false; }
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -751,6 +1358,15 @@
     }
     var open = S.clues.length >= 3;
     for (i = 0; i < cur.tape.length; i++) cur.tape[i].sprite.visible = !open;
+
+    for (i = 0; i < cur.smokes.length; i++) {
+      var sm = cur.smokes[i];
+      var age = (t * 0.00022 + sm.ph) % 1;
+      sm.s.position.set(sm.x + age * 0.35 + Math.sin(age * 6 + sm.ph * 20) * 0.14, sm.y + age * 1.25, sm.z);
+      var sc = 0.34 + age * 0.8;
+      sm.s.scale.set(sc, sc, 1);
+      sm.s.material.opacity = 0.55 * (age < 0.15 ? age / 0.15 : 1 - (age - 0.15) / 0.85);
+    }
 
     if (t - lastWater > 200) {
       lastWater = t;

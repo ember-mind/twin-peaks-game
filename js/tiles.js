@@ -178,6 +178,47 @@
         if (h % 2 === 0) R(ctx, x + ((h >> 4) % 14) + 1, y + ((h >> 2) % 14) + 1, 1, 1, '#e4d0a4');
         organicEdge(ctx, flags, tx, ty, x, y);
         break;
+      case '=': { // marciapiede: lastra di cemento chiaro, giunto centrale, cordolo verso la strada
+        R(ctx, x, y, 16, 16, '#c8c4b8');
+        R(ctx, x, y, 16, 1, '#d8d4c8');            // luce superiore
+        R(ctx, x, y + 8, 16, 1, '#a8a498');        // giunto: divide la lastra in 2
+        R(ctx, x + (h % 14) + 1, y + ((h >> 3) % 6) + 1, 1, 1, '#b4b0a4');
+        if (h % 2 === 0) R(ctx, x + ((h >> 2) % 13) + 1, y + ((h >> 4) % 6) + 1, 1, 1, '#dcd8cc');
+        if (h % 3 === 0) R(ctx, x + ((h >> 1) % 13) + 1, y + ((h >> 5) % 6) + 9, 1, 1, '#b8b4a8');
+        if (cellAt(flags, tx, ty - 1) === 'r') R(ctx, x, y, 16, 1, '#88847a');      // cordolo verso la strada
+        if (cellAt(flags, tx, ty + 1) === 'r') R(ctx, x, y + 15, 16, 1, '#88847a');
+        if (cellAt(flags, tx - 1, ty) === 'r') R(ctx, x, y, 1, 16, '#88847a');
+        if (cellAt(flags, tx + 1, ty) === 'r') R(ctx, x + 15, y, 1, 16, '#88847a');
+        break;
+      }
+      case '-': { // strisce pedonali: base della strada + 3 barre bianco sporco, orientate secondo la strada
+        R(ctx, x, y, 16, 16, '#a8a49a');
+        R(ctx, x + (h % 14) + 1, y + ((h >> 3) % 14) + 1, 1, 1, '#928e84');
+        if (h % 2 === 0) R(ctx, x + ((h >> 2) % 14) + 1, y + ((h >> 4) % 14) + 1, 1, 1, '#bcb8ac');
+        var stripe = '#e8e4d8';
+        var horiz = cellAt(flags, tx - 1, ty) === 'r' || cellAt(flags, tx + 1, ty) === 'r';
+        for (i = 0; i < 3; i++) {
+          if (horiz) { // strada orizzontale: barre verticali attraverso la carreggiata
+            R(ctx, x + 1 + i * 5, y + 1, 3, 14, stripe);
+            if ((h + i) % 4 === 0) R(ctx, x + 1 + i * 5 + (h % 3), y + 3 + ((h >> 2) % 8), 1, 1, '#a8a49a'); // usura
+          } else { // strada verticale: barre orizzontali
+            R(ctx, x + 1, y + 1 + i * 5, 14, 3, stripe);
+            if ((h + i) % 4 === 0) R(ctx, x + 3 + ((h >> 2) % 8), y + 1 + i * 5 + (h % 3), 1, 1, '#a8a49a');
+          }
+        }
+        break;
+      }
+      case ',': { // erba fiorita: stessa erba di '.' con 3-5 fiorellini deterministici
+        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h, { tuft: 1 });
+        var flowerColors = ['#ffffff', '#f0d048', '#f0a0c0'];
+        var nFlowers = 3 + (h % 3);
+        for (i = 0; i < nFlowers; i++) {
+          var fx = 1 + ((h + i * 7) % 13), fy = 1 + ((h >> (i + 1)) % 13);
+          R(ctx, x + fx, y + fy + 1, 1, 2, '#2f6a30');          // stelo
+          R(ctx, x + fx - 1, y + fy, 2, 2, flowerColors[(h + i) % 3]); // bocciolo
+        }
+        break;
+      }
       case 'w': {
         R(ctx, x, y, 16, 16, '#4a86cc');
         R(ctx, x, y, 16, 8, '#5090d8');
@@ -364,13 +405,13 @@
         R(ctx, x, y + 2, 16, 1, '#c83048');
         R(ctx, x, y + 14, 16, 2, '#5a0a14');
         break;
-      case 'Z': // pavimento zig-zag
-        for (j = 0; j < 8; j++) {
-          for (i = 0; i < 8; i++) {
-            var xx = i * 2;
-            var fold = xx < 8 ? xx : 14 - xx;
-            var cc = ((fold / 2 + j) % 2) === 0 ? '#e8dcc0' : '#4a3020';
-            R(ctx, x + xx, y + j * 2, 2, 2, cc);
+      case 'Z': // pavimento zig-zag (chevron della Loggia Nera: diagonali che si invertono)
+        for (j = 0; j < 16; j++) {
+          var ph = j % 8;
+          var dshift = ph < 4 ? ph : 7 - ph;
+          for (i = 0; i < 16; i++) {
+            var band = Math.floor((i + dshift) / 4) % 2;
+            R(ctx, x + i, y + j, 1, 1, band ? '#18100a' : '#f0e6cc');
           }
         }
         break;
@@ -407,6 +448,112 @@
           }
         }
         break;
+      case 'L': { // lampione: base + palo sottile + testa che si accende di caldo
+        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        R(ctx, x + 4, y + 14, 8, 2, 'rgba(0,0,0,0.20)'); // ombra a terra
+        R(ctx, x + 5, y + 11, 6, 4, '#2e2e2e');          // base
+        R(ctx, x + 5, y + 11, 6, 1, '#4a4a4a');
+        R(ctx, x + 7, y + 3, 2, 8, '#242424');           // palo sottile
+        R(ctx, x + 7, y + 3, 1, 8, '#3e3e3e');
+        R(ctx, x + 4, y, 8, 4, '#242424');               // testa lampione (contorno scuro)
+        R(ctx, x + 5, y + 1, 6, 2, '#ffe9a8');           // vetro caldo
+        R(ctx, x + 6, y + 1, 4, 1, '#fff6d0');           // punto luce più intenso
+        break;
+      }
+      case 'P': { // palo del telefono: palo spesso + crossarm orizzontale + 2 isolatori
+        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        R(ctx, x + 5, y + 14, 6, 2, 'rgba(0,0,0,0.20)'); // ombra a terra
+        R(ctx, x + 6, y + 1, 3, 14, '#3a2818');          // palo spesso
+        R(ctx, x + 6, y + 1, 1, 14, '#523a24');
+        R(ctx, x + 3, y + 3, 10, 2, '#2e2014');          // crossarm orizzontale
+        R(ctx, x + 3, y + 3, 10, 1, '#463020');
+        R(ctx, x + 4, y + 2, 1, 1, '#d8d0c0');           // isolatore sx
+        R(ctx, x + 11, y + 2, 1, 1, '#d8d0c0');          // isolatore dx
+        break;
+      }
+      case 'B': { // panchina: schienale a nord + assi del sedile, vista frontale-dall'alto
+        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        R(ctx, x + 2, y + 14, 12, 2, 'rgba(0,0,0,0.18)'); // ombra a terra
+        R(ctx, x + 3, y + 3, 10, 3, '#4a3018');           // schienale (banda scura a nord)
+        R(ctx, x + 3, y + 3, 10, 1, '#6a4526');
+        R(ctx, x + 2, y + 6, 12, 6, '#5a3c1e');           // contorno seduta
+        R(ctx, x + 3, y + 7, 10, 4, '#8a5f36');           // assi (faccia superiore)
+        R(ctx, x + 3, y + 7, 10, 1, '#a67840');           // luce
+        R(ctx, x + 3, y + 9, 10, 1, '#6a4526');           // fuga fra le assi
+        R(ctx, x + 2, y + 6, 1, 7, '#3a2410');            // gamba sx
+        R(ctx, x + 13, y + 6, 1, 7, '#3a2410');           // gamba dx
+        break;
+      }
+      case 'F': { // staccionata bianca: pali + corrimano, saldato ai lati se il vicino è la stessa staccionata
+        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        var fl = cellAt(flags, tx - 1, ty) === 'F';
+        var fr = cellAt(flags, tx + 1, ty) === 'F';
+        R(ctx, x + 2, y + 12, 12, 1, 'rgba(0,0,0,0.16)'); // ombra a terra
+        var rx = fl ? x : x + 1, rex = fr ? x + 16 : x + 15;
+        R(ctx, rx, y + 6, rex - rx, 2, '#c8c4b8');         // corrimano (esteso se il vicino è recinzione)
+        R(ctx, rx, y + 6, rex - rx, 1, '#e8e4d8');
+        for (i = 0; i < 4; i++) { // 4 pali verticali
+          var px = x + 1 + i * 4;
+          R(ctx, px, y + 1, 2, 1, '#d8d4c8');              // cappello del palo
+          R(ctx, px, y + 2, 2, 11, '#e8e4d8');
+          R(ctx, px, y + 2, 1, 11, '#ffffff');
+          R(ctx, px + 1, y + 2, 1, 11, '#b8b4a8');
+        }
+        break;
+      }
+      case 'A': { // aiuola: cordolo di pietra chiara + terra scura + fiori vivaci
+        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        R(ctx, x + 2, y + 14, 12, 1, 'rgba(0,0,0,0.14)'); // ombra a terra
+        R(ctx, x + 2, y + 2, 12, 12, '#d8d0c0');          // cordolo chiaro
+        R(ctx, x + 3, y + 3, 10, 10, '#3a2818');          // terra scura
+        R(ctx, x + 3, y + 3, 10, 1, '#4e3820');           // leggera luce sulla terra
+        var bedColors = ['#d83030', '#f0d048', '#ffffff'];
+        for (i = 0; i < 5; i++) {
+          var bx = 4 + ((h + i * 5) % 8), by = 4 + ((h >> (i + 1)) % 8);
+          R(ctx, x + bx, y + by, 1, 1, bedColors[(h + i) % 3]);
+        }
+        break;
+      }
+      case 'H': { // idrante rosso: cofano scuro + due bocchette laterali
+        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        R(ctx, x + 5, y + 13, 6, 2, 'rgba(0,0,0,0.18)'); // ombra a terra
+        R(ctx, x + 6, y + 4, 4, 9, '#a81c1c');           // corpo
+        R(ctx, x + 6, y + 4, 1, 9, '#c83a3a');           // luce laterale
+        R(ctx, x + 9, y + 4, 1, 9, '#7a1010');           // ombra laterale
+        R(ctx, x + 5, y + 2, 6, 3, '#7a1010');           // cofano scuro
+        R(ctx, x + 6, y + 2, 4, 1, '#961818');
+        R(ctx, x + 5, y + 8, 1, 2, '#8a1414');           // bocchetta sx
+        R(ctx, x + 10, y + 8, 1, 2, '#8a1414');          // bocchetta dx
+        R(ctx, x + 7, y + 12, 2, 1, '#5a0e0e');          // base
+        break;
+      }
+      case 'E': { // cassetta postale: scatola blu-grigia su palo + bandierina rossa laterale
+        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        R(ctx, x + 5, y + 14, 6, 2, 'rgba(0,0,0,0.18)'); // ombra a terra
+        R(ctx, x + 7, y + 9, 2, 6, '#4a4a52');           // palo
+        R(ctx, x + 4, y + 3, 8, 6, '#5a6a7a');           // scatola
+        R(ctx, x + 4, y + 3, 8, 1, '#7a8a98');           // luce superiore
+        R(ctx, x + 4, y + 8, 8, 1, '#3a4650');           // ombra inferiore scatola
+        R(ctx, x + 11, y + 4, 2, 2, '#c83030');          // bandierina laterale
+        break;
+      }
+      case 'n': { // cespuglio: chioma piccola e tonda, palette degli alberi senza tronco né sfondamento
+        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        R(ctx, x + 3, y + 13, 10, 2, 'rgba(0,0,0,0.16)'); // ombra a terra
+        R(ctx, x + 4, y + 4, 8, 8, '#2e5e34');            // rim scuro
+        R(ctx, x + 3, y + 6, 1, 4, '#2e5e34');            // arrotondamento bordo sx
+        R(ctx, x + 12, y + 6, 1, 4, '#2e5e34');           // arrotondamento bordo dx
+        R(ctx, x + 6, y + 3, 4, 1, '#2e5e34');            // arrotondamento cima
+        R(ctx, x + 6, y + 11, 4, 1, '#2e5e34');           // arrotondamento base
+        R(ctx, x + 5, y + 5, 6, 6, '#3d7a42');            // corpo mezzatinta
+        R(ctx, x + 5, y + 5, 3, 2, '#57a05a');            // luce NW
+        R(ctx, x + 9, y + 9, 2, 2, '#183018');            // ombra SE
+        R(ctx, x + 4, y + 4, 1, 1, '#1c3a22');            // contorno angoli arrotondati
+        R(ctx, x + 11, y + 4, 1, 1, '#1c3a22');
+        R(ctx, x + 4, y + 11, 1, 1, '#1c3a22');
+        R(ctx, x + 11, y + 11, 1, 1, '#1c3a22');
+        break;
+      }
       case 'v':
         R(ctx, x, y, 16, 16, '#000000');
         break;

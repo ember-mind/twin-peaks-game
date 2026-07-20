@@ -44,8 +44,8 @@ Canvas 480×320 (CSS 960×640). Storia: engine+data scritti in una prima session
 
 ## Note tecniche v3D
 
-- Mappe grandi (2026-07-19): town 56×36, woods 28×22 — generate e validate con `test/genmaps.js` (BFS: ogni porta/NPC/oggetto raggiungibile dallo spawn). Per modificarle: rigenerare con lo script, non a mano. Spawn town (28,33).
-- Camera: CAM_UP 13.5 / CAM_BACK 9.2 (zoom largo, ~24 tile visibili); nebbia 38→80.
+- Mappe grandi (2026-07-19): town 56×36, woods 28×22 — generate e validate con `test/genmaps.js` (BFS: ogni porta/NPC/oggetto raggiungibile dallo spawn). Per modificarle: rigenerare con lo script, non a mano. Spawn town (30,32), rivolto verso il cartello "Benvenuti" (30,30) invece che addossato alla siepe di confine sud (2026-07-19).
+- Camera: CAM_UP 13.5 / CAM_BACK 9.2, FOV 38° tarato su aspect 1.5 (landscape); su schermi stretti (mobile ritratto) il FOV verticale sale dinamicamente (`fovForAspect` in render3d.js) per non restringere troppo l'orizzontale — altrimenti il mondo appare più "zoomato" su mobile. Nebbia 38→80.
 
 - Fullscreen: canvas WebGL = finestra intera; canvas UI logico 160px di altezza × larghezza proporzionale (`UW` dinamico in engine.js), SCALE 2.
 - Luci per tipo mappa: esterni hemi 0.6 + sole 0.68 con ombre 2048; interni caldi più tenui; Stanza Rossa rossa. Somma hemi+sun ≤ ~1.3 o il Lambert clippa (prato slavato).
@@ -59,7 +59,19 @@ Canvas 480×320 (CSS 960×640). Storia: engine+data scritti in una prima session
 - [ ] Salvataggio in localStorage
 - [ ] Secondo atto: BOB, il gufo, Leo Johnson
 
+## Deploy
+
+- **Live**: https://twinpeaks.latosicurodellaroccia.xyz (Coolify static, nginx:alpine, progetto "Twin Peaks Game")
+- Repo: `ember-mind/twin-peaks-game` (privato) — deploy key read-only generata da Coolify. Il codice sorgente canonico vive QUI nel vault; per pubblicare: `rsync` verso `~/Code/solo/projects/twin-peaks-game`, commit, push (account ember-mind), poi Deploy dalla dashboard Coolify (niente webhook: deploy key, non GitHub App).
+- Mobile: touch.js — D-pad + A/B + tap-to-advance.
+
 ## MEMORY
+
+- [2026-07-20] Decision: insegne edifici montate sul BORDO FRONTALE DEL TETTO (sopra la porta, davanti alla gronda, y = WALL_H+0.34+h/2, z = southZ+0.34), non sulla facciata: la facciata è alta un solo tile e la gronda la mette in ombra — lì il testo non si legge. Provata anche la posizione sul colmo: leggibile ma esce dall'inquadratura quando il giocatore arriva da sud. Ogni edificio pubblico ha targa con nome + icona (SHERIFF/stella, OSPEDALE/croce, GREAT NORTHERN/pino, ROADHOUSE/neon+nota); il Double R tiene la sua insegna da diner sul colmo; casa Palmer ha un cartello da giardino su palo (è una casa privata, non un'attività). L'ospedale ha tetto piatto con croce a terra visibile dall'alto.
+- [2026-07-20] Arredo urbano: 11 nuovi caratteri mappa — solidi `L` lampione `P` palo telefonico `B` panchina `F` staccionata `A` aiuola `H` idrante `E` cassetta postale `n` cespuglio; calpestabili `=` marciapiede `-` strisce pedonali `,` erba fiorita. Marciapiedi lungo le strade + strisce agli incroci sono ciò che fa leggere "città". Tutti i solidi vanno in M.SOLID (maps.js) E in SKIP_BAKE (render3d.js); i calpestabili in nessuno dei due. Piazza col cartello Benvenuti + panchine a (30,30).
+- [2026-07-20] Graphics pass su render3d/tiles: antialias ON (spigoli tetti/muri lisci, le texture restano pixelate via NearestFilter); decorazioni terreno deterministiche in bakeGround (chiazze morbide grandi + fiori/ciottoli/ciocche solo su erba, seed da map.id); comignoli sul colmo (addChimney) con fumo animato a 3 puff per edificio (solo town, world.smokes, rise 1.25 unit — rise maggiore esce dal frame: la camera a 55° lascia poco cielo sopra i tetti); pavimento Stanza Rossa rifatto in tiles.js 'Z': chevron diagonale 45° a bande di 4px che si invertono ogni 4 righe, '#f0e6cc'/'#18100a' (prima era un checker che si leggeva rosa slavato sotto luce rossa). Verifica visiva via Chrome headless --screenshot + harness temporaneo (il layer WebGL non viene composto negli screenshot headless → blit su canvas 2D overlay; smoke test 261 ✔, walkthrough 82 ✔).
+- [2026-07-19] Decision: campagna 5 atti approvata dal Senato con emendamenti (walkthrough simulator in P1, checkpoint rilasciabili per atto, save solo su porta, 5 atti confermati). Costruita da 6 legionari in sequenza + touch in parallelo. Finale: 261 smoke check, 82 acquisizioni walkthrough, end via laura_finale2.
+- [2026-07-19] Decision: deploy = repo privato ember-mind/twin-peaks-game + Coolify deploy-key (pattern fuga-al-fresco/serate-film). La GitHub App di Coolify non copre i repo nuovi di ember-mind e l'account browser è escapemanuele → deploy key è la via senza attriti.
 
 - [2026-07-19] Decision: motore grafico definitivo = THREE.js r147 vendorizzato (WebGL). Le due iterazioni 2D (retexture piatto, poi warp Mode7 + billboard software) bocciate dall'utente: voleva un motore 3D vero. Le texture restano generate dalla pixel-art procedurale (tiles.js/chars.js) → zero asset, look coerente.
 - [2026-07-19] Pattern: pipeline render3d — bake del terreno in una CanvasTexture per mappa (ripaint solo tile animati ogni 250ms), geometria per ciò che ha volume (edifici, muri), billboard per ciò che è "sprite" (alberi, personaggi, prop). UI su canvas 2D overlay trasparente sopra il canvas WebGL.
