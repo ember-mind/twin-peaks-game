@@ -121,6 +121,46 @@ ok(true, 'tutte le voci di D.objectives entrano in una riga (<= 48 caratteri)');
 ok(GAME.Maps.town.onEnter && GAME.Data.dialogues[GAME.Maps.town.onEnter.dialogue],
    'town.onEnter punta a un dialogo esistente');
 
+// guardia propagazione campi: ogni campo di un oggetto mappa in maps.js deve
+// finire su GAME.Maps[id] (glue.js), a meno che non sia rimodellato apposta
+// (doors/gate -> doors, interact/objects -> objects). Chiude in modo
+// meccanico la classe di bug "campo aggiunto a maps.js ma mai propagato"
+// (es. 'indoor' silenziosamente ignorato).
+const TRANSFORMED_KEYS = ['doors', 'gate', 'interact', 'objects'];
+for (const id of mapIds) {
+  const src = GAME.maps.maps[id];
+  const out = GAME.Maps[id];
+  for (const k of Object.keys(src)) {
+    if (TRANSFORMED_KEYS.includes(k)) continue;
+    ok(Object.prototype.hasOwnProperty.call(out, k), `campo "${k}" di maps.js:${id} propagato in GAME.Maps`);
+  }
+}
+
+// guardia arredo urbano: il set noto {L P B F A H E n} deve essere sia
+// solido (M.SOLID, collisioni) sia skip-baked (Render3DConfig.terrain.skipBake,
+// niente tile di terreno sotto). Invariante stretta e vera: NON l'uguaglianza
+// dei due insiemi (arredo interno C/t/h/K/U e' solido ma non skip-baked, D/X/o
+// sono skip-baked ma non solidi, entrambi per design).
+const URBAN_PROPS = ['L', 'P', 'B', 'F', 'A', 'H', 'E', 'n'];
+const SKIP_BAKE = GAME.Render3DConfig.terrain.skipBake;
+for (const ch of URBAN_PROPS) {
+  ok(GAME.maps.SOLID[ch], `arredo urbano "${ch}" e' solido (M.SOLID)`);
+  ok(SKIP_BAKE[ch], `arredo urbano "${ch}" e' skip-baked (Render3DConfig.terrain.skipBake)`);
+}
+
+// guardia interact -> dialogo: ogni chiave interact usata in una mappa deve
+// risolvere (via INTERACT_DLG, o come id diretto) a un dialogo reale in
+// data.js. Cattura il gap "serve una voce sia in maps.js che in glue.js".
+for (const id of mapIds) {
+  const interact = GAME.maps.maps[id].interact || {};
+  for (const [xy, key] of Object.entries(interact)) {
+    const dlg = GAME.INTERACT_DLG[key] || key;
+    for (const did of dialogueId(dlg)) {
+      ok(GAME.Data.dialogues[did], `interact ${id}:${xy} "${key}" -> dialogo "${did}" esiste`);
+    }
+  }
+}
+
 /* ---------------- 2. partita completa ---------------- */
 
 console.log('# partita');

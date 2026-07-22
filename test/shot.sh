@@ -14,4 +14,4 @@ URL="file://$(pwd)/test/shot.html?map=${MAP}&x=${X}&y=${Y}&dir=${DIR}"
 [ -n "$CLUES" ] && URL="${URL}&clues=${CLUES}"
 [ -n "$FLAG" ] && URL="${URL}&flag=${FLAG}"
 CH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-exec "$CH" --headless=new --window-size=960,640 --virtual-time-budget=9000 --screenshot="$OUT" --hide-scrollbars "$URL" 2>/dev/null
+exec "$CH" --headless=new --enable-unsafe-swiftshader --use-angle=swiftshader --window-size=960,640 --virtual-time-budget=9000 --screenshot="$OUT" --hide-scrollbars "$URL" 2>/dev/null

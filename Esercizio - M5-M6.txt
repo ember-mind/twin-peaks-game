@@ -1,0 +1,751 @@
+PRODUZIONE NARRATIVA 2:
+M5 “IL VAGONE” + M6 “ONE EYED JACKS”
+
+Produrre due pacchetti completi di scrittura e narrative design,
+candidati allo Script Lock.
+
+Fonti canoniche:
+
+- World & Story Identity Bible v0.9.1;
+- M4 “I frammenti” v1.1.1 Script Lock.
+
+Non scrivere codice.
+Non modificare il motore.
+Non creare mappe.
+Non aggiungere nuovi personaggi.
+Non aggiungere nuovi indizi narrativi salvo l’atomizzazione necessaria
+degli elementi già presenti.
+Non introdurre una nuova meccanica.
+Non scrivere la morte di Jacques in scena.
+Non certificare Jacques come innocente quando le prove stabiliscono
+soltanto che la sua presenza non basta.
+Non presentare come osservazione fisica un’intenzione attribuita
+dall’autore.
+
+==================================================
+0. MANIFESTO DELLE DIPENDENZE
+==================================================
+
+Conferma prima di scrivere:
+
+- P2 è una rotta investigativa accettata, non un fatto confermato;
+- M5 scopre il vagone: M4 non lo conosceva;
+- E6A conferma il rapporto Laura–James;
+- T_JAMES_EST fornisce la rotta;
+- Gerard ed E5 possono essere presenti o assenti;
+- P4b può essere formulata o assente;
+- M5 deve funzionare in tutti questi stati;
+- il player e Cooper ricordano il volto sconosciuto;
+- il nome resta perduto;
+- la verità autoriale è che Leland/BOB causa la morte di Jacques;
+- Cooper e il player non possono provarlo;
+- gli stati player-facing restano:
+jacques_dead,
+jacques_testimony_lost,
+jacques_death_suspicious;
+- jacques_murder_confirmed non viene mai scritto.
+
+Dichiara ogni conflitto trovato prima di procedere.
+
+==================================================
+1. CONTRATTO CANONICO DI M5
+==================================================
+
+Definisci:
+
+- causa ereditata da M4;
+- stato all’ingresso;
+- obiettivo player-facing iniziale;
+- domanda narrativa;
+- durata;
+- beat;
+- contenuto obbligatorio;
+- contenuto facoltativo;
+- condizione di completamento;
+- stato all’uscita;
+- conoscenza player/Cooper/Truman;
+- audience-state ipotizzato.
+
+Obiettivo iniziale raccomandato:
+
+“Verifica la rotta di James: oltre il ponte, verso i binari.”
+
+L’obiettivo deve cambiare soltanto quando il player scopre realmente il
+vagone.
+
+==================================================
+2. EVIDENZE ATOMICHE DI M5
+==================================================
+
+Atomizza gli elementi esistenti.
+
+Definisci almeno:
+
+E7A — testo fisico del biglietto o della scritta:
+“FUOCO CAMMINA CON ME”.
+
+E7B — posizione materiale del biglietto:
+semi-sepolto, piegato, macchiato o altro fatto osservabile già
+compatibile col progetto.
+
+E8A — posizione dell’anello.
+
+E8B — superficie intorno all’anello:
+polvere interrotta, assenza di segni di rotolamento o altro segnale
+osservabile.
+
+E_SCENE — disposizione del mucchio, degli oggetti e dello spazio.
+
+Per ciascuna unità indica:
+
+- fatto letterale;
+- interazione che lo acquisisce;
+- affidabilità;
+- ciò che supporta;
+- ciò che non supporta;
+- interpretazioni alternative;
+- descrizione mostrata al player.
+
+Regole:
+
+- nessuna “stessa grafia” con la poesia orale di Gerard;
+- E5 ed E7 possono condividere un TESTO, non una mano;
+- “posato deliberatamente” è un’inferenza;
+- “centrato, polvere intatta, nessun solco di rotolamento” sono fatti;
+- non attribuire intenzione sulla base della sola composizione scenica.
+
+==================================================
+3. PROPOSIZIONI DI M5
+==================================================
+
+Costruisci una progressione in almeno due livelli.
+
+P3A:
+“Almeno alcuni elementi del vagone sono stati collocati deliberatamente.”
+
+P3B, solo se il supporto è sufficiente:
+“Il vagone è stato usato come scena preparata, non soltanto come luogo
+di una lotta improvvisa.”
+
+Per ogni proposizione indica:
+
+- supporto minimo;
+- supporto forte;
+- contraddizioni;
+- stato iniziale;
+- confronto che la genera;
+- ciò che permette;
+- rischio di sovrainferenza.
+
+Se P3B non è realmente sostenuta dagli elementi esistenti, mantenerla
+come ipotesi e lasciare la conferma a M6/M10.
+
+==================================================
+4. LA FALSA TEORIA
+==================================================
+
+Crea una teoria errata ma ragionevole relativa a Jacques.
+
+Non costruirla con prove inventate.
+
+La teoria deve possedere:
+
+- almeno due elementi reali a sostegno;
+- una spiegazione coerente della scena;
+- una debolezza non immediatamente risolutiva;
+- un modo in cui l’ordine di ispezione la rende più o meno attraente;
+- una successiva confutazione parziale, non un colpo di scena arbitrario.
+
+Non dichiarare che l’anello apparteneva a Jacques o era un pegno
+d’amore, salvo che il repository lo stabilisca.
+
+La teoria consigliata è:
+
+“Jacques era presente e una situazione organizzata per un incontro o
+uno scambio è degenerata.”
+
+Questa teoria può essere sbagliata sull’autore senza essere assurda
+sulla sua presenza.
+
+==================================================
+5. DRAMMATURGIA SPAZIALE DI M5
+==================================================
+
+Progetta 8–12 beat.
+
+Per ogni beat indica:
+
+- posizione;
+- obiettivo minuto per minuto;
+- azione del player;
+- informazione visibile;
+- interazione;
+- taccuino;
+- interpretazione possibile;
+- stato scritto;
+- domanda successiva;
+- variante dovuta all’ordine di ispezione.
+
+La missione deve comprendere:
+
+- scoperta del vagone attraverso movimento;
+- ingresso;
+- tre osservazioni;
+- almeno un confronto scelto;
+- una teoria provvisoria;
+- una rilettura dopo l’ultima osservazione;
+- una presentazione o comunicazione a Truman/Hawk;
+- S1;
+- nuovo obiettivo verso Jacques.
+
+Nessun NPC deve spiegare la scena completa.
+
+Hawk può:
+
+- proteggere il perimetro;
+- descrivere un fatto che ha personalmente osservato;
+- obiettare a una teoria.
+
+Non può risolvere P3 al posto del player.
+
+==================================================
+6. STATO E5 PRESENTE/ASSENTE
+==================================================
+
+Scrivi due trattamenti coerenti.
+
+Se E5 è presente:
+
+- E7A può essere confrontata con la formula recitata da Gerard;
+- il risultato è una ricorrenza testuale;
+- non è ancora identità BOB=fuoco.
+
+Se E5 è assente:
+
+- E7A entra come formula scritta autonoma;
+- M5 resta completabile;
+- nessun obiettivo richiede di tornare obbligatoriamente da Gerard;
+- l’eventuale collegamento può avvenire più tardi se il player acquisisce
+E5.
+
+Non penalizzare irreversibilmente chi ha saltato un contenuto dichiarato
+facoltativo.
+
+==================================================
+7. S1 — CUSTODIA DELL’ANELLO
+==================================================
+
+Scrivi la scelta completa:
+
+A. Custodia istituzionale.
+
+B. Custodia investigativa personale documentata.
+
+Per ogni opzione indica:
+
+- intenzione del player;
+- azione concreta di Cooper;
+- documentazione;
+- risposta di Truman;
+- stato scritto;
+- conseguenza probatoria;
+- conseguenza relazionale;
+- eco in M9;
+- eco nella Loggia;
+- riconvergenza.
+
+Cooper non nasconde l’anello.
+
+L’opzione personale deve includere:
+
+- fotografia;
+- registrazione;
+- firma del trasferimento;
+- contestazione visibile di Truman.
+
+La scelta non deve suggerire che una delle due sia professionalmente
+corretta in assoluto.
+
+==================================================
+8. SCRITTURA COMPLETA DI M5
+==================================================
+
+Scrivi:
+
+- dialoghi;
+- pagine d’azione;
+- descrizioni degli esami;
+- voci del taccuino;
+- confronto;
+- teoria provvisoria;
+- risposte di Hawk/Truman;
+- S1;
+- obiettivi;
+- repeat text.
+
+Regole:
+
+- segnali osservabili prima delle interpretazioni;
+- massimo un fatto portante nuovo per pagina;
+- nessuna metafora che sostituisca la materialità della scena;
+- il vagone non diventa un museo di simboli;
+- il silenzio non deve essere spiegato;
+- Laura resta una persona, non soltanto la vittima rappresentata dagli
+oggetti.
+
+==================================================
+9. CONTRATTO CANONICO DI M6
+==================================================
+
+Definisci:
+
+- causa ereditata;
+- obiettivo;
+- opposizione di Jacques;
+- posta;
+- luogo;
+- giurisdizione;
+- durata;
+- beat;
+- arresto fisso;
+- morte successiva fissa;
+- variabili aperte;
+- stato all’uscita;
+- nuova domanda.
+
+Usa il linguaggio procedurale appropriato al progetto.
+
+Non simulare diritto reale quando il gioco non lo possiede.
+
+==================================================
+10. TEST DI DISTINZIONE DELLE TATTICHE
+==================================================
+
+Prima di scrivere i dialoghi, confronta:
+
+- PROVA;
+- PRESSIONE;
+- FALSA SICUREZZA.
+
+Ogni tattica deve possedere almeno:
+
+- due domande esclusive;
+- una tattica distinta di Jacques;
+- un’informazione verificabile unica;
+- un’informazione incompleta o ambigua;
+- una reazione distinta di Cooper;
+- una reazione distinta di Truman o Hawk;
+- un costo persistente;
+- una risorsa specifica che la morte di Jacques distruggerà;
+- una diversa forma del taccuino.
+
+Se due tattiche non soddisfano tutti i criteri, fondile prima della
+scrittura.
+
+Il player non può esaurire tutte e tre in un solo interrogatorio.
+
+Definisci:
+
+- quando la tattica viene scelta;
+- se può essere cambiata;
+- quale costo ha il cambio;
+- quando Jacques si chiude definitivamente.
+
+==================================================
+11. P5 — PRESENZA NON EQUIVALE A COLPA
+==================================================
+
+La missione deve permettere al player di distinguere:
+
+- Jacques era presente;
+- Jacques conosce parti della scena;
+- Jacques può mentire;
+- nulla di questo attribuisce automaticamente l’omicidio.
+
+Definisci:
+
+- fatti ammessi;
+- fatti negati;
+- contraddizioni;
+- testimonianza incompleta;
+- proposizione formulabile;
+- ciò che resta ignoto.
+
+Formulazione raccomandata:
+
+“Jacques può essere collocato sulla scena. La sua presenza non basta ad
+attribuirgli l’omicidio.”
+
+Non usare:
+
+“Jacques è innocente.”
+
+==================================================
+12. RISORSA COSTRUITA E PERDUTA
+==================================================
+
+Per ogni tattica definisci una risorsa specifica.
+
+Esempi da verificare e correggere:
+
+PROVA:
+una dichiarazione formalizzabile che richiedeva un secondo colloquio.
+
+PRESSIONE:
+una lista di nomi fra cui Jacques non ha ancora distinto quello reale.
+
+FALSA SICUREZZA:
+un dettaglio contestuale sul terzo uomo che soltanto Jacques poteva
+interpretare.
+
+La morte di Jacques deve distruggere quella risorsa.
+
+Non deve:
+
+- annullare tutte le informazioni già ottenute;
+- punire retroattivamente la scelta;
+- rendere una tattica chiaramente migliore;
+- attribuire al player la colpa della morte.
+
+Il risultato emotivo deve essere un rimpianto specifico:
+
+“Ho perso QUESTO”,
+
+non un generico:
+
+“Avrei dovuto scegliere meglio”.
+
+==================================================
+13. MORTE DI JACQUES E P9
+==================================================
+
+La verità autoriale resta:
+
+Leland/BOB causa la morte di Jacques.
+
+La conoscenza player-facing resta:
+
+- Jacques è morto;
+- la testimonianza è persa;
+- la morte favorisce chi protegge il segreto;
+- la morte è sospetta;
+- l’autore non è provato.
+
+Scrivi:
+
+- la comunicazione di Lucy/Truman;
+- la reazione di Cooper per tattica;
+- la voce del taccuino;
+- P9;
+- il cambiamento nell’ospedale;
+- il nuovo obiettivo.
+
+P9 raccomandata:
+
+“La perdita di Jacques favorisce chiunque protegga il segreto,
+indipendentemente dalla causa precisa della morte.”
+
+Non scrivere:
+
+“Jacques è stato eliminato da BOB.”
+
+==================================================
+14. SCRITTURA COMPLETA DI M6
+==================================================
+
+Scrivi:
+
+- ingresso a One Eyed Jacks;
+- eventuale presenza compatta di Audrey senza espandere la sottotrama;
+- scelta della tattica;
+- domande esclusive;
+- risposte di Jacques;
+- azioni;
+- obiezioni;
+- arresto;
+- ritorno;
+- notizia della morte;
+- callback specifico per tattica;
+- obiettivi;
+- taccuino;
+- repeat text.
+
+Mantieni Jacques:
+
+- evasivo;
+- opportunista;
+- capace di dire verità utili per salvarsi;
+- non onnisciente;
+- non ridotto a cattivo caricaturale.
+
+==================================================
+15. CONTRATTO DATI
+==================================================
+
+Fornisci:
+
+- evidenze atomiche;
+- osservazioni;
+- ipotesi;
+- proposizioni;
+- tattica;
+- storia delle domande;
+- S1;
+- risorsa costruita;
+- risorsa persa;
+- stati P3/P5/P9;
+- obiettivi;
+- accessi.
+
+Separare:
+
+```text
+jacques_present
+jacques_admitted_presence
+jacques_murder_attributed
+jacques_testimony_lost
+jacques_death_suspicious
+jacques_murder_confirmed
+
+L’ultimo resta sempre falso o non scritto.
+
+Per le proposizioni usare gli stati multistrato della Bible.
+
+==================================================
+16. REGIA SENSORIALE
+
+Per ciascuna missione, massimo:
+
+un suono dominante;
+
+un oggetto o processo risemantizzato;
+
+un cambiamento di attività.
+
+M5:
+
+il vagone deve comunicare attraverso materiale e disposizione;
+
+niente musica che spieghi la teoria;
+
+il treno o il metallo possono esistere come processi, non come
+punteggiatura sincronizzata.
+
+M6:
+
+One Eyed Jacks deve restare un luogo funzionante, non una stanza nata
+per l’interrogatorio;
+
+le attività continuano;
+
+la tattica deve cambiare l’uso sociale dello spazio;
+
+la morte successiva deve cambiare visibilmente l’ospedale, non OEJ.
+
+==================================================
+17. SCOPE
+
+Calcola separatamente:
+
+pagine di dialogo;
+
+pagine d’azione;
+
+voci taccuino;
+
+label;
+
+nodi;
+
+sottorami;
+
+confronti;
+
+tattiche;
+
+stati;
+
+contenuti E5 presente/assente;
+
+contenuti S1;
+
+callback post-morte;
+
+repeat;
+
+casi di test.
+
+Usa M4 come nuova taratura.
+
+Non dichiarare rispettato un budget precedente se viene superato.
+
+Se lo scope cresce, taglia nell’ordine:
+
+testo opzionale di Hawk;
+
+variazioni cosmetiche di Audrey;
+
+terza tattica, se non realmente distinta;
+
+teoria falsa presentabile come scelta autonoma, mantenendola come
+ipotesi del taccuino.
+
+Non tagliare:
+
+fatti/interpretazioni separati;
+
+S1;
+
+P5;
+
+perdita specifica per tattica;
+
+stato E5 presente/assente.
+
+==================================================
+18. TEST
+
+M5:
+
+ogni ordine di ispezione;
+
+E5 presente;
+
+E5 assente;
+
+P4b presente/assente;
+
+nessuna inferenza di grafia;
+
+anello: fatto distinto da intenzione;
+
+falsa teoria comprensibile e non ridicola;
+
+P3A/P3B non ricevono più del supporto;
+
+S1 entrambe le opzioni;
+
+nessun softlock.
+
+M6:
+
+ogni tattica;
+
+eventuale cambio di tattica;
+
+informazione unica per tattica;
+
+P5 formulabile in ogni percorso;
+
+arresto sempre raggiungibile;
+
+risorsa specifica costruita;
+
+risorsa specifica persa;
+
+P9 non attribuisce l’omicidio;
+
+morte non percepita come punizione della scelta;
+
+Audrey facoltativa;
+
+nessun softlock.
+
+Comprensione, domande aperte prima:
+
+“Che cosa hai osservato nel vagone?”
+
+“Che cosa ti ha fatto pensare che alcuni elementi fossero stati
+collocati?”
+
+“Che cosa sapevi realmente di Jacques prima di parlargli?”
+
+“Che cosa ha ammesso?”
+
+“Che cosa non hai mai provato?”
+
+“Che cosa hai perso quando è morto?”
+
+Test centrale:
+
+“Il player può spiegare perché Jacques era presente senza concludere
+automaticamente che fosse l’assassino, e può nominare la risorsa
+specifica che la sua morte ha distrutto?”
+
+==================================================
+19. AUTO-EDIT
+
+Identifica e correggi:
+
+cinque deduzioni oltre il supporto;
+
+cinque righe troppo espositive;
+
+tre righe troppo poetiche;
+
+due casi in cui Hawk risolve per il player;
+
+due casi in cui Jacques diventa caricatura;
+
+due informazioni che una tattica riceve senza averle guadagnate;
+
+una falsa teoria troppo debole;
+
+una tattica sinonimica;
+
+un callback invisibile;
+
+una pagina facoltativa da tagliare.
+
+Verifica nel testo finale che ogni correzione dichiarata sia realmente
+applicata.
+
+==================================================
+20. OUTPUT
+
+Produrre:
+
+manifesto delle dipendenze;
+
+contratti M5 e M6;
+
+evidenze atomiche;
+
+proposizioni;
+
+grafi dei nodi;
+
+beat;
+
+script completo M5;
+
+S1;
+
+matrice delle tattiche;
+
+script completo M6;
+
+P5 e P9;
+
+contratto dati;
+
+taccuino e obiettivi;
+
+regia sensoriale;
+
+scope;
+
+test;
+
+auto-edit;
+
+versioni finali pulite.
+
+Non implementare nulla.
+
+Domanda centrale:
+
+“Il player ha ricostruito una scena e interrogato un testimone,
+oppure ha soltanto cliccato oggetti finché il gioco gli ha consegnato
+una falsa pista e poi gliel’ha tolta?”
+

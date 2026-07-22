@@ -1,0 +1,725 @@
+FASE SUCCESSIVA:
+ARCHITETTURA CAUSALE DELLA TRAMA, DESIGN DELLE MISSIONI,
+SUSPENSE E INTRECCI NEL TWIN PEAKS GAME
+
+Questo è un esercizio sul progetto reale presente nel repository.
+
+Non scrivere codice.
+Non modificare il motore.
+Non costruire mappe.
+Non creare un nuovo gioco.
+Non aggiungere una nuova trama separata.
+Non riscrivere liberamente il canone senza dichiararlo.
+Non produrre dialoghi completi, tranne brevi esempi necessari.
+Non affidarti alla conoscenza esterna della serie quando i dati del
+progetto stabiliscono una versione differente.
+
+Il tuo compito è verificare e riprogettare la struttura completa del
+Twin Peaks Game affinché:
+
+- ogni atto sia causato dal precedente;
+- ogni missione faccia svolgere al giocatore il lavoro di Cooper;
+- gli indizi producano inferenze e non soltanto sblocchi;
+- le sottotrame interferiscano con la trama principale;
+- la suspense dipenda dal controllo dell’informazione;
+- i luoghi riflettano l’evoluzione della storia;
+- le scelte modifichino costi, rapporti, prove e interpretazioni senza
+necessariamente cambiare i fatti canonici;
+- l’interrogatorio di Leland e la Loggia spendano ciò che il giocatore
+ha imparato e fatto.
+
+L’output deve essere un documento progettuale, non un’implementazione.
+
+==================================================
+0. PROVENIENZA E MAPPA DEL PROGETTO
+==================================================
+
+Ispeziona i file reali del repository.
+
+Elenca:
+
+- atti;
+- missioni;
+- nodi narrativi;
+- obiettivi;
+- flag;
+- indizi;
+- personaggi;
+- luoghi;
+- scene obbligatorie;
+- scene facoltative;
+- finali o epiloghi;
+- sistemi di gameplay narrativo;
+- menu X o taccuino;
+- meccanismi di presentazione degli indizi.
+
+Per ogni elemento importante indica:
+
+- percorso del file;
+- ID del nodo o flag;
+- atto;
+- stato attuale;
+- funzione narrativa.
+
+Marca ogni elemento come:
+
+[C] CANONE DELLA SERIE
+[P] CANONE GIÀ STABILITO DAL PROGETTO
+[A] ADATTAMENTO DEL CANONE
+[N] NUOVA PROPOSTA
+[?] PROVENIENZA INCERTA
+
+Non attribuire al progetto contenuti che esistono soltanto nella tua
+memoria della serie.
+
+Crea una sezione:
+
+“Conflitti fra canone, progetto e proposta”.
+
+==================================================
+1. PROMESSA DEL GIOCO E RUOLO DEL GIOCATORE
+==================================================
+
+Definisci:
+
+- fantasia del giocatore;
+- ruolo interpretato;
+- identità fissa di Cooper;
+- aspetti di Cooper che il giocatore può esprimere;
+- verbi principali;
+- competenze investigative;
+- competenze sociali;
+- competenze intuitive o oniriche;
+- domanda drammatica centrale;
+- tema;
+- conflitto di valori;
+- esperienza promessa;
+- durata prevista;
+- grado reale di linearità.
+
+Distingui:
+
+- ciò che il giocatore scopre;
+- ciò che Cooper già sa;
+- ciò che entrambi imparano;
+- ciò che il sistema registra;
+- ciò che resta interpretazione.
+
+Scrivi una frase:
+
+“Il giocatore non osserva Cooper risolvere il caso; il giocatore…”
+
+Completa la frase attraverso azioni concrete.
+
+==================================================
+2. AUDIT DELLA TRAMA ATTUALE
+==================================================
+
+Per ogni atto esistente crea una tabella con:
+
+- stato all’ingresso;
+- causa ereditata;
+- obiettivo immediato;
+- ragione personale;
+- opposizione;
+- domanda di suspense;
+- azioni effettive del giocatore;
+- informazione ottenuta;
+- svolta;
+- conseguenza;
+- cambiamento nel mondo;
+- cambiamento di relazione;
+- nuovo obiettivo;
+- gancio verso l’atto successivo.
+
+Classifica ogni passaggio fra missioni come:
+
+- CAUSALE;
+- CAUSALE MA DEBOLE;
+- PURAMENTE INFORMATIVO;
+- ARBITRARIO;
+- DIPENDENTE DA COINCIDENZA;
+- DIPENDENTE DA UNA CUTSCENE;
+- DIPENDENTE DA CONOSCENZA NON GUADAGNATA.
+
+Per ogni passaggio debole, identifica la riparazione minima.
+
+Non difendere una transizione soltanto perché segue gli eventi della
+serie.
+
+==================================================
+3. MOTORE DRAMMATICO
+==================================================
+
+Definisci:
+
+- cosa vuole Cooper;
+- cosa teme;
+- quale convinzione iniziale viene messa alla prova;
+- cosa vuole BOB o la forza soprannaturale, marcando le interpretazioni
+incerte;
+- cosa vogliono i principali personaggi umani;
+- quali istituzioni o norme ostacolano Cooper;
+- cosa accade se il giocatore non interviene;
+- quale processo continua indipendentemente dal player;
+- perché il conflitto può sostenere tutto il gioco;
+- quale valore dovrà essere deciso o interpretato nel finale.
+
+L’opposizione deve agire senza attendere i trigger delle missioni.
+
+Per ogni forza opposta crea una timeline offscreen contenente:
+
+- informazione disponibile;
+- obiettivo;
+- azione;
+- traccia visibile;
+- conseguenza per il player;
+- limite della sua conoscenza.
+
+Non rendere BOB onnisciente per comodità.
+
+==================================================
+4. SPINA CAUSALE DEGLI ATTI
+==================================================
+
+Ricostruisci il gioco in 5 atti o usa la struttura già esistente quando
+differente.
+
+Per ogni atto indica:
+
+- domanda iniziale;
+- obiettivo;
+- strategia dominante;
+- missioni;
+- rivelazione;
+- fallimento o successo incompleto;
+- conseguenza irreversibile;
+- cambiamento di strategia;
+- domanda finale.
+
+Ogni atto deve modificare almeno tre fra:
+
+- obiettivo;
+- metodo;
+- sospetto;
+- alleanza;
+- rischio;
+- accesso;
+- interpretazione;
+- responsabilità;
+- condizione di un luogo.
+
+L’escalation non può consistere soltanto in indizi più importanti o
+dialoghi più lunghi.
+
+==================================================
+5. ARCHITETTURA DELLE MISSIONI
+==================================================
+
+Crea 8–12 schede missione basate prima di tutto sui contenuti esistenti.
+
+Non aggiungere una nuova missione quando una missione esistente può
+essere riparata.
+
+Per ogni missione indica:
+
+- ID e titolo;
+- atto;
+- causa ereditata;
+- obiettivo esplicito al player;
+- motivazione di Cooper;
+- obiettivo della forza opposta;
+- posta in gioco immediata;
+- verbo principale;
+- verbo secondario;
+- luogo;
+- problema spaziale;
+- problema informativo;
+- problema sociale;
+- indizi disponibili;
+- inferenza richiesta;
+- scelta o stance del giocatore;
+- risposta immediata;
+- svolta;
+- conseguenza;
+- cambiamento del mondo;
+- cambiamento di relazione;
+- informazione trattenuta;
+- nuova domanda;
+- motivo per cui la missione deve essere giocata e non riassunta.
+
+Nessuna missione può ridursi a:
+
+- raggiungi un NPC;
+- leggi il dialogo;
+- ricevi automaticamente l’indizio;
+- torna allo sceriffo.
+
+==================================================
+6. GERARCHIA DEGLI OBIETTIVI
+==================================================
+
+Definisci quattro livelli:
+
+1. obiettivo dell’intero gioco;
+2. obiettivo dell’atto;
+3. obiettivo della missione;
+4. obiettivo minuto per minuto.
+
+Per ogni missione scrivi:
+
+- testo mostrato al player;
+- condizione di completamento;
+- cosa il player crede di ottenere;
+- cosa ottiene realmente;
+- come il risultato genera il prossimo obiettivo.
+
+Gli obiettivi devono usare verbi concreti.
+
+Evita:
+
+- “continua a investigare”;
+- “scopri la verità”;
+- “parla con tutti”;
+- “cerca altri indizi”.
+
+Quando è necessaria una formulazione poetica, deve accompagnare e non
+sostituire l’azione concreta.
+
+==================================================
+7. ARCHITETTURA DELLA SUSPENSE
+==================================================
+
+Crea una matrice delle principali domande narrative.
+
+Per ciascuna domanda indica:
+
+- quando nasce;
+- cosa crede inizialmente il player;
+- cosa crede Cooper;
+- cosa sanno i personaggi;
+- cosa sa il sistema;
+- indizi;
+- falsi indizi;
+- interpretazioni alternative;
+- prima teoria ragionevole;
+- momento di complicazione;
+- risposta;
+- nuova domanda prodotta;
+- azione resa possibile dalla risposta.
+
+Distingui:
+
+- suspense: cosa potrebbe accadere;
+- curiosità: cosa è accaduto;
+- sorpresa: cosa modifica il modello;
+- ironia drammatica: cosa il player sa e Cooper no, o viceversa.
+
+Ogni grande rivelazione deve cambiare l’obiettivo attuale, non soltanto
+alzare la posta.
+
+==================================================
+8. CATENA DEGLI INDIZI E DELLE RIVELAZIONI
+==================================================
+
+Crea esattamente 5–7 rivelazioni maggiori.
+
+Per ogni rivelazione indica:
+
+- spiegazione precedente;
+- fatto nuovo;
+- indizi già disponibili;
+- nuovo indizio;
+- azione del player che collega i dati;
+- inferenza necessaria;
+- cosa viene reinterpretato;
+- cosa rimane ignoto;
+- nuovo obiettivo;
+- rischio di arbitrarietà.
+
+Nessuna rivelazione può dipendere interamente da:
+
+- confessione;
+- visione non preparata;
+- NPC che spiega la risposta;
+- oggetto introdotto nello stesso momento della soluzione.
+
+Le visioni di Cooper possono:
+
+- orientare;
+- creare una domanda;
+- fornire una relazione simbolica.
+
+Non devono sostituire la verifica investigativa.
+
+==================================================
+9. INTRECCIO DELLE SOTTOTRAME
+==================================================
+
+Mappa tutte le sottotrame esistenti.
+
+Per ognuna indica:
+
+- personaggio centrale;
+- obiettivo indipendente;
+- conflitto;
+- cosa accade senza Cooper;
+- primo contatto con la trama principale;
+- secondo contatto;
+- pressione esercitata sulla trama;
+- informazione o risorsa fornita;
+- costo prodotto;
+- payoff;
+- cambiamento nel mondo;
+- cosa perderebbe il gioco eliminandola.
+
+Una sottotrama deve intersecare la principale almeno due volte.
+
+Non deve esistere soltanto per:
+
+- cameo;
+- fan service;
+- spiegare lore;
+- consegnare un indizio;
+- ricreare una scena nota della serie.
+
+Individua sottotrame che possono essere fuse, ridotte o eliminate.
+
+==================================================
+10. AGENCY NEL CANONE FISSO
+==================================================
+
+Crea esattamente quattro scelte significative che non cambiano i fatti
+storici fondamentali.
+
+Includi:
+
+1. una scelta su come trattare una prova;
+2. una scelta di fiducia;
+3. una scelta fra giustizia e pietà;
+4. una scelta interpretativa o intuitiva.
+
+Per ognuna indica:
+
+- intenzione visibile;
+- azione;
+- risposta locale;
+- flag;
+- eco successiva;
+- relazione modificata;
+- informazione modificata;
+- conseguenza spaziale o di accesso;
+- interpretazione pubblica;
+- momento di payoff;
+- riconvergenza;
+- significato preservato dopo la riconvergenza.
+
+Non usare:
+
+- punteggio morale unico;
+- scelta buona/cattiva;
+- tre toni che producono la stessa risposta;
+- finali distinti soltanto da una pagina di testo.
+
+==================================================
+11. PERSONAGGI E RELAZIONI
+==================================================
+
+Per ogni personaggio principale crea:
+
+- desiderio;
+- paura;
+- convinzione falsa o incompleta;
+- agenda indipendente;
+- informazioni possedute;
+- informazioni negate;
+- relazione iniziale con Cooper;
+- tattica sociale;
+- luogo abituale;
+- azione offscreen;
+- punto di svolta;
+- possibile stato finale.
+
+Costruisci una rete dei conflitti.
+
+Ogni coppia importante deve possedere almeno una tensione non riducibile
+al caso di Laura.
+
+Includi Truman come agente drammatico, non soltanto come accompagnatore.
+
+Per Leland separa:
+
+- azioni compiute;
+- memoria;
+- responsabilità;
+- influenza di BOB;
+- interpretazione di Cooper;
+- interpretazione del player;
+- ciò che il gioco rifiuta di risolvere.
+
+Non trasformare il soprannaturale in assoluzione automatica.
+
+==================================================
+12. WORLDBUILDING FUNZIONALE E LUOGHI
+==================================================
+
+Per ogni luogo principale indica:
+
+- funzione civile;
+- proprietario;
+- utilizzatori reali;
+- attività ordinaria;
+- esclusioni sociali;
+- risorse e manutenzione;
+- rotta pubblica;
+- rotta privata;
+- conflitto contenuto;
+- missioni ospitate;
+- informazioni che il luogo può comunicare;
+- cosa cambia fra gli atti;
+- cosa rimane stabile;
+- identità visiva;
+- identità sonora;
+- oggetto o processo risemantizzato;
+- ragione per cui il luogo esiste anche senza la trama.
+
+Collega ogni luogo a:
+
+- almeno un personaggio;
+- almeno un processo economico o sociale;
+- almeno una conseguenza narrativa.
+
+Integra la direzione “La casa della legge” per la stazione, ma applica
+le correzioni già identificate:
+
+- meno simboli simultanei;
+- regole visuali come gerarchie, non dogmi;
+- Laura non rimossa dalla scena;
+- Truman attivo;
+- registratore con conseguenza reale;
+- nessuna pagina forzatamente non accelerabile;
+- massimo due segnali per BOB.
+
+==================================================
+13. RITMO
+==================================================
+
+Crea il ritmo completo del gioco indicando:
+
+- introduzione;
+- investigazione;
+- scoperta;
+- relazione;
+- sollievo;
+- conseguenza;
+- pressione;
+- mistero;
+- falsa soluzione;
+- rivelazione;
+- lutto;
+- preparazione;
+- climax;
+- aftermath.
+
+Per ogni fase indica:
+
+- durata stimata;
+- missione;
+- luogo;
+- verbo del player;
+- pressione;
+- domanda che mantiene l’attenzione;
+- stato emotivo ipotizzato;
+- rischio di noia;
+- rischio di sovraccarico.
+
+Non aumentare continuamente la tensione.
+
+Ogni grande rivelazione deve essere seguita da tempo sufficiente per
+comprenderne le conseguenze.
+
+==================================================
+14. REVISIONE DELL’ATTO 5
+==================================================
+
+Riprogetta l’interrogatorio di Leland come missione completa.
+
+Mantieni:
+
+- direzione “La casa della legge”;
+- domesticità della stazione;
+- registratore;
+- radiatore;
+- confessione;
+- morte;
+- accesso successivo alla Loggia.
+
+Correggi:
+
+- “colpevole → vittima” in responsabilità fratturata;
+- centralità morale di Laura;
+- obiettivo non dimostrato di BOB;
+- passività del player;
+- assenza di Truman come agente;
+- eccesso di segnali sensoriali;
+- pagine non accelerabili;
+- “Diane” senza rituale leggibile;
+- quantità di oggetti simbolici.
+
+Inserisci:
+
+- tre metodi d’interrogatorio convergenti;
+- una scelta registratore acceso/spento;
+- differenze nel verbale;
+- conseguenza relazionale con Truman;
+- massimo due segnali di affioramento di BOB;
+- un finale in cui la pietà non equivale ad assoluzione.
+
+Produci una scheda missione, non dialoghi completi.
+
+==================================================
+15. CONVERGENZA DEL FINALE
+==================================================
+
+Progetta la Loggia e il finale affinché spendano:
+
+- una competenza investigativa appresa;
+- una relazione;
+- una scelta precedente;
+- una catena di indizi;
+- una distinzione tra conoscenza e intuizione;
+- un luogo già risemantizzato;
+- il conflitto giustizia/pietà;
+- la responsabilità fratturata di Leland;
+- l’identità sensoriale del gioco.
+
+Il climax deve usare verbi già appresi.
+
+Non introdurre:
+
+- nuova meccanica;
+- oggetto risolutivo tardivo;
+- confessione definitiva;
+- spiegazione totale di BOB;
+- scelta finale scollegata dal resto del gioco.
+
+Definisci:
+
+- cosa è fisso;
+- cosa dipende dal player;
+- cosa resta ambiguo;
+- cosa viene risolto;
+- cosa il player porta fuori dalla Loggia;
+- come il mondo ordinario appare diverso dopo il ritorno.
+
+==================================================
+16. PRODUZIONE E SCOPE
+==================================================
+
+Per ogni missione stima:
+
+- righe di dialogo;
+- nuovi flag;
+- nuovi oggetti;
+- nuove varianti sprite;
+- nuovi suoni;
+- modifiche alle mappe;
+- scene riutilizzate;
+- sistemi richiesti;
+- rischio produttivo.
+
+Classifica:
+
+- già supportato;
+- semplice contenuto;
+- modifica moderata;
+- nuova funzionalità;
+- fuori scope.
+
+Taglia o semplifica ciò che richiede sistemi sproporzionati.
+
+Non dichiarare “fattibile con la pipeline” senza enumerare il lavoro.
+
+==================================================
+17. SELF-AUDIT
+==================================================
+
+Rispondi:
+
+1. Quale atto potrebbe essere rimosso senza rompere la trama?
+2. Quale missione ripete la strategia di un’altra?
+3. Dove Cooper conosce qualcosa che il player non ha guadagnato?
+4. Dove il player possiede un indizio che Cooper ignora?
+5. Quale transizione dipende da coincidenza?
+6. Quale visione risolve invece di orientare?
+7. Quale sottotrama esiste per fan service?
+8. Quale personaggio è soltanto distributore di missioni?
+9. Quale luogo è semplice scenografia?
+10. Quale scelta è cosmetica?
+11. Quale indizio è formalmente presente ma difficilmente comprensibile?
+12. Quale rivelazione cambia soltanto la posta?
+13. Dove BOB diventa una scusa per evitare responsabilità umana?
+14. Dove Laura viene trasformata in oggetto della crescita altrui?
+15. Quale scena è troppo fedele alla serie per funzionare come gioco?
+16. Dove la direzione artistica compensa una debolezza della trama?
+17. Quale climax potrebbe svolgersi senza il player?
+18. Quale contenuto supera lo scope reale?
+19. Quale mistero deve restare irrisolto?
+20. Perché il finale appartiene a questo gioco e non soltanto alla serie?
+
+==================================================
+18. OUTPUT
+==================================================
+
+Produci:
+
+- mappa della provenienza;
+- promessa e ruolo;
+- audit della trama;
+- motore drammatico;
+- spina causale;
+- schede missione;
+- gerarchia degli obiettivi;
+- matrice della suspense;
+- rivelazioni;
+- intreccio delle sottotrame;
+- ledger delle scelte;
+- rete dei personaggi;
+- worldbuilding dei luoghi;
+- ritmo;
+- revisione Atto 5;
+- convergenza del finale;
+- budget produttivo;
+- self-audit.
+
+Concludi con:
+
+- cinque problemi strutturali più gravi;
+- cinque riparazioni prioritarie;
+- tre missioni da tagliare, fondere o ridurre;
+- tre domande che necessitano decisione umana;
+- una frase che definisce la promessa giocabile del Twin Peaks Game.
+
+Non implementare nulla.
+
+La domanda centrale è:
+
+“Il giocatore sta facendo il lavoro di Cooper e pagando i costi delle
+sue interpretazioni, oppure sta soltanto camminando fra scene che la
+trama ha già risolto?”
+Griglia del prossimo esame
+Area Punti
+Spina causale e motore drammatico 7
+Missioni, obiettivi e verbi del player 6
+Suspense, indizi e rivelazioni 5
+Personaggi, intrecci e agency 4
+Worldbuilding, luoghi e identità sensoriale 4
+Finale, scope e auto-audit 4
+Totale 30
+
+Questa è la lezione giusta ora: porta l’identità sensoriale appena costruita dentro l’intera architettura del gioco, invece di lasciarla come un’eccellente regia isolata di una singola scena.
+
+Sources
+ChatGPT can make mistakes. Workspace data isn't used to train models.
+
+Pro

@@ -14,6 +14,8 @@
   var TILE = 16, VW = 240, VH = 160; // coordinate logiche UI (scalate su canvas)
   var UW = VW;                       // larghezza UI dinamica (fullscreen)
   var SPEED = 0.12; // px per ms (~2px per frame a 60fps)
+  var NPC_SPEED = SPEED * 0.55; // NPCs walk a bit slower than the player
+  var NPC_WANDER_RADIUS = 3; // tile radius from home
 
   /* Renderer prospettico stile Pokémon B/W (Mode7-lite):
    * il mondo è disegnato 2x su un canvas offscreen più largo della vista,
@@ -67,7 +69,7 @@
     return {
       mode: 'title',           // title | intro | play | end
       mapId: 'town', map: null, npcs: [],
-      player: { tx: 28, ty: 31, x: 28 * TILE, y: 31 * TILE, dir: 'up', moving: false, mx: 0, my: 0 },
+      player: { tx: 28, ty: 31, x: 28 * TILE, y: 31 * TILE, dir: 'up', moving: false, mx: 0, my: 0, turnUntil: 0 },
       clues: [], flags: {},
       introPage: 0,
       dialogue: null,          // {id, def, pages, i, replay}
@@ -82,7 +84,13 @@
     S.mapId = id;
     S.map = GAME.Maps[id];
     S.npcs = (S.map.npcs || []).map(function (n) {
-      return { id: n.id, x: n.x, y: n.y, sprite: n.sprite, name: n.name, dialogue: n.dialogue, dir: n.dir || 'down', cond: n.cond };
+      return {
+        id: n.id, x: n.x, y: n.y, vx: n.x, vy: n.y, sprite: n.sprite, name: n.name, dialogue: n.dialogue,
+        dir: n.dir || 'down', cond: n.cond, wander: n.wander,
+        homeX: n.x, homeY: n.y,
+        moving: false, mx: n.x, my: n.y, moveStartX: n.x, moveStartY: n.y, moveT: 0,
+        nextThink: tGlobal + Math.random() * 4000, reverseUntil: 0
+      };
     });
     var p = S.player;
     p.tx = tx; p.ty = ty; p.x = tx * TILE; p.y = ty * TILE;
@@ -318,6 +326,66 @@
     return null;
   }
 
+  function dirVector(d) {
+    if (d === 'up') return { dx: 0, dy: -1 };
+    if (d === 'down') return { dx: 0, dy: 1 };
+    if (d === 'left') return { dx: -1, dy: 0 };
+    return { dx: 1, dy: 0 };
+  }
+
+  function tileBlockedForNPC(nx, ny, self) {
+    if (GAME.Maps.isSolid(S.mapId, nx, ny, S)) return true;
+    if (GAME.Maps.doorAt(S.mapId, nx, ny)) return true; // NPCs avoid doors
+    var p = S.player;
+    if (p.tx === nx && p.ty === ny) return true;
+    if (p.moving && p.mx === nx && p.my === ny) return true;
+    for (var i = 0; i < S.npcs.length; i++) {
+      var n = S.npcs[i];
+      if (n === self || !E.npcActive(n)) continue;
+      if (n.x === nx && n.y === ny) return true;
+      if (n.moving && n.mx === nx && n.my === ny) return true;
+    }
+    return false;
+  }
+
+  function updateNPCs(dt) {
+    var p = S.player;
+    for (var i = 0; i < S.npcs.length; i++) {
+      var n = S.npcs[i];
+      if (!E.npcActive(n)) { n.moving = false; continue; }
+      if (n.moving) {
+        var tx = n.mx * TILE, ty = n.my * TILE;
+        var dx = tx - n.moveStartX * TILE, dy = ty - n.moveStartY * TILE;
+        n.moveT += dt * NPC_SPEED / TILE;
+        if (n.moveT >= 1) {
+          n.x = n.mx; n.y = n.my; n.vx = n.x; n.vy = n.y; n.moving = false;
+          n.nextThink = tGlobal + 800 + Math.random() * 1500;
+        } else {
+          var e = n.moveT * n.moveT * (3 - 2 * n.moveT);
+          n.vx = n.moveStartX + (n.mx - n.moveStartX) * e;
+          n.vy = n.moveStartY + (n.my - n.moveStartY) * e;
+        }
+      } else if (tGlobal >= n.nextThink) {
+        n.nextThink = tGlobal + 1500 + Math.random() * 3500;
+        var dirs = ['up', 'down', 'left', 'right'];
+        var look = dirs[Math.floor(Math.random() * 4)];
+        n.dir = look;
+        if (n.wander) {
+          var dist = Math.abs(n.x - p.tx) + Math.abs(n.y - p.ty);
+          if (dist > 5 && Math.random() < 0.35) {
+            var v = dirVector(look);
+            var nx = n.x + v.dx, ny = n.y + v.dy;
+            if (Math.abs(nx - n.homeX) <= NPC_WANDER_RADIUS && Math.abs(ny - n.homeY) <= NPC_WANDER_RADIUS && !tileBlockedForNPC(nx, ny, n)) {
+              n.mx = nx; n.my = ny; n.moving = true;
+              n.moveStartX = n.x; n.moveStartY = n.y;
+              n.moveT = 0;
+            }
+          }
+        }
+      }
+    }
+  }
+
   function opposite(d) {
     return d === 'up' ? 'down' : d === 'down' ? 'up' : d === 'left' ? 'right' : 'left';
   }
@@ -402,9 +470,15 @@
       }
     } else if (held.length) {
       var d = held[held.length - 1];
-      p.dir = d;
-      tryStep(d);
+      if (p.dir !== d) {
+        // turn-in-place: girati e aspetta un micro-frame prima di partire
+        p.dir = d;
+        p.turnUntil = tGlobal + 60;
+      } else if (tGlobal >= (p.turnUntil || 0)) {
+        tryStep(d);
+      }
     }
+    updateNPCs(dt);
   }
 
   /* ---------------- rendering ---------------- */
@@ -469,7 +543,8 @@
   function entityList() {
     var p = S.player;
     var ents = S.npcs.filter(function (n) { return E.npcActive(n); }).map(function (n) {
-      return { wx: n.x * TILE, wy: n.y * TILE, sprite: n.sprite, dir: n.dir, fr: 0,
+      return { wx: Math.round(n.vx * TILE), wy: Math.round(n.vy * TILE), sprite: n.sprite, dir: n.dir,
+               fr: n.moving ? (Math.floor(tGlobal / 90) % 4) : 0,
                moving: n.moving || false, alpha: n.sprite === 'laura' ? 0.85 : 1 };
     });
     ents.push({ wx: Math.round(p.x), wy: Math.round(p.y), sprite: 'cooper', dir: p.dir,

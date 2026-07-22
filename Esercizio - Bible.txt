@@ -1,0 +1,836 @@
+FASE SUCCESSIVA:
+CANON LOCK E WORLD & STORY IDENTITY BIBLE
+
+Progetto: Twin Peaks Game.
+
+Questo è un esercizio di consolidamento progettuale.
+
+Non scrivere codice.
+Non modificare il motore.
+Non implementare UI.
+Non aggiungere nuove mappe.
+Non aggiungere nuove missioni salvo una necessità causale dimostrata.
+Non riscrivere il canone della serie senza marcatura.
+Non duplicare integralmente i documenti precedenti.
+Non produrre un’altra raccolta di idee alternative.
+
+Il compito è creare UNA SOLA FONTE DI VERITÀ per:
+
+- canone del progetto;
+- promessa giocabile;
+- trama;
+- missioni;
+- personaggi;
+- indizi;
+- suspense;
+- scelte;
+- luoghi;
+- worldbuilding;
+- direzione artistica;
+- suono;
+- finale;
+- scope;
+- regole di scrittura;
+- test.
+
+Usa come input:
+
+- repository reale;
+- Direzione Artistica — Interrogatorio Leland;
+- Architettura Causale — Twin Peaks Game;
+- Grammatica dell’Indagine — Twin Peaks Game;
+- correzioni degli esami.
+
+Quando i documenti confliggono, non scegliere silenziosamente.
+Registra la decisione e la sua motivazione.
+
+==================================================
+0. GERARCHIA DELLE FONTI
+==================================================
+
+Definisci l’ordine di autorità:
+
+1. decisioni esplicite dell’autore umano;
+2. fatti del repository;
+3. canone della serie adottato dal progetto;
+4. adattamenti già approvati;
+5. nuove proposte;
+6. interpretazioni.
+
+Per ogni elemento usa:
+
+[C] canone della serie adottato;
+[P] fatto già nel progetto;
+[A] adattamento approvato;
+[L] decisione bloccata in questa Bible;
+[N] proposta non ancora approvata;
+[I] interpretazione;
+[?] incerto.
+
+Crea:
+
+- elenco delle fonti;
+- conflitti;
+- decisioni;
+- questioni che restano aperte.
+
+Una decisione [L] non può essere contraddetta nelle sezioni successive.
+
+==================================================
+1. CORREZIONI OBBLIGATORIE PRIMA DEL LOCK
+==================================================
+
+Integra queste correzioni.
+
+1. Sogno:
+- mantenere la Versione A;
+- rendere coerente ciò che ricordano player e Cooper;
+- versione raccomandata: entrambi ricordano il volto sconosciuto,
+soltanto il nome è perduto;
+- dichiarare ogni eventuale differenza.
+
+2. P2:
+- il cuore prova la relazione;
+- la testimonianza di James prova la geografia;
+- nessun oggetto deve contenere informazioni che non possiede.
+
+3. P3:
+- distinguere ripetizione testuale, grafia e materialità;
+- definire come il player riconosce che l’anello è stato posato.
+
+4. P4:
+- separare BOB e il fuoco fino a un ponte reale;
+- una comparazione può generare un’ipotesi, non automaticamente un
+fatto accettato.
+
+5. P5:
+- riformulare come “presenza non equivale a colpa”;
+- non certificare l’innocenza completa di Jacques senza prova.
+
+6. P7:
+- trattarla come ipotesi investigativa;
+- non usarla come prova procedurale autonoma.
+
+7. P8:
+- R+O non compongono BOB;
+- stabilire una regola di firma seriale oppure cambiare la
+proposizione;
+- non usare aritmetica di lettere impossibile.
+
+8. P9:
+- morte, perdita del testimone, sospetto di eliminazione e omicidio
+confermato sono stati distinti.
+
+9. Stati delle proposizioni:
+- formulata;
+- presentata;
+- accettata da un personaggio;
+- confermata;
+- contestata;
+- smentita.
+
+10. Ronette:
+- una domanda non ottimale non può eliminare per sempre un filo
+centrale;
+- il percorso modifica costo e comprensione, non la raggiungibilità
+assoluta.
+
+11. M8:
+- ogni avvertimento deve cambiare un’azione di Maddy;
+- la morte resta fissa;
+- tagliare la variante Sarah-trova-il-corpo salvo necessità
+dimostrata.
+
+12. M9:
+- falsa dichiarazione + accesso/opportunità sostengono il colloquio;
+- sogni e visioni non sono prova;
+- chiarire quando il colloquio diventa arresto.
+
+13. M10:
+- definire un ponte percepibile fra il volto BOB e Leland;
+- massimo due segnali;
+- mantenere S3 dopo i fatti materiali.
+
+14. Loggia:
+- aggiungere almeno due azioni significative usando verbi esistenti;
+- niente quiz;
+- S4 non deve essere l’unica partecipazione.
+
+15. Personaggi:
+- interiorità di Laura marcata come ricostruzione;
+- il grido di Ronette non certificato come intenzione cosciente;
+- Sarah non definita onnisciente;
+- Maddy riceve almeno un momento ordinario autonomo.
+
+16. Scope e test:
+- il sistema di proposizioni è una funzionalità maggiore;
+- domande aperte prima di domande orientate;
+- budget per combinazioni di stato.
+
+==================================================
+2. IDENTITÀ DEL GIOCO
+==================================================
+
+Blocca:
+
+- titolo di lavoro;
+- formato;
+- durata;
+- pubblico;
+- canone coperto;
+- punto di vista;
+- ruolo del player;
+- identità fissa di Cooper;
+- aspetti espressivi;
+- verbi;
+- tema;
+- conflitto di valori;
+- domanda drammatica;
+- promessa emotiva;
+- promessa giocabile;
+- grado di linearità;
+- contenuti esclusi.
+
+Scrivi:
+
+- logline;
+- pitch di 100 parole;
+- promessa giocabile di una frase;
+- frase “questo gioco non è…”.
+
+==================================================
+3. CANON LOCK DELLA TRAMA
+==================================================
+
+Crea la spina definitiva degli atti.
+
+Per ogni atto:
+
+- ingresso;
+- causa;
+- domanda;
+- obiettivo;
+- strategia;
+- missioni;
+- rivelazione;
+- successo incompleto;
+- conseguenza;
+- cambiamento di luogo;
+- cambiamento di relazione;
+- domanda d’uscita.
+
+Ogni transizione deve essere classificata:
+
+- causale;
+- causale attraverso opposizione;
+- causale attraverso mondo;
+- causale attraverso scelta;
+- deliberatamente misteriosa.
+
+Non lasciare transizioni “perché nella serie succede”.
+
+==================================================
+4. BIBBIA DELL’INDAGINE
+==================================================
+
+Crea la versione definitiva di:
+
+- nove indizi;
+- testimonianze;
+- presagi;
+- dieci proposizioni;
+- domande investigative;
+- false piste;
+- rivelazioni.
+
+Per ogni evidenza:
+
+- fatto letterale;
+- provenienza;
+- affidabilità;
+- personaggi che la conoscono;
+- azione che la acquisisce;
+- proposizioni supportate;
+- proposizioni non supportate;
+- interpretazioni alternative;
+- uso procedurale;
+- uso intuitivo;
+- payoff.
+
+Per ogni proposizione:
+
+- formulazione;
+- supporto minimo;
+- supporto forte;
+- contraddizioni;
+- stato iniziale;
+- come viene formulata;
+- dove viene presentata;
+- chi la accetta;
+- quando viene confermata;
+- cosa permette.
+
+Nessuna conclusione può ricevere dal supporto più di quanto il supporto
+contenga.
+
+==================================================
+5. GRAMMATICA INVESTIGATIVA DEFINITIVA
+==================================================
+
+Definisci precisamente:
+
+- esaminare;
+- confrontare;
+- formulare;
+- presentare;
+- interrogare;
+- scegliere metodo;
+- registrare;
+- interpretare.
+
+Per ogni verbo:
+
+- input;
+- target;
+- precondizione;
+- feedback;
+- stato;
+- fallimento;
+- retry;
+- costo;
+- missioni;
+- trattamento accessibile.
+
+Distingui:
+
+- domanda;
+- ipotesi;
+- proposizione;
+- accettazione sociale;
+- conferma fattuale;
+- interpretazione.
+
+La UI non deve elencare automaticamente la risposta appena gli indizi
+sono disponibili.
+
+==================================================
+6. MISSION BIBLE
+==================================================
+
+Crea una scheda canonica per ogni missione.
+
+Per ciascuna:
+
+- ID;
+- titolo;
+- atto;
+- durata;
+- causa;
+- obiettivo player-facing;
+- motivazione;
+- opposizione;
+- posta;
+- verbo dominante;
+- azioni minuto per minuto;
+- luogo;
+- NPC;
+- indizi;
+- inferenza;
+- scelta;
+- conseguenza;
+- stato scritto;
+- cambiamento del mondo;
+- cambiamento relazionale;
+- tensione;
+- sollievo;
+- nuova domanda;
+- contenuto opzionale;
+- scope;
+- criteri di comprensione.
+
+Segnala:
+
+- missione di investigazione;
+- missione di relazione;
+- tragedia fissa;
+- falsa soluzione;
+- ascolto;
+- climax;
+- aftermath.
+
+==================================================
+7. ARCHITETTURA DELLA SUSPENSE
+==================================================
+
+Per ogni grande domanda:
+
+- nascita;
+- credenza iniziale;
+- teoria ragionevole;
+- falsi indizi;
+- informazione trattenuta;
+- chi sa cosa;
+- complicazione;
+- risposta;
+- nuova domanda;
+- azione resa possibile.
+
+Distingui:
+
+- curiosità;
+- suspense;
+- sorpresa;
+- ironia drammatica;
+- ambiguità protetta.
+
+Specifica quali risposte:
+
+- sono complete;
+- sono parziali;
+- non verranno date.
+
+==================================================
+8. CHARACTER BIBLE
+==================================================
+
+Crea schede complete per:
+
+- Cooper;
+- Truman;
+- Laura;
+- Leland;
+- BOB;
+- Sarah;
+- Maddy;
+- Ronette;
+- Audrey;
+- James;
+- Donna;
+- Jacques;
+- Log Lady;
+- Gerard;
+- Nano/Gigante, dove necessari.
+
+Per ogni personaggio:
+
+- funzione narrativa;
+- desiderio;
+- paura;
+- convinzione;
+- agenda indipendente;
+- informazioni;
+- errori;
+- tattica;
+- voce;
+- rapporto con gli spazi;
+- azione offscreen;
+- arco;
+- stato finale;
+- rischio di riduzione;
+- contenuto da non scrivere.
+
+Distingui sempre:
+
+- fatto;
+- interiorità ricostruita;
+- interpretazione di Cooper;
+- interpretazione del player;
+- ambiguità.
+
+Laura non deve diventare soltanto:
+
+- vittima;
+- angelo;
+- oggetto della crescita di Cooper;
+- fonte di indizi.
+
+Maddy e Ronette devono possedere almeno un gesto o decisione non
+riducibile alla loro sofferenza.
+
+==================================================
+9. RETE DELLE RELAZIONI
+==================================================
+
+Per ogni coppia principale:
+
+- stato iniziale;
+- tensione indipendente dal caso;
+- fiducia;
+- debito;
+- informazione asimmetrica;
+- scena di svolta;
+- stato finale;
+- scelte che la modificano.
+
+Includi almeno:
+
+- Cooper–Truman;
+- Cooper–Leland;
+- Cooper–Sarah;
+- Cooper–Audrey;
+- Truman–Leland;
+- Sarah–Maddy;
+- James–Donna;
+- Laura–ciascuna versione che gli altri hanno costruito.
+
+==================================================
+10. WORLD BIBLE FUNZIONALE
+==================================================
+
+Definisci il mondo attraverso:
+
+- lavoro;
+- turismo;
+- segheria;
+- trasporti;
+- ospedale;
+- legge;
+- commercio;
+- contrabbando;
+- informazione;
+- routine quotidiane;
+- confini sociali;
+- luoghi accessibili e inaccessibili;
+- rapporto paese/bosco;
+- rapporto intimità/decoro.
+
+Per ogni sistema:
+
+- chi lo controlla;
+- chi ne dipende;
+- come appare;
+- come suona;
+- come influenza almeno una missione;
+- come cambia durante la trama.
+
+Non costruire lore che non modifica personaggi, missioni o luoghi.
+
+==================================================
+11. LOCATION E SENSORY BIBLE
+==================================================
+
+Per ogni mappa:
+
+- funzione;
+- proprietario;
+- utenti;
+- routine;
+- percorsi;
+- conflitto;
+- identità visiva;
+- identità sonora;
+- materiali;
+- manutenzione;
+- densità;
+- luce;
+- oggetto risemantizzato;
+- suono dominante;
+- cambiamento di attività;
+- trasformazioni per atto;
+- contenuto opzionale;
+- rapporto con il caso.
+
+Integra “La casa della legge” come grammatica della stazione.
+
+Trasforma le regole assolute in gerarchie:
+
+- deviazioni rare, non “una sola sempre”;
+- guida diegetica di base, ma accessibilità consentita;
+- un movimento dominante, non un solo oggetto animato;
+- camera stabile, non “camera neutrale”.
+
+Massimo due motivi simbolici dominanti per luogo.
+
+==================================================
+12. AGENCY E CONSEQUENCE LEDGER
+==================================================
+
+Per S1–S4 e ogni scelta minore:
+
+- intenzione;
+- azione;
+- risposta;
+- stato;
+- eco;
+- conseguenza informativa;
+- conseguenza relazionale;
+- conseguenza spaziale;
+- interpretazione;
+- riconvergenza;
+- significato conservato.
+
+Distingui:
+
+- local response;
+- persistence;
+- global influence;
+- expressive agency;
+- interpretive participation.
+
+Non chiamare significativa una scelta soltanto perché scrive un flag.
+
+==================================================
+13. M10 E FINALE LOCK
+==================================================
+
+Blocca definitivamente:
+
+- due o tre metodi M10;
+- domande esclusive;
+- informazioni ottenute;
+- tattiche di Leland;
+- risposta di Truman;
+- ponte volto→ospite;
+- fatti registrati prima di S3;
+- conseguenze acceso/spento;
+- responsabilità fratturata;
+- presenza morale di Laura;
+- passaggio alla Loggia.
+
+Per la Loggia:
+
+- 6–10 beat;
+- almeno due azioni significative;
+- nessun quiz;
+- stati precedenti spesi;
+- ordine o gesto controllato dal player;
+- cosa resta fisso;
+- cosa cambia;
+- ultima immagine;
+- epilogo.
+
+==================================================
+14. CONTENT STYLE GUIDE
+==================================================
+
+Definisci regole operative per:
+
+- prosa;
+- dialogo;
+- voce di Cooper;
+- voce di Truman;
+- voce di Leland;
+- rappresentazione di BOB;
+- descrizioni ambientali;
+- monologhi a Diane;
+- umorismo;
+- silenzio;
+- sottotesto;
+- lunghezza delle pagine;
+- accessibilità del testo;
+- ripetizioni;
+- contenuto opzionale.
+
+Vieta:
+
+- “come sai”;
+- esposizione reciproca;
+- personaggi che spiegano la propria personalità;
+- aforismi continui;
+- imitazione superficiale del dialogo televisivo;
+- poesia in ogni riga;
+- soprannaturale usato per assolvere;
+- Laura usata per perdonare altri.
+
+Includi esempi brevi deboli → corretti.
+
+==================================================
+15. PRODUCTION TEMPLATE
+==================================================
+
+Crea modelli standard per:
+
+- missione;
+- scena;
+- nodo di dialogo;
+- scelta;
+- indizio;
+- proposizione;
+- personaggio;
+- luogo;
+- suono;
+- callback;
+- test di comprensione.
+
+Ogni modello deve contenere:
+
+- ID;
+- funzione;
+- precondizioni;
+- stato;
+- contenuto;
+- conseguenze;
+- scope;
+- test.
+
+Questi modelli verranno usati nella fase di scrittura effettiva.
+
+==================================================
+16. SCOPE E VERSION LOCK
+==================================================
+
+Definisci:
+
+- versione minima;
+- versione raccomandata bloccata;
+- contenuti opzionali;
+- primi tagli;
+- sistemi necessari;
+- contenuti per missione;
+- dialoghi per stato;
+- flag o dati strutturati;
+- asset;
+- suoni;
+- test;
+- rischio.
+
+Non chiamare “semplice contenuto” una combinazione di rami che richiede
+scrittura, salvataggio e QA.
+
+Fornisci una matrice completa degli stati M8, M10 e Loggia.
+
+==================================================
+17. CONTINUITÀ E QA
+==================================================
+
+Definisci controlli per:
+
+- cronologia;
+- conoscenza;
+- indizi;
+- proposizioni;
+- accessi;
+- flag;
+- missioni;
+- scelte;
+- callback;
+- personaggi;
+- presenza di Laura/Maddy/Ronette;
+- finale;
+- epilogo.
+
+Separare:
+
+- validazione automatica;
+- revisione semantica;
+- playtest di comprensione;
+- playtest emotivo.
+
+Le domande aperte devono precedere quelle orientate.
+
+==================================================
+18. PACCHETTO PRODUTTIVO DI PROVA — M4
+==================================================
+
+Usando la Bible, produci il pacchetto completo di M4 senza
+implementarlo.
+
+Includi:
+
+- struttura di 8–12 beat;
+- obiettivi minuto per minuto;
+- nodi e ID proposti;
+- ordine libero;
+- domanda a Ronette con fail-forward;
+- Gerard;
+- James;
+- confronti;
+- proposizioni;
+- presentazione a Truman;
+- stati scritti;
+- contenuti opzionali;
+- regia sensoriale;
+- scope;
+- casi di test;
+- condizioni di completamento;
+- due brevi campioni di dialogo:
+1. Ronette/infermiera;
+2. Cooper/Truman durante la presentazione.
+
+I campioni devono dimostrare la guida stilistica, non completare tutta
+la missione.
+
+==================================================
+19. SELF-AUDIT
+==================================================
+
+Rispondi:
+
+1. Quale fatto è ancora una deduzione travestita?
+2. Quale proposizione riceve troppo dal proprio supporto?
+3. Quale menu anticipa una risposta?
+4. Quale personaggio femminile è ancora strumentale?
+5. Quale scelta resta soltanto una riga diversa?
+6. Quale scena parla troppo per Laura?
+7. Quale interpretazione di Cooper appare canonica?
+8. Quale luogo è ancora scenografia?
+9. Quale missione è soprattutto pagine da avanzare?
+10. Quale stato produce combinazione eccessiva?
+11. Quale elemento della Loggia è ancora passivo?
+12. Quale sistema è sottostimato?
+13. Quale contenuto deve essere tagliato?
+14. Quale ambiguità deve essere protetta?
+15. Quale decisione richiede ancora l’autore umano?
+
+==================================================
+20. OUTPUT
+==================================================
+
+Produci UNA Bible con:
+
+- gerarchia delle fonti;
+- canon lock;
+- identità;
+- trama;
+- indagine;
+- missioni;
+- suspense;
+- personaggi;
+- relazioni;
+- mondo;
+- luoghi;
+- direzione sensoriale;
+- agency;
+- finale;
+- style guide;
+- template;
+- scope;
+- QA;
+- pacchetto M4;
+- self-audit.
+
+Concludi con:
+
+- dieci decisioni canoniche bloccate;
+- cinque elementi ancora aperti;
+- cinque primi tagli;
+- cinque criteri per autorizzare la scrittura;
+- una frase definitiva che identifichi il gioco.
+
+Non implementare nulla.
+
+Domanda centrale:
+
+“Questa Bible permette a uno scrittore, un narrative designer e un
+programmatore di costruire la stessa esperienza senza dover
+reinterpretare le intenzioni del documento?”
+Dopo questa lezione
+
+Il passaggio successivo non sarà un altro esercizio teorico. Sarà la produzione dei contenuti reali:
+
+scrittura completa di M4;
+
+revisione e test di comprensione;
+
+scrittura M5–M6;
+
+M8;
+
+M9–M10;
+
+Loggia ed epilogo;
+
+integrazione nel repository soltanto dopo l’approvazione dei pacchetti narrativi.
+
+La Bible è quindi l’ultimo grande documento di progettazione prima della scrittura effettiva.
+

@@ -32,13 +32,13 @@
     cuore_intero: { name: 'Il cuore ricomposto', desc: 'James custodiva l\'altra meta\' del ciondolo di Laura.' },
     biglietto_fuoco: { name: '"FUOCO CAMMINA CON ME"', desc: 'Un brandello di carta nel vagone, accanto a un mucchio di terra.' },
     anello: { name: 'L\'anello di Laura', desc: 'Era sotto un\'asse del vagone. Perche\' l\'assassino non l\'ha preso?' },
-    lettera_o: { name: 'Lettera "O"', desc: 'Sotto l\'unghia di Maddy. R... O... Sta componendo un nome.' }
+    lettera_o: { name: 'Lettera "O"', desc: 'Sotto l\'unghia di Maddy. R... O... lettera per lettera, sta componendo ROBERT.' }
   };
 
   D.endText = [
     'Diane, sono le 2:30 del mattino. Il caso Palmer e\' ufficialmente chiuso.',
     'Ma alcune porte, una volta aperte, non si richiudono mai del tutto.',
-    'Il gufo osserva. Non e\' cio\' che sembra.',
+    'Il gufo osserva ancora. Ora so cosa vede.',
     'Twin Peaks tornera\'.'
   ];
 
@@ -111,12 +111,12 @@
 
     bobby: { pages: [
       { name: 'BOBBY', text: 'Ehi, cosa vuole, agente? Io non c\'entro NIENTE, chiaro?!' },
-      { name: 'BOBBY', text: 'Laura... nessuno la conosceva davvero. Nemmeno io. Nemmeno Donna.' }
+      { name: 'BOBBY', text: 'Chieda a Donna chi vedeva Laura di nascosto. Io ero con Shelly, quella notte. Con Shelly.' }
     ] },
 
     donna: { pages: [
-      { name: 'DONNA', text: 'Ero la sua migliore amica. Almeno... credevo di esserlo.' },
-      { name: 'DONNA', text: 'C\'e\' un video di un picnic: Laura rideva davanti all\'obiettivo di James. Lo trovi, agente. La prego.' }
+      { name: 'DONNA', text: 'Le persone continuano a chiedermi se sapevo. Io dico sempre di no.' },
+      { name: 'DONNA', text: 'Ho un video del picnic: Laura che ride, per l\'obiettivo di James. Lo guardi. Prima di chiedermi altro.' }
     ] },
 
     jacoby: { pages: [
@@ -292,7 +292,7 @@
       ],
       setFlag: 'met_mfap',
       again: { pages: [
-        { name: '???', text: 'Di nuovo lei! Si ricordi: il gufo non e\' cio\' che sembra.' }
+        { name: '???', text: 'Di nuovo lei! Ricordi: i gufi vedono anche quando dorme.' }
       ] }
     },
 
@@ -329,7 +329,7 @@
         { name: 'COOPER', text: 'Harry, ascolti: un monco recita poesie sul fuoco, e James custodisce l\'altra meta\' del cuore di Laura.' },
         { name: 'TRUMAN', text: 'Un venditore di scarpe che recita poesie in trance? Qui le cose non sono mai semplici.' },
         { name: 'TRUMAN', text: 'One Eyed Jacks... e il vagone del treno. Domani si va oltre confine.' },
-        { name: 'COOPER', text: 'Diane... il caso si allarga. Twin Peaks nasconde piu\' di quanto immaginassi.' }
+        { name: 'COOPER', text: 'Diane, la lista dei sospetti cresce piu\' in fretta di quanto io riesca a scriverla.' }
       ],
       setFlag: 'atto3'
     },
@@ -448,7 +448,8 @@
     },
 
     truman_wait4: { pages: [
-      { name: 'TRUMAN', text: 'Vada a riposare, agente. Domani sara\' peggio.' }
+      { name: 'TRUMAN', text: 'Vada a riposare, agente. Domani sara\' peggio.' },
+      { name: 'TRUMAN', text: 'A proposito: Audrey Horne e\' tornata a casa sana e salva. Ci ho pensato io, di persona.' }
     ] },
 
     /* ---------------- Atto 4: il gigante e la cugina ---------------- */
@@ -458,7 +459,7 @@
         { name: 'MADDY', text: 'Sono Maddy. La cugina di Laura.' },
         { name: 'MADDY', text: 'Tutti mi fissano. Come se vedessero... lei.' },
         { name: 'MADDY', text: 'Zia Sarah urla di notte. Zio Leland balla. Io ho paura di questa casa.' },
-        { name: 'COOPER', text: 'Diane... la somiglianza e\' impressionante. Quasi innaturale.' }
+        { name: 'COOPER', text: 'Diane, per un istante ho chiamato Maddy "Laura". Lei non mi ha corretto subito.' }
       ],
       again: { pages: [
         { name: 'MADDY', text: 'Con questi occhiali vedo poco. Ma certe cose... le sento.' }
@@ -470,7 +471,7 @@
         { name: 'SARAH', text: '...(urla) Il divano! Qualcosa striscia sul divano!' },
         { name: 'SARAH', text: 'Ha un viso... e dietro il suo viso, un altro viso!' },
         { name: 'SARAH', text: 'BOB! E\' LUI! DIO, E\' ANCORA QUI!' },
-        { name: 'COOPER', text: 'Diane... la madre lo VEDE. Nessuno le crede. Io si\'.' }
+        { name: 'COOPER', text: 'Diane... lo stesso nome del diario. Una madre lo vede. Io le credo.' }
       ]
     },
 
@@ -541,7 +542,7 @@
         { name: '', text: 'Non guardo oltre il necessario. Gli agenti della scientifica coprono, sollevano, misurano.' },
         { name: 'COOPER', text: 'Diane... e\' Maddy Ferguson.' },
         { name: 'COOPER', text: 'Sotto l\'unghia: una lettera. La "O".' },
-        { name: 'COOPER', text: 'R... O... Sta componendo un nome.' }
+        { name: 'COOPER', text: 'R... O... lettera per lettera, sta componendo ROBERT.' }
       ],
       give: ['lettera_o'],
       setFlag: 'maddy_trovata'
@@ -551,10 +552,10 @@
       { name: 'COOPER', text: 'L\'acqua e\' tornata immobile. Io no.' }
     ] },
 
-    /* ponte Atto 4 -> Atto 5: le lettere compongono BOB, Maddy e' morta */
+    /* ponte Atto 4 -> Atto 5: le lettere compongono ROBERT, il diario lo lega a BOB, Maddy e' morta */
     truman_atto5: {
       pages: [
-        { name: 'COOPER', text: 'Harry... le lettere. R, O... insieme a quella di Laura fanno un nome: B-O-B.' },
+        { name: 'COOPER', text: 'Harry... le lettere. R... O... lettera per lettera, componevano ROBERT. E nel diario di Laura, Robert ha un diminutivo: BOB.' },
         { name: 'TRUMAN', text: 'BOB. Il nome del diario di Laura. Il nome che Ronette ha sussurrato in coma.' },
         { name: 'COOPER', text: 'Jacques morto. Ora Maddy. Il gigante lo aveva detto: "E\' successo di nuovo".' },
         { name: 'TRUMAN', text: 'Chiunque sia, era a casa Palmer ieri notte.' },
@@ -564,7 +565,8 @@
     },
 
     truman_wait5: { pages: [
-      { name: 'TRUMAN', text: 'Quando e\' pronto, agente. Il distretto e\' con lei.' }
+      { name: 'TRUMAN', text: 'Quando e\' pronto, agente. Il distretto e\' con lei.' },
+      { name: 'COOPER', text: 'Diane, un\'ultima cosa: l\'anello di Laura. Chi lo porta appartiene gia\' alla Loggia. Ecco perche\' fu lasciato.' }
     ] },
 
     /* ---------------- Atto 5: la confessione, la Loggia ---------------- */
@@ -572,13 +574,13 @@
     leland_interr: {
       pages: [
         { name: 'COOPER', text: 'Sala interrogatori. Leland Palmer siede immobile, le mani strette sul tavolo.' },
-        { name: 'COOPER', text: 'Le lettere, Leland: R, O, la sua. Messe insieme fanno un nome. B-O-B.' },
+        { name: 'COOPER', text: 'Le lettere, Leland: R... O... lettera per lettera componevano ROBERT. Nel diario, Laura lo chiamava con un nome piu\' breve: BOB.' },
         { name: '', text: 'Il volto di Leland si irrigidisce. Qualcosa, sotto la pelle, cambia forma.' },
         { name: 'BOB', text: '"Hai il tuo bavaglio, agente? Vuoi giocare... col FUOCO?"' },
         { name: '', text: 'Una risata si alza dal petto di Leland. Non e\' la sua. Non e\' di nessuno.' },
         { name: 'BOB', text: '"Mi piace questa stanza. Cosi\' tante ombre in cui nascondersi..."' },
         { name: 'LELAND', text: 'Da quando avevo sei anni, agente. Quando LUI entra... io non ci sono.' },
-        { name: 'COOPER', text: 'Diane... ho appena guardato negli occhi qualcosa che non e\' umano.' }
+        { name: 'COOPER', text: 'Diane... lo stesso volto che descriveva Sarah. Ora l\'ho visto io.' }
       ],
       setFlag: 'leland_confessa'
     },

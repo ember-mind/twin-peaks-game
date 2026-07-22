@@ -12,8 +12,8 @@
 
   var NPCS = {
     town: [
-      { id: 'bobby',  x: 25, y: 16, sprite: 'bobby',  name: 'Bobby',  dialogue: 'bobby' },
-      { id: 'donna',  x: 44, y: 10, sprite: 'donna',  name: 'Donna',  dialogue: 'donna' },
+      { id: 'bobby',  x: 25, y: 16, sprite: 'bobby',  name: 'Bobby',  dialogue: 'bobby', wander: true },
+      { id: 'donna',  x: 44, y: 10, sprite: 'donna',  name: 'Donna',  dialogue: 'donna', wander: true },
       { id: 'jacoby', x: 16, y: 25, sprite: 'jacoby', name: 'Jacoby', dialogue: 'jacoby' }
     ],
     sheriff: [
@@ -53,7 +53,7 @@
     ],
     hotel_gn: [
       { id: 'benhorne', x: 5,  y: 7, sprite: 'benhorne', name: 'Ben Horne', dialogue: 'benhorne_a2', dir: 'down' },
-      { id: 'audrey',   x: 12, y: 9, sprite: 'audrey',   name: 'Audrey',    dialogue: 'audrey_a2',   dir: 'down' }
+      { id: 'audrey',   x: 12, y: 9, sprite: 'audrey',   name: 'Audrey',    dialogue: 'audrey_a2',   dir: 'down', wander: true }
     ],
     hospital: [
       { id: 'gerard', x: 7, y: 6, sprite: 'gerard', name: 'Gerard',

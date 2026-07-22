@@ -1,0 +1,371 @@
+FASE DI PRODUZIONE NARRATIVA 1:
+SCRITTURA COMPLETA DI M4 — “I FRAMMENTI”
+
+Fonte canonica:
+
+Twin Peaks Game — World & Story Identity Bible
+versione richiesta: v0.9.1, con il patch di revisione approvato.
+
+Questo è un lavoro di scrittura e narrative design.
+
+Non modificare il motore.
+Non implementare codice.
+Non scrivere altre missioni.
+Non aggiungere indizi.
+Non aggiungere personaggi.
+Non reintrodurre S2.
+Non trasformare M4 in un quiz combinatorio.
+Non imitare direttamente dialoghi o regia della serie televisiva.
+
+==================================================
+0. PATCH OBBLIGATORIO
+==================================================
+
+Prima di scrivere, conferma nel documento di output:
+
+- S2 esclusa da M4;
+- M4 contiene nove beat;
+- E6 è separata in:
+- E6A cuore_intero;
+- T_JAMES_EST testimonianza geografica;
+- T1 “BOB” deve provenire sempre da Ronette;
+- l’infermiera fornisce contesto e protezione, non sostituisce Ronette;
+- P4b è facoltativa;
+- P2 è la sola proposizione obbligatoria per completare M4;
+- la risposta fisica di Ronette genera un’osservazione/ipotesi, non una
+certezza;
+- le proposizioni distinguono:
+formulata, presentata, accettata socialmente e confermata;
+- gli errori di presentazione usano reason code, non testo unico per
+ogni combinazione.
+
+Se una di queste condizioni manca, non procedere alla scrittura.
+
+==================================================
+1. CONTRATTO CANONICO DI M4
+==================================================
+
+Dichiara:
+
+- causa;
+- stato all’ingresso;
+- obiettivo player-facing;
+- domanda narrativa;
+- nove beat;
+- contenuto obbligatorio;
+- contenuto facoltativo;
+- condizione esatta di completamento;
+- stato all’uscita;
+- conoscenza del player;
+- conoscenza di Cooper;
+- conoscenza di Truman;
+- audience-state ipotizzato all’ingresso e all’uscita.
+
+==================================================
+2. GRAFO DEI NODI
+==================================================
+
+Crea il grafo completo con ID definitivi.
+
+Beat canonici:
+
+B1 — Truman: riferire il sogno, senza scelta S2.
+B2 — Ronette: prima domanda.
+B3 — Gerard: poesia e momento umano.
+B4 — James: cuore e testimonianza geografica.
+B5 — Norma/Log Lady facoltative.
+B6 — 315 facoltativa.
+B7 — confronto Ronette/Gerard facoltativo, P4b-ipotesi.
+B8 — confronto cuore/testimonianza, P2 formulata.
+B9 — presentazione di P2 a Truman, chiusura missione.
+
+Per ogni nodo indica:
+
+- ID;
+- mappa;
+- precondizioni;
+- pagine;
+- stato scritto;
+- stato letto;
+- destinazione successiva;
+- repeat text;
+- condizione opzionale;
+- failure/retry.
+
+Fornisci il numero esatto di nodi nuovi e modificati.
+
+==================================================
+3. SCRITTURA COMPLETA
+==================================================
+
+Scrivi tutte le pagine di dialogo e azione della missione.
+
+Regole:
+
+- massimo due frasi per pagina;
+- massimo un fatto portante nuovo per pagina;
+- pagine emotive possono contenere zero fatti;
+- sottotesto prima dell’esposizione;
+- niente “come sai”;
+- niente personaggi che spiegano la propria personalità;
+- niente aforismi continui;
+- niente imitazione superficiale della serie;
+- Cooper parla con understatement;
+- Truman è concreto;
+- Ronette non viene spiegata dall’infermiera;
+- Gerard resta una persona, non un erogatore di formula;
+- James consegna una memoria prima di consegnare una prova;
+- la 315 non produce un nuovo indizio;
+- Norma e Log Lady non sono necessarie al completamento.
+
+==================================================
+4. RONETTE
+==================================================
+
+Progetta tre prime domande:
+
+- luogo;
+- uomo;
+- Laura.
+
+Ogni domanda deve:
+
+- produrre una reazione differente;
+- fornire un’osservazione;
+- aprire una seconda domanda;
+- preservare il benessere di Ronette;
+- condurre entro due passaggi al nome BOB pronunciato da Ronette.
+
+L’infermiera può:
+
+- interrompere;
+- contestare Cooper;
+- imporre una pausa;
+- descrivere una routine osservata.
+
+Non può pronunciare il nome BOB al posto di Ronette.
+
+Distingui:
+
+- fatto osservabile;
+- annotazione di Cooper;
+- ipotesi formulata.
+
+==================================================
+5. JAMES
+==================================================
+
+Separare rigorosamente:
+
+E6A:
+il cuore si ricompone e prova una relazione.
+
+T_JAMES_EST:
+James descrive i luoghi degli incontri e prova la geografia.
+
+Il dialogo deve avere un momento che appartiene al lutto di James e non
+al fascicolo.
+
+Non fargli formulare la proposizione P2 al posto del player.
+
+==================================================
+6. CONFRONTI
+==================================================
+
+Confronto obbligatorio:
+
+E6A + T_JAMES_EST
+→ nota emergente
+→ player conferma la formulazione di P2.
+
+Confronto facoltativo:
+
+T1 + E5
+→ P4b come ipotesi;
+→ mai fatto confermato;
+→ non necessario al progresso.
+
+Per ogni confronto scrivi:
+
+- testo prima del confronto;
+- osservazione risultante;
+- formulazione disponibile;
+- motivo per cui non riceve più di quanto le fonti contengono.
+
+==================================================
+7. PRESENTAZIONE A TRUMAN
+==================================================
+
+Il player sceglie P2 e allega prove.
+
+Definisci risposte per reason code:
+
+- SUFFICIENT_RELEVANT_SUPPORT;
+- INSUFFICIENT_SUPPORT;
+- IRRELEVANT_EVIDENCE;
+- PREMATURE_PROPOSITION;
+- ALREADY_REJECTED.
+
+Ogni risposta deve:
+
+- riguardare il nesso;
+- conservare la voce di Truman;
+- creare una domanda utile;
+- non consegnare direttamente la soluzione.
+
+Il progresso avviene soltanto quando P2 è:
+
+- formulata;
+- presentata;
+- accettata da Truman.
+
+La conferma fattuale rimane successiva.
+
+==================================================
+8. TACCUINO E OBIETTIVI
+==================================================
+
+Scrivi:
+
+- tutte le nuove voci;
+- osservazioni;
+- ipotesi;
+- P2 formulata;
+- P4b facoltativa;
+- memoria delle presentazioni respinte;
+- obiettivo iniziale;
+- obiettivi intermedi;
+- obiettivo finale;
+- repeat text dopo completamento.
+
+La UI non deve proporre una conclusione non formulata dal player.
+
+==================================================
+9. REGIA SENSORIALE
+==================================================
+
+Per ogni luogo indica soltanto:
+
+- un suono dominante;
+- un oggetto o processo risemantizzato;
+- un’attività ordinaria indipendente dal caso.
+
+Non aggiungere simboli ulteriori.
+
+La regia deve sostenere:
+
+- comprensione;
+- dignità dei personaggi;
+- ritmo.
+
+Non deve compensare passività o esposizione.
+
+==================================================
+10. STATI E CONTRATTO DATI
+==================================================
+
+Fornisci una tabella con:
+
+- evidenza acquisita;
+- osservazione;
+- nota di confronto;
+- proposizione;
+- presentazione;
+- risposta;
+- stato finale.
+
+Per P2 usa almeno:
+
+- formulation_status;
+- presentation_history;
+- accepted_by;
+- factual_status;
+- evidence_used;
+- unlocks.
+
+Non usare un singolo booleano “P2 sostenuta”.
+
+==================================================
+11. SCOPE
+==================================================
+
+Riporta:
+
+- pagine totali;
+- righe totali;
+- nodi nuovi;
+- nodi modificati;
+- scelte;
+- confronti;
+- reason code;
+- stati;
+- testi repeat;
+- varianti opzionali;
+- casi di test.
+
+Segnala qualunque superamento del budget prima di aggiungere contenuto.
+
+==================================================
+12. TEST
+==================================================
+
+Crea casi per:
+
+- ogni prima domanda a Ronette;
+- raggiungibilità di T1;
+- ordine libero ospedale/diner/hotel;
+- P4b ignorata;
+- P4b formulata;
+- P2 non ancora formulata;
+- prova insufficiente;
+- prova irrilevante;
+- stessa presentazione ripetuta;
+- P2 accettata;
+- completamento missione;
+- repeat content;
+- nessun softlock.
+
+Aggiungi domande di comprensione aperte.
+
+==================================================
+13. AUTO-EDIT
+==================================================
+
+Identifica:
+
+- cinque righe troppo esplicative;
+- tre righe troppo poetiche;
+- due momenti in cui l’infermiera parla troppo per Ronette;
+- due momenti in cui James diventa distributore di prove;
+- una deduzione che supera ancora il supporto;
+- un contenuto facoltativo da tagliare;
+- una pagina che non serve.
+
+Riscrivi o elimina ogni elemento identificato.
+
+==================================================
+14. OUTPUT
+==================================================
+
+Produci:
+
+1. manifesto del patch;
+2. contratto M4;
+3. grafo nodi;
+4. dialoghi completi;
+5. voci del taccuino;
+6. testi degli obiettivi;
+7. tabella degli stati;
+8. regia sensoriale;
+9. scope definitivo;
+10. casi di test;
+11. auto-edit;
+12. versione finale pulita pronta per revisione.
+
+Non implementare nulla.
+
+La domanda centrale è:
+
+“Dopo aver giocato M4, il player può spiegare con parole proprie perché
+la relazione di James conduce a un luogo a est, oppure ha soltanto
+selezionato la conclusione che il menu gli ha mostrato?”

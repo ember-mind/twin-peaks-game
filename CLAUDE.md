@@ -25,9 +25,9 @@ canvas fallback, no build step, plain script tags, all globals under `GAME`.
 - **Test order**: all `node test/*.js` green BEFORE opening the browser.
 - **Canonical source**: the vault is canonical; `ember-mind/twin-peaks-game`
   is a deploy copy, not source of truth.
-- **Map fields**: any field added to a map object in `js/maps.js` must be
-  propagated in `js/glue.js` or `render3d.js` sees `null` for it. A test
-  guard is planned; until then it's a manual rule.
+- **Map fields**: `js/glue.js` copies map fields through generically; only
+  keys in its `TRANSFORMED_KEYS` list (doors/gate/interact/objects) are
+  reshaped by hand. `test/smoke.js` fails loudly if a field is dropped.
 
 ## Acceptance criteria
 

@@ -217,5 +217,14 @@
         R(ctx, hx + 8, headTop + 14, 6, 1, white);
       }
     }
+
+    // rim-light lato sole (nord-ovest): 1px chiaro su bordo sinistro/alto,
+    // niente per le silhouette (shadow) — costo zero GPU, cotto nello sprite
+    if (!sh) {
+      var rim = 'rgba(255,242,208,0.45)';
+      R(ctx, hx, headTop + 2, 1, headH - 4, rim);            // bordo sx testa
+      R(ctx, hx + 2, headTop + (dir === 'up' ? 0 : -2), headW - 4, 1, rim); // bordo alto (calotta/cappello)
+      R(ctx, x + 14, bodyTop, 1, 15, rim);                    // bordo sx busto
+    }
   };
 })();

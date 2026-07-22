@@ -1,0 +1,157 @@
+PRODUZIONE NARRATIVA 1B:
+M4 “I FRAMMENTI” — REVISIONE V1.1 E SCRIPT LOCK
+
+Non riscrivere la missione da zero.
+Non aggiungere nuovi personaggi, indizi o sistemi.
+Non espandere lo scope.
+Applica soltanto le correzioni approvate.
+
+1. RISOLVI LA GEOGRAFIA
+
+Dichiara una sola versione:
+
+A. Il vagone e la sua posizione NON sono ancora noti.
+- rimuovi “vagone” e “a est” dalle domande precedenti a P2;
+- M5 scopre il vagone.
+
+B. Il vagone è già noto perché Ronette vi è stata trovata.
+- P2 non “scopre il vagone”;
+- P2 dimostra che la vita segreta di Laura aveva una rotta coerente
+verso quella zona;
+- l’obiettivo diventa una verifica motivata, non una scoperta.
+
+Registra la decisione canonica.
+
+2. CORREGGI P2
+
+Usa:
+
+“Il rapporto segreto confermato dal pendaglio rende James una fonte
+credibile per collocare una parte della vita privata di Laura oltre il
+ponte, verso i binari.”
+
+Produci anche una versione breve da UI.
+
+Distingui:
+
+- E6A: conferma la relazione;
+- T_JAMES_EST: fornisce la geografia;
+- P2: stabilisce il valore investigativo della testimonianza.
+
+3. CORREGGI B8
+
+Non scrivere:
+
+“l’oggetto dice con chi, la voce dice dove”.
+
+Mostra i fatti e chiedi:
+
+“Che cosa aggiunge il pendaglio alla testimonianza di James?”
+
+Il player deve distinguere:
+
+- corroborazione della fonte;
+- geografia;
+- conclusione eccessiva.
+
+M4 può essere un tutorial guidato, ma deve dichiararsi tale.
+
+4. EVITA LA DOPPIA SOLUZIONE
+
+Scegli una versione:
+
+A. Presentando P2, il sistema mostra automaticamente le prove usate per
+formularla.
+
+B. La selezione manuale delle prove resta, ma produce un costo o una
+differenza reale.
+
+Consigliata: A.
+Riserva la selezione probatoria completa a M9.
+
+5. RICONCILIA OBBLIGATORIO E FACOLTATIVO
+
+- Decidi se Gerard è obbligatorio.
+- Se P4b resta facoltativa, Gerard deve essere facoltativo o avere
+un’altra funzione necessaria esplicita.
+- La 315 è facoltativa: non deve essere elencata come obiettivo
+obbligatorio.
+- Riscrivi la scala degli obiettivi.
+
+6. RONETTE
+
+- La domanda sull’uomo è terminale.
+- Se scelta per prima, ottiene T1 ma sacrifica il contesto.
+- Se scelta per seconda, chiude naturalmente la visita.
+- Le altre domande aprono quella sull’uomo.
+- La riapertura dipende dal riposo o dal giro medico, non magicamente
+dalla poesia di Gerard.
+- L’infermiera descrive comportamento; non interpreta Ronette.
+- Applica davvero le revisioni al testo finale.
+
+7. LINE EDIT
+
+Applica le revisioni approvate a:
+
+- Truman nel racconto del sogno;
+- domanda sul luogo;
+- risposta di Cooper a Ronette;
+- congedo di Ronette;
+- infermiera;
+- apertura e chiusura di Gerard;
+- apertura di James;
+- metafora delle “orecchie basse”;
+- specchio 315;
+- presentazione e repeat di Truman.
+
+Mantieni le voci sobrie. Non sostituire ogni riga con un aforisma nuovo.
+
+8. REASON CODE
+
+Ogni risposta deve corrispondere alla causa del rifiuto.
+
+Usa almeno:
+
+- NO_GEOGRAPHIC_SUPPORT;
+- NO_CORROBORATION;
+- PREMATURE_SYMBOLIC_LINK;
+- ALREADY_REJECTED.
+
+Registra il livello di assistenza ricevuto dal player.
+
+9. SCOPE
+
+Ricalcola automaticamente e separatamente:
+
+- pagine dialogo;
+- pagine azione;
+- voci taccuino;
+- label scelta;
+- obiettivi;
+- repeat;
+- nodi;
+- rami;
+- reason-code text.
+
+Non scrivere “budget rispettato” quando è stato superato.
+
+10. TEST CENTRALE
+
+Il pacchetto passa soltanto quando un lettore non informato può
+rispondere:
+
+- Che cosa prova il pendaglio?
+- Che cosa dice James?
+- Perché insieme rendono utile la rotta a est?
+- Che cosa non è ancora stato provato?
+
+Produci:
+
+- diff v1.0 → v1.1;
+- versione finale pulita;
+- contratto dati aggiornato;
+- conteggio corretto;
+- casi di test aggiornati;
+- elenco di tutte le righe eliminate.
+
+Non implementare codice.

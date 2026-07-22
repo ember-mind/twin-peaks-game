@@ -1,0 +1,654 @@
+FASE SUCCESSIVA:
+GRAMMATICA DELL’INDAGINE E DRAMMATURGIA GIOCABILE
+
+Progetto: Twin Peaks Game.
+
+Questo è un esercizio progettuale sul gioco reale.
+
+Non scrivere codice.
+Non modificare il motore.
+Non creare nuove mappe.
+Non scrivere dialoghi completi.
+Non aggiungere nuove missioni salvo necessità dimostrata.
+Non trasformare il gioco in un puzzle investigativo astratto.
+Non usare combinazioni arbitrarie di oggetti come sostituto
+dell’inferenza.
+Non attribuire al player responsabilità per eventi che non poteva
+influenzare.
+
+Il compito è trasformare la struttura narrativa esistente in azioni
+giocabili comprensibili, specifiche e produttivamente realizzabili.
+
+Integra obbligatoriamente queste correzioni:
+
+1. Decidere esplicitamente se il volto nel sogno è riconoscibile come
+Leland.
+- Se sì, ridefinire il gioco come ironia drammatica e indagine sulla
+prova/responsabilità.
+- Se no, descrivere cosa viene percepito senza risolvere il “chi”.
+
+2. Eliminare la causalità circolare:
+il Gigante non può apparire perché una predizione non ancora
+pronunciata si è verificata.
+
+3. Eliminare la regola:
+“BOB agisce dove il player non guarda”.
+L’opposizione deve agire per obiettivi, informazioni e opportunità.
+
+4. Non definire la morte obbligatoria di Maddy come colpa del player.
+
+5. Sostituire le combinazioni di due indizi con un grafo di
+proposizioni.
+
+6. Riformulare la custodia dell’anello in modo compatibile con l’etica
+professionale di Cooper.
+
+7. Separare sospetto investigativo da base procedurale.
+
+8. Aggiungere la responsabilità fratturata come rivelazione maggiore.
+
+9. Distinguere sottotrame, archi relazionali, fili di mistero e
+personaggi-testimoni.
+
+10. Trattare le interpretazioni di Cooper come interpretazioni, non come
+verità metafisiche certificate dal gioco.
+
+==================================================
+1. CONTRATTO DEI VERBI
+==================================================
+
+Definisci i verbi realmente disponibili al player:
+
+- muoversi;
+- osservare;
+- esaminare;
+- confrontare;
+- interrogare;
+- presentare;
+- registrare;
+- scegliere una stance;
+- interpretare;
+- consultare il taccuino.
+
+Per ogni verbo indica:
+
+- input previsto;
+- oggetto o persona su cui opera;
+- informazione richiesta;
+- risultato immediato;
+- stato scritto;
+- feedback percettibile;
+- possibile fallimento;
+- possibilità di riprovare;
+- utilizzo nelle missioni;
+- costo produttivo.
+
+Distingui:
+
+- verbo realmente controllato;
+- scelta di dialogo;
+- risposta automatica;
+- semplice avanzamento di pagina;
+- interpretazione interna del player.
+
+Non chiamare “pressione”, “intuizione” o “ricostruzione” un verbo finché
+non è definita l’azione concreta del player.
+
+==================================================
+2. DECISIONE SUL SOGNO
+==================================================
+
+Progetta due versioni concise:
+
+A. volto non identificabile;
+B. Leland riconoscibile.
+
+Per ciascuna mostra:
+
+- domanda drammatica dell’intero gioco;
+- cosa sa il player;
+- cosa sa Cooper;
+- effetto su Jacques;
+- effetto sulla suspense;
+- effetto sull’Atto 4;
+- effetto sull’interrogatorio;
+- rischio principale.
+
+Seleziona una versione e spiega perché.
+
+Non tentare di mantenere contemporaneamente un whodunit e un’identità
+del colpevole già evidente al player.
+
+==================================================
+3. GRAFO DELLE PROPOSIZIONI
+==================================================
+
+Usa tutti i nove indizi esistenti.
+
+Per ogni indizio definisci:
+
+- osservazione letterale;
+- origine;
+- affidabilità;
+- chi lo conosce;
+- proposizioni che supporta;
+- proposizioni che contraddice;
+- contesto necessario;
+- interpretazioni alternative;
+- uso procedurale;
+- uso intuitivo;
+- eventuale rischio di incomprensione.
+
+Costruisci un grafo di 8–12 proposizioni, per esempio:
+
+- Laura conduceva una vita nascosta.
+- Laura incontrava qualcuno fuori dal centro.
+- Il vagone era una scena preparata.
+- Jacques era presente ma non necessariamente l’assassino.
+- BOB è un nome associato all’aggressore.
+- Leland ha mentito su Missoula.
+- La casa Palmer è collegata alla ripetizione.
+- Le prove materiali non spiegano completamente BOB.
+
+Ogni proposizione deve indicare:
+
+- supporto minimo;
+- supporto forte;
+- eventuali confutazioni;
+- missione in cui diventa formulabile;
+- azione che rende il collegamento giocabile;
+- cosa permette di fare.
+
+Non costruire proposizioni attraverso semplice somiglianza fra lettere
+senza un ponte testuale e causale esplicito.
+
+==================================================
+4. PRESENTAZIONE DELLE INFERENZE
+==================================================
+
+Progetta la presentazione a Truman.
+
+Il player deve:
+
+1. scegliere la conclusione che vuole sostenere;
+2. scegliere le prove;
+3. ricevere una risposta specifica sulla qualità del nesso.
+
+Definisci:
+
+- conclusioni disponibili in M4;
+- conclusioni disponibili in M9;
+- prove rilevanti;
+- prove insufficienti;
+- prove contraddittorie;
+- risposte di Truman;
+- aggiornamenti del taccuino;
+- fail-forward;
+- prevenzione del brute force;
+- condizione di progresso;
+- aiuto dopo errori ripetuti.
+
+Non usare un contatore nascosto come completamento alternativo.
+
+Il feedback non deve dire soltanto:
+
+- corretto;
+- sbagliato;
+- prova ancora.
+
+Deve spiegare quale legame manca senza consegnare la soluzione.
+
+==================================================
+5. CONOSCENZA E RESPONSABILITÀ
+==================================================
+
+Per ogni atto crea una matrice con:
+
+- player;
+- Cooper;
+- Truman;
+- Leland;
+- Sarah;
+- BOB come forza;
+- sistema.
+
+Per ogni fatto indica:
+
+- sa;
+- sospetta;
+- crede;
+- nega;
+- interpreta erroneamente;
+- non può sapere.
+
+Distingui:
+
+- responsabilità causale;
+- responsabilità professionale;
+- complicità;
+- impotenza;
+- colpa percepita;
+- colpa effettiva.
+
+Non attribuire colpa al player quando il sistema non gli offriva
+alternative o informazioni utilizzabili.
+
+==================================================
+6. MISSIONE M4 — I FRAMMENTI
+==================================================
+
+Riprogetta M4 in 8–12 beat giocabili.
+
+Per ogni beat indica:
+
+- luogo;
+- obiettivo minuto per minuto;
+- azione del player;
+- risposta dell’NPC o dell’ambiente;
+- informazione ottenuta;
+- interpretazione possibile;
+- stato scritto;
+- domanda successiva;
+- variante dovuta all’ordine di esplorazione.
+
+La missione deve rendere differenti:
+
+- interrogare Ronette;
+- parlare con James;
+- interpretare Gerard;
+- tornare da Truman.
+
+Non devono essere quattro versioni dello stesso gesto “premi Z”.
+
+Inserisci almeno:
+
+- una domanda scelta dal player;
+- un confronto fra due testimonianze;
+- una deduzione presentata;
+- una risposta fail-forward;
+- un momento umano non ridotto a indizio.
+
+==================================================
+7. MISSIONI M5–M6 — SCENA E FALSA SOLUZIONE
+==================================================
+
+Progetta il loop:
+
+- leggere il vagone;
+- costruire una teoria;
+- confrontare Jacques;
+- scoprire che la teoria era incompleta.
+
+Per il vagone definisci:
+
+- tre osservazioni;
+- due collegamenti;
+- una interpretazione errata ma ragionevole;
+- un’inferenza necessaria;
+- cosa il player deve fare materialmente.
+
+Per Jacques definisci tre tattiche:
+
+- prova;
+- pressione;
+- falsa sicurezza.
+
+Per ciascuna indica:
+
+- intenzione del player;
+- risposta di Jacques;
+- informazione ottenuta;
+- rischio;
+- rapporto con la giurisdizione;
+- cosa cambia dopo la sua morte.
+
+La morte di Jacques deve distruggere una risorsa costruita dal player,
+non soltanto interrompere una cutscene futura.
+
+==================================================
+8. MISSIONE M8 — TRAGEDIA FISSA, CONSEGUENZE APERTE
+==================================================
+
+La morte di Maddy resta fissa.
+
+Progetta almeno tre aspetti che il player può influenzare:
+
+- chi viene avvertito;
+- quale luogo controlla;
+- chi trova Maddy;
+- quali prove vengono preservate;
+- come Sarah viene protetta o lasciata sola;
+- quanto rapidamente si formula il sospetto;
+- quale promessa relazionale viene spezzata.
+
+Definisci:
+
+- cosa il player poteva ragionevolmente prevedere;
+- cosa non poteva prevedere;
+- cosa causa realmente;
+- cosa subisce;
+- quale responsabilità possiede;
+- quale emozione è ipotizzata.
+
+Non chiamare “agency” il semplice correre verso un esito immutabile.
+
+Non usare un obiettivo “salva Maddy” quando salvarla non è possibile.
+
+==================================================
+9. MISSIONE M9 — SOSPETTO E PROCEDURA
+==================================================
+
+Distingui:
+
+- ciò che permette a Cooper di sospettare Leland;
+- ciò che permette a Truman di convocarlo;
+- ciò che potrebbe sostenere una perquisizione;
+- ciò che non è formalmente utilizzabile.
+
+Non usare una visione come prova procedurale.
+
+Definisci esattamente:
+
+- proposizione presentata;
+- evidenze;
+- obiezione di Truman;
+- risposta del player;
+- risultato legale o operativo;
+- motivo per cui Leland arriva in centrale.
+
+Se il fascicolo non sostiene un mandato, cambia l’obiettivo e il
+linguaggio della missione.
+
+==================================================
+10. MISSIONE M10 — INTERROGATORIO
+==================================================
+
+Progetta la missione in 10–14 beat.
+
+I tre metodi devono differire attraverso:
+
+- domande disponibili;
+- ordine delle prove;
+- tattiche di Leland;
+- informazioni verificabili;
+- risposta di Truman;
+- momento dell’affioramento;
+- costo.
+
+Se due metodi producono soltanto dialoghi sinonimi, fondili.
+
+Posiziona la scelta del registratore con precisione.
+
+Prima della scelta elenca:
+
+- fatti già registrati;
+- prove già confermate;
+- responsabilità già ammessa.
+
+Dopo la scelta elenca:
+
+- materiale registrato o perduto;
+- ruolo di Truman;
+- conseguenza procedurale;
+- conseguenza relazionale;
+- effetto sull’epilogo;
+- effetto nella Loggia.
+
+Laura deve restare centro morale.
+
+La privacy o la pietà verso Leland non deve cancellare la verità delle
+vittime.
+
+Le conclusioni di Cooper su BOB e Leland devono essere chiaramente
+presentate come interpretazioni.
+
+==================================================
+11. RIVELAZIONE R7
+==================================================
+
+Aggiungi formalmente:
+
+“Responsabilità fratturata”.
+
+Definisci:
+
+- precedente modello;
+- nuovo modello;
+- indizi retroattivi;
+- nuova evidenza;
+- azione del player;
+- cosa viene reinterpretato;
+- cosa resta irrisolto;
+- nuovo obiettivo;
+- rischio di assoluzione automatica;
+- criterio per mantenere Laura e Maddy moralmente presenti.
+
+==================================================
+12. FINALE GIOCABILE
+==================================================
+
+Progetta la Loggia in 6–10 beat concreti.
+
+Per ogni beat indica:
+
+- obiettivo;
+- movimento;
+- interazione;
+- informazione;
+- scelta;
+- risposta;
+- stato precedente speso;
+- cambiamento di interpretazione.
+
+Non trasformare la Loggia in un quiz del menu indizi.
+
+Non introdurre nuovi verbi.
+
+Definisci:
+
+- cosa accade con ciascuno stato dell’anello;
+- come Truman è presente attraverso la relazione senza apparire
+arbitrariamente;
+- come il metodo d’interrogatorio ritorna;
+- come S3 modifica il congedo;
+- come S4 esprime interpretazione senza diventare una risposta giusta;
+- cosa rimane fisso;
+- cosa cambia realmente;
+- quale immagine appartiene a Laura;
+- come il mondo ordinario viene rivisto dopo.
+
+==================================================
+13. PERSONAGGI ASSENTI E FILI NARRATIVI
+==================================================
+
+Crea schede per:
+
+- Laura come presenza postuma;
+- Maddy;
+- Ronette;
+- Sarah.
+
+Per ciascuna indica:
+
+- desiderio;
+- azione indipendente;
+- ciò che gli altri interpretano male;
+- tracce nei luoghi;
+- rapporto con Cooper;
+- rapporto con Leland/BOB;
+- rischio di diventare dispositivo per la crescita maschile;
+- payoff non riducibile alla morte o alla testimonianza.
+
+Riclassifica ogni thread come:
+
+- sottotrama;
+- arco relazionale;
+- filo di mistero;
+- catena testimoniale;
+- motivo.
+
+Non gonfiare ogni filo in una sottotrama completa.
+
+==================================================
+14. INTEGRAZIONE CON I LUOGHI
+==================================================
+
+Per M4, M5, M8, M9 e M10 indica:
+
+- funzione ordinaria del luogo;
+- attività indipendente dal caso;
+- azione del player resa possibile dalla disposizione;
+- elemento sensoriale dominante;
+- informazione espressa dall’ambiente;
+- informazione espressa dal dialogo;
+- conseguenza visibile dopo la missione;
+- dettaglio stabile che cambia significato.
+
+Massimo:
+
+- un oggetto risemantizzato;
+- un suono dominante;
+- un cambiamento di attività;
+
+per luogo e per atto.
+
+La direzione artistica deve sostenere la giocabilità, non compensarne
+l’assenza.
+
+==================================================
+15. SCOPE REALE
+==================================================
+
+Per ogni missione modificata stima:
+
+- pagine di dialogo;
+- scelte;
+- proposizioni;
+- nuovi flag;
+- nuovi rami;
+- modifiche UI;
+- variazioni di obiettivi;
+- modifiche ai test;
+- rischio di regressione;
+- lavoro di scrittura;
+- lavoro di programmazione.
+
+Distingui almeno:
+
+- widget scelta;
+- presentazione indizi;
+- grafo proposizioni;
+- sezione presagi;
+- varianti di finale;
+- epilogo.
+
+Non chiamare tutto “semplice contenuto”.
+
+Fornisci:
+
+- versione minima;
+- versione raccomandata;
+- versione da tagliare se supera lo scope.
+
+==================================================
+16. TEST DI COMPRENSIONE
+==================================================
+
+Per M4, M8, M10 e finale definisci:
+
+- domanda aperta al player;
+- comportamento osservato;
+- comprensione prevista;
+- interpretazione alternativa accettabile;
+- errore che indica problema di design;
+- soglia di revisione.
+
+Testare separatamente:
+
+- indizio presentato;
+- indizio notato;
+- proposizione compresa;
+- conseguenza attribuita;
+- emozione dichiarata;
+- responsabilità percepita.
+
+Non chiedere soltanto:
+
+“Ti è piaciuta la scena?”
+
+==================================================
+17. SELF-AUDIT
+==================================================
+
+Rispondi:
+
+1. Quale missione è ancora principalmente dialogo passivo?
+2. Quale deduzione può essere risolta provando tutte le combinazioni?
+3. Quale indizio sostiene una conclusione che in realtà non implica?
+4. Dove il player sa troppo presto?
+5. Dove Cooper sa troppo presto?
+6. Dove una visione viene trattata come prova?
+7. Dove il gioco produce colpa senza responsabilità?
+8. Quale scelta viola l’identità fissa di Cooper?
+9. Quale metodo d’interrogatorio è soltanto una variante testuale?
+10. Quale conseguenza è invisibile?
+11. Quale personaggio femminile esiste principalmente per soffrire?
+12. Dove il gioco parla per Laura?
+13. Quale interpretazione di Cooper viene presentata come verità?
+14. Quale parte della Loggia è un quiz mascherato?
+15. Quale sistema nuovo è stato sottostimato?
+16. Quale contenuto va tagliato prima dell’implementazione?
+17. Che cosa il player fa davvero che una serie televisiva non potrebbe
+far fare allo spettatore?
+
+==================================================
+18. OUTPUT FINALE
+==================================================
+
+Produci:
+
+- decisione sul sogno;
+- contratto dei verbi;
+- grafo delle proposizioni;
+- matrice della conoscenza;
+- design della presentazione;
+- M4 giocabile;
+- M5–M6 giocabili;
+- M8 con conseguenze aperte;
+- M9 proceduralmente coerente;
+- M10 dettagliata;
+- R7;
+- finale giocabile;
+- schede Laura/Maddy/Ronette/Sarah;
+- integrazione dei luoghi;
+- scope per missione;
+- piano di test;
+- self-audit.
+
+Concludi con:
+
+- cinque azioni che definiscono il lavoro di Cooper;
+- cinque deduzioni che devono appartenere al player;
+- tre eventi fissi le cui conseguenze restano aperte;
+- tre contenuti da eliminare;
+- una frase che definisce la grammatica investigativa del gioco.
+
+Non implementare nulla.
+
+La domanda centrale è:
+
+“Il player sta ragionando attraverso le prove e pagando le conseguenze
+delle proprie interpretazioni, oppure sta soltanto individuando la
+combinazione di ID che l’autore ha dichiarato corretta?”
+Griglia del prossimo esame
+Area Punti
+Grafo delle proposizioni e grammatica investigativa 8
+Missioni e azioni minuto per minuto 7
+Conoscenza, responsabilità e tragedia fissa 4
+Interrogatorio e finale giocabile 5
+Personaggi assenti e integrazione dei luoghi 3
+Scope, test e auto-audit 3
+Totale 30
+
+Dopo questo passaggio, la AI sarà pronta a costruire la World and Story Identity Bible definitiva e poi a scrivere i contenuti veri: dialoghi, descrizioni, interazioni, obiettivi e variazioni, missione per missione.
+

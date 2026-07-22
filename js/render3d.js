@@ -92,6 +92,7 @@ var currentCamBack = CAM_BACK;
 var wasMoving = false;
 var dustParts = [];
 var leadX = 0, leadZ = 0;
+var lodgeEnterT = -99999;
 
   /* palette edifici */
   var BPAL = CONFIG.palettes;
@@ -847,14 +848,32 @@ var leadX = 0, leadZ = 0;
     return s;
   }
 
+  var blobTexture = (function () {
+    var tex = null;
+    return function () {
+      if (tex) return tex;
+      if (typeof document === 'undefined') return null;
+      var c = document.createElement('canvas');
+      c.width = 64; c.height = 64;
+      var g = c.getContext('2d');
+      var grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grd.addColorStop(0, 'rgba(0,0,0,0.55)');
+      grd.addColorStop(0.5, 'rgba(0,0,0,0.12)');
+      grd.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = grd;
+      g.fillRect(0, 0, 64, 64);
+      tex = new THREE.CanvasTexture(c);
+      return tex;
+    };
+  })();
+
   function blobShadow(scene, x, z, r) {
-    var m = new THREE.Mesh(
-      new THREE.CircleGeometry(r, 12),
-      new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.22, depthWrite: false })
-    );
+    var mat = new THREE.MeshBasicMaterial({ map: blobTexture(), transparent: true, opacity: 0.55, depthWrite: false });
+    if (!mat.map) mat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.22, depthWrite: false });
+    var m = new THREE.Mesh(new THREE.CircleGeometry(r, 24), mat);
     m.rotation.x = -Math.PI / 2;
     m.position.set(x, 0.012, z);
-    scene.add(m);
+    if (scene) scene.add(m); // il blob del player nasce senza scena: riparentato a ogni cambio mappa
     return m;
   }
 
@@ -2027,13 +2046,13 @@ var leadX = 0, leadZ = 0;
       var m = new THREE.SpriteMaterial({ map: charTex(n.sprite, n.dir, 0, false, 0), transparent: true, alphaTest: 0.05 });
       if (n.sprite === 'laura') m.opacity = 0.85;
       var s = new THREE.Sprite(m);
-      s.center.set(0.5, 0.08);
-      s.scale.set(1.0, 1.5, 1);
+      s.center.set(0.5, 0.13);
+      s.scale.set(1.15, 1.725, 1);
       s.position.set(n.x + 0.5, 0.01, n.y + 1.0);
       s.userData.npc = n;
       world.scene.add(s);
       world.npcs.push(s);
-      blobShadow(world.scene, n.x + 0.5, n.y + 0.95, 0.3);
+      s.userData.blob = blobShadow(world.scene, n.x + 0.5, n.y + 0.95, 0.3);
     });
 
     return world;
@@ -2073,16 +2092,13 @@ var leadX = 0, leadZ = 0;
       cur = worlds[S.mapId] || (worlds[S.mapId] = buildWorld(S));
       curId = S.mapId;
       camSnap = true;
+      if (S.mapId === 'redroom') lodgeEnterT = t; // effetto "reverse" all'ingresso nella Loggia
       if (!playerSprite) {
         var m = new THREE.SpriteMaterial({ map: charTex('cooper', 'down', 0, false, 0), transparent: true, alphaTest: 0.05 });
         playerSprite = new THREE.Sprite(m);
-        playerSprite.center.set(0.5, 0.08);
-        playerSprite.scale.set(1.0, 1.5, 1);
-        playerBlob = new THREE.Mesh(
-          new THREE.CircleGeometry(0.3, 12),
-          new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.22, depthWrite: false })
-        );
-        playerBlob.rotation.x = -Math.PI / 2;
+        playerSprite.center.set(0.5, 0.13);
+        playerSprite.scale.set(1.15, 1.725, 1);
+        playerBlob = blobShadow(null, 0, 0, 0.35);
       }
       cur.scene.add(playerSprite); // add() li riparenta dalla scena precedente
       cur.scene.add(playerBlob);
@@ -2095,19 +2111,33 @@ var leadX = 0, leadZ = 0;
     var p = S.player;
     var px = p.x / TILE + 0.5, pz = p.y / TILE + 1.0;
     var pframe = p.moving ? (Math.floor(t / 90) % 4) : 0;
-    playerSprite.material.map = charTex('cooper', p.dir, pframe, p.moving, t);
-    playerSprite.position.set(px, 0.01, pz);
+    var pmoving = p.moving;
+    if (S.mapId === 'redroom' && t - lodgeEnterT < 1500) {
+      pframe = 3 - (Math.floor(t / 90) % 4); pmoving = true; // reverse anche per Cooper
+    }
+    playerSprite.material.map = charTex('cooper', p.dir, pframe, pmoving, t);
+    var yBob = p.moving ? Math.abs(Math.sin(t / 90 * Math.PI)) * 0.03 : 0;
+    playerSprite.position.set(px, 0.01 + yBob, pz);
     playerBlob.position.set(px, 0.012, pz - 0.05);
 
-    // dust: spawn all'inizio di ogni passo
+    // dust: spawn all'inizio di ogni passo, solo su erba/terra
     if (p.moving && !wasMoving) {
-      var pmat = new THREE.SpriteMaterial({ map: dustTexture(), transparent: true, opacity: 0.5, depthWrite: false });
-      var puff = new THREE.Sprite(pmat);
-      puff.center.set(0.5, 0.02);
-      puff.scale.set(0.4, 0.4, 1);
-      puff.position.set(px - 0.1, 0.05, pz - 0.05);
-      cur.scene.add(puff);
-      cur.dust.push({ s: puff, age: 0, x: px - 0.1, y: 0.05, z: pz - 0.05 });
+      var underRow = S.map.rows[p.ty] || '';
+      var under = underRow[p.tx];
+      if (under === '.' || under === ',' || under === 'g' || under === 'p') {
+        var nPuffs = 2 + (Math.random() < 0.5 ? 1 : 0);
+        for (var pi = 0; pi < nPuffs; pi++) {
+          var pmat = new THREE.SpriteMaterial({ map: dustTexture(), transparent: true, opacity: 0.5, depthWrite: false });
+          var puff = new THREE.Sprite(pmat);
+          puff.center.set(0.5, 0.02);
+          puff.scale.set(0.4, 0.4, 1);
+          var pxo = px - 0.1 + (Math.random() - 0.5) * 0.25;
+          var pzo = pz - 0.05 + (Math.random() - 0.5) * 0.18;
+          puff.position.set(pxo, 0.05, pzo);
+          cur.scene.add(puff);
+          cur.dust.push({ s: puff, age: -pi * 40, x: pxo, y: 0.05, z: pzo });
+        }
+      }
     }
     wasMoving = p.moving;
 
@@ -2127,12 +2157,42 @@ var leadX = 0, leadZ = 0;
     }
 
     var i, s;
+    var lodge = S.mapId === 'redroom';
     for (i = 0; i < cur.npcs.length; i++) {
       s = cur.npcs[i];
       var npc = s.userData.npc;
       var nframe = npc.moving ? (Math.floor(t / 90) % 4) : 0;
-      s.material.map = charTex(npc.sprite, npc.dir, nframe, npc.moving, t);
+      var nmoving = npc.moving;
+      var jx = 0, nOpacity = null;
+      if (lodge) {
+        if (t - lodgeEnterT < 1500) {
+          // ingresso nella Loggia: camminata al contrario (reverse, stile Twin Peaks)
+          nframe = 3 - (Math.floor(t / 90) % 4); nmoving = true;
+        } else if (npc.sprite === 'mfap') {
+          // il Nano balla: ciclo continuo di 4 pose
+          nframe = Math.floor(t / 220) % 4; nmoving = true;
+        }
+        if (npc.sprite === 'bob') {
+          // BOB: jitter orizzontale + luminosita' pulsante
+          jx = (Math.floor(t / 70) % 2) ? 0.045 : -0.045;
+          s.material.color.setScalar(0.72 + 0.28 * (0.5 + 0.5 * Math.sin(t / 260)));
+        } else if (npc.sprite === 'laura') {
+          // Laura: fade/slide "a scatti" (teleport ogni 90ms)
+          var lph = Math.floor(t / 90);
+          jx = (((lph * 7) % 3) - 1) * 0.05;
+          nOpacity = 0.6 + 0.25 * (((lph * 5) % 4) / 3);
+        }
+      }
+      if (npc.sprite === 'giant') {
+        // il Gigante: slow-fade in/out
+        nOpacity = 0.4 + 0.5 * (0.5 + 0.5 * Math.sin(t / 1400));
+      }
+      s.material.map = charTex(npc.sprite, npc.dir, nframe, nmoving, t);
+      if (nOpacity !== null) s.material.opacity = nOpacity;
       s.visible = GAME.Engine.npcActive(npc);
+      var nyBob = npc.moving ? Math.abs(Math.sin(t / 90 * Math.PI)) * 0.03 : 0;
+      s.position.set(npc.vx + 0.5 + jx, 0.01 + nyBob, npc.vy + 1.0);
+      if (s.userData.blob) s.userData.blob.position.set(npc.vx + 0.5, 0.012, npc.vy + 0.95);
     }
     for (i = 0; i < cur.sparkles.length; i++) {
       s = cur.sparkles[i];
@@ -2178,10 +2238,22 @@ var leadX = 0, leadZ = 0;
     var kb = 1 - Math.exp(-dt * 0.006);
     currentCamBack += (targetBack - currentCamBack) * kb;
 
-    var tx = px, ty = CAM_UP, tz = pz + currentCamBack;
+    var targetLeadX = 0, targetLeadZ = 0, LEAD = 1.2;
+    if (!S.dialogue) {
+      if (p.dir === 'up') targetLeadZ = -LEAD;
+      else if (p.dir === 'down') targetLeadZ = LEAD;
+      else if (p.dir === 'left') targetLeadX = -LEAD;
+      else targetLeadX = LEAD;
+    }
+    var kl = 1 - Math.exp(-dt * 0.012);
+    leadX += (targetLeadX - leadX) * kl;
+    leadZ += (targetLeadZ - leadZ) * kl;
+
+    var tx = px + leadX, ty = CAM_UP, tz = pz + currentCamBack + leadZ;
     if (camSnap) {
       camera.position.set(tx, ty, tz);
       currentCamBack = targetBack;
+      leadX = targetLeadX; leadZ = targetLeadZ;
       camSnap = false;
     } else {
       var k = 1 - Math.exp(-dt * 0.008);
@@ -2189,7 +2261,7 @@ var leadX = 0, leadZ = 0;
       camera.position.y += (ty - camera.position.y) * k;
       camera.position.z += (tz - camera.position.z) * k;
     }
-    camera.lookAt(camera.position.x, 0, camera.position.z - CAM_BACK + 0.2);
+    camera.lookAt(camera.position.x, 0, camera.position.z - currentCamBack + 0.2);
     renderer.render(cur.scene, camera);
   };
 
