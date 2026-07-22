@@ -111,9 +111,9 @@
     var bodyTop = y + 18 + bob;
     R(ctx, x + 14, bodyTop, 20, 16, OL);   // contorno
     R(ctx, x + 15, bodyTop + 1, 18, 14, shirt);
-    if (c.tie) {
-      R(ctx, x + 22, bodyTop + 2, 4, 12, C(c.tie)); // cravatta
-      R(ctx, x + 21, bodyTop + 1, 6, 2, white);       // colletto
+    if (c.tie && dir !== 'up') { // cravatta e colletto solo di fronte/profilo, mai sulla schiena
+      R(ctx, x + 22, bodyTop + 2, 4, 12, C(c.tie));
+      R(ctx, x + 21, bodyTop + 1, 6, 2, white);
     }
     if (c.badge && dir !== 'up') { // stellina da sceriffo sul petto
       var bx = x + ((dir === 'right') ? 28 : 17), by2 = bodyTop + 3;

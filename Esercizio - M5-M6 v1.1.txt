@@ -1,0 +1,111 @@
+PRODUZIONE NARRATIVA 2B:
+M5–M6 v1.1 — REVISIONE MIRATA E SCRIPT LOCK
+
+Non riscrivere da zero.
+Non aggiungere nuove missioni.
+Non ampliare personaggi o sottotrame.
+Non iniziare M8.
+Correggi soltanto i problemi approvati.
+
+1. M5 — elimina la falsa cronologia della pioggia.
+Il biglietto asciutto non dimostra una collocazione post-pioggia.
+Definisci soltanto fatti fisici realmente osservabili.
+
+2. Rendi obbligatorie tutte e tre le osservazioni:
+- biglietto/mucchio;
+- anello/superficie;
+- disposizione della scena.
+L’ordine resta libero.
+
+3. Dopo due osservazioni, fai formulare una teoria preliminare.
+Dopo la terza, chiedi se il player:
+- la mantiene;
+- la rivede;
+- considera ancora entrambe possibili.
+Registra teoria iniziale, teoria finale e revisione.
+
+4. Correggi la falsa teoria:
+P2 colloca alcuni incontri nella zona dei binari;
+non prova che il vagone fosse il luogo degli incontri.
+
+5. Individua nel repository il collegamento reale M5→OEJ.
+Cita file, nodo, testo e flag.
+Non usare “il biglietto parla la lingua di OEJ” senza prova.
+Se il collegamento non esiste, dichiaralo come decisione umana aperta.
+
+6. Correggi S1:
+- Cooper non certifica che qualcuno volesse far trovare l’anello;
+- le due eco della Loggia devono riconoscere un costo in entrambe le
+opzioni, senza premiare la custodia personale.
+
+7. Scrivi M6 integralmente.
+Nessun “come da matrice”.
+Includi:
+- Prova completa;
+- Pressione completa;
+- Falsa sicurezza completa;
+- cambio tattica;
+- perdita della seconda domanda;
+- chiusura definitiva;
+- P5;
+- arresto;
+- ritorno;
+- notizia della morte.
+
+8. In ogni tattica Jacques deve ammettere inequivocabilmente la presenza
+al vagone, con una forma differente.
+
+9. Correggi il ramo Prova:
+Jacques non firma durante il primo colloquio.
+La risorsa persa è la possibilità di formalizzare la dichiarazione.
+
+10. Scrivi realmente la lista del ramo Pressione.
+Non certificare a sistema che “uno dei quattro è vero”.
+Mostra quale reazione rende un elemento più sospetto degli altri.
+
+11. Per ogni tattica definisci:
+- informazione acquisita che sopravvive;
+- chiarimento futuro che la morte rende impossibile;
+- almeno una eco successiva prevista in M9 o M10.
+
+12. Inserisci un beat giocabile di P5:
+il player deve distinguere presenza da attribuzione dell’omicidio.
+
+13. Chiarisci la catena operativa dell’arresto:
+base del fermo, ruolo di Hawk, passaggio del confine, arrivo in
+custodia.
+
+14. Rendi percepibile il tempo trascorso fra arresto e morte.
+
+15. Alla fine di M6 scrivi soltanto i fatti acquisiti.
+Non scrivere `jacques_death_suspicious` finché il player non ottiene
+i dati relativi all’ospedale.
+
+16. Integra tutti i testi nella sorgente finale.
+Nessun placeholder, rimando o estratto.
+
+17. Ricalcola:
+pagine, nodi, label, domande, rami, callback, stati e test
+direttamente dallo script finale.
+
+18. Aggiungi test per:
+- ogni ordine delle tre osservazioni;
+- teoria iniziale mantenuta o rivista;
+- S1;
+- ogni tattica completa;
+- cambio tattica in ogni punto legale;
+- P5 in ogni percorso;
+- arresto;
+- tempo trascorso;
+- risorsa costruita e persa;
+- P9 senza attribuzione;
+- ogni informazione sopravvissuta con eco successiva.
+
+Concludi con uno dei due stati:
+
+M5–M6 v1.1 — SCRIPT LOCK
+
+oppure
+
+M5–M6 v1.1 — ANCORA INCOMPLETO
+

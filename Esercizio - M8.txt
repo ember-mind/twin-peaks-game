@@ -1,0 +1,561 @@
+PRODUZIONE NARRATIVA 3:
+M8 — “STA ACCADENDO DI NUOVO”
+
+Fonte canonica:
+
+- World & Story Identity Bible v0.9.1;
+- M4 v1.1.1 Script Lock;
+- M5–M6 v1.1.1 Script Lock.
+
+Non scrivere codice.
+Non modificare mappe.
+Non introdurre una possibilità di salvare Maddy.
+Non mostrare il suo omicidio.
+Non usare l’obiettivo “salva Maddy”.
+Non attribuire al player colpa per il fatto fisso.
+Non trasformare Maddy in “Laura di nuovo”.
+Non fare dipendere la tragedia dalla scelta sbagliata del player.
+Non rendere Sarah onnisciente.
+Non introdurre informazioni attraverso coincidenze sincronizzate al
+movimento del player.
+
+==================================================
+0. MANIFESTO DELLE DIPENDENZE
+==================================================
+
+Conferma:
+
+- Jacques è morto;
+- la testimonianza specifica del ramo M6 è persa;
+- l’informazione già acquisita sopravvive;
+- P9 è formulata ma non confermata;
+- il Gigante orienta e non risolve;
+- la sua apparizione possiede una causa non circolare;
+- il secondo enunciato è “sta accadendo di nuovo”;
+- il player non sa esattamente chi, quando o dove;
+- Maddy muore comunque;
+- Sarah non trova il corpo;
+- la lettera O viene acquisita in ogni percorso;
+- la sua catena di custodia può variare;
+- nessuna leva scrive “maddy_salvabile”.
+
+Dichiara ogni conflitto prima di scrivere.
+
+==================================================
+1. CONTRATTO DELLA TRAGEDIA FISSA
+==================================================
+
+Definisci separatamente:
+
+FISSO:
+- morte di Maddy;
+- autore;
+- luogo del ritrovamento;
+- lettera O;
+- passaggio ad Atto 5.
+
+VARIABILE:
+- chi viene avvertito;
+- quale azione compie Maddy dopo l’avvertimento;
+- chi accompagna Sarah;
+- dove Cooper concentra l’attenzione;
+- chi raggiunge per primo il lago;
+- qualità della catena di custodia;
+- chi riceve la notizia direttamente;
+- quale promessa resta inevasa;
+- conseguenze relazionali e spaziali.
+
+Per ogni variabile indica:
+
+- informazione disponibile al momento della scelta;
+- intenzione del player;
+- azione visibile;
+- conseguenza;
+- cosa il player non poteva sapere.
+
+==================================================
+2. MADDY PRIMA DELLA TRAGEDIA
+==================================================
+
+Scrivi una breve scena ordinaria autonoma.
+
+Maddy deve:
+
+- volere qualcosa non legato a Laura;
+- compiere una scelta pratica;
+- parlare di un futuro possibile;
+- mostrare il desiderio di partire;
+- avere un rapporto specifico con Sarah;
+- non consegnare indizi;
+- non presagire poeticamente la propria morte.
+
+Non usare soltanto:
+
+“io non sono Laura”.
+
+Il momento deve poter restare nel gioco anche se Maddy non morisse.
+
+==================================================
+3. MAPPA DELLA CONOSCENZA
+==================================================
+
+Per:
+
+- player;
+- Cooper;
+- Truman;
+- Sarah;
+- Maddy;
+- Leland;
+- BOB;
+- sistema;
+
+indica cosa:
+
+- sanno;
+- sospettano;
+- temono;
+- negano;
+- non possono sapere.
+
+Separare:
+
+- “qualcosa si ripeterà”;
+- “una ragazza vicina a Laura è in pericolo”;
+- “Maddy è il bersaglio”;
+- “la casa Palmer è coinvolta”;
+- “Leland è responsabile”.
+
+Nessuna scelta può presupporre una conoscenza che player e Cooper non
+possiedono.
+
+==================================================
+4. SUSPENSE
+==================================================
+
+Costruisci tre livelli:
+
+1. minaccia generica:
+il secondo enigma;
+
+2. restrizione ragionevole:
+gli elementi già disponibili rendono plausibile una ragazza vicina
+a Laura o la casa Palmer;
+
+3. comprensione tardiva:
+solo dopo l’evento i dati convergono su Maddy.
+
+Definisci:
+
+- cosa il player può prevedere correttamente;
+- quale teoria alternativa resta ragionevole;
+- quale segnale è ambiguo;
+- quale segnale, retrospettivamente, cambia significato;
+- come evitare che il player pensi di aver fallito un puzzle di
+salvataggio.
+
+==================================================
+5. LEVA 1 — CHI AVVERTIRE
+==================================================
+
+Progetta opzioni basate soltanto sulla conoscenza disponibile.
+
+Possibili destinatari:
+
+- Sarah;
+- Maddy;
+- Truman o un vice;
+- nessuno, quando coerente col ruolo.
+
+Per ogni opzione:
+
+- label di intenzione;
+- azione concreta;
+- risposta;
+- azione autonoma successiva di Maddy;
+- azione autonoma successiva di Sarah;
+- presenza o assenza di un vice;
+- stato scritto;
+- eco dopo la morte.
+
+Avvertire Maddy deve modificare ciò che LEI fa:
+
+- prova a partire;
+- prepara la valigia;
+- sceglie di tornare per Sarah;
+- lascia un messaggio;
+- cambia percorso.
+
+Non può modificare soltanto il monologo di Cooper.
+
+==================================================
+6. LEVA 2 — DOVE CONCENTRARE L’ATTENZIONE
+==================================================
+
+Usa la geografia reale delle mappe.
+
+Non rendere le destinazioni equidistanti.
+
+Per ogni destinazione indica:
+
+- ragione per sceglierla;
+- distanza e costo temporale;
+- informazione ottenuta;
+- persona incontrata;
+- cosa resta senza controllo;
+- conseguenza sul ritrovamento;
+- conseguenza sulla lettera O.
+
+La scelta deve essere:
+
+- informata ma incompleta;
+- significativa nelle conseguenze;
+- incapace di evitare il fatto fisso.
+
+Non usare un countdown segreto.
+
+==================================================
+7. LEVA 3 — LA PROMESSA
+==================================================
+
+Progetta una breve scelta relazionale con Maddy prima del Roadhouse.
+
+Le opzioni devono esprimere:
+
+- protezione pratica;
+- rispetto della sua autonomia;
+- rassicurazione prudente.
+
+Nessuna deve promettere che sopravvivrà.
+
+La promessa deve:
+
+- avere risposta locale;
+- essere ricordata dopo;
+- non attribuire al player la causa della morte;
+- modificare il tono di una relazione o monologo;
+- non essere una scelta buona/cattiva.
+
+==================================================
+8. ROADHOUSE E GIGANTE
+==================================================
+
+Il Roadhouse non deve diventare una lunga cutscene.
+
+Definisci:
+
+- perché Cooper vi si trova;
+- che cosa il player può fare prima del secondo enunciato;
+- che cosa interrompe l’attività ordinaria;
+- come il Gigante appare senza causalità circolare;
+- quale informazione fornisce;
+- quale informazione trattiene;
+- quale nuovo obiettivo concreto genera.
+
+“Sta accadendo di nuovo” deve creare urgenza, non una soluzione.
+
+==================================================
+9. OPPOSIZIONE INDIPENDENTE
+==================================================
+
+Definisci la timeline di Leland/BOB attraverso:
+
+- informazione posseduta;
+- accesso;
+- opportunità;
+- obiettivo;
+- azione;
+- traccia;
+- limite.
+
+Non usare:
+
+- “agisce dove il player non guarda”;
+- “aspetta che Cooper entri al Roadhouse”;
+- “la morte parte quando il player sceglie”.
+
+L’evento avviene secondo una cronologia del mondo.
+
+Il player può soltanto arrivare in punti differenti di quella
+cronologia.
+
+==================================================
+10. RITROVAMENTO E LETTERA O
+==================================================
+
+Progetta almeno due versioni del ritrovamento che non cambino la morte.
+
+Distingui:
+
+- Cooper arriva per primo;
+- un vice o altro personaggio arriva prima.
+
+Per ciascuna:
+
+- cosa è visibile;
+- chi tocca cosa;
+- come viene preservata la scena;
+- come viene acquisita la lettera O;
+- catena di custodia;
+- risposta di Truman;
+- conseguenza in M9.
+
+La lettera deve essere:
+
+- sempre raggiungibile;
+- mai casualmente ignorata;
+- più o meno forte proceduralmente secondo il percorso;
+- identica come fatto fisico.
+
+==================================================
+11. RESPONSABILITÀ
+==================================================
+
+Per ogni leva distingue:
+
+- causal influence;
+- professional responsibility;
+- impotence;
+- perceived guilt;
+- actual guilt;
+- consequence ownership.
+
+Il testo di Cooper può esprimere colpa percepita.
+
+Il gioco non deve certificare che:
+
+- una scelta differente avrebbe salvato Maddy;
+- il player ha scelto il luogo sbagliato;
+- il Roadhouse era un errore del player.
+
+La formulazione canonica deve restare:
+
+> Il player ha deciso dove concentrare un’attenzione insufficiente; non
+> ha deciso se Maddy sarebbe morta.
+
+==================================================
+12. P7, P8 E PASSAGGIO A M9
+==================================================
+
+Definisci:
+
+- cosa prova la lettera O;
+- cosa non prova;
+- come si collega alla R;
+- come entra la regola seriale del diario;
+- perché la teoria resta teoria;
+- come la casa Palmer entra nel sospetto;
+- quale parte deriva da Sarah;
+- quale parte è procedurale;
+- quale nuovo obiettivo concreto nasce.
+
+Non scrivere:
+
+- “R+O compongono BOB”;
+- “la lettera prova Leland”;
+- “la visione di Sarah è prova”.
+
+==================================================
+13. PERSONAGGI
+==================================================
+
+Per Maddy, Sarah, Truman e Cooper definisci:
+
+- obiettivo di scena;
+- tattica;
+- azione indipendente;
+- informazione posseduta;
+- interpretazione errata;
+- costo;
+- cambiamento;
+- riga o gesto da non scrivere.
+
+Maddy deve possedere almeno un gesto che resti suo anche dopo la morte.
+
+Sarah deve essere testimone precoce, non oracolo.
+
+Truman deve agire attraverso i vice e la procedura.
+
+Cooper deve essere protagonista senza diventare onnipotente.
+
+==================================================
+14. INTEGRAZIONE SENSORIALE E SPAZIALE
+==================================================
+
+Per:
+
+- diner;
+- casa Palmer;
+- Roadhouse;
+- strade;
+- lago;
+- stazione;
+
+definisci al massimo:
+
+- un suono dominante;
+- un oggetto o processo risemantizzato;
+- un cambiamento di attività.
+
+Niente meteo sincronizzato.
+Niente musica che dica al player che ha scelto male.
+Niente oggetto infantile per produrre dolore.
+Niente luce rossa per indicare pericolo.
+La corsa attraverso town deve cambiare significato senza cambiare
+geometria.
+
+==================================================
+15. SCRIPT COMPLETO
+==================================================
+
+Scrivi la missione integralmente:
+
+- scena ordinaria di Maddy;
+- eventuale avvertimento;
+- promessa;
+- Roadhouse;
+- Gigante;
+- scelta della destinazione;
+- spostamento;
+- ritrovamento;
+- lettera O;
+- conseguenza;
+- rapporto a Truman;
+- nuovo obiettivo;
+- repeat text.
+
+Nessun placeholder o rimando.
+
+Ogni pagina deve essere attribuibile a una sorgente finale unica.
+
+==================================================
+16. CONTRATTO DATI
+==================================================
+
+Usa dati strutturati.
+
+Includi:
+
+- warning_target;
+- maddy_action_after_warning;
+- sarah_support_state;
+- focus_destination;
+- arrival_order;
+- body_found_by;
+- letter_o_chain;
+- promise_stance;
+- promise_echo;
+- P7 multistato;
+- P8 multistato;
+- Maddy/Sarah relationship states;
+- objective state.
+
+Non creare un prodotto cartesiano di booleani.
+
+==================================================
+17. SCOPE
+==================================================
+
+Calcola:
+
+- pagine;
+- nodi;
+- label;
+- moduli;
+- stati;
+- combinazioni effettivamente scritte;
+- testi condivisi;
+- varianti;
+- test;
+- contenuti facoltativi.
+
+Mostra:
+
+- versione minima;
+- versione raccomandata;
+- primi tagli.
+
+Il primo taglio non può essere l’azione autonoma di Maddy.
+
+==================================================
+18. TEST
+==================================================
+
+Testare:
+
+- ogni destinatario dell’avvertimento;
+- ogni destinazione;
+- ogni promessa;
+- catena della O;
+- Maddy compie un’azione propria in ogni percorso;
+- Sarah non trova il corpo;
+- nessun percorso salva Maddy;
+- nessun testo dice che il player ha scelto male;
+- P7/P8 non oltrepassano le prove;
+- M9 sempre raggiungibile;
+- nessun softlock;
+- combinazioni modulari corrette.
+
+Domande aperte prima:
+
+1. “Che cosa pensavi stesse per accadere?”
+2. “Che cosa hai tentato di cambiare?”
+3. “Che cosa hai effettivamente cambiato?”
+4. “Perché Maddy è morta?”
+5. “Che cosa apparteneva a Maddy, non a Laura?”
+6. “Di che cosa ti senti responsabile?”
+
+Solo dopo:
+
+> “Pensavi che fosse possibile salvarla?”
+
+==================================================
+19. AUTO-EDIT
+==================================================
+
+Identifica e correggi:
+
+- cinque righe che inducono falsa colpa;
+- tre righe che rendono Maddy un doppio di Laura;
+- due azioni attribuite al player ma causate dal sistema;
+- due deduzioni oltre il supporto;
+- due momenti in cui Sarah diventa onnisciente;
+- un momento in cui il Gigante risolve;
+- un simbolo sensoriale eccessivo;
+- una variante che aggiunge sofferenza senza funzione;
+- un modulo combinatorio da tagliare.
+
+Verificare che ogni modifica dichiarata appaia realmente nello script
+finale.
+
+==================================================
+20. OUTPUT
+==================================================
+
+Produrre:
+
+1. manifesto;
+2. contratto tragedia;
+3. conoscenza;
+4. suspense;
+5. scena autonoma di Maddy;
+6. leve;
+7. opposizione;
+8. beat;
+9. script completo;
+10. P7/P8;
+11. personaggi;
+12. luoghi e suono;
+13. dati;
+14. scope;
+15. test;
+16. auto-edit;
+17. versione finale pulita.
+
+Domanda centrale:
+
+“Il player può descrivere ciò che ha realmente modificato senza
+credere che una scelta corretta avrebbe salvato Maddy — e può ricordare
+Maddy come una persona che ha agito, non soltanto come la prossima
+vittima?”
+
