@@ -1,0 +1,84 @@
+#!/usr/bin/env node
+'use strict';
+
+const assert = require('node:assert');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const root = path.resolve(__dirname, '..');
+const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const main = fs.readFileSync(path.join(root, 'js', 'main.js'), 'utf8');
+const retro = fs.readFileSync(path.join(root, 'js', 'retro.js'), 'utf8');
+const authored = fs.readFileSync(path.join(root, 'js', 'retro-authored.js'), 'utf8');
+const retroUi = fs.readFileSync(path.join(root, 'js', 'retro-ui.js'), 'utf8');
+const adapter = fs.readFileSync(path.join(root, 'js', 'narrative-engine-adapter.js'), 'utf8');
+const notebook = fs.readFileSync(path.join(root, 'js', 'narrative-notebook.js'), 'utf8');
+const production = fs.readFileSync(path.join(root, 'js', 'narrative-production.js'), 'utf8');
+const engine = fs.readFileSync(path.join(root, 'js', 'engine.js'), 'utf8');
+const retroFont = fs.readFileSync(path.join(root, 'js', 'retro-font.js'), 'utf8');
+
+const checks = {
+  gold_native_resolution_160x144: /width="160" height="144"/.test(index) &&
+    /cv\.width = 160/.test(main) && /cv\.height = 144/.test(main),
+  production_loads_retro_renderer: /js\/retro\.js/.test(index),
+  production_loads_shared_bitmap_font_first: /js\/retro-font\.js/.test(index) &&
+    index.indexOf('js/retro-font.js') < index.indexOf('js/engine.js'),
+  production_loads_authored_tileset: /js\/retro-authored\.js/.test(index),
+  production_does_not_load_three: !/three\.min\.js/.test(index) && !/render3d\.js/.test(index),
+  engine_boots_without_webgl: /GAME\.Engine\.init\(cv, null\)/.test(main),
+  fixed_pixel_scaling: /image-rendering: pixelated !important/.test(index),
+  integer_viewport_scaling: /Math\.floor\(fit\)/.test(main),
+  integer_viewport_origin: /Math\.floor\(\(viewport\.width - stageWidth\) \/ 2\)/.test(main) &&
+    /stage\.style\.transform = 'none'/.test(main),
+  retro_overrides_tiles: /Spr\.drawTile = function/.test(retro),
+  retro_overrides_characters: /Spr\.drawChar = function/.test(retro),
+  authored_matrix_tiles_and_sprites: /var GRASS_8 = \[/.test(authored) && /var DOWN0 = \[/.test(authored) && /var SIDE1 = \[/.test(authored),
+  authored_sprite_archetypes: /var BODY = \{/.test(authored) && /narrow: \[/.test(authored) &&
+    /broad: \[/.test(authored) && /dress: \[/.test(authored) && /short: \[/.test(authored),
+  gold_overlapping_conifers: /Conifera 16x24/.test(authored) && /TREE_CANOPY_B/.test(authored) &&
+    /TREE_CANOPY_C/.test(authored) && /var TREE_DX = \[/.test(authored) && /var TREE_DY = \[/.test(authored),
+  gold_authored_ground_clusters: /var GRASS_8_VARIANTS = \[GRASS_8, GRASS_8_H, GRASS_8_V, GRASS_8_HV\]/.test(authored) &&
+    /paint\(ctx, TALL_GRASS/.test(authored),
+  gold_continuous_roofs_and_facades: /var facade = bottom !== ch && bottom !== 'D'/.test(authored) &&
+    /var upperFacade = !facade/.test(authored) && /for \(i = 2; i < 16; i \+= 4\)/.test(authored),
+  gold_world_transition_modules: /function sidewalk\(/.test(authored) && /function water\(/.test(authored) &&
+    /function fence\(/.test(authored) && /cell\(rows, tx, ty - 1\)/.test(authored),
+  gold_window_modules: /x \+ 2, y \+ 4, 12, 8, C\.ink\);/.test(authored) &&
+    /x \+ 3, y \+ 5, 4, 6, ch === '5'/.test(authored),
+  gold_interior_wall_and_floor_modules: /function interiorWall/.test(authored) &&
+    /for \(yy = 0; yy < 16; yy \+= 4\)/.test(authored),
+  gold_chibi_cooper_contrast: /shirtCol = name === 'cooper'/.test(authored) &&
+    /name === 'cooper' && dir !== 'up'/.test(authored),
+  gold_native_16px_actors: /var GOLD_DOWN0 = \[/.test(authored) &&
+    /GAME\.Retro2D\.spriteSize = \[16, 16\]/.test(authored),
+  gold_flat_world_projection: /var SCALE = 1/.test(engine) && /viewport GBC: 10x9 metatile/.test(engine),
+  gold_gameplay_has_no_quest_overlay: /Pokémon Oro non sovrappone quest banner/.test(retroUi),
+  gold_dialogue_exact_bottom_48px: /var by = 96, bh = 48/.test(engine) &&
+    /var bw = Math\.min\(UW, 160\)/.test(engine),
+  retro_disables_oblique_structures: /Sp\.drawStructures = function \(\) \{\}/.test(retro),
+  music_remains_loaded: /js\/audio\.js/.test(index),
+  production_loads_narrative_runtime: /js\/narrative-runtime\.js/.test(index) &&
+    /js\/narrative-engine-adapter\.js/.test(index),
+  production_loads_notebook_and_save: /js\/narrative-notebook\.js/.test(index) &&
+    /js\/narrative-save\.js/.test(index),
+  production_boots_narrative_bridge: /js\/narrative-production\.js/.test(index),
+  production_loads_causal_finale: /js\/narrative-finale\.js/.test(index) &&
+    /js\/narrative-finale-production\.js/.test(index),
+  production_uses_canvas_bitmap_ui: /js\/retro-ui\.js/.test(index) && /bitmapFont: true/.test(retroUi)
+  ,finale_keeps_notebook_read_only: /notebookOnly = !!\(opts && opts\.keepNotebook\)/.test(adapter) &&
+    /readOnly: notebookOnly/.test(adapter) && /opts\.readOnly \? \['Evidenze', 'Appunti', 'Proposizioni'\]/.test(notebook) &&
+    /A\.disable\(\{ keepNotebook: true \}\)/.test(production),
+  all_production_text_is_bitmap: !/fillText|measureText|strokeText/.test(engine) &&
+    !/fillText|measureText|strokeText/.test(retroUi) && /GAME\.RetroFont/.test(retroFont),
+  finale_has_single_canvas_owner: /setEngineOwned\(S\.mode === 'end'\)/.test(engine) &&
+    /canvas\.style\.display = owned \? 'none' : ''/.test(retroUi),
+  canvas_frame_state_is_atomic: /ctx\.globalAlpha = 1/.test(engine) &&
+    /ctx\.globalCompositeOperation = 'source-over'/.test(engine) &&
+    /ctx\.clearRect\(0, 0, canvas\.width, canvas\.height\)/.test(engine)
+};
+
+for (const [name, pass] of Object.entries(checks)) {
+  assert(pass, name);
+  console.log(`ok - ${name}`);
+}
+console.log(`\nRETRO-PROD-PASS ${Object.keys(checks).length}/${Object.keys(checks).length}`);

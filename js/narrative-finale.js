@@ -298,7 +298,8 @@
   function nanoPages(position) {
     var method = carryValue('m10_method'), pages = [
       page('nf.lodge.nano.open.01', '', 'Il Nano balla piano, poi si ferma. Parla al contrario; si capisce lo stesso.'),
-      page('nf.lodge.nano.open.02', '???', 'È LUI che stai cercando?')
+      page('nf.lodge.nano.open.02', '???', 'È LUI che stai cercando?'),
+      page('nf.lodge.nano.cooper', 'COOPER', 'Mi hai chiesto chi cerco. Prima dimmi che cosa cambia quando cambia il metodo.')
     ];
     if (method === 'personale') {
       pages.push(page('nf.lodge.method.personal.01', '???', 'Hai chiamato Laura, Maddy e Leland per nome.'));
@@ -335,6 +336,7 @@
     pages.push(page('nf.lodge.bob.record.02', '', 'Due righe restano cerchiate: «L\'ho uccisa io.»'));
     pages.push(page('nf.lodge.bob.record.03', '', '«Ho mentito io.»'));
     pages.push(page('nf.lodge.bob.02', 'BOB', 'Leland era solo un guanto. La mano... è ancora qui.'));
+    pages.push(page('nf.lodge.bob.cooper', 'COOPER', 'Un guanto conserva forma e tracce. Una mano non cancella nessuna delle due.'));
     if (carryValue('s3') === 'on') {
       pages.push(page('nf.lodge.s3.on.01', 'BOB', '«Quando dormo, lui non dorme.» L\'avete inciso.'));
       pages.push(page('nf.lodge.s3.on.02', 'BOB', 'Io non dimentico ciò che viene inciso.'));
@@ -381,12 +383,13 @@
   function lauraPages() {
     return [
       page('nf.lodge.laura.01', '', 'Laura è dove era nel sogno. Ma stavolta nessuno dorme.'),
+      page('nf.lodge.laura.cooper', 'COOPER', 'Laura. Non ti chiederò di rendere semplice ciò che ti è accaduto.'),
       page('nf.lodge.laura.02', 'OMBRA DI LAURA', 'Sono calma, adesso. Il fuoco non brucia più, qui dentro.'),
       page('nf.lodge.laura.record.01', '', 'Fra loro, il verbale resta aperto sulle ammissioni di Leland.'),
       page('nf.lodge.laura.record.02', '', 'La Loggia non cancella una riga.'),
-      page('nf.lodge.laura.03', 'OMBRA DI LAURA', 'Mio padre non lo sapeva. LUI sì.'),
-      page('nf.lodge.laura.03b', 'OMBRA DI LAURA', 'Non sapere non cancella ciò che ha scelto.'),
-      page('nf.lodge.laura.03c', 'OMBRA DI LAURA', 'Quanto fosse suo, non posso dirlo.'),
+      page('nf.lodge.laura.03', 'OMBRA DI LAURA', 'Non chiedermi dove finiva mio padre e dove cominciava BOB.'),
+      page('nf.lodge.laura.03b', 'OMBRA DI LAURA', 'Separarli non cancella ciò che mi è stato fatto.'),
+      page('nf.lodge.laura.03c', 'OMBRA DI LAURA', 'La parte che spetta a ciascuno non la posso misurare per te.'),
       page('nf.lodge.laura.order', '', carryValue('encounter_order') === 'nano_first' ? 'Laura guarda il taccuino chiuso, poi Cooper.' : 'Laura guarda Cooper. Il taccuino rimane chiuso.'),
       page('nf.lodge.laura.04', 'OMBRA DI LAURA', 'Ti rivedrò fra venticinque anni. Nel frattempo...'),
       page('nf.lodge.laura.05', '', 'Laura sorride. Le tende si muovono senza vento. L\'ultima immagine della Loggia è sua.')
@@ -396,15 +399,15 @@
   function blockedLodgePages() {
     var actor = run.state.blocked_actor, back = run.state.blocked_return_stage;
     if (actor === 'laura' && (back === 'await_lodge' || back === 'await_lodge_second')) {
-      return [page('nf.lodge.blocked.laura_early', '', 'Laura guarda oltre Cooper. Due presenze aspettano ancora fra le tende.')];
+      return [page('nf.lodge.blocked.laura_early', 'COOPER', 'Laura guarda oltre me. Prima devo ascoltare le altre due presenze.')];
     }
     if ((actor === 'mfap' || actor === 'bob') && back === 'await_lodge_second') {
-      return [page('nf.lodge.blocked.repeat', '', 'Questa presenza ha già parlato. L\'altra aspetta nella stanza.')];
+      return [page('nf.lodge.blocked.repeat', 'COOPER', 'Hai già parlato. L\'altra presenza aspetta; questa volta rispetto l\'ordine.')];
     }
     if ((actor === 'mfap' || actor === 'bob') && back === 'await_laura') {
-      return [page('nf.lodge.blocked.after_two', '', 'Le due presenze tacciono. Ora resta Laura.')];
+      return [page('nf.lodge.blocked.after_two', 'COOPER', 'Avete parlato entrambi. Ora Laura, senza altre scorciatoie.')];
     }
-    return [page('nf.lodge.blocked.exit', '', 'Le sedie sono vuote. Resta l\'uscita fra le tende.')];
+    return [page('nf.lodge.blocked.exit', 'COOPER', 'Le sedie sono vuote. Resta l\'uscita; per una volta, è una direzione sufficiente.')];
   }
 
   function woodsPages() {
@@ -422,6 +425,7 @@
     var pages = [page('nf.epilogue.station.01', '', 'Twin Peaks prima del caffè. La segheria fuma dritta.')];
     if (carryValue('s3') === 'on') pages.push(page('nf.epilogue.s3.on', 'TRUMAN', 'Il nastro è sigillato. La contea discute come chiamarlo. È agli atti.'));
     else pages.push(page('nf.epilogue.s3.off', 'TRUMAN', 'Ho firmato la mia testimonianza sul resto. La pagina più pesante è a mio nome.'));
+    pages.push(page('nf.epilogue.station.cooper', 'COOPER', 'Harry, prima del caffè: separiamo ciò che è agli atti da ciò che porteremo noi.'));
     if (carryValue('s1') === 'documented_custody' && carryValue('ring_final_gesture') === 'kept') {
       pages.push(page('nf.epilogue.ring.kept', '', 'Cooper posa anello e modulo sul bancone. Truman controfirma. Nessuno commenta.'));
     } else if (carryValue('s1') === 'documented_custody' && carryValue('ring_final_gesture') === 'left') {
@@ -435,12 +439,30 @@
   }
 
   function sarahEpiloguePages() {
-    if (carryValue('sarah_support_state') === 'vice') return [page('nf.epilogue.sarah.vice', '', 'Andy esce da casa Palmer con due tazze vuote. Qualcuno dorme; qualcuno veglia.')];
-    return [page('nf.epilogue.sarah.truman', '', 'L\'auto di Truman è ancora davanti a casa Palmer. La luce del portico è accesa.')];
+    if (carryValue('sarah_support_state') === 'vice') return [
+      page('nf.epilogue.sarah.vice', '', 'Andy esce da casa Palmer con due tazze vuote. Qualcuno dorme; qualcuno veglia.'),
+      page('nf.epilogue.sarah.vice.cooper', 'COOPER', 'Andy porta due tazze. Non busso: casa Palmer ha diritto a dormire.')
+    ];
+    return [
+      page('nf.epilogue.sarah.truman', '', 'L\'auto di Truman è ancora davanti a casa Palmer. La luce del portico è accesa.'),
+      page('nf.epilogue.sarah.truman.cooper', 'COOPER', 'Harry è rimasto. Non busso: questa casa ha diritto a un\'ora di sonno.')
+    ];
   }
 
   function ronetteEpiloguePages() {
-    return [page('nf.epilogue.ronette', 'INFERMIERA', 'Stamattina ha chiesto dell\'acqua. Con le parole.')];
+    return [
+      page('nf.epilogue.ronette', 'INFERMIERA', 'Stamattina ha chiesto dell\'acqua. Con le parole.'),
+      page('nf.epilogue.ronette.cooper', 'COOPER', 'Ronette ha chiesto acqua con le parole. Oggi questa è una notizia completa.')
+    ];
+  }
+
+  function optionalRepeatPages(kind) {
+    if (kind === 'sarah') return [
+      page('nf.epilogue.sarah.repeat', 'COOPER', 'La luce è accesa. Una seconda visita servirebbe a me, non a Sarah.')
+    ];
+    return [
+      page('nf.epilogue.ronette.repeat', 'COOPER', 'L\'acqua è arrivata. Non trasformo una buona notizia in un\'altra intervista.')
+    ];
   }
 
   function exitPages() {
@@ -485,6 +507,8 @@
     if (stage === 'epilogue_station') return stationPages();
     if (stage === 'epilogue_sarah') return sarahEpiloguePages();
     if (stage === 'epilogue_ronette') return ronetteEpiloguePages();
+    if (stage === 'epilogue_sarah_repeat') return optionalRepeatPages('sarah');
+    if (stage === 'epilogue_ronette_repeat') return optionalRepeatPages('ronette');
     if (stage === 'epilogue_exit') return exitPages();
     return [];
   }
@@ -731,6 +755,7 @@
     else if (stage === 'epilogue_station') return pauseAt('await_epilogue_exit');
     else if (stage === 'epilogue_sarah') { run.state.epilogue_seen.sarah = true; return pauseAt('await_epilogue_exit'); }
     else if (stage === 'epilogue_ronette') { run.state.epilogue_seen.ronette = true; return pauseAt('await_epilogue_exit'); }
+    else if (stage === 'epilogue_sarah_repeat' || stage === 'epilogue_ronette_repeat') return pauseAt('await_epilogue_exit');
     else if (stage === 'epilogue_exit') return complete();
     run.state.page_index = 0;
     return { ok: true, screen: emit() };
@@ -852,7 +877,8 @@
     lodge_nano: 1, ring_choice: 1, ring_feedback: 1, lodge_bob: 1, bob_choice: 1,
     bob_reaction: 1, lodge_laura: 1, lodge_blocked: 1, woods: 1,
     s4_choice: 1, epilogue_station: 1, epilogue_sarah: 1,
-    epilogue_ronette: 1, epilogue_exit: 1
+    epilogue_ronette: 1, epilogue_sarah_repeat: 1, epilogue_ronette_repeat: 1,
+    epilogue_exit: 1
   };
   var PAUSED_STAGES = {
     await_lodge: 1, await_lodge_second: 1, await_laura: 1,
@@ -867,6 +893,7 @@
     bob_choice: 1, bob_reaction: 1, lodge_laura: 1, lodge_blocked: 1,
     woods: 1, s4_choice: 1, await_epilogue_station: 1, epilogue_station: 1,
     await_epilogue_exit: 1, epilogue_sarah: 1, epilogue_ronette: 1,
+    epilogue_sarah_repeat: 1, epilogue_ronette_repeat: 1,
     epilogue_exit: 1, complete: 1
   };
   var S3_REQUIRED = {
@@ -875,7 +902,9 @@
     ring_choice: 1, ring_feedback: 1, lodge_bob: 1, bob_choice: 1, bob_reaction: 1,
     lodge_laura: 1, lodge_blocked: 1, woods: 1, s4_choice: 1,
     await_epilogue_station: 1, epilogue_station: 1, await_epilogue_exit: 1,
-    epilogue_sarah: 1, epilogue_ronette: 1, epilogue_exit: 1, complete: 1
+    epilogue_sarah: 1, epilogue_ronette: 1,
+    epilogue_sarah_repeat: 1, epilogue_ronette_repeat: 1,
+    epilogue_exit: 1, complete: 1
   };
   function pageCountForSavedState(state) {
     var previous = run, count = 0;
@@ -961,7 +990,9 @@
     if (state.encounters.length && ['nano_first', 'bob_first'].indexOf(state.values.encounter_order) < 0) return false;
     if (state.encounters.indexOf('bob') >= 0 && ['A', 'B', 'C'].indexOf(state.values.bob_response_stance) < 0) return false;
     if ((state.stage === 'await_epilogue_station' || state.stage === 'epilogue_station' || state.stage === 'await_epilogue_exit' ||
-         state.stage === 'epilogue_sarah' || state.stage === 'epilogue_ronette' || state.stage === 'epilogue_exit' || state.stage === 'complete') &&
+         state.stage === 'epilogue_sarah' || state.stage === 'epilogue_ronette' ||
+         state.stage === 'epilogue_sarah_repeat' || state.stage === 'epilogue_ronette_repeat' ||
+         state.stage === 'epilogue_exit' || state.stage === 'complete') &&
         ['avvertimento', 'istruzione', 'diagnosi'].indexOf(state.values.s4_interpretation) < 0) return false;
     if (CHOICE_STAGES[state.stage] || PAUSED_STAGES[state.stage] || state.stage === 'complete') {
       if (state.page_index !== 0) return false;
@@ -1037,7 +1068,11 @@
   NF.resumeEpilogueStation = function (opts) { return transaction(function () { return resume('await_epilogue_station', 'epilogue_station', opts); }); };
   function resumeEpilogueOptional(kind, opts) {
     if (kind !== 'sarah' && kind !== 'ronette') return { ok: false, error: 'invalid_epilogue_optional' };
-    if (run && run.state.epilogue_seen[kind]) return { ok: true, repeated: true, state: clone(run.state) };
+    if (run && run.state.epilogue_seen[kind]) {
+      var repeated = resume('await_epilogue_exit', 'epilogue_' + kind + '_repeat', opts);
+      if (repeated && repeated.ok) repeated.repeated = true;
+      return repeated;
+    }
     return resume('await_epilogue_exit', 'epilogue_' + kind, opts);
   }
   NF.resumeEpilogueOptional = function (kind, opts) { return transaction(function () { return resumeEpilogueOptional(kind, opts); }); };

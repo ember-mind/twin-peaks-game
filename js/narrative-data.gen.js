@@ -203,6 +203,14 @@
        "mode": "dialogue",
        "speaker_id": "infermiera",
        "display_name": "INFERMIERA"
+      },
+      {
+       "name": "COOPER",
+       "text": "Signorina Pulaski, una domanda alla volta. Se vuole fermarmi, guardi l'infermiera.",
+       "id": "m4.b2.ronette_q.p03",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER"
       }
      ],
      "choices": [
@@ -236,6 +244,13 @@
          "speaker_id": "infermiera",
          "display_name": "INFERMIERA",
          "text": "Ha riposato. Dieci minuti, come prima."
+        },
+        {
+         "id": "m4.b2.ronette_q.reopen.cooper",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Signorina Pulaski, ripartiamo da ciò che ricorda lei. Il mio taccuino può aspettare."
         }
        ]
       }
@@ -820,6 +835,14 @@
        "mode": "dialogue",
        "speaker_id": "truman",
        "display_name": "TRUMAN"
+      },
+      {
+       "name": "COOPER",
+       "text": "Harry, separo ciò che sospetto da ciò su cui possiamo camminare. Cominciamo dal nesso più solido.",
+       "id": "m4.b9.present_truman_m4.p02",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER"
       }
      ],
      "presentation": {
@@ -916,12 +939,12 @@
       "target_actor_id": "truman"
      },
      "repeat": {
-      "name": "TRUMAN",
-      "text": "I binari. Prendi Hawk, e non toccare niente finché non arrivo.",
+      "name": "COOPER",
+      "text": "Diane, Harry manda me e Hawk ai binari. Il verbo importante è «non toccare».",
       "id": "m4.repeat.present_truman_m4",
       "mode": "dialogue",
-      "speaker_id": "truman",
-      "display_name": "TRUMAN"
+      "speaker_id": "cooper",
+      "display_name": "COOPER"
      },
      "kind": "dialogue",
      "channel": "world",
@@ -1151,6 +1174,13 @@
        "id": "m5.b3.discovery.p03",
        "mode": "action",
        "text": "(Dentro: un sedile divelto, una lamiera piegata, terra presso la porta. Al centro, una traversa sgombra.)"
+      },
+      {
+       "id": "m5.b3.discovery.p04",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Prima terra, lamiera e distanze. Il vagone può aspettare un minuto prima di diventare una storia."
       }
      ],
      "effects": [
@@ -1202,6 +1232,13 @@
        "id": "m5.b5.mound.p04",
        "mode": "notebook",
        "text": "\"FUOCO CAMMINA CON ME\"."
+      },
+      {
+       "id": "m5.b5.mound.p05",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Pieghe pulite sotto terra; un lembo resta fuori. Registro posizione e testo separatamente."
       }
      ],
      "effects": [
@@ -1251,6 +1288,13 @@
        "id": "m5.b6.ring.p04",
        "mode": "notebook",
        "text": "La polvere intorno è intatta. Non vedo il percorso che avrebbe fatto cadendo."
+      },
+      {
+       "id": "m5.b6.ring.p05",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Centro esatto, polvere intatta. Prima di chiedere di chi fosse, annotiamo come stava qui."
       }
      ],
      "effects": [
@@ -1290,6 +1334,13 @@
        "id": "m5.b7.scene.p02",
        "mode": "notebook",
        "text": "La violenza ha i suoi segni ai bordi. Fra i bordi e il centro: nessun passaggio."
+      },
+      {
+       "id": "m5.b7.scene.p03",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Segni ai bordi, nessun trascinamento verso il centro. La stanza tiene separate due geometrie."
       }
      ],
      "effects": [
@@ -1671,8 +1722,10 @@
      "effects": [],
      "repeat": {
       "id": "m5.repeat.report",
-      "mode": "action",
-      "text": "(Il vagone è sigillato col nastro della centrale. Hawk fa un cenno: niente di nuovo.)"
+      "mode": "dialogue",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Il vagone è sigillato. Hawk non vede nulla di nuovo. Nemmeno io, per ora."
      },
      "invariant": "già committata con continuation incompleta → riprende next (m5_s1), MAI il repeat; repeat SOLO con east_route_confirmed (repeat_when)",
      "kind": "dialogue",
@@ -1804,6 +1857,13 @@
        "id": "m5.sign_oej.p01",
        "mode": "action",
        "text": "\"ONE EYED JACKS — oltre il confine\". Una freccia indica il sentiero a nord."
+      },
+      {
+       "id": "m5.sign_oej.p02",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Una freccia oltre confine non è una prova. È però un invito geograficamente molto preciso."
       }
      ],
      "effects": [],
@@ -2085,6 +2145,13 @@
        "speaker_id": "hawk",
        "display_name": "HAWK",
        "text": "(fuori, piano) Di là dal fiume comanda il fiume. Io resto all'uscita: è l'unica."
+      },
+      {
+       "id": "m6.b1.ferry.p05",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Un solo varco d'uscita e molti occhi abbassati. Hawk terrà il primo; io conterò i secondi."
       }
      ],
      "effects": [],
@@ -2171,6 +2238,13 @@
        "id": "m6.b4.tactic.p02",
        "mode": "notebook",
        "text": "Come ti siedi davanti a Jacques?"
+      },
+      {
+       "id": "m6.b4.tactic.p03",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Jacques conta le carte, non le uscite. Scelgo il metodo prima di scegliere la prima domanda."
       }
      ],
      "choices": [
@@ -2813,6 +2887,13 @@
        "id": "m6.b7b.night.p04",
        "mode": "action",
        "text": "(Il telefono di Lucy squilla. Risponde, poi alza lo sguardo verso Cooper.)"
+      },
+      {
+       "id": "m6.b7b.night.p05",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Diane, Jacques è in custodia. Firmo il rapporto prima che la memoria cominci a correggerlo."
       }
      ],
      "effects": [],
@@ -2980,9 +3061,9 @@
      "repeat": {
       "id": "m6.repeat.atto4_bridge",
       "mode": "dialogue",
-      "speaker_id": "truman",
-      "display_name": "TRUMAN",
-      "text": "Vada a riposare, agente. Domani sarà peggio."
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Diane, Truman ha ragione: domani sarà peggio. Per stanotte, caffè e rapporto."
      },
      "invariant": "jacques_dead e gigante1 sono conoscenza acquisita prima del rapporto; atto4 nasce solo dopo l'ultima pagina e apre M8 senza fallback legacy.",
      "kind": "dialogue",
@@ -3427,6 +3508,13 @@
        "id": "m8.b.roadhouse.p06",
        "mode": "notebook",
        "text": "Il telefono del Roadhouse."
+      },
+      {
+       "id": "m8.b.roadhouse.p07",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Harry, non so ancora cosa si ripeta. Abbiamo un telefono; scelgo chi deve sentire l'avvertimento."
       }
      ],
      "choices": [
@@ -3582,6 +3670,32 @@
        }
       },
       {
+       "id": "m8.b0.leland_taxi.autonomia.p01",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Maddy ha scelto Missoula. Non aggiungo un «ma»: verifico gli orari e le lascio la partenza.",
+       "condition": {
+        "value_is": {
+         "name": "promise_stance",
+         "equals": "autonomia"
+        }
+       }
+      },
+      {
+       "id": "m8.b0.leland_taxi.prudenza.p01",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Ho chiesto a Maddy una telefonata. Il taxi delle sette aggiunge un orario, non una garanzia.",
+       "condition": {
+        "value_is": {
+         "name": "promise_stance",
+         "equals": "prudenza"
+        }
+       }
+      },
+      {
        "id": "m8.b0.leland_taxi.accompagno.p02",
        "mode": "dialogue",
        "speaker_id": "leland",
@@ -3608,9 +3722,9 @@
      "repeat": {
       "id": "m8.repeat.leland_taxi",
       "mode": "dialogue",
-      "speaker_id": "leland",
-      "display_name": "LELAND",
-      "text": "La prima corriera, agente. Il taxi è prenotato."
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Taxi alle sette, corriera alle 7:40. Ripeto gli orari finché non compare una prenotazione."
      },
      "invariant": "La falsa storia nasce fisicamente al diner DOPO la promessa e PRIMA del Roadhouse/presagio/ritrovamento. Se Cooper ha offerto di accompagnare Maddy, verifica subito la compatibilità 7:00/7:10 e Leland conferma che il taxi aspetterà: nessuna contraddizione fabbricata o ignorata. M9 può solo verificare la prenotazione, mai creare la storia retroattivamente né usare gli orari come prova d'omicidio.",
      "kind": "dialogue",
@@ -3649,6 +3763,13 @@
        "id": "m8.c.focus.p02",
        "mode": "notebook",
        "text": "Dove andare, adesso?"
+      },
+      {
+       "id": "m8.c.focus.p03",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Tre luoghi e nessun fatto che ne preferisca uno. Scelgo una direzione, non una conclusione."
       }
      ],
      "choices": [
@@ -3741,6 +3862,13 @@
        "speaker_id": "lucy",
        "display_name": "LUCY",
        "text": "Agente — una chiamata anonima, qualcosa sulla riva del lago. Hawk è già in strada."
+      },
+      {
+       "id": "m8.c.route_palmer.p05",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Lucy, ricevuto. Non tocco nulla qui; raggiungo Hawk al lago."
       }
      ],
      "effects": [
@@ -3780,6 +3908,13 @@
        "id": "m8.c.route_lake.p01",
        "mode": "action",
        "text": "(L'acqua è ferma. Sulla riva, una forma che l'acqua non reclama. Cooper arriva per primo.)"
+      },
+      {
+       "id": "m8.c.route_lake.p02",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Fermo al perimetro. Prima proteggo la scena; poi troverò le parole per Maddy."
       }
      ],
      "effects": [
@@ -3827,6 +3962,13 @@
        "id": "m8.c.route_diner.p02",
        "mode": "action",
        "text": "(Il tempo di uscire: la radio di Hawk gracchia il nome del lago — una chiamata anonima ha segnalato qualcosa sulla riva.)"
+      },
+      {
+       "id": "m8.c.route_diner.p03",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Hawk ha il lago. Norma conferma che Maddy è tornata dai Palmer; porto con me questo ordine."
       }
      ],
      "effects": [
@@ -3898,6 +4040,13 @@
          "speaker_id": "hawk",
          "display_name": "HAWK",
          "text": "L'ho trovata io. Non l'ho mossa. Non ho toccato le mani. Guarda l'anulare."
+        },
+        {
+         "id": "m8.d.discovery.hawk.p03",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Hawk, hai fatto bene. Osservo da dove ti sei fermato; una scena preservata ha due paia d'occhi."
         }
        ]
       }
@@ -4279,8 +4428,10 @@
      "effects": [],
      "repeat": {
       "id": "m8.repeat.station",
-      "mode": "action",
-      "text": "(Il lago è recintato. Nessuno usa più quel sentiero.)"
+      "mode": "dialogue",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Il lago è recintato. Nessuno usa più quel sentiero; la scena, almeno, può restare ferma."
      },
      "invariant": "Sarah non è mai oracolo (dorme; il vice la sostiene, non scopre corpi); la valigia/biglietto è visibile SE E SOLO SE warning_target=palmer (di persona in C se focus=palmer, via Truman qui se focus=lago|diner; con warning=centrale|nessuno nessuna pagina valigia in alcun percorso); il lutto di Truman è logistico; obiettivo «contraddizione a Truman» → M9; M8 NON completa la funzione procedurale di M9, non tratta P8 come base della convocazione",
      "kind": "dialogue",
@@ -4851,9 +5002,9 @@
      "repeat": {
       "id": "m9.repeat.present",
       "mode": "dialogue",
-      "speaker_id": "truman",
-      "display_name": "TRUMAN",
-      "text": "L'ho chiamato io. Verrà a piedi, come viene qui chiunque."
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Leland verrà a piedi. Preparo domande e un tavolo libero: questa resta una convocazione volontaria."
      },
      "effects": [],
      "invariant": "P6 è l'UNICA base procedurale: P7/P8 sono annotate e mai accettate come base (VALID_BUT_NOT_PROCEDURAL); la visione di Sarah è respinta come atto e riconosciuta come direzione, mai come prova; l'allegato è MANUALE e sbagliarlo COSTA (NO_CORROBORATION, ripresentabile); Truman VUOLE sbagliarsi e obietta una volta sola (il lutto), poi firma la convocazione dell'amico; nessuna riga attribuisce un omicidio, nessun arresto, nessuna divisa a casa Palmer; l'eco M8 (letter_o_observation_source / sarah_support_state / warning_target) cambia RIGHE, mai il gate; atto5 nasce QUI (unico writer): il mondo classico diventa vero — Leland alla centrale",
@@ -4923,13 +5074,22 @@
        "speaker_id": "leland",
        "display_name": "LELAND",
        "text": "(posa il cappotto, siede al centro esatto della sedia) Allora facciamola bene."
+      },
+      {
+       "id": "m9.b3.arrivo.p07",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Leland è venuto senza scorta e si è seduto da solo. Tratto la precisione come comportamento, non come prova."
       }
      ],
      "effects": [],
      "repeat": {
       "id": "m9.repeat.arrivo",
-      "mode": "action",
-      "text": "(La panca d'attesa è vuota. La cornetta di Lucy è ancora calda.)"
+      "mode": "dialogue",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "La panca è vuota e la cornetta ancora calda. Leland è già nella stanza in fondo."
      },
      "invariant": "arrivo VOLONTARIO: da solo, a piedi, senza scorta — nessun arresto, nessun provvedimento, nessuna aura; Leland è persona informata, cordiale, esatto (il nodo della cravatta perfetto, la barba di tre giorni); NESSUN segnale BOB in M9 (i due segnali — ritratto e cambio di registro — esistono SOLO in M10-B5); nessuna battuta assolve nessuno; nessuna guardia `not node_done` (renderebbe il repeat irraggiungibile — lezione C8-A.1 B6)",
      "kind": "dialogue",

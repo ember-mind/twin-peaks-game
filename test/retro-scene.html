@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>TP-RETRO-LOADING</title>
+<style>
+  html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #111913; }
+  #stage { position: fixed; left: 0; top: 0; width: 800px; height: 720px; transform: none; }
+  canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="game" width="160" height="144"></canvas></div>
+<script src="../js/tiles.js?v=r60i"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=r60i"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=gold46"></script>
+<script src="../js/engine.js?v=r60i"></script>
+<script src="../js/glue.js?v=gold48"></script>
+<script src="../js/retro.js?v=r60i"></script>
+<script src="../js/retro-authored.js?v=r60i"></script>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var map = q.get('map') || 'sheriff';
+  var x = Number(q.get('x') || 6);
+  var y = Number(q.get('y') || 8);
+  var dir = q.get('dir') || 'up';
+  var cv = document.getElementById('game');
+  var stage = document.getElementById('stage');
+  var fit = Math.min(innerWidth / 160, innerHeight / 144);
+  var scale = fit >= 1 ? Math.max(1, Math.floor(fit)) : fit;
+  stage.style.width = Math.floor(160 * scale) + 'px';
+  stage.style.height = Math.floor(144 * scale) + 'px';
+  stage.style.left = Math.floor((innerWidth - parseInt(stage.style.width, 10)) / 2) + 'px';
+  stage.style.top = Math.floor((innerHeight - parseInt(stage.style.height, 10)) / 2) + 'px';
+  /* Modalita' silhouette (?silhouette=1): dipinge in nero pieno i tile
+   * edificio e in bianco tutto il resto. Serve a verificare che gli ingombri
+   * siano davvero diversi fra loro, senza che colore, tetto e insegne
+   * mascherino il fatto che la sagoma e' sempre la stessa. Vive solo qui
+   * nell'harness: il gioco non la conosce. */
+  if (q.get('silhouette') === '1') {
+    var realDrawTile = GAME.Sprites.drawTile;
+    GAME.Sprites.drawTile = function (ctx, ch, x, y, tx, ty, rows) {
+      var isBuilding = '0123456789D'.indexOf(ch) >= 0;
+      ctx.fillStyle = isBuilding ? '#000000' : '#ffffff';
+      ctx.fillRect(x, y, 16, 16);
+    };
+    GAME.Sprites.drawChar = function () {};
+    if (GAME.sprites && GAME.sprites.drawStructures) GAME.sprites.drawStructures = function () {};
+  }
+  GAME.Engine.init(cv, null);
+  GAME.Engine.start();
+  setTimeout(function () {
+    GAME.Engine.state.mode = 'play';
+    GAME.Engine.state.flags.intro_town = true;
+    GAME.Engine.loadMap(map, x, y, dir);
+    if (q.get('dialogue') === '1') {
+      GAME.Engine.state.dialogue = {
+        id: 'visual-audit', def: { pages: [] }, replay: true, i: 0,
+        pages: [{ name: 'COOPER', text: 'Harry. Ho sognato una stanza rossa.' }]
+      };
+    }
+    /* Non dichiarare READY prima che almeno alcuni rAF abbiano dipinto la
+     * scena richiesta. La vecchia esportazione a 80 ms poteva fotografare il
+     * titolo pur avendo gia' cambiato state.mode: prova falsa nel Gauntlet. */
+    setTimeout(function exportNativeFrame() {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          document.body.setAttribute('data-native-png', cv.toDataURL('image/png'));
+          document.title = 'TP-RETRO-READY ' + map;
+        });
+      });
+    }, 360);
+  }, 40);
+})();
+</script>
+</body>
+</html>

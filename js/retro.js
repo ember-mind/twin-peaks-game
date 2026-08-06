@@ -137,6 +137,11 @@
         R(c, x + 2, y + 1, 3, 14, P.cream); R(c, x + 8, y + 1, 3, 14, P.cream);
         R(c, x + 14, y + 1, 2, 14, P.cream);
         break;
+      case ':':
+        R(c, x, y, 16, 16, P.road);
+        R(c, x + 1, y + 2, 14, 3, P.cream); R(c, x + 1, y + 8, 14, 3, P.cream);
+        R(c, x + 1, y + 14, 14, 2, P.cream);
+        break;
       case 'p':
         R(c, x, y, 16, 16, P.path);
         R(c, x, y, 2, 16, P.pathDark); R(c, x + 14, y, 2, 16, P.pathDark);

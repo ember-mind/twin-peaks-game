@@ -443,10 +443,24 @@
   function checkCond(c, st) {
     st = st || S;
     if (!c) return false;
+    if (Object.prototype.toString.call(c) === '[object Array]') {
+      for (var i = 0; i < c.length; i++) if (!checkCond(c[i], st)) return false;
+      return true;
+    }
+    if (typeof c !== 'string') return false;
+    // Il layer classico può leggere prove narrative senza copiarle in flag
+    // legacy. Uno stato esplicito con `evidence` resta simulabile dai test;
+    // nel gioco il resolver consulta lo stato posseduto dall'adapter.
+    var narrativeState = st && st.evidence ? st : null;
+    if (!narrativeState && (!st || st === S) && GAME.NarrativeAdapter && GAME.NarrativeAdapter.getState) {
+      narrativeState = GAME.NarrativeAdapter.getState();
+    }
+    if (c.indexOf('evidence:') === 0) return !!(narrativeState && narrativeState.evidence && narrativeState.evidence[c.slice(9)]);
+    if (c.indexOf('nflag:') === 0) return !!(narrativeState && narrativeState.flags && narrativeState.flags[c.slice(6)]);
     var m = /^clues(\d+)$/.exec(c);
-    if (m) return st.clues.length >= +m[1];
-    if (c.indexOf('!flag:') === 0) return !st.flags[c.slice(6)];
-    if (c.indexOf('flag:') === 0) return !!st.flags[c.slice(5)];
+    if (m) return !!(st && st.clues) && st.clues.length >= +m[1];
+    if (c.indexOf('!flag:') === 0) return !(st && st.flags && st.flags[c.slice(6)]);
+    if (c.indexOf('flag:') === 0) return !!(st && st.flags && st.flags[c.slice(5)]);
     return false;
   }
 
@@ -492,7 +506,9 @@
     d.i++;
     if (d.i < d.pages.length) { audioSfx('page'); return; }
     S.dialogue = null;
-    if (!d.replay) {
+    // Ispezioni ambientali sono osservazioni ripetibili: non diventano stato
+    // di missione e non producono nemmeno il flag tecnico done_<dialogue>.
+    if (!d.replay && !d.def.transient) {
       var acquired = false;
       if (d.def.give) {
         d.def.give.forEach(function (c) {
@@ -617,7 +633,20 @@
       return;
     }
     var obj = GAME.Maps.objectAt(S.mapId, fx, fy);
-    if (obj) { audioSfx('interact'); startDialogue(resolveDialogue(obj.dialogue)); }
+    if (obj) {
+      audioSfx('interact');
+      startDialogue(resolveDialogue(obj.dialogue));
+      return;
+    }
+    // Ultima precedenza: una tile solida priva di interazione authored riceve
+    // un'osservazione di Cooper. Terreno, porte e spazio vuoto restano muti.
+    if (GAME.EnvironmentalInspect && GAME.EnvironmentalInspect.resolve) {
+      var environmental = GAME.EnvironmentalInspect.resolve(S.mapId, fx, fy, S);
+      if (environmental) {
+        audioSfx('interact');
+        startDialogue(environmental);
+      }
+    }
   }
 
   function bumpMsg(id) {
@@ -808,7 +837,7 @@
     }
     entityList().forEach(function (e) {
       var pal = GAME.Sprites.CHARS[e.sprite] || GAME.Sprites.CHARS.cooper;
-      GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, pal, e.dir, e.fr, e.alpha, e.moving, tGlobal);
+      GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, pal, e.dir, e.fr, e.alpha, e.moving, S.mapId === 'woods', tGlobal);
     });
   }
 
@@ -864,7 +893,7 @@
       ectx.setTransform(1, 0, 0, 1, 0, 0);
       ectx.clearRect(0, 0, 48, 60);
       var pal = GAME.Sprites.CHARS[e.sprite] || GAME.Sprites.CHARS.cooper;
-      GAME.Sprites.drawChar(ectx, 0, 0, pal, e.dir, e.fr, 1, e.moving, tGlobal); // piedi a y ~52
+      GAME.Sprites.drawChar(ectx, 0, 0, pal, e.dir, e.fr, 1, e.moving, S.mapId === 'woods', tGlobal); // piedi a y ~52
       // posizione schermo: centro X proiettato alla scala della riga
       var offX = (e.wx + 12 - cxr) * 2;
       var scrX = (offX - (OFF_W - warpSW[di]) / 2) * s;

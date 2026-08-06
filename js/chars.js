@@ -49,7 +49,7 @@
     truman:   { skin: '#e8b88a', hair: '#49301c', shirt: '#a78450', pants: '#665334', hat: '#594225', badge: '#e8c840', eyes: '#526c73', hairStyle: 'sidepart', build: 1.08, height: 1.03, jacket: true, collar: '#d2bd8c', brows: '#3b281a' },
     lucy:     { skin: '#f0c8a0', hair: '#ddc151', shirt: '#d36f96', pants: '#79506c', long: true, bun: true, eyes: '#5b7183', hairStyle: 'bouffant', build: 0.88, height: 0.98, collar: '#f6dfe7', earring: '#f3cf65', lip: '#a94862' },
     andy:     { skin: '#e8b88a', hair: '#694921', shirt: '#aa8954', pants: '#6a5738', badge: '#e0bd3b', eyes: '#5f7d72', hairStyle: 'sidepart', build: 0.96, height: 1.04, collar: '#d7c294', brows: '#49331f' },
-    hawk:     { skin: '#a06838', hair: '#17191b', shirt: '#36588f', pants: '#253855', long: true, eyes: '#34291f', hairStyle: 'long', build: 1.00, height: 1.08, jacket: true, collar: '#8ea5bf', brows: '#171717' },
+    hawk:     { skin: '#a06838', hair: '#3c2f24', shirt: '#36588f', pants: '#253855', long: true, eyes: '#34291f', hairStyle: 'long', build: 1.00, height: 1.08, jacket: true, collar: '#8ea5bf', brows: '#171717' },
     sarah:    { skin: '#f0c8a0', hair: '#3c261b', shirt: '#70407e', pants: '#70407e', long: true, dress: true, eyes: '#66564b', hairStyle: 'waves', build: 0.94, height: 1.00, shawl: '#4f2e61', lip: '#9c5567' },
     leland:   { skin: '#e8b88a', hair: '#bcbec1', shirt: '#393c46', pants: '#292c34', tie: '#594055', eyes: '#617079', hairStyle: 'sidepart', build: 1.00, height: 1.06, jacket: true, lapel: '#e8e3d8', brows: '#8b8580' },
     norma:    { skin: '#f0c8a0', hair: '#54351f', shirt: '#347768', pants: '#347768', dress: true, eyes: '#586b5a', hairStyle: 'waves', build: 0.98, height: 1.00, apron: '#efe4cd', collar: '#f6ead7', lip: '#a9515f' },

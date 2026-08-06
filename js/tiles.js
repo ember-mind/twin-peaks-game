@@ -111,6 +111,7 @@
     if (cx < 0 || cx >= row.length) return ' ';
     return row.charAt(cx);
   }
+  function roadSemantic(ch) { return ch === 'r' || ch === '-' || ch === ':'; }
 
   // erba ordinata per famiglie di valore: una base dominante + pochissimi
   // accenti. La vecchia versione metteva 6-9 segni per tile e trasformava il
@@ -527,10 +528,10 @@
           R(ctx, x + 3, y + 3 + ((h >>> 9) % 9), 8, 1, 'rgba(225,235,232,0.16)');
         }
         if (style.wet) wetSurfaceMarks(ctx, x, y, tx, ty, h, sp[3], '#dbe6e2', 'sidewalk');
-        if (cellAt(flags, tx, ty - 1) === 'r') { R(ctx, x, y, 16, 2, sp[3]); R(ctx, x, y + 2, 16, 1, sp[2]); }
-        if (cellAt(flags, tx, ty + 1) === 'r') { R(ctx, x, y + 14, 16, 2, sp[3]); R(ctx, x, y + 13, 16, 1, sp[2]); }
-        if (cellAt(flags, tx - 1, ty) === 'r') { R(ctx, x, y, 2, 16, sp[3]); R(ctx, x + 2, y, 1, 16, sp[2]); }
-        if (cellAt(flags, tx + 1, ty) === 'r') { R(ctx, x + 14, y, 2, 16, sp[3]); R(ctx, x + 13, y, 1, 16, sp[2]); }
+        if (roadSemantic(cellAt(flags, tx, ty - 1))) { R(ctx, x, y, 16, 2, sp[3]); R(ctx, x, y + 2, 16, 1, sp[2]); }
+        if (roadSemantic(cellAt(flags, tx, ty + 1))) { R(ctx, x, y + 14, 16, 2, sp[3]); R(ctx, x, y + 13, 16, 1, sp[2]); }
+        if (roadSemantic(cellAt(flags, tx - 1, ty))) { R(ctx, x, y, 2, 16, sp[3]); R(ctx, x + 2, y, 1, 16, sp[2]); }
+        if (roadSemantic(cellAt(flags, tx + 1, ty))) { R(ctx, x + 14, y, 2, 16, sp[3]); R(ctx, x + 13, y, 1, 16, sp[2]); }
         break;
       }
       case '-': { // strisce pedonali: base della strada + 3 barre bianco sporco, orientate secondo la strada
@@ -549,6 +550,15 @@
             if ((h + i) % 4 === 0) R(ctx, x + 3 + ((h >> 2) % 8), y + 1 + i * 5 + (h % 3), 1, 1, crossRoad[0]);
           }
         }
+        break;
+      }
+      case ':': { // zebra est-ovest su strada verticale: barre orizzontali continue
+        var crossVertical = TERRAIN.road[style.wet ? 'wet' : 'dry'];
+        R(ctx, x, y, 16, 16, crossVertical[0]);
+        macroWash(ctx, x, y, tx, ty, crossVertical[2], crossVertical[1], 0.1);
+        aggregate(ctx, x, y, h, crossVertical[1], crossVertical[2], 1);
+        var stripeEW = style.wet ? '#d2d7d2' : '#e1e0d7';
+        for (i = 0; i < 3; i++) R(ctx, x + 1, y + 1 + i * 5, 14, 3, stripeEW);
         break;
       }
       case ',': { // erba fiorita: stessa erba di '.' con 3-5 fiorellini deterministici

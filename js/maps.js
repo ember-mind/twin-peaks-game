@@ -2,13 +2,14 @@
    Legenda tile:
    . erba        g erba scura (bosco)  r strada      p sentiero terra
    w acqua(X)    T sempreverde(X)      Y sicomoro(X) S cartello(X)
-   1 distretto(X) 2 DoubleR(X) 3 casaPalmer(X) 4 hotel(X)  -> muri edifici
-   5 ospedale(X) 6 roadhouse(X)                            -> muri edifici
+   0 bottega/casa(X) 1 distretto(X) 2 DoubleR(X) 3 casaPalmer(X) 4 hotel(X)
+   5 ospedale(X) 6 roadhouse(X) 9 grandi magazzini Horne(X) -> muri edifici
    i muro int.(X) D porta              f parquet     c tappeto
    C bancone(X)  t tavolo(X)  h sedia(X)  K letto(X)  U comò(X)
    o olio        R tenda rossa(X)      Z zig-zag     M statua(X)
    v vuoto(X)    X transenna (apre con 3 indizi -> gate)
-   arredo urbano (town): = marciapiede    - strisce pedonali  , erba fiorita
+   arredo urbano (town): = marciapiede    u piazza in ghiaia  - strisce N-S
+   : strisce E-O sulla strada verticale   , erba fiorita
    L lampione(X)  P palo telefono(X)  B panchina(X)  F staccionata(X)
    A aiuola fiorita(X)  H idrante(X)  E cassetta postale(X)  n cespuglio(X)
    (X) = solido
@@ -22,7 +23,7 @@
 
   M.SOLID = {
     T: 1, S: 1, w: 1,
-    '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1, '7': 1, '8': 1,
+    '0': 1, '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1, '7': 1, '8': 1, '9': 1,
     i: 1, C: 1, t: 1, h: 1, K: 1, U: 1,
     Y: 1, R: 1, M: 1, v: 1, G: 1,
     L: 1, P: 1, B: 1, F: 1, A: 1, H: 1, E: 1, n: 1, q: 1
@@ -37,41 +38,53 @@
         //01234567890123456789012345678901234567890123456789012345
         'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTXTTTTT', // 0  X = sentiero bosco
         'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTpTTTTT', // 1
-        'T.................................................p....T', // 2
-        'T....TTTTTTTTTT....TTTTTTTTTT........TTTTTTTTTT...p....T', // 3  siepi dietro hotel/ospedale/palmer
-        'Tn...4444444444.....55555555.........3333333333...p.,..T', // 4
-        'T....4444444444.....55555555.........3333333333...p.n..T', // 5
-        'T....4444D44444.....555D5555.........33333D3333...p....T', // 6  hotel / ospedale / casa Palmer
-        'T.......ApA...........ApA............FFFFFpFFFF...p....T', // 7  aiuole hotel/ospedale, staccionata giardino Palmer
-        'T........p.......n.....p.wFF..............p.......p....T', // 8
-        'T........p..........T..p.wFF77773333......p.......p..,.T', // 9 Bookhouse + rail + edificio giallo
-        'T........p...,.........p.wFF77773333......p.......p....T', // 10
-        'T........p.............p.wFF77773333....,.p.......p....T', // 11
-        'T........p.............p.wFF77773333......p.......p....T', // 12
-        'T===L====pE=====L======p====L===========L=pE======p=L==T', // 13 marciapiede nord, lampioni, cassette postali
-        'Trrrrrrrr--r--rrrrrrrrrrrwFFrrrrrrrrrrrrrr--rrrrrrrrrrrr', // 14 strada waterfront: acqua/rail a sinistra
-        'Trrrrrrrr--r--rrrrrrrrrrrwFFrrrrrrrrrrrrrr--rrrrrrrrrrrr', // 15
-        'T=====P===L=======P===L==wFFFFF=============P=L========T', // 16 rail orizzontale sul waterfront
-        'T,....n..TTTTTTT.........wFFFFF........TTTTTTT.........T', // 17
-        'T.........11111..........wwwww.........2222222.........T', // 18
-        'T.........11111...........=rr=.........2222222..H......T', // 19 idrante vicino al diner
-        'T.........11D11...........=rr=.........222D222.........T', // 20 distretto / Double R
-        'T.......FFFpppFFF.....n.T.=rr=...........ppp....TTTTTT.T', // 21 vialetti distretto/diner, recinto
-        'T.,T..gggg.ppp...q........=rr=...........ppp....G.G.G..T', // 22 cassa servizio
-        'T..gggg....ppp.,B.........=rr=n..........ppp...........T', // 23
-        'T..ggggT..n...n.A.........=rr=...................G.G.G.T', // 24
-        'T.......B............T....=rr=........n....gggg........T', // 25
-        'T...wwwwwwwwwwF...........=rr=.............,66666666...T', // 26 lago / roadhouse, staccionata riva est
-        'T..,wwwwwwwwwwF...........=rr=.....T........66666666...T', // 27
-        'T..nwwwwwwwwwwF...........=rr=,.............666D6666...T', // 28 porta roadhouse
-        'T...wwwwwwwwwwF...........=rrB=A...............p......nT', // 29 piazza: panchina/aiuola
-        'T...wwwwwwwwwwF..,T.......=rr=S=H..............p..T....T', // 30 cartello Benvenuti, piazza, idrante
-        'T...wwwwwwwwwwF...........=rr==B............,..........T', // 31 piazza: panchina
-        'T...,..............n......=rr=.........................T', // 32
-        'T.........................=rr=.,.......................T', // 33
-        'TTTTTTTTTTTTTTTTTTTTT.n..n.n...,..n.TTTTTTTTTTTTTTTTTTTT', // 34
+        'T...........................777pp.................p....T', // 2 Bookhouse arretrato di una tile
+        'T.......4444........555555..777pp999..............p....T', // 3 coppia street sopra la corsia, sfalsata
+        'T.....444444........555555..777pp999....3333......p.,..T', // 4 hotel 6-wide, ospedale a L, Palmer 4-wide
+        'T.....444444..........5555..777pp999....3333......p.n..T', // 5
+        'T.....444D44..........5D55.....pp999....33D3......p....T', // 6 porte storiche 9 / 23 / 42 invariate
+        'T.......pppppppppppppppppppppppppppppppppppp......p....T', // 7 corsia nord larga tre tile
+        'T.......pppppppppppppppppppppppppppppppppppp......p....T', // 8 interno corsia senza bordi scuri
+        'T....Tn.pppppppppppppppppppppppppppppppppppp......p..,.T', // 9 bordo sud corsia e tre bocche d'accesso
+        'T.....B.ppp....000.000pppB...............ppp..000.p....T', // 10 botteghe sotto la corsia, fuori dal frame street
+        'T.......ppp....000.000ppp................ppp..000.p....T', // 11
+        'T.......ppp....000.000ppp................ppp..000.p....T', // 12
+        'T===L===ppp===========ppp===L==..=======Lppp======p=L==T', // 13 bocche 3-wide verso i crosswalk
+        'Trrrrrrr---rrrrrrrrrrr---rrrrrrrrrrrrrrrr---rrrrrrrrrrrr', // 14 crosswalk solo centrati sugli accessi reali
+        'Trrrrrrr---rrrrrrrrrrr---rrrrrrrrrrrrrrrr---rrrrrrrrrrrr', // 15
+        'T=====PpppL=======P===L====rrr==============Pppp=======T', // 16 bocche ovest/est larghe tre tile
+        'T......ppp111111..........=rrr=..............ppp.......T', // 17 corridoio ovest, distretto traslato a est
+        'T......ppp111111..........=rrr=........222222ppp.......T', // 18 Double R affiancato al corridoio est
+        'T......ppp111111..........=rrr=........222222ppp.......T', // 19
+        'T......ppp11D111..........=rrr=........222D22ppp.......T', // 20 porte storiche 12 / 42
+        'T......pppppppF...........=rrr=..........pppppppFFpFFF.T', // 21 svolte 3-high sotto sheriff e diner
+        'T.....Bppppppp....q.......=rrr=..........pppppppG.G.G..T', // 22 interno delle due svolte
+        'T==========================rrr==============pppp..p.p..T', // 23 bordo nord passeggiata civica 3-high
+        'T==========================rrr===============pppG=G=G==T', // 24 interno passeggiata senza effetto trincea
+        'T==========================rrr==============666666.....T', // 25 bordo sud fino a Roadhouse
+        'T...wwwwwwwwwwwF..........=rrr=..........ppp666666.....T', // 26 lago / asse dominante
+        'T...wwwwwwwwwwwF..........=rrruuuuu=.....ppp666666.....T', // 27 corte aperta, solo bordo est
+        'T...wwwwwwwwwwwF..........=:::uuuAuE.....ppp666D66.....T', // 28 zebra E-O dalla strada alla bocca u
+        'T...wwwwwwwwwwwF........B.=:::uuuuBu.....pppppppp......T', // 29 seconda riga zebra, corte e forecourt
+        'T...wwwwwwwwwwwF.........L=rrruuuHSu.....pppppppp......T', // 30 destinazioni dentro superfici continue
+        'T...wwwwwwwwwwwF..........=rrrppp........pppppppp......T', // 31 spawn e forecourt su blocchi 3-wide
+        'T.........................=rrr=........................T', // 32 nessuna piattaforma ornamentale
+        'T.........................=rrr=........................T', // 33 asse sud ancora leggibile
+        'TTTTTTTTTTTTTTTTTTTTTTTTTTTrrrTTTTTTTTTTTTTTTTTTTTTTTTTT', // 34 varco stradale fra gli alberi
         'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT'  // 35
       ],
+      /* Sottofondo esplicito per ogni prop urbano e per i volumi compatti.
+       * Il glifo descrive collisione/oggetto; questa tabella conserva la
+       * superficie della proprietà senza generare carrier verdi 1x1. */
+      ground: {
+        '6,10': '.', '15,10': '.', '16,10': '.', '17,10': '.', '19,10': '.', '20,10': '.', '21,10': '.', '25,10': '.', '46,10': '.', '47,10': '.', '48,10': '.',
+        '15,11': '.', '16,11': '.', '17,11': '.', '19,11': '.', '20,11': '.', '21,11': '.', '46,11': '.', '47,11': '.', '48,11': '.',
+        '15,12': '.', '16,12': '.', '17,12': '.', '19,12': '.', '20,12': '.', '21,12': '.', '46,12': '.', '47,12': '.', '48,12': '.',
+        '4,13': '=', '28,13': '=', '40,13': '=', '52,13': '=',
+        '6,16': '=', '10,16': '=', '18,16': '=', '22,16': '=', '44,16': '=',
+        '6,22': '.', '18,22': '.', '33,28': 'u', '35,28': '=',
+        '24,29': '.', '34,29': 'u', '25,30': '.', '33,30': 'u', '34,30': 'u'
+      },
       doors: {
         '9,6':  { to: 'hotel_gn', tx: 8, ty: 10, dir: 'up', needsFlag: 'sogno_fatto', blockedMsg: 'hotel_locked' },
         '23,6': { to: 'hospital', tx: 5, ty: 8, dir: 'up', needsFlag: 'sogno_fatto', blockedMsg: 'hospital_locked' },
@@ -86,7 +99,11 @@
       objects: [
         { type: 'landmark', kind: 'waterfall', x: 8, y: 0, w: 6, h: 2, dialogue: 'landmark_waterfall' },
         { type: 'landmark', kind: 'cemetery', x: 48, y: 21, w: 6, h: 4, dialogue: 'landmark_cemetery' },
-        { type: 'landmark', kind: 'tracks', x: 53, y: 1, w: 2, h: 33, dialogue: 'landmark_tracks' },
+        { type: 'landmark', kind: 'tracks', x: 53, y: 1, w: 2, h: 33, dialogue: [
+          { cond: 'nflag:vagone_scoperto', then: 'landmark_tracks_vagone' },
+          { cond: ['evidence:E6A_CUORE_INTERO', 'evidence:T_JAMES_EST'], then: 'landmark_tracks_route' },
+          'landmark_tracks'
+        ] },
         { type: 'landmark', kind: 'welcomesign', x: 30, y: 30, dialogue: 'sign_town' }
       ],
       gate: { x: 50, y: 0, to: 'woods', tx: 14, ty: 20, dir: 'up' },

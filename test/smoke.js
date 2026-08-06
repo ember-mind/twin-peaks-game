@@ -59,6 +59,19 @@ function hold(code, ms) {
 }
 const S = () => E.state;
 
+function drainDialogue(label) {
+  assert(S().dialogue, `${label}: nessun dialogo da avanzare`);
+  let presses = 0;
+  while (S().dialogue) {
+    const id = S().dialogue.id;
+    key('Enter');
+    pump(16);
+    presses++;
+    assert(presses <= 64, `${label}: dialogo "${id}" non si chiude entro 64 Enter`);
+  }
+  return presses;
+}
+
 function dialogueId(d) {
   if (typeof d === 'string') return [d];
   if (Array.isArray(d)) return d.flatMap(dialogueId); // cascata condizionale
@@ -196,18 +209,20 @@ ok(GAME.Maps.doorAt('town', 47, 28).needsFlag === 'atto4' && !S().flags.atto4, '
 E.loadMap('sheriff', 6, 3, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'truman', 'dialogo Truman parte');
-key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Truman iniziale');
 ok(!S().dialogue, 'dialogo Truman chiuso');
 ok(S().clues.includes('diario'), 'diario ottenuto');
 
 // replay: pagina "again"
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.replay, 'replay Truman usa "again"');
-key('Enter'); pump(16);
+drainDialogue('replay Truman');
 
 // camera di Laura: cuore + lettera R
 E.loadMap('palmer', 6, 2, 'up');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+key('Enter'); pump(16);
+ok(S().dialogue && S().dialogue.id === 'laura_room', 'dialogo camera di Laura parte');
+drainDialogue('camera di Laura');
 ok(S().clues.includes('cuore') && S().clues.includes('lettera_r'), 'indizi camera di Laura');
 ok(S().clues.length === 3, '3 indizi totali');
 
@@ -224,14 +239,14 @@ ok(S().mapId === 'redroom', 'entrato nella Stanza Rossa');
 E.loadMap('redroom', 8, 5, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'mfap', 'dialogo Nano parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Nano');
 ok(S().flags.met_mfap, 'flag met_mfap impostato');
 
 // Laura: prima hint condizionale già superata -> il sogno
 E.loadMap('redroom', 11, 3, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'laura_sogno', 'con flag: dialogo del sogno');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('sogno di Laura');
 ok(!S().dialogue, 'dialogo del sogno chiuso');
 ok(S().clues.includes('nome_sussurrato'), 'nome sussurrato ottenuto');
 ok(S().flags.sogno_fatto, 'flag sogno_fatto impostato');
@@ -241,7 +256,7 @@ ok(S().mode === 'play', 'il sogno non chiude la partita');
 E.loadMap('sheriff', 6, 3, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'truman_a2', 'dialogo Truman post-sogno parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Truman post-sogno');
 ok(!S().dialogue, 'dialogo Truman post-sogno chiuso');
 ok(S().mode === 'play', 'il racconto del sogno non chiude la partita');
 
@@ -249,37 +264,37 @@ ok(S().mode === 'play', 'il racconto del sogno non chiude la partita');
 E.loadMap('hotel_gn', 5, 6, 'down');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'benhorne_a2', 'dialogo Ben Horne parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Ben Horne');
 E.loadMap('hotel_gn', 12, 10, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'audrey_a2', 'dialogo Audrey (Great Northern) parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Audrey al Great Northern');
 ok(S().flags.audrey_indaga, 'flag audrey_indaga impostato');
 
 // ospedale: Gerard consegna la poesia del fuoco, Ronette sussurra BOB
 E.loadMap('hospital', 7, 7, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'gerard_a2', 'dialogo Gerard parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Gerard');
 ok(S().clues.includes('poesia_fuoco'), 'poesia del fuoco ottenuta');
 E.loadMap('hospital', 2, 2, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'ronette_letto', 'dialogo Ronette parte');
-key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Ronette');
 ok(S().flags.ronette_bob, 'flag ronette_bob impostato');
 
 // Double R: James consegna l'altra meta' del cuore (appare solo dopo il sogno)
 E.loadMap('diner', 10, 7, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'james_a2', 'dialogo James parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('James');
 ok(S().clues.includes('cuore_intero'), 'cuore ricomposto ottenuto');
 
 // Truman: chiusura Atto 2, ponte verso Atto 3 (non chiude piu' la partita: il vagone aspetta)
 E.loadMap('sheriff', 6, 3, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'truman_atto3', 'dialogo Truman Atto 3 parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Truman Atto 3');
 ok(!S().dialogue, 'dialogo Truman Atto 3 chiuso');
 ok(S().flags.atto3, 'flag atto3 impostato');
 ok(S().mode === 'play', 'Atto 3 non chiude la partita');
@@ -288,47 +303,47 @@ ok(S().mode === 'play', 'Atto 3 non chiude la partita');
 E.loadMap('traincar', 10, 5, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'mucchio_terra', 'dialogo mucchio di terra parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('mucchio di terra');
 ok(S().clues.includes('biglietto_fuoco'), 'biglietto del fuoco ottenuto');
 E.loadMap('traincar', 13, 4, 'down');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'anello_interact', 'dialogo anello parte');
-key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('anello');
 ok(S().clues.includes('anello'), 'anello ottenuto');
 
 // One Eyed Jacks: Jacques viene interrogato e arrestato
 E.loadMap('oej', 7, 6, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'jacques_a3', 'dialogo Jacques parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Jacques');
 ok(S().flags.jacques_preso, 'flag jacques_preso impostato');
 
 // Audrey sotto copertura al casinò, poi rimandata a casa
 E.loadMap('oej', 13, 8, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'audrey_oej', 'dialogo Audrey (OEJ) parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Audrey a One Eyed Jacks');
 ok(S().flags.audrey_salvata, 'flag audrey_salvata impostato');
 
 // Lucy: la chiamata dall'ospedale, Jacques e' morto
 E.loadMap('sheriff', 2, 7, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'lucy_a3', 'dialogo Lucy Atto 3 parte');
-key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Lucy Atto 3');
 ok(S().flags.jacques_morto, 'flag jacques_morto impostato');
 
 // lo specchio della 315: prima apparizione del Gigante
 E.loadMap('hotel_gn', 15, 2, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'gigante1_dlg', 'dialogo del Gigante parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('prima apparizione del Gigante');
 ok(S().flags.gigante1, 'flag gigante1 impostato');
 
 // Truman: chiusura Atto 3, ponte verso Atto 4 (non chiude piu' la partita: il gigante e Maddy aspettano)
 E.loadMap('sheriff', 6, 3, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'truman_atto4', 'dialogo Truman Atto 4 parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Truman Atto 4');
 ok(!S().dialogue, 'dialogo Truman Atto 4 chiuso');
 ok(S().flags.atto4, 'flag atto4 impostato');
 ok(S().mode === 'play', 'Atto 4 non chiude la partita');
@@ -339,19 +354,19 @@ ok(maddyNpc && E.npcActive(maddyNpc, S()), 'Maddy presente dopo atto4');
 E.loadMap('palmer', 9, 6, 'down');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'sarah_visione', 'dialogo visione di Sarah parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('visione di Sarah');
 
 // Double R: la Log Lady indica il roadhouse per stanotte
 E.loadMap('diner', 4, 6, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'loglady_a4', 'dialogo Log Lady Atto 4 parte');
-key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Log Lady Atto 4');
 
 // il roadhouse: seconda apparizione del Gigante sul palco
 E.loadMap('roadhouse', 8, 2, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'gigante2_dlg', 'dialogo del Gigante (roadhouse) parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('seconda apparizione del Gigante');
 ok(S().flags.gigante2, 'flag gigante2 impostato');
 ok(!E.npcActive(maddyNpc, S()), 'Maddy scomparsa dopo la seconda apparizione');
 
@@ -366,7 +381,7 @@ ok(!S().dialogue, 'nessun dialogo classico contraddice la testimonianza taxi del
 E.loadMap('town', 15, 29, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'lago_maddy', 'dialogo ritrovamento di Maddy parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('ritrovamento di Maddy');
 ok(S().clues.includes('lettera_o'), 'lettera "O" ottenuta');
 ok(S().flags.maddy_trovata, 'flag maddy_trovata impostato');
 
@@ -374,7 +389,7 @@ ok(S().flags.maddy_trovata, 'flag maddy_trovata impostato');
 E.loadMap('sheriff', 6, 3, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'truman_atto5', 'dialogo Truman Atto 5 parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Truman Atto 5');
 ok(S().mode === 'play', 'Atto 5 non chiude piu\' la partita (ponte ritirato)');
 ok(S().flags.atto5, 'flag atto5 impostato');
 
@@ -390,28 +405,28 @@ ok(E.npcActive(sheriffLelandNpc, S()), 'Leland presente al distretto dopo atto5'
 E.loadMap('sheriff', 4, 3, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'leland_interr', 'dialogo interrogatorio di Leland parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('interrogatorio di Leland');
 ok(S().flags.leland_confessa, 'flag leland_confessa impostato (BOB e\' emerso)');
 
 // la cella: la confessione si chiude con la morte di Leland
 E.loadMap('sheriff', 4, 3, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'leland_morte', 'dialogo morte di Leland parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('morte di Leland');
 ok(S().flags.leland_morto, 'flag leland_morto impostato');
 
 // Truman: l'ultimo ponte, verso il bosco
 E.loadMap('sheriff', 6, 3, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'truman_fine', 'dialogo finale di Truman parte');
-key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Truman finale');
 ok(S().mode === 'play', 'il ponte finale non chiude la partita');
 
 // la Stanza Rossa, un\'ultima volta: prima il Nano
 E.loadMap('redroom', 8, 5, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'mfap_finale', 'dialogo finale del Nano parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Nano finale');
 ok(S().flags.mfap_finale_visto, 'flag mfap_finale_visto impostato');
 
 // poi BOB stesso, comparso accanto a una statua
@@ -420,13 +435,13 @@ ok(bobNpc && E.npcActive(bobNpc, S()), 'BOB presente nella Stanza Rossa dopo la 
 E.loadMap('redroom', 14, 3, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'bob_finale', 'dialogo di BOB parte');
-key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('BOB finale');
 
 // Laura, infine: il vero finale
 E.loadMap('redroom', 11, 3, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'laura_finale2', 'dialogo finale di Laura parte');
-key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
+drainDialogue('Laura finale');
 ok(S().mode === 'end', 'vero finale raggiunto');
 
 // epilogo paginato, poi reset dal finale
