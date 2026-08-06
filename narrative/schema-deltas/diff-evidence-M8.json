@@ -1,0 +1,8 @@
+{
+ "_comment": "diff PROPOSTO a evidence.json (C8-A): SOLO ui_origin diegetici sulle due evidenze M8 della lettera O (lezione M5-B3.1: la 'function' interna non si renderizza mai). Nessuna evidenza nuova: E9A/E9B esistono già dal catalogo (acquired_in M8).",
+ "ui_origin_add": {
+  "E9A_LETTERA_O": "Il lago — la O sotto l'unghia di Maddy",
+  "E9B_STESSO_METODO": "Il lago — stessa incisione della R"
+ },
+ "note": "letter_o_observation_source (cooper_primary/hawk_preserved) e letter_o_chain (standard) sono VALORI tipizzati, non evidenze: arrivare secondi (Hawk preserva) non indebolisce la prova, cambia una riga di M9, mai il gate."
+}

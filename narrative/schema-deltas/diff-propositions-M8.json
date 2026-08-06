@@ -1,0 +1,7 @@
+{
+ "_comment": "diff PROPOSTO a propositions.json (C8-A): SOLO ui_short participant-facing per il taccuino. P7/P8 esistono già dal catalogo; nessun cambiamento a support_min/factual_ceiling. P8 resta factual_ceiling corroborated (chi resta ignoto); P7 resta ipotesi non-procedurale.",
+ "ui_short_add": {
+  "P8": "Le lettere seguono una firma progressiva che il diario aveva annunciato. Resta ignoto se sia dell'assassino, di «lui», o una messinscena.",
+  "P7": "[Ipotesi] La ripetizione è legata alla famiglia Palmer."
+ }
+}

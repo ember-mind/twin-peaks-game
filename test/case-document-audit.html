@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TP-CASE-DOCUMENT-LOADING</title>
+<style>
+html, body, iframe { width: 100%; height: 100%; margin: 0; border: 0; overflow: hidden; background: #111913; }
+</style>
+</head>
+<body>
+<iframe id="game" title="Twin Peaks case document audit"></iframe>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var frame = document.getElementById('game');
+  frame.src = '../index.html' + (q.get('touch') === '1' ? '?touch=1' : '');
+  frame.addEventListener('load', function () {
+    window.setTimeout(function () {
+      var w = frame.contentWindow;
+      var E = w.GAME.Engine;
+      var S = E.state;
+      S.flags.intro_town = true;
+      S.mode = 'play';
+      E.loadMap('town', 30, 23, 'up');
+      S.clues = ['diario', 'cuore', 'lettera_r'];
+      S.menu = true;
+      S.menuIndex = 0;
+      w.dispatchEvent(new w.KeyboardEvent('keydown', { code: 'Enter' }));
+      w.dispatchEvent(new w.KeyboardEvent('keyup', { code: 'Enter' }));
+      var requestedPage = Math.max(1, Math.min(3, Number(q.get('page') || 1)));
+      for (var page = 1; page < requestedPage; page++) {
+        w.dispatchEvent(new w.KeyboardEvent('keydown', { code: 'Enter' }));
+        w.dispatchEvent(new w.KeyboardEvent('keyup', { code: 'Enter' }));
+      }
+      document.title = 'TP-CASE-DOCUMENT-READY';
+    }, 200);
+  });
+})();
+</script>
+</body>
+</html>

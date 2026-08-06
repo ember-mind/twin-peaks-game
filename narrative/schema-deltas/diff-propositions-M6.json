@@ -1,0 +1,7 @@
+{
+ "_comment": "diff PROPOSTO a propositions.json (C6-A): SOLO ui_short participant-facing per il taccuino. P5 e P9 esistono già nel catalogo (support/formulable invariati); nessun cambiamento a support_min/ceiling.",
+ "ui_short_add": {
+  "P5": "Jacques può essere collocato sulla scena. La sua presenza non basta ad attribuirgli l'omicidio.",
+  "P9": "La perdita di Jacques favorisce chiunque protegga il segreto, qualunque ne sia la causa."
+ }
+}

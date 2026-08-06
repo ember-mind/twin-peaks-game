@@ -87,14 +87,15 @@
   }
 
   function paginate(raw) {
-    var out = [], i, combined, lines, offset, chunk, prefix, copy;
+    var out = [], i, lines, offset, chunk, copy;
     for (i = 0; i < raw.length; i++) {
-      prefix = raw[i].display_name ? raw[i].display_name + ': ' : '';
-      combined = prefix + raw[i].text;
-      lines = wrapChars(combined, 24);
+      /* Nome resta metadata: speaker card può mostrarlo senza rubare spazio
+       * alle quattro righe e ogni frammento mantiene stessa identità. */
+      lines = wrapChars(raw[i].text, 24);
       for (offset = 0; offset < lines.length; offset += 4) {
         chunk = lines.slice(offset, offset + 4);
-        copy = page(raw[i].id + (offset ? '.part' + (offset / 4 + 1) : ''), '', chunk.join('\n'), { portrait: raw[i].portrait });
+        copy = page(raw[i].id + (offset ? '.part' + (offset / 4 + 1) : ''),
+          raw[i].display_name, chunk.join('\n'), { portrait: raw[i].portrait });
         out.push(copy);
       }
     }

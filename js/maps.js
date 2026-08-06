@@ -38,11 +38,11 @@
         //01234567890123456789012345678901234567890123456789012345
         'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTXTTTTT', // 0  X = sentiero bosco
         'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTpTTTTT', // 1
-        'T...........................777pp.................p....T', // 2 Bookhouse arretrato di una tile
+        'T...........................777pp...B.............p....T', // 2 Bookhouse arretrato; panchina nel prato est
         'T.......4444........555555..777pp999..............p....T', // 3 coppia street sopra la corsia, sfalsata
         'T.....444444........555555..777pp999....3333......p.,..T', // 4 hotel 6-wide, ospedale a L, Palmer 4-wide
         'T.....444444..........5555..777pp999....3333......p.n..T', // 5
-        'T.....444D44..........5D55.....pp999....33D3......p....T', // 6 porte storiche 9 / 23 / 42 invariate
+        'T.....444D44..........5D55.E...pp999....33D3......p....T', // 6 porte storiche invariate; mailbox fuori rotta
         'T.......pppppppppppppppppppppppppppppppppppp......p....T', // 7 corsia nord larga tre tile
         'T.......pppppppppppppppppppppppppppppppppppp......p....T', // 8 interno corsia senza bordi scuri
         'T....Tn.pppppppppppppppppppppppppppppppppppp......p..,.T', // 9 bordo sud corsia e tre bocche d'accesso
@@ -77,6 +77,7 @@
        * Il glifo descrive collisione/oggetto; questa tabella conserva la
        * superficie della proprietà senza generare carrier verdi 1x1. */
       ground: {
+        '36,2': '.', '27,6': '.',
         '6,10': '.', '15,10': '.', '16,10': '.', '17,10': '.', '19,10': '.', '20,10': '.', '21,10': '.', '25,10': '.', '46,10': '.', '47,10': '.', '48,10': '.',
         '15,11': '.', '16,11': '.', '17,11': '.', '19,11': '.', '20,11': '.', '21,11': '.', '46,11': '.', '47,11': '.', '48,11': '.',
         '15,12': '.', '16,12': '.', '17,12': '.', '19,12': '.', '20,12': '.', '21,12': '.', '46,12': '.', '47,12': '.', '48,12': '.',

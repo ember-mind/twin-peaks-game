@@ -1,0 +1,834 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>m8-engine-harness</title>
+<style>body{margin:0;background:#000}#narrative{position:fixed;inset:0;pointer-events:none}.nw-focus{font-weight:bold}#log{position:fixed;left:0;bottom:0;max-height:40%;overflow:auto;background:#111;color:#ddd;font:11px monospace;white-space:pre-wrap;padding:6px;z-index:99}</style>
+</head>
+<body>
+<canvas id="gl" width="960" height="640"></canvas>
+<canvas id="game" width="480" height="320"></canvas>
+<div id="narrative"></div>
+<div id="log">running…</div>
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=harness-r6"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=harness-r6"></script>
+<script src="../js/engine.js?v=harness-r6"></script>
+<script src="../js/render3d.js"></script>
+<script src="../js/glue.js?v=harness-r6"></script>
+<script src="../js/main.js"></script>
+<script src="../js/narrative-runtime.js"></script>
+<script src="../js/narrative-ui.js"></script>
+<script src="../js/narrative-notebook.js"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r9"></script>
+<script src="../js/narrative-bootstrap.js"></script>
+<script src="../js/narrative-engine-adapter.js?v=harness-r9"></script>
+<script src="../js/narrative-save.js"></script>
+<script>
+// C8-C — M8 ENGINE INTEGRATION harness (mirrors test/m6-engine-harness.html).
+// Guida M8 attraverso il VERO motore+adapter+runtime e verifica i gate d'uscita
+// C8-C 1-8. Screen-truth = testo del DOM (visible_text), MAI screenshot.
+// Il chiamante carica la pagina headless e legge window.__C8C_RESULT.
+var LOCK = 30;
+var out = { checks: {}, errors: [], notes: [], run_log: {} };
+window.__C8C_RESULT = out;
+window.onerror = function (m, s, l) { out.errors.push(String(m) + ' @' + l); };
+window.addEventListener('unhandledrejection', function (e) { out.errors.push('unhandled: ' + (e.reason && e.reason.message || e.reason)); });
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(c) { window.dispatchEvent(new KeyboardEvent('keydown', { code: c, bubbles: true })); window.dispatchEvent(new KeyboardEvent('keyup', { code: c, bubbles: true })); }
+var DIRC = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+function holdKey(c) { window.dispatchEvent(new KeyboardEvent('keydown', { code: c, bubbles: true })); }
+function liftKey(c) { window.dispatchEvent(new KeyboardEvent('keyup', { code: c, bubbles: true })); }
+var seen = {}, allText = '';
+function pageIds() { return [].map.call(document.querySelectorAll('#narrative [data-page-id]'), function (o) { return o.getAttribute('data-page-id'); }); }
+function widgetOpts() { return [].map.call(document.querySelectorAll('.nw-root:not(.nb-root) .nw-opt'), function (o) { return o.getAttribute('data-choice-id'); }); }
+function snap() { pageIds().forEach(function (id) { seen[id] = true; }); var nb = document.getElementById('narrative'); if (nb) allText += ' ' + (nb.textContent || ''); }
+async function press(c) { key(c); await wait(LOCK + 45); snap(); }
+async function advanceUntil(pred, max) { max = max || 40; snap(); for (var i = 0; i < max; i++) { if (pred()) return true; await press('Enter'); } return pred(); }
+async function chooseChoice(id) { var o = widgetOpts(), idx = o.indexOf(id); if (idx < 0) return false; for (var k = 0; k < idx; k++) await press('ArrowDown'); await press('Enter'); return true; }
+
+/* ---- drive del TACCUINO REALE (C8-C.1 Fix 3) --------------------------------
+ * Nessun bypass: si legge il DOM prodotto da js/narrative-notebook.js e si
+ * naviga con i TASTI VERI (↑↓/Invio/Esc). Gli indici NON si assumono mai —
+ * si derivano dagli attributi data-* e dalla riga in focus (le liste del
+ * taccuino sono ordinate per ACQUISIZIONE). */
+function nbOpen() { return !!document.querySelector('.nb-root'); }
+function nbVisible() { var r = document.querySelector('.nb-root'); return !!r && r.style.display !== 'none'; }
+function nbItems(attr) { return [].slice.call(document.querySelectorAll('.nb-root [' + attr + ']')); }
+function nbIds(attr) { return nbItems(attr).map(function (o) { return o.getAttribute(attr); }); }
+function nbTitle() { var t = document.querySelector('.nb-root .nw-title'); return t ? t.textContent : ''; }
+function nbFocusIndex(list) { for (var i = 0; i < list.length; i++) if (list[i].className.indexOf('nw-focus') >= 0) return i; return -1; }
+// porta il focus sulla voce con quell'attributo=valore usando SOLO ArrowDown
+async function nbMoveTo(attr, value) {
+  var list = nbItems(attr), ids = list.map(function (o) { return o.getAttribute(attr); });
+  var target = ids.indexOf(value);
+  if (target < 0) return false;
+  var cur = nbFocusIndex(list); if (cur < 0) cur = 0;
+  var steps = (target - cur + ids.length) % ids.length;
+  for (var i = 0; i < steps; i++) await press('ArrowDown');
+  var after = nbItems(attr);
+  return nbFocusIndex(after) === target;
+}
+async function nbEnterSection(name) { if (!await nbMoveTo('data-nb-section', name)) return false; await press('Enter'); return true; }
+// attesa PASSIVA (nessun Invio): usata quando premere sarebbe un input reale
+// nel widget appena riaperto (confermerebbe la scelta in focus).
+async function waitFor(pred, max) { for (var i = 0; i < (max || 40); i++) { if (pred()) { snap(); return true; } await wait(LOCK + 45); snap(); } return pred(); }
+// riporta il taccuino al MENU: se è nascosto (flusso di confronto in corso)
+// aspetta; se è in una sezione, Esc torna indietro. Mai Esc dal menu (chiuderebbe).
+async function nbEnsureMenu(max) {
+  for (var i = 0; i < (max || 12); i++) {
+    if (!nbOpen()) return false;
+    if (nbVisible() && nbIds('data-nb-section').length === 4) return true;
+    if (nbVisible()) await press('Escape');
+    else { await wait(LOCK + 45); snap(); }
+  }
+  return nbVisible() && nbIds('data-nb-section').length === 4;
+}
+async function nbPickCompare(evId) { if (!await nbMoveTo('data-nb-compare', evId)) return false; await press('Enter'); return true; }
+function nbSectionRows() { return nbItems('data-nb-entry').map(function (o) { return { key: o.getAttribute('data-nb-entry'), text: o.textContent }; }); }
+
+async function run() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter, D = GAME.NarrativeData;
+  if (GAME.Render3D) GAME.Render3D.render = function () {};
+  function S() { return A.getState(); }
+  function val(s, name) { return s && s.values ? s.values[name] : undefined; }
+  var M4 = D.missions.M4, M5 = D.missions.M5, M6 = D.missions.M6, M8 = D.missions.M8;
+
+  // ---- GATE 0 — bootstrap dei cataloghi (C8-C.1 Fix 1) ----------------------
+  // L'harness NON cabla più i cataloghi da sé: chiama lo STESSO bootstrap di
+  // produzione (js/narrative-bootstrap.js) che chiama playtest.html. Un solo
+  // path: se si rompe, si rompe in entrambi.
+  out.checks['G0 bootstrap_present'] = (typeof GAME.installNarrativeCatalogs === 'function');
+  out.checks['G0 domains_empty_before_bootstrap'] = (Object.keys(NR.valueDomains).length === 0 && Object.keys(NR.valueTransitions).length === 0);
+  var installed = GAME.installNarrativeCatalogs();
+  out.run_log.catalogs_installed = installed;
+  out.checks['G0 domains_from_catalog_only'] =
+    (JSON.stringify(installed.value_domains) === JSON.stringify(Object.keys(D.enums.values_allowed).sort()) &&
+     Object.keys(D.enums.values_allowed).every(function (v) { return NR.valueDomains[v] === D.enums.enums[D.enums.values_allowed[v]]; }));
+  out.checks['G0 transitions_from_catalog_only'] =
+    (JSON.stringify(NR.valueTransitions) === JSON.stringify(D.enums.value_transitions || {}));
+  out.checks['G0 bootstrap_idempotent'] =
+    (JSON.stringify(GAME.installNarrativeCatalogs()) === JSON.stringify(installed));
+  // il bootstrap non conosce le missioni: nessun nome di missione nel sorgente
+  out.checks['G0 bootstrap_is_mission_agnostic'] =
+    (String(GAME.installNarrativeCatalogs).indexOf('M8') < 0 && String(GAME.installNarrativeCatalogs).indexOf('promise_stance') < 0);
+
+  out.checks['M8 in gen data'] = (!!M8 && M8.mission === 'M8');
+  out.checks['value_transitions in catalog'] = (!!D.enums.value_transitions && JSON.stringify(D.enums.value_transitions.presagio_status) === JSON.stringify([['active', 'verified']]));
+  out.checks['M8 enums applied'] = (JSON.stringify(D.enums.enums.maddy_action_after_warning) === JSON.stringify(['none', 'departure_prepared']) && JSON.stringify(D.enums.enums.sarah_support_state) === JSON.stringify(['none', 'vice']));
+
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK, missions: [M4, M5, M6, M8] });
+
+  // ---------- costruttori di stato PURI (runtime) ----------
+  function nodeM8(id) { return M8.nodes.filter(function (n) { return n.id === id; })[0]; }
+  function seedBase() { var s = NR.createState(); NR.applyEffects(s, [{ set: 'atto4' }, { evidence: 'E3_LETTERA_R' }, { evidence: 'E1_DIARIO' }]); return s; }
+  function pdn(s, id) { var p = NR.prepareNode(s, M8, id); if (!p.ok) throw new Error('pdn ' + id + ': ' + p.error); if (!p.continuation && !p.resume_choice) NR.commitNode(s, M8, p); return p; }
+  function pdc(s, id, ch) { var n = nodeM8(id); var p = NR.prepareChoice(s, M8, n, ch); if (!p.ok) throw new Error('pdc ' + id + '/' + ch + ': ' + p.error); return NR.commitChoice(s, M8, n, p); }
+  function routeOf(focus) { return focus === 'palmer' ? 'm8_route_palmer' : (focus === 'lago' ? 'm8_route_lake' : 'm8_route_diner'); }
+  // costruisce lo stato M8 fino a `target` col runtime PURO (deterministico)
+  function stateAt(target, opts) {
+    opts = opts || {}; var warn = opts.warn || 'palmer', focus = opts.focus || 'palmer', promise = opts.promise || 'accompagno';
+    var s = seedBase();
+    pdn(s, 'm8_diner'); pdc(s, 'm8_diner', 'promise_' + promise);
+    if (target === 'postDiner') return s;
+    pdn(s, 'm8_leland_taxi');
+    if (target === 'postTaxi') return s;
+    pdn(s, 'm8_roadhouse'); pdc(s, 'm8_roadhouse', 'warning_' + warn);
+    if (target === 'postWarning' || target === 'postRoadhouse') return s;
+    pdn(s, 'm8_focus_choice'); pdc(s, 'm8_focus_choice', 'focus_' + focus);
+    if (target === 'postFocus') return s;
+    pdn(s, routeOf(focus));
+    if (target === 'postRoute') return s;
+    pdn(s, 'm8_discovery');
+    if (target === 'postDiscovery') return s;
+    pdn(s, 'm8_promise_echo');
+    if (target === 'postEcho') return s;
+    return s;
+  }
+  // stato con P8 formulata (pronto per la stazione)
+  function toP8(opts) {
+    var s = stateAt('postEcho', opts);
+    pdn(s, 'm8_cmp_letters');
+    pdn(s, 'm8_cmp_diary');
+    pdc(s, 'm8_cmp_diary', 'diary_a');
+    return s;
+  }
+
+  // ---------- driver via VERO adapter ----------
+  function tgt(map, id) { return A._debugWorldTargets[map][id]; }
+  function clearClassic() { if (E.state) { E.state.dialogue = null; E.state.menu = null; E.state.mode = 'play'; } }
+  async function goActor(map, actor) { clearClassic(); E.loadMap(map, 1, 1, 'down'); await wait(80); clearClassic(); A.tryInteract(map, actor); await wait(60); snap(); }
+  async function goLandmark(map, id) { var t = tgt(map, id); clearClassic(); E.loadMap(map, t.x, t.y, 'down'); await wait(80); clearClassic(); A.tryInteractAt(map, t.x, t.y); await wait(60); snap(); }
+  // interazione dal KEYPATH DEL MOTORE: il player è posato ADIACENTE al target
+  // e RIVOLTO verso di esso, poi Invio → E.interact() → adapter.tryInteractAt.
+  // Il CAMMINO tile-per-tile fino al tile adiacente resta C8-E (come M6 C6-E).
+  async function interactLandmarkFromEngine(map, id) {
+    var t = tgt(map, id);
+    clearClassic();
+    E.loadMap(map, t.x, t.y - 1, 'down'); // sopra al target, rivolto in giù
+    await wait(80); clearClassic();
+    await press('Enter');                  // keypath reale del motore
+    await wait(60); snap();
+  }
+  async function endSession() { await advanceUntil(function () { return !A.active(); }, 12); if (A.active()) { await press('Escape'); await wait(120); } }
+  // svuota SEMPRE il lease fra due sezioni: Escape+blur a cascata rilascia
+  // widget/pagine/menu/sessione; se resta attivo lo si annota (mai un hang).
+  async function drainLease() { for (var i = 0; i < 24 && A.active(); i++) { key('Escape'); window.dispatchEvent(new Event('blur')); await wait(90); snap(); } if (A.active()) out.notes.push('lease still active after drain'); }
+  // RESET COMPLETO motore+narrativa fra due sezioni: (1) svuota il lease; (2)
+  // azzera QUALSIASI dialogo/menu CLASSICO rimasto aperto (loadMap NON lo pulisce:
+  // un Enter residuo dopo la chiusura di una sessione può aprire il dialogo
+  // classico dell'NPC adiacente — poi inquina l'interazione narrativa successiva);
+  // (3) posa il player su una mappa neutra SENZA onEnter e SENZA NPC adiacenti
+  // (sheriff @ 6,8), così un eventuale Enter residuo non apre nulla. NON tocca
+  // A.getState(): lo stato narrativo condiviso (gate 1→2→3) è preservato.
+  async function resetEngine() {
+    await drainLease();
+    if (E.state) { E.state.dialogue = null; E.state.menu = null; E.state.mode = 'play'; }
+    try { E.loadMap('sheriff', 6, 8, 'up'); } catch (e) { }
+    if (E.state) { E.state.dialogue = null; E.state.menu = null; }
+    await wait(100);
+    await drainLease();
+  }
+  // ogni gate è isolato: reset motore + try/catch + timeout DURO con budget
+  // per-sezione. Il timer viene SEMPRE azzerato quando la sezione vince la race
+  // (altrimenti stamperebbe un SECTION_TIMEOUT spurio, anche su gate conclusi).
+  async function runSection(name, fn, budgetMs) {
+    await resetEngine();
+    var timer = null;
+    var to = new Promise(function (res) { timer = setTimeout(function () { res('__timeout__'); }, budgetMs || 30000); });
+    try { var r = await Promise.race([fn(), to]); if (r === '__timeout__') out.checks[name + ' SECTION_TIMEOUT'] = false; }
+    catch (e) { out.errors.push(name + ': ' + (e && e.message || e)); }
+    finally { if (timer) clearTimeout(timer); }
+    await drainLease();
+  }
+
+  // ---------- pathfinder FISICO sul motore vero (per il keypath reale) ----------
+  // (mirrors test/m6-physical-harness.html: cammino tile-per-tile + facing;
+  // l'interazione FISICA richiede il player ADIACENTE e RIVOLTO all'NPC.)
+  function walkable(mapId, x, y) {
+    for (var i = 0; i < E.state.npcs.length; i++) { var n = E.state.npcs[i]; if (E.npcActive(n) && n.x === x && n.y === y) return false; }
+    if (GAME.Maps.doorAt(mapId, x, y)) return true;
+    return !GAME.Maps.isSolid(mapId, x, y, E.state);
+  }
+  function bfs(mapId, from, to) {
+    var m = GAME.Maps[mapId], W = m.width || m.rows[0].length, H = m.height || m.rows.length;
+    var seenB = {}, prev = {}, q = [from]; seenB[from[0] + ',' + from[1]] = true;
+    while (q.length) {
+      var cur = q.shift();
+      if (cur[0] === to[0] && cur[1] === to[1]) { var path = [cur]; while (prev[cur[0] + ',' + cur[1]]) { cur = prev[cur[0] + ',' + cur[1]]; path.unshift(cur); } return path; }
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) { var nx = cur[0] + d[0], ny = cur[1] + d[1], k = nx + ',' + ny; if (nx < 0 || ny < 0 || nx >= W || ny >= H || seenB[k] || !walkable(mapId, nx, ny)) return; seenB[k] = true; prev[k] = cur; q.push([nx, ny]); });
+    }
+    return null;
+  }
+  // cammino LIMITATO: mai un hang. Esce subito se il movimento è sospeso da un
+  // lease (A.active), e aborta dopo pochi stalli consecutivi (movimento fermo).
+  async function walkTo(tx, ty) {
+    var stalls = 0;
+    for (var guard = 0; guard < 220; guard++) {
+      if (A.active()) return false;                     // input di gioco sospeso: non spingere
+      if (E.state.dialogue) { key('Enter'); await wait(120); continue; }
+      var p = E.state.player;
+      if (p.tx === tx && p.ty === ty && !p.moving) return true;
+      var path = bfs(E.state.mapId, [p.tx, p.ty], [tx, ty]);
+      if (!path || path.length < 2) return (p.tx === tx && p.ty === ty);
+      var next = path[1], px = p.tx, py = p.ty;
+      var dir = next[0] > p.tx ? 'right' : next[0] < p.tx ? 'left' : next[1] > p.ty ? 'down' : 'up';
+      holdKey(DIRC[dir]);
+      var t0 = 0; while ((E.state.player.tx !== next[0] || E.state.player.ty !== next[1]) && t0 < 900) { await wait(45); t0 += 45; }
+      liftKey(DIRC[dir]); await wait(50);
+      if (E.state.player.tx === px && E.state.player.ty === py) { if (++stalls >= 4) return false; } else stalls = 0;
+    }
+    return false;
+  }
+  async function face(dir) { holdKey(DIRC[dir]); var t0 = 0; while (E.state.player.dir !== dir && t0 < 1500) { await wait(40); t0 += 40; } liftKey(DIRC[dir]); await wait(90); }
+  async function walkNextTo(tx, ty) {
+    var neigh = [[tx, ty - 1, 'down'], [tx, ty + 1, 'up'], [tx - 1, ty, 'right'], [tx + 1, ty, 'left']];
+    var best = null, bestLen = 1e9;
+    for (var i = 0; i < neigh.length; i++) { var nb = neigh[i]; if (!walkable(E.state.mapId, nb[0], nb[1])) continue; var pth = bfs(E.state.mapId, [E.state.player.tx, E.state.player.ty], [nb[0], nb[1]]); if (pth && pth.length < bestLen) { bestLen = pth.length; best = nb; } }
+    if (!best) return false;
+    await walkTo(best[0], best[1]); await face(best[2]); return true;
+  }
+
+  // =====================================================================
+  // GATE 1 — Diner Maddy→Leland→Roadhouse sui target reali
+  // =====================================================================
+  await runSection('gate1', async function () {
+    A.setState(seedBase()); seen = {};
+    // 1a Diner: promessa → obj_m8_25, poi Leland appare nello stesso locale
+    await goActor('diner', 'maddy');
+    await advanceUntil(function () { return widgetOpts().indexOf('promise_accompagno') >= 0; });
+    out.checks['G1 promise_undefined_at_widget'] = (val(S(), 'promise_stance') === undefined && A.active());
+    await chooseChoice('promise_accompagno');
+    await advanceUntil(function () { return !A.active(); });
+    out.checks['G1 promise_written'] = (val(S(), 'promise_stance') === 'accompagno');
+    out.checks['G1 obj_m8_25_pre_taxi'] = ((NR.activeObjective(S(), M8) || {}).id === 'obj_m8_25');
+    await goActor('diner', 'leland');
+    await advanceUntil(function () { return !A.active(); });
+    out.checks['G1 taxi_heard_pre_discovery'] = (S().evidence.T_LELAND_TAXI === true && !S().flags.maddy_trovata && val(S(), 'body_found_by') === undefined);
+    out.checks['G1 obj_m8_1_after_taxi'] = ((NR.activeObjective(S(), M8) || {}).id === 'obj_m8_1');
+    // sub-check PURO del timing: presagio nasce al commitNode del Roadhouse, non nelle pagine
+    var st1 = stateAt('postTaxi'); var pr = NR.prepareNode(st1, M8, 'm8_roadhouse');
+    out.checks['G1 presagio_undefined_before_commit'] = (val(st1, 'presagio_status') === undefined);
+    NR.commitNode(st1, M8, pr);
+    out.checks['G1 presagio_active_after_commit'] = (val(st1, 'presagio_status') === 'active');
+    // 1b Roadhouse: Gigante → commitNode presagio active → widget telefono NELLO STESSO LEASE
+    var evPre = A.events.length;
+    await goLandmark('roadhouse', 'roadhouse_phone');
+    await advanceUntil(function () { return widgetOpts().indexOf('warning_palmer') >= 0; });
+    out.checks['G1 presagio_active_at_phone_widget'] = (val(S(), 'presagio_status') === 'active' && A.active());
+    out.checks['G1 phone_same_lease_no_gameplay_frame'] = (A.active() && !A.events.slice(evPre).some(function (e) { return e.event === 'session_closed'; }));
+    await chooseChoice('warning_palmer');
+    await advanceUntil(function () { return !A.active(); });
+    out.checks['G1 warning_written'] = (val(S(), 'warning_target') === 'palmer');
+    out.checks['G1 maddy_action_written'] = (val(S(), 'maddy_action_after_warning') === 'departure_prepared');
+    out.checks['G1 sarah_support_written'] = (val(S(), 'sarah_support_state') === 'none');
+    // conserva lo stato reale per i gate 2-3 (continua la stessa run)
+    out.run_log.gate1_state = NR.serialize(S());
+  });
+
+  // =====================================================================
+  // GATE 2 — Crocevia + rotta sui target reali (focus → sola rotta scelta)
+  // =====================================================================
+  await runSection('gate2', async function () {
+    // continua dallo stato reale di gate1 (warning=palmer)
+    await goLandmark('town', 'town_crossroads');
+    await advanceUntil(function () { return widgetOpts().indexOf('focus_palmer') >= 0; });
+    out.checks['G2 body_found_by_absent_at_focus'] = (val(S(), 'body_found_by') === undefined);
+    await chooseChoice('focus_palmer');
+    await advanceUntil(function () { return !A.active(); });
+    out.checks['G2 focus_written'] = (val(S(), 'focus_destination') === 'palmer');
+    var routesAvail = ['m8_route_palmer', 'm8_route_lake', 'm8_route_diner'].filter(function (rid) {
+      var n = nodeM8(rid); return (n.conditions || []).every(function (c) { return NR.evalCond(S(), c, M8); });
+    });
+    out.checks['G2 only_chosen_route_root'] = (routesAvail.length === 1 && routesAvail[0] === 'm8_route_palmer');
+    out.checks['G2 body_found_by_absent_pre_route'] = (val(S(), 'body_found_by') === undefined);
+  });
+
+  // =====================================================================
+  // GATE 3 — Ritrovamento pages_by_value dal finder (+ E9A/E9B, derivazioni,
+  // presagio verified, maddy_trovata) sul VERO motore
+  // =====================================================================
+  await runSection('gate3', async function () {
+    // rotta Palmer (focus=palmer) → body_found_by=hawk
+    await goLandmark('palmer', 'palmer_entrance');
+    await advanceUntil(function () { return !A.active(); });
+    out.checks['G3 route_body_found_by_hawk'] = (val(S(), 'body_found_by') === 'hawk');
+    // discovery + echo (stesso lease via next)
+    await goLandmark('town', 'lago_maddy');
+    await advanceUntil(function () { return !A.active(); });
+    out.checks['G3 E9A_E9B_set'] = (S().evidence.E9A_LETTERA_O === true && S().evidence.E9B_STESSO_METODO === true);
+    out.checks['G3 letter_o_chain_standard'] = (val(S(), 'letter_o_chain') === 'standard');
+    out.checks['G3 letter_o_source_hawk_preserved'] = (val(S(), 'letter_o_observation_source') === 'hawk_preserved');
+    out.checks['G3 presagio_verified'] = (val(S(), 'presagio_status') === 'verified');
+    out.checks['G3 maddy_trovata'] = (S().flags.maddy_trovata === true);
+    out.checks['G3 echo_done'] = (S().nodes_done.m8_promise_echo === true);
+    out.checks['G3 hawk_branch_text'] = (seen['m8.d.discovery.hawk.p01'] === true);
+    out.checks['G3 cooper_branch_not_shown'] = (seen['m8.d.discovery.cooper.p01'] !== true);
+    out.checks['G3 accompagno_echo_text'] = (seen['m8.d.echo.accompagno'] === true);
+    // ramo cooper (focus=lago) — pages_by_value + cooper_primary (runtime PURO)
+    var sc = stateAt('postRoute', { focus: 'lago' });
+    out.checks['G3c route_lake_body_cooper'] = (val(sc, 'body_found_by') === 'cooper');
+    var pd = NR.prepareNode(sc, M8, 'm8_discovery');
+    out.checks['G3c cooper_pages_selected'] = (pd.pages.some(function (p) { return p.id === 'm8.d.discovery.cooper.p01'; }) && !pd.pages.some(function (p) { return p.id === 'm8.d.discovery.hawk.p01'; }));
+    NR.commitNode(sc, M8, pd);
+    out.checks['G3c source_cooper_primary'] = (val(sc, 'letter_o_observation_source') === 'cooper_primary');
+    out.checks['G3c presagio_verified'] = (val(sc, 'presagio_status') === 'verified');
+  });
+
+  // =====================================================================
+  // GATE 4 — Valigia nelle tre classi (conditional_pages CONGELATE nel prepared)
+  // =====================================================================
+  await runSection('gate4', async function () {
+    var VAL_ROUTE = 'm8.c.route_palmer.p02', VAL_STATION = 'm8.f.station.p_valigia';
+    // classe 1: warning=palmer ∧ focus=palmer → valigia nella rotta Palmer, non in stazione
+    var r1 = NR.prepareNode(stateAt('postFocus', { warn: 'palmer', focus: 'palmer' }), M8, 'm8_route_palmer');
+    out.checks['G4 class1_valigia_in_palmer_route'] = r1.pages.some(function (p) { return p.id === VAL_ROUTE; });
+    var st1 = NR.prepareNode(toP8({ warn: 'palmer', focus: 'palmer' }), M8, 'm8_station');
+    out.checks['G4 class1_no_valigia_at_station'] = !st1.pages.some(function (p) { return p.id === VAL_STATION; });
+    // classe 2: warning=palmer ∧ focus=lago|diner → valigia in stazione (via Truman)
+    var st2 = NR.prepareNode(toP8({ warn: 'palmer', focus: 'lago' }), M8, 'm8_station');
+    out.checks['G4 class2_valigia_at_station'] = st2.pages.some(function (p) { return p.id === VAL_STATION; });
+    var st2d = NR.prepareNode(toP8({ warn: 'palmer', focus: 'diner' }), M8, 'm8_station');
+    out.checks['G4 class2_valigia_at_station_diner'] = st2d.pages.some(function (p) { return p.id === VAL_STATION; });
+    // classe 3: warning=centrale|nessuno → nessuna pagina valigia in alcun percorso
+    var r3 = NR.prepareNode(stateAt('postFocus', { warn: 'centrale', focus: 'palmer' }), M8, 'm8_route_palmer');
+    var st3 = NR.prepareNode(toP8({ warn: 'centrale', focus: 'lago' }), M8, 'm8_station');
+    var st3n = NR.prepareNode(toP8({ warn: 'nessuno', focus: 'lago' }), M8, 'm8_station');
+    out.checks['G4 class3_no_valigia_route'] = !r3.pages.some(function (p) { return p.id === VAL_ROUTE; });
+    out.checks['G4 class3_no_valigia_station_centrale'] = !st3.pages.some(function (p) { return p.id === VAL_STATION; });
+    out.checks['G4 class3_no_valigia_station_nessuno'] = !st3n.pages.some(function (p) { return p.id === VAL_STATION; });
+  });
+
+  // =====================================================================
+  // GATE 5 — Taccuino reale (primitive di confronto del runtime, come le usa
+  // NarrativeNotebook): gating disponibilità + tempistica P8 + no mutazioni M4/M5
+  // =====================================================================
+  await runSection('gate5', async function () {
+    function m8cmps(s) { return NR.notebookActions(s, [M4, M5, M6, M8]).filter(function (a) { return a.source_mission === 'M8'; }).map(function (a) { return a.node.id; }); }
+    var sPre = stateAt('postDiscovery', { warn: 'palmer', focus: 'palmer' }); // maddy_trovata, echo NON fatto
+    out.checks['G5 no_M8_cmp_before_echo'] = (m8cmps(sPre).length === 0);
+    var s = stateAt('postEcho', { warn: 'palmer', focus: 'palmer' });
+    var afterEcho = m8cmps(s);
+    out.checks['G5 cmp_letters_avail_after_echo'] = (afterEcho.indexOf('m8_cmp_letters') >= 0);
+    out.checks['G5 cmp_diary_hidden_after_echo'] = (afterEcho.indexOf('m8_cmp_diary') < 0);
+    pdn(s, 'm8_cmp_letters');
+    out.checks['G5 cmp_letters_completed_on_node_commit'] = (!!s.comparisons.m8_cmp_letters && s.comparisons.m8_cmp_letters.completed === true && s.comparisons.m8_cmp_letters.result === 'LETTERS_SAME_METHOD');
+    out.checks['G5 cmp_diary_avail_after_cmp_letters'] = (m8cmps(s).indexOf('m8_cmp_diary') >= 0);
+    // drive cmp_diary
+    pdn(s, 'm8_cmp_diary');
+    var dn = nodeM8('m8_cmp_diary');
+    var opts0 = NR.availableChoices(s, M8, dn).map(function (c) { return c.id; });
+    out.checks['G5 diary_all_options_present'] = (['diary_a', 'diary_b', 'diary_c'].every(function (id) { return opts0.indexOf(id) >= 0; }));
+    // diary B: feedback + respinta, tentativo registrato, poi B nascosta, P8 non formulata
+    pdc(s, 'm8_cmp_diary', 'diary_b');
+    out.checks['G5 diaryB_recorded'] = ((s.comparisons.m8_cmp_diary.attempts || []).indexOf('NAME_OVERREACH') >= 0);
+    out.checks['G5 diaryB_hidden_after'] = (NR.availableChoices(s, M8, dn).map(function (c) { return c.id; }).indexOf('diary_b') < 0);
+    out.checks['G5 P8_unformulated_after_B'] = (NR.peekProp(s, 'P8').formulation.status !== 'formulated');
+    // diary C: poi resta solo A
+    pdc(s, 'm8_cmp_diary', 'diary_c');
+    out.checks['G5 diaryC_then_only_A'] = (NR.availableChoices(s, M8, dn).map(function (c) { return c.id; }).join(',') === 'diary_a');
+    out.checks['G5 P8_unformulated_before_A'] = (NR.peekProp(s, 'P8').formulation.status !== 'formulated');
+    // diary A: P8 formulata SOLO al commit, factual ≤ corroborated
+    pdc(s, 'm8_cmp_diary', 'diary_a');
+    out.checks['G5 P8_formulated_after_A'] = (NR.peekProp(s, 'P8').formulation.status === 'formulated');
+    out.checks['G5 P8_created_from_double_comparison'] = (JSON.stringify((NR.peekProp(s, 'P8').formulation.created_from || []).slice().sort()) === JSON.stringify(['E1_DIARIO', 'E3_LETTERA_R', 'E9A_LETTERA_O', 'E9B_STESSO_METODO']));
+    out.checks['G5 P8_factual_le_corroborated'] = (['unconfirmed', 'corroborated', undefined].indexOf(NR.peekProp(s, 'P8').factual_status) >= 0);
+    // M8 NON tocca b8_attempt_history / assistance_level / confronti M4-M5
+    out.checks['G5 b8_history_untouched'] = (s.b8_attempt_history.length === 0 && s.assistance_level === 0);
+    out.checks['G5 no_M4M5_comparisons'] = (Object.keys(s.comparisons).every(function (k) { return k.indexOf('m8_') === 0; }));
+  });
+
+  // =====================================================================
+  // GATE 5-UI — lo STESSO percorso, ma attraverso la UI VERA (C8-C.1 Fix 3):
+  // taccuino aperto col tasto T dal gameplay, sezione Confronta, selezione
+  // della COPPIA dal DOM, feedback B→C→A coi tasti veri, P8 formulata SOLO al
+  // commit dell'opzione A e visibile nella sezione Proposizioni del taccuino.
+  // Nessuna chiamata diretta al runtime nel percorso: solo DOM + tasti.
+  // =====================================================================
+  await runSection('gate5ui', async function () {
+    A.setState(stateAt('postEcho', { warn: 'palmer', focus: 'palmer' })); seen = {};
+    // 5ui-a apertura dal GAMEPLAY col tasto T (listener reale dell'adapter)
+    E.state.mode = 'play'; E.state.dialogue = null; E.state.menu = null;
+    await press('KeyT');
+    out.checks['G5UI notebook_opens_from_T_key'] = (nbOpen() && A.active() === true);
+    out.checks['G5UI notebook_menu_sections_rendered'] =
+      (JSON.stringify(nbIds('data-nb-section')) === JSON.stringify(['Evidenze', 'Appunti', 'Proposizioni', 'Confronta']));
+    // 5ui-b sezione Confronta: le evidenze acquisite sono selezionabili dal DOM
+    out.checks['G5UI enters_compare_section'] = await nbEnterSection('Confronta');
+    var compareIds = nbIds('data-nb-compare');
+    out.run_log.g5ui_compare_ids = compareIds;
+    out.checks['G5UI compare_lists_acquired_evidence'] =
+      (['E1_DIARIO', 'E3_LETTERA_R', 'E9A_LETTERA_O', 'E9B_STESSO_METODO'].every(function (id) { return compareIds.indexOf(id) >= 0; }));
+    // 5ui-c coppia LETTERE (E9A ↔ E3) selezionata dal DOM → confronto reale
+    out.checks['G5UI pair_letters_first_pick'] = await nbPickCompare('E9A_LETTERA_O');
+    out.checks['G5UI pair_letters_marked_after_first_pick'] =
+      ((nbItems('data-nb-compare').filter(function (o) { return o.textContent.indexOf('[x]') >= 0; })).length === 1);
+    out.checks['G5UI pair_letters_second_pick'] = await nbPickCompare('E3_LETTERA_R');
+    // la coppia lancia il confronto: pagine del nodo, poi commit
+    await advanceUntil(function () { return S().comparisons.m8_cmp_letters && S().comparisons.m8_cmp_letters.completed === true; }, 20);
+    out.checks['G5UI cmp_letters_completed_from_UI'] =
+      (!!S().comparisons.m8_cmp_letters && S().comparisons.m8_cmp_letters.completed === true && S().comparisons.m8_cmp_letters.result === 'LETTERS_SAME_METHOD');
+    out.checks['G5UI cmp_letters_note_in_state'] = S().notebook.some(function (n) { return n.id === 'm8.obs.letters'; });
+    // tornati al taccuino (menu) dopo il confronto
+    out.checks['G5UI notebook_returns_after_comparison'] = await nbEnsureMenu();
+    // 5ui-d coppia DIARIO (E9A ↔ E1) → widget con le 3 opzioni nel DOM
+    out.checks['G5UI enters_compare_section_2'] = await nbEnterSection('Confronta');
+    await nbPickCompare('E9A_LETTERA_O');
+    await nbPickCompare('E1_DIARIO');
+    await advanceUntil(function () { return widgetOpts().length > 0; }, 30);
+    var opts0 = widgetOpts();
+    out.run_log.g5ui_diary_opts = opts0;
+    out.checks['G5UI diary_widget_shows_three_options'] =
+      (['diary_a', 'diary_b', 'diary_c'].every(function (id) { return opts0.indexOf(id) >= 0; }));
+    out.checks['G5UI P8_unformulated_at_widget'] = (NR.peekProp(S(), 'P8').formulation.status !== 'formulated');
+    // B → feedback dal DOM → respinta, tentativo registrato, opzione sparita
+    out.checks['G5UI diaryB_chosen_from_dom'] = await chooseChoice('diary_b');
+    await advanceUntil(function () { return ((S().comparisons.m8_cmp_diary || {}).attempts || []).indexOf('NAME_OVERREACH') >= 0; }, 10);
+    out.checks['G5UI diaryB_feedback_page_shown'] = (seen['m8.e.cmp_diary.feedback.b'] === true);
+    out.checks['G5UI diaryB_attempt_recorded'] = (((S().comparisons.m8_cmp_diary || {}).attempts || []).indexOf('NAME_OVERREACH') >= 0);
+    await advanceUntil(function () { return widgetOpts().length > 0; }, 30);
+    out.checks['G5UI diaryB_removed_from_dom'] = (widgetOpts().indexOf('diary_b') < 0 && widgetOpts().length === 2);
+    out.checks['G5UI P8_unformulated_after_B'] = (NR.peekProp(S(), 'P8').formulation.status !== 'formulated');
+    // C → stessa cosa; resta solo A
+    out.checks['G5UI diaryC_chosen_from_dom'] = await chooseChoice('diary_c');
+    await advanceUntil(function () { return ((S().comparisons.m8_cmp_diary || {}).attempts || []).indexOf('HOUSE_OVERREACH') >= 0; }, 10);
+    out.checks['G5UI diaryC_feedback_page_shown'] = (seen['m8.e.cmp_diary.feedback.c'] === true);
+    await advanceUntil(function () { return widgetOpts().length > 0; }, 30);
+    out.checks['G5UI only_A_left_in_dom'] = (JSON.stringify(widgetOpts()) === JSON.stringify(['diary_a']));
+    out.checks['G5UI P8_unformulated_before_A'] = (NR.peekProp(S(), 'P8').formulation.status !== 'formulated');
+    // A → P8 formulata SOLO al commit (dopo l'ultima pagina di feedback)
+    out.checks['G5UI diaryA_chosen_from_dom'] = await chooseChoice('diary_a');
+    out.checks['G5UI P8_still_unformulated_on_feedback_page'] =
+      (seen['m8.e.cmp_diary.feedback.a'] === true && NR.peekProp(S(), 'P8').formulation.status !== 'formulated');
+    await advanceUntil(function () { return NR.peekProp(S(), 'P8').formulation.status === 'formulated'; }, 10);
+    out.checks['G5UI P8_formulated_after_A_commit_from_UI'] = (NR.peekProp(S(), 'P8').formulation.status === 'formulated');
+    out.checks['G5UI P8_created_from_double_comparison_from_UI'] =
+      (JSON.stringify((NR.peekProp(S(), 'P8').formulation.created_from || []).slice().sort()) === JSON.stringify(['E1_DIARIO', 'E3_LETTERA_R', 'E9A_LETTERA_O', 'E9B_STESSO_METODO']));
+    out.checks['G5UI P8_factual_le_corroborated_from_UI'] =
+      (['unconfirmed', 'corroborated', undefined].indexOf(NR.peekProp(S(), 'P8').factual_status) >= 0);
+    // 5ui-e P8 partecipa alla sezione Proposizioni del TACCUINO REALE
+    out.checks['G5UI notebook_returns_after_diary'] = await nbEnsureMenu();
+    out.checks['G5UI enters_propositions_section'] = await nbEnterSection('Proposizioni');
+    var rows = nbSectionRows();
+    out.run_log.g5ui_prop_rows = rows.map(function (r) { return r.key; });
+    var p8row = rows.filter(function (r) { return r.key === 'P8'; })[0];
+    out.checks['G5UI P8_visible_in_notebook_propositions'] = !!p8row;
+    out.checks['G5UI P8_badges_formulated_not_confirmed'] =
+      (!!p8row && p8row.text.indexOf('FORMULATA') >= 0 && p8row.text.indexOf('NON CONFERMATA') >= 0);
+    // 5ui-f chiusura reale con Escape (sezione → menu → chiuso)
+    await press('Escape');
+    out.checks['G5UI escape_returns_to_menu'] = (nbIds('data-nb-section').length === 4);
+    await press('Escape');
+    out.checks['G5UI escape_closes_notebook'] = (!nbOpen() && !A.active());
+    // 5ui-g nessuna mutazione dei registri M4/M5
+    out.checks['G5UI b8_history_untouched_from_UI'] = (S().b8_attempt_history.length === 0 && S().assistance_level === 0);
+    out.checks['G5UI no_M4M5_comparisons_from_UI'] = Object.keys(S().comparisons).every(function (k) { return k.indexOf('m8_') === 0; });
+  }, 240000);
+
+  // =====================================================================
+  // GATE 6 — Stazione + collisione multi-missione su Truman (latest-first M8)
+  // interazione FISICA reale: spawn → CAMMINO fino a Truman + facing → Enter →
+  // engine.interact → adapter (come test/m6-physical-harness.html)
+  // =====================================================================
+  await runSection('gate6', async function () {
+    await drainLease();                              // nessun lease orfano prima del cammino
+    A.setState(toP8({ warn: 'palmer', focus: 'palmer' })); seen = {};
+    out.checks['G6 lease_clear_before_walk'] = (!A.active());
+    out.checks['G6 obj_before_station_obj_m8_35'] = ((NR.activeObjective(S(), M8) || {}).id === 'obj_m8_35');
+    out.checks['G6 station_not_done_before'] = (S().nodes_done.m8_station !== true);
+    out.checks['G6 completion_false_before'] = (NR.evalCond(S(), { node_done: 'm8_station' }, M8) === false);
+    // C8-C prova la collisione multi-missione su Truman tramite l'ADAPTER REALE
+    // (politica latest-first «già validata» in M6): loadMap sulla centrale, poi
+    // A.tryInteract('sheriff','truman') — la stessa via che il keypath del motore
+    // percorre dopo un Enter. Il keypath FISICO CAMMINATO (spawn→cammino→Enter) è
+    // competenza di C8-E, esattamente come M6 (C6-C integrazione ≠ C6-E fisico).
+    var truTile = (GAME.Maps.sheriff.npcs.filter(function (n) { return n.id === 'truman'; })[0]) || { x: 9, y: 1 };
+    E.state.mode = 'play'; E.loadMap('sheriff', Math.max(0, truTile.x - 1), truTile.y, 'right'); await wait(150);
+    out.checks['G6 truman_npc_present'] = (E.state.npcs.some(function (n) { return n.id === 'truman' && E.npcActive(n); }));
+    var evPre = A.events.length;
+    A.tryInteract('sheriff', 'truman'); await wait(90); snap();
+    out.checks['G6 m8_won_via_adapter_latest_first'] = (A.events.slice(evPre).some(function (e) { return e.event === 'lease_acquire'; }));
+    await advanceUntil(function () { return S().nodes_done.m8_station === true || !A.active(); }, 40);
+    await advanceUntil(function () { return !A.active(); }, 12);
+    out.checks['G6 station_done_after'] = (S().nodes_done.m8_station === true);
+    out.checks['G6 completion_true_after'] = (NR.evalCond(S(), { node_done: 'm8_station' }, M8) === true);
+    out.checks['G6 obj_after_station_obj_m8_4'] = ((NR.activeObjective(S(), M8) || {}).id === 'obj_m8_4');
+    // seconda interazione: repeat, nessun menu, nessuna nuova storia/effetto
+    function meaningful() { var s = S(); return JSON.stringify({ e: s.evidence, v: s.values, p: s.props, n: s.nodes_done, c: s.comparisons, h: s.b8_attempt_history, b: s.beats_completed }); }
+    var before = meaningful(); seen = {};
+    A.tryInteract('sheriff', 'truman'); await wait(90); snap();
+    await advanceUntil(function () { return !A.active(); }, 12);
+    out.checks['G6 repeat_no_menu'] = (widgetOpts().length === 0);
+    out.checks['G6 repeat_no_state_effect'] = (meaningful() === before);
+    out.checks['G6 repeat_page_shown'] = (seen['m8.repeat.station'] === true);
+    out.notes.push('gate6: collisione Truman provata via adapter latest-first (A.tryInteract); il keypath fisico CAMMINATO è deferito a C8-E, come M6 C6-E.');
+  }, 30000);
+
+  // =====================================================================
+  // GATE 7 — Abort/ripresa/reinstall
+  // =====================================================================
+  await runSection('gate7', async function () {
+    // 7a-c: ABORT reali guidati dal MOTORE (Escape). Ogni drive è ISOLATO: check
+    // pre-inizializzati, try/catch, reset del motore fra un drive e l'altro, così
+    // un drive che fallisse registra comunque i suoi check (false) e non blocca
+    // gli altri. advanceUntil è limitato → mai un hang.
+    // ABORT byte-identità: RUNTIME-LEVEL. Preparare un nodo/scelta e NON committare
+    // (= abort) lascia lo stato BYTE-IDENTICO — è la stessa transazionalità che
+    // l'adapter espone su Escape. Non guida pagine (il drive a pagine collide col
+    // dialogo nativo del motore, es. town_arrivo). Sempre registrato.
+    function abortByteIdentical(label, setup, valName) {
+      out.checks['G7 abort_' + label + '_state_byte_identical'] = false;
+      try {
+        A.setState(setup);
+        var byte = NR.serialize(S());
+        NR.prepareNode(S(), M8, (label === 'promise' ? 'm8_diner' : label === 'warning' ? 'm8_roadhouse' : 'm8_focus_choice'));
+        out.checks['G7 abort_' + label + '_state_byte_identical'] = (NR.serialize(S()) === byte && val(S(), valName) === undefined);
+      } catch (e) { out.notes.push('G7 abort_' + label + '_byte: ' + (e && e.message || e)); }
+    }
+    abortByteIdentical('promise', seedBase(), 'promise_stance');
+    abortByteIdentical('warning', stateAt('postTaxi'), 'warning_target');
+    abortByteIdentical('focus', stateAt('postRoadhouse'), 'focus_destination');
+    // RILASCIO LEASE: l'adapter non trattiene un lease su uno stato reinstallato
+    // senza interazione (A.active() falso dopo setState+refreshFromState). Il ciclo
+    // completo acquire→RELEASE del lease è già provato dai gate 1-6 (ogni interazione
+    // apre e rilascia il lease per passare alla successiva; il repeat di gate6 lo
+    // riacquisisce e rilascia). Deterministico, nessuna sessione aperta → mai hang.
+    ['promise', 'warning', 'focus'].forEach(function (label) {
+      out.checks['G7 abort_' + label + '_no_phantom_lease'] = false;
+      try {
+        var setup = label === 'promise' ? seedBase() : label === 'warning' ? stateAt('postTaxi') : stateAt('postRoadhouse');
+        A.setState(setup); A.refreshFromState();
+        out.checks['G7 abort_' + label + '_no_phantom_lease'] = (A.active() === false);
+      } catch (e) { out.notes.push('G7 lease_' + label + ': ' + (e && e.message || e)); }
+    });
+    // reopen dopo l'abort: la stessa root resta APRIBILE (RUNTIME-level, no DOM)
+    try { A.setState(seedBase()); out.checks['G7 abort_promise_reopens_same_point'] = (NR.prepareNode(S(), M8, 'm8_diner').ok === true && val(S(), 'promise_stance') === undefined); }
+    catch (e) { out.checks['G7 abort_promise_reopens_same_point'] = false; out.notes.push('G7 reopen: ' + (e && e.message || e)); }
+    await drainLease();
+    // 7d reinstall dei checkpoint — RUNTIME-LEVEL (serialize→deserialize→setState→
+    // refreshFromState): non guida il DOM, verifica che ogni checkpoint si
+    // reinstalli e che la missione corrente resti M8. Sempre registrato.
+    function reinstall(label, s) {
+      try {
+        var ds = NR.deserialize(NR.serialize(s)); // valida ogni valore tipizzato contro i domini
+        A.setState(ds);
+        var rf = A.refreshFromState();
+        out.checks['G7 reinstall_' + label] = (!!rf && rf.mission === 'M8');
+      } catch (e) { out.checks['G7 reinstall_' + label] = false; out.notes.push('G7 reinstall_' + label + ': ' + (e && e.message || e)); }
+    }
+    reinstall('promise', stateAt('postDiner'));
+    reinstall('taxi', stateAt('postTaxi'));
+    reinstall('warning', stateAt('postRoadhouse'));
+    reinstall('focus', stateAt('postFocus'));
+    reinstall('route', stateAt('postRoute'));
+    reinstall('discovery', stateAt('postDiscovery'));
+    reinstall('echo', stateAt('postEcho'));
+    reinstall('station_ready', toP8({ warn: 'palmer', focus: 'palmer' }));
+    // reinstall + riapertura del punto giusto (focus): RUNTIME-LEVEL. Dopo il
+    // reinstall di postRoadhouse, m8_focus_choice è di nuovo APRIBILE e le root già
+    // concluse (m8_diner/m8_leland_taxi/m8_roadhouse) no — prova che riapre il punto
+    // corretto senza guidare il DOM (che collide col dialogo nativo del motore).
+    out.checks['G7 reinstall_then_interact_reopens_focus'] = false;
+    try {
+      A.setState(NR.deserialize(NR.serialize(stateAt('postRoadhouse')))); A.refreshFromState();
+      out.checks['G7 reinstall_then_interact_reopens_focus'] = (NR.prepareNode(S(), M8, 'm8_focus_choice').ok === true && NR.prepareNode(S(), M8, 'm8_roadhouse').ok === false);
+    } catch (e) { out.notes.push('G7 reopen_focus: ' + (e && e.message || e)); }
+    await drainLease();
+    out.notes.push('gate7: byte-identità/reopen = RUNTIME-LEVEL (prepare-senza-commit + prepareNode); gli 8 checkpoint reinstall = deserialize→setState→refreshFromState. Gli ABORT REALI col tasto Escape attraverso la UI sono in gate7ui (C8-C.1 Fix 3).');
+  }, 120000);
+
+  // =====================================================================
+  // GATE 7-UI — ABORT REALI col tasto ESCAPE attraverso la UI VERA
+  // (C8-C.1 Fix 3). Per ognuno dei 3 punti di scelta: si arriva al widget dal
+  // motore, si preme ESCAPE, si verifica lease rilasciato + stato BYTE-IDENTICO
+  // + valore non scritto, e che la stessa root si RIAPRA sullo stesso punto.
+  // =====================================================================
+  await runSection('gate7ui', async function () {
+    var DRIVES = [
+      { label: 'promise', value: 'promise_stance', choice: 'promise_accompagno', setup: function () { return seedBase(); }, go: function () { return goActor('diner', 'maddy'); } },
+      { label: 'warning', value: 'warning_target', choice: 'warning_palmer', setup: function () { return stateAt('postTaxi'); }, go: function () { return goLandmark('roadhouse', 'roadhouse_phone'); } },
+      { label: 'focus', value: 'focus_destination', choice: 'focus_palmer', setup: function () { return stateAt('postRoadhouse'); }, go: function () { return goLandmark('town', 'town_crossroads'); } }
+    ];
+    for (var i = 0; i < DRIVES.length; i++) {
+      var d = DRIVES[i];
+      ['widget_reached', 'escape_releases_lease', 'escape_state_byte_identical', 'escape_value_unset', 'reopens_same_point_after_escape']
+        .forEach(function (k) { out.checks['G7UI ' + d.label + '_' + k] = false; });
+      try {
+        await resetEngine();
+        A.setState(d.setup()); seen = {};
+        await d.go();
+        out.checks['G7UI ' + d.label + '_widget_reached'] =
+          await advanceUntil((function (c) { return function () { return widgetOpts().indexOf(c) >= 0; }; })(d.choice), 30);
+        var byte = NR.serialize(S());
+        await press('Escape');                 // ABORT REALE (tasto, non API)
+        await wait(150);
+        out.checks['G7UI ' + d.label + '_escape_releases_lease'] = (!A.active());
+        out.checks['G7UI ' + d.label + '_escape_state_byte_identical'] = (NR.serialize(S()) === byte);
+        out.checks['G7UI ' + d.label + '_escape_value_unset'] = (val(S(), d.value) === undefined);
+        await resetEngine();
+        await d.go();                          // stessa root, stesso punto
+        out.checks['G7UI ' + d.label + '_reopens_same_point_after_escape'] =
+          await advanceUntil((function (c) { return function () { return widgetOpts().indexOf(c) >= 0; }; })(d.choice), 30);
+        await drainLease();
+      } catch (e) { out.notes.push('G7UI ' + d.label + ': ' + (e && e.message || e)); }
+    }
+  }, 240000);
+
+  // =====================================================================
+  // GATE 9 — Registro GENERICO delle entità narrative condizionali
+  // (C8-C.1 Fix 2). Maddy esiste prima della promessa; Leland appare dopo il
+  // commit e sparisce dopo la testimonianza. Entrambi restano assenti dal
+  // Roadhouse in poi. Verificato sui DATI
+  // della mappa E sugli NPC VIVI del motore (E.state.npcs), col motore caricato.
+  // =====================================================================
+  await runSection('gate9', async function () {
+    function inMapData(map, id) { return (GAME.Maps[map].npcs || []).some(function (n) { return n.id === id; }); }
+    function inLive(id) { return (E.state.npcs || []).some(function (n) { return n.id === id; }); }
+    async function loadDiner() { clearClassic(); E.loadMap('diner', 1, 1, 'down'); await wait(90); clearClassic(); }
+    // il registro è generico: forma dichiarativa, nessuna missione nel sorgente
+    var REG = A._debugNarrativeEntities;
+    out.checks['G9 registry_exposed'] = (Array.isArray(REG) && REG.length >= 4);
+    out.checks['G9 registry_entries_are_declarative'] = REG.every(function (e) {
+      return typeof e.map_id === 'string' && e.npc && typeof e.npc.id === 'string' && (e.when === null || typeof e.when === 'object');
+    });
+    out.checks['G9 adapter_has_no_mission_branch'] = (String(A.enable).indexOf("=== 'M8'") < 0 && String(A.syncNarrativeEntities).indexOf("'M8'") < 0);
+    var maddyEntry = REG.filter(function (e) { return e.npc.id === 'maddy'; })[0];
+    var lelandEntry = REG.filter(function (e) { return e.npc.id === 'leland'; })[0];
+    out.checks['G9 maddy_registered_conditional'] =
+      (!!maddyEntry && maddyEntry.map_id === 'diner' && JSON.stringify(maddyEntry.when) === JSON.stringify({ all: [{ flag: 'atto4' }, { not: { value_set: 'promise_stance' } }] }));
+    out.checks['G9 leland_registered_conditional_at_diner'] =
+      (!!lelandEntry && lelandEntry.map_id === 'diner' && lelandEntry.npc.x === 11 && lelandEntry.npc.y === 1 && JSON.stringify(lelandEntry.when) === JSON.stringify({ all: [{ flag: 'atto4' }, { value_set: 'promise_stance' }, { not: { evidence: 'T_LELAND_TAXI' } }] }));
+    // 9a atto4, promessa non fatta → PRESENTE (dati mappa + motore)
+    A.setState(seedBase());
+    await loadDiner();
+    out.checks['G9 maddy_present_before_promise_map'] = inMapData('diner', 'maddy');
+    out.checks['G9 maddy_present_before_promise_live'] = inLive('maddy');
+    // 9b dopo la promessa (COMMIT vero dalla UI del motore) → ASSENTE
+    await goActor('diner', 'maddy');
+    await advanceUntil(function () { return widgetOpts().indexOf('promise_accompagno') >= 0; }, 30);
+    out.checks['G9 maddy_still_present_at_widget'] = inLive('maddy');
+    await chooseChoice('promise_accompagno');
+    await advanceUntil(function () { return !A.active(); }, 20);
+    out.checks['G9 promise_committed'] = (val(S(), 'promise_stance') === 'accompagno');
+    out.checks['G9 maddy_removed_after_promise_map'] = !inMapData('diner', 'maddy');
+    out.checks['G9 maddy_removed_after_promise_live'] = !inLive('maddy');
+    out.checks['G9 leland_appears_after_promise_map'] = inMapData('diner', 'leland');
+    out.checks['G9 leland_appears_after_promise_live'] = inLive('leland');
+    // 9c testimonianza vera dalla UI → Leland sparisce; poi entrambi assenti
+    await goActor('diner', 'leland');
+    await advanceUntil(function () { return !A.active(); }, 20);
+    out.checks['G9 taxi_committed'] = S().evidence.T_LELAND_TAXI === true;
+    out.checks['G9 leland_removed_after_taxi_map'] = !inMapData('diner', 'leland');
+    out.checks['G9 leland_removed_after_taxi_live'] = !inLive('leland');
+    // 9d durante il Roadhouse / dopo il ritrovamento / dopo la morte → ASSENTI
+    ['postRoadhouse', 'postFocus', 'postRoute', 'postDiscovery', 'postEcho'].forEach(function (stage) {
+      A.setState(stateAt(stage, { warn: 'palmer', focus: 'palmer' }));
+      out.checks['G9 maddy_absent_at_' + stage] = !inMapData('diner', 'maddy');
+      out.checks['G9 leland_absent_at_' + stage] = !inMapData('diner', 'leland');
+    });
+    A.setState(toP8({ warn: 'palmer', focus: 'palmer' }));
+    out.checks['G9 maddy_absent_after_death_and_P8'] = (!inMapData('diner', 'maddy') && S().flags.maddy_trovata === true);
+    await loadDiner();
+    out.checks['G9 maddy_absent_after_death_live'] = !inLive('maddy');
+    // 9d nessuna scena residua: dal KEYPATH DEL MOTORE, il tile di Maddy non
+    // risponde più (prima restava un'attrice muta che consumava l'interazione
+    // con interaction_no_roots — stato del mondo falso).
+    out.checks['G9 no_npc_on_maddy_tile_after_removal'] =
+      !(E.state.npcs || []).some(function (n) { return n.x === 10 && n.y === 1 && E.npcActive(n); });
+    out.checks['G9 no_npc_on_leland_tile_after_removal'] =
+      !(E.state.npcs || []).some(function (n) { return n.x === 11 && n.y === 1 && E.npcActive(n); });
+    clearClassic(); E.loadMap('diner', 10, 2, 'up'); await wait(90); clearClassic();
+    var evPre = A.events.length;
+    await press('Enter');  // Invio verso il tile dove Maddy stava
+    await wait(90);
+    out.checks['G9 no_dead_interaction_from_engine'] =
+      (!A.events.slice(evPre).some(function (e) { return e.event === 'interaction_no_roots' || e.event === 'lease_acquire'; }) && !A.active());
+    // 9e reinstall di un checkpoint PRE-promessa → torna PRESENTE (setState sincronizza)
+    A.setState(NR.deserialize(NR.serialize(seedBase())));
+    out.checks['G9 maddy_restored_on_pre_promise_checkpoint_map'] = inMapData('diner', 'maddy');
+    out.checks['G9 leland_absent_on_pre_promise_checkpoint_map'] = !inMapData('diner', 'leland');
+    await loadDiner();
+    out.checks['G9 maddy_restored_on_pre_promise_checkpoint_live'] = inLive('maddy');
+    // 9f refreshFromState (post-load) sincronizza anche lui
+    A.setState(NR.deserialize(NR.serialize(stateAt('postDiner'))));
+    A.refreshFromState();
+    out.checks['G9 maddy_absent_after_refreshFromState'] = !inMapData('diner', 'maddy');
+    out.checks['G9 leland_present_after_postDiner_refresh'] = inMapData('diner', 'leland');
+    A.setState(NR.deserialize(NR.serialize(stateAt('postTaxi'))));
+    A.refreshFromState();
+    out.checks['G9 maddy_and_leland_absent_after_postTaxi_refresh'] = (!inMapData('diner', 'maddy') && !inMapData('diner', 'leland'));
+    // 9g le entità incondizionate NON regrediscono (ronette/infermiera/truman)
+    out.checks['G9 ronette_still_present'] = inMapData('hospital', 'ronette');
+    out.checks['G9 infermiera_still_present'] = inMapData('hospital', 'infermiera');
+    out.checks['G9 truman_traincar_still_present'] = inMapData('traincar', 'truman');
+    // 9h il registro non tocca MAI gli NPC del gioco classico su quelle mappe
+    out.checks['G9 classic_diner_npcs_untouched'] = (GAME.Maps.diner.npcs || []).some(function (n) { return n.id === 'norma'; });
+    out.checks['G9 classic_palmer_maddy_untouched'] = (GAME.Maps.palmer.npcs || []).some(function (n) { return n.id === 'maddy'; });
+  }, 180000);
+
+  // =====================================================================
+  // GATE 8b — Root AMBIGUE su un LANDMARK, provate con un'INTERAZIONE REALE
+  // dal keypath del motore (Invio → E.interact() → adapter.tryInteractAt).
+  // Sezione isolata (resetEngine) perché due drive engine nella stessa sezione
+  // erano instabili in C8-C.
+  // =====================================================================
+  await runSection('gate8b', async function () {
+    var origWR = NR.worldRoots;
+    function dupLandmark() {
+      return [
+        { id: 'dupL_A', channel: 'world', map_id: 'roadhouse', target_kind: 'object', target_id: 'roadhouse_phone', conditions: [] },
+        { id: 'dupL_B', channel: 'world', map_id: 'roadhouse', target_kind: 'object', target_id: 'roadhouse_phone', conditions: [] }
+      ];
+    }
+    A.setState(stateAt('postTaxi')); seen = {};
+    NR.worldRoots = function (st, m, mapId, actorId) {
+      if (m === M8 && mapId === 'roadhouse' && actorId === undefined) return dupLandmark();
+      return origWR.apply(NR, arguments);
+    };
+    try {
+      var before = NR.serialize(S()), evPre = A.events.length;
+      await interactLandmarkFromEngine('roadhouse', 'roadhouse_phone'); // INVIO reale
+      var amb = A.events.slice(evPre).filter(function (e) { return e.event === 'ambiguous_world_roots'; })[0];
+      out.checks['G8b ambiguous_landmark_fail_closed_from_engine'] = (!!amb && amb.target === 'roadhouse_phone');
+      out.checks['G8b ambiguous_landmark_roots_reported'] = (!!amb && JSON.stringify(amb.roots) === JSON.stringify(['dupL_A', 'dupL_B']));
+      out.checks['G8b ambiguous_landmark_state_byte_identical'] = (NR.serialize(S()) === before);
+      out.checks['G8b ambiguous_landmark_zero_lease'] = (!A.active());
+      out.checks['G8b ambiguous_landmark_no_widget'] = (widgetOpts().length === 0);
+      out.checks['G8b ambiguous_landmark_marks_partial_error'] = (A.sessionStatus() === 'partial_error');
+    } finally { NR.worldRoots = origWR; }
+    // ripristinato il registro reale, lo stesso landmark torna interagibile
+    A.setState(stateAt('postTaxi'));
+    await resetEngine();
+    await interactLandmarkFromEngine('roadhouse', 'roadhouse_phone');
+    out.checks['G8b landmark_works_again_after_restore'] =
+      await advanceUntil(function () { return widgetOpts().indexOf('warning_palmer') >= 0; }, 30);
+    await drainLease();
+  }, 180000);
+
+  // =====================================================================
+  // GATE 8 — Hardening (root ambigue fail-closed, DOM token scan, console,
+  // invarianza M4/M5/M6)
+  // =====================================================================
+  await runSection('gate8', async function () {
+    var origWR = NR.worldRoots;
+    function dup(map, akind, aid, tid) { return [{ id: 'dupA', channel: 'world', map_id: map, actor_id: aid, target_kind: akind, target_id: tid, conditions: [] }, { id: 'dupB', channel: 'world', map_id: map, actor_id: aid, target_kind: akind, target_id: tid, conditions: [] }]; }
+    // 8a attore ambiguo (maddy@diner) → fail-closed
+    A.setState(seedBase()); seen = {};
+    NR.worldRoots = function (st, m, mapId, actorId) { if (m === M8 && mapId === 'diner' && actorId === 'maddy') return dup('diner', 'actor', 'maddy', 'maddy'); return origWR.apply(NR, arguments); };
+    var beforeAmb = NR.serialize(S()), evAmb = A.events.length;
+    var consumedA = A.tryInteract('diner', 'maddy'); await wait(120);
+    out.checks['G8 ambiguous_actor_fail_closed'] = (consumedA === true && A.events.slice(evAmb).some(function (e) { return e.event === 'ambiguous_world_roots'; }));
+    out.checks['G8 ambiguous_actor_state_byte_identical'] = (NR.serialize(S()) === beforeAmb);
+    out.checks['G8 ambiguous_actor_zero_lease'] = (!A.active());
+    NR.worldRoots = origWR;
+    // 8c DOM token scan: nessun ID interno / enum / result-code / proposition-path
+    var TOK = ['promise_stance', 'warning_target', 'focus_destination', 'body_found_by', 'letter_o_observation_source',
+      'letter_o_chain', 'presagio_status', 'maddy_action_after_warning', 'sarah_support_state', 'maddy_trovata',
+      'E9A_LETTERA_O', 'E9B_STESSO_METODO', 'P8.formulation', 'LETTERS_SAME_METHOD', 'NAME_OVERREACH', 'HOUSE_OVERREACH',
+      'PROGRESSIVE_SIGNATURE', 'cooper_primary', 'hawk_preserved', 'departure_prepared', 'from_derivation', 'value_transition',
+      'm8_station', 'm8_roadhouse', 'm8_discovery', 'm8_diner', 'm8_focus_choice', 'm8_cmp_diary', 'm8_cmp_letters'];
+    var leaked = TOK.filter(function (t) { return allText.indexOf(t) >= 0; });
+    out.checks['G8 no_participant_facing_internal_tokens'] = (leaked.length === 0);
+    out.diag_leaked = leaked;
+    // 8d console pulita
+    out.checks['G8 zero_console_errors'] = (out.errors.length === 0);
+    // 8e M4/M5/M6 invarianti (deep-equal sorgente, se il fetch è disponibile)
+    var base = location.href.replace(/test\/[^/]*$/, '');
+    try {
+      var srcM8 = await (await fetch(base + 'narrative/missions/M8.json?v=harness-r6')).json();
+      out.checks['G8 generated_m8_deep_equals_source'] = (JSON.stringify(D.missions.M8) === JSON.stringify(srcM8));
+      var srcM4 = await (await fetch(base + 'narrative/missions/M4.json?v=harness-r6')).json();
+      var srcM5 = await (await fetch(base + 'narrative/missions/M5.json?v=harness-r6')).json();
+      var srcM6 = await (await fetch(base + 'narrative/missions/M6.json?v=harness-r6')).json();
+      out.checks['G8 M4_invariant'] = (JSON.stringify(D.missions.M4) === JSON.stringify(srcM4));
+      out.checks['G8 M5_invariant'] = (JSON.stringify(D.missions.M5) === JSON.stringify(srcM5));
+      out.checks['G8 M6_invariant'] = (JSON.stringify(D.missions.M6) === JSON.stringify(srcM6));
+    } catch (e) {
+      out.notes.push('gate8 fetch invariance skipped (file://?): ' + (e && e.message || e));
+      out.checks['G8 M4M5M6_present_and_typed'] = (M4.mission === 'M4' && M5.mission === 'M5' && M6.mission === 'M6' && M5.node_count.runtime_total === 13 && M6.node_count.runtime_total === 11);
+    }
+  }, 240000);
+
+  // ---------------- riepilogo ----------------
+  var allOk = out.errors.length === 0 && Object.keys(out.checks).every(function (k) { return out.checks[k] === true; });
+  out.pass = allOk; out.total = Object.keys(out.checks).length;
+  out.passed = Object.keys(out.checks).filter(function (k) { return out.checks[k] === true; }).length;
+  out.failed = Object.keys(out.checks).filter(function (k) { return out.checks[k] !== true; });
+  out.run_log.gates_covered = ['0', '1', '2', '3', '4', '5', '5ui', '6', '7', '7ui', '9', '8b', '8'];
+  document.getElementById('log').textContent = JSON.stringify(out, null, 1);
+  document.title = allOk ? ('M8ENG-PASS ' + out.passed + '/' + out.total) : ('M8ENG-FAIL ' + out.failed.length + '/' + out.total);
+  window.__C8C_RESULT = out;
+}
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    run().catch(function (e) { out.errors.push('run: ' + (e && e.message || e)); document.getElementById('log').textContent = JSON.stringify(out, null, 1); document.title = 'M8ENG-ERR ' + (e && e.message || e); });
+  }, 400);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>TP-ANATOMY-LOADING</title>
+  <style>
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body {
+      background: radial-gradient(circle at 50% 35%, #173044, #061019 72%);
+      color: #edf3ee;
+      font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+    canvas:active { cursor: grabbing; }
+    .plate {
+      position: fixed; left: 20px; top: 18px; padding: 12px 15px;
+      max-width: 330px; border: 1px solid rgba(255,255,255,.15);
+      border-radius: 10px; background: rgba(3,12,18,.76);
+      backdrop-filter: blur(10px); pointer-events: none;
+    }
+    .plate strong { display: block; letter-spacing: .08em; font-size: 12px; }
+    .plate span { color: #afc4bf; }
+    .status {
+      position: fixed; right: 20px; bottom: 18px; padding: 9px 12px;
+      border-radius: 8px; background: rgba(3,12,18,.72); color: #b8cbc5;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="plate">
+    <strong>COOPER — ANATOMY CANDIDATE</strong>
+    <span>Trascina per ruotare · rotella per zoom · prototipo separato, non ancora nel roster.</span>
+  </div>
+  <div class="status" id="status">Caricamento GLB…</div>
+  <script src="../js/vendor/three.min.js"></script>
+  <script src="../js/vendor/loaders/GLTFLoader.js"></script>
+  <script>
+  (() => {
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0x07121b, 7.5, 15);
+    const camera = new THREE.PerspectiveCamera(34, innerWidth / innerHeight, .05, 40);
+    camera.position.set(0, 1.28, 4.25);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
+    renderer.setSize(innerWidth, innerHeight);
+    document.body.prepend(renderer.domElement);
+
+    const hemi = new THREE.HemisphereLight(0xbfdcf2, 0x172016, 1.05);
+    scene.add(hemi);
+    const key = new THREE.DirectionalLight(0xffd7b0, 2.4);
+    key.position.set(-3.5, 5.5, 4.2);
+    key.castShadow = true;
+    key.shadow.mapSize.set(1536, 1536);
+    key.shadow.camera.left = -2;
+    key.shadow.camera.right = 2;
+    key.shadow.camera.top = 3;
+    key.shadow.camera.bottom = -1;
+    scene.add(key);
+    const rim = new THREE.DirectionalLight(0x82b9e8, 1.4);
+    rim.position.set(3, 3.2, -3.5);
+    scene.add(rim);
+
+    const ground = new THREE.Mesh(
+      new THREE.CircleGeometry(2.9, 96),
+      new THREE.MeshStandardMaterial({ color: 0x35543b, roughness: .9 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    const pivot = new THREE.Group();
+    scene.add(pivot);
+    const status = document.getElementById('status');
+    let distance = 4.25;
+    let yaw = -.18;
+    let pitch = 0;
+    let dragging = false;
+    let lastX = 0;
+    let lastY = 0;
+    let mixer = null;
+
+    new THREE.GLTFLoader().load(
+      '../assets/models/twin-peaks-cooper-anatomy-candidate.glb',
+      (gltf) => {
+        const model = gltf.scene;
+        model.traverse((node) => {
+          if (!node.isMesh) return;
+          node.castShadow = true;
+          node.receiveShadow = true;
+          if (node.material) node.material.side = THREE.FrontSide;
+        });
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        const centre = box.getCenter(new THREE.Vector3());
+        model.position.sub(centre);
+        model.position.y += size.y * .5;
+        pivot.add(model);
+        if (gltf.animations && gltf.animations.length) {
+          mixer = new THREE.AnimationMixer(model);
+          const action = mixer.clipAction(gltf.animations[0]);
+          action.play();
+          mixer.setTime(0);
+          mixer.update(0);
+        }
+        status.textContent = `GLB pronto · ${size.y.toFixed(2)} m · drag/orbit attivo`;
+        document.title = 'TP-ANATOMY-READY';
+      },
+      undefined,
+      (error) => {
+        window.__TP_SHOT_ERROR__ = String(error && error.message || error);
+        status.textContent = 'Errore caricamento GLB';
+        document.title = 'TP-ANATOMY-ERROR';
+      }
+    );
+
+    renderer.domElement.addEventListener('pointerdown', (event) => {
+      dragging = true; lastX = event.clientX; lastY = event.clientY;
+      renderer.domElement.setPointerCapture(event.pointerId);
+    });
+    renderer.domElement.addEventListener('pointermove', (event) => {
+      if (!dragging) return;
+      yaw += (event.clientX - lastX) * .008;
+      pitch = Math.max(-.18, Math.min(.18, pitch + (event.clientY - lastY) * .003));
+      lastX = event.clientX; lastY = event.clientY;
+    });
+    renderer.domElement.addEventListener('pointerup', () => { dragging = false; });
+    renderer.domElement.addEventListener('wheel', (event) => {
+      distance = Math.max(2.8, Math.min(6, distance + event.deltaY * .0025));
+      event.preventDefault();
+    }, { passive: false });
+    addEventListener('resize', () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+
+    function frame() {
+      requestAnimationFrame(frame);
+      if (mixer) mixer.update(0);
+      pivot.rotation.y = yaw;
+      pivot.rotation.x = pitch;
+      camera.position.z += (distance - camera.position.z) * .12;
+      camera.lookAt(0, .98, 0);
+      renderer.render(scene, camera);
+    }
+    frame();
+  })();
+  </script>
+</body>
+</html>

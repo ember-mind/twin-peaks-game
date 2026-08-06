@@ -1,0 +1,10 @@
+{
+ "_comment": "diff PROPOSTO a evidence.json (C5-A): SOLO ui_origin diegetici (lezione B3.1: function mai renderizzata). Nessuna evidenza nuova: le 5 di M5 esistono dalla Fase A.",
+ "ui_origin_add": {
+  "E7A_BIGLIETTO_TESTO": "Il vagone — il biglietto nel mucchio",
+  "E7B_BIGLIETTO_POSIZIONE": "Il vagone — il mucchio presso la porta",
+  "E8A_ANELLO_POSIZIONE": "Il vagone — la traversa centrale",
+  "E8B_ANELLO_SUPERFICIE": "Il vagone — la polvere intorno all'anello",
+  "E_SCENE": "Il vagone — la disposizione della scena"
+ }
+}

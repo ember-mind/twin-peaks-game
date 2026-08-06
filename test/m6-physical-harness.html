@@ -1,0 +1,273 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>m6-physical-harness</title>
+<style>body{margin:0;background:#000}#narrative{position:fixed;inset:0;pointer-events:none}.nw-focus{font-weight:bold}#log{position:fixed;left:0;bottom:0;max-height:42%;overflow:auto;background:#111;color:#ddd;font:11px monospace;white-space:pre-wrap;padding:6px;z-index:99}</style>
+</head>
+<body>
+<canvas id="gl" width="960" height="640"></canvas>
+<canvas id="game" width="480" height="320"></canvas>
+<div id="narrative"></div>
+<div id="log">running…</div>
+<script src="../js/vendor/three.min.js?v=m6r6"></script>
+<script src="../js/tiles.js?v=m6r6"></script>
+<script src="../js/chars.js?v=m6r6"></script>
+<script src="../js/houses.js?v=m6r6"></script>
+<script src="../js/maps.js?v=m6r6"></script>
+<script src="../js/data.js?v=m6r6"></script>
+<script src="../js/retro-font.js?v=m6r6"></script>
+<script src="../js/engine.js?v=m6r6"></script>
+<script src="../js/render3d.js?v=m6r6"></script>
+<script src="../js/glue.js?v=m6r6"></script>
+<script src="../js/main.js?v=m6r6"></script>
+<script src="../js/narrative-runtime.js?v=m6r6"></script>
+<script src="../js/narrative-ui.js?v=m6r6"></script>
+<script src="../js/narrative-notebook.js?v=m6r6"></script>
+<script src="../js/narrative-data.gen.js?v=m6r7"></script>
+<script src="../js/narrative-engine-adapter.js?v=m6r7"></script>
+<script src="../js/narrative-save.js?v=m6r6"></script>
+<script>
+/* C6-E PHYSICAL END-TO-END — M6 CAMMINATA da un pathfinder BFS sul motore vero.
+ * Ogni SEGMENTO dentro una mappa è percorso tile-per-tile con i tasti di
+ * movimento (mai loadMap sui segmenti); le tre location M6 (oej/sheriff/hospital)
+ * sono raggiunte con un reset di mappa fra le fasi (dichiarato nel route log),
+ * come C5-E fra i percorsi. Due percorsi/tattiche (Prova, Falsa sicurezza). */
+var LOCK = 28;
+var out = { routes: {}, checks: {}, errors: [] };
+function progress(label) { document.getElementById('log').textContent = 'running: ' + label; }
+window.onerror = function (m, s, l) { out.errors.push(String(m) + ' @' + l); };
+window.addEventListener('unhandledrejection', function (e) { out.errors.push('unhandled: ' + (e.reason && e.reason.message || e.reason)); });
+var DIRC = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(c) { window.dispatchEvent(new KeyboardEvent('keydown', { code: c, bubbles: true })); window.dispatchEvent(new KeyboardEvent('keyup', { code: c, bubbles: true })); }
+function holdKey(c) { window.dispatchEvent(new KeyboardEvent('keydown', { code: c, bubbles: true })); }
+function liftKey(c) { window.dispatchEvent(new KeyboardEvent('keyup', { code: c, bubbles: true })); }
+function clearHeld() { window.dispatchEvent(new Event('blur')); }
+async function press(c) { key(c); await wait(LOCK + 45); }
+function widgetOpts() { return [].map.call(document.querySelectorAll('.nw-root:not(.nb-root) .nw-opt'), function (o) { return o.getAttribute('data-choice-id'); }); }
+async function advanceUntil(pred, cap) { for (var i = 0; i < (cap || 20) && !pred(); i++) { await press('Enter'); } return pred(); }
+async function chooseChoice(id) { var o = widgetOpts(), idx = o.indexOf(id); if (idx < 0) return false; for (var k = 0; k < idx; k++) await press('ArrowDown'); await press('Enter'); return true; }
+
+async function run() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter, D = GAME.NarrativeData;
+  if (GAME.Render3D) GAME.Render3D.render = function () {};
+  function S() { return A.getState(); }
+  var M4 = D.missions.M4, M5 = D.missions.M5, M6 = D.missions.M6;
+  var domains = {}; for (var nm in D.enums.values_allowed) domains[nm] = D.enums.enums[D.enums.values_allowed[nm]];
+  NR.setValueDomains(domains);
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK, missions: [M4, M5, M6] });
+  // sorveglianza anti-teleport: conto le chiamate a loadMap; dopo lo spawn
+  // iniziale di ogni percorso NON deve essercene alcuna (transizioni via porta).
+  var loadMapCalls = 0, origLoadMap = E.loadMap;
+  E.loadMap = function () { loadMapCalls++; return origLoadMap.apply(E, arguments); };
+
+  function seedEndM5() {
+    var s = NR.createState(); NR.applyEffects(s, [{ set: 'sogno_fatto' }]);
+    function dn(m, id) { var p = NR.prepareNode(s, m, id); if (!p.ok) return; NR.commitNode(s, m, p); }
+    function dc(m, at, ch) { var n = m.nodes.filter(function (x) { return x.id === at; })[0]; var p = NR.prepareChoice(s, m, n, ch); if (!p.ok) return; var c = NR.commitChoice(s, m, n, p); if (c.goto) dn(m, c.goto); }
+    dn(M4, 'truman_a2'); dn(M4, 'james_a2'); dn(M4, 'cmp_e6a_tjames'); dc(M4, 'cmp_e6a_tjames', 'b8_a');
+    var presN = M4.nodes.filter(function (n) { return n.id === 'present_truman_m4'; })[0];
+    var pp = NR.preparePresentation(s, M4, presN, 'P2'); NR.commitPresentation(s, M4, presN, pp);
+    dn(M5, 'm5_bridge'); dn(M5, 'm5_discovery'); dn(M5, 'm5_mound'); dn(M5, 'm5_ring');
+    var pt = NR.prepareNode(s, M5, 'm5_theory_initial'); NR.commitNode(s, M5, pt); dc(M5, 'm5_theory_initial', 'theory_degeneration');
+    dn(M5, 'm5_scene');
+    var pv = NR.prepareNode(s, M5, 'm5_theory_revision'); NR.commitNode(s, M5, pv); dc(M5, 'm5_theory_revision', 'revision_keep');
+    var pi = NR.prepareNode(s, M5, 'm5_report_intro'); NR.commitNode(s, M5, pi); dc(M5, 'm5_s1', 's1_institutional');
+    return s;
+  }
+
+  /* ---- pathfinder BFS sul motore vero (NPC-aware, porte incluse) ---- */
+  var walkSteps = 0;
+  function walkable(mapId, x, y) {
+    for (var i = 0; i < E.state.npcs.length; i++) { var n = E.state.npcs[i]; if (E.npcActive(n) && n.x === x && n.y === y) return false; }
+    if (GAME.Maps.doorAt(mapId, x, y)) return true;
+    return !GAME.Maps.isSolid(mapId, x, y, E.state);
+  }
+  function bfs(mapId, from, to) {
+    var m = GAME.Maps[mapId], W = m.width || m.rows[0].length, H = m.height || m.rows.length;
+    var seen = {}, prev = {}, q = [from]; seen[from[0] + ',' + from[1]] = true;
+    while (q.length) {
+      var cur = q.shift();
+      if (cur[0] === to[0] && cur[1] === to[1]) { var path = [cur]; while (prev[cur[0] + ',' + cur[1]]) { cur = prev[cur[0] + ',' + cur[1]]; path.unshift(cur); } return path; }
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) { var nx = cur[0] + d[0], ny = cur[1] + d[1], k = nx + ',' + ny; if (nx < 0 || ny < 0 || nx >= W || ny >= H || seen[k] || !walkable(mapId, nx, ny)) return; seen[k] = true; prev[k] = cur; q.push([nx, ny]); });
+    }
+    return null;
+  }
+  async function walkTo(tx, ty) {
+    for (var guard = 0; guard < 160; guard++) {
+      if (E.state.dialogue) { key('Enter'); await wait(140); continue; }
+      var p = E.state.player;
+      if (p.tx === tx && p.ty === ty && !p.moving) return true;
+      var path = bfs(E.state.mapId, [p.tx, p.ty], [tx, ty]);
+      if (!path || path.length < 2) { await wait(200); return p.tx === tx && p.ty === ty; }
+      var next = path[1];
+      var dir = next[0] > p.tx ? 'right' : next[0] < p.tx ? 'left' : next[1] > p.ty ? 'down' : 'up';
+      clearHeld();
+      holdKey(DIRC[dir]);
+      var startWait = 0; while (!E.state.player.moving && startWait < 450) { await wait(30); startWait += 30; }
+      liftKey(DIRC[dir]);
+      var t0 = 0; while ((E.state.player.tx !== next[0] || E.state.player.ty !== next[1] || E.state.player.moving) && t0 < 900) { await wait(40); t0 += 40; }
+      await wait(30); walkSteps++;
+    }
+    return false;
+  }
+  async function face(dir) { holdKey(DIRC[dir]); var t0 = 0; while (E.state.player.dir !== dir && t0 < 1500) { await wait(40); t0 += 40; } liftKey(DIRC[dir]); await wait(90); }
+  async function walkNextTo(tx, ty) {
+    var neigh = [[tx, ty - 1, 'down'], [tx, ty + 1, 'up'], [tx - 1, ty, 'right'], [tx + 1, ty, 'left']];
+    var best = null, bestLen = 1e9;
+    for (var i = 0; i < neigh.length; i++) { var nb = neigh[i]; if (!walkable(E.state.mapId, nb[0], nb[1])) continue; var pth = bfs(E.state.mapId, [E.state.player.tx, E.state.player.ty], [nb[0], nb[1]]); if (pth && pth.length < bestLen) { bestLen = pth.length; best = nb; } }
+    if (!best) return false;
+    await walkTo(best[0], best[1]); await face(best[2]); return true;
+  }
+  // transizione di PRODUZIONE: cammina (sulla mappa CORRENTE) fino al tile-porta;
+  // calpestandolo scatta la transizione — mi fermo appena la mappa cambia.
+  async function enterDoor(x, y, expectMap, route, phase) {
+    var s0 = walkSteps, fromMap = E.state.mapId;
+    progress(phase + ' ' + fromMap + '→' + expectMap);
+    for (var guard = 0; guard < 100 && E.state.mapId === fromMap; guard++) {
+      if (E.state.dialogue) { key('Enter'); await wait(140); continue; }
+      if (E.state.fadePhase) { await wait(100); continue; }
+      var p = E.state.player;
+      var path = bfs(fromMap, [p.tx, p.ty], [x, y]);
+      var dbgDoor = GAME.Maps.doorAt(fromMap, path && path[1] ? path[1][0] : p.tx, path && path[1] ? path[1][1] : p.ty);
+      progress(phase + ' ' + fromMap + '→' + expectMap + ' @' + p.tx + ',' + p.ty + ' #' + guard +
+        ' path=' + (path ? path.length : 0) + ' next=' + (path && path[1] ? path[1].join(',') : '-') +
+        ' moving=' + p.moving + ' dir=' + p.dir + ' mode=' + E.state.mode + ' active=' + A.active() +
+        ' solid=' + (path && path[1] ? GAME.Maps.isSolid(fromMap, path[1][0], path[1][1], E.state) : '-') +
+        ' nextDoor=' + !!dbgDoor + ' currentDoor=' + !!GAME.Maps.doorAt(fromMap, p.tx, p.ty) +
+        ' doors=' + Object.keys(GAME.Maps[fromMap].doors || {}).join('|'));
+      if (!path || path.length < 2) {
+        if (p.tx !== x || p.ty !== y) break;
+        // Se un frame di test ha chiuso il passo prima che onArrive avvii il
+        // fade, esci e rientra sul tile-porta usando solo input reale.
+        var off = [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]].filter(function (q) {
+          return walkable(fromMap, q[0], q[1]) && !GAME.Maps.doorAt(fromMap, q[0], q[1]);
+        })[0];
+        if (!off) { await wait(150); continue; }
+        var offDir = off[0] > p.tx ? 'right' : off[0] < p.tx ? 'left' : off[1] > p.ty ? 'down' : 'up';
+        clearHeld();
+        holdKey(DIRC[offDir]);
+        var offStart = 0; while (!E.state.player.moving && offStart < 450) { await wait(30); offStart += 30; }
+        liftKey(DIRC[offDir]);
+        var offWait = 0; while ((E.state.player.tx !== off[0] || E.state.player.ty !== off[1] || E.state.player.moving) && offWait < 900) { await wait(40); offWait += 40; }
+        walkSteps++; continue;
+      }
+      var next = path[1];
+      var dir = next[0] > p.tx ? 'right' : next[0] < p.tx ? 'left' : next[1] > p.ty ? 'down' : 'up';
+      clearHeld();
+      holdKey(DIRC[dir]);
+      var startWait = 0; while (!E.state.player.moving && E.state.mapId === fromMap && startWait < 450) { await wait(30); startWait += 30; }
+      liftKey(DIRC[dir]);
+      var t0 = 0; while ((E.state.player.tx !== next[0] || E.state.player.ty !== next[1] || E.state.player.moving) && E.state.mapId === fromMap && t0 < 900) { await wait(40); t0 += 40; }
+      await wait(30); walkSteps++;
+    }
+    var t1 = 0; while ((E.state.mapId !== expectMap || (E.state.fadePhase && E.state.fadePhase !== 0)) && t1 < 6000) { await wait(100); t1 += 100; }
+    route.push({ phase: phase, transition_kind: 'door', from_map: fromMap, to_map: E.state.mapId, via_door: [x, y], triggered_by_player: true, walked_tiles: walkSteps - s0 });
+    return E.state.mapId === expectMap;
+  }
+  async function interactTarget(tx, ty, doneWhen, route, label) {
+    var s0 = walkSteps;
+    var ok = await walkNextTo(tx, ty);
+    route.push({ phase: label, map: E.state.mapId, from_coords: [E.state.player.tx, E.state.player.ty], target: [tx, ty], walked_tiles: walkSteps - s0 });
+    key('Enter'); await wait(180);
+    await advanceUntil(doneWhen, 14);
+    return ok;
+  }
+  async function driveJacques(tactic, route) {
+    var s0 = walkSteps;
+    await walkNextTo(7, 5);
+    route.push({ phase: 'jacques_' + tactic, map: E.state.mapId, from_coords: [E.state.player.tx, E.state.player.ty], target: [7, 5], walked_tiles: walkSteps - s0 });
+    key('Enter'); await wait(180);
+    await advanceUntil(function () { return widgetOpts().length === 3; }, 10);
+    await chooseChoice(tactic);
+    await advanceUntil(function () { return widgetOpts().indexOf('p5_present') >= 0; }, 20);
+    await chooseChoice('p5_present');
+    await advanceUntil(function () { return S().flags.jacques_preso === true || !A.active(); }, 20);
+    await advanceUntil(function () { return !A.active(); }, 8);
+  }
+
+  async function runRoute(id, tacticChoice, tacticVal, ownRes, visitHospital) {
+    var route = [], c = {};
+    progress(id + ' seed');
+    A.setState(seedEndM5());
+    E.state.flags = { atto3: true, sogno_fatto: true, east_route_confirmed: true }; // gating porte del gioco classico
+    var spawnBefore = loadMapCalls;
+    E.loadMap('oej', 8, 8, 'up'); await wait(150); // UNICO spawn iniziale ammesso
+    route.push({ phase: 'spawn', map: 'oej', coords: [E.state.player.tx, E.state.player.ty] });
+    c.east_route_seed = (S().flags.east_route_confirmed === true);
+    // OEJ (segmento CAMMINATO): il Jacques visibile apre ingresso+tattica
+    // nello stesso lease. Nessun landmark invisibile da indovinare.
+    progress(id + ' Jacques'); await driveJacques(tacticChoice, route);
+    c.ferry_walked = (S().nodes_done.m6_ferry === true && route.filter(function (r) { return r.phase.indexOf('jacques_') === 0; })[0].walked_tiles > 0);
+    c.tactic = (S().values.m6_tactic === tacticVal);
+    c.own_resource = (S().evidence[ownRes] === true);
+    c.jacques_preso = (S().flags.jacques_preso === true);
+    c.jacques_walked = (route.filter(function (r) { return r.phase.indexOf('jacques_') === 0; })[0].walked_tiles > 0);
+    // TRANSIZIONI DI PRODUZIONE (porte reali): OEJ → traincar → town → sheriff
+    progress(id + ' viaggio centrale');
+    c.door_oej_to_traincar = await enterDoor(7, 9, 'traincar', route, 'travel_oej_to_traincar');
+    c.door_traincar_to_town = await enterDoor(0, 7, 'town', route, 'travel_traincar_to_town');
+    c.door_town_to_sheriff = await enterDoor(12, 20, 'sheriff', route, 'travel_town_to_sheriff');
+    // CENTRALE (segmenti CAMMINATI): Truman (ritorno) poi Lucy (notizia)
+    progress(id + ' Truman'); await interactTarget(7, 3, function () { return S().nodes_done.m6_return_night === true; }, route, 'return_night_truman');
+    await advanceUntil(function () { return !A.active(); }, 8);
+    progress(id + ' Lucy'); await interactTarget(2, 6, function () { return S().flags.jacques_dead === true; }, route, 'news_lucy');
+    await advanceUntil(function () { return !A.active(); }, 8);
+    c.news_dead = (S().flags.jacques_dead === true && S().flags.jacques_testimony_lost === true);
+    c.suspicious_false_after_news = (S().flags.jacques_death_suspicious !== true);
+    if (visitHospital) {
+      progress(id + ' ospedale');
+      // porte reali: sheriff → town → hospital, poi CAMMINO al registro
+      c.door_sheriff_to_town = await enterDoor(4, 8, 'town', route, 'travel_sheriff_to_town');
+      c.door_town_to_hospital = await enterDoor(23, 6, 'hospital', route, 'travel_town_to_hospital');
+      await interactTarget(4, 3, function () { return S().flags.jacques_death_suspicious === true; }, route, 'hospital_register');
+      c.hospital_visited_suspicious_true = (S().flags.jacques_death_suspicious === true && S().flags.night_log_no_visitor === true);
+    } else {
+      // CODA FACOLTATIVA SALTATA: nessun ospedale → il sospetto NON nasce
+      route.push({ phase: 'hospital_skipped', map: E.state.mapId, note: 'coda ospedaliera opzionale non visitata' });
+      c.hospital_skipped_suspicious_false = (S().flags.jacques_death_suspicious !== true && S().flags.night_log_no_visitor !== true);
+    }
+    c.no_murder = (!S().flags.jacques_murder_confirmed && !S().flags.jacques_murder_attributed);
+    c.resource_survives_death = (S().evidence[ownRes] === true);
+    // anti-teleport: dopo lo spawn iniziale NESSUN loadMap; nessun record di reset;
+    // ogni transizione cross-map è una porta di produzione innescata dal player;
+    // ogni segmento E ogni transizione hanno camminato > 0 tile.
+    c.no_direct_loadMap_after_initial_spawn = ((loadMapCalls - spawnBefore) === 1);
+    c.no_transit_map_reset_records = route.every(function (r) { return r.phase !== 'transit_map_reset'; });
+    c.every_cross_map_transition_uses_production_path = route.filter(function (r) { return r.transition_kind !== undefined; }).every(function (r) { return r.transition_kind === 'door' && r.triggered_by_player === true; });
+    c.walked_not_teleported = route.filter(function (r) { return r.walked_tiles !== undefined; }).every(function (r) { return r.walked_tiles > 0; });
+    out.routes[id] = route;
+    Object.keys(c).forEach(function (k) { out.checks[id + ': ' + k] = c[k]; });
+  }
+
+  var PARAMS = new URLSearchParams(location.search);
+  if (PARAMS.get('debugDoor')) {
+    var debugRoute = [];
+    E.state.flags = { atto3: true, sogno_fatto: true };
+    var debugSheriff = PARAMS.get('debugDoor') === 'sheriff';
+    E.loadMap(debugSheriff ? 'sheriff' : 'traincar', debugSheriff ? 4 : 1, 7, debugSheriff ? 'down' : 'left'); await wait(200);
+    var debugOk = await enterDoor(debugSheriff ? 4 : 0, debugSheriff ? 8 : 7, 'town', debugRoute, debugSheriff ? 'debug_sheriff_to_town' : 'debug_traincar_to_town');
+    out.routes.debug = debugRoute; out.checks.debug_door = debugOk;
+    out.pass = debugOk; out.total = 1; out.passed = debugOk ? 1 : 0; out.failed = debugOk ? [] : ['debug_door'];
+    document.getElementById('log').textContent = JSON.stringify(out, null, 1);
+    document.title = debugOk ? 'M6DOOR-PASS 1/1' : 'M6DOOR-FAIL 0/1';
+    return;
+  }
+  var PATH = PARAMS.get('path');
+  if (!PATH || PATH === 'P') await runRoute('P', 'tactic_prova', 'prova', 'JACQUES_MIDNIGHT_CLAIM', true);   // CON ospedale
+  if (!PATH || PATH === 'F') await runRoute('F', 'tactic_falsa_sicurezza', 'falsa_sicurezza', 'JACQUES_THIRD_MAN_DETAIL', false); // SENZA ospedale
+  out.total_walk_steps = walkSteps;
+
+  var allOk = out.errors.length === 0 && Object.keys(out.checks).every(function (k) { return out.checks[k] === true; });
+  out.pass = allOk; out.total = Object.keys(out.checks).length;
+  out.passed = Object.keys(out.checks).filter(function (k) { return out.checks[k]; }).length;
+  out.failed = Object.keys(out.checks).filter(function (k) { return out.checks[k] !== true; });
+  document.getElementById('log').textContent = JSON.stringify(out, null, 1);
+  document.title = (allOk ? 'M6PHYS-PASS ' : 'M6PHYS-FAIL ') + out.passed + '/' + out.total;
+}
+window.addEventListener('load', function () { setTimeout(function () { run().catch(function (e) { out.errors.push('run: ' + (e && e.message || e)); document.getElementById('log').textContent = JSON.stringify(out, null, 1); document.title = 'M6PHYS-ERR ' + (e && e.message || e); }); }, 400); });
+</script>
+</body>
+</html>

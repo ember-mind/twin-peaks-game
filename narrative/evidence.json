@@ -1,0 +1,267 @@
+{
+ "narrative_package": "narrative-v1.0",
+ "evidence": {
+  "E1_DIARIO": {
+   "label": "il diario di Laura",
+   "kind": "document",
+   "source": {
+    "document": "World & Story Bible v1.0.md",
+    "section": "§4-E1"
+   },
+   "acquired_in": "M2",
+   "supports": [
+    "P1",
+    "P2",
+    "P8"
+   ],
+   "bridge_for": [
+    "P8"
+   ]
+  },
+  "E2_CUORE": {
+   "label": "metà del pendaglio",
+   "kind": "object",
+   "source": {
+    "document": "World & Story Bible v1.0.md",
+    "section": "§4-E2"
+   },
+   "acquired_in": "M2",
+   "supports": [
+    "P1",
+    "P2"
+   ]
+  },
+  "E3_LETTERA_R": {
+   "label": "la lettera R",
+   "kind": "object",
+   "source": {
+    "document": "World & Story Bible v1.0.md",
+    "section": "§4-E3"
+   },
+   "acquired_in": "M2",
+   "supports": [
+    "P8"
+   ]
+  },
+  "E4_NOME": {
+   "label": "un nome dimenticato al risveglio",
+   "kind": "phantom",
+   "source": {
+    "document": "World & Story Bible v1.0.md",
+    "section": "§4-E4"
+   },
+   "acquired_in": "M3",
+   "supports": [
+    "P4"
+   ]
+  },
+  "E5_POESIA": {
+   "label": "la formula recitata da Gerard",
+   "kind": "testimony_recited",
+   "source": {
+    "document": "M4 v1.1.1 LOCK.md",
+    "section": "B3"
+   },
+   "acquired_in": "M4",
+   "optional": true,
+   "supports": [
+    "P4"
+   ],
+   "notes": "nessun campione grafico: recitata"
+  },
+  "E6A_CUORE_INTERO": {
+   "label": "le due metà combaciano",
+   "kind": "object",
+   "source": {
+    "document": "M4 v1.1.1 LOCK.md",
+    "section": "B4"
+   },
+   "acquired_in": "M4",
+   "supports": [
+    "P2"
+   ],
+   "function": "corroborazione della fonte (relazione)",
+   "ui_origin": "Double R — il pendaglio ricomposto"
+  },
+  "T_JAMES_EST": {
+   "label": "James: oltre il ponte, verso i binari",
+   "kind": "testimony",
+   "source": {
+    "document": "M4 v1.1.1 LOCK.md",
+    "section": "B4"
+   },
+   "acquired_in": "M4",
+   "supports": [
+    "P2"
+   ],
+   "function": "geografia",
+   "ui_origin": "Double R — testimonianza di James"
+  },
+  "T1_RONETTE_BOB": {
+   "label": "Ronette grida BOB alla domanda sull'uomo",
+   "kind": "testimony",
+   "source": {
+    "document": "M4 v1.1.1 LOCK.md",
+    "section": "B2-ronette_uomo"
+   },
+   "acquired_in": "M4",
+   "supports": [
+    "P4"
+   ],
+   "invariant": "pronunciata SOLO da Ronette"
+  },
+  "E7A_BIGLIETTO_TESTO": {
+   "label": "FUOCO CAMMINA CON ME (inciso)",
+   "kind": "object",
+   "source": {
+    "document": "M5-M6 v1.1.1 LOCK.md",
+    "section": "M5-B5"
+   },
+   "acquired_in": "M5",
+   "supports": [
+    "P3A"
+   ],
+   "ui_origin": "Il vagone — il biglietto nel mucchio"
+  },
+  "E7B_BIGLIETTO_POSIZIONE": {
+   "label": "piegato in quattro, inserito nel mucchio, pieghe pulite",
+   "kind": "observation",
+   "source": {
+    "document": "M5-M6 v1.1.1 LOCK.md",
+    "section": "M5-B5"
+   },
+   "acquired_in": "M5",
+   "supports": [
+    "P3A"
+   ],
+   "ui_origin": "Il vagone — il mucchio presso la porta"
+  },
+  "E8A_ANELLO_POSIZIONE": {
+   "label": "anello in piano al centro della traversa",
+   "kind": "observation",
+   "source": {
+    "document": "M5-M6 v1.1.1 LOCK.md",
+    "section": "M5-B6"
+   },
+   "acquired_in": "M5",
+   "supports": [
+    "P3A"
+   ],
+   "ui_origin": "Il vagone — la traversa centrale"
+  },
+  "E8B_ANELLO_SUPERFICIE": {
+   "label": "polvere intatta, nessun segno di rotolamento",
+   "kind": "observation",
+   "source": {
+    "document": "M5-M6 v1.1.1 LOCK.md",
+    "section": "M5-B6"
+   },
+   "acquired_in": "M5",
+   "supports": [
+    "P3A"
+   ],
+   "ui_origin": "Il vagone — la polvere intorno all'anello"
+  },
+  "E_SCENE": {
+   "label": "violenza ai bordi, centro senza passaggi",
+   "kind": "observation",
+   "source": {
+    "document": "M5-M6 v1.1.1 LOCK.md",
+    "section": "M5-B7"
+   },
+   "acquired_in": "M5",
+   "supports": [
+    "P3A"
+   ],
+   "ui_origin": "Il vagone — la disposizione della scena"
+  },
+  "JACQUES_MIDNIGHT_CLAIM": {
+   "label": "l'orario del merci di mezzanotte",
+   "kind": "testimony",
+   "source": {
+    "document": "M5-M6 v1.1.1 LOCK.md",
+    "section": "M6-PROVA"
+   },
+   "acquired_in": "M6",
+   "conditional": "m6_tactic=prova",
+   "provenance": "N→L (delega 2026-07-22)",
+   "ui_origin": "One Eyed Jacks — Jacques al banco"
+  },
+  "JACQUES_LIST_GIVEN": {
+   "label": "quattro figure; la voce cala sui fiammiferi",
+   "kind": "testimony",
+   "source": {
+    "document": "M5-M6 v1.1.1 LOCK.md",
+    "section": "M6-PRESSIONE"
+   },
+   "acquired_in": "M6",
+   "conditional": "m6_tactic=pressione",
+   "provenance": "N→L",
+   "ui_origin": "One Eyed Jacks — la lista di Jacques"
+  },
+  "JACQUES_THIRD_MAN_DETAIL": {
+   "label": "il terzo uomo guardava la stufa",
+   "kind": "testimony",
+   "source": {
+    "document": "M5-M6 v1.1.1 LOCK.md",
+    "section": "M6-FALSA_SICUREZZA"
+   },
+   "acquired_in": "M6",
+   "conditional": "m6_tactic=falsa_sicurezza",
+   "provenance": "N→L",
+   "ui_origin": "One Eyed Jacks — il terzo uomo al tavolo"
+  },
+  "E9A_LETTERA_O": {
+   "label": "una O incisa sotto l'unghia",
+   "kind": "object",
+   "source": {
+    "document": "M8 v1.1 LOCK.md",
+    "section": "D"
+   },
+   "acquired_in": "M8",
+   "ui_origin": "Il lago — la O sotto l'unghia di Maddy",
+   "supports": [
+    "P8"
+   ]
+  },
+  "E9B_STESSO_METODO": {
+   "label": "stessa posizione e tipo di incisione della R",
+   "kind": "observation",
+   "source": {
+    "document": "M8 v1.1 LOCK.md",
+    "section": "D"
+   },
+   "acquired_in": "M8",
+   "ui_origin": "Il lago — stessa incisione della R",
+   "supports": [
+    "P8"
+   ]
+  },
+  "T_LELAND_TAXI": {
+   "label": "«Ho chiamato la Twin Peaks Taxi» (Leland, prima del Roadhouse)",
+   "kind": "testimony",
+   "source": {
+    "document": "M9-M10 v1.1.1 CONFESSION LOCK.md",
+    "section": "§1"
+   },
+   "acquired_in": "M8",
+      "provenance": "N→L (m8_leland_taxi, diner, prima del Roadhouse e del ritrovamento)",
+   "supports": [
+    "P6"
+   ]
+  },
+  "D_TAXI": {
+   "label": "Twin Peaks Taxi: nessuna corsa prenotata per casa Palmer",
+   "kind": "document",
+   "source": {
+    "document": "M9-M10 v1.1.1 CONFESSION LOCK.md",
+    "section": "M9-B1"
+   },
+   "acquired_in": "M9",
+   "provenance": "N→L",
+   "supports": [
+    "P6"
+   ]
+  }
+ }
+}

@@ -1,0 +1,217 @@
+{
+ "narrative_schema_version": "1.1.0",
+ "narrative_package": "narrative-v1.0",
+ "enums": {
+  "m5_theory": [
+   "degeneration",
+   "staging",
+   "open"
+  ],
+  "m6_tactic": [
+   "prova",
+   "pressione",
+   "falsa_sicurezza"
+  ],
+  "m10_method": [
+   "probatorio",
+   "personale",
+   "intuitivo"
+  ],
+  "s1": [
+   "institutional",
+   "documented_custody"
+  ],
+  "ring_final_gesture": [
+   "none",
+   "kept",
+   "left"
+  ],
+  "ring_location_after_lodge": [
+   "evidence_vault",
+   "cooper",
+   "lodge"
+  ],
+  "final_ring_location": [
+   "evidence_vault",
+   "lodge"
+  ],
+  "s3": [
+   "on",
+   "off"
+  ],
+  "truman_testimony_state": [
+   "not_needed",
+   "voluntary_witness"
+  ],
+  "letter_o_observation_source": [
+   "cooper_primary",
+   "hawk_preserved"
+  ],
+  "letter_o_chain": [
+   "standard"
+  ],
+  "warning_target": [
+   "palmer",
+   "centrale",
+   "nessuno"
+  ],
+  "focus_destination": [
+   "palmer",
+   "lago",
+   "diner"
+  ],
+  "body_found_by": [
+   "cooper",
+   "hawk"
+  ],
+  "promise_stance": [
+   "accompagno",
+   "autonomia",
+   "prudenza"
+  ],
+  "encounter_order": [
+   "nano_first",
+   "bob_first"
+  ],
+  "bob_response_stance": [
+   "A",
+   "B",
+   "C"
+  ],
+  "s4_interpretation": [
+   "avvertimento",
+   "istruzione",
+   "diagnosi"
+  ],
+  "presagio_status": [
+   "active",
+   "verified"
+  ],
+  "formulation_status": [
+   "unformulated",
+   "formulated"
+  ],
+  "factual_status": [
+   "unconfirmed",
+   "corroborated",
+   "confirmed",
+   "confirmed_as_lie",
+   "contested",
+   "refuted"
+  ],
+  "presentation_result": [
+   "accepted",
+   "rejected"
+  ],
+  "acceptance_type": [
+   "investigatory_route",
+   "colloquio_necessario"
+  ],
+  "presentation_reason_code": [
+   "SUFFICIENT_RELEVANT_SUPPORT",
+   "NO_CORROBORATION",
+   "NO_GEOGRAPHIC_SUPPORT",
+   "VALID_BUT_NOT_PROCEDURAL",
+   "PREMATURE_SYMBOLIC_LINK",
+   "NOT_YET_FORMULATED",
+   "ALREADY_REJECTED"
+  ],
+  "b8_attempt_result": [
+   "SOURCE_CORROBORATION",
+   "GEOGRAPHIC_OVERREACH",
+   "SYMBOLIC_OVERREACH"
+  ],
+  "assistance_level": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "speaker_register": [
+   "leland_first_person",
+   "voice"
+  ],
+  "m5_initial_theory_domain": [
+   "degeneration",
+   "staging"
+  ],
+  "m5_final_theory_domain": [
+   "degeneration",
+   "staging",
+   "open"
+  ],
+  "maddy_action_after_warning": [
+   "none",
+   "departure_prepared"
+  ],
+  "sarah_support_state": [
+   "none",
+   "vice"
+  ]
+ },
+ "booleans_allowed": [
+  "mfap_finale_visto",
+  "leland_morto",
+  "maddy_trovata",
+  "jacques_preso",
+  "jacques_dead",
+  "jacques_testimony_lost",
+  "sogno_fatto",
+  "sogno_raccontato",
+  "atto3",
+  "atto4",
+  "atto5",
+  "gigante1",
+  "gigante2",
+  "audrey_indaga",
+  "audrey_salvata",
+  "audrey_vista_oej",
+  "dream_face_recognized_in_leland_scene",
+  "jacques_admitted_presence",
+  "jacques_death_suspicious",
+  "night_log_no_visitor",
+  "ronette_visita",
+  "east_route_confirmed",
+  "vagone_scoperto",
+  "m5_theory_revised",
+  "jacques_statement_terms_known",
+  "m6_resource_lost"
+ ],
+ "deprecated_forbidden": [
+  "clues6_gate",
+  "material_facts_recorded",
+  "m6_tactic_changed",
+  "maddy_salvabile",
+  "jacques_murder_confirmed",
+  "jacques_murder_attributed",
+  "leland_is_host",
+  "bob_true",
+  "leland_possession_percentage",
+  "correct_interpretation",
+  "forgiven",
+  "good_ending",
+  "bad_ending",
+  "s4_correct",
+  "laura_moral_presence"
+ ],
+ "values_allowed": {
+  "m5_initial_theory": "m5_initial_theory_domain",
+  "m5_final_theory": "m5_final_theory_domain",
+  "s1": "s1",
+  "m6_tactic": "m6_tactic",
+  "promise_stance": "promise_stance",
+  "warning_target": "warning_target",
+  "focus_destination": "focus_destination",
+  "body_found_by": "body_found_by",
+  "letter_o_observation_source": "letter_o_observation_source",
+  "letter_o_chain": "letter_o_chain",
+  "presagio_status": "presagio_status",
+  "maddy_action_after_warning": "maddy_action_after_warning",
+  "sarah_support_state": "sarah_support_state"
+ },
+ "value_transitions": {
+  "presagio_status": [
+   ["active", "verified"]
+  ]
+ }
+}

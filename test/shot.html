@@ -8,60 +8,314 @@
   html, body { margin: 0; padding: 0; background: #000; height: 100%; overflow: hidden; }
   #stage { position: fixed; inset: 0; }
   #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-  #gl { background: #000; }
-  #game { background: transparent; }
+  #gl { background: #000; image-rendering: auto; }
+  #game { background: transparent; image-rendering: pixelated; image-rendering: crisp-edges; }
+  #grade {
+    position: absolute; inset: 0; pointer-events: none; z-index: 4;
+    background:
+      radial-gradient(ellipse at 48% 38%, rgba(255,222,170,0.10), transparent 48%),
+      linear-gradient(145deg, rgba(22,52,68,0.14), transparent 46%, rgba(74,29,38,0.11));
+    mix-blend-mode: soft-light;
+  }
   #vignette {
     position: absolute; inset: 0; pointer-events: none; z-index: 5;
-    background: radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 100%);
+    background:
+      linear-gradient(to bottom, rgba(8,14,18,0.12), transparent 24%, transparent 76%, rgba(5,8,12,0.20)),
+      radial-gradient(ellipse at 50% 46%, transparent 58%, rgba(2,6,10,0.38) 100%);
   }
   #grain {
-    position: absolute; inset: 0; pointer-events: none; z-index: 6; opacity: 0.06;
+    position: absolute; inset: 0; pointer-events: none; z-index: 6; opacity: 0.028;
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%25" height="100%25" filter="url(%23n)"/></svg>');
+    background-size: 96px 96px;
   }
 </style>
 </head>
 <body>
 <div id="stage">
   <canvas id="gl" width="960" height="640"></canvas>
+  <div id="grade"></div>
   <div id="vignette"></div>
   <div id="grain"></div>
   <canvas id="game" width="480" height="320"></canvas>
 </div>
 
 <script src="../js/vendor/three.min.js"></script>
+<script src="../js/vendor/loaders/GLTFLoader.js"></script>
+<script src="../js/vendor/postprocessing/Pass.js"></script>
+<script src="../js/vendor/postprocessing/CopyShader.js"></script>
+<script src="../js/vendor/postprocessing/GammaCorrectionShader.js"></script>
+<script src="../js/vendor/postprocessing/ShaderPass.js"></script>
+<script src="../js/vendor/postprocessing/EffectComposer.js"></script>
+<script src="../js/vendor/postprocessing/SimplexNoise.js"></script>
+<script src="../js/vendor/postprocessing/SSAOShader.js"></script>
+<script src="../js/vendor/postprocessing/SSAOPass.js"></script>
 <script src="../js/tiles.js"></script>
-<script src="../js/chars.js"></script>
+<script src="../js/chars.js?v=char9"></script>
 <script src="../js/houses.js"></script>
-<script src="../js/maps.js"></script>
+<script src="../js/maps.js?v=harness-r6"></script>
 <script src="../js/data.js"></script>
-<script src="../js/engine.js"></script>
-<script src="../js/render3d.js"></script>
-<script src="../js/glue.js"></script>
-<script src="../js/main.js"></script>
+<script src="../js/retro-font.js?v=harness-r6"></script>
+<script src="../js/engine.js?v=harness-r6"></script>
+<script src="../js/render3d.js?v=9slice11"></script>
+<script src="../js/glue.js?v=harness-r6"></script>
 
 <script>
 window.addEventListener('load', function () {
   var q = new URLSearchParams(location.search);
-  setTimeout(function () {
-    var E = GAME.Engine;
-    E.state.mode = 'play';
-    if (q.get('map')) E.loadMap(q.get('map'), +(q.get('x') || 30), +(q.get('y') || 31), q.get('dir') || 'up');
-    if (q.get('clues')) E.state.clues = ['a','b','c','d'].slice(0, +q.get('clues'));
-    if (q.get('flag')) E.state.flags[q.get('flag')] = true;
+  var seed = +(q.get('seed') || 104729) >>> 0;
+  var season = q.get('season') || 'summer';
+  var wetParam = q.get('wet');
+  var wet = wetParam === null ? null : wetParam === '1' || wetParam === 'true';
+  var frameIndex = Math.max(0, +(q.get('frame') || 0) | 0);
+  var frameCount = Math.max(1, +(q.get('frames') || 1) | 0);
+  var stepMs = Math.max(1, +(q.get('stepMs') || 100) || 100);
+  var baseTimeMs = Math.max(0, +(q.get('timeMs') || 1000) || 1000);
+  var motion = q.get('motion') || 'idle';
+  var characterView = q.get('characterView') || '';
+  var strip = q.get('strip') === '1';
+  var settleMs = Math.max(0, +(q.get('settleMs') || 900) || 900);
+  var maxSettleMs = Math.max(settleMs, +(q.get('maxSettleMs') || 6000) || 6000);
 
-    var gl = document.getElementById('gl');
-    var ov = document.createElement('canvas');
-    ov.width = gl.width; ov.height = gl.height;
-    ov.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;z-index:99;';
-    document.getElementById('stage').appendChild(ov);
-    var cx = ov.getContext('2d');
-    setInterval(function () {
+  // The audit owns randomness before Engine.init/loadMap. Runtime rendering is
+  // otherwise deterministic, but NPC think offsets and first-step dust use
+  // Math.random. Mulberry32 is compact and reproducible across browsers.
+  Math.random = function () {
+    seed = (seed + 0x6d2b79f5) >>> 0;
+    var z = seed;
+    z = Math.imul(z ^ (z >>> 15), z | 1);
+    z ^= z + Math.imul(z ^ (z >>> 7), z | 61);
+    return ((z ^ (z >>> 14)) >>> 0) / 4294967296;
+  };
+
+  // Test-only style injection. It does not change the ASCII map or runtime
+  // implementation; it simply exercises tiles.js' public season/wet inputs.
+  var originalDrawTile = GAME.sprites.drawTile;
+  GAME.sprites.drawTile = function (ctx, ch, x, y, tx, ty, frame, flags) {
+    flags = flags || {};
+    flags.season = season;
+    flags.terrainSeason = season;
+    if (wet !== null) flags.wet = wet;
+    return originalDrawTile(ctx, ch, x, y, tx, ty, frame, flags);
+  };
+
+  var E = GAME.Engine;
+  var gl = document.getElementById('gl');
+  var ui = document.getElementById('game');
+  gl.width = 960; gl.height = 640;
+  ui.width = 480; ui.height = 320;
+  E.init(ui, gl);
+  GAME.Render3D.resize(960, 640);
+  E.state.mode = 'play';
+  if (q.get('suppressOnEnter') === '1') E.state.flags.intro_town = true;
+  if (q.get('map')) E.loadMap(q.get('map'), +(q.get('x') || 30), +(q.get('y') || 31), q.get('dir') || 'up');
+  if (q.get('clues')) E.state.clues = ['a','b','c','d'].slice(0, +q.get('clues'));
+  if (q.get('flag')) E.state.flags[q.get('flag')] = true;
+  if (q.get('flags')) q.get('flags').split(',').forEach(function (name) {
+    if (name) E.state.flags[name] = true;
+  });
+  if (GAME.Render3D.setCharacterEvidenceView) {
+    GAME.Render3D.setCharacterEvidenceView(characterView);
+  }
+  var motionOrigin = {
+    x: E.state.player.x,
+    y: E.state.player.y,
+    tx: E.state.player.tx,
+    ty: E.state.player.ty
+  };
+
+  var ov = document.createElement('canvas');
+  ov.width = gl.width; ov.height = gl.height;
+  ov.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;z-index:99;';
+  document.getElementById('stage').appendChild(ov);
+  var cx = ov.getContext('2d');
+
+  function setFrameState(index, count) {
+    var p = E.state.player;
+    if (motion === 'route') {
+      // Six-second gate at 30fps: lead-in, repeated jog, brake/settle,
+      // planted 90° turn, second run, reverse and lead-out. Seven samples per
+      // tile reproduce the real ~213ms grid timing.
+      var dir = 'down', moving = false, moveT = 0, ox = 0, oy = 0;
+      function travel(start, end, travelDir, baseX, baseY) {
+        if (index < start || index >= end) return false;
+        var at = index - start;
+        var tile = Math.floor(at / 7);
+        var sub = (at % 7) / 6;
+        dir = travelDir; moving = true; moveT = sub;
+        ox = baseX + (travelDir === 'right' ? tile + sub :
+          (travelDir === 'left' ? -(tile + sub) : 0));
+        oy = baseY + (travelDir === 'down' ? tile + sub :
+          (travelDir === 'up' ? -(tile + sub) : 0));
+        return true;
+      }
+      if (index < 15) {
+        dir = 'down';
+      } else if (travel(15, 64, 'down', 0, 0)) {
+        // seven tiles
+      } else if (index < 76) {
+        dir = 'down'; oy = 7;
+      } else if (index < 88) {
+        dir = 'right'; oy = 7;
+      } else if (travel(88, 95, 'right', 0, 7)) {
+        // one tile: enough to prove heading without leaving the clear field
+      } else if (index < 107) {
+        dir = 'right'; ox = 1; oy = 7;
+      } else if (index < 119) {
+        dir = 'left'; ox = 1; oy = 7;
+      } else if (travel(119, 126, 'left', 1, 7)) {
+        // direct 180° reverse and return
+      } else if (index < 138) {
+        dir = 'left'; oy = 7;
+      } else if (index < 150) {
+        dir = 'up'; oy = 7;
+      } else if (travel(150, 171, 'up', 0, 7)) {
+        // three sustained tiles back through the clear corridor
+      } else {
+        dir = 'up'; oy = 4;
+      }
+      p.dir = dir;
+      p.moving = moving;
+      p.moveT = moveT;
+      p.x = motionOrigin.x + ox * 16;
+      p.y = motionOrigin.y + oy * 16;
+      p.tx = motionOrigin.tx + (ox < 0 ? Math.ceil(ox) : Math.floor(ox));
+      p.ty = motionOrigin.ty + (oy < 0 ? Math.ceil(oy) : Math.floor(oy));
+      return;
+    }
+    if (motion !== 'walk') {
+      p.moving = false;
+      p.moveT = 0;
+      return;
+    }
+    var phase = count > 1 ? index / (count - 1) : 0;
+    p.moving = true;
+    p.moveT = phase;
+  }
+
+  function assetsPending() {
+    if (!GAME.Render3D.stats) return false;
+    var stats = GAME.Render3D.stats();
+    var vegetationRequired = E.state.mapId === 'town' ||
+      E.state.mapId === 'woods';
+    var architectureRequired = E.state.mapId === 'town';
+    return stats.authoredPropAsset === 'loading' ||
+      stats.authoredWelcomeBiomeAsset === 'loading' ||
+      stats.authoredCharacterAsset === 'loading' ||
+      (architectureRequired && stats.authoredArchitectureAsset === 'loading') ||
+      (vegetationRequired && stats.authoredVegetationAsset === 'loading');
+  }
+
+  function requiredAssetFailed() {
+    if (!GAME.Render3D.stats) return '';
+    var stats = GAME.Render3D.stats();
+    var vegetationRequired = E.state.mapId === 'town' ||
+      E.state.mapId === 'woods';
+    var architectureRequired = E.state.mapId === 'town';
+    if (architectureRequired &&
+        stats.authoredArchitectureAsset === 'failed') {
+      return 'authored architecture failed: ' +
+        (stats.authoredArchitectureError || 'unknown error');
+    }
+    if (vegetationRequired && stats.authoredVegetationAsset === 'failed') {
+      return 'authored vegetation failed: ' +
+        (stats.authoredVegetationError || 'unknown error');
+    }
+    if (stats.authoredCharacterAsset === 'failed') {
+      return 'authored character pack failed: ' +
+        (stats.authoredCharacterError || 'unknown error');
+    }
+    return '';
+  }
+
+  function paintStrip() {
+    var cols = frameCount <= 8 ? 4 : Math.ceil(Math.sqrt(frameCount));
+    var rows = Math.ceil(frameCount / cols);
+    var cellW = ov.width / cols, cellH = ov.height / rows;
+    cx.fillStyle = '#000';
+    cx.fillRect(0, 0, ov.width, ov.height);
+    var exported = [];
+    var fullFrame = document.createElement('canvas');
+    fullFrame.width = gl.width; fullFrame.height = gl.height;
+    var fullCtx = fullFrame.getContext('2d');
+    for (var i = 0; i < frameCount; i++) {
+      setFrameState(i, frameCount);
+      GAME.Render3D.render(E.state, stepMs, baseTimeMs + i * stepMs);
+      if (q.get('exportFrames') === '1') {
+        fullCtx.clearRect(0, 0, fullFrame.width, fullFrame.height);
+        fullCtx.drawImage(gl, 0, 0);
+        exported.push(fullFrame.toDataURL('image/webp', 0.9));
+      }
+      var dx = (i % cols) * cellW, dy = Math.floor(i / cols) * cellH;
+      cx.drawImage(gl, 0, 0, gl.width, gl.height, dx, dy, cellW, cellH);
+      if (q.get('labels') !== '0') {
+        cx.fillStyle = 'rgba(0,0,0,0.72)';
+        cx.fillRect(dx + 4, dy + 4, 34, 18);
+        cx.fillStyle = '#fff';
+        cx.font = '12px monospace';
+        cx.fillText(String(i).padStart(2, '0'), dx + 10, dy + 17);
+      }
+    }
+    window.__TP_SHOT_FRAMES__ = exported;
+  }
+
+  function finishCapture() {
+    if (strip) {
+      paintStrip();
+    } else {
+      setFrameState(frameIndex, Math.max(frameCount, frameIndex + 1));
+      GAME.Render3D.render(E.state, stepMs, baseTimeMs + frameIndex * stepMs);
+      cx.drawImage(gl, 0, 0);
+    }
+    window.__TP_SHOT_META__ = {
+      ready: true,
+      map: E.state.mapId,
+      x: E.state.player.tx,
+      y: E.state.player.ty,
+      dir: E.state.player.dir,
+      seed: +(q.get('seed') || 104729) >>> 0,
+      season: season,
+      wet: wet,
+      frame: frameIndex,
+      frames: frameCount,
+      stepMs: stepMs,
+      timeMs: baseTimeMs,
+      motion: motion,
+      strip: strip,
+      viewport: [960, 640]
+    };
+    document.title = 'TP-SHOT-READY';
+  }
+
+  // One warm-up submits the scene and starts any GLB fetch. We then poll only
+  // while an authored asset is actually loading. There is no requestAnimation-
+  // Frame loop: every image is a bounded, fixed-step render.
+  GAME.Render3D.render(E.state, 16, 0);
+  var settleStarted = performance.now();
+  (function awaitAssets() {
+    var elapsed = performance.now() - settleStarted;
+    var pending = assetsPending();
+    var failed = requiredAssetFailed();
+    if (elapsed >= maxSettleMs && (pending || failed)) {
+      window.__TP_SHOT_ERROR__ = failed ||
+        'required authored assets still loading after ' +
+          Math.round(maxSettleMs) + ' ms';
+      document.title = 'TP-SHOT-ERROR';
+      return;
+    }
+    if (elapsed >= settleMs && !pending && !failed) {
       try {
-        GAME.Render3D.render(E.state, 16, performance.now());
-        cx.drawImage(gl, 0, 0);
-      } catch (e2) {}
-    }, 80);
-  }, 400);
+        // Compile the final authored layer once after readiness; every captured
+        // temporal frame must start from the same asset/shader state.
+        GAME.Render3D.render(E.state, 16, 0);
+        finishCapture();
+      } catch (error) {
+        window.__TP_SHOT_ERROR__ = String(error && error.stack || error);
+        document.title = 'TP-SHOT-ERROR';
+      }
+      return;
+    }
+    setTimeout(awaitAssets, 50);
+  })();
 });
 </script>
 </body>

@@ -1,0 +1,679 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>m8-screentruth-harness</title>
+<style>body{margin:0;background:#000}#narrative{position:fixed;inset:0;pointer-events:none}.nw-focus{font-weight:bold}#log{position:fixed;left:0;bottom:0;max-height:42%;overflow:auto;background:#111;color:#ddd;font:11px monospace;white-space:pre-wrap;padding:6px;z-index:99}</style>
+</head>
+<body>
+<canvas id="gl" width="960" height="640"></canvas>
+<canvas id="game" width="480" height="320"></canvas>
+<div id="narrative"></div>
+<div id="log">running…</div>
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=harness-r6"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=harness-r6"></script>
+<script src="../js/engine.js?v=harness-r6"></script>
+<script src="../js/render3d.js"></script>
+<script src="../js/glue.js?v=harness-r6"></script>
+<script src="../js/main.js"></script>
+<script src="../js/narrative-runtime.js"></script>
+<script src="../js/narrative-ui.js"></script>
+<script src="../js/narrative-notebook.js"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r9"></script>
+<script src="../js/narrative-bootstrap.js"></script>
+<script src="../js/narrative-engine-adapter.js?v=harness-r9"></script>
+<script src="../js/narrative-save.js"></script>
+<script>
+/* C8-D SCREEN TRUTH — M8. Record FORMALI presi dalla UI VERA, congelati
+ * PRIMA del commit: page_id (o record_type:choice_menu), visible_text letto dal
+ * DOM VISIBILE, state_before, state_after, lease attivo pre-commit.
+ *
+ * Boot: STESSO path del participant (playtest.html) — narrative-bootstrap.js
+ * caricato e installNarrativeCatalogs() chiamato PRIMA di qualunque
+ * deserialize / A.enable. Nessun cablaggio manuale dei domini nell'harness.
+ *
+ * Screen truth = testo del DOM live. Gli screenshot PNG headless NON catturano
+ * l'overlay DOM (lezione C6-D): la verità di schermo è il visible_text.
+ *
+ * 4 passaggi completi attraverso il motore vero:
+ *   P1 accompagno / warning=palmer  / focus=palmer → hawk, valigia NELLA ROTTA
+ *   P2 autonomia  / warning=palmer  / focus=lago   → cooper, valigia IN STAZIONE
+ *   P3 prudenza   / warning=centrale/ focus=diner  → hawk, NESSUNA valigia
+ *   P4 accompagno / warning=nessuno / focus=lago   → cooper, NESSUNA valigia
+ * (entrambe le versioni cooper/hawk + le tre classi valigia + i tre valori di
+ *  promise_stance, warning_target, focus_destination). */
+var LOCK = 30;
+var out = { checks: {}, records: [], errors: [], notes: [], console_log: [], run_log: {} };
+window.__C8D_RESULT = out;
+window.onerror = function (m, s, l) { out.errors.push(String(m) + ' @' + l); };
+window.addEventListener('unhandledrejection', function (e) { out.errors.push('unhandled: ' + (e.reason && e.reason.message || e.reason)); });
+(function () {
+  ['log', 'warn', 'error'].forEach(function (lvl) {
+    var orig = console[lvl];
+    console[lvl] = function () {
+      if (out.console_log.length < 500) out.console_log.push(lvl + ': ' + [].slice.call(arguments).map(String).join(' '));
+      if (lvl === 'error') out.errors.push('console.error: ' + [].slice.call(arguments).map(String).join(' '));
+      return orig.apply(console, arguments);
+    };
+  });
+})();
+
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(c) { window.dispatchEvent(new KeyboardEvent('keydown', { code: c, bubbles: true })); window.dispatchEvent(new KeyboardEvent('keyup', { code: c, bubbles: true })); }
+
+/* ------------- lettura del DOM VISIBILE (mai del DOM nascosto) -------------
+ * Lezione C5-D: #narrative ospita più root (pagine, widget, taccuino) e quelle
+ * non a schermo restano nel DOM con display:none. La screen truth legge SOLO
+ * le root visibili. */
+function visibleRoots() {
+  var c = document.getElementById('narrative');
+  if (!c) return [];
+  return [].slice.call(c.children).filter(function (el) {
+    return !(el.style && el.style.display === 'none');
+  });
+}
+function visibleText() {
+  return visibleRoots().map(function (el) { return el.textContent || ''; }).join(' ').replace(/\s+/g, ' ').trim();
+}
+function visiblePageEls() {
+  var els = [];
+  visibleRoots().forEach(function (r) {
+    if (r.getAttribute && r.getAttribute('data-page-id')) els.push(r);
+    [].slice.call(r.querySelectorAll('[data-page-id]')).forEach(function (o) { els.push(o); });
+  });
+  return els;
+}
+function pageIds() { return visiblePageEls().map(function (o) { return o.getAttribute('data-page-id'); }); }
+function pageText(id) {
+  var els = visiblePageEls().filter(function (o) { return o.getAttribute('data-page-id') === id; });
+  return els.length ? (els[0].textContent || '').replace(/\s+/g, ' ').trim() : '';
+}
+function widgetRootText() {
+  var r = visibleRoots().filter(function (el) { return el.className && el.className.indexOf('nw-root') >= 0 && el.className.indexOf('nb-root') < 0; });
+  return r.length ? (r[0].textContent || '').replace(/\s+/g, ' ').trim() : visibleText();
+}
+function widgetOpts() {
+  return [].map.call(document.querySelectorAll('.nw-root:not(.nb-root) .nw-opt'), function (o) { return o.getAttribute('data-choice-id'); });
+}
+/* pagine VISTE in questo passaggio + il loro testo a schermo (per le classi
+ * valigia: una pagina condizionale si prova mostrandola, non deducendola) */
+var seen = {}, seenText = {};
+function snap() { visiblePageEls().forEach(function (o) { var id = o.getAttribute('data-page-id'); seen[id] = true; seenText[id] = (o.textContent || '').replace(/\s+/g, ' ').trim(); }); }
+async function press(c) { key(c); await wait(LOCK + 45); snap(); }
+async function advanceToPage(id, max) { snap(); for (var i = 0; i < (max || 40) && pageIds().indexOf(id) < 0; i++) await press('Enter'); return pageIds().indexOf(id) >= 0; }
+async function advanceUntil(pred, max) { snap(); for (var i = 0; i < (max || 40); i++) { if (pred()) return true; await press('Enter'); } return pred(); }
+async function chooseChoice(id) { var o = widgetOpts(), idx = o.indexOf(id); if (idx < 0) return false; for (var k = 0; k < idx; k++) await press('ArrowDown'); await press('Enter'); return true; }
+/* taccuino REALE (stessi helper del C8-C harness): indici mai assunti, derivati */
+function nbOpen() { return !!document.querySelector('.nb-root'); }
+function nbVisible() { var r = document.querySelector('.nb-root'); return !!r && r.style.display !== 'none'; }
+function nbItems(attr) { return [].slice.call(document.querySelectorAll('.nb-root [' + attr + ']')); }
+function nbIds(attr) { return nbItems(attr).map(function (o) { return o.getAttribute(attr); }); }
+function nbFocusIndex(list) { for (var i = 0; i < list.length; i++) if (list[i].className.indexOf('nw-focus') >= 0) return i; return -1; }
+async function nbMoveTo(attr, value) {
+  var list = nbItems(attr), ids = list.map(function (o) { return o.getAttribute(attr); });
+  var target = ids.indexOf(value); if (target < 0) return false;
+  var cur = nbFocusIndex(list); if (cur < 0) cur = 0;
+  var steps = (target - cur + ids.length) % ids.length;
+  for (var i = 0; i < steps; i++) await press('ArrowDown');
+  return nbFocusIndex(nbItems(attr)) === target;
+}
+async function nbEnterSection(name) { if (!await nbMoveTo('data-nb-section', name)) return false; await press('Enter'); return true; }
+async function nbPickCompare(evId) { if (!await nbMoveTo('data-nb-compare', evId)) return false; await press('Enter'); return true; }
+async function nbEnsureMenu(max) {
+  for (var i = 0; i < (max || 12); i++) {
+    if (!nbOpen()) return false;
+    if (nbVisible() && nbIds('data-nb-section').length === 4) return true;
+    if (nbVisible()) await press('Escape'); else { await wait(LOCK + 45); snap(); }
+  }
+  return nbVisible() && nbIds('data-nb-section').length === 4;
+}
+
+async function run() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter, D = GAME.NarrativeData;
+  if (GAME.Render3D) GAME.Render3D.render = function () {};
+  var M4 = D.missions.M4, M5 = D.missions.M5, M6 = D.missions.M6, M8 = D.missions.M8;
+  function S() { return A.getState(); }
+  function val(name) { var s = S(); return s && s.values ? s.values[name] : undefined; }
+
+  // ---- B0 — BOOT DI PRODUZIONE (C8-C.1): bootstrap PRIMA di deserialize/enable
+  out.checks['B0 bootstrap_file_loaded'] = (typeof GAME.installNarrativeCatalogs === 'function');
+  out.checks['B0 domains_empty_before_bootstrap'] =
+    (Object.keys(NR.valueDomains).length === 0 && Object.keys(NR.valueTransitions).length === 0);
+  var installed = GAME.installNarrativeCatalogs();     // <-- unico path di cablaggio
+  out.run_log.catalogs_installed = installed;
+  out.checks['B0 domains_installed_from_catalog'] =
+    (JSON.stringify(installed.value_domains) === JSON.stringify(Object.keys(D.enums.values_allowed).sort()));
+  out.checks['B0 bootstrap_before_any_deserialize'] = (Object.keys(NR.valueDomains).length > 0);
+  // nessun cablaggio manuale dei domini nel sorgente dell'harness
+  var ownSrc = [].slice.call(document.scripts).filter(function (s) { return !s.src; }).map(function (s) { return s.textContent; }).join('');
+  out.checks['B0 no_manual_domain_wiring_in_harness'] =
+    (ownSrc.indexOf('setValue' + 'Domains') < 0 && ownSrc.indexOf('setValue' + 'Transitions') < 0);
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK, missions: [M4, M5, M6, M8] });
+  out.checks['B0 adapter_enabled_after_bootstrap'] = (A.isEnabled() === true);
+
+  // pagine dei DATI GENERATI di M8 (ogni page_id dei record deve appartenere qui)
+  var genIds = {};
+  (function walk(o) {
+    if (Array.isArray(o)) return o.forEach(walk);
+    if (o && typeof o === 'object') { if (o.id && o.text !== undefined && o.mode) genIds[o.id] = true; for (var k in o) walk(o[k]); }
+  })(M8);
+  out.run_log.generated_page_count = Object.keys(genIds).length;
+
+  // token INTERNI che non devono MAI comparire nel testo a schermo
+  var TOK = ['promise_stance', 'warning_target', 'focus_destination', 'body_found_by', 'letter_o_observation_source',
+    'letter_o_chain', 'presagio_status', 'maddy_action_after_warning', 'sarah_support_state', 'maddy_trovata',
+    'E9A_LETTERA_O', 'E9B_STESSO_METODO', 'E3_LETTERA_R', 'E1_DIARIO', 'P8.formulation', 'LETTERS_SAME_METHOD',
+    'NAME_OVERREACH', 'HOUSE_OVERREACH', 'PROGRESSIVE_SIGNATURE', 'cooper_primary', 'hawk_preserved',
+    'departure_prepared', 'from_derivation', 'value_transition', 'm8_station', 'm8_roadhouse', 'm8_discovery',
+    'm8_diner', 'm8_focus_choice', 'm8_cmp_diary', 'm8_cmp_letters', 'm8.a.', 'm8.b.', 'm8.c.', 'm8.d.', 'm8.e.', 'm8.f.'];
+
+  // ---- stato iniziale: costruito col runtime, poi serialize→deserialize
+  // (il deserialize VALIDA i valori tipizzati contro i domini: prova che il
+  // bootstrap è avvenuto prima) ----
+  function seedBase() { var s = NR.createState(); NR.applyEffects(s, [{ set: 'atto4' }, { evidence: 'E3_LETTERA_R' }, { evidence: 'E1_DIARIO' }]); return s; }
+  function freshState() { return NR.deserialize(NR.serialize(seedBase())); }
+
+  function clearClassic() { if (E.state) { E.state.dialogue = null; E.state.menu = null; E.state.mode = 'play'; } }
+  // interazione dal KEYPATH DEL MOTORE: il player è posato ADIACENTE e RIVOLTO
+  // al target, poi Invio → E.interact() → adapter. (Il CAMMINO tile-per-tile è
+  // C8-E; qui la verità richiesta è quella di SCHERMO.)
+  async function interactFromEngine(map, x, y, dir) {
+    clearClassic(); E.loadMap(map, x, y, dir); await wait(120); clearClassic();
+    await press('Enter');
+  }
+  async function drainLease() { for (var i = 0; i < 24 && A.active(); i++) { key('Escape'); window.dispatchEvent(new Event('blur')); await wait(90); snap(); } }
+
+  /* record formale: congela il DOM PRIMA del commit, committa, rilegge lo stato */
+  function mkRecord(o) { out.records.push(o); return o; }
+  function stateSnap(keys) {
+    var s = S(), o = {};
+    keys.forEach(function (k) {
+      if (k.indexOf('e:') === 0) o[k] = s.evidence[k.slice(2)] === true;
+      else if (k.indexOf('f:') === 0) o[k] = s.flags[k.slice(2)] === true;
+      else if (k.indexOf('n:') === 0) o[k] = s.nodes_done[k.slice(2)] === true;
+      else if (k.indexOf('p:') === 0) o[k] = NR.peekProp(s, k.slice(2)).formulation.status;
+      else if (k.indexOf('c:') === 0) o[k] = !!(s.comparisons[k.slice(2)] && s.comparisons[k.slice(2)].completed);
+      else if (k === 'objective') o[k] = (NR.activeObjective(s, M8) || {}).id || null;
+      else o[k] = s.values[k] === undefined ? null : s.values[k];
+    });
+    return o;
+  }
+
+  // posizioni di interazione (adiacente + facing) dei 7 target M8
+  var AT = {
+    maddy: ['diner', 10, 2, 'up'],           // NPC maddy @ diner 10,1 (registro condizionale)
+    norma: ['diner', 6, 1, 'left'],          // NPC norma @ diner 5,1 (gioco classico)
+    phone: ['roadhouse', 8, 6, 'up'],        // object roadhouse_phone @ 8,5
+    leland: ['diner', 11, 2, 'up'],           // NPC Leland @ diner 11,1 dopo la promessa
+    crossroads: ['town', 30, 31, 'up'],      // visible sign town_crossroads @ 30,30
+    palmer: ['palmer', 8, 9, 'down'],        // landmark palmer_entrance @ 8,10
+    lago: ['town', 15, 29, 'up'],            // landmark lago_maddy @ 15,28
+    truman: ['sheriff', 6, 3, 'right']       // NPC Truman @ sheriff 7,3
+  };
+  async function go(k) { var t = AT[k]; await interactFromEngine(t[0], t[1], t[2], t[3]); }
+
+  var ROUTE_NODE = { palmer: 'm8_route_palmer', lago: 'm8_route_lake', diner: 'm8_route_diner' };
+  var ROUTE_LAST_PAGE = { palmer: 'm8.c.route_palmer.p04', lago: 'm8.c.route_lake.p01', diner: 'm8.c.route_diner.p02' };
+  var ROUTE_GO = { palmer: 'palmer', lago: 'lago', diner: 'norma' };
+  var DISCOVERY_LAST = { hawk: 'm8.d.discovery.hawk.p02', cooper: 'm8.d.discovery.cooper.p04' };
+
+  /* =====================================================================
+   * un PASSAGGIO completo attraverso la UI vera, con i record formali
+   * ===================================================================== */
+  async function runPass(P, opts) {
+    var promise = opts.promise, warn = opts.warn, focus = opts.focus, finder = opts.finder;
+    var c = {};
+    seen = {}; seenText = {};
+    await drainLease();
+    A.setState(freshState());
+    E.state.flags = { atto3: true, atto4: true, sogno_fatto: true, east_route_confirmed: true };
+
+    // ---- R1 PROMESSA (choice_menu) -------------------------------------
+    await go('maddy');
+    c.promise_widget_reached = await advanceUntil(function () { return widgetOpts().indexOf('promise_' + promise) >= 0; }, 30);
+    var r1 = {
+      pass: P, id: P + '_R01_promise', record_type: 'choice_menu', node_id: 'm8_diner',
+      choice_ids: widgetOpts().slice(), visible_text: widgetRootText(),
+      lease_active_pre_commit: A.active() === true,
+      state_before: stateSnap(['promise_stance', 'objective'])
+    };
+    c.promise_undefined_at_widget = (val('promise_stance') === undefined && A.active() === true);
+    await chooseChoice('promise_' + promise);
+    await advanceUntil(function () { return !A.active(); }, 20);
+    r1.state_after = stateSnap(['promise_stance', 'objective']);
+    mkRecord(r1);
+    c.promise_written = (val('promise_stance') === promise);
+    c.promise_objective_obj_m8_25 = ((NR.activeObjective(S(), M8) || {}).id === 'obj_m8_25');
+
+    // ---- R1b LELAND AL DINER (taxi prima del Roadhouse/ritrovamento) ----
+    c.leland_present_after_promise =
+      ((GAME.Maps.diner.npcs || []).some(function (n) { return n.id === 'leland' && n.x === 11 && n.y === 1; }));
+    await go('leland');
+    c.leland_page_reached = await advanceToPage('m8.b0.leland_taxi.p02', 20);
+    var r1b = {
+      pass: P, id: P + '_R01b_leland_taxi', page_id: 'm8.b0.leland_taxi.p02', node_id: 'm8_leland_taxi',
+      visible_text: pageText('m8.b0.leland_taxi.p02'), lease_active_pre_commit: A.active() === true,
+      state_before: stateSnap(['e:T_LELAND_TAXI', 'f:maddy_trovata', 'body_found_by', 'objective'])
+    };
+    await press('Enter'); await wait(140); snap();
+    await advanceUntil(function () { return !A.active(); }, 20);
+    r1b.state_after = stateSnap(['e:T_LELAND_TAXI', 'f:maddy_trovata', 'body_found_by', 'objective']);
+    mkRecord(r1b);
+    c.taxi_heard_pre_roadhouse_and_discovery =
+      (r1b.state_after['e:T_LELAND_TAXI'] === true && r1b.state_after['f:maddy_trovata'] === false &&
+       r1b.state_after.body_found_by === null && r1b.state_after.objective === 'obj_m8_1');
+    c.maddy_and_leland_absent_after_taxi =
+      (!(GAME.Maps.diner.npcs || []).some(function (n) { return n.id === 'maddy' || n.id === 'leland'; }) &&
+       !(E.state.npcs || []).some(function (n) { return n.id === 'maddy' || n.id === 'leland'; }));
+
+    // ---- R2 ULTIMA PAGINA DEL GIGANTE (presagio nasce al commitNode) ----
+    await go('phone');
+    c.giant_last_page_reached = await advanceToPage('m8.b.roadhouse.p06', 30);
+    var r2 = {
+      pass: P, id: P + '_R02_giant_last_page', page_id: 'm8.b.roadhouse.p06',
+      visible_text: pageText('m8.b.roadhouse.p06'),
+      lease_active_pre_commit: A.active() === true,
+      state_before: stateSnap(['presagio_status', 'objective'])
+    };
+    c.presagio_undefined_on_last_page = (val('presagio_status') === undefined && A.active() === true);
+    await press('Enter'); await wait(140); snap();      // COMMIT del nodo
+    r2.state_after = stateSnap(['presagio_status', 'objective']);
+    mkRecord(r2);
+    c.presagio_active_after_commit = (val('presagio_status') === 'active');
+
+    // ---- R3 TELEFONO (choice_menu → tre stati scritti) ------------------
+    c.phone_widget_reached = await advanceUntil(function () { return widgetOpts().indexOf('warning_' + warn) >= 0; }, 30);
+    var r3 = {
+      pass: P, id: P + '_R03_phone', record_type: 'choice_menu', node_id: 'm8_roadhouse',
+      choice_ids: widgetOpts().slice(), visible_text: widgetRootText(),
+      lease_active_pre_commit: A.active() === true,
+      state_before: stateSnap(['warning_target', 'maddy_action_after_warning', 'sarah_support_state'])
+    };
+    c.warning_undefined_at_widget = (val('warning_target') === undefined && A.active() === true);
+    c.phone_same_lease_as_giant = (A.active() === true);
+    await chooseChoice('warning_' + warn);
+    await advanceUntil(function () { return !A.active(); }, 20);
+    r3.state_after = stateSnap(['warning_target', 'maddy_action_after_warning', 'sarah_support_state']);
+    mkRecord(r3);
+    c.warning_three_states_written =
+      (val('warning_target') === warn && val('maddy_action_after_warning') !== undefined && val('sarah_support_state') !== undefined);
+
+    // ---- R4 FOCUS (commit → gameplay restituito, NESSUN goto) -----------
+    await go('crossroads');
+    c.focus_widget_reached = await advanceUntil(function () { return widgetOpts().indexOf('focus_' + focus) >= 0; }, 30);
+    var r4 = {
+      pass: P, id: P + '_R04_focus', record_type: 'choice_menu', node_id: 'm8_focus_choice',
+      choice_ids: widgetOpts().slice(), visible_text: widgetRootText(),
+      lease_active_pre_commit: A.active() === true,
+      state_before: stateSnap(['focus_destination', 'body_found_by'])
+    };
+    c.focus_undefined_at_widget = (val('focus_destination') === undefined && A.active() === true);
+    var evPreFocus = A.events.length;
+    await chooseChoice('focus_' + focus);
+    await advanceUntil(function () { return !A.active(); }, 20);
+    r4.state_after = stateSnap(['focus_destination', 'body_found_by', 'objective']);
+    r4.no_goto_evidence = {
+      lease_released: !A.active(),
+      route_nodes_done: ['m8_route_palmer', 'm8_route_lake', 'm8_route_diner'].filter(function (id) { return S().nodes_done[id] === true; }),
+      new_lease_acquires_after_commit: A.events.slice(evPreFocus).filter(function (e) { return e.event === 'lease_acquire'; }).length
+    };
+    mkRecord(r4);
+    c.focus_written = (val('focus_destination') === focus);
+    c.focus_no_goto_gameplay_returned =
+      (!A.active() && r4.no_goto_evidence.route_nodes_done.length === 0 && val('body_found_by') === undefined &&
+       r4.no_goto_evidence.new_lease_acquires_after_commit === 0);
+
+    // ---- R5 ROTTA (ultima pagina → body_found_by cooper|hawk) -----------
+    await go(ROUTE_GO[focus]);
+    var lastRoute = ROUTE_LAST_PAGE[focus];
+    c.route_last_page_reached = await advanceToPage(lastRoute, 30);
+    var r5 = {
+      pass: P, id: P + '_R05_route_' + focus, page_id: lastRoute, node_id: ROUTE_NODE[focus],
+      visible_text: pageText(lastRoute),
+      lease_active_pre_commit: A.active() === true,
+      state_before: stateSnap(['body_found_by'])
+    };
+    c.body_found_by_undefined_on_last_route_page = (val('body_found_by') === undefined && A.active() === true);
+    await press('Enter'); await wait(140); snap();
+    await advanceUntil(function () { return !A.active(); }, 20);
+    r5.state_after = stateSnap(['body_found_by']);
+    mkRecord(r5);
+    c.route_writes_finder = (val('body_found_by') === finder);
+
+    // valigia NELLA ROTTA (classe 1): pagina condizionale VISTA a schermo
+    var valigiaRoute = (seen['m8.c.route_palmer.p02'] === true);
+    if (valigiaRoute) mkRecord({ pass: P, id: P + '_RV_valigia_route', page_id: 'm8.c.route_palmer.p02', visible_text: seenText['m8.c.route_palmer.p02'], state_before: null, state_after: null, note: 'pagina condizionale valigia MOSTRATA nella rotta Palmer' });
+
+    // ---- R6 RITROVAMENTO (ultima pagina → tutti gli effetti) ------------
+    // finestra eventi aperta PRIMA dell'interazione: il lease di SESSIONE
+    // ('narrative', depth 1) deve essere acquisito UNA volta sola e coprire
+    // ritrovamento + eco (i lease figli 'narrative-pages'/'narrative-widget'
+    // sono contesti annidati dello STESSO lease, non nuove sessioni).
+    var evPreSession = A.events.length;
+    await go('lago');
+    var lastDisc = DISCOVERY_LAST[finder];
+    c.discovery_last_page_reached = await advanceToPage(lastDisc, 30);
+    var DKEYS = ['e:E9A_LETTERA_O', 'e:E9B_STESSO_METODO', 'f:maddy_trovata', 'letter_o_observation_source', 'letter_o_chain', 'presagio_status'];
+    var r6 = {
+      pass: P, id: P + '_R06_discovery_' + finder, page_id: lastDisc, node_id: 'm8_discovery',
+      visible_text: pageText(lastDisc),
+      lease_active_pre_commit: A.active() === true,
+      state_before: stateSnap(DKEYS)
+    };
+    c.discovery_preconditions_false = (r6.state_before['e:E9A_LETTERA_O'] === false && r6.state_before['e:E9B_STESSO_METODO'] === false &&
+      r6.state_before['f:maddy_trovata'] === false && r6.state_before.letter_o_observation_source === null &&
+      r6.state_before.presagio_status === 'active' && A.active() === true);
+    await press('Enter'); await wait(140); snap();       // COMMIT del ritrovamento
+    r6.state_after = stateSnap(DKEYS);
+    mkRecord(r6);
+    c.discovery_all_effects_after_commit =
+      (r6.state_after['e:E9A_LETTERA_O'] === true && r6.state_after['e:E9B_STESSO_METODO'] === true &&
+       r6.state_after['f:maddy_trovata'] === true && r6.state_after.presagio_status === 'verified' &&
+       r6.state_after.letter_o_chain === 'standard' &&
+       r6.state_after.letter_o_observation_source === (finder === 'cooper' ? 'cooper_primary' : 'hawk_preserved'));
+
+    // ---- R7 ECO DELLA PROMESSA — STESSO LEASE del ritrovamento ----------
+    var echoPage = 'm8.d.echo.' + promise;
+    c.echo_page_reached = await advanceToPage(echoPage, 30);
+    var evWindow = A.events.slice(evPreSession);
+    var r7 = {
+      pass: P, id: P + '_R07_promise_echo', page_id: echoPage, node_id: 'm8_promise_echo',
+      visible_text: pageText(echoPage),
+      lease_active_pre_commit: A.active() === true,
+      same_lease_as_discovery: {
+        // finestra: dall'interazione col lago fino alla pagina dell'eco
+        session_lease_acquires: evWindow.filter(function (e) { return e.event === 'lease_acquire' && e.name === 'narrative'; }).length,
+        session_lease_releases: evWindow.filter(function (e) { return e.event === 'lease_release' && e.name === 'narrative'; }).length,
+        session_closed_between: evWindow.filter(function (e) { return e.event === 'session_closed'; }).length,
+        child_context_acquires: evWindow.filter(function (e) { return e.event === 'lease_acquire' && e.name !== 'narrative'; }).length,
+        lease_still_held: A.active() === true
+      },
+      state_before: stateSnap(['n:m8_promise_echo'])
+    };
+    c.echo_same_lease_as_discovery =
+      (A.active() === true && r7.same_lease_as_discovery.session_closed_between === 0 &&
+       r7.same_lease_as_discovery.session_lease_acquires === 1 && r7.same_lease_as_discovery.session_lease_releases === 0);
+    await advanceUntil(function () { return !A.active(); }, 20);
+    r7.state_after = stateSnap(['n:m8_promise_echo', 'objective']);
+    mkRecord(r7);
+    c.echo_done = (S().nodes_done.m8_promise_echo === true);
+
+    // ---- R8 CONFRONTO LETTERE (taccuino REALE, tasto T) -----------------
+    clearClassic();
+    await press('KeyT');
+    c.notebook_opens_from_T = (nbOpen() && A.active() === true);
+    c.notebook_compare_section = await nbEnterSection('Confronta');
+    await nbPickCompare('E9A_LETTERA_O');
+    await nbPickCompare('E3_LETTERA_R');
+    c.cmp_letters_page_reached = await advanceToPage('m8.e.cmp_letters.p01', 20);
+    var r8 = {
+      pass: P, id: P + '_R08_cmp_letters', page_id: 'm8.e.cmp_letters.p01', node_id: 'm8_cmp_letters',
+      visible_text: pageText('m8.e.cmp_letters.p01'),
+      lease_active_pre_commit: A.active() === true,
+      state_before: stateSnap(['c:m8_cmp_letters'])
+    };
+    c.cmp_letters_not_completed_before = (r8.state_before['c:m8_cmp_letters'] === false && A.active() === true);
+    await advanceUntil(function () { return S().comparisons.m8_cmp_letters && S().comparisons.m8_cmp_letters.completed === true; }, 20);
+    r8.state_after = stateSnap(['c:m8_cmp_letters']);
+    r8.result = (S().comparisons.m8_cmp_letters || {}).result;
+    mkRecord(r8);
+    c.cmp_letters_completed_after_commit =
+      (r8.state_after['c:m8_cmp_letters'] === true && r8.result === 'LETTERS_SAME_METHOD');
+
+    // ---- R9 DIARIO B (tentativo assente → registrato e NASCOSTO) --------
+    c.notebook_back_to_menu = await nbEnsureMenu();
+    c.notebook_compare_section_2 = await nbEnterSection('Confronta');
+    await nbPickCompare('E9A_LETTERA_O');
+    await nbPickCompare('E1_DIARIO');
+    c.diary_widget_reached = await advanceUntil(function () { return widgetOpts().length === 3; }, 30);
+    var optsAtWidget = widgetOpts().slice();
+    var r9 = {
+      pass: P, id: P + '_R09_diary_B', record_type: 'choice_menu', node_id: 'm8_cmp_diary',
+      choice_ids: optsAtWidget, visible_text: widgetRootText(),
+      lease_active_pre_commit: A.active() === true,
+      state_before: { attempts: ((S().comparisons.m8_cmp_diary || {}).attempts || []).slice(), diary_b_in_dom: optsAtWidget.indexOf('diary_b') >= 0 }
+    };
+    c.diaryB_attempt_absent_before = (r9.state_before.attempts.length === 0 && r9.state_before.diary_b_in_dom === true && A.active() === true);
+    await chooseChoice('diary_b');
+    c.diaryB_feedback_page_shown = await advanceToPage('m8.e.cmp_diary.feedback.b', 20);
+    r9.feedback_page_id = 'm8.e.cmp_diary.feedback.b';
+    r9.feedback_visible_text = pageText('m8.e.cmp_diary.feedback.b');
+    await advanceUntil(function () { return widgetOpts().length > 0 && widgetOpts().indexOf('diary_b') < 0; }, 20);
+    r9.state_after = { attempts: ((S().comparisons.m8_cmp_diary || {}).attempts || []).slice(), diary_b_in_dom: widgetOpts().indexOf('diary_b') >= 0 };
+    mkRecord(r9);
+    c.diaryB_recorded_and_hidden =
+      (r9.state_after.attempts.indexOf('NAME_OVERREACH') >= 0 && r9.state_after.diary_b_in_dom === false);
+
+    // ---- R10 DIARIO C (secondo overreach: registrato, NASCOSTO, P8 ferma) ---
+    // Il contratto è B → C → A: dopo il rifiuto di B il widget ripropone [A, C];
+    // si sceglie C (secondo tentativo respinto) e solo DOPO resta la sola A.
+    var optsBeforeC = widgetOpts().slice();
+    var r10 = {
+      pass: P, id: P + '_R10_diary_C', record_type: 'choice_menu', node_id: 'm8_cmp_diary',
+      choice_ids: optsBeforeC, visible_text: widgetRootText(),
+      lease_active_pre_commit: A.active() === true,
+      state_before: {
+        attempts: ((S().comparisons.m8_cmp_diary || {}).attempts || []).slice(),
+        diary_c_in_dom: optsBeforeC.indexOf('diary_c') >= 0,
+        options_in_dom: optsBeforeC.slice(),
+        P8: NR.peekProp(S(), 'P8').formulation.status
+      }
+    };
+    c.diaryC_offered_after_B =
+      (r10.state_before.diary_c_in_dom === true && optsBeforeC.indexOf('diary_b') < 0 && A.active() === true);
+    c.diaryC_attempt_absent_before = (r10.state_before.attempts.indexOf('HOUSE_OVERREACH') < 0);
+    await chooseChoice('diary_c');
+    // (1) la pagina di feedback di C è MOSTRATA a schermo
+    c.diaryC_feedback_page_shown = await advanceToPage('m8.e.cmp_diary.feedback.c', 20);
+    r10.feedback_page_id = 'm8.e.cmp_diary.feedback.c';
+    r10.feedback_visible_text = pageText('m8.e.cmp_diary.feedback.c');
+    r10.state_on_feedback_page = { P8: NR.peekProp(S(), 'P8').formulation.status };
+    await advanceUntil(function () { return widgetOpts().length > 0 && widgetOpts().indexOf('diary_c') < 0; }, 20);
+    var optsAfterC = widgetOpts().slice();
+    r10.state_after = {
+      attempts: ((S().comparisons.m8_cmp_diary || {}).attempts || []).slice(),
+      diary_c_in_dom: optsAfterC.indexOf('diary_c') >= 0,
+      options_in_dom: optsAfterC.slice(),
+      P8: NR.peekProp(S(), 'P8').formulation.status
+    };
+    mkRecord(r10);
+    // (2) HOUSE_OVERREACH registrato negli attempts
+    c.diaryC_HOUSE_OVERREACH_recorded = (r10.state_after.attempts.indexOf('HOUSE_OVERREACH') >= 0);
+    // (3) C nascosta dal DOM dopo il commit
+    c.diaryC_hidden_after_commit = (r10.state_after.diary_c_in_dom === false);
+    // (4) resta SOLO A residua
+    c.diaryC_only_A_left = (JSON.stringify(optsAfterC) === JSON.stringify(['diary_a']));
+    // (5) P8 ancora unformulated dopo C (P8 nasce SOLO dall'opzione A)
+    c.diaryC_P8_still_unformulated =
+      (r10.state_after.P8 !== 'formulated' && r10.state_on_feedback_page.P8 !== 'formulated');
+    // entrambi i tentativi respinti sono ora nel registro, nell'ordine B → C
+    c.diary_both_overreach_attempts_recorded =
+      (r10.state_after.attempts.indexOf('NAME_OVERREACH') >= 0 && r10.state_after.attempts.indexOf('HOUSE_OVERREACH') >= 0);
+
+    // ---- R11 DIARIO A (P8 formulata SOLO al commit) ---------------------
+    var r11 = {
+      pass: P, id: P + '_R11_diary_A', record_type: 'choice_menu', node_id: 'm8_cmp_diary',
+      choice_ids: widgetOpts().slice(), visible_text: widgetRootText(),
+      lease_active_pre_commit: A.active() === true,
+      state_before: stateSnap(['p:P8', 'objective'])
+    };
+    c.P8_unformulated_at_widget = (r11.state_before['p:P8'] !== 'formulated' && A.active() === true);
+    await chooseChoice('diary_a');
+    c.diaryA_feedback_page_shown = await advanceToPage('m8.e.cmp_diary.feedback.a', 20);
+    r11.feedback_page_id = 'm8.e.cmp_diary.feedback.a';
+    r11.feedback_visible_text = pageText('m8.e.cmp_diary.feedback.a');
+    r11.state_on_feedback_page = stateSnap(['p:P8']);
+    c.P8_still_unformulated_on_feedback_page = (r11.state_on_feedback_page['p:P8'] !== 'formulated');
+    await advanceUntil(function () { return NR.peekProp(S(), 'P8').formulation.status === 'formulated'; }, 20);
+    r11.state_after = stateSnap(['p:P8', 'objective']);
+    mkRecord(r11);
+    c.P8_formulated_after_A_commit = (r11.state_after['p:P8'] === 'formulated');
+    c.objective_after_diary_A_obj_m8_35 = (r11.state_after.objective === 'obj_m8_35');
+    await advanceUntil(function () { return !A.active(); }, 20);
+    await drainLease();
+
+    // ---- R12 STAZIONE (ultima pagina → obj_m8_4 + completion true) ------
+    // NOTA (dai dati M8): obj_m8_4 e completion sono gated su node_done:m8_station
+    // (Lock §9-F). Il commit del diario A porta a obj_m8_35; obj_m8_4 e la
+    // completion arrivano al commit della stazione. Il record 10 del contratto
+    // è quindi verificato in DUE record consecutivi: R11 (diario A → P8 + obj_m8_35)
+    // e R12 (stazione → obj_m8_4 + completion true).
+    await go('truman');
+    c.station_last_page_reached = await advanceToPage('m8.f.station.p03', 30);
+    var r11 = {
+      pass: P, id: P + '_R12_station', page_id: 'm8.f.station.p03', node_id: 'm8_station',
+      visible_text: pageText('m8.f.station.p03'),
+      lease_active_pre_commit: A.active() === true,
+      state_before: Object.assign(stateSnap(['n:m8_station', 'objective']), { completion: NR.evalCond(S(), { node_done: 'm8_station' }, M8) })
+    };
+    c.station_not_done_before = (r11.state_before['n:m8_station'] === false && r11.state_before.objective === 'obj_m8_35' &&
+      r11.state_before.completion === false && A.active() === true);
+    await press('Enter'); await wait(140); snap();
+    await advanceUntil(function () { return !A.active(); }, 20);
+    r11.state_after = Object.assign(stateSnap(['n:m8_station', 'objective']), { completion: NR.evalCond(S(), { node_done: 'm8_station' }, M8) });
+    mkRecord(r11);
+    c.station_obj_m8_4_and_completion =
+      (r11.state_after['n:m8_station'] === true && r11.state_after.objective === 'obj_m8_4' && r11.state_after.completion === true);
+
+    // valigia IN STAZIONE (classe 2): pagina condizionale VISTA a schermo
+    var valigiaStation = (seen['m8.f.station.p_valigia'] === true);
+    if (valigiaStation) mkRecord({ pass: P, id: P + '_RV_valigia_station', page_id: 'm8.f.station.p_valigia', visible_text: seenText['m8.f.station.p_valigia'], state_before: null, state_after: null, note: 'pagina condizionale valigia MOSTRATA in stazione (via Truman)' });
+
+    // ---- classe valigia OSSERVATA a schermo in questo passaggio ---------
+    var klass = (valigiaRoute && !valigiaStation) ? 'route' : (!valigiaRoute && valigiaStation) ? 'station' : (!valigiaRoute && !valigiaStation) ? 'none' : 'BOTH_INVALID';
+    out.run_log['valigia_' + P] = { warning: warn, focus: focus, seen_route_page: valigiaRoute, seen_station_page: valigiaStation, observed_class: klass, expected_class: opts.valigia };
+    c['valigia_class_' + opts.valigia + '_observed_on_screen'] = (klass === opts.valigia);
+
+    out.run_log['pass_' + P] = { promise: promise, warning: warn, focus: focus, finder: finder, pages_seen: Object.keys(seen).sort() };
+    Object.keys(c).forEach(function (k) { out.checks[P + ': ' + k] = c[k]; });
+    await drainLease();
+  }
+
+  // ---- i 4 passaggi -----------------------------------------------------
+  await runPass('P1', { promise: 'accompagno', warn: 'palmer', focus: 'palmer', finder: 'hawk', valigia: 'route' });
+  await runPass('P2', { promise: 'autonomia', warn: 'palmer', focus: 'lago', finder: 'cooper', valigia: 'station' });
+  await runPass('P3', { promise: 'prudenza', warn: 'centrale', focus: 'diner', finder: 'hawk', valigia: 'none' });
+  await runPass('P4', { promise: 'accompagno', warn: 'nessuno', focus: 'lago', finder: 'cooper', valigia: 'none' });
+
+  // =====================================================================
+  // GATE DI CONTRATTO sui record (identici per ogni record)
+  // =====================================================================
+  var byId = {}; out.records.forEach(function (r) { byId[r.id] = r; });
+  // 1) ogni record dichiara page_id (di una pagina GENERATA) oppure record_type:choice_menu
+  out.checks['CONTRACT every_record_has_page_id_or_choice_menu'] = out.records.every(function (r) {
+    return (typeof r.page_id === 'string' && r.page_id.length > 0) || r.record_type === 'choice_menu';
+  });
+  out.checks['CONTRACT record_page_ids_belong_to_generated_data'] = out.records.every(function (r) {
+    return !r.page_id || genIds[r.page_id] === true;
+  });
+  out.checks['CONTRACT feedback_page_ids_belong_to_generated_data'] = out.records.every(function (r) {
+    return !r.feedback_page_id || genIds[r.feedback_page_id] === true;
+  });
+  // un record choice_menu dichiara il nodo e le opzioni CHE ERANO A SCHERMO.
+  // Nessun minimo arbitrario: nell'ordine di contratto B → C → A l'ultimo passo
+  // mostra UNA sola opzione residua, ed è esattamente ciò che si vuole provare.
+  out.checks['CONTRACT choice_menu_records_declare_node_and_choices'] = out.records.filter(function (r) { return r.record_type === 'choice_menu'; })
+    .every(function (r) { return typeof r.node_id === 'string' && Array.isArray(r.choice_ids) && r.choice_ids.length >= 1; });
+  // il ventaglio del diario si RESTRINGE a ogni tentativo respinto: 3 → 2 → 1
+  var dB = byId['P1_R09_diary_B'], dC = byId['P1_R10_diary_C'], dA = byId['P1_R11_diary_A'];
+  out.run_log.diary_option_counts = [dB && dB.choice_ids.length, dC && dC.choice_ids.length, dA && dA.choice_ids.length];
+  out.checks['CONTRACT diary_options_shrink_3_2_1'] =
+    (JSON.stringify(out.run_log.diary_option_counts) === JSON.stringify([3, 2, 1]));
+  out.checks['CONTRACT diary_sequence_is_B_then_C_then_A'] =
+    (!!dB && !!dC && !!dA &&
+     dB.choice_ids.indexOf('diary_b') >= 0 &&
+     dC.choice_ids.indexOf('diary_c') >= 0 && dC.choice_ids.indexOf('diary_b') < 0 &&
+     JSON.stringify(dA.choice_ids) === JSON.stringify(['diary_a']));
+  // 2) visible_text NON vuoto, letto dal DOM visibile
+  out.checks['CONTRACT every_record_has_non_empty_visible_text'] = out.records.every(function (r) {
+    return typeof r.visible_text === 'string' && r.visible_text.length > 0;
+  });
+  // 3) state_before / state_after presenti (i record valigia sono pagine
+  //    condizionali osservate: dichiarano esplicitamente null)
+  out.checks['CONTRACT every_record_has_state_before_and_after'] = out.records.every(function (r) {
+    return ('state_before' in r) && ('state_after' in r);
+  });
+  // 4) lease ATTIVO pre-commit su ogni record d'effetto
+  out.checks['CONTRACT every_effect_record_has_active_lease_pre_commit'] = out.records.filter(function (r) {
+    return r.lease_active_pre_commit !== undefined;
+  }).every(function (r) { return r.lease_active_pre_commit === true; });
+  // 5) nessun token interno nel testo a schermo di alcun record
+  var leaked = [];
+  out.records.forEach(function (r) {
+    [r.visible_text, r.feedback_visible_text].forEach(function (t) {
+      if (!t) return;
+      TOK.forEach(function (tok) { if (t.indexOf(tok) >= 0) leaked.push({ record: r.id, token: tok }); });
+    });
+  });
+  out.run_log.leaked_tokens = leaked;
+  out.checks['CONTRACT no_internal_token_in_any_visible_text'] = (leaked.length === 0);
+
+  // 6) i record del contratto sono TUTTI presenti (dal passaggio P1).
+  //    I 10 EVENTI del contratto + testimonianza taxi danno 13 record formali:
+  //    Leland viene registrato al diner prima del Roadhouse; il confronto del
+  //    diario è B → C → A (tre record: due tentativi respinti + la formulazione)
+  //    e l'evento 10 è verificato da R11 (diario A → P8 + obj_m8_35) + R12
+  //    (stazione → obj_m8_4 + completion true).
+  var REQUIRED = [
+    'P1_R01_promise', 'P1_R01b_leland_taxi', 'P1_R02_giant_last_page', 'P1_R03_phone', 'P1_R04_focus', 'P1_R05_route_palmer',
+    'P1_R06_discovery_hawk', 'P1_R07_promise_echo', 'P1_R08_cmp_letters',
+    'P1_R09_diary_B', 'P1_R10_diary_C', 'P1_R11_diary_A', 'P1_R12_station'
+  ];
+  REQUIRED.forEach(function (id) { out.checks['CONTRACT record_present: ' + id] = !!byId[id]; });
+  // 7) entrambe le versioni cooper/hawk del ritrovamento, dalla UI vera
+  out.checks['CONTRACT discovery_hawk_version_recorded'] = !!byId['P1_R06_discovery_hawk'];
+  out.checks['CONTRACT discovery_cooper_version_recorded'] = !!byId['P2_R06_discovery_cooper'];
+  out.checks['CONTRACT route_hawk_recorded'] = (!!byId['P1_R05_route_palmer'] && byId['P1_R05_route_palmer'].state_after.body_found_by === 'hawk');
+  out.checks['CONTRACT route_cooper_recorded'] = (!!byId['P2_R05_route_lago'] && byId['P2_R05_route_lago'].state_after.body_found_by === 'cooper');
+  // 8) le TRE classi valigia, osservate a schermo
+  out.checks['CONTRACT valigia_class1_route_observed'] = (out.run_log.valigia_P1.observed_class === 'route');
+  out.checks['CONTRACT valigia_class2_station_observed'] = (out.run_log.valigia_P2.observed_class === 'station');
+  out.checks['CONTRACT valigia_class3_none_centrale_observed'] = (out.run_log.valigia_P3.observed_class === 'none');
+  out.checks['CONTRACT valigia_class3_none_nessuno_observed'] = (out.run_log.valigia_P4.observed_class === 'none');
+  // 9) copertura dei domini attraversati dalla UI
+  var promises = {}, warns = {}, focuses = {};
+  ['P1', 'P2', 'P3', 'P4'].forEach(function (p) { var r = out.run_log['pass_' + p]; promises[r.promise] = 1; warns[r.warning] = 1; focuses[r.focus] = 1; });
+  out.checks['CONTRACT all_three_promise_values_through_UI'] = (Object.keys(promises).sort().join(',') === 'accompagno,autonomia,prudenza');
+  out.checks['CONTRACT all_three_warning_values_through_UI'] = (Object.keys(warns).sort().join(',') === 'centrale,nessuno,palmer');
+  out.checks['CONTRACT all_three_focus_values_through_UI'] = (Object.keys(focuses).sort().join(',') === 'diner,lago,palmer');
+
+  // ---------------- dichiarazioni per il revisore ----------------
+  out.notes.push('C8-D.1 — confronto del diario provato nell\'ordine del contratto B → C → A, tre record formali dalla UI vera: R09 diary_B (NAME_OVERREACH registrato, B nascosta), R10 diary_C (feedback m8.e.cmp_diary.feedback.c mostrata, HOUSE_OVERREACH registrato, C nascosta, resta la sola A, P8 ancora unformulated), R11 diary_A (P8 formulata SOLO al commit). Prima di C8-D.1 l\'harness saltava C andando da B ad A.');
+  out.notes.push('Cronologia taxi: promessa a Maddy → Leland appare al diner (11,1) → testimonianza T_LELAND_TAXI → Maddy e Leland assenti → Roadhouse. Nessun viaggio Palmer introdotto prima del bivio.');
+  out.notes.push('Boot: narrative-bootstrap.js caricato davvero; installNarrativeCatalogs() chiamato PRIMA di ogni deserialize/enable (gate B0). Nessun cablaggio manuale dei domini nell\'harness.');
+  out.notes.push('Screen truth = visible_text letto dal DOM VISIBILE (root con display!=="none"). Gli screenshot PNG headless NON catturano l\'overlay DOM (lezione C6-D): nessun PNG è prodotto qui.');
+  out.notes.push('Record 10 del contratto: dai DATI M8 obj_m8_4 e la completion sono gated su node_done:m8_station (Lock §9-F), non sul commit del diario A. È quindi verificato in DUE record consecutivi: R11 (diario A → P8 formulata → obj_m8_35) e R12 (ultima pagina della stazione → obj_m8_4 + completion true).');
+  out.notes.push('Interazione: il player è posato ADIACENTE e RIVOLTO al target, poi Invio → E.interact() → adapter (keypath del motore). Il CAMMINO tile-per-tile è competenza di C8-E (test/m8-physical-harness.html), come M6 C6-D/C6-E.');
+  out.notes.push('4 passaggi completi: P1 accompagno/palmer/palmer (hawk, valigia nella rotta) · P2 autonomia/palmer/lago (cooper, valigia in stazione) · P3 prudenza/centrale/diner (nessuna valigia) · P4 accompagno/nessuno/lago (nessuna valigia).');
+
+  // ---------------- riepilogo ----------------
+  var allOk = out.errors.length === 0 && Object.keys(out.checks).every(function (k) { return out.checks[k] === true; });
+  out.pass = allOk;
+  out.total = Object.keys(out.checks).length;
+  out.passed = Object.keys(out.checks).filter(function (k) { return out.checks[k] === true; }).length;
+  out.failed = Object.keys(out.checks).filter(function (k) { return out.checks[k] !== true; });
+  out.record_count = out.records.length;
+  out.title = (allOk ? 'M8ST-PASS ' : 'M8ST-FAIL ') + out.passed + '/' + out.total;
+  document.getElementById('log').textContent = JSON.stringify(out, null, 1);
+  document.title = out.title;
+  window.__C8D_RESULT = out;
+}
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    run().catch(function (e) {
+      out.errors.push('run: ' + (e && e.message || e) + ' | ' + (e && e.stack || ''));
+      out.title = 'M8ST-ERR ' + (e && e.message || e);
+      document.getElementById('log').textContent = JSON.stringify(out, null, 1);
+      document.title = out.title;
+    });
+  }, 400);
+});
+</script>
+</body>
+</html>

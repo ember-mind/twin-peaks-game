@@ -50,6 +50,10 @@ shot town 42 24 up diner-approach
 shot town 30 29 down cooper-front
 shot sheriff 4 6  up  cooper-npc
 shot woods   14 20 up cooper-night
+# R62: la notte va giudicata su un frame che contenga la PELLE. Con dir=up il
+# viso non e' in quadro e il gate "contrasto pelle/terreno" non e' verificabile.
+shot woods   14 20 down  cooper-night-front
+shot woods   14 20 right cooper-night-side
 # La chiusura del contorno "in tutte le direzioni" finora era verificata solo
 # di fronte e di spalle: mancava del tutto il profilo.
 shot sheriff 4 6  left  cooper-side-left

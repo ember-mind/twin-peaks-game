@@ -213,6 +213,19 @@ drainDialogue('Truman iniziale');
 ok(!S().dialogue, 'dialogo Truman chiuso');
 ok(S().clues.includes('diario'), 'diario ottenuto');
 
+// Fascicolo: documento repertato apribile, sfogliabile e richiudibile senza
+// perdere selezione o chiudere l'intero fascicolo.
+key('Escape'); pump(16);
+ok(S().menu === true && S().menuDocument === false, 'fascicolo apre sulla lista prove');
+key('Enter'); pump(16);
+ok(S().menuDocument === true && S().menuPage === 0, 'diario selezionato si apre con Invio');
+key('ArrowRight'); pump(16);
+ok(S().menuDocument === true && S().menuPage === 1, 'freccia sfoglia pagina diario');
+key('Escape'); pump(16);
+ok(S().menu === true && S().menuDocument === false, 'Esc dal diario torna al fascicolo');
+key('Escape'); pump(16);
+ok(S().menu === false, 'secondo Esc chiude fascicolo');
+
 // replay: pagina "again"
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.replay, 'replay Truman usa "again"');

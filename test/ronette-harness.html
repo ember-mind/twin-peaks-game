@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>B2 Ronette harness</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #000; height: 100%; overflow: hidden; }
+  #stage { position: fixed; inset: 0; }
+  #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+  #gl { background: #000; }
+  #game { background: transparent; }
+  /* overlay narrativo sopra i canvas del motore */
+  #narrative { position: absolute; left: 0; right: 0; bottom: 0; top: 0; z-index: 10; pointer-events: none; }
+  #narrative .nw-root { pointer-events: auto; }
+  .nw-root { position: absolute; left: 8%; right: 8%; bottom: 6%; background: rgba(12,14,20,0.94); border: 3px solid #c8b06a; border-radius: 4px; padding: 16px 20px; font: 18px/1.7 monospace; color: #e8e4d8; }
+  .nw-title { color: #c8b06a; margin-bottom: 8px; }
+  .nw-opt { padding: 2px 6px; white-space: pre; }
+  .nw-focus { background: #2e3442; color: #ffe9a8; }
+  .nw-page { min-height: 56px; }
+  .nw-name { color: #c8b06a; }
+  .nw-hint { text-align: right; color: #888; }
+  /* banner di verità per gli screenshot (harness, non participant build) */
+  #truth { position: absolute; top: 0; left: 0; right: 0; z-index: 11; font: 14px monospace; color: #9fe8a0; background: rgba(0,0,0,0.72); padding: 4px 8px; }
+  #log { display: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl" width="960" height="640"></canvas>
+  <canvas id="game" width="480" height="320"></canvas>
+  <div id="narrative"></div>
+  <div id="truth"></div>
+</div>
+<div id="log"></div>
+
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=harness-r6"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=harness-r6"></script>
+<script src="../js/engine.js?v=harness-r6"></script>
+<script src="../js/render3d.js"></script>
+<script src="../js/glue.js?v=harness-r6"></script>
+<script src="../js/main.js"></script>
+<script src="../js/narrative-runtime.js"></script>
+<script src="../js/narrative-ui.js"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
+<script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
+
+<script>
+var LOCK = 120;
+var results = { checks: {}, console_errors: [], console_log: [] };
+window.onerror = function (m, src, line) { results.console_errors.push(String(m) + ' @' + line); };
+(function () {
+  var ce = console.error, cw = console.warn;
+  console.error = function () { results.console_errors.push([].join.call(arguments, ' ')); ce.apply(console, arguments); };
+  console.warn = function () { results.console_log.push('[warn] ' + [].join.call(arguments, ' ')); cw.apply(console, arguments); };
+})();
+
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(code) {
+  window.dispatchEvent(new KeyboardEvent('keydown', { code: code, bubbles: true }));
+  window.dispatchEvent(new KeyboardEvent('keyup', { code: code, bubbles: true }));
+}
+function holdKey(code) { window.dispatchEvent(new KeyboardEvent('keydown', { code: code, bubbles: true })); }
+function liftKey(code) { window.dispatchEvent(new KeyboardEvent('keyup', { code: code, bubbles: true })); }
+
+var STOP = null; // ?shot=NN → ci si ferma lì per lo screenshot
+function stopped() { return new Promise(function () {}); } // mai risolta
+
+async function seq() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter;
+  var record = null;
+
+  // overlay per lo screenshot headless: il compositor non presenta il canvas
+  // WebGL nel frame catturato — si copia il frame su un canvas 2D (pattern di
+  // test/shot.html). Sotto la UI narrativa (z-index 9 < 10).
+  var glcv = document.getElementById('gl');
+  var ov = document.createElement('canvas');
+  ov.width = glcv.width; ov.height = glcv.height;
+  ov.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;z-index:9;';
+  document.getElementById('stage').appendChild(ov);
+  var ovx = ov.getContext('2d');
+  setInterval(function () {
+    try {
+      GAME.Render3D.render(E.state, 16, performance.now());
+      ovx.drawImage(glcv, 0, 0);
+    } catch (e2) {}
+  }, 80);
+
+  // banner di verità aggiornato di continuo
+  setInterval(function () {
+    var st = A.getState();
+    var t1 = st ? (st.evidence.T1_RONETTE_BOB === true) : false;
+    document.getElementById('truth').textContent =
+      'T1_RONETTE_BOB: ' + t1 + ' | narrative lease: ' + (A.active() ? 'HELD (movement SUSPENDED)' : 'FREE (movement ACTIVE)') +
+      ' | revision: ' + (st ? st.revision : '-');
+  }, 80);
+
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK });
+  E.loadMap('hospital', 2, 2, 'up'); // davanti al letto di Ronette (2,1)
+  var state = A.getState(), M = A.getMission();
+
+  // cattura del record critico: T1 fotografato quando la pagina BOB è a schermo
+  A.onLog = function (e) {
+    if (e.event === 'page_shown' && e.page_id === 'm4.b2.ronette_uomo.p03') {
+      record = {
+        page_id: e.page_id, visible_text: e.visible_text, speaker_id: 'ronette',
+        state_before_commit: { T1_RONETTE_BOB: state.evidence.T1_RONETTE_BOB === true },
+        movement_suspended_at_page: A.active(), world_actor: 'ronette',
+        source: 'M4 v1.1.1 LOCK.md#B2-uomo'
+      };
+    }
+    if (e.event === 'branch_committed' && e.node_id === 'ronette_uomo' && record) {
+      record.state_after_commit = { T1_RONETTE_BOB: state.evidence.T1_RONETTE_BOB === true };
+    }
+  };
+
+  // premessa M4: il sogno è stato fatto (M3, fuori missione) e raccontato a Truman
+  // (truman_a2 committato VIA RUNTIME — nessuna scrittura diretta di flag di missione)
+  NR.applyEffects(state, [{ set: 'sogno_fatto' }]);
+  var p0 = NR.prepareNode(state, M, 'truman_a2');
+  NR.commitNode(state, M, p0);
+  results.checks.truman_a2_committed = (state.flags.sogno_raccontato === true);
+
+  // gate: worldRoots espone SOLO ronette_q per Ronette; i rami interni mai
+  var roots = NR.worldRoots(state, M, 'hospital', 'ronette').map(function (n) { return n.id; });
+  results.checks.roots_only_ronette_q = (roots.length === 1 && roots[0] === 'ronette_q');
+  // gate: infermiera invisibile prima di node_done ronette_uomo
+  results.checks.infermiera_gated_before = (NR.worldRoots(state, M, 'hospital', 'infermiera').length === 0);
+  // gate: l'infermiera non pronuncia mai BOB (dati canonici)
+  var inf = M.nodes.filter(function (n) { return n.id === 'infermiera_ctx'; })[0];
+  results.checks.infermiera_never_bob = inf.pages.every(function (pg) {
+    return pg.speaker_id !== 'infermiera' || pg.text.indexOf('BOB') === -1;
+  });
+
+  // Escape sulle pagine iniziali PRIMA di ogni commit: stato byte-identico
+  var st0 = NR.serialize(state);
+  key('Enter'); await wait(200);                    // interazione → pagine iniziali
+  key('Escape'); await wait(200);
+  results.checks.escape_root_pure = (NR.serialize(state) === st0 && !A.active());
+
+  key('Enter'); await wait(200);                    // pagine iniziali (p01)
+  if (STOP === '01') { document.title = 'B2-SHOT-01'; return stopped(); }
+  key('Enter'); await wait(200);                    // p02
+  key('Enter'); await wait(200);                    // commitNode(ronette_q) → widget 3 scelte
+  results.checks.three_initial_choices = (document.querySelectorAll('.nw-opt').length === 3);
+  if (STOP === '02') { document.title = 'B2-SHOT-02'; return stopped(); }
+
+  key('Enter'); await wait(200);                    // conferma q_luogo → ramo p01
+  key('Enter'); await wait(200);                    // p02
+  key('Enter'); await wait(200);                    // p03
+  key('Enter'); await wait(200);                    // commitNode(luogo) → widget: SOLO q_uomo
+  var opts = [].map.call(document.querySelectorAll('.nw-opt'), function (o) { return o.getAttribute('data-choice-id'); });
+  results.checks.after_luogo_only_uomo = (opts.length === 1 && opts[0] === 'q_uomo');
+  results.checks.lease_held_between_questions = A.active();
+  if (STOP === '03') { document.title = 'B2-SHOT-03'; return stopped(); }
+
+  key('Enter'); await wait(200);                    // conferma q_uomo → uomo p01
+  key('Enter'); await wait(200);                    // p02
+  key('Enter'); await wait(200);                    // p03: BOB. BOB. BOB.
+  results.checks.bob_page_visible = !!document.querySelector('[data-page-id="m4.b2.ronette_uomo.p03"]');
+  results.checks.bob_before_t1 = (results.checks.bob_page_visible && state.evidence.T1_RONETTE_BOB !== true);
+  if (STOP === '04') { document.title = 'B2-SHOT-04'; return stopped(); }
+
+  key('Enter'); await wait(200);                    // p04
+  key('Enter'); await wait(200);                    // p05
+  key('Enter'); await wait(200);                    // p06
+  key('Enter'); await wait(300);                    // commitNode(uomo) → T1 → visita chiusa → sessione conclusa
+  results.checks.t1_after_commit = (state.evidence.T1_RONETTE_BOB === true);
+  var v1 = JSON.parse(NR.serialize(state)).visits.ronette_visit;
+  results.checks.visit_closed_after_uomo = (v1 && v1.closed === true);
+  results.checks.lease_released_after_visit = !A.active();
+  if (STOP === '05') { document.title = 'B2-SHOT-05'; return stopped(); }
+
+  key('Enter'); await wait(200);                    // ri-interazione: visita chiusa → risposta diegetica
+  results.checks.closed_no_empty_menu = !!document.querySelector('[data-page-id="m4.b2.adapter.visit_closed"]');
+  if (STOP === '06') { document.title = 'B2-SHOT-06'; return stopped(); }
+  key('Enter'); await wait(200);                    // chiudi la battuta
+
+  // nuovo beat obbligatorio altrove (James al Double R) — committato VIA RUNTIME
+  var pj = NR.prepareNode(state, M, 'james_a2');
+  var cj = NR.commitNode(state, M, pj);
+  results.checks.james_beat_committed = (cj.ok === true);
+
+  var reopenedBefore = JSON.parse(NR.serialize(state)).visits.ronette_visit.reopened;
+  key('Enter'); await wait(200);                    // interazione → pagina di riapertura (PRIMA del commit)
+  results.checks.reopen_page_before_commit = (!!document.querySelector('[data-page-id="m4.b2.ronette_q.reopen"]') &&
+    reopenedBefore === false && JSON.parse(NR.serialize(state)).visits.ronette_visit.reopened === false);
+  if (STOP === '07') { document.title = 'B2-SHOT-07'; return stopped(); }
+
+  key('Enter'); await wait(200);                    // conferma → commitVisitRefresh → scelte residue
+  var res1 = [].map.call(document.querySelectorAll('.nw-opt'), function (o) { return o.getAttribute('data-choice-id'); });
+  results.checks.reopened_residual_only_laura = (res1.length === 1 && res1[0] === 'q_laura');
+  results.checks.reopened_flag_set = (JSON.parse(NR.serialize(state)).visits.ronette_visit.reopened === true);
+  if (STOP === '08') { document.title = 'B2-SHOT-08'; return stopped(); }
+
+  key('Enter'); await wait(200);                    // conferma q_laura → ramo p01
+  key('Enter'); await wait(200);                    // p02
+  key('Enter'); await wait(200);                    // p03
+  key('Enter'); await wait(300);                    // commit → residue esaurite → sessione chiusa
+  var v2 = JSON.parse(NR.serialize(state)).visits.ronette_visit;
+  results.checks.residual_in_history = (v2.questions_asked.indexOf('q_laura') >= 0);
+  results.checks.residual_not_repeatable = (NR.availableChoices(state, M, M.nodes.filter(function (n) { return n.id === 'ronette_q'; })[0]).length === 0);
+  key('Enter'); await wait(200);                    // ri-interazione: niente residue → risposta diegetica, MAI menu vuoto
+  results.checks.exhausted_no_empty_menu = !!document.querySelector('[data-page-id="m4.b2.adapter.visit_closed"]');
+  if (STOP === '09') { document.title = 'B2-SHOT-09'; return stopped(); }
+  key('Enter'); await wait(200);                    // chiudi
+
+  // infermiera nel corridoio, DOPO T1
+  results.checks.infermiera_available_after = (NR.worldRoots(state, M, 'hospital', 'infermiera').length === 1);
+  E.loadMap('hospital', 4, 3, 'up');                // davanti all'infermiera (4,2)
+  key('Enter'); await wait(200);                    // infermiera_ctx p01
+  results.checks.infermiera_page_visible = !!document.querySelector('[data-page-id="m4.ctx.infermiera_ctx.p01"]');
+  if (STOP === '10') { document.title = 'B2-SHOT-10'; return stopped(); }
+  key('Enter'); await wait(200);                    // p02
+  key('Enter'); await wait(200);                    // p03
+  key('Enter'); await wait(200);                    // p04
+  key('Enter'); await wait(300);                    // commit → osservazione a taccuino
+  results.checks.infermiera_observation = state.notebook.some(function (n) { return n.id === 'm4.obs.infermiera_ctx'; });
+
+  // save/load: visita, history e chiusura sopravvivono
+  var ser = NR.serialize(state);
+  var re = NR.deserialize(ser);
+  results.checks.saveload_preserves_visit = (JSON.stringify(re.visits.ronette_visit) === JSON.stringify(v2) &&
+    re.evidence.T1_RONETTE_BOB === true && NR.serialize(re) === ser);
+
+  // gameplay davvero ripristinato: un passo reale del motore
+  results.checks.lease_free_at_end = !A.active();
+  var ty0 = E.state.player.ty;
+  holdKey('ArrowDown');
+  for (var w = 0; w < 40 && E.state.player.ty === ty0; w++) await wait(100);
+  liftKey('ArrowDown');
+  results.checks.movement_restored_real = (E.state.player.ty > ty0);
+  results.player_ty_before_after = [ty0, E.state.player.ty];
+  results.debug_engine = { mode: E.state.mode, dialogue: !!E.state.dialogue, menu: E.state.menu,
+    fadePhase: E.state.fadePhase, dir: E.state.player.dir, moving: E.state.player.moving,
+    tx: E.state.player.tx, ty: E.state.player.ty, narrActive: A.active() };
+
+  // profondità minima del lease tra la prima e la seconda domanda (mai 0)
+  var evs = A.events;
+  var iClosed = -1, iOpened = -1;
+  for (var i = 0; i < evs.length; i++) {
+    if (iClosed === -1 && evs[i].event === 'branch_committed' && evs[i].node_id === 'ronette_luogo') iClosed = i;
+    if (iClosed >= 0 && evs[i].event === 'widget_opened' && iOpened === -1 && i > iClosed) { iOpened = i; break; }
+  }
+  var minDepth = 99;
+  for (var j = iClosed; j <= iOpened && j >= 0; j++) {
+    if (evs[j] && evs[j].depth !== undefined) minDepth = Math.min(minDepth, evs[j].depth);
+  }
+  results.checks.no_gameplay_frame_between_questions = (iClosed >= 0 && iOpened > iClosed && minDepth >= 1);
+
+  results.record_critico = record;
+  results.all_pass = Object.keys(results.checks).every(function (k) { return results.checks[k] === true; });
+  document.getElementById('log').textContent = JSON.stringify({ results: results, events: A.events }, null, 1);
+  document.title = results.all_pass ? 'B2-PASS' : 'B2-FAIL';
+}
+
+// variante di regressione: blur pre-commit + percorso q_laura → q_uomo nel motore
+async function seqLaura() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter;
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK });
+  E.loadMap('hospital', 2, 2, 'up');
+  var state = A.getState(), M = A.getMission();
+  NR.applyEffects(state, [{ set: 'sogno_fatto' }]);
+  var p0 = NR.prepareNode(state, M, 'truman_a2'); NR.commitNode(state, M, p0);
+
+  // R1 — blur durante le pagine iniziali: byte-identico, lease 0, nessun nodo committato
+  var st0 = NR.serialize(state);
+  key('Enter'); await wait(200);                 // pagine iniziali aperte
+  window.dispatchEvent(new Event('blur')); await wait(200);
+  var stA = JSON.parse(NR.serialize(state));
+  results.checks.blur_root_pages_pure = (NR.serialize(state) === st0 && !A.active() &&
+    Object.keys(stA.nodes_done).length === 1); // solo truman_a2
+
+  // R2 — blur durante il primo widget: root già committato, il widget non aggiunge nulla
+  key('Enter'); await wait(200);                 // pagine iniziali
+  key('Enter'); await wait(200);                 // p02
+  key('Enter'); await wait(200);                 // commitNode(ronette_q) → widget
+  var base = NR.serialize(state);                // baseline POST-commit del root
+  window.dispatchEvent(new Event('blur')); await wait(200);
+  results.checks.blur_widget_pure = (NR.serialize(state) === base && !A.active());
+
+  // R3 — percorso q_laura → q_uomo nel motore vero
+  key('Enter'); await wait(200);                 // visita attiva → widget diretto
+  key('ArrowDown'); await wait(150); key('ArrowDown'); await wait(150);
+  key('Enter'); await wait(200);                 // conferma q_laura → ramo p01
+  key('Enter'); await wait(200);                 // p02
+  key('Enter'); await wait(200);                 // p03
+  key('Enter'); await wait(200);                 // commit ramo laura → widget: SOLO q_uomo
+  var opts = [].map.call(document.querySelectorAll('.nw-opt'), function (o) { return o.getAttribute('data-choice-id'); });
+  results.checks.after_laura_only_uomo = (opts.length === 1 && opts[0] === 'q_uomo');
+  results.checks.lease_held_laura_path = A.active();
+  key('Enter'); await wait(200);                 // conferma q_uomo → p01
+  for (var k = 0; k < 6; k++) { key('Enter'); await wait(200); } // p02..p06 + commit
+  results.checks.t1_after_laura_path = (state.evidence.T1_RONETTE_BOB === true);
+  var v = JSON.parse(NR.serialize(state)).visits.ronette_visit;
+  results.checks.visit_closed_laura_path = (v.closed === true && v.questions_asked.indexOf('q_laura') >= 0 && v.questions_asked.indexOf('q_uomo') >= 0);
+  results.checks.lease_free_laura_end = !A.active();
+  results.checks.no_console_errors = (results.console_errors.length === 0);
+
+  results.all_pass = Object.keys(results.checks).every(function (k) { return results.checks[k] === true; });
+  document.getElementById('log').textContent = JSON.stringify({ results: results, events: A.events }, null, 1);
+  document.title = results.all_pass ? 'VARIANT-PASS' : 'VARIANT-FAIL';
+}
+
+window.addEventListener('load', function () {
+  var q = new URLSearchParams(location.search);
+  STOP = q.get('shot');
+  var variant = q.get('variant');
+  setTimeout(function () { (variant === 'laura' ? seqLaura : seq)(); }, 300); // il motore ha già fatto boot (main.js)
+});
+</script>
+</body>
+</html>

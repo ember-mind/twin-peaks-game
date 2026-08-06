@@ -1,0 +1,122 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>narrative-bootstrap-probe</title>
+<style>body{margin:0;background:#111;color:#ddd;font:12px monospace}#log{white-space:pre-wrap;padding:8px}</style>
+</head>
+<body>
+<div id="log">running…</div>
+<!-- PROBE DI PRODUZIONE (C8-C.1 Fix 1). Carica SOLO i tre file che un boot di
+     produzione minimo carica per il layer narrativo: runtime + dati generati +
+     bootstrap. Nessun harness, nessun motore, nessun adapter, nessuna UI.
+     Riproduce la prova del revisore:
+       { valueDomainsKeys: [], valueTransitions: {},
+         prepareNode: {ok:true},
+         prepareChoice: {ok:false, error:"value_without_domain: promise_stance"} }
+     e verifica che DOPO installNarrativeCatalogs() la prima promessa di Maddy
+     si prepari, si committi e scriva il valore tipizzato. -->
+<script src="../js/narrative-runtime.js"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
+<script src="../js/narrative-bootstrap.js"></script>
+<script>
+var out = { checks: {}, errors: [], diag: {} };
+window.__BOOTSTRAP_PROBE = out;
+window.onerror = function (m, s, l) { out.errors.push(String(m) + ' @' + l); };
+try {
+  var NR = GAME.NarrativeRuntime, D = GAME.NarrativeData;
+  var M8 = D.missions.M8;
+  var firstNode = M8.nodes[0];                       // m8_diner (primo nodo M8)
+  var firstChoice = firstNode.choices[0].id;         // promise_* (prima scelta)
+  out.diag.first_node = firstNode.id;
+  out.diag.first_choice = firstChoice;
+
+  function seed() {
+    var s = NR.createState();
+    NR.applyEffects(s, [{ set: 'atto4' }]);
+    return s;
+  }
+
+  // ---- FASE 1: PRIMA del bootstrap (stato del bug segnalato dal revisore) ----
+  out.checks['pre_scripts_loaded_are_production_only'] =
+    (!GAME.NarrativeAdapter && !GAME.NarrativeUI && !GAME.Engine);
+  out.diag.pre_valueDomainsKeys = Object.keys(NR.valueDomains);
+  out.diag.pre_valueTransitions = Object.keys(NR.valueTransitions);
+  out.checks['pre_value_domains_empty'] = (Object.keys(NR.valueDomains).length === 0);
+  out.checks['pre_value_transitions_empty'] = (Object.keys(NR.valueTransitions).length === 0);
+  var sPre = seed();
+  var pnPre = NR.prepareNode(sPre, M8, firstNode.id);
+  out.checks['pre_prepareNode_ok'] = (pnPre.ok === true);
+  NR.commitNode(sPre, M8, pnPre);
+  var pcPre = NR.prepareChoice(sPre, M8, firstNode, firstChoice);
+  out.diag.pre_prepareChoice = { ok: pcPre.ok, error: pcPre.error || null };
+  out.checks['pre_prepareChoice_fails_value_without_domain'] =
+    (pcPre.ok === false && String(pcPre.error).indexOf('value_without_domain') === 0);
+
+  // ---- FASE 2: il bootstrap di produzione ----
+  var installed = GAME.installNarrativeCatalogs();
+  out.diag.installed = installed;
+  // generico: i domini installati sono ESATTAMENTE le chiavi del catalogo
+  out.checks['bootstrap_domains_match_catalog_keys'] =
+    (JSON.stringify(installed.value_domains) === JSON.stringify(Object.keys(D.enums.values_allowed).sort()));
+  out.checks['bootstrap_every_domain_is_catalog_array'] =
+    Object.keys(D.enums.values_allowed).every(function (v) {
+      return NR.valueDomains[v] === D.enums.enums[D.enums.values_allowed[v]];
+    });
+  out.checks['bootstrap_transitions_installed'] =
+    (JSON.stringify(NR.valueTransitions) === JSON.stringify(D.enums.value_transitions || {}));
+  // idempotenza: seconda chiamata → stesso stato installato
+  var again = GAME.installNarrativeCatalogs();
+  out.checks['bootstrap_idempotent'] =
+    (JSON.stringify(again) === JSON.stringify(installed) &&
+     JSON.stringify(Object.keys(NR.valueDomains).sort()) === JSON.stringify(installed.value_domains));
+
+  // ---- FASE 3: DOPO il bootstrap, in produzione, la promessa si committa ----
+  var sPost = seed();
+  var pnPost = NR.prepareNode(sPost, M8, firstNode.id);
+  out.checks['post_prepareNode_ok'] = (pnPost.ok === true);
+  NR.commitNode(sPost, M8, pnPost);
+  var pcPost = NR.prepareChoice(sPost, M8, firstNode, firstChoice);
+  out.diag.post_prepareChoice = { ok: pcPost.ok, error: pcPost.error || null };
+  out.checks['post_prepareChoice_ok'] = (pcPost.ok === true);
+  var cc = NR.commitChoice(sPost, M8, firstNode, pcPost);
+  out.checks['post_commitChoice_ok'] = (cc.ok === true);
+  out.checks['post_promise_stance_written'] = (sPost.values.promise_stance !== undefined);
+  out.diag.promise_stance = sPost.values.promise_stance;
+
+  // ---- FASE 4: la transizione del presagio (active→verified) è utilizzabile ----
+  // presagio_status nasce 'active' al commit del Roadhouse e transita a
+  // 'verified' al ritrovamento: senza value_transitions installate la
+  // resolveDeferredEffects fallirebbe con undeclared_transition.
+  var tName = Object.keys(D.enums.value_transitions || {})[0];
+  out.diag.transition_probed = tName || null;
+  if (tName) {
+    var pair = D.enums.value_transitions[tName][0];
+    var sT = seed();
+    sT.values[tName] = pair[0];
+    var rd = NR.resolveDeferredEffects(sT, [{ value_transition: { name: tName, from: pair[0], to: pair[1] } }]);
+    out.checks['post_value_transition_resolves'] = (rd.ok === true && rd.transitions.length === 1 && rd.transitions[0].to === pair[1]);
+  } else {
+    out.checks['post_value_transition_resolves'] = false;
+  }
+
+  // ---- FASE 5: deserialize di un salvataggio con valori tipizzati ----
+  // deserialize valida OGNI valore contro i domini: senza bootstrap prima del
+  // load, un salvataggio legittimo verrebbe rifiutato (save_value_without_domain).
+  var raw = NR.serialize(sPost);
+  var back = NR.deserialize(raw);
+  out.checks['post_deserialize_accepts_typed_values'] = (back.values.promise_stance === sPost.values.promise_stance);
+} catch (e) {
+  out.errors.push('probe: ' + (e && e.message || e));
+}
+var keys = Object.keys(out.checks);
+out.total = keys.length;
+out.passed = keys.filter(function (k) { return out.checks[k] === true; }).length;
+out.failed = keys.filter(function (k) { return out.checks[k] !== true; });
+out.pass = (out.errors.length === 0 && out.failed.length === 0);
+document.getElementById('log').textContent = JSON.stringify(out, null, 1);
+document.title = out.pass ? ('BOOTPROBE-PASS ' + out.passed + '/' + out.total)
+                          : ('BOOTPROBE-FAIL ' + out.failed.length + '/' + out.total);
+</script>
+</body>
+</html>

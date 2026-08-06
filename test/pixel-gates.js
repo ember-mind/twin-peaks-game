@@ -8,6 +8,8 @@
 //
 // Uso:
 //   node test/pixel-gates.js <frame.png> --rect=x0,y0,x1,y1 [--label=prato]
+//   node test/pixel-gates.js <frame.png> --mask-a=x,y,w,h --mask-b=x,y \
+//        [--mask-b-file=<altro.png>] [--bg=#rrggbb,...]
 //   node test/pixel-gates.js <frame.png> --tile-discipline
 //   node test/pixel-gates.js <frame.png> --stamp=y0,y1
 //
@@ -174,8 +176,11 @@ function maskOf(img, box, bgList) {
   return mask;
 }
 
-function maskIou(img, boxA, boxB, bgList) {
-  const a = maskOf(img, boxA, bgList), b = maskOf(img, boxB, bgList);
+// imgB opzionale: l'IoU fronte<->profilo confronta due catture diverse (lo
+// sprite non e' mai nelle due pose nello stesso frame). Con --mask-b-file la
+// maschera B viene letta da un secondo PNG, sullo stesso box.
+function maskIou(img, boxA, boxB, bgList, imgB) {
+  const a = maskOf(img, boxA, bgList), b = maskOf(imgB || img, boxB, bgList);
   let inter = 0, union = 0, diff = 0;
   for (let i = 0; i < Math.min(a.length, b.length); i++) {
     if (a[i] || b[i]) union++;
@@ -276,7 +281,9 @@ if (opts.has('mask-a') && opts.has('mask-b')) {
   const bgList = opts.has('bg')
     ? String(opts.get('bg')).split(',').map((h) => parseInt(h.replace('#', ''), 16))
     : null;
-  out.maskIou = maskIou(img, a, [b[0], b[1], a[2], a[3]], bgList);
+  const imgB = opts.has('mask-b-file') ? decodePng(String(opts.get('mask-b-file'))) : null;
+  out.maskIou = maskIou(img, a, [b[0], b[1], a[2], a[3]], bgList, imgB);
+  if (imgB) out.maskBFile = String(opts.get('mask-b-file'));
 }
 if (opts.has('tile-discipline')) out.tileDiscipline = tileDiscipline(img);
 if (opts.has('stamp')) {

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Twin Peaks — deterministic character atlas</title>
+  <style>
+    html, body { margin: 0; background: #10151b; }
+    canvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+  </style>
+</head>
+<body>
+<canvas id="atlas" width="5920" height="6720"></canvas>
+<script src="../js/chars.js?v=atlas2"></script>
+<script>
+(function () {
+  'use strict';
+  var cv = document.getElementById('atlas');
+  var g = cv.getContext('2d');
+  g.imageSmoothingEnabled = false;
+
+  var names = Object.keys(GAME.sprites.CHARS);
+  var dirs = ['down', 'left', 'right', 'up'];
+  var states = ['P0', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'IDLE', 'BLINK'];
+  var panelW = 1480, panelH = 1120;
+
+  function text(value, x, y, size, color, align) {
+    g.font = 'bold ' + size + 'px ui-monospace, SFMono-Regular, Menlo, monospace';
+    g.textAlign = align || 'left';
+    g.textBaseline = 'top';
+    g.fillStyle = color;
+    g.fillText(value, x, y);
+  }
+
+  function sprite(name, dir, state, x, y, scale) {
+    var moving = state < 8;
+    var tm = moving ? state * 45 + 1 : (state === 9 ? 4000 : 1000);
+    var frame = moving ? (state >> 1) : 0;
+    g.save();
+    g.translate(x, y);
+    g.scale(scale, scale);
+    GAME.sprites.drawChar(g, name, 3, 7, dir, frame, moving, tm);
+    g.restore();
+  }
+
+  names.forEach(function (name, index) {
+    var col = index % 4, row = Math.floor(index / 4);
+    var px = col * panelW, py = row * panelH;
+    var spec = GAME.sprites.CHARS[name];
+    var motion = spec.motion || {};
+
+    g.fillStyle = index % 2 ? '#17212a' : '#141d25';
+    g.fillRect(px, py, panelW, panelH);
+    g.strokeStyle = '#334452';
+    g.lineWidth = 2;
+    g.strokeRect(px + 1, py + 1, panelW - 2, panelH - 2);
+    text(String(index + 1).padStart(2, '0') + '  ' + name.toUpperCase(),
+      px + 18, py + 12, 20, '#f4e8ce');
+    text((motion.archetype || 'default') + ' · ' + spec.hairStyle +
+      ' · build ' + spec.build.toFixed(2) + ' · height ' + spec.height.toFixed(2),
+      px + 340, py + 15, 14, '#91aab9');
+
+    text('NATIVE 1× — 4 directions · 8 walk poses · idle · blink',
+      px + 18, py + 43, 14, '#d2b56c');
+    dirs.forEach(function (dir, di) {
+      var yy = py + 70 + di * 69;
+      text(dir.toUpperCase(), px + 8, yy + 24, 11, '#7f9aaa');
+      states.forEach(function (label, si) {
+        var xx = px + 78 + si * 60;
+        sprite(name, dir, si, xx, yy, 1);
+        text(label, xx + 3, yy + 57, 8, '#758997');
+      });
+    });
+
+    text('GAMEPLAY REVIEW 3× — nearest-neighbour, same deterministic states',
+      px + 18, py + 352, 14, '#d2b56c');
+    dirs.forEach(function (dir, di) {
+      var yy = py + 382 + di * 181;
+      states.forEach(function (label, si) {
+        var xx = px + 12 + si * 145;
+        sprite(name, dir, si, xx, yy, 3);
+        g.fillStyle = 'rgba(8,12,16,0.72)';
+        g.fillRect(xx + 4, yy + 4, 43, 17);
+        text((si === 0 ? dir.toUpperCase() + ' · ' : '') + label,
+          xx + 8, yy + 7, 10, '#e8dcc4');
+      });
+    });
+  });
+
+  document.title = 'TP-CHARS-ATLAS-READY';
+}());
+</script>
+</body>
+</html>

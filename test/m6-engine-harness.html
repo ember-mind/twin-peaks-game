@@ -1,0 +1,260 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>m6-engine-harness</title>
+<style>body{margin:0;background:#000}#narrative{position:fixed;inset:0;pointer-events:none}.nw-focus{font-weight:bold}#log{position:fixed;left:0;bottom:0;max-height:40%;overflow:auto;background:#111;color:#ddd;font:11px monospace;white-space:pre-wrap;padding:6px;z-index:99}</style>
+</head>
+<body>
+<canvas id="gl" width="960" height="640"></canvas>
+<canvas id="game" width="480" height="320"></canvas>
+<div id="narrative"></div>
+<div id="log">running…</div>
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=harness-r6"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=harness-r6"></script>
+<script src="../js/engine.js?v=harness-r6"></script>
+<script src="../js/render3d.js"></script>
+<script src="../js/glue.js?v=harness-r6"></script>
+<script src="../js/main.js"></script>
+<script src="../js/narrative-runtime.js"></script>
+<script src="../js/narrative-ui.js"></script>
+<script src="../js/narrative-notebook.js"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
+<script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
+<script src="../js/narrative-save.js"></script>
+<script>
+var LOCK = 30;
+var out = { checks: {}, errors: [] };
+window.onerror = function (m, s, l) { out.errors.push(String(m) + ' @' + l); };
+window.addEventListener('unhandledrejection', function (e) { out.errors.push('unhandled: ' + (e.reason && e.reason.message || e.reason)); });
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(c) { window.dispatchEvent(new KeyboardEvent('keydown', { code: c, bubbles: true })); window.dispatchEvent(new KeyboardEvent('keyup', { code: c, bubbles: true })); }
+var seen = {}, allText = '';
+function pageIds() { return [].map.call(document.querySelectorAll('#narrative [data-page-id]'), function (o) { return o.getAttribute('data-page-id'); }); }
+function widgetOpts() { return [].map.call(document.querySelectorAll('.nw-root:not(.nb-root) .nw-opt'), function (o) { return o.getAttribute('data-choice-id'); }); }
+function snap() { pageIds().forEach(function (id) { seen[id] = true; }); var nb = document.getElementById('narrative'); if (nb) allText += ' ' + (nb.textContent || ''); }
+async function press(c) { key(c); await wait(LOCK + 45); snap(); }
+async function advanceUntil(pred, max) { max = max || 40; snap(); for (var i = 0; i < max; i++) { if (pred()) return true; await press('Enter'); } return pred(); }
+async function chooseChoice(id) { var o = widgetOpts(), idx = o.indexOf(id); if (idx < 0) return false; for (var k = 0; k < idx; k++) await press('ArrowDown'); await press('Enter'); return true; }
+
+async function run() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter, NS = GAME.NarrativeSave, D = GAME.NarrativeData;
+  if (GAME.Render3D) GAME.Render3D.render = function () {};
+  function S() { return A.getState(); }
+  var M4 = D.missions.M4, M5 = D.missions.M5, M6 = D.missions.M6;
+  var domains = {}; for (var nm in D.enums.values_allowed) domains[nm] = D.enums.enums[D.enums.values_allowed[nm]];
+  NR.setValueDomains(domains);
+  out.checks.m6_in_gen_data = !!M6 && M6.mission === 'M6';
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK, missions: [M4, M5, M6] });
+
+  // costruzione del SEED (fine M5 reale) col runtime PURO
+  function seed() {
+    var s = NR.createState(); NR.applyEffects(s, [{ set: 'sogno_fatto' }]);
+    function dn(m, id) { var p = NR.prepareNode(s, m, id); if (!p.ok) return; NR.commitNode(s, m, p); }
+    function dc(m, at, ch) { var n = m.nodes.filter(function (x) { return x.id === at; })[0]; var p = NR.prepareChoice(s, m, n, ch); if (!p.ok) return; var c = NR.commitChoice(s, m, n, p); if (c.goto) dn(m, c.goto); }
+    dn(M4, 'truman_a2'); dn(M4, 'james_a2'); dn(M4, 'cmp_e6a_tjames'); dc(M4, 'cmp_e6a_tjames', 'b8_a');
+    var presN = M4.nodes.filter(function (n) { return n.id === 'present_truman_m4'; })[0];
+    var pp = NR.preparePresentation(s, M4, presN, 'P2'); NR.commitPresentation(s, M4, presN, pp);
+    dn(M5, 'm5_bridge'); dn(M5, 'm5_discovery'); dn(M5, 'm5_mound'); dn(M5, 'm5_ring');
+    var pt = NR.prepareNode(s, M5, 'm5_theory_initial'); NR.commitNode(s, M5, pt); dc(M5, 'm5_theory_initial', 'theory_degeneration');
+    dn(M5, 'm5_scene');
+    var pv = NR.prepareNode(s, M5, 'm5_theory_revision'); NR.commitNode(s, M5, pv); dc(M5, 'm5_theory_revision', 'revision_keep');
+    var pi = NR.prepareNode(s, M5, 'm5_report_intro'); NR.commitNode(s, M5, pi); dc(M5, 'm5_s1', 's1_institutional');
+    return s;
+  }
+  // teletrasporto + interazione col motore VERO (loadMap poi Enter = interact())
+  async function interactAt(map, x, y, dir) { E.loadMap(map, x, y, dir); await wait(120); await press('Enter'); }
+  function rootsPerTarget(mapId) {
+    var g = {}; NR.worldRoots(S(), M6, mapId).forEach(function (n) { var k = (n.map_id || '') + '|' + (n.target_kind || '') + '|' + (n.target_id || ''); (g[k] = g[k] || []).push(n.id); });
+    return g;
+  }
+  function noShadow(mapId) { var g = rootsPerTarget(mapId); return Object.keys(g).every(function (k) { return g[k].length <= 1; }); }
+
+  var TAC = [
+    ['tactic_prova', 'prova', 'JACQUES_MIDNIGHT_CLAIM', ['jacques_statement_terms_known'], 'prova'],
+    ['tactic_pressione', 'pressione', 'JACQUES_LIST_GIVEN', [], 'pressione'],
+    ['tactic_falsa_sicurezza', 'falsa_sicurezza', 'JACQUES_THIRD_MAN_DETAIL', [], 'falsa']
+  ];
+  var ALLRES = ['JACQUES_MIDNIGHT_CLAIM', 'JACQUES_LIST_GIVEN', 'JACQUES_THIRD_MAN_DETAIL'];
+
+  // ============ 1) le 3 tattiche end-to-end nel motore vero ============
+  for (var ti = 0; ti < TAC.length; ti++) {
+    var tCh = TAC[ti][0], tVal = TAC[ti][1], ownRes = TAC[ti][2], ownFlags = TAC[ti][3], fbSuf = TAC[ti][4];
+    var L = 'T[' + tVal + '] ';
+    A.setState(seed()); seen = {};
+    // Jacques visibile: ingresso B1-B2 → scelta tattica nello stesso lease.
+    await interactAt('oej', 7, 6, 'up');
+    await advanceUntil(function () { return widgetOpts().length === 3; });
+    out.checks[L + 'ferry_done'] = (S().nodes_done.m6_ferry === true);
+    out.checks[L + 'root_after_ferry'] = noShadow('oej');
+    var presoBefore = S().flags.jacques_preso === true;
+    out.checks[L + 'tactic_widget'] = (widgetOpts().indexOf(tCh) >= 0 && A.active());
+    await chooseChoice(tCh);
+    // B5-B6 ramo + B6b P5 (stessa sessione)
+    await advanceUntil(function () { return widgetOpts().indexOf('p5_present') >= 0; });
+    out.checks[L + 'admission'] = (S().flags.jacques_admitted_presence === true);
+    out.checks[L + 'own_resource'] = (S().evidence[ownRes] === true) && ownFlags.every(function (f) { return S().flags[f] === true; });
+    out.checks[L + 'no_other_resource'] = ALLRES.filter(function (r) { return r !== ownRes; }).every(function (r) { return !S().evidence[r]; });
+    out.checks[L + 'p5_before_arrest'] = (S().flags.jacques_preso !== true);
+    // P5 retry: B respinta+registrata, C respinta con feedback per-ramo, A formula
+    await chooseChoice('p5_killed');
+    await advanceUntil(function () { return widgetOpts().indexOf('p5_present') >= 0; });
+    out.checks[L + 'p5_B_recorded'] = ((S().comparisons.m6_p5 || {}).attempts || []).indexOf('ATTRIBUTION_OVERREACH') >= 0;
+    await chooseChoice('p5_no_third_man');
+    await advanceUntil(function () { return widgetOpts().indexOf('p5_present') >= 0; });
+    out.checks[L + 'p5_C_feedback_per_tactic'] = (seen['m6.b6b.p5.feedback.no_third.' + fbSuf] === true);
+    out.checks[L + 'p5_BC_hidden'] = (widgetOpts().join(',') === 'p5_present');
+    await chooseChoice('p5_present');
+    await advanceUntil(function () { return NR.peekProp(S(), 'P5').formulation.status === 'formulated' || S().flags.jacques_preso === true || !A.active(); }, 8);
+    out.checks[L + 'p5_formulated'] = (NR.peekProp(S(), 'P5').formulation.status === 'formulated');
+    // B7 arresto (continuazione, stessa sessione)
+    await advanceUntil(function () { return S().flags.jacques_preso === true || !A.active(); });
+    await advanceUntil(function () { return !A.active(); }, 8);
+    await wait(150);
+    out.checks[L + 'preso_after_chain'] = (S().flags.jacques_preso === true && presoBefore === false);
+    out.checks[L + 'root_after_arrest'] = noShadow('oej');
+    out.checks[L + 'no_murder'] = (!S().flags.jacques_murder_confirmed && !S().flags.jacques_murder_attributed);
+    // altra tattica NON eseguibile / non scritta
+    out.checks[L + 'single_tactic'] = (S().values.m6_tactic === tVal);
+  }
+
+  // ============ 2) coda post-arresto nel motore (con Prova) ============
+  await (async function () {
+    var L = 'POST ';
+    // ricostruisco lo stato fino a jacques_preso (Prova) col runtime, poi cammino B7b/B8/B8b
+    A.setState(seed()); seen = {};
+    await interactAt('oej', 7, 6, 'up'); await advanceUntil(function () { return widgetOpts().length === 3; });
+    await chooseChoice('tactic_prova'); await advanceUntil(function () { return widgetOpts().indexOf('p5_present') >= 0; });
+    await chooseChoice('p5_present'); await advanceUntil(function () { return S().flags.jacques_preso === true || !A.active(); });
+    await advanceUntil(function () { return !A.active(); }, 10);
+    out.checks[L + 'preso'] = (S().flags.jacques_preso === true);
+    // B8 notizia bloccata prima del ritorno notturno (Lucy@sheriff)
+    await interactAt('sheriff', 2, 5, 'down'); await advanceUntil(function () { return !A.active(); }, 8);
+    out.checks[L + 'news_blocked_before_return'] = (S().flags.jacques_dead !== true);
+    // B7b ritorno (Truman@sheriff) — coesiste con il rapporto M4 sullo stesso
+    // target: vince M6 (missione corrente) grazie alla risoluzione latest-first.
+    await interactAt('sheriff', 6, 3, 'right'); await advanceUntil(function () { return S().nodes_done.m6_return_night === true || !A.active(); });
+    await advanceUntil(function () { return !A.active(); }, 8);
+    out.checks[L + 'return_night_done'] = (S().nodes_done.m6_return_night === true);
+    // B8 notizia (Lucy@sheriff)
+    await interactAt('sheriff', 2, 5, 'down'); await advanceUntil(function () { return S().flags.jacques_dead === true || !A.active(); });
+    await advanceUntil(function () { return !A.active(); }, 8);
+    out.checks[L + 'news_dead'] = (S().flags.jacques_dead === true && S().flags.jacques_testimony_lost === true && S().flags.m6_resource_lost === true);
+    out.checks[L + 'p9'] = (NR.peekProp(S(), 'P9').formulation.status === 'formulated');
+    out.checks[L + 'suspicious_still_false'] = (S().flags.jacques_death_suspicious !== true);
+    out.checks[L + 'resource_survives_death'] = (S().evidence.JACQUES_MIDNIGHT_CLAIM === true && NR.peekProp(S(), 'P5').formulation.status === 'formulated');
+    // B8b ospedale (registro@hospital) → unico writer del sospetto
+    await interactAt('hospital', 4, 4, 'up'); await advanceUntil(function () { return S().flags.jacques_death_suspicious === true || !A.active(); });
+    out.checks[L + 'hospital_writes_suspicious'] = (S().flags.night_log_no_visitor === true && S().flags.jacques_death_suspicious === true);
+    out.checks[L + 'no_murder_final'] = (!S().flags.jacques_murder_confirmed && !S().flags.jacques_murder_attributed);
+  })();
+
+  // ============ 3) abort & ripresa sul VERO adapter ============
+  // 3a abort prima della tattica
+  A.setState(seed()); seen = {};
+  await interactAt('oej', 7, 6, 'up'); await advanceUntil(function () { return widgetOpts().length === 3; });
+  await press('Escape'); await wait(150);
+  out.checks['ABORT tactic: lease released, unset'] = (!A.active() && S().values.m6_tactic === undefined && !S().nodes_done.m6_interrogation_prova);
+  await interactAt('oej', 7, 6, 'up'); await advanceUntil(function () { return widgetOpts().length === 3; });
+  out.checks['ABORT tactic: reopen'] = (widgetOpts().length === 3 && A.active());
+  // avanza fino a P5 poi abort
+  await chooseChoice('tactic_prova'); await advanceUntil(function () { return widgetOpts().indexOf('p5_present') >= 0; });
+  await press('Escape'); await wait(150);
+  out.checks['ABORT p5: not formulated, milestone pending'] = (!A.active() && NR.peekProp(S(), 'P5').formulation.status === 'unformulated' && NR.pendingMilestones(S(), M6).length === 1);
+  // 3b ripresa P5 con nuova interazione con Jacques
+  await interactAt('oej', 7, 6, 'up'); await advanceUntil(function () { return widgetOpts().indexOf('p5_present') >= 0; }, 12);
+  out.checks['ABORT p5: reopen via jacques'] = (widgetOpts().indexOf('p5_present') >= 0 && A.active());
+  // 3c dopo B: tentativo committato, opzione nascosta, abort, opzioni residue
+  await chooseChoice('p5_killed'); await advanceUntil(function () { return widgetOpts().indexOf('p5_present') >= 0; });
+  await press('Escape'); await wait(150);
+  out.checks['ABORT after B: attempt committed'] = (((S().comparisons.m6_p5 || {}).attempts || []).indexOf('ATTRIBUTION_OVERREACH') >= 0 && !A.active());
+  await interactAt('oej', 7, 6, 'up'); await advanceUntil(function () { return widgetOpts().length >= 1; }, 12);
+  out.checks['ABORT after B: residual options (B hidden)'] = (widgetOpts().indexOf('p5_killed') < 0 && widgetOpts().indexOf('p5_present') >= 0);
+  // 3d adapter-state reinstall after deserialize (NON "save integration"): reinstallo
+  // lo stato deserializzato nell'adapter e provo che Jacques riapra P5.
+  var saved = NR.serialize(S());
+  if (A.active()) { await press('Escape'); await wait(150); }
+  A.setState(NR.deserialize(saved));
+  out.checks['reinstall_after_deserialize: milestone pending'] = (NR.pendingMilestones(S(), M6).length === 1);
+  await interactAt('oej', 7, 6, 'up'); await advanceUntil(function () { return widgetOpts().indexOf('p5_present') >= 0; }, 12);
+  out.checks['reinstall_after_deserialize: jacques reopens P5'] = (widgetOpts().indexOf('p5_present') >= 0);
+  if (A.active()) { await press('Escape'); await wait(150); }
+
+  // ============ 4) Audrey off/on nel motore VERO (C6-C.1) ============
+  function seedFerry(withAudrey) { var s = seed(); if (withAudrey) NR.applyEffects(s, [{ set: 'audrey_indaga' }]); var p = NR.prepareNode(s, M6, 'm6_ferry'); NR.commitNode(s, M6, p); return s; }
+  // OFF: audrey_indaga false → NPC cond inattivo (npcAt lo salta); il classico
+  // gestisce, l'adapter NON inghiotte l'interazione (nessun lease orfano).
+  A.setState(seedFerry(false)); seen = {};
+  E.state.flags.audrey_indaga = false;
+  E.loadMap('oej', 13, 8, 'up'); await wait(120);
+  out.audrey_off_policy = ((E.state.npcs || []).some(function (n) { return n.id === 'audrey' && GAME.Engine.npcActive && GAME.Engine.npcActive(n); })) ? 'classic_fallback_active_npc' : 'npc_cond_inactive_not_interactable';
+  var beforeOff = NR.serialize(S());
+  await press('Enter'); await wait(150);
+  out.checks['audrey_off_does_not_write_state'] = (NR.serialize(S()) === beforeOff && S().flags.audrey_vista_oej !== true);
+  out.checks['audrey_off_does_not_swallow_interaction'] = (!A.active() && !S().nodes_done.m6_audrey);
+  // ON: audrey_indaga true (narrativo + classico) → pagina, effetto solo dopo commit
+  A.setState(seedFerry(true)); seen = {};
+  E.state.flags.audrey_indaga = true;
+  E.loadMap('oej', 13, 8, 'up'); await wait(120); await press('Enter'); await wait(120);
+  out.checks['audrey_on_page_before_effect'] = (pageIds().length > 0 && S().flags.audrey_vista_oej !== true);
+  await advanceUntil(function () { return S().flags.audrey_vista_oej === true || !A.active(); });
+  out.checks['audrey_on_commits_once'] = (S().flags.audrey_vista_oej === true && S().nodes_done.m6_audrey === true);
+  await advanceUntil(function () { return !A.active(); }, 6);
+  E.loadMap('oej', 13, 8, 'up'); await wait(120); await press('Enter'); await wait(150);
+  out.checks['audrey_on_not_repeatable'] = (widgetOpts().length === 0 && S().flags.audrey_vista_oej === true && !A.active());
+  if (A.active()) { await press('Escape'); await wait(120); }
+  await interactAt('oej', 7, 6, 'up'); await advanceUntil(function () { return widgetOpts().length === 3; });
+  out.checks['audrey_does_not_block_jacques'] = (widgetOpts().indexOf('tactic_prova') >= 0);
+  if (A.active()) { await press('Escape'); await wait(120); }
+
+  // ============ 5) root ambigue = errore developer, fail-closed (C6-C.1) ============
+  var origWR = NR.worldRoots;
+  function dup(map, akind, aid, tid) { return [{ id: 'dupA', channel: 'world', map_id: map, actor_id: aid, target_kind: akind, target_id: tid, conditions: [] }, { id: 'dupB', channel: 'world', map_id: map, actor_id: aid, target_kind: akind, target_id: tid, conditions: [] }]; }
+  // 5a attore
+  A.setState(seedFerry(false)); seen = {};
+  NR.worldRoots = function (st, m, mapId, actorId) { if (m === M6 && mapId === 'oej' && actorId === 'jacques') return dup('oej', 'actor', 'jacques', 'jacques'); return origWR.apply(NR, arguments); };
+  var beforeAmb = NR.serialize(S()), evAmb = A.events.length;
+  var consumedA = A.tryInteract('oej', 'jacques'); await wait(120);
+  out.checks['ambiguous_actor_roots_fail_closed'] = (consumedA === true && A.events.slice(evAmb).some(function (e) { return e.event === 'ambiguous_world_roots'; }));
+  out.checks['ambiguous_root_state_byte_identical'] = (NR.serialize(S()) === beforeAmb);
+  out.checks['ambiguous_root_leaves_zero_lease'] = (!A.active());
+  NR.worldRoots = origWR;
+  // 5b ambientale
+  A.setState(seedFerry(false)); seen = {};
+  NR.worldRoots = function (st, m, mapId) { if (m === M6 && mapId === 'hospital') return dup('hospital', 'object', undefined, 'night_register'); return origWR.apply(NR, arguments); };
+  var evAmb2 = A.events.length;
+  var consumedB = A.tryInteractAt('hospital', 4, 3); await wait(120);
+  out.checks['ambiguous_ambient_roots_fail_closed'] = (consumedB === true && A.events.slice(evAmb2).some(function (e) { return e.event === 'ambiguous_world_roots'; }) && !A.active());
+  NR.worldRoots = origWR;
+
+  // ============ 6) dato generato = sorgente (deep-equal) ============
+  var sourceM6 = await (await fetch(location.href.replace(/test\/[^/]*$/, '') + 'narrative/missions/M6.json')).json();
+  out.checks['generated_m6_deep_equals_source'] = (JSON.stringify(D.missions.M6) === JSON.stringify(sourceM6));
+
+  // ============ 7) igiene participant-facing sul DOM (testo visibile) ============
+  var TOK = ['JACQUES_MIDNIGHT', 'JACQUES_LIST', 'JACQUES_THIRD', 'jacques_admitted', 'jacques_statement', 'jacques_preso', 'jacques_dead', 'jacques_testimony', 'jacques_death', 'night_log_no_visitor', 'm6_tactic', 'm6_resource', 'audrey_vista_oej', 'ATTRIBUTION_OVERREACH', 'UNSUPPORTED_BY_TACTIC', 'PRESENCE_SUPPORTED', 'proposition_path', '.formulation.', 'm6.b', 'east_route_confirmed'];
+  var leaked = TOK.filter(function (t) { return allText.indexOf(t) >= 0; });
+  out.checks['no_participant_facing_internal_tokens'] = (leaked.length === 0);
+  out.diag_leaked = leaked;
+
+  var allOk = out.errors.length === 0 && Object.keys(out.checks).every(function (k) { return out.checks[k] === true; });
+  out.pass = allOk; out.total = Object.keys(out.checks).length;
+  out.passed = Object.keys(out.checks).filter(function (k) { return out.checks[k]; }).length;
+  out.failed = Object.keys(out.checks).filter(function (k) { return out.checks[k] !== true; });
+  document.getElementById('log').textContent = JSON.stringify(out, null, 1);
+  document.title = (allOk ? 'M6ENG-PASS ' : 'M6ENG-FAIL ') + out.passed + '/' + out.total;
+}
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    run().catch(function (e) { out.errors.push('run: ' + (e && e.message || e)); document.getElementById('log').textContent = JSON.stringify(out, null, 1); document.title = 'M6ENG-ERR ' + (e && e.message || e); });
+  }, 400);
+});
+</script>
+</body>
+</html>

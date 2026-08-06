@@ -48,14 +48,17 @@ rect(t, 1, 14, W - 2, 15, 'r');
 t[14][W - 1] = 'r'; t[15][W - 1] = 'r';
 
 // siepi dietro gli edifici sud
-rect(t, 7, 17, 17, 17, 'T');
-rect(t, 37, 17, 47, 17, 'T');
+rect(t, 9, 17, 15, 17, 'T');
+rect(t, 39, 17, 45, 17, 'T');
 // distretto (1) e Double R (2), porte a sud
-rect(t, 7, 18, 17, 20, '1'); t[20][12] = 'D';
-rect(t, 37, 18, 47, 20, '2'); t[20][42] = 'D';
+rect(t, 10, 18, 14, 20, '1'); t[20][12] = 'D';
+rect(t, 39, 18, 45, 20, '2'); t[20][42] = 'D';
 // vialetti verso sud
-rect(t, 12, 21, 12, 23, 'p');
-rect(t, 42, 21, 42, 23, 'p');
+rect(t, 11, 21, 13, 23, 'p');
+rect(t, 41, 21, 43, 23, 'p');
+// Bordo distretto asimmetrico: landmark parziali dentro il viewport, non
+// piazza-vetrina centrata. Coordinate narrative e corridoio restano liberi.
+t[23][15] = ','; t[24][7] = 'T'; t[24][16] = 'A'; t[25][8] = 'B';
 
 // strada verticale dal centro verso sud (spawn)
 rect(t, 27, 16, 28, H - 3, 'r');
@@ -70,6 +73,13 @@ t[30][30] = 'S';
 rect(t, 19, 3, 28, 3, 'T');
 rect(t, 20, 4, 27, 6, '5'); t[6][23] = 'D';
 rect(t, 23, 7, 23, 13, 'p');
+
+// Bookhouse compatta da 64px + edificio giallo laterale: stessa topologia
+// acqua–rail–edifici del riferimento urbano Gold, collisione invariata.
+rect(t, 28, 9, 31, 12, '7');
+rect(t, 32, 9, 35, 12, '3');
+rect(t, 25, 8, 25, 12, 'w');
+for (let y = 8; y <= 12; y++) { t[y][26] = 'F'; t[y][27] = 'F'; }
 
 // roadhouse (6): sud-est, porta a sud (chiuso in Atto 2), corto vialetto
 rect(t, 44, 26, 51, 28, '6'); t[28][47] = 'D';
@@ -95,7 +105,7 @@ const FROZEN = new Set([
   '28,31', // spawn
   (W - 1) + ',14', (W - 1) + ',15', // uscite est
   '15,28', // riva del lago
-  '25,16', '44,10', '12,9', '16,25' // npc: bobby, donna, audrey, jacoby
+  '31,16', '44,10', '12,9', '16,25' // npc: bobby, donna, audrey, jacoby
 ]);
 function open(x, y) { return t[y] && (t[y][x] === '.' || t[y][x] === '=' || t[y][x] === ','); }
 function place(x, y, ch) {
@@ -157,39 +167,73 @@ for (let y = 1; y < H - 1; y++) {
   }
 }
 
+// 10b. zolle di erba alta authored davanti al distretto e al diner.
+// Restano attraversabili, spezzano i prati senza alterare i percorsi BFS.
+[[6,22],[7,22],[8,22],[9,22],
+ [3,23],[4,23],[5,23],[6,23],
+ [3,24],[4,24],[5,24],[6,24],
+ [43,25],[44,25],[45,25],[46,25]]
+  .forEach(([x,y]) => { if (t[y][x] === '.') t[y][x] = 'g'; });
+
+// Props collision-ready attorno al distretto: nessun prato supera 3 tile vuote.
+[[10,24],[14,24]].forEach(([x,y]) => { if (t[y][x] === '.') t[y][x] = 'n'; });
+if (t[23][16] === '.') t[23][16] = 'B';
+// Fronte urbano compatto: staccionata continua, varco esatto sul vialetto,
+// cassa di servizio. Silhouette simile ai piccoli compound di Pokémon Oro.
+for (let x = 8; x <= 16; x++) if (x < 11 || x > 13) place(x, 21, 'F');
+place(17, 22, 'q');
+
 // 11. piccola piazza attorno al cartello di benvenuto: anello di marciapiede,
 // due panchine ai lati e un'aiuola, senza toccare le 4 celle cardinali del cartello
 [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
   .forEach(([dx, dy]) => { if (t[30 + dy][30 + dx] === '.') t[30 + dy][30 + dx] = '='; });
 t[29][29] = 'B'; t[31][31] = 'B'; t[29][31] = 'A';
 
+// Waterfront reference-traced: strada rosa solo a est, rail a L e acqua
+// sotto. Collegamento nord/sud resta disponibile sul corridoio x31.
+for (let y = 14; y <= 15; y++) {
+  t[y][25] = 'w'; t[y][26] = 'F'; t[y][27] = 'F';
+}
+t[16][25] = 'w'; t[17][25] = 'w';
+for (let x = 26; x <= 30; x++) { t[16][x] = 'F'; t[17][x] = 'F'; }
+for (let x = 25; x <= 29; x++) t[18][x] = 'w';
+
 /* ---------------- WOODS 28x22 ---------------- */
 const WW = 28, WH = 22;
 const wd = grid(WW, WH, 'g');
 border(wd, 'T');
-// alberi interni sparsi (fitti, deterministico)
+// Pareti boschive Gen II: masse continue da 2x2/3x2, corridoio centrale
+// largo tre tile. Niente diagonali isolate da screensaver.
 for (let y = 1; y < WH - 1; y++) {
   for (let x = 1; x < WW - 1; x++) {
-    if ((x * 31 + y * 17) % 7 === 0) wd[y][x] = 'T';
+    const deep = x <= 10 || x >= 18;
+    const shoulder = x <= 12 || x >= 16;
+    if (deep || (shoulder && (Math.floor(x / 2) + Math.floor(y / 2)) % 3 !== 0)) wd[y][x] = 'T';
   }
 }
-// passaggio con le tende in alto al centro -> Red Room
-rect(wd, 12, 0, 15, 0, 'R'); wd[0][14] = 'D';
+// Lodge 96x64: 12 sottotile 8px in larghezza come il riferimento Gold.
+// Porta Red Room e cortile restano sulle coordinate narrative originali.
+rect(wd, 9, 1, 18, 4, 'T');
+rect(wd, 11, 1, 16, 4, '8'); wd[4][14] = 'D';
+rect(wd, 9, 5, 19, 7, 'g');
 // sentiero verticale
-for (let y = 1; y <= WH - 1; y++) { wd[y][14] = 'p'; }
+for (let y = 5; y < WH - 1; y++) { wd[y][13] = 'p'; wd[y][14] = 'p'; wd[y][15] = 'p'; }
+wd[3][10] = 'q'; wd[6][18] = 'q'; // props asimmetrici alle quote del target Gold
+wd[WH - 1][14] = 'p';
 // cerchio di sicomori attorno all'olio (Glastonbury Grove)
-const cx = 14, cy = 10;
+const cx = 14, cy = 12;
 [[-3, 0], [3, 0], [-2, -2], [2, -2], [-2, 2], [2, 2], [0, -3], [0, 3]]
   .forEach(([dx, dy]) => { wd[cy + dy][cx + dx] = 'Y'; });
-rect(wd, 13, 9, 14, 10, 'o');
-wd[11][14] = 'p'; // il sentiero riprende sotto l'olio
+for (let x = 13; x <= 15; x++) wd[11][x] = 'o';
+for (let x = 12; x <= 14; x++) wd[12][x] = 'o';
+wd[13][14] = 'p'; // il sentiero riprende sotto l'olio
 // radura attorno al cerchio
 for (let y = cy - 3; y <= cy + 3; y++) for (let x = cx - 4; x <= cx + 4; x++) {
   if (wd[y][x] === 'T') wd[y][x] = 'g';
 }
 // cartello Glastonbury Grove
-wd[14][11] = 'S';
-if (wd[14][12] === 'T') wd[14][12] = 'g';
+wd[16][11] = 'S';
+wd[16][12] = 'g'; wd[16][13] = 'g';
 // un po' di arredo al sentiero verso l'uscita sud, senza toccare il sentiero (x14)
 if (wd[20][12] === 'g') wd[20][12] = 'n';
 if (wd[20][16] === 'g') wd[20][16] = 'n';
@@ -197,8 +241,8 @@ if (wd[19][17] === 'g') wd[19][17] = 'B';
 
 /* ---------------- validazione ---------------- */
 const SOLID = {
-  T: 1, S: 1, w: 1, '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1, i: 1, C: 1, t: 1, h: 1, K: 1, U: 1, Y: 1, R: 1, M: 1, v: 1, o: 1,
-  L: 1, P: 1, B: 1, F: 1, A: 1, H: 1, E: 1, n: 1, // arredo urbano
+  T: 1, S: 1, w: 1, '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1, '7': 1, '8': 1, i: 1, C: 1, t: 1, h: 1, K: 1, U: 1, Y: 1, R: 1, M: 1, v: 1, o: 1,
+  L: 1, P: 1, B: 1, F: 1, A: 1, H: 1, E: 1, n: 1, q: 1, // arredo urbano
   G: 1 // lapide del cimitero
 };
 function bfs(g, sx, sy) {
@@ -264,7 +308,7 @@ reach(seenT, 23, 6, 'porta ospedale');
 reach(seenT, 47, 28, 'porta roadhouse');
 reach(seenT, 15, 28, 'riva del lago (lago_riva)');
 reach(seenT, W - 1, 14, 'uscita est (vagone)');
-[[25, 16, 'bobby'], [44, 10, 'donna'], [12, 9, 'audrey'], [16, 25, 'jacoby']]
+[[31, 16, 'bobby'], [44, 10, 'donna'], [12, 9, 'audrey'], [16, 25, 'jacoby']]
   .forEach(([x, y, n]) => {
     assertWalkable(x, y, 'npc ' + n);
     reach(seenT, x, y, 'npc ' + n);
@@ -272,10 +316,10 @@ reach(seenT, W - 1, 14, 'uscita est (vagone)');
 
 const seenW = bfs(wd, 14, 20);
 console.log('# woods');
-reach(seenW, 14, 0, 'porta redroom');
+reach(seenW, 14, 4, 'porta redroom');
 reach(seenW, 14, 21, 'uscita sud');
-reach(seenW, 14, 10, 'olio');
-reach(seenW, 11, 14, 'cartello grove');
+reach(seenW, 14, 12, 'olio');
+reach(seenW, 11, 16, 'cartello grove');
 
 /* ---------------- stampa ---------------- */
 function dump(g, name) {

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>TP-PROD-FINALE-LOADING</title>
+<style>
+  html,body,iframe{margin:0;border:0;width:100%;height:100%;overflow:hidden;background:#111913}
+  #status{position:fixed;left:0;top:0;z-index:99;padding:3px 6px;color:#183225;background:#f5efcf;font:10px monospace}
+  #report{display:none}
+</style>
+</head>
+<body>
+<iframe id="product" src="../index.html?narrativeTest=1&amp;touch=1" title="Twin Peaks production finale"></iframe>
+<div id="status">boot...</div><pre id="report"></pre>
+<script>
+(function () {
+  var out = { checks: {}, errors: [], screens: [] }, frame = document.getElementById('product');
+  var status = document.getElementById('status'), report = document.getElementById('report');
+  window.__TP_PROD_FINALE = out;
+  function wait(ms) { return new Promise(function (resolve) { setTimeout(resolve, ms); }); }
+  async function press(w, code) {
+    w.dispatchEvent(new w.KeyboardEvent('keydown', { code: code, key: code, bubbles: true }));
+    w.dispatchEvent(new w.KeyboardEvent('keyup', { code: code, key: code, bubbles: true }));
+    await wait(190);
+  }
+  async function waitFor(w, selector, max) {
+    for (var i = 0; i < (max || 30); i++) { var el = w.document.querySelector(selector); if (el) return el; await wait(60); }
+    throw new Error('selector_timeout:' + selector);
+  }
+  async function pressUntil(w, selector, max) {
+    for (var i = 0; i < (max || 30); i++) { var el = w.document.querySelector(selector); if (el) return el; await press(w, 'Enter'); }
+    throw new Error('press_until_timeout:' + selector);
+  }
+  async function closeNarrative(w, max) {
+    for (var i = 0; i < (max || 40) && w.document.querySelector('#narrative .nw-root'); i++) await press(w, 'Enter');
+    if (w.document.querySelector('#narrative .nw-root')) throw new Error('narrative_close_timeout');
+    await wait(80);
+  }
+  function node(mission, id) { return mission.nodes.filter(function (n) { return n.id === id; })[0]; }
+  function doNode(NR, state, mission, id) {
+    var prep = NR.prepareNode(state, mission, id); if (!prep.ok) throw new Error(id + ':' + prep.error);
+    var commit = NR.commitNode(state, mission, prep); if (!commit.ok) throw new Error(id + ':' + commit.error);
+  }
+  function capture(NF) {
+    var screen = NF.currentScreen(); if (!screen) return null;
+    if (screen.kind === 'page') {
+      out.screens.push(screen.page.id);
+      var lines = screen.page.text.split('\n');
+      if (lines.length > 4 || lines.some(function (line) { return line.length > 24; })) out.errors.push('gold_overflow:' + screen.page.id);
+      if (screen.page.portrait === 'bob') out.checks.bob_portrait_screen = true;
+    }
+    return screen;
+  }
+  function toChoice(NF, id) {
+    var guard = 0, screen;
+    while (NF.isActive()) {
+      screen = capture(NF);
+      if (screen.kind === 'choice') break;
+      var r = NF.advance(); if (!r.ok) throw new Error('advance:' + r.error);
+      if (++guard > 600) throw new Error('choice_guard');
+    }
+    screen = NF.currentScreen();
+    if (!screen || screen.kind !== 'choice' || screen.id !== id) throw new Error('expected_choice:' + id);
+  }
+  function toPause(NF) {
+    var guard = 0;
+    while (NF.isActive()) {
+      var screen = capture(NF); if (!screen || screen.kind !== 'page') throw new Error('expected_page:' + NF.getState().stage);
+      var r = NF.advance(); if (!r.ok) throw new Error('advance:' + r.error);
+      if (++guard > 600) throw new Error('pause_guard');
+    }
+  }
+  frame.addEventListener('load', async function () {
+    try {
+      await wait(550);
+      var w = frame.contentWindow, g = w.GAME, E = g.Engine, NR = g.NarrativeRuntime, A = g.NarrativeAdapter;
+      var NF = g.NarrativeFinale, FP = g.NarrativeFinaleProduction, M9 = g.NarrativeData.missions.M9, ns = A.getState();
+      E.state.mode = 'play'; E.state.flags.intro_town = true;
+      ns.flags.east_route_confirmed = true; ns.flags.jacques_dead = true;
+      E.state.flags.done_leland_dove = true;
+      g.NarrativeProduction.syncClassicToNarrative(NR, ns, E.state.flags);
+      out.checks.leland_taxi_claim_carries_from_atto4 = ns.evidence.T_LELAND_TAXI === true;
+      E.state.flags.gigante1 = true; await wait(260);
+      out.checks.m6_classic_giant_syncs = ns.flags.gigante1 === true && !ns.flags.atto4;
+      var bridgeMapLoaded = E.loadMap('sheriff', 6, 3, 'right');
+      out.checks.bridge_map_save_succeeds = bridgeMapLoaded !== false;
+      if (bridgeMapLoaded === false) throw new Error('bridge_map_save:' + (E.lastSaveError || 'unknown'));
+      await press(w, 'KeyZ');
+      var bridgeRoot = await waitFor(w, '#narrative .nw-root');
+      out.checks.m6_to_m8_bridge_is_physical = bridgeRoot.querySelector('[data-page-id="m6.b9.atto4.p01"]') !== null && !E.state.dialogue;
+      await closeNarrative(w);
+      out.checks.m6_bridge_commits_atto4 = ns.flags.atto4 === true && E.state.flags.atto4 === true && A.currentMission().mission === 'M8';
+      await wait(250);
+      E.loadMap('palmer', 7, 10, 'up');
+      out.checks.m8_owns_maddy_and_leland_without_palmer_duplicates = ['maddy', 'leland'].every(function (id) {
+        var npc = E.state.npcs.filter(function (n) { return n.id === id; })[0];
+        return !npc || !E.npcActive(npc);
+      });
+      E.loadMap('sheriff', 6, 3, 'right');
+      ns.nodes_done.m8_station = true; ns.nodes_done.m8_diner = true;
+      ns.values.promise_stance = 'accompagno'; ns.values.warning_target = 'palmer'; ns.values.m6_tactic = 'pressione';
+      ns.values.s1 = 'documented_custody'; ns.values.letter_o_observation_source = 'hawk_preserved'; ns.values.sarah_support_state = 'vice';
+      A.syncCarryoverEvidence();
+      out.checks.sarah_vision_requires_heard_flag = !ns.evidence.T_SARAH_VISIONE;
+      ns.flags.sarah_visione_ascoltata = true; A.syncCarryoverEvidence();
+      out.checks.sarah_vision_enters_after_heard_flag = ns.evidence.T_SARAH_VISIONE === true;
+      // Una P2 accettata da Truman è obbligatoria per arrivare qui dalla campagna
+      // reale. Resta nel ledger per provare che M9 filtri l'accettazione sul nodo.
+      ns.props.P2 = { formulation: { status: 'formulated', created_from: [] }, presentations: [], factual_status: 'unconfirmed', social_status: { accepted_by: ['truman'], rejected_by: [] } };
+      out.checks.all_runtime_missions_loaded = g.narrativeCatalogsInstalled.missions.join(',') === 'M4,M5,M6,M8,M9';
+      out.checks.completed_mission_never_falls_to_legacy = A.tryInteract('diner', 'maddy') === true && !E.state.dialogue;
+      await wait(120);
+      E.loadMap('oej', 6, 5, 'right'); await wait(240);
+      out.checks.dead_jacques_absent_from_world = !E.state.npcs.some(function (n) { return n.id === 'jacques' && E.npcActive(n); });
+
+      doNode(NR, ns, M9, 'm9_verifica_taxi');
+      doNode(NR, ns, M9, 'm9_cmp_taxi');
+      A.tryInteract('sheriff', 'truman');
+      var p6Option = await pressUntil(w, '[data-prop-choice="P6"]');
+      out.checks.m9_adapter_ignores_old_p2_acceptance = w.document.querySelectorAll('[data-prop-choice]').length === 1;
+      p6Option.click();
+      await waitFor(w, '[data-attachment-confirm]');
+      w.document.querySelector('[data-attachment-evidence="T_LELAND_TAXI"]').click();
+      w.document.querySelector('[data-attachment-confirm]').click();
+      await waitFor(w, '#narrative .nw-root');
+      await closeNarrative(w);
+      var rejected = ns.presentations[ns.presentations.length - 1];
+      out.checks.m9_wrong_attachment_costs = rejected.reason_code === 'NO_CORROBORATION' && !ns.flags.atto5;
+
+      A.tryInteract('sheriff', 'truman');
+      p6Option = await pressUntil(w, '[data-prop-choice="P6"]'); p6Option.click();
+      await waitFor(w, '[data-attachment-confirm]');
+      ['T_LELAND_TAXI', 'D_TAXI', 'T_SARAH_VISIONE'].forEach(function (id) { var el = w.document.querySelector('[data-attachment-evidence="' + id + '"]'); if (el) el.click(); });
+      w.document.querySelector('[data-attachment-confirm]').click();
+      await waitFor(w, '#narrative .nw-root');
+      await closeNarrative(w);
+      var accepted = ns.presentations[ns.presentations.length - 1];
+      out.checks.m9_manual_attachment_accepts = accepted.result === 'accepted' && ns.flags.atto5 && ns.nodes_done.m9_present_truman;
+      A.tryInteract('sheriff', 'leland'); await waitFor(w, '#narrative .nw-root');
+      for (var arrivalGuard = 0; arrivalGuard < 20 && !ns.nodes_done.m9_arrivo; arrivalGuard++) await press(w, 'Enter');
+      if (!ns.nodes_done.m9_arrivo) throw new Error('m9_arrival_commit_timeout');
+      out.checks.m9_arrival_completed = NR.checkCompletion(ns, M9);
+
+      await wait(450);
+      out.checks.final_module_armed_after_m9 = NF.isActive() && NF.getState().stage === 'm10_threshold';
+      out.checks.adapter_released_after_m9 = !A.isEnabled() && A.isNotebookEnabled();
+      out.checks.bitmap_canvas_present = !!w.document.getElementById('retro-ui-canvas');
+      out.checks.mobile_controls_present = g.touchMode === true && w.document.querySelectorAll('.tp-touch-ctrl').length === 3;
+      var finaleControls = Array.prototype.slice.call(w.document.querySelectorAll('.tp-touch-ctrl'));
+      var finaleVisible = finaleControls.filter(function (el) { return el.getAttribute('aria-hidden') === 'false'; });
+      out.mobile_controls_at_finale = finaleControls.map(function (el) { return { text: el.textContent, hidden: el.getAttribute('aria-hidden'), visibility: el.style.visibility }; });
+      out.checks.mobile_finale_single_owner = finaleVisible.length === 1 && /AVANTI/.test(finaleVisible[0].textContent) && !!w.document.querySelector('#narrative .nw-root');
+      var skippedNotebook = await A.openNotebook();
+      out.checks.notebook_blocked_under_active_finale = skippedNotebook.skipped === true && skippedNotebook.reason === 'finale_active';
+      out.checks.p6_starts_unconfirmed_before_confession = NF.getState().p6_status === 'unconfirmed';
+
+      toChoice(NF, 'm10_method'); NF.choose('personale');
+      toChoice(NF, 's3');
+      out.checks.material_admissions_before_s3 = Object.keys(NF.getState().material_admissions).length === 6;
+      out.checks.material_admissions_enter_shared_ledger = ns.flags.m10_admissions_committed === true && ns.props.P6.factual_status === 'confirmed_as_lie' && ns.props.P8.factual_status === 'corroborated';
+      out.checks.material_admission_notes_exist = ['m10.admission.taxi', 'm10.admission.victims', 'm10.admission.scene'].every(function (id) { return ns.notebook.some(function (note) { return note.id === id; }); });
+      out.checks.s3_threshold_visible = out.screens.some(function (id) { return id.indexOf('nf.m10.s3.threshold') === 0; });
+      NF.choose('off'); toPause(NF);
+      out.checks.death_pauses_for_walk = NF.getState().stage === 'await_lodge' && E.state.flags.leland_morto && E.state.flags.leland_confessa;
+
+      await wait(100);
+      var notebookButton = Array.prototype.filter.call(w.document.querySelectorAll('.tp-touch-ctrl'), function (el) { return /TACCUINO/.test(el.textContent); })[0];
+      out.checks.mobile_b_is_notebook = !!(notebookButton && notebookButton.getAttribute('aria-hidden') === 'false');
+      notebookButton.click(); await wait(100);
+      var notebookRoot = w.document.querySelector('[data-nb="notebook"]');
+      out.notebook_events = A.events.slice(-10);
+      out.checks.final_notebook_read_only = !!(notebookRoot && /SOLA LETTURA/.test(notebookRoot.textContent) && !/CONFRONTA/.test(notebookRoot.textContent));
+      var closeNotebook = w.document.querySelector('[data-nb-close]');
+      out.checks.mobile_notebook_has_touch_close = !!closeNotebook;
+      if (!closeNotebook) throw new Error('mobile_notebook_missing:' + JSON.stringify(out.notebook_events));
+      closeNotebook.click(); await wait(100);
+      out.checks.mobile_notebook_returns_to_walk = !w.document.querySelector('[data-nb="notebook"]') && NF.getState().stage === 'await_lodge';
+
+      E.loadMap('redroom', 10, 2, 'right'); await press(w, 'KeyZ');
+      out.checks.laura_first_blocked_through_engine = NF.isActive() && NF.currentScreen().page.id === 'nf.lodge.blocked.laura_early' && !E.state.dialogue;
+      toPause(NF);
+
+      E.loadMap('redroom', 13, 2, 'right'); await press(w, 'KeyZ');
+      out.checks.bob_first_physical = NF.isActive() && NF.getState().stage === 'lodge_bob';
+      toChoice(NF, 'bob_response_stance'); NF.choose('B'); toPause(NF);
+      out.checks.order_frozen_bob_first = NF.getState().values.encounter_order === 'bob_first' && NF.getState().stage === 'await_lodge_second';
+
+      E.loadMap('redroom', 13, 2, 'right'); await press(w, 'KeyZ');
+      out.checks.visited_actor_repeat_blocked_through_engine = NF.isActive() && NF.currentScreen().page.id === 'nf.lodge.blocked.repeat' && !E.state.dialogue;
+      toPause(NF);
+      E.loadMap('redroom', 10, 2, 'right'); await press(w, 'KeyZ');
+      out.checks.laura_after_one_blocked_through_engine = NF.isActive() && NF.currentScreen().page.id === 'nf.lodge.blocked.laura_early' && !E.state.dialogue;
+      toPause(NF);
+
+      E.loadMap('redroom', 7, 4, 'right'); await press(w, 'KeyZ');
+      out.checks.nano_second_physical = NF.isActive() && NF.getState().stage === 'lodge_nano';
+      toChoice(NF, 'ring_final_gesture'); NF.choose('left');
+      out.checks.ring_gesture_scene_visible = NF.currentScreen().page.id === 'nf.lodge.ring.feedback.left.01';
+      toPause(NF);
+      out.checks.ring_gesture_persists = NF.getState().values.final_ring_location === 'lodge';
+      E.loadMap('redroom', 10, 2, 'right'); await press(w, 'KeyZ');
+      out.checks.laura_is_last_gate = NF.getState().stage === 'lodge_laura' && !E.state.dialogue;
+      toPause(NF);
+      FP.poll();
+      out.checks.redroom_exit_rewired = g.Maps.redroom.doors['8,11'].to === 'woods';
+
+      E.loadMap('woods', 14, 5, 'down'); FP.poll();
+      toChoice(NF, 's4_interpretation'); NF.choose('diagnosi');
+      out.checks.woods_choice_then_station = NF.getState().stage === 'await_epilogue_station';
+      E.loadMap('sheriff', 6, 3, 'right');
+      out.checks.station_is_physical = FP.tryInteract('sheriff', 'truman'); toPause(NF);
+      E.loadMap('palmer', 8, 7, 'right'); out.checks.optional_sarah_physical = FP.tryInteract('palmer', 'sarah'); toPause(NF);
+      E.loadMap('hospital', 1, 1, 'right'); out.checks.optional_ronette_physical = FP.tryInteract('hospital', 'ronette'); toPause(NF);
+      E.loadMap('town', 29, 30, 'right'); out.checks.south_sign_is_physical = FP.tryInteractAt('town', 30, 30); toPause(NF);
+
+      var final = NF.getState();
+      out.checks.product_reaches_end = E.state.mode === 'end' && final.stage === 'complete';
+      out.checks.choices_pay_off = final.consequences.confession_register === 'personale' && final.consequences.post_s3_record === 'truman_voluntary_witness' && final.consequences.encounter_order === 'bob_first' && final.consequences.ring_final_gesture === 'left' && final.consequences.bob_response_stance === 'B' && final.consequences.s4_interpretation === 'diagnosi';
+      out.checks.optional_visits_recorded = final.epilogue_seen.sarah && final.epilogue_seen.ronette;
+      out.checks.laura_last_image_present = out.screens.some(function (id) { return id.indexOf('nf.lodge.laura.05') === 0; });
+      out.checks.laura_keeps_responsibility_fractured_not_cancelled = out.screens.indexOf('nf.lodge.laura.03b') >= 0 && out.screens.indexOf('nf.lodge.laura.03c') >= 0;
+      out.checks.no_gold_overflow = !out.errors.some(function (e) { return e.indexOf('gold_overflow:') === 0; });
+      out.checks.no_auto_fragment_pages = !out.screens.some(function (id) { return /\.part\d+$/.test(id); });
+      FP.reset();
+      out.checks.reset_restores_dream_exit = !NF.isPending() && g.Maps.redroom.doors['8,11'].to === 'hotel_gn';
+
+      var ok = Object.keys(out.checks).every(function (k) { return out.checks[k]; }) && !out.errors.length;
+      document.title = ok ? 'TP-PROD-FINALE-PASS' : 'TP-PROD-FINALE-FAIL';
+      status.textContent = document.title + ' · ' + final.stage;
+      report.textContent = JSON.stringify(out, null, 2);
+    } catch (e) {
+      out.errors.push(String(e && e.stack || e)); document.title = 'TP-PROD-FINALE-FAIL'; status.textContent = document.title; report.textContent = JSON.stringify(out, null, 2);
+    }
+  });
+})();
+</script>
+</body>
+</html>

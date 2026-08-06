@@ -7,6 +7,7 @@
   if (typeof window === 'undefined' || !window.document) return;
   var GAME = window.GAME = window.GAME || {};
   var doc = window.document, source, objective, canvas, ctx, hit = [], RF = GAME.RetroFont;
+  var Portraits = GAME.Portraits;
   var W = 160, H = 144;
   var lastSignature = '', engineOwned = false;
   var visualKey = '', visualPart = 0, visualView = null;
@@ -85,7 +86,8 @@
   }
 
   function frame(x, y, w, h) {
-    RF.frame(ctx, x, y, w, h);
+    if (Portraits) Portraits.frame(ctx, x, y, w, h);
+    else RF.frame(ctx, x, y, w, h);
   }
 
   function visibleRoot() {
@@ -119,12 +121,13 @@
   function pageView(rootEl, isNotebook) {
     var pageEl = directChildren(rootEl).filter(function (e) { return e.classList.contains('nw-page'); })[0];
     if (!pageEl) return null;
-    var portrait = pageEl.getAttribute('data-portrait');
-    var chars = Math.floor((152 - (portrait ? 43 : 16)) / 6);
+    var portraitHint = pageEl.getAttribute('data-portrait');
+    var chars = Math.floor((152 - 16) / 6);
     var maxLines = isNotebook ? 14 : 4;
     var nameEl = pageEl.querySelector('.nw-name');
     var name = nameEl ? clean(nameEl.textContent).replace(/:\s*$/, '') : '';
-    var nameLines = name ? wrap(name + ':', chars) : [];
+    var portrait = Portraits ? Portraits.resolve(name, portraitHint) : portraitHint;
+    var nameLines = name && !portrait ? wrap(name + ':', chars) : [];
     var body = pageBody(pageEl, nameEl), bodyLines = wrap(body, chars);
     var capacity = Math.max(1, maxLines - nameLines.length), chunks = [];
     if (!bodyLines.length) bodyLines = [''];
@@ -134,7 +137,7 @@
     visualPart = Math.min(visualPart, chunks.length - 1);
     visualView = {
       kind: 'page', key: key, part: visualPart, parts: chunks.length,
-      nameLines: nameLines, bodyLines: chunks[visualPart], sourceBody: body, portrait: portrait
+      name: name, nameLines: nameLines, bodyLines: chunks[visualPart], sourceBody: body, portrait: portrait
     };
     rootEl.setAttribute('data-visual-part', String(visualPart + 1));
     rootEl.setAttribute('data-visual-parts', String(chunks.length));
@@ -199,11 +202,7 @@
       for (pi = 0; pi < view.nameLines.length; pi++) text(ctx, view.nameLines[pi], x + 8, cy + pi * 9, '#31543a');
       cy += view.nameLines.length * 9;
       for (pi = 0; pi < view.bodyLines.length; pi++) text(ctx, view.bodyLines[pi], x + 8, cy + pi * 9, '#183225');
-      if (portrait && GAME.Sprites && GAME.Sprites.CHARS[portrait]) {
-        ctx.fillStyle = '#b8c087'; ctx.fillRect(x + w - 30, y + 6, 23, 33);
-        ctx.fillStyle = '#31543a'; ctx.fillRect(x + w - 31, y + 5, 25, 1); ctx.fillRect(x + w - 31, y + 39, 25, 1);
-        GAME.Sprites.drawChar(ctx, x + w - 27, y + 14, GAME.Sprites.CHARS[portrait], 'down', 0, 1, false, 0);
-      }
+      if (portrait && Portraits) Portraits.drawCard(ctx, portrait, view.name, x + 4, y - 35);
     }
     if (!isNotebook) {
       ctx.fillStyle = '#31543a'; ctx.fillRect(x + w - 12, y + h - 9, 5, 2); ctx.fillRect(x + w - 11, y + h - 7, 3, 2); ctx.fillRect(x + w - 10, y + h - 5, 1, 1);

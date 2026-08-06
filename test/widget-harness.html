@@ -1,0 +1,145 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>B1 widget harness</title>
+<style>
+  body { background:#1a1c20; color:#e8e4d8; font-family:monospace; margin:0; padding:20px; }
+  #stage { width:640px; height:300px; position:relative; background:#23262c; border:2px solid #555; }
+  .nw-root { position:absolute; left:40px; top:40px; right:40px; background:#101216; border:2px solid #c8b06a; padding:14px; font-size:16px; line-height:1.7; }
+  .nw-title { color:#c8b06a; margin-bottom:8px; }
+  .nw-opt { padding:2px 6px; white-space:pre; }
+  .nw-focus { background:#2e3442; color:#ffe9a8; }
+  .nw-page { min-height:60px; }
+  .nw-name { color:#c8b06a; }
+  .nw-hint { text-align:right; color:#777; }
+  #moveflag { margin-top:10px; color:#8fc; }
+  #log { display:none; }
+</style></head><body>
+<div id="stage"></div>
+<div id="moveflag">movement: ACTIVE</div>
+<div id="log"></div>
+<script src="../js/narrative-runtime.js"></script>
+<script src="../js/narrative-ui.js"></script>
+<script>
+// Missione artificiale B1 (dal contratto: 3 scelte — 0/1/2 pagine di feedback — effetto osservabile; secondo nodo con goto; terzo nodo con ramo NON preparabile)
+var MISSION = { mission: 'B1TEST', objectives: [ { id: 'o1', priority: 1, when: null, text: 't' } ], nodes: [
+  { id: 'test_node', kind: 'dialogue', channel: 'world', map_id: 'x', actor_id: 'x', prompt: 'Scegli:', choices: [
+    { id: 'test_a', label: 'A — senza feedback', effects: [ { evidence: 'T1_RONETTE_BOB' } ] },
+    { id: 'test_b', label: 'B — un feedback', feedback_pages: [ { id: 'test.choice.b.feedback', mode: 'notebook', text: 'Feedback di B.' } ], effects: [ { set: 'ronette_visita' } ] },
+    { id: 'test_c', label: 'C — due feedback', feedback_pages: [ { id: 'test.choice.c.f1', mode: 'notebook', text: 'Primo.' }, { id: 'test.choice.c.f2', mode: 'notebook', text: 'Secondo.' } ], effects: [] }
+  ] },
+  { id: 'goto_node', kind: 'dialogue', channel: 'internal', exposed: false, pages: [ { id: 'test.goto.p01', mode: 'dialogue', speaker_id: 'ronette', display_name: 'RONETTE', text: 'BOB. BOB. BOB.' } ], effects: [ { evidence: 'T1_RONETTE_BOB' } ] },
+  { id: 'test_node2', kind: 'dialogue', channel: 'world', map_id: 'x', actor_id: 'x', prompt: 'Con goto:', choices: [
+    { id: 'test_g', label: 'G — con ramo', goto: 'goto_node' }
+  ] },
+  { id: 'blocked_node', kind: 'dialogue', channel: 'internal', exposed: false, conditions: [ { flag: 'mai_settato' } ], pages: [ { id: 'test.blocked.p01', mode: 'dialogue', text: 'irraggiungibile' } ] },
+  { id: 'test_node3', kind: 'dialogue', channel: 'world', map_id: 'x', actor_id: 'x', prompt: 'Ramo rotto:', choices: [
+    { id: 'test_h', label: 'H — ramo non preparabile', goto: 'blocked_node' }
+  ] }
+] };
+var NR = GAME.NarrativeRuntime;
+var LOGS = [];
+function log(e) { LOGS.push(e); }
+var movement = { suspended: false };
+var inputContext = { suspend: function () { movement.suspended = true; document.getElementById('moveflag').textContent = 'movement: SUSPENDED'; }, restore: function () { movement.suspended = false; document.getElementById('moveflag').textContent = 'movement: ACTIVE'; } };
+var results = { cases: {}, console_errors: [] };
+window.onerror = function (m) { results.console_errors.push(String(m)); };
+
+var LOCK = 120; // advanceLockMs nei test
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(code, repeat) { window.dispatchEvent(new KeyboardEvent('keydown', { code: code, repeat: !!repeat })); }
+function clickOpt(i) { var el = document.querySelectorAll('.nw-opt')[i]; if (el) el.dispatchEvent(new MouseEvent('click', { bubbles: true })); }
+function clickPage() { var el = document.querySelector('.nw-root'); if (el) el.dispatchEvent(new MouseEvent('click', { bubbles: true })); }
+function open(nodeId, state, extra) {
+  var node = MISSION.nodes.filter(function (n) { return n.id === nodeId; })[0];
+  return GAME.NarrativeUI.openChoice(Object.assign({ state: state, mission: MISSION, node: node, container: document.getElementById('stage'), inputContext: inputContext, log: log, advanceLockMs: LOCK }, extra || {}));
+}
+function snap(s) { return NR.serialize(s); }
+
+async function run() {
+  // CASE 1 — tastiera: naviga, conferma B, feedback, commit
+  { let s = NR.createState(); const p = open('test_node', s); key('ArrowDown');
+    const st0 = snap(s); key('Enter'); // conferma B → feedback visibile, stato ancora immutato
+    results.cases.k_feedback_no_effect = (snap(s) === st0 && !!document.querySelector('[data-page-id="test.choice.b.feedback"]'));
+    await wait(LOCK + 30); key('Enter'); const r = await p;
+    results.cases.keyboard_commit = (r.committed === true && s.flags.ronette_visita === true && movement.suspended === false); }
+  // CASE 2 — mouse: hover+click su C, due pagine, click-avanza
+  { let s = NR.createState(); const p = open('test_node', s); clickOpt(2);
+    results.cases.mouse_f1 = !!document.querySelector('[data-page-id="test.choice.c.f1"]');
+    await wait(LOCK + 30); clickPage();
+    results.cases.mouse_f2 = !!document.querySelector('[data-page-id="test.choice.c.f2"]');
+    await wait(LOCK + 30); clickPage(); const r = await p; results.cases.mouse_commit = (r.committed === true); }
+  // CASE 3 — doppio Enter su A (senza feedback): un solo commit
+  { let s = NR.createState(); const p = open('test_node', s); key('Enter'); key('Enter'); key('Enter');
+    const r = await p; results.cases.double_enter_one_commit = (r.committed === true && s.revision === 1); }
+  // CASE 4 — doppio click
+  { let s = NR.createState(); const p = open('test_node', s); clickOpt(0); clickOpt(0);
+    const r = await p; results.cases.double_click_one_commit = (r.committed === true && s.revision === 1); }
+  // CASE 5 — Enter e click nello stesso frame
+  { let s = NR.createState(); const p = open('test_node', s); key('Enter'); clickOpt(0);
+    const r = await p; results.cases.same_frame_one_commit = (r.committed === true && s.revision === 1); }
+  // CASE 6 — Escape con scelta solo evidenziata: stato byte-identico
+  { let s = NR.createState(); const st0 = snap(s); const p = open('test_node', s); key('ArrowDown'); key('Escape');
+    const r = await p; results.cases.escape_highlight_pure = (r.aborted === true && snap(s) === st0 && movement.suspended === false); }
+  // CASE 7 — Escape durante il feedback (pre-commit): stato byte-identico
+  { let s = NR.createState(); const st0 = snap(s); const p = open('test_node', s); key('ArrowDown'); key('Enter'); key('Escape');
+    const r = await p; results.cases.escape_feedback_pure = (r.aborted === true && snap(s) === st0); }
+  // CASE 8 — focus loss durante il feedback: abort puro
+  { let s = NR.createState(); const st0 = snap(s); const p = open('test_node', s); key('ArrowDown'); key('Enter'); window.dispatchEvent(new Event('blur'));
+    const r = await p; results.cases.blur_feedback_pure = (r.aborted === true && snap(s) === st0); }
+  // CASE 9 — transazione stale iniettata: nessun effetto, chiusura sicura
+  { let s = NR.createState(); const p = open('test_node', s, { injectStale: true }); key('ArrowDown'); key('Enter'); await wait(LOCK + 30); key('Enter');
+    const r = await p; results.cases.stale_no_effect = (!!r.error && !s.flags.ronette_visita);
+    inputContext.restore(); } // lo stale chiude senza ripristino? no: stale → finish normale; ripristino difensivo
+  // CASE 10 — widget riaperto dopo abort: funziona
+  { let s = NR.createState(); let p = open('test_node', s); key('Escape'); await p;
+    p = open('test_node', s); key('Enter'); const r = await p;
+    results.cases.reopen_after_abort = (r.committed === true); }
+  // CASE 11 — movimento sospeso per tutto il flusso (incluso goto)
+  { let s = NR.createState(); const p = open('test_node2', s); key('Enter'); // conferma G → commit scelta → pagine del ramo
+    results.cases.movement_suspended_in_branch = (movement.suspended === true);
+    results.cases.bob_visible_before_effect = (!!document.querySelector('[data-page-id="test.goto.p01"]') && !s.evidence.T1_RONETTE_BOB);
+    await wait(LOCK + 30); key('Enter'); // conferma ultima pagina del ramo → commitNode → T1
+    const r = await p;
+    results.cases.goto_commit_after_page = (r.committed === true && s.evidence.T1_RONETTE_BOB === true);
+    results.cases.movement_restored = (movement.suspended === false); }
+  // CASE 12 — post-commit blur: nessun secondo commit (revision stabile)
+  { let s = NR.createState(); const p = open('test_node', s); key('Enter'); const r = await p;
+    const rev = s.revision; window.dispatchEvent(new Event('blur'));
+    results.cases.post_commit_blur_safe = (s.revision === rev); }
+  // CASE 13 — event.repeat ignorato: tasto tenuto non conferma né avanza
+  { let s = NR.createState(); const st0 = snap(s); const p = open('test_node', s);
+    key('Enter', true); key('ArrowDown', true); // repeat: nessun effetto
+    results.cases.repeat_ignored = (snap(s) === st0 && !!document.querySelector('.nw-title'));
+    key('Escape'); await p; }
+  // CASE 14 — advance-lock: due Enter ravvicinati NON attraversano due pagine
+  { let s = NR.createState(); const p = open('test_node', s); key('ArrowDown'); key('ArrowDown'); key('Enter'); // conferma C → f1
+    key('Enter'); // troppo presto: bloccato dall'advance-lock
+    results.cases.advance_lock_holds = !!document.querySelector('[data-page-id="test.choice.c.f1"]');
+    await wait(LOCK + 30); key('Enter'); // ora avanza → f2
+    results.cases.advance_lock_then_advances = !!document.querySelector('[data-page-id="test.choice.c.f2"]');
+    await wait(LOCK + 30); key('Enter'); const r = await p;
+    results.cases.advance_lock_commit = (r.committed === true); }
+  // CASE 15 — ramo non preparabile: esito esplicito, input RESTA sospeso
+  { let s = NR.createState(); const p = open('test_node3', s); key('Enter'); // scelta committata, prepareNode(blocked_node) fallisce
+    const r = await p;
+    results.cases.branch_prepare_failed_explicit = (r.error === 'branch_prepare_failed' && r.partial_transaction === true);
+    results.cases.partial_keeps_suspended = (movement.suspended === true);
+    inputContext.restore(); } // il "chiamante" (harness) sceglie il recupero
+
+  results.all_pass = Object.keys(results.cases).every(function (k) { return results.cases[k] === true; });
+  results.log_count = LOGS.length;
+  document.getElementById('log').textContent = JSON.stringify({ results: results, state_log: LOGS }, null, 1);
+  document.title = results.all_pass ? 'B1-PASS' : 'B1-FAIL';
+}
+window.addEventListener('load', function () {
+  var shot = (location.hash.match(/shot=(\w+)/) || [])[1];
+  if (!shot) { run(); return; }
+  // modalità screenshot: apre il widget e si ferma allo stadio richiesto
+  var s = NR.createState();
+  open(shot === 'goto' ? 'test_node2' : 'test_node', s, { advanceLockMs: 0 });
+  if (shot === 'highlight') { key('ArrowDown'); }
+  if (shot === 'feedback') { key('ArrowDown'); key('Enter'); }
+  if (shot === 'committed') { key('ArrowDown'); key('Enter'); key('Enter'); }
+  if (shot === 'goto') { key('Enter'); }
+  document.title = 'B1-SHOT-' + shot;
+});
+</script></body></html>

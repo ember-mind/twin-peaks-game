@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>M5 screen-truth harness (C5-D)</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #000; height: 100%; overflow: hidden; }
+  #stage { position: fixed; inset: 0; }
+  #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+  #gl { background: #000; } #game { background: transparent; }
+  #narrative { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+  #narrative .nw-root { pointer-events: auto; }
+  .nw-root { position: absolute; left: 8%; right: 8%; bottom: 6%; background: rgba(12,14,20,0.94); border: 3px solid #c8b06a; border-radius: 4px; padding: 16px 20px; font: 17px/1.65 monospace; color: #e8e4d8; }
+  .nb-root { top: 10%; bottom: 8%; overflow: auto; }
+  .nw-title { color: #c8b06a; } .nw-opt { padding: 2px 6px; white-space: pre-wrap; }
+  .nw-focus { background: #2e3442; color: #ffe9a8; } .nw-page { min-height: 56px; }
+  .nw-name { color: #c8b06a; } .nw-hint { text-align: right; color: #888; }
+  #truth { position: absolute; top: 0; left: 0; right: 0; z-index: 11; font: 13px monospace; color: #9fe8a0; background: rgba(0,0,0,0.72); padding: 4px 8px; }
+  #log { display: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl" width="960" height="640"></canvas>
+  <canvas id="game" width="480" height="320"></canvas>
+  <div id="narrative"></div>
+  <div id="truth"></div>
+</div>
+<div id="log"></div>
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=harness-r6"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=harness-r6"></script>
+<script src="../js/engine.js?v=harness-r6"></script>
+<script src="../js/render3d.js"></script>
+<script src="../js/glue.js?v=harness-r6"></script>
+<script src="../js/main.js"></script>
+<script src="../js/narrative-runtime.js"></script>
+<script src="../js/narrative-ui.js"></script>
+<script src="../js/narrative-notebook.js"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
+<script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
+<script src="../js/narrative-save.js"></script>
+<script>
+/* C5-D SCREEN TRUTH — 16 screenshot record-critici + state-log.json.
+ *
+ * Due modalità:
+ *   ?shot=NN  → SHOT: costruisce lo stato del record NN, si ferma alla pagina
+ *               pre-commit (o al display isolato), attiva l'overlay 3D throttled
+ *               e congela — Chrome headless cattura il PNG.
+ *   (nessun param) → LOG: itera tutti i 16 record, per ognuno cattura
+ *               state_before_commit dalla UI congelata → committa → cattura
+ *               state_after_commit; scrive lo state-log.json e il titolo
+ *               C5D-PASS/FAIL. Render3D disattivato (run logico).
+ *
+ * I 3 pages_by_value (14/15/16) sono STATI RUNTIME ISOLATI: m5_final_theory è
+ * portato al valore col SOLO effetto validato del runtime (dominio chiuso), e
+ * il record riporta il valore che ha selezionato la pagina. Nessun playthrough
+ * triplo. I richiami (12/13) passano dal taccuino VERO (mai bypass runtime del
+ * punto d'atterraggio). Gli altri 11 record attraversano la UI vera fino alla
+ * pagina pre-commit.
+ */
+var LOCK = 0; // niente advance-lock nei run automatici (le pagine si contano da noi)
+var SHOT = null;
+var results = { mode: null, checks: {}, records: [], console_errors: [] };
+var FORBIDDEN = /\bE\d[A-Z_]{2,}\b|\bT_[A-Z]|\bP[0-9][A-Z]?\b|\bm[45]_[a-z]|assistance_level|b8_attempt|reason_code|node_commit|milestone_|value_set|opposite_of|groups_completed|_custody\b|track_assistance|degeneration|staging|institutional|documented_custody|unconfirmed|factual_status/;
+
+window.onerror = function (m, src, line) { results.console_errors.push(String(m) + ' @' + line); };
+window.addEventListener('unhandledrejection', function (e) {
+  results.console_errors.push('unhandled: ' + (e.reason && e.reason.message || e.reason));
+  document.title = 'ERR-' + String(e.reason && e.reason.message || e.reason).slice(0, 80);
+});
+(function () { var ce = console.error; console.error = function () { results.console_errors.push([].join.call(arguments, ' ')); ce.apply(console, arguments); }; })();
+
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(code) {
+  window.dispatchEvent(new KeyboardEvent('keydown', { code: code, bubbles: true }));
+  window.dispatchEvent(new KeyboardEvent('keyup', { code: code, bubbles: true }));
+}
+async function press(code) { key(code); await wait(160); }
+// il root VISIBILE più in alto: i flussi del taccuino nascondono la nb-root
+// (display:none) e mostrano una nw-root figlia sopra — la screen-truth è QUELLA
+function topRoot() {
+  var rs = [].slice.call(document.querySelectorAll('#narrative .nw-root'));
+  for (var i = rs.length - 1; i >= 0; i--) { if (rs[i].style.display !== 'none') return rs[i]; }
+  return null;
+}
+function visibleText() { var r = topRoot(); return r ? r.textContent.trim() : ''; }
+function shownPageId() { var r = topRoot(); if (!r) return null; var b = r.querySelector('[data-page-id]'); return b ? b.getAttribute('data-page-id') : null; }
+function widgetChoiceIds() { var r = topRoot(); if (!r || r.classList.contains('nb-root')) return []; return [].map.call(r.querySelectorAll('.nw-opt[data-choice-id]'), function (o) { return o.getAttribute('data-choice-id'); }); }
+function nbText() { var r = document.querySelector('.nb-root'); return r ? r.textContent : ''; }
+var stopped = function () { return new Promise(function () {}); };
+
+window.addEventListener('load', function () {
+  SHOT = new URLSearchParams(location.search).get('shot');
+  setTimeout(function () {
+    run().catch(function (err) {
+      results.console_errors.push('run: ' + (err && err.message || err));
+      document.getElementById('log').textContent = JSON.stringify(results, null, 1);
+      document.title = 'ERR-' + String(err && err.message || err).slice(0, 80);
+    });
+  }, 300);
+});
+
+async function run() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter, NS = GAME.NarrativeSave;
+  var D = GAME.NarrativeData, M4d = D.missions.M4, M5d = D.missions.M5;
+  function S() { return A.getState(); }
+  function obj() { var cm = A.currentMission(); var o = NR.activeObjective(S(), cm); return o ? o.id : null; }
+
+  // domini chiusi (identico al motore) + adapter con [M4, M5]
+  var domains = {};
+  for (var nm in D.enums.values_allowed) domains[nm] = D.enums.enums[D.enums.values_allowed[nm]];
+  NR.setValueDomains(domains);
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK, missions: [M4d, M5d] });
+
+  // overlay 3D SOLO in shot mode (SwiftShader affoga il tempo reale)
+  if (SHOT) {
+    var realRender = GAME.Render3D.render.bind(GAME.Render3D), lastR = -9999;
+    GAME.Render3D.render = function (st, dt, now) { if (performance.now() - lastR < 450) return; lastR = performance.now(); realRender(st, dt, now); };
+    var glcv = document.getElementById('gl');
+    var ov = document.createElement('canvas'); ov.width = glcv.width; ov.height = glcv.height;
+    ov.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;z-index:9;';
+    document.getElementById('stage').appendChild(ov);
+    var ovx = ov.getContext('2d');
+    setInterval(function () { try { GAME.Render3D.render(E.state, 16, performance.now()); ovx.drawImage(glcv, 0, 0); } catch (e) {} }, 400);
+  } else if (GAME.Render3D) {
+    GAME.Render3D.render = function () {};
+  }
+  setInterval(function () {
+    document.getElementById('truth').textContent = 'mappa: ' + E.state.mapId + ' (' + E.state.player.tx + ',' + E.state.player.ty + ')' +
+      ' | obj: ' + obj() + ' | init: ' + (S().values.m5_initial_theory || '-') + ' | final: ' + (S().values.m5_final_theory || '-') +
+      ' | s1: ' + (S().values.s1 || '-') + ' | lease: ' + (A.active() ? 'HELD' : 'FREE');
+  }, 300);
+
+  /* ---------- helper: semina fine-M4 → ingresso M5 (obj_m5_1) ---------- */
+  function dn(m, id) { var p = NR.prepareNode(S(), m, id); return NR.commitNode(S(), m, p); }
+  function dc(m, atId, chId) { var n = m.nodes.filter(function (x) { return x.id === atId; })[0]; var p = NR.prepareChoice(S(), m, n, chId); var c = NR.commitChoice(S(), m, n, p); if (c.goto) dn(m, c.goto); return c; }
+  function reset() {
+    A.setState(NR.createState());
+    NR.applyEffects(S(), [{ set: 'sogno_fatto' }]);
+    dn(M4d, 'truman_a2'); dn(M4d, 'james_a2'); dn(M4d, 'cmp_e6a_tjames'); dc(M4d, 'cmp_e6a_tjames', 'b8_a');
+    var presN = M4d.nodes.filter(function (n) { return n.id === 'present_truman_m4'; })[0];
+    var pp = NR.preparePresentation(S(), M4d, presN, 'P2'); NR.commitPresentation(S(), M4d, presN, pp);
+    E.state.flags.atto3 = true; E.state.flags.sogno_fatto = true;
+  }
+  function setValue(name, val) { NR.applyEffects(S(), [{ value: name, to: val }]); }
+  function completeBridge() { dn(M5d, 'm5_bridge'); }
+  function completeDiscovery() { dn(M5d, 'm5_discovery'); }
+  function completeGroup(id) { dn(M5d, id); } // m5_mound / m5_ring / m5_scene
+  async function at(x, y, dir, mapId) { E.loadMap(mapId || 'traincar', x, y, dir); await wait(150); }
+  async function settle() { var t = 0; while (A.active() && t < 1500) { await wait(100); t += 100; } await wait(120); }
+  // svuota una sessione residua PRIMA del prossimo record: un ramo GIÀ committato
+  // avanza solo con Enter (Escape non lo aborta); un widget/pagina abortibile si
+  // chiude con Escape. Si alternano finché il lease non è libero.
+  async function drain() {
+    // fase 1: Escape (chiude taccuino sezione→menu→chiuso, aborta pagine/widget)
+    for (var g = 0; g < 8 && A.active(); g++) { key('Escape'); await wait(110); }
+    // fase 2: Enter (un ramo GIÀ committato non si aborta: si avanza a chiusura)
+    for (var g = 0; g < 12 && A.active(); g++) { key('Enter'); await wait(110); }
+    // fase 3: Escape per qualunque widget riaperto dall'avanzamento
+    for (var g = 0; g < 4 && A.active(); g++) { key('Escape'); await wait(110); }
+  }
+
+  // snapshot dei valori/evidenze/flag osservati (nomi participant-safe SOLO nel record, non a schermo)
+  function snap(keys) {
+    var st = S(), out = {};
+    keys.forEach(function (k) {
+      if (k.indexOf('m5_') === 0 || k === 's1') out[k] = (st.values[k] === undefined ? null : st.values[k]);
+      else if (k === 'P3A_formulated') out[k] = NR.peekProp(st, 'P3A').formulation.status === 'formulated';
+      else if (k === 'P3A_factual') out[k] = NR.peekProp(st, 'P3A').factual_status;
+      else if (st.evidence[k] !== undefined || /^E/.test(k) || /^T/.test(k)) out[k] = st.evidence[k] === true;
+      else out[k] = st.flags[k] === true;
+    });
+    return out;
+  }
+
+  // costruisce il record pre-commit dalla UI congelata
+  function beforeRecord(meta, keys) {
+    var vt = visibleText();
+    var isWidget = !!widgetChoiceIds().length && !shownPageId();
+    return {
+      shot: meta.shot, page_id: shownPageId(), widget_choices: isWidget ? widgetChoiceIds() : undefined,
+      visible_text: vt, map_id: meta.map_id, target_id: meta.target_id,
+      state_before_commit: snap(keys), objective_before: obj(),
+      movement_suspended: A.active(),
+      token_violation: FORBIDDEN.test(vt) ? vt.match(FORBIDDEN)[0] : null,
+      console_errors: results.console_errors.slice()
+    };
+  }
+
+  /* ---------- flussi condivisi verso i punti di report ---------- */
+  // porta lo stato a "3 gruppi + teoria finale = val" (isolato, effetti validati).
+  // ORDINE VINCOLANTE: dopo 2 gruppi la milestone teoria-iniziale BLOCCA la
+  // preparazione del 3° gruppo (observation_group_prepare); va risolta (initial
+  // set) PRIMA di completare la scena, altrimenti il 3° gruppo non si chiude.
+  function seedThroughFinalTheory(initial, finalVal) {
+    reset(); completeBridge(); completeDiscovery();
+    completeGroup('m5_ring'); completeGroup('m5_mound'); // 2 gruppi → milestone iniziale pendente
+    setValue('m5_initial_theory', initial);              // risolve → sblocca il 3° gruppo
+    completeGroup('m5_scene');                           // 3° gruppo → milestone revisione pendente
+    setValue('m5_final_theory', finalVal);               // risolve la revisione
+  }
+
+  /* ================= i 16 costruttori ================= */
+  var STORY = {
+    // 1) scoperta del vagone — ultima pagina prima del commit
+    '01': { name: 'discovery-before-commit', map_id: 'traincar', target_id: 'traincar_entrance', keys: ['vagone_scoperto'],
+      async build() { reset(); completeBridge(); await at(11, 7, 'up'); await press('Enter'); await press('Enter'); await press('Enter'); },
+      async commit() { await press('Enter'); await settle(); return snap(['vagone_scoperto']); } },
+
+    // 2) mucchio — ultima pagina (p04) prima del commit
+    '02': { name: 'mound-before-commit', map_id: 'traincar', target_id: 'mound', keys: ['E7A_BIGLIETTO_TESTO', 'E7B_BIGLIETTO_POSIZIONE'],
+      async build() { reset(); completeBridge(); completeDiscovery(); await at(10, 5, 'up'); await press('Enter'); await press('Enter'); await press('Enter'); await press('Enter'); },
+      async commit() { await press('Enter'); await settle(); return snap(['E7A_BIGLIETTO_TESTO', 'E7B_BIGLIETTO_POSIZIONE']); } },
+
+    // 3) anello — ultima pagina (p04) prima del commit
+    '03': { name: 'ring-before-commit', map_id: 'traincar', target_id: 'ring', keys: ['E8A_ANELLO_POSIZIONE', 'E8B_ANELLO_SUPERFICIE'],
+      async build() { reset(); completeBridge(); completeDiscovery(); await at(14, 5, 'left'); await press('Enter'); await press('Enter'); await press('Enter'); await press('Enter'); },
+      async commit() { await press('Enter'); await settle(); return snap(['E8A_ANELLO_POSIZIONE', 'E8B_ANELLO_SUPERFICIE']); } },
+
+    // 4) scena — ultima pagina (p02) prima del commit
+    '04': { name: 'scene-before-commit', map_id: 'traincar', target_id: 'scene_center', keys: ['E_SCENE'],
+      async build() { reset(); completeBridge(); completeDiscovery(); await at(11, 4, 'down'); await press('Enter'); await press('Enter'); },
+      async commit() { await press('Enter'); await settle(); return snap(['E_SCENE']); } },
+
+    // 5) prompt della teoria iniziale (milestone, prima del widget)
+    '05': { name: 'initial-theory-prompt', map_id: 'traincar', target_id: 'ring', keys: ['m5_initial_theory'],
+      async build() { reset(); completeBridge(); completeDiscovery(); completeGroup('m5_ring'); completeGroup('m5_mound');
+        await at(14, 5, 'left'); await press('Enter'); await wait(200); }, // anello completato → redirect milestone → prompt p01
+      async commit() { return snap(['m5_initial_theory']); } }, // prompt: nessun commit di valore
+
+    // 6) feedback della teoria iniziale (dopo la scelta, prima del commit)
+    '06': { name: 'initial-theory-feedback', map_id: 'traincar', target_id: 'ring', keys: ['m5_initial_theory'],
+      async build() { reset(); completeBridge(); completeDiscovery(); completeGroup('m5_ring'); completeGroup('m5_mound');
+        await at(14, 5, 'left'); await press('Enter'); await wait(150); // prompt p01
+        await press('Enter'); await wait(150); // → widget (2 scelte)
+        await press('ArrowDown'); await press('Enter'); await wait(200); }, // staging → feedback
+      async commit() { await press('Enter'); await settle(); return snap(['m5_initial_theory']); } },
+
+    // 7) menu di revisione (widget 3 scelte, prima del commit)
+    '07': { name: 'revision-menu-before-commit', map_id: 'traincar', target_id: 'ring', keys: ['m5_final_theory'],
+      async build() { reset(); completeBridge(); completeDiscovery();
+        completeGroup('m5_ring'); completeGroup('m5_mound'); // 2 gruppi
+        setValue('m5_initial_theory', 'staging');           // risolve iniziale → sblocca il 3°
+        completeGroup('m5_scene');                          // 3° gruppo → milestone revisione pendente
+        await at(14, 5, 'left'); await press('Enter'); await wait(150); // redirect milestone revisione → prompt p01
+        await press('Enter'); await wait(200); }, // → widget 3 scelte
+      async commit() { await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); await settle(); return snap(['m5_final_theory']); } }, // «entrambe» → open
+
+    // 8) feedback P3A (widget del confronto anello, prima del commit)
+    '08': { name: 'p3a-feedback-before-commit', map_id: 'traincar', target_id: 'ring', keys: ['P3A_formulated', 'P3A_factual'],
+      async build() { seedThroughFinalTheory('staging', 'open');
+        await at(11, 6, 'up'); // dentro il vagone, taccuino aperto dal gameplay
+        await press('KeyT'); await wait(150);
+        await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); await wait(120); // Confronta
+        // Evidenze in ordine di acquisizione: E6A(0),TJ(1),E8A(2),E8B(3),E7B(4),E7A(5),E_SCENE(6)
+        await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // E8A idx2
+        await press('ArrowDown'); await press('Enter'); await wait(150); // E8B idx3 → confronto
+        await press('Enter'); await wait(200); // intro p01 → commit → widget B8c
+        await press('Enter'); await wait(200); }, // ring_a → feedback
+      async commit() { await press('Enter'); await settle(); return snap(['P3A_formulated', 'P3A_factual']); } },
+
+    // 9) S1 — feedback custodia istituzionale (prima del commit)
+    '09': { name: 's1-institutional-before-commit', map_id: 'traincar', target_id: 'truman', keys: ['s1'],
+      async build() { seedThroughFinalTheory('staging', 'open');
+        await at(10, 4, 'left'); await press('Enter'); // Truman → report intro
+        for (var i = 0; i < 5; i++) await press('Enter'); // p01,p02,theory_open,p03,p04,p05 (6 pagine → l'ultima committa)
+        await press('Enter'); await wait(250); // commit intro → widget S1
+        await press('Enter'); await wait(150); // s1_institutional (idx0) → feedback p01
+        await press('Enter'); await wait(200); }, // → feedback p02 (ULTIMA pagina del feedback S1; s1 ancora null)
+      async commit() { for (var i = 0; i < 3 && S().values.s1 === undefined; i++) { await press('Enter'); } await settle(); return snap(['s1']); } },
+
+    // 10) S1 — feedback custodia documentata (prima del commit)
+    '10': { name: 's1-documented-before-commit', map_id: 'traincar', target_id: 'truman', keys: ['s1'],
+      async build() { seedThroughFinalTheory('staging', 'open');
+        await at(10, 4, 'left'); await press('Enter');
+        for (var i = 0; i < 5; i++) await press('Enter');
+        await press('Enter'); await wait(250); // widget S1
+        await press('ArrowDown'); await press('Enter'); await wait(150); // s1_documented (idx1) → feedback p01
+        await press('Enter'); await wait(200); }, // → feedback p02 (ULTIMA pagina del feedback S1; s1 ancora null)
+      async commit() { for (var i = 0; i < 3 && S().values.s1 === undefined; i++) { await press('Enter'); } await settle(); return snap(['s1']); } },
+
+    // 11) chiusura del rapporto — ultima pagina (p07) prima del commit di east_route
+    '11': { name: 'report-close-before-commit', map_id: 'traincar', target_id: 'truman', keys: ['east_route_confirmed'],
+      async build() { seedThroughFinalTheory('staging', 'open');
+        await at(10, 4, 'left'); await press('Enter');
+        for (var i = 0; i < 5; i++) await press('Enter');
+        await press('Enter'); await wait(250); // widget S1
+        await press('Enter'); await wait(200); // institutional → feedback p01
+        await press('Enter'); await wait(150); // feedback p02
+        await press('Enter'); await wait(200); // commit S1 → ramo report_close p06
+        await press('Enter'); await wait(200); }, // p07 (ultima pagina del ramo)
+      async commit() { await press('Enter'); await settle(); return snap(['east_route_confirmed']); } },
+
+    // 12) richiamo P3A → sezione PROPOSIZIONI
+    '12': { name: 'p3a-recall-propositions', map_id: 'traincar', target_id: 'ring', keys: ['P3A_formulated'],
+      async build() { seedThroughFinalTheory('staging', 'open');
+        // completa P3A via runtime (setup isolata; il RICHIAMO passa dalla UI vera)
+        var ring = M5d.nodes.filter(function (n) { return n.id === 'm5_cmp_ring'; })[0];
+        var pr = NR.prepareNode(S(), M5d, 'm5_cmp_ring'); NR.commitNode(S(), M5d, pr);
+        var pc = NR.prepareChoice(S(), M5d, ring, 'ring_a'); NR.commitChoice(S(), M5d, ring, pc);
+        NR.checkCompletion(S(), M5d);
+        await at(11, 6, 'up'); await press('KeyT'); await wait(150);
+        await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); await wait(120); // Confronta
+        await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // E8A idx2
+        await press('ArrowDown'); await press('Enter'); await wait(200); // E8B idx3 → richiamo (già registrato)
+        await press('Enter'); await wait(250); }, // chiudi il richiamo → sezione PROPOSIZIONI
+      async commit() { return snap(['P3A_formulated']); } }, // richiamo: nessuna scrittura
+
+    // 13) richiamo E7A↔E5 → sezione APPUNTI
+    '13': { name: 'ticket-e5-recall-notes', map_id: 'traincar', target_id: 'mound', keys: [],
+      async build() { seedThroughFinalTheory('staging', 'open');
+        dn(M4d, 'gerard_a2'); // E5_POESIA dal nodo M4 vero (surrogato dichiarato; E7A già presente dal mucchio)
+        var tk = NR.prepareNode(S(), M5d, 'm5_cmp_ticket_e5'); NR.commitNode(S(), M5d, tk); NR.checkCompletion(S(), M5d);
+        await at(11, 6, 'up'); await press('KeyT'); await wait(150);
+        await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); await wait(120); // Confronta
+        // ora: E6A(0),TJ(1),E8A(2),E8B(3),E7B(4),E7A(5),E_SCENE(6),E5(7)
+        for (var k = 0; k < 5; k++) await press('ArrowDown'); await press('Enter'); // E7A idx5
+        await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); await wait(200); // E5 idx7 → richiamo
+        await press('Enter'); await wait(250); }, // chiudi il richiamo → sezione APPUNTI
+      async commit() { return snap([]); } },
+
+    // 14/15/16) pages_by_value — stati runtime isolati (m5_final_theory)
+    '14': { name: 'pages-by-value-degeneration', map_id: 'traincar', target_id: 'truman', keys: ['m5_final_theory'], selecting_value: 'degeneration',
+      async build() { seedThroughFinalTheory('degeneration', 'degeneration');
+        await at(10, 4, 'left'); await press('Enter'); await press('Enter'); await press('Enter'); await wait(200); }, // p01,p02 → pagina by-value
+      async commit() { return snap(['m5_final_theory']); } },
+    '15': { name: 'pages-by-value-staging', map_id: 'traincar', target_id: 'truman', keys: ['m5_final_theory'], selecting_value: 'staging',
+      async build() { seedThroughFinalTheory('staging', 'staging');
+        await at(10, 4, 'left'); await press('Enter'); await press('Enter'); await press('Enter'); await wait(200); },
+      async commit() { return snap(['m5_final_theory']); } },
+    '16': { name: 'pages-by-value-open', map_id: 'traincar', target_id: 'truman', keys: ['m5_final_theory'], selecting_value: 'open',
+      async build() { seedThroughFinalTheory('staging', 'open');
+        await at(10, 4, 'left'); await press('Enter'); await press('Enter'); await press('Enter'); await wait(200); },
+      async commit() { return snap(['m5_final_theory']); } }
+  };
+
+  var ORDER = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16'];
+
+  /* ---------- SHOT mode: costruisci NN, congela ---------- */
+  if (SHOT) {
+    var sc = STORY[SHOT];
+    if (!sc) { document.title = 'C5D-NOSHOT-' + SHOT; await stopped(); return; }
+    await sc.build();
+    document.title = 'C5D-SHOT-' + SHOT + '-' + sc.name;
+    await stopped();
+    return;
+  }
+
+  /* ---------- LOG mode: itera i 16, cattura record ---------- */
+  results.mode = 'log';
+  for (var i = 0; i < ORDER.length; i++) {
+    var id = ORDER[i], scn = STORY[id];
+    var errBefore = results.console_errors.length;
+    await drain(); // chiudi ogni sessione residua prima di ricominciare (lease libero)
+    await scn.build();
+    var rec = beforeRecord({ shot: id, name: scn.name, map_id: scn.map_id, target_id: scn.target_id }, scn.keys);
+    // gate assistance/b8 assenti e immutati NEL record (invarianti M5)
+    rec.assistance_absent = (S().assistance_level === 0);
+    rec.b8_history_len = (S().b8_attempt_history || []).length;
+    if (scn.selecting_value !== undefined) { rec.selecting_value = scn.selecting_value; rec.selected_page_id = shownPageId(); }
+    var after = await scn.commit();
+    rec.state_after_commit = after;
+    rec.objective_after = obj();
+    rec.console_errors = results.console_errors.slice(errBefore);
+    results.records.push(rec);
+    await drain();
+  }
+
+  /* ---------- gate C5-D ---------- */
+  var byId = {}; results.records.forEach(function (r) { byId[r.shot] = r; });
+  var C = results.checks;
+  // page ID dei record = pagine dei dati generati
+  var genPageIds = {};
+  [M4d, M5d].forEach(function (m) { m.nodes.forEach(function (n) {
+    (n.pages || []).concat((n.pages_after_branch || [])).forEach(function (p) { genPageIds[p.id] = true; });
+    (n.choices || []).forEach(function (c) { (c.feedback_pages || []).forEach(function (p) { genPageIds[p.id] = true; }); });
+    if (n.pages_by_value) Object.keys(n.pages_by_value.cases).forEach(function (v) { n.pages_by_value.cases[v].forEach(function (p) { genPageIds[p.id] = true; }); });
+    if (n.completed_recall && n.completed_recall.page) genPageIds[n.completed_recall.page.id] = true;
+    if (n.repeat) genPageIds[n.repeat.id] = true;
+  }); });
+  C.page_ids_are_generated_data = results.records.every(function (r) { return !r.page_id || genPageIds[r.page_id] === true; });
+  // testo DOM = testo del record (già catturato dalla stessa fonte); coerenza
+  C.dom_text_recorded = results.records.every(function (r) { return typeof r.visible_text === 'string' && r.visible_text.length > 0; });
+  // nessun effetto prima del commit: per ogni record pre-commit il campo che
+  // cambia col commit era non-scritto (false/null/unformulated) nel before
+  var preCommit = ['01', '02', '03', '04', '06', '07', '08', '09', '10', '11'];
+  C.no_effect_before_commit = preCommit.every(function (id) {
+    var r = byId[id]; var b = r.state_before_commit, a = r.state_after_commit;
+    var changed = Object.keys(b).filter(function (k) { return JSON.stringify(b[k]) !== JSON.stringify(a[k]); });
+    return changed.length > 0 && changed.every(function (k) { return b[k] === false || b[k] === null || b[k] === 'unformulated'; });
+  });
+  // nessun ID/enum/reason-code interno a schermo
+  C.no_internal_tokens_visible = results.records.every(function (r) { return r.token_violation === null; });
+  // assistance_level assente (0) e b8_attempt_history IMMUTABILE lungo tutto M5
+  // (l'invariante M5 è che il flusso non li tocca: b8 resta al valore di fine-M4)
+  var b8Base = results.records[0].b8_history_len;
+  C.assistance_zero_b8_immutable = results.records.every(function (r) { return r.assistance_absent === true && r.b8_history_len === b8Base; });
+  // tutte e 3 le pages_by_value dimostrate e coerenti col valore
+  C.pages_by_value_all_three = ['14', '15', '16'].every(function (id) {
+    var r = byId[id]; return r && r.selected_page_id === 'm5.b9.report.theory_' + r.selecting_value && r.state_before_commit.m5_final_theory === r.selecting_value;
+  });
+  // P3A non confermata
+  C.p3a_unconfirmed = byId['08'].state_after_commit.P3A_formulated === true && byId['08'].state_after_commit.P3A_factual === 'unconfirmed';
+  // S1 non presentata come scelta morale corretta (nessun marcatore di correttezza, entrambe neutre)
+  var s1meta = M5d.nodes.filter(function (n) { return n.id === 'm5_s1'; })[0];
+  C.s1_not_moralized = (s1meta.invariant.indexOf('mai giudicata') >= 0) &&
+    !/corrett|giust|sbagli|migliore|dovresti/i.test(byId['09'].visible_text + byId['10'].visible_text) &&
+    byId['09'].state_before_commit.s1 === null && byId['10'].state_before_commit.s1 === null;
+  // FINAL S1 RECORD PATCH: il record S1-before-commit è sull'ULTIMA pagina del
+  // feedback (p02) con s1 ancora null → prova che l'effetto aspetta TUTTO il
+  // feedback, non solo la prima pagina (p01 non basterebbe)
+  C.s1_record_on_last_feedback_page = (byId['09'].page_id === 'm5.b9.s1.institutional.p02' &&
+    byId['10'].page_id === 'm5.b9.s1.documented.p02' &&
+    byId['09'].state_before_commit.s1 === null && byId['09'].state_after_commit.s1 === 'institutional' &&
+    byId['10'].state_before_commit.s1 === null && byId['10'].state_after_commit.s1 === 'documented_custody');
+  // lease attivo in ogni record pre-commit (+ recall/by-value che tengono il lease)
+  C.lease_active_pre_commit = preCommit.concat(['05', '12', '13', '14', '15', '16']).every(function (id) { return byId[id].movement_suspended === true; });
+  // richiami: nessuna scrittura di stato + sezione giusta a schermo
+  C.p3a_recall_propositions = byId['12'].visible_text.indexOf('PROPOSIZIONI') >= 0 && byId['12'].visible_text.indexOf('FORMULATA') >= 0;
+  C.ticket_e5_recall_notes = byId['13'].visible_text.indexOf('APPUNTI') >= 0 && byId['13'].visible_text.indexOf('Proposizioni.)') === -1;
+  // screenshot ↔ state-log concordi: ogni record ha map/target coerenti col nodo
+  C.records_have_map_target = results.records.every(function (r) { return r.map_id === 'traincar' && !!r.target_id; });
+  C.zero_console_errors = results.console_errors.length === 0;
+
+  results.all_pass = Object.keys(C).every(function (k) { return C[k] === true; });
+  results.record_count = results.records.length;
+  document.getElementById('log').textContent = JSON.stringify(results, null, 1);
+  document.title = results.all_pass ? 'C5D-PASS' : 'C5D-FAIL';
+}
+</script>
+</body>
+</html>

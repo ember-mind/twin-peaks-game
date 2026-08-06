@@ -1,0 +1,1305 @@
+{
+  "narrative_package": "narrative-v1.0",
+  "mission": "M8",
+  "title": "Sta accadendo di nuovo",
+  "source": {
+    "document": "M8 v1.1 LOCK.md",
+    "package": "narrative-v1.0"
+  },
+  "schema_delta": "narrative/schema-deltas/M8.md",
+  "entry_condition": {
+    "flag": "atto4"
+  },
+  "authorial_timeline": {
+    "note": "Timeline autoriale UNICA (Lock §8). DATO DICHIARATIVO, mai stato runtime, mai contatore, mai ramo: nessun effetto scrive T0..T7. Nessun percorso del player intercetta Leland/BOB.",
+    "steps": {
+      "T0": "pomeriggio — Maddy al diner decide la prima corriera del mattino (fermata del lago)",
+      "T1": "sera — torna a casa Palmer",
+      "T2": "Leland/BOB è GIÀ dentro la casa: il pericolo è interno, mai un estraneo sulla strada",
+      "T3": "il Gigante appare al Roadhouse: il processo è avviato, l'aggressione non ancora",
+      "T4": "la telefonata (se fatta) trova Maddy in casa: cambia ciò che fa NELLA casa, mai il percorso dell'omicidio",
+      "T5": "l'attacco avviene in casa, prima che chiunque possa arrivare",
+      "T6": "il corpo viene portato al lago",
+      "T7": "una chiamata civile anonima segnala la riva: la centrale manda Hawk (processo del mondo, indipendente dalla scelta del player)"
+    }
+  },
+  "value_transitions": [
+    {
+      "value_transition": {
+        "name": "presagio_status",
+        "from": "active",
+        "to": "verified"
+      },
+      "note": "active nasce al Roadhouse (m8_roadhouse), verified nasce SOLO al ritrovamento (m8_discovery); mai inversa. Primitiva generica DICHIARATA nello schema-delta, da implementare in C8-B."
+    }
+  ],
+  "completion": {
+    "when": {
+      "node_done": "m8_station"
+    },
+    "sets": []
+  },
+  "objectives": [
+    {
+      "id": "obj_m8_4",
+      "priority": 400,
+      "when": {
+        "all": [
+          {
+            "flag": "maddy_trovata"
+          },
+          {
+            "proposition_path": "P8.formulation.status",
+            "equals": "formulated"
+          },
+          {
+            "node_done": "m8_station"
+          }
+        ]
+      },
+      "text": "Porta a Truman una contraddizione che regga.",
+      "provenance_note": "[L] testo esatto del Lock §9-F. Il Lock consegna questo obiettivo DOPO la conversazione alla stazione, come passaggio a M9 (gate node_done:m8_station); prima della stazione è attivo obj_m8_35"
+    },
+    {
+      "id": "obj_m8_35",
+      "priority": 350,
+      "when": {
+        "all": [
+          {
+            "flag": "maddy_trovata"
+          },
+          {
+            "proposition_path": "P8.formulation.status",
+            "equals": "formulated"
+          },
+          {
+            "not": {
+              "node_done": "m8_station"
+            }
+          }
+        ]
+      },
+      "text": "Porta il nesso a Truman, alla centrale.",
+      "provenance_note": "[N] derivato: obiettivo intermedio (P8 formulata, stazione non ancora fatta) che indirizza alla centrale; la consegna della «contraddizione a Truman» (obj_m8_4) resta post-stazione per rispettare la cronologia del Lock §9-F e la matrice C8-D"
+    },
+    {
+      "id": "obj_m8_3",
+      "priority": 300,
+      "when": {
+        "all": [
+          {
+            "flag": "maddy_trovata"
+          },
+          {
+            "not": {
+              "proposition_path": "P8.formulation.status",
+              "equals": "formulated"
+            }
+          }
+        ]
+      },
+      "text": "Rileggi le lettere e il diario di Laura.",
+      "provenance_note": "[N] derivato dal beat E (le lettere e il diario)"
+    },
+    {
+      "id": "obj_m8_25",
+      "priority": 250,
+      "when": {
+        "all": [
+          {
+            "value_set": "promise_stance"
+          },
+          {
+            "not": {
+              "evidence": "T_LELAND_TAXI"
+            }
+          }
+        ]
+      },
+      "text": "Prima di uscire dal diner, parla con Leland.",
+      "provenance_note": "[N→L] rende obbligatoria la falsa storia del taxi richiesta dal lock M9 nel pomeriggio: dopo la promessa a Maddy, prima del Roadhouse e del presagio."
+    },
+    {
+      "id": "obj_m8_2",
+      "priority": 200,
+      "when": {
+        "all": [
+          {
+            "evidence": "T_LELAND_TAXI"
+          },
+          {
+            "value_is": {
+              "name": "presagio_status",
+              "equals": "active"
+            }
+          },
+          {
+            "not": {
+              "flag": "maddy_trovata"
+            }
+          }
+        ]
+      },
+      "text": "Torna all’incrocio. Scegli dove andare.",
+      "provenance_note": "[L] testo esatto del Lock §9-B"
+    },
+    {
+      "id": "obj_m8_1",
+      "priority": 100,
+      "when": {
+        "all": [
+          {
+            "value_set": "promise_stance"
+          },
+          {
+            "evidence": "T_LELAND_TAXI"
+          },
+          {
+            "not": {
+              "value_set": "presagio_status"
+            }
+          }
+        ]
+      },
+      "text": "Il paese si ritrova al Roadhouse, stasera.",
+      "provenance_note": "[N] obiettivo del Roadhouse (pre-enunciato del Gigante): attivo SOLO dopo la promessa al diner (value_set promise_stance), perché m8_roadhouse richiede promise_stance — altrimenti l'obiettivo punterebbe a una root non ancora azionabile"
+    },
+    {
+      "id": "obj_m8_0",
+      "priority": 50,
+      "when": {
+        "not": {
+          "value_set": "promise_stance"
+        }
+      },
+      "text": "Passa dal diner, questo pomeriggio.",
+      "provenance_note": "[N] obiettivo d'ingresso M8 (pre-diner): punta alla root azionabile m8_diner (dove nasce promise_stance) prima del Roadhouse — chiude il softlock semantico/wayfinding del verdetto C8-A.2. Testo di sola direzione (nessuna «raggiungi/salva Maddy»: igiene falsa colpa)"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "m8_diner",
+      "beat": "A",
+      "source_section": "M8-A",
+      "conditions": [
+        {
+          "not": {
+            "value_set": "promise_stance"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m8.a.diner.p01",
+          "mode": "action",
+          "text": "(Maddy al bancone, un tovagliolo pieno di numeri. Norma le riempie la tazza senza chiedere.)"
+        },
+        {
+          "id": "m8.a.diner.p02",
+          "mode": "dialogue",
+          "speaker_id": "maddy",
+          "display_name": "MADDY",
+          "text": "La 7:40 prende la coincidenza a Spokane. Passa alla fermata del lago — quella delle 11 no, ma parte a orario."
+        },
+        {
+          "id": "m8.a.diner.p03",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Torna a casa, signorina Ferguson?"
+        },
+        {
+          "id": "m8.a.diner.p04",
+          "mode": "dialogue",
+          "speaker_id": "maddy",
+          "display_name": "MADDY",
+          "text": "Torno al centralino della biblioteca. Mi tengono il posto fino a lunedì — l'ho fatto promettere per iscritto."
+        },
+        {
+          "id": "m8.a.diner.p05",
+          "mode": "action",
+          "text": "(Un avventore la saluta: \"Ciao, Laura\". Maddy non si volta subito.)"
+        },
+        {
+          "id": "m8.a.diner.p06",
+          "mode": "dialogue",
+          "speaker_id": "maddy",
+          "display_name": "MADDY",
+          "text": "(senza acidità) Maddy. Con due D. Laura era mia cugina — io sono quella che porta gli occhiali nelle foto."
+        },
+        {
+          "id": "m8.a.diner.p07",
+          "mode": "dialogue",
+          "speaker_id": "maddy",
+          "display_name": "MADDY",
+          "text": "Sono rimasta un giorno in più per zia Sarah. Uno. Poi Missoula si riprende il suo centralino."
+        },
+        {
+          "id": "m8.a.diner.p08",
+          "mode": "notebook",
+          "text": "La promessa a Maddy."
+        }
+      ],
+      "choices": [
+        {
+          "id": "promise_accompagno",
+          "label": "«Lunedì ti accompagno io alla corriera.»",
+          "effects": [
+            {
+              "value": "promise_stance",
+              "to": "accompagno"
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m8.a.diner.feedback.accompagno",
+              "mode": "dialogue",
+              "speaker_id": "maddy",
+              "display_name": "MADDY",
+              "text": "(sorride) Alle 7:10, agente. Io i federali li faccio aspettare al massimo cinque minuti."
+            }
+          ]
+        },
+        {
+          "id": "promise_autonomia",
+          "label": "«Missoula ti aspetta. Vai.»",
+          "effects": [
+            {
+              "value": "promise_stance",
+              "to": "autonomia"
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m8.a.diner.feedback.autonomia",
+              "mode": "dialogue",
+              "speaker_id": "maddy",
+              "display_name": "MADDY",
+              "text": "(annuisce, piano) È la prima persona in questa città che me lo dice senza un \"ma\"."
+            }
+          ]
+        },
+        {
+          "id": "promise_prudenza",
+          "label": "«Chiama quando arrivi. Sempre.»",
+          "effects": [
+            {
+              "value": "promise_stance",
+              "to": "prudenza"
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m8.a.diner.feedback.prudenza",
+              "mode": "dialogue",
+              "speaker_id": "maddy",
+              "display_name": "MADDY",
+              "text": "(ride) Lei parla come il mio centralino. Va bene: chiamerò. Sempre."
+            }
+          ]
+        }
+      ],
+      "invariant": "scena ordinaria autonoma (starebbe nel gioco anche senza la tragedia); nessuna voce di taccuino (non appartiene al fascicolo); nessun presagio/paura/«sono come Laura»; promise_stance write-once; nessuna opzione «giusta»",
+      "kind": "choice",
+      "channel": "world",
+      "map_id": "diner",
+      "target_kind": "actor",
+      "target_id": "maddy",
+      "actor_id": "maddy",
+      "interaction_slot": "primary",
+      "role": "promise",
+      "completion_when": {
+        "value_set": "promise_stance"
+      }
+    },
+    {
+      "id": "m8_roadhouse",
+      "beat": "B",
+      "source_section": "M8-B",
+      "conditions": [
+        {
+          "value_set": "promise_stance"
+        },
+        {
+          "evidence": "T_LELAND_TAXI"
+        },
+        {
+          "not": {
+            "value_set": "warning_target"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m8.b.roadhouse.p01",
+          "mode": "action",
+          "text": "(La banda suona. Il paese c'è tutto: birre, risate basse, il microfono che fischia una volta.)"
+        },
+        {
+          "id": "m8.b.roadhouse.p02",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "text": "Se i tuoi enigmi avevano un seguito, questo è il posto che mi hai chiesto di aspettare."
+        },
+        {
+          "id": "m8.b.roadhouse.p03",
+          "mode": "action",
+          "text": "(La musica non si ferma. Ma per Cooper la sala rallenta — solo per lui.)"
+        },
+        {
+          "id": "m8.b.roadhouse.p04",
+          "mode": "dialogue",
+          "speaker_id": "gigante",
+          "display_name": "GIGANTE",
+          "text": "Sta accadendo di nuovo."
+        },
+        {
+          "id": "m8.b.roadhouse.p05",
+          "mode": "action",
+          "text": "(La sala riprende il suo tempo. Nessuno ha visto niente.)"
+        },
+        {
+          "id": "m8.b.roadhouse.p06",
+          "mode": "notebook",
+          "text": "Il telefono del Roadhouse."
+        },
+        {
+          "id": "m8.b.roadhouse.p07",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Harry, non so ancora cosa si ripeta. Abbiamo un telefono; scelgo chi deve sentire l'avvertimento."
+        }
+      ],
+      "choices": [
+        {
+          "id": "warning_palmer",
+          "label": "Avverti casa Palmer.",
+          "effects": [
+            {
+              "value": "warning_target",
+              "to": "palmer"
+            },
+            {
+              "value": "maddy_action_after_warning",
+              "to": "departure_prepared"
+            },
+            {
+              "value": "sarah_support_state",
+              "to": "none"
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m8.b.roadhouse.feedback.palmer.p01",
+              "mode": "dialogue",
+              "speaker_id": "cooper",
+              "display_name": "COOPER",
+              "text": "Maddy. Sono Cooper. Svegli Sarah — restate insieme e non aprite a nessuno. Mando qualcuno."
+            },
+            {
+              "id": "m8.b.roadhouse.feedback.palmer.p02",
+              "mode": "dialogue",
+              "speaker_id": "maddy",
+              "display_name": "MADDY",
+              "text": "Le porte sono già chiuse, agente. Resto con lei. La valigia la porto nell'ingresso, così domattina non la sveglio."
+            }
+          ]
+        },
+        {
+          "id": "warning_centrale",
+          "label": "Chiedi alla centrale di mandare un vice.",
+          "effects": [
+            {
+              "value": "warning_target",
+              "to": "centrale"
+            },
+            {
+              "value": "maddy_action_after_warning",
+              "to": "none"
+            },
+            {
+              "value": "sarah_support_state",
+              "to": "vice"
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m8.b.roadhouse.feedback.centrale",
+              "mode": "dialogue",
+              "speaker_id": "lucy",
+              "display_name": "LUCY",
+              "text": "Glielo passo— no, è di pattuglia. Mando Andy a casa Palmer, agente. Ci mette dieci minuti."
+            }
+          ]
+        },
+        {
+          "id": "warning_nessuno",
+          "label": "Non perdere altro tempo: esci.",
+          "effects": [
+            {
+              "value": "warning_target",
+              "to": "nessuno"
+            },
+            {
+              "value": "maddy_action_after_warning",
+              "to": "none"
+            },
+            {
+              "value": "sarah_support_state",
+              "to": "none"
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m8.b.roadhouse.feedback.nessuno",
+              "mode": "action",
+              "text": "(Il telefono resta sulla forcella. La porta del Roadhouse è già alle spalle.)"
+            }
+          ]
+        }
+      ],
+      "effects": [
+        {
+          "value": "presagio_status",
+          "to": "active"
+        },
+        {
+          "notebook": {
+            "id": "m8.note.presagio",
+            "text": "Il secondo enunciato del Gigante: «Sta accadendo di nuovo». Significato ancora irrisolto."
+          }
+        }
+      ],
+      "invariant": "presagio_status: active nasce QUI (write iniziale, mai entry-gate); la label è INTENZIONE non comando; nessuna opzione nomina Maddy come bersaglio; maddy_departure_plan (prima corriera) invariato dal pomeriggio; l'enunciato è solo per Cooper (la banda non si ferma)",
+      "kind": "choice",
+      "channel": "world",
+      "map_id": "roadhouse",
+      "target_kind": "object",
+      "target_id": "roadhouse_phone",
+      "interaction_slot": "primary",
+      "role": "warning",
+      "completion_when": {
+        "value_set": "warning_target"
+      }
+    },
+    {
+      "id": "m8_leland_taxi",
+      "beat": "B0",
+      "source_section": "M8-B0 / contratto M9 pre-ritrovamento",
+      "conditions": [
+        {
+          "value_set": "promise_stance"
+        },
+        {
+          "not": {
+            "evidence": "T_LELAND_TAXI"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m8.b0.leland_taxi.p00",
+          "mode": "action",
+          "text": "(Maddy saluta ed esce. Leland posa il conto sul bancone.)"
+        },
+        {
+          "id": "m8.b0.leland_taxi.p01",
+          "mode": "dialogue",
+          "speaker_id": "leland",
+          "display_name": "LELAND",
+          "text": "Maddy prende la prima corriera domattina. Ho chiamato la Twin Peaks Taxi: passa da casa alle sette."
+        },
+        {
+          "id": "m8.b0.leland_taxi.accompagno.p01",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Con Maddy ci siamo accordati: la accompagno alle sette e dieci. Il taxi aspetterà?",
+          "condition": {
+            "value_is": {
+              "name": "promise_stance",
+              "equals": "accompagno"
+            }
+          }
+        },
+        {
+          "id": "m8.b0.leland_taxi.autonomia.p01",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Maddy ha scelto Missoula. Non aggiungo un «ma»: verifico gli orari e le lascio la partenza.",
+          "condition": {
+            "value_is": {
+              "name": "promise_stance",
+              "equals": "autonomia"
+            }
+          }
+        },
+        {
+          "id": "m8.b0.leland_taxi.prudenza.p01",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Ho chiesto a Maddy una telefonata. Il taxi delle sette aggiunge un orario, non una garanzia.",
+          "condition": {
+            "value_is": {
+              "name": "promise_stance",
+              "equals": "prudenza"
+            }
+          }
+        },
+        {
+          "id": "m8.b0.leland_taxi.accompagno.p02",
+          "mode": "dialogue",
+          "speaker_id": "leland",
+          "display_name": "LELAND",
+          "text": "Sarah si tranquillizza se c'è un'auto davanti. Aspetterà fino alle sette e dieci. Il suo accompagnamento resta, agente.",
+          "condition": {
+            "value_is": {
+              "name": "promise_stance",
+              "equals": "accompagno"
+            }
+          }
+        },
+        {
+          "id": "m8.b0.leland_taxi.p02",
+          "mode": "notebook",
+          "text": "Prima del Roadhouse, al diner: Leland dice di aver prenotato il taxi di Maddy."
+        }
+      ],
+      "effects": [
+        {
+          "evidence": "T_LELAND_TAXI"
+        }
+      ],
+      "repeat": {
+        "id": "m8.repeat.leland_taxi",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Taxi alle sette, corriera alle 7:40. Ripeto gli orari finché non compare una prenotazione."
+      },
+      "invariant": "La falsa storia nasce fisicamente al diner DOPO la promessa e PRIMA del Roadhouse/presagio/ritrovamento. Se Cooper ha offerto di accompagnare Maddy, verifica subito la compatibilità 7:00/7:10 e Leland conferma che il taxi aspetterà: nessuna contraddizione fabbricata o ignorata. M9 può solo verificare la prenotazione, mai creare la storia retroattivamente né usare gli orari come prova d'omicidio.",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "diner",
+      "target_kind": "actor",
+      "target_id": "leland",
+      "actor_id": "leland",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m8_focus_choice",
+      "beat": "C",
+      "source_section": "M8-C",
+      "conditions": [
+        {
+          "evidence": "T_LELAND_TAXI"
+        },
+        {
+          "value_set": "warning_target"
+        },
+        {
+          "not": {
+            "value_set": "focus_destination"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m8.c.focus.p01",
+          "mode": "action",
+          "text": "(Lo stesso paese di ogni giorno. Stanotte le strade sono solo distanza.)"
+        },
+        {
+          "id": "m8.c.focus.p02",
+          "mode": "notebook",
+          "text": "Dove andare, adesso?"
+        },
+        {
+          "id": "m8.c.focus.p03",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Tre luoghi e nessun fatto che ne preferisca uno. Scelgo una direzione, non una conclusione."
+        }
+      ],
+      "choices": [
+        {
+          "id": "focus_palmer",
+          "label": "casa Palmer — la casa continua a tornare (a nord, lontana)",
+          "effects": [
+            {
+              "value": "focus_destination",
+              "to": "palmer"
+            }
+          ]
+        },
+        {
+          "id": "focus_lago",
+          "label": "la fermata del lago — la corriera di Maddy (a ovest, lontana)",
+          "effects": [
+            {
+              "value": "focus_destination",
+              "to": "lago"
+            }
+          ]
+        },
+        {
+          "id": "focus_diner",
+          "label": "il Double R — Norma sa se è partita (vicino)",
+          "effects": [
+            {
+              "value": "focus_destination",
+              "to": "diner"
+            }
+          ]
+        }
+      ],
+      "invariant": "focus_destination write-once; NESSUN goto: il commit scrive focus_destination, chiude il widget e restituisce il gameplay — la world-root della destinazione scelta si CAMMINA (C8-E); ogni destinazione ha una ragione disponibile al player (geografia reale di town); i costi sono distanza dichiarata dallo spazio, mai countdown; nessuna opzione è «giusta»",
+      "kind": "choice",
+      "channel": "world",
+      "map_id": "town",
+      "target_kind": "landmark",
+      "target_id": "town_crossroads",
+      "interaction_slot": "primary",
+      "role": "focus",
+      "completion_when": {
+        "value_set": "focus_destination"
+      }
+    },
+    {
+      "id": "m8_route_palmer",
+      "beat": "C",
+      "source_section": "M8-C",
+      "conditions": [
+        {
+          "value_is": {
+            "name": "focus_destination",
+            "equals": "palmer"
+          }
+        },
+        {
+          "not": {
+            "value_set": "body_found_by"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m8.c.route_palmer.p01",
+          "mode": "action",
+          "text": "(La casa: buio al piano di sopra.)"
+        },
+        {
+          "id": "m8.c.route_palmer.p02",
+          "mode": "action",
+          "text": "(In ingresso, la valigia. Sotto la porta di Sarah, un biglietto: \"Torno lunedì. Non svegliarla.\" Di Maddy, nessuna traccia.)",
+          "condition": {
+            "value_is": {
+              "name": "warning_target",
+              "equals": "palmer"
+            }
+          },
+          "conditional_note": "valigia/biglietto = azione autonoma di Maddy, visibile QUI solo se warning=palmer (e focus=palmer, cioè si è a casa); altrimenti la riga arriva via Truman in F"
+        },
+        {
+          "id": "m8.c.route_palmer.p03",
+          "mode": "action",
+          "text": "(Il telefono squilla: è la centrale.)"
+        },
+        {
+          "id": "m8.c.route_palmer.p04",
+          "mode": "dialogue",
+          "speaker_id": "lucy",
+          "display_name": "LUCY",
+          "text": "Agente — una chiamata anonima, qualcosa sulla riva del lago. Hawk è già in strada."
+        },
+        {
+          "id": "m8.c.route_palmer.p05",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Lucy, ricevuto. Non tocco nulla qui; raggiungo Hawk al lago."
+        }
+      ],
+      "effects": [
+        {
+          "value": "body_found_by",
+          "to": "hawk"
+        }
+      ],
+      "invariant": "la casa NON è la scena del corpo (T2/T5: l'attacco è interno, il corpo è al lago); a Palmer arriva la chiamata della centrale → Hawk; la valigia/biglietto di Maddy sono la SUA azione, mai collegata al percorso della morte",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "palmer",
+      "target_kind": "landmark",
+      "target_id": "palmer_entrance",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m8_route_lake",
+      "beat": "C",
+      "source_section": "M8-C",
+      "conditions": [
+        {
+          "value_is": {
+            "name": "focus_destination",
+            "equals": "lago"
+          }
+        },
+        {
+          "not": {
+            "value_set": "body_found_by"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m8.c.route_lake.p01",
+          "mode": "action",
+          "text": "(L'acqua è ferma. Sulla riva, una forma che l'acqua non reclama. Cooper arriva per primo.)"
+        },
+        {
+          "id": "m8.c.route_lake.p02",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Fermo al perimetro. Prima proteggo la scena; poi troverò le parole per Maddy."
+        }
+      ],
+      "effects": [
+        {
+          "value": "body_found_by",
+          "to": "cooper"
+        }
+      ],
+      "invariant": "al lago Cooper è primo (cooper_primary); il fatto fisso non si evita da nessuna strada",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "town",
+      "target_kind": "landmark",
+      "target_id": "lago_maddy",
+      "interaction_slot": "primary",
+      "mandatory_beat": true,
+      "provenance_note": "[P] lago_maddy (town 15,28) dal repository"
+    },
+    {
+      "id": "m8_route_diner",
+      "beat": "C",
+      "source_section": "M8-C",
+      "conditions": [
+        {
+          "value_is": {
+            "name": "focus_destination",
+            "equals": "diner"
+          }
+        },
+        {
+          "not": {
+            "value_set": "body_found_by"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m8.c.route_diner.p01",
+          "mode": "dialogue",
+          "speaker_id": "norma",
+          "display_name": "NORMA",
+          "text": "Maddy? Ha chiesto della fermata del lago. Poi è tornata dai Palmer. Non era ancora partita."
+        },
+        {
+          "id": "m8.c.route_diner.p02",
+          "mode": "action",
+          "text": "(Il tempo di uscire: la radio di Hawk gracchia il nome del lago — una chiamata anonima ha segnalato qualcosa sulla riva.)"
+        },
+        {
+          "id": "m8.c.route_diner.p03",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Hawk ha il lago. Norma conferma che Maddy è tornata dai Palmer; porto con me questo ordine."
+        }
+      ],
+      "effects": [
+        {
+          "value": "body_found_by",
+          "to": "hawk"
+        }
+      ],
+      "invariant": "al diner Norma non sa più dell'orario; la chiamata anonima manda Hawk (processo del mondo); body_found_by=hawk",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "diner",
+      "target_kind": "actor",
+      "target_id": "norma",
+      "actor_id": "norma",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m8_discovery",
+      "beat": "D",
+      "source_section": "M8-D",
+      "conditions": [
+        {
+          "value_set": "body_found_by"
+        },
+        {
+          "not": {
+            "flag": "maddy_trovata"
+          }
+        }
+      ],
+      "pages_by_value": {
+        "value": "body_found_by",
+        "cases": {
+          "cooper": [
+            {
+              "id": "m8.d.discovery.cooper.p01",
+              "mode": "action",
+              "text": "(Sulla riva: Maddy. Cooper si ferma prima del perimetro.)"
+            },
+            {
+              "id": "m8.d.discovery.cooper.p02",
+              "mode": "dialogue",
+              "speaker_id": "cooper",
+              "display_name": "COOPER",
+              "text": "(fermo) Signorina Ferguson. Maddy. Con due D."
+            },
+            {
+              "id": "m8.d.discovery.cooper.p03",
+              "mode": "action",
+              "text": "(Si china senza toccare. Sotto l'unghia dell'anulare: un segno.)"
+            },
+            {
+              "id": "m8.d.discovery.cooper.p04",
+              "mode": "action",
+              "text": "(Arrivano le torce di Hawk e del vice. Cooper non si è mosso di un passo.)"
+            }
+          ],
+          "hawk": [
+            {
+              "id": "m8.d.discovery.hawk.p01",
+              "mode": "action",
+              "text": "(Quando Cooper arriva, il perimetro è già segnato. Hawk gli va incontro, si toglie il cappello.)"
+            },
+          {
+            "id": "m8.d.discovery.hawk.p02",
+            "mode": "dialogue",
+            "speaker_id": "hawk",
+            "display_name": "HAWK",
+            "text": "L'ho trovata io. Non l'ho mossa. Non ho toccato le mani. Guarda l'anulare."
+          },
+          {
+            "id": "m8.d.discovery.hawk.p03",
+            "mode": "dialogue",
+            "speaker_id": "cooper",
+            "display_name": "COOPER",
+            "text": "Hawk, hai fatto bene. Osservo da dove ti sei fermato; una scena preservata ha due paia d'occhi."
+            }
+          ]
+        }
+      },
+      "effects": [
+        {
+          "evidence": "E9A_LETTERA_O"
+        },
+        {
+          "evidence": "E9B_STESSO_METODO"
+        },
+        {
+          "value": "letter_o_chain",
+          "to": "standard"
+        },
+        {
+          "value": "letter_o_observation_source",
+          "from_derivation": {
+            "of": "body_found_by",
+            "map": {
+              "cooper": "cooper_primary",
+              "hawk": "hawk_preserved"
+            }
+          }
+        },
+        {
+          "value_transition": {
+            "name": "presagio_status",
+            "from": "active",
+            "to": "verified"
+          }
+        },
+        {
+          "set": "maddy_trovata"
+        },
+        {
+          "notebook": {
+            "id": "m8.note.letter_o",
+            "text": "Una O, incisa sotto l'unghia dell'anulare — stessa posizione e stesso tipo di incisione della R."
+          }
+        }
+      ],
+      "letter_o_source_note": "letter_o_observation_source è un EFFETTO derivato (from_derivation) del ritrovamento: unico writer eseguibile (Cooper primo → cooper_primary; altrimenti Hawk preserva → hawk_preserved). Disciplina runtime (schema-delta §3, C8-B): prepareNode legge body_found_by, valida dominio e copertura, risolve cooper_primary|hawk_preserved e CONGELA il risultato nel prepared; commitNode consuma il valore risolto — NON rilegge il sorgente al commit. Arrivare secondi NON indebolisce la prova — cambia una riga di M9, mai il gate. Mai adapter.",
+      "invariant": "E9A/E9B scritte in OGNI percorso (unico writer = discovery); letter_o_chain=standard sempre; presagio active→verified SOLO qui (value_transition); maddy_trovata [P] unico writer; nessun testo valuta le scelte della notte; effetti SOLO dopo l'ultima pagina",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "town",
+      "target_kind": "landmark",
+      "target_id": "lago_maddy",
+      "interaction_slot": "primary",
+      "next": "m8_promise_echo",
+      "next_note": "il ritrovamento continua obbligatoriamente all'eco della promessa (Lock: il monologo comune è parte del ritrovamento); i confronti del taccuino sono gated su node_done:m8_promise_echo, così l'eco non è saltabile nemmeno dopo load",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m8_promise_echo",
+      "beat": "D",
+      "source_section": "M8-D",
+      "conditions": [
+        {
+          "flag": "maddy_trovata"
+        },
+        {
+          "not": {
+            "node_done": "m8_promise_echo"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m8.d.echo.p01",
+          "mode": "action",
+          "text": "(Cooper prende il registratore. Non lo accende.)"
+        }
+      ],
+      "pages_by_value": {
+        "value": "promise_stance",
+        "cases": {
+          "accompagno": [
+            {
+              "id": "m8.d.echo.accompagno",
+              "mode": "dialogue",
+              "speaker_id": "cooper",
+              "display_name": "COOPER",
+              "text": "Diane. Aveva fissato le 7:10. Disse che un federale poteva aspettare cinque minuti."
+            }
+          ],
+          "autonomia": [
+            {
+              "id": "m8.d.echo.autonomia",
+              "mode": "dialogue",
+              "speaker_id": "cooper",
+              "display_name": "COOPER",
+              "text": "Diane. Disse che Missoula l'aspettava senza un \"ma\"."
+            }
+          ],
+          "prudenza": [
+            {
+              "id": "m8.d.echo.prudenza",
+              "mode": "dialogue",
+              "speaker_id": "cooper",
+              "display_name": "COOPER",
+              "text": "Diane. Rise della mia voce da centralino. Disse che avrebbe chiamato."
+            }
+          ]
+        }
+      },
+      "pages_after_branch": [
+        {
+          "id": "m8.d.echo.p02",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Sul tovagliolo aveva scritto tre partenze. Ne aveva scelta una."
+        },
+        {
+          "id": "m8.d.echo.p03",
+          "mode": "action",
+          "text": "(Silenzio.)"
+        }
+      ],
+      "effects": [],
+      "invariant": "l'eco della promessa deriva da promise_stance (pages_by_value, copertura totale del dominio); il monologo porta la colpa PERCEPITA, il testo non la conferma; nessun testo qui valuta le scelte della notte",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "town",
+      "target_kind": "landmark",
+      "target_id": "lago_maddy",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m8_cmp_letters",
+      "beat": "E",
+      "source_section": "M8-E",
+      "conditions": [
+        {
+          "evidence": "E9A_LETTERA_O"
+        },
+        {
+          "evidence": "E3_LETTERA_R"
+        },
+        {
+          "node_done": "m8_promise_echo"
+        }
+      ],
+      "gate_note": "i confronti del taccuino sono nascosti finché l'eco della promessa non è avvenuta (node_done:m8_promise_echo): protegge l'ordine drammaturgico D→E del Lock anche dopo crash/load, senza fare della promessa una causa della tragedia",
+      "pages": [
+        {
+          "id": "m8.e.cmp_letters.p01",
+          "mode": "notebook",
+          "text": "(Confronta: la O incisa sotto l'unghia ↔ la lettera R)"
+        }
+      ],
+      "effects": [
+        {
+          "notebook_observation": {
+            "id": "m8.obs.letters",
+            "text": "Le due lettere sembrano appartenere allo stesso metodo. Un ordine: prima la R, poi la O."
+          }
+        }
+      ],
+      "invariant": "confronto senza scelte, completed al node commit (result LETTERS_SAME_METHOD); produce SOLO la nota di ordine/metodo, nessuna proposizione; nessuna identità della mano",
+      "kind": "comparison",
+      "channel": "notebook",
+      "interaction_slot": "primary",
+      "comparison_completion": "node_commit",
+      "result": "LETTERS_SAME_METHOD",
+      "completed_recall": {
+        "section": "notes",
+        "page": {
+          "id": "m8.notebook.cmp_letters.recorded",
+          "mode": "notebook",
+          "text": "(Questo confronto è già annotato negli Appunti.)"
+        }
+      }
+    },
+    {
+      "id": "m8_cmp_diary",
+      "beat": "E",
+      "source_section": "M8-E",
+      "conditions": [
+        {
+          "evidence": "E9A_LETTERA_O"
+        },
+        {
+          "evidence": "E1_DIARIO"
+        },
+        {
+          "node_done": "m8_promise_echo"
+        },
+        {
+          "node_done": "m8_cmp_letters"
+        }
+      ],
+      "gate_note": "P8 non può saltare il primo confronto: il diario (che formula P8) è nascosto finché il confronto lettere R↔O non è committato (node_done:m8_cmp_letters). Gate: cmp_diary_hidden_before_cmp_letters, cmp_letters_commit_unlocks_cmp_diary, P8_cannot_bypass_first_comparison. Anche gated su m8_promise_echo (ordine D→E robusto dopo load).",
+      "pages": [
+        {
+          "id": "m8.e.cmp_diary.p01",
+          "mode": "notebook",
+          "text": "(Confronta: le lettere ↔ il diario di Laura)"
+        },
+        {
+          "id": "m8.e.cmp_diary.p02",
+          "mode": "notebook",
+          "display_name": "DIARIO DI LAURA",
+          "text": "«Ha un nome da persona perbene.»"
+        },
+        {
+          "id": "m8.e.cmp_diary.p02b",
+          "mode": "notebook",
+          "display_name": "DIARIO DI LAURA",
+          "text": "«Dice che me lo darà un pezzo alla volta, come le cose che non si possono restituire.»"
+        },
+        {
+          "id": "m8.e.cmp_diary.p03",
+          "mode": "notebook",
+          "text": "Che cosa puoi formulare?"
+        }
+      ],
+      "choices": [
+        {
+          "id": "diary_a",
+          "label": "Le lettere seguono una firma progressiva che il diario aveva annunciato.",
+          "result": "PROGRESSIVE_SIGNATURE",
+          "effects": [
+            {
+              "proposition": "P8",
+              "to": "formulated",
+              "created_from": [
+                "E3_LETTERA_R",
+                "E9A_LETTERA_O",
+                "E9B_STESSO_METODO",
+                "E1_DIARIO"
+              ]
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m8.e.cmp_diary.feedback.a",
+              "mode": "notebook",
+              "text": "Le lettere seguono una firma progressiva che il diario aveva annunciato. Resta ignoto se la firma sia dell'assassino, di \"lui\", o una messinscena."
+            }
+          ]
+        },
+        {
+          "id": "diary_b",
+          "label": "R+O compongono un nome.",
+          "result": "NAME_OVERREACH",
+          "retry": true,
+          "feedback_pages": [
+            {
+              "id": "m8.e.cmp_diary.feedback.b",
+              "mode": "notebook",
+              "text": "Due lettere non compongono niente. Un ordine e una promessa, forse."
+            }
+          ]
+        },
+        {
+          "id": "diary_c",
+          "label": "Il diario accusa qualcuno di casa.",
+          "result": "HOUSE_OVERREACH",
+          "retry": true,
+          "feedback_pages": [
+            {
+              "id": "m8.e.cmp_diary.feedback.c",
+              "mode": "notebook",
+              "text": "Il diario nomina \"lui\". Non dice chi, né dove abita."
+            }
+          ]
+        }
+      ],
+      "rules": {
+        "attempt_scope": "comparison",
+        "hide_attempted_results": true,
+        "track_assistance": false
+      },
+      "invariant": "P8 nasce SOLO dal doppio confronto (A); factual_status ≤ corroborated (chi resta ignoto: assassino/«lui»/messinscena); B respinta (le due lettere non compongono un nome), C respinta (il diario non nomina chi né dove — P7 resta ipotesi non-procedurale); tentativi in comparisons[node].attempts",
+      "kind": "comparison",
+      "channel": "notebook",
+      "interaction_slot": "primary",
+      "role": "proposition",
+      "completion_when": {
+        "proposition_path": "P8.formulation.status",
+        "equals": "formulated"
+      },
+      "completed_recall": {
+        "section": "propositions",
+        "page": {
+          "id": "m8.notebook.cmp_diary.recorded",
+          "mode": "notebook",
+          "text": "(Questo nesso è già registrato nelle Proposizioni.)"
+        }
+      }
+    },
+    {
+      "id": "m8_station",
+      "beat": "F",
+      "source_section": "M8-F",
+      "conditions": [
+        {
+          "proposition_path": "P8.formulation.status",
+          "equals": "formulated"
+        }
+      ],
+      "pages_by_value": {
+        "value": "sarah_support_state",
+        "cases": {
+          "vice": [
+            {
+              "id": "m8.f.station.sarah_vice",
+              "mode": "dialogue",
+              "speaker_id": "truman",
+              "display_name": "TRUMAN",
+              "text": "Andy era già con Sarah quando è arrivata la chiamata."
+            }
+          ],
+          "none": [
+            {
+              "id": "m8.f.station.sarah_truman",
+              "mode": "dialogue",
+              "speaker_id": "truman",
+              "display_name": "TRUMAN",
+              "text": "Sono passato io da Sarah prima di tornare qui. Adesso Andy resta con lei."
+            }
+          ]
+        },
+        "note": "la logistica di Sarah deriva dallo STATO NOMINALE sarah_support_state (vice = il vice è già con Sarah; none = Truman ci è passato). pages_by_value su un valore tipizzato: copertura totale del dominio [none, vice]. M9/epilogo leggono sarah_support_state come stato nominale."
+      },
+      "pages": [
+        {
+          "id": "m8.f.station.p01",
+          "mode": "action",
+          "text": "(La centrale, prima dell'alba.)"
+        }
+      ],
+      "pages_after_branch": [
+        {
+          "id": "m8.f.station.p_valigia",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "text": "In ingresso c'era la valigia pronta, e un biglietto per Sarah. Voleva partire domattina.",
+          "condition": {
+            "all": [
+              {
+                "value_is": {
+                  "name": "warning_target",
+                  "equals": "palmer"
+                }
+              },
+              {
+                "not": {
+                  "value_is": {
+                    "name": "focus_destination",
+                    "equals": "palmer"
+                  }
+                }
+              }
+            ]
+          },
+          "conditional_note": "rende visibile la valigia/biglietto a chi NON è passato da casa (warning=palmer ∧ focus≠palmer); congelata in prepareNode (conditional_pages, schema-delta §3)"
+        },
+        {
+          "id": "m8.f.station.p02",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "text": "Dimmi che cosa abbiamo, oltre a quello che abbiamo perso."
+        },
+        {
+          "id": "m8.f.station.p03",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Una firma che procede, Harry. Il diario dice che qualcuno le prometteva il proprio nome a pezzi."
+        }
+      ],
+      "effects": [],
+      "repeat": {
+        "id": "m8.repeat.station",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Il lago è recintato. Nessuno usa più quel sentiero; la scena, almeno, può restare ferma."
+      },
+      "invariant": "Sarah non è mai oracolo (dorme; il vice la sostiene, non scopre corpi); la valigia/biglietto è visibile SE E SOLO SE warning_target=palmer (di persona in C se focus=palmer, via Truman qui se focus=lago|diner; con warning=centrale|nessuno nessuna pagina valigia in alcun percorso); il lutto di Truman è logistico; obiettivo «contraddizione a Truman» → M9; M8 NON completa la funzione procedurale di M9, non tratta P8 come base della convocazione",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "sheriff",
+      "actor_id": "truman",
+      "target_kind": "actor",
+      "target_id": "truman",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    }
+  ],
+  "node_count": {
+    "runtime_total": 12
+  }
+}

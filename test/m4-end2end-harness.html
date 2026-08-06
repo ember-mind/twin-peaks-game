@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>M4 end-to-end harness</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #000; height: 100%; overflow: hidden; }
+  #stage { position: fixed; inset: 0; }
+  #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+  #gl { background: #000; }
+  #game { background: transparent; }
+  #narrative { position: absolute; left: 0; right: 0; bottom: 0; top: 0; z-index: 10; pointer-events: none; }
+  #narrative .nw-root { pointer-events: auto; }
+  .nw-root { position: absolute; left: 8%; right: 8%; bottom: 6%; background: rgba(12,14,20,0.94); border: 3px solid #c8b06a; border-radius: 4px; padding: 16px 20px; font: 17px/1.65 monospace; color: #e8e4d8; }
+  .nb-root { top: 10%; bottom: 8%; overflow: auto; }
+  .nw-title { color: #c8b06a; margin-bottom: 8px; }
+  .nw-opt { padding: 2px 6px; white-space: pre-wrap; }
+  .nw-focus { background: #2e3442; color: #ffe9a8; }
+  .nw-page { min-height: 56px; }
+  .nw-name { color: #c8b06a; }
+  .nw-hint { text-align: right; color: #888; margin-top: 8px; }
+  #truth { position: absolute; top: 0; left: 0; right: 0; z-index: 11; font: 13px monospace; color: #9fe8a0; background: rgba(0,0,0,0.72); padding: 4px 8px; }
+  #log { display: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl" width="960" height="640"></canvas>
+  <canvas id="game" width="480" height="320"></canvas>
+  <div id="narrative"></div>
+  <div id="truth"></div>
+</div>
+<div id="log"></div>
+
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=harness-r6"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=harness-r6"></script>
+<script src="../js/engine.js?v=harness-r6"></script>
+<script src="../js/render3d.js"></script>
+<script src="../js/glue.js?v=harness-r6"></script>
+<script src="../js/main.js"></script>
+<script src="../js/narrative-runtime.js"></script>
+<script src="../js/narrative-ui.js"></script>
+<script src="../js/narrative-notebook.js"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
+<script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
+<script src="../js/narrative-save.js"></script>
+
+<script>
+var LOCK = 120;
+var results = { checks: {}, route: [], console_errors: [], console_log: [] };
+window.onerror = function (m, src, line) { results.console_errors.push(String(m) + ' @' + line); };
+window.addEventListener('unhandledrejection', function (e) {
+  results.console_errors.push('unhandled: ' + (e.reason && e.reason.message || e.reason));
+  document.title = 'ERR-' + String(e.reason && e.reason.message || e.reason).slice(0, 80);
+});
+(function () {
+  var ce = console.error, cw = console.warn;
+  console.error = function () { results.console_errors.push([].join.call(arguments, ' ')); ce.apply(console, arguments); };
+  console.warn = function () { results.console_log.push('[warn] ' + [].join.call(arguments, ' ')); cw.apply(console, arguments); };
+})();
+
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(code) {
+  window.dispatchEvent(new KeyboardEvent('keydown', { code: code, bubbles: true }));
+  window.dispatchEvent(new KeyboardEvent('keyup', { code: code, bubbles: true }));
+}
+function holdKey(code) { window.dispatchEvent(new KeyboardEvent('keydown', { code: code, bubbles: true })); }
+function liftKey(code) { window.dispatchEvent(new KeyboardEvent('keyup', { code: code, bubbles: true })); }
+async function press(code) { key(code); await wait(200); }
+function noUI() { return !document.querySelector('#narrative .nw-root'); }
+function nbText() { var r = document.querySelector('.nb-root'); return r ? r.textContent : ''; }
+
+var STOP = null;
+function stopped() { return new Promise(function () {}); }
+async function stopIf(label) { if (STOP === label) { document.title = 'E2E-SHOT-' + label; await stopped(); } }
+
+var DIR_CODE = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+
+async function seq() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter, NS = GAME.NarrativeSave;
+  function S() { return A.getState(); }
+  function M() { return A.getMission(); }
+  function obj() { var o = NR.activeObjective(S(), M()); return o ? o.id : null; }
+
+  if (STOP) {
+    var realRender = GAME.Render3D.render.bind(GAME.Render3D);
+    var lastR = -9999;
+    GAME.Render3D.render = function (st, dt, now) {
+      if (performance.now() - lastR < 500) return;
+      lastR = performance.now();
+      realRender(st, dt, now);
+    };
+    var glcv = document.getElementById('gl');
+    var ov = document.createElement('canvas');
+    ov.width = glcv.width; ov.height = glcv.height;
+    ov.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;z-index:9;';
+    document.getElementById('stage').appendChild(ov);
+    var ovx = ov.getContext('2d');
+    setInterval(function () { try { GAME.Render3D.render(E.state, 16, performance.now()); ovx.drawImage(glcv, 0, 0); } catch (e2) {} }, 400);
+  } else if (GAME.Render3D) {
+    GAME.Render3D.render = function () {}; // run logico: niente SwiftShader
+  }
+  setInterval(function () {
+    var st = S();
+    document.getElementById('truth').textContent =
+      'mappa: ' + E.state.mapId + ' (' + E.state.player.tx + ',' + E.state.player.ty + ')' +
+      ' | obiettivo: ' + obj() + ' | E6A: ' + (st.evidence.E6A_CUORE_INTERO === true) +
+      ' | T_JAMES: ' + (st.evidence.T_JAMES_EST === true) + ' | T1: ' + (st.evidence.T1_RONETTE_BOB === true) +
+      ' | atto3: ' + (st.flags.atto3 === true) + ' | lease: ' + (A.active() ? 'HELD' : 'FREE');
+  }, 300);
+
+  /* ---------- pathfinder BFS sulla mappa REALE (porte incluse) ---------- */
+  function walkable(mapId, x, y) {
+    // gli NPC attivi bloccano il passo: il pathfinder deve evitarli
+    for (var i = 0; i < E.state.npcs.length; i++) {
+      var n = E.state.npcs[i];
+      if (E.npcActive(n) && n.x === x && n.y === y) return false;
+    }
+    if (GAME.Maps.doorAt(mapId, x, y)) return true;
+    return !GAME.Maps.isSolid(mapId, x, y, E.state);
+  }
+  function bfs(mapId, from, to) {
+    var m = GAME.Maps[mapId];
+    var W = m.width || m.rows[0].length, H = m.height || m.rows.length;
+    var seen = {}, prev = {}, q = [from];
+    seen[from[0] + ',' + from[1]] = true;
+    while (q.length) {
+      var cur = q.shift();
+      if (cur[0] === to[0] && cur[1] === to[1]) {
+        var path = [cur];
+        while (prev[cur[0] + ',' + cur[1]]) { cur = prev[cur[0] + ',' + cur[1]]; path.unshift(cur); }
+        return path;
+      }
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) {
+        var nx = cur[0] + d[0], ny = cur[1] + d[1], k = nx + ',' + ny;
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H || seen[k]) return;
+        if (!walkable(mapId, nx, ny)) return;
+        seen[k] = true; prev[k] = cur; q.push([nx, ny]);
+      });
+    }
+    return null;
+  }
+  async function walkTo(tx, ty) {
+    for (var guard = 0; guard < 500; guard++) {
+      // i monologhi CLASSICI (onEnter delle mappe) vanno smaltiti col tasto A,
+      // come farebbe un giocatore vero
+      if (E.state.dialogue) { key('Enter'); await wait(150); continue; }
+      var p = E.state.player;
+      if (p.tx === tx && p.ty === ty && !p.moving) return true;
+      var path = bfs(E.state.mapId, [p.tx, p.ty], [tx, ty]);
+      if (!path || path.length < 2) { if (!STOP && guard < 3) document.title = 'W-NOPATH-' + E.state.mapId + '-' + p.tx + ',' + p.ty; await wait(300); continue; }
+      var next = path[1];
+      var dir = next[0] > p.tx ? 'right' : next[0] < p.tx ? 'left' : next[1] > p.ty ? 'down' : 'up';
+      if (!STOP && guard === 0) document.title = 'W-len' + path.length + '-' + dir;
+      holdKey(DIR_CODE[dir]);
+      var t0 = 0;
+      while ((E.state.player.tx !== next[0] || E.state.player.ty !== next[1]) && t0 < 2400) { await wait(60); t0 += 60; }
+      liftKey(DIR_CODE[dir]);
+      await wait(80);
+    }
+    return false;
+  }
+  async function enterDoor(x, y, expectMap) {
+    if (!STOP) document.title = 'GO-' + expectMap + '-from-' + E.state.mapId + '-' + E.state.player.tx + ',' + E.state.player.ty;
+    var okWalk = await walkTo(x, y);
+    var t0 = 0;
+    while ((E.state.mapId !== expectMap || E.state.fadePhase !== 0) && t0 < 6000) { await wait(100); t0 += 100; }
+    results.route.push('→ ' + E.state.mapId + ' (' + E.state.player.tx + ',' + E.state.player.ty + ')');
+    if (!STOP) document.title = 'AT-' + E.state.mapId + '-' + E.state.player.tx + ',' + E.state.player.ty;
+    return okWalk && E.state.mapId === expectMap;
+  }
+  // girarsi verso un bersaglio ADIACENTE OCCUPATO (NPC): si tiene la freccia
+  // finché la direzione cambia — il passo è impossibile (tile bloccato)
+  async function face(dir) {
+    holdKey(DIR_CODE[dir]);
+    var t0 = 0;
+    while (E.state.player.dir !== dir && t0 < 1500) { await wait(40); t0 += 40; }
+    liftKey(DIR_CODE[dir]);
+    await wait(120);
+  }
+
+  /* ---------- boot: partita vera, UNICA semina ammessa: sogno_fatto ---------- */
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK });
+  E.loadMap('town', 28, 31, 'up'); // spawn canonico della partita
+  NR.applyEffects(S(), [{ set: 'sogno_fatto' }]); // il sogno appartiene a M3
+  E.state.flags.sogno_fatto = true; // stesso seme sul layer classico (porta ospedale)
+  results.checks.only_seed_is_dream = (Object.keys(S().flags).join(',') === 'sogno_fatto' &&
+    Object.keys(S().evidence).length === 0 && S().revision === 0);
+
+  var record = { james: null, bob: null, present: null };
+  A.onLog = function (e) {
+    if (e.event === 'page_shown' && e.page_id === 'm4.b4.james_a2.p10' && !record.james) {
+      record.james = { page_id: e.page_id, visible_text: e.visible_text,
+        state_before_commit: { E6A_CUORE_INTERO: S().evidence.E6A_CUORE_INTERO === true, T_JAMES_EST: S().evidence.T_JAMES_EST === true } };
+    }
+    if (e.event === 'page_shown' && e.page_id === 'm4.b2.ronette_uomo.p03' && !record.bob) {
+      record.bob = { page_id: e.page_id, state_before_commit: { T1_RONETTE_BOB: S().evidence.T1_RONETTE_BOB === true } };
+    }
+    if (e.event === 'page_shown' && e.page_id === 'm4.b9.present_p2.p04' && !record.present) {
+      record.present = { page_id: e.page_id, state_before_commit: { atto3: S().flags.atto3 === true, objective: obj() } };
+    }
+  };
+
+  /* ---------- LEG 1: town → stazione → racconto del sogno (VERO Truman) ---------- */
+  results.checks.leg1_to_sheriff = await enterDoor(12, 20, 'sheriff');
+  await walkTo(10, 1); await face('left'); // davanti a Truman (9,1)
+  await press('Enter'); // truman_a2 p01
+  for (var i = 0; i < 6; i++) await press('Enter'); // fino a p07
+  results.checks.dream_not_told_before_last_page = (S().flags.sogno_raccontato !== true);
+  await press('Enter'); // conferma ultima pagina → commit
+  results.checks.dream_told_after_commit = (S().flags.sogno_raccontato === true && obj() === 'obj_m4_2');
+  if (!results.checks.dream_told_after_commit && !STOP) {
+    results.debug_leg1 = A.events.slice(-25);
+    results.debug_engine = { mapId: E.state.mapId, px: E.state.player.tx, py: E.state.player.ty,
+      dir: E.state.player.dir, dialogue: E.state.dialogue ? E.state.dialogue.id : null,
+      menu: E.state.menu, mode: E.state.mode,
+      engFlags: Object.keys(E.state.flags), clues: E.state.clues.length,
+      npcs: E.state.npcs.map(function (n) { return n.id + '@' + n.x + ',' + n.y; }) };
+    document.getElementById('log').textContent = JSON.stringify({ results: results }, null, 1);
+    document.title = 'L1FAIL-' + obj() + '-ui' + (!noUI());
+    return; // diagnosi: fermati qui
+  }
+
+  /* ---------- LEG 2: stazione → town → ospedale → visita COMPLETA a Ronette ---------- */
+  results.checks.leg2_to_town = await enterDoor(6, 9, 'town');
+  results.checks.leg2_to_hospital = await enterDoor(23, 6, 'hospital');
+  await walkTo(2, 2); await face('up'); // letto di Ronette (2,1)
+  await press('Enter'); // pagine iniziali
+  await press('Enter'); await press('Enter'); // commit root → widget (3 scelte)
+  await press('Enter'); // q_luogo → ramo
+  await press('Enter'); await press('Enter'); await press('Enter'); // commit → widget [q_uomo]
+  await press('Enter'); // conferma q_uomo → p01
+  await press('Enter'); await press('Enter'); // p02 → p03 (BOB)
+  results.checks.bob_visible_t1_false = (record.bob && record.bob.state_before_commit.T1_RONETTE_BOB === false &&
+    S().evidence.T1_RONETTE_BOB !== true);
+  await stopIf('02');
+  for (var k2 = 0; k2 < 4; k2++) await press('Enter'); // p04..p06 + commit
+  results.checks.t1_after_visit = (S().evidence.T1_RONETTE_BOB === true &&
+    JSON.parse(NR.serialize(S())).visits.ronette_visit.closed === true);
+
+  /* ---------- LEG 3: ospedale → town → Double R → James (VERO NPC) ---------- */
+  results.checks.leg3_to_town = await enterDoor(5, 9, 'town');
+  results.checks.leg3_to_diner = await enterDoor(42, 20, 'diner');
+  await walkTo(10, 7); await face('up'); // James (10,6)
+  await press('Enter'); // p01
+  for (var k3 = 0; k3 < 9; k3++) await press('Enter'); // p02..p10 (10 pagine)
+  // ULTIMA pagina (p10) a schermo: le evidenze NON esistono ancora
+  results.checks.james_evidence_after_last_page_only = (record.james &&
+    record.james.state_before_commit.E6A_CUORE_INTERO === false &&
+    record.james.state_before_commit.T_JAMES_EST === false &&
+    S().evidence.E6A_CUORE_INTERO !== true);
+  await stopIf('01');
+  await press('Enter'); // conferma p10 → commit
+  var tS = 0; while (A.active() && tS < 3000) { await wait(100); tS += 100; } // sessione chiusa
+  results.checks.james_evidence_written = (S().evidence.E6A_CUORE_INTERO === true && S().evidence.T_JAMES_EST === true &&
+    obj() === 'obj_m4_2' && noUI());
+
+  /* ---------- LEG 4: taccuino nel diner — confronto e formulazione ---------- */
+  await press('KeyT');
+  await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // Confronta
+  // ordine di acquisizione REALE: T1 (ospedale) prima di E6A/T_JAMES (diner)
+  await press('ArrowDown'); await press('Enter'); await press('ArrowDown'); await press('Enter'); // E6A + T_JAMES → intro
+  await press('Enter'); await press('Enter'); await press('Enter'); // p02, p03, commit → widget B8
+  await press('Enter'); // b8_a → feedback
+  await press('Enter'); // commit → P2 formulata → menu
+  results.checks.p2_formulated_in_diner = (NR.peekProp(S(), 'P2').formulation.status === 'formulated' && obj() === 'obj_m4_3');
+  if (!results.checks.p2_formulated_in_diner && !STOP) {
+    results.debug_nb = { events: A.events.slice(-25), nb: nbText().slice(0, 300), ui: !noUI(),
+      overlay: document.getElementById('narrative').textContent.slice(0, 300) };
+    document.getElementById('log').textContent = JSON.stringify({ results: results }, null, 1);
+    document.title = 'NBFAIL-' + obj();
+    return;
+  }
+  await press('Escape'); // chiudi il taccuino
+
+  /* ---------- LEG 5: Double R → town → stazione → presentazione a Truman ---------- */
+  results.checks.leg5_to_town = await enterDoor(6, 9, 'town');
+  results.checks.leg5_to_sheriff = await enterDoor(12, 20, 'sheriff');
+  await walkTo(10, 1); await face('left');
+  await press('Enter'); // intro «Dimmi quale nesso regge»
+  await press('Enter'); // → menu [P2]
+  await press('Enter'); // P2 → provenienza
+  await press('Enter'); await press('Enter'); await press('Enter'); // p01..p03
+  await press('Enter'); // p04 (ultima pagina)
+  results.checks.act_not_advanced_before_commit = (record.present &&
+    record.present.state_before_commit.atto3 === false && record.present.state_before_commit.objective === 'obj_m4_3' &&
+    S().flags.atto3 !== true);
+  await stopIf('03');
+  await press('Enter'); // commit → accettazione → atto3 → obj est
+  results.checks.m4_completed = (S().flags.atto3 === true && obj() === 'obj_m4_4' &&
+    S().props.P2.social_status.accepted_by.join(',') === 'truman' && S().props.P2.factual_status === 'unconfirmed');
+
+  /* ---------- LEG 6 (facoltativo): ospedale → Gerard ---------- */
+  results.checks.leg6_to_town = await enterDoor(6, 9, 'town');
+  results.checks.leg6_to_hospital = await enterDoor(23, 6, 'hospital');
+  await walkTo(7, 7); await face('up'); // Gerard (7,6)
+  await press('Enter'); // p01
+  for (var k4 = 0; k4 < 7; k4++) await press('Enter'); // p02..p08
+  results.checks.gerard_e5_not_yet = (S().evidence.E5_POESIA !== true);
+  await stopIf('04');
+  await press('Enter'); // p09 (ultima pagina)
+  await press('Enter'); // conferma → commit
+  results.checks.gerard_e5_written = (S().evidence.E5_POESIA === true);
+
+  /* ---------- chiusura: save consentito in idle a fine percorso ---------- */
+  NS.clear('9');
+  var sv = NS.save('9', { classic: JSON.parse(localStorage.getItem('tp_save') || 'null') });
+  results.checks.save_ok_at_route_end = (sv.ok === true && noUI() && !A.active());
+  results.checks.no_console_errors = (results.console_errors.length === 0);
+
+  results.record_james = record.james;
+  results.record_bob = record.bob;
+  results.record_present = record.present;
+  results.all_pass = Object.keys(results.checks).every(function (k) { return results.checks[k] === true; });
+  document.getElementById('log').textContent = JSON.stringify({ results: results }, null, 1);
+  document.title = results.all_pass ? 'E2E-PASS' : 'E2E-FAIL';
+}
+
+window.addEventListener('load', function () {
+  var q = new URLSearchParams(location.search);
+  STOP = q.get('shot');
+  setTimeout(function () {
+    seq().catch(function (err) {
+      results.console_errors.push('seq: ' + (err && err.message || err));
+      document.title = 'ERR-' + String(err && err.message || err).slice(0, 80);
+      document.getElementById('log').textContent = JSON.stringify({ results: results }, null, 1);
+    });
+  }, 300);
+});
+</script>
+</body>
+</html>

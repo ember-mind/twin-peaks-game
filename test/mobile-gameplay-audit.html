@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>TP-MOBILE-GAMEPLAY-LOADING</title>
+<style>
+  html,body,iframe{margin:0;border:0;width:100%;height:100%;overflow:hidden;background:#111913}
+</style>
+</head>
+<body>
+<iframe id="product" title="Twin Peaks mobile gameplay" src="../index.html?touch=1&amp;mobileVisual=gold53"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('product');
+  frame.addEventListener('load',function(){
+    setTimeout(function(){
+      var w=frame.contentWindow,E=w.GAME.Engine;
+      E.state.mode='play';E.state.flags.intro_town=true;
+      E.loadMap('woods',14,4,'up');
+      document.title='TP-MOBILE-GAMEPLAY-READY';
+    },500);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><title>TP-PORTRAIT-AUDIT-LOADING</title>
+<style>html,body{margin:0;background:#183225}canvas{display:block;width:840px;height:728px;image-rendering:pixelated;image-rendering:crisp-edges}</style></head>
+<body><canvas id="audit" width="420" height="364"></canvas>
+<script src="../js/retro-font.js?v=gold54p1"></script>
+<script src="../js/portraits.js?v=gold54p6"></script>
+<script>
+(function(){
+  var entries=[
+    ['cooper','COOPER'],['truman','TRUMAN'],['lucy','LUCY'],['andy','ANDY'],
+    ['hawk','HAWK'],['sarah','SARAH'],['leland','LELAND'],['norma','NORMA'],
+    ['shelly','SHELLY'],['loglady','LOG LADY'],['bobby','BOBBY'],['donna','DONNA'],
+    ['jacoby','JACOBY'],['audrey','AUDREY'],['mfap','???'],['laura','OMBRA DI LAURA'],
+    ['gerard','GERARD'],['benhorne','BEN HORNE'],['giant','GIGANTE'],['maddy','MADDY'],
+    ['bob','BOB'],['james','JAMES'],['jacques','JACQUES'],['ronette','RONETTE'],['nurse','INFERMIERA']
+  ];
+  var cv=document.getElementById('audit'),ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
+  ctx.fillStyle='#dfe0a8';ctx.fillRect(0,0,cv.width,cv.height);
+  entries.forEach(function(e,i){GAME.Portraits.drawCard(ctx,e[0],e[1],2+(i%4)*105,3+Math.floor(i/4)*52);});
+  document.title='TP-PORTRAIT-AUDIT-PASS';
+})();
+</script></body></html>

@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>m6-runtime-session-harness</title>
+<style>
+  body { background:#111; color:#ddd; font-family:monospace; margin:0; }
+  #narrative { position:fixed; inset:0; pointer-events:none; }
+  .nw-root { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); background:#222; color:#eee; padding:12px; border:1px solid #555; z-index:10; }
+  .nw-focus { color:#fff; font-weight:bold; }
+  #log { white-space:pre-wrap; padding:8px; font-size:12px; }
+</style>
+</head>
+<body>
+<div id="narrative"></div>
+<div id="log">running…</div>
+<!-- runtime + UI + adapter (NIENTE engine/walking: la prova del lease invoca
+     A.tryInteract direttamente; l'adapter NON è modificato). -->
+<script src="../js/narrative-runtime.js"></script>
+<script src="../js/narrative-ui.js"></script>
+<script src="../js/narrative-notebook.js"></script>
+<script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
+<script src="../js/narrative-save.js"></script>
+<script>
+var LOCK = 40;
+var out = { checks: {}, errors: [], events_tail: [] };
+window.onerror = function (m, s, l) { out.errors.push(String(m) + ' @' + l); };
+window.addEventListener('unhandledrejection', function (e) { out.errors.push('unhandled: ' + (e.reason && e.reason.message || e.reason)); });
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(c) { window.dispatchEvent(new KeyboardEvent('keydown', { code: c, bubbles: true })); window.dispatchEvent(new KeyboardEvent('keyup', { code: c, bubbles: true })); }
+async function press(c) { key(c); await wait(LOCK + 40); }
+function widgetOpts() { return [].map.call(document.querySelectorAll('.nw-root:not(.nb-root) .nw-opt'), function (o) { return o.getAttribute('data-choice-id'); }); }
+async function advanceUntil(pred, max) { max = max || 40; for (var i = 0; i < max; i++) { if (pred()) return true; await press('Enter'); } return pred(); }
+async function chooseChoice(id) {
+  var opts = widgetOpts(); var idx = opts.indexOf(id);
+  if (idx < 0) return false;
+  for (var k = 0; k < idx; k++) await press('ArrowDown');
+  await press('Enter');
+  return true;
+}
+
+async function run() {
+  var NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter;
+  var base = location.href.replace(/test\/[^/]*$/, '');
+  async function getJson(p) { return (await fetch(base + p)).json(); }
+  var M4 = await getJson('narrative/missions/M4.json');
+  var M5 = await getJson('narrative/missions/M5.json');
+  var M6 = await getJson('narrative/missions/M6.json');
+  var enums = await getJson('narrative/state-enums.json');
+  var props = await getJson('narrative/propositions.json');
+  GAME.NarrativeData = { missions: { M4: M4, M5: M5, M6: M6 }, propositions: props, enums: enums };
+  var domains = {};
+  for (var nm in enums.values_allowed) domains[nm] = enums.enums[enums.values_allowed[nm]];
+  NR.setValueDomains(domains);
+
+  // --- stato SEED = fine M5 reale, costruito col runtime PURO (come il validatore) ---
+  var s = NR.createState(); NR.applyEffects(s, [{ set: 'sogno_fatto' }]);
+  function dn(m, id) { var p = NR.prepareNode(s, m, id); if (!p.ok) return p; return NR.commitNode(s, m, p); }
+  function dc(m, atId, chId) { var n = m.nodes.filter(function (x) { return x.id === atId; })[0]; var p = NR.prepareChoice(s, m, n, chId); if (!p.ok) return p; var c = NR.commitChoice(s, m, n, p); if (c.goto) dn(m, c.goto); return c; }
+  dn(M4, 'truman_a2'); dn(M4, 'james_a2'); dn(M4, 'cmp_e6a_tjames'); dc(M4, 'cmp_e6a_tjames', 'b8_a');
+  var presN = M4.nodes.filter(function (n) { return n.id === 'present_truman_m4'; })[0];
+  var pp = NR.preparePresentation(s, M4, presN, 'P2'); NR.commitPresentation(s, M4, presN, pp);
+  dn(M5, 'm5_bridge'); dn(M5, 'm5_discovery'); dn(M5, 'm5_mound'); dn(M5, 'm5_ring');
+  var pt = NR.prepareNode(s, M5, 'm5_theory_initial'); NR.commitNode(s, M5, pt); dc(M5, 'm5_theory_initial', 'theory_degeneration');
+  dn(M5, 'm5_scene');
+  var pv = NR.prepareNode(s, M5, 'm5_theory_revision'); NR.commitNode(s, M5, pv); dc(M5, 'm5_theory_revision', 'revision_keep');
+  var pi = NR.prepareNode(s, M5, 'm5_report_intro'); NR.commitNode(s, M5, pi); dc(M5, 'm5_s1', 's1_institutional');
+  out.checks.seed_is_end_of_m5 = (s.flags.east_route_confirmed === true);
+  // preambolo M6: entrare nella sala (m6_ferry, landmark) è un'interazione SEPARATA
+  // che precede il tavolo di Jacques; la seminiamo col runtime, come la fine di M5.
+  // La CATENA FORZATA da provare sotto un solo lease è tattica→ramo→P5→arresto.
+  dn(M6, 'm6_ferry');
+  out.checks.seed_ferry_done = (s.nodes_done.m6_ferry === true);
+
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK, mission: M4, missions: [M4, M5, M6], state: s });
+  A.setState(s);
+  var m4b8 = JSON.stringify(s.b8_attempt_history), m4assist = s.assistance_level;
+
+  // ====== LA PROVA DEL LEASE: una sola interazione col mondo (Jacques @ OEJ) ======
+  var evStart = A.events.length;
+  var interactions = 0;
+  var ok0 = A.tryInteract('oej', 'jacques'); interactions++;
+  await wait(200);
+  // B4 tattica: widget con 3 opzioni
+  await advanceUntil(function () { return widgetOpts().length === 3; });
+  out.checks.tactic_widget_open = (widgetOpts().indexOf('tactic_prova') >= 0);
+  out.checks.lease_held_at_tactic = (A.active() === true);
+  await chooseChoice('tactic_prova');
+  // B5-B6 ramo (goto) + B6b P5 (milestone, stesso lease) → widget P5
+  await advanceUntil(function () { return widgetOpts().indexOf('p5_present') >= 0; });
+  out.checks.branch_to_p5_same_lease = (A.active() === true && s.flags.jacques_admitted_presence === true);
+  out.checks.p5_attempt_scope_widget = (widgetOpts().indexOf('p5_killed') >= 0 && widgetOpts().indexOf('p5_no_third_man') >= 0);
+  // P5: B (respinta, registrata), poi C (respinta), poi A (formula) — retry stesso lease
+  await chooseChoice('p5_killed');
+  await advanceUntil(function () { return widgetOpts().indexOf('p5_present') >= 0; });
+  out.checks.p5_b_recorded = ((s.comparisons.m6_p5 || {}).attempts || []).indexOf('ATTRIBUTION_OVERREACH') >= 0;
+  out.checks.p5_retry_same_lease = (A.active() === true);
+  await chooseChoice('p5_no_third_man');
+  await advanceUntil(function () { return widgetOpts().indexOf('p5_present') >= 0; });
+  out.checks.p5_c_recorded_and_hidden = (((s.comparisons.m6_p5 || {}).attempts || []).indexOf('UNSUPPORTED_BY_TACTIC') >= 0 && widgetOpts().join(',') === 'p5_present');
+  await chooseChoice('p5_present');
+  // B7 arresto: continuazione dichiarativa (m6_p5.next) nello stesso lease → session chiude
+  await advanceUntil(function () { return s.flags.jacques_preso === true || !A.active(); });
+  await wait(200);
+
+  var evs = A.events.slice(evStart);
+  function has(ev, to) { return evs.some(function (e) { return e.event === ev && (to === undefined || e.to === to || e.node_id === to); }); }
+  // esattamente UNA sessione 'narrative': un acquire a depth 1 e un session_closed
+  var narrAcq = evs.filter(function (e) { return e.event === 'lease_acquire' && e.name === 'narrative' && e.depth === 1; });
+  var closed = evs.filter(function (e) { return e.event === 'session_closed'; });
+  out.checks.single_session_lease = (narrAcq.length === 1 && closed.length === 1);
+  // il lease non è mai tornato a 0 PRIMA della chiusura (chain sotto un solo lease)
+  var acq1i = evs.findIndex(function (e) { return e.event === 'lease_acquire' && e.name === 'narrative' && e.depth === 1; });
+  var closeI = evs.findIndex(function (e) { return e.event === 'session_closed'; });
+  // il lease 'narrative' (di sessione) torna a 0 UNA sola volta, ed è la chiusura:
+  // nessun drop-a-0 del lease di sessione prima di quella (i widget/pagine figli
+  // salgono/scendono a depth ≥1, mai a 0).
+  var narrZeroReleases = evs.filter(function (e) { return e.event === 'lease_release' && e.name === 'narrative' && e.depth === 0; });
+  out.checks.lease_never_drops_to_zero_mid_chain = (acq1i >= 0 && closeI > acq1i && narrZeroReleases.length === 1);
+  out.checks.one_world_interaction_only = (interactions === 1);
+  // ogni nodo della catena ha PROVATO di girare, dai suoi effetti di stato
+  // (più robusto del nome-evento del log dell'adapter):
+  out.checks.chain_ran_tactic = (s.values.m6_tactic === 'prova' && s.nodes_done.m6_tactic === true);
+  out.checks.chain_ran_branch = (s.nodes_done.m6_interrogation_prova === true && s.flags.jacques_admitted_presence === true);
+  out.checks.chain_ran_p5 = (s.nodes_done.m6_p5 === true && NR.peekProp(s, 'P5').formulation.status === 'formulated');
+  out.checks.chain_ran_arrest = (s.nodes_done.m6_arrest === true && s.flags.jacques_preso === true);
+  // l'arresto è avvenuto NELLO STESSO lease: node_committed#m6_arrest PRIMA che il
+  // lease 'narrative' torni a 0 (la chiusura di sessione)
+  var relZeroI = evs.findIndex(function (e) { return e.event === 'lease_release' && e.name === 'narrative' && e.depth === 0; });
+  var arrestI = evs.findIndex(function (e) { return e.event === 'node_committed' && e.node_id === 'm6_arrest'; });
+  out.checks.arrest_committed_before_lease_release = (arrestI >= 0 && relZeroI >= 0 && arrestI < relZeroI);
+  out.checks.p5_to_arrest_same_lease = (arrestI >= 0 && acq1i >= 0 && arrestI > acq1i && arrestI < relZeroI);
+  out.diag_committed = evs.filter(function (e) { return e.event === 'node_committed'; }).map(function (e) { return e.node_id; });
+  out.diag_event_names = evs.map(function (e) { return e.event; }).filter(function (v, i, a) { return a.indexOf(v) === i; });
+  // esito di stato dal run
+  out.checks.p5_formulated = (NR.peekProp(s, 'P5').formulation.status === 'formulated');
+  out.checks.jacques_preso = (s.flags.jacques_preso === true);
+  out.checks.session_closed_lease_released = (A.active() === false);
+  out.checks.m4_b8_assist_untouched = (JSON.stringify(s.b8_attempt_history) === m4b8 && s.assistance_level === m4assist);
+  out.checks.no_murder_flags = (!s.flags.jacques_murder_confirmed && !s.flags.jacques_murder_attributed);
+
+  out.events_tail = A.events.slice(-24).map(function (e) { return e.event + (e.name ? ':' + e.name : '') + (e.node_id ? '#' + e.node_id : '') + (e.to ? '->' + e.to : '') + (e.depth !== undefined ? '@' + e.depth : ''); });
+
+  var allOk = out.errors.length === 0 && Object.keys(out.checks).every(function (k) { return out.checks[k] === true; });
+  out.pass = allOk;
+  out.total = Object.keys(out.checks).length;
+  out.passed = Object.keys(out.checks).filter(function (k) { return out.checks[k]; }).length;
+  document.getElementById('log').textContent = JSON.stringify(out, null, 1);
+  document.title = (allOk ? 'M6LEASE-PASS ' : 'M6LEASE-FAIL ') + out.passed + '/' + out.total;
+}
+run().catch(function (e) { out.errors.push('run: ' + (e && e.message || e)); document.getElementById('log').textContent = JSON.stringify(out, null, 1); document.title = 'M6LEASE-ERR ' + (e && e.message || e); });
+</script>
+</body>
+</html>

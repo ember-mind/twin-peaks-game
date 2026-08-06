@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><title>TP-RETRO-PAGINATION-LOADING</title>
+<style>html,body{margin:0;background:#111913}#stage{position:relative;width:160px;height:144px}#narrative{position:absolute;inset:0}.retro-semantic-ui{opacity:0;pointer-events:none}#report{display:none}</style></head>
+<body><div id="stage"><div id="narrative"></div><div id="objective"></div></div><pre id="report"></pre>
+<script src="../js/retro-font.js?v=gold52"></script>
+<script src="../js/portraits.js?v=gold54p6"></script>
+<script src="../js/narrative-runtime.js?v=r8"></script>
+<script src="../js/narrative-ui.js?v=r8"></script>
+<script src="../js/retro-ui.js?v=gold54p4"></script>
+<script>
+(function () {
+  var out={checks:{},views:[],error:null}, report=document.getElementById('report');
+  function wait(ms){return new Promise(function(r){setTimeout(r,ms);});}
+  function key(code){window.dispatchEvent(new KeyboardEvent('keydown',{code:code,bubbles:true}));}
+  function norm(s){return GAME.RetroFont.clean(String(s)).replace(/\s+/g,' ').trim();}
+  var input={suspend:function(){},restore:function(){}};
+  async function run(){
+    var longText='Prima del ritrovamento, Leland ha detto che Maddy sarebbe partita domattina e che aveva chiamato lui il taxi. Lucy verifica ogni chiamata: nessuna prenotazione esiste, né oggi né per domattina.';
+    var p=GAME.NarrativeUI.showPages({pages:[{id:'probe.long',mode:'dialogue',display_name:'COOPER',text:longText}],container:document.getElementById('narrative'),inputContext:input,advanceLockMs:0});
+    await wait(160);
+    var first=GAME.RetroUI.inspect(), parts=first.parts, collected=[];
+    out.checks.long_page_split=first.kind==='page'&&parts>1;
+    out.checks.speaker_card_resolved=first.portrait==='cooper'&&first.name==='COOPER'&&first.nameLines.length===0;
+    for(var i=0;i<parts;i++){
+      var v=GAME.RetroUI.inspect(); out.views.push(v); collected=collected.concat(v.bodyLines);
+      out.checks['page_'+i+'_fits']=v.nameLines.length+v.bodyLines.length<=4;
+      if(i<parts-1){key('Enter');await wait(35);out.checks['continuation_'+i+'_keeps_semantic_page']=!!document.querySelector('[data-page-id="probe.long"]');}
+    }
+    out.checks.all_text_preserved=norm(collected.join(' '))===norm(longText);
+    key('Enter'); var pageResult=await p;
+    out.checks.semantic_page_commits_after_last_part=pageResult.done===true&&!document.querySelector('[data-page-id="probe.long"]');
+
+    var mission={mission:'PROBE',objectives:[],nodes:[]};
+    var node={id:'probe.choice',prompt:'Come procedi?',conditions:[],choices:[
+      {id:'a',label:'Confronta la dichiarazione di Leland con la prenotazione che Lucy non trova.',effects:[]},
+      {id:'b',label:'Rileggi prima le note sulla partenza prevista di Maddy e verifica ogni data.',effects:[]},
+      {id:'c',label:'Porta a Truman soltanto fatti verificati, senza trasformare il sospetto in verdetto.',effects:[]}
+    ]}; mission.nodes=[node];
+    var state=GAME.NarrativeRuntime.createState();
+    var choicePromise=GAME.NarrativeUI.openChoice({state:state,mission:mission,node:node,container:document.getElementById('narrative'),inputContext:input,advanceLockMs:0});
+    await wait(160);
+    var seen=[];
+    for(var j=0;j<3;j++){
+      var cv=GAME.RetroUI.inspect(); seen.push(cv.sourceText);
+      out.checks['choice_'+j+'_full']=cv.kind==='choice'&&norm(cv.choiceLines.join(' '))===norm(node.choices[j].label);
+      if(j<2){key('ArrowDown');await wait(120);}
+    }
+    out.checks.all_choices_reachable=seen.length===3&&seen.every(function(s,i){return norm(s)===norm(node.choices[i].label);});
+    key('Escape'); var cr=await choicePromise; out.checks.choice_abort_clean=cr.aborted===true;
+  }
+  window.addEventListener('load',function(){
+    run().catch(function(e){out.error=String(e&&e.stack||e);}).finally(function(){
+      var pass=!out.error&&Object.keys(out.checks).every(function(k){return out.checks[k]===true;});
+      report.textContent=JSON.stringify(out,null,2); document.title=pass?'TP-RETRO-PAGINATION-PASS':'TP-RETRO-PAGINATION-FAIL';
+    });
+  });
+})();
+</script></body></html>

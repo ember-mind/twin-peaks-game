@@ -1,0 +1,7 @@
+{
+ "_comment": "diff PROPOSTO a propositions.json (C5-A): SOLO ui_short participant-facing per il taccuino. P3A/P3B esistono dalla Fase A; nessun cambiamento a support/ceiling.",
+ "ui_short_add": {
+  "P3A": "La posizione dell'anello non è compatibile con una caduta casuale: collocazione deliberata come lettura più forte.",
+  "P3B": "[Ipotesi] Il vagone come scena preparata."
+ }
+}

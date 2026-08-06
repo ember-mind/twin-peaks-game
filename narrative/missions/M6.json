@@ -1,0 +1,1258 @@
+{
+  "narrative_package": "narrative-v1.0",
+  "mission": "M6",
+  "title": "One Eyed Jacks",
+  "source": {
+    "document": "M5-M6 v1.1.1 LOCK.md",
+    "package": "narrative-v1.0"
+  },
+  "schema_delta": "narrative/schema-deltas/M6.md",
+  "entry_condition": {
+    "flag": "east_route_confirmed"
+  },
+  "tactic": {
+    "value": "m6_tactic",
+    "domain": "m6_tactic",
+    "chosen_in": "m6_tactic",
+    "write_once": true,
+    "note": "Una sola tattica per playthrough (immutabile). Valore tipizzato come m5_theory; il cambio tattica (m6_tactic_changed) resta DEPRECATO e non compare mai."
+  },
+  "tactic_differentiation": {
+    "axes": [
+      "exclusive_questions",
+      "jacques_tactic",
+      "own_verifiable_info",
+      "specific_resource",
+      "admission_form",
+      "persistent_cost",
+      "future_echo"
+    ],
+    "by_tactic": {
+      "prova": {
+        "node": "m6_interrogation_prova",
+        "exclusive_questions": [
+          "m6.b5.prova.q1",
+          "m6.b5.prova.q2"
+        ],
+        "jacques_tactic": "rifiuta la firma; rimanda a un avvocato e al foglio",
+        "own_verifiable_info": "JACQUES_MIDNIGHT_CLAIM",
+        "specific_resource": "l'orario dichiarato: il merci di mezzanotte, verificabile ai binari",
+        "admission_form": "dichiarazione resa, NON firmata",
+        "persistent_cost": "i termini della dichiarazione mai formalizzati",
+        "future_echo": "M9: l'orario restringe la finestra della notte — utilizzabile senza identificare nessuno"
+      },
+      "pressione": {
+        "node": "m6_interrogation_pressione",
+        "exclusive_questions": [
+          "m6.b5.pressione.q1",
+          "m6.b5.pressione.q2"
+        ],
+        "jacques_tactic": "annega il nome in una lista di quattro figure",
+        "own_verifiable_info": "JACQUES_LIST_GIVEN",
+        "specific_resource": "quattro figure e la voce che cala sui fiammiferi",
+        "admission_form": "ammissione dentro la protesta: «quella notte c'ero»",
+        "persistent_cost": "QUALE figura contava: la scrematura mai fatta",
+        "future_echo": "M10: chi «accende e spegne senza fumare» torna riconoscibile nella confessione — mai probatoria"
+      },
+      "falsa_sicurezza": {
+        "node": "m6_interrogation_falsa",
+        "exclusive_questions": [
+          "m6.b5.falsa.q1",
+          "m6.b5.falsa.q2"
+        ],
+        "jacques_tactic": "si vanta del banco e si colloca da solo",
+        "own_verifiable_info": "JACQUES_THIRD_MAN_DETAIL",
+        "specific_resource": "il terzo uomo che guardava la stufa «come si guarda una persona»",
+        "admission_form": "il vanto che lo colloca: «anche al vagone... il banco era mio»",
+        "persistent_cost": "il significato dello sguardo: l'interprete è morto",
+        "future_echo": "M10: la ricorrenza comportamentale nell'affioramento — evocativa, proceduralmente muta"
+      }
+    },
+    "invariant": "i tre rami differiscono REALMENTE sui 7 assi (pairwise distinti); own_verifiable_info == l'evidenza scritta dal nodo; tutti scrivono jacques_admitted_presence, mai l'omicidio"
+  },
+  "milestones": [
+    {
+      "id": "milestone_p5",
+      "node": "m6_p5",
+      "pending_when": {
+        "flag": "jacques_admitted_presence"
+      },
+      "resolved_when": {
+        "proposition_path": "P5.formulation.status", "equals": "formulated"
+      },
+      "blocks": {
+        "kind": "node_prepare",
+        "nodes": [
+          "m6_arrest"
+        ]
+      }
+    }
+  ],
+  "completion": {
+    "when": {
+      "node_done": "m6_atto4_bridge"
+    },
+    "sets": []
+  },
+  "objectives": [
+    {
+      "id": "obj_m6_5",
+      "priority": 500,
+      "when": {
+        "all": [
+          {
+            "flag": "jacques_dead"
+          },
+          {
+            "not": {
+              "flag": "gigante1"
+            }
+          }
+        ]
+      },
+      "text": "Torna alla stanza 315.",
+      "provenance_note": "[L] testo esatto del Lock §5 B8"
+    },
+    {
+      "id": "obj_m6_6",
+      "priority": 600,
+      "when": {
+        "all": [
+          {
+            "flag": "jacques_dead"
+          },
+          {
+            "flag": "gigante1"
+          },
+          {
+            "not": {
+              "flag": "atto4"
+            }
+          }
+        ]
+      },
+      "text": "Riferisci a Truman ciò che hai visto nella 315.",
+      "provenance_note": "[P/N] ponte eseguibile da data.js truman_atto4: dopo il Gigante, Truman deve ricevere sia la visione sia la notizia di Jacques prima che M8 entri."
+    },
+    {
+      "id": "obj_m6_4",
+      "priority": 400,
+      "when": {
+        "all": [
+          {
+            "flag": "jacques_preso"
+          },
+          {
+            "not": {
+              "flag": "jacques_dead"
+            }
+          },
+          {
+            "not": {
+              "node_done": "m6_return_night"
+            }
+          }
+        ]
+      },
+      "text": "Torna alla centrale e chiudi il rapporto sul fermo di Renault.",
+      "provenance_note": "[N] orientamento fisico verso la root Truman che rende B7b; il testo Lock sull'ospedale resta nella battuta di Truman."
+    },
+    {
+      "id": "obj_m6_4b",
+      "priority": 450,
+      "when": {
+        "all": [
+          {
+            "flag": "jacques_preso"
+          },
+          {
+            "node_done": "m6_return_night"
+          },
+          {
+            "not": {
+              "flag": "jacques_dead"
+            }
+          }
+        ]
+      },
+      "text": "Vai da Lucy: l'ospedale è in linea.",
+      "provenance_note": "[N] orientamento fisico verso la root Lucy che consegna B8; lo squillo e la risposta sono già visibili alla fine del rapporto, quindi la chiamata esiste nel mondo prima dell'interazione."
+    },
+    {
+      "id": "obj_m6_3",
+      "priority": 300,
+      "when": {
+        "all": [
+          {
+            "proposition_path": "P5.formulation.status", "equals": "formulated"
+          },
+          {
+            "not": {
+              "flag": "jacques_preso"
+            }
+          }
+        ]
+      },
+      "text": "Accompagna Jacques oltre il fiume per formalizzare la dichiarazione.",
+      "provenance_note": "[N] derivato dalla catena d'arresto B7 (non verbalizzato come obiettivo nel Lock); testo corretto in C6-A.2 su nota del revisore — il fermo avviene solo DOPO l'attraversamento volontario e il tentativo di fuga, l'obiettivo non deve anticiparlo"
+    },
+    {
+      "id": "obj_m6_2",
+      "priority": 200,
+      "when": {
+        "all": [
+          {
+            "flag": "jacques_admitted_presence"
+          },
+          {
+            "not": {
+              "proposition_path": "P5.formulation.status", "equals": "formulated"
+            }
+          }
+        ]
+      },
+      "text": "Metti a fuoco che cosa puoi sostenere su Jacques.",
+      "provenance_note": "[N] derivato dal beat P5 B6b (non verbalizzato come obiettivo nel Lock)"
+    },
+    {
+      "id": "obj_m6_1",
+      "priority": 100,
+      "when": {
+        "not": {
+          "flag": "jacques_admitted_presence"
+        }
+      },
+      "text": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "provenance_note": "[N] obiettivo d'ingresso M6 (il Lock M5 lascia «Segui la rotta oltre il confine: One Eyed Jacks.»)"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "m6_ferry",
+      "beat": "B1-B2",
+      "source_section": "M6-B1-B2",
+      "conditions": [
+        {
+          "not": {
+            "node_done": "m6_ferry"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b1.ferry.p01",
+          "mode": "action",
+          "text": "(Il traghetto non chiede documenti. È il suo mestiere, non chiederne.)"
+        },
+        {
+          "id": "m6.b1.ferry.p02",
+          "mode": "action",
+          "text": "(Dentro: tavoli veri, fumo vero. Nessuno alza lo sguardo — alzarlo costa.)"
+        },
+        {
+          "id": "m6.b1.ferry.p03",
+          "mode": "action",
+          "text": "(Un uomo grosso tiene il banco a un tavolo di carte. Ride poco, conta molto.)"
+        },
+        {
+          "id": "m6.b1.ferry.p04",
+          "mode": "dialogue",
+        "speaker_id": "hawk",
+        "display_name": "HAWK",
+        "text": "(fuori, piano) Di là dal fiume comanda il fiume. Io resto all'uscita: è l'unica."
+      },
+      {
+        "id": "m6.b1.ferry.p05",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Un solo varco d'uscita e molti occhi abbassati. Hawk terrà il primo; io conterò i secondi."
+        }
+      ],
+      "effects": [],
+      "next": "m6_tactic",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "oej",
+      "target_kind": "actor",
+      "target_id": "jacques",
+      "actor_id": "jacques",
+      "interaction_slot": "primary",
+      "mandatory_beat": true,
+      "provenance_note": "[P] Jacques è attore reale e visibile a One Eyed Jacks; [N→L] il beat d'ingresso parte dalla prima interazione con lui e continua nello stesso lease verso la scelta della tattica. Nessun tile invisibile obbligatorio."
+    },
+    {
+      "id": "m6_audrey",
+      "beat": "B3",
+      "source_section": "M6-B3",
+      "optional": true,
+      "conditions": [
+        {
+          "flag": "audrey_indaga"
+        },
+        {
+          "node_done": "m6_ferry"
+        },
+        {
+          "not": {
+            "flag": "audrey_vista_oej"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b3.audrey.p01",
+          "mode": "dialogue",
+          "speaker_id": "audrey",
+          "display_name": "AUDREY",
+          "text": "(a bassa voce, senza voltarsi) Non mi saluti. Sono la nuova del guardaroba, e lei non mi ha mai vista."
+        },
+        {
+          "id": "m6.b3.audrey.p02",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "(senza voltarsi) La nuova del guardaroba esce da quella porta entro dieci minuti. Ci vediamo dal lato giusto del fiume."
+        }
+      ],
+      "effects": [
+        {
+          "set": "audrey_vista_oej"
+        }
+      ],
+      "invariant": "solo con audrey_indaga; unico writer di audrey_vista_oej; M6 completabile senza (nodo facoltativo)",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "oej",
+      "target_kind": "actor",
+      "target_id": "audrey",
+      "actor_id": "audrey",
+      "interaction_slot": "primary"
+    },
+    {
+      "id": "m6_tactic",
+      "beat": "B4",
+      "source_section": "M6-B4",
+      "conditions": [
+        {
+          "node_done": "m6_ferry"
+        },
+        {
+          "not": {
+            "value_set": "m6_tactic"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b4.tactic.p01",
+          "mode": "action",
+          "text": "(Jacques mescola. Il posto di fronte a lui è vuoto: un invito e una trappola.)"
+        },
+        {
+        "id": "m6.b4.tactic.p02",
+        "mode": "notebook",
+        "text": "Come ti siedi davanti a Jacques?"
+      },
+      {
+        "id": "m6.b4.tactic.p03",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Jacques conta le carte, non le uscite. Scelgo il metodo prima di scegliere la prima domanda."
+        }
+      ],
+      "choices": [
+        {
+          "id": "tactic_prova",
+          "label": "Prova.",
+          "effects": [
+            {
+              "value": "m6_tactic",
+              "to": "prova"
+            }
+          ],
+          "goto": "m6_interrogation_prova"
+        },
+        {
+          "id": "tactic_pressione",
+          "label": "Pressione.",
+          "effects": [
+            {
+              "value": "m6_tactic",
+              "to": "pressione"
+            }
+          ],
+          "goto": "m6_interrogation_pressione"
+        },
+        {
+          "id": "tactic_falsa_sicurezza",
+          "label": "Falsa sicurezza.",
+          "effects": [
+            {
+              "value": "m6_tactic",
+              "to": "falsa_sicurezza"
+            }
+          ],
+          "goto": "m6_interrogation_falsa"
+        }
+      ],
+      "invariant": "unico writer di m6_tactic; scelta write-once, una per playthrough; nessuna opzione marcata corretta; nessun cambio tattica",
+      "kind": "choice",
+      "channel": "world",
+      "map_id": "oej",
+      "target_kind": "actor",
+      "target_id": "jacques",
+      "actor_id": "jacques",
+      "interaction_slot": "primary",
+      "role": "tactic",
+      "completion_when": {
+        "value_set": "m6_tactic"
+      }
+    },
+    {
+      "id": "m6_interrogation_prova",
+      "beat": "B5-B6",
+      "source_section": "M6-PROVA",
+      "conditions": [
+        {
+          "value_is": {
+            "name": "m6_tactic",
+            "equals": "prova"
+          }
+        },
+        {
+          "not": {
+            "flag": "jacques_admitted_presence"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b5.prova.q1",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "(si siede, posa la foto del biglietto) Questo passava di mano, al vagone. La tua?",
+          "question": {
+            "exclusive": true
+          }
+        },
+        {
+          "id": "m6.b5.prova.p02",
+          "mode": "dialogue",
+          "speaker_id": "jacques",
+          "display_name": "JACQUES",
+          "text": "(la guarda a lungo, poi la gira a faccia in giù) Io porto le carte, non i messaggi."
+        },
+        {
+          "id": "m6.b5.prova.p03",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Non ho chiesto dei messaggi. Ho chiesto del vagone."
+        },
+        {
+          "id": "m6.b5.prova.p04",
+          "mode": "dialogue",
+          "speaker_id": "jacques",
+          "display_name": "JACQUES",
+          "text": "C'ero. Giocavamo. Questo è tutto quello che dico."
+        },
+        {
+          "id": "m6.b5.prova.p05",
+          "mode": "dialogue",
+          "speaker_id": "jacques",
+          "display_name": "JACQUES",
+          "text": "Se volete una firma, portatemi un avvocato e riportatemi il foglio."
+        },
+        {
+          "id": "m6.b5.prova.q2",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "(seconda domanda) A che ora te ne sei andato?",
+          "question": {
+            "exclusive": true
+          }
+        },
+        {
+          "id": "m6.b5.prova.p07",
+          "mode": "dialogue",
+          "speaker_id": "jacques",
+          "display_name": "JACQUES",
+          "text": "Col merci di mezzanotte. Chiedete ai binari, se sanno l'ora."
+        },
+        {
+          "id": "m6.b5.prova.p08",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "E chi restava, quando il merci è passato?",
+          "question": {
+            "exclusive": false,
+            "color": true
+          }
+        },
+        {
+          "id": "m6.b5.prova.p09",
+          "mode": "dialogue",
+          "speaker_id": "jacques",
+          "display_name": "JACQUES",
+          "text": "(mescola) L'avvocato, agente. Poi il foglio. Poi vediamo chi restava."
+        }
+      ],
+      "effects": [
+        {
+          "set": "jacques_admitted_presence"
+        },
+        {
+          "set": "jacques_statement_terms_known"
+        },
+        {
+          "evidence": "JACQUES_MIDNIGHT_CLAIM"
+        },
+        {
+          "notebook": {
+            "id": "m6.note.prova.admission",
+            "text": "Jacques ammette la presenza al vagone. Dichiarazione resa, NON firmata."
+          }
+        },
+        {
+          "notebook": {
+            "id": "m6.note.prova.midnight",
+            "text": "L'orario dichiarato: il merci di mezzanotte. Verificabile ai binari."
+          }
+        },
+        {
+          "notebook": {
+            "id": "m6.note.prova.negotiate",
+            "text": "Oltre l'orario non va. Vuole negoziare la dichiarazione: termini suoi, foglio davanti."
+          }
+        }
+      ],
+      "invariant": "ammissione di PRESENZA (mai omicidio); scrive jacques_admitted_presence + jacques_statement_terms_known + JACQUES_MIDNIGHT_CLAIM; 2 domande esclusive (q1,q2) + 1 di colore; effetti SOLO dopo l'ultima pagina",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "oej",
+      "target_kind": "actor",
+      "target_id": "jacques",
+      "actor_id": "jacques",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m6_interrogation_pressione",
+      "beat": "B5-B6",
+      "source_section": "M6-PRESSIONE",
+      "conditions": [
+        {
+          "value_is": {
+            "name": "m6_tactic",
+            "equals": "pressione"
+          }
+        },
+        {
+          "not": {
+            "flag": "jacques_admitted_presence"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b5.pressione.p01",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "(resta in piedi) Jacques Renault. Stanotte dormi dal lato giusto del fiume. Quanto comoda sarà la cella, dipende dai prossimi due minuti."
+        },
+        {
+          "id": "m6.b5.pressione.p02",
+          "mode": "dialogue",
+          "speaker_id": "jacques",
+          "display_name": "JACQUES",
+          "text": "(alza le mani, ride male) Piano, agente. Piano. Quella notte al vagone c'ero, sì — ma c'era mezzo mondo."
+        },
+        {
+          "id": "m6.b5.pressione.q1",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "I nomi del mezzo mondo. Adesso.",
+          "question": {
+            "exclusive": true
+          }
+        },
+        {
+          "id": "m6.b5.pressione.p04",
+          "mode": "dialogue",
+          "speaker_id": "jacques",
+          "display_name": "JACQUES",
+          "text": "Il camionista della birra, quello del Roadhouse. Il barista, quello nuovo. Un ragazzo del paese che non nomino — ha una madre. E quello dei fiammiferi."
+        },
+        {
+          "id": "m6.b5.pressione.p05",
+          "mode": "action",
+          "text": "(Sulla parola \"fiammiferi\" la voce cala. Le mani smettono di muoversi.)"
+        },
+        {
+          "id": "m6.b5.pressione.p06",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Quello dei fiammiferi."
+        },
+        {
+          "id": "m6.b5.pressione.p07",
+          "mode": "dialogue",
+          "speaker_id": "jacques",
+          "display_name": "JACQUES",
+          "text": "Uno che accendeva e spegneva. Accendeva e spegneva. Senza mai fumare."
+        },
+        {
+          "id": "m6.b5.pressione.q2",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "(seconda domanda) Chi dei quattro c'era QUELLA notte?",
+          "question": {
+            "exclusive": true
+          }
+        },
+        {
+          "id": "m6.b5.pressione.p09",
+          "mode": "dialogue",
+          "speaker_id": "jacques",
+          "display_name": "JACQUES",
+          "text": "(le mani ferme) Quella notte... (si riprende) Quella notte io tenevo il banco e guardavo le carte. Le facce, chiedetele alle carte."
+        }
+      ],
+      "effects": [
+        {
+          "set": "jacques_admitted_presence"
+        },
+        {
+          "evidence": "JACQUES_LIST_GIVEN"
+        },
+        {
+          "notebook": {
+            "id": "m6.note.pressione.admission",
+            "text": "L'ammissione arriva dentro la protesta: \"quella notte c'ero\"."
+          }
+        },
+        {
+          "notebook": {
+            "id": "m6.note.pressione.list",
+            "text": "Quattro figure. Su una — \"quello dei fiammiferi\" — la voce è calata. La lista è buttata lì per annegarmi; ma una voce non si governa."
+          }
+        },
+        {
+          "notebook": {
+            "id": "m6.note.pressione.narrow",
+            "text": "Alla domanda giusta ha esitato. Restringere la lista si può — ma non oggi, non urlando. Servirà tornarci con calma."
+          }
+        }
+      ],
+      "invariant": "ammissione di PRESENZA (mai omicidio); scrive jacques_admitted_presence + JACQUES_LIST_GIVEN; 2 domande esclusive (q1,q2); il sistema NON certifica quale figura sia vera; effetti SOLO dopo l'ultima pagina",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "oej",
+      "target_kind": "actor",
+      "target_id": "jacques",
+      "actor_id": "jacques",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m6_interrogation_falsa",
+      "beat": "B5-B6",
+      "source_section": "M6-FALSA_SICUREZZA",
+      "conditions": [
+        {
+          "value_is": {
+            "name": "m6_tactic",
+            "equals": "falsa_sicurezza"
+          }
+        },
+        {
+          "not": {
+            "flag": "jacques_admitted_presence"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b5.falsa.p01",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "(si siede, posa due fiches) Mi hanno detto che il banco qui perde volentieri, con chi sa stare al tavolo."
+        },
+        {
+          "id": "m6.b5.falsa.p02",
+          "mode": "dialogue",
+          "speaker_id": "jacques",
+          "display_name": "JACQUES",
+          "text": "(ride) Chi gliel'ha detto sapeva stare al tavolo?"
+        },
+        {
+          "id": "m6.b5.falsa.q1",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Che tavolo era, quella notte? Chi teneva il banco?",
+          "question": {
+            "exclusive": true
+          }
+        },
+        {
+          "id": "m6.b5.falsa.p04",
+          "mode": "dialogue",
+          "speaker_id": "jacques",
+          "display_name": "JACQUES",
+          "text": "Io. Io tengo sempre il banco — anche fuori di qui. Anche al vagone si giocava, quella notte, e il banco era mio."
+        },
+        {
+          "id": "m6.b5.falsa.q2",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "(seconda domanda) E il terzo? Quello che non giocava.",
+          "question": {
+            "exclusive": true
+          }
+        },
+        {
+          "id": "m6.b5.falsa.p06",
+          "mode": "dialogue",
+          "speaker_id": "jacques",
+          "display_name": "JACQUES",
+          "text": "(la risata cala) Non beveva. Guardava la stufa come si guarda una persona. (pausa) Io i tipi così li lascio guardare."
+        },
+        {
+          "id": "m6.b5.falsa.p07",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Che cosa guardava, secondo te?",
+          "question": {
+            "exclusive": false,
+            "color": true
+          }
+        },
+        {
+          "id": "m6.b5.falsa.p08",
+          "mode": "dialogue",
+          "speaker_id": "jacques",
+          "display_name": "JACQUES",
+          "text": "(raccoglie le fiches) Questa è una domanda da tavolo alto, agente. Si gioca un'altra sera."
+        }
+      ],
+      "effects": [
+        {
+          "set": "jacques_admitted_presence"
+        },
+        {
+          "evidence": "JACQUES_THIRD_MAN_DETAIL"
+        },
+        {
+          "notebook": {
+            "id": "m6.note.falsa.admission",
+            "text": "Il vanto lo colloca: \"anche al vagone... il banco era mio\"."
+          }
+        },
+        {
+          "notebook": {
+            "id": "m6.note.falsa.third_man",
+            "text": "Il terzo uomo — non beveva, guardava la stufa \"come si guarda una persona\"."
+          }
+        },
+        {
+          "notebook": {
+            "id": "m6.note.falsa.gaze",
+            "text": "Sarebbe tornato a parlare, da giocatore a giocatore. Il senso di quello sguardo lo sa solo chi l'ha visto."
+          }
+        }
+      ],
+      "invariant": "ammissione di PRESENZA (mai omicidio); scrive jacques_admitted_presence + JACQUES_THIRD_MAN_DETAIL; 2 domande esclusive (q1,q2) + 1 di colore; effetti SOLO dopo l'ultima pagina",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "oej",
+      "target_kind": "actor",
+      "target_id": "jacques",
+      "actor_id": "jacques",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m6_p5",
+      "beat": "B6b",
+      "source_section": "M6-B6b",
+      "milestone": "milestone_p5",
+      "conditions": [
+        {
+          "flag": "jacques_admitted_presence"
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b6b.p5.p01",
+          "mode": "notebook",
+          "text": "Che cosa puoi sostenere, adesso?"
+        }
+      ],
+      "choices": [
+        {
+          "id": "p5_present",
+          "label": "Jacques era presente al vagone.",
+          "result": "PRESENCE_SUPPORTED",
+          "effects": [
+            {
+              "proposition": "P5",
+              "to": "formulated",
+              "created_from": [
+                "jacques_admitted_presence"
+              ]
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m6.b6b.p5.feedback.present",
+              "mode": "notebook",
+              "text": "Jacques può essere collocato sulla scena. La sua presenza non basta ad attribuirgli l'omicidio."
+            }
+          ]
+        },
+        {
+          "id": "p5_killed",
+          "label": "Jacques ha ucciso Laura.",
+          "result": "ATTRIBUTION_OVERREACH",
+          "retry": true,
+          "feedback_pages": [
+            {
+              "id": "m6.b6b.p5.feedback.killed",
+              "mode": "notebook",
+              "text": "Le prove collocano. Non attribuiscono."
+            }
+          ]
+        },
+        {
+          "id": "p5_no_third_man",
+          "label": "Jacques non sa nulla del terzo uomo.",
+          "result": "UNSUPPORTED_BY_TACTIC",
+          "retry": true,
+          "feedback_pages_by_value": {
+            "value": "m6_tactic",
+            "cases": {
+              "prova": [
+                {
+                  "id": "m6.b6b.p5.feedback.no_third.prova",
+                  "mode": "notebook",
+                  "text": "Non posso sostenerlo. Non gli ho ancora chiesto di un terzo uomo."
+                }
+              ],
+              "pressione": [
+                {
+                  "id": "m6.b6b.p5.feedback.no_third.pressione",
+                  "mode": "notebook",
+                  "text": "Sa di altre presenze e prova a nasconderle in una lista. Non so ancora quale fosse al vagone."
+                }
+              ],
+              "falsa_sicurezza": [
+                {
+                  "id": "m6.b6b.p5.feedback.no_third.falsa",
+                  "mode": "notebook",
+                  "text": "Ha descritto il terzo uomo. Questa conclusione contraddice ciò che ha appena detto."
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "rules": {
+        "attempt_scope": "comparison",
+        "hide_attempted_results": true,
+        "track_assistance": false
+      },
+      "invariant": "P5 nasce SOLO da questo beat (mai automatica); A accettata (formulata da jacques_admitted_presence), B respinta nel merito, C respinta con testo per-ramo; nessuna scelta marcata corretta; tentativi in comparisons[node].attempts",
+      "kind": "choice",
+      "channel": "notebook",
+      "interaction_slot": "primary",
+      "role": "proposition",
+      "completion_when": {
+        "proposition_path": "P5.formulation.status", "equals": "formulated"
+      },
+      "next": "m6_arrest"
+    },
+    {
+      "id": "m6_arrest",
+      "beat": "B7",
+      "source_section": "M6-B7",
+      "conditions": [
+        {
+          "proposition_path": "P5.formulation.status", "equals": "formulated"
+        },
+        {
+          "not": {
+            "flag": "jacques_preso"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b7.arrest.p01",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Metti per iscritto ciò che hai ammesso. Con un avvocato, se lo vuoi."
+        },
+        {
+          "id": "m6.b7.arrest.p02",
+          "mode": "dialogue",
+          "speaker_id": "jacques",
+          "display_name": "JACQUES",
+          "text": "E se dico di no?"
+        },
+        {
+          "id": "m6.b7.arrest.p03",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Allora torneremo con più domande e meno discrezione."
+        },
+        {
+          "id": "m6.b7.arrest.p04",
+          "mode": "action",
+          "text": "(Jacques guarda la sala. Poi raccoglie il cappotto.)"
+        },
+        {
+          "id": "m6.b7.arrest.p05",
+          "mode": "dialogue",
+          "speaker_id": "jacques",
+          "display_name": "JACQUES",
+          "text": "Un foglio. Poi torno. (al traghetto) Il fiume ha due lati, agente. Ricordatevelo quando lo riattraversate."
+        },
+        {
+          "id": "m6.b7.arrest.p06",
+          "mode": "action",
+          "text": "(Sul molo della contea, Jacques spinge Hawk e prova a correre. Il piede scivola fra due assi.)"
+        },
+        {
+          "id": "m6.b7.arrest.p07",
+          "mode": "action",
+          "text": "(Jacques cade fra le assi. Quando Hawk lo gira, la gamba non segue.)"
+        }
+      ],
+      "effects": [
+        {
+          "set": "jacques_preso"
+        },
+        {
+          "notebook": {
+            "id": "m6.note.arrest",
+            "text": "Fermo sul lato della contea, dopo il tentativo di fuga. Renault in ospedale per la frattura, piantonato. La dichiarazione si formalizza domattina."
+          }
+        }
+      ],
+      "invariant": "catena: colloquio → uscita controllata → attraversamento volontario → fermo lato contea → tentativo di fuga/ferimento → ricovero; unico writer di jacques_preso; nessuna attribuzione dell'omicidio",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "oej",
+      "target_kind": "actor",
+      "target_id": "jacques",
+      "actor_id": "jacques",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m6_return_night",
+      "beat": "B7b",
+      "source_section": "M6-B7b",
+      "conditions": [
+        {
+          "flag": "jacques_preso"
+        },
+        {
+          "not": {
+            "node_done": "m6_return_night"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b7b.night.p01",
+          "mode": "action",
+          "text": "(Il traghetto di ritorno è più lento. O sembra.)"
+        },
+        {
+          "id": "m6.b7b.night.p02",
+          "mode": "action",
+          "text": "(In centrale: il rapporto preliminare porta via la sera. Hawk scrive, Cooper firma, la finestra diventa nera.)"
+        },
+        {
+          "id": "m6.b7b.night.p03",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "text": "Domattina l'ospedale, con il foglio. Adesso a casa, Cooper. Il paese ha già una notte in meno."
+        },
+        {
+        "id": "m6.b7b.night.p04",
+        "mode": "action",
+        "text": "(Il telefono di Lucy squilla. Risponde, poi alza lo sguardo verso Cooper.)"
+      },
+      {
+        "id": "m6.b7b.night.p05",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Diane, Jacques è in custodia. Firmo il rapporto prima che la memoria cominci a correggerlo."
+        }
+      ],
+      "effects": [],
+      "invariant": "tempo percepibile: SEMPRE presente prima della notizia (gate di m6_news); nessun flag scritto; prima del commit l'obiettivo punta a Truman, dopo il commit punta alla root Lucy",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "sheriff",
+      "actor_id": "truman",
+      "target_kind": "actor",
+      "target_id": "truman",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m6_news",
+      "beat": "B8",
+      "source_section": "M6-B8",
+      "conditions": [
+        {
+          "node_done": "m6_return_night"
+        },
+        {
+          "not": {
+            "flag": "jacques_dead"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b8.news.p01",
+          "mode": "dialogue",
+          "speaker_id": "lucy",
+          "display_name": "LUCY",
+          "text": "Agente Cooper? L'ospedale è in linea. È terribile."
+        },
+        {
+          "id": "m6.b8.news.p02",
+          "mode": "dialogue",
+          "speaker_id": "lucy",
+          "display_name": "LUCY",
+          "text": "Jacques Renault... soffocato nel suo letto. Un cuscino. Nessun testimone."
+        },
+        {
+          "id": "m6.b8.news.p03",
+          "mode": "dialogue",
+          "speaker_id": "lucy",
+          "display_name": "LUCY",
+          "text": "Chi entra e esce da un ospedale senza farsi notare, agente? Chi?"
+        }
+      ],
+      "pages_by_value": {
+        "value": "m6_tactic",
+        "cases": {
+          "prova": [
+            {
+              "id": "m6.b8.news.cooper_prova",
+              "mode": "dialogue",
+              "speaker_id": "cooper",
+              "display_name": "COOPER",
+              "text": "Aveva una dichiarazione da firmare, Harry. Termini suoi, foglio davanti. La firma non arriverà mai."
+            }
+          ],
+          "pressione": [
+            {
+              "id": "m6.b8.news.cooper_pressione",
+              "mode": "dialogue",
+              "speaker_id": "cooper",
+              "display_name": "COOPER",
+              "text": "Mi ha lasciato quattro figure e una voce che cala. L'unico che poteva dirmi su quale, è appena uscito dalla lista."
+            }
+          ],
+          "falsa_sicurezza": [
+            {
+              "id": "m6.b8.news.cooper_falsa",
+              "mode": "dialogue",
+              "speaker_id": "cooper",
+              "display_name": "COOPER",
+              "text": "Sarebbe tornato al tavolo. E io non saprò mai che cosa guardava il suo terzo uomo, quando guardava la stufa."
+            }
+          ]
+        }
+      },
+      "effects": [
+        {
+          "set": "jacques_dead"
+        },
+        {
+          "set": "jacques_testimony_lost"
+        },
+        {
+          "set": "m6_resource_lost"
+        },
+        {
+          "proposition": "P9",
+          "to": "formulated",
+          "created_from": [
+            "jacques_dead",
+            "jacques_testimony_lost"
+          ]
+        }
+      ],
+      "invariant": "la fine critica scrive SOLO jacques_dead + jacques_testimony_lost (+ m6_resource_lost, + P9); MAI jacques_death_suspicious, MAI jacques_murder_confirmed/attributed; lucy_a3 [P] invariata; effetti SOLO dopo l'ultima pagina",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "sheriff",
+      "target_kind": "actor",
+      "target_id": "lucy",
+      "actor_id": "lucy",
+      "interaction_slot": "primary",
+      "mandatory_beat": true,
+      "provenance_note": "[P] lucy_a3 conservata integralmente (Lock §5 B8): «un cuscino, nessun testimone» è la domanda di Lucy, non un fatto di sistema"
+    },
+    {
+      "id": "m6_atto4_bridge",
+      "beat": "B9",
+      "source_section": "M6-B9 / data.js — truman_atto4",
+      "conditions": [
+        {
+          "flag": "jacques_dead"
+        },
+        {
+          "flag": "gigante1"
+        },
+        {
+          "not": {
+            "flag": "atto4"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b9.atto4.p01",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Harry, devo dirle una cosa che suonerà incredibile. Un gigante mi è apparso, allo specchio."
+        },
+        {
+          "id": "m6.b9.atto4.p02",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "text": "Un gigante? Agente, con lei succede sempre qualcosa di strano."
+        },
+        {
+          "id": "m6.b9.atto4.p03",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Il Gigante mi è apparso poco dopo la notizia su Jacques. Non so se i due fatti siano collegati."
+        },
+        {
+          "id": "m6.b9.atto4.p04",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "text": "Se qualcuno temeva ciò che Jacques sapeva, ora abbiamo perso il modo di verificarlo."
+        }
+      ],
+      "effects": [
+        {
+          "set": "atto4"
+        }
+      ],
+      "repeat": {
+        "id": "m6.repeat.atto4_bridge",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Diane, Truman ha ragione: domani sarà peggio. Per stanotte, caffè e rapporto."
+      },
+      "invariant": "jacques_dead e gigante1 sono conoscenza acquisita prima del rapporto; atto4 nasce solo dopo l'ultima pagina e apre M8 senza fallback legacy.",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "sheriff",
+      "target_kind": "actor",
+      "target_id": "truman",
+      "actor_id": "truman",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m6_hospital",
+      "beat": "B8b",
+      "source_section": "M6-B8b",
+      "optional": true,
+      "conditions": [
+        {
+          "flag": "jacques_dead"
+        },
+        {
+          "not": {
+            "flag": "jacques_death_suspicious"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b8b.hospital.p01",
+          "mode": "action",
+          "text": "(La porta di Jacques: sigillata da stamattina. Davanti a Ronette: il piantone è raddoppiato.)"
+        },
+        {
+          "id": "m6.b8b.hospital.p02",
+          "mode": "action",
+          "text": "(Il registro del turno è aperto sul banco.)"
+        },
+        {
+          "id": "m6.b8b.hospital.p03",
+          "mode": "dialogue",
+          "speaker_id": "infermiera",
+          "display_name": "INFERMIERA",
+          "text": "Nessuno ha chiesto accesso alla stanza."
+        },
+        {
+          "id": "m6.b8b.hospital.p04",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Nessun ingresso registrato e un uomo morto sotto sorveglianza. Il registro non spiega la stanza."
+        }
+      ],
+      "effects": [
+        {
+          "set": "night_log_no_visitor"
+        },
+        {
+          "set": "jacques_death_suspicious"
+        },
+        {
+          "notebook": {
+            "id": "m6.note.hospital.register",
+            "text": "Nessuna firma fra mezzanotte e il cambio turno. Il registro non spiega la stanza."
+          }
+        }
+      ],
+      "invariant": "coda FACOLTATIVA; unico writer di night_log_no_visitor e di jacques_death_suspicious (formulated, factual_status unconfirmed — SOLO qui); la porta sigillata è lo stato di STAMATTINA, mai lo stato della notte; nessuna attribuzione dell'omicidio",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "hospital",
+      "target_kind": "object",
+      "target_id": "night_register",
+      "interaction_slot": "primary"
+    }
+  ],
+  "node_count": {
+    "runtime_total": 12
+  }
+}

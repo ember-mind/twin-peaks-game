@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>B3 notebook harness</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #000; height: 100%; overflow: hidden; }
+  #stage { position: fixed; inset: 0; }
+  #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+  #gl { background: #000; }
+  #game { background: transparent; }
+  #narrative { position: absolute; left: 0; right: 0; bottom: 0; top: 0; z-index: 10; pointer-events: none; }
+  #narrative .nw-root { pointer-events: auto; }
+  .nw-root { position: absolute; left: 8%; right: 8%; bottom: 6%; background: rgba(12,14,20,0.94); border: 3px solid #c8b06a; border-radius: 4px; padding: 16px 20px; font: 17px/1.65 monospace; color: #e8e4d8; }
+  .nb-root { top: 10%; bottom: 8%; overflow: auto; }
+  .nw-title { color: #c8b06a; margin-bottom: 8px; }
+  .nw-opt { padding: 2px 6px; white-space: pre-wrap; }
+  .nw-focus { background: #2e3442; color: #ffe9a8; }
+  .nw-page { min-height: 56px; }
+  .nw-name { color: #c8b06a; }
+  .nw-hint { text-align: right; color: #888; margin-top: 8px; }
+  #truth { position: absolute; top: 0; left: 0; right: 0; z-index: 11; font: 13px monospace; color: #9fe8a0; background: rgba(0,0,0,0.72); padding: 4px 8px; }
+  #log { display: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl" width="960" height="640"></canvas>
+  <canvas id="game" width="480" height="320"></canvas>
+  <div id="narrative"></div>
+  <div id="truth"></div>
+</div>
+<div id="log"></div>
+
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=harness-r6"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=harness-r6"></script>
+<script src="../js/engine.js?v=harness-r6"></script>
+<script src="../js/render3d.js"></script>
+<script src="../js/glue.js?v=harness-r6"></script>
+<script src="../js/main.js"></script>
+<script src="../js/narrative-runtime.js"></script>
+<script src="../js/narrative-ui.js"></script>
+<script src="../js/narrative-notebook.js"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
+<script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
+
+<script>
+var LOCK = 120;
+var results = { checks: {}, console_errors: [], console_log: [] };
+window.onerror = function (m, src, line) { results.console_errors.push(String(m) + ' @' + line); };
+(function () {
+  var ce = console.error, cw = console.warn;
+  console.error = function () { results.console_errors.push([].join.call(arguments, ' ')); ce.apply(console, arguments); };
+  console.warn = function () { results.console_log.push('[warn] ' + [].join.call(arguments, ' ')); cw.apply(console, arguments); };
+})();
+
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(code) {
+  window.dispatchEvent(new KeyboardEvent('keydown', { code: code, bubbles: true }));
+  window.dispatchEvent(new KeyboardEvent('keyup', { code: code, bubbles: true }));
+}
+async function press(code) { key(code); await wait(200); }
+function widgetOpts() { return [].map.call(document.querySelectorAll('.nw-root:not(.nb-root) .nw-opt'), function (o) { return o.getAttribute('data-choice-id'); }); }
+function nbText() { var r = document.querySelector('.nb-root'); return r ? r.textContent : ''; }
+
+var STOP = null;
+function stopped() { return new Promise(function () {}); }
+async function stopIf(label, title) { if (STOP === label) { document.title = 'B3-SHOT-' + label; await stopped(); } }
+
+async function seq() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter;
+  function S() { return A.getState(); }
+  function P2() { return NR.peekProp(S(), 'P2'); }
+
+  // overlay screenshot (pattern shot.html)
+  var glcv = document.getElementById('gl');
+  var ov = document.createElement('canvas');
+  ov.width = glcv.width; ov.height = glcv.height;
+  ov.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;z-index:9;';
+  document.getElementById('stage').appendChild(ov);
+  var ovx = ov.getContext('2d');
+  setInterval(function () { try { GAME.Render3D.render(E.state, 16, performance.now()); ovx.drawImage(glcv, 0, 0); } catch (e2) {} }, 80);
+
+  setInterval(function () {
+    var st = S();
+    document.getElementById('truth').textContent =
+      'P2: ' + (st.props.P2 ? st.props.P2.formulation.status : 'unformulated') +
+      ' / ' + (st.props.P2 ? st.props.P2.factual_status : 'unconfirmed') +
+      ' | b8_history: [' + st.b8_attempt_history.join(',') + '] | assistance_level: ' + st.assistance_level +
+      ' | lease: ' + (A.active() ? 'HELD' : 'FREE') + ' | rev: ' + st.revision;
+  }, 80);
+
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK });
+  E.loadMap('hospital', 5, 5, 'down');
+
+  // scanner dell'INTERA overlay narrativa: nessun token interno deve mai
+  // essere visibile al participant, in nessun momento della sessione
+  var TOKENS = ['E6A_', 'T_JAMES_', 'T1_', 'E5_', 'P2', 'SOURCE_CORROBORATION', 'GEOGRAPHIC_OVERREACH', 'SYMBOLIC_OVERREACH', 'm4.'];
+  var tokenViolations = [];
+  setInterval(function () {
+    var txt = document.getElementById('narrative').textContent;
+    TOKENS.forEach(function (t) {
+      if (txt.indexOf(t) >= 0 && tokenViolations.indexOf(t) === -1) tokenViolations.push(t);
+    });
+  }, 90);
+
+  var records = { B: null, A: null };
+  A.onLog = function (e) {
+    if (e.event === 'page_shown' && e.page_id === 'm4.b8.feedback.geographic_overreach' && !records.B) {
+      records.B = { page_id: e.page_id, state_before_commit: {
+        'P2.formulation.status': P2().formulation.status,
+        b8_attempt_history: S().b8_attempt_history.slice(), assistance_level: S().assistance_level },
+        movement_suspended: A.active() };
+    }
+    if (e.event === 'page_shown' && e.page_id === 'm4.b8.feedback.source_corroboration' && !records.A) {
+      records.A = { page_id: e.page_id, state_before_commit: { 'P2.formulation.status': P2().formulation.status } };
+    }
+  };
+
+  // premesse M4 via runtime (surrogati dichiarati: sogno + Truman + James)
+  NR.applyEffects(S(), [{ set: 'sogno_fatto' }]);
+  var p0 = NR.prepareNode(S(), A.getMission(), 'truman_a2'); NR.commitNode(S(), A.getMission(), p0);
+  var pj = NR.prepareNode(S(), A.getMission(), 'james_a2'); NR.commitNode(S(), A.getMission(), pj);
+  results.checks.evidence_seeded = (S().evidence.E6A_CUORE_INTERO === true && S().evidence.T_JAMES_EST === true);
+
+  function swapState(label) {
+    var ser = NR.serialize(S());
+    var re = NR.deserialize(ser);
+    results.checks['saveload_' + label] = (NR.serialize(re) === ser && Object.keys(re.committed_tx).length === Object.keys(S().committed_tx).length);
+    A.setState(re);
+  }
+  swapState('c1_acquisizioni');
+
+  // ---- taccuino: sezioni ----
+  await press('KeyT');
+  results.checks.notebook_sections_present = (document.querySelectorAll('[data-nb-section]').length === 4);
+  await stopIf('01');
+  await press('Enter'); // Evidenze
+  var entries = [].map.call(document.querySelectorAll('[data-nb-entry]'), function (o) { return o.getAttribute('data-nb-entry'); });
+  results.checks.evidence_acquired_only = (entries.length === 2 && entries.indexOf('E6A_CUORE_INTERO') >= 0 && entries.indexOf('T_JAMES_EST') >= 0);
+  var evText = nbText();
+  results.checks.evidence_labels_not_ids = (evText.indexOf('le due metà combaciano') >= 0 && evText.indexOf('E6A_CUORE_INTERO') === -1);
+  // e.function MAI renderizzato: la sezione non anticipa l'operazione di B8
+  results.checks.evidence_view_does_not_expose_function = (evText.indexOf('corroborazione') === -1 &&
+    evText.indexOf('geografia') === -1 && evText.indexOf('supporto') === -1 && evText.indexOf('funzione') === -1);
+  var KL = GAME.NarrativeNotebook.KIND_LABEL;
+  var evCat = GAME.NarrativeData.evidence.evidence;
+  results.checks.all_evidence_kinds_have_ui_labels = Object.keys(evCat).every(function (id) { return !!KL[evCat[id].kind]; });
+  await stopIf('02');
+  await press('Escape');
+
+  // ---- confronta: selezione della coppia (PURA) ----
+  await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // Confronta
+  await press('Enter'); // seleziona la prima voce
+  results.checks.compare_one_selected = (nbText().indexOf('[x]') >= 0);
+  await stopIf('03');
+  var pureSnap = NR.serialize(S());
+  await press('ArrowDown'); await press('Enter'); // coppia completa → intro B8
+  results.checks.b8_intro_visible = !!document.querySelector('[data-page-id="m4.b7.cmp_e6a_tjames.p01"], [data-page-id="m4.b8.cmp_e6a_tjames.p01"]');
+  results.checks.pair_selection_pure = (NR.serialize(S()) === pureSnap); // nessuna scrittura prima del commit del nodo
+  var introText = document.getElementById('narrative').textContent;
+  results.checks.comparison_intro_has_no_internal_ids = (introText.indexOf('E6A_') === -1 && introText.indexOf('T_JAMES_') === -1 &&
+    introText.indexOf('le due metà combaciano') >= 0);
+  await stopIf('04');
+  await press('Enter'); await press('Enter'); // p02, p03
+  await press('Enter'); // commitNode → widget B8
+  results.checks.b8_three_choices = (widgetOpts().length === 3);
+
+  // ---- tentativo B (GEOGRAPHIC_OVERREACH) ----
+  await press('ArrowDown'); await press('Enter'); // b8_b → feedback
+  results.checks.feedback_b_before_commit = (!!document.querySelector('[data-page-id="m4.b8.feedback.geographic_overreach"]') &&
+    P2().formulation.status === 'unformulated' && S().b8_attempt_history.length === 0);
+  await stopIf('05');
+  await press('Enter'); // commit
+  records.B.state_after_commit = { 'P2.formulation.status': P2().formulation.status,
+    b8_attempt_history: S().b8_attempt_history.slice(), assistance_level: S().assistance_level };
+  results.checks.after_b_history = (JSON.stringify(S().b8_attempt_history) === JSON.stringify(['GEOGRAPHIC_OVERREACH']) &&
+    S().assistance_level === 1 && P2().formulation.status === 'unformulated');
+  results.checks.after_b_options = (JSON.stringify(widgetOpts()) === JSON.stringify(['b8_a', 'b8_c']));
+  await stopIf('06');
+
+  // ---- Escape sul feedback PRIMA del commit: byte-identico ----
+  await press('ArrowDown'); await press('Enter'); // b8_c → feedback symbolic
+  var escSnap = NR.serialize(S());
+  await press('Escape'); // abort → torna al menu del taccuino
+  results.checks.escape_feedback_pure = (NR.serialize(S()) === escSnap);
+  await press('Escape'); // chiudi il taccuino
+  results.checks.lease_free_after_close = !A.active();
+  swapState('c3_dopo_errore_B');
+
+  // ---- rientro: tentativo C (SYMBOLIC_OVERREACH) ----
+  await press('KeyT');
+  await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // Confronta
+  await press('Enter'); await press('ArrowDown'); await press('Enter'); // coppia → widget diretto (già aperto)
+  results.checks.reopen_no_intro = (JSON.stringify(widgetOpts()) === JSON.stringify(['b8_a', 'b8_c']));
+  await press('ArrowDown'); await press('Enter'); // b8_c → feedback
+  await stopIf('07');
+  await press('Enter'); // commit
+  results.checks.after_c_history = (JSON.stringify(S().b8_attempt_history) === JSON.stringify(['GEOGRAPHIC_OVERREACH', 'SYMBOLIC_OVERREACH']) &&
+    S().assistance_level === 2 && P2().formulation.status === 'unformulated');
+  results.checks.after_c_only_a = (JSON.stringify(widgetOpts()) === JSON.stringify(['b8_a']));
+  await stopIf('08');
+  await press('Escape'); // chiudi widget
+  await press('Escape'); // chiudi taccuino
+  swapState('c4_dopo_B_C');
+
+  // ---- rientro: risposta A (SOURCE_CORROBORATION) ----
+  await press('KeyT');
+  await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter');
+  await press('Enter'); await press('ArrowDown'); await press('Enter'); // coppia → widget [A]
+  await press('Enter'); // b8_a → feedback source_corroboration
+  results.checks.feedback_a_before_commit = (!!document.querySelector('[data-page-id="m4.b8.feedback.source_corroboration"]') &&
+    P2().formulation.status === 'unformulated');
+  await stopIf('09');
+  await press('Enter'); // commit → P2 formulata → confronto completato → menu
+  records.A.state_after_commit = { 'P2.formulation.status': P2().formulation.status,
+    'P2.formulation.created_from': P2().formulation.created_from.slice(), 'P2.factual_status': P2().factual_status };
+  results.checks.p2_formulated = (P2().formulation.status === 'formulated' &&
+    JSON.stringify(P2().formulation.created_from) === JSON.stringify(['E6A_CUORE_INTERO', 'T_JAMES_EST']) &&
+    P2().factual_status === 'unconfirmed');
+  var cmp = JSON.parse(NR.serialize(S())).comparisons.cmp_e6a_tjames;
+  results.checks.comparison_completed = (cmp.opened === true && cmp.completed === true && cmp.result === 'SOURCE_CORROBORATION' &&
+    JSON.stringify(cmp.attempts) === JSON.stringify(['GEOGRAPHIC_OVERREACH', 'SYMBOLIC_OVERREACH', 'SOURCE_CORROBORATION']));
+
+  // ---- proposizioni: FORMULATA, NON CONFERMATA ----
+  await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // Proposizioni
+  var pText = nbText();
+  results.checks.p2_shown_formulated = (pText.indexOf('FORMULATA') >= 0);
+  await stopIf('10');
+  results.checks.p2_shown_unconfirmed = (pText.indexOf('NON CONFERMATA') >= 0);
+  await stopIf('11');
+  // participant build: niente ID interni, reason code, assistenza
+  results.checks.notebook_hides_internals = (pText.indexOf('assist') === -1 && pText.indexOf('m4.') === -1 &&
+    pText.indexOf('SOURCE_CORROBORATION') === -1 && pText.indexOf('GEOGRAPHIC') === -1 &&
+    pText.indexOf('SYMBOLIC') === -1 && pText.indexOf('reason') === -1 && pText.indexOf('P2') === -1);
+  results.checks.assistance_in_state_not_ui = (S().assistance_level === 2 && nbText().toLowerCase().indexOf('assist') === -1);
+  await stopIf('12');
+  // B3.2 — tre esiti della coppia: completed ≠ none
+  results.checks.completed_comparison_not_selectable = (NR.notebookActions(S(), A.getMission()).length === 0);
+  await press('Escape'); // → menu
+  await press('Escape'); // chiudi il taccuino
+  // terza evidenza (Gerard, via runtime) per poter formare una coppia estranea
+  var pg = NR.prepareNode(S(), A.getMission(), 'gerard_a2'); NR.commitNode(S(), A.getMission(), pg);
+  await press('KeyT');
+  await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // Confronta (3 voci)
+  var preNoMatch = NR.serialize(S());
+  await press('Enter'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // E6A + E5 → nessuna relazione
+  results.checks.unrelated_pair_still_no_link = !!document.querySelector('[data-page-id="m4.b7.adapter.no_link"]');
+  await press('Enter'); // chiudi la riga → menu
+  results.checks.unrelated_pair_no_state_write = (NR.serialize(S()) === preNoMatch);
+  await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // Confronta
+  var preRecall = NR.serialize(S());
+  await press('Enter'); await press('ArrowDown'); await press('Enter'); // E6A + T_JAMES → nesso GIÀ registrato
+  results.checks.completed_pair_reports_registered_link = !!document.querySelector('[data-page-id="m4.notebook.comparison_already_recorded"]');
+  results.checks.completed_pair_does_not_show_no_link = !document.querySelector('[data-page-id="m4.b7.adapter.no_link"]');
+  await press('Enter'); // chiudi il richiamo → il taccuino atterra su Proposizioni
+  results.checks.completed_pair_no_state_write = (NR.serialize(S()) === preRecall);
+  results.checks.completed_pair_keeps_p2_visible = (nbText().indexOf('TACCUINO — PROPOSIZIONI') >= 0 && nbText().indexOf('FORMULATA') >= 0);
+  await press('Escape'); await press('Escape'); // chiudi tutto
+  results.checks.full_overlay_has_no_internal_tokens = (tokenViolations.length === 0);
+  results.token_violations = tokenViolations;
+  swapState('c5_dopo_formulazione');
+
+  // dopo il load: confronto completato NON riapplicabile
+  var node = A.getMission().nodes.filter(function (n) { return n.id === 'cmp_e6a_tjames'; })[0];
+  results.checks.no_feedback_reapplied = (NR.availableChoices(S(), A.getMission(), node).length === 0 &&
+    JSON.parse(NR.serialize(S())).comparisons.cmp_e6a_tjames.completed === true);
+  results.checks.lease_free_at_end = !A.active();
+
+  // il lease non tocca mai zero tra il commit di B e il widget successivo
+  var evs = A.events, iB = -1, iW = -1;
+  for (var i = 0; i < evs.length; i++) {
+    if (iB === -1 && evs[i].event === 'commit' && evs[i].ok) {
+      // primo commit di scelta dopo l'apertura del confronto
+      var prior = evs.slice(0, i).some(function (x) { return x.event === 'choice_confirmed' && x.choice_id === 'b8_b'; });
+      if (prior) iB = i;
+    }
+    if (iB >= 0 && i > iB && evs[i].event === 'widget_opened' && iW === -1) { iW = i; break; }
+  }
+  var minD = 99;
+  for (var j = iB; j <= iW && j >= 0; j++) if (evs[j] && evs[j].depth !== undefined) minD = Math.min(minD, evs[j].depth);
+  results.checks.lease_held_through_retry = (iB >= 0 && iW > iB && minD >= 1);
+  results.checks.no_console_errors = (results.console_errors.length === 0);
+
+  results.record_critico_B = records.B;
+  results.record_critico_A = records.A;
+  results.all_pass = Object.keys(results.checks).every(function (k) { return results.checks[k] === true; });
+  document.getElementById('log').textContent = JSON.stringify({ results: results, events: A.events }, null, 1);
+  document.title = results.all_pass ? 'B3-PASS' : 'B3-FAIL';
+}
+
+window.addEventListener('load', function () {
+  var q = new URLSearchParams(location.search);
+  STOP = q.get('shot');
+  setTimeout(function () { seq(); }, 300);
+});
+</script>
+</body>
+</html>

@@ -13,6 +13,7 @@
   var last = 0, tGlobal = 0;
   var uiLayoutMode = '';
   var caseUiSignature = '';
+  var dialogueLiveSignature = '';
   var TILE = 16, VW = 160, VH = 144; // viewport GBC: 10x9 metatile
   var UW = VW;                       // larghezza UI dinamica (fullscreen)
   // 16 px/tile: 0.12 completava un'intera cella in ~133 ms e faceva leggere
@@ -82,6 +83,8 @@
       dialogue: null,          // {id, def, pages, i, replay}
       menu: false,
       menuIndex: 0,
+      menuDocument: false,
+      menuPage: 0,
       fade: 0, fadePhase: 0,   // 0 niente, 1 uscita, 2 rientro
       warp: null,
       lastBump: -9999
@@ -368,8 +371,13 @@
       // direzione resta in coda per il movimento alla chiusura.
       if (S && S.menu) {
         clearHeldInputs();
-        if (a === 'up') moveMenuSelection(-1);
-        else if (a === 'down') moveMenuSelection(1);
+        if (S.menuDocument) {
+          if (a === 'up' || a === 'left') moveDocumentPage(-1);
+          else if (a === 'down' || a === 'right') moveDocumentPage(1);
+        } else {
+          if (a === 'up') moveMenuSelection(-1);
+          else if (a === 'down') moveMenuSelection(1);
+        }
         return;
       }
       if (held.indexOf(a) < 0) {
@@ -414,8 +422,45 @@
     audioSfx('page');
   }
 
+  function selectedClueDocument() {
+    normalizeMenuIndex();
+    if (!S.clues.length) return null;
+    var clue = GAME.Data.clues[S.clues[S.menuIndex]];
+    if (!clue || !clue.document || !Array.isArray(clue.document.pages) || !clue.document.pages.length) return null;
+    return clue.document;
+  }
+
+  function openSelectedClue() {
+    if (!selectedClueDocument()) return false;
+    S.menuDocument = true;
+    S.menuPage = 0;
+    caseUiSignature = '';
+    audioSfx('page');
+    return true;
+  }
+
+  function closeDocument() {
+    S.menuDocument = false;
+    S.menuPage = 0;
+    caseUiSignature = '';
+    audioSfx('menu_close');
+  }
+
+  function moveDocumentPage(delta) {
+    var doc = selectedClueDocument();
+    if (!doc) { closeDocument(); return; }
+    var next = clamp((S.menuPage || 0) + delta, 0, doc.pages.length - 1);
+    if (next === S.menuPage) return;
+    S.menuPage = next;
+    caseUiSignature = '';
+    audioSfx('page');
+  }
+
   function setMenu(open) {
     S.menu = !!open;
+    S.menuDocument = false;
+    S.menuPage = 0;
+    caseUiSignature = '';
     clearHeldInputs();
     if (S.menu) normalizeMenuIndex();
     audioSfx(S.menu ? 'menu_open' : 'menu_close');
@@ -451,13 +496,20 @@
     }
     if (S.mode !== 'play') return;
     if (S.dialogue) { advanceDialogue(); return; }
-    if (S.menu) { setMenu(false); return; }
+    if (S.menu) {
+      if (!S.menuDocument) { openSelectedClue(); return; }
+      var doc = selectedClueDocument();
+      if (doc && S.menuPage < doc.pages.length - 1) moveDocumentPage(1);
+      else closeDocument();
+      return;
+    }
     interact();
   }
 
   function pressB() {
     if (S.mode === 'title') { pressN(); return; } // su touch il tasto B = nuova partita
     if (S.mode !== 'play' || S.fadePhase !== 0 || S.dialogue) return;
+    if (S.menu && S.menuDocument) { closeDocument(); return; }
     setMenu(!S.menu);
   }
 
@@ -525,7 +577,10 @@
         var lines = RF.wrapChars(String(page.text || '').replace(/§/g, String(S.clues.length)), 24);
         if (!lines.length) lines = [''];
         for (var li = 0; li < lines.length; li += 2) {
-          pages.push({ name: page.name || '', text: lines.slice(li, li + 2).join('\n') });
+          pages.push({
+            name: page.name || '', portrait: page.portrait || '',
+            text: lines.slice(li, li + 2).join('\n')
+          });
         }
       });
     }
@@ -940,20 +995,24 @@
   function drawDialogue() {
     var d = S.dialogue;
     var page = d.pages[d.i];
-    // Box chiaro classico: protagonista restano parole, non cornice.
+    var Portraits = GAME.Portraits;
+    var uiInk = Portraits ? Portraits.palette.ink : '#181818';
+    // Box e card non consumano righe: testo conserva due righe complete.
     var bw = Math.min(UW, 160);
     var bx = Math.floor((UW - bw) / 2);
     var by = 96, bh = 48;
-    RF.frame(ctx, bx, by, bw, bh);
+    if (Portraits) Portraits.frame(ctx, bx, by, bw, bh);
+    else RF.frame(ctx, bx, by, bw, bh);
     var str = page.text.replace(/§/g, String(S.clues.length));
     var lines = RF.wrapFixed(str, bw - 16, 1);
     for (var i = 0; i < Math.min(2, lines.length); i++) {
-      RF.drawFixed(ctx, lines[i], bx + 8, by + 8 + i * 16, '#181818');
+      RF.drawFixed(ctx, lines[i], bx + 8, by + 8 + i * 16, uiInk);
     }
-    ctx.fillStyle = '#181818';
+    ctx.fillStyle = uiInk;
     ctx.fillRect(bx + bw - 15, by + 37, 5, 1);
     ctx.fillRect(bx + bw - 14, by + 38, 3, 1);
     ctx.fillRect(bx + bw - 13, by + 39, 1, 1);
+    if (Portraits) Portraits.drawCard(ctx, page.portrait, page.name, bx + 8, by - 35);
   }
 
   function drawMenu() {
@@ -963,6 +1022,12 @@
     var mx = Math.floor((UW - mw) / 2);
     var px = mx + 9, innerW = mw - 18;
     box(mx, 4, mw, 136);
+
+    var openDocument = S.menuDocument ? selectedClueDocument() : null;
+    if (openDocument) {
+      drawMenuDocument(mx, mw, px, innerW, openDocument);
+      return;
+    }
 
     // Gerarchia: fascicolo -> obiettivo attivo -> inventario prove.
     text('FASCICOLO // CASO PALMER', px, 10, '#183225', 'bold 8px monospace');
@@ -1016,7 +1081,31 @@
       }
     }
     rule(px, 132, innerW, '#394566');
-    text(GAME.touchMode ? 'SCORRI  X CHIUDE' : 'SU/GIU CAMBIA  X CHIUDE',
+    var selectedDoc = selectedClueDocument();
+    text(GAME.touchMode
+           ? (selectedDoc ? 'TOCCA APRI  SCORRI  X CHIUDE' : 'SCORRI  X CHIUDE')
+           : (selectedDoc ? 'SU/GIU CAMBIA  INVIO APRE  X CHIUDE' : 'SU/GIU CAMBIA  X CHIUDE'),
+         mx + mw / 2, 133, '#31543a', '6px monospace', 'center');
+  }
+
+  function drawMenuDocument(mx, mw, px, innerW, doc) {
+    var page = doc.pages[S.menuPage] || doc.pages[0];
+    text(fitText('DOCUMENTO // ' + String(doc.title || 'PROVA').toUpperCase(), innerW - 38), px, 10,
+         '#183225', 'bold 7px monospace');
+    text((S.menuPage + 1) + ' / ' + doc.pages.length, mx + mw - 10, 10,
+         '#63834a', '6px monospace', 'right');
+    rule(px, 23, innerW, '#6f6040');
+    text(String(page.label || 'PAGINA').toUpperCase(), px, 31, '#63834a', 'bold 7px monospace');
+    ctx.fillStyle = '#f5efcf';
+    ctx.fillRect(px, 43, innerW, 78);
+    ctx.fillStyle = '#668448';
+    ctx.fillRect(px, 43, 2, 78);
+    var lines = wrap(page.text || '', innerW - 14);
+    for (var i = 0; i < Math.min(8, lines.length); i++) {
+      text(lines[i], px + 8, 50 + i * 9, '#183225', '7px monospace');
+    }
+    rule(px, 132, innerW, '#394566');
+    text(GAME.touchMode ? 'SCORRI PAGINE  TOCCA AVANTI  X INDIETRO' : '< > PAGINE  INVIO AVANTI  X INDIETRO',
          mx + mw / 2, 133, '#31543a', '6px monospace', 'center');
   }
 
@@ -1029,18 +1118,51 @@
     var listEl = document.getElementById('case-evidence-list');
     var objectiveEl = document.getElementById('case-objective-copy');
     var countEl = document.getElementById('case-count');
+    var headingEl = document.getElementById('case-heading-copy');
     var noteEl = document.getElementById('case-note');
     var helpEl = document.getElementById('case-help');
+    var documentEl = document.getElementById('case-document');
+    var documentTitleEl = document.getElementById('case-document-title');
+    var documentLabelEl = document.getElementById('case-document-label');
+    var documentCopyEl = document.getElementById('case-document-copy');
     var active = !!(rootEl && S.mode === 'play' && S.menu);
     document.body.setAttribute('data-menu', active ? 'true' : 'false');
     if (rootEl) rootEl.setAttribute('aria-hidden', active ? 'false' : 'true');
-    if (!active || !listEl || !objectiveEl || !countEl || !noteEl || !helpEl) return false;
+    if (!active || !listEl || !objectiveEl || !countEl || !headingEl || !noteEl || !helpEl) return false;
 
     var objective = GAME.Data.objectiveFor(S, checkCond);
-    var signature = [S.menuIndex, S.clues.join('|'), objective, GAME.touchMode ? 'touch' : 'keys'].join('::');
+    var signature = [S.menuIndex, S.menuDocument ? 'document' : 'list', S.menuPage || 0,
+      S.clues.join('|'), objective, GAME.touchMode ? 'touch' : 'keys'].join('::');
     if (signature === caseUiSignature) return true;
     caseUiSignature = signature;
     normalizeMenuIndex();
+
+    var openDocument = S.menuDocument ? selectedClueDocument() : null;
+    document.body.setAttribute('data-case-view', openDocument ? 'document' : 'list');
+    if (openDocument && documentEl && documentTitleEl && documentLabelEl && documentCopyEl) {
+      var page = openDocument.pages[S.menuPage] || openDocument.pages[0];
+      headingEl.textContent = 'Documento · ' + (openDocument.title || 'Prova');
+      countEl.textContent = 'Pagina ' + (S.menuPage + 1) + ' / ' + openDocument.pages.length;
+      documentTitleEl.textContent = openDocument.title || 'Documento repertato';
+      documentLabelEl.textContent = page.label || 'Pagina repertata';
+      documentCopyEl.textContent = page.text || '';
+      while (helpEl.firstChild) helpEl.removeChild(helpEl.firstChild);
+      if (GAME.touchMode) {
+        helpPart('SCORRI SU / GIÙ', 'sfoglia pagine');
+        helpPart('TOCCA', S.menuPage < openDocument.pages.length - 1 ? 'pagina seguente' : 'torna al fascicolo');
+        helpPart('X', 'torna al fascicolo');
+      } else {
+        helpPart('FRECCE', 'sfogliano pagine');
+        helpPart('INVIO oppure Z', S.menuPage < openDocument.pages.length - 1 ? 'pagina seguente' : 'torna al fascicolo');
+        helpPart('ESC oppure X', 'torna al fascicolo');
+      }
+      return true;
+    }
+
+    S.menuDocument = false;
+    S.menuPage = 0;
+    document.body.setAttribute('data-case-view', 'list');
+    headingEl.textContent = 'Fascicolo · Caso Palmer';
 
     objectiveEl.textContent = objective;
     countEl.textContent = S.clues.length + ' / ' + Object.keys(GAME.Data.clues).length;
@@ -1080,9 +1202,11 @@
     }
     if (GAME.touchMode) {
       helpPart('SCORRI SU / GIÙ', 'cambia prova');
+      if (selectedClueDocument()) helpPart('TOCCA', 'apre documento');
       helpPart('X', 'chiude fascicolo');
     } else {
       helpPart('FRECCE ↑ / ↓', 'cambiano prova');
+      if (selectedClueDocument()) helpPart('INVIO oppure Z', 'apre documento');
       helpPart('ESC oppure X', 'chiude fascicolo');
     }
     return true;
@@ -1253,15 +1377,24 @@
 
   function syncDialogueUi() {
     if (typeof document === 'undefined' || typeof document.getElementById !== 'function') return;
-    var active = !!(r3d && S.mode === 'play' && S.dialogue);
+    var canvasActive = !!(S.mode === 'play' && S.dialogue);
+    var active = !!(r3d && canvasActive);
     document.body.setAttribute('data-dialogue', active ? 'true' : 'false');
+    var live = document.getElementById('dialogue-live');
+    if (!canvasActive) { dialogueLiveSignature = ''; if (live) live.textContent = ''; return; }
+    var d = S.dialogue;
+    var page = d.pages[d.i] || {};
+    var liveCopy = (page.name ? page.name + '. ' : '') + String(page.text || '').replace(/§/g, String(S.clues.length));
+    var liveSignature = d.id + '|' + d.i + '|' + liveCopy;
+    if (live && liveSignature !== dialogueLiveSignature) {
+      dialogueLiveSignature = liveSignature;
+      live.textContent = liveCopy;
+    }
     if (!active) return;
     var speaker = document.getElementById('dialogue-speaker');
     var context = document.getElementById('dialogue-context');
     var copy = document.getElementById('dialogue-text');
     if (!speaker || !copy) return;
-    var d = S.dialogue;
-    var page = d.pages[d.i] || {};
     speaker.textContent = page.name || 'APPUNTO';
     if (context) {
       context.textContent = page.name === 'COOPER'
@@ -1301,6 +1434,7 @@
     if (S.mode === 'end') { drawEnd(); return; }
     drawWorld(dt); // (gestisce da sé la trasformazione)
     if (ctx.setTransform) ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
+    if (!r3d && GAME.GoldTone) GAME.GoldTone.apply(ctx, VW, VH, S.mapId);
     // WebGL usa il pannello HTML sincronizzato da syncDialogueUi().
     // Disegnare anche il box legacy sul canvas causa un cross-fade visibile:
     // prima compare il vecchio dialogo, poi #dialogue-ui lo sostituisce.

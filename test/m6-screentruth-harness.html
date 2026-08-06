@@ -1,0 +1,175 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>m6-screentruth-harness</title>
+<style>body{margin:0;background:#000}#narrative{position:fixed;inset:0;pointer-events:none}.nw-focus{font-weight:bold}#log{position:fixed;left:0;bottom:0;max-height:42%;overflow:auto;background:#111;color:#ddd;font:11px monospace;white-space:pre-wrap;padding:6px;z-index:99}</style>
+</head>
+<body>
+<canvas id="gl" width="960" height="640"></canvas>
+<canvas id="game" width="480" height="320"></canvas>
+<div id="narrative"></div>
+<div id="log">running…</div>
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=harness-r6"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=harness-r6"></script>
+<script src="../js/engine.js?v=harness-r6"></script>
+<script src="../js/render3d.js"></script>
+<script src="../js/glue.js?v=harness-r6"></script>
+<script src="../js/main.js"></script>
+<script src="../js/narrative-runtime.js"></script>
+<script src="../js/narrative-ui.js"></script>
+<script src="../js/narrative-notebook.js"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
+<script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
+<script src="../js/narrative-save.js"></script>
+<script>
+/* C6-D SCREEN TRUTH — record dei momenti critici di M6: ogni effetto nasce SOLO
+ * dopo l'ultima pagina del nodo che lo produce. Per ogni record cattura, dalla
+ * UI VERA congelata pre-commit: page_id, visible_text, state_before → committa →
+ * state_after. Asserisce che il campo-effetto è falso PRIMA e vero DOPO. */
+var LOCK = 30;
+var out = { checks: {}, records: [], errors: [] };
+window.onerror = function (m, s, l) { out.errors.push(String(m) + ' @' + l); };
+window.addEventListener('unhandledrejection', function (e) { out.errors.push('unhandled: ' + (e.reason && e.reason.message || e.reason)); });
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(c) { window.dispatchEvent(new KeyboardEvent('keydown', { code: c, bubbles: true })); window.dispatchEvent(new KeyboardEvent('keyup', { code: c, bubbles: true })); }
+async function press(c) { key(c); await wait(LOCK + 45); }
+function pageEls() { return [].slice.call(document.querySelectorAll('#narrative [data-page-id]')); }
+function pageIds() { return pageEls().map(function (o) { return o.getAttribute('data-page-id'); }); }
+function visibleText() { var el = document.querySelector('#narrative'); return (el ? el.textContent : '').replace(/\s+/g, ' ').trim(); }
+function widgetOpts() { return [].map.call(document.querySelectorAll('.nw-root:not(.nb-root) .nw-opt'), function (o) { return o.getAttribute('data-choice-id'); }); }
+var FREEZE_AT = new URLSearchParams(location.search).get('shot');
+async function advanceToPage(id, max) { max = max || 30; for (var i = 0; i < max; i++) { if (pageIds().indexOf(id) >= 0) break; await press('Enter'); } if (id === FREEZE_AT && pageIds().indexOf(id) >= 0) { document.title = 'SHOT ' + id; await new Promise(function () { }); } return pageIds().indexOf(id) >= 0; }
+async function advanceToWidget(cid, max) { max = max || 30; for (var i = 0; i < max; i++) { if (widgetOpts().indexOf(cid) >= 0) return true; await press('Enter'); } return widgetOpts().indexOf(cid) >= 0; }
+async function chooseChoice(id) { var o = widgetOpts(), idx = o.indexOf(id); if (idx < 0) return false; for (var k = 0; k < idx; k++) await press('ArrowDown'); await press('Enter'); return true; }
+
+async function run() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter, D = GAME.NarrativeData;
+  if (GAME.Render3D) GAME.Render3D.render = function () {};
+  function S() { return A.getState(); }
+  var M4 = D.missions.M4, M5 = D.missions.M5, M6 = D.missions.M6;
+  var domains = {}; for (var nm in D.enums.values_allowed) domains[nm] = D.enums.enums[D.enums.values_allowed[nm]];
+  NR.setValueDomains(domains);
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK, missions: [M4, M5, M6] });
+
+  function seedFerry() {
+    var s = NR.createState(); NR.applyEffects(s, [{ set: 'sogno_fatto' }]);
+    function dn(m, id) { var p = NR.prepareNode(s, m, id); if (!p.ok) return; NR.commitNode(s, m, p); }
+    function dc(m, at, ch) { var n = m.nodes.filter(function (x) { return x.id === at; })[0]; var p = NR.prepareChoice(s, m, n, ch); if (!p.ok) return; var c = NR.commitChoice(s, m, n, p); if (c.goto) dn(m, c.goto); }
+    dn(M4, 'truman_a2'); dn(M4, 'james_a2'); dn(M4, 'cmp_e6a_tjames'); dc(M4, 'cmp_e6a_tjames', 'b8_a');
+    var presN = M4.nodes.filter(function (n) { return n.id === 'present_truman_m4'; })[0];
+    var pp = NR.preparePresentation(s, M4, presN, 'P2'); NR.commitPresentation(s, M4, presN, pp);
+    dn(M5, 'm5_bridge'); dn(M5, 'm5_discovery'); dn(M5, 'm5_mound'); dn(M5, 'm5_ring');
+    var pt = NR.prepareNode(s, M5, 'm5_theory_initial'); NR.commitNode(s, M5, pt); dc(M5, 'm5_theory_initial', 'theory_degeneration');
+    dn(M5, 'm5_scene');
+    var pv = NR.prepareNode(s, M5, 'm5_theory_revision'); NR.commitNode(s, M5, pv); dc(M5, 'm5_theory_revision', 'revision_keep');
+    var pi = NR.prepareNode(s, M5, 'm5_report_intro'); NR.commitNode(s, M5, pi); dc(M5, 'm5_s1', 's1_institutional');
+    return s;
+  }
+  function snap(keys) { var st = S(), o = {}; keys.forEach(function (k) { if (k[0] === 'e') o[k] = st.evidence[k.slice(2)] === true; else if (k[0] === 'p') o[k] = NR.peekProp(st, k.slice(2)).formulation.status; else if (k[0] === 'v') o[k] = st.values[k.slice(2)]; else o[k] = st.flags[k] === true; }); return o; }
+  function rec(id, page, field, before, after) {
+    var ok = (before === false || before === undefined || before === 'unformulated') && (after === true || after === 'formulated' || (typeof after === 'string' && after.length));
+    out.records.push({ id: id, page_id: page, effect: field, state_before: before, state_after: after, visible_text_len: 0, delayed_ok: ok });
+    out.checks['effect_only_after_last_page: ' + id + ' (' + field + ')'] = ok;
+  }
+  async function interactAt(map, x, y, dir) { E.loadMap(map, x, y, dir); await wait(120); await press('Enter'); }
+
+  A.setState(seedFerry());
+  // R1 — TATTICA: è un MENU DI SCELTA (record_type: choice_menu), NON una pagina.
+  // m6_tactic è null mentre il widget è a schermo, scritto solo alla scelta.
+  await interactAt('oej', 7, 6, 'up');
+  await advanceToWidget('tactic_prova');
+  var choiceIds1 = widgetOpts().slice();
+  var before1 = S().values.m6_tactic, txt1 = visibleText();
+  await chooseChoice('tactic_prova');
+  var after1 = S().values.m6_tactic;
+  out.records.push({ id: 'R1_tactic', record_type: 'choice_menu', node_id: 'm6_tactic', choice_ids: choiceIds1, effect: 'm6_tactic', state_before: before1 === undefined ? null : before1, state_after: after1, visible_text: txt1.slice(0, 120) });
+  out.checks['choice_menu_effect_only_after_choice: R1 m6_tactic'] = (before1 === undefined && after1 === 'prova' && choiceIds1.length === 3 && choiceIds1.indexOf('tactic_prova') >= 0);
+
+  // R2 — RAMO ultima pagina: ammissione+risorsa false finché non committa il nodo
+  await advanceToPage('m6.b5.prova.p09');
+  var b2 = snap(['jacques_admitted_presence', 'e:JACQUES_MIDNIGHT_CLAIM']); var t2 = visibleText();
+  await press('Enter'); await wait(120);
+  var a2 = snap(['jacques_admitted_presence', 'e:JACQUES_MIDNIGHT_CLAIM']);
+  out.records.push({ id: 'R2_branch_last', page_id: 'm6.b5.prova.p09', state_before: b2, state_after: a2, visible_text: t2.slice(-140) });
+  out.checks['effect_only_after_last_page: R2 admission'] = (b2.jacques_admitted_presence === false && a2.jacques_admitted_presence === true);
+  out.checks['effect_only_after_last_page: R2 resource'] = (b2['e:JACQUES_MIDNIGHT_CLAIM'] === false && a2['e:JACQUES_MIDNIGHT_CLAIM'] === true);
+
+  // R3 — P5 prompt visibile: P5 unformulated, arresto NON preparabile
+  await advanceToPage('m6.b6b.p5.p01');
+  out.records.push({ id: 'R3_p5_prompt', page_id: 'm6.b6b.p5.p01', p5: NR.peekProp(S(), 'P5').formulation.status, arrest_preparable: NR.prepareNode(S(), M6, 'm6_arrest').ok, visible_text: visibleText().slice(-120) });
+  out.checks['R3 p5_prompt: P5 unformulated + arrest blocked'] = (NR.peekProp(S(), 'P5').formulation.status === 'unformulated' && NR.prepareNode(S(), M6, 'm6_arrest').ok === false);
+
+  // R4 — feedback opzione A visibile: P5 ancora unformulated, formulata solo dopo
+  await chooseChoice('p5_present');
+  await advanceToPage('m6.b6b.p5.feedback.present');
+  var b4 = NR.peekProp(S(), 'P5').formulation.status, t4 = visibleText();
+  await press('Enter'); await wait(120);
+  var a4 = NR.peekProp(S(), 'P5').formulation.status;
+  out.records.push({ id: 'R4_p5_feedback', page_id: 'm6.b6b.p5.feedback.present', effect: 'P5', state_before: b4, state_after: a4, visible_text: t4.slice(-120) });
+  out.checks['effect_only_after_last_page: R4 P5'] = (b4 === 'unformulated' && a4 === 'formulated');
+
+  // R5 — ARRESTO ultima pagina: jacques_preso false finché non committa
+  await advanceToPage('m6.b7.arrest.p07');
+  var b5 = S().flags.jacques_preso === true, t5 = visibleText();
+  await press('Enter'); await wait(120);
+  var a5 = S().flags.jacques_preso === true;
+  out.records.push({ id: 'R5_arrest_last', page_id: 'm6.b7.arrest.p07', effect: 'jacques_preso', state_before: b5, state_after: a5, visible_text: t5.slice(-140) });
+  out.checks['effect_only_after_last_page: R5 jacques_preso'] = (b5 === false && a5 === true);
+
+  // vai alla centrale: B7b poi B8
+  await advanceToPage('m6.b7.arrest.p07'); // già oltre; chiudo la sessione arresto
+  var g = 0; while (A.active() && g++ < 8) await press('Enter');
+  await interactAt('sheriff', 6, 3, 'right'); var g2 = 0; while (A.active() && g2++ < 8) await press('Enter'); // return_night
+  // R6 — NOTIZIA ultima pagina: TUTTI gli effetti del commit + il cambio d'obiettivo
+  await interactAt('sheriff', 2, 5, 'down');
+  await advanceToPage('m6.b8.news.cooper_prova');
+  var b6 = snap(['jacques_dead', 'jacques_death_suspicious', 'jacques_testimony_lost', 'm6_resource_lost']);
+  var p6b = NR.peekProp(S(), 'P9').formulation.status, ob6 = (NR.activeObjective(S(), M6) || {}).id, t6 = visibleText();
+  await press('Enter'); await wait(120);
+  var a6 = snap(['jacques_dead', 'jacques_death_suspicious', 'jacques_testimony_lost', 'm6_resource_lost']);
+  var p6a = NR.peekProp(S(), 'P9').formulation.status, oa6 = (NR.activeObjective(S(), M6) || {}).id;
+  out.records.push({ id: 'R6_news_last', page_id: 'm6.b8.news.cooper_prova', state_before: Object.assign({ P9: p6b, objective: ob6 }, b6), state_after: Object.assign({ P9: p6a, objective: oa6 }, a6), visible_text: t6.slice(-140) });
+  out.checks['effect_only_after_last_page: R6 jacques_dead'] = (b6.jacques_dead === false && a6.jacques_dead === true);
+  out.checks['R6 news: suspicious stays false'] = (b6.jacques_death_suspicious === false && a6.jacques_death_suspicious === false);
+  out.checks['R6 news: testimony_lost+resource_lost+P9 only after commit'] = (b6.jacques_testimony_lost === false && a6.jacques_testimony_lost === true && b6.m6_resource_lost === false && a6.m6_resource_lost === true && p6b === 'unformulated' && p6a === 'formulated');
+  out.checks['R6 news: objective flips obj_m6_4b -> obj_m6_5'] = (ob6 === 'obj_m6_4b' && oa6 === 'obj_m6_5');
+
+  // R7 — OSPEDALE ultima pagina: jacques_death_suspicious false finché non committa
+  var g3 = 0; while (A.active() && g3++ < 8) await press('Enter');
+  await interactAt('hospital', 4, 4, 'up');
+  await advanceToPage('m6.b8b.hospital.p04');
+  var b7 = snap(['jacques_death_suspicious', 'night_log_no_visitor']); var t7 = visibleText();
+  await press('Enter'); await wait(120);
+  var a7 = snap(['jacques_death_suspicious', 'night_log_no_visitor']);
+  out.records.push({ id: 'R7_hospital_last', page_id: 'm6.b8b.hospital.p04', state_before: b7, state_after: a7, visible_text: t7.slice(-140) });
+  out.checks['effect_only_after_last_page: R7 suspicious'] = (b7.jacques_death_suspicious === false && a7.jacques_death_suspicious === true);
+  out.checks['effect_only_after_last_page: R7 night_log'] = (b7.night_log_no_visitor === false && a7.night_log_no_visitor === true);
+
+  // page id dei record = pagine dei dati generati M6
+  var genIds = {}; (function walk(o) { if (Array.isArray(o)) return o.forEach(walk); if (o && typeof o === 'object') { if (o.id && o.text !== undefined && o.mode) genIds[o.id] = true; for (var k in o) walk(o[k]); } })(M6);
+  // ogni record che DICHIARA un page_id deve puntare a una pagina dei dati generati
+  // (nessuna eccezione: R1 è un choice_menu senza page_id)
+  out.checks['record_page_ids_are_generated_data'] = out.records.every(function (r) { return !r.page_id || genIds[r.page_id] === true; });
+  // testo visibile catturato non vuoto + nessun token interno
+  var TOK = ['JACQUES_MIDNIGHT', 'jacques_admitted', 'jacques_preso', 'jacques_dead', 'jacques_death', 'm6_tactic', 'ATTRIBUTION_OVERREACH', 'proposition_path', 'm6.b'];
+  out.checks['records_have_visible_text'] = out.records.every(function (r) { return typeof r.visible_text === 'string' && r.visible_text.length > 0; });
+  out.checks['no_internal_tokens_in_visible_text'] = out.records.every(function (r) { return TOK.every(function (t) { return (r.visible_text || '').indexOf(t) < 0; }); });
+
+  var allOk = out.errors.length === 0 && Object.keys(out.checks).every(function (k) { return out.checks[k] === true; });
+  out.pass = allOk; out.total = Object.keys(out.checks).length;
+  out.passed = Object.keys(out.checks).filter(function (k) { return out.checks[k]; }).length;
+  out.failed = Object.keys(out.checks).filter(function (k) { return out.checks[k] !== true; });
+  document.getElementById('log').textContent = JSON.stringify(out, null, 1);
+  document.title = (allOk ? 'M6TRUTH-PASS ' : 'M6TRUTH-FAIL ') + out.passed + '/' + out.total;
+}
+window.addEventListener('load', function () { setTimeout(function () { run().catch(function (e) { out.errors.push('run: ' + (e && e.message || e)); document.getElementById('log').textContent = JSON.stringify(out, null, 1); document.title = 'M6TRUTH-ERR ' + (e && e.message || e); }); }, 400); });
+</script>
+</body>
+</html>

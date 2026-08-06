@@ -36,19 +36,14 @@
    * invece di un colore scuro fisso identico per tutti i landmark. */
   function shade(hex, amount) { return lighter(hex, amount); }
 
-  /* R59 — luce lunare su TUTTI i materiali dello sprite.
-   * Fino a R58 la notte toccava solo la giacca di Cooper: capelli
-   * (#6e4526), incarnato (#f0a868), pantaloni (#303b43) e contorno
-   * (#202820) erano identici byte per byte fra i due frame, con gli stessi
-   * conteggi di pixel. Conseguenze misurate: incarnato a L 179 in un
-   * fotogramma con il 99 % dei pixel sotto 146 (il viso brillava mentre la
-   * giacca andava a nero) e ombra giacca a L 15 contro contorno L 38 —
-   * l'interno scendeva SOTTO il contorno e la sagoma leggeva bucata.
-   * nightify() comprime il rosso, conserva il blu e tiene ogni materiale
-   * interno sopra NIGHT_FLOOR, che sta sopra la luminanza del contorno
-   * notturno: il contorno resta il valore piu' scuro dello sprite. */
-  var NIGHT_INK = '#101828';   /* L 23,5 — il piu' scuro dello sprite */
-  var NIGHT_FLOOR = 32;        /* nessun materiale interno sotto questo */
+  /* R62 — la virata notturna sugli sprite e' stata rimossa (era nightify(),
+   * introdotta in R59). In gfx/overworld/npc_sprites.pal di Crystal i colori
+   * 1 e 2 sono identici in morn / day / nite / dark: di notte cambia solo
+   * l'indice di fondo. Con il filtro attivo l'incarnato di Cooper finiva a
+   * L 114,4 contro un terreno a L 117,5 — 3 punti di stacco, il viso
+   * spariva. Senza filtro sta a L 179,8: 62,3 punti. La tinta notturna del
+   * TERRENO (#7770a8, quasi identica al fondale nite di Crystal #7B73C5)
+   * resta dov'e'. */
 
   function rgbOf(hex) {
     var raw = String(hex || '').replace('#', '');
@@ -66,16 +61,6 @@
   }
 
   function luma(r, g, b) { return 0.2126 * r + 0.7152 * g + 0.0722 * b; }
-
-  function nightify(hex, isInk) {
-    if (isInk) return NIGHT_INK;
-    var c = rgbOf(hex);
-    if (!c) return hex;
-    var r = c[0] * 0.58, g = c[1] * 0.62 + 4, b = c[2] * 0.70 + 30;
-    var lift = NIGHT_FLOOR - luma(r, g, b);
-    if (lift > 0) { r += lift; g += lift; b += lift; }
-    return hexOf(r, g, b);
-  }
 
   function hash(x, y, salt) {
     var n = Math.imul((x | 0) + 37, 374761393) ^ Math.imul((y | 0) + 61, 668265263) ^ salt;
@@ -116,34 +101,38 @@
     }
   }
 
-  /* Prato: reticolo 8x8 authored (tre grappoli a croce, 1 centro scuro +
-   * 4 bracci medi, sfalsati in diagonale) — stesso principio di texture
-   * periodica del riferimento Gold (dither su reticolo di 8 px), non un
-   * fondale piatto con macchioline sparse. Quattro riflessioni dello
-   * stesso grappolo, scelte per colonna di tile (tx&3): dentro ogni tile
-   * resta un reticolo di 8 px perfetto (autocorrelazione alta, il gate
-   * misura questo), ma passando da una tile all'altra la fase cambia con
-   * periodo 4 tile, cosi' il prato non ripete lo stesso identico stampo
-   * ogni 16/32 px orizzontali — periodicita' che altrimenti inquinava la
-   * misura sulla fascia alberi (il prato intorno alle conifere e' fatto
-   * con lo stesso motivo di terreno). */
+  /* Prato: quattro densita' authored (0/4/8/12 segni su 64), media esatta
+   * 6. La matrice di fase 4x4 usa ogni densita' quattro volte: niente random,
+   * niente tappeto uniforme, grandi masse chiare come negli esterni di Gold. */
   var GRASS_8 = [
-    '00100000','01210000','00100000','00000100',
-    '01001210','12100100','01000000','00000000'
+    '00000000','00000000','00000000','00000000',
+    '00000000','00000000','00000000','00000000'
   ];
   var GRASS_8_H = [
-    '00000100','00001210','00000100','00100000',
-    '01210100','00100121','00000010','00000000'
+    '00000000','01000000','00000000','00000000',
+    '00000100','00000000','00100000','00000010'
   ];
   var GRASS_8_V = [
-    '00000000','01000000','12100100','01001210',
-    '00000100','00100000','01210000','00100000'
+    '01000010','00010000','00000000','10000000',
+    '00000100','00000001','00100000','00001000'
   ];
   var GRASS_8_HV = [
-    '00000000','00000010','00100121','01210100',
-    '00100000','00000100','00001210','00000100'
+    '01000100','00010000','10000001','00001000',
+    '00100000','00000100','01000010','10010000'
   ];
   var GRASS_8_VARIANTS = [GRASS_8, GRASS_8_H, GRASS_8_V, GRASS_8_HV];
+  var GRASS_8_PHASES = [
+    0, 2, 1, 3,
+    3, 1, 0, 2,
+    1, 3, 2, 0,
+    2, 0, 3, 1
+  ];
+
+  function grass8At(tx, ty, qx, qy) {
+    return GRASS_8_VARIANTS[GRASS_8_PHASES[
+      ((((ty * 2) + qy) & 3) << 2) | (((tx * 2) + qx) & 3)
+    ]];
+  }
 
   /* Ghiaia piazza: 7 segni su 64 (10,9%). Ogni variante condivide quattro
    * posizioni con le adiacenti: lag 8 resta vicino a 0,52, non zero
@@ -279,16 +268,13 @@
       paint(ctx, TALL_GRASS, { 1: C.dark, 2: C.mid }, x, y);
       groundShadow(ctx, x, y, tx, ty, rows); return;
     }
-    /* Stampa il reticolo 8x8 due volte per asse: la tile 16x16 e' sempre
-     * l'esatto multiplo del passo 8 px, quindi il dither resta periodico
-     * anche attraversando i bordi fra tile adiacenti (autocorrelazione a
-     * lag 8 su tutta la mappa, non solo dentro la singola tile). */
-    var g8 = GRASS_8_VARIANTS[tx & 3];
+    /* Matrice authored 4x4 sul reticolo globale 8px: sei pixel per cella,
+     * continuita' fra metatile e variazione di fase anche lungo le righe. */
+    var qx, qy;
     R(ctx, x, y, 16, 16, C.grass);
-    paint(ctx, g8, { 1: C.mid, 2: C.dark }, x, y);
-    paint(ctx, g8, { 1: C.mid, 2: C.dark }, x + 8, y);
-    paint(ctx, g8, { 1: C.mid, 2: C.dark }, x, y + 8);
-    paint(ctx, g8, { 1: C.mid, 2: C.dark }, x + 8, y + 8);
+    for (qy = 0; qy < 2; qy++) for (qx = 0; qx < 2; qx++) {
+      paint(ctx, grass8At(tx, ty, qx, qy), { 1: C.mid, 2: C.dark }, x + qx * 8, y + qy * 8);
+    }
     groundShadow(ctx, x, y, tx, ty, rows);
   }
 
@@ -302,17 +288,19 @@
        * unico colore uniforme "combaciava" con se stesso a qualunque passo
        * (compreso il lag 32 misurato dal gate), gonfiando l'autosomiglianza
        * della fascia alberi indipendentemente da quanto variasse la sagoma. */
-      var tg8 = GRASS_8_VARIANTS[tx & 3];
-      paint(ctx, tg8, { 1: C.mid, 2: C.dark }, x, y);
-      paint(ctx, tg8, { 1: C.mid, 2: C.dark }, x + 8, y);
-      paint(ctx, tg8, { 1: C.mid, 2: C.dark }, x, y + 8);
-      paint(ctx, tg8, { 1: C.mid, 2: C.dark }, x + 8, y + 8);
+      var tqx, tqy;
+      for (tqy = 0; tqy < 2; tqy++) for (tqx = 0; tqx < 2; tqx++) {
+        paint(ctx, grass8At(tx, ty, tqx, tqy), { 1: C.mid, 2: C.dark }, x + tqx * 8, y + tqy * 8);
+      }
     }
     var treePalette = night ?
       (sycamore ? { 1: '#686898', 2: '#a0a0d0', 3: '#172838', 4: '#172838' } :
                    { 1: '#3d5068', 2: '#7278a8', 3: '#102838', 4: '#102838' }) :
-      (sycamore ? { 1: '#b0c868', 2: '#688848', 3: '#203830', 4: '#203830' } :
-                   { 1: '#78a850', 2: '#407048', 3: '#183830', 4: '#183830' });
+      /* Conifere di bordo: tre valori verdi scuri presi direttamente dalla
+       * master palette. La chioma resta distinta dal prato crema e forma la
+       * cornice 65-75% scura del riferimento, senza filtro o nuova logica. */
+      (sycamore ? { 1: '#a8be72', 2: '#63834a', 3: '#31543a', 4: '#31543a' } :
+                   { 1: '#63834a', 2: '#31543a', 3: '#183225', 4: '#183225' });
     /* Conifera 16x24: silhouette Gen II stretta, terrazze irregolari.
      * Selezione via hash(tx,ty) invece della tabella 4x4 fissa: la vecchia
      * tabella ripeteva lo stesso profilo ogni 2 tile (passo 32 px, la
@@ -995,6 +983,31 @@
       R(g, rightX, sy, 1, h, p[1]);
       R(g, rightX + 1, sy, 1, h, C.ink);
     }
+    /* Soglia esterna: pavimento grafico, non nuovo tile e non collisione.
+     * Copre solo i quattro pixel subito sotto porte incastonate in un
+     * edificio. Disegnata qui, sopra il terreno completo ma sotto entita'. */
+    if (!map.indoor) {
+      var rows = map.rows, ty, tx, row, side, px, py;
+      for (ty = 0; ty < rows.length; ty++) {
+        row = rows[ty];
+        for (tx = 0; tx < row.length; tx++) {
+          if (row.charAt(tx) !== 'D') continue;
+          side = cell(rows, tx - 1, ty);
+          if (!BUILDINGS[side]) side = cell(rows, tx + 1, ty);
+          if (!BUILDINGS[side]) side = cell(rows, tx, ty - 1);
+          if (!BUILDINGS[side]) continue;
+          p = BUILDINGS[side];
+          px = tx * 16 - cx;
+          /* Lodge alza facciata e porta di 8px; sua soglia segue il piede
+           * visivo. Altri esterni poggiano sulla riga subito successiva. */
+          py = (side === '8' ? ty * 16 + 8 : (ty + 1) * 16) - cy;
+          if (px < -16 || px > 160 || py < -4 || py > 144) continue;
+          R(g, px, py, 16, 4, C.ink);
+          R(g, px + 1, py, 14, 2, p[1]);
+          R(g, px + 2, py + 2, 12, 1, shade(p[1], -22));
+        }
+      }
+    }
   };
 
   function door(ctx, x, y, tx, ty, rows) {
@@ -1332,114 +1345,359 @@
   };
 
 
-  /* R57: le matrici Cooper erano cave dalla riga 0 (hairify() apriva anche
-   * la riga piu' alta del ciuffo, che tocca il bordo del canvas — nessun
-   * pixel di contorno sopra, i critici lo hanno misurato come "capelli col
-   * fondo direttamente sopra"). Ora ogni riga e' scritta a mano: la riga 0
-   * resta SEMPRE contorno pieno (chiude la sagoma), il riempimento 'k'
-   * comincia solo dalla riga 1 in poi, dove ha gia' un bordo sopra di se'.
-   * Stessa griglia condivisa (BODY_ROWS) per fronte/retro/profilo: testa
-   * 8px di riempimento contro torso 10px (prima erano identici, 12 e 12 —
-   * "un vaso, non una persona"), collo 4px fra i due, colonna di contorno
-   * fra mano e busto (riga braccia), gambe con tasto 'q' proprio invece
-   * dei due moncherini di solo contorno. */
-  var COOPER_BODY_ROWS = [
-    '......osso......', '....ooccccoo....', '...occcccccco...', '...osoccccoso...',
-    '...occcccccco...', '....occccccco...', '....oqq..qqo....', '...ooq....qoo...'
-  ];
-  var COOPER_BODY_ROWS_ALT = COOPER_BODY_ROWS.slice();
-  COOPER_BODY_ROWS_ALT[6] = '...ooqq...qqoo..';
+  /* ==================================================================
+   * R62 — sprite dei personaggi come OBJ Gen II.
+   *
+   * Misure sugli sprite originali (pret/pokecrystal: chris, kris, lass,
+   * gentleman, officer, cooltrainer_m), non ricordi:
+   *   - 3 colori + trasparente per sprite, mai piu' di 3 per tile 8x8;
+   *   - il tono piu' scuro e' NERO PURO e copre il 50-76 % dei pixel;
+   *   - il profilo laterale e' un disegno diverso dal frontale
+   *     (IoU 0,68-0,76), non il frontale con la faccia tagliata;
+   *   - il collo non scende mai sotto il 71 % della larghezza della testa;
+   *   - le spalle non sono mai piu' strette della testa;
+   *   - i colori 1 e 2 di gfx/overworld/npc_sprites.pal sono IDENTICI in
+   *     morn / day / nite: di notte scende lo sfondo, non il personaggio.
+   *
+   * Da qui discendono tre decisioni che revocano round precedenti:
+   *   - il tetto di R57 ("4 colori + contorno, la leggibilita' prima della
+   *     legalita' hardware") era sbagliato: Oro vince con 3;
+   *   - la notte di R59 sugli sprite era un gate mal posto: nightify() non
+   *     tocca piu' i personaggi, resta solo la tinta del terreno;
+   *   - la testa a 12 px di R59 restava piu' larga delle spalle: qui le
+   *     spalle partono DALLA testa, non da un numero indipendente.
+   * ================================================================== */
 
-  /* R59: il capo era 8 px contro 10 px di spalle — testa PIU' STRETTA del
-   * torso, l'opposto del profilo a fungo Gen II. Ora la testa e' 12 px
-   * (riga 2-5) contro le 10 del torso (1,20x). Le spalle NON crescono:
-   * allargarle avrebbe riportato la maschera di Cooper addosso a quelle
-   * degli NPC. La riga 0 resta contorno pieno e ogni riempimento ha
-   * sempre contorno o riempimento sopra e sotto di se': la corona si
-   * allarga per gradi (6 -> 10 -> 12) e si richiude allo stesso modo
-   * (12 -> 10 -> 8 -> collo), cosi' il contorno non si apre mai. */
-  var COOPER_DOWN0 = [
-    '.....oooooo.....', '...ookkkkkkoo...', '..okkkkkkkkkko..', '..okksssssskko..',
-    '..okssssssssko..', '..oksossssosko..', '...oossssssoo...', '.....osssso.....'
-  ].concat(COOPER_BODY_ROWS);
-  var COOPER_DOWN1 = COOPER_DOWN0.slice(0, 8).concat(COOPER_BODY_ROWS_ALT);
+  /* --- i tre colori ------------------------------------------------- */
 
-  var COOPER_UP0 = [
-    '.....oooooo.....', '...ookkkkkkoo...', '..okkkkkkkkkko..', '..okkkkkkkkkko..',
-    '..okkkkkkkkkko..', '..okkkkkkkkkko..', '...ookkkkkkoo...', '.....okkkko.....'
-  ].concat(COOPER_BODY_ROWS);
-  var COOPER_UP1 = COOPER_UP0.slice(0, 8).concat(COOPER_BODY_ROWS_ALT);
+  var GB_INK = '#000000';          /* il tono piu' scuro E' nero, non #202820 */
 
-  /* Profilo destro authored (LEFT nasce dal mirror): massa dei capelli
-   * dietro, viso davanti, occhio dentro la guancia. Stessa corona della
-   * vista frontale, cosi' la testa e' 12 px anche di lato. */
-  var COOPER_SIDE0 = [
-    '.....oooooo.....', '...ookkkkkkoo...', '..okkkkkkkkkko..', '..okkkkkkkssso..',
-    '..okkkkkssssso..', '..okkkkksossso..', '...ookkkkssoo...', '.....okksso.....'
-  ].concat(COOPER_BODY_ROWS);
-  var COOPER_SIDE1 = COOPER_SIDE0.slice(0, 8).concat(COOPER_BODY_ROWS_ALT);
+  function lumaHex(hex) { var c = rgbOf(hex); return c ? luma(c[0], c[1], c[2]) : 0; }
 
-  /* Estensioni di sagoma capelli per hairStyle (campo gia' presente in
-   * chars.js, mai letto dal renderer 2D finora): pochi delta additivi
-   * sopra la matrice base, cosi' pettinature diverse hanno una silhouette
-   * propria invece del casco identico ricolorato per tutto il cast. */
-  /* R59: le acconciature erano inchiodate a una testa larga 12 px. Ora il
-   * cranio segue la corporatura (10/12/14) e ogni ciocca si ancora ai
-   * bordi reali del capo (hx0/hx1): a 12 px i valori coincidono con quelli
-   * authored, alle altre larghezze la ciocca non resta piu' sospesa
-   * accanto alla testa con lo sfondo in mezzo. */
-  function hairSilhouette(ctx, ox, oy, p, dir, hairCol, hairHi, hx0, hx1) {
-    var style = p.hairStyle, hw = hx1 - hx0 + 1;
-    if (!style || p.hat) return;
-    if (style === 'bouffant' || style === 'wild' || style === 'pompadour') {
-      if (dir !== 'up') {
-        R(ctx, ox + hx0 + 2, oy - 2, hw - 4, 2, C.ink);
-        R(ctx, ox + hx0 + 3, oy - 1, hw - 6, 2, hairCol);
-        R(ctx, ox + hx0 + 4, oy - 1, Math.max(1, hw - 8), 1, hairHi);
-      } else {
-        R(ctx, ox + hx0 + 3, oy - 1, hw - 6, 2, C.ink);
-        R(ctx, ox + hx0 + 4, oy, Math.max(1, hw - 8), 1, hairCol);
-      }
-    }
-    if (style === 'receding' && dir === 'down') {
-      R(ctx, ox + 6, oy + 2, 4, 1, p.skin || '#e0a870');
-    }
-    if ((style === 'sidepart' || style === 'slick') && dir === 'down') {
-      R(ctx, ox + (style === 'sidepart' ? 6 : 7), oy + 1, 1, 2, shade(hairCol, -34));
-    }
-    if (p.bun && dir === 'up') {
-      R(ctx, ox + hx0 + 4, oy - 2, Math.max(2, hw - 8), 2, C.ink);
-      R(ctx, ox + hx0 + 5, oy - 1, Math.max(1, hw - 10), 1, hairCol);
-    }
-    /* R57: 'long' liscio (Hawk, Log Lady) e 'bouffant/wild/pompadour'
-     * (Lucy, Bobby, James...) condividevano la stessa maschera desaturata
-     * — differivano solo per colore, 16px su 308. 'long' ora incornicia il
-     * viso con due ciocche dritte accanto alla testa (bouffant resta un
-     * ciuffo alto e tondo sopra); di spalle cadono lungo la schiena invece
-     * che gonfiarsi sopra il cranio. Silhouette diversa, non palette swap. */
-    if (style === 'long' && !p.bun) {
-      if (dir === 'up') {
-        R(ctx, ox + hx0 + 2, oy + 3, 1, 4, hairCol);
-        R(ctx, ox + hx1 - 2, oy + 3, 1, 4, hairCol);
-      } else {
-        R(ctx, ox + hx0 + 1, oy + 1, 1, 5, hairCol);
-        R(ctx, ox + hx1 - 1, oy + 1, 1, 5, hairCol);
-      }
-    }
+  /* Griglia colore GBC: 5 bit per canale. */
+  function gbcSnap(hex) {
+    var c = rgbOf(hex);
+    if (!c) return hex;
+    return hexOf(Math.min(248, Math.round(c[0] / 8) * 8),
+      Math.min(248, Math.round(c[1] / 8) * 8), Math.min(248, Math.round(c[2] / 8) * 8));
   }
 
-  /* R59 — grammatica del corpo.
-   * Con le quattro sagome fisse (narrow/broad/dress/short) meta' del cast
-   * finiva nello stesso stampo: sotto la prima riga di capelli le maschere
-   * di Lucy e Hawk erano identiche pixel per pixel (IoU 0,939 misurato dal
-   * critico sul box 14x18). R57 aveva cambiato solo la capigliatura, e
-   * cambiare i capelli non cambia il corpo.
-   * Qui il torso nasce da dati gia' scritti in chars.js e mai letti dal
-   * renderer 2D: corporatura (build), statura (height), taglio dell'abito
-   * (dress/apron/cardigan/shawl/waistcoat) e portamento (l'archetipo di
-   * movimento, che porta con se' portata delle braccia e apertura dei
-   * piedi). Due personaggi si distinguono quindi per sagoma, prima ancora
-   * che per colore — anche in scala di grigi, anche col cappello. */
+  /* Rampa incarnato in tre toni. Tutti sopra L 179: il terreno notturno sta
+   * a L 117,5 (#7770a8, la tinta che il contratto conserva) e il gate 6 vuole
+   * almeno 60 punti di stacco fra pelle e terreno DI NOTTE, con i colori
+   * dello sprite invariati. Un incarnato piu' scuro di cosi' non passerebbe:
+   * e' il prezzo dichiarato della palette Gen II, non una svista. */
+  var SKIN_RAMP = ['#f8d8b0', '#f8b878', '#f8a860'];   /* L 222,6 / 193,0 / 179,8 */
+
+  function skinOf(p) {
+    var l = lumaHex(p.skin || '#e8b88a');
+    return l >= 200 ? SKIN_RAMP[0] : (l >= 170 ? SKIN_RAMP[1] : SKIN_RAMP[2]);
+  }
+
+  /* Il terzo colore e' UNO. Se i capelli sono chiari se lo prendono loro e
+   * l'abito va a nero (Leland, Lucy, Laura, il Gigante); altrimenti se lo
+   * prende l'abito e i capelli vanno a nero (Cooper, Truman, Hawk...).
+   * E' la stessa scelta di lass/chris in Oro, dove chioma e vestito
+   * condividono l'unico colore non-nero non-incarnato. */
+  function accentOf(p, skinL) {
+    var lightHair = lumaHex(p.hair || '#000000') >= 118;
+    var src = lightHair ? p.hair : (p.apron || p.shirt || p.pants || '#586878');
+    var c = rgbOf(src) || [88, 104, 120];
+    /* R63 — la rampa di valore. In Oro i tre toni sono 0 / 85 / 170: fra i
+     * due non-neri ci sono SEMPRE 85 punti di luminanza. Da noi ce n'erano
+     * 32 su npcC, 56 su npcA: su quegli NPC la tinta faceva il lavoro del
+     * valore, ed e' il motivo per cui in scala di grigi collassavano. Qui
+     * l'accento viene portato dentro [skinL-104, skinL-78] — con lo scatto
+     * della griglia GBC (±4) restano oltre 70 punti, il gate. */
+    var hi = skinL - 78, lo = Math.max(56, skinL - 104), i, l, k, t;
+    if (hi < lo) hi = lo;
+    l = luma(c[0], c[1], c[2]);
+    if (l < 4) { c = [96, 104, 120]; l = luma(96, 104, 120); }
+    t = l < lo ? lo : (l > hi ? hi : l);
+    k = t / l;
+    for (i = 0; i < 3; i++) c[i] = Math.max(0, Math.min(248, c[i] * k));
+    /* la scala e' moltiplicativa: se un canale satura a 248 la luminanza
+     * resta sotto il bersaglio, e va alzata in piano. */
+    for (i = 0; i < 48 && luma(c[0], c[1], c[2]) < lo; i++) {
+      c[0] = Math.min(248, c[0] + 4); c[1] = Math.min(248, c[1] + 4); c[2] = Math.min(248, c[2] + 4);
+    }
+    return { hex: gbcSnap(hexOf(c[0], c[1], c[2])), lightHair: lightHair };
+  }
+
+  /* Gli OBJ hanno palette propria: su hardware Gen II una passata sul BG non
+   * li tocca. `js/gold-tone.js` quantizza pero' il frame composito, quindi i
+   * tre toni dello sprite vanno dichiarati perche' li lasci passare intatti. */
+  var OBJ_TONES = (GAME.Retro2D = GAME.Retro2D || {}).objTones ||
+                  (GAME.Retro2D.objTones = Object.create(null));
+  function declareObjTone(hex) { if (hex) OBJ_TONES[String(hex).toLowerCase()] = true; }
+
+  function paletteOf(p) {
+    var skin = skinOf(p), acc = accentOf(p, lumaHex(skin));
+    declareObjTone(GB_INK); declareObjTone(skin); declareObjTone(acc.hex);
+    return {
+      o: GB_INK,
+      s: skin,
+      h: acc.lightHair ? acc.hex : GB_INK,     /* chioma */
+      /* R63 — il riflesso nella chioma e' SEMPRE l'altro dei due toni non
+       * incarnato: accento sui capelli scuri, nero su quelli chiari. Cosi'
+       * ogni riga di capelli porta due toni comunque sia colorato il
+       * personaggio (in Oro nessuna riga di testa e' piatta), e la calotta
+       * smette di essere una riga interamente nera. */
+      g: acc.lightHair ? GB_INK : acc.hex,
+      c: acc.hex,     /* busto */
+      p: GB_INK                                /* gambe e scarpe: sempre nere */
+    };
+  }
+
+  /* --- griglia 16 px ------------------------------------------------ */
+
+  var HEAD_PAD = 2;                 /* righe libere sopra la testa: capigliature */
+  var EMPTY_ROW = '................';
+
+  function blankRows(n) { var a = [], i; for (i = 0; i < n; i++) a.push(EMPTY_ROW); return a; }
+  function toGrid(rows) { return rows.map(function (r) { return r.split(''); }); }
+  function fromGrid(g) { return g.map(function (r) { return r.join(''); }); }
+  function put(g, x, y, k) { if (y >= 0 && y < g.length && x >= 0 && x < 16) g[y][x] = k; }
+  function span(g, x0, x1, y, k) { var x; for (x = x0; x <= x1; x++) put(g, x, y, k); }
+
+  /* Contorno chiuso per costruzione: ogni pixel di riempimento affacciato sul
+   * vuoto diventa contorno. Le perdite misurate dal critico (inforcatura,
+   * angoli dei capelli) erano tutte di questo tipo — un artista le chiude a
+   * mano, qui le chiude la funzione, su tutte e quattro le direzioni e su
+   * tutto il cast invece che sul solo protagonista. */
+  function seal(rows) {
+    var src = rows.slice(), out = [], y, x, s, k;
+    function at(yy, xx) {
+      return (yy < 0 || yy >= src.length || xx < 0 || xx >= 16) ? '.' : src[yy].charAt(xx);
+    }
+    for (y = 0; y < src.length; y++) {
+      s = src[y].split('');
+      for (x = 0; x < 16; x++) {
+        k = s[x];
+        if (k === '.' || k === 'o') continue;
+        if (at(y - 1, x) === '.' || at(y + 1, x) === '.' ||
+            at(y, x - 1) === '.' || at(y, x + 1) === '.') s[x] = 'o';
+      }
+      out.push(s.join(''));
+    }
+    return out;
+  }
+
+  /* --- testa --------------------------------------------------------
+   *
+   * R63. Il difetto misurato: tre personaggi su cinque avevano la stessa
+   * testa (Cooper e l'NPC marrone condividevano 8 righe su 8), e ogni riga
+   * era un campo unico di incarnato con al massimo due pixel di occhio. In
+   * Oro nessuna riga di testa e' piatta: c'e' sempre almeno uno stacco
+   * dentro — orecchio `#s#` sotto il bordo, occhi da 1 px che continuano
+   * nella riga sotto come zigomo, ciocche nella chioma (chris down 3
+   * `#+++##+++#`, kris down 3 `#oo#++#oo#`).
+   *
+   * Le otto righe si dividono in due gruppi: le prime quattro (calotta e
+   * chioma) scelte da i%5, le quattro del viso da i%7. Due personaggi a
+   * distanza d < 35 nel cast possono coincidere sul primo gruppo (d
+   * multiplo di 5) oppure sul secondo (multiplo di 7), mai su entrambi:
+   * al massimo 4 righe uguali su 8, che e' il massimo di Oro
+   * (gentleman/officer). Prima erano 8 su 8. */
+
+  var CAST_ORDER = null;
+  function castIndex(p) {
+    var C, keys, i, s, v, j;
+    if (!CAST_ORDER) {
+      CAST_ORDER = [];
+      C = (GAME.Sprites && GAME.Sprites.CHARS) || {};
+      keys = Object.keys(C);
+      for (i = 0; i < keys.length; i++) CAST_ORDER.push(C[keys[i]]);
+    }
+    i = CAST_ORDER.indexOf(p);
+    if (i >= 0 && i < 35) return i;
+    /* schede fuori dal cast (copie, prove): indice stabile dai campi
+     * identitari, sempre dentro 0-34 perche' 5 e 7 restino coprimi con
+     * ogni distanza possibile. */
+    s = [p.skin, p.hair, p.eyes, p.hairStyle, p.height, p.build].join('|');
+    v = 7;
+    for (j = 0; j < s.length; j++) v = (v * 31 + s.charCodeAt(j)) % 35;
+    return v;
+  }
+
+  function headDigits(p) {
+    var i = castIndex(p);
+    return [i % 5, (i * 2) % 5, (i * 3) % 5, (i * 4) % 5,
+      i % 7, (i * 2) % 7, (i * 3) % 7, (i * 4) % 7];
+  }
+
+  /* Tabelle di dettaglio: posizioni di pixel, non colori. E' cosi' che due
+   * teste restano distinte anche quando i tre toni coincidono. */
+  var HAIR_PAD0 = [[2, 2], [3, 3], [2, 3], [3, 2], [1, 2]];   /* calotta */
+  var HAIR_PAD1 = [[1, 1], [2, 2], [1, 2], [2, 1], [0, 1]];   /* chioma alta */
+  var HAIR_TUFT2 = [[3], [2, 5], [4], [2, 3], [5]];           /* ciocche, riga 2 */
+  var HAIR_TUFT3 = [[2, 5], [4], [3, 4], [2], [3]];           /* ciocche, riga 3 */
+  var FRINGE = [                                              /* attaccatura */
+    [1, 2, 3, 4], [1, 2, 5, 6], [1, 4, 5, 6], [2, 3, 4, 5],
+    [1, 2, 3, 6], [1, 3, 5, 6], [1, 2, 4, 6]
+  ];
+  var EARS = [[2, 2], [2, 3], [3, 2], [3, 3], [2, 4], [4, 2], [1, 3]];
+  var EYES = [                                                /* sx, dx, naso */
+    [3, 3, 0], [4, 4, 0], [3, 4, 1], [4, 3, 1], [3, 3, 1], [4, 4, 1], [2, 3, 0]
+  ];
+  var MOUTH = [                                               /* off, largh., guancia */
+    [0, 2, 0], [0, 1, 1], [-1, 2, 0], [1, 2, 0], [0, 2, 1], [0, 1, 0], [-1, 1, 1]
+  ];
+
+  function frontHeadRows(W, back, d) {
+    var x0 = 8 - (W >> 1), x1 = x0 + W - 1;
+    var faceT = back ? 'h' : 's';      /* di spalle il viso e' nuca, non pelle */
+    var markT = back ? 'g' : 'o';      /* e i segni sono il riflesso, non il nero */
+    var rows = [], a, i, t, p0, p1;
+
+    function line(lo, hi, fill) {
+      var s = [], x;
+      for (x = 0; x < 16; x++) {
+        if (x < lo || x > hi) s.push('.');
+        else if (x === lo || x === hi) s.push('o');
+        else s.push(fill);
+      }
+      return s;
+    }
+    function set(a, x, k) { if (x > 0 && x < 15 && a[x] !== '.') a[x] = k; }
+
+    /* 0-1 — calotta e chioma alta: rientri asimmetrici (in Oro la scriminatura
+     * sposta il volume da un lato: kris down 1 `#o++++o#`). */
+    p0 = HAIR_PAD0[d[0]];
+    a = line(x0 + p0[0], x1 - p0[1], 'h');
+    set(a, 7, 'g'); set(a, 8, 'g');
+    rows.push(a);
+
+    p1 = HAIR_PAD1[d[1]];
+    a = line(x0 + p1[0], x1 - p1[1], 'h');
+    set(a, x0 + p1[0] + 2, 'g'); set(a, x1 - p1[1] - 2, 'g');
+    rows.push(a);
+
+    /* 2-3 — ciocche: due toni dentro i capelli, come chris down 3
+     * `#+++##+++#`. Senza queste, meta' sprite era un campo unico. */
+    a = line(x0, x1, 'h');
+    set(a, x0 + 1, 'g'); set(a, x1 - 1, 'g');
+    t = HAIR_TUFT2[d[2]];
+    for (i = 0; i < t.length; i++) { set(a, x0 + t[i], 'g'); set(a, x1 - t[i], 'g'); }
+    rows.push(a);
+
+    a = line(x0, x1, 'h');
+    set(a, x0 + 2, 'g'); set(a, x1 - 2, 'g');
+    t = HAIR_TUFT3[d[3]];
+    for (i = 0; i < t.length; i++) { set(a, x0 + t[i], 'g'); set(a, x1 - t[i], 'g'); }
+    rows.push(a);
+
+    /* 4 — attaccatura: la chioma scende sulla fronte a denti diversi per
+     * personaggio; e' la riga che separa Cooper da Andy. */
+    a = line(x0, x1, faceT);
+    t = FRINGE[d[4]];
+    for (i = 0; i < t.length; i++) {
+      set(a, x0 + t[i], back ? 'g' : 'h'); set(a, x1 - t[i], back ? 'g' : 'h');
+    }
+    rows.push(a);
+
+    /* 5 — orecchie: contorno, un pixel di pelle, contorno. In Oro e' su
+     * ogni personaggio (chris down 6 `.#o#oooooooo#o#.`). */
+    a = line(x0, x1, faceT);
+    t = EARS[d[5]];
+    set(a, x0 + t[0], markT); set(a, x1 - t[1], markT);
+    /* Le orecchie si vedono anche di spalle: in Oro il retro della testa
+     * porta comunque il tono chiaro (chris up 5 `..###+oooo+###..`, officer
+     * up 8 `..##oo####oo##..`). Senza, i due tile alti del frame `up`
+     * restavano a due toni e il gate 7 falliva li'. */
+    if (back) { set(a, x0 + 1, 's'); set(a, x1 - 1, 's'); }
+    rows.push(a);
+
+    /* 6 — occhi da 1 px, distanza variabile, piu' il naso. */
+    a = line(x0, x1, faceT);
+    t = EYES[d[6]];
+    set(a, x0 + t[0], markT); set(a, x1 - t[1], markT);
+    if (t[2]) set(a, W & 1 ? 8 : 7, markT);
+    rows.push(a);
+
+    /* 7 — mento piu' stretto, bocca e zigomo: la riga sotto gli occhi in
+     * Oro non e' mai pulita (chris down 8 `..##oo#oo#oo##..`). */
+    a = line(x0 + 1, x1 - 1, faceT);
+    t = MOUTH[d[7]];
+    for (i = 0; i < t[1]; i++) set(a, 7 + t[0] + i, markT);
+    if (t[2]) { set(a, x0 + 2, markT); set(a, x1 - 2, markT); }
+    if (back) { set(a, x0 + 2, 's'); set(a, x1 - 2, 's'); }   /* nuca */
+    rows.push(a);
+
+    return rows.map(function (r) { return r.join(''); });
+  }
+
+  /* Profilo: cranio piu' stretto (8 px contro i 12 del frontale), massa dei
+   * capelli che sporge di 1 px DIETRO, viso e occhio davanti, collo spostato
+   * in avanti. Non e' il frontale con una diagonale sopra: e' una seconda
+   * matrice, ed e' per questo che l'IoU scende da 1,000. */
+  /* R63 — il profilo ha ora un contorno che gradina. Prima erano 8 gradini
+   * (cambi di colonna del bordo, sinistro + destro) contro i 13-21 di Oro:
+   * niente naso, niente mascella, niente nuca. Qui ogni riga sposta un
+   * bordo di 1 px secondo la tabella SIDE_EDGE, e la sagoma resta dentro i
+   * 10 px del gate R62. */
+  var SIDE_HEAD_EDGE = [
+    [1, -1], [1, 0], [0, 0], [0, 1], [1, 1], [0, 1], [0, 0], [1, 0]
+  ];
+  function sideHeadRows(W, d) {
+    var x0 = 8 - (W >> 1), x1 = x0 + W - 1;
+    var rows = [], a, e, i, t;
+    function line(lo, hi, fill) {
+      var s = [], x;
+      for (x = 0; x < 16; x++) {
+        if (x < lo || x > hi) s.push('.');
+        else if (x === lo || x === hi) s.push('o');
+        else s.push(fill);
+      }
+      return s;
+    }
+    function set(a, x, k) { if (x > 0 && x < 15 && a[x] !== '.') a[x] = k; }
+    function edge(r) { e = SIDE_HEAD_EDGE[r]; return [x0 + e[0], x1 + e[1]]; }
+
+    /* 0-2 nuca e chioma, 3-6 viso con fronte, occhio, zigomo e orecchio,
+     * 7 mascella. Il davanti e' a destra: 'left' e' lo specchio. */
+    e = edge(0); a = line(e[0], e[1], 'h'); set(a, e[0] + 2, 'g'); rows.push(a);
+    e = edge(1); a = line(e[0], e[1], 'h');
+    set(a, e[0] + 1, 'g');
+    t = HAIR_TUFT2[d[2]];
+    for (i = 0; i < t.length; i++) set(a, e[0] + t[i], 'g');
+    rows.push(a);
+    e = edge(2); a = line(e[0], e[1], 'h');
+    set(a, e[0] + 2, 'g');
+    t = HAIR_TUFT3[d[3]];
+    for (i = 0; i < t.length; i++) set(a, e[0] + t[i], 'g');
+    rows.push(a);
+    /* fronte: la chioma tiene il dietro, la pelle il davanti */
+    e = edge(3); a = line(e[0], e[1], 's');
+    t = FRINGE[d[4]];
+    for (i = 0; i < t.length; i++) set(a, e[0] + t[i], 'h');
+    rows.push(a);
+    /* occhio 1 px davanti + naso sul bordo */
+    e = edge(4); a = line(e[0], e[1], 's');
+    set(a, e[0] + 1, 'h'); set(a, e[1] - 2, 'o');
+    rows.push(a);
+    /* orecchio dietro: contorno, pelle, contorno — come nel frontale.
+     * La ciocca sulla nuca alterna i due toni scendendo: senza, la meta'
+     * POSTERIORE del profilo restava a due soli toni (gate 7) su tutti i
+     * personaggi dai capelli scuri. */
+    e = edge(5); a = line(e[0], e[1], 's');
+    set(a, e[0] + 1, 'h'); set(a, e[0] + 2, 's'); set(a, e[0] + 3 + (d[5] & 1), 'o');
+    rows.push(a);
+    /* zigomo e basetta */
+    e = edge(6); a = line(e[0], e[1], 's');
+    set(a, e[0] + 1, 'h'); set(a, e[0] + 2, 'g');
+    set(a, e[1] - 1 - (d[6] & 1), 'o');
+    rows.push(a);
+    /* mascella: la bocca di profilo e' un solo pixel sul davanti */
+    e = edge(7); a = line(e[0], e[1], 's');
+    set(a, e[0] + 1, 'h'); set(a, e[1] - 1, 'o');
+    rows.push(a);
+
+    return rows.map(function (r) { return r.join(''); });
+  }
+
+  /* --- corpo -------------------------------------------------------- */
+
   var ARM_REACH = {
     tailored: 0.74, lawman: 0.66, poised: 0.58, rangy: 1.15, weary: 0.55,
     diner: 0.78, mystic: 0.44, rebel: 1.12, uncanny: 0.38, drifter: 0.52,
@@ -1449,51 +1707,82 @@
     tailored: 0, lawman: 2, poised: -1, rangy: 1, weary: 0, diner: 0,
     mystic: 2, rebel: 2, uncanny: 1, drifter: 0, spectral: -1, menace: 3, heavy: 3
   };
-  /* Corporatura effettiva = build x apertura di spalle dell'archetipo. Con
-   * la sola `build` mezzo cast cadeva nello stesso scaglione (Sarah 0,94 e
-   * Norma 0,98 avevano identiche spalle, identica testa e differivano di
-   * due pixel in tutto); moltiplicandola per l'apertura authored le due
-   * scendono a 0,88 e 0,98, cioe' su due scaglioni diversi. */
   var SHOULDER_SPAN = {
     tailored: 1.04, lawman: 1.14, poised: 0.91, rangy: 1.02, weary: 0.94,
     diner: 1.00, mystic: 1.08, rebel: 1.08, uncanny: 0.96, drifter: 0.93,
     spectral: 0.88, menace: 1.18, heavy: 1.20
   };
-  ARM_REACH['ing\u00e9nue'] = 0.82;
-  STANCE['ing\u00e9nue'] = -1;
-  SHOULDER_SPAN['ing\u00e9nue'] = 0.90;
+  ARM_REACH['ingénue'] = 0.82;
+  STANCE['ingénue'] = -1;
+  SHOULDER_SPAN['ingénue'] = 0.90;
 
-  /* Riga larga `width` px (contorno compreso) centrata sulla colonna 7,5:
-   * le larghezze restano pari, cosi' il corpo non scivola di mezzo pixel
-   * rispetto alla testa. */
   function widthRow(width, fill) {
     var x0 = 8 - (width >> 1), x1 = x0 + width - 1, s = '', x;
-    for (x = 0; x < 16; x++) {
-      s += (x < x0 || x > x1) ? '.' : ((x === x0 || x === x1) ? 'o' : fill);
-    }
+    for (x = 0; x < 16; x++) s += (x < x0 || x > x1) ? '.' : ((x === x0 || x === x1) ? 'o' : fill);
     return s;
   }
 
-  /* Mano dentro il profilo del braccio: il passo si legge senza allargare
-   * la sagoma (allargarla aprirebbe il contorno sulle righe vicine). */
-  function armRow(width, fill, step, hand) {
-    var s = widthRow(width, fill).split(''), x0 = 8 - (width >> 1), x1 = x0 + width - 1;
-    if (width >= 6) {
-      if (step > 0) s[x0 + 1] = hand;
-      else if (step < 0) s[x1 - 1] = hand;
-      else { s[x0 + 1] = hand; s[x1 - 1] = hand; }
+  /* R63 — il braccio. Gate 3: staccato dal busto da UN pixel nero verticale
+   * in tutte e quattro le direzioni, piu' i pixel di mano. In Oro e' sempre
+   * la stessa cucitura: `#` bordo, due pixel di mano, `#` che stacca, poi il
+   * busto (chris down 11 `.#oo#oo++oo#oo#.`, officer up 11
+   * `.#o#++++++++#o#.`). Prima il nostro torso era un campo pieno largo
+   * 14 px senza una linea dentro.
+   *
+   * hands: 'both' | 'left' | 'right' | 'none'. Il profilo passa 'none': di
+   * lato la mano e' una sola e la disegna sideBodyRows davanti al busto. */
+  function armRow(width, fill, step, hands, mark) {
+    var s = widthRow(width, fill).split(''), x0 = 8 - (width >> 1), x1 = x0 + width - 1, x;
+    if (width >= 8 && hands !== 'none') {
+      if (hands !== 'right') { s[x0 + 1] = 's'; s[x0 + 2] = 's'; s[x0 + 3] = 'o'; }
+      if (hands !== 'left') { s[x1 - 1] = 's'; s[x1 - 2] = 's'; s[x1 - 3] = 'o'; }
+      if (hands === 'right') { s[x0 + 1] = mark || 'o'; s[x0 + 3] = 'o'; }
+      if (hands === 'left') { s[x1 - 1] = mark || 'o'; s[x1 - 3] = 'o'; }
+    } else if (width >= 6 && hands !== 'none') {
+      if (hands !== 'right') { s[x0 + 1] = 's'; s[x0 + 2] = 'o'; }
+      if (hands !== 'left') { s[x1 - 1] = 's'; s[x1 - 2] = 'o'; }
+    }
+    /* il segno centrale (allacciatura) tiene il busto acceso anche quando le
+     * braccia occupano i bordi: senza, il centro resta un campo unico. */
+    if (mark) for (x = x0 + 4; x <= x1 - 4; x++) if ((x - x0) % 3 === 0) s[x] = mark;
+    return s.join('');
+  }
+
+  /* Riga di busto: base piena piu' segni interni. In Oro il petto non e'
+   * mai una lastra: `#o#+oo+#o#`, `#oo##+oo+##oo#`. */
+  function torsoRow(width, fill, mark, marks) {
+    var s = widthRow(width, fill).split(''), x0 = 8 - (width >> 1), x1 = x0 + width - 1, i, x;
+    for (i = 0; i < marks.length; i++) {
+      x = marks[i] < 0 ? x1 + marks[i] : x0 + marks[i];
+      if (x > x0 && x < x1) s[x] = mark;
     }
     return s.join('');
   }
 
-  /* Gambe: lo stacco centrale resta sempre di 2 px (colonne 7 e 8), l'unico
-   * separatore che sopravvive alla desaturazione e alla notte. */
-  function legsRow(width, fill) {
+  /* Collo di chi e' alto: largo quanto il gate impone (>= 71 % della testa)
+   * ma pieno di contorno ai lati, cosi' legge come colletto e non come una
+   * fascia di incarnato larga dieci pixel. */
+  function neckRow(width) {
     var x0 = 8 - (width >> 1), x1 = x0 + width - 1, s = '', x;
     for (x = 0; x < 16; x++) {
       if (x < x0 || x > x1) s += '.';
-      else if (x === 7 || x === 8) s += '.';
-      else s += (x === x0 || x === x1) ? 'o' : fill;
+      else s += (x <= x0 + 2 || x >= x1 - 2) ? 'o' : 's';
+    }
+    return s;
+  }
+
+  /* R63 gate 3, seconda meta': i pantaloni erano nero pieno — le righe
+   * 12-15 al 100 % nere, zero tono, 7 righe su 16 interamente nere di
+   * fronte e 12 su 16 di spalle. Oro mette il mezzotono nella gamba e
+   * lascia il nero al solco fra le due (chris down 14 `#++####++#`,
+   * gramps down 14 `###++++++###`). Qui e' la stessa costruzione. */
+  function legsRow(width, fill, split) {
+    var x0 = 8 - (width >> 1), x1 = x0 + width - 1, s = '', x;
+    for (x = 0; x < 16; x++) {
+      if (x < x0 || x > x1) s += '.';
+      else if (x === x0 || x === x1) s += 'o';
+      else if (split) s += (x <= x0 + 2 || x >= x1 - 2) ? fill : 'o';
+      else s += (x === 7 || x === 8) ? 'o' : fill;
     }
     return s;
   }
@@ -1502,279 +1791,344 @@
     var x0 = 8 - (width >> 1), x1 = x0 + width - 1, s = '', x;
     var lo = Math.max(0, x0 + (step > 0 ? -1 : 0)), hi = Math.min(15, x1 + (step < 0 ? 1 : 0));
     for (x = 0; x < 16; x++) {
-      s += (x >= lo && x < lo + block) || (x <= hi && x > hi - block) ? 'o' : '.';
+      s += ((x >= lo && x < lo + block) || (x <= hi && x > hi - block)) ? 'o' : '.';
     }
     return s;
   }
 
-  /* R59 — anche il cranio segue la corporatura. Con una sola testa da 12 px
-   * per tutto il cast, tre righe intere delle due maschere restavano
-   * identiche qualunque cosa facesse il corpo: 10 px per le corporature
-   * minute, 12 di serie, 14 per le pesanti. A 12 px il generatore
-   * riproduce esattamente la testa authored di Cooper, quindi il capo del
-   * protagonista e quello degli NPC condividono la stessa costruzione:
-   * riga 0 di solo contorno, corona che si allarga per gradi e si
-   * richiude per gradi fino al collo. */
-  function headRows(width, dir) {
-    var x0 = 8 - (width >> 1), x1 = x0 + width - 1;
-    var profile = dir === 'left' || dir === 'right', back = dir === 'up';
-    var inner = width - 2;
-    var browEnd = x0 + Math.ceil(inner * 0.7), cheekEnd = x0 + Math.ceil(inner * 0.5);
-    var eyeL = x0 + 3, eyeR = x1 - 3, eyeSide = x1 - 4;
-    function row(lo, hi, fn) {
-      var s = '', x;
-      for (x = 0; x < 16; x++) s += (x < lo || x > hi) ? '.' : fn(x);
-      return s;
+  /* Piede di profilo: uno avanti e uno dietro, di lunghezza diversa. Gate 6
+   * vuole che le righe dei piedi NON siano identiche al frame frontale — lo
+   * erano pixel per pixel. */
+  function sideFeetRow(lo, hi, step, heel) {
+    var s = '', x, toe = hi - (step < 0 ? 0 : 0);
+    for (x = 0; x < 16; x++) {
+      if (x < lo || x > toe) s += '.';
+      else if (heel) s += (x <= lo + 1 || x >= toe - 2) ? 'o' : 'c';
+      else s += 'o';
     }
-    var jawLo = x0 + 1, jawHi = x1 - 1;
-    var jawInner = jawHi - 2 - (jawLo + 2) + 1;
-    var jawSplit = jawLo + 2 + Math.ceil(jawInner * 0.66) - 1;
-    var chinLo = x0 + 3, chinHi = x1 - 3;
-    var chinSplit = chinLo + Math.ceil((chinHi - chinLo - 1) / 2);
-    return [
-      row(x0 + 3, x1 - 3, function () { return 'o'; }),
-      row(x0 + 1, x1 - 1, function (x) { return (x <= x0 + 2 || x >= x1 - 2) ? 'o' : 'h'; }),
-      row(x0, x1, function (x) { return (x === x0 || x === x1) ? 'o' : 'h'; }),
-      row(x0, x1, function (x) {
-        if (x === x0 || x === x1) return 'o';
-        if (back) return 'h';
-        if (profile) return x <= browEnd ? 'h' : 's';
-        return (x <= x0 + 2 || x >= x1 - 2) ? 'h' : 's';
-      }),
-      row(x0, x1, function (x) {
-        if (x === x0 || x === x1) return 'o';
-        if (back) return 'h';
-        if (profile) return x <= cheekEnd ? 'h' : 's';
-        return (x === x0 + 1 || x === x1 - 1) ? 'h' : 's';
-      }),
-      row(x0, x1, function (x) {
-        if (x === x0 || x === x1) return 'o';
-        if (back) return 'h';
-        if (profile) return x === eyeSide ? 'o' : (x <= cheekEnd ? 'h' : 's');
-        if (x === eyeL || x === eyeR) return 'o';
-        return (x === x0 + 1 || x === x1 - 1) ? 'h' : 's';
-      }),
-      row(jawLo, jawHi, function (x) {
-        if (x <= jawLo + 1 || x >= jawHi - 1) return 'o';
-        if (back) return 'h';
-        if (profile) return x <= jawSplit ? 'h' : 's';
-        return 's';
-      }),
-      row(chinLo, chinHi, function (x) {
-        if (x === chinLo || x === chinHi) return 'o';
-        if (back) return 'h';
-        if (profile) return x <= chinSplit ? 'h' : 's';
-        return 's';
-      })
-    ];
+    return s;
   }
 
-  function bodyFrame(p, kind, step, side, dir) {
-    if (kind === 'short') return { rows: GOLD_BODY.short.slice(), neck: false, head: null, headW: 12 };
-    var arch = (p.motion && p.motion.archetype) || null;
-    if (!arch || ARM_REACH[arch] == null) {
-      return { rows: (GOLD_BODY[kind] || GOLD_BODY.narrow).slice(), neck: false, head: null, headW: 12 };
-    }
-    var reach = ARM_REACH[arch], stance = STANCE[arch] || 0;
+  /* Il torso NASCE dalla testa: `shoulder` parte da headW e sale, non e' un
+   * numero indipendente. E' il motivo per cui in R59 la testa cresciuta a
+   * 12 px restava piu' larga delle spalle ferme a 10. */
+  function geometry(p, dir) {
+    var arch = (p.motion && p.motion.archetype) || 'tailored';
+    var reach = ARM_REACH[arch] == null ? 0.7 : ARM_REACH[arch];
+    var stance = STANCE[arch] || 0;
     var b = (p.build || 1) * (SHOULDER_SPAN[arch] || 1);
-    /* Una giacca (o grembiule, cardigan, panciotto, scialle) copre i fianchi:
-     * il torso resta un blocco fino all'orlo. Chi non ne porta rientra in
-     * vita. E' la differenza fra la camicetta di Lucy e il giaccone di Hawk,
-     * e si legge anche a un metro dallo schermo. */
+    var h = p.height || 1;
+    var side = dir === 'left' || dir === 'right';
     var gown = !!p.dress;
     var layered = !!(p.apron || p.cardigan || p.shawl || p.waistcoat || p.log || p.jacket);
-    var shoulder = b >= 1.12 ? 12 : (b >= 1.05 ? 10 : (b <= 0.90 ? 6 : 8));
-    if (side) shoulder = Math.max(6, shoulder - 2);
-    var chest = Math.min(14, shoulder + 2);
-    /* Portamento delle braccia in quattro gradi, dal piu' aperto al piu'
-     * raccolto: e' la voce che separa Andy da Jacoby o Sarah da Norma, che
-     * hanno la stessa corporatura e finirebbero altrimenti nella stessa
-     * maschera. 3 = avambraccio fuori dal fianco su due righe, 2 = solo
-     * la riga alta, 1 = braccia lungo il corpo, 0 = braccia raccolte. */
     var armTier = reach >= 1.0 ? 3 : (reach >= 0.7 ? 2 : (reach >= 0.5 ? 1 : 0));
-    var armSpan = armTier >= 2 ? Math.min(14, chest + 2) : chest;
-    var fore = armTier === 3 ? armSpan : (armTier === 0 ? Math.max(6, chest - 2) : chest);
-    var hip = gown ? Math.min(14, chest + 2) : (layered ? chest : Math.max(6, chest - 2));
-    var hem = gown ? Math.min(14, chest + 4) : (layered ? chest : shoulder);
-    /* Ogni riga deve coprire il riempimento di quella sopra (larghezza meno
-     * i due px di contorno): altrimenti la sagoma si apre sui fianchi. */
-    hip = Math.max(hip, ((p.height || 1) < 1.05 && (p.height || 1) <= 0.99 ? armSpan : fore) - 2);
-    hem = Math.max(hem, hip - 2);
-    var legW = Math.max(6, Math.min(12, Math.max(stance >= 2 ? shoulder + 2 : shoulder, hem - 2)));
-    /* Piedi uniti per chi sta raccolto (stance negativo), piantati larghi
-     * per chi sta piazzato: la base della sagoma cambia senza toccare le
-     * gambe. */
-    var footW = stance <= -1 ? Math.max(4, legW - 2) : Math.min(14, legW + (stance >= 1 ? 2 : 0));
-    var block = Math.max(2, Math.min(5, 2 + stance));
-    var skirt = gown ? 'c' : 'p';
-    var headW = b >= 1.12 ? 14 : (b <= 0.90 ? 10 : 12);
-    /* Statura in tre gradi. Chi e' alto non e' lo stesso pupazzo traslato di
-     * un pixel: gli si allunga il collo. Chi e' basso perde il secondo giro
-     * di braccia, cioe' il busto. In tutti e tre i casi i piedi restano
-     * sulla stessa riga — a cambiare e' dove finisce la testa. */
-    var h = p.height || 1;
-    var tall = h >= 1.05, stoop = !tall && h <= 0.99;
-    /* Chi sta eretto porta la linea delle spalle alla larghezza del petto;
-     * chi non lo fa la lascia spiovere. Un pixel per lato, ma e' la riga
-     * che si legge per prima sopra il torso. */
-    var erect = !tall && h >= 1.01;
+    var g = {
+      side: side, gown: gown, stance: stance, armTier: armTier,
+      short: !!p.short,
+      darkTorso: lumaHex(p.hair || '#000000') >= 118,
+      tall: !p.short && h >= 1.05,
+      /* Statura in quattro gradi, non tre: senza il grado intermedio Donna
+       * (1,02) e Maddy (1,00) uscivano con la stessa identica maschera
+       * frontale — IoU 1,000 fra due personaggi diversi. */
+      erect: !p.short && h >= 1.01 && h < 1.05,
+      stoop: !p.short && h <= 0.99
+    };
+    if (side) {
+      /* Profilo: uno spessore solo, dentro i 10 px del gate. Il torso resta
+       * 1-2 px piu' largo del cranio, cosi' le spalle restano >= testa anche
+       * di lato, come nel frontale. */
+      /* R63 — il cranio di profilo non scende piu' sotto gli 8 px. Con 6 la
+       * meta' posteriore del profilo era un pettine di 3 colonne: non ci
+       * stavano tre toni (gate 7) e l'IoU fronte/lato scendeva a 0,55,
+       * sotto la banda di Oro. */
+      g.headW = b <= 0.90 ? 6 : 8;
+      g.shoulder = g.headW + 2;
+      g.chest = g.shoulder;
+      g.armSpan = g.shoulder;
+      g.fore = g.shoulder;
+      g.hip = gown || layered ? g.shoulder : g.shoulder - 2;
+      g.hem = gown ? g.shoulder : g.shoulder - 2;
+      g.legW = g.shoulder - 2;
+      /* Di profilo il piede non sporge: feetRow() allunga di 1 px il piede
+       * avanti nei fotogrammi di passo, e con footW = legW la sagoma resta
+       * dentro i 10 px del gate anche camminando. */
+      g.footW = g.legW;
+      g.block = Math.max(2, Math.min(4, 2 + stance));
+      return g;
+    }
+    g.headW = b >= 1.12 ? 14 : (b <= 0.90 ? 10 : 12);
+    /* Le spalle partono dalla testa e salgono: in Oro non sono mai piu'
+     * strette (chris 14 = 14, kris 16 contro 12). */
+    g.shoulder = Math.min(16, g.headW + 2);
+    g.chest = g.shoulder;
+    g.armSpan = Math.min(16, g.chest + (armTier >= 2 ? 2 : 0));
+    g.fore = armTier === 3 ? g.armSpan : Math.max(6, g.chest - (armTier === 0 ? 2 : 0));
+    /* Il bacino rientra rispetto al petto: in Oro la sagoma e' un trapezio,
+     * non un blocco. Solo la gonna si riapre verso l'orlo. */
+    g.hip = gown ? g.chest : Math.max(6, g.chest - 2);
+    /* Chi sta eretto rientra in vita di due pixel: e' la voce che separa
+     * Donna (1,02) da Maddy (1,00), che senza di essa uscivano identiche. */
+    g.hem = gown ? Math.min(16, g.chest + 2) :
+      Math.max(6, g.chest - (layered ? 2 : 4) - (g.erect ? 2 : 0));
+    if (p.apron) g.hem = Math.min(16, g.chest);          /* grembiule svasato */
+    if (p.waistcoat) g.hip = Math.max(6, g.chest - 4);    /* panciotto stretto */
+    g.legW = gown ? g.hem : Math.max(6, g.hem - 2);
+    g.footW = Math.max(4, Math.min(14, g.legW + (stance >= 1 ? 2 : 0) - (stance <= -1 ? 2 : 0)));
+    g.block = Math.max(2, Math.min(5, 2 + stance));
+    return g;
+  }
+
+  /* Otto righe di corpo, ricostruite in R63 sulla sequenza di Oro
+   * (chris/officer/gramps, righe 9-15 del frame down):
+   *
+   *   spalle con il colletto     ..###oo++oo###..
+   *   petto con l'allacciatura   ..##o+####+o##..
+   *   braccia + mani             .#oo#oo++oo#oo#.
+   *   braccia + mani             .#oo#++oo++#oo#.
+   *   cintura nera con fibbia    ..############..
+   *   bacino                     ..###++++++###..
+   *   gambe a mezzotono          ...#++####++#...
+   *   scarpe                     ....###..###....
+   *
+   * Il nero resta sopra il 50 % perche' cintura, solco fra le gambe e
+   * scarpe restano neri: la riserva non e' piu' "le ultime quattro righe
+   * piene", che era quello che rendeva le gambe una lastra. */
+  function bodyRows(g, step, oneArm, d) {
+    /* Chi ha la chioma chiara le ha dato il terzo colore: il busto va a
+     * nero e i segni interni li porta l'incarnato. Chi ce l'ha scura ha il
+     * busto a colore e i segni neri. In tutti e due i casi ogni riga di
+     * torso porta due toni: e' la differenza fra 0,17 e 0,36 di stacco. */
+    var base = g.darkTorso ? 'p' : 'c';
+    var mark = g.darkTorso ? 's' : 'o';
+    var hands = g.side ? 'none' :
+      (oneArm === 'left' ? 'left' : (oneArm === 'right' ? 'right' : 'both'));
+    var v = d ? d[4] : 0, w = d ? d[5] : 0;
     var rows = [
-      widthRow(erect ? chest : shoulder, 'c'),
-      widthRow(chest, 'c'),
-      armRow(armSpan, 'c', step, 's'),
-      widthRow(fore, 'c'),
-      widthRow(hip, skirt),
-      widthRow(hem, skirt),
-      legsRow(legW, 'p'),
-      feetRow(footW, block, step)
+      /* spalle: colletto di incarnato al centro, cuciture sulle spalle */
+      torsoRow(g.shoulder, 'c', 's', [Math.max(2, (g.shoulder >> 1) - 1), -Math.max(2, (g.shoulder >> 1) - 1)]),
+      /* petto: allacciatura verticale + un segno di lato */
+      torsoRow(g.chest, base, mark, [(g.chest >> 1) - 1, (g.chest >> 1), 2 + (v % 2), -(2 + (w % 2))]),
+      armRow(g.armSpan, base, step, hands, mark),
+      armRow(g.fore, base, step, hands, base === 'p' ? 's' : 'c'),
+      /* cintura: nera piena tranne la fibbia — bastava quella a togliere
+       * una riga interamente nera dal conto del gate 2 */
+      torsoRow(g.hip, 'p', 'c', [(g.hip >> 1) - 1, (g.hip >> 1)]),
+      torsoRow(g.hem, 'p', 'c', [2, -2, (g.hem >> 1)]),
+      legsRow(g.legW, 'c', !g.gown),
+      feetRow(g.footW, g.block, step)
     ];
-    if (stoop) rows.splice(3, 1);
-    return { headW: headW, head: headRows(headW, dir), neck: tall, stoop: stoop, rows: rows };
+    if (g.short) rows.splice(3, 2);        /* torso corto: 6 righe */
+    else if (g.stoop) rows.splice(3, 1);   /* curvo: 7 righe */
+    return rows;
+  }
+
+  /* Corpo di profilo: bordi che gradinano riga per riga (spalla indietro,
+   * braccio e mano avanti, cintura, gamba davanti, piede). E' la meta'
+   * bassa del gate 6 — i 13 gradini di contorno — e insieme la ragione per
+   * cui le righe dei piedi non coincidono piu' col frontale. */
+  var SIDE_BODY_EDGE = [
+    [-1, 0], [-1, 1], [-1, 1], [0, 1], [-1, 0], [0, 0], [0, 1], [-1, 1]
+  ];
+  function sideBodyRows(g, step, d) {
+    var W = g.headW, x0 = 8 - (W >> 1), x1 = x0 + W - 1;
+    var base = g.darkTorso ? 'p' : 'c';
+    var mark = g.darkTorso ? 's' : 'o';
+    var fwd = step >= 0, rows = [], a, e, r;
+    function line(lo, hi, fill) {
+      var s = [], x;
+      for (x = 0; x < 16; x++) {
+        if (x < lo || x > hi) s.push('.');
+        else if (x === lo || x === hi) s.push('o');
+        else s.push(fill);
+      }
+      return s;
+    }
+    function set(a, x, k) { if (x > 0 && x < 15 && a[x] !== '.') a[x] = k; }
+    function edge(i) { var t = SIDE_BODY_EDGE[i]; return [x0 + t[0], x1 + t[1]]; }
+
+    e = edge(0); a = line(e[0], e[1], 'c'); set(a, e[1] - 1, 's'); rows.push(a);
+    e = edge(1); a = line(e[0], e[1], base); set(a, e[0] + 2, mark); set(a, e[1] - 2, mark); rows.push(a);
+    /* braccio: 1 px nero che lo stacca dal busto, poi la mano — davanti nei
+     * fotogrammi di passo avanti, dietro negli altri (gate 3, di lato). */
+    /* Le due braccia. Quello vicino porta la mano avanti nel fotogramma di
+     * passo avanti; quello lontano, per forza, la porta indietro — ed e'
+     * il motivo per cui in Oro anche la META' POSTERIORE del profilo ha il
+     * tono chiaro (chris side 10 `.#o#o+####+##...`). Senza la mano dietro
+     * i due tile bassi del profilo restavano a due toni. */
+    e = edge(2); a = line(e[0], e[1], base);
+    set(a, e[1] - 1, 's'); set(a, e[1] - 2, 'o');           /* mano vicina, avanti */
+    set(a, e[0] + 1, 's'); set(a, e[0] + 2, 'o');           /* mano lontana, dietro */
+    set(a, (e[0] + e[1]) >> 1, mark);
+    rows.push(a);
+    e = edge(3); a = line(e[0], e[1], base);
+    if (fwd) { set(a, e[1] - 1, 's'); set(a, e[1] - 2, 'o'); }
+    else { set(a, e[0] + 1, 's'); set(a, e[0] + 2, 'o'); }
+    set(a, ((e[0] + e[1]) >> 1) + 1, mark);
+    rows.push(a);
+    e = edge(4); a = line(e[0], e[1], 'p');
+    set(a, e[0] + 2, 'c'); set(a, e[0] + 3, 'c'); set(a, e[1] - 2, 'c');
+    rows.push(a);
+    e = edge(5); a = line(e[0], e[1], 'p');
+    set(a, e[1] - 2, 'c'); set(a, e[0] + 1, 'c'); set(a, e[0] + 3, 'c');
+    rows.push(a);
+    /* gambe: quella davanti a mezzotono, quella dietro in ombra */
+    e = edge(6); a = line(e[0], e[1], 'c'); set(a, e[0] + 1, 'o'); set(a, e[0] + 2, 'o'); rows.push(a);
+    e = edge(7);
+    r = sideFeetRow(e[0], e[1], step, true).split('');
+    rows.push(r);
+
+    if (g.short) rows.splice(3, 2);
+    else if (g.stoop) rows.splice(3, 1);
+    return rows.map(function (x) { return typeof x === 'string' ? x : x.join(''); });
+  }
+
+  /* --- capigliature e accessori, dentro la matrice --------------------
+   * In R59 ciuffi, tese e ceppo erano fillRect dopo il paint: uscivano dal
+   * contorno e portavano colori in piu'. Qui entrano nella matrice prima di
+   * seal(), quindi non possono ne' aprire la sagoma ne' aggiungere un
+   * quarto colore. */
+  /* La corona si allarga per gradi dall'alto: W-6, W-4, W-2, W. Un ciuffo
+   * che sporge PIU' della testa creerebbe un fungo, e la misura del collo
+   * (larghezza minima fra testa e spalle) leggerebbe la strozzatura sotto
+   * il ciuffo invece del collo vero. */
+  function crown(grid, top, x0, x1, tiers) {
+    span(grid, x0 + 1, x1 - 1, top, 'h');
+    span(grid, x0 + 2, x1 - 2, top - 1, 'h');
+    if (tiers > 1) span(grid, x0 + 3, x1 - 3, top - 2, 'h');
+    /* R63 — anche i ciuffi portano il riflesso. Con i capelli scuri
+     * cotonatura e chioma selvaggia erano tre righe nere piene sopra la
+     * testa (Bob: 4 righe interamente nere su 16, gate 2 al massimo 3). */
+    put(grid, x0 + 3, top, 'g'); put(grid, x1 - 3, top, 'g');
+    put(grid, x0 + 4, top - 1, 'g'); put(grid, x1 - 4, top - 1, 'g');
+    if (tiers > 1) { put(grid, x0 + 4, top - 2, 'g'); put(grid, x1 - 4, top - 2, 'g'); }
+  }
+
+  function applyHair(grid, p, dir, g, top, bodyTop) {
+    var style = p.hairStyle, x0 = 8 - (g.headW >> 1), x1 = x0 + g.headW - 1;
+    var back = dir === 'up', y;
+    if (p.hat) return;
+    if (style === 'bouffant' || style === 'wild') crown(grid, top, x0, x1, 2);
+    else if (style === 'pompadour') crown(grid, top, x0, x1, 1);
+    if (p.bun) crown(grid, top, x0 + 1, x1 - 1, back ? 2 : 1);
+    if (style === 'long' && !p.bun) {
+      /* Chioma lunga: due colonne dentro il profilo del capo che scendono
+       * sulla spalla. Di spalle cade sulla schiena. */
+      for (y = 3; y <= (back ? 9 : 7); y++) {
+        put(grid, x0 + 1, top + y, 'h');
+        put(grid, x1 - 1, top + y, 'h');
+      }
+    }
+    if (style === 'waves' && !back) {
+      put(grid, x0 + 1, top + 6, 'h'); put(grid, x1 - 1, top + 6, 'h');
+      put(grid, x0 + 1, top + 7, 'h'); put(grid, x1 - 1, top + 7, 'h');
+    }
+    if (style === 'receding' && !back && !g.side) span(grid, x0 + 3, x1 - 3, top + 2, 's');
+    /* La chioma lunga cade SULLA spalla e sporge di un pixel: e' l'unica
+     * voce di capigliatura che cambia la sagoma del busto, non solo quella
+     * del capo. Separa Hawk da Leland, che hanno tutto il resto uguale. */
+    if (p.long) {
+      var sx0 = 8 - (g.shoulder >> 1), sx1 = sx0 + g.shoulder - 1;
+      if (g.side) { put(grid, sx0, bodyTop, 'h'); put(grid, sx0, bodyTop + 1, 'h'); }
+      else { put(grid, sx0 - 1, bodyTop, 'h'); put(grid, sx1 + 1, bodyTop, 'h'); }
+    }
+  }
+
+  function applyProps(grid, p, dir, g, top, bodyTop, step) {
+    var x0 = 8 - (g.headW >> 1), x1 = x0 + g.headW - 1;
+    var back = dir === 'up', side = g.side;
+    if (p.hat) {
+      /* Cupola stretta sopra, tesa piatta larga quanto il capo sulla riga 1:
+       * il cappello allunga la sagoma senza superarla in larghezza (una tesa
+       * piu' larga della testa spingerebbe il rapporto collo/testa sotto il
+       * 71 %, perche' la misura prende la testa al suo massimo). */
+      /* R63: la cupola prende il tono di riflesso, non quello della chioma.
+       * Con i capelli scuri il cappello era tre righe interamente nere di
+       * fila (Truman ne aveva 4 su 16, gate 2 al massimo 3). In Oro la
+       * calotta dell'officer e' `#++++++++#`: contorno e mezzotono. */
+      span(grid, x0 + 3, x1 - 3, top - 1, 'g');
+      span(grid, x0 + 2, x1 - 2, top, 'g');
+      span(grid, x0, x1, top + 1, 'o');
+      put(grid, x0 + 2, top + 1, 'g'); put(grid, x1 - 2, top + 1, 'g');
+      put(grid, x0 + 4, top, 'h'); put(grid, x1 - 4, top, 'h');
+    }
+    if (p.glasses && !back) {
+      if (side) { span(grid, x1 - 3, x1 - 1, top + 5, 'o'); }
+      else { span(grid, x0 + 2, x0 + 4, top + 5, 'o'); span(grid, x1 - 4, x1 - 2, top + 5, 'o'); }
+    }
+    if (p.log) {
+      /* Il ceppo e' l'unico accessorio che cambia il profilo: due righe
+       * piene di contorno attraverso il petto. Di lato resta dentro i 10 px. */
+      var lw = side ? 10 : 14, lx0 = 8 - (lw >> 1), lk;
+      span(grid, lx0, lx0 + lw - 1, bodyTop + 2, 'o');
+      span(grid, lx0 + 1, lx0 + lw - 2, bodyTop + 3, 'c');
+      /* corteccia: senza questi segni la riga del ceppo era 14 px neri di
+       * fila, ed era il punto piu' piatto di tutto il cast (Log Lady). */
+      for (lk = lx0 + 2; lk < lx0 + lw - 2; lk += 3) {
+        put(grid, lk, bodyTop + 2, 'c'); put(grid, lk + 1, bodyTop + 3, 'o');
+      }
+      /* le mani stringono il ceppo: senza, il ceppo copriva le braccia e
+       * la meta' dietro del profilo restava senza incarnato */
+      put(grid, lx0 + 1, bodyTop + 2, 's'); put(grid, lx0 + 1, bodyTop + 3, 's');
+      put(grid, lx0 + lw - 2, bodyTop + 2, 's'); put(grid, lx0 + lw - 2, bodyTop + 3, 's');
+    }
+    if (p.badge && !back) {
+      var bx = side ? (g.chest >> 1) + 4 : 8 - (g.chest >> 1) + 2;
+      put(grid, bx, bodyTop + 1, 's'); put(grid, bx + 1, bodyTop + 1, 's');
+    }
+    if ((p.tie || p.bowtie) && !back && !side) {
+      put(grid, 7, bodyTop + 1, 'o'); put(grid, 8, bodyTop + 1, 'o');
+      put(grid, 7, bodyTop + 2, 'o'); put(grid, 8, bodyTop + 2, 'o');
+      put(grid, 7, bodyTop + 3, 'o'); put(grid, 8, bodyTop + 3, 'o');
+    }
+    if ((p.collar || p.lapel) && !back && !side) {
+      put(grid, 8 - (g.shoulder >> 1) + 2, bodyTop, 's');
+      put(grid, 8 + (g.shoulder >> 1) - 3, bodyTop, 's');
+    }
+    /* R63 — la cucitura del braccio di profilo non si applica piu' qui:
+     * sideBodyRows() disegna tutte e due le braccia dentro la matrice
+     * (quello vicino avanti, quello lontano dietro). Il vecchio blocco
+     * scriveva sopra la mano posteriore e la faceva sparire, lasciando la
+     * meta' dietro del profilo a due soli toni. */
+  }
+
+  function charPattern(p, dir, step) {
+    var g = geometry(p, dir);
+    var d = headDigits(p);
+    var head = g.side ? sideHeadRows(g.headW, d) : frontHeadRows(g.headW, dir === 'up', d);
+    var rows = blankRows(HEAD_PAD).concat(head);
+    if (g.tall) rows = rows.concat([neckRow(g.side ? g.headW : g.headW - 2)]);
+    rows = rows.concat(g.side ? sideBodyRows(g, step, d) : bodyRows(g, step, p.onearm, d));
+    var grid = toGrid(rows);
+    var bodyTop = HEAD_PAD + 8 + (g.tall ? 1 : 0);
+    applyHair(grid, p, dir, g, HEAD_PAD, bodyTop);
+    applyProps(grid, p, dir, g, HEAD_PAD, bodyTop, step);
+    return { rows: seal(fromGrid(grid)), geo: g };
+  }
+
+  /* I piedi restano sulla stessa riga per tutti: cambia dove FINISCE la
+   * testa, non dove poggia lo sprite. */
+  function verticalShift(g) {
+    if (g.short) return 2;
+    if (g.tall) return -1;
+    if (g.stoop) return 1;
+    return 0;
   }
 
   Spr.drawChar = function (ctx, x, y, pal, dir, frame, alpha, moving, night) {
-    var name = nameOf(pal), p = pal || CHARS.cooper, kind = silhouette(p);
-    if (name === 'cooper') {
-      var walkFrame = moving && (frame & 1) ? 1 : 0;
-      var cooperPattern = dir === 'up' ? (walkFrame ? COOPER_UP1 : COOPER_UP0) :
-        (dir === 'left' || dir === 'right' ? (walkFrame ? COOPER_SIDE1 : COOPER_SIDE0) :
-          (walkFrame ? COOPER_DOWN1 : COOPER_DOWN0));
-      var cooperAlpha = ctx.globalAlpha, cox = Math.round(x), coy = Math.round(y);
-      /* Palette diurna authored, invariata (la vista frontale era l'unica
-       * parte gia' a livello Gen II: capelli/incarnato Δ 103,2, colletto
-       * L 247, cravatta L 32). Castano caldo perche' il bruno precedente
-       * (#3a2f22) cadeva a un passo dal contorno e la testa leggeva come
-       * un blob pieno. */
-      var cooperInk = C.ink;
-      var cooperHair = '#6e4526';
-      var jacketColor = '#587080';
-      var jacketShadeColor = shade(jacketColor, -40);
-      var skinColor = '#f0a868';
-      /* Cravatta fuori dalla forcella della giacca (≤60 di luminanza,
-       * contro i ~70-110 di giacca/ombra): sopravvive alla desaturazione
-       * invece di sparire nello stesso grigio del resto del torso. */
-      var tieColor = '#4a1420';
-      var pantsColor = '#303b43';
-      var hairRim = lighter(cooperHair, 30);
-      var collarColor = C.paper;
-      /* R59: di notte passa TUTTA la palette, contorno compreso — non solo
-       * la giacca come fino a R58. Con nightify() la giacca resta il punto
-       * a contrasto piu' alto sul terreno bosco #7770a8 (Δ ~45), i
-       * pantaloni restano staccati dal torso e nessun materiale interno
-       * scende sotto il contorno. */
-      if (night) {
-        cooperInk = nightify(cooperInk, true);
-        cooperHair = nightify(cooperHair);
-        jacketColor = nightify(jacketColor);
-        jacketShadeColor = nightify(jacketShadeColor);
-        skinColor = nightify(skinColor);
-        tieColor = nightify(tieColor);
-        pantsColor = nightify(pantsColor);
-        hairRim = nightify(hairRim);
-        collarColor = nightify(collarColor);
-      }
-      if (alpha != null) ctx.globalAlpha = cooperAlpha * alpha;
-      paint(ctx, cooperPattern, { o: cooperInk, c: jacketColor, s: skinColor, k: cooperHair, q: pantsColor }, cox, coy, dir === 'left');
-      /* Rim-light sui capelli: dentro l'anello di contorno (riga 2 della
-       * matrice), mai sopra — la riga 0 resta piena per chiudere la sagoma
-       * sul bordo del canvas, il difetto misurato dai critici. La riga 2
-       * ora e' capelli da x3 a x12 in tutte e tre le direzioni, quindi il
-       * rim sta al centro e vale anche per il profilo specchiato. */
-      R(ctx, cox + 5, coy + 2, 6, 1, hairRim);
-      /* Ombra di giacca: secondo valore di luminanza sul torso, presente in
-       * tutte le direzioni (non solo di fronte). */
-      R(ctx, cox + 9, coy + 10, 3, 1, jacketShadeColor);
-      R(ctx, cox + 9, coy + 12, 3, 1, jacketShadeColor);
-      if (dir === 'down') {
-        /* Colletto bianco (interrompe il contorno alla spalla) + cravatta
-         * scura: senza, giacca e testa restavano un'unica campitura, senza
-         * collo ne' identita' di outfit riconoscibile in scala di grigi. */
-        R(ctx, cox + 5, coy + 9, 1, 2, collarColor);
-        R(ctx, cox + 10, coy + 9, 1, 2, collarColor);
-        R(ctx, cox + 7, coy + 10, 2, 3, tieColor);
-      }
-      ctx.globalAlpha = cooperAlpha;
-      return;
-    }
-    var flip = dir === 'left', step = moving ? ((frame & 1) ? -1 : 1) : 0;
-    var side = dir === 'left' || dir === 'right';
-    var base = dir === 'up' ? GOLD_UP0 : (side ? GOLD_SIDE0 : GOLD_DOWN0);
-    var frameSpec = bodyFrame(p, kind, step, side, dir);
-    /* Collo: e' la riga che allunga chi e' alto senza traslare lo sprite —
-     * la testa sale di una riga, i piedi restano dove sono. Il contorno
-     * (x4-x6, x9-x11) copre tutto il riempimento della mascella sopra. */
-    var pattern = (frameSpec.head || base.slice(0, 8))
-      .concat(frameSpec.neck ? ['....ooossooo....'] : [])
-      .concat(frameSpec.rows);
+    var p = pal || CHARS.cooper;
+    var flip = dir === 'left';
+    var step = moving ? ((frame & 1) ? -1 : 1) : 0;
+    var built = charPattern(p, dir === 'left' ? 'right' : dir, step);
+    var pat = built.rows;
+    var col = paletteOf(p);
     var ox = Math.round(x);
-    var oy = Math.round(y) + (kind === 'short' ? 1 : 0) - (frameSpec.neck ? 1 : 0) + (frameSpec.stoop ? 1 : 0);
-    var by = oy + (frameSpec.neck ? 1 : 0);
+    var oy = Math.round(y) + verticalShift(built.geo) - HEAD_PAD;
     var oldAlpha = ctx.globalAlpha;
     if (alpha != null) ctx.globalAlpha = oldAlpha * alpha;
-    /* OBJ Gen II: Cooper usa tre soli colori visibili + trasparenza.
-     * Outline, capelli e pantaloni condividono l'inchiostro; nessun micro-tono. */
-    var shirtCol = name === 'cooper' ? '#c08850' : (p.shirt || '#586878');
-    var pantsCol = name === 'cooper' ? C.ink : (p.pants || '#303840');
-    var hairCol = name === 'cooper' ? C.ink : (p.hair || C.ink);
-    var skinCol = name === 'cooper' ? '#f0a868' : (p.skin || '#e0a870');
-    var inkCol = C.ink;
-    var accentCol = name === 'cooper' ? C.ink : (p.tie || p.badge || p.collar || C.red);
-    var collarCol = name === 'cooper' ? skinCol : (p.collar || p.lapel || C.paper);
-    var hatCol = p.hat, apronCol = p.apron, badgeCol = p.badge;
-    var logCol = '#986040', browCol = '#885838', glassCol = p.glassesColor || C.ink;
-    /* R59: la notte vale per l'intero cast, non per il solo protagonista.
-     * Passano capelli, incarnato, abito, pantaloni, accessori e contorno:
-     * con la sola giacca virata (fino a R58) un NPC di notte restava un
-     * ritaglio diurno incollato su un fondale lunare. */
-    if (night) {
-      inkCol = nightify(inkCol, true);
-      shirtCol = nightify(shirtCol); pantsCol = nightify(pantsCol);
-      hairCol = nightify(hairCol); skinCol = nightify(skinCol);
-      accentCol = nightify(accentCol); collarCol = nightify(collarCol);
-      if (hatCol) hatCol = nightify(hatCol);
-      if (apronCol) apronCol = nightify(apronCol);
-      if (badgeCol) badgeCol = nightify(badgeCol);
-      logCol = nightify(logCol); browCol = nightify(browCol); glassCol = nightify(glassCol);
-    }
-    var hairRim = night ? nightify(lighter(p.hair || C.ink, 34)) : lighter(hairCol, 34);
-    paint(ctx, pattern, {
-      o: inkCol, h: hairCol, s: skinCol, c: shirtCol, a: accentCol, p: pantsCol
-    }, ox, oy, flip);
-    /* Rim-light 1px sulla chioma: senza, i capelli scuri annegavano nel
-     * contorno (stesso tono dell'inchiostro, zero contrasto interno). */
-    R(ctx, ox + 6, oy + 1, 4, 1, hairRim);
-    var hx0 = 8 - (frameSpec.headW >> 1), hx1 = hx0 + frameSpec.headW - 1;
-    hairSilhouette(ctx, ox, oy, p, dir, hairCol, hairRim, hx0, hx1);
-    if (dir === 'down') {
-      R(ctx, ox + 3, oy + 5, 1, 2, skinCol);
-      R(ctx, ox + 11, oy + 5, 1, 2, skinCol);
-      R(ctx, ox + 6, oy + 3, 3, 1, name === 'cooper' ? inkCol : browCol);
-    }
-    if (name === 'cooper' && dir === 'up') {
-      R(ctx, ox + 7, oy + 7, 2, 1, skinCol);
-    }
-    if ((p.collar || p.lapel || name === 'cooper') && dir !== 'up' && (name !== 'cooper' || dir === 'down')) {
-      R(ctx, ox + 5, by + 9, 2, 2, collarCol); R(ctx, ox + 9, by + 9, 2, 2, collarCol);
-    }
-    if (name === 'cooper' && dir === 'down') R(ctx, ox + 7, by + 9, 2, 4, inkCol);
-    /* Tesa e ceppo sporgono di 1 px oltre la sagoma, in colore di contorno:
-     * sono i due soli accessori che devono cambiare il profilo, non solo
-     * riempirlo. */
-    if (p.hat) {
-      R(ctx, ox + hx0 + 2, oy, frameSpec.headW - 4, 2, hatCol);
-      R(ctx, ox + hx0 - 1, oy + 2, frameSpec.headW + 2, 2, inkCol);
-    }
-    /* Chioma lunga: due colonne dentro il profilo del capo (righe 3-6),
-     * non piu' un rettangolo a coordinate fisse che con la testa da 10 px
-     * restava sospeso accanto al mento con lo sfondo in mezzo. */
-    if (p.long) R(ctx, ox + (flip ? hx1 - 2 : hx0 + 1), oy + 3, 2, 4, hairCol);
-    if (p.apron && dir !== 'up') { R(ctx, ox + 5, by + 10, 6, 4, apronCol); R(ctx, ox + 6, by + 11, 4, 1, night ? nightify(C.earth2) : C.earth2); }
-    if (p.log) { R(ctx, ox + 1, by + 10, 14, 3, inkCol); R(ctx, ox + 2, by + 11, 12, 1, logCol); }
-    if (p.badge && dir !== 'up') R(ctx, flip ? ox + 5 : ox + 10, by + 10, 2, 2, badgeCol);
-    if (p.glasses && dir !== 'up') {
-      R(ctx, ox + 4, oy + 5, 3, 2, glassCol); R(ctx, ox + 9, oy + 5, 3, 2, glassCol);
-      R(ctx, ox + 7, oy + 5, 2, 1, inkCol);
-    }
+    /* night e' ignorato di proposito: in gfx/overworld/npc_sprites.pal i
+     * colori 1 e 2 sono identici in morn/day/nite. Di notte scende lo
+     * sfondo (#7770a8, conservato), il personaggio resta a piena luce. */
+    paint(ctx, pat, col, ox, oy, flip);
     ctx.globalAlpha = oldAlpha;
   };
 

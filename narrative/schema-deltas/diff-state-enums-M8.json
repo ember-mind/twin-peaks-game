@@ -1,0 +1,31 @@
+{
+ "_comment": "diff PROPOSTO a state-enums.json (C8-A/.1) — SOLO aggiunte, da applicare dopo approvazione. Non tocca M4/M5/M6.",
+ "values_allowed_add": {
+  "promise_stance": "promise_stance",
+  "warning_target": "warning_target",
+  "focus_destination": "focus_destination",
+  "body_found_by": "body_found_by",
+  "letter_o_observation_source": "letter_o_observation_source",
+  "letter_o_chain": "letter_o_chain",
+  "presagio_status": "presagio_status",
+  "maddy_action_after_warning": "maddy_action_after_warning",
+  "sarah_support_state": "sarah_support_state"
+ },
+ "booleans_allowed_add": [],
+ "enums_add": {
+  "maddy_action_after_warning": [
+   "none",
+   "departure_prepared"
+  ],
+  "sarah_support_state": [
+   "none",
+   "vice"
+  ]
+ },
+ "value_transitions_add": {
+  "presagio_status": [
+   ["active", "verified"]
+  ]
+ },
+ "note": "C8-A.1 (revisione 24/30): maddy_action_after_warning e sarah_support_state sono STATI A DOMINIO CHIUSO (non booleani impliciti) — M9/epilogo li leggono come stati nominali; 'none' distingue «deciso: nessuna azione» da «non ancora deciso» (undefined). Ogni scelta telefonica li scrive ENTRAMBI esplicitamente (palmer→departure_prepared/none; centrale→none/vice; nessuno→none/none). GIÀ presenti in enums (nessuna aggiunta): i 7 valori tipizzati M8; GIÀ in booleans_allowed: maddy_trovata, atto4; GIÀ deprecato: maddy_salvabile. Aggiunte reali: elevare i 9 valori M8 a values_allowed + 2 domini nominali nuovi (maddy_action/sarah_support) + value_transitions_add (presagio active→verified). value_transition, from_derivation e conditional_pages sono dichiarati in schema-delta M8, da implementare in C8-B."
+}

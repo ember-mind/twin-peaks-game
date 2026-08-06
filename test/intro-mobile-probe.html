@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>TP-INTRO-MOBILE-LOADING</title>
+<style>html,body,iframe{margin:0;border:0;width:100%;height:100%;overflow:hidden;background:#111913}#report{display:none}</style>
+</head>
+<body>
+<iframe id="product" title="Twin Peaks prologo mobile" src="../index.html?touch=1&amp;introProbe=layout1"></iframe>
+<pre id="report"></pre>
+<script>
+(function () {
+  var frame = document.getElementById('product'), report = document.getElementById('report');
+  function wait(ms) { return new Promise(function (resolve) { setTimeout(resolve, ms); }); }
+  function norm(s) { return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim(); }
+  frame.addEventListener('load', function () {
+    setTimeout(async function () {
+      var out = { checks: {}, pages: [] };
+      try {
+        var w = frame.contentWindow, E = w.GAME.Engine, D = w.GAME.Data;
+        E.state.mode = 'intro'; E.state.introPage = 0;
+        var pages = E.introPages(), visible = [];
+        var game = w.document.getElementById('game');
+        var stage = w.document.getElementById('stage');
+        var gameRect = game.getBoundingClientRect();
+        var stageRect = stage.getBoundingClientRect();
+        var layout = E.introLayout();
+        out.checks.native_canvas_buffer = game.width === 160 && game.height === 144;
+        out.checks.canvas_and_stage_same_box =
+          Math.abs(gameRect.width - stageRect.width) < 0.01 && Math.abs(gameRect.height - stageRect.height) < 0.01;
+        out.checks.native_aspect_ratio_preserved = Math.abs(gameRect.width / gameRect.height - 160 / 144) < 0.001;
+        out.checks.stage_inside_product_viewport =
+          stageRect.left >= 0 && stageRect.top >= 0 &&
+          stageRect.right <= w.innerWidth + 0.01 && stageRect.bottom <= w.innerHeight + 0.01;
+        out.checks.intro_header_fits_frame = layout.titleFits === true;
+        out.checks.intro_rows_fit_frame = layout.contentFitsVertically === true;
+        for (var i = 0; i < pages.length; i++) {
+          await wait(90);
+          var body = w.document.getElementById('cinematic-body').textContent;
+          visible.push(body); out.pages.push(body);
+          w.dispatchEvent(new w.KeyboardEvent('keydown', { code: 'Enter', bubbles: true }));
+          w.dispatchEvent(new w.KeyboardEvent('keyup', { code: 'Enter', bubbles: true }));
+        }
+        await wait(140);
+        out.checks.continuations_exist = pages.length > D.intro.length;
+        out.checks.max_five_visible_lines = pages.every(function (p) { return p.lines.length <= 5; });
+        out.checks.all_copy_visible = norm(visible.join(' ')) === norm(D.intro.join(' '));
+        out.checks.ends_in_play = E.state.mode === 'play';
+        out.checks.mobile_controls_present = w.document.querySelectorAll('.tp-touch-ctrl').length >= 3;
+        out.checks.no_host_overflow = document.documentElement.scrollWidth <= innerWidth;
+      } catch (e) { out.error = String(e && e.message || e); }
+      var pass = !out.error && Object.keys(out.checks).every(function (k) { return out.checks[k] === true; });
+      report.textContent = JSON.stringify(out, null, 2);
+      document.title = pass ? 'TP-INTRO-MOBILE-PASS' : 'TP-INTRO-MOBILE-FAIL';
+    }, 700);
+  });
+})();
+</script>
+</body>
+</html>

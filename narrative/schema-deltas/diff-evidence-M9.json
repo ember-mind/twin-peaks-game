@@ -1,0 +1,24 @@
+{
+ "_comment": "diff PROPOSTO a evidence.json (C9-A): ui_origin diegetici sui due atomi di P6 (lezione M5-B3.1: la 'function' interna non si renderizza mai) + UNA evidenza nuova, la visione di Sarah, allegabile come ORIENTAMENTO e mai procedurale. T_LELAND_TAXI e D_TAXI esistono già a catalogo.",
+ "ui_origin_add": {
+  "T_LELAND_TAXI": "Diner — «Ho chiamato la Twin Peaks Taxi»",
+  "D_TAXI": "La centrale — Lucy verifica con Twin Peaks Taxi"
+ },
+ "evidence_add": {
+  "T_SARAH_VISIONE": {
+   "label": "ciò che Sarah ha visto",
+   "kind": "testimony",
+   "source": {
+    "document": "M9-M10 v1.1.1 CONFESSION LOCK.md",
+    "section": "§3-B2"
+   },
+   "acquired_in": "Atto4",
+   "provenance": "P (data.js sarah_visione, casa Palmer)",
+   "procedural": false,
+   "supports": [],
+   "ui_origin": "Casa Palmer — ciò che Sarah ha visto",
+   "invariant": "MAI in un support_min: allegabile come orientamento, mai come base. Truman la respinge come atto e la riconosce come direzione («Questo non entra in un fascicolo, Cooper.»)."
+  }
+ },
+ "note": "T_SARAH_VISIONE nasce nel layer CLASSICO (la battuta sarah_visione, casa Palmer, Atto 4): nessun nodo M9 la scrive. È dichiarata in M9.json come `carryover_evidence` (schema-delta §3, da implementare in C9-B/C9-C). Se il costrutto non viene implementato la voce non compare mai: nessun softlock, perché nessun support_min la nomina. D_TAXI resta l'unico atomo ACQUISITO dentro M9, e solo su richiesta del player a Lucy."
+}

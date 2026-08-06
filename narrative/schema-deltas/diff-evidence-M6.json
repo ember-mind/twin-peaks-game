@@ -1,0 +1,9 @@
+{
+ "_comment": "diff PROPOSTO a evidence.json (C6-A): SOLO ui_origin diegetici sulle tre testimonianze M6 (lezione M5-B3.1: la 'function' interna non si renderizza mai; il taccuino mostra un'origine diegetica). Nessuna evidenza nuova: le tre esistono già dal catalogo (source: N→L, delega 2026-07-22).",
+ "ui_origin_add": {
+  "JACQUES_MIDNIGHT_CLAIM": "One Eyed Jacks — Jacques al banco",
+  "JACQUES_LIST_GIVEN": "One Eyed Jacks — la lista di Jacques",
+  "JACQUES_THIRD_MAN_DETAIL": "One Eyed Jacks — il terzo uomo al tavolo"
+ },
+ "note": "night_log_no_visitor NON è un'evidenza: è un booleano (in booleans_allowed), scritto dalla coda ospedale B8b. jacques_admitted_presence e jacques_statement_terms_known sono booleani, non evidenze."
+}

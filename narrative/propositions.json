@@ -1,0 +1,174 @@
+{
+ "narrative_package": "narrative-v1.0",
+ "propositions": {
+  "P1": {
+   "text": "Laura conduceva una vita doppia.",
+   "support_min": {
+    "all_of": [
+     "E1_DIARIO"
+    ]
+   },
+   "support_strong": {
+    "all_of": [
+     "E1_DIARIO",
+     "E2_CUORE"
+    ]
+   },
+   "formulable_in": "M2",
+   "presentable": false
+  },
+  "P2": {
+   "text": "Il pendaglio conferma che James aveva con Laura un rapporto privato. James colloca alcuni dei loro incontri oltre il ponte, verso i binari: una rotta investigativa da verificare.",
+   "ui_short": "James colloca alcuni incontri oltre il ponte, verso i binari. Il pendaglio conferma il rapporto da cui parla.",
+   "support_min": {
+    "all_of": [
+     "E6A_CUORE_INTERO",
+     "T_JAMES_EST"
+    ]
+   },
+   "support_strong": {
+    "all_of": [
+     "E6A_CUORE_INTERO",
+     "T_JAMES_EST"
+    ],
+    "any_of": [
+     "E1_DIARIO"
+    ]
+   },
+   "born_from_comparison": "cmp_e6a_tjames",
+   "formulable_in": "M4",
+   "presented_to": "truman",
+   "presented_in": "M4",
+   "acceptance_type": "investigatory_route",
+   "unlocks": [
+    "east_route",
+    "M5"
+   ]
+  },
+  "P3A": {
+   "text": "La posizione non è compatibile con una caduta casuale: una collocazione deliberata è la lettura più forte.",
+   "support_min": {
+    "all_of": [
+     "E8A_ANELLO_POSIZIONE",
+     "E8B_ANELLO_SUPERFICIE"
+    ]
+   },
+   "support_strong": {
+    "all_of": [
+     "E8A_ANELLO_POSIZIONE",
+     "E8B_ANELLO_SUPERFICIE",
+     "E7B_BIGLIETTO_POSIZIONE"
+    ]
+   },
+   "born_from_comparison": "cmp_e8a_e8b",
+   "formulable_in": "M5",
+   "factual_ceiling": "unconfirmed",
+   "ui_short": "La posizione dell'anello non è compatibile con una caduta casuale: collocazione deliberata come lettura più forte."
+  },
+  "P3B": {
+   "text": "[IPOTESI] Il vagone è stato usato come scena preparata.",
+   "hypothesis": true,
+   "formulable_in": "M5",
+   "factual_ceiling": "unconfirmed",
+   "ui_short": "[Ipotesi] Il vagone come scena preparata."
+  },
+  "P4": {
+   "text": "L'aggressore è associato al nome BOB.",
+   "support_min": {
+    "all_of": [
+     "T1_RONETTE_BOB"
+    ]
+   },
+   "support_strong": {
+    "all_of": [
+     "T1_RONETTE_BOB",
+     "E4_NOME",
+     "E5_POESIA"
+    ]
+   },
+   "formulable_in": "M4",
+   "presentable": true,
+   "acceptance": "annotata, mai accettata come base"
+  },
+  "P4B": {
+   "text": "[IPOTESI] Il nome e il fuoco potrebbero riguardare lo stesso uomo.",
+   "hypothesis": true,
+   "born_from_comparison": "cmp_t1_e5",
+   "requires": [
+    "T1_RONETTE_BOB",
+    "E5_POESIA"
+   ],
+   "formulable_in": "M4",
+   "optional": true,
+   "presentation_reason_code_if_presented": "PREMATURE_SYMBOLIC_LINK"
+  },
+  "P5": {
+   "text": "Jacques può essere collocato sulla scena. La sua presenza non basta ad attribuirgli l'omicidio.",
+   "ui_short": "Jacques può essere collocato sulla scena. La sua presenza non basta ad attribuirgli l'omicidio.",
+   "support_min": {
+    "all_of": [
+     "jacques_admitted_presence"
+    ]
+   },
+   "formulable_in": "M6",
+   "never": "Jacques è innocente"
+  },
+  "P6": {
+   "text": "Il racconto di Leland sulla partenza prevista di Maddy non trova riscontro: il taxi che dice di aver chiamato non risulta prenotato. Una discrepanza che riguarda la vittima e va chiarita di persona.",
+   "support_min": {
+    "all_of": [
+     "T_LELAND_TAXI",
+     "D_TAXI"
+    ]
+   },
+   "born_from_comparison": "cmp_taxi",
+   "formulable_in": "M9",
+   "presented_to": "truman",
+   "acceptance_type": "colloquio_necessario",
+   "factual_path": [
+    "unconfirmed",
+    "confirmed_as_lie"
+   ],
+   "confirmed_in": "M10-B6"
+  },
+  "P7": {
+   "text": "[IPOTESI] La ripetizione è legata alla famiglia Palmer.",
+   "ui_short": "[Ipotesi] La ripetizione è legata alla famiglia Palmer.",
+   "hypothesis": true,
+   "formulable_in": "M8",
+   "procedural": false
+  },
+  "P8": {
+   "text": "Le lettere seguono una firma seriale che il diario associa a Robert.",
+   "ui_short": "Le lettere seguono una firma progressiva che il diario aveva annunciato. Resta ignoto se sia dell'assassino, di «lui», o una messinscena.",
+   "support_min": {
+    "all_of": [
+     "E3_LETTERA_R",
+     "E9A_LETTERA_O",
+     "E9B_STESSO_METODO",
+     "E1_DIARIO"
+    ]
+   },
+   "formulable_in": "M8",
+   "factual_ceiling": "corroborated",
+   "unknown": "se la firma sia dell'assassino, di BOB, o una messinscena"
+  },
+  "P9": {
+   "text": "La perdita di Jacques favorisce chiunque protegga il segreto, qualunque ne sia la causa.",
+   "ui_short": "La perdita di Jacques favorisce chiunque protegga il segreto, qualunque ne sia la causa.",
+   "support_min": {
+    "all_of": [
+     "jacques_dead",
+     "jacques_testimony_lost"
+    ]
+   },
+   "formulable_in": "M6",
+   "factual_ceiling": "unconfirmed"
+  },
+  "P10_R7": {
+   "text": "La responsabilità è fratturata, non cancellata.",
+   "experienced_in": "M10",
+   "never_quantified": true
+  }
+ }
+}

@@ -16,6 +16,8 @@ const notebook = fs.readFileSync(path.join(root, 'js', 'narrative-notebook.js'),
 const production = fs.readFileSync(path.join(root, 'js', 'narrative-production.js'), 'utf8');
 const engine = fs.readFileSync(path.join(root, 'js', 'engine.js'), 'utf8');
 const retroFont = fs.readFileSync(path.join(root, 'js', 'retro-font.js'), 'utf8');
+const portraits = fs.readFileSync(path.join(root, 'js', 'portraits.js'), 'utf8');
+const goldTone = fs.readFileSync(path.join(root, 'js', 'gold-tone.js'), 'utf8');
 
 const checks = {
   gold_native_resolution_160x144: /width="160" height="144"/.test(index) &&
@@ -24,13 +26,20 @@ const checks = {
     /canvas\.height !== VH/.test(engine) && /UW = VW;/.test(engine),
   intro_header_uses_fitting_native_scale: /FEBBRAIO, 1989'[\s\S]*bold 8px monospace/.test(engine) &&
     /titleFits: titleWidth <= l\.boxW - 20/.test(engine),
-  production_cache_busts_layout_fix: /js\/engine\.js\?v=gold53-layout1/.test(index) &&
+  production_cache_busts_layout_fix: /js\/engine\.js\?v=gold54p4-case-doc1/.test(index) &&
     /js\/main\.js\?v=gold53-layout1/.test(index),
   css_stage_preserves_native_aspect: /aspect-ratio: 10 \/ 9/.test(index) &&
     /max-width: 100vw; max-height: 100dvh/.test(index),
   production_loads_retro_renderer: /js\/retro\.js/.test(index),
   production_loads_shared_bitmap_font_first: /js\/retro-font\.js/.test(index) &&
     index.indexOf('js/retro-font.js') < index.indexOf('js/engine.js'),
+  production_loads_speaker_cards_before_engine: /js\/portraits\.js/.test(index) &&
+    index.indexOf('js/portraits.js') < index.indexOf('js/engine.js') &&
+    /Portraits\.drawCard/.test(engine) && /Portraits\.drawCard/.test(retroUi),
+  speaker_cards_use_native_pixel_faces_and_names: /function drawPortrait\(/.test(portraits) &&
+    /function drawCard\(/.test(portraits) && !/drawImage|fillText|measureText/.test(portraits),
+  production_uses_approved_master_palette: /js\/gold-tone\.js/.test(index) &&
+    /GAME\.GoldTone\.apply/.test(engine) && /#183225/.test(goldTone) && /#f5efcf/i.test(goldTone),
   production_loads_authored_tileset: /js\/retro-authored\.js/.test(index),
   production_does_not_load_three: !/three\.min\.js/.test(index) && !/render3d\.js/.test(index),
   engine_boots_without_webgl: /GAME\.Engine\.init\(cv, null\)/.test(main),
@@ -77,6 +86,9 @@ const checks = {
     /font-family: Verdana, Geneva, Tahoma, sans-serif/.test(index) && /function syncCaseUi\(\)/.test(engine)
   ,case_file_explains_controls: /FRECCE ↑ \/ ↓/.test(engine) &&
     /ESC oppure X/.test(engine) && /chiude fascicolo/.test(engine)
+  ,case_file_opens_reperted_documents: /id="case-document"/.test(index) &&
+    /function openSelectedClue\(\)/.test(engine) && /INVIO oppure Z/.test(engine) &&
+    /document:\s*\{/.test(fs.readFileSync(path.join(root, 'js', 'data.js'), 'utf8'))
   ,finale_keeps_notebook_read_only: /notebookOnly = !!\(opts && opts\.keepNotebook\)/.test(adapter) &&
     /readOnly: notebookOnly/.test(adapter) && /opts\.readOnly \? \['Evidenze', 'Appunti', 'Proposizioni'\]/.test(notebook) &&
     /A\.disable\(\{ keepNotebook: true \}\)/.test(production),

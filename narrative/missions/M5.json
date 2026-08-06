@@ -1,0 +1,915 @@
+{
+  "narrative_package": "narrative-v1.0",
+  "mission": "M5",
+  "title": "Il vagone",
+  "source": {
+    "document": "M5-M6 v1.1.1 LOCK.md",
+    "package": "narrative-v1.0"
+  },
+  "schema_delta": "narrative/schema-deltas/M5.md",
+  "entry_condition": {
+    "all": [
+      {
+        "flag": "atto3"
+      },
+      {
+        "proposition_path": "P2.social_status.accepted_by",
+        "contains": "truman"
+      }
+    ]
+  },
+  "observation_groups": {
+    "set_id": "m5_observations",
+    "groups": {
+      "ticket": [
+        "E7A_BIGLIETTO_TESTO",
+        "E7B_BIGLIETTO_POSIZIONE"
+      ],
+      "ring": [
+        "E8A_ANELLO_POSIZIONE",
+        "E8B_ANELLO_SUPERFICIE"
+      ],
+      "scene": [
+        "E_SCENE"
+      ]
+    }
+  },
+  "milestones": [
+    {
+      "id": "milestone_theory_initial",
+      "node": "m5_theory_initial",
+      "group_set": "m5_observations",
+      "after_groups": 2,
+      "resolved_when": {
+        "value_set": "m5_initial_theory"
+      },
+      "blocks": {
+        "kind": "observation_group_prepare",
+        "set": "m5_observations"
+      }
+    },
+    {
+      "id": "milestone_theory_revision",
+      "node": "m5_theory_revision",
+      "group_set": "m5_observations",
+      "after_groups": 3,
+      "resolved_when": {
+        "value_set": "m5_final_theory"
+      },
+      "blocks": {
+        "kind": "node_prepare",
+        "nodes": [
+          "m5_report_intro"
+        ]
+      }
+    }
+  ],
+  "completion": {
+    "when": {
+      "flag": "east_route_confirmed"
+    },
+    "sets": []
+  },
+  "objectives": [
+    {
+      "id": "obj_m5_4",
+      "priority": 400,
+      "when": {
+        "flag": "east_route_confirmed"
+      },
+      "text": "Segui la rotta oltre il confine: One Eyed Jacks."
+    },
+    {
+      "id": "obj_m5_3",
+      "priority": 300,
+      "when": {
+        "all": [
+          {
+            "value_set": "m5_final_theory"
+          },
+          {
+            "not": {
+              "flag": "east_route_confirmed"
+            }
+          }
+        ]
+      },
+      "text": "Riferisci la scena a Truman.",
+      "provenance_note": "[N→L] approvato dal revisore (C5-A review, 2026-07-23)"
+    },
+    {
+      "id": "obj_m5_2",
+      "priority": 200,
+      "when": {
+        "all": [
+          {
+            "flag": "vagone_scoperto"
+          },
+          {
+            "not": {
+              "value_set": "m5_final_theory"
+            }
+          }
+        ]
+      },
+      "text": "Esamina il vagone senza spostare nulla."
+    },
+    {
+      "id": "obj_m5_1",
+      "priority": 100,
+      "when": {
+        "not": {
+          "flag": "vagone_scoperto"
+        }
+      },
+      "text": "Verifica la rotta di James: oltre il ponte, verso i binari."
+    }
+  ],
+  "nodes": [
+    {
+      "id": "m5_bridge",
+      "beat": "B1-B2",
+      "source_section": "M5-B1-B2",
+      "conditions": [],
+      "pages": [
+        {
+          "id": "m5.b1.bridge.p01",
+          "mode": "action",
+          "text": "(Le case finiscono dove aveva detto James. Dopo il ponte, solo la massicciata.)"
+        },
+        {
+          "id": "m5.b1.bridge.p02",
+          "mode": "action",
+          "text": "(Il ponticello di legno: qui hanno trovato Ronette, la notte del delitto.)"
+        },
+        {
+          "id": "m5.b1.bridge.p03",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "La rotta di James e la strada di Ronette sono la stessa strada."
+        },
+        {
+          "id": "m5.b1.bridge.p04",
+          "mode": "dialogue",
+          "speaker_id": "hawk",
+          "display_name": "HAWK",
+          "text": "(raggiungendolo) Truman mi manda a farti da ombra. Da qui in poi le impronte sono mie e tue."
+        },
+        {
+          "id": "m5.b1.bridge.p05",
+          "mode": "dialogue",
+          "speaker_id": "hawk",
+          "display_name": "HAWK",
+          "text": "Le altre sono più vecchie della pioggia. Portano a est, nessuna torna indietro."
+        }
+      ],
+      "effects": [
+        {
+          "notebook": {
+            "id": "m5.note.bridge",
+            "text": "La rotta di James passa dal ponte di Ronette. Impronte vecchie, dirette a est."
+          }
+        }
+      ],
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "traincar",
+      "target_kind": "landmark",
+      "target_id": "sign_ponte",
+      "interaction_slot": "primary",
+      "mandatory_beat": true,
+      "provenance_note": "[P] sign_ponte è un oggetto della mappa traincar (5,6) nel repository — map_id corretto da town a traincar (realtà del repo)"
+    },
+    {
+      "id": "m5_discovery",
+      "beat": "B3-B4",
+      "source_section": "M5-B3-B4",
+      "conditions": [
+        {
+          "node_done": "m5_bridge"
+        }
+      ],
+      "pages": [
+        {
+          "id": "m5.b3.discovery.p01",
+          "mode": "action",
+          "text": "(Oltre la curva, fermo dove i binari muoiono: un vagone merci. Solo.)"
+        },
+        {
+          "id": "m5.b3.discovery.p02",
+          "mode": "dialogue",
+          "speaker_id": "hawk",
+          "display_name": "HAWK",
+          "text": "Io tengo fuori gli altri. Tu fai il primo passaggio."
+        },
+        {
+        "id": "m5.b3.discovery.p03",
+        "mode": "action",
+        "text": "(Dentro: un sedile divelto, una lamiera piegata, terra presso la porta. Al centro, una traversa sgombra.)"
+      },
+      {
+        "id": "m5.b3.discovery.p04",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Prima terra, lamiera e distanze. Il vagone può aspettare un minuto prima di diventare una storia."
+        }
+      ],
+      "effects": [
+        {
+          "set": "vagone_scoperto"
+        },
+        {
+          "notebook": {
+            "id": "m5.note.cooper_reading",
+            "text": "Nota di Cooper: \"Leggere la scena prima che il tempo la legga per me.\""
+          }
+        }
+      ],
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "traincar",
+      "target_kind": "landmark",
+      "target_id": "traincar_entrance",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m5_mound",
+      "beat": "B5",
+      "source_section": "M5-B5",
+      "observation_group": "ticket",
+      "conditions": [
+        {
+          "node_done": "m5_discovery"
+        }
+      ],
+      "pages": [
+        {
+          "id": "m5.b5.mound.p01",
+          "mode": "action",
+          "text": "(Un mucchio di terra, accanto alla porta. Dentro, non fuori.)"
+        },
+        {
+          "id": "m5.b5.mound.p02",
+          "mode": "notebook",
+          "text": "Un biglietto piegato in quattro, inserito nel mucchio. Le pieghe interne sono pulite; un lembo resta visibile sopra la terra."
+        },
+        {
+          "id": "m5.b5.mound.p03",
+          "mode": "action",
+          "text": "(Cooper lo apre con la penna. Lettere maiuscole, incise più che scritte.)"
+        },
+        {
+        "id": "m5.b5.mound.p04",
+        "mode": "notebook",
+        "text": "\"FUOCO CAMMINA CON ME\"."
+      },
+      {
+        "id": "m5.b5.mound.p05",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Pieghe pulite sotto terra; un lembo resta fuori. Registro posizione e testo separatamente."
+        }
+      ],
+      "effects": [
+        {
+          "evidence": "E7B_BIGLIETTO_POSIZIONE"
+        },
+        {
+          "evidence": "E7A_BIGLIETTO_TESTO"
+        }
+      ],
+      "invariant": "unico writer di E7A/E7B; nessuna datazione tramite pioggia",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "traincar",
+      "target_kind": "object",
+      "target_id": "mound",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m5_ring",
+      "beat": "B6",
+      "source_section": "M5-B6",
+      "observation_group": "ring",
+      "conditions": [
+        {
+          "node_done": "m5_discovery"
+        }
+      ],
+      "pages": [
+        {
+          "id": "m5.b6.ring.p01",
+          "mode": "action",
+          "text": "(Su una traversa di legno, al centro esatto: un anello.)"
+        },
+        {
+          "id": "m5.b6.ring.p02",
+          "mode": "notebook",
+          "text": "Un anello, in piano, al centro della traversa."
+        },
+        {
+          "id": "m5.b6.ring.p03",
+          "mode": "action",
+          "text": "(Cooper si abbassa. Non lo tocca.)"
+        },
+        {
+        "id": "m5.b6.ring.p04",
+        "mode": "notebook",
+        "text": "La polvere intorno è intatta. Non vedo il percorso che avrebbe fatto cadendo."
+      },
+      {
+        "id": "m5.b6.ring.p05",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Centro esatto, polvere intatta. Prima di chiedere di chi fosse, annotiamo come stava qui."
+        }
+      ],
+      "effects": [
+        {
+          "evidence": "E8A_ANELLO_POSIZIONE"
+        },
+        {
+          "evidence": "E8B_ANELLO_SUPERFICIE"
+        }
+      ],
+      "invariant": "unico writer di E8A/E8B; nessuna identità del proprietario",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "traincar",
+      "target_kind": "object",
+      "target_id": "ring",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m5_scene",
+      "beat": "B7",
+      "source_section": "M5-B7",
+      "observation_group": "scene",
+      "conditions": [
+        {
+          "node_done": "m5_discovery"
+        }
+      ],
+      "pages": [
+        {
+          "id": "m5.b7.scene.p01",
+          "mode": "action",
+          "text": "(Il sedile e le schegge restano agli angoli. Fra quei segni e la traversa centrale non ci sono trascinamenti.)"
+        },
+        {
+        "id": "m5.b7.scene.p02",
+        "mode": "notebook",
+        "text": "La violenza ha i suoi segni ai bordi. Fra i bordi e il centro: nessun passaggio."
+      },
+      {
+        "id": "m5.b7.scene.p03",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Segni ai bordi, nessun trascinamento verso il centro. La stanza tiene separate due geometrie."
+        }
+      ],
+      "effects": [
+        {
+          "evidence": "E_SCENE"
+        }
+      ],
+      "invariant": "E_SCENE scritta SOLO qui (esame scelto), mai entrando nel vagone",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "traincar",
+      "target_kind": "landmark",
+      "target_id": "scene_center",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m5_theory_initial",
+      "beat": "B8a",
+      "source_section": "M5-B8a",
+      "milestone": "milestone_theory_initial",
+      "conditions": [
+        {
+          "groups_completed": {
+            "set": "m5_observations",
+            "gte": 2
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m5.b8a.theory.p01",
+          "mode": "notebook",
+          "text": "Prima lettura della scena?"
+        }
+      ],
+      "choices": [
+        {
+          "id": "theory_degeneration",
+          "label": "«Un incontro qui è degenerato.»",
+          "effects": [
+            {
+              "value": "m5_initial_theory",
+              "to": "degeneration"
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m5.b8a.feedback.degeneration",
+              "mode": "notebook",
+              "text": "Una lettura possibile. La scena non ha ancora finito di parlare."
+            }
+          ]
+        },
+        {
+          "id": "theory_staging",
+          "label": "«Qualcuno ha disposto alcuni elementi.»",
+          "effects": [
+            {
+              "value": "m5_initial_theory",
+              "to": "staging"
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m5.b8a.feedback.staging",
+              "mode": "notebook",
+              "text": "Una lettura possibile. La scena non ha ancora finito di parlare."
+            }
+          ]
+        }
+      ],
+      "invariant": "nessuna delle due scelte marcata come corretta; la UI non mostra segni di correttezza",
+      "kind": "choice",
+      "channel": "notebook",
+      "interaction_slot": "primary",
+      "role": "theory",
+      "completion_when": {
+        "value_set": "m5_initial_theory"
+      }
+    },
+    {
+      "id": "m5_theory_revision",
+      "beat": "B8b",
+      "source_section": "M5-B8b",
+      "milestone": "milestone_theory_revision",
+      "conditions": [
+        {
+          "groups_completed": {
+            "set": "m5_observations",
+            "gte": 3
+          }
+        },
+        {
+          "value_set": "m5_initial_theory"
+        }
+      ],
+      "pages": [
+        {
+          "id": "m5.b8b.revision.p01",
+          "mode": "notebook",
+          "text": "Il nuovo fatto cambia la tua lettura?"
+        }
+      ],
+      "choices": [
+        {
+          "id": "revision_keep",
+          "label": "Mantengo la teoria.",
+          "effects": [
+            {
+              "value": "m5_final_theory",
+              "from_value": "m5_initial_theory"
+            }
+          ]
+        },
+        {
+          "id": "revision_switch",
+          "label": "La rivedo.",
+          "effects": [
+            {
+              "value": "m5_final_theory",
+              "opposite_of": "m5_initial_theory",
+              "within": [
+                "degeneration",
+                "staging"
+              ]
+            },
+            {
+              "set": "m5_theory_revised"
+            }
+          ]
+        },
+        {
+          "id": "revision_open",
+          "label": "La scena sostiene ancora entrambe.",
+          "effects": [
+            {
+              "value": "m5_final_theory",
+              "to": "open"
+            },
+            {
+              "set": "m5_theory_revised"
+            }
+          ]
+        }
+      ],
+      "invariant": "open è una revisione: scrive m5_theory_revised=true; nessuna teoria marcata corretta",
+      "kind": "choice",
+      "channel": "notebook",
+      "interaction_slot": "primary",
+      "role": "theory",
+      "completion_when": {
+        "value_set": "m5_final_theory"
+      }
+    },
+    {
+      "id": "m5_cmp_ring",
+      "beat": "B8c",
+      "source_section": "M5-B8c",
+      "conditions": [
+        {
+          "evidence": "E8A_ANELLO_POSIZIONE"
+        },
+        {
+          "evidence": "E8B_ANELLO_SUPERFICIE"
+        }
+      ],
+      "pages": [
+        {
+          "id": "m5.b8c.cmp_ring.p01",
+          "mode": "notebook",
+          "text": "Che cosa dice la polvere intatta sulla posizione dell'anello?"
+        }
+      ],
+      "choices": [
+        {
+          "id": "ring_a",
+          "label": "Che la posizione non è compatibile con una caduta casuale: una collocazione deliberata è la lettura più forte.",
+          "result": "DELIBERATE_PLACEMENT",
+          "effects": [
+            {
+              "proposition": "P3A",
+              "to": "formulated",
+              "created_from": [
+                "E8A_ANELLO_POSIZIONE",
+                "E8B_ANELLO_SUPERFICIE"
+              ]
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m5.b8c.feedback.deliberate",
+              "mode": "notebook",
+              "text": "La posizione non è compatibile con una caduta casuale: una collocazione deliberata è la lettura più forte."
+            }
+          ]
+        },
+        {
+          "id": "ring_b",
+          "label": "Che nessuno entra qui da anni.",
+          "result": "NO_ENTRY_OVERREACH",
+          "retry": true,
+          "feedback_pages": [
+            {
+              "id": "m5.b8c.feedback.no_entry",
+              "mode": "notebook",
+              "text": "Le impronte fuori dicono altro: qualcuno è passato, prima della pioggia."
+            }
+          ]
+        },
+        {
+          "id": "ring_c",
+          "label": "Che l'anello è di Laura.",
+          "result": "OWNERSHIP_OVERREACH",
+          "retry": true,
+          "feedback_pages": [
+            {
+              "id": "m5.b8c.feedback.ownership",
+              "mode": "notebook",
+              "text": "Niente qui dice di chi sia."
+            }
+          ]
+        }
+      ],
+      "rules": {
+        "attempt_scope": "comparison",
+        "hide_attempted_results": true,
+        "track_assistance": false
+      },
+      "invariant": "P3A nasce SOLO da questo confronto (unconfirmed); tentativi in comparisons[node].attempts — MAI b8_attempt_history di M4, MAI assistance_level",
+      "kind": "comparison",
+      "channel": "notebook",
+      "interaction_slot": "primary",
+      "mandatory_beat": false,
+      "completed_recall": {
+        "section": "propositions",
+        "page": {
+          "id": "m5.notebook.cmp_ring.already_recorded",
+          "mode": "notebook",
+          "text": "(Questo nesso è già registrato nelle Proposizioni.)"
+        }
+      }
+    },
+    {
+      "id": "m5_cmp_ticket_e5",
+      "beat": "B8c",
+      "source_section": "M5-B8c",
+      "optional": true,
+      "cross_mission_latency": {
+        "policy": "global_notebook_registry",
+        "keep": [
+          "source_mission"
+        ],
+        "dedup_by": "node_id"
+      },
+      "conditions": [
+        {
+          "evidence": "E7A_BIGLIETTO_TESTO"
+        },
+        {
+          "evidence": "E5_POESIA"
+        }
+      ],
+      "pages": [
+        {
+          "id": "m5.b8c.cmp_ticket_e5.p01",
+          "mode": "notebook",
+          "text": "(Confronta: la formula incisa nel biglietto ↔ la formula recitata da Gerard)"
+        }
+      ],
+      "effects": [
+        {
+          "notebook_observation": {
+            "id": "m5.obs.ticket_e5",
+            "text": "La stessa formula, detta in un letto e incisa in un vagone. Ricorrenza — non ancora identità."
+          }
+        }
+      ],
+      "invariant": "nessuna identità di mano/autore; P4B non confermata; M5 completabile senza E5 e senza rimandi pendenti",
+      "kind": "comparison",
+      "channel": "notebook",
+      "interaction_slot": "primary",
+      "comparison_completion": "node_commit",
+      "result": "RECURRENCE_NOT_IDENTITY",
+      "completed_recall": {
+        "section": "notes",
+        "page": {
+          "id": "m5.notebook.cmp_ticket_e5.note_recorded",
+          "mode": "notebook",
+          "text": "(Questo confronto è già annotato negli Appunti.)"
+        }
+      }
+    },
+    {
+      "id": "m5_report_intro",
+      "beat": "B9",
+      "source_section": "M5-B9",
+      "conditions": [
+        {
+          "groups_completed": {
+            "set": "m5_observations",
+            "gte": 3
+          }
+        },
+        {
+          "value_set": "m5_final_theory"
+        }
+      ],
+      "pages": [
+        {
+          "id": "m5.b9.report.p01",
+          "mode": "action",
+          "text": "(Truman arriva col passo di chi non vuole arrivare.)"
+        },
+        {
+          "id": "m5.b9.report.p02",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "text": "Non avete toccato niente. Bene: adesso tocca a me guardare."
+        }
+      ],
+      "pages_by_value": {
+        "value": "m5_final_theory",
+        "cases": {
+          "degeneration": [
+            {
+              "id": "m5.b9.report.theory_degeneration",
+              "mode": "dialogue",
+              "speaker_id": "cooper",
+              "display_name": "COOPER",
+              "text": "Una lettura possibile è che qualcuno avesse fissato un incontro qui. E che qualcosa si sia rotto."
+            }
+          ],
+          "staging": [
+            {
+              "id": "m5.b9.report.theory_staging",
+              "mode": "dialogue",
+              "speaker_id": "cooper",
+              "display_name": "COOPER",
+              "text": "Il centro potrebbe essere stato lasciato così perché venisse letto. Non lo scrivo ancora: lo guardo."
+            }
+          ],
+          "open": [
+            {
+              "id": "m5.b9.report.theory_open",
+              "mode": "dialogue",
+              "speaker_id": "cooper",
+              "display_name": "COOPER",
+              "text": "Ho due letture, Harry, e la scena le regge entrambe. Le porto tutte e due."
+            }
+          ]
+        }
+      },
+      "pages_after_branch": [
+        {
+          "id": "m5.b9.report.p03",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "text": "La lettura la verbalizziamo come tua. I fatti come nostri."
+        },
+        {
+          "id": "m5.b9.report.p04",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "text": "(guarda l'anello senza toccarlo) Questo va nella cassaforte delle prove. Stasera."
+        },
+        {
+          "id": "m5.b9.report.p05",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "È l'unico oggetto la cui posizione non riesco ancora a leggere come accidentale. Vorrei poterlo guardare finché non ci riesco."
+        }
+      ],
+      "next": "m5_s1",
+      "effects": [],
+      "repeat": {
+        "id": "m5.repeat.report",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Il vagone è sigillato. Hawk non vede nulla di nuovo. Nemmeno io, per ora."
+      },
+      "invariant": "già committata con continuation incompleta → riprende next (m5_s1), MAI il repeat; repeat SOLO con east_route_confirmed (repeat_when)",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "traincar",
+      "actor_id": "truman",
+      "target_kind": "actor",
+      "target_id": "truman",
+      "interaction_slot": "primary",
+      "repeat_when": {
+        "flag": "east_route_confirmed"
+      }
+    },
+    {
+      "id": "m5_s1",
+      "beat": "B9",
+      "source_section": "M5-B9",
+      "prompt": "L'anello: dove va stanotte?",
+      "provenance_note": "[N→L] prompt approvato dal revisore (C5-A v1.1 review, 2026-07-23)",
+      "choices": [
+        {
+          "id": "s1_institutional",
+          "label": "Cassaforte: custodia istituzionale.",
+          "effects": [
+            {
+              "value": "s1",
+              "to": "institutional"
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m5.b9.s1.institutional.p01",
+              "mode": "action",
+              "text": "(Cooper fotografa. Truman registra e deposita.)"
+            },
+            {
+              "id": "m5.b9.s1.institutional.p02",
+              "mode": "dialogue",
+              "speaker_id": "truman",
+              "display_name": "TRUMAN",
+              "text": "Quando saprai che cos'è, sarà dove deve essere."
+            }
+          ],
+          "goto": "m5_report_close"
+        },
+        {
+          "id": "s1_documented",
+          "label": "Custodia investigativa personale, documentata.",
+          "effects": [
+            {
+              "value": "s1",
+              "to": "documented_custody"
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m5.b9.s1.documented.p01",
+              "mode": "action",
+              "text": "(Cooper fotografa l'anello sul posto e compila il trasferimento.)"
+            },
+            {
+              "id": "m5.b9.s1.documented.p01b",
+              "mode": "action",
+              "text": "(Sigilla l'anello in una busta. Firma e la ripone nella tasca interna.)"
+            },
+            {
+              "id": "m5.b9.s1.documented.p02",
+              "mode": "dialogue",
+              "speaker_id": "truman",
+              "display_name": "TRUMAN",
+              "text": "(firma, senza fretta) Metto a verbale che non sono d'accordo. E che ti conosco abbastanza da firmare lo stesso."
+            }
+          ],
+          "goto": "m5_report_close"
+        }
+      ],
+      "invariant": "s1 write-once, mai giudicata; widget B1 invariato; continuation esplicita: ogni choices[].goto == node.next (ripresa dichiarativa dopo abort sul ramo di chiusura)",
+      "kind": "choice",
+      "channel": "internal",
+      "exposed": false,
+      "completion_when": {
+        "value_set": "s1"
+      },
+      "next": "m5_report_close"
+    },
+    {
+      "id": "m5_report_close",
+      "beat": "B9",
+      "source_section": "M5-B9",
+      "pages": [
+        {
+          "id": "m5.b9.report.p06",
+          "mode": "dialogue",
+          "speaker_id": "hawk",
+          "display_name": "HAWK",
+          "text": "(dalla porta) Dal cartello in poi il sentiero non serve altre proprietà. Finisce a One Eyed Jacks."
+        },
+        {
+          "id": "m5.b9.report.p07",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "text": "Allora controlliamo chi usa quella strada. Renault tiene il banco laggiù; cominciamo da lui."
+        }
+      ],
+      "effects": [
+        {
+          "set": "east_route_confirmed"
+        }
+      ],
+      "invariant": "UNICO writer di east_route_confirmed; obiettivo OEJ solo dopo l'ultima pagina (commit del ramo)",
+      "kind": "dialogue",
+      "channel": "internal",
+      "exposed": false,
+      "mandatory_beat": true
+    },
+    {
+      "id": "m5_sign_oej",
+      "beat": "B9",
+      "source_section": "M5-B9",
+      "optional": true,
+      "conditions": [
+        {
+          "flag": "east_route_confirmed"
+        }
+      ],
+      "pages": [
+        {
+          "id": "m5.sign_oej.p01",
+          "mode": "action",
+          "text": "\"ONE EYED JACKS — oltre il confine\". Una freccia indica il sentiero a nord."
+        },
+        {
+          "id": "m5.sign_oej.p02",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Una freccia oltre confine non è una prova. È però un invito geograficamente molto preciso."
+        }
+      ],
+      "effects": [],
+      "invariant": "[P] cartello fisico dal repository; nessuna prova collega il cartello a Jacques",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "traincar",
+      "target_kind": "sign",
+      "target_id": "sign_oej",
+      "interaction_slot": "primary"
+    }
+  ],
+  "node_count": {
+    "runtime_total": 13
+  }
+}

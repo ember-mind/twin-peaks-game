@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>M5 engine harness (C5-C.2)</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #000; height: 100%; overflow: hidden; }
+  #stage { position: fixed; inset: 0; }
+  #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+  #gl { background: #000; } #game { background: transparent; }
+  #narrative { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+  #narrative .nw-root { pointer-events: auto; }
+  .nw-root { position: absolute; left: 8%; right: 8%; bottom: 6%; background: rgba(12,14,20,0.94); border: 3px solid #c8b06a; border-radius: 4px; padding: 16px 20px; font: 17px/1.65 monospace; color: #e8e4d8; }
+  .nb-root { top: 10%; bottom: 8%; overflow: auto; }
+  .nw-title { color: #c8b06a; } .nw-opt { padding: 2px 6px; white-space: pre-wrap; }
+  .nw-focus { background: #2e3442; color: #ffe9a8; } .nw-page { min-height: 56px; }
+  .nw-name { color: #c8b06a; } .nw-hint { text-align: right; color: #888; }
+  #truth { position: absolute; top: 0; left: 0; right: 0; z-index: 11; font: 13px monospace; color: #9fe8a0; background: rgba(0,0,0,0.72); padding: 4px 8px; }
+  #log { display: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl" width="960" height="640"></canvas>
+  <canvas id="game" width="480" height="320"></canvas>
+  <div id="narrative"></div>
+  <div id="truth"></div>
+</div>
+<div id="log"></div>
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=harness-r6"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=harness-r6"></script>
+<script src="../js/engine.js?v=harness-r6"></script>
+<script src="../js/render3d.js"></script>
+<script src="../js/glue.js?v=harness-r6"></script>
+<script src="../js/main.js"></script>
+<script src="../js/narrative-runtime.js"></script>
+<script src="../js/narrative-ui.js"></script>
+<script src="../js/narrative-notebook.js"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
+<script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
+<script src="../js/narrative-save.js"></script>
+<script>
+var LOCK = 120;
+var results = { checks: {}, console_errors: [], console_log: [] };
+window.onerror = function (m, src, line) { results.console_errors.push(String(m) + ' @' + line); };
+window.addEventListener('unhandledrejection', function (e) {
+  results.console_errors.push('unhandled: ' + (e.reason && e.reason.message || e.reason));
+  document.title = 'ERR-' + String(e.reason && e.reason.message || e.reason).slice(0, 80);
+});
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(code) {
+  window.dispatchEvent(new KeyboardEvent('keydown', { code: code, bubbles: true }));
+  window.dispatchEvent(new KeyboardEvent('keyup', { code: code, bubbles: true }));
+}
+function holdKey(c) { window.dispatchEvent(new KeyboardEvent('keydown', { code: c, bubbles: true })); }
+function liftKey(c) { window.dispatchEvent(new KeyboardEvent('keyup', { code: c, bubbles: true })); }
+async function press(code) { key(code); await wait(200); }
+function noUI() { return !document.querySelector('#narrative .nw-root'); }
+function widgetOpts() { return [].map.call(document.querySelectorAll('.nw-root:not(.nb-root) .nw-opt'), function (o) { return o.getAttribute('data-choice-id'); }); }
+var DIRC = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+
+async function seq() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter, NS = GAME.NarrativeSave;
+  var D = GAME.NarrativeData;
+  if (GAME.Render3D) GAME.Render3D.render = function () {}; // run logico
+  function S() { return A.getState(); }
+  function obj() { var cm = A.currentMission(); var o = NR.activeObjective(S(), cm); return o ? o.id : null; }
+
+  setInterval(function () {
+    var st = S();
+    document.getElementById('truth').textContent =
+      'mappa: ' + E.state.mapId + ' (' + E.state.player.tx + ',' + E.state.player.ty + ')' +
+      ' | obiettivo: ' + obj() + ' | gruppi: ' + NR.groupsCompleted(st, D.missions.M5, 'm5_observations') +
+      ' | init: ' + (st.values.m5_initial_theory || '-') + ' | final: ' + (st.values.m5_final_theory || '-') +
+      ' | s1: ' + (st.values.s1 || '-') + ' | east: ' + (st.flags.east_route_confirmed === true);
+  }, 300);
+
+  // domini + boot: missioni [M4, M5], stato = fine M4 via runtime (dichiarato:
+  // il percorso fisico M4 è già validato end-to-end; C5-C prova M5 nel motore)
+  var domains = {};
+  for (var name in D.enums.values_allowed) domains[name] = D.enums.enums[D.enums.values_allowed[name]];
+  NR.setValueDomains(domains);
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK, missions: [D.missions.M4, D.missions.M5] });
+  var st0 = S(), M4d = D.missions.M4, M5d = D.missions.M5;
+  NR.applyEffects(st0, [{ set: 'sogno_fatto' }]);
+  function dn(m, id) { var p = NR.prepareNode(st0, m, id); var c = NR.commitNode(st0, m, p); return c; }
+  function dc(m, atId, chId) { var n = m.nodes.filter(function (x) { return x.id === atId; })[0]; var p = NR.prepareChoice(st0, m, n, chId); var c = NR.commitChoice(st0, m, n, p); if (c.goto) dn(m, c.goto); return c; }
+  dn(M4d, 'truman_a2'); dn(M4d, 'james_a2'); dn(M4d, 'cmp_e6a_tjames'); dc(M4d, 'cmp_e6a_tjames', 'b8_a');
+  var presN = M4d.nodes.filter(function (n) { return n.id === 'present_truman_m4'; })[0];
+  var pp = NR.preparePresentation(st0, M4d, presN, 'P2'); NR.commitPresentation(st0, M4d, presN, pp);
+  results.checks.m4_done_entry_m5 = (st0.flags.atto3 === true && obj() === 'obj_m5_1');
+  E.state.flags.atto3 = true; E.state.flags.sogno_fatto = true; // layer classico (porte)
+
+  var m4Snapshot = { assistance_level: st0.assistance_level, b8: JSON.stringify(st0.b8_attempt_history) };
+  function classic() { try { return JSON.parse(localStorage.getItem('tp_save')); } catch (e) { return null; } }
+  var cpN = 0;
+  function checkpoint(nm) {
+    cpN++;
+    NS.clear('5');
+    var r = NS.save('5', { classic: classic() });
+    var l = NS.load('5', { classic: classic() });
+    var okAll = r.ok && l.ok && NR.serialize(l.state) === NR.serialize(S()) &&
+      (NR.activeObjective(l.state, A.currentMission()) || {}).id === obj() && noUI() && !A.active();
+    results.checks['cp' + String(cpN).padStart(2, '0') + '_' + nm] = okAll;
+  }
+
+  async function at(x, y, dir, mapId) {
+    E.loadMap(mapId || 'traincar', x, y, dir);
+    await wait(150);
+  }
+
+  // C5-C.2 (Blocker verifica): install VERO dello stato caricato.
+  // save → azzera lo stato dell'adapter → load → setState(loaded) → refreshFromState.
+  // Prova che lo stato ricostruito dal disco (non quello ancora in memoria) è
+  // quello con cui l'interazione successiva riprende. Ritorna { ok } dove ok è
+  // vero se il caricato è byte-identico a ciò che c'era prima dell'azzeramento.
+  function installNow(slot) {
+    NS.clear(slot);
+    var sv = NS.save(slot, { classic: classic() });
+    var expected = NR.serialize(S());
+    A.setState(NR.createState());
+    var ld = NS.load(slot, { classic: classic() });
+    A.setState(ld.state); A.refreshFromState();
+    return { ok: !!(sv.ok && ld.ok && NR.serialize(S()) === expected), envelope: ld.envelope };
+  }
+  // lease netti (acquire−release) per nome: prova che una ripresa tiene UN solo
+  // lease di sessione, senza annidamenti orfani.
+  function leaseNet(name) {
+    var n = 0;
+    A.events.forEach(function (e) { if (e.event === 'lease_acquire' && e.name === name) n++; if (e.event === 'lease_release' && e.name === name) n--; });
+    return n;
+  }
+  // selezione di una coppia nel taccuino VERO guidata dal DOM (ordine di
+  // acquisizione: mai indici assunti). Da gameplay: apre T, va in Confronta,
+  // seleziona le due evidenze per id, chiude l'eventuale richiamo.
+  function nbCompareOrder() { return [].map.call(document.querySelectorAll('.nb-root [data-nb-compare]'), function (o) { return o.getAttribute('data-nb-compare'); }); }
+  function nbText() { return (document.querySelector('.nb-root') || {}).textContent || ''; }
+  async function nbSelectAt(target, from) { var cur = from; while (cur < target) { await press('ArrowDown'); cur++; } while (cur > target) { await press('ArrowUp'); cur--; } await press('Enter'); }
+  async function nbCompareRecall(evA, evB) {
+    await press('KeyT'); await wait(150);
+    await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); await wait(120); // Confronta (sezione 3)
+    var order = nbCompareOrder();
+    var ia = order.indexOf(evA), ib = order.indexOf(evB);
+    await nbSelectAt(ia, 0);
+    await nbSelectAt(ib, ia); // seconda selezione → confirmPair
+    await wait(250);
+    await press('Enter'); await wait(200); // chiudi la pagina di richiamo → torna al taccuino nella sezione giusta
+  }
+  function dnNow(m, id) { var p = NR.prepareNode(S(), m, id); return NR.commitNode(S(), m, p); }
+
+  // 1) ponte [P sign_ponte @ traincar 5,6]
+  await at(5, 7, 'up');
+  await press('Enter');
+  for (var i = 0; i < 5; i++) await press('Enter'); // 5 pagine + commit
+  results.checks.bridge_done = (S().nodes_done.m5_bridge === true && S().notebook.some(function (n) { return n.id === 'm5.note.bridge'; }));
+
+  // 2) scoperta del vagone [entrance 11,6]
+  await at(11, 7, 'up');
+  await press('Enter'); // p01
+  await press('Enter'); await press('Enter'); // p02, p03
+  results.checks.vagone_false_on_last_page = (S().flags.vagone_scoperto !== true);
+  await press('Enter'); // commit
+  results.checks.discovery_done = (S().flags.vagone_scoperto === true && obj() === 'obj_m5_2');
+  checkpoint('dopo_scoperta');
+
+  // 3) gruppo 1: ANELLO (ordine R→T→S in questo run funzionale)
+  await at(14, 5, 'left'); // anello (13,5)
+  await press('Enter');
+  await press('Enter'); await press('Enter');
+  await press('Enter'); // p04 (ultima pagina)
+  results.checks.ring_evidence_after_last_page = (S().evidence.E8A_ANELLO_POSIZIONE !== true);
+  await press('Enter'); // conferma → commit gruppo 1
+  await wait(250);
+  results.checks.group1_no_theory = (NR.groupsCompleted(S(), M5d, 'm5_observations') === 1 && !A.active());
+  checkpoint('dopo_gruppo1');
+
+  // 4) gruppo 2: MUCCHIO → milestone teoria NELLO STESSO LEASE
+  await at(10, 5, 'up'); // mucchio (10,4)
+  await press('Enter');
+  for (var k = 0; k < 4; k++) await press('Enter'); // p02..p04 + commit → milestone
+  await wait(250);
+  results.checks.theory_prompt_same_lease = (A.active() && !!document.querySelector('[data-page-id="m5.b8a.theory.p01"]'));
+  await press('Enter'); // prompt → commit → widget
+  results.checks.theory_widget_open = (widgetOpts().length === 2);
+  // abort della teoria: la milestone resta pendente
+  await press('Escape'); await wait(250);
+  results.checks.theory_abort_pending = (!A.active() && NR.pendingMilestones(S(), M5d).length === 1);
+  // INSTALL dello stato "teoria iniziale pendente" (idle-salvabile: abort al
+  // choosing) → l'interazione successiva riprende la milestone dalla copia caricata
+  var tiInst = installNow('ti');
+  results.checks.load_installs_theory_initial_pending =
+    (tiInst.ok && NR.pendingMilestones(S(), M5d).length === 1 && S().values.m5_initial_theory === undefined);
+  // interazione con il TERZO gruppo → REDIRECT alla milestone, widget diretto (resume)
+  await at(11, 4, 'down'); // scene_center (11,5)
+  await press('Enter'); await wait(250);
+  results.checks.milestone_redirect_resume = (widgetOpts().length === 2 && !document.querySelector('[data-page-id="m5.b8a.theory.p01"]'));
+  results.checks.load_then_interaction_reopens_theory = (widgetOpts().length === 2);
+  await press('ArrowDown'); await press('Enter'); // staging → feedback
+  results.checks.theory_value_after_feedback_only = (S().values.m5_initial_theory === undefined);
+  await press('Enter'); // commit
+  results.checks.theory_committed = (S().values.m5_initial_theory === 'staging' && NR.pendingMilestones(S(), M5d).length === 0);
+  checkpoint('dopo_teoria');
+
+  // 5) gruppo 3: SCENA → milestone revisione stesso lease
+  await press('Enter'); // scena p01 (nuova interazione: siamo ancora davanti)
+  await press('Enter'); // p02
+  await press('Enter'); // commit → milestone revisione
+  await wait(250);
+  results.checks.revision_prompt_same_lease = (A.active() && !!document.querySelector('[data-page-id="m5.b8b.revision.p01"]'));
+  await press('Enter'); // → widget 3 scelte
+  results.checks.revision_widget = (widgetOpts().length === 3);
+
+  // --- Blocker 2 (C5-C.2): ABORT della revisione → NIENTE softlock ---
+  await press('Escape'); await wait(250); // abbandono del widget di revisione
+  results.checks.revision_abort_leaves_final_theory_unset = (S().values.m5_final_theory === undefined);
+  results.checks.revision_abort_keeps_milestone_pending =
+    (!A.active() && NR.pendingMilestones(S(), M5d).length === 1 && NR.pendingMilestones(S(), M5d)[0].node === 'm5_theory_revision');
+
+  // ripresa da Truman: le sue root (rapporto) sono bloccate dalla milestone —
+  // l'interazione deve RIAPRIRE la revisione, non morire (era il softlock)
+  var leaseBefore = leaseNet('narrative');
+  await at(10, 4, 'left'); // Truman (9,4)
+  await press('Enter'); await wait(250);
+  results.checks.revision_abort_then_truman_reopens_revision =
+    (A.active() && widgetOpts().length === 3 && A.events.some(function (e) { return e.event === 'milestone_resume' && e.to === 'm5_theory_revision'; }));
+  results.checks.pending_milestone_resume_holds_single_session_lease = (leaseNet('narrative') - leaseBefore === 1);
+  await press('Escape'); await wait(250);
+  // ripresa da un target GIÀ COMPLETATO: scene_center (11,5)
+  await at(11, 4, 'down');
+  await press('Enter'); await wait(250);
+  results.checks.revision_abort_then_completed_scene_reopens_revision = (A.active() && widgetOpts().length === 3);
+  await press('Escape'); await wait(250);
+  // e dall'anello già completato (13,5)
+  await at(14, 5, 'left');
+  await press('Enter'); await wait(250);
+  results.checks.revision_abort_then_completed_ring_reopens_revision = (A.active() && widgetOpts().length === 3);
+  await press('Escape'); await wait(250);
+
+  // mission-scoped: una milestone M5 pendente NON reindirizza un'interazione M4
+  // (Ronette, ospedale — nodi M4; il suo contenuto appare, mai la revisione)
+  var evLenA = A.events.length;
+  await at(2, 1, 'up', 'hospital');
+  await press('Enter'); await wait(250);
+  results.checks.pending_milestone_does_not_redirect_unrelated_mission =
+    (!document.querySelector('[data-page-id="m5.b8b.revision.p01"]') && widgetOpts().length !== 3 &&
+      !A.events.slice(evLenA).some(function (e) { return e.event === 'milestone_resume'; }));
+  if (A.active()) { await press('Escape'); await wait(200); }
+  if (A.active()) { await press('Escape'); await wait(200); }
+
+  // save/load INSTALLATO dello stato "revisione pendente" (lo stato che nascondeva
+  // il softlock): dopo l'install una interazione lo riapre end-to-end
+  await at(11, 4, 'down', 'traincar'); // torna sulla scena, senza interagire
+  var rvInst = installNow('rev');
+  results.checks.save_revision_pending = (rvInst.envelope.mission === 'M5' && NR.pendingMilestones(S(), M5d).length === 1 && S().values.m5_final_theory === undefined);
+  results.checks.load_installs_revision_pending_state = (rvInst.ok && NR.pendingMilestones(S(), M5d).length === 1 && S().values.m5_final_theory === undefined);
+  await at(10, 4, 'left'); // Truman
+  await press('Enter'); await wait(250);
+  results.checks.load_then_interaction_reopens_revision = (A.active() && widgetOpts().length === 3);
+
+  // ora CHIUDI davvero la revisione dalla ripresa: sblocca il rapporto
+  await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // «entrambe» → open
+  await wait(250);
+  results.checks.revision_commit_after_resume_unlocks_report =
+    (S().values.m5_final_theory === 'open' && S().flags.m5_theory_revised === true && obj() === 'obj_m5_3' &&
+      NR.pendingMilestones(S(), M5d).length === 0 && NR.prepareNode(S(), M5d, 'm5_report_intro').ok === true);
+  checkpoint('dopo_revisione');
+
+  // 6) P3A dal taccuino VERO (m5_p3a_real_notebook_flow)
+  var acts = NR.notebookActions(S(), [M4d, M5d]);
+  results.checks.notebook_m5_action_visible = acts.some(function (a) { return a.node.id === 'm5_cmp_ring' && a.source_mission === 'M5'; });
+  // lista Confronta = evidenze in ordine di acquisizione: E6A(0),TJ(1),E8A(2),E8B(3),E7B(4),E7A(5),E_SCENE(6)
+  await press('KeyT');
+  await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // Confronta
+  await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // E8A (idx2)
+  await press('ArrowDown'); await press('Enter'); // E8B (idx3) → pagina del confronto
+  await press('Enter'); // p01 → commit → widget B8c
+  results.checks.p3a_widget_from_ui = (widgetOpts().length === 3);
+  await press('Enter'); // ring_a → feedback
+  await press('Enter'); // commit → P3A
+  results.checks.p3a_formulated_independent = (NR.peekProp(S(), 'P3A').formulation.status === 'formulated' &&
+    NR.peekProp(S(), 'P3A').factual_status === 'unconfirmed' && S().values.m5_final_theory === 'open');
+  // richiamo del confronto completato → Proposizioni
+  await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // Confronta
+  var preRecall = NR.serialize(S());
+  await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); await press('ArrowDown'); await press('Enter'); // stessa coppia
+  await press('Enter'); // chiudi il richiamo → Proposizioni
+  var nbT = (document.querySelector('.nb-root') || {}).textContent || '';
+  results.checks.completed_m5_p3a_recall_opens_propositions = (nbT.indexOf('PROPOSIZIONI') >= 0 && nbT.indexOf('FORMULATA') >= 0);
+  results.checks.completed_recall_never_writes_state = (NR.serialize(S()) === preRecall);
+  await press('Escape'); await press('Escape');
+  checkpoint('dopo_p3a');
+  // E7A↔E5 dal taccuino VERO (m5_ticket_e5_real_notebook_flow)
+  dnNow(M4d, 'gerard_a2'); // E5 (nodo M4, surrogato dichiarato) — su S() live (dopo gli install)
+  await press('KeyT');
+  await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // Confronta
+  // lista ora: ...E7A(5), E_SCENE(6), E5(7)
+  for (var kk = 0; kk < 5; kk++) await press('ArrowDown');
+  await press('Enter'); // E7A
+  await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // E5 → nodo diretto
+  await press('Enter'); // nota → commit
+  var c5e = JSON.parse(NR.serialize(S())).comparisons.m5_cmp_ticket_e5;
+  results.checks.ticket_e5_real_flow = (c5e && c5e.completed === true && S().notebook.some(function (n) { return n.id === 'm5.obs.ticket_e5'; }));
+  // richiamo direct-effect → APPUNTI (mai «Proposizioni»)
+  await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter');
+  for (var k5 = 0; k5 < 5; k5++) await press('ArrowDown');
+  await press('Enter'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter');
+  await press('Enter'); // chiudi il richiamo → Appunti
+  var nbT2 = (document.querySelector('.nb-root') || {}).textContent || '';
+  results.checks.completed_m5_ticket_e5_recall_opens_notes = (nbT2.indexOf('APPUNTI') >= 0 && nbT2.indexOf('Proposizioni.)') === -1);
+  await press('Escape'); await press('Escape');
+
+  // --- Blocker 1 (C5-C.2): richiami dei confronti M4 letti dai DATI ---
+  // completa cmp_t1_e5 (P4B formulata dagli EFFETTI DEL NODO — il caso che
+  // l'euristica choice-vs-node sbagliava mandandolo agli Appunti). M4 è già
+  // validata end-to-end: qui la setup è runtime, il RICHIAMO passa dalla UI vera.
+  results.checks.all_comparisons_define_completed_recall = [M4d, M5d].every(function (m) {
+    return m.nodes.filter(function (n) { return n.kind === 'comparison'; }).every(function (n) {
+      var cr = n.completed_recall;
+      return !!cr && (cr.section === 'propositions' || cr.section === 'notes') && !!cr.page && !!cr.page.id;
+    });
+  });
+  NR.applyEffects(S(), [{ evidence: 'T1_RONETTE_BOB' }]); // E5_POESIA già concessa (gerard_a2 sopra)
+  var t1e5 = dnNow(M4d, 'cmp_t1_e5');
+  results.checks.m4_p4b_completed_via_node_effects =
+    (t1e5.ok && NR.peekProp(S(), 'P4B').formulation.status === 'formulated' && JSON.parse(NR.serialize(S())).comparisons.cmp_t1_e5.completed === true);
+  // richiamo P4B → PROPOSIZIONI (era il bug: apriva Appunti)
+  var preM4 = NR.serialize(S());
+  await nbCompareRecall('T1_RONETTE_BOB', 'E5_POESIA');
+  results.checks.completed_m4_p4b_recall_opens_propositions = (nbText().indexOf('PROPOSIZIONI') >= 0 && nbText().indexOf('Appunti.)') === -1);
+  results.checks.completed_m4_recall_never_writes_state = (NR.serialize(S()) === preM4);
+  await press('Escape'); await press('Escape'); await wait(150);
+  // richiamo P2 (cmp_e6a_tjames, completata dal boot via scelta) → PROPOSIZIONI
+  await nbCompareRecall('E6A_CUORE_INTERO', 'T_JAMES_EST');
+  results.checks.completed_m4_p2_recall_opens_propositions = (nbText().indexOf('PROPOSIZIONI') >= 0 && nbText().indexOf('Appunti.)') === -1);
+  await press('Escape'); await press('Escape'); await wait(150);
+
+  // 7) rapporto: Truman (9,4) — intro con pages_by_value(open) → S1 → abort → resume → chiusura
+  await at(10, 4, 'left');
+  await press('Enter'); // intro p01
+  for (var k2 = 0; k2 < 5; k2++) await press('Enter'); // p02, theory_open, p03..p05
+  await press('Enter'); // conferma ultima pagina → commit intro → widget S1
+  await wait(250);
+  results.checks.report_by_value_open = A.events.some(function (e) { return e.event === 'pages_by_value' && e.value === 'open' && e.selected_page_id === 'm5.b9.report.theory_open'; });
+  results.checks.s1_widget_same_lease = (A.active() && widgetOpts().length === 2);
+  await press('Escape'); await wait(250); // abort S1
+  // stato "intro committata / S1 assente": INSTALL dal disco → l'interazione
+  // riprende la scelta S1 (mai il repeat) — prova end-to-end, non solo serialize
+  results.checks.report_intro_done_s1_absent = (S().nodes_done.m5_report_intro === true && S().values.s1 === undefined);
+  var rpt1 = installNow('rpt1');
+  results.checks.load_installs_report_intro_s1_absent =
+    (rpt1.ok && S().nodes_done.m5_report_intro === true && S().values.s1 === undefined && NR.pendingMilestones(S(), M5d).length === 0);
+  await at(10, 4, 'left');
+  await press('Enter'); await wait(250); // resume dopo install → widget S1 diretto
+  results.checks.s1_resume_not_repeat = (widgetOpts().length === 2 && !document.querySelector('[data-page-id="m5.repeat.report"]'));
+  await press('Enter'); // institutional → feedback p01
+  results.checks.s1_null_on_feedback = (S().values.s1 === undefined);
+  await press('Enter'); // feedback p02
+  await press('Enter'); // → ramo close p06 (branch del widget S1: S1 già committata)
+  results.checks.east_false_mid_close = (S().values.s1 === 'institutional' && S().flags.east_route_confirmed !== true);
+  // NB (C5-C.2): report_close è il BRANCH-commit della scelta S1 — S1 e la
+  // chiusura sono una transazione ATOMICA nello stesso widget (Escape ignorato
+  // in fase branch). Non esiste quindi un frame idle "S1 committata / close
+  // assente" da salvare: è il confine transazionale corretto, non un buco.
+  await press('Enter'); // p07
+  await press('Enter'); // commit ramo → east_route
+  results.checks.close_committed = (S().flags.east_route_confirmed === true && obj() === 'obj_m5_4' &&
+    S().beats_completed.indexOf('m5_report_close') !== -1);
+  checkpoint('dopo_chiusura');
+
+  // 8) repeat solo ora
+  await press('Enter'); await wait(250);
+  results.checks.repeat_after_completion = !!document.querySelector('[data-page-id="m5.repeat.report"]');
+  await press('Enter');
+  // cartello OEJ [P]
+  await at(20, 3, 'up');
+  await press('Enter'); await wait(200);
+  results.checks.sign_oej_page = !!document.querySelector('[data-page-id="m5.sign_oej.p01"]');
+  await press('Enter');
+  checkpoint('finale');
+
+  // installazione VERA dello stato caricato (i 5 stati chiave sono coperti dai
+  // cp lungo il flusso; qui la prova di install completa sul finale)
+  (function () {
+    NS.clear('6');
+    var r = NS.save('6', { classic: classic() });
+    var expected = NR.serialize(S());
+    A.setState(NR.createState());
+    var l = NS.load('6', { classic: classic() });
+    A.setState(l.state); var rf = A.refreshFromState();
+    results.checks.m5_load_installs_state = (l.ok && NR.serialize(S()) === expected);
+    results.checks.m5_refresh_restores_current_objective = (rf.mission === 'M5' && rf.objective === 'obj_m5_4');
+    results.checks.m5_save_records_current_mission = (l.envelope.mission === 'M5');
+    results.checks.m5_load_restores_world_roots = (NR.worldRoots(S(), M5d, 'traincar', 'truman').length === 0 ||
+      NR.prepareNode(S(), M5d, 'm5_report_intro').already_completed === true);
+  })();
+  // allineamento sorgente ↔ registro target ↔ mappa
+  (function () {
+    var wt = A._debugWorldTargets || {};
+    var okAll = true, seenT = {};
+    M5d.nodes.filter(function (n) { return n.channel === 'world' && n.target_kind !== 'actor'; }).forEach(function (n) {
+      var reg = wt[n.map_id] || {};
+      if (!reg[n.target_id]) okAll = false;
+      var kkey = n.map_id + '/' + n.target_id;
+      if (seenT[kkey]) okAll = false;
+      seenT[kkey] = true;
+      if (reg[n.target_id] && reg[n.target_id].kind !== n.target_kind) okAll = false;
+    });
+    results.checks.every_target_map_matches_node_map_id = okAll;
+    results.checks.bridge_uses_repository_map = (M5d.nodes.filter(function (n) { return n.id === 'm5_bridge'; })[0].map_id === 'traincar' && !!(wt.traincar || {}).sign_ponte);
+  })();
+  results.checks.m4_state_untouched = (S().assistance_level === m4Snapshot.assistance_level &&
+    JSON.stringify(S().b8_attempt_history) === m4Snapshot.b8);
+  results.checks.no_console_errors = (results.console_errors.length === 0);
+  results.checks.lease_free_end = !A.active();
+  results.all_pass = Object.keys(results.checks).every(function (k) { return results.checks[k] === true; });
+  results.events_count = A.events.length;
+  results.checkpoints_saveload = cpN; // GENERATO dal numero reale
+  document.getElementById('log').textContent = JSON.stringify({ results: results, events: A.events.slice(-60) }, null, 1);
+  document.title = results.all_pass ? 'C5C-PASS' : 'C5C-FAIL';
+}
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    seq().catch(function (err) {
+      results.console_errors.push('seq: ' + (err && err.message || err));
+      document.title = 'ERR-' + String(err && err.message || err).slice(0, 80);
+      document.getElementById('log').textContent = JSON.stringify({ results: results }, null, 1);
+    });
+  }, 300);
+});
+</script>
+</body>
+</html>

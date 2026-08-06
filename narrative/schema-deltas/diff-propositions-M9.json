@@ -1,0 +1,7 @@
+{
+ "_comment": "diff PROPOSTO a propositions.json (C9-A): SOLO ui_short participant-facing per il taccuino. P6 esiste già a catalogo (support_min T_LELAND_TAXI+D_TAXI, born_from_comparison cmp_taxi, acceptance_type colloquio_necessario, factual_path unconfirmed→confirmed_as_lie confermato in M10-B6): nessun cambiamento a support_min, factual_path o confirmed_in.",
+ "ui_short_add": {
+  "P6": "Il taxi che Leland dice di aver prenotato per Maddy non risulta. Va chiarito di persona."
+ },
+ "note": "In M9 P6 arriva a `formulated` + `accepted_by: [truman]` con `acceptance_type: colloquio_necessario`, e resta `factual_status: unconfirmed`. La conferma (`confirmed_as_lie`) appartiene a M10-B6 e NON è materia di questo diff. P7 e P8 non cambiano: restano orientamento (VALID_BUT_NOT_PROCEDURAL alla presentazione) e conservano gli ui_short introdotti da diff-propositions-M8.json."
+}

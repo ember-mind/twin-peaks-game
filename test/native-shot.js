@@ -52,7 +52,9 @@ if (silhouette) url += `&silhouette=${silhouette}`;
 // screenshot e' una tinta piatta. Un "ok" su un frame vuoto e' peggio di un
 // errore, perche' entra fra le prove del round. Qui il frame viene decodificato
 // e rifiutato se non ha almeno MIN_COLORS colori distinti.
-const MIN_COLORS = 6;
+/* Master palette approvata produce anche quattro valori visibili in crop
+ * piccoli: e' palette Game Boy legittima, non tinta piatta. */
+const MIN_COLORS = 4;
 
 function distinctColors(file) {
   const buf = fs.readFileSync(file);

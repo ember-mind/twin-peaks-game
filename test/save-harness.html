@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>B5 save harness</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #000; height: 100%; overflow: hidden; }
+  #stage { position: fixed; inset: 0; }
+  #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+  #gl { background: #000; }
+  #game { background: transparent; }
+  #narrative { position: absolute; left: 0; right: 0; bottom: 0; top: 0; z-index: 10; pointer-events: none; }
+  #narrative .nw-root { pointer-events: auto; }
+  .nw-root { position: absolute; left: 8%; right: 8%; bottom: 6%; background: rgba(12,14,20,0.94); border: 3px solid #c8b06a; border-radius: 4px; padding: 16px 20px; font: 17px/1.65 monospace; color: #e8e4d8; }
+  .nb-root { top: 10%; bottom: 8%; overflow: auto; }
+  .nw-title { color: #c8b06a; margin-bottom: 8px; }
+  .nw-opt { padding: 2px 6px; white-space: pre-wrap; }
+  .nw-focus { background: #2e3442; color: #ffe9a8; }
+  .nw-page { min-height: 56px; }
+  .nw-name { color: #c8b06a; }
+  .nw-hint { text-align: right; color: #888; margin-top: 8px; }
+  #truth { position: absolute; top: 0; left: 0; right: 0; z-index: 11; font: 13px monospace; color: #9fe8a0; background: rgba(0,0,0,0.72); padding: 4px 8px; }
+  #log { display: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl" width="960" height="640"></canvas>
+  <canvas id="game" width="480" height="320"></canvas>
+  <div id="narrative"></div>
+  <div id="truth"></div>
+</div>
+<div id="log"></div>
+
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=harness-r6"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=harness-r6"></script>
+<script src="../js/engine.js?v=harness-r6"></script>
+<script src="../js/render3d.js"></script>
+<script src="../js/glue.js?v=harness-r6"></script>
+<script src="../js/main.js"></script>
+<script src="../js/narrative-runtime.js"></script>
+<script src="../js/narrative-ui.js"></script>
+<script src="../js/narrative-notebook.js"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
+<script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
+<script src="../js/narrative-save.js"></script>
+
+<script>
+var LOCK = 120;
+var results = { checks: {}, console_errors: [], console_log: [] };
+window.onerror = function (m, src, line) { results.console_errors.push(String(m) + ' @' + line); };
+(function () {
+  var ce = console.error, cw = console.warn;
+  console.error = function () { results.console_errors.push([].join.call(arguments, ' ')); ce.apply(console, arguments); };
+  console.warn = function () { results.console_log.push('[warn] ' + [].join.call(arguments, ' ')); cw.apply(console, arguments); };
+})();
+
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(code) {
+  window.dispatchEvent(new KeyboardEvent('keydown', { code: code, bubbles: true }));
+  window.dispatchEvent(new KeyboardEvent('keyup', { code: code, bubbles: true }));
+}
+async function press(code) { key(code); await wait(200); }
+function blurNow() { window.dispatchEvent(new Event('blur')); }
+function noUI() { return !document.querySelector('#narrative .nw-root'); }
+function widgetOpts() { return [].map.call(document.querySelectorAll('.nw-root:not(.nb-root) .nw-opt'), function (o) { return o.getAttribute('data-choice-id'); }); }
+function nbText() { var r = document.querySelector('.nb-root'); return r ? r.textContent : ''; }
+
+var STOP = null;
+function stopped() { return new Promise(function () {}); }
+async function stopIf(label, title) { if (STOP === label) { document.title = 'B5-SHOT-' + label; await stopped(); } }
+
+function classic() { try { return JSON.parse(localStorage.getItem('tp_save')); } catch (e) { return null; } }
+
+async function stageA() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter, NS = GAME.NarrativeSave;
+  function S() { return A.getState(); }
+  function M() { return A.getMission(); }
+  function obj() { var o = NR.activeObjective(S(), M()); return o ? o.id : null; }
+  var rqNode = null;
+
+  if (STOP) { // overlay 3D solo per gli screenshot, con render THROTTLED (2fps
+    // virtuali bastano per un fermo-immagine; SwiftShader a 60fps affoga)
+    var realRender = GAME.Render3D.render.bind(GAME.Render3D);
+    var lastR = -9999;
+    GAME.Render3D.render = function (st, dt, now) {
+      if (performance.now() - lastR < 500) return;
+      lastR = performance.now();
+      realRender(st, dt, now);
+    };
+    var glcv = document.getElementById('gl');
+    var ov = document.createElement('canvas');
+    ov.width = glcv.width; ov.height = glcv.height;
+    ov.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;z-index:9;';
+    document.getElementById('stage').appendChild(ov);
+    var ovx = ov.getContext('2d');
+    setInterval(function () { try { GAME.Render3D.render(E.state, 16, performance.now()); ovx.drawImage(glcv, 0, 0); } catch (e2) {} }, 400);
+  }
+  setInterval(function () {
+    var st = S();
+    document.getElementById('truth').textContent =
+      'canSave: ' + NS.canSave() + (NS.canSave() ? '' : ' («' + NS.CANNOT_SAVE_TEXT + '»)') +
+      ' | slot0: ' + (NS.has('0') ? ('SÌ gen ' + NS.generation()) : 'no') +
+      ' | obiettivo: ' + obj() + ' | b8: [' + st.b8_attempt_history.join(',') + '] | lease: ' + (A.active() ? 'HELD' : 'FREE') + ' | rev: ' + st.revision;
+  }, 300);
+
+  // reset storage narrativo per un run riproducibile
+  NS.clear('0'); localStorage.removeItem('twin-peaks:narrative:narrative-v1.0:meta');
+
+  // run-mode: il renderer 3D è un no-op (la logica non lo usa; SwiftShader
+  // renderebbe migliaia di frame virtuali mangiando il tempo reale)
+  if (!STOP && GAME.Render3D) GAME.Render3D.render = function () {};
+
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK });
+  E.loadMap('sheriff', 6, 3, 'right'); // davanti a Truman; il classico si salva qui (tp_save)
+  NR.applyEffects(S(), [{ set: 'sogno_fatto' }]);
+  rqNode = M().nodes.filter(function (n) { return n.id === 'ronette_q'; })[0];
+
+  // checkpoint helper: save → load-back → identità di stato e derivazioni
+  function checkpoint(name) {
+    var okSave = NS.canSave();
+    var r = NS.save('0', { classic: classic() });
+    var l = NS.load('0', { classic: classic(), expectGeneration: r.generation });
+    var same = l.ok && NR.serialize(l.state) === NR.serialize(S());
+    var oSame = l.ok && (NR.activeObjective(l.state, M()) || {}).id === obj();
+    var rootsSame = l.ok && JSON.stringify(NR.worldRoots(l.state, M(), 'sheriff', 'truman').map(function (n) { return n.id; })) ===
+                              JSON.stringify(NR.worldRoots(S(), M(), 'sheriff', 'truman').map(function (n) { return n.id; }));
+    var choicesSame = l.ok && JSON.stringify(NR.availableChoices(l.state, M(), rqNode).map(function (c) { return c.id; })) ===
+                                JSON.stringify(NR.availableChoices(S(), M(), rqNode).map(function (c) { return c.id; }));
+    results.checks['cp_' + name] = (okSave && r.ok && same && oSame && rootsSame && choicesSame && noUI() && !A.active());
+    if (!STOP) document.title = 'CP-' + name; // traccia di avanzamento per la diagnosi
+    return l;
+  }
+
+  // cp1 — prima di truman_a2
+  checkpoint('01_before_truman');
+
+  // save VIETATO durante le pagine di dialogo
+  key('Enter'); await wait(250); // truman_a2 p01 aperta
+  results.checks.save_blocked_during_dialogue = (!NS.canSave() && NS.save('0', { classic: classic() }).error === 'save_not_allowed');
+  await stopIf('01');
+  for (var i = 0; i < 7; i++) await press('Enter'); // fino al commit
+  results.checks.truman_done = (S().flags.sogno_raccontato === true);
+  checkpoint('02_after_truman');
+
+  // Ronette: prima domanda non terminale, poi interruzione (blur) → save
+  E.loadMap('hospital', 2, 2, 'up');
+  await press('Enter'); // pagine iniziali
+  results.checks.save_blocked_during_visit = !NS.canSave();
+  await press('Enter'); await press('Enter'); // commit root → widget
+  results.checks.save_blocked_during_widget = !NS.canSave();
+  await press('Enter'); // q_luogo → ramo
+  await press('Enter'); await press('Enter'); await press('Enter'); // commit ramo → widget [q_uomo]
+  blurNow(); await wait(250); // interruzione: sessione chiusa, visita a metà (stato committato coerente)
+  results.checks.blur_leaves_idle = (!A.active() && NS.canSave());
+  var cp3 = checkpoint('03_after_first_question');
+  if (STOP === '03') { // load → la domanda residua riemerge dai dati
+    A.setState(cp3.state); A.refreshFromState();
+    await press('Enter'); // interazione → widget diretto [q_uomo]
+    document.title = 'B5-SHOT-03'; return stopped();
+  }
+  await stopIf('02');
+
+  // completa la visita → T1
+  await press('Enter'); // widget [q_uomo]
+  await press('Enter'); // conferma → uomo p01
+  for (var k2 = 0; k2 < 6; k2++) await press('Enter'); // p02..p06 + commit
+  results.checks.t1_done = (S().evidence.T1_RONETTE_BOB === true);
+  checkpoint('04_after_t1');
+
+  // beat James (runtime) → riapertura reale → poi Escape sulle residue → save
+  var pj = NR.prepareNode(S(), M(), 'james_a2'); NR.commitNode(S(), M(), pj);
+  await press('Enter'); // pagina di riapertura
+  await press('Enter'); // commit → widget residue [q_laura]
+  await press('Escape'); await wait(250); // cancellazione consentita (riaperta)
+  checkpoint('05_after_reopen');
+
+  // B8 via taccuino reale: errore B
+  await press('KeyT');
+  results.checks.save_blocked_during_notebook = !NS.canSave();
+  await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // Confronta
+  // in questo percorso la lista ha TRE voci (T1 acquisita prima): E6A è idx1, T_JAMES idx2
+  await press('ArrowDown'); await press('Enter'); await press('ArrowDown'); await press('Enter'); // coppia → intro
+  results.checks.save_blocked_during_comparison = !NS.canSave();
+  await press('Enter'); await press('Enter'); await press('Enter'); // → widget B8
+  await press('ArrowDown'); await press('Enter'); // b8_b → feedback
+  await press('Enter'); // commit → widget [A,C]
+  await press('Escape'); // chiudi widget → menu taccuino
+  await press('Escape'); // chiudi taccuino
+  checkpoint('06_after_b8_b');
+
+  // B→C
+  await press('KeyT');
+  await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter');
+  await press('ArrowDown'); await press('Enter'); await press('ArrowDown'); await press('Enter'); // → widget [A,C]
+  await press('ArrowDown'); await press('Enter'); await press('Enter'); // C → feedback → commit → [A]
+  await press('Escape'); await press('Escape');
+  var cp7 = checkpoint('07_after_b8_bc');
+  if (STOP === '04') { // load → history e opzione residua riemergono
+    A.setState(cp7.state); A.refreshFromState();
+    await press('KeyT'); await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter');
+    await press('ArrowDown'); await press('Enter'); await press('ArrowDown'); await press('Enter'); // → widget [A]
+    document.title = 'B5-SHOT-04'; return stopped();
+  }
+
+  // A → P2 formulata
+  await press('KeyT');
+  await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter');
+  await press('ArrowDown'); await press('Enter'); await press('ArrowDown'); await press('Enter'); // → widget [A]
+  await press('Enter'); await press('Enter'); // A → feedback → commit → menu
+  await press('Escape');
+  var cp8 = checkpoint('08_p2_formulated');
+  if (STOP === '06') {
+    A.setState(cp8.state); A.refreshFromState();
+    await press('KeyT'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter');
+    document.title = 'B5-SHOT-06'; return stopped();
+  }
+
+  // P4B formulata (surrogati runtime dichiarati) e RESPINTA sul vero Truman
+  var pg2 = NR.prepareNode(S(), M(), 'gerard_a2'); NR.commitNode(S(), M(), pg2);
+  pg2 = NR.prepareNode(S(), M(), 'cmp_t1_e5'); NR.commitNode(S(), M(), pg2);
+  E.loadMap('sheriff', 6, 3, 'right');
+  await press('Enter'); await press('Enter'); // intro → menu [P2,P4B]
+  results.checks.save_blocked_during_presentation = !NS.canSave();
+  await press('ArrowDown'); await press('Enter'); // P4B → provenienza
+  await press('Enter'); // → pagina Truman
+  await press('Enter'); // commit rifiuto
+  var cp9 = checkpoint('09_p4b_rejected');
+  if (STOP === '05') {
+    A.setState(cp9.state); A.refreshFromState();
+    await press('KeyT'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter');
+    document.title = 'B5-SHOT-05'; return stopped();
+  }
+
+  // ALREADY_REJECTED
+  await press('Enter'); await press('Enter'); // intro → menu
+  await press('ArrowDown'); await press('Enter'); // P4B → pagina memoria
+  await press('Enter'); // commit (telemetria)
+  checkpoint('10_already_rejected');
+
+  // P2 accettata
+  await press('Enter'); await press('Enter'); // intro → menu
+  await press('Enter'); // P2 → provenienza
+  for (var k3 = 0; k3 < 5; k3++) await press('Enter'); // pagine p01..p04 + commit
+  results.checks.p2_accepted = (S().flags.atto3 === true && obj() === 'obj_m4_4');
+  var cp11 = checkpoint('11_p2_accepted');
+  results.record_centrale = {
+    checkpoint: 'after_p2_acceptance',
+    storage_key: NS.keyFor('0'),
+    state_identical_after_load: results.checks.cp_11_p2_accepted,
+    objective_before: 'obj_m4_4', objective_after: cp11.ok ? (NR.activeObjective(cp11.state, M()) || {}).id : null,
+    presentation_count: (S().props.P2 || { presentations: [] }).presentations.length,
+    p2_factual_status: (S().props.P2 || {}).factual_status,
+    atto3: S().flags.atto3 === true,
+    active_leases_after_load: A.active() ? 1 : 0,
+    visible_narrative_ui_after_load: !noUI(),
+    console_errors: results.console_errors.slice()
+  };
+  if (STOP === '07') {
+    A.setState(cp11.state); A.refreshFromState();
+    await press('KeyT'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter');
+    document.title = 'B5-SHOT-07'; return stopped();
+  }
+
+  // repeat
+  if (!STOP) document.title = 'RPT-0';
+  await press('Enter');
+  if (!STOP) document.title = 'RPT-1 ui:' + (!noUI()) + ' err:' + results.console_errors.length;
+  await press('Enter'); // repeat → chiudi
+  if (!STOP) document.title = 'RPT-2 ui:' + (!noUI()) + ' idle:' + (!A.active());
+  checkpoint('12_after_repeat');
+  // attesi per il cold boot scritti SUBITO (il kill del processo può perdere
+  // le ultime scritture localStorage non ancora flushate)
+  localStorage.setItem('b5_expected_state', NR.serialize(S()));
+  localStorage.setItem('b5_expected_objective', obj());
+
+  // enable() idempotente: una seconda enable non duplica i listener
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK });
+  var opens0 = A.events.filter(function (e) { return e.event === 'notebook_opened'; }).length;
+  await press('KeyT');
+  var opens1 = A.events.filter(function (e) { return e.event === 'notebook_opened'; }).length;
+  await press('Escape');
+  results.checks.enable_idempotent_listeners = (opens1 - opens0 === 1);
+
+  // consegna alla fase di resume: il COLD BOOT avviene in un processo Chrome
+  // separato con profilo persistente (--user-data-dir) — localStorage condiviso
+  localStorage.setItem('b5_expected_state', NR.serialize(S()));
+  localStorage.setItem('b5_expected_objective', obj());
+  localStorage.setItem('b5_resultsA', JSON.stringify(results));
+  results.all_pass = Object.keys(results.checks).every(function (k) { return results.checks[k] === true; });
+  document.getElementById('log').textContent = JSON.stringify({ results: results }, null, 1);
+  document.title = results.all_pass ? 'B5A-PASS' : 'B5A-FAIL';
+}
+
+async function stageB() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter, NS = GAME.NarrativeSave;
+  var prevRaw = localStorage.getItem('b5_resultsA');
+  if (prevRaw) { var prev = JSON.parse(prevRaw); results.checks = prev.checks; results.record_centrale = prev.record_centrale; results.console_errors = prev.console_errors.concat(results.console_errors); }
+
+  if (STOP) { // overlay 3D solo per gli screenshot, con render THROTTLED (2fps
+    // virtuali bastano per un fermo-immagine; SwiftShader a 60fps affoga)
+    var realRender = GAME.Render3D.render.bind(GAME.Render3D);
+    var lastR = -9999;
+    GAME.Render3D.render = function (st, dt, now) {
+      if (performance.now() - lastR < 500) return;
+      lastR = performance.now();
+      realRender(st, dt, now);
+    };
+    var glcv = document.getElementById('gl');
+    var ov = document.createElement('canvas');
+    ov.width = glcv.width; ov.height = glcv.height;
+    ov.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;z-index:9;';
+    document.getElementById('stage').appendChild(ov);
+    var ovx = ov.getContext('2d');
+    setInterval(function () { try { GAME.Render3D.render(E.state, 16, performance.now()); ovx.drawImage(glcv, 0, 0); } catch (e2) {} }, 400);
+  }
+  setInterval(function () {
+    var st = A.getState();
+    document.getElementById('truth').textContent = 'COLD BOOT | obiettivo: ' +
+      ((st && GAME.NarrativeRuntime.activeObjective(st, A.getMission())) || {}).id +
+      ' | lease: ' + (A.active() ? 'HELD' : 'FREE') + ' | UI: ' + (noUI() ? 'chiusa' : 'APERTA');
+  }, 120);
+
+  if (!STOP && GAME.Render3D) GAME.Render3D.render = function () {};
+  // ordine del contratto: 1) classico 2) motore 3) envelope narrativo 4-6) valida+consegna
+  var cs = classic();
+  E.state.mode = 'play';
+  E.loadMap(cs.mapId, cs.tx, cs.ty, cs.dir || 'up');
+  E.state.clues = cs.clues || []; E.state.flags = cs.flags || {};
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK });
+  var l = NS.load('0', { classic: cs, classicAdvanced: true });
+  results.checks.cold_load_ok = !!l.ok;
+  if (l.ok) {
+    A.setState(l.state);
+    A.refreshFromState();
+    // verifica SEMANTICA autosufficiente del cold boot (nessuna dipendenza
+    // dalla memoria del processo precedente): tutto ciò che il contratto
+    // richiede deve riemergere dai dati del solo envelope
+    var st = JSON.parse(NR.serialize(A.getState()));
+    var v = st.visits.ronette_visit || {};
+    results.checks.cold_state_identical = (
+      st.flags.atto3 === true &&
+      st.props.P2 && st.props.P2.social_status.accepted_by.join(',') === 'truman' &&
+      st.props.P2.factual_status === 'unconfirmed' &&
+      st.props.P2.presentations.length === 1 &&
+      st.props.P4B && st.props.P4B.presentations.length === 1 &&
+      v.closed === true && v.reopened === true && v.questions_asked.join(',') === 'q_luogo,q_uomo' &&
+      st.b8_attempt_history.length === 3 && st.assistance_level === 2 &&
+      st.comparisons.cmp_e6a_tjames && st.comparisons.cmp_e6a_tjames.completed === true &&
+      NR.serialize(NR.deserialize(NR.serialize(A.getState()))) === NR.serialize(A.getState())
+    );
+    results.checks.cold_objective = (((NR.activeObjective(A.getState(), A.getMission())) || {}).id === 'obj_m4_4');
+    results.checks.cold_no_ui_no_lease = (noUI() && !A.active());
+    var rev0 = A.getState().revision;
+    await wait(600); // nessuna pagina si apre da sola, revision ferma
+    results.checks.cold_no_auto_effects = (A.getState().revision === rev0 && noUI());
+    // il repeat di Truman riemerge dai dati
+    await press('Enter');
+    results.checks.cold_repeat_works = !!document.querySelector('[data-page-id="m4.repeat.present_truman_m4"]');
+    await stopIf('08');
+    await press('Enter'); // chiudi il repeat
+  }
+  // dump dello storage per lo screen-truth
+  var dump = {};
+  for (var i = 0; i < localStorage.length; i++) {
+    var k2 = localStorage.key(i);
+    if (k2.indexOf('twin-peaks:narrative') === 0 || k2 === 'tp_save' || k2.indexOf('b5_') === 0) dump[k2] = (localStorage.getItem(k2) || '').slice(0, 200);
+  }
+  results.storage_dump = dump;
+  results.checks.no_console_errors = (results.console_errors.length === 0);
+  results.all_pass = Object.keys(results.checks).every(function (k) { return results.checks[k] === true; });
+  document.getElementById('log').textContent = JSON.stringify({ results: results }, null, 1);
+  document.title = results.all_pass ? 'B5-PASS' : 'B5-FAIL';
+}
+
+window.addEventListener('unhandledrejection', function (e) {
+  results.console_errors.push('unhandled: ' + (e.reason && e.reason.message || e.reason));
+  document.title = 'ERR-' + String(e.reason && e.reason.message || e.reason).slice(0, 80);
+});
+window.addEventListener('load', function () {
+  var q = new URLSearchParams(location.search);
+  STOP = q.get('shot');
+  var resume = q.get('resume');
+  setTimeout(function () {
+    (resume ? stageB : stageA)().catch(function (err) {
+      results.console_errors.push('seq: ' + (err && err.message || err));
+      document.title = 'ERR-' + String(err && err.message || err).slice(0, 80);
+      document.getElementById('log').textContent = JSON.stringify({ results: results }, null, 1);
+    });
+  }, 300);
+});
+</script>
+</body>
+</html>

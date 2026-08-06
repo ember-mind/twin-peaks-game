@@ -1,0 +1,61 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>TP Houses Quality Sheet</title>
+<style>
+  html, body { margin: 0; background: #10161c; overflow: hidden; }
+  canvas { display: block; width: 960px; height: 640px; image-rendering: pixelated; }
+</style>
+<canvas id="sheet" width="960" height="640"></canvas>
+<script src="../js/houses.js"></script>
+<script>
+(function () {
+  var canvas = document.getElementById('sheet');
+  var g = canvas.getContext('2d');
+  var names = [
+    'SHERIFF', 'DOUBLE R', 'PALMER',
+    'GREAT NORTHERN', 'HOSPITAL', 'ROADHOUSE'
+  ];
+
+  g.fillStyle = '#10161c';
+  g.fillRect(0, 0, canvas.width, canvas.height);
+  g.imageSmoothingEnabled = false;
+
+  for (var i = 0; i < 6; i++) {
+    var col = i % 3, row = Math.floor(i / 3);
+    var ox = 20 + col * 313, oy = 20 + row * 305;
+    var ch = String(i + 1);
+    var map = {
+      id: 'house-quality-' + ch,
+      rows: [
+        '............',
+        '.TTTTTTTTTT.',
+        '.' + ch + ch + ch + ch + 'D' + ch + ch + ch + ch + ch + '.',
+        '.' + ch + ch + ch + ch + ch + ch + ch + ch + ch + ch + '.',
+        '.' + ch + ch + ch + ch + ch + ch + ch + ch + ch + ch + '.',
+        '............'
+      ]
+    };
+
+    g.fillStyle = '#18232b';
+    g.fillRect(ox, oy, 293, 285);
+    g.fillStyle = '#24343d';
+    g.fillRect(ox + 4, oy + 4, 285, 277);
+    g.fillStyle = '#6d8b70';
+    g.fillRect(ox + 9, oy + 49, 275, 218);
+
+    g.save();
+    g.translate(ox + 15, oy + 45);
+    g.scale(1.55, 1.55);
+    GAME.sprites.drawStructures(g, map, 0, 0, {});
+    g.restore();
+
+    g.fillStyle = 'rgba(7,12,15,0.88)';
+    g.fillRect(ox + 9, oy + 239, 275, 28);
+    g.fillStyle = '#e9dfc9';
+    g.font = 'bold 15px system-ui, sans-serif';
+    g.textAlign = 'center';
+    g.fillText(names[i], ox + 146, oy + 259);
+  }
+  document.title = 'TP-HOUSES-READY';
+})();
+</script>

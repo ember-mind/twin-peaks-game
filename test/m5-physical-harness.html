@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>M5 physical end-to-end harness (C5-E)</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #000; height: 100%; overflow: hidden; }
+  #stage { position: fixed; inset: 0; }
+  #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+  #gl { background: #000; } #game { background: transparent; }
+  #narrative { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+  #narrative .nw-root { pointer-events: auto; }
+  .nw-root { position: absolute; left: 8%; right: 8%; bottom: 6%; background: rgba(12,14,20,0.94); border: 3px solid #c8b06a; border-radius: 4px; padding: 16px 20px; font: 17px/1.65 monospace; color: #e8e4d8; }
+  .nb-root { top: 10%; bottom: 8%; overflow: auto; }
+  .nw-title { color: #c8b06a; } .nw-opt { padding: 2px 6px; white-space: pre-wrap; }
+  .nw-focus { background: #2e3442; color: #ffe9a8; } .nw-page { min-height: 56px; }
+  .nw-name { color: #c8b06a; } .nw-hint { text-align: right; color: #888; }
+  #truth { position: absolute; top: 0; left: 0; right: 0; z-index: 11; font: 13px monospace; color: #9fe8a0; background: rgba(0,0,0,0.72); padding: 4px 8px; }
+  #log { display: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl" width="960" height="640"></canvas>
+  <canvas id="game" width="480" height="320"></canvas>
+  <div id="narrative"></div>
+  <div id="truth"></div>
+</div>
+<div id="log"></div>
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=harness-r6"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=harness-r6"></script>
+<script src="../js/engine.js?v=harness-r6"></script>
+<script src="../js/render3d.js"></script>
+<script src="../js/glue.js?v=harness-r6"></script>
+<script src="../js/main.js"></script>
+<script src="../js/narrative-runtime.js"></script>
+<script src="../js/narrative-ui.js"></script>
+<script src="../js/narrative-notebook.js"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
+<script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
+<script src="../js/narrative-save.js"></script>
+<script>
+/* C5-E PHYSICAL END-TO-END — due percorsi CAMMINATI dallo spawn town fino a
+ * sign_oej, ogni segmento dal pathfinder BFS sulla mappa reale (mai loadMap per
+ * i segmenti di percorso, come l'end-to-end M4). L'unica semina ammessa è lo
+ * stato di fine-M4 via runtime (il percorso fisico M4 è già validato end-to-end)
+ * + i flag classici (atto3/sogno_fatto) che aprono la porta est town→traincar,
+ * + (Percorso B) E5_POESIA dal nodo M4 Gerard (surrogato dichiarato: M5 usa il
+ * CONFRONTO E7A↔E5 dal taccuino vero, non l'acquisizione fisica di E5).
+ *
+ * Percorso A (ring-first: anello→mucchio→scena): E5 assente, teoria keep,
+ *   revisione keep, P3A NON formulata, S1 institutional → M5 completabile
+ *   SENZA Gerard e SENZA P3A.
+ * Percorso B (scene-first: scena→mucchio→anello): E5 presente, teoria staging,
+ *   revisione open, P3A + E7A↔E5 dal TACCUINO REALE, S1 documented_custody.
+ *
+ * ?path=A|B esegue un solo percorso; senza parametro esegue A poi B (reset del
+ * mondo tra i due). Titolo C5DE-PASS/FAIL. */
+var LOCK = 60;
+var PATH = null;
+var out = { paths: {}, console_errors: [], console_log: [] };
+window.onerror = function (m, s, l) { out.console_errors.push(String(m) + ' @' + l); };
+window.addEventListener('unhandledrejection', function (e) {
+  out.console_errors.push('unhandled: ' + (e.reason && e.reason.message || e.reason));
+  document.title = 'ERR-' + String(e.reason && e.reason.message || e.reason).slice(0, 80);
+});
+(function () { var ce = console.error, cw = console.warn;
+  console.error = function () { out.console_errors.push([].join.call(arguments, ' ')); ce.apply(console, arguments); };
+  console.warn = function () { out.console_log.push('[warn] ' + [].join.call(arguments, ' ')); cw.apply(console, arguments); };
+})();
+
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(c) { window.dispatchEvent(new KeyboardEvent('keydown', { code: c, bubbles: true })); window.dispatchEvent(new KeyboardEvent('keyup', { code: c, bubbles: true })); }
+function holdKey(c) { window.dispatchEvent(new KeyboardEvent('keydown', { code: c, bubbles: true })); }
+function liftKey(c) { window.dispatchEvent(new KeyboardEvent('keyup', { code: c, bubbles: true })); }
+async function press(c) { key(c); await wait(160); }
+var DIRC = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+
+window.addEventListener('load', function () {
+  PATH = new URLSearchParams(location.search).get('path');
+  setTimeout(function () {
+    main().catch(function (err) {
+      out.console_errors.push('main: ' + (err && err.message || err));
+      document.getElementById('log').textContent = JSON.stringify(out, null, 1);
+      document.title = 'ERR-' + String(err && err.message || err).slice(0, 80);
+    });
+  }, 300);
+});
+
+async function main() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter, NS = GAME.NarrativeSave;
+  var D = GAME.NarrativeData, M4d = D.missions.M4, M5d = D.missions.M5;
+  function S() { return A.getState(); }
+  function obj() { var cm = A.currentMission(); var o = NR.activeObjective(S(), cm); return o ? o.id : null; }
+
+  if (GAME.Render3D) GAME.Render3D.render = function () {}; // run logico (SwiftShader)
+  var domains = {};
+  for (var nm in D.enums.values_allowed) domains[nm] = D.enums.enums[D.enums.values_allowed[nm]];
+  NR.setValueDomains(domains);
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK, missions: [M4d, M5d] });
+
+  setInterval(function () {
+    var p = E.state.player;
+    document.getElementById('truth').textContent = 'mappa: ' + E.state.mapId + ' (' + p.tx + ',' + p.ty + ')' +
+      ' | obj: ' + obj() + ' | init: ' + (S().values.m5_initial_theory || '-') + ' | final: ' + (S().values.m5_final_theory || '-') +
+      ' | s1: ' + (S().values.s1 || '-') + ' | east: ' + (S().flags.east_route_confirmed === true) + ' | lease: ' + (A.active() ? 'HELD' : 'FREE');
+  }, 300);
+
+  /* ------- semina fine-M4 (identica al motore) + flag classici ------- */
+  function dn(m, id) { var p = NR.prepareNode(S(), m, id); return NR.commitNode(S(), m, p); }
+  function dc(m, atId, chId) { var n = m.nodes.filter(function (x) { return x.id === atId; })[0]; var p = NR.prepareChoice(S(), m, n, chId); var c = NR.commitChoice(S(), m, n, p); if (c.goto) dn(m, c.goto); return c; }
+  function seedFineM4(withE5) {
+    A.setState(NR.createState());
+    NR.applyEffects(S(), [{ set: 'sogno_fatto' }]);
+    dn(M4d, 'truman_a2'); dn(M4d, 'james_a2'); dn(M4d, 'cmp_e6a_tjames'); dc(M4d, 'cmp_e6a_tjames', 'b8_a');
+    var presN = M4d.nodes.filter(function (n) { return n.id === 'present_truman_m4'; })[0];
+    var pp = NR.preparePresentation(S(), M4d, presN, 'P2'); NR.commitPresentation(S(), M4d, presN, pp);
+    if (withE5) dn(M4d, 'gerard_a2'); // E5_POESIA — surrogato M4 dichiarato (Percorso B)
+    E.state.flags.atto3 = true; E.state.flags.sogno_fatto = true; // porta est town→traincar
+  }
+
+  /* ------- pathfinder BFS sulla mappa reale (NPC-aware, porte incluse) ------- */
+  function walkable(mapId, x, y) {
+    for (var i = 0; i < E.state.npcs.length; i++) { var n = E.state.npcs[i]; if (E.npcActive(n) && n.x === x && n.y === y) return false; }
+    if (GAME.Maps.doorAt(mapId, x, y)) return true;
+    return !GAME.Maps.isSolid(mapId, x, y, E.state);
+  }
+  function bfs(mapId, from, to) {
+    var m = GAME.Maps[mapId];
+    var W = m.width || m.rows[0].length, H = m.height || m.rows.length;
+    var seen = {}, prev = {}, q = [from]; seen[from[0] + ',' + from[1]] = true;
+    while (q.length) {
+      var cur = q.shift();
+      if (cur[0] === to[0] && cur[1] === to[1]) { var path = [cur]; while (prev[cur[0] + ',' + cur[1]]) { cur = prev[cur[0] + ',' + cur[1]]; path.unshift(cur); } return path; }
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) {
+        var nx = cur[0] + d[0], ny = cur[1] + d[1], k = nx + ',' + ny;
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H || seen[k]) return;
+        if (!walkable(mapId, nx, ny)) return;
+        seen[k] = true; prev[k] = cur; q.push([nx, ny]);
+      });
+    }
+    return null;
+  }
+  async function walkTo(tx, ty) {
+    for (var guard = 0; guard < 600; guard++) {
+      if (E.state.dialogue) { key('Enter'); await wait(140); continue; } // monologhi classici
+      var p = E.state.player;
+      if (p.tx === tx && p.ty === ty && !p.moving) return true;
+      var path = bfs(E.state.mapId, [p.tx, p.ty], [tx, ty]);
+      if (!path || path.length < 2) { await wait(250); continue; }
+      var next = path[1];
+      var dir = next[0] > p.tx ? 'right' : next[0] < p.tx ? 'left' : next[1] > p.ty ? 'down' : 'up';
+      holdKey(DIRC[dir]);
+      var t0 = 0; while ((E.state.player.tx !== next[0] || E.state.player.ty !== next[1]) && t0 < 2400) { await wait(60); t0 += 60; }
+      liftKey(DIRC[dir]); await wait(70);
+    }
+    return false;
+  }
+  async function face(dir) {
+    holdKey(DIRC[dir]); var t0 = 0; while (E.state.player.dir !== dir && t0 < 1500) { await wait(40); t0 += 40; } liftKey(DIRC[dir]); await wait(110);
+  }
+  async function enterDoor(x, y, expectMap, route) {
+    await walkTo(x, y); // calpestando la porta scatta la transizione (il player non "arriva" mai idle sul tile)
+    var t0 = 0; while ((E.state.mapId !== expectMap || E.state.fadePhase !== 0) && t0 < 6000) { await wait(100); t0 += 100; }
+    route.push({ phase: 'transit', map: E.state.mapId, coords: [E.state.player.tx, E.state.player.ty], via_door: [x, y] });
+    return E.state.mapId === expectMap; // la transizione è il criterio di successo
+  }
+  // cammina fino a un vicino CALPESTABILE del bersaglio e gira verso di esso
+  async function walkNextTo(tx, ty) {
+    var neigh = [[tx, ty - 1, 'down'], [tx, ty + 1, 'up'], [tx - 1, ty, 'right'], [tx + 1, ty, 'left']];
+    // scegli il vicino raggiungibile più vicino
+    var best = null, bestLen = 1e9;
+    for (var i = 0; i < neigh.length; i++) {
+      var nb = neigh[i];
+      if (!walkable(E.state.mapId, nb[0], nb[1])) continue;
+      var pth = bfs(E.state.mapId, [E.state.player.tx, E.state.player.ty], [nb[0], nb[1]]);
+      if (pth && pth.length < bestLen) { bestLen = pth.length; best = nb; }
+    }
+    if (!best) return false;
+    await walkTo(best[0], best[1]); await face(best[2]);
+    return true;
+  }
+  function topRoot() { var rs = [].slice.call(document.querySelectorAll('#narrative .nw-root')); for (var i = rs.length - 1; i >= 0; i--) if (rs[i].style.display !== 'none') return rs[i]; return null; }
+  function pageId() { var r = topRoot(); if (!r) return null; var b = r.querySelector('[data-page-id]'); return b ? b.getAttribute('data-page-id') : null; }
+  function choices() { var r = topRoot(); if (!r || r.classList.contains('nb-root')) return []; return [].map.call(r.querySelectorAll('.nw-opt[data-choice-id]'), function (o) { return o.getAttribute('data-choice-id'); }); }
+  async function advanceUntil(pred, cap) { for (var i = 0; i < (cap || 12) && !pred(); i++) { await press('Enter'); } return pred(); }
+  async function answerWidget(idx, doneWhen, cap) { for (var k = 0; k < idx; k++) await press('ArrowDown'); await press('Enter'); await advanceUntil(doneWhen, cap || 8); }
+  // taccuino: gli indici della lista Confronta sono per ORDINE DI ACQUISIZIONE —
+  // si DERIVANO dal DOM, mai si assumono (dipendono dall'ordine del percorso).
+  function nbOrder() { return [].map.call(document.querySelectorAll('.nb-root [data-nb-compare]'), function (o) { return o.getAttribute('data-nb-compare'); }); }
+  async function nbGoto(targetIdx, fromIdx) { var c = fromIdx; while (c < targetIdx) { await press('ArrowDown'); c++; } while (c > targetIdx) { await press('ArrowUp'); c--; } await press('Enter'); return targetIdx; }
+  async function nbComparePair(evA, evB) {
+    await press('KeyT'); await wait(150);
+    await press('ArrowDown'); await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); await wait(120); // Confronta (sez. 3)
+    var order = nbOrder(); var ia = order.indexOf(evA), ib = order.indexOf(evB);
+    await nbGoto(ia, 0); await nbGoto(ib, ia); await wait(200); // seconda selezione → confirmPair
+  }
+
+  // interagisci con un bersaglio ambientale e committa il nodo (pagine → commit)
+  async function interactTarget(tx, ty, doneWhen, route, label) {
+    await walkNextTo(tx, ty);
+    route.push({ phase: label, map: E.state.mapId, coords: [E.state.player.tx, E.state.player.ty], target: [tx, ty] });
+    key('Enter'); await wait(180); // apre la sessione + prima pagina
+    await advanceUntil(doneWhen, 12);
+  }
+
+  /* =================== un percorso =================== */
+  async function runPath(path) {
+    var route = [], checks = {};
+    var withE5 = (path === 'B');
+    seedFineM4(withE5);
+    E.loadMap('town', 28, 31, 'up'); // spawn canonico della partita
+    await wait(200);
+    checks.entry_obj_m5_1 = (S().flags.atto3 === true && obj() === 'obj_m5_1');
+    var m4Snap = { assistance: S().assistance_level, b8: JSON.stringify(S().b8_attempt_history) };
+    checks.e5_seed_matches_path = (S().evidence.E5_POESIA === true) === withE5;
+    route.push({ phase: 'spawn', map: 'town', coords: [E.state.player.tx, E.state.player.ty] });
+
+    // town → traincar (porta est 55,14, needsFlag atto3)
+    checks.town_to_traincar = await enterDoor(55, 14, 'traincar', route);
+
+    // ponte [sign_ponte 5,6]
+    await interactTarget(5, 6, function () { return S().nodes_done.m5_bridge === true; }, route, 'sign_ponte');
+    checks.bridge_done = (S().nodes_done.m5_bridge === true);
+    route.push({ phase: 'binari', map: 'traincar', coords: [E.state.player.tx, E.state.player.ty], note: 'sentiero est-ovest verso il vagone' });
+
+    // scoperta del vagone [traincar_entrance 11,6]
+    await interactTarget(11, 6, function () { return S().flags.vagone_scoperto === true; }, route, 'discovery');
+    checks.discovery_done = (S().flags.vagone_scoperto === true && obj() === 'obj_m5_2');
+
+    // tre osservazioni nell'ordine del percorso
+    var ring = [13, 5], mound = [10, 4], scene = [11, 5];
+    var order = (path === 'A') ? [['mound', mound], ['ring', ring], ['scene', scene]]
+                               : [['scene', scene], ['mound', mound], ['ring', ring]];
+    var doneWhen = {
+      ring: function () { return S().evidence.E8A_ANELLO_POSIZIONE === true; },
+      mound: function () { return S().evidence.E7A_BIGLIETTO_TESTO === true; },
+      scene: function () { return S().evidence.E_SCENE === true; }
+    };
+    var initialIdx = (path === 'A') ? 0 : 1;   // A: degeneration; B: staging
+    var revIdx = (path === 'A') ? 0 : 2;       // A: keep; B: open
+    for (var g = 0; g < order.length; g++) {
+      var nm = order[g][0], co = order[g][1];
+      await interactTarget(co[0], co[1], doneWhen[nm], route, 'observe_' + nm);
+      if (g === 1) { // dopo il 2° gruppo: milestone teoria iniziale (stesso lease)
+        var okW = await advanceUntil(function () { return choices().length === 2; }, 8);
+        checks.theory_prompt_same_lease = okW;
+        await answerWidget(initialIdx, function () { return S().values.m5_initial_theory !== undefined; }, 8);
+        checks.initial_theory_set = (S().values.m5_initial_theory !== undefined);
+        route.push({ phase: 'milestone_theory_initial', map: 'traincar', coords: [E.state.player.tx, E.state.player.ty], value: S().values.m5_initial_theory });
+      }
+      if (g === 2) { // dopo il 3° gruppo: milestone revisione (stesso lease)
+        var okR = await advanceUntil(function () { return choices().length === 3; }, 8);
+        checks.revision_prompt_same_lease = okR;
+        await answerWidget(revIdx, function () { return S().values.m5_final_theory !== undefined; }, 8);
+        checks.final_theory_set = (S().values.m5_final_theory !== undefined && obj() === 'obj_m5_3');
+        route.push({ phase: 'milestone_theory_revision', map: 'traincar', coords: [E.state.player.tx, E.state.player.ty], value: S().values.m5_final_theory });
+      }
+    }
+    checks.three_groups = (NR.groupsCompleted(S(), M5d, 'm5_observations') === 3);
+
+    // Percorso B: P3A + E7A↔E5 dal TACCUINO VERO (indici DERIVATI dall'ordine)
+    if (path === 'B') {
+      // P3A: Confronta E8A ↔ E8B → widget B8c → ring_a → commit
+      await nbComparePair('E8A_ANELLO_POSIZIONE', 'E8B_ANELLO_SUPERFICIE');
+      await advanceUntil(function () { return choices().length === 3; }, 6); // intro → widget
+      await press('Enter'); // ring_a (idx0) → feedback
+      await advanceUntil(function () { return NR.peekProp(S(), 'P3A').formulation.status === 'formulated'; }, 6);
+      checks.p3a_formulated_via_notebook = (NR.peekProp(S(), 'P3A').formulation.status === 'formulated' && NR.peekProp(S(), 'P3A').factual_status === 'unconfirmed');
+      for (var e1 = 0; e1 < 4 && A.active(); e1++) await press('Escape'); // chiudi taccuino
+      route.push({ phase: 'notebook_p3a', map: 'traincar', coords: [E.state.player.tx, E.state.player.ty] });
+
+      // E7A↔E5: Confronta E7A ↔ E5 → nodo diretto (node_commit → APPUNTI)
+      await nbComparePair('E7A_BIGLIETTO_TESTO', 'E5_POESIA');
+      await advanceUntil(function () { var c = JSON.parse(NR.serialize(S())).comparisons.m5_cmp_ticket_e5; return c && c.completed === true; }, 6);
+      checks.ticket_e5_via_notebook = (function () { var c = JSON.parse(NR.serialize(S())).comparisons.m5_cmp_ticket_e5; return !!(c && c.completed) && S().notebook.some(function (n) { return n.id === 'm5.obs.ticket_e5'; }); })();
+      for (var e2 = 0; e2 < 4 && A.active(); e2++) await press('Escape'); // chiudi taccuino
+      route.push({ phase: 'notebook_ticket_e5', map: 'traincar', coords: [E.state.player.tx, E.state.player.ty] });
+    } else {
+      checks.p3a_not_formulated = (NR.peekProp(S(), 'P3A').formulation.status !== 'formulated');
+    }
+
+    // rapporto a Truman (9,4): intro → S1 → chiusura (east_route)
+    await walkNextTo(9, 4);
+    route.push({ phase: 'truman', map: 'traincar', coords: [E.state.player.tx, E.state.player.ty], target: [9, 4] });
+    key('Enter'); await wait(200); // apre il rapporto
+    await advanceUntil(function () { return choices().length === 2; }, 10); // intro → widget S1
+    checks.s1_widget = (choices().length === 2);
+    var s1Idx = (path === 'A') ? 0 : 1; // A: institutional; B: documented
+    await answerWidget(s1Idx, function () { return S().flags.east_route_confirmed === true; }, 10);
+    var expectS1 = (path === 'A') ? 'institutional' : 'documented_custody';
+    checks.s1_value = (S().values.s1 === expectS1);
+    checks.report_closed_east_route = (S().flags.east_route_confirmed === true && obj() === 'obj_m5_4');
+
+    // cartello One Eyed Jacks [sign_oej 20,2]
+    await interactTarget(20, 2, function () { return !!document.querySelector('[data-page-id="m5.sign_oej.p01"]'); }, route, 'sign_oej');
+    checks.sign_oej_seen = !!document.querySelector('[data-page-id="m5.sign_oej.p01"]');
+    for (var e3 = 0; e3 < 3 && A.active(); e3++) await press('Escape');
+
+    // M4 intatta + niente errori console
+    checks.m4_untouched = (S().assistance_level === m4Snap.assistance && JSON.stringify(S().b8_attempt_history) === m4Snap.b8);
+    // route: presenza dei waypoint del mondo
+    var phases = route.map(function (r) { return r.phase; });
+    checks.route_has_world_waypoints = ['spawn', 'transit', 'sign_ponte', 'binari', 'discovery', 'truman', 'sign_oej'].every(function (p) { return phases.indexOf(p) >= 0; });
+    // ASSERZIONE D'ORDINE (non solo presenza): la sequenza dei tre target
+    // ambientali nel route log DEVE combaciare ESATTAMENTE con l'ordine del
+    // percorso — così un ordine sbagliato FALLISCE (un gate di presenza no).
+    var observeSeq = phases.filter(function (p) { return p.indexOf('observe_') === 0; });
+    var expectedSeq = order.map(function (o) { return 'observe_' + o[0]; });
+    checks.route_target_order_matches = (observeSeq.join(',') === expectedSeq.join(','));
+
+    var pass = Object.keys(checks).every(function (k) { return checks[k] === true; });
+    return { route: route, checks: checks, pass: pass };
+  }
+
+  /* =================== esecuzione =================== */
+  var toRun = PATH ? [PATH] : ['A', 'B'];
+  for (var i = 0; i < toRun.length; i++) {
+    var res = await runPath(toRun[i]);
+    out.paths[toRun[i]] = res;
+  }
+  out.no_console_errors = (out.console_errors.length === 0);
+  var allPass = Object.keys(out.paths).every(function (k) { return out.paths[k].pass; }) && out.no_console_errors;
+  document.getElementById('log').textContent = JSON.stringify(out, null, 1);
+  document.title = PATH ? ('C5DE-' + PATH + '-' + (allPass ? 'PASS' : 'FAIL')) : ('C5DE-' + (allPass ? 'PASS' : 'FAIL'));
+}
+</script>
+</body>
+</html>

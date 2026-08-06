@@ -27,7 +27,27 @@
   ];
 
   D.clues = {
-    diario:    { name: 'Diario di Laura Palmer', desc: 'Nel registro cifrato: "Dice che lascerà il suo nome un pezzo alla volta." Ricorre il nome ROBERT.' },
+    diario:    {
+      name: 'Diario di Laura Palmer',
+      desc: 'Nel registro cifrato: "Dice che lascerà il suo nome un pezzo alla volta." Ricorre il nome ROBERT.',
+      document: {
+        title: 'Diario di Laura Palmer',
+        pages: [
+          {
+            label: 'Registro pubblico',
+            text: 'Oggi tutti mi hanno salutata per nome: al diner, a scuola, davanti alla chiesa. In un paese così piccolo è facile sembrare felici.'
+          },
+          {
+            label: 'Registro cifrato',
+            text: 'Nel bosco sento che qualcuno mi guarda. Non voglio tornarci da sola. Le parole cambiano quando provo a scrivere di lui.'
+          },
+          {
+            label: 'Registro cifrato',
+            text: 'Dice che lascerà il suo nome un pezzo alla volta. Nel margine ricorre una parola, premuta così forte da segnare il foglio: ROBERT.'
+          }
+        ]
+      }
+    },
     cuore:     { name: 'Metà cuore spezzato',  desc: 'Un ciondolo a metà. Qualcuno conserva l\'altra metà.' },
     lettera_r: { name: 'Lettera "R"',            desc: 'Un frammento trovato sotto l\'unghia di Laura.' },
     nome_sussurrato: { name: 'Il nome sussurrato nel sogno', desc: 'Laura ha detto il nome dell\'assassino. Al risveglio, era svanito.' },

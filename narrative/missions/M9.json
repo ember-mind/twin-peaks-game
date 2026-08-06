@@ -1,0 +1,659 @@
+{
+  "narrative_package": "narrative-v1.0",
+  "mission": "M9",
+  "title": "La convocazione",
+  "source": {
+    "document": "M9-M10 v1.1.1 CONFESSION LOCK.md",
+    "file": "M9-M10 v1.1 (confession lock).md",
+    "sections": "§1 (atomi P6) + §2 (contratto) + §3 (script, sorgente unica) + §7 (scope/test)",
+    "package": "narrative-v1.0"
+  },
+  "schema_delta": "narrative/schema-deltas/M9.md",
+  "entry_condition": {
+    "all": [
+      {
+        "flag": "atto4"
+      },
+      {
+        "node_done": "m8_station"
+      },
+      {
+        "evidence": "T_LELAND_TAXI"
+      }
+    ]
+  },
+  "entry_note": "[N] M9 comincia dove M8 finisce. T_LELAND_TAXI è stato ascoltato fisicamente al diner DOPO la promessa a Maddy e PRIMA del Roadhouse; M9 lo verifica, non lo crea retroattivamente. Il gate è la CONSEGNA di M8 (node_done m8_station, == M8.completion.when), il flag atto4 e quella testimonianza. NON è `atto5`: atto5 viene scritto dalla presentazione accettata (m9_present_truman), quando Leland passa alla centrale.",
+  "reads_only_from_m8": {
+    "note": "M9 LEGGE tre valori tipizzati scritti da M8 e non ne scrive nessuno. Le eco O e Sarah hanno copertura totale; warning_target produce una riga sulla valigia solo quando quella valigia esiste davvero (palmer), con silenzio intenzionale negli altri rami.",
+    "values": [
+      {
+        "name": "letter_o_observation_source",
+        "domain": [
+          "cooper_primary",
+          "hawk_preserved"
+        ],
+        "used_in": "m9_present_truman (pagine di nodo, prima del widget)",
+        "coverage": "totale"
+      },
+      {
+        "name": "sarah_support_state",
+        "domain": [
+          "none",
+          "vice"
+        ],
+        "used_in": "m9_present_truman (ramo accettato)",
+        "coverage": "totale"
+      },
+      {
+        "name": "warning_target",
+        "domain": [
+          "palmer",
+          "centrale",
+          "nessuno"
+        ],
+        "used_in": "m9_present_truman (ramo accettato, eco valigia)",
+        "coverage": "palmer + assenza intenzionale non-palmer (nessuna valigia inventata)"
+      },
+      {
+        "name": "promise_stance",
+        "domain": [
+          "accompagno",
+          "autonomia",
+          "prudenza"
+        ],
+        "used_in": "m9_verifica_taxi (eco investigativa solo per accompagno) + m9_present_truman (taccuino degli orari)",
+        "coverage": "totale; accompagno registra la doppia organizzazione, gli altri rami non inventano un accordo"
+      }
+    ]
+  },
+  "carryover_evidence": [
+    {
+      "evidence": "T_SARAH_VISIONE",
+      "diegetic_source": "data.js — sarah_visione (palmer, Atto 4)",
+      "when": {
+        "flag": "sarah_visione_ascoltata"
+      },
+      "attachable_only": true,
+      "never_in_support_min": true,
+      "note": "[N] evidenza nata nel layer classico solo dopo la conversazione fisica con Sarah (flag sarah_visione_ascoltata), allegabile come ORIENTAMENTO e mai base procedurale. Nessun atto4 implicito concede conoscenza al player."
+    }
+  ],
+  "completion": {
+    "when": {
+      "node_done": "m9_arrivo"
+    },
+    "sets": []
+  },
+  "objectives": [
+    {
+      "id": "obj_m9_4",
+      "priority": 400,
+      "when": {
+        "all": [
+          {
+            "proposition_path": "P6.social_status.accepted_by",
+            "contains": "truman"
+          },
+          {
+            "node_done": "m9_present_truman"
+          }
+        ]
+      },
+      "text": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "provenance_note": "[L] testo esatto del Lock §3-B2. Obiettivo TERMINALE di M9 (passaggio a M10): gated sul nodo che lo CONSEGNA (node_done m9_present_truman), non sul solo stato di accettazione."
+    },
+    {
+      "id": "obj_m9_3",
+      "priority": 300,
+      "when": {
+        "all": [
+          {
+            "proposition_path": "P6.formulation.status",
+            "equals": "formulated"
+          },
+          {
+            "not": {
+              "proposition_path": "P6.social_status.accepted_by",
+              "contains": "truman"
+            }
+          }
+        ]
+      },
+      "text": "Porta a Truman una contraddizione che regga.",
+      "provenance_note": "[L] testo esatto del Lock §2 (obiettivo della missione; identico a obj_m8_4, che M8 consegna post-stazione). Resta attivo anche dopo una presentazione RESPINTA (allegato incompleto): la ripresentazione è il rimedio, mai un vicolo."
+    },
+    {
+      "id": "obj_m9_2",
+      "priority": 200,
+      "when": {
+        "all": [
+          {
+            "evidence": "D_TAXI"
+          },
+          {
+            "not": {
+              "proposition_path": "P6.formulation.status",
+              "equals": "formulated"
+            }
+          }
+        ]
+      },
+      "text": "Nel taccuino: metti il racconto di Leland accanto alla verifica.",
+      "provenance_note": "[N] derivato dal Lock §3-B1 (la riga «(taccuino — Confronta: T_LELAND_TAXI ↔ D_TAXI)»); punta al taccuino, root sempre azionabile."
+    },
+    {
+      "id": "obj_m9_1",
+      "priority": 100,
+      "when": {
+        "all": [
+          {
+            "evidence": "T_LELAND_TAXI"
+          },
+          {
+            "not": {
+              "evidence": "D_TAXI"
+            }
+          }
+        ]
+      },
+      "text": "Chiedi a Lucy se il taxi di Leland era prenotato.",
+      "provenance_note": "[N] derivato dalla domanda del taccuino nel Lock §3-B1. Si attiva solo dopo che il player ha ascoltato fisicamente la dichiarazione di Leland: nessun ricordo fantasma."
+    }
+  ],
+  "nodes": [
+    {
+      "id": "m9_verifica_taxi",
+      "beat": "B1",
+      "source_section": "M9-B1",
+      "conditions": [
+        {
+          "evidence": "T_LELAND_TAXI"
+        },
+        {
+          "not": {
+            "evidence": "D_TAXI"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m9.b1.verifica.p01",
+          "mode": "notebook",
+          "text": "Prima del ritrovamento, Leland ha detto: «Ho chiamato la Twin Peaks Taxi: passa da casa alle sette.» Quella corsa era prenotata?"
+        },
+        {
+          "id": "m9.b1.verifica.p02",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Lucy. Leland dice di aver prenotato la Twin Peaks Taxi per le sette, a casa Palmer. Può verificare?"
+        },
+        {
+          "id": "m9.b1.verifica.p03",
+          "mode": "dialogue",
+          "speaker_id": "lucy",
+          "display_name": "LUCY",
+          "text": "(solleva la cornetta. Tre minuti dopo:) Ho chiamato la Twin Peaks Taxi. Nessuna corsa per casa Palmer alle sette. Nessuna prenotazione di Leland, né oggi né per domattina."
+        },
+        {
+          "id": "m9.b1.verifica.accompagno.p01",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "L'orario era compatibile col mio accompagnamento. La discrepanza è una sola: quel taxi non è mai stato prenotato.",
+          "condition": {
+            "value_is": {
+              "name": "promise_stance",
+              "equals": "accompagno"
+            }
+          }
+        }
+      ],
+      "effects": [
+        {
+          "evidence": "D_TAXI"
+        },
+        {
+          "notebook": {
+            "id": "m9.note.taxi",
+            "text": "Twin Peaks Taxi: nessuna corsa per casa Palmer alle sette; nessuna prenotazione di Leland, né oggi né per domattina."
+          }
+        }
+      ],
+      "invariant": "D_TAXI nasce SOLO dalla richiesta del player a Lucy e solo dopo la dichiarazione fisicamente ascoltata da Leland; nel ramo accompagno Cooper chiude il falso conflitto 7:00/7:10 e isola l'unica discrepanza: la prenotazione inesistente; nessun documento aperto da solo; nessuna riga afferma DOVE fosse Leland; nessuna riga attribuisce un omicidio; guardia di rientro sull'effetto proprio (not evidence D_TAXI)",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "sheriff",
+      "target_kind": "actor",
+      "target_id": "lucy",
+      "actor_id": "lucy",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m9_cmp_taxi",
+      "beat": "B1",
+      "source_section": "M9-B1",
+      "conditions": [
+        {
+          "evidence": "T_LELAND_TAXI"
+        },
+        {
+          "evidence": "D_TAXI"
+        }
+      ],
+      "pages": [
+        {
+          "id": "m9.b1.cmp_taxi.p01",
+          "mode": "notebook",
+          "text": "(Confronta: il racconto della partenza ↔ la verifica della corsa)"
+        },
+        {
+          "id": "m9.b1.cmp_taxi.p02",
+          "mode": "notebook",
+          "text": "\"Ho chiamato la Twin Peaks Taxi\" — e la compagnia non ha ricevuto alcuna prenotazione."
+        }
+      ],
+      "effects": [
+        {
+          "proposition": "P6",
+          "to": "formulated",
+          "created_from": [
+            "T_LELAND_TAXI",
+            "D_TAXI"
+          ]
+        }
+      ],
+      "invariant": "P6 nasce SOLO da questo confronto (dichiarazione ↔ verifica), con ENTRAMBI gli atomi; nessuna scelta: il Lock §3-B1 non offre alternative di formulazione; factual_status resta unconfirmed (confirmed_as_lie è M10-B6, mai qui); il confronto non prova l'omicidio — prova che il colloquio è necessario",
+      "kind": "comparison",
+      "channel": "notebook",
+      "interaction_slot": "primary",
+      "comparison_completion": "node_commit",
+      "result": "TAXI_CLAIM_UNVERIFIED",
+      "role": "proposition",
+      "completion_when": {
+        "proposition_path": "P6.formulation.status",
+        "equals": "formulated"
+      },
+      "catalog_name_note": "propositions.json registra `born_from_comparison: \"cmp_taxi\"` come NOME LOGICO del confronto; l'id di nodo segue la convenzione di missione m9_* (stessa relazione di P3A/cmp_e8a_e8b ↔ m5_cmp_ring).",
+      "completed_recall": {
+        "section": "propositions",
+        "page": {
+          "id": "m9.notebook.cmp_taxi.recorded",
+          "mode": "notebook",
+          "text": "(Questo nesso è già registrato nelle Proposizioni.)"
+        }
+      }
+    },
+    {
+      "id": "m9_present_truman",
+      "beat": "B2",
+      "source_section": "M9-B2",
+      "conditions": [
+        {
+          "proposition_path": "P6.formulation.status",
+          "equals": "formulated"
+        }
+      ],
+      "pages": [
+        {
+          "id": "m9.b2.present.p01",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "text": "(non alza gli occhi dal fascicolo) Dimmi che non sei qui per la casa Palmer."
+        },
+        {
+          "id": "m9.b2.present.eco_o.cooper",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "La O di Maddy: l'ho vista io, sotto l'unghia. Non me l'ha descritta nessuno.",
+          "condition": {
+            "value_is": {
+              "name": "letter_o_observation_source",
+              "equals": "cooper_primary"
+            }
+          },
+          "conditional_note": "eco M8 [Lock §6]: una riga di Cooper in B2-M9, versione cooper_primary"
+        },
+        {
+          "id": "m9.b2.present.eco_o.hawk",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "La O di Maddy: Hawk me l'ha descritta come si descrive una ferita.",
+          "condition": {
+            "value_is": {
+              "name": "letter_o_observation_source",
+              "equals": "hawk_preserved"
+            }
+          },
+          "conditional_note": "eco M8 [Lock §6]: versione hawk_preserved. Arrivare secondi cambia UNA riga, mai il gate."
+        }
+      ],
+      "presentation": {
+        "target_actor_id": "truman",
+        "options_from": "formulated_propositions_only",
+        "auto_show_provenance": false,
+        "attachment": {
+          "mode": "manual",
+          "from": "acquired_evidence",
+          "declared_for": "C9-B",
+          "note": "[Lock §3-B2] «P6: allegato MANUALE — T_LELAND_TAXI + D_TAXI; qui sbagliare conta». La provenienza NON si mostra da sola (auto_show_provenance false): la selezione è del player e determina il ramo."
+        },
+        "on": {
+          "P6": {
+            "attachment_required": [
+              "T_LELAND_TAXI",
+              "D_TAXI"
+            ],
+            "by_support": {
+              "complete": {
+                "when_attached_all": [
+                  "T_LELAND_TAXI",
+                  "D_TAXI"
+                ],
+                "result": "accepted",
+                "reason_code": "SUFFICIENT_RELEVANT_SUPPORT",
+                "acceptance_type": "colloquio_necessario",
+                "pages": [
+                  {
+                    "id": "m9.b2.p6.accept.p01",
+                    "mode": "dialogue",
+                    "speaker_id": "cooper",
+                    "display_name": "COOPER",
+                    "text": "Prima del ritrovamento, Leland disse che Maddy sarebbe partita domattina e che aveva chiamato lui il taxi. Non esiste alcuna prenotazione."
+                  },
+                  {
+                    "id": "m9.b2.p6.accept.p02",
+                    "mode": "dialogue",
+                    "speaker_id": "truman",
+                    "display_name": "TRUMAN",
+                    "text": "Il lutto confonde, Cooper. Un uomo che ha perso la figlia—"
+                  },
+                  {
+                    "id": "m9.b2.p6.accept.p03",
+                    "mode": "dialogue",
+                    "speaker_id": "cooper",
+                    "display_name": "COOPER",
+                    "text": "Il lutto confonde le date, Harry. Non inventa una prenotazione mai fatta.",
+                    "provenance_note": "[N→L] cronologia re-lockata dopo il carryover fisico da Atto 4: il punto procedurale taxi+corriera resta invariato senza datare falsamente la battuta."
+                  },
+                  {
+                    "id": "m9.b2.p6.accept.valigia.truman",
+                    "mode": "dialogue",
+                    "speaker_id": "truman",
+                    "display_name": "TRUMAN",
+                    "text": "E la valigia era ancora nell'ingresso, con il biglietto per Sarah. Questo lo so io.",
+                    "condition": {
+                      "value_is": {
+                        "name": "warning_target",
+                        "equals": "palmer"
+                      }
+                    },
+                    "conditional_note": "eco M8 [Lock §1]: se warning_target=palmer la valigia e il biglietto erano ancora in casa — Truman lo sa e lo dice"
+                  },
+                  {
+                    "id": "m9.b2.p6.accept.p04",
+                    "mode": "dialogue",
+                    "speaker_id": "truman",
+                    "display_name": "TRUMAN",
+                    "text": "(pausa lunga) La compagnia può aver perso la corsa."
+                  },
+                  {
+                    "id": "m9.b2.p6.accept.p05",
+                    "mode": "dialogue",
+                    "speaker_id": "cooper",
+                    "display_name": "COOPER",
+                    "text": "Può. Allora lo chiariamo: di persona, con calma, da persona informata. È il suo diritto — ed è il nostro lavoro."
+                  },
+                  {
+                    "id": "m9.b2.p6.accept.sarah.vice",
+                    "mode": "dialogue",
+                    "speaker_id": "lucy",
+                    "display_name": "LUCY",
+                    "text": "Andy è ancora con Sarah. Dice che non ha ancora chiesto \"chi\".",
+                    "condition": {
+                      "value_is": {
+                        "name": "sarah_support_state",
+                        "equals": "vice"
+                      }
+                    },
+                    "conditional_note": "eco M8 [Lock §3-B2]: ramo sarah_support_state = vice, testo esatto"
+                  },
+                  {
+                    "id": "m9.b2.p6.accept.sarah.none",
+                    "mode": "action",
+                    "text": "(Truman si alza; prende il cappello come si prende un peso.)",
+                    "condition": {
+                      "value_is": {
+                        "name": "sarah_support_state",
+                        "equals": "none"
+                      }
+                    },
+                    "conditional_note": "eco M8 [Lock §3-B2]: ramo «altrimenti», testo esatto reso come didascalia"
+                  },
+                  {
+                    "id": "m9.b2.p6.accept.p06",
+                    "mode": "dialogue",
+                    "speaker_id": "truman",
+                    "display_name": "TRUMAN",
+                    "text": "Lo chiamo io. A casa sua non mando nessuno con la divisa."
+                  }
+                ],
+                "effects": [
+                  {
+                    "set": "atto5"
+                  },
+                  {
+                    "notebook": {
+                      "id": "m9.note.convocazione",
+                      "text": "Leland Palmer è atteso alla centrale. Un colloquio da persona informata: nessun provvedimento, nessuna divisa a casa sua."
+                    }
+                  }
+                ]
+              },
+              "missing_corroboration": {
+                "when_missing_any": [
+                  "T_LELAND_TAXI",
+                  "D_TAXI"
+                ],
+                "partition_note": "il Lock §3-B2 nomina esplicitamente il caso «P6 senza D_TAXI»; la condizione è generalizzata a MANCA UNO QUALUNQUE degli atomi richiesti, così `complete` (li ha tutti) e `missing_corroboration` (ne manca almeno uno) partizionano TOTALMENTE lo spazio degli allegati — nessuna combinazione senza ramo.",
+                "result": "rejected",
+                "reason_code": "NO_CORROBORATION",
+                "retry": true,
+                "pages": [
+                  {
+                    "id": "m9.b2.p6.no_corroboration.p01",
+                    "mode": "dialogue",
+                    "speaker_id": "truman",
+                    "display_name": "TRUMAN",
+                    "text": "Una frase detta nel dolore non è una contraddizione. Fammi vedere la verifica."
+                  }
+                ]
+              }
+            },
+            "already_rejected_page": {
+              "id": "m9.b2.p6.already_rejected",
+              "mode": "dialogue",
+              "speaker_id": "truman",
+              "display_name": "TRUMAN",
+              "text": "Me l'hai già mostrato. Non è cambiato niente."
+            },
+            "attachment_responses": {
+              "T_SARAH_VISIONE": {
+                "page": {
+                  "id": "m9.b2.p6.visione",
+                  "mode": "dialogue",
+                  "speaker_id": "truman",
+                  "display_name": "TRUMAN",
+                  "text": "Questo non entra in un fascicolo, Cooper. Ma capisco perché guardi da quella parte."
+                },
+                "note": "risposta ADDITIVA a un allegato non procedurale: non cambia il ramo né il verdetto, non entra in nessun support_min. Costrutto dichiarato (schema-delta §2c)."
+              }
+            }
+          },
+          "P8": {
+            "result": "rejected",
+            "reason_code": "VALID_BUT_NOT_PROCEDURAL",
+            "pages": [
+              {
+                "id": "m9.b2.p8.p01",
+                "mode": "dialogue",
+                "speaker_id": "truman",
+                "display_name": "TRUMAN",
+                "text": "Lo tengo a mente. Ma non convoco un uomo per una teoria."
+              }
+            ],
+            "already_rejected_page": {
+              "id": "m9.b2.p8.already_rejected",
+              "mode": "dialogue",
+              "speaker_id": "truman",
+              "display_name": "TRUMAN",
+              "text": "Me l'hai già mostrato. Non è cambiato niente."
+            }
+          },
+          "P7": {
+            "result": "rejected",
+            "reason_code": "VALID_BUT_NOT_PROCEDURAL",
+            "pages": [
+              {
+                "id": "m9.b2.p7.p01",
+                "mode": "dialogue",
+                "speaker_id": "truman",
+                "display_name": "TRUMAN",
+                "text": "Lo tengo a mente. Ma non convoco un uomo per una teoria."
+              }
+            ],
+            "already_rejected_page": {
+              "id": "m9.b2.p7.already_rejected",
+              "mode": "dialogue",
+              "speaker_id": "truman",
+              "display_name": "TRUMAN",
+              "text": "Me l'hai già mostrato. Non è cambiato niente."
+            }
+          },
+          "_none_formulated": {
+            "result": "rejected",
+            "reason_code": "NOT_YET_FORMULATED",
+            "pages": [
+              {
+                "id": "m9.b2.none_formulated.p01",
+                "mode": "dialogue",
+                "speaker_id": "truman",
+                "display_name": "TRUMAN",
+                "text": "Non ho una contraddizione da giudicare, Cooper. Portamene una che regga."
+              }
+            ]
+          }
+        }
+      },
+      "repeat": {
+        "id": "m9.repeat.present",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Leland verrà a piedi. Preparo domande e un tavolo libero: questa resta una convocazione volontaria."
+      },
+      "effects": [],
+      "invariant": "P6 è l'UNICA base procedurale: P7/P8 sono annotate e mai accettate come base (VALID_BUT_NOT_PROCEDURAL); la visione di Sarah è respinta come atto e riconosciuta come direzione, mai come prova; l'allegato è MANUALE e sbagliarlo COSTA (NO_CORROBORATION, ripresentabile); Truman VUOLE sbagliarsi e obietta una volta sola (il lutto), poi firma la convocazione dell'amico; nessuna riga attribuisce un omicidio, nessun arresto, nessuna divisa a casa Palmer; l'eco M8 (letter_o_observation_source / sarah_support_state / warning_target) cambia RIGHE, mai il gate; atto5 nasce QUI (unico writer): il mondo classico diventa vero — Leland alla centrale",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "sheriff",
+      "target_kind": "actor",
+      "target_id": "truman",
+      "actor_id": "truman",
+      "interaction_slot": "primary",
+      "completion_when": {
+        "proposition_path": "P6.social_status.accepted_by",
+        "contains": "truman"
+      },
+      "mandatory_beat": true
+    },
+    {
+      "id": "m9_arrivo",
+      "beat": "B3",
+      "source_section": "M9-B3",
+      "conditions": [
+        {
+          "proposition_path": "P6.social_status.accepted_by",
+          "contains": "truman"
+        },
+        {
+          "flag": "atto5"
+        }
+      ],
+      "pages": [
+        {
+          "id": "m9.b3.arrivo.p01",
+          "mode": "action",
+          "text": "(Leland arriva da solo, a piedi. Saluta Lucy per nome. Il nodo della cravatta è perfetto; la barba, di tre giorni.)"
+        },
+        {
+          "id": "m9.b3.arrivo.p02",
+          "mode": "dialogue",
+          "speaker_id": "leland",
+          "display_name": "LELAND",
+          "text": "Lucy. Tuo padre ha poi sistemato la grondaia?"
+        },
+        {
+          "id": "m9.b3.arrivo.p03",
+          "mode": "dialogue",
+          "speaker_id": "lucy",
+          "display_name": "LUCY",
+          "text": "(la macchina si ferma; guarda la stanza in fondo; riprende) Sì, signor Palmer. A ottobre."
+        },
+        {
+          "id": "m9.b3.arrivo.p04",
+          "mode": "dialogue",
+          "speaker_id": "leland",
+          "display_name": "LELAND",
+          "text": "(a Truman) Harry. Mi hai chiesto di chiarire una partenza. Le partenze, di questi tempi, sono la cosa più difficile da chiarire."
+        },
+        {
+          "id": "m9.b3.arrivo.p05",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "text": "Ti ringrazio di essere venuto, Leland. È una formalità che dobbiamo a tutti."
+        },
+        {
+          "id": "m9.b3.arrivo.p06",
+          "mode": "dialogue",
+          "speaker_id": "leland",
+          "display_name": "LELAND",
+          "text": "(posa il cappotto, siede al centro esatto della sedia) Allora facciamola bene."
+        },
+        {
+          "id": "m9.b3.arrivo.p07",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Leland è venuto senza scorta e si è seduto da solo. Tratto la precisione come comportamento, non come prova."
+        }
+      ],
+      "effects": [],
+      "repeat": {
+        "id": "m9.repeat.arrivo",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "La panca è vuota e la cornetta ancora calda. Leland è già nella stanza in fondo."
+      },
+      "invariant": "arrivo VOLONTARIO: da solo, a piedi, senza scorta — nessun arresto, nessun provvedimento, nessuna aura; Leland è persona informata, cordiale, esatto (il nodo della cravatta perfetto, la barba di tre giorni); NESSUN segnale BOB in M9 (i due segnali — ritratto e cambio di registro — esistono SOLO in M10-B5); nessuna battuta assolve nessuno; nessuna guardia `not node_done` (renderebbe il repeat irraggiungibile — lezione C8-A.1 B6)",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "sheriff",
+      "target_kind": "actor",
+      "target_id": "leland",
+      "actor_id": "leland",
+      "interaction_slot": "primary",
+      "mandatory_beat": true,
+      "provenance_note": "[P] leland è NPC reale di sheriff (js/glue.js), condizionato a `flag:atto5` && `!flag:leland_morto`: la presenza fisica combacia con il gate narrativo perché atto5 è scritto dalla presentazione accettata. Il posizionamento/cammino è C9-E."
+    }
+  ],
+  "node_count": {
+    "runtime_total": 4
+  }
+}

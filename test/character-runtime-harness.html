@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TP-CHAR-AUDIT-RUNNING</title>
+<style>
+  html, body { margin: 0; min-height: 100%; background: #10171a; color: #e8f1ed; font: 14px/1.4 monospace; }
+  #gl { position: fixed; inset: 0; width: 960px; height: 640px; opacity: .3; }
+  #game { display: none; }
+  #report { position: relative; z-index: 2; box-sizing: border-box; width: 960px; min-height: 640px;
+    padding: 24px; background: linear-gradient(90deg, rgba(10,18,22,.94), rgba(10,18,22,.72)); }
+  h1 { margin: 0 0 12px; font-size: 22px; color: #9fe3c0; }
+  .pass { color: #9fe3c0; } .fail { color: #ff8f82; }
+  pre { white-space: pre-wrap; font-size: 11px; color: #b9cbc6; }
+</style>
+</head>
+<body>
+<canvas id="gl" width="960" height="640"></canvas>
+<canvas id="game" width="480" height="320"></canvas>
+<main id="report"><h1>Character runtime audit</h1><div id="checks">Loading Loop10…</div><pre id="json"></pre></main>
+
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/vendor/loaders/GLTFLoader.js"></script>
+<script src="../js/vendor/postprocessing/Pass.js"></script>
+<script src="../js/vendor/postprocessing/CopyShader.js"></script>
+<script src="../js/vendor/postprocessing/GammaCorrectionShader.js"></script>
+<script src="../js/vendor/postprocessing/ShaderPass.js"></script>
+<script src="../js/vendor/postprocessing/EffectComposer.js"></script>
+<script src="../js/vendor/postprocessing/SimplexNoise.js"></script>
+<script src="../js/vendor/postprocessing/SSAOShader.js"></script>
+<script src="../js/vendor/postprocessing/SSAOPass.js"></script>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=harness-r6"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=harness-r6"></script>
+<script src="../js/engine.js?v=harness-r6"></script>
+<script src="../js/render3d.js"></script>
+<script src="../js/glue.js?v=harness-r6"></script>
+<script>
+window.addEventListener('load', function () {
+  var checks = [], failures = [];
+  function check(name, ok, detail) {
+    checks.push({ name: name, ok: !!ok, detail: detail || '' });
+    if (!ok) failures.push(name + (detail ? ': ' + detail : ''));
+  }
+  function draw(payload) {
+    document.getElementById('checks').innerHTML = checks.map(function (row) {
+      return '<div class="' + (row.ok ? 'pass' : 'fail') + '">' +
+        (row.ok ? 'PASS ' : 'FAIL ') + row.name +
+        (row.detail ? ' — ' + row.detail : '') + '</div>';
+    }).join('');
+    document.getElementById('json').textContent = JSON.stringify(payload, null, 2);
+  }
+
+  var E = GAME.Engine, R = GAME.Render3D;
+  E.init(document.getElementById('game'), document.getElementById('gl'));
+  R.resize(960, 640);
+  E.state.mode = 'play';
+  E.state.flags.intro_town = true;
+  E.loadMap('town', 30, 31, 'up');
+  R.render(E.state, 16, 0);
+  var initial = R.characterAudit();
+  check('procedural fallback exists during async load',
+    initial.player && !initial.player.authored &&
+      (initial.asset === 'loading' || initial.asset === 'ready'),
+    initial.asset);
+
+  var started = performance.now();
+  (function waitForPack() {
+    var state = R.stats().authoredCharacterAsset;
+    if (state === 'failed') {
+      check('character pack loads', false, R.stats().authoredCharacterError);
+      draw({ initial: initial, error: R.stats().authoredCharacterError });
+      document.title = 'TP-CHAR-RUNTIME-FAIL';
+      return;
+    }
+    if (state !== 'ready') {
+      if (performance.now() - started > 30000) {
+        check('character pack loads', false, 'timeout');
+        draw({ initial: initial });
+        document.title = 'TP-CHAR-RUNTIME-FAIL';
+        return;
+      }
+      setTimeout(waitForPack, 50);
+      return;
+    }
+    try {
+      R.render(E.state, 16, 7000);
+      var readyTown = R.characterAudit();
+      check('24 roots loaded', readyTown.roots.length === 24, String(readyTown.roots.length));
+      check('13 clips loaded', readyTown.clips.length === 13, String(readyTown.clips.length));
+      check('late player/NPC swap is authored',
+        readyTown.player.authored && readyTown.npcs.every(function (row) { return row.authored; }));
+      check('one unique skeleton per current actor',
+        readyTown.uniqueSkeletons === readyTown.authoredActors,
+        readyTown.uniqueSkeletons + '/' + readyTown.authoredActors);
+      check('no source-bone leakage', readyTown.sourceBoneLeaks.length === 0);
+      check('42 bones on every instance',
+        [readyTown.player].concat(readyTown.npcs).every(function (row) { return row.boneCount === 42; }));
+      check('no clone failures', readyTown.counters.cloneErrors === 0);
+      check('floor scale/origin retained',
+        Math.abs(readyTown.player.scale[0] - 0.76) < 1e-6 &&
+        Math.abs(readyTown.player.scale[1] - 0.86) < 1e-6 &&
+        Math.abs(readyTown.player.scale[2] - 0.76) < 1e-6 &&
+        Math.abs(readyTown.player.position[1] - 0.015) < 1e-6,
+        JSON.stringify({ scale: readyTown.player.scale, position: readyTown.player.position }));
+      check('shadow microcasters excluded',
+        readyTown.player.shadowCasters > 0 &&
+        readyTown.player.shadowCasters < readyTown.player.partCount &&
+        readyTown.player.shadowReceivers === readyTown.player.partCount,
+        readyTown.player.shadowCasters + '/' + readyTown.player.partCount);
+      check('coffee prop hidden during exploration',
+        readyTown.player.contextProps === 1 &&
+        readyTown.player.visibleContextProps === 0,
+        readyTown.player.visibleContextProps + '/' + readyTown.player.contextProps);
+
+      var p = E.state.player;
+      p.moving = true; p.moveT = 0.15;
+      R.render(E.state, 16, 11000);
+      var startA = R.characterAudit().player;
+      p.moveT = 0.65;
+      R.render(E.state, 16, 11120);
+      var startB = R.characterAudit().player;
+      check('authored start owns the first tile',
+        startA.activeClip === 'TP_start' && startB.activeClip === 'TP_start');
+      check('moveT deterministically changes bone pose',
+        Math.abs(startA.poseChecksum - startB.poseChecksum) > 0.001,
+        startA.poseChecksum + ' → ' + startB.poseChecksum);
+      p.moveT = 0.999;
+      R.render(E.state, 16, 11195);
+      var startEnd = R.characterAudit().player;
+      p.moveT = 0.001;
+      R.render(E.state, 16, 11212);
+      var establishedWalk = R.characterAudit().player;
+      check('start transitions to grid walk on first tile wrap',
+        startEnd.activeClip === 'TP_start' &&
+        establishedWalk.activeClip === 'TP_grid_walk');
+      p.moving = false; p.moveT = 0;
+      R.render(E.state, 16, 11300);
+      p.moving = true; p.moveT = 0;
+      R.render(E.state, 16, 11600);
+      var walkStart = R.characterAudit().player;
+      p.moveT = 0.5;
+      R.render(E.state, 16, 11710);
+      var walkMiddle = R.characterAudit().player;
+      p.moveT = 1;
+      R.render(E.state, 16, 11820);
+      var walkEnd = R.characterAudit().player;
+      check('new start remains source-authored across the first tile',
+        walkStart.activeClip === 'TP_start' &&
+        walkMiddle.activeClip === 'TP_start' &&
+        walkEnd.activeClip === 'TP_start');
+      p.moveT = 0.999;
+      R.render(E.state, 16, 11830);
+      var walkWrapA = R.characterAudit().player;
+      p.moveT = 0.001;
+      R.render(E.state, 16, 11846);
+      var walkWrapB = R.characterAudit().player;
+      check('held-walk loop boundary enters established walk',
+        walkWrapA.activeClip === 'TP_start' &&
+        walkWrapB.activeClip === 'TP_grid_walk');
+      check('authored start-to-walk boundary pose is continuous',
+        Math.abs(walkWrapA.poseChecksum - walkWrapB.poseChecksum) < 0.5,
+        JSON.stringify({
+          checksum: [walkWrapA.poseChecksum, walkWrapB.poseChecksum],
+          base: [walkWrapA.walkPhaseBase, walkWrapB.walkPhaseBase],
+          time: [walkWrapA.walkSampleTime, walkWrapB.walkSampleTime]
+        }));
+
+      E.loadMap('diner', 5, 2, 'up');
+      E.state.dialogue = { id: 'norma', i: 0, pages: [{ name: 'COOPER' }] };
+      R.render(E.state, 16, 20000);
+      var coffee = R.characterAudit();
+      check('Cooper coffee context clip', coffee.player.activeClip === 'TP_cooper_coffee');
+      check('coffee prop visible only in coffee context',
+        coffee.player.contextProps === 1 &&
+        coffee.player.visibleContextProps === 1,
+        coffee.player.visibleContextProps + '/' + coffee.player.contextProps);
+      E.state.dialogue.pages[0].name = 'NORMA';
+      R.render(E.state, 16, 20200);
+      var talk = R.characterAudit();
+      var norma = talk.npcs.filter(function (row) { return row.name === 'norma'; })[0];
+      check('focused NPC talk clip', norma && norma.activeClip === 'TP_talk_subtle');
+      E.state.dialogue = null;
+
+      E.state.flags.leland_morto = true;
+      E.loadMap('redroom', 8, 8, 'up');
+      R.render(E.state, 16, 30000);
+      R.render(E.state, 16, 32000);
+      var lodge = R.characterAudit();
+      function clipOf(name) {
+        var row = lodge.npcs.filter(function (item) { return item.name === name; })[0];
+        return row && row.activeClip;
+      }
+      check('MFAP dance clip', clipOf('mfap') === 'TP_mfap_dance');
+      check('Laura spectral clip', clipOf('laura') === 'TP_laura_spectral');
+      check('BOB menace clip', clipOf('bob') === 'TP_bob_menace');
+
+      E.loadMap('hospital', 5, 7, 'up');
+      R.render(E.state, 16, 40000);
+      var beforeRoster = R.characterAudit();
+      var added = {
+        id: 'runtime_probe', x: 3, y: 2, vx: 3, vy: 2,
+        sprite: 'ronette', name: 'Runtime Probe', dialogue: null, dir: 'down',
+        moving: false, moveT: 0
+      };
+      E.state.npcs.push(added);
+      R.render(E.state, 16, 40100);
+      var addedRoster = R.characterAudit();
+      check('ID roster adds runtime NPC',
+        addedRoster.npcs.some(function (row) { return row.npcId === 'runtime_probe'; }) &&
+        addedRoster.rosterSignature === addedRoster.runtimeRosterSignature);
+      E.state.npcs.splice(E.state.npcs.indexOf(added), 1);
+      R.render(E.state, 16, 40200);
+      var removedRoster = R.characterAudit();
+      check('ID roster removes runtime NPC',
+        !removedRoster.npcs.some(function (row) { return row.npcId === 'runtime_probe'; }) &&
+        removedRoster.rosterSignature === removedRoster.runtimeRosterSignature);
+      check('removed rig mixer/skeleton cleaned',
+        removedRoster.counters.mixers === beforeRoster.counters.mixers &&
+        removedRoster.counters.skeletons === beforeRoster.counters.skeletons,
+        JSON.stringify({
+          before: beforeRoster.counters,
+          added: addedRoster.counters,
+          removed: removedRoster.counters
+        }));
+
+      var payload = {
+        initial: initial,
+        readyTown: readyTown,
+        walk: {
+          a: startA, b: startB, start: walkStart, middle: walkMiddle,
+          end: walkEnd, wrapA: walkWrapA, wrapB: walkWrapB
+        },
+        coffee: coffee,
+        talk: talk,
+        lodge: lodge,
+        roster: { before: beforeRoster, added: addedRoster, removed: removedRoster }
+      };
+      draw(payload);
+      window.__TP_CHARACTER_RUNTIME_AUDIT__ = { checks: checks, payload: payload };
+      document.title = failures.length ? 'TP-CHAR-RUNTIME-FAIL' : 'TP-CHAR-RUNTIME-PASS';
+    } catch (error) {
+      check('runtime harness exception', false, String(error && error.stack || error));
+      draw({ initial: initial, error: String(error && error.stack || error) });
+      document.title = 'TP-CHAR-RUNTIME-FAIL';
+    }
+  })();
+});
+</script>
+</body>
+</html>

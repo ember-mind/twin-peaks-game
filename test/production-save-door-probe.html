@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><title>TP-SAVE-DOOR-LOADING</title>
+<style>html,body,iframe{margin:0;border:0;width:100%;height:100%;overflow:hidden;background:#111913}#report{display:none}</style></head>
+<body><pre id="report"></pre><script>
+(function(){
+  var out={checks:{},error:null}, report=document.getElementById('report');
+  var nkey='twin-peaks:narrative:narrative-v1.0:slot:main', mkey='twin-peaks:narrative:narrative-v1.0:meta';
+  function wait(ms){return new Promise(function(r){setTimeout(r,ms);});}
+  function clear(){[nkey,nkey+':tmp',nkey+':backup',mkey,'tp_save','twin-peaks:finale:v2'].forEach(function(k){localStorage.removeItem(k);});}
+  function load(label){return new Promise(function(resolve,reject){var old=document.querySelector('iframe');if(old)old.remove();var f=document.createElement('iframe');f.addEventListener('load',function(){setTimeout(function(){resolve(f);},700);},{once:true});f.src='../index.html?doorProbe='+label+Date.now();document.body.appendChild(f);setTimeout(function(){reject(new Error('timeout:'+label));},5000);});}
+  async function run(){
+    clear(); var f=await load('first'),w=f.contentWindow,E=w.GAME.Engine;
+    out.checks.production_ready=!!w.GAME.NarrativeProduction.ready;
+    E.state.mode='play'; E.loadMap('sheriff',4,7,'up'); await wait(260);
+    out.checks.initial_pair_saved=!!localStorage.getItem('tp_save')&&!!localStorage.getItem(nkey);
+    E.loadMap('town',28,31,'up'); await wait(160);
+    var classic=JSON.parse(localStorage.getItem('tp_save'));
+    out.checks.door_destination_saved=classic.mapId==='town'&&classic.tx===28&&classic.ty===31;
+    var direct=w.GAME.NarrativeSave.load('main',{classic:classic,classicAdvanced:false});
+    out.checks.envelope_refreshed_with_door_position=direct.ok===true;
+    f=await load('cold'),w=f.contentWindow; await wait(220);
+    out.checks.cold_reload_ready=!!w.GAME.NarrativeProduction.ready&&!w.GAME.NarrativeLoadBlocked;
+    out.checks.no_fingerprint_recovery=!w.document.querySelector('.nw-save-recovery');
+    var classic2=JSON.parse(localStorage.getItem('tp_save'));
+    var cold=w.GAME.NarrativeSave.load('main',{classic:classic2,classicAdvanced:false});
+    out.checks.cold_reload_pair_valid=cold.ok===true;
+    clear();
+  }
+  run().catch(function(e){out.error=String(e&&e.stack||e);}).finally(function(){var pass=!out.error&&Object.keys(out.checks).every(function(k){return out.checks[k]===true;});report.textContent=JSON.stringify(out,null,2);document.title=pass?'TP-SAVE-DOOR-PASS':'TP-SAVE-DOOR-FAIL';});
+})();
+</script></body></html>

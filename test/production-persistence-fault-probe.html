@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>TP-PERSISTENCE-FAULT-LOADING</title>
+<style>
+html,body,iframe{margin:0;border:0;width:100%;height:100%;overflow:hidden;background:#111913}
+#status{position:fixed;left:0;top:0;z-index:99;padding:3px 6px;color:#183225;background:#f5efcf;font:10px monospace}
+#report{display:none}
+</style>
+</head>
+<body>
+<div id="status">boot...</div><pre id="report"></pre>
+<script>
+(function () {
+  var out = { checks: {}, errors: [] };
+  var status = document.getElementById('status'), report = document.getElementById('report');
+  var narrativeKey = 'twin-peaks:narrative:narrative-v1.0:slot:main';
+  var metaKey = 'twin-peaks:narrative:narrative-v1.0:meta';
+  var finaleKey = 'twin-peaks:finale:v2';
+  window.__TP_PERSISTENCE_FAULT = out;
+  function wait(ms) { return new Promise(function (resolve) { setTimeout(resolve, ms); }); }
+  function clearSaves() {
+    [narrativeKey, narrativeKey + ':tmp', narrativeKey + ':backup', metaKey, finaleKey, finaleKey + ':tmp', 'tp_save'].forEach(function (key) { localStorage.removeItem(key); });
+  }
+  function waitFor(check, label) {
+    return new Promise(function (resolve, reject) {
+      var tries = 0, timer = setInterval(function () {
+        if (check()) { clearInterval(timer); resolve(); }
+        else if (++tries > 80) { clearInterval(timer); reject(new Error('wait_timeout:' + label)); }
+      }, 80);
+    });
+  }
+  function same(keys, before) { return keys.every(function (key) { return localStorage.getItem(key) === before[key]; }); }
+  async function run() {
+    clearSaves();
+    var frame = document.createElement('iframe');
+    frame.src = '../index.html?persistenceFault=' + Date.now();
+    document.body.insertBefore(frame, status);
+    await new Promise(function (resolve, reject) {
+      frame.addEventListener('load', function () { setTimeout(resolve, 700); }, { once: true });
+      setTimeout(function () { reject(new Error('load_timeout')); }, 6000);
+    });
+    var w = frame.contentWindow, g = w.GAME, E = g.Engine, A = g.NarrativeAdapter;
+    var NP = g.NarrativeProduction, FP = g.NarrativeFinaleProduction, NF = g.NarrativeFinale;
+    await waitFor(function () { return NP && NP.ready; }, 'production_ready');
+    E.state.mode = 'play'; E.loadMap('sheriff', 4, 7, 'right');
+    var classic = { mapId: E.state.mapId, tx: E.state.player.tx, ty: E.state.player.ty, dir: E.state.player.dir, clues: E.state.clues.slice(), flags: JSON.parse(JSON.stringify(E.state.flags || {})) };
+    var seeded = NP.onClassicSave(classic);
+    out.checks.baseline_save_succeeds = seeded.ok === true && !!localStorage.getItem(narrativeKey) && !!localStorage.getItem('tp_save');
+
+    var narrativeKeys = [narrativeKey, narrativeKey + ':tmp', narrativeKey + ':backup', metaKey];
+    var beforeClassicFault = {};
+    narrativeKeys.forEach(function (key) { beforeClassicFault[key] = localStorage.getItem(key); });
+    var nativeSet = w.Storage.prototype.setItem;
+    w.Storage.prototype.setItem = function (key, value) {
+      if (key === 'tp_save') throw new Error('fault:tp_save');
+      return nativeSet.call(this, key, value);
+    };
+    A.getState().revision += 1;
+    var classicFault = NP.onClassicSave(classic);
+    w.Storage.prototype.setItem = nativeSet;
+    out.checks.classic_second_write_reports_failure = classicFault.ok === false && /classic_save_write_failed_rolled_back/.test(classicFault.error || '');
+    out.checks.classic_second_write_rolls_back_narrative_envelope = same(narrativeKeys, beforeClassicFault);
+
+    // Ripristina un envelope coerente con revisione corrente prima del fault finale.
+    var repaired = NP.onClassicSave(classic);
+    out.checks.save_recovers_after_fault_removed = repaired.ok === true;
+    var checkpointKeys = narrativeKeys.concat([finaleKey, finaleKey + ':tmp', 'tp_save']);
+    var beforeFinaleFault = {};
+    checkpointKeys.forEach(function (key) { beforeFinaleFault[key] = localStorage.getItem(key); });
+    w.Storage.prototype.setItem = function (key, value) {
+      if (key === finaleKey) throw new Error('fault:finale');
+      return nativeSet.call(this, key, value);
+    };
+    var armed = FP.arm(A.getState());
+    w.Storage.prototype.setItem = nativeSet;
+    out.checks.finale_write_failure_propagates = armed.ok === false && armed.error === 'finale_save_write_failed' && FP.checkpointError === 'finale_save_write_failed';
+    out.checks.finale_write_failure_rolls_back_pair = same(checkpointKeys, beforeFinaleFault);
+    out.checks.failed_arm_leaves_no_pending_finale = !NF.isPending();
+
+    // Fault dopo arm: advance deve fallire e ripristinare stato finale,
+    // ledger, mondo, UI e cursore del save. Retry: un solo passo.
+    var armedOk = FP.arm(A.getState());
+    out.checks.finale_arm_recovers_after_fault = armedOk.ok === true && NF.isPending();
+    var beforeAdvanceStorage = {};
+    checkpointKeys.forEach(function (key) { beforeAdvanceStorage[key] = localStorage.getItem(key); });
+    var beforeAdvanceState = NF.serialize();
+    var beforeAdvanceScreen = NF.currentScreen().page.id;
+    var beforeAdvanceClassic = JSON.stringify({ mode: E.state.mode, flags: E.state.flags });
+    var beforeAdvanceLedger = g.NarrativeRuntime.serialize(A.getState());
+    var faultAdvanceOnce = true;
+    w.Storage.prototype.setItem = function (key, value) {
+      if (key === finaleKey && faultAdvanceOnce) { faultAdvanceOnce = false; throw new Error('fault:finale_advance'); }
+      return nativeSet.call(this, key, value);
+    };
+    var failedAdvance = NF.advance();
+    w.Storage.prototype.setItem = nativeSet;
+    out.checks.advance_fault_returns_failure = failedAdvance.ok === false && failedAdvance.rolled_back === true && failedAdvance.error === 'finale_save_write_failed';
+    out.checks.advance_fault_restores_finale_byte_exact = NF.serialize() === beforeAdvanceState && NF.currentScreen().page.id === beforeAdvanceScreen;
+    out.checks.advance_fault_restores_external_participants = JSON.stringify({ mode: E.state.mode, flags: E.state.flags }) === beforeAdvanceClassic && g.NarrativeRuntime.serialize(A.getState()) === beforeAdvanceLedger;
+    out.checks.advance_fault_restores_storage_pair = same(checkpointKeys, beforeAdvanceStorage);
+    var retriedAdvance = NF.advance();
+    out.checks.advance_retry_moves_once = retriedAdvance.ok === true && NF.getState().page_index === 1;
+
+    // Porta il finale alla prima scelta, poi guasta il checkpoint: il valore
+    // write-once e la history non devono restare in memoria.
+    while (NF.isActive() && NF.currentScreen().kind !== 'choice') {
+      var step = NF.advance(); if (!step.ok) throw new Error('drain_method:' + step.error);
+    }
+    var choiceRoot = w.document.querySelector('#narrative .nw-root');
+    choiceRoot.dispatchEvent(new w.KeyboardEvent('keydown', { code: 'ArrowDown', bubbles: true }));
+    out.checks.choice_focus_second_before_fault = choiceRoot.querySelector('.nw-focus').getAttribute('data-choice-id') === 'personale';
+    var beforeChoiceState = NF.serialize();
+    var faultChoiceOnce = true;
+    w.Storage.prototype.setItem = function (key, value) {
+      if (key === finaleKey && faultChoiceOnce) { faultChoiceOnce = false; throw new Error('fault:finale_choice'); }
+      return nativeSet.call(this, key, value);
+    };
+    var failedChoice = NF.choose('personale');
+    w.Storage.prototype.setItem = nativeSet;
+    var restoredFocus = w.document.querySelector('#narrative .nw-focus');
+    out.checks.choice_fault_rolls_back_write_once = failedChoice.ok === false && failedChoice.rolled_back === true && NF.serialize() === beforeChoiceState && NF.getState().values.m10_method === undefined && NF.currentScreen().id === 'm10_method';
+    out.checks.choice_fault_restores_visual_focus = restoredFocus && restoredFocus.getAttribute('data-choice-id') === 'personale';
+    out.checks.choice_retry_commits_once = NF.choose('personale').ok === true && NF.getState().values.m10_method === 'personale';
+
+    // Fault diretto sulla meta durante rebind (percorso loadMap/saveGame):
+    // rebind stesso ripristina main/tmp/backup/meta, poi retry e load restano validi.
+    E.state.flags.meta_fault_probe = true;
+    var classicMeta = { mapId: E.state.mapId, tx: E.state.player.tx, ty: E.state.player.ty, dir: E.state.player.dir, clues: E.state.clues.slice(), flags: JSON.parse(JSON.stringify(E.state.flags || {})) };
+    var beforeMetaFault = {};
+    narrativeKeys.forEach(function (key) { beforeMetaFault[key] = localStorage.getItem(key); });
+    var faultMetaOnce = true;
+    w.Storage.prototype.setItem = function (key, value) {
+      if (key === metaKey && faultMetaOnce) { faultMetaOnce = false; throw new Error('fault:meta'); }
+      return nativeSet.call(this, key, value);
+    };
+    var metaFault = NP.onClassicSave(classicMeta);
+    w.Storage.prototype.setItem = nativeSet;
+    out.checks.meta_fault_reports_failure = metaFault.ok === false && /save_validation_failed/.test(metaFault.error || '');
+    out.checks.meta_fault_rolls_back_envelope_exact = same(narrativeKeys, beforeMetaFault);
+    var metaRetry = NP.onClassicSave(classicMeta);
+    var loadedAfterMeta = g.NarrativeSave.load('main', { classic: classicMeta, classicAdvanced: false });
+    out.checks.meta_fault_retry_and_load_valid = metaRetry.ok === true && loadedAfterMeta.ok === true && !/save_corrupted/.test(loadedAfterMeta.error || '');
+
+    // Porta fisica durante finale: se tp_save fallisce dopo rebind, envelope,
+    // mondo RAM e coordinate tornano tutti al checkpoint precedente.
+    var beforeDoorFault = {};
+    checkpointKeys.forEach(function (key) { beforeDoorFault[key] = localStorage.getItem(key); });
+    var beforeDoorWorld = JSON.stringify({ mapId: E.state.mapId, tx: E.state.player.tx, ty: E.state.player.ty, dir: E.state.player.dir });
+    var faultDoorOnce = true;
+    w.Storage.prototype.setItem = function (key, value) {
+      if (key === 'tp_save' && faultDoorOnce) { faultDoorOnce = false; throw new Error('fault:tp_save_door'); }
+      return nativeSet.call(this, key, value);
+    };
+    var failedDoor = E.loadMap('town', 28, 31, 'up');
+    w.Storage.prototype.setItem = nativeSet;
+    out.checks.finale_door_tp_fault_reports_failure = failedDoor === false && /classic_save_write_failed_rolled_back/.test(E.lastSaveError || '');
+    out.checks.finale_door_tp_fault_restores_pair_and_world = same(checkpointKeys, beforeDoorFault) && JSON.stringify({ mapId: E.state.mapId, tx: E.state.player.tx, ty: E.state.player.ty, dir: E.state.player.dir }) === beforeDoorWorld;
+
+    // Porta il flow al ritorno da Truman. Fault sull'interazione fisica deve
+    // essere consumato dal finale, mai cadere nel dialogo legacy; retry resta possibile.
+    function drainFinale() {
+      var guard = 0;
+      while (NF.isActive()) {
+        var screen = NF.currentScreen(), result;
+        if (screen.kind === 'choice') {
+          if (screen.id === 's3') result = NF.choose('on');
+          else if (screen.id === 'ring_final_gesture') result = NF.choose('kept');
+          else if (screen.id === 'bob_response_stance') result = NF.choose('B');
+          else if (screen.id === 's4_interpretation') result = NF.choose('avvertimento');
+          else throw new Error('unexpected_choice:' + screen.id);
+        } else result = NF.advance();
+        if (!result.ok) throw new Error('drain_finale:' + result.error);
+        if (++guard > 500) throw new Error('drain_finale_guard');
+      }
+    }
+    drainFinale();
+    if (NF.getState().stage !== 'await_lodge') throw new Error('expected_await_lodge');
+    if (!NF.beginLodge('mfap').ok) throw new Error('begin_mfap'); drainFinale();
+    if (!NF.beginLodge('bob').ok) throw new Error('begin_bob'); drainFinale();
+    if (!NF.resumeLaura().ok) throw new Error('resume_laura'); drainFinale();
+
+    // Uscita automatica Loggia→bosco: fault consumato e visibile una volta,
+    // nessun retry silenzioso ogni 180 ms; A/tap riprova senza doppio passo.
+    var beforeWoodsState = NF.serialize(), faultWoodsOnce = true;
+    E.state.mapId = 'woods';
+    w.Storage.prototype.setItem = function (key, value) {
+      if (key === finaleKey && faultWoodsOnce) { faultWoodsOnce = false; throw new Error('fault:physical_woods'); }
+      return nativeSet.call(this, key, value);
+    };
+    var consumedWoodsFault = FP.poll();
+    w.Storage.prototype.setItem = nativeSet;
+    out.checks.woods_poll_fault_consumed_and_visible = consumedWoodsFault === true && NF.serialize() === beforeWoodsState && FP.lastTransitionError === 'finale_save_write_failed' && /Premi A per riprovare/.test(w.document.getElementById('objective').textContent);
+    out.checks.woods_poll_fault_does_not_spin = FP.poll() === false && NF.serialize() === beforeWoodsState;
+    out.checks.woods_poll_manual_retry_commits_once = FP.tryInteractAt('woods', E.state.player.tx, E.state.player.ty) === true && NF.isActive() && NF.getState().stage === 'woods';
+    drainFinale();
+    out.checks.reached_physical_station_pause = NF.getState().stage === 'await_epilogue_station';
+    var beforePhysicalState = NF.serialize(), faultPhysicalOnce = true;
+    w.Storage.prototype.setItem = function (key, value) {
+      if (key === finaleKey && faultPhysicalOnce) { faultPhysicalOnce = false; throw new Error('fault:physical_station'); }
+      return nativeSet.call(this, key, value);
+    };
+    var consumedPhysicalFault = FP.tryInteract('sheriff', 'truman');
+    w.Storage.prototype.setItem = nativeSet;
+    out.checks.physical_fault_consumed_without_legacy = consumedPhysicalFault === true && NF.serialize() === beforePhysicalState && !E.state.dialogue && FP.lastTransitionError === 'finale_save_write_failed';
+    out.checks.physical_fault_visible_and_retryable = /Salvataggio non riuscito/.test(w.document.getElementById('objective').textContent) && FP.tryInteract('sheriff', 'truman') === true && NF.getState().stage === 'epilogue_station';
+    clearSaves();
+  }
+  run().catch(function (e) { out.errors.push(String(e && e.stack || e)); }).finally(function () {
+    var failed = Object.keys(out.checks).filter(function (key) { return !out.checks[key]; });
+    if (out.errors.length || failed.length) {
+      document.title = 'TP-PERSISTENCE-FAULT-FAIL'; status.textContent = 'FAIL ' + failed.join(',');
+    } else {
+      document.title = 'TP-PERSISTENCE-FAULT-PASS'; status.textContent = 'PASS ' + Object.keys(out.checks).length + '/' + Object.keys(out.checks).length;
+    }
+    report.textContent = JSON.stringify(out, null, 2);
+  });
+})();
+</script>
+</body>
+</html>

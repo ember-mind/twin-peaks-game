@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>TP-SAVE-RECOVERY-LOADING</title>
+<style>
+  html,body,iframe{margin:0;border:0;width:100%;height:100%;overflow:hidden;background:#111913}
+  #status{position:fixed;left:0;top:0;z-index:99;padding:3px 6px;color:#183225;background:#f5efcf;font:10px monospace}
+  #report{display:none}
+</style>
+</head>
+<body>
+<div id="status">boot...</div><pre id="report"></pre>
+<script>
+(function () {
+  var out = { checks: {}, errors: [] }, status = document.getElementById('status'), report = document.getElementById('report');
+  var narrativeKey = 'twin-peaks:narrative:narrative-v1.0:slot:main';
+  var metaKey = 'twin-peaks:narrative:narrative-v1.0:meta';
+  var finaleKey = 'twin-peaks:finale:v2';
+  window.__TP_SAVE_RECOVERY = out;
+  function wait(ms) { return new Promise(function (resolve) { setTimeout(resolve, ms); }); }
+  function touch(el, type, id, x, y) {
+    var ev = new Event(type, { bubbles: true, cancelable: true });
+    Object.defineProperty(ev, 'changedTouches', { value: [{ identifier: id, clientX: x, clientY: y }] });
+    el.dispatchEvent(ev);
+  }
+  function clearTestSaves() {
+    [narrativeKey, narrativeKey + ':tmp', narrativeKey + ':backup', metaKey, finaleKey, 'tp_save'].forEach(function (key) { localStorage.removeItem(key); });
+  }
+  function seedClassic() {
+    localStorage.setItem('tp_save', JSON.stringify({ mapId: 'sheriff', tx: 4, ty: 7, dir: 'up', clues: [], flags: { intro_town: true } }));
+  }
+  function seedInvalidClassic(mapId, tx, ty) {
+    localStorage.setItem('tp_save', JSON.stringify({ mapId: mapId, tx: tx, ty: ty, dir: 'up', clues: [], flags: { intro_town: true } }));
+    localStorage.setItem(narrativeKey, 'preserve-paired-narrative');
+    localStorage.setItem(metaKey, JSON.stringify({ slots: { main: 1 } }));
+  }
+  function loadProduct(label) {
+    return new Promise(function (resolve, reject) {
+      var old = document.querySelector('iframe'); if (old) old.remove();
+      var frame = document.createElement('iframe'); frame.title = label;
+      frame.addEventListener('load', function () { setTimeout(function () { resolve(frame); }, 650); }, { once: true });
+      frame.src = '../index.html?touch=1&recoveryProbe=' + encodeURIComponent(label + Date.now());
+      document.body.insertBefore(frame, status);
+      setTimeout(function () { reject(new Error('load_timeout:' + label)); }, 5000);
+    });
+  }
+  async function run() {
+    clearTestSaves(); seedClassic();
+    localStorage.setItem(narrativeKey, '{corrupt');
+    localStorage.setItem(metaKey, JSON.stringify({ slots: { main: 1 } }));
+    var frame = await loadProduct('narrative-corrupt'), w = frame.contentWindow, root = w.document.querySelector('.nw-save-recovery');
+    out.checks.narrative_corruption_blocks = !!(root && root.getAttribute('data-save-source') === 'narrative' && w.GAME.NarrativeLoadBlocked);
+    out.checks.corrupt_narrative_not_deleted = localStorage.getItem(narrativeKey) === '{corrupt';
+    out.checks.adapter_disabled_on_corruption = !w.GAME.NarrativeAdapter.isEnabled() && !w.GAME.NarrativeProduction.ready;
+    out.checks.recovery_has_two_mobile_choices = !!(root && root.querySelectorAll('[data-recovery-action]').length === 2);
+    out.checks.recovery_uses_bitmap_canvas = w.getComputedStyle(w.document.getElementById('retro-ui-canvas')).display !== 'none' && w.getComputedStyle(w.document.getElementById('narrative')).opacity === '0';
+    var controls = Array.from(w.document.querySelectorAll('.tp-touch-ctrl'));
+    var dpad = controls.filter(function (el) { return el.tagName === 'DIV'; })[0];
+    var confirm = controls.filter(function (el) { return el.tagName === 'BUTTON' && el.getAttribute('aria-label') === 'Conferma scelta'; })[0];
+    out.checks.recovery_mobile_dpad_and_confirm_visible = !!(dpad && confirm && dpad.style.visibility === 'visible' && confirm.style.visibility === 'visible');
+    var dr = dpad.getBoundingClientRect();
+    touch(dpad, 'touchstart', 71, dr.left + dr.width / 2, dr.top + dr.height - 5);
+    touch(dpad, 'touchend', 71, dr.left + dr.width / 2, dr.top + dr.height - 5);
+    await wait(50);
+    out.checks.recovery_mobile_dpad_reaches_new_game = root.querySelector('.nw-focus').getAttribute('data-recovery-action') === 'new';
+    touch(confirm, 'touchstart', 72, 1, 1);
+    touch(confirm, 'touchend', 72, 1, 1);
+    await wait(850);
+    out.checks.explicit_new_game_clears_all_saves = !localStorage.getItem(narrativeKey) && !localStorage.getItem(metaKey) && !localStorage.getItem(finaleKey) && !localStorage.getItem('tp_save');
+
+    clearTestSaves(); seedClassic(); localStorage.setItem(finaleKey, '{corrupt');
+    frame = await loadProduct('finale-corrupt'); w = frame.contentWindow; root = w.document.querySelector('.nw-save-recovery');
+    out.checks.finale_corruption_blocks = !!(root && root.getAttribute('data-save-source') === 'finale' && w.GAME.NarrativeLoadBlocked);
+    out.checks.corrupt_finale_not_deleted = localStorage.getItem(finaleKey) === '{corrupt';
+    out.checks.runtime_not_started_below_finale_error = !w.GAME.NarrativeAdapter.isEnabled() && !w.GAME.NarrativeProduction.ready;
+
+    clearTestSaves(); localStorage.setItem('tp_save', '{corrupt');
+    localStorage.setItem(narrativeKey, 'preserve-me');
+    localStorage.setItem(metaKey, JSON.stringify({ slots: { main: 1 } }));
+    frame = await loadProduct('classic-corrupt'); w = frame.contentWindow; root = w.document.querySelector('.nw-save-recovery');
+    out.checks.classic_corruption_blocks = !!(root && root.getAttribute('data-save-source') === 'classic' && w.GAME.NarrativeLoadBlocked);
+    out.checks.corrupt_classic_not_deleted = localStorage.getItem('tp_save') === '{corrupt';
+    out.checks.narrative_preserved_under_classic_error = localStorage.getItem(narrativeKey) === 'preserve-me' && !!localStorage.getItem(metaKey);
+    out.checks.runtime_not_started_below_classic_error = !w.GAME.NarrativeAdapter.isEnabled() && !w.GAME.NarrativeProduction.ready;
+
+    clearTestSaves(); seedInvalidClassic('map-that-does-not-exist', 1, 1);
+    var nonexistentRaw = localStorage.getItem('tp_save');
+    frame = await loadProduct('classic-nonexistent-map'); w = frame.contentWindow; root = w.document.querySelector('.nw-save-recovery');
+    out.checks.nonexistent_map_blocks_before_load = !!(root && root.getAttribute('data-save-source') === 'classic' && w.GAME.NarrativeProduction.loadError.error === 'classic_save_invalid_map');
+    out.checks.nonexistent_map_pair_quarantined = !!(w.GAME.NarrativeProduction.quarantinedSavePair && w.GAME.NarrativeProduction.quarantinedSavePair.classic_present && w.GAME.NarrativeProduction.quarantinedSavePair.narrative_present && !w.GAME.NarrativeAdapter.isEnabled() && !w.GAME.NarrativeProduction.ready);
+    out.checks.nonexistent_map_pair_preserved = localStorage.getItem('tp_save') === nonexistentRaw && localStorage.getItem(narrativeKey) === 'preserve-paired-narrative';
+
+    clearTestSaves(); seedInvalidClassic('sheriff', 999, 7);
+    var outOfBoundsRaw = localStorage.getItem('tp_save');
+    frame = await loadProduct('classic-out-of-bounds'); w = frame.contentWindow; root = w.document.querySelector('.nw-save-recovery');
+    out.checks.out_of_bounds_blocks_before_load = !!(root && root.getAttribute('data-save-source') === 'classic' && w.GAME.NarrativeProduction.loadError.error === 'classic_save_out_of_bounds');
+    out.checks.out_of_bounds_pair_quarantined = !!(w.GAME.NarrativeProduction.quarantinedSavePair && w.GAME.NarrativeProduction.quarantinedSavePair.classic_present && w.GAME.NarrativeProduction.quarantinedSavePair.narrative_present && !w.GAME.NarrativeAdapter.isEnabled() && !w.GAME.NarrativeProduction.ready);
+    out.checks.out_of_bounds_pair_preserved = localStorage.getItem('tp_save') === outOfBoundsRaw && localStorage.getItem(narrativeKey) === 'preserve-paired-narrative';
+
+    clearTestSaves(); seedInvalidClassic('sheriff', 0, 0);
+    frame = await loadProduct('classic-solid-tile'); w = frame.contentWindow; root = w.document.querySelector('.nw-save-recovery');
+    out.checks.solid_tile_blocks_before_load = !!(root && root.getAttribute('data-save-source') === 'classic' && w.GAME.NarrativeProduction.loadError.error === 'classic_save_invalid_tile');
+    out.checks.solid_tile_pair_quarantined = !!(w.GAME.NarrativeProduction.quarantinedSavePair && w.GAME.NarrativeProduction.quarantinedSavePair.classic_present && w.GAME.NarrativeProduction.quarantinedSavePair.narrative_present && !w.GAME.NarrativeAdapter.isEnabled() && !w.GAME.NarrativeProduction.ready);
+    clearTestSaves();
+  }
+  run().catch(function (e) { out.errors.push(String(e && e.stack || e)); }).finally(function () {
+    var failed = Object.keys(out.checks).filter(function (key) { return !out.checks[key]; });
+    if (out.errors.length || failed.length) {
+      document.title = 'TP-SAVE-RECOVERY-FAIL'; status.textContent = 'FAIL ' + failed.join(',');
+    } else {
+      document.title = 'TP-SAVE-RECOVERY-PASS'; status.textContent = 'PASS ' + Object.keys(out.checks).length + '/' + Object.keys(out.checks).length;
+    }
+    report.textContent = JSON.stringify(out, null, 2);
+  });
+})();
+</script>
+</body>
+</html>

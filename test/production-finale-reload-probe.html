@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>TP-FINALE-RELOAD-LOADING</title>
+<style>
+  html,body,iframe{margin:0;border:0;width:100%;height:100%;overflow:hidden;background:#111913}
+  #status{position:fixed;left:0;top:0;z-index:99;padding:3px 6px;color:#183225;background:#f5efcf;font:10px monospace}
+  #report{display:none}
+</style>
+</head>
+<body>
+<div id="status">boot...</div><pre id="report"></pre>
+<script>
+(function () {
+  var out = { checks: {}, errors: [] };
+  var status = document.getElementById('status'), report = document.getElementById('report');
+  var narrativeKey = 'twin-peaks:narrative:narrative-v1.0:slot:main';
+  var metaKey = 'twin-peaks:narrative:narrative-v1.0:meta';
+  var finaleKey = 'twin-peaks:finale:v2';
+  window.__TP_FINALE_RELOAD = out;
+  function wait(ms) { return new Promise(function (resolve) { setTimeout(resolve, ms); }); }
+  function clearSaves() {
+    [narrativeKey, narrativeKey + ':tmp', narrativeKey + ':backup', metaKey, finaleKey, 'tp_save'].forEach(function (key) { localStorage.removeItem(key); });
+  }
+  function loadProduct(label) {
+    return new Promise(function (resolve, reject) {
+      var old = document.querySelector('iframe'); if (old) old.remove();
+      var frame = document.createElement('iframe'); frame.title = label;
+      var timeout = setTimeout(function () { reject(new Error('load_timeout:' + label)); }, 6000);
+      frame.addEventListener('load', function () {
+        clearTimeout(timeout); setTimeout(function () { resolve(frame); }, 800);
+      }, { once: true });
+      frame.src = '../index.html?finaleReloadProbe=' + encodeURIComponent(label + Date.now());
+      document.body.insertBefore(frame, status);
+    });
+  }
+  async function waitFor(check, label, max) {
+    for (var i = 0; i < (max || 50); i++) { if (check()) return; await wait(80); }
+    throw new Error('wait_timeout:' + label);
+  }
+  function driveToChoice(NF, choiceId) {
+    for (var guard = 0; guard < 500; guard++) {
+      var screen = NF.currentScreen();
+      if (!screen) throw new Error('missing_finale_screen');
+      if (screen.kind === 'choice') {
+        if (screen.id === choiceId) return;
+        if (screen.id === 'm10_method') { NF.choose('personale'); continue; }
+        throw new Error('unexpected_choice:' + screen.id);
+      }
+      var step = NF.advance();
+      if (!step.ok) throw new Error('finale_drive:' + step.error);
+    }
+    throw new Error('finale_drive_guard:' + choiceId);
+  }
+  async function run() {
+    clearSaves();
+    var frame = await loadProduct('seed'), w = frame.contentWindow, g = w.GAME;
+    await waitFor(function () { return g.NarrativeProduction && g.NarrativeProduction.ready; }, 'production_ready');
+    var E = g.Engine, A = g.NarrativeAdapter, NF = g.NarrativeFinale, ns = A.getState();
+    E.state.mode = 'play';
+    E.loadMap('sheriff', 4, 7, 'right');
+    ns.flags.atto4 = true;
+    ns.flags.atto5 = true;
+    ns.nodes_done.m8_station = true;
+    ns.nodes_done.m9_arrivo = true;
+    ns.evidence.T_LELAND_TAXI = true;
+    ns.revision += 1;
+    await waitFor(function () { return NF.isActive() && NF.getState().stage === 'm10_threshold'; }, 'finale_arm');
+    out.checks.seed_checkpoint_uses_requested_world = E.state.mapId === 'sheriff' && E.state.player.tx === 4 && E.state.player.ty === 7 && E.state.player.dir === 'right';
+    out.checks.adapter_frozen_at_handoff = !A.isEnabled() && A.isNotebookEnabled();
+
+    // Mutazione classica durante finale attivo: onState deve riallineare
+    // envelope prima di salvare il nuovo schermo del finale.
+    E.state.flags.finale_reload_probe = true;
+    var advanced = NF.advance();
+    if (!advanced.ok) throw new Error('finale_advance:' + advanced.error);
+    await wait(120);
+    var expectedFinale = NF.getState();
+    var expectedClassic = JSON.parse(localStorage.getItem('tp_save'));
+    var expectedEnvelope = JSON.parse(localStorage.getItem(narrativeKey));
+    out.checks.active_finale_checkpoint_saved = !!localStorage.getItem(finaleKey) && expectedFinale.active;
+    out.checks.classic_mutation_saved_by_finale_checkpoint = expectedClassic.flags.finale_reload_probe === true;
+    out.checks.envelope_correlated_before_reload = expectedEnvelope.classic_save_fingerprint === g.NarrativeSave.classicFingerprint(expectedClassic);
+
+    var expected = { mapId: expectedClassic.mapId, tx: expectedClassic.tx, ty: expectedClassic.ty, dir: expectedClassic.dir, stage: expectedFinale.stage, page: expectedFinale.page_index };
+    frame = await loadProduct('cold-reload'); w = frame.contentWindow; g = w.GAME; E = g.Engine; A = g.NarrativeAdapter; NF = g.NarrativeFinale;
+    await waitFor(function () { return g.NarrativeProduction && g.NarrativeProduction.ready && NF.isPending(); }, 'cold_restore');
+    var restored = NF.getState();
+    out.checks.cold_reload_enters_play_without_continue = E.state.mode === 'play';
+    out.checks.cold_reload_restores_map_and_coords = E.state.mapId === expected.mapId && E.state.player.tx === expected.tx && E.state.player.ty === expected.ty && E.state.player.dir === expected.dir;
+    out.checks.cold_reload_restores_active_finale_screen = NF.isActive() && restored.stage === expected.stage && restored.page_index === expected.page;
+    out.checks.cold_reload_keeps_adapter_read_only = !A.isEnabled() && A.isNotebookEnabled();
+    out.checks.cold_reload_has_no_recovery_overlay = !g.NarrativeLoadBlocked && !w.document.querySelector('.nw-save-recovery');
+
+    driveToChoice(NF, 's3');
+    await wait(150);
+    var ledger = A.getState();
+    var ledgerNotes = ledger.notebook.map(function (n) { return n.id; });
+    var admissionEnvelope = JSON.parse(localStorage.getItem(narrativeKey));
+    out.checks.admissions_commit_to_shared_ledger = ledger.flags.m10_admissions_committed === true && ledger.props.P6.factual_status === 'confirmed_as_lie' && ledger.props.P8.factual_status === 'corroborated';
+    out.checks.admissions_visible_as_notebook_notes = ['m10.admission.taxi', 'm10.admission.victims', 'm10.admission.scene'].every(function (id) { return ledgerNotes.indexOf(id) >= 0; });
+    out.checks.admissions_saved_in_atomic_envelope = admissionEnvelope.state.flags.m10_admissions_committed === true && admissionEnvelope.state.props.P6.factual_status === 'confirmed_as_lie';
+
+    frame = await loadProduct('admissions-reload'); w = frame.contentWindow; g = w.GAME; E = g.Engine; A = g.NarrativeAdapter; NF = g.NarrativeFinale;
+    await waitFor(function () { return g.NarrativeProduction && g.NarrativeProduction.ready && NF.isPending(); }, 'admissions_restore');
+    var restoredLedger = A.getState();
+    out.checks.admissions_survive_cold_reload = restoredLedger.flags.m10_admissions_committed === true && restoredLedger.props.P6.factual_status === 'confirmed_as_lie' && restoredLedger.props.P8.factual_status === 'corroborated';
+
+    await wait(900); // oltre più cicli participant: nessun town overwrite tardivo
+    var stableClassic = JSON.parse(localStorage.getItem('tp_save'));
+    var stableEnvelope = JSON.parse(localStorage.getItem(narrativeKey));
+    out.checks.checkpoint_not_overwritten_by_fresh_town = stableClassic.mapId === expected.mapId && stableClassic.tx === expected.tx && stableClassic.ty === expected.ty && E.state.mapId === expected.mapId;
+    out.checks.envelope_still_correlated_after_boot = stableEnvelope.classic_save_fingerprint === g.NarrativeSave.classicFingerprint(stableClassic);
+    out.checks.classic_probe_flag_survives_reload = E.state.flags.finale_reload_probe === true;
+
+    // Compatibilità R14→R16: simula un checkpoint v2 nel punto il cui
+    // page_index=3 ora indica un'altra pagina. Il loader deve usare last_screen,
+    // riprendere sulla stessa battuta e risalvare schema 3 + page_id.
+    NF.reset();
+    var rearmed = g.NarrativeFinaleProduction.arm(A.getState());
+    if (!rearmed.ok) throw new Error('legacy_probe_arm:' + rearmed.error);
+    while (NF.currentScreen().kind !== 'choice') {
+      var towardMethod = NF.advance(); if (!towardMethod.ok) throw new Error('legacy_probe_method:' + towardMethod.error);
+    }
+    if (!NF.choose('intuitivo').ok) throw new Error('legacy_probe_choose');
+    while (NF.getState().stage !== 'm10_admissions' || NF.currentScreen().page.id !== 'nf.m10.admit.intuitive.03') {
+      var towardLegacyPage = NF.advance(); if (!towardLegacyPage.ok) throw new Error('legacy_probe_page:' + towardLegacyPage.error);
+    }
+    var legacyRaw = JSON.parse(localStorage.getItem(finaleKey));
+    legacyRaw.version = 2;
+    legacyRaw.page_index = 3;
+    legacyRaw.last_screen = 'nf.m10.admit.intuitive.03';
+    delete legacyRaw.page_id;
+    localStorage.setItem(finaleKey, JSON.stringify(legacyRaw));
+    frame = await loadProduct('legacy-v2-reload'); w = frame.contentWindow; g = w.GAME; E = g.Engine; A = g.NarrativeAdapter; NF = g.NarrativeFinale;
+    await waitFor(function () { return g.NarrativeProduction && g.NarrativeProduction.ready && NF.isPending(); }, 'legacy_restore');
+    var migratedState = NF.getState();
+    var migratedStored = JSON.parse(localStorage.getItem(finaleKey));
+    out.checks.legacy_v2_restores_by_page_id = NF.isActive() && NF.currentScreen().page.id === 'nf.m10.admit.intuitive.03' && migratedState.page_index !== 3;
+    out.checks.legacy_v2_upgrades_schema_and_persists = migratedState.version === 3 && migratedState.page_id === 'nf.m10.admit.intuitive.03' && migratedStored.version === 3 && migratedStored.page_id === 'nf.m10.admit.intuitive.03';
+
+    // Fault nel risalvataggio della migrazione: nessun finale/UI/input/mondo
+    // v3 può restare vivo sotto la recovery che il boot mostrerà al chiamante.
+    var legacyFaultRaw = JSON.parse(JSON.stringify(migratedStored));
+    legacyFaultRaw.version = 2;
+    legacyFaultRaw.page_index = 3;
+    legacyFaultRaw.last_screen = 'nf.m10.admit.intuitive.03';
+    delete legacyFaultRaw.page_id;
+    var legacyFaultString = JSON.stringify(legacyFaultRaw);
+    localStorage.setItem(finaleKey, legacyFaultString);
+    NF.reset();
+    E.state.mode = 'title';
+    E.loadMap('town', 30, 29, 'down');
+    E.state.mode = 'play';
+    E.state.flags.migration_fault_baseline = true;
+    E.state.player.moving = true; E.state.player.mx = 31; E.state.player.my = 29; E.state.player.turnUntil = 4321;
+    if (E.state.npcs.length) {
+      E.state.npcs[0].moving = true; E.state.npcs[0].mx = E.state.npcs[0].x + 1; E.state.npcs[0].moveT = 0.375;
+    }
+    var beforeMigrationFaultMap = E.state.map;
+    var beforeMigrationFaultNpcs = E.state.npcs;
+    var beforeMigrationFaultPlayer = JSON.stringify(E.state.player);
+    var beforeMigrationFaultNpcState = JSON.stringify(E.state.npcs);
+    var beforeMigrationFaultWorld = JSON.stringify({ mapId: E.state.mapId, tx: E.state.player.tx, ty: E.state.player.ty, dir: E.state.player.dir, mode: E.state.mode, clues: E.state.clues, flags: E.state.flags });
+    var beforeMigrationFaultLedger = g.NarrativeRuntime.serialize(A.getState());
+    var classicForMigrationFault = JSON.parse(localStorage.getItem('tp_save'));
+    var nativeSet = w.Storage.prototype.setItem, failMigrationWriteOnce = true;
+    w.Storage.prototype.setItem = function (key, value) {
+      if (key === finaleKey && failMigrationWriteOnce) { failMigrationWriteOnce = false; throw new Error('fault:migration_resave'); }
+      return nativeSet.call(this, key, value);
+    };
+    var failedMigrationRestore = g.NarrativeFinaleProduction.restoreFromStorage(classicForMigrationFault);
+    w.Storage.prototype.setItem = nativeSet;
+    var afterMigrationFaultWorld = JSON.stringify({ mapId: E.state.mapId, tx: E.state.player.tx, ty: E.state.player.ty, dir: E.state.player.dir, mode: E.state.mode, clues: E.state.clues, flags: E.state.flags });
+    out.checks.migration_resave_fault_returns_clean_failure = failedMigrationRestore.ok === false && failedMigrationRestore.rolled_back === true && !NF.isPending();
+    out.checks.migration_resave_fault_unmounts_finale_ui = !w.document.querySelector('#narrative .nw-root');
+    out.checks.migration_resave_fault_restores_world_and_ledger = afterMigrationFaultWorld === beforeMigrationFaultWorld && g.NarrativeRuntime.serialize(A.getState()) === beforeMigrationFaultLedger;
+    out.checks.migration_resave_fault_restores_map_roster_and_motion = E.state.mapId === 'town' && E.state.map === beforeMigrationFaultMap && E.state.map === g.Maps.town && E.state.npcs === beforeMigrationFaultNpcs && JSON.stringify(E.state.npcs) === beforeMigrationFaultNpcState && JSON.stringify(E.state.player) === beforeMigrationFaultPlayer;
+    out.checks.migration_resave_fault_preserves_legacy_checkpoint = localStorage.getItem(finaleKey) === legacyFaultString;
+    clearSaves();
+  }
+  run().catch(function (e) { out.errors.push(String(e && e.stack || e)); }).finally(function () {
+    var failed = Object.keys(out.checks).filter(function (key) { return !out.checks[key]; });
+    if (out.errors.length || failed.length) {
+      document.title = 'TP-FINALE-RELOAD-FAIL'; status.textContent = 'FAIL ' + failed.join(',');
+    } else {
+      document.title = 'TP-FINALE-RELOAD-PASS'; status.textContent = 'PASS ' + Object.keys(out.checks).length + '/' + Object.keys(out.checks).length;
+    }
+    report.textContent = JSON.stringify(out, null, 2);
+  });
+})();
+</script>
+</body>
+</html>

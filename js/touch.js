@@ -316,7 +316,7 @@
         game.NarrativeAdapter.active()) return narrativeChoiceActive() ? 'narrative-choice' : 'narrative';
     var st = game.Engine && game.Engine.state;
     if (!st) return 'advance';
-    if (st.menu) return 'menu';
+    if (st.menu) return st.menuDocument ? 'menu-document' : 'menu';
     if (st.dialogue) return 'dialogue';
     if (st.mode === 'play') return 'play';
     if (st.mode === 'title') return 'title';
@@ -401,14 +401,14 @@
       showControl(uiDpad, true, 0.85);
       showControl(uiA, true, 0.85);
       showControl(uiB, true, 0.85);
-    } else if (mode === 'menu') {
+    } else if (mode === 'menu' || mode === 'menu-document') {
       // Il fascicolo usa tutto il portrait: niente overlay in basso.
-      // Scorrimento = swipe verticale sul documento; tap o × = chiusura.
+      // Swipe cambia prova/pagina; tap apre o avanza; × torna indietro.
       var menuLayout = playLayout();
       if (menuLayout.gutter) placeGutterButton(uiB, 64, menuLayout.gutterRight, Math.round(viewportSize().height / 2 - 32));
       else compactTopButton(uiB, 44, 10, 10);
-      buttonFace(uiB, '×', 'CHIUDI');
-      uiB.setAttribute('aria-label', 'Chiudi fascicolo indizi');
+      buttonFace(uiB, '×', mode === 'menu-document' ? 'INDIETRO' : 'CHIUDI');
+      uiB.setAttribute('aria-label', mode === 'menu-document' ? 'Torna al fascicolo indizi' : 'Chiudi fascicolo indizi');
       showControl(uiDpad, false, 0);
       showControl(uiA, false, 0);
       showControl(uiB, true, 0.72);
@@ -496,7 +496,7 @@
       var dx = t.clientX - tapX, dy = t.clientY - tapY;
       var moved = Math.sqrt(dx * dx + dy * dy);
       tapId = null;
-      if (interactionMode() === 'menu' && dt < 900 &&
+      if (interactionMode().indexOf('menu') === 0 && dt < 900 &&
           Math.abs(dy) >= MENU_SWIPE_MOVE && Math.abs(dy) > Math.abs(dx) * 1.15) {
         pressKey(dy < 0 ? 'ArrowUp' : 'ArrowDown');
         return;

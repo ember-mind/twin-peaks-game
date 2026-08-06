@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>TP-PROD-NARRATIVE-LOADING</title>
+<style>
+  html, body, iframe { margin: 0; border: 0; width: 100%; height: 100%; overflow: hidden; background: #111913; }
+  #status { position: fixed; left: 0; top: 0; z-index: 99; padding: 4px 7px; color: #17261d; background: #f4f0d2; font: 11px monospace; }
+  #report { display: none; }
+</style>
+</head>
+<body>
+<iframe id="product" src="../index.html?narrativeTest=1" title="Twin Peaks production build"></iframe>
+<div id="status">boot…</div>
+<pre id="report"></pre>
+<script>
+(function () {
+  var out = { checks: {}, errors: [] };
+  window.__TP_PROD_NARRATIVE = out;
+  var frame = document.getElementById('product');
+  var status = document.getElementById('status');
+  var report = document.getElementById('report');
+  function wait(ms) { return new Promise(function (resolve) { setTimeout(resolve, ms); }); }
+  async function press(w, code) {
+    w.dispatchEvent(new w.KeyboardEvent('keydown', { code: code, bubbles: true }));
+    w.dispatchEvent(new w.KeyboardEvent('keyup', { code: code, bubbles: true }));
+    await wait(190);
+  }
+  frame.addEventListener('load', async function () {
+    try {
+      await wait(450);
+      var w = frame.contentWindow, g = w.GAME;
+      var E = g.Engine, NR = g.NarrativeRuntime, A = g.NarrativeAdapter;
+      out.checks.product_boot_ready = !!(g.NarrativeProduction && g.NarrativeProduction.ready);
+      out.checks.adapter_enabled = A.isEnabled();
+      out.checks.all_runtime_missions_loaded =
+        g.narrativeCatalogsInstalled.missions.join(',') === 'M4,M5,M6,M8,M9';
+      out.checks.test_mode_isolated = g.NarrativeProduction.testMode === true;
+
+      var mode = new URLSearchParams(location.search).get('mode') || 'm8';
+      E.state.mode = 'play';
+      E.state.flags.intro_town = true;
+      await wait(240);
+      var objective = w.document.getElementById('objective'), M4 = g.NarrativeData.missions.M4;
+      out.checks.pre_m4_objective_hidden = objective.style.display === 'none' && !NR.evalCond(A.getState(), M4.entry_condition, M4);
+      NR.applyEffects(A.getState(), [{ set: 'sogno_fatto' }]); E.state.flags.sogno_fatto = true;
+      await wait(240);
+      out.checks.m4_objective_has_reachable_root = /Riferisci il sogno a Truman/.test(objective.textContent) && NR.worldRoots(A.getState(), M4, 'sheriff', 'truman').some(function (n) { return n.id === 'truman_a2'; });
+      if (mode === 'm4') {
+        E.loadMap('sheriff', 6, 1, 'right');
+        A.tryInteract('sheriff', 'truman');
+      } else {
+        NR.applyEffects(A.getState(), [{ set: 'atto4' }]);
+        E.state.flags.atto4 = true;
+        A.syncNarrativeEntities('probe');
+        E.loadMap('diner', 10, 2, 'up');
+        A.tryInteract('diner', 'maddy');
+      }
+      await wait(220);
+      var root = w.document.querySelector('#narrative .nw-root');
+      out.checks.real_narrative_ui_visible = !!root;
+      out.checks.participant_text_visible = !!(root && root.textContent.trim().length > 20);
+      out.checks.gameplay_lease_active = A.active();
+      out.visible_text = root ? root.textContent.trim() : '';
+      if (mode === 'm8' && new URLSearchParams(location.search).get('pause') === 'choice') {
+        for (var pc = 0; pc < 24 && !w.document.querySelectorAll('#narrative [data-choice-id]').length; pc++) await press(w, 'Enter');
+        out.checks.m8_three_choices_visible = w.document.querySelectorAll('#narrative [data-choice-id]').length === 3;
+      } else if (mode === 'm8' && new URLSearchParams(location.search).get('auto') === '1') {
+        var choiceCount = 0;
+        for (var i = 0; i < 24; i++) {
+          choiceCount = w.document.querySelectorAll('#narrative [data-choice-id]').length;
+          if (choiceCount) break;
+          await press(w, 'Enter');
+        }
+        out.checks.m8_three_choices_visible = choiceCount === 3;
+        await press(w, 'Enter');
+        for (var j = 0; j < 16 && w.document.querySelector('#narrative .nw-root'); j++) await press(w, 'Enter');
+        var stance = A.getState().values.promise_stance;
+        out.checks.m8_choice_committed = stance === 'accompagno';
+        out.checks.m8_choice_survives_serialize =
+          NR.deserialize(NR.serialize(A.getState())).values.promise_stance === stance;
+        out.promise_stance = stance;
+      }
+      var ok = Object.keys(out.checks).every(function (k) { return out.checks[k]; });
+      document.title = ok ? 'TP-PROD-NARRATIVE-PASS' : 'TP-PROD-NARRATIVE-FAIL';
+      status.textContent = document.title + (out.promise_stance ? ' · promise_stance=' + out.promise_stance + ' · serialize=PASS' : '');
+      report.textContent = JSON.stringify(out, null, 2);
+    } catch (e) {
+      out.errors.push(String(e && e.stack || e));
+      document.title = 'TP-PROD-NARRATIVE-FAIL';
+      status.textContent = document.title;
+    }
+  });
+})();
+</script>
+</body>
+</html>

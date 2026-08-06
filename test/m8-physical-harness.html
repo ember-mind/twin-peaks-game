@@ -1,0 +1,672 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>m8-physical-harness</title>
+<style>body{margin:0;background:#000}#narrative{position:fixed;inset:0;pointer-events:none}.nw-focus{font-weight:bold}#log{position:fixed;left:0;bottom:0;max-height:42%;overflow:auto;background:#111;color:#ddd;font:11px monospace;white-space:pre-wrap;padding:6px;z-index:99}</style>
+</head>
+<body>
+<canvas id="gl" width="960" height="640"></canvas>
+<canvas id="game" width="480" height="320"></canvas>
+<div id="narrative"></div>
+<div id="log">running…</div>
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=harness-r6"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=harness-r6"></script>
+<script src="../js/engine.js?v=harness-r6"></script>
+<script src="../js/render3d.js"></script>
+<script src="../js/glue.js?v=harness-r6"></script>
+<script src="../js/main.js"></script>
+<script src="../js/narrative-runtime.js"></script>
+<script src="../js/narrative-ui.js"></script>
+<script src="../js/narrative-notebook.js"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r9"></script>
+<script src="../js/narrative-bootstrap.js"></script>
+<script src="../js/narrative-engine-adapter.js?v=harness-r9"></script>
+<script>
+/* C8-E PHYSICAL END-TO-END — M8 CAMMINATA sul motore vero.
+ *
+ * BOOT = participant boot effettivo (stesso ordine di playtest.html):
+ *   script → GAME.installNarrativeCatalogs() → A.enable({container}).
+ * narrative-bootstrap.js è caricato DAVVERO; installNarrativeCatalogs() è
+ * chiamato PRIMA di qualunque deserialize / A.enable; NESSUN cablaggio manuale
+ * dei domini in questo file (gate B0). narrative-save.js NON è caricato, come
+ * nella participant build.
+ *
+ * Poi, per ogni percorso: UN SOLO spawn (E.loadMap iniziale) e da lì solo
+ * INPUT DI GIOCO — cammino tile-per-tile con i tasti direzione (walker BFS sul
+ * motore vero, mai teleport), facing, Invio → E.interact() → adapter. Le
+ * transizioni fra mappe passano per le PORTE DI PRODUZIONE (si calpesta il tile
+ * porta), mai loadMap. L'harness non chiama MAI le API di interazione
+ * dell'adapter (gate B0 harness_never_calls_adapter_interact).
+ *
+ * 7 target: Maddy e Leland al diner, telefono del Roadhouse,
+ * crocevia, casa Palmer, lago, Truman alla centrale. 9 classi di route (warning × focus) coperte tutte,
+ * con promise_stance ruotata in quadrato latino → copertura PAIRWISE completa
+ * delle tre coppie (warning,focus), (warning,promise), (focus,promise). */
+var out = { routes: {}, checks: {}, errors: [], notes: [], console_log: [], run_log: {}, trace: [] };
+window.__C8E_RESULT = out;
+// heartbeat: ogni fase lascia una traccia nel #log, così anche un run
+// interrotto dal budget mostra ESATTAMENTE dove si è fermato.
+var progress = { routes_done: 0, routes_total: 9, phase: 'boot' };
+function mark(s) {
+  if (out.finalized) return;   // dopo la finalizzazione il #log porta il JSON, non il progress
+  var E = window.GAME && GAME.Engine;
+  var p = E && E.state && E.state.player;
+  progress.phase = s;
+  out.trace.push(s + ' @' + (E && E.state ? E.state.mapId : '?') + (p ? ' ' + p.tx + ',' + p.ty : '') + ' t=' + Math.round(performance.now()));
+  var el = document.getElementById('log');
+  if (el) el.textContent = 'RUNNING\n' + out.trace.join('\n') + '\n' + JSON.stringify({ errors: out.errors, run_log: out.run_log }, null, 1);
+  // il titolo porta SEMPRE lo stato: un run troncato dal budget non lascia mai
+  // il titolo di default (trappola segnalata in C8-E: "titolo che non finalizza").
+  if (!out.finalized) document.title = 'M8PHYS-RUNNING ' + progress.routes_done + '/' + progress.routes_total + ' ' + s;
+}
+
+window.onerror = function (m, s, l) { out.errors.push(String(m) + ' @' + l); };
+window.addEventListener('unhandledrejection', function (e) { out.errors.push('unhandled: ' + (e.reason && e.reason.message || e.reason)); });
+(function () {
+  ['log', 'warn', 'error'].forEach(function (lvl) {
+    var orig = console[lvl];
+    console[lvl] = function () {
+      if (out.console_log.length < 500) out.console_log.push(lvl + ': ' + [].slice.call(arguments).map(String).join(' '));
+      if (lvl === 'error') out.errors.push('console.error: ' + [].slice.call(arguments).map(String).join(' '));
+      return orig.apply(console, arguments);
+    };
+  });
+})();
+
+/* ===================== CLOCK COMPRESSO (C8-E) =============================
+ * Headless + SwiftShader il compositor emette ~2-3 frame/s. Il motore avanza al
+ * massimo `dt = min(50, now-last)` di tempo di gioco per frame, quindi un tile
+ * (133 ms di gioco) costava ~600 ms reali e i 9 percorsi ~30 minuti: il cammino
+ * era GATED SUL rAF REALE.
+ *
+ * Qui l'harness PRENDE IL CONTROLLO DEL CLOCK. `requestAnimationFrame` non è più
+ * il compositor ma una CODA che l'harness pompa in un loop stretto con dt FISSO
+ * (16 ms). Il motore continua a girare col SUO loop e col SUO update(): mappe,
+ * collisioni, prenotazione tile degli NPC, porte, fade, facing, E.interact()
+ * sono ESATTAMENTE quelli di produzione. Cambia solo la SORGENTE DEL TEMPO.
+ *
+ * Il PERCORSO non è accorciato: ogni tile è ancora un passo del motore, un tile
+ * per pressione (gate one_tile_per_step / max_step_distance_is_1), i cambi mappa
+ * restano le porte di produzione. È il TEMPO a essere compresso, non il cammino.
+ *
+ * L'override è installato QUI, a livello di script, PRIMA che main.js avvii il
+ * motore su `load`: così il loop del motore nasce già dentro la coda. NON viene
+ * toccato `performance.now()` — l'advanceLock della UI narrativa continua a
+ * misurare TEMPO REALE, quindi la lettura delle pagine non è falsificata. */
+var VT_DT = 16;                 // dt fisso per frame pompato (ms di gioco)
+var vtNow = 0, framesPumped = 0, rafQ = [], maxStepDistance = 0;
+(function installCompressedClock() {
+  vtNow = (typeof performance !== 'undefined' ? performance.now() : 0);
+  window.requestAnimationFrame = function (cb) { rafQ.push(cb); return rafQ.length; };
+})();
+function pump(frames) {
+  for (var i = 0; i < (frames || 1); i++) {
+    var q = rafQ; rafQ = [];
+    vtNow += VT_DT; framesPumped++;
+    for (var j = 0; j < q.length; j++) {
+      try { q[j](vtNow); } catch (e) { out.errors.push('frame: ' + (e && e.message || e)); }
+    }
+  }
+}
+function pumpUntil(pred, maxFrames) {
+  for (var i = 0; i < (maxFrames || 400); i++) { if (pred()) return true; pump(1); }
+  return pred();
+}
+
+var LOCK = 30;   // advanceLockMs dell'harness (come m6-physical C6-E): il
+                 // lock di lettura di produzione è 150 ms e NON cambia nulla di
+                 // logico — accorcia solo l'attesa fra una pagina e l'altra.
+var DIRC = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(c) { window.dispatchEvent(new KeyboardEvent('keydown', { code: c, bubbles: true })); window.dispatchEvent(new KeyboardEvent('keyup', { code: c, bubbles: true })); }
+function holdKey(c) { window.dispatchEvent(new KeyboardEvent('keydown', { code: c, bubbles: true })); }
+function liftKey(c) { window.dispatchEvent(new KeyboardEvent('keyup', { code: c, bubbles: true })); }
+function visibleRoots() { var c = document.getElementById('narrative'); return c ? [].slice.call(c.children).filter(function (el) { return !(el.style && el.style.display === 'none'); }) : []; }
+function visiblePageIds() { var ids = []; visibleRoots().forEach(function (r) { if (r.getAttribute && r.getAttribute('data-page-id')) ids.push(r.getAttribute('data-page-id')); [].slice.call(r.querySelectorAll('[data-page-id]')).forEach(function (o) { ids.push(o.getAttribute('data-page-id')); }); }); return ids; }
+var seen = {};
+function snap() { visiblePageIds().forEach(function (id) { seen[id] = true; }); }
+async function press(c) { key(c); pump(2); await wait(LOCK + 45); pump(2); snap(); }
+function widgetOpts() { return [].map.call(document.querySelectorAll('.nw-root:not(.nb-root) .nw-opt'), function (o) { return o.getAttribute('data-choice-id'); }); }
+async function advanceUntil(pred, max) { snap(); for (var i = 0; i < (max || 40); i++) { if (pred()) return true; await press('Enter'); } return pred(); }
+async function chooseChoice(id) { var o = widgetOpts(), idx = o.indexOf(id); if (idx < 0) return false; for (var k = 0; k < idx; k++) await press('ArrowDown'); await press('Enter'); return true; }
+function nbOpen() { return !!document.querySelector('.nb-root'); }
+function nbVisible() { var r = document.querySelector('.nb-root'); return !!r && r.style.display !== 'none'; }
+function nbItems(attr) { return [].slice.call(document.querySelectorAll('.nb-root [' + attr + ']')); }
+function nbIds(attr) { return nbItems(attr).map(function (o) { return o.getAttribute(attr); }); }
+function nbFocusIndex(list) { for (var i = 0; i < list.length; i++) if (list[i].className.indexOf('nw-focus') >= 0) return i; return -1; }
+async function nbMoveTo(attr, value) {
+  var list = nbItems(attr), ids = list.map(function (o) { return o.getAttribute(attr); });
+  var target = ids.indexOf(value); if (target < 0) return false;
+  var cur = nbFocusIndex(list); if (cur < 0) cur = 0;
+  var steps = (target - cur + ids.length) % ids.length;
+  for (var i = 0; i < steps; i++) await press('ArrowDown');
+  return nbFocusIndex(nbItems(attr)) === target;
+}
+async function nbEnterSection(name) { if (!await nbMoveTo('data-nb-section', name)) return false; await press('Enter'); return true; }
+async function nbPickCompare(evId) { if (!await nbMoveTo('data-nb-compare', evId)) return false; await press('Enter'); return true; }
+async function nbEnsureMenu(max) {
+  for (var i = 0; i < (max || 12); i++) {
+    if (!nbOpen()) return false;
+    if (nbVisible() && nbIds('data-nb-section').length === 4) return true;
+    if (nbVisible()) await press('Escape'); else { await wait(LOCK + 60); snap(); }
+  }
+  return nbVisible() && nbIds('data-nb-section').length === 4;
+}
+
+async function run() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter, D = GAME.NarrativeData;
+  // run LOGICO: il cammino non ha bisogno del rendering (SwiftShader affoga il
+  // tempo reale — regola del LOOP OPERATIVO). Il motore, l'input, le collisioni
+  // e le porte restano quelli veri: si spegne solo il disegno.
+  if (GAME.Render3D) { GAME.Render3D.render = function () {}; if (GAME.Render3D.prewarm) GAME.Render3D.prewarm = function () {}; }
+  if (GAME.Presentation3D && GAME.Presentation3D.render) GAME.Presentation3D.render = function () {};
+  var M4 = D.missions.M4, M5 = D.missions.M5, M6 = D.missions.M6, M8 = D.missions.M8;
+  function S() { return A.getState(); }
+  function val(n) { var s = S(); return s && s.values ? s.values[n] : undefined; }
+
+  /* ---- B0 — PARTICIPANT BOOT (C8-C.1) --------------------------------- */
+  out.checks['B0 bootstrap_file_really_loaded'] = (typeof GAME.installNarrativeCatalogs === 'function');
+  out.checks['B0 domains_empty_before_bootstrap'] =
+    (Object.keys(NR.valueDomains).length === 0 && Object.keys(NR.valueTransitions).length === 0);
+  out.checks['B0 nothing_deserialized_before_bootstrap'] = (A.isEnabled() === false);
+  var installed = GAME.installNarrativeCatalogs();       // <-- PRIMA di enable/deserialize
+  out.run_log.catalogs_installed = installed;
+  out.checks['B0 catalogs_installed_from_bootstrap'] =
+    (JSON.stringify(installed.value_domains) === JSON.stringify(Object.keys(D.enums.values_allowed).sort()) &&
+     JSON.stringify(NR.valueTransitions) === JSON.stringify(D.enums.value_transitions || {}));
+  var ownSrc = [].slice.call(document.scripts).filter(function (s) { return !s.src; }).map(function (s) { return s.textContent; }).join('');
+  out.checks['B0 no_manual_domain_wiring_in_harness'] =
+    (ownSrc.indexOf('setValue' + 'Domains') < 0 && ownSrc.indexOf('setValue' + 'Transitions') < 0);
+  // l'harness non forza MAI l'adapter: nessuna chiamata diretta alle sue API di
+  // interazione — solo tasti veri e E.interact() dal keypath del motore.
+  out.checks['B0 harness_never_calls_adapter_interact'] =
+    (ownSrc.indexOf('A.try' + 'Interact') < 0 && ownSrc.indexOf('try' + 'InteractAt(') < 0 && ownSrc.indexOf('A.open' + 'Notebook') < 0);
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK, missions: [M4, M5, M6, M8] });
+  out.checks['B0 adapter_enabled_after_bootstrap'] = (A.isEnabled() === true);
+  out.notes.push('CLOCK: l\'harness serve requestAnimationFrame da una propria coda con dt FISSO di ' + VT_DT + ' ms (il compositor headless ne emetteva 2-3/s e il cammino era gated sul frame reale). Il motore gira col SUO loop e col SUO update(): collisioni, prenotazione tile NPC, porte, fade, facing e E.interact() sono quelli di produzione. performance.now() NON e sovrascritto, quindi l\'advanceLock di lettura della UI narrativa misura tempo REALE. Tempo compresso, percorso invariato: un tile per pressione (gate one_tile_per_step_max_distance_1).');
+  out.notes.push('boot: stesso ordine di playtest.html (bootstrap → enable). Differenza dichiarata: playtest.html (build pilot M4 congelata) chiama A.enable senza `missions`; qui la lista è [M4,M5,M6,M8] perché M8 dev\'essere entrata. advanceLockMs = 30 ms (come m6-physical C6-E) invece dei 150 di produzione: accorcia l\'attesa di lettura fra le pagine, non tocca alcuna logica.');
+
+  /* ---- il motore gira sul clock dell'harness: nessuna dipendenza dal rAF
+   * del compositor. Si registra comunque la cadenza reale osservata, per il log. */
+  out.run_log.clock = { mode: 'harness_pumped_fixed_dt', fixed_dt_ms: VT_DT, raf_source: 'harness queue (compositor bypassed)' };
+
+  /* ---- sorveglianza anti-teleport ------------------------------------- */
+  var loadMapCalls = 0, origLoadMap = E.loadMap;
+  E.loadMap = function () { loadMapCalls++; return origLoadMap.apply(E, arguments); };
+
+  /* ---- walker BFS sul motore vero ------------------------------------- */
+  var walkSteps = 0;
+  window.__WALKDBG = new URLSearchParams(location.search).get('walkdbg') === '1';
+  function npcBlocking(mapId, x, y) {
+    if (E.state.mapId !== mapId) return false;
+    for (var i = 0; i < E.state.npcs.length; i++) { var n = E.state.npcs[i]; if (E.npcActive(n) && n.x === x && n.y === y) return true; }
+    return false;
+  }
+  // le PORTE sono attraversabili solo se sono la destinazione: un tile-porta
+  // calpestato per sbaglio a metà cammino sarebbe una transizione non voluta.
+  function walkable(mapId, x, y, goal) {
+    if (npcBlocking(mapId, x, y)) return false;
+    var isGoal = goal && goal[0] === x && goal[1] === y;
+    if (GAME.Maps.doorAt(mapId, x, y)) return !!isGoal;
+    return !GAME.Maps.isSolid(mapId, x, y, E.state);
+  }
+  function bfs(mapId, from, to) {
+    var m = GAME.Maps[mapId], W = m.width || m.rows[0].length, H = m.height || m.rows.length;
+    var seenB = {}, prev = {}, q = [from]; seenB[from[0] + ',' + from[1]] = true;
+    while (q.length) {
+      var cur = q.shift();
+      if (cur[0] === to[0] && cur[1] === to[1]) { var path = [cur]; while (prev[cur[0] + ',' + cur[1]]) { cur = prev[cur[0] + ',' + cur[1]]; path.unshift(cur); } return path; }
+      var dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+      for (var i = 0; i < dirs.length; i++) {
+        var nx = cur[0] + dirs[i][0], ny = cur[1] + dirs[i][1], k = nx + ',' + ny;
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H || seenB[k] || !walkable(mapId, nx, ny, to)) continue;
+        seenB[k] = true; prev[k] = cur; q.push([nx, ny]);
+      }
+    }
+    return null;
+  }
+  function dirOf(a, b) { return b[0] > a[0] ? 'right' : b[0] < a[0] ? 'left' : b[1] > a[1] ? 'down' : 'up'; }
+  /* UN PASSO = una pressione direzionale, servita dal clock dell'harness.
+   * Il tasto viene RILASCIATO nell'istante in cui il motore INGAGGIA il passo
+   * (p.moving = true, cioè tryStep ha superato collisioni/porte/prenotazioni
+   * NPC): così `onArrive` non trova più la direzione premuta e non prenota il
+   * tile successivo. Un tile per pressione, sempre — verificato dal gate
+   * max_step_distance_is_1. */
+  function stepToSync(next) {
+    var p0 = E.state.player, px = p0.tx, py = p0.ty;
+    var dir = dirOf([px, py], next);
+    holdKey(DIRC[dir]);
+    // turn-in-place (60 ms di gioco) + ingaggio del passo: ~5 frame a dt 16
+    var engaged = pumpUntil(function () { return E.state.player.moving; }, 30);
+    liftKey(DIRC[dir]);                     // rilascio PRIMA dell'arrivo
+    if (!engaged) { pump(2); return false; } // tile bloccato (muro/NPC/porta chiusa)
+    pumpUntil(function () { return !E.state.player.moving; }, 40);
+    var d = Math.abs(E.state.player.tx - px) + Math.abs(E.state.player.ty - py);
+    if (d > maxStepDistance) maxStepDistance = d;
+    if (d > 1) out.errors.push('step_teleport ' + px + ',' + py + ' -> ' + E.state.player.tx + ',' + E.state.player.ty);
+    return d === 1;
+  }
+  /* cammina fino a (tx,ty) UN TILE ALLA VOLTA, ricalcolando la BFS a ogni passo
+   * (NPC in movimento, porte, dialoghi del gioco classico). Interamente
+   * sincrona: nessuna attesa di frame reale. */
+  function walkToSync(tx, ty, stopOnMapChange) {
+    var startMap = E.state.mapId, stalls = 0, dialogueDismissals = 0;
+    for (var guard = 0; guard < 1500; guard++) {
+      if (stopOnMapChange && E.state.mapId !== startMap) return true;
+      if (E.state.dialogue) {
+        if (++dialogueDismissals > 24) return false;
+        key('Enter'); pump(4); continue;      // dialogo classico (urto/NPC): si chiude
+      }
+      if (A.active()) return false;           // gameplay sospeso da un lease
+      var p = E.state.player;
+      if (p.tx === tx && p.ty === ty && !p.moving) return true;
+      var path = bfs(E.state.mapId, [p.tx, p.ty], [tx, ty]);
+      if (!path || path.length < 2) { if (++stalls >= 10) return (p.tx === tx && p.ty === ty); pump(8); continue; }
+      if (stepToSync(path[1])) { walkSteps++; stalls = 0; }
+      else { if (++stalls >= 25) return false; pump(12); } // un NPC che vaga si sposta
+    }
+    return false;
+  }
+  /* facing: la direzione si TOCCA e si rilascia entro il frame del turn-in-place,
+   * prima che il motore possa ingaggiare il passo — il tile del target è
+   * calpestabile e una pressione lunga ci finirebbe sopra. */
+  function faceSync(dir, keepX, keepY) {
+    for (var i = 0; i < 12; i++) {
+      var p = E.state.player;
+      if (p.dir === dir && !p.moving && p.tx === keepX && p.ty === keepY) return true;
+      holdKey(DIRC[dir]);
+      pumpUntil(function () { return E.state.player.dir === dir; }, 8);
+      liftKey(DIRC[dir]);
+      pump(2);
+      if (E.state.player.moving) pumpUntil(function () { return !E.state.player.moving; }, 40);
+      if (E.state.player.tx !== keepX || E.state.player.ty !== keepY) walkToSync(keepX, keepY);
+    }
+    var q = E.state.player;
+    return q.dir === dir && q.tx === keepX && q.ty === keepY && !q.moving;
+  }
+  // si posiziona sul tile ADIACENTE più vicino al target e ci si rivolge
+  function walkNextToSync(tx, ty) {
+    var neigh = [[tx, ty - 1, 'down'], [tx, ty + 1, 'up'], [tx - 1, ty, 'right'], [tx + 1, ty, 'left']];
+    var cands = [];
+    for (var i = 0; i < neigh.length; i++) {
+      var nb = neigh[i];
+      if (!walkable(E.state.mapId, nb[0], nb[1], null)) continue;
+      var pth = bfs(E.state.mapId, [E.state.player.tx, E.state.player.ty], [nb[0], nb[1]]);
+      if (pth) cands.push({ nb: nb, len: pth.length });
+    }
+    if (!cands.length) return null;
+    cands.sort(function (a, b) { return a.len - b.len; });
+    // il target si RAGGIUNGE CAMMINANDO: se il tile adiacente più vicino è
+    // quello su cui il player si trova già (len 1), si sceglie il successivo
+    // che richiede almeno un passo — nessuna interazione "a costo zero".
+    var pick = cands.filter(function (c) { return c.len >= 2; })[0] || cands[0];
+    var ok = walkToSync(pick.nb[0], pick.nb[1]);
+    var faced = faceSync(pick.nb[2], pick.nb[0], pick.nb[1]);
+    return (ok && faced) ? { x: pick.nb[0], y: pick.nb[1], dir: pick.nb[2] } : null;
+  }
+  /* TRANSIZIONE DI PRODUZIONE: si cammina fino al tile-porta sulla mappa
+   * CORRENTE; calpestandolo il motore esegue la transizione (onArrive → warp →
+   * fadePhase → loadMap interno). Nessun loadMap dell'harness. La dissolvenza
+   * non si "salta": si POMPA, cioè avanza col clock compresso. */
+  function enterDoorSync(x, y, expectMap, route, phase) {
+    var s0 = walkSteps, fromMap = E.state.mapId;
+    walkToSync(x, y, true);
+    pumpUntil(function () { return E.state.mapId === expectMap && (!E.state.fadePhase || E.state.fadePhase === 0); }, 600);
+    var ok = (E.state.mapId === expectMap);
+    route.push({ phase: phase, transition_kind: 'door', from_map: fromMap, to_map: E.state.mapId, via_door: [x, y], triggered_by_player: true, walked_tiles: walkSteps - s0, ok: ok });
+    return ok;
+  }
+
+  /* un NPC del gioco classico che VAGA (bobby gira intorno al crocevia di town)
+   * può fermarsi SOPRA un target ambientale: E.interact() trova prima l'NPC e
+   * apre il suo dialogo, e il landmark narrativo non risponde. È il mondo che
+   * si muove, non un bug: si aspetta che si sposti, come farebbe un giocatore.
+   * Per i target ATTORE l'occupante atteso è l'attore stesso. */
+  function tileOccupiedByOther(tx, ty, actorId) {
+    return (E.state.npcs || []).filter(function (n) {
+      return E.npcActive(n) && n.x === tx && n.y === ty && n.id !== actorId;
+    }).map(function (n) { return n.id; });
+  }
+  function waitTargetClearSync(tx, ty, actorId, maxFrames) {
+    for (var i = 0; i < (maxFrames || 900); i++) {
+      if (!tileOccupiedByOther(tx, ty, actorId).length) return i;
+      pump(1);
+    }
+    return -1;
+  }
+
+  /* INTERAZIONE FISICA: cammino → facing → (tile libero) → Invio →
+   * E.interact() → adapter. L'Invio si ripete (al massimo 3 volte, come farebbe
+   * un giocatore) se un residuo del gioco classico ha consumato la pressione:
+   * ogni tentativo è un tasto vero, mai una chiamata all'adapter. */
+  async function interactTarget(tx, ty, label, route, doneWhen, cap, actorId) {
+    var s0 = walkSteps;
+    if (E.state) { E.state.dialogue = null; E.state.menu = null; }
+    var pick = null;
+    for (var att = 0; att < 3 && !pick; att++) {
+      if (att) { await wait(200); if (E.state) { E.state.dialogue = null; E.state.menu = null; } }
+      pick = walkNextToSync(tx, ty);
+    }
+    var p = E.state.player;
+    var rec = { phase: label, map: E.state.mapId, from_coords: [p.tx, p.ty], facing: p.dir, target: [tx, ty], walked_tiles: walkSteps - s0, placed_and_faced: !!pick, interaction: 'engine_enter', enter_presses: 0, target_tile_blockers: [], waited_for_clear_frames: 0 };
+    route.push(rec);
+    var evPre = A.events.length;
+    for (var k = 0; k < 3; k++) {
+      if (E.state) { E.state.dialogue = null; E.state.menu = null; E.state.mode = 'play'; }
+      pumpUntil(function () { return !E.state.player.moving; }, 60);
+      if (pick && (E.state.player.tx !== pick.x || E.state.player.ty !== pick.y)) { walkToSync(pick.x, pick.y); faceSync(pick.dir, pick.x, pick.y); }
+      var blockers = tileOccupiedByOther(tx, ty, actorId);
+      if (blockers.length) {
+        rec.target_tile_blockers = rec.target_tile_blockers.concat(blockers);
+        var waited = waitTargetClearSync(tx, ty, actorId, 900);
+        rec.waited_for_clear_frames += (waited < 0 ? 900 : waited);
+      }
+      key('Enter'); rec.enter_presses++;
+      await wait(200); snap();
+      if (A.events.slice(evPre).some(function (e) { return e.event === 'lease_acquire'; })) break;
+      // niente lease: se il motore ha aperto un DIALOGO CLASSICO l'interazione è
+      // stata mangiata da un attore del gioco classico — si registra e si riprova.
+      if (E.state && E.state.dialogue) rec.classic_dialogue_swallowed = true;
+    }
+    rec.lease_acquired = A.events.slice(evPre).some(function (e) { return e.event === 'lease_acquire'; });
+    if (doneWhen) rec.reached = await advanceUntil(doneWhen, cap || 24);
+    return rec;
+  }
+
+  /* ---- stato iniziale (runtime → serialize → deserialize) -------------- */
+  function seedBase() { var s = NR.createState(); NR.applyEffects(s, [{ set: 'atto4' }, { evidence: 'E3_LETTERA_R' }, { evidence: 'E1_DIARIO' }]); return s; }
+  function freshState() { return NR.deserialize(NR.serialize(seedBase())); }
+  async function drainLease() { for (var i = 0; i < 24 && A.active(); i++) { key('Escape'); window.dispatchEvent(new Event('blur')); await wait(110); snap(); } }
+
+  /* ---- geografia: porte reali e target ---------------------------------
+   * town è l'hub: ogni interno si raggiunge dalla sua porta di town. */
+  var DOOR = {
+    town_to_diner: [42, 20], diner_to_town: [6, 9],
+    town_to_roadhouse: [47, 28], roadhouse_to_town: [7, 9],
+    town_to_palmer: [42, 6], palmer_to_town: [7, 11],
+    town_to_sheriff: [12, 20]
+  };
+  var T = {
+    maddy: [10, 1], leland: [11, 1], norma: [5, 1], phone: [8, 5], crossroads: [30, 30],
+    palmer_entrance: [8, 10], lago: [15, 28], truman: [7, 3]
+  };
+  var SPAWN = ['town', 42, 21, 'down'];
+  var targetsTouched = {};
+
+  async function runRoute(id, opts) {
+    var promise = opts.promise, warn = opts.warn, focus = opts.focus, finder = (focus === 'lago' ? 'cooper' : 'hawk');
+    var route = [], c = {};
+    seen = {};
+    await drainLease();
+    A.setState(freshState());
+    E.state.flags = { atto3: true, atto4: true, sogno_fatto: true, east_route_confirmed: true }; // gating porte del gioco classico
+    var loadMapBefore = loadMapCalls;
+    E.loadMap(SPAWN[0], SPAWN[1], SPAWN[2], SPAWN[3]);   // UNICO spawn ammesso
+    pump(10);
+    if (E.state) { E.state.dialogue = null; E.state.menu = null; E.state.mode = 'play'; }
+    route.push({ phase: 'spawn', map: E.state.mapId, coords: [E.state.player.tx, E.state.player.ty] });
+    mark(id + ' spawn');
+
+    // 1) DINER — Maddy (NPC del registro condizionale)
+    c.door_town_to_diner = enterDoorSync(DOOR.town_to_diner[0], DOOR.town_to_diner[1], 'diner', route, 'travel_town_to_diner');
+    mark(id + ' at_diner');
+    var rMaddy = await interactTarget(T.maddy[0], T.maddy[1], 'target_maddy_diner', route,
+      function () { return widgetOpts().indexOf('promise_' + promise) >= 0; }, 24, 'maddy');
+    c.maddy_walked_and_reached = (rMaddy.walked_tiles > 0 && rMaddy.placed_and_faced === true && rMaddy.reached === true && rMaddy.lease_acquired === true);
+    targetsTouched.maddy_diner = true;
+    await chooseChoice('promise_' + promise);
+    await advanceUntil(function () { return !A.active(); }, 24);
+    c.promise_written = (val('promise_stance') === promise);
+
+    // 1b) LELAND appare nello STESSO diner, prima del Roadhouse. La falsa
+    //      prenotazione viene acquisita senza deviazione preventiva a Palmer.
+    mark(id + ' leland_appeared_at_diner');
+    c.objective_pre_taxi = ((NR.activeObjective(S(), M8) || {}).id === 'obj_m8_25');
+    c.leland_present_after_promise =
+      ((GAME.Maps.diner.npcs || []).some(function (n) { return n.id === 'leland' && n.x === 11 && n.y === 1; }) &&
+       (E.state.npcs || []).some(function (n) { return n.id === 'leland' && n.x === 11 && n.y === 1; }));
+    var rLeland = await interactTarget(T.leland[0], T.leland[1], 'target_leland_taxi_diner', route,
+      function () { return S().evidence.T_LELAND_TAXI === true || !A.active(); }, 24, 'leland');
+    c.leland_walked_and_reached = (rLeland.walked_tiles > 0 && rLeland.placed_and_faced === true && rLeland.reached === true && rLeland.lease_acquired === true);
+    targetsTouched.leland_taxi = true;
+    await advanceUntil(function () { return !A.active(); }, 24);
+    c.taxi_testimony_pre_roadhouse_and_discovery =
+      (S().evidence.T_LELAND_TAXI === true && !S().flags.maddy_trovata && val('presagio_status') === undefined && val('body_found_by') === undefined);
+    c.objective_after_taxi = ((NR.activeObjective(S(), M8) || {}).id === 'obj_m8_1');
+
+    // 1c) MADDY E LELAND FISICAMENTE ASSENTI dopo la testimonianza: dati
+    //      mappa, NPC vivi, Invio morto e tile calpestabili per entrambi.
+    mark(id + ' taxi_done');
+    var mapHasMaddy = (GAME.Maps.diner.npcs || []).some(function (n) { return n.id === 'maddy'; });
+    var liveHasMaddy = (E.state.npcs || []).some(function (n) { return n.id === 'maddy'; });
+    var mapHasLeland = (GAME.Maps.diner.npcs || []).some(function (n) { return n.id === 'leland'; });
+    var liveHasLeland = (E.state.npcs || []).some(function (n) { return n.id === 'leland'; });
+    var stoodBelow = walkToSync(T.maddy[0], T.maddy[1] + 1);
+    var facedTile = faceSync('up', T.maddy[0], T.maddy[1] + 1);
+    var evPreDead = A.events.length;
+    key('Enter'); await wait(300);
+    var deadInteractionMaddy = A.events.slice(evPreDead).some(function (e) { return e.event === 'lease_acquire' || e.event === 'interaction_no_roots'; }) || A.active() || !!E.state.dialogue;
+    var walkedOntoMaddy = walkToSync(T.maddy[0], T.maddy[1]);
+    var facedLelandTile = faceSync('right', T.maddy[0], T.maddy[1]);
+    var evPreDeadLeland = A.events.length;
+    key('Enter'); await wait(300);
+    var deadInteractionLeland = A.events.slice(evPreDeadLeland).some(function (e) { return e.event === 'lease_acquire' || e.event === 'interaction_no_roots'; }) || A.active() || !!E.state.dialogue;
+    var walkedOntoLeland = walkToSync(T.leland[0], T.leland[1]);
+    route.push({ phase: 'diner_absence_probe', map: E.state.mapId, maddy_tile: T.maddy.slice(), leland_tile: T.leland.slice(), map_data_has_maddy: mapHasMaddy, live_npcs_have_maddy: liveHasMaddy, map_data_has_leland: mapHasLeland, live_npcs_have_leland: liveHasLeland, stood_adjacent_to_maddy: stoodBelow && facedTile, maddy_enter_opened_something: deadInteractionMaddy, leland_enter_opened_something: deadInteractionLeland, walked_onto_maddy_tile: walkedOntoMaddy, faced_leland_tile: facedLelandTile, walked_onto_leland_tile: walkedOntoLeland });
+    mark(id + ' absence_probe_done');
+    c.maddy_and_leland_physically_absent_after_taxi =
+      (mapHasMaddy === false && liveHasMaddy === false && mapHasLeland === false && liveHasLeland === false &&
+       deadInteractionMaddy === false && deadInteractionLeland === false && walkedOntoMaddy === true && walkedOntoLeland === true);
+    if (E.state) { E.state.dialogue = null; E.state.menu = null; }
+
+    // 2) USCITA DAL DINER → ROADHOUSE — Gigante + telefono
+    c.door_diner_to_town = enterDoorSync(DOOR.diner_to_town[0], DOOR.diner_to_town[1], 'town', route, 'travel_diner_to_town');
+    c.door_town_to_roadhouse = enterDoorSync(DOOR.town_to_roadhouse[0], DOOR.town_to_roadhouse[1], 'roadhouse', route, 'travel_town_to_roadhouse');
+    mark(id + ' at_roadhouse');
+    var rPhone = await interactTarget(T.phone[0], T.phone[1], 'target_roadhouse_phone', route,
+      function () { return widgetOpts().indexOf('warning_' + warn) >= 0; }, 24);
+    c.phone_walked_and_reached = (rPhone.walked_tiles > 0 && rPhone.placed_and_faced === true && rPhone.reached === true && rPhone.lease_acquired === true);
+    targetsTouched.roadhouse_phone = true;
+    c.presagio_active_at_widget = (val('presagio_status') === 'active');
+    await chooseChoice('warning_' + warn);
+    await advanceUntil(function () { return !A.active(); }, 24);
+    c.warning_written = (val('warning_target') === warn);
+    c.door_roadhouse_to_town = enterDoorSync(DOOR.roadhouse_to_town[0], DOOR.roadhouse_to_town[1], 'town', route, 'travel_roadhouse_to_town');
+
+    // 3) CROCEVIA
+    mark(id + ' at_crossroads');
+    var rCross = await interactTarget(T.crossroads[0], T.crossroads[1], 'target_crossroads', route,
+      function () { return widgetOpts().indexOf('focus_' + focus) >= 0; }, 24);
+    c.crossroads_walked_and_reached = (rCross.walked_tiles > 0 && rCross.placed_and_faced === true && rCross.reached === true && rCross.lease_acquired === true);
+    targetsTouched.crossroads = true;
+    await chooseChoice('focus_' + focus);
+    await advanceUntil(function () { return !A.active(); }, 24);
+    c.focus_written = (val('focus_destination') === focus);
+    c.focus_returns_gameplay_no_goto = (!A.active() && val('body_found_by') === undefined);
+
+    // 5) ROTTA scelta — camminata fino alla destinazione
+    mark(id + ' route_start');
+    if (focus === 'palmer') {
+      c.door_town_to_palmer = enterDoorSync(DOOR.town_to_palmer[0], DOOR.town_to_palmer[1], 'palmer', route, 'travel_town_to_palmer');
+      var rPal = await interactTarget(T.palmer_entrance[0], T.palmer_entrance[1], 'target_palmer_house', route,
+        function () { return S().values.body_found_by !== undefined || !A.active(); }, 24);
+      c.palmer_walked_and_reached = (rPal.walked_tiles > 0 && rPal.placed_and_faced === true && rPal.lease_acquired === true);
+      targetsTouched.palmer_house = true;
+      await advanceUntil(function () { return !A.active(); }, 24);
+      c.door_palmer_to_town = enterDoorSync(DOOR.palmer_to_town[0], DOOR.palmer_to_town[1], 'town', route, 'travel_palmer_to_town');
+    } else if (focus === 'diner') {
+      c.door_town_to_diner_2 = enterDoorSync(DOOR.town_to_diner[0], DOOR.town_to_diner[1], 'diner', route, 'travel_town_to_diner_route');
+      var rNor = await interactTarget(T.norma[0], T.norma[1], 'target_diner_norma', route,
+        function () { return S().values.body_found_by !== undefined || !A.active(); }, 24, 'norma');
+      c.norma_walked_and_reached = (rNor.walked_tiles > 0 && rNor.placed_and_faced === true && rNor.lease_acquired === true);
+      await advanceUntil(function () { return !A.active(); }, 24);
+      c.door_diner_to_town_2 = enterDoorSync(DOOR.diner_to_town[0], DOOR.diner_to_town[1], 'town', route, 'travel_diner_to_town_route');
+    } else {
+      var rLake = await interactTarget(T.lago[0], T.lago[1], 'target_lake_route', route,
+        function () { return S().values.body_found_by !== undefined || !A.active(); }, 24);
+      c.lake_route_walked_and_reached = (rLake.walked_tiles > 0 && rLake.placed_and_faced === true && rLake.lease_acquired === true);
+      targetsTouched.lake = true;
+      await advanceUntil(function () { return !A.active(); }, 24);
+    }
+    c.route_finder_written = (val('body_found_by') === finder);
+
+    // 6) LAGO — ritrovamento + eco (stesso lease)
+    mark(id + ' at_lake');
+    var evPreLake = A.events.length;
+    var rDisc = await interactTarget(T.lago[0], T.lago[1], 'target_lake_discovery', route,
+      function () { return S().nodes_done.m8_promise_echo === true || !A.active(); }, 40);
+    c.lake_walked_and_reached = (rDisc.walked_tiles > 0 && rDisc.placed_and_faced === true && rDisc.lease_acquired === true);
+    targetsTouched.lake = true;
+    var evLake = A.events.slice(evPreLake);
+    c.discovery_and_echo_same_session_lease =
+      (evLake.filter(function (e) { return e.event === 'lease_acquire' && e.name === 'narrative'; }).length === 1 &&
+       S().nodes_done.m8_discovery === true && S().nodes_done.m8_promise_echo === true);
+    c.discovery_effects = (S().evidence.E9A_LETTERA_O === true && S().evidence.E9B_STESSO_METODO === true &&
+      S().flags.maddy_trovata === true && val('presagio_status') === 'verified' &&
+      val('letter_o_observation_source') === (finder === 'cooper' ? 'cooper_primary' : 'hawk_preserved'));
+    await advanceUntil(function () { return !A.active(); }, 24);
+
+    // 7) TACCUINO (tasto T reale) — confronti fino a P8
+    if (E.state) { E.state.dialogue = null; E.state.menu = null; E.state.mode = 'play'; }
+    mark(id + ' notebook');
+    await press('KeyT');
+    c.notebook_opens_from_T_key = (nbOpen() && A.active() === true);
+    await nbEnterSection('Confronta');
+    await nbPickCompare('E9A_LETTERA_O'); await nbPickCompare('E3_LETTERA_R');
+    c.cmp_letters_completed = await advanceUntil(function () { return !!(S().comparisons.m8_cmp_letters && S().comparisons.m8_cmp_letters.completed); }, 24);
+    await nbEnsureMenu();
+    await nbEnterSection('Confronta');
+    await nbPickCompare('E9A_LETTERA_O'); await nbPickCompare('E1_DIARIO');
+    await advanceUntil(function () { return widgetOpts().length === 3; }, 30);
+    await chooseChoice('diary_b');
+    await advanceUntil(function () { return widgetOpts().length > 0 && widgetOpts().indexOf('diary_b') < 0; }, 24);
+    c.diaryB_rejected_and_hidden = (((S().comparisons.m8_cmp_diary || {}).attempts || []).indexOf('NAME_OVERREACH') >= 0 && widgetOpts().indexOf('diary_b') < 0);
+    await chooseChoice('diary_a');
+    c.P8_formulated = await advanceUntil(function () { return NR.peekProp(S(), 'P8').formulation.status === 'formulated'; }, 24);
+    await advanceUntil(function () { return !A.active(); }, 24);
+    await drainLease();
+    route.push({ phase: 'notebook_comparisons', map: E.state.mapId, input: 'KeyT + arrows + Enter', P8: NR.peekProp(S(), 'P8').formulation.status });
+    c.objective_before_station = ((NR.activeObjective(S(), M8) || {}).id === 'obj_m8_35');
+
+    // 8) CENTRALE — Truman CAMMINATO (nessuna forzatura d'adapter: solo Invio)
+    if (E.state) { E.state.dialogue = null; E.state.menu = null; E.state.mode = 'play'; }
+    mark(id + ' to_sheriff');
+    c.door_town_to_sheriff = enterDoorSync(DOOR.town_to_sheriff[0], DOOR.town_to_sheriff[1], 'sheriff', route, 'travel_town_to_sheriff');
+    var rTru = await interactTarget(T.truman[0], T.truman[1], 'target_truman_station', route,
+      function () { return S().nodes_done.m8_station === true || !A.active(); }, 30, 'truman');
+    c.truman_WALKED_not_adapter_forced =
+      (rTru.walked_tiles > 0 && rTru.placed_and_faced === true && rTru.lease_acquired === true && rTru.interaction === 'engine_enter');
+    targetsTouched.truman_station = true;
+    await advanceUntil(function () { return !A.active(); }, 24);
+    c.station_done = (S().nodes_done.m8_station === true);
+    c.completion_true = (NR.evalCond(S(), { node_done: 'm8_station' }, M8) === true);
+    c.objective_after_station_obj_m8_4 = ((NR.activeObjective(S(), M8) || {}).id === 'obj_m8_4');
+
+    // ---- invarianti fisici del percorso --------------------------------
+    c.no_direct_loadMap_after_initial_spawn = ((loadMapCalls - loadMapBefore) === 1);
+    c.no_transit_map_reset_records = route.every(function (r) { return r.phase !== 'transit_map_reset'; });
+    c.every_cross_map_transition_uses_production_path = route.filter(function (r) { return r.transition_kind !== undefined; })
+      .every(function (r) { return r.transition_kind === 'door' && r.triggered_by_player === true && r.ok === true; });
+    c.walked_not_teleported = route.filter(function (r) { return r.walked_tiles !== undefined; }).every(function (r) { return r.walked_tiles > 0; });
+    c.every_target_placed_and_faced = route.filter(function (r) { return r.placed_and_faced !== undefined; }).every(function (r) { return r.placed_and_faced === true; });
+    c.one_tile_per_step_max_distance_1 = (maxStepDistance <= 1);
+    c.no_interaction_swallowed_by_classic_actor = route.every(function (r) { return r.classic_dialogue_swallowed !== true; });
+    c.every_target_interaction_acquired_lease = route.filter(function (r) { return r.lease_acquired !== undefined; }).every(function (r) { return r.lease_acquired === true; });
+
+    mark(id + ' done');
+    out.routes[id] = { class: { promise: promise, warning: warn, focus: focus, finder: finder }, steps: route };
+    Object.keys(c).forEach(function (k) { out.checks[id + ': ' + k] = c[k]; });
+    await drainLease();
+  }
+
+  /* ---- 9 classi di route (warning × focus), promise in quadrato latino:
+   * copertura PAIRWISE completa di tutte e tre le coppie di fattori. ---- */
+  var ROUTES = [
+    { id: 'R1', warn: 'palmer',   focus: 'palmer', promise: 'accompagno' },
+    { id: 'R2', warn: 'palmer',   focus: 'lago',   promise: 'autonomia' },
+    { id: 'R3', warn: 'palmer',   focus: 'diner',  promise: 'prudenza' },
+    { id: 'R4', warn: 'centrale', focus: 'palmer', promise: 'autonomia' },
+    { id: 'R5', warn: 'centrale', focus: 'lago',   promise: 'prudenza' },
+    { id: 'R6', warn: 'centrale', focus: 'diner',  promise: 'accompagno' },
+    { id: 'R7', warn: 'nessuno',  focus: 'palmer', promise: 'prudenza' },
+    { id: 'R8', warn: 'nessuno',  focus: 'lago',   promise: 'accompagno' },
+    { id: 'R9', warn: 'nessuno',  focus: 'diner',  promise: 'autonomia' }
+  ];
+  var only = new URLSearchParams(location.search).get('routes');
+  var todo = only ? ROUTES.filter(function (r) { return only.split(',').indexOf(r.id) >= 0; }) : ROUTES;
+  progress.routes_total = todo.length;
+  for (var i = 0; i < todo.length; i++) {
+    try { await runRoute(todo[i].id, todo[i]); }
+    catch (e) { out.errors.push(todo[i].id + ': ' + (e && e.message || e) + ' | ' + (e && e.stack || '')); }
+    progress.routes_done = i + 1;
+  }
+
+  /* ---- copertura ------------------------------------------------------ */
+  var classes = Object.keys(out.routes).map(function (k) { return out.routes[k].class; });
+  function pairs(a, b) { var s = {}; classes.forEach(function (c) { s[c[a] + '|' + c[b]] = 1; }); return Object.keys(s).sort(); }
+  out.run_log.route_classes = classes;
+  out.run_log.pairs_warning_focus = pairs('warning', 'focus');
+  out.run_log.pairs_warning_promise = pairs('warning', 'promise');
+  out.run_log.pairs_focus_promise = pairs('focus', 'promise');
+  out.checks['COVER nine_route_classes_warning_x_focus'] = (out.run_log.pairs_warning_focus.length === 9);
+  out.checks['COVER pairwise_warning_x_promise'] = (out.run_log.pairs_warning_promise.length === 9);
+  out.checks['COVER pairwise_focus_x_promise'] = (out.run_log.pairs_focus_promise.length === 9);
+  var SEVEN = ['maddy_diner', 'roadhouse_phone', 'leland_taxi', 'crossroads', 'palmer_house', 'lake', 'truman_station'];
+  out.run_log.targets_walked = SEVEN.filter(function (t) { return targetsTouched[t] === true; });
+  out.checks['COVER seven_targets_walked_and_interacted'] = (out.run_log.targets_walked.length === SEVEN.length);
+  out.checks['COVER routes_completed'] = (Object.keys(out.routes).length === todo.length);
+
+  out.total_walk_steps = walkSteps;
+  out.run_log.engine_frames_pumped = framesPumped;
+  out.run_log.max_step_distance_tiles = maxStepDistance;
+  finalize('completed');
+}
+
+/* FINALIZZAZIONE GARANTITA — il titolo si scrive SEMPRE, una sola volta:
+ * a fine run, su eccezione, o allo scadere del watchdog (?deadline=ms). Un run
+ * troncato dal virtual-time-budget produce M8PHYS-INCOMPLETE con la fase esatta
+ * e il budget consumato, MAI il titolo di default. */
+function finalize(reason) {
+  if (out.finalized) return;
+  out.finalized = reason;
+  out.total = Object.keys(out.checks).length;
+  out.passed = Object.keys(out.checks).filter(function (k) { return out.checks[k] === true; }).length;
+  out.failed = Object.keys(out.checks).filter(function (k) { return out.checks[k] !== true; });
+  out.total_walk_steps = (out.total_walk_steps || 0);
+  out.virtual_time_ms_at_finalize = Math.round(performance.now());
+  out.run_log.engine_frames_pumped = framesPumped;
+  out.run_log.max_step_distance_tiles = maxStepDistance;
+  out.last_phase = progress.phase;
+  out.routes_completed = Object.keys(out.routes).length;
+  var complete = (reason === 'completed');
+  out.pass = complete && out.errors.length === 0 && out.total > 0 && out.failed.length === 0;
+  out.title = complete
+    ? ((out.pass ? 'M8PHYS-PASS ' : 'M8PHYS-FAIL ') + out.passed + '/' + out.total)
+    : ('M8PHYS-INCOMPLETE ' + out.passed + '/' + out.total + ' routes ' + out.routes_completed + '/' + progress.routes_total +
+       ' last=' + progress.phase + ' vt=' + out.virtual_time_ms_at_finalize + 'ms (' + reason + ')');
+  var el = document.getElementById('log');
+  if (el) el.textContent = JSON.stringify(out, null, 1);
+  document.title = out.title;
+  window.__C8E_RESULT = out;
+}
+window.addEventListener('load', function () {
+  var q = new URLSearchParams(location.search);
+  var deadline = +(q.get('deadline') || 0);
+  if (deadline > 0) setTimeout(function () { finalize('deadline_' + deadline + 'ms'); }, deadline);
+  setTimeout(function () {
+    run().catch(function (e) {
+      out.errors.push('run: ' + (e && e.message || e) + ' | ' + (e && e.stack || ''));
+      finalize('exception');
+    });
+  }, 400);
+});
+</script>
+</body>
+</html>

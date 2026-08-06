@@ -74,6 +74,9 @@
           var pg = pages[pageIdx];
           var box = el('div', 'nw-page');
           box.setAttribute('data-page-id', pg.id);
+          if (pg.portrait) box.setAttribute('data-portrait', pg.portrait);
+          if (pg.speaker_id) box.setAttribute('data-speaker-id', pg.speaker_id);
+          if (pg.display_name) box.setAttribute('data-speaker-label', pg.display_name);
           if (pg.display_name) box.appendChild(el('span', 'nw-name', pg.display_name + ': '));
           box.appendChild(document.createTextNode(pg.text));
           root.appendChild(box);
@@ -204,6 +207,9 @@
         var pg = pages[i];
         var box = el('div', 'nw-page');
         box.setAttribute('data-page-id', pg.id);
+        if (pg.portrait) box.setAttribute('data-portrait', pg.portrait);
+        if (pg.speaker_id) box.setAttribute('data-speaker-id', pg.speaker_id);
+        if (pg.display_name) box.setAttribute('data-speaker-label', pg.display_name);
         if (pg.display_name) box.appendChild(el('span', 'nw-name', pg.display_name + ': '));
         box.appendChild(document.createTextNode(pg.text));
         root.appendChild(box);

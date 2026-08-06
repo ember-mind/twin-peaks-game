@@ -1,0 +1,958 @@
+{
+  "narrative_package": "narrative-v1.0",
+  "mission": "M4",
+  "title": "I frammenti",
+  "source": {
+    "document": "M4 v1.1.1 LOCK.md",
+    "package": "narrative-v1.0"
+  },
+  "entry_condition": {
+    "flag": "sogno_fatto"
+  },
+  "completion": {
+    "when": {
+      "proposition_path": "P2.social_status.accepted_by",
+      "contains": "truman"
+    },
+    "sets": [
+      "atto3"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_m4_4",
+      "priority": 400,
+      "when": {
+        "proposition_path": "P2.social_status.accepted_by",
+        "contains": "truman"
+      },
+      "text": "Verifica la rotta di James: oltre il ponte, verso i binari."
+    },
+    {
+      "id": "obj_m4_3",
+      "priority": 300,
+      "when": {
+        "all": [
+          {
+            "proposition_path": "P2.formulation.status",
+            "equals": "formulated"
+          },
+          {
+            "not": {
+              "proposition_path": "P2.social_status.accepted_by",
+              "contains": "truman"
+            }
+          }
+        ]
+      },
+      "text": "Mostra a Truman il nesso che regge."
+    },
+    {
+      "id": "obj_m4_2",
+      "priority": 200,
+      "when": {
+        "all": [
+          {
+            "flag": "sogno_raccontato"
+          },
+          {
+            "not": {
+              "proposition_path": "P2.formulation.status",
+              "equals": "formulated"
+            }
+          }
+        ]
+      },
+      "text": "Parla con Ronette all'ospedale e con James al Double R.",
+      "optional_line": "Facoltativo: la stanza 315; il vicino di stanza che recita versi."
+    },
+    {
+      "id": "obj_m4_1",
+      "priority": 100,
+      "when": {
+        "not": {
+          "flag": "sogno_raccontato"
+        }
+      },
+      "text": "Riferisci il sogno a Truman."
+    }
+  ],
+  "nodes": [
+    {
+      "id": "truman_a2",
+      "modified": true,
+      "beat": "B1",
+      "source_section": "B1",
+      "conditions": [
+        {
+          "flag": "sogno_fatto"
+        },
+        {
+          "not": {
+            "flag": "sogno_raccontato"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "name": "COOPER",
+          "text": "Harry. Stanotte ho sognato una stanza rossa.",
+          "id": "m4.b1.truman_a2.p01",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        },
+        {
+          "name": "COOPER",
+          "text": "Laura era lì. Mi ha detto un nome all'orecchio. Al risveglio non c'era più.",
+          "id": "m4.b1.truman_a2.p02",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        },
+        {
+          "name": "TRUMAN",
+          "text": "Se torna, lo mettiamo a verbale. Per ora abbiamo persone sveglie.",
+          "id": "m4.b1.truman_a2.p03",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN"
+        },
+        {
+          "name": "COOPER",
+          "text": "Nel sogno c'era anche un uomo. Capelli lunghi, grigi. Sorrideva mentre nessun altro lo faceva.",
+          "id": "m4.b1.truman_a2.p04",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        },
+        {
+          "name": "TRUMAN",
+          "text": "Se fosse di qui, avrei già un nome.",
+          "id": "m4.b1.truman_a2.p05",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN"
+        },
+        {
+          "name": "TRUMAN",
+          "text": "Ronette si è svegliata stanotte. Non parla — ma è sveglia.",
+          "id": "m4.b1.truman_a2.p06",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN"
+        },
+        {
+          "name": "TRUMAN",
+          "text": "E il ragazzo, James, è al Double R da stamattina. Norma dice che non tocca il caffè.",
+          "id": "m4.b1.truman_a2.p07",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN"
+        }
+      ],
+      "effects": [
+        {
+          "set": "sogno_raccontato"
+        },
+        {
+          "notebook": {
+            "id": "m4.note.truman_a2",
+            "text": "L'uomo del sogno: capelli lunghi, grigi. Nessun volto del paese corrisponde."
+          }
+        }
+      ],
+      "next": null,
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "sheriff",
+      "actor_id": "truman",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "ronette_q",
+      "new": true,
+      "beat": "B2",
+      "source_section": "B2",
+      "conditions": [
+        {
+          "flag": "sogno_raccontato"
+        }
+      ],
+      "pages": [
+        {
+          "name": "",
+          "text": "(Il monitor tiene il suo tempo. Ronette guarda la porta, non la finestra.)",
+          "id": "m4.b2.ronette_q.p01",
+          "mode": "action"
+        },
+        {
+          "name": "INFERMIERA",
+          "text": "Dieci minuti, agente. È sveglia, non è tornata.",
+          "id": "m4.b2.ronette_q.p02",
+          "mode": "dialogue",
+          "speaker_id": "infermiera",
+          "display_name": "INFERMIERA"
+        },
+        {
+          "name": "COOPER",
+          "text": "Signorina Pulaski, una domanda alla volta. Se vuole fermarmi, guardi l'infermiera.",
+          "id": "m4.b2.ronette_q.p03",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        }
+      ],
+      "choices": [
+        {
+          "id": "q_luogo",
+          "label": "Del posto dove l'hanno trovata",
+          "goto": "ronette_luogo"
+        },
+        {
+          "id": "q_uomo",
+          "label": "Dell'uomo che era con lei",
+          "goto": "ronette_uomo"
+        },
+        {
+          "id": "q_laura",
+          "label": "Di Laura",
+          "goto": "ronette_laura"
+        }
+      ],
+      "rules": {
+        "visit_state": "ronette_visit",
+        "terminal_choice": "q_uomo",
+        "max_questions": 2,
+        "second_question_policy": "force_terminal",
+        "reopen": {
+          "after_new_mandatory_beat": true,
+          "pages": [
+            {
+              "id": "m4.b2.ronette_q.reopen",
+              "mode": "dialogue",
+              "speaker_id": "infermiera",
+              "display_name": "INFERMIERA",
+              "text": "Ha riposato. Dieci minuti, come prima."
+            },
+            {
+              "id": "m4.b2.ronette_q.reopen.cooper",
+              "mode": "dialogue",
+              "speaker_id": "cooper",
+              "display_name": "COOPER",
+              "text": "Signorina Pulaski, ripartiamo da ciò che ricorda lei. Il mio taccuino può aspettare."
+            }
+          ]
+        }
+      },
+      "effects": [
+        {
+          "set": "ronette_visita"
+        }
+      ],
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "hospital",
+      "actor_id": "ronette",
+      "interaction_slot": "primary"
+    },
+    {
+      "id": "ronette_luogo",
+      "new": true,
+      "beat": "B2",
+      "source_section": "B2-luogo",
+      "pages": [
+        {
+          "name": "COOPER",
+          "text": "Signorina Pulaski. Ricorda il posto dove l'hanno trovata?",
+          "id": "m4.b2.ronette_luogo.p01",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        },
+        {
+          "name": "",
+          "text": "(Alla parola \"posto\", Ronette guarda verso la porta.)",
+          "id": "m4.b2.ronette_luogo.p02",
+          "mode": "action"
+        },
+        {
+          "name": "COOPER",
+          "text": "(piano) Va bene.",
+          "id": "m4.b2.ronette_luogo.p03",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        }
+      ],
+      "effects": [
+        {
+          "notebook_observation": {
+            "id": "m4.obs.ronette_luogo",
+            "text": "alla parola \"posto\" guarda verso la porta."
+          }
+        }
+      ],
+      "next": "ronette_q",
+      "kind": "dialogue",
+      "channel": "internal",
+      "exposed": false
+    },
+    {
+      "id": "ronette_laura",
+      "new": true,
+      "beat": "B2",
+      "source_section": "B2-laura",
+      "pages": [
+        {
+          "name": "COOPER",
+          "text": "Laura era con lei, quella notte.",
+          "id": "m4.b2.ronette_laura.p01",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        },
+        {
+          "name": "",
+          "text": "(Ronette alza due dita. Le guarda a lungo.)",
+          "id": "m4.b2.ronette_laura.p02",
+          "mode": "action"
+        },
+        {
+          "name": "COOPER",
+          "text": "Due?",
+          "id": "m4.b2.ronette_laura.p03",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        }
+      ],
+      "effects": [
+        {
+          "notebook_observation": {
+            "id": "m4.obs.ronette_laura",
+            "text": "due dita. Non è chiaro chi stia contando."
+          }
+        }
+      ],
+      "next": "ronette_q",
+      "kind": "dialogue",
+      "channel": "internal",
+      "exposed": false
+    },
+    {
+      "id": "ronette_uomo",
+      "new": true,
+      "beat": "B2",
+      "source_section": "B2-uomo",
+      "terminal": true,
+      "pages": [
+        {
+          "name": "COOPER",
+          "text": "E l'uomo? C'era un uomo, quella notte.",
+          "id": "m4.b2.ronette_uomo.p01",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        },
+        {
+          "name": "",
+          "text": "(Il tracciato si impenna prima che la frase finisca.)",
+          "id": "m4.b2.ronette_uomo.p02",
+          "mode": "action"
+        },
+        {
+          "name": "RONETTE",
+          "text": "BOB. BOB. BOB.",
+          "id": "m4.b2.ronette_uomo.p03",
+          "mode": "dialogue",
+          "speaker_id": "ronette",
+          "display_name": "RONETTE"
+        },
+        {
+          "name": "",
+          "text": "(Le mani stringono il lenzuolo. Poi, piano, lo lasciano.)",
+          "id": "m4.b2.ronette_uomo.p04",
+          "mode": "action"
+        },
+        {
+          "name": "COOPER",
+          "text": "Grazie. Per oggi basta.",
+          "id": "m4.b2.ronette_uomo.p05",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        },
+        {
+          "name": "INFERMIERA",
+          "text": "Quando si stanca, ricomincia dal soffitto. Adesso deve riposare.",
+          "id": "m4.b2.ronette_uomo.p06",
+          "mode": "dialogue",
+          "speaker_id": "infermiera",
+          "display_name": "INFERMIERA"
+        }
+      ],
+      "effects": [
+        {
+          "evidence": "T1_RONETTE_BOB"
+        }
+      ],
+      "next": null,
+      "invariant": "unico nodo che scrive T1_RONETTE_BOB",
+      "kind": "dialogue",
+      "channel": "internal",
+      "exposed": false
+    },
+    {
+      "id": "infermiera_ctx",
+      "new": true,
+      "beat": "ctx",
+      "source_section": "infermiera_ctx",
+      "optional": true,
+      "conditions": [
+        {
+          "node_done": "ronette_uomo"
+        }
+      ],
+      "pages": [
+        {
+          "name": "INFERMIERA",
+          "text": "Non chiedo cosa le ha chiesto. Le dico cosa vedo io.",
+          "id": "m4.ctx.infermiera_ctx.p01",
+          "mode": "dialogue",
+          "speaker_id": "infermiera",
+          "display_name": "INFERMIERA"
+        },
+        {
+          "name": "INFERMIERA",
+          "text": "Quando un uomo entra senza farsi sentire, lei ripete la stessa parola. Sempre alle sue spalle.",
+          "id": "m4.ctx.infermiera_ctx.p02",
+          "mode": "dialogue",
+          "speaker_id": "infermiera",
+          "display_name": "INFERMIERA"
+        },
+        {
+          "name": "COOPER",
+          "text": "Non le chiedo di ripetermela.",
+          "id": "m4.ctx.infermiera_ctx.p03",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        },
+        {
+          "name": "INFERMIERA",
+          "text": "Il resto, se può, deve dirglielo lei.",
+          "id": "m4.ctx.infermiera_ctx.p04",
+          "mode": "dialogue",
+          "speaker_id": "infermiera",
+          "display_name": "INFERMIERA"
+        }
+      ],
+      "effects": [
+        {
+          "notebook_observation": {
+            "id": "m4.obs.infermiera_ctx",
+            "text": "la routine dell'infermiera: la parola arriva quando qualcuno entra alle sue spalle."
+          }
+        }
+      ],
+      "invariant": "l'infermiera non pronuncia mai il nome",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "hospital",
+      "actor_id": "infermiera",
+      "interaction_slot": "primary"
+    },
+    {
+      "id": "gerard_a2",
+      "modified": true,
+      "beat": "B3",
+      "source_section": "B3",
+      "optional": true,
+      "guided": "letto accanto a Ronette",
+      "pages": [
+        {
+          "name": "",
+          "text": "(Gerard è girato verso la finestra. Il braccio sinistro manca dalla manica.)",
+          "id": "m4.b3.gerard_a2.p01",
+          "mode": "action"
+        },
+        {
+          "name": "GERARD",
+          "text": "Quella sedia la usano tutti quelli che vogliono sapere.",
+          "id": "m4.b3.gerard_a2.p02",
+          "mode": "dialogue",
+          "speaker_id": "gerard",
+          "display_name": "GERARD"
+        },
+        {
+          "name": "COOPER",
+          "text": "Mi hanno detto che di notte recita. Sempre gli stessi versi.",
+          "id": "m4.b3.gerard_a2.p03",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        },
+        {
+          "name": "GERARD",
+          "text": "Attraverso il buio del futuro passato... il mago desidera vedere.",
+          "id": "m4.b3.gerard_a2.p04",
+          "mode": "dialogue",
+          "speaker_id": "gerard",
+          "display_name": "GERARD"
+        },
+        {
+          "name": "GERARD",
+          "text": "Uno canta fra due mondi... FUOCO CAMMINA CON ME.",
+          "id": "m4.b3.gerard_a2.p05",
+          "mode": "dialogue",
+          "speaker_id": "gerard",
+          "display_name": "GERARD"
+        },
+        {
+          "name": "",
+          "text": "(Si interrompe. Guarda il cuscino, storto sotto la spalla.)",
+          "id": "m4.b3.gerard_a2.p06",
+          "mode": "action"
+        },
+        {
+          "name": "GERARD",
+          "text": "Le spiacerebbe? Con un braccio solo, il sonno è una trattativa.",
+          "id": "m4.b3.gerard_a2.p07",
+          "mode": "dialogue",
+          "speaker_id": "gerard",
+          "display_name": "GERARD"
+        },
+        {
+          "name": "",
+          "text": "(Cooper sistema il cuscino. Gerard chiude gli occhi prima di dire grazie.)",
+          "id": "m4.b3.gerard_a2.p08",
+          "mode": "action"
+        },
+        {
+          "name": "GERARD",
+          "text": "Non l'ho imparata. Mi viene.",
+          "id": "m4.b3.gerard_a2.p09",
+          "mode": "dialogue",
+          "speaker_id": "gerard",
+          "display_name": "GERARD"
+        }
+      ],
+      "effects": [
+        {
+          "evidence": "E5_POESIA"
+        }
+      ],
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "hospital",
+      "actor_id": "gerard",
+      "interaction_slot": "primary",
+      "conditions": [
+        {
+          "flag": "sogno_raccontato"
+        }
+      ]
+    },
+    {
+      "id": "james_a2",
+      "modified": true,
+      "beat": "B4",
+      "source_section": "B4",
+      "conditions": [
+        {
+          "flag": "sogno_raccontato"
+        }
+      ],
+      "pages": [
+        {
+          "name": "",
+          "text": "(James tiene la tazza con due mani. Piena.)",
+          "id": "m4.b4.james_a2.p01",
+          "mode": "action"
+        },
+        {
+          "name": "COOPER",
+          "text": "Sono venuto a restituirle una metà.",
+          "id": "m4.b4.james_a2.p02",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        },
+        {
+          "name": "",
+          "text": "(James non lo tocca. Tira fuori una catenina dal collo: l'altra metà.)",
+          "id": "m4.b4.james_a2.p03",
+          "mode": "action"
+        },
+        {
+          "name": "JAMES",
+          "text": "Gliel'avevo data a febbraio. Al lago. Aveva riso — ha detto che i cuori interi portano sfortuna.",
+          "id": "m4.b4.james_a2.p04",
+          "mode": "dialogue",
+          "speaker_id": "james",
+          "display_name": "JAMES"
+        },
+        {
+          "name": "",
+          "text": "(Le unisce; le due metà combaciano. Per un momento nessuno dei due parla. La tazza resta piena.)",
+          "id": "m4.b4.james_a2.p05",
+          "mode": "action"
+        },
+        {
+          "name": "JAMES",
+          "text": "Non l'ho più vista ridere così, dopo.",
+          "id": "m4.b4.james_a2.p06",
+          "mode": "dialogue",
+          "speaker_id": "james",
+          "display_name": "JAMES"
+        },
+        {
+          "name": "COOPER",
+          "text": "Non devo sapere cosa vi siete detti. Devo sapere dove ve lo dicevate.",
+          "id": "m4.b4.james_a2.p07",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        },
+        {
+          "name": "JAMES",
+          "text": "Non in paese. Qui una macchina parcheggiata diventa una storia prima di sera.",
+          "id": "m4.b4.james_a2.p08",
+          "mode": "dialogue",
+          "speaker_id": "james",
+          "display_name": "JAMES"
+        },
+        {
+          "name": "JAMES",
+          "text": "Oltre la strada a est. Dopo il ponte — dove finiscono le case e cominciano i binari.",
+          "id": "m4.b4.james_a2.p09",
+          "mode": "dialogue",
+          "speaker_id": "james",
+          "display_name": "JAMES"
+        },
+        {
+          "name": "JAMES",
+          "text": "Se là fuori c'è qualcosa, agente... io gliel'ho indicato. Non me lo racconti mai.",
+          "id": "m4.b4.james_a2.p10",
+          "mode": "dialogue",
+          "speaker_id": "james",
+          "display_name": "JAMES"
+        }
+      ],
+      "effects": [
+        {
+          "evidence": "E6A_CUORE_INTERO"
+        },
+        {
+          "evidence": "T_JAMES_EST"
+        }
+      ],
+      "invariant": "James non formula mai P2",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "diner",
+      "actor_id": "james",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "cmp_t1_e5",
+      "new": true,
+      "beat": "B7",
+      "source_section": "B7",
+      "optional": true,
+      "conditions": [
+        {
+          "evidence": "T1_RONETTE_BOB"
+        },
+        {
+          "evidence": "E5_POESIA"
+        }
+      ],
+      "pages": [
+        {
+          "name": "",
+          "text": "(Confronta: Ronette pronuncia «BOB» ↔ la formula recitata da Gerard)",
+          "id": "m4.b7.cmp_t1_e5.p01",
+          "mode": "action"
+        },
+        {
+          "name": "TACCUINO",
+          "text": "Un nome gridato in un letto. Una formula recitata in quello accanto. Stesso filo — o due livelli del caso.",
+          "id": "m4.b7.cmp_t1_e5.p02",
+          "mode": "notebook"
+        }
+      ],
+      "effects": [
+        {
+          "proposition": "P4B",
+          "to": "formulated",
+          "created_from": [
+            "T1_RONETTE_BOB",
+            "E5_POESIA"
+          ]
+        }
+      ],
+      "kind": "comparison",
+      "channel": "notebook",
+      "interaction_slot": "primary",
+      "comparison_completion": "node_commit",
+      "completed_recall": {
+        "section": "propositions",
+        "page": {
+          "id": "m4.notebook.cmp_t1_e5.already_recorded",
+          "mode": "notebook",
+          "text": "(Questo nesso è già registrato nelle Proposizioni.)"
+        }
+      }
+    },
+    {
+      "id": "cmp_e6a_tjames",
+      "new": true,
+      "beat": "B8",
+      "source_section": "B8",
+      "conditions": [
+        {
+          "evidence": "E6A_CUORE_INTERO"
+        },
+        {
+          "evidence": "T_JAMES_EST"
+        }
+      ],
+      "pages": [
+        {
+          "name": "",
+          "text": "(Confronta: le due metà combaciano ↔ James: «oltre il ponte, verso i binari»)",
+          "id": "m4.b8.cmp_e6a_tjames.p01",
+          "mode": "action"
+        },
+        {
+          "name": "TACCUINO",
+          "text": "Un confronto accosta due voci. Sta a te dire che cosa una aggiunge all'altra.",
+          "first_time_only": true,
+          "id": "m4.b8.cmp_e6a_tjames.p02",
+          "mode": "notebook"
+        },
+        {
+          "name": "TACCUINO",
+          "text": "Che cosa aggiunge il pendaglio alla testimonianza di James?",
+          "id": "m4.b8.cmp_e6a_tjames.p03",
+          "mode": "notebook"
+        }
+      ],
+      "choices": [
+        {
+          "id": "b8_a",
+          "label": "Conferma che James parlava da un rapporto privato realmente esistito.",
+          "result": "SOURCE_CORROBORATION",
+          "effects": [
+            {
+              "proposition": "P2",
+              "to": "formulated",
+              "created_from": [
+                "E6A_CUORE_INTERO",
+                "T_JAMES_EST"
+              ]
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m4.b8.feedback.source_corroboration",
+              "mode": "notebook",
+              "text": "Il pendaglio conferma il rapporto. La geografia resta una testimonianza da verificare."
+            }
+          ]
+        },
+        {
+          "id": "b8_b",
+          "label": "Dimostra che tutti gli incontri segreti di Laura avvenivano presso i binari.",
+          "result": "GEOGRAPHIC_OVERREACH",
+          "retry": true,
+          "feedback_pages": [
+            {
+              "id": "m4.b8.feedback.geographic_overreach",
+              "mode": "notebook",
+              "text": "James descrive alcuni incontri con lui. Non l'intera vita privata di Laura."
+            }
+          ]
+        },
+        {
+          "id": "b8_c",
+          "label": "Collega James all'uomo del sogno.",
+          "result": "SYMBOLIC_OVERREACH",
+          "retry": true,
+          "feedback_pages": [
+            {
+              "id": "m4.b8.feedback.symbolic_overreach",
+              "mode": "notebook",
+              "text": "Niente nelle due fonti riguarda l'uomo del sogno."
+            }
+          ]
+        }
+      ],
+      "tracks": [
+        "b8_attempt_history",
+        "assistance_level"
+      ],
+      "rules": {
+        "attempt_history": "b8_attempt_history",
+        "hide_attempted_results": true
+      },
+      "kind": "comparison",
+      "channel": "notebook",
+      "interaction_slot": "primary",
+      "mandatory_beat": true,
+      "completed_recall": {
+        "section": "propositions",
+        "page": {
+          "id": "m4.notebook.cmp_e6a_tjames.already_recorded",
+          "mode": "notebook",
+          "text": "(Questo nesso è già registrato nelle Proposizioni.)"
+        }
+      }
+    },
+    {
+      "id": "present_truman_m4",
+      "new": true,
+      "beat": "B9",
+      "source_section": "B9",
+      "pages": [
+        {
+          "name": "TRUMAN",
+          "text": "Dimmi quale nesso regge, Cooper.",
+          "id": "m4.b9.present_truman_m4.p01",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN"
+        },
+        {
+          "name": "COOPER",
+          "text": "Harry, separo ciò che sospetto da ciò su cui possiamo camminare. Cominciamo dal nesso più solido.",
+          "id": "m4.b9.present_truman_m4.p02",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        }
+      ],
+      "presentation": {
+        "options_from": "formulated_propositions_only",
+        "auto_show_provenance": {
+          "from": "formulation.created_from",
+          "template": "Formulata da: {evidence_labels}"
+        },
+        "on": {
+          "P2": {
+            "result": "accepted",
+            "reason_code": "SUFFICIENT_RELEVANT_SUPPORT",
+            "acceptance_type": "investigatory_route",
+            "pages": [
+              {
+                "name": "COOPER",
+                "text": "Il pendaglio conferma che quel rapporto esisteva. Il paese non lo vedeva, e James non l'ha mai messo in piazza.",
+                "id": "m4.b9.present_p2.p01",
+                "mode": "dialogue",
+                "speaker_id": "cooper",
+                "display_name": "COOPER"
+              },
+              {
+                "name": "COOPER",
+                "text": "I posti li ha detti lui: oltre il ponte, verso i binari.",
+                "id": "m4.b9.present_p2.p02",
+                "mode": "dialogue",
+                "speaker_id": "cooper",
+                "display_name": "COOPER"
+              },
+              {
+                "name": "TRUMAN",
+                "text": "Il pendaglio conferma che James parlava da dentro quella relazione. La strada resta da controllare.",
+                "id": "m4.b9.present_p2.p03",
+                "mode": "dialogue",
+                "speaker_id": "truman",
+                "display_name": "TRUMAN"
+              },
+              {
+                "name": "TRUMAN",
+                "text": "Dopo il ponte non ci sono case. Cominciamo dai binari.",
+                "id": "m4.b9.present_p2.p04",
+                "mode": "dialogue",
+                "speaker_id": "truman",
+                "display_name": "TRUMAN"
+              }
+            ],
+            "effects": []
+          },
+          "P4B": {
+            "result": "rejected",
+            "reason_code": "PREMATURE_SYMBOLIC_LINK",
+            "already_rejected_page": {
+              "id": "m4.b9.p4b.already_rejected",
+              "mode": "dialogue",
+              "speaker_id": "truman",
+              "display_name": "TRUMAN",
+              "text": "Me l'hai già mostrato. Non è cambiato niente."
+            },
+            "pages": [
+              {
+                "name": "TRUMAN",
+                "text": "Un nome in un letto e dei versi in quello accanto. Lo tengo a mente — ma non ci cammino sopra.",
+                "id": "m4.b9.p4b.p01",
+                "mode": "dialogue",
+                "speaker_id": "truman",
+                "display_name": "TRUMAN"
+              }
+            ]
+          },
+          "_none_formulated": {
+            "result": "rejected",
+            "reason_code": "NOT_YET_FORMULATED",
+            "pages": [
+              {
+                "name": "TRUMAN",
+                "text": "Non ho ancora un nesso da giudicare. Cosa collega le tue visite?",
+                "id": "m4.b9.none_formulated.p01",
+                "mode": "dialogue",
+                "speaker_id": "truman",
+                "display_name": "TRUMAN"
+              }
+            ],
+            "effects": [
+              {
+                "notebook_question": {
+                  "id": "m4.q.visits",
+                  "text": "Che cosa aggiunge una visita alle altre?"
+                }
+              }
+            ]
+          }
+        },
+        "target_actor_id": "truman"
+      },
+      "repeat": {
+        "name": "COOPER",
+        "text": "Diane, Harry manda me e Hawk ai binari. Il verbo importante è «non toccare».",
+        "id": "m4.repeat.present_truman_m4",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER"
+      },
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "sheriff",
+      "actor_id": "truman",
+      "interaction_slot": "primary",
+      "mandatory_beat": true,
+      "conditions": [
+        {
+          "flag": "sogno_raccontato"
+        }
+      ]
+    }
+  ],
+  "node_count": {
+    "new": 8,
+    "modified": 3,
+    "runtime_total": 11
+  }
+}

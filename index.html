@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>TWIN PEAKS — Il Mistero di Laura Palmer</title>
 <style>
+  .sr-only {
+    position: absolute !important; width: 1px !important; height: 1px !important;
+    padding: 0 !important; margin: -1px !important; overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important;
+  }
   html, body {
     margin: 0; padding: 0; width: 100%; height: 100%; height: 100dvh;
     background: #000; overflow: hidden; overscroll-behavior: none; touch-action: none;
@@ -357,6 +362,31 @@
     color: #173524; background: #d7e98e; border-left: 5px solid #668448;
     font-size: 1.02em; line-height: 1.48;
   }
+  #case-document {
+    display: none; min-height: 0; overflow: hidden;
+    grid-template-rows: auto auto minmax(3.5em, 1fr); gap: clamp(8px, 1.4vh, 14px);
+    padding: clamp(14px, 2.4vh, 26px);
+    color: #173524; background: #f7f0cf;
+    border: 2px solid #756b4c; box-shadow: inset 0 0 0 5px #e8deb1;
+  }
+  #case-document-title {
+    margin: 0; color: #173524; font: 800 1.25em/1.2 Georgia, "Times New Roman", serif;
+  }
+  #case-document-label {
+    color: #668448; font-size: .78em; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .1em;
+  }
+  #case-document-copy {
+    min-height: 0; overflow: auto; white-space: pre-line;
+    font: 1.08em/1.65 Georgia, "Times New Roman", serif;
+  }
+  body[data-case-view="document"] #case-panel {
+    grid-template-rows: auto minmax(120px, 1fr) auto;
+  }
+  body[data-case-view="document"] #case-objective,
+  body[data-case-view="document"] #case-evidence-block,
+  body[data-case-view="document"] #case-note { display: none; }
+  body[data-case-view="document"] #case-document { display: grid; }
   #case-help {
     display: flex; justify-content: center; flex-wrap: wrap; gap: .35em 1.5em;
     padding-top: .65em; border-top: 2px solid #394566;
@@ -371,6 +401,14 @@
     #case-ui { font-size: 11px; padding: 8px; }
     #case-panel { padding: 10px; gap: 5px; }
     #case-note { line-height: 1.35; }
+  }
+  @media (max-width: 560px) {
+    #case-ui { padding: 6px; font-size: 12px; }
+    #case-panel { padding: 8px; gap: 4px; }
+    #case-heading { gap: 8px; font-size: .96em; }
+    #case-document { padding: 10px; gap: 4px; }
+    #case-document-copy { line-height: 1.45; }
+    #case-help { gap: .25em .7em; padding-top: .45em; font-size: .82em; }
   }
   .tp-touch-ctrl {
     -webkit-tap-highlight-color: transparent;
@@ -399,12 +437,18 @@
     <div id="dialogue-text"></div>
     <div id="dialogue-next">◆</div>
   </section>
+  <div id="dialogue-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
   <section id="case-ui" aria-live="polite" aria-hidden="true">
     <div id="case-panel">
-      <header id="case-heading"><span>Fascicolo · Caso Palmer</span><span id="case-count"></span></header>
+      <header id="case-heading"><span id="case-heading-copy">Fascicolo · Caso Palmer</span><span id="case-count"></span></header>
       <div id="case-objective"><span class="case-label">Obiettivo attuale</span><span id="case-objective-copy"></span></div>
-      <div><span class="case-label">Prove raccolte</span><div id="case-evidence-list"></div></div>
+      <div id="case-evidence-block"><span class="case-label">Prove raccolte</span><div id="case-evidence-list"></div></div>
       <div id="case-note"></div>
+      <article id="case-document" aria-live="polite">
+        <h2 id="case-document-title"></h2>
+        <div id="case-document-label"></div>
+        <div id="case-document-copy"></div>
+      </article>
       <footer id="case-help"></footer>
     </div>
   </section>
@@ -416,26 +460,28 @@
 <script src="js/chars.js?v=char9"></script>
 <script src="js/houses.js"></script>
 <script src="js/maps.js?v=r60i2"></script>
-<script src="js/data.js?v=11narrative"></script>
+<script src="js/data.js?v=11narrative-case-doc1"></script>
 <script src="js/environmental-inspect.js?v=r60i2"></script>
 <script src="js/retro-font.js?v=gold46"></script>
-<script src="js/engine.js?v=gold53-layout1"></script>
+<script src="js/portraits.js?v=gold54p6"></script>
+<script src="js/gold-tone.js?v=gold54p4"></script>
+<script src="js/engine.js?v=gold54p4-case-doc1"></script>
 <script src="js/glue.js?v=gold49n3"></script>
 <script src="js/retro.js?v=r60i2"></script>
-<script src="js/retro-authored.js?v=r60i2"></script>
+<script src="js/retro-authored.js?v=gold54p4"></script>
 <script src="js/main.js?v=gold53-layout1"></script>
-<script src="js/touch.js?v=gold52n3"></script>
+<script src="js/touch.js?v=gold52n3-case-doc1"></script>
 <script src="js/audio.js"></script>
 <script src="js/narrative-runtime.js?v=2"></script>
-<script src="js/narrative-ui.js"></script>
+<script src="js/narrative-ui.js?v=gold54p2"></script>
 <script src="js/narrative-notebook.js?v=4"></script>
 <script src="js/narrative-data.gen.js?v=12"></script>
 <script src="js/narrative-bootstrap.js"></script>
 <script src="js/narrative-engine-adapter.js?v=7"></script>
 <script src="js/narrative-save.js?v=4"></script>
-<script src="js/narrative-finale.js?v=17"></script>
+<script src="js/narrative-finale.js?v=gold54p2"></script>
 <script src="js/narrative-finale-production.js?v=12"></script>
 <script src="js/narrative-production.js?v=20"></script>
-<script src="js/retro-ui.js?v=gold52n3"></script>
+<script src="js/retro-ui.js?v=gold54p4"></script>
 </body>
 </html>

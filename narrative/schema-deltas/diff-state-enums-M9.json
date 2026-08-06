@@ -1,0 +1,11 @@
+{
+ "_comment": "diff PROPOSTO a state-enums.json (C9-A) — SOLO aggiunte, da applicare dopo approvazione (C9-C). Non tocca M4/M5/M6/M8.",
+ "values_allowed_add": {},
+ "booleans_allowed_add": ["sarah_visione_ascoltata"],
+ "enums_add": {},
+ "value_transitions_add": {},
+ "presentation_attachment_modes_add": [
+  "manual"
+ ],
+ "note": "M9 non introduce valori tipizzati nuovi. Aggiunge il solo booleano sarah_visione_ascoltata, scritto dal dialogo classico di Sarah e sincronizzato nel ledger: T_SARAH_VISIONE nasce solo da conoscenza diegeticamente acquisita. M9 scrive atto5, già a catalogo. presentation_attachment_modes_add: [manual] dichiara l'allegato manuale."
+}

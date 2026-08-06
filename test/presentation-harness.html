@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>B4 presentation harness</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #000; height: 100%; overflow: hidden; }
+  #stage { position: fixed; inset: 0; }
+  #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+  #gl { background: #000; }
+  #game { background: transparent; }
+  #narrative { position: absolute; left: 0; right: 0; bottom: 0; top: 0; z-index: 10; pointer-events: none; }
+  #narrative .nw-root { pointer-events: auto; }
+  .nw-root { position: absolute; left: 8%; right: 8%; bottom: 6%; background: rgba(12,14,20,0.94); border: 3px solid #c8b06a; border-radius: 4px; padding: 16px 20px; font: 17px/1.65 monospace; color: #e8e4d8; }
+  .nb-root { top: 10%; bottom: 8%; overflow: auto; }
+  .nw-title { color: #c8b06a; margin-bottom: 8px; }
+  .nw-opt { padding: 2px 6px; white-space: pre-wrap; }
+  .nw-focus { background: #2e3442; color: #ffe9a8; }
+  .nw-page { min-height: 56px; }
+  .nw-name { color: #c8b06a; }
+  .nw-hint { text-align: right; color: #888; margin-top: 8px; }
+  #truth { position: absolute; top: 0; left: 0; right: 0; z-index: 11; font: 13px monospace; color: #9fe8a0; background: rgba(0,0,0,0.72); padding: 4px 8px; }
+  #log { display: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl" width="960" height="640"></canvas>
+  <canvas id="game" width="480" height="320"></canvas>
+  <div id="narrative"></div>
+  <div id="truth"></div>
+</div>
+<div id="log"></div>
+
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=harness-r6"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=harness-r6"></script>
+<script src="../js/engine.js?v=harness-r6"></script>
+<script src="../js/render3d.js"></script>
+<script src="../js/glue.js?v=harness-r6"></script>
+<script src="../js/main.js"></script>
+<script src="../js/narrative-runtime.js"></script>
+<script src="../js/narrative-ui.js"></script>
+<script src="../js/narrative-notebook.js"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
+<script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
+
+<script>
+var LOCK = 120;
+var results = { checks: {}, console_errors: [], console_log: [] };
+window.onerror = function (m, src, line) { results.console_errors.push(String(m) + ' @' + line); };
+(function () {
+  var ce = console.error, cw = console.warn;
+  console.error = function () { results.console_errors.push([].join.call(arguments, ' ')); ce.apply(console, arguments); };
+  console.warn = function () { results.console_log.push('[warn] ' + [].join.call(arguments, ' ')); cw.apply(console, arguments); };
+})();
+
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(code) {
+  window.dispatchEvent(new KeyboardEvent('keydown', { code: code, bubbles: true }));
+  window.dispatchEvent(new KeyboardEvent('keyup', { code: code, bubbles: true }));
+}
+function holdKey(code) { window.dispatchEvent(new KeyboardEvent('keydown', { code: code, bubbles: true })); }
+function liftKey(code) { window.dispatchEvent(new KeyboardEvent('keyup', { code: code, bubbles: true })); }
+async function press(code) { key(code); await wait(200); }
+function menuProps() { return [].map.call(document.querySelectorAll('[data-prop-choice]'), function (o) { return o.getAttribute('data-prop-choice'); }); }
+function nbText() { var r = document.querySelector('.nb-root'); return r ? r.textContent : ''; }
+
+var STOP = null;
+function stopped() { return new Promise(function () {}); }
+async function stopIf(label) { if (STOP === label) { document.title = 'B4-SHOT-' + label; await stopped(); } }
+
+async function seq() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter;
+  function S() { return A.getState(); }
+  function M() { return A.getMission(); }
+  function P(pid) { return NR.peekProp(S(), pid); }
+  function obj() { var o = NR.activeObjective(S(), M()); return o ? o.id : null; }
+
+  var glcv = document.getElementById('gl');
+  var ov = document.createElement('canvas');
+  ov.width = glcv.width; ov.height = glcv.height;
+  ov.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;z-index:9;';
+  document.getElementById('stage').appendChild(ov);
+  var ovx = ov.getContext('2d');
+  setInterval(function () { try { GAME.Render3D.render(E.state, 16, performance.now()); ovx.drawImage(glcv, 0, 0); } catch (e2) {} }, 80);
+
+  setInterval(function () {
+    var st = S(); var o = NR.activeObjective(st, M());
+    var p2 = st.props.P2;
+    document.getElementById('truth').textContent =
+      'atto3: ' + (st.flags.atto3 === true) + ' | obiettivo: ' + (o ? o.id + ' «' + o.text + '»' : '-') +
+      ' | P2 accepted_by: [' + (p2 ? p2.social_status.accepted_by.join(',') : '') + '] | factual: ' + (p2 ? p2.factual_status : '-') +
+      ' | lease: ' + (A.active() ? 'HELD' : 'FREE') + ' | rev: ' + st.revision;
+  }, 80);
+
+  var TOKENS = ['E6A_', 'T_JAMES_', 'T1_', 'E5_', 'P2', 'P4B', 'SOURCE_CORROBORATION', 'GEOGRAPHIC_OVERREACH', 'SYMBOLIC_OVERREACH', 'PREMATURE_SYMBOLIC_LINK', 'NOT_YET_FORMULATED', 'ALREADY_REJECTED', 'SUFFICIENT_RELEVANT_SUPPORT', 'm4.'];
+  var tokenViolations = [];
+  setInterval(function () {
+    var txt = document.getElementById('narrative').textContent;
+    TOKENS.forEach(function (t) { if (txt.indexOf(t) >= 0 && tokenViolations.indexOf(t) === -1) tokenViolations.push(t); });
+  }, 90);
+
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK });
+  E.loadMap('sheriff', 6, 1, 'right'); // davanti al vero Truman (7,1)
+
+  var record = null;
+  A.onLog = function (e) {
+    if (e.event === 'page_shown' && e.page_id === 'm4.b9.present_p2.p04' && !record) {
+      record = { page_id: e.page_id, visible_text: e.visible_text,
+        state_before_commit: { 'P2.social_status.accepted_by': P('P2').social_status.accepted_by.slice(),
+          'P2.factual_status': P('P2').factual_status, atto3: S().flags.atto3 === true, objective: obj() },
+        movement_suspended: A.active() };
+    }
+    if (e.event === 'presentation_committed' && e.result === 'accepted' && record && !record.state_after_commit) {
+      record.state_after_commit = { 'P2.social_status.accepted_by': P('P2').social_status.accepted_by.slice(),
+        'P2.factual_status': P('P2').factual_status, atto3: S().flags.atto3 === true, objective: obj() };
+      record.presentation_count = S().props.P2.presentations.length;
+    }
+  };
+
+  function swapState(label) {
+    var ser = NR.serialize(S());
+    var re = NR.deserialize(ser);
+    results.checks['saveload_' + label] = (NR.serialize(re) === ser);
+    A.setState(re);
+  }
+
+  // M3 surrogato dichiarato; il RACCONTO del sogno però avviene sul VERO Truman
+  NR.applyEffects(S(), [{ set: 'sogno_fatto' }]);
+  await press('Enter'); // interazione → truman_a2 p01
+  for (var i = 0; i < 7; i++) await press('Enter'); // p02..p07 + commit
+  results.checks.truman_a2_real_path = (S().flags.sogno_raccontato === true && obj() === 'obj_m4_2');
+
+  // presentazione senza nulla di formulato: ramo _none_formulated, MAI menu vuoto
+  await press('Enter'); // → intro «Dimmi quale nesso regge»
+  await press('Enter'); // → ramo none: «Non ho ancora un nesso da giudicare...»
+  results.checks.none_formulated_no_menu = (menuProps().length === 0 && !!document.querySelector('[data-page-id="m4.b9.none_formulated.p01"]'));
+  await stopIf('01');
+  await press('Enter'); // commit del ramo none
+  results.checks.none_formulated_record = (S().presentations.length === 1 && S().presentations[0].reason_code === 'NOT_YET_FORMULATED');
+  results.checks.none_formulated_question = S().notebook.some(function (n) { return n.id === 'm4.q.visits'; });
+  results.checks.none_formulated_no_atto3 = (S().flags.atto3 !== true);
+  swapState('c1_prima_delle_formulazioni');
+
+  // P2 formulata (surrogati via runtime, dichiarati)
+  var st = S(), Mn = M();
+  var pn = NR.prepareNode(st, Mn, 'james_a2'); NR.commitNode(st, Mn, pn);
+  pn = NR.prepareNode(st, Mn, 'cmp_e6a_tjames'); NR.commitNode(st, Mn, pn);
+  var rq = Mn.nodes.filter(function (n) { return n.id === 'cmp_e6a_tjames'; })[0];
+  var pc = NR.prepareChoice(st, Mn, rq, 'b8_a'); NR.commitChoice(st, Mn, rq, pc);
+  results.checks.p2_formulated_setup = (P('P2').formulation.status === 'formulated');
+  swapState('c2_p2_formulata');
+
+  // Escape sull'intro: puro
+  var esc0 = NR.serialize(S());
+  await press('Enter'); await press('Escape');
+  results.checks.escape_intro_pure = (NR.serialize(S()) === esc0 && !A.active());
+
+  // menu con SOLO P2
+  await press('Enter'); await press('Enter'); // intro → menu
+  results.checks.menu_only_p2 = (JSON.stringify(menuProps()) === JSON.stringify(['P2']));
+  await stopIf('02');
+  var esc1 = NR.serialize(S());
+  await press('Escape'); // annulla dal menu: puro
+  results.checks.escape_menu_pure = (NR.serialize(S()) === esc1 && !A.active());
+
+  // P4B formulata (confronto opzionale, surrogati via runtime)
+  st = S();
+  pn = NR.prepareNode(st, Mn, 'ronette_q'); NR.commitNode(st, Mn, pn);
+  var rn = Mn.nodes.filter(function (n) { return n.id === 'ronette_q'; })[0];
+  pc = NR.prepareChoice(st, Mn, rn, 'q_uomo'); var cu = NR.commitChoice(st, Mn, rn, pc);
+  pn = NR.prepareNode(st, Mn, cu.goto); NR.commitNode(st, Mn, pn); // ronette_uomo → T1
+  pn = NR.prepareNode(st, Mn, 'gerard_a2'); NR.commitNode(st, Mn, pn); // E5
+  pn = NR.prepareNode(st, Mn, 'cmp_t1_e5'); NR.commitNode(st, Mn, pn); // P4B formulata
+  results.checks.p4b_formulated_setup = (P('P4B').formulation.status === 'formulated');
+
+  await press('Enter'); await press('Enter'); // intro → menu [P2, P4B]
+  results.checks.menu_p2_and_p4b = (JSON.stringify(menuProps()) === JSON.stringify(['P2', 'P4B']));
+  await stopIf('03');
+
+  // P4B: provenienza generata + feedback di Truman PRIMA del commit
+  await press('ArrowDown'); await press('Enter'); // seleziona P4B → provenienza
+  results.checks.p4b_provenance_generated = !!document.querySelector('[data-page-id="m4.b9.provenance.P4B"]');
+  var histBefore = S().presentations.length;
+  await press('Enter'); // → pagina di Truman (rifiuto)
+  results.checks.p4b_feedback_before_commit = (!!document.querySelector('[data-page-id="m4.b9.p4b.p01"]') &&
+    S().presentations.length === histBefore && S().flags.atto3 !== true);
+  await stopIf('05');
+  await press('Enter'); // commit del rifiuto
+  results.checks.p4b_rejected_persistent = (S().props.P4B.presentations.length === 1 &&
+    S().props.P4B.presentations[0].reason_code === 'PREMATURE_SYMBOLIC_LINK' &&
+    S().flags.atto3 !== true && obj() === 'obj_m4_3');
+
+  // badge del taccuino: RESPINTA DA TRUMAN
+  await press('KeyT');
+  await press('ArrowDown'); await press('ArrowDown'); await press('Enter'); // Proposizioni
+  results.checks.badge_rejected = (nbText().indexOf('RESPINTA DA TRUMAN') >= 0 && nbText().indexOf('NON CONFERMATA') >= 0);
+  await stopIf('06');
+  await press('Escape'); await press('Escape');
+  swapState('c3_dopo_p4b_respinta');
+
+  // memoria del rifiuto: seconda presentazione identica → nessuna nuova history
+  await press('Enter'); await press('Enter'); // intro → menu
+  await press('ArrowDown'); await press('Enter'); // P4B di nuovo
+  results.checks.already_rejected_page = !!document.querySelector('[data-page-id="m4.b9.p4b.already_rejected"]');
+  var g1 = S().presentations.length, h1 = S().props.P4B.presentations.length;
+  await press('Enter'); // commit (repeated)
+  results.checks.already_rejected_no_history = (S().presentations.length === g1 && S().props.P4B.presentations.length === h1);
+
+  // P2: provenienza → pagine di Truman → ultima pagina PRIMA del commit
+  await press('Enter'); await press('Enter'); // intro → menu
+  await press('Enter'); // seleziona P2 → provenienza
+  results.checks.p2_provenance_generated = (!!document.querySelector('[data-page-id="m4.b9.provenance.P2"]') &&
+    document.getElementById('narrative').textContent.indexOf('le due metà combaciano') >= 0);
+  await stopIf('04');
+  await press('Enter'); await press('Enter'); await press('Enter'); // p01, p02, p03
+  await press('Enter'); // p04 (ultima pagina di Truman)
+  results.checks.p2_last_page_before_commit = (!!document.querySelector('[data-page-id="m4.b9.present_p2.p04"]') &&
+    P('P2').social_status.accepted_by.length === 0 && S().flags.atto3 !== true && obj() === 'obj_m4_3');
+  await stopIf('07');
+  await press('Enter'); // commit → accettazione → atto3 → obiettivo est
+  results.checks.p2_accepted_after_commit = (P('P2').social_status.accepted_by.join(',') === 'truman' &&
+    P('P2').factual_status === 'unconfirmed' && S().flags.atto3 === true && obj() === 'obj_m4_4');
+  results.checks.p2_record_complete = (function () {
+    var r = S().props.P2.presentations[0];
+    return r && r.result === 'accepted' && r.reason_code === 'SUFFICIENT_RELEVANT_SUPPORT' &&
+      r.acceptance_type === 'investigatory_route' && r.target === 'truman' && r.mission === 'M4' &&
+      JSON.stringify(r.evidence_shown) === JSON.stringify(['E6A_CUORE_INTERO', 'T_JAMES_EST']) &&
+      S().props.P2.presentations.length === 1;
+  })();
+  await stopIf('09'); // banner: obiettivo est
+  swapState('c4_dopo_accettazione');
+
+  // re-interazione: repeat canonico, niente menu, nessun record nuovo
+  var recCount = S().presentations.length;
+  await press('Enter'); // interazione → repeat
+  results.checks.repeat_page_no_menu = (!!document.querySelector('[data-page-id="m4.repeat.present_truman_m4"]') && menuProps().length === 0);
+  await stopIf('10');
+  await press('Enter'); // chiudi il repeat
+  results.checks.repeat_no_new_records = (S().presentations.length === recCount && S().props.P2.presentations.length === 1 && S().flags.atto3 === true);
+  swapState('c5_dopo_repeat');
+
+  // badge finale: ACCETTATA DA TRUMAN (taccuino post-accettazione)
+  await press('KeyT');
+  await press('ArrowDown'); await press('ArrowDown'); await press('Enter');
+  results.checks.badge_accepted = (nbText().indexOf('ACCETTATA DA TRUMAN') >= 0 && nbText().indexOf('NON CONFERMATA') >= 0);
+  await stopIf('08');
+  await press('Escape'); await press('Escape');
+
+  // gameplay davvero ripristinato
+  results.checks.lease_free_at_end = !A.active();
+  var ty0 = E.state.player.ty;
+  holdKey('ArrowDown');
+  for (var w = 0; w < 40 && E.state.player.ty === ty0; w++) await wait(100);
+  liftKey('ArrowDown');
+  results.checks.movement_restored_real = (E.state.player.ty > ty0);
+
+  results.checks.full_overlay_has_no_internal_tokens = (tokenViolations.length === 0);
+  results.token_violations = tokenViolations;
+  results.checks.no_console_errors = (results.console_errors.length === 0);
+  results.record_critico = record;
+  results.all_pass = Object.keys(results.checks).every(function (k) { return results.checks[k] === true; });
+  document.getElementById('log').textContent = JSON.stringify({ results: results, events: A.events }, null, 1);
+  document.title = results.all_pass ? 'B4-PASS' : 'B4-FAIL';
+}
+
+window.addEventListener('load', function () {
+  var q = new URLSearchParams(location.search);
+  STOP = q.get('shot');
+  setTimeout(function () { seq(); }, 300);
+});
+</script>
+</body>
+</html>
