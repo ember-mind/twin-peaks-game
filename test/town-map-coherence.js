@@ -117,10 +117,14 @@ ok(at(30, 31) === 'p' && [30, 31, 32].every((x) => walkable.has(key(x, 31))) &&
 ok([30, 31, 32, 33, 34].every((x) => [27, 28, 29, 30].every((y) =>
   at(x, y) === 'u' || sourceMap.ground[key(x, y)] === 'u')),
   'corte 5x4 continua, props interni sullo stesso sottofondo');
-ok([30, 31, 32].every((x) => [28, 29, 30].every((y) => at(x, y) === 'u')) &&
+ok([30, 31, 32].every((x) => [28, 29, 30].every((y) =>
+  at(x, y) === 'u' || sourceMap.ground[key(x, y)] === 'u')) &&
    [28, 29].every((y) => at(29, y) === ':') && at(29, 30) === 'r' && at(35, 27) === '=' &&
    sourceMap.ground['35,28'] === '=',
   'corte civica ha bocca 3-wide diretta dalla strada e solo bordo est');
+ok(at(30, 30) === 'S' && sourceMap.interact['30,30'] === 'cartello' &&
+  sourceMap.objects.some((obj) => obj.kind === 'welcomesign' && obj.x === 30 && obj.y === 30),
+  'cartello visibile, interazione e landmark coincidono a 30,30');
 
 ok([23, 24, 25].every((y) =>
   [...Array.from({ length: 25 }, (_, i) => i + 1), ...Array.from({ length: 14 }, (_, i) => i + 30)]

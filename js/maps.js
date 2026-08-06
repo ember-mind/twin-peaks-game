@@ -66,7 +66,7 @@
         'T...wwwwwwwwwwwF..........=rrruuuuu=.....ppp666666.....T', // 27 corte aperta, solo bordo est
         'T...wwwwwwwwwwwF..........=:::uuuAuE.....ppp666D66.....T', // 28 zebra E-O dalla strada alla bocca u
         'T...wwwwwwwwwwwF........B.=:::uuuuBu.....pppppppp......T', // 29 seconda riga zebra, corte e forecourt
-        'T...wwwwwwwwwwwF.........L=rrruuuHSu.....pppppppp......T', // 30 destinazioni dentro superfici continue
+        'T...wwwwwwwwwwwF.........L=rrrSuuHuu.....pppppppp......T', // 30 cartello storico a x30, idrante dentro la corte
         'T...wwwwwwwwwwwF..........=rrrppp........pppppppp......T', // 31 spawn e forecourt su blocchi 3-wide
         'T.........................=rrr=........................T', // 32 nessuna piattaforma ornamentale
         'T.........................=rrr=........................T', // 33 asse sud ancora leggibile
@@ -83,7 +83,7 @@
         '4,13': '=', '28,13': '=', '40,13': '=', '52,13': '=',
         '6,16': '=', '10,16': '=', '18,16': '=', '22,16': '=', '44,16': '=',
         '6,22': '.', '18,22': '.', '33,28': 'u', '35,28': '=',
-        '24,29': '.', '34,29': 'u', '25,30': '.', '33,30': 'u', '34,30': 'u'
+        '24,29': '.', '34,29': 'u', '25,30': '.', '30,30': 'u', '33,30': 'u'
       },
       doors: {
         '9,6':  { to: 'hotel_gn', tx: 8, ty: 10, dir: 'up', needsFlag: 'sogno_fatto', blockedMsg: 'hotel_locked' },
