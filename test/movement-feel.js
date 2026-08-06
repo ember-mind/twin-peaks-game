@@ -102,6 +102,22 @@ E.start();
 pump(32);
 S().mode = 'play';
 
+// Tap completo fra due frame: il passo resta in coda e non viene perso.
+reset(6, 7, 'right');
+keyDown('ArrowRight');
+keyUp('ArrowRight');
+pump(300);
+ok(S().player.tx === 7 && !S().player.moving, 'tap breve fra frame muove di una tile');
+
+// Key-repeat durante il passo non deve prenotare una tile fantasma al rilascio.
+reset(6, 7, 'right');
+keyDown('ArrowRight');
+pump(16);
+emit(windowHandlers, 'keydown', { code: 'ArrowRight', repeat: true });
+keyUp('ArrowRight');
+pump(500);
+ok(S().player.tx === 7 && !S().player.moving, 'key-repeat non aggiunge passo dopo rilascio');
+
 // Blur cancella la coda, non il passo gia' iniziato: nessun passo fantasma.
 reset(6, 7, 'right');
 keyDown('ArrowRight');

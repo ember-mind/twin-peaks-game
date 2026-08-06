@@ -64,6 +64,9 @@
   };
 
   var held = []; // pila delle direzioni tenute premutе
+  // Conserva un tap breve fino al prossimo tick: keydown+keyup possono cadere
+  // fra due frame (automazione, tastiere Bluetooth, browser sotto carico).
+  var queuedDirection = null;
 
   /* ---------------- stato ---------------- */
 
@@ -344,7 +347,10 @@
         else if (a === 'down') moveMenuSelection(1);
         return;
       }
-      if (held.indexOf(a) < 0) held.push(a);
+      if (held.indexOf(a) < 0) {
+        held.push(a);
+        queuedDirection = a;
+      }
       return;
     }
     if (e.repeat) return;
@@ -362,6 +368,7 @@
 
   function clearHeldInputs() {
     held.length = 0;
+    queuedDirection = null;
   }
 
   function onVisibilityChange() {
@@ -730,13 +737,14 @@
         p.x = p.moveStartX * TILE + dx * e;
         p.y = p.moveStartY * TILE + dy * e;
       }
-    } else if (held.length) {
-      var d = held[held.length - 1];
+    } else if (held.length || queuedDirection) {
+      var d = held.length ? held[held.length - 1] : queuedDirection;
       if (p.dir !== d) {
         // turn-in-place: girati e aspetta un micro-frame prima di partire
         p.dir = d;
         p.turnUntil = tGlobal + 60;
       } else if (tGlobal >= (p.turnUntil || 0)) {
+        if (queuedDirection === d) queuedDirection = null;
         tryStep(d);
       }
     }
