@@ -12,12 +12,12 @@
 
   var NPCS = {
     town: [
-      { id: 'bobby',  x: 25, y: 16, sprite: 'bobby',  name: 'Bobby',  dialogue: 'bobby', wander: true },
+      { id: 'bobby',  x: 31, y: 16, sprite: 'bobby',  name: 'Bobby',  dialogue: 'bobby', wander: true },
       { id: 'donna',  x: 44, y: 10, sprite: 'donna',  name: 'Donna',  dialogue: 'donna', wander: true },
       { id: 'jacoby', x: 16, y: 25, sprite: 'jacoby', name: 'Jacoby', dialogue: 'jacoby' }
     ],
     sheriff: [
-      { id: 'truman', x: 9,  y: 1, sprite: 'truman', name: 'Truman',
+      { id: 'truman', x: 7,  y: 3, sprite: 'truman', name: 'Truman',
         dialogue: [
           { cond: 'flag:leland_morto', then: 'truman_fine' },
           { cond: 'flag:atto5', then: 'truman_wait5' },
@@ -29,11 +29,11 @@
           { cond: 'flag:sogno_fatto', then: 'truman_a2' },
           'truman'
         ], dir: 'down' },
-      { id: 'andy',   x: 2,  y: 1, sprite: 'andy',   name: 'Andy',   dialogue: 'andy',   dir: 'down' },
-      { id: 'hawk',   x: 11, y: 4, sprite: 'hawk',   name: 'Hawk',   dialogue: 'hawk',   dir: 'down' },
-      { id: 'lucy',   x: 4,  y: 6, sprite: 'lucy',   name: 'Lucy',
+      { id: 'andy',   x: 2,  y: 3, sprite: 'andy',   name: 'Andy',   dialogue: 'andy',   dir: 'down' },
+      { id: 'hawk',   x: 7, y: 6, sprite: 'hawk',   name: 'Hawk',   dialogue: 'hawk',   dir: 'down' },
+      { id: 'lucy',   x: 2,  y: 6, sprite: 'lucy',   name: 'Lucy',
         dialogue: [{ cond: 'flag:jacques_preso', then: 'lucy_a3' }, 'lucy'], dir: 'down' },
-      { id: 'leland', x: 6,  y: 1, sprite: 'leland', name: 'Leland',
+      { id: 'leland', x: 5,  y: 3, sprite: 'leland', name: 'Leland',
         cond: ['flag:atto5', '!flag:leland_morto'],
         dialogue: [{ cond: 'flag:leland_confessa', then: 'leland_morte' }, 'leland_interr'], dir: 'down' }
     ],
@@ -41,7 +41,7 @@
       { id: 'sarah',  x: 9,  y: 7, sprite: 'sarah',  name: 'Sarah',
         dialogue: [{ cond: 'flag:atto4', then: 'sarah_visione' }, 'sarah'], dir: 'down' },
       { id: 'leland', x: 12, y: 8, sprite: 'leland', name: 'Leland',
-        cond: ['!flag:atto5'],
+        cond: ['!flag:atto5', '!flag:gigante2', '!flag:narrative_m8_owned'],
         dialogue: [
           { cond: 'flag:maddy_trovata', then: 'leland_dopo' },
           { cond: 'flag:gigante2', then: 'leland_dove' },
@@ -49,7 +49,7 @@
           'leland'
         ], dir: 'down' },
       { id: 'maddy', x: 11, y: 7, sprite: 'maddy', name: 'Maddy', dialogue: 'maddy_a4',
-        cond: ['flag:atto4', '!flag:gigante2'], dir: 'down' }
+        cond: ['flag:atto4', '!flag:gigante2', '!flag:narrative_m8_owned'], dir: 'down' }
     ],
     hotel_gn: [
       { id: 'benhorne', x: 5,  y: 7, sprite: 'benhorne', name: 'Ben Horne', dialogue: 'benhorne_a2', dir: 'down' },
@@ -83,7 +83,7 @@
       { id: 'hawk_vagone', x: 12, y: 4, sprite: 'hawk', name: 'Hawk', dialogue: 'hawk_vagone', dir: 'down' }
     ],
     oej: [
-      { id: 'jacques', x: 7,  y: 5, sprite: 'jacques', name: 'Jacques', dialogue: 'jacques_a3', dir: 'down' },
+      { id: 'jacques', x: 7,  y: 5, sprite: 'jacques', name: 'Jacques', dialogue: 'jacques_a3', dir: 'down', cond: '!flag:jacques_morto' },
       { id: 'audrey',  x: 13, y: 7, sprite: 'audrey',  name: 'Audrey',  dialogue: 'audrey_oej',
         dir: 'down', cond: 'flag:audrey_indaga' }
     ]

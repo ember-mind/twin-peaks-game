@@ -27,6 +27,7 @@ require(J('chars.js'));
 require(J('houses.js'));
 require(J('maps.js'));
 require(J('data.js'));
+require(J('retro-font.js'));
 require(J('engine.js'));
 require(J('glue.js'));
 

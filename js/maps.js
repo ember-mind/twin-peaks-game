@@ -22,10 +22,10 @@
 
   M.SOLID = {
     T: 1, S: 1, w: 1,
-    '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1,
+    '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1, '7': 1, '8': 1,
     i: 1, C: 1, t: 1, h: 1, K: 1, U: 1,
     Y: 1, R: 1, M: 1, v: 1, G: 1,
-    L: 1, P: 1, B: 1, F: 1, A: 1, H: 1, E: 1, n: 1
+    L: 1, P: 1, B: 1, F: 1, A: 1, H: 1, E: 1, n: 1, q: 1
   };
   M.isSolid = function (ch) { return !ch || !!M.SOLID[ch]; };
 
@@ -43,24 +43,24 @@
         'T....4444444444.....55555555.........3333333333...p.n..T', // 5
         'T....4444D44444.....555D5555.........33333D3333...p....T', // 6  hotel / ospedale / casa Palmer
         'T.......ApA...........ApA............FFFFFpFFFF...p....T', // 7  aiuole hotel/ospedale, staccionata giardino Palmer
-        'T........p.......n.....p..,...............p.......p....T', // 8
-        'T........p..........T..p.........T........p.......p..,.T', // 9
-        'T........p...,.........p.n................p.......p....T', // 10
-        'T........p.............p................,.p.......p....T', // 11
-        'T........p.............p.........n........p.......p....T', // 12
+        'T........p.......n.....p.wFF..............p.......p....T', // 8
+        'T........p..........T..p.wFF77773333......p.......p..,.T', // 9 Bookhouse + rail + edificio giallo
+        'T........p...,.........p.wFF77773333......p.......p....T', // 10
+        'T........p.............p.wFF77773333....,.p.......p....T', // 11
+        'T........p.............p.wFF77773333......p.......p....T', // 12
         'T===L====pE=====L======p====L===========L=pE======p=L==T', // 13 marciapiede nord, lampioni, cassette postali
-        'Trrrrrrrr--r--rrrrrrrrrrrrr--rrrrrrrrrrrrr--rrrrrrrrrrrr', // 14 uscita est -> vagone (Atto 3), strisce pedonali
-        'Trrrrrrrr--r--rrrrrrrrrrrrr--rrrrrrrrrrrrr--rrrrrrrrrrrr', // 15 uscita est -> vagone (Atto 3), strisce pedonali
-        'T=====P===L=======P===L====rr===P=L=========P=L========T', // 16 marciapiede sud, pali del telefono, lampioni
-        'T,....nTTTTTTTTTTT........=rr=.......TTTTTTTTTTT.......T', // 17 siepi dietro distretto/diner
-        'T......11111111111........=rr=.......22222222222.......T', // 18
-        'T......11111111111........=rr=.......22222222222H......T', // 19 idrante vicino al diner
-        'T......11111D11111........=rr=.......22222D22222.......T', // 20 distretto / Double R
-        'T..........ApA........n.T.=rr=...........ApA....TTTTTT.T', // 21 aiuole distretto/diner
-        'T.,T........p.............=rr=............p.....G.G.G..T', // 22
-        'T...........p.............=rr=n...........p............T', // 23
-        'T.........................=rr=...................G.G.G.T', // 24
-        'T....................T....=rr=........n................T', // 25
+        'Trrrrrrrr--r--rrrrrrrrrrrwFFrrrrrrrrrrrrrr--rrrrrrrrrrrr', // 14 strada waterfront: acqua/rail a sinistra
+        'Trrrrrrrr--r--rrrrrrrrrrrwFFrrrrrrrrrrrrrr--rrrrrrrrrrrr', // 15
+        'T=====P===L=======P===L==wFFFFF=============P=L========T', // 16 rail orizzontale sul waterfront
+        'T,....n..TTTTTTT.........wFFFFF........TTTTTTT.........T', // 17
+        'T.........11111..........wwwww.........2222222.........T', // 18
+        'T.........11111...........=rr=.........2222222..H......T', // 19 idrante vicino al diner
+        'T.........11D11...........=rr=.........222D222.........T', // 20 distretto / Double R
+        'T.......FFFpppFFF.....n.T.=rr=...........ppp....TTTTTT.T', // 21 vialetti distretto/diner, recinto
+        'T.,T..gggg.ppp...q........=rr=...........ppp....G.G.G..T', // 22 cassa servizio
+        'T..gggg....ppp.,B.........=rr=n..........ppp...........T', // 23
+        'T..ggggT..n...n.A.........=rr=...................G.G.G.T', // 24
+        'T.......B............T....=rr=........n....gggg........T', // 25
         'T...wwwwwwwwwwF...........=rr=.............,66666666...T', // 26 lago / roadhouse, staccionata riva est
         'T..,wwwwwwwwwwF...........=rr=.....T........66666666...T', // 27
         'T..nwwwwwwwwwwF...........=rr=,.............666D6666...T', // 28 porta roadhouse
@@ -76,7 +76,7 @@
         '9,6':  { to: 'hotel_gn', tx: 8, ty: 10, dir: 'up', needsFlag: 'sogno_fatto', blockedMsg: 'hotel_locked' },
         '23,6': { to: 'hospital', tx: 5, ty: 8, dir: 'up', needsFlag: 'sogno_fatto', blockedMsg: 'hospital_locked' },
         '42,6': { to: 'palmer', tx: 7, ty: 10, dir: 'up' },
-        '12,20': { to: 'sheriff', tx: 6, ty: 8, dir: 'up' },
+        '12,20': { to: 'sheriff', tx: 4, ty: 7, dir: 'up' },
         '42,20': { to: 'diner', tx: 6, ty: 8, dir: 'up' },
         '47,28': { to: 'roadhouse', tx: 7, ty: 8, dir: 'up', needsFlag: 'atto4', blockedMsg: 'roadhouse_chiuso' },
         '55,14': { to: 'traincar', tx: 2, ty: 7, dir: 'right', needsFlag: 'atto3', blockedMsg: 'est_bloccato' },
@@ -97,20 +97,18 @@
       id: 'sheriff',
       indoor: true,
       rows: [
-        'iiiiiiiiiiiiii', // 0
-        'iffffffffffffi', // 1 Andy(2,1) Truman(9,1)
-        'ifCCffffCCfffi', // 2 scrivanie
-        'iffffffffffffi', // 3
-        'iffffffffffffi', // 4 Hawk(11,4)
-        'iffCCCCffffffi', // 5 bancone Lucy
-        'iffffffffffffi', // 6 Lucy(4,6)
-        'iffffffffffffi', // 7
-        'iffffffffffffi', // 8 (spawn 6,8)
-        'iiiiiiDDiiiiii'  // 9
+        'iiiiiiiiii', // 0
+        'iffffffffi', // 1 scaffali
+        'ifCCffCCfi', // 2 scrivanie
+        'iffffffffi', // 3 Andy(2,3), Leland(5,3), Truman(7,3)
+        'ifffttfffi', // 4 scrivania centrale 32x16
+        'iffhffhffi', // 5 sedie, corridoio centrale libero
+        'iffffffffi', // 6 Lucy(2,6), Hawk(7,6)
+        'iffffffffi', // 7 pavimento fino alla porta (spawn 4,7)
+        'iiiiDiiiii'  // 8 porta centrale 16px
       ],
       doors: {
-        '6,9': { to: 'town', tx: 12, ty: 21, dir: 'down' },
-        '7,9': { to: 'town', tx: 12, ty: 21, dir: 'down' }
+        '4,8': { to: 'town', tx: 12, ty: 21, dir: 'down' }
       },
       interact: {}
     },
@@ -212,34 +210,34 @@
       rows: [
         //         111111111122222222
         //0123456789012345678901234567
-        'TTTTTTTTTTTTRRDRTTTTTTTTTTTT', // 0  tende -> Red Room (14,0)
-        'TgggggTggggggTpgggggTggggggT', // 1
-        'TggggTggggggTgpggggTggggggTT', // 2
-        'TgggTggggggTggpgggTggggggTgT', // 3
-        'TggTggggggTgggpggTggggggTggT', // 4
-        'TgTggggggTggggpgTggggggTgggT', // 5
-        'TTggggggTgggggpTggggggTggggT', // 6
-        'TggggggTggggggYggggggTgggggT', // 7  cerchio di sicomori
-        'TgggggTgggggYgpgYgggTggggggT', // 8
-        'TggggTgggggggooggggTggggggTT', // 9  olio (13-14, 9-10)
-        'TgggTggggggYgooggYgggggggTgT', // 10
-        'TggTggggggggggpgggggggggTggT', // 11
-        'TgTggggggTggYgpgYggggggTgggT', // 12
-        'TTggggggTgggggYgggggggTggggT', // 13
-        'TggggggTgggSggpggggggTgggggT', // 14 cartello Glastonbury Grove (11,14)
-        'TgggggTggggggTpgggggTggggggT', // 15
-        'TggggTggggggTgpggggTggggggTT', // 16
-        'TgggTggggggTggpgggTggggggTgT', // 17
-        'TggTggggggTgggpggTggggggTggT', // 18
-        'TgTggggggTggggpgTBgggggTgggT', // 19 panchina al sentiero (17,19)
-        'TTggggggTgggngpTngggggTggggT', // 20 (spawn 14,20), cespugli al sentiero
+        'TTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 0 alberi dietro Lodge
+        'TTTTTTTTTTT888888TTTTTTTTTTT', // 1 tetto Lodge, 96 px come reference Gold
+        'TTTTTTTTTTT888888TTTTTTTTTTT', // 2 tetto Lodge
+        'TTTTTTTTTTq888888TTTTTTTTTTT', // 3 facciata Lodge, cassa alta sinistra
+        'TTTTTTTTTTT888D88TTTTTTTTTTT', // 4 porta -> Red Room (14,4)
+        'TTTTTTTTTggggpppggggTTTTTTTT', // 5 cortile
+        'TTTTTTTTTggggpppggqgTTTTTTTT', // 6 cortile, cassa destra
+        'TTTTTTTTTggggpppggggTTTTTTTT', // 7 cortile
+        'TTTTTTTTTTTgTpppggTTTTTTTTTT', // 8
+        'TTTTTTTTTTgggpYpgggTTTTTTTTT', // 9 cerchio di sicomori
+        'TTTTTTTTTTggYpppYggTTTTTTTTT', // 10
+        'TTTTTTTTTTgggooogggTTTTTTTTT', // 11 olio 3×2
+        'TTTTTTTTTTgYooopgYgTTTTTTTTT', // 12 olio 3×2 sfalsato
+        'TTTTTTTTTTgggpppgggTTTTTTTTT', // 13
+        'TTTTTTTTTTggYpppYggTTTTTTTTT', // 14
+        'TTTTTTTTTTgggpYpgggTTTTTTTTT', // 15
+        'TTTTTTTTTTTSggppTTTTTTTTTTTT', // 16 cartello Glastonbury Grove (11,16)
+        'TTTTTTTTTTTTTpppTTTTTTTTTTTT', // 17
+        'TTTTTTTTTTTTgpppTTTTTTTTTTTT', // 18
+        'TTTTTTTTTTTTgpppTTTTTTTTTTTT', // 19
+        'TTTTTTTTTTTgTpppngTTTTTTTTTT', // 20 (spawn 14,20), cespuglio al sentiero
         'TTTTTTTTTTTTTTpTTTTTTTTTTTTT'  // 21 uscita sud -> città
       ],
       doors: {
-        '14,0': { to: 'redroom', tx: 8, ty: 9, dir: 'up' },
+        '14,4': { to: 'redroom', tx: 8, ty: 9, dir: 'up' },
         '14,21': { to: 'town', tx: 50, ty: 1, dir: 'down' }
       },
-      interact: { '14,10': 'olio', '11,14': 'cartelloBosco' }
+      interact: { '14,12': 'olio', '11,16': 'cartelloBosco' }
     },
 
     redroom: {

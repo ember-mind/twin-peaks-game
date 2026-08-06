@@ -11,6 +11,97 @@
   function R(ctx, x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }
   S.R = R;
 
+  /* --------------------------------------------------------------------
+   * Direzione artistica del terreno
+   *
+   * Il renderer 3D usa questo canvas come albedo del piano. La variazione
+   * deve quindi funzionare a due scale: segni piccoli leggibili vicino alla
+   * camera e chiazze larghe, continue oltre i confini 16x16, che impediscono
+   * il classico effetto "tappeto di tile". Tutto resta deterministico.
+   *
+   * Varianti additive (nessuna mappa va modificata):
+   *   flags.season / flags.terrainSeason: spring | summer | autumn | winter
+   *   flags.wet / flags.weather === 'rain'
+   * In assenza di override, town e woods riflettono la pioggia già presente
+   * nel renderer 3D; gli altri scenari mantengono il profilo asciutto.
+   * ------------------------------------------------------------------ */
+  var TERRAIN = {
+    grass: {
+      spring: ['#68875b', '#7f9b6c', '#526f49', '#789468'],
+      summer: ['#637f55', '#799365', '#4d6745', '#708a60'],
+      autumn: ['#6e7850', '#88835a', '#535f40', '#7b8054'],
+      winter: ['#5e7261', '#748579', '#495b50', '#6a7c6b']
+    },
+    forest: {
+      spring: ['#305342', '#466b54', '#223f32', '#55765d'],
+      summer: ['#2e4b3c', '#42634e', '#21372d', '#4f6d56'],
+      autumn: ['#384c3a', '#57634a', '#29382c', '#62684d'],
+      winter: ['#304743', '#465b55', '#223632', '#526660']
+    },
+    road: {
+      dry: ['#858983', '#737771', '#9b9e96', '#666b67'],
+      wet: ['#656e6b', '#545d5b', '#7a8380', '#454d4c']
+    },
+    path: {
+      dry: ['#c9b587', '#ad966b', '#dfcca1', '#927b56'],
+      wet: ['#a89772', '#8e7c5d', '#c0ae88', '#77654b']
+    },
+    sidewalk: {
+      dry: ['#bbbdb7', '#a2a59f', '#d0d2cc', '#888d89'],
+      wet: ['#9da5a2', '#858e8b', '#b7bfbc', '#737b79']
+    }
+  };
+
+  function terrainStyle(flags) {
+    flags = flags || {};
+    var map = flags.map || {};
+    var season = flags.terrainSeason || flags.season || map.terrainSeason || map.season || 'summer';
+    if (!TERRAIN.grass[season]) season = 'summer';
+    var weather = flags.weather || map.weather || '';
+    var wet = flags.wet === true || map.wet === true || weather === 'rain' ||
+      (flags.wet !== false && (map.id === 'town' || map.id === 'woods'));
+    return { season: season, wet: wet, mapId: map.id || '' };
+  }
+  S.terrainStyle = terrainStyle;
+
+  function hash2(a, b, salt) {
+    var n = Math.imul((a | 0) + 101, 374761393) ^
+      Math.imul((b | 0) + 307, 668265263) ^ Math.imul((salt | 0) + 17, 2246822519);
+    n = Math.imul(n ^ (n >>> 13), 1274126177);
+    return (n ^ (n >>> 16)) >>> 0;
+  }
+
+  /* Variazione locale a costo costante. La vera scala macro viene dipinta dal
+   * bake 3D sull'intera mappa. Anche un piccolo fillRect, però, sopravviveva al
+   * mip come timbro quadrato: il lobo ora è ellittico, raro e a bordo morbido. */
+  function macroWash(ctx, x, y, tx, ty, colorA, colorB, alpha) {
+    var gy = Math.floor(ty / 3);
+    var gx = Math.floor((tx + ((gy & 1) ? 2 : 0)) / 4);
+    var h = hash2(gx, gy, 11);
+    ctx.save();
+    var lobe = hash2(tx >> 1, ty >> 1, 41);
+    if ((lobe % 5) === 0) {
+      ctx.globalAlpha = alpha * (0.18 + ((h >>> 23) % 9) / 100);
+      var lx = 5 + (lobe >>> 5) % 6, ly = 5 + (lobe >>> 10) % 6;
+      ctx.fillStyle = (h & 1) ? colorB : colorA;
+      ctx.beginPath();
+      ctx.ellipse(x + lx, y + ly, 4.4, 2.1, ((lobe >>> 14) % 7 - 3) * 0.09, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // Piccoli cluster, non rumore uniforme: ogni materiale ha un gesto preciso.
+  function aggregate(ctx, x, y, h, dark, light, density) {
+    density = density || 2;
+    for (var i = 0; i < density; i++) {
+      var px = 2 + ((h + i * 47) % 12);
+      var py = 2 + (((h >>> (i + 1)) + i * 29) % 12);
+      R(ctx, x + px, y + py, 2, 1, dark);
+      if (((h + i) & 1) === 0) R(ctx, x + px, y + py - 1, 1, 1, light);
+    }
+  }
+
   // lettura sicura del carattere di una cella vicina; ' ' se fuori mappa o senza mappa
   function cellAt(flags, cx, cy) {
     if (!flags.map || !flags.map.rows) return ' ';
@@ -21,46 +112,214 @@
     return row.charAt(cx);
   }
 
-  // erba mottled B/W: base + chiazze sabbiose + macchie scure + ciuffi, deterministica via h
+  // erba ordinata per famiglie di valore: una base dominante + pochissimi
+  // accenti. La vecchia versione metteva 6-9 segni per tile e trasformava il
+  // prato in rumore ad alta frequenza, rubando il primo read agli attori.
   // opts.tuft => cluster di ciuffi extra (erba alta); opts.dapple => macchioline chiare rade
   function grass(ctx, x, y, base, light, dark, tuft, h, opts) {
     opts = opts || {};
     R(ctx, x, y, 16, 16, base);
-    R(ctx, x + (h % 12), y + ((h >> 2) % 12), 3, 2, light);
-    R(ctx, x + ((h >> 3) % 13), y + ((h >> 1) % 13), 2, 2, light);
-    if (h % 2 === 0) R(ctx, x + ((h >> 4) % 14), y + ((h >> 2) % 14), 1, 1, light);
-    R(ctx, x + ((h >> 1) % 13), y + ((h >> 4) % 13), 2, 1, dark);
-    if (h % 3 === 0) R(ctx, x + ((h >> 2) % 14), y + ((h >> 5) % 14), 1, 1, dark);
+    if (opts.macro) macroWash(ctx, x, y, opts.tx, opts.ty, light, dark, opts.wet ? 0.09 : 0.105);
+    if (h % 23 === 0) {
+      var lx = x + (h % 12) + 1, ly = y + ((h >> 2) % 12) + 1;
+      R(ctx, lx, ly, 3, 1, light);                   // foglie viste dall'alto
+      R(ctx, lx + 1, ly - 1, 1, 1, light);
+    }
+    if (h % 29 === 0) {
+      var dx = x + ((h >> 1) % 13) + 1, dy = y + ((h >> 4) % 12) + 2;
+      R(ctx, dx, dy, 2, 1, dark);
+      R(ctx, dx + 1, dy + 1, 1, 1, dark);
+    }
     var bx = x + ((h >> 3) % 13) + 1, by = y + ((h >> 1) % 12) + 2;
-    R(ctx, bx, by, 1, 2, tuft);
-    R(ctx, bx + 1, by + 1, 1, 1, tuft);
-    if (h % 5 === 0) R(ctx, x + ((h >> 4) % 13) + 1, y + ((h >> 2) % 12) + 2, 1, 2, tuft);
-    if (opts.tuft) { // erba alta: ciuffo denso extra, deterministico
+    if (h % 31 === 0) {
+      R(ctx, bx, by, 1, 2, tuft);
+      R(ctx, bx + 1, by + 1, 1, 1, tuft);
+    }
+    if (opts.tuft && h % 17 === 0) { // erba alta: gruppi, non un segno in ogni cella
       var cx = x + ((h >> 5) % 12) + 1, cy = y + ((h >> 3) % 11) + 3;
       R(ctx, cx, cy, 1, 3, tuft);
       R(ctx, cx + 1, cy + 1, 1, 2, tuft);
       R(ctx, cx - 1, cy + 2, 1, 1, tuft);
     }
     if (opts.dapple) { // macchie di luce fra gli alberi (woods)
-      R(ctx, x + ((h >> 2) % 13) + 1, y + ((h >> 5) % 13) + 1, 2, 1, opts.dapple);
-      if (h % 4 === 0) R(ctx, x + ((h >> 4) % 14), y + ((h >> 1) % 14), 1, 1, opts.dapple);
+      if (h % 19 === 0) R(ctx, x + ((h >> 2) % 13) + 1, y + ((h >> 5) % 13) + 1, 2, 1, opts.dapple);
     }
+    if (opts.wet && (h % 23 === 0)) { // riflesso corto, parallelo alla pioggia
+      R(ctx, x + 3 + ((h >>> 3) % 8), y + 2 + ((h >>> 5) % 11), 3, 1, 'rgba(205,225,216,0.18)');
+    }
+    if (opts.ecology) ecologyDetail(ctx, x, y, opts.tx, opts.ty, h, opts.ecology, opts.wet);
+  }
+
+  function styledGrass(ctx, x, y, h, tx, ty, style, opts, forest) {
+    var p = TERRAIN[forest ? 'forest' : 'grass'][style.season];
+    opts = opts || {};
+    opts.tx = tx;
+    opts.ty = ty;
+    opts.wet = style.wet;
+    opts.macro = 1;
+    opts.ecology = forest ? 'forest' : 'grass';
+    grass(ctx, x, y, p[0], p[1], p[2], p[3], h, opts);
+  }
+
+  /* Motivi ecologici regionali: ogni regione 5x4 tile sceglie un vocabolario
+   * (aghi, foglie, felci, trifoglio, terra umida). Non sono fleck uniformi:
+   * compaiono in piccoli gruppi coerenti e lasciano vaste zone calme. */
+  function ecologyDetail(ctx, x, y, tx, ty, h, kind, wet) {
+    var region = hash2(Math.floor(tx / 5), Math.floor(ty / 4), kind === 'forest' ? 71 : 79);
+    var motif = region % 4;
+    if (((h >>> 3) % 97) !== 0) return;
+    var px = 2 + ((h >>> 7) % 8), py = 3 + ((h >>> 12) % 8);
+    ctx.save();
+    if (kind === 'forest') {
+      if (motif === 0) { // aghi e rametti in una tasca asciutta
+        ctx.globalAlpha = 0.44;
+        R(ctx, x + px, y + py, 5, 1, '#84705a');
+        R(ctx, x + px + 2, y + py + 2, 4, 1, '#5f5144');
+        R(ctx, x + px + 1, y + py - 2, 1, 3, '#75634f');
+      } else if (motif === 1) { // felce: asse e tre foglie alternate
+        ctx.globalAlpha = 0.58;
+        R(ctx, x + px + 2, y + py - 1, 1, 7, '#60795b');
+        R(ctx, x + px, y + py, 3, 1, '#718967');
+        R(ctx, x + px + 2, y + py + 2, 4, 1, '#718967');
+        R(ctx, x + px, y + py + 4, 3, 1, '#536b50');
+      } else if (motif === 2) { // foglie larghe, calde e leggibili
+        ctx.globalAlpha = 0.46;
+        R(ctx, x + px, y + py, 3, 2, '#7a6749');
+        R(ctx, x + px + 4, y + py + 2, 2, 3, '#66543d');
+        R(ctx, x + px + 1, y + py + 1, 1, 1, '#a08b61');
+      } else if (wet) { // muschio saturo in una depressione
+        ctx.globalAlpha = 0.2;
+        R(ctx, x + px - 1, y + py, 8, 5, '#152f2b');
+        R(ctx, x + px, y + py, 5, 1, '#6f8f73');
+        R(ctx, x + px + 2, y + py + 4, 4, 1, '#425f50');
+      }
+    } else if (motif === 0) { // trifoglio
+      ctx.globalAlpha = 0.55;
+      R(ctx, x + px, y + py, 2, 2, '#83a274');
+      R(ctx, x + px + 2, y + py + 1, 2, 2, '#77976b');
+      R(ctx, x + px + 1, y + py + 3, 1, 2, '#496745');
+    } else if (motif === 1 && wet) { // terra scura affiorante dopo la pioggia
+      ctx.globalAlpha = 0.24;
+      R(ctx, x + px - 1, y + py, 8, 4, '#33453b');
+      R(ctx, x + px + 1, y + py - 1, 5, 1, '#829786');
+      R(ctx, x + px + 2, y + py + 4, 3, 1, '#46594b');
+    } else if (motif === 2) { // ciuffo a ventaglio
+      ctx.globalAlpha = 0.52;
+      R(ctx, x + px + 2, y + py, 1, 6, '#496944');
+      R(ctx, x + px, y + py + 2, 2, 1, '#729269');
+      R(ctx, x + px + 3, y + py + 1, 3, 1, '#78976e');
+      R(ctx, x + px + 3, y + py + 4, 2, 1, '#526f4e');
+    }
+    ctx.restore();
   }
 
   // colore erba del vicino, per bordi organici di sentiero/strada; null se non è erba
-  function grassColorOf(ch) { return ch === 'g' ? '#35553a' : (ch === '.' ? '#7a9e58' : null); }
+  function grassColorOf(ch, style) {
+    style = style || { season: 'summer' }; // compatibilità con chiamanti/preview legacy
+    if (!TERRAIN.grass[style.season]) style.season = 'summer';
+    if (ch === 'g') return TERRAIN.forest[style.season][0];
+    if (ch === '.' || ch === ',') return TERRAIN.grass[style.season][0];
+    return null;
+  }
 
-  // bordo dithered 2px verso i lati erbosi: pixel alternati di erba sopra il path
-  function organicEdge(ctx, flags, tx, ty, x, y) {
-    var k, g;
-    g = grassColorOf(cellAt(flags, tx, ty - 1));
-    if (g) for (k = 0; k < 16; k++) R(ctx, x + k, y + (k % 2), 1, 1, g);
-    g = grassColorOf(cellAt(flags, tx, ty + 1));
-    if (g) for (k = 0; k < 16; k++) R(ctx, x + k, y + 15 - (k % 2), 1, 1, g);
-    g = grassColorOf(cellAt(flags, tx - 1, ty));
-    if (g) for (k = 0; k < 16; k++) R(ctx, x + (k % 2), y + k, 1, 1, g);
-    g = grassColorOf(cellAt(flags, tx + 1, ty));
-    if (g) for (k = 0; k < 16; k++) R(ctx, x + 15 - (k % 2), y + k, 1, 1, g);
+  // Zolle larghe che attraversano davvero il confine: il sentiero conserva
+  // i bounds della cella, ma la sua silhouette non sembra più tirata col righello.
+  function organicEdge(ctx, flags, tx, ty, x, y, style) {
+    var g, gd, start;
+    var h = hash2(tx, ty, 29);
+    g = grassColorOf(cellAt(flags, tx, ty - 1), style);
+    if (g) {
+      gd = cellAt(flags, tx, ty - 1) === 'g' ? TERRAIN.forest[style.season][2] : TERRAIN.grass[style.season][2];
+      start = 2 + ((h >>> 2) % 6);
+      R(ctx, x, y, 16, 1, g);
+      R(ctx, x + start, y, 7, 2, g);
+      R(ctx, x + start + 2, y + 2, 3, 1, g);
+      R(ctx, x + start + 3, y + 2, 1, 1, gd);
+    }
+    g = grassColorOf(cellAt(flags, tx, ty + 1), style);
+    if (g) {
+      gd = cellAt(flags, tx, ty + 1) === 'g' ? TERRAIN.forest[style.season][2] : TERRAIN.grass[style.season][2];
+      start = 1 + ((h >>> 6) % 7);
+      R(ctx, x, y + 15, 16, 1, g);
+      R(ctx, x + start, y + 14, 7, 2, g);
+      R(ctx, x + start + 3, y + 13, 3, 1, g);
+      R(ctx, x + start + 4, y + 13, 1, 1, gd);
+    }
+    g = grassColorOf(cellAt(flags, tx - 1, ty), style);
+    if (g) {
+      gd = cellAt(flags, tx - 1, ty) === 'g' ? TERRAIN.forest[style.season][2] : TERRAIN.grass[style.season][2];
+      start = 2 + ((h >>> 10) % 6);
+      R(ctx, x, y, 1, 16, g);
+      R(ctx, x, y + start, 2, 7, g);
+      R(ctx, x + 2, y + start + 2, 1, 3, g);
+      R(ctx, x + 2, y + start + 3, 1, 1, gd);
+    }
+    g = grassColorOf(cellAt(flags, tx + 1, ty), style);
+    if (g) {
+      gd = cellAt(flags, tx + 1, ty) === 'g' ? TERRAIN.forest[style.season][2] : TERRAIN.grass[style.season][2];
+      start = 1 + ((h >>> 14) % 7);
+      R(ctx, x + 15, y, 1, 16, g);
+      R(ctx, x + 14, y + start, 2, 7, g);
+      R(ctx, x + 13, y + start + 3, 1, 3, g);
+      R(ctx, x + 13, y + start + 4, 1, 1, gd);
+    }
+  }
+
+  function pathSurfaceDetail(ctx, flags, tx, ty, x, y, h, style, p) {
+    var vertical = cellAt(flags, tx, ty - 1) === 'p' || cellAt(flags, tx, ty + 1) === 'p';
+    var horizontal = cellAt(flags, tx - 1, ty) === 'p' || cellAt(flags, tx + 1, ty) === 'p';
+    ctx.save();
+    // Fascia calpestata continua ma tenue, con interruzioni più scure regionali.
+    ctx.globalAlpha = style.wet ? 0.14 : 0.105;
+    if (vertical && !horizontal) {
+      R(ctx, x + 6, y, 4, 16, p[1]);
+      ctx.globalAlpha = 0.16;
+      R(ctx, x + 5 + ((h >>> 4) & 1), y + 3 + ((h >>> 8) % 7), 6, 4, p[3]);
+    } else if (horizontal && !vertical) {
+      R(ctx, x, y + 6, 16, 4, p[1]);
+      ctx.globalAlpha = 0.16;
+      R(ctx, x + 3 + ((h >>> 8) % 7), y + 5 + ((h >>> 4) & 1), 4, 6, p[3]);
+    } else {
+      R(ctx, x + 4, y + 5, 8, 6, p[1]);
+    }
+    // Nel bosco radici e lettiera attraversano soltanto alcuni tratti.
+    if (style.mapId === 'woods' && (hash2(Math.floor(tx / 3), Math.floor(ty / 3), 97) % 4) === 0) {
+      ctx.globalAlpha = 0.55;
+      if (vertical) {
+        var ry = y + 4 + ((h >>> 14) % 7);
+        R(ctx, x + 1, ry, 12, 1, '#715f45');
+        R(ctx, x + 9, ry + 1, 5, 1, '#554835');
+        R(ctx, x + 3, ry - 1, 4, 1, '#8a7656');
+      } else {
+        var rx = x + 4 + ((h >>> 14) % 7);
+        R(ctx, rx, y + 1, 1, 12, '#715f45');
+        R(ctx, rx + 1, y + 9, 1, 5, '#554835');
+      }
+    }
+    if (style.wet && ((h >>> 5) % 3 === 0)) {
+      ctx.globalAlpha = 0.24;
+      var px = vertical ? x + 6 : x + 3 + ((h >>> 12) % 6);
+      var py = vertical ? y + 3 + ((h >>> 12) % 7) : y + 6;
+      R(ctx, px, py, vertical ? 5 : 7, vertical ? 6 : 4, '#5f6658');
+      ctx.globalAlpha = 0.32;
+      R(ctx, px + 1, py + 1, vertical ? 4 : 5, 1, '#d4ceb1');
+    }
+    ctx.restore();
+  }
+
+  function wetSurfaceMarks(ctx, x, y, tx, ty, h, dark, sheen, kind) {
+    var region = hash2(Math.floor(tx / 4), Math.floor(ty / 3), kind === 'road' ? 103 : 107);
+    if ((region % 3) !== 0 || ((h >>> 3) & 1)) return;
+    var px = 2 + ((h >>> 8) % 5), py = 3 + ((h >>> 13) % 7);
+    ctx.save();
+    ctx.globalAlpha = kind === 'road' ? 0.25 : 0.16;
+    R(ctx, x + px, y + py, 9, 4, dark);
+    R(ctx, x + px + 2, y + py - 1, 5, 1, dark);
+    R(ctx, x + px + 1, y + py + 4, 6, 1, dark);
+    ctx.globalAlpha = 0.32;
+    R(ctx, x + px + 2, y + py + 1, 5, 1, sheen);
+    R(ctx, x + px + 4, y + py + 2, 3, 1, sheen);
+    ctx.restore();
   }
 
   // chioma in pianta (vista dall'alto ~55°): blob arrotondato di file fillRect
@@ -110,17 +369,58 @@
     R(ctx, x + 5, y + 9, 7, 1, out); R(ctx, x + 3, y + 7, 2, 1, out); R(ctx, x + 11, y + 7, 2, 1, out); // bordo sud
   }
 
-  function floorWood(ctx, x, y) {
-    R(ctx, x, y, 16, 16, '#b08650');
-    R(ctx, x, y, 16, 1, '#c09a68');
-    R(ctx, x, y + 5, 16, 1, '#96703c');
-    R(ctx, x, y + 10, 16, 1, '#96703c');
-    R(ctx, x, y + 15, 16, 1, '#8a6636');
-    R(ctx, x + 7, y, 1, 5, '#96703c');
-    R(ctx, x + 3, y + 6, 1, 4, '#96703c');
-    R(ctx, x + 11, y + 11, 1, 5, '#96703c');
-    R(ctx, x + 2, y + 2, 3, 1, '#a67c46');
-    R(ctx, x + 9, y + 7, 3, 1, '#a67c46');
+  function floorWood(ctx, x, y, tx, ty, h) {
+    // Tavole larghe lungo la profondità della stanza. Qualunque fuga continua
+    // sull'asse X diventa un pettine nella camera obliqua: le fughe principali
+    // sono quindi verticali, mentre i giunti di testa compaiono sfalsati e
+    // soltanto ogni tre tile.
+    tx = tx || 0; ty = ty || 0; h = h == null ? hash2(tx, ty, 131) : h;
+    var tones = ['#aa8050', '#a67b4c', '#af8656'];
+    var tonePick = hash2(tx, 0, 137) % 3;
+    R(ctx, x, y, 16, 16, tones[tonePick]);
+    // Due pixel tono-su-tono separano assi larghe 16px, lungo la profondità.
+    R(ctx, x, y, 1, 16, '#916b44');
+    R(ctx, x + 1, y, 1, 16, '#b58c5a');
+    // Testa sfalsata ogni tre tile: segmento locale, mai una riga continua.
+    if (((ty + ((tx & 1) ? 1 : 0)) % 3) === 0) {
+      R(ctx, x + 2, y, 14, 2, '#9a744a');
+      R(ctx, x + 2, y + 1, 14, 1, '#b58b59');
+    }
+    var gx = x + 6 + ((h >>> 5) % 5);
+    R(ctx, gx, y + 4, 2, 8, tonePick === 2 ? '#9f764a' : '#b78a57');
+    if ((h % 9) === 0) {
+      R(ctx, x + 6, y + 6, 4, 4, '#9b7044');
+      R(ctx, x + 7, y + 7, 2, 2, '#805c39');
+    }
+  }
+
+  function chevronFloor(ctx, x, y, tx, ty) {
+    var wx0 = tx * 16, wy0 = ty * 16;
+    var startY = Math.floor((wy0 - 24) / 12) * 12;
+    var startX = Math.floor((wx0 - 36) / 24) * 24;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, 16, 16);
+    ctx.clip();
+    ctx.translate(x - wx0, y - wy0);
+    R(ctx, wx0 - 1, wy0 - 1, 18, 18, '#d2cab5');
+    ctx.lineCap = 'square';
+    ctx.lineJoin = 'miter';
+    for (var sx = startX; sx <= wx0 + 40; sx += 24) {
+      ctx.beginPath();
+      for (var sy = startY, n = 0; sy <= wy0 + 40; sy += 12, n++) {
+        var vx = sx + ((Math.floor(sy / 12) & 1) ? 12 : 0);
+        if (n === 0) ctx.moveTo(vx, sy);
+        else ctx.lineTo(vx, sy);
+      }
+      ctx.strokeStyle = '#857c6e';
+      ctx.lineWidth = 10;
+      ctx.stroke();
+      ctx.strokeStyle = '#35302c';
+      ctx.lineWidth = 7;
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   // finestra da facciata: vetro scuro + tendina/awning azzurra
@@ -153,65 +453,111 @@
 
   S.drawTile = function (ctx, ch, x, y, tx, ty, frame, flags) {
     flags = flags || {};
-    var h = (tx * 31 + ty * 17) % 97;
+    var style = terrainStyle(flags);
+    var mapSalt = 0;
+    for (var si = 0; si < style.mapId.length; si++) mapSalt = (mapSalt * 31 + style.mapId.charCodeAt(si)) | 0;
+    // 30 bit positivi: i vecchi pattern usano anche >> (signed), quindi
+    // manteniamo coordinate locali sempre non-negative.
+    var h = hash2(tx, ty, mapSalt) & 0x3fffffff;
     var i, j;
     switch (ch) {
-      case '.':
-        grass(ctx, x, y, '#7a9e58', '#9ab670', '#5e7e42', '#8aac68', h, { tuft: 1 });
+      case '.': {
+        var gp = TERRAIN.grass[style.season];
+        grass(ctx, x, y, gp[0], gp[1], gp[2], gp[3], h, {
+          tuft: 1, macro: 1, tx: tx, ty: ty, wet: style.wet, ecology: 'grass'
+        });
         break;
-      case 'g':
-        grass(ctx, x, y, '#2f4d34', '#456249', '#233828', '#557555', h, { dapple: '#c0d078' });
+      }
+      case 'g': {
+        var fp = TERRAIN.forest[style.season];
+        grass(ctx, x, y, fp[0], fp[1], fp[2], fp[3], h, {
+          macro: 1, tx: tx, ty: ty, wet: style.wet,
+          ecology: 'forest',
+          dapple: style.wet ? 'rgba(154,180,156,0.34)' : '#71866b'
+        });
         break;
-      case 'r':
-        R(ctx, x, y, 16, 16, '#a8a49a');
-        R(ctx, x + (h % 14) + 1, y + ((h >> 3) % 14) + 1, 1, 1, '#928e84');
-        if (h % 2 === 0) R(ctx, x + ((h >> 2) % 14) + 1, y + ((h >> 4) % 14) + 1, 1, 1, '#bcb8ac');
-        if (h % 3 === 0) R(ctx, x + ((h >> 1) % 13) + 1, y + ((h >> 5) % 13) + 1, 2, 1, '#928e84');
-        if (h % 5 === 0) R(ctx, x + ((h >> 2) % 12) + 2, y + ((h >> 3) % 12) + 2, 2, 2, '#8a867c');
-        organicEdge(ctx, flags, tx, ty, x, y);
+      }
+      case 'r': {
+        var rp = TERRAIN.road[style.wet ? 'wet' : 'dry'];
+        R(ctx, x, y, 16, 16, rp[0]);
+        macroWash(ctx, x, y, tx, ty, rp[2], rp[1], 0.11);
+        aggregate(ctx, x, y, h, rp[1], rp[2], 2);
+        // Fessura occasionale: corta e spezzata, niente reticolo per-tile.
+        if ((h % 11) === 0) {
+          var crackX = 4 + ((h >>> 6) % 7);
+          R(ctx, x + crackX, y + 5, 1, 3, rp[3]);
+          R(ctx, x + crackX + 1, y + 8, 2, 1, rp[3]);
+          R(ctx, x + crackX + 2, y + 9, 1, 2, rp[3]);
+        }
+        if (style.wet && ((h >>> 5) % 3 === 0)) {
+          R(ctx, x + 3 + ((h >>> 9) % 5), y + 2 + ((h >>> 12) % 9), 6, 1, 'rgba(210,227,225,0.16)');
+        }
+        if (style.wet) wetSurfaceMarks(ctx, x, y, tx, ty, h, rp[3], '#d1dfdc', 'road');
+        organicEdge(ctx, flags, tx, ty, x, y, style);
         break;
-      case 'p':
-        R(ctx, x, y, 16, 16, '#d8c090');
-        R(ctx, x + (h % 14) + 1, y + ((h >> 3) % 14) + 1, 1, 1, '#c0a878');
-        if (h % 3 === 0) R(ctx, x + ((h >> 2) % 13) + 1, y + ((h >> 4) % 13) + 1, 2, 1, '#c0a878');
-        if (h % 4 === 0) R(ctx, x + ((h >> 1) % 12) + 2, y + ((h >> 5) % 12) + 2, 2, 2, '#b09060');
-        if (h % 2 === 0) R(ctx, x + ((h >> 4) % 14) + 1, y + ((h >> 2) % 14) + 1, 1, 1, '#e4d0a4');
-        organicEdge(ctx, flags, tx, ty, x, y);
+      }
+      case 'p': {
+        var pp = TERRAIN.path[style.wet ? 'wet' : 'dry'];
+        R(ctx, x, y, 16, 16, pp[0]);
+        macroWash(ctx, x, y, tx, ty, pp[2], pp[1], 0.1);
+        aggregate(ctx, x, y, h, pp[1], pp[2], 3);
+        // Impronte/ghiaia compressa: cluster più scuro, raro e direzionale.
+        if ((h % 7) === 0) {
+          var wornX = 5 + ((h >>> 7) % 5), wornY = 4 + ((h >>> 11) % 7);
+          R(ctx, x + wornX, y + wornY, 3, 2, pp[3]);
+          R(ctx, x + wornX + 1, y + wornY - 1, 2, 1, pp[1]);
+        }
+        if (style.wet && ((h >>> 3) % 4 === 0)) {
+          R(ctx, x + 4 + ((h >>> 14) % 4), y + 3 + ((h >>> 18) % 8), 5, 1, 'rgba(226,220,194,0.18)');
+        }
+        pathSurfaceDetail(ctx, flags, tx, ty, x, y, h, style, pp);
+        organicEdge(ctx, flags, tx, ty, x, y, style);
         break;
+      }
       case '=': { // marciapiede: lastra di cemento chiaro, giunto centrale, cordolo verso la strada
-        R(ctx, x, y, 16, 16, '#c8c4b8');
-        R(ctx, x, y, 16, 1, '#d8d4c8');            // luce superiore
-        R(ctx, x, y + 8, 16, 1, '#a8a498');        // giunto: divide la lastra in 2
-        R(ctx, x + (h % 14) + 1, y + ((h >> 3) % 6) + 1, 1, 1, '#b4b0a4');
-        if (h % 2 === 0) R(ctx, x + ((h >> 2) % 13) + 1, y + ((h >> 4) % 6) + 1, 1, 1, '#dcd8cc');
-        if (h % 3 === 0) R(ctx, x + ((h >> 1) % 13) + 1, y + ((h >> 5) % 6) + 9, 1, 1, '#b8b4a8');
-        if (cellAt(flags, tx, ty - 1) === 'r') R(ctx, x, y, 16, 1, '#88847a');      // cordolo verso la strada
-        if (cellAt(flags, tx, ty + 1) === 'r') R(ctx, x, y + 15, 16, 1, '#88847a');
-        if (cellAt(flags, tx - 1, ty) === 'r') R(ctx, x, y, 1, 16, '#88847a');
-        if (cellAt(flags, tx + 1, ty) === 'r') R(ctx, x + 15, y, 1, 16, '#88847a');
+        var sp = TERRAIN.sidewalk[style.wet ? 'wet' : 'dry'];
+        R(ctx, x, y, 16, 16, sp[0]);
+        macroWash(ctx, x, y, tx, ty, sp[2], sp[1], 0.07);
+        // Lastre 32x16: il giunto appare una volta ogni due tile, non a righe.
+        if ((ty & 1) === 0) R(ctx, x, y, 16, 1, sp[2]);
+        if ((ty & 1) === 1) R(ctx, x, y + 15, 16, 1, sp[1]);
+        if ((tx & 1) === 0) R(ctx, x, y, 1, 16, sp[1]);
+        aggregate(ctx, x, y, h, sp[1], sp[2], 1);
+        if (style.wet && ((h >>> 5) % 3 === 0)) {
+          R(ctx, x + 3, y + 3 + ((h >>> 9) % 9), 8, 1, 'rgba(225,235,232,0.16)');
+        }
+        if (style.wet) wetSurfaceMarks(ctx, x, y, tx, ty, h, sp[3], '#dbe6e2', 'sidewalk');
+        if (cellAt(flags, tx, ty - 1) === 'r') { R(ctx, x, y, 16, 2, sp[3]); R(ctx, x, y + 2, 16, 1, sp[2]); }
+        if (cellAt(flags, tx, ty + 1) === 'r') { R(ctx, x, y + 14, 16, 2, sp[3]); R(ctx, x, y + 13, 16, 1, sp[2]); }
+        if (cellAt(flags, tx - 1, ty) === 'r') { R(ctx, x, y, 2, 16, sp[3]); R(ctx, x + 2, y, 1, 16, sp[2]); }
+        if (cellAt(flags, tx + 1, ty) === 'r') { R(ctx, x + 14, y, 2, 16, sp[3]); R(ctx, x + 13, y, 1, 16, sp[2]); }
         break;
       }
       case '-': { // strisce pedonali: base della strada + 3 barre bianco sporco, orientate secondo la strada
-        R(ctx, x, y, 16, 16, '#a8a49a');
-        R(ctx, x + (h % 14) + 1, y + ((h >> 3) % 14) + 1, 1, 1, '#928e84');
-        if (h % 2 === 0) R(ctx, x + ((h >> 2) % 14) + 1, y + ((h >> 4) % 14) + 1, 1, 1, '#bcb8ac');
-        var stripe = '#e8e4d8';
+        var crossRoad = TERRAIN.road[style.wet ? 'wet' : 'dry'];
+        R(ctx, x, y, 16, 16, crossRoad[0]);
+        macroWash(ctx, x, y, tx, ty, crossRoad[2], crossRoad[1], 0.1);
+        aggregate(ctx, x, y, h, crossRoad[1], crossRoad[2], 1);
+        var stripe = style.wet ? '#d2d7d2' : '#e1e0d7';
         var horiz = cellAt(flags, tx - 1, ty) === 'r' || cellAt(flags, tx + 1, ty) === 'r';
         for (i = 0; i < 3; i++) {
           if (horiz) { // strada orizzontale: barre verticali attraverso la carreggiata
             R(ctx, x + 1 + i * 5, y + 1, 3, 14, stripe);
-            if ((h + i) % 4 === 0) R(ctx, x + 1 + i * 5 + (h % 3), y + 3 + ((h >> 2) % 8), 1, 1, '#a8a49a'); // usura
+            if ((h + i) % 4 === 0) R(ctx, x + 1 + i * 5 + (h % 3), y + 3 + ((h >> 2) % 8), 1, 1, crossRoad[0]); // usura
           } else { // strada verticale: barre orizzontali
             R(ctx, x + 1, y + 1 + i * 5, 14, 3, stripe);
-            if ((h + i) % 4 === 0) R(ctx, x + 3 + ((h >> 2) % 8), y + 1 + i * 5 + (h % 3), 1, 1, '#a8a49a');
+            if ((h + i) % 4 === 0) R(ctx, x + 3 + ((h >> 2) % 8), y + 1 + i * 5 + (h % 3), 1, 1, crossRoad[0]);
           }
         }
         break;
       }
       case ',': { // erba fiorita: stessa erba di '.' con 3-5 fiorellini deterministici
-        grass(ctx, x, y, '#7a9e58', '#9ab670', '#5e7e42', '#8aac68', h, { tuft: 1 });
-        var flowerColors = ['#ffffff', '#f0d048', '#f0a0c0'];
-        var nFlowers = 3 + (h % 3);
+        var flowerGrass = TERRAIN.grass[style.season];
+        grass(ctx, x, y, flowerGrass[0], flowerGrass[1], flowerGrass[2], flowerGrass[3], h, {
+          tuft: 1, macro: 1, tx: tx, ty: ty, wet: style.wet, ecology: 'grass'
+        });
+        var flowerColors = ['#d8ded4', '#d4bc62', '#c88c9f'];
+        var nFlowers = 1 + (h % 2);
         for (i = 0; i < nFlowers; i++) {
           var fx = 1 + ((h + i * 7) % 13), fy = 1 + ((h >> (i + 1)) % 13);
           R(ctx, x + fx, y + fy + 1, 1, 2, '#2f6a30');          // stelo
@@ -220,36 +566,51 @@
         break;
       }
       case 'w': {
-        R(ctx, x, y, 16, 16, '#4a86cc');
-        R(ctx, x, y, 16, 8, '#5090d8');
-        var off = ((frame >> 4) + tx + ty) % 2;
-        R(ctx, x + 2 + off * 2, y + 4, 4, 1, '#78b4e8');
-        R(ctx, x + 9 - off * 2, y + 9, 4, 1, '#78b4e8');
-        R(ctx, x + 4 + off, y + 13, 3, 1, '#6aa4e0');
-        R(ctx, x + 3 + off, y + 7, 2, 1, '#9cd0f0');
-        var spark = (frame >> 4) & 1; // scintille deterministiche che pulsano
-        if ((h % 3) === spark) R(ctx, x + 3 + (h % 9), y + 2 + ((h >> 2) % 6), 1, 1, '#ffffff');
-        if ((h % 4) === spark) R(ctx, x + 6 + (h % 6), y + 8 + ((h >> 3) % 5), 1, 1, '#eaf6ff');
-        // rim interno del bacino visto dall'alto: parete che scende nell'acqua
-        var rimPale = '#d6e2ec', rimMid = '#94a8bc', foam = '#d8ecf8';
-        if (cellAt(flags, tx, ty - 1) !== 'w') { R(ctx, x, y, 16, 1, rimPale); R(ctx, x, y + 1, 16, 2, rimMid); } // nord: 3px
-        if (cellAt(flags, tx - 1, ty) !== 'w') R(ctx, x, y, 2, 16, rimMid);      // ovest: 2px
-        if (cellAt(flags, tx + 1, ty) !== 'w') R(ctx, x + 14, y, 2, 16, rimMid); // est: 2px
-        if (cellAt(flags, tx, ty + 1) !== 'w') R(ctx, x, y + 15, 16, 1, foam);   // sud: 1px schiuma
+        var waterBase = style.wet ? '#356e7b' : '#3f7f91';
+        var waterDeep = style.wet ? '#285a68' : '#316979';
+        var waterLight = style.wet ? '#6da7aa' : '#76b5bd';
+        R(ctx, x, y, 16, 16, waterBase);
+        macroWash(ctx, x, y, tx, ty, waterLight, waterDeep, 0.1);
+        var waterPhase = (frame >> 4) & 3;
+        var off = (waterPhase + tx * 3 + ty) & 3;
+        // Tre linee morbide di diversa lunghezza: moto coerente, nessun flash.
+        R(ctx, x + 1 + off, y + 4, 6, 1, waterLight);
+        R(ctx, x + 8 - (off >> 1), y + 9, 6, 1, '#5f9ba4');
+        R(ctx, x + 3 + ((off + 1) & 2), y + 13, 4, 1, waterDeep);
+        if ((h % 5) === 0) R(ctx, x + 5 + (h % 5), y + 3 + ((h >> 3) % 8), 2, 1, '#a9d4cf');
+        // Acqua bassa e schiuma spezzata solo al contatto con la riva.
+        var rimPale = '#b9cbc1', rimMid = '#73978f', foam = '#d6e2d7';
+        if (cellAt(flags, tx, ty - 1) !== 'w') {
+          R(ctx, x, y, 16, 1, rimPale);
+          R(ctx, x, y + 1, 16, 2, rimMid);
+          R(ctx, x + 2 + (h % 4), y + 2, 5, 1, foam);
+        }
+        if (cellAt(flags, tx - 1, ty) !== 'w') {
+          R(ctx, x, y, 2, 16, rimMid);
+          R(ctx, x + 1, y + 3 + (h % 5), 1, 5, foam);
+        }
+        if (cellAt(flags, tx + 1, ty) !== 'w') {
+          R(ctx, x + 14, y, 2, 16, rimMid);
+          R(ctx, x + 14, y + 5 + (h % 4), 1, 5, foam);
+        }
+        if (cellAt(flags, tx, ty + 1) !== 'w') {
+          R(ctx, x, y + 14, 16, 2, rimMid);
+          R(ctx, x + 3 + (h % 4), y + 14, 6, 1, foam);
+        }
         break;
       }
       case 'T': { // sempreverde in pianta: chioma vista dall'alto, sfora in alto
-        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        styledGrass(ctx, x, y, h, tx, ty, style);
         canopyTop(ctx, x, y, tx, ty, flags, 'T', '#2e5e34', '#3d7a42', '#57a05a', '#1c3a22', '#183018', null);
         break;
       }
       case 'Y': { // sicomoro in pianta: chioma pallida con anello chiaro, vista dall'alto
-        grass(ctx, x, y, '#2f4d34', '#456249', '#233828', '#557555', h, { dapple: '#c0d078' });
+        styledGrass(ctx, x, y, h, tx, ty, style, { dapple: '#aebd85' }, true);
         canopyTop(ctx, x, y, tx, ty, flags, 'Y', '#3a6a40', '#4e8a52', '#7ab47e', '#264a2c', '#2a5030', '#cdd8a8');
         break;
       }
       case 'S': { // cartello 3D: due pali in prospettiva, asse inclinata, venatura, ombra
-        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        styledGrass(ctx, x, y, h, tx, ty, style);
         R(ctx, x + 3, y + 13, 10, 2, 'rgba(0,0,0,0.28)');  // ombra ellittica a terra (marcata)
         R(ctx, x + 2, y + 14, 12, 1, 'rgba(0,0,0,0.20)');
         R(ctx, x + 4, y + 12, 8, 1, 'rgba(0,0,0,0.16)');
@@ -316,7 +677,7 @@
         break;
       }
       case 'f':
-        floorWood(ctx, x, y);
+        floorWood(ctx, x, y, tx, ty, h);
         break;
       case 'c': // tappeto
         R(ctx, x, y, 16, 16, '#8a3a4a');
@@ -332,7 +693,7 @@
         R(ctx, x + 6, y + 7, 4, 2, '#d0a0a8');
         break;
       case 'C': // bancone / scrivania (box: faccia superiore + faccia frontale a sud)
-        floorWood(ctx, x, y);
+        floorWood(ctx, x, y, tx, ty, h);
         R(ctx, x + 1, y + 14, 14, 2, 'rgba(0,0,0,0.18)'); // ombra a terra (sud)
         R(ctx, x + 1, y + 1, 14, 13, '#5a3c1e');          // contorno scuro
         R(ctx, x + 2, y + 2, 12, 9, '#c89a5a');           // faccia superiore chiara
@@ -342,7 +703,7 @@
         R(ctx, x + 2, y + 11, 12, 1, '#6a4526');
         break;
       case 't': // tavolo (box più piccolo: faccia superiore + frontale)
-        floorWood(ctx, x, y);
+        floorWood(ctx, x, y, tx, ty, h);
         R(ctx, x + 3, y + 13, 10, 2, 'rgba(0,0,0,0.16)'); // ombra a terra
         R(ctx, x + 2, y + 2, 12, 11, '#5a3c1e');          // contorno
         R(ctx, x + 3, y + 3, 10, 8, '#c89a58');           // faccia superiore
@@ -351,7 +712,7 @@
         R(ctx, x + 3, y + 11, 10, 2, '#8a5f36');          // faccia frontale
         break;
       case 'h': // sedia (box piccolo + schienale a nord)
-        floorWood(ctx, x, y);
+        floorWood(ctx, x, y, tx, ty, h);
         R(ctx, x + 5, y + 13, 6, 1, 'rgba(0,0,0,0.16)');  // ombra a terra
         R(ctx, x + 4, y + 2, 8, 3, '#4a3018');            // schienale a nord (banda scura più alta)
         R(ctx, x + 4, y + 5, 8, 8, '#5a3c1e');            // contorno seduta
@@ -360,7 +721,7 @@
         R(ctx, x + 5, y + 11, 6, 2, '#8a5f30');           // faccia frontale
         break;
       case 'K': // letto (materasso dall'alto: cuscino a nord, coperta a sud)
-        floorWood(ctx, x, y);
+        floorWood(ctx, x, y, tx, ty, h);
         R(ctx, x + 1, y + 14, 14, 2, 'rgba(0,0,0,0.16)'); // ombra a terra
         R(ctx, x + 1, y + 1, 14, 13, '#5a3c22');          // telaio / contorno
         R(ctx, x + 2, y + 2, 12, 10, '#e8e0d0');          // materasso
@@ -372,7 +733,7 @@
         R(ctx, x + 2, y + 12, 12, 2, '#8a5f3a');          // bordo frontale 2px
         break;
       case 'U': // comò / mobile (box: faccia superiore sottile + frontale con cassetti)
-        floorWood(ctx, x, y);
+        floorWood(ctx, x, y, tx, ty, h);
         R(ctx, x + 1, y + 14, 14, 2, 'rgba(0,0,0,0.16)'); // ombra a terra
         R(ctx, x + 1, y + 2, 14, 12, '#5a3c1e');          // contorno
         R(ctx, x + 2, y + 3, 12, 3, '#a67440');           // faccia superiore chiara
@@ -393,27 +754,21 @@
         R(ctx, x + 6 + oo, y + 6, 2, 1, '#3a3a54');
         break;
       }
-      case 'R': // tenda rossa (Black Lodge): pieghe con 3 rossi + luci
-        R(ctx, x, y, 16, 16, '#8a1020');
-        for (i = 0; i < 4; i++) {
-          var fx = x + i * 4;
-          R(ctx, fx, y, 4, 16, i % 2 ? '#b82438' : '#9c1828');
-          R(ctx, fx, y, 1, 16, '#6a0c18');
-          R(ctx, fx + 2, y, 1, 16, i % 2 ? '#d0405a' : '#b82a40');
+      case 'R': // tenda rossa: pieghe ampie, stabili nella proiezione obliqua
+        R(ctx, x, y, 16, 16, '#94182a');
+        for (i = 0; i < 2; i++) {
+          var fx = x + i * 8;
+          R(ctx, fx, y, 2, 16, '#71101e');
+          R(ctx, fx + 2, y, 4, 16, '#9e1d31');
+          R(ctx, fx + 3, y, 2, 16, '#b92c42');
+          R(ctx, fx + 6, y, 2, 16, '#821525');
         }
-        R(ctx, x, y, 16, 2, '#6a0c18');
-        R(ctx, x, y + 2, 16, 1, '#c83048');
-        R(ctx, x, y + 14, 16, 2, '#5a0a14');
+        R(ctx, x, y, 16, 2, '#74111f');
+        R(ctx, x, y + 2, 16, 2, '#a92338');
+        R(ctx, x, y + 14, 16, 2, '#68101b');
         break;
-      case 'Z': // pavimento zig-zag (chevron della Loggia Nera: diagonali che si invertono)
-        for (j = 0; j < 16; j++) {
-          var ph = j % 8;
-          var dshift = ph < 4 ? ph : 7 - ph;
-          for (i = 0; i < 16; i++) {
-            var band = Math.floor((i + dshift) / 4) % 2;
-            R(ctx, x + i, y + j, 1, 1, band ? '#18100a' : '#f0e6cc');
-          }
-        }
+      case 'Z': // chevron vettoriale largo, senza scalette da un pixel
+        chevronFloor(ctx, x, y, tx, ty);
         break;
       case 'M': // statua
         S.drawTile(ctx, 'Z', x, y, tx, ty, frame, flags);
@@ -429,7 +784,7 @@
         if (flags.woodsOpen) {
           S.drawTile(ctx, 'p', x, y, tx, ty, frame, flags);
         } else {
-          grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+          styledGrass(ctx, x, y, h, tx, ty, style);
           R(ctx, x + 1, y + 14, 3, 1, 'rgba(0,0,0,0.18)'); // ombra pali
           R(ctx, x + 12, y + 14, 3, 1, 'rgba(0,0,0,0.18)');
           R(ctx, x + 1, y + 3, 3, 12, '#4a4a4a');           // palo sx volumetrico
@@ -449,7 +804,7 @@
         }
         break;
       case 'L': { // lampione: base + palo sottile + testa che si accende di caldo
-        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        styledGrass(ctx, x, y, h, tx, ty, style);
         R(ctx, x + 4, y + 14, 8, 2, 'rgba(0,0,0,0.20)'); // ombra a terra
         R(ctx, x + 5, y + 11, 6, 4, '#2e2e2e');          // base
         R(ctx, x + 5, y + 11, 6, 1, '#4a4a4a');
@@ -461,7 +816,7 @@
         break;
       }
       case 'P': { // palo del telefono: palo spesso + crossarm orizzontale + 2 isolatori
-        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        styledGrass(ctx, x, y, h, tx, ty, style);
         R(ctx, x + 5, y + 14, 6, 2, 'rgba(0,0,0,0.20)'); // ombra a terra
         R(ctx, x + 6, y + 1, 3, 14, '#3a2818');          // palo spesso
         R(ctx, x + 6, y + 1, 1, 14, '#523a24');
@@ -472,7 +827,7 @@
         break;
       }
       case 'B': { // panchina: schienale a nord + assi del sedile, vista frontale-dall'alto
-        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        styledGrass(ctx, x, y, h, tx, ty, style);
         R(ctx, x + 2, y + 14, 12, 2, 'rgba(0,0,0,0.18)'); // ombra a terra
         R(ctx, x + 3, y + 3, 10, 3, '#4a3018');           // schienale (banda scura a nord)
         R(ctx, x + 3, y + 3, 10, 1, '#6a4526');
@@ -485,7 +840,7 @@
         break;
       }
       case 'F': { // staccionata bianca: pali + corrimano, saldato ai lati se il vicino è la stessa staccionata
-        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        styledGrass(ctx, x, y, h, tx, ty, style);
         var fl = cellAt(flags, tx - 1, ty) === 'F';
         var fr = cellAt(flags, tx + 1, ty) === 'F';
         R(ctx, x + 2, y + 12, 12, 1, 'rgba(0,0,0,0.16)'); // ombra a terra
@@ -502,7 +857,7 @@
         break;
       }
       case 'A': { // aiuola: cordolo di pietra chiara + terra scura + fiori vivaci
-        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        styledGrass(ctx, x, y, h, tx, ty, style);
         R(ctx, x + 2, y + 14, 12, 1, 'rgba(0,0,0,0.14)'); // ombra a terra
         R(ctx, x + 2, y + 2, 12, 12, '#d8d0c0');          // cordolo chiaro
         R(ctx, x + 3, y + 3, 10, 10, '#3a2818');          // terra scura
@@ -515,7 +870,7 @@
         break;
       }
       case 'H': { // idrante rosso: cofano scuro + due bocchette laterali
-        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        styledGrass(ctx, x, y, h, tx, ty, style);
         R(ctx, x + 5, y + 13, 6, 2, 'rgba(0,0,0,0.18)'); // ombra a terra
         R(ctx, x + 6, y + 4, 4, 9, '#a81c1c');           // corpo
         R(ctx, x + 6, y + 4, 1, 9, '#c83a3a');           // luce laterale
@@ -528,7 +883,7 @@
         break;
       }
       case 'E': { // cassetta postale: scatola blu-grigia su palo + bandierina rossa laterale
-        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        styledGrass(ctx, x, y, h, tx, ty, style);
         R(ctx, x + 5, y + 14, 6, 2, 'rgba(0,0,0,0.18)'); // ombra a terra
         R(ctx, x + 7, y + 9, 2, 6, '#4a4a52');           // palo
         R(ctx, x + 4, y + 3, 8, 6, '#5a6a7a');           // scatola
@@ -538,7 +893,7 @@
         break;
       }
       case 'n': { // cespuglio: chioma piccola e tonda, palette degli alberi senza tronco né sfondamento
-        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        styledGrass(ctx, x, y, h, tx, ty, style);
         R(ctx, x + 3, y + 13, 10, 2, 'rgba(0,0,0,0.16)'); // ombra a terra
         R(ctx, x + 4, y + 4, 8, 8, '#2e5e34');            // rim scuro
         R(ctx, x + 3, y + 6, 1, 4, '#2e5e34');            // arrotondamento bordo sx
@@ -555,7 +910,7 @@
         break;
       }
       case 'G': // lapide del cimitero (top-down: base in pietra + ombra)
-        grass(ctx, x, y, '#a8b878', '#c4cc94', '#8ca05c', '#7a9450', h);
+        styledGrass(ctx, x, y, h, tx, ty, style);
         R(ctx, x + 3, y + 12, 10, 2, 'rgba(0,0,0,0.22)');
         R(ctx, x + 4, y + 3, 8, 9, '#8a8d88');
         R(ctx, x + 5, y + 2, 6, 1, '#a5a8a0');

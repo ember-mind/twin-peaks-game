@@ -6,7 +6,10 @@
 (function () {
   if (typeof window === 'undefined') return; // ambiente node (test/smoke.js): niente DOM
 
-  var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  // `?touch=1` permette audit ripetibili da browser desktop e controller
+  // assistivi; sui telefoni il rilevamento resta automatico.
+  var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0 ||
+    /(?:\?|&)touch=1(?:&|$)/.test(window.location.search);
   if (!isTouch) return;
 
   // segnala al motore che i comandi sono touch: il titolo mostra le scritte giuste
@@ -17,6 +20,7 @@
   var DEAD = 24;              // raggio morto al centro del d-pad (px)
   var TAP_MAX_MS = 300;       // durata massima di un "tap" (per l'avanzamento dialoghi)
   var TAP_MAX_MOVE = 12;      // spostamento massimo di un "tap" (px)
+  var MENU_SWIPE_MOVE = 28;   // gesto verticale intenzionale nel fascicolo (px)
 
   function css(el, props) {
     for (var k in props) if (props.hasOwnProperty(k)) el.style[k] = props[k];
@@ -24,6 +28,11 @@
 
   function sendKey(type, code) {
     window.dispatchEvent(new KeyboardEvent(type, { code: code }));
+  }
+
+  function pressKey(code) {
+    sendKey('keydown', code);
+    sendKey('keyup', code);
   }
 
   function noContextMenu(el) {
@@ -67,14 +76,36 @@
   function buildDpad() {
     var dpad = document.createElement('div');
     dpad.className = CTRL_CLASS;
+    dpad.setAttribute('role', 'group');
+    dpad.setAttribute('aria-label', 'Controllo direzionale: muovi in quattro direzioni');
     css(dpad, {
-      position: 'fixed', left: '16px',
-      bottom: 'calc(16px + env(safe-area-inset-bottom))',
+      position: 'fixed',
+      left: 'calc(16px + env(safe-area-inset-left, 0px))',
+      bottom: 'calc(16px + env(safe-area-inset-bottom, 0px))',
       width: '150px', height: '150px',
-      background: 'rgba(0,0,0,0.35)', borderRadius: '24px',
-      touchAction: 'none', opacity: '0.5', zIndex: '9999',
+      background: 'transparent', border: '0', borderRadius: '0',
+      boxShadow: 'none',
+      touchAction: 'none', opacity: '0.85', zIndex: '9999',
+      transition: 'opacity 120ms ease, transform 120ms ease',
       userSelect: 'none', webkitUserSelect: 'none', webkitTouchCallout: 'none'
     });
+
+    var cross = document.createElement('span');
+    cross.setAttribute('aria-hidden', 'true');
+    css(cross, {
+      position: 'absolute', inset: '0', background: '#d8d0a0',
+      clipPath: 'polygon(34% 0,66% 0,66% 34%,100% 34%,100% 66%,66% 66%,66% 100%,34% 100%,34% 66%,0 66%,0 34%,34% 34%)',
+      filter: 'drop-shadow(4px 4px 0 #080c09)', pointerEvents: 'none'
+    });
+    dpad.appendChild(cross);
+    var crossCore = document.createElement('span');
+    crossCore.setAttribute('aria-hidden', 'true');
+    css(crossCore, {
+      position: 'absolute', inset: '5px', background: '#17241b',
+      clipPath: 'polygon(34% 0,66% 0,66% 34%,100% 34%,100% 66%,66% 66%,66% 100%,34% 100%,34% 66%,0 66%,0 34%,34% 34%)',
+      boxShadow: 'inset 0 0 0 2px #344438', pointerEvents: 'none'
+    });
+    dpad.appendChild(crossCore);
 
     var arrows = { up: '▲', down: '▼', left: '◀', right: '▶' };
     var pos = {
@@ -86,10 +117,11 @@
     for (var d in arrows) {
       var span = document.createElement('span');
       span.textContent = arrows[d];
+      span.setAttribute('aria-hidden', 'true');
       css(span, {
         position: 'absolute', width: '28px', height: '28px',
         lineHeight: '28px', textAlign: 'center',
-        color: 'rgba(255,255,255,0.7)', fontSize: '20px',
+        color: '#fff8d0', fontFamily: 'monospace', fontSize: '20px',
         pointerEvents: 'none'
       });
       css(span, pos[d]);
@@ -133,42 +165,312 @@
   /* ---------------- pulsanti A/B ---------------- */
 
   function buildButton(opts) {
-    var btn = document.createElement('div');
+    var btn = document.createElement('button');
+    btn.type = 'button';
     btn.className = CTRL_CLASS;
     btn.textContent = opts.label;
+    btn.setAttribute('aria-label', opts.ariaLabel);
+    btn.setAttribute('title', opts.ariaLabel);
     css(btn, {
-      position: 'fixed', right: opts.right, bottom: opts.bottom,
+      position: 'fixed',
+      right: 'calc(' + opts.right + 'px + env(safe-area-inset-right, 0px))',
+      bottom: 'calc(' + opts.bottom + 'px + env(safe-area-inset-bottom, 0px))',
       width: opts.size + 'px', height: opts.size + 'px',
-      borderRadius: '50%',
-      background: 'rgba(0,0,0,0.35)', border: '2px solid rgba(255,255,255,0.4)',
-      color: 'rgba(255,255,255,0.8)', fontFamily: 'sans-serif',
+      borderRadius: '6px',
+      background: '#17241b', border: '4px solid #d8d0a0',
+      boxShadow: 'inset 0 0 0 2px #344438, 4px 4px 0 #080c09',
+      color: '#fff8d0', fontFamily: 'monospace',
       fontWeight: 'bold', fontSize: Math.round(opts.size * 0.4) + 'px',
+      padding: '0', margin: '0', lineHeight: '1', appearance: 'none',
+      webkitAppearance: 'none',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      touchAction: 'none', opacity: '0.5', zIndex: '9999',
+      flexDirection: 'column',
+      touchAction: 'none', opacity: '0.85', zIndex: '9999',
+      transition: 'opacity 120ms ease, transform 120ms ease',
       userSelect: 'none', webkitUserSelect: 'none', webkitTouchCallout: 'none'
     });
 
-    var touchId = null;
+    var touchId = null, ignoreClickUntil = 0, activeCode = null;
+    function currentCode() {
+      var game = window.GAME || {};
+      if (opts.secondary && interactionMode() === 'play' && game.NarrativeAdapter &&
+          game.NarrativeAdapter.isNotebookEnabled && game.NarrativeAdapter.isNotebookEnabled()) return 'KeyT';
+      return opts.code;
+    }
     function onStart(e) {
       e.preventDefault();
       if (touchId !== null) return; // gia' un dito su questo pulsante
       touchId = e.changedTouches[0].identifier;
-      sendKey('keydown', opts.code);
+      btn.style.transform = 'translate(2px, 2px)';
+      btn.style.boxShadow = 'inset 0 0 0 3px #344438, 1px 1px 0 #080c09';
+      activeCode = currentCode();
+      sendKey('keydown', activeCode);
     }
     function onEnd(e) {
       e.preventDefault();
       for (var i = 0; i < e.changedTouches.length; i++) {
         if (e.changedTouches[i].identifier === touchId) {
           touchId = null;
-          sendKey('keyup', opts.code);
+          sendKey('keyup', activeCode || currentCode());
+          activeCode = null;
+          btn.style.transform = 'scale(1)';
+          btn.style.boxShadow = 'inset 0 0 0 2px #344438, 4px 4px 0 #080c09';
+          ignoreClickUntil = now() + 500; // il click sintetico del touch non deve duplicare l'azione
         }
       }
+    }
+    function onClick(e) {
+      e.preventDefault();
+      if (now() < ignoreClickUntil) return;
+      pressKey(currentCode()); // attivazione da switch-control/screen reader/tastiera
     }
     btn.addEventListener('touchstart', onStart);
     btn.addEventListener('touchend', onEnd);
     btn.addEventListener('touchcancel', onEnd);
+    btn.addEventListener('click', onClick);
     noContextMenu(btn);
     return btn;
+  }
+
+  function buttonFace(btn, letter, hint) {
+    while (btn.children && btn.children.length) btn.removeChild(btn.children[0]);
+    btn.textContent = '';
+    var main = document.createElement('span');
+    main.textContent = letter;
+    css(main, { display: 'block', fontSize: '22px', lineHeight: '20px', pointerEvents: 'none' });
+    btn.appendChild(main);
+    if (hint) {
+      var sub = document.createElement('span');
+      sub.textContent = hint;
+      css(sub, { display: 'block', fontSize: '8px', lineHeight: '10px', letterSpacing: '1px', pointerEvents: 'none' });
+      btn.appendChild(sub);
+    }
+  }
+
+  /* ---------------- layout per stato di gioco ---------------- */
+
+  var uiDpad = null, uiA = null, uiB = null;
+  var controlMode = '';
+
+  function viewportSize() {
+    var vv = window.visualViewport;
+    return {
+      width: Math.max(1, Math.round(vv ? vv.width : window.innerWidth)),
+      height: Math.max(1, Math.round(vv ? vv.height : window.innerHeight))
+    };
+  }
+
+  function playLayout() {
+    var vp = viewportSize(), landscape = vp.width > vp.height;
+    var shortSide = Math.min(vp.width, vp.height);
+    var stage = document.getElementById ? document.getElementById('stage') : null;
+    var rect = stage ? stage.getBoundingClientRect() : { left: 0, right: vp.width, top: 0, height: vp.height };
+    var side = landscape ? Math.max(0, Math.min(rect.left, vp.width - rect.right)) : 0;
+    var gutter = landscape && side >= 88;
+    var dpad = landscape ? Math.min(144, Math.max(96, side - 24)) : (vp.width < 360 ? 128 : 144);
+    return {
+      landscape: landscape, gutter: gutter, dpad: dpad,
+      dpadLeft: Math.max(8, Math.round((rect.left - dpad) / 2)),
+      dpadTop: Math.max(8, Math.round((vp.height - dpad) / 2)),
+      gutterRight: Math.max(8, Math.round((vp.width - rect.right - 64) / 2)),
+      edge: landscape ? 10 : 16,
+      a: landscape ? 64 : 72,
+      aRight: landscape ? 14 : 20,
+      aBottom: landscape ? 76 : 90,
+      b: landscape ? 64 : 72,
+      bRight: landscape ? 82 : 96,
+      bBottom: landscape ? 14 : 20
+    };
+  }
+
+  function narrativeChoiceActive() {
+    // DOM semantico = fonte immediata; RetroUI.inspect copre anche WebView
+    // dove il selettore complesso puo' non essere ancora aggiornato.
+    if (document.querySelectorAll) {
+      var roots = document.querySelectorAll('#narrative .nw-root');
+      for (var i = roots.length - 1; i >= 0; i--) {
+        var root = roots[i];
+        var isNotebook = (' ' + (root.className || '') + ' ').indexOf(' nb-root ') >= 0;
+        if (!isNotebook && root.style.display !== 'none' && root.querySelector && root.querySelector('.nw-opt')) return true;
+      }
+    }
+    var retro = window.GAME && window.GAME.RetroUI;
+    var view = retro && retro.inspect ? retro.inspect() : null;
+    return !!(view && view.kind === 'choice');
+  }
+
+  function recoveryChoiceActive() {
+    if (!document.querySelectorAll) return false;
+    var options = document.querySelectorAll('#narrative .nw-save-recovery .nw-opt');
+    return !!(options && options.length > 1);
+  }
+
+  function interactionMode() {
+    var game = window.GAME || {};
+    // Recovery vive sopra titolo/boot, fuori da adapter e finale. Deve comunque
+    // usare lo stesso contratto touch delle altre scelte: D-pad + A.
+    if (recoveryChoiceActive()) return 'narrative-choice';
+    if (game.NarrativeFinaleProduction && game.NarrativeFinaleProduction.isActive &&
+        game.NarrativeFinaleProduction.isActive()) return narrativeChoiceActive() ? 'narrative-choice' : 'narrative';
+    if (game.NarrativeAdapter && game.NarrativeAdapter.active &&
+        game.NarrativeAdapter.active()) return narrativeChoiceActive() ? 'narrative-choice' : 'narrative';
+    var st = game.Engine && game.Engine.state;
+    if (!st) return 'advance';
+    if (st.menu) return 'menu';
+    if (st.dialogue) return 'dialogue';
+    if (st.mode === 'play') return 'play';
+    if (st.mode === 'title') return 'title';
+    return 'advance'; // intro e finale: serve soltanto avanzare
+  }
+
+  function showControl(el, visible, opacity) {
+    if (!el) return;
+    el.style.visibility = visible ? 'visible' : 'hidden';
+    el.style.pointerEvents = visible ? 'auto' : 'none';
+    el.style.opacity = visible ? String(opacity) : '0';
+    el.style.transform = visible ? 'scale(1)' : 'scale(0.88)';
+    el.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    if (el.tagName === 'BUTTON') el.tabIndex = visible ? 0 : -1;
+  }
+
+  function compactTopButton(btn, size, top, right) {
+    css(btn, {
+      width: size + 'px', height: size + 'px',
+      top: 'calc(' + top + 'px + env(safe-area-inset-top, 0px))',
+      right: 'calc(' + right + 'px + env(safe-area-inset-right, 0px))',
+      bottom: 'auto',
+      fontSize: Math.round(size * 0.38) + 'px'
+    });
+  }
+
+  function restorePlayButton(btn, size, right, bottom) {
+    css(btn, {
+      width: size + 'px', height: size + 'px',
+      top: 'auto',
+      right: 'calc(' + right + 'px + env(safe-area-inset-right, 0px))',
+      bottom: 'calc(' + bottom + 'px + env(safe-area-inset-bottom, 0px))',
+      fontSize: Math.round(size * 0.4) + 'px'
+    });
+  }
+
+  function placeGutterButton(btn, size, right, top) {
+    css(btn, {
+      width: size + 'px', height: size + 'px',
+      top: top + 'px',
+      right: right + 'px', bottom: 'auto',
+      fontSize: Math.round(size * 0.4) + 'px'
+    });
+  }
+
+  function syncControls(force) {
+    var mode = interactionMode();
+    if (mode === controlMode && !force) return;
+    controlMode = mode;
+
+    // Lasciare un d-pad nascosto con una direzione attiva farebbe camminare
+    // Cooper dietro al menu/dialogo: rilascia sempre il lease direzionale.
+    if (mode !== 'play') {
+      dpadTouchId = null;
+      setDpadDir(null);
+    }
+
+    if (mode === 'play') {
+      var layout = playLayout();
+      if (layout.gutter) {
+        css(uiDpad, {
+          left: layout.dpadLeft + 'px', top: layout.dpadTop + 'px', bottom: 'auto',
+          width: layout.dpad + 'px', height: layout.dpad + 'px', borderRadius: '6px'
+        });
+        placeGutterButton(uiA, 64, layout.gutterRight, Math.round(viewportSize().height / 2 - 76));
+        placeGutterButton(uiB, 64, layout.gutterRight + 58, Math.round(viewportSize().height / 2 + 18));
+      } else {
+        css(uiDpad, {
+          left: 'calc(' + layout.edge + 'px + env(safe-area-inset-left, 0px))', top: 'auto',
+          bottom: 'calc(' + layout.edge + 'px + env(safe-area-inset-bottom, 0px))',
+          width: layout.dpad + 'px', height: layout.dpad + 'px', borderRadius: '6px'
+        });
+        restorePlayButton(uiA, layout.a, layout.aRight, layout.aBottom);
+        restorePlayButton(uiB, layout.b, layout.bRight, layout.bBottom);
+      }
+      buttonFace(uiA, 'A', 'AZIONE');
+      var game = window.GAME || {};
+      var notebook = game.NarrativeAdapter && game.NarrativeAdapter.isNotebookEnabled && game.NarrativeAdapter.isNotebookEnabled();
+      buttonFace(uiB, 'B', notebook ? 'TACCUINO' : 'MENU');
+      uiA.setAttribute('aria-label', 'Interagisci');
+      uiB.setAttribute('aria-label', 'Apri fascicolo indizi');
+      showControl(uiDpad, true, 0.85);
+      showControl(uiA, true, 0.85);
+      showControl(uiB, true, 0.85);
+    } else if (mode === 'menu') {
+      // Il fascicolo usa tutto il portrait: niente overlay in basso.
+      // Scorrimento = swipe verticale sul documento; tap o × = chiusura.
+      var menuLayout = playLayout();
+      if (menuLayout.gutter) placeGutterButton(uiB, 64, menuLayout.gutterRight, Math.round(viewportSize().height / 2 - 32));
+      else compactTopButton(uiB, 44, 10, 10);
+      buttonFace(uiB, '×', 'CHIUDI');
+      uiB.setAttribute('aria-label', 'Chiudi fascicolo indizi');
+      showControl(uiDpad, false, 0);
+      showControl(uiA, false, 0);
+      showControl(uiB, true, 0.72);
+    } else if (mode === 'narrative-choice') {
+      // Il canvas mostra una sola opzione alla volta. D-pad cambia focus;
+      // A conferma. Stessi key event della tastiera, quindi nessun secondo
+      // percorso di commit e nessun doppio avanzamento da touch sintetico.
+      var choiceLayout = playLayout();
+      if (choiceLayout.gutter) {
+        css(uiDpad, {
+          left: choiceLayout.dpadLeft + 'px', top: choiceLayout.dpadTop + 'px', bottom: 'auto',
+          width: choiceLayout.dpad + 'px', height: choiceLayout.dpad + 'px', borderRadius: '6px'
+        });
+        placeGutterButton(uiA, 64, choiceLayout.gutterRight, Math.round(viewportSize().height / 2 - 32));
+      } else {
+        css(uiDpad, {
+          left: 'calc(' + choiceLayout.edge + 'px + env(safe-area-inset-left, 0px))', top: 'auto',
+          bottom: 'calc(' + choiceLayout.edge + 'px + env(safe-area-inset-bottom, 0px))',
+          width: choiceLayout.dpad + 'px', height: choiceLayout.dpad + 'px', borderRadius: '6px'
+        });
+        restorePlayButton(uiA, choiceLayout.a, choiceLayout.aRight, choiceLayout.aBottom);
+      }
+      buttonFace(uiA, 'A', 'SCEGLI');
+      uiA.setAttribute('aria-label', 'Conferma scelta');
+      showControl(uiDpad, true, 0.85);
+      showControl(uiA, true, 0.85);
+      showControl(uiB, false, 0);
+    } else if (mode === 'narrative' || mode === 'dialogue' || mode === 'advance') {
+      var advanceLayout = playLayout();
+      if (advanceLayout.gutter) placeGutterButton(uiA, 64, advanceLayout.gutterRight, Math.round(viewportSize().height / 2 - 32));
+      else compactTopButton(uiA, 50, 12, 12);
+      buttonFace(uiA, 'A', 'AVANTI');
+      uiA.setAttribute('aria-label', (mode === 'dialogue' || mode === 'narrative') ? 'Avanza dialogo' : 'Continua');
+      showControl(uiDpad, false, 0);
+      showControl(uiA, true, 0.68);
+      showControl(uiB, false, 0);
+    } else if (mode === 'title') {
+      var titleLayout = playLayout();
+      if (titleLayout.gutter) {
+        placeGutterButton(uiA, 64, titleLayout.gutterRight, Math.round(viewportSize().height / 2 - 70));
+        placeGutterButton(uiB, 64, titleLayout.gutterRight + 58, Math.round(viewportSize().height / 2 + 20));
+      } else {
+        compactTopButton(uiA, 50, 12, 12);
+        compactTopButton(uiB, 42, 70, 16);
+      }
+      buttonFace(uiA, 'A', 'CONTINUA');
+      buttonFace(uiB, 'B', 'NUOVA');
+      uiA.setAttribute('aria-label', 'Continua partita');
+      uiB.setAttribute('aria-label', 'Nuova partita');
+      showControl(uiDpad, false, 0);
+      showControl(uiA, true, 0.68);
+      showControl(uiB, true, 0.58);
+    } else {
+      showControl(uiDpad, false, 0);
+      showControl(uiA, false, 0);
+      showControl(uiB, false, 0);
+    }
+  }
+
+  function watchControls() {
+    syncControls();
+    window.requestAnimationFrame(watchControls);
   }
 
   /* ---------------- tap ovunque = A (avanza dialoghi/titolo) ---------------- */
@@ -194,49 +496,50 @@
       var dx = t.clientX - tapX, dy = t.clientY - tapY;
       var moved = Math.sqrt(dx * dx + dy * dy);
       tapId = null;
+      if (interactionMode() === 'menu' && dt < 900 &&
+          Math.abs(dy) >= MENU_SWIPE_MOVE && Math.abs(dy) > Math.abs(dx) * 1.15) {
+        pressKey(dy < 0 ? 'ArrowUp' : 'ArrowDown');
+        return;
+      }
+      // UI narrativa bitmap gestisce il proprio click. Inviare anche Enter
+      // avanzerebbe due nodi con un solo tap su Safari/Chrome mobile.
+      if (interactionMode().indexOf('narrative') === 0) return;
       if (dt < TAP_MAX_MS && moved < TAP_MAX_MOVE) {
-        sendKey('keydown', 'Enter');
-        sendKey('keyup', 'Enter');
+        pressKey('Enter');
       }
     }
-  }
-
-  /* ---------------- suggerimento iniziale ("tocca per iniziare") -------- */
-
-  function buildHint() {
-    var hint = document.createElement('div');
-    hint.textContent = 'tocca per iniziare';
-    css(hint, {
-      position: 'fixed', left: '50%', bottom: '20%',
-      transform: 'translateX(-50%)',
-      color: 'rgba(255,255,255,0.8)', fontFamily: 'sans-serif',
-      fontSize: '14px', letterSpacing: '1px',
-      pointerEvents: 'none', zIndex: '9998'
-    });
-    return hint;
   }
 
   /* ---------------- avvio ---------------- */
 
   function setup() {
-    var dpad = buildDpad();
-    var btnA = buildButton({ label: 'A', code: 'Enter', size: 72, right: '20px', bottom: 'calc(90px + env(safe-area-inset-bottom))' });
-    var btnB = buildButton({ label: 'B', code: 'Escape', size: 56, right: '96px', bottom: 'calc(20px + env(safe-area-inset-bottom))' });
-    var hint = buildHint();
-
-    document.body.appendChild(dpad);
-    document.body.appendChild(btnA);
-    document.body.appendChild(btnB);
-    document.body.appendChild(hint);
+    uiDpad = buildDpad();
+    uiA = buildButton({ label: 'A', ariaLabel: 'Interagisci', code: 'Enter', size: 72, right: 20, bottom: 90 });
+    uiB = buildButton({ label: 'B', ariaLabel: 'Apri fascicolo indizi', code: 'Escape', secondary: true, size: 56, right: 96, bottom: 20 });
+    document.body.appendChild(uiDpad);
+    document.body.appendChild(uiA);
+    document.body.appendChild(uiB);
 
     document.addEventListener('touchstart', onDocTouchStart, { passive: true });
     document.addEventListener('touchend', onDocTouchEnd, { passive: true });
 
-    // rimuove il suggerimento al primo tocco, ovunque esso avvenga
-    document.addEventListener('touchstart', function removeHint() {
-      if (hint.parentNode) hint.parentNode.removeChild(hint);
-      document.removeEventListener('touchstart', removeHint, true);
-    }, { capture: true, once: true });
+    syncControls();
+    window.addEventListener('resize', function () { syncControls(true); });
+    window.addEventListener('orientationchange', function () { syncControls(true); });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', function () { syncControls(true); });
+    }
+    window.addEventListener('blur', function () {
+      dpadTouchId = null;
+      setDpadDir(null);
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        dpadTouchId = null;
+        setDpadDir(null);
+      }
+    });
+    window.requestAnimationFrame(watchControls);
   }
 
   if (document.readyState === 'loading') {

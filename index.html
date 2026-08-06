@@ -2,48 +2,367 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>TWIN PEAKS — Il Mistero di Laura Palmer</title>
 <style>
-  html, body { margin: 0; padding: 0; background: #000; height: 100%; overflow: hidden; touch-action: none; }
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%; height: 100dvh;
+    background: #000; overflow: hidden; overscroll-behavior: none; touch-action: none;
+  }
+  body { position: fixed; inset: 0; }
   #stage { position: fixed; inset: 0; touch-action: none; }
   #stage canvas {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
+  }
+  #presentation {
+    z-index: 0;
+    background: #08070b;
+    image-rendering: auto;
+    pointer-events: none;
+    transition: opacity 480ms ease;
+  }
+  #gl {
+    z-index: 1;
+    background: #000;
+    image-rendering: auto;
+    transition: opacity 320ms ease;
+  }
+  #game {
+    z-index: 7;
+    background: transparent;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+    object-fit: contain;
+    object-position: center bottom;
+    transition: opacity 240ms ease;
   }
-  #gl { background: #000; }
-  #game { background: transparent; }
+  body[data-ui-mode="full"] #game {
+    object-position: center center;
+    image-rendering: auto;
+  }
+  body[data-ui-mode="full"] #presentation { opacity: 1; }
+  body[data-ui-mode="full"] #gl { opacity: 0; }
+  body[data-ui-mode="play"] #presentation { opacity: 0; }
+  body[data-screen="title"] #game,
+  body[data-screen="intro"] #game,
+  body[data-screen="end"] #game { opacity: 0; }
+  body[data-dialogue="true"] #game { opacity: 0; }
+  #cinematic-ui {
+    position: absolute;
+    left: 50%;
+    z-index: 9;
+    width: min(650px, calc(100vw - 48px));
+    box-sizing: border-box;
+    color: #efe8da;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, 12px);
+    transition: opacity 420ms ease, transform 520ms cubic-bezier(.2,.8,.2,1);
+    font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    text-align: center;
+    text-shadow: 0 2px 14px rgba(0,0,0,.78);
+  }
+  body[data-screen="title"] #cinematic-ui,
+  body[data-screen="intro"] #cinematic-ui,
+  body[data-screen="end"] #cinematic-ui {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  body[data-screen="title"] #cinematic-ui {
+    bottom: 7vh;
+    padding: 16px 26px 14px;
+    background: radial-gradient(ellipse at center, rgba(9,5,8,.58), rgba(9,5,8,0) 72%);
+  }
+  body[data-screen="intro"] #cinematic-ui,
+  body[data-screen="end"] #cinematic-ui {
+    top: 50%;
+    transform: translate(-50%, -47%);
+    padding: 34px 42px 31px;
+    background: linear-gradient(145deg, rgba(12,7,11,.88), rgba(19,10,14,.70));
+    border: 1px solid rgba(210,167,92,.54);
+    box-shadow: 0 22px 70px rgba(0,0,0,.42), inset 0 0 0 1px rgba(255,255,255,.035);
+    backdrop-filter: blur(8px);
+  }
+  #cinematic-kicker {
+    color: #cdb27a;
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+  }
+  #cinematic-title {
+    margin: 11px 0 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(24px, 3.1vw, 38px);
+    font-weight: 500;
+    letter-spacing: .04em;
+  }
+  body[data-screen="title"] #cinematic-title,
+  body[data-screen="title"] #cinematic-body { display: none; }
+  #cinematic-body {
+    margin: 17px auto 0;
+    max-width: 540px;
+    color: #ddd6ca;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(16px, 1.8vw, 20px);
+    font-style: italic;
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+  #cinematic-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 19px;
+    padding: 10px 16px 9px;
+    border-top: 1px solid rgba(210,167,92,.68);
+    border-bottom: 1px solid rgba(210,167,92,.68);
+    color: #fff2d0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .17em;
+    text-transform: uppercase;
+    animation: breathe 2.4s ease-in-out infinite;
+  }
+  #cinematic-action::before {
+    content: "◆";
+    color: #cda75b;
+    font-size: 8px;
+  }
+  #cinematic-meta {
+    margin-top: 14px;
+    color: rgba(239,231,220,.88);
+    font-size: 12px;
+    font-weight: 550;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+  }
+  @keyframes breathe {
+    0%, 100% { opacity: .68; }
+    50% { opacity: 1; }
+  }
+  @media (max-width: 620px) {
+    body[data-screen="title"] #cinematic-ui { bottom: 5vh; }
+    body[data-screen="intro"] #cinematic-ui,
+    body[data-screen="end"] #cinematic-ui { padding: 25px 22px 23px; }
+    #cinematic-meta { letter-spacing: .05em; }
+  }
+  #dialogue-ui {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(18px, 4vh, 44px);
+    z-index: 10;
+    width: min(920px, calc(100vw - 44px));
+    min-height: 102px;
+    box-sizing: border-box;
+    padding: 27px 62px 21px 32px;
+    color: #f1eadf;
+    background:
+      linear-gradient(100deg, rgba(13,17,27,.96), rgba(9,11,19,.90)),
+      radial-gradient(circle at 15% 0%, rgba(112,37,54,.24), transparent 45%);
+    border: 1px solid rgba(205,178,122,.82);
+    box-shadow:
+      0 22px 70px rgba(0,0,0,.50),
+      inset 0 0 0 3px rgba(74,86,119,.32);
+    opacity: 0;
+    transform: translate(-50%, 18px);
+    transition: opacity 210ms ease, transform 280ms cubic-bezier(.2,.8,.2,1);
+    pointer-events: none;
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  body[data-dialogue="true"] #dialogue-ui {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  #dialogue-speaker {
+    position: absolute;
+    top: -18px;
+    left: 24px;
+    padding: 10px 18px 9px 22px;
+    color: #fff0c9;
+    background: linear-gradient(100deg, #4b1724, #27111a);
+    border: 1px solid rgba(205,178,122,.88);
+    box-shadow: 0 8px 25px rgba(0,0,0,.35);
+    font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 12px;
+    font-weight: 750;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+  #dialogue-speaker::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 9px;
+    bottom: 8px;
+    width: 3px;
+    background: #a44d61;
+  }
+  #dialogue-text {
+    font-size: clamp(18px, 1.7vw, 22px);
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: .005em;
+    text-shadow: 0 2px 12px rgba(0,0,0,.58);
+  }
+  #dialogue-next {
+    position: absolute;
+    right: 25px;
+    bottom: 22px;
+    color: #d9ba75;
+    font-size: 13px;
+    animation: breathe 1.5s ease-in-out infinite;
+  }
+  #dialogue-context {
+    position: absolute;
+    top: 10px;
+    right: 18px;
+    color: rgba(201,184,129,.56);
+    font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 8px;
+    font-weight: 650;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  @media (max-width: 620px) {
+    #dialogue-ui {
+      width: calc(100vw - 24px);
+      min-height: 105px;
+      padding: 27px 44px 20px 22px;
+    }
+    #dialogue-text { font-size: 17px; line-height: 1.42; }
+  }
+  #grade {
+    position: absolute; inset: 0; pointer-events: none; z-index: 4;
+    background:
+      radial-gradient(ellipse at 48% 38%, rgba(255,222,170,0.10), transparent 48%),
+      linear-gradient(145deg, rgba(22,52,68,0.14), transparent 46%, rgba(74,29,38,0.11));
+    mix-blend-mode: soft-light;
+  }
   #vignette {
     position: absolute; inset: 0; pointer-events: none; z-index: 5;
-    background: radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 100%);
+    background:
+      linear-gradient(to bottom, rgba(8,14,18,0.12), transparent 24%, transparent 76%, rgba(5,8,12,0.20)),
+      radial-gradient(ellipse at 50% 46%, transparent 58%, rgba(2,6,10,0.38) 100%);
   }
   #grain {
-    position: absolute; inset: 0; pointer-events: none; z-index: 6; opacity: 0.06;
+    position: absolute; inset: 0; pointer-events: none; z-index: 6; opacity: 0.028;
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%25" height="100%25" filter="url(%23n)"/></svg>');
+    background-size: 96px 96px;
+  }
+  /* Produzione retro 2D: viewport GBC nativo 160x144 (10:9), pixel netti. */
+  html, body { background: #111913; }
+  #stage {
+    inset: auto;
+    left: 0; top: 0;
+    width: min(100vw, 111.1111vh);
+    height: min(100vh, 90vw);
+    transform: none;
+    background: #17261d;
+    box-shadow: 0 0 0 2px #4f6747, 0 16px 60px rgba(0,0,0,.72);
+  }
+  #game {
+    display: block;
+    width: 100%; height: 100%;
+    object-fit: fill;
+    object-position: center;
+    opacity: 1 !important;
+    image-rendering: pixelated !important;
+    image-rendering: crisp-edges !important;
+  }
+  #presentation, #gl, #grade, #vignette, #grain,
+  #cinematic-ui, #dialogue-ui { display: none !important; }
+  #narrative {
+    position: absolute; inset: 0; z-index: 12; pointer-events: none;
+    font-family: ui-monospace, Menlo, Monaco, "Courier New", monospace;
+  }
+  /* DOM resta semantico/accessibile; retro-ui.js lo dipinge pixel-per-pixel. */
+  .retro-semantic-ui { opacity: 0 !important; pointer-events: none !important; }
+  #retro-ui-canvas {
+    position: absolute; inset: 0; z-index: 14;
+    width: 100%; height: 100%;
+    image-rendering: pixelated; image-rendering: crisp-edges;
+  }
+  #narrative .nw-root { pointer-events: auto; }
+  .nw-root {
+    position: absolute; left: 2.5%; right: 2.5%; bottom: 2.5%;
+    box-sizing: border-box;
+    max-height: 74%; overflow: auto;
+    padding: clamp(10px, 1.8vh, 18px) clamp(13px, 2.1vw, 24px);
+    color: #17261d; background: #f4f0d2;
+    border: clamp(3px, .5vh, 6px) double #17261d;
+    box-shadow: .5vh .7vh 0 rgba(23,38,29,.82);
+    font-size: clamp(15px, 2.25vh, 23px); line-height: 1.38;
+  }
+  .nb-root { top: 4%; bottom: 4%; max-height: none; }
+  .nw-title { color: #36543b; font-weight: 800; margin-bottom: .55em; }
+  .nw-opt { padding: .12em .35em; white-space: pre-wrap; }
+  .nw-focus { color: #f4f0d2; background: #36543b; }
+  .nw-name { color: #36543b; font-weight: 800; }
+  .nw-hint { color: #526b46; text-align: right; margin-top: .55em; }
+  #objective {
+    position: absolute; z-index: 11; top: 2.5%; left: 50%;
+    transform: translateX(-50%); max-width: 88%; box-sizing: border-box;
+    padding: .45em .8em; pointer-events: none;
+    color: #17261d; background: #f4f0d2; border: 3px double #17261d;
+    font: 700 clamp(10px, 1.45vh, 15px)/1.25 ui-monospace, Menlo, Monaco, "Courier New", monospace;
+    text-align: center;
+  }
+  .tp-touch-ctrl {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
   }
 </style>
 </head>
 <body>
 <div id="stage">
+  <canvas id="presentation" width="960" height="640"></canvas>
   <canvas id="gl" width="960" height="640"></canvas>
+  <div id="grade"></div>
   <div id="vignette"></div>
   <div id="grain"></div>
-  <canvas id="game" width="480" height="320"></canvas>
+  <canvas id="game" width="160" height="144"></canvas>
+  <section id="cinematic-ui" aria-live="polite">
+    <div id="cinematic-kicker"></div>
+    <h1 id="cinematic-title"></h1>
+    <div id="cinematic-body"></div>
+    <div id="cinematic-action"></div>
+    <div id="cinematic-meta"></div>
+  </section>
+  <section id="dialogue-ui" aria-live="polite">
+    <div id="dialogue-speaker"></div>
+    <div id="dialogue-context"></div>
+    <div id="dialogue-text"></div>
+    <div id="dialogue-next">◆</div>
+  </section>
+  <div id="narrative" aria-live="polite"></div>
+  <div id="objective"></div>
 </div>
 <!-- Script classici, nessun modulo ES: funziona da file:// -->
-<script src="js/vendor/three.min.js"></script>
 <script src="js/tiles.js"></script>
-<script src="js/chars.js"></script>
+<script src="js/chars.js?v=char9"></script>
 <script src="js/houses.js"></script>
-<script src="js/maps.js"></script>
-<script src="js/data.js"></script>
-<script src="js/engine.js"></script>
-<script src="js/render3d.js"></script>
-<script src="js/glue.js"></script>
-<script src="js/main.js"></script>
-<script src="js/touch.js"></script>
+<script src="js/maps.js?v=gold51"></script>
+<script src="js/data.js?v=11narrative"></script>
+<script src="js/retro-font.js?v=gold46"></script>
+<script src="js/engine.js?v=gold49save3"></script>
+<script src="js/glue.js?v=gold49n3"></script>
+<script src="js/retro.js?v=gold46"></script>
+<script src="js/retro-authored.js?v=gold53"></script>
+<script src="js/main.js?v=gold46"></script>
+<script src="js/touch.js?v=gold52n3"></script>
 <script src="js/audio.js"></script>
+<script src="js/narrative-runtime.js?v=2"></script>
+<script src="js/narrative-ui.js"></script>
+<script src="js/narrative-notebook.js?v=4"></script>
+<script src="js/narrative-data.gen.js?v=12"></script>
+<script src="js/narrative-bootstrap.js"></script>
+<script src="js/narrative-engine-adapter.js?v=7"></script>
+<script src="js/narrative-save.js?v=4"></script>
+<script src="js/narrative-finale.js?v=17"></script>
+<script src="js/narrative-finale-production.js?v=12"></script>
+<script src="js/narrative-production.js?v=20"></script>
+<script src="js/retro-ui.js?v=gold52n3"></script>
 </body>
 </html>

@@ -221,7 +221,8 @@
   /* ================== grafo audio (creato al primo gesto utente) ================== */
 
   var actx = null;
-  var master = null, bus = null;
+  var master = null, bus = null, sfxBus = null, sfxNoiseBuffer = null;
+  var lastSfxAt = {};
   var DEFAULT_VOLUME = 0.35;
   var targetVolume = DEFAULT_VOLUME;
   var muted = false;
@@ -294,12 +295,132 @@
     master = actx.createGain();
     master.gain.value = 0;
     lowpass.connect(master);
+    // Gli effetti hanno un bus asciutto separato, ma attraversano lo stesso
+    // master: mute e volume globale valgono identici per musica e feedback.
+    sfxBus = actx.createGain();
+    sfxBus.gain.value = 0.62;
+    sfxBus.connect(master);
     master.connect(actx.destination);
 
     // dissolvenza in ingresso morbida all'avvio, poi rispetta mute/volume correnti
     var now = actx.currentTime;
     master.gain.setValueAtTime(0, now);
     master.gain.linearRampToValueAtTime(muted ? 0 : targetVolume, now + 1.5);
+  }
+
+  /* ================== SFX procedurali, originali e senza sample ================== */
+
+  function sfxReady() {
+    return !!(actx && sfxBus && actx.state === 'running' && !muted && targetVolume > 0);
+  }
+
+  function sfxLevel(options, fallback) {
+    var v = options && options.gain;
+    if (typeof v !== 'number' || !isFinite(v)) v = fallback;
+    return Math.max(0, Math.min(1, v));
+  }
+
+  function sfxTone(type, f0, f1, duration, level, delay) {
+    var t = actx.currentTime + (delay || 0);
+    var osc = actx.createOscillator();
+    var gain = actx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(Math.max(20, f0), t);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(20, f1 || f0), t + duration);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, level), t + Math.min(0.008, duration * 0.25));
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+    osc.connect(gain); gain.connect(sfxBus);
+    osc.onended = function () { osc.disconnect(); gain.disconnect(); };
+    osc.start(t); osc.stop(t + duration + 0.01);
+  }
+
+  function getSfxNoiseBuffer() {
+    if (sfxNoiseBuffer) return sfxNoiseBuffer;
+    var length = Math.max(1, Math.round(actx.sampleRate * 0.18));
+    sfxNoiseBuffer = actx.createBuffer(1, length, actx.sampleRate);
+    var data = sfxNoiseBuffer.getChannelData(0);
+    for (var i = 0; i < length; i++) {
+      var env = 1 - i / length;
+      data[i] = (Math.random() * 2 - 1) * env;
+    }
+    return sfxNoiseBuffer;
+  }
+
+  function sfxNoise(type, frequency, duration, level, delay) {
+    var t = actx.currentTime + (delay || 0);
+    var src = actx.createBufferSource();
+    var filter = actx.createBiquadFilter();
+    var gain = actx.createGain();
+    src.buffer = getSfxNoiseBuffer();
+    filter.type = type || 'lowpass';
+    filter.frequency.setValueAtTime(frequency, t);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, level), t + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+    src.connect(filter); filter.connect(gain); gain.connect(sfxBus);
+    src.onended = function () { src.disconnect(); filter.disconnect(); gain.disconnect(); };
+    src.start(t); src.stop(t + duration + 0.01);
+  }
+
+  var FOOTSTEP_SURFACES = {
+    grass:  { filter: 620,  noise: 0.055, tone: 82 },
+    dirt:   { filter: 900,  noise: 0.065, tone: 98 },
+    road:   { filter: 1750, noise: 0.040, tone: 145 },
+    wood:   { filter: 1250, noise: 0.035, tone: 205 },
+    carpet: { filter: 430,  noise: 0.038, tone: 72 },
+    tile:   { filter: 2100, noise: 0.030, tone: 180 }
+  };
+
+  function footstepSurface(surface) {
+    if (FOOTSTEP_SURFACES[surface]) return FOOTSTEP_SURFACES[surface];
+    if (surface === '.' || surface === ',' || surface === 'g') return FOOTSTEP_SURFACES.grass;
+    if (surface === 'p') return FOOTSTEP_SURFACES.dirt;
+    if (surface === 'r' || surface === '=' || surface === '-') return FOOTSTEP_SURFACES.road;
+    if (surface === 'f' || surface === 'D' || surface === 'C') return FOOTSTEP_SURFACES.wood;
+    if (surface === 'c' || surface === 'Z') return FOOTSTEP_SURFACES.carpet;
+    return FOOTSTEP_SURFACES.tile;
+  }
+
+  function playSfx(name, options) {
+    options = options || {};
+    if (!sfxReady()) return false; // prima del gesto utente: silenzio, mai side effect
+    var now = actx.currentTime;
+    var gap = name === 'footstep' ? 0.09 : (name === 'page' ? 0.025 : 0.045);
+    if (lastSfxAt[name] != null && now - lastSfxAt[name] < gap) return false;
+    var level = sfxLevel(options, 0.12);
+    if (level <= 0) return false;
+    lastSfxAt[name] = now;
+
+    if (name === 'footstep') {
+      var foot = footstepSurface(options.surface);
+      sfxNoise('lowpass', foot.filter, 0.065, foot.noise * level / 0.12);
+      sfxTone('sine', foot.tone, foot.tone * 0.72, 0.055, 0.026 * level / 0.12);
+    } else if (name === 'dialogue') {
+      sfxTone('triangle', 520, 430, 0.045, 0.035 * level / 0.12);
+    } else if (name === 'page') {
+      sfxTone('sine', 760, 620, 0.028, 0.025 * level / 0.12);
+    } else if (name === 'menu_open') {
+      sfxTone('triangle', 360, 510, 0.055, 0.035 * level / 0.12);
+      sfxTone('triangle', 510, 650, 0.055, 0.028 * level / 0.12, 0.045);
+    } else if (name === 'menu_close') {
+      sfxTone('triangle', 560, 330, 0.075, 0.035 * level / 0.12);
+    } else if (name === 'interact') {
+      sfxTone('triangle', 280, 430, 0.085, 0.045 * level / 0.12);
+    } else if (name === 'blocked') {
+      sfxTone('square', 145, 112, 0.13, 0.025 * level / 0.12);
+      sfxNoise('lowpass', 380, 0.11, 0.024 * level / 0.12);
+    } else if (name === 'door') {
+      sfxNoise('lowpass', 780, 0.16, 0.055 * level / 0.12);
+      sfxTone('sine', 115, 72, 0.15, 0.04 * level / 0.12);
+    } else if (name === 'acquire') {
+      sfxTone('sine', 520, 650, 0.10, 0.04 * level / 0.12);
+      sfxTone('sine', 720, 900, 0.14, 0.035 * level / 0.12, 0.075);
+    } else {
+      delete lastSfxAt[name];
+      return false;
+    }
+    return true;
   }
 
   /* ================== voci (fabbrica di sintesi, tutta a oscillatori) ================== */
@@ -571,6 +692,7 @@
 
   GAME.Audio = {
     toggleMute: toggleMute, setVolume: setVolume, isMuted: isMuted,
+    playSfx: playSfx,
     // diagnostica: stato del contesto ('off' finche' non c'e' gesto utente) e brano in corso
     state: function () { return actx ? actx.state : 'off'; },
     cue: function () { return activeCueName; }
@@ -578,7 +700,9 @@
 
   function ensureContext() {
     if (actx) return;
-    actx = new (window.AudioContext || window.webkitAudioContext)();
+    var AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextCtor) return;
+    try { actx = new AudioContextCtor(); } catch (e) { actx = null; return; }
     buildGraph();
     switchCue(desiredCueName());
   }
@@ -595,6 +719,7 @@
 
   function onFirstGesture() {
     ensureContext();
+    if (!actx) return; // browser senza WebAudio: il gioco resta pienamente giocabile
     if (actx.state === 'running') { releaseGestureHooks(); return; }
     var p = actx.resume();
     if (p && p.then) {

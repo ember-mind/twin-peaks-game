@@ -1,6 +1,6 @@
 /* Twin Peaks — Il Mistero di Laura Palmer
  * engine.js — loop di gioco, input, movimento su griglia, camera, rendering,
- * finestre di dialogo in stile GBA, menu indizi, macchina a stati
+ * finestre di dialogo in stile Game Boy, menu indizi, macchina a stati
  * (title -> intro -> play -> end).
  */
 (function () {
@@ -11,17 +11,19 @@
 
   var canvas, ctx, S;
   var last = 0, tGlobal = 0;
-  var TILE = 16, VW = 240, VH = 160; // coordinate logiche UI (scalate su canvas)
+  var uiLayoutMode = '';
+  var TILE = 16, VW = 160, VH = 144; // viewport GBC: 10x9 metatile
   var UW = VW;                       // larghezza UI dinamica (fullscreen)
-  var SPEED = 0.12; // px per ms (~2px per frame a 60fps)
+  // 16 px/tile: 0.12 completava un'intera cella in ~133 ms e faceva leggere
+  // la locomozione riggata come pattinata accelerata. ~213 ms conserva risposta
+  // arcade ma lascia una falcata visibile e un appoggio riconoscibile.
+  var SPEED = 0.075;
   var NPC_SPEED = SPEED * 0.55; // NPCs walk a bit slower than the player
   var NPC_WANDER_RADIUS = 3; // tile radius from home
 
-  /* Renderer prospettico stile Pokémon B/W (Mode7-lite):
-   * il mondo è disegnato 2x su un canvas offscreen più largo della vista,
-   * poi composto a strisce orizzontali di 1px con scala crescente verso
-   * il basso: le righe lontane sono compresse e mostrano più mondo. */
-  var SCALE = 2;            // canvas 480x320 = 2x le coordinate UI
+  /* Produzione piatta Gen II. Codice warp storico resta irraggiungibile: buffer
+   * nativo 160x144 e scala CSS nearest-neighbour sono unica proiezione. */
+  var SCALE = 1;
   var WVW = 352, WVH = 240; // finestra mondo campionata (in px mondo)
   var TOP_SCALE = 0.72;     // compressione prospettica della riga più lontana
   var PITCH = 1.25;         // schiacciamento verticale del terreno (camera inclinata)
@@ -71,9 +73,11 @@
       mapId: 'town', map: null, npcs: [],
       player: { tx: 28, ty: 31, x: 28 * TILE, y: 31 * TILE, dir: 'up', moving: false, mx: 0, my: 0, turnUntil: 0 },
       clues: [], flags: {},
-      introPage: 0,
+      introPage: 0,           // indice della pagina VISIBILE, incluse continuazioni
+      endPage: 0,
       dialogue: null,          // {id, def, pages, i, replay}
       menu: false,
+      menuIndex: 0,
       fade: 0, fadePhase: 0,   // 0 niente, 1 uscita, 2 rientro
       warp: null,
       lastBump: -9999
@@ -81,6 +85,10 @@
   }
 
   function loadMap(id, tx, ty, dir) {
+    var previous = S && S.player ? {
+      mapId: S.mapId, map: S.map, npcs: S.npcs, camSnap: camSnap,
+      player: { tx: S.player.tx, ty: S.player.ty, x: S.player.x, y: S.player.y, dir: S.player.dir, moving: S.player.moving }
+    } : null;
     S.mapId = id;
     S.map = GAME.Maps[id];
     S.npcs = (S.map.npcs || []).map(function (n) {
@@ -96,7 +104,16 @@
     p.tx = tx; p.ty = ty; p.x = tx * TILE; p.y = ty * TILE;
     p.dir = dir || 'down'; p.moving = false;
     camSnap = true;
-    if (S.mode === 'play') saveGame(); // porta attraversata in partita: persisti la posizione
+    if (S.mode === 'play' && saveGame() === false) {
+      // Nessun avanzamento solo in RAM: se la coppia save non committa, anche
+      // la porta torna allo stato precedente. Player può riprovare.
+      if (previous) {
+        S.mapId = previous.mapId; S.map = previous.map; S.npcs = previous.npcs; camSnap = previous.camSnap;
+        p.tx = previous.player.tx; p.ty = previous.player.ty; p.x = previous.player.x; p.y = previous.player.y;
+        p.dir = previous.player.dir; p.moving = previous.player.moving;
+      }
+      return false;
+    } // porta attraversata in partita: persisti posizione o rollback
     // arrivo su una mappa con monologo d'apertura una tantum (solo browser, solo in partita,
     // solo la prima volta: il flag "once" viene salvato con S.flags dal saveGame qui sopra)
     var oe = S.map.onEnter;
@@ -105,6 +122,7 @@
       S.flags[oe.once] = true;
       startDialogue(oe.dialogue);
     }
+    return true;
   }
 
   /* ---------------- salvataggio (localStorage) ---------------- */
@@ -112,13 +130,26 @@
   var SAVE_KEY = 'tp_save';
 
   function saveGame() {
-    if (typeof localStorage === 'undefined') return;
+    if (typeof localStorage === 'undefined') return true;
     try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify({
+      var snapshot = {
         mapId: S.mapId, tx: S.player.tx, ty: S.player.ty, dir: S.player.dir,
         clues: S.clues, flags: S.flags
-      }));
-    } catch (e) { /* file:// o storage non disponibile: ignora */ }
+      };
+      // Save classico + envelope narrativo devono avanzare come coppia.
+      // Il participant scrive entrambi; il fallback diretto vale solo prima
+      // che il runtime narrativo abbia completato il boot.
+      if (GAME.NarrativeProduction && GAME.NarrativeProduction.onClassicSave) {
+        var coordinated = GAME.NarrativeProduction.onClassicSave(JSON.parse(JSON.stringify(snapshot)));
+        if (coordinated && coordinated.handled) {
+          E.lastSaveError = coordinated.ok ? null : (coordinated.error || 'classic_save_failed');
+          return !!coordinated.ok;
+        }
+      }
+      localStorage.setItem(SAVE_KEY, JSON.stringify(snapshot));
+      E.lastSaveError = null;
+      return true;
+    } catch (e) { E.lastSaveError = String(e && e.message || e); return false; }
   }
 
   function loadSave() {
@@ -139,6 +170,76 @@
     try { return !!localStorage.getItem(SAVE_KEY); } catch (e) { return false; }
   }
 
+  // Un save non basta sia JSON ben formato: la posizione deve appartenere al
+  // catalogo mappe realmente caricato e indicare una tile calpestabile. Questa
+  // funzione e' condivisa col participant narrativo, cosi' titolo e recovery
+  // applicano lo stesso confine semantico prima di chiamare loadMap().
+  function inspectClassicSaveState(save) {
+    var shapeValid = save && typeof save === 'object' && !Array.isArray(save) &&
+      typeof save.mapId === 'string' && save.mapId.length > 0 &&
+      Number.isInteger(save.tx) && Number.isInteger(save.ty) &&
+      ['up', 'down', 'left', 'right'].indexOf(save.dir) >= 0 &&
+      (save.clues === undefined || Array.isArray(save.clues)) &&
+      (save.flags === undefined || (save.flags && typeof save.flags === 'object' && !Array.isArray(save.flags)));
+    if (!shapeValid) return { ok: false, error: 'classic_save_invalid_shape' };
+
+    var map = GAME.Maps && GAME.Maps[save.mapId];
+    if (!map || !Array.isArray(map.rows)) return { ok: false, error: 'classic_save_invalid_map' };
+    var row = map.rows[save.ty];
+    if (save.ty < 0 || save.tx < 0 || typeof row !== 'string' || save.tx >= row.length) {
+      return { ok: false, error: 'classic_save_out_of_bounds' };
+    }
+    var collisionState = { clues: (save.clues || []).slice(), flags: save.flags || {} };
+    if (!GAME.Maps.isSolid || GAME.Maps.isSolid(save.mapId, save.tx, save.ty, collisionState)) {
+      return { ok: false, error: 'classic_save_invalid_tile' };
+    }
+    return { ok: true, state: save };
+  }
+
+  // Ripristino boot-safe: usato dal titolo e dal checkpoint del finale.
+  // loadMap gira ancora in `title`, quindi non risalva una town fresca e non
+  // attiva onEnter; solo dopo mondo e coordinate validi passiamo a `play`.
+  function restoreClassicSave(save) {
+    var inspected = inspectClassicSaveState(save);
+    if (!inspected.ok) return inspected;
+    S.clues = (save.clues || []).slice();
+    S.flags = JSON.parse(JSON.stringify(save.flags || {}));
+    S.mode = 'title';
+    loadMap(save.mapId, save.tx, save.ty, save.dir);
+    S.mode = 'play';
+    return { ok: true, mapId: S.mapId, tx: S.player.tx, ty: S.player.ty, dir: S.player.dir };
+  }
+
+  // Snapshot RAM completo del sottoinsieme mutato da loadMap/restoreClassicSave.
+  // Map e roster precedenti restano referenze vive ma scollegate durante il
+  // restore sincrono; ripristinarle evita coppie impossibili mapId/map/NPC.
+  function captureWorldState() {
+    if (!S || !S.player) return null;
+    return {
+      mode: S.mode,
+      mapId: S.mapId,
+      map: S.map,
+      npcs: S.npcs,
+      player: JSON.parse(JSON.stringify(S.player)),
+      clues: S.clues.slice(),
+      flags: JSON.parse(JSON.stringify(S.flags || {})),
+      camSnap: camSnap
+    };
+  }
+  function restoreWorldState(snapshot) {
+    if (!S || !snapshot || !snapshot.player || !Array.isArray(snapshot.npcs)) return false;
+    S.mode = snapshot.mode;
+    S.mapId = snapshot.mapId;
+    S.map = snapshot.map;
+    S.npcs = snapshot.npcs;
+    Object.keys(S.player).forEach(function (key) { delete S.player[key]; });
+    Object.keys(snapshot.player).forEach(function (key) { S.player[key] = snapshot.player[key]; });
+    S.clues = snapshot.clues.slice();
+    S.flags = JSON.parse(JSON.stringify(snapshot.flags || {}));
+    camSnap = snapshot.camSnap;
+    return true;
+  }
+
   var r3d = false;
 
   E.init = function (cv, glcv) {
@@ -148,7 +249,7 @@
     if (glcv && GAME.Render3D && GAME.Render3D.init(glcv)) {
       r3d = true; // motore 3D WebGL attivo: il canvas 2D fa solo da overlay UI
     }
-    if (!r3d && typeof document !== 'undefined' && canvas.width >= VW * SCALE) {
+    if (!r3d && false) {
       offCv = document.createElement('canvas');
       offCv.width = OFF_W; offCv.height = OFF_H;
       octx = offCv.getContext('2d');
@@ -158,17 +259,28 @@
       ectx = entCv.getContext('2d');
       ectx.imageSmoothingEnabled = false;
       buildWarp(VH * SCALE);
-    } else if (!r3d) {
-      SCALE = 1; // fallback piatto (test node / canvas piccolo)
     }
     S = E.state = freshState();
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('blur', clearHeldInputs);
+    if (typeof document !== 'undefined' && document.addEventListener) {
+      document.addEventListener('visibilitychange', onVisibilityChange);
+    }
   };
 
   E.loadMap = loadMap;
+  E.inspectClassicSaveState = inspectClassicSaveState;
+  E.restoreClassicSave = restoreClassicSave;
+  E.captureWorldState = captureWorldState;
+  E.restoreWorldState = restoreWorldState;
   E.checkCond = checkCond;
   E.resolveDialogue = resolveDialogue;
+  E.introPages = function () {
+    return introPages().map(function (p) {
+      return { sourceIndex: p.sourceIndex, part: p.part, parts: p.parts, lines: p.lines.slice() };
+    });
+  };
   E.npcActive = function (n, st) {
     if (!n.cond) return true;
     if (Object.prototype.toString.call(n.cond) === '[object Array]') {
@@ -185,6 +297,13 @@
 
   E.start = function () {
     loadMap('town', 28, 31, 'up');
+    // Costruisce e compila la scena iniziale mentre il titolo 3D la copre.
+    // Il primo frame giocabile non paga così il cold path WebGL.
+    if (GAME.Render3D && GAME.Render3D.prewarm && typeof window !== 'undefined') {
+      window.setTimeout(function () {
+        if (S.mode === 'title') GAME.Render3D.prewarm('town', []);
+      }, 700);
+    }
     last = (typeof performance !== 'undefined') ? performance.now() : Date.now();
     requestAnimationFrame(loop);
     // fallback: se il rAF è sospeso (tab nascosta/occlusa) il gioco continua via timer
@@ -198,11 +317,33 @@
 
   /* ---------------- input ---------------- */
 
+  // vero durante una sessione narrativa (visita/widget): il gameplay è in lease
+  function narrativeActive() {
+    return !!((GAME.NarrativeAdapter && GAME.NarrativeAdapter.active()) ||
+      (GAME.NarrativeFinaleProduction && GAME.NarrativeFinaleProduction.isActive()));
+  }
+
+  function audioSfx(name, options) {
+    if (GAME.Audio && typeof GAME.Audio.playSfx === 'function') {
+      GAME.Audio.playSfx(name, options || {});
+    }
+  }
+
   function onKeyDown(e) {
     var a = KEYMAP[e.code];
     if (!a) return;
+    if (narrativeActive()) return; // input in lease alla UI narrativa
     e.preventDefault();
     if (a === 'up' || a === 'down' || a === 'left' || a === 'right') {
+      // Il fascicolo possiede il D-pad finche' e' aperto: le frecce verticali
+      // scorrono gli indizi, quelle orizzontali vengono assorbite e nessuna
+      // direzione resta in coda per il movimento alla chiusura.
+      if (S && S.menu) {
+        clearHeldInputs();
+        if (a === 'up') moveMenuSelection(-1);
+        else if (a === 'down') moveMenuSelection(1);
+        return;
+      }
       if (held.indexOf(a) < 0) held.push(a);
       return;
     }
@@ -219,14 +360,41 @@
     if (i >= 0) held.splice(i, 1);
   }
 
+  function clearHeldInputs() {
+    held.length = 0;
+  }
+
+  function onVisibilityChange() {
+    if (typeof document !== 'undefined' && document.hidden) clearHeldInputs();
+  }
+
+  function normalizeMenuIndex() {
+    var count = S.clues.length;
+    if (!count) { S.menuIndex = 0; return; }
+    S.menuIndex = clamp(S.menuIndex || 0, 0, count - 1);
+  }
+
+  function moveMenuSelection(delta) {
+    var count = S.clues.length;
+    if (!count) return;
+    normalizeMenuIndex();
+    S.menuIndex = (S.menuIndex + delta + count) % count;
+    audioSfx('page');
+  }
+
+  function setMenu(open) {
+    S.menu = !!open;
+    clearHeldInputs();
+    if (S.menu) normalizeMenuIndex();
+    audioSfx(S.menu ? 'menu_open' : 'menu_close');
+  }
+
   function pressA() {
     if (S.fadePhase !== 0) return;
     if (S.mode === 'title') {
       var save = loadSave();
       if (save) { // riprendi la partita salvata
-        S.clues = save.clues || []; S.flags = save.flags || {};
-        loadMap(save.mapId, save.tx, save.ty, save.dir);
-        S.mode = 'play';
+        restoreClassicSave(save);
       } else {
         S.mode = 'intro'; S.introPage = 0;
       }
@@ -234,7 +402,8 @@
     }
     if (S.mode === 'intro') {
       S.introPage++;
-      if (S.introPage >= GAME.Data.intro.length) {
+      audioSfx('page');
+      if (S.introPage >= introPages().length) {
         S.mode = 'play';
         // la mappa iniziale e' stata caricata da E.start() mentre si era ancora al
         // titolo (onEnter non poteva scattare, mode non era 'play'): ricarica ora
@@ -243,17 +412,21 @@
       }
       return;
     }
-    if (S.mode === 'end') { S = E.state = freshState(); loadMap('town', 28, 31, 'up'); return; }
+    if (S.mode === 'end') {
+      var pages = endPages();
+      if ((S.endPage || 0) < pages.length - 1) { S.endPage = (S.endPage || 0) + 1; audioSfx('page'); return; }
+      S = E.state = freshState(); loadMap('town', 28, 31, 'up'); return;
+    }
     if (S.mode !== 'play') return;
     if (S.dialogue) { advanceDialogue(); return; }
-    if (S.menu) { S.menu = false; return; }
+    if (S.menu) { setMenu(false); return; }
     interact();
   }
 
   function pressB() {
     if (S.mode === 'title') { pressN(); return; } // su touch il tasto B = nuova partita
     if (S.mode !== 'play' || S.fadePhase !== 0 || S.dialogue) return;
-    S.menu = !S.menu;
+    setMenu(!S.menu);
   }
 
   function pressN() { // titolo: N forza una partita nuova, scartando il salvataggio
@@ -298,21 +471,37 @@
     var def = GAME.Data.dialogues[id];
     if (!def) { if (typeof console !== 'undefined') console.warn('dialogo mancante:', id); return; }
     var done = !!S.flags['done_' + id];
-    var pages = (done && def.again) ? def.again.pages : def.pages;
+    var sourcePages = (done && def.again) ? def.again.pages : def.pages;
+    var pages = sourcePages;
+    if (typeof document !== 'undefined') {
+      pages = [];
+      sourcePages.forEach(function (page) {
+        var lines = RF.wrapChars(String(page.text || '').replace(/§/g, String(S.clues.length)), 24);
+        if (!lines.length) lines = [''];
+        for (var li = 0; li < lines.length; li += 2) {
+          pages.push({ name: page.name || '', text: lines.slice(li, li + 2).join('\n') });
+        }
+      });
+    }
     S.dialogue = { id: id, def: def, pages: pages, i: 0, replay: done };
+    audioSfx('dialogue');
   }
 
   function advanceDialogue() {
     var d = S.dialogue;
     d.i++;
-    if (d.i < d.pages.length) return;
+    if (d.i < d.pages.length) { audioSfx('page'); return; }
     S.dialogue = null;
     if (!d.replay) {
+      var acquired = false;
       if (d.def.give) {
-        d.def.give.forEach(function (c) { if (S.clues.indexOf(c) < 0) S.clues.push(c); });
+        d.def.give.forEach(function (c) {
+          if (S.clues.indexOf(c) < 0) { S.clues.push(c); acquired = true; }
+        });
       }
       if (d.def.setFlag) S.flags[d.def.setFlag] = true;
       S.flags['done_' + d.id] = true;
+      if (acquired) audioSfx('acquire');
       if (d.def.end) { S.mode = 'end'; clearSave(); return; }
     }
   }
@@ -322,6 +511,20 @@
   function npcAt(x, y) {
     for (var i = 0; i < S.npcs.length; i++) {
       if (S.npcs[i].x === x && S.npcs[i].y === y && E.npcActive(S.npcs[i])) return S.npcs[i];
+    }
+    return null;
+  }
+
+  function npcReservesTile(n, x, y) {
+    if (!E.npcActive(n)) return false;
+    if (n.x === x && n.y === y) return true;
+    return !!(n.moving && n.mx === x && n.my === y);
+  }
+
+  function npcReservingTile(x, y, self) {
+    for (var i = 0; i < S.npcs.length; i++) {
+      var n = S.npcs[i];
+      if (n !== self && npcReservesTile(n, x, y)) return n;
     }
     return null;
   }
@@ -339,13 +542,7 @@
     var p = S.player;
     if (p.tx === nx && p.ty === ny) return true;
     if (p.moving && p.mx === nx && p.my === ny) return true;
-    for (var i = 0; i < S.npcs.length; i++) {
-      var n = S.npcs[i];
-      if (n === self || !E.npcActive(n)) continue;
-      if (n.x === nx && n.y === ny) return true;
-      if (n.moving && n.mx === nx && n.my === ny) return true;
-    }
-    return false;
+    return !!npcReservingTile(nx, ny, self);
   }
 
   function updateNPCs(dt) {
@@ -398,16 +595,35 @@
     var npc = npcAt(fx, fy);
     if (npc) {
       npc.dir = opposite(p.dir);
+      audioSfx('interact');
+      if (GAME.NarrativeFinaleProduction && GAME.NarrativeFinaleProduction.tryInteract(S.mapId, npc.id)) return;
+      // attori narrativi: l'adapter (se attivo per questo attore) gestisce la visita
+      if (GAME.NarrativeAdapter && GAME.NarrativeAdapter.tryInteract(S.mapId, npc.id)) return;
       startDialogue(resolveDialogue(npc.dialogue));
       return;
     }
+    // target fisici del finale (cartello sud) hanno precedenza sull'oggetto
+    // classico: il finale consuma solo la propria soglia attiva.
+    if (GAME.NarrativeFinaleProduction && GAME.NarrativeFinaleProduction.tryInteractAt &&
+        GAME.NarrativeFinaleProduction.tryInteractAt(S.mapId, fx, fy)) {
+      audioSfx('interact');
+      return;
+    }
+    // target ambientali narrativi (object/landmark/sign): l'adapter risolve
+    // genericamente la casella verso il proprio registro di target
+    if (GAME.NarrativeAdapter && GAME.NarrativeAdapter.tryInteractAt &&
+        GAME.NarrativeAdapter.tryInteractAt(S.mapId, fx, fy)) {
+      audioSfx('interact');
+      return;
+    }
     var obj = GAME.Maps.objectAt(S.mapId, fx, fy);
-    if (obj) startDialogue(resolveDialogue(obj.dialogue));
+    if (obj) { audioSfx('interact'); startDialogue(resolveDialogue(obj.dialogue)); }
   }
 
   function bumpMsg(id) {
     if (tGlobal - S.lastBump < 700) return;
     S.lastBump = tGlobal;
+    audioSfx('blocked');
     startDialogue(id);
   }
 
@@ -421,7 +637,7 @@
     if (door && door.needsFlag && !S.flags[door.needsFlag]) { bumpMsg(door.blockedMsg); return; }
     if (door && door.needsClues && S.clues.length < door.needsClues) { bumpMsg(door.blockedMsg || 'woods_blocked'); return; }
     if (GAME.Maps.isSolid(S.mapId, nx, ny, S)) return;
-    if (npcAt(nx, ny)) return;
+    if (npcReservingTile(nx, ny, null)) return;
     p.mx = nx; p.my = ny; p.moving = true;
     p.moveStartX = p.tx; p.moveStartY = p.ty;
     p.moveT = 0;
@@ -433,6 +649,7 @@
     if (!door || door.locked) return;
     if (door.needsFlag && !S.flags[door.needsFlag]) return;
     if (door.needsClues && S.clues.length < door.needsClues) return;
+    audioSfx('door');
     S.warp = door;
     S.fadePhase = 1;
   }
@@ -445,15 +662,22 @@
       S.fade += dt / 180;
       if (S.fade >= 1) {
         S.fade = 1;
-        var w = S.warp; S.warp = null;
-        if (w) loadMap(w.to, w.tx, w.ty, w.dir);
-        S.fadePhase = 2;
+        // Un frame nero completo precede build/upload/compile. La fase 3
+        // assorbe il cold path senza bloccare un'immagine a metà dissolvenza.
+        S.fadePhase = 3;
       }
+    } else if (S.fadePhase === 3) {
+      var w = S.warp; S.warp = null;
+      if (w && GAME.Render3D && GAME.Render3D.prewarm) {
+        GAME.Render3D.prewarm(w.to, S.clues);
+      }
+      if (w) loadMap(w.to, w.tx, w.ty, w.dir);
+      S.fadePhase = 2;
     } else if (S.fadePhase === 2) {
       S.fade -= dt / 180;
       if (S.fade <= 0) { S.fade = 0; S.fadePhase = 0; }
     }
-    if (S.mode !== 'play' || S.dialogue || S.menu || S.fadePhase !== 0) return;
+    if (S.mode !== 'play' || S.dialogue || S.menu || S.fadePhase !== 0 || narrativeActive()) return;
     var p = S.player;
     if (p.moving) {
       var tx = p.mx * TILE, ty = p.my * TILE;
@@ -462,7 +686,16 @@
       p.moveT += dt * SPEED / total;
       if (p.moveT >= 1) {
         p.x = tx; p.y = ty; p.tx = p.mx; p.ty = p.my; p.moving = false;
+        var footRow = S.map.rows[p.ty] || '';
+        audioSfx('footstep', { surface: footRow.charAt(p.tx) });
         onArrive();
+        // Se la stessa direzione resta tenuta, prenota subito la tile seguente:
+        // elimina il frame morto fra due passi senza cambiare durata/velocita'
+        // del singolo passo. Porte, dialoghi e collisioni restano autorita'.
+        if (S.fadePhase === 0 && !S.dialogue && held.length &&
+            held[held.length - 1] === p.dir) {
+          tryStep(p.dir);
+        }
       } else {
         var e = p.moveT * p.moveT * (3 - 2 * p.moveT); // smoothstep
         p.x = p.moveStartX * TILE + dx * e;
@@ -483,32 +716,46 @@
 
   /* ---------------- rendering ---------------- */
 
+  var RF = GAME.RetroFont;
+  function fontScale(font) {
+    var m = /(\d+)px/.exec(font || ''), n = m ? +m[1] : 8;
+    return n >= 20 ? 3 : n >= 14 ? 2 : 1;
+  }
+
   function text(str, x, y, color, font, align) {
-    ctx.font = font || '8px monospace';
-    ctx.textAlign = align || 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillStyle = color || '#ffffff';
-    ctx.fillText(str, x, y);
+    return RF.draw(ctx, str, x, y, color || '#183225', { scale: fontScale(font), align: align || 'left' });
   }
 
   function wrap(str, maxW) {
-    ctx.font = '8px monospace';
-    var words = str.split(' '), lines = [], cur = '';
-    for (var i = 0; i < words.length; i++) {
-      var t = cur ? cur + ' ' + words[i] : words[i];
-      if (cur && ctx.measureText(t).width > maxW) { lines.push(cur); cur = words[i]; }
-      else cur = t;
-    }
-    if (cur) lines.push(cur);
-    return lines;
+    return RF.wrapPixels(str, maxW, 1);
   }
 
   function box(x, y, w, h) {
-    ctx.fillStyle = 'rgba(16,20,72,0.95)';
-    ctx.fillRect(x, y, w, h);
-    ctx.strokeStyle = '#f0f0f0';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+    RF.frame(ctx, x, y, w, h);
+  }
+
+  function rule(x, y, w, color) {
+    ctx.fillStyle = color || '#394566';
+    ctx.fillRect(x, y, w, 1);
+  }
+
+  function fitText(str, maxW) {
+    return RF.fit(str, maxW, 1);
+  }
+
+  function drawNameplate(name, x, y) {
+    var label = String(name || '').toUpperCase();
+    var w = RF.measure(label, 1) + 14;
+    ctx.fillStyle = 'rgba(0,0,0,0.72)';
+    ctx.fillRect(x + 2, y + 2, w, 14);
+    ctx.fillStyle = '#35111b';
+    ctx.fillRect(x, y, w, 14);
+    ctx.strokeStyle = '#c9b878';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, 13);
+    ctx.fillStyle = '#7d3142';
+    ctx.fillRect(x + 3, y + 3, 2, 8);
+    text(label, x + 8, y + 3, '#f5efcf', 'bold 7px monospace');
   }
 
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -518,7 +765,7 @@
     var map = S.map, rows = map.rows;
     var x0 = Math.floor(cx / TILE), y0 = Math.floor(cy / TILE);
     var x1 = Math.floor((cx + vw - 1) / TILE), y1 = Math.floor((cy + vh - 1) / TILE);
-    var opts = { woodsOpen: S.clues.length >= 3, t: tGlobal };
+    var opts = { woodsOpen: S.clues.length >= 3, t: tGlobal, mapId: S.mapId, indoor: !!map.indoor };
     var x, y, mx, my;
     for (y = y0; y <= y1; y++) {
       for (x = x0; x <= x1; x++) {
@@ -556,6 +803,9 @@
   // mondo piatto (fallback node / canvas 1x): terreno + entità senza proiezione
   function paintWorld(g, cx, cy, vw, vh) {
     paintGround(g, cx, cy, vw, vh);
+    if (GAME.Retro2D && GAME.Retro2D.limitBackgroundPalettes) {
+      GAME.Retro2D.limitBackgroundPalettes(g, cx, cy, vw, vh);
+    }
     entityList().forEach(function (e) {
       var pal = GAME.Sprites.CHARS[e.sprite] || GAME.Sprites.CHARS.cooper;
       GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, pal, e.dir, e.fr, e.alpha, e.moving, tGlobal);
@@ -568,6 +818,10 @@
     var mw = map.width * TILE, mh = map.height * TILE;
     var txx = mw > vw ? clamp(p.x + 8 - vw / 2, 0, mw - vw) : (mw - vw) / 2;
     var tyy = mh > vh ? clamp(p.y + 8 - vh / 2, 0, mh - vh) : (mh - vh) / 2;
+    /* Il frame Lodge di riferimento tiene Cooper a x~72 e lascia piu'
+     * respiro a destra: offset costante di mezzo metatile, senza spostare
+     * arte oltre i confini delle tile o alterare collisioni. */
+    if (map.id === 'woods' && mw > vw) txx = clamp(txx - 8, 0, mw - vw);
     if (camSnap) { camX = txx; camY = tyy; camSnap = false; return; }
     var k = 1 - Math.exp(-dt * 0.012);
     camX += (txx - camX) * k;
@@ -624,41 +878,84 @@
   function drawDialogue() {
     var d = S.dialogue;
     var page = d.pages[d.i];
-    // box centrato, larghezza leggibile anche a schermo largo
-    var bw = Math.min(UW - 4, 360);
+    // Box chiaro classico: protagonista restano parole, non cornice.
+    var bw = Math.min(UW, 160);
     var bx = Math.floor((UW - bw) / 2);
-    box(bx, 106, bw, 52);
-    var name = page.name || '';
-    if (name) {
-      var w = name.length * 5 + 10;
-      box(bx + 4, 96, w, 11);
-      text(name, bx + 9, 98, '#ffe9a8');
-    }
+    var by = 96, bh = 48;
+    RF.frame(ctx, bx, by, bw, bh);
     var str = page.text.replace(/§/g, String(S.clues.length));
-    var lines = wrap(str, bw - 20);
-    for (var i = 0; i < Math.min(3, lines.length); i++) text(lines[i], bx + 8, 112 + i * 11, '#ffffff');
-    if (Math.floor(tGlobal / 400) % 2 === 0) text('▼', bx + bw - 12, 150, '#ffffff');
+    var lines = RF.wrapFixed(str, bw - 16, 1);
+    for (var i = 0; i < Math.min(2, lines.length); i++) {
+      RF.drawFixed(ctx, lines[i], bx + 8, by + 8 + i * 16, '#181818');
+    }
+    ctx.fillStyle = '#181818';
+    ctx.fillRect(bx + bw - 15, by + 37, 5, 1);
+    ctx.fillRect(bx + bw - 14, by + 38, 3, 1);
+    ctx.fillRect(bx + bw - 13, by + 39, 1, 1);
   }
 
   function drawMenu() {
-    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.fillStyle = 'rgba(24,50,37,0.78)';
     ctx.fillRect(0, 0, UW, VH);
-    // 240 di larghezza: la riga obiettivo (fino a ~44 caratteri a ~5px l'uno)
-    // deve starci senza sbordare; 180 la tagliava.
-    var mw = Math.min(UW - 16, 240);
+    var mw = Math.min(UW - 10, 280);
     var mx = Math.floor((UW - mw) / 2);
-    box(mx, 24, mw, 125); // +13 di altezza per la riga obiettivo in cima
-    text(GAME.Data.objectiveFor(S, checkCond), mx + 12, 34, '#ffe9a8');
-    text('INDIZI (' + S.clues.length + ')', mx + 12, 47, '#ffe9a8');
+    var px = mx + 9, innerW = mw - 18;
+    box(mx, 4, mw, 136);
+
+    // Gerarchia: fascicolo -> obiettivo attivo -> inventario prove.
+    text('FASCICOLO // CASO PALMER', px, 10, '#183225', 'bold 8px monospace');
+    text('OBIETTIVO ATTIVO', px, 22, '#63834a', 'bold 6px monospace');
+    var objective = wrap(GAME.Data.objectiveFor(S, checkCond), innerW);
+    for (var oi = 0; oi < Math.min(2, objective.length); oi++) {
+      text(objective[oi], px, 30 + oi * 10, '#183225', '8px monospace');
+    }
+    rule(px, 51, innerW, '#6f6040');
+
+    var count = S.clues.length;
+    normalizeMenuIndex();
+    text('PROVE RACCOLTE', px, 56, '#31543a', 'bold 7px monospace');
     if (!S.clues.length) {
-      text('Nessun indizio raccolto.', mx + 12, 65, '#c8c8d8');
+      text('0', mx + mw - 10, 56, '#183225', 'bold 7px monospace', 'right');
+      text('Nessun indizio raccolto.', px, 72, '#183225');
+      ctx.fillStyle = '#c3d879';
+      ctx.fillRect(px, 108, innerW, 22);
+      text('NOTE DI COOPER', px + 6, 115, '#31543a', '7px monospace');
     } else {
-      for (var i = 0; i < S.clues.length; i++) {
+      var visible = 4;
+      var start = clamp(S.menuIndex - 1, 0, Math.max(0, count - visible));
+      var end = Math.min(count, start + visible);
+      text((start + 1) + '-' + end + ' / ' + count, mx + mw - 22, 56, '#63834a', '6px monospace', 'right');
+      if (start > 0) text('▲', mx + mw - 14, 69, '#31543a', '7px monospace');
+      if (end < count) text('▼', mx + mw - 14, 101, '#31543a', '7px monospace');
+      for (var i = start; i < end; i++) {
         var c = GAME.Data.clues[S.clues[i]];
-        text('• ' + (c ? c.name : S.clues[i]), mx + 12, 65 + i * 13, '#ffffff');
+        var rowY = 68 + (i - start) * 10;
+        var selected = i === S.menuIndex;
+        if (selected) {
+          ctx.fillStyle = '#31543a';
+          ctx.fillRect(px, rowY - 1, innerW, 10);
+          ctx.fillStyle = '#63834a';
+          ctx.fillRect(px, rowY - 1, 2, 10);
+        }
+        text(selected ? '›' : '·', px + 5, rowY, selected ? '#f5efcf' : '#63834a', '7px monospace');
+        text(fitText(c ? c.name : S.clues[i], innerW - 24), px + 14, rowY,
+             selected ? '#f5efcf' : '#183225', '7px monospace');
+      }
+
+      var selectedClue = GAME.Data.clues[S.clues[S.menuIndex]];
+      var desc = selectedClue && selectedClue.desc ? selectedClue.desc : 'Nessuna annotazione disponibile.';
+      ctx.fillStyle = '#c3d879';
+      ctx.fillRect(px, 108, innerW, 22);
+      ctx.fillStyle = '#63834a';
+      ctx.fillRect(px, 108, 2, 22);
+      var descLines = wrap(desc, innerW - 13);
+      for (var di = 0; di < Math.min(2, descLines.length); di++) {
+        text(descLines[di], px + 7, 112 + di * 9, '#183225', '7px monospace');
       }
     }
-    text('X / ESC: chiudi', mx + 12, 137, '#8a8ab0');
+    rule(px, 132, innerW, '#394566');
+    text(GAME.touchMode ? 'SWIPE SCEGLI . X CHIUDI' : '^V SCEGLI . A/X CHIUDI',
+         mx + mw / 2, 133, '#31543a', '6px monospace', 'center');
   }
 
   function curtainRows(yTop, n) {
@@ -672,79 +969,191 @@
   }
 
   function drawTitle() {
-    ctx.fillStyle = '#080810';
-    ctx.fillRect(0, 0, UW, VH);
-    curtainRows(0, 2);
-    curtainRows(VH - 32, 2);
-    // Le tende occupano y 0-32 e VH-32..VH: tutto il testo sta dentro 36..122,
-    // ben distanziato (le righe si accavallavano e finivano sotto la tenda).
-    // NB: una riga da 8px occupa ~17px logici (ascendenti+discendenti), non 8:
-    // misurato sui pixel del canvas. Da qui il passo di 20-24px fra le righe e
-    // l'ultima riga a 108 (finisce a ~125, la tenda inferiore inizia a 131).
     var touch = !!GAME.touchMode;
     var save = hasSave();
-    text('TWIN PEAKS', UW / 2, 40, '#f0f0f0', 'bold 16px monospace', 'center');
-    text('Il Mistero di Laura Palmer', UW / 2, 64, '#c8c8d8', '8px monospace', 'center');
+    // Cartolina Game Boy: montagne, due cime, abeti e insegna.
+    ctx.fillStyle = '#9abf5a'; ctx.fillRect(0, 0, UW, VH);
+    ctx.fillStyle = '#63834a';
+    ctx.beginPath(); ctx.moveTo(0, 76); ctx.lineTo(48, 28); ctx.lineTo(88, 72);
+    ctx.lineTo(132, 20); ctx.lineTo(198, 75); ctx.lineTo(UW, 48); ctx.lineTo(UW, 104);
+    ctx.lineTo(0, 104); ctx.fill();
+    ctx.fillStyle = '#31543a';
+    for (var px = 0; px < UW; px += 13) {
+      var ph = 13 + ((px * 7) % 17);
+      ctx.fillRect(px + 5, 83 - ph, 2, ph + 19);
+      ctx.beginPath(); ctx.moveTo(px + 6, 62 - ph); ctx.lineTo(px, 90); ctx.lineTo(px + 12, 90); ctx.fill();
+    }
+    ctx.fillStyle = '#183225'; ctx.fillRect(10, 37, UW - 20, 49);
+    ctx.fillStyle = '#f5efcf'; ctx.fillRect(13, 40, UW - 26, 43);
+    ctx.strokeStyle = '#63834a'; ctx.strokeRect(16.5, 43.5, UW - 33, 36);
+    text('TWIN PEAKS', UW / 2, 50, '#183225', 'bold 14px monospace', 'center');
+    text('IL MISTERO DI LAURA PALMER', UW / 2, 72, '#31543a', 'bold 7px monospace', 'center');
+    ctx.fillStyle = '#183225'; ctx.fillRect(0, 104, UW, 40);
     if (Math.floor(tGlobal / 500) % 2 === 0) {
       text(save ? (touch ? 'TOCCA: CONTINUA' : 'INVIO: CONTINUA')
                 : (touch ? 'TOCCA PER INIZIARE' : 'PREMI INVIO'),
-           UW / 2, 88, '#ffe9a8', '8px monospace', 'center');
+           UW / 2, 118, '#f5efcf', 'bold 8px monospace', 'center');
     }
     var hint;
-    if (touch) hint = save ? 'B: nuova partita   D-pad: muovi   A: parla' : 'D-pad: muovi   A: parla   B: indizi';
-    else hint = save ? 'N: nuova partita   Frecce: muovi   X: indizi' : 'Frecce: muovi   Z/Invio: parla   X: indizi';
-    text(hint, UW / 2, 108, '#8a8ab0', '8px monospace', 'center');
+    if (touch) hint = 'D-PAD  A PARLA  B MENU';
+    else hint = save ? 'N NUOVO  X INDIZI' : 'FRECCE MUOVI  Z PARLA';
+    text(hint, UW / 2, 134, '#9abf5a', '7px monospace', 'center');
   }
 
   function drawIntro() {
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, UW, VH);
-    var x0 = Math.max(20, Math.floor((UW - 200) / 2));
-    var lines = wrap(GAME.Data.intro[S.introPage], 200);
-    for (var i = 0; i < lines.length; i++) text(lines[i], x0, 46 + i * 11, '#e8e8e8');
-    if (Math.floor(tGlobal / 500) % 2 === 0) {
-      text('▼ INVIO', UW / 2, 140, '#8a8ab0', '8px monospace', 'center');
+    ctx.fillStyle = '#31543a'; ctx.fillRect(0, 0, UW, VH);
+    ctx.fillStyle = '#63834a';
+    for (var x = 0; x < UW; x += 16) {
+      ctx.beginPath(); ctx.moveTo(x + 8, 4); ctx.lineTo(x, 34); ctx.lineTo(x + 16, 34); ctx.fill();
+      ctx.fillRect(x + 7, 28, 2, 24);
     }
+    var boxW = Math.min(224, UW - 16);
+    var boxX = Math.floor((UW - boxW) / 2);
+    RF.frame(ctx, boxX, 36, boxW, 94);
+    text('FEBBRAIO, 1989', UW / 2, 44, '#31543a', 'bold 16px monospace', 'center');
+    var page = introPages()[S.introPage] || { lines: [] };
+    var lines = page.lines;
+    for (var i = 0; i < lines.length; i++) {
+      text(lines[i], boxX + 10, 65 + i * 9, '#183225');
+    }
+    if (Math.floor(tGlobal / 500) % 2 === 0) {
+      text('V  INVIO', UW / 2, 116, '#31543a', 'bold 8px monospace', 'center');
+    }
+  }
+
+  // Il box Game Boy contiene cinque righe. Ogni blocco del prologo viene
+  // spezzato in pagine vere: nessuna riga viene disegnata e poi persa.
+  function introPages() {
+    var boxW = Math.min(224, UW - 16), pages = [];
+    (GAME.Data.intro || []).forEach(function (entry, sourceIndex) {
+      var lines = wrap(entry, boxW - 20), parts = Math.max(1, Math.ceil(lines.length / 5));
+      for (var part = 0; part < parts; part++) {
+        pages.push({ sourceIndex: sourceIndex, part: part, parts: parts, lines: lines.slice(part * 5, part * 5 + 5) });
+      }
+    });
+    return pages.length ? pages : [{ sourceIndex: 0, part: 0, parts: 1, lines: [] }];
+  }
+
+  function endPages() {
+    var source = GAME.Data.endText || ["Twin Peaks tornera'. Grazie per aver giocato."], pages = [], page = [];
+    source.forEach(function (line) {
+      var wrapped = RF.wrapChars(line, 23);
+      if (page.length && page.length + wrapped.length > 5) { pages.push(page); page = []; }
+      while (wrapped.length > 5) { pages.push(wrapped.slice(0, 5)); wrapped = wrapped.slice(5); }
+      page = page.concat(wrapped);
+    });
+    if (page.length) pages.push(page);
+    return pages.length ? pages : [['FINE.']];
   }
 
   function drawEnd() {
-    ctx.fillStyle = '#080810';
-    ctx.fillRect(0, 0, UW, VH);
+    var pages = endPages(), pageIndex = clamp(S.endPage || 0, 0, pages.length - 1), lines = pages[pageIndex];
     curtainRows(0, 10);
-    var lines = GAME.Data.endText;
-    if (!lines) { // fallback: nessun D.endText -> comportamento precedente
-      ctx.fillStyle = 'rgba(10,0,4,0.55)';
-      ctx.fillRect(0, 56, UW, 48);
-      text('CONTINUA...', UW / 2, 66, '#f0f0f0', 'bold 16px monospace', 'center');
-      text('Twin Peaks tornera\'. Grazie per aver giocato.', UW / 2, 88, '#e8c8d0', '8px monospace', 'center');
-      if (Math.floor(tGlobal / 500) % 2 === 0) {
-        text('INVIO: torna al titolo', UW / 2, 140, '#d0a8b0', '8px monospace', 'center');
-      }
-      return;
-    }
-    var boxTop = 38, linesY = boxTop + 28, countY = linesY + lines.length * 11 + 5;
-    ctx.fillStyle = 'rgba(10,0,4,0.55)';
-    ctx.fillRect(0, boxTop, UW, countY + 10 - boxTop);
-    text('IL CERCHIO SI CHIUDE', UW / 2, boxTop + 8, '#f0f0f0', 'bold 16px monospace', 'center');
-    for (var i = 0; i < lines.length; i++) {
-      text(lines[i], UW / 2, linesY + i * 11, '#e8c8d0', '8px monospace', 'center');
-    }
+    RF.frame(ctx, 4, 5, UW - 8, VH - 10);
+    text('IL CERCHIO', UW / 2, 15, '#183225', 'bold 16px monospace', 'center');
+    text('SI CHIUDE', UW / 2, 31, '#31543a', 'bold 16px monospace', 'center');
+    rule(10, 46, UW - 20, '#63834a');
+    for (var i = 0; i < lines.length; i++) text(lines[i], 10, 53 + i * 9, '#183225', '8px monospace');
     var total = Object.keys(GAME.Data.clues).length;
-    text('Indizi raccolti: ' + S.clues.length + '/' + total, UW / 2, countY, '#ffe9a8', '8px monospace', 'center');
+    text('PAG. ' + (pageIndex + 1) + '/' + pages.length, 10, 106, '#63834a', '7px monospace');
+    text('INDIZI ' + S.clues.length + '/' + total, UW - 10, 106, '#31543a', '7px monospace', 'right');
+    rule(10, 117, UW - 20, '#63834a');
     if (Math.floor(tGlobal / 500) % 2 === 0) {
-      text('INVIO: torna al titolo', UW / 2, 140, '#d0a8b0', '8px monospace', 'center');
+      text(pageIndex < pages.length - 1 ? 'INVIO . PAGINA SEGUENTE' : 'INVIO . TORNA AL TITOLO',
+           UW / 2, 124, '#31543a', '8px monospace', 'center');
     }
   }
 
+  function syncCinematicUi() {
+    if (typeof document === 'undefined' || typeof document.getElementById !== 'function') return;
+    var kicker = document.getElementById('cinematic-kicker');
+    var title = document.getElementById('cinematic-title');
+    var body = document.getElementById('cinematic-body');
+    var action = document.getElementById('cinematic-action');
+    var meta = document.getElementById('cinematic-meta');
+    if (!kicker || !title || !body || !action || !meta) return;
+    var touch = !!GAME.touchMode;
+    if (S.mode === 'title') {
+      kicker.textContent = 'CASO 1989  ·  TWIN PEAKS, WASHINGTON';
+      title.textContent = '';
+      body.textContent = '';
+      action.textContent = hasSave()
+        ? (touch ? 'TOCCA PER CONTINUARE' : 'INVIO  ·  CONTINUA')
+        : (touch ? 'TOCCA PER INIZIARE' : 'INVIO  ·  NUOVA PARTITA');
+      meta.textContent = touch
+        ? 'D-PAD MUOVI  ·  A INTERAGISCI  ·  B INDIZI'
+        : (hasSave()
+          ? 'N NUOVA PARTITA  ·  FRECCE MUOVI  ·  X INDIZI'
+          : 'FRECCE MUOVI  ·  Z INTERAGISCI  ·  X INDIZI');
+    } else if (S.mode === 'intro') {
+      var intro = introPages(), introPage = intro[S.introPage] || intro[0];
+      kicker.textContent = 'PROLOGO  ·  ' + (S.introPage + 1) + ' / ' + intro.length;
+      title.textContent = 'FEBBRAIO, 1989';
+      body.textContent = introPage.lines.join('\n');
+      action.textContent = touch ? 'TOCCA PER CONTINUARE' : 'INVIO  ·  CONTINUA';
+      meta.textContent = 'OGNI SEGRETO LASCIA UNA TRACCIA';
+    } else if (S.mode === 'end') {
+      kicker.textContent = 'EPILOGO';
+      title.textContent = 'IL CERCHIO SI CHIUDE';
+      body.textContent = GAME.Data.endText ? GAME.Data.endText.join('\n') : 'Twin Peaks tornerà.';
+      action.textContent = touch ? 'TOCCA PER TORNARE' : 'INVIO  ·  TORNA AL TITOLO';
+      meta.textContent = 'INDIZI RACCOLTI  ' + S.clues.length + ' / ' + Object.keys(GAME.Data.clues).length;
+    }
+  }
+
+  function syncDialogueUi() {
+    if (typeof document === 'undefined' || typeof document.getElementById !== 'function') return;
+    var active = !!(r3d && S.mode === 'play' && S.dialogue);
+    document.body.setAttribute('data-dialogue', active ? 'true' : 'false');
+    if (!active) return;
+    var speaker = document.getElementById('dialogue-speaker');
+    var context = document.getElementById('dialogue-context');
+    var copy = document.getElementById('dialogue-text');
+    if (!speaker || !copy) return;
+    var d = S.dialogue;
+    var page = d.pages[d.i] || {};
+    speaker.textContent = page.name || 'APPUNTO';
+    if (context) {
+      context.textContent = page.name === 'COOPER'
+        ? 'REGISTRAZIONE DIANE  ·  CASO PALMER'
+        : 'INTERVISTA SUL CAMPO  ·  CASO PALMER';
+    }
+    copy.textContent = String(page.text || '').replace(/§/g, String(S.clues.length));
+  }
+
   function render(dt) {
+    /* Schermata finale ha un solo proprietario. Overlay narrativa viene
+     * svuotato/nascosto prima del primo drawEnd, evitando frame compositi. */
+    if (GAME.RetroUI && GAME.RetroUI.setEngineOwned) GAME.RetroUI.setEngineOwned(S.mode === 'end');
+    if (typeof document !== 'undefined' && document.body) {
+      var nextLayoutMode = S.mode === 'play' ? 'play' : 'full';
+      if (nextLayoutMode !== uiLayoutMode) {
+        uiLayoutMode = nextLayoutMode;
+        document.body.setAttribute('data-ui-mode', uiLayoutMode);
+      }
+      document.body.setAttribute('data-screen', S.mode);
+    }
+    /* Frame atomico: nessuno stato canvas (alpha/composite/transform) passa
+     * dalla scena precedente all'epilogo o a qualunque schermata successiva. */
+    if (ctx.setTransform) ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (ctx.setTransform) ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
-    ctx.clearRect(0, 0, UW, VH);
+    if (GAME.Presentation3D && GAME.Presentation3D.render) {
+      GAME.Presentation3D.render(S.mode, tGlobal, S.introPage);
+    }
+    syncCinematicUi();
+    syncDialogueUi();
     if (S.mode === 'title') { drawTitle(); return; }
     if (S.mode === 'intro') { drawIntro(); return; }
     if (S.mode === 'end') { drawEnd(); return; }
     drawWorld(dt); // (gestisce da sé la trasformazione)
     if (ctx.setTransform) ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
-    if (S.dialogue) drawDialogue();
+    // WebGL usa il pannello HTML sincronizzato da syncDialogueUi().
+    // Disegnare anche il box legacy sul canvas causa un cross-fade visibile:
+    // prima compare il vecchio dialogo, poi #dialogue-ui lo sostituisce.
+    if (S.dialogue && !r3d) drawDialogue();
     if (S.menu) drawMenu();
     if (S.fade > 0) {
       ctx.fillStyle = 'rgba(0,0,0,' + S.fade.toFixed(3) + ')';

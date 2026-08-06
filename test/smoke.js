@@ -31,6 +31,7 @@ require(J('chars.js'));
 require(J('houses.js'));
 require(J('maps.js'));
 require(J('data.js'));
+require(J('retro-font.js'));
 require(J('engine.js'));
 require(J('glue.js'));
 require(J('render3d.js')); // window e' globale (riga sopra): CONFIG si popola anche senza THREE
@@ -171,7 +172,14 @@ ok(S().mode === 'title', 'parte dal titolo');
 
 key('Enter'); pump(16);
 ok(S().mode === 'intro', 'titolo -> intro');
-key('Enter'); key('Enter'); key('Enter'); pump(16);
+const introPages = E.introPages();
+ok(introPages.length > GAME.Data.intro.length && introPages.every((p) => p.lines.length <= 5), 'prologo impaginato senza troncare oltre 5 righe');
+const introNorm = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
+const introSource = introNorm(GAME.Data.intro.join(' '));
+const introVisible = introNorm(introPages.flatMap((p) => p.lines).join(' '));
+ok(introVisible === introSource, 'tutto il testo del prologo resta visibile');
+for (let i = 0; i < introPages.length; i++) key('Enter');
+pump(16);
 ok(S().mode === 'play', 'intro -> gioco');
 ok(S().mapId === 'town', 'spawn in città');
 ok(!GAME.Maps.isSolid('town', S().player.tx, S().player.ty, S()), 'spawn calpestabile');
@@ -185,7 +193,7 @@ ok(GAME.Maps.doorAt('town', 23, 6).needsFlag === 'sogno_fatto' && !S().flags.sog
 ok(GAME.Maps.doorAt('town', 47, 28).needsFlag === 'atto4' && !S().flags.atto4, 'roadhouse chiuso prima di atto4');
 
 // Truman: consegna il diario
-E.loadMap('sheriff', 8, 1, 'right');
+E.loadMap('sheriff', 6, 3, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'truman', 'dialogo Truman parte');
 key('Enter'); key('Enter'); key('Enter'); pump(16);
@@ -206,8 +214,8 @@ ok(S().clues.length === 3, '3 indizi totali');
 // transenna ora aperta
 ok(!GAME.Maps.isSolid('town', 50, 0, S()), 'bosco aperto con 3 indizi');
 
-// bosco -> Stanza Rossa camminando fino alla porta (10,0)
-E.loadMap('woods', 14, 2, 'up');
+// bosco -> Stanza Rossa camminando fino alla porta della Lodge (14,4)
+E.loadMap('woods', 14, 5, 'up');
 hold('ArrowUp', 800);
 pump(600); // dissolvenza + warp
 ok(S().mapId === 'redroom', 'entrato nella Stanza Rossa');
@@ -230,7 +238,7 @@ ok(S().flags.sogno_fatto, 'flag sogno_fatto impostato');
 ok(S().mode === 'play', 'il sogno non chiude la partita');
 
 // Truman: racconta il sogno (ponte Atto 1 -> Atto 2, non chiude la partita)
-E.loadMap('sheriff', 8, 1, 'right');
+E.loadMap('sheriff', 6, 3, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'truman_a2', 'dialogo Truman post-sogno parte');
 key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
@@ -268,7 +276,7 @@ key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
 ok(S().clues.includes('cuore_intero'), 'cuore ricomposto ottenuto');
 
 // Truman: chiusura Atto 2, ponte verso Atto 3 (non chiude piu' la partita: il vagone aspetta)
-E.loadMap('sheriff', 8, 1, 'right');
+E.loadMap('sheriff', 6, 3, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'truman_atto3', 'dialogo Truman Atto 3 parte');
 key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
@@ -303,7 +311,7 @@ key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
 ok(S().flags.audrey_salvata, 'flag audrey_salvata impostato');
 
 // Lucy: la chiamata dall'ospedale, Jacques e' morto
-E.loadMap('sheriff', 4, 7, 'up');
+E.loadMap('sheriff', 2, 7, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'lucy_a3', 'dialogo Lucy Atto 3 parte');
 key('Enter'); key('Enter'); key('Enter'); pump(16);
@@ -317,7 +325,7 @@ key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter
 ok(S().flags.gigante1, 'flag gigante1 impostato');
 
 // Truman: chiusura Atto 3, ponte verso Atto 4 (non chiude piu' la partita: il gigante e Maddy aspettano)
-E.loadMap('sheriff', 8, 1, 'right');
+E.loadMap('sheriff', 6, 3, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'truman_atto4', 'dialogo Truman Atto 4 parte');
 key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
@@ -347,11 +355,12 @@ key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
 ok(S().flags.gigante2, 'flag gigante2 impostato');
 ok(!E.npcActive(maddyNpc, S()), 'Maddy scomparsa dopo la seconda apparizione');
 
-// casa Palmer: Leland mente sulla partenza di Maddy
+// casa Palmer: dopo il Roadhouse Leland non ricompare; la testimonianza taxi
+// appartiene al diner narrativo prima del ritrovamento.
 E.loadMap('palmer', 12, 9, 'up');
 key('Enter'); pump(16);
-ok(S().dialogue && S().dialogue.id === 'leland_dove', 'dialogo Leland (bugia su Maddy) parte');
-key('Enter'); key('Enter'); pump(16);
+ok(!E.npcActive(GAME.Maps.palmer.npcs.find((n) => n.id === 'leland'), S()), 'Leland assente da Palmer dopo il Roadhouse');
+ok(!S().dialogue, 'nessun dialogo classico contraddice la testimonianza taxi del diner');
 
 // la riva del lago: il ritrovamento di Maddy
 E.loadMap('town', 15, 29, 'up');
@@ -362,7 +371,7 @@ ok(S().clues.includes('lettera_o'), 'lettera "O" ottenuta');
 ok(S().flags.maddy_trovata, 'flag maddy_trovata impostato');
 
 // Truman: chiusura Atto 4, ponte verso Atto 5 (non chiude piu' la partita: il ponte e' stato ritirato)
-E.loadMap('sheriff', 8, 1, 'right');
+E.loadMap('sheriff', 6, 3, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'truman_atto5', 'dialogo Truman Atto 5 parte');
 key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
@@ -378,21 +387,21 @@ ok(!E.npcActive(palmerLelandNpc, S()), 'Leland assente da casa Palmer dopo atto5
 // distretto: Leland e' li', in interrogatorio
 const sheriffLelandNpc = GAME.Maps.sheriff.npcs.find((n) => n.id === 'leland');
 ok(E.npcActive(sheriffLelandNpc, S()), 'Leland presente al distretto dopo atto5');
-E.loadMap('sheriff', 5, 1, 'right');
+E.loadMap('sheriff', 4, 3, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'leland_interr', 'dialogo interrogatorio di Leland parte');
 key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
 ok(S().flags.leland_confessa, 'flag leland_confessa impostato (BOB e\' emerso)');
 
 // la cella: la confessione si chiude con la morte di Leland
-E.loadMap('sheriff', 5, 1, 'right');
+E.loadMap('sheriff', 4, 3, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'leland_morte', 'dialogo morte di Leland parte');
 key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
 ok(S().flags.leland_morto, 'flag leland_morto impostato');
 
 // Truman: l'ultimo ponte, verso il bosco
-E.loadMap('sheriff', 8, 1, 'right');
+E.loadMap('sheriff', 6, 3, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'truman_fine', 'dialogo finale di Truman parte');
 key('Enter'); key('Enter'); key('Enter'); pump(16);
@@ -420,8 +429,8 @@ ok(S().dialogue && S().dialogue.id === 'laura_finale2', 'dialogo finale di Laura
 key('Enter'); key('Enter'); key('Enter'); key('Enter'); key('Enter'); pump(16);
 ok(S().mode === 'end', 'vero finale raggiunto');
 
-// reset dal finale
-key('Enter'); pump(16);
+// epilogo paginato, poi reset dal finale
+for (let endGuard = 0; endGuard < 10 && S().mode === 'end'; endGuard++) { key('Enter'); pump(16); }
 ok(S().mode === 'title' || S().mapId === 'town', 'reset post-finale');
 ok(E.state.clues.length === 0, 'indizi azzerati al reset');
 
