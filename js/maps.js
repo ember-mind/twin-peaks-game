@@ -26,11 +26,30 @@
     '0': 1, '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1, '7': 1, '8': 1, '9': 1,
     i: 1, C: 1, t: 1, h: 1, K: 1, U: 1,
     Y: 1, R: 1, M: 1, v: 1, G: 1,
-    L: 1, P: 1, B: 1, F: 1, A: 1, H: 1, E: 1, n: 1, q: 1
+    L: 1, P: 1, B: 1, F: 1, A: 1, H: 1, E: 1, n: 1, q: 1, V: 1, J: 1
   };
   M.isSolid = function (ch) { return !ch || !!M.SOLID[ch]; };
 
   M.maps = {
+    arrival: {
+      id: 'arrival',
+      rows: [
+        'TT99..JJJT',
+        'TT99E.JJJT',
+        'T.99..JJJT',
+        'T.....VV.T',
+        'T........T',
+        'TT......TT',
+        'TTT....TTT',
+        'TTTT..TTTT',
+        'TTTTpTTTTT'
+      ],
+      ground: { '4,1': '.', '6,3': '.', '7,3': '.' },
+      doors: { '4,8': { to: 'town', tx: 28, ty: 31, dir: 'up' } },
+      interact: {},
+      onEnter: { dialogue: 'town_arrivo', once: 'intro_town' }
+    },
+
     town: {
       id: 'town',
       rows: [
@@ -43,12 +62,12 @@
         'T.....444444........555555..777pp999....3333......p.,..T', // 4 hotel 6-wide, ospedale a L, Palmer 4-wide
         'T.....444444..........5555..777pp999....3333......p.n..T', // 5
         'T.....444D44..........5D55.E...pp999....33D3......p....T', // 6 porte storiche invariate; mailbox fuori rotta
-        'T.......pppppppppppppppppppppppppppppppppppp......p....T', // 7 corsia nord larga tre tile
+        'T.......ppppppppppppppppppppppppppppppVVpppp......p....T', // 7 berlina FBI sul bordo nord della corsia
         'T.......pppppppppppppppppppppppppppppppppppp......p....T', // 8 interno corsia senza bordi scuri
         'T....Tn.pppppppppppppppppppppppppppppppppppp......p..,.T', // 9 bordo sud corsia e tre bocche d'accesso
-        'T.....B.ppp....000.000pppB...............ppp..000.p....T', // 10 botteghe sotto la corsia, fuori dal frame street
-        'T.......ppp....000.000ppp................ppp..000.p....T', // 11
-        'T.......ppp....000.000ppp................ppp..000.p....T', // 12
+        'T.....B.ppp....000.000pppB.....T........Tppp..000.p....T', // 10 quinte arboree della hero view
+        'T.......ppp....000.000ppp.....TT.......TTppp..000.p....T', // 11 massa conifere, corridoio centrale libero
+        'T.......ppp....000.000ppp....TTT......TTTppp..000.p....T', // 12 profondita' forestale sotto la corsia
         'T===L===ppp===========ppp===L==..=======Lppp======p=L==T', // 13 bocche 3-wide verso i crosswalk
         'Trrrrrrr---rrrrrrrrrrr---rrrrrrrrrrrrrrrr---rrrrrrrrrrrr', // 14 crosswalk solo centrati sugli accessi reali
         'Trrrrrrr---rrrrrrrrrrr---rrrrrrrrrrrrrrrr---rrrrrrrrrrrr', // 15
@@ -77,7 +96,7 @@
        * Il glifo descrive collisione/oggetto; questa tabella conserva la
        * superficie della proprietà senza generare carrier verdi 1x1. */
       ground: {
-        '36,2': '.', '27,6': '.',
+        '36,2': '.', '27,6': '.', '38,7': 'p', '39,7': 'p',
         '6,10': '.', '15,10': '.', '16,10': '.', '17,10': '.', '19,10': '.', '20,10': '.', '21,10': '.', '25,10': '.', '46,10': '.', '47,10': '.', '48,10': '.',
         '15,11': '.', '16,11': '.', '17,11': '.', '19,11': '.', '20,11': '.', '21,11': '.', '46,11': '.', '47,11': '.', '48,11': '.',
         '15,12': '.', '16,12': '.', '17,12': '.', '19,12': '.', '20,12': '.', '21,12': '.', '46,12': '.', '47,12': '.', '48,12': '.',

@@ -194,8 +194,8 @@ ok(introVisible === introSource, 'tutto il testo del prologo resta visibile');
 for (let i = 0; i < introPages.length; i++) key('Enter');
 pump(16);
 ok(S().mode === 'play', 'intro -> gioco');
-ok(S().mapId === 'town', 'spawn in città');
-ok(!GAME.Maps.isSolid('town', S().player.tx, S().player.ty, S()), 'spawn calpestabile');
+ok(S().mapId === 'arrival', 'spawn nella radura d\'arrivo');
+ok(!GAME.Maps.isSolid('arrival', S().player.tx, S().player.ty, S()), 'spawn calpestabile');
 
 // transenna chiusa senza indizi
 ok(GAME.Maps.isSolid('town', 50, 0, S()), 'bosco transennato a 0 indizi');

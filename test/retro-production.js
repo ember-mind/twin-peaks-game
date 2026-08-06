@@ -26,7 +26,7 @@ const checks = {
     /canvas\.height !== VH/.test(engine) && /UW = VW;/.test(engine),
   intro_header_uses_fitting_native_scale: /FEBBRAIO, 1989'[\s\S]*bold 8px monospace/.test(engine) &&
     /titleFits: titleWidth <= l\.boxW - 20/.test(engine),
-  production_cache_busts_layout_fix: /js\/engine\.js\?v=gold54p4-case-doc1/.test(index) &&
+  production_cache_busts_layout_fix: /js\/engine\.js\?v=r69i13/.test(index) &&
     /js\/main\.js\?v=gold54p5-mobile1/.test(index),
   css_stage_preserves_native_aspect: /aspect-ratio: 10 \/ 9/.test(index) &&
     /max-width: 100vw; max-height: 100dvh/.test(index),
@@ -39,7 +39,7 @@ const checks = {
   speaker_cards_use_native_pixel_faces_and_names: /function drawPortrait\(/.test(portraits) &&
     /function drawCard\(/.test(portraits) && !/drawImage|fillText|measureText/.test(portraits),
   production_uses_approved_master_palette: /js\/gold-tone\.js/.test(index) &&
-    /GAME\.GoldTone\.apply/.test(engine) && /#183225/.test(goldTone) && /#f5efcf/i.test(goldTone),
+    /GAME\.GoldTone\.apply/.test(engine) && /#072619/.test(goldTone) && /#eee6b5/i.test(goldTone),
   production_loads_authored_tileset: /js\/retro-authored\.js/.test(index),
   production_does_not_load_three: !/three\.min\.js/.test(index) && !/render3d\.js/.test(index),
   engine_boots_without_webgl: /GAME\.Engine\.init\(cv, null\)/.test(main),
@@ -70,7 +70,7 @@ const checks = {
     /GAME\.Retro2D\.spriteSize = \[16, 16\]/.test(authored),
   gold_flat_world_projection: /var SCALE = 1/.test(engine) && /viewport GBC: 10x9 metatile/.test(engine),
   gold_gameplay_has_no_quest_overlay: /Pokémon Oro non sovrappone quest banner/.test(retroUi),
-  gold_dialogue_exact_bottom_48px: /var by = 96, bh = 48/.test(engine) &&
+  gold_dialogue_reference_bottom_49px: /var by = 95, bh = 49/.test(engine) &&
     /var bw = Math\.min\(UW, 160\)/.test(engine),
   retro_disables_oblique_structures: /Sp\.drawStructures = function \(\) \{\}/.test(retro),
   music_remains_loaded: /js\/audio\.js/.test(index),

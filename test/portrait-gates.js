@@ -21,10 +21,10 @@ assert(Object.keys(P.faces).length >= 25, 'full speaking cast not covered');
 const card = P.drawCard(ctx, '', 'COOPER', 5, 55);
 assert.strictEqual(card.key, 'cooper');
 assert.strictEqual(card.label, 'COOPER');
-assert(card.width >= 40 && card.height === 43, 'card geometry unstable');
+assert(card.width >= 40 && card.height === 47, 'card geometry unstable');
 assert(ctx.rects.length >= 35, 'portrait lacks authored pixel detail');
 assert(ctx.rects.every(r => Number.isInteger(r[0]) && Number.isInteger(r[1])), 'subpixel portrait draw');
-assert.deepStrictEqual(Object.values(P.palette).sort(), ['#183225','#31543a','#63834a','#a8be72','#f5efcf'].sort());
+assert.deepStrictEqual(Object.values(P.palette).sort(), ['#072619','#34572d','#6a8a43','#9aab69','#eee6b5'].sort());
 
 /* Copertura reale, non conteggio config: ogni identità parlante dei due
  * dataset deve risolversi. Diario/taccuino sono documenti, non persone. */

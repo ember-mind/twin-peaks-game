@@ -9,7 +9,7 @@
   var RF = GAME.RetroFont;
 
   var PAL = {
-    ink: '#183225', deep: '#31543a', mid: '#63834a', light: '#a8be72', paper: '#f5efcf'
+    ink: '#072619', deep: '#34572d', mid: '#6a8a43', light: '#9aab69', paper: '#eee6b5'
   };
 
   function R(ctx, x, y, w, h, c) {
@@ -19,6 +19,8 @@
 
   function frame(ctx, x, y, w, h) {
     x = Math.round(x); y = Math.round(y); w = Math.round(w); h = Math.round(h);
+    /* Riga superiore piena a y: la reference separa mondo/UI esattamente qui. */
+    R(ctx, x, y, w, 1, PAL.ink);
     R(ctx, x + 2, y, w - 4, h, PAL.ink); R(ctx, x, y + 2, w, h - 4, PAL.ink);
     R(ctx, x + 3, y + 2, w - 6, h - 4, PAL.paper); R(ctx, x + 2, y + 3, w - 4, h - 6, PAL.paper);
     R(ctx, x + 5, y + 4, w - 10, h - 8, PAL.deep); R(ctx, x + 4, y + 5, w - 8, h - 10, PAL.deep);
@@ -176,19 +178,22 @@
    * Nessuna testa parametrica condivisa: ogni silhouette regge anche senza targa. */
   function drawCoreHead(ctx, key, px, py) {
     if (key === 'cooper') {
-      /* Viso stretto in tre-quarti, onda alta, naso lungo, sorriso trattenuto. */
-      R(ctx, px + 10, py + 2, 14, 3, PAL.ink); R(ctx, px + 13, py, 9, 2, PAL.deep);
-      R(ctx, px + 9, py + 5, 16, 11, PAL.ink); R(ctx, px + 11, py + 16, 12, 5, PAL.ink);
-      R(ctx, px + 11, py + 5, 12, 11, PAL.paper); R(ctx, px + 12, py + 16, 10, 4, PAL.paper);
-      R(ctx, px + 9, py + 8, 2, 6, PAL.light); R(ctx, px + 23, py + 7, 2, 7, PAL.ink);
-      R(ctx, px + 12, py + 8, 5, 1, PAL.ink); R(ctx, px + 19, py + 8, 3, 1, PAL.ink);
-      R(ctx, px + 14, py + 10, 2, 2, PAL.deep); R(ctx, px + 20, py + 10, 1, 2, PAL.deep);
-      R(ctx, px + 18, py + 11, 1, 5, PAL.mid); R(ctx, px + 17, py + 16, 3, 1, PAL.deep);
-      R(ctx, px + 14, py + 18, 6, 1, PAL.ink); R(ctx, px + 16, py + 19, 4, 1, PAL.mid);
-      /* Tazza nera. */
-      R(ctx, px + 2, py + 18, 5, 1, PAL.ink); R(ctx, px + 2, py + 18, 1, 6, PAL.ink);
-      R(ctx, px + 2, py + 23, 5, 1, PAL.ink); R(ctx, px + 3, py + 19, 3, 4, PAL.paper);
-      R(ctx, px + 6, py + 19, 2, 1, PAL.ink); R(ctx, px + 7, py + 20, 1, 3, PAL.ink);
+      /* Cooper: onda alta, tempia scoperta, volto lungo in tre-quarti.
+       * Maschera piu larga: leggibile come volto umano a scala nativa. */
+      R(ctx, px + 8, py + 2, 18, 4, PAL.ink); R(ctx, px + 11, py, 13, 3, PAL.deep);
+      R(ctx, px + 15, py, 8, 1, PAL.light); R(ctx, px + 7, py + 5, 20, 12, PAL.ink);
+      R(ctx, px + 9, py + 17, 16, 5, PAL.ink);
+      R(ctx, px + 9, py + 6, 15, 11, PAL.paper); R(ctx, px + 11, py + 17, 12, 4, PAL.paper);
+      R(ctx, px + 8, py + 8, 2, 7, PAL.light); R(ctx, px + 24, py + 7, 3, 8, PAL.deep);
+      R(ctx, px + 10, py + 9, 6, 2, PAL.ink); R(ctx, px + 19, py + 8, 5, 2, PAL.ink);
+      R(ctx, px + 12, py + 11, 2, 2, PAL.deep); R(ctx, px + 20, py + 10, 2, 2, PAL.deep);
+      R(ctx, px + 18, py + 11, 2, 6, PAL.mid); R(ctx, px + 17, py + 16, 4, 2, PAL.deep);
+      R(ctx, px + 13, py + 18, 8, 1, PAL.ink); R(ctx, px + 15, py + 19, 5, 1, PAL.mid);
+      R(ctx, px + 10, py + 14, 2, 2, PAL.light); R(ctx, px + 22, py + 13, 2, 3, PAL.mid);
+      /* Busto esteso: ritratto, non icona con prop. */
+      R(ctx, px + 5, py + 27, 22, 7, PAL.ink); R(ctx, px + 8, py + 27, 16, 7, PAL.deep);
+      R(ctx, px + 13, py + 27, 3, 7, PAL.paper); R(ctx, px + 18, py + 27, 3, 7, PAL.paper);
+      R(ctx, px + 16, py + 28, 3, 6, PAL.ink);
       return true;
     }
     if (key === 'truman') {
@@ -583,24 +588,75 @@
     return label;
   }
 
+  /* Ritratto Cooper authored direttamente sul well 34x36.
+   * Scanline del volto restringono fronte -> mascella: niente maschera quadra. */
+  function drawCooperWell(ctx, x, y) {
+    R(ctx, x, y, 34, 36, PAL.light);
+    R(ctx, x + 1, y + 1, 32, 1, PAL.mid); R(ctx, x + 1, y + 2, 1, 33, PAL.mid);
+    /* Spalle, revers e cravatta asimmetrici. */
+    R(ctx, x + 3, y + 27, 28, 9, PAL.ink); R(ctx, x + 6, y + 25, 22, 11, PAL.deep);
+    R(ctx, x + 7, y + 26, 8, 10, PAL.ink); R(ctx, x + 20, y + 26, 8, 10, PAL.ink);
+    R(ctx, x + 13, y + 25, 4, 8, PAL.paper); R(ctx, x + 18, y + 25, 4, 8, PAL.paper);
+    R(ctx, x + 16, y + 27, 3, 9, PAL.ink); R(ctx, x + 15, y + 27, 5, 2, PAL.deep);
+    /* Capelli: onda e riga diagonale, tre valori. */
+    R(ctx, x + 16, y, 4, 1, PAL.ink); R(ctx, x + 13, y + 1, 7, 1, PAL.ink);
+    R(ctx, x + 9, y + 2, 11, 2, PAL.ink); R(ctx, x + 7, y + 4, 18, 3, PAL.ink);
+    R(ctx, x + 5, y + 7, 20, 4, PAL.ink);
+    R(ctx, x + 14, y + 1, 4, 1, PAL.deep); R(ctx, x + 8, y + 3, 7, 2, PAL.deep);
+    R(ctx, x + 16, y + 2, 4, 1, PAL.mid); R(ctx, x + 6, y + 6, 8, 2, PAL.deep);
+    R(ctx, x + 20, y + 4, 4, 2, PAL.mid); R(ctx, x + 23, y + 7, 2, 3, PAL.deep);
+    R(ctx, x + 20, y + 4, 5, 2, PAL.mid); R(ctx, x + 5, y + 8, 3, 7, PAL.deep);
+    /* Viso a scanline; lato lontano ombreggiato. */
+    var face = [[6,7,22],[6,8,23],[6,9,24],[7,10,23],[7,11,22],[7,12,22],
+                [8,13,20],[8,14,20],[8,15,19],[9,16,17],[9,17,16],
+                [10,18,14],[10,19,13],[11,20,11],[12,21,8]];
+    face.forEach(function (r) { R(ctx, x + r[0], y + r[1], r[2], 1, PAL.paper); });
+    /* Orecchio vicino, tempia e zigomo: tre-quarti leggibile senza targa. */
+    R(ctx, x + 7, y + 11, 2, 5, PAL.ink); R(ctx, x + 8, y + 12, 2, 3, PAL.mid);
+    R(ctx, x + 9, y + 13, 1, 1, PAL.paper);
+    R(ctx, x + 24, y + 8, 2, 4, PAL.deep);
+    R(ctx, x + 22, y + 10, 3, 6, PAL.mid); R(ctx, x + 21, y + 14, 3, 5, PAL.deep);
+    R(ctx, x + 20, y + 18, 3, 2, PAL.mid); R(ctx, x + 19, y + 20, 2, 2, PAL.deep);
+    R(ctx, x + 8, y + 11, 2, 6, PAL.light); R(ctx, x + 10, y + 17, 2, 2, PAL.mid);
+    /* Sopracciglia sottili e occhi sfalsati da tre-quarti. */
+    R(ctx, x + 10, y + 10, 4, 1, PAL.ink); R(ctx, x + 18, y + 9, 3, 1, PAL.ink);
+    R(ctx, x + 11, y + 12, 2, 1, PAL.ink); R(ctx, x + 19, y + 11, 1, 1, PAL.ink);
+    R(ctx, x + 12, y + 11, 1, 1, PAL.mid); R(ctx, x + 20, y + 10, 1, 1, PAL.light);
+    R(ctx, x + 10, y + 13, 3, 1, PAL.mid); R(ctx, x + 11, y + 15, 2, 2, PAL.mid);
+    /* Naso lungo, zigomo, bocca breve, mento. */
+    R(ctx, x + 16, y + 12, 1, 3, PAL.mid); R(ctx, x + 16, y + 15, 1, 1, PAL.mid);
+    R(ctx, x + 17, y + 16, 1, 1, PAL.mid); R(ctx, x + 15, y + 17, 2, 1, PAL.deep);
+    R(ctx, x + 21, y + 14, 2, 3, PAL.mid); R(ctx, x + 20, y + 17, 2, 1, PAL.light);
+    /* Profilo della mascella a gradini: evita guancia circolare. */
+    R(ctx, x + 20, y + 19, 1, 1, PAL.deep); R(ctx, x + 19, y + 20, 1, 1, PAL.ink);
+    R(ctx, x + 18, y + 21, 2, 1, PAL.deep); R(ctx, x + 17, y + 22, 2, 1, PAL.mid);
+    R(ctx, x + 12, y + 19, 4, 1, PAL.ink); R(ctx, x + 13, y + 20, 3, 1, PAL.mid);
+    R(ctx, x + 13, y + 22, 5, 1, PAL.deep); R(ctx, x + 12, y + 23, 8, 2, PAL.paper);
+    R(ctx, x + 13, y + 24, 9, 1, PAL.mid);
+    R(ctx, x + 11, y + 25, 12, 1, PAL.deep); R(ctx, x + 12, y + 26, 10, 1, PAL.paper);
+    /* Dither modellato: fronte e guancia, non rumore uniforme. */
+    R(ctx, x + 8, y + 9, 1, 1, PAL.light); R(ctx, x + 9, y + 11, 1, 1, PAL.mid);
+    R(ctx, x + 23, y + 12, 1, 1, PAL.deep); R(ctx, x + 21, y + 18, 1, 1, PAL.mid);
+  }
+
   function drawCard(ctx, key, name, x, y) {
     key = resolve(name, key);
     if (!key) return null;
     x = Math.round(x == null ? 5 : x); y = Math.round(y == null ? 55 : y);
-    /* Sagoma 40x43 con angoli a gradino: piu vicina a card Gen II, meno rigida.
-     * Ombra da 2 px e targa condivisa col box la fanno sembrare innestata. */
-    R(ctx, x + 3, y + 3, 38, 42, PAL.deep); R(ctx, x + 2, y + 2, 40, 40, PAL.deep);
-    R(ctx, x + 1, y, 38, 43, PAL.paper); R(ctx, x, y + 1, 40, 41, PAL.paper);
-    R(ctx, x + 2, y + 1, 36, 41, PAL.ink); R(ctx, x + 1, y + 2, 38, 39, PAL.ink);
-    R(ctx, x + 3, y + 2, 34, 31, PAL.deep);
-    drawPortrait(ctx, key, x + 4, y + 2);
+    /* Sagoma 40x47: chiude y104; y105 resta vuota prima del testo. */
+    R(ctx, x + 3, y + 3, 37, 45, PAL.deep); R(ctx, x + 2, y + 2, 38, 43, PAL.deep);
+    R(ctx, x + 1, y, 38, 47, PAL.paper); R(ctx, x, y + 1, 40, 45, PAL.paper);
+    R(ctx, x + 2, y + 1, 36, 45, PAL.ink); R(ctx, x + 1, y + 2, 38, 43, PAL.ink);
+    R(ctx, x + 3, y + 2, 34, 36, PAL.deep);
+    if (key === 'cooper') drawCooperWell(ctx, x + 3, y + 2);
+    else drawPortrait(ctx, key, x + 4, y + 3);
     var label = displayLabel(name, key, 36);
     var tw = 40;
-    var ty = y + 32;
-    R(ctx, x + 1, ty, tw - 2, 11, PAL.ink); R(ctx, x, ty + 1, tw, 9, PAL.ink);
-    R(ctx, x + 2, ty + 2, tw - 4, 7, PAL.paper);
+    var ty = y + 38;
+    R(ctx, x + 1, ty, tw - 2, 9, PAL.ink); R(ctx, x, ty + 1, tw, 7, PAL.ink);
+    R(ctx, x + 2, ty + 1, tw - 4, 7, PAL.paper);
     drawMicro(ctx, label, x + Math.floor(tw / 2), ty + 3, PAL.ink, 36);
-    return { x:x, y:y, width:tw, height:43, key:key, label:label };
+    return { x:x, y:y, width:tw, height:47, key:key, label:label };
   }
 
   GAME.Portraits = {

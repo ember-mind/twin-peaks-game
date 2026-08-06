@@ -239,3 +239,21 @@ Hard gate visivo aggiornato 2026-08-05 su richiesta di Emanuele: somiglianza qua
 - 2026-08-06 — R20: integrato 7,8/10, ma world 5,8 e UI 68/100 bloccano. R21 applica richieste pixel-esatte del critico UI e depth pass del critico world.
 - 2026-08-06 — R21–R23: nessuna chiusura. Critici indipendenti convergono su atlas/metatile e sprite; R24 interviene su silhouette e composizione, non su grading.
 - 2026-08-06 — R50 respinta dai critici; R51 ripristina byte-per-byte il rendering R49 per urbano, Lodge e Cooper. Nessuna falsa dichiarazione 10/10: hard gate resta aperto a 7,9/10 integrato.
+
+## R69 — Reference hero scene (2026-08-06)
+
+Riferimento canonico: `artifacts/retro-gauntlet/refs/reference-r69.png`. Motore scelto: Canvas 2D nativo `160×144`; Godot/Blender respinti per questa passata perché avrebbero introdotto migrazione senza aumentare fedeltà del raster 2D.
+
+Risultato implementato:
+
+- palette a sei toni misurata dalla reference: `#072619`, `#34572D`, `#6A8A43`, `#9AAB69`, `#DCD9A9`, `#EEE6B5`;
+- stanza iniziale authored `10×9`, collisioni reali e uscita verso Twin Peaks;
+- composizione misurata: shop, chalet, mailbox, berlina, Cooper rear-view e foresta a cornice;
+- dialog box `y95`, card `40×47` da `y58` a `y104`, riga vuota `y105`, testo da `y106`;
+- Cooper portrait `34×36`, tre-quarti, orecchio/tempia/zigomo, nome completo;
+- vignetta indicizzata senza blur; nearest-neighbor e scala intera;
+- mobile verificato a `390×844` e `844×390`, stage `320×288` = `2×`.
+
+Progressione blind review integrata: `67,5 → 69,1 → 75 → 83,2 grezzo → 87,8 → 90,5 → 91,3 → 93,4 → 95,4 → 95,5 HARD PASS`; gauntlet UI/mobile: `81 → 86 → 89 → 92 → 94 → 95,1 → 95,3 HARD PASS`. World specialistico: `61 → 72 → 76 → 82 → 85 → 88 → 87 → 91 → 93`, dichiarato shipping-ready senza blocker materiali. Forest gate: corridoio finale 23 px, almeno sei varianti, overlap, tre piani e rami authored. Report completi: `artifacts/r69-critique-round1..10.md`, `artifacts/r69-ui-mobile-round1..10.md`, `artifacts/retro-gauntlet/r69-world-round2..10.md`.
+
+Validazione finale: `R69 23/23`, portrait `9/9`, gold-tone `9/9`, sprite semanticamente senza `NO`, retro production `45/45`, mobile `19/19`, touch `13/13`, movement `9/9`, town `85/85`, smoke `366`, walkthrough completo `86`, validatori narrativi M4–M10 verdi. Capture finale SHA-256 `240e2343891552c2e77fbfc3dd2130b646338d940a553eb78ee4a616b1a8bbb7`. Pagina condivisibile: `progress.html`.

@@ -75,8 +75,8 @@
   function freshState() {
     return {
       mode: 'title',           // title | intro | play | end
-      mapId: 'town', map: null, npcs: [],
-      player: { tx: 28, ty: 31, x: 28 * TILE, y: 31 * TILE, dir: 'up', moving: false, mx: 0, my: 0, turnUntil: 0 },
+      mapId: 'arrival', map: null, npcs: [],
+      player: { tx: 4, ty: 3, x: 4 * TILE, y: 3 * TILE, dir: 'up', moving: false, mx: 0, my: 0, turnUntil: 0 },
       clues: [], flags: {},
       introPage: 0,           // indice della pagina VISIBILE, incluse continuazioni
       endPage: 0,
@@ -327,7 +327,7 @@
   };
 
   E.start = function () {
-    loadMap('town', 28, 31, 'up');
+    loadMap('arrival', 4, 3, 'up');
     // Costruisce e compila la scena iniziale mentre il titolo 3D la copre.
     // Il primo frame giocabile non paga così il cold path WebGL.
     if (GAME.Render3D && GAME.Render3D.prewarm && typeof window !== 'undefined') {
@@ -492,7 +492,7 @@
     if (S.mode === 'end') {
       var pages = endPages();
       if ((S.endPage || 0) < pages.length - 1) { S.endPage = (S.endPage || 0) + 1; audioSfx('page'); return; }
-      S = E.state = freshState(); loadMap('town', 28, 31, 'up'); return;
+      S = E.state = freshState(); loadMap('arrival', 4, 3, 'up'); return;
     }
     if (S.mode !== 'play') return;
     if (S.dialogue) { advanceDialogue(); return; }
@@ -880,6 +880,12 @@
   // terreno + strutture + sparkle su un contesto, finestra (cx,cy,vw,vh) in px mondo
   function paintGround(g, cx, cy, vw, vh) {
     var map = S.map, rows = map.rows;
+    /* Stanza d'arrivo 160x144: fondale authored su coordinate reference.
+     * Collisioni restano nella mappa ASCII; raster non eredita ingombri 16px. */
+    if (map.id === 'arrival' && GAME.Retro2D && GAME.Retro2D.drawArrivalBackdrop) {
+      GAME.Retro2D.drawArrivalBackdrop(g, cx, cy, vw, vh);
+      return;
+    }
     var x0 = Math.floor(cx / TILE), y0 = Math.floor(cy / TILE);
     var x1 = Math.floor((cx + vw - 1) / TILE), y1 = Math.floor((cy + vh - 1) / TILE);
     var opts = { woodsOpen: S.clues.length >= 3, t: tGlobal, mapId: S.mapId, indoor: !!map.indoor };
@@ -911,7 +917,7 @@
                fr: n.moving ? (Math.floor(tGlobal / 90) % 4) : 0,
                moving: n.moving || false, alpha: n.sprite === 'laura' ? 0.85 : 1 };
     });
-    ents.push({ wx: Math.round(p.x), wy: Math.round(p.y), sprite: 'cooper', dir: p.dir,
+    ents.push({ wx: Math.round(p.x) + (S.mapId === 'arrival' ? 8 : 0), wy: Math.round(p.y) - (S.mapId === 'arrival' ? 1 : 0), sprite: 'cooper', dir: p.dir,
                 fr: p.moving ? (Math.floor(tGlobal / 90) % 4) : 0, moving: p.moving, alpha: 1 });
     ents.sort(function (a, b) { return a.wy - b.wy; });
     return ents;
@@ -935,6 +941,9 @@
     var mw = map.width * TILE, mh = map.height * TILE;
     var txx = mw > vw ? clamp(p.x + 8 - vw / 2, 0, mw - vw) : (mw - vw) / 2;
     var tyy = mh > vh ? clamp(p.y + 8 - vh / 2, 0, mh - vh) : (mh - vh) / 2;
+    /* Nel reference dialogo e ritratto occupano il terzo inferiore: alza il
+     * soggetto nel mondo visibile, invece di lasciarlo dietro la UI. */
+    if (S.dialogue && !map.indoor && mh > vh) tyy = clamp(tyy + 12, 0, mh - vh);
     /* Il frame Lodge di riferimento tiene Cooper a x~72 e lascia piu'
      * respiro a destra: offset costante di mezzo metatile, senza spostare
      * arte oltre i confini delle tile o alterare collisioni. */
@@ -1000,19 +1009,21 @@
     // Box e card non consumano righe: testo conserva due righe complete.
     var bw = Math.min(UW, 160);
     var bx = Math.floor((UW - bw) / 2);
-    var by = 96, bh = 48;
+    /* Reference R69: mondo 95 px, box 49 px. La card termina a y=103;
+     * il testo parte a y=106, quindi volto e battuta non si toccano. */
+    var by = 95, bh = 49;
     if (Portraits) Portraits.frame(ctx, bx, by, bw, bh);
     else RF.frame(ctx, bx, by, bw, bh);
     var str = page.text.replace(/§/g, String(S.clues.length));
     var lines = RF.wrapFixed(str, bw - 16, 1);
     for (var i = 0; i < Math.min(2, lines.length); i++) {
-      RF.drawFixed(ctx, lines[i], bx + 8, by + 8 + i * 16, uiInk);
+      RF.drawFixed(ctx, lines[i], bx + 8, by + 11 + i * 16, uiInk);
     }
     ctx.fillStyle = uiInk;
-    ctx.fillRect(bx + bw - 15, by + 37, 5, 1);
-    ctx.fillRect(bx + bw - 14, by + 38, 3, 1);
-    ctx.fillRect(bx + bw - 13, by + 39, 1, 1);
-    if (Portraits) Portraits.drawCard(ctx, page.portrait, page.name, bx + 8, by - 35);
+    ctx.fillRect(bx + bw - 15, by + 39, 5, 1);
+    ctx.fillRect(bx + bw - 14, by + 40, 3, 1);
+    ctx.fillRect(bx + bw - 13, by + 41, 1, 1);
+    if (Portraits) Portraits.drawCard(ctx, page.portrait, page.name, bx + 9, by - 37);
   }
 
   function drawMenu() {
@@ -1440,6 +1451,9 @@
     // prima compare il vecchio dialogo, poi #dialogue-ui lo sostituisce.
     if (S.dialogue && !r3d) drawDialogue();
     if (S.menu && !caseUiActive) drawMenu();
+    if (!r3d && GAME.GoldTone && GAME.GoldTone.atmosphere) {
+      GAME.GoldTone.atmosphere(ctx, VW, VH, S.mapId);
+    }
     if (S.fade > 0) {
       ctx.fillStyle = 'rgba(0,0,0,' + S.fade.toFixed(3) + ')';
       ctx.fillRect(0, 0, UW, VH);

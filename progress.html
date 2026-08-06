@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Twin Peaks — Gauntlet visivo</title>
+<style>
+:root{--ink:#072619;--deep:#34572d;--mid:#6a8a43;--soft:#9aab69;--paper:#eee6b5;--pale:#dcd9a9}
+*{box-sizing:border-box}html{background:var(--ink);color:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}body{margin:0;background:var(--paper);min-height:100vh}a{color:inherit}.wrap{width:min(1080px,calc(100% - 28px));margin:auto;padding:32px 0 64px}.top{display:flex;gap:24px;align-items:flex-end;justify-content:space-between;border-bottom:6px double var(--ink);padding-bottom:18px}.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase}.top h1{font-size:clamp(28px,6vw,62px);line-height:.93;margin:8px 0 0;max-width:780px}.play{display:inline-block;background:var(--ink);color:var(--paper);padding:12px 16px;text-decoration:none;box-shadow:5px 5px 0 var(--soft);white-space:nowrap}.status{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0}.score{border:3px solid var(--ink);padding:14px;background:var(--pale);min-height:116px}.score strong{display:block;font-size:38px;line-height:1}.score span{display:block;margin-top:9px;font-size:12px}.pass{background:var(--soft)}.pending{border-style:dashed}.section{margin-top:34px}.section h2{font-size:20px;border-bottom:2px solid var(--ink);padding-bottom:7px}.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px}.shot{margin:0;border:3px solid var(--ink);background:var(--deep);padding:7px}.shot img{display:block;width:100%;height:auto;image-rendering:pixelated;background:var(--paper)}.shot figcaption{color:var(--paper);font-size:12px;padding:8px 3px 2px}.chart{border:3px solid var(--ink);background:var(--pale);padding:18px}.chart svg{display:block;width:100%;height:auto}.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;margin-top:12px}.dot{display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:-2px;background:var(--ink)}.dot.ui{background:var(--mid)}.dot.world{background:var(--soft);border:1px solid var(--ink)}table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--soft)}th{background:var(--ink);color:var(--paper)}.tests{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.test{border:2px solid var(--ink);padding:10px;background:#fff8d0}.test b{display:block;font-size:22px}.method{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;counter-reset:step}.method div{border-left:6px solid var(--deep);padding:10px;background:var(--pale)}.method div:before{counter-increment:step;content:counter(step);display:block;font-weight:900;font-size:24px}.foot{margin-top:42px;padding-top:16px;border-top:6px double var(--ink);font-size:12px;line-height:1.6}@media(max-width:720px){.wrap{width:min(100% - 18px,1080px);padding-top:18px}.top{align-items:flex-start;flex-direction:column}.status{grid-template-columns:1fr}.compare{grid-template-columns:1fr}.tests{grid-template-columns:repeat(2,1fr)}.method{grid-template-columns:1fr 1fr}}@media(max-width:420px){.tests,.method{grid-template-columns:1fr}.play{width:100%;text-align:center}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <div><div class="eyebrow">Twin Peaks · Retro 2D · R69</div><h1>Gauntlet visivo</h1></div>
+    <a class="play" href="./">Gioca ora →</a>
+  </header>
+
+  <section class="status" aria-label="Ultimi voti ciechi">
+    <article class="score pass"><strong>95,5</strong><span>Critico integrato · HARD PASS</span></article>
+    <article class="score pass"><strong>95,3</strong><span>UI + mobile · HARD PASS</span></article>
+    <article class="score"><strong>93,0</strong><span>World art · READY, zero blocker</span></article>
+  </section>
+
+  <section class="section">
+    <h2>Confronto usato dai critici</h2>
+    <div class="compare">
+      <figure class="shot"><img src="artifacts/retro-gauntlet/refs/reference-r69.png" alt="Riferimento fornito"><figcaption>Riferimento fornito · composizione target</figcaption></figure>
+      <figure class="shot"><img src="artifacts/retro-gauntlet/r69-final-arrival-5x.png" alt="Build corrente ingrandita 5 volte"><figcaption>Build corrente · canvas 160×144, nearest-neighbor 5×</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Andamento review cieca</h2>
+    <div class="chart">
+      <svg viewBox="0 0 900 250" role="img" aria-label="Progressione punteggi da 67,5 a oltre 93">
+        <path d="M45 25V215H875" fill="none" stroke="#072619" stroke-width="3"/>
+        <path d="M45 72H875M45 120H875M45 167H875" fill="none" stroke="#9aab69" stroke-width="1" stroke-dasharray="5 6"/>
+        <polyline points="55,197 150,190 245,168 340,129 435,107 530,94 625,90 720,77 815,67" fill="none" stroke="#072619" stroke-width="7"/>
+        <polyline points="55,154 150,131 245,112 340,98 435,88 530,83 625,82 720,83 815,81" fill="none" stroke="#6a8a43" stroke-width="7"/>
+        <polyline points="150,197 245,145 340,126 435,98 530,84 625,69 720,74 815,79 855,58" fill="none" stroke="#9aab69" stroke-width="7"/>
+        <text x="8" y="31">100</text><text x="17" y="77">90</text><text x="17" y="125">80</text><text x="17" y="172">70</text><text x="17" y="220">60</text>
+        <text x="48" y="240">inizio</text><text x="795" y="240">round 10</text>
+      </svg>
+      <div class="legend"><span><i class="dot"></i>integrato</span><span><i class="dot ui"></i>UI/mobile</span><span><i class="dot world"></i>world art</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Gate automatici correnti</h2>
+    <div class="tests">
+      <div class="test"><b>23/23</b>reference</div><div class="test"><b>45/45</b>production</div>
+      <div class="test"><b>19/19</b>mobile</div><div class="test"><b>13/13</b>touch</div>
+      <div class="test"><b>366</b>smoke</div><div class="test"><b>86</b>walkthrough</div>
+      <div class="test"><b>9/9</b>portrait</div><div class="test"><b>9/9</b>palette</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Metodo</h2>
+    <div class="method"><div>Build reale e cattura lossless.</div><div>Critici ricevono reference e frame, senza difesa autore.</div><div>Un gap osservabile per giro; correzione mirata.</div><div>Suite completa prima del deploy.</div></div>
+  </section>
+
+  <footer class="foot">Aggiornato 6 agosto 2026. Canvas 160×144, sei toni, pixel interi. Godot/Blender esclusi da questa passata: migrazione non aumentava fedeltà raster né compatibilità mobile.</footer>
+</main>
+</body>
+</html>

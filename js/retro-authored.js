@@ -278,6 +278,193 @@
     groundShadow(ctx, x, y, tx, ty, rows);
   }
 
+  /* Terreno hero: carta crema dominante e pochi ciuffi, come reference.
+   * Nessun tappeto verde: 4 segni deterministici per tile, grandi vuoti. */
+  function arrivalGround(ctx, x, y, tx, ty) {
+    R(ctx, x, y, 16, 16, '#eee6b5');
+    var phase = hash(tx, ty, 0x69) & 3;
+    var marks = [
+      [[3,4],[11,2],[7,11],[14,14]],
+      [[1,7],[9,4],[13,10],[5,14]],
+      [[4,2],[14,6],[8,9],[2,13]],
+      [[2,3],[10,7],[15,11],[6,15]]
+    ][phase];
+    for (var i = 0; i < marks.length; i++) {
+      R(ctx, x + marks[i][0], y + marks[i][1], i === 2 ? 2 : 1, 1, '#9aab69');
+      if (i === 1) R(ctx, x + marks[i][0] + 1, y + marks[i][1] - 1, 1, 1, '#6a8a43');
+    }
+  }
+
+  /* R69 hero tableau. Coordinate misurate sulla reference normalizzata
+   * 160x144: negozio 30,2; chalet 89,0; auto 93,42; radura dentro foresta. */
+  function arrivalFir(ctx, x, y, h, back) {
+    var fir = [
+      '........oo........','.......oddo.......','......odmmdo......','.....oddddddo.....',
+      '...oooddmddddooo..','..oddddddddddddo..','......odd.do......','.....oddddddo.....',
+      '...oodddmdddddoo..','..odddddddddddddo.','.....odd.ddo......','....odddddddddo...',
+      '..oodddddmdddddoo.','.odddddddddddddddo','....oddd.ddddo....','...odddddddddddo..',
+      '.ooddddmddddddddoo','oddddddddddddddddd','...oddddd.ddddo...','..odddddddddddddo.',
+      'ooddddmdddddddddoo','oddddddddddddddddd','....oddd.ddddo....','..odddddddddddddo.',
+      'oddddddddddddddddd','......oooooo......','.......oddo.......','.......oddo.......'
+    ];
+    /* Tre silhouette reali: alcune fasce slittano 1 px, chiome non stampate. */
+    var variant = Math.abs((x * 7 + y * 3) | 0) % 3;
+    if (variant) fir = fir.map(function (row, ri) {
+      if (ri % 5 !== variant) return row;
+      return variant === 1 ? ('.' + row.slice(0, -1)) : (row.slice(1) + '.');
+    });
+    paint(ctx, fir, {
+      o: back ? '#34572d' : '#072619',
+      d: back ? '#6a8a43' : '#34572d',
+      m: back ? '#9aab69' : '#6a8a43'
+    }, x, y + Math.max(0, h - 32));
+    /* Cluster direzionali: rami, non stipple. */
+    var baseY = y + Math.max(0, h - 32);
+    R(ctx, x + 4 + variant, baseY + 8, 6, 2, back ? '#9aab69' : '#6a8a43');
+    R(ctx, x + 8 - variant, baseY + 14, 6, 2, back ? '#34572d' : '#072619');
+    R(ctx, x + 2 + variant, baseY + 19, 7, 2, back ? '#9aab69' : '#6a8a43');
+    R(ctx, x + 7, baseY + 23, 8, 2, back ? '#34572d' : '#072619');
+  }
+
+  function arrivalShop(ctx) {
+    var x = 30, y = 2;
+    R(ctx, x + 1, y, 32, 36, '#072619'); R(ctx, x, y + 1, 34, 34, '#072619');
+    R(ctx, x + 3, y + 2, 28, 14, '#9aab69');
+    R(ctx, x + 5, y + 4, 24, 10, '#6a8a43');
+    R(ctx, x + 6, y + 5, 1, 1, '#dcd9a9'); R(ctx, x + 26, y + 12, 2, 1, '#34572d');
+    /* insegna-oggetto: telefono nero, non lettera placeholder */
+    R(ctx, x + 14, y + 5, 7, 7, '#072619'); R(ctx, x + 16, y + 3, 5, 3, '#34572d');
+    R(ctx, x + 16, y + 6, 3, 3, '#9aab69'); R(ctx, x + 13, y + 11, 10, 2, '#34572d');
+    R(ctx, x + 2, y + 17, 30, 3, '#34572d');
+    for (var i = 0; i < 10; i++) R(ctx, x + 3 + i * 3, y + 20, 2, 4, i & 1 ? '#9aab69' : '#dcd9a9');
+    R(ctx, x + 3, y + 24, 28, 2, '#072619');
+    R(ctx, x + 3, y + 26, 28, 9, '#6a8a43');
+    R(ctx, x + 4, y + 27, 26, 1, '#9aab69');
+    /* Ombra dell'awning e muratura sfalsata: profondita' a 1 px. */
+    R(ctx, x + 3, y + 25, 28, 1, '#34572d');
+    [[4,28,3],[16,29,4],[5,33,3],[17,32,2],[27,29,2]].forEach(function (b) {
+      R(ctx, x + b[0], y + b[1], b[2], 1, '#34572d');
+    });
+    R(ctx, x + 5, y + 27, 11, 7, '#072619'); R(ctx, x + 7, y + 28, 7, 4, '#9aab69');
+    R(ctx, x + 10, y + 28, 1, 4, '#34572d'); R(ctx, x + 7, y + 30, 7, 1, '#34572d');
+    R(ctx, x + 20, y + 26, 9, 10, '#072619'); R(ctx, x + 22, y + 28, 5, 8, '#34572d');
+    R(ctx, x + 26, y + 32, 1, 1, '#dcd9a9');
+  }
+
+  function arrivalCabinHero(ctx) {
+    var x = 89, peak = 111;
+    /* timpano a gradini, 44x12 */
+    for (var y = 0; y < 11; y++) {
+      var half = 3 + y * 2;
+      R(ctx, peak - half, y, Math.min(44, half * 2), 1, '#072619');
+      if (y > 2) R(ctx, peak - half + 3, y, Math.max(2, Math.min(38, half * 2 - 6)), 1, y & 1 ? '#34572d' : '#6a8a43');
+    }
+    /* assi del timpano e chiodi, seguono gable invece di bande vuote */
+    R(ctx, x + 17, 4, 1, 6, '#9aab69'); R(ctx, x + 27, 6, 1, 4, '#34572d');
+    R(ctx, x + 11, 8, 3, 1, '#6a8a43'); R(ctx, x + 31, 8, 2, 1, '#9aab69');
+    R(ctx, x, 10, 44, 4, '#072619'); R(ctx, x + 2, 12, 40, 2, '#9aab69');
+    R(ctx, x + 3, 14, 38, 18, '#6a8a43');
+    for (y = 16; y < 32; y += 4) R(ctx, x + 3, y, 38, 1, '#34572d');
+    R(ctx, x + 4, 17, 2, 1, '#9aab69'); R(ctx, x + 37, 29, 2, 1, '#34572d');
+    /* finestre gemelle, porta centrale */
+    [5, 29].forEach(function (dx) {
+      R(ctx, x + dx, 18, 9, 9, '#072619'); R(ctx, x + dx + 2, 20, 5, 5, '#dcd9a9');
+      R(ctx, x + dx + 4, 20, 1, 5, '#34572d'); R(ctx, x + dx + 2, 22, 5, 1, '#34572d');
+    });
+    R(ctx, x + 17, 14, 11, 18, '#072619'); R(ctx, x + 20, 17, 6, 14, '#34572d');
+    R(ctx, x + 25, 24, 1, 1, '#dcd9a9');
+    /* veranda piena: balaustre laterali e tre gradini centrali */
+    R(ctx, x + 1, 29, 42, 3, '#072619');
+    R(ctx, x + 2, 32, 14, 6, '#34572d'); R(ctx, x + 29, 32, 13, 6, '#34572d');
+    for (var bx = 3; bx < 16; bx += 3) R(ctx, x + bx, 30, 1, 7, '#9aab69');
+    for (bx = 30; bx < 43; bx += 3) R(ctx, x + bx, 30, 1, 7, '#9aab69');
+    R(ctx, x + 17, 30, 11, 2, '#dcd9a9');
+    R(ctx, x + 15, 32, 15, 2, '#9aab69');
+    R(ctx, x + 13, 34, 19, 2, '#6a8a43');
+    R(ctx, x + 13, 36, 19, 1, '#072619');
+    R(ctx, x + 15, 30, 1, 7, '#072619'); R(ctx, x + 29, 30, 1, 7, '#072619');
+    /* texture corta sotto veranda: densita senza cambiare bbox */
+    for (var tx = 3; tx < 41; tx += 4) R(ctx, x + tx, 34 + ((tx >> 2) & 1), 2, 1, '#6a8a43');
+  }
+
+  function arrivalMailboxHero(ctx) {
+    R(ctx, 67, 29, 2, 8, '#34572d'); R(ctx, 64, 24, 8, 7, '#072619');
+    R(ctx, 65, 25, 6, 4, '#6a8a43'); R(ctx, 65, 26, 5, 1, '#9aab69');
+    R(ctx, 71, 24, 2, 5, '#072619');
+  }
+
+  function arrivalCarHero(ctx) {
+    var x = 93, y = 39;
+    R(ctx, x + 3, y + 5, 29, 9, '#072619'); R(ctx, x, y + 8, 35, 6, '#072619');
+    R(ctx, x + 9, y + 1, 17, 7, '#072619');
+    /* Tetto, parabrezza, montante e lunotto restano quattro volumi distinti. */
+    R(ctx, x + 11, y + 2, 13, 1, '#6a8a43');
+    R(ctx, x + 10, y + 3, 7, 4, '#9aab69'); R(ctx, x + 19, y + 3, 6, 4, '#9aab69');
+    R(ctx, x + 17, y + 3, 2, 5, '#34572d');
+    R(ctx, x + 3, y + 7, 29, 6, '#6a8a43');
+    R(ctx, x + 1, y + 9, 6, 3, '#9aab69'); R(ctx, x + 29, y + 8, 5, 3, '#dcd9a9');
+    R(ctx, x + 14, y + 8, 1, 5, '#34572d'); R(ctx, x + 22, y + 8, 1, 5, '#34572d');
+    R(ctx, x + 4, y + 11, 8, 3, '#eee6b5'); R(ctx, x + 24, y + 11, 8, 3, '#eee6b5');
+    R(ctx, x + 5, y + 11, 6, 5, '#072619'); R(ctx, x + 25, y + 11, 6, 5, '#072619');
+    R(ctx, x + 7, y + 13, 2, 2, '#9aab69'); R(ctx, x + 27, y + 13, 2, 2, '#9aab69');
+    R(ctx, x + 2, y + 14, 32, 2, '#34572d'); R(ctx, x + 6, y + 16, 25, 1, '#9aab69');
+  }
+
+  function arrivalGrassCluster(ctx, x, y, variant) {
+    var mid = '#9aab69', dark = '#6a8a43';
+    R(ctx, x, y + 2, 1, 2, mid); R(ctx, x + 2, y, 1, 3, dark);
+    R(ctx, x + 4, y + 1, 1, 2, mid);
+    if (variant & 1) { R(ctx, x + 1, y + 4, 2, 1, dark); R(ctx, x + 5, y + 3, 1, 2, mid); }
+    if (variant & 2) R(ctx, x + 7, y + 1, 2, 1, mid);
+  }
+
+  GAME.Retro2D = GAME.Retro2D || {};
+  GAME.Retro2D.drawArrivalBackdrop = function (ctx, cx, cy, vw, vh) {
+    ctx.save(); ctx.translate(-Math.round(cx || 0), -Math.round(cy || 0));
+    R(ctx, 0, 0, 160, 144, '#eee6b5');
+    /* Ciuffi minuti + cluster authored: radura leggibile, non vuoto uniforme. */
+    for (var gy = 5; gy < 93; gy += 11) for (var gx = 6; gx < 156; gx += 13) {
+      if (((gx * 3 + gy) % 17) < 7) {
+        R(ctx, gx, gy, 1, 2, '#9aab69'); R(ctx, gx + 2, gy + 1, 2, 1, '#6a8a43');
+      }
+    }
+    [[23,40,1],[37,47,3],[54,40,0],[75,39,1],[134,42,2],
+     [25,56,2],[45,61,1],[61,53,3],[86,55,1],[137,58,3],
+     [21,72,3],[38,78,0],[57,69,2],[91,72,1],[119,68,2],[137,77,1],
+     [61,86,3],[82,84,0],[96,88,2]].forEach(function (g) {
+      arrivalGrassCluster(ctx, g[0], g[1], g[2]);
+    });
+    /* masse continue: foresta, non collezione di icone isolate */
+    R(ctx, 0, 0, 20, 95, '#34572d'); R(ctx, 143, 0, 17, 95, '#34572d');
+    R(ctx, 0, 78, 59, 17, '#34572d'); R(ctx, 103, 78, 57, 17, '#34572d');
+    /* Branch bands su masse: niente stipple casuale. */
+    [[0,0,20,95,3],[143,0,17,95,11],[0,76,61,19,19],[99,76,61,19,29]].forEach(function (q) {
+      for (var fy = q[1] + 1; fy < q[1] + q[3]; fy += 6) {
+        for (var fx = q[0] + 1; fx < q[0] + q[2]; fx += 11) {
+          var phase = hash(fx, fy, q[4]);
+          R(ctx, fx + (phase & 3), fy, 6 + ((phase >> 2) & 2), 2, (phase & 4) ? '#072619' : '#6a8a43');
+          R(ctx, fx + 2 + ((phase >> 3) & 2), fy + 2, 4, 2, '#34572d');
+          if (phase & 8) R(ctx, fx + 3, fy, 2, 1, '#9aab69');
+        }
+      }
+    });
+    for (var my = 3; my < 94; my += 7) {
+      R(ctx, 2 + (my % 11), my, 2, 2, '#6a8a43');
+      R(ctx, 148 + (my % 7), my + 2, 3, 1, '#9aab69');
+    }
+    /* profondita dietro, poi prima fila sovrapposta */
+    [-8,3,14,143,153].forEach(function (fx, i) { arrivalFir(ctx, fx, i & 1 ? 9 : -7, 36, true); });
+    [-7,4,15,144,154].forEach(function (fx, i) { arrivalFir(ctx, fx, 25 + (i & 1) * 8, 39, false); });
+    [17,29,41,101,114,128].forEach(function (fx, i) {
+      arrivalFir(ctx, fx, 48 + (i & 1) * 4, 35, true);
+    });
+    [-8,2,12,22,32,42,52,93,103,113,123,133,143,153].forEach(function (fx, i) {
+      arrivalFir(ctx, fx, 60 + (i % 3) * 5, 38 - (i & 1) * 4, i % 3 === 0);
+    });
+    arrivalShop(ctx); arrivalCabinHero(ctx); arrivalMailboxHero(ctx); arrivalCarHero(ctx);
+    ctx.restore();
+  };
+
   function tree(ctx, x, y, tx, ty, rows, sycamore, night) {
     /* Tile BG 2bpp credibile: un solo colore terreno + tre colori chioma.
      * Tronco condivide outline; niente seconda palette di erba sotto. */
@@ -528,6 +715,38 @@
     }
   }
 
+  /* Berlina laterale 32x16 della scena d'arrivo. Due tile solidi, stessa
+   * hitbox della sagoma: niente attraversamento fantasma. Ogni meta' dipinge
+   * solo il proprio rettangolo, quindi la scansione tile non cancella l'altra. */
+  function parkedCar(ctx, x, y, tx, ty, rows, opts) {
+    if (opts && opts.mapId === 'arrival') arrivalGround(ctx, x, y, tx, ty);
+    else path(ctx, x, y, tx, ty, rows);
+    var right = cell(rows, tx - 1, ty) === 'V';
+    if (!right) {
+      R(ctx, x + 3, y + 14, 13, 2, C.dark);
+      R(ctx, x + 2, y + 6, 14, 8, C.ink);
+      R(ctx, x + 8, y + 2, 8, 5, C.ink);
+      R(ctx, x + 3, y + 7, 13, 5, '#6a8a43');
+      R(ctx, x + 9, y + 3, 7, 4, '#9aab69');
+      R(ctx, x + 10, y + 4, 6, 3, C.dark);
+      R(ctx, x + 5, y + 10, 7, 6, C.ink);
+      R(ctx, x + 7, y + 12, 3, 3, '#6a8a43');
+      R(ctx, x, y + 9, 3, 3, C.ink); R(ctx, x + 2, y + 8, 2, 1, C.paper);
+      R(ctx, x + 13, y + 7, 3, 1, C.paper);
+    } else {
+      R(ctx, x, y + 14, 13, 2, C.dark);
+      R(ctx, x, y + 6, 14, 8, C.ink);
+      R(ctx, x, y + 2, 8, 5, C.ink);
+      R(ctx, x, y + 7, 13, 5, '#6a8a43');
+      R(ctx, x, y + 3, 7, 4, '#9aab69');
+      R(ctx, x, y + 4, 6, 3, C.dark);
+      R(ctx, x + 5, y + 10, 7, 6, C.ink);
+      R(ctx, x + 7, y + 12, 3, 3, '#6a8a43');
+      R(ctx, x + 13, y + 8, 3, 5, C.ink); R(ctx, x + 11, y + 7, 3, 1, C.paper);
+      R(ctx, x, y + 6, 1, 7, C.dark);
+    }
+  }
+
   function bush(ctx, x, y, tx, ty, rows, night) {
     R(ctx, x, y, 16, 16, night ? '#7770a8' : C.grass);
     var edge = night ? '#172838' : C.ink;
@@ -739,6 +958,47 @@
     }
     if (lx === 0) R(ctx, x, y, 2, 16, C.ink);
     if (cell(rows, tx + 1, ty) !== '9') R(ctx, x + 14, y, 2, 16, C.ink);
+  }
+
+  /* Casa di legno dell'arrivo: 4x4 tile, timpano scuro, assi orizzontali,
+   * finestre gemelle, porta centrale e veranda. Sagoma distinta dal negozio. */
+  function arrivalCabin(ctx, x, y, tx, ty, rows) {
+    var q = blobLocal(rows, tx, ty, 'J'), lx = q.x, ly = q.y;
+    var roofTop = [9, 2, 9][lx] || 2;
+    arrivalGround(ctx, x, y, tx, ty);
+    if (ly === 0) {
+      R(ctx, x, y + roofTop, 16, 16 - roofTop, C.ink);
+      R(ctx, x, y + roofTop + 2, 16, 2, '#34572d');
+      R(ctx, x, y + roofTop + 5, 16, 2, '#6a8a43');
+      if (lx === 0) R(ctx, x + 2, y + roofTop + 1, 14, 1, '#9aab69');
+      if (lx === 2) R(ctx, x, y + roofTop + 1, 14, 1, '#9aab69');
+    } else if (ly === 1) {
+      R(ctx, x, y + roofTop, 16, 16 - roofTop, C.ink);
+      R(ctx, x, y + roofTop + 2, 16, 2, '#34572d');
+      R(ctx, x, y + roofTop + 5, 16, 2, '#6a8a43');
+      R(ctx, x, y + 14, 16, 2, '#9aab69');
+    } else if (ly === 2) {
+      R(ctx, x, y, 16, 16, '#6a8a43');
+      for (var sy = 2; sy < 16; sy += 4) R(ctx, x, y + sy, 16, 1, '#34572d');
+      if (lx === 0 || lx === 2) {
+        R(ctx, x + 3, y + 4, 10, 9, C.ink); R(ctx, x + 5, y + 6, 6, 5, '#dcd9a9');
+        R(ctx, x + 8, y + 6, 1, 5, C.ink); R(ctx, x + 5, y + 8, 6, 1, C.ink);
+      } else {
+        R(ctx, x + 3, y, 10, 16, C.ink); R(ctx, x + 5, y + 2, 7, 14, '#34572d');
+        R(ctx, x + 10, y + 9, 1, 1, '#dcd9a9');
+      }
+    } else {
+      R(ctx, x, y, 16, 5, '#6a8a43'); R(ctx, x, y + 5, 16, 3, C.ink);
+      if (lx === 0 || lx === 2) {
+        R(ctx, x + 2, y + 5, 2, 11, C.ink); R(ctx, x + 12, y + 5, 2, 11, C.ink);
+        R(ctx, x + 4, y + 8, 8, 2, '#9aab69');
+      } else {
+        R(ctx, x, y + 8, 16, 3, '#9aab69'); R(ctx, x + 2, y + 12, 12, 2, '#6a8a43');
+        R(ctx, x + 4, y + 15, 8, 1, C.ink);
+      }
+    }
+    if (lx === 0) R(ctx, x, y + roofTop, 2, 16 - roofTop, C.ink);
+    if (lx === 2) R(ctx, x + 14, y + roofTop, 2, 16 - roofTop, C.ink);
   }
 
   /* Loggia: tetto 32px, gronda sporgente, facciata viola a mattoni e
@@ -1112,7 +1372,10 @@
       return;
     }
     switch (ch) {
-      case '.': grass(ctx, x, y, tx, ty, false, false, rows); return;
+      case '.':
+        if (opts && opts.mapId === 'arrival') arrivalGround(ctx, x, y, tx, ty);
+        else grass(ctx, x, y, tx, ty, false, false, rows);
+        return;
       case 'g': grass(ctx, x, y, tx, ty, true, nightWoods, rows); return;
       case ',': grass(ctx, x, y, tx, ty, false, false, rows); R(ctx, x + 3, y + 6, 2, 2, '#e8ddad'); R(ctx, x + 10, y + 11, 2, 2, '#bb5962'); return;
       case 'T': tree(ctx, x, y, tx, ty, rows, false, nightWoods); return;
@@ -1157,7 +1420,9 @@
           R(ctx, x + 3, y + 13, 10, 2, '#573d31');
         }
         return;
+      case 'V': parkedCar(ctx, x, y, tx, ty, rows, opts); return;
       case 'n': bush(ctx, x, y, tx, ty, rows, nightWoods); return;
+      case 'J': arrivalCabin(ctx, x, y, tx, ty, rows); return;
       case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': building(ctx, ch, x, y, tx, ty, rows); return;
       case 'D': door(ctx, x, y, tx, ty, rows); return;
       case 'i': interiorWall(ctx, x, y, tx, ty, rows); return;
@@ -2303,7 +2568,27 @@
     var p = pal || CHARS.cooper;
     var flip = dir === 'left';
     var step = moving ? ((frame & 1) ? -1 : 1) : 0;
-    var built = charPattern(p, dir === 'left' ? 'right' : dir, step);
+    /* Cooper visto di spalle nella hero scene: 10x15, masse continue.
+     * Evita il pattern generico a scacchiera che leggeva 14x17 e frontale. */
+    var cooperBack = p === CHARS.cooper && dir === 'up' ? [
+      '................',
+      '......oggo......',
+      '.....oggggo.....',
+      '....oggggggo....',
+      '...osggggggso...',
+      '...ohggggggho...',
+      '....ohggggho....',
+      '....oossssoo....',
+      '...oocccccoo....',
+      '..osccpcpccsco..',
+      '..occcpcpccccco.',
+      '...occpppcco....',
+      '...oocpcccoo....',
+      '....oc..co......',
+      '...oop..poo.....',
+      '................'
+    ] : null;
+    var built = cooperBack ? { rows: seal(cooperBack), geo: geometry(p, dir) } : charPattern(p, dir === 'left' ? 'right' : dir, step);
     var pat = built.rows;
     var col = paletteOf(p);
     var ox = Math.round(x);
