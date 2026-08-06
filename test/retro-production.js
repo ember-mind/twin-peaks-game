@@ -65,6 +65,10 @@ const checks = {
   production_loads_causal_finale: /js\/narrative-finale\.js/.test(index) &&
     /js\/narrative-finale-production\.js/.test(index),
   production_uses_canvas_bitmap_ui: /js\/retro-ui\.js/.test(index) && /bitmapFont: true/.test(retroUi)
+  ,case_file_uses_readable_screen_font: /id="case-ui"/.test(index) &&
+    /font-family: Verdana, Geneva, Tahoma, sans-serif/.test(index) && /function syncCaseUi\(\)/.test(engine)
+  ,case_file_explains_controls: /FRECCE ↑ \/ ↓/.test(engine) &&
+    /ESC oppure X/.test(engine) && /chiude fascicolo/.test(engine)
   ,finale_keeps_notebook_read_only: /notebookOnly = !!\(opts && opts\.keepNotebook\)/.test(adapter) &&
     /readOnly: notebookOnly/.test(adapter) && /opts\.readOnly \? \['Evidenze', 'Appunti', 'Proposizioni'\]/.test(notebook) &&
     /A\.disable\(\{ keepNotebook: true \}\)/.test(production),

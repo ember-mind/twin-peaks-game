@@ -309,6 +309,66 @@
     font: 700 clamp(10px, 1.45vh, 15px)/1.25 ui-monospace, Menlo, Monaco, "Courier New", monospace;
     text-align: center;
   }
+  /* Fascicolo leggibile a risoluzione schermo. Il mondo resta 160×144;
+     testi lunghi e legenda tasti non vengono ingranditi da una griglia 5×7. */
+  #case-ui {
+    position: absolute; inset: 0; z-index: 20;
+    display: none; align-items: center; justify-content: center;
+    box-sizing: border-box; padding: clamp(8px, 1.8vh, 18px);
+    color: #173524; background: rgba(12, 27, 19, .78);
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: clamp(12px, 1.9vh, 17px); line-height: 1.36;
+    letter-spacing: .01em; pointer-events: none;
+  }
+  body[data-menu="true"] #case-ui { display: flex; }
+  #case-panel {
+    width: min(880px, 100%); max-height: 100%; overflow: hidden;
+    box-sizing: border-box; padding: clamp(12px, 2.2vh, 22px);
+    background: #fffdf0; border: 3px solid #18231b;
+    box-shadow: 0 0 0 4px #fffdf0, 0 0 0 7px #18231b, 8px 10px 0 rgba(0,0,0,.35);
+    display: grid; grid-template-rows: auto auto auto minmax(72px, 1fr) auto;
+    gap: clamp(6px, 1.2vh, 12px);
+  }
+  #case-heading {
+    display: flex; justify-content: space-between; gap: 16px;
+    color: #173524; font-size: 1.08em; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .055em;
+  }
+  #case-objective {
+    padding-bottom: .65em; border-bottom: 2px solid #756b4c;
+  }
+  .case-label {
+    display: block; margin-bottom: .18em; color: #54713f;
+    font-size: .76em; font-weight: 800; text-transform: uppercase; letter-spacing: .08em;
+  }
+  #case-evidence-list { display: grid; gap: 3px; }
+  .case-evidence {
+    min-height: 1.45em; box-sizing: border-box; padding: .18em .5em;
+    border-left: 4px solid transparent;
+  }
+  .case-evidence.is-selected {
+    color: #fffdf0; background: #31543a; border-left-color: #91ad58; font-weight: 700;
+  }
+  #case-note {
+    min-height: 0; overflow: auto; padding: .7em .8em;
+    color: #173524; background: #d7e98e; border-left: 5px solid #668448;
+    font-size: 1.02em; line-height: 1.48;
+  }
+  #case-help {
+    display: flex; justify-content: center; flex-wrap: wrap; gap: .35em 1.5em;
+    padding-top: .65em; border-top: 2px solid #394566;
+    color: #294c34; font-size: .9em; font-weight: 800;
+  }
+  #case-help kbd {
+    padding: .1em .42em; color: #fffdf0; background: #294c34;
+    border: 0; border-radius: 3px; box-shadow: inset 0 -2px 0 rgba(0,0,0,.24);
+    font: inherit;
+  }
+  @media (max-height: 560px) {
+    #case-ui { font-size: 11px; padding: 8px; }
+    #case-panel { padding: 10px; gap: 5px; }
+    #case-note { line-height: 1.35; }
+  }
   .tp-touch-ctrl {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
@@ -336,6 +396,15 @@
     <div id="dialogue-text"></div>
     <div id="dialogue-next">◆</div>
   </section>
+  <section id="case-ui" aria-live="polite" aria-hidden="true">
+    <div id="case-panel">
+      <header id="case-heading"><span>Fascicolo · Caso Palmer</span><span id="case-count"></span></header>
+      <div id="case-objective"><span class="case-label">Obiettivo attuale</span><span id="case-objective-copy"></span></div>
+      <div><span class="case-label">Prove raccolte</span><div id="case-evidence-list"></div></div>
+      <div id="case-note"></div>
+      <footer id="case-help"></footer>
+    </div>
+  </section>
   <div id="narrative" aria-live="polite"></div>
   <div id="objective"></div>
 </div>
@@ -347,7 +416,7 @@
 <script src="js/data.js?v=11narrative"></script>
 <script src="js/environmental-inspect.js?v=r60i2"></script>
 <script src="js/retro-font.js?v=gold46"></script>
-<script src="js/engine.js?v=r60i3"></script>
+<script src="js/engine.js?v=r60j1"></script>
 <script src="js/glue.js?v=gold49n3"></script>
 <script src="js/retro.js?v=r60i2"></script>
 <script src="js/retro-authored.js?v=r60i2"></script>

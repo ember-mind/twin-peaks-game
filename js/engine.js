@@ -12,6 +12,7 @@
   var canvas, ctx, S;
   var last = 0, tGlobal = 0;
   var uiLayoutMode = '';
+  var caseUiSignature = '';
   var TILE = 16, VW = 160, VH = 144; // viewport GBC: 10x9 metatile
   var UW = VW;                       // larghezza UI dinamica (fullscreen)
   // 16 px/tile: 0.12 completava un'intera cella in ~133 ms e faceva leggere
@@ -991,8 +992,76 @@
       }
     }
     rule(px, 132, innerW, '#394566');
-    text(GAME.touchMode ? 'SWIPE SCEGLI . X CHIUDI' : '^V SCEGLI . A/X CHIUDI',
+    text(GAME.touchMode ? 'SCORRI  X CHIUDE' : 'SU/GIU CAMBIA  X CHIUDE',
          mx + mw / 2, 133, '#31543a', '6px monospace', 'center');
+  }
+
+  /* Fascicolo HTML: font Verdana a risoluzione schermo. Il renderer bitmap
+   * resta fallback per harness e ambienti senza DOM completo. */
+  function syncCaseUi() {
+    if (typeof document === 'undefined' || !document.body ||
+        typeof document.getElementById !== 'function') return false;
+    var rootEl = document.getElementById('case-ui');
+    var listEl = document.getElementById('case-evidence-list');
+    var objectiveEl = document.getElementById('case-objective-copy');
+    var countEl = document.getElementById('case-count');
+    var noteEl = document.getElementById('case-note');
+    var helpEl = document.getElementById('case-help');
+    var active = !!(rootEl && S.mode === 'play' && S.menu);
+    document.body.setAttribute('data-menu', active ? 'true' : 'false');
+    if (rootEl) rootEl.setAttribute('aria-hidden', active ? 'false' : 'true');
+    if (!active || !listEl || !objectiveEl || !countEl || !noteEl || !helpEl) return false;
+
+    var objective = GAME.Data.objectiveFor(S, checkCond);
+    var signature = [S.menuIndex, S.clues.join('|'), objective, GAME.touchMode ? 'touch' : 'keys'].join('::');
+    if (signature === caseUiSignature) return true;
+    caseUiSignature = signature;
+    normalizeMenuIndex();
+
+    objectiveEl.textContent = objective;
+    countEl.textContent = S.clues.length + ' / ' + Object.keys(GAME.Data.clues).length;
+    while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
+
+    if (!S.clues.length) {
+      var emptyEl = document.createElement('div');
+      emptyEl.className = 'case-evidence';
+      emptyEl.textContent = 'Nessuna prova raccolta.';
+      listEl.appendChild(emptyEl);
+      noteEl.textContent = 'Esamina luoghi, oggetti e persone. Cooper annoterà qui ciò che conta.';
+    } else {
+      var visible = 4;
+      var start = clamp(S.menuIndex - 1, 0, Math.max(0, S.clues.length - visible));
+      var end = Math.min(S.clues.length, start + visible);
+      for (var i = start; i < end; i++) {
+        var clue = GAME.Data.clues[S.clues[i]];
+        var item = document.createElement('div');
+        item.className = 'case-evidence' + (i === S.menuIndex ? ' is-selected' : '');
+        item.textContent = (i === S.menuIndex ? 'Selezionata: ' : '') + (clue ? clue.name : S.clues[i]);
+        listEl.appendChild(item);
+      }
+      var selected = GAME.Data.clues[S.clues[S.menuIndex]];
+      noteEl.textContent = selected && selected.desc
+        ? selected.desc
+        : 'Nessuna annotazione disponibile.';
+    }
+
+    while (helpEl.firstChild) helpEl.removeChild(helpEl.firstChild);
+    function helpPart(key, copy) {
+      var span = document.createElement('span');
+      var kbd = document.createElement('kbd');
+      kbd.textContent = key;
+      span.appendChild(kbd);
+      span.appendChild(document.createTextNode(' ' + copy));
+      helpEl.appendChild(span);
+    }
+    if (GAME.touchMode) {
+      helpPart('SCORRI SU / GIÙ', 'cambia prova');
+      helpPart('X', 'chiude fascicolo');
+    } else {
+      helpPart('FRECCE ↑ / ↓', 'cambiano prova');
+      helpPart('ESC oppure X', 'chiude fascicolo');
+    }
+    return true;
   }
 
   function curtainRows(yTop, n) {
@@ -1032,8 +1101,8 @@
            UW / 2, 118, '#f5efcf', 'bold 8px monospace', 'center');
     }
     var hint;
-    if (touch) hint = 'D-PAD  A PARLA  B MENU';
-    else hint = save ? 'N NUOVO  X INDIZI' : 'FRECCE MUOVI  Z PARLA';
+    if (touch) hint = 'D-PAD  A ESAMINA  B PROVE';
+    else hint = 'FRECCE MUOVI  INVIO ESAMINA';
     text(hint, UW / 2, 134, '#9abf5a', '7px monospace', 'center');
   }
 
@@ -1120,8 +1189,8 @@
       meta.textContent = touch
         ? 'D-PAD MUOVI  ·  A INTERAGISCI  ·  B INDIZI'
         : (hasSave()
-          ? 'N NUOVA PARTITA  ·  FRECCE MUOVI  ·  X INDIZI'
-          : 'FRECCE MUOVI  ·  Z INTERAGISCI  ·  X INDIZI');
+          ? 'N: NUOVA PARTITA  ·  FRECCE: MUOVI  ·  X: FASCICOLO'
+          : 'FRECCE: MUOVI  ·  INVIO: ESAMINA O PARLA  ·  X: FASCICOLO');
     } else if (S.mode === 'intro') {
       var intro = introPages(), introPage = intro[S.introPage] || intro[0];
       kicker.textContent = 'PROLOGO  ·  ' + (S.introPage + 1) + ' / ' + intro.length;
@@ -1182,6 +1251,7 @@
     }
     syncCinematicUi();
     syncDialogueUi();
+    var caseUiActive = syncCaseUi();
     if (S.mode === 'title') { drawTitle(); return; }
     if (S.mode === 'intro') { drawIntro(); return; }
     if (S.mode === 'end') { drawEnd(); return; }
@@ -1191,7 +1261,7 @@
     // Disegnare anche il box legacy sul canvas causa un cross-fade visibile:
     // prima compare il vecchio dialogo, poi #dialogue-ui lo sostituisce.
     if (S.dialogue && !r3d) drawDialogue();
-    if (S.menu) drawMenu();
+    if (S.menu && !caseUiActive) drawMenu();
     if (S.fade > 0) {
       ctx.fillStyle = 'rgba(0,0,0,' + S.fade.toFixed(3) + ')';
       ctx.fillRect(0, 0, UW, VH);
