@@ -20,6 +20,14 @@ const retroFont = fs.readFileSync(path.join(root, 'js', 'retro-font.js'), 'utf8'
 const checks = {
   gold_native_resolution_160x144: /width="160" height="144"/.test(index) &&
     /cv\.width = 160/.test(main) && /cv\.height = 144/.test(main),
+  engine_repairs_and_locks_native_buffer: /canvas\.width !== VW/.test(engine) &&
+    /canvas\.height !== VH/.test(engine) && /UW = VW;/.test(engine),
+  intro_header_uses_fitting_native_scale: /FEBBRAIO, 1989'[\s\S]*bold 8px monospace/.test(engine) &&
+    /titleFits: titleWidth <= l\.boxW - 20/.test(engine),
+  production_cache_busts_layout_fix: /js\/engine\.js\?v=gold53-layout1/.test(index) &&
+    /js\/main\.js\?v=gold53-layout1/.test(index),
+  css_stage_preserves_native_aspect: /aspect-ratio: 10 \/ 9/.test(index) &&
+    /max-width: 100vw; max-height: 100dvh/.test(index),
   production_loads_retro_renderer: /js\/retro\.js/.test(index),
   production_loads_shared_bitmap_font_first: /js\/retro-font\.js/.test(index) &&
     index.indexOf('js/retro-font.js') < index.indexOf('js/engine.js'),

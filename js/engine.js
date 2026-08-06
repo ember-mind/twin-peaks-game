@@ -248,6 +248,10 @@
 
   E.init = function (cv, glcv) {
     canvas = cv;
+    // Il renderer retro ha un solo buffer logico. Riparalo anche quando un
+    // host/test ha mutato gli attributi del canvas prima del boot.
+    if (canvas.width !== VW) canvas.width = VW;
+    if (canvas.height !== VH) canvas.height = VH;
     ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     if (glcv && GAME.Render3D && GAME.Render3D.init(glcv)) {
@@ -285,6 +289,20 @@
       return { sourceIndex: p.sourceIndex, part: p.part, parts: p.parts, lines: p.lines.slice() };
     });
   };
+  E.introLayout = function () {
+    var l = introLayout();
+    var titleWidth = RF.measure('FEBBRAIO, 1989', 1);
+    return {
+      canvasWidth: UW, canvasHeight: VH,
+      boxX: l.boxX, boxY: l.boxY, boxW: l.boxW, boxH: l.boxH,
+      innerLeft: l.boxX + 10, innerRight: l.boxX + l.boxW - 10,
+      titleWidth: titleWidth,
+      titleFits: titleWidth <= l.boxW - 20,
+      bodyLastBottom: l.bodyY + 4 * l.lineGap + 7,
+      promptY: l.promptY,
+      contentFitsVertically: l.bodyY + 4 * l.lineGap + 7 < l.promptY && l.promptY + 7 < l.boxY + l.boxH
+    };
+  };
   E.npcActive = function (n, st) {
     if (!n.cond) return true;
     if (Object.prototype.toString.call(n.cond) === '[object Array]') {
@@ -296,7 +314,13 @@
   };
 
   E.onResize = function () {
-    if (canvas && canvas.width) UW = Math.max(VW, Math.round(canvas.width / SCALE));
+    // Mai derivare coordinate UI dai pixel CSS/device: causava prologo largo
+    // quanto il browser ma alto solo 144px, quindi testo enorme e tagliato.
+    UW = VW;
+    if (!canvas) return;
+    if (canvas.width !== VW) canvas.width = VW;
+    if (canvas.height !== VH) canvas.height = VH;
+    if (ctx) ctx.imageSmoothingEnabled = false;
   };
 
   E.start = function () {
@@ -1106,6 +1130,21 @@
     text(hint, UW / 2, 134, '#9abf5a', '7px monospace', 'center');
   }
 
+  function introLayout() {
+    var boxW = Math.min(144, UW - 16);
+    return {
+      boxW: boxW,
+      boxX: Math.floor((UW - boxW) / 2),
+      boxY: 34,
+      boxH: 104,
+      titleY: 42,
+      dividerY: 53,
+      bodyY: 60,
+      lineGap: 10,
+      promptY: 123
+    };
+  }
+
   function drawIntro() {
     ctx.fillStyle = '#31543a'; ctx.fillRect(0, 0, UW, VH);
     ctx.fillStyle = '#63834a';
@@ -1113,24 +1152,29 @@
       ctx.beginPath(); ctx.moveTo(x + 8, 4); ctx.lineTo(x, 34); ctx.lineTo(x + 16, 34); ctx.fill();
       ctx.fillRect(x + 7, 28, 2, 24);
     }
-    var boxW = Math.min(224, UW - 16);
-    var boxX = Math.floor((UW - boxW) / 2);
-    RF.frame(ctx, boxX, 36, boxW, 94);
-    text('FEBBRAIO, 1989', UW / 2, 44, '#31543a', 'bold 16px monospace', 'center');
+    var l = introLayout();
+    RF.frame(ctx, l.boxX, l.boxY, l.boxW, l.boxH);
+    // Scala 1: 76px reali dentro 124px utili. La vecchia scala 2 occupava
+    // 152px e tagliava entrambe le estremita' del titolo.
+    text('FEBBRAIO, 1989', UW / 2, l.titleY, '#31543a', 'bold 8px monospace', 'center');
+    rule(l.boxX + 9, l.dividerY, l.boxW - 18, '#63834a');
     var page = introPages()[S.introPage] || { lines: [] };
     var lines = page.lines;
     for (var i = 0; i < lines.length; i++) {
-      text(lines[i], boxX + 10, 65 + i * 9, '#183225');
+      text(lines[i], l.boxX + 10, l.bodyY + i * l.lineGap, '#183225');
     }
     if (Math.floor(tGlobal / 500) % 2 === 0) {
-      text('V  INVIO', UW / 2, 116, '#31543a', 'bold 8px monospace', 'center');
+      text('PAG. ' + (S.introPage + 1) + '/' + introPages().length,
+           l.boxX + 10, l.promptY, '#63834a', '7px monospace');
+      text('INVIO >', l.boxX + l.boxW - 10, l.promptY,
+           '#31543a', 'bold 8px monospace', 'right');
     }
   }
 
   // Il box Game Boy contiene cinque righe. Ogni blocco del prologo viene
   // spezzato in pagine vere: nessuna riga viene disegnata e poi persa.
   function introPages() {
-    var boxW = Math.min(224, UW - 16), pages = [];
+    var boxW = introLayout().boxW, pages = [];
     (GAME.Data.intro || []).forEach(function (entry, sourceIndex) {
       var lines = wrap(entry, boxW - 20), parts = Math.max(1, Math.ceil(lines.length / 5));
       for (var part = 0; part < parts; part++) {
