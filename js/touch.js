@@ -85,8 +85,8 @@
       width: '150px', height: '150px',
       background: 'transparent', border: '0', borderRadius: '0',
       boxShadow: 'none',
-      touchAction: 'none', opacity: '0.85', zIndex: '9999',
-      transition: 'opacity 120ms ease, transform 120ms ease',
+      touchAction: 'none', opacity: '1', zIndex: '9999',
+      transition: 'none',
       userSelect: 'none', webkitUserSelect: 'none', webkitTouchCallout: 'none'
     });
 
@@ -176,17 +176,18 @@
       right: 'calc(' + opts.right + 'px + env(safe-area-inset-right, 0px))',
       bottom: 'calc(' + opts.bottom + 'px + env(safe-area-inset-bottom, 0px))',
       width: opts.size + 'px', height: opts.size + 'px',
-      borderRadius: '6px',
+      borderRadius: '0',
       background: '#17241b', border: '4px solid #d8d0a0',
       boxShadow: 'inset 0 0 0 2px #344438, 4px 4px 0 #080c09',
+      clipPath: 'polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px)',
       color: '#fff8d0', fontFamily: 'monospace',
       fontWeight: 'bold', fontSize: Math.round(opts.size * 0.4) + 'px',
       padding: '0', margin: '0', lineHeight: '1', appearance: 'none',
       webkitAppearance: 'none',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       flexDirection: 'column',
-      touchAction: 'none', opacity: '0.85', zIndex: '9999',
-      transition: 'opacity 120ms ease, transform 120ms ease',
+      touchAction: 'none', opacity: '1', zIndex: '9999',
+      transition: 'none',
       userSelect: 'none', webkitUserSelect: 'none', webkitTouchCallout: 'none'
     });
 
@@ -327,7 +328,9 @@
     if (!el) return;
     el.style.visibility = visible ? 'visible' : 'hidden';
     el.style.pointerEvents = visible ? 'auto' : 'none';
-    el.style.opacity = visible ? String(opacity) : '0';
+    /* Controlli opachi e pixel-authored: niente bolle traslucide sopra il
+     * mondo. `opacity` resta parametro compatibile ma non cambia il look. */
+    el.style.opacity = visible ? '1' : '0';
     el.style.transform = visible ? 'scale(1)' : 'scale(0.88)';
     el.setAttribute('aria-hidden', visible ? 'false' : 'true');
     if (el.tagName === 'BUTTON') el.tabIndex = visible ? 0 : -1;
@@ -379,7 +382,7 @@
       if (layout.gutter) {
         css(uiDpad, {
           left: layout.dpadLeft + 'px', top: layout.dpadTop + 'px', bottom: 'auto',
-          width: layout.dpad + 'px', height: layout.dpad + 'px', borderRadius: '6px'
+          width: layout.dpad + 'px', height: layout.dpad + 'px', borderRadius: '0'
         });
         placeGutterButton(uiA, 64, layout.gutterRight, Math.round(viewportSize().height / 2 - 76));
         placeGutterButton(uiB, 64, layout.gutterRight + 58, Math.round(viewportSize().height / 2 + 18));
@@ -387,7 +390,7 @@
         css(uiDpad, {
           left: 'calc(' + layout.edge + 'px + env(safe-area-inset-left, 0px))', top: 'auto',
           bottom: 'calc(' + layout.edge + 'px + env(safe-area-inset-bottom, 0px))',
-          width: layout.dpad + 'px', height: layout.dpad + 'px', borderRadius: '6px'
+          width: layout.dpad + 'px', height: layout.dpad + 'px', borderRadius: '0'
         });
         restorePlayButton(uiA, layout.a, layout.aRight, layout.aBottom);
         restorePlayButton(uiB, layout.b, layout.bRight, layout.bBottom);
@@ -420,14 +423,14 @@
       if (choiceLayout.gutter) {
         css(uiDpad, {
           left: choiceLayout.dpadLeft + 'px', top: choiceLayout.dpadTop + 'px', bottom: 'auto',
-          width: choiceLayout.dpad + 'px', height: choiceLayout.dpad + 'px', borderRadius: '6px'
+          width: choiceLayout.dpad + 'px', height: choiceLayout.dpad + 'px', borderRadius: '0'
         });
         placeGutterButton(uiA, 64, choiceLayout.gutterRight, Math.round(viewportSize().height / 2 - 32));
       } else {
         css(uiDpad, {
           left: 'calc(' + choiceLayout.edge + 'px + env(safe-area-inset-left, 0px))', top: 'auto',
           bottom: 'calc(' + choiceLayout.edge + 'px + env(safe-area-inset-bottom, 0px))',
-          width: choiceLayout.dpad + 'px', height: choiceLayout.dpad + 'px', borderRadius: '6px'
+          width: choiceLayout.dpad + 'px', height: choiceLayout.dpad + 'px', borderRadius: '0'
         });
         restorePlayButton(uiA, choiceLayout.a, choiceLayout.aRight, choiceLayout.aBottom);
       }

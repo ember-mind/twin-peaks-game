@@ -388,6 +388,17 @@ console.log('colori per tile 8x8 max  ' + maxTile + '     (gate <= 3)');
 console.log('massa tono scuro min     ' + F(minDark) + ' %  (gate >= 50 %)');
 console.log('contorno chiuso min      ' + F(worstClosure) + ' %  (gate >= 95 %)');
 console.log('notte identica al giorno ' + report.every((r) => r.nightIdentical));
+{
+  /* gate R62.1: il profilo e' piu' stretto e piu' leggero del frontale */
+  let sw = 0, fw = 0, sm = 0;
+  for (const r of report) for (const k of Object.keys(r.dirs)) {
+    if (/^(left|right)/.test(k)) sw = Math.max(sw, r.dirs[k].width);
+    else fw = Math.max(fw, r.dirs[k].width);
+    sm = Math.max(sm, r.sideMassPct);
+  }
+  console.log('larghezza profilo max    ' + sw + ' px  (gate <= 10, frontale ' + fw + ')');
+  console.log('massa profilo / fronte   ' + F(sm) + ' %  (gate <= 80 %)');
+}
 
 /* --- R63 -------------------------------------------------------------- */
 

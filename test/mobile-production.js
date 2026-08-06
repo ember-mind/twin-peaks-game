@@ -17,7 +17,7 @@ const checks = {
   mobile_uses_visual_viewport: /window\.visualViewport/.test(main),
   mobile_audit_override: /touch=1/.test(main) && /touch=1/.test(touch),
   portrait_reserves_controls_region: /viewport\.height \* 0\.54/.test(main),
-  mobile_scale_uses_eighth_steps: /Math\.floor\(fit \* 8\) \/ 8/.test(main),
+  mobile_keeps_integer_scale: /var scale = fit >= 1 \? Math\.max\(1, Math\.floor\(fit\)\) : fit/.test(main),
   desktop_keeps_integer_scale: /Math\.floor\(fit\)/.test(main),
   orientation_resizes_stage: /orientationchange/.test(main),
   touch_dpad_available: /buildDpad/.test(touch),

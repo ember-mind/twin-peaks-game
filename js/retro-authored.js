@@ -624,7 +624,7 @@
   function bookhouse(ctx, x, y, tx, ty, rows) {
     var q = blobLocal(rows, tx, ty, '7'), lx = q.x, ly = q.y;
     var bw = blobSpanX(rows, tx, ty, '7').width;
-    R(ctx, x, y, 16, 16, '#25292e');
+    R(ctx, x, y, 16, 16, '#31543a');
     if (ly === 0) {
       R(ctx, x, y, 16, 2, C.ink); R(ctx, x, y + 2, 16, 2, '#61686a');
       if ((lx & 1) === 0) {
@@ -677,9 +677,13 @@
         R(ctx, x, y + 13, 16, 3, '#171b20');
       }
     }
-    R(ctx, x, y, 2, 16, '#171b20'); R(ctx, x + 14, y, 2, 16, '#171b20');
-    if (lx === 0) R(ctx, x, y, 3, 16, C.ink);
-    if (cell(rows, tx + 1, ty) !== '7') R(ctx, x + 13, y, 3, 16, C.ink);
+    /* Un solo giunto interno da 1px. Prima ogni tile portava due bordi da
+     * 2px: fra moduli nasceva una sbarra nera larga 4px, piu' forte delle
+     * finestre. Contorno spesso resta solo sul perimetro del volume. */
+    if (lx > 0) R(ctx, x, y, 1, 16, '#31543a');
+    if (cell(rows, tx + 1, ty) === '7') R(ctx, x + 15, y, 1, 16, '#31543a');
+    if (lx === 0) { R(ctx, x, y, 3, 16, C.ink); R(ctx, x + 3, y, 1, 16, '#63834a'); }
+    if (cell(rows, tx + 1, ty) !== '7') { R(ctx, x + 13, y, 3, 16, C.ink); R(ctx, x + 12, y, 1, 16, '#63834a'); }
   }
 
   /* Horne's Department Store: massa autonoma 3x4 accanto al Bookhouse,
@@ -696,7 +700,10 @@
         R(ctx, x + i, y - 6, 1, 18, '#719098');
         R(ctx, x + i + 1, y - 6, 1, 18, '#29444d');
       }
-      R(ctx, x, y + 10, 16, 2, '#90a9a8'); R(ctx, x, y + 12, 16, 4, C.ink);
+      /* Gronda in quattro valori: luce, ombra, contorno, sottotetto. La
+       * vecchia fascia nera 4px leggeva come rettangolo piatto. */
+      R(ctx, x, y + 10, 16, 1, '#d9d49a'); R(ctx, x, y + 11, 16, 1, '#63834a');
+      R(ctx, x, y + 12, 16, 2, C.ink); R(ctx, x, y + 14, 16, 2, '#31543a');
     } else if (ly === 1) {
       R(ctx, x, y, 16, 16, '#d4ad68'); R(ctx, x, y, 16, 2, C.ink);
       R(ctx, x + 1, y + 3, 14, 9, '#684534');
@@ -707,12 +714,15 @@
       } else {
         R(ctx, x + 4, y + 6, 8, 1, '#987244'); R(ctx, x + 6, y + 8, 4, 1, '#987244');
       }
-      R(ctx, x, y + 13, 16, 3, '#9a6843');
+      R(ctx, x, y + 12, 16, 1, '#d69874'); R(ctx, x, y + 13, 16, 3, '#9a6843');
+      if (lx === 0) R(ctx, x + 2, y + 2, 2, 11, '#684534');
+      if (cell(rows, tx + 1, ty) !== '9') R(ctx, x + 12, y + 2, 2, 11, '#684534');
     } else if (ly === 2) {
       R(ctx, x, y, 16, 16, '#684534');
       R(ctx, x + 1, y + 1, 14, 13, C.ink); R(ctx, x + 2, y + 2, 12, 11, '#a9c8c1');
       R(ctx, x + 3, y + 3, 10, 3, C.paper); R(ctx, x + 7, y + 2, 1, 11, C.ink);
-      R(ctx, x, y + 14, 16, 2, '#d4ad68');
+      R(ctx, x + 2, y + 8, 12, 1, C.ink); R(ctx, x + 3, y + 9, 4, 1, '#f5efcf');
+      R(ctx, x, y + 13, 16, 1, '#684534'); R(ctx, x, y + 14, 16, 2, '#d4ad68');
     } else {
       R(ctx, x, y, 16, 16, '#d4ad68'); R(ctx, x, y, 16, 2, '#684534');
       if (lx === 1) {
@@ -721,6 +731,7 @@
         R(ctx, x + 3, y + 2, 4, 6, '#8eb4af'); R(ctx, x + 9, y + 2, 4, 6, '#8eb4af');
         R(ctx, x + 7, y + 1, 2, 15, C.ink);
         R(ctx, x + 6, y + 10, 1, 1, C.gold); R(ctx, x + 9, y + 10, 1, 1, C.gold);
+        R(ctx, x + 2, y + 14, 12, 1, '#f5efcf');
       } else {
         R(ctx, x + 2, y + 3, 12, 8, C.ink); R(ctx, x + 3, y + 4, 10, 6, '#8eb4af');
         R(ctx, x + 3, y + 7, 10, 1, C.ink); R(ctx, x, y + 13, 16, 3, '#684534');
@@ -856,6 +867,19 @@
           R(ctx, x + 6, y + 7, 3, 1, ch === '4' ? '#3d5a3f' : C.red);
           R(ctx, x + 6, y + 8, 2, 1, ch === '4' ? '#3d5a3f' : C.red);
         }
+      } else if (ch === '4') {
+        /* Great Northern: travi di legno e due gruppi finestra. Ritmo 4px,
+         * nessun rumore casuale; la facciata ora legge come loggia, non
+         * come pannello uniforme sotto un tetto verde. */
+        var hotelSpan = blobSpanX(rows, tx, ty, ch);
+        R(ctx, x, y + 3, 16, 2, p[3]); R(ctx, x, y + 11, 16, 2, p[3]);
+        if (hotelSpan.local === 1 || hotelSpan.local === hotelSpan.width - 2) {
+          R(ctx, x + 2, y + 5, 12, 6, C.ink);
+          R(ctx, x + 3, y + 6, 4, 4, '#d9d49a'); R(ctx, x + 9, y + 6, 4, 4, '#d9d49a');
+        } else {
+          R(ctx, x + 7, y + 3, 2, 10, p[3]);
+          R(ctx, x + 3, y + 7, 1, 1, '#63834a'); R(ctx, x + 12, y + 9, 1, 1, '#63834a');
+        }
       } else if (ch === '0') {
         /* Bottega/casa compatta: la fascia centrale e' un'insegna, le due
          * colonne laterali sono finestre. Identita leggibile anche quando
@@ -912,6 +936,10 @@
         for (i = 0; i < 16; i += 4) R(ctx, x + i, y + 2, 2, 3, i & 4 ? C.paper : C.red);
       } else if (ch === '3') {
         R(ctx, x + 1, y + 5, 14, 1, '#b08060'); R(ctx, x + 5, y + 6, 1, 7, '#b08060');
+      } else if (ch === '4') {
+        R(ctx, x, y + 3, 16, 2, p[3]); R(ctx, x, y + 10, 16, 1, p[3]);
+        R(ctx, x + 3, y + 4, 2, 9, p[3]); R(ctx, x + 11, y + 4, 2, 9, p[3]);
+        R(ctx, x + 6, y + 7, 1, 1, '#63834a'); R(ctx, x + 9, y + 5, 1, 1, '#63834a');
       } else if (ch === '6') {
         R(ctx, x, y + 13, 16, 3, '#a52e2e');
       }
@@ -1036,6 +1064,9 @@
       R(ctx, x + 1, y - 3, 14, 3, p[1]);
       R(ctx, x + 1, y - 3, 14, 1, C.ink);
       R(ctx, x, y - 1, 1, 1, C.ink); R(ctx, x + 15, y - 1, 1, 1, C.ink);
+      R(ctx, x + 2, y - 2, 12, 1, '#d9d49a');
+      R(ctx, x + 1, y - 1, 2, 17, C.ink); R(ctx, x + 2, y, 1, 16, p[1]);
+      R(ctx, x + 13, y - 1, 2, 17, C.ink); R(ctx, x + 13, y, 1, 16, p[1]);
     }
     else if (side === '5') { R(ctx, x + 6, y + 4, 4, 5, C.paper); R(ctx, x + 7, y + 5, 2, 3, C.red); R(ctx, x + 6, y + 6, 4, 1, C.red); }
     else if (side === '6') { R(ctx, x + 2, y + 2, 12, 3, '#2b2420'); R(ctx, x + 5, y + 3, 6, 1, C.red); }
@@ -1526,171 +1557,257 @@
       i % 7, (i * 2) % 7, (i * 3) % 7, (i * 4) % 7];
   }
 
-  /* Tabelle di dettaglio: posizioni di pixel, non colori. E' cosi' che due
-   * teste restano distinte anche quando i tre toni coincidono. */
-  var HAIR_PAD0 = [[2, 2], [3, 3], [2, 3], [3, 2], [1, 2]];   /* calotta */
-  var HAIR_PAD1 = [[1, 1], [2, 2], [1, 2], [2, 1], [0, 1]];   /* chioma alta */
-  var HAIR_TUFT2 = [[3], [2, 5], [4], [2, 3], [5]];           /* ciocche, riga 2 */
-  var HAIR_TUFT3 = [[2, 5], [4], [3, 4], [2], [3]];           /* ciocche, riga 3 */
-  var FRINGE = [                                              /* attaccatura */
-    [1, 2, 3, 4], [1, 2, 5, 6], [1, 4, 5, 6], [2, 3, 4, 5],
-    [1, 2, 3, 6], [1, 3, 5, 6], [1, 2, 4, 6]
+  /* Il dettaglio di Oro non e' pixel sparsi: sono FASCE, quasi sempre di
+   * 2 px, simmetriche rispetto al centro (chris down 9 `##oo++oo##`, 11
+   * `#oo#oo++oo#oo#`, 14 `#++####++#`). Un primo tentativo di R63 aveva
+   * portato la densita' dentro il gate spargendo singoli pixel: i numeri
+   * passavano e la faccia leggeva come rumore. bandRow costruisce la riga
+   * dal bordo verso il centro, una fascia per volta, e l'ultima riempie:
+   * e' la stessa grammatica.
+   *
+   * I token, non i colori: O contorno, H chioma, G riflesso della chioma,
+   * S incarnato, F il campo del viso (incarnato di fronte, nuca di
+   * spalle), M il segno sul viso (nero di fronte, riflesso di spalle). */
+  function bandRow(lo, hi, spec, tone) {
+    var s = [], x, i, n, k, si = 0, a = lo, b = hi;
+    for (x = 0; x < 16; x++) s.push('.');
+    while (a <= b && si < spec.length) {
+      k = tone(spec[si][0]); n = spec[si][1]; si++;
+      if (n < 0) break;
+      for (i = 0; i < n && a <= b; i++) s[a++] = k;
+      for (i = 0; i < n && a <= b; i++) s[b--] = k;
+    }
+    k = tone(spec[spec.length - 1][0]);
+    while (a <= b) s[a++] = k;
+    return s;
+  }
+
+  /* Cinque fasce per la chioma, sette per il viso: due personaggi a
+   * distanza < 35 nel cast possono coincidere su un gruppo solo. */
+  /* La testa di Oro si allarga scendendo: chris down misura 6, 8, 10, 10,
+   * 12, 12, 14, 14, 12 px di riga. Le righe piu' larghe sono quelle del
+   * VISO, non della calotta, ed e' per questo che la faccia domina la
+   * testa. La nostra era quasi a larghezza costante (8, 10, 12, 12, 12,
+   * 12, 12, 10): la chioma pesava quanto il viso e lo sprite leggeva come
+   * un blocco con una striscia chiara in mezzo. */
+  var HAIR_PAD0 = [[3, 3], [4, 4], [3, 4], [4, 3], [2, 3]];   /* calotta */
+  var HAIR_PAD1 = [[2, 2], [3, 3], [2, 3], [3, 2], [1, 2]];   /* chioma alta */
+  var HAIR_BAND2 = [
+    [['O', 1], ['H', 1], ['G', -1]],
+    [['O', 1], ['H', 2], ['G', -1]],
+    [['O', 1], ['H', 3], ['G', -1]],
+    [['O', 1], ['G', 1], ['H', -1]],
+    [['O', 1], ['G', 2], ['H', -1]]
   ];
-  var EARS = [[2, 2], [2, 3], [3, 2], [3, 3], [2, 4], [4, 2], [1, 3]];
-  var EYES = [                                                /* sx, dx, naso */
-    [3, 3, 0], [4, 4, 0], [3, 4, 1], [4, 3, 1], [3, 3, 1], [4, 4, 1], [2, 3, 0]
+  var HAIR_BAND3 = [
+    [['O', 1], ['H', 2], ['G', 1], ['H', -1]],
+    [['O', 1], ['G', 1], ['H', 1], ['G', -1]],
+    [['O', 1], ['H', 1], ['G', 2], ['H', -1]],
+    [['O', 1], ['H', 3], ['G', -1]],
+    [['O', 1], ['H', 1], ['G', -1]]
   ];
-  var MOUTH = [                                               /* off, largh., guancia */
-    [0, 2, 0], [0, 1, 1], [-1, 2, 0], [1, 2, 0], [0, 2, 1], [0, 1, 0], [-1, 1, 1]
+  /* Riga 4: la fascia bassa della chioma. In Oro le prime SEI righe della
+   * testa sono tutte capelli e il viso comincia solo alla settima (chris
+   * down 5 `..####++++####..`, 6 `.#o#oooooooo#o#.`): il viso e' alto tre
+   * righe, non quattro. Quando ne prendeva quattro, l'incarnato diventava
+   * un lastrone chiaro con due tacche ai bordi — leggeva come una maschera,
+   * non come una faccia. E' anche la riga che separa Cooper da Andy, che
+   * prima uscivano con la stessa identica testa (8 righe uguali su 8). */
+  var FRINGE = [
+    [['O', 2], ['H', 2], ['G', -1]],
+    [['O', 2], ['G', 2], ['H', -1]],
+    [['O', 1], ['H', 2], ['O', 1], ['G', -1]],
+    [['O', 2], ['H', 1], ['G', 2], ['H', -1]],
+    [['O', 1], ['G', 1], ['H', 2], ['G', -1]],
+    [['O', 2], ['H', 3], ['G', -1]],
+    [['O', 1], ['H', 1], ['G', 1], ['O', 1], ['H', -1]]
+  ];
+  /* Orecchie: contorno, un pixel di pelle, contorno — sotto il bordo, non
+   * fuori (chris down 6 `.#o#oooooooo#o#.`). Restano pelle anche di
+   * spalle: e' cosi' che i tile alti del frame `up` portano tre toni. */
+  var EARS = [
+    [['O', 1], ['S', 1], ['M', 1], ['F', -1]],
+    [['O', 1], ['S', 2], ['M', 1], ['F', -1]],
+    [['O', 1], ['S', 1], ['M', 2], ['F', -1]],
+    [['O', 1], ['H', 1], ['S', 1], ['M', 1], ['F', -1]],
+    [['O', 1], ['S', 1], ['M', 1], ['H', 1], ['F', -1]],
+    [['O', 2], ['S', 1], ['M', 1], ['F', -1]],
+    [['O', 1], ['S', 1], ['M', 1], ['F', 1], ['H', 1], ['F', -1]]
+  ];
+  /* Occhi: la loro posizione si misura dal CENTRO, non dal bordo. In Oro
+   * stanno a 1-2 px dall'asse (chris down 7 `.#oooo#oo#oooo#.`: colonne 6
+   * e 9 su una testa larga 14) e fra i due ne restano due di incarnato.
+   * Misurandoli dal bordo finivano agli angoli del viso, e la faccia
+   * leggeva come un granchio. */
+  var EYES = [                  /* scarto extra, sopracciglio, naso, larghezza */
+    [0, 0, 0, 1], [1, 0, 0, 1], [0, 1, 0, 1], [1, 1, 0, 1],
+    [0, 0, 1, 1], [1, 0, 1, 1], [0, 0, 0, 2]
+  ];
+  /* Sotto gli occhi Oro lascia l'incarnato pulito fra le due colonne
+   * scure (chris down 8 `..##oo#oo#oo##..`): una bocca larga due le
+   * chiudeva a un blocco nero di quattro. Qui la bocca e' al massimo un
+   * pixel. */
+  var MOUTH = [                           /* bocca, guancia, mento */
+    [0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0], [0, 1, 1], [1, 0, 1]
   ];
 
   function frontHeadRows(W, back, d) {
     var x0 = 8 - (W >> 1), x1 = x0 + W - 1;
-    var faceT = back ? 'h' : 's';      /* di spalle il viso e' nuca, non pelle */
-    var markT = back ? 'g' : 'o';      /* e i segni sono il riflesso, non il nero */
-    var rows = [], a, i, t, p0, p1;
-
-    function line(lo, hi, fill) {
-      var s = [], x;
-      for (x = 0; x < 16; x++) {
-        if (x < lo || x > hi) s.push('.');
-        else if (x === lo || x === hi) s.push('o');
-        else s.push(fill);
-      }
-      return s;
-    }
+    var rows = [], a, i, t, p0, p1, eL, eR;
+    /* di spalle il campo del viso e' nuca e i segni sono il riflesso: la
+     * stessa matrice, letta con due toni diversi */
+    /* Due letture della stessa matrice. Le righe di sola chioma (0-3)
+     * usano i toni veri dei capelli in tutte e due le direzioni; le righe
+     * del viso (4-7) di spalle diventano nuca: il campo passa alla chioma
+     * e i segni al riflesso. Tenere un'unica mappa mandava a nero l'intera
+     * nuca dei personaggi biondi — Lucy usciva con 5 righe interamente
+     * nere su 16 contro le 3 del gate. */
+    var HAIRTONE = { O: 'o', H: 'h', G: 'g', S: 's', F: 'h', M: 'g' };
+    var TONE = back ? { O: 'o', H: 'g', G: 'g', S: 's', F: 'h', M: 'g' }
+      : { O: 'o', H: 'h', G: 'g', S: 's', F: 's', M: 'o' };
+    function tone(k) { return TONE[k]; }
+    function hairTone(k) { return HAIRTONE[k]; }
     function set(a, x, k) { if (x > 0 && x < 15 && a[x] !== '.') a[x] = k; }
 
-    /* 0-1 — calotta e chioma alta: rientri asimmetrici (in Oro la scriminatura
-     * sposta il volume da un lato: kris down 1 `#o++++o#`). */
+    /* 0-1 — calotta e chioma alta, con la scriminatura spostata di lato
+     * (in Oro il volume non e' mai simmetrico: kris down 1 `#o++++o#`). */
     p0 = HAIR_PAD0[d[0]];
-    a = line(x0 + p0[0], x1 - p0[1], 'h');
-    set(a, 7, 'g'); set(a, 8, 'g');
+    a = bandRow(x0 + p0[0], x1 - p0[1], [['O', 1], ['G', -1]], hairTone);
     rows.push(a);
-
     p1 = HAIR_PAD1[d[1]];
-    a = line(x0 + p1[0], x1 - p1[1], 'h');
-    set(a, x0 + p1[0] + 2, 'g'); set(a, x1 - p1[1] - 2, 'g');
+    a = bandRow(x0 + p1[0], x1 - p1[1], [['O', 1], ['H', 1], ['G', -1]], hairTone);
     rows.push(a);
 
-    /* 2-3 — ciocche: due toni dentro i capelli, come chris down 3
-     * `#+++##+++#`. Senza queste, meta' sprite era un campo unico. */
-    a = line(x0, x1, 'h');
-    set(a, x0 + 1, 'g'); set(a, x1 - 1, 'g');
-    t = HAIR_TUFT2[d[2]];
-    for (i = 0; i < t.length; i++) { set(a, x0 + t[i], 'g'); set(a, x1 - t[i], 'g'); }
-    rows.push(a);
+    /* 2-3 — ciocche: due toni dentro i capelli, in fasce, come chris
+     * down 3 `#+++##+++#`. Prima meta' sprite era un campo unico. */
+    rows.push(bandRow(x0 + 1, x1 - 1, HAIR_BAND2[d[2]], hairTone));
+    rows.push(bandRow(x0 + 1, x1 - 1, HAIR_BAND3[d[3]], hairTone));
 
-    a = line(x0, x1, 'h');
-    set(a, x0 + 2, 'g'); set(a, x1 - 2, 'g');
-    t = HAIR_TUFT3[d[3]];
-    for (i = 0; i < t.length; i++) { set(a, x0 + t[i], 'g'); set(a, x1 - t[i], 'g'); }
-    rows.push(a);
+    /* 4 — fascia bassa della chioma: ancora capelli, non ancora viso */
+    rows.push(bandRow(x0 + 1, x1 - 1, FRINGE[d[4]], hairTone));
 
-    /* 4 — attaccatura: la chioma scende sulla fronte a denti diversi per
-     * personaggio; e' la riga che separa Cooper da Andy. */
-    a = line(x0, x1, faceT);
-    t = FRINGE[d[4]];
-    for (i = 0; i < t.length; i++) {
-      set(a, x0 + t[i], back ? 'g' : 'h'); set(a, x1 - t[i], back ? 'g' : 'h');
-    }
-    rows.push(a);
+    /* 5 — orecchie e tempie: la prima riga di viso */
+    rows.push(bandRow(x0, x1, EARS[d[5]], tone));
 
-    /* 5 — orecchie: contorno, un pixel di pelle, contorno. In Oro e' su
-     * ogni personaggio (chris down 6 `.#o#oooooooo#o#.`). */
-    a = line(x0, x1, faceT);
-    t = EARS[d[5]];
-    set(a, x0 + t[0], markT); set(a, x1 - t[1], markT);
-    /* Le orecchie si vedono anche di spalle: in Oro il retro della testa
-     * porta comunque il tono chiaro (chris up 5 `..###+oooo+###..`, officer
-     * up 8 `..##oo####oo##..`). Senza, i due tile alti del frame `up`
-     * restavano a due toni e il gate 7 falliva li'. */
-    if (back) { set(a, x0 + 1, 's'); set(a, x1 - 1, 's'); }
-    rows.push(a);
-
-    /* 6 — occhi da 1 px, distanza variabile, piu' il naso. */
-    a = line(x0, x1, faceT);
+    /* 6 — occhi da 1 px su un viso pulito: in Oro non sono mai piu' di
+     * due pixel neri, ed e' per questo che si leggono. */
     t = EYES[d[6]];
-    set(a, x0 + t[0], markT); set(a, x1 - t[1], markT);
-    if (t[2]) set(a, W & 1 ? 8 : 7, markT);
+    eL = Math.max(x0 + 2, 7 - (W >= 13 ? 2 : 1) - t[0]);
+    eR = Math.min(x1 - 2, 8 + (W >= 13 ? 2 : 1) + t[0]);
+    a = bandRow(x0, x1, [['O', 1], ['F', -1]], tone);
+    set(a, eL, TONE.M); set(a, eR, TONE.M);
+    if (t[3] > 1) { set(a, eL + 1, TONE.M); set(a, eR - 1, TONE.M); }
+    if (t[1]) { set(a, eL - 1, TONE.H); set(a, eR + 1, TONE.H); }   /* sopracciglio */
+    if (t[2]) set(a, W & 1 ? 8 : 7, TONE.M);                       /* naso */
     rows.push(a);
 
-    /* 7 — mento piu' stretto, bocca e zigomo: la riga sotto gli occhi in
-     * Oro non e' mai pulita (chris down 8 `..##oo#oo#oo##..`). */
-    a = line(x0 + 1, x1 - 1, faceT);
+    /* 7 — mento piu' stretto: le colonne degli occhi continuano come lati
+     * del naso, esattamente come in Oro (chris down 8 `..##oo#oo#oo##..`),
+     * piu' la bocca. */
+    a = bandRow(x0 + 1, x1 - 1, [['O', 1], ['F', -1]], tone);
     t = MOUTH[d[7]];
-    for (i = 0; i < t[1]; i++) set(a, 7 + t[0] + i, markT);
-    if (t[2]) { set(a, x0 + 2, markT); set(a, x1 - 2, markT); }
+    for (i = 0; i < t[0]; i++) set(a, 7 + i, TONE.M);
+    if (t[1]) { set(a, x0 + 2, TONE.M); set(a, x1 - 2, TONE.M); }
+    if (t[2]) { set(a, eL - 1, TONE.M); set(a, eR + 1, TONE.M); }
     if (back) { set(a, x0 + 2, 's'); set(a, x1 - 2, 's'); }   /* nuca */
     rows.push(a);
+
+    /* Teste larghe 14 px: le fasce si allungano in proporzione e il viso
+     * torna a essere un campo (6-8 px di incarnato di fila). Oro sul suo
+     * personaggio piu' largo — gramps — mette due colonne in piu' per
+     * lato (`.#o+o##oo##o+o#.`): qui sono le stesse due. */
+    if (W >= 13) {
+      for (i = 4; i < 8; i++) {
+        set(rows[i], x0 + 4, i & 1 ? TONE.M : TONE.H);
+        set(rows[i], x1 - 4, i & 1 ? TONE.M : TONE.H);
+      }
+    }
 
     return rows.map(function (r) { return r.join(''); });
   }
 
   /* Profilo: cranio piu' stretto (8 px contro i 12 del frontale), massa dei
-   * capelli che sporge di 1 px DIETRO, viso e occhio davanti, collo spostato
-   * in avanti. Non e' il frontale con una diagonale sopra: e' una seconda
-   * matrice, ed e' per questo che l'IoU scende da 1,000. */
-  /* R63 — il profilo ha ora un contorno che gradina. Prima erano 8 gradini
-   * (cambi di colonna del bordo, sinistro + destro) contro i 13-21 di Oro:
-   * niente naso, niente mascella, niente nuca. Qui ogni riga sposta un
-   * bordo di 1 px secondo la tabella SIDE_EDGE, e la sagoma resta dentro i
-   * 10 px del gate R62. */
+   * capelli dietro, viso e occhio davanti. Non e' il frontale con una
+   * diagonale sopra: e' una seconda matrice, ed e' per questo che l'IoU
+   * scende da 1,000.
+   *
+   * R63 — il contorno gradina. Prima erano 8 gradini (cambi di colonna del
+   * bordo, sinistro + destro) contro i 13-21 di Oro: niente naso, niente
+   * mascella, niente nuca. Qui ogni riga sposta un bordo di 1 px secondo
+   * SIDE_HEAD_EDGE, e la sagoma resta dentro i 10 px del gate R62. */
   var SIDE_HEAD_EDGE = [
     [1, -1], [1, 0], [0, 0], [0, 1], [1, 1], [0, 1], [0, 0], [1, 0]
   ];
+  /* Di profilo le fasce non sono simmetriche: corrono da dietro in avanti. */
+  function runRow(lo, hi, spec, tone) {
+    var s = [], x, i, si = 0, a = lo, k, n;
+    for (x = 0; x < 16; x++) s.push('.');
+    while (a <= hi && si < spec.length) {
+      k = tone(spec[si][0]); n = spec[si][1]; si++;
+      if (n < 0) break;
+      for (i = 0; i < n && a <= hi; i++) s[a++] = k;
+    }
+    k = tone(spec[spec.length - 1][0]);
+    while (a <= hi) s[a++] = k;
+    if (lo >= 0 && lo < 16) s[lo] = 'o';
+    if (hi >= 0 && hi < 16) s[hi] = 'o';
+    return s;
+  }
+  var SIDE_HAIR = [
+    [['O', 1], ['H', 1], ['G', 2], ['H', -1]],
+    [['O', 1], ['G', 1], ['H', 2], ['G', -1]],
+    [['O', 1], ['H', 2], ['G', 1], ['H', -1]],
+    [['O', 1], ['G', 2], ['H', -1]],
+    [['O', 1], ['H', 1], ['G', -1]]
+  ];
+  var SIDE_FRINGE = [
+    [['O', 1], ['H', 2], ['S', -1]],
+    [['O', 1], ['H', 3], ['S', -1]],
+    [['O', 1], ['H', 4], ['S', -1]],
+    [['O', 1], ['G', 1], ['H', 2], ['S', -1]],
+    [['O', 1], ['H', 2], ['G', 1], ['S', -1]],
+    [['O', 1], ['H', 3], ['G', 1], ['S', -1]],
+    [['O', 1], ['H', 2], ['S', 1], ['H', 1], ['S', -1]]
+  ];
   function sideHeadRows(W, d) {
     var x0 = 8 - (W >> 1), x1 = x0 + W - 1;
-    var rows = [], a, e, i, t;
-    function line(lo, hi, fill) {
-      var s = [], x;
-      for (x = 0; x < 16; x++) {
-        if (x < lo || x > hi) s.push('.');
-        else if (x === lo || x === hi) s.push('o');
-        else s.push(fill);
-      }
-      return s;
-    }
+    var rows = [], a, e;
+    var TONE = { O: 'o', H: 'h', G: 'g', S: 's', F: 's', M: 'o' };
+    function tone(k) { return TONE[k]; }
     function set(a, x, k) { if (x > 0 && x < 15 && a[x] !== '.') a[x] = k; }
-    function edge(r) { e = SIDE_HEAD_EDGE[r]; return [x0 + e[0], x1 + e[1]]; }
+    function edge(r) { var t = SIDE_HEAD_EDGE[r]; return [x0 + t[0], x1 + t[1]]; }
 
-    /* 0-2 nuca e chioma, 3-6 viso con fronte, occhio, zigomo e orecchio,
-     * 7 mascella. Il davanti e' a destra: 'left' e' lo specchio. */
-    e = edge(0); a = line(e[0], e[1], 'h'); set(a, e[0] + 2, 'g'); rows.push(a);
-    e = edge(1); a = line(e[0], e[1], 'h');
-    set(a, e[0] + 1, 'g');
-    t = HAIR_TUFT2[d[2]];
-    for (i = 0; i < t.length; i++) set(a, e[0] + t[i], 'g');
+    /* 0-2 nuca e chioma */
+    e = edge(0); rows.push(runRow(e[0], e[1], [['O', 1], ['G', -1]], tone));
+    /* i due toni della chioma stanno tutti e due nella colonna piu'
+     * arretrata: su un cranio di profilo da 6 px la meta' posteriore e'
+     * un pettine di tre colonne, e senza questo restava a due toni */
+    e = edge(1); a = runRow(e[0], e[1], [['O', 1], ['H', 1], ['G', -1]], tone);
+    set(a, e[0] + 1, 'h'); rows.push(a);
+    e = edge(2); a = runRow(e[0], e[1], SIDE_HAIR[d[2]], tone);
+    set(a, e[0] + 1, 'g'); rows.push(a);
+    /* 3 attaccatura: la chioma tiene il dietro, la pelle il davanti, e il
+     * sopracciglio porta i due toni della chioma fin sul davanti — senza,
+     * la meta' ANTERIORE del profilo restava a due toni (gate 7). */
+    e = edge(3); a = runRow(e[0], e[1], SIDE_FRINGE[d[4]], tone);
+    set(a, e[1] - 2, 'h'); set(a, e[1] - 3, 'g');
     rows.push(a);
-    e = edge(2); a = line(e[0], e[1], 'h');
-    set(a, e[0] + 2, 'g');
-    t = HAIR_TUFT3[d[3]];
-    for (i = 0; i < t.length; i++) set(a, e[0] + t[i], 'g');
+    /* 4 occhio da 1 px davanti, naso sul bordo */
+    e = edge(4); a = runRow(e[0], e[1], [['O', 1], ['H', 2], ['S', -1]], tone);
+    set(a, e[1] - 2, 'o');
     rows.push(a);
-    /* fronte: la chioma tiene il dietro, la pelle il davanti */
-    e = edge(3); a = line(e[0], e[1], 's');
-    t = FRINGE[d[4]];
-    for (i = 0; i < t.length; i++) set(a, e[0] + t[i], 'h');
+    /* 5 orecchio: contorno, pelle, contorno — sotto il bordo come nel
+     * frontale. E' l'incarnato che tiene tre toni nella meta' POSTERIORE
+     * del profilo, dove prima ce n'erano due (gate 7). */
+    e = edge(5); a = runRow(e[0], e[1], [['O', 1], ['H', 1], ['S', 1], ['M', 1], ['S', -1]], tone);
     rows.push(a);
-    /* occhio 1 px davanti + naso sul bordo */
-    e = edge(4); a = line(e[0], e[1], 's');
-    set(a, e[0] + 1, 'h'); set(a, e[1] - 2, 'o');
-    rows.push(a);
-    /* orecchio dietro: contorno, pelle, contorno — come nel frontale.
-     * La ciocca sulla nuca alterna i due toni scendendo: senza, la meta'
-     * POSTERIORE del profilo restava a due soli toni (gate 7) su tutti i
-     * personaggi dai capelli scuri. */
-    e = edge(5); a = line(e[0], e[1], 's');
-    set(a, e[0] + 1, 'h'); set(a, e[0] + 2, 's'); set(a, e[0] + 3 + (d[5] & 1), 'o');
-    rows.push(a);
-    /* zigomo e basetta */
-    e = edge(6); a = line(e[0], e[1], 's');
-    set(a, e[0] + 1, 'h'); set(a, e[0] + 2, 'g');
+    /* 6 zigomo e basetta */
+    e = edge(6); a = runRow(e[0], e[1], [['O', 1], ['H', 1], ['G', 1], ['S', -1]], tone);
     set(a, e[1] - 1 - (d[6] & 1), 'o');
     rows.push(a);
-    /* mascella: la bocca di profilo e' un solo pixel sul davanti */
-    e = edge(7); a = line(e[0], e[1], 's');
-    set(a, e[0] + 1, 'h'); set(a, e[1] - 1, 'o');
+    /* 7 mascella: la bocca di profilo e' un solo pixel sul davanti */
+    e = edge(7); a = runRow(e[0], e[1], [['O', 1], ['H', 1], ['S', -1]], tone);
+    set(a, e[1] - 1, 'o');
     rows.push(a);
 
     return rows.map(function (r) { return r.join(''); });
@@ -1764,9 +1881,13 @@
    * fascia di incarnato larga dieci pixel. */
   function neckRow(width) {
     var x0 = 8 - (width >> 1), x1 = x0 + width - 1, s = '', x;
+    /* R63 — il colletto stringe di 2 px per lato, non di 3: con 3 su un
+     * collo di profilo largo 6 la riga usciva interamente nera, e bastava
+     * quella a portare il Gigante a 4 righe nere su 16 (gate 2: max 3). */
+    var pad = width >= 10 ? 2 : 1;
     for (x = 0; x < 16; x++) {
       if (x < x0 || x > x1) s += '.';
-      else s += (x <= x0 + 2 || x >= x1 - 2) ? 'o' : 's';
+      else s += (x <= x0 + pad || x >= x1 - pad) ? 'o' : 's';
     }
     return s;
   }
@@ -1859,20 +1980,26 @@
     g.headW = b >= 1.12 ? 14 : (b <= 0.90 ? 10 : 12);
     /* Le spalle partono dalla testa e salgono: in Oro non sono mai piu'
      * strette (chris 14 = 14, kris 16 contro 12). */
+    /* Torso coerente con la testa. Le braccia non superano questa misura:
+     * evita sia il corpo-filamento sia la posa a croce larga 16px. */
     g.shoulder = Math.min(16, g.headW + 2);
     g.chest = g.shoulder;
-    g.armSpan = Math.min(16, g.chest + (armTier >= 2 ? 2 : 0));
+    /* R63 — solo la falcata piu' lunga allarga le braccia oltre le spalle.
+     * Con +2 da armTier 2 in su, le righe delle braccia uscivano a 16 px
+     * su una testa da 12: in Oro la riga delle braccia e' larga quanto il
+     * punto piu' largo della testa (chris 14 e 14), non di piu'. */
+    g.armSpan = Math.min(16, g.chest + (armTier >= 3 ? 2 : 0));
     g.fore = armTier === 3 ? g.armSpan : Math.max(6, g.chest - (armTier === 0 ? 2 : 0));
     /* Il bacino rientra rispetto al petto: in Oro la sagoma e' un trapezio,
      * non un blocco. Solo la gonna si riapre verso l'orlo. */
-    g.hip = gown ? g.chest : Math.max(6, g.chest - 2);
+    g.hip = gown ? g.chest : Math.max(8, g.chest - (layered ? 0 : 2));
     /* Chi sta eretto rientra in vita di due pixel: e' la voce che separa
      * Donna (1,02) da Maddy (1,00), che senza di essa uscivano identiche. */
     g.hem = gown ? Math.min(16, g.chest + 2) :
-      Math.max(6, g.chest - (layered ? 2 : 4) - (g.erect ? 2 : 0));
+      Math.max(8, g.chest - 2 - (g.erect ? 2 : 0));
     if (p.apron) g.hem = Math.min(16, g.chest);          /* grembiule svasato */
     if (p.waistcoat) g.hip = Math.max(6, g.chest - 4);    /* panciotto stretto */
-    g.legW = gown ? g.hem : Math.max(6, g.hem - 2);
+    g.legW = gown ? g.hem : Math.max(8, g.hem - 2);
     g.footW = Math.max(4, Math.min(14, g.legW + (stance >= 1 ? 2 : 0) - (stance <= -1 ? 2 : 0)));
     g.block = Math.max(2, Math.min(5, 2 + stance));
     return g;
@@ -1881,39 +2008,57 @@
   /* Otto righe di corpo, ricostruite in R63 sulla sequenza di Oro
    * (chris/officer/gramps, righe 9-15 del frame down):
    *
-   *   spalle con il colletto     ..###oo++oo###..
-   *   petto con l'allacciatura   ..##o+####+o##..
+   *   spalle con il colletto     ..##oo++oo##..
+   *   petto con l'allacciatura   ..#o+####+o#..
    *   braccia + mani             .#oo#oo++oo#oo#.
    *   braccia + mani             .#oo#++oo++#oo#.
-   *   cintura nera con fibbia    ..############..
+   *   cintura nera con la fibbia ..############..
    *   bacino                     ..###++++++###..
    *   gambe a mezzotono          ...#++####++#...
    *   scarpe                     ....###..###....
    *
-   * Il nero resta sopra il 50 % perche' cintura, solco fra le gambe e
-   * scarpe restano neri: la riserva non e' piu' "le ultime quattro righe
-   * piene", che era quello che rendeva le gambe una lastra. */
+   * Tutte a fasce di 2 px simmetriche: Oro non mette mai un pixel isolato
+   * dentro il busto. Il nero resta sopra il 50 % perche' cintura, solco
+   * fra le gambe e scarpe restano neri — la riserva non e' piu' "le ultime
+   * quattro righe piene", che era quello che rendeva le gambe una lastra. */
   function bodyRows(g, step, oneArm, d) {
     /* Chi ha la chioma chiara le ha dato il terzo colore: il busto va a
-     * nero e i segni interni li porta l'incarnato. Chi ce l'ha scura ha il
+     * nero e i segni interni li porta l'accento. Chi ce l'ha scura ha il
      * busto a colore e i segni neri. In tutti e due i casi ogni riga di
      * torso porta due toni: e' la differenza fra 0,17 e 0,36 di stacco. */
     var base = g.darkTorso ? 'p' : 'c';
-    var mark = g.darkTorso ? 's' : 'o';
-    var hands = g.side ? 'none' :
-      (oneArm === 'left' ? 'left' : (oneArm === 'right' ? 'right' : 'both'));
-    var v = d ? d[4] : 0, w = d ? d[5] : 0;
+    var mark = g.darkTorso ? 'c' : 'o';
+    var TONE = { O: 'o', S: 's', C: base, M: mark, P: 'p', A: 'c' };
+    function tone(k) { return TONE[k]; }
+    function band(width, spec) {
+      var x0 = 8 - (width >> 1);
+      return bandRow(x0, x0 + width - 1, spec, tone).join('');
+    }
+    var oneL = oneArm === 'left', oneR = oneArm === 'right';
+    /* mani: due di fronte e di spalle, una sola per chi tiene un braccio
+     * lungo il corpo. Fra la mano e il busto c'e' sempre 1 px nero: e' il
+     * gate 3, ed e' la cucitura che Oro non salta mai. */
+    function armBand(width, inner) {
+      var x0 = 8 - (width >> 1), x1 = x0 + width - 1;
+      var a = bandRow(x0, x1, [['O', 1], ['S', 1], ['O', 1]].concat(inner), tone);
+      if (oneL) { a[x1 - 1] = TONE.C; a[x1 - 2] = TONE.C; a[x1 - 3] = TONE.C; }
+      if (oneR) { a[x0 + 1] = TONE.C; a[x0 + 2] = TONE.C; a[x0 + 3] = TONE.C; }
+      return a.join('');
+    }
     var rows = [
-      /* spalle: colletto di incarnato al centro, cuciture sulle spalle */
-      torsoRow(g.shoulder, 'c', 's', [Math.max(2, (g.shoulder >> 1) - 1), -Math.max(2, (g.shoulder >> 1) - 1)]),
-      /* petto: allacciatura verticale + un segno di lato */
-      torsoRow(g.chest, base, mark, [(g.chest >> 1) - 1, (g.chest >> 1), 2 + (v % 2), -(2 + (w % 2))]),
-      armRow(g.armSpan, base, step, hands, mark),
-      armRow(g.fore, base, step, hands, base === 'p' ? 's' : 'c'),
+      /* spalle: il colletto di incarnato fra due fasce di stoffa */
+      band(g.shoulder, [['O', 1], ['A', 4], ['O', 1], ['S', -1]]),
+      /* petto: allacciatura verticale al centro */
+      band(g.chest, [['O', 1], ['S', 1], ['C', 2], ['M', -1]]),
+      /* Braccio alto dentro la giacca; mani visibili solo nella riga sotto.
+       * Due righe con quattro pixel pelle per lato leggevano come pugni. */
+      band(Math.max(6, g.armSpan - 2), [['O', 1], ['C', -1]]),
+      armBand(Math.max(8, g.fore - 2), [['C', -1]]),
       /* cintura: nera piena tranne la fibbia — bastava quella a togliere
        * una riga interamente nera dal conto del gate 2 */
-      torsoRow(g.hip, 'p', 'c', [(g.hip >> 1) - 1, (g.hip >> 1)]),
-      torsoRow(g.hem, 'p', 'c', [2, -2, (g.hem >> 1)]),
+      /* Riserva nera in una cintura continua, non dispersa nel petto. */
+      band(g.hip, [['O', 3], ['P', 3], ['A', -1]]),
+      band(g.hem, [['O', 1], ['A', 2], ['P', -1]]),
       legsRow(g.legW, 'c', !g.gown),
       feetRow(g.footW, g.block, step)
     ];
@@ -1925,57 +2070,53 @@
   /* Corpo di profilo: bordi che gradinano riga per riga (spalla indietro,
    * braccio e mano avanti, cintura, gamba davanti, piede). E' la meta'
    * bassa del gate 6 — i 13 gradini di contorno — e insieme la ragione per
-   * cui le righe dei piedi non coincidono piu' col frontale. */
+   * cui le righe dei piedi non coincidono piu' col frontale.
+   *
+   * Anche qui fasce, non pixel sparsi: dietro la manica del braccio
+   * lontano, davanti la mano del braccio vicino, in mezzo il busto. In Oro
+   * la meta' POSTERIORE del profilo porta comunque il tono chiaro (chris
+   * side 10 `.#o#o+####+##...`): senza la mano dietro, i due tile bassi
+   * restavano a due toni. */
   var SIDE_BODY_EDGE = [
-    [-1, 0], [-1, 1], [-1, 1], [0, 1], [-1, 0], [0, 0], [0, 1], [-1, 1]
+    [-1, 0], [-1, 0], [-1, 1], [0, 0], [-1, 0], [1, -1], [0, 1], [0, 0]
   ];
   function sideBodyRows(g, step, d) {
     var W = g.headW, x0 = 8 - (W >> 1), x1 = x0 + W - 1;
     var base = g.darkTorso ? 'p' : 'c';
-    var mark = g.darkTorso ? 's' : 'o';
-    var fwd = step >= 0, rows = [], a, e, r;
-    function line(lo, hi, fill) {
-      var s = [], x;
-      for (x = 0; x < 16; x++) {
-        if (x < lo || x > hi) s.push('.');
-        else if (x === lo || x === hi) s.push('o');
-        else s.push(fill);
-      }
-      return s;
-    }
+    var mark = g.darkTorso ? 'c' : 'o';
+    var TONE = { O: 'o', S: 's', C: base, M: mark, P: 'p', A: 'c' };
+    function tone(k) { return TONE[k]; }
+    var fwd = step >= 0, rows = [], a, e;
     function set(a, x, k) { if (x > 0 && x < 15 && a[x] !== '.') a[x] = k; }
     function edge(i) { var t = SIDE_BODY_EDGE[i]; return [x0 + t[0], x1 + t[1]]; }
+    function row(i, spec) { e = edge(i); return runRow(e[0], e[1], spec, tone); }
 
-    e = edge(0); a = line(e[0], e[1], 'c'); set(a, e[1] - 1, 's'); rows.push(a);
-    e = edge(1); a = line(e[0], e[1], base); set(a, e[0] + 2, mark); set(a, e[1] - 2, mark); rows.push(a);
-    /* braccio: 1 px nero che lo stacca dal busto, poi la mano — davanti nei
-     * fotogrammi di passo avanti, dietro negli altri (gate 3, di lato). */
-    /* Le due braccia. Quello vicino porta la mano avanti nel fotogramma di
-     * passo avanti; quello lontano, per forza, la porta indietro — ed e'
-     * il motivo per cui in Oro anche la META' POSTERIORE del profilo ha il
-     * tono chiaro (chris side 10 `.#o#o+####+##...`). Senza la mano dietro
-     * i due tile bassi del profilo restavano a due toni. */
-    e = edge(2); a = line(e[0], e[1], base);
-    set(a, e[1] - 1, 's'); set(a, e[1] - 2, 'o');           /* mano vicina, avanti */
-    set(a, e[0] + 1, 's'); set(a, e[0] + 2, 'o');           /* mano lontana, dietro */
-    set(a, (e[0] + e[1]) >> 1, mark);
+    /* spalla: colletto di incarnato davanti */
+    a = row(0, [['O', 1], ['C', -1]]); set(a, e[1] - 1, 's'); rows.push(a);
+    /* petto: la cucitura della manica lontana dietro */
+    /* il petto porta sempre un tono non nero: con la giacca scura
+     * (accento sui capelli) una fascia di sole C e' nero pieno, e la riga
+     * finiva nel conto del gate 2 */
+    rows.push(row(1, [['O', 1], ['S', 1], ['O', 1], ['A', 2], ['C', -1]]));
+    /* braccia: manica e mano lontana dietro, mano vicina davanti, sempre
+     * staccate dal busto da 1 px nero (gate 3, di profilo) */
+    a = row(2, [['O', 1], ['S', 1], ['O', 1], ['C', -1]]);
+    set(a, e[1] - 1, 's'); set(a, e[1] - 2, 's'); set(a, e[1] - 3, 'o');
     rows.push(a);
-    e = edge(3); a = line(e[0], e[1], base);
+    a = row(3, [['O', 1], ['S', 1], ['O', 1], ['M', 2], ['C', -1]]);
     if (fwd) { set(a, e[1] - 1, 's'); set(a, e[1] - 2, 'o'); }
-    else { set(a, e[0] + 1, 's'); set(a, e[0] + 2, 'o'); }
-    set(a, ((e[0] + e[1]) >> 1) + 1, mark);
+    else { set(a, e[1] - 1, 'o'); }
     rows.push(a);
-    e = edge(4); a = line(e[0], e[1], 'p');
-    set(a, e[0] + 2, 'c'); set(a, e[0] + 3, 'c'); set(a, e[1] - 2, 'c');
-    rows.push(a);
-    e = edge(5); a = line(e[0], e[1], 'p');
-    set(a, e[1] - 2, 'c'); set(a, e[0] + 1, 'c'); set(a, e[0] + 3, 'c');
-    rows.push(a);
+    /* cintura nera con la fibbia davanti */
+    a = row(4, [['O', 1], ['P', -1]]); set(a, e[1] - 2, 'c'); set(a, e[1] - 3, 'c'); rows.push(a);
+    /* bacino */
+    rows.push(row(5, [['O', 1], ['A', 2], ['P', -1]]));
     /* gambe: quella davanti a mezzotono, quella dietro in ombra */
-    e = edge(6); a = line(e[0], e[1], 'c'); set(a, e[0] + 1, 'o'); set(a, e[0] + 2, 'o'); rows.push(a);
+    rows.push(row(6, [['O', 1], ['P', 2], ['A', -1]]));
+    /* piedi: uno avanti e uno dietro, non le due scarpe simmetriche del
+     * frontale (gate 6, seconda meta') */
     e = edge(7);
-    r = sideFeetRow(e[0], e[1], step, true).split('');
-    rows.push(r);
+    rows.push(sideFeetRow(e[0], e[1], step, false).split(''));
 
     if (g.short) rows.splice(3, 2);
     else if (g.stoop) rows.splice(3, 1);
@@ -1992,15 +2133,29 @@
    * (larghezza minima fra testa e spalle) leggerebbe la strozzatura sotto
    * il ciuffo invece del collo vero. */
   function crown(grid, top, x0, x1, tiers) {
-    span(grid, x0 + 1, x1 - 1, top, 'h');
-    span(grid, x0 + 2, x1 - 2, top - 1, 'h');
-    if (tiers > 1) span(grid, x0 + 3, x1 - 3, top - 2, 'h');
-    /* R63 — anche i ciuffi portano il riflesso. Con i capelli scuri
+    /* R63 — anche i ciuffi portano il riflesso: con i capelli scuri
      * cotonatura e chioma selvaggia erano tre righe nere piene sopra la
-     * testa (Bob: 4 righe interamente nere su 16, gate 2 al massimo 3). */
-    put(grid, x0 + 3, top, 'g'); put(grid, x1 - 3, top, 'g');
-    put(grid, x0 + 4, top - 1, 'g'); put(grid, x1 - 4, top - 1, 'g');
-    if (tiers > 1) { put(grid, x0 + 4, top - 2, 'g'); put(grid, x1 - 4, top - 2, 'g'); }
+     * testa (Bob: 4 righe interamente nere su 16, gate 2 al massimo 3).
+     * Il riflesso resta DENTRO il ciuffo: quando sporgeva, seal() lo
+     * chiudeva a nero e lasciava sopra la testa una riga piu' larga del
+     * ciuffo, che la misura del collo leggeva come strozzatura — Lucy
+     * scendeva a 66,7 % contro il 71 % del gate R62. */
+    function tier(y, pad) {
+      var a = x0 + pad, b = x1 - pad, m;
+      if (b <= a) return;
+      span(grid, a, b, y, 'h');
+      /* un riflesso solo, di 2 px, al centro del ciuffo: a pixel alterni
+       * la cotonatura usciva a pettine (Lucy) invece che a ciocca */
+      m = (a + b) >> 1;
+      put(grid, m, y, 'g'); if (m + 1 < b) put(grid, m + 1, y, 'g');
+    }
+    /* Il ciuffo sta SOPRA la calotta e resta piu' stretto di lei: con la
+     * fascia larga (pad 1) la riga 0 usciva piu' larga della riga 1, e la
+     * misura del collo leggeva quella rientranza come collo — James
+     * scendeva a 70 % contro il 71 % del gate R62. */
+    tier(top, 3);
+    tier(top - 1, 4);
+    if (tiers > 1) tier(top - 2, 5);
   }
 
   function applyHair(grid, p, dir, g, top, bodyTop) {
@@ -2052,8 +2207,12 @@
       put(grid, x0 + 4, top, 'h'); put(grid, x1 - 4, top, 'h');
     }
     if (p.glasses && !back) {
-      if (side) { span(grid, x1 - 3, x1 - 1, top + 5, 'o'); }
-      else { span(grid, x0 + 2, x0 + 4, top + 5, 'o'); span(grid, x1 - 4, x1 - 2, top + 5, 'o'); }
+      /* R63 — le lenti stanno sulla riga degli OCCHI (top+6), non su
+       * quella delle orecchie: li' cancellavano l'orecchio, e con esso
+       * l'unico pixel di incarnato nella meta' posteriore del profilo
+       * (Jacoby e Maddy uscivano a due toni in un tile, gate 7). */
+      if (side) { span(grid, x1 - 3, x1 - 1, top + 6, 'o'); }
+      else { span(grid, x0 + 2, x0 + 4, top + 6, 'o'); span(grid, x1 - 4, x1 - 2, top + 6, 'o'); }
     }
     if (p.log) {
       /* Il ceppo e' l'unico accessorio che cambia il profilo: due righe
@@ -2091,18 +2250,44 @@
      * meta' dietro del profilo a due soli toni. */
   }
 
+  /* Nessuna riga sopra le scarpe puo' essere una barra nera piena. E' il
+   * gate 2 (in Oro al massimo 3 righe interamente nere su 16: chris 3,
+   * kris 2, gramps 2). La matrice per costruzione non ne produce, ma un
+   * accessorio che attraversa la riga — tesa del cappello, lenti, ciuffo,
+   * ceppo — puo' coprirla tutta: Truman ne aveva 4, Maddy 4. La riga
+   * riceve due pixel di accento al centro, che e' quello che fa Oro con
+   * la fascia del cappello (officer down 1 `#++++++++#`). */
+  function unbar(rows, g) {
+    var ink = g.darkTorso ? { o: 1, g: 1, p: 1 } : { o: 1, h: 1, p: 1 };
+    var y, x, lo, hi, solid, mid, r;
+    for (y = 0; y < rows.length - 2; y++) {
+      r = rows[y].split(''); lo = -1; hi = -1; solid = true;
+      for (x = 0; x < 16; x++) {
+        if (r[x] === '.') continue;
+        if (lo < 0) lo = x;
+        hi = x;
+        if (!ink[r[x]]) { solid = false; break; }
+      }
+      if (!solid || lo < 0 || hi - lo < 5) continue;
+      mid = (lo + hi) >> 1;
+      r[mid] = 'c'; r[mid + 1] = 'c';
+      rows[y] = r.join('');
+    }
+    return rows;
+  }
+
   function charPattern(p, dir, step) {
     var g = geometry(p, dir);
     var d = headDigits(p);
     var head = g.side ? sideHeadRows(g.headW, d) : frontHeadRows(g.headW, dir === 'up', d);
     var rows = blankRows(HEAD_PAD).concat(head);
-    if (g.tall) rows = rows.concat([neckRow(g.side ? g.headW : g.headW - 2)]);
+    if (g.tall) rows = rows.concat([neckRow(g.side ? g.headW : g.headW - 1)]);
     rows = rows.concat(g.side ? sideBodyRows(g, step, d) : bodyRows(g, step, p.onearm, d));
     var grid = toGrid(rows);
     var bodyTop = HEAD_PAD + 8 + (g.tall ? 1 : 0);
     applyHair(grid, p, dir, g, HEAD_PAD, bodyTop);
     applyProps(grid, p, dir, g, HEAD_PAD, bodyTop, step);
-    return { rows: seal(fromGrid(grid)), geo: g };
+    return { rows: seal(unbar(fromGrid(grid), g)), geo: g };
   }
 
   /* I piedi restano sulla stessa riga per tutti: cambia dove FINISCE la

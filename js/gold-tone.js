@@ -1,14 +1,27 @@
-/* gold-tone.js — master palette oliva/crema del mockup approvato.
- * Quantizza solo scene diurne dopo compositing: tile, sprite e strutture
- * conservano forme/collisioni, ma rosa e grigi non spezzano art direction.
+/* gold-tone.js — master palette Gen II derivata dal mockup approvato.
+ * Il nucleo oliva/crema resta dominante; piccole rampe calde, blu e viola
+ * separano materiali/landmark come negli esterni di Pokemon Oro. Quantizza
+ * solo scene diurne dopo compositing: forme e collisioni non cambiano.
  */
 (function () {
   'use strict';
   var G = typeof window !== 'undefined' ? window : globalThis;
   var GAME = G.GAME = G.GAME || {};
-  var PAL = ['#183225', '#31543a', '#63834a', '#a8be72', '#d9d49a', '#f5efcf'];
-  var RGB = [[24,50,37], [49,84,58], [99,131,74], [168,190,114], [217,212,154], [245,239,207]];
-  var EXEMPT = { woods:true, blacklodge:true, oej:true };
+  var PAL = [
+    '#183225', '#31543a', '#63834a', '#a8be72', '#d9d49a', '#f5efcf',
+    '#70404f', '#b8665c', '#d69874',
+    '#3f5368', '#8095aa',
+    '#554c70', '#9184a8',
+    '#76553f', '#d6a765', '#ead879'
+  ];
+  var RGB = PAL.map(function (hex) {
+    var n = parseInt(hex.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  });
+  /* Solo piazza esterna usa il concept oliva dominante. Interni e scene
+   * notturne conservano palette authored: Oro cambia palette per ambiente,
+   * non applica una tinta globale a tutto il gioco. */
+  var FILTERED = { town:true };
   var cache = Object.create(null);
 
   function choose(r, g, b) {
@@ -16,13 +29,19 @@
     if (cache[key] !== undefined) return cache[key];
     var hi = Math.max(r, g, b), lo = Math.min(r, g, b);
     var lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    var chroma = hi - lo;
     var green = g > r * 0.96 && g > b * 1.08;
-    var pink = r > g * 1.10 && b > g * 0.92;
+    var purple = chroma > 22 && r > g * 1.05 && b > g * 1.05;
+    var blue = chroma > 22 && b > r * 1.06 && b > g * 0.96;
+    var warm = chroma > 22 && r > g * 1.08 && r > b * 1.03 && b > g * 0.82;
+    var ochre = chroma > 26 && r > b * 1.22 && g > b * 1.18;
     var idx;
     if (lum < 48) idx = 0;
+    else if (warm) idx = lum > 162 ? 8 : (lum > 102 ? 7 : 6);
+    else if (purple) idx = lum > 142 ? 12 : 11;
+    else if (blue) idx = lum > 145 ? 10 : 9;
+    else if (ochre) idx = lum > 183 ? 15 : (lum > 116 ? 14 : 13);
     else if (lum < 92) idx = 1;
-    else if (pink && lum > 155) idx = 4;
-    else if (pink && lum > 108) idx = 2;
     else if (green && lum > 185) idx = 4;      // prato chiaro -> suolo crema del concept
     else if (green && lum > 150) idx = 3;
     else if (green && lum > 105) idx = 2;
@@ -52,7 +71,7 @@
   }
 
   function apply(ctx, width, height, mapId) {
-    if (!ctx || !ctx.getImageData || !ctx.putImageData || EXEMPT[mapId]) return false;
+    if (!ctx || !ctx.getImageData || !ctx.putImageData || !FILTERED[mapId]) return false;
     var img;
     try { img = ctx.getImageData(0, 0, width, height); }
     catch (_) { return false; }
@@ -67,6 +86,6 @@
     return true;
   }
 
-  GAME.GoldTone = { palette:PAL, exempt:EXEMPT, apply:apply };
+  GAME.GoldTone = { palette:PAL, filtered:FILTERED, apply:apply };
   if (typeof module !== 'undefined' && module.exports) module.exports = GAME.GoldTone;
 })();

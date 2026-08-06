@@ -26,12 +26,11 @@
         var touch = hasTouchInput();
         var portrait = viewport.height > viewport.width;
         // Ritratto mobile: schermo nel settore superiore, controlli nel settore
-        // inferiore. Scala a ottavi: quasi piena larghezza e pixel ancora netti.
+        // inferiore. Sopra 1x la scala resta SEMPRE intera: un pixel nativo non
+        // puo' diventare largo 2px in una colonna e 3px nella successiva.
         var gameHeight = touch && portrait ? viewport.height * 0.54 : viewport.height;
         var fit = Math.min(viewport.width / 160, gameHeight / 144);
-        var scale = touch
-          ? (portrait ? Math.max(0.5, Math.floor(fit * 8) / 8) : (fit >= 1 ? Math.max(1, Math.floor(fit)) : fit))
-          : (fit >= 1 ? Math.max(1, Math.floor(fit)) : fit);
+        var scale = fit >= 1 ? Math.max(1, Math.floor(fit)) : fit;
         var stageWidth = Math.floor(160 * scale);
         var stageHeight = Math.floor(144 * scale);
         stage.style.width = stageWidth + 'px';

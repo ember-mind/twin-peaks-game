@@ -27,7 +27,7 @@ const checks = {
   intro_header_uses_fitting_native_scale: /FEBBRAIO, 1989'[\s\S]*bold 8px monospace/.test(engine) &&
     /titleFits: titleWidth <= l\.boxW - 20/.test(engine),
   production_cache_busts_layout_fix: /js\/engine\.js\?v=gold54p4-case-doc1/.test(index) &&
-    /js\/main\.js\?v=gold53-layout1/.test(index),
+    /js\/main\.js\?v=gold54p5-mobile1/.test(index),
   css_stage_preserves_native_aspect: /aspect-ratio: 10 \/ 9/.test(index) &&
     /max-width: 100vw; max-height: 100dvh/.test(index),
   production_loads_retro_renderer: /js\/retro\.js/.test(index),
