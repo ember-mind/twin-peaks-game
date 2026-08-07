@@ -588,55 +588,57 @@
     return label;
   }
 
-  /* Ritratto Cooper authored direttamente sul well 34x36.
-   * Scanline del volto restringono fronte -> mascella: niente maschera quadra. */
+  /* Ritratto Cooper ricavato dall'immagine approvata, poi ridotto a 32x33 e
+   * cinque toni esatti. La matrice e' l'asset: nessun resize o filtro runtime. */
+  var COOPER_ART = [
+    '********************************',
+    '***********OooooooOO************',
+    '**********o....ooo..o***********',
+    '********O........ooo.oO*********',
+    '*******O.......o.....o.o********',
+    '*******.....o..........o********',
+    '******O................oo*******',
+    '******o......o...OOOo...o*******',
+    '******......O#**#####o..o*******',
+    '******.....o#########*..O*******',
+    '******.....o##########..O*******',
+    '******o....o##########oO********',
+    '******O....O##***###Oo.*********',
+    '******O....##OOOo*#OO*o*********',
+    '******OO*o.##*O.o*#oooo*********',
+    '******OoO*O####**##O##O*********',
+    '******O*OO#########*##O*********',
+    '*******o*O##########*#o*********',
+    '********o**######*OO**O*********',
+    '********O.o#######**#*O*********',
+    '*********oo*####*OO*#*O*********',
+    '*********OOO####****#O**********',
+    '*********OO#O####*O*#O**********',
+    '********OoO#*o*#####*O**********',
+    '********ooO##*oO####oO**********',
+    '******o..o#O*#*O....O.O*********',
+    '****Oo..oo*#*O**OOo**..oO*******',
+    '**o..o.ooo*##*OO*o*#*.o..o******',
+    'Oooooo.oooo####*.O##O.o..o..O***',
+    '.oooo..ooo.*###o..*#Oooo.oooooO*',
+    'ooooo..ooooo##*o..O#Oooo..oooo.O',
+    'oooooo..ooo.O***.o#Oooo..oooooo.',
+    'ooooo..oooo.**#*..*#Ooooo.ooooo.'
+  ];
+  var COOPER_CHAN = { '.':PAL.ink, 'o':PAL.deep, 'O':PAL.mid, '*':PAL.light, '#':PAL.paper };
+
   function drawCooperWell(ctx, x, y) {
-    R(ctx, x, y, 34, 36, PAL.light);
-    R(ctx, x + 1, y + 1, 32, 1, PAL.mid); R(ctx, x + 1, y + 2, 1, 33, PAL.mid);
-    /* Spalle, revers e cravatta asimmetrici. */
-    R(ctx, x + 3, y + 27, 28, 9, PAL.ink); R(ctx, x + 6, y + 25, 22, 11, PAL.deep);
-    R(ctx, x + 7, y + 26, 8, 10, PAL.ink); R(ctx, x + 20, y + 26, 8, 10, PAL.ink);
-    R(ctx, x + 13, y + 25, 4, 8, PAL.paper); R(ctx, x + 18, y + 25, 4, 8, PAL.paper);
-    R(ctx, x + 16, y + 27, 3, 9, PAL.ink); R(ctx, x + 15, y + 27, 5, 2, PAL.deep);
-    /* Capelli: onda e riga diagonale, tre valori. */
-    R(ctx, x + 16, y, 4, 1, PAL.ink); R(ctx, x + 13, y + 1, 7, 1, PAL.ink);
-    R(ctx, x + 9, y + 2, 11, 2, PAL.ink); R(ctx, x + 7, y + 4, 18, 3, PAL.ink);
-    R(ctx, x + 5, y + 7, 20, 4, PAL.ink);
-    R(ctx, x + 14, y + 1, 4, 1, PAL.deep); R(ctx, x + 8, y + 3, 7, 2, PAL.deep);
-    R(ctx, x + 16, y + 2, 4, 1, PAL.mid); R(ctx, x + 6, y + 6, 8, 2, PAL.deep);
-    R(ctx, x + 20, y + 4, 4, 2, PAL.mid); R(ctx, x + 23, y + 7, 2, 3, PAL.deep);
-    R(ctx, x + 20, y + 4, 5, 2, PAL.mid); R(ctx, x + 5, y + 8, 3, 7, PAL.deep);
-    /* Viso a scanline; lato lontano ombreggiato. */
-    var face = [[6,7,22],[6,8,23],[6,9,24],[7,10,23],[7,11,22],[7,12,22],
-                [8,13,20],[8,14,20],[8,15,19],[9,16,17],[9,17,16],
-                [10,18,14],[10,19,13],[11,20,11],[12,21,8]];
-    face.forEach(function (r) { R(ctx, x + r[0], y + r[1], r[2], 1, PAL.paper); });
-    /* Orecchio vicino, tempia e zigomo: tre-quarti leggibile senza targa. */
-    R(ctx, x + 7, y + 11, 2, 5, PAL.ink); R(ctx, x + 8, y + 12, 2, 3, PAL.mid);
-    R(ctx, x + 9, y + 13, 1, 1, PAL.paper);
-    R(ctx, x + 24, y + 8, 2, 4, PAL.deep);
-    R(ctx, x + 22, y + 10, 3, 6, PAL.mid); R(ctx, x + 21, y + 14, 3, 5, PAL.deep);
-    R(ctx, x + 20, y + 18, 3, 2, PAL.mid); R(ctx, x + 19, y + 20, 2, 2, PAL.deep);
-    R(ctx, x + 8, y + 11, 2, 6, PAL.light); R(ctx, x + 10, y + 17, 2, 2, PAL.mid);
-    /* Sopracciglia sottili e occhi sfalsati da tre-quarti. */
-    R(ctx, x + 10, y + 10, 4, 1, PAL.ink); R(ctx, x + 18, y + 9, 3, 1, PAL.ink);
-    R(ctx, x + 11, y + 12, 2, 1, PAL.ink); R(ctx, x + 19, y + 11, 1, 1, PAL.ink);
-    R(ctx, x + 12, y + 11, 1, 1, PAL.mid); R(ctx, x + 20, y + 10, 1, 1, PAL.light);
-    R(ctx, x + 10, y + 13, 3, 1, PAL.mid); R(ctx, x + 11, y + 15, 2, 2, PAL.mid);
-    /* Naso lungo, zigomo, bocca breve, mento. */
-    R(ctx, x + 16, y + 12, 1, 3, PAL.mid); R(ctx, x + 16, y + 15, 1, 1, PAL.mid);
-    R(ctx, x + 17, y + 16, 1, 1, PAL.mid); R(ctx, x + 15, y + 17, 2, 1, PAL.deep);
-    R(ctx, x + 21, y + 14, 2, 3, PAL.mid); R(ctx, x + 20, y + 17, 2, 1, PAL.light);
-    /* Profilo della mascella a gradini: evita guancia circolare. */
-    R(ctx, x + 20, y + 19, 1, 1, PAL.deep); R(ctx, x + 19, y + 20, 1, 1, PAL.ink);
-    R(ctx, x + 18, y + 21, 2, 1, PAL.deep); R(ctx, x + 17, y + 22, 2, 1, PAL.mid);
-    R(ctx, x + 12, y + 19, 4, 1, PAL.ink); R(ctx, x + 13, y + 20, 3, 1, PAL.mid);
-    R(ctx, x + 13, y + 22, 5, 1, PAL.deep); R(ctx, x + 12, y + 23, 8, 2, PAL.paper);
-    R(ctx, x + 13, y + 24, 9, 1, PAL.mid);
-    R(ctx, x + 11, y + 25, 12, 1, PAL.deep); R(ctx, x + 12, y + 26, 10, 1, PAL.paper);
-    /* Dither modellato: fronte e guancia, non rumore uniforme. */
-    R(ctx, x + 8, y + 9, 1, 1, PAL.light); R(ctx, x + 9, y + 11, 1, 1, PAL.mid);
-    R(ctx, x + 23, y + 12, 1, 1, PAL.deep); R(ctx, x + 21, y + 18, 1, 1, PAL.mid);
+    R(ctx, x, y, 34, 36, PAL.deep);
+    for (var row = 0; row < COOPER_ART.length; row++) {
+      var line = COOPER_ART[row], col = 0;
+      while (col < line.length) {
+        var ch = line.charAt(col), run = 1;
+        while (line.charAt(col + run) === ch) run++;
+        R(ctx, x + 1 + col, y + 1 + row, run, 1, COOPER_CHAN[ch]);
+        col += run;
+      }
+    }
+    R(ctx, x + 1, y + 34, 32, 1, PAL.ink);
   }
 
   function drawCard(ctx, key, name, x, y) {

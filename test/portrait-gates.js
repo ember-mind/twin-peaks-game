@@ -26,6 +26,16 @@ assert(ctx.rects.length >= 35, 'portrait lacks authored pixel detail');
 assert(ctx.rects.every(r => Number.isInteger(r[0]) && Number.isInteger(r[1])), 'subpixel portrait draw');
 assert.deepStrictEqual(Object.values(P.palette).sort(), ['#072619','#34572d','#6a8a43','#9aab69','#eee6b5'].sort());
 
+/* Cooper usa davvero asset generato e indicizzato: 32x33, cinque toni,
+ * nessun resize o drawImage asincrono nel frame di dialogo. */
+const portraitSource = fs.readFileSync(path.join(root, 'js/portraits.js'), 'utf8');
+const artBlock = /var COOPER_ART = \[([\s\S]*?)\n  \];/.exec(portraitSource);
+assert(artBlock, 'generated Cooper portrait matrix missing');
+const artRows = [...artBlock[1].matchAll(/'([.oO*#]+)'/g)].map(m => m[1]);
+assert.strictEqual(artRows.length, 33, 'Cooper portrait must be 33 rows');
+assert(artRows.every(row => row.length === 32), 'Cooper portrait rows must be 32 px');
+assert(fs.existsSync(path.join(root, 'assets/portraits/cooper-speaker-r1.png')), 'source portrait asset missing');
+
 /* Copertura reale, non conteggio config: ogni identità parlante dei due
  * dataset deve risolversi. Diario/taccuino sono documenti, non persone. */
 sandbox.global = sandbox.globalThis;
