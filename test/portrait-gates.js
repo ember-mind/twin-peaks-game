@@ -35,12 +35,24 @@ const artRows = [...artBlock[1].matchAll(/'([.oO*#]+)'/g)].map(m => m[1]);
 assert.strictEqual(artRows.length, 33, 'Cooper portrait must be 33 rows');
 assert(artRows.every(row => row.length === 32), 'Cooper portrait rows must be 32 px');
 assert(fs.existsSync(path.join(root, 'assets/portraits/cooper-speaker-r1.png')), 'source portrait asset missing');
-assert(fs.existsSync(path.join(root, 'assets/portraits/cooper-speaker-hires-r2.png')), 'hi-res compositor portrait missing');
+const hiresDir = path.join(root, 'assets', 'portraits', 'hires');
+const hiresFiles = fs.readdirSync(hiresDir).filter(file => file.endsWith('.png')).sort();
+assert.deepStrictEqual(hiresFiles, Object.keys(P.faces).sort().map(key => key + '.png'), 'hi-res cast does not match portrait resolver');
+for (const file of hiresFiles) {
+  const png = fs.readFileSync(path.join(hiresDir, file));
+  assert.strictEqual(png.readUInt32BE(16), 256, file + ' width must be 256');
+  assert.strictEqual(png.readUInt32BE(20), 264, file + ' height must be 264');
+}
 const indexSource = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const engineSource = fs.readFileSync(path.join(root, 'js/engine.js'), 'utf8');
-assert(/id="speaker-portrait-hires"[\s\S]*cooper-speaker-hires-r2\.png/.test(indexSource), 'hi-res portrait not mounted in stage');
+assert(/id="speaker-portrait-hires"[\s\S]*assets\/portraits\/hires\/cooper\.png/.test(indexSource), 'hi-res portrait not mounted in stage');
 assert(/left: 8\.125%;[\s\S]*top: 42\.361111%;[\s\S]*width: 20%;[\s\S]*height: 22\.916667%/.test(indexSource), 'hi-res portrait not aligned to native portrait well');
-assert(/key === 'cooper' && !r3d/.test(engineSource), 'hi-res portrait visibility not speaker-scoped');
+assert(/GAME\.Portraits\.faces\[key\]/.test(engineSource), 'hi-res portrait visibility not cast-scoped');
+assert(/assetRoot \+ nextKey \+ '\.png'/.test(engineSource), 'hi-res portrait source not switched with speaker');
+const progressSource = fs.readFileSync(path.join(root, 'portrait-progress.html'), 'utf8');
+assert(/STATO ATTUALE · CANVAS 32×33/.test(progressSource), 'comparison page lacks current-state column');
+assert(/PROGRESSO · IMAGEGEN 256×264/.test(progressSource), 'comparison page lacks progress column');
+assert.strictEqual([...progressSource.matchAll(/\['[a-z]+'\s*,\s*'[^']+'\]/g)].length, 25, 'comparison page must show full cast');
 
 /* Copertura reale, non conteggio config: ogni identità parlante dei due
  * dataset deve risolversi. Diario/taccuino sono documenti, non persone. */
@@ -68,4 +80,4 @@ for (const name of names) {
 const finaleSource = fs.readFileSync(path.join(root, 'js/narrative-finale.js'), 'utf8');
 assert(/raw\[i\]\.display_name, chunk\.join/.test(finaleSource), 'finale chunks lose speaker metadata');
 assert(!/combined\s*=\s*prefix\s*\+/.test(finaleSource), 'finale burns speaker into body copy');
-console.log('PORTRAIT-GOLD-PASS 9/9');
+console.log('PORTRAIT-CAST-PASS 25/25');

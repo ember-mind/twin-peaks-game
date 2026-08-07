@@ -265,3 +265,11 @@ Diagnosi da screenshot desktop: sorgente ImageGen 1254×1254 era stata ridotta a
 Correzione: asset indicizzato `256×264`, sei toni, sovrapposto esclusivamente al pozzo interno del ritratto. Coordinate native `(13,61)`, area `32×33`; cornice, targa, testo e mondo restano nel framebuffer GBC `160×144`. Visibilità legata a speaker risolto `cooper`; fuori dialogo o con altro speaker l'overlay è nascosto. Nessuna mutazione DOM ripetuta a ogni frame.
 
 Prove: `r71-cooper-hires-desktop.png` a `1280×1152` e `r71-cooper-hires-mobile.png` a `390×844`; portrait `9/9`, reference `23/23`, production `45/45`, mobile `19/19`, touch `13/13`, smoke `366`, walkthrough `86`. Pagina `progress.html` aggiornata con confronto R70/R71.
+
+## R72 — Cast parlante completo (2026-08-07)
+
+Estesa soluzione R71 a tutte le 25 identità risolte dal motore. Ogni volto nasce da chiamata ImageGen separata con Cooper come sola reference di stile/framing; niente sprite sheet e niente palette swap. Performer e ancore fisionomiche sono registrati in `assets/portraits/hires/README.md`.
+
+Runtime: `assets/portraits/hires/<key>.png`, `256×264`, massimo sei toni. Cambio sorgente segue `GAME.Portraits.resolve`; immagine viene nascosta durante caricamento e canvas procedurale resta fallback. Verifiche visive in dialogo: Truman, Audrey, BOB, Laura; mobile Audrey `390×844`. Pagina condivisibile `portrait-progress.html`: vecchio canvas a sinistra, asset R72 a destra, 25 schede complete.
+
+Gate: portrait cast `25/25`, reference `23/23`, production `45/45`, mobile `19/19`, touch `13/13`. Browser confronto: 25/25 asset `256×264`, zero overflow desktop/mobile, zero warning/error.

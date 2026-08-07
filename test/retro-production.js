@@ -26,7 +26,7 @@ const checks = {
     /canvas\.height !== VH/.test(engine) && /UW = VW;/.test(engine),
   intro_header_uses_fitting_native_scale: /FEBBRAIO, 1989'[\s\S]*bold 8px monospace/.test(engine) &&
     /titleFits: titleWidth <= l\.boxW - 20/.test(engine),
-  production_cache_busts_layout_fix: /js\/engine\.js\?v=r71face2/.test(index) &&
+  production_cache_busts_layout_fix: /js\/engine\.js\?v=r72cast1/.test(index) &&
     /js\/main\.js\?v=gold54p5-mobile1/.test(index),
   css_stage_preserves_native_aspect: /aspect-ratio: 10 \/ 9/.test(index) &&
     /max-width: 100vw; max-height: 100dvh/.test(index),

@@ -12,7 +12,7 @@
 </style>
 </head>
 <body>
-<div id="stage"><canvas id="game" width="160" height="144"></canvas><img id="speaker-portrait-hires" src="../assets/portraits/cooper-speaker-hires-r2.png" alt="" aria-hidden="true" hidden></div>
+<div id="stage"><canvas id="game" width="160" height="144"></canvas><img id="speaker-portrait-hires" src="../assets/portraits/hires/cooper.png" data-portrait-root="../assets/portraits/hires/" alt="" aria-hidden="true" hidden></div>
 <script src="../js/tiles.js?v=r60i2"></script>
 <script src="../js/chars.js"></script>
 <script src="../js/houses.js"></script>
@@ -21,7 +21,7 @@
 <script src="../js/retro-font.js?v=gold46"></script>
 <script src="../js/portraits.js?v=r70face1"></script>
 <script src="../js/gold-tone.js?v=r69i13"></script>
-<script src="../js/engine.js?v=r71face2"></script>
+<script src="../js/engine.js?v=r72cast1"></script>
 <script src="../js/glue.js?v=gold48"></script>
 <script src="../js/retro.js?v=r60i2"></script>
 <script src="../js/retro-authored.js?v=r69i13"></script>
@@ -62,9 +62,10 @@
     GAME.Engine.state.flags.intro_town = true;
     GAME.Engine.loadMap(map, x, y, dir);
     if (q.get('dialogue') === '1') {
+      var speaker = q.get('speaker') || 'COOPER';
       GAME.Engine.state.dialogue = {
         id: 'visual-audit', def: { pages: [] }, replay: true, i: 0,
-        pages: [{ name: 'COOPER', text: 'Harry. Ho sognato una stanza rossa.' }]
+        pages: [{ name: speaker, text: 'Harry. Ho sognato una stanza rossa.' }]
       };
     }
     /* Non dichiarare READY prima che almeno alcuni rAF abbiano dipinto la

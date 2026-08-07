@@ -1426,12 +1426,23 @@
     var key = page && GAME.Portraits
       ? GAME.Portraits.resolve(page.name, page.portrait)
       : '';
-    var visible = key === 'cooper' && !r3d;
+    var visible = !!(key && GAME.Portraits && GAME.Portraits.faces[key] && !r3d);
     var nextKey = visible ? key : '';
     if (speakerPortraitKey === nextKey) return;
     speakerPortraitKey = nextKey;
-    image.hidden = !visible;
+    image.hidden = true;
     image.setAttribute('data-speaker', nextKey);
+    if (!visible) return;
+    var assetRoot = image.getAttribute('data-portrait-root') || 'assets/portraits/hires/';
+    var nextSrc = assetRoot + nextKey + '.png';
+    image.onload = function () {
+      if (speakerPortraitKey === nextKey) image.hidden = false;
+    };
+    image.onerror = function () {
+      if (speakerPortraitKey === nextKey) image.hidden = true;
+    };
+    if (image.getAttribute('src') !== nextSrc) image.setAttribute('src', nextSrc);
+    if (image.complete && image.naturalWidth > 0) image.hidden = false;
   }
 
   function render(dt) {
