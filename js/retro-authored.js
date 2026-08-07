@@ -10,6 +10,16 @@
   var Spr = GAME.Sprites;
   var oldTile = Spr.drawTile;
   var CHARS = Spr.CHARS || {};
+  var COOPER_SHEET_SRC = '/assets/sprites/cooper-walkcycle-16.png?v=r75cooper1';
+  var cooperWalkSheet = null;
+
+  /* Atlas 3x3 derivato dal master approvato: righe fronte/spalle/destra,
+   * colonne fermo/passo A/passo B. Il renderer conserva lo sprite authored
+   * precedente finche' il PNG non e' pronto, quindi nessun frame vuoto. */
+  if (typeof G.Image === 'function') {
+    cooperWalkSheet = new G.Image();
+    cooperWalkSheet.src = COOPER_SHEET_SRC;
+  }
 
   var C = {
     ink: '#202820', dark: '#385840', mid: '#689848', grass: '#a8d068', hi: '#e0e8a0',
@@ -2564,8 +2574,28 @@
     return 0;
   }
 
+  function drawCooperWalkSheet(ctx, x, y, dir, frame, alpha, moving) {
+    if (!cooperWalkSheet || !cooperWalkSheet.complete || cooperWalkSheet.naturalWidth !== 48 || cooperWalkSheet.naturalHeight !== 48 || !ctx.drawImage) return false;
+    var row = dir === 'up' ? 1 : (dir === 'left' || dir === 'right' ? 2 : 0);
+    var col = moving ? ((frame & 1) ? 2 : 1) : 0;
+    var ox = Math.round(x), oy = Math.round(y);
+    ctx.save();
+    ctx.globalAlpha *= alpha == null ? 1 : alpha;
+    ctx.imageSmoothingEnabled = false;
+    if (dir === 'left') {
+      ctx.translate(ox + 16, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(cooperWalkSheet, col * 16, row * 16, 16, 16, 0, oy, 16, 16);
+    } else {
+      ctx.drawImage(cooperWalkSheet, col * 16, row * 16, 16, 16, ox, oy, 16, 16);
+    }
+    ctx.restore();
+    return true;
+  }
+
   Spr.drawChar = function (ctx, x, y, pal, dir, frame, alpha, moving, night) {
     var p = pal || CHARS.cooper;
+    if (p === CHARS.cooper && drawCooperWalkSheet(ctx, x, y, dir, frame, alpha, moving)) return;
     var flip = dir === 'left';
     var step = moving ? ((frame & 1) ? -1 : 1) : 0;
     /* Cooper visto di spalle nella hero scene: 10x15, masse continue.
@@ -2603,6 +2633,13 @@
   };
 
   GAME.Retro2D = GAME.Retro2D || {};
+  GAME.Retro2D.cooperWalkSheet = {
+    src: COOPER_SHEET_SRC,
+    frame: [16, 16],
+    rows: ['down', 'up', 'right'],
+    columns: ['idle', 'stepA', 'stepB'],
+    mirrorsLeft: true
+  };
 
   function rgbDistance(a, b) {
     var dr = a[0] - b[0], dg = a[1] - b[1], db = a[2] - b[2];

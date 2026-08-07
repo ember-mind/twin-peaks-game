@@ -13,7 +13,7 @@
 <body>
 <main class="wrap">
   <header class="top">
-    <div><div class="eyebrow">Twin Peaks · Retro 2D · R74</div><h1>Gauntlet visivo</h1></div>
+    <div><div class="eyebrow">Twin Peaks · Retro 2D · R75</div><h1>Gauntlet visivo</h1></div>
     <a class="play" href="./">Gioca ora →</a>
   </header>
 
@@ -21,6 +21,18 @@
     <article class="score pass"><strong>95,5</strong><span>Critico integrato · HARD PASS</span></article>
     <article class="score pass"><strong>95,3</strong><span>UI + mobile · HARD PASS</span></article>
     <article class="score"><strong>93,0</strong><span>World art · READY, zero blocker</span></article>
+  </section>
+
+  <section class="section">
+    <h2>R75 · Cooper generato, ora giocabile</h2>
+    <div class="compare">
+      <figure class="shot"><img src="artifacts/retro-gauntlet/r75-cooper-atlas-preview.png" alt="Atlas di Cooper con nove frame"><figcaption>Asset runtime · fronte, spalle, profilo; fermo e due passi</figcaption></figure>
+      <figure class="shot"><img src="artifacts/retro-gauntlet/r75-cooper-in-game-desktop.png" alt="Cooper animato nella scena di arrivo"><figcaption>Nel gioco · profilo destro durante cammino, viewport desktop 1280×1152</figcaption></figure>
+    </div>
+    <div class="compare" style="margin-top:14px">
+      <figure class="shot"><img src="artifacts/retro-gauntlet/r75-cooper-in-game-mobile.png" alt="Cooper nella scena di arrivo su mobile"><figcaption>Mobile · viewport reale 390×844, pixel interi 2×</figcaption></figure>
+      <article class="chart"><strong>Pipeline approvata</strong><p>Master R2 con giacca FBI, camicia e cravatta → nove celle 16×16 → sei toni + trasparenza. Destra e sinistra condividono il profilo tramite specchio. Se PNG non è pronto, renderer precedente resta fallback: nessun frame vuoto.</p></article>
+    </div>
   </section>
 
   <section class="section">
@@ -85,7 +97,7 @@
   <section class="section">
     <h2>Gate automatici correnti</h2>
     <div class="tests">
-      <div class="test"><b>23/23</b>reference</div><div class="test"><b>47/47</b>production</div>
+      <div class="test"><b>23/23</b>reference</div><div class="test"><b>48/48</b>production</div>
       <div class="test"><b>19/19</b>mobile</div><div class="test"><b>13/13</b>touch</div>
       <div class="test"><b>366</b>smoke</div><div class="test"><b>86</b>walkthrough</div>
       <div class="test"><b>9/9</b>portrait</div><div class="test"><b>9/9</b>palette</div>
@@ -97,7 +109,7 @@
     <div class="method"><div>Build reale e cattura lossless.</div><div>Critici ricevono reference e frame, senza difesa autore.</div><div>Un gap osservabile per giro; correzione mirata.</div><div>Suite completa prima del deploy.</div></div>
   </section>
 
-  <footer class="foot">Aggiornato 7 agosto 2026. Canvas 160×144, sei toni, pixel interi; 25 ritratti speaker 256×264 e dialoghi ad alta risoluzione con griglia R74. Godot/Blender esclusi: migrazione non aumentava fedeltà raster né compatibilità mobile.</footer>
+  <footer class="foot">Aggiornato 7 agosto 2026. Canvas 160×144, sei toni, pixel interi; Cooper R75 usa atlas animato 48×48. 25 ritratti speaker 256×264 e dialoghi ad alta risoluzione con griglia R74. Godot/Blender esclusi: migrazione non aumentava fedeltà raster né compatibilità mobile.</footer>
 </main>
 </body>
 </html>

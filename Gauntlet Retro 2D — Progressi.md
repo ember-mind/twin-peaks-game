@@ -287,3 +287,9 @@ Diagnosi geometrica sul frame R73: targhetta fino a `y=104`, prima riga a `y=106
 Nuova griglia: testo a `x=11`, allineato alla targhetta; prima riga `y=111`, sette pixel sotto la card; seconda riga `y=122`, cadenza ridotta da 16 a 11 pixel. `RetroFont.balanceFixedPair` sceglie una divisione fra parole con lunghezze visive più vicine, senza superare 24 caratteri né alterare copy o punteggiatura. Canvas fallback e overlay DOM usano stessa coppia di righe.
 
 Audit browser completo ora misura ogni pagina realmente paginata: `1.480` righe/targhe, `0` overflow. Prove: `r74-dialogue-spacing-desktop.png` a `1280×1152` (`8×`) e `r74-dialogue-spacing-mobile.png` a `390×844` (`2×`); zero overflow viewport. Production `47/47`.
+
+## R75 — Cooper generato nel gioco (2026-08-07)
+
+Integrato il master approvato con giacca FBI, camicia e cravatta come personaggio controllabile. Pipeline deterministica: griglia sorgente 3×3, ritaglio delle nove pose, riduzione nearest-neighbor in celle native `16×16`, rimappatura sui sei toni canonici e trasparenza. Atlas finale `48×48`: righe fronte/spalle/destra; colonne fermo/passo A/passo B; sinistra specchiata dal profilo destro.
+
+Il renderer usa il PNG soltanto dopo caricamento completo e mantiene Cooper procedurale come fallback, evitando frame vuoti. Prove browser reali: fermo frontale, passo laterale, desktop `1280×1152`, mobile `390×844`, zero warning/error. Gate: Cooper sheet `7/7`, production `48/48`, reference `23/23`, mobile `19/19`, movimento `9/9`, smoke completo `366`.

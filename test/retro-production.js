@@ -18,6 +18,7 @@ const engine = fs.readFileSync(path.join(root, 'js', 'engine.js'), 'utf8');
 const retroFont = fs.readFileSync(path.join(root, 'js', 'retro-font.js'), 'utf8');
 const portraits = fs.readFileSync(path.join(root, 'js', 'portraits.js'), 'utf8');
 const goldTone = fs.readFileSync(path.join(root, 'js', 'gold-tone.js'), 'utf8');
+const cooperSheet = fs.readFileSync(path.join(root, 'assets', 'sprites', 'cooper-walkcycle-16.png'));
 
 const checks = {
   gold_native_resolution_160x144: /width="160" height="144"/.test(index) &&
@@ -41,6 +42,10 @@ const checks = {
   production_uses_approved_master_palette: /js\/gold-tone\.js/.test(index) &&
     /GAME\.GoldTone\.apply/.test(engine) && /#072619/.test(goldTone) && /#eee6b5/i.test(goldTone),
   production_loads_authored_tileset: /js\/retro-authored\.js/.test(index),
+  production_loads_generated_cooper_walkcycle: /retro-authored\.js\?v=r75cooper1/.test(index) &&
+    /cooper-walkcycle-16\.png\?v=r75cooper1/.test(authored) &&
+    /drawCooperWalkSheet/.test(authored) && /dir === 'left'/.test(authored) &&
+    cooperSheet.readUInt32BE(16) === 48 && cooperSheet.readUInt32BE(20) === 48,
   production_does_not_load_three: !/three\.min\.js/.test(index) && !/render3d\.js/.test(index),
   engine_boots_without_webgl: /GAME\.Engine\.init\(cv, null\)/.test(main),
   fixed_pixel_scaling: /image-rendering: pixelated !important/.test(index),
