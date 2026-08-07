@@ -257,3 +257,11 @@ Risultato implementato:
 Progressione blind review integrata: `67,5 → 69,1 → 75 → 83,2 grezzo → 87,8 → 90,5 → 91,3 → 93,4 → 95,4 → 95,5 HARD PASS`; gauntlet UI/mobile: `81 → 86 → 89 → 92 → 94 → 95,1 → 95,3 HARD PASS`. World specialistico: `61 → 72 → 76 → 82 → 85 → 88 → 87 → 91 → 93`, dichiarato shipping-ready senza blocker materiali. Forest gate: corridoio finale 23 px, almeno sei varianti, overlap, tre piani e rami authored. Report completi: `artifacts/r69-critique-round1..10.md`, `artifacts/r69-ui-mobile-round1..10.md`, `artifacts/retro-gauntlet/r69-world-round2..10.md`.
 
 Validazione finale: `R69 23/23`, portrait `9/9`, gold-tone `9/9`, sprite semanticamente senza `NO`, retro production `45/45`, mobile `19/19`, touch `13/13`, movement `9/9`, town `85/85`, smoke `366`, walkthrough completo `86`, validatori narrativi M4–M10 verdi. Capture finale SHA-256 `240e2343891552c2e77fbfc3dd2130b646338d940a553eb78ee4a616b1a8bbb7`. Pagina condivisibile: `progress.html`.
+
+## R71 — Ritratto Cooper ad alta risoluzione (2026-08-07)
+
+Diagnosi da screenshot desktop: sorgente ImageGen 1254×1254 era stata ridotta a matrice 32×33 e poi ingrandita 8× col canvas. I grandi blocchi erano perdita irreversibile, non problema di CSS.
+
+Correzione: asset indicizzato `256×264`, sei toni, sovrapposto esclusivamente al pozzo interno del ritratto. Coordinate native `(13,61)`, area `32×33`; cornice, targa, testo e mondo restano nel framebuffer GBC `160×144`. Visibilità legata a speaker risolto `cooper`; fuori dialogo o con altro speaker l'overlay è nascosto. Nessuna mutazione DOM ripetuta a ogni frame.
+
+Prove: `r71-cooper-hires-desktop.png` a `1280×1152` e `r71-cooper-hires-mobile.png` a `390×844`; portrait `9/9`, reference `23/23`, production `45/45`, mobile `19/19`, touch `13/13`, smoke `366`, walkthrough `86`. Pagina `progress.html` aggiornata con confronto R70/R71.

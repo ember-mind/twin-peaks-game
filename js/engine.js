@@ -12,6 +12,7 @@
   var canvas, ctx, S;
   var last = 0, tGlobal = 0;
   var uiLayoutMode = '';
+  var speakerPortraitKey = null;
   var caseUiSignature = '';
   var dialogueLiveSignature = '';
   var TILE = 16, VW = 160, VH = 144; // viewport GBC: 10x9 metatile
@@ -1415,6 +1416,24 @@
     copy.textContent = String(page.text || '').replace(/§/g, String(S.clues.length));
   }
 
+  function syncSpeakerPortrait() {
+    if (typeof document === 'undefined' || typeof document.getElementById !== 'function') return;
+    var image = document.getElementById('speaker-portrait-hires');
+    if (!image) return;
+    var page = S.mode === 'play' && S.dialogue
+      ? (S.dialogue.pages[S.dialogue.i] || {})
+      : null;
+    var key = page && GAME.Portraits
+      ? GAME.Portraits.resolve(page.name, page.portrait)
+      : '';
+    var visible = key === 'cooper' && !r3d;
+    var nextKey = visible ? key : '';
+    if (speakerPortraitKey === nextKey) return;
+    speakerPortraitKey = nextKey;
+    image.hidden = !visible;
+    image.setAttribute('data-speaker', nextKey);
+  }
+
   function render(dt) {
     /* Schermata finale ha un solo proprietario. Overlay narrativa viene
      * svuotato/nascosto prima del primo drawEnd, evitando frame compositi. */
@@ -1439,6 +1458,7 @@
     }
     syncCinematicUi();
     syncDialogueUi();
+    syncSpeakerPortrait();
     var caseUiActive = syncCaseUi();
     if (S.mode === 'title') { drawTitle(); return; }
     if (S.mode === 'intro') { drawIntro(); return; }

@@ -13,7 +13,7 @@
 <body>
 <main class="wrap">
   <header class="top">
-    <div><div class="eyebrow">Twin Peaks · Retro 2D · R69</div><h1>Gauntlet visivo</h1></div>
+    <div><div class="eyebrow">Twin Peaks · Retro 2D · R71</div><h1>Gauntlet visivo</h1></div>
     <a class="play" href="./">Gioca ora →</a>
   </header>
 
@@ -21,6 +21,18 @@
     <article class="score pass"><strong>95,5</strong><span>Critico integrato · HARD PASS</span></article>
     <article class="score pass"><strong>95,3</strong><span>UI + mobile · HARD PASS</span></article>
     <article class="score"><strong>93,0</strong><span>World art · READY, zero blocker</span></article>
+  </section>
+
+  <section class="section">
+    <h2>R71 · Ritratto Cooper su desktop</h2>
+    <div class="compare">
+      <figure class="shot"><img src="artifacts/retro-gauntlet/r70-cooper-face-5x.png" alt="Ritratto precedente incorporato nel canvas"><figcaption>Prima · volto 32×33 incorporato nel canvas e ingrandito</figcaption></figure>
+      <figure class="shot"><img src="artifacts/retro-gauntlet/r71-cooper-hires-desktop.png" alt="Ritratto ad alta risoluzione su desktop"><figcaption>Dopo · asset 256×264 nel pozzo ritratto, viewport 1280×1152</figcaption></figure>
+    </div>
+    <div class="compare" style="margin-top:14px">
+      <figure class="shot"><img src="artifacts/retro-gauntlet/r71-cooper-hires-mobile.png" alt="Ritratto ad alta risoluzione su mobile"><figcaption>Mobile · viewport reale 390×844, allineamento percentuale</figcaption></figure>
+      <article class="chart"><strong>Decisione tecnica</strong><p>Mondo, box, cornice e nome restano nel framebuffer Game Boy 160×144. Solo interno del ritratto usa asset indicizzato ad alta risoluzione. Dettaglio preservato su desktop; posizione e proporzioni restano stabili su mobile.</p></article>
+    </div>
   </section>
 
   <section class="section">
@@ -62,7 +74,7 @@
     <div class="method"><div>Build reale e cattura lossless.</div><div>Critici ricevono reference e frame, senza difesa autore.</div><div>Un gap osservabile per giro; correzione mirata.</div><div>Suite completa prima del deploy.</div></div>
   </section>
 
-  <footer class="foot">Aggiornato 6 agosto 2026. Canvas 160×144, sei toni, pixel interi. Godot/Blender esclusi da questa passata: migrazione non aumentava fedeltà raster né compatibilità mobile.</footer>
+  <footer class="foot">Aggiornato 7 agosto 2026. Canvas 160×144, sei toni, pixel interi; ritratto speaker 256×264 sul compositor. Godot/Blender esclusi da questa passata: migrazione non aumentava fedeltà raster né compatibilità mobile.</footer>
 </main>
 </body>
 </html>

@@ -279,6 +279,22 @@
     image-rendering: pixelated !important;
     image-rendering: crisp-edges !important;
   }
+  /* Volto Cooper conserva risoluzione ImageGen sul compositor. Il mondo e la
+     cornice restano nel framebuffer GBC 160x144. Coordinate del pozzo: 32x33
+     pixel nativi, da (13,61). */
+  #speaker-portrait-hires {
+    position: absolute;
+    z-index: 8;
+    left: 8.125%;
+    top: 42.361111%;
+    width: 20%;
+    height: 22.916667%;
+    display: block;
+    object-fit: fill;
+    image-rendering: auto;
+    pointer-events: none;
+  }
+  #speaker-portrait-hires[hidden] { display: none; }
   #presentation, #gl, #grade, #vignette, #grain,
   #cinematic-ui, #dialogue-ui { display: none !important; }
   #narrative {
@@ -424,6 +440,7 @@
   <div id="vignette"></div>
   <div id="grain"></div>
   <canvas id="game" width="160" height="144"></canvas>
+  <img id="speaker-portrait-hires" src="assets/portraits/cooper-speaker-hires-r2.png" alt="" aria-hidden="true" hidden>
   <section id="cinematic-ui" aria-live="polite">
     <div id="cinematic-kicker"></div>
     <h1 id="cinematic-title"></h1>
@@ -465,7 +482,7 @@
 <script src="js/retro-font.js?v=gold46"></script>
 <script src="js/portraits.js?v=r70face1"></script>
 <script src="js/gold-tone.js?v=r69i13"></script>
-<script src="js/engine.js?v=r69i13"></script>
+<script src="js/engine.js?v=r71face2"></script>
 <script src="js/glue.js?v=gold49n3"></script>
 <script src="js/retro.js?v=r60i2"></script>
 <script src="js/retro-authored.js?v=r69i13"></script>

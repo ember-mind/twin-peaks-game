@@ -35,6 +35,12 @@ const artRows = [...artBlock[1].matchAll(/'([.oO*#]+)'/g)].map(m => m[1]);
 assert.strictEqual(artRows.length, 33, 'Cooper portrait must be 33 rows');
 assert(artRows.every(row => row.length === 32), 'Cooper portrait rows must be 32 px');
 assert(fs.existsSync(path.join(root, 'assets/portraits/cooper-speaker-r1.png')), 'source portrait asset missing');
+assert(fs.existsSync(path.join(root, 'assets/portraits/cooper-speaker-hires-r2.png')), 'hi-res compositor portrait missing');
+const indexSource = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const engineSource = fs.readFileSync(path.join(root, 'js/engine.js'), 'utf8');
+assert(/id="speaker-portrait-hires"[\s\S]*cooper-speaker-hires-r2\.png/.test(indexSource), 'hi-res portrait not mounted in stage');
+assert(/left: 8\.125%;[\s\S]*top: 42\.361111%;[\s\S]*width: 20%;[\s\S]*height: 22\.916667%/.test(indexSource), 'hi-res portrait not aligned to native portrait well');
+assert(/key === 'cooper' && !r3d/.test(engineSource), 'hi-res portrait visibility not speaker-scoped');
 
 /* Copertura reale, non conteggio config: ogni identità parlante dei due
  * dataset deve risolversi. Diario/taccuino sono documenti, non persone. */
