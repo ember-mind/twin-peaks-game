@@ -293,3 +293,11 @@ Audit browser completo ora misura ogni pagina realmente paginata: `1.480` righe/
 Integrato il master approvato con giacca FBI, camicia e cravatta come personaggio controllabile. Pipeline deterministica: griglia sorgente 3×3, ritaglio delle nove pose, riduzione nearest-neighbor in celle native `16×16`, rimappatura sui sei toni canonici e trasparenza. Atlas finale `48×48`: righe fronte/spalle/destra; colonne fermo/passo A/passo B; sinistra specchiata dal profilo destro.
 
 Il renderer usa il PNG soltanto dopo caricamento completo e mantiene Cooper procedurale come fallback, evitando frame vuoti. Prove browser reali: fermo frontale, passo laterale, desktop `1280×1152`, mobile `390×844`, zero warning/error. Gate: Cooper sheet `7/7`, production `48/48`, reference `23/23`, mobile `19/19`, movimento `9/9`, smoke completo `366`.
+
+## R76 — Continuità radura-cittadina (2026-08-07)
+
+Diagnosi: `arrival` usava fondale authored crema, mentre `town` tornava a prato verde, strada a mattoni scuri e grandi marciapiedi. Inoltre uscita della radura depositava Cooper direttamente sulla carreggiata a `(28,31)`.
+
+Correzione sistemica: terreno, sentieri, strada, marciapiedi, ghiaia, recinti e sotto-alberi della cittadina condividono ora sei toni e grammatica R69. Nuovo ingresso `(30,33)`: margine boscoso calpestabile, dissolvenza verso terreno chiaro, nessun salto sull'asfalto. Coordinate delle otto porte storiche, NPC, oggetti, collisioni e rete narrativa restano invariate.
+
+Prove: transizione eseguita con input reale; catture ingresso, centro e mobile `390×844`; frame nativo `160×144` con esattamente i sei colori canonici; zero asset rotti. Gate town `87/87`, production `49/49`, reference `23/23`, smoke `366`.

@@ -16,6 +16,7 @@ require('../js/data.js');
 require('../js/glue.js');
 
 const sourceMap = GAME.maps.maps.town;
+const arrivalMap = GAME.maps.maps.arrival;
 const map = GAME.Maps.town;
 const rows = sourceMap.rows;
 const W = sourceMap.width;
@@ -56,6 +57,8 @@ function coordsWhere(chars) {
 ok(rows.length === 36 && rows.every((row) => row.length === 56), 'town reale resta 56x36 rettangolare');
 ok(!GAME.maps.SOLID.u, 'piazza u e calpestabile');
 ok(!GAME.maps.SOLID[':'], 'zebra est-ovest : e calpestabile');
+ok(arrivalMap.doors['4,8'].to === 'town' && arrivalMap.doors['4,8'].tx === 30 && arrivalMap.doors['4,8'].ty === 33 &&
+  !GAME.maps.SOLID[at(30, 33)], 'radura sbocca sul margine sud calpestabile, non sulla strada');
 
 const expectedDoors = ['9,6', '23,6', '42,6', '12,20', '42,20', '47,28', '55,14', '55,15'];
 ok(expectedDoors.every((k) => sourceMap.doors[k]), 'coordinate porte storiche invariate');
@@ -95,7 +98,7 @@ while (urbanRemaining.size) {
 ok(urban.length === 18 && urbanComponents.length === 1,
   'ghiaia limitata a corte civica 6x4 e ingresso visibile');
 
-const groundedProps = 'SLPBAHEq';
+const groundedProps = 'SLPBAHEqV';
 const props = coordsWhere(groundedProps);
 ok(props.every(([x, y]) => ['.', '=', 'u', 'p', 'r'].includes(sourceMap.ground[key(x, y)])), 'ogni prop urbano dichiara sottofondo');
 const compactBuildings = coordsWhere('0');
@@ -192,7 +195,8 @@ ok([[22, 24], [41, 43]].every(([x0, x1]) =>
   Array.from({ length: x1 - x0 + 1 }, (_, i) => x0 + i).every((x) =>
     [7, 8, 9, 10, 11, 12, 13].every((y) => at(x, y) === 'p'))),
   'approcci ospedale e Palmer larghi tre tile fino alla strada');
-ok([7, 8, 9].every((y) => Array.from({ length: 36 }, (_, i) => i + 8).every((x) => at(x, y) === 'p')),
+ok([7, 8, 9].every((y) => Array.from({ length: 36 }, (_, i) => i + 8).every((x) =>
+  at(x, y) === 'p' || sourceMap.ground[key(x, y)] === 'p')),
   'corsia nord 36x3 continua, con una vera riga interna senza bordi');
 ok([7, 8, 9].every((x) => [16, 17, 18, 19, 20, 21, 22, 23].every((y) => 'p='.includes(at(x, y)))) &&
    [21, 22, 23].every((y) => Array.from({ length: 7 }, (_, i) => i + 7).every((x) => 'p='.includes(at(x, y)))),
@@ -224,10 +228,13 @@ for (const [cx, cy, bx, by] of [
 
 const authored = fs.readFileSync(path.join(__dirname, '..', 'js', 'retro-authored.js'), 'utf8');
 ok(!/urbanCore/.test(authored), 'nessun cambio materiale tramite rettangolo di coordinate');
-ok(/case 'r': road\(/.test(authored) && /case 'u': gravel\(/.test(authored) && /case ':'/.test(authored),
+ok(/case 'r':[\s\S]{0,180}townRoad/.test(authored) && /case 'u':[\s\S]{0,180}townGravel/.test(authored) && /case ':'/.test(authored),
   'strada, zebra orientata e piazza hanno renderer distinti');
 ok(/function semanticCell/.test(authored) && /vertical && !horizontal/.test(authored), 'marciapiede usa autotile orizzontale verticale e giunzioni');
 ok(/function departmentStore/.test(authored) && /case '9': building/.test(authored), 'Horne\'s usa storefront authored dedicato');
 ok(/'0': \['#713943'/.test(authored) && /case '0': case '1'/.test(authored), 'bottega\/casa compatta ha renderer distinto');
+ok(/function townGround/.test(authored) && /function townPath/.test(authored) && /function townRoad/.test(authored) &&
+  /function townSidewalk/.test(authored) && /paleGround/.test(authored),
+  'town estende terreno crema R69 a prato, sentieri, strada, marciapiedi e sotto-alberi');
 
 console.log('\nTOWN-MAP-COHERENCE-PASS ' + passed + '/' + passed);

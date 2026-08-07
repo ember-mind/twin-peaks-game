@@ -475,11 +475,12 @@
     ctx.restore();
   };
 
-  function tree(ctx, x, y, tx, ty, rows, sycamore, night) {
+  function tree(ctx, x, y, tx, ty, rows, sycamore, night, paleGround) {
     /* Tile BG 2bpp credibile: un solo colore terreno + tre colori chioma.
      * Tronco condivide outline; niente seconda palette di erba sotto. */
-    R(ctx, x, y, 16, 16, night ? '#7770a8' : C.grass);
-    if (!night) {
+    if (paleGround) arrivalGround(ctx, x, y, tx, ty);
+    else R(ctx, x, y, 16, 16, night ? '#7770a8' : C.grass);
+    if (!night && !paleGround) {
       /* Stesso prato periodico delle tile d'erba vicine: senza questo il
        * fondo restava un verde piatto sotto/fra le chiome, ed essendo un
        * unico colore uniforme "combaciava" con se stesso a qualunque passo
@@ -607,8 +608,9 @@
     if (cell(rows, tx + 1, ty) !== 'w') { R(ctx, x + 14, y, 2, 16, C.ink); R(ctx, x + 13, y + 3, 1, 10, '#b09a6c'); }
   }
 
-  function fence(ctx, x, y, tx, ty, rows) {
-    grass(ctx, x, y, tx, ty, false, false, rows);
+  function fence(ctx, x, y, tx, ty, rows, paleGround) {
+    if (paleGround) townGround(ctx, x, y, tx, ty, rows);
+    else grass(ctx, x, y, tx, ty, false, false, rows);
     var horizontal = cell(rows, tx - 1, ty) === 'F' || cell(rows, tx + 1, ty) === 'F';
     if (horizontal) {
       R(ctx, x, y + 5, 16, 2, C.ink); R(ctx, x, y + 6, 16, 2, '#d6c484');
@@ -676,12 +678,66 @@
     groundShadow(ctx, x, y, tx, ty, rows);
   }
 
+  /* R76 — vocabolario della radura esteso alla cittadina. La topologia
+   * narrativa resta a tile, ma tutte le superfici usano la stessa carta
+   * crema e la stessa rampa della reference R69. Strada e marciapiede si
+   * distinguono per ritmo, non tramite grandi campi moderni verde/bianco. */
+  function townGround(ctx, x, y, tx, ty, rows) {
+    arrivalGround(ctx, x, y, tx, ty);
+    groundShadow(ctx, x, y, tx, ty, rows);
+  }
+
+  function townPath(ctx, x, y, tx, ty, rows) {
+    R(ctx, x, y, 16, 16, '#eee6b5');
+    var phase = hash(tx, ty, 0x76) & 3;
+    var px = [3, 9, 5, 11][phase], py = [5, 3, 11, 9][phase];
+    R(ctx, x + px, y + py, 3, 1, '#9aab69');
+    R(ctx, x + 13 - (phase & 1) * 3, y + 13 - ((phase >> 1) & 1) * 4, 1, 1, '#6a8a43');
+    if (cell(rows, tx - 1, ty) !== 'p') R(ctx, x, y + 2, 1, 12, '#9aab69');
+    if (cell(rows, tx + 1, ty) !== 'p') R(ctx, x + 15, y + 2, 1, 12, '#9aab69');
+    if (cell(rows, tx, ty - 1) !== 'p') R(ctx, x + 2, y, 12, 1, '#9aab69');
+    if (cell(rows, tx, ty + 1) !== 'p') R(ctx, x + 2, y + 15, 12, 1, '#9aab69');
+    groundShadow(ctx, x, y, tx, ty, rows);
+  }
+
+  function townRoad(ctx, x, y, tx, ty, rows) {
+    R(ctx, x, y, 16, 16, '#dcd9a9');
+    var yy, seam;
+    for (yy = 3; yy < 16; yy += 6) {
+      R(ctx, x, y + yy, 16, 1, '#9aab69');
+      seam = ((ty + (yy / 3 | 0)) & 1) ? 4 : 11;
+      R(ctx, x + seam, y + yy - 2, 1, 2, '#9aab69');
+    }
+    if (!roadCell(cell(rows, tx - 1, ty))) R(ctx, x, y, 1, 16, '#6a8a43');
+    if (!roadCell(cell(rows, tx + 1, ty))) R(ctx, x + 15, y, 1, 16, '#6a8a43');
+    if (!roadCell(cell(rows, tx, ty - 1))) R(ctx, x, y, 16, 1, '#6a8a43');
+    if (!roadCell(cell(rows, tx, ty + 1))) R(ctx, x, y + 15, 16, 1, '#6a8a43');
+  }
+
+  function townSidewalk(ctx, x, y, tx, ty, rows, opts) {
+    R(ctx, x, y, 16, 16, '#eee6b5');
+    var vertical = semanticCell(rows, tx, ty - 1, opts) === '=' || semanticCell(rows, tx, ty + 1, opts) === '=';
+    if (vertical) R(ctx, x, y + 7, 16, 1, '#9aab69');
+    else R(ctx, x + 7, y, 1, 16, '#9aab69');
+    R(ctx, x + 2 + ((tx + ty) & 1) * 10, y + 2, 2, 1, '#dcd9a9');
+    groundShadow(ctx, x, y, tx, ty, rows);
+  }
+
+  function townGravel(ctx, x, y, tx, ty, rows) {
+    townGround(ctx, x, y, tx, ty, rows);
+    var phase = hash(tx, ty, 0x77) & 7;
+    R(ctx, x + 2 + phase, y + 4, 1, 1, '#6a8a43');
+    R(ctx, x + 11 - (phase & 3), y + 9, 2, 1, '#9aab69');
+    R(ctx, x + 5, y + 13 - (phase & 1) * 2, 1, 1, '#6a8a43');
+  }
+
   function paintGroundSurface(ctx, ground, x, y, tx, ty, rows, opts) {
-    if (ground === 'u') gravel(ctx, x, y, tx, ty, rows);
-    else if (ground === '=') sidewalk(ctx, x, y, tx, ty, rows, opts);
-    else if (ground === 'p') path(ctx, x, y, tx, ty, rows);
-    else if (ground === 'r') road(ctx, x, y, tx, ty, rows);
-    else grass(ctx, x, y, tx, ty, false, false, rows);
+    var town = opts && opts.mapId === 'town';
+    if (ground === 'u') town ? townGravel(ctx, x, y, tx, ty, rows) : gravel(ctx, x, y, tx, ty, rows);
+    else if (ground === '=') town ? townSidewalk(ctx, x, y, tx, ty, rows, opts) : sidewalk(ctx, x, y, tx, ty, rows, opts);
+    else if (ground === 'p') town ? townPath(ctx, x, y, tx, ty, rows) : path(ctx, x, y, tx, ty, rows);
+    else if (ground === 'r') town ? townRoad(ctx, x, y, tx, ty, rows) : road(ctx, x, y, tx, ty, rows);
+    else town ? townGround(ctx, x, y, tx, ty, rows) : grass(ctx, x, y, tx, ty, false, false, rows);
   }
 
   /* Props urbani authored sul layer terreno esplicito. Forme strette e
@@ -730,6 +786,7 @@
    * solo il proprio rettangolo, quindi la scansione tile non cancella l'altra. */
   function parkedCar(ctx, x, y, tx, ty, rows, opts) {
     if (opts && opts.mapId === 'arrival') arrivalGround(ctx, x, y, tx, ty);
+    else if (opts && opts.mapId === 'town') townPath(ctx, x, y, tx, ty, rows);
     else path(ctx, x, y, tx, ty, rows);
     var right = cell(rows, tx - 1, ty) === 'V';
     if (!right) {
@@ -757,8 +814,9 @@
     }
   }
 
-  function bush(ctx, x, y, tx, ty, rows, night) {
-    R(ctx, x, y, 16, 16, night ? '#7770a8' : C.grass);
+  function bush(ctx, x, y, tx, ty, rows, night, paleGround) {
+    if (paleGround) arrivalGround(ctx, x, y, tx, ty);
+    else R(ctx, x, y, 16, 16, night ? '#7770a8' : C.grass);
     var edge = night ? '#172838' : C.ink;
     var body = night ? '#505888' : '#507848';
     var light = night ? '#8580b0' : '#88a858';
@@ -1383,38 +1441,53 @@
     }
     switch (ch) {
       case '.':
-        if (opts && opts.mapId === 'arrival') arrivalGround(ctx, x, y, tx, ty);
+        if (opts && (opts.mapId === 'arrival' || opts.mapId === 'town')) townGround(ctx, x, y, tx, ty, rows);
         else grass(ctx, x, y, tx, ty, false, false, rows);
         return;
       case 'g': grass(ctx, x, y, tx, ty, true, nightWoods, rows); return;
-      case ',': grass(ctx, x, y, tx, ty, false, false, rows); R(ctx, x + 3, y + 6, 2, 2, '#e8ddad'); R(ctx, x + 10, y + 11, 2, 2, '#bb5962'); return;
-      case 'T': tree(ctx, x, y, tx, ty, rows, false, nightWoods); return;
-      case 'Y': tree(ctx, x, y, tx, ty, rows, true, nightWoods); return;
-      case 'r': road(ctx, x, y, tx, ty, rows); return;
-      case 'u': gravel(ctx, x, y, tx, ty, rows); return;
+      case ',':
+        if (opts && opts.mapId === 'town') townGround(ctx, x, y, tx, ty, rows);
+        else grass(ctx, x, y, tx, ty, false, false, rows);
+        R(ctx, x + 3, y + 6, 2, 2, '#dcd9a9'); R(ctx, x + 10, y + 11, 2, 2, '#6a8a43'); return;
+      case 'T': tree(ctx, x, y, tx, ty, rows, false, nightWoods, opts && opts.mapId === 'town'); return;
+      case 'Y': tree(ctx, x, y, tx, ty, rows, true, nightWoods, opts && opts.mapId === 'town'); return;
+      case 'r':
+        if (opts && opts.mapId === 'town') townRoad(ctx, x, y, tx, ty, rows);
+        else road(ctx, x, y, tx, ty, rows);
+        return;
+      case 'u':
+        if (opts && opts.mapId === 'town') townGravel(ctx, x, y, tx, ty, rows);
+        else gravel(ctx, x, y, tx, ty, rows);
+        return;
       case 'p':
         if (nightWoods) {
           /* Cortile Lodge senza corsia verticale inventata: il target usa
            * terreno viola continuo. Collisioni e percorso restano invariati. */
           nightGround(ctx, x, y, tx, ty);
           groundShadow(ctx, x, y, tx, ty, rows);
-        } else path(ctx, x, y, tx, ty, rows);
+        } else if (opts && opts.mapId === 'town') townPath(ctx, x, y, tx, ty, rows);
+        else path(ctx, x, y, tx, ty, rows);
         return;
       case 'o': oilPool(ctx, x, y, tx, ty, rows); return;
-      case '=': sidewalk(ctx, x, y, tx, ty, rows, opts); return;
+      case '=':
+        if (opts && opts.mapId === 'town') townSidewalk(ctx, x, y, tx, ty, rows, opts);
+        else sidewalk(ctx, x, y, tx, ty, rows, opts);
+        return;
       case '-':
-        road(ctx, x, y, tx, ty, rows);
+        if (opts && opts.mapId === 'town') townRoad(ctx, x, y, tx, ty, rows);
+        else road(ctx, x, y, tx, ty, rows);
         R(ctx, x + 2, y, 3, 16, C.paper); R(ctx, x + 8, y, 3, 16, C.paper); R(ctx, x + 14, y, 2, 16, C.paper);
         return;
       case ':':
-        road(ctx, x, y, tx, ty, rows);
+        if (opts && opts.mapId === 'town') townRoad(ctx, x, y, tx, ty, rows);
+        else road(ctx, x, y, tx, ty, rows);
         R(ctx, x, y + 2, 16, 3, C.paper); R(ctx, x, y + 8, 16, 3, C.paper); R(ctx, x, y + 14, 16, 2, C.paper);
         return;
       case 'w': water(ctx, x, y, tx, ty, rows); return;
       case 'F':
         if (opts && opts.mapId === 'town' && tx >= 26 && tx <= 27 && ty >= 8 && ty <= 15) urbanRail(ctx, x, y);
         else if (opts && opts.mapId === 'town' && tx >= 26 && tx <= 30 && ty >= 16 && ty <= 17) urbanRailHorizontal(ctx, x, y, ty === 17);
-        else fence(ctx, x, y, tx, ty, rows);
+        else fence(ctx, x, y, tx, ty, rows, opts && opts.mapId === 'town');
         return;
       case 'q':
         if (nightWoods) {
@@ -1431,7 +1504,7 @@
         }
         return;
       case 'V': parkedCar(ctx, x, y, tx, ty, rows, opts); return;
-      case 'n': bush(ctx, x, y, tx, ty, rows, nightWoods); return;
+      case 'n': bush(ctx, x, y, tx, ty, rows, nightWoods, opts && opts.mapId === 'town'); return;
       case 'J': arrivalCabin(ctx, x, y, tx, ty, rows); return;
       case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': building(ctx, ch, x, y, tx, ty, rows); return;
       case 'D': door(ctx, x, y, tx, ty, rows); return;

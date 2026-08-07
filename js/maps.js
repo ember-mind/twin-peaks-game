@@ -45,7 +45,9 @@
         'TTTTpTTTTT'
       ],
       ground: { '4,1': '.', '6,3': '.', '7,3': '.' },
-      doors: { '4,8': { to: 'town', tx: 28, ty: 31, dir: 'up' } },
+      /* La radura continua nel margine sud della cittadina. Prima Cooper
+       * compariva direttamente sull'asfalto civico: salto visivo netto. */
+      doors: { '4,8': { to: 'town', tx: 30, ty: 33, dir: 'up' } },
       interact: {},
       onEnter: { dialogue: 'town_arrivo', once: 'intro_town' }
     },
