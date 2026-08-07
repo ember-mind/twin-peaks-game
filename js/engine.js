@@ -579,9 +579,11 @@
         var lines = RF.wrapChars(String(page.text || '').replace(/§/g, String(S.clues.length)), 24);
         if (!lines.length) lines = [''];
         for (var li = 0; li < lines.length; li += 2) {
+          var pair = lines.slice(li, li + 2);
+          if (RF.balanceFixedPair) pair = RF.balanceFixedPair(pair, 24);
           pages.push({
             name: page.name || '', portrait: page.portrait || '',
-            text: lines.slice(li, li + 2).join('\n')
+            text: pair.join('\n')
           });
         }
       });
@@ -1011,15 +1013,16 @@
     // Box e card non consumano righe: testo conserva due righe complete.
     var bw = Math.min(UW, 160);
     var bx = Math.floor((UW - bw) / 2);
-    /* Reference R69: mondo 95 px, box 49 px. La card termina a y=103;
-     * il testo parte a y=106, quindi volto e battuta non si toccano. */
+    /* Reference R69: mondo 95 px, box 49 px. Card termina a y=104;
+     * testo parte a y=111: sette pixel nativi di respiro dal ritratto. */
     var by = 95, bh = 49;
     if (Portraits) Portraits.frame(ctx, bx, by, bw, bh);
     else RF.frame(ctx, bx, by, bw, bh);
     var str = page.text.replace(/§/g, String(S.clues.length));
     var lines = RF.wrapFixed(str, bw - 16, 1);
+    if (RF.balanceFixedPair) lines = RF.balanceFixedPair(lines, 24);
     for (var i = 0; i < Math.min(2, lines.length); i++) {
-      RF.drawFixed(ctx, lines[i], bx + 8, by + 11 + i * 16, uiInk);
+      RF.drawFixed(ctx, lines[i], bx + 11, by + 16 + i * 11, uiInk);
     }
     ctx.fillStyle = uiInk;
     ctx.fillRect(bx + bw - 15, by + 39, 5, 1);
@@ -1465,6 +1468,7 @@
     var page = S.dialogue.pages[S.dialogue.i] || {};
     var raw = String(page.text || '').replace(/§/g, String(S.clues.length));
     var lines = RF.wrapFixed(raw, 144, 1);
+    if (RF.balanceFixedPair) lines = RF.balanceFixedPair(lines, 24);
     var key = GAME.Portraits ? GAME.Portraits.resolve(page.name, page.portrait) : '';
     var label = GAME.Portraits && GAME.Portraits.label
       ? GAME.Portraits.label(page.name, key, 36)

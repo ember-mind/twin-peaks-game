@@ -11,6 +11,9 @@ ok(/RF\.draw\(ctx/.test(engine)&&/RF\.draw\(ctx2/.test(ui),'motore e UI usano st
 ok(RF.clean('Harry')==='Harry'&&RF.FONT.a&&RF.FONT.z,'minuscole Gen II preservate e disegnabili');
 ok(RF.measure('iiii',1)<RF.measure('WWWW',1),'metriche bitmap proporzionali');
 ok(RF.measure('TWIN PEAKS',2)<=128,'titolo bitmap entra nella targa GBC');
+const balanced=RF.balanceFixedPair(RF.wrapChars('Harry. Ho sognato una stanza rossa.',24),24);
+ok(balanced.join('|')==='Harry. Ho sognato|una stanza rossa.','dialogo breve bilanciato su due righe');
+ok(balanced.every(line=>line.length<=24)&&balanced.join(' ')==='Harry. Ho sognato una stanza rossa.','bilanciamento conserva testo e capienza Gen II');
 const wrapped=GAME.Data.endText.flatMap(line=>RF.wrapChars(line,23));
 ok(wrapped.every(line=>line.length<=23),'epilogo massimo 23 caratteri per riga GBC');
 ok(Math.ceil(wrapped.length/5)>=2,'epilogo paginato massimo 5 righe');

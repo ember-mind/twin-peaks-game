@@ -11,9 +11,9 @@
   #speaker-portrait-hires[hidden] { display: none; }
   #speaker-name-hires, #speaker-dialogue-hires { position:absolute; z-index:3; color:#072619; background:#eee6b5; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-weight:700; overflow:hidden; pointer-events:none; }
   #speaker-name-hires { left:6.875%; top:67.361111%; width:22.5%; height:4.861111%; display:flex; align-items:center; justify-content:center; white-space:nowrap; font-size:calc(var(--native-scale, 1) * 4px); line-height:1; }
-  #speaker-dialogue-hires { left:5%; top:73.611111%; width:90%; height:16.666667%; font-size:calc(var(--native-scale, 1) * 6.4px); line-height:1; letter-spacing:calc(var(--native-scale, 1) * .08px); }
+  #speaker-dialogue-hires { left:6.875%; top:77.083333%; width:86.25%; height:12.5%; font-size:calc(var(--native-scale, 1) * 6.4px); line-height:1; letter-spacing:calc(var(--native-scale, 1) * .08px); }
   #speaker-dialogue-hires .speaker-line { position:absolute; left:0; width:100%; white-space:nowrap; }
-  #speaker-dialogue-hires .speaker-line:first-child { top:0; } #speaker-dialogue-hires .speaker-line:last-child { top:66.666667%; }
+  #speaker-dialogue-hires .speaker-line:first-child { top:0; } #speaker-dialogue-hires .speaker-line:last-child { top:61.111111%; }
   #speaker-name-hires[hidden], #speaker-dialogue-hires[hidden] { display:none; }
 </style>
 </head>
@@ -24,10 +24,10 @@
 <script src="../js/houses.js"></script>
 <script src="../js/maps.js?v=r69i13"></script>
 <script src="../js/data.js"></script>
-<script src="../js/retro-font.js?v=gold46"></script>
-<script src="../js/portraits.js?v=r73text1"></script>
+<script src="../js/retro-font.js?v=r74space1"></script>
+<script src="../js/portraits.js?v=r74space1"></script>
 <script src="../js/gold-tone.js?v=r69i13"></script>
-<script src="../js/engine.js?v=r73text1"></script>
+<script src="../js/engine.js?v=r74space1"></script>
 <script src="../js/glue.js?v=gold48"></script>
 <script src="../js/retro.js?v=r60i2"></script>
 <script src="../js/retro-authored.js?v=r69i13"></script>
@@ -73,19 +73,22 @@
       var def = GAME.Data.dialogues[id];
       var pages = (def.pages || []).concat(def.again && def.again.pages || []);
       pages.forEach(function (page) {
-        var lines = GAME.RetroFont.wrapFixed(String(page.text || ''), 144, 1);
-        probe.style.fontSize = (scale * 6.4) + 'px';
-        probe.style.letterSpacing = (scale * 0.08) + 'px';
-        lines.slice(0, 2).forEach(function (line) {
-          probe.textContent = line; measured++;
-          if (probe.getBoundingClientRect().width > 144 * scale) failures.push(id + ': ' + line);
-        });
-        var key = GAME.Portraits.resolve(page.name, page.portrait);
-        var label = GAME.Portraits.label(page.name, key, 36);
-        probe.style.fontSize = (scale * 4) + 'px';
-        probe.style.letterSpacing = 'normal';
-        probe.textContent = label; measured++;
-        if (probe.getBoundingClientRect().width > 36 * scale) failures.push(id + ': [' + label + ']');
+        var lines = GAME.RetroFont.wrapChars(String(page.text || ''), 24);
+        for (var li = 0; li < lines.length; li += 2) {
+          var pair = GAME.RetroFont.balanceFixedPair(lines.slice(li, li + 2), 24);
+          probe.style.fontSize = (scale * 6.4) + 'px';
+          probe.style.letterSpacing = (scale * 0.08) + 'px';
+          pair.forEach(function (line) {
+            probe.textContent = line; measured++;
+            if (probe.getBoundingClientRect().width > 138 * scale) failures.push(id + ': ' + line);
+          });
+          var key = GAME.Portraits.resolve(page.name, page.portrait);
+          var label = GAME.Portraits.label(page.name, key, 36);
+          probe.style.fontSize = (scale * 4) + 'px';
+          probe.style.letterSpacing = 'normal';
+          probe.textContent = label; measured++;
+          if (probe.getBoundingClientRect().width > 36 * scale) failures.push(id + ': [' + label + ']');
+        }
       });
     });
     probe.remove();

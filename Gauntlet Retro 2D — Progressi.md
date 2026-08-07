@@ -279,3 +279,11 @@ Gate: portrait cast `25/25`, reference `23/23`, production `45/45`, mobile `19/1
 Applicata al testo stessa separazione usata per i volti: canvas nativo conserva box, freccia e glifi fallback; due overlay DOM ad alta risoluzione coprono soltanto nome e due righe della battuta. Scala derivata dal fattore nativo calcolato da `main.js`, quindi desktop `8×` e mobile `2×` mantengono proporzioni identiche.
 
 Wrapping resta quello canonico di `RetroFont.wrapFixed(raw, 144, 1)`. Audit browser su tutte le pagine classiche: `762` righe/targhe misurate, `0` overflow. Prove: `r73-dialogue-clear-800.png`, desktop `1280×1152`, mobile `390×844`; nessuna copertura della freccia, nessun overflow viewport, zero warning/error. Production `46/46`, mobile `19/19`, touch `13/13`.
+
+## R74 — Spaziatura e bilanciamento dialoghi (2026-08-07)
+
+Diagnosi geometrica sul frame R73: targhetta fino a `y=104`, prima riga a `y=106`; solo due pixel nativi separavano volto e battuta. Inoltre wrapping greedy produceva spesso prima riga lunga e seconda corta.
+
+Nuova griglia: testo a `x=11`, allineato alla targhetta; prima riga `y=111`, sette pixel sotto la card; seconda riga `y=122`, cadenza ridotta da 16 a 11 pixel. `RetroFont.balanceFixedPair` sceglie una divisione fra parole con lunghezze visive più vicine, senza superare 24 caratteri né alterare copy o punteggiatura. Canvas fallback e overlay DOM usano stessa coppia di righe.
+
+Audit browser completo ora misura ogni pagina realmente paginata: `1.480` righe/targhe, `0` overflow. Prove: `r74-dialogue-spacing-desktop.png` a `1280×1152` (`8×`) e `r74-dialogue-spacing-mobile.png` a `390×844` (`2×`); zero overflow viewport. Production `47/47`.

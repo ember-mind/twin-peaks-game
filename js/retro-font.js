@@ -165,6 +165,24 @@
     return wrapChars(value, Math.max(1, Math.floor((maxWidth + scale) / (6 * scale))));
   }
 
+  /* Due righe con peso visivo simile. Mantiene parole, capienza Gen II e
+   * spezzature di parole molto lunghe gia' prodotte da wrapChars. */
+  function balanceFixedPair(value, chars) {
+    chars = Math.max(1, Math.floor(chars || 24));
+    var lines = (Array.isArray(value) ? value : wrapChars(value, chars)).slice(0, 2).map(clean);
+    if (lines.length !== 2 || !lines[0] || !lines[1]) return lines;
+    if (lines[0].indexOf(' ') < 0 && !/[.!?;:,'")\]]$/.test(lines[0])) return lines;
+    var words = (lines[0] + ' ' + lines[1]).replace(/\s+/g, ' ').trim().split(' ');
+    var best = null, bestScore = Infinity;
+    for (var i = 1; i < words.length; i++) {
+      var left = words.slice(0, i).join(' '), right = words.slice(i).join(' ');
+      if (left.length > chars || right.length > chars) continue;
+      var score = Math.abs(left.length - right.length) * 10 + (left.length < right.length ? 1 : 0);
+      if (score < bestScore) { best = [left, right]; bestScore = score; }
+    }
+    return best || lines;
+  }
+
   function wrapChars(value, chars) {
     chars = Math.max(1, Math.floor(chars));
     var paras = clean(value).split(/\n/), lines = [];
@@ -223,7 +241,8 @@
 
   GAME.RetroFont = {
     FONT: FONT, clean: clean, glyph: glyph, draw: draw, drawFixed: drawFixed, measure: measure,
-    wrapChars: wrapChars, wrapPixels: wrapPixels, wrapFixed: wrapFixed, fit: fit, frame: frame,
+    wrapChars: wrapChars, wrapPixels: wrapPixels, wrapFixed: wrapFixed,
+    balanceFixedPair: balanceFixedPair, fit: fit, frame: frame,
     palette: { ink:'#181818', dark:'#383838', mid:'#777777', grass:'#9abf5a', paper:'#fffdf0' }
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = GAME.RetroFont;

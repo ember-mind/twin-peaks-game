@@ -26,8 +26,8 @@ const checks = {
     /canvas\.height !== VH/.test(engine) && /UW = VW;/.test(engine),
   intro_header_uses_fitting_native_scale: /FEBBRAIO, 1989'[\s\S]*bold 8px monospace/.test(engine) &&
     /titleFits: titleWidth <= l\.boxW - 20/.test(engine),
-  production_cache_busts_layout_fix: /js\/engine\.js\?v=r73text1/.test(index) &&
-    /js\/main\.js\?v=r73text1/.test(index),
+  production_cache_busts_layout_fix: /js\/engine\.js\?v=r74space1/.test(index) &&
+    /js\/main\.js\?v=r74space1/.test(index) && /js\/retro-font\.js\?v=r74space1/.test(index),
   css_stage_preserves_native_aspect: /aspect-ratio: 10 \/ 9/.test(index) &&
     /max-width: 100vw; max-height: 100dvh/.test(index),
   production_loads_retro_renderer: /js\/retro\.js/.test(index),
@@ -102,6 +102,9 @@ const checks = {
   ,high_resolution_dialogue_typography: /id="speaker-name-hires"/.test(index) &&
     /id="speaker-dialogue-hires"/.test(index) && /function syncSpeakerTypography\(\)/.test(engine) &&
     /RF\.wrapFixed\(raw, 144, 1\)/.test(engine) && /--native-scale/.test(index)
+  ,dialogue_copy_has_breathing_room_and_balance: /top: 77\.083333%/.test(index) &&
+    /left: 6\.875%/.test(index) && /by \+ 16 \+ i \* 11/.test(engine) &&
+    /function balanceFixedPair\(/.test(retroFont) && /RF\.balanceFixedPair/.test(engine)
 };
 
 for (const [name, pass] of Object.entries(checks)) {
