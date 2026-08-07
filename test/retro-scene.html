@@ -9,19 +9,25 @@
   canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; }
   #speaker-portrait-hires { position: absolute; z-index: 2; left: 8.125%; top: 42.361111%; width: 20%; height: 22.916667%; object-fit: fill; image-rendering: auto; pointer-events: none; }
   #speaker-portrait-hires[hidden] { display: none; }
+  #speaker-name-hires, #speaker-dialogue-hires { position:absolute; z-index:3; color:#072619; background:#eee6b5; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-weight:700; overflow:hidden; pointer-events:none; }
+  #speaker-name-hires { left:6.875%; top:67.361111%; width:22.5%; height:4.861111%; display:flex; align-items:center; justify-content:center; white-space:nowrap; font-size:calc(var(--native-scale, 1) * 4px); line-height:1; }
+  #speaker-dialogue-hires { left:5%; top:73.611111%; width:90%; height:16.666667%; font-size:calc(var(--native-scale, 1) * 6.4px); line-height:1; letter-spacing:calc(var(--native-scale, 1) * .08px); }
+  #speaker-dialogue-hires .speaker-line { position:absolute; left:0; width:100%; white-space:nowrap; }
+  #speaker-dialogue-hires .speaker-line:first-child { top:0; } #speaker-dialogue-hires .speaker-line:last-child { top:66.666667%; }
+  #speaker-name-hires[hidden], #speaker-dialogue-hires[hidden] { display:none; }
 </style>
 </head>
 <body>
-<div id="stage"><canvas id="game" width="160" height="144"></canvas><img id="speaker-portrait-hires" src="../assets/portraits/hires/cooper.png" data-portrait-root="../assets/portraits/hires/" alt="" aria-hidden="true" hidden></div>
+<div id="stage"><canvas id="game" width="160" height="144"></canvas><img id="speaker-portrait-hires" src="../assets/portraits/hires/cooper.png" data-portrait-root="../assets/portraits/hires/" alt="" aria-hidden="true" hidden><div id="speaker-name-hires" aria-hidden="true" hidden></div><div id="speaker-dialogue-hires" aria-hidden="true" hidden><span id="speaker-dialogue-line-1" class="speaker-line"></span><span id="speaker-dialogue-line-2" class="speaker-line"></span></div></div>
 <script src="../js/tiles.js?v=r60i2"></script>
 <script src="../js/chars.js"></script>
 <script src="../js/houses.js"></script>
 <script src="../js/maps.js?v=r69i13"></script>
 <script src="../js/data.js"></script>
 <script src="../js/retro-font.js?v=gold46"></script>
-<script src="../js/portraits.js?v=r70face1"></script>
+<script src="../js/portraits.js?v=r73text1"></script>
 <script src="../js/gold-tone.js?v=r69i13"></script>
-<script src="../js/engine.js?v=r72cast1"></script>
+<script src="../js/engine.js?v=r73text1"></script>
 <script src="../js/glue.js?v=gold48"></script>
 <script src="../js/retro.js?v=r60i2"></script>
 <script src="../js/retro-authored.js?v=r69i13"></script>
@@ -38,6 +44,7 @@
   var scale = fit >= 1 ? Math.max(1, Math.floor(fit)) : fit;
   stage.style.width = Math.floor(160 * scale) + 'px';
   stage.style.height = Math.floor(144 * scale) + 'px';
+  stage.style.setProperty('--native-scale', scale);
   stage.style.left = Math.floor((innerWidth - parseInt(stage.style.width, 10)) / 2) + 'px';
   stage.style.top = Math.floor((innerHeight - parseInt(stage.style.height, 10)) / 2) + 'px';
   /* Modalita' silhouette (?silhouette=1): dipinge in nero pieno i tile
@@ -57,6 +64,34 @@
   }
   GAME.Engine.init(cv, null);
   GAME.Engine.start();
+  if (q.get('clarity') === '1') {
+    var probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:700;line-height:1';
+    document.body.appendChild(probe);
+    var failures = [], measured = 0;
+    Object.keys(GAME.Data.dialogues).forEach(function (id) {
+      var def = GAME.Data.dialogues[id];
+      var pages = (def.pages || []).concat(def.again && def.again.pages || []);
+      pages.forEach(function (page) {
+        var lines = GAME.RetroFont.wrapFixed(String(page.text || ''), 144, 1);
+        probe.style.fontSize = (scale * 6.4) + 'px';
+        probe.style.letterSpacing = (scale * 0.08) + 'px';
+        lines.slice(0, 2).forEach(function (line) {
+          probe.textContent = line; measured++;
+          if (probe.getBoundingClientRect().width > 144 * scale) failures.push(id + ': ' + line);
+        });
+        var key = GAME.Portraits.resolve(page.name, page.portrait);
+        var label = GAME.Portraits.label(page.name, key, 36);
+        probe.style.fontSize = (scale * 4) + 'px';
+        probe.style.letterSpacing = 'normal';
+        probe.textContent = label; measured++;
+        if (probe.getBoundingClientRect().width > 36 * scale) failures.push(id + ': [' + label + ']');
+      });
+    });
+    probe.remove();
+    document.body.setAttribute('data-clarity-measured', String(measured));
+    document.body.setAttribute('data-clarity-overflow', JSON.stringify(failures));
+  }
   setTimeout(function () {
     GAME.Engine.state.mode = 'play';
     GAME.Engine.state.flags.intro_town = true;

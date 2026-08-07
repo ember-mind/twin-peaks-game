@@ -26,8 +26,8 @@ const checks = {
     /canvas\.height !== VH/.test(engine) && /UW = VW;/.test(engine),
   intro_header_uses_fitting_native_scale: /FEBBRAIO, 1989'[\s\S]*bold 8px monospace/.test(engine) &&
     /titleFits: titleWidth <= l\.boxW - 20/.test(engine),
-  production_cache_busts_layout_fix: /js\/engine\.js\?v=r72cast1/.test(index) &&
-    /js\/main\.js\?v=gold54p5-mobile1/.test(index),
+  production_cache_busts_layout_fix: /js\/engine\.js\?v=r73text1/.test(index) &&
+    /js\/main\.js\?v=r73text1/.test(index),
   css_stage_preserves_native_aspect: /aspect-ratio: 10 \/ 9/.test(index) &&
     /max-width: 100vw; max-height: 100dvh/.test(index),
   production_loads_retro_renderer: /js\/retro\.js/.test(index),
@@ -99,6 +99,9 @@ const checks = {
   canvas_frame_state_is_atomic: /ctx\.globalAlpha = 1/.test(engine) &&
     /ctx\.globalCompositeOperation = 'source-over'/.test(engine) &&
     /ctx\.clearRect\(0, 0, canvas\.width, canvas\.height\)/.test(engine)
+  ,high_resolution_dialogue_typography: /id="speaker-name-hires"/.test(index) &&
+    /id="speaker-dialogue-hires"/.test(index) && /function syncSpeakerTypography\(\)/.test(engine) &&
+    /RF\.wrapFixed\(raw, 144, 1\)/.test(engine) && /--native-scale/.test(index)
 };
 
 for (const [name, pass] of Object.entries(checks)) {

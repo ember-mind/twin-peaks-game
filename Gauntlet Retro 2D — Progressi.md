@@ -273,3 +273,9 @@ Estesa soluzione R71 a tutte le 25 identità risolte dal motore. Ogni volto nasc
 Runtime: `assets/portraits/hires/<key>.png`, `256×264`, massimo sei toni. Cambio sorgente segue `GAME.Portraits.resolve`; immagine viene nascosta durante caricamento e canvas procedurale resta fallback. Verifiche visive in dialogo: Truman, Audrey, BOB, Laura; mobile Audrey `390×844`. Pagina condivisibile `portrait-progress.html`: vecchio canvas a sinistra, asset R72 a destra, 25 schede complete.
 
 Gate: portrait cast `25/25`, reference `23/23`, production `45/45`, mobile `19/19`, touch `13/13`. Browser confronto: 25/25 asset `256×264`, zero overflow desktop/mobile, zero warning/error.
+
+## R73 — Tipografia dialoghi leggibile (2026-08-07)
+
+Applicata al testo stessa separazione usata per i volti: canvas nativo conserva box, freccia e glifi fallback; due overlay DOM ad alta risoluzione coprono soltanto nome e due righe della battuta. Scala derivata dal fattore nativo calcolato da `main.js`, quindi desktop `8×` e mobile `2×` mantengono proporzioni identiche.
+
+Wrapping resta quello canonico di `RetroFont.wrapFixed(raw, 144, 1)`. Audit browser su tutte le pagine classiche: `762` righe/targhe misurate, `0` overflow. Prove: `r73-dialogue-clear-800.png`, desktop `1280×1152`, mobile `390×844`; nessuna copertura della freccia, nessun overflow viewport, zero warning/error. Production `46/46`, mobile `19/19`, touch `13/13`.

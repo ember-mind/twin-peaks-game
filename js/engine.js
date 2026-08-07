@@ -13,6 +13,7 @@
   var last = 0, tGlobal = 0;
   var uiLayoutMode = '';
   var speakerPortraitKey = null;
+  var speakerTypographySignature = '';
   var caseUiSignature = '';
   var dialogueLiveSignature = '';
   var TILE = 16, VW = 160, VH = 144; // viewport GBC: 10x9 metatile
@@ -1445,6 +1446,39 @@
     if (image.complete && image.naturalWidth > 0) image.hidden = false;
   }
 
+  function syncSpeakerTypography() {
+    if (typeof document === 'undefined' || typeof document.getElementById !== 'function') return;
+    var name = document.getElementById('speaker-name-hires');
+    var box = document.getElementById('speaker-dialogue-hires');
+    var line1 = document.getElementById('speaker-dialogue-line-1');
+    var line2 = document.getElementById('speaker-dialogue-line-2');
+    if (!name || !box || !line1 || !line2) return;
+    var active = !!(S.mode === 'play' && S.dialogue && !r3d);
+    if (!active) {
+      if (speakerTypographySignature) {
+        speakerTypographySignature = '';
+        name.hidden = true;
+        box.hidden = true;
+      }
+      return;
+    }
+    var page = S.dialogue.pages[S.dialogue.i] || {};
+    var raw = String(page.text || '').replace(/§/g, String(S.clues.length));
+    var lines = RF.wrapFixed(raw, 144, 1);
+    var key = GAME.Portraits ? GAME.Portraits.resolve(page.name, page.portrait) : '';
+    var label = GAME.Portraits && GAME.Portraits.label
+      ? GAME.Portraits.label(page.name, key, 36)
+      : String(page.name || '');
+    var signature = label + '|' + (lines[0] || '') + '|' + (lines[1] || '');
+    if (speakerTypographySignature === signature) return;
+    speakerTypographySignature = signature;
+    name.textContent = label;
+    line1.textContent = lines[0] || '';
+    line2.textContent = lines[1] || '';
+    name.hidden = false;
+    box.hidden = false;
+  }
+
   function render(dt) {
     /* Schermata finale ha un solo proprietario. Overlay narrativa viene
      * svuotato/nascosto prima del primo drawEnd, evitando frame compositi. */
@@ -1470,6 +1504,7 @@
     syncCinematicUi();
     syncDialogueUi();
     syncSpeakerPortrait();
+    syncSpeakerTypography();
     var caseUiActive = syncCaseUi();
     if (S.mode === 'title') { drawTitle(); return; }
     if (S.mode === 'intro') { drawIntro(); return; }

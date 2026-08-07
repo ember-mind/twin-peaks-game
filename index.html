@@ -269,6 +269,7 @@
     transform: translate(-50%, -50%);
     background: #17261d;
     box-shadow: 0 0 0 2px #4f6747, 0 16px 60px rgba(0,0,0,.72);
+    --native-scale: 1;
   }
   #game {
     display: block;
@@ -295,6 +296,52 @@
     pointer-events: none;
   }
   #speaker-portrait-hires[hidden] { display: none; }
+  /* Testo dialogo composto a risoluzione display. Sotto resta il bitmap
+     nativo come fallback; fondi crema coprono soltanto i vecchi glifi. */
+  #speaker-name-hires,
+  #speaker-dialogue-hires {
+    position: absolute;
+    z-index: 9;
+    color: #072619;
+    background: #eee6b5;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-weight: 700;
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  #speaker-name-hires {
+    left: 6.875%;
+    top: 67.361111%;
+    width: 22.5%;
+    height: 4.861111%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    font-size: calc(var(--native-scale) * 4px);
+    line-height: 1;
+  }
+  #speaker-dialogue-hires {
+    left: 5%;
+    top: 73.611111%;
+    width: 90%;
+    height: 16.666667%;
+    font-size: calc(var(--native-scale) * 6.4px);
+    line-height: 1;
+    letter-spacing: calc(var(--native-scale) * 0.08px);
+  }
+  #speaker-dialogue-hires .speaker-line {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    white-space: nowrap;
+  }
+  #speaker-dialogue-hires .speaker-line:first-child { top: 0; }
+  #speaker-dialogue-hires .speaker-line:last-child { top: 66.666667%; }
+  #speaker-name-hires[hidden],
+  #speaker-dialogue-hires[hidden] { display: none; }
   #presentation, #gl, #grade, #vignette, #grain,
   #cinematic-ui, #dialogue-ui { display: none !important; }
   #narrative {
@@ -441,6 +488,8 @@
   <div id="grain"></div>
   <canvas id="game" width="160" height="144"></canvas>
   <img id="speaker-portrait-hires" src="assets/portraits/hires/cooper.png" data-portrait-root="assets/portraits/hires/" alt="" aria-hidden="true" hidden>
+  <div id="speaker-name-hires" aria-hidden="true" hidden></div>
+  <div id="speaker-dialogue-hires" aria-hidden="true" hidden><span id="speaker-dialogue-line-1" class="speaker-line"></span><span id="speaker-dialogue-line-2" class="speaker-line"></span></div>
   <section id="cinematic-ui" aria-live="polite">
     <div id="cinematic-kicker"></div>
     <h1 id="cinematic-title"></h1>
@@ -480,13 +529,13 @@
 <script src="js/data.js?v=11narrative-case-doc1"></script>
 <script src="js/environmental-inspect.js?v=r60i2"></script>
 <script src="js/retro-font.js?v=gold46"></script>
-<script src="js/portraits.js?v=r70face1"></script>
+<script src="js/portraits.js?v=r73text1"></script>
 <script src="js/gold-tone.js?v=r69i13"></script>
-<script src="js/engine.js?v=r72cast1"></script>
+<script src="js/engine.js?v=r73text1"></script>
 <script src="js/glue.js?v=gold49n3"></script>
 <script src="js/retro.js?v=r60i2"></script>
 <script src="js/retro-authored.js?v=r69i13"></script>
-<script src="js/main.js?v=gold54p5-mobile1"></script>
+<script src="js/main.js?v=r73text1"></script>
 <script src="js/touch.js?v=gold54p5-mobile1"></script>
 <script src="js/audio.js"></script>
 <script src="js/narrative-runtime.js?v=2"></script>

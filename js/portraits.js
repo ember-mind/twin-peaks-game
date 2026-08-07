@@ -663,7 +663,8 @@
 
   GAME.Portraits = {
     palette: PAL, faces: FACES, aliases: ALIASES, labels: LABELS,
-    resolve: resolve, draw: drawPortrait, drawCard: drawCard, frame: frame
+    resolve: resolve, label: displayLabel,
+    draw: drawPortrait, drawCard: drawCard, frame: frame
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = GAME.Portraits;
 })();

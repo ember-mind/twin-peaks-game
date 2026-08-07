@@ -35,6 +35,7 @@
         var stageHeight = Math.floor(144 * scale);
         stage.style.width = stageWidth + 'px';
         stage.style.height = stageHeight + 'px';
+        stage.style.setProperty('--native-scale', scale);
         stage.style.left = Math.floor((viewport.width - stageWidth) / 2) + 'px';
         stage.style.top = touch && portrait
           ? Math.max(0, Math.floor((gameHeight - stageHeight) / 2)) + 'px'

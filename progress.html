@@ -13,7 +13,7 @@
 <body>
 <main class="wrap">
   <header class="top">
-    <div><div class="eyebrow">Twin Peaks · Retro 2D · R72</div><h1>Gauntlet visivo</h1></div>
+    <div><div class="eyebrow">Twin Peaks · Retro 2D · R73</div><h1>Gauntlet visivo</h1></div>
     <a class="play" href="./">Gioca ora →</a>
   </header>
 
@@ -21,6 +21,15 @@
     <article class="score pass"><strong>95,5</strong><span>Critico integrato · HARD PASS</span></article>
     <article class="score pass"><strong>95,3</strong><span>UI + mobile · HARD PASS</span></article>
     <article class="score"><strong>93,0</strong><span>World art · READY, zero blocker</span></article>
+  </section>
+
+  <section class="section">
+    <h2>R73 · Testo dialoghi ad alta risoluzione</h2>
+    <div class="compare">
+      <figure class="shot"><img src="artifacts/retro-gauntlet/r72-audrey-dialogue.png" alt="Dialogo bitmap precedente"><figcaption>Prima · glifi incorporati nel canvas 160×144</figcaption></figure>
+      <figure class="shot"><img src="artifacts/retro-gauntlet/r73-dialogue-clear-800.png" alt="Dialogo ad alta risoluzione"><figcaption>Dopo · nome e battuta composti alla risoluzione display</figcaption></figure>
+    </div>
+    <div class="chart" style="margin-top:14px"><strong>762 elementi misurati, zero overflow</strong><p>Stesso wrapping a due righe. Cornice, freccia, ritratto e mondo restano invariati. Canvas bitmap rimane fallback; scala tipografica segue fattore nativo intero su desktop e mobile.</p></div>
   </section>
 
   <section class="section">
@@ -67,7 +76,7 @@
   <section class="section">
     <h2>Gate automatici correnti</h2>
     <div class="tests">
-      <div class="test"><b>23/23</b>reference</div><div class="test"><b>45/45</b>production</div>
+      <div class="test"><b>23/23</b>reference</div><div class="test"><b>46/46</b>production</div>
       <div class="test"><b>19/19</b>mobile</div><div class="test"><b>13/13</b>touch</div>
       <div class="test"><b>366</b>smoke</div><div class="test"><b>86</b>walkthrough</div>
       <div class="test"><b>9/9</b>portrait</div><div class="test"><b>9/9</b>palette</div>
@@ -79,7 +88,7 @@
     <div class="method"><div>Build reale e cattura lossless.</div><div>Critici ricevono reference e frame, senza difesa autore.</div><div>Un gap osservabile per giro; correzione mirata.</div><div>Suite completa prima del deploy.</div></div>
   </section>
 
-  <footer class="foot">Aggiornato 7 agosto 2026. Canvas 160×144, sei toni, pixel interi; 25 ritratti speaker 256×264 sul compositor. Godot/Blender esclusi da questa passata: migrazione non aumentava fedeltà raster né compatibilità mobile.</footer>
+  <footer class="foot">Aggiornato 7 agosto 2026. Canvas 160×144, sei toni, pixel interi; 25 ritratti speaker 256×264 e testo dialoghi alla risoluzione display. Godot/Blender esclusi: migrazione non aumentava fedeltà raster né compatibilità mobile.</footer>
 </main>
 </body>
 </html>
