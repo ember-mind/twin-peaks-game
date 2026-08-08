@@ -28,6 +28,7 @@ for row in 0 1 2; do
       -trim +repage \
       -filter point -resize "$resize_geometry" \
       -gravity south -background none -extent 16x16 \
+      -strip \
       "$work/frame-${frame}.png"
   done
 done
@@ -36,7 +37,7 @@ magick montage \
   "$work/frame-0.png" "$work/frame-1.png" "$work/frame-2.png" \
   "$work/frame-3.png" "$work/frame-4.png" "$work/frame-5.png" \
   "$work/frame-6.png" "$work/frame-7.png" "$work/frame-8.png" \
-  -tile 3x3 -geometry 16x16+0+0 -background none "$out"
+  -tile 3x3 -geometry 16x16+0+0 -background none -strip "$out"
 
 # Fixed project palette, preserving alpha. ImageMagick maps each opaque pixel to
 # nearest listed color; transparent background remains transparent.
@@ -44,7 +45,7 @@ magick xc:'#072619' xc:'#34572D' xc:'#6A8A43' xc:'#9AAB69' xc:'#DCD9A9' xc:'#EEE
   +append "$work/palette.png"
 magick "$out" -alpha extract "$work/alpha.png"
 magick "$out" -alpha off -dither none -remap "$work/palette.png" "$work/color.png"
-magick "$work/color.png" "$work/alpha.png" -alpha off -compose CopyOpacity -composite "$out"
+magick "$work/color.png" "$work/alpha.png" -alpha off -compose CopyOpacity -composite -strip "$out"
 
 find "$work" -type f -delete
 rmdir "$work"

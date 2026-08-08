@@ -21,12 +21,14 @@ Twenty-three generated masters live in `cast-masters/`; Cooper reuses approved e
 ## Rebuild
 
 ```bash
-tools/build-character-atlas.sh assets/sprites/cast-masters/truman.png assets/sprites/cast-16/truman.png
-tools/build-character-atlas.sh assets/sprites/cast-masters/giant.png assets/sprites/cast-16/giant.png '7x16!'
-tools/build-cast-atlas.sh assets/sprites/cast-16 assets/sprites/cast-walkcycles-16.png
-tools/audit-cast-atlas.sh
-node test/cast-sprite-sheet.js
+# Rebuild completo da master già presenti
+tools/rebuild-generated-cast.sh
+
+# Import non distruttivo di un nuovo master + rebuild completo
+tools/rebuild-generated-cast.sh truman /path/to/raw-truman.png
 ```
+
+Comando unico: valida chiave, quantizza copia del raw, preserva raw originale, compila 24×9 frame, costruisce atlante, verifica palette/alpha, deriva cache tag SHA-256, aggiorna HTML/renderer e lancia test. `cast-manifest.json` governa ordine e sole eccezioni geometriche.
 
 Master grid contract:
 

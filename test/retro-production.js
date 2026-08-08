@@ -2,6 +2,7 @@
 'use strict';
 
 const assert = require('node:assert');
+const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -19,6 +20,7 @@ const retroFont = fs.readFileSync(path.join(root, 'js', 'retro-font.js'), 'utf8'
 const portraits = fs.readFileSync(path.join(root, 'js', 'portraits.js'), 'utf8');
 const goldTone = fs.readFileSync(path.join(root, 'js', 'gold-tone.js'), 'utf8');
 const castSheet = fs.readFileSync(path.join(root, 'assets', 'sprites', 'cast-walkcycles-16.png'));
+const castVersion = 'cast-' + crypto.createHash('sha256').update(castSheet).digest('hex').slice(0, 12);
 
 const checks = {
   gold_native_resolution_160x144: /width="160" height="144"/.test(index) &&
@@ -42,8 +44,8 @@ const checks = {
   production_uses_approved_master_palette: /js\/gold-tone\.js/.test(index) &&
     /GAME\.GoldTone\.apply/.test(engine) && /#072619/.test(goldTone) && /#eee6b5/i.test(goldTone),
   production_loads_authored_tileset: /js\/retro-authored\.js/.test(index),
-  production_loads_generated_cast_walkcycles: /retro-authored\.js\?v=r77cast1/.test(index) &&
-    /cast-walkcycles-16\.png\?v=r77cast1/.test(authored) &&
+  production_loads_generated_cast_walkcycles: new RegExp('retro-authored\\.js\\?v=' + castVersion).test(index) &&
+    new RegExp('cast-walkcycles-16\\.png\\?v=' + castVersion).test(authored) &&
     /drawCastWalkSheet/.test(authored) && /dir === 'left'/.test(authored) &&
     castSheet.readUInt32BE(16) === 240 && castSheet.readUInt32BE(20) === 240,
   production_loads_continuous_town_art: /maps\.js\?v=r76town1/.test(index) &&

@@ -27,6 +27,6 @@ blank=$(mktemp "${TMPDIR:-/tmp}/tp-cast-blank.XXXXXX.png")
 magick -size 48x48 xc:none "$blank"
 images+=("$blank")
 
-magick montage "${images[@]}" -tile 5x5 -geometry 48x48+0+0 -background none "$out"
+magick montage "${images[@]}" -tile 5x5 -geometry 48x48+0+0 -background none -strip "$out"
 find "$blank" -type f -delete
 echo "$out"

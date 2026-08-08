@@ -2,6 +2,7 @@
 'use strict';
 
 const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
@@ -11,6 +12,7 @@ const manifest = JSON.parse(fs.readFileSync(path.join(root, 'assets', 'sprites',
 const charsSource = fs.readFileSync(path.join(root, 'js', 'chars.js'), 'utf8');
 const authored = fs.readFileSync(path.join(root, 'js', 'retro-authored.js'), 'utf8');
 const castPng = fs.readFileSync(path.join(root, 'assets', 'sprites', 'cast-walkcycles-16.png'));
+const castVersion = 'cast-' + crypto.createHash('sha256').update(castPng).digest('hex').slice(0, 12);
 
 const context = { GAME: {} };
 vm.runInNewContext(charsSource, context);
@@ -27,6 +29,8 @@ assert.deepEqual(runtimeOrder, manifestKeys, 'atlas order matches manifest');
 assert.equal(castPng.toString('ascii', 1, 4), 'PNG', 'cast atlas PNG signature');
 assert.equal(castPng.readUInt32BE(16), 240, 'cast atlas width');
 assert.equal(castPng.readUInt32BE(20), 240, 'cast atlas height');
+assert(authored.includes(`cast-walkcycles-16.png?v=${castVersion}`), 'asset cache version matches atlas hash');
+assert(fs.readFileSync(path.join(root, 'index.html'), 'utf8').includes(`retro-authored.js?v=${castVersion}`), 'renderer cache version matches atlas hash');
 
 for (const key of manifestKeys) {
   const file = path.join(root, 'assets', 'sprites', 'cast-16', `${key}.png`);
@@ -41,4 +45,4 @@ assert(/naturalHeight !== 240/.test(authored), 'runtime validates atlas height')
 assert(/drawCastWalkSheet\(ctx, name/.test(authored), 'runtime uses generated art for every known character');
 assert(/CAST_SHEET_ORDER\.indexOf\(name\)/.test(authored), 'runtime resolves character block');
 
-console.log('CAST-SPRITE-PASS 34/34');
+console.log('CAST-SPRITE-PASS 36/36');

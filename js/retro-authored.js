@@ -10,7 +10,7 @@
   var Spr = GAME.Sprites;
   var oldTile = Spr.drawTile;
   var CHARS = Spr.CHARS || {};
-  var CAST_SHEET_SRC = 'assets/sprites/cast-walkcycles-16.png?v=r77cast1';
+  var CAST_SHEET_SRC = 'assets/sprites/cast-walkcycles-16.png?v=cast-06b8ed9caf35';
   var CAST_SHEET_ORDER = [
     'cooper', 'truman', 'lucy', 'andy', 'hawk',
     'sarah', 'leland', 'norma', 'shelly', 'loglady',
