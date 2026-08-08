@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "layout": {
+    "master": "3x3: down idle/A/B, up idle/A/B, right idle/A/B",
+    "runtimeCell": 16,
+    "characterAtlas": "48x48",
+    "castColumns": 5
+  },
+  "palette": ["#072619", "#34572D", "#6A8A43", "#9AAB69", "#DCD9A9", "#EEE6B5"],
+  "characters": [
+    {"key":"cooper","name":"Dale Cooper","portrait":"assets/portraits/hires/cooper.png","identity":"swept dark hair, composed eyes, slim FBI agent, black suit, white shirt and narrow dark-red tie"},
+    {"key":"truman","name":"Harry S. Truman","portrait":"assets/portraits/hires/truman.png","identity":"square face, dark side-parted hair, sturdy sheriff, tan uniform shirt, dark trousers, badge and dark sheriff hat"},
+    {"key":"lucy","name":"Lucy Moran","portrait":"assets/portraits/hires/lucy.png","identity":"heart-shaped face, alert eyes, high curly bun, slim build, rose office dress with pale rounded collar"},
+    {"key":"andy","name":"Andy Brennan","portrait":"assets/portraits/hires/andy.png","identity":"long soft worried face, dark side-parted hair, lanky deputy, tan uniform shirt, tie and badge"},
+    {"key":"hawk","name":"Hawk","portrait":"assets/portraits/hires/hawk.png","identity":"high cheekbones, long straight black hair, tall calm deputy, dark field jacket over blue uniform"},
+    {"key":"sarah","name":"Sarah Palmer","portrait":"assets/portraits/hires/sarah.png","identity":"tired haunted eyes, short dark waves, slightly stooped build, dark violet dress and shawl"},
+    {"key":"leland","name":"Leland Palmer","portrait":"assets/portraits/hires/leland.png","identity":"long expressive face, swept silver hair, tall formal man, charcoal suit, pale shirt and muted tie"},
+    {"key":"norma","name":"Norma Jennings","portrait":"assets/portraits/hires/norma.png","identity":"gentle knowing eyes, soft light-brown waves, diner blouse and pale waist apron"},
+    {"key":"shelly","name":"Shelly Johnson","portrait":"assets/portraits/hires/shelly.png","identity":"large dark eyes, full lips, long dark waves, rose waitress dress, white collar and apron"},
+    {"key":"loglady","name":"Margaret Lanterman","portrait":"assets/portraits/hires/loglady.png","identity":"angular face, square glasses, long gray-brown hair, heavy cardigan and plaid skirt, carrying a log across both arms"},
+    {"key":"bobby","name":"Bobby Briggs","portrait":"assets/portraits/hires/bobby.png","identity":"broad cheekbones, black pompadour, defiant teen, black leather jacket and blue jeans"},
+    {"key":"donna","name":"Donna Hayward","portrait":"assets/portraits/hires/donna.png","identity":"fine oval face, searching eyes, long dark waves, burgundy top, dark skirt or trousers, small necklace"},
+    {"key":"jacoby","name":"Lawrence Jacoby","portrait":"assets/portraits/hires/jacoby.png","identity":"receding gray hair, beard, mismatched red and blue round glasses, pale patterned shirt and gray trousers"},
+    {"key":"audrey","name":"Audrey Horne","portrait":"assets/portraits/hires/audrey.png","identity":"heart-shaped face, arched brows, curled black bob, slim red sweater, pale collar and dark skirt"},
+    {"key":"mfap","name":"Man from Another Place","portrait":"assets/portraits/hires/mfap.png","identity":"compact adult, round face, slick dark hair, enigmatic smile, bright red suit, white shirt and black bow tie"},
+    {"key":"laura","name":"Laura Palmer","portrait":"assets/portraits/hires/laura.png","identity":"luminous oval face, sad eyes, long blonde waves, pale spectral dress, calm apparition"},
+    {"key":"gerard","name":"Philip Gerard","portrait":"assets/portraits/hires/gerard.png","identity":"gaunt face, receding curls, beard, frightened eyes, one-armed man in dark waistcoat and muted shirt"},
+    {"key":"benhorne","name":"Benjamin Horne","portrait":"assets/portraits/hires/benhorne.png","identity":"broad face, slick black hair, calculating eyes, expensive near-black suit and deep-red tie"},
+    {"key":"giant","name":"The Giant","portrait":"assets/portraits/hires/giant.png","identity":"extremely tall thin body, long narrow face, bald high forehead, solemn dark suit and bow tie","resizeGeometry":"7x16!"},
+    {"key":"maddy","name":"Maddy Ferguson","portrait":"assets/portraits/hires/maddy.png","identity":"Laura-like face, dark bob, large round glasses, worried gaze, rose top and dark skirt"},
+    {"key":"bob","name":"BOB","portrait":"assets/portraits/hires/bob.png","identity":"large looming build, weathered face, long wild gray hair, uncanny eyes, broad theatrical smile, faded denim jacket"},
+    {"key":"james","name":"James Hurley","portrait":"assets/portraits/hires/james.png","identity":"angular face, high black pompadour, brooding teen, black biker jacket and blue jeans"},
+    {"key":"jacques","name":"Jacques Renault","portrait":"assets/portraits/hires/jacques.png","identity":"wide heavy build, beard and mustache, narrowed eyes, dark vest over brick-red shirt"},
+    {"key":"ronette","name":"Ronette Pulaski","portrait":"assets/portraits/hires/ronette.png","identity":"delicate exhausted face, disordered blonde hair, pale hospital gown and collar"}
+  ]
+}

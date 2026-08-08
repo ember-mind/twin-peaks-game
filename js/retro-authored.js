@@ -10,15 +10,22 @@
   var Spr = GAME.Sprites;
   var oldTile = Spr.drawTile;
   var CHARS = Spr.CHARS || {};
-  var COOPER_SHEET_SRC = '/assets/sprites/cooper-walkcycle-16.png?v=r75cooper1';
-  var cooperWalkSheet = null;
+  var CAST_SHEET_SRC = 'assets/sprites/cast-walkcycles-16.png?v=r77cast1';
+  var CAST_SHEET_ORDER = [
+    'cooper', 'truman', 'lucy', 'andy', 'hawk',
+    'sarah', 'leland', 'norma', 'shelly', 'loglady',
+    'bobby', 'donna', 'jacoby', 'audrey', 'mfap',
+    'laura', 'gerard', 'benhorne', 'giant', 'maddy',
+    'bob', 'james', 'jacques', 'ronette'
+  ];
+  var castWalkSheet = null;
 
-  /* Atlas 3x3 derivato dal master approvato: righe fronte/spalle/destra,
-   * colonne fermo/passo A/passo B. Il renderer conserva lo sprite authored
-   * precedente finche' il PNG non e' pronto, quindi nessun frame vuoto. */
+  /* Atlante 5x5 del cast. Ogni blocco 48x48 contiene un master 3x3:
+   * righe fronte/spalle/destra, colonne fermo/passo A/passo B. Il renderer
+   * conserva gli sprite authored precedenti finche' il PNG non e' pronto. */
   if (typeof G.Image === 'function') {
-    cooperWalkSheet = new G.Image();
-    cooperWalkSheet.src = COOPER_SHEET_SRC;
+    castWalkSheet = new G.Image();
+    castWalkSheet.src = CAST_SHEET_SRC;
   }
 
   var C = {
@@ -2647,8 +2654,11 @@
     return 0;
   }
 
-  function drawCooperWalkSheet(ctx, x, y, dir, frame, alpha, moving) {
-    if (!cooperWalkSheet || !cooperWalkSheet.complete || cooperWalkSheet.naturalWidth !== 48 || cooperWalkSheet.naturalHeight !== 48 || !ctx.drawImage) return false;
+  function drawCastWalkSheet(ctx, name, x, y, dir, frame, alpha, moving) {
+    var castIndex = CAST_SHEET_ORDER.indexOf(name);
+    if (castIndex < 0 || !castWalkSheet || !castWalkSheet.complete || castWalkSheet.naturalWidth !== 240 || castWalkSheet.naturalHeight !== 240 || !ctx.drawImage) return false;
+    var blockX = (castIndex % 5) * 48;
+    var blockY = Math.floor(castIndex / 5) * 48;
     var row = dir === 'up' ? 1 : (dir === 'left' || dir === 'right' ? 2 : 0);
     var col = moving ? ((frame & 1) ? 2 : 1) : 0;
     var ox = Math.round(x), oy = Math.round(y);
@@ -2658,9 +2668,9 @@
     if (dir === 'left') {
       ctx.translate(ox + 16, 0);
       ctx.scale(-1, 1);
-      ctx.drawImage(cooperWalkSheet, col * 16, row * 16, 16, 16, 0, oy, 16, 16);
+      ctx.drawImage(castWalkSheet, blockX + col * 16, blockY + row * 16, 16, 16, 0, oy, 16, 16);
     } else {
-      ctx.drawImage(cooperWalkSheet, col * 16, row * 16, 16, 16, ox, oy, 16, 16);
+      ctx.drawImage(castWalkSheet, blockX + col * 16, blockY + row * 16, 16, 16, ox, oy, 16, 16);
     }
     ctx.restore();
     return true;
@@ -2668,7 +2678,8 @@
 
   Spr.drawChar = function (ctx, x, y, pal, dir, frame, alpha, moving, night) {
     var p = pal || CHARS.cooper;
-    if (p === CHARS.cooper && drawCooperWalkSheet(ctx, x, y, dir, frame, alpha, moving)) return;
+    var name = nameOf(p);
+    if (drawCastWalkSheet(ctx, name, x, y, dir, frame, alpha, moving)) return;
     var flip = dir === 'left';
     var step = moving ? ((frame & 1) ? -1 : 1) : 0;
     /* Cooper visto di spalle nella hero scene: 10x15, masse continue.
@@ -2706,12 +2717,15 @@
   };
 
   GAME.Retro2D = GAME.Retro2D || {};
-  GAME.Retro2D.cooperWalkSheet = {
-    src: COOPER_SHEET_SRC,
+  GAME.Retro2D.castWalkSheet = {
+    src: CAST_SHEET_SRC,
+    size: [240, 240],
+    block: [48, 48],
     frame: [16, 16],
     rows: ['down', 'up', 'right'],
     columns: ['idle', 'stepA', 'stepB'],
-    mirrorsLeft: true
+    mirrorsLeft: true,
+    order: CAST_SHEET_ORDER.slice()
   };
 
   function rgbDistance(a, b) {
