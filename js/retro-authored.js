@@ -10,6 +10,15 @@
   var Spr = GAME.Sprites;
   var oldTile = Spr.drawTile;
   var CHARS = Spr.CHARS || {};
+  var runtimeActorScale = 1;
+
+  /* Mobile keeps the native 16x20 silhouette. On large desktop stages the
+   * same sprite otherwise reads undersized beside the furniture. Scale around
+   * the feet so actors grow upward without losing their ground contact. */
+  Spr.setRuntimeActorScale = function (scale) {
+    scale = Number(scale);
+    runtimeActorScale = isFinite(scale) ? Math.max(1, Math.min(1.32, scale)) : 1;
+  };
   var CAST_SHEET_SRC = 'assets/sprites/cast-walkcycles-16.png?v=cast-06b8ed9caf35';
   var CAST_SHEET_ORDER = [
     'cooper', 'truman', 'lucy', 'andy', 'hawk',
@@ -1634,6 +1643,14 @@
   }
 
   Spr.drawChar = function (ctx, x, y, pal, dir, frame, alpha, moving) {
+    var actorScale = runtimeActorScale;
+    var scaled = actorScale !== 1;
+    if (scaled) {
+      ctx.save();
+      ctx.translate(Math.round(x + 8), Math.round(y + 16));
+      ctx.scale(actorScale, actorScale);
+      ctx.translate(-Math.round(x + 8), -Math.round(y + 16));
+    }
     var name = nameOf(pal), p = pal || CHARS.cooper;
     var flip = dir === 'right';
     var f = moving ? (frame & 1) : 0;
@@ -1689,6 +1706,7 @@
     if (name === 'cooper' && dir !== 'up') R(ctx, ox + 7, oy + 11, 2, 4, p.tie || C.red);
     if (name === 'bob' && dir !== 'up') { R(ctx, ox + 6, oy + 7, 5, 1, C.paper); R(ctx, ox + 7, oy + 8, 3, 1, C.ink); }
     ctx.globalAlpha = oldAlpha;
+    if (scaled) ctx.restore();
   };
 
   /* R10: actor nativo 16x16. Gen II usa testa larga, busto corto e piedi

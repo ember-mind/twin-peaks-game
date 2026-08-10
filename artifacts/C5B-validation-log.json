@@ -1,0 +1,8 @@
+{
+ "generated_by": "test/narrative-validate.js",
+ "generated_at": "2026-08-10T17:14:45.120Z",
+ "total_checks": 3240,
+ "failures": 0,
+ "m5_canonical_paths_executed": 72,
+ "runtime_schema": "1.1.0"
+}

@@ -51,6 +51,8 @@ Gating: flag/indizi su porte e dialoghi a cascata; indizi nel menu X e taccuino 
 | `test/retro-font.js` | gate font bitmap, impaginazione epilogo e clipping |
 | `test/mobile-production.js` | gate mobile: viewport, safe-area, orientamento, controlli e ownership dei tap |
 | `test/touch-runtime.js` | prova runtime D-pad, A/B, rilascio input e tap narrativo singolo |
+| `coldstage.config.mjs` | scenari browser riusabili: desktop, avvio gameplay, mobile 390×844 e capture visuale locale |
+| `test/coldstage-config.js` | gate routing changed-file → scenari Coldstage minimi |
 
 Canvas logico 160×144, scalato dal CSS con nearest-neighbour a rapporto 10:9. In landscape mobile il canvas resta intatto al centro; D-pad e A/B vivono nei gutter laterali. Storia: engine+data scritti in una prima sessione, sprites+maps riscritti in una seconda con API diversa; `glue.js` riconcilia. `retro.js` sovrascrive solo le facciate grafiche: mappe, collisioni, dialoghi e stato narrativo restano canonici.
 
@@ -60,6 +62,33 @@ Canvas logico 160×144, scalato dal CSS con nearest-neighbour a rapporto 10:9. I
 - Risoluzione: 160×144 fissa; CSS ingrandisce senza smoothing. Camera piatta, nessuna prospettiva.
 - Regressioni minime: `node test/mobile-production.js`, `node test/touch-runtime.js`, `node test/retro-font.js`, `node test/retro-production.js`, `node test/narrative-finale.js`, `node test/smoke.js`, `node test/walkthrough.js`.
 - Evidenza Gauntlet e catture: [[Gauntlet Retro 2D — Progressi]].
+
+## Coldstage
+
+Twin Peaks è secondo client del tool autonomo `/Users/ebuccelli/Code/solo/projects/coldstage`.
+Il gioco resta statico, senza package o build step: Coldstage usa il proprio Vite
+per servirlo e il proprio Selenium per guidare Chrome.
+
+```bash
+coldstage doctor
+coldstage run changed
+coldstage run all
+coldstage diff visual
+coldstage stop
+```
+
+Lane: `desktop`, `gameplay`, `mobile`, `visual`. `run changed` osserva 105 file
+runtime e allarga solo agli scenari toccati. Pass corrente: 40/40 check,
+zero errori console severi, desktop 1280×720, mobile 390×844, una capture locale.
+Ogni lane parte con storage isolato; gameplay crea `tp_save`, mobile successivo
+verifica che non sia presente. `storage: 'preserve'` resta opt-in per lane concatenate.
+`RUNTIME PASS` non certifica estetica: capture riporta
+`visual-review=NOT_PERFORMED` finché persona o vision critic non apre i pixel.
+`coldstage review visual` crea un solo contact sheet compatto; dopo ispezione,
+`coldstage review record visual ...` salva attestazione separata senza mutare report runtime.
+Baseline approvata vive in `test/coldstage-baselines/`. `run changed` confronta
+automaticamente SHA-256 e pixel: `aiReviewNeeded=false` non apre immagini;
+solo differenze oltre 0,1% generano diff sheet e chiedono review AI/umana.
 
 ### Renderer 3D legacy
 
@@ -123,6 +152,7 @@ Che tipo di ruolo gioca il player nei panni dell'agente Cooper — patto esplici
 
 ## MEMORY
 
+- [2026-08-07] Decision (COLDSTAGE SECOND CLIENT): Twin Peaks ha validato il confine config-per-game/core-standalone senza introdurre npm o build nel gioco. Quattro lane browser (`desktop`, `gameplay`, `mobile`, `visual`) passano ora 40/40 check con 0 errori console severi; desktop 1280×720 e mobile esatto 390×844 condividono un solo Chrome, poi cleanup lascia 0 runtime. Primo run rosso utile: Chrome headless limitava la finestra a 500 px e CSS risolveva nearest-neighbor come `crisp-edges`; Coldstage ora usa CDP device metrics per viewport sotto 500 px e il gate accetta qualunque valore non-`auto`. Report runtime della capture resta onestamente `visual-review=NOT_PERFORMED`; poi Codex ha aperto un solo contact sheet WebP 640×452 e registrato attestazione separata **PASS_WITH_NOTES**. Frame ispezionato: arrivo/dialogo; palette GBC coerente, pixel presentation nitida, gerarchia dialogo leggibile, portrait card forte. Gap maggiore: sprite Cooper nel mondo tende a silhouette scura e legge meno bene di ritratto/UI. Verdetto non copre gioco intero, animazione, pacing o altre scene. Gap storage chiuso: lane isolate per default con tab fresca + pulizia origin CDP; gameplay crea `tp_save`, mobile successivo ne attesta assenza. Cache HTTP/shader resta condivisa per efficienza; `storage: 'preserve'` è opt-in esplicito. Pixel gate locale usa baseline proveniente solo da review approvata: primo confronto e due rerun hanno hash identico, 0 pixel cambiati, `aiReviewNeeded=false`; nessuna immagine inviata al modello. `run changed` avanza baseline file-change solo dopo gate verde.
 - [2026-08-06] Decision (SPEAKER PORTRAIT R64): ogni dialogo attribuito mostra card 40×43 in alto a sinistra del box, ritratto actor-inspired 32×30 e nome completo in microfont bitmap. Le pagine narrative mantengono identità durante la paginazione; taccuino/documenti senza parlante non ricevono ritratto. Critico indipendente R12: **10/10 HARD PASS** su riconoscibilità, differenziazione, nomi, geometria card e autenticità pixel. Mobile reale provato a 390×844 e 844×390, buffer 160×144, nessun overflow.
 - [2026-08-06] Decision (WORLD GOLD R65): background diurno su palette oliva/crema, prato authored con celle 0/4/8/12 a media 6, conifere 72% verdi scuri, soglie porte e props street fuori route. Funzionalità PASS (retro 45/45, mobile 19/19, touch 13/13, finale 27/27, smoke 366, walkthrough 86). Critico mondo severo: **8,4/10**, quindi nessuna falsa chiusura 10/10; gap aperto = composizione architettonica e masse alberate meno ricche di Pokémon Oro.
 - [2026-08-06] Decision (MATERIAL ZONING R66): la master palette a 6 colori annullava colori authored già corretti. Il filtro ora opera solo sulla `town`, mantiene nucleo oliva/crema dominante e aggiunge rampe controllate rosa, blu, viola e ocra. Interni/notte conservano palette propria. Bookhouse, Horne's e Great Northern hanno giunti, gronde, finestre, travi e portici leggibili. Due arbitri fresh-context: **9,1/10**, gap massimo spostato dall'ambiente allo sprite.

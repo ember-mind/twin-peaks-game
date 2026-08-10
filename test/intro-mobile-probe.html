@@ -42,8 +42,8 @@
           w.dispatchEvent(new w.KeyboardEvent('keyup', { code: 'Enter', bubbles: true }));
         }
         await wait(140);
-        out.checks.continuations_exist = pages.length > D.intro.length;
-        out.checks.max_five_visible_lines = pages.every(function (p) { return p.lines.length <= 5; });
+        out.checks.one_page_per_intro_block = pages.length === D.intro.length && pages.every(function (p) { return p.parts === 1; });
+        out.checks.max_seven_visible_lines = pages.every(function (p) { return p.lines.length <= 7; });
         out.checks.all_copy_visible = norm(visible.join(' ')) === norm(D.intro.join(' '));
         out.checks.ends_in_play = E.state.mode === 'play';
         out.checks.mobile_controls_present = w.document.querySelectorAll('.tp-touch-ctrl').length >= 3;

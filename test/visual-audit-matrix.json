@@ -8,8 +8,8 @@
     "suppressOnEnter": true
   },
   "notes": {
-    "gameplay": "Exact critic matrix: nine town landmarks/exteriors, seven indoor families, two woods framings, Red Room and train car.",
-    "temporal": "Fixed-step renderer strips plus six frozen production-page checkpoints across the classic-dialogue to HTML-dialogue transition.",
+    "gameplay": "Production retro matrix: nine town landmarks/exteriors, seven indoor families, three woods framings, Red Room and train car.",
+    "temporal": "Four representative retro world states plus six frozen checkpoints after a real classic-dialogue interaction.",
     "presentation": "Representative and intentionally non-exhaustive: three B4 presentation states and one M5 theory-revision state."
   },
   "gameplay": [
@@ -38,41 +38,33 @@
   ],
   "temporal": [
     {
-      "id": "walk-8",
+      "id": "town-walk-state",
       "map": "town",
       "x": 30,
       "y": 23,
       "dir": "up",
-      "frames": 8,
-      "stepMs": 90,
-      "motion": "walk"
+      "motion": "idle"
     },
     {
-      "id": "rain-16",
+      "id": "town-rain-state",
       "map": "town",
       "x": 30,
       "y": 30,
-      "dir": "up",
-      "frames": 16,
-      "stepMs": 80
+      "dir": "up"
     },
     {
-      "id": "water-16",
+      "id": "town-water-state",
       "map": "town",
       "x": 16,
       "y": 29,
-      "dir": "left",
-      "frames": 16,
-      "stepMs": 120
+      "dir": "left"
     },
     {
-      "id": "redroom-16",
+      "id": "redroom-state",
       "map": "redroom",
       "x": 8,
       "y": 10,
-      "dir": "up",
-      "frames": 16,
-      "stepMs": 90
+      "dir": "up"
     },
     {
       "id": "dialogue-transition-000ms",

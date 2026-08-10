@@ -292,7 +292,7 @@ const o35 = M8.objectives.find(o => o.id === 'obj_m8_35');
 ok(!!o35 && o35.when.all.some(c => c.not && c.not.node_done === 'm8_station') && o35.when.all.some(c => c.proposition_path === 'P8.formulation.status'), 'obj_m8_35_directs_to_station (obiettivo intermedio: P8 formulata, stazione non ancora fatta)');
 ok(!evalObj(o4.when, { mt: true, p8: true, stationDone: false }) && evalObj(o4.when, { mt: true, p8: true, stationDone: true }), 'station_objective_not_active_before_commit (matrice C8-D)');
 ok(M8.objectives.find(o => o.id === 'obj_m8_4').text === 'Porta a Truman una contraddizione che regga.', 'obj_m8_4: testo esatto Lock §9-F');
-ok(M8.objectives.find(o => o.id === 'obj_m8_2').text === 'Torna all’incrocio. Scegli dove andare.', 'obj_m8_2: istruzione post-taxi azionabile');
+ok(M8.objectives.find(o => o.id === 'obj_m8_2').text === 'Torna all’incrocio: casa Palmer, lago o diner.', 'obj_m8_2: istruzione post-taxi nomina le tre destinazioni azionabili');
 ok(M8.objectives.every(o => !!o.provenance_note), 'ogni obiettivo dichiara la provenienza');
 
 console.log('# C8-A.3: obiettivo d\'ingresso azionabile + contratto valigia + coerenza documentale');

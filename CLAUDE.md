@@ -23,6 +23,10 @@ canvas fallback, no build step, plain script tags, all globals under `GAME`.
   tree row near the Benvenuti sign) — spawns behind the tree barrier are
   hidden from camera.
 - **Test order**: all `node test/*.js` green BEFORE opening the browser.
+- **Coldstage**: use `coldstage run changed --json` after native tests. Trust
+  `pixelGate`: when `aiReviewNeeded=false`, do not open screenshots. When true,
+  inspect only returned `reviewSheet`. Never approve/replace a baseline without
+  a scoped `review record` verdict of `pass` or `pass-with-notes`.
 - **Canonical source**: the vault is canonical; `ember-mind/twin-peaks-game`
   is a deploy copy, not source of truth.
 - **Map fields**: `js/glue.js` copies map fields through generically; only

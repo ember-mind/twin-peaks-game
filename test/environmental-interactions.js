@@ -42,7 +42,7 @@ const GAME = global.GAME;
 const E = GAME.Engine;
 const ENV = GAME.EnvironmentalInspect;
 const RF = GAME.RetroFont;
-const REQUIRED = ['T', 'S', 'w', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'i', 'C', 't', 'h', 'K', 'U', 'Y', 'R', 'M', 'v', 'G', 'L', 'P', 'B', 'F', 'A', 'H', 'E', 'n', 'q'];
+const REQUIRED = ['T', 'S', 'w', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'i', 'C', 't', 'h', 'K', 'U', 'Y', 'R', 'M', 'v', 'G', 'L', 'P', 'B', 'F', 'A', 'H', 'E', 'n', 'q', 'V', 'J'];
 const TARGET_TERMS = {
   T: /alber|chiom|agh|tronch/i, S: /cartell|pali|asse|letter|Benvenuti|Glastonbury|One Eyed|ponticell/i, w: /acqua|riva|rifless/i,
   '0': /bottega|insegna|vetrina|casa/i, '1': /distrett|ardesia|matton/i, '2': /Double R|tendalin|matton/i, '3': /casa|scandol|assito|Palmer/i,
@@ -55,7 +55,7 @@ const TARGET_TERMS = {
   G: /lapid|pietra|tomba|nome|Laura/i, L: /lamp|lanterna|vetro/i, P: /palo|isolator|traversa/i,
   B: /panchin|sedile|schienal/i, F: /pali|staccion|ringhier|montant/i, A: /fior|aiuol|cordolo/i,
   H: /idrant|bocchett|calotta/i, E: /cassett|bandierina|messaggio/i, n: /cespugl|chioma|foglie/i,
-  q: /cassa|tavole|coperchio/i
+  q: /cassa|tavole|coperchio/i, V: /auto|parabrezza|cofano/i, J: /cabina|finestra|tetto|legno/i
 };
 const DELTAS = [
   { dx: 0, dy: -1, dir: 'down' },

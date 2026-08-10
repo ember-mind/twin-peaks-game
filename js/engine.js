@@ -303,9 +303,9 @@
       innerLeft: l.boxX + 10, innerRight: l.boxX + l.boxW - 10,
       titleWidth: titleWidth,
       titleFits: titleWidth <= l.boxW - 20,
-      bodyLastBottom: l.bodyY + 4 * l.lineGap + 7,
+      bodyLastBottom: l.bodyY + 6 * l.lineGap + 7,
       promptY: l.promptY,
-      contentFitsVertically: l.bodyY + 4 * l.lineGap + 7 < l.promptY && l.promptY + 7 < l.boxY + l.boxH
+      contentFitsVertically: l.bodyY + 6 * l.lineGap + 7 < l.promptY && l.promptY + 7 < l.boxY + l.boxH
     };
   };
   E.npcActive = function (n, st) {
@@ -1021,13 +1021,20 @@
     var str = page.text.replace(/§/g, String(S.clues.length));
     var lines = RF.wrapFixed(str, bw - 16, 1);
     if (RF.balanceFixedPair) lines = RF.balanceFixedPair(lines, 24);
-    for (var i = 0; i < Math.min(2, lines.length); i++) {
-      RF.drawFixed(ctx, lines[i], bx + 11, by + 16 + i * 11, uiInk);
+    var displayTypography = typeof document !== 'undefined' &&
+      typeof document.getElementById === 'function' &&
+      document.getElementById('speaker-dialogue-hires');
+    if (!displayTypography) {
+      for (var i = 0; i < Math.min(2, lines.length); i++) {
+        RF.drawFixed(ctx, lines[i], bx + 11, by + 16 + i * 11, uiInk);
+      }
     }
-    ctx.fillStyle = uiInk;
-    ctx.fillRect(bx + bw - 15, by + 39, 5, 1);
-    ctx.fillRect(bx + bw - 14, by + 40, 3, 1);
-    ctx.fillRect(bx + bw - 13, by + 41, 1, 1);
+    // Affordance persistente: la freccia sola non spiegava come continuare.
+    // Resta nel bordo inferiore, fuori dalle due righe narrative.
+    if (!displayTypography) {
+      RF.draw(ctx, GAME.touchMode ? 'A AVANTI >' : 'INVIO AVANTI >',
+        bx + bw - 10, by + 39, uiInk, { align: 'right' });
+    }
     if (Portraits) Portraits.drawCard(ctx, page.portrait, page.name, bx + 9, by - 37);
   }
 
@@ -1280,8 +1287,8 @@
       titleY: 42,
       dividerY: 53,
       bodyY: 60,
-      lineGap: 10,
-      promptY: 123
+      lineGap: 9,
+      promptY: 130
     };
   }
 
@@ -1311,14 +1318,14 @@
     }
   }
 
-  // Il box Game Boy contiene cinque righe. Ogni blocco del prologo viene
-  // spezzato in pagine vere: nessuna riga viene disegnata e poi persa.
+  // Sette righe entrano fra titolo e prompt. Ogni blocco narrativo occupa
+  // una pagina: niente continuazioni quasi vuote o intestazioni ripetute.
   function introPages() {
     var boxW = introLayout().boxW, pages = [];
     (GAME.Data.intro || []).forEach(function (entry, sourceIndex) {
-      var lines = wrap(entry, boxW - 20), parts = Math.max(1, Math.ceil(lines.length / 5));
+      var lines = wrap(entry, boxW - 20), parts = Math.max(1, Math.ceil(lines.length / 7));
       for (var part = 0; part < parts; part++) {
-        pages.push({ sourceIndex: sourceIndex, part: part, parts: parts, lines: lines.slice(part * 5, part * 5 + 5) });
+        pages.push({ sourceIndex: sourceIndex, part: part, parts: parts, lines: lines.slice(part * 7, part * 7 + 7) });
       }
     });
     return pages.length ? pages : [{ sourceIndex: 0, part: 0, parts: 1, lines: [] }];
@@ -1453,15 +1460,17 @@
     if (typeof document === 'undefined' || typeof document.getElementById !== 'function') return;
     var name = document.getElementById('speaker-name-hires');
     var box = document.getElementById('speaker-dialogue-hires');
+    var advance = document.getElementById('speaker-advance-hires');
     var line1 = document.getElementById('speaker-dialogue-line-1');
     var line2 = document.getElementById('speaker-dialogue-line-2');
-    if (!name || !box || !line1 || !line2) return;
+    if (!name || !box || !advance || !line1 || !line2) return;
     var active = !!(S.mode === 'play' && S.dialogue && !r3d);
     if (!active) {
       if (speakerTypographySignature) {
         speakerTypographySignature = '';
         name.hidden = true;
         box.hidden = true;
+        advance.hidden = true;
       }
       return;
     }
@@ -1479,8 +1488,10 @@
     name.textContent = label;
     line1.textContent = lines[0] || '';
     line2.textContent = lines[1] || '';
+    advance.textContent = GAME.touchMode ? 'A · AVANTI' : 'INVIO · AVANTI';
     name.hidden = false;
     box.hidden = false;
+    advance.hidden = false;
   }
 
   function render(dt) {

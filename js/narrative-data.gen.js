@@ -3285,7 +3285,7 @@
        }
       ]
      },
-     "text": "Torna all’incrocio. Scegli dove andare.",
+     "text": "Torna all’incrocio: casa Palmer, lago o diner.",
      "provenance_note": "[L] testo esatto del Lock §9-B"
     },
     {

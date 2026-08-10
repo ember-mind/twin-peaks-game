@@ -22,7 +22,7 @@
 
   D.intro = [
     'Diane, sono le 11:30 del 24 febbraio. Entro nella cittadina di Twin Peaks, stato di Washington. Non ho mai visto così tanti alberi in vita mia.',
-    'Una ragazza di diciassette anni, Laura Palmer, è stata trovata morta sulla riva del lago, avvolta nella plastica. Lo sceriffo locale mi aspetta.',
+    'Laura Palmer, diciassette anni, è stata trovata sulla riva del lago, avvolta nella plastica. Lo sceriffo mi aspetta.',
     'Diane, ricordami di chiedere dove fanno la torta di ciliegie. Ho il presentimento che qui sia dannatamente buona. E il caffè... ne sento già il profumo.'
   ];
 
@@ -711,7 +711,7 @@
     { cond: 'flag:leland_morto', text: 'Torna alla Loggia (Glastonbury Grove).' },
     { cond: 'flag:atto5', text: 'Interroga Leland Palmer alla centrale.' },
     { cond: 'flag:maddy_trovata', text: 'Riferisci a Truman alla centrale.' },
-    { cond: 'flag:gigante2', text: 'Casa Palmer. Poi il lago.' },
+    { cond: 'flag:gigante2', text: 'Parla con Sarah a casa Palmer; poi vai al lago.' },
     { cond: 'flag:atto4', text: 'Stasera: il Roadhouse.' },
     { cond: 'flag:gigante1', text: 'Riferisci a Truman alla centrale.' },
     { cond: 'flag:atto3', text: 'La strada a est: il vagone del treno.' },
@@ -720,7 +720,7 @@
     // lo da' James al Double R, non l'hotel. Senza "diner" qui il giocatore
     // rischia di girare a vuoto tra Truman e Great Northern senza raggiungere
     // mai i 6 indizi che sbloccano l'Atto 3.
-    { cond: 'flag:sogno_fatto', text: 'Ospedale, diner e hotel. Poi Truman.' },
+    { cond: 'flag:sogno_fatto', text: 'Parla con Ronette in ospedale e James al diner.' },
     { cond: null, text: 'Parla con lo sceriffo Truman (a ovest).' }
   ];
 

@@ -265,15 +265,23 @@
     var vp = viewportSize(), landscape = vp.width > vp.height;
     var shortSide = Math.min(vp.width, vp.height);
     var stage = document.getElementById ? document.getElementById('stage') : null;
-    var rect = stage ? stage.getBoundingClientRect() : { left: 0, right: vp.width, top: 0, height: vp.height };
+    var rect = stage ? stage.getBoundingClientRect() : { left: 0, right: vp.width, top: 0, bottom: vp.height, height: vp.height };
     var side = landscape ? Math.max(0, Math.min(rect.left, vp.width - rect.right)) : 0;
     var gutter = landscape && side >= 88;
     var dpad = landscape ? Math.min(144, Math.max(96, side - 24)) : (vp.width < 360 ? 128 : 144);
+    // In portrait, aggancia controller allo schermo. Prima restava fissato al
+    // fondo del telefono, creando oltre 300 px di fascia nera su 390x844.
+    var stageBottom = Number.isFinite(rect.bottom) ? rect.bottom : rect.top + rect.height;
+    var freeBelow = Math.max(0, vp.height - stageBottom - dpad - 16);
+    var portraitGap = Math.max(18, Math.min(82, Math.round(freeBelow * 0.25)));
+    var controlTop = Math.max(stageBottom + 12,
+      Math.min(vp.height - dpad - 16, Math.round(stageBottom + portraitGap)));
     return {
       landscape: landscape, gutter: gutter, dpad: dpad,
       dpadLeft: Math.max(8, Math.round((rect.left - dpad) / 2)),
       dpadTop: Math.max(8, Math.round((vp.height - dpad) / 2)),
       gutterRight: Math.max(8, Math.round((vp.width - rect.right - 64) / 2)),
+      controlTop: controlTop,
       edge: landscape ? 10 : 16,
       a: landscape ? 64 : 72,
       aRight: landscape ? 14 : 20,
@@ -365,6 +373,16 @@
     });
   }
 
+  function placePortraitButton(btn, size, right, top) {
+    css(btn, {
+      width: size + 'px', height: size + 'px',
+      top: top + 'px',
+      right: 'calc(' + right + 'px + env(safe-area-inset-right, 0px))',
+      bottom: 'auto',
+      fontSize: Math.round(size * 0.4) + 'px'
+    });
+  }
+
   function syncControls(force) {
     var mode = interactionMode();
     if (mode === controlMode && !force) return;
@@ -386,6 +404,14 @@
         });
         placeGutterButton(uiA, 64, layout.gutterRight, Math.round(viewportSize().height / 2 - 76));
         placeGutterButton(uiB, 64, layout.gutterRight + 58, Math.round(viewportSize().height / 2 + 18));
+      } else if (!layout.landscape) {
+        css(uiDpad, {
+          left: 'calc(' + layout.edge + 'px + env(safe-area-inset-left, 0px))',
+          top: layout.controlTop + 'px', bottom: 'auto',
+          width: layout.dpad + 'px', height: layout.dpad + 'px', borderRadius: '0'
+        });
+        placePortraitButton(uiA, layout.a, layout.aRight, layout.controlTop + 8);
+        placePortraitButton(uiB, layout.b, layout.bRight, layout.controlTop + 74);
       } else {
         css(uiDpad, {
           left: 'calc(' + layout.edge + 'px + env(safe-area-inset-left, 0px))', top: 'auto',
@@ -426,6 +452,13 @@
           width: choiceLayout.dpad + 'px', height: choiceLayout.dpad + 'px', borderRadius: '0'
         });
         placeGutterButton(uiA, 64, choiceLayout.gutterRight, Math.round(viewportSize().height / 2 - 32));
+      } else if (!choiceLayout.landscape) {
+        css(uiDpad, {
+          left: 'calc(' + choiceLayout.edge + 'px + env(safe-area-inset-left, 0px))',
+          top: choiceLayout.controlTop + 'px', bottom: 'auto',
+          width: choiceLayout.dpad + 'px', height: choiceLayout.dpad + 'px', borderRadius: '0'
+        });
+        placePortraitButton(uiA, choiceLayout.a, choiceLayout.aRight, choiceLayout.controlTop + 36);
       } else {
         css(uiDpad, {
           left: 'calc(' + choiceLayout.edge + 'px + env(safe-area-inset-left, 0px))', top: 'auto',

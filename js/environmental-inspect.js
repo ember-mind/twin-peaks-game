@@ -9,82 +9,84 @@
   function line(slug, text) { return { id: 'env_' + slug, text: text }; }
 
   var ARCHETYPES = {
-    T: line('evergreen', 'Conto tre livelli nella chioma e perdo il tronco sotto gli aghi: buon promemoria sui limiti della visuale.'),
-    S: line('sign', 'Leggo le lettere sull’asse, poi guardo i due pali e l’erba: testo e luogo vanno tenuti insieme.'),
-    w: line('water', 'Per misurare questa riva comincio dal bordo, non dai riflessi: l’acqua cambia continuamente.'),
-    '0': line('mixed_use_shop', 'Tetto bordeaux, insegna crema, vetrina stretta: una piccola bottega con casa al piano superiore.'),
-    '1': line('sheriff_building', 'Per orientarmi nel distretto seguo il blu della porta tra ardesia e mattoni chiari.'),
-    '2': line('diner_building', 'Il tendalino crema tra tetto blu e mattoni rossi mi basta per riconoscere il Double R.'),
-    '3': line('residence_building', 'Guardo scandole, assito e finestre: proporzioni da casa, non da monumento.'),
-    '4': line('great_northern', 'Il Great Northern sembra metà albergo e metà bosco; confronto portico, tronchi e scandole per trovare il confine.'),
-    '5': line('hospital_building', 'Guardo la croce rossa sullo stucco chiaro e abbasso la voce; funzione e stile qui hanno colori diversi.'),
-    '6': line('roadhouse_building', 'Il Roadhouse sembra sparire nelle tavole scure, finché l’insegna rossa non riprende lo sguardo.'),
-    '7': line('bookhouse_building', 'Noto pochissimo vetro nel grigio del Bookhouse; ingresso e finestre restano profondi nella facciata.'),
-    '8': line('lodge_building', 'La Loggia sembra trattenere tutto nel tetto verde e nei mattoni viola; una sola porta rompe la simmetria.'),
-    '9': line('horne_department_store', 'Una H dorata divide il tetto petrolio dalle quattro vetrine. La merce oltre il vetro resta una griglia chiara.'),
-    i: line('interior_wall', 'Passo il dito lungo la cornice del muro e lascio che la stanza mi si sistemi in testa.'),
-    C: line('counter', 'Appoggio due dita al bordo del bancone. Quando ascolto, preferisco occupare meno spazio possibile.'),
-    t: line('table', 'Questo tavolo chiede una tazza di caffè e buona compagnia. Per ora mi basta il caffè.'),
-    h: line('chair', 'Anche vuota, la sedia suggerisce una direzione; seguo schienale alto, seduta chiara e gambe corte.'),
-    K: line('bed', 'Un letto vuoto conserva una forma umana senza imitarla; noto cuscino bianco, coperta rossa e telaio scuro.'),
-    U: line('dresser', 'Conto due cassetti e una maniglia dorata; non apro un comò senza una ragione migliore della curiosità.'),
-    Y: line('sycamore', 'Sicomoro: corteccia pallida, chioma ad anello, passo che rallenta da solo.'),
-    R: line('red_curtain', 'Le pieghe del velluto scendono dritte. Non vedo una finestra, eppure continuo ad aspettarmi aria.'),
-    M: line('statue', 'La statua sembra meno ferma sul pavimento a zig-zag; confronto la figura grigia con la base quadrata.'),
-    v: line('void', 'Nero pieno fino al margine. Qui misurare il vuoto è più onesto che descriverlo.'),
-    G: line('grave', 'La pietra ha sommità arrotondata e base corta. Quasi niente spazio per un nome.'),
-    L: line('streetlamp', 'Alzo gli occhi lungo il lampione, poi torno al piede del palo. Ormai è un movimento automatico.'),
-    P: line('telephone_pole', 'Due isolatori sulla traversa. Li seguo con gli occhi finché il collo mi ricorda di tornare a terra.'),
-    B: line('bench', 'Una panchina vuota offre spazio senza imporre compagnia; noto due fasce di legno e gambe alle estremità.'),
-    F: line('fence', 'Uso gli intervalli tra i pali bianchi per seguire il confine senza perdere di vista l’erba oltre.'),
-    A: line('flowerbed', 'Mi fermo sui tre colori dei fiori, poi conto il cordolo: non tutto ciò che attira lo sguardo è urgente.'),
-    H: line('hydrant', 'L’idrante rosso ha tutta l’aria di aspettare il proprio momento. Gli auguro una giornata tranquilla.'),
-    E: line('mailbox', 'La bandierina rossa rende visibile perfino l’attesa di un messaggio; distinguo scatola, palo e segnale.'),
-    n: line('bush', 'Mi abbasso all’altezza del cespuglio e da qui sparisce molto più mondo del previsto.'),
-    q: line('crate', 'Registro ciò che vedo: tavole ocra, fasce scure, una stecca sul coperchio; il contenuto resta un’ipotesi.')
+    T: line('evergreen', 'Gli aghi serrano la chioma fino a nascondere il tronco; fra questi alberi la distanza sa mentire.'),
+    S: line('sign', 'Le lettere sull’asse hanno perso vernice, i due pali no: il cartello resiste meglio del messaggio.'),
+    w: line('water', 'Al bordo della riva il riflesso si spezza in acqua scura e ricomincia un poco più in là.'),
+    '0': line('mixed_use_shop', 'Una bottega sotto casa: insegna crema, vetrina stretta, due finestre che prendono la luce del tetto.'),
+    '1': line('sheriff_building', 'Porta blu fra ardesia e mattoni chiari: il distretto ha l’aria di un posto dove ogni passo viene sentito.'),
+    '2': line('diner_building', 'Il tendalino crema taglia i mattoni rossi del Double R, e già da fuori il caffè vince la discussione.'),
+    '3': line('residence_building', 'Scandole, assito, finestre basse: dalla casa il calore arriva al vetro e le voci fino alla strada.'),
+    '4': line('great_northern', 'Il Great Northern alza il portico fra grossi tronchi, come se l’albergo avesse imparato a stare nel bosco.'),
+    '5': line('hospital_building', 'La croce rossa sullo stucco chiaro basta a farmi rallentare ogni volta che riconosco l’ospedale.'),
+    '6': line('roadhouse_building', 'Le tavole scure inghiottono il Roadhouse quasi tutto; resta accesa l’insegna rossa.'),
+    '7': line('bookhouse_building', 'Nel grigio del Bookhouse, ingresso e finestre affondano tanto che il poco vetro sembra guardare fuori.'),
+    '8': line('lodge_building', 'Tetto verde, mattoni viola, facciata chiusa: la Loggia concede una porta sola.'),
+    '9': line('horne_department_store', 'La H dorata sorveglia quattro vetrine, con la merce degli Horne disposta in file troppo dritte.'),
+    i: line('interior_wall', 'La cornice corre lungo il muro e torna al punto di partenza. Così imparo la misura della stanza.'),
+    C: line('counter', 'Il bordo del bancone è liscio nel punto dove si appoggiano le mani durante le risposte difficili.'),
+    t: line('table', 'Sul tavolo ci starebbero due tazze, il mio fascicolo e una conversazione tenuta abbastanza bassa.'),
+    h: line('chair', 'Schienale alto, seduta chiara, gambe corte: la sedia vuota guarda già dalla parte giusta.'),
+    K: line('bed', 'Cuscino bianco, coperta rossa, telaio scuro: il letto vuoto conserva il peso al centro.'),
+    U: line('dresser', 'Due cassetti e una maniglia dorata; il comò resta chiuso sotto il palmo della mia mano.'),
+    Y: line('sycamore', 'Il sicomoro porta corteccia pallida e chioma ad anello. Ai suoi piedi il mio passo perde velocità.'),
+    R: line('red_curtain', 'Le tende di velluto scendono dritte, ma una piega continua a muoversi dove l’aria dovrebbe finire.'),
+    M: line('statue', 'La statua grigia poggia su una base quadrata, e il pavimento a zig-zag le ruba ogni equilibrio.'),
+    v: line('void', 'Nero pieno fino al margine: il vuoto comincia esattamente dove finiscono le mie scarpe.'),
+    G: line('grave', 'La lapide arrotondata lascia al nome più spazio che alle date, ed è ancora troppo poco.'),
+    L: line('streetlamp', 'Il lampione sale diritto e la luce si ferma nel vetro, piccola come una stanza vista da fuori.'),
+    P: line('telephone_pole', 'Due isolatori sul palo tengono i fili separati. In alto il vento li fa parlare insieme.'),
+    B: line('bench', 'La panchina ha due fasce di legno consumate in modo diverso e un sedile abbastanza lungo per il silenzio.'),
+    F: line('fence', 'Fra i pali bianchi della staccionata l’erba passa senza chiedere il permesso.'),
+    A: line('flowerbed', 'Tre colori di fiori dentro un cordolo basso: una piccola ostinazione contro tutto quel verde.'),
+    H: line('hydrant', 'L’idrante rosso aspetta sul bordo della strada con la pazienza delle cose utili.'),
+    E: line('mailbox', 'La bandierina rossa della cassetta è abbassata, ma il metallo conserva il suono di ogni messaggio.'),
+    n: line('bush', 'All’altezza del cespuglio, la chioma di foglie chiude quasi tutto il mondo sotto il cielo.'),
+    q: line('crate', 'La cassa ha tavole ocra, fasce scure e una sola stecca sul coperchio; il resto rimane dentro.'),
+    V: line('parked_car', 'L’auto parcheggiata trattiene il cielo sul parabrezza; sotto il cofano il metallo perde calore.'),
+    J: line('arrival_cabin', 'La cabina di legno ha una finestra accesa e un tetto basso, quasi alla stessa altezza degli abeti.')
   };
 
   var MAP_TILE = {
-    'town:T': line('town_evergreen', 'Contare tutte queste chiome sarebbe possibile e poco utile; noto invece come la luce cambia lo stesso verde.'),
-    'woods:T': line('woods_evergreen', 'Distinguo il bordo blu-verde delle chiome solo perché il sottobosco vira al viola.'),
-    'traincar:T': line('traincar_evergreen', 'Confronto il legno vivo degli alberi con le linee rigide del vagone e dei binari.'),
-    'town:G': line('town_grave', 'Tra sei lapidi in due file, tengo i nomi separati dai numeri: è una forma minima di rispetto.'),
-    'town:q': line('town_service_crate', 'Una cassa nella zona di servizio: la giro con lo sguardo e lascio il coperchio dov’è.'),
-    'woods:q': line('woods_crate', 'Quattro angoli dritti in mezzo al bosco. La cassa riesce quasi a fare rumore restando immobile.'),
-    'sheriff:i': line('sheriff_wall', 'Le cornici del distretto dividono bene uffici e passaggi. Il mio rapporto per Harry merita linee altrettanto pulite.'),
-    'palmer:i': line('palmer_wall', 'Nella casa Palmer abbasso la voce e seguo le pareti calde lungo camere e corridoio.'),
-    'hotel_gn:i': line('hotel_wall', 'I pannelli del Great Northern si ripetono lungo il corridoio, così mi oriento dal rumore dei miei passi.'),
-    'hospital:i': line('hospital_wall', 'Conto pochi passi tra pareti, corridoio e camere; in ospedale anche la distanza pesa.'),
-    'diner:i': line('diner_wall', 'Queste cornici appartengono al Double R quanto l’odore del caffè. Il secondo dettaglio è più persuasivo.'),
-    'traincar:i': line('traincar_wall', 'Il vagone stringe le pareti attorno al passaggio e io tengo le spalle raccolte.'),
-    'oej:i': line('oej_wall', 'La parete scura di One Eyed Jack’s assorbe quasi il bordo della stanza. Mi raddrizzo il bavero e resto visibile.'),
-    'roadhouse:i': line('roadhouse_wall', 'Mi fermo contro la parete del Roadhouse e lascio che il palco venga a me.'),
-    'sheriff:C': line('sheriff_desk', 'Due coppie di scrivanie e un passaggio centrale. Se Harry porta le mappe, so già dove stenderle.'),
-    'hotel_gn:C': line('hotel_counter', 'Appoggio il taccuino al bancone del Great Northern, abbastanza largo per una chiave e una risposta breve.'),
-    'diner:C': line('diner_counter', 'Sei moduli di banco al Double R. Abbastanza spazio per caffè, torta e una conversazione tenuta bassa.'),
-    'oej:C': line('oej_counter', 'Poso entrambe le mani sul banco di One Eyed Jack’s, dove preferisco che ogni gesto arrivi con un istante d’anticipo.'),
-    'roadhouse:C': line('roadhouse_counter', 'Dal bancone del Roadhouse il palco sembra più vicino. Mi viene da ordinare caffè, poi ricordo dove sono.'),
-    'sheriff:t': line('sheriff_table', 'Due sedie ai lati del tavolo centrale. Poserei il fascicolo in mezzo e lascerei parlare Harry.'),
-    'palmer:t': line('palmer_table', 'Nella zona giorno dei Palmer, il tavolo quadrato mi ricorda quanto poco spazio serva per riunire una famiglia.'),
-    'diner:t': line('diner_table', 'Al tavolo del Double R c’è posto per due tazze e una fetta di torta, quindi prendo la sedia rivolta alla sala.'),
-    'oej:t': line('oej_gaming_table', 'Sul tavolo da gioco il centro è libero. Istintivamente conto i posti invece delle puntate.'),
-    'roadhouse:t': line('roadhouse_table', 'I tavoli del Roadhouse guardano il palco in file ordinate, ma ne sceglierei uno laterale dove la musica lascia pensare.'),
-    'sheriff:h': line('sheriff_chair', 'Le due sedie ai lati del tavolo suggeriscono un confronto faccia a faccia; noto schienali chiari e legno scuro.'),
-    'redroom:h': line('redroom_chair', 'La seduta color miele sembra quasi domestica; sul pavimento rosso a zig-zag non lo è più.'),
-    'roadhouse:h': line('roadhouse_chair', 'Questa sedia ha già deciso: schienale al muro, occhi al palco. Per una sera accetto il suggerimento.'),
-    'palmer:K': line('laura_bed', 'Guardo il letto di Laura senza cercare significati nei colori: coperta rossa, cuscino bianco, telaio scuro.'),
-    'hotel_gn:K': line('hotel_bed', 'Il letto del Great Northern sembra pronto. Mi siedo sul bordo con le scarpe ai piedi.'),
-    'hospital:K': line('hospital_bed', 'Conto sei letti identici e mi impongo di ricordare che chi li occupa non lo è.'),
-    'palmer:U': line('laura_dresser', 'Registro il comò della camera di Laura senza aprirlo: piano chiaro, fronte bruno, maniglia dorata.'),
-    'hotel_gn:U': line('hotel_dresser', 'Sul comò del Great Northern lascio il taccuino: occupa poco spazio e resta impossibile da dimenticare.')
+    'town:T': line('town_evergreen', 'Fra le chiome del paese la luce cambia verde a ogni passo e lascia i tronchi nella stessa ombra.'),
+    'woods:T': line('woods_evergreen', 'Nel bosco il bordo blu-verde delle chiome emerge soltanto sopra il viola del sottobosco.'),
+    'traincar:T': line('traincar_evergreen', 'Gli alberi crescono storti attorno al vagone, mentre binari e assi insistono a restare diritti.'),
+    'town:G': line('town_grave', 'Sei lapidi in due file; leggo i nomi, lascio passare un respiro, poi le date.'),
+    'town:q': line('town_service_crate', 'La cassa di servizio porta una scheggia chiara sul coperchio, proprio dove la mano cercherebbe presa.'),
+    'woods:q': line('woods_crate', 'La cassa mette quattro angoli dritti in mezzo al bosco e per questo sembra più rumorosa degli alberi.'),
+    'sheriff:i': line('sheriff_wall', 'Le cornici del distretto separano uffici e passaggi. Lucy batte un tasto e il suono attraversa il muro.'),
+    'palmer:i': line('palmer_wall', 'Le pareti calde di casa Palmer accompagnano il corridoio fino alla camera di Laura.'),
+    'hotel_gn:i': line('hotel_wall', 'I pannelli del Great Northern si ripetono lungo il corridoio. Ogni passo ritorna con voce più bassa.'),
+    'hospital:i': line('hospital_wall', 'Fra le pareti dell’ospedale il corridoio è corto, ma nessuna porta sembra vicina.'),
+    'diner:i': line('diner_wall', 'Al Double R, le cornici hanno assorbito tanto caffè da sembrare più scure vicino ai tavoli.'),
+    'traincar:i': line('traincar_wall', 'Le pareti del vagone stringono il passaggio finché le mie spalle sfiorano il metallo.'),
+    'oej:i': line('oej_wall', 'La parete scura di One Eyed Jack’s mangia il bordo della stanza. Il mio bavero chiaro resta in vista.'),
+    'roadhouse:i': line('roadhouse_wall', 'Contro la parete del Roadhouse, il basso passa nel legno e il palco vibra ai margini.'),
+    'sheriff:C': line('sheriff_desk', 'Due coppie di scrivanie nel distretto lasciano al centro un passaggio largo quanto le mappe di Harry.'),
+    'hotel_gn:C': line('hotel_counter', 'Sul bancone del Great Northern una chiave e una domanda occupano quasi lo stesso spazio.'),
+    'diner:C': line('diner_counter', 'Il banco del Double R tiene caffè, torta e gomiti senza costringere nessuna voce ad alzarsi.'),
+    'oej:C': line('oej_counter', 'Sul banco di One Eyed Jack’s tengo le mani aperte, con ogni gesto visibile fino alla punta delle dita.'),
+    'roadhouse:C': line('roadhouse_counter', 'Dal bancone del Roadhouse il palco sembra a portata di mano e il caffè molto più lontano.'),
+    'sheriff:t': line('sheriff_table', 'Il tavolo centrale lascia una sedia per Harry e una per me, con il fascicolo esattamente in mezzo.'),
+    'palmer:t': line('palmer_table', 'Il tavolo quadrato dei Palmer porta quattro sedie vicine e un segno chiaro lasciato da un piatto.'),
+    'diner:t': line('diner_table', 'Sul tavolo del Double R c’è posto per due tazze, una fetta di torta e il mio taccuino ancora chiuso.'),
+    'oej:t': line('oej_gaming_table', 'Il centro del tavolo da gioco è libero. I posti attorno sono consumati da molte attese.'),
+    'roadhouse:t': line('roadhouse_table', 'I tavoli del Roadhouse guardano il palco. Da quello laterale la musica lascia ancora spazio ai pensieri.'),
+    'sheriff:h': line('sheriff_chair', 'Le sedie del distretto stanno faccia a faccia, schienali chiari sopra il legno scuro.'),
+    'redroom:h': line('redroom_chair', 'La sedia color miele potrebbe stare in un salotto, finché il pavimento rosso le passa sotto a zig-zag.'),
+    'roadhouse:h': line('roadhouse_chair', 'La sedia del Roadhouse tiene lo schienale al muro e la seduta rivolta al palco.'),
+    'palmer:K': line('laura_bed', 'Il letto di Laura: coperta rossa, cuscino bianco, telaio scuro, una piega corta sul lato della parete.'),
+    'hotel_gn:K': line('hotel_bed', 'Il letto del Great Northern è teso e pronto. Mi siedo sul bordo senza slacciare le scarpe.'),
+    'hospital:K': line('hospital_bed', 'Sei letti uguali in ospedale, sei coperte tirate fino alla stessa altezza.'),
+    'palmer:U': line('laura_dresser', 'Il comò di Laura resta chiuso: piano chiaro, fronte bruno, maniglia dorata fredda al tatto.'),
+    'hotel_gn:U': line('hotel_dresser', 'Lascio il taccuino sul comò del Great Northern e la maniglia dorata scompare sotto il suo bordo.')
   };
 
   var COORD = {
-    'town:30,30': line('welcome_sign', 'Leggo due volte: «Benvenuti a Twin Peaks — popolazione: 51.201». La precisione della cifra mi resta in mente.'),
-    'town:50,22': line('laura_grave', 'Leggo «LAURA PALMER, 1972-1989» e mi fermo sui diciassette anni: una voce non dovrebbe ridursi a due date.'),
-    'woods:11,16': line('grove_sign', 'Leggo «GLASTONBURY GROVE» nel legno, poi guardo i sicomori: il nome delimita il luogo, non la sensazione.'),
-    'traincar:20,2': line('oej_sign', 'Seguo la freccia sotto «ONE EYED JACKS — oltre il confine»; direzione chiara, giurisdizione meno semplice.'),
-    'traincar:5,6': line('bridge_sign', 'Confronto il cartello di legno con il ponticello: segnaletica modesta per un confine importante.')
+    'town:30,30': line('welcome_sign', '«Benvenuti a Twin Peaks — popolazione: 51.201.» La cifra precisa occupa più spazio del benvenuto.'),
+    'town:50,22': line('laura_grave', '«LAURA PALMER, 1972-1989.» Diciassette anni compressi fra un nome e due date.'),
+    'woods:11,16': line('grove_sign', '«GLASTONBURY GROVE.» Il nome è inciso nel legno; i sicomori lo tengono stretto in cerchio.'),
+    'traincar:20,2': line('oej_sign', 'Sotto «ONE EYED JACKS — oltre il confine», la freccia indica bene la strada e tace sulla giurisdizione.'),
+    'traincar:5,6': line('bridge_sign', 'Il piccolo cartello di legno indica il ponticello, e il ponticello regge molto più di quanto prometta.')
   };
 
   var COORD_CANON = {
@@ -97,7 +99,7 @@
 
   // Stesso carattere grafico, volume diverso: regioni assegnate a coordinate
   // senza duplicare decine di righe authored nel registro.
-  var PALMER_HOUSE = line('palmer_house', 'Guardo scandole di cedro, assito crema e veranda; il lutto non altera la casa Palmer, altera chi la guarda.');
+  var PALMER_HOUSE = line('palmer_house', 'Scandole di cedro, assito crema, veranda: casa Palmer è intatta fino alla finestra della camera di Laura.');
   PALMER_HOUSE.scope = { kind: 'region', mapId: 'town', tile: '3', x0: 40, y0: 4, x1: 44, y1: 6 };
   var ROADHOUSE_STAGE = line('roadhouse_stage', 'Sfioro il bordo del palco del Roadhouse con la punta della scarpa. Preferisco restare nel pubblico.');
   ROADHOUSE_STAGE.scope = { kind: 'region', mapId: 'roadhouse', tile: 'C', x0: 1, y0: 1, x1: 14, y1: 1 };
@@ -112,19 +114,19 @@
   var STATE = [
     {
       mapId: 'woods', tile: 'Y', flag: 'sogno_fatto',
-      entry: line('sycamore_after_dream', 'Riconosco corteccia pallida e chioma ad anello. I sicomori sono gli stessi; è il mio sguardo a non esserlo.')
+      entry: line('sycamore_after_dream', 'Riconosco corteccia pallida e chioma ad anello. Stavolta conto anche lo spazio fra un sicomoro e l’altro.')
     },
     {
       mapId: 'town', tile: 'G', flag: 'leland_morto',
-      entry: line('town_grave_after_leland', 'Ora conosco chi ha ucciso Laura; davanti alle lapidi, la risposta sembra ancora più piccola del danno.')
+      entry: line('town_grave_after_leland', 'Conosco il nome che finirà nel fascicolo. Davanti alle lapidi, non riesco a pronunciarlo.')
     },
     {
       mapId: 'traincar', tile: 'i', clue: 'anello',
-      entry: line('traincar_after_ring', 'Ho trovato l’anello in questo vagone. Guardo di nuovo le pareti: il luogo è uguale, il significato no.')
+      entry: line('traincar_after_ring', 'L’anello non è più sulla traversa. Sulla parete del vagone, la sua ombra continua a sembrarmi al centro.')
     },
     {
       mapId: 'hospital', tile: 'K', flag: 'ronette_bob',
-      entry: line('hospital_bed_after_ronette', 'Ronette ha pronunciato un nome. Conto gli altri letti identici; il suo isolamento appare ancora più netto.')
+      entry: line('hospital_bed_after_ronette', 'Ronette ha pronunciato un nome. Gli altri letti restano uguali; il suo adesso ha una voce.')
     }
   ];
 

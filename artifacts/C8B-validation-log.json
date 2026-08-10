@@ -1,0 +1,18 @@
+{
+ "generated_by": "test/narrative-validate.js",
+ "generated_at": "2026-08-10T17:14:45.128Z",
+ "revision": "C8-B.1",
+ "m8_canonical_paths_executed": 27,
+ "paths_continue_from_deserialized_state": 27,
+ "save_load_checkpoints": 460,
+ "primitives": [
+  "value_transition",
+  "from_derivation",
+  "conditional_pages"
+ ],
+ "from_derivation_contract": "full-source-domain coverage (source domain + current-in-domain + map covers domain + every output in derived domain + failure keeps state byte-identical)",
+ "m8_static_validator_reconciliation": "test/narrative-validate-m8.js = 3550 (era 3548 nella ricostruzione del revisore: +2 gate source_map bible-authority aggiunti nella pulizia C8-A.3, ora inclusi nel bundle con la source-map)",
+ "total_checks": 4354,
+ "failures": 0,
+ "runtime_schema": "1.1.0"
+}

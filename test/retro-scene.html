@@ -97,7 +97,10 @@
   }
   setTimeout(function () {
     GAME.Engine.state.mode = 'play';
-    GAME.Engine.state.flags.intro_town = true;
+    if (q.get('suppressOnEnter') !== '0') GAME.Engine.state.flags.intro_town = true;
+    if (q.get('flags')) q.get('flags').split(',').forEach(function (name) {
+      if (name) GAME.Engine.state.flags[name] = true;
+    });
     GAME.Engine.loadMap(map, x, y, dir);
     if (q.get('dialogue') === '1') {
       var speaker = q.get('speaker') || 'COOPER';

@@ -186,7 +186,7 @@ ok(S().mode === 'title', 'parte dal titolo');
 key('Enter'); pump(16);
 ok(S().mode === 'intro', 'titolo -> intro');
 const introPages = E.introPages();
-ok(introPages.length > GAME.Data.intro.length && introPages.every((p) => p.lines.length <= 5), 'prologo impaginato senza troncare oltre 5 righe');
+ok(introPages.length === GAME.Data.intro.length && introPages.every((p) => p.lines.length <= 7 && p.parts === 1), 'prologo in tre pagine complete, massimo 7 righe');
 const introNorm = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
 const introSource = introNorm(GAME.Data.intro.join(' '));
 const introVisible = introNorm(introPages.flatMap((p) => p.lines).join(' '));

@@ -299,7 +299,8 @@
   /* Testo dialogo composto a risoluzione display. Sotto resta il bitmap
      nativo come fallback; fondi crema coprono soltanto i vecchi glifi. */
   #speaker-name-hires,
-  #speaker-dialogue-hires {
+  #speaker-dialogue-hires,
+  #speaker-advance-hires {
     position: absolute;
     z-index: 9;
     color: #072619;
@@ -340,8 +341,21 @@
   }
   #speaker-dialogue-hires .speaker-line:first-child { top: 0; }
   #speaker-dialogue-hires .speaker-line:last-child { top: 61.111111%; }
+  #speaker-advance-hires {
+    right: 6.875%;
+    top: 91.666667%;
+    width: 32.5%;
+    height: 3.472222%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    white-space: nowrap;
+    font-size: max(10px, calc(var(--native-scale) * 2.8px));
+    line-height: 1;
+  }
   #speaker-name-hires[hidden],
-  #speaker-dialogue-hires[hidden] { display: none; }
+  #speaker-dialogue-hires[hidden],
+  #speaker-advance-hires[hidden] { display: none; }
   #presentation, #gl, #grade, #vignette, #grain,
   #cinematic-ui, #dialogue-ui { display: none !important; }
   #narrative {
@@ -490,6 +504,7 @@
   <img id="speaker-portrait-hires" src="assets/portraits/hires/cooper.png" data-portrait-root="assets/portraits/hires/" alt="" aria-hidden="true" hidden>
   <div id="speaker-name-hires" aria-hidden="true" hidden></div>
   <div id="speaker-dialogue-hires" aria-hidden="true" hidden><span id="speaker-dialogue-line-1" class="speaker-line"></span><span id="speaker-dialogue-line-2" class="speaker-line"></span></div>
+  <div id="speaker-advance-hires" aria-hidden="true" hidden></div>
   <section id="cinematic-ui" aria-live="polite">
     <div id="cinematic-kicker"></div>
     <h1 id="cinematic-title"></h1>
@@ -526,22 +541,22 @@
 <script src="js/chars.js?v=char9"></script>
 <script src="js/houses.js"></script>
 <script src="js/maps.js?v=r76town1"></script>
-<script src="js/data.js?v=11narrative-case-doc1"></script>
-<script src="js/environmental-inspect.js?v=r60i2"></script>
+<script src="js/data.js?v=12qa1"></script>
+<script src="js/environmental-inspect.js?v=12literary"></script>
 <script src="js/retro-font.js?v=r74space1"></script>
 <script src="js/portraits.js?v=r74space1"></script>
 <script src="js/gold-tone.js?v=r69i13"></script>
-<script src="js/engine.js?v=r74space1"></script>
+<script src="js/engine.js?v=r77qa2"></script>
 <script src="js/glue.js?v=gold49n3"></script>
 <script src="js/retro.js?v=r60i2"></script>
 <script src="js/retro-authored.js?v=cast-06b8ed9caf35"></script>
 <script src="js/main.js?v=r74space1"></script>
-<script src="js/touch.js?v=gold54p5-mobile1"></script>
+<script src="js/touch.js?v=r77qa1"></script>
 <script src="js/audio.js"></script>
 <script src="js/narrative-runtime.js?v=2"></script>
 <script src="js/narrative-ui.js?v=gold54p2"></script>
 <script src="js/narrative-notebook.js?v=4"></script>
-<script src="js/narrative-data.gen.js?v=12"></script>
+<script src="js/narrative-data.gen.js?v=13qa1"></script>
 <script src="js/narrative-bootstrap.js"></script>
 <script src="js/narrative-engine-adapter.js?v=7"></script>
 <script src="js/narrative-save.js?v=4"></script>

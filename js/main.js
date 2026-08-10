@@ -31,6 +31,9 @@
         var gameHeight = touch && portrait ? viewport.height * 0.54 : viewport.height;
         var fit = Math.min(viewport.width / 160, gameHeight / 144);
         var scale = fit >= 1 ? Math.max(1, Math.floor(fit)) : fit;
+        // Keep mobile silhouettes native. At large desktop sizes, lift actors
+        // slightly relative to furniture while preserving their pixel style.
+        var actorScale = touch ? 1 : Math.min(1.32, 1 + Math.max(0, scale - 4) * 0.07);
         var stageWidth = Math.floor(160 * scale);
         var stageHeight = Math.floor(144 * scale);
         stage.style.width = stageWidth + 'px';
@@ -40,6 +43,9 @@
         stage.style.top = touch && portrait
           ? Math.max(0, Math.floor((gameHeight - stageHeight) / 2)) + 'px'
           : Math.floor((viewport.height - stageHeight) / 2) + 'px';
+        if (GAME.Sprites && GAME.Sprites.setRuntimeActorScale) {
+          GAME.Sprites.setRuntimeActorScale(actorScale);
+        }
         stage.style.transform = 'none';
       }
       if (GAME.Engine.onResize) GAME.Engine.onResize();

@@ -24,6 +24,8 @@ const checks = {
   touch_ab_available: /buildButton/.test(touch),
   controls_use_safe_areas: /safe-area-inset-left/.test(touch) && /safe-area-inset-right/.test(touch) && /safe-area-inset-bottom/.test(touch),
   controls_resize_for_orientation: /function playLayout/.test(touch) && /landscape/.test(touch),
+  portrait_controls_follow_stage: /var stageBottom =/.test(touch) && /controlTop: controlTop/.test(touch) &&
+    /function placePortraitButton/.test(touch),
   narrative_owns_its_tap: /interactionMode\(\)\.indexOf\('narrative'\) === 0\) return/.test(touch),
   narrative_choice_has_dpad: /mode === 'narrative-choice'/.test(touch) && /showControl\(uiDpad, true/.test(touch),
   narrative_choice_has_confirm: /Conferma scelta/.test(touch) && /buttonFace\(uiA, 'A', 'SCEGLI'\)/.test(touch),

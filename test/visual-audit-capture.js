@@ -171,6 +171,7 @@ function commandFor(entry, common, baseUrl, output, options) {
     args.push(`--ready-prefix=${entry.readyPrefix}`);
     args.push(`--timeout-ms=${entry.timeoutMs || 20000}`);
   } else {
+    args.push('--retro');
     args.push(`--seed=${common.seed}`);
     args.push(`--season=${common.season}`);
     args.push(`--wet=${common.wet}`);

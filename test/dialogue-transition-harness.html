@@ -13,11 +13,12 @@ try { localStorage.removeItem('tp_save'); } catch (_) {}
 </script>
 </head>
 <body>
-<iframe id="production" src="../index.html" title="Twin Peaks production build"></iframe>
+<iframe id="production" title="Twin Peaks production build"></iframe>
 <script>
 (function () {
   var q = new URLSearchParams(location.search);
   var atMs = +(q.get('at') || 0);
+  var productUrl = '../index.html' + (q.get('touch') === '1' ? '?touch=1' : '');
   if ([0, 16, 50, 150, 300, 600].indexOf(atMs) < 0) {
     document.title = 'TP-DIALOGUE-ERROR-invalid-time';
     return;
@@ -31,7 +32,7 @@ try { localStorage.removeItem('tp_save'); } catch (_) {}
 
   function waitForRuntime(win, deadline) {
     if (win.GAME && win.GAME.Engine && win.GAME.Engine.state &&
-        win.GAME.Render3D && win.document.body) {
+        win.GAME.Retro2D && win.document.body) {
       return Promise.resolve();
     }
     if (performance.now() > deadline) {
@@ -47,10 +48,12 @@ try { localStorage.removeItem('tp_save'); } catch (_) {}
     // Stop future simulation submissions. Pixels and DOM reached at the exact
     // checkpoint stay visible while CDP polls the outer ready title.
     win.requestAnimationFrame = function () { return 0; };
-    if (win.GAME.Render3D) win.GAME.Render3D.render = function () {};
     var animations = win.document.getAnimations ? win.document.getAnimations() : [];
     animations.forEach(function (animation) { animation.pause(); });
-    var dialogueUi = win.document.getElementById('dialogue-ui');
+    var dialogueText = win.document.getElementById('speaker-dialogue-hires');
+    var dialogueName = win.document.getElementById('speaker-name-hires');
+    var portrait = win.document.getElementById('speaker-portrait-hires');
+    var advance = win.document.getElementById('speaker-advance-hires');
     var gameCanvas = win.document.getElementById('game');
     window.__TP_DIALOGUE_META__ = {
       ready: true,
@@ -58,11 +61,12 @@ try { localStorage.removeItem('tp_save'); } catch (_) {}
       map: E.state.mapId,
       player: [E.state.player.tx, E.state.player.ty, E.state.player.dir],
       dialogueState: !!E.state.dialogue,
-      htmlDialogueActive: win.document.body.getAttribute('data-dialogue') === 'true',
-      htmlDialogueOpacity: dialogueUi ? win.getComputedStyle(dialogueUi).opacity : null,
-      legacyCanvasOpacity: gameCanvas ? win.getComputedStyle(gameCanvas).opacity : null,
-      speaker: (win.document.getElementById('dialogue-speaker') || {}).textContent || '',
-      text: (win.document.getElementById('dialogue-text') || {}).textContent || ''
+      retroDialogueActive: !!E.state.dialogue,
+      canvasOpacity: gameCanvas ? win.getComputedStyle(gameCanvas).opacity : null,
+      portraitVisible: !!(portrait && !portrait.hidden),
+      speaker: dialogueName ? dialogueName.textContent : '',
+      text: dialogueText ? dialogueText.textContent : '',
+      advanceHint: advance ? advance.textContent : (win.GAME.touchMode ? 'A AVANTI' : 'INVIO AVANTI')
     };
     document.title = 'TP-DIALOGUE-READY-' + String(atMs).padStart(3, '0');
   }
@@ -81,9 +85,8 @@ try { localStorage.removeItem('tp_save'); } catch (_) {}
       };
       E.state.mode = 'play';
       E.state.flags.intro_town = true;
-      // Genuine production interaction path: Cooper immediately west of
-      // Truman, matching test/dialogue-presentation.js.
-      E.loadMap('sheriff', 6, 1, 'right');
+      // Percorso reale 2D: Cooper immediatamente a ovest di Truman.
+      E.loadMap('sheriff', 6, 3, 'right');
 
       // Settle authored room/character assets before defining Enter as t=0.
       setTimeout(function () {
@@ -102,6 +105,7 @@ try { localStorage.removeItem('tp_save'); } catch (_) {}
       }, 1100);
     }).catch(fail);
   });
+  frame.src = productUrl;
 })();
 </script>
 </body>

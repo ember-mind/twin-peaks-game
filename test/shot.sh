@@ -9,6 +9,7 @@
 #   --character-view=side|threeq --export-frames=/tmp/frames
 #   --strip --labels=false --suppress-on-enter
 #   --page=test/presentation-harness.html --stop=01
+#   --retro  (usa il renderer 2D di produzione)
 #   --stop-param=shot --ready-prefix=B4-SHOT-
 #   --timeout-ms=20000 --base-url=http://... --gpu=auto|metal|swiftshader
 set -euo pipefail
@@ -45,6 +46,7 @@ READY_PREFIX=TP-SHOT-READY
 TIMEOUT_MS=15000
 BASE_URL=""
 EXTRA_FLAGS=""
+RETRO=0
 CH="${CHROME_BIN:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
 GPU="${TP_SHOT_GPU:-}"
 
@@ -74,6 +76,7 @@ for arg in "$@"; do
     --timeout-ms=*) TIMEOUT_MS="${arg#*=}" ;;
     --base-url=*) BASE_URL="${arg#*=}" ;;
     --flags=*) EXTRA_FLAGS="${arg#*=}" ;;
+    --retro) RETRO=1 ;;
     --chrome=*) CH="${arg#*=}" ;;
     --gpu=*) GPU="${arg#*=}" ;;
     *) die "opzione sconosciuta: $arg" ;;
@@ -131,7 +134,13 @@ if [[ "$READY" != 1 ]]; then
   exit 2
 fi
 
-if [[ "$PAGE" == "test/shot.html" ]]; then
+if [[ "$RETRO" == 1 ]]; then
+  PAGE="test/retro-scene.html"
+  READY_PREFIX="TP-RETRO-READY"
+  URL="${BASE_URL}/${PAGE}?map=${MAP}&x=${X}&y=${Y}&dir=${DIR}&seed=${SEED}&season=${SEASON}&frame=${FRAME}&frames=${FRAMES}&stepMs=${STEP_MS}&motion=${MOTION}&suppressOnEnter=${SUPPRESS_ON_ENTER}"
+  [[ -n "$WET" ]] && URL="${URL}&wet=${WET}"
+  [[ -n "$EXTRA_FLAGS" ]] && URL="${URL}&flags=${EXTRA_FLAGS}"
+elif [[ "$PAGE" == "test/shot.html" ]]; then
   URL="${BASE_URL}/${PAGE}?map=${MAP}&x=${X}&y=${Y}&dir=${DIR}&seed=${SEED}&season=${SEASON}&frame=${FRAME}&frames=${FRAMES}&stepMs=${STEP_MS}&timeMs=${TIME_MS}&motion=${MOTION}&strip=${STRIP}&labels=${LABELS}&settleMs=${SETTLE_MS}&maxSettleMs=${MAX_SETTLE_MS}&suppressOnEnter=${SUPPRESS_ON_ENTER}"
   [[ -n "$CHARACTER_VIEW" ]] && URL="${URL}&characterView=${CHARACTER_VIEW}"
   [[ -n "$EXPORT_FRAMES_DIR" ]] && URL="${URL}&exportFrames=1"
