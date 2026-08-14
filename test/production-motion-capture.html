@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <title>TP-PRODUCTION-MOTION-BOOT</title>
+  <style>
+    html, body { margin: 0; background: #0b1812; color: #f4edb7; font: 16px monospace; }
+    iframe { width: 1280px; height: 720px; border: 0; display: block; }
+  </style>
+</head>
+<body>
+  <!-- Contenuto catturato: index.html reale. Questa pagina invia soltanto
+       input tastiera e osserva state/canvas; non assegna stato di gioco. -->
+  <iframe id="production" src="../index.html?evidence=production-motion-r102e"></iframe>
+  <script>
+  (function () {
+    'use strict';
+    window.__TP_SHOT_FRAMES__ = [];
+    window.__TP_SHOT_FRAME_META__ = [];
+
+    var iframe = document.getElementById('production');
+    var codes = { up: 'ArrowUp', down: 'ArrowDown', right: 'ArrowRight', left: 'ArrowLeft' };
+
+    function delay(ms) { return new Promise(function (resolve) { setTimeout(resolve, ms); }); }
+    function until(test, timeoutMs) {
+      var start = performance.now();
+      return new Promise(function (resolve, reject) {
+        function poll() {
+          var value;
+          try { value = test(); } catch (_) { value = false; }
+          if (value) { resolve(value); return; }
+          if (performance.now() - start > timeoutMs) { reject(new Error('wait timeout')); return; }
+          requestAnimationFrame(poll);
+        }
+        poll();
+      });
+    }
+    function press(win, code) {
+      win.dispatchEvent(new KeyboardEvent('keydown', { code: code }));
+      win.dispatchEvent(new KeyboardEvent('keyup', { code: code }));
+    }
+
+    async function boot(win, game) {
+      await until(function () { return game.Engine && game.Engine.state && game.Engine.state.mode === 'title'; }, 8000);
+      press(win, 'KeyN');
+      await until(function () { return game.Engine.state.mode === 'intro'; }, 2000);
+      for (var page = 0; page < game.Engine.introPages().length; page++) {
+        press(win, 'Enter');
+        await delay(40);
+      }
+      await until(function () { return game.Engine.state.mode === 'play'; }, 2000);
+      while (game.Engine.state.dialogue) {
+        press(win, 'Enter');
+        await delay(50);
+      }
+    }
+
+    async function traversal(win, game, dir, record) {
+      var state = game.Engine.state;
+      press(win, codes[dir]);
+      await until(function () { return state.player.dir === dir && state.player.moving; }, 2000);
+      var seen = {};
+      while (state.player.moving) {
+        var phase = game.Engine.walkPhase(state.player.moveT);
+        if (record && !seen[phase]) {
+          seen[phase] = true;
+          var canvas = iframe.contentDocument.querySelector('#game');
+          window.__TP_SHOT_FRAMES__.push(canvas.toDataURL('image/png'));
+          window.__TP_SHOT_FRAME_META__.push({
+            source: 'production index.html canvas after real keyboard input',
+            direction: dir,
+            phase: phase,
+            moveT: Number(state.player.moveT.toFixed(4)),
+            player: { tx: state.player.tx, ty: state.player.ty },
+            moving: state.player.moving,
+            canvas: [canvas.width, canvas.height]
+          });
+        }
+        await new Promise(function (resolve) { requestAnimationFrame(resolve); });
+      }
+      if (record && Object.keys(seen).join(',') !== '0,1,2,3') {
+        throw new Error(dir + ' phases=' + Object.keys(seen).join(','));
+      }
+      await delay(80);
+    }
+
+    iframe.addEventListener('load', async function () {
+      try {
+        var win = iframe.contentWindow;
+        var game = win.GAME;
+        await boot(win, game);
+        await traversal(win, game, 'up', true);       // (4,3) -> (4,2)
+        await traversal(win, game, 'down', true);     // (4,2) -> (4,3)
+        await traversal(win, game, 'down', false);    // piazza libera: (4,4)
+        await traversal(win, game, 'right', true);    // (4,4) -> (5,4)
+        await traversal(win, game, 'left', true);     // (5,4) -> (4,4)
+        if (window.__TP_SHOT_FRAMES__.length !== 16) throw new Error('expected 16 frames');
+        document.title = 'TP-PRODUCTION-MOTION-READY';
+      } catch (error) {
+        window.__TP_SHOT_ERROR__ = error && error.stack || String(error);
+        document.title = 'TP-SHOT-ERROR';
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

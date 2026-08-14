@@ -58,27 +58,27 @@
         //         1111111111222222222233333333334444444444555555
         //01234567890123456789012345678901234567890123456789012345
         'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTXTTTTT', // 0  X = sentiero bosco
-        'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTpTTTTT', // 1
+        'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTpTT..T', // 1 ferrovia libera dentro il landmark
         'Twwwww.......T..............777pp...B........T....p....T', // 2 bacino reale sotto cascata
         'T.wwww..4444......T.555555..777pp999......T.......p....T', // 3 ansa del bacino + coppia street
         'Twwww.444444........555555..777pp999....3333.T....p.,..T', // 4 bacino profondo, hotel 6-wide, ospedale a L
-        'T.www.444444..T.......5555..777pp999.T..3333......p.n..T', // 5 ansa bassa lascia un corridoio davanti hotel
-        'T.....444D44..........5D55.E...pp999....33D3......p....T', // 6 porte storiche invariate; mailbox fuori rotta
+        'T.www.444444..T.......5555..ppppp999.T..3333......p.n..T', // 5 Bookhouse 3-high; vicolo e forecourt leggibili
+        'T.....444D44..........5D55.E...ppppp....33D3......p....T', // 6 Horne 3-high; porte storiche invariate
         'T.......ppppppppppppppppppppppppppppppVVpppp......p....T', // 7 berlina FBI sul bordo nord della corsia
         'T.......ppppVVpppppVVppppppppppppppppppppppp......p....T', // 8 auto hotel + ambulanza ospedale
         'T....Tn.pppppppppppppppppppppppppppppppppppp......p..,.T', // 9 bordo sud corsia e tre bocche d'accesso
-        'T.....B.ppp.T..000.00.pppB.T...T........Tppp.T000.p..T.T', // 10 pharmacy 3x3, hardware 2x3, newsstand 3x2
+        'T.....B.ppp.T..000.00.pppB.T...T........Tppp.T000.p....T', // 10 pharmacy 3x3, hardware 2x3, newsstand 3x2
         'T.......ppp.T..000.00.ppp..T..TT.......TTppp..000.p....T', // 11 masse davvero diverse, corridoi invariati
-        'T.......ppp....000.00.ppp....TTT.T....TTTppp......p..T.T', // 12 edicola bassa, hardware stretto
+        'T.......ppp....000.00.ppp....TTT.T....TTTppp......p....T', // 12 edicola bassa, hardware stretto
         'T===L===ppp===========ppp===L==..=======Lppp======p=L==T', // 13 bocche 3-wide verso i crosswalk
         'Trrrrrrr---rrrrrrrrrrr---rrrrrrrrrrrrrrrr---rrrrrrrrrrrr', // 14 crosswalk solo centrati sugli accessi reali
         'Trrrrrrr---rrrrrrrrrrr---rrrrrrrrrrrrrrrr---rrrrrrrrrrrr', // 15
         'T=====PpppL=======P===L====rrr==============Pppp=======T', // 16 bocche ovest/est larghe tre tile
-        'T......ppp111111..........=rrr=..............ppp.......T', // 17 corridoio ovest, distretto traslato a est
-        'T.T....ppp111111...T......=rrr=....T...222222ppp..T....T', // 18 Double R affiancato al corridoio est
-        'T......ppp111111..........=rrr=........222222ppp.......T', // 19
-        'T......ppp11D111..........=rrr=........222D22ppp.......T', // 20 porte storiche 12 / 42
-        'T......pppppppF...........=rrr=..........pppppppFFpFFF.T', // 21 svolte 3-high sotto sheriff e diner
+        'T......ppp11111...........=rrr=..............ppp.......T', // 17 sheriff 5-wide: scala Gen II, piazzale libero a est
+        'T.T....ppp11111....T......=rrr=....T...222222ppp..T....T', // 18 Double R affiancato al corridoio est
+        'T......ppp11111...........=rrr=........222222ppp.......T', // 19
+        'T......ppp11D11...........=rrr=........222D22ppp.......T', // 20 porte storiche 12 / 42
+        'T......ppppp===============rrr=..........pppppppFFpFF..T', // 21 marciapiede Sheriff-porta-strada continuo
         'T.....Bppppppp.VV.q.......=rrr=.......VV.pppppppG.G.G..T', // 22 pattuglia sheriff + auto diner
         'T==========================rrr==============ppppT.p.p..T', // 23 bordo nord passeggiata civica 3-high
         'T==========================rrr===============pppG=G=G==T', // 24 interno passeggiata senza effetto trincea
@@ -104,8 +104,10 @@
         '15,12': '.', '16,12': '.', '17,12': '.', '19,12': '.', '20,12': '.',
         '4,13': '=', '28,13': '=', '40,13': '=', '52,13': '=',
         '6,16': '=', '10,16': '=', '18,16': '=', '22,16': '=', '44,16': '=',
-        '6,22': '.', '15,22': '.', '16,22': '.', '18,22': '.',
+        '6,22': '.', '15,22': '=', '16,22': '=', '18,22': '.',
         '38,22': '.', '39,22': '.', '12,8': 'p', '13,8': 'p', '19,8': 'p', '20,8': 'p',
+        '48,22': '.', '50,22': '.', '52,22': '.',
+        '48,24': '=', '50,24': '=', '52,24': '=',
         '33,28': 'u', '35,28': '=', '24,29': '.', '34,29': 'u',
         '25,30': '.', '30,30': 'u', '33,30': 'u', '51,30': '.'
       },

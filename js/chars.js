@@ -108,6 +108,40 @@
     };
   });
 
+  /* R101c — firme di silhouette per il renderer 16x16. Tre viste sorgente:
+   * sinistra resta lo specchio esatto della destra. I nomi descrivono una
+   * forma riconoscibile, non un colore; retro-authored le applica prima di
+   * chiudere il contorno. */
+  var PIXEL16 = {
+    cooper:   ['swept-crown-cuff','swept-nape-cuff','forward-quiff-cuff'],
+    truman:   ['sheriff-brim','sheriff-brim','sheriff-brim'],
+    lucy:     ['high-bun','rear-bun','rear-bun'],
+    andy:     ['long-hatless','long-hatless','long-hatless'],
+    hawk:     ['hair-tails','hair-tails','rear-curtain'],
+    sarah:    ['shawl-hunch','shawl-hunch','shawl-hunch'],
+    leland:   ['silver-long-neck','silver-long-neck','silver-long-neck'],
+    norma:    ['apron-shelf','apron-shelf','apron-shelf'],
+    shelly:   ['bell-apron','bell-apron','bell-apron'],
+    loglady:  ['log-crossbar','log-crossbar','log-projection'],
+    bobby:    ['broad-pompadour','broad-pompadour','broad-pompadour'],
+    donna:    ['hair-cape','hair-cape','rear-tail'],
+    jacoby:   ['bald-side-tufts','bald-side-tufts','bald-rear-tuft'],
+    audrey:   ['square-bob','v-nape','rear-bob-hook'],
+    mfap:     ['short-formal','short-formal','short-formal'],
+    laura:    ['spectral-gown','spectral-gown','spectral-gown'],
+    gerard:   ['one-arm-waistcoat','one-arm-waistcoat','one-arm-waistcoat'],
+    benhorne: ['block-suit','block-suit','block-suit'],
+    giant:    ['elongated-uncanny','elongated-uncanny','elongated-uncanny'],
+    maddy:    ['temple-tabs','temple-tabs','temple-tabs'],
+    bob:      ['wild-mane','wild-mane','wild-mane'],
+    james:    ['narrow-pompadour','narrow-pompadour','forward-pompadour'],
+    jacques:  ['barrel-waistcoat','barrel-waistcoat','barrel-waistcoat'],
+    ronette:  ['low-hair-lock','low-hair-lock','low-hair-lock']
+  };
+  Object.keys(PIXEL16).forEach(function (name) {
+    S.CHARS[name].pixel16 = { down: PIXEL16[name][0], up: PIXEL16[name][1], side: PIXEL16[name][2] };
+  });
+
   S.drawChar = function (ctx, name, x, y, dir, frame, moving, t) {
     var c = S.CHARS[name] || S.CHARS.cooper;
     var motion = c.motion || { archetype: 'tailored', phase: 0 };

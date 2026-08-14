@@ -18,6 +18,7 @@ assert.strictEqual(cast.readUInt32BE(20), 240, 'five 48px cast rows');
 assert(/rows: \['down', 'up', 'right'\]/.test(authored), 'direction rows declared');
 assert(/columns: \['idle', 'stepA', 'stepB'\]/.test(authored), 'animation columns declared');
 assert(/ctx\.scale\(-1, 1\)/.test(authored), 'left direction mirrors right');
-assert(/castWalkSheet\.complete/.test(authored), 'procedural fallback remains until cast image loads');
+assert(/var CAST_RENDERER = 'native-authored-r102e'/.test(authored), 'native-authored cast is production renderer');
+assert(!/if \(drawCastWalkSheet\(ctx, name/.test(authored), 'legacy atlas cannot replace Cooper after load');
 
-console.log('COOPER-SPRITE-PASS 9/9');
+console.log('COOPER-ASSET-CONTRACT-PASS — dimensions/provenance only; visual gate separate');

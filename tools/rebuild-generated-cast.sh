@@ -54,17 +54,11 @@ node - "$tag" <<'NODE'
 const fs = require('node:fs');
 const tag = process.argv[2];
 const authoredPath = 'js/retro-authored.js';
-const indexPath = 'index.html';
 const authored = fs.readFileSync(authoredPath, 'utf8').replace(
   /cast-walkcycles-16\.png\?v=[^']+/,
   `cast-walkcycles-16.png?v=${tag}`
 );
-const index = fs.readFileSync(indexPath, 'utf8').replace(
-  /retro-authored\.js\?v=[^"]+/,
-  `retro-authored.js?v=${tag}`
-);
 fs.writeFileSync(authoredPath, authored);
-fs.writeFileSync(indexPath, index);
 NODE
 
 node test/cast-sprite-sheet.js
@@ -72,4 +66,4 @@ node test/retro-production.js >/dev/null
 
 find "$work" -type f -delete
 rmdir "$work"
-echo "CAST REBUILT: 24 characters, 216 frames, cache tag $tag"
+echo "ARCHIVE CAST REBUILT: 24 characters, 216 frames, asset tag $tag; production remains native-authored"

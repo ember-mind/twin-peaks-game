@@ -19,6 +19,12 @@
     scale = Number(scale);
     runtimeActorScale = isFinite(scale) ? Math.max(1, Math.min(1.32, scale)) : 1;
   };
+  /* R101 — renderer produzione unico. I master ImageGen ridotti 1254→16 px
+   * con point sampling producevano sagome mediane 9×16, sei toni e molti
+   * micro-cluster. Il generatore qui sotto nasce invece direttamente sulla
+   * griglia 16×16 di Crystal: tre toni, contorno nero, fasce coerenti.
+   * L'atlante resta archivio comparativo/rebuild, mai sorgente runtime. */
+  var CAST_RENDERER = 'native-authored-r102e';
   var CAST_SHEET_SRC = 'assets/sprites/cast-walkcycles-16.png?v=cast-06b8ed9caf35';
   var CAST_SHEET_ORDER = [
     'cooper', 'truman', 'lucy', 'andy', 'hawk',
@@ -28,14 +34,6 @@
     'bob', 'james', 'jacques', 'ronette'
   ];
   var castWalkSheet = null;
-
-  /* Atlante 5x5 del cast. Ogni blocco 48x48 contiene un master 3x3:
-   * righe fronte/spalle/destra, colonne fermo/passo A/passo B. Il renderer
-   * conserva gli sprite authored precedenti finche' il PNG non e' pronto. */
-  if (typeof G.Image === 'function') {
-    castWalkSheet = new G.Image();
-    castWalkSheet.src = CAST_SHEET_SRC;
-  }
 
   var C = {
     ink: '#202820', dark: '#385840', mid: '#689848', grass: '#a8d068', hi: '#e0e8a0',
@@ -378,88 +376,78 @@
     R(ctx, x + 7, baseY + 23, 8, 2, back ? '#34572d' : '#072619');
   }
 
+  var ARRIVAL_CONTACT_BOUNDS = {
+    shop: [32, 0, 32, 48], cabin: [96, 0, 48, 48],
+    mailbox: [64, 16, 16, 16], car: [96, 48, 32, 16]
+  };
+
   function arrivalShop(ctx) {
-    var x = 30, y = 2;
-    R(ctx, x + 1, y, 32, 36, '#072619'); R(ctx, x, y + 1, 34, 34, '#072619');
-    R(ctx, x + 3, y + 2, 28, 14, '#9aab69');
-    R(ctx, x + 5, y + 4, 24, 10, '#6a8a43');
-    R(ctx, x + 6, y + 5, 1, 1, '#dcd9a9'); R(ctx, x + 26, y + 12, 2, 1, '#34572d');
-    /* insegna-oggetto: telefono nero, non lettera placeholder */
-    R(ctx, x + 14, y + 5, 7, 7, '#072619'); R(ctx, x + 16, y + 3, 5, 3, '#34572d');
-    R(ctx, x + 16, y + 6, 3, 3, '#9aab69'); R(ctx, x + 13, y + 11, 10, 2, '#34572d');
-    R(ctx, x + 2, y + 17, 30, 3, '#34572d');
-    for (var i = 0; i < 10; i++) R(ctx, x + 3 + i * 3, y + 20, 2, 4, i & 1 ? '#9aab69' : '#dcd9a9');
-    R(ctx, x + 3, y + 24, 28, 2, '#072619');
-    R(ctx, x + 3, y + 26, 28, 9, '#6a8a43');
-    R(ctx, x + 4, y + 27, 26, 1, '#9aab69');
-    /* Ombra dell'awning e muratura sfalsata: profondita' a 1 px. */
-    R(ctx, x + 3, y + 25, 28, 1, '#34572d');
-    [[4,28,3],[16,29,4],[5,33,3],[17,32,2],[27,29,2]].forEach(function (b) {
-      R(ctx, x + b[0], y + b[1], b[2], 1, '#34572d');
-    });
-    R(ctx, x + 5, y + 27, 11, 7, '#072619'); R(ctx, x + 7, y + 28, 7, 4, '#9aab69');
-    R(ctx, x + 10, y + 28, 1, 4, '#34572d'); R(ctx, x + 7, y + 30, 7, 1, '#34572d');
-    R(ctx, x + 20, y + 26, 9, 10, '#072619'); R(ctx, x + 22, y + 28, 5, 8, '#34572d');
-    R(ctx, x + 26, y + 32, 1, 1, '#dcd9a9');
+    var b = ARRIVAL_CONTACT_BOUNDS.shop, x = b[0], y = b[1], i;
+    /* Base e soglia coincidono con le tre righe solide `9`; solo il cornicione
+     * sporge di 2 px, come overhang non calpestabile. Porta chiaramente chiusa. */
+    R(ctx, x - 2, y + 2, 36, 18, '#072619'); R(ctx, x, y + 4, 32, 14, '#9aab69');
+    R(ctx, x + 3, y + 6, 26, 10, '#6a8a43');
+    R(ctx, x + 12, y + 7, 8, 7, '#072619'); R(ctx, x + 14, y + 5, 5, 3, '#34572d');
+    R(ctx, x + 14, y + 8, 4, 3, '#9aab69'); R(ctx, x + 11, y + 14, 11, 2, '#34572d');
+    R(ctx, x - 1, y + 19, 34, 3, '#072619');
+    for (i = 0; i < 11; i++) R(ctx, x + i * 3, y + 22, 2, 5, i & 1 ? '#9aab69' : '#dcd9a9');
+    R(ctx, x, y + 27, 32, 21, '#072619'); R(ctx, x + 2, y + 29, 28, 17, '#6a8a43');
+    for (i = 3; i < 29; i += 8) R(ctx, x + i, y + 31 + (i & 1), 5, 1, '#34572d');
+    R(ctx, x + 3, y + 31, 12, 10, '#072619'); R(ctx, x + 5, y + 33, 8, 6, '#9aab69');
+    R(ctx, x + 8, y + 33, 1, 6, '#34572d'); R(ctx, x + 5, y + 36, 8, 1, '#34572d');
+    R(ctx, x + 19, y + 29, 10, 18, '#072619'); R(ctx, x + 21, y + 32, 6, 15, '#34572d');
+    R(ctx, x + 26, y + 40, 1, 1, '#dcd9a9'); R(ctx, x, y + 46, 32, 2, '#34572d');
   }
 
   function arrivalCabinHero(ctx) {
-    var x = 89, peak = 111;
-    /* timpano a gradini, 44x12 */
-    for (var y = 0; y < 11; y++) {
+    var b = ARRIVAL_CONTACT_BOUNDS.cabin, x = b[0], peak = x + 24, y, i;
+    /* Corpo 48x48 identico al footprint J. Tetto sporge solo in alto/lato;
+     * veranda e gradini terminano sulla base solida y47. */
+    for (y = 0; y < 12; y++) {
       var half = 3 + y * 2;
-      R(ctx, peak - half, y, Math.min(44, half * 2), 1, '#072619');
-      if (y > 2) R(ctx, peak - half + 3, y, Math.max(2, Math.min(38, half * 2 - 6)), 1, y & 1 ? '#34572d' : '#6a8a43');
+      R(ctx, peak - half, y, Math.min(52, half * 2), 1, '#072619');
+      if (y > 2) R(ctx, peak - half + 3, y, Math.max(2, Math.min(46, half * 2 - 6)), 1, y & 1 ? '#34572d' : '#6a8a43');
     }
-    /* assi del timpano e chiodi, seguono gable invece di bande vuote */
-    R(ctx, x + 17, 4, 1, 6, '#9aab69'); R(ctx, x + 27, 6, 1, 4, '#34572d');
-    R(ctx, x + 11, 8, 3, 1, '#6a8a43'); R(ctx, x + 31, 8, 2, 1, '#9aab69');
-    R(ctx, x, 10, 44, 4, '#072619'); R(ctx, x + 2, 12, 40, 2, '#9aab69');
-    R(ctx, x + 3, 14, 38, 18, '#6a8a43');
-    for (y = 16; y < 32; y += 4) R(ctx, x + 3, y, 38, 1, '#34572d');
-    R(ctx, x + 4, 17, 2, 1, '#9aab69'); R(ctx, x + 37, 29, 2, 1, '#34572d');
-    /* finestre gemelle, porta centrale */
-    [5, 29].forEach(function (dx) {
+    R(ctx, x, 11, 48, 29, '#072619'); R(ctx, x + 2, 13, 44, 25, '#6a8a43');
+    for (y = 15; y < 38; y += 4) R(ctx, x + 2, y, 44, 1, '#34572d');
+    R(ctx, x + 18, 5, 1, 6, '#9aab69'); R(ctx, x + 30, 7, 1, 4, '#34572d');
+    [5, 34].forEach(function (dx) {
       R(ctx, x + dx, 18, 9, 9, '#072619'); R(ctx, x + dx + 2, 20, 5, 5, '#dcd9a9');
       R(ctx, x + dx + 4, 20, 1, 5, '#34572d'); R(ctx, x + dx + 2, 22, 5, 1, '#34572d');
     });
-    R(ctx, x + 17, 14, 11, 18, '#072619'); R(ctx, x + 20, 17, 6, 14, '#34572d');
-    R(ctx, x + 25, 24, 1, 1, '#dcd9a9');
-    /* veranda piena: balaustre laterali e tre gradini centrali */
-    R(ctx, x + 1, 29, 42, 3, '#072619');
-    R(ctx, x + 2, 32, 14, 6, '#34572d'); R(ctx, x + 29, 32, 13, 6, '#34572d');
-    for (var bx = 3; bx < 16; bx += 3) R(ctx, x + bx, 30, 1, 7, '#9aab69');
-    for (bx = 30; bx < 43; bx += 3) R(ctx, x + bx, 30, 1, 7, '#9aab69');
-    R(ctx, x + 17, 30, 11, 2, '#dcd9a9');
-    R(ctx, x + 15, 32, 15, 2, '#9aab69');
-    R(ctx, x + 13, 34, 19, 2, '#6a8a43');
-    R(ctx, x + 13, 36, 19, 1, '#072619');
-    R(ctx, x + 15, 30, 1, 7, '#072619'); R(ctx, x + 29, 30, 1, 7, '#072619');
-    /* texture corta sotto veranda: densita senza cambiare bbox */
-    for (var tx = 3; tx < 41; tx += 4) R(ctx, x + tx, 34 + ((tx >> 2) & 1), 2, 1, '#6a8a43');
+    /* Porta serrata: nessun tile D e nessuna soglia chiara d'invito. */
+    R(ctx, x + 19, 14, 11, 25, '#072619'); R(ctx, x + 22, 17, 6, 21, '#34572d');
+    R(ctx, x + 27, 29, 1, 1, '#dcd9a9'); R(ctx, x + 21, 19, 8, 2, '#072619');
+    R(ctx, x, 33, 48, 4, '#072619');
+    for (i = 3; i < 17; i += 3) R(ctx, x + i, 34, 1, 7, '#9aab69');
+    for (i = 34; i < 47; i += 3) R(ctx, x + i, 34, 1, 7, '#9aab69');
+    R(ctx, x + 2, 37, 15, 4, '#34572d'); R(ctx, x + 33, 37, 13, 4, '#34572d');
+    R(ctx, x + 18, 37, 14, 3, '#dcd9a9');
+    R(ctx, x + 16, 40, 18, 3, '#9aab69'); R(ctx, x + 14, 43, 22, 3, '#6a8a43');
+    R(ctx, x + 12, 46, 26, 2, '#072619');
   }
 
   function arrivalMailboxHero(ctx) {
-    R(ctx, 67, 29, 2, 8, '#34572d'); R(ctx, 64, 24, 8, 7, '#072619');
-    R(ctx, 65, 25, 6, 4, '#6a8a43'); R(ctx, 65, 26, 5, 1, '#9aab69');
-    R(ctx, 71, 24, 2, 5, '#072619');
+    var b = ARRIVAL_CONTACT_BOUNDS.mailbox, x = b[0], y = b[1];
+    R(ctx, x + 6, y + 6, 2, 10, '#34572d'); R(ctx, x, y + 1, 10, 8, '#072619');
+    R(ctx, x + 1, y + 2, 8, 5, '#6a8a43'); R(ctx, x + 1, y + 3, 6, 1, '#9aab69');
+    R(ctx, x + 9, y + 1, 3, 6, '#072619'); R(ctx, x + 4, y + 15, 7, 1, '#072619');
   }
 
   function arrivalCarHero(ctx) {
-    var x = 93, y = 39;
-    R(ctx, x + 3, y + 5, 29, 9, '#072619'); R(ctx, x, y + 8, 35, 6, '#072619');
-    R(ctx, x + 9, y + 1, 17, 7, '#072619');
-    /* Tetto, parabrezza, montante e lunotto restano quattro volumi distinti. */
-    R(ctx, x + 11, y + 2, 13, 1, '#6a8a43');
-    R(ctx, x + 10, y + 3, 7, 4, '#9aab69'); R(ctx, x + 19, y + 3, 6, 4, '#9aab69');
-    R(ctx, x + 17, y + 3, 2, 5, '#34572d');
-    R(ctx, x + 3, y + 7, 29, 6, '#6a8a43');
-    R(ctx, x + 1, y + 9, 6, 3, '#9aab69'); R(ctx, x + 29, y + 8, 5, 3, '#dcd9a9');
-    R(ctx, x + 14, y + 8, 1, 5, '#34572d'); R(ctx, x + 22, y + 8, 1, 5, '#34572d');
-    R(ctx, x + 4, y + 11, 8, 3, '#eee6b5'); R(ctx, x + 24, y + 11, 8, 3, '#eee6b5');
-    R(ctx, x + 5, y + 11, 6, 5, '#072619'); R(ctx, x + 25, y + 11, 6, 5, '#072619');
-    R(ctx, x + 7, y + 13, 2, 2, '#9aab69'); R(ctx, x + 27, y + 13, 2, 2, '#9aab69');
-    R(ctx, x + 2, y + 14, 32, 2, '#34572d'); R(ctx, x + 6, y + 16, 25, 1, '#9aab69');
+    var b = ARRIVAL_CONTACT_BOUNDS.car, x = b[0], y = b[1];
+    /* Tetto può sporgere sopra il footprint; carrozzeria, ruote e contatto
+     * restano interamente nelle due celle V x96..127, y48..63. */
+    R(ctx, x + 7, y - 5, 19, 7, '#072619'); R(ctx, x + 9, y - 4, 15, 1, '#6a8a43');
+    R(ctx, x + 8, y - 3, 7, 4, '#9aab69'); R(ctx, x + 17, y - 3, 7, 4, '#9aab69');
+    R(ctx, x + 15, y - 3, 2, 5, '#34572d');
+    R(ctx, x + 2, y, 28, 13, '#072619'); R(ctx, x, y + 4, 32, 8, '#072619');
+    R(ctx, x + 3, y + 2, 26, 8, '#6a8a43');
+    R(ctx, x + 1, y + 5, 6, 3, '#9aab69'); R(ctx, x + 27, y + 4, 4, 3, '#dcd9a9');
+    R(ctx, x + 13, y + 3, 1, 7, '#34572d'); R(ctx, x + 21, y + 3, 1, 7, '#34572d');
+    R(ctx, x + 4, y + 9, 7, 5, '#072619'); R(ctx, x + 22, y + 9, 7, 5, '#072619');
+    R(ctx, x + 6, y + 11, 3, 2, '#9aab69'); R(ctx, x + 24, y + 11, 3, 2, '#9aab69');
+    R(ctx, x + 1, y + 13, 30, 3, '#34572d'); R(ctx, x + 5, y + 14, 22, 1, '#9aab69');
   }
 
   function arrivalGrassCluster(ctx, x, y, variant) {
@@ -488,9 +476,18 @@
     });
     /* masse continue: foresta, non collezione di icone isolate */
     R(ctx, 0, 0, 20, 95, '#34572d'); R(ctx, 143, 0, 17, 95, '#34572d');
-    R(ctx, 0, 78, 59, 17, '#34572d'); R(ctx, 103, 78, 57, 17, '#34572d');
+    /* Riga 5 = TT......TT: la massa di contatto segue le due coppie T.
+     * Chiome alte possono sporgere pochi pixel, mai riempire il corridoio. */
+    R(ctx, 0, 78, 32, 17, '#34572d'); R(ctx, 128, 78, 32, 17, '#34572d');
+    /* Imbuto sud: contatto forestale identico alle righe T 6–8. Prima il
+     * fondale finiva a y95, lasciando 49px crema sopra collisioni d'albero. */
+    R(ctx, 0, 96, 48, 16, '#34572d'); R(ctx, 112, 96, 48, 16, '#34572d');
+    R(ctx, 0, 112, 64, 16, '#34572d'); R(ctx, 96, 112, 64, 16, '#34572d');
+    R(ctx, 0, 128, 64, 16, '#34572d'); R(ctx, 80, 128, 80, 16, '#34572d');
     /* Branch bands su masse: niente stipple casuale. */
-    [[0,0,20,95,3],[143,0,17,95,11],[0,76,61,19,19],[99,76,61,19,29]].forEach(function (q) {
+    [[0,0,20,95,3],[143,0,17,95,11],[0,76,32,19,19],[128,76,32,19,29],
+     [0,96,48,16,31],[112,96,48,16,37],[0,112,64,16,41],[96,112,64,16,43],
+     [0,128,64,16,47],[80,128,80,16,53]].forEach(function (q) {
       for (var fy = q[1] + 1; fy < q[1] + q[3]; fy += 6) {
         for (var fx = q[0] + 1; fx < q[0] + q[2]; fx += 11) {
           var phase = hash(fx, fy, q[4]);
@@ -510,9 +507,13 @@
     [17,29,41,101,114,128].forEach(function (fx, i) {
       arrivalFir(ctx, fx, 48 + (i & 1) * 4, 35, true);
     });
-    [-8,2,12,22,32,42,52,93,103,113,123,133,143,153].forEach(function (fx, i) {
+    [-8,2,12,128,138,148,158].forEach(function (fx, i) {
       arrivalFir(ctx, fx, 60 + (i % 3) * 5, 38 - (i & 1) * 4, i % 3 === 0);
     });
+    [[0,90],[16,93],[32,90],[112,92],[128,89],[144,93],
+     [0,106],[16,109],[32,105],[48,109],[96,107],[112,104],[128,109],[144,106],
+     [0,122],[16,119],[32,123],[48,120],[80,121],[96,118],[112,123],[128,119],[144,122]]
+      .forEach(function (p, i) { arrivalFir(ctx, p[0], p[1], 36 + (i & 3), i % 4 === 0); });
     arrivalShop(ctx); arrivalCabinHero(ctx); arrivalMailboxHero(ctx); arrivalCarHero(ctx);
     ctx.restore();
   };
@@ -541,6 +542,41 @@
        * cornice 65-75% scura del riferimento, senza filtro o nuova logica. */
       (sycamore ? { 1: '#a8be72', 2: '#63834a', 3: '#31543a', 4: '#31543a' } :
                    { 1: '#63834a', 2: '#31543a', 3: '#183225', 4: '#183225' });
+    /* Nelle fasce con almeno tre vicini, una chioma arretrata continua
+     * riempie i grandi fori crema tra conifere. Alberi isolati conservano
+     * invece terreno visibile e silhouette autonoma. */
+    function treeNeighborCount(qx, qy) {
+      var count = 0;
+      if (cell(rows, qx - 1, qy) === 'T' || cell(rows, qx - 1, qy) === 'Y') count++;
+      if (cell(rows, qx + 1, qy) === 'T' || cell(rows, qx + 1, qy) === 'Y') count++;
+      if (cell(rows, qx, qy - 1) === 'T' || cell(rows, qx, qy - 1) === 'Y') count++;
+      if (cell(rows, qx, qy + 1) === 'T' || cell(rows, qx, qy + 1) === 'Y') count++;
+      return count;
+    }
+    var treeNeighbors = treeNeighborCount(tx, ty);
+    if (paleGround && !night && treeNeighbors >= 3) {
+      R(ctx, x, y - 8, 16, 24, treePalette[3]);
+      R(ctx, x + 2, y - 6, 8, 3, treePalette[2]);
+      R(ctx, x + 9, y - 2, 7, 3, treePalette[1]);
+      R(ctx, x + 1, y + 5, 11, 3, treePalette[2]);
+      R(ctx, x + 6, y + 11, 10, 2, treePalette[1]);
+      /* Mezze maschere ai passaggi denso→rado. Intaccano soltanto 1–2px
+       * del bordo esterno: l'interno resta chiuso, il limite non è un
+       * rettangolo 16px perfetto o una siepe a baseline continua. */
+      var edgePhase = hash(tx, ty, 0x631) & 3;
+      if (treeNeighborCount(tx - 1, ty) < 3) {
+        R(ctx, x, y - 5 + edgePhase, 1, 2, '#eee6b5');
+        R(ctx, x, y + 5 + edgePhase, 2, 2, '#eee6b5');
+      }
+      if (treeNeighborCount(tx + 1, ty) < 3) {
+        R(ctx, x + 15, y - 2 + edgePhase, 1, 2, '#eee6b5');
+        R(ctx, x + 14, y + 8 - edgePhase, 2, 2, '#eee6b5');
+      }
+      if (treeNeighborCount(tx, ty + 1) < 3) {
+        R(ctx, x + 2 + edgePhase * 2, y + 15, 5, 1, '#eee6b5');
+        R(ctx, x + 10 - edgePhase, y + 14, 2, 2, '#eee6b5');
+      }
+    }
     /* Conifera 16x24: silhouette Gen II stretta, terrazze irregolari.
      * Selezione via hash(tx,ty) invece della tabella 4x4 fissa: la vecchia
      * tabella ripeteva lo stesso profilo ogni 2 tile (passo 32 px, la
@@ -552,10 +588,11 @@
      * variano tile per tile, come le conifere sfalsate e sovrapposte del
      * riferimento, senza introdurre rumore nel terreno sottostante. */
     var h = hash(tx, ty, sycamore ? 71 : 43);
-    var shapeIdx = h % 3;
-    var flip = ((h >>> 2) & 1) === 1;
-    var dx = TREE_DX[(h >>> 4) & 3];
-    var dy = TREE_DY[(h >>> 6) & 3];
+    var treePhase = ((tx + (ty & 1) * 3) % 4 + 4) % 4;
+    var shapeIdx = [0, 1, 0, 2][treePhase];
+    var flip = treePhase === 2;
+    var dx = [0, -1, -2, -1][treePhase];
+    var dy = [0, -2, -1, -3][treePhase];
     if (night) {
       /* Dither terreno con un colore gia' presente nella palette albero:
        * quattro colori totali per tile, non una seconda palette sottostante. */
@@ -576,6 +613,20 @@
     }
     paint(ctx, shapeIdx === 0 ? TREE_CANOPY : (shapeIdx === 1 ? TREE_CANOPY_B : TREE_CANOPY_C),
       treePalette, x + dx, y - 8 + dy, flip);
+    /* Tre silhouette esterne, non solo tre riempimenti interni. Rami corti
+     * spezzano cadenza 16/32px senza chiudere i varchi chiari del bosco. */
+    if (!night) {
+      if (shapeIdx === 0) {
+        R(ctx, x + dx - 2, y + 3 + dy, 4, 2, treePalette[3]);
+        R(ctx, x + dx + 13, y + 10 + dy, 4, 1, treePalette[2]);
+      } else if (shapeIdx === 1) {
+        R(ctx, x + dx + 14, y + 1 + dy, 3, 2, treePalette[3]);
+        R(ctx, x + dx - 1, y + 11 + dy, 4, 2, treePalette[2]);
+      } else {
+        R(ctx, x + dx - 2, y + 7 + dy, 5, 1, treePalette[2]);
+        R(ctx, x + dx + 12, y + 13 + dy, 5, 2, treePalette[3]);
+      }
+    }
     /* Cluster di aghi in tre profondita. La sagoma resta quella solida del
      * metatile, ma la chioma non legge piu' come icona a riempimento unico. */
     if (!night) {
@@ -583,8 +634,10 @@
       R(ctx, x + dx + 4 + needle, y - 3 + dy, 4, 1, treePalette[1]);
       R(ctx, x + dx + 2 + ((needle + 1) & 3), y + 3 + dy, 6, 2, treePalette[2]);
       R(ctx, x + dx + 8 - needle, y + 9 + dy, 5, 1, treePalette[1]);
-      R(ctx, x + dx + 5 + (needle & 1), y + 14 + dy, 7, 2, treePalette[3]);
-      R(ctx, x + dx + 6 + ((needle + 2) & 3), y + 15 + dy, 3, 1, treePalette[1]);
+      if (!paleGround) {
+        R(ctx, x + dx + 5 + (needle & 1), y + 14 + dy, 7, 2, treePalette[3]);
+        R(ctx, x + dx + 6 + ((needle + 2) & 3), y + 15 + dy, 3, 1, treePalette[1]);
+      }
     }
     /* Connessioni sottili tra metatile adiacenti: le terrazze si toccano
      * senza trasformare la chioma in fasce orizzontali. Anche questi stub
@@ -593,6 +646,8 @@
      * di conifere e' un reticolo perfettamente periodico, indipendente
      * dalla sagoma scelta sopra). */
     if (cell(rows, tx - 1, ty) === 'T' || cell(rows, tx - 1, ty) === 'Y') {
+      R(ctx, x + dx - 2, y - 3 + dy, 6, 2, treePalette[3]);
+      R(ctx, x + dx - 1, y + 1 + dy, 5, 2, treePalette[2]);
       R(ctx, x + dx, y + 7, 3, 1, treePalette[2]); R(ctx, x + dx, y + 13, 3, 3, treePalette[3]);
     }
     if (cell(rows, tx + 1, ty) === 'T' || cell(rows, tx + 1, ty) === 'Y') {
@@ -686,33 +741,6 @@
     }
   }
 
-  function urbanRail(ctx, x, y) {
-    /* Argine/rail metallica del quartiere industriale. Quattro colori,
-     * montanti grigi e pietra: niente scala verde dominante. */
-    R(ctx, x, y, 16, 16, '#7890c8');
-    R(ctx, x + 3, y, 3, 16, '#30383b'); R(ctx, x + 4, y, 1, 16, '#d0c89d');
-    R(ctx, x + 11, y, 3, 16, '#30383b'); R(ctx, x + 12, y, 1, 16, '#d0c89d');
-    R(ctx, x, y + 1, 16, 2, '#30383b'); R(ctx, x, y + 2, 16, 1, '#788082');
-    R(ctx, x, y + 6, 16, 2, '#30383b'); R(ctx, x, y + 7, 16, 1, '#788082');
-    R(ctx, x, y + 11, 16, 2, '#30383b'); R(ctx, x, y + 12, 16, 1, '#788082');
-  }
-
-  function urbanRailHorizontal(ctx, x, y, lip) {
-    /* Tratto inferiore della ferrovia a L del target: due rotaie, traversine
-     * ogni 4 px e acqua visibile fra i moduli. */
-    R(ctx, x, y, 16, 16, '#7890c8');
-    if (lip) {
-      R(ctx, x, y, 16, 3, '#30383b'); R(ctx, x, y + 1, 16, 1, '#d0c89d');
-      R(ctx, x + 2, y, 2, 6, '#788082'); R(ctx, x + 7, y, 2, 6, '#788082');
-      R(ctx, x + 12, y, 2, 6, '#788082');
-      return;
-    }
-    R(ctx, x, y + 3, 16, 3, '#30383b'); R(ctx, x, y + 4, 16, 1, '#d0c89d');
-    R(ctx, x, y + 10, 16, 3, '#30383b'); R(ctx, x, y + 11, 16, 1, '#d0c89d');
-    R(ctx, x + 2, y + 1, 2, 14, '#788082'); R(ctx, x + 7, y + 1, 2, 14, '#788082');
-    R(ctx, x + 12, y + 1, 2, 14, '#788082');
-  }
-
   function lakeShore(ctx, x, y, tx, ty, rows) {
     /* Riva naturale sullo stesso tile F solido: sostituisce la vecchia
      * staccionata a scala senza cambiare collisione o interazione lago. */
@@ -763,26 +791,32 @@
    * crema e la stessa rampa della reference R69. Strada e marciapiede si
    * distinguono per ritmo, non tramite grandi campi moderni verde/bianco. */
   function townGround(ctx, x, y, tx, ty, rows) {
-    arrivalGround(ctx, x, y, tx, ty);
-    /* Un ciuffo authored ogni cinque tile circa: abbastanza grande da
-     * sopravvivere al filtro GoldTone, abbastanza raro da lasciare respiro. */
-    var tuft = hash(tx, ty, 0x72) % 5;
-    if (tuft === 0) {
+    /* Oro/Rosso tengono il terreno quasi vuoto e concentrano dettaglio in
+     * piccoli cluster. Prima quattro pixel isolati PER TILE creavano
+     * confetti uniforme e competevano con porte, NPC e props. */
+    R(ctx, x, y, 16, 16, '#eee6b5');
+    var tuft = hash(tx, ty, 0x72) & 7;
+    if (tuft < 2) {
       var ox = 3 + (hash(tx, ty, 0x721) % 7), oy = 6 + (hash(tx, ty, 0x722) % 5);
-      R(ctx, x + ox, y + oy, 1, 4, '#6a8a43');
+      R(ctx, x + ox, y + oy, 1, 3, '#6a8a43');
       R(ctx, x + ox - 2, y + oy + 1, 2, 1, '#9aab69');
       R(ctx, x + ox + 1, y + oy + 2, 3, 1, '#6a8a43');
-      R(ctx, x + ox - 1, y + oy + 4, 3, 1, '#9aab69');
+    } else if (tuft === 2) {
+      R(ctx, x + 4, y + 9, 3, 1, '#9aab69');
+      R(ctx, x + 11, y + 4, 1, 1, '#6a8a43');
     }
     groundShadow(ctx, x, y, tx, ty, rows);
   }
 
   function townPath(ctx, x, y, tx, ty, rows) {
-    R(ctx, x, y, 16, 16, '#eee6b5');
+    /* Sentiero distinto dal prato: stessa rampa crema, valore medio diverso.
+     * Questo rende corsie e forecourt leggibili senza inventare asfalto. */
+    R(ctx, x, y, 16, 16, '#dcd9a9');
     var phase = hash(tx, ty, 0x76) & 3;
     var px = [3, 9, 5, 11][phase], py = [5, 3, 11, 9][phase];
     R(ctx, x + px, y + py, 3, 1, '#9aab69');
     R(ctx, x + 13 - (phase & 1) * 3, y + 13 - ((phase >> 1) & 1) * 4, 1, 1, '#6a8a43');
+    R(ctx, x + 2 + ((tx + ty) & 7), y + 8, 2, 1, '#eee6b5');
     if (cell(rows, tx - 1, ty) !== 'p') R(ctx, x, y + 2, 1, 12, '#9aab69');
     if (cell(rows, tx + 1, ty) !== 'p') R(ctx, x + 15, y + 2, 1, 12, '#9aab69');
     if (cell(rows, tx, ty - 1) !== 'p') R(ctx, x + 2, y, 12, 1, '#9aab69');
@@ -791,17 +825,40 @@
   }
 
   function townRoad(ctx, x, y, tx, ty, rows) {
-    R(ctx, x, y, 16, 16, '#dcd9a9');
-    var yy, seam;
-    for (yy = 3; yy < 16; yy += 6) {
-      R(ctx, x, y + yy, 16, 1, '#9aab69');
-      seam = ((ty + (yy / 3 | 0)) & 1) ? 4 : 11;
-      R(ctx, x + seam, y + yy - 2, 1, 2, '#9aab69');
+    var left = roadCell(cell(rows, tx - 1, ty));
+    var right = roadCell(cell(rows, tx + 1, ty));
+    var up = roadCell(cell(rows, tx, ty - 1));
+    var down = roadCell(cell(rows, tx, ty + 1));
+    var phase = hash(tx, ty, 0x793) & 7;
+
+    /* Quattro valori per metatile: carreggiata quieta, aggregato in cluster
+     * corti, cordolo esplicito. Nessuna fuga attraversa tutta la tile. */
+    R(ctx, x, y, 16, 16, '#a9aaa0');
+    R(ctx, x + 3 + (phase & 3), y + 4, 3, 1, '#c3c4b2');
+    R(ctx, x + 10 - ((phase >> 1) & 3), y + 11, 2, 1, '#85877f');
+    if (phase === 0 || phase === 5) R(ctx, x + 8, y + 7, 1, 1, '#92948a');
+
+    if (!left) {
+      R(ctx, x, y, 1, 16, '#34572d');
+      R(ctx, x + 1, y + 1, 1, 14, '#dcd9a9');
     }
-    if (!roadCell(cell(rows, tx - 1, ty))) R(ctx, x, y, 1, 16, '#6a8a43');
-    if (!roadCell(cell(rows, tx + 1, ty))) R(ctx, x + 15, y, 1, 16, '#6a8a43');
-    if (!roadCell(cell(rows, tx, ty - 1))) R(ctx, x, y, 16, 1, '#6a8a43');
-    if (!roadCell(cell(rows, tx, ty + 1))) R(ctx, x, y + 15, 16, 1, '#6a8a43');
+    if (!right) {
+      R(ctx, x + 15, y, 1, 16, '#34572d');
+      R(ctx, x + 14, y + 1, 1, 14, '#dcd9a9');
+    }
+    if (!up) {
+      R(ctx, x, y, 16, 1, '#34572d');
+      R(ctx, x + 1, y + 1, 14, 1, '#dcd9a9');
+    }
+    if (!down) {
+      R(ctx, x, y + 15, 16, 1, '#34572d');
+      R(ctx, x + 1, y + 14, 14, 1, '#85877f');
+    }
+    /* Corner interni: il cordolo gira, non termina con una T smussata. */
+    if (!left && !up) R(ctx, x + 1, y + 1, 2, 2, '#dcd9a9');
+    if (!right && !up) R(ctx, x + 13, y + 1, 2, 2, '#dcd9a9');
+    if (!left && !down) R(ctx, x + 1, y + 13, 2, 2, '#85877f');
+    if (!right && !down) R(ctx, x + 13, y + 13, 2, 2, '#85877f');
   }
 
   function townSidewalk(ctx, x, y, tx, ty, rows, opts) {
@@ -835,6 +892,9 @@
   function groundedProp(ctx, ch, ground, x, y, tx, ty, rows, opts) {
     var i;
     paintGroundSurface(ctx, ground, x, y, tx, ty, rows, opts);
+    /* Il cartello d'ingresso ha un pannello hero continuo 42x22. Il glifo S
+     * conserva collisione/interazione, ma non disegna un secondo pannello. */
+    if (ch === 'S' && opts && opts.mapId === 'town' && tx === 30 && ty === 30) return;
     if (ch === 'S') {
       R(ctx, x + 3, y + 8, 2, 8, C.ink); R(ctx, x + 11, y + 8, 2, 8, C.ink);
       R(ctx, x + 2, y + 1, 12, 9, C.ink); R(ctx, x + 3, y + 2, 10, 7, C.paper);
@@ -864,6 +924,15 @@
     } else if (ch === 'E') {
       R(ctx, x + 7, y + 9, 2, 7, C.ink); R(ctx, x + 3, y + 3, 10, 7, C.ink);
       R(ctx, x + 4, y + 4, 8, 5, '#59758a'); R(ctx, x + 11, y + 4, 2, 4, C.red);
+    } else if (ch === 'G') {
+      /* Lapide top-down sul vero sottofondo: niente carrier d'erba quadrato
+       * quando la seconda fila poggia sul marciapiede. */
+      R(ctx, x + 3, y + 12, 10, 3, C.ink);
+      R(ctx, x + 4, y + 4, 8, 9, '#85877f');
+      R(ctx, x + 5, y + 3, 6, 2, '#c3c4b2');
+      R(ctx, x + 5, y + 5, 6, 6, '#a9aaa0');
+      R(ctx, x + 6, y + 7, 4, 1, '#85877f');
+      R(ctx, x + 2, y + 14, 12, 2, '#85877f');
     } else if (ch === 'q') {
       R(ctx, x + 2, y + 3, 12, 12, C.ink); R(ctx, x + 3, y + 4, 10, 9, '#8d6541');
       R(ctx, x + 4, y + 5, 8, 2, '#c79a57'); R(ctx, x + 7, y + 4, 2, 9, C.ink);
@@ -1040,7 +1109,7 @@
     '4': ['#2c5334','#5c8a52','#a9805a','#3c2a1e'], // Great Northern: tetto verde scuro
     '5': ['#c7d6d2','#ecf5ef','#f1f4e6','#8faaa4'], // ospedale: tetto/facciata chiari
     '6': ['#2c1a1f','#5c3a3a','#c06a4e','#1c1418'], // roadhouse: tetto scuro, legno rosso (facciata schiarita: R58, tetto/facciata erano quasi lo stesso valore)
-    '7': ['#242a30','#697074','#4b5054','#202428'],
+    '7': ['#3c2a1e','#6f5238','#a9805a','#3c2a1e'],
     '8': ['#31583f','#6d8a52','#8a78a8','#34324f'],
     '9': ['#355660','#719098','#d4ad68','#684534'] // Horne's: tetto petrolio, facciata ocra
   };
@@ -1510,9 +1579,9 @@
 
   function townWindow(g, x, y, w, h, glass, trim) {
     R(g, x, y, w, h, C.ink);
-    R(g, x + 2, y + 2, w - 4, h - 4, glass);
-    R(g, x + (w >> 1), y + 2, 1, h - 4, trim);
-    R(g, x + 2, y + (h >> 1), w - 4, 1, trim);
+    R(g, x + 1, y + 1, w - 2, h - 2, glass);
+    R(g, x + (w >> 1), y + 1, 1, h - 2, trim);
+    R(g, x + 1, y + (h >> 1), w - 2, 1, trim);
   }
 
   function townRoofTrim(g, x, y, w, cut, salt) {
@@ -1538,34 +1607,48 @@
    * primitive ridipingono l'intero volume visibile in un solo passaggio.
    * Collisione resta la sagoma ASCII sottostante; nessun prop fisico invade
    * il forecourt. */
-  function townClosedFlat(g, x, y, w, h, p) {
-    var i;
-    R(g, x + 4, y + 4, w, h, '#223b24');
-    R(g, x, y, w, h, C.ink);
-    R(g, x + 3, y + 3, w - 6, h - 6, p[2]);
-    R(g, x - 2, y - 20, w + 4, 22, C.ink);
-    R(g, x, y - 18, w, 18, p[0]);
-    R(g, x, y - 18, w, 3, p[1]);
-    for (i = 5; i < w - 3; i += 8) R(g, x + i, y - 14, 2, 11, shade(p[0], -30));
-    for (i = 8; i < w - 7; i += 17) R(g, x + i, y - 13 + (hash(i, w, 0x91) % 7), 5, 1, p[1]);
-    R(g, x - 3, y - 2, w + 6, 4, C.ink);
-    R(g, x, y - 2, w, 2, p[1]);
+  function townFacadeShell(g, x, y, w, h, p, shadowDx) {
+    /* Contorno nativo 1px. Il vecchio guscio nero da 3px diventava 18-24px
+     * su desktop e faceva sembrare ogni volume una primitive CSS. */
+    var sx = shadowDx == null ? 1 : shadowDx;
+    R(g, x + sx, y + 2, w, h, '#223b24');
+    R(g, x, y, w, h, p[2]);
+    R(g, x, y, w, 1, C.ink); R(g, x, y + h - 1, w, 1, C.ink);
+    R(g, x, y, 1, h, C.ink); R(g, x + w - 1, y, 1, h, C.ink);
+    R(g, x + 1, y + 1, w - 2, 1, lighter(p[2], 18));
   }
 
-  function townClosedGable(g, x, y, w, h, p) {
-    var i, inset;
-    R(g, x + 4, y + 4, w, h, '#223b24');
-    R(g, x, y, w, h, C.ink);
-    R(g, x + 3, y + 3, w - 6, h - 6, p[2]);
+  function townClosedFlat(g, x, y, w, h, p) {
+    var i, roofRow;
+    townFacadeShell(g, x, y, w, h, p);
+    R(g, x - 1, y - 19, w + 2, 20, C.ink);
+    R(g, x, y - 18, w, 18, p[0]);
+    R(g, x + 1, y - 17, w - 2, 2, p[1]);
+    for (roofRow = 0; roofRow < 2; roofRow++) {
+      for (i = 4 + roofRow * 5; i < w - 5; i += 12) {
+        R(g, x + i, y - 13 + roofRow * 6, 6, 1, shade(p[0], -30));
+        R(g, x + i + 2, y - 12 + roofRow * 6, 3, 1, p[1]);
+      }
+    }
+    R(g, x - 1, y - 1, w + 2, 2, C.ink);
+    R(g, x, y - 1, w, 1, p[1]);
+  }
+
+  function townClosedGable(g, x, y, w, h, p, shadowDx) {
+    var i, inset, rowY, outerX, outerW;
+    townFacadeShell(g, x, y, w, h, p, shadowDx);
     for (i = 0; i < 11; i++) {
       inset = 22 - i * 2;
-      R(g, x + inset - 2, y - 22 + i * 2, w - inset * 2 + 4, 2, C.ink);
-      R(g, x + inset, y - 20 + i * 2, w - inset * 2, 2, p[0]);
-      if (i > 3 && (i & 1)) R(g, x + inset + 4, y - 19 + i * 2, Math.max(2, w - inset * 2 - 8), 1, p[1]);
-      if (i > 4 && !(i & 1) && w - inset * 2 > 24) R(g, x + inset + 8 + (i % 3) * 5, y - 19 + i * 2, 7, 1, shade(p[0], -28));
+      rowY = y - 22 + i * 2;
+      outerX = x + inset - 2;
+      outerW = w - inset * 2 + 4;
+      R(g, outerX, rowY, outerW, 2, C.ink);
+      R(g, outerX + 1, rowY + 1, Math.max(1, outerW - 2), 1, p[0]);
+      if (i > 3 && (i & 1)) R(g, x + inset + 4, rowY + 1, Math.max(2, w - inset * 2 - 8), 1, p[1]);
+      if (i > 4 && !(i & 1) && w - inset * 2 > 24) R(g, x + inset + 8 + (i % 3) * 5, rowY + 1, 7, 1, shade(p[0], -28));
     }
-    R(g, x - 3, y - 2, w + 6, 4, C.ink);
-    R(g, x, y - 2, w, 2, p[1]);
+    R(g, x - 1, y - 1, w + 2, 2, C.ink);
+    R(g, x, y - 1, w, 1, p[1]);
   }
 
   function townTwinWindow(g, x, y, glass, trim) {
@@ -1579,13 +1662,85 @@
     R(g, x + 3, y + 3, w - 6, 3, C.ink); R(g, x + 5, y + 3, w - 10, 1, light);
   }
 
+  var TOWN_FONT_5X7 = {
+    A:['01110','10001','10001','11111','10001','10001','10001'],
+    B:['11110','10001','10001','11110','10001','10001','11110'],
+    D:['11110','10001','10001','10001','10001','10001','11110'],
+    E:['11111','10000','10000','11110','10000','10000','11111'],
+    F:['11111','10000','10000','11110','10000','10000','10000'],
+    G:['01110','10001','10000','10111','10001','10001','01110'],
+    H:['10001','10001','10001','11111','10001','10001','10001'],
+    I:['11111','00100','00100','00100','00100','00100','11111'],
+    K:['10001','10010','10100','11000','10100','10010','10001'],
+    N:['10001','11001','11001','10101','10011','10011','10001'],
+    O:['01110','10001','10001','10001','10001','10001','01110'],
+    P:['11110','10001','10001','11110','10000','10000','10000'],
+    R:['11110','10001','10001','11110','10100','10010','10001'],
+    S:['01111','10000','10000','01110','00001','00001','11110'],
+    T:['11111','00100','00100','00100','00100','00100','00100'],
+    U:['10001','10001','10001','10001','10001','10001','01110'],
+    L:['10000','10000','10000','10000','10000','10000','11111'],
+    W:['10001','10001','10001','10101','10101','10101','01010']
+  };
+
+  function townTinyWord(g, value, x, y, color) {
+    for (var ci = 0; ci < value.length; ci++) {
+      var glyph = TOWN_FONT_5X7[value.charAt(ci)];
+      if (!glyph) continue;
+      for (var gy = 0; gy < 7; gy++) for (var gx = 0; gx < 5; gx++) {
+        if (glyph[gy].charAt(gx) === '1') R(g, x + ci * 6 + gx, y + gy, 1, 1, color);
+      }
+    }
+  }
+
+  var TOWN_FONT_4X5 = {
+    B:['1110','1001','1110','1001','1110'], E:['1111','1000','1110','1000','1111'],
+    H:['1001','1001','1111','1001','1001'], K:['1001','1010','1100','1010','1001'],
+    O:['0110','1001','1001','1001','0110'], S:['0111','1000','0110','0001','1110'],
+    U:['1001','1001','1001','1001','0110']
+  };
+
+  function townCompactWord(g, value, x, y, color) {
+    for (var ci = 0; ci < value.length; ci++) {
+      var glyph = TOWN_FONT_4X5[value.charAt(ci)];
+      if (!glyph) continue;
+      for (var gy = 0; gy < 5; gy++) for (var gx = 0; gx < 4; gx++) {
+        if (glyph[gy].charAt(gx) === '1') R(g, x + ci * 5 + gx, y + gy, 1, 1, color);
+      }
+    }
+  }
+
+  var TOWN_FONT_3X5 = {
+    B:['110','101','110','101','110'], D:['110','101','101','101','110'],
+    E:['111','100','110','100','111'], L:['100','100','100','100','111'],
+    H:['101','101','111','101','101'], N:['101','111','111','111','101'],
+    O:['010','101','101','101','010'], R:['110','101','110','101','101'],
+    S:['011','100','010','001','110'], T:['111','010','010','010','010'],
+    U:['101','101','101','101','111']
+  };
+
+  function townMicroWord(g, value, x, y, color) {
+    var cursor = x;
+    for (var ci = 0; ci < value.length; ci++) {
+      var glyph = TOWN_FONT_3X5[value.charAt(ci)];
+      if (!glyph) { cursor += 2; continue; }
+      for (var gy = 0; gy < 5; gy++) for (var gx = 0; gx < 3; gx++) {
+        if (glyph[gy].charAt(gx) === '1') R(g, cursor + gx, y + gy, 1, 1, color);
+      }
+      cursor += 4;
+    }
+  }
+
   function townSignIcon(g, kind, x, y) {
     if (kind === 'sheriff') {
-      /* Stella bicolore, punte separate: non può collassare in una croce. */
-      R(g, x + 7, y, 2, 4, '#2f4d63'); R(g, x + 7, y + 12, 2, 4, '#2f4d63');
-      R(g, x, y + 7, 4, 2, '#2f4d63'); R(g, x + 12, y + 7, 4, 2, '#2f4d63');
-      R(g, x + 3, y + 3, 10, 10, '#2f4d63'); R(g, x + 5, y + 5, 6, 6, C.paper);
-      R(g, x + 7, y + 7, 2, 2, '#2f4d63');
+      /* Stella stepped 14x14: centro stretto, sei punte separate. La vecchia
+       * massa 10x10 era visivamente una croce medica. */
+      R(g, x + 6, y, 2, 3, '#2f4d63');
+      R(g, x + 5, y + 3, 4, 2, '#2f4d63');
+      R(g, x, y + 5, 5, 2, '#2f4d63'); R(g, x + 9, y + 5, 5, 2, '#2f4d63');
+      R(g, x + 3, y + 7, 8, 3, '#2f4d63');
+      R(g, x + 3, y + 10, 3, 4, '#2f4d63'); R(g, x + 8, y + 10, 3, 4, '#2f4d63');
+      R(g, x + 5, y + 6, 4, 4, '#dbc78d'); R(g, x + 6, y + 7, 2, 2, C.paper);
     } else if (kind === 'cup') {
       R(g, x + 1, y + 5, 10, 8, C.ink); R(g, x + 3, y + 3, 6, 2, C.ink);
       R(g, x + 11, y + 6, 5, 6, C.ink); R(g, x + 11, y + 8, 2, 2, C.paper);
@@ -1671,28 +1826,16 @@
   }
 
   function townWelcomeAccents(g, cx, cy) {
-    var x = 28 * 16 - cx, y = 27 * 16 - cy, i;
-    /* Un solo supporto coincide col cartello solido x30,y30. Pannello sta
-     * tutto a est della strada: cartello stradale, non overlay sul percorso. */
-    R(g, x + 29, y + 24, 7, 34, C.ink);
-    R(g, x + 32, y + 26, 2, 31, '#6a8a43');
-    R(g, x + 31, y + 5, 56, 23, C.ink);
-    R(g, x + 34, y + 8, 50, 17, '#dcd9a9');
-    R(g, x + 37, y + 10, 44, 12, '#9aab69');
-    /* Twin Peaks, foresta e lago: firma visiva leggibile senza font. */
-    for (i = 0; i < 8; i++) {
-      R(g, x + 39 + i, y + 20 - i, 2, Math.max(2, i + 1), '#34572d');
-      R(g, x + 67 + i, y + 20 - i, 2, Math.max(2, i + 1), '#34572d');
-    }
-    for (i = 0; i < 5; i++) {
-      R(g, x + 51 + i, y + 21 - i, 2, i + 1, '#6a8a43');
-      R(g, x + 73 + i, y + 21 - i, 2, i + 1, '#6a8a43');
-    }
-    R(g, x + 38, y + 19, 42, 2, '#6f9185');
-    R(g, x + 46, y + 21, 26, 1, '#dfe9df');
-    R(g, x + 51, y + 10, 14, 1, C.paper);
-    for (i = 0; i < 6; i++) R(g, x + 46 + i * 5, y + 13, 2, 2, C.ink);
-    R(g, x + 26, y + 57, 13, 4, C.ink); R(g, x + 29, y + 57, 7, 2, '#9aab69');
+    var x = 30 * 16 - cx, y = 30 * 16 - cy;
+    /* Pannello 40x22, tre metatile scarse. Testo vero a 1x; supporto resta
+     * dentro cella interattiva x30,y30. */
+    R(g, x + 9, y - 3, 2, 19, C.ink); R(g, x + 10, y - 2, 1, 17, '#754429');
+    R(g, x + 5, y - 23, 42, 22, C.ink);
+    R(g, x + 6, y - 22, 40, 20, '#dcd9a9');
+    R(g, x + 8, y - 20, 36, 16, '#9aab69');
+    townTinyWord(g, 'TWIN', x + 15, y - 20, C.ink);
+    townTinyWord(g, 'PEAKS', x + 12, y - 12, C.ink);
+    R(g, x + 7, y + 15, 6, 2, C.ink); R(g, x + 8, y + 15, 4, 1, '#9aab69');
   }
 
   function townLakeAccents(g, cx, cy) {
@@ -1755,12 +1898,49 @@
     }
   }
 
+  function townTracksAccents(g, map, cx, cy) {
+    var track = null;
+    for (var oi = 0; oi < (map.objects || []).length; oi++) {
+      if (map.objects[oi].type === 'landmark' && map.objects[oi].kind === 'tracks') {
+        track = map.objects[oi]; break;
+      }
+    }
+    if (!track) return;
+    var x = track.x * 16 - cx;
+    var width = track.w * 16;
+    for (var ty = track.y; ty < track.y + track.h; ty++) {
+      var y = ty * 16 - cy;
+      if (y > 144 || y + 16 < 0 || x > 160 || x + width < 0) continue;
+      var crossing = roadCell(cell(map.rows, track.x, ty));
+      if (!crossing) {
+        R(g, x, y, width, 16, '#b7ad83');
+        R(g, x + 2 + ((ty * 5) & 7), y + 5, 3, 1, '#8f8b72');
+        R(g, x + 19 - ((ty * 3) & 7), y + 13, 4, 1, '#dcd9a9');
+        /* Due traversine per metatile: ritmo 8 px, non recinzione a scala. */
+        R(g, x + 2, y + 1, width - 4, 3, '#30383b');
+        R(g, x + 4, y + 2, width - 8, 1, '#8f8b72');
+        R(g, x + 2, y + 9, width - 4, 3, '#30383b');
+        R(g, x + 4, y + 10, width - 8, 1, '#8f8b72');
+      } else {
+        /* Al passaggio stradale restano carreggiata e passabilità; solo
+         * rotaie e flange attraversano l'asfalto. */
+        R(g, x + 5, y, 5, 16, '#77736a'); R(g, x + 22, y, 5, 16, '#77736a');
+      }
+      R(g, x + 7, y, 3, 16, '#30383b'); R(g, x + 8, y, 1, 16, '#d0c89d');
+      R(g, x + 23, y, 3, 16, '#30383b'); R(g, x + 24, y, 1, 16, '#d0c89d');
+    }
+    /* Fine corsa nord dentro la prima cella dichiarata dal landmark. */
+    var top = track.y * 16 - cy;
+    R(g, x + 3, top + 2, width - 6, 4, '#30383b');
+    R(g, x + 6, top + 3, width - 12, 1, '#d0c89d');
+  }
+
   function townForestMassAccents(g, map, cx, cy) {
     if (!map || map.id !== 'town' || !map.rows) return;
     var minTx = Math.max(0, Math.floor(cx / 16) - 1);
-    var maxTx = Math.min(map.w - 1, Math.floor((cx + 159) / 16) + 1);
+    var maxTx = Math.min(map.width - 1, Math.floor((cx + 159) / 16) + 1);
     var minTy = Math.max(0, Math.floor(cy / 16) - 1);
-    var maxTy = Math.min(map.h - 1, Math.floor((cy + 143) / 16) + 1);
+    var maxTy = Math.min(map.height - 1, Math.floor((cy + 143) / 16) + 1);
     for (var ty = minTy; ty <= maxTy; ty++) {
       for (var tx = minTx; tx <= maxTx; tx++) {
         if (!map.rows[ty] || map.rows[ty].charAt(tx) !== 'T') continue;
@@ -1798,29 +1978,22 @@
     if (!map || map.id !== 'town') return;
     var x, y, i;
 
-    /* La camera look-ahead vede oltre la chioma della riga nord: copri i
-     * tronchi tagliati con un margine forestale continuo, come nel tableau. */
-    if (cy < 32) {
-      R(g, 0, 0, 160, 3, C.ink);
-      for (i = 0; i < 160; i += 8) {
-        var crown = 5 + (hash(i >> 3, cy, 0x723) % 5);
-        R(g, i, 2, 8, crown, '#34572d');
-        R(g, i + 2, 3, 4, Math.max(2, crown - 3), '#6a8a43');
-        if ((i & 16) === 0) R(g, i + 5, 2, 2, 3, '#9aab69');
-      }
-      R(g, 0, 10, 160, 1, C.ink);
-    }
-
-    townForestMassAccents(g, map, cx, cy);
+    /* Alberi base gia' authored 16x24 con tre profondita'. Il vecchio layer
+     * aggiuntivo riempiva ogni cella con frammenti e una fascia casuale sul
+     * bordo alto: dietro gli edifici sembrava raster corrotto. Nessun quarto
+     * passaggio sopra le chiome; silhouette individuali restano leggibili. */
     townWaterfallAccents(g, cx, cy);
     townWelcomeAccents(g, cx, cy);
     townLakeAccents(g, cx, cy);
+    townTracksAccents(g, map, cx, cy);
 
     /* Great Northern — loggia chiusa: timpano, tronchi, portico e camino. */
     x = 6 * 16 - cx; y = 4 * 16 - cy;
     townClosedGable(g, x, y, 96, 48, BUILDINGS['4']);
     for (i = 5; i < 43; i += 8) R(g, x + 3, y + i, 90, 2, '#3c2a1e');
     for (i = 10; i < 92; i += 16) R(g, x + i, y + 3, 2, 39, '#6f5238');
+    R(g, x + 2, y + 1, 92, 10, C.ink); R(g, x + 3, y + 2, 90, 8, '#d8c98a');
+    townTinyWord(g, 'GREAT NORTHERN', x + 6, y + 2, '#3c2a1e');
     R(g, x + 15, y - 18, 10, 15, C.ink); R(g, x + 18, y - 16, 5, 12, '#3c2a1e');
     townTwinWindow(g, x + 8, y + 10, '#d9d49a', '#3c2a1e');
     townTwinWindow(g, x + 68, y + 10, '#d9d49a', '#3c2a1e');
@@ -1830,44 +2003,53 @@
     townStep(g, x + 45, y + 48, 22, '#d8c98a');
     townFoundationShadow(g, x, y + 54, 96);
 
-    /* Calhoun Memorial — corpo clinico chiuso + pensilina laterale. */
+    /* Calhoun Memorial — volume clinico unico 6x4. Simmetria, croce e
+     * ingresso sulla vera tile D: niente ala bianca sospesa o falso varco. */
     x = 20 * 16 - cx; y = 3 * 16 - cy;
-    townClosedFlat(g, x + 32, y, 64, 64, BUILDINGS['5']);
-    /* Fasce cliniche orizzontali prima degli infissi: il volume non resta
-     * carta vuota e l'ala diagnostica condivide lo stesso materiale. */
-    for (i = 6; i < 59; i += 8) {
-      R(g, x + 36 + ((i >> 3) & 1) * 5, y + i, 53, 1, '#8faaa4');
-      R(g, x + 3 + (((i >> 3) + 1) & 1) * 4, y + 5 + (i >> 1), 24, 1, '#c7d6d2');
+    townFacadeShell(g, x, y, 96, 64, BUILDINGS['5']);
+    /* Tetto clinico arretrato a tre quote. Pattern orizzontale: nessuna
+     * sequenza di montanti che possa sembrare testo decorativo. */
+    R(g, x + 12, y - 27, 72, 5, C.ink); R(g, x + 13, y - 26, 70, 3, '#ecf5ef');
+    R(g, x + 7, y - 23, 82, 7, C.ink); R(g, x + 8, y - 22, 80, 5, '#c7d6d2');
+    R(g, x + 3, y - 17, 90, 17, C.ink); R(g, x + 4, y - 16, 88, 15, '#c7d6d2');
+    R(g, x + 6, y - 14, 84, 2, '#ecf5ef');
+    for (i = 9; i < 84; i += 15) {
+      R(g, x + i, y - 9, 8, 1, '#8faaa4'); R(g, x + i + 2, y - 8, 4, 1, '#ecf5ef');
     }
-    R(g, x, y, 34, 31, C.ink); R(g, x + 3, y + 3, 29, 25, '#f1f4e6');
-    R(g, x - 2, y - 5, 38, 7, C.ink); R(g, x, y - 3, 34, 3, '#ecf5ef');
-    R(g, x - 2, y + 29, 38, 5, C.ink); R(g, x + 1, y + 29, 32, 2, '#8faaa4');
-    townTwinWindow(g, x + 39, y + 9, '#dfe9df', '#8faaa4');
-    R(g, x + 48, y + 30, 16, 31, C.ink); R(g, x + 51, y + 34, 10, 27, '#dfe9df');
-    R(g, x + 42, y - 14, 20, 13, C.ink); R(g, x + 44, y - 12, 16, 9, C.paper);
-    R(g, x + 50, y - 11, 4, 7, C.red); R(g, x + 47, y - 8, 10, 3, C.red);
-    R(g, x + 43, y + 55, 26, 3, '#8faaa4'); R(g, x + 46, y + 58, 2, 6, C.ink); R(g, x + 66, y + 58, 2, 6, C.ink);
-    /* Ala diagnostica più bassa + ingresso a due profondità. */
-    R(g, x - 7, y + 24, 42, 7, C.ink); R(g, x - 4, y + 26, 36, 3, '#8faaa4');
-    R(g, x + 34, y + 47, 42, 5, C.ink); R(g, x + 38, y + 49, 34, 3, '#dfe9df');
-    R(g, x + 38, y + 52, 3, 12, C.ink); R(g, x + 70, y + 52, 3, 12, C.ink);
-    /* Segnaletica forecourt, passabile e ancorata all'ingresso reale. */
-    R(g, x + 43, y + 69, 26, 2, '#8faaa4');
-    R(g, x + 47, y + 75, 18, 1, '#9bc0b2');
-    R(g, x + 51, y + 81, 10, 1, '#8faaa4');
-    /* Due aiuole basse: bordo grafico passabile, nessuna falsa siepe. */
-    [[17,70],[74,72]].forEach(function (p, pi) {
-      R(g, x + p[0], y + p[1], 17, 2, '#8faaa4');
-      for (var fi = 0; fi < 3; fi++) {
-        R(g, x + p[0] + 3 + fi * 5, y + p[1] - 3 - ((fi + pi) & 1), 2, 3, '#6a8a43');
-        R(g, x + p[0] + 4 + fi * 5, y + p[1] - 4 - ((fi + pi) & 1), 1, 1, C.paper);
-      }
-    });
-    townFoundationShadow(g, x + 32, y + 64, 64);
+    R(g, x - 1, y - 2, 98, 2, C.ink); R(g, x + 2, y - 1, 92, 1, '#8faaa4');
+    for (i = 7; i < 59; i += 8) {
+      R(g, x + 3 + (((i >> 3) & 1) * 4), y + i, 88, 1, '#c7d6d2');
+    }
+    /* Insegna clinica e croce: entrambe leggibili a 1x, stesso piano. */
+    R(g, x + 20, y + 3, 53, 12, C.ink); R(g, x + 21, y + 4, 51, 10, '#ecf5ef');
+    townTinyWord(g, 'HOSPITAL', x + 23, y + 5, '#31543a');
+    R(g, x + 5, y + 3, 13, 12, C.ink); R(g, x + 6, y + 4, 11, 10, '#ecf5ef');
+    R(g, x + 10, y + 5, 3, 8, C.red); R(g, x + 8, y + 8, 7, 3, C.red);
+    townWindow(g, x + 7, y + 23, 18, 13, '#dfe9df', '#8faaa4');
+    townWindow(g, x + 30, y + 23, 14, 13, '#dfe9df', '#8faaa4');
+    townWindow(g, x + 72, y + 23, 17, 13, '#dfe9df', '#8faaa4');
+    R(g, x + 7, y + 25, 7, 1, C.paper); R(g, x + 74, y + 25, 7, 1, C.paper);
+    R(g, x + 6, y + 37, 20, 1, '#8faaa4'); R(g, x + 29, y + 37, 16, 1, '#8faaa4');
+    R(g, x + 71, y + 37, 19, 1, '#8faaa4');
+    /* Portale sulla quarta tile del footprint, esattamente [23,6]. */
+    R(g, x + 45, y + 34, 22, 4, C.ink); R(g, x + 48, y + 35, 16, 2, '#ecf5ef');
+    R(g, x + 48, y + 37, 16, 27, C.ink); R(g, x + 51, y + 40, 10, 24, '#dfe9df');
+    R(g, x + 56, y + 40, 1, 24, '#8faaa4'); R(g, x + 59, y + 52, 1, 2, C.red);
+    R(g, x + 42, y + 61, 28, 3, '#8faaa4');
+    townStep(g, x + 46, y + 64, 20, '#ecf5ef');
+    R(g, x + 40, y + 70, 32, 15, '#34572d'); R(g, x + 41, y + 70, 30, 14, '#dfe9df');
+    R(g, x + 56, y + 70, 1, 14, '#8faaa4');
+    townFoundationShadow(g, x, y + 64, 96);
 
     /* Casa Palmer — grande timpano domestico, portico e ringhiera. */
     x = 40 * 16 - cx; y = 4 * 16 - cy;
     townClosedGable(g, x, y, 64, 48, BUILDINGS['3']);
+    for (var palmerRoofRow = 0; palmerRoofRow < 2; palmerRoofRow++) {
+      for (i = 7 + palmerRoofRow * 6; i < 58; i += 12) {
+        R(g, x + i, y - 15 + palmerRoofRow * 7, 6, 1, '#4a2f22');
+        R(g, x + i + 2, y - 14 + palmerRoofRow * 7, 3, 1, '#a9754f');
+      }
+    }
     for (i = 5; i < 43; i += 7) {
       R(g, x + 3 + (((i / 7) & 1) * 3), y + i, 55, 1, '#a9754f');
     }
@@ -1876,81 +2058,79 @@
     townTwinWindow(g, x + 37, y + 7, '#eee6b5', '#4a2f22');
     R(g, x + 4, y + 23, 56, 3, C.ink); R(g, x + 7, y + 26, 50, 3, '#ecd7a4');
     R(g, x + 8, y + 29, 3, 18, C.ink); R(g, x + 53, y + 29, 3, 18, C.ink);
-    R(g, x + 32, y + 27, 16, 20, C.ink); R(g, x + 35, y + 30, 10, 17, '#754429');
+    R(g, x + 32, y + 27, 16, 21, C.ink); R(g, x + 35, y + 30, 10, 18, '#754429');
     R(g, x + 7, y + 41, 50, 3, '#a9754f');
     for (i = 12; i < 53; i += 8) R(g, x + i, y + 35, 2, 6, '#4a2f22');
+    /* Breve camminamento domestico sulla riga p reale davanti alla porta. */
+    R(g, x + 24, y + 48, 32, 12, '#4a2f22'); R(g, x + 25, y + 49, 30, 10, '#ecd7a4');
+    R(g, x + 40, y + 49, 1, 10, '#a9754f');
     townStep(g, x + 30, y + 48, 20, '#ecd7a4');
     /* Abbaino e veranda laterale danno secondo piano e profondità domestica. */
     R(g, x + 8, y - 18, 20, 17, C.ink); R(g, x + 11, y - 15, 14, 12, '#ecd7a4');
     townTwinWindow(g, x + 8, y - 13, '#eee6b5', '#4a2f22');
     R(g, x - 5, y + 20, 18, 5, C.ink); R(g, x - 2, y + 22, 15, 2, '#ecd7a4');
-    R(g, x - 2, y + 25, 3, 22, C.ink);
+    R(g, x, y + 25, 3, 22, C.ink);
     townFoundationShadow(g, x, y + 54, 64);
 
-    /* Bookhouse — mattoni sfalsati, libreria luminosa, insegna obliqua. */
+    /* Bookhouse — lodge civica 3x3. Timpano scuro e insegna BOOK HOUSE:
+     * luogo di riunione, mai libreria. Ombra verso sinistra libera il vicolo. */
     x = 28 * 16 - cx; y = 2 * 16 - cy;
-    townClosedFlat(g, x, y, 48, 64, BUILDINGS['7']);
-    for (i = 5; i < 58; i += 8) {
-      R(g, x + 3 + ((i >> 3) & 1) * 4, y + i, 39, 2, '#697074');
+    townClosedGable(g, x, y, 48, 48, BUILDINGS['7'], -1);
+    R(g, x + 5, y - 27, 9, 12, C.ink); R(g, x + 7, y - 25, 5, 9, '#6f5238');
+    for (var bookRoofRow = 0; bookRoofRow < 2; bookRoofRow++) {
+      for (i = 4 + bookRoofRow * 5; i < 44; i += 11) {
+        R(g, x + i, y - 13 + bookRoofRow * 6, 6, 1, '#6f5238');
+        R(g, x + i + 2, y - 12 + bookRoofRow * 6, 3, 1, '#3c2a1e');
+      }
     }
-    R(g, x + 6, y + 10, 36, 18, C.ink); R(g, x + 9, y + 13, 30, 12, '#d9d49a');
-    for (i = 12; i < 38; i += 7) R(g, x + i, y + 14, 2, 10, '#30353a');
-    R(g, x + 3, y + 34, 42, 11, C.ink); R(g, x + 6, y + 37, 36, 5, '#e7cf77');
-    townSignIcon(g, 'book', x + 17, y + 31);
-    R(g, x + 16, y + 48, 16, 16, C.ink); R(g, x + 19, y + 51, 10, 13, '#242a30');
-    /* Frontone spezzato, torretta e bay laterale: libreria civica, non box. */
-    R(g, x + 9, y - 25, 30, 7, C.ink); R(g, x + 14, y - 30, 20, 6, C.ink);
-    R(g, x + 17, y - 28, 14, 8, '#697074');
-    R(g, x + 21, y - 26, 6, 4, '#e7cf77');
-    R(g, x - 8, y + 18, 10, 42, C.ink); R(g, x - 5, y + 21, 7, 36, '#61686a');
-    R(g, x + 46, y + 28, 9, 32, C.ink); R(g, x + 46, y + 31, 6, 26, '#30353a');
-    for (i = 23; i < 55; i += 8) R(g, x - 4, y + i, 5, 2, '#e7cf77');
-    /* Cortile grafico in asse: gradini e lastre piatte occupano il vuoto
-     * verticale senza fingere nuovi ostacoli o una porta attraversabile. */
-    R(g, x + 15, y + 67, 18, 3, '#30353a');
-    R(g, x + 17, y + 70, 14, 2, '#73777a');
-    for (i = 0; i < 3; i++) {
-      R(g, x + 18 - i * 2, y + 74 + i * 7, 12 + i * 4, 2, '#9aab69');
-      R(g, x + 21 - i, y + 76 + i * 7, 6 + i * 2, 1, '#dcd9a9');
+    for (i = 6; i < 46; i += 7) {
+      R(g, x + 3 + (((i / 7) & 1) * 4), y + i, 40, 1, '#6f5238');
     }
-    townStep(g, x + 14, y + 64, 20, '#73777a');
+    /* Placca nel timpano/facciata, non fascia commerciale. */
+    R(g, x + 10, y + 2, 28, 15, C.ink); R(g, x + 11, y + 3, 26, 13, '#d8c98a');
+    townCompactWord(g, 'BOOK', x + 15, y + 4, '#3c2a1e');
+    townCompactWord(g, 'HOUSE', x + 12, y + 10, '#3c2a1e');
+    R(g, x + 12, y + 17, 24, 1, '#3c2a1e');
+    /* Portico, finestre laterali e ringhiera: cabin/meeting lodge. */
+    R(g, x - 1, y + 20, 50, 4, C.ink); R(g, x + 1, y + 21, 46, 2, '#6f5238');
+    townWindow(g, x + 3, y + 26, 12, 10, '#d9d49a', '#3c2a1e');
+    townWindow(g, x + 33, y + 26, 12, 10, '#d9d49a', '#3c2a1e');
+    R(g, x + 18, y + 24, 12, 24, C.ink); R(g, x + 20, y + 27, 8, 21, '#3c2a1e');
+    R(g, x + 22, y + 28, 4, 6, '#6f5238'); R(g, x + 27, y + 41, 1, 1, '#d8c98a');
+    R(g, x + 2, y + 37, 3, 11, C.ink); R(g, x + 43, y + 37, 3, 11, C.ink);
+    R(g, x + 3, y + 39, 13, 2, '#3c2a1e'); R(g, x + 32, y + 39, 13, 2, '#3c2a1e');
+    for (i = 7; i < 43; i += 7) if (i < 18 || i > 29) R(g, x + i, y + 40, 2, 7, '#3c2a1e');
+    townStep(g, x + 14, y + 48, 20, '#d8c98a');
+    R(g, x + 3, y + 54, 42, 2, '#31543a');
 
-    /* Horne's — parapetto a gradoni, H centrale, vetrina continua. */
+    /* Horne's — Art Déco 3x4, contenuto nel proprio footprint. Vicolo da
+     * due tile resta visibile: niente ali che si fingono terzo edificio. */
     x = 33 * 16 - cx; y = 3 * 16 - cy;
-    townClosedFlat(g, x, y, 48, 64, BUILDINGS['9']);
-    /* Torre Art Déco: identità leggibile anche senza glifo. */
-    R(g, x + 12, y - 22, 24, 20, C.ink); R(g, x + 16, y - 27, 16, 7, C.ink);
-    R(g, x + 17, y - 20, 14, 16, '#d4ad68');
-    R(g, x + 20, y - 18, 3, 12, '#684534'); R(g, x + 27, y - 18, 3, 12, '#684534');
-    R(g, x + 23, y - 13, 4, 2, '#684534');
-    R(g, x + 6, y - 27, 36, 7, C.ink); R(g, x + 11, y - 32, 26, 5, C.ink); R(g, x + 16, y - 36, 16, 4, C.ink);
-    R(g, x - 2, y - 2, 52, 4, C.ink); R(g, x, y, 48, 3, '#719098');
-    /* Medaglione geometrico, non seconda H: torre + materiali bastano a
-     * identificare il department store senza dipendere da due glifi. */
-    R(g, x + 13, y + 10, 22, 12, C.ink); R(g, x + 15, y + 12, 18, 8, '#f0d888');
-    R(g, x + 23, y + 12, 2, 1, '#684534'); R(g, x + 21, y + 13, 6, 1, '#684534');
-    R(g, x + 20, y + 14, 8, 1, '#684534'); R(g, x + 19, y + 15, 10, 2, '#684534');
-    R(g, x + 20, y + 17, 8, 1, '#684534'); R(g, x + 21, y + 18, 6, 1, '#684534');
-    R(g, x + 23, y + 19, 2, 1, '#684534');
-    R(g, x + 23, y + 14, 2, 1, '#d4ad68'); R(g, x + 22, y + 15, 4, 2, '#d4ad68');
-    R(g, x + 23, y + 17, 2, 1, '#d4ad68');
-    R(g, x + 4, y + 31, 40, 21, C.ink); R(g, x + 7, y + 34, 34, 15, '#d9c78d');
-    R(g, x + 23, y + 34, 2, 15, '#684534'); R(g, x + 7, y + 41, 34, 2, '#684534');
-    /* Ritmo materico e pensilina: department store anche coprendo la H. */
-    for (i = 6; i < 44; i += 9) {
-      R(g, x + i, y + 4, 2, 23, '#684534');
-      R(g, x + i + 2, y + 5, 4, 1, '#f0d888');
+    townFacadeShell(g, x, y, 48, 48, BUILDINGS['9'], 1);
+    R(g, x + 14, y - 29, 20, 6, C.ink); R(g, x + 15, y - 28, 18, 5, '#719098');
+    R(g, x + 8, y - 23, 32, 5, C.ink); R(g, x + 9, y - 22, 30, 4, '#355660');
+    R(g, x + 3, y - 18, 42, 18, C.ink); R(g, x + 4, y - 17, 40, 16, '#355660');
+    R(g, x + 5, y - 16, 38, 2, '#719098');
+    for (i = 8; i < 41; i += 9) {
+      R(g, x + i, y - 11, 5, 1, '#719098'); R(g, x + i + 1, y - 10, 3, 1, '#355660');
     }
-    R(g, x + 1, y + 27, 46, 6, C.ink); R(g, x + 4, y + 29, 40, 2, '#719098');
-    /* Ali vetrate basse + torre centrale: department store, non bottega. */
-    R(g, x - 17, y + 22, 19, 37, C.ink); R(g, x - 14, y + 25, 16, 31, '#719098');
-    R(g, x + 46, y + 18, 19, 41, C.ink); R(g, x + 46, y + 21, 16, 35, '#d4ad68');
-    for (i = 0; i < 2; i++) {
-      R(g, x - 12 + i * 8, y + 30, 6, 15, C.ink); R(g, x - 11 + i * 8, y + 32, 4, 11, '#f0d888');
-      R(g, x + 49 + i * 8, y + 29, 6, 16, C.ink); R(g, x + 50 + i * 8, y + 31, 4, 12, '#f0d888');
+    /* Nome + funzione compatti: targa 28x14, facciata ancora dominante. */
+    R(g, x + 10, y + 2, 28, 14, C.ink); R(g, x + 11, y + 3, 26, 12, '#f0d888');
+    townMicroWord(g, 'HORNE', x + 15, y + 4, '#684534');
+    townMicroWord(g, 'STORE', x + 15, y + 10, '#684534');
+    for (i = 3; i < 44; i += 10) {
+      R(g, x + i, y + 20, 2, 18, '#684534');
+      R(g, x + i + 2, y + 21, 5, 1, '#f0d888');
     }
-    R(g, x - 20, y + 18, 24, 6, C.ink); R(g, x + 44, y + 14, 24, 6, C.ink);
-    townFoundationShadow(g, x, y + 58, 48);
+    R(g, x + 2, y + 21, 44, 4, C.ink); R(g, x + 4, y + 22, 40, 2, '#719098');
+    townWindow(g, x + 3, y + 27, 14, 14, '#d9c78d', '#684534');
+    townWindow(g, x + 31, y + 27, 14, 14, '#d9c78d', '#684534');
+    R(g, x + 5, y + 35, 10, 2, '#f0d888'); R(g, x + 33, y + 35, 10, 2, '#f0d888');
+    /* Ingresso doppio incassato, perfettamente dentro massa solida. */
+    R(g, x + 18, y + 31, 13, 17, C.ink); R(g, x + 20, y + 33, 9, 15, '#355660');
+    R(g, x + 24, y + 33, 1, 15, C.ink); R(g, x + 27, y + 41, 1, 1, '#f0d888');
+    townStep(g, x + 15, y + 48, 18, '#d4ad68');
+    R(g, x + 3, y + 54, 42, 2, '#31543a');
 
     /* Tre botteghe: sagome diverse prima delle icone. */
     x = 15 * 16 - cx; y = 10 * 16 - cy;
@@ -2005,51 +2185,86 @@
       R(g, x + 9 + i * 10, y + 24 - (i & 1), 3, 1, i & 1 ? '#713943' : '#435a50');
     }
 
-    /* Distretto — tetto civico basso, frontone, badge e portico. */
+    /* Distretto — golden sample R99b. Cinque metatile come gli edifici
+     * civici di Gen II: gerarchia tetto/facciata/zoccolo leggibile a 1x,
+     * profili da 1px e porta sulla vera cella D. */
     x = 10 * 16 - cx; y = 17 * 16 - cy;
-    townClosedFlat(g, x, y, 96, 64, BUILDINGS['1']);
-    /* Siding a corsi sfalsati sulle campiture chiare; finestre e badge
-     * vengono dopo, quindi restano incassati e perfettamente leggibili. */
-    for (i = 6; i < 31; i += 7) {
-      R(g, x + 4 + ((i / 7) & 1) * 4, y + i, 27, 1, '#9aab69');
-      R(g, x + 64 + (((i / 7) + 1) & 1) * 4, y + i, 27, 1, '#9aab69');
+    townFacadeShell(g, x, y, 80, 64, BUILDINGS['1']);
+    /* Tetto civico a padiglione, 31px: tre terrazze fanno leggere profondita'
+     * top-down. Niente cap rettangolare o motivo centrale a freccia. */
+    R(g, x + 8, y - 31, 64, 4, C.ink); R(g, x + 9, y - 30, 62, 3, '#5c8098');
+    R(g, x + 4, y - 27, 72, 4, C.ink); R(g, x + 5, y - 26, 70, 3, '#2f4d63');
+    R(g, x, y - 23, 80, 23, C.ink); R(g, x + 1, y - 22, 78, 21, '#2f4d63');
+    R(g, x + 2, y - 21, 76, 2, '#5c8098');
+    for (var roofRow = 0; roofRow < 3; roofRow++) {
+      var roofY = y - 19 + roofRow * 6;
+      var roofShift = roofRow & 1 ? 7 : 3;
+      for (i = roofShift; i < 76; i += 10) {
+        R(g, x + i, roofY, 6, 1, '#213648');
+        R(g, x + i + 1, roofY + 1, 3, 1, '#5c8098');
+      }
     }
-    townGable(g, x + 48, y - 20, [3,7,11,15,19], '#2f4d63', '#5c8098');
-    townTwinWindow(g, x + 9, y + 12, '#dbc78d', '#213648');
-    townTwinWindow(g, x + 67, y + 12, '#dbc78d', '#213648');
-    R(g, x + 35, y + 3, 26, 20, C.ink); R(g, x + 38, y + 6, 20, 14, '#e4d9b0');
-    townSignIcon(g, 'sheriff', x + 40, y + 5);
-    R(g, x + 7, y + 34, 82, 4, C.ink); R(g, x + 10, y + 38, 76, 3, '#5c8098');
-    R(g, x + 11, y + 41, 3, 22, C.ink); R(g, x + 82, y + 41, 3, 22, C.ink);
-    R(g, x + 32, y + 38, 16, 25, C.ink); R(g, x + 35, y + 42, 10, 21, '#2f4d63');
-    /* Due ali più basse e ingresso arretrato rompono rettangolo largo. */
-    R(g, x - 12, y + 18, 16, 46, C.ink); R(g, x - 9, y + 21, 13, 40, '#5c8098');
-    R(g, x + 92, y + 18, 16, 46, C.ink); R(g, x + 92, y + 21, 13, 40, '#2f4d63');
-    townTwinWindow(g, x - 10, y + 29, '#dbc78d', '#213648');
-    townTwinWindow(g, x + 88, y + 29, '#dbc78d', '#213648');
-    R(g, x + 28, y + 33, 40, 7, C.ink); R(g, x + 32, y + 35, 32, 3, '#dbc78d');
-    R(g, x + 15, y + 24, 9, 2, '#dbc78d'); R(g, x + 72, y + 27, 8, 2, '#dbc78d');
-    R(g, x + 47, y - 30, 3, 11, C.ink); R(g, x + 42, y - 32, 13, 4, C.ink);
-    townStep(g, x + 30, y + 64, 20, '#dbc78d');
-    townFoundationShadow(g, x, y + 70, 96);
+    R(g, x - 1, y - 2, 82, 1, C.ink); R(g, x + 1, y - 1, 78, 1, '#5c8098');
+
+    /* Facciata: due bay laterali integrati. Corsi di siding corti, mai
+     * attraversamenti full-width; finestre 16x11 coerenti con porta 12x24. */
+    for (i = 7; i < 54; i += 7) {
+      R(g, x + 3 + ((i / 7) & 1) * 3, y + i, 20, 1, '#9aab69');
+      R(g, x + 57 + (((i / 7) + 1) & 1) * 3, y + i, 18, 1, '#9aab69');
+    }
+    townWindow(g, x + 7, y + 17, 16, 11, '#5c8098', '#213648');
+    townWindow(g, x + 57, y + 17, 16, 11, '#5c8098', '#213648');
+    R(g, x + 8, y + 18, 6, 1, '#dbc78d'); R(g, x + 58, y + 18, 6, 1, '#dbc78d');
+
+    /* Insegna esplicita, leggibile a 1x: l'identita' non dipende piu' da
+     * croce/stella ambigua. */
+    R(g, x + 18, y + 3, 45, 11, C.ink); R(g, x + 19, y + 4, 43, 9, '#dbc78d');
+    townTinyWord(g, 'SHERIFF', x + 20, y + 5, '#213648');
+
+    /* Portico stretto: la soglia indica chiaramente cella D. Colonne da
+     * 2px, porta incassata con vetro, maniglia e zoccolo. */
+    R(g, x + 25, y + 28, 30, 3, C.ink); R(g, x + 28, y + 28, 24, 1, '#dbc78d');
+    R(g, x + 27, y + 31, 2, 31, C.ink); R(g, x + 51, y + 31, 2, 31, C.ink);
+    R(g, x + 32, y + 32, 16, 31, C.ink);
+    R(g, x + 34, y + 34, 12, 8, '#5c8098'); R(g, x + 34, y + 42, 12, 1, C.ink);
+    R(g, x + 34, y + 43, 12, 19, '#2f4d63');
+    R(g, x + 43, y + 52, 2, 2, '#dbc78d');
+    R(g, x + 3, y + 35, 23, 2, '#5c8098'); R(g, x + 54, y + 35, 23, 2, '#5c8098');
+    R(g, x + 5, y + 56, 20, 3, '#213648'); R(g, x + 55, y + 56, 20, 3, '#213648');
+    /* Piazzola 2x1 sulla vera riga calpestabile 21. Collega porta e
+     * marciapiede senza sembrare prato casuale. */
+    R(g, x + 24, y + 64, 32, 16, '#34572d');
+    R(g, x + 25, y + 65, 30, 14, '#dcd9a9');
+    R(g, x + 40, y + 65, 1, 14, '#9aab69'); R(g, x + 25, y + 72, 30, 1, '#9aab69');
+    R(g, x + 4, y + 63, 24, 2, '#34572d'); R(g, x + 52, y + 63, 24, 2, '#34572d');
+    townStep(g, x + 30, y + 63, 20, '#dbc78d');
 
     /* Double R — vetrata lunga e iconica tenda a scacchi. */
     x = 39 * 16 - cx; y = 18 * 16 - cy;
     townClosedFlat(g, x, y, 96, 48, BUILDINGS['2']);
+    R(g, x + 5, y - 22, 86, 4, C.ink); R(g, x + 7, y - 21, 82, 2, '#c1585a');
     for (i = 5; i < 44; i += 7) {
       R(g, x + 3 + (((i / 7) & 1) * 5), y + i, 85, 1, '#c1585a');
     }
-    R(g, x + 31, y - 20, 34, 17, C.ink); R(g, x + 34, y - 17, 28, 11, C.paper);
-    townSignIcon(g, 'cup', x + 41, y - 18);
+    R(g, x + 30, y - 20, 36, 13, C.ink); R(g, x + 32, y - 18, 32, 9, C.paper);
+    townMicroWord(g, 'DOUBLE R', x + 34, y - 16, '#713943');
+    /* Tazzina secondaria 10x9: non compete con parola DOUBLE R. */
+    R(g, x + 74, y - 18, 12, 10, C.ink); R(g, x + 75, y - 17, 10, 8, C.paper);
+    R(g, x + 77, y - 15, 5, 4, '#713943'); R(g, x + 82, y - 14, 2, 3, '#713943');
+    R(g, x + 77, y - 10, 7, 1, '#713943');
     townAwning(g, x + 3, y + 10, 90, '#8f2430', C.paper);
     R(g, x + 5, y + 20, 86, 22, C.ink); R(g, x + 8, y + 23, 80, 16, '#f8e078');
     for (i = 20; i < 82; i += 20) R(g, x + i, y + 23, 2, 16, '#8f2430');
-    R(g, x + 47, y + 23, 10, 25, C.ink); R(g, x + 50, y + 26, 5, 19, '#713943');
+    R(g, x + 48, y + 23, 16, 25, C.ink); R(g, x + 51, y + 26, 10, 22, '#713943');
+    R(g, x + 59, y + 38, 1, 2, C.paper);
+    townStep(g, x + 46, y + 48, 20, '#e3ab77');
     townFoundationShadow(g, x, y + 54, 96);
 
     /* Roadhouse — massa scura, insegna luminosa, portico basso. */
     x = 44 * 16 - cx; y = 25 * 16 - cy;
     townClosedGable(g, x, y, 96, 64, BUILDINGS['6']);
+    R(g, x + 31, y - 29, 34, 8, C.ink); R(g, x + 33, y - 27, 30, 5, '#5c3a3a');
+    R(g, x + 38, y - 26, 20, 1, '#c06a4e');
     for (i = 5; i < 60; i += 6) {
       R(g, x + 4 + (((i / 6) & 1) * 4), y + i, 84, 1, '#5c3a3a');
       if ((i & 12) === 0) R(g, x + 25 + (i % 18), y + i - 2, 2, 3, '#c06a4e');
@@ -2061,19 +2276,21 @@
     R(g, x + 9, y + 29, 16, 13, C.ink); R(g, x + 12, y + 32, 10, 7, '#caa15a');
     townSignIcon(g, 'note', x + 9, y + 28);
     R(g, x + 10, y + 3, 76, 21, C.ink); R(g, x + 13, y + 6, 70, 15, '#caa15a');
-    for (i = 17; i < 80; i += 9) { R(g, x + i, y + 7, 4, 3, C.paper); R(g, x + i + 1, y + 10, 2, 2, C.red); }
-    townSignIcon(g, 'note', x + 40, y + 4);
+    R(g, x + 15, y + 7, 2, 8, '#2c1a1f'); R(g, x + 17, y + 7, 4, 2, '#2c1a1f');
+    R(g, x + 12, y + 14, 5, 3, '#2c1a1f');
+    townTinyWord(g, 'ROADHOUSE', x + 23, y + 10, '#2c1a1f');
     /* Fascia luminosa e coronamento incassato: ingresso domina facciata. */
     R(g, x + 34, y + 25, 44, 6, C.ink); R(g, x + 38, y + 27, 36, 2, '#caa15a');
     R(g, x + 38, y + 31, 36, 5, '#5c3a3a');
     R(g, x + 6, y + 30, 84, 4, '#5c3a3a');
     R(g, x + 8, y + 34, 3, 29, C.ink); R(g, x + 85, y + 34, 3, 29, C.ink);
     R(g, x + 40, y + 34, 32, 29, C.ink);
-    R(g, x + 43, y + 38, 11, 25, '#2c1a1f'); R(g, x + 58, y + 38, 11, 25, '#2c1a1f');
-    R(g, x + 55, y + 38, 2, 25, '#caa15a');
+    R(g, x + 43, y + 38, 5, 25, '#5c3a3a'); R(g, x + 64, y + 38, 5, 25, '#5c3a3a');
+    R(g, x + 48, y + 36, 16, 28, C.ink); R(g, x + 51, y + 39, 10, 25, '#2c1a1f');
+    R(g, x + 56, y + 39, 2, 25, '#caa15a');
     R(g, x + 42, y + 36, 29, 3, '#caa15a');
     R(g, x + 17, y + 38, 18, 14, C.ink); R(g, x + 20, y + 41, 12, 8, '#c06a4e');
-    R(g, x + 62, y + 38, 18, 14, C.ink); R(g, x + 65, y + 41, 12, 8, '#c06a4e');
+    R(g, x + 73, y + 38, 18, 14, C.ink); R(g, x + 76, y + 41, 12, 8, '#c06a4e');
     townStep(g, x + 46, y + 64, 20, '#caa15a');
     townFoundationShadow(g, x, y + 70, 96);
   }
@@ -2184,17 +2401,17 @@
    * descrive ingombro artistico relativo in pixel. Test e renderer condividono
    * questa fonte per impedire anchor stale e porte decorative false. */
   var TOWN_STRUCTURE_DEFS = [
-    { id:'great-northern', ch:'4', anchor:[6,4], component:[6,3,6,4], door:[9,6], visualBounds:[0,-22,96,86], cameraFocus:[9,7], materialKit:'lodge' },
-    { id:'hospital', ch:'5', anchor:[20,3], component:[20,3,6,4], door:[23,6], visualBounds:[0,-14,96,82], cameraFocus:[23,7], materialKit:'clinical' },
-    { id:'palmer', ch:'3', anchor:[40,4], component:[40,4,4,3], door:[42,6], visualBounds:[0,-22,64,78], cameraFocus:[42,7], materialKit:'home' },
-    { id:'bookhouse', ch:'7', anchor:[28,2], component:[28,2,3,4], door:null, visualBounds:[0,-20,48,90], cameraFocus:[29,8], materialKit:'brick' },
-    { id:'hornes', ch:'9', anchor:[33,3], component:[33,3,3,4], door:null, visualBounds:[0,-36,48,100], cameraFocus:[34,8], materialKit:'deco' },
-    { id:'pharmacy', ch:'0', anchor:[15,10], component:[15,10,3,3], door:null, visualBounds:[0,-22,48,76], cameraFocus:[16,14], materialKit:'pharmacy' },
-    { id:'hardware', ch:'0', anchor:[19,10], component:[19,10,2,3], door:null, visualBounds:[0,-29,32,77], cameraFocus:[20,14], materialKit:'hardware' },
+    { id:'great-northern', ch:'4', anchor:[6,4], component:[6,3,6,4], door:[9,6], visualBounds:[-1,-22,98,86], cameraFocus:[9,7], materialKit:'lodge' },
+    { id:'hospital', ch:'5', anchor:[20,3], component:[20,3,6,4], door:[23,6], visualBounds:[-1,-27,98,113], cameraFocus:[23,7], materialKit:'clinical' },
+    { id:'palmer', ch:'3', anchor:[40,4], component:[40,4,4,3], door:[42,6], visualBounds:[-5,-22,71,83], cameraFocus:[42,7], materialKit:'home' },
+    { id:'bookhouse', ch:'7', anchor:[28,2], component:[28,2,3,3], door:null, visualBounds:[-1,-27,50,84], cameraFocus:[29,7], materialKit:'timber-lodge-meeting' },
+    { id:'hornes', ch:'9', anchor:[33,3], component:[33,3,3,3], door:null, visualBounds:[-1,-29,50,86], cameraFocus:[34,7], materialKit:'deco' },
+    { id:'pharmacy', ch:'0', anchor:[15,10], component:[15,10,3,3], door:null, visualBounds:[-1,-22,50,76], cameraFocus:[16,14], materialKit:'pharmacy' },
+    { id:'hardware', ch:'0', anchor:[19,10], component:[19,10,2,3], door:null, visualBounds:[-1,-29,37,80], cameraFocus:[20,14], materialKit:'hardware' },
     { id:'newsstand', ch:'0', anchor:[46,10], component:[46,10,3,2], door:null, visualBounds:[-7,-25,62,62], cameraFocus:[47,14], materialKit:'news' },
-    { id:'sheriff', ch:'1', anchor:[10,17], component:[10,17,6,4], door:[12,20], visualBounds:[-19,-20,115,94], cameraFocus:[12,21], materialKit:'civic' },
-    { id:'double-r', ch:'2', anchor:[39,18], component:[39,18,6,3], door:[42,20], visualBounds:[0,-20,96,78], cameraFocus:[42,21], materialKit:'diner' },
-    { id:'roadhouse', ch:'6', anchor:[44,25], component:[44,25,6,4], door:[47,28], visualBounds:[0,-22,116,96], cameraFocus:[47,29], materialKit:'venue' }
+    { id:'sheriff', ch:'1', anchor:[10,17], component:[10,17,5,4], door:[12,20], visualBounds:[-1,-32,84,113], cameraFocus:[12,21], materialKit:'civic' },
+    { id:'double-r', ch:'2', anchor:[39,18], component:[39,18,6,3], door:[42,20], visualBounds:[-1,-22,98,81], cameraFocus:[42,21], materialKit:'diner' },
+    { id:'roadhouse', ch:'6', anchor:[44,25], component:[44,25,6,4], door:[47,28], visualBounds:[-4,-29,101,104], cameraFocus:[47,29], materialKit:'venue' }
   ];
 
   function interiorHeroAccents(g, map, cx, cy) {
@@ -2612,7 +2829,7 @@
   Spr.drawTile = function (ctx, ch, x, y, tx, ty, rows, opts) {
     var nightWoods = !!(opts && opts.mapId === 'woods');
     var underlay = groundAt(opts, tx, ty);
-    if (underlay && 'SLPBAHEq'.indexOf(ch) >= 0) {
+    if (underlay && 'SLPBAHEqG'.indexOf(ch) >= 0) {
       groundedProp(ctx, ch, underlay, x, y, tx, ty, rows, opts);
       return;
     }
@@ -2651,18 +2868,61 @@
       case '-':
         if (opts && opts.mapId === 'town') townRoad(ctx, x, y, tx, ty, rows);
         else road(ctx, x, y, tx, ty, rows);
-        R(ctx, x + 2, y, 3, 16, C.paper); R(ctx, x + 8, y, 3, 16, C.paper); R(ctx, x + 14, y, 2, 16, C.paper);
+        var cwY = roadCell(cell(rows, tx, ty - 1)) ? 0 : 3;
+        var cwH = 16 - cwY - (roadCell(cell(rows, tx, ty + 1)) ? 0 : 3);
+        if (!roadCell(cell(rows, tx, ty - 1))) R(ctx, x + 1, y, 14, 1, '#85877f');
+        if (!roadCell(cell(rows, tx, ty + 1))) R(ctx, x + 1, y + 15, 14, 1, '#85877f');
+        /* Gruppo 3x2: cinque bande lungo 48px, non tre ripetizioni per tile
+         * (nove barre da codice a barre). */
+        var zebraLeft = cell(rows, tx - 1, ty) === '-';
+        var zebraRight = cell(rows, tx + 1, ty) === '-';
+        if (!zebraLeft && zebraRight) {
+          R(ctx, x + 8, y + cwY, 2, cwH, C.paper);
+        } else if (zebraLeft && zebraRight) {
+          R(ctx, x, y + cwY, 2, cwH, C.paper); R(ctx, x + 8, y + cwY, 2, cwH, C.paper);
+        } else if (zebraLeft && !zebraRight) {
+          R(ctx, x, y + cwY, 2, cwH, C.paper); R(ctx, x + 8, y + cwY, 2, cwH, C.paper);
+        } else {
+          R(ctx, x + 4, y + cwY, 2, cwH, C.paper); R(ctx, x + 10, y + cwY, 2, cwH, C.paper);
+        }
+        if (!roadCell(cell(rows, tx, ty - 1))) {
+          R(ctx, x, y, 16, 1, '#31543a'); R(ctx, x + 1, y + 1, 14, 1, '#85877f'); R(ctx, x + 1, y + 2, 14, 1, '#77736a');
+        }
+        if (!roadCell(cell(rows, tx, ty + 1))) {
+          R(ctx, x, y + 15, 16, 1, '#31543a'); R(ctx, x + 1, y + 14, 14, 1, '#85877f'); R(ctx, x + 1, y + 13, 14, 1, '#77736a');
+        }
         return;
       case ':':
         if (opts && opts.mapId === 'town') townRoad(ctx, x, y, tx, ty, rows);
         else road(ctx, x, y, tx, ty, rows);
-        R(ctx, x, y + 2, 16, 3, C.paper); R(ctx, x, y + 8, 16, 3, C.paper); R(ctx, x, y + 14, 16, 2, C.paper);
+        var cwX = roadCell(cell(rows, tx - 1, ty)) ? 0 : 3;
+        var cwW = 16 - cwX - (roadCell(cell(rows, tx + 1, ty)) ? 0 : 3);
+        if (!roadCell(cell(rows, tx - 1, ty))) R(ctx, x, y + 1, 1, 14, '#85877f');
+        if (!roadCell(cell(rows, tx + 1, ty))) R(ctx, x + 15, y + 1, 1, 14, '#85877f');
+        /* Attraversamento 3x2: tre sole bande centrate sull'intero gruppo
+         * alto 32px. Prima ogni riga ripeteva tre bande = scala da sei. */
+        var zebraUp = cell(rows, tx, ty - 1) === ':';
+        var zebraDown = cell(rows, tx, ty + 1) === ':';
+        if (!zebraUp && zebraDown) {
+          R(ctx, x + cwX, y + 10, cwW, 2, C.paper);
+          R(ctx, x + cwX, y + 14, cwW, 2, C.paper);
+        } else if (zebraUp && !zebraDown) {
+          R(ctx, x + cwX, y + 2, cwW, 2, C.paper);
+        } else {
+          R(ctx, x + cwX, y + 5, cwW, 2, C.paper);
+          R(ctx, x + cwX, y + 10, cwW, 2, C.paper);
+          R(ctx, x + cwX, y + 15, cwW, 1, C.paper);
+        }
+        if (!roadCell(cell(rows, tx - 1, ty))) {
+          R(ctx, x, y, 1, 16, '#31543a'); R(ctx, x + 1, y + 1, 1, 14, '#85877f'); R(ctx, x + 2, y + 1, 1, 14, '#77736a');
+        }
+        if (!roadCell(cell(rows, tx + 1, ty))) {
+          R(ctx, x + 15, y, 1, 16, '#31543a'); R(ctx, x + 14, y + 1, 1, 14, '#85877f'); R(ctx, x + 13, y + 1, 1, 14, '#77736a');
+        }
         return;
       case 'w': water(ctx, x, y, tx, ty, rows); return;
       case 'F':
-        if (opts && opts.mapId === 'town' && tx >= 16 && tx <= 19 && ty >= 26 && ty <= 31) lakeShore(ctx, x, y, tx, ty, rows);
-        else if (opts && opts.mapId === 'town' && tx >= 26 && tx <= 27 && ty >= 8 && ty <= 15) urbanRail(ctx, x, y);
-        else if (opts && opts.mapId === 'town' && tx >= 26 && tx <= 30 && ty >= 16 && ty <= 17) urbanRailHorizontal(ctx, x, y, ty === 17);
+        if (opts && opts.mapId === 'town' && ty >= 26 && ty <= 31 && cell(rows, tx - 1, ty) === 'w') lakeShore(ctx, x, y, tx, ty, rows);
         else fence(ctx, x, y, tx, ty, rows, opts && opts.mapId === 'town');
         return;
       case 'q':
@@ -3066,6 +3326,97 @@
             at(y, x - 1) === '.' || at(y, x + 1) === '.') s[x] = 'o';
       }
       out.push(s.join(''));
+    }
+    return out;
+  }
+
+  /* Il generatore lavora su due righe di margine sopra la testa: servono a
+   * disegnare cappelli, cotonature e ciuffi senza coordinate negative. Prima
+   * quelle righe finivano anche nel frame finale: gli attori alti occupavano
+   * 17–19 px e uscivano dalla cella OBJ 16×16. Qui il margine e' soltanto un
+   * tavolo da disegno: lo fondiamo nelle prime righe della testa, poi
+   * riallineiamo dal basso i corpi corti. Nessun clipping runtime. */
+  function fitActorCell(rows, g) {
+    var out = rows.slice(), y, x, base, over;
+    if (!g.fullCell) {
+      for (y = 0; y < HEAD_PAD; y++) {
+        base = out[HEAD_PAD + y].split('');
+        over = out[y].split('');
+        for (x = 0; x < 16; x++) if (over[x] !== '.') base[x] = over[x];
+        out[HEAD_PAD + y] = base.join('');
+      }
+      out = out.slice(HEAD_PAD);
+    }
+    while (out.length < 16) out.unshift(EMPTY_ROW);
+    if (out.length !== 16) throw new Error('actor pattern exceeds 16 rows after authored fit: ' + out.length);
+    return out;
+  }
+
+  /* Uno sprite overworld e' una sola sagoma. Cue scritti oltre capelli o
+   * maniche creavano isole da 1–2 px (antenne visibili a 5×). Conserviamo la
+   * componente 4-connessa maggiore e rifiutiamo decorazioni flottanti. */
+  function removeDetachedSpecks(rows) {
+    var grid = toGrid(rows), seen = [], groups = [], y, x, i;
+    for (i = 0; i < 256; i++) seen.push(false);
+    for (y = 0; y < 16; y++) for (x = 0; x < 16; x++) {
+      var start = y * 16 + x;
+      if (grid[y][x] === '.' || seen[start]) continue;
+      var stack = [start], group = [];
+      seen[start] = true;
+      while (stack.length) {
+        var pos = stack.pop(), cy = Math.floor(pos / 16), cx = pos % 16;
+        group.push(pos);
+        var neighbors = [[cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]];
+        for (var n = 0; n < neighbors.length; n++) {
+          var nx = neighbors[n][0], ny = neighbors[n][1];
+          if (nx < 0 || nx >= 16 || ny < 0 || ny >= 16) continue;
+          var np = ny * 16 + nx;
+          if (!seen[np] && grid[ny][nx] !== '.') { seen[np] = true; stack.push(np); }
+        }
+      }
+      groups.push(group);
+    }
+    groups.sort(function (a, b) { return b.length - a.length; });
+    for (i = 1; i < groups.length; i++) for (var j = 0; j < groups[i].length; j++) {
+      var p = groups[i][j]; grid[Math.floor(p / 16)][p % 16] = '.';
+    }
+    return fromGrid(grid);
+  }
+
+  /* La prima riga opaca non puo' essere una barra orizzontale: sui master
+   * Crystal la calotta rientra di un pixel per lato. Questo singolo gradino
+   * elimina l'effetto casco senza aggiungere rumore. */
+  function taperCellCrown(rows) {
+    var out = rows.slice(), y, x, lo, hi, row;
+    for (y = 0; y < 16; y++) {
+      row = out[y].split(''); lo = -1; hi = -1;
+      for (x = 0; x < 16; x++) if (row[x] !== '.') { if (lo < 0) lo = x; hi = x; }
+      if (lo < 0) continue;
+      if (hi - lo + 1 >= 8) { row[lo] = '.'; row[hi] = '.'; out[y] = row.join(''); }
+      break;
+    }
+    return out;
+  }
+
+  /* Nelle quattro righe alte, conserva ciocca principale e rimuove spuntoni
+   * da 1–2 px separati da vuoto. Restano dettagli interni di colore; cambia
+   * soltanto contorno che a scala 5× leggeva come antenna. */
+  function cleanCrownOutliers(rows) {
+    var out = rows.slice(), first = -1, y, x;
+    for (y = 0; y < 16 && first < 0; y++) if (/[^.]/.test(out[y])) first = y;
+    for (y = first; y >= 0 && y < Math.min(16, first + 4); y++) {
+      var row = out[y].split(''), runs = [], start = -1;
+      for (x = 0; x <= 16; x++) {
+        var filled = x < 16 && row[x] !== '.';
+        if (filled && start < 0) start = x;
+        if (!filled && start >= 0) { runs.push([start, x - 1]); start = -1; }
+      }
+      if (runs.length < 2) continue;
+      runs.sort(function (a, b) { return (b[1] - b[0]) - (a[1] - a[0]); });
+      for (var r = 1; r < runs.length; r++) if (runs[r][1] - runs[r][0] + 1 <= 2) {
+        for (x = runs[r][0]; x <= runs[r][1]; x++) row[x] = '.';
+      }
+      out[y] = row.join('');
     }
     return out;
   }
@@ -3477,7 +3828,11 @@
    * vuole che le righe dei piedi NON siano identiche al frame frontale — lo
    * erano pixel per pixel. */
   function sideFeetRow(lo, hi, step, heel) {
-    var s = '', x, toe = hi - (step < 0 ? 0 : 0);
+    /* Profilo Gen II: nel passo il piede avanza di un pixel; nell'idle resta
+     * sotto il bacino. Prima `step` non cambiava alcuna coordinata e tutto il
+     * cast, salvo Cooper authored, pattinava con sagoma identica. */
+    if (step > 0) { lo = Math.min(14, lo + 1); hi = Math.min(15, hi + 1); }
+    var s = '', x, toe = hi;
     for (x = 0; x < 16; x++) {
       if (x < lo || x > toe) s += '.';
       else if (heel) s += (x <= lo + 1 || x >= toe - 2) ? 'o' : 'c';
@@ -3502,6 +3857,7 @@
     var g = {
       side: side, gown: gown, stance: stance, armTier: armTier,
       short: !!p.short,
+      uncanny: arch === 'uncanny',
       darkTorso: lumaHex(p.hair || '#000000') >= 118,
       tall: !p.short && h >= 1.05,
       /* Statura in quattro gradi, non tre: senza il grado intermedio Donna
@@ -3511,34 +3867,40 @@
       stoop: !p.short && h <= 0.99
     };
     if (side) {
-      /* Profilo: uno spessore solo, dentro i 10 px del gate. Il torso resta
-       * 1-2 px piu' largo del cranio, cosi' le spalle restano >= testa anche
-       * di lato, come nel frontale. */
-      /* R63 — il cranio di profilo non scende piu' sotto gli 8 px. Con 6 la
-       * meta' posteriore del profilo era un pettine di 3 colonne: non ci
-       * stavano tre toni (gate 7) e l'IoU fronte/lato scendeva a 0,55,
-       * sotto la banda di Oro. */
-      g.headW = b <= 0.90 ? 6 : 8;
-      g.shoulder = g.headW + 2;
+      /* Reference pret/pokecrystal (24 umani, 48 side frame): bbox p10/mediana
+       * 12/13 px e massa side/front mediana 87,3 %. Il vecchio ramo scendeva
+       * a 6 px di cranio e 8 px di spalle: profili-filamento, IoU fino a 0,57.
+       * Dieci pixel di cranio + dodici di spalle ripristinano volume GBC. */
+      /* Il Gigante deve leggere alto anche dentro la stessa cella 16x16:
+       * cranio piu' stretto e corpo lungo, ma inviluppo laterale ancora
+       * dentro i 12 px misurati in Crystal. */
+      g.headW = g.uncanny ? 8 : 10;
+      g.sideBodyW = g.uncanny ? 10 : g.headW;
+      g.shoulder = b >= 1.12 ? 14 : 12;
       g.chest = g.shoulder;
       g.armSpan = g.shoulder;
       g.fore = g.shoulder;
-      g.hip = gown || layered ? g.shoulder : g.shoulder - 2;
-      g.hem = gown ? g.shoulder : g.shoulder - 2;
-      g.legW = g.shoulder - 2;
-      /* Di profilo il piede non sporge: feetRow() allunga di 1 px il piede
-       * avanti nei fotogrammi di passo, e con footW = legW la sagoma resta
-       * dentro i 10 px del gate anche camminando. */
+      /* Profili minuti rientrano sotto petto; corporature broad/menace e
+       * gonne conservano 12 px. Evita side mass > front senza riportare il
+       * vecchio filamento da 8 px. */
+      g.hip = gown || b >= 1.08 ? g.shoulder : g.shoulder - 2;
+      g.hem = gown || b >= 1.08 ? g.shoulder : g.shoulder - 2;
+      g.legW = Math.max(8, g.hip - 2);
+      /* Piede entro il profilo: il lato resta piu' stretto del frontale, ma
+       * non collassa sotto banda 12–14 px misurata nel reference. */
       g.footW = g.legW;
       g.block = Math.max(2, Math.min(4, 2 + stance));
       return g;
     }
-    g.headW = b >= 1.12 ? 14 : (b <= 0.90 ? 10 : 12);
+    /* Reference front/back p10/mediana/p90 = 12,7/14/16 px. Nessuna testa
+     * umana scende a 10 px: corporatura minuta cambia orlo/stance, non scala
+     * intero cranio. */
+    g.headW = g.uncanny ? 10 : (b >= 1.12 ? 14 : 12);
     /* Le spalle partono dalla testa e salgono: in Oro non sono mai piu'
      * strette (chris 14 = 14, kris 16 contro 12). */
     /* Torso coerente con la testa. Le braccia non superano questa misura:
      * evita sia il corpo-filamento sia la posa a croce larga 16px. */
-    g.shoulder = Math.min(16, g.headW + 2);
+    g.shoulder = g.uncanny ? 14 : Math.min(16, g.headW + 2);
     g.chest = g.shoulder;
     /* R63 — solo la falcata piu' lunga allarga le braccia oltre le spalle.
      * Con +2 da armTier 2 in su, le righe delle braccia uscivano a 16 px
@@ -3637,14 +3999,21 @@
     [-1, 0], [-1, 0], [-1, 1], [0, 0], [-1, 0], [1, -1], [0, 1], [0, 0]
   ];
   function sideBodyRows(g, step, d) {
-    var W = g.headW, x0 = 8 - (W >> 1), x1 = x0 + W - 1;
+    var W = g.sideBodyW || g.headW;
     var base = g.darkTorso ? 'p' : 'c';
     var mark = g.darkTorso ? 'c' : 'o';
     var TONE = { O: 'o', S: 's', C: base, M: mark, P: 'p', A: 'c' };
     function tone(k) { return TONE[k]; }
-    var fwd = step >= 0, rows = [], a, e;
+    var fwd = step > 0, rows = [], a, e;
     function set(a, x, k) { if (x > 0 && x < 15 && a[x] !== '.') a[x] = k; }
-    function edge(i) { var t = SIDE_BODY_EDGE[i]; return [x0 + t[0], x1 + t[1]]; }
+    var widths = [g.shoulder, g.chest, g.armSpan, g.fore, g.hip, g.hem, g.legW, g.footW];
+    function edge(i) {
+      /* Consuma davvero geometria/archetipo. -2 compensa i gradini esterni:
+       * una spalla 12 produce bbox 12, una broad 14 produce bbox 14. */
+      var bw = Math.max(8, Math.min(12, (widths[i] || W) - 2));
+      var bx0 = 8 - (bw >> 1), bx1 = bx0 + bw - 1, t = SIDE_BODY_EDGE[i];
+      return [bx0 + t[0], bx1 + t[1]];
+    }
     function row(i, spec) { e = edge(i); return runRow(e[0], e[1], spec, tone); }
 
     /* spalla: colletto di incarnato davanti */
@@ -3717,6 +4086,8 @@
   function applyHair(grid, p, dir, g, top, bodyTop) {
     var style = p.hairStyle, x0 = 8 - (g.headW >> 1), x1 = x0 + g.headW - 1;
     var back = dir === 'up', y;
+    var pixelView = g.side ? 'side' : (back ? 'up' : 'down');
+    var pixelCue = p.pixel16 && p.pixel16[pixelView];
     if (p.hat) return;
     if (style === 'bouffant' || style === 'wild') crown(grid, top, x0, x1, 2);
     else if (style === 'pompadour') crown(grid, top, x0, x1, 1);
@@ -3739,8 +4110,15 @@
      * del capo. Separa Hawk da Leland, che hanno tutto il resto uguale. */
     if (p.long) {
       var sx0 = 8 - (g.shoulder >> 1), sx1 = sx0 + g.shoulder - 1;
-      if (g.side) { put(grid, sx0, bodyTop, 'h'); put(grid, sx0, bodyTop + 1, 'h'); }
-      else { put(grid, sx0 - 1, bodyTop, 'h'); put(grid, sx1 + 1, bodyTop, 'h'); }
+      if (pixelCue === 'temple-tabs') {
+        /* Maddy: capelli dentro le spalle. Le vecchie code x0/x15 univano
+         * testa e busto in una maschera larga 16 senza collo. */
+        put(grid, sx0 + 1, bodyTop, 'h'); put(grid, sx1 - 1, bodyTop, 'h');
+      } else if (g.side) {
+        put(grid, sx0, bodyTop, 'h'); put(grid, sx0, bodyTop + 1, 'h');
+      } else {
+        put(grid, sx0 - 1, bodyTop, 'h'); put(grid, sx1 + 1, bodyTop, 'h');
+      }
     }
   }
 
@@ -3799,11 +4177,271 @@
       put(grid, 8 - (g.shoulder >> 1) + 2, bodyTop, 's');
       put(grid, 8 + (g.shoulder >> 1) - 3, bodyTop, 's');
     }
+    if (p.waistcoat) {
+      /* Panciotto a V: firma larga e continua, non puntini decorativi. */
+      if (side) {
+        put(grid, 8, bodyTop + 1, 's');
+        put(grid, 9, bodyTop + 2, 'o');
+        put(grid, 9, bodyTop + 3, 'o');
+      } else if (!back) {
+        put(grid, 6, bodyTop + 1, 's'); put(grid, 9, bodyTop + 1, 's');
+        put(grid, 7, bodyTop + 2, 'o'); put(grid, 8, bodyTop + 2, 'o');
+        put(grid, 7, bodyTop + 3, 'o'); put(grid, 8, bodyTop + 3, 'o');
+      }
+    }
+    if (p.onearm) {
+      /* Gerard: il vecchio onearm cambiava solo il colore dentro una sagoma
+       * perfettamente simmetrica. Qui manca davvero il volume della manica.
+       * seal() richiude il nuovo bordo, quindi il moncherino resta netto e
+       * non apre buchi nel contorno. */
+      if (side) {
+        var sideX1 = 8 - ((g.sideBodyW || g.headW) >> 1) + (g.sideBodyW || g.headW) - 1;
+        put(grid, sideX1 + 1, bodyTop + 2, '.');
+        put(grid, sideX1, bodyTop + 2, '.');
+        put(grid, sideX1 - 1, bodyTop + 2, '.');
+        put(grid, sideX1, bodyTop + 3, '.');
+        put(grid, sideX1 - 1, bodyTop + 3, '.');
+      } else {
+        var removeRight = back ? p.onearm === 'right' : p.onearm === 'left';
+        var ax0 = 8 - (Math.max(8, g.fore - 2) >> 1);
+        var ax1 = ax0 + Math.max(8, g.fore - 2) - 1;
+        var cut0 = removeRight ? ax1 - 2 : ax0;
+        var cut1 = removeRight ? ax1 : ax0 + 2;
+        for (var ay = bodyTop + 2; ay <= bodyTop + 3; ay++) {
+          for (var ax = cut0; ax <= cut1; ax++) put(grid, ax, ay, '.');
+        }
+      }
+    }
     /* R63 — la cucitura del braccio di profilo non si applica piu' qui:
      * sideBodyRows() disegna tutte e due le braccia dentro la matrice
      * (quello vicino avanti, quello lontano dietro). Il vecchio blocco
      * scriveva sopra la mano posteriore e la faceva sparire, lasciando la
      * meta' dietro del profilo a due soli toni. */
+  }
+
+  function applyIdentityCue(grid, p, dir, g, top, bodyTop, step) {
+    var view = g.side ? 'side' : (dir === 'up' ? 'up' : 'down');
+    var cue = p.pixel16 && p.pixel16[view];
+    if (!cue) return;
+    var hx0 = 8 - (g.headW >> 1), hx1 = hx0 + g.headW - 1;
+    var shoulderW = Math.min(14, g.shoulder || 12);
+    var bx0 = 8 - (shoulderW >> 1), bx1 = bx0 + shoulderW - 1;
+    function add(x, y, k) { put(grid, x, y, k || 'o'); }
+    function cut(x, y) { put(grid, x, y, '.'); }
+
+    if (cue === 'sheriff-brim') {
+      span(grid, Math.max(0, hx0 - 2), Math.min(15, hx1 + 2), top + 1, 'o');
+      add(hx0, top, 'g'); add(hx1, top, 'g');
+    }
+
+    if (cue.indexOf('swept-') === 0) {
+      add(hx0 + 2, top - 1, 'o'); add(hx0 + 3, top - 1, 'g');
+      if (g.side) { add(hx1 + 1, top + 2, 'o'); add(hx1, top + 2, 'g'); }
+      add(g.side ? bx1 : bx0, bodyTop + 3, 's');
+    }
+    if (cue === 'forward-quiff-cuff') {
+      add(hx1 + 1, top + 2, 'o'); add(hx1, top + 2, 'g');
+      /* Cooper: polsino/mano avanzano davvero fuori dal busto. Prima il cue
+       * cambiava solo colore dentro la maschera e il profilo coincideva al
+       * 97,5% con Donna. */
+      add(bx1 + 1, bodyTop + 3, 'o');
+      add(bx1 + 1, bodyTop + 4, 's');
+    }
+    if (cue.indexOf('rear-bun') >= 0) {
+      add(hx0 - 1, top + 2, 'o'); add(hx0 - 1, top + 3, 'h');
+      add(hx0 - 1, top + 4, 'o');
+      add(hx0, top + 5, 'h'); add(hx0 + 1, top + 5, 'h');
+      /* Lucy, profilo: chignon a volume 2 px, non stessa calotta del bob. */
+      if (g.side) { add(hx0 - 2, top + 2, 'o'); add(hx0 - 2, top + 3, 'h'); }
+    }
+    if (cue === 'long-hatless') {
+      add(7, top - 1, 'o'); add(8, top - 1, 'g');
+      if (g.side) {
+        add(hx1 + 1, top + 6, 'o');
+        add(7, bodyTop + 1, 'o'); add(8, bodyTop + 1, 'o');
+        cut(bx1, bodyTop + 2); cut(bx1 - 1, bodyTop + 3);
+      }
+    }
+    if (cue === 'rear-curtain') {
+      add(hx0 - 1, top + 4, 'o'); add(hx0 - 1, top + 5, 'h');
+      add(hx0 - 1, top + 6, 'h'); add(hx0 - 1, top + 7, 'o');
+      add(hx0, bodyTop, 'h'); add(hx0, bodyTop + 1, 'h');
+      add(hx0, bodyTop + 2, 'h'); add(hx0, bodyTop + 3, 'o');
+      add(bx0 - 1, bodyTop + 1, 'h'); add(bx0 - 1, bodyTop + 2, 'h');
+      add(bx0 - 1, bodyTop + 3, 'o');
+      /* Hawk: coda lunga continua oltre giacca, leggibile nella sagoma 1×. */
+      add(bx0 - 2, bodyTop + 3, 'o'); add(bx0 - 2, bodyTop + 4, 'h');
+      add(bx0 - 2, bodyTop + 5, 'o');
+    }
+    if (cue === 'hair-tails') {
+      /* Hawk front/back: due code oltre la nuca separano il profilo
+       * verticale dal pompadour corto di James. */
+      add(hx0, top + 5, 'o'); add(hx0, top + 6, 'h');
+      add(hx0, top + 7, 'h'); add(hx0, top + 8, 'o');
+      if (!g.side) {
+        add(hx1, top + 5, 'o'); add(hx1, top + 6, 'h');
+        add(hx1, top + 7, 'h'); add(hx1, top + 8, 'o');
+        add(bx0 - 1, bodyTop + 3, 'h'); add(bx0 - 1, bodyTop + 4, 'o');
+        add(bx1 + 1, bodyTop + 3, 'h'); add(bx1 + 1, bodyTop + 4, 'o');
+      }
+    }
+    if (cue === 'silver-long-neck' && g.side) {
+      cut(hx0, top + 7); add(hx1 + 1, top + 7, 'o');
+      /* Leland: falda posteriore del completo, opposta ai capelli di Maddy. */
+      add(bx1, bodyTop + 4, 'c'); add(bx1 + 1, bodyTop + 4, 'o');
+      add(bx1, bodyTop + 5, 'c'); add(bx1 + 1, bodyTop + 5, 'o');
+    }
+    if (cue === 'shawl-hunch') {
+      add(bx0 - 2, bodyTop - 1, 'o'); add(bx0 - 1, bodyTop - 1, 'c');
+      add(bx0 - 2, bodyTop, 'o'); add(bx0 - 1, bodyTop, 'c');
+      if (g.side) { add(bx0 - 1, bodyTop + 1, 'o'); cut(bx1, bodyTop + 2); }
+      if (!g.side) { add(bx1 + 1, bodyTop + 1, 'o'); add(bx1, bodyTop + 1, 'c'); }
+    }
+    if (cue === 'apron-shelf') {
+      add(bx0, bodyTop + 5, 'o'); add(bx0 - 1, bodyTop + 5, 'c');
+      if (g.side) {
+        add(bx0 - 1, bodyTop + 4, 'o');
+        add(bx0 - 1, bodyTop + 6, 'o'); add(bx0, bodyTop + 6, 'c');
+        add(bx1, bodyTop + 5, 'c'); add(bx1 + 1, bodyTop + 5, 'o');
+        add(bx1, bodyTop + 6, 'c'); add(bx1 + 1, bodyTop + 6, 'o');
+      } else { add(bx1, bodyTop + 5, 'o'); add(bx1 + 1, bodyTop + 5, 'c'); }
+    }
+    if (cue === 'bell-apron') {
+      add(bx0 - 1, bodyTop + 5, 'o'); add(bx0 - 2, bodyTop + 6, 'o');
+      add(bx1 + 1, bodyTop + 5, 'o'); add(bx1 + 2, bodyTop + 6, 'o');
+      if (g.side) {
+        cut(bx0 - 2, bodyTop + 6); cut(bx1 + 2, bodyTop + 6);
+        add(bx0 - 1, bodyTop + 4, 'o');
+        add(bx1 - 1, bodyTop + 4, 'c'); add(bx1, bodyTop + 4, 'c'); add(bx1 + 1, bodyTop + 4, 'o');
+        add(bx0 - 1, bodyTop + 5, 'o');
+        add(bx1 - 1, bodyTop + 5, 'c'); add(bx1, bodyTop + 5, 'c'); add(bx1 + 1, bodyTop + 5, 'o');
+        add(bx0 - 1, bodyTop + 6, 'o');
+        add(bx1 - 1, bodyTop + 6, 'c'); add(bx1, bodyTop + 6, 'c'); add(bx1 + 1, bodyTop + 6, 'o');
+      }
+    }
+    if (cue === 'broad-pompadour') {
+      add(hx0 - 1, top + 1, 'o'); add(hx0 - 1, top + 2, 'h');
+      add(hx1 + 1, top + 2, 'o'); add(hx1 + 1, top + 3, 'h');
+      add(hx0 - 1, top + 4, 'o'); add(hx1 + 1, top + 4, 'o');
+      if (g.side) {
+        add(hx0 - 2, top + 2, 'o'); add(hx0 - 2, top + 3, 'h');
+        add(hx1 + 2, top + 2, 'o'); add(hx1 + 2, top + 3, 'h');
+      }
+    }
+    if (cue === 'wild-mane') {
+      add(hx0 - 1, top, 'o'); add(hx0 - 1, top + 1, 'h');
+      add(hx1 + 1, top + 3, 'o'); add(hx1 + 1, top + 4, 'h');
+      if (!g.side) {
+        add(bx0 - 1, bodyTop, 'h'); add(bx0 - 1, bodyTop + 1, 'o');
+        cut(bx1, bodyTop + 2); cut(bx1 - 1, bodyTop + 2);
+        cut(bx1, bodyTop + 3); cut(bx1 - 1, bodyTop + 3);
+      }
+      else {
+        add(hx0 - 1, top + 5, 'h'); add(hx0 - 1, top + 6, 'h');
+        add(hx0 - 1, top + 7, 'o');
+        add(bx0 - 1, bodyTop, 'h'); add(bx0 - 1, bodyTop + 1, 'h');
+        add(bx0 - 1, bodyTop + 2, 'h'); add(bx0 - 1, bodyTop + 3, 'o');
+        cut(bx1, bodyTop + 1); cut(bx1, bodyTop + 2);
+        cut(bx1 - 1, bodyTop + 2); cut(bx1, bodyTop + 3);
+        cut(bx1 - 1, bodyTop + 3);
+      }
+    }
+    if (cue === 'hair-cape') {
+      add(bx0 - 1, bodyTop + 1, 'h'); add(bx0, bodyTop + 2, 'o');
+      add(bx1 + 1, bodyTop + 1, 'h'); add(bx1, bodyTop + 2, 'o');
+    }
+    if (cue === 'rear-tail') {
+      /* Donna: coda/cappa posteriore continua fino alla vita, con fronte
+       * del busto scavato. Forma leggibile a 1x, non semplice palette swap
+       * del completo di Cooper. */
+      add(bx0 - 1, bodyTop, 'h'); add(bx0 - 1, bodyTop + 1, 'h');
+      add(bx0 - 1, bodyTop + 2, 'h'); add(bx0 - 1, bodyTop + 3, 'h');
+      add(bx0 - 1, bodyTop + 4, 'o'); add(bx0, bodyTop + 4, 'h');
+      cut(bx1, bodyTop + 2); cut(bx1, bodyTop + 3);
+    }
+    if (cue.indexOf('bald-') === 0) {
+      add(hx0 - 1, top + 4, 'o'); add(hx0 - 1, top + 5, 'h');
+      if (!g.side) { add(hx1 + 1, top + 4, 'o'); add(hx1 + 1, top + 5, 'h'); }
+    }
+    if (cue === 'bald-rear-tuft' && g.side) {
+      /* Jacoby: montatura/naso avanzano sul lato opposto al ciuffo. */
+      add(hx1 + 1, top + 6, 'o'); add(hx1 + 1, top + 7, 's');
+    }
+    if (cue === 'square-bob') {
+      add(hx0 - 1, top + 5, 'o'); add(hx0 - 1, top + 6, 'h');
+      add(hx1 + 1, top + 5, 'o'); add(hx1 + 1, top + 6, 'h');
+      add(8, bodyTop + 1, 'o');
+    }
+    if (cue === 'v-nape') {
+      add(7, top + 8, 'h'); add(8, top + 8, 'h'); add(7, top + 9, 'o');
+    }
+    if (cue === 'rear-bob-hook') {
+      add(hx0 - 1, top + 5, 'o'); add(hx0 - 1, top + 6, 'h');
+      add(hx0, top + 7, 'o');
+      add(8, bodyTop + 1, 'o');
+    }
+    if (cue === 'spectral-gown') {
+      /* Un solo orlo sospeso: Laura non finisce in due scarpe umane. */
+      for (var sx = 0; sx < 16; sx++) cut(sx, bodyTop + 7);
+      var gownX = step ? 7 : 6;
+      add(gownX, bodyTop + 7, 'o'); add(gownX + 1, bodyTop + 7, 'c');
+      add(gownX + 2, bodyTop + 7, 'c'); add(gownX + 3, bodyTop + 7, 'o');
+      if (g.side) {
+        cut(bx1, bodyTop + 2); cut(bx1, bodyTop + 3);
+        cut(bx1 - 1, bodyTop + 3);
+      }
+    }
+    if (cue === 'temple-tabs') {
+      add(hx0, top + 6, 'o'); add(hx0, top + 7, 'h');
+      if (!g.side) {
+        add(hx1, top + 6, 'o');
+        cut(hx0, top + 7); cut(hx1, top + 7);
+      }
+      else {
+        add(hx0 - 1, top + 6, 'o'); add(hx0 - 1, top + 7, 'h');
+        add(bx0 - 1, bodyTop + 2, 'h'); add(bx0 - 1, bodyTop + 3, 'o');
+      }
+    }
+    if (cue === 'forward-pompadour') {
+      add(hx1 + 1, top + 1, 'o'); add(hx1 + 1, top + 2, 'h');
+      add(hx1 + 2, top + 2, 'o'); add(hx1 + 2, top + 3, 'h');
+    }
+    if (cue === 'narrow-pompadour') {
+      add(hx1 + 1, top + 1, 'o'); add(hx1 + 1, top + 2, 'h');
+    }
+    if (cue === 'barrel-waistcoat') {
+      var barrelL = g.side ? bx0 : bx0 - 1, barrelR = g.side ? bx1 : bx1 + 1;
+      if (g.side) {
+        span(grid, barrelL, barrelR, bodyTop + 4, 'c');
+        span(grid, barrelL, barrelR, bodyTop + 5, 'c');
+        for (var barrelY = bodyTop + 4; barrelY <= bodyTop + 5; barrelY++) {
+          add(barrelL + 3, barrelY, 'o'); add(barrelL + 4, barrelY, 'o');
+          add(7, barrelY, 'o'); add(8, barrelY, 'o');
+          add(barrelR - 4, barrelY, 'o'); add(barrelR - 3, barrelY, 'o');
+          add(barrelL + 1, barrelY, 'o'); add(barrelR - 1, barrelY, 'o');
+        }
+        /* Jacques: jowl/stubble sporge sotto il profilo del viso. */
+        add(hx1 + 1, top + 6, 'o'); add(hx1 + 1, top + 7, 's');
+      } else {
+        add(barrelL, bodyTop + 4, 'o'); add(barrelR, bodyTop + 4, 'o');
+        add(barrelL, bodyTop + 5, 'c'); add(barrelR, bodyTop + 5, 'c');
+      }
+    }
+    if (cue === 'block-suit' && g.side) {
+      add(hx0 - 1, top + 3, 'o'); add(hx0 - 1, top + 4, 'h');
+      add(hx1 + 1, top + 3, 'o'); add(hx1 + 1, top + 4, 'h');
+    }
+    if (cue === 'low-hair-lock') {
+      var lockX = g.side ? hx0 - 1 : hx1 + 1;
+      add(lockX, top + 6, 'h'); add(lockX, top + 7, 'h');
+      add(lockX, top + 8, 'o'); add(lockX, top + 9, 'h');
+      if (g.side) {
+        add(bx1, bodyTop + 4, 'c'); add(bx1 + 1, bodyTop + 4, 'o');
+      }
+      else {
+        add(bx1 + 1, bodyTop + 3, 'o');
+      }
+    }
   }
 
   /* Nessuna riga sopra le scarpe puo' essere una barra nera piena. E' il
@@ -3836,23 +4474,60 @@
     var g = geometry(p, dir);
     var d = headDigits(p);
     var head = g.side ? sideHeadRows(g.headW, d) : frontHeadRows(g.headW, dir === 'up', d);
-    var rows = blankRows(HEAD_PAD).concat(head);
-    if (g.tall) rows = rows.concat([neckRow(g.side ? g.headW : g.headW - 1)]);
-    rows = rows.concat(g.side ? sideBodyRows(g, step, d) : bodyRows(g, step, p.onearm, d));
+    var body = g.side ? sideBodyRows(g, step, d) : bodyRows(g, step, p.onearm, d);
+    var rows;
+    /* R101b — Giant: 7 righe testa + collo + 8 righe corpo. Occupa la
+     * cella intera con massa verticale continua; testa 10/8 px contro
+     * spalle 14/12. Gli altri alti aggiungono collo sopra il modello
+     * standard, ma qui quella soluzione sembrava solo un NPC normale
+     * traslato verso l'alto. */
+    if (g.uncanny) {
+      g.fullCell = true;
+      head = head.slice(1);
+      rows = head.concat([neckRow(g.side ? g.headW : g.headW - 1)]).concat(body);
+    } else {
+      rows = blankRows(HEAD_PAD).concat(head);
+      rows = rows.concat(body);
+    }
     var grid = toGrid(rows);
-    var bodyTop = HEAD_PAD + 8 + (g.tall ? 1 : 0);
-    applyHair(grid, p, dir, g, HEAD_PAD, bodyTop);
-    applyProps(grid, p, dir, g, HEAD_PAD, bodyTop, step);
-    return { rows: seal(unbar(fromGrid(grid), g)), geo: g };
+    var headTop = g.fullCell ? 0 : HEAD_PAD;
+    var bodyTop = g.fullCell ? 8 : HEAD_PAD + 8;
+    applyHair(grid, p, dir, g, headTop, bodyTop);
+    applyProps(grid, p, dir, g, headTop, bodyTop, step);
+    applyIdentityCue(grid, p, dir, g, headTop, bodyTop, step);
+    var fitted = fitActorCell(fromGrid(grid), g);
+    fitted = removeDetachedSpecks(fitted);
+    fitted = taperCellCrown(fitted);
+    fitted = cleanCrownOutliers(fitted);
+    fitted = removeDetachedSpecks(fitted);
+    return { rows: seal(unbar(fitted, g)), geo: g };
+  }
+
+  function authoredCharacterPattern(name, dir, step) {
+    var cast = GAME.RetroCastMatrices || {};
+    var actor = cast[name];
+    if (actor) {
+      var view = dir === 'up' ? 'up' : ((dir === 'left' || dir === 'right') ? 'side' : 'down');
+      var pose = actor[view] && actor[view][step ? 'step' : 'idle'];
+      if (!pose || pose.length !== 16 || pose.some(function (row) { return row.length !== 16 || /[^.osc]/.test(row); })) {
+        throw new Error('invalid authored 16x16 matrix: ' + name + '/' + view + '/' + (step ? 'step' : 'idle'));
+      }
+      return { rows: pose, geo: { fullCell: true } };
+    }
+    /* Cast di produzione senza matrice e' build rotta, non autorizzazione a
+     * tornare al manichino procedurale. Fallback resta solo per palette di
+     * sviluppo estranee all'inventario CHARS. */
+    if (Object.prototype.hasOwnProperty.call(CHARS, name)) {
+      throw new Error('missing authored cast matrix: ' + name);
+    }
+    return null;
   }
 
   /* I piedi restano sulla stessa riga per tutti: cambia dove FINISCE la
    * testa, non dove poggia lo sprite. */
   function verticalShift(g) {
-    if (g.short) return 2;
-    if (g.tall) return -1;
-    if (g.stoop) return 1;
-    return 0;
+    /* fitActorCell() ha gia' allineato ogni matrice sulla baseline 15. */
+    return HEAD_PAD;
   }
 
   function drawCastWalkSheet(ctx, name, x, y, dir, frame, alpha, moving) {
@@ -3880,30 +4555,15 @@
   Spr.drawChar = function (ctx, x, y, pal, dir, frame, alpha, moving, night) {
     var p = pal || CHARS.cooper;
     var name = nameOf(p);
-    if (drawCastWalkSheet(ctx, name, x, y, dir, frame, alpha, moving)) return;
-    var flip = dir === 'left';
-    var step = moving ? ((frame & 1) ? -1 : 1) : 0;
-    /* Cooper visto di spalle nella hero scene: 10x15, masse continue.
-     * Evita il pattern generico a scacchiera che leggeva 14x17 e frontale. */
-    var cooperBack = p === CHARS.cooper && dir === 'up' ? [
-      '................',
-      '......oggo......',
-      '.....oggggo.....',
-      '....oggggggo....',
-      '...osggggggso...',
-      '...ohggggggho...',
-      '....ohggggho....',
-      '....oossssoo....',
-      '...oocccccoo....',
-      '..osccpcpccsco..',
-      '..occcpcpccccco.',
-      '...occpppcco....',
-      '...oocpcccoo....',
-      '....oc..co......',
-      '...oop..poo.....',
-      '................'
-    ] : null;
-    var built = cooperBack ? { rows: seal(cooperBack), geo: geometry(p, dir) } : charPattern(p, dir === 'left' ? 'right' : dir, step);
+    /* Cadenza Gen II a quattro fasi: contatto, passo A, contatto, passo B.
+     * Down/up specchiano il solo passo B; il profilo alterna davvero idle e
+     * passo, mentre left resta il mirror esatto di right. */
+    var phase = moving ? (frame & 3) : 0;
+    var stepping = !!moving && (phase === 1 || phase === 3);
+    var flip = dir === 'left' || (stepping && phase === 3 && (dir === 'down' || dir === 'up'));
+    var step = stepping ? 1 : 0;
+    var built = authoredCharacterPattern(name, dir, step) ||
+      charPattern(p, dir === 'left' ? 'right' : dir, step);
     var pat = built.rows;
     var col = paletteOf(p);
     var ox = Math.round(x);
@@ -3920,6 +4580,7 @@
   GAME.Retro2D = GAME.Retro2D || {};
   GAME.Retro2D.castWalkSheet = {
     src: CAST_SHEET_SRC,
+    production: false,
     size: [240, 240],
     block: [48, 48],
     frame: [16, 16],
@@ -3927,6 +4588,18 @@
     columns: ['idle', 'stepA', 'stepB'],
     mirrorsLeft: true,
     order: CAST_SHEET_ORDER.slice()
+  };
+  GAME.Retro2D.castRenderer = {
+    id: CAST_RENDERER,
+    kind: 'explicit-authored-matrices',
+    frame: [16, 16],
+    opaqueTones: 3,
+    directions: ['down', 'up', 'right'],
+    mirrorsLeft: true,
+    gait: 'front-back-mirror-x; side-reuse',
+    sourceAtlas: false,
+    productionFallback: false,
+    matrixFiles: ['retro-cast-matrices-a.js', 'retro-cast-matrices-b.js']
   };
   GAME.Retro2D.interiorPropFootprints = INTERIOR_PROP_FOOTPRINTS.map(function (p) {
     return { id:p.id, map:p.map, kind:p.kind, cells:p.cells.map(function (c) { return c.slice(); }) };
@@ -3938,6 +4611,9 @@
       cameraFocus:d.cameraFocus.slice(), materialKit:d.materialKit
     };
   });
+  GAME.Retro2D.arrivalContactBounds = Object.keys(ARRIVAL_CONTACT_BOUNDS).reduce(function (out, key) {
+    out[key] = ARRIVAL_CONTACT_BOUNDS[key].slice(); return out;
+  }, {});
 
   function rgbDistance(a, b) {
     var dr = a[0] - b[0], dg = a[1] - b[1], db = a[2] - b[2];

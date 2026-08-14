@@ -13,14 +13,46 @@
 <body>
 <main class="wrap">
   <header class="top">
-    <div><div class="eyebrow">Twin Peaks · Retro 2D · R98</div><h1>Gauntlet grafica + storia</h1></div>
+    <div><div class="eyebrow">Twin Peaks · Retro 2D · R102E</div><h1>Gauntlet grafica + storia</h1></div>
     <a class="play" href="./">Gioca ora →</a>
   </header>
 
   <section class="status" aria-label="Ultimi voti indipendenti">
-    <article class="score pass"><strong>9,0–9,5</strong><span>Grafica R98 · due critici indipendenti · entrambi PASS</span></article>
+    <article class="score pass"><strong>9,0+</strong><span>R102E · 24/24 identità e movimento · due critici indipendenti sopra hard floor</span></article>
     <article class="score pass"><strong>9,7</strong><span>Narrativa R3 · da 8,0 · esame indipendente superato</span></article>
-    <article class="score pass"><strong>102/102</strong><span>11 strutture + 23 props + 61 accessi + 7 renderer</span></article>
+    <article class="score pass"><strong>96/96</strong><span>Interazioni fisiche · incluso Book House chiuso e lapidi</span></article>
+  </section>
+
+  <section class="section">
+    <h2>R102E · Cast ridisegnato, non soltanto reso nitido</h2>
+    <div class="compare">
+      <figure class="shot"><img src="artifacts/retro-gauntlet/r101-cast-before.png" alt="Cast precedente ottenuto riducendo master ad alta risoluzione"><figcaption>Prima · atlas ridotto con pixel isolati, profili sottili e sei toni</figcaption></figure>
+      <figure class="shot"><img src="artifacts/retro-gauntlet/r102e-cast-labelled-6x.png" alt="Cast R102E disegnato direttamente a sedici pixel"><figcaption>Dopo · 24 personaggi authored, tre viste, idle e passo, 16×16 reali</figcaption></figure>
+    </div>
+    <figure class="shot" style="margin-top:14px"><img src="artifacts/retro-gauntlet/r102e-cast-blind-6x.png" alt="Cast R102E senza etichette"><figcaption>Review cieca · identità giudicate senza nomi; floor 9,0 su tutti i 24 attori</figcaption></figure>
+    <figure class="shot" style="margin-top:14px"><img src="artifacts/retro-gauntlet/r102e-full-cast-motion.gif" alt="Tutto il cast R102E in movimento"><figcaption>Movimento completo · spalle, braccia, bacino, orli e piedi articolati; nessun accessorio fluttua</figcaption></figure>
+    <div class="compare" style="margin-top:14px">
+      <figure class="shot"><img src="artifacts/retro-gauntlet/r102e-cooper-production-motion.gif" alt="Cooper R102E nel runtime reale"><figcaption>Produzione · 16 frame, quattro direzioni, input tastiera reale</figcaption></figure>
+      <figure class="shot"><img src="artifacts/retro-gauntlet/r102e-production-cast-scenes.png" alt="Cast R102E nelle scene del gioco"><figcaption>Scene vere · cittadina, centrale, Palmer, diner, hotel, ospedale, OEJ, vagone e Red Room</figcaption></figure>
+    </div>
+    <figure class="shot" style="margin-top:14px"><img src="artifacts/retro-gauntlet/r102e-pokecrystal-reference.png" alt="Campione misurato degli sprite umani di Pokémon Crystal"><figcaption>Bar esterno bloccato · pret/pokecrystal commit 7a7881d</figcaption></figure>
+    <div class="chart" style="margin-top:14px"><strong>Perché R102E sostituisce il falso pass precedente</strong><p>R101F era tecnicamente nitido ma ancora generico e rigido. Il Gauntlet riaperto ha imposto frame nativi a 1×, tavola cieca, animazione temporale e scene reali. R102E usa matrici authored esplicite: cappello di Andy, chignon di Lucy, profilo lungo di Hawk, postura di Sarah, grembiuli distinti, ciocco separato della Log Lady e asimmetria di Gerard sono ora forma, non sola tinta. Tutti i 24 attori restano entro 16×16, tre toni, piedi a riga 15 e contorno minimo 94,5%.</p></div>
+  </section>
+
+  <section class="section">
+    <h2>R100P · Cittadina ricostruita sulla grammatica Game Boy</h2>
+    <div class="compare">
+      <figure class="shot"><img src="artifacts/retro-gauntlet/r99-baseline-street-two-buildings-native.png" alt="Strada e edifici prima del nuovo gauntlet"><figcaption>Prima · masse piatte, materiali deboli, edifici senza identità</figcaption></figure>
+      <figure class="shot"><img src="artifacts/retro-gauntlet/r100o-street-native.png" alt="Book House e Horne Store dopo il nuovo gauntlet"><figcaption>Dopo · Book House in legno, Horne Store Art Déco, vicolo reale</figcaption></figure>
+    </div>
+    <figure class="shot" style="margin-top:14px"><img src="artifacts/retro-gauntlet/r100o-town-board.png" alt="Dieci viste native degli undici gruppi edilizi R100P"><figcaption>Dieci frame nativi 160×144 · 11 gruppi edilizi, tetti 30–39%, porte vere 16px, insegne bitmap e materiali distinti</figcaption></figure>
+    <div class="chart" style="margin-top:14px"><strong>Veto chiusi</strong><p>Book House non è più una libreria generica; Double R mostra nome e tazzina; Great Northern e Roadhouse sono riconoscibili; Horne Store usa una vera targa Art Déco; ospedale, Sheriff e Palmer allineano porta, soglia e percorso alla collisione reale.</p></div>
+  </section>
+
+  <section class="section">
+    <h2>R100P · Oggetti, percorsi e collisioni leggibili</h2>
+    <figure class="shot"><img src="artifacts/retro-gauntlet/r100p-object-board.png" alt="Arrivo, ferrovia, piazza, lago, cimitero e bosco verificati"><figcaption>Arrivo, ferrovia, piazza, lago, cimitero e Grove · ogni cattura parte da una cella calpestabile</figcaption></figure>
+    <div class="chart" style="margin-top:14px"><strong>Arte e mappa dicono la stessa cosa</strong><p>L’imbuto iniziale segue le collisioni riga per riga e conserva un asse percorribile 6→4→2→1 tile. Negozio, baita, cassetta postale e automobile coincidono con i loro bounds. La ferrovia è continua, ma l’attraversamento conserva strada e passabilità. Riva, lapidi e props mantengono sottofondo esplicito.</p></div>
   </section>
 
   <section class="section">
@@ -132,6 +164,13 @@
         <tr><td>R96B full</td><td>9,3 · PASS</td><td>8,91 · iterare</td></tr>
         <tr><td>R97 full</td><td>9,4 · PASS</td><td>8,96 · iterare</td></tr>
         <tr><td>R98 full</td><td>9,5 · PASS</td><td>9,00 · PASS</td></tr>
+        <tr><td>R100L edifici</td><td>audit mirato</td><td>9,0–9,4 · 11/11 PASS</td></tr>
+        <tr><td>R100M foresta / Double R</td><td>9,0 / 9,1 · PASS</td><td>collisioni invariate</td></tr>
+        <tr><td>R100N rifinitura</td><td>bordo chioma + targa</td><td>seam e padding corretti</td></tr>
+        <tr><td>R100O sistema completo</td><td>9,20 · PASS</td><td>11 edifici, strade, oggetti, attori e segnaletica</td></tr>
+        <tr><td>R100P audit finale</td><td>9,6 · PASS</td><td>imbuto iniziale corretto; floor globale 9,0</td></tr>
+        <tr><td>R102D movimento cast</td><td>9,0–9,5 · PASS</td><td>24 attori, articolazione relativa e cadenza Crystal</td></tr>
+        <tr><td>R102E identità cast</td><td>9,0–9,4 · PASS</td><td>24/24 riconoscibili a 1× e nella tavola cieca</td></tr>
       </tbody></table>
     </div>
   </section>
@@ -140,10 +179,11 @@
     <h2>Gate automatici correnti</h2>
     <div class="tests">
       <div class="test"><b>11/11</b>strutture</div><div class="test"><b>23/23</b>props</div>
-      <div class="test"><b>61/61</b>accessi</div><div class="test"><b>7/7</b>renderer</div>
+      <div class="test"><b>61/61</b>accessi</div><div class="test"><b>10/10</b>renderer</div>
       <div class="test"><b>54/54</b>production</div><div class="test"><b>23/23</b>mobile</div>
-      <div class="test"><b>13/13</b>touch</div><div class="test"><b>366</b>smoke</div>
+      <div class="test"><b>13/13</b>touch</div><div class="test"><b>367</b>smoke</div>
       <div class="test"><b>86</b>walkthrough</div><div class="test"><b>87/87</b>town</div>
+      <div class="test"><b>44/44</b>contratti JS</div><div class="test"><b>92/92</b>browser + visual</div>
     </div>
   </section>
 
@@ -152,7 +192,7 @@
     <div class="method"><div>Build reale e cattura lossless.</div><div>Critici ricevono reference e frame, senza difesa autore.</div><div>Un gap osservabile per giro; correzione mirata.</div><div>Suite completa prima del deploy.</div></div>
   </section>
 
-  <footer class="foot">Aggiornato 13 agosto 2026. Canvas 160×144, sei toni, pixel interi. R98 usa volumi chiusi, 11 StructureDef, 23 famiglie prop e accessi missione verificati 61/61; 25 ritratti speaker 256×264; dialoghi 9,7/10. Grafica: 9,5 e 9,00, entrambi PASS. Punteggi riportati dai critici, non dall’autore delle patch.</footer>
+  <footer class="foot">Aggiornato 14 agosto 2026. Canvas 160×144 e pixel interi. R102E: 24 attori authored nella cella nativa, tre toni opachi, quattro direzioni, identità specifiche e movimento Crystal; hard floor indipendente 9,0/10. R100P: 11 StructureDef, porte, collisioni, ferrovia e imbuto forestale verificati. Dialoghi 9,7/10. Coldstage: 92/92, review pixel hash-bound, zero errori console.</footer>
 </main>
 </body>
 </html>

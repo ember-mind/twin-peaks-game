@@ -2,7 +2,6 @@
 'use strict';
 
 const assert = require('node:assert');
-const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -20,7 +19,6 @@ const retroFont = fs.readFileSync(path.join(root, 'js', 'retro-font.js'), 'utf8'
 const portraits = fs.readFileSync(path.join(root, 'js', 'portraits.js'), 'utf8');
 const goldTone = fs.readFileSync(path.join(root, 'js', 'gold-tone.js'), 'utf8');
 const castSheet = fs.readFileSync(path.join(root, 'assets', 'sprites', 'cast-walkcycles-16.png'));
-const castVersion = 'cast-' + crypto.createHash('sha256').update(castSheet).digest('hex').slice(0, 12);
 
 const checks = {
   gold_native_resolution_160x144: /width="160" height="144"/.test(index) &&
@@ -31,7 +29,7 @@ const checks = {
     /titleFits: titleWidth <= l\.boxW - 20/.test(engine),
   intro_uses_three_complete_pages: /Math\.ceil\(lines\.length \/ 7\)/.test(engine) &&
     /lines\.slice\(part \* 7, part \* 7 \+ 7\)/.test(engine),
-  production_cache_busts_layout_fix: /js\/engine\.js\?v=r77qa3/.test(index) &&
+  production_cache_busts_layout_fix: /js\/engine\.js\?v=r100p/.test(index) &&
     /js\/touch\.js\?v=r77qa1/.test(index) && /js\/data\.js\?v=12qa4/.test(index) &&
     /js\/narrative-data\.gen\.js\?v=13qa3/.test(index) &&
     /js\/narrative-finale\.js\?v=gold54p5/.test(index) &&
@@ -50,14 +48,17 @@ const checks = {
     /Portraits\.drawCard/.test(engine) && /Portraits\.drawCard/.test(retroUi),
   speaker_cards_use_native_pixel_faces_and_names: /function drawPortrait\(/.test(portraits) &&
     /function drawCard\(/.test(portraits) && !/drawImage|fillText|measureText/.test(portraits),
-  production_uses_approved_master_palette: /js\/gold-tone\.js/.test(index) &&
-    /GAME\.GoldTone\.apply/.test(engine) && /#072619/.test(goldTone) && /#eee6b5/i.test(goldTone),
+  production_preserves_gbc_bg_obj_palette_banks: /js\/gold-tone\.js/.test(index) &&
+    /limitBackgroundPalettes/.test(engine) && !/GAME\.GoldTone\.apply\(ctx/.test(engine) &&
+    /objTones/.test(authored) && /#072619/.test(goldTone) && /#eee6b5/i.test(goldTone),
   production_loads_authored_tileset: /js\/retro-authored\.js/.test(index),
-  production_loads_generated_cast_walkcycles: new RegExp('retro-authored\\.js\\?v=' + castVersion).test(index) &&
-    new RegExp('cast-walkcycles-16\\.png\\?v=' + castVersion).test(authored) &&
-    /drawCastWalkSheet/.test(authored) && /dir === 'left'/.test(authored) &&
+  production_uses_native_authored_cast: /retro-cast-matrices-a\.js\?v=r102e/.test(index) &&
+    /retro-cast-matrices-b\.js\?v=r102e/.test(index) &&
+    /retro-authored\.js\?v=r102e-authoredcast/.test(index) &&
+    /var CAST_RENDERER = 'native-authored-r102e'/.test(authored) &&
+    /sourceAtlas: false/.test(authored) && !/if \(drawCastWalkSheet\(ctx, name/.test(authored) &&
     castSheet.readUInt32BE(16) === 240 && castSheet.readUInt32BE(20) === 240,
-  production_loads_continuous_town_art: /maps\.js\?v=r76town1/.test(index) &&
+  production_loads_continuous_town_art: /maps\.js\?v=r100p/.test(index) &&
     /function townGround/.test(authored) && /function townRoad/.test(authored) && /paleGround/.test(authored),
   production_does_not_load_three: !/three\.min\.js/.test(index) && !/render3d\.js/.test(index),
   engine_boots_without_webgl: /GAME\.Engine\.init\(cv, null\)/.test(main),

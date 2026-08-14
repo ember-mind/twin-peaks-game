@@ -19,9 +19,9 @@
     '4': line('great_northern', 'Il Great Northern alza il portico fra grossi tronchi, come se l’albergo avesse imparato a stare nel bosco.'),
     '5': line('hospital_building', 'La croce rossa sullo stucco chiaro basta a farmi rallentare ogni volta che riconosco l’ospedale.'),
     '6': line('roadhouse_building', 'Le tavole scure inghiottono il Roadhouse quasi tutto; resta accesa l’insegna rossa.'),
-    '7': line('bookhouse_building', 'Nel grigio del Bookhouse, ingresso e finestre affondano tanto che il poco vetro sembra guardare fuori.'),
+    '7': line('bookhouse_building', 'L\u2019insegna dice BOOK HOUSE. La porta del luogo di riunione è chiusa; oltre il vetro, una lampada resta accesa.'),
     '8': line('lodge_building', 'Tetto verde, mattoni viola, facciata chiusa: la Loggia concede una porta sola.'),
-    '9': line('horne_department_store', 'La H dorata sorveglia quattro vetrine, con la merce degli Horne disposta in file troppo dritte.'),
+    '9': line('horne_department_store', 'HORNE STORE. La porta \u00e8 chiusa; nelle due vetrine la merce degli Horne aspetta in file troppo dritte.'),
     i: line('interior_wall', 'La cornice corre lungo il muro e torna al punto di partenza. Così imparo la misura della stanza.'),
     C: line('counter', 'Il bordo del bancone è liscio nel punto dove si appoggiano le mani durante le risposte difficili.'),
     t: line('table', 'Sul tavolo ci starebbero due tazze, il mio fascicolo e una conversazione tenuta abbastanza bassa.'),
@@ -43,10 +43,12 @@
     n: line('bush', 'All’altezza del cespuglio, la chioma di foglie chiude quasi tutto il mondo sotto il cielo.'),
     q: line('crate', 'La cassa ha tavole ocra, fasce scure e una sola stecca sul coperchio; il resto rimane dentro.'),
     V: line('parked_car', 'L’auto parcheggiata trattiene il cielo sul parabrezza; sotto il cofano il metallo perde calore.'),
-    J: line('arrival_cabin', 'La cabina di legno ha una finestra accesa e un tetto basso, quasi alla stessa altezza degli abeti.')
+    J: line('arrival_cabin', 'La cabina di legno ha una finestra accesa e un tetto basso. La porta è serrata; nessuna soglia promette un ingresso.')
   };
 
   var MAP_TILE = {
+    'arrival:9': line('arrival_shop', 'Il piccolo emporio è chiuso. Vetrina e porta sono serrate; il telefono nero sull’insegna sembra aspettare una chiamata.'),
+    'arrival:J': line('arrival_cabin_closed', 'La veranda finisce contro una porta serrata. Dalla finestra accesa non arriva nessun movimento.'),
     'town:T': line('town_evergreen', 'Fra le chiome del paese la luce cambia verde a ogni passo e lascia i tronchi nella stessa ombra.'),
     'woods:T': line('woods_evergreen', 'Nel bosco il bordo blu-verde delle chiome emerge soltanto sopra il viola del sottobosco.'),
     'traincar:T': line('traincar_evergreen', 'Gli alberi crescono storti attorno al vagone, mentre binari e assi insistono a restare diritti.'),

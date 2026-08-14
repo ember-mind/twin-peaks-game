@@ -2,7 +2,7 @@
 'use strict';
 
 /*
- * Twin Peaks shipping performance gate.
+ * Twin Peaks archived WebGL performance gate.
  *
  * Canonical invocation (representative desktop hardware):
  *   node test/performance-gate.js
@@ -10,6 +10,7 @@
  * Useful diagnostics:
  *   node test/performance-gate.js --quick --report-only
  *   node test/performance-gate.js --gpu=swiftshader --allow-software --report-only
+ *   node test/performance-gate.js --legacy
  *   node test/performance-gate.js --help
  *
  * Exit codes: 0 pass, 1 threshold failure, 2 infrastructure/configuration error.
@@ -74,6 +75,7 @@ Options:
   --quick                 15 samples, 2 warmups, 2 memory passes
   --allow-software        Do not fail solely because Chrome uses software WebGL
   --report-only           Always exit 0 after a completed measurement
+  --legacy                Measure archived Three.js path (not production)
   --help                  Show this help
 
 Shipping thresholds:
@@ -109,6 +111,7 @@ function parseArgs(argv) {
     output: DEFAULT_REPORT,
     allowSoftware: false,
     reportOnly: false,
+    legacy: false,
     quick: false
   };
   for (const arg of argv) {
@@ -118,6 +121,7 @@ function parseArgs(argv) {
     } else if (arg === '--quick') options.quick = true;
     else if (arg === '--allow-software') options.allowSoftware = true;
     else if (arg === '--report-only') options.reportOnly = true;
+    else if (arg === '--legacy') options.legacy = true;
     else if (arg.startsWith('--chrome=')) options.chrome = arg.slice(9);
     else if (arg.startsWith('--gpu=')) options.gpu = arg.slice(6);
     else if (arg.startsWith('--width=')) options.width = parseNumber(arg.slice(8), 'width', 320);
@@ -203,6 +207,7 @@ function harnessHtml() {
     'js/houses.js',
     'js/maps.js',
     'js/data.js',
+    'js/retro-font.js',
     'js/presentation3d.js',
     'js/engine.js',
     'js/render3d.js',
@@ -690,6 +695,14 @@ async function main() {
     console.error(error.message);
     console.error('\n' + usage());
     process.exitCode = 2;
+    return;
+  }
+
+  const productionIndex = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  const productionUsesLegacy3D = /three\.min\.js|render3d\.js/.test(productionIndex);
+  if (!productionUsesLegacy3D && !options.legacy) {
+    console.log('PERFORMANCE-GATE-PASS production runtime is native 2D; archived WebGL path excluded');
+    console.log('Run with --legacy to benchmark archived Three.js renderer.');
     return;
   }
 

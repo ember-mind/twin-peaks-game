@@ -4,38 +4,37 @@
   "type": "pixel-baseline",
   "projectId": "twin-peaks-pokemon",
   "scenario": "visual",
-  "sourceRunId": "2026-08-14T08-13-30-615Z-desktop-gameplay-mobile-visual",
-  "sourceReport": ".coldstage/runs/2026-08-14T08-13-30-615Z-desktop-gameplay-mobile-visual/report.json",
-  "sourceReportDigest": "0814c09c643dc07bae275244a718c47a7db7563c450743761d463626a19f649e",
-  "sourceReview": ".coldstage/reviews/2026-08-14T08-13-30-615Z-desktop-gameplay-mobile-visual/visual/review-1786695271320-7459e2f6.json",
-  "sourceReviewDigest": "d422724aaa8376301891f94505ec92ad9ee3d9b2202dedd87ebc8e6ddbf24607",
-  "approvedAt": "2026-08-14T08:14:31.576Z",
-  "approvedBy": "codex-agent",
+  "sourceRunId": "2026-08-14T17-15-24-975Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual",
+  "sourceReport": ".coldstage/runs/2026-08-14T17-15-24-975Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual/report.json",
+  "sourceReportDigest": "d161e8e330bfb80b1adff27d20651ff646600479ef8a853931f197675459e2a1",
+  "sourceReview": ".coldstage/reviews/2026-08-14T17-15-24-975Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual/visual/review-1786727795366-f6c0b0de.json",
+  "sourceReviewDigest": "81355b34d3d3675a9119a940c039fc382c1817924d35e7a271acf623d673ffaa",
+  "approvedAt": "2026-08-14T17:16:40.237Z",
+  "approvedBy": "codex-gauntlet-r102e",
   "reviewVerdict": "pass-with-notes",
   "review": {
     "reviewer": {
       "type": "vision-model",
-      "id": "codex-agent",
+      "id": "codex-gauntlet-r102e",
       "provider": "OpenAI",
-      "model": "gpt-5",
-      "version": "2026-08-14"
+      "model": "GPT-5"
     },
     "verdict": "pass-with-notes",
-    "reviewedAt": "2026-08-14T08:14:31.320Z",
+    "reviewedAt": "2026-08-14T17:16:35.366Z",
     "scope": "Contact sheet from 1 local artifact(s)",
-    "notes": "Reviewed pixel diff sheet. Diff 0.100%; Cooper portrait, nameplate, dialogue copy, world and mobile-safe layout remain legible. Variation expected from bitmap/card corrections. No clipping, overflow, false obstacle, or gameplay regression."
+    "notes": "Expected authored r102e character and arrival-art change. Diff sheet preserves 160x144 composition, dialogue readability, object grounding, actor contrast, and closed pixel forms. No clipping, blur, broken UI, accidental displacement, or visual regression visible."
   },
   "captures": [
     {
       "name": "visual-arrival-dialogue.png",
-      "path": "test/coldstage-baselines/visual/versions/d422724aaa8376301891f945/visual-arrival-dialogue.png",
-      "sha256": "6c6d08bbfdb8d08b97bcaf3ed543d702735c72004c080fe626255aa3977ad204",
+      "path": "test/coldstage-baselines/visual/versions/81355b34d3d3675a9119a940/visual-arrival-dialogue.png",
+      "sha256": "215fb82bc0d3053aa84e4d3c34b46999a26c1bb7c17098099d36566fdd7c0f2a",
       "width": 1280,
       "height": 720
     }
   ],
   "integrity": {
     "algorithm": "sha256",
-    "manifestDigest": "e558ed09c179260f7661fc357609614adc84417ad0f9b9a8aab50ea3a6d68925"
+    "manifestDigest": "d469417dfd528b999c51225a734d51258823c63a0c50f748f9fae32558f4ee1c"
   }
 }

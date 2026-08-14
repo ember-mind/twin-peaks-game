@@ -1,12 +1,14 @@
 # Generated overworld cast R77
 
-## Runtime
+## Runtime R101
 
-- `cast-walkcycles-16.png`: atlas `240×240`, 5×5 character blocks.
+- Produzione usa `native-authored-r101f` in `js/retro-authored.js`: costruzione
+  diretta sulla griglia `16×16`, tre toni opachi, nessun caricamento asincrono.
+- `cast-walkcycles-16.png`: archivio comparativo `240×240`, non produzione.
 - Each character block: `48×48`, with nine `16×16` frames.
 - Character order: `cast-manifest.json`.
-- Runtime lookup and left-facing mirror: `js/retro-authored.js`.
-- Procedural sprites remain fallback while atlas loads or when key is unknown.
+- Runtime e mirror sinistro: `js/retro-authored.js`.
+- Nessun cambio grafico dopo il load: test e utente vedono stessi pixel.
 
 ## Sources
 

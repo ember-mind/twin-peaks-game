@@ -36,6 +36,12 @@ for (const raw of defs) {
   assert(cells >= w * h * 0.68, `${d.id}: component bbox substantially matches map solids`);
   assert(d.visualBounds[2] >= w * 16, `${d.id}: visual width covers collision width`);
   assert(d.visualBounds[3] >= h * 16, `${d.id}: visual height covers collision height`);
+  assert(d.visualBounds[0] <= 0 && d.visualBounds[1] <= 0,
+    `${d.id}: visual bounds include collision origin and roof lift`);
+  assert(d.visualBounds[0] + d.visualBounds[2] >= w * 16,
+    `${d.id}: visual bounds right edge contains collision footprint`);
+  assert(d.visualBounds[1] + d.visualBounds[3] >= h * 16,
+    `${d.id}: visual bounds bottom edge contains collision footprint`);
   assert.equal(d.cameraFocus.length, 2, `${d.id}: camera focus declared`);
   assert(d.materialKit, `${d.id}: material kit declared`);
   if (d.door) {

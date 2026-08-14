@@ -156,6 +156,8 @@ require(path.join(ROOT, 'js/maps.js'));
 require(path.join(ROOT, 'js/chars.js'));
 const originalTile = function () {};
 GAME.Sprites = { CHARS: GAME.sprites.CHARS, drawTile: originalTile };
+require(path.join(ROOT, 'js/retro-cast-matrices-a.js'));
+require(path.join(ROOT, 'js/retro-cast-matrices-b.js'));
 require(path.join(ROOT, 'js/retro-authored.js'));
 
 const maps = GAME.maps.maps;
@@ -202,6 +204,80 @@ for (const capture of townCaptures) {
 }
 assert.deepEqual(unmatched, [], 'every town building component must be assigned to a visual capture');
 console.log('ok - visual matrix covers all 11 town building components');
+
+/* Una cattura di prova deve partire da una cella legalmente calpestabile.
+ * Prima lago, cartello e sicomoro producevano prove visive impossibili da
+ * raggiungere giocando, incluso Cooper in piedi nell'acqua. */
+for (const profile of ['gameplay', 'temporal']) {
+  for (const capture of matrix[profile]) {
+    if (!capture.map) continue;
+    const map = maps[capture.map];
+    assert(map, `${capture.id}: map missing`);
+    const tile = map.rows[capture.y] && map.rows[capture.y].charAt(capture.x);
+    assert(!GAME.maps.isSolid(tile), `${capture.id}: capture starts on solid ${capture.map}@${capture.x},${capture.y} (${tile})`);
+  }
+}
+console.log('ok - every visual capture starts on a walkable production tile');
+
+/* Landmark non-edificio: ogni dichiarazione deve possedere arte semantica e
+ * una cattura legale. I binari erano metadata senza un solo pixel attivo. */
+for (const id of ['arrival-tableau', 'town-tracks']) {
+  assert(matrix.gameplay.some((entry) => entry.id === id), `${id} missing from gameplay matrix`);
+}
+const tracks = maps.town.objects.find((object) => object.type === 'landmark' && object.kind === 'tracks');
+assert(tracks, 'town tracks landmark missing');
+for (let ty = tracks.y; ty < tracks.y + tracks.h; ty++) {
+  for (let tx = tracks.x; tx < tracks.x + tracks.w; tx++) {
+    assert(!GAME.maps.isSolid(maps.town.rows[ty][tx]), `track bed must be walkable at ${tx},${ty}`);
+  }
+}
+const railView = new PixelContext(160, 144);
+const railCx = 52 * 16 - 80, railCy = 15 * 16 - 72;
+GAME.sprites.drawStructures(railView, maps.town, railCx, railCy);
+const railRect = [tracks.x * 16 - railCx, 0, tracks.w * 16, 144];
+assert(countPixels(railView, new Set(['#30383b']), railRect) > 500, 'track rails/sleepers must be visible');
+assert(countPixels(railView, new Set(['#d0c89d']), railRect) > 100, 'track metal highlight must be visible');
+console.log('ok - town tracks own visible rail art, walkable crossing and named capture');
+
+/* Arrival hero art uses same contact boxes as ASCII collision. Roof overhang
+ * is allowed; body/base pixels must terminate on these four exact bounds. */
+function glyphBounds(map, glyph) {
+  const cells = [];
+  for (let y = 0; y < map.height; y++) for (let x = 0; x < map.width; x++) {
+    if (map.rows[y][x] === glyph) cells.push([x, y]);
+  }
+  return [
+    Math.min(...cells.map((cell) => cell[0])) * 16,
+    Math.min(...cells.map((cell) => cell[1])) * 16,
+    (Math.max(...cells.map((cell) => cell[0])) - Math.min(...cells.map((cell) => cell[0])) + 1) * 16,
+    (Math.max(...cells.map((cell) => cell[1])) - Math.min(...cells.map((cell) => cell[1])) + 1) * 16
+  ];
+}
+assert.deepEqual(GAME.Retro2D.arrivalContactBounds, {
+  shop: glyphBounds(maps.arrival, '9'), cabin: glyphBounds(maps.arrival, 'J'),
+  mailbox: glyphBounds(maps.arrival, 'E'), car: glyphBounds(maps.arrival, 'V')
+});
+const arrival = new PixelContext(160, 144);
+GAME.Retro2D.drawArrivalBackdrop(arrival, 0, 0, 160, 144);
+const contactInk = new Set(['#072619', '#34572d']);
+assert(countPixels(arrival, contactInk, [32, 46, 32, 2]) >= 32, 'arrival shop base must reach collision base');
+assert(countPixels(arrival, contactInk, [96, 46, 48, 2]) >= 20, 'arrival cabin base must reach collision base');
+assert(countPixels(arrival, contactInk, [64, 16, 16, 16]) >= 35, 'arrival mailbox must stay legible inside its solid tile');
+assert(countPixels(arrival, contactInk, [96, 61, 32, 3]) >= 30, 'arrival car contact must reach its collision base');
+console.log('ok - arrival shop, cabin, mailbox and car art aligns with collision contact boxes');
+
+const forestContact = new Set(['#072619', '#34572d', '#6a8a43', '#9aab69']);
+for (let ty = 5; ty <= 8; ty++) {
+  for (let tx = 0; tx < maps.arrival.width; tx++) {
+    const dark = countPixels(arrival, forestContact, [tx * 16, ty * 16, 16, 16]);
+    if (maps.arrival.rows[ty][tx] === 'T') {
+      assert(dark >= 110, `arrival solid forest must read solid at ${tx},${ty}: ${dark}/256`);
+    } else {
+      assert(dark <= 80, `arrival walkable corridor must read open at ${tx},${ty}: ${dark}/256`);
+    }
+  }
+}
+console.log('ok - arrival south forest coverage agrees with T collision and open corridor');
 
 /* Red Room floor: adjacent metatiles must not restart the same 16px stamp.
  * Dark strokes cross every vertical tile seam in a 4x4 test field. */
@@ -325,4 +401,4 @@ assert.equal(mobilePortraitActorScale, desktopActorScale, 'portrait mobile and d
 assert.equal(mobileLandscapeActorScale, desktopActorScale, 'landscape mobile and desktop actor scale differ');
 console.log('ok - desktop and mobile use the identical native actor scale');
 
-console.log('\nGRAPHIC-PASS-CONTRACT-PASS 7/7');
+console.log('\nGRAPHIC-PASS-CONTRACT-PASS 10/10');

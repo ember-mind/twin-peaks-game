@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 'use strict';
 const assert = require('node:assert');
+const fs = require('node:fs');
 global.GAME = {};
 const GoldTone = require('../js/gold-tone.js');
+const engine = fs.readFileSync(require('node:path').join(__dirname, '..', 'js', 'engine.js'), 'utf8');
 const original = new Uint8ClampedArray([
   208,160,176,255, 168,208,104,255, 228,214,161,255,
   32,40,32,255, 104,152,72,255, 88,72,88,255,
@@ -26,4 +28,5 @@ stored = null;
 assert.strictEqual(GoldTone.apply(ctx, 3, 3, 'sheriff'), true);
 assert(stored, 'interior must share reference display palette');
 assert.strictEqual(GoldTone.apply(ctx, 3, 3, 'unknown'), false);
-console.log('GOLD-TONE-PASS 9/9');
+assert(!/GAME\.GoldTone\.apply\(ctx/.test(engine), 'legacy luma transform must not quantize production BG/OBJ frame');
+console.log('GBC-PALETTE-BANK-PASS 10/10');

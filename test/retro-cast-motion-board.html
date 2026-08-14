@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TP-CAST-MOTION-LOADING</title>
+<style>
+  html,body{margin:0;background:#111913;overflow:hidden}
+  canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+</style>
+</head>
+<body>
+<canvas id="board" width="720" height="360"></canvas>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js"></script>
+<script src="../js/portraits.js"></script>
+<script src="../js/gold-tone.js"></script>
+<script src="../js/engine.js"></script>
+<script src="../js/glue.js"></script>
+<script src="../js/retro.js"></script>
+<script src="../js/retro-cast-matrices-a.js?v=r102e"></script>
+<script src="../js/retro-cast-matrices-b.js?v=r102e"></script>
+<script src="../js/retro-authored.js?v=r102e-authoredcast"></script>
+<script>
+(function () {
+  'use strict';
+  var cv = document.getElementById('board'), g = cv.getContext('2d');
+  var names = Object.keys(GAME.Sprites.CHARS);
+  var states = [];
+  ['down', 'up', 'right'].forEach(function (direction) {
+    [0, 1, 2, 3].forEach(function (phase) { states.push({ direction: direction, phase: phase }); });
+  });
+  window.__TP_SHOT_FRAMES__ = [];
+  window.__TP_SHOT_FRAME_META__ = [];
+  g.imageSmoothingEnabled = false;
+
+  function draw(state) {
+    g.fillStyle = '#eee6b5'; g.fillRect(0, 0, cv.width, cv.height);
+    names.forEach(function (name, index) {
+      var x0 = (index % 6) * 120, y0 = Math.floor(index / 6) * 90;
+      g.fillStyle = (index & 1) ? '#dcd9a9' : '#eee6b5';
+      g.fillRect(x0, y0, 120, 90);
+      g.strokeStyle = '#34572d'; g.lineWidth = 1; g.strokeRect(x0 + .5, y0 + .5, 119, 89);
+      g.fillStyle = '#072619'; g.font = 'bold 6px ui-monospace,monospace';
+      g.fillText(String(index + 1).padStart(2, '0') + ' ' + name.toUpperCase(), x0 + 4, y0 + 10);
+      g.save();
+      g.translate(x0 + 28, y0 + 18); g.scale(4, 4);
+      GAME.Sprites.drawChar(g, 0, 0, GAME.Sprites.CHARS[name], state.direction,
+        state.phase, 1, true, false, state.phase * 80);
+      g.restore();
+    });
+    /* Stato nel DOM/meta, non sopra i pixel del cast. La vecchia etichetta
+     * copriva piedi di Ronette nell'ultima cella e invalidava la prova. */
+    document.body.setAttribute('data-direction', state.direction);
+    document.body.setAttribute('data-phase', String(state.phase));
+  }
+
+  fetch('../index.html', { cache: 'no-store' }).then(function (response) { return response.text(); }).then(function (index) {
+    if (GAME.Retro2D.castRenderer.id !== 'native-authored-r102e' ||
+        index.indexOf('retro-authored.js?v=r102e-authoredcast') < 0 ||
+        index.indexOf('retro-cast-matrices-a.js?v=r102e') < 0 ||
+        index.indexOf('retro-cast-matrices-b.js?v=r102e') < 0) {
+      throw new Error('production renderer provenance mismatch');
+    }
+    states.forEach(function (state) {
+      draw(state);
+      window.__TP_SHOT_FRAMES__.push(cv.toDataURL('image/png'));
+      window.__TP_SHOT_FRAME_META__.push({
+        source: 'production renderer full-cast temporal board',
+        renderer: GAME.Retro2D.castRenderer.id,
+        direction: state.direction,
+        phase: state.phase,
+        actors: names.length,
+        canvas: [cv.width, cv.height]
+      });
+    });
+    draw(states[0]);
+    document.title = 'TP-CAST-MOTION-READY';
+  }).catch(function (error) {
+    window.__TP_SHOT_ERROR__ = error.message;
+    document.title = 'TP-SHOT-ERROR';
+  });
+}());
+</script>
+</body>
+</html>

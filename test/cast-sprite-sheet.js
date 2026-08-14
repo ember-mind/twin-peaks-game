@@ -29,8 +29,8 @@ assert.deepEqual(runtimeOrder, manifestKeys, 'atlas order matches manifest');
 assert.equal(castPng.toString('ascii', 1, 4), 'PNG', 'cast atlas PNG signature');
 assert.equal(castPng.readUInt32BE(16), 240, 'cast atlas width');
 assert.equal(castPng.readUInt32BE(20), 240, 'cast atlas height');
-assert(authored.includes(`cast-walkcycles-16.png?v=${castVersion}`), 'asset cache version matches atlas hash');
-assert(fs.readFileSync(path.join(root, 'index.html'), 'utf8').includes(`retro-authored.js?v=${castVersion}-r98`), 'renderer cache version matches atlas hash and visual revision');
+assert(authored.includes(`cast-walkcycles-16.png?v=${castVersion}`), 'archived asset cache version matches atlas hash');
+assert(fs.readFileSync(path.join(root, 'index.html'), 'utf8').includes('retro-authored.js?v=r102e-authoredcast'), 'production loads native cast revision');
 
 for (const key of manifestKeys) {
   const file = path.join(root, 'assets', 'sprites', 'cast-16', `${key}.png`);
@@ -42,7 +42,7 @@ for (const key of manifestKeys) {
 
 assert(/naturalWidth !== 240/.test(authored), 'runtime validates atlas width');
 assert(/naturalHeight !== 240/.test(authored), 'runtime validates atlas height');
-assert(/drawCastWalkSheet\(ctx, name/.test(authored), 'runtime uses generated art for every known character');
-assert(/CAST_SHEET_ORDER\.indexOf\(name\)/.test(authored), 'runtime resolves character block');
+assert(/production: false/.test(authored), 'downsampled atlas is explicitly archival');
+assert(/sourceAtlas: false/.test(authored), 'runtime uses native-authored character builder');
 
-console.log('CAST-SPRITE-PASS 36/36');
+console.log('CAST-SPRITE-PASS 36/36 — legacy atlas archived, native renderer active');

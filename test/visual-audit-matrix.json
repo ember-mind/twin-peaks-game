@@ -13,8 +13,9 @@
     "presentation": "Representative and intentionally non-exhaustive: three B4 presentation states and one M5 theory-revision state."
   },
   "gameplay": [
+    { "id": "arrival-tableau", "map": "arrival", "x": 4, "y": 3, "dir": "up" },
     { "id": "town-welcome", "map": "town", "x": 30, "y": 31, "dir": "up" },
-    { "id": "town-lake", "map": "town", "x": 16, "y": 29, "dir": "left" },
+    { "id": "town-lake", "map": "town", "x": 16, "y": 28, "dir": "left" },
     { "id": "town-waterfall", "map": "town", "x": 5, "y": 5, "dir": "up" },
     { "id": "town-great-northern", "map": "town", "x": 9, "y": 8, "dir": "up" },
     { "id": "town-hospital", "map": "town", "x": 23, "y": 8, "dir": "up" },
@@ -27,6 +28,8 @@
     { "id": "town-shop-west", "map": "town", "x": 16, "y": 14, "dir": "up" },
     { "id": "town-shop-center", "map": "town", "x": 20, "y": 14, "dir": "up" },
     { "id": "town-shop-east", "map": "town", "x": 47, "y": 14, "dir": "up" },
+    { "id": "town-cemetery", "map": "town", "x": 50, "y": 23, "dir": "up" },
+    { "id": "town-tracks", "map": "town", "x": 52, "y": 15, "dir": "right" },
     { "id": "sheriff", "map": "sheriff", "x": 4, "y": 7, "dir": "up" },
     { "id": "palmer", "map": "palmer", "x": 7, "y": 10, "dir": "up" },
     { "id": "hotel", "map": "hotel_gn", "x": 8, "y": 10, "dir": "up" },
@@ -36,7 +39,7 @@
     { "id": "roadhouse", "map": "roadhouse", "x": 7, "y": 8, "dir": "up" },
     { "id": "roadhouse-stage", "map": "roadhouse", "x": 7, "y": 4, "dir": "up" },
     { "id": "woods-entry", "map": "woods", "x": 14, "y": 20, "dir": "up" },
-    { "id": "woods-grove", "map": "woods", "x": 14, "y": 15, "dir": "up" },
+    { "id": "woods-grove", "map": "woods", "x": 14, "y": 16, "dir": "up" },
     { "id": "woods-lodge", "map": "woods", "x": 14, "y": 5, "dir": "up" },
     { "id": "redroom", "map": "redroom", "x": 8, "y": 10, "dir": "up" },
     { "id": "traincar", "map": "traincar", "x": 11, "y": 8, "dir": "up" }
@@ -54,14 +57,14 @@
       "id": "town-rain-state",
       "map": "town",
       "x": 30,
-      "y": 30,
+      "y": 31,
       "dir": "up"
     },
     {
       "id": "town-water-state",
       "map": "town",
       "x": 16,
-      "y": 29,
+      "y": 28,
       "dir": "left"
     },
     {

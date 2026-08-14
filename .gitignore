@@ -1,4 +1,5 @@
 .coldstage/
+.gauntlet/
 .vite/
 artifacts/visual-audit/**
 test/coldstage-baselines/visual/versions/**

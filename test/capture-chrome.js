@@ -27,6 +27,7 @@ function parse(argv) {
     timeoutMs: 15000,
     gpu: process.platform === 'darwin' ? 'metal' : 'auto',
     framesDir: '',
+    metaOutput: '',
     nativeAttr: ''
   };
   for (const arg of argv) {
@@ -39,6 +40,7 @@ function parse(argv) {
     else if (arg.startsWith('--timeout-ms=')) out.timeoutMs = Number(arg.slice(13));
     else if (arg.startsWith('--gpu=')) out.gpu = arg.slice(6);
     else if (arg.startsWith('--frames-dir=')) out.framesDir = arg.slice(13);
+    else if (arg.startsWith('--meta-output=')) out.metaOutput = arg.slice(14);
     else if (arg.startsWith('--native-attr=')) out.nativeAttr = arg.slice(14);
     else throw new Error(`unknown option: ${arg}`);
   }
@@ -295,14 +297,18 @@ async function main() {
       const frames = await cdp.evaluate('window.__TP_SHOT_FRAMES__ || []', options.timeoutMs);
       fs.mkdirSync(options.framesDir, { recursive: true });
       for (let index = 0; index < frames.length; index++) {
-        const match = /^data:image\/webp;base64,(.+)$/.exec(frames[index]);
+        const match = /^data:image\/(png|webp);base64,(.+)$/.exec(frames[index]);
         if (!match) throw new Error(`invalid exported motion frame ${index}`);
         fs.writeFileSync(
-          path.join(options.framesDir, `frame-${String(index).padStart(3, '0')}.webp`),
-          Buffer.from(match[1], 'base64')
+          path.join(options.framesDir, `frame-${String(index).padStart(3, '0')}.${match[1]}`),
+          Buffer.from(match[2], 'base64')
         );
       }
       exportedFrames = frames.length;
+    }
+    if (options.metaOutput) {
+      const meta = await cdp.evaluate('window.__TP_SHOT_FRAME_META__ || []', options.timeoutMs);
+      fs.writeFileSync(options.metaOutput, JSON.stringify(meta, null, 2) + '\n');
     }
     console.log(JSON.stringify({
       ok: true,
@@ -310,7 +316,8 @@ async function main() {
       gpu: options.gpu,
       viewport: [options.width, options.height],
       output: options.output,
-      exportedFrames
+      exportedFrames,
+      metaOutput: options.metaOutput || null
     }));
   } catch (error) {
     let log = '';

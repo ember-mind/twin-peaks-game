@@ -24,6 +24,7 @@ const y = args.get('y') || '31';
 const dir = args.get('dir') || 'up';
 const dialogue = args.get('dialogue') || '';
 const silhouette = args.get('silhouette') || '';
+const flags = args.get('flags') || '';
 const out = path.resolve(root, args.get('out') || '/tmp/native.png');
 const chrome = process.env.CHROME_BIN ||
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -46,6 +47,7 @@ if (!up) { console.error('native-shot: server non raggiungibile'); process.exit(
 let url = `http://127.0.0.1:${port}/test/retro-scene.html?map=${map}&x=${x}&y=${y}&dir=${dir}`;
 if (dialogue) url += `&dialogue=${dialogue}`;
 if (silhouette) url += `&silhouette=${silhouette}`;
+if (flags) url += `&flags=${encodeURIComponent(flags)}`;
 
 // Cattura + gate anti-frame-bianco. La pipeline headless ogni tanto consegna
 // un canvas non ancora dipinto: il file esiste, il titolo e' pronto, e lo

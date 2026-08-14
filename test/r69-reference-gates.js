@@ -50,10 +50,12 @@ const checks = {
   dialogue_split_95_49: /var by = 95, bh = 49/.test(engine),
   portrait_card_40x47: allCastCardsExact,
   portrait_anchor_overlaps_world: /bx \+ 9, by - 37/.test(engine),
-  six_tone_reference_palette: /\['#072619', '#34572d', '#6a8a43', '#9aab69', '#dcd9a9', '#eee6b5'\]/.test(tone),
+  legacy_reference_palette_remains_available: /\['#072619', '#34572d', '#6a8a43', '#9aab69', '#dcd9a9', '#eee6b5'\]/.test(tone),
   portrait_uses_same_display_ramp: /ink: '#072619'/.test(portraits) && /paper: '#eee6b5'/.test(portraits),
-  full_world_uses_reference_display: /town:true/.test(tone) && /sheriff:true/.test(tone) && /woods:true/.test(tone) && /redroom:true/.test(tone),
-  no_color_family_branching: !/purple|blue material|warm material|ochre/.test(tone),
+  production_uses_per_tile_bg_palette_banks: /limitBackgroundPalettes/.test(engine) &&
+    /GAME\.Retro2D\.limitBackgroundPalettes/.test(authored),
+  production_keeps_obj_palette_separate: /objTones/.test(authored) &&
+    !/GAME\.GoldTone\.apply\(ctx/.test(engine),
   hero_spawn_faces_arrival_tableau: /mapId: 'arrival'/.test(engine) && /tx: 4, ty: 3/.test(engine) && /loadMap\('arrival', 4, 3, 'up'\)/.test(engine),
   hero_dialogue_camera_lift: /S\.dialogue && !map\.indoor/.test(engine) && /tyy \+ 12/.test(engine),
   arrival_is_rectangular_10x9: arrival.rows.length === 9 && arrival.rows.every((row) => row.length === 10),

@@ -15,7 +15,7 @@ assert.ok(/runtime mirror/.test(manifest.policy));
 
 const report = guard.audit({ repoRoot: root, canonicalRoot: manifest.canonical_root });
 assert.deepStrictEqual(report.errors, [], JSON.stringify(report.errors, null, 2));
-assert.strictEqual(report.checked, 62, 'playable runtime scope changed; audit manifest before sync');
+assert.strictEqual(report.checked, 64, 'playable runtime scope changed; audit manifest before sync');
 assert.deepStrictEqual(manifest.known_divergences, {});
 assert.strictEqual(report.known.length, 0);
 

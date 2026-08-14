@@ -25,6 +25,14 @@
   var NPC_SPEED = SPEED * 0.55; // NPCs walk a bit slower than the player
   var NPC_WANDER_RADIUS = 3; // tile radius from home
 
+  /* Funzione pura condivisa da player, NPC e prove. Ogni attraversamento di
+   * tile riparte da fase 0; progress=1 viene saturato per diagnostica, mentre
+   * il runtime torna all'idle appena chiude il movimento. */
+  function walkPhase(progress) {
+    return Math.max(0, Math.min(3, Math.floor(progress * 4)));
+  }
+  E.walkPhase = walkPhase;
+
   /* Produzione piatta Gen II. Codice warp storico resta irraggiungibile: buffer
    * nativo 160x144 e scala CSS nearest-neighbour sono unica proiezione. */
   var SCALE = 1;
@@ -918,11 +926,15 @@
     var p = S.player;
     var ents = S.npcs.filter(function (n) { return E.npcActive(n); }).map(function (n) {
       return { wx: Math.round(n.vx * TILE), wy: Math.round(n.vy * TILE), sprite: n.sprite, dir: n.dir,
-               fr: n.moving ? (Math.floor(tGlobal / 90) % 4) : 0,
+               fr: n.moving ? walkPhase(n.moveT) : 0,
                moving: n.moving || false, alpha: n.sprite === 'laura' ? 0.85 : 1 };
     });
     ents.push({ wx: Math.round(p.x) + (S.mapId === 'arrival' ? 8 : 0), wy: Math.round(p.y) - (S.mapId === 'arrival' ? 1 : 0), sprite: 'cooper', dir: p.dir,
-                fr: p.moving ? (Math.floor(tGlobal / 90) % 4) : 0, moving: p.moving, alpha: 1 });
+                /* Un tile contiene sempre l'intero ciclo: contatto, A,
+                 * contatto, B. Il passo non dipende dall'istante globale in
+                 * cui il tasto viene premuto e non puo' iniziare a meta'. */
+                fr: p.moving ? walkPhase(p.moveT) : 0,
+                moving: p.moving, alpha: 1 });
     ents.sort(function (a, b) { return a.wy - b.wy; });
     return ents;
   }
@@ -1554,15 +1566,16 @@
     if (S.mode === 'end') { drawEnd(); return; }
     drawWorld(dt); // (gestisce da sé la trasformazione)
     if (ctx.setTransform) ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
-    if (!r3d && GAME.GoldTone) GAME.GoldTone.apply(ctx, VW, VH, S.mapId);
+    /* Il background e' gia' normalizzato per cella 8x8 da
+     * Retro2D.limitBackgroundPalettes prima degli OBJ. Una seconda passata
+     * luma-only sul frame composito cancellava le palette materiali e
+     * riquantizzava anche personaggi/UI: comportamento opposto ai bank
+     * BG/OBJ del Game Boy Color. */
     // WebGL usa il pannello HTML sincronizzato da syncDialogueUi().
     // Disegnare anche il box legacy sul canvas causa un cross-fade visibile:
     // prima compare il vecchio dialogo, poi #dialogue-ui lo sostituisce.
     if (S.dialogue && !r3d) drawDialogue();
     if (S.menu && !caseUiActive) drawMenu();
-    if (!r3d && GAME.GoldTone && GAME.GoldTone.atmosphere) {
-      GAME.GoldTone.atmosphere(ctx, VW, VH, S.mapId);
-    }
     if (S.fade > 0) {
       ctx.fillStyle = 'rgba(0,0,0,' + S.fade.toFixed(3) + ')';
       ctx.fillRect(0, 0, UW, VH);

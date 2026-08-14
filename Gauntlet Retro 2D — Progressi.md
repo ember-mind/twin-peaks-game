@@ -3,10 +3,141 @@ type: project
 status: active
 project: Twin Peaks Game
 created: 2026-08-05
-updated: 2026-08-06
+updated: 2026-08-14
 ---
 
 # Gauntlet Retro 2D — Progressi
+
+## R102E — Gauntlet personaggi riaperto e chiuso su prove reali (2026-08-14)
+
+R101F è stato revocato dopo il rifiuto visivo dell'utente: era nitido, ma il
+cast restava generico, rigido e peggiore della barra a scala desktop. Il nuovo
+contratto vieta pass basati soltanto su morphology proxy o tavole ingrandite.
+
+R102E usa 24 set authored espliciti: fronte, retro e profilo; idle e passo;
+fase B specchiata per fronte/retro e lato coerente. Tutto nasce nella cella
+finale `16×16`, con massimo tre toni opachi, piedi su riga 15, zero overflow,
+zero componenti flottanti e contorno minimo `94,5%` contro minimo Crystal
+`94,4%`.
+
+Riparazioni d'identità decisive: chignon di Lucy, cappello di Andy, capelli
+lunghi di Hawk, postura incurvata di Sarah, grembiuli distinti di Norma e
+Shelly, ciocco separato della Log Lady e asimmetria a un braccio di Gerard.
+La tavola cieca conserva 24 identità senza nomi.
+
+Il movimento non è un toggle dei piedi: spalle, braccia, busto, orli, bacino e
+gambe cambiano insieme. Misure native corrette: down A/B `87,5/87,5` pixel
+mediani (`64,5/66,5` nelle prime dieci righe), up `82/87,5` (`59/61,5`), lato
+`76/76` (`52/52`). Barra Crystal: down `103/62`, up `82/50`, lato `90/53`.
+Il cast muove meno area totale in down/lato, ma eguaglia o supera
+l'articolazione superiore e resta dentro l'envelope normale della fonte.
+
+Tre audit indipendenti:
+
+- identità: `OURS_WINS`, 24/24, ogni asse e ogni attore `>=9,0`;
+- regressione movimento: `OURS_WINS`, floor `9,0`;
+- integrazione finale: `OURS_WINS`, release `YES`; leggibilità `9,1`, anatomia
+  `9,0`, identità `9,0`, turnaround `9,1`, gait `9,0`, grounding `9,0`, coesione
+  `9,0`, desktop `9,3`, mobile `9,1`, veridicità prove `9,2`.
+
+Il critico integrato aveva inizialmente posto un veto usando per errore gli
+atlas archiviati dell'8 agosto. La riproduzione del calcolo ha trovato input
+stale; il critico ha ritirato il veto e rifatto l'esame sui frame r102e. Questo
+incidente è ora parte della prova: ogni misura deve dichiarare renderer, crop,
+frame e SHA, non soltanto un numero.
+
+Suite finale: authored cast PASS, structural sprite PASS, runtime PASS,
+walk-phase PASS, graphic pass `10/10`, retro production `54/54`, mobile
+`23/23`, touch `13/13`, smoke `367`, walkthrough completo `86`; Coldstage
+desktop/gameplay/mobile/4 direzioni verde e visual review hash-bound.
+
+Pagina condivisibile: `progress.html`. Contratto ed evidenze:
+`.gauntlet/character-sprite-fidelity-r101/`.
+
+## R101 — cast nativo 16×16, niente più atlas sgranato (2026-08-14)
+
+**Stato: superseded e revocato da R102E.** Sezione conservata come cronologia
+del falso pass e della diagnosi tecnica iniziale.
+
+Diagnosi: produzione caricava in modo asincrono `cast-walkcycles-16.png`, creato riducendo master grandi con nearest-neighbor. I test nativi non disponevano di `Image` e misuravano invece il fallback procedurale più pulito. Quindi test e gioco reale stavano giudicando due renderer diversi.
+
+Correzione:
+
+- `js/retro-authored.js` è ora unica fonte production per i 24 world-sprite;
+- ogni stato nasce direttamente nella cella finale `16×16`, senza riduzione;
+- tre toni opachi più trasparenza, contorno scuro continuo e cluster leggibili;
+- fronte e retro usano passo B specchiato da A; profilo riusa la posa e la direzione sinistra specchia la destra, come Pokémon Crystal;
+- atlas precedente conservato solo come archivio comparativo: non può più sostituire il renderer dopo il caricamento;
+- stessa sorgente verificata in test, desktop e mobile.
+- 24 firme semantiche native (`pixel16`) differenziano sagoma, capelli,
+  uniforme e accessorio in fronte, retro e profilo; nessun palette swap di
+  uno stencil comune;
+- casi limite fissati con contratti permanenti: statura del Gigante, braccio
+  mancante e panciotto di Gerard, collo/capelli/spalle di Maddy.
+
+Bar misurata su 24 sprite umani di `pret/pokecrystal`, commit `7a7881d0d62e0ddbd82dcf10e7116807487ac651`: cella `16×16`, tre toni, fronte 12–16 px, profilo 12–14 px, rapporto massa profilo/fronte 0,756–0,995, IoU 0,718–0,840, contorno scuro almeno 94,4%.
+
+Risultati automatici: **24/24** attori e **24/24 silhouette uniche** in
+fronte, retro e profilo; tre toni esatti; fronte `13–16 px`, profilo
+`12–14 px`; contorno 100%; micro-cluster mediana/p90/massimo
+`11,0/17,8/22,6%`; grammatica Crystal PASS. Contratto runtime, cast, Cooper,
+retro production, smoke e walkthrough tutti PASS. Coldstage fresco:
+**40/40**, zero errori console su desktop, gameplay, mobile e visual. Prove
+legate alla build `native-authored-r101f` da manifest SHA-256; evidenza
+condivisibile in `progress.html`.
+
+Il primo critico finale ha fermato il round a **8,4** perché le terne statiche
+non provavano la cadenza reale. Aggiunta quindi una prova temporale dalla
+produzione: input tastiera, 12 frame PNG lossless ogni 55 ms, movimento e
+ritorno alla posa ferma; GIF e contact sheet sono hashate con la build.
+
+Il secondo critico ha accettato il gait a **9,1**, ma ha fermato l'identità a
+**8,7**: Cooper e Donna laterali avevano IoU `0,975`. R101F rende polsino e
+mano di Cooper una vera sporgenza, mentre Donna porta una cappa di capelli
+continua e un busto scavato. Correzione estesa alle coppie più simili del
+cast: Cooper/Donna `0,939`, massimo globale `0,959`; nuovo gate permanente
+`IoU < 0,960` e 24/24 firme ancora uniche in ogni vista.
+
+Terzo critico, contesto fresco e sole prove R101F: **PASS**, hard floor
+**9,0/10**. Nitidezza `10,0`; morfologia `9,5`; identità `9,0`; direzioni
+`9,5`; gait `9,2`; armonia scena `9,4`; desktop/mobile/provenienza `9,5`.
+Manifest verificato 19/19, nessuna prova stale o contraddittoria.
+
+## R100P — sistema esterni completo e ultimo veto chiuso (2026-08-14)
+
+Reference primarie: disassemblati originali [pret/pokecrystal](https://github.com/pret/pokecrystal) e [pret/pokered](https://github.com/pret/pokered), confrontati a `1×` con la reference approvata R69. Non sono stati copiati asset: sono state estratte regole di scala, silhouette, materiali, contrasto, passabilità e palette.
+
+Risultato finale:
+
+- 11 gruppi edilizi riconoscibili e completi: Book House, Horne Store, Hospital, Palmer, Sheriff, Double R, Roadhouse, Great Northern e tre botteghe;
+- strade, cordoli, attraversamenti e sentieri hanno categorie visive distinte;
+- ferrovia continua con ballast, due rotaie, traversine e attraversamento stradale percorribile;
+- scena iniziale ricomposta con bounds grafici uguali ai bounds di collisione per negozio, baita, cassetta postale e automobile;
+- imbuto forestale verificato cella per cella: massa solida su `T`, corridoio libero sulle celle camminabili, restringimento leggibile `6→4→2→1` tile;
+- 24 attori, quattro direzioni e tre frame di passo; palette OBJ separata dalla palette BG;
+- matrice condivisibile aggiornata in `progress.html` con stato precedente, 11 edifici e sei scene-oggetto finali.
+
+Prove permanenti: **44/44** contratti JS eseguibili, `graphic-pass-contract` **10/10**, `town-map-coherence` **87/87**, `town-structure-semantics` **11/11**, `retro-production` **54/54**, `mobile-production` **23/23**, `cast-sprite-sheet` **36/36**, `environmental-interactions` **96**, smoke **367**, walkthrough **86**. Coldstage: **40/40** controlli desktop/gameplay/mobile/visual, zero errori console e review scoped `pass-with-notes`. Tre audit indipendenti finali: sistema globale **9,2**, hard floor **9,0**; harsh art audit **9,2**; confronto Gold/Red + R69 dell’arrivo **9,6**. Nessun blocker residuo.
+
+Diagnosi del progresso: ogni scena viene catturata a `160×144`, giudicata a `1×`, misurata per cella `8×8`, confrontata con collisioni e data a critici senza spiegazione difensiva. Patch ammessa solo su gap osservabile; nuova cattura e nuovo esame dopo ogni veto.
+
+## R100N — grammatica cittadina e gate di produzione (2026-08-14)
+
+Ricostruzione degli esterni su framebuffer nativo `160×144`, usando come fonti misurabili i tileset originali `pret/pokecrystal` e `pret/pokered`, più la reference approvata `artifacts/retro-gauntlet/refs/reference-r69.png`.
+
+Risultato:
+
+- 11 gruppi edilizi con renderer semantico: Sheriff, Book House, Horne Store, Hospital, Palmer, Double R, Roadhouse, Great Northern e tre botteghe;
+- ogni porta grafica coincide con porta, collisione e percorso della mappa;
+- strade grigie con cordoli e attraversamenti a tre bande, niente pattern “scala”;
+- foresta con conifere A/B/A/C, massa posteriore solo nei cluster densi e maschere da 1–2 px ai bordi;
+- lago, lapidi, cartelli, panchine e idranti con sottofondo esplicito; nessun carrier verde o staccionata falsa;
+- 24 attori, quattro direzioni e tre frame di cammino; palette OBJ separata dalla palette BG, come vincolo hardware Gen II;
+- pagina condivisibile `progress.html` con confronto prima/dopo e matrici R100N.
+
+Prove permanenti: `graphic-pass-contract` 7/7, `town-map-coherence` 87/87, `town-structure-semantics` 11/11, `retro-production` 54/54, `mobile-production` 23/23, `cast-sprite-sheet` 36/36, walkthrough completo 86 acquisizioni. Gauntlet esterno: ogni edificio 9,0–9,4; foresta 9,0; Double R 9,1. Ultimi due veti localizzati — seam rettangolare della chioma e targa troppo stretta — corretti in R100N.
+
+Lezione riusabile: giudicare edifici solo da catture legali su tile calpestabili. Separare quattro contratti: silhouette, identità, topologia e collisione. Un render bello ma con porta falsa, spawn illegale o sottofondo implicito non passa.
 
 ## Obiettivo
 

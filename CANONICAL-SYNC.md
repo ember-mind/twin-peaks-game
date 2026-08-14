@@ -11,7 +11,8 @@ Exact-equality scope:
 - `index.html`;
 - 27 production scripts loaded by `index.html`;
 - 25 high-resolution portrait PNGs loaded by speaker cards;
-- production cast atlas `assets/sprites/cast-walkcycles-16.png`;
+- archived comparative cast atlas `assets/sprites/cast-walkcycles-16.png`
+  (production characters are native-authored in `js/retro-authored.js`);
 - 8 canonical source JSON files listed in manifest.
 
 Vault-only books, gauntlet records, source portraits and 3D models remain knowledge/archive material. They are outside deployed bundle and are never deleted by sync.

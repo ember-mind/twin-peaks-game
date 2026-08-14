@@ -64,7 +64,7 @@ const expectedDoors = ['9,6', '23,6', '42,6', '12,20', '42,20', '47,28', '55,14'
 ok(expectedDoors.every((k) => sourceMap.doors[k]), 'coordinate porte storiche invariate');
 for (const k of expectedDoors.slice(0, 6)) {
   const [x, y] = k.split(',').map(Number);
-  ok(at(x, y + 1) === 'p', 'approccio authored subito sotto porta ' + k);
+  ok(at(x, y + 1) === 'p' || at(x, y + 1) === '=', 'approccio authored subito sotto porta ' + k);
 }
 
 const walkable = flood([30, 31], (x, y) => x >= 0 && y >= 0 && x < W && y < H && !GAME.maps.SOLID[at(x, y)]);
@@ -98,7 +98,7 @@ while (urbanRemaining.size) {
 ok(urban.length === 18 && urbanComponents.length === 1,
   'ghiaia limitata a corte civica 6x4 e ingresso visibile');
 
-const groundedProps = 'SLPBAHEqV';
+const groundedProps = 'SLPBAHEqVG';
 const props = coordsWhere(groundedProps);
 ok(props.every(([x, y]) => ['.', '=', 'u', 'p', 'r'].includes(sourceMap.ground[key(x, y)])), 'ogni prop urbano dichiara sottofondo');
 const compactBuildings = coordsWhere('0');
@@ -150,7 +150,7 @@ ok(eastWestCrosswalk.length === 6 && [28, 29].every((y) => [27, 28, 29].every((x
  * sono incluse nel bbox pur usando il glifo D invece del glifo edificio. */
 const footprints = [
   ['4', 6, 3, 6, 4, 9, 6], ['5', 20, 3, 6, 4, 23, 6], ['3', 40, 4, 4, 3, 42, 6],
-  ['1', 10, 17, 6, 4, 12, 20], ['2', 39, 18, 6, 3, 42, 20], ['6', 44, 25, 6, 4, 47, 28]
+  ['1', 10, 17, 5, 4, 12, 20], ['2', 39, 18, 6, 3, 42, 20], ['6', 44, 25, 6, 4, 47, 28]
 ];
 for (const [ch, x0, y0, width, height, dx, dy] of footprints) {
   const cells = coordsWhere(ch).concat([[dx, dy]]);
@@ -161,19 +161,19 @@ for (const [ch, x0, y0, width, height, dx, dy] of footprints) {
 
 /* Cattura street: due edifici veri separati da un vicolo percorribile,
  * non ali costruite per ingannare il frame. */
-function exactBlock(ch, x0, y0, width) {
+function exactBlock(ch, x0, y0, width, height) {
   const cells = coordsWhere(ch);
-  return cells.length === width * 4 && cells.every(([x, y]) => x >= x0 && x < x0 + width && y >= y0 && y < y0 + 4);
+  return cells.length === width * height && cells.every(([x, y]) => x >= x0 && x < x0 + width && y >= y0 && y < y0 + height);
 }
-ok(exactBlock('7', 28, 2, 3) && exactBlock('9', 33, 3, 3),
-  'Bookhouse e Horne\'s 3x4 sono autonomi e sfalsati verticalmente');
+ok(exactBlock('7', 28, 2, 3, 3) && exactBlock('9', 33, 3, 3, 3),
+  'Bookhouse e Horne\'s 3x3 sono autonomi e sfalsati verticalmente');
 ok([2, 3, 4, 5, 6, 7, 8, 9].every((y) => [31, 32].every((x) =>
   at(x, y) === 'p' && walkable.has(key(x, y)))),
   'vicolo largo due tile fra edifici sfalsati, calpestabile e connesso');
 ok(at(32, 5) === 'p' && walkable.has('32,5'), 'camera street x32,y5 in vicolo reale e connessa');
 const streetWindow = [];
 for (let y = 2; y <= 10; y++) for (let x = 27; x <= 36; x++) streetWindow.push(at(x, y));
-ok(streetWindow.filter((ch) => ch === '7').length === 12 && streetWindow.filter((ch) => ch === '9').length === 12,
+ok(streetWindow.filter((ch) => ch === '7').length === 9 && streetWindow.filter((ch) => ch === '9').length === 9,
   'frame street contiene entrambi gli edifici interi');
 const streetComponents = [];
 const streetSolid = new Set();

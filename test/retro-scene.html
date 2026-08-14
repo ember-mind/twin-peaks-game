@@ -31,7 +31,9 @@
 <script src="../js/engine.js?v=r74space1"></script>
 <script src="../js/glue.js?v=gold48"></script>
 <script src="../js/retro.js?v=r60i2"></script>
-<script src="../js/retro-authored.js?v=r76town1"></script>
+<script src="../js/retro-cast-matrices-a.js?v=r102e"></script>
+<script src="../js/retro-cast-matrices-b.js?v=r102e"></script>
+<script src="../js/retro-authored.js?v=r102e-authoredcast"></script>
 <script>
 (function () {
   var q = new URLSearchParams(location.search);
@@ -109,6 +111,56 @@
         id: 'visual-audit', def: { pages: [] }, replay: true, i: 0,
         pages: [{ name: speaker, text: 'Harry. Ho sognato una stanza rossa.' }]
       };
+    }
+    /* R101 usa lo stesso renderer cast nativo in test e produzione: niente
+     * Image asincrona, niente frame fallback promosso per errore. */
+    document.body.setAttribute('data-cast-renderer',
+      GAME.Retro2D && GAME.Retro2D.castRenderer && GAME.Retro2D.castRenderer.id || 'missing');
+    /* Prova temporale R101: un passo nasce dal vero loop di produzione,
+     * riceve input tastiera reale e viene campionato lossless ogni 55 ms.
+     * Non ricostruiamo i frame nel test: esportiamo il canvas che il giocatore
+     * vede, inclusi scorrimento, cadenza e ritorno alla posa idle. */
+    if (q.get('motion') === '1') {
+      window.__TP_SHOT_FRAMES__ = [];
+      setTimeout(function startProductionWalk() {
+        window.dispatchEvent(new KeyboardEvent('keydown', {
+          code: 'ArrowRight', key: 'ArrowRight', bubbles: true
+        }));
+        var sample = 0;
+        function captureMotionFrame() {
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              window.__TP_SHOT_FRAMES__.push(cv.toDataURL('image/png'));
+              sample++;
+              if (sample === 5) {
+                window.dispatchEvent(new KeyboardEvent('keyup', {
+                  code: 'ArrowRight', key: 'ArrowRight', bubbles: true
+                }));
+              }
+              if (sample < 12) {
+                setTimeout(captureMotionFrame, 55);
+                return;
+              }
+              fetch('../index.html').then(function (response) { return response.text(); }).then(function (index) {
+                if (GAME.Retro2D.castRenderer.id !== 'native-authored-r102e' ||
+                    index.indexOf('retro-authored.js?v=r102e-authoredcast') < 0 ||
+                    index.indexOf('retro-cast-matrices-a.js?v=r102e') < 0 ||
+                    index.indexOf('retro-cast-matrices-b.js?v=r102e') < 0) {
+                  throw new Error('production cast provenance mismatch');
+                }
+                document.body.setAttribute('data-motion-provenance', 'r102e-authoredcast');
+                document.body.setAttribute('data-native-png', cv.toDataURL('image/png'));
+                document.title = 'TP-RETRO-MOTION-READY ' + map;
+              }).catch(function (error) {
+                window.__TP_SHOT_ERROR__ = error.message;
+                document.title = 'TP-SHOT-ERROR';
+              });
+            });
+          });
+        }
+        captureMotionFrame();
+      }, 80);
+      return;
     }
     /* Non dichiarare READY prima che almeno alcuni rAF abbiano dipinto la
      * scena richiesta. La vecchia esportazione a 80 ms poteva fotografare il

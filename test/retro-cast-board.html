@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TP-NATIVE-CAST-LOADING</title>
+<style>
+  html,body{margin:0;background:#111913;overflow:hidden}
+  canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+</style>
+</head>
+<body>
+<canvas id="board" width="1440" height="720"></canvas>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js"></script>
+<script src="../js/portraits.js"></script>
+<script src="../js/gold-tone.js"></script>
+<script src="../js/engine.js"></script>
+<script src="../js/glue.js"></script>
+<script src="../js/retro.js"></script>
+<script src="../js/retro-cast-matrices-a.js?v=r102e"></script>
+<script src="../js/retro-cast-matrices-b.js?v=r102e"></script>
+<script src="../js/retro-authored.js?v=r102e-authoredcast"></script>
+<script>
+(function () {
+  'use strict';
+  var cv = document.getElementById('board');
+  var g = cv.getContext('2d');
+  var params = new URLSearchParams(location.search);
+  var scale = Math.max(1, Math.min(6, Number(params.get('scale')) || 2));
+  var blind = params.get('blind') === '1';
+  cv.width = 720 * scale; cv.height = 360 * scale;
+  cv.style.width = cv.width + 'px'; cv.style.height = cv.height + 'px';
+  var names = Object.keys(GAME.Sprites.CHARS);
+  var dirs = ['down', 'up', 'left', 'right'];
+  var cellW = 120 * scale, cellH = 90 * scale;
+  g.imageSmoothingEnabled = false;
+  g.fillStyle = '#eee6b5'; g.fillRect(0, 0, cv.width, cv.height);
+  names.forEach(function (name, i) {
+    var x0 = (i % 6) * cellW, y0 = Math.floor(i / 6) * cellH;
+    g.fillStyle = (i & 1) ? '#dcd9a9' : '#eee6b5';
+    g.fillRect(x0, y0, cellW, cellH);
+    g.strokeStyle = '#34572d'; g.lineWidth = Math.max(1, scale / 2); g.strokeRect(x0 + .5, y0 + .5, cellW - 1, cellH - 1);
+    if (!blind) {
+      g.fillStyle = '#072619'; g.font = 'bold ' + (6 * scale) + 'px ui-monospace,monospace';
+      g.textBaseline = 'top'; g.fillText(String(i + 1).padStart(2, '0') + ' ' + name.toUpperCase(), x0 + 4 * scale, y0 + 3 * scale);
+    }
+    dirs.forEach(function (dir, row) {
+      var sy = y0 + 14 * scale + row * 18.5 * scale;
+      if (!blind) {
+        g.fillStyle = '#34572d'; g.font = 'bold ' + Math.max(5, 4.5 * scale) + 'px ui-monospace,monospace';
+        g.fillText(dir.slice(0, 1).toUpperCase(), x0 + 4 * scale, sy + 5.5 * scale);
+      }
+      [0, 1, 2].forEach(function (pose, col) {
+        g.save();
+        g.translate(x0 + 17 * scale + col * 31 * scale, sy);
+        g.scale(scale, scale);
+        /* Tre colonne oneste: idle, passo A (fase 1), passo B (fase 3).
+         * La vecchia colonna centrale era fase 0 e duplicava l'idle. */
+        GAME.Sprites.drawChar(g, 0, 2, GAME.Sprites.CHARS[name], dir,
+          pose === 0 ? 0 : (pose === 1 ? 1 : 3), 1, pose !== 0, false, pose * 90);
+        g.restore();
+      });
+    });
+  });
+  document.body.setAttribute('data-cast-renderer', GAME.Retro2D.castRenderer.id);
+  document.body.setAttribute('data-blind-board', blind ? 'true' : 'false');
+  fetch('../index.html', { cache: 'no-store' }).then(function (response) { return response.text(); }).then(function (index) {
+    if (GAME.Retro2D.castRenderer.id !== 'native-authored-r102e' ||
+        index.indexOf('retro-authored.js?v=r102e-authoredcast') < 0 ||
+        index.indexOf('retro-cast-matrices-a.js?v=r102e') < 0 ||
+        index.indexOf('retro-cast-matrices-b.js?v=r102e') < 0) {
+      throw new Error('production renderer provenance mismatch');
+    }
+    document.body.setAttribute('data-production-index', 'r102e-authoredcast');
+    document.title = 'TP-NATIVE-CAST-READY';
+  }).catch(function (error) {
+    document.body.setAttribute('data-error', error.message);
+    document.title = 'TP-NATIVE-CAST-ERROR';
+  });
+}());
+</script>
+</body>
+</html>

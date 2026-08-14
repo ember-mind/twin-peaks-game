@@ -329,6 +329,7 @@ function enterEnvironmental(mapId, tile) {
 enterEnvironmental('town', 'T');
 enterEnvironmental('town', '0');
 enterEnvironmental('town', '1');
+enterEnvironmental('town', '7');
 enterEnvironmental('town', '9');
 enterEnvironmental('town', 'B');
 enterEnvironmental('diner', 't');
