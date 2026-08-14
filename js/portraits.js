@@ -169,7 +169,9 @@
       R(ctx, x - 3, top + 5, 5, 19, PAL.ink); R(ctx, x + w - 2, top + 5, 5, 19, PAL.deep);
       if (style === 'wild') { R(ctx, x, top - 4, 4, 4, PAL.ink); R(ctx, x + w - 5, top - 5, 5, 5, PAL.deep); }
     } else if (style === 'cap') {
-      R(ctx, x - 1, top - 2, w + 2, 5, PAL.paper); R(ctx, x + 3, top - 4, w - 6, 3, PAL.paper);
+      /* Visiera dentro la sagoma della card: il generic portrait parte a y+3,
+       * quindi top-3 e' il limite superiore visibile. */
+      R(ctx, x - 1, top - 2, w + 2, 5, PAL.paper); R(ctx, x + 3, top - 3, w - 6, 3, PAL.paper);
       R(ctx, x - 1, top + 2, w + 2, 2, PAL.deep); R(ctx, x - 2, top + 4, 4, 10, PAL.ink); R(ctx, x + w - 2, top + 4, 4, 10, PAL.ink);
     }
   }
@@ -646,7 +648,7 @@
     if (!key) return null;
     x = Math.round(x == null ? 5 : x); y = Math.round(y == null ? 55 : y);
     /* Sagoma 40x47: chiude y104; y105 resta vuota prima del testo. */
-    R(ctx, x + 3, y + 3, 37, 45, PAL.deep); R(ctx, x + 2, y + 2, 38, 43, PAL.deep);
+    R(ctx, x + 3, y + 3, 37, 44, PAL.deep); R(ctx, x + 2, y + 2, 38, 43, PAL.deep);
     R(ctx, x + 1, y, 38, 47, PAL.paper); R(ctx, x, y + 1, 40, 45, PAL.paper);
     R(ctx, x + 2, y + 1, 36, 45, PAL.ink); R(ctx, x + 1, y + 2, 38, 43, PAL.ink);
     R(ctx, x + 3, y + 2, 34, 36, PAL.deep);

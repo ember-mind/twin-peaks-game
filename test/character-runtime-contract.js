@@ -33,7 +33,7 @@ assert.equal(atlas.readUInt32BE(20), 240, 'cast atlas height');
 assert.equal(manifestCast.length, 24, 'complete moving cast');
 assert.deepEqual(manifestCast, runtimeCast, 'manifest and runtime cast must match');
 assert(authored.includes(`cast-walkcycles-16.png?v=${atlasVersion}`), 'atlas cache version must match bytes');
-assert(index.includes(`retro-authored.js?v=${atlasVersion}`), 'renderer cache version must match atlas');
+assert(index.includes(`retro-authored.js?v=${atlasVersion}-r98`), 'renderer cache version must match atlas and visual revision');
 assert(/drawCastWalkSheet\(ctx, name/.test(authored), 'runtime must draw generated cast sheet');
 assert(/CAST_SHEET_ORDER\.indexOf\(name\)/.test(authored), 'runtime must resolve cast atlas block');
 assert(/rows: \['down', 'up', 'right'\]/.test(authored), 'direction rows contract');

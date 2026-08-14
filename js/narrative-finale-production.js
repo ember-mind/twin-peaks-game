@@ -243,6 +243,9 @@
     var NF = finale(); if (!NF || !NF.isPending || !NF.isPending()) return false;
     if (NF.isActive()) return true;
     var state = NF.getState();
+    if (state.stage === 'await_post_s3' && mapId === 'sheriff' && actorId === 'leland') {
+      return consumePhysicalTransition(NF.resumePostS3());
+    }
     if ((state.stage === 'await_lodge' || state.stage === 'await_lodge_second') && mapId === 'redroom' && (actorId === 'mfap' || actorId === 'bob')) {
       var lodge = NF.beginLodge(actorId);
       if (!lodge.ok && lodge.error === 'lodge_actor_already_seen') {

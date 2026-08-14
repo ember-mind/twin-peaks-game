@@ -158,11 +158,7 @@
   }
 
   function objectiveText(NR, A) {
-    if (!A.isEnabled()) return '';
-    var mission = A.getMission();
-    if (!mission || (mission.entry_condition && !NR.evalCond(A.getState(), mission.entry_condition, mission))) return '';
-    var o = mission && NR.activeObjective(A.getState(), mission);
-    return o ? o.text + (o.optional_line ? ' — ' + o.optional_line : '') : '';
+    return A.getObjectiveText ? A.getObjectiveText() : '';
   }
 
   function renderObjective(NR, A) {
@@ -170,6 +166,12 @@
     var E = GAME.Engine;
     if (!el || !E || !E.state || E.state.mode !== 'play') {
       if (el) el.style.display = 'none';
+      return;
+    }
+    // Notebook possiede gia' una sola copia risolta dell'obiettivo. Il sync
+    // periodico non deve riaprire il duplicato DOM mentre il pannello e' vivo.
+    if (A.isNotebookOpen && A.isNotebookOpen()) {
+      el.style.display = 'none';
       return;
     }
     if (!A.isEnabled()) {
@@ -358,6 +360,7 @@
   };
   NP.inspectClassicSave = inspectClassicSave;
   NP.syncClassicToNarrative = syncClassicToNarrative;
+  NP.renderObjective = renderObjective;
   NP.showSaveRecovery = showSaveRecovery;
   NP.onClassicSave = function (classic) {
     if (!NP.ready) return { handled: false, ok: false, skipped: 'boot_not_ready' };

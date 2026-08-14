@@ -31,9 +31,15 @@ const checks = {
     /titleFits: titleWidth <= l\.boxW - 20/.test(engine),
   intro_uses_three_complete_pages: /Math\.ceil\(lines\.length \/ 7\)/.test(engine) &&
     /lines\.slice\(part \* 7, part \* 7 \+ 7\)/.test(engine),
-  production_cache_busts_layout_fix: /js\/engine\.js\?v=r77qa2/.test(index) &&
-    /js\/touch\.js\?v=r77qa1/.test(index) && /js\/data\.js\?v=12qa1/.test(index) &&
-    /js\/narrative-data\.gen\.js\?v=13qa1/.test(index),
+  production_cache_busts_layout_fix: /js\/engine\.js\?v=r77qa3/.test(index) &&
+    /js\/touch\.js\?v=r77qa1/.test(index) && /js\/data\.js\?v=12qa4/.test(index) &&
+    /js\/narrative-data\.gen\.js\?v=13qa3/.test(index) &&
+    /js\/narrative-finale\.js\?v=gold54p5/.test(index) &&
+    /js\/narrative-finale-production\.js\?v=13/.test(index),
+  production_cache_busts_objective_notebook_fix:
+    /js\/narrative-notebook\.js\?v=5/.test(index) &&
+    /js\/narrative-engine-adapter\.js\?v=10/.test(index) &&
+    /js\/narrative-production\.js\?v=21/.test(index),
   css_stage_preserves_native_aspect: /aspect-ratio: 10 \/ 9/.test(index) &&
     /max-width: 100vw; max-height: 100dvh/.test(index),
   production_loads_retro_renderer: /js\/retro\.js/.test(index),
@@ -82,6 +88,14 @@ const checks = {
     /GAME\.Retro2D\.spriteSize = \[16, 16\]/.test(authored),
   gold_flat_world_projection: /var SCALE = 1/.test(engine) && /viewport GBC: 10x9 metatile/.test(engine),
   gold_gameplay_has_no_quest_overlay: /Pokémon Oro non sovrappone quest banner/.test(retroUi),
+  notebook_renders_single_resolved_objective:
+    /A\.getObjectiveText = currentObjectiveText/.test(adapter) &&
+    /getObjectiveText: currentObjectiveText/.test(adapter) &&
+    /data-nb-objective/.test(notebook),
+  title_and_intro_footer_stay_inside_frames:
+    /Mistero di Laura Palmer', UW \/ 2, 69, '#31543a', '7px monospace'/.test(engine) &&
+    /promptY: 126/.test(engine) &&
+    /text\('PAG\.[\s\S]*var advanceLabel[\s\S]*if \(Math\.floor\(tGlobal \/ 500\) % 2 === 0\) \{\s*text\('>'/.test(engine),
   gold_dialogue_reference_bottom_49px: /var by = 95, bh = 49/.test(engine) &&
     /var bw = Math\.min\(UW, 160\)/.test(engine),
   retro_disables_oblique_structures: /Sp\.drawStructures = function \(\) \{\}/.test(retro),

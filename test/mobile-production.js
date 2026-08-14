@@ -8,6 +8,8 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const index = read('index.html');
 const main = read('js/main.js');
 const touch = read('js/touch.js');
+const adapter = read('js/narrative-engine-adapter.js');
+const notebook = read('js/narrative-notebook.js');
 
 const checks = {
   viewport_covers_notch: /viewport-fit=cover/.test(index),
@@ -26,6 +28,16 @@ const checks = {
   controls_resize_for_orientation: /function playLayout/.test(touch) && /landscape/.test(touch),
   portrait_controls_follow_stage: /var stageBottom =/.test(touch) && /controlTop: controlTop/.test(touch) &&
     /function placePortraitButton/.test(touch),
+  mobile_notebook_shows_active_objective_in_one_press:
+    /getObjectiveText: currentObjectiveText/.test(adapter) &&
+    /data-nb-objective/.test(notebook) && /OBIETTIVO: /.test(notebook),
+  objective_has_one_shared_resolver:
+    /A\.getObjectiveText = currentObjectiveText/.test(adapter) &&
+    /var narrative = NR\.activeObjective/.test(adapter) &&
+    /GAME\.Data\.objectiveFor/.test(adapter),
+  notebook_hides_duplicate_semantic_objective:
+    /objectiveEl\.style\.display = 'none'/.test(adapter) &&
+    /objectiveEl\.style\.display = objectiveDisplay/.test(adapter),
   narrative_owns_its_tap: /interactionMode\(\)\.indexOf\('narrative'\) === 0\) return/.test(touch),
   narrative_choice_has_dpad: /mode === 'narrative-choice'/.test(touch) && /showControl\(uiDpad, true/.test(touch),
   narrative_choice_has_confirm: /Conferma scelta/.test(touch) && /buttonFace\(uiA, 'A', 'SCEGLI'\)/.test(touch),

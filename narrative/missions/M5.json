@@ -373,7 +373,7 @@
         "mode": "dialogue",
         "speaker_id": "cooper",
         "display_name": "COOPER",
-        "text": "Segni ai bordi, nessun trascinamento verso il centro. La stanza tiene separate due geometrie."
+        "text": "Hawk, controlla la soglia. Io fotografo il vuoto fra questi segni."
         }
       ],
       "effects": [
@@ -394,6 +394,7 @@
       "id": "m5_theory_initial",
       "beat": "B8a",
       "source_section": "M5-B8a",
+      "prompt": "Prima lettura della scena?",
       "milestone": "milestone_theory_initial",
       "conditions": [
         {
@@ -407,7 +408,7 @@
         {
           "id": "m5.b8a.theory.p01",
           "mode": "notebook",
-          "text": "Prima lettura della scena?"
+          "text": "Nel taccuino restano aperte due letture della scena."
         }
       ],
       "choices": [
@@ -424,7 +425,7 @@
             {
               "id": "m5.b8a.feedback.degeneration",
               "mode": "notebook",
-              "text": "Una lettura possibile. La scena non ha ancora finito di parlare."
+              "text": "La segno a matita. Prima del rapporto, voglio l'ultimo riscontro."
             }
           ]
         },
@@ -441,7 +442,7 @@
             {
               "id": "m5.b8a.feedback.staging",
               "mode": "notebook",
-              "text": "Una lettura possibile. La scena non ha ancora finito di parlare."
+              "text": "La segno a matita. Prima del rapporto, voglio l'ultimo riscontro."
             }
           ]
         }
@@ -459,6 +460,7 @@
       "id": "m5_theory_revision",
       "beat": "B8b",
       "source_section": "M5-B8b",
+      "prompt": "Il nuovo fatto cambia la tua lettura?",
       "milestone": "milestone_theory_revision",
       "conditions": [
         {
@@ -475,7 +477,7 @@
         {
           "id": "m5.b8b.revision.p01",
           "mode": "notebook",
-          "text": "Il nuovo fatto cambia la tua lettura?"
+          "text": "Il terzo gruppo è completo; la prima ipotesi resta scritta a matita."
         }
       ],
       "choices": [
@@ -533,6 +535,7 @@
       "id": "m5_cmp_ring",
       "beat": "B8c",
       "source_section": "M5-B8c",
+      "prompt": "Che cosa dice la polvere intatta?",
       "conditions": [
         {
           "evidence": "E8A_ANELLO_POSIZIONE"
@@ -545,7 +548,7 @@
         {
           "id": "m5.b8c.cmp_ring.p01",
           "mode": "notebook",
-          "text": "Che cosa dice la polvere intatta sulla posizione dell'anello?"
+          "text": "La polvere è continua fino al bordo dell'anello."
         }
       ],
       "choices": [

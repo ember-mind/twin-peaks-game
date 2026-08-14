@@ -1,29 +1,41 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "tool": "coldstage",
   "type": "pixel-baseline",
   "projectId": "twin-peaks-pokemon",
   "scenario": "visual",
-  "sourceRunId": "2026-08-07T19-57-37-938Z-desktop-gameplay-mobile-visual",
-  "sourceReport": ".coldstage/runs/2026-08-07T19-57-37-938Z-desktop-gameplay-mobile-visual/report.json",
-  "sourceReview": ".coldstage/reviews/2026-08-07T19-57-37-938Z-desktop-gameplay-mobile-visual/visual-review.json",
-  "approvedAt": "2026-08-07T20:34:23.342Z",
-  "approvedBy": "codex",
+  "sourceRunId": "2026-08-14T08-13-30-615Z-desktop-gameplay-mobile-visual",
+  "sourceReport": ".coldstage/runs/2026-08-14T08-13-30-615Z-desktop-gameplay-mobile-visual/report.json",
+  "sourceReportDigest": "0814c09c643dc07bae275244a718c47a7db7563c450743761d463626a19f649e",
+  "sourceReview": ".coldstage/reviews/2026-08-14T08-13-30-615Z-desktop-gameplay-mobile-visual/visual/review-1786695271320-7459e2f6.json",
+  "sourceReviewDigest": "d422724aaa8376301891f94505ec92ad9ee3d9b2202dedd87ebc8e6ddbf24607",
+  "approvedAt": "2026-08-14T08:14:31.576Z",
+  "approvedBy": "codex-agent",
   "reviewVerdict": "pass-with-notes",
   "review": {
-    "reviewer": "codex",
+    "reviewer": {
+      "type": "vision-model",
+      "id": "codex-agent",
+      "provider": "OpenAI",
+      "model": "gpt-5",
+      "version": "2026-08-14"
+    },
     "verdict": "pass-with-notes",
-    "reviewedAt": "2026-08-07T20:07:51.988Z",
+    "reviewedAt": "2026-08-14T08:14:31.320Z",
     "scope": "Contact sheet from 1 local artifact(s)",
-    "notes": "Scope: single arrival-dialogue contact sheet at 640x452. Strong GBC palette, crisp nearest-neighbor presentation, readable dialogue hierarchy, and integrated portrait card. Largest gap: Cooper world sprite collapses toward a dark silhouette and reads less clearly than portrait/UI. This does not attest other scenes, animation, pacing, or full-game visual quality."
+    "notes": "Reviewed pixel diff sheet. Diff 0.100%; Cooper portrait, nameplate, dialogue copy, world and mobile-safe layout remain legible. Variation expected from bitmap/card corrections. No clipping, overflow, false obstacle, or gameplay regression."
   },
   "captures": [
     {
       "name": "visual-arrival-dialogue.png",
-      "path": "test/coldstage-baselines/visual/visual-arrival-dialogue.png",
-      "sha256": "797af7b7b3160ef5a72e9095e73b2fe05124ebc181ac9b4b57d1860967636682",
+      "path": "test/coldstage-baselines/visual/versions/d422724aaa8376301891f945/visual-arrival-dialogue.png",
+      "sha256": "6c6d08bbfdb8d08b97bcaf3ed543d702735c72004c080fe626255aa3977ad204",
       "width": 1280,
       "height": 720
     }
-  ]
+  ],
+  "integrity": {
+    "algorithm": "sha256",
+    "manifestDigest": "e558ed09c179260f7661fc357609614adc84417ad0f9b9a8aab50ea3a6d68925"
+  }
 }

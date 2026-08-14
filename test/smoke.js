@@ -127,6 +127,22 @@ for (const [id, def] of Object.entries(GAME.Data.dialogues)) {
 }
 ok(true, 'tutte le pagine di dialogo entrano nel box (<= 129 caratteri)');
 
+// Ogni prova raccolta apre una scheda leggibile. Le pagine restano entro le
+// otto righe del fallback bitmap 160x144, oltre alla vista HTML scorrevole.
+for (const [id, clue] of Object.entries(GAME.Data.clues)) {
+  assert(clue.document && typeof clue.document.title === 'string' && clue.document.title.trim(),
+    `prova "${id}" senza documento apribile`);
+  assert(Array.isArray(clue.document.pages) && clue.document.pages.length > 0,
+    `documento "${id}" senza pagine`);
+  for (const [index, page] of clue.document.pages.entries()) {
+    assert(typeof page.label === 'string' && page.label.trim(), `documento "${id}" pagina ${index + 1} senza etichetta`);
+    assert(typeof page.text === 'string' && page.text.trim(), `documento "${id}" pagina ${index + 1} senza testo`);
+    const lines = GAME.RetroFont.wrapPixels(page.text, 118, 1);
+    assert(lines.length <= 8, `documento "${id}" pagina ${index + 1} supera 8 righe bitmap (${lines.length})`);
+  }
+}
+ok(true, 'tutte le prove hanno documenti completi e pagine entro 8 righe bitmap');
+
 // obiettivo del menu indizi: una riga sola, e il dialogo d'arrivo di town.onEnter esiste
 for (const o of GAME.Data.objectives) {
   assert(o.text.length <= 48, `obiettivo "${o.text}" troppo lungo (${o.text.length} > 48)`);

@@ -9,16 +9,17 @@
   canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; }
   #speaker-portrait-hires { position: absolute; z-index: 2; left: 8.125%; top: 42.361111%; width: 20%; height: 22.916667%; object-fit: fill; image-rendering: auto; pointer-events: none; }
   #speaker-portrait-hires[hidden] { display: none; }
-  #speaker-name-hires, #speaker-dialogue-hires { position:absolute; z-index:3; color:#072619; background:#eee6b5; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-weight:700; overflow:hidden; pointer-events:none; }
+  #speaker-name-hires, #speaker-dialogue-hires, #speaker-advance-hires { position:absolute; z-index:3; color:#072619; background:#eee6b5; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-weight:700; overflow:hidden; pointer-events:none; }
   #speaker-name-hires { left:6.875%; top:67.361111%; width:22.5%; height:4.861111%; display:flex; align-items:center; justify-content:center; white-space:nowrap; font-size:calc(var(--native-scale, 1) * 4px); line-height:1; }
   #speaker-dialogue-hires { left:6.875%; top:77.083333%; width:86.25%; height:12.5%; font-size:calc(var(--native-scale, 1) * 6.4px); line-height:1; letter-spacing:calc(var(--native-scale, 1) * .08px); }
   #speaker-dialogue-hires .speaker-line { position:absolute; left:0; width:100%; white-space:nowrap; }
   #speaker-dialogue-hires .speaker-line:first-child { top:0; } #speaker-dialogue-hires .speaker-line:last-child { top:61.111111%; }
-  #speaker-name-hires[hidden], #speaker-dialogue-hires[hidden] { display:none; }
+  #speaker-advance-hires { right:6.875%; top:91.666667%; width:32.5%; height:3.472222%; display:flex; align-items:center; justify-content:flex-end; white-space:nowrap; font-size:max(10px,calc(var(--native-scale,1) * 2.8px)); line-height:1; }
+  #speaker-name-hires[hidden], #speaker-dialogue-hires[hidden], #speaker-advance-hires[hidden] { display:none; }
 </style>
 </head>
 <body>
-<div id="stage"><canvas id="game" width="160" height="144"></canvas><img id="speaker-portrait-hires" src="../assets/portraits/hires/cooper.png" data-portrait-root="../assets/portraits/hires/" alt="" aria-hidden="true" hidden><div id="speaker-name-hires" aria-hidden="true" hidden></div><div id="speaker-dialogue-hires" aria-hidden="true" hidden><span id="speaker-dialogue-line-1" class="speaker-line"></span><span id="speaker-dialogue-line-2" class="speaker-line"></span></div></div>
+<div id="stage"><canvas id="game" width="160" height="144"></canvas><img id="speaker-portrait-hires" src="../assets/portraits/hires/cooper.png" data-portrait-root="../assets/portraits/hires/" alt="" aria-hidden="true" hidden><div id="speaker-name-hires" aria-hidden="true" hidden></div><div id="speaker-dialogue-hires" aria-hidden="true" hidden><span id="speaker-dialogue-line-1" class="speaker-line"></span><span id="speaker-dialogue-line-2" class="speaker-line"></span></div><div id="speaker-advance-hires" aria-hidden="true" hidden></div></div>
 <script src="../js/tiles.js?v=r60i2"></script>
 <script src="../js/chars.js"></script>
 <script src="../js/houses.js"></script>

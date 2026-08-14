@@ -35,7 +35,7 @@
         pages: [
           {
             label: 'Registro pubblico',
-            text: 'Oggi tutti mi hanno salutata per nome: al diner, a scuola, davanti alla chiesa. In un paese così piccolo è facile sembrare felici.'
+            text: 'Norma mi ha tenuto la fetta con più ciliegie. Donna ne ha rubata una; James ha riso col caffè in mano. Sono arrivata tardi a scuola.'
           },
           {
             label: 'Registro cifrato',
@@ -48,21 +48,165 @@
         ]
       }
     },
-    cuore:     { name: 'Metà cuore spezzato',  desc: 'Un ciondolo a metà. Qualcuno conserva l\'altra metà.' },
-    lettera_r: { name: 'Lettera "R"',            desc: 'Un frammento trovato sotto l\'unghia di Laura.' },
-    nome_sussurrato: { name: 'Il nome sussurrato nel sogno', desc: 'Laura ha detto il nome dell\'assassino. Al risveglio, era svanito.' },
-    poesia_fuoco: { name: 'La poesia del fuoco', desc: '"Fuoco cammina con me." Il monco l\'ha recitata in trance.' },
-    cuore_intero: { name: 'Il cuore ricomposto', desc: 'James custodiva l\'altra metà del ciondolo di Laura.' },
-    biglietto_fuoco: { name: '"FUOCO CAMMINA CON ME"', desc: 'Un brandello di carta nel vagone, accanto a un mucchio di terra.' },
-    anello: { name: 'L\'anello di Laura', desc: 'Era sotto un\'asse del vagone. Perchè l\'assassino non l\'ha preso?' },
-    lettera_o: { name: 'Lettera "O"', desc: 'Sotto l\'unghia di Maddy: una O, dopo la R di Laura. Potrebbe essere una sequenza; non prova un nome né un\'identità.' }
+    cuore:     {
+      name: 'Metà cuore spezzato',
+      desc: 'Un ciondolo a metà. Qualcuno conserva l\'altra metà.',
+      document: {
+        title: 'Metà cuore spezzato',
+        pages: [
+          {
+            label: 'Camera di Laura',
+            text: 'Sotto il cuscino c\'era un ciondolo a forma di mezzo cuore.'
+          },
+          {
+            label: 'Nota',
+            text: 'Il ciondolo è soltanto una metà. Qualcuno conserva l\'altra.'
+          }
+        ]
+      }
+    },
+    lettera_r: {
+      name: 'Lettera "R"',
+      desc: 'Un frammento trovato sotto l\'unghia di Laura.',
+      document: {
+        title: 'Lettera "R"',
+        pages: [
+          {
+            label: 'Rapporto medico-legale',
+            text: 'Carta trovata sotto un\'unghia di Laura: un frammento della lettera R.'
+          }
+        ]
+      }
+    },
+    nome_sussurrato: {
+      name: 'Il nome sussurrato nel sogno',
+      desc: 'Laura ha detto il nome dell\'assassino. Al risveglio, era svanito.',
+      document: {
+        title: 'Il nome sussurrato',
+        pages: [
+          {
+            label: 'Stanza Rossa',
+            text: 'L\'ombra di Laura si è avvicinata e ha sussurrato un nome all\'orecchio di Cooper.'
+          },
+          {
+            label: 'Al risveglio',
+            text: 'Cooper ricorda di aver udito un nome, ma non riesce più a richiamarlo.'
+          },
+          {
+            label: 'Stato',
+            text: 'Il sussurro appartiene al sogno. Non è una prova verificata.'
+          }
+        ]
+      }
+    },
+    poesia_fuoco: {
+      name: 'La poesia del fuoco',
+      desc: '"Fuoco cammina con me." Il monco l\'ha recitata in trance.',
+      document: {
+        title: 'La poesia del fuoco',
+        pages: [
+          {
+            label: 'Gerard — ospedale',
+            text: 'Gerard recita in trance: «Attraverso l\'oscurità del futuro passato... FUOCO CAMMINA CON ME.»'
+          }
+        ]
+      }
+    },
+    cuore_intero: {
+      name: 'Il cuore ricomposto',
+      desc: 'James custodiva l\'altra metà del ciondolo di Laura.',
+      document: {
+        title: 'Il cuore ricomposto',
+        pages: [
+          {
+            label: 'Testimonianza di James',
+            text: 'James dice che Laura portava una metà del ciondolo. L\'altra era sua.'
+          },
+          {
+            label: 'Consegna',
+            text: 'James consegna la sua metà a Cooper.'
+          }
+        ]
+      }
+    },
+    biglietto_fuoco: {
+      name: '"FUOCO CAMMINA CON ME"',
+      desc: 'Un brandello di carta nel vagone, accanto a un mucchio di terra.',
+      document: {
+        title: '"FUOCO CAMMINA CON ME"',
+        pages: [
+          {
+            label: 'Vagone',
+            text: 'Un brandello strappato da un giornale era tra la terra smossa.'
+          },
+          {
+            label: 'Scritta',
+            text: 'Sul foglio, a mano: «FUOCO CAMMINA CON ME».'
+          },
+          {
+            label: 'Macchie',
+            text: 'I bordi hanno macchie scure. Sembrano sangue; il foglio è sigillato in attesa della scientifica.'
+          }
+        ]
+      }
+    },
+    anello: {
+      name: 'L\'anello di Laura',
+      desc: 'Era sotto un\'asse del vagone. Perché l\'assassino non l\'ha preso?',
+      document: {
+        title: 'Anello trovato nel vagone',
+        pages: [
+          {
+            label: 'Ritrovamento',
+            text: 'Sotto un\'asse del pavimento c\'era un anello d\'oro.'
+          },
+          {
+            label: 'Aspetto',
+            text: 'Sembra il monile di Laura Palmer.'
+          },
+          {
+            label: 'Posizione',
+            text: 'L\'anello era disteso quasi al centro del vano.'
+          },
+          {
+            label: 'Polvere',
+            text: 'La polvere attorno era interrotta. Non c\'erano tracce di rotolamento.'
+          },
+          {
+            label: 'Ipotesi',
+            text: 'L\'anello potrebbe essere stato posato.'
+          }
+        ]
+      }
+    },
+    lettera_o: {
+      name: 'Lettera "O"',
+      desc: 'Sotto l\'unghia di Maddy: una O, dopo la R di Laura. Potrebbe essere una sequenza; non prova un nome né un\'identità.',
+      document: {
+        title: 'Lettera "O"',
+        pages: [
+          {
+            label: 'Riva del lago',
+            text: 'Sotto un\'unghia di Maddy c\'era la lettera O.'
+          },
+          {
+            label: 'Sequenza',
+            text: 'La O viene dopo la R trovata sotto un\'unghia di Laura.'
+          },
+          {
+            label: 'Cautela',
+            text: 'R, poi O: forse l\'inizio di una firma. È un\'ipotesi, non un nome né un\'identità.'
+          }
+        ]
+      }
+    }
   };
 
   D.endText = [
-    'Diane, sono le 2:30 del mattino. Il caso Palmer è ufficialmente chiuso.',
-    'Ma alcune porte, una volta aperte, non si richiudono mai del tutto.',
-    'Il gufo osserva ancora. Ora so cosa vede.',
-    'Twin Peaks tornerà.'
+    'Diane, sono le 7:12. Il sole è sopra gli alberi. Le ammissioni di Leland sono agli atti.',
+    'Alla centrale, la nota della Twin Peaks Taxi resta agganciata al verbale firmato.',
+    'Alle 7:40 la corriera per Missoula parte in orario. Il posto di Maddy resta vuoto.',
+    'Hawk chiama da Glastonbury Grove: dodici sicomori, nessuna impronta in uscita.'
   ];
 
   D.dialogues = {
@@ -113,22 +257,22 @@
     ] },
 
     landmark_cemetery: { pages: [
-      { name: '', text: 'Cimitero di Twin Peaks. Le lapidi sono piccole, umide, inclinate come domande.' },
-      { name: 'COOPER', text: 'Laura Palmer, diciassette anni. La lapide registra le date; io cercherò di non ridurre una vita alle righe del fascicolo.' }
+      { name: '', text: 'Accanto alla cappella, una fotografia di Laura è circondata da fiori e biglietti.' },
+      { name: 'COOPER', text: 'Laura Palmer, diciassette anni. Segno le date nel fascicolo. Non ridurrò una vita a quelle date: nella foto ride con la torta.' }
     ] },
 
     landmark_tracks: { pages: [
       { name: '', text: 'I binari tagliano il paese verso est, oltre il confine.' },
-      { name: 'COOPER', text: 'Una direzione è un fatto geografico, non ancora una pista. Conviene rispettare la differenza.' }
+      { name: 'COOPER', text: 'Segno est. Prima voglio sapere chi usa questi binari.' }
     ] },
 
     landmark_tracks_route: { pages: [
       { name: 'COOPER', text: 'James ha indicato l\'est; il ciondolo dice perché la sua memoria conta.' },
-      { name: 'COOPER', text: 'I binari danno una direzione, non una conclusione. Li seguiremo come tali.' }
+        { name: 'COOPER', text: 'Proseguo a est lungo i binari.' }
     ] },
 
     landmark_tracks_vagone: { pages: [
-      { name: 'COOPER', text: 'Questi binari portano al vagone oltre la curva. Ora conosco il luogo, non ancora tutto ciò che vi è accaduto.' }
+      { name: 'COOPER', text: 'Il vagone è oltre la curva dei binari. Adesso posso controllare il luogo descritto da James.' }
     ] },
 
     hospital_locked: { pages: [
@@ -144,19 +288,22 @@
     bobby: { pages: [
       { name: 'BOBBY', text: 'Ehi, cosa vuole, agente? Io non c\'entro NIENTE, chiaro?!' },
       { name: 'BOBBY', text: 'Chieda a Donna chi vedeva Laura di nascosto. Io ero con Shelly, quella notte. Con Shelly.' },
-      { name: 'COOPER', text: 'Bobby, Shelly è una persona, non un alibi. Ripeta la frase senza usare il suo nome.' }
+      { name: 'COOPER', text: 'Bobby, guardi me. Dove si trovava, senza mettere Shelly fra noi?' },
+      { name: 'BOBBY', text: 'Chieda a Shelly. Se le do io l\'orario, dirà che gliel\'ho messo in bocca.' }
     ] },
 
     donna: { pages: [
       { name: 'DONNA', text: 'Le persone continuano a chiedermi se sapevo. Io dico sempre di no.' },
       { name: 'DONNA', text: 'Ho un video del picnic: Laura che ride, per l\'obiettivo di James. Lo guardi. Prima di chiedermi altro.' },
+      { name: '', text: 'Nel video Laura ruba una ciliegia dalla fetta di Donna. Donna prova a riprenderla; Laura ride con la bocca piena.' },
       { name: 'COOPER', text: 'Donna, guarderò il film prima di un\'altra domanda. Voglio vedere Laura quando nessuno le chiede di spiegarsi.' }
     ] },
 
     jacoby: { pages: [
-      { name: 'JACOBY', text: 'Aloha, agente Cooper! Le piace il mio cocco? È un ascoltatore eccellente.' },
-      { name: 'JACOBY', text: 'Laura era mia paziente. Aveva segreti che nemmeno io ho scoperto. E io sono un professionista.' },
-      { name: 'COOPER', text: 'Dottor Jacoby, il cocco sa ascoltare. Vediamo se lei sa rispondere: quali segreti Laura affidava soltanto ai vivi?' }
+      { name: 'JACOBY', text: 'Aloha, agente Cooper. Il cocco non interrompe e non mente. Due qualità rare, nel mio studio.' },
+      { name: 'JACOBY', text: 'Laura mentiva bene. Non per gioco: cambiava risposta appena prendevo la penna.' },
+      { name: 'COOPER', text: 'Quale domanda le faceva guardare la penna, dottore?' },
+      { name: 'JACOBY', text: 'Quella resta tra medico e paziente. La penna no: appena la prendevo, Laura cambiava versione.' }
     ] },
 
     audrey: { pages: [
@@ -166,12 +313,12 @@
 
     tomba_laura: {
       pages: [
-        { name: '', text: 'Una lapide nuova. La terra è ancora smossa. "LAURA PALMER, 1972-1989".' },
-        { name: '', text: 'Qualcuno ha lasciato una rosa. Non c\'è biglietto.' },
-        { name: 'COOPER', text: 'Diciassette anni. Qui non prometto giustizia alla pietra; prometto attenzione a chi è rimasto.' }
+        { name: '', text: 'Una foto di Laura è fissata a un leggio della cappella. Sotto: "LAURA PALMER, 1972-1989".' },
+        { name: '', text: 'Qualcuno ha lasciato una rosa nel bicchiere dell\'acqua. Non c\'è biglietto.' },
+        { name: 'COOPER', text: 'Tre biglietti ricordano la torta, i pasti a domicilio e una risata al picnic. Trascrivo i nomi e lascio la rosa dov\'è.' }
       ],
       again: { pages: [
-        { name: 'COOPER', text: 'Riposa, Laura. Ci penso io.' }
+        { name: 'COOPER', text: 'La rosa è nel bicchiere. I tre biglietti sono registrati; non sposto altro.' }
       ] }
     },
 
@@ -182,7 +329,7 @@
         { name: 'TRUMAN', text: 'Agente Cooper? Benvenuto a Twin Peaks. Sono Harry Truman, lo sceriffo. La stavamo aspettando.' },
         { name: 'TRUMAN', text: 'Laura Palmer è stata trovata stamattina sulla riva del lago, avvolta nella plastica. Uccisa altrove.' },
         { name: 'TRUMAN', text: 'Tenga: il diario di Laura. Nel registro cifrato ricorrono un «lui» e il nome «ROBERT». Ci faccia buon uso, agente.' },
-        { name: 'COOPER', text: 'Harry, comincerò dal diario. Laura non può più rispondere; leggerò con cura le domande che ha lasciato.' }
+        { name: 'COOPER', text: 'Comincio dal diario, Harry. Quando trovo una domanda, torno da lei per i fatti.' }
       ],
       give: ['diario'],
       again: { pages: [
@@ -194,19 +341,20 @@
     lucy: { pages: [
       { name: 'LUCY', text: 'Agente Cooper! Tutte le chiamate dello sceriffo passano dal mio centralino. TUTTE. Anche quelle strane.' },
       { name: 'LUCY', text: 'Stamattina il telefono ha squillato tre volte, ma non rispondeva nessuno. Si sentiva solo... un respiro.' },
-      { name: 'COOPER', text: 'Lucy, tre chiamate mute fanno un comportamento, non un guasto. Mi dia gli orari esatti.' }
+      { name: 'COOPER', text: 'Mi scriva gli orari, Lucy. Un guasto non sceglie quando respirare.' }
     ] },
 
     andy: { pages: [
       { name: 'ANDY', text: 'Agente Cooper... mi scusi. Credevo di essere pronto.' },
       { name: 'ANDY', text: 'Laura aveva diciassette anni. Scriverlo nel rapporto non lo rende più sopportabile.' },
-      { name: 'COOPER', text: 'Andy, essere scossi non rende meno bravi poliziotti. A volte impedisce soltanto di diventare distratti.' }
+      { name: 'COOPER', text: 'Finisca il rapporto, Andy. Poi si prenda cinque minuti. In quest\'ordine.' }
     ] },
 
     hawk: { pages: [
       { name: 'HAWK', text: 'Nel bosco distingui un animale da qualcuno che vuole essere sentito.' },
       { name: 'HAWK', text: 'Stanotte non ho sentito animali. Solo passi che si fermavano quando mi fermavo io.' },
-      { name: 'COOPER', text: 'Hawk, quei passi copiavano la tua distanza. Cerchiamo dove hanno smesso di farlo.' }
+      { name: 'COOPER', text: 'Fammi vedere dove ti sei fermato. Da lì cerchiamo il passo in più.' },
+      { name: 'HAWK', text: 'Ti porto fino al punto. Da lì cammini davanti: voglio sentire se i passi scelgono te.' }
     ] },
 
     /* ---------------- casa Palmer ---------------- */
@@ -214,20 +362,23 @@
     sarah: { pages: [
       { name: 'SARAH', text: 'Era in fondo al corridoio. Capelli lunghi. Chino sul letto di Laura.' },
       { name: 'SARAH', text: 'Quando ho acceso la luce non c\'era nessuno. Ma il sorriso è rimasto.' },
-      { name: 'COOPER', text: 'Signora Palmer, prendo sul serio quel sorriso. Mi dica cosa illuminava la lampada, centimetro per centimetro.' }
+      { name: 'COOPER', text: 'Quando ha acceso la luce, cosa ha visto per primo: il letto, la finestra o la porta?' },
+      { name: 'SARAH', text: 'La porta. No, il letto. Vede? Se mi fa scegliere, una cosa cancella l\'altra.' }
     ] },
 
     leland: { pages: [
       { name: 'LELAND', text: 'La mia piccola Laura... la mia bambina...' },
       { name: 'LELAND', text: 'Sa cosa faccio, agente? Ballo. Da solo, in salotto. Ballare mi aiuta a non pensare.' },
-      { name: 'COOPER', text: 'Signor Palmer, non giudico la musica. Mi dica quando ha cominciato a usarla per tenere lontano il pensiero.' }
+      { name: 'COOPER', text: 'Che disco mette, signor Palmer, quando deve smettere di pensare?' },
+      { name: 'LELAND', text: 'Non importa quale. Prima chiudo le tende. Non voglio che Sarah mi veda così.' }
     ] },
 
     laura_room: {
       pages: [
         { name: 'COOPER', text: 'La stanza di Laura. Ordinata. Troppo ordinata. Cerco meglio...' },
         { name: 'COOPER', text: 'Sotto il cuscino: un ciondolo a forma di mezzo cuore. Qualcuno conserva l\'altra metà.' },
-        { name: 'COOPER', text: 'E il rapporto dell\'autopsia: sotto l\'unghia di Laura, un frammento di lettera. La lettera "R".' }
+        { name: '', text: 'La radio di Cooper gracchia. È Andy, dalla centrale.' },
+        { name: 'ANDY', text: 'Agente, il medico legale ha trovato carta sotto un\'unghia di Laura: un frammento della lettera R.' }
       ],
       give: ['cuore', 'lettera_r'],
       again: { pages: [
@@ -242,7 +393,7 @@
       { name: 'BEN HORNE', text: 'Il Great Northern è un luogo rispettabile, agente. Chieda pure in giro.' },
       { name: 'BEN HORNE', text: 'Se cercasse... intrattenimenti più vivaci, oltre confine c\'è un certo casinò. Ma non ho detto nulla.' },
       { name: 'BEN HORNE', text: 'Laura Palmer? Una ragazza perbene. Della sua vita notturna non so nulla. Nulla.' },
-      { name: 'COOPER', text: 'Signor Horne, ha detto «rispettabile» prima che glielo chiedessi. Vorrei verificare quella parola.' }
+      { name: 'COOPER', text: 'Non avevo ancora chiesto se l\'hotel fosse rispettabile, signor Horne. Adesso sì.' }
     ] },
 
     audrey_a2: { pages: [
@@ -250,7 +401,7 @@
       { name: 'AUDREY', text: 'Laura lavorava al banco profumi, qui in hotel. Nessuno lo sapeva, tranne mio padre.' },
       { name: 'AUDREY', text: 'C\'è dell\'altro, agente, ma mi serve tempo per scoprirlo senza farmi notare.' },
       { name: 'AUDREY', text: 'Indagherò io. So essere invisibile, agente.' },
-      { name: 'COOPER', text: 'Audrey, l\'invisibilità funziona finché nessuno decide di cercarla. Mi riferisca cosa trova, poi si fermi.' }
+      { name: 'COOPER', text: 'Audrey: un nome, un luogo, poi torna alla hall. Se salta l\'ultimo passaggio, chiamo suo padre.' }
     ], setFlag: 'audrey_indaga' },
 
     specchio315: { pages: [
@@ -279,7 +430,7 @@
         { name: 'GERARD', text: 'Salve, agente. Mi chiamo Gerard. Vendo scarpe, di porta in porta.' },
         { name: 'GERARD', text: 'Le scarpe raccontano molto di una persona, sa? Dove va, da dove viene.' },
         { name: 'GERARD', text: '...Attraverso l\'oscurità del futuro passato... il mago desidera vedere.' },
-        { name: 'GERARD', text: 'Un solo occasione tra questo mondo e l\'altro: FUOCO CAMMINA CON ME.' },
+        { name: 'GERARD', text: 'Una sola occasione tra questo mondo e l\'altro: FUOCO CAMMINA CON ME.' },
         { name: 'COOPER', text: 'Signor Gerard, la poesia resta parola sua finché non trova un fatto. La ripeta lentamente.' }
       ],
       give: ['poesia_fuoco']
@@ -294,15 +445,17 @@
     ] },
 
     shelly: { pages: [
-      { name: 'SHELLY', text: 'Bobby, il mio ragazzo... usciva con Laura. Di nascosto da tutti. Anche da me.' },
-      { name: 'SHELLY', text: 'Laura aveva dei segreti, agente. Segreti che facevano paura persino a lei.' },
-      { name: 'COOPER', text: 'Shelly, Bobby e i segreti di Laura arrivano nello stesso respiro. Torniamo a ciò che lui sapeva.' }
+      { name: 'SHELLY', text: 'Bobby veniva da me quando diceva di essere con Laura. E da Laura quando diceva di essere con me.' },
+      { name: 'SHELLY', text: 'Quando gli chiedevo di lei, controllava prima la porta. Poi diceva che non c\'era niente da sapere.' },
+      { name: 'COOPER', text: 'Cominci dalle prime parole che Bobby usava quando entrava.' },
+      { name: 'SHELLY', text: 'Prima mi dica se lo proteggete. Se torna qui dopo che parlo, la porta la controllo io.' }
     ] },
 
     loglady: { pages: [
       { name: 'LOG LADY', text: 'Il mio ceppo ha visto qualcosa, quella notte. Lui vede sempre tutto.' },
       { name: 'LOG LADY', text: 'Chieda al bosco. Gli alberi ricordano. Attenzione al fuoco che cammina con me.' },
-      { name: 'COOPER', text: 'Signora, un ceppo non può testimoniare. Lei sì. Mi dica cosa ha visto, senza tradurlo per me.' }
+      { name: 'COOPER', text: 'Dov\'era lei quando il ceppo ha visto, signora?' },
+      { name: 'LOG LADY', text: 'A casa. Il ceppo era sul tavolo. Non lo porto in centrale, se è questo che sta chiedendo.' }
     ] },
 
     james_a2: {
@@ -321,7 +474,7 @@
     olio: {
       pages: [
         { name: 'COOPER', text: 'Una pozza scura in mezzo al cerchio di sicomori. Olio di motore... bruciato.' },
-        { name: 'COOPER', text: 'Olio bruciato. Il «fuoco che cammina» ora ha almeno un odore; non ancora una spiegazione.' }
+        { name: 'COOPER', text: 'Olio bruciato. Prelevo un campione.' }
       ]
     },
 
@@ -355,6 +508,7 @@
       pages: [
         { name: 'OMBRA DI LAURA', text: 'Si avvicina piano, nel bagliore rosso. I suoi occhi non sono più gli stessi.' },
         { name: 'OMBRA DI LAURA', text: 'Sono io... eppure non sono io.' },
+        { name: '', text: 'Alle sue spalle appare un uomo dai capelli lunghi e grigi. Sorride. Laura non si volta.' },
         { name: '', text: '(Laura si avvicina e sussurra un nome all\'orecchio di Cooper...)' },
         { name: 'OMBRA DI LAURA', text: 'Ti rivedrò fra venticinque anni.' },
         { name: 'COOPER', text: 'Diane, ho udito un nome e già ne sento i contorni svanire. Registrarlo non basterà, ma ci provo.' }
@@ -369,19 +523,19 @@
     /* ponte Atto 1 -> Atto 2: il racconto del sogno */
     truman_a2: {
       pages: [
-        { name: 'COOPER', text: 'Harry, ho fatto un sogno. Una stanza rossa. Un ometto che parlava a ritroso.' },
-        { name: 'COOPER', text: 'Laura era lì. Mi ha sussurrato un nome... ma al risveglio l\'avevo già perso.' },
-        { name: 'TRUMAN', text: 'Un nome sussurrato che non ricorda... Agente, intanto la scientifica ha finito.' },
-        { name: 'TRUMAN', text: 'Ronette è all\'ospedale, in coma. E c\'è un testimone strano: un venditore di scarpe.' }
+        { name: 'COOPER', text: 'Harry, nel sogno c\'era una stanza rossa. Un uomo piccolo parlava come se le parole arrivassero al contrario.' },
+        { name: 'COOPER', text: 'Laura mi ha detto un nome. Al risveglio restava solo la certezza di averlo sentito.' },
+        { name: 'TRUMAN', text: 'Un nome che non abbiamo. Va bene. Le do qualcosa che abbiamo: la scientifica ha finito.' },
+        { name: 'TRUMAN', text: 'Ronette è in coma all\'ospedale. Un venditore di scarpe ha chiesto di lei.' }
       ]
     },
 
     truman_atto3: {
       pages: [
-        { name: 'COOPER', text: 'Harry, ascolti: un monco recita poesie sul fuoco, e James custodisce l\'altra metà del cuore di Laura.' },
-        { name: 'TRUMAN', text: 'Un venditore di scarpe che recita poesie in trance? Qui le cose non sono mai semplici.' },
-        { name: 'TRUMAN', text: 'One Eyed Jacks... e il vagone del treno. Domani si va oltre confine.' },
-        { name: 'COOPER', text: 'Diane, la lista dei sospetti cresce più in fretta di quanto io riesca a scriverla.' }
+        { name: 'COOPER', text: 'Harry, Gerard ha recitato una frase sul fuoco. James aveva l\'altra metà del ciondolo. Due fatti; il legame manca.' },
+        { name: 'TRUMAN', text: 'E il luogo?' },
+        { name: 'TRUMAN', text: 'One Eyed Jacks. Poi il vagone del treno. Domani passiamo il confine.' },
+        { name: 'COOPER', text: 'Diane, domani: al vagone partiamo dalla scena; al casinò, da chi mente.' }
       ],
       setFlag: 'atto3'
     },
@@ -458,7 +612,7 @@
         { name: 'AUDREY', text: 'Agente Cooper! Cosa ci fa qui? Shh, sto lavorando sotto copertura...' },
         { name: 'AUDREY', text: 'Ho trovato il registro del banco profumi. Collega il Great Northern a questo posto.' },
         { name: 'AUDREY', text: 'È emozionante, e terrificante insieme. Ma ho paura, agente. Davvero paura.' },
-        { name: 'COOPER', text: 'Vai a casa, Audrey. Subito. Questo non è un gioco, per te.' }
+        { name: 'COOPER', text: 'Mi dia il registro. Poi resti dietro di me fino alla porta. Per una volta, Audrey, essere vista è il piano.' }
       ],
       setFlag: 'audrey_salvata'
     },
@@ -468,7 +622,7 @@
       pages: [
         { name: 'LUCY', text: 'Agente Cooper! È appena arrivata una chiamata dall\'ospedale. È terribile.' },
         { name: 'LUCY', text: 'Jacques Renault... soffocato nel suo letto. Un cuscino. Nessun testimone.' },
-        { name: 'LUCY', text: 'Chi entra e esce da un ospedale senza farsi notare, agente? Chi?' },
+        { name: 'LUCY', text: 'Chi entra ed esce da un ospedale senza farsi notare, agente? Chi?' },
         { name: 'COOPER', text: 'Lucy, controlli ingressi, turni e registri. Chi non si fa notare lascia spesso che siano gli orari a notarlo.' }
       ],
       setFlag: 'jacques_morto'
@@ -497,10 +651,10 @@
     /* ponte Atto 3 -> Atto 4: il gigante, la morte di Jacques */
     truman_atto4: {
       pages: [
-        { name: 'COOPER', text: 'Harry, devo dirle una cosa che suonerà incredibile. Un gigante mi è apparso, allo specchio.' },
-        { name: 'TRUMAN', text: 'Un gigante? Agente, con lei succede sempre qualcosa di strano.' },
-        { name: 'COOPER', text: 'E c\'è dell\'altro: Jacques Renault è morto in ospedale. Soffocato, nel suo letto.' },
-        { name: 'TRUMAN', text: 'Qualcuno ha paura di ciò che Jacques sapeva. E ora... anche io.' }
+        { name: 'COOPER', text: 'Harry, nello specchio è apparso un uomo alto. Mi ha detto che sarebbe accaduto di nuovo.' },
+        { name: 'TRUMAN', text: 'Le credo. Non so cosa farne, ma le credo.' },
+        { name: 'COOPER', text: 'Facciamo qualcosa con questo: Jacques è stato soffocato nel suo letto d\'ospedale.' },
+        { name: 'TRUMAN', text: 'Allora qualcuno teme ciò che Jacques sapeva. Questo so dove metterlo.' }
       ],
       setFlag: 'atto4'
     },
@@ -531,7 +685,7 @@
         { name: 'SARAH', text: 'Il divano era vuoto. Poi c\'era un uomo accovacciato, come se aspettasse che lo guardassi.' },
         { name: 'SARAH', text: 'Capelli grigi. Lo stesso sorriso che vedo quando chiudo gli occhi.' },
         { name: 'SARAH', text: 'BOB. È il nome che mi viene. Non so da dove.' },
-        { name: 'COOPER', text: 'Signora Palmer, la descrizione coincide una seconda volta. Non è una prova; è una ragione per ascoltarla meglio.' }
+        { name: 'COOPER', text: 'Signora Palmer, descriva ancora il sorriso. Questa volta io scrivo e lei non deve difendersi.' }
       ],
       setFlag: 'sarah_visione_ascoltata'
     },
@@ -553,7 +707,8 @@
 
     leland_dopo: {
       pages: [
-        { name: 'LELAND', text: 'Anche lei, adesso... anche Maddy... *ride, poi piange, poi ride ancora*' },
+        { name: 'LELAND', text: 'Anche lei, adesso... anche Maddy...' },
+        { name: '', text: 'Leland ride. Il suono si spezza in pianto, poi torna risata.' },
         { name: 'COOPER', text: 'Signor Palmer, non giudico come suona il dolore. Devo capire perché cambia quando nominiamo Maddy.' }
       ]
     },
@@ -571,7 +726,7 @@
         { name: 'LOG LADY', text: 'Il mio ceppo ha ripreso a parlare, agente.' },
         { name: 'LOG LADY', text: 'Il mio ceppo dice: stanotte, al roadhouse. Le civette sono già lì.' },
         { name: 'LOG LADY', text: 'Vada, agente. Prima che la musica cominci.' },
-        { name: 'COOPER', text: 'Margaret, mi ha dato luogo e ora. Stasera il suo ceppo ha un ottimo senso della procedura.' }
+        { name: 'COOPER', text: 'Margaret, questo basta: luogo e ora. Ci sarò.' }
       ]
     },
 
@@ -581,7 +736,8 @@
       pages: [
         { name: '', text: 'La musica si interrompe. Il palco si illumina, vuoto... poi non più vuoto.' },
         { name: 'GIGANTE', text: 'Sta accadendo di nuovo.' },
-        { name: 'GIGANTE', text: 'Sta accadendo... DI NUOVO. Poi svanisce, in un lampo bianco.' },
+        { name: 'GIGANTE', text: 'Sta accadendo... DI NUOVO.' },
+        { name: '', text: 'Il Gigante svanisce in un lampo bianco.' },
         { name: 'COOPER', text: 'Diane. Casa Palmer. SUBITO.' }
       ],
       setFlag: 'gigante2'
@@ -618,31 +774,31 @@
     /* ponte Atto 4 -> Atto 5: il diario annuncia ROBERT, le lettere iniziano R-O, Ronette e' l'unica fonte di BOB */
     truman_atto5: {
       pages: [
-        { name: 'COOPER', text: 'Il diario nomina ROBERT e annuncia una firma a pezzi. Sotto le unghie: R, poi O. Ronette ha pronunciato BOB.' },
-        { name: 'TRUMAN', text: 'Due nomi, una sequenza. Bastano per porre la domanda; non per dichiarare che siano la stessa persona.' },
+        { name: 'COOPER', text: 'Nel diario, ROBERT. Sotto le unghie, R e O. Ronette dice BOB. Possono toccarsi; non posso ancora unirli.' },
+        { name: 'TRUMAN', text: 'Allora non li uniamo. Dove portano i fatti?' },
         { name: 'COOPER', text: 'Jacques morto. Ora Maddy. Il gigante lo aveva detto: "È successo di nuovo".' },
-        { name: 'TRUMAN', text: 'Chiunque sia, era a casa Palmer ieri notte.' },
-        { name: 'COOPER', text: 'Domani chiudo questo cerchio, Harry.' }
+        { name: 'TRUMAN', text: 'E Maddy era a casa Palmer.' },
+        { name: 'COOPER', text: 'Portiamo Leland qui. Gli faccio le domande prima che il cerchio scelga per noi.' }
       ],
       setFlag: 'atto5'
     },
 
     truman_wait5: { pages: [
       { name: 'TRUMAN', text: 'Quando è pronto, agente. Il distretto è con lei.' },
-      { name: 'COOPER', text: 'L\'anello era centrato e la polvere intatta. La Loggia lo richiama, forse; non so chi l\'abbia lasciato né perché.' }
+      { name: 'COOPER', text: 'Prima Leland, Harry. Poi il bosco. In quest\'ordine, finché i fatti reggono.' }
     ] },
 
     /* ---------------- Atto 5: la confessione, la Loggia ---------------- */
 
     leland_interr: {
       pages: [
-        { name: 'COOPER', text: 'Sala interrogatori. Leland Palmer siede immobile, le mani strette sul tavolo.' },
-        { name: 'COOPER', text: 'Nel diario: ROBERT e una firma a pezzi. Sotto le unghie: R, poi O. Ronette ha pronunciato BOB.' },
+        { name: '', text: 'Sala interrogatori. Leland Palmer siede immobile, le mani strette sul tavolo.' },
+        { name: 'COOPER', text: "Leland, guardi: R, O. Dov'era lei quando ha ucciso Laura Palmer e Maddy Ferguson?" },
         { name: '', text: 'Il volto di Leland si irrigidisce. Qualcosa, sotto la pelle, cambia forma.' },
         { name: 'BOB', text: '"Hai il tuo bavaglio, agente? Vuoi giocare... col FUOCO?"' },
         { name: '', text: 'Una risata si alza dal petto di Leland. Non è la sua. Non è di nessuno.' },
         { name: 'BOB', text: '"Mi piace questa stanza. Così tante ombre in cui nascondersi..."' },
-        { name: 'LELAND', text: 'Da quando avevo sei anni, agente. Quando LUI entra... io non ci sono.' },
+        { name: 'LELAND', text: 'Laura e Maddy le ho uccise io. BOB è dentro di me dall\'infanzia; il mio nome resta sul verbale.' },
         { name: 'COOPER', text: 'Diane... lo stesso volto che descriveva Sarah. Ora l\'ho visto io.' }
       ],
       setFlag: 'leland_confessa'
@@ -651,11 +807,11 @@
     leland_morte: {
       pages: [
         { name: '', text: 'La cella è fredda. Leland è seduto a terra, la schiena contro il muro.' },
-        { name: '', text: 'L\'impianto antincendio si apre. Piove, dentro.' },
+        { name: '', text: 'Leland si lancia contro la parete. Il tubo cede all\'urto; l\'acqua invade la cella.' },
         { name: 'LELAND', text: 'La vedo... Laura. È bellissima... mi... perdona?' },
-        { name: 'COOPER', text: 'Vada verso la luce, Leland.' },
-        { name: 'LELAND', text: '*Il respiro si spegne, piano, come una candela nel vento.*' },
-        { name: 'COOPER', text: 'Diane... è morto tra le mie braccia. Il caso... non è chiuso. Non ancora.' }
+        { name: '', text: 'Cooper non risponde. Tiene la foto di Laura davanti a sé.' },
+        { name: '', text: 'Il respiro di Leland si spezza. Poi non riprende.' },
+        { name: 'COOPER', text: "Diane. Ora del decesso, 2:30. Sigilliamo la cella; l'acqua resta parte della scena." }
       ],
       setFlag: 'leland_morto',
       again: { pages: [
@@ -667,7 +823,7 @@
     truman_fine: {
       pages: [
         { name: 'TRUMAN', text: 'BOB è ancora là fuori, vero?' },
-        { name: 'COOPER', text: 'Il bosco, Harry. Il cerchio si chiude dove si è aperto.' },
+        { name: 'COOPER', text: 'Non lo so. Ma il bosco ricorre in ogni racconto. Vado a Glastonbury Grove.' },
         { name: 'TRUMAN', text: 'Glastonbury Grove. Vada, agente. La aspetteremo qui.' }
       ]
     },
@@ -677,7 +833,7 @@
         { name: '???', text: 'È LUI che stai cercando?' },
         { name: '???', text: 'Quando mi vedrai di nuovo, non sarò io.' },
         { name: '???', text: 'Andiamo a rockeggiare!' },
-        { name: 'COOPER', text: 'La stanza ride di nuovo. Questa volta non devo capire tutto; devo ricordare cosa cambia.' }
+        { name: 'COOPER', text: 'Ripete il gesto del sogno. Nel taccuino scrivo soltanto: «Mi riconosce».' }
       ],
       setFlag: 'mfap_finale_visto'
     },
@@ -686,16 +842,16 @@
       { name: '', text: 'Il sorriso di BOB si allarga. Troppo. Rimane così, troppo a lungo.' },
       { name: 'BOB', text: 'Leland era solo un guanto. La mano... è ancora qui.' },
       { name: 'BOB', text: 'Ci rivedremo, agente. Noi ci rivediamo SEMPRE.' },
-      { name: 'COOPER', text: 'Una mano senza impronte è una vanteria, non una prova. Resta il guanto: Leland, i fatti, le parole registrate.' }
+      { name: 'COOPER', text: 'Diane. La firma sotto le ammissioni dice Leland Palmer.' }
     ] },
 
     laura_finale2: {
       pages: [
-        { name: 'OMBRA DI LAURA', text: 'Sono calma, adesso. Il fuoco non brucia più, qui dentro.' },
-        { name: 'OMBRA DI LAURA', text: 'Non chiedermi dove finiva mio padre e dove cominciava BOB. Separarli non cancella ciò che mi è stato fatto.' },
+        { name: '', text: 'Laura apre il taccuino. Copre BOB con una mano e indica la firma: Leland Palmer.' },
+        { name: 'OMBRA DI LAURA', text: 'Non cancellare quel nome.' },
         { name: 'OMBRA DI LAURA', text: 'Ti rivedrò fra venticinque anni. Nel frattempo...' },
         { name: '', text: '(Laura sorride. Le tende si muovono senza vento.)' },
-        { name: 'COOPER', text: 'Diane... il caso Palmer è chiuso. Ma Twin Peaks non chiude mai.' }
+        { name: 'COOPER', text: 'Diane. Le ammissioni di Leland sono agli atti. Il resto rimane aperto.' }
       ],
       end: true
     }
@@ -721,6 +877,8 @@
     // rischia di girare a vuoto tra Truman e Great Northern senza raggiungere
     // mai i 6 indizi che sbloccano l'Atto 3.
     { cond: 'flag:sogno_fatto', text: 'Parla con Ronette in ospedale e James al diner.' },
+    { cond: 'clues3', text: 'Segui il sentiero nel bosco.' },
+    { cond: 'clues1', text: 'Casa Palmer: esamina la camera di Laura.' },
     { cond: null, text: 'Parla con lo sceriffo Truman (a ovest).' }
   ];
 

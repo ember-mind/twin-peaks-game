@@ -91,7 +91,7 @@ ok(!!cemeteryCooper, 'cimitero contiene battuta Cooper');
 ok(/Laura Palmer/i.test(cemeteryCooper.text), 'cimitero nomina Laura, non un corpo anonimo');
 ok(/lapide|date/i.test(cemeteryCooper.text), 'battuta resta specifica al cimitero');
 ok(/diciassette|vita|persona/i.test(cemeteryCooper.text), 'battuta conserva età e umanità di Laura');
-ok(/fascicolo/i.test(cemeteryCooper.text) && /non ridurre/i.test(cemeteryCooper.text), 'metodo di Cooper rifiuta riduzione investigativa');
+ok(/fascicolo/i.test(cemeteryCooper.text) && /non ridurr(?:e|ò)/i.test(cemeteryCooper.text), 'metodo di Cooper rifiuta riduzione investigativa');
 ok(!DEHUMANIZING_REMAINS.test(cemeteryCooper.text) && !HARD_BOILED.test(cemeteryCooper.text), 'cimitero supera guardia tono/grounding');
 
 console.log('# anello: osservazione e inferenza separate');

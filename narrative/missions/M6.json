@@ -242,31 +242,31 @@
         {
           "id": "m6.b1.ferry.p01",
           "mode": "action",
-          "text": "(Il traghetto non chiede documenti. È il suo mestiere, non chiederne.)"
+          "text": "(Il traghetto attraversa senza registro.)"
         },
         {
           "id": "m6.b1.ferry.p02",
           "mode": "action",
-          "text": "(Dentro: tavoli veri, fumo vero. Nessuno alza lo sguardo — alzarlo costa.)"
+          "text": "(Dentro, nessuno guarda Cooper.)"
         },
         {
           "id": "m6.b1.ferry.p03",
           "mode": "action",
-          "text": "(Un uomo grosso tiene il banco a un tavolo di carte. Ride poco, conta molto.)"
+          "text": "(Jacques controlla la passerella prima del mazzo.)"
         },
         {
           "id": "m6.b1.ferry.p04",
           "mode": "dialogue",
         "speaker_id": "hawk",
         "display_name": "HAWK",
-        "text": "(fuori, piano) Di là dal fiume comanda il fiume. Io resto all'uscita: è l'unica."
+        "text": "(fuori, piano) Io resto qui. Se chiudono il molo, restiamo dentro."
       },
       {
         "id": "m6.b1.ferry.p05",
         "mode": "dialogue",
         "speaker_id": "cooper",
         "display_name": "COOPER",
-        "text": "Un solo varco d'uscita e molti occhi abbassati. Hawk terrà il primo; io conterò i secondi."
+        "text": "Tieni libera la passerella. Io vado al tavolo."
         }
       ],
       "effects": [],
@@ -333,6 +333,7 @@
       "id": "m6_tactic",
       "beat": "B4",
       "source_section": "M6-B4",
+      "prompt": "Quale metodo usi con Jacques?",
       "conditions": [
         {
           "node_done": "m6_ferry"
@@ -351,15 +352,15 @@
         },
         {
         "id": "m6.b4.tactic.p02",
-        "mode": "notebook",
-        "text": "Come ti siedi davanti a Jacques?"
+        "mode": "action",
+        "text": "(Jacques spinge il mazzo al centro del tavolo.)"
       },
       {
         "id": "m6.b4.tactic.p03",
         "mode": "dialogue",
         "speaker_id": "cooper",
         "display_name": "COOPER",
-        "text": "Jacques conta le carte, non le uscite. Scelgo il metodo prima di scegliere la prima domanda."
+        "text": "Jacques. Prima di cominciare, il mazzo resta sul tavolo."
         }
       ],
       "choices": [
@@ -643,7 +644,7 @@
         {
           "notebook": {
             "id": "m6.note.pressione.list",
-            "text": "Quattro figure. Su una — \"quello dei fiammiferi\" — la voce è calata. La lista è buttata lì per annegarmi; ma una voce non si governa."
+            "text": "Possibile copertura: quattro figure. Sui fiammiferi la voce cala; le mani si fermano."
           }
         },
         {
@@ -788,6 +789,7 @@
       "id": "m6_p5",
       "beat": "B6b",
       "source_section": "M6-B6b",
+      "prompt": "Che cosa puoi sostenere?",
       "milestone": "milestone_p5",
       "conditions": [
         {
@@ -798,7 +800,7 @@
         {
           "id": "m6.b6b.p5.p01",
           "mode": "notebook",
-          "text": "Che cosa puoi sostenere, adesso?"
+          "text": "Ammissione registrata: Jacques era al vagone."
         }
       ],
       "choices": [
@@ -1054,7 +1056,7 @@
           "mode": "dialogue",
           "speaker_id": "lucy",
           "display_name": "LUCY",
-          "text": "Chi entra e esce da un ospedale senza farsi notare, agente? Chi?"
+          "text": "Chi entra ed esce da un ospedale senza farsi notare, agente? Chi?"
         }
       ],
       "pages_by_value": {
@@ -1075,7 +1077,7 @@
               "mode": "dialogue",
               "speaker_id": "cooper",
               "display_name": "COOPER",
-              "text": "Mi ha lasciato quattro figure e una voce che cala. L'unico che poteva dirmi su quale, è appena uscito dalla lista."
+              "text": "Quattro nomi sul suo elenco, Harry. Sui fiammiferi ha abbassato la voce. Ora non posso chiedergli perché."
             }
           ],
           "falsa_sicurezza": [
@@ -1149,14 +1151,14 @@
           "mode": "dialogue",
           "speaker_id": "truman",
           "display_name": "TRUMAN",
-          "text": "Un gigante? Agente, con lei succede sempre qualcosa di strano."
+          "text": "Un gigante non so dove metterlo. Jacques sì: qualcuno ha superato un piantone."
         },
         {
           "id": "m6.b9.atto4.p03",
           "mode": "dialogue",
           "speaker_id": "cooper",
           "display_name": "COOPER",
-          "text": "Il Gigante mi è apparso poco dopo la notizia su Jacques. Non so se i due fatti siano collegati."
+          "text": "Cominciamo dal piantone. Sul Gigante non scrivo ancora nulla."
         },
         {
           "id": "m6.b9.atto4.p04",

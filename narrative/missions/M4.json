@@ -175,6 +175,7 @@
       "new": true,
       "beat": "B2",
       "source_section": "B2",
+      "prompt": "Dieci minuti. Da cosa inizi?",
       "conditions": [
         {
           "flag": "sogno_raccontato"
@@ -207,17 +208,17 @@
       "choices": [
         {
           "id": "q_luogo",
-          "label": "Del posto dove l'hanno trovata",
+          "label": "Indicale la porta: ricorda il luogo?",
           "goto": "ronette_luogo"
         },
         {
           "id": "q_uomo",
-          "label": "Dell'uomo che era con lei",
+          "label": "Nomina l'uomo: termina la visita.",
           "goto": "ronette_uomo"
         },
         {
           "id": "q_laura",
-          "label": "Di Laura",
+          "label": "Mostrale la foto di Laura.",
           "goto": "ronette_laura"
         }
       ],
@@ -264,12 +265,10 @@
       "source_section": "B2-luogo",
       "pages": [
         {
-          "name": "COOPER",
-          "text": "Signorina Pulaski. Ricorda il posto dove l'hanno trovata?",
+          "name": "",
+          "text": "Cooper indica la porta senza avvicinarsi al letto.",
           "id": "m4.b2.ronette_luogo.p01",
-          "mode": "dialogue",
-          "speaker_id": "cooper",
-          "display_name": "COOPER"
+          "mode": "action"
         },
         {
           "name": "",
@@ -279,7 +278,7 @@
         },
         {
           "name": "COOPER",
-          "text": "(piano) Va bene.",
+          "text": "Va bene. Restiamo qui.",
           "id": "m4.b2.ronette_luogo.p03",
           "mode": "dialogue",
           "speaker_id": "cooper",
@@ -306,12 +305,10 @@
       "source_section": "B2-laura",
       "pages": [
         {
-          "name": "COOPER",
-          "text": "Laura era con lei, quella notte.",
+          "name": "",
+          "text": "Cooper posa la foto di Laura sul comodino, rivolta verso Ronette.",
           "id": "m4.b2.ronette_laura.p01",
-          "mode": "dialogue",
-          "speaker_id": "cooper",
-          "display_name": "COOPER"
+          "mode": "action"
         },
         {
           "name": "",
@@ -713,6 +710,7 @@
       "new": true,
       "beat": "B8",
       "source_section": "B8",
+      "prompt": "Che cosa dimostra il confronto?",
       "conditions": [
         {
           "evidence": "E6A_CUORE_INTERO"
@@ -730,14 +728,14 @@
         },
         {
           "name": "TACCUINO",
-          "text": "Un confronto accosta due voci. Sta a te dire che cosa una aggiunge all'altra.",
+          "text": "Un confronto accosta due voci; il taccuino conserva entrambe senza fonderle.",
           "first_time_only": true,
           "id": "m4.b8.cmp_e6a_tjames.p02",
           "mode": "notebook"
         },
         {
           "name": "TACCUINO",
-          "text": "Che cosa aggiunge il pendaglio alla testimonianza di James?",
+          "text": "Nel taccuino, il pendaglio ricomposto è affiancato alla rotta indicata da James.",
           "id": "m4.b8.cmp_e6a_tjames.p03",
           "mode": "notebook"
         }

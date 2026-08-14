@@ -131,7 +131,9 @@
   function thresholdPages() {
     return [
       page('nf.m10.threshold.01', '', 'Prima della porta. Il corridoio nord è vuoto.'),
-      page('nf.m10.threshold.02', 'COOPER', 'Diane. Ipotesi da non verbalizzare: chi ha disposto la scena voleva essere letto.')
+      carryValue('s1') === 'documented_custody'
+        ? page('nf.m10.threshold.02', 'COOPER', 'Diane. Busta firmata nella tasca interna. L\'anello entra con me.')
+        : page('nf.m10.threshold.02', 'COOPER', 'Diane. Anello in cassaforte. Può toccarlo solo chi firma il registro delle prove.')
     ];
   }
 
@@ -254,7 +256,7 @@
 
   function postS3Pages() {
     return [
-      page('nf.m10.posts3.01', 'LELAND', 'Avevo dodici anni. Nella casa bianca dei nonni, un uomo chiedeva di giocare.'),
+      page('nf.m10.posts3.01', 'LELAND', 'Da bambino, nella casa bianca dei nonni, un uomo chiedeva di giocare.'),
       page('nf.m10.posts3.02', 'LELAND', 'Diceva: ho un nome da persona perbene, piccolo. Come il tuo.'),
       page('nf.m10.posts3.03', 'VOCE', 'I pezzi del nome sono nostri. Li abbiamo lasciati perché qualcuno contasse.'),
       page('nf.m10.posts3.04', 'LELAND', 'Quando dormo, lui non dorme. Il resto non so più di chi sia.'),
@@ -270,14 +272,14 @@
         page('nf.m10.s3.off.02', 'TRUMAN', 'Da qui in poi porto io il resto. Se servirà, lo giuro a voce.')
       ];
     }
-    return [page('nf.m10.s3.on', '', 'La spia resta accesa. I fatti sono sul nastro; cambia solo chi porta il resto.')];
+    return [page('nf.m10.s3.on', '', 'La spia resta accesa. Truman sposta il registratore più vicino a Leland.')];
   }
 
   function victimsPages() {
     return [
-      page('nf.m10.victims.01', 'COOPER', 'Maddy aveva scelto la corriera delle 7:40.'),
-      page('nf.m10.victims.01b', 'COOPER', 'Laura aveva affidato a un diario ciò che temeva.'),
-      page('nf.m10.victims.02', 'COOPER', 'Le loro azioni restano nel fascicolo. Il perdono non è materia nostra.'),
+      page('nf.m10.victims.01', '', 'Cooper posa sul tavolo due fotografie: Laura a sinistra, Maddy a destra.'),
+      page('nf.m10.victims.01b', '', 'Truman gira le foto verso Leland. Il verbale resta aperto sulla sua firma.'),
+      page('nf.m10.victims.02', '', 'Leland abbassa gli occhi. La firma resta davanti a lui.'),
       page('nf.m10.victims.03', 'TRUMAN', 'Da questo momento sei in stato di fermo, Leland. Per i fatti che hai ammesso.'),
       page('nf.m10.victims.04', '', 'Truman apre la cella. La porta si vede per intero; la serratura fa il suo suono.')
     ];
@@ -285,14 +287,16 @@
 
   function deathPages() {
     return [
-      page('nf.m10.death.01', '', 'Il grido arriva dal corridoio. Truman apre la cella in un secondo.'),
-      page('nf.m10.death.02', '', 'Due dita sul collo. Conta. Poi smette di contare.'),
+      page('nf.m10.death.01', '', 'Dalla cella arriva un urto. Il tubo cede; l\'acqua corre nel corridoio.'),
+      page('nf.m10.death.02', '', 'Truman apre. Leland è a terra sotto il tubo spezzato.'),
+      page('nf.m10.death.02b', 'LELAND', 'Laura... mi perdona?'),
+      page('nf.m10.death.02c', '', 'Cooper gli tiene davanti la foto di Laura. Non risponde.'),
       page('nf.m10.death.03', 'TRUMAN', 'Lucy: il dottore. E Andy alla porta.'),
-      page('nf.m10.death.04', '', 'Dottore, firme, barella. Poi restano la stanza e il radiatore.'),
-      page('nf.m10.death.05', 'COOPER', 'So cosa ha fatto. Non so dove finisse la sua volontà.'),
-      page('nf.m10.death.05b', 'COOPER', 'Una cosa non cancella l\'altra.'),
+      page('nf.m10.death.04', '', 'Il medico cerca il polso, poi scuote la testa. Truman scrive 2:30 sul modulo.'),
+      page('nf.m10.death.05', '', 'Cooper rimette la foto nel fascicolo e lascia il verbale aperto sulla firma di Leland.'),
+      page('nf.m10.death.05b', '', 'Sul modulo della causa, Cooper lascia una riga vuota.'),
       page('nf.m10.death.06', 'TRUMAN', 'La contea lo chiamerà chiuso.'),
-      page('nf.m10.death.07', 'COOPER', 'Non lo è. C\'è un posto che non è in nessun fascicolo.')
+      page('nf.m10.death.07', 'COOPER', 'Io vado a Glastonbury Grove.')
     ];
   }
 
@@ -300,21 +304,21 @@
     var method = carryValue('m10_method'), pages = [
       page('nf.lodge.nano.open.01', '', 'Il Nano balla piano, poi si ferma. Parla al contrario; si capisce lo stesso.'),
       page('nf.lodge.nano.open.02', '???', 'È LUI che stai cercando?'),
-      page('nf.lodge.nano.cooper', 'COOPER', 'Mi hai chiesto chi cerco. Prima dimmi che cosa cambia quando cambia il metodo.')
+      page('nf.lodge.nano.cooper', 'COOPER', 'Parto da Leland: ha confessato. Ora cerco BOB.')
     ];
     if (method === 'personale') {
       pages.push(page('nf.lodge.method.personal.01', '???', 'Hai chiamato Laura, Maddy e Leland per nome.'));
-      pages.push(page('nf.lodge.method.personal.02', '???', 'I nomi pesano. Qui ne manca uno che nessuno pronuncia.'));
-      pages.push(page('nf.lodge.method.personal.03', '???', 'Hai pagato coi nomi. Si paga sempre coi nomi, da voi.'));
+      pages.push(page('nf.lodge.method.personal.02', '???', 'BOB è il nome che manca al verbale.'));
+      pages.push(page('nf.lodge.method.personal.03', '???', 'Non lasciare che quel nome cancelli gli altri tre.'));
     } else if (method === 'intuitivo') {
       pages.push(page('nf.lodge.method.intuitive.01', '', 'Cooper apre la bocca. Il Nano risponde prima della domanda.'));
       pages.push(page('nf.lodge.method.intuitive.02', '???', 'Tu ascolti già così.'));
       pages.push(page('nf.lodge.method.intuitive.03', '???', 'Quando mi vedrai di nuovo, non sarò io.'));
       pages.push(page('nf.lodge.method.intuitive.04', '???', 'Non chiedere come è entrato. Chiedi da quanto ascoltava.'));
     } else {
-      pages.push(page('nf.lodge.method.probatory.01', '???', 'Hai contato bene. Le date. Le corse mai fatte. Le lettere: due.'));
-      pages.push(page('nf.lodge.method.probatory.02', '???', 'L\'elenco è giusto. Che cosa conta, quando conta fino in fondo?'));
-      pages.push(page('nf.lodge.method.probatory.03', '???', 'C\'è una riga che il tuo foglio non ha. Non te la dico: non è mia.'));
+      pages.push(page('nf.lodge.method.probatory.01', '???', 'Hai seguito una corsa mai prenotata.'));
+      pages.push(page('nf.lodge.method.probatory.02', '???', 'Hai seguito il biglietto fino alla terra.'));
+      pages.push(page('nf.lodge.method.probatory.03', '???', 'Il biglietto porta a Leland. BOB non compare in nessun documento.'));
     }
     pages.push(position === 'first'
       ? page('nf.lodge.nano.position.first', '???', 'Vai pure di là. Adesso hai un modo per guardarlo.')
@@ -323,7 +327,7 @@
       pages.push(page('nf.lodge.ring.documented', '', 'L\'anello è nella tasca di Cooper. Il modulo firmato dice come ci è arrivato.'));
     } else {
       pages.push(page('nf.lodge.ring.institutional.01', '', 'Il Nano apre la mano. Vuota.'));
-      pages.push(page('nf.lodge.ring.institutional.02', '???', 'L\'hai lasciato dove tutti potevano trovarlo. E nessuno sapeva che cosa cercare.'));
+      pages.push(page('nf.lodge.ring.institutional.02', '???', 'L\'anello è in cassaforte. Là può toccarlo solo chi firma il registro.'));
     }
     return pages;
   }
@@ -337,7 +341,7 @@
     pages.push(page('nf.lodge.bob.record.02', '', 'Due righe restano cerchiate: «L\'ho uccisa io.»'));
     pages.push(page('nf.lodge.bob.record.03', '', '«Ho mentito io.»'));
     pages.push(page('nf.lodge.bob.02', 'BOB', 'Leland era solo un guanto. La mano... è ancora qui.'));
-    pages.push(page('nf.lodge.bob.cooper', 'COOPER', 'Un guanto conserva forma e tracce. Una mano non cancella nessuna delle due.'));
+    pages.push(page('nf.lodge.bob.cooper', 'COOPER', 'La firma sotto queste ammissioni dice Leland Palmer.'));
     if (carryValue('s3') === 'on') {
       pages.push(page('nf.lodge.s3.on.01', 'BOB', '«Quando dormo, lui non dorme.» L\'avete inciso.'));
       pages.push(page('nf.lodge.s3.on.02', 'BOB', 'Io non dimentico ciò che viene inciso.'));
@@ -357,8 +361,8 @@
       pages.push(page('nf.lodge.bob.response.a.04', 'BOB', 'Un guanto che parla. Tienitelo, il tuo verbale.'));
     } else if (stance === 'B') {
       pages.push(page('nf.lodge.bob.response.b.01', '', 'Cooper apre il taccuino sulle ammissioni. Non parla.'));
-      pages.push(page('nf.lodge.bob.response.b.02', '', 'BOB guarda i fogli. Guardarli gli costa.'));
-      pages.push(page('nf.lodge.bob.response.b.03', 'BOB', 'I fogli non mi piacciono.'));
+      pages.push(page('nf.lodge.bob.response.b.02', '', 'BOB allunga una mano verso le pagine. Si ferma sul nome di Laura.'));
+      pages.push(page('nf.lodge.bob.response.b.03', 'BOB', 'Chiudilo.'));
     } else {
       pages.push(page('nf.lodge.bob.response.c.01', 'COOPER', '«Il resto non so più di chi sia.» Parole sue.'));
       pages.push(page('nf.lodge.bob.response.c.02', 'COOPER', 'Ma Laura e Maddy le ha nominate lui.'));
@@ -369,28 +373,32 @@
   }
 
   function ringFeedbackPages() {
+    if (carryValue('s1') !== 'documented_custody') {
+      return [
+        page('nf.lodge.ring.feedback.institutional.01', '', 'Le mani del Nano restano sulle ginocchia. La cassaforte non si apre.'),
+        page('nf.lodge.ring.feedback.institutional.02', '???', 'Senza una firma, nessuno lo tocca.')
+      ];
+    }
     if (carryValue('ring_final_gesture') === 'left') {
       return [
         page('nf.lodge.ring.feedback.left.01', '', 'Cooper posa la busta sul tavolino. L\'anello scivola fuori e resta lì.'),
-        page('nf.lodge.ring.feedback.left.02', '???', 'Adesso sai dove lo hai lasciato. Non dire che è perduto.')
+        page('nf.lodge.ring.feedback.left.02', '', 'Il Nano ritira la mano senza toccarlo.')
       ];
     }
     return [
       page('nf.lodge.ring.feedback.kept.01', '', 'Cooper mostra l\'anello, lo risigilla e ripone la busta nella tasca interna.'),
-      page('nf.lodge.ring.feedback.kept.02', '???', 'Lo riporti indietro. Ma non torna uguale.')
+      page('nf.lodge.ring.feedback.kept.02', '', 'Il Nano tende la mano. Cooper abbottona la tasca.')
     ];
   }
 
   function lauraPages() {
     return [
       page('nf.lodge.laura.01', '', 'Laura è dove era nel sogno. Ma stavolta nessuno dorme.'),
-      page('nf.lodge.laura.cooper', 'COOPER', 'Laura. Non ti chiederò di rendere semplice ciò che ti è accaduto.'),
-      page('nf.lodge.laura.02', 'OMBRA DI LAURA', 'Sono calma, adesso. Il fuoco non brucia più, qui dentro.'),
-      page('nf.lodge.laura.record.01', '', 'Fra loro, il verbale resta aperto sulle ammissioni di Leland.'),
-      page('nf.lodge.laura.record.02', '', 'La Loggia non cancella una riga.'),
-      page('nf.lodge.laura.03', 'OMBRA DI LAURA', 'Non chiedermi dove finiva mio padre e dove cominciava BOB.'),
-      page('nf.lodge.laura.03b', 'OMBRA DI LAURA', 'Separarli non cancella ciò che mi è stato fatto.'),
-      page('nf.lodge.laura.03c', 'OMBRA DI LAURA', 'La parte che spetta a ciascuno non la posso misurare per te.'),
+      page('nf.lodge.laura.cooper', 'COOPER', 'Laura.'),
+      page('nf.lodge.laura.02', '', 'Laura apre il verbale sulle ammissioni.'),
+      page('nf.lodge.laura.record.01', '', 'Copre BOB con una mano e indica la firma: Leland Palmer.'),
+      page('nf.lodge.laura.record.02', '', 'Cooper sottolinea la firma una volta sola.'),
+      page('nf.lodge.laura.03', 'OMBRA DI LAURA', 'Lascia aperta questa pagina.'),
       page('nf.lodge.laura.order', '', carryValue('encounter_order') === 'nano_first' ? 'Laura guarda il taccuino chiuso, poi Cooper.' : 'Laura guarda Cooper. Il taccuino rimane chiuso.'),
       page('nf.lodge.laura.04', 'OMBRA DI LAURA', 'Ti rivedrò fra venticinque anni. Nel frattempo...'),
       page('nf.lodge.laura.05', '', 'Laura sorride. Le tende si muovono senza vento. L\'ultima immagine della Loggia è sua.')
@@ -433,8 +441,8 @@
       pages.push(page('nf.epilogue.ring.left.01', 'TRUMAN', 'C\'è la firma. Non c\'è l\'oggetto.'));
       pages.push(page('nf.epilogue.ring.left.02', 'COOPER', 'Lo so. È mio, questo peso.'));
     }
-    pages.push(page('nf.epilogue.station.02', 'LUCY', 'No, signora. Il cane era sotto il portico. Come sempre.'));
-    pages.push(page('nf.epilogue.station.03', '', 'Fuori, il volantino delle scomparse non c\'è più. Restano i buchi delle puntine.'));
+    pages.push(page('nf.epilogue.station.02', 'LUCY', 'Centrale dello sceriffo. Sì, signora, la ascolto.'));
+    pages.push(page('nf.epilogue.station.03', '', 'Sul bancone, la nota della Twin Peaks Taxi resta agganciata al verbale firmato.'));
     pages.push(page('nf.epilogue.station.04', '', 'Alla fermata, il tabellone indica Missoula. La 7:40 parte in orario.'));
     return pages;
   }
@@ -468,20 +476,20 @@
 
   function exitPages() {
     var reading = carryValue('s4_interpretation'), last;
-    if (reading === 'istruzione') last = 'Non è una prova. Come istruzione: forse qualcosa lo tiene lontano.';
-    else if (reading === 'diagnosi') last = 'Non è una prova. La leggo come diagnosi tardiva: forse parlava di Leland.';
-    else last = 'Non è una prova. La porto fuori come avvertimento: potrebbe tornare.';
+    if (reading === 'istruzione') last = 'Cooper annota per il medico: «Quali sostanze mancavano?»';
+    else if (reading === 'diagnosi') last = 'Cooper allega la frase al fascicolo di Leland, sotto «ipotesi».';
+    else last = 'Cooper chiama Hawk: il bosco resta sotto sorveglianza.';
     return [
       page('nf.epilogue.exit.01', '', 'La strada verso sud. Il cartello: BENVENUTI A TWIN PEAKS.'),
-      page('nf.epilogue.exit.02', 'COOPER', 'Diane. Il caso Palmer è chiuso. Ma Twin Peaks non chiude mai.'),
-      page('nf.epilogue.exit.s4.' + reading, 'COOPER', last),
+      page('nf.epilogue.exit.02', 'COOPER', 'Diane. Le ammissioni di Leland sono agli atti. Il resto rimane aperto.'),
+      page('nf.epilogue.exit.s4.' + reading, '', last),
       page('nf.epilogue.exit.03', '', 'Cooper esce dall\'inquadratura. La camera resta sul paese nell\'alba.')
     ];
   }
 
   function s3ThresholdPages() {
     return [
-      page('nf.m10.s3.threshold.01', 'LELAND', 'Prima che continui: il nastro resta acceso?'),
+      page('nf.m10.s3.threshold.01', 'LELAND', 'Prima che continui: da qui in poi non so più di chi sia la voce.'),
       page('nf.m10.s3.threshold.02', 'TRUMAN', 'Gli omicidi, il vagone, il taxi e le lettere sono già registrati.'),
       page('nf.m10.s3.threshold.03', 'TRUMAN', 'Da qui in poi scegliamo soltanto chi porta il resto.')
     ];
@@ -545,10 +553,10 @@
       ] };
     }
     if (stage === 's4_choice') {
-      return { kind: 'choice', id: 's4_interpretation', prompt: 'Come annoti la frase?', choices: [
-        { id: 'avvertimento', label: 'Avvertimento.' },
-        { id: 'istruzione', label: 'Istruzione.' },
-        { id: 'diagnosi', label: 'Diagnosi.' }
+      return { kind: 'choice', id: 's4_interpretation', prompt: 'Che cosa fai della frase del Gigante?', choices: [
+        { id: 'avvertimento', label: 'Avverti Hawk: sorvegliare il bosco.' },
+        { id: 'istruzione', label: 'Chiedi al medico quali sostanze mancavano.' },
+        { id: 'diagnosi', label: 'Allegala al fascicolo, come ipotesi.' }
       ] };
     }
     var pages = pagesFor(stage);
@@ -729,7 +737,7 @@
     else if (stage === 'm10_surface') run.state.stage = 'm10_admissions';
     else if (stage === 'm10_admissions') { recordAdmissions(); run.state.stage = 's3_threshold'; }
     else if (stage === 's3_threshold') run.state.stage = 's3_choice';
-    else if (stage === 's3_feedback') run.state.stage = 'post_s3';
+    else if (stage === 's3_feedback') return pauseAt('await_post_s3');
     else if (stage === 'post_s3') run.state.stage = 'victims';
     else if (stage === 'victims') run.state.stage = 'death';
     else if (stage === 'death') { setFlag('leland_morto'); return pauseAt('await_lodge'); }
@@ -882,13 +890,13 @@
     epilogue_exit: 1
   };
   var PAUSED_STAGES = {
-    await_lodge: 1, await_lodge_second: 1, await_laura: 1,
+    await_post_s3: 1, await_lodge: 1, await_lodge_second: 1, await_laura: 1,
     await_lodge_exit: 1, await_epilogue_station: 1, await_epilogue_exit: 1
   };
   var CHOICE_STAGES = { method_choice: 1, s3_choice: 1, ring_choice: 1, bob_choice: 1, s4_choice: 1 };
   var METHOD_REQUIRED = {
     m10_open: 1, m10_questions: 1, m10_surface: 1, m10_admissions: 1,
-    s3_threshold: 1, s3_choice: 1, s3_feedback: 1, post_s3: 1, victims: 1,
+    s3_threshold: 1, s3_choice: 1, s3_feedback: 1, await_post_s3: 1, post_s3: 1, victims: 1,
     death: 1, await_lodge: 1, await_lodge_second: 1, await_laura: 1,
     await_lodge_exit: 1, lodge_nano: 1, ring_choice: 1, ring_feedback: 1, lodge_bob: 1,
     bob_choice: 1, bob_reaction: 1, lodge_laura: 1, lodge_blocked: 1,
@@ -898,7 +906,7 @@
     epilogue_exit: 1, complete: 1
   };
   var S3_REQUIRED = {
-    s3_feedback: 1, post_s3: 1, victims: 1, death: 1, await_lodge: 1,
+    s3_feedback: 1, await_post_s3: 1, post_s3: 1, victims: 1, death: 1, await_lodge: 1,
     await_lodge_second: 1, await_laura: 1, await_lodge_exit: 1, lodge_nano: 1,
     ring_choice: 1, ring_feedback: 1, lodge_bob: 1, bob_choice: 1, bob_reaction: 1,
     lodge_laura: 1, lodge_blocked: 1, woods: 1, s4_choice: 1,
@@ -979,7 +987,7 @@
       seen[state.encounters[i]] = true;
     }
     if (state.encounters.length > 2) return false;
-    if (state.stage === 'await_lodge' && state.encounters.length !== 0) return false;
+    if ((state.stage === 'await_post_s3' || state.stage === 'await_lodge') && state.encounters.length !== 0) return false;
     if (state.stage === 'await_lodge_second' && state.encounters.length !== 1) return false;
     if ((state.stage === 'await_laura' || state.stage === 'lodge_laura' || state.stage === 'await_lodge_exit') &&
         (state.encounters.length !== 2 || !state.flags.mfap_finale_visto)) return false;
@@ -1045,6 +1053,7 @@
     return resume(run.state.stage, 'lodge_' + kind, opts);
   }
   NF.beginLodge = function (actorId, opts) { return transaction(function () { return beginLodge(actorId, opts); }); };
+  NF.resumePostS3 = function (opts) { return transaction(function () { return resume('await_post_s3', 'post_s3', opts); }); };
   function resumeLaura(opts) {
     if (!run || run.state.encounters.length !== 2 || !run.state.flags.mfap_finale_visto) return { ok: false, error: 'laura_before_required_encounters' };
     return resume('await_laura', 'lodge_laura', opts);
@@ -1083,6 +1092,7 @@
   NF.isPending = function () { return !!(run && run.state.stage !== 'complete'); };
   NF.objective = function () {
     if (!run || run.state.stage === 'complete') return '';
+    if (run.state.stage === 'await_post_s3') return 'Torna da Leland per chiudere il verbale.';
     if (run.state.stage === 'await_lodge') return 'Nella Loggia: scegli chi affrontare per primo.';
     if (run.state.stage === 'await_lodge_second') return 'Nella Loggia: affronta l\'altra presenza.';
     if (run.state.stage === 'await_laura') return 'Nella Loggia: parla infine con Laura.';

@@ -26,6 +26,7 @@
   var NR = null, UI = null;
   var enabled = false;
   var notebookOnly = false;
+  var notebookOpen = false;
   var listenersBound = false; // enable() idempotente: listener globali UNA volta
   var partialError = false;   // transazione parziale avvenuta e non risolta
   var mission = null, state = null, container = null;
@@ -143,9 +144,14 @@
     { map_id: 'hospital', when: null, npc: { id: 'ronette', x: 2, y: 1, sprite: 'ronette', name: 'Ronette', dialogue: null, dir: 'down' } },
     // TODO participant build: sprite dedicato per l'infermiera (placeholder norma)
     { map_id: 'hospital', when: null, npc: { id: 'infermiera', x: 4, y: 2, sprite: 'norma', name: 'Infermiera', dialogue: null, dir: 'down' } },
-    // C5-C — Truman al vagone per il rapporto (gating narrativo via worldRoots;
-    // la presenza visiva anticipata resta dichiarata nel manifest come limite C5-C)
-    { map_id: 'traincar', when: null, npc: { id: 'truman', x: 9, y: 4, sprite: 'truman', name: 'Truman', dialogue: null, dir: 'down' } },
+    // C5-C — Truman arriva al vagone solo quando Cooper ha una teoria finale
+    // da riferire. Prima restava visibile ma senza root attive e quindi muto.
+    // Dopo il rapporto torna alla centrale: nessun doppione fisico fra mappe.
+    {
+      map_id: 'traincar',
+      when: { all: [{ value_set: 'm5_final_theory' }, { not: { flag: 'east_route_confirmed' } }] },
+      npc: { id: 'truman', x: 9, y: 4, sprite: 'truman', name: 'Truman', dialogue: null, dir: 'down' }
+    },
     // C8-C.1 — Maddy al diner SOLO nella finestra della promessa (m8_diner):
     // atto4 aperto e promessa non ancora fatta. Dopo la promessa torna a casa
     // Palmer (timeline della Bible): il mondo non la mostra più al diner.
@@ -306,6 +312,7 @@
   };
   A.isEnabled = function () { return enabled; };
   A.isNotebookEnabled = function () { return enabled || notebookOnly; };
+  A.isNotebookOpen = function () { return notebookOpen; };
   A.getState = function () { return state; };
   // uno stato reinstallato (load/checkpoint) può implicare un mondo diverso:
   // il registro delle entità va ri-sincronizzato PRIMA di qualunque interazione.
@@ -344,10 +351,32 @@
     return ent.length ? ent[ent.length - 1] : mission;
   }
   A.currentMission = currentMission;
+
+  /* Unica sorgente participant-facing dell'obiettivo. La missione narrativa
+   * corrente vince solo quando e' davvero entrata e possiede un obiettivo
+   * attivo; prima di M4 (e negli interstizi) resta valido il percorso classico.
+   * Notebook, DOM semantico e log leggono tutti questo resolver: mai due copie
+   * divergenti dello stesso comando. */
+  function currentObjectiveText() {
+    var NF = GAME.NarrativeFinale;
+    if (NF && NF.isPending && NF.isPending() && NF.objective) return NF.objective() || '';
+    var cm = currentMission();
+    if (enabled && cm && (!cm.entry_condition || NR.evalCond(state, cm.entry_condition, cm))) {
+      var narrative = NR.activeObjective(state, cm);
+      if (narrative) return narrative.text + (narrative.optional_line ? ' — ' + narrative.optional_line : '');
+    }
+    var E = GAME.Engine;
+    if (E && E.state && GAME.Data && GAME.Data.objectiveFor && E.checkCond) {
+      return GAME.Data.objectiveFor(E.state, E.checkCond) || '';
+    }
+    return '';
+  }
+  A.getObjectiveText = currentObjectiveText;
+
   function objectiveUpdate() {
     var cm = currentMission();
     var o = NR.activeObjective(state, cm);
-    logEv({ event: 'objective', mission: cm.mission, id: o ? o.id : null, text: o ? o.text : null });
+    logEv({ event: 'objective', mission: cm.mission, id: o ? o.id : null, text: currentObjectiveText() || null });
   }
 
   /* ---------------- interazione dal motore ---------------- */
@@ -369,6 +398,54 @@
       return n.channel === 'world' && n.map_id === mapId && n.target_kind === targetKind && id === targetId && state.nodes_done[n.id];
     });
     return matches.length ? matches[matches.length - 1] : null;
+  }
+
+  // Un target posseduto dal layer narrativo non deve mai cadere nel dialogo
+  // classico quando, nello stato corrente, non ha root attive. Mostra invece
+  // una risposta diegetica breve sotto lease. Nessun prepare/commit: stato
+  // narrativo byte-identico prima e dopo il feedback.
+  function showNoRootsFeedback(meta) {
+    meta = meta || {};
+    var session = inputContexts.acquire('narrative-no-roots');
+    var isActor = !!meta.actor;
+    var page = {
+      id: isActor ? 'adapter.no_roots.actor' : 'adapter.no_roots.target',
+      mode: 'dialogue',
+      speaker_id: 'cooper',
+      display_name: 'COOPER',
+      portrait: 'cooper',
+      text: isActor
+        ? 'Non c\'è altro da chiedere qui, per ora.'
+        : 'Qui non c\'è altro da leggere, per ora.'
+    };
+    logEv({
+      event: 'interaction_no_roots_feedback',
+      mission: meta.mission || null,
+      map: meta.map || null,
+      actor: meta.actor || null,
+      target: meta.target || null,
+      page_id: page.id
+    });
+    var shown;
+    try {
+      shown = UI.showPages({
+        pages: [page], container: container, inputContext: childInput('narrative-pages'),
+        log: logEv, allowCancel: true, advanceLockMs: advanceLockMs
+      });
+    } catch (error) {
+      inputContexts.release(session);
+      partialError = true;
+      logEv({ event: 'interaction_no_roots_feedback_error', error: String(error && error.message || error) });
+      return;
+    }
+    Promise.resolve(shown).then(function (outcome) {
+      inputContexts.release(session);
+      logEv({ event: 'interaction_no_roots_feedback_closed', outcome: outcome });
+    }, function (error) {
+      inputContexts.release(session);
+      partialError = true;
+      logEv({ event: 'interaction_no_roots_feedback_error', error: String(error && error.message || error) });
+    });
   }
 
   // true = l'adapter ha gestito l'interazione (il motore non apre il vecchio dialogo)
@@ -399,7 +476,9 @@
         logEv({ event: 'completed_mission_repeat', mission: owner.mission, actor: actorId, node: completedActor ? completedActor.id : null });
         return true;
       }
-      logEv({ event: 'interaction_no_roots', actor: actorId }); return true;
+      logEv({ event: 'interaction_no_roots', actor: actorId });
+      showNoRootsFeedback({ mission: owner.mission, map: mapId, actor: actorId });
+      return true;
     }
     // C6-C.1: più root attive sullo STESSO target = errore DI SVILUPPO (il
     // root-contract è violato), MAI scelta silenziosa della prima. Fail-closed:
@@ -441,6 +520,7 @@
           return true;
         }
         logEv({ event: 'interaction_no_roots', target: tid });
+        showNoRootsFeedback({ mission: m.mission, map: mapId, target: tid });
         return true; // consumata: il classico non deve rispondere per un target narrativo
       }
     }
@@ -454,11 +534,26 @@
       return Promise.resolve({ skipped: true, reason: 'finale_active' });
     }
     syncCarryoverEvidence('notebook');
+    // Il notebook contiene gia' l'obiettivo risolto: nascondi la copia DOM
+    // esterna anche all'albero accessibile finche' il pannello resta aperto.
+    var objectiveEl = document.getElementById && document.getElementById('objective');
+    var objectiveDisplay = objectiveEl ? objectiveEl.style.display : '';
+    notebookOpen = true;
+    if (objectiveEl) objectiveEl.style.display = 'none';
     var session = inputContexts.acquire('narrative-notebook');
     var notebookInput = childInput('notebook-view');
-    return GAME.NarrativeNotebook.open({
+    function releaseNotebook() {
+      notebookOpen = false;
+      if (objectiveEl) objectiveEl.style.display = objectiveDisplay;
+      inputContexts.release(session);
+      logEv({ event: 'notebook_closed' });
+    }
+    var opened;
+    try {
+      opened = GAME.NarrativeNotebook.open({
       state: state, mission: mission, missions: enteredMissions(), data: GAME.NarrativeData,
       container: container, inputContext: notebookInput,
+      getObjectiveText: currentObjectiveText,
       readOnly: notebookOnly,
       log: logEv, advanceLockMs: advanceLockMs,
       runComparison: runComparisonFlow,
@@ -487,12 +582,20 @@
           pages: [recall.page], container: container, inputContext: childInput('narrative-pages'), log: logEv, allowCancel: true, advanceLockMs: advanceLockMs
         }).then(function () { return { recallSection: section }; });
       }
-    }).catch(function (err) {
+      });
+    } catch (err) {
       notebookInput.forceRelease();
+      partialError = true;
+      logEv({ event: 'notebook_error', error: String(err && err.message || err) });
+      releaseNotebook();
+      return Promise.resolve({ ok: false, error: 'notebook_open_failed' });
+    }
+    return Promise.resolve(opened).catch(function (err) {
+      notebookInput.forceRelease();
+      partialError = true;
       logEv({ event: 'notebook_error', error: String(err && err.message || err) });
     }).then(function () {
-      inputContexts.release(session);
-      logEv({ event: 'notebook_closed' });
+      releaseNotebook();
     });
   };
 

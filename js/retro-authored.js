@@ -200,6 +200,32 @@
     }
   }
 
+  function woodsPath(ctx, x, y, tx, ty, rows) {
+    var left = cell(rows, tx - 1, ty) === 'p', right = cell(rows, tx + 1, ty) === 'p';
+    var up = cell(rows, tx, ty - 1) === 'p', down = cell(rows, tx, ty + 1) === 'p';
+    /* Sentiero viola desaturato: resta nella notte della Lodge ma crea un
+     * asse leggibile già dall'ingresso, come i percorsi Gen II. */
+    R(ctx, x, y, 16, 16, '#958db8');
+    R(ctx, x + 3 + ((tx + ty) & 3), y + 4, 3, 1, '#b5add0');
+    R(ctx, x + 10 - ((tx * 3 + ty) & 2), y + 11, 2, 1, '#686898');
+    if (!left) { R(ctx, x, y, 2, 16, '#3d5068'); R(ctx, x + 2, y + 2, 1, 12, '#7770a8'); }
+    if (!right) { R(ctx, x + 14, y, 2, 16, '#3d5068'); R(ctx, x + 13, y + 2, 1, 12, '#7770a8'); }
+    if (!up) { R(ctx, x, y, 16, 2, '#3d5068'); R(ctx, x + 2, y + 2, 12, 1, '#b5add0'); }
+    if (!down) { R(ctx, x, y + 14, 16, 2, '#3d5068'); R(ctx, x + 2, y + 13, 12, 1, '#686898'); }
+    /* Spalle irregolari: mordono il bordo, mai la corsia centrale. */
+    if (!left) {
+      var biteL = 2 + (hash(tx, ty, 0x811) & 3);
+      R(ctx, x, y + 3, biteL, 4, '#7770a8'); R(ctx, x, y + 11, Math.max(2, 6 - biteL), 3, '#3d5068');
+      R(ctx, x + biteL - 1, y + 4, 1, 2, '#686898');
+    }
+    if (!right) {
+      var biteR = 2 + (hash(tx, ty, 0x812) & 3);
+      R(ctx, x + 16 - biteR, y + 2, biteR, 3, '#3d5068');
+      R(ctx, x + 13, y + 9, 3, 4, '#7770a8');
+      R(ctx, x + 15 - biteR, y + 10, 1, 2, '#686898');
+    }
+  }
+
   var TREE_CANOPY = [
     '.......33.......','......3213......','.....321113.....','....3211113.....',
     '...3211211123...','..333211112333..','.....32113......','....3211113.....',
@@ -550,6 +576,16 @@
     }
     paint(ctx, shapeIdx === 0 ? TREE_CANOPY : (shapeIdx === 1 ? TREE_CANOPY_B : TREE_CANOPY_C),
       treePalette, x + dx, y - 8 + dy, flip);
+    /* Cluster di aghi in tre profondita. La sagoma resta quella solida del
+     * metatile, ma la chioma non legge piu' come icona a riempimento unico. */
+    if (!night) {
+      var needle = (h >>> 8) & 3;
+      R(ctx, x + dx + 4 + needle, y - 3 + dy, 4, 1, treePalette[1]);
+      R(ctx, x + dx + 2 + ((needle + 1) & 3), y + 3 + dy, 6, 2, treePalette[2]);
+      R(ctx, x + dx + 8 - needle, y + 9 + dy, 5, 1, treePalette[1]);
+      R(ctx, x + dx + 5 + (needle & 1), y + 14 + dy, 7, 2, treePalette[3]);
+      R(ctx, x + dx + 6 + ((needle + 2) & 3), y + 15 + dy, 3, 1, treePalette[1]);
+    }
     /* Connessioni sottili tra metatile adiacenti: le terrazze si toccano
      * senza trasformare la chioma in fasce orizzontali. Anche questi stub
      * seguono dx: erano l'origine principale della cadenza a 16/32 px (un
@@ -615,6 +651,17 @@
   function water(ctx, x, y, tx, ty, rows) {
     R(ctx, x, y, 16, 16, C.water);
     R(ctx, x + 1, y + 4, 8, 1, C.water2); R(ctx, x + 7, y + 10, 8, 1, '#526f98');
+    /* Pattern globale a due profondita: grandi laghi non collassano in una
+     * lastra piatta, ma le onde restano continue fra tile adiacenti. */
+    var wave = hash(tx >> 1, ty, 0x966) & 3;
+    if (((tx + ty) & 3) === 0) {
+      R(ctx, x + 3 + wave, y + 7, 7, 2, '#34572d');
+      R(ctx, x + 5 + wave, y + 7, 3, 1, C.water2);
+    }
+    if (((tx * 3 + ty) & 7) === 2) {
+      R(ctx, x + 1, y + 13, 11, 1, '#6f9185');
+      R(ctx, x + 4, y + 14, 5, 1, '#9bc0b2');
+    }
     if (cell(rows, tx, ty - 1) !== 'w') {
       R(ctx, x, y, 16, 2, C.ink); R(ctx, x, y + 2, 16, 2, '#b09a6c');
       R(ctx, x + 2, y + 4, 6, 1, C.water2);
@@ -666,6 +713,23 @@
     R(ctx, x + 12, y + 1, 2, 14, '#788082');
   }
 
+  function lakeShore(ctx, x, y, tx, ty, rows) {
+    /* Riva naturale sullo stesso tile F solido: sostituisce la vecchia
+     * staccionata a scala senza cambiare collisione o interazione lago. */
+    townGround(ctx, x, y, tx, ty, rows);
+    var bite = 5 + (hash(tx, ty, 0x91a) & 3);
+    R(ctx, x, y, bite, 16, C.water);
+    R(ctx, x + bite, y, 2, 16, C.ink);
+    R(ctx, x + bite + 2, y, 2, 16, '#a89068');
+    R(ctx, x + 1, y + 4 + ((ty & 1) * 6), Math.max(2, bite - 2), 1, C.water2);
+    R(ctx, x + bite - 1, y + 2 + ((ty * 3) & 7), 2, 2, '#6a8a43');
+    R(ctx, x + bite + 2 + (ty & 2), y + 11, 2, 1, '#9aab69');
+    if ((ty & 1) === 0) {
+      R(ctx, x + bite + 5, y + 3, 2, 12, '#34572d');
+      R(ctx, x + bite + 2, y + 7, 4, 2, '#6a8a43');
+    }
+  }
+
   function path(ctx, x, y, tx, ty, rows) {
     var left = cell(rows, tx - 1, ty) === 'p', right = cell(rows, tx + 1, ty) === 'p';
     var up = cell(rows, tx, ty - 1) === 'p', down = cell(rows, tx, ty + 1) === 'p';
@@ -700,6 +764,16 @@
    * distinguono per ritmo, non tramite grandi campi moderni verde/bianco. */
   function townGround(ctx, x, y, tx, ty, rows) {
     arrivalGround(ctx, x, y, tx, ty);
+    /* Un ciuffo authored ogni cinque tile circa: abbastanza grande da
+     * sopravvivere al filtro GoldTone, abbastanza raro da lasciare respiro. */
+    var tuft = hash(tx, ty, 0x72) % 5;
+    if (tuft === 0) {
+      var ox = 3 + (hash(tx, ty, 0x721) % 7), oy = 6 + (hash(tx, ty, 0x722) % 5);
+      R(ctx, x + ox, y + oy, 1, 4, '#6a8a43');
+      R(ctx, x + ox - 2, y + oy + 1, 2, 1, '#9aab69');
+      R(ctx, x + ox + 1, y + oy + 2, 3, 1, '#6a8a43');
+      R(ctx, x + ox - 1, y + oy + 4, 3, 1, '#9aab69');
+    }
     groundShadow(ctx, x, y, tx, ty, rows);
   }
 
@@ -802,7 +876,7 @@
    * solo il proprio rettangolo, quindi la scansione tile non cancella l'altra. */
   function parkedCar(ctx, x, y, tx, ty, rows, opts) {
     if (opts && opts.mapId === 'arrival') arrivalGround(ctx, x, y, tx, ty);
-    else if (opts && opts.mapId === 'town') townPath(ctx, x, y, tx, ty, rows);
+    else if (opts && opts.mapId === 'town') paintGroundSurface(ctx, groundAt(opts, tx, ty) || 'p', x, y, tx, ty, rows, opts);
     else path(ctx, x, y, tx, ty, rows);
     var right = cell(rows, tx - 1, ty) === 'V';
     if (!right) {
@@ -864,9 +938,66 @@
     if (((tx + ty) & 1) === 0) R(ctx, x + 8, y + 8, 2, 2, '#d8c878');
   }
 
-  function floor(ctx, x, y, tx, ty, carpet) {
+  function floor(ctx, x, y, tx, ty, carpet, mapId) {
     var yy, seam;
+    /* Profilo per luogo: pattern e ritmo sopravvivono alla master palette
+     * monocromatica. Prima tutti gli interni finivano come lo stesso parquet. */
+    if (!carpet && mapId === 'hospital') {
+      R(ctx, x, y, 16, 16, '#f1f4e6');
+      R(ctx, x, y + 7, 16, 1, '#8faaa4'); R(ctx, x + 7, y, 1, 16, '#8faaa4');
+      if (((tx + ty) & 1) === 0) { R(ctx, x + 2, y + 2, 3, 3, '#d4dfda'); R(ctx, x + 10, y + 10, 3, 3, '#d4dfda'); }
+      else { R(ctx, x + 10, y + 2, 3, 3, '#d4dfda'); R(ctx, x + 2, y + 10, 3, 3, '#d4dfda'); }
+      return;
+    }
+    if (!carpet && mapId === 'diner') {
+      R(ctx, x, y, 16, 16, C.paper);
+      for (var fy = 0; fy < 16; fy += 4) for (var fx = 0; fx < 16; fx += 4) {
+        if ((((tx * 4 + fx / 4) + (ty * 4 + fy / 4)) & 1) === 0) R(ctx, x + fx, y + fy, 4, 4, '#9aab69');
+      }
+      return;
+    }
+    if (!carpet && mapId === 'oej') {
+      R(ctx, x, y, 16, 16, '#493b50');
+      if (((tx + ty) & 3) === 0) {
+        R(ctx, x + 7, y + 4, 2, 2, '#9a7452'); R(ctx, x + 4, y + 7, 2, 2, '#684351');
+        R(ctx, x + 10, y + 7, 2, 2, '#684351'); R(ctx, x + 7, y + 10, 2, 2, '#9a7452');
+      }
+      return;
+    }
+    if (!carpet && mapId === 'roadhouse') {
+      R(ctx, x, y, 16, 16, '#9aab69');
+      for (yy = 0; yy < 16; yy += 8) {
+        R(ctx, x, y + yy, 16, 2, C.mid); R(ctx, x, y + yy + 2, 16, 1, '#dcd9a9');
+        R(ctx, x + ((((ty + yy) >> 3) & 1) ? 4 : 12), y + yy + 3, 1, 5, C.mid);
+      }
+      return;
+    }
+    if (!carpet && mapId === 'hotel_gn') {
+      R(ctx, x, y, 16, 16, '#dcd9a9');
+      R(ctx, x + 4, y + 4, 8, 1, '#9aab69'); R(ctx, x + 4, y + 11, 8, 1, '#9aab69');
+      if (((tx + ty) & 3) === 0) { R(ctx, x + 7, y + 2, 2, 2, C.mid); R(ctx, x + 7, y + 13, 2, 1, C.mid); }
+      return;
+    }
+    if (!carpet && mapId === 'palmer') {
+      R(ctx, x, y, 16, 16, '#dcd9a9');
+      for (yy = 0; yy < 16; yy += 8) {
+        R(ctx, x, y + yy, 16, 1, '#9aab69');
+        seam = ((tx + ty + yy / 8) & 1) ? 5 : 13;
+        R(ctx, x + seam, y + yy + 1, 1, 7, C.paper);
+      }
+      return;
+    }
     if (carpet) {
+      if (mapId === 'palmer') {
+        R(ctx, x, y, 16, 16, '#9aab69');
+        R(ctx, x, y, 16, 2, '#dcd9a9'); R(ctx, x, y + 14, 16, 2, C.mid);
+        R(ctx, x, y, 2, 16, '#dcd9a9'); R(ctx, x + 14, y, 2, 16, C.mid);
+        if (((tx + ty) & 1) === 0) {
+          R(ctx, x + 7, y + 5, 2, 2, C.paper); R(ctx, x + 5, y + 7, 6, 2, C.mid);
+          R(ctx, x + 7, y + 9, 2, 2, C.paper);
+        }
+        return;
+      }
       R(ctx, x, y, 16, 16, '#9a4f5c');
       R(ctx, x, y, 2, 16, '#6b3441'); R(ctx, x + 14, y, 2, 16, '#6b3441');
       if (((tx + ty) & 1) === 0) { R(ctx, x + 7, y + 7, 2, 2, '#d08376'); R(ctx, x + 6, y + 8, 4, 1, '#6b3441'); }
@@ -878,6 +1009,23 @@
       R(ctx, x, y + yy + 3, 16, 1, '#85877f');
       seam = (((ty + yy / 4) & 1) ? 4 : 12);
       R(ctx, x + seam, y + yy + 1, 1, 2, '#92948a');
+    }
+  }
+
+  /* Zig-zag continuo in coordinate mondo. Nessuna dipendenza dal bordo del
+   * tile: la V attraversa tutte le metatile senza trasformarsi in righe. */
+  function redRoomFloor(ctx, x, y, tx, ty) {
+    var px, py, wx, wy, phase, tri, d;
+    R(ctx, x, y, 16, 16, '#eee6b5');
+    for (py = 0; py < 16; py++) {
+      wy = ty * 16 + py;
+      for (px = 0; px < 16; px++) {
+        wx = tx * 16 + px;
+        phase = ((wx % 32) + 32) % 32;
+        tri = phase < 16 ? phase : 32 - phase;
+        d = ((wy - tri) % 24 + 24) % 24;
+        if (d < 3) R(ctx, x + px, y + py, 1, 1, C.ink);
+      }
     }
   }
 
@@ -1329,6 +1477,991 @@
     return out;
   }
 
+  /* R70 — hero accents continui per gli edifici di Twin Peaks.
+   *
+   * I tile restano 16x16 e governano collisione/interazione. Questo layer
+   * aggiunge la parte che un edificio non puo' esprimere bene un tile alla
+   * volta: timpani, verande, insegne e pensiline che attraversano piu'
+   * colonne. E' lo stesso principio della scena d'arrivo: silhouette prima,
+   * micro-dettaglio dopo. Coordinate in tile intenzionalmente esplicite:
+   * sono firme dei landmark, non nuova geometria di gioco. */
+  function townGable(g, center, top, widths, roof, light) {
+    var i, w;
+    for (i = 0; i < widths.length; i++) {
+      w = widths[i];
+      R(g, center - w, top + i * 2, w * 2, 2, roof);
+      R(g, center - w, top + i * 2, 2, 2, C.ink);
+      R(g, center + w - 2, top + i * 2, 2, 2, C.ink);
+      if (w > 4 && (i & 1)) R(g, center - w + 2, top + i * 2 + 1, w * 2 - 4, 1, light);
+    }
+    R(g, center - widths[0], top, widths[0] * 2, 1, C.ink);
+    R(g, center - widths[widths.length - 1], top + widths.length * 2,
+      widths[widths.length - 1] * 2, 2, C.ink);
+  }
+
+  function townAwning(g, x, y, w, base, light) {
+    var i;
+    R(g, x - 2, y, w + 4, 2, C.ink);
+    R(g, x - 1, y + 2, w + 2, 4, base);
+    for (i = 1; i < w; i += 8) R(g, x + i, y + 2, 4, 4, light);
+    R(g, x - 1, y + 6, w + 2, 2, C.ink);
+    for (i = 1; i < w; i += 8) R(g, x + i, y + 8, 4, 2, light);
+  }
+
+  function townWindow(g, x, y, w, h, glass, trim) {
+    R(g, x, y, w, h, C.ink);
+    R(g, x + 2, y + 2, w - 4, h - 4, glass);
+    R(g, x + (w >> 1), y + 2, 1, h - 4, trim);
+    R(g, x + 2, y + (h >> 1), w - 4, 1, trim);
+  }
+
+  function townRoofTrim(g, x, y, w, cut, salt) {
+    var ry = y - ROOF_LIFT, i;
+    R(g, x - 3, ry - 1, w + 6, cut + 1, '#eee6b5');
+    for (i = 4; i < w; i += 19) {
+      if ((hash(i, salt, 0x75) & 1) === 0) R(g, x + i, ry + 2 + (i % Math.max(3, cut - 2)), 2, 1, '#9aab69');
+    }
+    R(g, x - 2, ry + cut, w + 4, 2, C.ink);
+  }
+
+  function townRoofGableMask(g, x, y, w) {
+    var ry = y - ROOF_LIFT, i, cut;
+    for (i = 0; i < 8; i++) {
+      cut = Math.max(2, 24 - i * 3);
+      R(g, x - 2, ry + i * 2, cut, 2, '#eee6b5');
+      R(g, x + w - cut + 2, ry + i * 2, cut, 2, '#eee6b5');
+    }
+  }
+
+  /* R78 — landmark chiusi. I vecchi accenti correggevano il tetto base con
+   * rettangoli color prato: nelle sagome a L restavano linee sospese. Queste
+   * primitive ridipingono l'intero volume visibile in un solo passaggio.
+   * Collisione resta la sagoma ASCII sottostante; nessun prop fisico invade
+   * il forecourt. */
+  function townClosedFlat(g, x, y, w, h, p) {
+    var i;
+    R(g, x + 4, y + 4, w, h, '#223b24');
+    R(g, x, y, w, h, C.ink);
+    R(g, x + 3, y + 3, w - 6, h - 6, p[2]);
+    R(g, x - 2, y - 20, w + 4, 22, C.ink);
+    R(g, x, y - 18, w, 18, p[0]);
+    R(g, x, y - 18, w, 3, p[1]);
+    for (i = 5; i < w - 3; i += 8) R(g, x + i, y - 14, 2, 11, shade(p[0], -30));
+    for (i = 8; i < w - 7; i += 17) R(g, x + i, y - 13 + (hash(i, w, 0x91) % 7), 5, 1, p[1]);
+    R(g, x - 3, y - 2, w + 6, 4, C.ink);
+    R(g, x, y - 2, w, 2, p[1]);
+  }
+
+  function townClosedGable(g, x, y, w, h, p) {
+    var i, inset;
+    R(g, x + 4, y + 4, w, h, '#223b24');
+    R(g, x, y, w, h, C.ink);
+    R(g, x + 3, y + 3, w - 6, h - 6, p[2]);
+    for (i = 0; i < 11; i++) {
+      inset = 22 - i * 2;
+      R(g, x + inset - 2, y - 22 + i * 2, w - inset * 2 + 4, 2, C.ink);
+      R(g, x + inset, y - 20 + i * 2, w - inset * 2, 2, p[0]);
+      if (i > 3 && (i & 1)) R(g, x + inset + 4, y - 19 + i * 2, Math.max(2, w - inset * 2 - 8), 1, p[1]);
+      if (i > 4 && !(i & 1) && w - inset * 2 > 24) R(g, x + inset + 8 + (i % 3) * 5, y - 19 + i * 2, 7, 1, shade(p[0], -28));
+    }
+    R(g, x - 3, y - 2, w + 6, 4, C.ink);
+    R(g, x, y - 2, w, 2, p[1]);
+  }
+
+  function townTwinWindow(g, x, y, glass, trim) {
+    R(g, x, y, 20, 12, C.ink);
+    R(g, x + 2, y + 2, 7, 8, glass); R(g, x + 11, y + 2, 7, 8, glass);
+    R(g, x + 9, y + 2, 2, 8, trim);
+  }
+
+  function townStep(g, x, y, w, light) {
+    R(g, x, y, w, 3, C.ink); R(g, x + 2, y, w - 4, 1, light);
+    R(g, x + 3, y + 3, w - 6, 3, C.ink); R(g, x + 5, y + 3, w - 10, 1, light);
+  }
+
+  function townSignIcon(g, kind, x, y) {
+    if (kind === 'sheriff') {
+      /* Stella bicolore, punte separate: non può collassare in una croce. */
+      R(g, x + 7, y, 2, 4, '#2f4d63'); R(g, x + 7, y + 12, 2, 4, '#2f4d63');
+      R(g, x, y + 7, 4, 2, '#2f4d63'); R(g, x + 12, y + 7, 4, 2, '#2f4d63');
+      R(g, x + 3, y + 3, 10, 10, '#2f4d63'); R(g, x + 5, y + 5, 6, 6, C.paper);
+      R(g, x + 7, y + 7, 2, 2, '#2f4d63');
+    } else if (kind === 'cup') {
+      R(g, x + 1, y + 5, 10, 8, C.ink); R(g, x + 3, y + 3, 6, 2, C.ink);
+      R(g, x + 11, y + 6, 5, 6, C.ink); R(g, x + 11, y + 8, 2, 2, C.paper);
+      R(g, x, y + 13, 14, 2, C.ink); R(g, x + 4, y, 2, 3, C.ink); R(g, x + 8, y + 1, 2, 2, C.ink);
+    } else if (kind === 'book') {
+      R(g, x, y + 3, 15, 11, C.ink); R(g, x + 2, y + 5, 5, 6, C.paper); R(g, x + 9, y + 5, 5, 6, C.paper);
+      R(g, x + 7, y + 4, 2, 9, '#697074'); R(g, x + 3, y + 6, 3, 1, '#697074'); R(g, x + 10, y + 6, 3, 1, '#697074');
+    } else if (kind === 'note') {
+      R(g, x + 8, y + 1, 4, 10, C.ink); R(g, x + 10, y + 1, 6, 4, C.ink);
+      R(g, x + 3, y + 9, 9, 6, C.ink); R(g, x, y + 10, 7, 5, C.ink);
+    } else if (kind === 'hammer') {
+      R(g, x + 7, y + 5, 4, 10, C.ink); R(g, x + 1, y + 2, 11, 5, C.ink);
+      R(g, x + 11, y + 3, 4, 3, C.ink);
+    } else if (kind === 'paper') {
+      R(g, x + 3, y + 1, 11, 14, C.ink); R(g, x + 1, y + 3, 11, 12, C.paper);
+      R(g, x + 3, y + 5, 7, 2, C.ink); R(g, x + 3, y + 9, 5, 2, C.ink); R(g, x + 3, y + 13, 7, 1, C.ink);
+    }
+  }
+
+  function townFirProp(g, x, y, h, light) {
+    var row, w;
+    for (row = 0; row < h - 5; row += 4) {
+      w = Math.min(15, 3 + (row >> 1));
+      R(g, x + 8 - (w >> 1), y + row, w, 3, C.ink);
+      R(g, x + 9 - (w >> 1), y + row + 1, Math.max(1, w - 3), 1, light);
+    }
+    R(g, x + 7, y + h - 6, 3, 6, C.ink);
+  }
+
+  function townFoundationShadow(g, x, y, w) {
+    R(g, x + 4, y, w - 8, 4, '#34572d');
+    for (var i = 8; i < w - 8; i += 15) R(g, x + i, y + 3, 8, 2, '#6a8a43');
+  }
+
+  function townWaterfallAccents(g, cx, cy) {
+    var x = 1 * 16 - cx, y = -cy, i;
+    /* Parete rocciosa a terrazze; cascata termina nel bacino w reale. */
+    R(g, x - 4, y + 2, 17, 31, C.ink); R(g, x, y, 19, 11, '#34572d');
+    R(g, x + 4, y + 10, 13, 23, '#6a8a43');
+    R(g, x + 57, y + 1, 19, 32, C.ink); R(g, x + 53, y, 18, 11, '#34572d');
+    R(g, x + 55, y + 10, 15, 23, '#6a8a43');
+    for (i = 0; i < 4; i++) {
+      R(g, x + 2 + i * 17, y + 4 + (i & 1) * 7, 10, 3, '#223b24');
+      R(g, x + 5 + i * 15, y + 8 + ((i + 1) & 1) * 8, 7, 2, '#9aab69');
+    }
+    R(g, x + 10, y, 50, 5, '#223b24');
+    R(g, x + 16, y + 2, 38, 4, '#526f98');
+    /* Bordi a gradini, mai una cornice rettangolare chiusa. */
+    R(g, x + 18, y + 6, 4, 10, C.ink); R(g, x + 20, y + 16, 3, 12, C.ink);
+    R(g, x + 50, y + 6, 4, 9, C.ink); R(g, x + 49, y + 15, 3, 13, C.ink);
+    R(g, x + 22, y + 6, 28, 10, '#526f98');
+    R(g, x + 23, y + 16, 26, 12, '#526f98');
+    R(g, x + 25, y + 28, 22, 8, '#526f98');
+    for (i = 0; i < 6; i++) {
+      R(g, x + 24 + ((i * 3) & 7), y + 8 + i * 5, 20 - (i & 1) * 4, 2, '#9bc0b2');
+      R(g, x + 27 + ((i + 1) & 3), y + 8 + i * 5, 6, 1, '#dfe9df');
+    }
+    R(g, x + 8, y + 31, 56, 4, C.ink);
+    /* Bacino a quattro terrazze: ogni massa d'acqua resta dentro tile w
+     * reali. Le rive cambiano lato e profondita, quindi niente rettangolo. */
+    R(g, x + 2, y + 35, 76, 12, '#526f98');
+    R(g, x + 18, y + 47, 60, 16, '#6f9185');
+    R(g, x + 2, y + 63, 60, 16, '#526f98');
+    R(g, x + 18, y + 79, 44, 12, '#6f9185');
+    R(g, x + 10, y + 36, 19, 3, '#dfe9df');
+    R(g, x + 33, y + 39, 22, 3, C.paper);
+    R(g, x + 58, y + 36, 14, 3, '#dfe9df');
+    R(g, x + 23, y + 50, 38, 2, '#9bc0b2');
+    R(g, x + 8, y + 67, 17, 2, '#9bc0b2');
+    R(g, x + 32, y + 72, 23, 2, '#dfe9df');
+    R(g, x + 25, y + 84, 29, 2, '#9bc0b2');
+    /* Spruzzo sale davanti alla caduta, mai fuori dal bacino. */
+    [[18,34],[25,31],[34,33],[44,30],[52,34]].forEach(function (p, pi) {
+      R(g, x + p[0], y + p[1], 2, 2, pi & 1 ? C.paper : '#dfe9df');
+      if (!(pi & 1)) R(g, x + p[0] + 3, y + p[1] - 2, 1, 1, '#9bc0b2');
+    });
+    /* Strati rocciosi interni spezzano le due pareti verticali. */
+    [[0,24],[2,34],[64,24],[68,34],[0,55],[58,59],[8,76],[51,79]].forEach(function (p) {
+      R(g, x + p[0], y + p[1], 9, 7, C.ink);
+      R(g, x + p[0] + 2, y + p[1] + 1, 6, 3, '#6a8a43');
+      R(g, x + p[0] + 4, y + p[1] + 4, 4, 1, '#9aab69');
+    });
+  }
+
+  function townWelcomeAccents(g, cx, cy) {
+    var x = 28 * 16 - cx, y = 27 * 16 - cy, i;
+    /* Un solo supporto coincide col cartello solido x30,y30. Pannello sta
+     * tutto a est della strada: cartello stradale, non overlay sul percorso. */
+    R(g, x + 29, y + 24, 7, 34, C.ink);
+    R(g, x + 32, y + 26, 2, 31, '#6a8a43');
+    R(g, x + 31, y + 5, 56, 23, C.ink);
+    R(g, x + 34, y + 8, 50, 17, '#dcd9a9');
+    R(g, x + 37, y + 10, 44, 12, '#9aab69');
+    /* Twin Peaks, foresta e lago: firma visiva leggibile senza font. */
+    for (i = 0; i < 8; i++) {
+      R(g, x + 39 + i, y + 20 - i, 2, Math.max(2, i + 1), '#34572d');
+      R(g, x + 67 + i, y + 20 - i, 2, Math.max(2, i + 1), '#34572d');
+    }
+    for (i = 0; i < 5; i++) {
+      R(g, x + 51 + i, y + 21 - i, 2, i + 1, '#6a8a43');
+      R(g, x + 73 + i, y + 21 - i, 2, i + 1, '#6a8a43');
+    }
+    R(g, x + 38, y + 19, 42, 2, '#6f9185');
+    R(g, x + 46, y + 21, 26, 1, '#dfe9df');
+    R(g, x + 51, y + 10, 14, 1, C.paper);
+    for (i = 0; i < 6; i++) R(g, x + 46 + i * 5, y + 13, 2, 2, C.ink);
+    R(g, x + 26, y + 57, 13, 4, C.ink); R(g, x + 29, y + 57, 7, 2, '#9aab69');
+  }
+
+  function townLakeAccents(g, cx, cy) {
+    var x = 4 * 16 - cx, y = 26 * 16 - cy, i;
+    /* Firme solo su acqua già solida: riflessi, tronco e canneto non mentono
+     * su passabilità. */
+    for (i = 0; i < 5; i++) {
+      R(g, x + 18 + i * 31, y + 10 + (i & 1) * 18, 18, 2, '#526f98');
+      R(g, x + 23 + i * 31, y + 12 + (i & 1) * 18, 10, 1, '#c0d0e0');
+    }
+    R(g, x + 65, y + 39, 48, 6, C.ink);
+    R(g, x + 69, y + 38, 40, 4, '#6a8a43');
+    R(g, x + 77, y + 37, 6, 2, '#dcd9a9');
+    /* Isolotto roccioso e riflesso di conifere: spezzano rettangolo d'acqua. */
+    R(g, x + 116, y + 16, 30, 12, C.ink);
+    R(g, x + 120, y + 17, 22, 8, '#6a8a43');
+    R(g, x + 125, y + 13, 3, 9, '#34572d');
+    R(g, x + 130, y + 9, 4, 13, '#34572d');
+    R(g, x + 136, y + 15, 3, 7, '#34572d');
+    R(g, x + 124, y + 27, 17, 2, '#526f98');
+    /* Riflessi verticali di conifere dentro acqua solida. Profili diversi,
+     * non icone copiate: il lago acquista profondita e memoria del bosco. */
+    [128,158,187].forEach(function (rx, ri) {
+      var ry = y + 14 + (ri & 1) * 7;
+      for (var band = 0; band < 4; band++) {
+        var rw = 5 + band * 4 - (ri === 2 && band > 1 ? 2 : 0);
+        R(g, x + rx - (rw >> 1), ry + band * 5, rw, 3, band & 1 ? '#34572d' : '#526f98');
+        R(g, x + rx - Math.max(1, (rw >> 1) - 2), ry + band * 5 + 1, Math.max(2, rw - 4), 1, '#9bc0b2');
+      }
+      R(g, x + rx - 2, ry + 20, 5, 2, '#34572d');
+    });
+    /* Secca rocciosa spezzata sulla riva sud. */
+    [[139,67,13],[158,73,9],[177,64,12]].forEach(function (rock, ri) {
+      R(g, x + rock[0], y + rock[1], rock[2], 6, C.ink);
+      R(g, x + rock[0] + 2, y + rock[1] + 1, rock[2] - 4, 3, ri & 1 ? '#9aab69' : '#6a8a43');
+      R(g, x + rock[0] + 4, y + rock[1] + 2, Math.max(2, rock[2] - 8), 1, C.paper);
+    });
+    /* Riva vicina spezzata: profilo scuro a gradini dentro ultime tile w.
+     * Il bordo coincide con acqua non calpestabile, quindi resta onesto. */
+    [[36,82,31,7],[72,87,24,6],[102,80,28,9],[134,88,19,5],[160,83,36,8]].forEach(function (bank, bi) {
+      R(g, x + bank[0], y + bank[1], bank[2], bank[3], C.ink);
+      R(g, x + bank[0] + 3, y + bank[1] + 1, bank[2] - 6, Math.max(2, bank[3] - 3), bi & 1 ? '#6a8a43' : '#34572d');
+      R(g, x + bank[0] + 7, y + bank[1], Math.max(3, bank[2] - 14), 1, '#9aab69');
+    });
+    [[8,66],[20,69],[145,62],[157,67],[174,61]].forEach(function (reed, ri) {
+      R(g, x + reed[0], y + reed[1] - (ri & 1) * 4, 2, 12 + (ri & 1) * 4, '#34572d');
+      R(g, x + reed[0] - 3, y + reed[1] + 3, 4, 2, '#6a8a43');
+      R(g, x + reed[0] + 1, y + reed[1] + 6, 4, 2, '#9aab69');
+    });
+    /* Piccolo pontile sulla sponda est, sempre sopra tile acqua/staccionata. */
+    R(g, x + 174, y + 18, 34, 12, C.ink);
+    R(g, x + 176, y + 20, 30, 8, '#a07850');
+    for (i = 178; i < 205; i += 6) R(g, x + i, y + 21, 2, 6, '#d8c98a');
+    /* Sponda est irregolare sopra acqua solida: roccia, reeds, ombra. */
+    for (i = 0; i < 6; i++) {
+      var shore = 4 + ((i * 5) & 7);
+      R(g, x + 208 - shore, y + i * 16, shore, 16, '#34572d');
+      R(g, x + 207 - shore, y + i * 16 + 3, 3, 5, '#6a8a43');
+      R(g, x + 202, y + i * 16 + 11, 5, 2, '#9aab69');
+    }
+  }
+
+  function townForestMassAccents(g, map, cx, cy) {
+    if (!map || map.id !== 'town' || !map.rows) return;
+    var minTx = Math.max(0, Math.floor(cx / 16) - 1);
+    var maxTx = Math.min(map.w - 1, Math.floor((cx + 159) / 16) + 1);
+    var minTy = Math.max(0, Math.floor(cy / 16) - 1);
+    var maxTy = Math.min(map.h - 1, Math.floor((cy + 143) / 16) + 1);
+    for (var ty = minTy; ty <= maxTy; ty++) {
+      for (var tx = minTx; tx <= maxTx; tx++) {
+        if (!map.rows[ty] || map.rows[ty].charAt(tx) !== 'T') continue;
+        var x = tx * 16 - cx;
+        var y = ty * 16 - cy;
+        var v = hash(tx, ty, 0x4f31);
+        var lean = (v & 3) - 1;
+        var crownY = y - 5 + ((v >> 2) & 1);
+
+        /* Aghi e rami dentro chiome fisiche. Cluster variati sostituiscono
+         * barre ripetute: bosco legge come massa sovrapposta, mai recinzione. */
+        R(g, x + 3 + lean, crownY, 8, 2, '#183225');
+        R(g, x + 5 + lean, crownY + 1, 4, 1, '#9aab69');
+        R(g, x + 1 + ((v >> 3) & 2), y + 2, 12, 3, '#31543a');
+        R(g, x + 4 + ((v >> 5) & 1), y + 2, 5, 1, '#63834a');
+        R(g, x + 4 - lean, y + 8, 9, 2, '#183225');
+        R(g, x + 6 - lean, y + 8, 4, 1, '#9aab69');
+        R(g, x + 2 + ((v >> 6) & 2), y + 13, 10, 2, '#31543a');
+
+        /* Giunti solo fra celle T: chiome adiacenti si fondono senza creare
+         * ostacoli visivi sopra sentieri calpestabili. */
+        if (tx > 0 && map.rows[ty].charAt(tx - 1) === 'T') {
+          R(g, x - 2, y + 4 + ((v >> 7) & 3), 6, 2, '#183225');
+          R(g, x, y + 5 + ((v >> 7) & 3), 4, 1, '#63834a');
+        }
+        if (ty > 0 && map.rows[ty - 1] && map.rows[ty - 1].charAt(tx) === 'T') {
+          R(g, x + 6 + lean, y - 3, 5, 4, '#183225');
+          R(g, x + 7 + lean, y - 2, 3, 2, '#63834a');
+        }
+      }
+    }
+  }
+
+  function townHeroAccents(g, map, cx, cy) {
+    if (!map || map.id !== 'town') return;
+    var x, y, i;
+
+    /* La camera look-ahead vede oltre la chioma della riga nord: copri i
+     * tronchi tagliati con un margine forestale continuo, come nel tableau. */
+    if (cy < 32) {
+      R(g, 0, 0, 160, 3, C.ink);
+      for (i = 0; i < 160; i += 8) {
+        var crown = 5 + (hash(i >> 3, cy, 0x723) % 5);
+        R(g, i, 2, 8, crown, '#34572d');
+        R(g, i + 2, 3, 4, Math.max(2, crown - 3), '#6a8a43');
+        if ((i & 16) === 0) R(g, i + 5, 2, 2, 3, '#9aab69');
+      }
+      R(g, 0, 10, 160, 1, C.ink);
+    }
+
+    townForestMassAccents(g, map, cx, cy);
+    townWaterfallAccents(g, cx, cy);
+    townWelcomeAccents(g, cx, cy);
+    townLakeAccents(g, cx, cy);
+
+    /* Great Northern — loggia chiusa: timpano, tronchi, portico e camino. */
+    x = 6 * 16 - cx; y = 4 * 16 - cy;
+    townClosedGable(g, x, y, 96, 48, BUILDINGS['4']);
+    for (i = 5; i < 43; i += 8) R(g, x + 3, y + i, 90, 2, '#3c2a1e');
+    for (i = 10; i < 92; i += 16) R(g, x + i, y + 3, 2, 39, '#6f5238');
+    R(g, x + 15, y - 18, 10, 15, C.ink); R(g, x + 18, y - 16, 5, 12, '#3c2a1e');
+    townTwinWindow(g, x + 8, y + 10, '#d9d49a', '#3c2a1e');
+    townTwinWindow(g, x + 68, y + 10, '#d9d49a', '#3c2a1e');
+    R(g, x + 33, y + 23, 31, 4, C.ink); R(g, x + 36, y + 27, 25, 3, '#d8c98a');
+    R(g, x + 36, y + 30, 3, 17, C.ink); R(g, x + 58, y + 30, 3, 17, C.ink);
+    R(g, x + 48, y + 29, 16, 19, C.ink); R(g, x + 51, y + 32, 10, 16, '#2c5334');
+    townStep(g, x + 45, y + 48, 22, '#d8c98a');
+    townFoundationShadow(g, x, y + 54, 96);
+
+    /* Calhoun Memorial — corpo clinico chiuso + pensilina laterale. */
+    x = 20 * 16 - cx; y = 3 * 16 - cy;
+    townClosedFlat(g, x + 32, y, 64, 64, BUILDINGS['5']);
+    /* Fasce cliniche orizzontali prima degli infissi: il volume non resta
+     * carta vuota e l'ala diagnostica condivide lo stesso materiale. */
+    for (i = 6; i < 59; i += 8) {
+      R(g, x + 36 + ((i >> 3) & 1) * 5, y + i, 53, 1, '#8faaa4');
+      R(g, x + 3 + (((i >> 3) + 1) & 1) * 4, y + 5 + (i >> 1), 24, 1, '#c7d6d2');
+    }
+    R(g, x, y, 34, 31, C.ink); R(g, x + 3, y + 3, 29, 25, '#f1f4e6');
+    R(g, x - 2, y - 5, 38, 7, C.ink); R(g, x, y - 3, 34, 3, '#ecf5ef');
+    R(g, x - 2, y + 29, 38, 5, C.ink); R(g, x + 1, y + 29, 32, 2, '#8faaa4');
+    townTwinWindow(g, x + 39, y + 9, '#dfe9df', '#8faaa4');
+    R(g, x + 48, y + 30, 16, 31, C.ink); R(g, x + 51, y + 34, 10, 27, '#dfe9df');
+    R(g, x + 42, y - 14, 20, 13, C.ink); R(g, x + 44, y - 12, 16, 9, C.paper);
+    R(g, x + 50, y - 11, 4, 7, C.red); R(g, x + 47, y - 8, 10, 3, C.red);
+    R(g, x + 43, y + 55, 26, 3, '#8faaa4'); R(g, x + 46, y + 58, 2, 6, C.ink); R(g, x + 66, y + 58, 2, 6, C.ink);
+    /* Ala diagnostica più bassa + ingresso a due profondità. */
+    R(g, x - 7, y + 24, 42, 7, C.ink); R(g, x - 4, y + 26, 36, 3, '#8faaa4');
+    R(g, x + 34, y + 47, 42, 5, C.ink); R(g, x + 38, y + 49, 34, 3, '#dfe9df');
+    R(g, x + 38, y + 52, 3, 12, C.ink); R(g, x + 70, y + 52, 3, 12, C.ink);
+    /* Segnaletica forecourt, passabile e ancorata all'ingresso reale. */
+    R(g, x + 43, y + 69, 26, 2, '#8faaa4');
+    R(g, x + 47, y + 75, 18, 1, '#9bc0b2');
+    R(g, x + 51, y + 81, 10, 1, '#8faaa4');
+    /* Due aiuole basse: bordo grafico passabile, nessuna falsa siepe. */
+    [[17,70],[74,72]].forEach(function (p, pi) {
+      R(g, x + p[0], y + p[1], 17, 2, '#8faaa4');
+      for (var fi = 0; fi < 3; fi++) {
+        R(g, x + p[0] + 3 + fi * 5, y + p[1] - 3 - ((fi + pi) & 1), 2, 3, '#6a8a43');
+        R(g, x + p[0] + 4 + fi * 5, y + p[1] - 4 - ((fi + pi) & 1), 1, 1, C.paper);
+      }
+    });
+    townFoundationShadow(g, x + 32, y + 64, 64);
+
+    /* Casa Palmer — grande timpano domestico, portico e ringhiera. */
+    x = 40 * 16 - cx; y = 4 * 16 - cy;
+    townClosedGable(g, x, y, 64, 48, BUILDINGS['3']);
+    for (i = 5; i < 43; i += 7) {
+      R(g, x + 3 + (((i / 7) & 1) * 3), y + i, 55, 1, '#a9754f');
+    }
+    R(g, x + 45, y - 18, 8, 14, C.ink); R(g, x + 47, y - 16, 4, 10, '#a9754f');
+    townTwinWindow(g, x + 7, y + 7, '#eee6b5', '#4a2f22');
+    townTwinWindow(g, x + 37, y + 7, '#eee6b5', '#4a2f22');
+    R(g, x + 4, y + 23, 56, 3, C.ink); R(g, x + 7, y + 26, 50, 3, '#ecd7a4');
+    R(g, x + 8, y + 29, 3, 18, C.ink); R(g, x + 53, y + 29, 3, 18, C.ink);
+    R(g, x + 32, y + 27, 16, 20, C.ink); R(g, x + 35, y + 30, 10, 17, '#754429');
+    R(g, x + 7, y + 41, 50, 3, '#a9754f');
+    for (i = 12; i < 53; i += 8) R(g, x + i, y + 35, 2, 6, '#4a2f22');
+    townStep(g, x + 30, y + 48, 20, '#ecd7a4');
+    /* Abbaino e veranda laterale danno secondo piano e profondità domestica. */
+    R(g, x + 8, y - 18, 20, 17, C.ink); R(g, x + 11, y - 15, 14, 12, '#ecd7a4');
+    townTwinWindow(g, x + 8, y - 13, '#eee6b5', '#4a2f22');
+    R(g, x - 5, y + 20, 18, 5, C.ink); R(g, x - 2, y + 22, 15, 2, '#ecd7a4');
+    R(g, x - 2, y + 25, 3, 22, C.ink);
+    townFoundationShadow(g, x, y + 54, 64);
+
+    /* Bookhouse — mattoni sfalsati, libreria luminosa, insegna obliqua. */
+    x = 28 * 16 - cx; y = 2 * 16 - cy;
+    townClosedFlat(g, x, y, 48, 64, BUILDINGS['7']);
+    for (i = 5; i < 58; i += 8) {
+      R(g, x + 3 + ((i >> 3) & 1) * 4, y + i, 39, 2, '#697074');
+    }
+    R(g, x + 6, y + 10, 36, 18, C.ink); R(g, x + 9, y + 13, 30, 12, '#d9d49a');
+    for (i = 12; i < 38; i += 7) R(g, x + i, y + 14, 2, 10, '#30353a');
+    R(g, x + 3, y + 34, 42, 11, C.ink); R(g, x + 6, y + 37, 36, 5, '#e7cf77');
+    townSignIcon(g, 'book', x + 17, y + 31);
+    R(g, x + 16, y + 48, 16, 16, C.ink); R(g, x + 19, y + 51, 10, 13, '#242a30');
+    /* Frontone spezzato, torretta e bay laterale: libreria civica, non box. */
+    R(g, x + 9, y - 25, 30, 7, C.ink); R(g, x + 14, y - 30, 20, 6, C.ink);
+    R(g, x + 17, y - 28, 14, 8, '#697074');
+    R(g, x + 21, y - 26, 6, 4, '#e7cf77');
+    R(g, x - 8, y + 18, 10, 42, C.ink); R(g, x - 5, y + 21, 7, 36, '#61686a');
+    R(g, x + 46, y + 28, 9, 32, C.ink); R(g, x + 46, y + 31, 6, 26, '#30353a');
+    for (i = 23; i < 55; i += 8) R(g, x - 4, y + i, 5, 2, '#e7cf77');
+    /* Cortile grafico in asse: gradini e lastre piatte occupano il vuoto
+     * verticale senza fingere nuovi ostacoli o una porta attraversabile. */
+    R(g, x + 15, y + 67, 18, 3, '#30353a');
+    R(g, x + 17, y + 70, 14, 2, '#73777a');
+    for (i = 0; i < 3; i++) {
+      R(g, x + 18 - i * 2, y + 74 + i * 7, 12 + i * 4, 2, '#9aab69');
+      R(g, x + 21 - i, y + 76 + i * 7, 6 + i * 2, 1, '#dcd9a9');
+    }
+    townStep(g, x + 14, y + 64, 20, '#73777a');
+
+    /* Horne's — parapetto a gradoni, H centrale, vetrina continua. */
+    x = 33 * 16 - cx; y = 3 * 16 - cy;
+    townClosedFlat(g, x, y, 48, 64, BUILDINGS['9']);
+    /* Torre Art Déco: identità leggibile anche senza glifo. */
+    R(g, x + 12, y - 22, 24, 20, C.ink); R(g, x + 16, y - 27, 16, 7, C.ink);
+    R(g, x + 17, y - 20, 14, 16, '#d4ad68');
+    R(g, x + 20, y - 18, 3, 12, '#684534'); R(g, x + 27, y - 18, 3, 12, '#684534');
+    R(g, x + 23, y - 13, 4, 2, '#684534');
+    R(g, x + 6, y - 27, 36, 7, C.ink); R(g, x + 11, y - 32, 26, 5, C.ink); R(g, x + 16, y - 36, 16, 4, C.ink);
+    R(g, x - 2, y - 2, 52, 4, C.ink); R(g, x, y, 48, 3, '#719098');
+    /* Medaglione geometrico, non seconda H: torre + materiali bastano a
+     * identificare il department store senza dipendere da due glifi. */
+    R(g, x + 13, y + 10, 22, 12, C.ink); R(g, x + 15, y + 12, 18, 8, '#f0d888');
+    R(g, x + 23, y + 12, 2, 1, '#684534'); R(g, x + 21, y + 13, 6, 1, '#684534');
+    R(g, x + 20, y + 14, 8, 1, '#684534'); R(g, x + 19, y + 15, 10, 2, '#684534');
+    R(g, x + 20, y + 17, 8, 1, '#684534'); R(g, x + 21, y + 18, 6, 1, '#684534');
+    R(g, x + 23, y + 19, 2, 1, '#684534');
+    R(g, x + 23, y + 14, 2, 1, '#d4ad68'); R(g, x + 22, y + 15, 4, 2, '#d4ad68');
+    R(g, x + 23, y + 17, 2, 1, '#d4ad68');
+    R(g, x + 4, y + 31, 40, 21, C.ink); R(g, x + 7, y + 34, 34, 15, '#d9c78d');
+    R(g, x + 23, y + 34, 2, 15, '#684534'); R(g, x + 7, y + 41, 34, 2, '#684534');
+    /* Ritmo materico e pensilina: department store anche coprendo la H. */
+    for (i = 6; i < 44; i += 9) {
+      R(g, x + i, y + 4, 2, 23, '#684534');
+      R(g, x + i + 2, y + 5, 4, 1, '#f0d888');
+    }
+    R(g, x + 1, y + 27, 46, 6, C.ink); R(g, x + 4, y + 29, 40, 2, '#719098');
+    /* Ali vetrate basse + torre centrale: department store, non bottega. */
+    R(g, x - 17, y + 22, 19, 37, C.ink); R(g, x - 14, y + 25, 16, 31, '#719098');
+    R(g, x + 46, y + 18, 19, 41, C.ink); R(g, x + 46, y + 21, 16, 35, '#d4ad68');
+    for (i = 0; i < 2; i++) {
+      R(g, x - 12 + i * 8, y + 30, 6, 15, C.ink); R(g, x - 11 + i * 8, y + 32, 4, 11, '#f0d888');
+      R(g, x + 49 + i * 8, y + 29, 6, 16, C.ink); R(g, x + 50 + i * 8, y + 31, 4, 12, '#f0d888');
+    }
+    R(g, x - 20, y + 18, 24, 6, C.ink); R(g, x + 44, y + 14, 24, 6, C.ink);
+    townFoundationShadow(g, x, y + 58, 48);
+
+    /* Tre botteghe: sagome diverse prima delle icone. */
+    x = 15 * 16 - cx; y = 10 * 16 - cy;
+    townClosedGable(g, x, y, 48, 48, BUILDINGS['0']);
+    R(g, x + 17, y + 4, 14, 12, C.ink); R(g, x + 19, y + 6, 10, 8, C.paper);
+    R(g, x + 23, y + 7, 2, 6, '#713943'); R(g, x + 21, y + 9, 6, 2, '#713943');
+    townAwning(g, x + 3, y + 19, 42, '#713943', '#f0dfb5');
+    townWindow(g, x + 5, y + 29, 38, 14, '#9bc0b2', '#435a50');
+    /* Bottiglie e scatole dietro vetro: farmacia leggibile senza sola croce. */
+    for (i = 0; i < 5; i++) {
+      R(g, x + 9 + i * 6, y + 34 + (i & 1), 3, 6 - (i & 1), i & 1 ? '#713943' : '#435a50');
+      R(g, x + 10 + i * 6, y + 32 + (i & 1), 1, 2, C.paper);
+    }
+    R(g, x + 7, y + 40, 34, 2, C.ink);
+
+    x = 19 * 16 - cx;
+    townClosedFlat(g, x, y, 32, 48, BUILDINGS['0']);
+    R(g, x + 2, y - 25, 28, 8, C.ink);
+    for (i = 3; i < 28; i += 10) R(g, x + i, y - 29, 7, 7, C.ink);
+    R(g, x + 4, y - 23, 24, 4, '#713943');
+    R(g, x + 3, y + 6, 26, 16, C.ink); R(g, x + 6, y + 9, 20, 10, C.paper);
+    townSignIcon(g, 'hammer', x + 8, y + 6);
+    R(g, x, y + 23, 32, 5, C.ink); R(g, x + 3, y + 24, 26, 2, '#435a50');
+    /* Hardware: serranda metallica profonda, non vetrina da boutique. */
+    R(g, x + 1, y + 26, 30, 19, C.ink); R(g, x + 4, y + 29, 18, 13, '#719098');
+    for (i = 31; i < 42; i += 4) R(g, x + 5, y + i, 16, 1, '#d9c78d');
+    R(g, x + 24, y + 29, 5, 13, '#435a50'); R(g, x + 26, y + 31, 2, 9, '#d9c78d');
+    /* Rastrelliera attrezzi incisa nella facciata solida. */
+    R(g, x + 3, y + 19, 26, 3, '#435a50');
+    R(g, x + 8, y + 16, 2, 5, C.ink); R(g, x + 15, y + 15, 5, 2, C.ink);
+    R(g, x + 17, y + 16, 2, 5, C.ink); R(g, x + 24, y + 16, 3, 5, C.ink);
+    /* Piccola insegna a lama ancorata al muro + zerbino piatto. */
+    R(g, x + 28, y + 4, 8, 18, C.ink); R(g, x + 29, y + 6, 6, 13, '#d9c78d');
+    R(g, x + 31, y + 8, 2, 8, '#435a50'); R(g, x + 29, y + 11, 6, 2, '#435a50');
+    R(g, x + 9, y + 48, 14, 3, '#34572d'); R(g, x + 11, y + 48, 10, 1, '#d9c78d');
+
+    x = 46 * 16 - cx;
+    townClosedFlat(g, x, y, 48, 32, BUILDINGS['0']);
+    for (i = 0; i < 7; i++) R(g, x - 4 + i, y - 25 + i, 56 - i * 2, 2, i === 0 ? C.ink : '#435a50');
+    R(g, x - 5, y - 13, 58, 4, C.ink); R(g, x - 2, y - 12, 52, 2, '#d9c78d');
+    R(g, x + 9, y + 3, 30, 17, C.ink); R(g, x + 12, y + 6, 24, 11, C.paper);
+    townSignIcon(g, 'paper', x + 16, y + 3);
+    townAwning(g, x + 2, y + 20, 44, '#435a50', '#d9c78d');
+    /* Edicola aperta: mensole e pile, canopy molto più largo del corpo. */
+    R(g, x - 7, y + 27, 62, 6, C.ink); R(g, x - 3, y + 29, 54, 2, '#d9c78d');
+    R(g, x + 4, y + 27, 40, 5, C.ink); R(g, x + 7, y + 28, 34, 3, C.paper);
+    for (i = 8; i < 40; i += 8) R(g, x + i, y + 29, 5, 2, (i & 8) ? '#435a50' : '#6a8a43');
+    /* Testate sovrapposte e legature: edicola, non vetrina generica. */
+    for (i = 0; i < 4; i++) {
+      R(g, x + 6 + i * 10, y + 22 - (i & 1), 8, 6, C.ink);
+      R(g, x + 8 + i * 10, y + 23 - (i & 1), 5, 3, C.paper);
+      R(g, x + 9 + i * 10, y + 24 - (i & 1), 3, 1, i & 1 ? '#713943' : '#435a50');
+    }
+
+    /* Distretto — tetto civico basso, frontone, badge e portico. */
+    x = 10 * 16 - cx; y = 17 * 16 - cy;
+    townClosedFlat(g, x, y, 96, 64, BUILDINGS['1']);
+    /* Siding a corsi sfalsati sulle campiture chiare; finestre e badge
+     * vengono dopo, quindi restano incassati e perfettamente leggibili. */
+    for (i = 6; i < 31; i += 7) {
+      R(g, x + 4 + ((i / 7) & 1) * 4, y + i, 27, 1, '#9aab69');
+      R(g, x + 64 + (((i / 7) + 1) & 1) * 4, y + i, 27, 1, '#9aab69');
+    }
+    townGable(g, x + 48, y - 20, [3,7,11,15,19], '#2f4d63', '#5c8098');
+    townTwinWindow(g, x + 9, y + 12, '#dbc78d', '#213648');
+    townTwinWindow(g, x + 67, y + 12, '#dbc78d', '#213648');
+    R(g, x + 35, y + 3, 26, 20, C.ink); R(g, x + 38, y + 6, 20, 14, '#e4d9b0');
+    townSignIcon(g, 'sheriff', x + 40, y + 5);
+    R(g, x + 7, y + 34, 82, 4, C.ink); R(g, x + 10, y + 38, 76, 3, '#5c8098');
+    R(g, x + 11, y + 41, 3, 22, C.ink); R(g, x + 82, y + 41, 3, 22, C.ink);
+    R(g, x + 32, y + 38, 16, 25, C.ink); R(g, x + 35, y + 42, 10, 21, '#2f4d63');
+    /* Due ali più basse e ingresso arretrato rompono rettangolo largo. */
+    R(g, x - 12, y + 18, 16, 46, C.ink); R(g, x - 9, y + 21, 13, 40, '#5c8098');
+    R(g, x + 92, y + 18, 16, 46, C.ink); R(g, x + 92, y + 21, 13, 40, '#2f4d63');
+    townTwinWindow(g, x - 10, y + 29, '#dbc78d', '#213648');
+    townTwinWindow(g, x + 88, y + 29, '#dbc78d', '#213648');
+    R(g, x + 28, y + 33, 40, 7, C.ink); R(g, x + 32, y + 35, 32, 3, '#dbc78d');
+    R(g, x + 15, y + 24, 9, 2, '#dbc78d'); R(g, x + 72, y + 27, 8, 2, '#dbc78d');
+    R(g, x + 47, y - 30, 3, 11, C.ink); R(g, x + 42, y - 32, 13, 4, C.ink);
+    townStep(g, x + 30, y + 64, 20, '#dbc78d');
+    townFoundationShadow(g, x, y + 70, 96);
+
+    /* Double R — vetrata lunga e iconica tenda a scacchi. */
+    x = 39 * 16 - cx; y = 18 * 16 - cy;
+    townClosedFlat(g, x, y, 96, 48, BUILDINGS['2']);
+    for (i = 5; i < 44; i += 7) {
+      R(g, x + 3 + (((i / 7) & 1) * 5), y + i, 85, 1, '#c1585a');
+    }
+    R(g, x + 31, y - 20, 34, 17, C.ink); R(g, x + 34, y - 17, 28, 11, C.paper);
+    townSignIcon(g, 'cup', x + 41, y - 18);
+    townAwning(g, x + 3, y + 10, 90, '#8f2430', C.paper);
+    R(g, x + 5, y + 20, 86, 22, C.ink); R(g, x + 8, y + 23, 80, 16, '#f8e078');
+    for (i = 20; i < 82; i += 20) R(g, x + i, y + 23, 2, 16, '#8f2430');
+    R(g, x + 47, y + 23, 10, 25, C.ink); R(g, x + 50, y + 26, 5, 19, '#713943');
+    townFoundationShadow(g, x, y + 54, 96);
+
+    /* Roadhouse — massa scura, insegna luminosa, portico basso. */
+    x = 44 * 16 - cx; y = 25 * 16 - cy;
+    townClosedGable(g, x, y, 96, 64, BUILDINGS['6']);
+    for (i = 5; i < 60; i += 6) {
+      R(g, x + 4 + (((i / 6) & 1) * 4), y + i, 84, 1, '#5c3a3a');
+      if ((i & 12) === 0) R(g, x + 25 + (i % 18), y + i - 2, 2, 3, '#c06a4e');
+    }
+    R(g, x + 3, y + 25, 29, 38, C.ink); R(g, x + 6, y + 28, 23, 32, '#5c3a3a');
+    for (i = 30; i < 59; i += 6) R(g, x + 7, y + i, 21, 2, '#c06a4e');
+    /* Tetto basso dell'ala: separa volume laterale da facciata principale. */
+    R(g, x - 4, y + 19, 40, 7, C.ink); R(g, x, y + 21, 32, 3, '#2c1a1f');
+    R(g, x + 9, y + 29, 16, 13, C.ink); R(g, x + 12, y + 32, 10, 7, '#caa15a');
+    townSignIcon(g, 'note', x + 9, y + 28);
+    R(g, x + 10, y + 3, 76, 21, C.ink); R(g, x + 13, y + 6, 70, 15, '#caa15a');
+    for (i = 17; i < 80; i += 9) { R(g, x + i, y + 7, 4, 3, C.paper); R(g, x + i + 1, y + 10, 2, 2, C.red); }
+    townSignIcon(g, 'note', x + 40, y + 4);
+    /* Fascia luminosa e coronamento incassato: ingresso domina facciata. */
+    R(g, x + 34, y + 25, 44, 6, C.ink); R(g, x + 38, y + 27, 36, 2, '#caa15a');
+    R(g, x + 38, y + 31, 36, 5, '#5c3a3a');
+    R(g, x + 6, y + 30, 84, 4, '#5c3a3a');
+    R(g, x + 8, y + 34, 3, 29, C.ink); R(g, x + 85, y + 34, 3, 29, C.ink);
+    R(g, x + 40, y + 34, 32, 29, C.ink);
+    R(g, x + 43, y + 38, 11, 25, '#2c1a1f'); R(g, x + 58, y + 38, 11, 25, '#2c1a1f');
+    R(g, x + 55, y + 38, 2, 25, '#caa15a');
+    R(g, x + 42, y + 36, 29, 3, '#caa15a');
+    R(g, x + 17, y + 38, 18, 14, C.ink); R(g, x + 20, y + 41, 12, 8, '#c06a4e');
+    R(g, x + 62, y + 38, 18, 14, C.ink); R(g, x + 65, y + 41, 12, 8, '#c06a4e');
+    townStep(g, x + 46, y + 64, 20, '#caa15a');
+    townFoundationShadow(g, x, y + 70, 96);
+  }
+
+  function redRoomHeroAccents(g) {
+    var i;
+    /* Quinte sempre in campo: la mappa e' piu' larga del viewport, quindi
+     * affidarsi soltanto alle colonne R esterne lasciava la scena senza tende. */
+    R(g, 0, 0, 18, 144, '#4c1119'); R(g, 142, 0, 18, 144, '#4c1119');
+    for (i = 0; i < 18; i += 6) {
+      R(g, i, 0, 3, 144, '#8f2430'); R(g, i + 3, 0, 2, 144, '#c1585a');
+      R(g, 142 + i, 0, 3, 144, '#8f2430'); R(g, 145 + i, 0, 2, 144, '#c1585a');
+    }
+    R(g, 0, 0, 160, 5, C.ink); R(g, 0, 5, 160, 5, '#8f2430');
+    for (i = 0; i < 160; i += 16) {
+      R(g, i, 7, 8, 5, '#c1585a'); R(g, i + 8, 7, 8, 7, '#4c1119');
+    }
+    R(g, 17, 0, 2, 144, C.ink); R(g, 141, 0, 2, 144, C.ink);
+  }
+
+  function traincarHeroAccents(g, cx, cy) {
+    var x = 8 * 16 - cx, y = 3 * 16 - cy, i;
+    /* Guscio e rotaie: arte continua; percorso e collisioni restano ASCII. */
+    R(g, x - 3, y - 4, 134, 3, C.ink); R(g, x, y - 1, 128, 2, '#a07850');
+    R(g, x - 2, y + 50, 132, 3, C.ink);
+    for (i = 5; i < 124; i += 16) {
+      R(g, x + i, y + 5, 1, 42, '#715d48');
+      R(g, x + i + 4, y + 9, 7, 5, C.ink); R(g, x + i + 5, y + 10, 5, 3, '#d0a868');
+      if (i === 21) {
+        /* Vetro incrinato: tre segmenti, non rumore uniforme. */
+        R(g, x + i + 7, y + 10, 1, 2, '#715d48');
+        R(g, x + i + 6, y + 11, 1, 1, C.paper);
+        R(g, x + i + 8, y + 12, 2, 1, '#715d48');
+      } else if (i === 37) {
+        R(g, x + i + 5, y + 10, 5, 3, '#171f26');
+        R(g, x + i + 6, y + 10, 1, 3, '#d0a868'); R(g, x + i + 8, y + 11, 2, 1, '#715d48');
+      } else if (i === 85) {
+        /* Baia tamponata: assi irregolari sopra finestra, danno localizzato. */
+        R(g, x + i + 3, y + 8, 10, 2, '#715d48');
+        R(g, x + i + 5, y + 11, 8, 2, '#a07850');
+        R(g, x + i + 7, y + 8, 1, 5, C.ink);
+      } else if (i === 101) {
+        R(g, x + i + 3, y + 9, 9, 2, '#a07850');
+        R(g, x + i + 4, y + 13, 8, 2, '#715d48');
+      } else if (i === 117) {
+        R(g, x + i + 4, y + 9, 3, 2, '#171f26');
+        R(g, x + i + 9, y + 12, 3, 2, '#715d48');
+      }
+      if ((i & 31) === 5) R(g, x + i + 2, y + 20, 10, 1, '#a07850');
+      else R(g, x + i + 4, y + 27, 8, 1, '#715d48');
+    }
+    /* Portello strappato: apertura scura e tavole interrotte diventano il
+     * punto focale investigativo, sopra il rumore delle rotaie. */
+    R(g, x + 45, y + 29, 34, 27, C.ink); R(g, x + 49, y + 33, 26, 23, '#40382f');
+    R(g, x + 52, y + 35, 20, 18, '#40382f');
+    R(g, x + 55, y + 37, 14, 14, '#171f26');
+    R(g, x + 55, y + 37, 5, 3, '#715d48'); R(g, x + 64, y + 48, 5, 3, '#715d48');
+    R(g, x + 58, y + 40, 2, 8, '#d0a868'); R(g, x + 65, y + 39, 2, 7, '#a07850');
+    R(g, x + 45, y + 28, 34, 4, '#a07850');
+    R(g, x + 48, y + 32, 3, 24, '#715d48'); R(g, x + 75, y + 32, 3, 24, '#715d48');
+    R(g, x + 57, y + 46, 12, 2, '#d0a868'); R(g, x + 60, y + 43, 5, 3, C.paper);
+    R(g, x - 2, y + 55, 132, 3, C.ink); R(g, x + 2, y + 57, 124, 1, '#a07850');
+    /* Ruote + binari compatti: chassis resta gerarchicamente dominante. */
+    R(g, x - 8, y + 60, 144, 15, '#b9a772');
+    for (i = -4; i < 136; i += 12) R(g, x + i, y + 61, 6, 13, '#715d48');
+    R(g, x - 8, y + 63, 144, 3, C.ink); R(g, x - 8, y + 71, 144, 3, C.ink);
+    for (i = 12; i < 116; i += 28) {
+      R(g, x + i, y + 51, 12, 8, C.ink); R(g, x + i + 3, y + 53, 6, 4, '#715d48');
+    }
+    R(g, x - 2, y + 55, 132, 2, C.ink);
+  }
+
+  function sceneHeroAccents(g, map, cx, cy) {
+    if (!map) return;
+    if (map.id === 'redroom') redRoomHeroAccents(g);
+    else if (map.id === 'traincar') traincarHeroAccents(g, cx, cy);
+  }
+
+  /* Contratto semantico dei props R75. `physical` deve stare solo su tile
+   * solidi reali; `soft` descrive tende/decorazioni volutamente passabili. */
+  var INTERIOR_PROP_FOOTPRINTS = [
+    { id:'sheriff-phones', map:'sheriff', kind:'physical', cells:[[2,2],[6,2]] },
+    { id:'palmer-sofa', map:'palmer', kind:'physical', cells:[[3,6]] },
+    { id:'palmer-dining', map:'palmer', kind:'physical', cells:[[2,8],[3,8],[2,9],[3,9]] },
+    { id:'palmer-sideboard', map:'palmer', kind:'physical', cells:[[14,6]] },
+    { id:'hotel-reception', map:'hotel_gn', kind:'physical', cells:[[4,8],[5,8],[6,8],[7,8]] },
+    { id:'hotel-lobby-rug', map:'hotel_gn', kind:'soft', cells:[[5,6],[6,6],[7,6],[5,7],[6,7],[7,7],[8,7]] },
+    { id:'hotel-luggage', map:'hotel_gn', kind:'physical', cells:[[2,6]] },
+    { id:'hotel-seating', map:'hotel_gn', kind:'physical', cells:[[8,6],[9,6],[10,6]] },
+    { id:'hotel-hearth', map:'hotel_gn', kind:'physical', cells:[[12,2],[12,3]] },
+    { id:'hotel-staircase', map:'hotel_gn', kind:'physical', cells:[[6,4],[7,4],[8,4],[9,4]] },
+    { id:'hospital-curtains', map:'hospital', kind:'soft', cells:[[3,1],[7,3],[8,5]] },
+    { id:'hospital-monitor', map:'hospital', kind:'physical', cells:[[9,5]] },
+    { id:'hospital-reception', map:'hospital', kind:'physical', cells:[[1,7],[2,7],[3,7]] },
+    { id:'hospital-waiting', map:'hospital', kind:'physical', cells:[[7,8],[9,8]] },
+    { id:'diner-coffee', map:'diner', kind:'physical', cells:[[4,2],[5,2]] },
+    { id:'diner-booths', map:'diner', kind:'physical', cells:[[2,5],[3,5],[8,5],[9,5],[2,7],[3,7],[8,7],[9,7]] },
+    { id:'diner-counter-stools', map:'diner', kind:'physical', cells:[[4,3],[6,3],[2,4],[9,4],[2,6],[9,6]] },
+    { id:'oej-felt-tables', map:'oej', kind:'physical', cells:[[3,2],[4,2],[11,2],[12,2],[3,7],[4,7],[11,7],[12,7]] },
+    { id:'oej-roulette', map:'oej', kind:'physical', cells:[[6,4],[7,4],[8,4],[9,4]] },
+    { id:'oej-seating', map:'oej', kind:'physical', cells:[[3,3],[12,3],[3,6],[12,6]] },
+    { id:'oej-service', map:'oej', kind:'physical', cells:[[14,2]] },
+    { id:'roadhouse-bar-stools', map:'roadhouse', kind:'physical', cells:[[3,5],[9,5]] },
+    { id:'roadhouse-stage', map:'roadhouse', kind:'physical', cells:[[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1],[9,1],[10,1],[11,1],[12,1],[13,1],[14,1]] }
+  ];
+
+  /* Contratto dati R80. Anchor e door sono coordinate tile reali; visualBounds
+   * descrive ingombro artistico relativo in pixel. Test e renderer condividono
+   * questa fonte per impedire anchor stale e porte decorative false. */
+  var TOWN_STRUCTURE_DEFS = [
+    { id:'great-northern', ch:'4', anchor:[6,4], component:[6,3,6,4], door:[9,6], visualBounds:[0,-22,96,86], cameraFocus:[9,7], materialKit:'lodge' },
+    { id:'hospital', ch:'5', anchor:[20,3], component:[20,3,6,4], door:[23,6], visualBounds:[0,-14,96,82], cameraFocus:[23,7], materialKit:'clinical' },
+    { id:'palmer', ch:'3', anchor:[40,4], component:[40,4,4,3], door:[42,6], visualBounds:[0,-22,64,78], cameraFocus:[42,7], materialKit:'home' },
+    { id:'bookhouse', ch:'7', anchor:[28,2], component:[28,2,3,4], door:null, visualBounds:[0,-20,48,90], cameraFocus:[29,8], materialKit:'brick' },
+    { id:'hornes', ch:'9', anchor:[33,3], component:[33,3,3,4], door:null, visualBounds:[0,-36,48,100], cameraFocus:[34,8], materialKit:'deco' },
+    { id:'pharmacy', ch:'0', anchor:[15,10], component:[15,10,3,3], door:null, visualBounds:[0,-22,48,76], cameraFocus:[16,14], materialKit:'pharmacy' },
+    { id:'hardware', ch:'0', anchor:[19,10], component:[19,10,2,3], door:null, visualBounds:[0,-29,32,77], cameraFocus:[20,14], materialKit:'hardware' },
+    { id:'newsstand', ch:'0', anchor:[46,10], component:[46,10,3,2], door:null, visualBounds:[-7,-25,62,62], cameraFocus:[47,14], materialKit:'news' },
+    { id:'sheriff', ch:'1', anchor:[10,17], component:[10,17,6,4], door:[12,20], visualBounds:[-19,-20,115,94], cameraFocus:[12,21], materialKit:'civic' },
+    { id:'double-r', ch:'2', anchor:[39,18], component:[39,18,6,3], door:[42,20], visualBounds:[0,-20,96,78], cameraFocus:[42,21], materialKit:'diner' },
+    { id:'roadhouse', ch:'6', anchor:[44,25], component:[44,25,6,4], door:[47,28], visualBounds:[0,-22,116,96], cameraFocus:[47,29], materialKit:'venue' }
+  ];
+
+  function interiorHeroAccents(g, map, cx, cy) {
+    if (!map || !map.indoor) return;
+    var x, y, i;
+    if (map.id === 'sheriff') {
+      /* Bacheca casi e telefoni sulle scrivanie: ufficio di polizia, non lobby. */
+      x = 3 * 16 - cx; y = 1 * 16 - cy;
+      R(g, x, y + 2, 62, 12, C.ink); R(g, x + 2, y + 4, 58, 8, '#c9b878');
+      for (i = 5; i < 55; i += 12) { R(g, x + i, y + 5, 7, 4, C.paper); R(g, x + i + 1, y + 10, 5, 1, '#6a8a43'); }
+      [[2,2],[6,2]].forEach(function (p) {
+        var px = p[0] * 16 - cx, py = p[1] * 16 - cy;
+        R(g, px + 5, py + 5, 7, 5, C.ink); R(g, px + 6, py + 6, 5, 2, '#9aab69');
+        R(g, px + 4, py + 4, 3, 2, C.ink); R(g, px + 10, py + 4, 3, 2, C.ink);
+        R(g, px + 2, py + 14, 28, 3, '#34572d');
+        R(g, px + 6, py + 14, 20, 1, '#6a8a43');
+      });
+      /* Tappeto sottile e ombre di contatto sulle sole celle già fisiche. */
+      x = 4 * 16 - cx; y = 4 * 16 - cy;
+      R(g, x - 3, y - 2, 38, 21, '#34572d');
+      R(g, x, y, 32, 16, '#9aab69');
+      R(g, x + 3, y + 3, 26, 10, '#dcd9a9');
+      R(g, x + 2, y + 14, 28, 3, '#34572d');
+      [[3,5],[6,5]].forEach(function (p) {
+        var px = p[0] * 16 - cx, py = p[1] * 16 - cy;
+        R(g, px + 3, py + 13, 11, 3, '#34572d');
+      });
+      /* Stipite e soglia sulla porta reale x4,y8. */
+      x = 4 * 16 - cx; y = 8 * 16 - cy;
+      R(g, x - 3, y - 4, 22, 4, C.ink); R(g, x - 2, y - 2, 20, 2, '#9aab69');
+      R(g, x - 3, y, 3, 16, C.ink); R(g, x + 16, y, 3, 16, C.ink);
+    } else if (map.id === 'palmer') {
+      /* Parete domestica + divano sul solo tavolo solido: nessun finto ostacolo. */
+      x = 6 * 16 - cx; y = 1 * 16 - cy;
+      R(g, x, y + 2, 54, 14, C.ink); R(g, x + 2, y + 4, 15, 10, C.paper);
+      R(g, x + 20, y + 5, 12, 9, '#d9c78d'); R(g, x + 35, y + 3, 17, 11, C.paper);
+      R(g, x + 7, y + 6, 5, 6, '#6a8a43'); R(g, x + 39, y + 5, 9, 7, '#9aab69');
+      x = 3 * 16 - cx; y = 6 * 16 - cy;
+      R(g, x, y + 1, 16, 12, C.ink); R(g, x + 2, y + 2, 12, 8, '#9a4f5c');
+      R(g, x + 2, y + 4, 12, 2, '#d08376'); R(g, x, y + 10, 3, 5, C.ink); R(g, x + 13, y + 10, 3, 5, C.ink);
+      /* Camino sulla parete solida: centro domestico, non ostacolo nuovo. */
+      x = 9 * 16 - cx; y = 4 * 16 - cy;
+      R(g, x, y + 2, 32, 14, C.ink); R(g, x + 3, y + 4, 26, 10, '#a9754f');
+      R(g, x + 9, y + 7, 14, 7, C.ink); R(g, x + 12, y + 9, 8, 5, '#c1585a');
+      R(g, x - 3, y, 38, 4, C.ink); R(g, x, y, 32, 2, '#ecd7a4');
+      /* Stipiti sul vero varco x4–5: la parete ora legge come porta fra
+       * camera e soggiorno, non come taglio della mappa. */
+      x = 4 * 16 - cx; y = 4 * 16 - cy;
+      R(g, x - 2, y - 2, 36, 4, C.ink); R(g, x, y - 1, 32, 2, '#a9754f');
+      R(g, x - 2, y, 3, 16, C.ink); R(g, x + 31, y, 3, 16, C.ink);
+      R(g, x + 1, y + 2, 1, 12, '#ecd7a4'); R(g, x + 29, y + 2, 1, 12, '#ecd7a4');
+    } else if (map.id === 'hotel_gn') {
+      /* Runner continuo porta→scala→corridoio: prima degli arredi fisici. */
+      x = 8 * 16 - cx; y = 5 * 16 - cy;
+      R(g, x, y, 32, 96, '#34572d'); R(g, x + 3, y, 26, 96, '#9aab69');
+      R(g, x + 7, y, 18, 96, '#d8c98a');
+      for (i = 4; i < 92; i += 12) { R(g, x + 9, y + i, 4, 4, '#6a8a43'); R(g, x + 19, y + i + 5, 4, 4, '#6a8a43'); }
+      R(g, x + 32, y, 64, 16, '#34572d'); R(g, x + 35, y + 3, 58, 10, '#9aab69');
+      /* Fascia trasversale unisce reception, salotto e corridoio 315. */
+      x = 4 * 16 - cx; y = 7 * 16 - cy;
+      R(g, x, y + 2, 112, 14, '#34572d'); R(g, x + 3, y + 4, 106, 10, '#9aab69');
+      for (i = 10; i < 100; i += 16) {
+        R(g, x + i, y + 7, 7, 4, '#d8c98a');
+        R(g, x + i + 2, y + 8, 3, 2, '#6a8a43');
+      }
+      /* Rastrelliera chiavi solidale al banco: un unico mobile leggibile. */
+      x = 4 * 16 - cx; y = 8 * 16 - cy;
+      R(g, x + 3, y - 10, 58, 12, C.ink); R(g, x + 5, y - 8, 54, 9, '#a9805a');
+      for (i = 8; i < 54; i += 9) { R(g, x + i, y - 7, 1, 6, '#3c2a1e'); R(g, x + i + 2, y - 5, 4, 2, C.gold); }
+      R(g, x, y + 2, 64, 14, C.ink); R(g, x + 2, y + 3, 60, 8, '#a9805a');
+      R(g, x + 3, y + 4, 58, 2, '#d8c98a');
+      R(g, x + 28, y - 1, 8, 4, C.gold); R(g, x + 30, y - 4, 4, 3, C.paper);
+      R(g, x + 2, y + 13, 60, 4, '#34572d'); R(g, x + 8, y + 13, 48, 1, '#75593d');
+      /* Lampada sospesa: segnale morbido/passabile, asse della hall. */
+      x = 10 * 16 - cx; y = 5 * 16 - cy;
+      R(g, x + 7, y - 10, 2, 11, C.ink); R(g, x + 2, y, 12, 4, C.ink);
+      R(g, x + 4, y + 1, 8, 3, '#d8c98a'); R(g, x + 5, y + 4, 6, 1, '#c1a873');
+      /* Grande tappeto passabile: riempie hall senza fingere un ostacolo. */
+      x = 5 * 16 - cx; y = 6 * 16 - cy;
+      R(g, x - 2, y - 2, 68, 36, C.ink);
+      R(g, x, y, 64, 32, '#34572d'); R(g, x + 3, y + 3, 58, 26, '#9aab69');
+      R(g, x + 7, y + 7, 50, 18, '#dcd9a9');
+      for (i = 10; i < 54; i += 8) R(g, x + i, y + 10 + ((i >> 3) & 1) * 6, 3, 3, '#6a8a43');
+      /* Braccio reception e freccia corridoio 315: asse visivo continuo. */
+      R(g, x - 17, y + 20, 19, 8, C.ink); R(g, x - 15, y + 22, 17, 4, '#9aab69');
+      R(g, x + 62, y + 10, 35, 9, C.ink); R(g, x + 62, y + 12, 33, 5, '#9aab69');
+      R(g, x + 89, y + 9, 7, 3, '#d8c98a'); R(g, x + 93, y + 12, 3, 3, '#d8c98a');
+      /* Salottino fisico h-t-h e deposito bagagli U. */
+      x = 8 * 16 - cx; y = 6 * 16 - cy;
+      R(g, x, y, 48, 16, C.ink); R(g, x + 3, y + 3, 42, 10, '#6a8a43');
+      R(g, x + 5, y + 4, 13, 6, '#d8c98a'); R(g, x + 30, y + 4, 13, 6, '#d8c98a');
+      R(g, x + 7, y + 11, 10, 3, '#34572d'); R(g, x + 31, y + 11, 10, 3, '#34572d');
+      R(g, x + 20, y + 5, 8, 9, '#3c2a1e'); R(g, x + 22, y + 7, 4, 3, C.gold);
+      R(g, x + 3, y + 14, 42, 3, '#34572d');
+      x = 2 * 16 - cx; y = 6 * 16 - cy;
+      R(g, x + 2, y + 3, 12, 11, C.ink); R(g, x + 4, y + 5, 8, 7, '#a9805a');
+      R(g, x + 5, y + 2, 6, 3, C.ink); R(g, x + 6, y + 3, 4, 2, C.gold);
+      R(g, x + 3, y + 13, 11, 3, '#34572d');
+      /* Camino in pietra sul muro reale x12: asse lodge della lobby. */
+      x = 12 * 16 - cx; y = 2 * 16 - cy;
+      R(g, x - 8, y, 24, 34, C.ink); R(g, x - 5, y + 2, 18, 30, '#75593d');
+      for (i = 3; i < 29; i += 7) R(g, x - 3 + ((i >> 2) & 1) * 4, y + i, 13, 2, '#a9805a');
+      R(g, x - 4, y + 18, 16, 13, C.ink); R(g, x - 1, y + 21, 10, 9, '#3c2a1e');
+      R(g, x - 7, y + 15, 22, 4, C.ink); R(g, x - 4, y + 15, 16, 2, '#d8c98a');
+      /* Scala centrale su quattro C reali: massa verticale della hall. */
+      x = 6 * 16 - cx; y = 4 * 16 - cy;
+      R(g, x, y - 14, 64, 31, C.ink); R(g, x + 4, y - 11, 56, 26, '#75593d');
+      for (i = 0; i < 6; i++) {
+        R(g, x + 8 + i * 4, y + 11 - i * 4, 40 - i * 8, 3, C.ink);
+        R(g, x + 10 + i * 4, y + 11 - i * 4, 36 - i * 8, 1, '#d8c98a');
+      }
+      R(g, x + 4, y - 12, 3, 28, C.ink); R(g, x + 57, y - 12, 3, 28, C.ink);
+      for (i = 0; i < 5; i++) {
+        R(g, x + 7 + i * 5, y - 10 + i * 4, 2, 5, '#a9805a');
+        R(g, x + 55 - i * 5, y - 10 + i * 4, 2, 5, '#a9805a');
+      }
+      R(g, x + 4, y + 14, 56, 4, '#34572d'); R(g, x + 12, y + 14, 40, 1, '#75593d');
+      /* Profondità parete della stanza 315 sul vero muro x12. */
+      x = 12 * 16 - cx; y = 0 * 16 - cy;
+      R(g, x + 1, y, 4, 64, C.ink); R(g, x + 5, y + 3, 2, 58, '#a9805a');
+      R(g, x + 11, y, 4, 64, '#3c2a1e');
+      /* Soglia doppia sulla porta reale x8–9,y11. */
+      x = 8 * 16 - cx; y = 11 * 16 - cy;
+      R(g, x - 4, y - 3, 40, 3, C.ink); R(g, x, y - 2, 32, 2, '#d8c98a');
+    } else if (map.id === 'hospital') {
+      /* Corridoio ward passabile: collega baie, reception e uscita. */
+      x = 5 * 16 - cx; y = 1 * 16 - cy;
+      R(g, x, y, 32, 128, '#8faaa4'); R(g, x + 3, y, 26, 128, '#dfe9df');
+      R(g, x + 7, y, 18, 128, C.paper);
+      for (i = 6; i < 124; i += 16) { R(g, x + 9, y + i, 6, 2, '#9bc0b2'); R(g, x + 18, y + i + 7, 6, 2, '#9bc0b2'); }
+      /* Soglie cliniche spezzano corridoio senza fingere muri. */
+      [31,63,95].forEach(function (dy, ti) {
+        R(g, x + 3, y + dy, 26, 3, '#8faaa4');
+        R(g, x + 7 + (ti & 1) * 4, y + dy, 14, 1, '#9bc0b2');
+      });
+      /* Zona attesa collegata: tappeto passabile reception→sedute. */
+      x = 3 * 16 - cx; y = 7 * 16 - cy;
+      R(g, x, y + 3, 116, 29, '#dfe9df'); R(g, x + 3, y + 6, 110, 23, '#9bc0b2');
+      R(g, x + 7, y + 10, 102, 15, C.paper);
+      for (i = 12; i < 105; i += 18) R(g, x + i, y + 13, 6, 2, '#8faaa4');
+      /* Tende morbide accanto ai letti: corte, aperte, attraversabili. */
+      x = 1 * 16 - cx; y = 1 * 16 - cy;
+      [[32,0],[96,32],[112,64]].forEach(function (pair) {
+        var dx = pair[0], dy = pair[1];
+        R(g, x + dx - 5, y + dy - 3, 22, 2, '#dfe9df');
+        R(g, x + dx - 5, y + dy - 1, 22, 1, '#8faaa4');
+        R(g, x + dx, y + dy, 1, 17, '#8faaa4'); R(g, x + dx + 2, y + dy + 2, 7, 12, '#dfe9df');
+        for (var sy = 4; sy < 13; sy += 4) R(g, x + dx + 3, y + dy + sy, 5, 1, '#8faaa4');
+        R(g, x + dx + 9, y + dy + 2, 5, 12, C.paper);
+      });
+      /* Tre baie complete sui K reali: testiera, lenzuolo, monitor. */
+      [[1,1],[5,3],[9,5]].forEach(function (p, bi) {
+        var px = p[0] * 16 - cx, py = p[1] * 16 - cy;
+        R(g, px, py + 1, 16, 14, C.ink); R(g, px + 2, py + 3, 12, 10, '#dfe9df');
+        R(g, px + 3, py + 4, 10, 3, C.paper); R(g, px + 3, py + 8, 10, 4, bi & 1 ? '#9bc0b2' : '#8faaa4');
+        R(g, px + 12, py - 4, 8, 7, C.ink); R(g, px + 14, py - 2, 4, 3, '#34572d');
+        R(g, px + 14, py - 1, 2, 1, bi === 1 ? C.red : '#9bc0b2');
+        R(g, px + 1, py + 13, 17, 3, '#8faaa4');
+        R(g, px + 5, py + 13, 9, 1, '#9bc0b2');
+      });
+      x = 9 * 16 - cx; y = 5 * 16 - cy;
+      R(g, x + 2, y + 1, 12, 12, C.ink); R(g, x + 4, y + 3, 8, 6, '#dfe9df');
+      R(g, x + 5, y + 6, 3, 1, C.red); R(g, x + 8, y + 4, 2, 4, C.red);
+      R(g, x + 8, y + 13, 2, 2, C.ink);
+      /* Reception su tre C solide: profondità clinica senza bloccare asse. */
+      x = 1 * 16 - cx; y = 7 * 16 - cy;
+      R(g, x, y + 2, 48, 14, C.ink); R(g, x + 2, y + 4, 44, 7, '#8faaa4');
+      R(g, x + 3, y + 5, 42, 2, '#dfe9df');
+      R(g, x + 7, y - 5, 15, 9, C.ink); R(g, x + 9, y - 3, 11, 6, C.paper);
+      R(g, x + 12, y - 2, 5, 1, C.red); R(g, x + 13, y, 3, 1, C.red);
+      R(g, x + 35, y, 8, 5, C.ink); R(g, x + 37, y + 1, 4, 2, '#dfe9df');
+      R(g, x + 2, y + 13, 44, 4, '#8faaa4'); R(g, x + 8, y + 13, 32, 1, '#9bc0b2');
+      /* Due sedute reali h: sala d'attesa leggibile, corsia porta libera. */
+      [[7,8],[9,8]].forEach(function (p) {
+        var px = p[0] * 16 - cx, py = p[1] * 16 - cy;
+        R(g, px + 2, py + 1, 12, 13, C.ink); R(g, px + 4, py + 3, 8, 6, '#8faaa4');
+        R(g, px + 4, py + 10, 3, 4, '#dfe9df'); R(g, px + 9, py + 10, 3, 4, '#dfe9df');
+        R(g, px + 3, py + 14, 11, 2, '#8faaa4');
+      });
+      /* Porta reale a due ante e cornice profonda. */
+      x = 5 * 16 - cx; y = 9 * 16 - cy;
+      R(g, x - 4, y - 4, 40, 4, C.ink); R(g, x, y - 2, 32, 2, '#dfe9df');
+      R(g, x - 3, y, 3, 16, C.ink); R(g, x + 32, y, 3, 16, C.ink);
+    } else if (map.id === 'diner') {
+      /* Macchina del caffè sul bancone + sedute booth sugli stessi tavoli. */
+      x = 3 * 16 - cx; y = 2 * 16 - cy;
+      R(g, x + 28, y - 1, 20, 13, C.ink); R(g, x + 30, y + 1, 16, 9, '#d9c78d');
+      R(g, x + 32, y + 2, 6, 5, '#9aab69'); R(g, x + 40, y + 2, 4, 5, C.paper);
+      R(g, x + 34, y + 8, 10, 1, C.ink); R(g, x + 36, y + 10, 2, 4, C.ink);
+      [[2,5],[8,5],[2,7],[8,7]].forEach(function (p) {
+        var px = p[0] * 16 - cx, py = p[1] * 16 - cy;
+        R(g, px - 2, py + 1, 20, 5, C.ink); R(g, px, py + 2, 16, 3, '#8f2430');
+      });
+    } else if (map.id === 'oej') {
+      /* Parete a pannelli e tappeto d'asse: profondità prima dei tavoli. */
+      R(g, 10, 17, 140, 23, '#271a24');
+      for (i = 13; i < 146; i += 16) {
+        R(g, i, 20, 12, 16, '#684351'); R(g, i + 2, 22, 8, 12, '#3d2834');
+        R(g, i + 4, 24, 4, 2, C.gold);
+      }
+      x = 7 * 16 - cx; y = 1 * 16 - cy;
+      R(g, x, y, 32, 112, '#3d2834'); R(g, x + 3, y, 26, 112, '#684351');
+      R(g, x + 7, y, 18, 112, '#2f4937');
+      for (i = 7; i < 108; i += 14) { R(g, x + 10, y + i, 4, 4, C.gold); R(g, x + 18, y + i + 6, 4, 4, '#c1585a'); }
+      /* Tavoli in feltro; tende ancorate alle pareti mondo, non alla camera. */
+      x = 1 * 16 - cx; R(g, x, 0, 10, 144, '#4c1119');
+      for (i = 2; i < 10; i += 5) R(g, x + i, 0, 2, 144, '#c1585a');
+      x = 15 * 16 - cx; R(g, x - 10, 0, 10, 144, '#4c1119');
+      for (i = 2; i < 10; i += 5) R(g, x - 10 + i, 0, 2, 144, '#c1585a');
+      [[3,2],[11,2],[3,7],[11,7]].forEach(function (p, pi) {
+        var px = p[0] * 16 - cx, py = p[1] * 16 - cy;
+        R(g, px + 1, py + 3, 14, 8, '#31543a'); R(g, px + 3, py + 5, 4, 5, C.paper);
+        R(g, px + 9, py + 5, 4, 3, C.gold); R(g, px + 10, py + 8, 4, 3, C.red);
+        if (pi === 1) { R(g, px + 2, py + 2, 5, 3, '#c1585a'); R(g, px + 8, py + 8, 5, 2, C.paper); }
+        if (pi === 2) { R(g, px + 4, py + 4, 7, 1, C.gold); R(g, px + 12, py + 7, 2, 4, C.ink); }
+        if (pi === 3) { R(g, px + 2, py + 7, 4, 3, C.ink); R(g, px + 8, py + 4, 2, 2, '#c1585a'); }
+      });
+      /* Bicchieri, carte e fiches: cluster diversi, leggibili a 1x. */
+      [[3,2],[11,2],[3,7],[11,7]].forEach(function (p, pi) {
+        var px = p[0] * 16 - cx, py = p[1] * 16 - cy;
+        R(g, px + 4, py + 5, 3, 2, C.paper); R(g, px + 8, py + 6, 2, 2, C.gold);
+        R(g, px + 11, py + 4 + (pi & 1), 2, 3, '#c1585a');
+      });
+      /* Due clienti sulle vere sedute h: silhouette ambientali, collisione
+       * gia fisica, layout finalmente non bilaterale. */
+      [[3,3,0],[12,6,1]].forEach(function (p) {
+        var px = p[0] * 16 - cx, py = p[1] * 16 - cy;
+        R(g, px + 5, py + 2, 6, 5, C.ink); R(g, px + 6, py + 3, 4, 3, p[2] ? '#d9c78d' : '#684351');
+        R(g, px + 4, py + 7, 8, 7, C.ink); R(g, px + 6, py + 8, 4, 5, p[2] ? '#684351' : '#31543a');
+      });
+      /* Roulette sul bancone CCCC: punto focale centrale, non nuovo ostacolo. */
+      x = 6 * 16 - cx; y = 4 * 16 - cy;
+      R(g, x, y + 2, 64, 12, C.ink); R(g, x + 2, y + 4, 60, 8, '#31543a');
+      R(g, x + 24, y + 3, 16, 10, C.gold); R(g, x + 27, y + 5, 10, 6, C.ink);
+      R(g, x + 30, y + 6, 4, 4, C.red); R(g, x + 31, y - 9, 2, 12, C.ink);
+      R(g, x + 25, y - 12, 14, 4, C.ink); R(g, x + 28, y - 11, 8, 2, C.gold);
+      /* Tre lampade sospese e pool di luce: atmosfera senza falsa collisione. */
+      [4,8,12].forEach(function (lx) {
+        var px = lx * 16 - cx, py = 3 * 16 - cy;
+        R(g, px + 7, py - 12, 2, 11, C.ink); R(g, px + 3, py - 1, 10, 4, C.ink);
+        R(g, px + 5, py, 6, 2, C.gold);
+        R(g, px + 2, py + 4, 12, 1, '#684351'); R(g, px + 4, py + 6, 8, 1, '#684351');
+      });
+    } else if (map.id === 'roadhouse') {
+      /* Palco, sipario, fari e microfono: fuoco scenico sulla riga C. */
+      x = 1 * 16 - cx; y = 1 * 16 - cy;
+      R(g, x, y - 14, 224, 30, '#34572d');
+      for (i = 0; i < 224; i += 16) { R(g, x + i, y - 12, 8, 25, '#6a8a43'); R(g, x + i + 8, y - 12, 8, 25, '#9aab69'); }
+      R(g, x, y + 12, 224, 5, C.ink); R(g, x, y + 17, 224, 3, '#dcd9a9');
+      /* Fondale spezzato e batteria laterale: palco, non barra nera. */
+      R(g, x + 22, y - 8, 48, 18, '#2c1a1f'); R(g, x + 26, y - 5, 40, 12, '#5c3a3a');
+      R(g, x + 166, y - 7, 31, 16, '#2c1a1f'); R(g, x + 170, y - 4, 23, 10, '#5c3a3a');
+      R(g, x + 176, y + 1, 10, 8, C.ink); R(g, x + 178, y + 3, 6, 4, '#caa15a');
+      R(g, x + 165, y + 5, 9, 5, C.ink); R(g, x + 188, y + 5, 9, 5, C.ink);
+      x = 8 * 16 - cx; y = 1 * 16 - cy;
+      R(g, x + 7, y - 3, 2, 22, C.ink); R(g, x + 3, y - 5, 10, 5, C.ink);
+      R(g, x + 5, y - 3, 6, 2, '#dcd9a9');
+      R(g, x + 1, y + 16, 15, 3, C.ink); R(g, x + 4, y + 16, 9, 1, '#dcd9a9');
+      for (i = -44; i <= 44; i += 22) { R(g, x + i + 5, y - 10, 8, 5, C.ink); R(g, x + i + 7, y - 8, 4, 3, '#dcd9a9'); }
+      /* Coni luce a gradini: palco leggibile anche dalla porta. */
+      for (i = 0; i < 7; i++) {
+        R(g, x - 42 - i, y + 18 + i * 3, 12 + i * 2, 2, i & 1 ? '#9aab69' : C.paper);
+        R(g, x + 34 - i, y + 18 + i * 3, 9 + i * 2, 2, i & 1 ? '#6a8a43' : '#dcd9a9');
+      }
+    }
+  }
+
   /* Sporto del tetto: 2px oltre la facciata su entrambi i lati, contorno
    * proprio (scuro fuori, chiaro dentro). Va disegnato in un passaggio a
    * parte, dopo l'intera griglia di tile: verso destra/sotto il tile vicino
@@ -1355,6 +2488,9 @@
       R(g, rightX, sy, 1, h, p[1]);
       R(g, rightX + 1, sy, 1, h, C.ink);
     }
+    townHeroAccents(g, map, cx, cy);
+    sceneHeroAccents(g, map, cx, cy);
+    interiorHeroAccents(g, map, cx, cy);
     /* Soglia esterna: pavimento grafico, non nuovo tile e non collisione.
      * Copre solo i quattro pixel subito sotto porte incastonate in un
      * edificio. Disegnata qui, sopra il terreno completo ma sotto entita'. */
@@ -1417,33 +2553,58 @@
     else if (side === '8') { R(ctx, x + 2, y + 2, 12, 3, '#31583f'); R(ctx, x + 5, y + 5, 6, 3, '#f8e078'); }
   }
 
-  function interiorWall(ctx, x, y, tx, ty, rows) {
+  function interiorWall(ctx, x, y, tx, ty, rows, opts) {
     var below = cell(rows, tx, ty + 1), left = cell(rows, tx - 1, ty), right = cell(rows, tx + 1, ty);
+    var mapId = opts && opts.mapId;
+    var wallBase = mapId === 'hospital' ? '#e6eee8' :
+      (mapId === 'diner' ? '#e8c48e' : (mapId === 'oej' ? '#563347' :
+      (mapId === 'roadhouse' ? '#382925' : (mapId === 'hotel_gn' ? '#75593d' : '#886848'))));
+    var wallTrim = mapId === 'hospital' ? '#8faaa4' :
+      (mapId === 'diner' ? '#9a3038' : (mapId === 'oej' ? '#c19a55' :
+      (mapId === 'roadhouse' ? '#a25f42' : '#715d48')));
     var openBelow = 'fcthCKUo'.indexOf(below) >= 0;
     var openSide = 'fcthCKUoD'.indexOf(left) >= 0 || 'fcthCKUoD'.indexOf(right) >= 0;
     if ((tx === 0 && 'fcthCKUoD'.indexOf(right) >= 0) ||
         (tx === rows[ty].length - 1 && 'fcthCKUoD'.indexOf(left) >= 0)) {
-      floor(ctx, x, y, tx, ty, false);
+      floor(ctx, x, y, tx, ty, false, mapId);
       if (tx === 0) { R(ctx, x, y, 4, 16, '#403038'); R(ctx, x + 3, y, 1, 16, '#715d48'); }
       else { R(ctx, x + 12, y, 4, 16, '#403038'); R(ctx, x + 12, y, 1, 16, '#715d48'); }
       return;
     }
     R(ctx, x, y, 16, 16, '#403038');
     if (openBelow) {
-      R(ctx, x, y, 16, 2, C.ink); R(ctx, x, y + 2, 16, 12, '#886848'); R(ctx, x, y + 14, 16, 2, C.ink);
+      R(ctx, x, y, 16, 2, C.ink); R(ctx, x, y + 2, 16, 12, wallBase); R(ctx, x, y + 14, 16, 2, C.ink);
       R(ctx, x + 1, y + 3, 14, 9, C.ink); R(ctx, x + 2, y + 4, 12, 7, '#c09860');
-      R(ctx, x + 3, y + 5, 10, 3, '#f0d888'); R(ctx, x + 3, y + 9, 10, 1, '#785040');
+      R(ctx, x + 3, y + 5, 10, 3, mapId === 'hospital' ? C.paper : '#f0d888');
+      R(ctx, x + 3, y + 9, 10, 1, wallTrim);
     } else if (openSide) {
-      R(ctx, x + 3, y, 2, 16, '#7c6750'); R(ctx, x + 11, y, 2, 16, C.ink);
+      R(ctx, x + 3, y, 2, 16, wallTrim); R(ctx, x + 11, y, 2, 16, C.ink);
     } else {
-      R(ctx, x + 1, y + 3, 14, 2, '#715d48'); R(ctx, x + 1, y + 10, 14, 2, '#715d48');
+      R(ctx, x + 1, y + 3, 14, 2, wallTrim); R(ctx, x + 1, y + 10, 14, 2, wallTrim);
     }
   }
 
-  function backWallLip(ctx, x, y, tx, ty, rows) {
+  function backWallLip(ctx, x, y, tx, ty, rows, opts) {
     if (cell(rows, tx, ty - 1) !== 'i') return;
+    var mapId = opts && opts.mapId;
+    if (mapId === 'hotel_gn') {
+      R(ctx, x, y, 16, 16, C.ink); R(ctx, x + 1, y + 2, 14, 11, '#dcd9a9');
+      R(ctx, x + 1, y + 10, 14, 3, '#6a8a43'); R(ctx, x + 7, y + 2, 2, 11, '#34572d');
+      R(ctx, x, y + 13, 16, 3, C.ink);
+      if ((tx & 3) === 1) { R(ctx, x + 3, y + 4, 4, 3, '#9aab69'); R(ctx, x + 4, y + 5, 2, 1, C.ink); }
+      return;
+    }
+    if (mapId === 'palmer') {
+      R(ctx, x, y, 16, 16, C.ink); R(ctx, x + 1, y + 2, 14, 12, '#eee6b5');
+      R(ctx, x + 1, y + 11, 14, 3, '#9aab69'); R(ctx, x, y + 14, 16, 2, C.ink);
+      R(ctx, x + 4, y + 5, 1, 2, '#9aab69'); R(ctx, x + 11, y + 7, 1, 2, '#9aab69');
+      if ((tx & 3) === 2) { R(ctx, x + 5, y + 4, 7, 6, C.ink); R(ctx, x + 6, y + 5, 5, 4, '#dcd9a9'); }
+      return;
+    }
+    var panel = mapId === 'hospital' ? '#dfe9df' : (mapId === 'diner' ? '#d9a56f' :
+      (mapId === 'oej' ? '#6e4057' : (mapId === 'roadhouse' ? '#49352c' : '#a07850')));
     R(ctx, x, y, 16, 16, '#403038'); R(ctx, x, y, 16, 2, C.ink); R(ctx, x, y + 14, 16, 2, C.ink);
-    R(ctx, x + 1, y + 3, 14, 9, C.ink); R(ctx, x + 2, y + 4, 12, 7, '#a07850');
+    R(ctx, x + 1, y + 3, 14, 9, C.ink); R(ctx, x + 2, y + 4, 12, 7, panel);
     if ((tx & 1) === 0) { R(ctx, x + 3, y + 5, 10, 4, '#f0d888'); R(ctx, x + 8, y + 5, 1, 4, C.ink); }
     else { R(ctx, x + 3, y + 5, 10, 1, '#d0a868'); R(ctx, x + 3, y + 8, 10, 1, '#684838'); }
   }
@@ -1477,9 +2638,7 @@
         return;
       case 'p':
         if (nightWoods) {
-          /* Cortile Lodge senza corsia verticale inventata: il target usa
-           * terreno viola continuo. Collisioni e percorso restano invariati. */
-          nightGround(ctx, x, y, tx, ty);
+          woodsPath(ctx, x, y, tx, ty, rows);
           groundShadow(ctx, x, y, tx, ty, rows);
         } else if (opts && opts.mapId === 'town') townPath(ctx, x, y, tx, ty, rows);
         else path(ctx, x, y, tx, ty, rows);
@@ -1501,7 +2660,8 @@
         return;
       case 'w': water(ctx, x, y, tx, ty, rows); return;
       case 'F':
-        if (opts && opts.mapId === 'town' && tx >= 26 && tx <= 27 && ty >= 8 && ty <= 15) urbanRail(ctx, x, y);
+        if (opts && opts.mapId === 'town' && tx >= 16 && tx <= 19 && ty >= 26 && ty <= 31) lakeShore(ctx, x, y, tx, ty, rows);
+        else if (opts && opts.mapId === 'town' && tx >= 26 && tx <= 27 && ty >= 8 && ty <= 15) urbanRail(ctx, x, y);
         else if (opts && opts.mapId === 'town' && tx >= 26 && tx <= 30 && ty >= 16 && ty <= 17) urbanRailHorizontal(ctx, x, y, ty === 17);
         else fence(ctx, x, y, tx, ty, rows, opts && opts.mapId === 'town');
         return;
@@ -1524,14 +2684,37 @@
       case 'J': arrivalCabin(ctx, x, y, tx, ty, rows); return;
       case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': building(ctx, ch, x, y, tx, ty, rows); return;
       case 'D': door(ctx, x, y, tx, ty, rows); return;
-      case 'i': interiorWall(ctx, x, y, tx, ty, rows); return;
-      case 'f': floor(ctx, x, y, tx, ty, false); backWallLip(ctx, x, y, tx, ty, rows); return;
-      case 'c': floor(ctx, x, y, tx, ty, true); backWallLip(ctx, x, y, tx, ty, rows); return;
-      case 'C': floor(ctx, x, y, tx, ty, false); backWallLip(ctx, x, y, tx, ty, rows); R(ctx, x, y + 4, 16, 12, C.ink); R(ctx, x + 1, y + 5, 14, 5, '#9a6843'); R(ctx, x + 2, y + 6, 12, 2, '#d19b5c'); R(ctx, x + 3, y + 11, 4, 3, '#6a4934'); R(ctx, x + 9, y + 11, 4, 3, '#6a4934'); return;
-      case 't': floor(ctx, x, y, tx, ty, false); backWallLip(ctx, x, y, tx, ty, rows); R(ctx, x + 1, y + 4, 14, 9, C.ink); R(ctx, x + 2, y + 3, 12, 8, '#875c3d'); R(ctx, x + 3, y + 4, 10, 2, '#c28a50'); R(ctx, x + 3, y + 11, 2, 4, C.ink); R(ctx, x + 11, y + 11, 2, 4, C.ink); return;
-      case 'h': floor(ctx, x, y, tx, ty, false); backWallLip(ctx, x, y, tx, ty, rows); R(ctx, x + 4, y + 2, 8, 12, C.ink); R(ctx, x + 5, y + 3, 6, 7, '#9a6843'); R(ctx, x + 6, y + 4, 4, 2, '#d5a364'); return;
-      case 'K': floor(ctx, x, y, tx, ty, false); backWallLip(ctx, x, y, tx, ty, rows); R(ctx, x + 1, y + 2, 14, 13, C.ink); R(ctx, x + 2, y + 3, 12, 11, '#ddd7b9'); R(ctx, x + 3, y + 4, 5, 3, C.paper); R(ctx, x + 3, y + 8, 10, 1, '#aaa989'); return;
-      case 'U': floor(ctx, x, y, tx, ty, false); backWallLip(ctx, x, y, tx, ty, rows); R(ctx, x + 2, y + 2, 12, 13, C.ink); R(ctx, x + 3, y + 3, 10, 11, '#855b3d'); R(ctx, x + 4, y + 4, 8, 2, '#c28a50'); R(ctx, x + 4, y + 8, 8, 1, C.ink); R(ctx, x + 8, y + 10, 1, 1, C.gold); return;
+      case 'i': interiorWall(ctx, x, y, tx, ty, rows, opts); return;
+      case 'f': floor(ctx, x, y, tx, ty, false, opts && opts.mapId); backWallLip(ctx, x, y, tx, ty, rows, opts); return;
+      case 'c': floor(ctx, x, y, tx, ty, true, opts && opts.mapId); backWallLip(ctx, x, y, tx, ty, rows, opts); return;
+      case 'C': floor(ctx, x, y, tx, ty, false, opts && opts.mapId); backWallLip(ctx, x, y, tx, ty, rows, opts); R(ctx, x, y + 4, 16, 12, C.ink); R(ctx, x + 1, y + 5, 14, 5, '#9a6843'); R(ctx, x + 2, y + 6, 12, 2, '#d19b5c'); R(ctx, x + 3, y + 11, 4, 3, '#6a4934'); R(ctx, x + 9, y + 11, 4, 3, '#6a4934'); return;
+      case 't': floor(ctx, x, y, tx, ty, false, opts && opts.mapId); backWallLip(ctx, x, y, tx, ty, rows, opts); R(ctx, x + 1, y + 4, 14, 9, C.ink); R(ctx, x + 2, y + 3, 12, 8, '#875c3d'); R(ctx, x + 3, y + 4, 10, 2, '#c28a50'); R(ctx, x + 3, y + 11, 2, 4, C.ink); R(ctx, x + 11, y + 11, 2, 4, C.ink); return;
+      case 'h':
+        if (opts && opts.mapId === 'redroom') redRoomFloor(ctx, x, y, tx, ty);
+        else floor(ctx, x, y, tx, ty, false, opts && opts.mapId);
+        backWallLip(ctx, x, y, tx, ty, rows, opts);
+        if (opts && opts.mapId === 'redroom') {
+          R(ctx, x + 3, y + 1, 10, 8, C.ink); R(ctx, x + 5, y + 3, 6, 5, '#caa15a');
+          R(ctx, x + 1, y + 7, 4, 6, C.ink); R(ctx, x + 11, y + 7, 4, 6, C.ink);
+          R(ctx, x + 4, y + 8, 8, 5, C.ink); R(ctx, x + 5, y + 9, 6, 3, '#caa15a');
+          R(ctx, x + 4, y + 12, 2, 4, C.ink); R(ctx, x + 10, y + 12, 2, 4, C.ink);
+        } else {
+          R(ctx, x + 4, y + 2, 8, 12, C.ink); R(ctx, x + 5, y + 3, 6, 7, '#9a6843'); R(ctx, x + 6, y + 4, 4, 2, '#d5a364');
+        }
+        return;
+      case 'K': floor(ctx, x, y, tx, ty, false, opts && opts.mapId); backWallLip(ctx, x, y, tx, ty, rows, opts); R(ctx, x + 1, y + 2, 14, 13, C.ink); R(ctx, x + 2, y + 3, 12, 11, '#ddd7b9'); R(ctx, x + 3, y + 4, 5, 3, C.paper); R(ctx, x + 3, y + 8, 10, 1, '#aaa989'); return;
+      case 'U': floor(ctx, x, y, tx, ty, false, opts && opts.mapId); backWallLip(ctx, x, y, tx, ty, rows, opts); R(ctx, x + 2, y + 2, 12, 13, C.ink); R(ctx, x + 3, y + 3, 10, 11, '#855b3d'); R(ctx, x + 4, y + 4, 8, 2, '#c28a50'); R(ctx, x + 4, y + 8, 8, 1, C.ink); R(ctx, x + 8, y + 10, 1, 1, C.gold); return;
+      case 'Z': redRoomFloor(ctx, x, y, tx, ty); return;
+      case 'R':
+        R(ctx, x, y, 16, 16, '#8f2430');
+        R(ctx, x, y, 3, 16, '#4c1119'); R(ctx, x + 3, y, 5, 16, '#c1585a');
+        R(ctx, x + 5, y, 2, 16, '#e47a75'); R(ctx, x + 8, y, 5, 16, '#8f2430');
+        R(ctx, x + 13, y, 3, 16, '#4c1119'); return;
+      case 'M':
+        redRoomFloor(ctx, x, y, tx, ty);
+        R(ctx, x + 4, y + 12, 8, 3, C.ink); R(ctx, x + 5, y + 10, 6, 3, '#727878');
+        R(ctx, x + 6, y + 3, 4, 7, '#c4c7ba'); R(ctx, x + 7, y + 1, 3, 3, C.paper);
+        R(ctx, x + 6, y + 5, 1, 5, '#e2e1cc'); R(ctx, x + 9, y + 4, 1, 6, '#5b6260'); return;
       default: oldTile(ctx, ch, x, y, tx, ty, rows, opts); return;
     }
   };
@@ -2745,6 +3928,16 @@
     mirrorsLeft: true,
     order: CAST_SHEET_ORDER.slice()
   };
+  GAME.Retro2D.interiorPropFootprints = INTERIOR_PROP_FOOTPRINTS.map(function (p) {
+    return { id:p.id, map:p.map, kind:p.kind, cells:p.cells.map(function (c) { return c.slice(); }) };
+  });
+  GAME.Retro2D.townStructureDefs = TOWN_STRUCTURE_DEFS.map(function (d) {
+    return {
+      id:d.id, ch:d.ch, anchor:d.anchor.slice(), component:d.component.slice(),
+      door:d.door && d.door.slice(), visualBounds:d.visualBounds.slice(),
+      cameraFocus:d.cameraFocus.slice(), materialKit:d.materialKit
+    };
+  });
 
   function rgbDistance(a, b) {
     var dr = a[0] - b[0], dg = a[1] - b[1], db = a[2] - b[2];

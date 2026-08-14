@@ -21,7 +21,7 @@ assert(Object.keys(P.faces).length >= 25, 'full speaking cast not covered');
 const card = P.drawCard(ctx, '', 'COOPER', 5, 55);
 assert.strictEqual(card.key, 'cooper');
 assert.strictEqual(card.label, 'COOPER');
-assert(card.width >= 40 && card.height === 47, 'card geometry unstable');
+assert(card.width === 40 && card.height === 47, 'card geometry unstable');
 assert(ctx.rects.length >= 35, 'portrait lacks authored pixel detail');
 assert(ctx.rects.every(r => Number.isInteger(r[0]) && Number.isInteger(r[1])), 'subpixel portrait draw');
 assert.deepStrictEqual(Object.values(P.palette).sort(), ['#072619','#34572d','#6a8a43','#9aab69','#eee6b5'].sort());
@@ -77,7 +77,67 @@ for (const name of names) {
   const full = P.drawCard(ctx, '', name, 5, 55);
   assert(full && full.label.indexOf('...') < 0, 'truncated speaker label: ' + name);
 }
+/* Metadata non basta: ogni volto deve restare nei 40x47 pixel dichiarati.
+ * Questo cattura accessori specifici (es. visiera nurse) fuori sagoma. */
+for (const key of Object.keys(P.faces)) {
+  const pixels = new Set();
+  const raster = {
+    fillStyle: '',
+    fillRect(x, y, w, h) {
+      for (let yy = y; yy < y + h; yy++) {
+        for (let xx = x; xx < x + w; xx++) pixels.add(xx + ',' + yy);
+      }
+    }
+  };
+  const meta = P.drawCard(raster, key, key.toUpperCase(), 9, 58);
+  assert(meta && meta.x === 9 && meta.y === 58 && meta.width === 40 && meta.height === 47,
+    key + ': card metadata mismatch');
+  const points = [...pixels].map(value => value.split(',').map(Number));
+  assert(points.length > 0, key + ': empty raster');
+  assert(points.every(([x, y]) => x >= 9 && x <= 48 && y >= 58 && y <= 104),
+    key + ': raster escapes 40x47 footprint');
+  assert.strictEqual(Math.min(...points.map(point => point[0])), 9, key + ': left bound');
+  assert.strictEqual(Math.max(...points.map(point => point[0])), 48, key + ': right bound');
+  assert.strictEqual(Math.min(...points.map(point => point[1])), 58, key + ': top bound');
+  assert.strictEqual(Math.max(...points.map(point => point[1])), 104, key + ': bottom bound');
+  assert(!Array.from({ length: 40 }, (_, index) => pixels.has((9 + index) + ',105')).some(Boolean),
+    key + ': row 105 must stay blank');
+}
+
+/* Regressione isolata: la precedente visiera top-4 dell'infermiera evadeva
+ * davvero di un pixel. Eseguiamo quel sorgente mutato in una VM separata e
+ * pretendiamo che lo stesso vincolo all-cast lo rifiuti, senza toccare il
+ * runtime live in nessuna delle due root. */
+function rasterEscapesCard(runtime, key) {
+  const x = 9, y = 58;
+  const pixels = [];
+  const raster = {
+    fillStyle: '',
+    fillRect(rx, ry, w, h) {
+      for (let yy = ry; yy < ry + h; yy++) {
+        for (let xx = rx; xx < rx + w; xx++) pixels.push([xx, yy]);
+      }
+    }
+  };
+  runtime.drawCard(raster, key, key.toUpperCase(), x, y);
+  return pixels.some(([px, py]) => px < x || px > x + 39 || py < y || py > y + 46);
+}
+assert.deepStrictEqual(Object.keys(P.faces).filter(key => rasterEscapesCard(P, key)), [],
+  'current all-cast raster must fit the card');
+const nurseTop3 = 'R(ctx, x + 3, top - 3, w - 6, 3, PAL.paper);';
+const nurseTop4 = 'R(ctx, x + 3, top - 4, w - 6, 3, PAL.paper);';
+assert.strictEqual(portraitSource.split(nurseTop3).length - 1, 1,
+  'nurse top-3 cap needle changed; update the adversarial mutation explicitly');
+const priorPortraitSource = portraitSource.replace(nurseTop3, nurseTop4);
+const priorSandbox = { globalThis: {}, module: { exports: {} } };
+priorSandbox.globalThis.GAME = {};
+vm.runInNewContext(fs.readFileSync(path.join(root, 'js/retro-font.js'), 'utf8'), priorSandbox);
+priorSandbox.module = { exports: {} };
+vm.runInNewContext(priorPortraitSource, priorSandbox);
+const priorP = priorSandbox.globalThis.GAME.Portraits;
+assert.deepStrictEqual(Object.keys(priorP.faces).filter(key => rasterEscapesCard(priorP, key)), ['nurse'],
+  'top-4 nurse mutation must fail the all-cast raster gate');
 const finaleSource = fs.readFileSync(path.join(root, 'js/narrative-finale.js'), 'utf8');
 assert(/raw\[i\]\.display_name, chunk\.join/.test(finaleSource), 'finale chunks lose speaker metadata');
 assert(!/combined\s*=\s*prefix\s*\+/.test(finaleSource), 'finale burns speaker into body copy');
-console.log('PORTRAIT-CAST-PASS 25/25');
+console.log('PORTRAIT-CAST-PASS 25/25; ADVERSARIAL-NURSE-PASS 1/1');

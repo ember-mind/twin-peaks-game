@@ -111,6 +111,7 @@ const allowedClassicDiane = new Set([
   'truman_atto3:first',
   'leland_morte:first',
   'leland_interr:first',
+  'bob_finale:first',
   'laura_finale2:first',
   'laura_sogno:first',
   'gigante2_dlg:first'

@@ -945,9 +945,29 @@
     var mw = map.width * TILE, mh = map.height * TILE;
     var txx = mw > vw ? clamp(p.x + 8 - vw / 2, 0, mw - vw) : (mw - vw) / 2;
     var tyy = mh > vh ? clamp(p.y + 8 - vh / 2, 0, mh - vh) : (mh - vh) / 2;
+    /* Look-ahead Gen II: quando Cooper guarda un landmark, il frame mostra
+     * il volume intero invece di tagliarne il tetto. Due tile verso nord,
+     * uno sugli altri assi; nessun cambio a coordinate o collisioni. */
+    if (!S.dialogue && !map.indoor) {
+      if (p.dir === 'up' && mh > vh) tyy = clamp(tyy - 40, 0, mh - vh);
+      else if (p.dir === 'down' && mh > vh) tyy = clamp(tyy + 16, 0, mh - vh);
+      if (p.dir === 'left' && mw > vw) txx = clamp(txx - 16, 0, mw - vw);
+      else if (p.dir === 'right' && mw > vw) txx = clamp(txx + 16, 0, mw - vw);
+    }
     /* Nel reference dialogo e ritratto occupano il terzo inferiore: alza il
      * soggetto nel mondo visibile, invece di lasciarlo dietro la UI. */
     if (S.dialogue && !map.indoor && mh > vh) tyy = clamp(tyy + 12, 0, mh - vh);
+    /* Lobby larga: quando Cooper entra, il desk reale al x4–7 deve cadere
+     * nell'asse visivo, non restare schiacciato contro bordo sinistro. Solo
+     * camera: coordinate, pathfinding e collisioni restano intatti. */
+    if (map.id === 'hotel_gn' && p.ty >= 7 && mw > vw) {
+      txx = clamp(txx, 0, mw - vw);
+    }
+    /* Soggiorno Palmer: porta, tavolo, divano e camino devono condividere
+     * frame. Look-ahead solo visivo; griglia e interazioni restano identiche. */
+    if (map.id === 'palmer' && p.ty >= 7 && mh > vh) {
+      tyy = clamp(tyy - 16, 0, mh - vh);
+    }
     /* Il frame Lodge di riferimento tiene Cooper a x~72 e lascia piu'
      * respiro a destra: offset costante di mezzo metatile, senza spostare
      * arte oltre i confini delle tile o alterare collisioni. */
@@ -1264,7 +1284,10 @@
     ctx.fillStyle = '#f5efcf'; ctx.fillRect(13, 40, UW - 26, 43);
     ctx.strokeStyle = '#63834a'; ctx.strokeRect(16.5, 43.5, UW - 33, 36);
     text('TWIN PEAKS', UW / 2, 50, '#183225', 'bold 14px monospace', 'center');
-    text('IL MISTERO DI LAURA PALMER', UW / 2, 72, '#31543a', 'bold 7px monospace', 'center');
+    // Il font bitmap usa scala intera: 6px e 7px producono entrambi scala 1.
+    // Il maiuscolo misurava 147px e finiva sotto la cornice; il titolo misto
+    // misura 125px e resta intero nel bordo interno da 127px.
+    text('Mistero di Laura Palmer', UW / 2, 69, '#31543a', '7px monospace', 'center');
     ctx.fillStyle = '#183225'; ctx.fillRect(0, 104, UW, 40);
     if (Math.floor(tGlobal / 500) % 2 === 0) {
       text(save ? (touch ? 'TOCCA: CONTINUA' : 'INVIO: CONTINUA')
@@ -1288,7 +1311,8 @@
       dividerY: 53,
       bodyY: 60,
       lineGap: 9,
-      promptY: 130
+      // Ultima riga corpo termina a 121; footer 126..132 resta dentro frame.
+      promptY: 126
     };
   }
 
@@ -1310,10 +1334,14 @@
     for (var i = 0; i < lines.length; i++) {
       text(lines[i], l.boxX + 10, l.bodyY + i * l.lineGap, '#183225');
     }
+    // Contesto e comando non spariscono: pulsa soltanto la freccia.
+    text('PAG. ' + (S.introPage + 1) + '/' + introPages().length,
+         l.boxX + 10, l.promptY, '#63834a', '7px monospace');
+    var advanceLabel = GAME.touchMode ? 'A' : 'INVIO';
+    text(advanceLabel, l.boxX + l.boxW - 18, l.promptY,
+         '#31543a', 'bold 8px monospace', 'right');
     if (Math.floor(tGlobal / 500) % 2 === 0) {
-      text('PAG. ' + (S.introPage + 1) + '/' + introPages().length,
-           l.boxX + 10, l.promptY, '#63834a', '7px monospace');
-      text('INVIO >', l.boxX + l.boxW - 10, l.promptY,
+      text('>', l.boxX + l.boxW - 10, l.promptY,
            '#31543a', 'bold 8px monospace', 'right');
     }
   }

@@ -13,14 +13,37 @@
 <body>
 <main class="wrap">
   <header class="top">
-    <div><div class="eyebrow">Twin Peaks · Retro 2D · R76</div><h1>Gauntlet visivo</h1></div>
+    <div><div class="eyebrow">Twin Peaks · Retro 2D · R98</div><h1>Gauntlet grafica + storia</h1></div>
     <a class="play" href="./">Gioca ora →</a>
   </header>
 
-  <section class="status" aria-label="Ultimi voti ciechi">
-    <article class="score pass"><strong>95,5</strong><span>Critico integrato · HARD PASS</span></article>
-    <article class="score pass"><strong>95,3</strong><span>UI + mobile · HARD PASS</span></article>
-    <article class="score"><strong>93,0</strong><span>World art · READY, zero blocker</span></article>
+  <section class="status" aria-label="Ultimi voti indipendenti">
+    <article class="score pass"><strong>9,0–9,5</strong><span>Grafica R98 · due critici indipendenti · entrambi PASS</span></article>
+    <article class="score pass"><strong>9,7</strong><span>Narrativa R3 · da 8,0 · esame indipendente superato</span></article>
+    <article class="score pass"><strong>102/102</strong><span>11 strutture + 23 props + 61 accessi + 7 renderer</span></article>
+  </section>
+
+  <section class="section">
+    <h2>R98 · Matrice completa finale</h2>
+    <div class="compare">
+      <figure class="shot"><img src="artifacts/visual-audit/gauntlet-2026-08-12-full/gameplay-sheet.png" alt="Matrice baseline di ventisette scene"><figcaption>Baseline · voto esterno 6,9/10</figcaption></figure>
+      <figure class="shot"><img src="artifacts/visual-audit/gauntlet-2026-08-13-r98/gameplay-sheet.png" alt="Matrice R98 di ventisette scene"><figcaption>R98 · 27 scene reali · esterni, interni, bosco, Red Room e traincar</figcaption></figure>
+    </div>
+    <div class="chart" style="margin-top:14px"><strong>Gate esterno superato</strong><p>Ogni round usa 27 catture native 160×144, test collisioni, playthrough desktop/mobile e due critici indipendenti. R98 chiude il gap con chiome sovrapposte, facciate materiche, ombre di contatto, soglie reali e danni variati sul vagone. Nessun dettaglio aggiunto mente sulla collisione.</p></div>
+  </section>
+
+  <section class="section">
+    <h2>Narrativa · diagnosi e riparazione</h2>
+    <table><thead><tr><th>Round</th><th>Voto</th><th>Risultato</th></tr></thead><tbody>
+      <tr><td>Esame iniziale</td><td>8,0</td><td>12 difetti: tempo, causazione, scelte cosmetiche, Laura poco concreta</td></tr>
+      <tr><td>Riparazione R2</td><td>9,1</td><td>10/12 chiusi; voci, reazioni NPC, morte e obiettivi migliorati</td></tr>
+      <tr><td>Riparazione R3</td><td>9,7 · PASS</td><td>Finale post-alba, Laura concreta e agente, prompt unici, prove con provenienza, rami pagati</td></tr>
+    </tbody></table>
+    <div class="compare" style="margin-top:14px">
+      <figure class="shot"><img src="artifacts/visual-audit/gauntlet-2026-08-12-r91/dialogue-desktop.png" alt="Dialogo reale desktop"><figcaption>Desktop · ritratto, nome e battuta bilanciata</figcaption></figure>
+      <figure class="shot"><img src="artifacts/visual-audit/gauntlet-2026-08-12-r91/dialogue-mobile.png" alt="Dialogo reale mobile"><figcaption>Mobile · stessa gerarchia, controlli touch fuori dal testo</figcaption></figure>
+    </div>
+    <div class="chart" style="margin-top:14px"><strong>Release exam</strong><p>23 suite, 4.354 controlli transazionali M4–M9, 193 controlli craft, 248 grounding, 35 riparazioni causali, 27/27 combinazioni finale e walkthrough completo da 86 acquisizioni. Copertura personaggi: 77/77 scene classiche, 52/52 varianti, 7/7 repeat. Voto lettore indipendente: 9,7/10.</p></div>
   </section>
 
   <section class="section">
@@ -94,26 +117,33 @@
   <section class="section">
     <h2>Andamento review cieca</h2>
     <div class="chart">
-      <svg viewBox="0 0 900 250" role="img" aria-label="Progressione punteggi da 67,5 a oltre 93">
-        <path d="M45 25V215H875" fill="none" stroke="#072619" stroke-width="3"/>
-        <path d="M45 72H875M45 120H875M45 167H875" fill="none" stroke="#9aab69" stroke-width="1" stroke-dasharray="5 6"/>
-        <polyline points="55,197 150,190 245,168 340,129 435,107 530,94 625,90 720,77 815,67" fill="none" stroke="#072619" stroke-width="7"/>
-        <polyline points="55,154 150,131 245,112 340,98 435,88 530,83 625,82 720,83 815,81" fill="none" stroke="#6a8a43" stroke-width="7"/>
-        <polyline points="150,197 245,145 340,126 435,98 530,84 625,69 720,74 815,79 855,58" fill="none" stroke="#9aab69" stroke-width="7"/>
-        <text x="8" y="31">100</text><text x="17" y="77">90</text><text x="17" y="125">80</text><text x="17" y="172">70</text><text x="17" y="220">60</text>
-        <text x="48" y="240">inizio</text><text x="795" y="240">round 10</text>
-      </svg>
-      <div class="legend"><span><i class="dot"></i>integrato</span><span><i class="dot ui"></i>UI/mobile</span><span><i class="dot world"></i>world art</span></div>
+      <table><thead><tr><th>Build</th><th>Art director</th><th>Architettura/gioco</th></tr></thead><tbody>
+        <tr><td>Baseline</td><td>6,9</td><td>6,9</td></tr>
+        <tr><td>R79</td><td>7,7</td><td>7,7</td></tr>
+        <tr><td>R80</td><td>7,9</td><td>7,9</td></tr>
+        <tr><td>R86</td><td>8,5</td><td>8,5</td></tr>
+        <tr><td>R89</td><td>9,1</td><td>8,2</td></tr>
+        <tr><td>R90</td><td>9,2</td><td>8,4</td></tr>
+        <tr><td>R91</td><td>9,3</td><td>8,5</td></tr>
+        <tr><td>R92</td><td>9,4</td><td>8,6</td></tr>
+        <tr><td>R93</td><td>9,5</td><td>8,7</td></tr>
+        <tr><td>R94 full</td><td>9,1</td><td>8,73</td></tr>
+        <tr><td>R95 full</td><td>9,2</td><td>8,87</td></tr>
+        <tr><td>R96B full</td><td>9,3 · PASS</td><td>8,91 · iterare</td></tr>
+        <tr><td>R97 full</td><td>9,4 · PASS</td><td>8,96 · iterare</td></tr>
+        <tr><td>R98 full</td><td>9,5 · PASS</td><td>9,00 · PASS</td></tr>
+      </tbody></table>
     </div>
   </section>
 
   <section class="section">
     <h2>Gate automatici correnti</h2>
     <div class="tests">
-      <div class="test"><b>23/23</b>reference</div><div class="test"><b>49/49</b>production</div>
-      <div class="test"><b>19/19</b>mobile</div><div class="test"><b>13/13</b>touch</div>
-      <div class="test"><b>366</b>smoke</div><div class="test"><b>86</b>walkthrough</div>
-      <div class="test"><b>87/87</b>town</div><div class="test"><b>9/9</b>palette</div>
+      <div class="test"><b>11/11</b>strutture</div><div class="test"><b>23/23</b>props</div>
+      <div class="test"><b>61/61</b>accessi</div><div class="test"><b>7/7</b>renderer</div>
+      <div class="test"><b>54/54</b>production</div><div class="test"><b>23/23</b>mobile</div>
+      <div class="test"><b>13/13</b>touch</div><div class="test"><b>366</b>smoke</div>
+      <div class="test"><b>86</b>walkthrough</div><div class="test"><b>87/87</b>town</div>
     </div>
   </section>
 
@@ -122,7 +152,7 @@
     <div class="method"><div>Build reale e cattura lossless.</div><div>Critici ricevono reference e frame, senza difesa autore.</div><div>Un gap osservabile per giro; correzione mirata.</div><div>Suite completa prima del deploy.</div></div>
   </section>
 
-  <footer class="foot">Aggiornato 7 agosto 2026. Canvas 160×144, sei toni, pixel interi; R76 estende grammatica visiva della radura a tutta Twin Peaks. Cooper R75 usa atlas animato 48×48. 25 ritratti speaker 256×264 e dialoghi ad alta risoluzione con griglia R74.</footer>
+  <footer class="foot">Aggiornato 13 agosto 2026. Canvas 160×144, sei toni, pixel interi. R98 usa volumi chiusi, 11 StructureDef, 23 famiglie prop e accessi missione verificati 61/61; 25 ritratti speaker 256×264; dialoghi 9,7/10. Grafica: 9,5 e 9,00, entrambi PASS. Punteggi riportati dai critici, non dall’autore delle patch.</footer>
 </main>
 </body>
 </html>

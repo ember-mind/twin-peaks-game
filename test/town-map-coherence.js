@@ -102,8 +102,8 @@ const groundedProps = 'SLPBAHEqV';
 const props = coordsWhere(groundedProps);
 ok(props.every(([x, y]) => ['.', '=', 'u', 'p', 'r'].includes(sourceMap.ground[key(x, y)])), 'ogni prop urbano dichiara sottofondo');
 const compactBuildings = coordsWhere('0');
-ok(compactBuildings.length === 27 && compactBuildings.every(([x, y]) => sourceMap.ground[key(x, y)] === '.'),
-  'le tre botteghe/case 3x3 dichiarano sottofondo su ogni tile solido');
+ok(compactBuildings.length === 21 && compactBuildings.every(([x, y]) => sourceMap.ground[key(x, y)] === '.'),
+  'le tre botteghe dichiarano sottofondo su footprint 3x3, 2x3 e 3x2');
 ok(Object.keys(sourceMap.ground).every((k) => {
   const [x, y] = k.split(',').map(Number);
   return groundedProps.includes(at(x, y)) || at(x, y) === '0';
@@ -195,9 +195,10 @@ ok([[22, 24], [41, 43]].every(([x0, x1]) =>
   Array.from({ length: x1 - x0 + 1 }, (_, i) => x0 + i).every((x) =>
     [7, 8, 9, 10, 11, 12, 13].every((y) => at(x, y) === 'p'))),
   'approcci ospedale e Palmer larghi tre tile fino alla strada');
-ok([7, 8, 9].every((y) => Array.from({ length: 36 }, (_, i) => i + 8).every((x) =>
-  at(x, y) === 'p' || sourceMap.ground[key(x, y)] === 'p')),
-  'corsia nord 36x3 continua, con una vera riga interna senza bordi');
+ok([7, 8].every((y) => Array.from({ length: 36 }, (_, i) => i + 8).every((x) =>
+  at(x, y) === 'p' || (at(x, y) === 'V' && sourceMap.ground[key(x, y)] === 'p'))) &&
+  Array.from({ length: 36 }, (_, i) => i + 8).every((x) => at(x, 9) === 'p' && !GAME.maps.isSolid(at(x, 9))),
+  'corsia nord 36x3 continua: solo auto V su fondo p e riga interna libera');
 ok([7, 8, 9].every((x) => [16, 17, 18, 19, 20, 21, 22, 23].every((y) => 'p='.includes(at(x, y)))) &&
    [21, 22, 23].every((y) => Array.from({ length: 7 }, (_, i) => i + 7).every((x) => 'p='.includes(at(x, y)))),
   'raccordo hotel-sheriff largo tre tile e svolta 7x3');
@@ -208,22 +209,22 @@ ok([45, 46, 47].every((x) => [16, 17, 18, 19, 20, 21, 22, 23, 24].every((y) => a
   'diner e Roadhouse collegati da corridoi e forecourt larghi almeno tre tile');
 
 const compactExpected = new Set();
-for (const [x0, y0] of [[15, 10], [19, 10], [46, 10]]) {
-  for (let y = y0; y < y0 + 3; y++) for (let x = x0; x < x0 + 3; x++) compactExpected.add(key(x, y));
+for (const [x0, y0, width, height] of [[15,10,3,3],[19,10,2,3],[46,10,3,2]]) {
+  for (let y = y0; y < y0 + height; y++) for (let x = x0; x < x0 + width; x++) compactExpected.add(key(x, y));
 }
 ok(compactBuildings.every(([x, y]) => compactExpected.has(key(x, y))) && compactExpected.size === compactBuildings.length,
-  'botteghe/case formano tre volumi 3x3 fuori dal frame street');
+  'botteghe formano tre volumi fisicamente diversi fuori dal frame street');
 
-/* Carrier criticati: ognuno deve contenere un volume 3x3 intero, compreso
+/* Carrier criticati: ognuno deve contenere il volume compatto intero, compreso
  * il lift del tetto. È una misura di completezza, non un conteggio gonfiato
  * da recinti o props. */
 function frameContains(cx, cy, x0, y0, width, height) {
   return x0 >= cx - 5 && x0 + width - 1 <= cx + 4 && y0 - 1 >= cy - 4 && y0 + height - 1 <= cy + 4;
 }
-for (const [cx, cy, bx, by] of [
-  [16, 9, 15, 10], [20, 9, 19, 10], [47, 13, 46, 10]
+for (const [cx, cy, bx, by, width, height] of [
+  [16,9,15,10,3,3], [20,9,19,10,2,3], [47,13,46,10,3,2]
 ]) {
-  ok(frameContains(cx, cy, bx, by, 3, 3), 'carrier frame @' + cx + ',' + cy + ' contiene landmark 3x3 intero con tetto');
+  ok(frameContains(cx, cy, bx, by, width, height), 'carrier frame @' + cx + ',' + cy + ' contiene landmark intero con tetto');
 }
 
 const authored = fs.readFileSync(path.join(__dirname, '..', 'js', 'retro-authored.js'), 'utf8');

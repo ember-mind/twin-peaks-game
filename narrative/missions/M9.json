@@ -377,8 +377,8 @@
                     "mode": "dialogue",
                     "speaker_id": "cooper",
                     "display_name": "COOPER",
-                    "text": "Il lutto confonde le date, Harry. Non inventa una prenotazione mai fatta.",
-                    "provenance_note": "[N→L] cronologia re-lockata dopo il carryover fisico da Atto 4: il punto procedurale taxi+corriera resta invariato senza datare falsamente la battuta."
+                    "text": "Ha nominato la compagnia, casa Palmer e le sette. Il registro non ha la prenotazione.",
+                    "provenance_note": "[N→L] cronologia re-lockata dopo il carryover fisico da Atto 4; revisione craft: Cooper oppone fatti verificabili senza generalizzare il lutto."
                   },
                   {
                     "id": "m9.b2.p6.accept.valigia.truman",
@@ -630,7 +630,7 @@
           "mode": "dialogue",
           "speaker_id": "cooper",
           "display_name": "COOPER",
-          "text": "Leland è venuto senza scorta e si è seduto da solo. Tratto la precisione come comportamento, non come prova."
+          "text": "Diane. Nodo perfetto, barba di tre giorni. Due righe separate."
         }
       ],
       "effects": [],

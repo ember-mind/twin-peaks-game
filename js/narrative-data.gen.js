@@ -184,6 +184,7 @@
      "new": true,
      "beat": "B2",
      "source_section": "B2",
+     "prompt": "Dieci minuti. Da cosa inizi?",
      "conditions": [
       {
        "flag": "sogno_raccontato"
@@ -216,17 +217,17 @@
      "choices": [
       {
        "id": "q_luogo",
-       "label": "Del posto dove l'hanno trovata",
+       "label": "Indicale la porta: ricorda il luogo?",
        "goto": "ronette_luogo"
       },
       {
        "id": "q_uomo",
-       "label": "Dell'uomo che era con lei",
+       "label": "Nomina l'uomo: termina la visita.",
        "goto": "ronette_uomo"
       },
       {
        "id": "q_laura",
-       "label": "Di Laura",
+       "label": "Mostrale la foto di Laura.",
        "goto": "ronette_laura"
       }
      ],
@@ -273,12 +274,10 @@
      "source_section": "B2-luogo",
      "pages": [
       {
-       "name": "COOPER",
-       "text": "Signorina Pulaski. Ricorda il posto dove l'hanno trovata?",
+       "name": "",
+       "text": "Cooper indica la porta senza avvicinarsi al letto.",
        "id": "m4.b2.ronette_luogo.p01",
-       "mode": "dialogue",
-       "speaker_id": "cooper",
-       "display_name": "COOPER"
+       "mode": "action"
       },
       {
        "name": "",
@@ -288,7 +287,7 @@
       },
       {
        "name": "COOPER",
-       "text": "(piano) Va bene.",
+       "text": "Va bene. Restiamo qui.",
        "id": "m4.b2.ronette_luogo.p03",
        "mode": "dialogue",
        "speaker_id": "cooper",
@@ -315,12 +314,10 @@
      "source_section": "B2-laura",
      "pages": [
       {
-       "name": "COOPER",
-       "text": "Laura era con lei, quella notte.",
+       "name": "",
+       "text": "Cooper posa la foto di Laura sul comodino, rivolta verso Ronette.",
        "id": "m4.b2.ronette_laura.p01",
-       "mode": "dialogue",
-       "speaker_id": "cooper",
-       "display_name": "COOPER"
+       "mode": "action"
       },
       {
        "name": "",
@@ -722,6 +719,7 @@
      "new": true,
      "beat": "B8",
      "source_section": "B8",
+     "prompt": "Che cosa dimostra il confronto?",
      "conditions": [
       {
        "evidence": "E6A_CUORE_INTERO"
@@ -739,14 +737,14 @@
       },
       {
        "name": "TACCUINO",
-       "text": "Un confronto accosta due voci. Sta a te dire che cosa una aggiunge all'altra.",
+       "text": "Un confronto accosta due voci; il taccuino conserva entrambe senza fonderle.",
        "first_time_only": true,
        "id": "m4.b8.cmp_e6a_tjames.p02",
        "mode": "notebook"
       },
       {
        "name": "TACCUINO",
-       "text": "Che cosa aggiunge il pendaglio alla testimonianza di James?",
+       "text": "Nel taccuino, il pendaglio ricomposto è affiancato alla rotta indicata da James.",
        "id": "m4.b8.cmp_e6a_tjames.p03",
        "mode": "notebook"
       }
@@ -1340,7 +1338,7 @@
        "mode": "dialogue",
        "speaker_id": "cooper",
        "display_name": "COOPER",
-       "text": "Segni ai bordi, nessun trascinamento verso il centro. La stanza tiene separate due geometrie."
+       "text": "Hawk, controlla la soglia. Io fotografo il vuoto fra questi segni."
       }
      ],
      "effects": [
@@ -1361,6 +1359,7 @@
      "id": "m5_theory_initial",
      "beat": "B8a",
      "source_section": "M5-B8a",
+     "prompt": "Prima lettura della scena?",
      "milestone": "milestone_theory_initial",
      "conditions": [
       {
@@ -1374,7 +1373,7 @@
       {
        "id": "m5.b8a.theory.p01",
        "mode": "notebook",
-       "text": "Prima lettura della scena?"
+       "text": "Nel taccuino restano aperte due letture della scena."
       }
      ],
      "choices": [
@@ -1391,7 +1390,7 @@
         {
          "id": "m5.b8a.feedback.degeneration",
          "mode": "notebook",
-         "text": "Una lettura possibile. La scena non ha ancora finito di parlare."
+         "text": "La segno a matita. Prima del rapporto, voglio l'ultimo riscontro."
         }
        ]
       },
@@ -1408,7 +1407,7 @@
         {
          "id": "m5.b8a.feedback.staging",
          "mode": "notebook",
-         "text": "Una lettura possibile. La scena non ha ancora finito di parlare."
+         "text": "La segno a matita. Prima del rapporto, voglio l'ultimo riscontro."
         }
        ]
       }
@@ -1426,6 +1425,7 @@
      "id": "m5_theory_revision",
      "beat": "B8b",
      "source_section": "M5-B8b",
+     "prompt": "Il nuovo fatto cambia la tua lettura?",
      "milestone": "milestone_theory_revision",
      "conditions": [
       {
@@ -1442,7 +1442,7 @@
       {
        "id": "m5.b8b.revision.p01",
        "mode": "notebook",
-       "text": "Il nuovo fatto cambia la tua lettura?"
+       "text": "Il terzo gruppo è completo; la prima ipotesi resta scritta a matita."
       }
      ],
      "choices": [
@@ -1500,6 +1500,7 @@
      "id": "m5_cmp_ring",
      "beat": "B8c",
      "source_section": "M5-B8c",
+     "prompt": "Che cosa dice la polvere intatta?",
      "conditions": [
       {
        "evidence": "E8A_ANELLO_POSIZIONE"
@@ -1512,7 +1513,7 @@
       {
        "id": "m5.b8c.cmp_ring.p01",
        "mode": "notebook",
-       "text": "Che cosa dice la polvere intatta sulla posizione dell'anello?"
+       "text": "La polvere è continua fino al bordo dell'anello."
       }
      ],
      "choices": [
@@ -2127,31 +2128,31 @@
       {
        "id": "m6.b1.ferry.p01",
        "mode": "action",
-       "text": "(Il traghetto non chiede documenti. È il suo mestiere, non chiederne.)"
+       "text": "(Il traghetto attraversa senza registro.)"
       },
       {
        "id": "m6.b1.ferry.p02",
        "mode": "action",
-       "text": "(Dentro: tavoli veri, fumo vero. Nessuno alza lo sguardo — alzarlo costa.)"
+       "text": "(Dentro, nessuno guarda Cooper.)"
       },
       {
        "id": "m6.b1.ferry.p03",
        "mode": "action",
-       "text": "(Un uomo grosso tiene il banco a un tavolo di carte. Ride poco, conta molto.)"
+       "text": "(Jacques controlla la passerella prima del mazzo.)"
       },
       {
        "id": "m6.b1.ferry.p04",
        "mode": "dialogue",
        "speaker_id": "hawk",
        "display_name": "HAWK",
-       "text": "(fuori, piano) Di là dal fiume comanda il fiume. Io resto all'uscita: è l'unica."
+       "text": "(fuori, piano) Io resto qui. Se chiudono il molo, restiamo dentro."
       },
       {
        "id": "m6.b1.ferry.p05",
        "mode": "dialogue",
        "speaker_id": "cooper",
        "display_name": "COOPER",
-       "text": "Un solo varco d'uscita e molti occhi abbassati. Hawk terrà il primo; io conterò i secondi."
+       "text": "Tieni libera la passerella. Io vado al tavolo."
       }
      ],
      "effects": [],
@@ -2218,6 +2219,7 @@
      "id": "m6_tactic",
      "beat": "B4",
      "source_section": "M6-B4",
+     "prompt": "Quale metodo usi con Jacques?",
      "conditions": [
       {
        "node_done": "m6_ferry"
@@ -2236,15 +2238,15 @@
       },
       {
        "id": "m6.b4.tactic.p02",
-       "mode": "notebook",
-       "text": "Come ti siedi davanti a Jacques?"
+       "mode": "action",
+       "text": "(Jacques spinge il mazzo al centro del tavolo.)"
       },
       {
        "id": "m6.b4.tactic.p03",
        "mode": "dialogue",
        "speaker_id": "cooper",
        "display_name": "COOPER",
-       "text": "Jacques conta le carte, non le uscite. Scelgo il metodo prima di scegliere la prima domanda."
+       "text": "Jacques. Prima di cominciare, il mazzo resta sul tavolo."
       }
      ],
      "choices": [
@@ -2528,7 +2530,7 @@
       {
        "notebook": {
         "id": "m6.note.pressione.list",
-        "text": "Quattro figure. Su una — \"quello dei fiammiferi\" — la voce è calata. La lista è buttata lì per annegarmi; ma una voce non si governa."
+        "text": "Possibile copertura: quattro figure. Sui fiammiferi la voce cala; le mani si fermano."
        }
       },
       {
@@ -2673,6 +2675,7 @@
      "id": "m6_p5",
      "beat": "B6b",
      "source_section": "M6-B6b",
+     "prompt": "Che cosa puoi sostenere?",
      "milestone": "milestone_p5",
      "conditions": [
       {
@@ -2683,7 +2686,7 @@
       {
        "id": "m6.b6b.p5.p01",
        "mode": "notebook",
-       "text": "Che cosa puoi sostenere, adesso?"
+       "text": "Ammissione registrata: Jacques era al vagone."
       }
      ],
      "choices": [
@@ -2941,7 +2944,7 @@
        "mode": "dialogue",
        "speaker_id": "lucy",
        "display_name": "LUCY",
-       "text": "Chi entra e esce da un ospedale senza farsi notare, agente? Chi?"
+       "text": "Chi entra ed esce da un ospedale senza farsi notare, agente? Chi?"
       }
      ],
      "pages_by_value": {
@@ -2962,7 +2965,7 @@
          "mode": "dialogue",
          "speaker_id": "cooper",
          "display_name": "COOPER",
-         "text": "Mi ha lasciato quattro figure e una voce che cala. L'unico che poteva dirmi su quale, è appena uscito dalla lista."
+         "text": "Quattro nomi sul suo elenco, Harry. Sui fiammiferi ha abbassato la voce. Ora non posso chiedergli perché."
         }
        ],
        "falsa_sicurezza": [
@@ -3036,14 +3039,14 @@
        "mode": "dialogue",
        "speaker_id": "truman",
        "display_name": "TRUMAN",
-       "text": "Un gigante? Agente, con lei succede sempre qualcosa di strano."
+       "text": "Un gigante non so dove metterlo. Jacques sì: qualcuno ha superato un piantone."
       },
       {
        "id": "m6.b9.atto4.p03",
        "mode": "dialogue",
        "speaker_id": "cooper",
        "display_name": "COOPER",
-       "text": "Il Gigante mi è apparso poco dopo la notizia su Jacques. Non so se i due fatti siano collegati."
+       "text": "Cominciamo dal piantone. Sul Gigante non scrivo ancora nulla."
       },
       {
        "id": "m6.b9.atto4.p04",
@@ -3326,6 +3329,7 @@
      "id": "m8_diner",
      "beat": "A",
      "source_section": "M8-A",
+     "prompt": "Che cosa prometti a Maddy?",
      "conditions": [
       {
        "not": {
@@ -3381,8 +3385,8 @@
       },
       {
        "id": "m8.a.diner.p08",
-       "mode": "notebook",
-       "text": "La promessa a Maddy."
+       "mode": "action",
+       "text": "(Maddy piega il tovagliolo sugli orari e aspetta.)"
       }
      ],
      "choices": [
@@ -3461,6 +3465,7 @@
      "id": "m8_roadhouse",
      "beat": "B",
      "source_section": "M8-B",
+     "prompt": "Chi deve ricevere l'avvertimento?",
      "conditions": [
       {
        "value_set": "promise_stance"
@@ -3514,7 +3519,7 @@
        "mode": "dialogue",
        "speaker_id": "cooper",
        "display_name": "COOPER",
-       "text": "Harry, non so ancora cosa si ripeta. Abbiamo un telefono; scelgo chi deve sentire l'avvertimento."
+       "text": "Harry, non so ancora cosa si ripeta. La linea è libera; quello che dico adesso farà muovere qualcuno."
       }
      ],
      "choices": [
@@ -3740,6 +3745,7 @@
      "id": "m8_focus_choice",
      "beat": "C",
      "source_section": "M8-C",
+     "prompt": "Dove vai?",
      "conditions": [
       {
        "evidence": "T_LELAND_TAXI"
@@ -3762,14 +3768,14 @@
       {
        "id": "m8.c.focus.p02",
        "mode": "notebook",
-       "text": "Dove andare, adesso?"
+       "text": "Sul taccuino, tre luoghi restano senza segni di priorità."
       },
       {
        "id": "m8.c.focus.p03",
        "mode": "dialogue",
        "speaker_id": "cooper",
        "display_name": "COOPER",
-       "text": "Tre luoghi e nessun fatto che ne preferisca uno. Scelgo una direzione, non una conclusione."
+       "text": "Nessun fatto ne preferisce uno. Il primo costo è la distanza."
       }
      ],
      "choices": [
@@ -4228,6 +4234,7 @@
      "id": "m8_cmp_diary",
      "beat": "E",
      "source_section": "M8-E",
+     "prompt": "Che cosa puoi formulare?",
      "conditions": [
       {
        "evidence": "E9A_LETTERA_O"
@@ -4264,7 +4271,7 @@
       {
        "id": "m8.e.cmp_diary.p03",
        "mode": "notebook",
-       "text": "Che cosa puoi formulare?"
+       "text": "Cooper affianca la promessa del diario alla sequenza R–O."
       }
      ],
      "choices": [
@@ -4827,8 +4834,8 @@
             "mode": "dialogue",
             "speaker_id": "cooper",
             "display_name": "COOPER",
-            "text": "Il lutto confonde le date, Harry. Non inventa una prenotazione mai fatta.",
-            "provenance_note": "[N→L] cronologia re-lockata dopo il carryover fisico da Atto 4: il punto procedurale taxi+corriera resta invariato senza datare falsamente la battuta."
+            "text": "Ha nominato la compagnia, casa Palmer e le sette. Il registro non ha la prenotazione.",
+            "provenance_note": "[N→L] cronologia re-lockata dopo il carryover fisico da Atto 4; revisione craft: Cooper oppone fatti verificabili senza generalizzare il lutto."
            },
            {
             "id": "m9.b2.p6.accept.valigia.truman",
@@ -5080,7 +5087,7 @@
        "mode": "dialogue",
        "speaker_id": "cooper",
        "display_name": "COOPER",
-       "text": "Leland è venuto senza scorta e si è seduto da solo. Tratto la precisione come comportamento, non come prova."
+       "text": "Diane. Nodo perfetto, barba di tre giorni. Due righe separate."
       }
      ],
      "effects": [],

@@ -144,6 +144,12 @@
         var S = buildSections(state, missions, data);
         if (view === 'menu') {
           root.appendChild(el('div', 'nw-title', opts.readOnly ? 'TACCUINO — SOLA LETTURA' : 'TACCUINO'));
+          var objectiveText = opts.getObjectiveText ? opts.getObjectiveText() : (opts.objectiveText || '');
+          if (objectiveText) {
+            var objective = el('div', 'nw-page nb-objective', 'OBIETTIVO: ' + objectiveText);
+            objective.setAttribute('data-nb-objective', 'true');
+            root.appendChild(objective);
+          }
           SECTIONS.forEach(function (name, i) {
             var counts = { Evidenze: S.evidences.length, Appunti: S.notes.length, Proposizioni: S.props.length, Confronta: null };
             var suffix = counts[name] === null ? '' : ' (' + counts[name] + ')';

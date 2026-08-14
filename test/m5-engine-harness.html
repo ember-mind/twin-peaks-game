@@ -41,7 +41,7 @@
 <script src="../js/narrative-runtime.js"></script>
 <script src="../js/narrative-ui.js"></script>
 <script src="../js/narrative-notebook.js"></script>
-<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r77"></script>
 <script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
 <script src="../js/narrative-save.js"></script>
 <script>
@@ -96,6 +96,44 @@ async function seq() {
   var pp = NR.preparePresentation(st0, M4d, presN, 'P2'); NR.commitPresentation(st0, M4d, presN, pp);
   results.checks.m4_done_entry_m5 = (st0.flags.atto3 === true && obj() === 'obj_m5_1');
   E.state.flags.atto3 = true; E.state.flags.sogno_fatto = true; // layer classico (porte)
+
+  function inMapData(map, id) { return (GAME.Maps[map].npcs || []).some(function (n) { return n.id === id; }); }
+  function inLive(id) { return (E.state.npcs || []).some(function (n) { return n.id === id; }); }
+
+  // Truman non anticipa il rapporto: assente finché m5_final_theory non esiste.
+  A.syncNarrativeEntities('m5-truman-early');
+  results.checks.truman_traincar_absent_before_report_ready_map = !inMapData('traincar', 'truman');
+  await at(10, 4, 'left');
+  results.checks.truman_traincar_absent_before_report_ready_live = !inLive('truman');
+
+  // Actor narrativo posseduto ma senza root: input consumato, pagina visibile,
+  // lease attivo, zero scritture e rilascio completo alla chiusura.
+  var m5State = S(), feedbackState = NR.createState();
+  NR.applyEffects(feedbackState, [{ set: 'sogno_fatto' }]);
+  A.setState(feedbackState);
+  await at(4, 3, 'up', 'hospital');
+  var feedbackBefore = NR.serialize(S()), feedbackEvents = A.events.length;
+  await press('Enter'); await wait(80);
+  results.checks.no_roots_actor_input_consumed = !E.state.dialogue;
+  results.checks.no_roots_actor_feedback_visible = !!document.querySelector('[data-page-id="adapter.no_roots.actor"]');
+  results.checks.no_roots_actor_feedback_holds_lease = A.active();
+  results.checks.no_roots_actor_feedback_logged = A.events.slice(feedbackEvents).some(function (e) { return e.event === 'interaction_no_roots_feedback' && e.actor === 'infermiera'; });
+  await press('Enter'); await wait(80);
+  results.checks.no_roots_actor_feedback_releases_lease = !A.active();
+  results.checks.no_roots_actor_feedback_never_writes_state = NR.serialize(S()) === feedbackBefore;
+  A.setState(m5State);
+
+  // Stesso contratto per un target ambientale che avrebbe un fallback classico:
+  // il cartello OEJ è posseduto da M5, ma non ha root prima del rapporto.
+  await at(20, 3, 'up', 'traincar');
+  var targetBefore = NR.serialize(S()), targetEvents = A.events.length;
+  await press('Enter'); await wait(80);
+  results.checks.no_roots_target_input_consumed_without_classic_fallback = !E.state.dialogue;
+  results.checks.no_roots_target_feedback_visible = !!document.querySelector('[data-page-id="adapter.no_roots.target"]');
+  results.checks.no_roots_target_feedback_logged = A.events.slice(targetEvents).some(function (e) { return e.event === 'interaction_no_roots_feedback' && e.target === 'sign_oej'; });
+  await press('Enter'); await wait(80);
+  results.checks.no_roots_target_feedback_releases_lease = !A.active();
+  results.checks.no_roots_target_feedback_never_writes_state = NR.serialize(S()) === targetBefore;
 
   var m4Snapshot = { assistance_level: st0.assistance_level, b8: JSON.stringify(st0.b8_attempt_history) };
   function classic() { try { return JSON.parse(localStorage.getItem('tp_save')); } catch (e) { return null; } }
@@ -163,7 +201,7 @@ async function seq() {
   // 2) scoperta del vagone [entrance 11,6]
   await at(11, 7, 'up');
   await press('Enter'); // p01
-  await press('Enter'); await press('Enter'); // p02, p03
+  await press('Enter'); await press('Enter'); await press('Enter'); // p02, p03, p04
   results.checks.vagone_false_on_last_page = (S().flags.vagone_scoperto !== true);
   await press('Enter'); // commit
   results.checks.discovery_done = (S().flags.vagone_scoperto === true && obj() === 'obj_m5_2');
@@ -173,7 +211,7 @@ async function seq() {
   await at(14, 5, 'left'); // anello (13,5)
   await press('Enter');
   await press('Enter'); await press('Enter');
-  await press('Enter'); // p04 (ultima pagina)
+  await press('Enter'); await press('Enter'); // p04, p05 (ultima pagina)
   results.checks.ring_evidence_after_last_page = (S().evidence.E8A_ANELLO_POSIZIONE !== true);
   await press('Enter'); // conferma → commit gruppo 1
   await wait(250);
@@ -183,7 +221,8 @@ async function seq() {
   // 4) gruppo 2: MUCCHIO → milestone teoria NELLO STESSO LEASE
   await at(10, 5, 'up'); // mucchio (10,4)
   await press('Enter');
-  for (var k = 0; k < 4; k++) await press('Enter'); // p02..p04 + commit → milestone
+  for (var k = 0; k < 4; k++) await press('Enter'); // p02..p05
+  await press('Enter'); // conferma p05 → commit → milestone
   await wait(250);
   results.checks.theory_prompt_same_lease = (A.active() && !!document.querySelector('[data-page-id="m5.b8a.theory.p01"]'));
   await press('Enter'); // prompt → commit → widget
@@ -210,7 +249,8 @@ async function seq() {
   // 5) gruppo 3: SCENA → milestone revisione stesso lease
   await press('Enter'); // scena p01 (nuova interazione: siamo ancora davanti)
   await press('Enter'); // p02
-  await press('Enter'); // commit → milestone revisione
+  await press('Enter'); // p03
+  await press('Enter'); // conferma p03 → commit → milestone revisione
   await wait(250);
   results.checks.revision_prompt_same_lease = (A.active() && !!document.querySelector('[data-page-id="m5.b8b.revision.p01"]'));
   await press('Enter'); // → widget 3 scelte
@@ -222,19 +262,15 @@ async function seq() {
   results.checks.revision_abort_keeps_milestone_pending =
     (!A.active() && NR.pendingMilestones(S(), M5d).length === 1 && NR.pendingMilestones(S(), M5d)[0].node === 'm5_theory_revision');
 
-  // ripresa da Truman: le sue root (rapporto) sono bloccate dalla milestone —
-  // l'interazione deve RIAPRIRE la revisione, non morire (era il softlock)
+  // Truman resta assente durante la revisione pendente. La milestone si riapre
+  // da target M5 già completati, senza introdurre un attore prematuro.
+  results.checks.truman_absent_while_revision_pending = !inMapData('traincar', 'truman');
   var leaseBefore = leaseNet('narrative');
-  await at(10, 4, 'left'); // Truman (9,4)
-  await press('Enter'); await wait(250);
-  results.checks.revision_abort_then_truman_reopens_revision =
-    (A.active() && widgetOpts().length === 3 && A.events.some(function (e) { return e.event === 'milestone_resume' && e.to === 'm5_theory_revision'; }));
-  results.checks.pending_milestone_resume_holds_single_session_lease = (leaseNet('narrative') - leaseBefore === 1);
-  await press('Escape'); await wait(250);
   // ripresa da un target GIÀ COMPLETATO: scene_center (11,5)
   await at(11, 4, 'down');
   await press('Enter'); await wait(250);
   results.checks.revision_abort_then_completed_scene_reopens_revision = (A.active() && widgetOpts().length === 3);
+  results.checks.pending_milestone_resume_holds_single_session_lease = (leaseNet('narrative') - leaseBefore === 1);
   await press('Escape'); await wait(250);
   // e dall'anello già completato (13,5)
   await at(14, 5, 'left');
@@ -259,7 +295,7 @@ async function seq() {
   var rvInst = installNow('rev');
   results.checks.save_revision_pending = (rvInst.envelope.mission === 'M5' && NR.pendingMilestones(S(), M5d).length === 1 && S().values.m5_final_theory === undefined);
   results.checks.load_installs_revision_pending_state = (rvInst.ok && NR.pendingMilestones(S(), M5d).length === 1 && S().values.m5_final_theory === undefined);
-  await at(10, 4, 'left'); // Truman
+  await at(11, 4, 'down'); // scena completata
   await press('Enter'); await wait(250);
   results.checks.load_then_interaction_reopens_revision = (A.active() && widgetOpts().length === 3);
 
@@ -269,6 +305,8 @@ async function seq() {
   results.checks.revision_commit_after_resume_unlocks_report =
     (S().values.m5_final_theory === 'open' && S().flags.m5_theory_revised === true && obj() === 'obj_m5_3' &&
       NR.pendingMilestones(S(), M5d).length === 0 && NR.prepareNode(S(), M5d, 'm5_report_intro').ok === true);
+  results.checks.truman_traincar_present_when_report_ready_map = inMapData('traincar', 'truman');
+  results.checks.truman_traincar_present_when_report_ready_live = inLive('truman');
   checkpoint('dopo_revisione');
 
   // 6) P3A dal taccuino VERO (m5_p3a_real_notebook_flow)
@@ -371,17 +409,19 @@ async function seq() {
   await press('Enter'); // commit ramo → east_route
   results.checks.close_committed = (S().flags.east_route_confirmed === true && obj() === 'obj_m5_4' &&
     S().beats_completed.indexOf('m5_report_close') !== -1);
+  results.checks.truman_traincar_absent_after_report_map = !inMapData('traincar', 'truman');
+  results.checks.truman_traincar_absent_after_report_live = !inLive('truman');
   checkpoint('dopo_chiusura');
 
-  // 8) repeat solo ora
+  // 8) Truman lascia il vagone dopo il rapporto: niente duplicato o repeat fisico.
   await press('Enter'); await wait(250);
-  results.checks.repeat_after_completion = !!document.querySelector('[data-page-id="m5.repeat.report"]');
-  await press('Enter');
+  results.checks.repeat_not_physically_reachable_after_report = !document.querySelector('[data-page-id="m5.repeat.report"]');
   // cartello OEJ [P]
   await at(20, 3, 'up');
   await press('Enter'); await wait(200);
   results.checks.sign_oej_page = !!document.querySelector('[data-page-id="m5.sign_oej.p01"]');
-  await press('Enter');
+  await press('Enter'); // p02
+  await press('Enter'); // conferma p02 → commit/chiusura
   checkpoint('finale');
 
   // installazione VERA dello stato caricato (i 5 stati chiave sono coperti dai

@@ -30,14 +30,13 @@ function assertLauraAntiAbsolution(text, label) {
   ABSOLUTION_CLAIMS.forEach(function (claim) {
     assert.ok(!claim.test(text), label + ': Laura certifica ignoranza/innocenza con ' + claim);
   });
-  assert.ok(/mio padre/i.test(text) && /\bBOB\b/.test(text), label + ': Leland e BOB restano entrambi nella domanda');
-  assert.ok(/Non chiedermi dove finiva mio padre e dove cominciava BOB/i.test(text), label + ': Laura non rifiuta la separazione comoda');
-  assert.ok(/Separarli non cancella ciò che mi è stato fatto/i.test(text), label + ': BOB viene usato per assolvere Leland');
+  assert.ok(/\bBOB\b/.test(text) && /Leland Palmer/i.test(text), label + ': BOB e la firma di Leland restano entrambi visibili');
+  assert.ok(/copre BOB/i.test(text) && /firma/i.test(text), label + ': Laura trasferisce il giudizio in un gesto sul verbale');
+  assert.ok(/Non cancellare quel nome|Lascia aperta questa pagina/i.test(text), label + ': il gesto produce un ordine concreto, non una tesi');
 }
 
 var classicLauraPages = ClassicData.dialogues.laura_finale2.pages;
-var classicLauraText = classicLauraPages.filter(function (page) { return page.name === 'OMBRA DI LAURA'; })
-  .map(function (page) { return page.text; }).join(' ');
+var classicLauraText = classicLauraPages.map(function (page) { return page.text; }).join(' ');
 assert.ok(ClassicData.dialogues.laura_finale2.end === true, 'finale classico Laura resta raggiungibile e conclusivo');
 assertLauraAntiAbsolution(classicLauraText, 'finale classico');
 
@@ -144,6 +143,16 @@ methods.forEach(function (method, mi) {
         drainToChoice('m10_method');
         var beforeMethod = NF.getState().history.map(function (e) { return e.id || ''; });
         assert.ok(beforeMethod.indexOf('nf.m10.threshold.02') >= 0, 'Diane precede scelta metodo');
+        var thresholdText = screens.filter(function (screen) {
+          return screen.kind === 'page' && /^nf\.m10\.threshold\./.test(screen.page.id);
+        }).map(function (screen) { return screen.page.text; }).join(' ').replace(/\s+/g, ' ');
+        if (s1 === 'documented_custody') {
+          assert.ok(/Busta firmata nella tasca interna/.test(thresholdText) && !/Anello in cassaforte/.test(thresholdText),
+            'soglia anello: la custodia documentata porta la busta con Cooper');
+        } else {
+          assert.ok(/Anello in cassaforte/.test(thresholdText) && /solo chi firma il registro/.test(thresholdText),
+            'soglia anello: la custodia istituzionale resta alla centrale e richiede una firma');
+        }
         assert.ok(NF.choose(method).ok);
 
         roundTrip('m10_open');
@@ -178,6 +187,11 @@ methods.forEach(function (method, mi) {
         facts.forEach(function (fact) { assert.deepStrictEqual(atS3.material_admissions[fact], { recorded: true, speaker_register: 'leland_first_person' }); });
         assert.ok(atS3.history.some(function (e) { return e.id === 'nf.m10.s3.threshold.01'; }), 'soglia S3 visibile');
         assert.ok(NF.choose(s3).ok);
+        drainToPauseOrComplete();
+        assert.strictEqual(NF.getState().stage, 'await_post_s3');
+        assert.strictEqual(NF.objective(), 'Torna da Leland per chiudere il verbale.');
+        roundTrip('await_post_s3');
+        assert.ok(NF.resumePostS3().ok);
         drainToPauseOrComplete();
         assert.strictEqual(NF.getState().stage, 'await_lodge');
         roundTrip('await_lodge');
@@ -282,10 +296,24 @@ methods.forEach(function (method, mi) {
 
         var flat = screens.map(function (screen) { return screen.kind === 'page' ? screen.page.text : screen.prompt; }).join(' ').replace(/\s+/g, ' ');
         assert.ok(/L'ho uccisa io/.test(flat) && /taxi/i.test(flat) && /lettere/i.test(flat), 'ammissioni materiali esplicite');
+        assert.ok(/Centrale dello sceriffo\. Sì, signora, la ascolto\./.test(flat) && /Twin Peaks Taxi resta agganciata al verbale firmato/.test(flat),
+          'epilogo: centralino e nota taxi ripagano elementi già preparati');
+        assert.ok(!/cane era sotto il portico|volantino delle scomparse/i.test(flat),
+          'epilogo: nessuna immagine non preparata appare soltanto nel payoff');
         assert.ok(/Il volto cambia/.test(flat), 'cambio ritratto dichiarato');
-        assertLauraAntiAbsolution(flat.match(/Non chiedermi dove finiva mio padre[\s\S]*?La parte che spetta a ciascuno non la posso misurare per te\./)[0], 'finale narrativo');
-        assert.ok(/Separarli non cancella ciò che mi è stato fatto/.test(flat) && /La parte che spetta a ciascuno non la posso misurare per te/.test(flat),
-          'Laura rifiuta la separazione assolutoria e non quantifica la responsabilità');
+        assert.ok(/tubo cede/.test(flat) && /tubo spezzato/.test(flat) && /foto di Laura\. Non risponde/.test(flat),
+          'morte di Leland: urto, tubo rotto e non-assoluzione sono mostrati in sequenza');
+        var lauraText = screens.filter(function (screen) {
+          return screen.kind === 'page' && /^nf\.lodge\.laura\./.test(screen.page.id);
+        }).map(function (screen) { return screen.page.text; }).join(' ').replace(/\s+/g, ' ');
+        assertLauraAntiAbsolution(lauraText, 'finale narrativo');
+        assert.ok(/sottolinea la firma una volta sola/.test(lauraText),
+          'Laura rifiuta l’assoluzione attraverso l’azione di Cooper, senza ripetere la tesi');
+        if (s1 === 'institutional') {
+          assert.ok(/L'anello è in cassaforte/.test(flat) && /solo chi firma il registro/.test(flat),
+            'custodia istituzionale: il Nano riconosce che soltanto i firmatari possono toccare l’anello');
+          assert.ok(!/L'anello è nella tasca di Cooper/.test(flat), 'custodia istituzionale: nessuna busta appare nella tasca di Cooper');
+        }
         if (bobChoice === 'A') assert.ok(/Per Laura, Leland ha detto: «L'ho uccisa io»/.test(flat) && /Per Maddy, Leland ha detto: «L'ho uccisa io»/.test(flat) && /La sua voce è sul nastro/.test(flat), 'stance A attribuisce entrambe le ammissioni a Leland senza ambiguità di pagina');
         assert.ok(!/epilogue\.promise/.test(complete.history.map(function (e) { return e.id || ''; }).join(' ')), 'nessun secondo payoff promise_stance');
         passes++;
@@ -338,6 +366,7 @@ assert.strictEqual(NF.deserialize('{bad json').error, 'invalid_finale_save');
 assert.strictEqual(NF.deserialize({ version: 2, active: false, stage: 'bogus_stage', page_index: 0, values: {}, flags: {}, material_admissions: {}, history: [], encounters: [], epilogue_seen: {} }).error, 'invalid_finale_save');
 assert.strictEqual(NF.deserialize({ version: 2, active: false, stage: 'm10_threshold', page_index: 0, values: {}, flags: {}, material_admissions: {}, history: [], encounters: [], epilogue_seen: {} }).error, 'invalid_finale_save');
 assert.strictEqual(NF.deserialize({ version: 2, active: false, stage: 'await_laura', page_index: 0, values: {}, flags: {}, material_admissions: {}, history: [], encounters: [], epilogue_seen: {} }).error, 'invalid_finale_save');
+assert.strictEqual(NF.deserialize({ version: 3, active: false, stage: 'await_post_s3', page_index: 0, page_id: null, values: { m10_method: 'personale', s3: 'on' }, flags: {}, material_admissions: {}, history: [], encounters: ['bob'], epilogue_seen: {} }).error, 'invalid_finale_save');
 assert.strictEqual(NF.deserialize({ version: 2, active: true, stage: 'm10_threshold', page_index: 999, values: {}, flags: {}, material_admissions: {}, history: [], encounters: [], epilogue_seen: {} }).error, 'invalid_finale_save');
 assert.strictEqual(NF.deserialize({ version: 2, active: true, stage: 'm10_open', page_index: 0, values: {}, flags: {}, material_admissions: {}, history: [], encounters: [], epilogue_seen: {} }).error, 'invalid_finale_save');
 assert.strictEqual(NF.deserialize({ version: 2, active: false, stage: 'await_lodge_second', page_index: 0, values: { m10_method: 'personale', s3: 'on' }, flags: {}, material_admissions: {}, history: [], encounters: ['bob'], epilogue_seen: {} }).error, 'invalid_finale_save');

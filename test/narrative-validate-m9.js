@@ -133,8 +133,8 @@ ok(arrivalRepeat && /panca/i.test(arrivalRepeat.text) && /cornetta/i.test(arriva
   /Leland/i.test(arrivalRepeat.text) && /stanza/i.test(arrivalRepeat.text),
   'Repeat M9 conserva panca/cornetta e situa Leland nella stanza');
 const continuityOverride = allPages.get('m9.b2.p6.accept.p03');
-ok(continuityOverride.text === 'Il lutto confonde le date, Harry. Non inventa una prenotazione mai fatta.',
-  'override di continuità: la verifica riguarda prenotazione già dichiarata, non una corsa futura');
+ok(continuityOverride.text === 'Ha nominato la compagnia, casa Palmer e le sette. Il registro non ha la prenotazione.',
+  'override di continuità: Cooper oppone dettagli dichiarati e registro, senza universalizzare il lutto');
 ok(/cronologia re-lockata/.test(continuityOverride.provenance_note || '') && lockN.indexOf(continuityOverride.text) !== -1,
   'correzione di continuità re-lockata nella sorgente, mai riscrittura silenziosa');
 // frammenti esatti dichiarati dal Lock §1/§3/§6 per le righe condizionali derivate

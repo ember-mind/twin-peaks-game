@@ -109,9 +109,9 @@ source-map, ammessa dal contratto (stesso schema del beat C di M8, spezzato in 4
     nasce all'accettazione. Il posizionamento/cammino è C9-E; la collisione di target
     `truman@sheriff` fra M8 (`m8_station`, concluso ma con `repeat`) e M9
     (`m9_present_truman`) è risolta dall'adapter **latest-first** — da riprovare in C9-C.
-11. **Continuità `m9.b2.p6.accept.p03`** — **[N→L]**. La verifica riguarda una
-    prenotazione dichiarata prima del ritrovamento: il lutto non inventa una
-    prenotazione mai fatta.
+11. **Continuità `m9.b2.p6.accept.p03`** — **[N→L]**. La verifica oppone i tre
+    dettagli dichiarati da Leland — compagnia, casa e ora — al registro privo
+    di prenotazione, senza trasformare il lutto in una regola universale.
 
 ## Correzioni v1.1.1 rispettate (checklist dal §0 e §7 del Lock)
 

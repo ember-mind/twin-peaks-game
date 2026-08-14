@@ -161,6 +161,11 @@
       out.checks.material_admission_notes_exist = ['m10.admission.taxi', 'm10.admission.victims', 'm10.admission.scene'].every(function (id) { return ns.notebook.some(function (note) { return note.id === id; }); });
       out.checks.s3_threshold_visible = out.screens.some(function (id) { return id.indexOf('nf.m10.s3.threshold') === 0; });
       NF.choose('off'); toPause(NF);
+      out.checks.post_s3_pauses_for_walk = NF.getState().stage === 'await_post_s3' && NF.objective() === 'Torna da Leland per chiudere il verbale.';
+      E.loadMap('sheriff', 6, 3, 'left');
+      await press(w, 'KeyZ');
+      out.checks.post_s3_resumes_through_leland = NF.isActive() && NF.getState().stage === 'post_s3';
+      toPause(NF);
       out.checks.death_pauses_for_walk = NF.getState().stage === 'await_lodge' && E.state.flags.leland_morto && E.state.flags.leland_confessa;
 
       await wait(100);
@@ -218,7 +223,8 @@
       out.checks.choices_pay_off = final.consequences.confession_register === 'personale' && final.consequences.post_s3_record === 'truman_voluntary_witness' && final.consequences.encounter_order === 'bob_first' && final.consequences.ring_final_gesture === 'left' && final.consequences.bob_response_stance === 'B' && final.consequences.s4_interpretation === 'diagnosi';
       out.checks.optional_visits_recorded = final.epilogue_seen.sarah && final.epilogue_seen.ronette;
       out.checks.laura_last_image_present = out.screens.some(function (id) { return id.indexOf('nf.lodge.laura.05') === 0; });
-      out.checks.laura_keeps_responsibility_fractured_not_cancelled = out.screens.indexOf('nf.lodge.laura.03b') >= 0 && out.screens.indexOf('nf.lodge.laura.03c') >= 0;
+      out.checks.laura_keeps_responsibility_fractured_not_cancelled = out.screens.indexOf('nf.lodge.laura.03') >= 0 &&
+        out.screens.indexOf('nf.lodge.laura.03b') < 0 && out.screens.indexOf('nf.lodge.laura.03c') < 0;
       out.checks.no_gold_overflow = !out.errors.some(function (e) { return e.indexOf('gold_overflow:') === 0; });
       out.checks.no_auto_fragment_pages = !out.screens.some(function (id) { return /\.part\d+$/.test(id); });
       FP.reset();

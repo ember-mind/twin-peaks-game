@@ -84,7 +84,7 @@ for (const tile of REQUIRED) {
   assert(TARGET_TERMS[tile].test(archetypeDef.pages[0].text),
     `${archetypeDef.pages[0].text}: archetipo intercambiabile, manca lessico target "${tile}"`);
 }
-ok(ENV.resolve('town', 2, 2, { flags: {} }) === null, 'terreno passabile resta muto');
+ok(ENV.resolve('town', 6, 2, { flags: {} }) === null, 'terreno passabile resta muto');
 ok(ENV.resolve('town', -1, 2, { flags: {} }) === null, 'spazio fuori mappa resta muto');
 ok(ENV.resolve('town', 50, 0, { flags: {} }) === null, 'transenna dinamica non usa fallback ambientale');
 

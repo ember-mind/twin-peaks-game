@@ -181,6 +181,7 @@
       "id": "m8_diner",
       "beat": "A",
       "source_section": "M8-A",
+      "prompt": "Che cosa prometti a Maddy?",
       "conditions": [
         {
           "not": {
@@ -236,8 +237,8 @@
         },
         {
           "id": "m8.a.diner.p08",
-          "mode": "notebook",
-          "text": "La promessa a Maddy."
+          "mode": "action",
+          "text": "(Maddy piega il tovagliolo sugli orari e aspetta.)"
         }
       ],
       "choices": [
@@ -316,6 +317,7 @@
       "id": "m8_roadhouse",
       "beat": "B",
       "source_section": "M8-B",
+      "prompt": "Chi deve ricevere l'avvertimento?",
       "conditions": [
         {
           "value_set": "promise_stance"
@@ -369,7 +371,7 @@
           "mode": "dialogue",
           "speaker_id": "cooper",
           "display_name": "COOPER",
-          "text": "Harry, non so ancora cosa si ripeta. Abbiamo un telefono; scelgo chi deve sentire l'avvertimento."
+          "text": "Harry, non so ancora cosa si ripeta. La linea è libera; quello che dico adesso farà muovere qualcuno."
         }
       ],
       "choices": [
@@ -595,6 +597,7 @@
       "id": "m8_focus_choice",
       "beat": "C",
       "source_section": "M8-C",
+      "prompt": "Dove vai?",
       "conditions": [
         {
           "evidence": "T_LELAND_TAXI"
@@ -617,14 +620,14 @@
         {
           "id": "m8.c.focus.p02",
           "mode": "notebook",
-          "text": "Dove andare, adesso?"
+          "text": "Sul taccuino, tre luoghi restano senza segni di priorità."
         },
         {
           "id": "m8.c.focus.p03",
           "mode": "dialogue",
           "speaker_id": "cooper",
           "display_name": "COOPER",
-          "text": "Tre luoghi e nessun fatto che ne preferisca uno. Scelgo una direzione, non una conclusione."
+          "text": "Nessun fatto ne preferisce uno. Il primo costo è la distanza."
         }
       ],
       "choices": [
@@ -1083,6 +1086,7 @@
       "id": "m8_cmp_diary",
       "beat": "E",
       "source_section": "M8-E",
+      "prompt": "Che cosa puoi formulare?",
       "conditions": [
         {
           "evidence": "E9A_LETTERA_O"
@@ -1119,7 +1123,7 @@
         {
           "id": "m8.e.cmp_diary.p03",
           "mode": "notebook",
-          "text": "Che cosa puoi formulare?"
+          "text": "Cooper affianca la promessa del diario alla sequenza R–O."
         }
       ],
       "choices": [

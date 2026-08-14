@@ -30,7 +30,7 @@ assert.equal(castPng.toString('ascii', 1, 4), 'PNG', 'cast atlas PNG signature')
 assert.equal(castPng.readUInt32BE(16), 240, 'cast atlas width');
 assert.equal(castPng.readUInt32BE(20), 240, 'cast atlas height');
 assert(authored.includes(`cast-walkcycles-16.png?v=${castVersion}`), 'asset cache version matches atlas hash');
-assert(fs.readFileSync(path.join(root, 'index.html'), 'utf8').includes(`retro-authored.js?v=${castVersion}`), 'renderer cache version matches atlas hash');
+assert(fs.readFileSync(path.join(root, 'index.html'), 'utf8').includes(`retro-authored.js?v=${castVersion}-r98`), 'renderer cache version matches atlas hash and visual revision');
 
 for (const key of manifestKeys) {
   const file = path.join(root, 'assets', 'sprites', 'cast-16', `${key}.png`);
