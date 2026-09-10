@@ -8,18 +8,23 @@
 </style>
 </head>
 <body>
-<iframe id="product" title="Twin Peaks mobile gameplay" src="../index.html?touch=1&amp;mobileVisual=gold53"></iframe>
+<iframe id="product" title="Twin Peaks gameplay visual"></iframe>
 <script>
 (function(){
   var frame=document.getElementById('product');
+  var params=new URLSearchParams(location.search);
+  var query=params.get('touch')==='0'?'':'touch=1&';
+  query+='mobileVisual=heartgold-r120';
   frame.addEventListener('load',function(){
     setTimeout(function(){
       var w=frame.contentWindow,E=w.GAME.Engine;
+      var q=new URLSearchParams(location.search);
       E.state.mode='play';E.state.flags.intro_town=true;
-      E.loadMap('woods',14,4,'up');
+      E.loadMap(q.get('map')||'town',+(q.get('x')||12),+(q.get('y')||22),q.get('dir')||'up');
       document.title='TP-MOBILE-GAMEPLAY-READY';
-    },500);
+    },800);
   });
+  frame.src='../index.html?'+query;
 })();
 </script>
 </body>

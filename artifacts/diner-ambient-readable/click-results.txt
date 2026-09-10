@@ -1,0 +1,3 @@
+lights { max: 76, maxDelta: 106 }
+neon { max: 215, maxDelta: 143 }
+glass { max: 21, maxDelta: 70 }

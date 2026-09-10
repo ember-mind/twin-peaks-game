@@ -1224,7 +1224,7 @@ var AUTHORED_CHARACTERS_ENABLED = true;
   // dall'alto sembra un tavolo: il testo e' cio' che lo rende un cartello.
   var SIGN_LABELS = {
     'woods:11,14': ['GLASTONBURY', 'GROVE'],
-    'traincar:5,6': ['PONTE'],
+    'traincar:4,6': ['PONTE'],
     'traincar:20,2': ['ONE EYED JACKS']
   };
 

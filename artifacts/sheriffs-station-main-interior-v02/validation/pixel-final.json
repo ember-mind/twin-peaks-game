@@ -1,0 +1,123 @@
+{
+  "status": "unchanged",
+  "projectId": "twin-peaks-pokemon",
+  "runId": "2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation",
+  "scenario": "sheriffsStation",
+  "aiReviewNeeded": false,
+  "nextAction": "none",
+  "baselineRunId": "2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation",
+  "algorithm": "pixelmatch-7.2.0-srgb-rgba-v1",
+  "baselineEvidence": {
+    "manifestPath": "test/coldstage-baselines/sheriffsStation/baseline.json",
+    "manifestDigest": "369acd9d13fbc6c41fd889f849f0d998b5dff9bf7b48bdf71d300681eb59929e",
+    "sourceReport": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/report.json",
+    "sourceReportDigest": "aea3f4339c7289d8954ef9709de8ac25f11f45471cfb516e4964028cf578d4da",
+    "sourceReview": ".coldstage/reviews/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation/review-1788891991835-9cae737f.json",
+    "sourceReviewDigest": "c25d98c9245b19a86ce17b84716526acf88ed107f3267560f60af697dc4a7b4e"
+  },
+  "policy": {
+    "threshold": 0,
+    "maxChangedRatio": 0,
+    "includeAA": true
+  },
+  "policyDigest": "a916d5f814a87d42e37981c34ae67701592ac9430dfc47d9e879ea56253e5631",
+  "captures": [
+    {
+      "name": "sheriffsStation-depth-behind.png",
+      "status": "unchanged",
+      "baselinePath": "test/coldstage-baselines/sheriffsStation/versions/c25d98c9245b19a86ce17b84/sheriffsStation-depth-behind.png",
+      "baselineSha256": "426d5410042c09b84c76fcefa552e0db937cf63432a130bd9500c2873ab1ea15",
+      "currentPath": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-depth-behind.png",
+      "currentSha256": "426d5410042c09b84c76fcefa552e0db937cf63432a130bd9500c2873ab1ea15",
+      "policyDigest": "a916d5f814a87d42e37981c34ae67701592ac9430dfc47d9e879ea56253e5631",
+      "changedPixels": 0,
+      "changedRatio": 0,
+      "diffArtifact": null
+    },
+    {
+      "name": "sheriffsStation-depth-front.png",
+      "status": "unchanged",
+      "baselinePath": "test/coldstage-baselines/sheriffsStation/versions/c25d98c9245b19a86ce17b84/sheriffsStation-depth-front.png",
+      "baselineSha256": "ef261fd8420920e5432a9600da88e044cf7b8caea85e0a49695567181417fce7",
+      "currentPath": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-depth-front.png",
+      "currentSha256": "ef261fd8420920e5432a9600da88e044cf7b8caea85e0a49695567181417fce7",
+      "policyDigest": "a916d5f814a87d42e37981c34ae67701592ac9430dfc47d9e879ea56253e5631",
+      "changedPixels": 0,
+      "changedRatio": 0,
+      "diffArtifact": null
+    },
+    {
+      "name": "sheriffsStation-files-access.png",
+      "status": "unchanged",
+      "baselinePath": "test/coldstage-baselines/sheriffsStation/versions/c25d98c9245b19a86ce17b84/sheriffsStation-files-access.png",
+      "baselineSha256": "36d2226c52471795c0a37a4148da093b19f57466a22e0bda3d1dbab9a3978d3f",
+      "currentPath": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-files-access.png",
+      "currentSha256": "36d2226c52471795c0a37a4148da093b19f57466a22e0bda3d1dbab9a3978d3f",
+      "policyDigest": "a916d5f814a87d42e37981c34ae67701592ac9430dfc47d9e879ea56253e5631",
+      "changedPixels": 0,
+      "changedRatio": 0,
+      "diffArtifact": null
+    },
+    {
+      "name": "sheriffsStation-native-clean.png",
+      "status": "unchanged",
+      "baselinePath": "test/coldstage-baselines/sheriffsStation/versions/c25d98c9245b19a86ce17b84/sheriffsStation-native-clean.png",
+      "baselineSha256": "af3bbde3b6520e73a30c588a274ee68c807396996feb62d537c0cbd56f87924b",
+      "currentPath": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-native-clean.png",
+      "currentSha256": "af3bbde3b6520e73a30c588a274ee68c807396996feb62d537c0cbd56f87924b",
+      "policyDigest": "a916d5f814a87d42e37981c34ae67701592ac9430dfc47d9e879ea56253e5631",
+      "changedPixels": 0,
+      "changedRatio": 0,
+      "diffArtifact": null
+    },
+    {
+      "name": "sheriffsStation-native-debug.png",
+      "status": "unchanged",
+      "baselinePath": "test/coldstage-baselines/sheriffsStation/versions/c25d98c9245b19a86ce17b84/sheriffsStation-native-debug.png",
+      "baselineSha256": "c5e582452a3c2aca2f70fe7ab6ed82c003e92c6824e786ab62dc0c85a9115a36",
+      "currentPath": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-native-debug.png",
+      "currentSha256": "c5e582452a3c2aca2f70fe7ab6ed82c003e92c6824e786ab62dc0c85a9115a36",
+      "policyDigest": "a916d5f814a87d42e37981c34ae67701592ac9430dfc47d9e879ea56253e5631",
+      "changedPixels": 0,
+      "changedRatio": 0,
+      "diffArtifact": null
+    },
+    {
+      "name": "sheriffsStation-rear-door.png",
+      "status": "unchanged",
+      "baselinePath": "test/coldstage-baselines/sheriffsStation/versions/c25d98c9245b19a86ce17b84/sheriffsStation-rear-door.png",
+      "baselineSha256": "fb50eb2a17eef6834edf40297318072b5d6015dd2939148b6b9ac77e624af851",
+      "currentPath": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-rear-door.png",
+      "currentSha256": "fb50eb2a17eef6834edf40297318072b5d6015dd2939148b6b9ac77e624af851",
+      "policyDigest": "a916d5f814a87d42e37981c34ae67701592ac9430dfc47d9e879ea56253e5631",
+      "changedPixels": 0,
+      "changedRatio": 0,
+      "diffArtifact": null
+    },
+    {
+      "name": "sheriffsStation-reception-access.png",
+      "status": "unchanged",
+      "baselinePath": "test/coldstage-baselines/sheriffsStation/versions/c25d98c9245b19a86ce17b84/sheriffsStation-reception-access.png",
+      "baselineSha256": "054d685ef1c89a571a6c200dda2e100c95cd8571fe0f0f421623610f25e832af",
+      "currentPath": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-reception-access.png",
+      "currentSha256": "054d685ef1c89a571a6c200dda2e100c95cd8571fe0f0f421623610f25e832af",
+      "policyDigest": "a916d5f814a87d42e37981c34ae67701592ac9430dfc47d9e879ea56253e5631",
+      "changedPixels": 0,
+      "changedRatio": 0,
+      "diffArtifact": null
+    },
+    {
+      "name": "sheriffsStation-right-workspace.png",
+      "status": "unchanged",
+      "baselinePath": "test/coldstage-baselines/sheriffsStation/versions/c25d98c9245b19a86ce17b84/sheriffsStation-right-workspace.png",
+      "baselineSha256": "faaf067e4deeb8ed810dc34312ac3869f32948805ac8b26856b69f2f81cc7f61",
+      "currentPath": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-right-workspace.png",
+      "currentSha256": "faaf067e4deeb8ed810dc34312ac3869f32948805ac8b26856b69f2f81cc7f61",
+      "policyDigest": "a916d5f814a87d42e37981c34ae67701592ac9430dfc47d9e879ea56253e5631",
+      "changedPixels": 0,
+      "changedRatio": 0,
+      "diffArtifact": null
+    }
+  ],
+  "reviewSheet": null
+}

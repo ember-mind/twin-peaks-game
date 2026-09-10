@@ -1,0 +1,164 @@
+[
+  {
+    "id": "pendant-middle",
+    "start": 6865,
+    "end": 7220,
+    "variant": 0
+  },
+  {
+    "id": "pendant-west",
+    "start": 8135,
+    "end": 8409,
+    "variant": 2
+  },
+  {
+    "id": "pendant-east",
+    "start": 11170,
+    "end": 11465,
+    "variant": 0
+  },
+  {
+    "id": "pie-glass",
+    "start": 14640,
+    "end": 16945,
+    "variant": 0
+  },
+  {
+    "id": "pendant-middle",
+    "start": 15656,
+    "end": 15983,
+    "variant": 2
+  },
+  {
+    "id": "pendant-west",
+    "start": 16801,
+    "end": 17056,
+    "variant": 1
+  },
+  {
+    "id": "double-r-neon",
+    "start": 18375,
+    "end": 18543,
+    "variant": 2
+  },
+  {
+    "id": "pendant-west",
+    "start": 21780,
+    "end": 22070,
+    "variant": 1
+  },
+  {
+    "id": "pendant-east",
+    "start": 23378,
+    "end": 23716,
+    "variant": 1
+  },
+  {
+    "id": "pie-glass",
+    "start": 23837,
+    "end": 27116,
+    "variant": 1
+  },
+  {
+    "id": "pendant-middle",
+    "start": 24022,
+    "end": 24323,
+    "variant": 1
+  },
+  {
+    "id": "pendant-west",
+    "start": 29246,
+    "end": 29532,
+    "variant": 2
+  },
+  {
+    "id": "pendant-middle",
+    "start": 31439,
+    "end": 31689,
+    "variant": 1
+  },
+  {
+    "id": "pendant-east",
+    "start": 34832,
+    "end": 35134,
+    "variant": 1
+  },
+  {
+    "id": "pie-glass",
+    "start": 36220,
+    "end": 39764,
+    "variant": 1
+  },
+  {
+    "id": "pendant-west",
+    "start": 39401,
+    "end": 39659,
+    "variant": 2
+  },
+  {
+    "id": "double-r-neon",
+    "start": 41698,
+    "end": 41838,
+    "variant": 1
+  },
+  {
+    "id": "pendant-middle",
+    "start": 43629,
+    "end": 43889,
+    "variant": 1
+  },
+  {
+    "id": "pendant-east",
+    "start": 45455,
+    "end": 45809,
+    "variant": 2
+  },
+  {
+    "id": "pendant-west",
+    "start": 50319,
+    "end": 50586,
+    "variant": 0
+  },
+  {
+    "id": "double-r-neon",
+    "start": 51815,
+    "end": 52042,
+    "variant": 0
+  },
+  {
+    "id": "pie-glass",
+    "start": 52132,
+    "end": 55018,
+    "variant": 0
+  },
+  {
+    "id": "pendant-middle",
+    "start": 53671,
+    "end": 53922,
+    "variant": 0
+  },
+  {
+    "id": "pendant-east",
+    "start": 53794,
+    "end": 54119,
+    "variant": 2
+  },
+  {
+    "id": "pendant-west",
+    "start": 54979,
+    "end": 55254,
+    "variant": 2
+  },
+  {
+    "id": "pendant-east",
+    "start": 59604,
+    "end": 59876,
+    "variant": 2
+  },
+  {
+    "id": "pendant-middle",
+    "start": 59869,
+    "end": 60196,
+    "variant": 0
+  }
+]

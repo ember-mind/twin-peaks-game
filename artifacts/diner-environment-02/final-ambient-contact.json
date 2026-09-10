@@ -1,0 +1,64 @@
+{
+  "status": "ready-for-review",
+  "projectId": "twin-peaks-pokemon",
+  "runId": "2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment",
+  "scenario": "dinerAmbient",
+  "runtimeStatus": "pass",
+  "fresh": true,
+  "reportDigest": "10456623ddc2680d14bfa34cb82dc4d0225fa27633c3de655633d0d423936c40",
+  "visualReview": "not-performed",
+  "sourceArtifacts": 9,
+  "contactSheet": ".coldstage/reviews/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerAmbient-contact-sheet.webp",
+  "contactSheetSha256": "dcc28d83d60c083406462c59562002f785fb718552dadf5ac243ee4ea28bb462",
+  "sourceEvidence": [
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerAmbient-steam-0.png",
+      "sha256": "2d9e5fb2de434cac431b348ecc43e013195c2b307d69ea0b4aa3b0cd7ebd7efe",
+      "bytes": 31403
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerAmbient-steam-420.png",
+      "sha256": "9b1f15d7e1de3cb7097cf24a38147e0450f0ed650ea90a17725b448dfda2bce1",
+      "bytes": 31419
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerAmbient-steam-900.png",
+      "sha256": "185a826925b01ff39c354925443c962e182818b891e471d52ddf0eb2ac0c90b9",
+      "bytes": 31427
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerAmbient-lamp-west.png",
+      "sha256": "9ebf8f3787f09f475d710328c19e722c0f74fecb769dc5700d292b0a93dfaadb",
+      "bytes": 31484
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerAmbient-lamp-east.png",
+      "sha256": "37a5f18c3e7f561fc4cb2412e327dd3fa50628f9ac4bb4e97d7a57b91cefaf8e",
+      "bytes": 31463
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerAmbient-neon.png",
+      "sha256": "21bc7aba0520cad9085cb8a868ece61f5d9918a9abe67eb956ca7615674fefc0",
+      "bytes": 31419
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerAmbient-glass-start.png",
+      "sha256": "bd4690fdd4db0a5bdf42d00535aa3cb93aa4c541fc14085f59e1fbe22f75acc5",
+      "bytes": 31447
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerAmbient-glass-mid.png",
+      "sha256": "3d8e4ea04ca3932cf161c6ade425433f0ff7689470e1fa4cd57a11f678052ad1",
+      "bytes": 31458
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerAmbient-glass-end.png",
+      "sha256": "90618cc1df3fed374e2cf5a66210ba54a5c84906ba2e9a005906bec51a866f46",
+      "bytes": 31388
+    }
+  ],
+  "dimensions": {
+    "width": 1280,
+    "height": 2052
+  }
+}

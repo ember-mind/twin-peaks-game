@@ -1,0 +1,13 @@
+{
+  "reviewer": "gpt-6-astra",
+  "scope": "Connected preview interaction and transition UX",
+  "url": "http://127.0.0.1:4177/test/double-r-location.html",
+  "checks": {
+    "roundTripButton": "Round trip complete · exterior → interior → exterior",
+    "manualUpFromExteriorSpawn": "Inside Double R · facing into the room",
+    "manualDownFromInteriorSpawn": "Outside Double R · facing parking",
+    "debugToggle": "operable",
+    "artEdits": "none"
+  },
+  "verdict": "pass"
+}

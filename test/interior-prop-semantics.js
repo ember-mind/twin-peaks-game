@@ -19,7 +19,7 @@ vm.runInContext(fs.readFileSync(path.join(root, 'js/retro-authored.js'), 'utf8')
 const maps = context.GAME.maps.maps;
 const solid = context.GAME.maps.SOLID;
 const props = Array.from(context.GAME.Retro2D.interiorPropFootprints || []);
-assert.equal(props.length, 23, 'all twenty-three authored prop families declared');
+assert.equal(props.length, 24, 'all twenty-four authored prop families declared (hospital nativo: tenda, monitor, letti, bancone, sedia)');
 
 for (const prop of props) {
   const map = maps[prop.map];

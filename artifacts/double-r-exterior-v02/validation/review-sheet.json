@@ -1,0 +1,34 @@
+{
+  "status": "ready-for-review",
+  "projectId": "twin-peaks-pokemon",
+  "runId": "2026-09-08T13-40-40-914Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior",
+  "scenario": "dinerExterior",
+  "runtimeStatus": "pass",
+  "fresh": true,
+  "reportDigest": "12ed270be58e99d9ae30b91f176422d5d768d637a3ae9e161ff4962719826974",
+  "visualReview": "not-performed",
+  "sourceArtifacts": 3,
+  "contactSheet": ".coldstage/reviews/2026-09-08T13-40-40-914Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior/dinerExterior-contact-sheet.webp",
+  "contactSheetSha256": "ac92b7268a55a5101ecf7945dbd0c7538bf8888c64baba4db60c55769a674279",
+  "sourceEvidence": [
+    {
+      "path": ".coldstage/runs/2026-09-08T13-40-40-914Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior/dinerExterior-parking-clean.png",
+      "sha256": "9e59578eb7943b5149288b023794d1ac4cbc5f822a2ab019dbd7a951175e50ce",
+      "bytes": 11416
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T13-40-40-914Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior/dinerExterior-entrance-clean.png",
+      "sha256": "5f75a9b9ace2d343798cd64f20094ef481b35330e0de84802821d56e0ba25638",
+      "bytes": 11392
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T13-40-40-914Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior/dinerExterior-entrance-debug.png",
+      "sha256": "bd9575ffac3b2fb738cfb4325d46253c7776dc5ae3af430f4cb7187de6eb9074",
+      "bytes": 15574
+    }
+  ],
+  "dimensions": {
+    "width": 1280,
+    "height": 852
+  }
+}

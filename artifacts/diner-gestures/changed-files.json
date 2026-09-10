@@ -1,0 +1,15 @@
+[
+  "js/ambient-life.js",
+  "js/character-activity.js",
+  "js/retro-authored.js",
+  "js/engine.js",
+  "index.html",
+  "test/retro-production.js",
+  "test/canonical-sync.js",
+  "CANONICAL-SYNC.md",
+  "test/ambient-life-preview.html",
+  "coldstage.config.mjs",
+  "test/coldstage-config.js",
+  "test/character-activity.js",
+  "docs/character-activity.md"
+]

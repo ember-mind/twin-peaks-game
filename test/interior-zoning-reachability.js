@@ -14,12 +14,12 @@ require('../js/data.js');
 require('../js/glue.js');
 
 const starts = {
-  sheriff: [4, 7], palmer: [7, 10], hotel_gn: [8, 10], hospital: [5, 8],
+  sheriff: [7, 10], palmer: [7, 10], hotel_gn: [8, 10], room_315: [2, 6], hospital: [7, 10],
   diner: [6, 8], oej: [7, 8], roadhouse: [7, 8]
 };
 const targets = {
   palmer: [[6, 1], [8, 10]],
-  hotel_gn: [[15, 1]],
+  room_315: [[13, 3]],
   roadhouse: [[8, 1], [8, 5]]
 };
 const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
@@ -62,9 +62,11 @@ for (const [id, start] of Object.entries(starts)) {
 }
 
 /* Corridoi narrativi tassativi: test esplicito contro regressioni future. */
+const hotelCorridor = [];
+for (let y = 2; y <= 4; y++) for (let x = 13; x <= 16; x++) hotelCorridor.push([x, y]);
 for (const [id, cells] of Object.entries({
   palmer: [[4,4],[5,4],[4,5],[5,5]],
-  hotel_gn: [[13,4],[14,4],[15,4],[16,4]],
+  hotel_gn: hotelCorridor,
   roadhouse: [[8,2],[8,4],[8,5],[8,6]]
 })) {
   const map = GAME.Maps[id];
@@ -74,4 +76,11 @@ for (const [id, cells] of Object.entries({
   }
 }
 
-console.log(`INTERIOR-ZONING-REACHABILITY-PASS ${checks}/${checks} · 7/7 interiors connected`);
+/* La porta 315 (glifo D, x14 y1) e' raggiungibile dallo spawno del corridoio. */
+{
+  const seenHotel = flood(GAME.Maps.hotel_gn, starts.hotel_gn);
+  assert(seenHotel.has(key(14, 1)), 'hotel_gn: door 14,1 (verso room_315) reachable from 8,10');
+  checks++;
+}
+
+console.log(`INTERIOR-ZONING-REACHABILITY-PASS ${checks}/${checks} · ${Object.keys(starts).length}/${Object.keys(starts).length} interiors connected`);

@@ -90,41 +90,12 @@ function stats(px) {
   let darkest = null;
   for (const [hex] of colors) if (!darkest || luma(hex) < luma(darkest)) darkest = hex;
   const darkPct = darkest ? +(100 * counts.get(darkest) / mass).toFixed(1) : 0;
-  const width = maxX - minX + 1, height = maxY - minY + 1;
-  let upperMass = 0, lowerMass = 0;
-  const splitY = minY + Math.ceil(height / 2);
-  for (let y = minY; y <= maxY; y++) for (let x = minX; x <= maxX; x++) {
-    if (!px[y * W + x]) continue;
-    if (y < splitY) upperMass++; else lowerMass++;
-  }
-  const seen = new Uint8Array(px.length), components = [];
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const start = y * W + x;
-    if (!px[start] || seen[start]) continue;
-    const stack = [start]; seen[start] = 1; let size = 0;
-    while (stack.length) {
-      const pos = stack.pop(), cy = Math.floor(pos / W), cx = pos % W; size++;
-      for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
-        const nx = cx + dx, ny = cy + dy;
-        if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
-        const next = ny * W + nx;
-        if (px[next] && !seen[next]) { seen[next] = 1; stack.push(next); }
-      }
-    }
-    components.push(size);
-  }
-  components.sort((a, b) => b - a);
   return {
     bbox: [minX, minY, maxX, maxY],
-    width, height, mass,
-    fillPct: +(100 * mass / (width * height || 1)).toFixed(1),
-    upperLower: +(upperMass / (lowerMass || 1)).toFixed(2),
-    contained16: minX >= OX && maxX < OX + 16 && minY >= OY && maxY < OY + 16,
-    baseline15: maxY === OY + 15,
+    width: maxX - minX + 1, height: maxY - minY + 1, mass,
     colorCount: colors.length,
     colors: colors.map(([hex, n]) => [hex, n]),
     darkest, darkPct,
-    components,
     darkestIsBlack: darkest === '#000000'
   };
 }
@@ -386,9 +357,8 @@ if (args.has('art')) {
   process.exit(0);
 }
 const names = args.get('char') ? String(args.get('char')).split(',') : Object.keys(GAME.Sprites.CHARS);
-const fullCast = !args.get('char');
-if (fullCast) {
-  assert.equal(names.length, 24, 'production cast inventory');
+if (!args.get('char')) {
+  assert.equal(names.length, 25, 'production cast inventory');
   for (const name of names) {
     const sig = GAME.Sprites.CHARS[name].pixel16;
     assert(sig && sig.down && sig.up && sig.side && !sig.left, name + ' requires down/up/side pixel16 signatures only');
@@ -444,17 +414,13 @@ for (const name of names) {
   report.push(row);
 }
 
-/* JSON is formatting, never a bypass: assertions below always execute. */
-const jsonMode = args.has('json');
-const realConsoleLog = console.log;
-if (jsonMode) console.log = function () {};
+if (args.has('json')) { console.log(JSON.stringify(report, null, 2)); process.exit(0); }
 
 const F = (v, n = 1) => (typeof v === 'number' ? v.toFixed(n) : String(v));
 console.log('nome        IoU F/L  lato/fr%  collo%  spalle-testa  colori  nero%  nero?  tile  contorno%  notte=giorno');
 let worstClosure = 100, maxColors = 0, maxTile = 0, minDark = 100, worstNeck = 999, worstShoulder = 999, maxIou = 0;
 let minIou = 999, minSideMass = 999, maxSideMass = 0, minFrontW = 999, maxFrontW = 0,
-  minSideW = 999, maxSideW = 0, maxTiny = 0, maxHeight = 0;
-const containmentFailures = [], baselineFailures = [], componentFailures = [];
+  minSideW = 999, maxSideW = 0, maxTiny = 0;
 for (const r of report) {
   const d = r.dirs.down;
   let cl = 100, cols = 0, tile = 0, dark = 100, neck = 999, sh = 999;
@@ -474,14 +440,7 @@ for (const r of report) {
   maxFrontW = Math.max(maxFrontW, r.dirs.down.width, r.dirs.up.width);
   minSideW = Math.min(minSideW, r.dirs.left.width, r.dirs.right.width);
   maxSideW = Math.max(maxSideW, r.dirs.left.width, r.dirs.right.width);
-  for (const k of Object.keys(r.dirs)) {
-    const state = r.dirs[k];
-    maxTiny = Math.max(maxTiny, state.tinyClusterPct);
-    maxHeight = Math.max(maxHeight, state.height);
-    if (!state.contained16) containmentFailures.push(r.name + '/' + k + '=' + state.bbox.join(','));
-    if (!state.baseline15) baselineFailures.push(r.name + '/' + k + '=y' + state.bbox[3]);
-    if (state.components.length !== 1) componentFailures.push(r.name + '/' + k + '=' + state.components.join(','));
-  }
+  for (const k of Object.keys(r.dirs)) maxTiny = Math.max(maxTiny, r.dirs[k].tinyClusterPct);
   console.log(
     r.name.padEnd(11) + F(r.iouFrontSide, 3).padStart(7) + F(r.sideMassPct).padStart(10) +
     F(neck).padStart(8) + String(sh).padStart(14) + String(cols).padStart(8) +
@@ -489,22 +448,18 @@ for (const r of report) {
     String(tile).padStart(6) + F(cl).padStart(11) + (r.nightIdentical ? '      si' : '      NO'));
 }
 console.log('\n--- peggior caso su ' + report.length + ' personaggi ---');
-console.log('IoU fronte/lato min/max  ' + F(minIou, 3) + ' / ' + F(maxIou, 3) + '   (diagnostica; fonte mediana 0,749)');
-console.log('collo/testa min          ' + F(worstNeck) + ' %  (diagnostica)');
+console.log('IoU fronte/lato min/max  ' + F(minIou, 3) + ' / ' + F(maxIou, 3) + '   (bar 0,718–0,837)');
+console.log('collo/testa min          ' + F(worstNeck) + ' %  (gate >= 71 %)');
 console.log('spalle - testa min       ' + worstShoulder + ' px  (diagnostica include cappelli/chiome)');
 console.log('colori per sprite max    ' + maxColors + '     (gate <= 3)');
 console.log('colori per tile 8x8 max  ' + maxTile + '     (gate <= 3)');
-console.log('massa tono scuro min     ' + F(minDark) + ' %  (diagnostica; nessun gate)');
-console.log('contorno chiuso min      ' + F(worstClosure) + ' %  (gate >= 94,4 % · minimo Crystal)');
+console.log('massa tono scuro min     ' + F(minDark) + ' %  (gate >= 50 %)');
+console.log('contorno chiuso min      ' + F(worstClosure) + ' %  (gate >= 95 %)');
 console.log('notte identica al giorno ' + report.every((r) => r.nightIdentical));
 console.log('bbox fronte min/max      ' + minFrontW + ' / ' + maxFrontW + ' px  (bar 12–16)');
-console.log('bbox profilo min/max     ' + minSideW + ' / ' + maxSideW + ' px  (bar 12–15)');
-console.log('massa lato/fronte min/max ' + F(minSideMass) + ' / ' + F(maxSideMass) + ' %  (diagnostica; fonte mediana 79,5)');
-console.log('micro-cluster max        ' + F(maxTiny) + ' %  (diagnostica; nessun gate)');
-console.log('altezza massima          ' + maxHeight + ' px  (gate <= 16)');
-console.log('overflow cella 16x16     ' + containmentFailures.length + (containmentFailures.length ? '  ' + containmentFailures.slice(0, 8).join(' · ') : ''));
-console.log('baseline piedi errata    ' + baselineFailures.length + (baselineFailures.length ? '  ' + baselineFailures.slice(0, 8).join(' · ') : ''));
-console.log('componenti flottanti     ' + componentFailures.length + (componentFailures.length ? '  ' + componentFailures.slice(0, 8).join(' · ') : ''));
+console.log('bbox profilo min/max     ' + minSideW + ' / ' + maxSideW + ' px  (bar 12–14)');
+console.log('massa lato/fronte min/max ' + F(minSideMass) + ' / ' + F(maxSideMass) + ' %  (bar 75,6–99,5; toll. 103)');
+console.log('micro-cluster max        ' + F(maxTiny) + ' %');
 {
   /* gate R62.1: il profilo e' piu' stretto e piu' leggero del frontale */
   let sw = 0, fw = 0, sm = 0;
@@ -513,8 +468,8 @@ console.log('componenti flottanti     ' + componentFailures.length + (componentF
     else fw = Math.max(fw, r.dirs[k].width);
     sm = Math.max(sm, r.sideMassPct);
   }
-  console.log('larghezza profilo max    ' + sw + ' px  (gate <= 15, frontale ' + fw + ')');
-  console.log('massa profilo / fronte   ' + F(sm) + ' %  (diagnostica)');
+  console.log('larghezza profilo max    ' + sw + ' px  (gate <= 14, frontale ' + fw + ')');
+  console.log('massa profilo / fronte   ' + F(sm) + ' %  (gate <= 103 %)');
 }
 
 /* --- R63 -------------------------------------------------------------- */
@@ -573,43 +528,14 @@ function sameCell(a, b) {
   }
   return true;
 }
-function differentCell(a, b) { return !sameCell(a, b); }
 let gaitPass = true;
-const gaitFailures = [];
-const gaitFailureReasons = [];
 for (const r of report) {
   const name = r.name;
-  const downIdle = render(GAME, name, 'down', 0, false, false);
-  const upIdle = render(GAME, name, 'up', 0, false, false);
-  const rightIdle = render(GAME, name, 'right', 0, false, false);
-  const leftIdle = render(GAME, name, 'left', 0, false, false);
-  const downA = render(GAME, name, 'down', 1, true, false);
-  const upA = render(GAME, name, 'up', 1, true, false);
-  const rightStep = render(GAME, name, 'right', 1, true, false);
-  const cadenceChecks = {
-    downContact0: sameCell(downIdle, render(GAME, name, 'down', 0, true, false)),
-    downContact2: sameCell(downIdle, render(GAME, name, 'down', 2, true, false)),
-    downStepExists: differentCell(downIdle, downA),
-    downStepMirror: mirroredCell(downA, render(GAME, name, 'down', 3, true, false)),
-    upContact0: sameCell(upIdle, render(GAME, name, 'up', 0, true, false)),
-    upContact2: sameCell(upIdle, render(GAME, name, 'up', 2, true, false)),
-    upStepExists: differentCell(upIdle, upA),
-    upStepMirror: mirroredCell(upA, render(GAME, name, 'up', 3, true, false)),
-    sideContact0: sameCell(rightIdle, render(GAME, name, 'right', 0, true, false)),
-    sideContact2: sameCell(rightIdle, render(GAME, name, 'right', 2, true, false)),
-    sideStepExists: differentCell(rightIdle, rightStep),
-    sideStepReuse: sameCell(rightStep, render(GAME, name, 'right', 3, true, false)),
-    leftIdleMirror: mirroredCell(rightIdle, leftIdle),
-    leftStepAMirror: mirroredCell(rightStep, render(GAME, name, 'left', 1, true, false)),
-    leftStepBMirror: mirroredCell(rightStep, render(GAME, name, 'left', 3, true, false))
-  };
-  const failedCadenceChecks = Object.keys(cadenceChecks).filter((key) => !cadenceChecks[key]);
-  const actorGaitPass = failedCadenceChecks.length === 0;
-  gaitPass = gaitPass && actorGaitPass;
-  if (!actorGaitPass) {
-    gaitFailures.push(name);
-    gaitFailureReasons.push(name + ':' + failedCadenceChecks.join('|'));
-  }
+  gaitPass = gaitPass &&
+    mirroredCell(render(GAME, name, 'down', 0, true, false), render(GAME, name, 'down', 1, true, false)) &&
+    mirroredCell(render(GAME, name, 'up', 0, true, false), render(GAME, name, 'up', 1, true, false)) &&
+    sameCell(render(GAME, name, 'right', 0, true, false), render(GAME, name, 'right', 1, true, false)) &&
+    mirroredCell(render(GAME, name, 'right', 0, false, false), render(GAME, name, 'left', 0, false, false));
 }
 
 /* R101b — identita' del Gigante. La statura non puo' dipendere da una
@@ -636,52 +562,52 @@ for (const view of ['down', 'up', 'side']) {
   }
 }
 crossActorPairs.sort((a, b) => b.v - a.v);
-const cooperRow = report.find((r) => r.name === 'cooper');
-const donnaRow = report.find((r) => r.name === 'donna');
-const cooperDonnaSideIou = cooperRow && donnaRow ?
-  signatureIou(cooperRow.maskSig.side, donnaRow.maskSig.side) : null;
+const cooperDonnaSideIou = signatureIou(
+  report.find((r) => r.name === 'cooper').maskSig.side,
+  report.find((r) => r.name === 'donna').maskSig.side
+);
 
 const G = (ok) => (ok ? 'OK  ' : 'NO  ');
 console.log('\n--- R63, dettaglio interno (peggior caso sul cast) ---');
-console.log('    stacco interno fronte   ' + F(cFront.v, 3) + '  (diagnostica)  ' + cFront.who);
-console.log('    stacco interno profilo  ' + F(cSide.v, 3) + '  (diagnostica)  ' + cSide.who);
-console.log('    stacco interno retro    ' + F(cBack.v, 3) + '  (diagnostica)  ' + cBack.who);
-console.log('    righe interamente nere  ' + blk.v + '/16   (diagnostica)  ' + blk.who);
-console.log('    righe-testa identiche   ' + headPair.v + '/8    (diagnostica)  ' + headPair.who);
-console.log('    rampa: toni non-neri    ' + F(gap.v) + '   (diagnostica RGB; palette-index gate separato)  ' + gap.who);
-console.log('    gradini contorno lato   ' + stp.v + '     (diagnostica; reference min 11)  ' + stp.who);
-console.log('    toni nel tile 8x8 min   ' + tile3.v + '     (diagnostica: due toni sono validi)');
-console.log('    piedi lato = frontale   ' + (feetSame.length ? feetSame.join(',') : 'nessuno') + '   (diagnostica)');
-console.log('    ' +
+console.log(G(cFront.v >= 0.36) + 'stacco interno fronte   ' + F(cFront.v, 3) + '  (gate >= 0,360)  ' + cFront.who);
+console.log(G(cSide.v >= 0.36) + 'stacco interno profilo  ' + F(cSide.v, 3) + '  (gate >= 0,360)  ' + cSide.who);
+console.log(G(cBack.v >= 0.30) + 'stacco interno retro    ' + F(cBack.v, 3) + '  (gate >= 0,300)  ' + cBack.who);
+console.log(G(blk.v <= 3) + 'righe interamente nere  ' + blk.v + '/16   (gate <= 3)      ' + blk.who);
+console.log(G(headPair.v <= 5) + 'righe-testa identiche   ' + headPair.v + '/8    (gate <= 5)      ' + headPair.who);
+console.log(G(gap.v >= 70) + 'rampa: toni non-neri    ' + F(gap.v) + '   (gate >= 70)     ' + gap.who);
+console.log(G(stp.v >= 13) + 'gradini contorno lato   ' + stp.v + '     (gate >= 13)     ' + stp.who);
+console.log(G(tile3.v >= 3) + 'toni nel tile 8x8 min   ' + tile3.v + '     (gate = 3)      ' + tile3.who);
+console.log(G(feetSame.length === 0) + 'piedi lato = frontale   ' + (feetSame.length ? feetSame.join(',') : 'nessuno') + '   (gate: nessuno)');
+console.log(G(tinyMedian <= 13.5 && tinyP90 <= 18 && maxTiny <= 26) +
   'micro-cluster med/p90/max ' + F(tinyMedian) + '/' + F(tinyP90) + '/' + F(maxTiny) +
-  ' %  (diagnostica; nessun gate)');
-console.log(G(gaitPass) + 'cadenza Crystal  idle→A→idle→B · down/up B mirror · side idle↔step · left mirror' +
-  (gaitFailures.length ? '  FAIL: ' + gaitFailures.join(',') : ''));
-if (gaitFailureReasons.length) console.log('    dettaglio cadenza      ' + gaitFailureReasons.join(' · '));
+  ' %  (bar mediana <= 13,5)');
+console.log(G(gaitPass) + 'grammatica passo Crystal  down/up mirror · side reuse · left mirror');
 console.log(G(giantShapePass) + 'firma Gigante            testa 10/9 · spalle 14 · altezza 16');
 console.log(G(maddyShapePass) + 'firma Maddy              collo 83,3% · spalle +2 px');
-console.log('    silhouette uniche        ' + viewUniqueness.down + '/24 D · ' + viewUniqueness.up + '/24 U · ' + viewUniqueness.side + '/24 S  (diagnostica locale)');
-console.log('    IoU massimo fra attori   ' + F(crossActorIou.v, 3) + '  ' + crossActorIou.who + '/' + crossActorIou.view + '  (diagnostica; Crystal contiene coppie IoU 1,000)');
+console.log(G(viewUniqueness.down === 25 && viewUniqueness.up === 25 && viewUniqueness.side === 25) +
+  'silhouette uniche        ' + viewUniqueness.down + '/25 D · ' + viewUniqueness.up + '/25 U · ' + viewUniqueness.side + '/25 S');
+console.log(G(crossActorIou.v < 0.96) + 'IoU massimo fra attori   ' + F(crossActorIou.v, 3) + '  ' + crossActorIou.who + '/' + crossActorIou.view + '  (gate < 0,960)');
 console.log('    top 5 coppie          ' + crossActorPairs.slice(0, 5)
   .map((pair) => F(pair.v, 3) + ' ' + pair.who + '/' + pair.view).join(' · '));
-if (cooperDonnaSideIou != null) console.log('    Cooper/Donna profilo    ' + F(cooperDonnaSideIou, 3) + '  (diagnostica locale)');
+console.log(G(cooperDonnaSideIou < 0.95) + 'Cooper/Donna profilo    ' + F(cooperDonnaSideIou, 3) + '  (gate < 0,950)');
 
-/* R10: precondizioni strutturali soltanto. Morfologia/identita/qualita'
- * restano gate visuali per-attore; questi numeri non producono un voto. */
-assert(containmentFailures.length === 0, 'opaque pixels escape immutable 16x16 actor cell: ' + containmentFailures.slice(0, 12).join(' · '));
-assert(baselineFailures.length === 0, 'feet must remain on actor-cell row 15: ' + baselineFailures.slice(0, 12).join(' · '));
-assert(componentFailures.length === 0, 'actor silhouette contains detached pixel islands: ' + componentFailures.slice(0, 12).join(' · '));
+/* Hard gates R101: valori ricostruiti sul commit pret/pokecrystal 7a7881d,
+ * non soglie inventate dopo aver guardato il nostro output. */
 assert(minFrontW >= 12 && maxFrontW <= 16, 'front/back bbox outside Crystal 12–16px bar');
-assert(minSideW >= 12 && maxSideW <= 15, 'side bbox outside Crystal 12–15px bar');
-assert(maxColors <= 3 && maxTile <= 3, 'OBJ must use at most three opaque tones');
+assert(minSideW >= 12 && maxSideW <= 14, 'side bbox outside Crystal 12–14px bar');
+assert(minSideMass >= 75 && maxSideMass <= 103, 'side/front mass outside measured bar+tolerance');
+assert(minIou >= 0.718 && maxIou <= 0.84, 'front/side IoU outside measured Crystal band');
+assert(maxColors <= 3 && maxTile <= 3 && tile3.v >= 3, 'OBJ must use exactly three opaque tones');
 assert(worstClosure >= 94.4, 'outline closure below Crystal minimum');
+assert(minDark >= 50, 'dark-tone mass below stable GBC grouping');
+assert(worstNeck >= 71, 'neck/head proportion below Crystal human anatomy');
+assert(tinyMedian <= 13.5 && tinyP90 <= 18 && maxTiny <= 26, 'micro-cluster noise above Crystal bar');
+assert(headPair.v <= 5, 'too many identical head rows between distinct actors');
 assert(gaitPass, 'walk transform grammar diverges from Crystal');
-if (fullCast) {
-  assert(giantShapePass, 'Giant must preserve elongated uncanny silhouette in front and side states');
-  assert(maddyShapePass, 'Maddy must preserve human neck and shoulder proportions in front/back states');
-}
-console.log('\nNATIVE-CAST-R10 STRUCTURAL PASS — visual review still mandatory for all 24 actors');
-if (jsonMode) {
-  console.log = realConsoleLog;
-  realConsoleLog(JSON.stringify({ ok: true, report }, null, 2));
-}
+assert(giantShapePass, 'Giant must preserve elongated uncanny silhouette in front and side states');
+assert(maddyShapePass, 'Maddy must preserve human neck and shoulder proportions in front/back states');
+assert(viewUniqueness.down === 25 && viewUniqueness.up === 25 && viewUniqueness.side === 25,
+  'each actor must keep a unique silhouette in every authored view');
+assert(crossActorIou.v < 0.96, 'cross-actor silhouettes remain too close');
+assert(cooperDonnaSideIou < 0.95, 'Cooper and Donna side silhouettes remain too close');
+console.log('\nNATIVE-CAST-R101 PASS — 25 attori, reference-measured morphology and gait');

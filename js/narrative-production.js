@@ -135,7 +135,10 @@
   }
 
   function syncClassicToNarrative(NR, state, classicFlags) {
-    ['sogno_fatto', 'atto3', 'atto4', 'atto5', 'gigante1', 'maddy_trovata', 'leland_morto', 'sarah_visione_ascoltata'].forEach(function (name) {
+    // audrey_indaga è scritto dal layer classico (data.js audrey_a2 /
+    // audrey_a2_ben): senza questo ponte il nodo facoltativo m6_audrey resta
+    // irraggiungibile a runtime (M6 stitch C4).
+    ['sogno_fatto', 'atto3', 'atto4', 'atto5', 'gigante1', 'maddy_trovata', 'leland_morto', 'sarah_visione_ascoltata', 'audrey_indaga'].forEach(function (name) {
       if (classicFlags[name]) ensureFlag(NR, state, name);
     });
     // Compatibilità salvataggi legacy: il vecchio dialogo classico vale come
@@ -149,12 +152,18 @@
     if (state.flags.atto4) classicFlags.atto4 = true;
     if (state.flags.atto5) classicFlags.atto5 = true;
     if (state.flags.jacques_preso) classicFlags.jacques_preso = true;
+    // Atto 3: la porta classica traincar 21,0 → oej legge east_route_confirmed
+    // (js/maps.js); l'unico writer è il nodo narrativo m5_tracks_north.
+    if (state.flags.east_route_confirmed) classicFlags.east_route_confirmed = true;
     if (state.flags.jacques_dead) classicFlags.jacques_morto = true;
     if (state.flags.maddy_trovata) classicFlags.maddy_trovata = true;
     // M8 narrativa possiede Maddy e Leland: i duplicati classici a Palmer
     // restano nascosti mentre le presenze fisiche canoniche vivono al diner.
     if (state.flags.atto4) classicFlags.narrative_m8_owned = true;
-    if (state.nodes_done.m8_roadhouse) classicFlags.gigante2 = true;
+    // pass 01 (node split B1): il tavolo (Truman, dichiarazione del Gigante)
+    // e' ora m8_roadhouse_truman; il telefono e' un nodo separato
+    // (m8_roadhouse_phone) che NON deve pilotare gigante2.
+    if (state.nodes_done.m8_roadhouse_truman) classicFlags.gigante2 = true;
   }
 
   function objectiveText(NR, A) {

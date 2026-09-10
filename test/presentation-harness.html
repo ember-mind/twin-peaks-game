@@ -46,7 +46,7 @@
 <script src="../js/narrative-runtime.js"></script>
 <script src="../js/narrative-ui.js"></script>
 <script src="../js/narrative-notebook.js"></script>
-<script src="../js/narrative-data.gen.js?v=harness-r77"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
 <script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
 
 <script>
@@ -107,7 +107,7 @@ async function seq() {
 
   E.state.mode = 'play';
   A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK });
-  E.loadMap('sheriff', 6, 1, 'right'); // davanti al vero Truman (7,1)
+  E.loadMap('sheriff', 10, 5, 'up'); // davanti al vero Truman (10,4)
 
   var record = null;
   A.onLog = function (e) {

@@ -1,0 +1,53 @@
+{
+  "generatedAt": "2026-09-08T18:13:46Z",
+  "passed": true,
+  "scene": {
+    "mapId": "sheriffs_station_main_interior",
+    "nativeCanvas": [256, 192],
+    "mapTiles": [16, 12],
+    "walkableTiles": 84,
+    "reachableTiles": 84,
+    "mainAisle": {
+      "columns": [6, 9],
+      "rows": [5, 10],
+      "walkableTiles": 24
+    },
+    "requiredTargets": [
+      "receptionStaff",
+      "rightDesk",
+      "files",
+      "rearDoor",
+      "depthBehind",
+      "depthFront"
+    ],
+    "requiredTargetsReachedWithEngineKeyboard": true,
+    "collisionProbes": ["files", "rightDeskNorth", "closedRearDoor"],
+    "closedRearDoorTransitioned": false,
+    "saveWrites": 0,
+    "integerArtDrawCalls": true,
+    "foregroundInterval": "half-open [min,max)",
+    "engineDepthIntervalObserved": [64, "Infinity"],
+    "productionAtlasRenderer": "heartgold-atlas-r116",
+    "cooperTileAnchorObserved": [96, 48],
+    "coreAndAtlasMatchFrozenBefore": true
+  },
+  "preview": {
+    "catalogBackedSnapshot": true,
+    "routeTargets": 14,
+    "realKeyboardStepsForFullDemo": 100,
+    "estimatedDemoMilliseconds": 21400,
+    "cleanScaleAt1280x960": 5,
+    "writesSaves": false
+  },
+  "tests": [
+    {"command": "node test/sheriffs-station-native.js", "exitCode": 0},
+    {"command": "node test/sheriffs-station-native.js --audit-frozen", "exitCode": 0},
+    {"command": "node test/world-engine-v0.1-catalog.js", "exitCode": 0},
+    {"command": "node test/double-r-exterior-native.js", "exitCode": 0},
+    {"command": "node test/double-r-location-native.js", "exitCode": 0},
+    {"command": "node test/location-traversal.js", "exitCode": 0},
+    {"command": "node test/traincar-location-traversal.js", "exitCode": 0},
+    {"command": "node test/smoke.js", "exitCode": 0, "checks": 368},
+    {"command": "node test/walkthrough.js", "exitCode": 0, "acquisitions": 86}
+  ]
+}

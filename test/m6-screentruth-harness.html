@@ -24,7 +24,7 @@
 <script src="../js/narrative-runtime.js"></script>
 <script src="../js/narrative-ui.js"></script>
 <script src="../js/narrative-notebook.js"></script>
-<script src="../js/narrative-data.gen.js?v=harness-r77"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
 <script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
 <script src="../js/narrative-save.js"></script>
 <script>
@@ -126,7 +126,7 @@ async function run() {
   // vai alla centrale: B7b poi B8
   await advanceToPage('m6.b7.arrest.p07'); // già oltre; chiudo la sessione arresto
   var g = 0; while (A.active() && g++ < 8) await press('Enter');
-  await interactAt('sheriff', 6, 3, 'right'); var g2 = 0; while (A.active() && g2++ < 8) await press('Enter'); // return_night
+  await interactAt('sheriff', 10, 5, 'up'); var g2 = 0; while (A.active() && g2++ < 8) await press('Enter'); // return_night
   // R6 — NOTIZIA ultima pagina: TUTTI gli effetti del commit + il cambio d'obiettivo
   await interactAt('sheriff', 2, 5, 'down');
   await advanceToPage('m6.b8.news.cooper_prova');
@@ -143,7 +143,7 @@ async function run() {
 
   // R7 — OSPEDALE ultima pagina: jacques_death_suspicious false finché non committa
   var g3 = 0; while (A.active() && g3++ < 8) await press('Enter');
-  await interactAt('hospital', 4, 4, 'up');
+  await interactAt('hospital', 13, 9, 'up');
   await advanceToPage('m6.b8b.hospital.p04');
   var b7 = snap(['jacques_death_suspicious', 'night_log_no_visitor']); var t7 = visibleText();
   await press('Enter'); await wait(120);

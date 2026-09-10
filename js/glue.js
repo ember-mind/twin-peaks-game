@@ -12,59 +12,62 @@
 
   var NPCS = {
     town: [
-      { id: 'bobby',  x: 31, y: 16, sprite: 'bobby',  name: 'Bobby',  dialogue: 'bobby', wander: true },
-      { id: 'donna',  x: 44, y: 10, sprite: 'donna',  name: 'Donna',  dialogue: 'donna', wander: true },
-      { id: 'jacoby', x: 16, y: 25, sprite: 'jacoby', name: 'Jacoby', dialogue: 'jacoby' }
+      { id: 'bobby',  x: 31, y: 16, sprite: 'bobby',  name: 'Bobby',
+        cond: ['!flag:gigante2'],
+        dialogue: [
+          { cond: 'flag:done_shelly', then: 'bobby_shelly' },
+          { cond: 'flag:done_shelly_bobby', then: 'bobby_shelly' },
+          'bobby'
+        ], wander: true },
+      { id: 'donna',  x: 44, y: 10, sprite: 'donna',  name: 'Donna',
+        cond: ['!flag:gigante2'],
+        dialogue: 'donna', wander: true },
+      { id: 'jacoby', x: 16, y: 25, sprite: 'jacoby', name: 'Jacoby',
+        cond: ['!flag:gigante2'],
+        dialogue: 'jacoby' }
     ],
     sheriff: [
-      { id: 'truman', x: 7,  y: 3, sprite: 'truman', name: 'Truman',
+      { id: 'truman', x: 10, y: 4, sprite: 'truman', name: 'Truman',
         dialogue: [
           { cond: 'flag:leland_morto', then: 'truman_fine' },
-          { cond: 'flag:atto5', then: 'truman_wait5' },
-          { cond: 'flag:maddy_trovata', then: 'truman_atto5' },
-          { cond: 'flag:atto4', then: 'truman_wait4' },
-          { cond: 'flag:gigante1', then: 'truman_atto4' },
           { cond: 'flag:atto3', then: 'truman_wait3' },
           { cond: 'clues6', then: 'truman_atto3' },
           { cond: 'flag:sogno_fatto', then: 'truman_a2' },
           'truman'
         ], dir: 'down' },
-      { id: 'andy',   x: 2,  y: 3, sprite: 'andy',   name: 'Andy',   dialogue: 'andy',   dir: 'down' },
-      { id: 'hawk',   x: 7, y: 6, sprite: 'hawk',   name: 'Hawk',   dialogue: 'hawk',   dir: 'down' },
+      { id: 'andy',   x: 10, y: 7, sprite: 'andy',   name: 'Andy',   dialogue: 'andy',   dir: 'down' },
+      { id: 'hawk',   x: 12, y: 8, sprite: 'hawk',   name: 'Hawk',
+        dialogue: [{ cond: 'flag:sogno_fatto', then: 'hawk_a2' }, 'hawk'], dir: 'down' },
       { id: 'lucy',   x: 2,  y: 6, sprite: 'lucy',   name: 'Lucy',
         dialogue: [{ cond: 'flag:jacques_preso', then: 'lucy_a3' }, 'lucy'], dir: 'down' },
-      { id: 'leland', x: 5,  y: 3, sprite: 'leland', name: 'Leland',
+      { id: 'leland', x: 8,  y: 5, sprite: 'leland', name: 'Leland',
         cond: ['flag:atto5', '!flag:leland_morto'],
         dialogue: [{ cond: 'flag:leland_confessa', then: 'leland_morte' }, 'leland_interr'], dir: 'down' }
     ],
     palmer: [
       { id: 'sarah',  x: 9,  y: 7, sprite: 'sarah',  name: 'Sarah',
-        dialogue: [{ cond: 'flag:atto4', then: 'sarah_visione' }, 'sarah'], dir: 'down' },
-      { id: 'leland', x: 12, y: 8, sprite: 'leland', name: 'Leland',
-        cond: ['!flag:atto5', '!flag:gigante2', '!flag:narrative_m8_owned'],
-        dialogue: [
-          { cond: 'flag:maddy_trovata', then: 'leland_dopo' },
-          { cond: 'flag:gigante2', then: 'leland_dove' },
-          { cond: 'flag:atto4', then: 'leland_a4' },
-          'leland'
-        ], dir: 'down' },
-      { id: 'maddy', x: 11, y: 7, sprite: 'maddy', name: 'Maddy', dialogue: 'maddy_a4',
-        cond: ['flag:atto4', '!flag:gigante2', '!flag:narrative_m8_owned'], dir: 'down' }
+        cond: ['!flag:gigante2'],
+        dialogue: [{ cond: 'flag:atto4', then: 'sarah_visione' }, 'sarah'], dir: 'down' }
     ],
     hotel_gn: [
       { id: 'benhorne', x: 5,  y: 7, sprite: 'benhorne', name: 'Ben Horne', dialogue: 'benhorne_a2', dir: 'down' },
-      { id: 'audrey',   x: 12, y: 9, sprite: 'audrey',   name: 'Audrey',    dialogue: 'audrey_a2',   dir: 'down', wander: true }
+      { id: 'audrey',   x: 12, y: 9, sprite: 'audrey',   name: 'Audrey',
+        dialogue: [{ cond: 'flag:done_benhorne_a2', then: 'audrey_a2_ben' }, 'audrey_a2'],
+        dir: 'down', wander: true }
     ],
     hospital: [
-      { id: 'gerard', x: 7, y: 6, sprite: 'gerard', name: 'Gerard',
-        dialogue: [{ cond: 'flag:atto4', then: 'gerard_a4' }, 'gerard_a2'], dir: 'down' }
+      { id: 'gerard', x: 11, y: 4, sprite: 'gerard', name: 'Gerard',
+        dialogue: 'gerard_a2', dir: 'left' }
     ],
     diner: [
-      { id: 'norma',   x: 5, y: 1, sprite: 'norma',   name: 'Norma',    dialogue: 'norma',   dir: 'down' },
-      { id: 'shelly',  x: 8, y: 4, sprite: 'shelly',  name: 'Shelly',   dialogue: 'shelly',  dir: 'down' },
+      { id: 'norma',   x: 5, y: 2, sprite: 'norma',   name: 'Norma',
+        dialogue: [{ cond: ['flag:sogno_fatto', 'flag:done_norma'], then: 'norma_a2' }, 'norma'],
+        dir: 'down' },
+      { id: 'shelly',  x: 9, y: 7, sprite: 'shelly',  name: 'Shelly',
+        dialogue: [{ cond: 'flag:done_bobby', then: 'shelly_bobby' }, 'shelly'], dir: 'down' },
       { id: 'loglady', x: 4, y: 5, sprite: 'loglady', name: 'Log Lady',
         dialogue: [{ cond: 'flag:atto4', then: 'loglady_a4' }, 'loglady'], dir: 'down' },
-      { id: 'james',   x: 10, y: 6, sprite: 'james',  name: 'James',    dialogue: 'james_a2', dir: 'down', cond: 'flag:sogno_fatto' }
+      { id: 'james',   x: 9, y: 6, sprite: 'james',  name: 'James',    dialogue: 'james_a2', dir: 'down', cond: 'flag:sogno_fatto' }
     ],
     woods: [],
     redroom: [
@@ -79,21 +82,16 @@
       { id: 'bob', x: 14, y: 2, sprite: 'bob', name: 'BOB', dialogue: 'bob_finale',
         cond: ['flag:leland_morto'], dir: 'down' }
     ],
-    traincar: [
-      { id: 'hawk_vagone', x: 12, y: 4, sprite: 'hawk', name: 'Hawk', dialogue: 'hawk_vagone', dir: 'down' }
-    ],
-    oej: [
-      { id: 'jacques', x: 7,  y: 5, sprite: 'jacques', name: 'Jacques', dialogue: 'jacques_a3', dir: 'down', cond: '!flag:jacques_morto' },
-      { id: 'audrey',  x: 13, y: 7, sprite: 'audrey',  name: 'Audrey',  dialogue: 'audrey_oej',
-        dir: 'down', cond: 'flag:audrey_indaga' }
-    ]
+    traincar: [],
+    oej: []
   };
 
   /* interact id (maps.js) -> dialogue id (data.js), oppure cascata condizionale
      (stessa forma della cascata NPC: prima condizione vera vince) */
   var INTERACT_DLG = {
     cartello: 'sign_town',
-    cameraLaura: 'laura_room',
+    cameraLaura: [{ cond: 'flag:done_andy', then: 'laura_room_andy' }, 'laura_room'],
+    bacheca: 'bacheca_centrale',
     olio: 'olio',
     cartelloBosco: 'sign_grove',
     tomba_laura: 'tomba_laura',
@@ -102,17 +100,18 @@
       { cond: 'flag:jacques_morto', then: 'gigante1_dlg' },
       'specchio315'
     ],
-    palco_gigante: [
-      { cond: 'flag:gigante2', then: 'palco_dopo' },
-      'gigante2_dlg'
-    ],
     lago_riva: [
       { cond: 'flag:maddy_trovata', then: 'lago_dopo' },
-      { cond: 'flag:gigante2', then: 'lago_maddy' },
-      'lago_sguardo'
+      { cond: 'flag:sogno_fatto', then: 'lago_sguardo' },
+      'lago_laura'
+    ],
+    letto_315: 'letto_315',
+    scrivania_315: [
+      { cond: 'evidence:T1_RONETTE_BOB', then: 'scrivania_315_bob' },
+      'scrivania_315'
     ]
   };
-  var SPARKLE = { cameraLaura: 1, olio: 1, mucchio_terra: 1, anello_interact: 1 };
+  var SPARKLE = { cameraLaura: 1, olio: 1, mucchio_terra: 1, anello_interact: 1, specchio315: 1 };
 
   GAME.INTERACT_DLG = INTERACT_DLG; // esposto per test/smoke.js (guardia interact -> dialogo)
 

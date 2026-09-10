@@ -1,0 +1,13 @@
+PORTRAIT-EVIDENCE-PARITY-PASS 11/11
+  fb4718260378991baed267e3e8c726665278748315fbc0a3568971aac2ac1b1f  js/portraits.js
+  6f99c626f0420e42a2b07ba4bb8ce98fdca29d171beeecf6b6c411503f9a2ac7  test/r69-reference-gates.js
+  1d294b5cac64543fefb49e4f81b938b890fadf78e8eb8fda53f90e48570731b1  test/portrait-gates.js
+  3cb6afa333e20ba81d5d4420c8ab852effe0aed73f833a7cb59d3c9a29dbff35  test/smoke.js
+  495a8840ab66947f3dd2d7141f2f2996d0045fd6fcfc969c59af3ee9402a8bf3  test/retro-font.js
+  ed6f8fbe25e4069f5adbb3448613e5cba90f9bc98e82227d7c2a017e37afacac  portrait-progress.html
+  11f42fbd703317edded1f1b8c971cb303d65c1e6c6daca12a892fc5085a4e34a  test/portrait-evidence-parity.js
+  cf496607004dff7fad00e1ecff96557eaf3be186511247aded405676bdb99658  canonical-sync.manifest.json
+  ecc59498d8eb41619143f44e7a12f98be42d382393249d4082c08d8218b4b866  tools/check-canonical-sync.js
+  4f6bb6eca49ee2dfe78d2e4557a06244a639d441758e4469a216e507b7618ef8  test/canonical-sync.js
+  33566fb9b2a74ed148a0fd832e5269438a3770e30b9b357165f60fe634b19fd5  CANONICAL-SYNC.md
+PORTRAIT-EVIDENCE-ADVERSARIAL-PASS 3/3

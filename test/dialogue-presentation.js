@@ -71,7 +71,7 @@ global.GAME.Render3D = {
 const E = global.GAME.Engine;
 E.init(canvas, {});
 E.start();
-E.loadMap('sheriff', 6, 3, 'right');
+E.loadMap('sheriff', 11, 4, 'left');
 E.state.mode = 'play';
 
 handlers.keydown({ code: 'Enter', repeat: false, preventDefault() {} });

@@ -1,0 +1,6 @@
+const fs=require('fs'),crypto=require('crypto'),sharp=require('/opt/homebrew/lib/node_modules/coldstage/node_modules/sharp');
+const {create}=require(process.cwd()+'/js/ambient-life.js');global.GAME={AmbientLife:create(1989)};require(process.cwd()+'/js/ambient-life-scenes.js');
+(async()=>{const root='artifacts/diner-ambient-011',files=fs.readdirSync(root+'/frames').filter(f=>f.endsWith('.png')).sort(),union=new Set(),allowed=new Set(),hashes=new Set();let base,w;
+for(let i=0;i<files.length;i++){const {data,info}=await sharp(root+'/frames/'+files[i]).removeAlpha().raw().toBuffer({resolveWithObject:true});w=info.width;if(!base)base=data;hashes.add(crypto.createHash('sha256').update(data).digest('hex'));for(let k=0;k<data.length;k+=3)if(data[k]!==base[k]||data[k+1]!==base[k+1]||data[k+2]!==base[k+2])union.add(k/3);
+GAME.AmbientLife.seek('diner',i*100);GAME.AmbientLife.draw({globalAlpha:1,fillStyle:'',fillRect(x,y,ww,hh){for(let yy=y;yy<y+hh;yy++)for(let xx=x;xx<x+ww;xx++)allowed.add(yy*w+xx);}},'diner',-16,-16);}
+const r={frames:files.length,width:w,height:base.length/(w*3),distinctFrames:hashes.size,changedPixelUnion:union.size,outsideAmbientRegions:[...union].filter(p=>!allowed.has(p)).length};fs.writeFileSync(root+'/pixel-motion.json',JSON.stringify(r,null,2));console.log(r);})();

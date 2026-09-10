@@ -58,31 +58,13 @@ function commitNode(state, id) {
 
 const identityAssertion = /\bROBERT\b|sta(?:nno)? componendo|compone(?:re)? (?:il )?nome|forma(?:no)? (?:il )?nome|identifica|(?:e|è) (?:la )?firma/i;
 
-console.log('# acquisizione classica al lago');
-E.init(canvas);
-E.start();
-E.state.mode = 'play';
-E.state.flags.intro_town = true;
-E.state.flags.gigante2 = true;
-E.loadMap('town', 15, 29, 'up');
-key('Enter');
-pump(16);
-ok(E.state.dialogue && E.state.dialogue.id === 'lago_maddy', 'Invio al lago apre lago_maddy');
-const lakeText = E.state.dialogue.pages.map((page) => page.text).join(' ');
-ok(!identityAssertion.test(lakeText), 'acquisizione non afferma composizione o identità ROBERT');
-ok(/potrebbe/i.test(lakeText) && /ipotesi/i.test(lakeText) && /non un nome né un.identità/i.test(lakeText),
-  'Cooper marca esplicitamente teoria provvisoria e limite');
-ok(!E.state.clues.includes('lettera_o'), 'lettera O assente prima del commit del dialogo');
-while (E.state.dialogue) { key('Enter'); pump(16); }
-ok(E.state.clues.includes('lettera_o'), 'chiusura del dialogo acquisisce lettera_o');
-ok(E.state.flags.maddy_trovata === true, 'chiusura del dialogo registra maddy_trovata');
-
-console.log('# descrizione visibile nel menu indizi');
-const clueText = D.clues.lettera_o.desc;
-ok(!identityAssertion.test(clueText), 'UI indizio non compone ROBERT e non assegna identità');
-ok(/Potrebbe/i.test(clueText) && /non prova un nome né un.identità/i.test(clueText),
-  'UI distingue osservazione da ipotesi');
-ok(/una O/i.test(clueText) && /R di Laura/i.test(clueText), 'UI conserva lettere, ordine e provenienza osservabile');
+// Il ritrovamento classico al lago (`lago_maddy`, dialogo + `give: ['lettera_o']`)
+// e' stato ritirato dal layer classico: era gia' SHADOWED in produzione (M8
+// `m8_discovery` possiede il target condiviso `lago_maddy`/tile 15,28 da
+// `flag:atto4` in poi) e non produceva piu' l'indizio nel gioco reale. L'unico
+// path che raggiunge il giocatore e' quello mission-owned verificato sotto:
+// l'invariante R19J (osservazione/ipotesi, mai identita' affermata) resta
+// coperta li' via `P8.formulation.status` e `evidence.E9A_LETTERA_O`.
 
 console.log('# confronto narrativo resta volontario');
 GAME.installNarrativeCatalogs();

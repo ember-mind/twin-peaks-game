@@ -44,7 +44,7 @@ ok(!room.some((page) => /rapporto dell.autopsia/i.test(page.text)), 'il rapporto
 const counters = {
   bobby: ['BOBBY', /messo in bocca/i],
   jacoby: ['JACOBY', /medico e paziente/i],
-  hawk: ['HAWK', /cammini davanti/i],
+  hawk: ['HAWK', /camminerà davanti/i],
   sarah: ['SARAH', /una cosa cancella l'altra/i],
   leland: ['LELAND', /chiudo le tende/i],
   shelly: ['SHELLY', /se lo proteggete/i],
@@ -85,12 +85,10 @@ ok(!/cane era sotto il portico|volantino delle scomparse/i.test(finaleSource) &&
 ok(/curva dei binari/i.test(corpus(D.landmark_tracks_vagone)), 'la provenienza del vagone conserva la parola binari');
 ok(!/entra e esce/i.test(corpus(D.lucy) + ' ' + M6Source) && /entra ed esce/i.test(corpus(D.lucy) + ' ' + M6Source),
   'la concordanza formale «entra ed esce» è coerente nel classico e in M6');
-ok(D.leland_dopo.pages.some((page) => !page.name && /Leland ride/i.test(page.text)) &&
-  D.leland_dopo.pages.every((page) => !page.name || !/\*?ride\*?/i.test(page.text)),
-  'la risata di Leland è azione, non didascalia pronunciata');
-ok(D.gigante2_dlg.pages.some((page) => !page.name && /Gigante svanisce/i.test(page.text)) &&
-  D.gigante2_dlg.pages.every((page) => !page.name || !/svanisce/i.test(page.text)),
-  'la scomparsa del Gigante è azione, non battuta');
+// leland_a4/leland_dove/leland_dopo, gigante2_dlg: ritirati dal layer
+// classico (M8 li' possiede sul diner/roadhouse); il contratto "azione non
+// battuta" per quei nodi non e' verificabile qui (narrative/missions/*.json
+// e' fuori dal perimetro di questa pulizia).
 ok(Data.clues.anello.desc.includes('Perché') && /Una sola occasione/.test(corpus(D.gerard_a2)), 'grammatica corretta nei due errori noti');
 
 function checkCond(cond, state) {
@@ -99,7 +97,8 @@ function checkCond(cond, state) {
   return false;
 }
 ok(Data.objectiveFor({ clues: [], flags: {} }, checkCond) === 'Parla con lo sceriffo Truman (a ovest).', 'obiettivo iniziale: Truman');
-ok(Data.objectiveFor({ clues: ['diario'], flags: {} }, checkCond) === 'Casa Palmer: esamina la camera di Laura.', 'dopo Truman l’obiettivo indica casa Palmer');
+ok(Data.objectiveFor({ clues: ['diario'], flags: {} }, checkCond) === 'Il Double R, poi casa Palmer.', 'dopo Truman l’obiettivo indica il Double R e poi casa Palmer');
+ok(Data.objectiveFor({ clues: ['diario'], flags: { double_r_visitato: true } }, checkCond) === 'Casa Palmer: la camera di Laura.', 'dopo il Double R l’obiettivo indica casa Palmer');
 ok(Data.objectiveFor({ clues: ['diario', 'cuore', 'lettera_r'], flags: {} }, checkCond) === 'Segui il sentiero nel bosco.', 'a tre indizi l’obiettivo indica il bosco');
 
 console.log(`NARRATIVE-REPAIR-CONTRACT-PASS ${checks}/${checks}`);

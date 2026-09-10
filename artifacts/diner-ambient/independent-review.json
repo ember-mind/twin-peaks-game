@@ -1,0 +1,62 @@
+{
+  "review": "Ambient Life v0.1 independent review",
+  "verdict": "pass-with-notes",
+  "reviewedAt": "2026-09-08T13:48:00+02:00",
+  "scope": "Double R diner ambient-life layer only",
+  "findings": [
+    {
+      "area": "immutable-art",
+      "verdict": "pass",
+      "evidence": "artifacts/diner-ambient/static-before.sha256 validates js/retro-authored.js, js/maps.js, and assets/sprites/cast-walkcycles-hg-24.png without mismatch. The returned Coldstage contact sheet and production frames preserve the current Double R composition and characters."
+    },
+    {
+      "area": "coffee-steam",
+      "verdict": "pass",
+      "evidence": "Two independently phased steam instances cycle through seven states, including the breakup/rest state, over configured 1.20-1.36 s and 1.32-1.48 s periods. Frames 000-013 show the counter wisp staying attached above the coffee service area and changing by isolated one-pixel marks; the booth wisp follows a different phase."
+    },
+    {
+      "area": "lamps",
+      "verdict": "pass",
+      "evidence": "The three lamps use separate seeded clocks. Timeline first starts are 6.865 s, 8.135 s, and 11.170 s, with later starts remaining asynchronous. Frames 068-072, 081-084, and 111-114 show tiny warm-value changes on the corresponding fixture and nearby material strips. The bulbs remain lit throughout and there is no blink or blackout. Idle delays are independently sampled from 4-12 s."
+    },
+    {
+      "area": "neon",
+      "verdict": "pass",
+      "evidence": "The only 30 s reel event begins at 18.375 s and lasts 168 ms. Frames 183-186 show a tiny localized dim microevent while the Double R sign remains continuously readable and illuminated. The configured 8-25 s idle range and 140-280 ms event length keep normal presentation above 95%; the 120 s native duty-cycle test also passes."
+    },
+    {
+      "area": "pie-case-glass",
+      "verdict": "pass",
+      "evidence": "Timeline events run 14.640-17.946 s and 23.837-27.116 s, satisfying 2-4 s active duration with 5-15 s idle scheduling. Frames 146-168 and 238-272 show only the glass highlight changing, with a maximum one-pixel horizontal shift. Pie silhouettes, trays, and case geometry remain fixed."
+    },
+    {
+      "area": "architecture-and-isolation",
+      "verdict": "pass",
+      "evidence": "js/ambient-life.js implements four reusable archetypes with declarative scene registration in js/ambient-life-scenes.js. Each element owns a seeded RNG derived from scene and element id; drawing consumes neither RNG nor time. Updates pause off-map and can be paused or disabled. The layer draws in depth slices and contains no character-animation or audio path. Pixel-motion analysis finds 112 unique frames and a union of only 141 changing pixels across the 300-frame reel; all changed coordinates fall inside registered effect regions, with zero base-art or actor drift."
+    },
+    {
+      "area": "verification",
+      "verdict": "pass",
+      "evidence": "All 55 native result entries exit 0, including ambient-life.js. Coldstage reports runtime pass, zero severe console errors, and 99/99 aggregate checks across the reported scenarios. The diner baseline is unchanged; dinerAmbient correctly has no prior baseline and was reviewed from its generated contact sheet plus actual 300-frame production capture."
+    }
+  ],
+  "notes": [
+    "The 30-second reel contains one neon event, two glass events, and multiple events for every lamp. Longer-run timing and duty-cycle coverage comes from the deterministic 120-second native test rather than visual sampling alone.",
+    "The effects are intentionally near the threshold of notice at native scale; selected event crops confirm they are present, attached, and materially smaller than the static diner details."
+  ],
+  "requiredFixes": [],
+  "evidenceReviewed": [
+    ".coldstage/reviews/2026-09-08T11-41-53-735Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient/dinerAmbient-contact-sheet.webp",
+    "artifacts/diner-ambient/frames/frame-000.png through frame-299.png",
+    "artifacts/diner-ambient/timeline.json",
+    "artifacts/diner-ambient/pixel-motion.json",
+    "artifacts/diner-ambient/review-final.json",
+    "artifacts/diner-ambient/native-results.json",
+    "artifacts/diner-ambient/coldstage-final.json",
+    "artifacts/diner-ambient/static-before.sha256",
+    "js/ambient-life.js",
+    "js/ambient-life-scenes.js",
+    "js/engine.js",
+    "test/ambient-life.js"
+  ]
+}

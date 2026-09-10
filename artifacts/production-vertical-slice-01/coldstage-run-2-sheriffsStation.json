@@ -1,0 +1,45 @@
+{
+  "status": "fail",
+  "reportPath": ".coldstage/runs/2026-09-09T08-00-08-213Z-sheriffsStation/report.json",
+  "environment": {
+    "lane": "selenium-release",
+    "browser": "Chrome",
+    "browserVersion": "152.0.7977.83",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "changedFileCount": null,
+  "baseline": null,
+  "pixelGate": {
+    "status": "pending",
+    "aiReviewNeeded": false
+  },
+  "scenarios": [
+    {
+      "name": "sheriffsStation",
+      "status": "fail",
+      "attestation": {
+        "runtime": "fail",
+        "visualReview": "not-performed"
+      },
+      "durationMs": 26091,
+      "checks": {
+        "passed": 0,
+        "total": 0,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": {
+        "status": "skipped-runtime-failure",
+        "aiReviewNeeded": false,
+        "nextAction": "fix-runtime",
+        "reviewSheet": null
+      },
+      "error": "javascript error: Route to center ended at 7,9\n  (Session info: chrome=152.0.7977.83)",
+      "screenshot": ".coldstage/runs/2026-09-09T08-00-08-213Z-sheriffsStation/sheriffsStation.png",
+      "localArtifacts": 0,
+      "captureDeterminism": []
+    }
+  ]
+}

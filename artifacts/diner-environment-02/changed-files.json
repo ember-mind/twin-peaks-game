@@ -1,0 +1,17 @@
+[
+  "CANONICAL-SYNC.md",
+  "coldstage.config.mjs",
+  "index.html",
+  "js/ambient-life.js",
+  "js/ambient-life-scenes.js",
+  "js/environment-reactions.js",
+  "js/engine.js",
+  "test/ambient-life.js",
+  "test/environment-life.js",
+  "test/environment-entry.js",
+  "test/ambient-life-preview.html",
+  "test/canonical-sync.js",
+  "test/coldstage-config.js",
+  "test/retro-production.js",
+  "docs/ambient-life.md"
+]

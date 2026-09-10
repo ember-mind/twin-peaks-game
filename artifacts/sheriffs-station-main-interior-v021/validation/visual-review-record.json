@@ -1,0 +1,17 @@
+{
+  "status": "recorded",
+  "projectId": "twin-peaks-pokemon",
+  "runId": "2026-09-08T18-53-19-883Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation",
+  "scenario": "sheriffsStation",
+  "verdict": "pass-with-notes",
+  "reviewer": {
+    "type": "vision-model",
+    "id": "codex-primary-art-direction",
+    "provider": "openai",
+    "model": "gpt-6"
+  },
+  "reportDigest": "2d98daf0b5c1a750c9be0e3c63a4566c99632b1d8835d252e58816573642667b",
+  "reviewDigest": "77fa4330e88c0a02d41408bb432f0b730f6a6358ce6119830e31716cb7769189",
+  "reviewPath": ".coldstage/reviews/2026-09-08T18-53-19-883Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation/review-1788893862709-4960fb4d.json",
+  "contactSheet": ".coldstage/reviews/2026-09-08T18-53-19-883Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-contact-sheet.webp"
+}

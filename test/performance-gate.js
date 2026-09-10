@@ -41,10 +41,11 @@ const THRESHOLDS = Object.freeze({
 });
 const ROUTE = Object.freeze([
   { id: 'town', x: 30, y: 31, dir: 'up' },
-  { id: 'sheriff', x: 9, y: 2, dir: 'up' },
+  { id: 'sheriff', x: 7, y: 7, dir: 'up' },
   { id: 'palmer', x: 8, y: 10, dir: 'up' },
   { id: 'hotel_gn', x: 8, y: 10, dir: 'up' },
-  { id: 'hospital', x: 5, y: 8, dir: 'up' },
+  { id: 'room_315', x: 2, y: 6, dir: 'down' },
+  { id: 'hospital', x: 7, y: 10, dir: 'up' },
   { id: 'diner', x: 7, y: 8, dir: 'up' },
   { id: 'woods', x: 14, y: 16, dir: 'up' },
   { id: 'redroom', x: 8, y: 10, dir: 'up' },

@@ -24,7 +24,7 @@
 <script src="../js/narrative-runtime.js"></script>
 <script src="../js/narrative-ui.js"></script>
 <script src="../js/narrative-notebook.js"></script>
-<script src="../js/narrative-data.gen.js?v=harness-r77"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r9"></script>
 <script src="../js/narrative-bootstrap.js"></script>
 <script src="../js/narrative-engine-adapter.js?v=harness-r9"></script>
 <script src="../js/narrative-save.js"></script>
@@ -138,7 +138,11 @@ async function run() {
     if (target === 'postDiner') return s;
     pdn(s, 'm8_leland_taxi');
     if (target === 'postTaxi') return s;
-    pdn(s, 'm8_roadhouse'); pdc(s, 'm8_roadhouse', 'warning_' + warn);
+    // pass 01 (split B1): il tavolo di Truman (presagio active) e il telefono
+    // (warning_target) sono due nodi separati — si cammina fra i due, nessun `next`.
+    pdn(s, 'm8_roadhouse_truman');
+    if (target === 'postTrumanTable') return s;
+    pdn(s, 'm8_roadhouse_phone'); pdc(s, 'm8_roadhouse_phone', 'warning_' + warn);
     if (target === 'postWarning' || target === 'postRoadhouse') return s;
     pdn(s, 'm8_focus_choice'); pdc(s, 'm8_focus_choice', 'focus_' + focus);
     if (target === 'postFocus') return s;
@@ -271,12 +275,17 @@ async function run() {
     await advanceUntil(function () { return !A.active(); });
     out.checks['G1 taxi_heard_pre_discovery'] = (S().evidence.T_LELAND_TAXI === true && !S().flags.maddy_trovata && val(S(), 'body_found_by') === undefined);
     out.checks['G1 obj_m8_1_after_taxi'] = ((NR.activeObjective(S(), M8) || {}).id === 'obj_m8_1');
-    // sub-check PURO del timing: presagio nasce al commitNode del Roadhouse, non nelle pagine
-    var st1 = stateAt('postTaxi'); var pr = NR.prepareNode(st1, M8, 'm8_roadhouse');
+    // sub-check PURO del timing: presagio nasce al commitNode del tavolo (Truman),
+    // non nelle pagine (pass 01, split B1: il telefono è un nodo a valle, si cammina)
+    var st1 = stateAt('postTaxi'); var pr = NR.prepareNode(st1, M8, 'm8_roadhouse_truman');
     out.checks['G1 presagio_undefined_before_commit'] = (val(st1, 'presagio_status') === undefined);
     NR.commitNode(st1, M8, pr);
     out.checks['G1 presagio_active_after_commit'] = (val(st1, 'presagio_status') === 'active');
-    // 1b Roadhouse: Gigante → commitNode presagio active → widget telefono NELLO STESSO LEASE
+    // 1b Roadhouse: il tavolo di Truman (Gigante → commitNode presagio active) poi,
+    // camminando, il telefono (nodo separato, nessun `next`)
+    await goActor('roadhouse', 'truman');
+    await advanceUntil(function () { return !A.active(); });
+    out.checks['G1 truman_table_presagio_active'] = (val(S(), 'presagio_status') === 'active');
     var evPre = A.events.length;
     await goLandmark('roadhouse', 'roadhouse_phone');
     await advanceUntil(function () { return widgetOpts().indexOf('warning_palmer') >= 0; });
@@ -507,8 +516,8 @@ async function run() {
     // A.tryInteract('sheriff','truman') — la stessa via che il keypath del motore
     // percorre dopo un Enter. Il keypath FISICO CAMMINATO (spawn→cammino→Enter) è
     // competenza di C8-E, esattamente come M6 (C6-C integrazione ≠ C6-E fisico).
-    var truTile = (GAME.Maps.sheriff.npcs.filter(function (n) { return n.id === 'truman'; })[0]) || { x: 9, y: 1 };
-    E.state.mode = 'play'; E.loadMap('sheriff', Math.max(0, truTile.x - 1), truTile.y, 'right'); await wait(150);
+    var truTile = (GAME.Maps.sheriff.npcs.filter(function (n) { return n.id === 'truman'; })[0]) || { x: 10, y: 4 };
+    E.state.mode = 'play'; E.loadMap('sheriff', truTile.x, truTile.y + 1, 'up'); await wait(150);
     out.checks['G6 truman_npc_present'] = (E.state.npcs.some(function (n) { return n.id === 'truman' && E.npcActive(n); }));
     var evPre = A.events.length;
     A.tryInteract('sheriff', 'truman'); await wait(90); snap();
@@ -546,12 +555,14 @@ async function run() {
       try {
         A.setState(setup);
         var byte = NR.serialize(S());
-        NR.prepareNode(S(), M8, (label === 'promise' ? 'm8_diner' : label === 'warning' ? 'm8_roadhouse' : 'm8_focus_choice'));
+        NR.prepareNode(S(), M8, (label === 'promise' ? 'm8_diner' : label === 'warning' ? 'm8_roadhouse_phone' : 'm8_focus_choice'));
         out.checks['G7 abort_' + label + '_state_byte_identical'] = (NR.serialize(S()) === byte && val(S(), valName) === undefined);
       } catch (e) { out.notes.push('G7 abort_' + label + '_byte: ' + (e && e.message || e)); }
     }
     abortByteIdentical('promise', seedBase(), 'promise_stance');
-    abortByteIdentical('warning', stateAt('postTaxi'), 'warning_target');
+    // warning: il nodo azionabile per la scelta (telefono) richiede il tavolo di
+    // Truman già concluso (pass 01, split B1) — setup a 'postTrumanTable'.
+    abortByteIdentical('warning', stateAt('postTrumanTable'), 'warning_target');
     abortByteIdentical('focus', stateAt('postRoadhouse'), 'focus_destination');
     // RILASCIO LEASE: l'adapter non trattiene un lease su uno stato reinstallato
     // senza interazione (A.active() falso dopo setState+refreshFromState). Il ciclo
@@ -591,12 +602,13 @@ async function run() {
     reinstall('station_ready', toP8({ warn: 'palmer', focus: 'palmer' }));
     // reinstall + riapertura del punto giusto (focus): RUNTIME-LEVEL. Dopo il
     // reinstall di postRoadhouse, m8_focus_choice è di nuovo APRIBILE e le root già
-    // concluse (m8_diner/m8_leland_taxi/m8_roadhouse) no — prova che riapre il punto
-    // corretto senza guidare il DOM (che collide col dialogo nativo del motore).
+    // concluse (m8_diner/m8_leland_taxi/m8_roadhouse_truman/m8_roadhouse_phone) no —
+    // prova che riapre il punto corretto senza guidare il DOM (collide col dialogo
+    // nativo del motore).
     out.checks['G7 reinstall_then_interact_reopens_focus'] = false;
     try {
       A.setState(NR.deserialize(NR.serialize(stateAt('postRoadhouse')))); A.refreshFromState();
-      out.checks['G7 reinstall_then_interact_reopens_focus'] = (NR.prepareNode(S(), M8, 'm8_focus_choice').ok === true && NR.prepareNode(S(), M8, 'm8_roadhouse').ok === false);
+      out.checks['G7 reinstall_then_interact_reopens_focus'] = (NR.prepareNode(S(), M8, 'm8_focus_choice').ok === true && NR.prepareNode(S(), M8, 'm8_roadhouse_truman').ok === false && NR.prepareNode(S(), M8, 'm8_roadhouse_phone').ok === false);
     } catch (e) { out.notes.push('G7 reopen_focus: ' + (e && e.message || e)); }
     await drainLease();
     out.notes.push('gate7: byte-identità/reopen = RUNTIME-LEVEL (prepare-senza-commit + prepareNode); gli 8 checkpoint reinstall = deserialize→setState→refreshFromState. Gli ABORT REALI col tasto Escape attraverso la UI sono in gate7ui (C8-C.1 Fix 3).');
@@ -611,7 +623,8 @@ async function run() {
   await runSection('gate7ui', async function () {
     var DRIVES = [
       { label: 'promise', value: 'promise_stance', choice: 'promise_accompagno', setup: function () { return seedBase(); }, go: function () { return goActor('diner', 'maddy'); } },
-      { label: 'warning', value: 'warning_target', choice: 'warning_palmer', setup: function () { return stateAt('postTaxi'); }, go: function () { return goLandmark('roadhouse', 'roadhouse_phone'); } },
+      // pass 01 (split B1): il telefono richiede il tavolo di Truman già concluso.
+      { label: 'warning', value: 'warning_target', choice: 'warning_palmer', setup: function () { return stateAt('postTrumanTable'); }, go: function () { return goLandmark('roadhouse', 'roadhouse_phone'); } },
       { label: 'focus', value: 'focus_destination', choice: 'focus_palmer', setup: function () { return stateAt('postRoadhouse'); }, go: function () { return goLandmark('town', 'town_crossroads'); } }
     ];
     for (var i = 0; i < DRIVES.length; i++) {
@@ -661,13 +674,20 @@ async function run() {
     var lelandEntry = REG.filter(function (e) { return e.npc.id === 'leland'; })[0];
     out.checks['G9 maddy_registered_conditional'] =
       (!!maddyEntry && maddyEntry.map_id === 'diner' && JSON.stringify(maddyEntry.when) === JSON.stringify({ all: [{ flag: 'atto4' }, { not: { value_set: 'promise_stance' } }] }));
+    // C1 (pass 01): Leland non e' piu' condizionato a promise_stance — copre
+    // l'intera finestra atto4..T_LELAND_TAXI (m8_leland_waiting/m8_leland_taxi
+    // si dividono i due nodi sullo stesso attore, mai due root vive insieme).
     out.checks['G9 leland_registered_conditional_at_diner'] =
-      (!!lelandEntry && lelandEntry.map_id === 'diner' && lelandEntry.npc.x === 11 && lelandEntry.npc.y === 1 && JSON.stringify(lelandEntry.when) === JSON.stringify({ all: [{ flag: 'atto4' }, { value_set: 'promise_stance' }, { not: { evidence: 'T_LELAND_TAXI' } }] }));
+      (!!lelandEntry && lelandEntry.map_id === 'diner' && lelandEntry.npc.x === 11 && lelandEntry.npc.y === 1 && JSON.stringify(lelandEntry.when) === JSON.stringify({ all: [{ flag: 'atto4' }, { not: { evidence: 'T_LELAND_TAXI' } }] }));
     // 9a atto4, promessa non fatta → PRESENTE (dati mappa + motore)
     A.setState(seedBase());
     await loadDiner();
     out.checks['G9 maddy_present_before_promise_map'] = inMapData('diner', 'maddy');
     out.checks['G9 maddy_present_before_promise_live'] = inLive('maddy');
+    // C1 (pass 01): Leland e' gia' presente PRIMA della promessa (O10: niente
+    // rifiuto meta se interpellato presto) — m8_leland_waiting possiede l'attore.
+    out.checks['G9 leland_present_before_promise_map'] = inMapData('diner', 'leland');
+    out.checks['G9 leland_present_before_promise_live'] = inLive('leland');
     // 9b dopo la promessa (COMMIT vero dalla UI del motore) → ASSENTE
     await goActor('diner', 'maddy');
     await advanceUntil(function () { return widgetOpts().indexOf('promise_accompagno') >= 0; }, 30);
@@ -722,11 +742,10 @@ async function run() {
     A.setState(NR.deserialize(NR.serialize(stateAt('postTaxi'))));
     A.refreshFromState();
     out.checks['G9 maddy_and_leland_absent_after_postTaxi_refresh'] = (!inMapData('diner', 'maddy') && !inMapData('diner', 'leland'));
-    // 9g le entità incondizionate NON regrediscono; Truman non si duplica
-    // nel vagone fuori dalla finestra del rapporto M5.
+    // 9g le entità incondizionate NON regrediscono (ronette/infermiera/truman)
     out.checks['G9 ronette_still_present'] = inMapData('hospital', 'ronette');
     out.checks['G9 infermiera_still_present'] = inMapData('hospital', 'infermiera');
-    out.checks['G9 truman_traincar_absent_outside_m5_report'] = !inMapData('traincar', 'truman');
+    out.checks['G9 truman_traincar_still_present'] = inMapData('traincar', 'truman');
     // 9h il registro non tocca MAI gli NPC del gioco classico su quelle mappe
     out.checks['G9 classic_diner_npcs_untouched'] = (GAME.Maps.diner.npcs || []).some(function (n) { return n.id === 'norma'; });
     out.checks['G9 classic_palmer_maddy_untouched'] = (GAME.Maps.palmer.npcs || []).some(function (n) { return n.id === 'maddy'; });
@@ -746,7 +765,8 @@ async function run() {
         { id: 'dupL_B', channel: 'world', map_id: 'roadhouse', target_kind: 'object', target_id: 'roadhouse_phone', conditions: [] }
       ];
     }
-    A.setState(stateAt('postTaxi')); seen = {};
+    // pass 01: il telefono e' azionabile solo dopo il tavolo di Truman (postTrumanTable)
+    A.setState(stateAt('postTrumanTable')); seen = {};
     NR.worldRoots = function (st, m, mapId, actorId) {
       if (m === M8 && mapId === 'roadhouse' && actorId === undefined) return dupLandmark();
       return origWR.apply(NR, arguments);
@@ -763,7 +783,7 @@ async function run() {
       out.checks['G8b ambiguous_landmark_marks_partial_error'] = (A.sessionStatus() === 'partial_error');
     } finally { NR.worldRoots = origWR; }
     // ripristinato il registro reale, lo stesso landmark torna interagibile
-    A.setState(stateAt('postTaxi'));
+    A.setState(stateAt('postTrumanTable'));
     await resetEngine();
     await interactLandmarkFromEngine('roadhouse', 'roadhouse_phone');
     out.checks['G8b landmark_works_again_after_restore'] =
@@ -792,7 +812,8 @@ async function run() {
       'letter_o_chain', 'presagio_status', 'maddy_action_after_warning', 'sarah_support_state', 'maddy_trovata',
       'E9A_LETTERA_O', 'E9B_STESSO_METODO', 'P8.formulation', 'LETTERS_SAME_METHOD', 'NAME_OVERREACH', 'HOUSE_OVERREACH',
       'PROGRESSIVE_SIGNATURE', 'cooper_primary', 'hawk_preserved', 'departure_prepared', 'from_derivation', 'value_transition',
-      'm8_station', 'm8_roadhouse', 'm8_discovery', 'm8_diner', 'm8_focus_choice', 'm8_cmp_diary', 'm8_cmp_letters'];
+      'm8_station', 'm8_roadhouse_truman', 'm8_roadhouse_phone', 'm8_giant_stage', 'm8_leland_waiting', 'm8_lucy',
+      'm8_discovery', 'm8_diner', 'm8_focus_choice', 'm8_cmp_diary', 'm8_cmp_letters'];
     var leaked = TOK.filter(function (t) { return allText.indexOf(t) >= 0; });
     out.checks['G8 no_participant_facing_internal_tokens'] = (leaked.length === 0);
     out.diag_leaked = leaked;

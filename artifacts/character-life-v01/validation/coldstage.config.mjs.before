@@ -1,0 +1,526 @@
+const runtimeFiles = [
+  'index.html',
+  'js/',
+  'assets/',
+  'narrative/',
+  'coldstage.config.mjs',
+  'test/double-r-exterior-prototype.html',
+  'test/double-r-exterior-prototype.js',
+  'js/double-r-exterior-art.js',
+  'js/double-r-exterior-scene.js',
+  'test/double-r-location.html',
+  'test/double-r-location.js',
+  'js/double-r-location-data.js',
+  'js/double-r-location-production.js',
+  'test/sheriffs-station.html',
+  'test/sheriffs-station-preview.js',
+];
+
+const bootReady = `
+  const game = window.GAME;
+  const state = game?.Engine?.state;
+  const canvas = document.querySelector('#game');
+  return Boolean(state && canvas)
+    && state.mode === 'title'
+    && document.body.dataset.screen === 'title'
+    && canvas.width === 256
+    && canvas.height === 192;
+`;
+
+const startNewGame = `
+  const press = (code) => {
+    window.dispatchEvent(new KeyboardEvent('keydown', { code }));
+    window.dispatchEvent(new KeyboardEvent('keyup', { code }));
+  };
+  press('KeyN');
+  for (let index = 0; index < GAME.Engine.introPages().length; index += 1) {
+    press('Enter');
+  }
+`;
+
+const shellEvidence = `
+  const state = GAME.Engine.state;
+  const canvas = document.querySelector('#game');
+  const stage = document.querySelector('#stage');
+  const rect = stage.getBoundingClientRect();
+  const style = getComputedStyle(canvas);
+  const controls = [...document.querySelectorAll('.tp-touch-ctrl')];
+  const visible = controls.filter((element) => {
+    const controlStyle = getComputedStyle(element);
+    return controlStyle.visibility !== 'hidden'
+      && controlStyle.display !== 'none'
+      && Number(controlStyle.opacity) > 0;
+  });
+  return {
+    mode: state.mode,
+    mapId: state.mapId,
+    viewport: { width: innerWidth, height: innerHeight },
+    canvas: {
+      width: canvas.width,
+      height: canvas.height,
+      imageRendering: style.imageRendering,
+    },
+    stage: {
+      width: Math.round(rect.width),
+      height: Math.round(rect.height),
+      left: Math.round(rect.left),
+      top: Math.round(rect.top),
+    },
+    touchMode: Boolean(GAME.touchMode),
+    touchControls: controls.length,
+    visibleTouchControls: visible.length,
+    savePresent: Boolean(localStorage.getItem('tp_save')),
+    horizontalOverflow: document.documentElement.scrollWidth > innerWidth,
+    verticalOverflow: document.documentElement.scrollHeight > innerHeight,
+  };
+`;
+
+const mobileGameplayEvidence = `
+  const state = GAME.Engine.state;
+  const canvas = document.querySelector('#game');
+  const stage = document.querySelector('#stage');
+  const rect = stage.getBoundingClientRect();
+  const visible = [...document.querySelectorAll('.tp-touch-ctrl')].filter((element) => {
+    const style = getComputedStyle(element);
+    return style.visibility !== 'hidden' && style.display !== 'none' && Number(style.opacity) > 0;
+  });
+  return {
+    mode: state.mode,
+    mapId: state.mapId,
+    player: { tx: state.player.tx, ty: state.player.ty },
+    dialogueActive: Boolean(state.dialogue),
+    viewport: { width: innerWidth, height: innerHeight },
+    canvas: { width: canvas.width, height: canvas.height },
+    stage: { width: Math.round(rect.width), height: Math.round(rect.height) },
+    touchMode: Boolean(GAME.touchMode),
+    visibleTouchControls: visible.length,
+    horizontalOverflow: document.documentElement.scrollWidth > innerWidth,
+    verticalOverflow: document.documentElement.scrollHeight > innerHeight,
+  };
+`;
+
+const cooperDirectionScenario = (dir, code) => ({
+  path: `/?coldstage=cooper-${dir}`,
+  viewport: { width: 1280, height: 720 },
+  readyScript: bootReady,
+  settleMs: 220,
+  setupScript: `${startNewGame}
+    press('Enter'); press('Enter'); press('Enter');
+    press('${code}');
+  `,
+  evidenceScript: `
+    const state = GAME.Engine.state;
+    const rect = document.querySelector('#stage').getBoundingClientRect();
+    return {
+      mode: state.mode,
+      mapId: state.mapId,
+      dir: state.player.dir,
+      dialogueActive: Boolean(state.dialogue),
+      stage: { width: Math.round(rect.width), height: Math.round(rect.height) },
+    };
+  `,
+  checks: [
+    { path: 'mode', equals: 'play' },
+    { path: 'mapId', equals: 'town' },
+    { path: 'dir', equals: dir },
+    { path: 'dialogueActive', equals: false },
+    { path: 'stage.width', equals: 768 },
+    { path: 'stage.height', equals: 576 },
+  ],
+  captures: [{
+    name: `cooper-${dir}`,
+    readyScript: `return GAME.Engine.state.player.dir === '${dir}' && !GAME.Engine.state.dialogue;`,
+    settleMs: 120,
+  }],
+});
+
+export default {
+  projectId: 'twin-peaks-pokemon',
+  origin: 'http://127.0.0.1:4177',
+  outputDir: '.coldstage/runs',
+  baselineDir: 'test/coldstage-baselines',
+  stateFile: '.coldstage/state.json',
+  watch: runtimeFiles,
+  browser: {
+    viewport: { width: 1280, height: 720 },
+    pageLoadTimeoutMs: 30_000,
+    scriptTimeoutMs: 60_000,
+  },
+  scenarios: {
+    sheriffsStation: {
+      review: 'visual',
+      scriptTimeoutMs: 60_000,
+      diff: { threshold: 0, maxChangedRatio: 0, includeAA: true },
+      path: '/test/sheriffs-station.html?clean=1',
+      viewport: { width: 1280, height: 960 },
+      readyScript: `return Boolean(window.__SHERIFF_PREVIEW__?.snapshot().ready);`,
+      setupScript: `if (window.GAME && GAME.AmbientLife) GAME.AmbientLife.setEnabled(false);
+        return window.__SHERIFF_PREVIEW__.demoRoutes();`,
+      settleMs: 180,
+      evidenceScript: `return window.__SHERIFF_PREVIEW__.snapshot();`,
+      checks: [
+        { path: 'mapId', equals: 'sheriffs_station_main_interior' },
+        { path: 'canvas.width', equals: 256 },
+        { path: 'canvas.height', equals: 192 },
+        { path: 'worldLocation', equals: 'sheriffs-station' },
+        { path: 'worldEnvironment', equals: 'main-interior' },
+        { path: 'connections.length', equals: 0 },
+        { path: 'routesComplete', equals: true },
+        { path: 'player.moving', equals: false },
+        { path: 'atlasId', equals: 'heartgold-atlas-r116' },
+      ],
+      captures: [
+        { name: 'native-clean', setupScript: `window.__SHERIFF_PREVIEW__.reset(); window.__SHERIFF_PREVIEW__.setDebug(false);`, settleMs: 180 },
+        { name: 'native-debug', setupScript: `window.__SHERIFF_PREVIEW__.setDebug(true);`, settleMs: 180 },
+        { name: 'reception-access', setupScript: `window.__SHERIFF_PREVIEW__.setDebug(false); return window.__SHERIFF_PREVIEW__.goTo('receptionStaff');`, settleMs: 180 },
+        { name: 'right-workspace', setupScript: `return window.__SHERIFF_PREVIEW__.goTo('rightDesk');`, settleMs: 180 },
+        { name: 'files-access', setupScript: `return window.__SHERIFF_PREVIEW__.goTo('files');`, settleMs: 180 },
+        { name: 'rear-door', setupScript: `return window.__SHERIFF_PREVIEW__.goTo('rearDoor');`, settleMs: 180 },
+        { name: 'depth-behind', setupScript: `return window.__SHERIFF_PREVIEW__.goTo('depthBehind');`, settleMs: 180 },
+        { name: 'depth-front', setupScript: `return window.__SHERIFF_PREVIEW__.goTo('depthFront');`, settleMs: 180 },
+      ],
+    },
+    desktop: {
+      path: '/?coldstage=desktop',
+      viewport: { width: 1280, height: 720 },
+      readyScript: bootReady,
+      settleMs: 120,
+      evidenceScript: shellEvidence,
+      checks: [
+        { path: 'mode', equals: 'title' },
+        { path: 'mapId', equals: 'town' },
+        { path: 'viewport.width', equals: 1280 },
+        { path: 'viewport.height', equals: 720 },
+        { path: 'canvas.width', equals: 256 },
+        { path: 'canvas.height', equals: 192 },
+        { path: 'canvas.imageRendering', notEquals: 'auto' },
+        { path: 'stage.width', equals: 768 },
+        { path: 'stage.height', equals: 576 },
+        { path: 'touchMode', equals: false },
+        { path: 'touchControls', equals: 0 },
+        { path: 'savePresent', equals: false },
+        { path: 'horizontalOverflow', equals: false },
+        { path: 'verticalOverflow', equals: false },
+      ],
+    },
+    gameplay: {
+      path: '/?coldstage=gameplay',
+      viewport: { width: 1280, height: 720 },
+      readyScript: bootReady,
+      settleMs: 80,
+      setupScript: startNewGame,
+      evidenceScript: `
+        const state = GAME.Engine.state;
+        const canvas = document.querySelector('#game');
+        return {
+          mode: state.mode,
+          mapId: state.mapId,
+          player: { tx: state.player.tx, ty: state.player.ty },
+          introPages: GAME.Engine.introPages().length,
+          dialogueActive: Boolean(state.dialogue),
+          canvas: { width: canvas.width, height: canvas.height },
+          saveCreated: Boolean(localStorage.getItem('tp_save')),
+        };
+      `,
+      checks: [
+        { path: 'mode', equals: 'play' },
+        { path: 'mapId', equals: 'town' },
+        { path: 'player.tx', equals: 28 },
+        { path: 'player.ty', equals: 31 },
+        { path: 'introPages', min: 1 },
+        { path: 'dialogueActive', equals: true },
+        { path: 'canvas.width', equals: 256 },
+        { path: 'canvas.height', equals: 192 },
+        { path: 'saveCreated', equals: true },
+      ],
+    },
+    mobile: {
+      path: '/?touch=1&coldstage=mobile',
+      viewport: { width: 390, height: 844 },
+      readyScript: bootReady,
+      settleMs: 120,
+      evidenceScript: shellEvidence,
+      checks: [
+        { path: 'mode', equals: 'title' },
+        { path: 'viewport.width', equals: 390 },
+        { path: 'viewport.height', equals: 844 },
+        { path: 'canvas.width', equals: 256 },
+        { path: 'canvas.height', equals: 192 },
+        { path: 'canvas.imageRendering', notEquals: 'auto' },
+        { path: 'stage.width', equals: 256 },
+        { path: 'stage.height', equals: 192 },
+        { path: 'touchMode', equals: true },
+        { path: 'touchControls', equals: 3 },
+        { path: 'visibleTouchControls', equals: 2 },
+        { path: 'savePresent', equals: false },
+        { path: 'horizontalOverflow', equals: false },
+        { path: 'verticalOverflow', equals: false },
+      ],
+    },
+    mobileGameplay: {
+      path: '/?touch=1&coldstage=mobile-gameplay',
+      viewport: { width: 390, height: 844 },
+      readyScript: bootReady,
+      settleMs: 120,
+      setupScript: startNewGame,
+      evidenceScript: mobileGameplayEvidence,
+      checks: [
+        { path: 'mode', equals: 'play' },
+        { path: 'mapId', equals: 'town' },
+        { path: 'player.tx', equals: 28 },
+        { path: 'player.ty', equals: 31 },
+        { path: 'dialogueActive', equals: true },
+        { path: 'viewport.width', equals: 390 },
+        { path: 'viewport.height', equals: 844 },
+        { path: 'canvas.width', equals: 256 },
+        { path: 'canvas.height', equals: 192 },
+        { path: 'stage.width', equals: 256 },
+        { path: 'stage.height', equals: 192 },
+        { path: 'touchMode', equals: true },
+        { path: 'visibleTouchControls', equals: 1 },
+        { path: 'horizontalOverflow', equals: false },
+        { path: 'verticalOverflow', equals: false },
+      ],
+      captures: [{
+        name: 'mobile-portrait-gameplay',
+        readyScript: `return GAME.Engine.state.mode === 'play' && Boolean(GAME.Engine.state.dialogue);`,
+        settleMs: 120,
+      }],
+    },
+    mobileLandscapeGameplay: {
+      path: '/?touch=1&coldstage=mobile-landscape-gameplay',
+      viewport: { width: 844, height: 390 },
+      readyScript: bootReady,
+      settleMs: 120,
+      setupScript: startNewGame,
+      evidenceScript: mobileGameplayEvidence,
+      checks: [
+        { path: 'mode', equals: 'play' },
+        { path: 'mapId', equals: 'town' },
+        { path: 'dialogueActive', equals: true },
+        { path: 'viewport.width', equals: 844 },
+        { path: 'viewport.height', equals: 390 },
+        { path: 'canvas.width', equals: 256 },
+        { path: 'canvas.height', equals: 192 },
+        { path: 'stage.width', equals: 512 },
+        { path: 'stage.height', equals: 384 },
+        { path: 'touchMode', equals: true },
+        { path: 'visibleTouchControls', equals: 1 },
+        { path: 'horizontalOverflow', equals: false },
+        { path: 'verticalOverflow', equals: false },
+      ],
+      captures: [{
+        name: 'mobile-landscape-gameplay',
+        readyScript: `return GAME.Engine.state.mode === 'play' && Boolean(GAME.Engine.state.dialogue);`,
+        settleMs: 120,
+      }],
+    },
+    dinerLocation: {
+      review: 'visual',
+      diff: { threshold: 0, maxChangedRatio: 0, includeAA: true },
+      path: '/test/double-r-location.html?clean=1',
+      viewport: { width: 1280, height: 960 },
+      readyScript: `return Boolean(window.__LOCATION_PREVIEW__?.snapshot().ready);`,
+      setupScript: `return window.__LOCATION_PREVIEW__.demoRoundTrip();`,
+      settleMs: 400,
+      evidenceScript: `return window.__LOCATION_PREVIEW__.snapshot();`,
+      checks: [
+        { path: 'connectionId', equals: 'double-r-front-entrance' },
+        { path: 'mapId', equals: 'double_r_exterior_prototype' },
+        { path: 'player.tx', equals: 6 },
+        { path: 'player.ty', equals: 7 },
+        { path: 'player.dir', equals: 'down' },
+        { path: 'player.moving', equals: false },
+        { path: 'fadePhase', equals: 0 },
+        { path: 'roundTripComplete', equals: true },
+        { path: 'saveCount', equals: 2 },
+        { path: 'canvas.width', equals: 256 },
+        { path: 'canvas.height', equals: 192 },
+      ],
+      captures: [
+        { name: 'parking', setupScript: `window.__LOCATION_PREVIEW__.reset();`, settleMs: 180 },
+        { name: 'inside', setupScript: `return window.__LOCATION_PREVIEW__.enter();`, settleMs: 180 },
+        { name: 'outside', setupScript: `return window.__LOCATION_PREVIEW__.exit();`, settleMs: 180 },
+        { name: 'connection-debug', setupScript: `window.__LOCATION_PREVIEW__.setDebug(true);`, settleMs: 180 },
+      ],
+    },
+    dinerExterior: {
+      review: 'visual',
+      diff: { threshold: 0, maxChangedRatio: 0, includeAA: true },
+      path: '/test/double-r-exterior-prototype.html?clean=1',
+      viewport: { width: 1280, height: 960 },
+      readyScript: `return Boolean(window.__EXTERIOR_PREVIEW__?.snapshot().ready);`,
+      setupScript: `return window.__EXTERIOR_PREVIEW__.demo();`,
+      settleMs: 160,
+      evidenceScript: `return window.__EXTERIOR_PREVIEW__.snapshot();`,
+      checks: [
+        { path: 'mapId', equals: 'double_r_exterior_prototype' },
+        { path: 'canvas.width', equals: 256 },
+        { path: 'canvas.height', equals: 192 },
+        { path: 'player.tx', equals: 6 },
+        { path: 'player.ty', equals: 6 },
+        { path: 'player.moving', equals: false },
+        { path: 'triggerVisits', equals: 1 },
+        { path: 'transitionDisabled', equals: true },
+      ],
+      captures: [
+        { name: 'parking-clean', setupScript: `window.__EXTERIOR_PREVIEW__.reset(); window.__EXTERIOR_PREVIEW__.setDebug(false);`, settleMs: 180 },
+        { name: 'entrance-clean', setupScript: `return window.__EXTERIOR_PREVIEW__.demo();`, settleMs: 180 },
+        { name: 'entrance-debug', setupScript: `window.__EXTERIOR_PREVIEW__.setDebug(true);`, settleMs: 180 },
+      ],
+    },
+    diner: {
+      review: 'visual',
+      diff: { threshold: 0.1, maxChangedRatio: 0.001, includeAA: false },
+      path: '/?coldstage=diner',
+      viewport: { width: 1280, height: 960 },
+      readyScript: bootReady,
+      setupScript: startNewGame + `
+        const state = GAME.Engine.state;
+        state.dialogue = null;
+        GAME.Engine.loadMap('diner', 6, 8, 'up');
+        state.dialogue = null;
+        state.fade = 0;
+        GAME.AmbientLife.setEnabled(false);
+      `,
+      evidenceScript: `return { mapId: GAME.Engine.state.mapId, mode: GAME.Engine.state.mode,
+        kit: Boolean(GAME.Retro2D.interiorKit), dialogue: Boolean(GAME.Engine.state.dialogue) };`,
+      checks: [
+        { path: 'mapId', equals: 'diner' }, { path: 'mode', equals: 'play' },
+        { path: 'kit', equals: true }, { path: 'dialogue', equals: false },
+      ],
+      captures: [{ name: 'double-r-interior', settleMs: 240 }],
+    },
+    dinerAmbient: {
+      review: 'visual',
+      diff: {threshold:0,maxChangedRatio:0,includeAA:true},
+      path:'/?coldstage=diner-ambient', viewport:{width:1280,height:960}, readyScript:bootReady,
+      setupScript: startNewGame + `
+        const state=GAME.Engine.state; state.dialogue=null;
+        GAME.Engine.loadMap('diner',6,8,'up');state.dialogue=null;state.fade=0;
+        state.npcs.forEach(n=>{n.nextThink=Infinity;n.dir='down';});
+        GAME.AmbientLife.reset(1989);GAME.AmbientLife.setPaused(true);GAME.AmbientLife.seek('diner',0);
+        window.ambientStarts=Object.fromEntries(GAME.AmbientLife.snapshot('diner').items.map(e=>[e.id,e.next]));
+      `,
+      evidenceScript:`return {mapId:GAME.Engine.state.mapId,elements:GAME.AmbientLife.snapshot('diner').items.length,enabled:GAME.AmbientLife.snapshot('diner').enabled};`,
+      checks:[{path:'mapId',equals:'diner'},{path:'elements',equals:9},{path:'enabled',equals:true}],
+      captures:[
+        ['steam-0','0'],['steam-420','420'],['steam-900','900'],
+        ['lamp-west',"window.ambientStarts['pendant-west']+140"],
+        ['lamp-east',"window.ambientStarts['pendant-east']+140"],
+        ['neon',"window.ambientStarts['double-r-neon']+80"],
+        ['glass-start',"window.ambientStarts['pie-glass']+300"],
+        ['glass-mid',"window.ambientStarts['pie-glass']+1400"],
+        ['glass-end',"window.ambientStarts['pie-glass']+2500"]
+      ].map(([name,time])=>({name,settleMs:100,readyScript:`if(window.ambientCapture!==${JSON.stringify(name)}){GAME.AmbientLife.seek('diner',${time});window.ambientCapture=${JSON.stringify(name)};}return true;`}))
+    },
+    dinerEnvironment: {
+      review:'visual',diff:{threshold:0,maxChangedRatio:0,includeAA:true},
+      path:'/?coldstage=diner-environment',viewport:{width:1280,height:960},readyScript:bootReady,
+      setupScript:startNewGame+`
+        const state=GAME.Engine.state;state.dialogue=null;
+        GAME.Engine.loadMap('diner',6,8,'up');state.dialogue=null;state.fade=0;
+        state.npcs.forEach(n=>{n.nextThink=Infinity;n.dir='down';});
+        GAME.AmbientLife.reset(1989);GAME.AmbientLife.setPaused(true);GAME.AmbientLife.seek('diner',0);
+        GAME.EnvironmentReactions.setPaused(true);
+        window.machineStart=GAME.AmbientLife.snapshot('diner').items.find(e=>e.id==='coffee-machine').next;
+      `,
+      evidenceScript:`return {machine:GAME.AmbientLife.snapshot('diner').items.some(e=>e.type==='MACHINE_IDLE_ACTIVITY'),clock:GAME.AmbientLife.snapshot('diner').items.some(e=>e.type==='CLOCK_TICK'),door:GAME.EnvironmentReactions.snapshot('diner')[0].state};`,
+      checks:[{path:'machine',equals:true},{path:'clock',equals:true},{path:'door',equals:'CLOSED'}],
+      captures:[['static','0',-1],['machine','window.machineStart+300',-1],['clock-tick','5000',-1],['clock-later','15000',-1],
+        ['door-opening','0',0],['door-angle','0',160],['door-open','0',320],['door-closing','0',850],['door-closed','0',1100]
+      ].map(([name,time,elapsed])=>({name,settleMs:100,readyScript:`
+        if(window.environmentCapture!==${JSON.stringify(name)}){
+          GAME.AmbientLife.seek('diner',${time});GAME.EnvironmentReactions.reset('diner');
+          if(${elapsed}>=0){GAME.Engine.emitEnvironmentEvent({type:'ENTITY_ENTERED_DOORWAY',sceneId:'diner',arrivalKey:'6,8',fromMapId:'town',entityId:'preview-entity'});
+            GAME.EnvironmentReactions.setPaused(false);GAME.EnvironmentReactions.update(${elapsed},'diner');GAME.EnvironmentReactions.setPaused(true);}
+          window.environmentCapture=${JSON.stringify(name)};
+        }return true;`}))
+    },
+    dinerGestures: {
+      review:'visual',diff:{threshold:0,maxChangedRatio:0,includeAA:true},
+      path:'/?coldstage=diner-gestures',viewport:{width:1280,height:960},readyScript:bootReady,
+      setupScript:startNewGame+`
+        const s=GAME.Engine.state;s.dialogue=null;GAME.Engine.loadMap('diner',6,8,'up');s.dialogue=null;s.fade=0;
+        s.npcs.forEach(n=>{n.nextThink=Infinity;n.dir='down';});
+        GAME.AmbientLife.setEnabled(false);GAME.CharacterActivity.reset(1989);GAME.CharacterActivity.update(0,s);GAME.CharacterActivity.setPaused(true);
+      `,
+      evidenceScript:`return {map:GAME.Engine.state.mapId,sip:GAME.CharacterActivity.pose('booth-sip'),wipe:GAME.CharacterActivity.pose('counter-wipe')};`,
+      checks:[{path:'map',equals:'diner'},{path:'sip',equals:-1},{path:'wipe',equals:-1}],
+      captures:[['rest',-1,3000],['sip-reach','booth-sip',100],['sip-lift','booth-sip',450],['sip-drink','booth-sip',1000],['sip-return','booth-sip',1750],['sip-rest','booth-sip',3000],
+        ['wipe-left','counter-wipe',100],['wipe-middle','counter-wipe',450],['wipe-right','counter-wipe',800],['wipe-return','counter-wipe',1100],['wipe-rest','counter-wipe',3000]
+      ].map(([name,id,time])=>({name,settleMs:100,readyScript:`
+        if(window.gestureCapture!==${JSON.stringify(name)}){GAME.CharacterActivity.preview('booth-sip',3000);GAME.CharacterActivity.preview('counter-wipe',3000);
+          if(${JSON.stringify(id)}!==-1)GAME.CharacterActivity.preview(${JSON.stringify(id)},${time});
+          window.gestureCapture=${JSON.stringify(name)};}return true;`}))
+    },
+    cooperDown: cooperDirectionScenario('down', 'ArrowDown'),
+    cooperUp: cooperDirectionScenario('up', 'ArrowUp'),
+    cooperRight: cooperDirectionScenario('right', 'ArrowRight'),
+    cooperLeft: cooperDirectionScenario('left', 'ArrowLeft'),
+    visual: {
+      review: 'visual',
+      diff: { threshold: 0.1, maxChangedRatio: 0.001, includeAA: false },
+      path: '/?coldstage=visual',
+      viewport: { width: 1280, height: 720 },
+      readyScript: bootReady,
+      settleMs: 80,
+      setupScript: startNewGame,
+      evidenceScript: `
+        const state = GAME.Engine.state;
+        return {
+          mode: state.mode,
+          mapId: state.mapId,
+          dialogueActive: Boolean(state.dialogue),
+        };
+      `,
+      checks: [
+        { path: 'mode', equals: 'play' },
+        { path: 'mapId', equals: 'town' },
+        { path: 'dialogueActive', equals: true },
+      ],
+      captures: [{
+        name: 'town-entrance-dialogue',
+        readyScript: `return document.body.dataset.screen === 'play';`,
+        settleMs: 180,
+      }],
+    },
+  },
+  selectChanged(files) {
+    const selected = new Set();
+    const all = () => ['desktop', 'gameplay', 'mobile', 'mobileGameplay', 'mobileLandscapeGameplay',
+      'cooperDown', 'cooperUp', 'cooperRight', 'cooperLeft', 'visual', 'diner', 'dinerAmbient', 'dinerEnvironment', 'dinerGestures', 'dinerExterior', 'dinerLocation', 'sheriffsStation']
+      .forEach((name) => selected.add(name));
+    for (const file of files) {
+      if (file.startsWith('test/sheriffs-station') || file.startsWith('js/sheriffs-station-')) {
+        selected.add('sheriffsStation');
+      } else if (file.startsWith('test/double-r-location') || file === 'js/location-connections.js'
+        || file === 'js/double-r-location-data.js' || file === 'js/double-r-location-production.js') {
+        selected.add('dinerLocation');
+      } else if (file.startsWith('test/double-r-exterior-') || file.startsWith('js/double-r-exterior-')) {
+        selected.add('dinerExterior');
+        selected.add('dinerLocation');
+      } else if (['index.html', 'coldstage.config.mjs'].includes(file)
+        || ['js/main.js', 'js/engine.js', 'js/glue.js'].includes(file)) {
+        all();
+      } else if (file === 'js/touch.js') {
+        selected.add('mobile');
+        selected.add('mobileGameplay');
+        selected.add('mobileLandscapeGameplay');
+      } else if (file.startsWith('js/narrative-') || file.startsWith('narrative/')) {
+        selected.add('gameplay');
+        selected.add('visual');
+      } else if (file.startsWith('assets/')
+        || /^js\/retro-cast-matrices-[ab]\.js$/.test(file)
+        || ['js/character-activity.js','js/environment-reactions.js','js/ambient-life.js','js/ambient-life-scenes.js','js/retro.js', 'js/retro-authored.js', 'js/retro-ui.js', 'js/retro-font.js',
+          'js/portraits.js', 'js/gold-tone.js', 'js/chars.js', 'js/tiles.js'].includes(file)) {
+        all();
+      } else if (file.startsWith('js/')) {
+        selected.add('gameplay');
+      }
+    }
+    return ['desktop', 'gameplay', 'mobile', 'mobileGameplay', 'mobileLandscapeGameplay',
+      'cooperDown', 'cooperUp', 'cooperRight', 'cooperLeft', 'visual', 'diner', 'dinerAmbient', 'dinerEnvironment', 'dinerGestures', 'dinerExterior', 'dinerLocation', 'sheriffsStation']
+      .filter((name) => selected.has(name));
+  },
+};

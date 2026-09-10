@@ -1,0 +1,24 @@
+{
+  "status": "ready-for-review",
+  "projectId": "twin-peaks-pokemon",
+  "runId": "2026-09-08T06-57-43-519Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner",
+  "scenario": "diner",
+  "runtimeStatus": "pass",
+  "fresh": true,
+  "reportDigest": "2cee95ea81f206273c85ae197c8ea6507d0f22297300aa51b3afa2655427cbea",
+  "visualReview": "not-performed",
+  "sourceArtifacts": 1,
+  "contactSheet": ".coldstage/reviews/2026-09-08T06-57-43-519Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner/diner-contact-sheet.webp",
+  "contactSheetSha256": "06d2f689e025258a70dd68eb6e81240a14325beb81d3cb68dd81d73805ffe6fb",
+  "sourceEvidence": [
+    {
+      "path": ".coldstage/runs/2026-09-08T06-57-43-519Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner/diner-double-r-interior.png",
+      "sha256": "2dc49a832f136a0da7a16119fa1f4ed56dda47f21a5dcbe5bafb51f576d0d849",
+      "bytes": 21325
+    }
+  ],
+  "dimensions": {
+    "width": 640,
+    "height": 452
+  }
+}

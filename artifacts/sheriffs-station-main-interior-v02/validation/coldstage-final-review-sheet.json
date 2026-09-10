@@ -1,0 +1,59 @@
+{
+  "status": "ready-for-review",
+  "projectId": "twin-peaks-pokemon",
+  "runId": "2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation",
+  "scenario": "sheriffsStation",
+  "runtimeStatus": "pass",
+  "fresh": true,
+  "reportDigest": "aea3f4339c7289d8954ef9709de8ac25f11f45471cfb516e4964028cf578d4da",
+  "visualReview": "not-performed",
+  "sourceArtifacts": 8,
+  "contactSheet": ".coldstage/reviews/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-contact-sheet.webp",
+  "contactSheetSha256": "345aa15170d176dd673c815807d94b7943defb5aa6e05c60502204de95d29739",
+  "sourceEvidence": [
+    {
+      "path": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-native-clean.png",
+      "sha256": "af3bbde3b6520e73a30c588a274ee68c807396996feb62d537c0cbd56f87924b",
+      "bytes": 11371
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-native-debug.png",
+      "sha256": "c5e582452a3c2aca2f70fe7ab6ed82c003e92c6824e786ab62dc0c85a9115a36",
+      "bytes": 17271
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-reception-access.png",
+      "sha256": "054d685ef1c89a571a6c200dda2e100c95cd8571fe0f0f421623610f25e832af",
+      "bytes": 10965
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-right-workspace.png",
+      "sha256": "faaf067e4deeb8ed810dc34312ac3869f32948805ac8b26856b69f2f81cc7f61",
+      "bytes": 11339
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-files-access.png",
+      "sha256": "36d2226c52471795c0a37a4148da093b19f57466a22e0bda3d1dbab9a3978d3f",
+      "bytes": 11323
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-rear-door.png",
+      "sha256": "fb50eb2a17eef6834edf40297318072b5d6015dd2939148b6b9ac77e624af851",
+      "bytes": 11319
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-depth-behind.png",
+      "sha256": "426d5410042c09b84c76fcefa552e0db937cf63432a130bd9500c2873ab1ea15",
+      "bytes": 11126
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-depth-front.png",
+      "sha256": "ef261fd8420920e5432a9600da88e044cf7b8caea85e0a49695567181417fce7",
+      "bytes": 11288
+    }
+  ],
+  "dimensions": {
+    "width": 1280,
+    "height": 1652
+  }
+}

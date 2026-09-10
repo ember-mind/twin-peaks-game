@@ -1,0 +1,3 @@
+Command: node test/walkthrough.js
+Exit: 0
+Output: OK: cammino completo simulato, 86 acquisizioni, finale raggiunto

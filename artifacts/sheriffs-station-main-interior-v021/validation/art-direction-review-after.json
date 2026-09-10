@@ -1,0 +1,29 @@
+{
+  "date": "2026-09-08T18:58:15.162761+00:00",
+  "verdict": "pass-with-notes",
+  "reviewer": "codex-primary-art-direction",
+  "artSha256": "650a26eb56b6f709ad2acca507db7509c9840d6e5ca26c5736357b882bfb19a5",
+  "inspectionOrder": [
+    "returned sheriff pixelDiff.reviewSheet",
+    "golden reference",
+    "exact native-after-256.png",
+    "native-after.png at 5x",
+    "native-before-256.png",
+    "comparison.png: concept/before/after at 2x native"
+  ],
+  "escalationReason": "Overview could not resolve one-pixel material edges and floor contacts.",
+  "criteria": {
+    "focalHierarchy": "Pass. County map and deep sheriff desk form the central anchor; the lamp is the only concentrated amber light. Existing aisle remains clear.",
+    "lighting": "Pass with notes. Cool highlights affect fixtures, wall, steel, glass and back floor; hard warm clusters stay local to the sheriff desktop and adjacent floor. No gradients or blur. Fluorescent spill is deliberately subtle.",
+    "materials": "Pass. Oak has inset joints and directional rims; steel has cool edge planes and dark drawers; paper remains broad ivory; glass uses sparse cool reflections.",
+    "depth": "Pass. Visible hard ground contact, deeper desk fronts and chair planes improve grounding. All existing actor depth bands and collision footprints are unchanged.",
+    "environmentalDensity": "Pass. County parcels/river, coat and hat, radio, phone, case papers and counter notices restore functional density without adding floor obstacles.",
+    "sameGameQuality": "Pass with notes. Native furniture and player use compatible hard pixel clusters and scale. Material and focal treatment recover the reference identity; perspective, dense decor and painterly texture remain intentionally reduced. This is model review, not user visual approval."
+  },
+  "baseline": "v0.2 retained; no baseline approval or replacement",
+  "runtime": {
+    "scenarios": 17,
+    "checksPassed": 133,
+    "checksTotal": 133
+  }
+}

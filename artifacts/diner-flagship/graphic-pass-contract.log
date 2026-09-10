@@ -1,0 +1,16 @@
+ok - visual matrix covers all 11 town building components
+ok - every visual capture starts on a walkable production tile
+ok - town tracks own visible rail art, walkable crossing and named capture
+ok - town forest stays world-locked across camera tile boundaries
+ok - town trees occlude actors by foot depth without foreground shadows
+ok - town trunks exist only inside complete macro trees
+ok - town houses stay world-locked across horizontal and vertical camera boundaries
+ok - arrival shop, cabin, mailbox and car art aligns with collision contact boxes
+ok - arrival south forest coverage agrees with T collision and open corridor
+ok - Red Room has continuous zigzag and curtains in every viewport
+ok - train car continuous shell, windows, wheels and rails are present
+ok - seven interior floor profiles are pixel-distinct
+ok - look-ahead is render-only and collision data stays byte-identical
+ok - desktop and mobile use the identical native actor scale
+
+GRAPHIC-PASS-CONTRACT-PASS 14/14

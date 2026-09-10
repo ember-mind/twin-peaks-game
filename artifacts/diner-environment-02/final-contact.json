@@ -1,0 +1,64 @@
+{
+  "status": "ready-for-review",
+  "projectId": "twin-peaks-pokemon",
+  "runId": "2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment",
+  "scenario": "dinerEnvironment",
+  "runtimeStatus": "pass",
+  "fresh": true,
+  "reportDigest": "10456623ddc2680d14bfa34cb82dc4d0225fa27633c3de655633d0d423936c40",
+  "visualReview": "not-performed",
+  "sourceArtifacts": 9,
+  "contactSheet": ".coldstage/reviews/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerEnvironment-contact-sheet.webp",
+  "contactSheetSha256": "d9619bddba582337962b0444ed9621e8691b7403b96e720f846bdd57b896e4d3",
+  "sourceEvidence": [
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerEnvironment-static.png",
+      "sha256": "2d9e5fb2de434cac431b348ecc43e013195c2b307d69ea0b4aa3b0cd7ebd7efe",
+      "bytes": 31403
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerEnvironment-machine.png",
+      "sha256": "76239aff4c1ab4e94c7ee4652876ca45b3fc50e4becd29bbed11396a2d3c88a6",
+      "bytes": 31452
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerEnvironment-clock-tick.png",
+      "sha256": "58139aa9eac1b841566cfacdef071d85da49528bd43c0be27849ab211de81232",
+      "bytes": 31440
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerEnvironment-clock-later.png",
+      "sha256": "698ba3adc14a5d341fb21a99cf28d5aa155c62ec5ec43b93ab864c380a315dd3",
+      "bytes": 31459
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerEnvironment-door-opening.png",
+      "sha256": "a1c1862cac2620d7c7d19f3b520ca6597ee700f161f2607490bd82c31f5d9db8",
+      "bytes": 31451
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerEnvironment-door-angle.png",
+      "sha256": "3d3b5830d36cda0ce3e6a27975a72e1afb055e32defa6953cd980003b9f4dfe5",
+      "bytes": 31464
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerEnvironment-door-open.png",
+      "sha256": "86d435412313f12fd87bcfbcb827c61b32b0abb192ed63d90a2900de65b69e84",
+      "bytes": 31428
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerEnvironment-door-closing.png",
+      "sha256": "3d3b5830d36cda0ce3e6a27975a72e1afb055e32defa6953cd980003b9f4dfe5",
+      "bytes": 31464
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerEnvironment-door-closed.png",
+      "sha256": "2d9e5fb2de434cac431b348ecc43e013195c2b307d69ea0b4aa3b0cd7ebd7efe",
+      "bytes": 31403
+    }
+  ],
+  "dimensions": {
+    "width": 1280,
+    "height": 2052
+  }
+}

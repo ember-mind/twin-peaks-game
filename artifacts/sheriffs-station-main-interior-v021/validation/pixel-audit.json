@@ -1,0 +1,20 @@
+{
+  "generatedAt": "2026-09-08T18:56:50.265Z",
+  "method": "Verified each clean-capture 5x5 RGBA block is uniform, then copied its top-left pixel into the 256x192 framebuffer. No resize filter was used.",
+  "source": "artifacts/sheriffs-station-main-interior-v021/native-after.png",
+  "sourceSha256": "c9530547e0e72f99dc37f2e719629f31a42d7c7388554bb7617664d20b3a44dd",
+  "sourceDimensions": {
+    "width": 1280,
+    "height": 960,
+    "channels": 4
+  },
+  "blockSize": 5,
+  "verifiedBlocks": 49152,
+  "allBlocksUniform": true,
+  "output": "artifacts/sheriffs-station-main-interior-v021/native-after-256.png",
+  "outputSha256": "49cdda206f59def4aa31a2e2ac3b0f98b407368df13b85aab41757b1e11cd8a5",
+  "outputDimensions": {
+    "width": 256,
+    "height": 192
+  }
+}

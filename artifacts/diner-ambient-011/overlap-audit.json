@@ -1,0 +1,147 @@
+{
+  "seedCount": 20,
+  "minutesPerSeed": 10,
+  "windowMs": 150,
+  "reports": [
+    {
+      "seed": 1989,
+      "events": 296,
+      "startsWithin150ms": 18,
+      "tripleStartsWithin150ms": 0,
+      "neonLampOverlaps": 6
+    },
+    {
+      "seed": 1,
+      "events": 299,
+      "startsWithin150ms": 22,
+      "tripleStartsWithin150ms": 0,
+      "neonLampOverlaps": 6
+    },
+    {
+      "seed": 2,
+      "events": 295,
+      "startsWithin150ms": 21,
+      "tripleStartsWithin150ms": 1,
+      "neonLampOverlaps": 8
+    },
+    {
+      "seed": 3,
+      "events": 301,
+      "startsWithin150ms": 27,
+      "tripleStartsWithin150ms": 0,
+      "neonLampOverlaps": 4
+    },
+    {
+      "seed": 4,
+      "events": 302,
+      "startsWithin150ms": 17,
+      "tripleStartsWithin150ms": 0,
+      "neonLampOverlaps": 6
+    },
+    {
+      "seed": 5,
+      "events": 299,
+      "startsWithin150ms": 27,
+      "tripleStartsWithin150ms": 1,
+      "neonLampOverlaps": 6
+    },
+    {
+      "seed": 6,
+      "events": 300,
+      "startsWithin150ms": 17,
+      "tripleStartsWithin150ms": 0,
+      "neonLampOverlaps": 7
+    },
+    {
+      "seed": 7,
+      "events": 306,
+      "startsWithin150ms": 21,
+      "tripleStartsWithin150ms": 3,
+      "neonLampOverlaps": 6
+    },
+    {
+      "seed": 8,
+      "events": 297,
+      "startsWithin150ms": 18,
+      "tripleStartsWithin150ms": 0,
+      "neonLampOverlaps": 8
+    },
+    {
+      "seed": 9,
+      "events": 290,
+      "startsWithin150ms": 19,
+      "tripleStartsWithin150ms": 0,
+      "neonLampOverlaps": 6
+    },
+    {
+      "seed": 10,
+      "events": 296,
+      "startsWithin150ms": 26,
+      "tripleStartsWithin150ms": 0,
+      "neonLampOverlaps": 11
+    },
+    {
+      "seed": 42,
+      "events": 299,
+      "startsWithin150ms": 17,
+      "tripleStartsWithin150ms": 0,
+      "neonLampOverlaps": 6
+    },
+    {
+      "seed": 99,
+      "events": 300,
+      "startsWithin150ms": 20,
+      "tripleStartsWithin150ms": 0,
+      "neonLampOverlaps": 11
+    },
+    {
+      "seed": 256,
+      "events": 297,
+      "startsWithin150ms": 12,
+      "tripleStartsWithin150ms": 0,
+      "neonLampOverlaps": 5
+    },
+    {
+      "seed": 512,
+      "events": 298,
+      "startsWithin150ms": 13,
+      "tripleStartsWithin150ms": 0,
+      "neonLampOverlaps": 7
+    },
+    {
+      "seed": 1024,
+      "events": 297,
+      "startsWithin150ms": 21,
+      "tripleStartsWithin150ms": 0,
+      "neonLampOverlaps": 6
+    },
+    {
+      "seed": 4096,
+      "events": 299,
+      "startsWithin150ms": 14,
+      "tripleStartsWithin150ms": 0,
+      "neonLampOverlaps": 5
+    },
+    {
+      "seed": 65535,
+      "events": 297,
+      "startsWithin150ms": 17,
+      "tripleStartsWithin150ms": 0,
+      "neonLampOverlaps": 6
+    },
+    {
+      "seed": 123456,
+      "events": 304,
+      "startsWithin150ms": 23,
+      "tripleStartsWithin150ms": 2,
+      "neonLampOverlaps": 6
+    },
+    {
+      "seed": 987654,
+      "events": 289,
+      "startsWithin150ms": 11,
+      "tripleStartsWithin150ms": 0,
+      "neonLampOverlaps": 4
+    }
+  ]
+}

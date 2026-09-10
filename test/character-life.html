@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Character Life v0.1 — Sheriff's Station</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; min-height: 100%; background: #17251e; color: #f4e6c8; font: 14px/1.4 monospace; }
+    body { display: grid; place-items: center; padding: 16px; }
+    main { display: grid; grid-template-columns: auto minmax(290px, 380px); gap: 18px; align-items: center; }
+    #stage { position: relative; width: 768px; height: 576px; overflow: hidden; image-rendering: pixelated; image-rendering: crisp-edges; }
+    canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; }
+    aside { display: grid; gap: 12px; max-height: calc(100vh - 32px); overflow: auto; padding: 14px; border: 1px solid #946345; background: #24382f; }
+    h1 { margin: 0; color: #ffe18a; font-size: 17px; }
+    p { margin: 0; }
+    .controls { display: flex; flex-wrap: wrap; gap: 7px; }
+    button { padding: 7px 9px; border: 1px solid #946345; color: inherit; background: #35271f; font: inherit; cursor: pointer; }
+    button:hover { background: #65452f; }
+    .review { border-top: 1px solid #71806b; padding-top: 10px; }
+    .label { color: #ffe18a; font-weight: bold; }
+    #debug { min-height: 17em; margin: 0; white-space: pre-wrap; color: #d4d8c7; }
+    body.clean aside { display: none; }
+    body.clean main { grid-template-columns: auto; }
+    body.clean { padding: 0; }
+    @media (max-width: 980px) {
+      body { display: block; }
+      main { grid-template-columns: 1fr; justify-items: center; }
+      aside { width: min(100%, 560px); max-height: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div id="stage"><canvas id="game" width="256" height="192"></canvas></div>
+    <aside>
+      <h1>Character Life v0.1</h1>
+      <p>Production timing is intentionally quiet. Watch at normal speed for at least one minute.</p>
+      <div class="controls">
+        <button id="pause" type="button">Pause</button>
+        <button id="reset" type="button">Reset seed 1989</button>
+        <button id="accelerate" type="button">Accelerated review: off</button>
+        <button id="interact" type="button">Walk + interact</button>
+      </div>
+      <div class="review">
+        <p><span class="label">Review-only manual poses</span> — paused and persistent; they do not change production timing.</p>
+        <div class="controls">
+          <button data-pose="still" type="button">Still</button>
+          <button data-pose="blink" type="button">Blink down</button>
+          <button data-pose="reading-raised" type="button">Reading: file raised</button>
+          <button data-pose="reading-lowered" type="button">Reading: eyes lowered</button>
+          <button data-pose="reaction-left" type="button">Reaction left</button>
+          <button data-pose="reaction-right" type="button">Reaction right</button>
+        </div>
+      </div>
+      <details id="debug-details">
+        <summary>Debug state</summary>
+      <pre id="debug"></pre>
+      </details>
+    </aside>
+  </main>
+
+  <script src="../js/tiles.js"></script>
+  <script src="../js/chars.js"></script>
+  <script src="../js/houses.js"></script>
+  <script src="../js/maps.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/retro-font.js"></script>
+  <script src="../js/portraits.js"></script>
+  <script src="../js/gold-tone.js"></script>
+  <script src="../js/engine.js"></script>
+  <script src="../js/glue.js"></script>
+  <script src="../js/retro.js"></script>
+  <script src="../js/retro-cast-matrices-a.js"></script>
+  <script src="../js/retro-cast-matrices-b.js"></script>
+  <script src="../js/retro-authored.js"></script>
+  <script src="../js/ambient-life.js"></script>
+  <script src="../js/character-activity.js"></script>
+  <script src="../js/environment-reactions.js"></script>
+  <script src="../js/ambient-life-scenes.js"></script>
+  <script src="../js/location-connections.js"></script>
+  <script src="../js/double-r-exterior-art.js"></script>
+  <script src="../js/double-r-exterior-scene.js"></script>
+  <script src="../js/double-r-location-data.js"></script>
+  <script src="../js/double-r-location-production.js"></script>
+  <script src="../js/sheriffs-station-art.js"></script>
+  <script src="../js/sheriffs-station-exterior-art.js"></script>
+  <script src="../js/sheriffs-station-scene.js"></script>
+  <script src="../js/sheriffs-station-exterior-scene.js"></script>
+  <script src="../js/sheriffs-station-location-data.js"></script>
+  <script src="../js/sheriffs-station-production.js"></script>
+  <script src="../js/character-life-scenes.js"></script>
+  <script src="../js/traincar-location-data.js"></script>
+  <script src="../js/traincar-location-production.js"></script>
+  <script src="../js/world-engine.js"></script>
+  <script src="../js/world-catalog.js"></script>
+  <script src="character-life-preview.js"></script>
+</body>
+</html>

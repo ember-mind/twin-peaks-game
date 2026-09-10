@@ -1,0 +1,49 @@
+{
+  "status": "ready-for-review",
+  "projectId": "twin-peaks-pokemon",
+  "runId": "2026-09-08T21-40-29-677Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation-characterLife",
+  "scenario": "characterLife",
+  "runtimeStatus": "pass",
+  "fresh": true,
+  "reportDigest": "ab25f376c4e9ac589643cea08c8ad067d0545386607a06dd5a1d3a17d711c8f9",
+  "visualReview": "not-performed",
+  "sourceArtifacts": 6,
+  "contactSheet": ".coldstage/reviews/2026-09-08T21-40-29-677Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation-characterLife/characterLife-contact-sheet.webp",
+  "contactSheetSha256": "29278ecca5135123fdf1ed11debac23deec3505e5ffc904ae58830a7413fddcf",
+  "sourceEvidence": [
+    {
+      "path": ".coldstage/runs/2026-09-08T21-40-29-677Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation-characterLife/characterLife-still.png",
+      "sha256": "463c10346bc61eff9fb9a4105863df1e2e81b01fe52ff1e8dddeeec43f64b5e0",
+      "bytes": 15481
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T21-40-29-677Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation-characterLife/characterLife-blink.png",
+      "sha256": "40c46f487dc43ced332adb03bb8deca26646c2cd0bc16ba5410f80edac4dc64a",
+      "bytes": 15491
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T21-40-29-677Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation-characterLife/characterLife-reading-raised.png",
+      "sha256": "76771e9c5c4541c2bcb37062feb2fca257dcdc82a558df1699da45bf44a41a38",
+      "bytes": 15498
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T21-40-29-677Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation-characterLife/characterLife-reading-lowered.png",
+      "sha256": "8459ebd7717c0b5908d8948d70a0d4072a9fabe5c61579d2497da0cf681d67c1",
+      "bytes": 15442
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T21-40-29-677Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation-characterLife/characterLife-reaction-right.png",
+      "sha256": "df49fa13034b8ed007cee4f10d357fffb5ebc44b55f860552646a653e86076e4",
+      "bytes": 15323
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T21-40-29-677Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation-characterLife/characterLife-restored.png",
+      "sha256": "89a0ba55345135d7461eca57210d08d8f7530c2580db32570cb09274ee84aa2a",
+      "bytes": 15409
+    }
+  ],
+  "dimensions": {
+    "width": 1280,
+    "height": 1252
+  }
+}

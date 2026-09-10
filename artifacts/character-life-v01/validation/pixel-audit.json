@@ -1,0 +1,85 @@
+{
+  "sourceRunId": "2026-09-08T21-40-29-677Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation-characterLife",
+  "nativeCanvas": {
+    "width": 256,
+    "height": 192
+  },
+  "actorCrop": {
+    "x": 156,
+    "y": 56,
+    "width": 24,
+    "height": 24
+  },
+  "comparisonReference": "character-life-still-native.png",
+  "changedPixels": {
+    "still": {
+      "fullCanvas": 0,
+      "actorCrop": 0
+    },
+    "blink": {
+      "fullCanvas": 8,
+      "actorCrop": 4
+    },
+    "readingRaised": {
+      "fullCanvas": 306,
+      "actorCrop": 49
+    },
+    "readingLowered": {
+      "fullCanvas": 307,
+      "actorCrop": 51
+    },
+    "reactionRight": {
+      "fullCanvas": 433,
+      "actorCrop": 177
+    },
+    "restored": {
+      "fullCanvas": 254,
+      "actorCrop": 0
+    }
+  },
+  "interpretation": "The restored Truman crop is pixel-identical to the initial still crop. Full-canvas changes outside the actor crop come from the pre-existing Sheriff's Station Ambient Life registration for the mug, lamp, and glass, which remained enabled during capture.",
+  "cropStrip": {
+    "path": "artifacts/character-life-v01/npc-crop-strip-8x.png",
+    "scale": 8,
+    "resampling": "nearest-neighbor",
+    "layout": "three columns by two rows, labeled",
+    "sha256": "2a725dc51d272d635d6c178de35c333dd18b0933aebe8830e2abab8bba222c8b"
+  },
+  "nativeCaptures": [
+    {
+      "pose": "still",
+      "path": "artifacts/character-life-v01/character-life-still-native.png",
+      "sha256": "b8439d0d304b37c45cff558555d4984c37acce2bd11b8672aeb10804d7ed779d"
+    },
+    {
+      "pose": "blink",
+      "path": "artifacts/character-life-v01/character-life-blink-native.png",
+      "sha256": "d53604e7fcf1a8983fbe75dec20747038882f2117236d77a82a316037e36e97b"
+    },
+    {
+      "pose": "reading-raised",
+      "path": "artifacts/character-life-v01/character-life-reading-raised-native.png",
+      "sha256": "c7f48ce07b20152e51190e510e0ecaeae189239fdf557a159c01bce4bb2f7b81"
+    },
+    {
+      "pose": "reading-lowered",
+      "path": "artifacts/character-life-v01/character-life-reading-lowered-native.png",
+      "sha256": "670ed7e8a42cae80f4758d4ae3abb4874ca945d2d076a7ebef0d356bbd33bc14"
+    },
+    {
+      "pose": "reaction-right",
+      "path": "artifacts/character-life-v01/character-life-reaction-right-native.png",
+      "sha256": "d70d7227728a5c3f9aca06f3bedb153f7daca39ca34a27effc58e8713e6ae97f"
+    },
+    {
+      "pose": "restored",
+      "path": "artifacts/character-life-v01/character-life-restored-native.png",
+      "sha256": "3805e8fbe190606048d6853d2d11f03050854064486a42df57d1e1e98f032ca0"
+    }
+  ],
+  "visualReview": {
+    "characterLife": "pass-with-notes",
+    "sheriffsStation": "pass-with-notes",
+    "baselineAdvanced": false
+  }
+}

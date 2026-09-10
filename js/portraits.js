@@ -659,7 +659,12 @@
     var ty = y + 38;
     R(ctx, x + 1, ty, tw - 2, 9, PAL.ink); R(ctx, x, ty + 1, tw, 7, PAL.ink);
     R(ctx, x + 2, ty + 1, tw - 4, 7, PAL.paper);
-    drawMicro(ctx, label, x + Math.floor(tw / 2), ty + 3, PAL.ink, 36);
+    /* La targhetta DOM (#speaker-name-hires) e' piu' larga del micro-font a
+     * 36px e non tronca i nomi lunghi (INFERMIERA, GIGANTE...): quando esiste
+     * (build di produzione) possiede il testo, il pixel resta solo cornice. */
+    var domLabel = typeof document !== 'undefined' && typeof document.getElementById === 'function'
+      ? document.getElementById('speaker-name-hires') : null;
+    if (!domLabel) drawMicro(ctx, label, x + Math.floor(tw / 2), ty + 3, PAL.ink, 36);
     return { x:x, y:y, width:tw, height:47, key:key, label:label };
   }
 

@@ -1,0 +1,1 @@
+uso: bosco-gates.js <frame.png> [--mockup=ox,oy,f] [--exclude=x0,y0,x1,y1]

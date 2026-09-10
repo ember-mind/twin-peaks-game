@@ -1,0 +1,3 @@
+Command: node test/sheriffs-station-native.js --audit-frozen
+Exit: 0
+Output: SHERIFFS-STATION-NATIVE-PASS production hooks, collision, connected routes, keyboard movement, native pixels, depth intervals, Cooper anchor, frozen core/atlas audit

@@ -1,0 +1,71 @@
+{
+  "status": "pass",
+  "checks": {
+    "native_framebuffer_256x192": true,
+    "native_aspect_4x3": true,
+    "tile_collision_grid_unchanged": true,
+    "extended_tiles_have_camera_overdraw": true,
+    "forest_layout_is_world_stable": true,
+    "forest_culling_uses_runtime_viewport": true,
+    "heartgold_cast_is_production": true,
+    "cast_atlas_preloaded": true,
+    "engine_waits_for_cast": true,
+    "cast_frame_24px": true,
+    "four_phase_gait": true,
+    "runtime_contact_shadow": true,
+    "material_palette_83d3a7": true,
+    "material_palette_a7e2b9": true,
+    "material_palette_6baa91": true,
+    "material_palette_4e8067": true,
+    "material_palette_315a49": true,
+    "material_palette_e8d08f": true,
+    "material_palette_f3dfa8": true,
+    "material_palette_d6bc7d": true,
+    "material_palette_aa8e5c": true,
+    "material_palette_dfcb91": true,
+    "material_palette_ecdca9": true,
+    "material_palette_c5ac74": true,
+    "material_palette_917a54": true,
+    "exterior_palette_not_gbc_quantized": true,
+    "organic_road_intrusions": true,
+    "building_cast_shadows": true,
+    "building_landscape": true,
+    "cast_atlas_exists": true,
+    "cast_atlas_360x360": true,
+    "cast_inventory_24": true,
+    "cast_color_depth_12_to_16": true,
+    "cast_height_heartgold_range": true,
+    "cast_binary_alpha": true
+  },
+  "cast": {
+    "status": "pass",
+    "characters": 24,
+    "frames": 216,
+    "sheet": "72x72",
+    "atlas": "360x360",
+    "opaqueColorsPerFrame": {
+      "min": 12,
+      "max": 15
+    },
+    "visibleHeight": {
+      "min": 24,
+      "max": 24
+    },
+    "visibleWidth": {
+      "min": 13,
+      "max": 15
+    },
+    "stepAlphaDifference": {
+      "min": 12,
+      "max": 20
+    },
+    "footBaseline": {
+      "row": 23,
+      "matchingFrames": 216
+    },
+    "binaryAlpha": true,
+    "magentaPixels": 0,
+    "outputDir": "assets/sprites/cast-hg-24",
+    "castAtlas": "assets/sprites/cast-walkcycles-hg-24.png"
+  }
+}

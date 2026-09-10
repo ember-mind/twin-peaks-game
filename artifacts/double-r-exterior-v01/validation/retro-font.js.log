@@ -1,0 +1,15 @@
+ok - engine senza CanvasText antialias
+ok - UI narrativa senza CanvasText antialias
+ok - font condiviso caricato prima del motore
+ok - motore e UI usano stesso helper
+ok - minuscole Gen II preservate e disegnabili
+ok - metriche bitmap proporzionali
+ok - titolo bitmap entra nella targa GBC
+ok - dialogo breve bilanciato su due righe
+ok - bilanciamento conserva testo e capienza Gen II
+ok - epilogo massimo 23 caratteri per riga GBC
+ok - epilogo paginato massimo 5 righe
+ok - glyph interi nei limiti GBC x=4..155
+ok - ancore pixel finale GBC separate e stabili
+
+RETRO-FONT-PASS 13/13

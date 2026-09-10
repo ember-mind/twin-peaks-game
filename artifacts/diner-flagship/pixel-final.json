@@ -1,0 +1,39 @@
+{
+  "status": "unchanged",
+  "projectId": "twin-peaks-pokemon",
+  "runId": "2026-09-08T07-08-18-648Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner",
+  "scenario": "diner",
+  "aiReviewNeeded": false,
+  "nextAction": "none",
+  "baselineRunId": "2026-09-08T07-08-18-648Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner",
+  "algorithm": "pixelmatch-7.2.0-srgb-rgba-v1",
+  "baselineEvidence": {
+    "manifestPath": "test/coldstage-baselines/diner/baseline.json",
+    "manifestDigest": "30c4b15e1bf17ae5d1dc260c3c6e0b644dbfbbee95855b76fe5e843ddd58ccc7",
+    "sourceReport": ".coldstage/runs/2026-09-08T07-08-18-648Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner/report.json",
+    "sourceReportDigest": "617b429764c032208db6b6172bdce5294f300c20b9610043560039a039e497f7",
+    "sourceReview": ".coldstage/reviews/2026-09-08T07-08-18-648Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner/diner/review-1788851368442-684b02af.json",
+    "sourceReviewDigest": "9f6809c6a9fbb545d757adc85b4b8ca7cb26555faf9a2bdb503fdbb42697740b"
+  },
+  "policy": {
+    "threshold": 0.1,
+    "maxChangedRatio": 0.001,
+    "includeAA": false
+  },
+  "policyDigest": "7e241daa6f285eece8b66f7f7d78c02a35118fb30e90413d2cfbb0bd4fb54302",
+  "captures": [
+    {
+      "name": "diner-double-r-interior.png",
+      "status": "unchanged",
+      "baselinePath": "test/coldstage-baselines/diner/versions/9f6809c6a9fbb545d757adc8/diner-double-r-interior.png",
+      "baselineSha256": "c4db527ac61a1e381d5266128c42f0c53624adb146f73e401d51bd436274048a",
+      "currentPath": ".coldstage/runs/2026-09-08T07-08-18-648Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner/diner-double-r-interior.png",
+      "currentSha256": "c4db527ac61a1e381d5266128c42f0c53624adb146f73e401d51bd436274048a",
+      "policyDigest": "7e241daa6f285eece8b66f7f7d78c02a35118fb30e90413d2cfbb0bd4fb54302",
+      "changedPixels": 0,
+      "changedRatio": 0,
+      "diffArtifact": null
+    }
+  ],
+  "reviewSheet": null
+}

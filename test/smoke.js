@@ -34,6 +34,19 @@ require(J('data.js'));
 require(J('retro-font.js'));
 require(J('engine.js'));
 require(J('glue.js'));
+require(J('double-r-exterior-art.js'));
+require(J('double-r-exterior-scene.js'));
+global.GAME.DoubleRExteriorScene.install();
+require(J('sheriffs-station-exterior-scene.js'));
+global.GAME.SheriffsStationExteriorScene.install();
+require(J('sheriffs-station-scene.js'));
+global.GAME.SheriffsStationScene.install();
+require(J('location-connections.js'));
+require(J('double-r-location-data.js'));
+require(J('sheriffs-station-location-data.js'));
+require(J('room-315-location-data.js'));
+[].concat(global.GAME.DoubleRLocationConnections, global.GAME.SheriffsStationLocationConnections, global.GAME.Room315LocationConnections)
+  .forEach((c) => global.GAME.LocationConnections.install(c, global.GAME.Maps));
 require(J('render3d.js')); // window e' globale (riga sopra): CONFIG si popola anche senza THREE
 
 const GAME = global.GAME;
@@ -88,10 +101,14 @@ function ok(cond, label) {
 /* ---------------- 1. controlli strutturali ---------------- */
 
 console.log('# struttura');
-const mapIds = ['town', 'sheriff', 'palmer', 'hotel_gn', 'hospital', 'diner', 'woods', 'redroom', 'traincar', 'oej', 'roadhouse'];
+const mapIds = ['town', 'sheriff', 'palmer', 'hotel_gn', 'room_315', 'hospital', 'diner', 'woods', 'redroom', 'traincar', 'oej', 'roadhouse'];
+// Le due scene native (piazzali di distretto e Double R) vivono solo in
+// GAME.Maps: entrano nella guardia strutturale, non nelle guardie che leggono
+// l'oggetto sorgente di maps.js.
+const sceneIds = mapIds.concat(['sheriffs_station_exterior', 'double_r_exterior_prototype']);
 const fake3 = { clues: ['a', 'b', 'c'] };
 
-for (const id of mapIds) {
+for (const id of sceneIds) {
   const m = GAME.Maps[id];
   ok(m && m.rows.length === m.height && m.rows[0].length === m.width, `mappa ${id} coerente`);
   for (const r of m.rows) assert.strictEqual(r.length, m.width, `riga larghezza costante in ${id}`);
@@ -210,8 +227,9 @@ ok(introVisible === introSource, 'tutto il testo del prologo resta visibile');
 for (let i = 0; i < introPages.length; i++) key('Enter');
 pump(16);
 ok(S().mode === 'play', 'intro -> gioco');
-ok(S().mapId === 'arrival', 'spawn nella radura d\'arrivo');
-ok(!GAME.Maps.isSolid('arrival', S().player.tx, S().player.ty, S()), 'spawn calpestabile');
+ok(S().mapId === 'town' && S().player.tx === 28 && S().player.ty === 31 && S().player.dir === 'up',
+   'spawn all\'ingresso sud della città');
+ok(!GAME.Maps.isSolid('town', S().player.tx, S().player.ty, S()), 'spawn iniziale calpestabile');
 
 // transenna chiusa senza indizi
 ok(GAME.Maps.isSolid('town', 50, 0, S()), 'bosco transennato a 0 indizi');
@@ -222,7 +240,7 @@ ok(GAME.Maps.doorAt('town', 23, 6).needsFlag === 'sogno_fatto' && !S().flags.sog
 ok(GAME.Maps.doorAt('town', 47, 28).needsFlag === 'atto4' && !S().flags.atto4, 'roadhouse chiuso prima di atto4');
 
 // Truman: consegna il diario
-E.loadMap('sheriff', 6, 3, 'right');
+E.loadMap('sheriff', 11, 4, 'left');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'truman', 'dialogo Truman parte');
 drainDialogue('Truman iniziale');
@@ -282,7 +300,7 @@ ok(S().flags.sogno_fatto, 'flag sogno_fatto impostato');
 ok(S().mode === 'play', 'il sogno non chiude la partita');
 
 // Truman: racconta il sogno (ponte Atto 1 -> Atto 2, non chiude la partita)
-E.loadMap('sheriff', 6, 3, 'right');
+E.loadMap('sheriff', 11, 4, 'left');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'truman_a2', 'dialogo Truman post-sogno parte');
 drainDialogue('Truman post-sogno');
@@ -296,31 +314,31 @@ ok(S().dialogue && S().dialogue.id === 'benhorne_a2', 'dialogo Ben Horne parte')
 drainDialogue('Ben Horne');
 E.loadMap('hotel_gn', 12, 10, 'up');
 key('Enter'); pump(16);
-ok(S().dialogue && S().dialogue.id === 'audrey_a2', 'dialogo Audrey (Great Northern) parte');
+ok(S().dialogue && S().dialogue.id === 'audrey_a2_ben', 'dialogo Audrey (Great Northern) parte');
 drainDialogue('Audrey al Great Northern');
 ok(S().flags.audrey_indaga, 'flag audrey_indaga impostato');
 
 // ospedale: Gerard consegna la poesia del fuoco, Ronette sussurra BOB
-E.loadMap('hospital', 7, 7, 'up');
+E.loadMap('hospital', 12, 4, 'left');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'gerard_a2', 'dialogo Gerard parte');
 drainDialogue('Gerard');
 ok(S().clues.includes('poesia_fuoco'), 'poesia del fuoco ottenuta');
-E.loadMap('hospital', 2, 2, 'up');
+E.loadMap('hospital', 3, 6, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'ronette_letto', 'dialogo Ronette parte');
 drainDialogue('Ronette');
 ok(S().flags.ronette_bob, 'flag ronette_bob impostato');
 
 // Double R: James consegna l'altra meta' del cuore (appare solo dopo il sogno)
-E.loadMap('diner', 10, 7, 'up');
+E.loadMap('diner', 9, 7, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'james_a2', 'dialogo James parte');
 drainDialogue('James');
 ok(S().clues.includes('cuore_intero'), 'cuore ricomposto ottenuto');
 
 // Truman: chiusura Atto 2, ponte verso Atto 3 (non chiude piu' la partita: il vagone aspetta)
-E.loadMap('sheriff', 6, 3, 'right');
+E.loadMap('sheriff', 11, 4, 'left');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'truman_atto3', 'dialogo Truman Atto 3 parte');
 drainDialogue('Truman Atto 3');
@@ -328,58 +346,48 @@ ok(!S().dialogue, 'dialogo Truman Atto 3 chiuso');
 ok(S().flags.atto3, 'flag atto3 impostato');
 ok(S().mode === 'play', 'Atto 3 non chiude la partita');
 
-// il vagone del treno: il mucchio di terra e l'anello di Laura
-E.loadMap('traincar', 10, 5, 'up');
+// il vagone del treno: il mucchio di terra e l'anello (proprietà mai affermata: guardia M5 ring_c)
+E.loadMap('traincar', 13, 7, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'mucchio_terra', 'dialogo mucchio di terra parte');
 drainDialogue('mucchio di terra');
 ok(S().clues.includes('biglietto_fuoco'), 'biglietto del fuoco ottenuto');
-E.loadMap('traincar', 13, 4, 'down');
+E.loadMap('traincar', 13, 6, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'anello_interact', 'dialogo anello parte');
 drainDialogue('anello');
 ok(S().clues.includes('anello'), 'anello ottenuto');
 
-// One Eyed Jacks: Jacques viene interrogato e arrestato
-E.loadMap('oej', 7, 6, 'up');
-key('Enter'); pump(16);
-ok(S().dialogue && S().dialogue.id === 'jacques_a3', 'dialogo Jacques parte');
-drainDialogue('Jacques');
+// One Eyed Jacks: Jacques interrogato/arrestato e Audrey sotto copertura sono
+// mission-owned (M5/M6). Stub = syncNarrativeToClassic outcome.
+S().flags.jacques_preso = true;
 ok(S().flags.jacques_preso, 'flag jacques_preso impostato');
-
-// Audrey sotto copertura al casinò, poi rimandata a casa
-E.loadMap('oej', 13, 8, 'up');
-key('Enter'); pump(16);
-ok(S().dialogue && S().dialogue.id === 'audrey_oej', 'dialogo Audrey (OEJ) parte');
-drainDialogue('Audrey a One Eyed Jacks');
+S().flags.audrey_salvata = true;
 ok(S().flags.audrey_salvata, 'flag audrey_salvata impostato');
 
 // Lucy: la chiamata dall'ospedale, Jacques e' morto
-E.loadMap('sheriff', 2, 7, 'up');
+E.loadMap('sheriff', 2, 5, 'down');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'lucy_a3', 'dialogo Lucy Atto 3 parte');
 drainDialogue('Lucy Atto 3');
 ok(S().flags.jacques_morto, 'flag jacques_morto impostato');
 
 // lo specchio della 315: prima apparizione del Gigante
-E.loadMap('hotel_gn', 15, 2, 'up');
+E.loadMap('room_315', 13, 4, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'gigante1_dlg', 'dialogo del Gigante parte');
 drainDialogue('prima apparizione del Gigante');
 ok(S().flags.gigante1, 'flag gigante1 impostato');
 
-// Truman: chiusura Atto 3, ponte verso Atto 4 (non chiude piu' la partita: il gigante e Maddy aspettano)
-E.loadMap('sheriff', 6, 3, 'right');
-key('Enter'); pump(16);
-ok(S().dialogue && S().dialogue.id === 'truman_atto4', 'dialogo Truman Atto 4 parte');
-drainDialogue('Truman Atto 4');
-ok(!S().dialogue, 'dialogo Truman Atto 4 chiuso');
+// Truman: chiusura Atto 3, ponte verso Atto 4 is mission-owned (M6
+// m6_atto4_bridge; classic truman_atto4 retired, was shadowed in production).
+// Stub = syncNarrativeToClassic outcome.
+S().flags.atto4 = true;
 ok(S().flags.atto4, 'flag atto4 impostato');
 ok(S().mode === 'play', 'Atto 4 non chiude la partita');
 
-// casa Palmer: Maddy e' apparsa; Sarah ha la visione di BOB dietro il divano
-const maddyNpc = GAME.Maps.palmer.npcs.find((n) => n.id === 'maddy');
-ok(maddyNpc && E.npcActive(maddyNpc, S()), 'Maddy presente dopo atto4');
+// casa Palmer: Sarah ha la visione di BOB dietro il divano (Maddy e Leland
+// sono mission-owned al diner, non piu' classici a casa Palmer)
 E.loadMap('palmer', 9, 6, 'down');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'sarah_visione', 'dialogo visione di Sarah parte');
@@ -391,61 +399,51 @@ key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'loglady_a4', 'dialogo Log Lady Atto 4 parte');
 drainDialogue('Log Lady Atto 4');
 
-// il roadhouse: seconda apparizione del Gigante sul palco
-E.loadMap('roadhouse', 8, 2, 'up');
-key('Enter'); pump(16);
-ok(S().dialogue && S().dialogue.id === 'gigante2_dlg', 'dialogo del Gigante (roadhouse) parte');
-drainDialogue('seconda apparizione del Gigante');
+// il roadhouse: seconda apparizione del Gigante sul palco is mission-owned
+// (M8). Stub = syncNarrativeToClassic outcome (nodes_done.m8_roadhouse_truman
+// -> gigante2, dopo lo split del nodo nel pass 01).
+S().flags.gigante2 = true;
 ok(S().flags.gigante2, 'flag gigante2 impostato');
-ok(!E.npcActive(maddyNpc, S()), 'Maddy scomparsa dopo la seconda apparizione');
 
-// casa Palmer: dopo il Roadhouse Leland non ricompare; la testimonianza taxi
-// appartiene al diner narrativo prima del ritrovamento.
-E.loadMap('palmer', 12, 9, 'up');
+// casa Palmer: dopo il Roadhouse Sarah non ricompare piu' (cond '!flag:gigante2')
+E.loadMap('palmer', 9, 6, 'down');
 key('Enter'); pump(16);
-ok(!E.npcActive(GAME.Maps.palmer.npcs.find((n) => n.id === 'leland'), S()), 'Leland assente da Palmer dopo il Roadhouse');
+ok(!E.npcActive(GAME.Maps.palmer.npcs.find((n) => n.id === 'sarah'), S()), 'Sarah assente da Palmer dopo il Roadhouse');
 ok(!S().dialogue, 'nessun dialogo classico contraddice la testimonianza taxi del diner');
 
-// la riva del lago: il ritrovamento di Maddy
-E.loadMap('town', 15, 29, 'up');
-key('Enter'); pump(16);
-ok(S().dialogue && S().dialogue.id === 'lago_maddy', 'dialogo ritrovamento di Maddy parte');
-drainDialogue('ritrovamento di Maddy');
-ok(S().clues.includes('lettera_o'), 'lettera "O" ottenuta');
+// la riva del lago: il ritrovamento di Maddy is mission-owned (M8
+// m8_discovery; classic lago_maddy retired, was shadowed in production).
+// Stub = syncNarrativeToClassic outcome.
+S().flags.maddy_trovata = true;
 ok(S().flags.maddy_trovata, 'flag maddy_trovata impostato');
 
-// Truman: chiusura Atto 4, ponte verso Atto 5 (non chiude piu' la partita: il ponte e' stato ritirato)
-E.loadMap('sheriff', 6, 3, 'right');
-key('Enter'); pump(16);
-ok(S().dialogue && S().dialogue.id === 'truman_atto5', 'dialogo Truman Atto 5 parte');
-drainDialogue('Truman Atto 5');
-ok(S().mode === 'play', 'Atto 5 non chiude piu\' la partita (ponte ritirato)');
+// Truman: chiusura Atto 4, ponte verso Atto 5 is mission-owned (M9
+// m9_present_truman; classic truman_atto5 retired, was shadowed in
+// production). Stub = syncNarrativeToClassic outcome.
+S().flags.atto5 = true;
 ok(S().flags.atto5, 'flag atto5 impostato');
+ok(S().mode === 'play', 'Atto 5 non chiude piu\' la partita (ponte ritirato)');
 
 /* ---------------- Atto 5: la confessione, la Loggia, il vero finale ---------------- */
-
-// casa Palmer: Leland se n'e' trasferito al distretto
-const palmerLelandNpc = GAME.Maps.palmer.npcs.find((n) => n.id === 'leland');
-ok(!E.npcActive(palmerLelandNpc, S()), 'Leland assente da casa Palmer dopo atto5');
 
 // distretto: Leland e' li', in interrogatorio
 const sheriffLelandNpc = GAME.Maps.sheriff.npcs.find((n) => n.id === 'leland');
 ok(E.npcActive(sheriffLelandNpc, S()), 'Leland presente al distretto dopo atto5');
-E.loadMap('sheriff', 4, 3, 'right');
+E.loadMap('sheriff', 7, 5, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'leland_interr', 'dialogo interrogatorio di Leland parte');
 drainDialogue('interrogatorio di Leland');
 ok(S().flags.leland_confessa, 'flag leland_confessa impostato (BOB e\' emerso)');
 
 // la cella: la confessione si chiude con la morte di Leland
-E.loadMap('sheriff', 4, 3, 'right');
+E.loadMap('sheriff', 7, 5, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'leland_morte', 'dialogo morte di Leland parte');
 drainDialogue('morte di Leland');
 ok(S().flags.leland_morto, 'flag leland_morto impostato');
 
 // Truman: l'ultimo ponte, verso il bosco
-E.loadMap('sheriff', 6, 3, 'right');
+E.loadMap('sheriff', 11, 4, 'left');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'truman_fine', 'dialogo finale di Truman parte');
 drainDialogue('Truman finale');

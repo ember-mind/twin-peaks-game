@@ -16,7 +16,10 @@
   var speakerTypographySignature = '';
   var caseUiSignature = '';
   var dialogueLiveSignature = '';
-  var TILE = 16, VW = 160, VH = 144; // viewport GBC: 10x9 metatile
+  var TILE = 16, VW = 256, VH = 192; // viewport nativo: 16x12 metatile
+  // Primo frame giocabile: ingresso sud della città, accanto al cartello.
+  // Coordinate già validate da genmaps contro collisioni e occlusione camera.
+  var START_MAP = 'town', START_TX = 28, START_TY = 31, START_DIR = 'up';
   var UW = VW;                       // larghezza UI dinamica (fullscreen)
   // 16 px/tile: 0.12 completava un'intera cella in ~133 ms e faceva leggere
   // la locomozione riggata come pattinata accelerata. ~213 ms conserva risposta
@@ -33,8 +36,8 @@
   }
   E.walkPhase = walkPhase;
 
-  /* Produzione piatta Gen II. Codice warp storico resta irraggiungibile: buffer
-   * nativo 160x144 e scala CSS nearest-neighbour sono unica proiezione. */
+  /* Produzione piatta retro 2D. Codice warp storico resta irraggiungibile:
+   * buffer nativo 256x192 e scala CSS nearest-neighbour sono unica proiezione. */
   var SCALE = 1;
   var WVW = 352, WVH = 240; // finestra mondo campionata (in px mondo)
   var TOP_SCALE = 0.72;     // compressione prospettica della riga più lontana
@@ -85,8 +88,8 @@
   function freshState() {
     return {
       mode: 'title',           // title | intro | play | end
-      mapId: 'arrival', map: null, npcs: [],
-      player: { tx: 4, ty: 3, x: 4 * TILE, y: 3 * TILE, dir: 'up', moving: false, mx: 0, my: 0, turnUntil: 0 },
+      mapId: START_MAP, map: null, npcs: [],
+      player: { tx: START_TX, ty: START_TY, x: START_TX * TILE, y: START_TY * TILE, dir: START_DIR, moving: false, mx: 0, my: 0, turnUntil: 0 },
       clues: [], flags: {},
       introPage: 0,           // indice della pagina VISIBILE, incluse continuazioni
       endPage: 0,
@@ -131,6 +134,7 @@
       }
       return false;
     } // porta attraversata in partita: persisti posizione o rollback
+    if (GAME.EnvironmentReactions) GAME.EnvironmentReactions.reset(id);
     // arrivo su una mappa con monologo d'apertura una tantum (solo browser, solo in partita,
     // solo la prima volta: il flag "once" viene salvato con S.flags dal saveGame qui sopra)
     var oe = S.map.onEnter;
@@ -175,6 +179,16 @@
       var raw = localStorage.getItem(SAVE_KEY);
       return raw ? JSON.parse(raw) : null;
     } catch (e) { return null; }
+  }
+
+  // R103 apriva nuove partite nella radura arrival. Se quel save non contiene
+  // ancora alcun progresso, trattalo come nuova partita: evita che cache locali
+  // riportino il giocatore al vecchio punto dopo il fix dello spawn.
+  function isLegacyOpeningSave(save) {
+    if (!save || save.mapId !== 'arrival' || save.tx !== 4 || save.ty !== 3 ||
+        (save.dir || 'up') !== 'up' || (save.clues || []).length !== 0) return false;
+    var flagKeys = Object.keys(save.flags || {});
+    return flagKeys.every(function (key) { return key === 'intro_town'; });
   }
 
   function clearSave() {
@@ -291,6 +305,10 @@
   };
 
   E.loadMap = loadMap;
+  // Narrow world-event adapter. Future outputs can consume the same fact here.
+  E.emitEnvironmentEvent = function (event) {
+    return GAME.EnvironmentReactions ? GAME.EnvironmentReactions.handle(event) : 0;
+  };
   E.inspectClassicSaveState = inspectClassicSaveState;
   E.restoreClassicSave = restoreClassicSave;
   E.captureWorldState = captureWorldState;
@@ -337,7 +355,7 @@
   };
 
   E.start = function () {
-    loadMap('arrival', 4, 3, 'up');
+    loadMap(START_MAP, START_TX, START_TY, START_DIR);
     // Costruisce e compila la scena iniziale mentre il titolo 3D la copre.
     // Il primo frame giocabile non paga così il cold path WebGL.
     if (GAME.Render3D && GAME.Render3D.prewarm && typeof window !== 'undefined') {
@@ -480,7 +498,10 @@
     if (S.fadePhase !== 0) return;
     if (S.mode === 'title') {
       var save = loadSave();
-      if (save) { // riprendi la partita salvata
+      if (isLegacyOpeningSave(save)) {
+        clearSave();
+        S.mode = 'intro'; S.introPage = 0;
+      } else if (save) { // riprendi la partita salvata
         restoreClassicSave(save);
       } else {
         S.mode = 'intro'; S.introPage = 0;
@@ -502,7 +523,7 @@
     if (S.mode === 'end') {
       var pages = endPages();
       if ((S.endPage || 0) < pages.length - 1) { S.endPage = (S.endPage || 0) + 1; audioSfx('page'); return; }
-      S = E.state = freshState(); loadMap('arrival', 4, 3, 'up'); return;
+      S = E.state = freshState(); loadMap(START_MAP, START_TX, START_TY, START_DIR); return;
     }
     if (S.mode !== 'play') return;
     if (S.dialogue) { advanceDialogue(); return; }
@@ -677,7 +698,9 @@
           n.vx = n.moveStartX + (n.mx - n.moveStartX) * e;
           n.vy = n.moveStartY + (n.my - n.moveStartY) * e;
         }
-      } else if (tGlobal >= n.nextThink) {
+      } else if (tGlobal >= n.nextThink &&
+          !(GAME.CharacterActivity && GAME.CharacterActivity.managedActor && GAME.CharacterActivity.managedActor(n.id) && !n.wander) &&
+          !(GAME.CharacterActivity && GAME.CharacterActivity.busy(n.id))) {
         n.nextThink = tGlobal + 1500 + Math.random() * 3500;
         var dirs = ['up', 'down', 'left', 'right'];
         var look = dirs[Math.floor(Math.random() * 4)];
@@ -708,8 +731,16 @@
     else if (p.dir === 'left') dx = -1; else dx = 1;
     var fx = p.tx + dx, fy = p.ty + dy;
     var npc = npcAt(fx, fy);
+    // banconi: se la casella davanti e' solida e senza oggetto authored, ma
+    // subito oltre c'e' un NPC (Norma dietro il banco, Lucy alla reception),
+    // il giocatore parla attraverso il bancone invece di ispezionare il legno.
+    if (!npc && GAME.Maps.isSolid(S.mapId, fx, fy, S) && !GAME.Maps.objectAt(S.mapId, fx, fy)) {
+      var across = npcAt(fx + dx, fy + dy);
+      if (across) npc = across;
+    }
     if (npc) {
       npc.dir = opposite(p.dir);
+      if (GAME.CharacterActivity && GAME.CharacterActivity.reactToInteractor) GAME.CharacterActivity.reactToInteractor(npc,S);
       audioSfx('interact');
       if (GAME.NarrativeFinaleProduction && GAME.NarrativeFinaleProduction.tryInteract(S.mapId, npc.id)) return;
       // attori narrativi: l'adapter (se attivo per questo attore) gestisce la visita
@@ -777,6 +808,9 @@
     if (!door || door.locked) return;
     if (door.needsFlag && !S.flags[door.needsFlag]) return;
     if (door.needsClues && S.clues.length < door.needsClues) return;
+    if (door.departureReaction) E.emitEnvironmentEvent({type:'ENTITY_ENTERED_DOORWAY',
+      sceneId:S.mapId,arrivalKey:S.player.tx+','+S.player.ty,entityId:'player',
+      connectionId:door.connectionId,reactionId:door.departureReaction});
     audioSfx('door');
     S.warp = door;
     S.fadePhase = 1;
@@ -786,6 +820,10 @@
 
   function update(dt) {
     tGlobal += dt;
+    if(GAME.CharacterActivity) GAME.CharacterActivity.update(dt,S);
+    if (GAME.AmbientLife && S.mode === 'play') GAME.AmbientLife.update(dt, S.mapId);
+    // Preserve the opening pose while the destination is hidden by the warp fade.
+    if (GAME.EnvironmentReactions && S.mode === 'play' && S.fadePhase === 0) GAME.EnvironmentReactions.update(dt, S.mapId);
     if (S.fadePhase === 1) {
       S.fade += dt / 180;
       if (S.fade >= 1) {
@@ -799,7 +837,12 @@
       if (w && GAME.Render3D && GAME.Render3D.prewarm) {
         GAME.Render3D.prewarm(w.to, S.clues);
       }
-      if (w) loadMap(w.to, w.tx, w.ty, w.dir);
+      if (w) {
+        var fromMapId=S.mapId,fromDoorKey=S.player.tx+','+S.player.ty;
+        if (loadMap(w.to,w.tx,w.ty,w.dir)) E.emitEnvironmentEvent({type:'ENTITY_ENTERED_DOORWAY',
+          sceneId:w.to,arrivalKey:w.tx+','+w.ty,fromMapId:fromMapId,fromDoorKey:fromDoorKey,
+          entityId:'player',connectionId:w.connectionId});
+      }
       S.fadePhase = 2;
     } else if (S.fadePhase === 2) {
       S.fade -= dt / 180;
@@ -892,15 +935,27 @@
   // terreno + strutture + sparkle su un contesto, finestra (cx,cy,vw,vh) in px mondo
   function paintGround(g, cx, cy, vw, vh) {
     var map = S.map, rows = map.rows;
-    /* Stanza d'arrivo 160x144: fondale authored su coordinate reference.
+    /* Stanza d'arrivo: fondale authored, centrato nel viewport.
      * Collisioni restano nella mappa ASCII; raster non eredita ingombri 16px. */
     if (map.id === 'arrival' && GAME.Retro2D && GAME.Retro2D.drawArrivalBackdrop) {
       GAME.Retro2D.drawArrivalBackdrop(g, cx, cy, vw, vh);
       return;
     }
-    var x0 = Math.floor(cx / TILE), y0 = Math.floor(cy / TILE);
-    var x1 = Math.floor((cx + vw - 1) / TILE), y1 = Math.floor((cy + vh - 1) / TILE);
-    var opts = { woodsOpen: S.clues.length >= 3, t: tGlobal, mapId: S.mapId, indoor: !!map.indoor };
+    /* Sprite di alberi e tetti superano la cella 16px che li ancora. Senza
+     * overdraw, la camera che attraversa un confine tile li faceva apparire
+     * o sparire prima che la sagoma avesse lasciato davvero il viewport. */
+    var overdraw = 2;
+    var x0 = Math.floor(cx / TILE) - overdraw, y0 = Math.floor(cy / TILE) - overdraw;
+    var x1 = Math.floor((cx + vw - 1) / TILE) + overdraw;
+    var y1 = Math.floor((cy + vh - 1) / TILE) + overdraw;
+    var opts = {
+      woodsOpen: S.clues.length >= 3,
+      t: tGlobal,
+      mapId: S.mapId,
+      indoor: !!map.indoor,
+      viewportWidth: vw,
+      viewportHeight: vh
+    };
     var x, y, mx, my;
     for (y = y0; y <= y1; y++) {
       for (x = x0; x <= x1; x++) {
@@ -915,7 +970,13 @@
     }
     // oggetti (sparkle cercabile)
     (map.objects || []).forEach(function (o) {
-      if (o.type === 'sparkle' && typeof o.dialogue === 'string' && !S.flags['done_' + o.dialogue]) {
+      if (o.type !== 'sparkle') return;
+      // cascata (es. cameraLaura): la scintilla sparisce quando UNA qualsiasi variante e' gia' stata letta
+      var ids = Array.isArray(o.dialogue)
+        ? o.dialogue.map(function (e) { return typeof e === 'string' ? e : e.then; })
+        : [resolveDialogue(o.dialogue, S)];
+      var read = ids.some(function (id) { return id && S.flags['done_' + id]; });
+      if (!read && ids[0]) {
         GAME.Sprites.drawSparkle(g, o.x * TILE - cx, o.y * TILE - cy, tGlobal);
       }
     });
@@ -924,12 +985,14 @@
   // lista entità (player + npc) ordinata per profondità (y dei piedi)
   function entityList() {
     var p = S.player;
+    var arrivalOx = S.mapId === 'arrival' ? 48 : 0;
+    var arrivalOy = S.mapId === 'arrival' ? 24 : 0;
     var ents = S.npcs.filter(function (n) { return E.npcActive(n); }).map(function (n) {
-      return { wx: Math.round(n.vx * TILE), wy: Math.round(n.vy * TILE), sprite: n.sprite, dir: n.dir,
+      return { id:n.id, wx: Math.round(n.vx * TILE) + arrivalOx, wy: Math.round(n.vy * TILE) + arrivalOy, sprite: n.sprite, dir: n.dir,
                fr: n.moving ? walkPhase(n.moveT) : 0,
                moving: n.moving || false, alpha: n.sprite === 'laura' ? 0.85 : 1 };
     });
-    ents.push({ wx: Math.round(p.x) + (S.mapId === 'arrival' ? 8 : 0), wy: Math.round(p.y) - (S.mapId === 'arrival' ? 1 : 0), sprite: 'cooper', dir: p.dir,
+    ents.push({ id:'cooper', wx: Math.round(p.x) + arrivalOx + (S.mapId === 'arrival' ? 8 : 0), wy: Math.round(p.y) + arrivalOy - (S.mapId === 'arrival' ? 1 : 0), sprite: 'cooper', dir: p.dir,
                 /* Un tile contiene sempre l'intero ciclo: contatto, A,
                  * contatto, B. Il passo non dipende dall'istante globale in
                  * cui il tasto viene premuto e non puo' iniziare a meta'. */
@@ -943,11 +1006,33 @@
   function paintWorld(g, cx, cy, vw, vh) {
     paintGround(g, cx, cy, vw, vh);
     if (GAME.Retro2D && GAME.Retro2D.limitBackgroundPalettes) {
-      GAME.Retro2D.limitBackgroundPalettes(g, cx, cy, vw, vh);
+      GAME.Retro2D.limitBackgroundPalettes(g, cx, cy, vw, vh, S.mapId);
     }
-    entityList().forEach(function (e) {
+    var entities = entityList();
+    if (GAME.AmbientLife) GAME.AmbientLife.draw(g,S.mapId,cx,cy,-Infinity,entities.length?entities[0].wy+TILE:Infinity);
+    if (GAME.EnvironmentReactions) GAME.EnvironmentReactions.draw(g,S.mapId,cx,cy,-Infinity,entities.length?entities[0].wy+TILE:Infinity);
+    entities.forEach(function (e, index) {
       var pal = GAME.Sprites.CHARS[e.sprite] || GAME.Sprites.CHARS.cooper;
-      GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, pal, e.dir, e.fr, e.alpha, e.moving, S.mapId === 'woods', tGlobal);
+      GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, pal, e.dir, e.fr, e.alpha, e.moving, S.mapId === 'woods', tGlobal, {mapId:S.mapId,wx:e.wx,wy:e.wy,npcId:e.id,characterLife:GAME.CharacterActivity&&GAME.CharacterActivity.actorPose?GAME.CharacterActivity.actorPose(e.id):null});
+      /* Painter's algorithm completo. Alberi erano tutti nel ground pass,
+       * quindi Cooper compariva davanti anche quando suoi piedi erano a nord
+       * della radice. Dopo ogni attore ridisegniamo sola fascia di alberi fra
+       * suoi piedi e quelli del prossimo attore: NPC e player mantengono
+       * entrambi profondita' corretta, senza ombre sopra sprite. */
+      if (GAME.sprites && GAME.sprites.drawForegroundStructures) {
+        var footY = e.wy + TILE;
+        var nextFootY = index + 1 < entities.length ? entities[index + 1].wy + TILE : Infinity;
+        GAME.sprites.drawForegroundStructures(g, S.map, cx, cy, {
+          mapId: S.mapId,
+          indoor: !!S.map.indoor,
+          viewportWidth: vw,
+          viewportHeight: vh,
+          forestDepthMin: footY,
+          forestDepthMax: nextFootY
+        });
+        if (GAME.AmbientLife) GAME.AmbientLife.draw(g,S.mapId,cx,cy,footY,nextFootY);
+        if (GAME.EnvironmentReactions) GAME.EnvironmentReactions.draw(g,S.mapId,cx,cy,footY,nextFootY);
+      }
     });
   }
 
@@ -1026,7 +1111,7 @@
       ectx.setTransform(1, 0, 0, 1, 0, 0);
       ectx.clearRect(0, 0, 48, 60);
       var pal = GAME.Sprites.CHARS[e.sprite] || GAME.Sprites.CHARS.cooper;
-      GAME.Sprites.drawChar(ectx, 0, 0, pal, e.dir, e.fr, 1, e.moving, S.mapId === 'woods', tGlobal); // piedi a y ~52
+      GAME.Sprites.drawChar(ectx, 0, 0, pal, e.dir, e.fr, 1, e.moving, S.mapId === 'woods', tGlobal, {mapId:S.mapId,wx:e.wx,wy:e.wy,npcId:e.id,characterLife:GAME.CharacterActivity&&GAME.CharacterActivity.actorPose?GAME.CharacterActivity.actorPose(e.id):null}); // piedi a y ~52
       // posizione schermo: centro X proiettato alla scala della riga
       var offX = (e.wx + 12 - cxr) * 2;
       var scrX = (offX - (OFF_W - warpSW[di]) / 2) * s;
@@ -1043,11 +1128,11 @@
     var Portraits = GAME.Portraits;
     var uiInk = Portraits ? Portraits.palette.ink : '#181818';
     // Box e card non consumano righe: testo conserva due righe complete.
-    var bw = Math.min(UW, 160);
+    var bw = Math.min(UW - 8, 248);
     var bx = Math.floor((UW - bw) / 2);
     /* Reference R69: mondo 95 px, box 49 px. Card termina a y=104;
      * testo parte a y=111: sette pixel nativi di respiro dal ritratto. */
-    var by = 95, bh = 49;
+    var by = VH - 53, bh = 49;
     if (Portraits) Portraits.frame(ctx, bx, by, bw, bh);
     else RF.frame(ctx, bx, by, bw, bh);
     var str = page.text.replace(/§/g, String(S.clues.length));
@@ -1300,16 +1385,16 @@
     // Il maiuscolo misurava 147px e finiva sotto la cornice; il titolo misto
     // misura 125px e resta intero nel bordo interno da 127px.
     text('Mistero di Laura Palmer', UW / 2, 69, '#31543a', '7px monospace', 'center');
-    ctx.fillStyle = '#183225'; ctx.fillRect(0, 104, UW, 40);
+    ctx.fillStyle = '#183225'; ctx.fillRect(0, VH - 40, UW, 40);
     if (Math.floor(tGlobal / 500) % 2 === 0) {
       text(save ? (touch ? 'TOCCA: CONTINUA' : 'INVIO: CONTINUA')
                 : (touch ? 'TOCCA PER INIZIARE' : 'PREMI INVIO'),
-           UW / 2, 118, '#f5efcf', 'bold 8px monospace', 'center');
+           UW / 2, VH - 26, '#f5efcf', 'bold 8px monospace', 'center');
     }
     var hint;
     if (touch) hint = 'D-PAD  A ESAMINA  B PROVE';
     else hint = 'FRECCE MUOVI  INVIO ESAMINA';
-    text(hint, UW / 2, 134, '#9abf5a', '7px monospace', 'center');
+    text(hint, UW / 2, VH - 10, '#9abf5a', '7px monospace', 'center');
   }
 
   function introLayout() {
@@ -1480,8 +1565,13 @@
     var visible = !!(key && GAME.Portraits && GAME.Portraits.faces[key] && !r3d);
     var nextKey = visible ? key : '';
     if (speakerPortraitKey === nextKey) return;
+    /* Il widget narrativo (retro-ui.js) puo' possedere lo stesso overlay
+     * quando non c'e' un dialogo classico da mostrare: non rubargli il
+     * ritratto, altrimenti ogni frame senza S.dialogue lo spegnerebbe. */
+    if (!visible && image.getAttribute('data-speaker-source') === 'narrative') return;
     speakerPortraitKey = nextKey;
     image.hidden = true;
+    image.removeAttribute('data-speaker-source');
     image.setAttribute('data-speaker', nextKey);
     if (!visible) return;
     var assetRoot = image.getAttribute('data-portrait-root') || 'assets/portraits/hires/';

@@ -1,0 +1,34 @@
+# landmark fisico e stato iniziale
+  ok - landmark tracks presente sulla mappa town
+  ok - casella authored dei binari risolve il landmark reale
+  ok - da spawn si raggiunge la casella da cui Invio affronta i binari
+  ok - stato vuoto usa risposta neutra
+  ok - landmark_tracks: definizione presente
+  ok - landmark_tracks: Cooper parla
+  ok - stato vuoto non inventa la data
+  ok - stato vuoto non conosce il vagone
+  ok - stato vuoto non conosce cuore/ciondolo
+  ok - risposta neutra resta specifica ai binari
+# gate atomico della rotta
+  ok - solo cuore intero non basta per conoscere la rotta
+  ok - solo testimonianza geografica non basta per usare il ciondolo
+  ok - E6A + T_JAMES_EST sbloccano insieme la lettura ricca
+  ok - landmark_tracks_route: definizione presente
+  ok - landmark_tracks_route: Cooper parla
+  ok - lettura ricca attribuisce geografia e relazione alle fonti esatte
+  ok - lettura ricca resta specifica al target
+  ok - prove M4 non anticipano ancora il vagone
+  ok - prove M4 non inventano una data
+# scoperta del vagone e precedenza
+  ok - flag semantico esatto sblocca il richiamo al vagone
+  ok - scoperta del vagone ha precedenza sulla variante di rotta
+  ok - landmark_tracks_vagone: definizione presente
+  ok - landmark_tracks_vagone: Cooper parla
+  ok - variante scoperta nomina soltanto luogo osservato e target
+  ok - flag vagone isolato non importa conoscenza del cuore
+  ok - nessuna variante conserva la data senza fonte
+# percorso runtime: adapter narrativo -> resolver classico
+  ok - runtime vuoto resta neutro
+  ok - runtime legge prove reali dall'adapter
+  ok - runtime legge flag reale dall'adapter
+tracks-provenance: PASS (29 checks)

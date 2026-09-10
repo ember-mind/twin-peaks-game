@@ -1,0 +1,90 @@
+{
+  "canonicalRoot": "/Users/ebuccelli/Vault/1. Projects/Twin Peaks Game",
+  "files": [
+    {
+      "path": "js/retro-authored.js",
+      "sha256": "e5c028474db7a5e60988be86983a9ee9580ad328a9c98da5d5a0a43e8c0298e1",
+      "action": "scoped-copy"
+    },
+    {
+      "path": "js/sheriffs-station-scene.js",
+      "sha256": "e00cc708c3026f690a8395e95b9fec246b67fd9bf58c54c31e983618eab92497",
+      "action": "scoped-copy"
+    },
+    {
+      "path": "js/station-population-scenes.js",
+      "sha256": "5d0f945212a58d6ea16413f9f72f1144152e6d8a53c85452e2eda30cf13b16fb",
+      "action": "scoped-copy"
+    },
+    {
+      "path": "assets/sprites/station-population-v01.png",
+      "sha256": "f5be9e80e047f903cf9a0fe6fa7689f460d91d71c7fc65391d53f184d9a88167",
+      "action": "scoped-copy"
+    },
+    {
+      "path": "assets/sprites/station-population-v01.manifest.json",
+      "sha256": "1e797a1de90536db1f72ed59a58457c793e4bb7d4de91dac8f51ce7412a3a069",
+      "action": "scoped-copy"
+    },
+    {
+      "path": "tools/build-station-population-frames.js",
+      "sha256": "c3b1822fb937d843e74d7a78302aee77004e6e2e12def8afa52cc43411ce0601",
+      "action": "scoped-copy"
+    },
+    {
+      "path": "index.html",
+      "action": "insert-population-script-only",
+      "sha256": "64ad80db52040b64e724d360048d6de0339a053b5eda9921f5be47f7f3e31372"
+    },
+    {
+      "path": "test/station-population.html",
+      "sha256": "67a9c43e16f0602d4a1fe934c4078ce6d1d71273dfcb5168a033e7200cc1d1ca",
+      "action": "population-preview-and-test-copy"
+    },
+    {
+      "path": "test/station-population-preview.js",
+      "sha256": "160237b2c25dd4c6cb5afa5d371dd4bce5ae60193d908264e3efa4a0e19df2a1",
+      "action": "population-preview-and-test-copy"
+    },
+    {
+      "path": "test/station-population.js",
+      "sha256": "60f77f16e7b2352b0cba107d250248151359617e588c1ddb027e5577c2dbc1b4",
+      "action": "population-preview-and-test-copy"
+    },
+    {
+      "path": "test/sheriffs-station.html",
+      "sha256": "40569e3fa68a737e1052c0b707acb8effdc370da8a00ed7d86007a6041eb9ec8",
+      "action": "population-preview-and-test-copy"
+    },
+    {
+      "path": "test/character-life.html",
+      "sha256": "713ac866e33ba25b99aa3dfa1cf0604df08cb22402963c90fa1fec74f14131fc",
+      "action": "population-preview-and-test-copy"
+    },
+    {
+      "path": "test/character-life-preview.js",
+      "sha256": "9a93cff4e1ca36ace7d47ce42c8c0558ae47157ce3f367cf88b627e6cb89d549",
+      "action": "population-preview-and-test-copy"
+    },
+    {
+      "path": "test/character-life.js",
+      "sha256": "0c1744df146fd3cfe2f32ec429c27584fc0c4e67da0b815138b36309896aed18",
+      "action": "population-preview-and-test-copy"
+    },
+    {
+      "path": "test/sheriffs-station-native.js",
+      "sha256": "fb29906e7297985f3eeacd18b3034d3dc699635ec28a9e605601226f07c97e61",
+      "action": "population-preview-and-test-copy"
+    },
+    {
+      "path": "js/ambient-life-scenes.js",
+      "action": "restore-missing-approved-station-ambient-registration-verbatim",
+      "sha256": "d3c4f0825ac2c0af69680d9f4185b789acaccb1b27fca455c9a768571f92cf16"
+    }
+  ],
+  "preservedDivergence": [
+    "index.html other content",
+    "js/maps.js",
+    "coldstage.config.mjs existing scenarios"
+  ]
+}

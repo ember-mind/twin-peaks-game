@@ -1,0 +1,70 @@
+{
+  "review": "Ambient Life v0.1.1 bounded polish",
+  "verdict": "pass",
+  "seed": 1989,
+  "scope": {
+    "reviewed": [
+      "continuous steam variation and seamless cycle boundaries",
+      "fixed-seed determinism and registration-order independence",
+      "irregular independent intermittent timing",
+      "glass repetition",
+      "neon/lamp overlap behavior",
+      "preservation of diner layout and ambient draw registration"
+    ],
+    "excluded": [
+      "static diner/town differences outside the supplied Ambient Life review sheet"
+    ]
+  },
+  "evidence": [
+    {
+      "source": ".coldstage/diffs/2026-09-08T12-24-04-535Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient/dinerAmbient/dinerAmbient-diff-sheet.webp",
+      "finding": "Inspected first as required. All eight changed comparisons (three glass, two lamp, one neon, and two steam) show tiny localized changes (0.006% to 0.018%) at intended ambient accents, with no visible layout, sprite registration, or scene-wide shift."
+    },
+    {
+      "source": "artifacts/diner-ambient-011/timeline.json and artifacts/diner-ambient-011/before-after.json",
+      "finding": "The 100 ms, 60-second fixed-seed trace contains 600 samples. Both steam sources remain active throughout. Counter steam completes 47 cycles and booth steam 43; each uses all three variants, has no adjacent variant repeat, and has respectively 43 and 36 distinct observed post-boundary durations. Durations stay within their registered 1200-1360 ms and 1320-1480 ms bands."
+    },
+    {
+      "source": "js/ambient-life.js and test/ambient-life.js",
+      "finding": "Continuous cycles advance start exactly to the previous end, change variant/duration only at that boundary, and force a different next variant when multiple variants exist. The independent test passed 48 exact end-minus-1/end transitions, verified frame 6 is the empty rest state before frame 0, exercised all three variants and more than 12 durations, and confirmed identical results across update partitioning and definition reordering."
+    },
+    {
+      "source": "artifacts/diner-ambient-011/frames/frame-005.png through frame-008.png",
+      "finding": "Representative native frames around the first counter-steam boundary show the wisp reaching its empty breakup/rest appearance before the next wisp begins; no spatial pop or registration jump is visible."
+    },
+    {
+      "source": "artifacts/diner-ambient-011/timeline.json",
+      "finding": "The three lamps have separate irregular schedules: 7, 7, and 6 starts in the minute, with varied gaps and durations. The neon starts three times. No neon/lamp overlap occurs in the first minute, which is a natural result of these independent clocks rather than forced exclusion."
+    },
+    {
+      "source": "artifacts/diner-ambient-011/overlap-audit.json",
+      "finding": "Across 20 seeds and 10 minutes per seed, each trace has 289-306 intermittent events. Starts within 150 ms are infrequent relative to total events, triple-near-starts are rare (0 for 16 of 20 seeds, maximum 3), and every seed has 4-11 natural neon/lamp overlaps. This does not show regular synchronized firing."
+    },
+    {
+      "source": "artifacts/diner-ambient-011/overlap-frames/frame-000.png through frame-034.png",
+      "finding": "Inspected representative before/during/after frames 000, 008, 014, 018, 023, and 030 from the 104400-105080 ms native capture. The middle lamp and neon overlap naturally while their accents remain subtle and spatially localized; the combination does not produce a distracting flash."
+    },
+    {
+      "source": "artifacts/diner-ambient-011/timeline.json",
+      "finding": "The glass reflection starts four times at 14640, 23837, 36220, and 52132 ms with durations 2305, 3279, 3544, and 2886 ms. The renderer does not use the stored variant field for this archetype; its perceptible variation comes from the irregular durations and gaps, which do not form a short or regular loop."
+    },
+    {
+      "source": "artifacts/diner-ambient-011/pixel-motion.json",
+      "finding": "The 600-frame native capture contains 334 distinct frames and a union of 160 changed pixels, with zero changed pixels outside registered ambient draw regions."
+    },
+    {
+      "source": "node test/ambient-life.js",
+      "finding": "Independent rerun passed both AMBIENT-LIFE-PASS and AMBIENT-ORGANIC-PASS, covering deterministic replay, independent clocks, read-only drawing, depth slicing, pause/disable behavior, seamless varied steam cycles, single-variant compatibility, and ordering independence."
+    }
+  ],
+  "requiredFixes": [],
+  "notes": [
+    "Glass does not render variant-dependent geometry. Its irregular event duration and delay provide timing variation without a perceptibly locked cadence.",
+    "The implementation preserves the four existing archetypes and all seven diner registrations; the v0.1.1 production diff is confined to continuous-cycle state and reporting fields."
+  ],
+  "limitations": [
+    "This review did not watch a full video in real time. It used the complete 600-frame native capture, the complete 100 ms timeline, exact-boundary tests, the Coldstage review sheet, and selected native frame sequences.",
+    "The 100 ms timeline can undersample the shortest lamp/neon frame changes; the supplemental overlap sequence was captured at 20 ms and was used for that temporal question.",
+    "The visual judgment is bounded to the supplied diner Ambient Life evidence and does not approve or replace static baselines."
+  ]
+}

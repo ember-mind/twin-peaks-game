@@ -1,0 +1,6 @@
+{
+  "metric": "sRGB weighted luma difference, authored base floor colors",
+  "before": 70.88419999999998,
+  "after": 50.61659999999998,
+  "reductionPercent": 28.592549538543157
+}

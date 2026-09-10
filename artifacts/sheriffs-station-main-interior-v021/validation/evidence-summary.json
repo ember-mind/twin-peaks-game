@@ -1,0 +1,70 @@
+{
+  "generatedAt": "2026-09-08T18:59:50.595Z",
+  "workingDirectory": "/Users/ebuccelli/Code/solo/projects/twin-peaks-game",
+  "sourceCode": {
+    "file": "js/sheriffs-station-art.js",
+    "sha256": "650a26eb56b6f709ad2acca507db7509c9840d6e5ca26c5736357b882bfb19a5"
+  },
+  "execution": [
+    {
+      "command": "node test/sheriffs-station-native.js",
+      "exitCode": 0,
+      "resultFrom": "artifacts/sheriffs-station-main-interior-v021/validation/01-sheriffs-station-native.log"
+    },
+    {
+      "command": "node test/sheriffs-station-native.js --audit-frozen",
+      "exitCode": 0,
+      "resultFrom": "artifacts/sheriffs-station-main-interior-v021/validation/02-sheriffs-station-audit-frozen.log"
+    },
+    {
+      "command": "node test/smoke.js",
+      "exitCode": 0,
+      "resultFrom": "artifacts/sheriffs-station-main-interior-v021/validation/03-smoke.log"
+    },
+    {
+      "command": "node test/walkthrough.js",
+      "exitCode": 0,
+      "resultFrom": "artifacts/sheriffs-station-main-interior-v021/validation/04-walkthrough.log"
+    },
+    {
+      "command": "node test/world-engine-v0.1-catalog.js",
+      "exitCode": 0,
+      "resultFrom": "artifacts/sheriffs-station-main-interior-v021/validation/05-world-catalog.log"
+    },
+    {
+      "command": "coldstage run changed --json",
+      "exitCode": 0,
+      "resultFrom": "artifacts/sheriffs-station-main-interior-v021/validation/coldstage-changed.json",
+      "reportPath": ".coldstage/runs/2026-09-08T18-53-19-883Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/report.json"
+    },
+    {
+      "command": "coldstage review sheriffsStation --run .coldstage/runs/2026-09-08T18-53-19-883Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/report.json --json",
+      "exitCode": 0,
+      "resultFrom": "artifacts/sheriffs-station-main-interior-v021/validation/coldstage-review.json"
+    }
+  ],
+  "evidence": {
+    "nativeAllPassed": true,
+    "protectedFilesUnchanged": true,
+    "protectedFileCount": 18,
+    "geometryUnchanged": true,
+    "coldstageStatus": "pass",
+    "sheriffRuntimeStatus": "pass",
+    "sheriffChecks": {
+      "passed": 9,
+      "total": 9,
+      "failed": []
+    },
+    "sheriffConsoleSevere": 0,
+    "sheriffPixelDiff": {
+      "status": "review-required",
+      "aiReviewNeeded": true,
+      "nextAction": "visual-review",
+      "reviewSheet": ".coldstage/diffs/2026-09-08T18-53-19-883Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation/sheriffsStation-diff-sheet.webp"
+    },
+    "sheriffReviewStatus": "ready-for-review",
+    "sheriffContactSheet": ".coldstage/reviews/2026-09-08T18-53-19-883Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-contact-sheet.webp",
+    "sourceCaptures": 8
+  },
+  "baselineAction": "none"
+}

@@ -1,0 +1,48 @@
+{
+  "startedAt": "2026-09-08T18:53:04.468Z",
+  "finishedAt": "2026-09-08T18:53:05.087Z",
+  "workingDirectory": "/Users/ebuccelli/Code/solo/projects/twin-peaks-game",
+  "commands": [
+    {
+      "command": "node test/sheriffs-station-native.js",
+      "startedAt": "2026-09-08T18:53:04.469Z",
+      "durationMs": 188,
+      "exitCode": 0,
+      "signal": null,
+      "log": "artifacts/sheriffs-station-main-interior-v021/validation/01-sheriffs-station-native.log"
+    },
+    {
+      "command": "node test/sheriffs-station-native.js --audit-frozen",
+      "startedAt": "2026-09-08T18:53:04.659Z",
+      "durationMs": 198,
+      "exitCode": 0,
+      "signal": null,
+      "log": "artifacts/sheriffs-station-main-interior-v021/validation/02-sheriffs-station-audit-frozen.log"
+    },
+    {
+      "command": "node test/smoke.js",
+      "startedAt": "2026-09-08T18:53:04.857Z",
+      "durationMs": 131,
+      "exitCode": 0,
+      "signal": null,
+      "log": "artifacts/sheriffs-station-main-interior-v021/validation/03-smoke.log"
+    },
+    {
+      "command": "node test/walkthrough.js",
+      "startedAt": "2026-09-08T18:53:04.988Z",
+      "durationMs": 61,
+      "exitCode": 0,
+      "signal": null,
+      "log": "artifacts/sheriffs-station-main-interior-v021/validation/04-walkthrough.log"
+    },
+    {
+      "command": "node test/world-engine-v0.1-catalog.js",
+      "startedAt": "2026-09-08T18:53:05.050Z",
+      "durationMs": 37,
+      "exitCode": 0,
+      "signal": null,
+      "log": "artifacts/sheriffs-station-main-interior-v021/validation/05-world-catalog.log"
+    }
+  ],
+  "allPassed": true
+}

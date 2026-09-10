@@ -1,0 +1,117 @@
+--- MAPPE SCOPERTE (indizi al momento della scoperta) ---
+  double_r_exterior_prototype  (indizi: 0)
+  sheriff  (indizi: 0)
+  palmer  (indizi: 0)
+  diner  (indizi: 0)
+  town  (indizi: 0)
+  woods  (indizi: 3)
+  redroom  (indizi: 3)
+  hotel_gn  (indizi: 3)
+  hospital  (indizi: 4)
+  traincar  (indizi: 6)
+  oej  (indizi: 6)
+  roadhouse  (indizi: 8)
+
+--- TRACCIA ACQUISIZIONI (ordine) ---
+  1. done:bobby  [town]
+  2. done:donna  [town]
+  3. done:jacoby  [town]
+  4. done:landmark_cemetery  [town]
+  5. done:landmark_tracks  [town]
+  6. done:sign_town  [town]
+  7. done:lago_sguardo  [town]
+  8. done:tomba_laura  [town]
+  9. clue:diario  [sheriff]
+  10. done:truman  [sheriff]
+  11. done:andy  [sheriff]
+  12. done:hawk  [sheriff]
+  13. done:lucy  [sheriff]
+  14. done:sarah  [palmer]
+  15. done:leland  [palmer]
+  16. clue:cuore  [palmer]
+  17. clue:lettera_r  [palmer]
+  18. done:laura_room  [palmer]
+  19. done:norma  [diner]
+  20. done:shelly  [diner]
+  21. done:loglady  [diner]
+  22. done:olio  [woods]
+  23. done:sign_grove  [woods]
+  24. flag:met_mfap  [redroom]
+  25. done:mfap  [redroom]
+  26. clue:nome_sussurrato  [redroom]
+  27. flag:sogno_fatto  [redroom]
+  28. done:laura_sogno  [redroom]
+  29. done:truman_a2  [sheriff]
+  30. clue:cuore_intero  [diner]
+  31. done:james_a2  [diner]
+  32. done:benhorne_a2  [hotel_gn]
+  33. flag:audrey_indaga  [hotel_gn]
+  34. done:audrey_a2  [hotel_gn]
+  35. done:specchio315  [hotel_gn]
+  36. clue:poesia_fuoco  [hospital]
+  37. done:gerard_a2  [hospital]
+  38. flag:ronette_bob  [hospital]
+  39. done:ronette_letto  [hospital]
+  40. flag:atto3  [sheriff]
+  41. done:truman_atto3  [sheriff]
+  42. done:truman_wait3  [sheriff]
+  43. done:hawk_vagone  [traincar]
+  44. done:sign_ponte  [traincar]
+  45. done:sign_oej  [traincar]
+  46. clue:biglietto_fuoco  [traincar]
+  47. done:mucchio_terra  [traincar]
+  48. clue:anello  [traincar]
+  49. done:anello_interact  [traincar]
+  50. flag:jacques_preso  [oej]
+  51. done:jacques_a3  [oej]
+  52. flag:audrey_salvata  [oej]
+  53. done:audrey_oej  [oej]
+  54. flag:jacques_morto  [sheriff]
+  55. done:lucy_a3  [sheriff]
+  56. flag:gigante1  [hotel_gn]
+  57. done:gigante1_dlg  [hotel_gn]
+  58. flag:atto4  [sheriff]
+  59. done:truman_atto4  [sheriff]
+  60. flag:sarah_visione_ascoltata  [palmer]
+  61. done:sarah_visione  [palmer]
+  62. done:leland_a4  [palmer]
+  63. done:maddy_a4  [palmer]
+  64. done:loglady_a4  [diner]
+  65. done:specchio_dopo  [hotel_gn]
+  66. done:gerard_a4  [hospital]
+  67. done:truman_wait4  [sheriff]
+  68. flag:gigante2  [roadhouse]
+  69. done:gigante2_dlg  [roadhouse]
+  70. clue:lettera_o  [town]
+  71. flag:maddy_trovata  [town]
+  72. done:lago_maddy  [town]
+  73. flag:atto5  [sheriff]
+  74. done:truman_atto5  [sheriff]
+  75. flag:leland_confessa  [sheriff]
+  76. done:leland_interr  [sheriff]
+  77. done:palco_dopo  [roadhouse]
+  78. done:lago_dopo  [town]
+  79. done:truman_wait5  [sheriff]
+  80. flag:leland_morto  [sheriff]
+  81. done:leland_morte  [sheriff]
+  82. flag:mfap_finale_visto  [redroom]
+  83. done:mfap_finale  [redroom]
+  84. done:laura_finale2  [redroom]
+  85. done:bob_finale  [redroom]
+  86. done:truman_fine  [sheriff]
+
+--- OBIETTIVO (variazioni lungo la traccia) ---
+  @1. Parla con lo sceriffo Truman (a ovest).
+  @9. Casa Palmer: esamina la camera di Laura.
+  @17. Segui il sentiero nel bosco.
+  @27. Parla con Ronette in ospedale e James al diner.
+  @36. Riferisci a Truman alla centrale.
+  @40. La strada a est: il vagone del treno.
+  @56. Riferisci a Truman alla centrale.
+  @58. Stasera: il Roadhouse.
+  @68. Parla con Sarah a casa Palmer; poi vai al lago.
+  @71. Riferisci a Truman alla centrale.
+  @73. Interroga Leland Palmer alla centrale.
+  @80. Torna alla Loggia (Glastonbury Grove).
+
+OK: cammino completo simulato, 86 acquisizioni, finale raggiunto ✔

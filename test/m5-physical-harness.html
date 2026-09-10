@@ -41,7 +41,7 @@
 <script src="../js/narrative-runtime.js"></script>
 <script src="../js/narrative-ui.js"></script>
 <script src="../js/narrative-notebook.js"></script>
-<script src="../js/narrative-data.gen.js?v=harness-r77"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
 <script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
 <script src="../js/narrative-save.js"></script>
 <script>
@@ -225,17 +225,17 @@ async function main() {
     // town → traincar (porta est 55,14, needsFlag atto3)
     checks.town_to_traincar = await enterDoor(55, 14, 'traincar', route);
 
-    // ponte [sign_ponte 5,6]
-    await interactTarget(5, 6, function () { return S().nodes_done.m5_bridge === true; }, route, 'sign_ponte');
+    // ponte [bridge_rail 4,6 — parapetto est, si guarda da (4,7)]
+    await interactTarget(4, 6, function () { return S().nodes_done.m5_bridge === true; }, route, 'bridge_rail');
     checks.bridge_done = (S().nodes_done.m5_bridge === true);
     route.push({ phase: 'binari', map: 'traincar', coords: [E.state.player.tx, E.state.player.ty], note: 'sentiero est-ovest verso il vagone' });
 
-    // scoperta del vagone [traincar_entrance 11,6]
-    await interactTarget(11, 6, function () { return S().flags.vagone_scoperto === true; }, route, 'discovery');
+    // scoperta del vagone [traincar_entrance 13,7 — la porta sud]
+    await interactTarget(13, 7, function () { return S().flags.vagone_scoperto === true; }, route, 'discovery');
     checks.discovery_done = (S().flags.vagone_scoperto === true && obj() === 'obj_m5_2');
 
     // tre osservazioni nell'ordine del percorso
-    var ring = [13, 5], mound = [10, 4], scene = [11, 5];
+    var ring = [13, 5], mound = [13, 6], scene = [12, 5];
     var order = (path === 'A') ? [['mound', mound], ['ring', ring], ['scene', scene]]
                                : [['scene', scene], ['mound', mound], ['ring', ring]];
     var doneWhen = {
@@ -287,8 +287,8 @@ async function main() {
     }
 
     // rapporto a Truman (9,4): intro → S1 → chiusura (east_route)
-    await walkNextTo(9, 4);
-    route.push({ phase: 'truman', map: 'traincar', coords: [E.state.player.tx, E.state.player.ty], target: [9, 4] });
+    await walkNextTo(9, 8);
+    route.push({ phase: 'truman', map: 'traincar', coords: [E.state.player.tx, E.state.player.ty], target: [9, 8] });
     key('Enter'); await wait(200); // apre il rapporto
     await advanceUntil(function () { return choices().length === 2; }, 10); // intro → widget S1
     checks.s1_widget = (choices().length === 2);

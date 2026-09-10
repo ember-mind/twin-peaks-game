@@ -18,27 +18,27 @@ const engine = fs.readFileSync(path.join(root, 'js', 'engine.js'), 'utf8');
 const retroFont = fs.readFileSync(path.join(root, 'js', 'retro-font.js'), 'utf8');
 const portraits = fs.readFileSync(path.join(root, 'js', 'portraits.js'), 'utf8');
 const goldTone = fs.readFileSync(path.join(root, 'js', 'gold-tone.js'), 'utf8');
-const castSheet = fs.readFileSync(path.join(root, 'assets', 'sprites', 'cast-walkcycles-16.png'));
+const castSheet = fs.readFileSync(path.join(root, 'assets', 'sprites', 'cast-walkcycles-hg-24.png'));
 
 const checks = {
-  gold_native_resolution_160x144: /width="160" height="144"/.test(index) &&
-    /cv\.width = 160/.test(main) && /cv\.height = 144/.test(main),
+  heartgold_native_resolution_256x192: /width="256" height="192"/.test(index) &&
+    /cv\.width = 256/.test(main) && /cv\.height = 192/.test(main),
   engine_repairs_and_locks_native_buffer: /canvas\.width !== VW/.test(engine) &&
     /canvas\.height !== VH/.test(engine) && /UW = VW;/.test(engine),
   intro_header_uses_fitting_native_scale: /FEBBRAIO, 1989'[\s\S]*bold 8px monospace/.test(engine) &&
     /titleFits: titleWidth <= l\.boxW - 20/.test(engine),
   intro_uses_three_complete_pages: /Math\.ceil\(lines\.length \/ 7\)/.test(engine) &&
     /lines\.slice\(part \* 7, part \* 7 \+ 7\)/.test(engine),
-  production_cache_busts_layout_fix: /js\/engine\.js\?v=r100p/.test(index) &&
-    /js\/touch\.js\?v=r77qa1/.test(index) && /js\/data\.js\?v=12qa4/.test(index) &&
-    /js\/narrative-data\.gen\.js\?v=13qa3/.test(index) &&
+  production_cache_busts_layout_fix: /js\/engine\.js\?v=r142-narrative-portrait/.test(index) &&
+    /js\/touch\.js\?v=r112gutter/.test(index) && /js\/data\.js\?v=13act2/.test(index) &&
+    /js\/narrative-data\.gen\.js\?v=18act3c/.test(index) &&
     /js\/narrative-finale\.js\?v=gold54p5/.test(index) &&
-    /js\/narrative-finale-production\.js\?v=13/.test(index),
+    /js\/narrative-finale-production\.js\?v=14/.test(index),
   production_cache_busts_objective_notebook_fix:
     /js\/narrative-notebook\.js\?v=5/.test(index) &&
     /js\/narrative-engine-adapter\.js\?v=10/.test(index) &&
     /js\/narrative-production\.js\?v=21/.test(index),
-  css_stage_preserves_native_aspect: /aspect-ratio: 10 \/ 9/.test(index) &&
+  css_stage_preserves_native_aspect: /aspect-ratio: 4 \/ 3/.test(index) &&
     /max-width: 100vw; max-height: 100dvh/.test(index),
   production_loads_retro_renderer: /js\/retro\.js/.test(index),
   production_loads_shared_bitmap_font_first: /js\/retro-font\.js/.test(index) &&
@@ -52,13 +52,11 @@ const checks = {
     /limitBackgroundPalettes/.test(engine) && !/GAME\.GoldTone\.apply\(ctx/.test(engine) &&
     /objTones/.test(authored) && /#072619/.test(goldTone) && /#eee6b5/i.test(goldTone),
   production_loads_authored_tileset: /js\/retro-authored\.js/.test(index),
-  production_uses_native_authored_cast: /retro-cast-matrices-a\.js\?v=r102e/.test(index) &&
-    /retro-cast-matrices-b\.js\?v=r102e/.test(index) &&
-    /retro-authored\.js\?v=r102e-authoredcast/.test(index) &&
-    /var CAST_RENDERER = 'native-authored-r102e'/.test(authored) &&
-    /sourceAtlas: false/.test(authored) && !/if \(drawCastWalkSheet\(ctx, name/.test(authored) &&
-    castSheet.readUInt32BE(16) === 240 && castSheet.readUInt32BE(20) === 240,
-  production_loads_continuous_town_art: /maps\.js\?v=r100p/.test(index) &&
+  production_uses_heartgold_authored_cast: /retro-authored\.js\?v=r141-gestures/.test(index) &&
+    /var CAST_RENDERER = 'heartgold-atlas-r116'/.test(authored) &&
+    /sourceAtlas: true/.test(authored) && /if \(drawCastWalkSheet\(ctx, name/.test(authored) &&
+    castSheet.readUInt32BE(16) === 360 && castSheet.readUInt32BE(20) === 360,
+  production_loads_continuous_town_art: /maps\.js\?v=r100q/.test(index) &&
     /function townGround/.test(authored) && /function townRoad/.test(authored) && /paleGround/.test(authored),
   production_does_not_load_three: !/three\.min\.js/.test(index) && !/render3d\.js/.test(index),
   engine_boots_without_webgl: /GAME\.Engine\.init\(cv, null\)/.test(main),
@@ -85,9 +83,9 @@ const checks = {
     /for \(yy = 0; yy < 16; yy \+= 4\)/.test(authored),
   gold_chibi_cooper_contrast: /shirtCol = name === 'cooper'/.test(authored) &&
     /name === 'cooper' && dir !== 'up'/.test(authored),
-  gold_native_16px_actors: /var GOLD_DOWN0 = \[/.test(authored) &&
-    /GAME\.Retro2D\.spriteSize = \[16, 16\]/.test(authored),
-  gold_flat_world_projection: /var SCALE = 1/.test(engine) && /viewport GBC: 10x9 metatile/.test(engine),
+  heartgold_native_24px_actors: /frame: \[24, 24\]/.test(authored) &&
+    /visibleHeight: \[20, 24\]/.test(authored),
+  heartgold_flat_world_projection: /var SCALE = 1/.test(engine) && /viewport DS-like: 16x12 metatile/.test(engine),
   gold_gameplay_has_no_quest_overlay: /Pokémon Oro non sovrappone quest banner/.test(retroUi),
   notebook_renders_single_resolved_objective:
     /A\.getObjectiveText = currentObjectiveText/.test(adapter) &&
@@ -97,8 +95,8 @@ const checks = {
     /Mistero di Laura Palmer', UW \/ 2, 69, '#31543a', '7px monospace'/.test(engine) &&
     /promptY: 126/.test(engine) &&
     /text\('PAG\.[\s\S]*var advanceLabel[\s\S]*if \(Math\.floor\(tGlobal \/ 500\) % 2 === 0\) \{\s*text\('>'/.test(engine),
-  gold_dialogue_reference_bottom_49px: /var by = 95, bh = 49/.test(engine) &&
-    /var bw = Math\.min\(UW, 160\)/.test(engine),
+  heartgold_dialogue_reference_bottom_49px: /var by = VH - 53, bh = 49/.test(engine) &&
+    /var bw = Math\.min\(UW - 8, 248\)/.test(engine),
   retro_disables_oblique_structures: /Sp\.drawStructures = function \(\) \{\}/.test(retro),
   music_remains_loaded: /js\/audio\.js/.test(index),
   production_loads_narrative_runtime: /js\/narrative-runtime\.js/.test(index) &&
@@ -130,8 +128,8 @@ const checks = {
     /id="speaker-dialogue-hires"/.test(index) && /id="speaker-advance-hires"/.test(index) &&
     /function syncSpeakerTypography\(\)/.test(engine) &&
     /RF\.wrapFixed\(raw, 144, 1\)/.test(engine) && /--native-scale/.test(index)
-  ,dialogue_copy_has_breathing_room_and_balance: /top: 77\.083333%/.test(index) &&
-    /left: 6\.875%/.test(index) && /by \+ 16 \+ i \* 11/.test(engine) &&
+  ,dialogue_copy_has_breathing_room_and_balance: /top: 80\.729167%/.test(index) &&
+    /left: 5\.859375%/.test(index) && /by \+ 16 \+ i \* 11/.test(engine) &&
     /function balanceFixedPair\(/.test(retroFont) && /RF\.balanceFixedPair/.test(engine)
   ,dialogue_shows_advance_control: /INVIO AVANTI >/.test(engine) && /A AVANTI >/.test(engine) &&
     /INVIO · AVANTI/.test(engine) && /A · AVANTI/.test(engine)

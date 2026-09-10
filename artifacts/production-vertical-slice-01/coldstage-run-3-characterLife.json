@@ -1,0 +1,45 @@
+{
+  "status": "fail",
+  "reportPath": ".coldstage/runs/2026-09-09T08-06-01-515Z-characterLife/report.json",
+  "environment": {
+    "lane": "selenium-release",
+    "browser": "Chrome",
+    "browserVersion": "152.0.7977.83",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "changedFileCount": null,
+  "baseline": null,
+  "pixelGate": {
+    "status": "pending",
+    "aiReviewNeeded": false
+  },
+  "scenarios": [
+    {
+      "name": "characterLife",
+      "status": "fail",
+      "attestation": {
+        "runtime": "fail",
+        "visualReview": "not-performed"
+      },
+      "durationMs": 4802,
+      "checks": {
+        "passed": 0,
+        "total": 0,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": {
+        "status": "skipped-runtime-failure",
+        "aiReviewNeeded": false,
+        "nextAction": "fix-runtime",
+        "reviewSheet": null
+      },
+      "error": "javascript error: Truman did not return to his task focus\n  (Session info: chrome=152.0.7977.83)",
+      "screenshot": ".coldstage/runs/2026-09-09T08-06-01-515Z-characterLife/characterLife.png",
+      "localArtifacts": 0,
+      "captureDeterminism": []
+    }
+  ]
+}

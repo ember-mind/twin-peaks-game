@@ -38,7 +38,7 @@
         "own_verifiable_info": "JACQUES_MIDNIGHT_CLAIM",
         "specific_resource": "l'orario dichiarato: il merci di mezzanotte, verificabile ai binari",
         "admission_form": "dichiarazione resa, NON firmata",
-        "persistent_cost": "i termini della dichiarazione mai formalizzati",
+        "persistent_cost": "i termini della dichiarazione mai formalizzati (nessun flag: la nota del taccuino è l'unica traccia)",
         "future_echo": "M9: l'orario restringe la finestra della notte — utilizzabile senza identificare nessuno"
       },
       "pressione": {
@@ -78,7 +78,8 @@
         "flag": "jacques_admitted_presence"
       },
       "resolved_when": {
-        "proposition_path": "P5.formulation.status", "equals": "formulated"
+        "proposition_path": "P5.formulation.status",
+        "equals": "formulated"
       },
       "blocks": {
         "kind": "node_prepare",
@@ -135,6 +136,29 @@
       "provenance_note": "[P/N] ponte eseguibile da data.js truman_atto4: dopo il Gigante, Truman deve ricevere sia la visione sia la notizia di Jacques prima che M8 entri."
     },
     {
+      "id": "obj_m6_3b",
+      "priority": 350,
+      "when": {
+        "all": [
+          {
+            "flag": "jacques_preso"
+          },
+          {
+            "not": {
+              "flag": "jacques_dead"
+            }
+          },
+          {
+            "not": {
+              "node_done": "m6_hospital_guard"
+            }
+          }
+        ]
+      },
+      "text": "Passa dall'ospedale: Renault è piantonato.",
+      "provenance_note": "[N] M6 stitch C2c: la battuta di Truman («Domattina l'ospedale, con il foglio») diventa un passaggio fisico obbligatorio; l'obiettivo orienta al registro di turno prima del rapporto notturno."
+    },
+    {
       "id": "obj_m6_4",
       "priority": 400,
       "when": {
@@ -146,6 +170,9 @@
             "not": {
               "flag": "jacques_dead"
             }
+          },
+          {
+            "node_done": "m6_hospital_guard"
           },
           {
             "not": {
@@ -184,7 +211,8 @@
       "when": {
         "all": [
           {
-            "proposition_path": "P5.formulation.status", "equals": "formulated"
+            "proposition_path": "P5.formulation.status",
+            "equals": "formulated"
           },
           {
             "not": {
@@ -206,7 +234,8 @@
           },
           {
             "not": {
-              "proposition_path": "P5.formulation.status", "equals": "formulated"
+              "proposition_path": "P5.formulation.status",
+              "equals": "formulated"
             }
           }
         ]
@@ -257,16 +286,16 @@
         {
           "id": "m6.b1.ferry.p04",
           "mode": "dialogue",
-        "speaker_id": "hawk",
-        "display_name": "HAWK",
-        "text": "(fuori, piano) Io resto qui. Se chiudono il molo, restiamo dentro."
-      },
-      {
-        "id": "m6.b1.ferry.p05",
-        "mode": "dialogue",
-        "speaker_id": "cooper",
-        "display_name": "COOPER",
-        "text": "Tieni libera la passerella. Io vado al tavolo."
+          "speaker_id": "hawk",
+          "display_name": "HAWK",
+          "text": "(fuori, piano) Io resto qui. Se chiudono il molo, restiamo dentro."
+        },
+        {
+          "id": "m6.b1.ferry.p05",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Tieni libera la passerella. Io vado al tavolo."
         }
       ],
       "effects": [],
@@ -351,16 +380,24 @@
           "text": "(Jacques mescola. Il posto di fronte a lui è vuoto: un invito e una trappola.)"
         },
         {
-        "id": "m6.b4.tactic.p02",
-        "mode": "action",
-        "text": "(Jacques spinge il mazzo al centro del tavolo.)"
-      },
-      {
-        "id": "m6.b4.tactic.p03",
-        "mode": "dialogue",
-        "speaker_id": "cooper",
-        "display_name": "COOPER",
-        "text": "Jacques. Prima di cominciare, il mazzo resta sul tavolo."
+          "id": "m6.b4.tactic.p02",
+          "mode": "action",
+          "text": "(Jacques spinge il mazzo al centro del tavolo.)"
+        },
+        {
+          "id": "m6.b4.tactic.cards_recall",
+          "mode": "action",
+          "condition": {
+            "evidence": "E_CARTE"
+          },
+          "text": "(Il mazzo è tagliato squadrato, di piatto. Come le carte sotto il sedile, nel vagone.)"
+        },
+        {
+          "id": "m6.b4.tactic.p03",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Jacques. Prima di cominciare, il mazzo resta sul tavolo."
         }
       ],
       "choices": [
@@ -508,9 +545,6 @@
           "set": "jacques_admitted_presence"
         },
         {
-          "set": "jacques_statement_terms_known"
-        },
-        {
           "evidence": "JACQUES_MIDNIGHT_CLAIM"
         },
         {
@@ -532,7 +566,7 @@
           }
         }
       ],
-      "invariant": "ammissione di PRESENZA (mai omicidio); scrive jacques_admitted_presence + jacques_statement_terms_known + JACQUES_MIDNIGHT_CLAIM; 2 domande esclusive (q1,q2) + 1 di colore; effetti SOLO dopo l'ultima pagina",
+      "invariant": "ammissione di PRESENZA (mai omicidio); scrive jacques_admitted_presence + JACQUES_MIDNIGHT_CLAIM; 2 domande esclusive (q1,q2) + 1 di colore; effetti SOLO dopo l'ultima pagina",
       "kind": "dialogue",
       "channel": "world",
       "map_id": "oej",
@@ -786,6 +820,237 @@
       "mandatory_beat": true
     },
     {
+      "id": "m6_cmp_cards_prova",
+      "beat": "B4c",
+      "source_section": "M6-B4c",
+      "optional": true,
+      "prompt": "Stesso taglio. Che cosa collega?",
+      "conditions": [
+        {
+          "evidence": "E_CARTE"
+        },
+        {
+          "evidence": "JACQUES_MIDNIGHT_CLAIM"
+        },
+        {
+          "flag": "jacques_admitted_presence"
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b4c.cmp_cards.prova.p01",
+          "mode": "notebook",
+          "text": "Carte sotto il sedile del vagone; il mazzo di Jacques al tavolo. Taglio squadrato in entrambi."
+        }
+      ],
+      "choices": [
+        {
+          "id": "cards_hand",
+          "label": "La stessa mano teneva il banco lì e qui.",
+          "result": "PRESENCE_STRENGTHENED",
+          "effects": [
+            {
+              "notebook": {
+                "id": "m6.note.cards_bank.prova",
+                "text": "Il taglio del mazzo è lo stesso, al vagone e al tavolo. Jacques al vagone: sostenuto due volte."
+              }
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m6.b4c.cmp_cards.prova.feedback.hand",
+              "mode": "notebook",
+              "text": "(Cooper allinea le due annotazioni. Una mano, due tavoli.)"
+            }
+          ]
+        },
+        {
+          "id": "cards_killer",
+          "label": "Le carte dicono che ha ucciso lui.",
+          "result": "ATTRIBUTION_OVERREACH",
+          "retry": true,
+          "feedback_pages": [
+            {
+              "id": "m6.b4c.cmp_cards.prova.feedback.killer",
+              "mode": "notebook",
+              "text": "Le carte collocano una mano a un tavolo. Non a un corpo."
+            }
+          ]
+        }
+      ],
+      "rules": {
+        "attempt_scope": "comparison",
+        "hide_attempted_results": false,
+        "track_assistance": false
+      },
+      "invariant": "PRESENZA ≠ PATERNITÀ: il confronto NON formula mai P5 (m6_p5 resta l'unico formulatore); nessun flag, sola annotazione (upsert per id, idempotente); tre nodi mutuamente esclusivi, uno per testimonianza di ramo. hide_attempted_results FALSE di proposito: senza una scelta che formula una proposizione il runtime non marca mai `completed` un confronto, e nascondere i risultati già tentati lascerebbe l'interazione MUTA alla seconda visita; così le due letture restano sempre riconsultabili e la coppia non risponde mai «nessun filo».",
+      "kind": "comparison",
+      "channel": "notebook",
+      "interaction_slot": "primary",
+      "completed_recall": {
+        "section": "propositions",
+        "page": {
+          "id": "m6.notebook.cmp_cards.prova.already_recorded",
+          "mode": "notebook",
+          "text": "(Questo nesso è già registrato nelle Proposizioni.)"
+        }
+      }
+    },
+    {
+      "id": "m6_cmp_cards_pressione",
+      "beat": "B4c",
+      "source_section": "M6-B4c",
+      "optional": true,
+      "prompt": "Stesso taglio. Che cosa collega?",
+      "conditions": [
+        {
+          "evidence": "E_CARTE"
+        },
+        {
+          "evidence": "JACQUES_LIST_GIVEN"
+        },
+        {
+          "flag": "jacques_admitted_presence"
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b4c.cmp_cards.pressione.p01",
+          "mode": "notebook",
+          "text": "Carte sotto il sedile del vagone; il mazzo di Jacques al tavolo. Taglio squadrato in entrambi."
+        }
+      ],
+      "choices": [
+        {
+          "id": "cards_hand",
+          "label": "La stessa mano teneva il banco lì e qui.",
+          "result": "PRESENCE_STRENGTHENED",
+          "effects": [
+            {
+              "notebook": {
+                "id": "m6.note.cards_bank.pressione",
+                "text": "Il taglio del mazzo è lo stesso, al vagone e al tavolo. Jacques al vagone: sostenuto due volte."
+              }
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m6.b4c.cmp_cards.pressione.feedback.hand",
+              "mode": "notebook",
+              "text": "(Cooper allinea le due annotazioni. Una mano, due tavoli.)"
+            }
+          ]
+        },
+        {
+          "id": "cards_killer",
+          "label": "Le carte dicono che ha ucciso lui.",
+          "result": "ATTRIBUTION_OVERREACH",
+          "retry": true,
+          "feedback_pages": [
+            {
+              "id": "m6.b4c.cmp_cards.pressione.feedback.killer",
+              "mode": "notebook",
+              "text": "Le carte collocano una mano a un tavolo. Non a un corpo."
+            }
+          ]
+        }
+      ],
+      "rules": {
+        "attempt_scope": "comparison",
+        "hide_attempted_results": false,
+        "track_assistance": false
+      },
+      "invariant": "PRESENZA ≠ PATERNITÀ: il confronto NON formula mai P5 (m6_p5 resta l'unico formulatore); nessun flag, sola annotazione (upsert per id, idempotente); tre nodi mutuamente esclusivi, uno per testimonianza di ramo. hide_attempted_results FALSE di proposito: senza una scelta che formula una proposizione il runtime non marca mai `completed` un confronto, e nascondere i risultati già tentati lascerebbe l'interazione MUTA alla seconda visita; così le due letture restano sempre riconsultabili e la coppia non risponde mai «nessun filo».",
+      "kind": "comparison",
+      "channel": "notebook",
+      "interaction_slot": "primary",
+      "completed_recall": {
+        "section": "propositions",
+        "page": {
+          "id": "m6.notebook.cmp_cards.pressione.already_recorded",
+          "mode": "notebook",
+          "text": "(Questo nesso è già registrato nelle Proposizioni.)"
+        }
+      }
+    },
+    {
+      "id": "m6_cmp_cards_falsa",
+      "beat": "B4c",
+      "source_section": "M6-B4c",
+      "optional": true,
+      "prompt": "Stesso taglio. Che cosa collega?",
+      "conditions": [
+        {
+          "evidence": "E_CARTE"
+        },
+        {
+          "evidence": "JACQUES_THIRD_MAN_DETAIL"
+        },
+        {
+          "flag": "jacques_admitted_presence"
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b4c.cmp_cards.falsa.p01",
+          "mode": "notebook",
+          "text": "Carte sotto il sedile del vagone; il mazzo di Jacques al tavolo. Taglio squadrato in entrambi."
+        }
+      ],
+      "choices": [
+        {
+          "id": "cards_hand",
+          "label": "La stessa mano teneva il banco lì e qui.",
+          "result": "PRESENCE_STRENGTHENED",
+          "effects": [
+            {
+              "notebook": {
+                "id": "m6.note.cards_bank.falsa",
+                "text": "Il taglio del mazzo è lo stesso, al vagone e al tavolo. Jacques al vagone: sostenuto due volte."
+              }
+            }
+          ],
+          "feedback_pages": [
+            {
+              "id": "m6.b4c.cmp_cards.falsa.feedback.hand",
+              "mode": "notebook",
+              "text": "(Cooper allinea le due annotazioni. Una mano, due tavoli.)"
+            }
+          ]
+        },
+        {
+          "id": "cards_killer",
+          "label": "Le carte dicono che ha ucciso lui.",
+          "result": "ATTRIBUTION_OVERREACH",
+          "retry": true,
+          "feedback_pages": [
+            {
+              "id": "m6.b4c.cmp_cards.falsa.feedback.killer",
+              "mode": "notebook",
+              "text": "Le carte collocano una mano a un tavolo. Non a un corpo."
+            }
+          ]
+        }
+      ],
+      "rules": {
+        "attempt_scope": "comparison",
+        "hide_attempted_results": false,
+        "track_assistance": false
+      },
+      "invariant": "PRESENZA ≠ PATERNITÀ: il confronto NON formula mai P5 (m6_p5 resta l'unico formulatore); nessun flag, sola annotazione (upsert per id, idempotente); tre nodi mutuamente esclusivi, uno per testimonianza di ramo. hide_attempted_results FALSE di proposito: senza una scelta che formula una proposizione il runtime non marca mai `completed` un confronto, e nascondere i risultati già tentati lascerebbe l'interazione MUTA alla seconda visita; così le due letture restano sempre riconsultabili e la coppia non risponde mai «nessun filo».",
+      "kind": "comparison",
+      "channel": "notebook",
+      "interaction_slot": "primary",
+      "completed_recall": {
+        "section": "propositions",
+        "page": {
+          "id": "m6.notebook.cmp_cards.falsa.already_recorded",
+          "mode": "notebook",
+          "text": "(Questo nesso è già registrato nelle Proposizioni.)"
+        }
+      }
+    },
+    {
       "id": "m6_p5",
       "beat": "B6b",
       "source_section": "M6-B6b",
@@ -882,7 +1147,8 @@
       "interaction_slot": "primary",
       "role": "proposition",
       "completion_when": {
-        "proposition_path": "P5.formulation.status", "equals": "formulated"
+        "proposition_path": "P5.formulation.status",
+        "equals": "formulated"
       },
       "next": "m6_arrest"
     },
@@ -892,7 +1158,8 @@
       "source_section": "M6-B7",
       "conditions": [
         {
-          "proposition_path": "P5.formulation.status", "equals": "formulated"
+          "proposition_path": "P5.formulation.status",
+          "equals": "formulated"
         },
         {
           "not": {
@@ -967,12 +1234,131 @@
       "mandatory_beat": true
     },
     {
+      "id": "m6_hospital_guard",
+      "beat": "B7c",
+      "source_section": "M6-B7c",
+      "conditions": [
+        {
+          "flag": "jacques_preso"
+        },
+        {
+          "not": {
+            "flag": "jacques_dead"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b7c.guard.p01",
+          "mode": "action",
+          "text": "(Fine visite. In fondo al reparto, davanti a una porta chiusa, un agente della contea su una sedia. Non legge.)"
+        },
+        {
+          "id": "m6.b7c.guard.p02",
+          "mode": "action",
+          "text": "(Il registro del turno è aperto sul banco. Ultima riga: la firma di Hawk, ora del ricovero.)"
+        },
+        {
+          "id": "m6.b7c.guard.p03",
+          "mode": "dialogue",
+          "speaker_id": "infermiera",
+          "display_name": "INFERMIERA",
+          "text": "Piantonato. Firma domattina."
+        },
+        {
+          "id": "m6.b7c.guard.p04",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Diane, nove e dieci. Porta chiusa, sedia occupata. La firma è domattina."
+        }
+      ],
+      "effects": [
+        {
+          "notebook": {
+            "id": "m6.note.guard",
+            "text": "Renault piantonato, stanza in fondo al reparto. Registro aperto sul banco, ultima firma di Hawk. Dichiarazione domattina."
+          }
+        }
+      ],
+      "repeat": {
+        "id": "m6.repeat.hospital_guard",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Domattina. Con il foglio."
+      },
+      "invariant": "osservazione OBBLIGATORIA prima del rapporto notturno (m6_return_night la richiede con node_done); nessun flag scritto, sola annotazione; esclusiva con m6_hospital sullo stesso target (jacques_dead)",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "hospital",
+      "target_kind": "object",
+      "target_id": "night_register",
+      "interaction_slot": "primary",
+      "mandatory_beat": true
+    },
+    {
+      "id": "m6_return_night_early",
+      "beat": "B7b",
+      "source_section": "M6-B7b",
+      "conditions": [
+        {
+          "flag": "jacques_preso"
+        },
+        {
+          "not": {
+            "node_done": "m6_hospital_guard"
+          }
+        },
+        {
+          "not": {
+            "flag": "jacques_dead"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m6.b7b.early.p01",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "text": "Prima l'ospedale, Cooper. Voglio che tu veda dove l'ho messo."
+        },
+        {
+          "id": "m6.b7b.early.p02",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Vado. Poi il rapporto."
+        }
+      ],
+      "effects": [],
+      "repeat": {
+        "id": "m6.repeat.return_night_early",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Prima l'ospedale. Poi il rapporto."
+      },
+      "invariant": "il rifiuto parla nella finzione: nessun rapporto notturno prima dell'ospedale; nessun effetto, nessun flag; esclusivo con m6_return_night sul node_done della guardia",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "sheriff",
+      "actor_id": "truman",
+      "target_kind": "actor",
+      "target_id": "truman",
+      "interaction_slot": "primary"
+    },
+    {
       "id": "m6_return_night",
       "beat": "B7b",
       "source_section": "M6-B7b",
       "conditions": [
         {
           "flag": "jacques_preso"
+        },
+        {
+          "node_done": "m6_hospital_guard"
         },
         {
           "not": {
@@ -999,20 +1385,30 @@
           "text": "Domattina l'ospedale, con il foglio. Adesso a casa, Cooper. Il paese ha già una notte in meno."
         },
         {
-        "id": "m6.b7b.night.p04",
-        "mode": "action",
-        "text": "(Il telefono di Lucy squilla. Risponde, poi alza lo sguardo verso Cooper.)"
-      },
-      {
-        "id": "m6.b7b.night.p05",
-        "mode": "dialogue",
-        "speaker_id": "cooper",
-        "display_name": "COOPER",
-        "text": "Diane, Jacques è in custodia. Firmo il rapporto prima che la memoria cominci a correggerlo."
+          "id": "m6.b7b.night.audrey",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "condition": {
+            "flag": "audrey_vista_oej"
+          },
+          "text": "La nuova del guardaroba è rientrata con la barca delle otto. L'ho accompagnata io."
+        },
+        {
+          "id": "m6.b7b.night.p04",
+          "mode": "action",
+          "text": "(Il telefono di Lucy squilla. Risponde, poi alza lo sguardo verso Cooper.)"
+        },
+        {
+          "id": "m6.b7b.night.p05",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Diane, Jacques è in custodia. Firmo il rapporto prima che la memoria cominci a correggerlo."
         }
       ],
       "effects": [],
-      "invariant": "tempo percepibile: SEMPRE presente prima della notizia (gate di m6_news); nessun flag scritto; prima del commit l'obiettivo punta a Truman, dopo il commit punta alla root Lucy",
+      "invariant": "passaggio dall'ospedale OBBLIGATORIO (node_done m6_hospital_guard); tempo percepibile: SEMPRE presente prima della notizia (gate di m6_news); nessun flag scritto; prima del commit l'obiettivo punta a Truman, dopo il commit punta alla root Lucy",
       "kind": "dialogue",
       "channel": "world",
       "map_id": "sheriff",
@@ -1099,9 +1495,6 @@
           "set": "jacques_testimony_lost"
         },
         {
-          "set": "m6_resource_lost"
-        },
-        {
           "proposition": "P9",
           "to": "formulated",
           "created_from": [
@@ -1110,7 +1503,7 @@
           ]
         }
       ],
-      "invariant": "la fine critica scrive SOLO jacques_dead + jacques_testimony_lost (+ m6_resource_lost, + P9); MAI jacques_death_suspicious, MAI jacques_murder_confirmed/attributed; lucy_a3 [P] invariata; effetti SOLO dopo l'ultima pagina",
+      "invariant": "la fine critica scrive SOLO jacques_dead + jacques_testimony_lost (+ P9); MAI jacques_death_suspicious, MAI jacques_murder_confirmed/attributed; lucy_a3 [P] invariata; effetti SOLO dopo l'ultima pagina",
       "kind": "dialogue",
       "channel": "world",
       "map_id": "sheriff",
@@ -1119,7 +1512,22 @@
       "actor_id": "lucy",
       "interaction_slot": "primary",
       "mandatory_beat": true,
-      "provenance_note": "[P] lucy_a3 conservata integralmente (Lock §5 B8): «un cuscino, nessun testimone» è la domanda di Lucy, non un fatto di sistema"
+      "provenance_note": "[P] lucy_a3 conservata integralmente (Lock §5 B8): «un cuscino, nessun testimone» è la domanda di Lucy, non un fatto di sistema",
+      "pages_after_branch": [
+        {
+          "id": "m6.b8.news.cooper_impeto",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "condition": {
+            "value_is": {
+              "name": "m5_final_theory",
+              "equals": "degeneration"
+            }
+          },
+          "text": "Avevo scritto impeto, Harry. Lo tengo a verbale. Ma un cuscino non è un impeto: un cuscino aspetta."
+        }
+      ]
     },
     {
       "id": "m6_atto4_bridge",
@@ -1154,6 +1562,16 @@
           "text": "Un gigante non so dove metterlo. Jacques sì: qualcuno ha superato un piantone."
         },
         {
+          "id": "m6.b9.atto4.register",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "condition": {
+            "flag": "jacques_death_suspicious"
+          },
+          "text": "Il registro dice nessuno. Allora era qualcuno che non firma."
+        },
+        {
           "id": "m6.b9.atto4.p03",
           "mode": "dialogue",
           "speaker_id": "cooper",
@@ -1166,6 +1584,32 @@
           "speaker_id": "truman",
           "display_name": "TRUMAN",
           "text": "Se qualcuno temeva ciò che Jacques sapeva, ora abbiamo perso il modo di verificarlo."
+        },
+        {
+          "id": "m6.b9.atto4.s1_safe",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "condition": {
+            "value_is": {
+              "name": "s1",
+              "equals": "institutional"
+            }
+          },
+          "text": "L'anello è in cassaforte. Lo cito nel rapporto."
+        },
+        {
+          "id": "m6.b9.atto4.s1_pocket",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "condition": {
+            "value_is": {
+              "name": "s1",
+              "equals": "documented_custody"
+            }
+          },
+          "text": "L'anello ce l'hai tu, con la mia firma sotto. Non lo cito."
         }
       ],
       "effects": [
@@ -1233,9 +1677,6 @@
       ],
       "effects": [
         {
-          "set": "night_log_no_visitor"
-        },
-        {
           "set": "jacques_death_suspicious"
         },
         {
@@ -1245,7 +1686,7 @@
           }
         }
       ],
-      "invariant": "coda FACOLTATIVA; unico writer di night_log_no_visitor e di jacques_death_suspicious (formulated, factual_status unconfirmed — SOLO qui); la porta sigillata è lo stato di STAMATTINA, mai lo stato della notte; nessuna attribuzione dell'omicidio",
+      "invariant": "coda FACOLTATIVA; unico writer di jacques_death_suspicious (formulated, factual_status unconfirmed — SOLO qui); la porta sigillata è lo stato di STAMATTINA, mai lo stato della notte; nessuna attribuzione dell'omicidio",
       "kind": "dialogue",
       "channel": "world",
       "map_id": "hospital",
@@ -1255,6 +1696,6 @@
     }
   ],
   "node_count": {
-    "runtime_total": 12
+    "runtime_total": 17
   }
 }

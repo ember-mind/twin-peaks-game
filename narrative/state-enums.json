@@ -133,7 +133,7 @@
   ],
   "m5_initial_theory_domain": [
    "degeneration",
-   "staging"
+   "withheld"
   ],
   "m5_final_theory_domain": [
    "degeneration",
@@ -164,18 +164,13 @@
   "gigante1",
   "gigante2",
   "audrey_indaga",
-  "audrey_salvata",
   "audrey_vista_oej",
   "dream_face_recognized_in_leland_scene",
   "jacques_admitted_presence",
   "jacques_death_suspicious",
-  "night_log_no_visitor",
   "ronette_visita",
   "east_route_confirmed",
-  "vagone_scoperto",
-  "m5_theory_revised",
-  "jacques_statement_terms_known",
-  "m6_resource_lost"
+  "vagone_scoperto"
  ],
  "deprecated_forbidden": [
   "clues6_gate",

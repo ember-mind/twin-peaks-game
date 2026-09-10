@@ -1,12 +1,9 @@
 {
  "_comment": "diff PROPOSTO a state-enums.json (C6-A) — SOLO aggiunte, da applicare dopo approvazione. Non tocca M4/M5.",
- "booleans_allowed_add": [
-  "jacques_statement_terms_known",
-  "m6_resource_lost"
- ],
+ "booleans_allowed_add": [],
  "values_allowed_add": {
   "m6_tactic": "m6_tactic"
  },
  "enums_add": {},
- "note": "GIÀ presenti in state-enums.json (nessuna aggiunta): enum m6_tactic [prova,pressione,falsa_sicurezza]; booleani jacques_preso, jacques_dead, jacques_testimony_lost, jacques_admitted_presence, jacques_death_suspicious, night_log_no_visitor, audrey_indaga, audrey_vista_oej, east_route_confirmed. GIÀ in deprecated_forbidden (nessun cambiamento): m6_tactic_changed, jacques_murder_confirmed, jacques_murder_attributed. Aggiunte reali: SOLO i due booleani (statement_terms_known scritto dal ramo Prova; m6_resource_lost dalla notizia) + la riga values_allowed che eleva m6_tactic a valore tipizzato write-once (come s1/m5_theory)."
+ "note": "GIÀ presenti in state-enums.json (nessuna aggiunta): enum m6_tactic [prova,pressione,falsa_sicurezza]; booleani jacques_preso, jacques_dead, jacques_testimony_lost, jacques_admitted_presence, jacques_death_suspicious, audrey_indaga, audrey_vista_oej, east_route_confirmed. GIÀ in deprecated_forbidden (nessun cambiamento): m6_tactic_changed, jacques_murder_confirmed, jacques_murder_attributed. M6 stitch C4: i due booleani proposti in C6-A (jacques_statement_terms_known, m6_resource_lost) sono stati TAGLIATI — nessun lettore — insieme a night_log_no_visitor (fuso in jacques_death_suspicious) e ad audrey_salvata (residuo classico). Unica aggiunta reale residua: la riga values_allowed che eleva m6_tactic a valore tipizzato write-once (come s1/m5_theory)."
 }

@@ -1,0 +1,26 @@
+[
+  {
+    "state": "production-minute",
+    "uniform5x": true
+  },
+  {
+    "state": "lucy-blink",
+    "uniform5x": true
+  },
+  {
+    "state": "lucy-telephone",
+    "uniform5x": true
+  },
+  {
+    "state": "andy-blink",
+    "uniform5x": true
+  },
+  {
+    "state": "andy-check-note",
+    "uniform5x": true
+  },
+  {
+    "state": "restored",
+    "uniform5x": true
+  }
+]

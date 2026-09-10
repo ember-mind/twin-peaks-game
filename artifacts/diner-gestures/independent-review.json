@@ -1,0 +1,50 @@
+{
+  "review": "Diner character gestures independent review",
+  "verdict": "pass",
+  "scope": "Seated customer coffee sip and Norma counter wipe",
+  "findings": [
+    {
+      "area": "seated-customer-sip",
+      "verdict": "pass",
+      "evidence": "The Coldstage contact sheet shows the upper-right booth cup leaving its table position, reaching the customer's mouth, and returning. Native-frame detail samples 000, 005, 008, 011, 014, 017, 020, and 035 show the near sleeve, forearm, hand, handle, and cup moving as one readable chain. The far resting arm remains attached to the body. The table cup is suppressed during lift frames while its saucer remains, so no doubled cup or doubled near hand appears."
+    },
+    {
+      "area": "norma-counter-wipe",
+      "verdict": "pass",
+      "evidence": "Native-frame detail samples 039, 040, 043, 046, 049, 052, 055, and 070 show Norma's sleeve connected at the shoulder, the forearm reaching the counter, the hand touching the cloth, and the cloth translating left-to-right on the countertop. No detached hand, extra arm, or second cloth appears."
+    },
+    {
+      "area": "resting-art",
+      "verdict": "pass",
+      "evidence": "The production captures dinerGestures-rest, dinerGestures-sip-rest, and dinerGestures-wipe-rest have the same SHA-256 digest (2c86b7361c5312d82d0be8b6fdf64b289e102215f1436384df35423095d5f844). Direct native-frame comparisons of 000 vs 035, 039 vs 070, and 000 vs 079 each report zero changed pixels."
+    },
+    {
+      "area": "runtime-guards",
+      "verdict": "pass",
+      "evidence": "The activity unit test covers deterministic clocks, pause and disable behavior, Norma's fixed workstation guard, map scoping, direction lock while wiping, and cancellation when dialogue begins. Engine NPC look/wander selection checks CharacterActivity.busy('norma'), preventing an idle turn during the wipe. The seated patron is intentionally independent while the player speaks to Norma."
+    },
+    {
+      "area": "regression-gates",
+      "verdict": "pass",
+      "evidence": "All 58 native test entries pass. Coldstage reports 105/105 checks. The diner, dinerAmbient, and dinerEnvironment pixel gates are unchanged and did not require visual inspection; this review did not open those screenshots. The new dinerGestures scenario passed runtime checks and correctly requested first-baseline visual review. Its isolated 80-frame capture has seven distinct appearances, a 161-pixel change union, zero changed pixels outside the Norma/patron bounds, and byte-identical first and last frames."
+    }
+  ],
+  "requiredFixes": [],
+  "notes": [
+    "Visual judgment is based on the generated 11-capture Coldstage contact sheet and 16 selected native-resolution frames from the 80-frame production capture. This review does not claim continuous viewing of a rendered video.",
+    "The counter wipe reads more strongly than the sip at whole-scene scale, but both remain legible and physically connected in native-detail samples."
+  ],
+  "evidenceReviewed": [
+    ".coldstage/reviews/2026-09-08T13-02-43-822Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures/dinerGestures-contact-sheet.webp",
+    "artifacts/diner-gestures/review-contact.json",
+    "artifacts/diner-gestures/pixel-motion.json",
+    "artifacts/diner-gestures/frames/frame-000.png, 005, 008, 011, 014, 017, 020, 035, 039, 040, 043, 046, 049, 052, 055, and 070",
+    "artifacts/diner-gestures/native-results.json",
+    "js/character-activity.js",
+    "js/retro-authored.js",
+    "js/engine.js",
+    "test/character-activity.js",
+    "docs/character-activity.md",
+    "coldstage.config.mjs"
+  ]
+}

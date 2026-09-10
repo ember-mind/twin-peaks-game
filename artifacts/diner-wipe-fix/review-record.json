@@ -1,0 +1,17 @@
+{
+  "status": "recorded",
+  "projectId": "twin-peaks-pokemon",
+  "runId": "2026-09-08T13-11-14-844Z-dinerGestures",
+  "scenario": "dinerGestures",
+  "verdict": "pass",
+  "reviewer": {
+    "type": "vision-model",
+    "id": "codex",
+    "provider": "openai",
+    "model": "gpt-6"
+  },
+  "reportDigest": "2a1e30b6398af500b143876f806517c4d206f76cba561328edfbc1056656a23e",
+  "reviewDigest": "a5cca4087e743c628195b90903e39835a01e1e5a712395436b3c0e386e543b0b",
+  "reviewPath": ".coldstage/reviews/2026-09-08T13-11-14-844Z-dinerGestures/dinerGestures/review-1788873095891-0872ce55.json",
+  "contactSheet": ".coldstage/reviews/2026-09-08T13-11-14-844Z-dinerGestures/dinerGestures-contact-sheet.webp"
+}

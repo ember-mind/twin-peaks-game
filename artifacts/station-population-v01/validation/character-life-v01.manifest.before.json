@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "id": "character-life-v0.1",
+  "asset": "assets/sprites/character-life-v01.png",
+  "outputSha256": "c7ee161139c445fe5ca8e61badb658d7f69fdbe1adfd69f69bc9949b04af19cb",
+  "nativeFrame": {
+    "width": 24,
+    "height": 24
+  },
+  "source": {
+    "asset": "assets/sprites/cast-walkcycles-hg-24.png",
+    "sha256": "dcc9e00ad1370606b039ee6039b955720d711d04f521d601169eebe97eb4d770",
+    "immutable": true,
+    "character": "truman",
+    "frames": {
+      "down": {
+        "x": 72,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      },
+      "right": {
+        "x": 72,
+        "y": 48,
+        "width": 24,
+        "height": 24
+      }
+    }
+  },
+  "frames": {
+    "truman.blink.down": {
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      },
+      "baseDirection": "down",
+      "behavior": "generic",
+      "changedPixels": 4
+    },
+    "truman.blink.right": {
+      "rect": {
+        "x": 24,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      },
+      "baseDirection": "right",
+      "behavior": "generic",
+      "mirrorForDirection": "left",
+      "changedPixels": 2
+    },
+    "truman.reading.fileRaised": {
+      "rect": {
+        "x": 48,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      },
+      "baseDirection": "down",
+      "behavior": "contextual",
+      "context": "sheriffs-station.office",
+      "pose": "fileRaised",
+      "changedPixels": 49
+    },
+    "truman.reading.eyesLowered": {
+      "rect": {
+        "x": 72,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      },
+      "baseDirection": "down",
+      "behavior": "contextual",
+      "context": "sheriffs-station.office",
+      "pose": "eyesLowered",
+      "changedPixels": 51
+    }
+  },
+  "animations": {
+    "truman.blink": {
+      "behavior": "generic",
+      "oneShot": true,
+      "framesByDirection": {
+        "down": {
+          "frame": "truman.blink.down",
+          "mirrorX": false
+        },
+        "right": {
+          "frame": "truman.blink.right",
+          "mirrorX": false
+        },
+        "left": {
+          "frame": "truman.blink.right",
+          "mirrorX": true
+        }
+      },
+      "unsupportedDirections": [
+        "up"
+      ],
+      "fallback": "base-frame",
+      "restore": "base-frame"
+    },
+    "truman.reading": {
+      "behavior": "contextual",
+      "context": "sheriffs-station.office",
+      "requiredDirection": "down",
+      "oneShot": true,
+      "frames": [
+        "truman.reading.fileRaised",
+        "truman.reading.eyesLowered"
+      ],
+      "restore": "base-frame"
+    }
+  },
+  "constraints": {
+    "timingOwner": "runtime-character-life-profile",
+    "stillnessDefault": true,
+    "nativePixelsOnly": true,
+    "interpolation": false,
+    "translation": false,
+    "deformation": false,
+    "continuousLoop": false
+  }
+}

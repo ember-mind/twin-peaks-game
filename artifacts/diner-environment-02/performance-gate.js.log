@@ -1,0 +1,2 @@
+PERFORMANCE-GATE-PASS production runtime is native 2D; archived WebGL path excluded
+Run with --legacy to benchmark archived Three.js renderer.

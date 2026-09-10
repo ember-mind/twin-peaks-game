@@ -1,0 +1,64 @@
+{
+  "status": "ready-for-review",
+  "projectId": "twin-peaks-pokemon",
+  "runId": "2026-09-08T11-39-10-327Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient",
+  "scenario": "dinerAmbient",
+  "runtimeStatus": "pass",
+  "fresh": true,
+  "reportDigest": "900bbd12bda45c25adb85452bedd279f596b69753f7eea0a3521a2289682ef62",
+  "visualReview": "not-performed",
+  "sourceArtifacts": 9,
+  "contactSheet": ".coldstage/reviews/2026-09-08T11-39-10-327Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient/dinerAmbient-contact-sheet.webp",
+  "contactSheetSha256": "357db334103a604fbae215a1b5dcc9dbbea7010a413dd0833e8763d0ce126ca3",
+  "sourceEvidence": [
+    {
+      "path": ".coldstage/runs/2026-09-08T11-39-10-327Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient/dinerAmbient-steam-0.png",
+      "sha256": "2d9e5fb2de434cac431b348ecc43e013195c2b307d69ea0b4aa3b0cd7ebd7efe",
+      "bytes": 31403
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T11-39-10-327Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient/dinerAmbient-steam-420.png",
+      "sha256": "514460a4a987a052c34a554f528ed1eceea12ab606a3251f5b039302e49abd81",
+      "bytes": 31409
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T11-39-10-327Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient/dinerAmbient-steam-900.png",
+      "sha256": "8e3e3e081ada552d8a92601be7df0e7d6f1590fc86db461dbf4d38818ea997d2",
+      "bytes": 31430
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T11-39-10-327Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient/dinerAmbient-lamp-west.png",
+      "sha256": "42976abae4354cf9463db7027279db7e056e3bb518e78c00382ba1ecc02136d7",
+      "bytes": 31473
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T11-39-10-327Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient/dinerAmbient-lamp-east.png",
+      "sha256": "f7afe700b27b6ecf55f430524ce21c073c5063044a02dbee70dc58e0f30e62cb",
+      "bytes": 31476
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T11-39-10-327Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient/dinerAmbient-neon.png",
+      "sha256": "906313f243859b0bf79ab01756b4b6a055335427906f486491bae0efdcd0df81",
+      "bytes": 31451
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T11-39-10-327Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient/dinerAmbient-glass-start.png",
+      "sha256": "0544ecbf67760892d747c279e2917335622154fac69bb08f134c55c229d554a9",
+      "bytes": 31446
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T11-39-10-327Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient/dinerAmbient-glass-mid.png",
+      "sha256": "2280859fa3e7c56c07d3eecf3aa24d67ce9b3507eabd45cdfe2e6da2647e69da",
+      "bytes": 31413
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T11-39-10-327Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient/dinerAmbient-glass-end.png",
+      "sha256": "1301cbb64d6520a46c469bbe0d829e804ae56ee2692cc0442b30e44784bb84de",
+      "bytes": 31394
+    }
+  ],
+  "dimensions": {
+    "width": 1280,
+    "height": 2052
+  }
+}

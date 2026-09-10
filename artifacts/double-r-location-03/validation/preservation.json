@@ -1,0 +1,76 @@
+{
+  "sourceHashes": {
+    "allUnchanged": true,
+    "files": {
+      "test/double-r-exterior-art.js": {
+        "beforeSha256": "803651cbd46c6378139249bf1cfa72f1a444ee5969ab99de4fb4debed7d7549d",
+        "afterSha256": "803651cbd46c6378139249bf1cfa72f1a444ee5969ab99de4fb4debed7d7549d",
+        "unchanged": true
+      },
+      "js/retro-authored.js": {
+        "beforeSha256": "373160698a43b96333ae622e5832baaec6f553188af929d28d67dfe20c4b8a22",
+        "afterSha256": "373160698a43b96333ae622e5832baaec6f553188af929d28d67dfe20c4b8a22",
+        "unchanged": true
+      },
+      "js/ambient-life.js": {
+        "beforeSha256": "3e7ff48d8671c0b867d8b760c86a18e73d5196c50cefa63e323a28a4251a9ec3",
+        "afterSha256": "3e7ff48d8671c0b867d8b760c86a18e73d5196c50cefa63e323a28a4251a9ec3",
+        "unchanged": true
+      },
+      "js/ambient-life-scenes.js": {
+        "beforeSha256": "4b5167ec88e8e46de9ddd08ef8977c2ffc62b5c104a9a13224fad630f8f8a34d",
+        "afterSha256": "4b5167ec88e8e46de9ddd08ef8977c2ffc62b5c104a9a13224fad630f8f8a34d",
+        "unchanged": true
+      },
+      "js/environment-reactions.js": {
+        "beforeSha256": "905e11b0910d83f593282c686ea1ca7d3212077aa6e1db0809a4c8f5e28165e4",
+        "afterSha256": "905e11b0910d83f593282c686ea1ca7d3212077aa6e1db0809a4c8f5e28165e4",
+        "unchanged": true
+      },
+      "js/character-activity.js": {
+        "beforeSha256": "5a4f342f1a42bece8d5cf94dcbebdfdbd17c54f70e4a702d690c80b237618239",
+        "afterSha256": "5a4f342f1a42bece8d5cf94dcbebdfdbd17c54f70e4a702d690c80b237618239",
+        "unchanged": true
+      },
+      "assets/sprites/cast-walkcycles-hg-24.png": {
+        "beforeSha256": "dcc9e00ad1370606b039ee6039b955720d711d04f521d601169eebe97eb4d770",
+        "afterSha256": "dcc9e00ad1370606b039ee6039b955720d711d04f521d601169eebe97eb4d770",
+        "unchanged": true
+      },
+      "js/maps.js": {
+        "beforeSha256": "c1b26f199808437776de7258e7d5eaa7cb75edd1a08ba07eb167d3c2c0432a17",
+        "afterSha256": "c1b26f199808437776de7258e7d5eaa7cb75edd1a08ba07eb167d3c2c0432a17",
+        "unchanged": true
+      }
+    }
+  },
+  "exteriorPixels": {
+    "decoder": "ImageMagick 7 /opt/homebrew/bin/magick; PNG decoded to raw RGBA bytes via `magick <path> rgba:-`",
+    "baselinePath": "artifacts/double-r-exterior-v02/native-clean.png",
+    "currentPath": ".coldstage/runs/2026-09-08T14-25-24-761Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation/dinerExterior-parking-clean.png",
+    "baseline": {
+      "width": 1280,
+      "height": 960,
+      "decodedRgbaSha256": "c0c10eab96daf72f804d1def5cfdc113a927c224ff6552a031dcb3faa54bc56b"
+    },
+    "current": {
+      "width": 1280,
+      "height": 960,
+      "decodedRgbaSha256": "c0c10eab96daf72f804d1def5cfdc113a927c224ff6552a031dcb3faa54bc56b"
+    },
+    "dimensionsEqual": true,
+    "decodedPixelsEqual": true
+  },
+  "dinerPixels": {
+    "scenario": "diner",
+    "status": "unchanged",
+    "algorithm": "pixelmatch-7.2.0-srgb-rgba-v1",
+    "capture": "diner-double-r-interior.png",
+    "changedPixels": 0,
+    "changedRatio": 0,
+    "baselineSha256": "2c86b7361c5312d82d0be8b6fdf64b289e102215f1436384df35423095d5f844",
+    "currentSha256": "2c86b7361c5312d82d0be8b6fdf64b289e102215f1436384df35423095d5f844",
+    "unchanged": true
+  },
+  "coldstageRunId": "2026-09-08T14-25-24-761Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation"
+}

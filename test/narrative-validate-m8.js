@@ -93,8 +93,8 @@ ok(!(effectsOf({ effects: [], choices: M8.nodes.flatMap(n => n.choices || []) })
 console.log('# writer unici');
 function writers(pred) { const o = []; for (const n of M8.nodes) if (effectsOf(n).some(pred)) o.push(n.id); return o; }
 ok(JSON.stringify(writers(e => e.value === 'promise_stance')) === '["m8_diner"]', 'promise_stance: unico writer = diner');
-ok(JSON.stringify(writers(e => e.value === 'warning_target')) === '["m8_roadhouse"]', 'warning_target: unico writer = roadhouse');
-ok(JSON.stringify(writers(e => e.value === 'presagio_status')) === '["m8_roadhouse"]', 'presagio_status (to active): unico writer = roadhouse');
+ok(JSON.stringify(writers(e => e.value === 'warning_target')) === '["m8_roadhouse_phone"]', 'warning_target: unico writer = roadhouse (nodo telefono, dopo lo split B1)');
+ok(JSON.stringify(writers(e => e.value === 'presagio_status')) === '["m8_roadhouse_truman"]', 'presagio_status (to active): unico writer = roadhouse (nodo tavolo, dopo lo split B1)');
 ok(JSON.stringify(writers(e => e.value_transition && e.value_transition.name === 'presagio_status')) === '["m8_discovery"]', 'presagio active→verified: SOLO al ritrovamento (value_transition)');
 ok(JSON.stringify(writers(e => e.value === 'focus_destination')) === '["m8_focus_choice"]', 'focus_destination: unico writer = focus_choice');
 ok(JSON.stringify(writers(e => e.value === 'body_found_by').sort()) === JSON.stringify(ROUTES.slice().sort()), 'body_found_by: scritto dai 3 route');
@@ -103,8 +103,8 @@ ok(JSON.stringify(writers(e => e.evidence === 'E9B_STESSO_METODO')) === '["m8_di
 ok(JSON.stringify(writers(e => e.evidence === 'T_LELAND_TAXI')) === '["m8_leland_taxi"]', 'T_LELAND_TAXI: unico writer = Leland, pre-ritrovamento');
 ok(JSON.stringify(writers(e => e.value === 'letter_o_chain')) === '["m8_discovery"]', 'letter_o_chain: unico writer = ritrovamento');
 ok(JSON.stringify(writers(e => e.set === 'maddy_trovata')) === '["m8_discovery"]', 'maddy_trovata: unico writer = ritrovamento');
-ok(JSON.stringify(writers(e => e.value === 'maddy_action_after_warning')) === '["m8_roadhouse"]', 'maddy_action_after_warning: valore, unico writer = roadhouse');
-ok(JSON.stringify(writers(e => e.value === 'sarah_support_state')) === '["m8_roadhouse"]', 'sarah_support_state: valore, unico writer = roadhouse');
+ok(JSON.stringify(writers(e => e.value === 'maddy_action_after_warning')) === '["m8_roadhouse_phone"]', 'maddy_action_after_warning: valore, unico writer = roadhouse (nodo telefono)');
+ok(JSON.stringify(writers(e => e.value === 'sarah_support_state')) === '["m8_roadhouse_phone"]', 'sarah_support_state: valore, unico writer = roadhouse (nodo telefono)');
 ok(JSON.stringify(writers(e => e.value === 'letter_o_observation_source')) === '["m8_discovery"]', 'letter_o_observation_source: effetto derivato, unico writer = ritrovamento');
 ok(JSON.stringify(writers(e => e.proposition === 'P8')) === '["m8_cmp_diary"]', 'P8: unico writer = cmp_diary');
 // body_found_by mai sarah
@@ -159,7 +159,7 @@ ok(JSON.stringify(enums.enums.focus_destination) === JSON.stringify(['palmer', '
 let combos = 0; for (const w of enums.enums.warning_target) for (const f of enums.enums.focus_destination) combos++;
 ok(combos === 9, '9 combinazioni warning×focus (' + combos + ')');
 // derivazioni: palmer→maddy_action, centrale→sarah_support, nessuno→nessuna
-const rh = node('m8_roadhouse');
+const rh = node('m8_roadhouse_phone');
 const wPalmer = rh.choices.find(c => c.effects.some(e => e.value === 'warning_target' && e.to === 'palmer'));
 const wCentr = rh.choices.find(c => c.effects.some(e => e.value === 'warning_target' && e.to === 'centrale'));
 const wNess = rh.choices.find(c => c.effects.some(e => e.value === 'warning_target' && e.to === 'nessuno'));
@@ -238,8 +238,12 @@ function condPages(n) { const out = []; (function w(o) { if (Array.isArray(o)) r
 const cpRoute = condPages(node('m8_route_palmer'));
 ok(cpRoute.length === 1 && JSON.stringify(cpRoute[0].condition) === JSON.stringify({ value_is: { name: 'warning_target', equals: 'palmer' } }), 'valigia in C (route_palmer): condizione warning=palmer');
 const cpStation = condPages(st);
-ok(cpStation.length === 1 && cpStation[0].condition.all && cpStation[0].condition.all.some(c => c.value_is && c.value_is.equals === 'palmer') && cpStation[0].condition.all.some(c => c.not && c.not.value_is && c.not.value_is.name === 'focus_destination'), 'valigia in F (station): condizione warning=palmer ∧ focus≠palmer');
-ok(cpRoute[0].id === 'm8.c.route_palmer.p02' && cpStation[0].id === 'm8.f.station.p_valigia', 'conditional_pages: le due pagine valigia hanno un `condition` esplicito (congelate in prepareNode, mai al commit)');
+const cpStationValigia = cpStation.find(p => p.id === 'm8.f.station.p_valigia');
+const cpStationLago = cpStation.find(p => p.id === 'm8.f.station.p_lago');
+ok(cpStation.length === 2, 'station: due pagine condizionali (valigia B2 + lago B7, pass 01)');
+ok(!!cpStationValigia && cpStationValigia.condition.all && cpStationValigia.condition.all.some(c => c.value_is && c.value_is.equals === 'palmer') && cpStationValigia.condition.all.some(c => c.not && c.not.value_is && c.not.value_is.name === 'focus_destination'), 'valigia in F (station): condizione warning=palmer ∧ focus≠palmer');
+ok(!!cpStationLago && JSON.stringify(cpStationLago.condition) === JSON.stringify({ value_is: { name: 'focus_destination', equals: 'lago' } }), 'lago in F (station, B7): condizione focus_destination=lago, indipendente dalla valigia');
+ok(cpRoute[0].id === 'm8.c.route_palmer.p02' && !!cpStationValigia, 'conditional_pages: le due pagine valigia hanno un `condition` esplicito (congelate in prepareNode, mai al commit)');
 
 console.log('# C8-A.2: precedenza D→E dei confronti + eco della promessa non saltabile');
 // B2: il ritrovamento continua obbligatoriamente all'eco della promessa
@@ -260,13 +264,16 @@ ok(cdN.choices.some(ch => (ch.effects || []).some(e => e.proposition === 'P8')),
 
 console.log('# obiettivi: esattamente uno vero in ogni combinazione raggiungibile');
 const combos2 = [
-  { promiseSet: false, warningSet: false, taxi: false, presagioSet: false, presagioVal: null, mt: false, p8: false, stationDone: false, expect: 'obj_m8_0' },
-  { promiseSet: true, warningSet: false, taxi: false, presagioSet: false, presagioVal: null, mt: false, p8: false, stationDone: false, expect: 'obj_m8_25' },
-  { promiseSet: true, warningSet: false, taxi: true, presagioSet: false, presagioVal: null, mt: false, p8: false, stationDone: false, expect: 'obj_m8_1' },
-  { promiseSet: true, warningSet: true, taxi: true, presagioSet: true, presagioVal: 'active', mt: false, p8: false, stationDone: false, expect: 'obj_m8_2' },
-  { promiseSet: true, warningSet: true, taxi: true, presagioSet: true, presagioVal: 'verified', mt: true, p8: false, stationDone: false, expect: 'obj_m8_3' },
-  { promiseSet: true, warningSet: true, taxi: true, presagioSet: true, presagioVal: 'verified', mt: true, p8: true, stationDone: false, expect: 'obj_m8_35' },
-  { promiseSet: true, warningSet: true, taxi: true, presagioSet: true, presagioVal: 'verified', mt: true, p8: true, stationDone: true, expect: 'obj_m8_4' }
+  { promiseSet: false, warningSet: false, taxi: false, presagioSet: false, presagioVal: null, trumanDone: false, mt: false, p8: false, stationDone: false, expect: 'obj_m8_0' },
+  { promiseSet: true, warningSet: false, taxi: false, presagioSet: false, presagioVal: null, trumanDone: false, mt: false, p8: false, stationDone: false, expect: 'obj_m8_25' },
+  { promiseSet: true, warningSet: false, taxi: true, presagioSet: false, presagioVal: null, trumanDone: false, mt: false, p8: false, stationDone: false, expect: 'obj_m8_1' },
+  // pass 01 (B1, split del nodo Roadhouse): fra il commit del tavolo (Truman,
+  // presagio_status=active) e il commit del telefono (warning_target), rung 150.
+  { promiseSet: true, warningSet: false, taxi: true, presagioSet: true, presagioVal: 'active', trumanDone: true, mt: false, p8: false, stationDone: false, expect: 'obj_m8_15' },
+  { promiseSet: true, warningSet: true, taxi: true, presagioSet: true, presagioVal: 'active', trumanDone: true, mt: false, p8: false, stationDone: false, expect: 'obj_m8_2' },
+  { promiseSet: true, warningSet: true, taxi: true, presagioSet: true, presagioVal: 'verified', trumanDone: true, mt: true, p8: false, stationDone: false, expect: 'obj_m8_3' },
+  { promiseSet: true, warningSet: true, taxi: true, presagioSet: true, presagioVal: 'verified', trumanDone: true, mt: true, p8: true, stationDone: false, expect: 'obj_m8_35' },
+  { promiseSet: true, warningSet: true, taxi: true, presagioSet: true, presagioVal: 'verified', trumanDone: true, mt: true, p8: true, stationDone: true, expect: 'obj_m8_4' }
 ];
 function evalObj(c, env) {
   if (c.value_set === 'presagio_status') return env.presagioSet;
@@ -277,6 +284,7 @@ function evalObj(c, env) {
   if (c.flag === 'maddy_trovata') return env.mt;
   if (c.proposition_path === 'P8.formulation.status') return c.equals === 'formulated' && env.p8;
   if (c.node_done === 'm8_station') return env.stationDone;
+  if (c.node_done === 'm8_roadhouse_truman') return !!env.trumanDone;
   if (c.not) return !evalObj(c.not, env);
   if (c.all) return c.all.every(x => evalObj(x, env));
   throw new Error('cond obj? ' + JSON.stringify(c));
@@ -315,13 +323,13 @@ const entryEnv = { promiseSet: false, presagioSet: false, presagioVal: null, mt:
 const entryActive = M8.objectives.filter(o => evalObj(o.when, entryEnv)).sort((a, b) => b.priority - a.priority);
 ok(entryActive.length >= 1 && entryActive[0].id === 'obj_m8_0', 'entry_objective_points_to_actionable_root: obiettivo d\'ingresso = obj_m8_0');
 ok(nodeAvailableAtEntry('m8_diner'), 'entry_objective_points_to_actionable_root: m8_diner (target di obj_m8_0) è azionabile all\'ingresso');
-ok(!nodeAvailableAtEntry('m8_roadhouse'), 'entry_objective_points_to_actionable_root: m8_roadhouse NON è azionabile all\'ingresso (richiede promise_stance)');
+ok(!nodeAvailableAtEntry('m8_roadhouse_truman'), 'entry_objective_points_to_actionable_root: m8_roadhouse_truman NON è azionabile all\'ingresso (richiede promise_stance)');
 const oj0 = M8.objectives.find(o => o.id === 'obj_m8_0');
 const oj1 = M8.objectives.find(o => o.id === 'obj_m8_1');
 ok(oj0 && oj1 && oj0.priority < oj1.priority, 'diner_precedes_roadhouse_in_objective_chain: obj_m8_0 (pre-diner) precede obj_m8_1 (Roadhouse) in priorità');
 ok(JSON.stringify(oj1.when).indexOf('"value_set":"promise_stance"') !== -1, 'diner_precedes_roadhouse_in_objective_chain: l\'obiettivo Roadhouse richiede value_set promise_stance');
 // B2: contratto valigia — visibile IFF warning=palmer (mai «in ogni percorso»)
-ok(cpRoute[0].condition.value_is.equals === 'palmer' && cpStation[0].condition.all.some(c => c.value_is && c.value_is.equals === 'palmer'), 'contract_valigia_visible_iff_warning_palmer (entrambe le pagine gated su warning=palmer)');
+ok(cpRoute[0].condition.value_is.equals === 'palmer' && cpStationValigia.condition.all.some(c => c.value_is && c.value_is.equals === 'palmer'), 'contract_valigia_visible_iff_warning_palmer (entrambe le pagine gated su warning=palmer)');
 const allInvariants = M8.nodes.map(n => n.invariant || '').join('  ');
 ok(!/valigia[^]*visibile in ogni percorso/.test(allInvariants), 'json_invariants_do_not_claim_universal_valigia (nessun invariant dichiara «valigia visibile in ogni percorso»)');
 ok(node('m8_station').invariant.indexOf('warning_target=palmer') !== -1, 'json_invariants_do_not_claim_universal_valigia: m8_station.invariant dichiara valigia iff warning=palmer');
@@ -331,9 +339,9 @@ const SRCMAP = fs.readFileSync(path.join(ROOT, 'schema-deltas', 'M8-source-map.m
 const SDELTA = fs.readFileSync(path.join(ROOT, 'schema-deltas', 'M8.md'), 'utf8');
 ok(/entrambi i valori sono sempre scritti/.test(MATRIX) && /\biff\b/.test(MATRIX) && /altrimenti/.test(MATRIX) && !/maddy_action_after_warning` SOLO se/.test(MATRIX) && !/sarah_support_state` SOLO se/.test(MATRIX), 'matrix_nominal_states_use_explicit_none (stati nominali: «iff … none altrimenti», mai «SOLO se»)');
 ok(/commit del nodo Roadhouse/.test(MATRIX) && !/active dopo la scelta\)/.test(MATRIX), 'matrix_presagio_timing_matches_node_commit (presagio active al commit del nodo, mai «dopo la scelta»)');
-ok(/50→250→100→200→300→350→400/.test(MATRIX), 'matrix_objective_chain_matches_json (catena raggiungibile documentata)');
+ok(/50→250→100→150→200→300→350→400/.test(MATRIX), 'matrix_objective_chain_matches_json (catena raggiungibile documentata)');
 const prioSet = M8.objectives.map(o => o.priority).sort((a, b) => a - b).join(',');
-ok(prioSet === '50,100,200,250,300,350,400', 'matrix_objective_chain_matches_json: priorità JSON = 50,100,200,250,300,350,400 (' + prioSet + ')');
+ok(prioSet === '50,100,150,200,250,300,350,400', 'matrix_objective_chain_matches_json: priorità JSON = 50,100,150,200,250,300,350,400 (' + prioSet + ')');
 ok(!/valigia\/biglietto visibile in ogni percorso/.test(MATRIX) && !/valigia\/biglietto visibile in ogni percorso/.test(SDELTA), 'contract_valigia_visible_iff_warning_palmer: matrice/schema-delta non dichiarano «valigia visibile in ogni percorso»');
 const inSituOcc = (SRCMAP.match(/in_situ solo se Cooper primo/g) || []).length;
 const inSituNeg = (SRCMAP.match(/nessun\s+«in_situ solo se Cooper primo»/g) || []).length;
@@ -352,13 +360,13 @@ for (const n of M8.nodes.filter(n => n.channel === 'world')) {
 }
 const KINDS = ['dialogue', 'choice', 'comparison'];
 for (const n of M8.nodes) ok(KINDS.includes(n.kind), n.id + ': kind nello schema (' + n.kind + ')');
-ok(M8.node_count.runtime_total === M8.nodes.length && M8.nodes.length === 12, 'node_count == nodi reali == 12 (' + M8.nodes.length + ')');
+ok(M8.node_count.runtime_total === M8.nodes.length && M8.nodes.length === 16, 'node_count == nodi reali == 16 (' + M8.nodes.length + ', pass 01: split roadhouse +1, giant_stage/leland_waiting/lucy +3)');
 
 console.log('# M4/M5/M6 invariati: i diff solo AGGIUNGONO');
 ok(Object.keys(dEvid.ui_origin_add).every(k => k.indexOf('E9') === 0 && evidence[k]), 'diff-evidence tocca SOLO E9A/E9B');
 ok(Object.keys(dProp.ui_short_add).every(k => k === 'P7' || k === 'P8'), 'diff-propositions tocca SOLO P7/P8');
 ok(dEnums.booleans_allowed_add.every(b => !enums.booleans_allowed.includes(b)), 'diff-state-enums: booleani nuovi (maddy_action/sarah_support) non già presenti');
-ok(M6.node_count && M6.node_count.runtime_total === 12 && M5.node_count.runtime_total === 13, 'M5 (13) / M6 (12, incluso ponte atto4) coerenti');
+ok(M6.node_count && M6.node_count.runtime_total === 17 && M5.node_count.runtime_total === 21, 'M5 (21) / M6 (17, M6 stitch: +3 confronti carte, +piantone, +rifiuto notturno) coerenti');
 
 console.log('');
 if (failures === 0) { console.log(checks + ' controlli statici M8 superati ✔ (proposta C8-A — copertura dinamica in C8-B); ' + m8pages + ' pagine M8, ' + M8.nodes.length + ' nodi'); process.exit(0); }

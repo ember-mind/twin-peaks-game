@@ -1,0 +1,22 @@
+[
+  {
+    "folder": "minute-frames",
+    "frames": 600,
+    "width": 256,
+    "height": 192,
+    "distinctFrames": 474,
+    "changedPixelUnion": 577,
+    "outsideEffectRegions": 0,
+    "firstLastIdentical": false
+  },
+  {
+    "folder": "door-frames",
+    "frames": 75,
+    "width": 256,
+    "height": 192,
+    "distinctFrames": 4,
+    "changedPixelUnion": 392,
+    "outsideEffectRegions": 0,
+    "firstLastIdentical": true
+  }
+]

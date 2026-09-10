@@ -1,0 +1,12 @@
+# movement feel
+  ok - tap breve fra frame muove di una tile
+  ok - key-repeat non aggiunge passo dopo rilascio
+  ok - passo avviato prima del blur
+  ok - blur completa solo il passo in corso
+  ok - tab nascosta azzera input tenuti
+  ok - player non entra nella destinazione prenotata da NPC
+  ok - NPC non entra nella destinazione prenotata dal player
+  ok - movimento tenuto concatena il passo senza frame morto
+  ok - rilascio termina dopo il passo prenotato
+
+9 controlli superati ✔

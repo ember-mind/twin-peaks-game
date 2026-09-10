@@ -1,0 +1,44 @@
+{
+  "scope": "perceptual visual parity; native geometry and World data frozen",
+  "reference": "artifacts/sheriffs-station-main-interior-v01/final.png",
+  "before": "artifacts/sheriffs-station-main-interior-v021/native-before.png",
+  "reviewer": "primary art-direction agent",
+  "criteria": {
+    "focal hierarchy": {
+      "before": "The map has scale but little frame depth; the small lamp does not organize nearby values.",
+      "target": "A richer desk plane, layered map frame and local task light form one dominant focal group."
+    },
+    "lighting": {
+      "before": "Fixtures are readable icons, but nearby surfaces remain almost uniformly lit.",
+      "target": "Cool light affects upper walls, steel and nearby floor; warm light stays local to the sheriff desktop and edge."
+    },
+    "material differentiation": {
+      "before": "Large flat panels and a few trim lines give oak, steel and flooring similarly simple shading.",
+      "target": "Directional oak edges, cool sharp metal, calm painted bands, quiet linoleum values, clean paper and sparse crisp glass reflections."
+    },
+    "depth": {
+      "before": "Uniform rectangular cast shadows do not establish tight furniture contact.",
+      "target": "Compact dark cores, adjacent occlusion bands and leg contacts; stronger player grounding without touching sprite or depth ordering."
+    },
+    "environmental density": {
+      "before": "The office loses most functional signs of occupation from the concept.",
+      "target": "A clearer county map, coat/hat, radio and subdued notices on existing surfaces; no new floor obstacles or surplus clutter."
+    },
+    "same-game quality": {
+      "before": "The pixel scale is correct but surfaces still read as a simplified prototype.",
+      "target": "Deliberate native clusters carry confident depth and hierarchy at 256x192 and integer scale, without borrowing concept gradients or fine noise."
+    }
+  },
+  "intentionallyExcluded": [
+    "new furniture footprints",
+    "extra rooms",
+    "interactions",
+    "Ambient Life",
+    "audio",
+    "narrative",
+    "extra plants and mugs",
+    "all small framed decorations",
+    "literal concept texture",
+    "soft gradients or blur"
+  ]
+}

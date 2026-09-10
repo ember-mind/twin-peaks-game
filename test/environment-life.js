@@ -1,0 +1,32 @@
+'use strict';
+const assert=require('node:assert/strict');
+const {create,doorEntryFrames}=require('../js/environment-reactions.js');
+const reactions=create();
+const def={id:'entry',trigger:'ENTITY_ENTERED_DOORWAY',arrivalKey:'2,3',fromMapId:'street',x:16,y:32,depth:48,frames:doorEntryFrames,palette:{}};
+reactions.register('hotel',[def]);
+const event={type:def.trigger,sceneId:'hotel',arrivalKey:'2,3',fromMapId:'street',entityId:'npc-1'};
+reactions.update(1000000,'hotel');assert.equal(reactions.snapshot('hotel')[0].state,'CLOSED','time alone cannot trigger reaction');
+for(const change of [{type:'RANDOM_AMBIENT'},{arrivalKey:'9,9'},{fromMapId:'woods'},{sceneId:'other'}])assert.equal(reactions.handle({...event,...change}),0);
+assert.equal(reactions.handle(event),1);assert.equal(reactions.handle(event),0,'active entry coalesces without a restart');
+let ctx={globalAlpha:1,fillStyle:'#000',marks:[],fillRect(...p){assert(p.every(Number.isInteger));this.marks.push([...p,this.fillStyle]);}};
+const before=JSON.stringify(reactions.snapshot('hotel'));reactions.draw(ctx,'hotel',0,0);assert(ctx.marks.length>0);assert.equal(JSON.stringify(reactions.snapshot('hotel')),before);
+const full=ctx.marks;ctx.marks=[];reactions.draw(ctx,'hotel',0,0,-Infinity,48);assert.equal(ctx.marks.length,0);reactions.draw(ctx,'hotel',0,0,48,Infinity);assert.deepEqual(ctx.marks,full);
+reactions.update(280,'hotel');assert.equal(reactions.snapshot('hotel')[0].state,'OPEN');
+reactions.update(520,'other');assert.equal(reactions.snapshot('hotel')[0].state,'OPEN','other maps do not advance reaction');
+reactions.setPaused(true);reactions.update(520,'hotel');assert.equal(reactions.snapshot('hotel')[0].state,'OPEN');reactions.setPaused(false);
+reactions.update(520,'hotel');assert.equal(reactions.snapshot('hotel')[0].state,'CLOSING');reactions.update(280,'hotel');assert.equal(reactions.snapshot('hotel')[0].state,'CLOSED');
+ctx.marks=[];reactions.draw(ctx,'hotel',0,0);assert.equal(ctx.marks.length,0,'closed reaction reveals exact immutable base');
+assert.equal(reactions.handle(event),1);reactions.reset('hotel');assert.equal(reactions.snapshot('hotel')[0].state,'CLOSED');
+reactions.setEnabled(false);assert.equal(reactions.handle(event),0);
+const partition=create();partition.register('hotel',[def]);partition.handle(event);for(let i=0;i<85;i++)partition.update(10,'hotel');
+reactions.setEnabled(true);reactions.handle(event);reactions.update(850,'hotel');assert.deepEqual(reactions.snapshot('hotel'),partition.snapshot('hotel'));
+const {create:ambient}=require('../js/ambient-life.js');const life=ambient(1989);
+life.register('lab',[{id:'status',type:'MACHINE_IDLE_ACTIVITY',x:0,y:0,depth:0,variants:2,marks:[[{x:0,y:0,color:'#ffffff'}],[{x:1,y:0,color:'#ffffff'}]]},
+ {id:'time',type:'CLOCK_TICK',x:0,y:0,depth:0,startSeconds:10800,face:[[-5,-4,10,10]],palette:{face:'#f4e6c8',hand:'#292b26',second:'#b88759'}}]);
+let active=0,events=new Set();for(let t=0;t<=120000;t+=20){life.seek('lab',t);let m=life.snapshot('lab').items[0];if(m.active)active+=20;if(m.start>=0)events.add(m.start);}
+assert(active/120000<.10);assert(events.size>=4&&events.size<=15);
+life.seek('lab',4999);assert.equal(life.snapshot('lab').items[1].second,0);life.seek('lab',5000);assert.equal(life.snapshot('lab').items[1].second,1);
+life.seek('lab',60000);assert.equal(life.snapshot('lab').items[1].second,0);
+life.setTimeSource(()=>4*3600+30*60+15);let clock=life.snapshot('lab').items[1];assert.equal(clock.hour,4);assert.equal(clock.minute,6);assert.equal(clock.second,3);
+life.setTimeSource(null);assert.equal(life.snapshot('lab').items[1].hour,3);
+console.log('ENVIRONMENT-LIFE-PASS event matching, no random doors, coalescing, lifecycle, depth, partition, generic hotel reuse, sparse machine activity and external clock source');

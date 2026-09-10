@@ -1,0 +1,72 @@
+{
+  "review": "independent-focused-art-polish",
+  "verdict": "pass-with-notes",
+  "scope": "Visible diner polish and preservation of the previously approved composition",
+  "evidence": {
+    "diffSheet": ".coldstage/diffs/2026-09-08T09-28-01-853Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner/diner/diner-diff-sheet.webp",
+    "contactSheet": ".coldstage/reviews/2026-09-08T09-28-01-853Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner/diner-contact-sheet.webp",
+    "sourceEvidence": ".coldstage/runs/2026-09-08T09-28-01-853Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner/diner-double-r-interior.png",
+    "approvedBefore": "artifacts/diner-polish/before.png",
+    "nativeResults": "artifacts/diner-polish/native-results.json",
+    "browserResults": "artifacts/diner-polish/coldstage-r1.json"
+  },
+  "preservation": {
+    "verdict": "pass",
+    "observations": [
+      "The counter, camera framing, 14x10 room footprint, entrance, booth positions, and seated-character placements remain visibly preserved.",
+      "The central circulation route remains readable and unobstructed from the entrance to the counter."
+    ]
+  },
+  "requestedPolish": [
+    {
+      "request": "Pie board 30-40% smaller and offset from the central path",
+      "verdict": "pass",
+      "observation": "The freestanding pie board is substantially reduced, approximately within the requested range, and moved to the right side of the aisle; it no longer dominates or blocks the entrance-to-counter axis."
+    },
+    {
+      "request": "Controlled asymmetry",
+      "verdict": "pass",
+      "observation": "The left-side plant and right-side pie board form a deliberate unequal pairing, while the table settings and occupied booths vary without making the room feel random."
+    },
+    {
+      "request": "Distinct table routines with some empty",
+      "verdict": "pass",
+      "observation": "The four booth tables use visibly different prop groupings; the lower-right booth remains clearly empty, while occupied tables read as individual routines rather than copies."
+    },
+    {
+      "request": "Simplify the secondary backbar by 15-20%",
+      "verdict": "pass-with-notes",
+      "observation": "The backbar has clearer gaps and fewer uniformly repeated small items, which improves grouping. It remains the densest zone in the room, especially around the menu, coffee sign, registers, and lamps, but does not compete materially with navigation."
+    },
+    {
+      "request": "Softer checker contrast",
+      "verdict": "pass",
+      "observation": "The floor shifts to closely valued olive-gray and warm-cream tiles, reducing the previous high-contrast checker effect while retaining readable tile structure."
+    },
+    {
+      "request": "Localized warmer counter, pie, and booth light with neutral circulation",
+      "verdict": "pass",
+      "observation": "Warm pools are concentrated at the counter edge, pie case, wall lamps, and booth perimeters; the middle floor remains cooler and more neutral, keeping the path legible."
+    },
+    {
+      "request": "One signature detail",
+      "verdict": "pass-with-notes",
+      "observation": "The small Double R-branded tabletop plaques read as one restrained signature motif. The motif appears on two tables, but it remains subordinate and does not create a second focal point."
+    },
+    {
+      "request": "Selective history without clutter",
+      "verdict": "pass",
+      "observation": "Sparse framed wall pieces, worn wood variation, and limited tabletop ephemera suggest accumulated history while leaving open wall, counter, and floor breathing room."
+    }
+  ],
+  "visibleImprovement": "The revised diner has a clearer movement axis, calmer floor, stronger local light hierarchy, and more believable booth-to-booth variation while retaining the approved spatial identity.",
+  "materialDefectsRequiringFix": [],
+  "minorNotes": [
+    "The upper-right backbar remains visually busy at native pixel scale; a future optional pass could remove one small accent near the menu or coffee sign, but this is not required for acceptance.",
+    "The tabletop Double R motif is repeated rather than a single unique object; it still reads as one coherent signature design idea."
+  ],
+  "validation": {
+    "native": "pass; all entries in native-results.json exit 0",
+    "browser": "pass; Coldstage runtime scenarios pass and the diner pixel gate correctly requested this visual review"
+  }
+}

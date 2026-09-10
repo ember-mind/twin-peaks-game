@@ -38,6 +38,7 @@ require(J('retro-font.js'));
 require(J('engine.js'));
 require(J('glue.js'));
 
+const evidenceCatalog = require(path.join(__dirname, '..', 'narrative', 'evidence.json')).evidence;
 const GAME = global.GAME;
 const E = GAME.Engine;
 const ENV = GAME.EnvironmentalInspect;
@@ -56,6 +57,14 @@ const TARGET_TERMS = {
   B: /panchin|sedile|schienal/i, F: /pali|staccion|ringhier|montant/i, A: /fior|aiuol|cordolo/i,
   H: /idrant|bocchett|calotta/i, E: /cassett|bandierina|messaggio/i, n: /cespugl|chioma|foglie/i,
   q: /cassa|tavole|coperchio/i, V: /auto|parabrezza|cofano/i, J: /cabina|finestra|tetto|legno/i
+};
+/* Il distretto e' una scena nativa: i glifi delle sue righe sono solo
+ * collisione (l'arte authored sostituisce drawTile), quindi il lessico atteso
+ * non segue il glifo ma la mappa. */
+const MAP_TARGET_TERMS = {
+  sheriff: /distrett|cornic|paret|muro|scrivani|banc|panca|sedi/i,
+  hospital: /paret|corridoio|porta|lett|coperta/i,
+  room_315: /pannell|boiserie|pino|chiod/i
 };
 const DELTAS = [
   { dx: 0, dy: -1, dir: 'down' },
@@ -103,6 +112,7 @@ const CURATED_IDS = new Set([
 const MAXIM_TIC = /;\s*(?:una?|ogni|presenza|visibilità|sapere|l['’]ordine)\b|\bnon (?:significa|equivale|stabilisce|prova)\b/i;
 const knownFlags = new Set(Object.values(GAME.Data.dialogues).map((def) => def.setFlag).filter(Boolean));
 const knownClues = new Set(Object.keys(GAME.Data.clues));
+const knownEvidence = new Set(Object.keys(evidenceCatalog));
 let oneSentenceCount = 0;
 let twoSentenceCount = 0;
 for (const [id, def] of environmentalDefs) {
@@ -115,7 +125,8 @@ for (const [id, def] of environmentalDefs) {
   if (meta.sourceClass === 'authored-canon') {
     assert(meta.canonDialogue && GAME.Data.dialogues[meta.canonDialogue], `${id}: fonte canonica non risolta`);
   } else if (meta.sourceClass === 'state-context') {
-    assert((meta.scope.flag && knownFlags.has(meta.scope.flag)) || (meta.scope.clue && knownClues.has(meta.scope.clue)),
+    assert((meta.scope.flag && knownFlags.has(meta.scope.flag)) || (meta.scope.clue && knownClues.has(meta.scope.clue)) ||
+      (meta.scope.evidence && knownEvidence.has(meta.scope.evidence)),
       `${id}: stato canonico non risolto`);
   } else {
     assert(!UNGROUNDED.test(page.text), `${id}: claim ambientale non fondato: ${page.text}`);
@@ -212,7 +223,9 @@ function scopeMatches(scope, mapId, x, y, state) {
   if (scope.kind === 'state') {
     const flagMatch = scope.flag && state && state.flags && state.flags[scope.flag];
     const clueMatch = scope.clue && state && state.clues && state.clues.indexOf(scope.clue) >= 0;
-    return mapId === scope.mapId && tile === scope.tile && !!(flagMatch || clueMatch);
+    const evidenceMatch = scope.evidence && state && state.evidence && state.evidence[scope.evidence];
+    const coordMatch = !scope.coords || scope.coords.indexOf(x + ',' + y) >= 0;
+    return mapId === scope.mapId && tile === scope.tile && coordMatch && !!(flagMatch || clueMatch || evidenceMatch);
   }
   return false;
 }
@@ -235,7 +248,8 @@ for (const [mapId, map] of Object.entries(GAME.maps.maps)) {
       assert(def, `${mapId}@${x},${y} dialogo "${id}" mancante`);
       assert(scopeMatches(def.environmentalMeta.scope, mapId, x, y, { flags: {} }),
         `${id}: scope non copre ${mapId}@${x},${y}`);
-      assert(TARGET_TERMS[tile].test(def.pages[0].text),
+      const lexicon = MAP_TARGET_TERMS[mapId] || TARGET_TERMS[tile];
+      assert(lexicon.test(def.pages[0].text),
         `${id}: testo intercambiabile per tile "${tile}" a ${mapId}@${x},${y}`);
       resolvedFaceableCount++;
       usage[id] = (usage[id] || 0) + 1;
@@ -268,16 +282,19 @@ const afterLeland = ENV.resolve('town', 50, 22, { clues: [], flags: { leland_mor
 ok(afterLeland === 'env_town_grave_after_leland' &&
    scopeMatches(GAME.Data.dialogues[afterLeland].environmentalMeta.scope, 'town', 50, 22,
      { clues: [], flags: { leland_morto: true } }), 'variante lapidi fondata su flag leland_morto');
-const afterRing = ENV.resolve('traincar', 8, 3, { clues: ['anello'], flags: {} });
+const afterRing = ENV.resolve('traincar', 9, 3, { clues: ['anello'], flags: {} });
 ok(afterRing === 'env_traincar_after_ring' &&
-   scopeMatches(GAME.Data.dialogues[afterRing].environmentalMeta.scope, 'traincar', 8, 3,
+   scopeMatches(GAME.Data.dialogues[afterRing].environmentalMeta.scope, 'traincar', 9, 3,
      { clues: ['anello'], flags: {} }), 'variante vagone fondata su indizio anello');
-const afterRonette = ENV.resolve('hospital', 1, 1, { clues: [], flags: { ronette_bob: true } });
+const afterRonette = ENV.resolve('hospital', 3, 3, { clues: [], flags: {}, evidence: { T1_RONETTE_BOB: true } });
 ok(afterRonette === 'env_hospital_bed_after_ronette' &&
-   scopeMatches(GAME.Data.dialogues[afterRonette].environmentalMeta.scope, 'hospital', 1, 1,
-     { clues: [], flags: { ronette_bob: true } }), 'variante letti fondata su flag ronette_bob');
+   scopeMatches(GAME.Data.dialogues[afterRonette].environmentalMeta.scope, 'hospital', 3, 3,
+     { clues: [], flags: {}, evidence: { T1_RONETTE_BOB: true } }), 'variante letti fondata su evidence T1_RONETTE_BOB');
+ok(ENV.resolve('hospital', 9, 3, { clues: [], flags: {}, evidence: { T1_RONETTE_BOB: true } }) === 'env_hospital_bed',
+   'evidence T1_RONETTE_BOB non si estende al letto di Gerard');
 ok(ENV.resolve('town', 50, 22, { flags: {} }) === 'env_laura_grave', 'override per coordinata vince');
 ok(ENV.resolve('sheriff', 0, 0, { flags: {} }) === 'env_sheriff_wall', 'override mappa+tile vince');
+ok(ENV.resolve('room_315', 0, 0, { flags: {} }) === 'env_room315_wall', 'muro Room 315 non risponde più con testo evergreen');
 ok(ENV.resolve('town', 40, 4, { flags: {} }) === 'env_palmer_house' &&
    ENV.resolve('town', 33, 3, { flags: {} }) === 'env_horne_department_store',
    'casa Palmer e Horne\'s hanno archetipi distinti');
@@ -342,7 +359,7 @@ ok(E.state.dialogue && E.state.dialogue.id === 'sign_town', 'oggetto esplicito p
 E.state.dialogue = null;
 
 // NPC davanti a una parete potenzialmente risolvibile altrove: NPC resta prima scelta.
-place('sheriff', { px: 6, py: 3, dir: 'right' });
+place('sheriff', { px: 11, py: 4, dir: 'left' });
 key('Enter');
 ok(E.state.dialogue && E.state.dialogue.id === 'truman', 'NPC precede fallback ambientale');
 

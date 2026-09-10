@@ -68,7 +68,8 @@
     bob:      { skin: '#c89868', hair: '#74746b', shirt: '#345682', pants: '#263854', long: true, grin: true, eyes: '#424d48', hairStyle: 'wild', build: 1.10, height: 1.10, jacket: true, stubble: '#715e4d', brows: '#4c4a43' },
     james:    { skin: '#e8b88a', hair: '#0c0e12', shirt: '#20242a', pants: '#2c4d84', eyes: '#49616e', hairStyle: 'pompadour', build: 1.02, height: 1.05, jacket: true, collar: '#aeb6bb', brows: '#14161a' },
     jacques:  { skin: '#e8a878', hair: '#543c21', shirt: '#973729', pants: '#463023', eyes: '#5d5f4d', hairStyle: 'sidepart', build: 1.15, height: 1.01, waistcoat: '#4d3028', stubble: '#76543e', brows: '#4e3422' },
-    ronette:  { skin: '#f4e0d0', hair: '#dfc756', shirt: '#d2d4d7', pants: '#d2d4d7', long: true, dress: true, eyes: '#667a8f', hairStyle: 'waves', build: 0.88, height: 0.99, collar: '#f5f3ed', necklace: '#b8ab88' }
+    ronette:  { skin: '#f4e0d0', hair: '#dfc756', shirt: '#d2d4d7', pants: '#d2d4d7', long: true, dress: true, eyes: '#667a8f', hairStyle: 'waves', build: 0.88, height: 0.99, collar: '#f5f3ed', necklace: '#b8ab88' },
+    infermiera: { skin: '#e8caa8', hair: '#33262a', shirt: '#ecece4', pants: '#7c8aa2', dress: true, bun: true, cap: '#f7f5ef', eyes: '#5d6b7d', hairStyle: 'bun', build: 0.92, height: 0.99, apron: '#ecece4', collar: '#aeb6bc', lip: '#a9606a' }
   };
 
   // Grammatica di silhouette riusabile. Le palette descrivono identità;
@@ -98,7 +99,8 @@
     jacoby:   ['mystic', 40], audrey: ['poised', 280],  mfap: ['uncanny', 470],
     laura:    ['spectral', 160], gerard: ['drifter', 330], benhorne: ['tailored', 520],
     giant:    ['uncanny', 60], maddy: ['ingénue', 240], bob: ['menace', 410],
-    james:    ['rebel', 20], jacques: ['heavy', 300],   ronette: ['spectral', 490]
+    james:    ['rebel', 20], jacques: ['heavy', 300],   ronette: ['spectral', 490],
+    infermiera: ['poised', 150]
   };
   Object.keys(CHARACTER_STYLE).forEach(function (name) {
     var entry = CHARACTER_STYLE[name];
@@ -136,7 +138,8 @@
     bob:      ['wild-mane','wild-mane','wild-mane'],
     james:    ['narrow-pompadour','narrow-pompadour','forward-pompadour'],
     jacques:  ['barrel-waistcoat','barrel-waistcoat','barrel-waistcoat'],
-    ronette:  ['low-hair-lock','low-hair-lock','low-hair-lock']
+    ronette:  ['low-hair-lock','low-hair-lock','low-hair-lock'],
+    infermiera: ['nurse-cap-crown','nurse-cap-nape','nurse-cap-profile']
   };
   Object.keys(PIXEL16).forEach(function (name) {
     S.CHARS[name].pixel16 = { down: PIXEL16[name][0], up: PIXEL16[name][1], side: PIXEL16[name][2] };

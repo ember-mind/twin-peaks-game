@@ -1,0 +1,3 @@
+Command: node test/smoke.js
+Exit: 0
+Output: 368 controlli superati

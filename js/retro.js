@@ -296,5 +296,5 @@
 
   // Case già leggibili nei tile: nessuna massa obliqua/prospettica aggiuntiva.
   Sp.drawStructures = function () {};
-  GAME.Retro2D = { palette: P, logicalWidth: 160, logicalHeight: 144 };
+  GAME.Retro2D = { palette: P, logicalWidth: 256, logicalHeight: 192 };
 })();

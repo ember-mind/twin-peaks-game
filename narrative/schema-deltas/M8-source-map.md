@@ -12,7 +12,7 @@ conteggi autorevoli sono STAMPATI da `test/narrative-validate-m8.js` a ogni run.
 | Nodo | Sezione Lock | Pagine (rese) | Note |
 |---|---|---|---|
 | m8_diner | M8-A | 7 + choice | scena ordinaria + promise_stance; nessuna voce di taccuino |
-| m8_roadhouse | M8-B | 6 + choice | Gigante → `presagio_status: active`; warning_target; obiettivo |
+| m8_roadhouse_truman + m8_roadhouse_phone | M8-B | 5 + (2 + choice) | pass 01 (B1, split di m8_roadhouse): tavolo (Truman, Gigante → `presagio_status: active`) e telefono (warning_target; obiettivo 150/200) su due world-root distinte, nessun `next` — si cammina fra le due (8,1→8,5) |
 | m8_focus_choice | M8-C | 2 + choice | focus_destination; nessun goto (la route si CAMMINA, world-root gated) |
 | m8_route_palmer | M8-C | 4 | body_found_by=hawk; valigia/biglietto [condizionale: warning=palmer]; chiamata centrale |
 | m8_route_lake | M8-C | 1 | body_found_by=cooper (primo) |

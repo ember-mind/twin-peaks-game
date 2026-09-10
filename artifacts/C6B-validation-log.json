@@ -1,9 +1,9 @@
 {
  "generated_by": "test/narrative-validate.js",
- "generated_at": "2026-08-14T10:32:20.673Z",
+ "generated_at": "2026-09-10T18:52:10.467Z",
  "m6_canonical_paths_executed": 12,
  "save_load_checkpoints": 90,
- "total_checks": 3240,
+ "total_checks": 2411,
  "failures": 0,
  "runtime_schema": "1.1.0"
 }

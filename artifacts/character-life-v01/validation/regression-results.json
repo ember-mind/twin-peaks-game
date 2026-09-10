@@ -1,0 +1,47 @@
+[
+  {
+    "test": "test/character-activity.js",
+    "exitCode": 0,
+    "log": "artifacts/character-life-v01/validation/character-activity.log"
+  },
+  {
+    "test": "test/sheriffs-station-native.js",
+    "exitCode": 0,
+    "log": "artifacts/character-life-v01/validation/sheriffs-station-native.log"
+  },
+  {
+    "test": "test/world-engine-v0.1-catalog.js",
+    "exitCode": 0,
+    "log": "artifacts/character-life-v01/validation/world-engine-v0.1-catalog.log"
+  },
+  {
+    "test": "test/smoke.js",
+    "exitCode": 0,
+    "log": "artifacts/character-life-v01/validation/smoke.log"
+  },
+  {
+    "test": "test/walkthrough.js",
+    "exitCode": 0,
+    "log": "artifacts/character-life-v01/validation/walkthrough.log"
+  },
+  {
+    "test": "test/cast-sprite-sheet.js",
+    "exitCode": 0,
+    "log": "artifacts/character-life-v01/validation/cast-sprite-sheet.log"
+  },
+  {
+    "test": "test/character-runtime-contract.js",
+    "exitCode": 0,
+    "log": "artifacts/character-life-v01/validation/character-runtime-contract.log"
+  },
+  {
+    "test": "test/retro-production.js",
+    "exitCode": 0,
+    "log": "artifacts/character-life-v01/validation/retro-production.log"
+  },
+  {
+    "test": "test/coldstage-config.js",
+    "exitCode": 0,
+    "log": "artifacts/character-life-v01/validation/coldstage-config.log"
+  }
+]

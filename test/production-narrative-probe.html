@@ -42,14 +42,12 @@
       E.state.flags.intro_town = true;
       await wait(240);
       var objective = w.document.getElementById('objective'), M4 = g.NarrativeData.missions.M4;
-      out.checks.pre_m4_classic_objective_visible = objective.style.display !== 'none' &&
-        /Parla con lo sceriffo Truman/i.test(objective.textContent) &&
-        !NR.evalCond(A.getState(), M4.entry_condition, M4);
+      out.checks.pre_m4_objective_hidden = objective.style.display === 'none' && !NR.evalCond(A.getState(), M4.entry_condition, M4);
       NR.applyEffects(A.getState(), [{ set: 'sogno_fatto' }]); E.state.flags.sogno_fatto = true;
       await wait(240);
       out.checks.m4_objective_has_reachable_root = /Riferisci il sogno a Truman/.test(objective.textContent) && NR.worldRoots(A.getState(), M4, 'sheriff', 'truman').some(function (n) { return n.id === 'truman_a2'; });
       if (mode === 'm4') {
-        E.loadMap('sheriff', 6, 1, 'right');
+        E.loadMap('sheriff', 10, 5, 'up');
         A.tryInteract('sheriff', 'truman');
       } else {
         NR.applyEffects(A.getState(), [{ set: 'atto4' }]);

@@ -113,13 +113,13 @@
       },
       doors: {
         '9,6':  { to: 'hotel_gn', tx: 8, ty: 10, dir: 'up', needsFlag: 'sogno_fatto', blockedMsg: 'hotel_locked' },
-        '23,6': { to: 'hospital', tx: 5, ty: 8, dir: 'up', needsFlag: 'sogno_fatto', blockedMsg: 'hospital_locked' },
+        '23,6': { to: 'hospital', tx: 7, ty: 10, dir: 'up', needsFlag: 'sogno_fatto', blockedMsg: 'hospital_locked' },
         '42,6': { to: 'palmer', tx: 7, ty: 10, dir: 'up' },
-        '12,20': { to: 'sheriff', tx: 4, ty: 7, dir: 'up' },
-        '42,20': { to: 'diner', tx: 6, ty: 8, dir: 'up' },
+        '12,20': { to: 'sheriffs_station_exterior', tx: 7, ty: 10, dir: 'up' },
+        '42,20': { to: 'double_r_exterior_prototype', tx: 6, ty: 10, dir: 'up' },
         '47,28': { to: 'roadhouse', tx: 7, ty: 8, dir: 'up', needsFlag: 'atto4', blockedMsg: 'roadhouse_chiuso' },
-        '55,14': { to: 'traincar', tx: 2, ty: 7, dir: 'right', needsFlag: 'atto3', blockedMsg: 'est_bloccato' },
-        '55,15': { to: 'traincar', tx: 2, ty: 7, dir: 'right', needsFlag: 'atto3', blockedMsg: 'est_bloccato' }
+        '55,14': { to: 'traincar', tx: 1, ty: 7, dir: 'right', needsFlag: 'atto3', blockedMsg: 'est_bloccato' },
+        '55,15': { to: 'traincar', tx: 1, ty: 7, dir: 'right', needsFlag: 'atto3', blockedMsg: 'est_bloccato' }
       },
       interact: { '30,30': 'cartello', '15,28': 'lago_riva', '50,22': 'tomba_laura' },
       objects: [
@@ -136,23 +136,30 @@
       onEnter: { dialogue: 'town_arrivo', once: 'intro_town' }
     },
 
+    /* Distretto: geometria nativa 16x12 (js/sheriffs-station-scene.js).
+     * I glifi sono solo collisione: l'arte e' authored in
+     * js/sheriffs-station-art.js, che sostituisce drawTile/drawStructures
+     * per questa mappa. 'T' = solido (muri + arredo), '.' = calpestabile.
+     * Le celle 7,11 e 8,11 sono l'ingresso (trigger della connessione
+     * sheriffs-station-front-entrance). */
     sheriff: {
       id: 'sheriff',
       indoor: true,
       rows: [
-        'iiiiiiiiii', // 0
-        'iffffffffi', // 1 scaffali
-        'ifCCffCCfi', // 2 scrivanie
-        'iffffffffi', // 3 Andy(2,3), Leland(5,3), Truman(7,3)
-        'ifffttfffi', // 4 scrivania centrale 32x16
-        'iffhffhffi', // 5 sedie, corridoio centrale libero
-        'iffffffffi', // 6 Lucy(2,6), Hawk(7,6)
-        'iffffffffi', // 7 pavimento fino alla porta (spawn 4,7)
-        'iiiiDiiiii'  // 8 porta centrale 16px
+        'TTTTTTTTTTTTTTTT', // 0  muro nord
+        'TTTTTTTTTTTTTTTT', // 1  muro nord
+        'TTTTTTTTTTTTTTTT', // 2  muro nord
+        'TTTT...TT......T', // 3  schedari(1-3,3), poltrona sceriffo(7-8,3)
+        'TTTT..TTTT.....T', // 4  schedari(1-3,4), scrivania sceriffo(6-9,4); Truman(10,4)
+        'T..............T', // 5  corridoio libero; Leland(8,5) in atto 5
+        'T...T......TTT.T', // 6  ritorno reception(4,6), scrivania destra nord(11-13,6); Lucy(2,6)
+        'TTTTT.......T..T', // 7  bancone reception(1-4,7), sedia(12,7); Andy(10,7)
+        'T..............T', // 8  fascia di transito
+        'T..........TTT.T', // 9  scrivania destra sud(11-13,9)
+        'TTTT........T..T', // 10 panca d'attesa(1-3,10), sedia(12,10); spawn ingresso 7,10
+        'TTTTTTT..TTTTTTT'  // 11 ingresso 7,11 / 8,11
       ],
-      doors: {
-        '4,8': { to: 'town', tx: 12, ty: 21, dir: 'down' }
-      },
+      doors: {},
       interact: {}
     },
 
@@ -180,12 +187,34 @@
       interact: { '6,1': 'cameraLaura' }
     },
 
+    room_315: {
+      id: 'room_315',
+      indoor: true,
+      rows: [
+        'TTTTTTTTTTTTTTTT', // 0  muro nord (finestra, specchio, quadro)
+        'TTTTTTTTTTTTTTTT', // 1
+        'TTTTTTTTTTTTTTTT', // 2
+        'TTTTT..TTT..TT.T', // 3  letto(1-3,3), comodino(4,3), scrittoio(7-9,3), comò+specchio(12-13,3)
+        'TTTT...........T', // 4  letto(1-3,4)
+        'TTTT...........T', // 5  letto(1-3,5)
+        'T..............T', // 6  risveglio: spawn 2,6 giù (piedi del letto)
+        'T............T.T', // 7  portavaligie(13,7)
+        'T..............T', // 8
+        'T..............T', // 9
+        'T..............T', // 10 spawn dal corridoio 7,10 su
+        'TTTTTTT.TTTTTTTT'  // 11 porta 315 -> corridoio Great Northern (7,11)
+      ],
+      doors: {},
+      interact: { '13,3': 'specchio315', '1,5': 'letto_315', '2,5': 'letto_315', '3,5': 'letto_315', '8,3': 'scrivania_315' },
+      onEnter: { dialogue: 'hotel_risveglio', once: 'intro_hotel' }
+    },
+
     hotel_gn: {
       id: 'hotel_gn',
       indoor: true,
       rows: [
         'iiiiiiiiiiiiiiiiii', // 0
-        'ifffffffffffiKKUfi', // 1  stanza 315: letto, comò (15,1) da ispezionare
+        'ifffffffffffiiDiii', // 1  corridoio verso la stanza 315
         'ifffffffffffiffffi', // 2
         'ifffffffffffiffffi', // 3
         'ifffffCCCCfffffffi', // 4  scala lobby; corridoio destro verso stanza
@@ -201,45 +230,53 @@
         '8,11': { to: 'town', tx: 9, ty: 7, dir: 'down' },
         '9,11': { to: 'town', tx: 9, ty: 7, dir: 'down' }
       },
-      interact: { '15,1': 'specchio315' }
+      interact: {}
     },
 
     hospital: {
       id: 'hospital',
       indoor: true,
+      // Ward nativo 16x12 (Act 2 closure): parete nord righe 0-2, pavimento 3-10,
+      // porta doppia sud 7-8,11. Ingombri: stand monitor (1-2,3), letto Ronette
+      // (3-4,3-5; attrice a 3,5), sedia (1,6), tenda (8,3-5), letto Gerard
+      // (9-10,3-5; Gerard a 11,4), bancone infermiera (12-14,8; registro 13,8;
+      // infermiera a 11,8). Spawn 7,10 su.
       rows: [
-        'iiiiiiiiiiii', // 0
-        'iKKffffffffi', // 1  letto di Ronette (2,1) da ispezionare
-        'iffffffffffi', // 2
-        'iffffKKffffi', // 3
-        'iffffffffffi', // 4
-        'iffffffffKKi', // 5
-        'iffffffffffi', // 6  Gerard(7,6)
-        'iCCCfffffffi', // 7 reception collegata a parete; corridoio x4–10 libero
-        'iffffffhfhfi', // 8 sala d'attesa; spawn 5,8
-        'iiiiiDDiiiii'  // 9
+        'TTTTTTTTTTTTTTTT', // 0
+        'TTTTTTTTTTTTTTTT', // 1
+        'TTTTTTTTTTTTTTTT', // 2
+        'TTTTT...TTT....T', // 3
+        'T..TT...TTT....T', // 4
+        'T..TT...TTT....T', // 5
+        'TT.............T', // 6
+        'T..............T', // 7
+        'T...........TTTT', // 8
+        'T..............T', // 9
+        'T..............T', // 10
+        'TTTTTTT..TTTTTTT'  // 11
       ],
       doors: {
-        '5,9': { to: 'town', tx: 23, ty: 7, dir: 'down' },
-        '6,9': { to: 'town', tx: 23, ty: 7, dir: 'down' }
+        '7,11': { to: 'town', tx: 23, ty: 7, dir: 'down' },
+        '8,11': { to: 'town', tx: 23, ty: 7, dir: 'down' }
       },
-      interact: { '2,1': 'ronette_letto' }
+      interact: { '3,5': 'ronette_letto' }
     },
 
     diner: {
       id: 'diner',
       indoor: true,
+      interior: {"material":"diner","counter":[2,3,9],"stools":[[2,4],[4,4],[6,4],[8,4],[10,4]],"booths":[[1,6,3],[10,6,3],[1,8,3],[10,8,3]],"guests":[null,{"hair":"#634337","hairHi":"#936550","hairStyle":"bob","seat":"right","coat":"#997082","coatHi":"#bd94a0","coatShadow":"#654a61"},{"hair":"#353730","hairHi":"#606052","hairStyle":"swept","seat":"left","coat":"#476352","coatHi":"#78917a","coatShadow":"#31483b"},null],"plant":[12,2],"coatRack":[12,4],"specials":[8,6,1,1],"islandPlant":[6,6]},
       rows: [
-        'iiiiiiiiiiiiii', // 0
-        'iffffffffffffi', // 1 Norma(5,1)
-        'iffCCCCCCffffi', // 2 bancone
-        'ifffhfhffffffi', // 3 sgabelli al bancone
-        'ifhffffffhfffi', // 4 sedute booth; Shelly(8,4)
-        'ifttffffttfffi', // 5 Log Lady(4,5)
-        'ifhffffffhfffi', // 6 sedute booth
-        'ifttffffttfffi', // 7
-        'iffffffffffffi', // 8 (spawn 6,8)
-        'iiiiiiDDiiiiii'  // 9
+        'iiiiiiiiiiiiii',
+        'iffffffffffffi',
+        'ifffffffffffhi',
+        'ifCCCCCCCCCffi',
+        'ifhfhfhfhfhfhi',
+        'ihhfffffffffhi',
+        'itttffhftfttti',
+        'ihhfffffffffhi',
+        'itttffffffttti',
+        'iiiiiiDDiiiiii'
       ],
       doors: {
         '6,9': { to: 'town', tx: 42, ty: 21, dir: 'down' },
@@ -301,7 +338,7 @@
         'RRRRRRRRDRRRRRRR'  // 11 uscita tra le tende -> bosco
       ],
       doors: {
-        '8,11': { to: 'hotel_gn', tx: 14, ty: 2, dir: 'down' } // risveglio: Cooper si sveglia nella stanza 315 del Great Northern
+        '8,11': { to: 'room_315', tx: 2, ty: 6, dir: 'down' } // risveglio: Cooper si sveglia nella stanza 315 del Great Northern
       },
       interact: {},
       onEnter: 'redroom'
@@ -311,32 +348,36 @@
 
     traincar: {
       id: 'traincar',
+      /* Act 3 pass 01 — geometria nativa 24x12 (radura del ponte e del vagone).
+       * La sorgente authored e' js/traincar-scene.js: le due devono coincidere
+       * riga per riga, e la scena fallisce rumorosamente se divergono.
+       * Legenda: T albero, g erba secca, p sentiero, w torrente (solido),
+       * b asse del ponte, r rotaia, i sponda del vagone (solida), f pavimento
+       * del vagone, D porta, S cartello (solido). */
       rows: [
         //         111111111122
         //0123456789012345678901234
-        'TTTTTTTTTTTTTTTTTTTTTDTT', // 0  D = sentiero verso One Eyed Jacks
-        'TggggggggggggggggggggpgT', // 1
-        'TggTggggggggggggggggSpgT', // 2  cartello One Eyed Jacks
-        'TgggggTgiiiiiiiiTggggpgT', // 3  parete nord del vagone
-        'TgggTgggiffffffigggTgpgT', // 4  interno: mucchio (10,4) hawk (12,4)
-        'TgggggggiffffffigggggpTT', // 5  interno: anello (13,5)
-        'TggggSggiiiDiiiigggggpgT', // 6  cartello ponte, porta sud del vagone (11,6)
-        'ppppppppppppppppppppppgT', // 7  sentiero est-ovest, uscita a ovest -> città (0,7)
-        'TggggggggggggggggggggggT', // 8
-        'TgTggggggggggggggTggggTT', // 9
-        'TggTgggggTgggggggggggggT', // 10
-        'TgggggTggggggggggggggggT', // 11
-        'TggggggggggggggggggggggT', // 12
-        'TTTTTTTTTTTTTTTTTTTTTTTT'  // 13
+        'TTTTTTTTTTTTTTTTTTTTTDTT', //  0  D = varco verso One Eyed Jacks
+        'TTTTTTTTTTTTTTTTTTTTTpTT', //  1  il varco fra gli alberi
+        'TTTwwTTTTiiiiiiiiiTTSpTT', //  2  facce nord 48 px: chioma + vagone
+        'TggwwggggiiiiiiiiigggpgT', //  3  sponda nord del vagone (stufa 12,3)
+        'TggwwggggifffffffigggpgT', //  4  interno, lamiera piegata (16,4)
+        'TggwwggggifffffffigggpgT', //  5  traversa 12..14, anello (13,5)
+        'TggwwggggifffffffigggpgT', //  6  sedile+carte (10,6), mucchio (13,6)
+        'pppbbprrriiiiDDiiigggpgT', //  7  ponte, binari, porta sud (13-14,7)
+        'TggwwggggggggggggggggpgT', //  8  massicciata aperta
+        'TggwwggggggggggggggggpgT', //  9
+        'TggwwggggggggggggggggpgT', // 10
+        'TTTTTTTTTTTTTTTTTTTTTTTT'  // 11  linea di alberi a sud
       ],
       doors: {
         '0,7': { to: 'town', tx: 54, ty: 14, dir: 'left' },
-        '21,0': { to: 'oej', tx: 8, ty: 8, dir: 'up' }
+        '21,0': { to: 'oej', tx: 8, ty: 8, dir: 'up', needsFlag: 'east_route_confirmed', blockedMsg: 'oej_bloccato' }
       },
       interact: {
-        '5,6': 'sign_ponte',
+        '4,6': 'sign_ponte',
         '20,2': 'sign_oej',
-        '10,4': 'mucchio_terra',
+        '13,6': 'mucchio_terra',
         '13,5': 'anello_interact'
       }
     },
@@ -384,7 +425,7 @@
         '7,9': { to: 'town', tx: 47, ty: 29, dir: 'down' },
         '8,9': { to: 'town', tx: 47, ty: 29, dir: 'down' }
       },
-      interact: { '8,1': 'palco_gigante' }
+      interact: {}
     }
   };
 

@@ -309,12 +309,17 @@ console.log('# B3 — notebook, comparison & formulation');
   ok(acts.length === 0, 'B3: nessun confronto prima delle evidenze');
   doNode(s, 'truman_a2'); doNode(s, 'james_a2');
   acts = NR.notebookActions(s, M4);
-  ok(acts.length === 1 && acts[0].node.id === 'cmp_e6a_tjames', 'B3: confronto E6A+T_JAMES dalle condizioni');
-  ok(JSON.stringify(acts[0].required_evidence.slice().sort()) === JSON.stringify(['E6A_CUORE_INTERO', 'T_JAMES_EST']), 'B3: coppia richiesta derivata dai dati');
+  ok(acts.length === 0, 'B3: confronto E6A+T_JAMES NON disponibile senza T1_RONETTE_BOB (Ronette obbligatoria)');
+  doNode(s, 'ronette_q'); doChoice(s, 'ronette_q', 'q_uomo');
+  acts = NR.notebookActions(s, M4);
+  ok(acts.length === 1 && acts[0].node.id === 'cmp_e6a_tjames', 'B3: confronto E6A+T_JAMES+T1 dalle condizioni, dopo la visita completata');
+  ok(JSON.stringify(acts[0].required_evidence.slice().sort()) === JSON.stringify(['E6A_CUORE_INTERO', 'T_JAMES_EST']), 'B3: coppia richiesta derivata dai dati (Ronette gated via node_done, non evidence)');
 }
 // B3-2: retry policy — stesso errore non ripetibile, doppio tentativo impossibile
 {
-  let s = freshState(); doNode(s, 'truman_a2'); doNode(s, 'james_a2'); doNode(s, 'cmp_e6a_tjames');
+  let s = freshState(); doNode(s, 'truman_a2'); doNode(s, 'james_a2');
+  doNode(s, 'ronette_q'); doChoice(s, 'ronette_q', 'q_uomo');
+  doNode(s, 'cmp_e6a_tjames');
   const cmpNode = M4.nodes.find(n => n.id === 'cmp_e6a_tjames');
   ok(NR.availableChoices(s, M4, cmpNode).length === 3, 'B3: tre risposte prima dei tentativi');
   doChoice(s, 'cmp_e6a_tjames', 'b8_b');
@@ -334,6 +339,7 @@ console.log('# B3 — notebook, comparison & formulation');
 // B3-3: comparisons strutturato; nodes_done MAI gate del successo
 {
   let s = freshState(); doNode(s, 'truman_a2'); doNode(s, 'james_a2');
+  doNode(s, 'ronette_q'); doChoice(s, 'ronette_q', 'q_uomo');
   doNode(s, 'cmp_e6a_tjames');
   ok(s.comparisons.cmp_e6a_tjames && s.comparisons.cmp_e6a_tjames.opened === true, 'B3: opened al commit del nodo');
   ok(s.nodes_done.cmp_e6a_tjames === true && s.comparisons.cmp_e6a_tjames.completed === false, 'B3: nodes_done ≠ successo (aperto ma non completato)');
@@ -369,7 +375,9 @@ console.log('# B3 — notebook, comparison & formulation');
   })(M4.nodes);
   ok(leaked.length === 0, 'B3.1: comparison_intro_has_no_internal_ids (trovati: ' + leaked.join(' ') + ')');
   // confronto completato: sparisce dalle azioni del taccuino
-  let s = freshState(); doNode(s, 'truman_a2'); doNode(s, 'james_a2'); doNode(s, 'cmp_e6a_tjames');
+  let s = freshState(); doNode(s, 'truman_a2'); doNode(s, 'james_a2');
+  doNode(s, 'ronette_q'); doChoice(s, 'ronette_q', 'q_uomo');
+  doNode(s, 'cmp_e6a_tjames');
   ok(NR.notebookActions(s, M4).length === 1, 'B3.1: confronto disponibile prima del completamento');
   // B3.2: pairStatus a TRE esiti (mai «nessun filo» per un nesso registrato)
   const pair = ['E6A_CUORE_INTERO', 'T_JAMES_EST'];
@@ -390,6 +398,7 @@ console.log('# B3 — notebook, comparison & formulation');
 // B3-4: created_from esatto, factual unconfirmed, save/load nei 5 checkpoint
 {
   let s = freshState(); doNode(s, 'truman_a2'); doNode(s, 'james_a2');
+  doNode(s, 'ronette_q'); doChoice(s, 'ronette_q', 'q_uomo');
   s = saveLoad(s); // checkpoint 1: dopo le acquisizioni
   doNode(s, 'cmp_e6a_tjames');
   s = saveLoad(s); // checkpoint 2: dopo l'apertura del confronto
@@ -463,6 +472,7 @@ console.log('# B5 — narrative save');
   NS._setStorage({ getItem: k => (mem.has(k) ? mem.get(k) : null), setItem: (k, v) => mem.set(k, String(v)), removeItem: k => mem.delete(k) });
 
   let s = freshState(); doNode(s, 'truman_a2'); doNode(s, 'james_a2');
+  doNode(s, 'ronette_q'); doChoice(s, 'ronette_q', 'q_uomo');
   let status = 'idle';
   globalThis.GAME.NarrativeAdapter = {
     isEnabled: () => true, active: () => status === 'active', sessionStatus: () => status,
@@ -641,8 +651,8 @@ console.log('# B5 — narrative save');
   delete globalThis.GAME.NarrativeAdapter;
 }
 
-/* ===== C5-B — M5 dinamica: 72 percorsi + pairwise + abort/resume ===== */
-console.log('# C5-B — M5 dynamic (runtime esteso, matrice canonica)');
+/* ===== C5-B — M5 dinamica (act-3 pass 01): 24 percorsi + pairwise + abort/resume ===== */
+console.log('# C5-B — M5 dynamic (runtime esteso, matrice canonica act-3)');
 const M5 = JSON.parse(fs.readFileSync(path.join(ROOT, 'missions', 'M5.json'), 'utf8'));
 {
   const domains = {};
@@ -661,71 +671,160 @@ function doChoice5(s, atId, choiceId) {
 function m5Base() { // fine-M4 REALE via runtime M4, poi ingresso fisico M5
   let s = freshState();
   doNode(s, 'truman_a2'); doNode(s, 'james_a2');
+  doNode(s, 'ronette_q'); doChoice(s, 'ronette_q', 'q_uomo');
   doNode(s, 'cmp_e6a_tjames'); doChoice(s, 'cmp_e6a_tjames', 'b8_a');
   doPresent(s, 'P2');
   doNode5(s, 'm5_bridge'); doNode5(s, 'm5_discovery');
   return s;
 }
-const OBS = { T: 'm5_mound', R: 'm5_ring', S: 'm5_scene' };
-const ORDERS = ['TRS', 'TSR', 'RTS', 'RST', 'STR', 'SRT'];
-const THEORIES = [['theory_degeneration', 'degeneration'], ['theory_staging', 'staging']];
-const REVS = [['revision_keep', null, false], ['revision_switch', 'opposite', true], ['revision_open', 'open', true]];
-const S1S = [['s1_institutional', 'institutional'], ['s1_documented', 'documented_custody']];
+function permutations3(arr) {
+  const out = [];
+  for (let i = 0; i < arr.length; i++) for (let j = 0; j < arr.length; j++) for (let k = 0; k < arr.length; k++) {
+    if (i === j || j === k || i === k) continue;
+    out.push([arr[i], arr[j], arr[k]]);
+  }
+  return out;
+}
+const ORDERS = permutations3(['m5_mound', 'm5_ring', 'm5_scene']); // 6 ordini
+const THEORY_PATHS = [
+  { initChoice: 'theory_degeneration', initVal: 'degeneration', finalNode: 'm5_theory_revision', finalChoice: 'revision_keep', finalVal: 'degeneration', reportPage: 'm5.b9.report.contest.p01', absentPage: 'm5.b9.report.accept.p01' },
+  { initChoice: 'theory_withhold', initVal: 'withheld', finalNode: 'm5_theory_first', finalChoice: 'first_staging', finalVal: 'staging', reportPage: 'm5.b9.report.accept.p01', absentPage: 'm5.b9.report.contest.p01' }
+];
+const TIMINGS = ['immediate', 'last']; // confronto subito dopo l'anello, oppure per ultimo
 let pathCount = 0;
-for (const order of ORDERS) for (const [tCh, tVal] of THEORIES) for (const [rCh, rKind, rRev] of REVS) for (const [sCh, sVal] of S1S) {
+for (const order of ORDERS) for (const theory of THEORY_PATHS) for (const timing of TIMINGS) {
   pathCount++;
-  const label = 'M5[' + order + '/' + tVal + '/' + rCh + '/' + sVal + ']';
+  const label = 'M5[' + order.map(o => o.slice(3)).join('') + '/' + theory.initVal + '/' + timing + ']';
   let s = m5Base();
-  const b8Before = JSON.stringify(s.b8_attempt_history), assistBefore = s.assistance_level;
-  s = saveLoad(s);
-  let r = doNode5(s, OBS[order[0]]); ok(r.ok, label + ': gruppo1');
-  ok(NR.trueObjectives(s, M5).length === 1, label + ': un obiettivo vero (post g1)');
-  s = saveLoad(s);
-  r = doNode5(s, OBS[order[1]]); ok(r.ok, label + ': gruppo2');
-  ok(NR.pendingMilestones(s, M5).length === 1, label + ': milestone iniziale pendente');
-  ok(!NR.prepareNode(s, M5, OBS[order[2]]).ok, label + ': 3° gruppo bloccato (milestone_pending)');
-  let pt = NR.prepareNode(s, M5, 'm5_theory_initial'); ok(pt.ok && pt.pages.length === 1, label + ': prompt teoria apribile');
+  ok(NR.trueObjectives(s, M5).length === 1 && NR.trueObjectives(s, M5)[0].id === 'obj_m5_2', label + ': obj@200 dopo scoperta');
+
+  // R1: prima lettura alla porta, prima di qualunque osservazione
+  let pt = NR.prepareNode(s, M5, 'm5_theory_initial'); ok(pt.ok && pt.pages.length === 1, label + ': prompt iniziale apribile');
   NR.commitNode(s, M5, pt);
-  ok(NR.pendingMilestones(s, M5).length === 1, label + ': milestone NON risolta dal commit del prompt');
-  ok(s.beats_completed.indexOf('m5_theory_initial') === -1, label + ': beat NON scritto dal prompt');
-  ok(!NR.prepareNode(s, M5, OBS[order[2]]).ok, label + ': 3° gruppo ancora bloccato');
-  s = saveLoad(s);
-  const rc = NR.prepareNode(s, M5, 'm5_theory_initial');
-  ok(rc.resume_choice === true && rc.pages.length === 0, label + ': abort/save → riapre il widget, niente prompt né repeat');
-  doChoice5(s, 'm5_theory_initial', tCh);
-  ok(s.values.m5_initial_theory === tVal, label + ': iniziale = ' + tVal);
+  doChoice5(s, 'm5_theory_initial', theory.initChoice);
+  ok(s.values.m5_initial_theory === theory.initVal, label + ': iniziale = ' + theory.initVal);
+
+  let cmpDone = false;
+  for (const nodeId of order) {
+    s = saveLoad(s);
+    const r = doNode5(s, nodeId); ok(r.ok, label + ': ' + nodeId);
+    ok(NR.trueObjectives(s, M5).length === 1, label + ': un obiettivo vero dopo ' + nodeId);
+    if (nodeId === 'm5_ring' && timing === 'immediate') {
+      const finalNode = theory.finalNode;
+      const gateMetPre = s.nodes_done.m5_mound && s.nodes_done.m5_scene;
+      if (!gateMetPre) ok(!NR.prepareNode(s, M5, finalNode).ok, label + ': nodo teoria finale bloccato prima del gate completo');
+      const rp = NR.prepareNode(s, M5, 'm5_cmp_ring'); ok(rp.ok, label + ': confronto apribile subito dopo l\'anello');
+      NR.commitNode(s, M5, rp);
+      doChoice5(s, 'm5_cmp_ring', 'ring_a');
+      cmpDone = true;
+      ok(NR.peekProp(s, 'P3A').formulation.status === 'formulated', label + ': P3A formulata subito');
+    }
+    const gateMet = s.nodes_done.m5_mound && s.nodes_done.m5_scene && cmpDone;
+    if (!gateMet) {
+      ok(!NR.prepareNode(s, M5, theory.finalNode).ok, label + ': nodo teoria finale bloccato prima del gate (dopo ' + nodeId + ')');
+      ok(NR.pendingMilestones(s, M5).length === 0, label + ': milestone non pendente prima del gate (dopo ' + nodeId + ')');
+    }
+  }
+  if (!cmpDone) {
+    ok(NR.trueObjectives(s, M5).length === 1 && NR.trueObjectives(s, M5)[0].id === 'obj_m5_3', label + ': obj@250 dopo le 3 osservazioni (confronto non ancora fatto)');
+    const rp = NR.prepareNode(s, M5, 'm5_cmp_ring'); ok(rp.ok, label + ': confronto apribile alla fine');
+    NR.commitNode(s, M5, rp);
+    doChoice5(s, 'm5_cmp_ring', 'ring_a');
+    ok(NR.peekProp(s, 'P3A').formulation.status === 'formulated', label + ': P3A formulata alla fine');
+  }
+  ok(NR.trueObjectives(s, M5).length === 1 && NR.trueObjectives(s, M5)[0].id === 'obj_m5_4', label + ': obj@275 dopo mucchio+centro+confronto');
+
+  ok(NR.pendingMilestones(s, M5).length === 1, label + ': milestone della teoria presa pendente');
+  const blocked = NR.prepareNode(s, M5, 'm5_report_intro');
+  ok(!blocked.ok && String(blocked.error).indexOf('milestone_pending') === 0, label + ': rapporto bloccato (milestone_pending)');
+  let pv = NR.prepareNode(s, M5, theory.finalNode); ok(pv.ok, label + ': nodo revisione/prima lettura apribile');
+  NR.commitNode(s, M5, pv);
+  ok(NR.pendingMilestones(s, M5).length === 1, label + ': milestone non risolta dal solo prompt');
+  doChoice5(s, theory.finalNode, theory.finalChoice);
+  ok(s.values.m5_final_theory === theory.finalVal, label + ': finale = ' + theory.finalVal);
   ok(NR.pendingMilestones(s, M5).length === 0, label + ': milestone risolta dal VALORE');
+  ok(NR.trueObjectives(s, M5).length === 1 && NR.trueObjectives(s, M5)[0].id === 'obj_m5_5', label + ': obj@300 dopo la teoria finale');
+
   s = saveLoad(s);
-  r = doNode5(s, OBS[order[2]]); ok(r.ok, label + ': gruppo3 ora permesso');
-  ok(NR.groupsCompleted(s, M5, 'm5_observations') === 3, label + ': 3 gruppi completi');
-  ok(!NR.prepareNode(s, M5, 'm5_report_intro').ok, label + ': rapporto bloccato dalla revisione');
-  let pv = NR.prepareNode(s, M5, 'm5_theory_revision'); NR.commitNode(s, M5, pv);
-  ok(NR.pendingMilestones(s, M5).length === 1, label + ': revisione non risolta dal prompt');
-  doChoice5(s, 'm5_theory_revision', rCh);
-  const expectedFinal = rKind === null ? tVal : rKind === 'opposite' ? (tVal === 'degeneration' ? 'staging' : 'degeneration') : 'open';
-  ok(s.values.m5_final_theory === expectedFinal, label + ': finale = ' + expectedFinal);
-  ok(!!s.flags.m5_theory_revised === rRev, label + ': revised = ' + rRev);
-  s = saveLoad(s);
-  let pi = NR.prepareNode(s, M5, 'm5_report_intro');
-  ok(pi.ok && pi.pages.some(pg => pg.id === 'm5.b9.report.theory_' + expectedFinal), label + ': pagina-teoria corretta nel rapporto');
+  let pi = NR.prepareNode(s, M5, 'm5_report_intro'); ok(pi.ok, label + ': rapporto apribile dopo teoria finale + confronto');
+  ok(pi.pages.some(pg => pg.id === theory.reportPage), label + ': pagina di rapporto selezionata per valore');
+  ok(!pi.pages.some(pg => pg.id === theory.absentPage), label + ': pagina dell\'altro valore assente');
   NR.commitNode(s, M5, pi);
   const cont = NR.prepareNode(s, M5, 'm5_report_intro');
-  ok(cont.continuation === 'm5_s1', label + ': abort_s1_resumes_s1_not_repeat');
-  s = saveLoad(s);
-  ok(NR.prepareNode(s, M5, 'm5_report_intro').continuation === 'm5_s1', label + ': save_after_report_intro_resumes_s1');
-  doChoice5(s, 'm5_s1', sCh);
-  ok(s.values.s1 === sVal, label + ': s1 = ' + sVal);
-  ok(s.flags.east_route_confirmed === true, label + ': east_route al commit della chiusura');
-  ok(NR.activeObjective(s, M5).id === 'obj_m5_4', label + ': obiettivo OEJ');
-  ok(s.beats_completed.indexOf('m5_report_close') !== -1 && s.beats_completed.indexOf('m5_report_intro') === -1, label + ': beat SOLO sul ramo finale');
+  ok(cont.continuation === 'm5_s1', label + ': rapporto prosegue a S1');
+
+  ok(NR.prepareNode(s, M5, 'm5_tracks_north_early').ok, label + ': taglio nord anticipato apribile prima di S1');
+  ok(!NR.prepareNode(s, M5, 'm5_tracks_north').ok, label + ': taglio nord definitivo non apribile prima di S1');
+  doChoice5(s, 'm5_s1', 's1_institutional');
+  ok(s.values.s1 === 'institutional', label + ': s1 scritta');
+  ok(s.flags.east_route_confirmed !== true, label + ': east_route non confermata subito dopo la chiusura');
+  ok(!NR.prepareNode(s, M5, 'm5_tracks_north_early').ok, label + ': taglio nord anticipato non più apribile dopo S1');
+  ok(NR.checkCompletion(s, M5) === false, label + ': M5 non completa prima del taglio nord');
+
+  let ptn = NR.prepareNode(s, M5, 'm5_tracks_north'); ok(ptn.ok, label + ': taglio nord apribile dopo S1');
+  NR.commitNode(s, M5, ptn);
+  ok(s.flags.east_route_confirmed === true && s.evidence.E_TRACCE_EST === true, label + ': east_route + E_TRACCE_EST scritti dal taglio nord');
+  ok(NR.checkCompletion(s, M5) === true, label + ': M5 completa dopo il taglio nord');
+  ok(NR.trueObjectives(s, M5).length === 1 && NR.trueObjectives(s, M5)[0].id === 'obj_m5_7', label + ': obj@400 finale (OEJ)');
+
   const rep2 = NR.prepareNode(s, M5, 'm5_report_intro');
   ok(rep2.already_completed === true && rep2.pages[0] && rep2.pages[0].id === 'm5.repeat.report', label + ': repeat_only_after_east_route_confirmed');
-  ok(JSON.stringify(s.b8_attempt_history) === b8Before && s.assistance_level === assistBefore, label + ': stato B8/assistenza M4 IMMUTATO');
   ok(NR.peekProp(s, 'P3B').formulation.status === 'unformulated', label + ': P3B mai formulata');
   s = saveLoad(s);
   ok(NR.serialize(NR.deserialize(NR.serialize(s))) === NR.serialize(s), label + ': round-trip finale');
 }
-ok(pathCount === 72, 'matrice canonica: 72 percorsi ESEGUITI dal runtime (' + pathCount + ')');
+ok(pathCount === 24, 'matrice canonica atto3: 24 percorsi ESEGUITI dal runtime (' + pathCount + ')');
+
+console.log('# C5-B — stufa/carte facoltative (prese o saltate, entrambe completano)');
+{
+  // saltate entrambe: M5 completa comunque
+  let s = m5Base();
+  doNode5(s, 'm5_mound'); doNode5(s, 'm5_ring'); doNode5(s, 'm5_scene');
+  let pt = NR.prepareNode(s, M5, 'm5_theory_initial'); NR.commitNode(s, M5, pt);
+  doChoice5(s, 'm5_theory_initial', 'theory_degeneration');
+  doNode5(s, 'm5_cmp_ring'); doChoice5(s, 'm5_cmp_ring', 'ring_a');
+  let pv = NR.prepareNode(s, M5, 'm5_theory_revision'); NR.commitNode(s, M5, pv);
+  doChoice5(s, 'm5_theory_revision', 'revision_keep');
+  NR.commitNode(s, M5, NR.prepareNode(s, M5, 'm5_report_intro'));
+  doChoice5(s, 'm5_s1', 's1_institutional');
+  doNode5(s, 'm5_tracks_north');
+  ok(NR.checkCompletion(s, M5) === true, 'C5B-facoltative: M5 completa senza stufa/carte');
+  ok(!s.evidence.E_STUFA && !s.evidence.E_CARTE, 'C5B-facoltative: nessuna evidenza facoltativa scritta se saltate');
+}
+{
+  // prese entrambe, in ordine: la riga "non una sera sola" appare SOLO sulla seconda
+  let s = m5Base();
+  const stoveP = doNode5(s, 'm5_stove');
+  ok(stoveP.ok && !stoveP.prep.pages.some(pg => pg.id === 'm5.a7.stove.p04'), 'C5B-facoltative: stufa presa per prima, nessuna riga condizionata');
+  const cardsP = doNode5(s, 'm5_cards');
+  ok(cardsP.ok && cardsP.prep.pages.some(pg => pg.id === 'm5.a8.cards.p04'), 'C5B-facoltative: carte prese per seconde, riga condizionata presente');
+  ok(s.evidence.E_STUFA === true && s.evidence.E_CARTE === true, 'C5B-facoltative: entrambe le evidenze scritte');
+}
+{
+  // ordine invertito: la riga appare sulle carte solo se prese per prime
+  let s = m5Base();
+  const cardsP = doNode5(s, 'm5_cards');
+  ok(cardsP.ok && !cardsP.prep.pages.some(pg => pg.id === 'm5.a8.cards.p04'), 'C5B-facoltative: carte prese per prime, nessuna riga condizionata');
+  const stoveP = doNode5(s, 'm5_stove');
+  ok(stoveP.ok && stoveP.prep.pages.some(pg => pg.id === 'm5.a7.stove.p04'), 'C5B-facoltative: stufa presa per seconda, riga condizionata presente');
+}
+
+console.log('# C5-B — retry sul confronto anello: P3A resta unformulated finché non si sceglie A');
+{
+  let s = m5Base();
+  doNode5(s, 'm5_mound'); doNode5(s, 'm5_ring'); doNode5(s, 'm5_scene');
+  ok(NR.trueObjectives(s, M5).length === 1 && NR.trueObjectives(s, M5)[0].id === 'obj_m5_3', 'C5B-retry: obj@250 con le 3 osservazioni fatte, confronto non tentato');
+  doNode5(s, 'm5_cmp_ring');
+  doChoice5(s, 'm5_cmp_ring', 'ring_b');
+  ok(NR.peekProp(s, 'P3A').formulation.status === 'unformulated', 'C5B-retry: P3A non formulata dopo B');
+  ok(NR.trueObjectives(s, M5).length === 1 && NR.trueObjectives(s, M5)[0].id === 'obj_m5_3', 'C5B-retry: obj@250 invariato dopo B');
+  doChoice5(s, 'm5_cmp_ring', 'ring_c');
+  ok(NR.peekProp(s, 'P3A').formulation.status === 'unformulated', 'C5B-retry: P3A non formulata dopo C');
+  ok(NR.trueObjectives(s, M5).length === 1 && NR.trueObjectives(s, M5)[0].id === 'obj_m5_3', 'C5B-retry: obj@250 invariato dopo C');
+  doChoice5(s, 'm5_cmp_ring', 'ring_a');
+  ok(NR.peekProp(s, 'P3A').formulation.status === 'formulated', 'C5B-retry: P3A formulata da A dopo i tentativi');
+  ok(NR.trueObjectives(s, M5).length === 1 && NR.trueObjectives(s, M5)[0].id === 'obj_m5_4', 'C5B-retry: obj@275 dopo la formulazione');
+}
 
 console.log('# C5-B — pairwise, continuation, domini, confronti, registro');
 {
@@ -735,6 +834,7 @@ console.log('# C5-B — pairwise, continuation, domini, confronti, registro');
   let pt = NR.prepareNode(s, M5, 'm5_theory_initial'); NR.commitNode(s, M5, pt);
   doChoice5(s, 'm5_theory_initial', 'theory_degeneration');
   doNode5(s, 'm5_scene');
+  doNode5(s, 'm5_cmp_ring'); doChoice5(s, 'm5_cmp_ring', 'ring_a');
   let pv = NR.prepareNode(s, M5, 'm5_theory_revision'); NR.commitNode(s, M5, pv);
   doChoice5(s, 'm5_theory_revision', 'revision_keep');
   let pi = NR.prepareNode(s, M5, 'm5_report_intro'); NR.commitNode(s, M5, pi);
@@ -751,25 +851,27 @@ console.log('# C5-B — pairwise, continuation, domini, confronti, registro');
   NR.commitChoice(s, M5, s1Node, pc2);
   ok(s.values.s1 === 'institutional', 'C5B: s1_not_reasked_after_commit (write-once)');
   doNode5(s, 'm5_report_close');
-  ok(s.flags.east_route_confirmed === true, 'C5B: completed_choice_continues_to_common_next (chiusura ripresa)');
+  ok(s.flags.east_route_confirmed !== true, 'C5B: completed_choice_continues_to_common_next (chiusura ripresa, ancora senza east_route)');
+  doNode5(s, 'm5_tracks_north');
+  ok(s.flags.east_route_confirmed === true, 'C5B: east_route_confirmed scritta SOLO dal taglio nord, dopo la chiusura ripresa');
 }
 {
   // domini: deserialize respinge lo stato impossibile
   let s = m5Base();
   const raw = JSON.parse(NR.serialize(s));
   raw.values.m5_initial_theory = 'open';
-  ok((() => { try { NR.deserialize(JSON.stringify(raw)); return false; } catch (e) { return String(e.message).indexOf('save_value_out_of_domain') === 0; } })(), 'C5B: deserialize_rejects_impossible_initial_theory');
-  // opposite_of con sorgente assente → prepare rifiutato
+  ok((() => { try { NR.deserialize(JSON.stringify(raw)); return false; } catch (e) { return String(e.message).indexOf('save_value_out_of_domain') === 0; } })(), 'C5B: deserialize_rejects_impossible_initial_theory (open non è iniziale)');
+  // from_value con sorgente assente → prepare rifiutato (revision_keep prima che m5_initial_theory sia scritta)
   const revNode = M5.nodes.find(n => n.id === 'm5_theory_revision');
-  const bad = NR.prepareChoice(s, M5, revNode, 'revision_switch');
-  ok(!bad.ok && String(bad.error).indexOf('value_source_missing') === 0, 'C5B: opposite_of senza sorgente → prepare rifiutato');
+  const badFv = NR.prepareChoice(s, M5, revNode, 'revision_keep');
+  ok(!badFv.ok && String(badFv.error).indexOf('value_source_missing') === 0, 'C5B: from_value senza sorgente → prepare rifiutato');
 }
 {
   // confronto anello: tentativi per-comparison, assistenza M4 intoccata
   let s = m5Base();
   doNode5(s, 'm5_ring'); doNode5(s, 'm5_mound');
   let pt = NR.prepareNode(s, M5, 'm5_theory_initial'); NR.commitNode(s, M5, pt);
-  doChoice5(s, 'm5_theory_initial', 'theory_staging');
+  doChoice5(s, 'm5_theory_initial', 'theory_withhold');
   const a0 = s.assistance_level, b80 = JSON.stringify(s.b8_attempt_history);
   doNode5(s, 'm5_cmp_ring');
   doChoice5(s, 'm5_cmp_ring', 'ring_b');
@@ -779,7 +881,7 @@ console.log('# C5-B — pairwise, continuation, domini, confronti, registro');
   ok(NR.availableChoices(s, M5, cmpNode).map(c => c.id).join(',') === 'ring_a,ring_c', 'C5B: risposta tentata nascosta (scope comparison)');
   doChoice5(s, 'm5_cmp_ring', 'ring_a');
   ok(NR.peekProp(s, 'P3A').formulation.status === 'formulated' && NR.peekProp(s, 'P3A').factual_status === 'unconfirmed', 'C5B: P3A formulata, mai confermata');
-  ok(s.values.m5_initial_theory === 'staging' && NR.peekProp(s, 'P3A').formulation.status === 'formulated', 'C5B: tensione conservata (teoria ≠ P3A)');
+  ok(s.values.m5_initial_theory === 'withheld' && NR.peekProp(s, 'P3A').formulation.status === 'formulated', 'C5B: tensione conservata (teoria sospesa ≠ P3A)');
 }
 {
   // E7A↔E5: completed al node commit; registro cross-mission
@@ -853,11 +955,12 @@ console.log('# C5-B.1 — contratto runtime chiuso (12 test dalla revisione)');
   ok(!pBad.ok && NR.serialize(s) === beforeBad, 'C5B1: invalid_opposite_never_writes_state (prepare rifiutato, stato puro)');
   // worldRoots/objective/completion propagano la missione
   doNode5(s, 'm5_scene');
+  doNode5(s, 'm5_cmp_ring'); doChoice5(s, 'm5_cmp_ring', 'ring_a');
   let pv = NR.prepareNode(s, M5, 'm5_theory_revision'); NR.commitNode(s, M5, pv);
   doChoice5(s, 'm5_theory_revision', 'revision_keep');
   const roots = NR.worldRoots(s, M5, 'traincar', 'truman');
   ok(roots.length === 1 && roots[0].id === 'm5_report_intro', 'C5B1: worldRoots_supports_groups_completed (Truman esposto sul vagone)');
-  ok(NR.activeObjective(s, M5).id === 'obj_m5_3', 'C5B1: activeObjective_passes_mission_to_conditions');
+  ok(NR.activeObjective(s, M5).id === 'obj_m5_5', 'C5B1: activeObjective_passes_mission_to_conditions');
   ok(NR.checkCompletion(s, M5) === false, 'C5B1: checkCompletion_passes_mission_to_conditions (falsa prima della chiusura)');
   // pair status: stessa politica del registro
   const futureM = { mission: 'F', entry_condition: { flag: 'future_entered' }, nodes: [{ id: 'cmp_future', kind: 'comparison', channel: 'notebook', conditions: [{ evidence: 'E7A_BIGLIETTO_TESTO' }, { evidence: 'E7B_BIGLIETTO_POSIZIONE' }] }] };
@@ -916,15 +1019,19 @@ function m6Base(audrey) { // fine-M5 REALE via runtime (east_route_confirmed), p
   let pt = NR.prepareNode(s, M5, 'm5_theory_initial'); NR.commitNode(s, M5, pt);
   doChoice5(s, 'm5_theory_initial', 'theory_degeneration');
   doNode5(s, 'm5_scene');
+  doNode5(s, 'm5_cmp_ring'); doChoice5(s, 'm5_cmp_ring', 'ring_a');
   let pv = NR.prepareNode(s, M5, 'm5_theory_revision'); NR.commitNode(s, M5, pv);
   doChoice5(s, 'm5_theory_revision', 'revision_keep');
   let pi = NR.prepareNode(s, M5, 'm5_report_intro'); NR.commitNode(s, M5, pi);
   doChoice5(s, 'm5_s1', 's1_institutional'); // segue il goto → m5_report_close
+  doNode5(s, 'm5_tracks_north'); // UNICO writer di east_route_confirmed
   if (audrey) s.flags.audrey_indaga = true;
   return s;
 }
+// M6 stitch C4: jacques_statement_terms_known è TAGLIATO — nessun ramo scrive
+// più un flag proprio, la risorsa di ramo è la sola evidenza.
 const TACTICS = [
-  ['tactic_prova', 'prova', 'm6_interrogation_prova', 'JACQUES_MIDNIGHT_CLAIM', ['jacques_statement_terms_known']],
+  ['tactic_prova', 'prova', 'm6_interrogation_prova', 'JACQUES_MIDNIGHT_CLAIM', []],
   ['tactic_pressione', 'pressione', 'm6_interrogation_pressione', 'JACQUES_LIST_GIVEN', []],
   ['tactic_falsa_sicurezza', 'falsa_sicurezza', 'm6_interrogation_falsa', 'JACQUES_THIRD_MAN_DETAIL', []]
 ];
@@ -963,7 +1070,7 @@ for (const [tCh, tVal, branchId, ownRes, ownFlags] of TACTICS) for (const audrey
   ok(s.evidence[ownRes] === true, label + ': risorsa propria ' + ownRes);
   ownFlags.forEach(f => ok(s.flags[f] === true, label + ': flag di risorsa ' + f));
   ALL_RESOURCES.filter(r => r !== ownRes).forEach(r => ok(!s.evidence[r], label + ': risorsa altrui assente ' + r));
-  if (tVal !== 'prova') ok(!s.flags.jacques_statement_terms_known, label + ': statement_terms_known solo in Prova');
+  ok(!s.flags.jacques_statement_terms_known, label + ': statement_terms_known TAGLIATO (mai scritto da nessun ramo)');
   // beat P5: milestone pendente, arresto bloccato
   ok(NR.pendingMilestones(s, M6).length === 1 && NR.pendingMilestones(s, M6)[0].id === 'milestone_p5', label + ': milestone_p5 pendente');
   ok(!NR.prepareNode(s, M6, 'm6_arrest').ok, label + ': arresto bloccato (pending_p5_does_not_expose_arrest)');
@@ -992,15 +1099,26 @@ for (const [tCh, tVal, branchId, ownRes, ownFlags] of TACTICS) for (const audrey
   s = sl6(s);
   ok(doNode6(s, 'm6_arrest').ok && s.flags.jacques_preso === true, label + ': arresto → jacques_preso');
   ok(!NR.prepareNode(s, M6, 'm6_arrest').ok, label + ': arresto concluso non ripetibile');
-  ok(NR.activeObjective(s, M6).id === 'obj_m6_4' && NR.worldRoots(s, M6, 'sheriff', 'truman').some(function (n) { return n.id === 'm6_return_night'; }), label + ': obiettivo post-fermo punta alla root Truman');
+  // M6 stitch C2c: fra il fermo e il rapporto notturno c'è il passaggio in ospedale.
+  ok(NR.activeObjective(s, M6).id === 'obj_m6_3b', label + ': obiettivo post-fermo punta all\'ospedale');
+  ok(!NR.prepareNode(s, M6, 'm6_return_night').ok, label + ': rapporto notturno bloccato senza il piantone');
+  ok(NR.worldRoots(s, M6, 'sheriff', 'truman').some(function (n) { return n.id === 'm6_return_night_early'; }), label + ': il rifiuto parla nella finzione (root Truman = rinvio all\'ospedale)');
+  ok(doNode6(s, 'm6_return_night_early').ok && Object.keys(s.flags).indexOf('m6_return_night_early') === -1, label + ': il rinvio non scrive stato');
+  ok(doNode6(s, 'm6_hospital_guard').ok, label + ': registro di turno, piantone visto');
+  ok(!NR.prepareNode(s, M6, 'm6_return_night_early').ok, label + ': dopo il piantone il rinvio sparisce');
+  ok(NR.activeObjective(s, M6).id === 'obj_m6_4' && NR.worldRoots(s, M6, 'sheriff', 'truman').some(function (n) { return n.id === 'm6_return_night'; }), label + ': obiettivo post-ospedale punta alla root Truman');
   // tempo percepibile: notizia bloccata finché B7b non è committato
   ok(!NR.prepareNode(s, M6, 'm6_news').ok, label + ': notizia bloccata prima di B7b (tempo percepibile)');
-  ok(doNode6(s, 'm6_return_night').ok, label + ': ritorno e notte');
+  const nightPrep = NR.prepareNode(s, M6, 'm6_return_night');
+  ok(nightPrep.ok && nightPrep.pages.some(pg => pg.id === 'm6.b7b.night.audrey') === audrey, label + ': variante Audrey nel rapporto SOLO dopo averla vista a One Eyed Jacks');
+  ok(NR.commitNode(s, M6, nightPrep).ok, label + ': ritorno e notte');
   ok(NR.activeObjective(s, M6).id === 'obj_m6_4b' && NR.worldRoots(s, M6, 'sheriff', 'lucy').some(function (n) { return n.id === 'm6_news'; }), label + ': obiettivo post-notte punta alla root Lucy');
   s = sl6(s);
   // notizia: fine critica
-  ok(doNode6(s, 'm6_news').ok, label + ': notizia');
-  ok(s.flags.jacques_dead === true && s.flags.jacques_testimony_lost === true && s.flags.m6_resource_lost === true, label + ': la fine scrive SOLO dead+testimony_lost+resource_lost');
+  const newsPrep = NR.prepareNode(s, M6, 'm6_news');
+  ok(newsPrep.ok && newsPrep.pages.some(pg => pg.id === 'm6.b8.news.cooper_impeto'), label + ': correzione «impeto» resa con teoria finale degeneration');
+  ok(NR.commitNode(s, M6, newsPrep).ok, label + ': notizia');
+  ok(s.flags.jacques_dead === true && s.flags.jacques_testimony_lost === true && s.flags.m6_resource_lost !== true, label + ': la fine scrive SOLO dead+testimony_lost (resource_lost fuso in C4)');
   ok(NR.peekProp(s, 'P9').formulation.status === 'formulated', label + ': P9 formulata');
   ok(s.flags.jacques_death_suspicious !== true, label + ': death_suspicious ancora FALSO alla notizia');
   ok(!s.flags.jacques_murder_confirmed && !s.flags.jacques_murder_attributed, label + ': nessun murder_*');
@@ -1012,16 +1130,19 @@ for (const [tCh, tVal, branchId, ownRes, ownFlags] of TACTICS) for (const audrey
   if (hospital) {
     s = sl6(s);
     ok(doNode6(s, 'm6_hospital').ok, label + ': coda ospedale');
-    ok(s.flags.night_log_no_visitor === true && s.flags.jacques_death_suspicious === true, label + ': suspicious SOLO da B8b (registro giocato)');
+    ok(s.flags.jacques_death_suspicious === true && s.flags.night_log_no_visitor !== true, label + ': suspicious SOLO da B8b (night_log_no_visitor fuso in C4)');
     ok(!NR.prepareNode(s, M6, 'm6_hospital').ok, label + ': ospedale concluso non ripetibile');
   } else {
-    ok(s.flags.jacques_death_suspicious !== true && s.flags.night_log_no_visitor !== true, label + ': senza ospedale, suspicious resta falso');
+    ok(s.flags.jacques_death_suspicious !== true, label + ': senza ospedale, suspicious resta falso');
   }
   // confine col motore classico: la visione in stanza 315 viene sincronizzata,
   // poi il rapporto a Truman è giocato nel runtime che possiede l'interazione.
   NR.applyEffects(s, [{ set: 'gigante1' }]);
   ok(NR.activeObjective(s, M6).id === 'obj_m6_6', label + ': dopo il Gigante, obiettivo = rapporto a Truman');
-  ok(doNode6(s, 'm6_atto4_bridge').ok && s.flags.atto4 === true, label + ': rapporto a Truman → atto4');
+  const bridgePrep = NR.prepareNode(s, M6, 'm6_atto4_bridge');
+  ok(bridgePrep.ok && bridgePrep.pages.some(pg => pg.id === 'm6.b9.atto4.register') === hospital, label + ': variante «registro» del ponte SOLO con il sospetto della coda B8b');
+  ok(bridgePrep.pages.some(pg => pg.id === 'm6.b9.atto4.s1_safe') && !bridgePrep.pages.some(pg => pg.id === 'm6.b9.atto4.s1_pocket'), label + ': eco S1 = la custodia scelta davvero (institutional)');
+  ok(NR.commitNode(s, M6, bridgePrep).ok && s.flags.atto4 === true, label + ': rapporto a Truman → atto4');
   ok(NR.checkCompletion(s, M6) === true, label + ': M6 completa solo dopo il rapporto');
   // root-contract su tutto il percorso: mai due world-root azionabili sullo stesso target
   const rootsByTarget = {};
@@ -1087,7 +1208,8 @@ function driveToRoute(P, W, F) {
   const s = m8Base();
   doNode8(s, 'm8_diner'); doChoice8(s, 'm8_diner', 'promise_' + P);
   doNode8(s, 'm8_leland_taxi');
-  doNode8(s, 'm8_roadhouse'); doChoice8(s, 'm8_roadhouse', 'warning_' + W);
+  doNode8(s, 'm8_roadhouse_truman');
+  doNode8(s, 'm8_roadhouse_phone'); doChoice8(s, 'm8_roadhouse_phone', 'warning_' + W);
   doNode8(s, 'm8_focus_choice'); doChoice8(s, 'm8_focus_choice', 'focus_' + F);
   doNode8(s, routeOf(F));
   return s;
@@ -1096,7 +1218,8 @@ function driveToFocus(P, W, F) {
   const s = m8Base();
   doNode8(s, 'm8_diner'); doChoice8(s, 'm8_diner', 'promise_' + P);
   doNode8(s, 'm8_leland_taxi');
-  doNode8(s, 'm8_roadhouse'); doChoice8(s, 'm8_roadhouse', 'warning_' + W);
+  doNode8(s, 'm8_roadhouse_truman');
+  doNode8(s, 'm8_roadhouse_phone'); doChoice8(s, 'm8_roadhouse_phone', 'warning_' + W);
   doNode8(s, 'm8_focus_choice'); doChoice8(s, 'm8_focus_choice', 'focus_' + F);
   return s;
 }
@@ -1115,7 +1238,7 @@ function driveToStation(P, W, F) {
   ok(NR.evalCond(s, M8.entry_condition, M8), 'C8B: M8 entrata (atto4)');
   ok(soleObj(s) === 'obj_m8_0', 'C8B: entry_objective_points_to_actionable_root (obj_m8_0)');
   ok(NR.prepareNode(s, M8, 'm8_diner').ok, 'C8B: entry root m8_diner azionabile');
-  ok(!NR.prepareNode(s, M8, 'm8_roadhouse').ok, 'C8B: roadhouse NON azionabile all\'ingresso (richiede promise_stance)');
+  ok(!NR.prepareNode(s, M8, 'm8_roadhouse_truman').ok, 'C8B: roadhouse NON azionabile all\'ingresso (richiede promise_stance)');
 }
 
 // --- value_transition (6 gate) ---
@@ -1227,17 +1350,22 @@ for (const P of ['accompagno', 'autonomia', 'prudenza']) for (const W of ['palme
   doChoice8(s, 'm8_diner', 'promise_' + P); s = sl8(s);
   ok(NR.peekValue(s, 'promise_stance') === P, label + ': promise_stance=' + P + ' (sopravvive save/load)');
   ok(soleObj(s) === 'obj_m8_25', label + ': obj_m8_25 dopo la promessa (Leland al diner)');
-  ok(!NR.prepareNode(s, M8, 'm8_roadhouse').ok, label + ': Roadhouse chiuso prima della testimonianza');
+  ok(!NR.prepareNode(s, M8, 'm8_roadhouse_truman').ok, label + ': Roadhouse chiuso prima della testimonianza');
   doNode8(s, 'm8_leland_taxi'); s = sl8(s);
   ok(s.evidence.T_LELAND_TAXI === true, label + ': falsa storia taxi ascoltata al diner, prima del Roadhouse');
   ok(!s.flags.maddy_trovata && NR.peekValue(s, 'body_found_by') === undefined, label + ': testimonianza precede presagio, scoperta e assegnazione del ritrovamento');
   ok(soleObj(s) === 'obj_m8_1', label + ': obj_m8_1 dopo il taxi (root Roadhouse azionabile)');
-  // roadhouse: presagio null sulla pagina del Gigante, active dopo il commit del nodo
-  const pr = NR.prepareNode(s, M8, 'm8_roadhouse');
+  // roadhouse pass 01 (split B1): tavolo (presagio null sulla pagina del Gigante,
+  // active dopo il commit del nodo), poi si CAMMINA fino al telefono (nessun `next`)
+  const pr = NR.prepareNode(s, M8, 'm8_roadhouse_truman');
   ok(pr.ok && NR.peekValue(s, 'presagio_status') === undefined, label + ': presagio null sulla pagina del Gigante');
   NR.commitNode(s, M8, pr); s = sl8(s);
   ok(NR.peekValue(s, 'presagio_status') === 'active', label + ': presagio active dopo commitNode (mai come entry, sopravvive save/load)');
-  doChoice8(s, 'm8_roadhouse', 'warning_' + W); s = sl8(s);
+  ok(soleObj(s) === 'obj_m8_15', label + ': obj_m8_15 (il telefono del Roadhouse) fra il tavolo e la telefonata');
+  const prPhone = NR.prepareNode(s, M8, 'm8_roadhouse_phone');
+  ok(prPhone.ok, label + ': telefono azionabile dopo il tavolo (si cammina, nessun next)');
+  NR.commitNode(s, M8, prPhone); s = sl8(s);
+  doChoice8(s, 'm8_roadhouse_phone', 'warning_' + W); s = sl8(s);
   ok(NR.peekValue(s, 'warning_target') === W, label + ': warning_target=' + W);
   ok(NR.peekValue(s, 'maddy_action_after_warning') === (W === 'palmer' ? 'departure_prepared' : 'none'), label + ': maddy_action nominale (none esplicito ≠ undefined)');
   ok(NR.peekValue(s, 'sarah_support_state') === (W === 'centrale' ? 'vice' : 'none'), label + ': sarah_support nominale');

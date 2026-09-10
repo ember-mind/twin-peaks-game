@@ -1,0 +1,27 @@
+node:assert:152
+  throw new AssertionError(obj);
+  ^
+
+AssertionError [ERR_ASSERTION]: js/maps.js remains unchanged
++ actual - expected
+
++ 'c1b26f199808437776de7258e7d5eaa7cb75edd1a08ba07eb167d3c2c0432a17'
+- '71b5c38bf06a4e0394215944a98e7ba037898f96a7f889623772c35f5b15854f'
+
+    at Object.<anonymous> (/Users/ebuccelli/Vault/1. Projects/Twin Peaks Game/test/character-life.js:282:10)
+    at Module._compile (node:internal/modules/cjs/loader:1854:14)
+    at Object..js (node:internal/modules/cjs/loader:1985:10)
+    at Module.load (node:internal/modules/cjs/loader:1577:32)
+    at Module._load (node:internal/modules/cjs/loader:1379:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 'c1b26f199808437776de7258e7d5eaa7cb75edd1a08ba07eb167d3c2c0432a17',
+  expected: '71b5c38bf06a4e0394215944a98e7ba037898f96a7f889623772c35f5b15854f',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.16.0

@@ -55,10 +55,11 @@
     'town:G': line('town_grave', 'Sei lapidi in due file; leggo i nomi, lascio passare un respiro, poi le date.'),
     'town:q': line('town_service_crate', 'La cassa di servizio porta una scheggia chiara sul coperchio, proprio dove la mano cercherebbe presa.'),
     'woods:q': line('woods_crate', 'La cassa mette quattro angoli dritti in mezzo al bosco e per questo sembra più rumorosa degli alberi.'),
-    'sheriff:i': line('sheriff_wall', 'Le cornici del distretto separano uffici e passaggi. Lucy batte un tasto e il suono attraversa il muro.'),
+    'sheriff:T': line('sheriff_wall', 'Le cornici del distretto separano uffici e passaggi. Lucy batte un tasto e il suono attraversa il muro.'),
     'palmer:i': line('palmer_wall', 'Le pareti calde di casa Palmer accompagnano il corridoio fino alla camera di Laura.'),
     'hotel_gn:i': line('hotel_wall', 'I pannelli del Great Northern si ripetono lungo il corridoio. Ogni passo ritorna con voce più bassa.'),
-    'hospital:i': line('hospital_wall', 'Fra le pareti dell’ospedale il corridoio è corto, ma nessuna porta sembra vicina.'),
+    'hospital:T': line('hospital_wall', 'Fra le pareti dell’ospedale il corridoio è corto, ma nessuna porta sembra vicina.'),
+    'room_315:T': line('room315_wall', 'Pannelli di pino sopra la boiserie. Il Great Northern non lascia vedere i chiodi.'),
     'diner:i': line('diner_wall', 'Al Double R, le cornici hanno assorbito tanto caffè da sembrare più scure vicino ai tavoli.'),
     'traincar:i': line('traincar_wall', 'Le pareti del vagone stringono il passaggio finché le mie spalle sfiorano il metallo.'),
     'oej:i': line('oej_wall', 'La parete scura di One Eyed Jack’s mangia il bordo della stanza. Il mio bavero chiaro resta in vista.'),
@@ -78,7 +79,6 @@
     'roadhouse:h': line('roadhouse_chair', 'La sedia del Roadhouse tiene lo schienale al muro e la seduta rivolta al palco.'),
     'palmer:K': line('laura_bed', 'Il letto di Laura: coperta rossa, cuscino bianco, telaio scuro, una piega corta sul lato della parete.'),
     'hotel_gn:K': line('hotel_bed', 'Il letto del Great Northern è teso e pronto. Mi siedo sul bordo senza slacciare le scarpe.'),
-    'hospital:K': line('hospital_bed', 'Sei letti uguali in ospedale, sei coperte tirate fino alla stessa altezza.'),
     'palmer:U': line('laura_dresser', 'Il comò di Laura resta chiuso: piano chiaro, fronte bruno, maniglia dorata fredda al tatto.'),
     'hotel_gn:U': line('hotel_dresser', 'Lascio il taccuino sul comò del Great Northern e la maniglia dorata scompare sotto il suo bordo.')
   };
@@ -88,7 +88,10 @@
     'town:50,22': line('laura_grave', '«LAURA PALMER, 1972-1989.» Diciassette anni compressi fra un nome e due date.'),
     'woods:11,16': line('grove_sign', '«GLASTONBURY GROVE.» Il nome è inciso nel legno; i sicomori lo tengono stretto in cerchio.'),
     'traincar:20,2': line('oej_sign', 'Sotto «ONE EYED JACKS — oltre il confine», la freccia indica bene la strada e tace sulla giurisdizione.'),
-    'traincar:5,6': line('bridge_sign', 'Il piccolo cartello di legno indica il ponticello, e il ponticello regge molto più di quanto prometta.')
+    'traincar:4,6': line('bridge_sign', 'Dal parapetto del ponticello la riva scivola sotto le assi, e il paletto della contea resta piantato di là dall’acqua.'),
+    'traincar:12,3': line('traincar_stove', 'Contro la parete del vagone, una stufa di ghisa fredda sotto il palmo.'),
+    'traincar:10,6': line('traincar_cards', 'Un sedile divelto. Sotto, qualcosa di chiaro.'),
+    'traincar:21,2': line('traincar_tracks_north', 'Il terreno segna un varco stretto fra gli alberi.')
   };
 
   var COORD_CANON = {
@@ -96,7 +99,7 @@
     'town:50,22': 'tomba_laura',
     'woods:11,16': 'sign_grove',
     'traincar:20,2': 'sign_oej',
-    'traincar:5,6': 'sign_ponte'
+    'traincar:4,6': 'sign_ponte'
   };
 
   // Stesso carattere grafico, volume diverso: regioni assegnate a coordinate
@@ -113,6 +116,16 @@
   }
   for (cx = 1; cx <= 14; cx++) COORD['roadhouse:' + cx + ',1'] = ROADHOUSE_STAGE;
 
+  // Ospedale nativo: letti resi in glifo T solido, distinti solo per coordinata.
+  var HOSPITAL_BED = line('hospital_bed', 'Due letti uguali in corsia, due coperte tirate fino alla stessa altezza.');
+  var RONETTE_BED_CELLS = [];
+  var GERARD_BED_CELLS = [];
+  for (cy = 3; cy <= 5; cy++) {
+    for (cx = 3; cx <= 4; cx++) { COORD['hospital:' + cx + ',' + cy] = HOSPITAL_BED; RONETTE_BED_CELLS.push(cx + ',' + cy); }
+    for (cx = 9; cx <= 10; cx++) { COORD['hospital:' + cx + ',' + cy] = HOSPITAL_BED; GERARD_BED_CELLS.push(cx + ',' + cy); }
+  }
+  HOSPITAL_BED.scope = { kind: 'coords', mapId: 'hospital', tile: 'T', keys: RONETTE_BED_CELLS.concat(GERARD_BED_CELLS) };
+
   var STATE = [
     {
       mapId: 'woods', tile: 'Y', flag: 'sogno_fatto',
@@ -127,7 +140,7 @@
       entry: line('traincar_after_ring', 'L’anello non è più sulla traversa. Sulla parete del vagone, la sua ombra continua a sembrarmi al centro.')
     },
     {
-      mapId: 'hospital', tile: 'K', flag: 'ronette_bob',
+      mapId: 'hospital', tile: 'T', coords: RONETTE_BED_CELLS, evidence: 'T1_RONETTE_BOB',
       entry: line('hospital_bed_after_ronette', 'Ronette ha pronunciato un nome. Gli altri letti restano uguali; il suo adesso ha una voce.')
     }
   ];
@@ -172,7 +185,7 @@
   STATE.forEach(function (rule) {
     register(rule.entry, {
       sourceClass: 'state-context',
-      scope: { kind: 'state', mapId: rule.mapId, tile: rule.tile, flag: rule.flag || null, clue: rule.clue || null }
+      scope: { kind: 'state', mapId: rule.mapId, tile: rule.tile, coords: rule.coords || null, flag: rule.flag || null, clue: rule.clue || null, evidence: rule.evidence || null }
     });
   });
 
@@ -185,9 +198,11 @@
 
     for (var i = 0; i < STATE.length; i++) {
       var rule = STATE[i];
-      var stateMatches = rule.flag ? !!(state && state.flags && state.flags[rule.flag]) :
+      var stateMatches = rule.evidence ? !!(state && state.evidence && state.evidence[rule.evidence]) :
+        rule.flag ? !!(state && state.flags && state.flags[rule.flag]) :
         !!(rule.clue && state && state.clues && state.clues.indexOf(rule.clue) >= 0);
-      if (rule.mapId === mapId && rule.tile === tile && stateMatches) {
+      var coordMatches = !rule.coords || rule.coords.indexOf(x + ',' + y) >= 0;
+      if (rule.mapId === mapId && rule.tile === tile && coordMatches && stateMatches) {
         return rule.entry.id;
       }
     }

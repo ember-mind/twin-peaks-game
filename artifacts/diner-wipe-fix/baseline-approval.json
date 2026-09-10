@@ -1,0 +1,9 @@
+{
+  "status": "approved",
+  "projectId": "twin-peaks-pokemon",
+  "scenario": "dinerGestures",
+  "sourceRunId": "2026-09-08T13-11-14-844Z-dinerGestures",
+  "approvedBy": "codex",
+  "captures": 11,
+  "manifestPath": "test/coldstage-baselines/dinerGestures/baseline.json"
+}

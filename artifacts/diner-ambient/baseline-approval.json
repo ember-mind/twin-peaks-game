@@ -1,0 +1,9 @@
+{
+  "status": "approved",
+  "projectId": "twin-peaks-pokemon",
+  "scenario": "dinerAmbient",
+  "sourceRunId": "2026-09-08T11-41-53-735Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient",
+  "approvedBy": "gpt-5.6-sol",
+  "captures": 9,
+  "manifestPath": "test/coldstage-baselines/dinerAmbient/baseline.json"
+}

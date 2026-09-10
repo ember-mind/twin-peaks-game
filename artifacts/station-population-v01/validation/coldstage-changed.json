@@ -1,0 +1,473 @@
+{
+  "status": "pass",
+  "reportPath": ".coldstage/runs/2026-09-09T06-48-36-257Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation-characterLife-stationP/report.json",
+  "environment": {
+    "lane": "selenium-release",
+    "browser": "Chrome",
+    "browserVersion": "152.0.7977.83",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "changedFileCount": 66,
+  "baseline": {
+    "previousStatus": "ready",
+    "statePath": ".coldstage/state.json",
+    "advanced": false,
+    "status": "held-for-pixel-gate"
+  },
+  "pixelGate": {
+    "status": "pending",
+    "aiReviewNeeded": true
+  },
+  "scenarios": [
+    {
+      "name": "desktop",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 657,
+      "checks": {
+        "passed": 14,
+        "total": 14,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 0,
+      "captureDeterminism": []
+    },
+    {
+      "name": "gameplay",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 397,
+      "checks": {
+        "passed": 9,
+        "total": 9,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 0,
+      "captureDeterminism": []
+    },
+    {
+      "name": "mobile",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 253,
+      "checks": {
+        "passed": 14,
+        "total": 14,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 0,
+      "captureDeterminism": []
+    },
+    {
+      "name": "mobileGameplay",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 488,
+      "checks": {
+        "passed": 15,
+        "total": 15,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 1,
+      "captureDeterminism": []
+    },
+    {
+      "name": "mobileLandscapeGameplay",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 591,
+      "checks": {
+        "passed": 13,
+        "total": 13,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 1,
+      "captureDeterminism": []
+    },
+    {
+      "name": "cooperDown",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 696,
+      "checks": {
+        "passed": 6,
+        "total": 6,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 1,
+      "captureDeterminism": []
+    },
+    {
+      "name": "cooperUp",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 614,
+      "checks": {
+        "passed": 6,
+        "total": 6,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 1,
+      "captureDeterminism": []
+    },
+    {
+      "name": "cooperRight",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 551,
+      "checks": {
+        "passed": 6,
+        "total": 6,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 1,
+      "captureDeterminism": []
+    },
+    {
+      "name": "cooperLeft",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 698,
+      "checks": {
+        "passed": 6,
+        "total": 6,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 1,
+      "captureDeterminism": []
+    },
+    {
+      "name": "visual",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-performed"
+      },
+      "durationMs": 467,
+      "checks": {
+        "passed": 3,
+        "total": 3,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": {
+        "status": "review-required",
+        "aiReviewNeeded": true,
+        "nextAction": "visual-review",
+        "reviewSheet": ".coldstage/diffs/2026-09-09T06-48-36-257Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation-characterLife-stationP/visual/visual-diff-sheet.webp"
+      },
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 1,
+      "captureDeterminism": []
+    },
+    {
+      "name": "diner",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-performed"
+      },
+      "durationMs": 496,
+      "checks": {
+        "passed": 4,
+        "total": 4,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": {
+        "status": "unchanged",
+        "aiReviewNeeded": false,
+        "nextAction": "none",
+        "reviewSheet": null
+      },
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 1,
+      "captureDeterminism": []
+    },
+    {
+      "name": "dinerAmbient",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-performed"
+      },
+      "durationMs": 1751,
+      "checks": {
+        "passed": 3,
+        "total": 3,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": {
+        "status": "review-required",
+        "aiReviewNeeded": true,
+        "nextAction": "visual-review",
+        "reviewSheet": ".coldstage/diffs/2026-09-09T06-48-36-257Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation-characterLife-stationP/dinerAmbient/dinerAmbient-diff-sheet.webp"
+      },
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 9,
+      "captureDeterminism": []
+    },
+    {
+      "name": "dinerEnvironment",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-performed"
+      },
+      "durationMs": 1644,
+      "checks": {
+        "passed": 3,
+        "total": 3,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": {
+        "status": "review-required",
+        "aiReviewNeeded": true,
+        "nextAction": "visual-review",
+        "reviewSheet": ".coldstage/diffs/2026-09-09T06-48-36-257Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation-characterLife-stationP/dinerEnvironment/dinerEnvironment-diff-sheet.webp"
+      },
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 9,
+      "captureDeterminism": []
+    },
+    {
+      "name": "dinerGestures",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-performed"
+      },
+      "durationMs": 1975,
+      "checks": {
+        "passed": 3,
+        "total": 3,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": {
+        "status": "unchanged",
+        "aiReviewNeeded": false,
+        "nextAction": "none",
+        "reviewSheet": null
+      },
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 11,
+      "captureDeterminism": []
+    },
+    {
+      "name": "dinerExterior",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-performed"
+      },
+      "durationMs": 2874,
+      "checks": {
+        "passed": 8,
+        "total": 8,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": {
+        "status": "baseline-missing",
+        "aiReviewNeeded": false,
+        "nextAction": "visual-review-then-baseline-approval",
+        "reviewSheet": null
+      },
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 3,
+      "captureDeterminism": []
+    },
+    {
+      "name": "dinerLocation",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-performed"
+      },
+      "durationMs": 5988,
+      "checks": {
+        "passed": 11,
+        "total": 11,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": {
+        "status": "baseline-missing",
+        "aiReviewNeeded": false,
+        "nextAction": "visual-review-then-baseline-approval",
+        "reviewSheet": null
+      },
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 4,
+      "captureDeterminism": []
+    },
+    {
+      "name": "sheriffsStation",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-performed"
+      },
+      "durationMs": 46714,
+      "checks": {
+        "passed": 9,
+        "total": 9,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": {
+        "status": "review-required",
+        "aiReviewNeeded": true,
+        "nextAction": "visual-review",
+        "reviewSheet": ".coldstage/diffs/2026-09-09T06-48-36-257Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation-characterLife-stationP/sheriffsStation/sheriffsStation-diff-sheet.webp"
+      },
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 8,
+      "captureDeterminism": []
+    },
+    {
+      "name": "characterLife",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-performed"
+      },
+      "durationMs": 65100,
+      "checks": {
+        "passed": 16,
+        "total": 16,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": {
+        "status": "baseline-missing",
+        "aiReviewNeeded": false,
+        "nextAction": "visual-review-then-baseline-approval",
+        "reviewSheet": null
+      },
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 6,
+      "captureDeterminism": []
+    },
+    {
+      "name": "stationP",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-performed"
+      },
+      "durationMs": 70493,
+      "checks": {
+        "passed": 21,
+        "total": 21,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": {
+        "status": "baseline-missing",
+        "aiReviewNeeded": false,
+        "nextAction": "visual-review-then-baseline-approval",
+        "reviewSheet": null
+      },
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 6,
+      "captureDeterminism": []
+    }
+  ]
+}

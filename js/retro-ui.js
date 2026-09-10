@@ -1,4 +1,4 @@
-/* retro-ui.js — proiezione canvas GBC 160x144 della UI narrativa DOM.
+/* retro-ui.js — proiezione canvas 256x192 della UI narrativa DOM.
  * DOM resta sorgente semantica/accessibile e gestore input; visuale usa font
  * bitmap 5x7, scala intera e cornici tile-based in stile Game Boy.
  */
@@ -8,9 +8,10 @@
   var GAME = window.GAME = window.GAME || {};
   var doc = window.document, source, objective, canvas, ctx, hit = [], RF = GAME.RetroFont;
   var Portraits = GAME.Portraits;
-  var W = 160, H = 144;
+  var W = 256, H = 192;
   var lastSignature = '', engineOwned = false;
   var visualKey = '', visualPart = 0, visualView = null;
+  var narrativePortraitKey = '';
 
   var FONT = {
     'A':['01110','10001','10001','11111','10001','10001','10001'],
@@ -122,14 +123,17 @@
     var pageEl = directChildren(rootEl).filter(function (e) { return e.classList.contains('nw-page'); })[0];
     if (!pageEl) return null;
     var portraitHint = pageEl.getAttribute('data-portrait');
-    var chars = Math.floor((152 - 16) / 6);
-    var maxLines = isNotebook ? 14 : 4;
+    var chars = Math.floor((W - 24) / 6);
+    var maxLines = isNotebook ? 19 : 5;
     var nameEl = pageEl.querySelector('.nw-name');
     var name = nameEl ? clean(nameEl.textContent).replace(/:\s*$/, '') : '';
     var portrait = Portraits ? Portraits.resolve(name, portraitHint) : portraitHint;
     var nameLines = name && !portrait ? wrap(name + ':', chars) : [];
+    /* Testo con ritratto parte 11px più in basso (vedi renderPanel): una riga
+     * di capacità in meno per non sforare il fondo del box. */
+    var portraitInset = portrait && !isNotebook ? 1 : 0;
     var body = pageBody(pageEl, nameEl), bodyLines = wrap(body, chars);
-    var capacity = Math.max(1, maxLines - nameLines.length), chunks = [];
+    var capacity = Math.max(1, maxLines - nameLines.length - portraitInset), chunks = [];
     if (!bodyLines.length) bodyLines = [''];
     for (var i = 0; i < bodyLines.length; i += capacity) chunks.push(bodyLines.slice(i, i + capacity));
     var key = (pageEl.getAttribute('data-page-id') || '') + '|' + (portrait || '') + '|' + name + '|' + body;
@@ -152,14 +156,60 @@
     visualPart++; lastSignature = ''; render(true); return true;
   }
 
+  /* Mostra/nasconde il ritratto hires e la targhetta nome sopra la card
+   * disegnata da Portraits.drawCard nel widget narrativo, rispecchiando
+   * engine.js syncSpeakerPortrait/syncSpeakerTypography per il dialogo
+   * classico. I due sistemi non sono mai attivi insieme (dialogo classico vs
+   * widget narrativo), ma l'attributo data-speaker-source evita che l'uno
+   * nasconda gli overlay dell'altro. */
+  function syncPortraitOverlay(key, name) {
+    if (typeof doc === 'undefined' || typeof doc.getElementById !== 'function') return;
+    var image = doc.getElementById('speaker-portrait-hires');
+    var nameEl = doc.getElementById('speaker-name-hires');
+    var visible = !!(key && Portraits && Portraits.faces[key]);
+    var nextKey = visible ? key : '';
+    var label = visible && Portraits.label ? Portraits.label(name, key, 36) : '';
+    if (narrativePortraitKey === nextKey + '|' + label) return;
+    narrativePortraitKey = nextKey + '|' + label;
+    if (!visible) {
+      if (image && image.getAttribute('data-speaker-source') === 'narrative') {
+        image.hidden = true;
+        image.removeAttribute('data-speaker-source');
+      }
+      if (nameEl && nameEl.getAttribute('data-speaker-source') === 'narrative') {
+        nameEl.hidden = true;
+        nameEl.removeAttribute('data-speaker-source');
+      }
+      return;
+    }
+    if (nameEl) {
+      nameEl.setAttribute('data-speaker-source', 'narrative');
+      nameEl.textContent = label;
+      nameEl.hidden = false;
+    }
+    if (!image) return;
+    image.setAttribute('data-speaker-source', 'narrative');
+    image.setAttribute('data-speaker', nextKey);
+    var assetRoot = image.getAttribute('data-portrait-root') || 'assets/portraits/hires/';
+    var nextSrc = assetRoot + nextKey + '.png';
+    image.onload = function () {
+      if (narrativePortraitKey === nextKey + '|' + label) image.hidden = false;
+    };
+    image.onerror = function () {
+      if (narrativePortraitKey === nextKey + '|' + label) image.hidden = true;
+    };
+    if (image.getAttribute('src') !== nextSrc) image.setAttribute('src', nextSrc);
+    if (image.complete && image.naturalWidth > 0) image.hidden = false;
+  }
+
   function renderPanel(rootEl) {
     var kids = directChildren(rootEl), isNotebook = rootEl.classList.contains('nb-root');
     var options = kids.filter(function (e) { return e.classList.contains('nw-opt'); });
     var titleEl = kids.filter(function (e) { return e.classList.contains('nw-title'); })[0];
     var pageEl = kids.filter(function (e) { return e.classList.contains('nw-page'); })[0];
-    var x = isNotebook ? 3 : 4, y, w = isNotebook ? 154 : 152, h;
+    var x = isNotebook ? 3 : 4, y, w = isNotebook ? W - 6 : W - 8, h;
     hit = [];
-    if (isNotebook) { y = 3; h = 138; }
+    if (isNotebook) { y = 3; h = H - 6; }
     else if (options.length) {
       var previewChars = Math.floor((w - 24) / 6);
       var focusedIndex = Math.max(0, options.findIndex(function (e) { return e.classList.contains('nw-focus'); }));
@@ -167,9 +217,9 @@
       var focusedLines = wrap(focusedCopy, Math.floor((w - 27) / 6));
       var previewTitle = titleEl ? wrap(titleEl.textContent, Math.floor((w - 14) / 6)).length : 0;
       var previewPage = pageEl ? wrap(pageEl.textContent, previewChars).length : 0;
-      h = Math.min(138, 28 + focusedLines.length * 9 + previewTitle * 8 + (previewTitle ? 3 : 0) + previewPage * 8 + (previewPage ? 4 : 0)); y = 141 - h;
+      h = Math.min(H - 6, 28 + focusedLines.length * 9 + previewTitle * 8 + (previewTitle ? 3 : 0) + previewPage * 8 + (previewPage ? 4 : 0)); y = H - 3 - h;
     }
-    else { h = 50; y = 91; }
+    else { h = 58; y = H - 61; }
     frame(x, y, w, h);
     var cy = y + 7;
     if (titleEl) {
@@ -196,13 +246,21 @@
       visualKey = ''; visualPart = 0;
       visualView = { kind: 'choice', index: oi, count: options.length, choiceLines: optionLines.slice(), sourceText: copy };
       rootEl.setAttribute('data-visual-choice', String(oi + 1) + '/' + options.length);
+      syncPortraitOverlay('');
     } else if (pageEl) {
       var view = pageView(rootEl, isNotebook);
       var portrait = view.portrait, pi;
+      /* Card tag (drawn at y-35, alta 47px) copre fino a y+12: il testo deve
+       * partire sotto, come nel box classico (engine.js drawDialogue: card a
+       * by-37, testo a by+16 -> stesso margine di 53px dal top della card). */
+      if (portrait && !isNotebook) cy = y + 18;
       for (pi = 0; pi < view.nameLines.length; pi++) text(ctx, view.nameLines[pi], x + 8, cy + pi * 9, '#31543a');
       cy += view.nameLines.length * 9;
       for (pi = 0; pi < view.bodyLines.length; pi++) text(ctx, view.bodyLines[pi], x + 8, cy + pi * 9, '#183225');
       if (portrait && Portraits) Portraits.drawCard(ctx, portrait, view.name, x + 4, y - 35);
+      syncPortraitOverlay(!isNotebook ? portrait : '', view.name);
+    } else {
+      syncPortraitOverlay('');
     }
     if (!isNotebook) {
       ctx.fillStyle = '#31543a'; ctx.fillRect(x + w - 12, y + h - 9, 5, 2); ctx.fillRect(x + w - 11, y + h - 7, 3, 2); ctx.fillRect(x + w - 10, y + h - 5, 1, 1);
@@ -211,7 +269,7 @@
 
   function render(force) {
     if (!ctx) return;
-    if (engineOwned) { ctx.clearRect(0, 0, W, H); return; }
+    if (engineOwned) { ctx.clearRect(0, 0, W, H); syncPortraitOverlay(''); return; }
     var rootEl = visibleRoot();
     var sig = (rootEl ? rootEl.textContent + '|' + rootEl.className + '|' + Array.prototype.map.call(rootEl.querySelectorAll('.nw-page'), function (e) { return e.getAttribute('data-portrait') || ''; }).join('|') + '|' + Array.prototype.map.call(rootEl.querySelectorAll('.nw-focus'), function (e) { return e.textContent; }).join('|') : '') + '|' + (objective ? objective.textContent + objective.style.display : '');
     if (!force && sig === lastSignature) return;
@@ -220,7 +278,7 @@
     canvas.style.display = rootEl ? '' : 'none';
     canvas.style.pointerEvents = rootEl ? 'auto' : 'none';
     renderObjective(rootEl);
-    if (rootEl) renderPanel(rootEl);
+    if (rootEl) renderPanel(rootEl); else syncPortraitOverlay('');
   }
 
   function boot() {

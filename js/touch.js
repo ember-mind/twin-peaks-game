@@ -21,6 +21,9 @@
   var TAP_MAX_MS = 300;       // durata massima di un "tap" (per l'avanzamento dialoghi)
   var TAP_MAX_MOVE = 12;      // spostamento massimo di un "tap" (px)
   var MENU_SWIPE_MOVE = 28;   // gesto verticale intenzionale nel fascicolo (px)
+  // Sfalsamento diagonale nel gutter landscape. 40px mantiene B almeno 8px
+  // fuori dal framebuffer 512px su viewport 844x390; 58px lo sovrapponeva.
+  var GUTTER_DIAGONAL = 40;
 
   function css(el, props) {
     for (var k in props) if (props.hasOwnProperty(k)) el.style[k] = props[k];
@@ -403,7 +406,7 @@
           width: layout.dpad + 'px', height: layout.dpad + 'px', borderRadius: '0'
         });
         placeGutterButton(uiA, 64, layout.gutterRight, Math.round(viewportSize().height / 2 - 76));
-        placeGutterButton(uiB, 64, layout.gutterRight + 58, Math.round(viewportSize().height / 2 + 18));
+        placeGutterButton(uiB, 64, layout.gutterRight + GUTTER_DIAGONAL, Math.round(viewportSize().height / 2 + 18));
       } else if (!layout.landscape) {
         css(uiDpad, {
           left: 'calc(' + layout.edge + 'px + env(safe-area-inset-left, 0px))',
@@ -485,7 +488,7 @@
       var titleLayout = playLayout();
       if (titleLayout.gutter) {
         placeGutterButton(uiA, 64, titleLayout.gutterRight, Math.round(viewportSize().height / 2 - 70));
-        placeGutterButton(uiB, 64, titleLayout.gutterRight + 58, Math.round(viewportSize().height / 2 + 20));
+        placeGutterButton(uiB, 64, titleLayout.gutterRight + GUTTER_DIAGONAL, Math.round(viewportSize().height / 2 + 20));
       } else {
         compactTopButton(uiA, 50, 12, 12);
         compactTopButton(uiB, 42, 70, 16);

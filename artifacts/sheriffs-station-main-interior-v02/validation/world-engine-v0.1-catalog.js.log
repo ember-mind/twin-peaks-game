@@ -1,0 +1,3 @@
+Command: node test/world-engine-v0.1-catalog.js
+Exit: 0
+Output: WORLD-ENGINE-V0.1-CATALOG-PASS registration, immutable catalog, scoped lookups, shared connections, validation, authored references

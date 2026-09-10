@@ -1,0 +1,104 @@
+# town — invarianti (coordinate preesistenti)
+  ok invariato porta hotel
+  ok invariato porta palmer
+  ok invariato porta sceriffo
+  ok invariato porta diner
+  ok invariato transenna bosco
+  ok invariato cartello
+  ok invariato (calpestabile) spawn
+  ok corridoio cimitero
+  ok tomba di Laura
+  ok invariato (calpestabile) uscita est (vagone)
+  ok invariato (calpestabile) uscita est (vagone)
+  ok invariato lago
+  ok invariato (calpestabile) riva del lago (lago_riva)
+# town — raggiungibilita'
+  ok porta hotel
+  ok porta palmer
+  ok porta sceriffo
+  ok porta diner
+  ok transenna bosco
+  ok cartello
+  ok porta ospedale
+  ok porta roadhouse
+  ok riva del lago (lago_riva)
+  ok uscita est (vagone)
+  ok invariato (calpestabile) npc bobby
+  ok npc bobby
+  ok invariato (calpestabile) npc donna
+  ok npc donna
+  ok invariato (calpestabile) npc audrey
+  ok npc audrey
+  ok invariato (calpestabile) npc jacoby
+  ok npc jacoby
+# woods
+  ok porta redroom
+  ok uscita sud
+  ok olio
+  ok cartello grove
+--- town ---
+        'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTXTTTTT', // 0
+        'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTpTTTTT', // 1
+        'T.................................................p....T', // 2
+        'T....TTTTTTTTTT....TTTTTTTTTT........TTTTTTTTTT...p....T', // 3
+        'Tn...4444444444.....55555555.........3333333333...p.,..T', // 4
+        'T....4444444444.....55555555.........3333333333...p.n..T', // 5
+        'T....4444D44444.....555D5555.........33333D3333...p....T', // 6
+        'T.......ApA...........ApA............FFFFFpFFFF...p....T', // 7
+        'T........p.......n.....p.wFF..............p.......p....T', // 8
+        'T........p..........T..p.wFF77773333......p.......p..,.T', // 9
+        'T........p...,.........p.wFF77773333......p.......p....T', // 10
+        'T........p.............p.wFF77773333....,.p.......p....T', // 11
+        'T........p.............p.wFF77773333......p.......p....T', // 12
+        'T===L====pE=====L======p====L===========L=pE======p=L==T', // 13
+        'Trrrrrrrr--r--rrrrrrrrrrrwFF-rrrrrrrrrrrrr--rrrrrrrrrrrr', // 14
+        'Trrrrrrrr--r--rrrrrrrrrrrwFF-rrrrrrrrrrrrr--rrrrrrrrrrrr', // 15
+        'T=====P===L=======P===L==wFFFFF=P=L=========P=L========T', // 16
+        'T,....n..TTTTTTT.........wFFFFF........TTTTTTT.........T', // 17
+        'T.........11111..........wwwww.........2222222.........T', // 18
+        'T.........11111...........=rr=.........2222222..H......T', // 19
+        'T.........11D11,..........=rr=.........222D222.........T', // 20
+        'T.......FFFpppFFF.....n.T.=rr=...........ppp....TTTTTT.T', // 21
+        'T.,T..gggg.ppp...q........=rr=...........ppp....G.G.G..T', // 22
+        'T..gggg....ppp.,B.........=rr=n..........ppp...........T', // 23
+        'T..ggggT..n...n.A.........=rr=...................G.G.G.T', // 24
+        'T.......B............T....=rr=........n....gggg........T', // 25
+        'T...wwwwwwwwwwF...........=rr=.............,66666666...T', // 26
+        'T..,wwwwwwwwwwF...........=rr=.....T........66666666...T', // 27
+        'T..nwwwwwwwwwwF...........=rr=,.............666D6666...T', // 28
+        'T...wwwwwwwwwwF...........=rrB=A...............p......nT', // 29
+        'T...wwwwwwwwwwF..,T.......=rr=S=H..............p..T....T', // 30
+        'T...wwwwwwwwwwF...........=rr==B............,..........T', // 31
+        'T...,..............n......=rr=.........................T', // 32
+        'T.........................=rr=.,.......................T', // 33
+        'TTTTTTTTTTTTTTTTTTTTT.n..n.n...,..n.TTTTTTTTTTTTTTTTTTTT', // 34
+        'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT' // 35
+--- woods ---
+        'TTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 0
+        'TTTTTTTTTTT888888TTTTTTTTTTT', // 1
+        'TTTTTTTTTTT888888TTTTTTTTTTT', // 2
+        'TTTTTTTTTTq888888TTTTTTTTTTT', // 3
+        'TTTTTTTTTTT888D88TTTTTTTTTTT', // 4
+        'TTTTTTTTTggggpppggggTTTTTTTT', // 5
+        'TTTTTTTTTggggpppggqgTTTTTTTT', // 6
+        'TTTTTTTTTggggpppggggTTTTTTTT', // 7
+        'TTTTTTTTTTTgTpppggTTTTTTTTTT', // 8
+        'TTTTTTTTTTgggpYpgggTTTTTTTTT', // 9
+        'TTTTTTTTTTggYpppYggTTTTTTTTT', // 10
+        'TTTTTTTTTTgggooogggTTTTTTTTT', // 11
+        'TTTTTTTTTTgYooopgYgTTTTTTTTT', // 12
+        'TTTTTTTTTTgggpppgggTTTTTTTTT', // 13
+        'TTTTTTTTTTggYpppYggTTTTTTTTT', // 14
+        'TTTTTTTTTTgggpYpgggTTTTTTTTT', // 15
+        'TTTTTTTTTTTSggppTTTTTTTTTTTT', // 16
+        'TTTTTTTTTTTTTpppTTTTTTTTTTTT', // 17
+        'TTTTTTTTTTTTgpppTTTTTTTTTTTT', // 18
+        'TTTTTTTTTTTTgpppTTTTTTTTTTTT', // 19
+        'TTTTTTTTTTTgTpppngTTTTTTTTTT', // 20
+        'TTTTTTTTTTTTTTpTTTTTTTTTTTTT' // 21
+  ok diner access
+  ok diner access
+  ok diner access
+  ok diner access
+  ok diner access
+  ok diner access

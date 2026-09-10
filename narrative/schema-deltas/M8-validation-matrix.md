@@ -44,11 +44,13 @@ eco da `promise_stance`; logistica Sarah da `sarah_support_state` (none/vice).
    «visibile in ogni percorso».
 9. P8 formulata SOLO dal doppio confronto (m8_cmp_diary A); B/C respinte;
    `factual_status ≤ corroborated`; P7 resta ipotesi.
-10. Obiettivo univoco a ogni passo (priorità 50/100/200/250/300/350/400; catena raggiungibile 50→250→100→200→300→350→400):
+10. Obiettivo univoco a ogni passo (priorità 50/100/150/200/250/300/350/400; catena raggiungibile 50→250→100→150→200→300→350→400):
     obj_m8_0 (50, pre-diner: «Passa dal diner, questo pomeriggio.» → root azionabile m8_diner)
     → obj_m8_25 (250, Leland al diner dopo promise_stance) → obj_m8_1
-    (100, Roadhouse solo dopo T_LELAND_TAXI) → obj_m8_2
-    (200, torna all’incrocio; attivo solo con T_LELAND_TAXI) → obj_m8_3 (300, rileggi lettere/diario) → obj_m8_35 (350, porta
+    (100, Roadhouse solo dopo T_LELAND_TAXI, ¬node_done m8_roadhouse_truman) → obj_m8_15
+    (150, pass 01 — split del nodo Roadhouse: «Il telefono del Roadhouse.», presagio_status=active ∧ ¬warning_target,
+    fra la dichiarazione al tavolo e la telefonata) → obj_m8_2
+    (200, torna all’incrocio; attivo solo con T_LELAND_TAXI ∧ warning_target set) → obj_m8_3 (300, rileggi lettere/diario) → obj_m8_35 (350, porta
     il nesso alla centrale) → obj_m8_4 (400, contraddizione a Truman, dopo la stazione).
     L'obiettivo d'ingresso punta SEMPRE a una root disponibile.
 11. Nessun softlock; save/load a ogni passo; M9 raggiungibile da tutti gli stati.

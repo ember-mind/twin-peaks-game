@@ -24,7 +24,7 @@
 <script src="../js/narrative-runtime.js"></script>
 <script src="../js/narrative-ui.js"></script>
 <script src="../js/narrative-notebook.js"></script>
-<script src="../js/narrative-data.gen.js?v=harness-r77"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
 <script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
 <script src="../js/narrative-save.js"></script>
 <script>
@@ -139,7 +139,7 @@ async function run() {
     out.checks[L + 'news_blocked_before_return'] = (S().flags.jacques_dead !== true);
     // B7b ritorno (Truman@sheriff) — coesiste con il rapporto M4 sullo stesso
     // target: vince M6 (missione corrente) grazie alla risoluzione latest-first.
-    await interactAt('sheriff', 6, 3, 'right'); await advanceUntil(function () { return S().nodes_done.m6_return_night === true || !A.active(); });
+    await interactAt('sheriff', 10, 5, 'up'); await advanceUntil(function () { return S().nodes_done.m6_return_night === true || !A.active(); });
     await advanceUntil(function () { return !A.active(); }, 8);
     out.checks[L + 'return_night_done'] = (S().nodes_done.m6_return_night === true);
     // B8 notizia (Lucy@sheriff)
@@ -150,7 +150,7 @@ async function run() {
     out.checks[L + 'suspicious_still_false'] = (S().flags.jacques_death_suspicious !== true);
     out.checks[L + 'resource_survives_death'] = (S().evidence.JACQUES_MIDNIGHT_CLAIM === true && NR.peekProp(S(), 'P5').formulation.status === 'formulated');
     // B8b ospedale (registro@hospital) → unico writer del sospetto
-    await interactAt('hospital', 4, 4, 'up'); await advanceUntil(function () { return S().flags.jacques_death_suspicious === true || !A.active(); });
+    await interactAt('hospital', 13, 9, 'up'); await advanceUntil(function () { return S().flags.jacques_death_suspicious === true || !A.active(); });
     out.checks[L + 'hospital_writes_suspicious'] = (S().flags.night_log_no_visitor === true && S().flags.jacques_death_suspicious === true);
     out.checks[L + 'no_murder_final'] = (!S().flags.jacques_murder_confirmed && !S().flags.jacques_murder_attributed);
   })();
@@ -207,9 +207,8 @@ async function run() {
   out.checks['audrey_on_commits_once'] = (S().flags.audrey_vista_oej === true && S().nodes_done.m6_audrey === true);
   await advanceUntil(function () { return !A.active(); }, 6);
   E.loadMap('oej', 13, 8, 'up'); await wait(120); await press('Enter'); await wait(150);
-  out.checks['audrey_on_not_repeatable'] = (widgetOpts().length === 0 && S().flags.audrey_vista_oej === true &&
-    !!document.querySelector('[data-page-id="adapter.no_roots.actor"]') && A.active());
-  if (A.active()) { await press('Enter'); await wait(120); }
+  out.checks['audrey_on_not_repeatable'] = (widgetOpts().length === 0 && S().flags.audrey_vista_oej === true && !A.active());
+  if (A.active()) { await press('Escape'); await wait(120); }
   await interactAt('oej', 7, 6, 'up'); await advanceUntil(function () { return widgetOpts().length === 3; });
   out.checks['audrey_does_not_block_jacques'] = (widgetOpts().indexOf('tactic_prova') >= 0);
   if (A.active()) { await press('Escape'); await wait(120); }
@@ -230,7 +229,7 @@ async function run() {
   A.setState(seedFerry(false)); seen = {};
   NR.worldRoots = function (st, m, mapId) { if (m === M6 && mapId === 'hospital') return dup('hospital', 'object', undefined, 'night_register'); return origWR.apply(NR, arguments); };
   var evAmb2 = A.events.length;
-  var consumedB = A.tryInteractAt('hospital', 4, 3); await wait(120);
+  var consumedB = A.tryInteractAt('hospital', 13, 8); await wait(120);
   out.checks['ambiguous_ambient_roots_fail_closed'] = (consumedB === true && A.events.slice(evAmb2).some(function (e) { return e.event === 'ambiguous_world_roots'; }) && !A.active());
   NR.worldRoots = origWR;
 

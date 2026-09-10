@@ -1,0 +1,17 @@
+{
+  "oldRun": "2026-09-08T12-39-26-780Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment",
+  "finalRun": "2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment",
+  "unchanged": [
+    "dinerEnvironment-static.png",
+    "dinerEnvironment-door-opening.png",
+    "dinerEnvironment-door-angle.png",
+    "dinerEnvironment-door-open.png",
+    "dinerEnvironment-door-closing.png",
+    "dinerEnvironment-door-closed.png"
+  ],
+  "changed": [
+    "dinerEnvironment-machine.png",
+    "dinerEnvironment-clock-tick.png",
+    "dinerEnvironment-clock-later.png"
+  ]
+}

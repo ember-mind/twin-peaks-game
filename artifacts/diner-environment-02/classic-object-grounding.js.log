@@ -1,0 +1,253 @@
+# corpus oggetti classici
+  ok - registro oggetti authored non vuoto
+  ok - landmark_waterfall: dialogo esistente (town@1,0)
+  ok - landmark_waterfall:first[0] senza intenzione invisibile: "Le cascate dietro il Great Northern. L'acqua cade come un respiro lungo, bianca e fredda."
+  ok - landmark_waterfall:first[0] non riduce persone a resti corporei
+  ok - landmark_waterfall:first[0] senza cinismo hard-boiled
+  ok - landmark_waterfall:first[1] senza intenzione invisibile: "Laura fu vista qui, l'ultimo pomeriggio. L'acqua continua a cadere; il tempo dell'alibi, invece, si può misurare."
+  ok - landmark_waterfall:first[1] non riduce persone a resti corporei
+  ok - landmark_waterfall:first[1] senza cinismo hard-boiled
+  ok - landmark_cemetery: dialogo esistente (town@48,21)
+  ok - landmark_cemetery:first[0] senza intenzione invisibile: "Accanto alla cappella, una fotografia di Laura è circondata da fiori e biglietti."
+  ok - landmark_cemetery:first[0] non riduce persone a resti corporei
+  ok - landmark_cemetery:first[0] senza cinismo hard-boiled
+  ok - landmark_cemetery:first[1] senza intenzione invisibile: "Laura Palmer, diciassette anni. Segno le date nel fascicolo. Non ridurrò una vita a quelle date: nella foto ride con la torta."
+  ok - landmark_cemetery:first[1] non riduce persone a resti corporei
+  ok - landmark_cemetery:first[1] senza cinismo hard-boiled
+  ok - landmark_tracks_vagone: dialogo esistente (town@53,1)
+  ok - landmark_tracks_vagone:first[0] senza intenzione invisibile: "Il vagone è oltre la curva dei binari. Adesso posso controllare il luogo descritto da James."
+  ok - landmark_tracks_vagone:first[0] non riduce persone a resti corporei
+  ok - landmark_tracks_vagone:first[0] senza cinismo hard-boiled
+  ok - landmark_tracks_route: dialogo esistente (town@53,1)
+  ok - landmark_tracks_route:first[0] senza intenzione invisibile: "James ha indicato l'est; il ciondolo dice perché la sua memoria conta."
+  ok - landmark_tracks_route:first[0] non riduce persone a resti corporei
+  ok - landmark_tracks_route:first[0] senza cinismo hard-boiled
+  ok - landmark_tracks_route:first[1] senza intenzione invisibile: "Proseguo a est lungo i binari."
+  ok - landmark_tracks_route:first[1] non riduce persone a resti corporei
+  ok - landmark_tracks_route:first[1] senza cinismo hard-boiled
+  ok - landmark_tracks: dialogo esistente (town@53,1)
+  ok - landmark_tracks:first[0] senza intenzione invisibile: "I binari tagliano il paese verso est, oltre il confine."
+  ok - landmark_tracks:first[0] non riduce persone a resti corporei
+  ok - landmark_tracks:first[0] senza cinismo hard-boiled
+  ok - landmark_tracks:first[1] senza intenzione invisibile: "Segno est. Prima voglio sapere chi usa questi binari."
+  ok - landmark_tracks:first[1] non riduce persone a resti corporei
+  ok - landmark_tracks:first[1] senza cinismo hard-boiled
+  ok - sign_town: dialogo esistente (town@30,30, town@30,30)
+  ok - sign_town:first[0] senza intenzione invisibile: ""Benvenuti a Twin Peaks. Popolazione: 51.201"."
+  ok - sign_town:first[0] non riduce persone a resti corporei
+  ok - sign_town:first[0] senza cinismo hard-boiled
+  ok - sign_town:first[1] senza intenzione invisibile: "Cinquantunomiladuecentuno. Una cifra così precisa merita una domanda semplice: chi continua a contarli?"
+  ok - sign_town:first[1] non riduce persone a resti corporei
+  ok - sign_town:first[1] senza cinismo hard-boiled
+  ok - lago_dopo: dialogo esistente (town@15,28)
+  ok - lago_dopo:first[0] senza intenzione invisibile: "L'acqua è tornata immobile. Io no."
+  ok - lago_dopo:first[0] non riduce persone a resti corporei
+  ok - lago_dopo:first[0] senza cinismo hard-boiled
+  ok - lago_maddy: dialogo esistente (town@15,28)
+  ok - lago_maddy:first[0] senza intenzione invisibile: "Qualcosa galleggia tra i giunchi. Plastica trasparente. La stessa del 24 febbraio."
+  ok - lago_maddy:first[0] non riduce persone a resti corporei
+  ok - lago_maddy:first[0] senza cinismo hard-boiled
+  ok - lago_maddy:first[1] senza intenzione invisibile: "Non guardo oltre il necessario. Gli agenti della scientifica coprono, sollevano, misurano."
+  ok - lago_maddy:first[1] non riduce persone a resti corporei
+  ok - lago_maddy:first[1] senza cinismo hard-boiled
+  ok - lago_maddy:first[2] senza intenzione invisibile: "Maddy Ferguson. Con due D."
+  ok - lago_maddy:first[2] non riduce persone a resti corporei
+  ok - lago_maddy:first[2] senza cinismo hard-boiled
+  ok - lago_maddy:first[3] senza intenzione invisibile: "Sotto l'unghia: una lettera. La "O"."
+  ok - lago_maddy:first[3] non riduce persone a resti corporei
+  ok - lago_maddy:first[3] senza cinismo hard-boiled
+  ok - lago_maddy:first[4] senza intenzione invisibile: "R, poi O. Potrebbe essere l'inizio di una firma. Per ora è un'ipotesi, non un nome né un'identità."
+  ok - lago_maddy:first[4] non riduce persone a resti corporei
+  ok - lago_maddy:first[4] senza cinismo hard-boiled
+  ok - lago_sguardo: dialogo esistente (town@15,28)
+  ok - lago_sguardo:first[0] senza intenzione invisibile: "L'acqua è immobile. In lontananza, il fumo della segheria sale dritto nel cielo."
+  ok - lago_sguardo:first[0] non riduce persone a resti corporei
+  ok - lago_sguardo:first[0] senza cinismo hard-boiled
+  ok - lago_sguardo:first[1] senza intenzione invisibile: "L'acqua non si muove. Quel fumo sì: almeno uno dei due accetta di indicare il vento."
+  ok - lago_sguardo:first[1] non riduce persone a resti corporei
+  ok - lago_sguardo:first[1] senza cinismo hard-boiled
+  ok - tomba_laura: dialogo esistente (town@50,22)
+  ok - tomba_laura:first[0] senza intenzione invisibile: "Una foto di Laura è fissata a un leggio della cappella. Sotto: "LAURA PALMER, 1972-1989"."
+  ok - tomba_laura:first[0] non riduce persone a resti corporei
+  ok - tomba_laura:first[0] senza cinismo hard-boiled
+  ok - tomba_laura:first[1] senza intenzione invisibile: "Qualcuno ha lasciato una rosa nel bicchiere dell'acqua. Non c'è biglietto."
+  ok - tomba_laura:first[1] non riduce persone a resti corporei
+  ok - tomba_laura:first[1] senza cinismo hard-boiled
+  ok - tomba_laura:first[2] senza intenzione invisibile: "Tre biglietti ricordano la torta, i pasti a domicilio e una risata al picnic. Trascrivo i nomi e lascio la rosa dov'è."
+  ok - tomba_laura:first[2] non riduce persone a resti corporei
+  ok - tomba_laura:first[2] senza cinismo hard-boiled
+  ok - tomba_laura:again[0] senza intenzione invisibile: "La rosa è nel bicchiere. I tre biglietti sono registrati; non sposto altro."
+  ok - tomba_laura:again[0] non riduce persone a resti corporei
+  ok - tomba_laura:again[0] senza cinismo hard-boiled
+  ok - laura_room: dialogo esistente (palmer@6,1)
+  ok - laura_room:first[0] senza intenzione invisibile: "La stanza di Laura. Ordinata. Troppo ordinata. Cerco meglio..."
+  ok - laura_room:first[0] non riduce persone a resti corporei
+  ok - laura_room:first[0] senza cinismo hard-boiled
+  ok - laura_room:first[1] senza intenzione invisibile: "Sotto il cuscino: un ciondolo a forma di mezzo cuore. Qualcuno conserva l'altra metà."
+  ok - laura_room:first[1] non riduce persone a resti corporei
+  ok - laura_room:first[1] senza cinismo hard-boiled
+  ok - laura_room:first[2] senza intenzione invisibile: "La radio di Cooper gracchia. È Andy, dalla centrale."
+  ok - laura_room:first[2] non riduce persone a resti corporei
+  ok - laura_room:first[2] senza cinismo hard-boiled
+  ok - laura_room:first[3] senza intenzione invisibile: "Agente, il medico legale ha trovato carta sotto un'unghia di Laura: un frammento della lettera R."
+  ok - laura_room:first[3] non riduce persone a resti corporei
+  ok - laura_room:first[3] senza cinismo hard-boiled
+  ok - laura_room:again[0] senza intenzione invisibile: "Non c'è altro qui. Solo il silenzio di una stanza che non ha più futuro."
+  ok - laura_room:again[0] non riduce persone a resti corporei
+  ok - laura_room:again[0] senza cinismo hard-boiled
+  ok - specchio_dopo: dialogo esistente (hotel_gn@15,1)
+  ok - specchio_dopo:first[0] senza intenzione invisibile: "Lo specchio riflette solo la stanza. Ma l'aria... vibra ancora."
+  ok - specchio_dopo:first[0] non riduce persone a resti corporei
+  ok - specchio_dopo:first[0] senza cinismo hard-boiled
+  ok - specchio_dopo:first[1] senza intenzione invisibile: "Il riflesso adesso segue ogni movimento. Provo tre volte; il ritardo non torna."
+  ok - specchio_dopo:first[1] non riduce persone a resti corporei
+  ok - specchio_dopo:first[1] senza cinismo hard-boiled
+  ok - gigante1_dlg: dialogo esistente (hotel_gn@15,1)
+  ok - gigante1_dlg:first[0] senza intenzione invisibile: "Lo specchio vibra. La stanza si fa fredda. Un'ombra alta prende forma nel riflesso."
+  ok - gigante1_dlg:first[0] non riduce persone a resti corporei
+  ok - gigante1_dlg:first[0] senza cinismo hard-boiled
+  ok - gigante1_dlg:first[1] senza intenzione invisibile: "Mi perdoni l'intrusione. Le dirò tre cose."
+  ok - gigante1_dlg:first[1] non riduce persone a resti corporei
+  ok - gigante1_dlg:first[1] senza cinismo hard-boiled
+  ok - gigante1_dlg:first[2] senza intenzione invisibile: "È successo di nuovo. E accadrà ancora."
+  ok - gigante1_dlg:first[2] non riduce persone a resti corporei
+  ok - gigante1_dlg:first[2] senza cinismo hard-boiled
+  ok - gigante1_dlg:first[3] senza intenzione invisibile: "I gufi non sono ciò che sembrano."
+  ok - gigante1_dlg:first[3] non riduce persone a resti corporei
+  ok - gigante1_dlg:first[3] senza cinismo hard-boiled
+  ok - gigante1_dlg:first[4] senza intenzione invisibile: "Senza sostanze chimiche, lui torna."
+  ok - gigante1_dlg:first[4] non riduce persone a resti corporei
+  ok - gigante1_dlg:first[4] senza cinismo hard-boiled
+  ok - gigante1_dlg:first[5] senza intenzione invisibile: "Questo le apparterrà quando sarà vero."
+  ok - gigante1_dlg:first[5] non riduce persone a resti corporei
+  ok - gigante1_dlg:first[5] senza cinismo hard-boiled
+  ok - gigante1_dlg:first[6] senza intenzione invisibile: "Tre avvertimenti, nessuna istruzione. Comincerò dai gufi: almeno lasciano tracce."
+  ok - gigante1_dlg:first[6] non riduce persone a resti corporei
+  ok - gigante1_dlg:first[6] senza cinismo hard-boiled
+  ok - specchio315: dialogo esistente (hotel_gn@15,1)
+  ok - specchio315:first[0] senza intenzione invisibile: "Uno specchio ovale sul comò. Il riflesso sembra restare un istante di troppo."
+  ok - specchio315:first[0] non riduce persone a resti corporei
+  ok - specchio315:first[0] senza cinismo hard-boiled
+  ok - specchio315:first[1] senza intenzione invisibile: "Il riflesso arriva tardi. Una frazione di secondo, ma abbastanza da farmi contare due volte."
+  ok - specchio315:first[1] non riduce persone a resti corporei
+  ok - specchio315:first[1] senza cinismo hard-boiled
+  ok - ronette_letto: dialogo esistente (hospital@2,1)
+  ok - ronette_letto:first[0] senza intenzione invisibile: "Ronette Pulaski. In coma. Il monitor scandisce un respiro incerto."
+  ok - ronette_letto:first[0] non riduce persone a resti corporei
+  ok - ronette_letto:first[0] senza cinismo hard-boiled
+  ok - ronette_letto:first[1] senza intenzione invisibile: "Si agita, improvvisamente. Le labbra si muovono, un sussurro..."
+  ok - ronette_letto:first[1] non riduce persone a resti corporei
+  ok - ronette_letto:first[1] senza cinismo hard-boiled
+  ok - ronette_letto:first[2] senza intenzione invisibile: "...BOB... BOB!"
+  ok - ronette_letto:first[2] non riduce persone a resti corporei
+  ok - ronette_letto:first[2] senza cinismo hard-boiled
+  ok - ronette_letto:first[3] senza intenzione invisibile: "Signorina Pulaski, ha detto un nome. Registro il momento e il battito; non presumo ancora cosa ricordi."
+  ok - ronette_letto:first[3] non riduce persone a resti corporei
+  ok - ronette_letto:first[3] senza cinismo hard-boiled
+  ok - ronette_letto:again[0] senza intenzione invisibile: "Dorme. Le dita si muovono, come se scrivesse."
+  ok - ronette_letto:again[0] non riduce persone a resti corporei
+  ok - ronette_letto:again[0] senza cinismo hard-boiled
+  ok - ronette_letto:again[1] senza intenzione invisibile: "Le dita ripetono un gesto. Non lo chiamerò messaggio finché non saprò leggerlo."
+  ok - ronette_letto:again[1] non riduce persone a resti corporei
+  ok - ronette_letto:again[1] senza cinismo hard-boiled
+  ok - olio: dialogo esistente (woods@14,12)
+  ok - olio:first[0] senza intenzione invisibile: "Una pozza scura in mezzo al cerchio di sicomori. Olio di motore... bruciato."
+  ok - olio:first[0] non riduce persone a resti corporei
+  ok - olio:first[0] senza cinismo hard-boiled
+  ok - olio:first[1] senza intenzione invisibile: "Olio bruciato. Prelevo un campione."
+  ok - olio:first[1] non riduce persone a resti corporei
+  ok - olio:first[1] senza cinismo hard-boiled
+  ok - sign_grove: dialogo esistente (woods@11,16)
+  ok - sign_grove:first[0] senza intenzione invisibile: ""GLASTONBURY GROVE". Dodici sicomori in cerchio, inciso nel legno."
+  ok - sign_grove:first[0] non riduce persone a resti corporei
+  ok - sign_grove:first[0] senza cinismo hard-boiled
+  ok - sign_grove:first[1] senza intenzione invisibile: "Glastonbury, come la tomba di Re Artù. Dodici sicomori e nessun segno sulla mappa: conto entrambi."
+  ok - sign_grove:first[1] non riduce persone a resti corporei
+  ok - sign_grove:first[1] senza cinismo hard-boiled
+  ok - sign_ponte: dialogo esistente (traincar@5,6)
+  ok - sign_ponte:first[0] senza intenzione invisibile: "Un vecchio ponticello di legno, accanto al sentiero."
+  ok - sign_ponte:first[0] non riduce persone a resti corporei
+  ok - sign_ponte:first[0] senza cinismo hard-boiled
+  ok - sign_ponte:first[1] senza intenzione invisibile: "Qui hanno trovato Ronette Pulaski, la notte del delitto: errante, insanguinata, muta."
+  ok - sign_ponte:first[1] non riduce persone a resti corporei
+  ok - sign_ponte:first[1] senza cinismo hard-boiled
+  ok - sign_oej: dialogo esistente (traincar@20,2)
+  ok - sign_oej:first[0] senza intenzione invisibile: ""ONE EYED JACKS — oltre il confine". Una freccia indica il sentiero a nord."
+  ok - sign_oej:first[0] non riduce persone a resti corporei
+  ok - sign_oej:first[0] senza cinismo hard-boiled
+  ok - sign_oej:first[1] senza intenzione invisibile: "Un casinò clandestino oltre la linea di stato. La freccia conosce la giurisdizione meglio del cartello."
+  ok - sign_oej:first[1] non riduce persone a resti corporei
+  ok - sign_oej:first[1] senza cinismo hard-boiled
+  ok - mucchio_terra: dialogo esistente (traincar@10,4)
+  ok - mucchio_terra:first[0] senza intenzione invisibile: "Un mucchio di terra smossa, qui nel vagone. Qualcuno ha scavato, di recente."
+  ok - mucchio_terra:first[0] non riduce persone a resti corporei
+  ok - mucchio_terra:first[0] senza cinismo hard-boiled
+  ok - mucchio_terra:first[1] senza intenzione invisibile: "Tra la terra, un brandello di carta strappata da un giornale."
+  ok - mucchio_terra:first[1] non riduce persone a resti corporei
+  ok - mucchio_terra:first[1] senza cinismo hard-boiled
+  ok - mucchio_terra:first[2] senza intenzione invisibile: "Vi è scritto, a mano: "FUOCO CAMMINA CON ME". Macchie scure sui bordi."
+  ok - mucchio_terra:first[2] non riduce persone a resti corporei
+  ok - mucchio_terra:first[2] senza cinismo hard-boiled
+  ok - mucchio_terra:first[3] senza intenzione invisibile: "Sembra sangue. Lo sigillo e lascio che sia la scientifica a dargli un nome."
+  ok - mucchio_terra:first[3] non riduce persone a resti corporei
+  ok - mucchio_terra:first[3] senza cinismo hard-boiled
+  ok - mucchio_terra:again[0] senza intenzione invisibile: "Non c'è altro, sotto la terra smossa."
+  ok - mucchio_terra:again[0] non riduce persone a resti corporei
+  ok - mucchio_terra:again[0] senza cinismo hard-boiled
+  ok - anello_interact: dialogo esistente (traincar@13,5)
+  ok - anello_interact:first[0] senza intenzione invisibile: "Un'asse del pavimento cede sotto il mio peso. Sotto, qualcosa luccica."
+  ok - anello_interact:first[0] non riduce persone a resti corporei
+  ok - anello_interact:first[0] senza cinismo hard-boiled
+  ok - anello_interact:first[1] senza intenzione invisibile: "Un anello d'oro giace piatto sotto l'asse. Sembra il monile di Laura Palmer."
+  ok - anello_interact:first[1] non riduce persone a resti corporei
+  ok - anello_interact:first[1] senza cinismo hard-boiled
+  ok - anello_interact:first[2] senza intenzione invisibile: "È quasi al centro del vano; polvere interrotta intorno, nessuna traccia di rotolamento. Potrebbe essere stato posato."
+  ok - anello_interact:first[2] non riduce persone a resti corporei
+  ok - anello_interact:first[2] senza cinismo hard-boiled
+  ok - anello_interact:again[0] senza intenzione invisibile: "Il vano sotto l'asse è vuoto. Posizione e polvere sono registrate; qui non c'è altro."
+  ok - anello_interact:again[0] non riduce persone a resti corporei
+  ok - anello_interact:again[0] senza cinismo hard-boiled
+  ok - palco_dopo: dialogo esistente (roadhouse@8,1)
+  ok - palco_dopo:first[0] senza intenzione invisibile: "Il palco è vuoto. L'eco no."
+  ok - palco_dopo:first[0] non riduce persone a resti corporei
+  ok - palco_dopo:first[0] senza cinismo hard-boiled
+  ok - palco_dopo:first[1] senza intenzione invisibile: "Il palco è vuoto. Cronometro e pubblico concordano; ciò che ho visto resta fuori dal verbale, per ora."
+  ok - palco_dopo:first[1] non riduce persone a resti corporei
+  ok - palco_dopo:first[1] senza cinismo hard-boiled
+  ok - gigante2_dlg: dialogo esistente (roadhouse@8,1)
+  ok - gigante2_dlg:first[0] senza intenzione invisibile: "La musica si interrompe. Il palco si illumina, vuoto... poi non più vuoto."
+  ok - gigante2_dlg:first[0] non riduce persone a resti corporei
+  ok - gigante2_dlg:first[0] senza cinismo hard-boiled
+  ok - gigante2_dlg:first[1] senza intenzione invisibile: "Sta accadendo di nuovo."
+  ok - gigante2_dlg:first[1] non riduce persone a resti corporei
+  ok - gigante2_dlg:first[1] senza cinismo hard-boiled
+  ok - gigante2_dlg:first[2] senza intenzione invisibile: "Sta accadendo... DI NUOVO."
+  ok - gigante2_dlg:first[2] non riduce persone a resti corporei
+  ok - gigante2_dlg:first[2] senza cinismo hard-boiled
+  ok - gigante2_dlg:first[3] senza intenzione invisibile: "Il Gigante svanisce in un lampo bianco."
+  ok - gigante2_dlg:first[3] non riduce persone a resti corporei
+  ok - gigante2_dlg:first[3] senza cinismo hard-boiled
+  ok - gigante2_dlg:first[4] senza intenzione invisibile: "Diane. Casa Palmer. SUBITO."
+  ok - gigante2_dlg:first[4] non riduce persone a resti corporei
+  ok - gigante2_dlg:first[4] senza cinismo hard-boiled
+# cimitero: Laura resta persona
+  ok - cimitero contiene battuta Cooper
+  ok - cimitero nomina Laura, non un corpo anonimo
+  ok - battuta resta specifica al cimitero
+  ok - battuta conserva età e umanità di Laura
+  ok - metodo di Cooper rifiuta riduzione investigativa
+  ok - cimitero supera guardia tono/grounding
+# anello: osservazione e inferenza separate
+  ok - anello conserva first/repeat completi
+  ok - pagina oggetto descrive posizione visibile
+  ok - pagina oggetto non attribuisce gesto o intenzione
+  ok - pagina successiva espone segnali osservabili
+  ok - inferenza sul posizionamento resta provvisoria
+  ok - repeat non introduce intenzione retroattiva
+# Enter reale: prima visita e repeat
+  ok - primo Enter apre first anello
+  ok - first runtime resta grounded
+  ok - prima visita acquisisce anello
+  ok - secondo Enter apre repeat anello
+  ok - repeat runtime resta grounded
+classic-object-grounding: PASS (248 checks; 23 dialoghi oggetto)

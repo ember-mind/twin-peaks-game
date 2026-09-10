@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-09-08T18:59:20.744Z",
+  "output": "artifacts/sheriffs-station-main-interior-v021/comparison.png",
+  "outputSha256": "9f01222d5257393400390a82f9d32552b927ae64b1eb05f97205a2ba2f8cd3ee",
+  "outputDimensions": {
+    "width": 1568,
+    "height": 420
+  },
+  "panels": [
+    {
+      "label": "GOLDEN CONCEPT",
+      "source": "artifacts/sheriffs-station-main-interior-v01/final.png",
+      "sourceSha256": "3bcd2360102dc6be442b62fa0d43c9e3777a512442b1f71b48532a39a5287956",
+      "displayedDimensions": {
+        "width": 512,
+        "height": 384
+      },
+      "resizeKernel": "lanczos3"
+    },
+    {
+      "label": "NATIVE BEFORE",
+      "source": "artifacts/sheriffs-station-main-interior-v021/native-before-256.png",
+      "sourceSha256": "6aa33fb64997ada642bddf7fe0ccc09973828aac4e6365158a52021b8447eff5",
+      "displayedDimensions": {
+        "width": 512,
+        "height": 384
+      },
+      "resizeKernel": "nearest"
+    },
+    {
+      "label": "NATIVE AFTER",
+      "source": "artifacts/sheriffs-station-main-interior-v021/native-after-256.png",
+      "sourceSha256": "49cdda206f59def4aa31a2e2ac3b0f98b407368df13b85aab41757b1e11cd8a5",
+      "displayedDimensions": {
+        "width": 512,
+        "height": 384
+      },
+      "resizeKernel": "nearest"
+    }
+  ]
+}

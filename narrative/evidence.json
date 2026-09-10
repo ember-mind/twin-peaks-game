@@ -245,7 +245,7 @@
     "section": "§1"
    },
    "acquired_in": "M8",
-      "provenance": "N→L (m8_leland_taxi, diner, prima del Roadhouse e del ritrovamento)",
+   "provenance": "N→L (m8_leland_taxi, diner, prima del Roadhouse e del ritrovamento)",
    "supports": [
     "P6"
    ]
@@ -262,6 +262,52 @@
    "supports": [
     "P6"
    ]
+  },
+  "E_PONTE_DIREZIONE": {
+   "label": "paletto della contea sulla sponda del paese, assi consumate da quella parte",
+   "kind": "observation",
+   "source": {
+    "document": "docs/act-3-design-report.md",
+    "section": "§12 A2"
+   },
+   "acquired_in": "M5",
+   "supports": [],
+   "ui_origin": "Il ponte — la sponda del paese"
+  },
+  "E_TRACCE_EST": {
+   "label": "le impronte passano il vagone ed entrano nel taglio a nord",
+   "kind": "observation",
+   "source": {
+    "document": "docs/act-3-design-report.md",
+    "section": "§12 A14"
+   },
+   "acquired_in": "M5",
+   "supports": [],
+   "ui_origin": "Il taglio a nord — oltre il vagone"
+  },
+  "E_STUFA": {
+   "label": "stufa fredda, cenere rastrellata in cerchio, un angolo di fiammiferi bruciato",
+   "kind": "object",
+   "source": {
+    "document": "docs/act-3-design-report.md",
+    "section": "§12 A7"
+   },
+   "acquired_in": "M5",
+   "supports": [],
+   "ui_origin": "Il vagone — la stufa sulla parete di fondo"
+  },
+  "E_CARTE": {
+   "label": "mazzo umido sotto il sedile, taglio del mazziere ancora squadrato",
+   "kind": "object",
+   "source": {
+    "document": "docs/act-3-design-report.md",
+    "section": "§12 A8"
+   },
+   "acquired_in": "M5",
+   "supports": [
+    "P5"
+   ],
+   "ui_origin": "Il vagone — sotto il sedile divelto"
   }
  }
 }

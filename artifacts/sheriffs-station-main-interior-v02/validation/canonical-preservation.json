@@ -1,0 +1,10 @@
+{
+  "scope": "new station authoring modules and evidence only",
+  "equal": true,
+  "files": [
+    "js/sheriffs-station-art.js",
+    "js/sheriffs-station-scene.js",
+    "js/sheriffs-station-production.js"
+  ],
+  "broaderCanonicalMirror": "pre-existing drift remains; no unrelated files overwritten"
+}

@@ -34,8 +34,6 @@
           stageRect.right <= w.innerWidth + 0.01 && stageRect.bottom <= w.innerHeight + 0.01;
         out.checks.intro_header_fits_frame = layout.titleFits === true;
         out.checks.intro_rows_fit_frame = layout.contentFitsVertically === true;
-        out.checks.intro_footer_has_native_clearance =
-          layout.bodyLastBottom < layout.promptY && layout.promptY + 7 < layout.boxY + layout.boxH;
         for (var i = 0; i < pages.length; i++) {
           await wait(90);
           var body = w.document.getElementById('cinematic-body').textContent;

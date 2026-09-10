@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Double R — concept / native validation</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#17251e;color:#f4e6c8;font:15px/1.5 system-ui,sans-serif}main{max-width:1600px;margin:auto;padding:24px}h1{font-size:24px;margin:0}p{color:#cfbc92}a{color:#e9bd5d}.pair{display:grid;grid-template-columns:1fr 1fr;gap:20px}figure{margin:0}img{display:block;width:100%;aspect-ratio:4/3;object-fit:contain;background:#111b16}img.native{image-rendering:pixelated}figcaption{padding:10px 0}nav{display:flex;gap:24px;margin:18px 0}details{margin-top:20px}details img{max-width:1024px}@media(max-width:800px){.pair{grid-template-columns:1fr}}
+</style>
+<main><h1>Double R exterior · native validation</h1><p>One approved composition, rebuilt with native pixel clusters. Existing 24×24 Cooper sprite; 256×192 game canvas.</p>
+<nav><a href="../../test/double-r-exterior-prototype.html">Play preview</a><a href="../../test/double-r-exterior-prototype.html?debug=1">Debug navigation</a><a href="README.md">Validation notes</a></nav>
+<div class="pair"><figure><img src="../double-r-exterior-v01/double-r-exterior-v01-final.png" alt="Approved v0.1 exterior concept"><figcaption>CONCEPT TARGET · approved v0.1</figcaption></figure>
+<figure><img class="native" src="native-clean.png" alt="Native exterior with unchanged Cooper player sprite"><figcaption>NATIVE GAME RESULT · integer pixel rendering, player at parking</figcaption></figure></div>
+<details><summary>Entrance and collision evidence</summary><div class="pair"><figure><img class="native" src="native-entrance.png" alt="Player at exterior entrance"><figcaption>Four actual engine steps from parking to entrance. Transition disabled.</figcaption></figure><figure><img class="native" src="native-debug.png" alt="Debug collision and entrance trigger view"><figcaption>Red cells: blocked. Green cells: entrance trigger. Gold: depth boundaries.</figcaption></figure></div></details>
+<p>Facade presentation remains authored elevation; navigation remains the existing orthographic tile grid. Comparison images fit this page; the playable preview uses integer display scaling.</p></main></html>

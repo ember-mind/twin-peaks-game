@@ -24,7 +24,7 @@
 <script src="../js/narrative-runtime.js"></script>
 <script src="../js/narrative-ui.js"></script>
 <script src="../js/narrative-notebook.js"></script>
-<script src="../js/narrative-data.gen.js?v=harness-r77"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r9"></script>
 <script src="../js/narrative-bootstrap.js"></script>
 <script src="../js/narrative-engine-adapter.js?v=harness-r9"></script>
 <script src="../js/narrative-save.js"></script>
@@ -170,7 +170,8 @@ async function run() {
     'letter_o_chain', 'presagio_status', 'maddy_action_after_warning', 'sarah_support_state', 'maddy_trovata',
     'E9A_LETTERA_O', 'E9B_STESSO_METODO', 'E3_LETTERA_R', 'E1_DIARIO', 'P8.formulation', 'LETTERS_SAME_METHOD',
     'NAME_OVERREACH', 'HOUSE_OVERREACH', 'PROGRESSIVE_SIGNATURE', 'cooper_primary', 'hawk_preserved',
-    'departure_prepared', 'from_derivation', 'value_transition', 'm8_station', 'm8_roadhouse', 'm8_discovery',
+    'departure_prepared', 'from_derivation', 'value_transition', 'm8_station', 'm8_roadhouse_truman', 'm8_roadhouse_phone',
+    'm8_giant_stage', 'm8_leland_waiting', 'm8_lucy', 'm8_discovery',
     'm8_diner', 'm8_focus_choice', 'm8_cmp_diary', 'm8_cmp_letters', 'm8.a.', 'm8.b.', 'm8.c.', 'm8.d.', 'm8.e.', 'm8.f.'];
 
   // ---- stato iniziale: costruito col runtime, poi serialize→deserialize
@@ -205,16 +206,18 @@ async function run() {
     return o;
   }
 
-  // posizioni di interazione (adiacente + facing) dei 7 target M8
+  // posizioni di interazione (adiacente + facing) degli 8 target M8 (pass 01:
+  // +roadhouse_truman dopo lo split B1; crossroads ripuntato 47,30 — B4/O8)
   var AT = {
     maddy: ['diner', 10, 2, 'up'],           // NPC maddy @ diner 10,1 (registro condizionale)
     norma: ['diner', 6, 1, 'left'],          // NPC norma @ diner 5,1 (gioco classico)
+    roadhouse_truman: ['roadhouse', 5, 8, 'left'], // NPC truman @ roadhouse 4,8 (tavolo, registro C2)
     phone: ['roadhouse', 8, 6, 'up'],        // object roadhouse_phone @ 8,5
-    leland: ['diner', 11, 2, 'up'],           // NPC Leland @ diner 11,1 dopo la promessa
-    crossroads: ['town', 30, 31, 'up'],      // visible sign town_crossroads @ 30,30
+    leland: ['diner', 11, 2, 'up'],           // NPC Leland @ diner 11,1 (presente dall'apertura dell'atto, C1)
+    crossroads: ['town', 47, 29, 'down'],    // landmark town_crossroads @ 47,30 (spawn di ritorno dal Roadhouse)
     palmer: ['palmer', 8, 9, 'down'],        // landmark palmer_entrance @ 8,10
     lago: ['town', 15, 29, 'up'],            // landmark lago_maddy @ 15,28
-    truman: ['sheriff', 6, 3, 'right']       // NPC Truman @ sheriff 7,3
+    truman: ['sheriff', 10, 5, 'up']         // NPC Truman @ sheriff 10,4
   };
   async function go(k) { var t = AT[k]; await interactFromEngine(t[0], t[1], t[2], t[3]); }
 
@@ -272,12 +275,13 @@ async function run() {
       (!(GAME.Maps.diner.npcs || []).some(function (n) { return n.id === 'maddy' || n.id === 'leland'; }) &&
        !(E.state.npcs || []).some(function (n) { return n.id === 'maddy' || n.id === 'leland'; }));
 
-    // ---- R2 ULTIMA PAGINA DEL GIGANTE (presagio nasce al commitNode) ----
-    await go('phone');
-    c.giant_last_page_reached = await advanceToPage('m8.b.roadhouse.p06', 30);
+    // ---- R2 ULTIMA PAGINA DEL GIGANTE, al tavolo di Truman (presagio nasce al
+    // commitNode del nodo tavolo — pass 01, split B1) ----
+    await go('roadhouse_truman');
+    c.giant_last_page_reached = await advanceToPage('m8.b.truman.p05', 30);
     var r2 = {
-      pass: P, id: P + '_R02_giant_last_page', page_id: 'm8.b.roadhouse.p06',
-      visible_text: pageText('m8.b.roadhouse.p06'),
+      pass: P, id: P + '_R02_giant_last_page', page_id: 'm8.b.truman.p05',
+      visible_text: pageText('m8.b.truman.p05'),
       lease_active_pre_commit: A.active() === true,
       state_before: stateSnap(['presagio_status', 'objective'])
     };
@@ -287,16 +291,20 @@ async function run() {
     mkRecord(r2);
     c.presagio_active_after_commit = (val('presagio_status') === 'active');
 
-    // ---- R3 TELEFONO (choice_menu → tre stati scritti) ------------------
+    // ---- R3 TELEFONO (si CAMMINA dal tavolo, nessun `next`; choice_menu →
+    // tre stati scritti) ------------------
+    await go('phone');
     c.phone_widget_reached = await advanceUntil(function () { return widgetOpts().indexOf('warning_' + warn) >= 0; }, 30);
     var r3 = {
-      pass: P, id: P + '_R03_phone', record_type: 'choice_menu', node_id: 'm8_roadhouse',
+      pass: P, id: P + '_R03_phone', record_type: 'choice_menu', node_id: 'm8_roadhouse_phone',
       choice_ids: widgetOpts().slice(), visible_text: widgetRootText(),
       lease_active_pre_commit: A.active() === true,
       state_before: stateSnap(['warning_target', 'maddy_action_after_warning', 'sarah_support_state'])
     };
     c.warning_undefined_at_widget = (val('warning_target') === undefined && A.active() === true);
-    c.phone_same_lease_as_giant = (A.active() === true);
+    // pass 01 (split B1): il telefono è un lease NUOVO, aperto dopo aver
+    // camminato dal tavolo (era «stessa lease del Gigante» prima dello split).
+    c.phone_widget_lease_active = (A.active() === true);
     await chooseChoice('warning_' + warn);
     await advanceUntil(function () { return !A.active(); }, 20);
     r3.state_after = stateSnap(['warning_target', 'maddy_action_after_warning', 'sarah_support_state']);

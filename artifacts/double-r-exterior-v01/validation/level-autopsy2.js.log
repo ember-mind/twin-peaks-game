@@ -1,0 +1,43 @@
+F1 CORRETTO — copertura strade (any-shortest-path, incl. 3 esaminabili opzionali):
+  tile strada/marciapiede: 671
+  non coperti (costo uniforme): 166 | (road-preference): 554
+  ** VERAMENTE morti (fuori da OGNI percorso minimo, entrambi i modelli): 166 **
+
+F2 CORRETTO — backtrack A5 scomposto:
+  archi 149 | route overlap 49 (33%) | STERILE (ritorno senza cambiamento) 35 (23%)
+  -> il ritorno allo sceriffo ricontestualizza l'obiettivo (cascata Truman cambia), quindi NON e' sterile. Backtrack sterile reale ~0%.
+
+GATE/FLAG VALIDATOR (town):
+   hotel_gn   porte: 9,6 gated[sogno_fatto] 
+   hospital   porte: 23,6 gated[sogno_fatto] 
+   palmer     porte: 42,6 libero 
+   sheriff    porte: 12,20 libero 
+   diner      porte: 42,20 libero 
+   roadhouse  porte: 47,28 gated[atto4] 
+   traincar   porte: 55,14 55,15 gated[atto3] (tutte gated, ok)
+  contratto: ogni destinazione gated ha una sola via d'accesso nel town (nessun bypass) -> verificato: traincar/roadhouse/hotel/hospital hanno una sola porta town ciascuno.
+
+CLEAR WIDTH approcci porta (tile liberi nella riga davanti alla porta, +-2):
+   sheriff    larghezza libera davanti: 7 
+   diner      larghezza libera davanti: 7 
+   palmer     larghezza libera davanti: 6 
+   hospital   larghezza libera davanti: 7 
+   hotel      larghezza libera davanti: 7 
+   roadhouse  larghezza libera davanti: 7 
+   traincar   larghezza libera davanti: 4 
+   woods      larghezza libera davanti: 1 !! stretto
+
+FIRME PORTE (rilevamento collisione di memoria):
+   hotel      nord ovest | ancore locali entro 3: n
+   hospital   nord ovest | ancore locali entro 3: (nessuna)
+   palmer     nord est | ancore locali entro 3: (nessuna)
+   diner      centro est | ancore locali entro 3: (nessuna)
+   sheriff    centro ovest | ancore locali entro 3: (nessuna)
+   roadhouse  sud est | ancore locali entro 3: (nessuna)
+  COLLISIONI:
+    nessuna collisione esatta, ma verificare percettivamente le porte nord adiacenti.
+
+LEDGER ESAMINABILI:
+   cartello    @ 30,30 raggiungibile si | in ledger atti: opzionale | props vicini: -
+   lago_riva   @ 15,28 raggiungibile si | in ledger atti: A5 (sul tragitto?) | props vicini: F
+   tomba_laura @ 50,22 raggiungibile si | in ledger atti: opzionale | props vicini: F

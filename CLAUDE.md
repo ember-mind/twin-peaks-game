@@ -23,10 +23,6 @@ canvas fallback, no build step, plain script tags, all globals under `GAME`.
   tree row near the Benvenuti sign) — spawns behind the tree barrier are
   hidden from camera.
 - **Test order**: all `node test/*.js` green BEFORE opening the browser.
-- **Coldstage**: use `coldstage run changed --json` after native tests. Trust
-  `pixelGate`: when `aiReviewNeeded=false`, do not open screenshots. When true,
-  inspect only returned `reviewSheet`. Never approve/replace a baseline without
-  a scoped `review record` verdict of `pass` or `pass-with-notes`.
 - **Canonical source**: the vault is canonical; `ember-mind/twin-peaks-game`
   is a deploy copy, not source of truth.
 - **Map fields**: `js/glue.js` copies map fields through generically; only
@@ -37,6 +33,17 @@ canvas fallback, no build step, plain script tags, all globals under `GAME`.
 
 `node test/smoke.js` and `node test/walkthrough.js` both green, with no drop
 in check/acquisition counts vs. the last MEMORY entry in `Twin Peaks Game.md`.
+
+## Narrative work
+
+Before designing or writing any narrative content (acts, scenes, dialogue,
+evidence, objectives), read `docs/narrative/README.md` (two screens) — it
+points to `docs/narrative-system-v0.1.md`, `docs/narrative-craft-bible-v0.1.md`
+and `docs/narrative/templates/`. Run `node test/narrative-lint.js` with the
+mission validators before claiming structural validity.
+
+Story truth (what is objectively true, who knows what): `docs/story/README.md`
+— run `node test/story-truth-lint.js`.
 
 ## Read next
 

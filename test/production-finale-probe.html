@@ -82,7 +82,7 @@
       out.checks.leland_taxi_claim_carries_from_atto4 = ns.evidence.T_LELAND_TAXI === true;
       E.state.flags.gigante1 = true; await wait(260);
       out.checks.m6_classic_giant_syncs = ns.flags.gigante1 === true && !ns.flags.atto4;
-      var bridgeMapLoaded = E.loadMap('sheriff', 6, 3, 'right');
+      var bridgeMapLoaded = E.loadMap('sheriff', 10, 5, 'up');
       out.checks.bridge_map_save_succeeds = bridgeMapLoaded !== false;
       if (bridgeMapLoaded === false) throw new Error('bridge_map_save:' + (E.lastSaveError || 'unknown'));
       await press(w, 'KeyZ');
@@ -96,7 +96,7 @@
         var npc = E.state.npcs.filter(function (n) { return n.id === id; })[0];
         return !npc || !E.npcActive(npc);
       });
-      E.loadMap('sheriff', 6, 3, 'right');
+      E.loadMap('sheriff', 10, 5, 'up');
       ns.nodes_done.m8_station = true; ns.nodes_done.m8_diner = true;
       ns.values.promise_stance = 'accompagno'; ns.values.warning_target = 'palmer'; ns.values.m6_tactic = 'pressione';
       ns.values.s1 = 'documented_custody'; ns.values.letter_o_observation_source = 'hawk_preserved'; ns.values.sarah_support_state = 'vice';
@@ -161,11 +161,6 @@
       out.checks.material_admission_notes_exist = ['m10.admission.taxi', 'm10.admission.victims', 'm10.admission.scene'].every(function (id) { return ns.notebook.some(function (note) { return note.id === id; }); });
       out.checks.s3_threshold_visible = out.screens.some(function (id) { return id.indexOf('nf.m10.s3.threshold') === 0; });
       NF.choose('off'); toPause(NF);
-      out.checks.post_s3_pauses_for_walk = NF.getState().stage === 'await_post_s3' && NF.objective() === 'Torna da Leland per chiudere il verbale.';
-      E.loadMap('sheriff', 6, 3, 'left');
-      await press(w, 'KeyZ');
-      out.checks.post_s3_resumes_through_leland = NF.isActive() && NF.getState().stage === 'post_s3';
-      toPause(NF);
       out.checks.death_pauses_for_walk = NF.getState().stage === 'await_lodge' && E.state.flags.leland_morto && E.state.flags.leland_confessa;
 
       await wait(100);
@@ -212,10 +207,10 @@
       E.loadMap('woods', 14, 5, 'down'); FP.poll();
       toChoice(NF, 's4_interpretation'); NF.choose('diagnosi');
       out.checks.woods_choice_then_station = NF.getState().stage === 'await_epilogue_station';
-      E.loadMap('sheriff', 6, 3, 'right');
+      E.loadMap('sheriff', 10, 5, 'up');
       out.checks.station_is_physical = FP.tryInteract('sheriff', 'truman'); toPause(NF);
       E.loadMap('palmer', 8, 7, 'right'); out.checks.optional_sarah_physical = FP.tryInteract('palmer', 'sarah'); toPause(NF);
-      E.loadMap('hospital', 1, 1, 'right'); out.checks.optional_ronette_physical = FP.tryInteract('hospital', 'ronette'); toPause(NF);
+      E.loadMap('hospital', 2, 5, 'right'); out.checks.optional_ronette_physical = FP.tryInteract('hospital', 'ronette'); toPause(NF);
       E.loadMap('town', 29, 30, 'right'); out.checks.south_sign_is_physical = FP.tryInteractAt('town', 30, 30); toPause(NF);
 
       var final = NF.getState();
@@ -223,8 +218,7 @@
       out.checks.choices_pay_off = final.consequences.confession_register === 'personale' && final.consequences.post_s3_record === 'truman_voluntary_witness' && final.consequences.encounter_order === 'bob_first' && final.consequences.ring_final_gesture === 'left' && final.consequences.bob_response_stance === 'B' && final.consequences.s4_interpretation === 'diagnosi';
       out.checks.optional_visits_recorded = final.epilogue_seen.sarah && final.epilogue_seen.ronette;
       out.checks.laura_last_image_present = out.screens.some(function (id) { return id.indexOf('nf.lodge.laura.05') === 0; });
-      out.checks.laura_keeps_responsibility_fractured_not_cancelled = out.screens.indexOf('nf.lodge.laura.03') >= 0 &&
-        out.screens.indexOf('nf.lodge.laura.03b') < 0 && out.screens.indexOf('nf.lodge.laura.03c') < 0;
+      out.checks.laura_keeps_responsibility_fractured_not_cancelled = out.screens.indexOf('nf.lodge.laura.03b') >= 0 && out.screens.indexOf('nf.lodge.laura.03c') >= 0;
       out.checks.no_gold_overflow = !out.errors.some(function (e) { return e.indexOf('gold_overflow:') === 0; });
       out.checks.no_auto_fragment_pages = !out.screens.some(function (id) { return /\.part\d+$/.test(id); });
       FP.reset();

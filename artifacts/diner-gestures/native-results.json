@@ -1,0 +1,234 @@
+[
+  {
+    "test": "authored-cast-contract.js",
+    "exit": 0
+  },
+  {
+    "test": "canonical-sync.js",
+    "exit": 0
+  },
+  {
+    "test": "cast-sprite-sheet.js",
+    "exit": 0
+  },
+  {
+    "test": "character-quality.js",
+    "exit": 0
+  },
+  {
+    "test": "character-runtime-contract.js",
+    "exit": 0
+  },
+  {
+    "test": "choice-prompt-dedup.js",
+    "exit": 0
+  },
+  {
+    "test": "choice-prompts.js",
+    "exit": 0
+  },
+  {
+    "test": "classic-object-grounding.js",
+    "exit": 0
+  },
+  {
+    "test": "coldstage-config.js",
+    "exit": 0
+  },
+  {
+    "test": "cooper-sprite-sheet.js",
+    "exit": 0
+  },
+  {
+    "test": "dialogue-craft-regression.js",
+    "exit": 0
+  },
+  {
+    "test": "dialogue-presentation.js",
+    "exit": 0
+  },
+  {
+    "test": "diner-layout.js",
+    "exit": 0
+  },
+  {
+    "test": "environmental-interactions.js",
+    "exit": 0
+  },
+  {
+    "test": "gen-m6-check.js",
+    "exit": 0
+  },
+  {
+    "test": "genmaps.js",
+    "exit": 0
+  },
+  {
+    "test": "gold-tone-gates.js",
+    "exit": 0
+  },
+  {
+    "test": "graphic-pass-contract.js",
+    "exit": 0
+  },
+  {
+    "test": "heartgold-visual-contract.js",
+    "exit": 0
+  },
+  {
+    "test": "initial-spawn.js",
+    "exit": 0
+  },
+  {
+    "test": "interaction-voice.js",
+    "exit": 0
+  },
+  {
+    "test": "interior-prop-semantics.js",
+    "exit": 0
+  },
+  {
+    "test": "interior-zoning-reachability.js",
+    "exit": 0
+  },
+  {
+    "test": "letter-chain-provenance.js",
+    "exit": 0
+  },
+  {
+    "test": "level-autopsy.js",
+    "exit": 0
+  },
+  {
+    "test": "level-autopsy2.js",
+    "exit": 0
+  },
+  {
+    "test": "level-autopsy3.js",
+    "exit": 0
+  },
+  {
+    "test": "mobile-production.js",
+    "exit": 0
+  },
+  {
+    "test": "movement-feel.js",
+    "exit": 0
+  },
+  {
+    "test": "narrative-finale.js",
+    "exit": 0
+  },
+  {
+    "test": "narrative-m9-runtime.js",
+    "exit": 0
+  },
+  {
+    "test": "narrative-repair-contract.js",
+    "exit": 0
+  },
+  {
+    "test": "narrative-validate-m5.js",
+    "exit": 0
+  },
+  {
+    "test": "narrative-validate-m6.js",
+    "exit": 0
+  },
+  {
+    "test": "narrative-validate-m8.js",
+    "exit": 0
+  },
+  {
+    "test": "narrative-validate-m9.js",
+    "exit": 0
+  },
+  {
+    "test": "narrative-validate.js",
+    "exit": 0
+  },
+  {
+    "test": "notebook-objective.js",
+    "exit": 0
+  },
+  {
+    "test": "objective-notebook-visibility.js",
+    "exit": 0
+  },
+  {
+    "test": "objective-resolver.js",
+    "exit": 0
+  },
+  {
+    "test": "performance-gate.js",
+    "exit": 0
+  },
+  {
+    "test": "portrait-evidence-parity.js",
+    "exit": 0
+  },
+  {
+    "test": "portrait-gates.js",
+    "exit": 0
+  },
+  {
+    "test": "r69-reference-gates.js",
+    "exit": 0
+  },
+  {
+    "test": "retro-font.js",
+    "exit": 0
+  },
+  {
+    "test": "retro-production.js",
+    "exit": 0
+  },
+  {
+    "test": "ronette-bob-provenance.js",
+    "exit": 0
+  },
+  {
+    "test": "smoke.js",
+    "exit": 0
+  },
+  {
+    "test": "touch-runtime.js",
+    "exit": 0
+  },
+  {
+    "test": "town-map-coherence.js",
+    "exit": 0
+  },
+  {
+    "test": "town-structure-semantics.js",
+    "exit": 0
+  },
+  {
+    "test": "tracks-provenance.js",
+    "exit": 0
+  },
+  {
+    "test": "walk-phase-contract.js",
+    "exit": 0
+  },
+  {
+    "test": "walkthrough.js",
+    "exit": 0
+  },
+  {
+    "test": "ambient-life.js",
+    "exit": 0
+  },
+  {
+    "test": "environment-life.js",
+    "exit": 0
+  },
+  {
+    "test": "environment-entry.js",
+    "exit": 0
+  },
+  {
+    "test": "character-activity.js",
+    "exit": 0
+  }
+]

@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>TP-A3-BOOT</title>
+<style>
+  html, body { margin: 0; background: #0b0f0c; }
+  #product { border: 0; width: 960px; height: 640px; display: block; }
+  #status { position: fixed; right: 0; bottom: 0; z-index: 99; padding: 3px 6px;
+            color: #17261d; background: #f4f0d2; font: 10px monospace; }
+</style>
+</head>
+<body>
+<iframe id="product" title="Twin Peaks production build"></iframe>
+<div id="status">idle</div>
+<script>
+/* test/act-3-playthrough-probe.html — driver di supporto per la giocata
+ * dell'Atto 3 sulla build REALE (index.html, nessuna modifica ai file di
+ * produzione). Espone window.A3: primitive di input, cammino BFS, apertura
+ * taccuino, e un registratore di trascrizione che legge SOLO ciò che la UI
+ * emette (eventi page_shown dell'adapter + DOM .nw-page + HUD #objective).
+ * Le sequenze dei percorsi vivono nel driver node (test/act-3-playthrough.js). */
+(function () {
+  'use strict';
+  var frame = document.getElementById('product');
+  var statusEl = document.getElementById('status');
+  var W = null;                 // iframe window
+  var LOCK = 220;               // > advanceLockMs di produzione (150)
+  var A3 = window.A3 = {};
+
+  var transcript = [];          // righe della trascrizione
+  var classicSeen = [];         // dialoghi CLASSICI osservati (map, id, testo)
+  var mapEntries = [];          // entità presenti a ogni ingresso mappa
+  var apiFallbacks = [];        // punti in cui si è dovuto usare l'API invece dei tasti
+  var notes = [];               // osservazioni libere del driver
+  var lastPrepared = null;      // node id dell'ultimo prepare (per attribuire le pagine)
+  var pendingShot = null;
+
+  A3.transcript = transcript;
+  A3.classicSeen = classicSeen;
+  A3.mapEntries = mapEntries;
+  A3.apiFallbacks = apiFallbacks;
+  A3.notes = notes;
+
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  A3.wait = wait;
+  function G() { return W.GAME; }
+  function E() { return W.GAME.Engine; }
+  function S() { return W.GAME.Engine.state; }
+  function A() { return W.GAME.NarrativeAdapter; }
+  function NR() { return W.GAME.NarrativeRuntime; }
+
+  function objectiveText() {
+    var el = W.document.getElementById('objective');
+    if (!el) return '';
+    if (el.style.display === 'none') return '';
+    return (el.textContent || '').replace(/\s*·\s*T: taccuino\s*$/, '').trim();
+  }
+  A3.objective = function () { return objectiveText(); };
+
+  function stateDigest() {
+    var s = A().getState();
+    return {
+      flags: Object.keys(s.flags).filter(function (k) { return s.flags[k]; }).sort(),
+      values: JSON.parse(JSON.stringify(s.values)),
+      evidence: Object.keys(s.evidence).filter(function (k) { return s.evidence[k]; }).sort(),
+      nodes_done: Object.keys(s.nodes_done).filter(function (k) { return s.nodes_done[k]; }).sort()
+    };
+  }
+  A3.stateDigest = stateDigest;
+
+  function diffDigest(before, after) {
+    var d = {};
+    ['flags', 'evidence', 'nodes_done'].forEach(function (k) {
+      var add = after[k].filter(function (v) { return before[k].indexOf(v) === -1; });
+      if (add.length) d[k] = add;
+    });
+    var vals = {};
+    Object.keys(after.values).forEach(function (k) {
+      if (JSON.stringify(before.values[k]) !== JSON.stringify(after.values[k])) vals[k] = after.values[k];
+    });
+    if (Object.keys(vals).length) d.values = vals;
+    return d;
+  }
+
+  /* ---- registratore: si aggancia SOLO al log dell'adapter e al DOM reale ---- */
+  var digestAtSessionStart = null;
+  function installRecorder() {
+    var a = A();
+    a.onLog = function (ev) {
+      if (ev.event === 'page_shown') {
+        var box = W.document.querySelector('#narrative .nw-page[data-page-id="' + ev.page_id + '"]');
+        var label = box ? (box.getAttribute('data-speaker-label') || null) : null;
+        var dom = box ? box.textContent : null;
+        var body = dom;
+        if (dom !== null && label && dom.indexOf(label + ': ') === 0) body = dom.slice(label.length + 2);
+        transcript.push({
+          kind: 'page',
+          node_id: lastPrepared,
+          page_id: ev.page_id,
+          speaker_id: box ? (box.getAttribute('data-speaker-id') || null) : null,
+          display_name: label,
+          text: body === null ? ev.visible_text : body,
+          dom_text: dom,
+          objective: objectiveText(),
+          map: S().mapId
+        });
+      } else if (ev.event === 'widget_opened') {
+        transcript.push({ kind: 'widget', node_id: lastPrepared, choices: ev.choices.slice(), objective: objectiveText(), map: S().mapId });
+      } else if (ev.event === 'choice_confirmed') {
+        transcript.push({ kind: 'choice', node_id: lastPrepared, choice_id: ev.choice_id });
+      } else if (ev.event === 'node_committed') {
+        transcript.push({ kind: 'commit', node_id: ev.node_id, ok: ev.ok, repeated: !!ev.repeated });
+      } else if (ev.event === 'branch_committed') {
+        transcript.push({ kind: 'commit', node_id: ev.node_id, ok: ev.ok, branch: true });
+      } else if (ev.event === 'interaction_no_roots' || ev.event === 'interaction_no_roots_feedback') {
+        transcript.push({ kind: 'no_roots', target: ev.target || ev.actor || null, page_id: ev.page_id || null });
+      } else if (ev.event === 'compare_pair_selected') {
+        transcript.push({ kind: 'pair', pair: ev.pair.slice(), status: ev.status, matched: ev.matched });
+      } else if (ev.event === 'ambiguous_world_roots') {
+        transcript.push({ kind: 'ERROR_ambiguous_roots', map: ev.map, target: ev.target || ev.actor, roots: ev.roots });
+      } else if (ev.event === 'presentation_committed') {
+        transcript.push({ kind: 'presentation', result: ev.result, reason: ev.reason });
+      }
+    };
+    // wrapper di TEST sui prepare: serve solo ad attribuire le pagine a un nodo.
+    var nr = NR();
+    if (!nr.__a3wrapped) {
+      nr.__a3wrapped = true;
+      var pn = nr.prepareNode;
+      nr.prepareNode = function (s, m, id) { lastPrepared = (typeof id === 'string') ? id : (id && id.id); return pn.apply(this, arguments); };
+      var pc = nr.prepareChoice;
+      nr.prepareChoice = function (s, m, node, cid) { lastPrepared = node && node.id; return pc.apply(this, arguments); };
+    }
+    // ingresso mappa: fotografa le entità presenti (per i doppioni di attore)
+    var e = E();
+    if (!e.__a3wrapped) {
+      e.__a3wrapped = true;
+      var lm = e.loadMap;
+      e.loadMap = function (id, x, y, dir) {
+        var r = lm.apply(this, arguments);
+        try {
+          mapEntries.push({
+            map: id, at: [x, y, dir],
+            npcs: (e.state.npcs || []).map(function (n) { return n.id + '@' + n.x + ',' + n.y; })
+          });
+        } catch (_) {}
+        return r;
+      };
+    }
+  }
+
+  /* ---- input reale ---- */
+  function key(code) {
+    W.dispatchEvent(new W.KeyboardEvent('keydown', { code: code, bubbles: true }));
+    W.dispatchEvent(new W.KeyboardEvent('keyup', { code: code, bubbles: true }));
+  }
+  A3.press = async function (code, times) {
+    times = times || 1;
+    for (var i = 0; i < times; i++) { key(code); await wait(LOCK); }
+  };
+  function narrativeOpen() { return !!W.document.querySelector('#narrative .nw-root'); }
+  A3.narrativeOpen = narrativeOpen;
+  function widgetOpts() {
+    return [].map.call(W.document.querySelectorAll('#narrative .nw-root:not(.nb-root) .nw-opt[data-choice-id]'),
+      function (o) { return o.getAttribute('data-choice-id'); });
+  }
+  A3.widgetOpts = widgetOpts;
+
+  /* ---- movimento ---- */
+  function solid(map, x, y) { return G().Maps.isSolid(map, x, y, S()); }
+  function npcAt(x, y) {
+    return (S().npcs || []).some(function (n) { return (n.x === x && n.y === y) || (n.mx === x && n.my === y); });
+  }
+  function pathTo(tx, ty) {
+    var map = S().mapId, rows = S().map.rows;
+    var h = rows.length, w = rows[0].length;
+    var start = S().player.tx + ',' + S().player.ty;
+    var prev = {}, q = [start], seen = {};
+    seen[start] = true;
+    while (q.length) {
+      var cur = q.shift(), p = cur.split(',').map(Number);
+      if (p[0] === tx && p[1] === ty) {
+        var out = [], k = cur;
+        while (k !== start) { out.unshift(k); k = prev[k]; }
+        return out.map(function (s) { return s.split(',').map(Number); });
+      }
+      [[0, -1], [0, 1], [-1, 0], [1, 0]].forEach(function (d) {
+        var nx = p[0] + d[0], ny = p[1] + d[1];
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) return;
+        var kk = nx + ',' + ny;
+        if (seen[kk]) return;
+        if (G().Maps.doorAt(map, nx, ny)) return;      // mai attraversare porte camminando qui
+        if (solid(map, nx, ny)) return;
+        if (npcAt(nx, ny) && !(nx === tx && ny === ty)) return;
+        seen[kk] = true; prev[kk] = cur; q.push(kk);
+      });
+    }
+    return null;
+  }
+  var DIRKEY = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+  function dirTo(from, to) {
+    if (to[1] < from[1]) return 'up';
+    if (to[1] > from[1]) return 'down';
+    if (to[0] < from[0]) return 'left';
+    return 'right';
+  }
+  // un passo alla volta, sincronizzato col motore: mai un tap mentre Cooper
+  // è ancora in movimento (altrimenti la coda direzione lo porta oltre).
+  async function idle() {
+    for (var i = 0; i < 80; i++) {
+      var st = S();
+      if (!st.player.moving && st.fadePhase === 0 && !st.dialogue && !st.menu) return true;
+      await wait(40);
+    }
+    return false;
+  }
+  async function stepTo(cell) {
+    await idle();
+    var d = dirTo([S().player.tx, S().player.ty], cell);
+    if (S().player.dir !== d) { key(DIRKEY[d]); await wait(150); await idle(); }
+    for (var i = 0; i < 10; i++) {
+      var p = S().player;
+      if (p.tx === cell[0] && p.ty === cell[1]) return true;
+      key(DIRKEY[d]);
+      await wait(170);
+      await idle();
+    }
+    var f = S().player;
+    return f.tx === cell[0] && f.ty === cell[1];
+  }
+  // cammina davvero (tasti freccia) fino a (x,y). Ritorna false se non c'è via.
+  A3.lastWalk = null;
+  A3.walkTo = async function (x, y) {
+    var from = [S().player.tx, S().player.ty];
+    var path = pathTo(x, y);
+    if (!path) { A3.lastWalk = { from: from, to: [x, y], reason: 'no_path' }; return false; }
+    for (var i = 0; i < path.length; i++) {
+      if (!(await stepTo(path[i]))) {
+        A3.lastWalk = { from: from, to: [x, y], reason: 'step_failed', at: path[i], stuck: [S().player.tx, S().player.ty], path: path };
+        return false;
+      }
+    }
+    A3.lastWalk = { from: from, to: [x, y], reason: 'ok', steps: path.length };
+    return true;
+  };
+  A3.walkDiag = function () { return A3.lastWalk; };
+  // cammina fino a una casella adiacente al target e GUARDA il target:
+  // l'interazione colpisce sempre la casella guardata.
+  A3.reach = async function (tx, ty) {
+    var map = S().mapId;
+    var cands = [[tx, ty - 1, 'down'], [tx, ty + 1, 'up'], [tx - 1, ty, 'right'], [tx + 1, ty, 'left']]
+      .filter(function (c) { return !solid(map, c[0], c[1]) && !npcAt(c[0], c[1]) && !G().Maps.doorAt(map, c[0], c[1]); });
+    for (var i = 0; i < cands.length; i++) {
+      var c = cands[i];
+      if (S().player.tx === c[0] && S().player.ty === c[1]) { await A3.face(c[2]); return { ok: true, from: c }; }
+    }
+    for (var j = 0; j < cands.length; j++) {
+      var d = cands[j];
+      if (await A3.walkTo(d[0], d[1])) { await A3.face(d[2]); return { ok: true, from: d }; }
+    }
+    return { ok: false, error: 'unreachable', target: [tx, ty], candidates: cands };
+  };
+  A3.canReach = function (tx, ty) {
+    var map = S().mapId;
+    return [[tx, ty - 1], [tx, ty + 1], [tx - 1, ty], [tx + 1, ty]].some(function (c) {
+      if (solid(map, c[0], c[1]) || npcAt(c[0], c[1])) return false;
+      if (S().player.tx === c[0] && S().player.ty === c[1]) return true;
+      return !!pathTo(c[0], c[1]);
+    });
+  };
+  // avvicinamento da un lato SCELTO (per riprodurre l'approccio di un giocatore)
+  A3.reachFrom = async function (sx, sy, dir) {
+    if (!(S().player.tx === sx && S().player.ty === sy) && !(await A3.walkTo(sx, sy))) {
+      return { ok: false, error: 'unreachable_side', side: [sx, sy], diag: A3.lastWalk };
+    }
+    await A3.face(dir);
+    return { ok: true, from: [sx, sy, dir] };
+  };
+  A3.face = async function (dir) {
+    for (var i = 0; i < 4 && S().player.dir !== dir; i++) { key(DIRKEY[dir]); await wait(140); }
+    return S().player.dir === dir;
+  };
+  // teleport DI VIAGGIO (cambio mappa o riposizionamento lungo): mai per saltare
+  // un'interazione. Registrato nella trascrizione.
+  A3.travel = async function (map, x, y, dir, why) {
+    transcript.push({ kind: 'travel', to: map, at: [x, y, dir], why: why || null });
+    E().loadMap(map, x, y, dir);
+    await wait(420);
+    if (S().dialogue) await A3.drainClassic('onEnter ' + map);   // monologo d'arrivo
+    return { map: S().mapId, x: S().player.tx, y: S().player.ty };
+  };
+  // come travel, ma SENZA consumare il monologo d'arrivo: serve a ispezionare
+  // che cosa la build mette davvero nella scatola di dialogo entrando.
+  A3.travelNoDrain = async function (map, x, y, dir, why) {
+    transcript.push({ kind: 'travel', to: map, at: [x, y, dir], why: why || null });
+    E().loadMap(map, x, y, dir);
+    await wait(520);
+    return { map: S().mapId, x: S().player.tx, y: S().player.ty };
+  };
+
+  // attraversa una porta REALE camminandoci dentro
+  A3.enterDoor = async function (doorX, doorY, standX, standY) {
+    var from = S().mapId;
+    if (!(await A3.walkTo(standX, standY))) return { ok: false, error: 'no_path_to_door' };
+    var d = dirTo([standX, standY], [doorX, doorY]);
+    await A3.face(d);
+    for (var i = 0; i < 8; i++) {
+      key(DIRKEY[d]);
+      await wait(260);
+      if (S().mapId !== from) break;
+      if (S().dialogue) break;
+    }
+    await wait(420);
+    var blocked = null;
+    if (S().mapId === from && S().dialogue) {
+      blocked = { id: S().dialogue.id, text: dialogueText() };
+      await A3.drainClassic();
+    }
+    transcript.push({ kind: 'door', from: from, to: S().mapId, blocked: blocked });
+    if (S().mapId !== from) {
+      mapEntries.push({
+        map: S().mapId, at: [S().player.tx, S().player.ty, S().player.dir],
+        npcs: (S().npcs || []).map(function (n) { return n.id + '@' + n.x + ',' + n.y; })
+      });
+    }
+    return { ok: S().mapId !== from, map: S().mapId, blocked: blocked };
+  };
+
+  /* ---- dialoghi classici ---- */
+  function dialogueText() {
+    var d = S().dialogue;
+    if (!d) return '';
+    var pages = d.pages || [];
+    var p = pages[d.i || 0];        // il motore indicizza con d.i (engine.js advanceDialogue)
+    if (p === undefined) return '';
+    return typeof p === 'string' ? p : (p.text || JSON.stringify(p));
+  }
+  A3.drainClassic = async function (label) {
+    var seen = [];
+    for (var i = 0; i < 60 && S().dialogue; i++) {
+      var id = S().dialogue.id;
+      seen.push({ id: id, text: dialogueText() });
+      key('Enter');
+      await wait(150);
+    }
+    if (seen.length) {
+      classicSeen.push({ map: S().mapId, label: label || null, id: seen[0].id, pages: seen.length, first: seen[0].text });
+      transcript.push({ kind: 'classic', map: S().mapId, id: seen[0].id, pages: seen.map(function (s) { return s.text; }) });
+    }
+    return seen;
+  };
+
+  /* ---- interazione reale (tasto A sulla casella guardata) ---- */
+  async function settle(maxMs) {
+    var t0 = Date.now();
+    while (Date.now() - t0 < (maxMs || 2500)) {
+      await wait(120);
+      if (!A().active() && !narrativeOpen() && !S().dialogue) return;
+    }
+  }
+  // preme A e fa avanzare le pagine finché la sessione narrativa non si ferma
+  // su un widget di scelta o si chiude. Non sceglie mai da solo.
+  A3.interact = async function (opts) {
+    opts = opts || {};
+    digestAtSessionStart = stateDigest();
+    var mark = transcript.length;
+    key('Enter');
+    await wait(300);
+    for (var i = 0; i < (opts.maxAdvance || 80); i++) {
+      if (widgetOpts().length) break;
+      if (!narrativeOpen() && !A().active()) break;
+      key('Enter');
+      await wait(LOCK);
+    }
+    if (!narrativeOpen() && S().dialogue) await A3.drainClassic('after-interact');
+    var after = stateDigest();
+    var delta = diffDigest(digestAtSessionStart, after);
+    if (Object.keys(delta).length) transcript.push({ kind: 'delta', delta: delta });
+    await wait(260);   // l'HUD si aggiorna col poll di produzione (180 ms)
+    transcript.push({ kind: 'objective', text: objectiveText(), where: 'dopo l\'interazione' });
+    return { rows: transcript.slice(mark), choices: widgetOpts(), delta: delta };
+  };
+  // continua ad avanzare dopo una scelta finché non compare un altro widget o
+  // la sessione si chiude
+  A3.advance = async function (maxAdvance) {
+    var before = stateDigest();
+    var mark = transcript.length;
+    for (var i = 0; i < (maxAdvance || 80); i++) {
+      if (widgetOpts().length) break;
+      if (!narrativeOpen() && !A().active()) break;
+      key('Enter');
+      await wait(LOCK);
+    }
+    await wait(260);
+    var delta = diffDigest(before, stateDigest());
+    if (Object.keys(delta).length) transcript.push({ kind: 'delta', delta: delta });
+    transcript.push({ kind: 'objective', text: objectiveText(), where: 'dopo l\'avanzamento' });
+    return { rows: transcript.slice(mark), choices: widgetOpts(), delta: delta };
+  };
+  function currentPageId() {
+    var b = W.document.querySelector('#narrative .nw-page[data-page-id]');
+    return b ? b.getAttribute('data-page-id') : null;
+  }
+  A3.currentPageId = currentPageId;
+  // interagisce e si FERMA sulla pagina richiesta (per la cattura), senza
+  // committare oltre: la sessione riprende con A3.advance().
+  A3.interactUntilPage = async function (pageId, maxAdvance) {
+    digestAtSessionStart = stateDigest();
+    var mark = transcript.length;
+    key('Enter');
+    await wait(300);
+    for (var i = 0; i < (maxAdvance || 90); i++) {
+      if (currentPageId() === pageId) break;
+      if (widgetOpts().length) break;
+      if (!narrativeOpen() && !A().active()) break;
+      key('Enter');
+      await wait(LOCK);
+    }
+    return { rows: transcript.slice(mark), reached: currentPageId() === pageId, at: currentPageId() };
+  };
+  A3.advanceUntilPage = async function (pageId, maxAdvance) {
+    for (var i = 0; i < (maxAdvance || 90); i++) {
+      if (currentPageId() === pageId) break;
+      if (widgetOpts().length) break;
+      if (!narrativeOpen() && !A().active()) break;
+      key('Enter');
+      await wait(LOCK);
+    }
+    return { reached: currentPageId() === pageId, at: currentPageId() };
+  };
+  // sceglie e si ferma sulla PRIMA pagina di feedback della scelta
+  A3.chooseAndHold = async function (choiceId) {
+    var opts = widgetOpts(), idx = opts.indexOf(choiceId);
+    if (idx < 0) return { ok: false, error: 'choice_absent', available: opts };
+    for (var k = 0; k < idx; k++) await A3.press('ArrowDown');
+    await A3.press('Enter');
+    await wait(260);
+    return { ok: true, page: currentPageId() };
+  };
+  A3.choose = async function (choiceId) {
+    var opts = widgetOpts(), idx = opts.indexOf(choiceId);
+    if (idx < 0) return { ok: false, error: 'choice_absent', available: opts };
+    for (var k = 0; k < idx; k++) await A3.press('ArrowDown');
+    await A3.press('Enter');
+    var r = await A3.advance();
+    return { ok: true, after: r };
+  };
+  // interagisci col target guardato e scegli in sequenza
+  A3.interactAndChoose = async function (choices) {
+    var r = await A3.interact();
+    for (var i = 0; i < choices.length; i++) {
+      var c = await A3.choose(choices[i]);
+      if (!c.ok) return { ok: false, at: choices[i], error: c.error, available: c.available, first: r };
+    }
+    await settle();
+    return { ok: true };
+  };
+
+  /* ---- menu di presentazione (M4: P2 a Truman) ---- */
+  function propOpts() {
+    return [].map.call(W.document.querySelectorAll('#narrative [data-prop-choice]'),
+      function (o) { return o.getAttribute('data-prop-choice'); });
+  }
+  A3.propOpts = propOpts;
+  A3.presentProposition = async function (propId) {
+    for (var w = 0; w < 40 && !propOpts().length; w++) await A3.press('Enter');
+    var opts = propOpts();
+    var idx = opts.indexOf(propId);
+    if (idx < 0) return { ok: false, error: 'proposition_absent', available: opts };
+    for (var k = 0; k < idx; k++) await A3.press('ArrowDown');
+    await A3.press('Enter');
+    await wait(260);
+    // menu allegati (se dichiarato manuale): conferma senza allegare
+    var confirm = W.document.querySelector('#narrative [data-attachment-confirm]');
+    if (confirm) {
+      var evs = W.document.querySelectorAll('#narrative [data-attachment-evidence]').length;
+      for (var e2 = 0; e2 < evs; e2++) await A3.press('ArrowDown');
+      await A3.press('Enter');
+    }
+    var r = await A3.advance();
+    await settle();
+    return { ok: true, after: r };
+  };
+
+  /* ---- taccuino ---- */
+  function nbRoot() { return W.document.querySelector('#narrative .nb-root'); }
+  A3.openNotebook = async function () {
+    await A3.press('KeyT');
+    await wait(260);
+    return !!nbRoot();
+  };
+  function nbFocusIndex() {
+    var root = nbRoot();
+    if (!root) return -1;
+    var items = [].slice.call(root.querySelectorAll('.nw-opt'));
+    for (var i = 0; i < items.length; i++) if (items[i].className.indexOf('nw-focus') >= 0) return i;
+    return -1;
+  }
+  function nbCompareIds() {
+    var root = nbRoot();
+    if (!root) return [];
+    return [].map.call(root.querySelectorAll('[data-nb-compare]'), function (o) { return o.getAttribute('data-nb-compare'); });
+  }
+  A3.notebookSections = function () {
+    var root = nbRoot();
+    if (!root) return [];
+    return [].map.call(root.querySelectorAll('[data-nb-section]'), function (o) { return o.getAttribute('data-nb-section'); });
+  };
+  A3.notebookObjective = function () {
+    var root = nbRoot();
+    var el = root && root.querySelector('[data-nb-objective]');
+    return el ? el.textContent : null;
+  };
+  // apre Confronta e seleziona due evidenze per ID, coi soli tasti
+  A3.compare = async function (evA, evB) {
+    // l'HUD si nasconde mentre il taccuino è aperto: campiona l'obiettivo PRIMA
+    transcript.push({ kind: 'objective', text: objectiveText(), where: 'prima del taccuino' });
+    if (!nbRoot() && !(await A3.openNotebook())) return { ok: false, error: 'notebook_did_not_open' };
+    transcript.push({ kind: 'objective', text: A3.notebookObjective(), where: 'nel taccuino' });
+    var sections = A3.notebookSections();
+    var target = sections.indexOf('Confronta');
+    if (target < 0) return { ok: false, error: 'compare_section_absent', sections: sections };
+    var cur = nbFocusIndex();
+    for (var i = 0; i < (target - cur + sections.length) % sections.length; i++) await A3.press('ArrowDown');
+    await A3.press('Enter');
+    await wait(200);
+    var ids = nbCompareIds();
+    if (ids.indexOf(evA) < 0 || ids.indexOf(evB) < 0) return { ok: false, error: 'evidence_absent', ids: ids };
+    for (var s = 0; s < 2; s++) {
+      var want = ids.indexOf(s === 0 ? evA : evB);
+      var focus = nbFocusIndex();
+      var steps = (want - focus + ids.length) % ids.length;
+      for (var j = 0; j < steps; j++) await A3.press('ArrowDown');
+      await A3.press('Enter');
+      await wait(220);
+    }
+    // confirmPair è partito: avanza fino al widget del confronto o alla riga neutra
+    for (var k = 0; k < 40; k++) {
+      if (widgetOpts().length) break;
+      if (!W.document.querySelector('#narrative .nw-root:not(.nb-root)')) break;
+      await A3.press('Enter');
+    }
+    return { ok: true, choices: widgetOpts() };
+  };
+  A3.closeNotebook = async function () {
+    for (var i = 0; i < 6 && nbRoot(); i++) await A3.press('Escape');
+    await wait(200);
+    return !nbRoot();
+  };
+
+  /* ---- boot / reload ---- */
+  async function waitFor(pred, ms, label) {
+    var t0 = Date.now();
+    while (Date.now() - t0 < (ms || 20000)) {
+      try { if (pred()) return true; } catch (_) {}
+      await wait(80);
+    }
+    throw new Error('timeout: ' + (label || 'condition'));
+  }
+  async function loadFrame(url) {
+    await new Promise(function (resolve) {
+      frame.onload = function () { resolve(); };
+      frame.src = url;
+    });
+    W = frame.contentWindow;
+    await waitFor(function () { return W.GAME && W.GAME.Engine && W.GAME.Engine.state; }, 25000, 'engine');
+    await waitFor(function () { return W.GAME.NarrativeProduction && W.GAME.NarrativeProduction.ready; }, 25000, 'narrative boot');
+    await wait(400);
+  }
+  // porta la build dal titolo alla partita premendo davvero A
+  async function toPlay() {
+    for (var i = 0; i < 40 && S().mode !== 'play'; i++) { key('Enter'); await wait(200); }
+    await waitFor(function () { return S().mode === 'play'; }, 12000, 'mode play');
+    await wait(400);
+    await A3.drainClassic('opening');
+  }
+  A3.boot = async function () {
+    // partita davvero nuova: niente stato residuo di un percorso precedente
+    try { localStorage.clear(); } catch (_) {}
+    await loadFrame('../index.html');
+    try { W.localStorage.clear(); } catch (_) {}
+    await loadFrame('../index.html');
+    installRecorder();
+    await toPlay();
+    statusEl.textContent = 'play';
+    return { map: S().mapId, mode: S().mode, testMode: W.GAME.NarrativeProduction.testMode };
+  };
+  A3.reload = async function () {
+    var before = { map: S().mapId, x: S().player.tx, y: S().player.ty, dir: S().player.dir,
+                   objective: objectiveText(), digest: stateDigest(),
+                   npcs: (S().npcs || []).map(function (n) { return n.id + '@' + n.x + ',' + n.y; }).sort() };
+    await loadFrame('../index.html');
+    installRecorder();
+    await toPlay();
+    var after = { map: S().mapId, x: S().player.tx, y: S().player.ty, dir: S().player.dir,
+                  objective: objectiveText(), digest: stateDigest(),
+                  npcs: (S().npcs || []).map(function (n) { return n.id + '@' + n.x + ',' + n.y; }).sort() };
+    transcript.push({ kind: 'reload', before: before, after: after });
+    return { before: before, after: after };
+  };
+
+  /* ---- utilità di prova ---- */
+  A3.npcsHere = function () {
+    return (S().npcs || []).map(function (n) { return { id: n.id, sprite: n.sprite, x: n.x, y: n.y }; });
+  };
+  A3.mapNpcs = function (map) {
+    return (G().Maps[map].npcs || []).map(function (n) { return { id: n.id, sprite: n.sprite, x: n.x, y: n.y }; });
+  };
+  A3.ringHidden = function () {
+    return G().TraincarScene ? G().TraincarScene.ringHidden() : null;
+  };
+  A3.classicFlags = function () { return JSON.parse(JSON.stringify(S().flags)); };
+  A3.dialogueNow = function () {
+    var d = S().dialogue;
+    if (!d) return null;
+    var box = W.document.getElementById('dialogue-text');
+    return { id: d.id, i: d.i, pages: (d.pages || []).length, text: dialogueText(),
+             box_visible: !!(box && box.textContent), box_text: box ? box.textContent : null };
+  };
+  // caselle calpestabili NON raggiungibili dalla posizione attuale (NPC compresi)
+  A3.unreachableTiles = function () {
+    var rows = S().map.rows, map = S().mapId, out = [];
+    for (var y = 0; y < rows.length; y++) for (var x = 0; x < rows[y].length; x++) {
+      if (solid(map, x, y) || npcAt(x, y)) continue;
+      if (G().Maps.doorAt(map, x, y)) continue;   // le porte si attraversano, non si percorrono
+      if (S().player.tx === x && S().player.ty === y) continue;
+      if (!pathTo(x, y)) out.push([x, y]);
+    }
+    return out;
+  };
+  A3.pos = function () { return { map: S().mapId, x: S().player.tx, y: S().player.ty, dir: S().player.dir }; };
+  A3.note = function (text, data) { notes.push({ text: text, data: data === undefined ? null : data }); };
+  A3.fallback = function (where, why) { apiFallbacks.push({ where: where, why: why }); };
+  // ultima risorsa dichiarata: interazione via API pubblica dell'adapter
+  A3.apiInteract = async function (map, actor, why) {
+    A3.fallback(map + '/' + actor, why);
+    transcript.push({ kind: 'api_interact', map: map, actor: actor, why: why });
+    var mark = transcript.length;
+    digestAtSessionStart = stateDigest();
+    A().tryInteract(map, actor);
+    await wait(320);
+    for (var i = 0; i < 80; i++) {
+      if (widgetOpts().length) break;
+      if (!narrativeOpen() && !A().active()) break;
+      key('Enter');
+      await wait(LOCK);
+    }
+    var delta = diffDigest(digestAtSessionStart, stateDigest());
+    if (Object.keys(delta).length) transcript.push({ kind: 'delta', delta: delta });
+    return { rows: transcript.slice(mark), choices: widgetOpts(), delta: delta };
+  };
+  // chiude un widget senza committare nulla (Escape prima del commit)
+  A3.abortWidget = async function () {
+    for (var i = 0; i < 5 && widgetOpts().length; i++) await A3.press('Escape');
+    for (var j = 0; j < 20 && A().active(); j++) await wait(120);
+    await wait(200);
+    return !widgetOpts();
+  };
+  A3.reset = function () {
+    transcript.length = 0; classicSeen.length = 0; mapEntries.length = 0;
+    apiFallbacks.length = 0; notes.length = 0;
+  };
+  A3.dump = function () {
+    return { transcript: transcript, classic: classicSeen, mapEntries: mapEntries,
+             fallbacks: apiFallbacks, notes: notes };
+  };
+  A3.status = function (t) { statusEl.textContent = t; document.title = 'TP-A3-' + t; };
+})();
+</script>
+</body>
+</html>

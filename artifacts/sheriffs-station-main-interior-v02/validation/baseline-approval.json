@@ -1,0 +1,9 @@
+{
+  "status": "approved",
+  "projectId": "twin-peaks-pokemon",
+  "scenario": "sheriffsStation",
+  "sourceRunId": "2026-09-08T18-23-07-546Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation",
+  "approvedBy": "codex-primary-art-direction",
+  "captures": 8,
+  "manifestPath": "test/coldstage-baselines/sheriffsStation/baseline.json"
+}

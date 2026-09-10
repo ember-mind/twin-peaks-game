@@ -1,0 +1,52 @@
+{
+  "critic": "fresh-independent-integrated-visual-review-r3",
+  "verdict": "OURS_WINS",
+  "floor": 9,
+  "scores": {
+    "patrons": 9.0,
+    "boothIntegration": 9.1,
+    "materials": 9.2,
+    "whole": 9.1
+  },
+  "hardGate": "PASS",
+  "evidence": [
+    {
+      "path": ".coldstage/runs/2026-09-08T08-15-25-966Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner/diner-double-r-interior.png",
+      "observations": [
+        "Both seated patrons read as attached figures rather than floating heads: each has a connected neck/compact chest and small arms terminating at or resting on the tabletop.",
+        "The tabletops provide an unambiguous occlusion boundary below each chest; no legs or lower-body fragments leak through the table fronts.",
+        "Patrons occupy the inner booth edge at the same cast scale as the standing figures, and their silhouettes remain distinct from the burgundy seat backs.",
+        "Warm wood wall panels, cream laminate tables, gold light pools, burgundy channel-tufted vinyl, dark green accents, and metal stool bases form a coherent diner material system.",
+        "The long service counter remains the dominant functional anchor, with pie case, registers, stools, menu, and staff clearly legible; booth props add use without choking the open center aisle and entrance path."
+      ]
+    },
+    {
+      "path": ".coldstage/diffs/2026-09-08T08-15-25-966Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner/diner/diner-diff-sheet.webp",
+      "observations": [
+        "The current frame is a coherent incremental visual change from baseline, concentrated in booth patrons, booth/table details, and nearby dressing rather than a broken scene-wide displacement."
+      ]
+    },
+    {
+      "path": ".gauntlet/diner-seating/evidence/user-earlier-board.png",
+      "observations": [
+        "The production frame satisfies the earlier board's observable grammar: counter-first composition, paired wall booths, warm wood and burgundy palette, seated townspeople, clear entrance, and open circulation while respecting the native game camera and cast scale."
+      ]
+    }
+  ],
+  "biggestGap": "The patrons pass at native scale, but their tabletop arm gestures are only one-to-two-pixel cues and the upper-right patron's pale torso has limited separation from the cream tabletop; stronger hand/forearm contrast would make the seated pose instantaneous without zooming.",
+  "regressionRisk": "Any further anatomy enlargement or contrast pass could push patrons above the established cast scale, obscure tabletop props, weaken the clean table occlusion, or narrow the booth-side circulation lanes.",
+  "nextCheck": "After any patron edit, recapture the same 256x192 native diner camera and verify both patrons at 1x: connected head-neck-chest silhouette, visible resting forearms/hands, lower body fully occluded, unchanged counter dominance, and unchanged open entrance-to-counter aisle.",
+  "regressionEvidence": {
+    "nativeTests": {
+      "path": ".gauntlet/diner-seating/evidence/native-results.json",
+      "result": "PASS",
+      "summary": "All recorded native test commands exited 0, including diner layout, interior zoning/reachability, character runtime, mobile production, performance, and smoke coverage."
+    },
+    "coldstage": {
+      "path": ".gauntlet/diner-seating/evidence/coldstage-r3.json",
+      "result": "PASS",
+      "summary": "All desktop, gameplay, mobile, directional, visual, and diner scenarios passed runtime checks with zero severe console errors; the diner pixel change correctly remained pending this independent visual review."
+    }
+  },
+  "parityLimitation": "The exact latest user board was unavailable, so this verdict does not claim pixel-level or composition-level parity with that missing artifact. It is a scoped production-quality verdict against the supplied earlier board and the explicit seating/material/layout bar."
+}

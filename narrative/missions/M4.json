@@ -60,11 +60,97 @@
               "proposition_path": "P2.formulation.status",
               "equals": "formulated"
             }
+          },
+          {
+            "not": {
+              "node_done": "james_a2"
+            }
+          },
+          {
+            "not": {
+              "evidence": "T1_RONETTE_BOB"
+            }
           }
         ]
       },
       "text": "Parla con Ronette all'ospedale e con James al Double R.",
       "optional_line": "Facoltativo: la stanza 315; il vicino di stanza che recita versi."
+    },
+    {
+      "id": "obj_m4_2a",
+      "priority": 210,
+      "when": {
+        "all": [
+          {
+            "flag": "sogno_raccontato"
+          },
+          {
+            "not": {
+              "proposition_path": "P2.formulation.status",
+              "equals": "formulated"
+            }
+          },
+          {
+            "not": {
+              "node_done": "james_a2"
+            }
+          },
+          {
+            "evidence": "T1_RONETTE_BOB"
+          }
+        ]
+      },
+      "text": "James, al Double R. Norma dice che non tocca il caffè."
+    },
+    {
+      "id": "obj_m4_2b",
+      "priority": 225,
+      "when": {
+        "all": [
+          {
+            "flag": "sogno_raccontato"
+          },
+          {
+            "not": {
+              "proposition_path": "P2.formulation.status",
+              "equals": "formulated"
+            }
+          },
+          {
+            "node_done": "james_a2"
+          },
+          {
+            "not": {
+              "evidence": "T1_RONETTE_BOB"
+            }
+          }
+        ]
+      },
+      "text": "Ronette, all'ospedale: ha dieci minuti. Poi il taccuino (T)."
+    },
+    {
+      "id": "obj_m4_2c",
+      "priority": 250,
+      "when": {
+        "all": [
+          {
+            "flag": "sogno_raccontato"
+          },
+          {
+            "not": {
+              "proposition_path": "P2.formulation.status",
+              "equals": "formulated"
+            }
+          },
+          {
+            "node_done": "james_a2"
+          },
+          {
+            "evidence": "T1_RONETTE_BOB"
+          }
+        ]
+      },
+      "text": "Taccuino (T): accosta le due metà del cuore alla strada di James."
     },
     {
       "id": "obj_m4_1",
@@ -96,7 +182,7 @@
       "pages": [
         {
           "name": "COOPER",
-          "text": "Harry. Stanotte ho sognato una stanza rossa.",
+          "text": "Harry. Stanotte ho sognato una stanza rossa. Laura era lì.",
           "id": "m4.b1.truman_a2.p01",
           "mode": "dialogue",
           "speaker_id": "cooper",
@@ -104,7 +190,7 @@
         },
         {
           "name": "COOPER",
-          "text": "Laura era lì. Mi ha detto un nome all'orecchio. Al risveglio non c'era più.",
+          "text": "Mi ha detto un nome all'orecchio. L'ho portato fino alla porta. Poi niente.",
           "id": "m4.b1.truman_a2.p02",
           "mode": "dialogue",
           "speaker_id": "cooper",
@@ -120,7 +206,7 @@
         },
         {
           "name": "COOPER",
-          "text": "Nel sogno c'era anche un uomo. Capelli lunghi, grigi. Sorrideva mentre nessun altro lo faceva.",
+          "text": "C'era anche un uomo. Capelli lunghi, grigi. Sorrideva mentre nessun altro lo faceva.",
           "id": "m4.b1.truman_a2.p04",
           "mode": "dialogue",
           "speaker_id": "cooper",
@@ -128,7 +214,7 @@
         },
         {
           "name": "TRUMAN",
-          "text": "Se fosse di qui, avrei già un nome.",
+          "text": "Sarah ha detto capelli lunghi. E il sorriso. Se fosse di qui, avrei già un nome.",
           "id": "m4.b1.truman_a2.p05",
           "mode": "dialogue",
           "speaker_id": "truman",
@@ -144,7 +230,7 @@
         },
         {
           "name": "TRUMAN",
-          "text": "E il ragazzo, James, è al Double R da stamattina. Norma dice che non tocca il caffè.",
+          "text": "E James è al Double R da stamattina. Norma dice che non tocca il caffè.",
           "id": "m4.b1.truman_a2.p07",
           "mode": "dialogue",
           "speaker_id": "truman",
@@ -171,6 +257,48 @@
       "mandatory_beat": true
     },
     {
+      "id": "ronette_attesa",
+      "new": true,
+      "beat": "attesa",
+      "source_section": "attesa-ronette",
+      "optional": true,
+      "conditions": [
+        { "flag": "sogno_fatto" },
+        { "not": { "flag": "sogno_raccontato" } }
+      ],
+      "pages": [
+        {
+          "name": "INFERMIERA",
+          "text": "Non ancora, agente. Lo sceriffo ha chiesto di sapere prima di chiunque.",
+          "id": "m4.attesa.ronette_attesa.p01",
+          "mode": "dialogue",
+          "speaker_id": "infermiera",
+          "display_name": "INFERMIERA"
+        },
+        {
+          "name": "COOPER",
+          "text": "Allora prima lo sceriffo. Lei intanto non la sveglia nessuno.",
+          "id": "m4.attesa.ronette_attesa.p02",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        }
+      ],
+      "repeat": {
+        "name": "COOPER",
+        "text": "Prima Harry. L'infermiera non ha bisogno di ripeterlo.",
+        "id": "m4.repeat.ronette_attesa",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER"
+      },
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "hospital",
+      "actor_id": "ronette",
+      "interaction_slot": "primary"
+    },
+    {
       "id": "ronette_q",
       "new": true,
       "beat": "B2",
@@ -184,13 +312,13 @@
       "pages": [
         {
           "name": "",
-          "text": "(Il monitor tiene il suo tempo. Ronette guarda la porta, non la finestra.)",
+          "text": "(Il monitor tiene il suo tempo. Ronette guarda la porta, non il soffitto.)",
           "id": "m4.b2.ronette_q.p01",
           "mode": "action"
         },
         {
           "name": "INFERMIERA",
-          "text": "Dieci minuti, agente. È sveglia, non è tornata.",
+          "text": "Dieci minuti, agente. Si è svegliata alle due. È sveglia, non è tornata.",
           "id": "m4.b2.ronette_q.p02",
           "mode": "dialogue",
           "speaker_id": "infermiera",
@@ -402,6 +530,48 @@
       "exposed": false
     },
     {
+      "id": "infermiera_attesa",
+      "new": true,
+      "beat": "attesa",
+      "source_section": "attesa-infermiera",
+      "optional": true,
+      "conditions": [
+        { "flag": "sogno_fatto" },
+        { "not": { "flag": "sogno_raccontato" } }
+      ],
+      "pages": [
+        {
+          "name": "INFERMIERA",
+          "text": "Il reparto apre alle visite quando lo dice lo sceriffo. Oggi non l'ha ancora detto.",
+          "id": "m4.attesa.infermiera_attesa.p01",
+          "mode": "dialogue",
+          "speaker_id": "infermiera",
+          "display_name": "INFERMIERA"
+        },
+        {
+          "name": "COOPER",
+          "text": "Torno quando lo sceriffo avrà detto la sua.",
+          "id": "m4.attesa.infermiera_attesa.p02",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        }
+      ],
+      "repeat": {
+        "name": "COOPER",
+        "text": "Il reparto aspetta la parola dello sceriffo. Anch'io.",
+        "id": "m4.repeat.infermiera_attesa",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER"
+      },
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "hospital",
+      "actor_id": "infermiera",
+      "interaction_slot": "primary"
+    },
+    {
       "id": "infermiera_ctx",
       "new": true,
       "beat": "ctx",
@@ -459,6 +629,54 @@
       "channel": "world",
       "map_id": "hospital",
       "actor_id": "infermiera",
+      "interaction_slot": "primary",
+      "repeat": {
+        "name": "COOPER",
+        "text": "L'infermiera ha detto quello che vede. Il resto lo deve dire lei, se può.",
+        "id": "m4.repeat.infermiera_ctx",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER"
+      }
+    },
+    {
+      "id": "gerard_attesa",
+      "new": true,
+      "beat": "attesa",
+      "source_section": "attesa-gerard",
+      "optional": true,
+      "conditions": [
+        { "flag": "sogno_fatto" },
+        { "not": { "flag": "sogno_raccontato" } }
+      ],
+      "pages": [
+        {
+          "name": "",
+          "text": "(Gerard è in piedi accanto al letto, girato verso la tenda. La manica sinistra è vuota.)",
+          "id": "m4.attesa.gerard_attesa.p01",
+          "mode": "action"
+        },
+        {
+          "name": "COOPER",
+          "text": "Guarda la tenda, non me. Non è lui che devo sentire per primo.",
+          "id": "m4.attesa.gerard_attesa.p02",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        }
+      ],
+      "repeat": {
+        "name": "COOPER",
+        "text": "Gerard dorme. La manica vuota non si è mossa.",
+        "id": "m4.repeat.gerard_attesa",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER"
+      },
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "hospital",
+      "actor_id": "gerard",
       "interaction_slot": "primary"
     },
     {
@@ -471,7 +689,7 @@
       "pages": [
         {
           "name": "",
-          "text": "(Gerard è girato verso la finestra. Il braccio sinistro manca dalla manica.)",
+          "text": "(Gerard è girato verso la tenda. Il braccio sinistro manca dalla manica.)",
           "id": "m4.b3.gerard_a2.p01",
           "mode": "action"
         },
@@ -550,7 +768,63 @@
         {
           "flag": "sogno_raccontato"
         }
-      ]
+      ],
+      "repeat": {
+        "name": "COOPER",
+        "text": "Gerard dorme. Le labbra continuano da sole; non lo sveglio per una seconda recita.",
+        "id": "m4.repeat.gerard_a2",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER"
+      }
+    },
+    {
+      "id": "james_attesa",
+      "new": true,
+      "beat": "attesa",
+      "source_section": "attesa-james",
+      "optional": true,
+      "conditions": [
+        { "flag": "sogno_fatto" },
+        { "not": { "flag": "sogno_raccontato" } }
+      ],
+      "pages": [
+        {
+          "name": "",
+          "text": "(James guarda la tazza. Non alza gli occhi.)",
+          "id": "m4.attesa.james_attesa.p01",
+          "mode": "action"
+        },
+        {
+          "name": "JAMES",
+          "text": "Non ancora. Non so ancora cosa dirle.",
+          "id": "m4.attesa.james_attesa.p02",
+          "mode": "dialogue",
+          "speaker_id": "james",
+          "display_name": "JAMES"
+        },
+        {
+          "name": "COOPER",
+          "text": "Va bene. Prima parlo con Harry, poi torno qui.",
+          "id": "m4.attesa.james_attesa.p03",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        }
+      ],
+      "repeat": {
+        "name": "COOPER",
+        "text": "James non alza gli occhi. Prima Harry.",
+        "id": "m4.repeat.james_attesa",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER"
+      },
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "diner",
+      "actor_id": "james",
+      "interaction_slot": "primary"
     },
     {
       "id": "james_a2",
@@ -652,7 +926,15 @@
       "map_id": "diner",
       "actor_id": "james",
       "interaction_slot": "primary",
-      "mandatory_beat": true
+      "mandatory_beat": true,
+      "repeat": {
+        "name": "COOPER",
+        "text": "Ha detto un posto, non un nome. Per oggi mi basta il posto.",
+        "id": "m4.repeat.james_a2",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER"
+      }
     },
     {
       "id": "cmp_t1_e5",
@@ -717,6 +999,9 @@
         },
         {
           "evidence": "T_JAMES_EST"
+        },
+        {
+          "node_done": "ronette_uomo"
         }
       ],
       "pages": [
@@ -864,7 +1149,7 @@
               },
               {
                 "name": "TRUMAN",
-                "text": "Il pendaglio conferma che James parlava da dentro quella relazione. La strada resta da controllare.",
+                "text": "Il pendaglio dice che James parlava da dentro. La strada resta da controllare.",
                 "id": "m4.b9.present_p2.p03",
                 "mode": "dialogue",
                 "speaker_id": "truman",
@@ -872,8 +1157,24 @@
               },
               {
                 "name": "TRUMAN",
-                "text": "Dopo il ponte non ci sono case. Cominciamo dai binari.",
+                "text": "Dopo il ponte non ci sono case. C'è il ponticello di legno dove hanno raccolto Ronette, la notte di Laura.",
                 "id": "m4.b9.present_p2.p04",
+                "mode": "dialogue",
+                "speaker_id": "truman",
+                "display_name": "TRUMAN"
+              },
+              {
+                "name": "COOPER",
+                "text": "Veniva da est.",
+                "id": "m4.b9.present_p2.p05",
+                "mode": "dialogue",
+                "speaker_id": "cooper",
+                "display_name": "COOPER"
+              },
+              {
+                "name": "TRUMAN",
+                "text": "Da est. Hawk è già al ponte. Non toccate niente, nessuno dei due.",
+                "id": "m4.b9.present_p2.p06",
                 "mode": "dialogue",
                 "speaker_id": "truman",
                 "display_name": "TRUMAN"
@@ -949,8 +1250,8 @@
     }
   ],
   "node_count": {
-    "new": 8,
+    "new": 12,
     "modified": 3,
-    "runtime_total": 11
+    "runtime_total": 15
   }
 }

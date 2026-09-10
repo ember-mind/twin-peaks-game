@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>TP-A4-BOOT</title>
+<style>
+  html, body { margin: 0; background: #0b0f0c; }
+  #product { border: 0; width: 960px; height: 640px; display: block; }
+  #status { position: fixed; right: 0; bottom: 0; z-index: 99; padding: 3px 6px;
+            color: #17261d; background: #f4f0d2; font: 10px monospace; }
+</style>
+</head>
+<body>
+<iframe id="product" title="Twin Peaks production build"></iframe>
+<div id="status">idle</div>
+<script>
+/* test/act-4-playthrough-probe.html — driver di supporto per la giocata
+ * dell'Atto 4 (M8) sulla build REALE (index.html, nessuna modifica ai file di
+ * produzione). Copia adattata di test/act-3-playthrough-probe.html: espone
+ * window.A4 con le stesse primitive (tasti veri, cammino BFS, porte, taccuino,
+ * registratore di trascrizione che legge SOLO ciò che la UI emette) più:
+ *   - seed(): stato di fine Atto 3 installato nel runtime reale (come
+ *     test/m8-engine-harness.html::seedBase + i flag classici di confine);
+ *   - worldTarget/entityDef/npcActive: letture dal registro dell'adapter e
+ *     dal motore, mai coordinate assunte;
+ *   - walkTo con ripianificazione (i passanti di città si muovono) e guardia
+ *     sul cambio mappa.
+ * Le sequenze dei percorsi vivono nel driver node (test/act-4-playthrough.js). */
+(function () {
+  'use strict';
+  var frame = document.getElementById('product');
+  var statusEl = document.getElementById('status');
+  var W = null;                 // iframe window
+  var LOCK = 220;               // > advanceLockMs di produzione (150)
+  var A4 = window.A4 = {};
+
+  var transcript = [];          // righe della trascrizione
+  var classicSeen = [];         // dialoghi CLASSICI osservati (map, id, testo)
+  var mapEntries = [];          // entità presenti a ogni ingresso mappa
+  var apiFallbacks = [];        // punti in cui si è dovuto usare l'API invece dei tasti
+  var notes = [];               // osservazioni libere del driver
+  var lastPrepared = null;      // node id dell'ultimo prepare (per attribuire le pagine)
+
+  A4.transcript = transcript;
+  A4.classicSeen = classicSeen;
+  A4.mapEntries = mapEntries;
+  A4.apiFallbacks = apiFallbacks;
+  A4.notes = notes;
+
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  A4.wait = wait;
+  function G() { return W.GAME; }
+  function E() { return W.GAME.Engine; }
+  function S() { return W.GAME.Engine.state; }
+  function A() { return W.GAME.NarrativeAdapter; }
+  function NR() { return W.GAME.NarrativeRuntime; }
+  function missionById(id) {
+    var D = W.GAME.NarrativeData;
+    return D && D.missions ? D.missions[id] : null;
+  }
+
+  function objectiveText() {
+    var el = W.document.getElementById('objective');
+    if (!el) return '';
+    if (el.style.display === 'none') return '';
+    return (el.textContent || '').replace(/\s*·\s*T: taccuino\s*$/, '').trim();
+  }
+  A4.objective = function () { return objectiveText(); };
+  // obiettivo attivo di UNA missione secondo il runtime (id + testo), per
+  // distinguere l'ultimo piolo di M8 dal primo di M9 quando l'HUD passa a M9
+  A4.objectiveOf = function (missionId) {
+    var m = missionById(missionId);
+    if (!m) return null;
+    var o = NR().activeObjective(A().getState(), m);
+    return o ? { id: o.id, text: o.text } : null;
+  };
+
+  function stateDigest() {
+    var s = A().getState();
+    return {
+      flags: Object.keys(s.flags).filter(function (k) { return s.flags[k]; }).sort(),
+      values: JSON.parse(JSON.stringify(s.values)),
+      evidence: Object.keys(s.evidence).filter(function (k) { return s.evidence[k]; }).sort(),
+      nodes_done: Object.keys(s.nodes_done).filter(function (k) { return s.nodes_done[k]; }).sort()
+    };
+  }
+  A4.stateDigest = stateDigest;
+  A4.propStatus = function (id) {
+    var p = NR().peekProp(A().getState(), id);
+    return p && p.formulation ? p.formulation.status : null;
+  };
+
+  function diffDigest(before, after) {
+    var d = {};
+    ['flags', 'evidence', 'nodes_done'].forEach(function (k) {
+      var add = after[k].filter(function (v) { return before[k].indexOf(v) === -1; });
+      if (add.length) d[k] = add;
+    });
+    var vals = {};
+    Object.keys(after.values).forEach(function (k) {
+      if (JSON.stringify(before.values[k]) !== JSON.stringify(after.values[k])) vals[k] = after.values[k];
+    });
+    if (Object.keys(vals).length) d.values = vals;
+    return d;
+  }
+
+  /* ---- registratore: si aggancia SOLO al log dell'adapter e al DOM reale ---- */
+  var digestAtSessionStart = null;
+  function installRecorder() {
+    var a = A();
+    a.onLog = function (ev) {
+      if (ev.event === 'page_shown') {
+        var box = W.document.querySelector('#narrative .nw-page[data-page-id="' + ev.page_id + '"]');
+        var label = box ? (box.getAttribute('data-speaker-label') || null) : null;
+        var dom = box ? box.textContent : null;
+        var body = dom;
+        if (dom !== null && label && dom.indexOf(label + ': ') === 0) body = dom.slice(label.length + 2);
+        transcript.push({
+          kind: 'page',
+          node_id: lastPrepared,
+          page_id: ev.page_id,
+          speaker_id: box ? (box.getAttribute('data-speaker-id') || null) : null,
+          display_name: label,
+          text: body === null ? ev.visible_text : body,
+          dom_text: dom,
+          objective: objectiveText(),
+          map: S().mapId
+        });
+      } else if (ev.event === 'widget_opened') {
+        transcript.push({ kind: 'widget', node_id: lastPrepared, choices: ev.choices.slice(), objective: objectiveText(), map: S().mapId,
+                          at: [S().player.tx, S().player.ty, S().player.dir] });
+      } else if (ev.event === 'choice_confirmed') {
+        transcript.push({ kind: 'choice', node_id: lastPrepared, choice_id: ev.choice_id });
+      } else if (ev.event === 'node_committed') {
+        transcript.push({ kind: 'commit', node_id: ev.node_id, ok: ev.ok, repeated: !!ev.repeated });
+      } else if (ev.event === 'branch_committed') {
+        transcript.push({ kind: 'commit', node_id: ev.node_id, ok: ev.ok, branch: true });
+      } else if (ev.event === 'interaction_no_roots' || ev.event === 'interaction_no_roots_feedback') {
+        transcript.push({ kind: 'no_roots', target: ev.target || ev.actor || null, page_id: ev.page_id || null, map: S().mapId });
+      } else if (ev.event === 'compare_pair_selected') {
+        transcript.push({ kind: 'pair', pair: ev.pair.slice(), status: ev.status, matched: ev.matched });
+      } else if (ev.event === 'ambiguous_world_roots') {
+        transcript.push({ kind: 'ERROR_ambiguous_roots', map: ev.map, target: ev.target || ev.actor, roots: ev.roots });
+      } else if (ev.event === 'presentation_committed') {
+        transcript.push({ kind: 'presentation', result: ev.result, reason: ev.reason });
+      } else if (ev.event === 'milestone_resume' || ev.event === 'completed_mission_repeat') {
+        transcript.push({ kind: 'adapter_event', event: ev.event, detail: JSON.parse(JSON.stringify(ev)) });
+      }
+    };
+    // wrapper di TEST sui prepare: serve solo ad attribuire le pagine a un nodo.
+    var nr = NR();
+    if (!nr.__a4wrapped) {
+      nr.__a4wrapped = true;
+      var pn = nr.prepareNode;
+      nr.prepareNode = function (s, m, id) { lastPrepared = (typeof id === 'string') ? id : (id && id.id); return pn.apply(this, arguments); };
+      var pc = nr.prepareChoice;
+      nr.prepareChoice = function (s, m, node, cid) { lastPrepared = node && node.id; return pc.apply(this, arguments); };
+    }
+    // ingresso mappa: fotografa le entità presenti (per i doppioni di attore)
+    var e = E();
+    if (!e.__a4wrapped) {
+      e.__a4wrapped = true;
+      var lm = e.loadMap;
+      e.loadMap = function (id, x, y, dir) {
+        var r = lm.apply(this, arguments);
+        try {
+          mapEntries.push({
+            map: id, at: [x, y, dir],
+            npcs: (e.state.npcs || []).filter(function (n) { return e.npcActive(n, e.state); })
+              .map(function (n) { return n.id + '@' + n.x + ',' + n.y; })
+          });
+        } catch (_) {}
+        return r;
+      };
+    }
+  }
+
+  /* ---- input reale ---- */
+  function key(code) {
+    W.dispatchEvent(new W.KeyboardEvent('keydown', { code: code, bubbles: true }));
+    W.dispatchEvent(new W.KeyboardEvent('keyup', { code: code, bubbles: true }));
+  }
+  A4.press = async function (code, times) {
+    times = times || 1;
+    for (var i = 0; i < times; i++) { key(code); await wait(LOCK); }
+  };
+  function narrativeOpen() { return !!W.document.querySelector('#narrative .nw-root'); }
+  A4.narrativeOpen = narrativeOpen;
+  function widgetOpts() {
+    return [].map.call(W.document.querySelectorAll('#narrative .nw-root:not(.nb-root) .nw-opt[data-choice-id]'),
+      function (o) { return o.getAttribute('data-choice-id'); });
+  }
+  A4.widgetOpts = widgetOpts;
+
+  /* ---- movimento ---- */
+  function solid(map, x, y) { return G().Maps.isSolid(map, x, y, S()); }
+  function activeNpcs() {
+    return (S().npcs || []).filter(function (n) { return E().npcActive(n, S()); });
+  }
+  function npcAt(x, y) {
+    return activeNpcs().some(function (n) { return (n.x === x && n.y === y) || (n.mx === x && n.my === y); });
+  }
+  function pathTo(tx, ty) {
+    var map = S().mapId, rows = S().map.rows;
+    var h = rows.length, w = rows[0].length;
+    var start = S().player.tx + ',' + S().player.ty;
+    var prev = {}, q = [start], seen = {};
+    seen[start] = true;
+    while (q.length) {
+      var cur = q.shift(), p = cur.split(',').map(Number);
+      if (p[0] === tx && p[1] === ty) {
+        var out = [], k = cur;
+        while (k !== start) { out.unshift(k); k = prev[k]; }
+        return out.map(function (s) { return s.split(',').map(Number); });
+      }
+      [[0, -1], [0, 1], [-1, 0], [1, 0]].forEach(function (d) {
+        var nx = p[0] + d[0], ny = p[1] + d[1];
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) return;
+        var kk = nx + ',' + ny;
+        if (seen[kk]) return;
+        if (G().Maps.doorAt(map, nx, ny)) return;      // mai attraversare porte camminando qui
+        if (solid(map, nx, ny)) return;
+        if (npcAt(nx, ny) && !(nx === tx && ny === ty)) return;
+        seen[kk] = true; prev[kk] = cur; q.push(kk);
+      });
+    }
+    return null;
+  }
+  var DIRKEY = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+  function dirTo(from, to) {
+    if (to[1] < from[1]) return 'up';
+    if (to[1] > from[1]) return 'down';
+    if (to[0] < from[0]) return 'left';
+    return 'right';
+  }
+  // un passo alla volta, sincronizzato col motore: mai un tap mentre Cooper
+  // è ancora in movimento (altrimenti la coda direzione lo porta oltre).
+  async function idle() {
+    for (var i = 0; i < 80; i++) {
+      var st = S();
+      if (!st.player.moving && st.fadePhase === 0 && !st.dialogue && !st.menu) return true;
+      await wait(40);
+    }
+    return false;
+  }
+  async function stepTo(cell) {
+    await idle();
+    var d = dirTo([S().player.tx, S().player.ty], cell);
+    if (S().player.dir !== d) { key(DIRKEY[d]); await wait(150); await idle(); }
+    for (var i = 0; i < 10; i++) {
+      var p = S().player;
+      if (p.tx === cell[0] && p.ty === cell[1]) return true;
+      key(DIRKEY[d]);
+      await wait(170);
+      await idle();
+    }
+    var f = S().player;
+    return f.tx === cell[0] && f.ty === cell[1];
+  }
+  // cammina davvero (tasti freccia) fino a (x,y). I passanti si muovono: se un
+  // passo fallisce si ripianifica (fino a 5 volte). Ritorna false se non c'è via
+  // o se la mappa cambia sotto i piedi.
+  A4.lastWalk = null;
+  A4.walkTo = async function (x, y) {
+    var from = [S().player.tx, S().player.ty], map = S().mapId, steps = 0;
+    for (var attempt = 0; attempt < 5; attempt++) {
+      var path = pathTo(x, y);
+      if (!path) { A4.lastWalk = { from: from, to: [x, y], reason: 'no_path', attempt: attempt }; if (attempt === 4) return false; await wait(500); continue; }
+      var ok = true;
+      for (var i = 0; i < path.length; i++) {
+        if (S().mapId !== map) { A4.lastWalk = { from: from, to: [x, y], reason: 'map_changed', now: S().mapId }; return false; }
+        if (!(await stepTo(path[i]))) { ok = false; break; }
+        steps++;
+      }
+      if (ok) { A4.lastWalk = { from: from, to: [x, y], reason: 'ok', steps: steps, replans: attempt }; return true; }
+      await wait(450);   // lascia passare il passante e ripianifica
+    }
+    A4.lastWalk = { from: from, to: [x, y], reason: 'step_failed', stuck: [S().player.tx, S().player.ty], steps: steps };
+    return false;
+  };
+  A4.walkDiag = function () { return A4.lastWalk; };
+  // cammina fino a una casella adiacente al target e GUARDA il target:
+  // l'interazione colpisce sempre la casella guardata.
+  A4.reach = async function (tx, ty) {
+    var map = S().mapId;
+    var cands = [[tx, ty - 1, 'down'], [tx, ty + 1, 'up'], [tx - 1, ty, 'right'], [tx + 1, ty, 'left']]
+      .filter(function (c) { return !solid(map, c[0], c[1]) && !npcAt(c[0], c[1]) && !G().Maps.doorAt(map, c[0], c[1]); });
+    for (var i = 0; i < cands.length; i++) {
+      var c = cands[i];
+      if (S().player.tx === c[0] && S().player.ty === c[1]) { await A4.face(c[2]); return { ok: true, from: c }; }
+    }
+    for (var j = 0; j < cands.length; j++) {
+      var d = cands[j];
+      if (await A4.walkTo(d[0], d[1])) { await A4.face(d[2]); return { ok: true, from: d }; }
+    }
+    return { ok: false, error: 'unreachable', target: [tx, ty], candidates: cands, diag: A4.lastWalk };
+  };
+  A4.canReach = function (tx, ty) {
+    var map = S().mapId;
+    return [[tx, ty - 1], [tx, ty + 1], [tx - 1, ty], [tx + 1, ty]].some(function (c) {
+      if (solid(map, c[0], c[1]) || npcAt(c[0], c[1])) return false;
+      if (S().player.tx === c[0] && S().player.ty === c[1]) return true;
+      return !!pathTo(c[0], c[1]);
+    });
+  };
+  A4.reachFrom = async function (sx, sy, dir) {
+    if (!(S().player.tx === sx && S().player.ty === sy) && !(await A4.walkTo(sx, sy))) {
+      return { ok: false, error: 'unreachable_side', side: [sx, sy], diag: A4.lastWalk };
+    }
+    await A4.face(dir);
+    return { ok: true, from: [sx, sy, dir] };
+  };
+  A4.face = async function (dir) {
+    for (var i = 0; i < 4 && S().player.dir !== dir; i++) { key(DIRKEY[dir]); await wait(140); }
+    return S().player.dir === dir;
+  };
+  // teleport DI VIAGGIO (cambio mappa o riposizionamento lungo): mai per saltare
+  // un'interazione, MAI lungo la rotta scelta al crocevia. Registrato.
+  A4.travel = async function (map, x, y, dir, why) {
+    transcript.push({ kind: 'travel', to: map, at: [x, y, dir], why: why || null });
+    E().loadMap(map, x, y, dir);
+    await wait(420);
+    if (S().dialogue) await A4.drainClassic('onEnter ' + map);   // monologo d'arrivo
+    return { map: S().mapId, x: S().player.tx, y: S().player.ty };
+  };
+  A4.travelNoDrain = async function (map, x, y, dir, why) {
+    transcript.push({ kind: 'travel', to: map, at: [x, y, dir], why: why || null });
+    E().loadMap(map, x, y, dir);
+    await wait(520);
+    return { map: S().mapId, x: S().player.tx, y: S().player.ty };
+  };
+
+  // attraversa una porta REALE camminandoci dentro
+  A4.enterDoor = async function (doorX, doorY, standX, standY) {
+    var from = S().mapId;
+    if (!(await A4.walkTo(standX, standY))) return { ok: false, error: 'no_path_to_door', diag: A4.lastWalk };
+    var d = dirTo([standX, standY], [doorX, doorY]);
+    await A4.face(d);
+    var arrival = null;
+    for (var i = 0; i < 8; i++) {
+      key(DIRKEY[d]);
+      // mai un secondo tap mentre Cooper è in movimento: la coda direzione lo
+      // porterebbe un passo oltre la casella d'arrivo dopo il warp
+      for (var t = 0; t < 40; t++) {
+        await wait(40);
+        var st = S();
+        if (st.mapId !== from || st.fadePhase !== 0 || st.dialogue || !st.player.moving) break;
+      }
+      if (S().mapId !== from) break;
+      if (S().fadePhase !== 0) break;      // warp partito
+      if (S().dialogue) break;
+    }
+    for (var u = 0; u < 40 && S().mapId === from && S().fadePhase !== 0; u++) await wait(40);
+    if (S().mapId !== from) arrival = [S().player.tx, S().player.ty, S().player.dir];
+    await wait(520);
+    await idle();
+    var blocked = null;
+    if (S().mapId === from && S().dialogue) {
+      blocked = { id: S().dialogue.id, text: dialogueText() };
+      await A4.drainClassic();
+    }
+    transcript.push({ kind: 'door', from: from, to: S().mapId, blocked: blocked, arrival: arrival });
+    if (S().mapId !== from) {
+      await idle();
+      mapEntries.push({
+        map: S().mapId, at: [S().player.tx, S().player.ty, S().player.dir],
+        npcs: activeNpcs().map(function (n) { return n.id + '@' + n.x + ',' + n.y; })
+      });
+      if (S().dialogue) await A4.drainClassic('onEnter ' + S().mapId);
+    }
+    return { ok: S().mapId !== from, map: S().mapId, blocked: blocked, arrival: arrival, pos: A4.pos() };
+  };
+
+  /* ---- dialoghi classici ---- */
+  function dialogueText() {
+    var d = S().dialogue;
+    if (!d) return '';
+    var pages = d.pages || [];
+    var p = pages[d.i || 0];        // il motore indicizza con d.i (engine.js advanceDialogue)
+    if (p === undefined) return '';
+    return typeof p === 'string' ? p : (p.text || JSON.stringify(p));
+  }
+  function dialogueSpeaker() {
+    var d = S().dialogue;
+    if (!d) return null;
+    var p = (d.pages || [])[d.i || 0];
+    return p && typeof p === 'object' ? (p.name || null) : null;
+  }
+  A4.drainClassic = async function (label) {
+    var seen = [];
+    for (var i = 0; i < 60 && S().dialogue; i++) {
+      var id = S().dialogue.id;
+      seen.push({ id: id, name: dialogueSpeaker(), text: dialogueText() });
+      key('Enter');
+      await wait(150);
+    }
+    if (seen.length) {
+      classicSeen.push({ map: S().mapId, label: label || null, id: seen[0].id, pages: seen.length, first: seen[0].text,
+                         texts: seen.map(function (s) { return s.text; }) });
+      transcript.push({ kind: 'classic', map: S().mapId, id: seen[0].id,
+                        pages: seen.map(function (s) { return (s.name ? s.name + ': ' : '') + s.text; }) });
+    }
+    return seen;
+  };
+
+  /* ---- interazione reale (tasto A sulla casella guardata) ---- */
+  async function settle(maxMs) {
+    var t0 = Date.now();
+    while (Date.now() - t0 < (maxMs || 2500)) {
+      await wait(120);
+      if (!A().active() && !narrativeOpen() && !S().dialogue) return;
+    }
+  }
+  // preme A e fa avanzare le pagine finché la sessione narrativa non si ferma
+  // su un widget di scelta o si chiude. Non sceglie mai da solo.
+  A4.interact = async function (opts) {
+    opts = opts || {};
+    digestAtSessionStart = stateDigest();
+    var mark = transcript.length;
+    transcript.push({ kind: 'press', at: [S().mapId, S().player.tx, S().player.ty, S().player.dir] });
+    key('Enter');
+    await wait(300);
+    for (var i = 0; i < (opts.maxAdvance || 80); i++) {
+      if (widgetOpts().length) break;
+      if (!narrativeOpen() && !A().active()) break;
+      key('Enter');
+      await wait(LOCK);
+    }
+    if (!narrativeOpen() && S().dialogue) await A4.drainClassic('after-interact');
+    var after = stateDigest();
+    var delta = diffDigest(digestAtSessionStart, after);
+    if (Object.keys(delta).length) transcript.push({ kind: 'delta', delta: delta });
+    await wait(260);   // l'HUD si aggiorna col poll di produzione (180 ms)
+    transcript.push({ kind: 'objective', text: objectiveText(), where: 'dopo l\'interazione' });
+    return { rows: transcript.slice(mark), choices: widgetOpts(), delta: delta };
+  };
+  A4.advance = async function (maxAdvance) {
+    var before = stateDigest();
+    var mark = transcript.length;
+    for (var i = 0; i < (maxAdvance || 80); i++) {
+      if (widgetOpts().length) break;
+      if (!narrativeOpen() && !A().active()) break;
+      key('Enter');
+      await wait(LOCK);
+    }
+    await wait(260);
+    var delta = diffDigest(before, stateDigest());
+    if (Object.keys(delta).length) transcript.push({ kind: 'delta', delta: delta });
+    transcript.push({ kind: 'objective', text: objectiveText(), where: 'dopo l\'avanzamento' });
+    return { rows: transcript.slice(mark), choices: widgetOpts(), delta: delta };
+  };
+  function currentPageId() {
+    var b = W.document.querySelector('#narrative .nw-page[data-page-id]');
+    return b ? b.getAttribute('data-page-id') : null;
+  }
+  A4.currentPageId = currentPageId;
+  A4.interactUntilPage = async function (pageId, maxAdvance) {
+    digestAtSessionStart = stateDigest();
+    var mark = transcript.length;
+    transcript.push({ kind: 'press', at: [S().mapId, S().player.tx, S().player.ty, S().player.dir] });
+    key('Enter');
+    await wait(300);
+    for (var i = 0; i < (maxAdvance || 90); i++) {
+      if (currentPageId() === pageId) break;
+      if (widgetOpts().length) break;
+      if (!narrativeOpen() && !A().active()) break;
+      key('Enter');
+      await wait(LOCK);
+    }
+    return { rows: transcript.slice(mark), reached: currentPageId() === pageId, at: currentPageId() };
+  };
+  A4.advanceUntilPage = async function (pageId, maxAdvance) {
+    for (var i = 0; i < (maxAdvance || 90); i++) {
+      if (currentPageId() === pageId) break;
+      if (widgetOpts().length) break;
+      if (!narrativeOpen() && !A().active()) break;
+      key('Enter');
+      await wait(LOCK);
+    }
+    return { reached: currentPageId() === pageId, at: currentPageId() };
+  };
+  A4.chooseAndHold = async function (choiceId) {
+    var opts = widgetOpts(), idx = opts.indexOf(choiceId);
+    if (idx < 0) return { ok: false, error: 'choice_absent', available: opts };
+    for (var k = 0; k < idx; k++) await A4.press('ArrowDown');
+    await A4.press('Enter');
+    await wait(260);
+    return { ok: true, page: currentPageId() };
+  };
+  A4.choose = async function (choiceId) {
+    var opts = widgetOpts(), idx = opts.indexOf(choiceId);
+    if (idx < 0) return { ok: false, error: 'choice_absent', available: opts };
+    var mark = transcript.length;
+    for (var k = 0; k < idx; k++) await A4.press('ArrowDown');
+    await A4.press('Enter');
+    var r = await A4.advance();
+    return { ok: true, after: r, rows: transcript.slice(mark) };
+  };
+
+  /* ---- taccuino ---- */
+  function nbRoot() { return W.document.querySelector('#narrative .nb-root'); }
+  A4.openNotebook = async function () {
+    await A4.press('KeyT');
+    await wait(260);
+    return !!nbRoot();
+  };
+  function nbFocusIndex() {
+    var root = nbRoot();
+    if (!root) return -1;
+    var items = [].slice.call(root.querySelectorAll('.nw-opt'));
+    for (var i = 0; i < items.length; i++) if (items[i].className.indexOf('nw-focus') >= 0) return i;
+    return -1;
+  }
+  function nbCompareIds() {
+    var root = nbRoot();
+    if (!root) return [];
+    return [].map.call(root.querySelectorAll('[data-nb-compare]'), function (o) { return o.getAttribute('data-nb-compare'); });
+  }
+  A4.notebookSections = function () {
+    var root = nbRoot();
+    if (!root) return [];
+    return [].map.call(root.querySelectorAll('[data-nb-section]'), function (o) { return o.getAttribute('data-nb-section'); });
+  };
+  A4.notebookObjective = function () {
+    var root = nbRoot();
+    var el = root && root.querySelector('[data-nb-objective]');
+    return el ? el.textContent : null;
+  };
+  // apre Confronta e seleziona due evidenze per ID, coi soli tasti
+  A4.compare = async function (evA, evB) {
+    transcript.push({ kind: 'objective', text: objectiveText(), where: 'prima del taccuino' });
+    if (!nbRoot() && !(await A4.openNotebook())) return { ok: false, error: 'notebook_did_not_open' };
+    transcript.push({ kind: 'objective', text: A4.notebookObjective(), where: 'nel taccuino' });
+    var sections = A4.notebookSections();
+    var target = sections.indexOf('Confronta');
+    if (target < 0) return { ok: false, error: 'compare_section_absent', sections: sections };
+    var cur = nbFocusIndex();
+    for (var i = 0; i < (target - cur + sections.length) % sections.length; i++) await A4.press('ArrowDown');
+    await A4.press('Enter');
+    await wait(200);
+    var ids = nbCompareIds();
+    if (ids.indexOf(evA) < 0 || ids.indexOf(evB) < 0) return { ok: false, error: 'evidence_absent', ids: ids };
+    var mark = transcript.length;
+    for (var s = 0; s < 2; s++) {
+      var want = ids.indexOf(s === 0 ? evA : evB);
+      var focus = nbFocusIndex();
+      var steps = (want - focus + ids.length) % ids.length;
+      for (var j = 0; j < steps; j++) await A4.press('ArrowDown');
+      await A4.press('Enter');
+      await wait(220);
+    }
+    for (var k = 0; k < 40; k++) {
+      if (widgetOpts().length) break;
+      if (!W.document.querySelector('#narrative .nw-root:not(.nb-root)')) break;
+      await A4.press('Enter');
+    }
+    return { ok: true, choices: widgetOpts(), rows: transcript.slice(mark) };
+  };
+  A4.closeNotebook = async function () {
+    for (var i = 0; i < 6 && nbRoot(); i++) await A4.press('Escape');
+    await wait(200);
+    return !nbRoot();
+  };
+
+  /* ---- boot / seed / reload ---- */
+  async function waitFor(pred, ms, label) {
+    var t0 = Date.now();
+    while (Date.now() - t0 < (ms || 20000)) {
+      try { if (pred()) return true; } catch (_) {}
+      await wait(80);
+    }
+    throw new Error('timeout: ' + (label || 'condition'));
+  }
+  async function loadFrame(url) {
+    await new Promise(function (resolve) {
+      frame.onload = function () { resolve(); };
+      frame.src = url;
+    });
+    W = frame.contentWindow;
+    await waitFor(function () { return W.GAME && W.GAME.Engine && W.GAME.Engine.state; }, 25000, 'engine');
+    await waitFor(function () { return W.GAME.NarrativeProduction && W.GAME.NarrativeProduction.ready; }, 25000, 'narrative boot');
+    await wait(400);
+  }
+  // porta la build dal titolo alla partita premendo davvero A
+  async function toPlay() {
+    for (var i = 0; i < 40 && S().mode !== 'play'; i++) { key('Enter'); await wait(200); }
+    await waitFor(function () { return S().mode === 'play'; }, 12000, 'mode play');
+    await wait(400);
+    await A4.drainClassic('opening');
+  }
+  // NOTA: come il probe dell'Atto 3, la build è caricata SENZA ?narrativeTest=1:
+  // in test mode narrative-production.js salta la persistenza (persist →
+  // skipped test_mode) e il salva+ricarica non sarebbe verificabile.
+  A4.boot = async function () {
+    try { localStorage.clear(); } catch (_) {}
+    await loadFrame('../index.html');
+    try { W.localStorage.clear(); } catch (_) {}
+    await loadFrame('../index.html');
+    installRecorder();
+    await toPlay();
+    statusEl.textContent = 'play';
+    return { map: S().mapId, mode: S().mode, testMode: W.GAME.NarrativeProduction.testMode };
+  };
+  // stato di FINE ATTO 3 installato nel runtime reale: lo stesso seme di
+  // test/m8-engine-harness.html::seedBase (atto4 + E3_LETTERA_R + E1_DIARIO)
+  // più i flag di confine che il mondo legge (gigante1 dallo specchio della
+  // 315, jacques_dead da Lucy, sogno_fatto/atto3 per porte e NPC classici).
+  // I flag classici corrispondenti vengono scritti sul motore: il ciclo di
+  // sync di produzione (180 ms) allinea il resto nei due sensi.
+  A4.seed = async function () {
+    // IN PLACE sullo stato vivo: narrative-production.js tiene un riferimento
+    // chiuso allo stato di boot per il sync classico↔narrativo; un setState
+    // lo staccherebbe (sync su uno stato morto: gigante2 mai derivato, flag
+    // classici mai riportati) — artefatto della semina, non della build.
+    var nr = NR(), a = A();
+    var s = a.getState();
+    nr.applyEffects(s, [
+      { set: 'sogno_fatto' }, { set: 'atto3' }, { set: 'east_route_confirmed' },
+      { set: 'jacques_preso' }, { set: 'jacques_dead' }, { set: 'gigante1' }, { set: 'atto4' },
+      { evidence: 'E3_LETTERA_R' }, { evidence: 'E1_DIARIO' }
+    ]);
+    s.nodes_done.m6_atto4_bridge = true;          // il ponte M6 è ciò che scrive atto4
+    nr.deserialize(nr.serialize(s));             // valida il seme come farebbe il save layer
+    s.revision++;
+    var rf = a.refreshFromState();
+    var f = S().flags;
+    ['sogno_fatto', 'atto3', 'east_route_confirmed', 'jacques_preso', 'jacques_morto', 'gigante1', 'atto4'].forEach(function (k) { f[k] = true; });
+    await wait(700);   // due giri del sync di produzione
+    transcript.push({ kind: 'seed', digest: stateDigest(), refreshed: rf });
+    return { refreshed: rf, digest: stateDigest(), classicFlags: JSON.parse(JSON.stringify(S().flags)) };
+  };
+  A4.savedNow = function () {
+    try {
+      var key = W.GAME.NarrativeSave.keyFor('main');
+      var raw = W.localStorage.getItem(key);
+      var classic = W.localStorage.getItem('tp_save');
+      return { narrative: raw !== null, classic: classic !== null, revision: A().getState().revision };
+    } catch (e) { return { error: String(e && e.message || e) }; }
+  };
+  A4.reload = async function () {
+    // lascia al ciclo di sync il tempo di persistere l'ultimo commit
+    for (var w = 0; w < 25; w++) { var sn = A4.savedNow(); if (sn.narrative && sn.classic && !A().active()) break; await wait(200); }
+    var before = { map: S().mapId, x: S().player.tx, y: S().player.ty, dir: S().player.dir,
+                   objective: objectiveText(), digest: stateDigest(),
+                   npcs: activeNpcs().map(function (n) { return n.id + '@' + n.x + ',' + n.y; }).sort(),
+                   saved: A4.savedNow() };
+    await loadFrame('../index.html');
+    installRecorder();
+    await toPlay();
+    await wait(500);
+    var after = { map: S().mapId, x: S().player.tx, y: S().player.ty, dir: S().player.dir,
+                  objective: objectiveText(), digest: stateDigest(),
+                  npcs: activeNpcs().map(function (n) { return n.id + '@' + n.x + ',' + n.y; }).sort() };
+    transcript.push({ kind: 'reload', before: before, after: after });
+    return { before: before, after: after };
+  };
+
+  /* ---- utilità di prova ---- */
+  A4.npcsHere = function () {
+    return activeNpcs().map(function (n) { return { id: n.id, sprite: n.sprite, x: n.x, y: n.y, dir: n.dir }; });
+  };
+  A4.mapNpcs = function (map) {
+    return (G().Maps[map].npcs || []).map(function (n) { return { id: n.id, sprite: n.sprite, x: n.x, y: n.y }; });
+  };
+  // un NPC (classico o narrativo) è attivo su una mappa secondo il MOTORE,
+  // senza doverci camminare: E.npcActive sui dati della mappa reale
+  A4.npcActive = function (map, id) {
+    var list = (G().Maps[map] && G().Maps[map].npcs) || [];
+    var n = null;
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) n = list[i];
+    if (!n) return { present: false, active: false, reason: 'absent_from_map_data' };
+    return { present: true, active: !!E().npcActive(n, S()), cond: n.cond || null, x: n.x, y: n.y };
+  };
+  A4.worldTarget = function (map, id) {
+    var reg = A()._debugWorldTargets;
+    return reg && reg[map] && reg[map][id] ? JSON.parse(JSON.stringify(reg[map][id])) : null;
+  };
+  A4.worldTargets = function (map) {
+    var reg = A()._debugWorldTargets;
+    return reg && reg[map] ? JSON.parse(JSON.stringify(reg[map])) : null;
+  };
+  A4.entityDefs = function (map) {
+    return (A()._debugNarrativeEntities || []).filter(function (e) { return e.map_id === map; })
+      .map(function (e) { return { id: e.npc.id, x: e.npc.x, y: e.npc.y, sprite: e.npc.sprite, when: e.when }; });
+  };
+  A4.entityDef = function (map, id) {
+    return A4.entityDefs(map).filter(function (e) { return e.id === id; })[0] || null;
+  };
+  A4.doorAt = function (map, x, y) { var d = G().Maps.doorAt(map, x, y); return d ? JSON.parse(JSON.stringify(d)) : null; };
+  A4.doorsOf = function (map) { return JSON.parse(JSON.stringify(G().Maps[map].doors || {})); };
+  A4.isSolid = function (map, x, y) { return solid(map, x, y); };
+  A4.missionNodeIds = function (id) { var m = missionById(id); return m ? m.nodes.map(function (n) { return n.id; }) : null; };
+  A4.classicFlags = function () { return JSON.parse(JSON.stringify(S().flags)); };
+  A4.dialogueNow = function () {
+    var d = S().dialogue;
+    if (!d) return null;
+    return { id: d.id, i: d.i, pages: (d.pages || []).length, text: dialogueText() };
+  };
+  A4.pos = function () { return { map: S().mapId, x: S().player.tx, y: S().player.ty, dir: S().player.dir }; };
+  A4.note = function (text, data) { notes.push({ text: text, data: data === undefined ? null : data }); };
+  A4.fallback = function (where, why) { apiFallbacks.push({ where: where, why: why }); };
+  // ultima risorsa dichiarata: interazione via API pubblica dell'adapter
+  A4.apiInteract = async function (map, actor, why) {
+    A4.fallback(map + '/' + actor, why);
+    transcript.push({ kind: 'api_interact', map: map, actor: actor, why: why });
+    var mark = transcript.length;
+    digestAtSessionStart = stateDigest();
+    A().tryInteract(map, actor);
+    await wait(320);
+    for (var i = 0; i < 80; i++) {
+      if (widgetOpts().length) break;
+      if (!narrativeOpen() && !A().active()) break;
+      key('Enter');
+      await wait(LOCK);
+    }
+    var delta = diffDigest(digestAtSessionStart, stateDigest());
+    if (Object.keys(delta).length) transcript.push({ kind: 'delta', delta: delta });
+    return { rows: transcript.slice(mark), choices: widgetOpts(), delta: delta };
+  };
+  A4.abortWidget = async function () {
+    for (var i = 0; i < 5 && widgetOpts().length; i++) await A4.press('Escape');
+    for (var j = 0; j < 20 && A().active(); j++) await wait(120);
+    await wait(200);
+    return !widgetOpts().length;
+  };
+  A4.reset = function () {
+    transcript.length = 0; classicSeen.length = 0; mapEntries.length = 0;
+    apiFallbacks.length = 0; notes.length = 0;
+  };
+  A4.dump = function () {
+    return { transcript: transcript, classic: classicSeen, mapEntries: mapEntries,
+             fallbacks: apiFallbacks, notes: notes };
+  };
+  A4.status = function (t) { statusEl.textContent = t; document.title = 'TP-A4-' + t; };
+})();
+</script>
+</body>
+</html>

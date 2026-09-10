@@ -1,0 +1,3 @@
+Command: node test/location-traversal.js
+Exit: 0
+Output: LOCATION-TRAVERSAL-PASS both leaves round-trip, fade order, reactions, held input, collision and save rollback/retry

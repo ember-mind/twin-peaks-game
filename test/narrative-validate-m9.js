@@ -493,8 +493,8 @@ ok(Object.keys(dEvid.evidence_add).length === 1 && !!dEvid.evidence_add.T_SARAH_
 ok(!evidence.T_SARAH_VISIONE, 'diff-evidence: la visione non è ancora nel catalogo reale (i diff non sono applicati in C9-A)');
 ok(Object.keys(dProp.ui_short_add).length === 1 && !!dProp.ui_short_add.P6, 'diff-propositions: solo ui_short su P6');
 ok(!propositions.P6.ui_short, 'diff-propositions: P6 non ha ancora ui_short a catalogo (diff non applicato)');
-ok(M8.node_count.runtime_total === 12 && M6.node_count.runtime_total === 12 && M5.node_count.runtime_total === 13,
-  'M5 (13) / M6 (12, incluso ponte atto4) / M8 (12) coerenti');
+ok(M8.node_count.runtime_total === 12 && M6.node_count.runtime_total === 17 && M5.node_count.runtime_total === 21,
+  'M5 (21) / M6 (17, M6 stitch: +3 confronti carte, +piantone, +rifiuto notturno) / M8 (12) coerenti');
 ok(M8.nodes.some(n => n.id === 'm8_leland_taxi'), 'M8 contiene ponte taxi pre-ritrovamento senza nodo m9_');
 
 console.log('# coerenza DOCUMENTALE (schema-delta / source-map / matrice == dati)');

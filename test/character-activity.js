@@ -1,0 +1,14 @@
+'use strict';
+const assert=require('node:assert/strict');require('../js/ambient-life.js');const {create}=require('../js/character-activity.js');
+const state=()=>({mapId:'diner',mode:'play',fadePhase:0,dialogue:null,menu:null,npcs:[{id:'norma',x:5,y:2,dir:'left',moving:false}]});
+const a=create(1989),b=create(1989),s=state();a.update(0,s);b.update(0,state());
+assert.equal(a.pose('booth-sip'),-1);a.play('booth-sip');a.update(100,s);assert.equal(a.pose('booth-sip'),0);a.update(900,s);assert.equal(a.pose('booth-sip'),3);
+a.setPaused(true);a.update(1000,s);assert.equal(a.pose('booth-sip'),3);a.setPaused(false);
+a.play('counter-wipe');a.update(0,s);assert.equal(s.npcs[0].dir,'down');assert(a.busy('norma'));
+s.dialogue={id:'norma'};a.update(20,s);assert.equal(a.pose('counter-wipe'),-1);s.dialogue=null;a.update(20,s);assert.equal(a.pose('counter-wipe'),-1,'conversation cancels current gesture, never resumes mid-wipe');
+a.reset(1989);a.update(0,s);for(let i=0;i<6000;i++)a.update(20,s);b.update(120000,state());assert.deepEqual(a.snapshot(),b.snapshot(),'independent seeded clocks are partition invariant');
+const starts=a.snapshot().items.map(e=>e.next);assert.notEqual(starts[0],starts[1]);
+a.preview('booth-sip',1000);a.setEnabled(false);assert.equal(a.pose('booth-sip'),-1);a.setEnabled(true);
+s.npcs[0].x=6;a.play('counter-wipe');a.update(0,s);assert.equal(a.pose('counter-wipe'),-1,'cannot wipe from another tile');
+s.npcs[0].x=5;s.mapId='town';a.update(0,s);assert.equal(a.pose('booth-sip'),-1,'scene scope');
+console.log('CHARACTER-ACTIVITY-PASS seeded clocks, distinct starts, preview, dialogue cancellation, pause, disable, workstation and map guards');

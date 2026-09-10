@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "id": "station-population-v0.1",
+  "asset": "assets/sprites/station-population-v01.png",
+  "outputSha256": "f5be9e80e047f903cf9a0fe6fa7689f460d91d71c7fc65391d53f184d9a88167",
+  "nativeFrame": {
+    "width": 24,
+    "height": 24
+  },
+  "inheritedPrefix": {
+    "asset": "assets/sprites/character-life-v01.png",
+    "sha256": "c7ee161139c445fe5ca8e61badb658d7f69fdbe1adfd69f69bc9949b04af19cb",
+    "sourceRect": {
+      "x": 0,
+      "y": 0,
+      "width": 96,
+      "height": 24
+    },
+    "outputRect": {
+      "x": 0,
+      "y": 0,
+      "width": 96,
+      "height": 24
+    },
+    "decodedPixelsIdentical": true
+  },
+  "source": {
+    "asset": "assets/sprites/cast-walkcycles-hg-24.png",
+    "sha256": "dcc9e00ad1370606b039ee6039b955720d711d04f521d601169eebe97eb4d770",
+    "immutable": true,
+    "frames": {
+      "lucy.down": {
+        "x": 144,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      },
+      "andy.down": {
+        "x": 216,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      }
+    }
+  },
+  "frames": {
+    "lucy.blink.down": {
+      "rect": {
+        "x": 96,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      },
+      "actor": "lucy",
+      "baseDirection": "down",
+      "behavior": "generic",
+      "changedPixels": 4
+    },
+    "lucy.telephone.down": {
+      "rect": {
+        "x": 120,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      },
+      "actor": "lucy",
+      "baseDirection": "down",
+      "behavior": "contextual",
+      "context": "sheriffs-station.reception",
+      "pose": "receiverToEar",
+      "changedPixels": 8,
+      "occlusionContract": {
+        "receptionFrontStartsAtLocalRow": 10,
+        "authoredPixelRows": [
+          5,
+          9
+        ],
+        "fullyVisibleAboveReceptionFront": true
+      }
+    },
+    "andy.blink.down": {
+      "rect": {
+        "x": 144,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      },
+      "actor": "andy",
+      "baseDirection": "down",
+      "behavior": "generic",
+      "changedPixels": 4
+    },
+    "andy.note.down": {
+      "rect": {
+        "x": 168,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      },
+      "actor": "andy",
+      "baseDirection": "down",
+      "behavior": "contextual",
+      "context": "sheriffs-station.right-desk",
+      "pose": "checkingNote",
+      "changedPixels": 22
+    }
+  },
+  "animations": {
+    "lucy.blink": {
+      "behavior": "generic",
+      "oneShot": true,
+      "framesByDirection": {
+        "down": "lucy.blink.down"
+      },
+      "unsupportedDirections": [
+        "up",
+        "left",
+        "right"
+      ],
+      "fallback": "base-frame",
+      "restore": "base-frame"
+    },
+    "lucy.telephone": {
+      "behavior": "contextual",
+      "context": "sheriffs-station.reception",
+      "requiredDirection": "down",
+      "oneShot": true,
+      "frames": [
+        "lucy.telephone.down"
+      ],
+      "restore": "base-frame"
+    },
+    "andy.blink": {
+      "behavior": "generic",
+      "oneShot": true,
+      "framesByDirection": {
+        "down": "andy.blink.down"
+      },
+      "unsupportedDirections": [
+        "up",
+        "left",
+        "right"
+      ],
+      "fallback": "base-frame",
+      "restore": "base-frame"
+    },
+    "andy.note": {
+      "behavior": "contextual",
+      "context": "sheriffs-station.right-desk",
+      "requiredDirection": "down",
+      "oneShot": true,
+      "frames": [
+        "andy.note.down"
+      ],
+      "restore": "base-frame"
+    }
+  },
+  "constraints": {
+    "timingOwner": "runtime-character-life-profile",
+    "stillnessDefault": true,
+    "nativePixelsOnly": true,
+    "interpolation": false,
+    "translation": false,
+    "deformation": false,
+    "continuousLoop": false
+  }
+}

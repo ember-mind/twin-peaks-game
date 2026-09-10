@@ -1,0 +1,105 @@
+{
+  "dangling": [
+    {
+      "key": "jacques_testimony_lost",
+      "reason": "INTENTIONAL-UNRESOLVED: docs/act-3-design-report.md §6 verdict MERGE (\"jacques_testimony_lost + m6_resource_lost into one\") EXECUTED in the M6 stitch (plan C4): m6_resource_lost is cut, jacques_testimony_lost is the single survivor and is read as P9.formulation.created_from in narrative/missions/M6.json (m6_news). The lint's reader scan does not follow created_from lists."
+    },
+    {
+      "key": "E_PONTE_DIREZIONE",
+      "reason": "INTENTIONAL: docs/act-3-design-report.md §6 (\"ADD ... E_PONTE_DIREZIONE (bridge) ... All four are plain observations written by terminal world nodes; two feed M6 through pages_by_value / one optional pair.\") -- declared as a non-gating positional atom by design, not every one of the four is meant to have a reader."
+    },
+    {
+      "key": "E_STUFA",
+      "reason": "INTENTIONAL: docs/act-3-design-report.md §6, same \"plain observations\" verdict as E_PONTE_DIREZIONE (E_CARTE is the sibling atom that does feed P5; E_STUFA does not by design)."
+    },
+    {
+      "key": "E_TRACCE_EST",
+      "reason": "INTENTIONAL: docs/act-3-design-report.md §6, same \"plain observations\" verdict as E_PONTE_DIREZIONE."
+    },
+    {
+      "key": "JACQUES_MIDNIGHT_CLAIM",
+      "reason": "INTENTIONAL-UNRESOLVED: docs/act-3-design-report.md §6 verdict is KEEP (\"all three JACQUES_* atoms\") with verification hooks explicitly DEFERRED (\"DEFER: ... verification hooks for JACQUES_MIDNIGHT_CLAIM / LIST (M9 per LOCK)\"). The M9 reader does not exist yet."
+    },
+    {
+      "key": "JACQUES_LIST_GIVEN",
+      "reason": "INTENTIONAL-UNRESOLVED: same DEFER verdict as JACQUES_MIDNIGHT_CLAIM, docs/act-3-design-report.md §6."
+    },
+    {
+      "key": "JACQUES_THIRD_MAN_DETAIL",
+      "reason": "INTENTIONAL-UNRESOLVED: docs/act-3-design-report.md §6 KEEP verdict covers \"all three JACQUES_* atoms\"; this one has no verification-hook mention at all in the LOCK/DEFER note, same unresolved-reader status as its siblings."
+    },
+    {
+      "key": "ronette_visita",
+      "reason": "intentional: visit-entry marker, gate is node_done ronette_uomo -- docs/act-2-closure-report.md."
+    },
+    {
+      "key": "maddy_action_after_warning",
+      "reason": "forward-referenced: reader is the unbuilt epilogue, narrative/schema-deltas/M8.md."
+    },
+    {
+      "key": "letter_o_chain",
+      "reason": "forward-referenced: reader is the unbuilt epilogue, narrative/schema-deltas/M8.md."
+    },
+    {
+      "key": "P9.formulation.status",
+      "reason": "open TODO: design report §5 'give the register one reader'; owner Act 3 step C3."
+    }
+  ],
+  "external_writers": [
+    {
+      "key": "sogno_fatto",
+      "kind": "flag",
+      "reason": "Classic-layer flag synced into narrative state by js/narrative-production.js syncClassicToNarrative() via an array-driven ensureFlag() call, not a static `state.flags.<name>` access -- the check's regex over `state.flags.<name>` / `flags.<name>` does not see this pattern."
+    },
+    {
+      "key": "gigante1",
+      "kind": "flag",
+      "reason": "Same syncClassicToNarrative() array-driven pattern as sogno_fatto (js/narrative-production.js:138); also declared KEEP in docs/act-3-design-report.md §6."
+    },
+    {
+      "key": "audrey_indaga",
+      "kind": "flag",
+      "reason": "Classic-layer flag (js/data.js audrey_a2 / audrey_a2_ben setFlag) synced into narrative state by js/narrative-production.js syncClassicToNarrative() via the array-driven ensureFlag() call (M6 stitch C4) -- the check's regex over `state.flags.<name>` does not see this pattern. Runtime proof: test/act-3-flow.js \"audrey_indaga: ponte classico→narrativo\"."
+    }
+  ],
+  "external_writer_patterns": [],
+  "single_writer_flags": [
+    {
+      "key": "east_route_confirmed",
+      "reason": "SEED (system §16 #3): O3 double-writer risk, keep single-writer under lint from day one."
+    },
+    {
+      "key": "vagone_scoperto",
+      "reason": "SEED (system §16 #3)."
+    },
+    {
+      "key": "jacques_dead",
+      "reason": "SEED (system §16 #3): critical ending flag, must never gain a second writer."
+    },
+    {
+      "key": "jacques_preso",
+      "reason": "SEED (system §16 #3)."
+    },
+    {
+      "key": "atto4",
+      "reason": "SEED (system §16 #3): act gate, single writer by design (M6 bridge)."
+    }
+  ],
+  "write_once_values": [],
+  "documented_multiple_writers": [
+    {
+      "key": "jacques_admitted_presence",
+      "kind": "flag",
+      "reason": "three mutually exclusive tactic branches (m6_interrogation_prova/pressione/falsa), each gated on a distinct m6_tactic value; only one is ever reachable per playthrough."
+    }
+  ],
+  "known_open": [
+    {
+      "key": "P7.formulation.status",
+      "check": "read-before-write",
+      "reason": "M9's m9_present_truman node (narrative/missions/M9.json:517) has a presentation.on.P7 branch, but no mission node anywhere formulates P7 (no {proposition: \"P7\", to: \"formulated\"} effect exists); the branch is currently dead code.",
+      "owner_milestone": "M9 pass: formulate P7 or cut the dead presentation branch",
+      "found": "2026-09-10, narrative-lint v0.1 first run"
+    }
+  ]
+}

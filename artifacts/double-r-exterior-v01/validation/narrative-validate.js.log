@@ -1,0 +1,17 @@
+# walk ricorsivi: effetti/condizioni/reason/result a ogni livello
+# reciprocità evidenze↔proposizioni
+# registro GLOBALE delle pagine (principali, presentazione, reopen, repeat)
+# binding: root vs rami interni
+# dinamica — transazioni prepare/commit eseguite dal runtime
+# percorsi completi (save/load a ogni passo)
+# B3 — notebook, comparison & formulation
+# B4 — presentation to Truman
+# B5 — narrative save
+# C5-B — M5 dynamic (runtime esteso, matrice canonica)
+# C5-B — pairwise, continuation, domini, confronti, registro
+# C5-B.1 — contratto runtime chiuso (12 test dalla revisione)
+# C5-B.2 — resolver delle coppie a due passaggi
+# C6-B — M6 dynamic (estensioni runtime generiche, matrice canonica)
+# C8-B — M8 dynamic (value_transition / from_derivation / conditional_pages + matrice 27)
+
+4354 controlli narrativi superati ✔ (runtime transazionale)

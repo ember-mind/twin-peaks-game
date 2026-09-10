@@ -1,0 +1,65 @@
+{
+  "status": "pass",
+  "runId": "2026-09-09T06-48-36-257Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation-characterLife-stationP",
+  "scenario": "stationP",
+  "durationMs": 61017.4,
+  "rate": 1,
+  "aggregateStillFraction": 0.957297372305682,
+  "actors": {
+    "station-truman": {
+      "stillFraction": 0.9426395822611786,
+      "position": [10, 4],
+      "events": {
+        "blink": 2,
+        "reading": 1
+      },
+      "firstEventMs": 23132.3
+    },
+    "station-lucy": {
+      "stillFraction": 0.9554742994253799,
+      "position": [2, 6],
+      "events": {
+        "blink": 2,
+        "telephone": 1
+      },
+      "firstEventMs": 17365.9
+    },
+    "station-andy": {
+      "stillFraction": 0.9737782352304873,
+      "position": [10, 7],
+      "events": {
+        "blink": 1,
+        "check-note": 1
+      },
+      "firstEventMs": 43614.9
+    }
+  },
+  "independentStarts": true,
+  "allStationary": true,
+  "allNamedRoutesReachable": true,
+  "interactions": [
+    {
+      "id": "station-truman",
+      "playerTile": [11, 4],
+      "reactiveDirection": "right",
+      "restoredDirection": "down"
+    },
+    {
+      "id": "station-lucy",
+      "playerTile": [3, 6],
+      "reactiveDirection": "right",
+      "restoredDirection": "down"
+    },
+    {
+      "id": "station-andy",
+      "playerTile": [9, 7],
+      "reactiveDirection": "left",
+      "restoredDirection": "down"
+    }
+  ],
+  "coldstageChecks": {
+    "passed": 21,
+    "total": 21,
+    "consoleSevere": 0
+  }
+}

@@ -137,11 +137,35 @@
             "not": {
               "flag": "maddy_trovata"
             }
+          },
+          {
+            "value_set": "warning_target"
           }
         ]
       },
       "text": "Torna all’incrocio: casa Palmer, lago o diner.",
-      "provenance_note": "[L] testo esatto del Lock §9-B"
+      "provenance_note": "[L] testo esatto del Lock §9-B. Guardia aggiunta nel pass 01 del nodo split (B1): warning_target set, cosi' l'obiettivo non precede il telefono (obj_m8_15 copre la finestra fra la dichiarazione al tavolo e la telefonata)"
+    },
+    {
+      "id": "obj_m8_15",
+      "priority": 150,
+      "when": {
+        "all": [
+          {
+            "value_is": {
+              "name": "presagio_status",
+              "equals": "active"
+            }
+          },
+          {
+            "not": {
+              "value_set": "warning_target"
+            }
+          }
+        ]
+      },
+      "text": "Il telefono del Roadhouse.",
+      "provenance_note": "[L] Lock §9-B"
     },
     {
       "id": "obj_m8_1",
@@ -158,11 +182,16 @@
             "not": {
               "value_set": "presagio_status"
             }
+          },
+          {
+            "not": {
+              "node_done": "m8_roadhouse_truman"
+            }
           }
         ]
       },
       "text": "Il paese si ritrova al Roadhouse, stasera.",
-      "provenance_note": "[N] obiettivo del Roadhouse (pre-enunciato del Gigante): attivo SOLO dopo la promessa al diner (value_set promise_stance), perché m8_roadhouse richiede promise_stance — altrimenti l'obiettivo punterebbe a una root non ancora azionabile"
+      "provenance_note": "[N] obiettivo del Roadhouse (pre-enunciato del Gigante): attivo SOLO dopo la promessa al diner (value_set promise_stance), perché m8_roadhouse_truman richiede promise_stance — altrimenti l'obiettivo punterebbe a una root non ancora azionabile. Guardia not node_done m8_roadhouse_truman aggiunta nel pass 01 (ridondante con not value_set presagio_status, ma esplicita dopo lo split del nodo — O9)"
     },
     {
       "id": "obj_m8_0",
@@ -314,10 +343,54 @@
       }
     },
     {
-      "id": "m8_roadhouse",
+      "id": "m8_leland_waiting",
+      "beat": "A0",
+      "source_section": "M8-A0",
+      "conditions": [
+        {
+          "flag": "atto4"
+        },
+        {
+          "not": {
+            "value_set": "promise_stance"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m8.a.leland_waiting.p01",
+          "mode": "action",
+          "text": "(Leland al bancone, accanto a Maddy. Il conto è già sotto la sua mano; aspetta che lei finisca.)"
+        },
+        {
+          "id": "m8.a.leland_waiting.p02",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Aspetto che lei finisca."
+        }
+      ],
+      "effects": [],
+      "repeat": {
+        "id": "m8.repeat.leland_waiting",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Il conto è già sotto la sua mano. Aspetto che lei finisca."
+      },
+      "invariant": "presenza opzionale prima della promessa (R1: il pomeriggio è uno sguardo, non un fetch — chiude il rifiuto meta di O10); nessun effetto, nessuno stato scritto; esclusivo con m8_leland_taxi sul write-once di promise_stance (le due condizioni sono l'una la negazione dell'altra: mai due root vive sullo stesso attore)",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "diner",
+      "target_kind": "actor",
+      "target_id": "leland",
+      "actor_id": "leland",
+      "interaction_slot": "primary"
+    },
+    {
+      "id": "m8_roadhouse_truman",
       "beat": "B",
       "source_section": "M8-B",
-      "prompt": "Chi deve ricevere l'avvertimento?",
       "conditions": [
         {
           "value_set": "promise_stance"
@@ -327,47 +400,127 @@
         },
         {
           "not": {
-            "value_set": "warning_target"
+            "value_set": "presagio_status"
           }
         }
       ],
       "pages": [
         {
-          "id": "m8.b.roadhouse.p01",
+          "id": "m8.b.truman.p01",
           "mode": "action",
           "text": "(La banda suona. Il paese c'è tutto: birre, risate basse, il microfono che fischia una volta.)"
         },
         {
-          "id": "m8.b.roadhouse.p02",
+          "id": "m8.b.truman.p02",
           "mode": "dialogue",
           "speaker_id": "truman",
           "display_name": "TRUMAN",
           "text": "Se i tuoi enigmi avevano un seguito, questo è il posto che mi hai chiesto di aspettare."
         },
         {
-          "id": "m8.b.roadhouse.p03",
+          "id": "m8.b.truman.p03",
           "mode": "action",
           "text": "(La musica non si ferma. Ma per Cooper la sala rallenta — solo per lui.)"
         },
         {
-          "id": "m8.b.roadhouse.p04",
+          "id": "m8.b.truman.p04",
           "mode": "dialogue",
           "speaker_id": "gigante",
           "display_name": "GIGANTE",
           "text": "Sta accadendo di nuovo."
         },
         {
-          "id": "m8.b.roadhouse.p05",
+          "id": "m8.b.truman.p05",
           "mode": "action",
           "text": "(La sala riprende il suo tempo. Nessuno ha visto niente.)"
+        }
+      ],
+      "effects": [
+        {
+          "value": "presagio_status",
+          "to": "active"
         },
         {
-          "id": "m8.b.roadhouse.p06",
+          "notebook": {
+            "id": "m8.note.presagio",
+            "text": "Il secondo enunciato del Gigante: «Sta accadendo di nuovo». Significato ancora irrisolto."
+          }
+        }
+      ],
+      "invariant": "presagio_status: active nasce QUI (write iniziale, mai entry-gate); l'enunciato è solo per Cooper (la banda non si ferma); nessuna opzione, nessuna destinazione nominata; gigante2 (sync classico) deriva da QUESTO nodo (node_done:m8_roadhouse_truman); nessun `next` verso il telefono — il giocatore CAMMINA fino a 8,5 (nodo split B1)",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "roadhouse",
+      "target_kind": "actor",
+      "target_id": "truman",
+      "actor_id": "truman",
+      "interaction_slot": "primary"
+    },
+    {
+      "id": "m8_giant_stage",
+      "beat": "B",
+      "source_section": "M8-B",
+      "conditions": [
+        {
+          "value_is": {
+            "name": "presagio_status",
+            "equals": "active"
+          }
+        },
+        {
+          "not": {
+            "value_set": "warning_target"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m8.b.giant.p01",
+          "mode": "action",
+          "text": "(Sul palco, dietro la banda, un uomo alto. Nessuno lo guarda. Non indica niente.)"
+        }
+      ],
+      "effects": [],
+      "repeat": {
+        "id": "m8.b.giant.repeat",
+        "mode": "action",
+        "text": "(Sul palco, dietro la banda, un uomo alto. Nessuno lo guarda. Non indica niente.)"
+      },
+      "invariant": "mai una seconda dichiarazione, mai una direzione; presenza silenziosa fra l'enunciato al tavolo e la telefonata (finestra presagio_status=active ∧ ¬warning_target); il nodo esiste perché un'entità con dialogue:null non è mai un NPC muto (O4/O5): il palco (8,1) è tessera solida ma faceable da 8,2, interact() risolve npcAt prima di ogni test di solidità",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "roadhouse",
+      "target_kind": "actor",
+      "target_id": "gigante",
+      "actor_id": "gigante",
+      "interaction_slot": "primary"
+    },
+    {
+      "id": "m8_roadhouse_phone",
+      "beat": "B",
+      "source_section": "M8-B",
+      "prompt": "Chi deve ricevere l'avvertimento?",
+      "conditions": [
+        {
+          "value_is": {
+            "name": "presagio_status",
+            "equals": "active"
+          }
+        },
+        {
+          "not": {
+            "value_set": "warning_target"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m8.b.phone.p01",
           "mode": "notebook",
           "text": "Il telefono del Roadhouse."
         },
         {
-          "id": "m8.b.roadhouse.p07",
+          "id": "m8.b.phone.p02",
           "mode": "dialogue",
           "speaker_id": "cooper",
           "display_name": "COOPER",
@@ -462,19 +615,8 @@
           ]
         }
       ],
-      "effects": [
-        {
-          "value": "presagio_status",
-          "to": "active"
-        },
-        {
-          "notebook": {
-            "id": "m8.note.presagio",
-            "text": "Il secondo enunciato del Gigante: «Sta accadendo di nuovo». Significato ancora irrisolto."
-          }
-        }
-      ],
-      "invariant": "presagio_status: active nasce QUI (write iniziale, mai entry-gate); la label è INTENZIONE non comando; nessuna opzione nomina Maddy come bersaglio; maddy_departure_plan (prima corriera) invariato dal pomeriggio; l'enunciato è solo per Cooper (la banda non si ferma)",
+      "effects": [],
+      "invariant": "presagio_status è già active (scritto da m8_roadhouse_truman); questo nodo scrive SOLO warning_target/maddy_action_after_warning/sarah_support_state; la label è INTENZIONE non comando; nessuna opzione nomina Maddy come bersaglio; maddy_departure_plan (prima corriera) invariato dal pomeriggio",
       "kind": "choice",
       "channel": "world",
       "map_id": "roadhouse",
@@ -594,6 +736,126 @@
       "mandatory_beat": true
     },
     {
+      "id": "m8_lucy",
+      "beat": "X",
+      "source_section": "M8-X (trasversale)",
+      "conditions": [
+        {
+          "flag": "atto4"
+        },
+        {
+          "not": {
+            "node_done": "m8_station"
+          }
+        }
+      ],
+      "pages": [
+        {
+          "id": "m8.lucy.p01",
+          "mode": "dialogue",
+          "speaker_id": "lucy",
+          "display_name": "LUCY",
+          "text": "Stasera il paese è tutto al Roadhouse, agente. Norma chiude alle sei per andarci. Lei ci va?",
+          "condition": {
+            "not": {
+              "value_set": "presagio_status"
+            }
+          }
+        },
+        {
+          "id": "m8.lucy.p02",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Ci sarò, Lucy. Prima passo dal Double R.",
+          "condition": {
+            "not": {
+              "value_set": "presagio_status"
+            }
+          }
+        },
+        {
+          "id": "m8.lucy.p03",
+          "mode": "dialogue",
+          "speaker_id": "lucy",
+          "display_name": "LUCY",
+          "text": "Linea libera, agente. Hawk è di pattuglia, il resto del paese è al Roadhouse. Le serve qualcuno?",
+          "condition": {
+            "all": [
+              {
+                "value_is": {
+                  "name": "presagio_status",
+                  "equals": "active"
+                }
+              },
+              {
+                "not": {
+                  "flag": "maddy_trovata"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "m8.lucy.p03b",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "Non ancora. Se squilla, segnati l'ora.",
+          "condition": {
+            "all": [
+              {
+                "value_is": {
+                  "name": "presagio_status",
+                  "equals": "active"
+                }
+              },
+              {
+                "not": {
+                  "flag": "maddy_trovata"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "m8.lucy.p04",
+          "mode": "action",
+          "text": "(Lucy al centralino. Nessuna luce accesa sul quadro: a quest'ora non chiama nessuno.)",
+          "condition": {
+            "flag": "maddy_trovata"
+          }
+        },
+        {
+          "id": "m8.lucy.p04b",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "condition": {
+            "flag": "maddy_trovata"
+          },
+          "text": "Niente da passare. Segna l'ora comunque."
+        }
+      ],
+      "effects": [],
+      "effect_policy": "always",
+      "repeat": {
+        "id": "m8.lucy.repeat",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Il quadro è tuo, Lucy. Il taccuino è mio."
+      },
+      "invariant": "Lucy instrada, mai interpreta; mai nomina il gigante, Maddy o il taxi; le pagine coprono per `condition` l'intero dominio presagio_status×maddy_trovata (mai vuoto), quindi effect_policy=always (primitiva generica già letta dal runtime, non locked dal primo commit) rivaluta la finestra corretta a ogni visita — nessun effetto, quindi la rivalutazione ripetuta è priva di rischio; ogni finestra porta anche una riga COOPER (voce Cooper obbligatoria su ogni root, test/interaction-voice.js), il repeat resta un fallback puramente difensivo",
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "sheriff",
+      "target_kind": "actor",
+      "target_id": "lucy",
+      "actor_id": "lucy",
+      "interaction_slot": "primary"
+    },
+    {
       "id": "m8_focus_choice",
       "beat": "C",
       "source_section": "M8-C",
@@ -672,6 +934,13 @@
       "role": "focus",
       "completion_when": {
         "value_set": "focus_destination"
+      },
+      "repeat": {
+        "id": "m8.c.focus.repeat",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER",
+        "text": "Il Roadhouse ha chiuso. Da qui, le strade sono solo distanza."
       }
     },
     {
@@ -892,19 +1161,19 @@
               "mode": "action",
               "text": "(Quando Cooper arriva, il perimetro è già segnato. Hawk gli va incontro, si toglie il cappello.)"
             },
-          {
-            "id": "m8.d.discovery.hawk.p02",
-            "mode": "dialogue",
-            "speaker_id": "hawk",
-            "display_name": "HAWK",
-            "text": "L'ho trovata io. Non l'ho mossa. Non ho toccato le mani. Guarda l'anulare."
-          },
-          {
-            "id": "m8.d.discovery.hawk.p03",
-            "mode": "dialogue",
-            "speaker_id": "cooper",
-            "display_name": "COOPER",
-            "text": "Hawk, hai fatto bene. Osservo da dove ti sei fermato; una scena preservata ha due paia d'occhi."
+            {
+              "id": "m8.d.discovery.hawk.p02",
+              "mode": "dialogue",
+              "speaker_id": "hawk",
+              "display_name": "HAWK",
+              "text": "L'ho trovata io. Non l'ho mossa. Non ho toccato le mani. Guarda l'anulare."
+            },
+            {
+              "id": "m8.d.discovery.hawk.p03",
+              "mode": "dialogue",
+              "speaker_id": "cooper",
+              "display_name": "COOPER",
+              "text": "Hawk, hai fatto bene. Osservo da dove ti sei fermato; una scena preservata ha due paia d'occhi."
             }
           ]
         }
@@ -1244,6 +1513,20 @@
       ],
       "pages_after_branch": [
         {
+          "id": "m8.f.station.p_lago",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "text": "La chiamata sulla riva è arrivata qui mentre tu eri già al lago. Un civile, senza nome; Hawk è partito subito.",
+          "condition": {
+            "value_is": {
+              "name": "focus_destination",
+              "equals": "lago"
+            }
+          },
+          "conditional_note": "B7 (pass 01): chiude l'informazione mancante su chi ha ricevuto la chiamata anonima quando Cooper era già al lago (focus_destination=lago); congelata in prepareNode (conditional_pages, schema-delta §3), indipendente dalla condizione della valigia"
+        },
+        {
           "id": "m8.f.station.p_valigia",
           "mode": "dialogue",
           "speaker_id": "truman",
@@ -1282,6 +1565,20 @@
           "speaker_id": "cooper",
           "display_name": "COOPER",
           "text": "Una firma che procede, Harry. Il diario dice che qualcuno le prometteva il proprio nome a pezzi."
+        },
+        {
+          "id": "m8.f.station.hook.p01",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER",
+          "text": "E un orario. Ieri al diner Leland ha detto di aver chiamato la Twin Peaks Taxi per le sette, da casa. L'ho scritto io, alla luce del giorno."
+        },
+        {
+          "id": "m8.f.station.hook.p02",
+          "mode": "dialogue",
+          "speaker_id": "truman",
+          "display_name": "TRUMAN",
+          "text": "Allora abbiamo un'ora. Prima delle sette, Lucy chiama la compagnia: una corsa prenotata, o niente."
         }
       ],
       "effects": [],
@@ -1304,6 +1601,6 @@
     }
   ],
   "node_count": {
-    "runtime_total": 12
+    "runtime_total": 16
   }
 }

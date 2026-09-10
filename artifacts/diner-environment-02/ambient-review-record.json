@@ -1,0 +1,17 @@
+{
+  "status": "recorded",
+  "projectId": "twin-peaks-pokemon",
+  "runId": "2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment",
+  "scenario": "dinerAmbient",
+  "verdict": "pass-with-notes",
+  "reviewer": {
+    "type": "vision-model",
+    "id": "gpt-5.6-sol",
+    "provider": "openai",
+    "model": "gpt-5.6-sol"
+  },
+  "reportDigest": "10456623ddc2680d14bfa34cb82dc4d0225fa27633c3de655633d0d423936c40",
+  "reviewDigest": "6cd2796560cbbf152d4e030d35fd47b6409bb24f78df5cb8760467b1aed3f54b",
+  "reviewPath": ".coldstage/reviews/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerAmbient/review-1788871755735-4e84c30c.json",
+  "contactSheet": ".coldstage/reviews/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerAmbient-contact-sheet.webp"
+}

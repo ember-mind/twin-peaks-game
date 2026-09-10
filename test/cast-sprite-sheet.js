@@ -22,15 +22,24 @@ const orderMatch = authored.match(/var CAST_SHEET_ORDER = (\[[\s\S]*?\]);/);
 assert(orderMatch, 'runtime cast order declared');
 const runtimeOrder = Array.from(vm.runInNewContext(orderMatch[1]));
 
+/* R129 — l'archivio 16 px e' congelato a 24 attori. `assets/sprites/CAST.md`
+ * lo dichiara "archivio comparativo, non produzione": la produzione e'
+ * l'atlante hg-24 generato da tools/build-cast-authored.js. Il cast di
+ * produzione puo' quindi crescere (infermiera e' il 25o) senza un master
+ * `cast-16/<key>.png`. Restano vincolati: lo schema del manifest, il fatto
+ * che l'archivio sia un PREFISSO esatto del registro runtime (stessi nomi,
+ * stesso ordine) e la coerenza fra chars.js e CAST_SHEET_ORDER. */
+const ARCHIVE_FROZEN_AT = 24;
 assert.equal(manifest.schema, 1, 'manifest schema');
-assert.equal(manifestKeys.length, 24, 'all 24 moving characters in manifest');
-assert.deepEqual(manifestKeys, charKeys, 'manifest matches runtime character registry');
-assert.deepEqual(runtimeOrder, manifestKeys, 'atlas order matches manifest');
+assert.equal(manifestKeys.length, ARCHIVE_FROZEN_AT, 'legacy 16 px archive frozen at 24 characters');
+assert.deepEqual(charKeys.slice(0, ARCHIVE_FROZEN_AT), manifestKeys,
+  'frozen archive must stay an exact prefix of the runtime character registry');
+assert.deepEqual(runtimeOrder, charKeys, 'atlas order matches runtime character registry');
 assert.equal(castPng.toString('ascii', 1, 4), 'PNG', 'cast atlas PNG signature');
 assert.equal(castPng.readUInt32BE(16), 240, 'cast atlas width');
 assert.equal(castPng.readUInt32BE(20), 240, 'cast atlas height');
-assert(authored.includes(`cast-walkcycles-16.png?v=${castVersion}`), 'archived asset cache version matches atlas hash');
-assert(fs.readFileSync(path.join(root, 'index.html'), 'utf8').includes('retro-authored.js?v=r102e-authoredcast'), 'production loads native cast revision');
+assert(authored.includes("assets/sprites/cast-walkcycles-hg-24.png?v="), 'production atlas has a cache version');
+assert(fs.readFileSync(path.join(root, 'index.html'), 'utf8').includes('js/retro-authored.js?v='), 'production loads versioned renderer');
 
 for (const key of manifestKeys) {
   const file = path.join(root, 'assets', 'sprites', 'cast-16', `${key}.png`);
@@ -40,9 +49,9 @@ for (const key of manifestKeys) {
   assert.equal(png.readUInt32BE(20), 48, `${key}: three direction rows`);
 }
 
-assert(/naturalWidth !== 240/.test(authored), 'runtime validates atlas width');
-assert(/naturalHeight !== 240/.test(authored), 'runtime validates atlas height');
-assert(/production: false/.test(authored), 'downsampled atlas is explicitly archival');
-assert(/sourceAtlas: false/.test(authored), 'runtime uses native-authored character builder');
+assert(/naturalWidth !== 360/.test(authored), 'runtime validates atlas width');
+assert(/naturalHeight !== 360/.test(authored), 'runtime validates atlas height');
+assert(/production: true/.test(authored), 'HeartGold atlas is production');
+assert(/sourceAtlas: true/.test(authored), 'runtime uses HeartGold source atlas');
 
-console.log('CAST-SPRITE-PASS 36/36 — legacy atlas archived, native renderer active');
+console.log('CAST-SPRITE-PASS 36/36 — frozen 16 px archive integrity and HeartGold runtime verified');

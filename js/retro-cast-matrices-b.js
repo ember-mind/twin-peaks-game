@@ -1395,6 +1395,122 @@
         ".....oooooooo..."
       ]
     }
+  },
+  infermiera: {
+    down: {
+      idle: [
+        "................",
+        "....ooooooo.....",
+        "...oossssssoo...",
+        "..oossssssssoo..",
+        "..oooooooooooo..",
+        ".oocsssssssscoo.",
+        ".ocsossssssosco.",
+        ".ocssssssssssco.",
+        "..oossssssssoo..",
+        ".ooccossssoccoo.",
+        ".osccossssoccso.",
+        "..occossssocco..",
+        "..ocssssssssco..",
+        ".occssoooosscco.",
+        "..occo....occo..",
+        "..oooo....oooo.."
+      ],
+      step: [
+        "................",
+        ".....ooooooo....",
+        "....oossssssoo..",
+        "...oossssssssoo.",
+        "...oooooooooooo.",
+        "..oocsssssssscoo",
+        "..ocsossssssosco",
+        "..ocssssssssssco",
+        "...oossssssssoo.",
+        ".oooccossssocco.",
+        ".osoccossssocso.",
+        "..occossssocco..",
+        "..ocssssssssco..",
+        ".occsoooooossco.",
+        ".occo......occo.",
+        ".oooo......oooo."
+      ]
+    },
+    up: {
+      idle: [
+        "................",
+        "....ooooooo.....",
+        "...oossssssoo...",
+        "..oossssssssoo..",
+        "..oooooooooooo..",
+        ".oocooooooocoo..",
+        ".ooooccccooooo..",
+        ".ooooccccoooooo.",
+        "..oocoooooocoo..",
+        ".ooccossssoccoo.",
+        ".osccossssoccso.",
+        "..occossssocco..",
+        "..ocssssssssco..",
+        ".occssoooosscco.",
+        "..occo....occo..",
+        "..oooo....oooo.."
+      ],
+      step: [
+        "................",
+        ".....ooooooo....",
+        "....oossssssoo..",
+        "...oossssssssoo.",
+        "...oooooooooooo.",
+        "..oocooooooocoo.",
+        "..ooooccccooooo.",
+        "..ooooccccoooooo",
+        "...oocoooooocoo.",
+        ".oooccossssocco.",
+        ".osoccossssocso.",
+        "..occossssocco..",
+        "..ocssssssssco..",
+        ".occsoooooossco.",
+        ".occo......occo.",
+        ".oooo......oooo."
+      ]
+    },
+    side: {
+      idle: [
+        "................",
+        "....ooooo.......",
+        "...oossssoo.....",
+        "..ooosssssooo...",
+        "..oooooosssssoo.",
+        "..ooocooossssso.",
+        "..ooocoossossso.",
+        "..ooocoossssso..",
+        "...oooooosssso..",
+        "..occcosssssco..",
+        "..occcossssscoo.",
+        "..occcosssssco..",
+        "...occssssssco..",
+        "..occssoooossoo.",
+        "...occo..occo...",
+        "...oooo..oooo..."
+      ],
+      step: [
+        "................",
+        ".....ooooo......",
+        "....oossssoo....",
+        "...ooosssssooo..",
+        "...oooooosssssoo",
+        "...ooocooossssso",
+        "...ooocoossossso",
+        "...ooocoossssso.",
+        "....oooooosssso.",
+        "..ooccossssscoo.",
+        "..occcosssssco..",
+        "..occcossssscoo.",
+        "...occssssssco..",
+        "..occsoooooossoo",
+        "..occo.....occo.",
+        "..oooo.....oooo."
+      ]
+    }
   }
 };
   /* R102d: literal full-pose walk redraws. Reference-faithful head translation,

@@ -1,0 +1,72 @@
+[
+  {
+    "test": "smoke",
+    "exitCode": 0,
+    "summary": [
+      "368 controlli superati \u2714"
+    ]
+  },
+  {
+    "test": "walkthrough",
+    "exitCode": 0,
+    "summary": [
+      "OK: cammino completo simulato, 86 acquisizioni, finale raggiunto \u2714"
+    ]
+  },
+  {
+    "test": "character-activity",
+    "exitCode": 0,
+    "summary": [
+      "CHARACTER-ACTIVITY-PASS seeded clocks, distinct starts, preview, dialogue cancellation, pause, disable, workstation and map guards"
+    ]
+  },
+  {
+    "test": "walk-phase-contract",
+    "exitCode": 0,
+    "summary": [
+      "WALK-PHASE-PASS \u2014 boundaries + 30/60/120 Hz + large-dt + chained reset"
+    ]
+  },
+  {
+    "test": "world-engine-v0.1-catalog",
+    "exitCode": 0,
+    "summary": [
+      "WORLD-ENGINE-V0.1-CATALOG-PASS registration, immutable catalog, scoped lookups, shared connections, validation, authored references"
+    ]
+  },
+  {
+    "test": "ambient-life",
+    "exitCode": 0,
+    "summary": [
+      "AMBIENT-ORGANIC-PASS 48 seamless cycles,3 variants,no adjacent repeat,duration jitter,single variant and ordering independence"
+    ]
+  },
+  {
+    "test": "sheriffs-station-ambient",
+    "exitCode": 0,
+    "summary": [
+      "SHERIFFS-STATION-AMBIENT-PASS five elements (one continuous), quieter than diner, per-element isolated containment + alpha ceiling, duty cycle, idle gaps, liveliness floor, independent clocks, no reactions"
+    ]
+  },
+  {
+    "test": "cast-sprite-sheet",
+    "exitCode": 0,
+    "summary": [
+      "CAST-SPRITE-PASS 36/36 \u2014 legacy asset integrity and HeartGold runtime verified"
+    ]
+  },
+  {
+    "test": "character-runtime-contract",
+    "exitCode": 0,
+    "summary": [
+      "CHARACTER-RUNTIME-PASS \u2014 heartgold-atlas-r116, 24 actors, cast authored R128"
+    ]
+  },
+  {
+    "test": "retro-production",
+    "exitCode": 0,
+    "summary": [
+      "RETRO-PROD-PASS 54/54"
+    ]
+  }
+]

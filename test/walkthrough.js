@@ -30,6 +30,18 @@ require(J('data.js'));
 require(J('retro-font.js'));
 require(J('engine.js'));
 require(J('glue.js'));
+require(J('location-connections.js'));
+require(J('double-r-exterior-art.js'));
+require(J('double-r-exterior-scene.js'));
+require(J('double-r-location-data.js'));
+require(J('sheriffs-station-exterior-scene.js'));
+require(J('sheriffs-station-scene.js'));
+require(J('sheriffs-station-location-data.js'));
+global.GAME.DoubleRExteriorScene.install();
+global.GAME.SheriffsStationExteriorScene.install();
+global.GAME.SheriffsStationScene.install();
+[].concat(global.GAME.DoubleRLocationConnections, global.GAME.SheriffsStationLocationConnections)
+  .forEach((c) => global.GAME.LocationConnections.install(c, global.GAME.Maps));
 
 const GAME = global.GAME;
 const E = GAME.Engine;
@@ -53,12 +65,10 @@ const PREREQ = {
   'jacques_morto': ['jacques_preso'],
   'gigante1': ['jacques_morto'],
   'atto4': ['gigante1'],
-  'done_truman_atto4': ['gigante1'],
+  'narrative_m8_owned': ['atto4'],
   'gigante2': ['atto4'],
-  'lettera_o': ['gigante2'],
   'maddy_trovata': ['gigante2'],
   'atto5': ['maddy_trovata'],
-  'done_truman_atto5': ['maddy_trovata'],
   'leland_confessa': ['atto5'],
   'leland_morto': ['leland_confessa'],
   'done_laura_finale2': ['leland_morto', 'met_mfap']
@@ -174,6 +184,34 @@ function applyDialogue(dialogueField, mapId) {
   return true;
 }
 
+// Atto 3->4->5 span e' mission-owned (M5/M6/M8/M9): jacques_a3, audrey_oej,
+// truman_atto4/gerard_a4/lago_maddy (+ clue lettera_o)/truman_atto5 sono stati
+// ritirati dal layer classico, cosi' come la porta vagone->oej ora e' gated da
+// east_route_confirmed. Questi stub riproducono l'esito di
+// syncNarrativeToClassic (js/narrative-production.js) cosi' che il simulatore
+// classico possa proseguire oltre i nodi ritirati fino al finale.
+const MISSION_STUBS = [
+  { id: 'east_route_confirmed', when: () => simSt.flags.atto3 },
+  { id: 'jacques_preso', when: () => simSt.flags.east_route_confirmed },
+  { id: 'audrey_salvata', when: () => simSt.flags.audrey_indaga && simSt.flags.atto3 },
+  { id: 'atto4', when: () => simSt.flags.gigante1 },
+  { id: 'narrative_m8_owned', when: () => simSt.flags.atto4 },
+  { id: 'gigante2', when: () => simSt.flags.atto4 },
+  { id: 'maddy_trovata', when: () => simSt.flags.gigante2 },
+  { id: 'atto5', when: () => simSt.flags.maddy_trovata }
+];
+function applyMissionStubs() {
+  let didChange = false;
+  MISSION_STUBS.forEach((s) => {
+    if (!simSt.flags[s.id] && s.when()) {
+      simSt.flags[s.id] = true;
+      pushTrace({ type: 'flag', id: s.id, map: 'mission' });
+      didChange = true;
+    }
+  });
+  return didChange;
+}
+
 /* ---------------- iterazione a punto fisso ---------------- */
 
 const knownEntries = { [start.mapId]: [{ x: start.x, y: start.y }] };
@@ -182,6 +220,7 @@ let iterations = 0;
 while (changed && iterations < 200) {
   changed = false;
   iterations++;
+  if (applyMissionStubs()) changed = true;
   Object.keys(knownEntries).forEach((mapId) => {
     const res = reachableTiles(mapId, knownEntries[mapId]);
 

@@ -24,7 +24,7 @@
 <script src="../js/narrative-runtime.js?v=m6r6"></script>
 <script src="../js/narrative-ui.js?v=m6r6"></script>
 <script src="../js/narrative-notebook.js?v=m6r6"></script>
-<script src="../js/narrative-data.gen.js?v=harness-r77"></script>
+<script src="../js/narrative-data.gen.js?v=m6r7"></script>
 <script src="../js/narrative-engine-adapter.js?v=m6r7"></script>
 <script src="../js/narrative-save.js?v=m6r6"></script>
 <script>
@@ -211,7 +211,7 @@ async function run() {
     c.door_traincar_to_town = await enterDoor(0, 7, 'town', route, 'travel_traincar_to_town');
     c.door_town_to_sheriff = await enterDoor(12, 20, 'sheriff', route, 'travel_town_to_sheriff');
     // CENTRALE (segmenti CAMMINATI): Truman (ritorno) poi Lucy (notizia)
-    progress(id + ' Truman'); await interactTarget(7, 3, function () { return S().nodes_done.m6_return_night === true; }, route, 'return_night_truman');
+    progress(id + ' Truman'); await interactTarget(10, 4, function () { return S().nodes_done.m6_return_night === true; }, route, 'return_night_truman');
     await advanceUntil(function () { return !A.active(); }, 8);
     progress(id + ' Lucy'); await interactTarget(2, 6, function () { return S().flags.jacques_dead === true; }, route, 'news_lucy');
     await advanceUntil(function () { return !A.active(); }, 8);
@@ -220,9 +220,9 @@ async function run() {
     if (visitHospital) {
       progress(id + ' ospedale');
       // porte reali: sheriff → town → hospital, poi CAMMINO al registro
-      c.door_sheriff_to_town = await enterDoor(4, 8, 'town', route, 'travel_sheriff_to_town');
+      c.door_sheriff_to_town = await enterDoor(7, 11, 'town', route, 'travel_sheriff_to_town');
       c.door_town_to_hospital = await enterDoor(23, 6, 'hospital', route, 'travel_town_to_hospital');
-      await interactTarget(4, 3, function () { return S().flags.jacques_death_suspicious === true; }, route, 'hospital_register');
+      await interactTarget(13, 8, function () { return S().flags.jacques_death_suspicious === true; }, route, 'hospital_register');
       c.hospital_visited_suspicious_true = (S().flags.jacques_death_suspicious === true && S().flags.night_log_no_visitor === true);
     } else {
       // CODA FACOLTATIVA SALTATA: nessun ospedale → il sospetto NON nasce
@@ -248,7 +248,7 @@ async function run() {
     E.state.flags = { atto3: true, sogno_fatto: true };
     var debugSheriff = PARAMS.get('debugDoor') === 'sheriff';
     E.loadMap(debugSheriff ? 'sheriff' : 'traincar', debugSheriff ? 4 : 1, 7, debugSheriff ? 'down' : 'left'); await wait(200);
-    var debugOk = await enterDoor(debugSheriff ? 4 : 0, debugSheriff ? 8 : 7, 'town', debugRoute, debugSheriff ? 'debug_sheriff_to_town' : 'debug_traincar_to_town');
+    var debugOk = await enterDoor(debugSheriff ? 7 : 0, debugSheriff ? 11 : 7, 'town', debugRoute, debugSheriff ? 'debug_sheriff_to_town' : 'debug_traincar_to_town');
     out.routes.debug = debugRoute; out.checks.debug_door = debugOk;
     out.pass = debugOk; out.total = 1; out.passed = debugOk ? 1 : 0; out.failed = debugOk ? [] : ['debug_door'];
     document.getElementById('log').textContent = JSON.stringify(out, null, 1);

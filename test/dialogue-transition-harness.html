@@ -85,8 +85,8 @@ try { localStorage.removeItem('tp_save'); } catch (_) {}
       };
       E.state.mode = 'play';
       E.state.flags.intro_town = true;
-      // Percorso reale 2D: Cooper immediatamente a ovest di Truman.
-      E.loadMap('sheriff', 6, 3, 'right');
+      // Percorso reale 2D: Cooper immediatamente a sud di Truman.
+      E.loadMap('sheriff', 10, 5, 'up');
 
       // Settle authored room/character assets before defining Enter as t=0.
       setTimeout(function () {

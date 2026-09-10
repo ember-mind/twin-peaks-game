@@ -1,0 +1,265 @@
+{
+  "status": "pass",
+  "reportPath": ".coldstage/runs/2026-09-08T07-08-18-648Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner/report.json",
+  "environment": {
+    "lane": "selenium-release",
+    "browser": "Chrome",
+    "browserVersion": "152.0.7977.76",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "changedFileCount": 33,
+  "baseline": {
+    "previousStatus": "ready",
+    "statePath": ".coldstage/state.json",
+    "advanced": false,
+    "status": "held-for-pixel-gate"
+  },
+  "pixelGate": {
+    "status": "pending",
+    "aiReviewNeeded": true
+  },
+  "scenarios": [
+    {
+      "name": "desktop",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 535,
+      "checks": {
+        "passed": 14,
+        "total": 14,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 0,
+      "captureDeterminism": []
+    },
+    {
+      "name": "gameplay",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 557,
+      "checks": {
+        "passed": 9,
+        "total": 9,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 0,
+      "captureDeterminism": []
+    },
+    {
+      "name": "mobile",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 246,
+      "checks": {
+        "passed": 14,
+        "total": 14,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 0,
+      "captureDeterminism": []
+    },
+    {
+      "name": "mobileGameplay",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 775,
+      "checks": {
+        "passed": 15,
+        "total": 15,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 1,
+      "captureDeterminism": []
+    },
+    {
+      "name": "mobileLandscapeGameplay",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 714,
+      "checks": {
+        "passed": 13,
+        "total": 13,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 1,
+      "captureDeterminism": []
+    },
+    {
+      "name": "cooperDown",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 831,
+      "checks": {
+        "passed": 6,
+        "total": 6,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 1,
+      "captureDeterminism": []
+    },
+    {
+      "name": "cooperUp",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 652,
+      "checks": {
+        "passed": 6,
+        "total": 6,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 1,
+      "captureDeterminism": []
+    },
+    {
+      "name": "cooperRight",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 936,
+      "checks": {
+        "passed": 6,
+        "total": 6,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 1,
+      "captureDeterminism": []
+    },
+    {
+      "name": "cooperLeft",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-applicable"
+      },
+      "durationMs": 649,
+      "checks": {
+        "passed": 6,
+        "total": 6,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": null,
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 1,
+      "captureDeterminism": []
+    },
+    {
+      "name": "visual",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-performed"
+      },
+      "durationMs": 566,
+      "checks": {
+        "passed": 3,
+        "total": 3,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": {
+        "status": "review-required",
+        "aiReviewNeeded": true,
+        "nextAction": "visual-review",
+        "reviewSheet": ".coldstage/diffs/2026-09-08T07-08-18-648Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner/visual/visual-diff-sheet.webp"
+      },
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 1,
+      "captureDeterminism": []
+    },
+    {
+      "name": "diner",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-performed"
+      },
+      "durationMs": 523,
+      "checks": {
+        "passed": 4,
+        "total": 4,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": {
+        "status": "review-required",
+        "aiReviewNeeded": true,
+        "nextAction": "visual-review",
+        "reviewSheet": ".coldstage/diffs/2026-09-08T07-08-18-648Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner/diner/diner-diff-sheet.webp"
+      },
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 1,
+      "captureDeterminism": []
+    }
+  ]
+}

@@ -32,12 +32,12 @@ const scenes = {
     counter: { speaker: 'JACOBY', anchor: /medico e paziente/i }
   },
   truman: {
-    speakers: ['TRUMAN', 'TRUMAN', 'TRUMAN', 'COOPER'],
-    anchors: [/diario/i, /ROBERT/i, /torno da lei per i fatti/i],
+    speakers: ['TRUMAN', 'TRUMAN', 'COOPER', 'TRUMAN', 'TRUMAN', 'COOPER'],
+    anchors: [/diario/i, /ROBERT/i, /pasti a domicilio/i],
     give: ['diario']
   },
   lucy: {
-    speakers: ['LUCY', 'LUCY', 'COOPER'],
+    speakers: ['LUCY', 'LUCY', 'COOPER', 'LUCY'],
     anchors: [/centralino/i, /respiro/i, /orari/i]
   },
   andy: {
@@ -47,7 +47,7 @@ const scenes = {
   hawk: {
     speakers: ['HAWK', 'HAWK', 'COOPER', 'HAWK'],
     anchors: [/animale/i, /passi/i, /dove ti sei fermato/i],
-    counter: { speaker: 'HAWK', anchor: /cammini davanti/i }
+    counter: { speaker: 'HAWK', anchor: /camminerà davanti/i }
   },
   sarah: {
     speakers: ['SARAH', 'SARAH', 'COOPER', 'SARAH'],
@@ -60,17 +60,17 @@ const scenes = {
     counter: { speaker: 'LELAND', anchor: /chiudo le tende/i }
   },
   benhorne_a2: {
-    speakers: ['BEN HORNE', 'BEN HORNE', 'BEN HORNE', 'BEN HORNE', 'COOPER'],
-    anchors: [/rispettabile/i, /casinò/i, /non avevo ancora chiesto/i]
+    speakers: ['BEN HORNE', 'BEN HORNE', 'COOPER', 'BEN HORNE'],
+    anchors: [/315/i, /nulla\. Nulla/i, /la sera l'ha portata lei/i]
   },
   audrey_a2: {
-    speakers: ['AUDREY', 'AUDREY', 'AUDREY', 'AUDREY', 'COOPER'],
-    anchors: [/banco profumi/i, /hall/i, /chiamo suo padre/i],
+    speakers: ['AUDREY', 'AUDREY', 'COOPER', 'AUDREY'],
+    anchors: [/banco profumi/i, /nessuno, e in questo sono brava/i, /chiamo suo padre/i],
     setFlag: 'audrey_indaga'
   },
   shelly: {
     speakers: ['SHELLY', 'SHELLY', 'COOPER', 'SHELLY'],
-    anchors: [/con Laura/i, /controllava prima la porta/i, /prime parole/i],
+    anchors: [/con Laura/i, /prima controllava la porta/i, /niente da sapere/i],
     counter: { speaker: 'SHELLY', anchor: /se lo proteggete/i }
   },
   loglady: {
@@ -80,6 +80,7 @@ const scenes = {
   }
 };
 
+// audrey_oej: rimosso dal layer classico, e' mission-owned (M6).
 const bridges = {
   truman_a2: {
     speakers: ['COOPER', 'COOPER', 'TRUMAN', 'TRUMAN'],
@@ -90,16 +91,6 @@ const bridges = {
     anchors: [/due fatti/i, /e il luogo/i, /partiamo dalla scena/i],
     setFlag: 'atto3'
   },
-  audrey_oej: {
-    speakers: ['AUDREY', 'AUDREY', 'AUDREY', 'COOPER'],
-    anchors: [/registro del banco profumi/i, /dietro di me fino alla porta/i, /essere vista è il piano/i],
-    setFlag: 'audrey_salvata'
-  },
-  truman_atto4: {
-    speakers: ['COOPER', 'TRUMAN', 'COOPER', 'TRUMAN'],
-    anchors: [/le credo/i, /facciamo qualcosa/i, /so dove metterlo/i],
-    setFlag: 'atto4'
-  },
   sarah_visione: {
     speakers: ['SARAH', 'SARAH', 'SARAH', 'COOPER'],
     anchors: [/sorriso/i, /io scrivo/i, /non deve difendersi/i],
@@ -108,15 +99,6 @@ const bridges = {
   loglady_a4: {
     speakers: ['LOG LADY', 'LOG LADY', 'LOG LADY', 'COOPER'],
     anchors: [/luogo e ora/i, /ci sarò/i]
-  },
-  truman_atto5: {
-    speakers: ['COOPER', 'TRUMAN', 'COOPER', 'TRUMAN', 'COOPER'],
-    anchors: [/ROBERT/i, /non li uniamo/i, /portiamo Leland qui/i],
-    setFlag: 'atto5'
-  },
-  truman_wait5: {
-    speakers: ['TRUMAN', 'COOPER'],
-    anchors: [/prima Leland/i, /poi il bosco/i]
   },
   leland_interr: {
     speakers: ['', 'COOPER', '', 'BOB', '', 'BOB', 'LELAND', 'COOPER'],
@@ -190,8 +172,8 @@ for (const line of oldLines) ok(!revisedCorpus.includes(line), `formula rimossa:
 console.log('# Cooper agisce nella conversazione');
 for (const id of Object.keys(scenes)) {
   const cooper = D[id].pages.filter((page) => page.name === 'COOPER');
-  ok(cooper.length === 1, `${id}: una contromossa Cooper leggibile`);
-  ok(/[?.:]|\b(?:cominci|finisca|fammi|scriva|guardi)\b/i.test(cooper[0].text), `${id}: battuta contiene domanda, ordine o pressione concreta`);
+  ok(cooper.length >= 1, `${id}: almeno una contromossa Cooper leggibile`);
+  ok(cooper.every((page) => /[?.:]|\b(?:cominci|finisca|fammi|scriva|guardi)\b/i.test(page.text)), `${id}: ogni battuta di Cooper contiene domanda, ordine o pressione concreta`);
 }
 
 console.log(`dialogue-craft-regression: PASS (${checks} checks; ${Object.keys(scenes).length} scene, ${Object.keys(bridges).length} ponti)`);

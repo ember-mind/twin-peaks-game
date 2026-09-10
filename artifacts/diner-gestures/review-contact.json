@@ -1,0 +1,74 @@
+{
+  "status": "ready-for-review",
+  "projectId": "twin-peaks-pokemon",
+  "runId": "2026-09-08T13-02-43-822Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures",
+  "scenario": "dinerGestures",
+  "runtimeStatus": "pass",
+  "fresh": true,
+  "reportDigest": "771c22a75d7a5debf03136293136bf8acbbbf7ed16532947bf46794c5a6f1fcd",
+  "visualReview": "not-performed",
+  "sourceArtifacts": 11,
+  "contactSheet": ".coldstage/reviews/2026-09-08T13-02-43-822Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures/dinerGestures-contact-sheet.webp",
+  "contactSheetSha256": "a71d7cb5c3715009da6308e17a60ab8a4efa7e7c771d2d5956daeeea08c4acc8",
+  "sourceEvidence": [
+    {
+      "path": ".coldstage/runs/2026-09-08T13-02-43-822Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures/dinerGestures-rest.png",
+      "sha256": "2c86b7361c5312d82d0be8b6fdf64b289e102215f1436384df35423095d5f844",
+      "bytes": 31373
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T13-02-43-822Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures/dinerGestures-sip-reach.png",
+      "sha256": "211553ddcb822557120bb4f502bdeca56b6d3908fe554d79ad75ca49af740095",
+      "bytes": 31368
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T13-02-43-822Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures/dinerGestures-sip-lift.png",
+      "sha256": "ab57c3084557a8ffe295e54d8a47fd8cae8d43e2b2df8a858bdcd6019fa7073d",
+      "bytes": 31332
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T13-02-43-822Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures/dinerGestures-sip-drink.png",
+      "sha256": "3a35f7c28a17526f4268bb74606ef4342709a07611131ee4beefb87ed632be4b",
+      "bytes": 31281
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T13-02-43-822Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures/dinerGestures-sip-return.png",
+      "sha256": "ab57c3084557a8ffe295e54d8a47fd8cae8d43e2b2df8a858bdcd6019fa7073d",
+      "bytes": 31332
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T13-02-43-822Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures/dinerGestures-sip-rest.png",
+      "sha256": "2c86b7361c5312d82d0be8b6fdf64b289e102215f1436384df35423095d5f844",
+      "bytes": 31373
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T13-02-43-822Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures/dinerGestures-wipe-left.png",
+      "sha256": "315179923558a90da9ac0a21c6f7ef2398a2cd2729185b272cd39e07b1ebecaa",
+      "bytes": 31419
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T13-02-43-822Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures/dinerGestures-wipe-middle.png",
+      "sha256": "ee490405c3dd845b0766411db532700ba70020f9e029a8dd152b7086fe2c96e0",
+      "bytes": 31448
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T13-02-43-822Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures/dinerGestures-wipe-right.png",
+      "sha256": "cfb41516f184ee007cd9a6bdd3cfa6467bed3ec03f6800176cfd7bfa1ac39343",
+      "bytes": 31460
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T13-02-43-822Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures/dinerGestures-wipe-return.png",
+      "sha256": "ee490405c3dd845b0766411db532700ba70020f9e029a8dd152b7086fe2c96e0",
+      "bytes": 31448
+    },
+    {
+      "path": ".coldstage/runs/2026-09-08T13-02-43-822Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures/dinerGestures-wipe-rest.png",
+      "sha256": "2c86b7361c5312d82d0be8b6fdf64b289e102215f1436384df35423095d5f844",
+      "bytes": 31373
+    }
+  ],
+  "dimensions": {
+    "width": 1280,
+    "height": 2452
+  }
+}

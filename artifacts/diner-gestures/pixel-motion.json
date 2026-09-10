@@ -1,0 +1,11 @@
+{
+  "frames": 80,
+  "native": [
+    256,
+    192
+  ],
+  "distinctFrames": 7,
+  "changedPixelUnion": 161,
+  "outsideGestureBounds": 0,
+  "firstLastIdentical": true
+}

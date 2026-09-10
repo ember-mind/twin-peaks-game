@@ -92,9 +92,20 @@
     if (testMode) return;
     try { localStorage.removeItem(KEY); localStorage.removeItem(KEY + ':tmp'); } catch (_) {}
   }
+  /* L'uscita dal sogno è definita in js/maps.js (redroom '8,11' -> stanza 315):
+   * la ricordiamo prima che il finale la dirotti sul bosco, così il reset
+   * ripristina la porta canonica invece di un letterale legacy. */
+  var dreamExit = null;
+  function rememberDreamExit() {
+    if (dreamExit || !GAME.Maps || !GAME.Maps.redroom) return;
+    var d = GAME.Maps.redroom.doors['8,11'];
+    if (d && d.to !== 'woods') dreamExit = { to: d.to, tx: d.tx, ty: d.ty, dir: d.dir };
+  }
   function restoreDreamExit() {
     if (!GAME.Maps || !GAME.Maps.redroom) return;
-    GAME.Maps.redroom.doors['8,11'] = { to: 'hotel_gn', tx: 14, ty: 2, dir: 'down' };
+    rememberDreamExit();
+    GAME.Maps.redroom.doors['8,11'] = dreamExit ? { to: dreamExit.to, tx: dreamExit.tx, ty: dreamExit.ty, dir: dreamExit.dir }
+      : { to: 'room_315', tx: 2, ty: 6, dir: 'down' };
   }
   function copyFlagsToClassic(finalState) {
     var E = engine(); if (!E || !E.state || !finalState) return;
@@ -294,6 +305,7 @@
     if (!NF || !E || !E.state || !NF.isPending || !NF.isPending()) return false;
     var state = NF.getState();
     if (state.flags && state.flags.leland_morto && GAME.Maps && GAME.Maps.redroom) {
+      rememberDreamExit();
       GAME.Maps.redroom.doors['8,11'] = { to: 'woods', tx: 14, ty: 5, dir: 'down' };
     }
     if (!NF.isActive() && state.stage === 'await_lodge_exit' && E.state.mapId === 'woods') {

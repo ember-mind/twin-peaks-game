@@ -1,0 +1,45 @@
+{
+  "status": "pass",
+  "reportPath": ".coldstage/runs/2026-09-08T13-11-36-438Z-dinerGestures/report.json",
+  "environment": {
+    "lane": "selenium-release",
+    "browser": "Chrome",
+    "browserVersion": "152.0.7977.76",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "changedFileCount": null,
+  "baseline": null,
+  "pixelGate": {
+    "status": "pass",
+    "aiReviewNeeded": false
+  },
+  "scenarios": [
+    {
+      "name": "dinerGestures",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-performed"
+      },
+      "durationMs": 3012,
+      "checks": {
+        "passed": 3,
+        "total": 3,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": {
+        "status": "unchanged",
+        "aiReviewNeeded": false,
+        "nextAction": "none",
+        "reviewSheet": null
+      },
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 11,
+      "captureDeterminism": []
+    }
+  ]
+}

@@ -1,0 +1,2692 @@
+=== test/ambient-life.js ===
+AMBIENT-LIFE-PASS clocks, duty cycle,7 steam states, independent lamps, deterministic replay, read-only draw, depth, pause, disable and reuse
+AMBIENT-ORGANIC-PASS 48 seamless cycles,3 variants,no adjacent repeat,duration jitter,single variant and ordering independence
+EXIT:0
+=== test/ambient-preview-controls.js ===
+AMBIENT-PREVIEW-CONTROLS-PASS real seeded events, real-time replay, rest, zoom capture, cancellation and mode recovery
+EXIT:0
+=== test/authored-cast-contract.js ===
+AUTHORED-CAST-PASS — 24 actors × 3 views × 2 poses, source matrices clean
+EXIT:0
+=== test/canonical-sync.js ===
+node:assert:152
+  throw new AssertionError(obj);
+  ^
+
+AssertionError [ERR_ASSERTION]: [
+  {
+    "file": "index.html",
+    "error": "unaudited_divergence",
+    "canonical_sha256": "64ad80db52040b64e724d360048d6de0339a053b5eda9921f5be47f7f3e31372",
+    "deploy_sha256": "ad8c9a146f6dca06208b1513a5e71d4e94aa908ce2abbae1ec1dd49cb99b521b"
+  },
+  {
+    "file": "js/ambient-life-scenes.js",
+    "error": "unaudited_divergence",
+    "canonical_sha256": "d3c4f0825ac2c0af69680d9f4185b789acaccb1b27fca455c9a768571f92cf16",
+    "deploy_sha256": "58fe6b68246d882920838752c43224dd0cf139447d7d76cfc070c057b2dd12ad"
+  },
+  {
+    "file": "js/character-life-scenes.js",
+    "error": "unaudited_divergence",
+    "canonical_sha256": "4e0dd32ec4df4ec71a3c11a74072fcb29b39fb6659a9f4bd860e74548020e0b4",
+    "deploy_sha256": "2df5a767f61fcbf8adafa7abb5e340e18f644bdceac956e5b5dc9134f0d2bdde"
+  },
+  {
+    "file": "js/double-r-location-data.js",
+    "error": "unaudited_divergence",
+    "canonical_sha256": "daee86895b54b903bfbeb3d540d86b4049bea325325da082fe61098296f4165e",
+    "deploy_sha256": "5a1ed970e28e16072dddb73290a0bc1ed76e79c0086906d426161503ca726cd6"
+  },
+  {
+    "file": "js/double-r-location-production.js",
+    "error": "unaudited_divergence",
+    "canonical_sha256": "5cfacde5c53a5d43bd24ba9ee8b4203ce66a69de5623410e251a2d6bed5e171f",
+    "deploy_sha256": "d3b544a650afb9675c3f96bfd7f0c480a4aa58e6e7e1c8499d4919b310d8f1f4"
+  },
+  {
+    "file": "js/environmental-inspect.js",
+    "error": "unaudited_divergence",
+    "canonical_sha256": "ff8b7c67116852c3b91a1029864174d280050e7c2de4f734c349c6e489caa584",
+    "deploy_sha256": "de4e9931e3acb1b7d6e485ccd8eea66a32822fb7bdff241fd1b2a7a5a0b3847e"
+  },
+  {
+    "file": "js/glue.js",
+    "error": "unaudited_divergence",
+    "canonical_sha256": "d0bbc3caa15f814ac91fbaea135f632ffa7781823f8d8beaeab84f7d1a2f35fc",
+    "deploy_sha256": "80d6d2e668948d86e510350f7e183eacbf3c7fbb86a56d89e5b997632937e9aa"
+  },
+  {
+    "file": "js/location-connections.js",
+    "error": "unaudited_divergence",
+    "canonical_sha256": "8a170951b6af3cfba394811a936d9925357740c553944003964ae75548995078",
+    "deploy_sha256": "a99a2ba52da74903728eea8021039fe8b04e5738e9c0ee0ed1ef3f3dc5657699"
+  },
+  {
+    "file": "js/maps.js",
+    "error": "unaudited_divergence",
+    "canonical_sha256": "c1b26f199808437776de7258e7d5eaa7cb75edd1a08ba07eb167d3c2c0432a17",
+    "deploy_sha256": "f069b0620db1a2583f14473794de7c3cb3ce8baef1e0b13bfbb0cfaf6a68dfdc"
+  },
+  {
+    "file": "js/retro-authored.js",
+    "error": "unaudited_divergence",
+    "canonical_sha256": "e5c028474db7a5e60988be86983a9ee9580ad328a9c98da5d5a0a43e8c0298e1",
+    "deploy_sha256": "6fbd134967e0d85e6ddc85a3984cf1c50482d1aafaba7587b22fac840d088327"
+  },
+  {
+    "file": "js/sheriffs-station-art.js",
+    "error": "unaudited_divergence",
+    "canonical_sha256": "650a26eb56b6f709ad2acca507db7509c9840d6e5ca26c5736357b882bfb19a5",
+    "deploy_sha256": "47a3b76d18f82e247af45b6eee5a6fbc68d66e4a8d72a39e808163492729698c"
+  },
+  {
+    "file": "js/sheriffs-station-exterior-art.js",
+    "error": "canonical_missing"
+  },
+  {
+    "file": "js/sheriffs-station-exterior-scene.js",
+    "error": "canonical_missing"
+  },
+  {
+    "file": "js/sheriffs-station-location-data.js",
+    "error": "canonical_missing"
+  },
+  {
+    "file": "js/sheriffs-station-production.js",
+    "error": "unaudited_divergence",
+    "canonical_sha256": "62b42452107a5bdfd11a56dcaa6eadd9b4c8d51b071b897b1a18e2cfee3de28a",
+    "deploy_sha256": "dab03d54d25008bcde30ea79c1ac38b4009386e7244c1aa8f8aba136458a577a"
+  },
+  {
+    "file": "js/sheriffs-station-scene.js",
+    "error": "unaudited_divergence",
+    "canonical_sha256": "e00cc708c3026f690a8395e95b9fec246b67fd9bf58c54c31e983618eab92497",
+    "deploy_sha256": "3fb8f86b1963072e6468911830f17d3ce62880a7e7f7def1dd70320a1c0b6902"
+  },
+  {
+    "file": "js/town-dusk.js",
+    "error": "canonical_missing"
+  },
+  {
+    "file": "js/world-catalog.js",
+    "error": "unaudited_divergence",
+    "canonical_sha256": "da3c46fe42b6363381d5a03bdab7c47945b0c8b1f632640c98ab21aa8a12308d",
+    "deploy_sha256": "574041e8bb336713cdf78810b378e5a4b4f87233040fa930a8b584625c0808c7"
+  }
+]
++ actual - expected
+
++ [
++   {
++     canonical_sha256: '64ad80db52040b64e724d360048d6de0339a053b5eda9921f5be47f7f3e31372',
++     deploy_sha256: 'ad8c9a146f6dca06208b1513a5e71d4e94aa908ce2abbae1ec1dd49cb99b521b',
++     error: 'unaudited_divergence',
++     file: 'index.html'
++   },
++   {
++     canonical_sha256: 'd3c4f0825ac2c0af69680d9f4185b789acaccb1b27fca455c9a768571f92cf16',
++     deploy_sha256: '58fe6b68246d882920838752c43224dd0cf139447d7d76cfc070c057b2dd12ad',
++     error: 'unaudited_divergence',
++     file: 'js/ambient-life-scenes.js'
++   },
++   {
++     canonical_sha256: '4e0dd32ec4df4ec71a3c11a74072fcb29b39fb6659a9f4bd860e74548020e0b4',
++     deploy_sha256: '2df5a767f61fcbf8adafa7abb5e340e18f644bdceac956e5b5dc9134f0d2bdde',
++     error: 'unaudited_divergence',
++     file: 'js/character-life-scenes.js'
++   },
++   {
++     canonical_sha256: 'daee86895b54b903bfbeb3d540d86b4049bea325325da082fe61098296f4165e',
++     deploy_sha256: '5a1ed970e28e16072dddb73290a0bc1ed76e79c0086906d426161503ca726cd6',
++     error: 'unaudited_divergence',
++     file: 'js/double-r-location-data.js'
++   },
++   {
++     canonical_sha256: '5cfacde5c53a5d43bd24ba9ee8b4203ce66a69de5623410e251a2d6bed5e171f',
++     deploy_sha256: 'd3b544a650afb9675c3f96bfd7f0c480a4aa58e6e7e1c8499d4919b310d8f1f4',
++     error: 'unaudited_divergence',
++     file: 'js/double-r-location-production.js'
++   },
++   {
++     canonical_sha256: 'ff8b7c67116852c3b91a1029864174d280050e7c2de4f734c349c6e489caa584',
++     deploy_sha256: 'de4e9931e3acb1b7d6e485ccd8eea66a32822fb7bdff241fd1b2a7a5a0b3847e',
++     error: 'unaudited_divergence',
++     file: 'js/environmental-inspect.js'
++   },
++   {
++     canonical_sha256: 'd0bbc3caa15f814ac91fbaea135f632ffa7781823f8d8beaeab84f7d1a2f35fc',
++     deploy_sha256: '80d6d2e668948d86e510350f7e183eacbf3c7fbb86a56d89e5b997632937e9aa',
++     error: 'unaudited_divergence',
++     file: 'js/glue.js'
++   },
++   {
++     canonical_sha256: '8a170951b6af3cfba394811a936d9925357740c553944003964ae75548995078',
++     deploy_sha256: 'a99a2ba52da74903728eea8021039fe8b04e5738e9c0ee0ed1ef3f3dc5657699',
++     error: 'unaudited_divergence',
++     file: 'js/location-connections.js'
++   },
++   {
++     canonical_sha256: 'c1b26f199808437776de7258e7d5eaa7cb75edd1a08ba07eb167d3c2c0432a17',
++     deploy_sha256: 'f069b0620db1a2583f14473794de7c3cb3ce8baef1e0b13bfbb0cfaf6a68dfdc',
++     error: 'unaudited_divergence',
++     file: 'js/maps.js'
++   },
++   {
++     canonical_sha256: 'e5c028474db7a5e60988be86983a9ee9580ad328a9c98da5d5a0a43e8c0298e1',
++     deploy_sha256: '6fbd134967e0d85e6ddc85a3984cf1c50482d1aafaba7587b22fac840d088327',
++     error: 'unaudited_divergence',
++     file: 'js/retro-authored.js'
++   },
++   {
++     canonical_sha256: '650a26eb56b6f709ad2acca507db7509c9840d6e5ca26c5736357b882bfb19a5',
++     deploy_sha256: '47a3b76d18f82e247af45b6eee5a6fbc68d66e4a8d72a39e808163492729698c',
++     error: 'unaudited_divergence',
++     file: 'js/sheriffs-station-art.js'
++   },
++   {
++     error: 'canonical_missing',
++     file: 'js/sheriffs-station-exterior-art.js'
++   },
++   {
++     error: 'canonical_missing',
++     file: 'js/sheriffs-station-exterior-scene.js'
++   },
++   {
++     error: 'canonical_missing',
++     file: 'js/sheriffs-station-location-data.js'
++   },
++   {
++     canonical_sha256: '62b42452107a5bdfd11a56dcaa6eadd9b4c8d51b071b897b1a18e2cfee3de28a',
++     deploy_sha256: 'dab03d54d25008bcde30ea79c1ac38b4009386e7244c1aa8f8aba136458a577a',
++     error: 'unaudited_divergence',
++     file: 'js/sheriffs-station-production.js'
++   },
++   {
++     canonical_sha256: 'e00cc708c3026f690a8395e95b9fec246b67fd9bf58c54c31e983618eab92497',
++     deploy_sha256: '3fb8f86b1963072e6468911830f17d3ce62880a7e7f7def1dd70320a1c0b6902',
++     error: 'unaudited_divergence',
++     file: 'js/sheriffs-station-scene.js'
++   },
++   {
++     error: 'canonical_missing',
++     file: 'js/town-dusk.js'
++   },
++   {
++     canonical_sha256: 'da3c46fe42b6363381d5a03bdab7c47945b0c8b1f632640c98ab21aa8a12308d',
++     deploy_sha256: '574041e8bb336713cdf78810b378e5a4b4f87233040fa930a8b584625c0808c7',
++     error: 'unaudited_divergence',
++     file: 'js/world-catalog.js'
++   }
++ ]
+- []
+
+    at Object.<anonymous> (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/test/canonical-sync.js:17:8)
+    at Module._compile (node:internal/modules/cjs/loader:1854:14)
+    at Object..js (node:internal/modules/cjs/loader:1985:10)
+    at Module.load (node:internal/modules/cjs/loader:1577:32)
+    at Module._load (node:internal/modules/cjs/loader:1379:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: [
+    {
+      file: 'index.html',
+      error: 'unaudited_divergence',
+      canonical_sha256: '64ad80db52040b64e724d360048d6de0339a053b5eda9921f5be47f7f3e31372',
+      deploy_sha256: 'ad8c9a146f6dca06208b1513a5e71d4e94aa908ce2abbae1ec1dd49cb99b521b'
+    },
+    {
+      file: 'js/ambient-life-scenes.js',
+      error: 'unaudited_divergence',
+      canonical_sha256: 'd3c4f0825ac2c0af69680d9f4185b789acaccb1b27fca455c9a768571f92cf16',
+      deploy_sha256: '58fe6b68246d882920838752c43224dd0cf139447d7d76cfc070c057b2dd12ad'
+    },
+    {
+      file: 'js/character-life-scenes.js',
+      error: 'unaudited_divergence',
+      canonical_sha256: '4e0dd32ec4df4ec71a3c11a74072fcb29b39fb6659a9f4bd860e74548020e0b4',
+      deploy_sha256: '2df5a767f61fcbf8adafa7abb5e340e18f644bdceac956e5b5dc9134f0d2bdde'
+    },
+    {
+      file: 'js/double-r-location-data.js',
+      error: 'unaudited_divergence',
+      canonical_sha256: 'daee86895b54b903bfbeb3d540d86b4049bea325325da082fe61098296f4165e',
+      deploy_sha256: '5a1ed970e28e16072dddb73290a0bc1ed76e79c0086906d426161503ca726cd6'
+    },
+    {
+      file: 'js/double-r-location-production.js',
+      error: 'unaudited_divergence',
+      canonical_sha256: '5cfacde5c53a5d43bd24ba9ee8b4203ce66a69de5623410e251a2d6bed5e171f',
+      deploy_sha256: 'd3b544a650afb9675c3f96bfd7f0c480a4aa58e6e7e1c8499d4919b310d8f1f4'
+    },
+    {
+      file: 'js/environmental-inspect.js',
+      error: 'unaudited_divergence',
+      canonical_sha256: 'ff8b7c67116852c3b91a1029864174d280050e7c2de4f734c349c6e489caa584',
+      deploy_sha256: 'de4e9931e3acb1b7d6e485ccd8eea66a32822fb7bdff241fd1b2a7a5a0b3847e'
+    },
+    {
+      file: 'js/glue.js',
+      error: 'unaudited_divergence',
+      canonical_sha256: 'd0bbc3caa15f814ac91fbaea135f632ffa7781823f8d8beaeab84f7d1a2f35fc',
+      deploy_sha256: '80d6d2e668948d86e510350f7e183eacbf3c7fbb86a56d89e5b997632937e9aa'
+    },
+    {
+      file: 'js/location-connections.js',
+      error: 'unaudited_divergence',
+      canonical_sha256: '8a170951b6af3cfba394811a936d9925357740c553944003964ae75548995078',
+      deploy_sha256: 'a99a2ba52da74903728eea8021039fe8b04e5738e9c0ee0ed1ef3f3dc5657699'
+    },
+    {
+      file: 'js/maps.js',
+      error: 'unaudited_divergence',
+      canonical_sha256: 'c1b26f199808437776de7258e7d5eaa7cb75edd1a08ba07eb167d3c2c0432a17',
+      deploy_sha256: 'f069b0620db1a2583f14473794de7c3cb3ce8baef1e0b13bfbb0cfaf6a68dfdc'
+    },
+    {
+      file: 'js/retro-authored.js',
+      error: 'unaudited_divergence',
+      canonical_sha256: 'e5c028474db7a5e60988be86983a9ee9580ad328a9c98da5d5a0a43e8c0298e1',
+      deploy_sha256: '6fbd134967e0d85e6ddc85a3984cf1c50482d1aafaba7587b22fac840d088327'
+    },
+    {
+      file: 'js/sheriffs-station-art.js',
+      error: 'unaudited_divergence',
+      canonical_sha256: '650a26eb56b6f709ad2acca507db7509c9840d6e5ca26c5736357b882bfb19a5',
+      deploy_sha256: '47a3b76d18f82e247af45b6eee5a6fbc68d66e4a8d72a39e808163492729698c'
+    },
+    {
+      file: 'js/sheriffs-station-exterior-art.js',
+      error: 'canonical_missing'
+    },
+    {
+      file: 'js/sheriffs-station-exterior-scene.js',
+      error: 'canonical_missing'
+    },
+    {
+      file: 'js/sheriffs-station-location-data.js',
+      error: 'canonical_missing'
+    },
+    {
+      file: 'js/sheriffs-station-production.js',
+      error: 'unaudited_divergence',
+      canonical_sha256: '62b42452107a5bdfd11a56dcaa6eadd9b4c8d51b071b897b1a18e2cfee3de28a',
+      deploy_sha256: 'dab03d54d25008bcde30ea79c1ac38b4009386e7244c1aa8f8aba136458a577a'
+    },
+    {
+      file: 'js/sheriffs-station-scene.js',
+      error: 'unaudited_divergence',
+      canonical_sha256: 'e00cc708c3026f690a8395e95b9fec246b67fd9bf58c54c31e983618eab92497',
+      deploy_sha256: '3fb8f86b1963072e6468911830f17d3ce62880a7e7f7def1dd70320a1c0b6902'
+    },
+    { file: 'js/town-dusk.js', error: 'canonical_missing' },
+    {
+      file: 'js/world-catalog.js',
+      error: 'unaudited_divergence',
+      canonical_sha256: 'da3c46fe42b6363381d5a03bdab7c47945b0c8b1f632640c98ab21aa8a12308d',
+      deploy_sha256: '574041e8bb336713cdf78810b378e5a4b4f87233040fa930a8b584625c0808c7'
+    }
+  ],
+  expected: [],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.16.0
+EXIT:1
+=== test/cast-sprite-sheet.js ===
+CAST-SPRITE-PASS 36/36 — legacy asset integrity and HeartGold runtime verified
+EXIT:0
+=== test/character-activity.js ===
+CHARACTER-ACTIVITY-PASS seeded clocks, distinct starts, preview, dialogue cancellation, pause, disable, workstation and map guards
+EXIT:0
+=== test/character-life.js ===
+/Users/ebuccelli/Code/solo/projects/twin-peaks-game/js/sheriffs-station-production.js:17
+  G.EnvironmentReactions.register('sheriff', [{
+                         ^
+
+TypeError: Cannot read properties of undefined (reading 'register')
+    at /Users/ebuccelli/Code/solo/projects/twin-peaks-game/js/sheriffs-station-production.js:17:26
+    at Object.<anonymous> (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/js/sheriffs-station-production.js:27:2)
+    at Module._compile (node:internal/modules/cjs/loader:1854:14)
+    at Object..js (node:internal/modules/cjs/loader:1985:10)
+    at Module.load (node:internal/modules/cjs/loader:1577:32)
+    at Module._load (node:internal/modules/cjs/loader:1379:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.require (node:internal/modules/cjs/loader:1600:12)
+    at require (node:internal/modules/helpers:153:16)
+    at load (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/test/character-life.js:67:24)
+
+Node.js v24.16.0
+EXIT:1
+=== test/character-quality.js ===
+ok - 24 character profiles, articulated rig, dialogue two-shot
+EXIT:0
+=== test/character-runtime-contract.js ===
+CHARACTER-RUNTIME-PASS — heartgold-atlas-r116, 24 actors, cast authored R128
+EXIT:0
+=== test/choice-prompt-dedup.js ===
+CHOICE-PROMPT-DEDUP-PASS 11/11
+EXIT:0
+=== test/choice-prompts.js ===
+CHOICE-PROMPTS-PASS 12/12
+EXIT:0
+=== test/classic-object-grounding.js ===
+# corpus oggetti classici
+  ok - registro oggetti authored non vuoto
+  ok - landmark_waterfall: dialogo esistente (town@1,0)
+  ok - landmark_waterfall:first[0] senza intenzione invisibile: "Le cascate dietro il Great Northern. L'acqua cade come un respiro lungo, bianca e fredda."
+  ok - landmark_waterfall:first[0] non riduce persone a resti corporei
+  ok - landmark_waterfall:first[0] senza cinismo hard-boiled
+  ok - landmark_waterfall:first[1] senza intenzione invisibile: "Laura fu vista qui, l'ultimo pomeriggio. L'acqua continua a cadere; il tempo dell'alibi, invece, si può misurare."
+  ok - landmark_waterfall:first[1] non riduce persone a resti corporei
+  ok - landmark_waterfall:first[1] senza cinismo hard-boiled
+  ok - landmark_cemetery: dialogo esistente (town@48,21)
+  ok - landmark_cemetery:first[0] senza intenzione invisibile: "Accanto alla cappella, una fotografia di Laura è circondata da fiori e biglietti."
+  ok - landmark_cemetery:first[0] non riduce persone a resti corporei
+  ok - landmark_cemetery:first[0] senza cinismo hard-boiled
+  ok - landmark_cemetery:first[1] senza intenzione invisibile: "Laura Palmer, diciassette anni. Segno le date nel fascicolo. Non ridurrò una vita a quelle date: nella foto ride con la torta."
+  ok - landmark_cemetery:first[1] non riduce persone a resti corporei
+  ok - landmark_cemetery:first[1] senza cinismo hard-boiled
+  ok - landmark_tracks_vagone: dialogo esistente (town@53,1)
+  ok - landmark_tracks_vagone:first[0] senza intenzione invisibile: "Il vagone è oltre la curva dei binari. Adesso posso controllare il luogo descritto da James."
+  ok - landmark_tracks_vagone:first[0] non riduce persone a resti corporei
+  ok - landmark_tracks_vagone:first[0] senza cinismo hard-boiled
+  ok - landmark_tracks_route: dialogo esistente (town@53,1)
+  ok - landmark_tracks_route:first[0] senza intenzione invisibile: "James ha indicato l'est; il ciondolo dice perché la sua memoria conta."
+  ok - landmark_tracks_route:first[0] non riduce persone a resti corporei
+  ok - landmark_tracks_route:first[0] senza cinismo hard-boiled
+  ok - landmark_tracks_route:first[1] senza intenzione invisibile: "Proseguo a est lungo i binari."
+  ok - landmark_tracks_route:first[1] non riduce persone a resti corporei
+  ok - landmark_tracks_route:first[1] senza cinismo hard-boiled
+  ok - landmark_tracks: dialogo esistente (town@53,1)
+  ok - landmark_tracks:first[0] senza intenzione invisibile: "I binari tagliano il paese verso est, oltre il confine."
+  ok - landmark_tracks:first[0] non riduce persone a resti corporei
+  ok - landmark_tracks:first[0] senza cinismo hard-boiled
+  ok - landmark_tracks:first[1] senza intenzione invisibile: "Segno est. Prima voglio sapere chi usa questi binari."
+  ok - landmark_tracks:first[1] non riduce persone a resti corporei
+  ok - landmark_tracks:first[1] senza cinismo hard-boiled
+  ok - sign_town: dialogo esistente (town@30,30, town@30,30)
+  ok - sign_town:first[0] senza intenzione invisibile: ""Benvenuti a Twin Peaks. Popolazione: 51.201"."
+  ok - sign_town:first[0] non riduce persone a resti corporei
+  ok - sign_town:first[0] senza cinismo hard-boiled
+  ok - sign_town:first[1] senza intenzione invisibile: "Cinquantunomiladuecentuno. Una cifra così precisa merita una domanda semplice: chi continua a contarli?"
+  ok - sign_town:first[1] non riduce persone a resti corporei
+  ok - sign_town:first[1] senza cinismo hard-boiled
+  ok - lago_dopo: dialogo esistente (town@15,28)
+  ok - lago_dopo:first[0] senza intenzione invisibile: "L'acqua è tornata immobile. Io no."
+  ok - lago_dopo:first[0] non riduce persone a resti corporei
+  ok - lago_dopo:first[0] senza cinismo hard-boiled
+  ok - lago_maddy: dialogo esistente (town@15,28)
+  ok - lago_maddy:first[0] senza intenzione invisibile: "Qualcosa galleggia tra i giunchi. Plastica trasparente. La stessa del 24 febbraio."
+  ok - lago_maddy:first[0] non riduce persone a resti corporei
+  ok - lago_maddy:first[0] senza cinismo hard-boiled
+  ok - lago_maddy:first[1] senza intenzione invisibile: "Non guardo oltre il necessario. Gli agenti della scientifica coprono, sollevano, misurano."
+  ok - lago_maddy:first[1] non riduce persone a resti corporei
+  ok - lago_maddy:first[1] senza cinismo hard-boiled
+  ok - lago_maddy:first[2] senza intenzione invisibile: "Maddy Ferguson. Con due D."
+  ok - lago_maddy:first[2] non riduce persone a resti corporei
+  ok - lago_maddy:first[2] senza cinismo hard-boiled
+  ok - lago_maddy:first[3] senza intenzione invisibile: "Sotto l'unghia: una lettera. La "O"."
+  ok - lago_maddy:first[3] non riduce persone a resti corporei
+  ok - lago_maddy:first[3] senza cinismo hard-boiled
+  ok - lago_maddy:first[4] senza intenzione invisibile: "R, poi O. Potrebbe essere l'inizio di una firma. Per ora è un'ipotesi, non un nome né un'identità."
+  ok - lago_maddy:first[4] non riduce persone a resti corporei
+  ok - lago_maddy:first[4] senza cinismo hard-boiled
+  ok - lago_sguardo: dialogo esistente (town@15,28)
+  ok - lago_sguardo:first[0] senza intenzione invisibile: "L'acqua è immobile. In lontananza, il fumo della segheria sale dritto nel cielo."
+  ok - lago_sguardo:first[0] non riduce persone a resti corporei
+  ok - lago_sguardo:first[0] senza cinismo hard-boiled
+  ok - lago_sguardo:first[1] senza intenzione invisibile: "L'acqua non si muove. Quel fumo sì: almeno uno dei due accetta di indicare il vento."
+  ok - lago_sguardo:first[1] non riduce persone a resti corporei
+  ok - lago_sguardo:first[1] senza cinismo hard-boiled
+  ok - tomba_laura: dialogo esistente (town@50,22)
+  ok - tomba_laura:first[0] senza intenzione invisibile: "Una foto di Laura è fissata a un leggio della cappella. Sotto: "LAURA PALMER, 1972-1989"."
+  ok - tomba_laura:first[0] non riduce persone a resti corporei
+  ok - tomba_laura:first[0] senza cinismo hard-boiled
+  ok - tomba_laura:first[1] senza intenzione invisibile: "Qualcuno ha lasciato una rosa nel bicchiere dell'acqua. Non c'è biglietto."
+  ok - tomba_laura:first[1] non riduce persone a resti corporei
+  ok - tomba_laura:first[1] senza cinismo hard-boiled
+  ok - tomba_laura:first[2] senza intenzione invisibile: "Tre biglietti ricordano la torta, i pasti a domicilio e una risata al picnic. Trascrivo i nomi e lascio la rosa dov'è."
+  ok - tomba_laura:first[2] non riduce persone a resti corporei
+  ok - tomba_laura:first[2] senza cinismo hard-boiled
+  ok - tomba_laura:again[0] senza intenzione invisibile: "La rosa è nel bicchiere. I tre biglietti sono registrati; non sposto altro."
+  ok - tomba_laura:again[0] non riduce persone a resti corporei
+  ok - tomba_laura:again[0] senza cinismo hard-boiled
+  ok - laura_room: dialogo esistente (palmer@6,1)
+  ok - laura_room:first[0] senza intenzione invisibile: "La stanza di Laura. Ordinata. Troppo ordinata. Cerco meglio..."
+  ok - laura_room:first[0] non riduce persone a resti corporei
+  ok - laura_room:first[0] senza cinismo hard-boiled
+  ok - laura_room:first[1] senza intenzione invisibile: "Sotto il cuscino: un ciondolo a forma di mezzo cuore. Qualcuno conserva l'altra metà."
+  ok - laura_room:first[1] non riduce persone a resti corporei
+  ok - laura_room:first[1] senza cinismo hard-boiled
+  ok - laura_room:first[2] senza intenzione invisibile: "La radio di Cooper gracchia. È Andy, dalla centrale."
+  ok - laura_room:first[2] non riduce persone a resti corporei
+  ok - laura_room:first[2] senza cinismo hard-boiled
+  ok - laura_room:first[3] senza intenzione invisibile: "Agente, il medico legale ha trovato carta sotto un'unghia di Laura: un frammento della lettera R."
+  ok - laura_room:first[3] non riduce persone a resti corporei
+  ok - laura_room:first[3] senza cinismo hard-boiled
+  ok - laura_room:again[0] senza intenzione invisibile: "Non c'è altro qui. Solo il silenzio di una stanza che non ha più futuro."
+  ok - laura_room:again[0] non riduce persone a resti corporei
+  ok - laura_room:again[0] senza cinismo hard-boiled
+  ok - specchio_dopo: dialogo esistente (hotel_gn@15,1)
+  ok - specchio_dopo:first[0] senza intenzione invisibile: "Lo specchio riflette solo la stanza. Ma l'aria... vibra ancora."
+  ok - specchio_dopo:first[0] non riduce persone a resti corporei
+  ok - specchio_dopo:first[0] senza cinismo hard-boiled
+  ok - specchio_dopo:first[1] senza intenzione invisibile: "Il riflesso adesso segue ogni movimento. Provo tre volte; il ritardo non torna."
+  ok - specchio_dopo:first[1] non riduce persone a resti corporei
+  ok - specchio_dopo:first[1] senza cinismo hard-boiled
+  ok - gigante1_dlg: dialogo esistente (hotel_gn@15,1)
+  ok - gigante1_dlg:first[0] senza intenzione invisibile: "Lo specchio vibra. La stanza si fa fredda. Un'ombra alta prende forma nel riflesso."
+  ok - gigante1_dlg:first[0] non riduce persone a resti corporei
+  ok - gigante1_dlg:first[0] senza cinismo hard-boiled
+  ok - gigante1_dlg:first[1] senza intenzione invisibile: "Mi perdoni l'intrusione. Le dirò tre cose."
+  ok - gigante1_dlg:first[1] non riduce persone a resti corporei
+  ok - gigante1_dlg:first[1] senza cinismo hard-boiled
+  ok - gigante1_dlg:first[2] senza intenzione invisibile: "È successo di nuovo. E accadrà ancora."
+  ok - gigante1_dlg:first[2] non riduce persone a resti corporei
+  ok - gigante1_dlg:first[2] senza cinismo hard-boiled
+  ok - gigante1_dlg:first[3] senza intenzione invisibile: "I gufi non sono ciò che sembrano."
+  ok - gigante1_dlg:first[3] non riduce persone a resti corporei
+  ok - gigante1_dlg:first[3] senza cinismo hard-boiled
+  ok - gigante1_dlg:first[4] senza intenzione invisibile: "Senza sostanze chimiche, lui torna."
+  ok - gigante1_dlg:first[4] non riduce persone a resti corporei
+  ok - gigante1_dlg:first[4] senza cinismo hard-boiled
+  ok - gigante1_dlg:first[5] senza intenzione invisibile: "Questo le apparterrà quando sarà vero."
+  ok - gigante1_dlg:first[5] non riduce persone a resti corporei
+  ok - gigante1_dlg:first[5] senza cinismo hard-boiled
+  ok - gigante1_dlg:first[6] senza intenzione invisibile: "Tre avvertimenti, nessuna istruzione. Comincerò dai gufi: almeno lasciano tracce."
+  ok - gigante1_dlg:first[6] non riduce persone a resti corporei
+  ok - gigante1_dlg:first[6] senza cinismo hard-boiled
+  ok - specchio315: dialogo esistente (hotel_gn@15,1)
+  ok - specchio315:first[0] senza intenzione invisibile: "Uno specchio ovale sul comò. Il riflesso sembra restare un istante di troppo."
+  ok - specchio315:first[0] non riduce persone a resti corporei
+  ok - specchio315:first[0] senza cinismo hard-boiled
+  ok - specchio315:first[1] senza intenzione invisibile: "Il riflesso arriva tardi. Una frazione di secondo, ma abbastanza da farmi contare due volte."
+  ok - specchio315:first[1] non riduce persone a resti corporei
+  ok - specchio315:first[1] senza cinismo hard-boiled
+  ok - ronette_letto: dialogo esistente (hospital@2,1)
+  ok - ronette_letto:first[0] senza intenzione invisibile: "Ronette Pulaski. In coma. Il monitor scandisce un respiro incerto."
+  ok - ronette_letto:first[0] non riduce persone a resti corporei
+  ok - ronette_letto:first[0] senza cinismo hard-boiled
+  ok - ronette_letto:first[1] senza intenzione invisibile: "Si agita, improvvisamente. Le labbra si muovono, un sussurro..."
+  ok - ronette_letto:first[1] non riduce persone a resti corporei
+  ok - ronette_letto:first[1] senza cinismo hard-boiled
+  ok - ronette_letto:first[2] senza intenzione invisibile: "...BOB... BOB!"
+  ok - ronette_letto:first[2] non riduce persone a resti corporei
+  ok - ronette_letto:first[2] senza cinismo hard-boiled
+  ok - ronette_letto:first[3] senza intenzione invisibile: "Signorina Pulaski, ha detto un nome. Registro il momento e il battito; non presumo ancora cosa ricordi."
+  ok - ronette_letto:first[3] non riduce persone a resti corporei
+  ok - ronette_letto:first[3] senza cinismo hard-boiled
+  ok - ronette_letto:again[0] senza intenzione invisibile: "Dorme. Le dita si muovono, come se scrivesse."
+  ok - ronette_letto:again[0] non riduce persone a resti corporei
+  ok - ronette_letto:again[0] senza cinismo hard-boiled
+  ok - ronette_letto:again[1] senza intenzione invisibile: "Le dita ripetono un gesto. Non lo chiamerò messaggio finché non saprò leggerlo."
+  ok - ronette_letto:again[1] non riduce persone a resti corporei
+  ok - ronette_letto:again[1] senza cinismo hard-boiled
+  ok - olio: dialogo esistente (woods@14,12)
+  ok - olio:first[0] senza intenzione invisibile: "Una pozza scura in mezzo al cerchio di sicomori. Olio di motore... bruciato."
+  ok - olio:first[0] non riduce persone a resti corporei
+  ok - olio:first[0] senza cinismo hard-boiled
+  ok - olio:first[1] senza intenzione invisibile: "Olio bruciato. Prelevo un campione."
+  ok - olio:first[1] non riduce persone a resti corporei
+  ok - olio:first[1] senza cinismo hard-boiled
+  ok - sign_grove: dialogo esistente (woods@11,16)
+  ok - sign_grove:first[0] senza intenzione invisibile: ""GLASTONBURY GROVE". Dodici sicomori in cerchio, inciso nel legno."
+  ok - sign_grove:first[0] non riduce persone a resti corporei
+  ok - sign_grove:first[0] senza cinismo hard-boiled
+  ok - sign_grove:first[1] senza intenzione invisibile: "Glastonbury, come la tomba di Re Artù. Dodici sicomori e nessun segno sulla mappa: conto entrambi."
+  ok - sign_grove:first[1] non riduce persone a resti corporei
+  ok - sign_grove:first[1] senza cinismo hard-boiled
+  ok - sign_ponte: dialogo esistente (traincar@5,6)
+  ok - sign_ponte:first[0] senza intenzione invisibile: "Un vecchio ponticello di legno, accanto al sentiero."
+  ok - sign_ponte:first[0] non riduce persone a resti corporei
+  ok - sign_ponte:first[0] senza cinismo hard-boiled
+  ok - sign_ponte:first[1] senza intenzione invisibile: "Qui hanno trovato Ronette Pulaski, la notte del delitto: errante, insanguinata, muta."
+  ok - sign_ponte:first[1] non riduce persone a resti corporei
+  ok - sign_ponte:first[1] senza cinismo hard-boiled
+  ok - sign_oej: dialogo esistente (traincar@20,2)
+  ok - sign_oej:first[0] senza intenzione invisibile: ""ONE EYED JACKS — oltre il confine". Una freccia indica il sentiero a nord."
+  ok - sign_oej:first[0] non riduce persone a resti corporei
+  ok - sign_oej:first[0] senza cinismo hard-boiled
+  ok - sign_oej:first[1] senza intenzione invisibile: "Un casinò clandestino oltre la linea di stato. La freccia conosce la giurisdizione meglio del cartello."
+  ok - sign_oej:first[1] non riduce persone a resti corporei
+  ok - sign_oej:first[1] senza cinismo hard-boiled
+  ok - mucchio_terra: dialogo esistente (traincar@10,4)
+  ok - mucchio_terra:first[0] senza intenzione invisibile: "Un mucchio di terra smossa, qui nel vagone. Qualcuno ha scavato, di recente."
+  ok - mucchio_terra:first[0] non riduce persone a resti corporei
+  ok - mucchio_terra:first[0] senza cinismo hard-boiled
+  ok - mucchio_terra:first[1] senza intenzione invisibile: "Tra la terra, un brandello di carta strappata da un giornale."
+  ok - mucchio_terra:first[1] non riduce persone a resti corporei
+  ok - mucchio_terra:first[1] senza cinismo hard-boiled
+  ok - mucchio_terra:first[2] senza intenzione invisibile: "Vi è scritto, a mano: "FUOCO CAMMINA CON ME". Macchie scure sui bordi."
+  ok - mucchio_terra:first[2] non riduce persone a resti corporei
+  ok - mucchio_terra:first[2] senza cinismo hard-boiled
+  ok - mucchio_terra:first[3] senza intenzione invisibile: "Sembra sangue. Lo sigillo e lascio che sia la scientifica a dargli un nome."
+  ok - mucchio_terra:first[3] non riduce persone a resti corporei
+  ok - mucchio_terra:first[3] senza cinismo hard-boiled
+  ok - mucchio_terra:again[0] senza intenzione invisibile: "Non c'è altro, sotto la terra smossa."
+  ok - mucchio_terra:again[0] non riduce persone a resti corporei
+  ok - mucchio_terra:again[0] senza cinismo hard-boiled
+  ok - anello_interact: dialogo esistente (traincar@13,5)
+  ok - anello_interact:first[0] senza intenzione invisibile: "Un'asse del pavimento cede sotto il mio peso. Sotto, qualcosa luccica."
+  ok - anello_interact:first[0] non riduce persone a resti corporei
+  ok - anello_interact:first[0] senza cinismo hard-boiled
+  ok - anello_interact:first[1] senza intenzione invisibile: "Un anello d'oro giace piatto sotto l'asse. Sembra il monile di Laura Palmer."
+  ok - anello_interact:first[1] non riduce persone a resti corporei
+  ok - anello_interact:first[1] senza cinismo hard-boiled
+  ok - anello_interact:first[2] senza intenzione invisibile: "È quasi al centro del vano; polvere interrotta intorno, nessuna traccia di rotolamento. Potrebbe essere stato posato."
+  ok - anello_interact:first[2] non riduce persone a resti corporei
+  ok - anello_interact:first[2] senza cinismo hard-boiled
+  ok - anello_interact:again[0] senza intenzione invisibile: "Il vano sotto l'asse è vuoto. Posizione e polvere sono registrate; qui non c'è altro."
+  ok - anello_interact:again[0] non riduce persone a resti corporei
+  ok - anello_interact:again[0] senza cinismo hard-boiled
+  ok - palco_dopo: dialogo esistente (roadhouse@8,1)
+  ok - palco_dopo:first[0] senza intenzione invisibile: "Il palco è vuoto. L'eco no."
+  ok - palco_dopo:first[0] non riduce persone a resti corporei
+  ok - palco_dopo:first[0] senza cinismo hard-boiled
+  ok - palco_dopo:first[1] senza intenzione invisibile: "Il palco è vuoto. Cronometro e pubblico concordano; ciò che ho visto resta fuori dal verbale, per ora."
+  ok - palco_dopo:first[1] non riduce persone a resti corporei
+  ok - palco_dopo:first[1] senza cinismo hard-boiled
+  ok - gigante2_dlg: dialogo esistente (roadhouse@8,1)
+  ok - gigante2_dlg:first[0] senza intenzione invisibile: "La musica si interrompe. Il palco si illumina, vuoto... poi non più vuoto."
+  ok - gigante2_dlg:first[0] non riduce persone a resti corporei
+  ok - gigante2_dlg:first[0] senza cinismo hard-boiled
+  ok - gigante2_dlg:first[1] senza intenzione invisibile: "Sta accadendo di nuovo."
+  ok - gigante2_dlg:first[1] non riduce persone a resti corporei
+  ok - gigante2_dlg:first[1] senza cinismo hard-boiled
+  ok - gigante2_dlg:first[2] senza intenzione invisibile: "Sta accadendo... DI NUOVO."
+  ok - gigante2_dlg:first[2] non riduce persone a resti corporei
+  ok - gigante2_dlg:first[2] senza cinismo hard-boiled
+  ok - gigante2_dlg:first[3] senza intenzione invisibile: "Il Gigante svanisce in un lampo bianco."
+  ok - gigante2_dlg:first[3] non riduce persone a resti corporei
+  ok - gigante2_dlg:first[3] senza cinismo hard-boiled
+  ok - gigante2_dlg:first[4] senza intenzione invisibile: "Diane. Casa Palmer. SUBITO."
+  ok - gigante2_dlg:first[4] non riduce persone a resti corporei
+  ok - gigante2_dlg:first[4] senza cinismo hard-boiled
+# cimitero: Laura resta persona
+  ok - cimitero contiene battuta Cooper
+  ok - cimitero nomina Laura, non un corpo anonimo
+  ok - battuta resta specifica al cimitero
+  ok - battuta conserva età e umanità di Laura
+  ok - metodo di Cooper rifiuta riduzione investigativa
+  ok - cimitero supera guardia tono/grounding
+# anello: osservazione e inferenza separate
+  ok - anello conserva first/repeat completi
+  ok - pagina oggetto descrive posizione visibile
+  ok - pagina oggetto non attribuisce gesto o intenzione
+  ok - pagina successiva espone segnali osservabili
+  ok - inferenza sul posizionamento resta provvisoria
+  ok - repeat non introduce intenzione retroattiva
+# Enter reale: prima visita e repeat
+  ok - primo Enter apre first anello
+  ok - first runtime resta grounded
+  ok - prima visita acquisisce anello
+  ok - secondo Enter apre repeat anello
+  ok - repeat runtime resta grounded
+classic-object-grounding: PASS (248 checks; 23 dialoghi oggetto)
+EXIT:0
+=== test/coldstage-config.js ===
+Coldstage routing: all checks passed ✔
+EXIT:0
+=== test/cooper-sprite-sheet.js ===
+COOPER-SPRITE-PASS 10/10
+EXIT:0
+=== test/dialogue-craft-regression.js ===
+# scene primo arco
+  ok - bobby: scena presente
+  ok - bobby: turni e numero pagine stabili
+  ok - bobby: testo entro limite UI di 129 caratteri
+  ok - bobby: conserva dettaglio concreto /Shelly/i
+  ok - bobby: conserva dettaglio concreto /guardi me/i
+  ok - bobby: conserva dettaglio concreto /dove si trovava/i
+  ok - bobby: l'NPC riprende il turno dopo la domanda di Cooper
+  ok - bobby: la contro-risposta protegge una propria agenda
+  ok - jacoby: scena presente
+  ok - jacoby: turni e numero pagine stabili
+  ok - jacoby: testo entro limite UI di 129 caratteri
+  ok - jacoby: conserva dettaglio concreto /cocco/i
+  ok - jacoby: conserva dettaglio concreto /penna/i
+  ok - jacoby: conserva dettaglio concreto /quale domanda/i
+  ok - jacoby: l'NPC riprende il turno dopo la domanda di Cooper
+  ok - jacoby: la contro-risposta protegge una propria agenda
+  ok - truman: scena presente
+  ok - truman: turni e numero pagine stabili
+  ok - truman: testo entro limite UI di 129 caratteri
+  ok - truman: conserva dettaglio concreto /diario/i
+  ok - truman: conserva dettaglio concreto /ROBERT/i
+  ok - truman: conserva dettaglio concreto /torno da lei per i fatti/i
+  ok - truman: contratto indizi invariato
+  ok - lucy: scena presente
+  ok - lucy: turni e numero pagine stabili
+  ok - lucy: testo entro limite UI di 129 caratteri
+  ok - lucy: conserva dettaglio concreto /centralino/i
+  ok - lucy: conserva dettaglio concreto /respiro/i
+  ok - lucy: conserva dettaglio concreto /orari/i
+  ok - andy: scena presente
+  ok - andy: turni e numero pagine stabili
+  ok - andy: testo entro limite UI di 129 caratteri
+  ok - andy: conserva dettaglio concreto /diciassette/i
+  ok - andy: conserva dettaglio concreto /rapporto/i
+  ok - andy: conserva dettaglio concreto /cinque minuti/i
+  ok - hawk: scena presente
+  ok - hawk: turni e numero pagine stabili
+  ok - hawk: testo entro limite UI di 129 caratteri
+  ok - hawk: conserva dettaglio concreto /animale/i
+  ok - hawk: conserva dettaglio concreto /passi/i
+  ok - hawk: conserva dettaglio concreto /dove ti sei fermato/i
+  ok - hawk: l'NPC riprende il turno dopo la domanda di Cooper
+  ok - hawk: la contro-risposta protegge una propria agenda
+  ok - sarah: scena presente
+  ok - sarah: turni e numero pagine stabili
+  ok - sarah: testo entro limite UI di 129 caratteri
+  ok - sarah: conserva dettaglio concreto /corridoio/i
+  ok - sarah: conserva dettaglio concreto /sorriso/i
+  ok - sarah: conserva dettaglio concreto /letto, la finestra o la porta/i
+  ok - sarah: l'NPC riprende il turno dopo la domanda di Cooper
+  ok - sarah: la contro-risposta protegge una propria agenda
+  ok - leland: scena presente
+  ok - leland: turni e numero pagine stabili
+  ok - leland: testo entro limite UI di 129 caratteri
+  ok - leland: conserva dettaglio concreto /ballo/i
+  ok - leland: conserva dettaglio concreto /salotto/i
+  ok - leland: conserva dettaglio concreto /che disco/i
+  ok - leland: l'NPC riprende il turno dopo la domanda di Cooper
+  ok - leland: la contro-risposta protegge una propria agenda
+  ok - benhorne_a2: scena presente
+  ok - benhorne_a2: turni e numero pagine stabili
+  ok - benhorne_a2: testo entro limite UI di 129 caratteri
+  ok - benhorne_a2: conserva dettaglio concreto /rispettabile/i
+  ok - benhorne_a2: conserva dettaglio concreto /casinò/i
+  ok - benhorne_a2: conserva dettaglio concreto /non avevo ancora chiesto/i
+  ok - audrey_a2: scena presente
+  ok - audrey_a2: turni e numero pagine stabili
+  ok - audrey_a2: testo entro limite UI di 129 caratteri
+  ok - audrey_a2: conserva dettaglio concreto /banco profumi/i
+  ok - audrey_a2: conserva dettaglio concreto /hall/i
+  ok - audrey_a2: conserva dettaglio concreto /chiamo suo padre/i
+  ok - audrey_a2: contratto flag invariato
+  ok - shelly: scena presente
+  ok - shelly: turni e numero pagine stabili
+  ok - shelly: testo entro limite UI di 129 caratteri
+  ok - shelly: conserva dettaglio concreto /con Laura/i
+  ok - shelly: conserva dettaglio concreto /controllava prima la porta/i
+  ok - shelly: conserva dettaglio concreto /prime parole/i
+  ok - shelly: l'NPC riprende il turno dopo la domanda di Cooper
+  ok - shelly: la contro-risposta protegge una propria agenda
+  ok - loglady: scena presente
+  ok - loglady: turni e numero pagine stabili
+  ok - loglady: testo entro limite UI di 129 caratteri
+  ok - loglady: conserva dettaglio concreto /ceppo/i
+  ok - loglady: conserva dettaglio concreto /fuoco/i
+  ok - loglady: conserva dettaglio concreto /dov'era lei/i
+  ok - loglady: l'NPC riprende il turno dopo la domanda di Cooper
+  ok - loglady: la contro-risposta protegge una propria agenda
+# ponti Atto 2-5
+  ok - truman_a2: ponte presente
+  ok - truman_a2: turni e numero pagine stabili
+  ok - truman_a2: testo entro limite UI di 129 caratteri
+  ok - truman_a2: conserva funzione drammatica /nome che non abbiamo/i
+  ok - truman_a2: conserva funzione drammatica /qualcosa che abbiamo/i
+  ok - truman_a2: conserva funzione drammatica /venditore di scarpe/i
+  ok - truman_atto3: ponte presente
+  ok - truman_atto3: turni e numero pagine stabili
+  ok - truman_atto3: testo entro limite UI di 129 caratteri
+  ok - truman_atto3: conserva funzione drammatica /due fatti/i
+  ok - truman_atto3: conserva funzione drammatica /e il luogo/i
+  ok - truman_atto3: conserva funzione drammatica /partiamo dalla scena/i
+  ok - truman_atto3: contratto flag invariato
+  ok - audrey_oej: ponte presente
+  ok - audrey_oej: turni e numero pagine stabili
+  ok - audrey_oej: testo entro limite UI di 129 caratteri
+  ok - audrey_oej: conserva funzione drammatica /registro del banco profumi/i
+  ok - audrey_oej: conserva funzione drammatica /dietro di me fino alla porta/i
+  ok - audrey_oej: conserva funzione drammatica /essere vista è il piano/i
+  ok - audrey_oej: contratto flag invariato
+  ok - truman_atto4: ponte presente
+  ok - truman_atto4: turni e numero pagine stabili
+  ok - truman_atto4: testo entro limite UI di 129 caratteri
+  ok - truman_atto4: conserva funzione drammatica /le credo/i
+  ok - truman_atto4: conserva funzione drammatica /facciamo qualcosa/i
+  ok - truman_atto4: conserva funzione drammatica /so dove metterlo/i
+  ok - truman_atto4: contratto flag invariato
+  ok - sarah_visione: ponte presente
+  ok - sarah_visione: turni e numero pagine stabili
+  ok - sarah_visione: testo entro limite UI di 129 caratteri
+  ok - sarah_visione: conserva funzione drammatica /sorriso/i
+  ok - sarah_visione: conserva funzione drammatica /io scrivo/i
+  ok - sarah_visione: conserva funzione drammatica /non deve difendersi/i
+  ok - sarah_visione: contratto flag invariato
+  ok - loglady_a4: ponte presente
+  ok - loglady_a4: turni e numero pagine stabili
+  ok - loglady_a4: testo entro limite UI di 129 caratteri
+  ok - loglady_a4: conserva funzione drammatica /luogo e ora/i
+  ok - loglady_a4: conserva funzione drammatica /ci sarò/i
+  ok - truman_atto5: ponte presente
+  ok - truman_atto5: turni e numero pagine stabili
+  ok - truman_atto5: testo entro limite UI di 129 caratteri
+  ok - truman_atto5: conserva funzione drammatica /ROBERT/i
+  ok - truman_atto5: conserva funzione drammatica /non li uniamo/i
+  ok - truman_atto5: conserva funzione drammatica /portiamo Leland qui/i
+  ok - truman_atto5: contratto flag invariato
+  ok - truman_wait5: ponte presente
+  ok - truman_wait5: turni e numero pagine stabili
+  ok - truman_wait5: testo entro limite UI di 129 caratteri
+  ok - truman_wait5: conserva funzione drammatica /prima Leland/i
+  ok - truman_wait5: conserva funzione drammatica /poi il bosco/i
+  ok - leland_interr: ponte presente
+  ok - leland_interr: turni e numero pagine stabili
+  ok - leland_interr: testo entro limite UI di 129 caratteri
+  ok - leland_interr: conserva funzione drammatica /dov'era lei/i
+  ok - leland_interr: conserva funzione drammatica /dall'infanzia/i
+  ok - leland_interr: conserva funzione drammatica /stesso volto/i
+  ok - leland_interr: contratto flag invariato
+  ok - bob_finale: ponte presente
+  ok - bob_finale: turni e numero pagine stabili
+  ok - bob_finale: testo entro limite UI di 129 caratteri
+  ok - bob_finale: conserva funzione drammatica /guanto/i
+  ok - bob_finale: conserva funzione drammatica /firma sotto le ammissioni/i
+  ok - bob_finale: conserva funzione drammatica /Leland Palmer/i
+# vecchie formule autoriali rimosse
+  ok - formula rimossa: "Shelly è una persona, non un alibi"
+  ok - formula rimossa: "Quale porta ha provato ad aprire"
+  ok - formula rimossa: "La sua precisione sarà più utile della paura"
+  ok - formula rimossa: "Il dolore non rende debole il rapporto"
+  ok - formula rimossa: "La visione è un dato, non una colpa"
+  ok - formula rimossa: "Il dolore ha un ritmo"
+  ok - formula rimossa: "Una difesa così precisa indica il punto da verificare"
+  ok - formula rimossa: "L’invisibilità non è un piano"
+  ok - formula rimossa: "L'invisibilità non è un piano"
+  ok - formula rimossa: "Quale dettaglio ricorda davvero, e quale ha aggiunto dopo"
+  ok - formula rimossa: "Il ceppo non è un testimone verificabile"
+  ok - formula rimossa: "la lista dei sospetti cresce più in fretta"
+  ok - formula rimossa: "Questo non è un gioco, per te"
+  ok - formula rimossa: "con lei succede sempre qualcosa di strano"
+  ok - formula rimossa: "il suo ceppo ha un ottimo senso della procedura"
+  ok - formula rimossa: "Domani chiudo questo cerchio"
+  ok - formula rimossa: "Una mano senza impronte è una vanteria"
+# Cooper agisce nella conversazione
+  ok - bobby: una contromossa Cooper leggibile
+  ok - bobby: battuta contiene domanda, ordine o pressione concreta
+  ok - jacoby: una contromossa Cooper leggibile
+  ok - jacoby: battuta contiene domanda, ordine o pressione concreta
+  ok - truman: una contromossa Cooper leggibile
+  ok - truman: battuta contiene domanda, ordine o pressione concreta
+  ok - lucy: una contromossa Cooper leggibile
+  ok - lucy: battuta contiene domanda, ordine o pressione concreta
+  ok - andy: una contromossa Cooper leggibile
+  ok - andy: battuta contiene domanda, ordine o pressione concreta
+  ok - hawk: una contromossa Cooper leggibile
+  ok - hawk: battuta contiene domanda, ordine o pressione concreta
+  ok - sarah: una contromossa Cooper leggibile
+  ok - sarah: battuta contiene domanda, ordine o pressione concreta
+  ok - leland: una contromossa Cooper leggibile
+  ok - leland: battuta contiene domanda, ordine o pressione concreta
+  ok - benhorne_a2: una contromossa Cooper leggibile
+  ok - benhorne_a2: battuta contiene domanda, ordine o pressione concreta
+  ok - audrey_a2: una contromossa Cooper leggibile
+  ok - audrey_a2: battuta contiene domanda, ordine o pressione concreta
+  ok - shelly: una contromossa Cooper leggibile
+  ok - shelly: battuta contiene domanda, ordine o pressione concreta
+  ok - loglady: una contromossa Cooper leggibile
+  ok - loglady: battuta contiene domanda, ordine o pressione concreta
+dialogue-craft-regression: PASS (193 checks; 12 scene, 10 ponti)
+EXIT:0
+=== test/dialogue-presentation.js ===
+ok - WebGL dialogue uses only HTML presentation
+EXIT:0
+=== test/diner-layout.js ===
+DINER-LAYOUT-PASS generated geometry, aisle, doors, NPC and shared painter translation
+EXIT:0
+=== test/double-r-exterior-native.js ===
+DOUBLE-R-EXTERIOR-NATIVE-PASS 18/18
+EXIT:0
+=== test/double-r-location-native.js ===
+DOUBLE-R-LOCATION-CONTROLLER-PASS demo round trip, save/reaction ledger and reset cancellation
+EXIT:0
+=== test/double-r-location.js ===
+/Users/ebuccelli/Code/solo/projects/twin-peaks-game/test/double-r-location.js:3
+  var G = window.GAME, E = G.Engine, scene = G.DoubleRExteriorScene, MAP = scene.mapId;
+          ^
+
+ReferenceError: window is not defined
+    at /Users/ebuccelli/Code/solo/projects/twin-peaks-game/test/double-r-location.js:3:11
+    at Object.<anonymous> (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/test/double-r-location.js:108:2)
+    at Module._compile (node:internal/modules/cjs/loader:1854:14)
+    at Object..js (node:internal/modules/cjs/loader:1985:10)
+    at Module.load (node:internal/modules/cjs/loader:1577:32)
+    at Module._load (node:internal/modules/cjs/loader:1379:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.16.0
+EXIT:1
+=== test/environment-entry.js ===
+ENVIRONMENT-ENTRY-PASS real movement to door, commit dispatch, reaction completion, no load-only events, no rollback events
+EXIT:0
+=== test/environment-life.js ===
+ENVIRONMENT-LIFE-PASS event matching, no random doors, coalescing, lifecycle, depth, partition, generic hotel reuse, sparse machine activity and external clock source
+EXIT:0
+=== test/environmental-interactions.js ===
+# registro
+  ok - archetipo solido "T" registrato
+  ok - archetipo solido "S" registrato
+  ok - archetipo solido "w" registrato
+  ok - archetipo solido "0" registrato
+  ok - archetipo solido "1" registrato
+  ok - archetipo solido "2" registrato
+  ok - archetipo solido "3" registrato
+  ok - archetipo solido "4" registrato
+  ok - archetipo solido "5" registrato
+  ok - archetipo solido "6" registrato
+  ok - archetipo solido "7" registrato
+  ok - archetipo solido "8" registrato
+  ok - archetipo solido "9" registrato
+  ok - archetipo solido "i" registrato
+  ok - archetipo solido "C" registrato
+  ok - archetipo solido "t" registrato
+  ok - archetipo solido "h" registrato
+  ok - archetipo solido "K" registrato
+  ok - archetipo solido "U" registrato
+  ok - archetipo solido "Y" registrato
+  ok - archetipo solido "R" registrato
+  ok - archetipo solido "M" registrato
+  ok - archetipo solido "v" registrato
+  ok - archetipo solido "G" registrato
+  ok - archetipo solido "L" registrato
+  ok - archetipo solido "P" registrato
+  ok - archetipo solido "B" registrato
+  ok - archetipo solido "F" registrato
+  ok - archetipo solido "A" registrato
+  ok - archetipo solido "H" registrato
+  ok - archetipo solido "E" registrato
+  ok - archetipo solido "n" registrato
+  ok - archetipo solido "q" registrato
+  ok - archetipo solido "V" registrato
+  ok - archetipo solido "J" registrato
+  ok - terreno passabile resta muto
+  ok - spazio fuori mappa resta muto
+  ok - transenna dinamica non usa fallback ambientale
+  ok - 80 dialoghi COOPER unici, <=129, senza effetti
+  ok - cadenza variata: 58 righe a una frase, 22 a due
+  ok - diversità R19K: ; 12, negazioni 6, astratti 1, cluster 2-frasi 10/30
+# copertura fisica
+  ok - tile "T" affrontabile coperta
+  ok - tile "S" affrontabile coperta
+  ok - tile "w" affrontabile coperta
+  ok - tile "0" affrontabile coperta
+  ok - tile "1" affrontabile coperta
+  ok - tile "2" affrontabile coperta
+  ok - tile "3" affrontabile coperta
+  ok - tile "4" affrontabile coperta
+  ok - tile "5" affrontabile coperta
+  ok - tile "6" affrontabile coperta
+  ok - tile "7" affrontabile coperta
+  ok - tile "8" affrontabile coperta
+  ok - tile "9" affrontabile coperta
+  ok - tile "i" affrontabile coperta
+  ok - tile "C" affrontabile coperta
+  ok - tile "t" affrontabile coperta
+  ok - tile "h" affrontabile coperta
+  ok - tile "K" affrontabile coperta
+  ok - tile "U" affrontabile coperta
+  ok - tile "Y" affrontabile coperta
+  ok - tile "R" affrontabile coperta
+  ok - tile "M" affrontabile coperta
+  ok - tile "G" affrontabile coperta
+  ok - tile "L" affrontabile coperta
+  ok - tile "P" affrontabile coperta
+  ok - tile "B" affrontabile coperta
+  ok - tile "F" affrontabile coperta
+  ok - tile "A" affrontabile coperta
+  ok - tile "H" affrontabile coperta
+  ok - tile "E" affrontabile coperta
+  ok - tile "n" affrontabile coperta
+  ok - tile "q" affrontabile coperta
+  ok - tile "V" affrontabile coperta
+  ok - tile "J" affrontabile coperta
+  ok - 1030/1030 tile solide affrontabili risolte
+  ok - scope verificato su ogni coordinata; linee condivise prive di geometria non garantita
+  ok - override di stato sceglie osservazione diversa
+  ok - scope override di stato verificato
+  ok - variante lapidi fondata su flag leland_morto
+  ok - variante vagone fondata su indizio anello
+  ok - variante letti fondata su flag ronette_bob
+  ok - override per coordinata vince
+  ok - override mappa+tile vince
+  ok - casa Palmer e Horne's hanno archetipi distinti
+  ok - tile C distingue palco da bancone Roadhouse
+# Invio reale
+  ok - Invio town:T apre env_town_evergreen senza mutare stato
+  ok - Invio town:0 apre env_mixed_use_shop senza mutare stato
+  ok - Invio town:1 apre env_sheriff_building senza mutare stato
+  ok - Invio town:7 apre env_bookhouse_building senza mutare stato
+  ok - Invio town:9 apre env_horne_department_store senza mutare stato
+  ok - Invio town:B apre env_bench senza mutare stato
+  ok - Invio diner:t apre env_diner_table senza mutare stato
+  ok - Invio redroom:R apre env_red_curtain senza mutare stato
+  ok - oggetto esplicito precede fallback per coordinata
+  ok - NPC precede fallback ambientale
+
+96 controlli ambientali superati.
+EXIT:0
+=== test/gen-m6-check.js ===
+2 controlli gen-M6 superati ✔ (deep-equal + determinismo)
+EXIT:0
+=== test/genmaps.js ===
+# town — invarianti (coordinate preesistenti)
+  ok invariato porta hotel
+  ok invariato porta palmer
+  ok invariato porta sceriffo
+  ok invariato porta diner
+  ok invariato transenna bosco
+  ok invariato cartello
+  ok invariato (calpestabile) spawn
+  ok corridoio cimitero
+  ok tomba di Laura
+  ok invariato (calpestabile) uscita est (vagone)
+  ok invariato (calpestabile) uscita est (vagone)
+  ok invariato lago
+  ok invariato (calpestabile) riva del lago (lago_riva)
+# town — raggiungibilita'
+  ok porta hotel
+  ok porta palmer
+  ok porta sceriffo
+  ok porta diner
+  ok transenna bosco
+  ok cartello
+  ok porta ospedale
+  ok porta roadhouse
+  ok riva del lago (lago_riva)
+  ok uscita est (vagone)
+  ok invariato (calpestabile) npc bobby
+  ok npc bobby
+  ok invariato (calpestabile) npc donna
+  ok npc donna
+  ok invariato (calpestabile) npc audrey
+  ok npc audrey
+  ok invariato (calpestabile) npc jacoby
+  ok npc jacoby
+# woods
+  ok porta redroom
+  ok uscita sud
+  ok olio
+  ok cartello grove
+--- town ---
+        'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTXTTTTT', // 0
+        'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTpTTTTT', // 1
+        'T.................................................p....T', // 2
+        'T....TTTTTTTTTT....TTTTTTTTTT........TTTTTTTTTT...p....T', // 3
+        'Tn...4444444444.....55555555.........3333333333...p.,..T', // 4
+        'T....4444444444.....55555555.........3333333333...p.n..T', // 5
+        'T....4444D44444.....555D5555.........33333D3333...p....T', // 6
+        'T.......ApA...........ApA............FFFFFpFFFF...p....T', // 7
+        'T........p.......n.....p.wFF..............p.......p....T', // 8
+        'T........p..........T..p.wFF77773333......p.......p..,.T', // 9
+        'T........p...,.........p.wFF77773333......p.......p....T', // 10
+        'T........p.............p.wFF77773333....,.p.......p....T', // 11
+        'T........p.............p.wFF77773333......p.......p....T', // 12
+        'T===L====pE=====L======p====L===========L=pE======p=L==T', // 13
+        'Trrrrrrrr--r--rrrrrrrrrrrwFF-rrrrrrrrrrrrr--rrrrrrrrrrrr', // 14
+        'Trrrrrrrr--r--rrrrrrrrrrrwFF-rrrrrrrrrrrrr--rrrrrrrrrrrr', // 15
+        'T=====P===L=======P===L==wFFFFF=P=L=========P=L========T', // 16
+        'T,....n..TTTTTTT.........wFFFFF........TTTTTTT.........T', // 17
+        'T.........11111..........wwwww.........2222222.........T', // 18
+        'T.........11111...........=rr=.........2222222..H......T', // 19
+        'T.........11D11,..........=rr=.........222D222.........T', // 20
+        'T.......FFFpppFFF.....n.T.=rr=...........ppp....TTTTTT.T', // 21
+        'T.,T..gggg.ppp...q........=rr=...........ppp....G.G.G..T', // 22
+        'T..gggg....ppp.,B.........=rr=n..........ppp...........T', // 23
+        'T..ggggT..n...n.A.........=rr=...................G.G.G.T', // 24
+        'T.......B............T....=rr=........n....gggg........T', // 25
+        'T...wwwwwwwwwwF...........=rr=.............,66666666...T', // 26
+        'T..,wwwwwwwwwwF...........=rr=.....T........66666666...T', // 27
+        'T..nwwwwwwwwwwF...........=rr=,.............666D6666...T', // 28
+        'T...wwwwwwwwwwF...........=rrB=A...............p......nT', // 29
+        'T...wwwwwwwwwwF..,T.......=rr=S=H..............p..T....T', // 30
+        'T...wwwwwwwwwwF...........=rr==B............,..........T', // 31
+        'T...,..............n......=rr=.........................T', // 32
+        'T.........................=rr=.,.......................T', // 33
+        'TTTTTTTTTTTTTTTTTTTTT.n..n.n...,..n.TTTTTTTTTTTTTTTTTTTT', // 34
+        'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT' // 35
+--- woods ---
+        'TTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 0
+        'TTTTTTTTTTT888888TTTTTTTTTTT', // 1
+        'TTTTTTTTTTT888888TTTTTTTTTTT', // 2
+        'TTTTTTTTTTq888888TTTTTTTTTTT', // 3
+        'TTTTTTTTTTT888D88TTTTTTTTTTT', // 4
+        'TTTTTTTTTggggpppggggTTTTTTTT', // 5
+        'TTTTTTTTTggggpppggqgTTTTTTTT', // 6
+        'TTTTTTTTTggggpppggggTTTTTTTT', // 7
+        'TTTTTTTTTTTgTpppggTTTTTTTTTT', // 8
+        'TTTTTTTTTTgggpYpgggTTTTTTTTT', // 9
+        'TTTTTTTTTTggYpppYggTTTTTTTTT', // 10
+        'TTTTTTTTTTgggooogggTTTTTTTTT', // 11
+        'TTTTTTTTTTgYooopgYgTTTTTTTTT', // 12
+        'TTTTTTTTTTgggpppgggTTTTTTTTT', // 13
+        'TTTTTTTTTTggYpppYggTTTTTTTTT', // 14
+        'TTTTTTTTTTgggpYpgggTTTTTTTTT', // 15
+        'TTTTTTTTTTTSggppTTTTTTTTTTTT', // 16
+        'TTTTTTTTTTTTTpppTTTTTTTTTTTT', // 17
+        'TTTTTTTTTTTTgpppTTTTTTTTTTTT', // 18
+        'TTTTTTTTTTTTgpppTTTTTTTTTTTT', // 19
+        'TTTTTTTTTTTgTpppngTTTTTTTTTT', // 20
+        'TTTTTTTTTTTTTTpTTTTTTTTTTTTT' // 21
+  ok diner access
+  ok diner access
+  ok diner access
+  ok diner access
+  ok diner access
+  ok diner access
+EXIT:0
+=== test/gold-tone-gates.js ===
+GBC-PALETTE-BANK-PASS 10/10
+EXIT:0
+=== test/graphic-pass-contract.js ===
+ok - visual matrix covers all 11 town building components
+ok - every visual capture starts on a walkable production tile
+ok - town tracks own visible rail art, walkable crossing and named capture
+ok - town forest stays world-locked across camera tile boundaries
+ok - town trees occlude actors by foot depth without foreground shadows
+ok - town trunks exist only inside complete macro trees
+ok - town houses stay world-locked across horizontal and vertical camera boundaries
+ok - arrival shop, cabin, mailbox and car art aligns with collision contact boxes
+ok - arrival south forest coverage agrees with T collision and open corridor
+ok - Red Room has continuous zigzag and curtains in every viewport
+ok - train car continuous shell, windows, wheels and rails are present
+ok - seven interior floor profiles are pixel-distinct
+ok - look-ahead is render-only and collision data stays byte-identical
+ok - desktop and mobile use the identical native actor scale
+
+GRAPHIC-PASS-CONTRACT-PASS 14/14
+EXIT:0
+=== test/heartgold-visual-contract.js ===
+{
+  "status": "pass",
+  "checks": {
+    "native_framebuffer_256x192": true,
+    "native_aspect_4x3": true,
+    "tile_collision_grid_unchanged": true,
+    "extended_tiles_have_camera_overdraw": true,
+    "forest_layout_is_world_stable": true,
+    "forest_culling_uses_runtime_viewport": true,
+    "heartgold_cast_is_production": true,
+    "cast_atlas_preloaded": true,
+    "engine_waits_for_cast": true,
+    "cast_frame_24px": true,
+    "four_phase_gait": true,
+    "runtime_contact_shadow": true,
+    "material_palette_83d3a7": true,
+    "material_palette_a7e2b9": true,
+    "material_palette_6baa91": true,
+    "material_palette_4e8067": true,
+    "material_palette_315a49": true,
+    "material_palette_e8d08f": true,
+    "material_palette_f3dfa8": true,
+    "material_palette_d6bc7d": true,
+    "material_palette_aa8e5c": true,
+    "material_palette_dfcb91": true,
+    "material_palette_ecdca9": true,
+    "material_palette_c5ac74": true,
+    "material_palette_917a54": true,
+    "exterior_palette_not_gbc_quantized": true,
+    "organic_road_intrusions": true,
+    "building_cast_shadows": true,
+    "building_landscape": true,
+    "cast_atlas_exists": true,
+    "cast_atlas_360x360": true,
+    "cast_inventory_24": true,
+    "cast_color_depth_12_to_16": true,
+    "cast_height_heartgold_range": true,
+    "cast_binary_alpha": true
+  },
+  "cast": {
+    "status": "pass",
+    "characters": 24,
+    "frames": 216,
+    "sheet": "72x72",
+    "atlas": "360x360",
+    "opaqueColorsPerFrame": {
+      "min": 12,
+      "max": 15
+    },
+    "visibleHeight": {
+      "min": 24,
+      "max": 24
+    },
+    "visibleWidth": {
+      "min": 13,
+      "max": 15
+    },
+    "stepAlphaDifference": {
+      "min": 12,
+      "max": 20
+    },
+    "footBaseline": {
+      "row": 23,
+      "matchingFrames": 216
+    },
+    "binaryAlpha": true,
+    "magentaPixels": 0,
+    "outputDir": "assets/sprites/cast-hg-24",
+    "castAtlas": "assets/sprites/cast-walkcycles-hg-24.png"
+  }
+}
+EXIT:0
+=== test/initial-spawn.js ===
+INITIAL-SPAWN-PASS 12/12
+EXIT:0
+=== test/interaction-voice.js ===
+# target classici attivabili con Enter
+  - NPC town:bobby -> bobby
+  - NPC town:donna -> donna
+  - NPC town:jacoby -> jacoby
+  - OBJ town:1,0 -> landmark_waterfall
+  - OBJ town:48,21 -> landmark_cemetery
+  - OBJ town:53,1 -> landmark_tracks_vagone, landmark_tracks_route, landmark_tracks
+  - OBJ town:30,30 -> sign_town
+  - OBJ town:15,28 -> lago_dopo, lago_maddy, lago_sguardo
+  - OBJ town:50,22 -> tomba_laura
+  - NPC sheriff:truman -> truman_fine, truman_wait5, truman_atto5, truman_wait4, truman_atto4, truman_wait3, truman_atto3, truman_a2, truman
+  - NPC sheriff:andy -> andy
+  - NPC sheriff:hawk -> hawk
+  - NPC sheriff:lucy -> lucy_a3, lucy
+  - NPC sheriff:leland -> leland_morte, leland_interr
+  - NPC palmer:sarah -> sarah_visione, sarah
+  - NPC palmer:leland -> leland_dopo, leland_dove, leland_a4, leland
+  - NPC palmer:maddy -> maddy_a4
+  - OBJ palmer:6,1 -> laura_room
+  - NPC hotel_gn:benhorne -> benhorne_a2
+  - NPC hotel_gn:audrey -> audrey_a2
+  - OBJ hotel_gn:15,1 -> specchio_dopo, gigante1_dlg, specchio315
+  - NPC hospital:gerard -> gerard_a4, gerard_a2
+  - OBJ hospital:2,1 -> ronette_letto
+  - NPC diner:norma -> norma
+  - NPC diner:shelly -> shelly
+  - NPC diner:loglady -> loglady_a4, loglady
+  - NPC diner:james -> james_a2
+  - OBJ woods:14,12 -> olio
+  - OBJ woods:11,16 -> sign_grove
+  - NPC redroom:mfap -> mfap_finale, mfap
+  - NPC redroom:laura -> laura_finale2, laura_sogno, laura_hint
+  - NPC redroom:bob -> bob_finale
+  - NPC traincar:hawk_vagone -> hawk_vagone
+  - OBJ traincar:5,6 -> sign_ponte
+  - OBJ traincar:20,2 -> sign_oej
+  - OBJ traincar:10,4 -> mucchio_terra
+  - OBJ traincar:13,5 -> anello_interact
+  - NPC oej:jacques -> jacques_a3
+  - NPC oej:audrey -> audrey_oej
+  - OBJ roadhouse:8,1 -> palco_dopo, gigante2_dlg
+# voce Cooper per ramo
+  ok - bobby:first (1 COOPER)
+  ok - donna:first (1 COOPER)
+  ok - jacoby:first (1 COOPER)
+  ok - landmark_waterfall:first (2 COOPER)
+  ok - landmark_cemetery:first (1 COOPER)
+  ok - landmark_tracks_vagone:first (1 COOPER)
+  ok - landmark_tracks_route:first (2 COOPER)
+  ok - landmark_tracks:first (1 COOPER)
+  ok - sign_town:first (2 COOPER)
+  ok - lago_dopo:first (1 COOPER)
+  ok - lago_maddy:first (3 COOPER)
+  ok - lago_sguardo:first (1 COOPER)
+  ok - tomba_laura:first (1 COOPER)
+  ok - tomba_laura:again (1 COOPER)
+  ok - truman_fine:first (1 COOPER)
+  ok - truman_wait5:first (1 COOPER)
+  ok - truman_atto5:first (3 COOPER)
+  ok - truman_wait4:first (1 COOPER)
+  ok - truman_atto4:first (2 COOPER)
+  ok - truman_wait3:first (1 COOPER)
+  ok - truman_atto3:first (2 COOPER)
+  ok - truman_a2:first (2 COOPER)
+  ok - truman:first (1 COOPER)
+  ok - truman:again (1 COOPER)
+  ok - andy:first (1 COOPER)
+  ok - hawk:first (1 COOPER)
+  ok - lucy_a3:first (1 COOPER)
+  ok - lucy:first (1 COOPER)
+  ok - leland_morte:first (1 COOPER)
+  ok - leland_morte:again (1 COOPER)
+  ok - leland_interr:first (2 COOPER)
+  ok - sarah_visione:first (1 COOPER)
+  ok - sarah:first (1 COOPER)
+  ok - leland_dopo:first (1 COOPER)
+  ok - leland_dove:first (1 COOPER)
+  ok - leland_a4:first (1 COOPER)
+  ok - leland:first (1 COOPER)
+  ok - maddy_a4:first (1 COOPER)
+  ok - maddy_a4:again (1 COOPER)
+  ok - laura_room:first (2 COOPER)
+  ok - laura_room:again (1 COOPER)
+  ok - benhorne_a2:first (1 COOPER)
+  ok - audrey_a2:first (1 COOPER)
+  ok - specchio_dopo:first (1 COOPER)
+  ok - gigante1_dlg:first (1 COOPER)
+  ok - specchio315:first (1 COOPER)
+  ok - gerard_a4:first (1 COOPER)
+  ok - gerard_a2:first (1 COOPER)
+  ok - ronette_letto:first (1 COOPER)
+  ok - ronette_letto:again (1 COOPER)
+  ok - norma:first (1 COOPER)
+  ok - shelly:first (1 COOPER)
+  ok - loglady_a4:first (1 COOPER)
+  ok - loglady:first (1 COOPER)
+  ok - james_a2:first (1 COOPER)
+  ok - olio:first (2 COOPER)
+  ok - sign_grove:first (1 COOPER)
+  ok - mfap_finale:first (1 COOPER)
+  ok - mfap:first (1 COOPER)
+  ok - mfap:again (1 COOPER)
+  ok - laura_finale2:first (1 COOPER)
+  ok - laura_sogno:first (1 COOPER)
+  ok - laura_sogno:again (1 COOPER)
+  ok - laura_hint:first (1 COOPER)
+  ok - bob_finale:first (1 COOPER)
+  ok - hawk_vagone:first (1 COOPER)
+  ok - sign_ponte:first (1 COOPER)
+  ok - sign_oej:first (1 COOPER)
+  ok - mucchio_terra:first (3 COOPER)
+  ok - mucchio_terra:again (1 COOPER)
+  ok - anello_interact:first (3 COOPER)
+  ok - anello_interact:again (1 COOPER)
+  ok - jacques_a3:first (2 COOPER)
+  ok - jacques_a3:again (1 COOPER)
+  ok - audrey_oej:first (1 COOPER)
+  ok - palco_dopo:first (1 COOPER)
+  ok - gigante2_dlg:first (1 COOPER)
+# conteggi
+  target fisici: 40
+  rami dialogo unici: 66
+  varianti first/again: 77
+  pagine verificate: 252
+  battute COOPER verificate: 95
+  richiami a Diane giustificati: 7/7
+# voce Cooper nelle missioni narrative
+  ok - M4:truman_a2:entry
+  ok - M4:ronette_q:entry
+  ok - M4:ronette_q:reopen
+  ok - M4:infermiera_ctx:entry
+  ok - M4:gerard_a2:entry
+  ok - M4:james_a2:entry
+  ok - M4:present_truman_m4:entry
+  ok - M4:present_truman_m4:repeat
+  ok - M5:m5_bridge:entry
+  ok - M5:m5_discovery:entry
+  ok - M5:m5_mound:entry
+  ok - M5:m5_ring:entry
+  ok - M5:m5_scene:entry
+  ok - M5:m5_report_intro:entry[1]
+  ok - M5:m5_report_intro:entry[2]
+  ok - M5:m5_report_intro:entry[3]
+  ok - M5:m5_report_intro:repeat
+  ok - M5:m5_sign_oej:entry
+  ok - M6:m6_ferry:entry
+  ok - M6:m6_audrey:entry
+  ok - M6:m6_tactic:entry
+  ok - M6:m6_interrogation_prova:entry
+  ok - M6:m6_interrogation_pressione:entry
+  ok - M6:m6_interrogation_falsa:entry
+  ok - M6:m6_arrest:entry
+  ok - M6:m6_return_night:entry
+  ok - M6:m6_news:entry[1]
+  ok - M6:m6_news:entry[2]
+  ok - M6:m6_news:entry[3]
+  ok - M6:m6_atto4_bridge:entry
+  ok - M6:m6_atto4_bridge:repeat
+  ok - M6:m6_hospital:entry
+  ok - M8:m8_diner:entry
+  ok - M8:m8_roadhouse:entry
+  ok - M8:m8_leland_taxi:entry[1]
+  ok - M8:m8_leland_taxi:entry[2]
+  ok - M8:m8_leland_taxi:entry[3]
+  ok - M8:m8_leland_taxi:repeat
+  ok - M8:m8_focus_choice:entry
+  ok - M8:m8_route_palmer:entry[1]
+  ok - M8:m8_route_palmer:entry[2]
+  ok - M8:m8_route_lake:entry
+  ok - M8:m8_route_diner:entry
+  ok - M8:m8_discovery:entry[1]
+  ok - M8:m8_discovery:entry[2]
+  ok - M8:m8_promise_echo:entry[1]
+  ok - M8:m8_promise_echo:entry[2]
+  ok - M8:m8_promise_echo:entry[3]
+  ok - M8:m8_station:entry[1]
+  ok - M8:m8_station:entry[2]
+  ok - M8:m8_station:entry[3]
+  ok - M8:m8_station:repeat
+  ok - M9:m9_verifica_taxi:entry[1]
+  ok - M9:m9_verifica_taxi:entry[2]
+  ok - M9:m9_present_truman:entry[1]
+  ok - M9:m9_present_truman:entry[2]
+  ok - M9:m9_present_truman:repeat
+  ok - M9:m9_arrivo:entry
+  ok - M9:m9_arrivo:repeat
+# conteggi missioni narrative
+  world roots: 37
+  varianti entry/reopen rese: 52
+  repeat autoriali: 7
+  pagine COOPER uniche: 72
+interaction-voice: PASS (classici 77/77; narrative 52/52; repeat 7/7)
+EXIT:0
+=== test/interior-prop-semantics.js ===
+INTERIOR-PROP-SEMANTICS-PASS 23/23
+EXIT:0
+=== test/interior-zoning-reachability.js ===
+INTERIOR-ZONING-REACHABILITY-PASS 60/60 · 7/7 interiors connected
+EXIT:0
+=== test/letter-chain-provenance.js ===
+# acquisizione classica al lago
+  ok - Invio al lago apre lago_maddy
+  ok - acquisizione non afferma composizione o identità ROBERT
+  ok - Cooper marca esplicitamente teoria provvisoria e limite
+  ok - lettera O assente prima del commit del dialogo
+  ok - chiusura del dialogo acquisisce lettera_o
+  ok - chiusura del dialogo registra maddy_trovata
+# descrizione visibile nel menu indizi
+  ok - UI indizio non compone ROBERT e non assegna identità
+  ok - UI distingue osservazione da ipotesi
+  ok - UI conserva lettere, ordine e provenienza osservabile
+# confronto narrativo resta volontario
+  ok - m8_discovery: apertura volontaria preparabile
+  ok - m8_discovery: commit volontario riuscito
+  ok - ritrovamento non formula P8
+  ok - ritrovamento non auto-esegue confronti
+  ok - m8_promise_echo: apertura volontaria preparabile
+  ok - m8_promise_echo: commit volontario riuscito
+  ok - eco obbligatoria non formula P8
+  ok - dopo eco, confronti disponibili ma non eseguiti
+  ok - m8_cmp_letters: apertura volontaria preparabile
+  ok - m8_cmp_letters: commit volontario riuscito
+  ok - confronto R/O annota metodo, non identità
+  ok - m8_cmp_diary: apertura volontaria preparabile
+  ok - m8_cmp_diary: commit volontario riuscito
+  ok - aprire confronto col diario non sceglie teoria
+  ok - teoria progressiva richiede scelta esplicita diary_a
+  ok - prepare della scelta resta puro
+  ok - scelta volontaria committata
+  ok - solo scelta volontaria formula P8
+  ok - P8 non diventa identità confermata
+letter-chain-provenance: PASS (28 checks)
+EXIT:0
+=== test/level-autopsy.js ===
+DIMENSIONI: 56x36 (uniforme)
+
+PROPS SEMANTICI: 32
+  per tipo: panchina:6 cespuglio:2 cassetta:2 lampione:7 palo:3 staccionata:10 aiuola:1 idrante:1
+
+ESAMINABILI (interact): 30,30=cartello 15,28=lago_riva 50,22=tomba_laura
+PORTE: 8 + gate woods a 50,0
+   9,6 -> hotel_gn [needs sogno_fatto]
+   23,6 -> hospital [needs sogno_fatto]
+   42,6 -> palmer 
+   12,20 -> sheriffs_station_exterior 
+   42,20 -> double_r_exterior_prototype 
+   47,28 -> roadhouse [needs atto4]
+   55,14 -> traincar [needs atto3]
+   55,15 -> traincar [needs atto3]
+
+C2 RAGGIUNGIBILITÀ da 12,21 : calpestabili 1384 raggiunti 1383 !! 1 TILE ISOLATI
+
+C3/C4 approcci:
+   porta 9,6->hotel_gn        costo orientato 17
+   porta 23,6->hospital       costo orientato 25
+   porta 42,6->palmer         costo orientato 44
+   porta 12,20->sheriffs_station_exterior costo orientato 0
+   porta 42,20->double_r_exterior_prototype costo orientato 31
+   porta 47,28->roadhouse     costo orientato 44
+   porta 55,14->traincar      costo orientato 49
+   porta 55,15->traincar      costo orientato 48
+   esam cartello              costo orientato 26
+   esam lago_riva             costo orientato 13
+   esam tomba_laura           costo orientato 40
+
+C5 costo obbligatorio di traversata per atto (tile, percorso più breve fra le porte):
+   A1 (start)         1
+   A2 (sogno)         126
+   A3 (vagone)        100
+   A4 (roadhouse)     88
+   A5 (palmer+lago)   149
+
+C6 archi stradali più caricati (compaiono in N percorsi d'atto):
+   14,21|15,21 = 8
+   13,21|14,21 = 8
+   12,21|13,21 = 8
+   22,21|23,21 = 6
+   21,21|22,21 = 6
+   20,21|21,21 = 6
+  tile strada/sentiero: 412 | toccati dai percorsi obbligatori: 148 | mai usati: 264
+
+C8 periodicità props:
+   panchina    n=6 CV=0.28  
+   cespuglio   n=2 CV=0.00  
+   cassetta    n=2 CV=0.00  
+   lampione    n=7 CV=0.25  | run equispaziati: y13 step12
+   palo        n=3 CV=0.40  
+   staccionata n=10 CV=0.35  
+   aiuola      n=1 CV=0.00  
+   idrante     n=1 CV=0.00  
+
+C11 interferenze (prop solido nel guscio d'approccio):
+  prop F a 15,27 adiacente a 15,28
+
+--- TILE ISOLATO ---
+   1,3 char="."
+
+--- APPROCCI ESAMINABILE lago_riva 15,28 ---
+   up -> 15,27 char="F" SOLIDO
+   down -> 15,29 char="w" SOLIDO
+   left -> 14,28 char="w" SOLIDO
+   right -> 16,28 char="." libero
+
+C7 backtrack tax per atto (archi ripercorsi / archi totali del percorso obbligato):
+   A1 (start)         tax 0%  (0/1 archi)
+   A2 (sogno)         tax 25%  (32/126 archi)
+   A3 (vagone)        tax 3%  (3/100 archi)
+   A4 (roadhouse)     tax 5%  (4/88 archi)
+   A5 (palmer+lago)   tax 19%  (29/149 archi)
+
+C9 densità props (finestre 8x8, non-vuote):
+  celle non-vuote: 13 | min 1 max 4 media 2.0
+
+SEGNALE/RUMORE: esaminabili 3 vs props solidi che sembrano oggetti 32
+EXIT:0
+=== test/level-autopsy2.js ===
+F1 CORRETTO — copertura strade (any-shortest-path, incl. 3 esaminabili opzionali):
+  tile strada/marciapiede: 671
+  non coperti (costo uniforme): 166 | (road-preference): 554
+  ** VERAMENTE morti (fuori da OGNI percorso minimo, entrambi i modelli): 166 **
+
+F2 CORRETTO — backtrack A5 scomposto:
+  archi 149 | route overlap 49 (33%) | STERILE (ritorno senza cambiamento) 35 (23%)
+  -> il ritorno allo sceriffo ricontestualizza l'obiettivo (cascata Truman cambia), quindi NON e' sterile. Backtrack sterile reale ~0%.
+
+GATE/FLAG VALIDATOR (town):
+   hotel_gn   porte: 9,6 gated[sogno_fatto] 
+   hospital   porte: 23,6 gated[sogno_fatto] 
+   palmer     porte: 42,6 libero 
+   sheriffs_station_exterior porte: 12,20 libero 
+   double_r_exterior_prototype porte: 42,20 libero 
+   roadhouse  porte: 47,28 gated[atto4] 
+   traincar   porte: 55,14 55,15 gated[atto3] (tutte gated, ok)
+  contratto: ogni destinazione gated ha una sola via d'accesso nel town (nessun bypass) -> verificato: traincar/roadhouse/hotel/hospital hanno una sola porta town ciascuno.
+
+CLEAR WIDTH approcci porta (tile liberi nella riga davanti alla porta, +-2):
+   sheriff    larghezza libera davanti: 7 
+   diner      larghezza libera davanti: 7 
+   palmer     larghezza libera davanti: 6 
+   hospital   larghezza libera davanti: 7 
+   hotel      larghezza libera davanti: 7 
+   roadhouse  larghezza libera davanti: 7 
+   traincar   larghezza libera davanti: 4 
+   woods      larghezza libera davanti: 1 !! stretto
+
+FIRME PORTE (rilevamento collisione di memoria):
+   hotel      nord ovest | ancore locali entro 3: n
+   hospital   nord ovest | ancore locali entro 3: (nessuna)
+   palmer     nord est | ancore locali entro 3: (nessuna)
+   diner      centro est | ancore locali entro 3: (nessuna)
+   sheriff    centro ovest | ancore locali entro 3: (nessuna)
+   roadhouse  sud est | ancore locali entro 3: (nessuna)
+  COLLISIONI:
+    nessuna collisione esatta, ma verificare percettivamente le porte nord adiacenti.
+
+LEDGER ESAMINABILI:
+   cartello    @ 30,30 raggiungibile si | in ledger atti: opzionale | props vicini: -
+   lago_riva   @ 15,28 raggiungibile si | in ledger atti: A5 (sul tragitto?) | props vicini: F
+   tomba_laura @ 50,22 raggiungibile si | in ledger atti: opzionale | props vicini: F
+EXIT:0
+=== test/level-autopsy3.js ===
+2. PERMUTAZIONI A2 (ordine libero hotel/hospital/diner, costo orientato in azioni):
+   hotel>hospital>diner     97
+   diner>hospital>hotel     97
+   hospital>hotel>diner     119
+   diner>hotel>hospital     119
+   hotel>diner>hospital     124
+   hospital>diner>hotel     124
+  min 97 max 124 spread 28% (ordine davvero libero)
+
+3. GRAFO COMPRESSO (dead-end e strozzature):
+  dead-end (vicoli ciechi a 1 uscita): 19 50,0 35,2 5,4 1,5 9,6 23,6 42,6 12,20 42,20 50,21
+  strozzature (articulation, la cui rimozione isola >1 tile): 10 50,1 8,2 9,2 10,2 11,2 12,2 33,2 34,2 5,5 50,23
+
+4. STATI D'APPROCCIO Palmer(42,6) e woods gate(50,0):
+   palmer   |A_d| approcci fisici: 1 42,7 | costo correttivo dallo stato ottimo: 0 | NPC può occupare: no
+   woods    |A_d| approcci fisici: 1 50,1 | costo correttivo dallo stato ottimo: 0 | NPC può occupare: no
+  Nota: bobby(25,16) e donna(44,10) wander; donna e' a 4 tile da palmer(42,6): possibile occupazione transitoria dell'approccio in A5. jacoby(16,25) fisso, lontano.
+
+5. CLUSTER DEI TILE DORMIENTI (fuori da ogni percorso minimo, verifica near-shortest):
+  tile dormienti (fuori da near-shortest, slack d*+max(4,10%)): 84 in 10 cluster
+   cluster 0 size 27 bbox x[1-9] y[22-25]
+   cluster 1 size 24 bbox x[26-32] y[30-34]
+   cluster 2 size 22 bbox x[1-6] y[13-16]
+   cluster 3 size 4 bbox x[31-32] y[2-3]
+   cluster 4 size 2 bbox x[53-54] y[24-24]
+   cluster 5 size 1 bbox x[50-50] y[23-23]
+   cluster 6 size 1 bbox x[52-52] y[23-23]
+   cluster 7 size 1 bbox x[49-49] y[24-24]
+EXIT:0
+=== test/location-connections.js ===
+LOCATION-CONNECTIONS-PASS shared endpoint descriptors, generic mapping, atomic validation and uninstall
+EXIT:0
+=== test/location-traversal.js ===
+LOCATION-TRAVERSAL-PASS both leaves round-trip, fade order, reactions, held input, collision and save rollback/retry
+EXIT:0
+=== test/mobile-production.js ===
+ok - viewport_covers_notch
+ok - dynamic_viewport_height
+ok - no_page_overscroll
+ok - touch_action_disabled
+ok - mobile_uses_visual_viewport
+ok - mobile_audit_override
+ok - portrait_reserves_controls_region
+ok - mobile_keeps_integer_scale
+ok - desktop_keeps_integer_scale
+ok - orientation_resizes_stage
+ok - touch_dpad_available
+ok - touch_ab_available
+ok - controls_use_safe_areas
+ok - controls_resize_for_orientation
+ok - portrait_controls_follow_stage
+ok - narrative_owns_its_tap
+ok - narrative_choice_has_dpad
+ok - narrative_choice_has_confirm
+ok - held_direction_released_on_blur
+ok - hidden_page_releases_direction
+
+MOBILE-PROD-PASS 20/20
+EXIT:0
+=== test/movement-feel.js ===
+# movement feel
+  ok - tap breve fra frame muove di una tile
+  ok - key-repeat non aggiunge passo dopo rilascio
+  ok - passo avviato prima del blur
+  ok - blur completa solo il passo in corso
+  ok - tab nascosta azzera input tenuti
+  ok - player non entra nella destinazione prenotata da NPC
+  ok - NPC non entra nella destinazione prenotata dal player
+  ok - movimento tenuto concatena il passo senza frame morto
+  ok - rilascio termina dopo il passo prenotato
+
+9 controlli superati ✔
+EXIT:0
+=== test/narrative-finale.js ===
+NARRATIVE-FINALE-PASS 27/27; COOPER 8/8 famiglie, blocked 4/4
+EXIT:0
+=== test/narrative-m9-runtime.js ===
+NARRATIVE-M9-RUNTIME-PASS 12 paths × reject/retry/accept + transaction gates
+EXIT:0
+=== test/narrative-repair-contract.js ===
+NARRATIVE-REPAIR-CONTRACT-PASS 35/35
+EXIT:0
+=== test/narrative-validate-m5.js ===
+# autorità canonica e provenienza
+# registro pagine (globale, incluso M4)
+# igiene participant-facing
+# vocabolario vietato prima del confronto (fatti non ancora tali)
+# writer unici
+# valori tipizzati (contro i domini del delta)
+# macchina della teoria (B8a/B8b, transizioni esatte del Lock)
+# gruppi di osservazione e milestone
+# rapporto B9 (split: intro → S1 → chiusura — widget B1 davvero invariato)
+# confronto anello e confronto latente E5
+# obiettivi: esattamente uno vero in ogni combinazione raggiungibile
+# binding ambientali
+# nodes_done mai come sostituto di teoria/proposizione
+# C5-A.2: completion_when, repeat_when, beat sul ramo finale
+# controlli aggiunti dalla revisione C5-A
+
+1547 controlli statici M5 superati ✔ (proposta C5-A v1.2 — copertura dinamica in C5-B)
+EXIT:0
+=== test/narrative-validate-m6.js ===
+# autorità canonica e provenienza
+# registro pagine (globale, incluso M4+M5)
+# igiene participant-facing (nessun token interno nei testi/label)
+# nessuna attribuzione dell'omicidio (fuori dall'opzione respinta di P5)
+# flag deprecati mai OPERATIVI (effetti/condizioni) — le invarianti li citano solo per documentare
+# writer unici (mappa scrittura → nodi)
+# valori tipizzati e cataloghi (contro i domini)
+# nodo tattica (B4): una tattica, write-once, nessuna corretta
+# tre rami: value_is esclusivo, 2 domande esclusive, ammissione
+# differenziazione delle tattiche sui 7 assi (contratto §6)
+# beat P5 (B6b): giocato, A/B/C, feedback per-ramo, milestone
+# catena arresto → notte → notizia → Gigante → rapporto → ospedale
+# obiettivi: esattamente uno vero in ogni combinazione raggiungibile
+# binding ambientali e kind
+# nodes_done mai come gate narrativo (solo fisico)
+# C6-A.1: binding contro il catalogo reale del motore
+# C6-A.1: continuazione tattica→ramo (goto per valore selezionato)
+# C6-A.1: feedback/pagine per-valore coprono il dominio m6_tactic
+# C6-A.1: nessun world-root oscura un nodo irrisolto (softlock del root contract)
+# C6-A.1: M4/M5 stato e dati invariati (i diff solo AGGIUNGONO)
+# C6-A.2: continuazione P5→arresto + pulizia contrattuale (semantica unica)
+# C6-A.3: chiusura del contratto documentale (feedback in prepareChoice, obj_m6_3 allineato)
+# conteggio nodi e completamento
+
+3553 controlli statici M6 superati ✔ (proposta C6-A — copertura dinamica in C6-B); 69 pagine M6 registrate, 12 nodi
+EXIT:0
+=== test/narrative-validate-m8.js ===
+# autorità canonica e provenienza
+# registro pagine (globale M4+M5+M6+M8)
+# igiene participant-facing (nessun token interno)
+# IGIENE DELLA FALSA COLPA (Lock §4/§14)
+# tragedia fissa: nessun maddy_salvabile operativo
+# writer unici
+# valori tipizzati e transizione controllata (contro i domini + il diff)
+# authorial_timeline: dato dichiarativo, mai scritto da effetti/condizioni
+# le 9 combinazioni warning × focus + derivazioni
+# pages_by_value: copertura totale del dominio
+# beat E: confronti e P8
+# C8-A.1: contratto di esecuzione (movimento, completamento, repeat, condizionali)
+# C8-A.2: precedenza D→E dei confronti + eco della promessa non saltabile
+# obiettivi: esattamente uno vero in ogni combinazione raggiungibile
+# C8-A.3: obiettivo d'ingresso azionabile + contratto valigia + coerenza documentale
+# binding, kind, node_done, conteggio
+# M4/M5/M6 invariati: i diff solo AGGIUNGONO
+
+4201 controlli statici M8 superati ✔ (proposta C8-A — copertura dinamica in C8-B); 73 pagine M8, 12 nodi
+EXIT:0
+=== test/narrative-validate-m9.js ===
+# autorità canonica e provenienza
+# ingresso / uscita
+# registro pagine (globale M4+M5+M6+M8+M9)
+# FEDELTÀ AL LOCK: testi verbatim (letti dal file del Lock, non da una copia)
+# igiene participant-facing (nessun token interno a schermo)
+# IGIENE DEL LUTTO: nessuna attribuzione d'omicidio, nessun arresto, nessun BOB (Lock §2/§3)
+# writer unici (effetti di nodo + rami di presentazione)
+# M9 non scrive stato tipizzato: LEGGE M8 e basta
+# eco M8: valori LETTI, domini chiusi, copertura totale
+# P6: contratto di formulazione
+# presentazione: allegato MANUALE, partizione totale, reason code a dominio
+# arrivo: volontario, gated sull'accettazione, repeat raggiungibile
+# obiettivi: esattamente uno vero in ogni combinazione raggiungibile
+# obiettivo d'ingresso: punta a una root DAVVERO azionabile
+# binding world: map_id e attori REALI del motore
+# diff: M4/M5/M6 invariati; carry-in taxi posseduto da M8
+# coerenza DOCUMENTALE (schema-delta / source-map / matrice == dati)
+
+3779 controlli statici M9 superati ✔ (proposta C9-A — copertura dinamica in C9-B); 36 pagine M9, 4 nodi
+EXIT:0
+=== test/narrative-validate.js ===
+# walk ricorsivi: effetti/condizioni/reason/result a ogni livello
+# reciprocità evidenze↔proposizioni
+# registro GLOBALE delle pagine (principali, presentazione, reopen, repeat)
+# binding: root vs rami interni
+# dinamica — transazioni prepare/commit eseguite dal runtime
+# percorsi completi (save/load a ogni passo)
+# B3 — notebook, comparison & formulation
+# B4 — presentation to Truman
+# B5 — narrative save
+# C5-B — M5 dynamic (runtime esteso, matrice canonica)
+# C5-B — pairwise, continuation, domini, confronti, registro
+# C5-B.1 — contratto runtime chiuso (12 test dalla revisione)
+# C5-B.2 — resolver delle coppie a due passaggi
+# C6-B — M6 dynamic (estensioni runtime generiche, matrice canonica)
+# C8-B — M8 dynamic (value_transition / from_derivation / conditional_pages + matrice 27)
+
+4354 controlli narrativi superati ✔ (runtime transazionale)
+EXIT:0
+=== test/notebook-objective.js ===
+NOTEBOOK-OBJECTIVE-PASS 6/6
+EXIT:0
+=== test/objective-notebook-visibility.js ===
+OBJECTIVE-NOTEBOOK-VISIBILITY-PASS 11/11
+EXIT:0
+=== test/objective-resolver.js ===
+OBJECTIVE-RESOLVER-PASS 4/4
+EXIT:0
+=== test/portrait-evidence-parity.js ===
+node:assert:152
+  throw new AssertionError(obj);
+  ^
+
+AssertionError [ERR_ASSERTION]: portrait evidence drift:
+[
+  {
+    "file": "test/smoke.js",
+    "error": "byte_drift"
+  }
+]
++ actual - expected
+
++ [
++   {
++     error: 'byte_drift',
++     file: 'test/smoke.js'
++   }
++ ]
+- []
+
+    at Object.<anonymous> (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/test/portrait-evidence-parity.js:55:8)
+    at Module._compile (node:internal/modules/cjs/loader:1854:14)
+    at Object..js (node:internal/modules/cjs/loader:1985:10)
+    at Module.load (node:internal/modules/cjs/loader:1577:32)
+    at Module._load (node:internal/modules/cjs/loader:1379:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: [ { file: 'test/smoke.js', error: 'byte_drift' } ],
+  expected: [],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.16.0
+EXIT:1
+=== test/portrait-gates.js ===
+PORTRAIT-CAST-PASS 25/25; ADVERSARIAL-NURSE-PASS 1/1
+EXIT:0
+=== test/r69-reference-gates.js ===
+ok - reference_is_vaulted
+ok - native_canvas_256x192
+ok - dialogue_bottom_panel_53_49
+ok - portrait_card_40x47
+ok - portrait_anchor_overlaps_world
+ok - legacy_reference_palette_remains_available
+ok - portrait_uses_same_display_ramp
+ok - production_uses_per_tile_bg_palette_banks
+ok - production_keeps_obj_palette_separate
+ok - hero_spawn_starts_at_town_entrance
+ok - hero_dialogue_camera_lift
+ok - arrival_is_rectangular_10x9
+ok - arrival_has_shop_cabin_car_mailbox
+ok - hero_car_uses_large_two_tile_vehicle
+ok - car_collision_matches_art
+ok - car_preserves_path_ground
+ok - hero_forest_left_mass
+ok - hero_forest_right_mass
+ok - corridor_stays_open
+ok - bitmap_only_portraits
+ok - integer_scale_above_one
+ok - hard_pixel_edges
+ok - touch_controls_outside_canvas
+
+R69-REFERENCE-PASS 23/23
+EXIT:0
+=== test/retro-font.js ===
+ok - engine senza CanvasText antialias
+ok - UI narrativa senza CanvasText antialias
+ok - font condiviso caricato prima del motore
+ok - motore e UI usano stesso helper
+ok - minuscole Gen II preservate e disegnabili
+ok - metriche bitmap proporzionali
+ok - titolo bitmap entra nella targa GBC
+ok - dialogo breve bilanciato su due righe
+ok - bilanciamento conserva testo e capienza Gen II
+ok - epilogo massimo 23 caratteri per riga GBC
+ok - epilogo paginato massimo 5 righe
+ok - glyph interi nei limiti GBC x=4..155
+ok - ancore pixel finale GBC separate e stabili
+
+RETRO-FONT-PASS 13/13
+EXIT:0
+=== test/retro-production.js ===
+ok - heartgold_native_resolution_256x192
+ok - engine_repairs_and_locks_native_buffer
+ok - intro_header_uses_fitting_native_scale
+ok - intro_uses_three_complete_pages
+ok - production_cache_busts_layout_fix
+ok - production_cache_busts_objective_notebook_fix
+ok - css_stage_preserves_native_aspect
+ok - production_loads_retro_renderer
+ok - production_loads_shared_bitmap_font_first
+ok - production_loads_speaker_cards_before_engine
+ok - speaker_cards_use_native_pixel_faces_and_names
+ok - production_preserves_gbc_bg_obj_palette_banks
+ok - production_loads_authored_tileset
+ok - production_uses_heartgold_authored_cast
+ok - production_loads_continuous_town_art
+ok - production_does_not_load_three
+ok - engine_boots_without_webgl
+ok - fixed_pixel_scaling
+ok - integer_viewport_scaling
+ok - integer_viewport_origin
+ok - retro_overrides_tiles
+ok - retro_overrides_characters
+ok - authored_matrix_tiles_and_sprites
+ok - authored_sprite_archetypes
+ok - gold_overlapping_conifers
+ok - gold_authored_ground_clusters
+ok - gold_continuous_roofs_and_facades
+ok - gold_world_transition_modules
+ok - gold_window_modules
+ok - gold_interior_wall_and_floor_modules
+ok - gold_chibi_cooper_contrast
+ok - heartgold_native_24px_actors
+ok - heartgold_flat_world_projection
+ok - gold_gameplay_has_no_quest_overlay
+ok - notebook_renders_single_resolved_objective
+ok - title_and_intro_footer_stay_inside_frames
+ok - heartgold_dialogue_reference_bottom_49px
+ok - retro_disables_oblique_structures
+ok - music_remains_loaded
+ok - production_loads_narrative_runtime
+ok - production_loads_notebook_and_save
+ok - production_boots_narrative_bridge
+ok - production_loads_causal_finale
+ok - production_uses_canvas_bitmap_ui
+ok - case_file_uses_readable_screen_font
+ok - case_file_explains_controls
+ok - case_file_opens_reperted_documents
+ok - finale_keeps_notebook_read_only
+ok - all_production_text_is_bitmap
+ok - finale_has_single_canvas_owner
+ok - canvas_frame_state_is_atomic
+ok - high_resolution_dialogue_typography
+ok - dialogue_copy_has_breathing_room_and_balance
+ok - dialogue_shows_advance_control
+
+RETRO-PROD-PASS 54/54
+EXIT:0
+=== test/ronette-bob-provenance.js ===
+RONETTE-BOB-PROVENANCE-PASS 87 controlli; 154 schermate classiche pre-T1; 3 rotte M4
+EXIT:0
+=== test/sheriffs-station-ambient.js ===
+SHERIFFS-STATION-AMBIENT-PASS five elements (one continuous), quieter than diner, per-element isolated containment + alpha ceiling, duty cycle, idle gaps, liveliness floor, independent clocks, no reactions
+EXIT:0
+=== test/sheriffs-station-door.js ===
+SHERIFFS-STATION-DOOR-PASS production doorway dispatches the reaction, direct loadMap does not, OPENING/OPEN/CLOSING/CLOSED cycle completes, rects stay within the authored door art
+EXIT:0
+=== test/sheriffs-station-location.js ===
+SHERIFFS-STATION-LOCATION-PASS town <-> lot <-> canonical station round trip, station cast, no arrival bounce, Double R town exit, catalog parity, save rollback
+EXIT:0
+=== test/sheriffs-station-native.js ===
+SHERIFFS-STATION-NATIVE-PASS production hooks, collision, connected routes, keyboard movement, native pixels, depth intervals, Cooper anchor
+EXIT:0
+=== test/smoke.js ===
+# struttura
+  ok - mappa town coerente
+  ok - porta town:9,6 -> mappa hotel_gn esiste
+  ok - porta town:9,6 -> tile arrivo calpestabile
+  ok - porta town:23,6 -> mappa hospital esiste
+  ok - porta town:23,6 -> tile arrivo calpestabile
+  ok - porta town:42,6 -> mappa palmer esiste
+  ok - porta town:42,6 -> tile arrivo calpestabile
+  ok - porta town:12,20 -> mappa sheriffs_station_exterior esiste
+  ok - porta town:12,20 -> tile arrivo calpestabile
+  ok - porta town:42,20 -> mappa double_r_exterior_prototype esiste
+  ok - porta town:42,20 -> tile arrivo calpestabile
+  ok - porta town:47,28 -> mappa roadhouse esiste
+  ok - porta town:47,28 -> tile arrivo calpestabile
+  ok - porta town:55,14 -> mappa traincar esiste
+  ok - porta town:55,14 -> tile arrivo calpestabile
+  ok - porta town:55,15 -> mappa traincar esiste
+  ok - porta town:55,15 -> tile arrivo calpestabile
+  ok - porta town:50,0 -> mappa woods esiste
+  ok - porta town:50,0 -> tile arrivo calpestabile
+  ok - oggetto town@1,0 dialogo "landmark_waterfall" esiste
+  ok - oggetto town@48,21 dialogo "landmark_cemetery" esiste
+  ok - oggetto town@53,1 dialogo "landmark_tracks_vagone" esiste
+  ok - oggetto town@53,1 dialogo "landmark_tracks_route" esiste
+  ok - oggetto town@53,1 dialogo "landmark_tracks" esiste
+  ok - oggetto town@30,30 dialogo "sign_town" esiste
+  ok - oggetto town@30,30 dialogo "sign_town" esiste
+  ok - oggetto town@15,28 dialogo "lago_dopo" esiste
+  ok - oggetto town@15,28 dialogo "lago_maddy" esiste
+  ok - oggetto town@15,28 dialogo "lago_sguardo" esiste
+  ok - oggetto town@50,22 dialogo "tomba_laura" esiste
+  ok - npc bobby sprite "bobby" esiste
+  ok - npc bobby dialogo "bobby" esiste
+  ok - npc bobby su tile calpestabile
+  ok - npc donna sprite "donna" esiste
+  ok - npc donna dialogo "donna" esiste
+  ok - npc donna su tile calpestabile
+  ok - npc jacoby sprite "jacoby" esiste
+  ok - npc jacoby dialogo "jacoby" esiste
+  ok - npc jacoby su tile calpestabile
+  ok - mappa sheriff coerente
+  ok - porta sheriff:7,11 -> mappa sheriffs_station_exterior esiste
+  ok - porta sheriff:7,11 -> tile arrivo calpestabile
+  ok - porta sheriff:8,11 -> mappa sheriffs_station_exterior esiste
+  ok - porta sheriff:8,11 -> tile arrivo calpestabile
+  ok - npc truman sprite "truman" esiste
+  ok - npc truman dialogo "truman_fine" esiste
+  ok - npc truman dialogo "truman_wait5" esiste
+  ok - npc truman dialogo "truman_atto5" esiste
+  ok - npc truman dialogo "truman_wait4" esiste
+  ok - npc truman dialogo "truman_atto4" esiste
+  ok - npc truman dialogo "truman_wait3" esiste
+  ok - npc truman dialogo "truman_atto3" esiste
+  ok - npc truman dialogo "truman_a2" esiste
+  ok - npc truman dialogo "truman" esiste
+  ok - npc truman su tile calpestabile
+  ok - npc andy sprite "andy" esiste
+  ok - npc andy dialogo "andy" esiste
+  ok - npc andy su tile calpestabile
+  ok - npc hawk sprite "hawk" esiste
+  ok - npc hawk dialogo "hawk" esiste
+  ok - npc hawk su tile calpestabile
+  ok - npc lucy sprite "lucy" esiste
+  ok - npc lucy dialogo "lucy_a3" esiste
+  ok - npc lucy dialogo "lucy" esiste
+  ok - npc lucy su tile calpestabile
+  ok - npc leland sprite "leland" esiste
+  ok - npc leland dialogo "leland_morte" esiste
+  ok - npc leland dialogo "leland_interr" esiste
+  ok - npc leland su tile calpestabile
+  ok - mappa palmer coerente
+  ok - porta palmer:7,11 -> mappa town esiste
+  ok - porta palmer:7,11 -> tile arrivo calpestabile
+  ok - porta palmer:8,11 -> mappa town esiste
+  ok - porta palmer:8,11 -> tile arrivo calpestabile
+  ok - oggetto palmer@6,1 dialogo "laura_room" esiste
+  ok - npc sarah sprite "sarah" esiste
+  ok - npc sarah dialogo "sarah_visione" esiste
+  ok - npc sarah dialogo "sarah" esiste
+  ok - npc sarah su tile calpestabile
+  ok - npc leland sprite "leland" esiste
+  ok - npc leland dialogo "leland_dopo" esiste
+  ok - npc leland dialogo "leland_dove" esiste
+  ok - npc leland dialogo "leland_a4" esiste
+  ok - npc leland dialogo "leland" esiste
+  ok - npc leland su tile calpestabile
+  ok - npc maddy sprite "maddy" esiste
+  ok - npc maddy dialogo "maddy_a4" esiste
+  ok - npc maddy su tile calpestabile
+  ok - mappa hotel_gn coerente
+  ok - porta hotel_gn:8,11 -> mappa town esiste
+  ok - porta hotel_gn:8,11 -> tile arrivo calpestabile
+  ok - porta hotel_gn:9,11 -> mappa town esiste
+  ok - porta hotel_gn:9,11 -> tile arrivo calpestabile
+  ok - oggetto hotel_gn@15,1 dialogo "specchio_dopo" esiste
+  ok - oggetto hotel_gn@15,1 dialogo "gigante1_dlg" esiste
+  ok - oggetto hotel_gn@15,1 dialogo "specchio315" esiste
+  ok - npc benhorne sprite "benhorne" esiste
+  ok - npc benhorne dialogo "benhorne_a2" esiste
+  ok - npc benhorne su tile calpestabile
+  ok - npc audrey sprite "audrey" esiste
+  ok - npc audrey dialogo "audrey_a2" esiste
+  ok - npc audrey su tile calpestabile
+  ok - mappa hospital coerente
+  ok - porta hospital:5,9 -> mappa town esiste
+  ok - porta hospital:5,9 -> tile arrivo calpestabile
+  ok - porta hospital:6,9 -> mappa town esiste
+  ok - porta hospital:6,9 -> tile arrivo calpestabile
+  ok - oggetto hospital@2,1 dialogo "ronette_letto" esiste
+  ok - npc gerard sprite "gerard" esiste
+  ok - npc gerard dialogo "gerard_a4" esiste
+  ok - npc gerard dialogo "gerard_a2" esiste
+  ok - npc gerard su tile calpestabile
+  ok - mappa diner coerente
+  ok - porta diner:6,9 -> mappa double_r_exterior_prototype esiste
+  ok - porta diner:6,9 -> tile arrivo calpestabile
+  ok - porta diner:7,9 -> mappa double_r_exterior_prototype esiste
+  ok - porta diner:7,9 -> tile arrivo calpestabile
+  ok - npc norma sprite "norma" esiste
+  ok - npc norma dialogo "norma" esiste
+  ok - npc norma su tile calpestabile
+  ok - npc shelly sprite "shelly" esiste
+  ok - npc shelly dialogo "shelly" esiste
+  ok - npc shelly su tile calpestabile
+  ok - npc loglady sprite "loglady" esiste
+  ok - npc loglady dialogo "loglady_a4" esiste
+  ok - npc loglady dialogo "loglady" esiste
+  ok - npc loglady su tile calpestabile
+  ok - npc james sprite "james" esiste
+  ok - npc james dialogo "james_a2" esiste
+  ok - npc james su tile calpestabile
+  ok - mappa woods coerente
+  ok - porta woods:14,4 -> mappa redroom esiste
+  ok - porta woods:14,4 -> tile arrivo calpestabile
+  ok - porta woods:14,21 -> mappa town esiste
+  ok - porta woods:14,21 -> tile arrivo calpestabile
+  ok - oggetto woods@14,12 dialogo "olio" esiste
+  ok - oggetto woods@11,16 dialogo "sign_grove" esiste
+  ok - mappa redroom coerente
+  ok - porta redroom:8,11 -> mappa hotel_gn esiste
+  ok - porta redroom:8,11 -> tile arrivo calpestabile
+  ok - npc mfap sprite "mfap" esiste
+  ok - npc mfap dialogo "mfap_finale" esiste
+  ok - npc mfap dialogo "mfap" esiste
+  ok - npc mfap su tile calpestabile
+  ok - npc laura sprite "laura" esiste
+  ok - npc laura dialogo "laura_finale2" esiste
+  ok - npc laura dialogo "laura_sogno" esiste
+  ok - npc laura dialogo "laura_hint" esiste
+  ok - npc laura su tile calpestabile
+  ok - npc bob sprite "bob" esiste
+  ok - npc bob dialogo "bob_finale" esiste
+  ok - npc bob su tile calpestabile
+  ok - mappa traincar coerente
+  ok - porta traincar:0,7 -> mappa town esiste
+  ok - porta traincar:0,7 -> tile arrivo calpestabile
+  ok - porta traincar:21,0 -> mappa oej esiste
+  ok - porta traincar:21,0 -> tile arrivo calpestabile
+  ok - oggetto traincar@5,6 dialogo "sign_ponte" esiste
+  ok - oggetto traincar@20,2 dialogo "sign_oej" esiste
+  ok - oggetto traincar@10,4 dialogo "mucchio_terra" esiste
+  ok - oggetto traincar@13,5 dialogo "anello_interact" esiste
+  ok - npc hawk_vagone sprite "hawk" esiste
+  ok - npc hawk_vagone dialogo "hawk_vagone" esiste
+  ok - npc hawk_vagone su tile calpestabile
+  ok - mappa oej coerente
+  ok - porta oej:7,9 -> mappa traincar esiste
+  ok - porta oej:7,9 -> tile arrivo calpestabile
+  ok - porta oej:8,9 -> mappa traincar esiste
+  ok - porta oej:8,9 -> tile arrivo calpestabile
+  ok - npc jacques sprite "jacques" esiste
+  ok - npc jacques dialogo "jacques_a3" esiste
+  ok - npc jacques su tile calpestabile
+  ok - npc audrey sprite "audrey" esiste
+  ok - npc audrey dialogo "audrey_oej" esiste
+  ok - npc audrey su tile calpestabile
+  ok - mappa roadhouse coerente
+  ok - porta roadhouse:7,9 -> mappa town esiste
+  ok - porta roadhouse:7,9 -> tile arrivo calpestabile
+  ok - porta roadhouse:8,9 -> mappa town esiste
+  ok - porta roadhouse:8,9 -> tile arrivo calpestabile
+  ok - oggetto roadhouse@8,1 dialogo "palco_dopo" esiste
+  ok - oggetto roadhouse@8,1 dialogo "gigante2_dlg" esiste
+  ok - mappa sheriffs_station_exterior coerente
+  ok - porta sheriffs_station_exterior:7,6 -> mappa sheriff esiste
+  ok - porta sheriffs_station_exterior:7,6 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:8,6 -> mappa sheriff esiste
+  ok - porta sheriffs_station_exterior:8,6 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:2,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:2,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:3,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:3,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:4,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:4,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:5,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:5,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:6,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:6,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:7,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:7,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:8,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:8,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:9,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:9,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:10,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:10,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:11,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:11,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:12,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:12,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:13,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:13,11 -> tile arrivo calpestabile
+  ok - mappa double_r_exterior_prototype coerente
+  ok - porta double_r_exterior_prototype:6,6 -> mappa diner esiste
+  ok - porta double_r_exterior_prototype:6,6 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:7,6 -> mappa diner esiste
+  ok - porta double_r_exterior_prototype:7,6 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:2,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:2,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:3,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:3,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:4,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:4,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:5,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:5,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:6,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:6,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:7,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:7,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:8,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:8,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:9,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:9,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:10,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:10,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:11,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:11,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:12,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:12,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:13,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:13,11 -> tile arrivo calpestabile
+  ok - tutte le pagine di dialogo entrano nel box (<= 129 caratteri)
+  ok - tutte le prove hanno documenti completi e pagine entro 8 righe bitmap
+  ok - tutte le voci di D.objectives entrano in una riga (<= 48 caratteri)
+  ok - town.onEnter punta a un dialogo esistente
+  ok - campo "id" di maps.js:town propagato in GAME.Maps
+  ok - campo "rows" di maps.js:town propagato in GAME.Maps
+  ok - campo "ground" di maps.js:town propagato in GAME.Maps
+  ok - campo "onEnter" di maps.js:town propagato in GAME.Maps
+  ok - campo "height" di maps.js:town propagato in GAME.Maps
+  ok - campo "width" di maps.js:town propagato in GAME.Maps
+  ok - campo "id" di maps.js:sheriff propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:sheriff propagato in GAME.Maps
+  ok - campo "rows" di maps.js:sheriff propagato in GAME.Maps
+  ok - campo "height" di maps.js:sheriff propagato in GAME.Maps
+  ok - campo "width" di maps.js:sheriff propagato in GAME.Maps
+  ok - campo "id" di maps.js:palmer propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:palmer propagato in GAME.Maps
+  ok - campo "rows" di maps.js:palmer propagato in GAME.Maps
+  ok - campo "height" di maps.js:palmer propagato in GAME.Maps
+  ok - campo "width" di maps.js:palmer propagato in GAME.Maps
+  ok - campo "id" di maps.js:hotel_gn propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:hotel_gn propagato in GAME.Maps
+  ok - campo "rows" di maps.js:hotel_gn propagato in GAME.Maps
+  ok - campo "height" di maps.js:hotel_gn propagato in GAME.Maps
+  ok - campo "width" di maps.js:hotel_gn propagato in GAME.Maps
+  ok - campo "id" di maps.js:hospital propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:hospital propagato in GAME.Maps
+  ok - campo "rows" di maps.js:hospital propagato in GAME.Maps
+  ok - campo "height" di maps.js:hospital propagato in GAME.Maps
+  ok - campo "width" di maps.js:hospital propagato in GAME.Maps
+  ok - campo "id" di maps.js:diner propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:diner propagato in GAME.Maps
+  ok - campo "interior" di maps.js:diner propagato in GAME.Maps
+  ok - campo "rows" di maps.js:diner propagato in GAME.Maps
+  ok - campo "height" di maps.js:diner propagato in GAME.Maps
+  ok - campo "width" di maps.js:diner propagato in GAME.Maps
+  ok - campo "id" di maps.js:woods propagato in GAME.Maps
+  ok - campo "rows" di maps.js:woods propagato in GAME.Maps
+  ok - campo "height" di maps.js:woods propagato in GAME.Maps
+  ok - campo "width" di maps.js:woods propagato in GAME.Maps
+  ok - campo "id" di maps.js:redroom propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:redroom propagato in GAME.Maps
+  ok - campo "rows" di maps.js:redroom propagato in GAME.Maps
+  ok - campo "onEnter" di maps.js:redroom propagato in GAME.Maps
+  ok - campo "height" di maps.js:redroom propagato in GAME.Maps
+  ok - campo "width" di maps.js:redroom propagato in GAME.Maps
+  ok - campo "id" di maps.js:traincar propagato in GAME.Maps
+  ok - campo "rows" di maps.js:traincar propagato in GAME.Maps
+  ok - campo "height" di maps.js:traincar propagato in GAME.Maps
+  ok - campo "width" di maps.js:traincar propagato in GAME.Maps
+  ok - campo "id" di maps.js:oej propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:oej propagato in GAME.Maps
+  ok - campo "rows" di maps.js:oej propagato in GAME.Maps
+  ok - campo "height" di maps.js:oej propagato in GAME.Maps
+  ok - campo "width" di maps.js:oej propagato in GAME.Maps
+  ok - campo "id" di maps.js:roadhouse propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:roadhouse propagato in GAME.Maps
+  ok - campo "rows" di maps.js:roadhouse propagato in GAME.Maps
+  ok - campo "height" di maps.js:roadhouse propagato in GAME.Maps
+  ok - campo "width" di maps.js:roadhouse propagato in GAME.Maps
+  ok - arredo urbano "L" e' solido (M.SOLID)
+  ok - arredo urbano "L" e' skip-baked (Render3DConfig.terrain.skipBake)
+  ok - arredo urbano "P" e' solido (M.SOLID)
+  ok - arredo urbano "P" e' skip-baked (Render3DConfig.terrain.skipBake)
+  ok - arredo urbano "B" e' solido (M.SOLID)
+  ok - arredo urbano "B" e' skip-baked (Render3DConfig.terrain.skipBake)
+  ok - arredo urbano "F" e' solido (M.SOLID)
+  ok - arredo urbano "F" e' skip-baked (Render3DConfig.terrain.skipBake)
+  ok - arredo urbano "A" e' solido (M.SOLID)
+  ok - arredo urbano "A" e' skip-baked (Render3DConfig.terrain.skipBake)
+  ok - arredo urbano "H" e' solido (M.SOLID)
+  ok - arredo urbano "H" e' skip-baked (Render3DConfig.terrain.skipBake)
+  ok - arredo urbano "E" e' solido (M.SOLID)
+  ok - arredo urbano "E" e' skip-baked (Render3DConfig.terrain.skipBake)
+  ok - arredo urbano "n" e' solido (M.SOLID)
+  ok - arredo urbano "n" e' skip-baked (Render3DConfig.terrain.skipBake)
+  ok - interact town:30,30 "cartello" -> dialogo "sign_town" esiste
+  ok - interact town:15,28 "lago_riva" -> dialogo "lago_dopo" esiste
+  ok - interact town:15,28 "lago_riva" -> dialogo "lago_maddy" esiste
+  ok - interact town:15,28 "lago_riva" -> dialogo "lago_sguardo" esiste
+  ok - interact town:50,22 "tomba_laura" -> dialogo "tomba_laura" esiste
+  ok - interact palmer:6,1 "cameraLaura" -> dialogo "laura_room" esiste
+  ok - interact hotel_gn:15,1 "specchio315" -> dialogo "specchio_dopo" esiste
+  ok - interact hotel_gn:15,1 "specchio315" -> dialogo "gigante1_dlg" esiste
+  ok - interact hotel_gn:15,1 "specchio315" -> dialogo "specchio315" esiste
+  ok - interact hospital:2,1 "ronette_letto" -> dialogo "ronette_letto" esiste
+  ok - interact woods:14,12 "olio" -> dialogo "olio" esiste
+  ok - interact woods:11,16 "cartelloBosco" -> dialogo "sign_grove" esiste
+  ok - interact traincar:5,6 "sign_ponte" -> dialogo "sign_ponte" esiste
+  ok - interact traincar:20,2 "sign_oej" -> dialogo "sign_oej" esiste
+  ok - interact traincar:10,4 "mucchio_terra" -> dialogo "mucchio_terra" esiste
+  ok - interact traincar:13,5 "anello_interact" -> dialogo "anello_interact" esiste
+  ok - interact roadhouse:8,1 "palco_gigante" -> dialogo "palco_dopo" esiste
+  ok - interact roadhouse:8,1 "palco_gigante" -> dialogo "gigante2_dlg" esiste
+# partita
+  ok - parte dal titolo
+  ok - titolo -> intro
+  ok - prologo in tre pagine complete, massimo 7 righe
+  ok - tutto il testo del prologo resta visibile
+  ok - intro -> gioco
+  ok - spawn all'ingresso sud della città
+  ok - spawn iniziale calpestabile
+  ok - bosco transennato a 0 indizi
+  ok - hotel chiuso prima del sogno
+  ok - ospedale chiuso prima del sogno
+  ok - roadhouse chiuso prima di atto4
+  ok - dialogo Truman parte
+  ok - dialogo Truman chiuso
+  ok - diario ottenuto
+  ok - fascicolo apre sulla lista prove
+  ok - diario selezionato si apre con Invio
+  ok - freccia sfoglia pagina diario
+  ok - Esc dal diario torna al fascicolo
+  ok - secondo Esc chiude fascicolo
+  ok - replay Truman usa "again"
+  ok - dialogo camera di Laura parte
+  ok - indizi camera di Laura
+  ok - 3 indizi totali
+  ok - bosco aperto con 3 indizi
+  ok - entrato nella Stanza Rossa
+  ok - dialogo Nano parte
+  ok - flag met_mfap impostato
+  ok - con flag: dialogo del sogno
+  ok - dialogo del sogno chiuso
+  ok - nome sussurrato ottenuto
+  ok - flag sogno_fatto impostato
+  ok - il sogno non chiude la partita
+  ok - dialogo Truman post-sogno parte
+  ok - dialogo Truman post-sogno chiuso
+  ok - il racconto del sogno non chiude la partita
+  ok - dialogo Ben Horne parte
+  ok - dialogo Audrey (Great Northern) parte
+  ok - flag audrey_indaga impostato
+  ok - dialogo Gerard parte
+  ok - poesia del fuoco ottenuta
+  ok - dialogo Ronette parte
+  ok - flag ronette_bob impostato
+  ok - dialogo James parte
+  ok - cuore ricomposto ottenuto
+  ok - dialogo Truman Atto 3 parte
+  ok - dialogo Truman Atto 3 chiuso
+  ok - flag atto3 impostato
+  ok - Atto 3 non chiude la partita
+  ok - dialogo mucchio di terra parte
+  ok - biglietto del fuoco ottenuto
+  ok - dialogo anello parte
+  ok - anello ottenuto
+  ok - dialogo Jacques parte
+  ok - flag jacques_preso impostato
+  ok - dialogo Audrey (OEJ) parte
+  ok - flag audrey_salvata impostato
+  ok - dialogo Lucy Atto 3 parte
+  ok - flag jacques_morto impostato
+  ok - dialogo del Gigante parte
+  ok - flag gigante1 impostato
+  ok - dialogo Truman Atto 4 parte
+  ok - dialogo Truman Atto 4 chiuso
+  ok - flag atto4 impostato
+  ok - Atto 4 non chiude la partita
+  ok - Maddy presente dopo atto4
+  ok - dialogo visione di Sarah parte
+  ok - dialogo Log Lady Atto 4 parte
+  ok - dialogo del Gigante (roadhouse) parte
+  ok - flag gigante2 impostato
+  ok - Maddy scomparsa dopo la seconda apparizione
+  ok - Leland assente da Palmer dopo il Roadhouse
+  ok - nessun dialogo classico contraddice la testimonianza taxi del diner
+  ok - dialogo ritrovamento di Maddy parte
+  ok - lettera "O" ottenuta
+  ok - flag maddy_trovata impostato
+  ok - dialogo Truman Atto 5 parte
+  ok - Atto 5 non chiude piu' la partita (ponte ritirato)
+  ok - flag atto5 impostato
+  ok - Leland assente da casa Palmer dopo atto5
+  ok - Leland presente al distretto dopo atto5
+  ok - dialogo interrogatorio di Leland parte
+  ok - flag leland_confessa impostato (BOB e' emerso)
+  ok - dialogo morte di Leland parte
+  ok - flag leland_morto impostato
+  ok - dialogo finale di Truman parte
+  ok - il ponte finale non chiude la partita
+  ok - dialogo finale del Nano parte
+  ok - flag mfap_finale_visto impostato
+  ok - BOB presente nella Stanza Rossa dopo la morte di Leland
+  ok - dialogo di BOB parte
+  ok - dialogo finale di Laura parte
+  ok - vero finale raggiunto
+  ok - reset post-finale
+  ok - indizi azzerati al reset
+
+428 controlli superati ✔
+EXIT:0
+=== test/sprite-gates.js ===
+/Users/ebuccelli/Code/solo/projects/twin-peaks-game/js/retro-authored.js:6771
+      throw new Error('missing authored cast matrix: ' + name);
+      ^
+
+Error: missing authored cast matrix: cooper
+    at authoredCharacterPattern (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/js/retro-authored.js:6771:13)
+    at Spr.drawChar (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/js/retro-authored.js:6859:17)
+    at render (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/test/sprite-gates.js:72:16)
+    at Object.<anonymous> (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/test/sprite-gates.js:374:20)
+    at Module._compile (node:internal/modules/cjs/loader:1854:14)
+    at Object..js (node:internal/modules/cjs/loader:1985:10)
+    at Module.load (node:internal/modules/cjs/loader:1577:32)
+    at Module._load (node:internal/modules/cjs/loader:1379:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+
+Node.js v24.16.0
+EXIT:1
+=== test/station-population.js ===
+/Users/ebuccelli/Code/solo/projects/twin-peaks-game/js/sheriffs-station-production.js:17
+  G.EnvironmentReactions.register('sheriff', [{
+                         ^
+
+TypeError: Cannot read properties of undefined (reading 'register')
+    at /Users/ebuccelli/Code/solo/projects/twin-peaks-game/js/sheriffs-station-production.js:17:26
+    at Object.<anonymous> (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/js/sheriffs-station-production.js:27:2)
+    at Module._compile (node:internal/modules/cjs/loader:1854:14)
+    at Object..js (node:internal/modules/cjs/loader:1985:10)
+    at Module.load (node:internal/modules/cjs/loader:1577:32)
+    at Module._load (node:internal/modules/cjs/loader:1379:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.require (node:internal/modules/cjs/loader:1600:12)
+    at require (node:internal/modules/helpers:153:16)
+    at load (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/test/station-population.js:161:24)
+
+Node.js v24.16.0
+EXIT:1
+=== test/touch-runtime.js ===
+ok - controls_created
+ok - touch_mode_enabled
+ok - portrait_targets_large
+ok - dpad_holds_and_releases
+ok - ab_emit_engine_keys
+ok - mobile_b_opens_narrative_notebook
+ok - blur_releases_direction
+ok - narrative_choice_controls_visible
+ok - narrative_choice_dpad_changes_focus
+ok - narrative_choice_a_confirms_once
+ok - narrative_tap_not_duplicated
+ok - narrative_page_has_single_advance_control
+ok - recovery_choice_has_mobile_dpad_and_confirm
+
+TOUCH-RUNTIME-PASS 13/13
+EXIT:0
+=== test/town-dusk.js ===
+town-dusk: grade
+  ok  deterministico: stesso ingresso, stessa uscita
+  ok  memoizzato per chiave 24 bit: la seconda chiamata non aggiunge voci
+  ok  uscita intera in 0..255 e mai nero pieno
+  ok  la curva asfalto e quella terreno restano separate
+town-dusk: famiglie misurate sul lotto Double R
+  ok  creme del terreno -> calcestruzzo #6f6d64..#7a766c
+  ok  tile di strada -> ardesia #485665 del lotto (±12 per canale)
+  ok  prato e alberi -> verde profondo, e sono la famiglia piu' scura
+  ok  bordeaux resta bordeaux e i legni restano bruni
+  ok  inchiostri e contorni restano scuri (nessun sollevamento del nero)
+  ok  le alteluci restano superfici accese ma sotto #b8b4a4
+town-dusk: practicals
+  ok  ogni rettangolo emissivo sta dentro i visualBounds del suo landmark
+  ok  le luci sono piu' chiare della parete su cui poggiano
+  ok  i lampioni nascono dal glifo L, solo sulla fascia civica, mai sotto un landmark
+town-dusk: hook
+  ok  l'hook grada e disegna solo per town, e delega per ogni altra mappa
+  ok  applyGrade usa la curva asfalto solo dentro le tile di strada
+
+town-dusk: 15 check ok
+EXIT:0
+=== test/town-map-coherence.js ===
+ok - town reale resta 56x36 rettangolare
+ok - piazza u e calpestabile
+ok - zebra est-ovest : e calpestabile
+ok - radura sbocca sul margine sud calpestabile, non sulla strada
+ok - coordinate porte storiche invariate
+ok - approccio authored subito sotto porta 9,6
+ok - approccio authored subito sotto porta 23,6
+ok - approccio authored subito sotto porta 42,6
+ok - approccio authored subito sotto porta 12,20
+ok - approccio authored subito sotto porta 42,20
+ok - approccio authored subito sotto porta 47,28
+ok - porta raggiungibile dalla piazza 9,6
+ok - porta raggiungibile dalla piazza 23,6
+ok - porta raggiungibile dalla piazza 42,6
+ok - porta raggiungibile dalla piazza 12,20
+ok - porta raggiungibile dalla piazza 42,20
+ok - porta raggiungibile dalla piazza 47,28
+ok - porta raggiungibile dalla piazza 55,14
+ok - porta raggiungibile dalla piazza 55,15
+ok - NPC raggiungibile: bobby
+ok - NPC raggiungibile: donna
+ok - NPC raggiungibile: jacoby
+ok - interact presente nel distretto: 30,30
+ok - interact presente nel distretto: 15,28
+ok - interact presente nel distretto: 50,22
+ok - strada e attraversamenti formano una componente unica
+ok - nessun tile strada isolato
+ok - asse est-ovest continuo e largo due tile
+ok - asse nord-sud attraversa piazza e bordo sud, largo tre tile
+ok - rete primaria collega porta 9,6
+ok - rete primaria collega porta 23,6
+ok - rete primaria collega porta 42,6
+ok - rete primaria collega porta 12,20
+ok - rete primaria collega porta 42,20
+ok - rete primaria collega porta 47,28
+ok - rete primaria collega porta 55,14
+ok - rete primaria collega porta 55,15
+ok - ghiaia limitata a corte civica 6x4 e ingresso visibile
+ok - ogni prop urbano dichiara sottofondo
+ok - le tre botteghe dichiarano sottofondo su footprint 3x3, 2x3 e 3x2
+ok - layer sottofondo non contiene coordinate stale
+ok - frame piazza contiene anchor u
+ok - frame piazza contiene anchor r
+ok - frame piazza contiene anchor :
+ok - frame piazza contiene anchor =
+ok - frame piazza contiene anchor S
+ok - frame piazza contiene anchor B
+ok - frame piazza contiene anchor A
+ok - frame piazza contiene anchor H
+ok - frame piazza contiene anchor E
+ok - frame piazza contiene anchor L
+ok - asse rosa domina piazza e uscita sud includendo la zebra semantica
+ok - spawn piazza sulla bocca 3-wide e adiacente alla strada
+ok - corte 5x4 continua, props interni sullo stesso sottofondo
+ok - corte civica ha bocca 3-wide diretta dalla strada e solo bordo est
+ok - cartello visibile, interazione e landmark coincidono a 30,30
+ok - passeggiata civica larga tre righe su entrambi i lati della strada
+ok - crosswalk 3-wide allineati solo a hotel, ospedale e Palmer
+ok - zebra E-O 3x2 attraversa la strada verticale davanti alla corte
+ok - footprint 4 entro 6x4 con porta invariata
+ok - footprint 5 entro 6x4 con porta invariata
+ok - footprint 3 entro 4x3 con porta invariata
+ok - footprint 1 entro 5x4 con porta invariata
+ok - footprint 2 entro 6x3 con porta invariata
+ok - footprint 6 entro 6x4 con porta invariata
+ok - Bookhouse e Horne's 3x3 sono autonomi e sfalsati verticalmente
+ok - vicolo largo due tile fra edifici sfalsati, calpestabile e connesso
+ok - camera street x32,y5 in vicolo reale e connessa
+ok - frame street contiene entrambi gli edifici interi
+ok - frame street contiene esattamente due componenti edificio, nessuna terza slice
+ok - frame street usa meno del 40% prato
+ok - nessuna massa blu o rail residua accanto alla coppia street
+ok - approccio hotel largo tre tile dalla porta alla strada
+ok - approcci ospedale e Palmer larghi tre tile fino alla strada
+ok - corsia nord 36x3 continua: solo auto V su fondo p e riga interna libera
+ok - raccordo hotel-sheriff largo tre tile e svolta 7x3
+ok - diner e Roadhouse collegati da corridoi e forecourt larghi almeno tre tile
+ok - botteghe formano tre volumi fisicamente diversi fuori dal frame street
+ok - carrier frame @16,9 contiene landmark intero con tetto
+ok - carrier frame @20,9 contiene landmark intero con tetto
+ok - carrier frame @47,13 contiene landmark intero con tetto
+ok - nessun cambio materiale tramite rettangolo di coordinate
+ok - strada, zebra orientata e piazza hanno renderer distinti
+ok - marciapiede usa autotile orizzontale verticale e giunzioni
+ok - Horne's usa storefront authored dedicato
+ok - bottega/casa compatta ha renderer distinto
+ok - town estende terreno crema R69 a prato, sentieri, strada, marciapiedi e sotto-alberi
+
+TOWN-MAP-COHERENCE-PASS 87/87
+EXIT:0
+=== test/town-route-captures.js ===
+TOWN-ROUTE-PASS 125 passi, 45 frame, 6/6 edifici, 0 prato grezzo
+EXIT:0
+=== test/town-structure-semantics.js ===
+TOWN-STRUCTURE-SEMANTICS-PASS 11/11
+EXIT:0
+=== test/tracks-provenance.js ===
+# landmark fisico e stato iniziale
+  ok - landmark tracks presente sulla mappa town
+  ok - casella authored dei binari risolve il landmark reale
+  ok - da spawn si raggiunge la casella da cui Invio affronta i binari
+  ok - stato vuoto usa risposta neutra
+  ok - landmark_tracks: definizione presente
+  ok - landmark_tracks: Cooper parla
+  ok - stato vuoto non inventa la data
+  ok - stato vuoto non conosce il vagone
+  ok - stato vuoto non conosce cuore/ciondolo
+  ok - risposta neutra resta specifica ai binari
+# gate atomico della rotta
+  ok - solo cuore intero non basta per conoscere la rotta
+  ok - solo testimonianza geografica non basta per usare il ciondolo
+  ok - E6A + T_JAMES_EST sbloccano insieme la lettura ricca
+  ok - landmark_tracks_route: definizione presente
+  ok - landmark_tracks_route: Cooper parla
+  ok - lettura ricca attribuisce geografia e relazione alle fonti esatte
+  ok - lettura ricca resta specifica al target
+  ok - prove M4 non anticipano ancora il vagone
+  ok - prove M4 non inventano una data
+# scoperta del vagone e precedenza
+  ok - flag semantico esatto sblocca il richiamo al vagone
+  ok - scoperta del vagone ha precedenza sulla variante di rotta
+  ok - landmark_tracks_vagone: definizione presente
+  ok - landmark_tracks_vagone: Cooper parla
+  ok - variante scoperta nomina soltanto luogo osservato e target
+  ok - flag vagone isolato non importa conoscenza del cuore
+  ok - nessuna variante conserva la data senza fonte
+# percorso runtime: adapter narrativo -> resolver classico
+  ok - runtime vuoto resta neutro
+  ok - runtime legge prove reali dall'adapter
+  ok - runtime legge flag reale dall'adapter
+tracks-provenance: PASS (29 checks)
+EXIT:0
+=== test/traincar-location-traversal.js ===
+/Users/ebuccelli/Code/solo/projects/twin-peaks-game/js/sheriffs-station-production.js:17
+  G.EnvironmentReactions.register('sheriff', [{
+                         ^
+
+TypeError: Cannot read properties of undefined (reading 'register')
+    at /Users/ebuccelli/Code/solo/projects/twin-peaks-game/js/sheriffs-station-production.js:17:26
+    at Object.<anonymous> (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/js/sheriffs-station-production.js:27:2)
+    at Module._compile (node:internal/modules/cjs/loader:1854:14)
+    at Object..js (node:internal/modules/cjs/loader:1985:10)
+    at Module.load (node:internal/modules/cjs/loader:1577:32)
+    at Module._load (node:internal/modules/cjs/loader:1379:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.require (node:internal/modules/cjs/loader:1600:12)
+    at require (node:internal/modules/helpers:153:16)
+    at Object.<anonymous> (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/test/traincar-location-traversal.js:23:1)
+
+Node.js v24.16.0
+EXIT:1
+=== test/walk-phase-contract.js ===
+WALK-PHASE-PASS — boundaries + 30/60/120 Hz + large-dt + chained reset
+EXIT:0
+=== test/walkthrough.js ===
+--- MAPPE SCOPERTE (indizi al momento della scoperta) ---
+  double_r_exterior_prototype  (indizi: 0)
+  sheriffs_station_exterior  (indizi: 0)
+  palmer  (indizi: 0)
+  town  (indizi: 0)
+  diner  (indizi: 0)
+  sheriff  (indizi: 0)
+  woods  (indizi: 3)
+  redroom  (indizi: 3)
+  hotel_gn  (indizi: 3)
+  hospital  (indizi: 4)
+  traincar  (indizi: 6)
+  oej  (indizi: 6)
+  roadhouse  (indizi: 8)
+
+--- TRACCIA ACQUISIZIONI (ordine) ---
+  1. done:bobby  [town]
+  2. done:donna  [town]
+  3. done:jacoby  [town]
+  4. done:landmark_cemetery  [town]
+  5. done:landmark_tracks  [town]
+  6. done:sign_town  [town]
+  7. done:lago_sguardo  [town]
+  8. done:tomba_laura  [town]
+  9. done:sarah  [palmer]
+  10. done:leland  [palmer]
+  11. clue:cuore  [palmer]
+  12. clue:lettera_r  [palmer]
+  13. done:laura_room  [palmer]
+  14. done:norma  [diner]
+  15. done:shelly  [diner]
+  16. done:loglady  [diner]
+  17. clue:diario  [sheriff]
+  18. done:truman  [sheriff]
+  19. done:andy  [sheriff]
+  20. done:hawk  [sheriff]
+  21. done:lucy  [sheriff]
+  22. done:olio  [woods]
+  23. done:sign_grove  [woods]
+  24. flag:met_mfap  [redroom]
+  25. done:mfap  [redroom]
+  26. clue:nome_sussurrato  [redroom]
+  27. flag:sogno_fatto  [redroom]
+  28. done:laura_sogno  [redroom]
+  29. clue:cuore_intero  [diner]
+  30. done:james_a2  [diner]
+  31. done:truman_a2  [sheriff]
+  32. done:benhorne_a2  [hotel_gn]
+  33. flag:audrey_indaga  [hotel_gn]
+  34. done:audrey_a2  [hotel_gn]
+  35. done:specchio315  [hotel_gn]
+  36. clue:poesia_fuoco  [hospital]
+  37. done:gerard_a2  [hospital]
+  38. flag:ronette_bob  [hospital]
+  39. done:ronette_letto  [hospital]
+  40. flag:atto3  [sheriff]
+  41. done:truman_atto3  [sheriff]
+  42. done:truman_wait3  [sheriff]
+  43. done:hawk_vagone  [traincar]
+  44. done:sign_ponte  [traincar]
+  45. done:sign_oej  [traincar]
+  46. clue:biglietto_fuoco  [traincar]
+  47. done:mucchio_terra  [traincar]
+  48. clue:anello  [traincar]
+  49. done:anello_interact  [traincar]
+  50. flag:jacques_preso  [oej]
+  51. done:jacques_a3  [oej]
+  52. flag:audrey_salvata  [oej]
+  53. done:audrey_oej  [oej]
+  54. flag:jacques_morto  [sheriff]
+  55. done:lucy_a3  [sheriff]
+  56. flag:gigante1  [hotel_gn]
+  57. done:gigante1_dlg  [hotel_gn]
+  58. flag:atto4  [sheriff]
+  59. done:truman_atto4  [sheriff]
+  60. done:specchio_dopo  [hotel_gn]
+  61. done:gerard_a4  [hospital]
+  62. flag:sarah_visione_ascoltata  [palmer]
+  63. done:sarah_visione  [palmer]
+  64. done:leland_a4  [palmer]
+  65. done:maddy_a4  [palmer]
+  66. done:loglady_a4  [diner]
+  67. done:truman_wait4  [sheriff]
+  68. flag:gigante2  [roadhouse]
+  69. done:gigante2_dlg  [roadhouse]
+  70. clue:lettera_o  [town]
+  71. flag:maddy_trovata  [town]
+  72. done:lago_maddy  [town]
+  73. flag:atto5  [sheriff]
+  74. done:truman_atto5  [sheriff]
+  75. flag:leland_confessa  [sheriff]
+  76. done:leland_interr  [sheriff]
+  77. done:palco_dopo  [roadhouse]
+  78. done:lago_dopo  [town]
+  79. done:truman_wait5  [sheriff]
+  80. flag:leland_morto  [sheriff]
+  81. done:leland_morte  [sheriff]
+  82. flag:mfap_finale_visto  [redroom]
+  83. done:mfap_finale  [redroom]
+  84. done:laura_finale2  [redroom]
+  85. done:bob_finale  [redroom]
+  86. done:truman_fine  [sheriff]
+
+--- OBIETTIVO (variazioni lungo la traccia) ---
+  @1. Parla con lo sceriffo Truman (a ovest).
+  @11. Casa Palmer: esamina la camera di Laura.
+  @17. Segui il sentiero nel bosco.
+  @27. Parla con Ronette in ospedale e James al diner.
+  @36. Riferisci a Truman alla centrale.
+  @40. La strada a est: il vagone del treno.
+  @56. Riferisci a Truman alla centrale.
+  @58. Stasera: il Roadhouse.
+  @68. Parla con Sarah a casa Palmer; poi vai al lago.
+  @71. Riferisci a Truman alla centrale.
+  @73. Interroga Leland Palmer alla centrale.
+  @80. Torna alla Loggia (Glastonbury Grove).
+
+OK: cammino completo simulato, 86 acquisizioni, finale raggiunto ✔
+EXIT:0
+=== test/world-engine-v0.1-catalog.js ===
+WORLD-ENGINE-V0.1-CATALOG-PASS registration, immutable catalog, scoped lookups, shared connections, validation, authored references
+EXIT:0

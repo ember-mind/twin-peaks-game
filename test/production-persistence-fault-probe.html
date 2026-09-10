@@ -176,9 +176,6 @@ html,body,iframe{margin:0;border:0;width:100%;height:100%;overflow:hidden;backgr
       }
     }
     drainFinale();
-    if (NF.getState().stage !== 'await_post_s3') throw new Error('expected_await_post_s3');
-    if (!NF.resumePostS3().ok) throw new Error('resume_post_s3');
-    drainFinale();
     if (NF.getState().stage !== 'await_lodge') throw new Error('expected_await_lodge');
     if (!NF.beginLodge('mfap').ok) throw new Error('begin_mfap'); drainFinale();
     if (!NF.beginLodge('bob').ok) throw new Error('begin_bob'); drainFinale();

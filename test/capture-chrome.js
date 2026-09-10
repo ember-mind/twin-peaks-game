@@ -27,7 +27,6 @@ function parse(argv) {
     timeoutMs: 15000,
     gpu: process.platform === 'darwin' ? 'metal' : 'auto',
     framesDir: '',
-    metaOutput: '',
     nativeAttr: ''
   };
   for (const arg of argv) {
@@ -40,7 +39,6 @@ function parse(argv) {
     else if (arg.startsWith('--timeout-ms=')) out.timeoutMs = Number(arg.slice(13));
     else if (arg.startsWith('--gpu=')) out.gpu = arg.slice(6);
     else if (arg.startsWith('--frames-dir=')) out.framesDir = arg.slice(13);
-    else if (arg.startsWith('--meta-output=')) out.metaOutput = arg.slice(14);
     else if (arg.startsWith('--native-attr=')) out.nativeAttr = arg.slice(14);
     else throw new Error(`unknown option: ${arg}`);
   }
@@ -280,7 +278,7 @@ async function main() {
       const buffer = Buffer.from(match[1], 'base64');
       const nw = buffer.readUInt32BE(16);
       const nh = buffer.readUInt32BE(20);
-      if (nw !== 160 || nh !== 144) throw new Error(`native frame is ${nw}x${nh}, expected 160x144`);
+      if (nw !== 256 || nh !== 192) throw new Error(`native frame is ${nw}x${nh}, expected 256x192`);
       fs.writeFileSync(options.output, buffer);
       console.log(JSON.stringify({ ok: true, title, native: [nw, nh], output: options.output }));
       return;
@@ -294,21 +292,19 @@ async function main() {
     fs.writeFileSync(options.output, Buffer.from(shot.data, 'base64'));
     let exportedFrames = 0;
     if (options.framesDir) {
-      const frames = await cdp.evaluate('window.__TP_SHOT_FRAMES__ || []', options.timeoutMs);
+      // Fetch frames individually: long native animation reels can exceed CDP message limits.
+      const frameCount = await cdp.evaluate('(window.__TP_SHOT_FRAMES__ || []).length', options.timeoutMs);
       fs.mkdirSync(options.framesDir, { recursive: true });
-      for (let index = 0; index < frames.length; index++) {
-        const match = /^data:image\/(png|webp);base64,(.+)$/.exec(frames[index]);
+      for (let index = 0; index < frameCount; index++) {
+        const frame = await cdp.evaluate(`window.__TP_SHOT_FRAMES__[${index}]`, options.timeoutMs);
+        const match = /^data:image\/(png|webp);base64,(.+)$/.exec(frame);
         if (!match) throw new Error(`invalid exported motion frame ${index}`);
         fs.writeFileSync(
           path.join(options.framesDir, `frame-${String(index).padStart(3, '0')}.${match[1]}`),
           Buffer.from(match[2], 'base64')
         );
       }
-      exportedFrames = frames.length;
-    }
-    if (options.metaOutput) {
-      const meta = await cdp.evaluate('window.__TP_SHOT_FRAME_META__ || []', options.timeoutMs);
-      fs.writeFileSync(options.metaOutput, JSON.stringify(meta, null, 2) + '\n');
+      exportedFrames = frameCount;
     }
     console.log(JSON.stringify({
       ok: true,
@@ -316,8 +312,7 @@ async function main() {
       gpu: options.gpu,
       viewport: [options.width, options.height],
       output: options.output,
-      exportedFrames,
-      metaOutput: options.metaOutput || null
+      exportedFrames
     }));
   } catch (error) {
     let log = '';

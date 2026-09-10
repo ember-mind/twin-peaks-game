@@ -113,8 +113,8 @@ const allowedClassicDiane = new Set([
   'leland_interr:first',
   'bob_finale:first',
   'laura_finale2:first',
-  'laura_sogno:first',
-  'gigante2_dlg:first'
+  'laura_sogno:first'
+  // gigante2_dlg ritirato (Act 3 pass 01): il Roadhouse è del layer missione (M8)
 ]);
 const seenClassicDiane = new Set();
 
@@ -208,12 +208,21 @@ function cooperPage(page) {
   return !!page && (page.name === 'COOPER' || page.speaker_id === 'cooper' || page.display_name === 'COOPER');
 }
 
-function conditionValueNames(condition, out) {
+// Sentinella per un valore MAI scritto (peekValue === undefined nel runtime):
+// distinta da qualunque valore reale del dominio, cosi' value_set/¬value_set
+// possono essere enumerati come stato a se' quando un `value` non ha default.
+const UNSET = Symbol('unset');
+
+function conditionValueNames(condition, out, unsetOut) {
   if (!condition || typeof condition !== 'object') return out;
   if (condition.value_is && condition.value_is.name) out.add(condition.value_is.name);
+  if (typeof condition.value_set === 'string') {
+    out.add(condition.value_set);
+    if (unsetOut) unsetOut.add(condition.value_set);
+  }
   Object.values(condition).forEach((value) => {
-    if (Array.isArray(value)) value.forEach((item) => conditionValueNames(item, out));
-    else if (value && typeof value === 'object') conditionValueNames(value, out);
+    if (Array.isArray(value)) value.forEach((item) => conditionValueNames(item, out, unsetOut));
+    else if (value && typeof value === 'object') conditionValueNames(value, out, unsetOut);
   });
   return out;
 }
@@ -221,9 +230,19 @@ function conditionValueNames(condition, out) {
 function evalPageCondition(condition, values) {
   if (!condition) return true;
   if (condition.value_is) return values[condition.value_is.name] === condition.value_is.equals;
+  if (typeof condition.value_set === 'string') {
+    var v = values[condition.value_set];
+    return v !== undefined && v !== UNSET;
+  }
   if (condition.all) return condition.all.every((item) => evalPageCondition(item, values));
   if (condition.any) return condition.any.some((item) => evalPageCondition(item, values));
   if (condition.not) return !evalPageCondition(condition.not, values);
+  // condizioni di stato (node_done/flag/evidence/proposition_path, C8-B
+  // conditional_pages): non dipendono dai valori enumerati → la pagina è
+  // auditata come presente (stesso trattamento per tutte, mirror NR.evalCond
+  // ma senza uno state runtime da interrogare in questo audit statico).
+  if (condition.node_done !== undefined || condition.flag !== undefined ||
+    condition.evidence !== undefined || condition.proposition_path !== undefined) return true;
   throw new Error('interaction-voice: condizione pagina non supportata ' + JSON.stringify(condition));
 }
 
@@ -234,12 +253,14 @@ function domainFor(valueName) {
   return domain;
 }
 
-function assignments(names, index, current, out) {
+function assignments(names, index, current, out, unsetNames) {
   if (index === names.length) { out.push({ ...current }); return out; }
   const name = names[index];
-  for (const value of domainFor(name)) {
+  const domain = domainFor(name);
+  const options = unsetNames && unsetNames.has(name) ? [...domain, UNSET] : domain;
+  for (const value of options) {
     current[name] = value;
-    assignments(names, index + 1, current, out);
+    assignments(names, index + 1, current, out, unsetNames);
   }
   delete current[name];
   return out;
@@ -272,11 +293,12 @@ function respectsChoiceCorrelations(values, writes) {
 
 function renderedEntryVariants(mission, node) {
   const names = new Set();
+  const unsetNames = new Set();
   if (node.pages_by_value) names.add(node.pages_by_value.value);
   [...(node.pages || []), ...(node.pages_after_branch || [])]
-    .forEach((page) => conditionValueNames(page.condition, names));
+    .forEach((page) => conditionValueNames(page.condition, names, unsetNames));
   const valueNames = [...names];
-  const states = valueNames.length ? assignments(valueNames, 0, {}, []) : [{}];
+  const states = valueNames.length ? assignments(valueNames, 0, {}, [], unsetNames) : [{}];
   const writes = choiceValueWrites(mission);
   const variants = new Map();
 
@@ -296,32 +318,51 @@ let renderedVariants = 0;
 let repeatVariants = 0;
 const missionVoicePages = new Map();
 
+/* Eccezione riveduta ed esplicita (non un fallback generico): questi due
+ * world root di M8 sono muti per contratto di scena, non per lacuna di
+ * scrittura. m8_roadhouse_truman e' il beat di testimonianza (la voce di
+ * Cooper arriva al nodo telefono, m8_roadhouse_phone, non qui);
+ * m8_giant_stage e' presenza silenziosa per contratto (S3/L4,
+ * artifacts/act-4-design/scene-contracts.md: "indica nulla"). Entry e
+ * repeat esenti SOLO per questi id; il gate resta rigido per tutto il resto. */
+const silentByDesign = {
+  M8: new Set(['m8_roadhouse_truman', 'm8_giant_stage'])
+};
+
 console.log('# voce Cooper nelle missioni narrative');
 for (const mission of missions) {
+  const silentIds = silentByDesign[mission.name] || new Set();
   for (const node of mission.data.nodes || []) {
     if (node.channel !== 'world') continue;
     worldRoots++;
+    const silent = silentIds.has(node.id);
     const variants = renderedEntryVariants(mission.data, node);
     variants.forEach((variant, index) => {
       renderedVariants++;
       const label = `${mission.name}:${node.id}:entry${variants.length > 1 ? '[' + (index + 1) + ']' : ''}`;
-      if (!variant.pages.some(cooperPage)) fail(`${label} privo di battuta COOPER`);
-      else console.log(`  ok - ${label}`);
+      if (!variant.pages.some(cooperPage)) {
+        if (silent) console.log(`  ok - ${label} (silenzioso per contratto)`);
+        else fail(`${label} privo di battuta COOPER`);
+      } else console.log(`  ok - ${label}`);
       variant.pages.filter(cooperPage).forEach((page) => missionVoicePages.set(page.id, page));
     });
     if (node.rules && node.rules.reopen) {
       renderedVariants++;
       const pages = node.rules.reopen.pages || [];
       const label = `${mission.name}:${node.id}:reopen`;
-      if (!pages.some(cooperPage)) fail(`${label} privo di battuta COOPER`);
-      else console.log(`  ok - ${label}`);
+      if (!pages.some(cooperPage)) {
+        if (silent) console.log(`  ok - ${label} (silenzioso per contratto)`);
+        else fail(`${label} privo di battuta COOPER`);
+      } else console.log(`  ok - ${label}`);
       pages.filter(cooperPage).forEach((page) => missionVoicePages.set(page.id, page));
     }
     if (node.repeat) {
       repeatVariants++;
       const label = `${mission.name}:${node.id}:repeat`;
-      if (!cooperPage(node.repeat)) fail(`${label} privo di battuta COOPER`);
-      else console.log(`  ok - ${label}`);
+      if (!cooperPage(node.repeat)) {
+        if (silent) console.log(`  ok - ${label} (silenzioso per contratto)`);
+        else fail(`${label} privo di battuta COOPER`);
+      } else console.log(`  ok - ${label}`);
       if (cooperPage(node.repeat)) missionVoicePages.set(node.repeat.id, node.repeat);
     }
   }
@@ -341,9 +382,17 @@ console.log(`  varianti entry/reopen rese: ${renderedVariants}`);
 console.log(`  repeat autoriali: ${repeatVariants}`);
 console.log(`  pagine COOPER uniche: ${missionVoicePages.size}`);
 
-if (worldRoots !== 37) fail(`world roots attese 37, trovate ${worldRoots}`);
-if (renderedVariants !== 52) fail(`varianti entry/reopen attese 52, trovate ${renderedVariants}`);
-if (repeatVariants !== 7) fail(`repeat autoriali attesi 7, trovati ${repeatVariants}`);
+/* M6 stitch: +2 world root (m6_hospital_guard, m6_return_night_early) con il
+ * loro repeat; +3 varianti di m6_news (la correzione «impeto» rende una pagina
+ * in piu' solo con m5_final_theory=degeneration, su ognuna delle 3 tattiche) e
+ * +1 di m6_atto4_bridge (le due letture esclusive di s1). */
+// Act 4 pass 01 (split B1 + B2): +5 world root M8 (m8_leland_waiting,
+// m8_roadhouse_truman, m8_giant_stage al posto di m8_roadhouse; m8_lucy),
+// +3 repeat autoriali (m8_leland_waiting, m8_giant_stage, m8_focus_choice);
+// value_set ora enumerato (UNSET) aggiunge le varianti reali su m8_lucy.
+if (worldRoots !== 54) fail(`world roots attese 54, trovate ${worldRoots}`);
+if (renderedVariants !== 77) fail(`varianti entry/reopen attese 77, trovate ${renderedVariants}`);
+if (repeatVariants !== 24) fail(`repeat autoriali attesi 24, trovati ${repeatVariants}`);
 
 if (failures.length) {
   throw new Error(`interaction-voice: ${failures.length} errore/i`);

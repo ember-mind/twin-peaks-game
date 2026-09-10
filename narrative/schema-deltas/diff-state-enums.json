@@ -1,19 +1,18 @@
 {
  "_comment": "diff PROPOSTO a state-enums.json (C5-A) — da applicare solo dopo approvazione",
  "booleans_allowed_add": [
-  "vagone_scoperto",
-  "m5_theory_revised"
+  "vagone_scoperto"
  ],
  "values_allowed_add": {
   "m5_initial_theory": "m5_initial_theory_domain",
   "m5_final_theory": "m5_final_theory_domain",
   "s1": "s1"
  },
- "note": "east_route_confirmed già in booleans_allowed; s1 esiste già. C5-A.2: domini DISTINTI per teoria iniziale (2 valori) e finale (3) — 'open' impossibile nel valore iniziale anche in deserialize/migrazione/save corrotto; l'enum condiviso m5_theory resta per compat storica dei documenti.",
+ "note": "east_route_confirmed già in booleans_allowed; s1 esiste già. C5-A.2: domini DISTINTI per teoria iniziale (2 valori) e finale (3) — 'open' impossibile nel valore iniziale anche in deserialize/migrazione/save corrotto; l'enum condiviso m5_theory resta per compat storica dei documenti. | act-3 pass 01: dominio iniziale = degeneration|withheld (R1: alla porta si offre impeto o sospensione, mai disposizione); m5_theory_revised eliminato.",
  "enums_add": {
   "m5_initial_theory_domain": [
    "degeneration",
-   "staging"
+   "withheld"
   ],
   "m5_final_theory_domain": [
    "degeneration",

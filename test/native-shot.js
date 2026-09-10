@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-// test/native-shot.js — cattura il frame NATIVO 160x144 di una scena retro.
+// test/native-shot.js — cattura il frame NATIVO 256x192 di una scena retro.
 // Nessun upscaling, nessuno screenshot del compositor: prende i pixel esatti
 // del canvas esportati da test/retro-scene.html su <body data-native-png>.
 //
@@ -24,7 +24,7 @@ const y = args.get('y') || '31';
 const dir = args.get('dir') || 'up';
 const dialogue = args.get('dialogue') || '';
 const silhouette = args.get('silhouette') || '';
-const flags = args.get('flags') || '';
+const narrative = args.get('narrative') || '';
 const out = path.resolve(root, args.get('out') || '/tmp/native.png');
 const chrome = process.env.CHROME_BIN ||
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -47,7 +47,8 @@ if (!up) { console.error('native-shot: server non raggiungibile'); process.exit(
 let url = `http://127.0.0.1:${port}/test/retro-scene.html?map=${map}&x=${x}&y=${y}&dir=${dir}`;
 if (dialogue) url += `&dialogue=${dialogue}`;
 if (silhouette) url += `&silhouette=${silhouette}`;
-if (flags) url += `&flags=${encodeURIComponent(flags)}`;
+if (narrative) url += `&narrative=${narrative}`;
+if (args.get('nstate')) url += `&nstate=${encodeURIComponent(args.get('nstate'))}`;
 
 // Cattura + gate anti-frame-bianco. La pipeline headless ogni tanto consegna
 // un canvas non ancora dipinto: il file esiste, il titolo e' pronto, e lo
@@ -63,7 +64,7 @@ function distinctColors(file) {
   if (buf.length < 1200) return 0;
   const { spawnSync: run } = require('node:child_process');
   const r = run(process.execPath, [path.join(root, 'test', 'pixel-gates.js'), file,
-    '--rect=0,0,159,143'], { encoding: 'utf8' });
+    '--rect=0,0,255,191'], { encoding: 'utf8' });
   if (r.status !== 0) return 0;
   try { return JSON.parse(r.stdout).colors || 0; } catch (_) { return 0; }
 }

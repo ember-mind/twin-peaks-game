@@ -1,0 +1,12 @@
+{
+  "js/engine.js": "c01badcb2d9c490155b841993c9a1c484d7637bdc6813cad1ce523af5db4daa8",
+  "js/world-engine.js": "2437a8ba14a371b37bdf1f2679fe9dcccfac08a986da87a219cb6aa2a2acf00f",
+  "js/retro-authored.js": "373160698a43b96333ae622e5832baaec6f553188af929d28d67dfe20c4b8a22",
+  "js/retro.js": "1cb8b6bf039ca15177fec2aa1f97d50e3bd939798ec909c0fad8c918fba2c898",
+  "js/maps.js": "71b5c38bf06a4e0394215944a98e7ba037898f96a7f889623772c35f5b15854f",
+  "assets/sprites/cast-walkcycles-hg-24.png": "dcc9e00ad1370606b039ee6039b955720d711d04f521d601169eebe97eb4d770",
+  "js/ambient-life.js": "3e7ff48d8671c0b867d8b760c86a18e73d5196c50cefa63e323a28a4251a9ec3",
+  "js/ambient-life-scenes.js": "4b5167ec88e8e46de9ddd08ef8977c2ffc62b5c104a9a13224fad630f8f8a34d",
+  "js/environment-reactions.js": "905e11b0910d83f593282c686ea1ca7d3212077aa6e1db0809a4c8f5e28165e4",
+  "js/location-connections.js": "a99a2ba52da74903728eea8021039fe8b04e5738e9c0ee0ed1ef3f3dc5657699"
+}

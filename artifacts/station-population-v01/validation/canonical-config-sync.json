@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-09",
+  "canonicalRoot": "/Users/ebuccelli/Vault/1. Projects/Twin Peaks Game",
+  "scope": "stationP Coldstage scenario and changed-file routing only",
+  "files": [
+    {
+      "file": "coldstage.config.mjs",
+      "beforeSha256": "e6d892ffcabb7246709c14410d262bacec542bef52b74f456dd85b150fb950c5",
+      "afterSha256": "c3cafadfeaa751f923c54942485a59c3945b65fb3eb01ee928f29854b7f90ef8",
+      "action": "added exact workspace population scenario under final short key stationP, explicit population watch entries, and minimal stationP routing"
+    },
+    {
+      "file": "test/coldstage-config.js",
+      "beforeSha256": "7ac98a7622c810df4dbe4c257cdf3cbb9f2c05eb7727a4d127482e6133ba11be",
+      "afterSha256": "6008eed5f3eea0ecdf47278f6354ca5783245c339de9e07201e69fd50f727f84",
+      "action": "added stationP to the three existing all-scenario expectations"
+    }
+  ],
+  "preserved": "All pre-existing canonical scenarios, routing branches, timeout defaults, and known entrypoint differences remain unchanged.",
+  "verification": [
+    {
+      "command": "exact scenario block diff against workspace",
+      "result": "pass"
+    },
+    {
+      "command": "node test/coldstage-config.js",
+      "result": "pass: Coldstage routing 6/6"
+    },
+    {
+      "command": "native config import and targeted selectChanged probes",
+      "result": "pass"
+    },
+    {
+      "command": "node --check coldstage.config.mjs and test/coldstage-config.js",
+      "result": "pass"
+    }
+  ],
+  "browserRun": false
+}

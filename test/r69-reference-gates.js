@@ -44,10 +44,10 @@ const allCastCardsExact = Object.keys(Portraits.faces).length === 25 &&
 
 const checks = {
   reference_is_vaulted: fs.existsSync(path.join(root, 'artifacts/retro-gauntlet/refs/reference-r69.png')),
-  native_canvas_160x144: /width="160" height="144"/.test(index),
+  native_canvas_256x192: /width="256" height="192"/.test(index),
   /* Misure hard-pass registrate in Gauntlet Retro 2D — Progressi.md e
    * artifacts/r69-ui-mobile-round9.md. */
-  dialogue_split_95_49: /var by = 95, bh = 49/.test(engine),
+  dialogue_bottom_panel_53_49: /var by = VH - 53, bh = 49/.test(engine),
   portrait_card_40x47: allCastCardsExact,
   portrait_anchor_overlaps_world: /bx \+ 9, by - 37/.test(engine),
   legacy_reference_palette_remains_available: /\['#072619', '#34572d', '#6a8a43', '#9aab69', '#dcd9a9', '#eee6b5'\]/.test(tone),
@@ -56,12 +56,14 @@ const checks = {
     /GAME\.Retro2D\.limitBackgroundPalettes/.test(authored),
   production_keeps_obj_palette_separate: /objTones/.test(authored) &&
     !/GAME\.GoldTone\.apply\(ctx/.test(engine),
-  hero_spawn_faces_arrival_tableau: /mapId: 'arrival'/.test(engine) && /tx: 4, ty: 3/.test(engine) && /loadMap\('arrival', 4, 3, 'up'\)/.test(engine),
+  hero_spawn_starts_at_town_entrance: /START_MAP = 'town', START_TX = 28, START_TY = 31, START_DIR = 'up'/.test(engine) &&
+    /loadMap\(START_MAP, START_TX, START_TY, START_DIR\)/.test(engine),
   hero_dialogue_camera_lift: /S\.dialogue && !map\.indoor/.test(engine) && /tyy \+ 12/.test(engine),
   arrival_is_rectangular_10x9: arrival.rows.length === 9 && arrival.rows.every((row) => row.length === 10),
   arrival_has_shop_cabin_car_mailbox: arrival.rows.slice(0, 3).every((row) => row.slice(2, 4) === '99' && row.slice(6, 9) === 'JJJ') &&
     arrival.rows[1][4] === 'E' && arrival.rows[3].slice(6, 8) === 'VV',
-  hero_car_is_32px_pair: town.rows[7].slice(38, 40) === 'VV' && /function parkedCar/.test(authored),
+  hero_car_uses_large_two_tile_vehicle: town.rows[7].slice(38, 40) === 'VV' &&
+    /function drawParkedCarHero/.test(authored) && /Berlina laterale 45x23/.test(authored),
   car_collision_matches_art: global.GAME.maps.SOLID.V === 1,
   car_preserves_path_ground: town.ground['38,7'] === 'p' && town.ground['39,7'] === 'p',
   hero_forest_left_mass: town.rows[10][31] === 'T' && town.rows[11].slice(30, 32) === 'TT' && town.rows[12].slice(29, 32) === 'TTT',

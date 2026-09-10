@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sheriff's Station v0.2.1 — Native Comparison</title>
+  <style>
+    :root { --native-scale: 2; color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; background: #151a18; color: #ece6d4; font: 15px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    main { max-width: 1660px; margin: 0 auto; }
+    h1 { margin: 0 0 6px; font-size: 22px; }
+    h2 { margin: 32px 0 12px; font-size: 17px; }
+    p { margin: 6px 0 16px; color: #b9c1ba; }
+    nav, .controls { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 14px 0; }
+    a { color: #efd08a; }
+    button { border: 1px solid #6d7a71; border-radius: 4px; padding: 6px 10px; background: #252e29; color: inherit; font: inherit; cursor: pointer; }
+    button[aria-pressed="true"] { border-color: #efd08a; color: #efd08a; }
+    .triptych { display: grid; grid-template-columns: repeat(3, minmax(280px, 1fr)); gap: 18px; align-items: start; }
+    figure { margin: 0; padding: 12px; background: #202723; border: 1px solid #39443d; border-radius: 6px; overflow: auto; }
+    figcaption { margin-bottom: 10px; font-weight: 700; letter-spacing: .04em; }
+    .concept { display: block; width: 100%; height: auto; background: #0d100f; }
+    .native-scaled { display: block; width: calc(256px * var(--native-scale)); height: calc(192px * var(--native-scale)); max-width: none; image-rendering: pixelated; image-rendering: crisp-edges; background: #0d100f; }
+    .native-row { display: flex; flex-wrap: wrap; gap: 18px; align-items: start; }
+    .native-row figure { flex: 0 0 auto; }
+    .native-exact { display: block; width: 256px; height: 192px; image-rendering: pixelated; image-rendering: crisp-edges; }
+    .note { font-size: 13px; color: #93a098; }
+    @media (max-width: 1000px) { .triptych { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Sheriff's Station main interior — v0.2.1</h1>
+    <p>Concept reference, preserved native-before capture, and captured native-after frame. Native images use integer scaling and browser smoothing is disabled.</p>
+    <nav aria-label="Evidence links">
+      <a href="native-after.png">Clean capture (1280×960, exact 5×)</a>
+      <a href="native-debug.png">Debug capture</a>
+      <a href="http://127.0.0.1:4177/test/sheriffs-station.html?polish=v021">Live clean preview</a>
+      <a href="http://127.0.0.1:4177/test/sheriffs-station.html?polish=v021&amp;debug=1">Live debug preview</a>
+      <a href="validation/pixel-audit.json">Pixel extraction audit</a>
+      <a href="validation/capture-manifest.json">Capture provenance</a>
+    </nav>
+
+    <div class="controls" aria-label="Native display scale">
+      <span>Native comparison scale:</span>
+      <button type="button" data-scale="1" aria-pressed="false">1×</button>
+      <button type="button" data-scale="2" aria-pressed="true">2×</button>
+      <button type="button" data-scale="3" aria-pressed="false">3×</button>
+    </div>
+
+    <section class="triptych" aria-label="Three-way comparison">
+      <figure>
+        <figcaption>GOLDEN CONCEPT</figcaption>
+        <img class="concept" src="../sheriffs-station-main-interior-v01/final.png" alt="Golden concept reference">
+        <div class="note">Illustration reference; scaled to fit.</div>
+      </figure>
+      <figure>
+        <figcaption>NATIVE BEFORE</figcaption>
+        <img class="native-scaled" src="native-before-256.png" width="256" height="192" alt="Native frame before v0.2.1 polish">
+        <div class="note">Exact 256×192 framebuffer at the selected integer scale.</div>
+      </figure>
+      <figure>
+        <figcaption>NATIVE AFTER</figcaption>
+        <img class="native-scaled" src="native-after-256.png" width="256" height="192" alt="Native frame after v0.2.1 polish">
+        <div class="note">Exact 256×192 framebuffer at the selected integer scale.</div>
+      </figure>
+    </section>
+
+    <h2>Native-size QA — exact 256×192</h2>
+    <div class="native-row">
+      <figure>
+        <figcaption>BEFORE · 1×</figcaption>
+        <img class="native-exact" src="native-before-256.png" width="256" height="192" alt="Before framebuffer at native size">
+      </figure>
+      <figure>
+        <figcaption>AFTER · 1×</figcaption>
+        <img class="native-exact" src="native-after-256.png" width="256" height="192" alt="After framebuffer at native size">
+      </figure>
+    </div>
+  </main>
+  <script>
+    document.querySelectorAll('[data-scale]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        document.documentElement.style.setProperty('--native-scale', button.dataset.scale);
+        document.querySelectorAll('[data-scale]').forEach(function (other) {
+          other.setAttribute('aria-pressed', String(other === button));
+        });
+      });
+    });
+  </script>
+</body>
+</html>

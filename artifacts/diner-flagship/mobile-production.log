@@ -1,0 +1,22 @@
+ok - viewport_covers_notch
+ok - dynamic_viewport_height
+ok - no_page_overscroll
+ok - touch_action_disabled
+ok - mobile_uses_visual_viewport
+ok - mobile_audit_override
+ok - portrait_reserves_controls_region
+ok - mobile_keeps_integer_scale
+ok - desktop_keeps_integer_scale
+ok - orientation_resizes_stage
+ok - touch_dpad_available
+ok - touch_ab_available
+ok - controls_use_safe_areas
+ok - controls_resize_for_orientation
+ok - portrait_controls_follow_stage
+ok - narrative_owns_its_tap
+ok - narrative_choice_has_dpad
+ok - narrative_choice_has_confirm
+ok - held_direction_released_on_blur
+ok - hidden_page_releases_direction
+
+MOBILE-PROD-PASS 20/20

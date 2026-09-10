@@ -23,12 +23,17 @@ html, body, iframe { width: 100%; height: 100%; margin: 0; border: 0; overflow: 
       S.flags.intro_town = true;
       S.mode = 'play';
       E.loadMap('town', 30, 23, 'up');
-      S.clues = ['diario', 'cuore', 'lettera_r'];
+      S.clues = Object.keys(w.GAME.Data.clues);
+      var requestedClue = q.get('clue') || 'diario';
+      var clueIndex = S.clues.indexOf(requestedClue);
+      if (clueIndex < 0) clueIndex = 0;
       S.menu = true;
-      S.menuIndex = 0;
+      S.menuIndex = clueIndex;
       w.dispatchEvent(new w.KeyboardEvent('keydown', { code: 'Enter' }));
       w.dispatchEvent(new w.KeyboardEvent('keyup', { code: 'Enter' }));
-      var requestedPage = Math.max(1, Math.min(3, Number(q.get('page') || 1)));
+      var selected = w.GAME.Data.clues[S.clues[clueIndex]];
+      var pageCount = selected && selected.document ? selected.document.pages.length : 1;
+      var requestedPage = Math.max(1, Math.min(pageCount, Number(q.get('page') || 1)));
       for (var page = 1; page < requestedPage; page++) {
         w.dispatchEvent(new w.KeyboardEvent('keydown', { code: 'Enter' }));
         w.dispatchEvent(new w.KeyboardEvent('keyup', { code: 'Enter' }));

@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "run": "heartgold-visual-parity-r103",
+  "unit": "cast-hg-24",
+  "status": "round-12-build-pass",
+  "releaseGate": "pending-integrated-critic",
+  "source": {
+    "mastersRoot": "/Users/ebuccelli/Code/solo/projects/twin-peaks-game/assets/sprites",
+    "manifest": "cast-manifest.json",
+    "masterLayout": "3x3: down idle/A/B, up idle/A/B, right idle/A/B",
+    "masterCount": 24,
+    "mastersCopiedIntoCanonical": false,
+    "copyrightRule": "derived Twin Peaks cast masters only; no Nintendo asset pixels copied"
+  },
+  "build": {
+    "command": "node tools/build-heartgold-cast.js --masters-root /Users/ebuccelli/Code/solo/projects/twin-peaks-game/assets/sprites",
+    "generator": "tools/build-heartgold-cast.js",
+    "generatorSha256": "cd7dc2fdd6fd4b2ee6900bab14aecc3da53282530b6b5599f17ed8fa05b5060d",
+    "characterSheets": {
+      "path": "assets/sprites/cast-hg-24/",
+      "count": 24,
+      "dimensions": "72x72",
+      "framesPerSheet": 9,
+      "frameDimensions": "24x24"
+    },
+    "castAtlas": {
+      "path": "assets/sprites/cast-walkcycles-hg-24.png",
+      "dimensions": "360x360",
+      "sha256": "34eb8e0b774c849b78c938ce8a96947db0ebe6bff458f8ee116ee4bde01ed69e"
+    },
+    "portraitPresentation": {
+      "main": "js/main.js",
+      "mainSha256": "199d8af06696d026103a1083cf3237438946d723a72cb07c1b7962c80123f395",
+      "index": "index.html",
+      "indexSha256": "d84fc36e65a7fb3d858189aa9aebe3e7751ffd0cc2b4bbf430e520c75c8e4e4d",
+      "mainCacheVersion": "r111portrait-tight",
+      "referenceViewport": "390x844",
+      "nativeCanvas": "256x192",
+      "integerScale": 1,
+      "stageBounds": { "left": 67, "top": 250, "width": 256, "height": 192 },
+      "headerToStageGapPixels": 16,
+      "controlsToFooterGapPixels": 16,
+      "touchTargets": { "dpad": "144x144", "a": "72x72", "b": "72x72" },
+      "nextIntegerScaleMinimumWidth": 512,
+      "fullHeightCabinet": true
+    }
+  },
+  "verification": {
+    "characters": 24,
+    "frames": 216,
+    "visibleHeightPixels": { "min": 23, "max": 24 },
+    "visibleWidthPixels": { "min": 13, "max": 17 },
+    "opaqueColorsPerFrame": { "min": 12, "max": 15 },
+    "binaryAlpha": true,
+    "magentaPixels": 0,
+    "runtimeShadowIncluded": false,
+    "runtimeShadowEvidence": "production atlas and all 24 sheets remain shadow-free; contact boards mirror shared runtime tapered 14x5 two-value ellipse",
+    "sheetDimensionFailures": 0,
+    "atlasDimensionFailures": 0,
+    "deterministicRebuild": {
+      "consecutiveRuns": 2,
+      "matchingAtlasSha256": true,
+      "matchingEvidenceSha256": true
+    },
+    "darkMassAudit": {
+      "metric": "percent of opaque pixels below luminance 60",
+      "cooper": { "round2Percent": 89.2, "round4Percent": 36.0, "round5Percent": 31.7, "round7Percent": 29.8, "round8Percent": 19.6, "round9Percent": 19.8, "round10Percent": 19.8, "round11Percent": 19.8, "round12Percent": 17.6 },
+      "hawk": { "round2Percent": 87.6, "round4Percent": 32.3, "round5Percent": 29.2, "round7Percent": 27.2, "round8Percent": 17.6, "round9Percent": 17.5, "round10Percent": 17.5, "round11Percent": 17.4, "round12Percent": 14.4 },
+      "benhorne": { "round2Percent": 86.7, "round4Percent": 31.4, "round5Percent": 31.0, "round7Percent": 28.9, "round8Percent": 19.0, "round9Percent": 18.6, "round10Percent": 18.6, "round11Percent": 18.7, "round12Percent": 14.9 }
+    },
+    "contrastAudit": {
+      "metric": "opaque-pixel luminance percentile span across each 9-frame sheet",
+      "laura": { "p10": 69.8, "p90": 161.0, "p10ToP90Span": 91.3, "minimum": 34.4, "maximum": 185.1 },
+      "ronette": { "p10": 65.7, "p90": 155.7, "p10ToP90Span": 90.0, "minimum": 32.4, "maximum": 177.4 },
+      "outlinePolicy": "Laura and Ronette use character-colored lower/right selective contours; upper/left edges remain open and chromatic"
+    },
+    "logLadyBackSilhouette": {
+      "idleRowWidths": { "y11": 15, "y13": 12, "y15": 13, "y18": 12, "maximum": 15 },
+      "stepARowWidths": { "y11": 14, "y13": 10, "y15": 13, "y18": 11, "maximum": 14 },
+      "stepBRowWidths": { "y11": 14, "y13": 10, "y15": 13, "y18": 11, "maximum": 14 },
+      "identityCues": "pinched crown/shoulder rows, asymmetric shawl edge, warm carried-log ramp"
+    },
+    "cooperVisibleWidthPixels": {
+      "front": [17, 17, 17],
+      "back": [17, 17, 17],
+      "profile": [14, 14, 14]
+    },
+    "widthDistribution": {
+      "framesAtLeast13Pixels": 216,
+      "totalFrames": 216,
+      "percentAtLeast13Pixels": 100,
+      "histogram": { "13": 74, "14": 92, "15": 43, "16": 1, "17": 6 },
+      "profilePolicy": "profile archetypes target 13 px slender, 14 px sturdy/tall, and 15 px broad/compact; front and back volumes remain unchanged"
+    },
+    "gaitAudit": {
+      "metric": "Step A/B differing alpha-mask pixels",
+      "overall": { "min": 9, "max": 72 },
+      "down": { "min": 16, "average": 24.7, "max": 49 },
+      "up": { "min": 15, "average": 25.3, "max": 41 },
+      "right": { "min": 9, "average": 23.3, "max": 72 },
+      "footBaselineRow23Frames": 216,
+      "footBaselineTotalFrames": 216,
+      "collisionTilePixels": 16,
+      "verticalBobAdded": false
+    },
+    "heartgoldVisualContract": "pass",
+    "testGates": {
+      "heartgoldVisualContract": "pass",
+      "mobileProduction": "20/20 pass",
+      "touchRuntime": "13/13 pass",
+      "retroProduction": "54/54 pass",
+      "graphicPassContract": "10/10 pass",
+      "portraitLayout390x844": "pass"
+    },
+    "evidence": {
+      "root": ".gauntlet/heartgold-visual-parity-r103/evidence/round12/",
+      "castNative1x": { "path": "cast-labeled-native-1x.png", "dimensions": "500x480", "sha256": "67492698493f7a34f4a4ba3711bec98fdcb3399eb8187af03fa08b103dc6ab5d" },
+      "castNearest6x": { "path": "cast-labeled-nearest-6x.png", "dimensions": "3000x2880", "sha256": "7877b3d45c9f9709f3bd10926a7ea784bc9c3c62b4e70a7978b0366959be1c14" },
+      "motionNative1x": { "path": "cast-all-directions-gait-native-1x.png", "dimensions": "592x876", "sha256": "5acb71082362c9dbb940346c0c15867a6593b72ea9d49e4d09cb263cd31eb5e3" },
+      "motionNearest6x": { "path": "cast-all-directions-gait-nearest-6x.png", "dimensions": "3552x5256", "sha256": "5763e783a300b72eab8d13418facf27beedfc25d32751bb4844e82eced0bc042" },
+      "contactMotionNative1x": { "path": "cast-all-directions-gait-contact-native-1x.png", "dimensions": "656x972", "sha256": "1357cf185d2b6f90952002d03017281d85b6cc21b0eb66561a4138e1544d9e1e" },
+      "contactMotionNearest6x": { "path": "cast-all-directions-gait-contact-nearest-6x.png", "dimensions": "3936x5832", "sha256": "36cd3e798bdfcababc835fb047991cc91bf862735e74f68f5b9ac264328c5a65" },
+      "motionProof": "all 24 actors labeled across DOWN/UP/RIGHT/LEFT and IDLE/STEP-A/STEP-B; LEFT is deterministic nearest-neighbor mirror of RIGHT, matching runtime direction policy"
+    }
+  },
+  "visualNotes": [
+    "Native-size silhouettes remain readable across front, back, and profile rows.",
+    "Character-specific ramps separate uniforms, suits, dresses, spectral figures, and Lodge cast.",
+    "Top-left chromatic lighting and dark lower contours preserve selective-outline grammar without antialiasing.",
+    "Round 2 force-scales Giant and MFAP to adult proportions while preserving their tall and compact identities.",
+    "Round 2 deepens Laura and Ronette midtones, separates BOB/Jacques/Log Lady materials, and unifies Jacoby's formerly fragmented garment colors.",
+    "Round 4 reserves the darkest ramp for silhouette and facial-feature edges; interior dark pixels become chromatic hair or garment clusters.",
+    "Round 4 adds character-specific collar and center-accent marks, keeping face, hands, shirt, jacket, and hair on separate perceived ramps.",
+    "Round 4 widens Cooper front/back views to 17 pixels while keeping intentional 13-pixel profiles.",
+    "Round 5 limits each perceived material ramp to three tones, removing continuous diagonal shading at native size.",
+    "Round 5 ranks outline tones by top-left light direction while reserving darkest pixels for lower/right contact and occlusion.",
+    "Round 5 adds one-pixel neck and waist cuts by body category, separating head and torso while preserving broad, slender, tall, and compact identities.",
+    "Round 7 widens only sub-13-pixel profiles to 13 pixels, leaving every front and back silhouette unchanged.",
+    "Round 7 moves stable top/left outline segments into character-colored hair or clothing ramps while retaining dark contact, occlusion, hands, and single-pixel gestures.",
+    "Round 7 guarantees a one-pixel face highlight and front torso accent where legal source pixels exist, preventing hair, face, and torso from collapsing into one value mass.",
+    "Round 8 restores one-pixel swept, wide, long-hair, and hat-brim signatures inside existing actor bounds, increasing identity without changing frame dimensions.",
+    "Round 8 lifts near-black hair midtones for Cooper, Hawk, and Benjamin Horne while preserving contact and occlusion anchors.",
+    "Round 8 evidence labels every cast member at native scale and documents all four directions across idle and two gait phases.",
+    "Round 9 profiles use slender, sturdy/tall, and broad/compact target widths, replacing the common narrow rig without altering front or back views.",
+    "Round 9 adds profile-only neck highlights, front-side torso midtones, and archetype shoulder/belly signatures while preserving dark-mass gains.",
+    "Round 9 motion evidence labels all 24 actors across four directions and three gait phases at native 1x and nearest-neighbor 6x.",
+    "Round 10 adds one-pixel crown, shoulder, coat-tail, waist, and stance signatures to the otherwise similar dark-haired male rigs while staying inside established frame bounds.",
+    "Round 10 redistributes the same restrained ramps into centered back planes and visible profile planes, adding volume without extra colors or dark mass.",
+    "Round 10 evidence repeats the complete labeled 24-actor, four-direction, three-phase proof at native 1x and nearest-neighbor 6x.",
+    "Round 11 alternates one-pixel arm, hip, and shoe edges between Step A and Step B while preserving the common row-23 foot baseline in all 216 frames.",
+    "Round 11 raises the weakest Step A/B alpha-mask difference from one pixel to nine pixels; back and profile poses receive the clearest alternation without vertical jitter.",
+    "Round 12 contact boards mirror the shared tapered 14x5 two-value runtime ellipse for all 24 actors while the production atlas remains shadow-free.",
+    "Round 11 portrait composition preserves the 256x192 native viewport at integer 1x on 390x844 and expands cabinet ornament panels until only 16px separates them from display and controls.",
+    "Round 12 deepens Laura's cool blue and Ronette's teal-slate identity ramps, then adds selective lower/right chromatic contours so pale characters remain readable on bright terrain.",
+    "Round 12 sculpts Log Lady's back with crown, shoulder, shawl, and carried-log asymmetry instead of a common oval mass.",
+    "Round 12 replaces cross-ramp back stripes with same-ramp hair sheen, centered shoulder yokes, and lower folds across the full cast; sheets remain shadow-free.",
+    "Round 12 evidence repeats the complete labeled 24-actor, four-direction, three-phase proof at native 1x and nearest-neighbor 6x."
+  ]
+}

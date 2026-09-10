@@ -1,6 +1,45 @@
 # Generated overworld cast R77
 
-## Runtime R101
+## Runtime R128 (2026-09-07)
+
+- Produzione usa l'atlante `cast-walkcycles-hg-24.png` (360×360, 25 blocchi
+  72×72 su 25 slot, frame 24×24) via `drawCastWalkSheet` in
+  `js/retro-authored.js` (`CAST_RENDERER = 'heartgold-atlas-r116'`).
+  Cache tag `?v=r129-cast` (bumped con il 25º blocco: il tag è letterale in
+  `index.html` e `js/retro-authored.js`, nessuno lo deriva dal contenuto). L'atlante è ora **pieno**: 5×5 slot, 25 occupati.
+- **Tutto il cast è disegnato a mano**: sorgente `tools/cast-authored-frames.js`
+  (7 teste: short/neat/bob/long/bun/hat/cap; 2 corpi: jacket/skirt; overlay:
+  glasses/log/hairShoulders/beard/badge/apron; palette per personaggio),
+  compilato da `tools/build-cast-authored.js` in `cast-hg-24/<key>.png` e
+  nell'atlante. `--check` verifica senza scrivere, `--preview out.png` monta
+  il foglio di controllo. Riferimenti di design:
+  `cooper-redesign-reference-2026-09-07.png`, `cast-redesign-guide-2026-09-07.png`.
+  Evidenza: `artifacts/cast-r128/`.
+- `tools/build-heartgold-cast.js` resta solo come audit (`--verify-only`):
+  non lanciarlo senza flag, rigenererebbe i fogli dai master legacy.
+- Gate: `test/heartgold-visual-contract.js`, `test/character-runtime-contract.js`
+  (riscritto R127/R128 per l'atlante hg-24; la versione precedente pinnava il
+  renderer 16 px ritirato).
+
+## R129 (2026-09-09) — `infermiera`, 25º attore
+
+- Cast di produzione: **25** attori (`js/chars.js` `CHARS`,
+  `CAST_SHEET_ORDER`, `ORDER` in `tools/build-cast-authored.js` — stesso
+  ordine in tutti e tre). `infermiera` = testa `cap` (nuova) + corpo `skirt`
+  + overlay `apron`, palette bianca/ardesia: legge come personale di reparto
+  accanto al letto di Ronette nell'ospedale.
+- Matrici 16×16 in `js/retro-cast-matrices-b.js` (3 viste × 2 pose), come per
+  ogni chiave di `CHARS`: senza, `authoredCharacterPattern` lancia.
+- **L'archivio 16 px è congelato a 24.** `cast-walkcycles-16.png` (240×240),
+  `cast-manifest.json`, `cast-16/<key>.png` e `tools/audit-cast-atlas.sh`
+  restano fermi: è archivio comparativo, non produzione, e non ha slot liberi.
+  Di conseguenza `tools/build-heartgold-cast.js --verify-only` e il gate
+  `cast_inventory_24` in `test/heartgold-visual-contract.js` continuano a
+  contare 24 attori / 216 frame: leggono il manifest congelato, non l'ORDER
+  di produzione. `test/cast-sprite-sheet.js` verifica che il manifest resti un
+  prefisso esatto del registro runtime.
+
+## Runtime R101 (ritirato con R103–R126)
 
 - Produzione usa `native-authored-r101f` in `js/retro-authored.js`: costruzione
   diretta sulla griglia `16×16`, tre toni opachi, nessun caricamento asincrono.

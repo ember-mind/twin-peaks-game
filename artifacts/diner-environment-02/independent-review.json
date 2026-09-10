@@ -1,0 +1,83 @@
+{
+  "review": "Environment Life Pass 02 independent bounded review",
+  "verdict": "pass-with-notes",
+  "scope": {
+    "reviewed": [
+      "MACHINE_IDLE_ACTIVITY and CLOCK_TICK scheduling and rendering",
+      "world doorway transaction to environment reaction dispatch",
+      "no random, load-only, save-restore, or failed-save rollback door events",
+      "reaction lifecycle, registration reuse, depth rendering, and static-base restoration",
+      "Environment Life v0.2 documentation and preview controls",
+      "permitted Coldstage dinerAmbient diff sheet and dinerEnvironment contact sheet"
+    ],
+    "excluded": [
+      "static diner screenshot because its pixel gate reported aiReviewNeeded=false",
+      "baseline approval or recording",
+      "full manual gameplay and input QA, owned by the parent review"
+    ]
+  },
+  "findings": [
+    {
+      "severity": "resolved",
+      "title": "Production fade consumes the first authored door-opening pose",
+      "evidence": [
+        "js/engine.js:808-833 advances EnvironmentReactions before processing fade state.",
+        "js/engine.js:827 dispatches ENTITY_ENTERED_DOORWAY while the screen is at full black and immediately begins the 180 ms fade-in.",
+        "js/environment-reactions.js:69 defines the first OPENING frame as only 140 ms. It therefore ends before fade-in completes and is mostly obscured in the actual doorway path.",
+        "test/environment-entry.js verifies dispatch and eventual CLOSED state, but never asserts which reaction phases are visibly presented during production fade.",
+        "The Coldstage contact sheet shows all door poses through direct/manual triggering, which bypasses the production transition timing and cannot catch this integration defect."
+      ],
+      "resolution": "js/engine.js now advances reactions only while fadePhase is zero. The event still commits after successful load/save, but elapsed remains exactly zero throughout fade-in. test/environment-entry.js now asserts elapsed zero during the actual fade, frame 0 for the first 100 visible ms, frame 1 after 160 ms, OPEN after 300 ms, and eventual CLOSED. Independent rerun passed."
+    },
+    {
+      "severity": "resolved",
+      "title": "Published CommonJS setTimeSource export throws",
+      "evidence": [
+        "js/ambient-life.js:132-133 exports setTimeSource outside create(), but its body assigns the create()-local timeSource binding, which is out of scope.",
+        "The instance method at js/ambient-life.js:128 works and production uses that method; existing tests do not call the broken module-level export."
+      ],
+      "resolution": "The invalid module-level export was removed. Independent CommonJS probing confirmed that create(seed).setTimeSource(fn) remains functional and the stale surface is absent."
+    }
+  ],
+  "passes": [
+    "The real door transaction emits only after loadMap and coordinated save succeed; failed-save rollback emits no event.",
+    "Direct loadMap and save restoration do not synthesize doorway entry events.",
+    "EnvironmentReactions contains no RNG or idle timer; unmatched source/arrival/type events do not start the door.",
+    "The registered door follows OPENING, OPEN, CLOSING, CLOSED and coalesces duplicate active events.",
+    "Machine activity uses the generic intermittent scheduler with an 8-25 second idle band and configured device-specific marks.",
+    "Clock state is mechanically derived from elapsed seconds and supports a pure external time source for future World Time.",
+    "Closed reaction draws nothing; permitted evidence shows the final closed frame has the exact static-frame SHA-256.",
+    "The environment reaction registry is scene-, trigger-, source-, arrival-, and reaction-identity driven and can register another environment without diner-specific renderer code.",
+    "The v0.2 documentation clearly distinguishes continuous, intermittent, and reactive causes and documents the event path and reuse contract.",
+    "After re-review, production fade timing preserves the full authored door lifecycle once visible, and the clock's CommonJS instance API is coherent.",
+    "The final clock erase mask exactly covers the authored 03:00 hand rectangles at x195/y-7..-4 and x195..197/y-4. The east pendant pool begins at y-4 but its first-row ellipse ends at x194, so these pixels are outside the tint; the remaining tinted face is preserved."
+  ],
+  "visualEvidence": {
+    "dinerEnvironmentContactSheet": ".coldstage/reviews/2026-09-08T12-39-26-780Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerEnvironment-contact-sheet.webp",
+    "finding": "The machine and clock changes are small and localized. Door frames keep integer, hard-edged pixels and a fixed footprint; closing mirrors opening, and the closed source frame is byte-identical to static. The open doorway is visually severe but coherent with the authored cutaway and does not distort the base raster.",
+    "ambientDiffSheet": ".coldstage/diffs/2026-09-08T12-39-26-780Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerAmbient/dinerAmbient-diff-sheet.webp",
+    "ambientFinding": "The reviewed differences remain tiny and localized at the new clock/machine area; no broad Pass 01 art or layout drift is visible.",
+    "finalClockDiffSheets": [
+      ".coldstage/diffs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerEnvironment/dinerEnvironment-diff-sheet.webp",
+      ".coldstage/diffs/2026-09-08T12-47-23-185Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment/dinerAmbient/dinerAmbient-diff-sheet.webp"
+    ],
+    "finalClockFinding": "Both required sheets were inspected. Each affected capture reports the same localized 0.085% change at the upper-right clock. The current frames retain the pendant's warm face tint while clock hands remain crisp; there is no scene-wide movement, altered furniture, or Pass 01 effect drift.",
+    "finalColdstageReport": "artifacts/diner-environment-02/coldstage-final.json",
+    "baselineStatus": "reviewed pass-with-notes; no baseline was approved or recorded by this independent reviewer"
+  },
+  "verification": {
+    "commands": [
+      "node test/environment-life.js",
+      "node test/environment-entry.js",
+      "node test/ambient-life.js",
+      "CommonJS instance clock probe"
+    ],
+    "result": "PASS after both review fixes",
+    "parentReported": "Final Native 57 tests passed; fresh Coldstage runtime passed and requested AI review only for the localized clock refinement."
+  },
+  "limits": [
+    "The review did not inspect false-gate static screenshots.",
+    "The new visual baseline was not approved or recorded.",
+    "The contact sheet proves the manual preview frames, not visibility timing during a real fade transition."
+  ]
+}

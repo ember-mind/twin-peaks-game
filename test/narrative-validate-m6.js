@@ -100,7 +100,9 @@ eachText((text, where) => {
 console.log('# nessuna attribuzione dell\'omicidio (fuori dall\'opzione respinta di P5)');
 // "ha ucciso" = asserzione di omicidio: ammessa SOLO come label dell'opzione respinta p5_killed
 eachText((text, where) => {
-  if (/ha ucciso/i.test(text)) ok(where.indexOf('p5_killed') >= 0, where + ': asserzione d\'omicidio fuori dall\'opzione respinta di P5');
+  // ammessa SOLO come label di un'opzione RESPINTA con retry: p5_killed (P5) e
+  // cards_killer (confronto carte, M6 stitch C1b) — entrambe non formulano nulla
+  if (/ha ucciso/i.test(text)) ok(where.indexOf('p5_killed') >= 0 || where.indexOf('cards_killer') >= 0, where + ': asserzione d\'omicidio fuori da un\'opzione respinta');
 });
 // nessun testo pronuncia i flag deprecati di attribuzione
 eachText((text, where) => {
@@ -140,7 +142,10 @@ function writersOf(pred) {
 }
 ok(JSON.stringify(writersOf(e => e.value === 'm6_tactic')) === '["m6_tactic"]', 'm6_tactic: unico writer = nodo tattica');
 ok(JSON.stringify(writersOf(e => e.set === 'jacques_admitted_presence').sort()) === JSON.stringify(BRANCHES.slice().sort()), 'jacques_admitted_presence: scritto ESATTAMENTE dai 3 rami');
-ok(JSON.stringify(writersOf(e => e.set === 'jacques_statement_terms_known')) === '["m6_interrogation_prova"]', 'jacques_statement_terms_known: solo Prova');
+// M6 stitch C4: jacques_statement_terms_known TAGLIATO (nessun lettore) — il
+// costo persistente del ramo Prova resta nella nota del taccuino, non in un flag
+ok(writersOf(e => e.set === 'jacques_statement_terms_known').length === 0, 'jacques_statement_terms_known: TAGLIATO, nessuno scrittore');
+ok(!enums.booleans_allowed.includes('jacques_statement_terms_known'), 'jacques_statement_terms_known: fuori dal catalogo booleani');
 ok(JSON.stringify(writersOf(e => e.evidence === 'JACQUES_MIDNIGHT_CLAIM')) === '["m6_interrogation_prova"]', 'JACQUES_MIDNIGHT_CLAIM: solo Prova');
 ok(JSON.stringify(writersOf(e => e.evidence === 'JACQUES_LIST_GIVEN')) === '["m6_interrogation_pressione"]', 'JACQUES_LIST_GIVEN: solo Pressione');
 ok(JSON.stringify(writersOf(e => e.evidence === 'JACQUES_THIRD_MAN_DETAIL')) === '["m6_interrogation_falsa"]', 'JACQUES_THIRD_MAN_DETAIL: solo Falsa sicurezza');
@@ -148,9 +153,16 @@ ok(JSON.stringify(writersOf(e => e.proposition === 'P5')) === '["m6_p5"]', 'P5: 
 ok(JSON.stringify(writersOf(e => e.set === 'jacques_preso')) === '["m6_arrest"]', 'jacques_preso: unico writer = arresto');
 ok(JSON.stringify(writersOf(e => e.set === 'jacques_dead')) === '["m6_news"]', 'jacques_dead: unico writer = notizia');
 ok(JSON.stringify(writersOf(e => e.set === 'jacques_testimony_lost')) === '["m6_news"]', 'jacques_testimony_lost: unico writer = notizia');
-ok(JSON.stringify(writersOf(e => e.set === 'm6_resource_lost')) === '["m6_news"]', 'm6_resource_lost: unico writer = notizia');
+// M6 stitch C4: m6_resource_lost FUSO in jacques_testimony_lost (unico superstite,
+// letto da P9.created_from)
+ok(writersOf(e => e.set === 'm6_resource_lost').length === 0, 'm6_resource_lost: FUSO in jacques_testimony_lost, nessuno scrittore');
+ok(!enums.booleans_allowed.includes('m6_resource_lost'), 'm6_resource_lost: fuori dal catalogo booleani');
 ok(JSON.stringify(writersOf(e => e.proposition === 'P9')) === '["m6_news"]', 'P9: unico writer = notizia');
-ok(JSON.stringify(writersOf(e => e.set === 'night_log_no_visitor')) === '["m6_hospital"]', 'night_log_no_visitor: SOLO coda ospedale');
+// M6 stitch C4: night_log_no_visitor FUSO in jacques_death_suspicious, che ha ora
+// un lettore reale (la variante del ponte Atto 4, m6.b9.atto4.register)
+ok(writersOf(e => e.set === 'night_log_no_visitor').length === 0, 'night_log_no_visitor: FUSO in jacques_death_suspicious, nessuno scrittore');
+ok(!enums.booleans_allowed.includes('night_log_no_visitor'), 'night_log_no_visitor: fuori dal catalogo booleani');
+ok(JSON.stringify(M6).indexOf('m6.b9.atto4.register') >= 0, 'jacques_death_suspicious ha un lettore: la variante «registro» del ponte Atto 4');
 ok(JSON.stringify(writersOf(e => e.set === 'jacques_death_suspicious')) === '["m6_hospital"]', 'jacques_death_suspicious: SOLO coda ospedale (B8b giocata)');
 ok(JSON.stringify(writersOf(e => e.set === 'audrey_vista_oej')) === '["m6_audrey"]', 'audrey_vista_oej: solo nodo Audrey');
 ok(writersOf(e => e.set === 'jacques_murder_confirmed' || e.set === 'jacques_murder_attributed').length === 0, 'nessun nodo scrive jacques_murder_*');
@@ -162,7 +174,7 @@ console.log('# valori tipizzati e cataloghi (contro i domini)');
 const VA = Object.assign({}, enums.values_allowed, dEnums.values_allowed_add);
 ok(dEnums.values_allowed_add.m6_tactic === 'm6_tactic', 'delta: m6_tactic → dominio m6_tactic (valore tipizzato)');
 ok(JSON.stringify(enums.enums.m6_tactic) === JSON.stringify(['prova', 'pressione', 'falsa_sicurezza']), 'dominio m6_tactic già a catalogo [prova,pressione,falsa_sicurezza]');
-ok(dEnums.booleans_allowed_add.includes('jacques_statement_terms_known') && dEnums.booleans_allowed_add.includes('m6_resource_lost'), 'delta: aggiunti i due soli booleani nuovi');
+ok(dEnums.booleans_allowed_add.length === 0, 'delta: nessun booleano nuovo (i due proposti in C6-A sono stati tagliati in C4)');
 const BOOL = enums.booleans_allowed.concat(dEnums.booleans_allowed_add);
 for (const n of M6.nodes) {
   for (const e of effectsOf(n)) {
@@ -271,20 +283,22 @@ ok(JSON.stringify(effectsOf(bridge).filter(e => e.set).map(e => e.set)) === '["a
 const news = node('m6_news');
 ok(news.pages_by_value && JSON.stringify(Object.keys(news.pages_by_value.cases).sort()) === JSON.stringify(['falsa_sicurezza', 'pressione', 'prova']), 'm6_news: pages_by_value copre TUTTO il dominio (battuta di Cooper per tattica)');
 const newsSets = effectsOf(news).filter(e => e.set).map(e => e.set).sort();
-ok(JSON.stringify(newsSets) === JSON.stringify(['jacques_dead', 'jacques_testimony_lost', 'm6_resource_lost']), 'm6_news: scrive SOLO dead + testimony_lost + resource_lost');
+ok(JSON.stringify(newsSets) === JSON.stringify(['jacques_dead', 'jacques_testimony_lost']), 'm6_news: scrive SOLO dead + testimony_lost (resource_lost fuso in C4)');
 
 console.log('# obiettivi: esattamente uno vero in ogni combinazione raggiungibile');
 // predicati: a=jacques_admitted_presence, p=P5 formulata, preso=jacques_preso,
 // dead=jacques_dead, night=m6_return_night concluso, giant=gigante1, atto4=atto4.
-// Reachability: atto4→giant→dead→night→preso→p→a.
+// Reachability: atto4→giant→dead→night→guard→preso→p→a (M6 stitch C2c: il
+// passaggio dall'ospedale, `guard`, sta fra il fermo e il rapporto notturno).
 const combos = [
-  { a: false, p: false, preso: false, dead: false, giant: false, atto4: false, expect: 'obj_m6_1' },
-  { a: true, p: false, preso: false, dead: false, giant: false, atto4: false, expect: 'obj_m6_2' },
-  { a: true, p: true, preso: false, dead: false, giant: false, atto4: false, expect: 'obj_m6_3' },
-  { a: true, p: true, preso: true, dead: false, night: false, giant: false, atto4: false, expect: 'obj_m6_4' },
-  { a: true, p: true, preso: true, dead: false, night: true, giant: false, atto4: false, expect: 'obj_m6_4b' },
-  { a: true, p: true, preso: true, dead: true, night: true, giant: false, atto4: false, expect: 'obj_m6_5' },
-  { a: true, p: true, preso: true, dead: true, night: true, giant: true, atto4: false, expect: 'obj_m6_6' }
+  { a: false, p: false, preso: false, dead: false, guard: false, giant: false, atto4: false, expect: 'obj_m6_1' },
+  { a: true, p: false, preso: false, dead: false, guard: false, giant: false, atto4: false, expect: 'obj_m6_2' },
+  { a: true, p: true, preso: false, dead: false, guard: false, giant: false, atto4: false, expect: 'obj_m6_3' },
+  { a: true, p: true, preso: true, dead: false, guard: false, night: false, giant: false, atto4: false, expect: 'obj_m6_3b' },
+  { a: true, p: true, preso: true, dead: false, guard: true, night: false, giant: false, atto4: false, expect: 'obj_m6_4' },
+  { a: true, p: true, preso: true, dead: false, guard: true, night: true, giant: false, atto4: false, expect: 'obj_m6_4b' },
+  { a: true, p: true, preso: true, dead: true, guard: true, night: true, giant: false, atto4: false, expect: 'obj_m6_5' },
+  { a: true, p: true, preso: true, dead: true, guard: true, night: true, giant: true, atto4: false, expect: 'obj_m6_6' }
 ];
 function evalObjCond(c, env) {
   if (c.flag === 'jacques_admitted_presence') return env.a;
@@ -293,6 +307,7 @@ function evalObjCond(c, env) {
   if (c.flag === 'gigante1') return env.giant;
   if (c.flag === 'atto4') return env.atto4;
   if (c.node_done === 'm6_return_night') return !!env.night;
+  if (c.node_done === 'm6_hospital_guard') return !!env.guard;
   if (isP5Formulated(c)) return env.p;
   if (c.not) return !evalObjCond(c.not, env);
   if (c.all) return c.all.every(x => evalObjCond(x, env));
@@ -302,6 +317,8 @@ for (const env of combos) {
   const truthy = M6.objectives.filter(o => evalObjCond(o.when, env)).map(o => o.id);
   ok(truthy.length === 1 && truthy[0] === env.expect, 'obiettivi (' + JSON.stringify(env) + '): atteso ' + env.expect + ', trovato ' + truthy.join(','));
 }
+ok(M6.objectives.find(o => o.id === 'obj_m6_3b').text === "Passa dall'ospedale: Renault è piantonato.", 'obj_m6_3b: il gradino ospedale precede il rapporto notturno');
+ok(M6.objectives.find(o => o.id === 'obj_m6_3b').priority === 350, 'obj_m6_3b: priorità 350 (fra il fermo e il rapporto)');
 ok(M6.objectives.find(o => o.id === 'obj_m6_4').text === 'Torna alla centrale e chiudi il rapporto sul fermo di Renault.', 'obj_m6_4: orienta alla root Truman');
 ok(M6.objectives.find(o => o.id === 'obj_m6_4b').text === "Vai da Lucy: l'ospedale è in linea.", 'obj_m6_4b: orienta alla root Lucy dopo uno squillo già visibile');
 ok(node('m6_return_night').pages.some(p => p.id === 'm6.b7b.night.p04' && /telefono di Lucy squilla/.test(p.text)), 'm6_return_night: chiamata esiste nel mondo prima dell’interazione');
@@ -315,13 +332,13 @@ for (const n of M6.nodes.filter(n => n.channel === 'world')) {
   ok(['actor', 'object', 'landmark', 'sign'].includes(n.target_kind), n.id + ': target_kind valido');
   ok(n.x === undefined && n.y === undefined, n.id + ': nessuna coordinata nel nodo narrativo');
 }
-const KINDS = ['dialogue', 'choice'];
+const KINDS = ['dialogue', 'choice', 'comparison']; // comparison: confronto carte C1b, stessa forma di m5_cmp_ring
 for (const n of M6.nodes) ok(KINDS.includes(n.kind), n.id + ': kind nello schema (' + n.kind + ')');
 
 console.log('# nodes_done mai come gate narrativo (solo fisico)');
 for (const n of M6.nodes) {
   for (const c of (n.conditions || [])) {
-    if (c.node_done) ok(['m6_ferry', 'm6_return_night'].includes(c.node_done), n.id + ': node_done solo per il gating fisico (' + c.node_done + ')');
+    if (c.node_done) ok(['m6_ferry', 'm6_return_night', 'm6_hospital_guard'].includes(c.node_done), n.id + ': node_done solo per il gating fisico (' + c.node_done + ')');
   }
 }
 // nessuna contaminazione con lo stato privato di M4 (b8_attempt_history/assistance)
@@ -406,7 +423,7 @@ for (const t of ['prova', 'pressione', 'falsa_sicurezza']) for (const aud of [fa
   seq.push(['m6_tactic', [{ value: 'm6_tactic', to: t }]]);
   seq.push([branchOf[t]]);
   seq.push(['m6_p5', [{ proposition: 'P5', to: 'formulated' }]]);
-  seq.push(['m6_arrest'], ['m6_return_night'], ['m6_news']);
+  seq.push(['m6_arrest'], ['m6_hospital_guard'], ['m6_return_night'], ['m6_news']);
   if (hosp) seq.push(['m6_hospital']);
   seq.push(['m6_atto4_bridge']);
   const lbl = t + '/aud' + aud + '/hosp' + hosp;
@@ -418,7 +435,7 @@ for (const t of ['prova', 'pressione', 'falsa_sicurezza']) for (const aud of [fa
     assertNoShadow(S, lbl + ' dopo ' + nid); simStates++;
   }
 }
-ok(simStates === 12 * 10, 'simulazione root-contract su tutti gli stati canonici + ponte M8 (' + simStates + ')');
+ok(simStates === 12 * 11, 'simulazione root-contract su tutti gli stati canonici + piantone + ponte M8 (' + simStates + ')');
 
 console.log('# C6-A.1: M4/M5 stato e dati invariati (i diff solo AGGIUNGONO)');
 ok(Object.keys(dEvid.ui_origin_add).every(k => k.indexOf('JACQUES_') === 0 && evidence[k]), 'diff-evidence tocca SOLO le testimonianze M6');
@@ -426,7 +443,7 @@ ok(Object.keys(dProp.ui_short_add).every(k => k === 'P5' || k === 'P9'), 'diff-p
 // C6-B: il delta è stato APPLICATO al catalogo — i booleani M6 e m6_tactic ora vivono in state-enums.json
 ok(dEnums.booleans_allowed_add.every(b => enums.booleans_allowed.includes(b)), 'diff-state-enums applicato in C6-B: booleani M6 nel catalogo (additivo, M4/M5 intatti)');
 ok(Object.keys(dEnums.values_allowed_add).join(',') === 'm6_tactic' && Object.keys(dEnums.enums_add || {}).length === 0, 'diff-state-enums: solo m6_tactic in values_allowed, nessun enum nuovo');
-ok(M5.node_count && M5.node_count.runtime_total === 13 && M5.nodes.length === 13, 'M5 invariata (13 nodi)');
+ok(M5.node_count && M5.node_count.runtime_total === 21 && M5.nodes.length === 21, 'M5 invariata (21 nodi, act-3 pass 01)');
 ok(M4.mission === 'M4' && Array.isArray(M4.nodes), 'M4 presente e integra');
 
 console.log('# C6-A.2: continuazione P5→arresto + pulizia contrattuale (semantica unica)');
@@ -456,7 +473,7 @@ ok(smTxt.indexOf(obj3) >= 0, 'source_map_obj_m6_3_matches_mission_json (testo de
 ok(smTxt.indexOf('Procedi al fermo') === -1, 'source_map_obj_m6_3_matches_mission_json (nessun testo storico «Procedi al fermo» residuo)');
 
 console.log('# conteggio nodi e completamento');
-ok(M6.node_count.runtime_total === M6.nodes.length && M6.nodes.length === 12, 'node_count dichiarato == nodi reali == 12 (' + M6.nodes.length + ')');
+ok(M6.node_count.runtime_total === M6.nodes.length && M6.nodes.length === 17, 'node_count dichiarato == nodi reali == 17 (' + M6.nodes.length + ')');
 ok(BRANCHES.every(b => !!node(b)) && !!node('m6_p5') && !!node('m6_arrest') && !!node('m6_return_night') && !!node('m6_news') && !!node('m6_atto4_bridge') && !!node('m6_hospital'), 'nodi chiave esistono (3 rami + P5 + arresto + notte + notizia + ponte M8 + ospedale)');
 
 console.log('');

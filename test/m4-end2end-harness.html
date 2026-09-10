@@ -46,7 +46,7 @@
 <script src="../js/narrative-runtime.js"></script>
 <script src="../js/narrative-ui.js"></script>
 <script src="../js/narrative-notebook.js"></script>
-<script src="../js/narrative-data.gen.js?v=harness-r77"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r6c"></script>
 <script src="../js/narrative-engine-adapter.js?v=harness-r6b"></script>
 <script src="../js/narrative-save.js"></script>
 
@@ -74,13 +74,6 @@ function liftKey(code) { window.dispatchEvent(new KeyboardEvent('keyup', { code:
 async function press(code) { key(code); await wait(200); }
 function noUI() { return !document.querySelector('#narrative .nw-root'); }
 function nbText() { var r = document.querySelector('.nb-root'); return r ? r.textContent : ''; }
-function pageVisible(id) { return !!document.querySelector('[data-page-id="' + id + '"]'); }
-function choiceVisible() { return !!document.querySelector('#narrative .nw-opt'); }
-async function advanceUntil(test, max) {
-  max = max || 40;
-  for (var i = 0; i < max && !test(); i++) await press('Enter');
-  return test();
-}
 
 var STOP = null;
 function stopped() { return new Promise(function () {}); }
@@ -118,9 +111,7 @@ async function seq() {
       'mappa: ' + E.state.mapId + ' (' + E.state.player.tx + ',' + E.state.player.ty + ')' +
       ' | obiettivo: ' + obj() + ' | E6A: ' + (st.evidence.E6A_CUORE_INTERO === true) +
       ' | T_JAMES: ' + (st.evidence.T_JAMES_EST === true) + ' | T1: ' + (st.evidence.T1_RONETTE_BOB === true) +
-      ' | atto3: ' + (st.flags.atto3 === true) + ' | dir: ' + E.state.player.dir +
-      ' | moving: ' + !!E.state.player.moving + ' | dialogue: ' + !!E.state.dialogue +
-      ' | lease: ' + (A.active() ? 'HELD' : 'FREE');
+      ' | atto3: ' + (st.flags.atto3 === true) + ' | lease: ' + (A.active() ? 'HELD' : 'FREE');
   }, 300);
 
   /* ---------- pathfinder BFS sulla mappa REALE (porte incluse) ---------- */
@@ -165,12 +156,11 @@ async function seq() {
       if (!path || path.length < 2) { if (!STOP && guard < 3) document.title = 'W-NOPATH-' + E.state.mapId + '-' + p.tx + ',' + p.ty; await wait(300); continue; }
       var next = path[1];
       var dir = next[0] > p.tx ? 'right' : next[0] < p.tx ? 'left' : next[1] > p.ty ? 'down' : 'up';
-      if (!STOP) document.title = 'W-' + guard + '-' + p.tx + ',' + p.ty + '>' + next[0] + ',' + next[1] + '-' + dir;
+      if (!STOP && guard === 0) document.title = 'W-len' + path.length + '-' + dir;
       holdKey(DIR_CODE[dir]);
       var t0 = 0;
-      while (!E.state.player.moving && t0 < 2400) { await wait(20); t0 += 20; }
+      while ((E.state.player.tx !== next[0] || E.state.player.ty !== next[1]) && t0 < 2400) { await wait(60); t0 += 60; }
       liftKey(DIR_CODE[dir]);
-      while ((E.state.player.tx !== next[0] || E.state.player.ty !== next[1] || E.state.player.moving) && t0 < 2400) { await wait(40); t0 += 40; }
       await wait(80);
     }
     return false;
@@ -197,7 +187,7 @@ async function seq() {
   /* ---------- boot: partita vera, UNICA semina ammessa: sogno_fatto ---------- */
   E.state.mode = 'play';
   A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK });
-  E.loadMap('town', 30, 33, 'up'); // uscita canonica dalla radura d'arrivo
+  E.loadMap('town', 28, 31, 'up'); // spawn canonico della partita
   NR.applyEffects(S(), [{ set: 'sogno_fatto' }]); // il sogno appartiene a M3
   E.state.flags.sogno_fatto = true; // stesso seme sul layer classico (porta ospedale)
   results.checks.only_seed_is_dream = (Object.keys(S().flags).join(',') === 'sogno_fatto' &&
@@ -219,11 +209,11 @@ async function seq() {
 
   /* ---------- LEG 1: town → stazione → racconto del sogno (VERO Truman) ---------- */
   results.checks.leg1_to_sheriff = await enterDoor(12, 20, 'sheriff');
-  await walkTo(8, 3); await face('left'); // davanti a Truman (7,3)
+  await walkTo(10, 5); await face('up'); // davanti a Truman (10,4)
   await press('Enter'); // truman_a2 p01
-  await advanceUntil(function () { return pageVisible('m4.b1.truman_a2.p07'); });
+  for (var i = 0; i < 6; i++) await press('Enter'); // fino a p07
   results.checks.dream_not_told_before_last_page = (S().flags.sogno_raccontato !== true);
-  await advanceUntil(function () { return !A.active(); }); // conferma ultima pagina → commit
+  await press('Enter'); // conferma ultima pagina → commit
   results.checks.dream_told_after_commit = (S().flags.sogno_raccontato === true && obj() === 'obj_m4_2');
   if (!results.checks.dream_told_after_commit && !STOP) {
     results.debug_leg1 = A.events.slice(-25);
@@ -238,41 +228,35 @@ async function seq() {
   }
 
   /* ---------- LEG 2: stazione → town → ospedale → visita COMPLETA a Ronette ---------- */
-  results.checks.leg2_to_town = await enterDoor(4, 8, 'town');
+  results.checks.leg2_to_town = await enterDoor(6, 9, 'town');
   results.checks.leg2_to_hospital = await enterDoor(23, 6, 'hospital');
   await walkTo(2, 2); await face('up'); // letto di Ronette (2,1)
   await press('Enter'); // pagine iniziali
-  await advanceUntil(choiceVisible); // commit root → widget
+  await press('Enter'); await press('Enter'); // commit root → widget (3 scelte)
   await press('Enter'); // q_luogo → ramo
-  await advanceUntil(choiceVisible); // commit → widget [q_uomo]
+  await press('Enter'); await press('Enter'); await press('Enter'); // commit → widget [q_uomo]
   await press('Enter'); // conferma q_uomo → p01
-  await advanceUntil(function () { return pageVisible('m4.b2.ronette_uomo.p03'); });
+  await press('Enter'); await press('Enter'); // p02 → p03 (BOB)
   results.checks.bob_visible_t1_false = (record.bob && record.bob.state_before_commit.T1_RONETTE_BOB === false &&
     S().evidence.T1_RONETTE_BOB !== true);
   await stopIf('02');
-  await advanceUntil(function () { return !A.active(); }); // p04..p06 + commit
+  for (var k2 = 0; k2 < 4; k2++) await press('Enter'); // p04..p06 + commit
   results.checks.t1_after_visit = (S().evidence.T1_RONETTE_BOB === true &&
     JSON.parse(NR.serialize(S())).visits.ronette_visit.closed === true);
-  if (!results.checks.t1_after_visit && !STOP) {
-    results.debug_leg2 = A.events.slice(-45);
-    document.getElementById('log').textContent = JSON.stringify({ results: results }, null, 1);
-    document.title = 'L2FAIL-' + obj();
-    return;
-  }
 
   /* ---------- LEG 3: ospedale → town → Double R → James (VERO NPC) ---------- */
   results.checks.leg3_to_town = await enterDoor(5, 9, 'town');
   results.checks.leg3_to_diner = await enterDoor(42, 20, 'diner');
   await walkTo(10, 7); await face('up'); // James (10,6)
   await press('Enter'); // p01
-  await advanceUntil(function () { return pageVisible('m4.b4.james_a2.p10'); });
+  for (var k3 = 0; k3 < 9; k3++) await press('Enter'); // p02..p10 (10 pagine)
   // ULTIMA pagina (p10) a schermo: le evidenze NON esistono ancora
   results.checks.james_evidence_after_last_page_only = (record.james &&
     record.james.state_before_commit.E6A_CUORE_INTERO === false &&
     record.james.state_before_commit.T_JAMES_EST === false &&
     S().evidence.E6A_CUORE_INTERO !== true);
   await stopIf('01');
-  await advanceUntil(function () { return !A.active(); }); // conferma p10 → commit
+  await press('Enter'); // conferma p10 → commit
   var tS = 0; while (A.active() && tS < 3000) { await wait(100); tS += 100; } // sessione chiusa
   results.checks.james_evidence_written = (S().evidence.E6A_CUORE_INTERO === true && S().evidence.T_JAMES_EST === true &&
     obj() === 'obj_m4_2' && noUI());
@@ -298,29 +282,30 @@ async function seq() {
   /* ---------- LEG 5: Double R → town → stazione → presentazione a Truman ---------- */
   results.checks.leg5_to_town = await enterDoor(6, 9, 'town');
   results.checks.leg5_to_sheriff = await enterDoor(12, 20, 'sheriff');
-  await walkTo(8, 3); await face('left');
+  await walkTo(10, 5); await face('up');
   await press('Enter'); // intro «Dimmi quale nesso regge»
-  await advanceUntil(choiceVisible); // → menu [P2]
+  await press('Enter'); // → menu [P2]
   await press('Enter'); // P2 → provenienza
-  await advanceUntil(function () { return pageVisible('m4.b9.present_p2.p04'); });
+  await press('Enter'); await press('Enter'); await press('Enter'); // p01..p03
+  await press('Enter'); // p04 (ultima pagina)
   results.checks.act_not_advanced_before_commit = (record.present &&
     record.present.state_before_commit.atto3 === false && record.present.state_before_commit.objective === 'obj_m4_3' &&
     S().flags.atto3 !== true);
   await stopIf('03');
-  await advanceUntil(function () { return !A.active(); }); // commit → accettazione → atto3 → obj est
+  await press('Enter'); // commit → accettazione → atto3 → obj est
   results.checks.m4_completed = (S().flags.atto3 === true && obj() === 'obj_m4_4' &&
     S().props.P2.social_status.accepted_by.join(',') === 'truman' && S().props.P2.factual_status === 'unconfirmed');
 
   /* ---------- LEG 6 (facoltativo): ospedale → Gerard ---------- */
-  results.checks.leg6_to_town = await enterDoor(4, 8, 'town');
+  results.checks.leg6_to_town = await enterDoor(6, 9, 'town');
   results.checks.leg6_to_hospital = await enterDoor(23, 6, 'hospital');
   await walkTo(7, 7); await face('up'); // Gerard (7,6)
   await press('Enter'); // p01
-  await advanceUntil(function () { return pageVisible('m4.b3.gerard_a2.p08'); });
+  for (var k4 = 0; k4 < 7; k4++) await press('Enter'); // p02..p08
   results.checks.gerard_e5_not_yet = (S().evidence.E5_POESIA !== true);
   await stopIf('04');
-  await advanceUntil(function () { return pageVisible('m4.b3.gerard_a2.p09'); });
-  await advanceUntil(function () { return !A.active(); }); // conferma → commit
+  await press('Enter'); // p09 (ultima pagina)
+  await press('Enter'); // conferma → commit
   results.checks.gerard_e5_written = (S().evidence.E5_POESIA === true);
 
   /* ---------- chiusura: save consentito in idle a fine percorso ---------- */

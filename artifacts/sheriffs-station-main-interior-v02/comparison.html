@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sheriff’s Station — concept / native validation</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;background:#202b28;color:#e1e2d2;font:15px/1.5 system-ui,sans-serif}
+  main{max-width:1600px;margin:auto;padding:28px}h1{font-size:23px;margin:0 0 8px}p{max-width:90ch}
+  nav{display:flex;gap:20px;flex-wrap:wrap;margin:18px 0}a{color:#dfbd78}
+  .views{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}figure{margin:0;background:#17231f;padding:10px}
+  img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:contain}img.native{image-rendering:pixelated}
+  figcaption{padding:10px 4px 2px}figcaption strong{display:block}.debug{max-width:1000px;margin:24px auto}
+  .note{color:#b9c6be;font-size:13px}@media(max-width:850px){.views{grid-template-columns:1fr}main{padding:16px}}
+</style>
+<main>
+  <h1>Sheriff’s Station — main interior v0.2</h1>
+  <p>Same central entrance-to-desk axis, sage and oak office, steel files, cool practical light and one warm task lamp. Native geometry uses the existing 16px world grid and unchanged Cooper.</p>
+  <nav><a href="../../test/sheriffs-station.html">Play native scene</a><a href="../../test/sheriffs-station.html?debug=1">Play with collision overlay</a><a href="README.md">Validation notes</a></nav>
+  <section class="views" aria-label="Golden concept and native result">
+    <figure><img src="../sheriffs-station-main-interior-v01/final.png" alt="Approved sheriff’s station golden concept"><figcaption><strong>Golden concept v01</strong>Identity and hierarchy reference.</figcaption></figure>
+    <figure><img class="native" src="native-clean.png" alt="Production-backed 256 by 192 native sheriff’s station with Cooper"><figcaption><strong>Native result v0.2</strong>Real renderer, collision, depth and player sprite. No concept-image backdrop.</figcaption></figure>
+  </section>
+  <figure class="debug"><img class="native" src="native-debug.png" alt="Native scene showing blocked furniture cells and walkable routes"><figcaption><strong>Collision and walkability</strong>Overlay is inspection-only; normal play uses the clean view.</figcaption></figure>
+  <p class="note">Rear door remains background architecture. No new traversal, Ambient Life, audio or narrative. Compare atmosphere and playable hierarchy rather than matching concept pixels.</p>
+</main>
+</html>

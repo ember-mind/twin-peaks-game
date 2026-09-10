@@ -1,0 +1,19 @@
+[
+  {
+    "command": [
+      "node",
+      "test/station-population.js"
+    ],
+    "exitCode": 0,
+    "output": "STATION-POPULATION-PASS 3 staff, 81/81 connected floor, sparse independent minute, reactions, preserved core and Truman profile\n"
+  },
+  {
+    "command": [
+      "node",
+      "tools/build-station-population-frames.js",
+      "--check"
+    ],
+    "exitCode": 0,
+    "output": "Station population frames verified: {\"lucyBlink\":4,\"lucyTelephone\":8,\"andyBlink\":4,\"andyNote\":22}\n"
+  }
+]

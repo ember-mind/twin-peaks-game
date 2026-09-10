@@ -68,18 +68,26 @@
   // narrativa resta l'id logico nel nodo; le coordinate vivono QUI (C5-C §2)
   var WORLD_TARGETS = {
     traincar: {
-      sign_ponte: { x: 5, y: 6, kind: 'landmark' },
+      // Act 3 pass 01 (D5): coordinate ri-chiavate sulla radura nativa 24x12
+      // (js/traincar-scene.js). sign_ponte → bridge_rail (il parapetto est del
+      // ponte, sopra le assi); porta → mucchio → traversa/anello stanno sulla
+      // stessa colonna x=13, scene_center una tessera a ovest perché la pagina
+      // posizionale si guadagni camminando nel vuoto in mezzo al vagone.
+      bridge_rail: { x: 4, y: 6, kind: 'landmark' },
       sign_oej: { x: 20, y: 2, kind: 'sign' },
-      mound: { x: 10, y: 4, kind: 'object' },
+      mound: { x: 13, y: 6, kind: 'object' },
       ring: { x: 13, y: 5, kind: 'object' },
-      scene_center: { x: 11, y: 5, kind: 'landmark' },
-      traincar_entrance: { x: 11, y: 6, kind: 'landmark' }
+      scene_center: { x: 12, y: 5, kind: 'landmark' },
+      traincar_entrance: { x: 13, y: 7, kind: 'landmark' },
+      stove: { x: 12, y: 3, kind: 'object' },
+      cards: { x: 10, y: 6, kind: 'object' },
+      tracks_north: { x: 21, y: 2, kind: 'landmark' }
     },
     // C6-C: target ambientali di M6 (gli attori jacques/audrey/truman/lucy sono
     // già NPC di glue.js e passano per tryInteract per actor_id; qui SOLO i
     // landmark/object risolti per coordinata da tryInteractAt).
     hospital: {
-      night_register: { x: 4, y: 3, kind: 'object' }
+      night_register: { x: 13, y: 8, kind: 'object' }
     },
     // C8-C: target ambientali di M8 (stesso schema di C6-C). Gli attori maddy
     // (diner, iniettato sotto), norma (diner, già NPC) e truman (sheriff, già
@@ -94,7 +102,13 @@
       roadhouse_phone: { x: 8, y: 5, kind: 'object' }
     },
     town: {
-      town_crossroads: { x: 30, y: 30, kind: 'landmark' },
+      // pass 01 (B4/O8): 30,30 e' la tessera di SPAWN del cartello (mai
+      // raggiungibile via tryInteractAt, che risolve solo la tessera FACCIATA)
+      // ed e' condivisa col classico sign_town/welcomesign, spento per tutto
+      // l'atto. 47,30 e' un passo dallo spawn di ritorno dal Roadhouse
+      // (47,29, dir down): un solo tasto per il crocevia; il cartello
+      // classico torna libero a 30,30.
+      town_crossroads: { x: 47, y: 30, kind: 'landmark' },
       lago_maddy: { x: 15, y: 28, kind: 'landmark' }
     },
     palmer: {
@@ -139,18 +153,74 @@
    * Generico: nessun `if (mission === ...)`, altre entità future si registrano
    * qui con la stessa forma. */
   var NARRATIVE_ENTITIES = [
-    // B2 — ospedale: sprite ronette esiste in chars.js; l'infermiera usa un
-    // placeholder ([N] visivo). Presenza incondizionata come prima di C8-C.1.
-    { map_id: 'hospital', when: null, npc: { id: 'ronette', x: 2, y: 1, sprite: 'ronette', name: 'Ronette', dialogue: null, dir: 'down' } },
-    // TODO participant build: sprite dedicato per l'infermiera (placeholder norma)
-    { map_id: 'hospital', when: null, npc: { id: 'infermiera', x: 4, y: 2, sprite: 'norma', name: 'Infermiera', dialogue: null, dir: 'down' } },
+    // B2 — ospedale: ronette e infermiera hanno entrambe uno sprite dedicato
+    // in chars.js (R129). Presenza incondizionata come prima di C8-C.1.
+    { map_id: 'hospital', when: null, npc: { id: 'ronette', x: 3, y: 5, sprite: 'ronette', name: 'Ronette', dialogue: null, dir: 'up' } },
+    { map_id: 'hospital', when: null, npc: { id: 'infermiera', x: 11, y: 8, sprite: 'infermiera', name: 'Infermiera', dialogue: null, dir: 'down' } },
+    // M6 stitch C2 — il piantone della contea è SCENOGRAFIA, non un attore:
+    // dialogue null, nessun nodo narrativo. La porta piantonata è quella della
+    // stanza in fondo al reparto (alcova nord-est, 11-14 righe 3-5), lontana dal
+    // letto di Ronette (3,5); l'agente siede davanti, sulla riga 6.
+    // Finché Renault è vivo e in custodia: un solo piantone davanti alla porta.
+    {
+      map_id: 'hospital',
+      when: { all: [{ flag: 'jacques_preso' }, { not: { flag: 'jacques_dead' } }] },
+      npc: { id: 'piantone', x: 7, y: 3, sprite: 'andy', name: 'Agente', dialogue: null, dir: 'up' } // davanti alla porta doppia nord ("in fondo al reparto, davanti a una porta chiusa")
+    },
+    // Dopo la morte di Renault la sorveglianza si sposta su Ronette: è il
+    // «piantone raddoppiato» che m6.b8b.hospital.p01 descrive.
+    {
+      map_id: 'hospital',
+      when: { flag: 'jacques_dead' },
+      npc: { id: 'piantone_ronette', x: 3, y: 6, sprite: 'andy', name: 'Agente', dialogue: null, dir: 'up' }
+    },
+    // Playthrough E1 (2026-09-10): il pass 01 ha ritirato i NPC classici di One
+    // Eyed Jacks (jacques_a3, audrey_oej) senza registrare i sostituti: la mappa
+    // arrivava vuota e M6 non poteva partire. Le presenze ora sono narrative:
+    // Jacques al banco finché non è fermato; Audrey al tavolo solo se indaga e
+    // finché Cooper non l'ha vista (m6_audrey è l'unico writer di audrey_vista_oej).
+    {
+      map_id: 'oej',
+      when: { not: { flag: 'jacques_preso' } },
+      npc: { id: 'jacques', x: 7, y: 5, sprite: 'jacques', name: 'Jacques', dialogue: null, dir: 'down' }
+    },
+    {
+      map_id: 'oej',
+      when: { all: [{ flag: 'audrey_indaga' }, { not: { flag: 'audrey_vista_oej' } }, { not: { flag: 'jacques_preso' } }] },
+      npc: { id: 'audrey', x: 13, y: 7, sprite: 'audrey', name: 'Audrey', dialogue: null, dir: 'down' }
+    },
     // C5-C — Truman arriva al vagone solo quando Cooper ha una teoria finale
     // da riferire. Prima restava visibile ma senza root attive e quindi muto.
     // Dopo il rapporto torna alla centrale: nessun doppione fisico fra mappe.
     {
       map_id: 'traincar',
       when: { all: [{ value_set: 'm5_final_theory' }, { not: { flag: 'east_route_confirmed' } }] },
-      npc: { id: 'truman', x: 9, y: 4, sprite: 'truman', name: 'Truman', dialogue: null, dir: 'down' }
+      npc: { id: 'truman', x: 9, y: 8, sprite: 'truman', name: 'Truman', dialogue: null, dir: 'right' }
+    },
+    // Act 3 pass 01 — Hawk resta FUORI dal vagone, tre collocazioni condizionate
+    // (report §7): ponte dopo il suo arrivo e prima della scoperta; fuori dalla
+    // porta, di spalle, fino alla custodia; al taglio a nord dopo il rapporto.
+    // Un id per collocazione: syncNarrativeEntities identifica per npc.id, e
+    // tre voci con lo stesso id si rimuoverebbero a vicenda. Ogni collocazione
+    // ha un nodo-attore M5 di una riga (mai un NPC muto). Il classico
+    // hawk_vagone dentro il vagone è ritirato.
+    // Playthrough E1 (2026-09-10): mai sulla riga 7 — è l'unico attraversamento
+    // del torrente; a (5,7) Hawk chiudeva Cooper sulle assi (softlock). Sta
+    // sulla sponda est, accanto al parapetto, fuori dalla linea dei binari.
+    {
+      map_id: 'traincar',
+      when: { all: [{ node_done: 'm5_bridge' }, { not: { flag: 'vagone_scoperto' } }] },
+      npc: { id: 'hawk_bridge', x: 5, y: 6, sprite: 'hawk', name: 'Hawk', dialogue: null, dir: 'left' }
+    },
+    {
+      map_id: 'traincar',
+      when: { all: [{ flag: 'vagone_scoperto' }, { not: { value_set: 's1' } }] },
+      npc: { id: 'hawk_door', x: 14, y: 8, sprite: 'hawk', name: 'Hawk', dialogue: null, dir: 'down' }
+    },
+    {
+      map_id: 'traincar',
+      when: { value_set: 's1' },
+      npc: { id: 'hawk_cut', x: 22, y: 3, sprite: 'hawk', name: 'Hawk', dialogue: null, dir: 'up' }
     },
     // C8-C.1 — Maddy al diner SOLO nella finestra della promessa (m8_diner):
     // atto4 aperto e promessa non ancora fatta. Dopo la promessa torna a casa
@@ -161,12 +231,88 @@
       when: { all: [{ flag: 'atto4' }, { not: { value_set: 'promise_stance' } }] },
       npc: { id: 'maddy', x: 10, y: 1, sprite: 'maddy', name: 'Maddy', dialogue: null, dir: 'down' }
     },
-    // R8 — dopo l'uscita di Maddy, Leland resta al bancone fino alla sua
-    // dichiarazione. Testimonianza prima del presagio; nessun viaggio a Palmer.
+    // R8 — Leland resta al bancone dall'apertura dell'atto fino alla sua
+    // dichiarazione (C1, pass 01): non piu' condizionato a promise_stance —
+    // m8_leland_waiting (¬promise_stance) e m8_leland_taxi (promise_stance)
+    // si dividono la finestra sullo stesso attore, mai due root vive insieme
+    // (O10). Testimonianza prima del presagio; nessun viaggio a Palmer.
     {
       map_id: 'diner',
-      when: { all: [{ flag: 'atto4' }, { value_set: 'promise_stance' }, { not: { evidence: 'T_LELAND_TAXI' } }] },
+      when: { all: [{ flag: 'atto4' }, { not: { evidence: 'T_LELAND_TAXI' } }] },
       npc: { id: 'leland', x: 11, y: 1, sprite: 'leland', name: 'Leland', dialogue: null, dir: 'down' }
+    },
+    // C2 (pass 01) — Roadhouse come stanza: Truman al tavolo (nodo-attore
+    // m8_roadhouse_truman), il Gigante sul palco (nodo-attore m8_giant_stage,
+    // O4/O5) e la folla di scenografia (dialogue:null, nessun nodo — precedente
+    // piantone). Tavole/sedie sono 't'/'h' solide (js/maps.js:416/420); righe
+    // 2/4/6/8 sono 'f' libere. Truman su una tessera libera adiacente al
+    // tavolo lato porta (riga 8, sotto le tessere tavolo 3-4 di riga 7),
+    // faceable da 8,9/7,9 (porte) o dal corridoio; MAI su 8,4/8,5/8,6 (telefono
+    // e le due tessere adiacenti). La folla sta sulle righe 2 e 6 (libere,
+    // sotto il palco / sopra il bancone), lontana dalla colonna 8 (palco/telefono).
+    {
+      map_id: 'roadhouse',
+      when: { all: [{ flag: 'atto4' }, { not: { value_set: 'warning_target' } }] },
+      npc: { id: 'truman', x: 4, y: 8, sprite: 'truman', name: 'Truman', dialogue: null, dir: 'up' }
+    },
+    {
+      map_id: 'roadhouse',
+      when: { all: [{ flag: 'atto4' }, { not: { value_set: 'warning_target' } }] },
+      /* Playthrough RUN 1 (2026-09-10): a crowd on row 2 walled off the stage corridor
+       * (8,2 unreachable, the Giant unfaceable). The town sits at the west tables
+       * (rows 4 and 6, x<=5); rows 2/4/6 stay open from the east margin, so 8,2
+       * (the Giant), 8,4 and 8,6 (the phone) are all walkable by keys. */
+      npc: { id: 'bobby', x: 3, y: 4, sprite: 'bobby', name: 'Bobby', dialogue: null, dir: 'down' }
+    },
+    {
+      map_id: 'roadhouse',
+      when: { all: [{ flag: 'atto4' }, { not: { value_set: 'warning_target' } }] },
+      npc: { id: 'donna', x: 5, y: 4, sprite: 'donna', name: 'Donna', dialogue: null, dir: 'down' }
+    },
+    {
+      map_id: 'roadhouse',
+      when: { all: [{ flag: 'atto4' }, { not: { value_set: 'warning_target' } }] },
+      npc: { id: 'james', x: 2, y: 4, sprite: 'james', name: 'James', dialogue: null, dir: 'down' }
+    },
+    {
+      map_id: 'roadhouse',
+      when: { all: [{ flag: 'atto4' }, { not: { value_set: 'warning_target' } }] },
+      npc: { id: 'shelly', x: 3, y: 6, sprite: 'shelly', name: 'Shelly', dialogue: null, dir: 'down' }
+    },
+    {
+      map_id: 'roadhouse',
+      when: { all: [{ flag: 'atto4' }, { not: { value_set: 'warning_target' } }] },
+      npc: { id: 'norma', x: 5, y: 6, sprite: 'norma', name: 'Norma', dialogue: null, dir: 'up' }
+    },
+    {
+      map_id: 'roadhouse',
+      when: { all: [{ flag: 'atto4' }, { not: { value_set: 'warning_target' } }] },
+      npc: { id: 'loglady', x: 2, y: 6, sprite: 'loglady', name: 'Log Lady', dialogue: null, dir: 'up' }
+    },
+    // Il Gigante (C2/O4/O5): sul palco, 8,1 (tessera 'C' solida, faceable da
+    // 8,2 — interact() risolve npcAt prima di ogni test di solidità).
+    // dialogue:null: l'interazione appartiene al nodo m8_giant_stage.
+    {
+      map_id: 'roadhouse',
+      when: { all: [{ value_is: { name: 'presagio_status', equals: 'active' } }, { not: { value_set: 'warning_target' } }] },
+      npc: { id: 'gigante', x: 8, y: 1, sprite: 'giant', name: 'Gigante', dialogue: null, dir: 'down' }
+    },
+    // C4 (pass 01) — la riva del lago: Hawk in due collocazioni condizionate
+    // sullo stesso tile, un id per finestra (come i tre hawk_* del vagone).
+    // 16,27 è '.' libero (js/maps.js riga 27), a nord della corsia di
+    // avvicinamento da est (riga 28, dove il player cammina da 47,29 verso
+    // il cartello 15,28): non sulla traiettoria, adiacente in diagonale al
+    // landmark lago_maddy (15,28, 'F' solida). Nessun vice: la didascalia
+    // porta le torce (O-list, "il deputato non esiste come sprite proprio").
+    {
+      map_id: 'town',
+      when: { all: [{ value_is: { name: 'body_found_by', equals: 'hawk' } }, { not: { flag: 'maddy_trovata' } }] },
+      npc: { id: 'hawk_shore_first', x: 16, y: 27, sprite: 'hawk', name: 'Hawk', dialogue: null, dir: 'down' }
+    },
+    {
+      map_id: 'town',
+      when: { all: [{ flag: 'maddy_trovata' }, { not: { node_done: 'm8_station' } }] },
+      npc: { id: 'hawk_shore_after', x: 16, y: 27, sprite: 'hawk', name: 'Hawk', dialogue: null, dir: 'down' }
     }
   ];
   A._debugNarrativeEntities = NARRATIVE_ENTITIES;

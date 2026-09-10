@@ -146,8 +146,8 @@ function actorScaleAt(width, height, touch) {
     window, document, navigator: window.navigator, GAME, Math
   }, { filename: 'js/main.js' });
   assert.equal(calls.length, 1, 'bootstrap must set actor scale exactly once');
-  assert.equal(canvas.width, 160, 'bootstrap keeps native canvas width');
-  assert.equal(canvas.height, 144, 'bootstrap keeps native canvas height');
+  assert.equal(canvas.width, 256, 'bootstrap keeps native canvas width');
+  assert.equal(canvas.height, 192, 'bootstrap keeps native canvas height');
   return calls[0];
 }
 
@@ -156,8 +156,6 @@ require(path.join(ROOT, 'js/maps.js'));
 require(path.join(ROOT, 'js/chars.js'));
 const originalTile = function () {};
 GAME.Sprites = { CHARS: GAME.sprites.CHARS, drawTile: originalTile };
-require(path.join(ROOT, 'js/retro-cast-matrices-a.js'));
-require(path.join(ROOT, 'js/retro-cast-matrices-b.js'));
 require(path.join(ROOT, 'js/retro-authored.js'));
 
 const maps = GAME.maps.maps;
@@ -239,6 +237,84 @@ assert(countPixels(railView, new Set(['#30383b']), railRect) > 500, 'track rails
 assert(countPixels(railView, new Set(['#d0c89d']), railRect) > 100, 'track metal highlight must be visible');
 console.log('ok - town tracks own visible rail art, walkable crossing and named capture');
 
+/* Attraversare un confine camera non deve rigenerare ancore forestali. Due
+ * render separati di 1px devono quindi essere lo stesso mondo traslato di
+ * 1px in tutta la loro area comune, incluse chiome e ombre macro. */
+const forestBeforeBoundary = new PixelContext(256, 192);
+const forestAfterBoundary = new PixelContext(256, 192);
+const forestViewport = { mapId: 'town', indoor: false, viewportWidth: 256, viewportHeight: 192 };
+GAME.sprites.drawStructures(forestBeforeBoundary, maps.town, 351, 384, forestViewport);
+GAME.sprites.drawStructures(forestAfterBoundary, maps.town, 352, 384, forestViewport);
+for (let y = 0; y < 192; y++) for (let x = 32; x < 223; x++) {
+  assert.equal(forestAfterBoundary.pixels[y * 256 + x],
+    forestBeforeBoundary.pixels[y * 256 + x + 1],
+    `town forest changed layout across camera boundary at ${x},${y}`);
+}
+console.log('ok - town forest stays world-locked across camera tile boundaries');
+
+/* Alberi e attori condividono painter's order tramite quota dei piedi. Un
+ * albero con radice davanti deve coprire il marker-attore; un range oltre
+ * fondo mappa non deve toccarlo. Il pass depth ridisegna chioma/tronco, non
+ * ombre del terreno. */
+const actorMarker = '#ff00ff';
+const treeInFront = new PixelContext(256, 192);
+treeInFront.fillStyle = actorMarker;
+treeInFront.fillRect(208, 88, 16, 24);
+GAME.sprites.drawForegroundStructures(treeInFront, maps.town, 351, 384, {
+  viewportWidth: 256, viewportHeight: 192,
+  forestDepthMin: 500, forestDepthMax: 550
+});
+assert(countPixels(treeInFront, new Set([actorMarker]), [208, 88, 16, 24]) < 96,
+  'tree rooted in front must occlude actor body');
+const treeBehind = new PixelContext(256, 192);
+treeBehind.fillStyle = actorMarker;
+treeBehind.fillRect(208, 88, 16, 24);
+GAME.sprites.drawForegroundStructures(treeBehind, maps.town, 351, 384, {
+  viewportWidth: 256, viewportHeight: 192,
+  forestDepthMin: 10000, forestDepthMax: Infinity
+});
+assert.equal(countPixels(treeBehind, new Set([actorMarker]), [208, 88, 16, 24]), 16 * 24,
+  'tree rooted behind actor must not be redrawn over actor');
+const paintWorldBody = functionBody(engineSource, 'paintWorld');
+assert(paintWorldBody.indexOf('GAME.Sprites.drawChar') < paintWorldBody.indexOf('GAME.sprites.drawForegroundStructures'),
+  'foreground tree pass must run after actor draw');
+assert(/footY\s*=\s*e\.wy\s*\+\s*TILE/.test(paintWorldBody),
+  'forest depth threshold must use actor foot position');
+console.log('ok - town trees occlude actors by foot depth without foreground shadows');
+
+/* Town usa ancore organiche macro: tronco e chioma devono condividere stessa
+ * ancora. Un tronco dentro ogni tile T crea pali staccati dove algoritmo macro
+ * fonde piu' celle in una sola massa. */
+const trunkColors = new Set(['#806948', '#ad8758', '#9b7449', '#c09761']);
+const treeTile = new PixelContext(16, 16);
+GAME.Sprites.drawTile(treeTile, 'T', 0, 0, 12, 10, maps.town.rows, { mapId: 'town' });
+assert.equal(countPixels(treeTile, trunkColors), 0,
+  'town T tile must not emit a detached per-cell trunk');
+const completeForest = new PixelContext(256, 192);
+GAME.sprites.drawStructures(completeForest, maps.town, 351, 384, forestViewport);
+assert(countPixels(completeForest, trunkColors) > 0,
+  'complete macro trees must retain authored trunks');
+console.log('ok - town trunks exist only inside complete macro trees');
+
+/* Facciate, tetti, ombre e landscaping devono restare pixel-identici quando
+ * camera attraversa confini sia X sia Y. Confronto area centrale comune,
+ * lontana dal clipping legittimo del canvas. */
+const houseBase = new PixelContext(256, 192);
+const houseShiftX = new PixelContext(256, 192);
+const houseShiftY = new PixelContext(256, 192);
+GAME.sprites.drawStructures(houseBase, maps.town, 319, 31, forestViewport);
+GAME.sprites.drawStructures(houseShiftX, maps.town, 320, 31, forestViewport);
+GAME.sprites.drawStructures(houseShiftY, maps.town, 319, 32, forestViewport);
+for (let y = 24; y < 168; y++) for (let x = 32; x < 223; x++) {
+  assert.equal(houseShiftX.pixels[y * 256 + x], houseBase.pixels[y * 256 + x + 1],
+    `town house changed across horizontal camera boundary at ${x},${y}`);
+}
+for (let y = 24; y < 167; y++) for (let x = 32; x < 224; x++) {
+  assert.equal(houseShiftY.pixels[y * 256 + x], houseBase.pixels[(y + 1) * 256 + x],
+    `town house changed across vertical camera boundary at ${x},${y}`);
+}
+console.log('ok - town houses stay world-locked across horizontal and vertical camera boundaries');
+
 /* Arrival hero art uses same contact boxes as ASCII collision. Roof overhang
  * is allowed; body/base pixels must terminate on these four exact bounds. */
 function glyphBounds(map, glyph) {
@@ -259,14 +335,23 @@ assert.deepEqual(GAME.Retro2D.arrivalContactBounds, {
 });
 const arrival = new PixelContext(160, 144);
 GAME.Retro2D.drawArrivalBackdrop(arrival, 0, 0, 160, 144);
-const contactInk = new Set(['#072619', '#34572d']);
+const contactInk = new Set([
+  '#072619', '#34572d', '#5b4737', '#a98b5d', '#4b382d', '#835e42',
+  '#24382f', '#315a49', '#294f42'
+]);
 assert(countPixels(arrival, contactInk, [32, 46, 32, 2]) >= 32, 'arrival shop base must reach collision base');
 assert(countPixels(arrival, contactInk, [96, 46, 48, 2]) >= 20, 'arrival cabin base must reach collision base');
 assert(countPixels(arrival, contactInk, [64, 16, 16, 16]) >= 35, 'arrival mailbox must stay legible inside its solid tile');
 assert(countPixels(arrival, contactInk, [96, 61, 32, 3]) >= 30, 'arrival car contact must reach its collision base');
+assert.equal(arrival.pixels[56 * 160 + 90], '#24382f', 'large car left bumper missing');
+assert.equal(arrival.pixels[56 * 160 + 134], '#24382f', 'large car right bumper missing');
+assert.equal(arrival.pixels[41 * 160 + 101], '#24382f', 'large car roof must rise above its V collision row');
 console.log('ok - arrival shop, cabin, mailbox and car art aligns with collision contact boxes');
 
-const forestContact = new Set(['#072619', '#34572d', '#6a8a43', '#9aab69']);
+const forestContact = new Set([
+  '#072619', '#34572d', '#6a8a43', '#9aab69', '#24382f', '#315a49',
+  '#294f42', '#3e725b', '#639b72', '#80b878'
+]);
 for (let ty = 5; ty <= 8; ty++) {
   for (let tx = 0; tx < maps.arrival.width; tx++) {
     const dark = countPixels(arrival, forestContact, [tx * 16, ty * 16, 16, 16]);
@@ -286,7 +371,7 @@ for (let ty = 0; ty < 4; ty++) for (let tx = 0; tx < 4; tx++) {
   GAME.Sprites.drawTile(zigzag, 'Z', tx * 16, ty * 16, tx, ty,
     ['ZZZZ', 'ZZZZ', 'ZZZZ', 'ZZZZ'], { mapId: 'redroom' });
 }
-const ink = '#202820';
+const ink = '#24382f';
 const tileSigs = [];
 for (let tx = 0; tx < 4; tx++) {
   const tile = [];
@@ -401,4 +486,4 @@ assert.equal(mobilePortraitActorScale, desktopActorScale, 'portrait mobile and d
 assert.equal(mobileLandscapeActorScale, desktopActorScale, 'landscape mobile and desktop actor scale differ');
 console.log('ok - desktop and mobile use the identical native actor scale');
 
-console.log('\nGRAPHIC-PASS-CONTRACT-PASS 10/10');
+console.log('\nGRAPHIC-PASS-CONTRACT-PASS 14/14');

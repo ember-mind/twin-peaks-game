@@ -1,0 +1,32 @@
+{
+  "status": "pass",
+  "preflight": "artifacts/station-population-v01/validation/native-main.json",
+  "focused": [
+    {
+      "command": "node test/station-population.js",
+      "exitCode": 0,
+      "log": "artifacts/station-population-v01/validation/station-population.log"
+    },
+    {
+      "command": "node test/character-life.js",
+      "exitCode": 0,
+      "log": "artifacts/station-population-v01/validation/character-life.log"
+    },
+    {
+      "command": "node test/sheriffs-station-native.js",
+      "exitCode": 0,
+      "log": "artifacts/station-population-v01/validation/sheriffs-station-native.log"
+    },
+    {
+      "command": "node test/coldstage-config.js",
+      "exitCode": 0,
+      "log": "artifacts/station-population-v01/validation/coldstage-config.log"
+    },
+    {
+      "command": "node tools/build-station-population-frames.js --check",
+      "exitCode": 0,
+      "log": "artifacts/station-population-v01/validation/frame-reproducibility.log"
+    }
+  ],
+  "summary": "Fifteen scoped native commands passed, including 368 smoke checks, 86 walkthrough acquisitions, 36/36 cast checks, 54/54 renderer checks, and the focused 3-staff 81/81 connectivity suite."
+}

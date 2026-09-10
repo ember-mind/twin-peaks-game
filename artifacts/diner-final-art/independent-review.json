@@ -1,0 +1,55 @@
+{
+  "verdict": "pass-with-notes",
+  "scope": "Independent final environment-art review of the diner depth, material, and light polish only.",
+  "evidence": {
+    "authoritativeBefore": "artifacts/diner-final-art/before.png",
+    "reviewSheet": ".coldstage/diffs/2026-09-08T11-02-32-166Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner/diner/diner-diff-sheet.webp",
+    "sourceFrame": ".coldstage/runs/2026-09-08T11-02-32-166Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner/diner-double-r-interior.png"
+  },
+  "preservation": {
+    "result": "pass",
+    "observations": [
+      "The room footprint, camera, counter, stools, booths, tables, plant, menu board, equipment, signage, lamps, and character placements match the authoritative before image.",
+      "The native pixel vocabulary and limited warm brown, burgundy, cream, olive, and cool gray palette are preserved; edges remain hard with no blur, antialiasing, or smooth gradients.",
+      "No new prop, clutter, signage, or compositional element is visible."
+    ]
+  },
+  "requestedUnitObservations": [
+    {
+      "unit": "contact shadows and grounded joints",
+      "result": "pass",
+      "observation": "Compact dark pixel clusters now anchor the floor characters, stools, booths, plant pot, freestanding board, counter base, display glass, and equipment. Stool stems meet seats and feet more convincingly, booth and table edges read as joined assemblies, and the shadows remain crisp rather than soft."
+    },
+    {
+      "unit": "warm lamp influence and sprite accents",
+      "result": "pass-with-notes",
+      "observation": "Warm light is more legible across the upper woodwork, counter work surface, display case, and nearby floor tiles, with restrained warm pixels on hair and shoulder edges. The sprite accents are intentionally tiny and do not alter character designs."
+    },
+    {
+      "unit": "neon reflection",
+      "result": "pass-with-notes",
+      "observation": "A restrained burgundy-pink response appears along the counter frontage and nearby polished edges. It reads as reflected color without becoming a new glow effect, though it is subtle at gameplay scale."
+    },
+    {
+      "unit": "material separation",
+      "result": "pass",
+      "observation": "Booth vinyl gains seams, edge shine, and darker recesses; stool hardware and appliances retain cooler gray highlights; display glass uses pale cyan-gray reflections; wood remains matte and grain-led; cups and plates keep compact cream ceramic highlights. These surfaces separate more clearly without changing the established palette."
+    },
+    {
+      "unit": "floor variation and controlled wear",
+      "result": "pass",
+      "observation": "Small tile-value shifts and sparse marks break up the large floor field while preserving the checker pattern and clean circulation space. Wear is controlled and does not read as added clutter."
+    }
+  ],
+  "visibleImprovement": "The current frame has stronger depth and surface hierarchy than the authoritative before: movable objects sit on the floor, counter and booth faces separate into planes, glass and metal read cooler than the surrounding wood, and warm practical light connects the upper fixtures to nearby surfaces.",
+  "materialDefects": [],
+  "notes": [
+    "Warm sprite accents and the neon response are near the lower visibility threshold at native gameplay scale, but both are present and appropriately restrained for this pixel style.",
+    "The localized 1.670% diner diff is consistent with the requested polish and shows no broad silhouette or layout replacement."
+  ],
+  "verification": {
+    "nativeTests": "pass (all 54 recorded tests exited 0)",
+    "coldstageRuntime": "pass",
+    "coldstagePixelGate": "review-required; resolved by this scoped independent visual review"
+  }
+}

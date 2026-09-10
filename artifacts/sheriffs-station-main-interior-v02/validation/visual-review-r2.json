@@ -1,0 +1,23 @@
+{
+  "scope": "sheriffsStation only",
+  "report": ".coldstage/runs/2026-09-08T18-16-40-940Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/report.json",
+  "contactSheet": ".coldstage/reviews/2026-09-08T18-16-40-940Z-desktop-gameplay-mobile-mobileGameplay-mobileLandscapeGameplay-cooperDown-cooperUp-cooperRight-cooperLeft-visual-diner-dinerAmbient-dinerEnvironment-dinerGestures-dinerExterior-dinerLocation-sheriffsStation/sheriffsStation-contact-sheet.webp",
+  "reviewer": "primary art-direction agent",
+  "verdict": "refine-materials",
+  "baselineApproved": false,
+  "preserved": [
+    "central axis",
+    "sage/oak/steel identity",
+    "cool light and warm task lamp",
+    "public/staff opening",
+    "two right work desks",
+    "unchanged Cooper scale",
+    "front/behind furniture occlusion"
+  ],
+  "changesRequested": [
+    "lower floor seam contrast and add sparse broad linoleum value variation",
+    "clarify office drawer seams and handles",
+    "green bench seat cushion within unchanged footprint"
+  ],
+  "originalCaptureEscalation": "Contact sheet raised a floor-seam/material-readability concern; full clean capture inspected to resolve it."
+}

@@ -51,8 +51,6 @@ Gating: flag/indizi su porte e dialoghi a cascata; indizi nel menu X e taccuino 
 | `test/retro-font.js` | gate font bitmap, impaginazione epilogo e clipping |
 | `test/mobile-production.js` | gate mobile: viewport, safe-area, orientamento, controlli e ownership dei tap |
 | `test/touch-runtime.js` | prova runtime D-pad, A/B, rilascio input e tap narrativo singolo |
-| `coldstage.config.mjs` | scenari browser riusabili: desktop, avvio gameplay, mobile 390×844 e capture visuale locale |
-| `test/coldstage-config.js` | gate routing changed-file → scenari Coldstage minimi |
 
 Canvas logico 160×144, scalato dal CSS con nearest-neighbour a rapporto 10:9. In landscape mobile il canvas resta intatto al centro; D-pad e A/B vivono nei gutter laterali. Storia: engine+data scritti in una prima sessione, sprites+maps riscritti in una seconda con API diversa; `glue.js` riconcilia. `retro.js` sovrascrive solo le facciate grafiche: mappe, collisioni, dialoghi e stato narrativo restano canonici.
 
@@ -62,33 +60,6 @@ Canvas logico 160×144, scalato dal CSS con nearest-neighbour a rapporto 10:9. I
 - Risoluzione: 160×144 fissa; CSS ingrandisce senza smoothing. Camera piatta, nessuna prospettiva.
 - Regressioni minime: `node test/mobile-production.js`, `node test/touch-runtime.js`, `node test/retro-font.js`, `node test/retro-production.js`, `node test/narrative-finale.js`, `node test/smoke.js`, `node test/walkthrough.js`.
 - Evidenza Gauntlet e catture: [[Gauntlet Retro 2D — Progressi]].
-
-## Coldstage
-
-Twin Peaks è secondo client del tool autonomo `/Users/ebuccelli/Code/solo/projects/coldstage`.
-Il gioco resta statico, senza package o build step: Coldstage usa il proprio Vite
-per servirlo e il proprio Selenium per guidare Chrome.
-
-```bash
-coldstage doctor
-coldstage run changed
-coldstage run all
-coldstage diff visual
-coldstage stop
-```
-
-Lane: `desktop`, `gameplay`, `mobile`, `visual`. `run changed` osserva 105 file
-runtime e allarga solo agli scenari toccati. Pass corrente: 40/40 check,
-zero errori console severi, desktop 1280×720, mobile 390×844, una capture locale.
-Ogni lane parte con storage isolato; gameplay crea `tp_save`, mobile successivo
-verifica che non sia presente. `storage: 'preserve'` resta opt-in per lane concatenate.
-`RUNTIME PASS` non certifica estetica: capture riporta
-`visual-review=NOT_PERFORMED` finché persona o vision critic non apre i pixel.
-`coldstage review visual` crea un solo contact sheet compatto; dopo ispezione,
-`coldstage review record visual ...` salva attestazione separata senza mutare report runtime.
-Baseline approvata vive in `test/coldstage-baselines/`. `run changed` confronta
-automaticamente SHA-256 e pixel: `aiReviewNeeded=false` non apre immagini;
-solo differenze oltre 0,1% generano diff sheet e chiedono review AI/umana.
 
 ### Renderer 3D legacy
 

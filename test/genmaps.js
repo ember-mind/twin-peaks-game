@@ -328,3 +328,40 @@ function dump(g, name) {
 }
 dump(t, 'town');
 dump(wd, 'woods');
+
+/* Diner layout is generated from reusable furniture footprints. The same
+ * model is copied through glue.js and consumed by the interior renderer. */
+const dinerModel = {
+  material: 'diner', counter: [2, 3, 9], stools: [[2,4],[4,4],[6,4],[8,4],[10,4]],
+  booths: [[1,6,3],[10,6,3],[1,8,3],[10,8,3]],
+  guests: [null, {hair:'#634337',hairHi:'#936550',hairStyle:'bob',seat:'right',coat:'#997082',coatHi:'#bd94a0',coatShadow:'#654a61'}, {hair:'#353730',hairHi:'#606052',hairStyle:'swept',seat:'left',coat:'#476352',coatHi:'#78917a',coatShadow:'#31483b'}, null], plant: [12,2], coatRack: [12,4], specials: [8,6,1,1], islandPlant: [6,6]
+};
+const dinerGrid = grid(14, 10, 'f');
+border(dinerGrid, 'i');
+const [counterX, counterY, counterWidth] = dinerModel.counter;
+rect(dinerGrid, counterX, counterY, counterX + counterWidth - 1, counterY, 'C');
+for (const [x,y] of dinerModel.stools) dinerGrid[y][x] = 'h';
+for (const [x,y,width] of dinerModel.booths) {
+  rect(dinerGrid, x, y, x+width-1, y, 't');
+  // Raised backrests project north from the table; only outer seat anchors
+  // are solid, leaving the service approach and James at (10,6) open.
+  rect(dinerGrid, x === 1 ? x : x+width-1, y-1, x === 1 ? x+1 : x+width-1, y-1, 'h');
+}
+const [boardX,boardY,boardW,boardH] = dinerModel.specials;
+rect(dinerGrid,boardX,boardY,boardX+boardW-1,boardY+boardH-1,'t');
+for (const [x,y] of [dinerModel.plant, dinerModel.coatRack, dinerModel.islandPlant]) dinerGrid[y][x] = 'h';
+dinerGrid[9][6] = dinerGrid[9][7] = 'D';
+const seenDiner = bfs(dinerGrid, 6, 8);
+[[6,9],[7,9],[5,4],[4,5],[9,7],[9,6]].forEach(([x,y]) => reach(seenDiner,x,y,'diner access'));
+if (process.argv.includes('--write-diner')) {
+  const fs = require('node:fs');
+  const mapFile = require('node:path').join(__dirname, '../js/maps.js');
+  let source = fs.readFileSync(mapFile, 'utf8');
+  const start = source.indexOf('    diner: {');
+  const end = source.indexOf('      doors:', start);
+  const header = "    diner: {\n      id: 'diner',\n      indoor: true,\n" +
+    '      interior: ' + JSON.stringify(dinerModel) + ',\n      rows: [\n' +
+    dinerGrid.map(row => "        '" + row.join('') + "'").join(',\n') + '\n      ],\n';
+  source = source.slice(0,start) + header + source.slice(end);
+  fs.writeFileSync(mapFile, source);
+}

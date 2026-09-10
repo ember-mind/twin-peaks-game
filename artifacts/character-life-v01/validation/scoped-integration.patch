@@ -1,0 +1,245 @@
+--- a/js/engine.js
++++ b/js/engine.js
+@@ -698,7 +698,9 @@
+           n.vx = n.moveStartX + (n.mx - n.moveStartX) * e;
+           n.vy = n.moveStartY + (n.my - n.moveStartY) * e;
+         }
+-      } else if (tGlobal >= n.nextThink && !(GAME.CharacterActivity && GAME.CharacterActivity.busy(n.id))) {
++      } else if (tGlobal >= n.nextThink &&
++          !(GAME.CharacterActivity && GAME.CharacterActivity.managedActor && GAME.CharacterActivity.managedActor(n.id) && !n.wander) &&
++          !(GAME.CharacterActivity && GAME.CharacterActivity.busy(n.id))) {
+         n.nextThink = tGlobal + 1500 + Math.random() * 3500;
+         var dirs = ['up', 'down', 'left', 'right'];
+         var look = dirs[Math.floor(Math.random() * 4)];
+@@ -731,6 +733,7 @@
+     var npc = npcAt(fx, fy);
+     if (npc) {
+       npc.dir = opposite(p.dir);
++      if (GAME.CharacterActivity && GAME.CharacterActivity.reactToInteractor) GAME.CharacterActivity.reactToInteractor(npc,S);
+       audioSfx('interact');
+       if (GAME.NarrativeFinaleProduction && GAME.NarrativeFinaleProduction.tryInteract(S.mapId, npc.id)) return;
+       // attori narrativi: l'adapter (se attivo per questo attore) gestisce la visita
+@@ -972,11 +975,11 @@
+     var arrivalOx = S.mapId === 'arrival' ? 48 : 0;
+     var arrivalOy = S.mapId === 'arrival' ? 24 : 0;
+     var ents = S.npcs.filter(function (n) { return E.npcActive(n); }).map(function (n) {
+-      return { wx: Math.round(n.vx * TILE) + arrivalOx, wy: Math.round(n.vy * TILE) + arrivalOy, sprite: n.sprite, dir: n.dir,
++      return { id:n.id, wx: Math.round(n.vx * TILE) + arrivalOx, wy: Math.round(n.vy * TILE) + arrivalOy, sprite: n.sprite, dir: n.dir,
+                fr: n.moving ? walkPhase(n.moveT) : 0,
+                moving: n.moving || false, alpha: n.sprite === 'laura' ? 0.85 : 1 };
+     });
+-    ents.push({ wx: Math.round(p.x) + arrivalOx + (S.mapId === 'arrival' ? 8 : 0), wy: Math.round(p.y) + arrivalOy - (S.mapId === 'arrival' ? 1 : 0), sprite: 'cooper', dir: p.dir,
++    ents.push({ id:'cooper', wx: Math.round(p.x) + arrivalOx + (S.mapId === 'arrival' ? 8 : 0), wy: Math.round(p.y) + arrivalOy - (S.mapId === 'arrival' ? 1 : 0), sprite: 'cooper', dir: p.dir,
+                 /* Un tile contiene sempre l'intero ciclo: contatto, A,
+                  * contatto, B. Il passo non dipende dall'istante globale in
+                  * cui il tasto viene premuto e non puo' iniziare a meta'. */
+@@ -997,7 +1000,7 @@
+     if (GAME.EnvironmentReactions) GAME.EnvironmentReactions.draw(g,S.mapId,cx,cy,-Infinity,entities.length?entities[0].wy+TILE:Infinity);
+     entities.forEach(function (e, index) {
+       var pal = GAME.Sprites.CHARS[e.sprite] || GAME.Sprites.CHARS.cooper;
+-      GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, pal, e.dir, e.fr, e.alpha, e.moving, S.mapId === 'woods', tGlobal, {mapId:S.mapId,wx:e.wx,wy:e.wy});
++      GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, pal, e.dir, e.fr, e.alpha, e.moving, S.mapId === 'woods', tGlobal, {mapId:S.mapId,wx:e.wx,wy:e.wy,npcId:e.id,characterLife:GAME.CharacterActivity&&GAME.CharacterActivity.actorPose?GAME.CharacterActivity.actorPose(e.id):null});
+       /* Painter's algorithm completo. Alberi erano tutti nel ground pass,
+        * quindi Cooper compariva davanti anche quando suoi piedi erano a nord
+        * della radice. Dopo ogni attore ridisegniamo sola fascia di alberi fra
+@@ -1095,7 +1098,7 @@
+       ectx.setTransform(1, 0, 0, 1, 0, 0);
+       ectx.clearRect(0, 0, 48, 60);
+       var pal = GAME.Sprites.CHARS[e.sprite] || GAME.Sprites.CHARS.cooper;
+-      GAME.Sprites.drawChar(ectx, 0, 0, pal, e.dir, e.fr, 1, e.moving, S.mapId === 'woods', tGlobal, {mapId:S.mapId,wx:e.wx,wy:e.wy}); // piedi a y ~52
++      GAME.Sprites.drawChar(ectx, 0, 0, pal, e.dir, e.fr, 1, e.moving, S.mapId === 'woods', tGlobal, {mapId:S.mapId,wx:e.wx,wy:e.wy,npcId:e.id,characterLife:GAME.CharacterActivity&&GAME.CharacterActivity.actorPose?GAME.CharacterActivity.actorPose(e.id):null}); // piedi a y ~52
+       // posizione schermo: centro X proiettato alla scala della riga
+       var offX = (e.wx + 12 - cxr) * 2;
+       var scrX = (offX - (OFF_W - warpSW[di]) / 2) * s;
+--- a/js/retro-authored.js
++++ b/js/retro-authored.js
+@@ -45,6 +45,27 @@
+     });
+   }
+   Spr.castReady = castReady;
++
++  /* Optional authored idle frames use the same 24px cell, baseline, mirror
++   * and painter pass as locomotion. The activity owner chooses a frame;
++   * this renderer never advances animation time. */
++  var LIFE_SHEET_FILE = 'assets/sprites/character-life-v01.png?v=character-life-v01';
++  var LIFE_SHEET_SRC = (typeof document !== 'undefined' && document.currentScript && document.currentScript.src)
++    ? new URL('../' + LIFE_SHEET_FILE, document.currentScript.src).href : LIFE_SHEET_FILE;
++  var LIFE_FRAMES = {
++    'truman.blink.down': {x:0, actor:'truman', direction:'down'},
++    'truman.blink.right': {x:24, actor:'truman', direction:'right'},
++    'truman.reading.fileRaised': {x:48, actor:'truman', direction:'down'},
++    'truman.reading.eyesLowered': {x:72, actor:'truman', direction:'down'}
++  };
++  var lifeSheet = null;
++  Spr.characterLifeReady = typeof Image === 'undefined' ? null : new Promise(function (resolve) {
++    lifeSheet = new Image();
++    lifeSheet.decoding = 'sync';
++    lifeSheet.onload = function () { resolve(lifeSheet.naturalWidth === 96 && lifeSheet.naturalHeight === 24); };
++    lifeSheet.onerror = function () { resolve(false); };
++    lifeSheet.src = LIFE_SHEET_SRC;
++  });
+ 
+   var C = {
+     ink: '#24382f', dark: '#4e8067', mid: '#6baa91', grass: '#83d3a7', hi: '#a7e2b9',
+@@ -6753,13 +6774,19 @@
+     var col = phase === 1 ? 1 : (phase === 3 ? 2 : 0);
+     var ox = Math.round(x) - 4, oy = Math.round(y) - 8;
+     var source=castWalkSheet,sx=blockX+col*24,sy=blockY+row*24;
++    var life = !moving && environment && environment.characterLife;
++    var idleFrame = life && LIFE_FRAMES[life.spriteFrame];
++    if (idleFrame && idleFrame.actor === name && idleFrame.direction === (dir === 'left' ? 'right' : dir) &&
++        lifeSheet && lifeSheet.complete && lifeSheet.naturalWidth === 96 && lifeSheet.naturalHeight === 24) {
++      source=lifeSheet; sx=idleFrame.x; sy=0;
++    }
+     if(environment && environment.mapId==='diner' && typeof document!=='undefined') {
+       var warmth=interiorActorLight(environment.wx,environment.wy);
+       if(warmth && document.createElement) {
+         if(!dinerActorLightCanvas) { dinerActorLightCanvas=document.createElement('canvas'); dinerActorLightCanvas.width=24; dinerActorLightCanvas.height=24; }
+         var light=dinerActorLightCanvas.getContext('2d');
+         light.clearRect(0,0,24,24); light.imageSmoothingEnabled=false;
+-        light.drawImage(castWalkSheet,sx,sy,24,24,0,0,24,24);
++        light.drawImage(source,sx,sy,24,24,0,0,24,24);
+         light.globalCompositeOperation='source-atop';
+         light.fillStyle='rgba(244,230,200,'+warmth+')';
+         light.fillRect(7,1,7,1); light.fillRect(6,2,3,1);
+@@ -6828,6 +6855,7 @@
+   };
+ 
+   GAME.Retro2D = GAME.Retro2D || {};
++  GAME.Retro2D.characterLifeFrames = {src:LIFE_SHEET_SRC, frame:[24,24], frames:LIFE_FRAMES};
+   GAME.Retro2D.castWalkSheet = {
+     src: CAST_SHEET_SRC,
+     production: true,
+--- a/js/sheriffs-station-scene.js
++++ b/js/sheriffs-station-scene.js
+@@ -65,7 +65,17 @@
+     indoor: true,
+     doors: {},
+     objects: [],
+-    npcs: []
++    npcs: [
++      {
++        id: 'station-truman',
++        x: 10,
++        y: 4,
++        sprite: 'truman',
++        name: 'Truman',
++        dir: 'down',
++        wander: false
++      }
++    ]
+   };
+ 
+   var installed = false;
+--- a/index.html
++++ b/index.html
+@@ -584,6 +584,7 @@
+ <script src="js/sheriffs-station-art.js"></script>
+ <script src="js/sheriffs-station-scene.js"></script>
+ <script src="js/sheriffs-station-production.js"></script>
++<script src="js/character-life-scenes.js"></script>
+ <script src="js/traincar-location-data.js"></script>
+ <script src="js/traincar-location-production.js"></script>
+ <script src="js/world-engine.js"></script>
+--- a/coldstage.config.mjs
++++ b/coldstage.config.mjs
+@@ -14,6 +14,8 @@
+   'js/double-r-location-production.js',
+   'test/sheriffs-station.html',
+   'test/sheriffs-station-preview.js',
++  'test/character-life.html',
++  'test/character-life-preview.js',
+ ];
+ 
+ const bootReady = `
+@@ -144,9 +146,54 @@
+   browser: {
+     viewport: { width: 1280, height: 720 },
+     pageLoadTimeoutMs: 30_000,
+-    scriptTimeoutMs: 60_000,
++    scriptTimeoutMs: 90_000,
+   },
+   scenarios: {
++    characterLife: {
++      review: 'visual',
++      scriptTimeoutMs: 90_000,
++      diff: {threshold:0, maxChangedRatio:0, includeAA:true},
++      path: '/test/character-life.html?clean=1',
++      viewport: {width:1280, height:960},
++      readyScript: `return Boolean(window.__CHARACTER_LIFE_PREVIEW__?.snapshot().ready);`,
++      setupScript: `return window.__CHARACTER_LIFE_PREVIEW__.demoInteraction().then(s => {
++        window.__lifeReactionProof={player:s.player,npc:s.npc,history:s.history.filter(e=>e.category==='reactive')};
++        window.__CHARACTER_LIFE_PREVIEW__.reset();
++        return window.__CHARACTER_LIFE_PREVIEW__.observeLogical(61000);
++      });`,
++      // Observe a full minute at production timing before any forced poses.
++      settleMs: 100,
++      evidenceScript: `const s=window.__CHARACTER_LIFE_PREVIEW__.snapshot(); return {...s,
++        npcCount:GAME.Engine.state.npcs.length,
++        quietMinute:s.logicalObservationMs>=60000 && s.rate===1 && s.stillFraction>=0.85,
++        blinkSeen:s.history.some(e=>e.animation==='blink'),
++        readingSeen:s.history.some(e=>e.animation==='reading'),
++        interactionVerified:window.__lifeReactionProof?.npc?.dir==='down' && window.__lifeReactionProof?.history?.length>0,
++        reactionProof:window.__lifeReactionProof};`,
++      checks: [
++        {path:'ready', equals:true},
++        {path:'mapId', equals:'sheriffs_station_main_interior'},
++        {path:'canvas.width', equals:256},
++        {path:'canvas.height', equals:192},
++        {path:'observationComplete', equals:true},
++        {path:'accelerated', equals:false},
++        {path:'quietMinute', equals:true},
++        {path:'blinkSeen', equals:true},
++        {path:'readingSeen', equals:true},
++        {path:'interactionVerified', equals:true},
++        {path:'npcCount', equals:1},
++        {path:'npc.x', equals:10},
++        {path:'npc.y', equals:4},
++        {path:'npc.moving', equals:false},
++        {path:'atlasId', equals:'heartgold-atlas-r116'},
++      ],
++      captures: [['still','still'], ['blink','blink'], ['reading-raised','reading-raised'],
++        ['reading-lowered','reading-lowered'], ['reaction-right','reaction-right'], ['restored','still']].map(([name,pose]) => ({
++        name,
++        setupScript:`return window.__CHARACTER_LIFE_PREVIEW__.setManualPose(${JSON.stringify(pose)});`,
++        settleMs:100,
++      })),
++    },
+     sheriffsStation: {
+       review: 'visual',
+       scriptTimeoutMs: 60_000,
+@@ -155,6 +202,7 @@
+       viewport: { width: 1280, height: 960 },
+       readyScript: `return Boolean(window.__SHERIFF_PREVIEW__?.snapshot().ready);`,
+       setupScript: `if (window.GAME && GAME.AmbientLife) GAME.AmbientLife.setEnabled(false);
++        if (window.GAME && GAME.CharacterActivity) { GAME.CharacterActivity.reset(1989); GAME.CharacterActivity.setPaused(true); }
+         return window.__SHERIFF_PREVIEW__.demoRoutes();`,
+       settleMs: 180,
+       evidenceScript: `return window.__SHERIFF_PREVIEW__.snapshot();`,
+@@ -489,11 +537,15 @@
+   selectChanged(files) {
+     const selected = new Set();
+     const all = () => ['desktop', 'gameplay', 'mobile', 'mobileGameplay', 'mobileLandscapeGameplay',
+-      'cooperDown', 'cooperUp', 'cooperRight', 'cooperLeft', 'visual', 'diner', 'dinerAmbient', 'dinerEnvironment', 'dinerGestures', 'dinerExterior', 'dinerLocation', 'sheriffsStation']
++      'cooperDown', 'cooperUp', 'cooperRight', 'cooperLeft', 'visual', 'diner', 'dinerAmbient', 'dinerEnvironment', 'dinerGestures', 'dinerExterior', 'dinerLocation', 'sheriffsStation', 'characterLife']
+       .forEach((name) => selected.add(name));
+     for (const file of files) {
+-      if (file.startsWith('test/sheriffs-station') || file.startsWith('js/sheriffs-station-')) {
++      if (file.startsWith('test/character-life') || file === 'js/character-life-scenes.js') {
++        selected.add('characterLife');
+         selected.add('sheriffsStation');
++      } else if (file.startsWith('test/sheriffs-station') || file.startsWith('js/sheriffs-station-')) {
++        selected.add('sheriffsStation');
++        selected.add('characterLife');
+       } else if (file.startsWith('test/double-r-location') || file === 'js/location-connections.js'
+         || file === 'js/double-r-location-data.js' || file === 'js/double-r-location-production.js') {
+         selected.add('dinerLocation');
+@@ -520,7 +572,7 @@
+       }
+     }
+     return ['desktop', 'gameplay', 'mobile', 'mobileGameplay', 'mobileLandscapeGameplay',
+-      'cooperDown', 'cooperUp', 'cooperRight', 'cooperLeft', 'visual', 'diner', 'dinerAmbient', 'dinerEnvironment', 'dinerGestures', 'dinerExterior', 'dinerLocation', 'sheriffsStation']
++      'cooperDown', 'cooperUp', 'cooperRight', 'cooperLeft', 'visual', 'diner', 'dinerAmbient', 'dinerEnvironment', 'dinerGestures', 'dinerExterior', 'dinerLocation', 'sheriffsStation', 'characterLife']
+       .filter((name) => selected.has(name));
+   },
+ };

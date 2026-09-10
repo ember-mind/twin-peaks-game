@@ -1,6 +1,6 @@
-/* retro-authored.js — tileset/sprite authored per produzione Game Boy Color.
- * Ogni forma principale nasce da matrici pixel 16x16 / 16x20. Le mappe ASCII,
- * le collisioni e i dati narrativi restano invariati.
+/* retro-authored.js — tileset/sprite authored per produzione retro 2D.
+ * La griglia mondo resta 16x16; forme, materiali e attori possono superare
+ * il singolo tile senza cambiare mappe ASCII, collisioni o dati narrativi.
  */
 (function () {
   'use strict';
@@ -19,32 +19,107 @@
     scale = Number(scale);
     runtimeActorScale = isFinite(scale) ? Math.max(1, Math.min(1.32, scale)) : 1;
   };
-  /* R101 — renderer produzione unico. I master ImageGen ridotti 1254→16 px
-   * con point sampling producevano sagome mediane 9×16, sei toni e molti
-   * micro-cluster. Il generatore qui sotto nasce invece direttamente sulla
-   * griglia 16×16 di Crystal: tre toni, contorno nero, fasce coerenti.
-   * L'atlante resta archivio comparativo/rebuild, mai sorgente runtime. */
-  var CAST_RENDERER = 'native-authored-r102e';
-  var CAST_SHEET_SRC = 'assets/sprites/cast-walkcycles-16.png?v=cast-06b8ed9caf35';
+  /* R103 — atlas 24px derivato dai master individuali. Stessa baseline del
+   * tile 16px; proporzioni, rampe e silhouette seguono bar HGSS misurato. */
+  var CAST_RENDERER = 'heartgold-atlas-r116';
+  var CAST_SHEET_FILE = 'assets/sprites/cast-walkcycles-hg-24.png?v=r129-cast';
+  var CAST_SHEET_SRC = (typeof document !== 'undefined' && document.currentScript && document.currentScript.src)
+    ? new URL('../' + CAST_SHEET_FILE, document.currentScript.src).href
+    : CAST_SHEET_FILE;
   var CAST_SHEET_ORDER = [
     'cooper', 'truman', 'lucy', 'andy', 'hawk',
     'sarah', 'leland', 'norma', 'shelly', 'loglady',
     'bobby', 'donna', 'jacoby', 'audrey', 'mfap',
     'laura', 'gerard', 'benhorne', 'giant', 'maddy',
-    'bob', 'james', 'jacques', 'ronette'
+    'bob', 'james', 'jacques', 'ronette', 'infermiera'
   ];
   var castWalkSheet = null;
+  var castReady = null;
+  if (typeof Image !== 'undefined') {
+    castReady = new Promise(function (resolve, reject) {
+      castWalkSheet = new Image();
+      castWalkSheet.decoding = 'sync';
+      castWalkSheet.onload = function () { resolve(true); };
+      castWalkSheet.onerror = function () { reject(new Error('cast atlas failed: ' + CAST_SHEET_SRC)); };
+      castWalkSheet.src = CAST_SHEET_SRC;
+    });
+  }
+  Spr.castReady = castReady;
+
+  /* Optional authored idle frames use the same 24px cell, baseline, mirror
+   * and painter pass as locomotion. The activity owner chooses a frame;
+   * this renderer never advances animation time. */
+  var LIFE_SHEET_FILE = 'assets/sprites/station-population-v01.png?v=station-population-v01';
+  var LIFE_SHEET_SRC = (typeof document !== 'undefined' && document.currentScript && document.currentScript.src)
+    ? new URL('../' + LIFE_SHEET_FILE, document.currentScript.src).href : LIFE_SHEET_FILE;
+  var LIFE_FRAMES = {
+    'truman.blink.down': {x:0, actor:'truman', direction:'down'},
+    'truman.blink.right': {x:24, actor:'truman', direction:'right'},
+    'truman.reading.fileRaised': {x:48, actor:'truman', direction:'down'},
+    'truman.reading.eyesLowered': {x:72, actor:'truman', direction:'down'},
+    'lucy.blink.down': {x:96, actor:'lucy', direction:'down'},
+    'lucy.telephone.down': {x:120, actor:'lucy', direction:'down'},
+    'andy.blink.down': {x:144, actor:'andy', direction:'down'},
+    'andy.note.down': {x:168, actor:'andy', direction:'down'}
+  };
+  var lifeSheet = null;
+  Spr.characterLifeReady = typeof Image === 'undefined' ? null : new Promise(function (resolve) {
+    lifeSheet = new Image();
+    lifeSheet.decoding = 'sync';
+    lifeSheet.onload = function () { resolve(lifeSheet.naturalWidth === 192 && lifeSheet.naturalHeight === 24); };
+    lifeSheet.onerror = function () { resolve(false); };
+    lifeSheet.src = LIFE_SHEET_SRC;
+  });
 
   var C = {
-    ink: '#202820', dark: '#385840', mid: '#689848', grass: '#a8d068', hi: '#e0e8a0',
-    earth: '#e8d898', earth2: '#a89068', road: '#d8d0a0', road2: '#787860',
+    ink: '#24382f', dark: '#4e8067', mid: '#6baa91', grass: '#83d3a7', hi: '#a7e2b9',
+    earth: '#e8d08f', earth2: '#b69a64', road: '#dfcb91', road2: '#a18c62',
     paper: '#fff8d0', wood: '#a86848', wood2: '#583838', water: '#7890c8',
     water2: '#c0d0e0', red: '#b84858', gold: '#f0d060'
   };
 
+  /* HeartGold-quality material hierarchy. Values are Twin Peaks originals;
+   * reference contributes density, value separation and lighting grammar. */
+  var HG = {
+    grass:'#83d3a7', grassHi:'#a7e2b9', grassMid:'#6baa91', grassDark:'#4e8067',
+    grassDeep:'#315a49', path:'#e8d08f', pathHi:'#f3dfa8', pathMid:'#d6bc7d',
+    pathDark:'#aa8e5c', road:'#dfcb91', roadHi:'#ecdca9', roadMid:'#c5ac74',
+    roadDark:'#917a54', shadow:'#5e987b', shadowDark:'#46745e',
+    vergeWarm:'#c5c886', vergeMid:'#8fa474', vergeShadow:'#6f8969', vergeSoil:'#77664a',
+    flowerWhite:'#fff5d5', flowerPink:'#e994a0', flowerGold:'#efbd61'
+  };
+  var HG_GRASS_DETAIL = ['#8bd6aa','#91daad','#7ecba1','#76c39a','#88cea5','#9bdeb4',
+    '#72b991','#86d0a2','#95d8ae','#69af89','#8fd4aa','#78c79d'];
+  var HG_PATH_DETAIL = ['#ead397','#eed8a0','#e3c988','#d9bd7d','#f0dca5','#cfae70',
+    '#e6cc8d','#f5e4b2'];
+  var HG_ROAD_DETAIL = ['#e1cc93','#e5d09a','#d8c287','#d1b97f','#ead8a5','#c9ad72',
+    '#dcc58b','#eedcab'];
+
   function R(ctx, x, y, w, h, color) {
     ctx.fillStyle = color;
     ctx.fillRect(Math.round(x), Math.round(y), w, h);
+  }
+
+  function softPixelShadow(ctx, x, y, w, h, dark, soft) {
+    var rows = Math.max(3, Math.min(7, h || 5));
+    for (var row = 0; row < rows; row++) {
+      var inset = Math.abs((rows - 1) / 2 - row) * 2;
+      var sw = Math.max(4, Math.round(w - inset * 2));
+      R(ctx, x + Math.round(inset) + row, y + row, sw, 1,
+        row === 0 || row === rows - 1 ? soft : dark);
+    }
+    /* Bordo morbido staccato di un pixel verso sud-est. */
+    R(ctx, x + Math.max(3, Math.round(w * .28)), y + rows + 1,
+      Math.max(4, Math.round(w * .44)), 1, soft);
+  }
+
+  function grassDriftBlob(ctx, cx, cy, rx, ry, tone, salt) {
+    for (var row = -ry; row <= ry; row++) {
+      var ratio = Math.max(0, 1 - (row * row) / Math.max(1, ry * ry));
+      var half = Math.max(2, Math.floor(rx * Math.sqrt(ratio)));
+      var nudge = (((salt + row * 7) & 15) === 0 ? 2 : (((salt + row) & 7) === 1 ? -1 : 0));
+      R(ctx, cx - half + nudge, cy + row, Math.max(3, half * 2 - Math.abs(nudge)), 1, tone);
+    }
   }
 
   function lighter(hex, amount) {
@@ -328,52 +403,380 @@
     groundShadow(ctx, x, y, tx, ty, rows);
   }
 
-  /* Terreno hero: carta crema dominante e pochi ciuffi, come reference.
-   * Nessun tappeto verde: 4 segni deterministici per tile, grandi vuoti. */
+  /* Terreno hero: campi macro quieti. Il valore cambia ogni 32px, mentre
+   * cluster 2–5px rompono la superficie senza produrre pixel isolati. */
   function arrivalGround(ctx, x, y, tx, ty) {
-    R(ctx, x, y, 16, 16, '#eee6b5');
-    var phase = hash(tx, ty, 0x69) & 3;
-    var marks = [
-      [[3,4],[11,2],[7,11],[14,14]],
-      [[1,7],[9,4],[13,10],[5,14]],
-      [[4,2],[14,6],[8,9],[2,13]],
-      [[2,3],[10,7],[15,11],[6,15]]
-    ][phase];
-    for (var i = 0; i < marks.length; i++) {
-      R(ctx, x + marks[i][0], y + marks[i][1], i === 2 ? 2 : 1, 1, '#9aab69');
-      if (i === 1) R(ctx, x + marks[i][0] + 1, y + marks[i][1] - 1, 1, 1, '#6a8a43');
+    var field = hash(tx >> 1, ty >> 1, 0x690) & 3;
+    var base = [HG.grass, '#86d5aa', '#7fd0a3', '#89d7ad'][field];
+    R(ctx, x, y, 16, 16, base);
+    var phase = hash(tx, ty, 0x69) & 7;
+    if (phase < 3) {
+      var ox = 2 + ((phase * 5 + tx) % 9);
+      var oy = 3 + ((phase * 3 + ty) % 8);
+      var tone = phase & 1 ? HG.grassHi : HG.grassMid;
+      R(ctx, x + ox - 1, y + oy, 6 + (phase & 1), 2, tone);
+      R(ctx, x + ox + 1, y + oy - 2, 4, 2, phase === 2 ? '#91dab0' : HG.grassHi);
+      if (phase === 0) R(ctx, x + ox + 3, y + oy + 2, 3, 1, HG.grassMid);
     }
   }
 
   /* R69 hero tableau. Coordinate misurate sulla reference normalizzata
    * 160x144: negozio 30,2; chalet 89,0; auto 93,42; radura dentro foresta. */
-  function arrivalFir(ctx, x, y, h, back) {
-    var fir = [
-      '........oo........','.......oddo.......','......odmmdo......','.....oddddddo.....',
-      '...oooddmddddooo..','..oddddddddddddo..','......odd.do......','.....oddddddo.....',
-      '...oodddmdddddoo..','..odddddddddddddo.','.....odd.ddo......','....odddddddddo...',
-      '..oodddddmdddddoo.','.odddddddddddddddo','....oddd.ddddo....','...odddddddddddo..',
-      '.ooddddmddddddddoo','oddddddddddddddddd','...oddddd.ddddo...','..odddddddddddddo.',
-      'ooddddmdddddddddoo','oddddddddddddddddd','....oddd.ddddo....','..odddddddddddddo.',
-      'oddddddddddddddddd','......oooooo......','.......oddo.......','.......oddo.......'
+  /* R108 — vocabolario arboreo organico condiviso da Town e Arrivo.
+   * Ogni chioma nasce da lobi stepped larghi 6–16px. Nessuna fascia piena
+   * supera 17px; l'overlap 6–10px costruisce alberi da 30–46px senza muri. */
+  var ORGANIC_TREE_FAMILIES = [
+    { h:33, lobes:[[-13,13,8,7],[-7,6,8,8],[2,5,8,8],[11,12,8,7],[-8,18,8,7],[1,17,8,8],[9,20,7,6]] },
+    { h:41, lobes:[[-5,4,6,6],[3,2,6,7],[-10,12,7,7],[0,11,8,8],[9,13,7,7],[-8,22,8,7],[2,21,8,8],[10,25,7,6]] },
+    { h:47, lobes:[[0,3,5,6],[-4,10,6,7],[4,11,6,7],[-8,18,7,7],[1,18,7,8],[9,20,6,7],[-10,28,8,7],[0,27,8,8],[10,30,7,6]] },
+    { h:36, lobes:[[-14,10,8,8],[-6,5,8,8],[5,5,8,8],[13,11,7,7],[-10,18,8,7],[-1,16,8,8],[8,18,8,7],[0,24,8,7]] },
+    { h:43, lobes:[[-12,8,7,7],[-3,3,8,8],[7,7,8,8],[14,14,7,7],[-10,18,8,8],[0,16,8,8],[9,22,8,7],[-1,27,7,6]] },
+    { h:50, lobes:[[0,3,4,5],[-5,10,6,5],[4,12,6,6],[-8,19,6,6],[0,20,7,7],[7,24,6,6],[-10,31,7,6],[-1,32,8,7],[9,35,6,5]] }
+  ];
+
+  function pixelCrownLobe(ctx, cx, cy, rx, ry, tones, phase) {
+    var row, dy, ratio, half, left, span;
+    for (row = -ry; row <= ry; row++) {
+      dy = row / Math.max(1, ry);
+      ratio = Math.max(0, 1 - dy * dy);
+      half = Math.max(1, Math.floor(rx * Math.sqrt(ratio)));
+      /* Spalle spezzate e recessioni asimmetriche: il lobo non e' un cerchio
+       * ripetuto. L'inviluppo resta stepped e largo al massimo 17px. */
+      if (((phase + row * 3) & 15) === 1 && half > 3) half -= 2;
+      var lean = ((phase >>> 2) & 3) - 1;
+      var skew = row < 0 ? lean : -Math.sign(lean);
+      if (row > Math.floor(ry / 3)) skew += (phase & 1) ? 2 : -1;
+      if (((phase + row) & 7) === 0) skew += 1;
+      left = cx - half + skew;
+      span = Math.min(17, half * 2 + 1);
+      if (row >= -1 && row <= 2 && ((phase >>> 1) & 1) && span > 7) {
+        span -= 2;
+        if (phase & 1) left += 2;
+      }
+      var edgeTone = ((phase & 3) === 0 || row === -ry || row === ry) ? tones[0] : tones[1];
+      R(ctx, left, cy + row, span, 1, edgeTone);
+      /* Una sola scheggia interna, non una serie di highlight orizzontali. */
+      if (row === -Math.max(1, Math.round(ry * .28)) && span > 7) {
+        var glintW = Math.max(3, Math.min(8, span - 6));
+        R(ctx, left + 2 + ((phase >>> 5) & 2), cy + row, glintW, 2, tones[2]);
+      }
+    }
+    /* Accento compatto a gomito: volume locale, mai banda ripetuta. */
+    var accentX = cx - Math.max(2, rx - 3) + ((phase >>> 3) & 2);
+    R(ctx, accentX, cy - 2, Math.max(3, Math.min(6, rx - 1)), 2, tones[3]);
+    R(ctx, accentX + 2, cy - 4, 3, 2, tones[(phase & 3) === 0 ? 4 : 3]);
+  }
+
+  function pixelCanopyMass(ctx, cx, cy, w, h, tones, phase) {
+    /* Massa centrale authored: fonde i piccoli lobi in un volume da
+     * 22–28px. Bordi esterni restano stepped, l'interno non diventa una
+     * collezione di capesante e highlight puntiformi. */
+    var halfH = Math.floor(h / 2);
+    for (var row = 0; row < h; row++) {
+      var shoulder = Math.abs(row - halfH);
+      var inset = Math.floor(shoulder * .75);
+      var lean = ((phase >>> (row % 5)) & 1) ? 1 : 0;
+      if (row < 2 || row > h - 3) inset += 2;
+      var span = Math.max(10, w - inset * 2);
+      var left = cx - Math.floor(w / 2) + inset + lean;
+      R(ctx, left, cy - halfH + row, span, 1, tones[2]);
+    }
+    /* Due facce connesse e asimmetriche sostituiscono le tre righe seriali. */
+    var massX = cx - 7 + ((phase >>> 2) & 2);
+    R(ctx, massX, cy - 3, 9, 3, tones[3]);
+    R(ctx, massX + 3, cy - 6, 6, 3, tones[4]);
+    R(ctx, cx + 3, cy + 1, 6, 3, tones[1]);
+  }
+
+  function organicTreeShadow(ctx, cx, rootY, back, phase) {
+    if (back) return;
+    /* Tutte le ombre ambientali cadono a sud-est; varia la massa, non il verso. */
+    grassDriftBlob(ctx, cx + 3, rootY + 3, 10 + (phase & 2), 3,
+      (phase & 4) ? '#78c79d' : HG.shadow, phase ^ 0x45);
+    softPixelShadow(ctx, cx - 8, rootY + 1, 25 + (phase & 3), 5, HG.shadowDark, HG.shadow);
+    R(ctx, cx - 3, rootY + 2, 7, 1, HG.vergeSoil);
+    R(ctx, cx + 5, rootY + 4, 5, 1, HG.grassDark);
+  }
+
+  function forestUnderstoryStrip(ctx, x, baseY, w, minH, maxH, salt) {
+    /* Fascia continua composta da blocchi sovrapposti di ampiezza irregolare.
+     * Le quote alte cambiano, la base resta unita: foresta, non isole. */
+    var cursor = 0, ordinal = 0;
+    while (cursor < w) {
+      /* x/baseY sono coordinate schermo e cambiano a ogni pixel di camera.
+       * Usarle come seed rigenerava span, altezza e colore durante il moto.
+       * salt identifica gia' la run nel mondo; ordinal identifica il blocco. */
+      var v = hash(ordinal, salt, 0x4f35 + ordinal * 29);
+      var span = Math.min(w - cursor, 11 + (v % 11));
+      if (w - cursor - span > 0 && w - cursor - span < 7) span = w - cursor;
+      var h = minH + ((v >>> 5) % Math.max(1, maxH - minH + 1));
+      var overlap = ordinal === 0 ? 0 : 2;
+      var sx = x + cursor - overlap, sw = span + overlap;
+      var dark = (ordinal & 1) ? '#315a49' : '#3e725b';
+      R(ctx, sx, baseY - h, sw, h, dark);
+      R(ctx, sx + 2, baseY - h + 2, Math.max(3, sw - 4), Math.max(2, h - 5), '#639b72');
+      if (((v >>> 11) & 3) === 0 && sw > 10) {
+        R(ctx, sx + 4, baseY - h + 3, Math.min(7, sw - 6), 3, '#639b72');
+      }
+      cursor += span; ordinal++;
+    }
+  }
+
+  function arrivalBoundedCrown(ctx, cx, cy, rx, ry, boundX, boundW, tones, phase) {
+    /* Sagoma scura continua + due volumi interni compatti. La versione a
+     * tono-per-riga produceva terrazze orizzontali leggibili a 1x. */
+    for (var row = -ry; row <= ry; row++) {
+      var ratio = Math.max(0, 1 - (row * row) / Math.max(1, ry * ry));
+      var half = Math.max(2, Math.floor(rx * Math.sqrt(ratio)));
+      var nudge = row < 0 ? ((phase >>> 3) & 2) : -((phase >>> 5) & 1);
+      var left = Math.max(boundX, cx - half + nudge);
+      var right = Math.min(boundX + boundW, cx + half + 1 + nudge);
+      if (right > left) R(ctx, left, cy + row, right - left, 1, tones[0]);
+    }
+    var innerRx = Math.max(3, rx - 3), innerRy = Math.max(2, ry - 3);
+    var innerCx = cx - 1 + ((phase >>> 9) & 2), innerCy = cy - 2;
+    for (row = -innerRy; row <= innerRy; row++) {
+      ratio = Math.max(0, 1 - (row * row) / Math.max(1, innerRy * innerRy));
+      half = Math.max(1, Math.floor(innerRx * Math.sqrt(ratio)));
+      left = Math.max(boundX, innerCx - half);
+      right = Math.min(boundX + boundW, innerCx + half + 1);
+      if (right > left) R(ctx, left, innerCy + row, right - left, 1, tones[1]);
+    }
+    var accentX = Math.max(boundX, Math.min(boundX + boundW - 5, cx - 3 + ((phase >>> 7) & 2)));
+    R(ctx, accentX, cy - 1, 5, 3, tones[2]);
+    R(ctx, accentX + 2, cy - 5, 3, 4, tones[3]);
+  }
+
+  function arrivalFusedForestGroup(ctx, x, y, w, h, salt) {
+    var groups = [], cursor = 0, ordinal = 0;
+    while (cursor < w) {
+      var v = hash(Math.round(x + cursor), Math.round(y), salt + ordinal * 43);
+      var span = Math.min(w - cursor, 12 + (v % 8));
+      if (w - cursor - span > 0 && w - cursor - span < 7) span = w - cursor;
+      var cx = x + cursor + Math.round(span * .54) - (ordinal ? 2 : 0);
+      groups.push([cx, v, span]);
+      cursor += Math.max(8, span - 3); ordinal++;
+    }
+    /* Contatti e tronchi puntano tutti a sud-est e restano nel gruppo. */
+    for (var gi = 0; gi < groups.length; gi++) {
+      var g = groups[gi], contactX = Math.max(x, Math.min(x + w - 9, g[0] + 1));
+      R(ctx, contactX, y + h - 3, 9, 2, HG.shadowDark);
+      R(ctx, contactX + 3, y + h - 1, 6, 1, HG.shadow);
+      if (((g[1] >>> 9) & 3) === 0) {
+        R(ctx, g[0] - 1, y + h - 8, 3, 7, '#806948');
+        R(ctx, g[0], y + h - 7, 1, 6, '#ad8758');
+      }
+    }
+    var back = ['#315a49','#3e725b','#639b72','#80b878'];
+    var front = ['#24382f','#315a49','#3e725b','#639b72'];
+    for (gi = 0; gi < groups.length; gi++) {
+      g = groups[gi];
+      var ry = Math.max(5, Math.min(7, h - 5));
+      arrivalBoundedCrown(ctx, g[0], y + 6 + ((g[1] >>> 4) & 2),
+        8 + (g[1] & 3), ry, x, w, back, g[1]);
+    }
+    for (gi = 1; gi < groups.length; gi += 2) {
+      g = groups[gi];
+      arrivalBoundedCrown(ctx, g[0] + 2, y + h - 7,
+        7 + ((g[1] >>> 6) & 3), 5, x, w, front, g[1] ^ 0x54d);
+    }
+    /* Contatti corti sfalsati: nessuna barra continua o terrazza. */
+    for (gi = 0; gi < groups.length; gi += 2) {
+      g = groups[gi];
+      var rootX = Math.max(x, g[0] - 4);
+      var rootW = Math.min(7 + ((g[1] >>> 12) & 3), x + w - rootX);
+      R(ctx, rootX, y + h - 3 - ((g[1] >>> 15) & 1), rootW, 3, '#315a49');
+      if (rootW > 5) R(ctx, rootX + 2, y + h - 4, rootW - 3, 2, '#3e725b');
+    }
+  }
+
+  function arrivalFusedForestWall(ctx, x, y, w, h, towardRight, salt) {
+    /* Parete verticale a gruppi sfalsati. Ogni colonna usa altezze diverse;
+     * nessuna riga di corone coincide con la successiva estensione della
+     * foresta a imbuto. Le chiome restano entro celle solide in X. */
+    var dark = ['#24382f','#315a49','#3e725b','#639b72'];
+    var mid = ['#315a49','#3e725b','#639b72','#80b878'];
+    var sy = y + 5, ordinal = 0;
+    while (sy < y + h + 5) {
+      var v = hash(Math.round(x), Math.round(sy), salt + ordinal * 47);
+      var edgeCx = towardRight
+        ? x + w - 5 - ((v >>> 5) & 3)
+        : x + 5 + ((v >>> 5) & 3);
+      arrivalBoundedCrown(ctx, edgeCx, sy, 8 + (v & 3), 6 + ((v >>> 3) & 1),
+        x, w, (ordinal & 1) ? dark : mid, v);
+      if (w >= 24) {
+        var innerCx = towardRight ? x + 7 + ((v >>> 9) & 4) : x + w - 8 - ((v >>> 9) & 4);
+        arrivalBoundedCrown(ctx, innerCx, sy + 4 + ((v >>> 12) & 3),
+          7 + ((v >>> 14) & 2), 6, x, w, dark, v ^ 0x5a7);
+      }
+      if (((v >>> 17) & 3) === 0) {
+        var trunkX = Math.max(x + 1, Math.min(x + w - 4, edgeCx - 1));
+        R(ctx, trunkX, sy + 3, 3, 7, '#806948');
+        R(ctx, trunkX + 1, sy + 3, 1, 6, '#ad8758');
+        R(ctx, trunkX + (towardRight ? 2 : -1), sy + 9, 7, 2, HG.shadowDark);
+      }
+      sy += 10 + ((v >>> 20) % 7);
+      ordinal++;
+    }
+  }
+
+  function arrivalBoundedRect(ctx, x, y, w, h, boundX, boundW, tone) {
+    var left = Math.max(boundX, Math.round(x));
+    var right = Math.min(boundX + boundW, Math.round(x + w));
+    if (right > left && h > 0) R(ctx, left, y, right - left, h, tone);
+  }
+
+  function arrivalBoundedFirShape(ctx, cx, rootY, boundX, boundW, height, phase) {
+    var top = rootY - height;
+    var lean = (phase & 1) ? 1 : -1;
+    var tiers = [
+      [cx + lean, top, 3, 4],
+      [cx - 4, top + 4, 9, 5],
+      [cx - 6 + lean, top + 8, 13, 5],
+      [cx - 8, top + 12, 16, Math.max(4, height - 12)]
     ];
-    /* Tre silhouette reali: alcune fasce slittano 1 px, chiome non stampate. */
-    var variant = Math.abs((x * 7 + y * 3) | 0) % 3;
-    if (variant) fir = fir.map(function (row, ri) {
-      if (ri % 5 !== variant) return row;
-      return variant === 1 ? ('.' + row.slice(0, -1)) : (row.slice(1) + '.');
-    });
-    paint(ctx, fir, {
-      o: back ? '#34572d' : '#072619',
-      d: back ? '#6a8a43' : '#34572d',
-      m: back ? '#9aab69' : '#6a8a43'
-    }, x, y + Math.max(0, h - 32));
-    /* Cluster direzionali: rami, non stipple. */
-    var baseY = y + Math.max(0, h - 32);
-    R(ctx, x + 4 + variant, baseY + 8, 6, 2, back ? '#9aab69' : '#6a8a43');
-    R(ctx, x + 8 - variant, baseY + 14, 6, 2, back ? '#34572d' : '#072619');
-    R(ctx, x + 2 + variant, baseY + 19, 7, 2, back ? '#9aab69' : '#6a8a43');
-    R(ctx, x + 7, baseY + 23, 8, 2, back ? '#34572d' : '#072619');
+    for (var i = 0; i < tiers.length; i++) {
+      var t = tiers[i];
+      arrivalBoundedRect(ctx, t[0], t[1], t[2], t[3], boundX, boundW,
+        i & 1 ? '#315a49' : '#24382f');
+      arrivalBoundedRect(ctx, t[0] + 2 + (i === 2 ? 1 : 0), t[1] + 1,
+        Math.max(2, t[2] - 5), Math.max(1, t[3] - 2), boundX, boundW,
+        i < 2 ? '#80b878' : '#639b72');
+    }
+    arrivalBoundedRect(ctx, cx - 1, rootY - 5, 3, 5, boundX, boundW, '#6a8a43');
+    arrivalBoundedRect(ctx, cx + 2, rootY - 1, 7, 2, boundX, boundW, HG.shadowDark);
+  }
+
+  function arrivalBoundedBroadleafShape(ctx, cx, rootY, boundX, boundW, height, phase) {
+    var top = rootY - height;
+    var shift = (phase & 2) ? 2 : -1;
+    /* Quattro lobi stepped di dimensioni diverse: nessun anello centrale. */
+    arrivalBoundedRect(ctx, cx - 8 + shift, top + 6, 9, height - 8,
+      boundX, boundW, '#315a49');
+    arrivalBoundedRect(ctx, cx - 4, top + 1, 10, height - 4,
+      boundX, boundW, '#24382f');
+    arrivalBoundedRect(ctx, cx + 3 + shift, top + 5, 7, height - 8,
+      boundX, boundW, '#3e725b');
+    arrivalBoundedRect(ctx, cx - 7, top + 9, 16, height - 10,
+      boundX, boundW, '#315a49');
+    arrivalBoundedRect(ctx, cx - 2 + shift, top + 3, 6, 5,
+      boundX, boundW, '#639b72');
+    arrivalBoundedRect(ctx, cx - 6, top + 8, 5, 4,
+      boundX, boundW, '#80b878');
+    arrivalBoundedRect(ctx, cx + 3, top + 10, 4, 3,
+      boundX, boundW, '#639b72');
+    arrivalBoundedRect(ctx, cx - 1, rootY - 5, 3, 5,
+      boundX, boundW, '#6a8a43');
+    arrivalBoundedRect(ctx, cx + 2, rootY - 1, 8, 2,
+      boundX, boundW, HG.shadowDark);
+  }
+
+  function arrivalTreeWall(ctx, anchors, boundX, boundW, salt) {
+    /* Famiglie alternate e silhouette asimmetriche: nessuna ellisse o
+     * highlight concentrico puo' ripetersi fra vicini. */
+    for (var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      var v = hash(a[0], a[1], salt + i * 37);
+      var rootX = Math.max(boundX + 2, Math.min(boundX + boundW - 4, a[0]));
+      var height = 17 + ((v >>> 4) % 5);
+      if ((i + salt) % 3 === 0) {
+        arrivalBoundedFirShape(ctx, rootX, a[1], boundX, boundW, height, v);
+      } else {
+        arrivalBoundedBroadleafShape(ctx, rootX, a[1], boundX, boundW, height, v);
+      }
+    }
+  }
+
+  function arrivalStepForest(ctx, x, y, h, salt) {
+    /* Estensioni dell'imbuto: chiome basse dentro il proprio rettangolo
+     * solido. Nessuna corona sale nella cella calpestabile soprastante. */
+    for (var cellY = y; cellY < y + h; cellY += 16) {
+      var cv = hash(x, cellY, salt ^ 0x63d);
+      if (((cv >>> 8) & 1) === 0) {
+        arrivalBoundedFirShape(ctx, x + 8, cellY + 15, x, 16, 14 + (cv & 1), cv);
+      } else {
+        arrivalBoundedBroadleafShape(ctx, x + 8, cellY + 15, x, 16, 14 + (cv & 1), cv);
+      }
+    }
+  }
+
+  function arrivalSharedGround(ctx, x, y, w, salt) {
+    var lobeW = Math.max(14, Math.round(w * .46));
+    grassDriftBlob(ctx, x + Math.round(w * .44), y + 4,
+      Math.max(9, Math.round(w * .28)), 3, '#78c79d', salt);
+    softPixelShadow(ctx, x + 3, y + 1, lobeW, 5, HG.shadowDark, HG.shadow);
+    softPixelShadow(ctx, x + Math.round(w * .48), y + 2,
+      Math.max(11, Math.round(w * .34)), 4, HG.shadowDark, HG.shadow);
+    R(ctx, x + 6, y, Math.max(8, Math.round(w * .28)), 1, HG.vergeSoil);
+    R(ctx, x + Math.round(w * .61), y + 1, Math.max(6, Math.round(w * .20)), 1, HG.grassDark);
+  }
+
+  function arrivalGroundOcclusion(ctx, x, y, w, salt) {
+    var leftW = 5 + (salt & 2), rightW = 5 + ((salt >>> 2) & 2);
+    R(ctx, x, y - 2, leftW, 4, HG.grassDark);
+    R(ctx, x + 2, y - 4, Math.max(3, leftW - 2), 3, '#639b72');
+    R(ctx, x + w - rightW, y - 1, rightW, 4, '#315a49');
+    R(ctx, x + w - rightW + 1, y - 3, Math.max(3, rightW - 2), 3, '#639b72');
+  }
+
+  function drawOrganicTree(ctx, cx, rootY, family, back, salt, skipShadow) {
+    var spec = ORGANIC_TREE_FAMILIES[Math.abs(family) % ORGANIC_TREE_FAMILIES.length];
+    var phase = Math.abs(salt || 0) & 15;
+    var heightLift = ((phase >>> 1) % 7) - 3;
+    var top = rootY - spec.h - heightLift;
+    var tones = back
+      ? ['#315a49','#3e725b','#639b72','#80b878','#9aab69']
+      : ['#24382f','#315a49','#3e725b','#639b72','#80b878'];
+    /* Nel passaggio depth, chioma/tronco vengono ridisegnati sopra attori
+     * arretrati. Ombra di contatto resta nel passaggio terreno: ridisegnarla
+     * sopra piedi/personaggi produrrebbe una macchia semitrasparente falsa. */
+    if (!skipShadow) organicTreeShadow(ctx, cx, rootY, back, phase);
+    /* Tronchi variati e spesso nascosti: bordo forestale, non lollipop row. */
+    var trunkMode = (phase + family * 3) % 5;
+    if (!back && (trunkMode === 1 || trunkMode === 3)) {
+      var trunkDx = trunkMode === 1 ? -3 : 0;
+      var trunkW = trunkMode === 1 ? 5 : 4;
+      R(ctx, cx + trunkDx, rootY - 13, trunkW, 14, tones[0]);
+      R(ctx, cx + trunkDx + 1, rootY - 12, Math.max(2, trunkW - 2), 12, '#9b7449');
+      R(ctx, cx + trunkDx + 2, rootY - 11, 1, 10, '#c09761');
+    }
+    for (var i = 0; i < spec.lobes.length; i++) {
+      var l = spec.lobes[i];
+      pixelCrownLobe(ctx, cx + l[0], top + l[1], l[2], l[3], tones, phase + i * 3);
+    }
+    pixelCanopyMass(ctx, cx + ((phase & 3) - 1), rootY - Math.round(spec.h * .46),
+      23 + ((phase >>> 2) % 5), 12 + (phase & 1), tones, phase);
+    /* Nucleo interno fonde giunti fra lobi: corona unica, non grappolo. */
+    var blend = [tones[1], tones[2], tones[3], tones[3], tones[4]];
+    pixelCrownLobe(ctx, cx, rootY - Math.round(spec.h * .52), 8, 8, blend, phase + 23);
+    /* Base intenzionalmente asimmetrica: due masse di diversa taglia e quota
+     * spezzano la cadenza di cerchi gemelli. */
+    pixelCrownLobe(ctx, cx - 6, rootY - 14, 5 + (phase & 1), 5, tones, phase + 29);
+    pixelCrownLobe(ctx, cx + 5, rootY - 11 - ((phase >>> 2) & 2), 8, 5, tones, phase + 37);
+    if (trunkMode !== 1) {
+      var under = [tones[1], tones[2], tones[3], tones[3], tones[4]];
+      pixelCrownLobe(ctx, cx + ((phase & 3) - 1), rootY - 5, 8, 5, under, phase + 43);
+    }
+    if (!back && (trunkMode === 1 || trunkMode === 3)) {
+      /* Radici brevi sopra l'ellisse di contatto: tronco ancorato, mai palo. */
+      R(ctx, cx + trunkDx - 3, rootY - 2, 5, 2, tones[0]);
+      R(ctx, cx + trunkDx + trunkW - 1, rootY - 2, 5, 2, tones[0]);
+      R(ctx, cx + trunkDx, rootY - 2, trunkW + 1, 1, '#c09761');
+    }
+  }
+
+  function arrivalFir(ctx, x, y, h, back) {
+    var family = 1 + (Math.abs((x * 7 + y * 3) | 0) % 2);
+    drawOrganicTree(ctx, x + 9, y + h, family, back, x * 3 + y * 5);
+  }
+
+  function arrivalBroadleaf(ctx, x, y, h, back, split) {
+    drawOrganicTree(ctx, x + (split ? 23 : 20), y + h, split ? 3 : 0, back, x * 5 + y * 7);
+  }
+
+  function arrivalMixedTree(ctx, x, y, h, back, salt) {
+    var family = Math.abs(((x * 5 + y * 11 + (salt || 0)) | 0)) % ORGANIC_TREE_FAMILIES.length;
+    drawOrganicTree(ctx, x + 10, y + h, family, back, salt || 0);
   }
 
   var ARRIVAL_CONTACT_BOUNDS = {
@@ -383,71 +786,125 @@
 
   function arrivalShop(ctx) {
     var b = ARRIVAL_CONTACT_BOUNDS.shop, x = b[0], y = b[1], i;
+    var roofEdge = '#294451', roof = '#4f8f88', roofHi = '#83c6ad';
+    var wallEdge = '#5b4737', wall = '#d2bd7f', wallShade = '#a98b5d';
+    var glass = '#78aeb1', cream = '#eee1aa', door = '#684c3a';
     /* Base e soglia coincidono con le tre righe solide `9`; solo il cornicione
      * sporge di 2 px, come overhang non calpestabile. Porta chiaramente chiusa. */
-    R(ctx, x - 2, y + 2, 36, 18, '#072619'); R(ctx, x, y + 4, 32, 14, '#9aab69');
-    R(ctx, x + 3, y + 6, 26, 10, '#6a8a43');
-    R(ctx, x + 12, y + 7, 8, 7, '#072619'); R(ctx, x + 14, y + 5, 5, 3, '#34572d');
-    R(ctx, x + 14, y + 8, 4, 3, '#9aab69'); R(ctx, x + 11, y + 14, 11, 2, '#34572d');
-    R(ctx, x - 1, y + 19, 34, 3, '#072619');
-    for (i = 0; i < 11; i++) R(ctx, x + i * 3, y + 22, 2, 5, i & 1 ? '#9aab69' : '#dcd9a9');
-    R(ctx, x, y + 27, 32, 21, '#072619'); R(ctx, x + 2, y + 29, 28, 17, '#6a8a43');
-    for (i = 3; i < 29; i += 8) R(ctx, x + i, y + 31 + (i & 1), 5, 1, '#34572d');
-    R(ctx, x + 3, y + 31, 12, 10, '#072619'); R(ctx, x + 5, y + 33, 8, 6, '#9aab69');
-    R(ctx, x + 8, y + 33, 1, 6, '#34572d'); R(ctx, x + 5, y + 36, 8, 1, '#34572d');
-    R(ctx, x + 19, y + 29, 10, 18, '#072619'); R(ctx, x + 21, y + 32, 6, 15, '#34572d');
-    R(ctx, x + 26, y + 40, 1, 1, '#dcd9a9'); R(ctx, x, y + 46, 32, 2, '#34572d');
+    arrivalSharedGround(ctx, x - 7, y + 43, 56, 0x6f1);
+    R(ctx, x - 12, y + 1, 56, 20, roofEdge); R(ctx, x - 9, y + 3, 50, 16, roof);
+    R(ctx, x - 5, y + 5, 42, 4, roofHi);
+    R(ctx, x + 8, y + 7, 16, 8, roofEdge); R(ctx, x + 10, y + 8, 12, 5, cream);
+    R(ctx, x + 13, y + 7, 6, 2, roof); R(ctx, x + 12, y + 13, 10, 2, wallShade);
+    R(ctx, x - 11, y + 19, 54, 4, roofEdge);
+    for (i = -9; i < 42; i += 4) R(ctx, x + i, y + 23, 3, 6, i & 4 ? roofHi : cream);
+    R(ctx, x - 10, y + 28, 52, 3, shade(roofEdge, -10));
+    R(ctx, x - 7, y + 28, 46, 1, roofHi);
+    R(ctx, x - 8, y + 29, 48, 19, wallEdge); R(ctx, x - 5, y + 31, 43, 15, wall);
+    /* Cornicione profondo, fianco est e zoccolo: tre piani leggibili a 1x. */
+    R(ctx, x - 6, y + 27, 44, 3, roofEdge); R(ctx, x - 3, y + 29, 38, 1, cream);
+    R(ctx, x + 34, y + 31, 4, 15, wallShade); R(ctx, x + 34, y + 32, 1, 13, cream);
+    for (i = -1; i < 35; i += 9) R(ctx, x + i, y + 32 + (i & 1), 6, 1, wallShade);
+    R(ctx, x - 1, y + 32, 16, 10, wallEdge); R(ctx, x + 1, y + 34, 12, 6, glass);
+    R(ctx, x + 7, y + 34, 1, 6, roofEdge); R(ctx, x + 1, y + 37, 12, 1, roofEdge);
+    /* Pensilina stretta e stipiti profondi portano subito l'occhio alla porta. */
+    R(ctx, x + 15, y + 26, 18, 3, roofEdge); R(ctx, x + 18, y + 27, 12, 1, roofHi);
+    R(ctx, x + 17, y + 28, 14, 20, wallEdge); R(ctx, x + 20, y + 31, 9, 17, shade(door, -16));
+    R(ctx, x + 22, y + 32, 6, 16, door);
+    R(ctx, x + 17, y + 29, 2, 16, cream); R(ctx, x + 30, y + 29, 2, 16, wallShade);
+    R(ctx, x + 27, y + 41, 1, 1, cream); R(ctx, x - 6, y + 46, 44, 2, wallShade);
+    R(ctx, x + 17, y + 46, 16, 2, roofEdge); R(ctx, x + 20, y + 46, 10, 1, cream);
+    arrivalGroundOcclusion(ctx, x - 6, y + 47, 44, 0x6f1);
   }
 
   function arrivalCabinHero(ctx) {
     var b = ARRIVAL_CONTACT_BOUNDS.cabin, x = b[0], peak = x + 24, y, i;
+    var roofEdge = '#263d32', roof = '#557b43', roofHi = '#86a95f';
+    var wallEdge = '#4b382d', wall = '#b88758', wallShade = '#835e42';
+    var glass = '#78aaa2', cream = '#eadba4', door = '#513c31';
     /* Corpo 48x48 identico al footprint J. Tetto sporge solo in alto/lato;
      * veranda e gradini terminano sulla base solida y47. */
+    arrivalSharedGround(ctx, x - 7, 40, 66, 0x6f7);
     for (y = 0; y < 12; y++) {
       var half = 3 + y * 2;
-      R(ctx, peak - half, y, Math.min(52, half * 2), 1, '#072619');
-      if (y > 2) R(ctx, peak - half + 3, y, Math.max(2, Math.min(46, half * 2 - 6)), 1, y & 1 ? '#34572d' : '#6a8a43');
+      R(ctx, peak - half, y, Math.min(52, half * 2), 1, roofEdge);
+      if (y > 2) R(ctx, peak - half + 3, y, Math.max(2, Math.min(46, half * 2 - 6)), 1, y & 1 ? roof : roofHi);
     }
-    R(ctx, x, 11, 48, 29, '#072619'); R(ctx, x + 2, 13, 44, 25, '#6a8a43');
-    for (y = 15; y < 38; y += 4) R(ctx, x + 2, y, 44, 1, '#34572d');
-    R(ctx, x + 18, 5, 1, 6, '#9aab69'); R(ctx, x + 30, 7, 1, 4, '#34572d');
+    R(ctx, x - 6, 10, 60, 31, wallEdge); R(ctx, x - 4, 12, 56, 27, wall);
+    R(ctx, x - 10, 9, 68, 5, roofEdge); R(ctx, x - 7, 10, 62, 2, roofHi);
+    R(ctx, x - 6, 12, 60, 3, shade(roofEdge, -10)); R(ctx, x - 3, 15, 54, 2, wallShade);
+    R(ctx, x - 8, 13, 64, 3, shade(roofEdge, -22)); R(ctx, x - 4, 13, 56, 1, roofHi);
+    R(ctx, x + 48, 15, 4, 24, wallShade); R(ctx, x + 48, 16, 1, 21, cream);
+    for (y = 15; y < 39; y += 4) R(ctx, x - 4, y, 56, 1, wallShade);
+    R(ctx, x + 18, 5, 1, 6, roofHi); R(ctx, x + 30, 7, 1, 4, roof);
     [5, 34].forEach(function (dx) {
-      R(ctx, x + dx, 18, 9, 9, '#072619'); R(ctx, x + dx + 2, 20, 5, 5, '#dcd9a9');
-      R(ctx, x + dx + 4, 20, 1, 5, '#34572d'); R(ctx, x + dx + 2, 22, 5, 1, '#34572d');
+      R(ctx, x + dx, 18, 9, 9, wallEdge); R(ctx, x + dx + 2, 20, 5, 5, glass);
+      R(ctx, x + dx + 4, 20, 1, 5, roofEdge); R(ctx, x + dx + 2, 22, 5, 1, roofEdge);
     });
     /* Porta serrata: nessun tile D e nessuna soglia chiara d'invito. */
-    R(ctx, x + 19, 14, 11, 25, '#072619'); R(ctx, x + 22, 17, 6, 21, '#34572d');
-    R(ctx, x + 27, 29, 1, 1, '#dcd9a9'); R(ctx, x + 21, 19, 8, 2, '#072619');
-    R(ctx, x, 33, 48, 4, '#072619');
-    for (i = 3; i < 17; i += 3) R(ctx, x + i, 34, 1, 7, '#9aab69');
-    for (i = 34; i < 47; i += 3) R(ctx, x + i, 34, 1, 7, '#9aab69');
-    R(ctx, x + 2, 37, 15, 4, '#34572d'); R(ctx, x + 33, 37, 13, 4, '#34572d');
-    R(ctx, x + 18, 37, 14, 3, '#dcd9a9');
-    R(ctx, x + 16, 40, 18, 3, '#9aab69'); R(ctx, x + 14, 43, 22, 3, '#6a8a43');
-    R(ctx, x + 12, 46, 26, 2, '#072619');
+    /* Portale compatto nel timpano: gerarchia forte senza fingere accesso. */
+    R(ctx, x + 16, 12, 17, 4, roofEdge); R(ctx, x + 18, 13, 13, 2, roofHi);
+    R(ctx, x + 19, 14, 11, 25, wallEdge); R(ctx, x + 22, 17, 6, 21, door);
+    R(ctx, x + 19, 16, 2, 21, cream); R(ctx, x + 29, 16, 2, 21, wallShade);
+    R(ctx, x + 27, 29, 1, 1, cream); R(ctx, x + 21, 19, 8, 2, wallEdge);
+    R(ctx, x - 2, 33, 52, 4, wallEdge);
+    for (i = -1; i < 17; i += 3) R(ctx, x + i, 34, 1, 7, roofHi);
+    for (i = 34; i < 52; i += 3) R(ctx, x + i, 34, 1, 7, roofHi);
+    R(ctx, x - 4, 37, 21, 4, roof); R(ctx, x + 33, 37, 21, 4, roof);
+    R(ctx, x + 18, 37, 14, 3, cream); R(ctx, x + 21, 38, 8, 1, roofEdge);
+    R(ctx, x + 16, 40, 18, 3, roofHi); R(ctx, x + 14, 43, 22, 3, wallShade);
+    R(ctx, x + 12, 46, 26, 2, wallEdge);
+    arrivalGroundOcclusion(ctx, x - 4, 47, 58, 0x6f7);
   }
 
   function arrivalMailboxHero(ctx) {
     var b = ARRIVAL_CONTACT_BOUNDS.mailbox, x = b[0], y = b[1];
+    softPixelShadow(ctx, x + 2, y + 13, 12, 4, HG.shadowDark, HG.shadow);
     R(ctx, x + 6, y + 6, 2, 10, '#34572d'); R(ctx, x, y + 1, 10, 8, '#072619');
     R(ctx, x + 1, y + 2, 8, 5, '#6a8a43'); R(ctx, x + 1, y + 3, 6, 1, '#9aab69');
     R(ctx, x + 9, y + 1, 3, 6, '#072619'); R(ctx, x + 4, y + 15, 7, 1, '#072619');
   }
 
+  /* Berlina laterale 45x23: scala ambiente HeartGold, abbastanza grande da
+   * leggere come veicolo accanto a un attore 24px. Il contatto resta sulle
+   * due celle V; cofano e paraurti hanno solo un piccolo sporto decorativo. */
+  function drawParkedCarHero(ctx, x, y, body, bodyHi, glass, accent) {
+    softPixelShadow(ctx, x - 3, y + 11, 38, 5, HG.shadowDark, HG.shadow);
+    /* Tetto e abitacolo. */
+    R(ctx, x + 5, y - 7, 26, 11, C.ink);
+    R(ctx, x + 8, y - 5, 20, 8, body);
+    R(ctx, x + 10, y - 4, 8, 6, glass);
+    R(ctx, x + 20, y - 4, 7, 6, glass);
+    R(ctx, x + 18, y - 5, 2, 8, C.ink);
+    R(ctx, x + 11, y - 4, 6, 1, bodyHi);
+    R(ctx, x + 21, y - 4, 5, 1, bodyHi);
+    /* Carrozzeria continua, cofano e bagagliaio diseguali. */
+    R(ctx, x - 5, y + 3, 42, 11, C.ink);
+    R(ctx, x - 3, y + 5, 38, 7, body);
+    R(ctx, x - 1, y + 4, 9, 2, bodyHi);
+    R(ctx, x + 29, y + 6, 7, 4, bodyHi);
+    R(ctx, x - 6, y + 8, 4, 4, C.ink);
+    R(ctx, x + 35, y + 8, 4, 4, C.ink);
+    R(ctx, x - 4, y + 8, 3, 2, accent);
+    R(ctx, x + 35, y + 7, 3, 3, C.paper);
+    R(ctx, x + 9, y + 6, 1, 5, bodyHi);
+    R(ctx, x + 28, y + 5, 1, 6, C.ink);
+    /* Passaruota profondi e ruote 8x6: massa inferiore credibile, non due
+     * puntini neri sospesi sotto una carrozzeria alta mezzo tile. */
+    R(ctx, x, y + 9, 11, 7, C.ink);
+    R(ctx, x + 25, y + 9, 11, 7, C.ink);
+    R(ctx, x + 2, y + 11, 7, 5, '#30383b');
+    R(ctx, x + 27, y + 11, 7, 5, '#30383b');
+    R(ctx, x + 4, y + 12, 3, 2, '#85877f');
+    R(ctx, x + 29, y + 12, 3, 2, '#85877f');
+    R(ctx, x + 10, y + 12, 16, 4, C.ink);
+    R(ctx, x + 12, y + 12, 12, 2, body);
+    R(ctx, x + 12, y + 14, 12, 1, bodyHi);
+  }
+
   function arrivalCarHero(ctx) {
     var b = ARRIVAL_CONTACT_BOUNDS.car, x = b[0], y = b[1];
-    /* Tetto può sporgere sopra il footprint; carrozzeria, ruote e contatto
-     * restano interamente nelle due celle V x96..127, y48..63. */
-    R(ctx, x + 7, y - 5, 19, 7, '#072619'); R(ctx, x + 9, y - 4, 15, 1, '#6a8a43');
-    R(ctx, x + 8, y - 3, 7, 4, '#9aab69'); R(ctx, x + 17, y - 3, 7, 4, '#9aab69');
-    R(ctx, x + 15, y - 3, 2, 5, '#34572d');
-    R(ctx, x + 2, y, 28, 13, '#072619'); R(ctx, x, y + 4, 32, 8, '#072619');
-    R(ctx, x + 3, y + 2, 26, 8, '#6a8a43');
-    R(ctx, x + 1, y + 5, 6, 3, '#9aab69'); R(ctx, x + 27, y + 4, 4, 3, '#dcd9a9');
-    R(ctx, x + 13, y + 3, 1, 7, '#34572d'); R(ctx, x + 21, y + 3, 1, 7, '#34572d');
-    R(ctx, x + 4, y + 9, 7, 5, '#072619'); R(ctx, x + 22, y + 9, 7, 5, '#072619');
-    R(ctx, x + 6, y + 11, 3, 2, '#9aab69'); R(ctx, x + 24, y + 11, 3, 2, '#9aab69');
-    R(ctx, x + 1, y + 13, 30, 3, '#34572d'); R(ctx, x + 5, y + 14, 22, 1, '#9aab69');
+    drawParkedCarHero(ctx, x, y, '#4e8067', '#80b878', '#9bc0b2', '#d7a351');
   }
 
   function arrivalGrassCluster(ctx, x, y, variant) {
@@ -458,63 +915,230 @@
     if (variant & 2) R(ctx, x + 7, y + 1, 2, 1, mid);
   }
 
+  function arrivalFlowerPatch(ctx, x, y, variant) {
+    var petals = variant & 1 ? HG.flowerWhite : HG.flowerPink;
+    R(ctx, x + 1, y + 2, 2, 2, petals); R(ctx, x + 4, y, 2, 2, HG.flowerGold);
+    R(ctx, x + 7, y + 3, 2, 2, petals);
+    R(ctx, x + 2, y + 4, 1, 3, HG.grassDark);
+    R(ctx, x + 5, y + 2, 1, 4, HG.grassDark);
+    R(ctx, x + 8, y + 5, 1, 3, HG.grassDark);
+  }
+
+  function arrivalShrubCluster(ctx, x, y, variant) {
+    softPixelShadow(ctx, x + 2, y + 6, 20, 4, HG.shadowDark, HG.shadow);
+    var lobes = [[0,4,7,5],[4,1,8,7],[10,3,7,6],[15,2,8,7],[8,0,6,5]];
+    for (var i = 0; i < lobes.length; i++) {
+      var l = lobes[i];
+      R(ctx, x + l[0], y + l[1], l[2], l[3], i & 1 ? HG.grassDark : '#5b8d72');
+      R(ctx, x + l[0] + 2, y + l[1] + 1, Math.max(2, l[2] - 4), 2,
+        i === (variant % lobes.length) ? HG.grassHi : '#639b72');
+    }
+    for (i = 0; i < 3; i++) {
+      R(ctx, x + 4 + i * 7, y + 2 + ((i + variant) & 1), 2, 2,
+        i === 1 ? HG.flowerGold : (variant & 1 ? HG.flowerPink : HG.flowerWhite));
+    }
+  }
+
+  function arrivalEdgeIsland(ctx, x, y, kind) {
+    if (kind === 0) {
+      /* Staccionata + aiuola: ancora bassa sul margine occidentale. */
+      softPixelShadow(ctx, x + 1, y + 8, 25, 4, HG.shadowDark, HG.shadow);
+      R(ctx, x, y + 3, 25, 2, '#705b3e'); R(ctx, x + 2, y + 3, 21, 1, '#c49b5c');
+      R(ctx, x + 3, y, 3, 12, '#705b3e'); R(ctx, x + 19, y + 1, 3, 11, '#705b3e');
+      R(ctx, x + 4, y + 1, 1, 9, '#c49b5c'); R(ctx, x + 20, y + 2, 1, 8, '#c49b5c');
+      arrivalFlowerPatch(ctx, x + 7, y + 5, 1);
+    } else if (kind === 1) {
+      /* Rocce a gradino + un solo cespuglio: peso diverso dal lato opposto. */
+      softPixelShadow(ctx, x + 2, y + 9, 27, 5, HG.shadowDark, HG.shadow);
+      R(ctx, x + 1, y + 5, 12, 8, '#315a49'); R(ctx, x + 3, y + 3, 8, 8, '#639b72');
+      R(ctx, x + 5, y + 3, 4, 2, '#80b878');
+      R(ctx, x + 14, y + 8, 10, 5, '#315a49'); R(ctx, x + 16, y + 6, 7, 5, '#639b72');
+      arrivalGrassCluster(ctx, x + 21, y + 2, 3);
+    } else {
+      /* Palina e erbe inclinate segnano l'imbuto senza chiuderlo. */
+      softPixelShadow(ctx, x + 1, y + 10, 21, 4, HG.shadowDark, HG.shadow);
+      R(ctx, x + 5, y, 3, 14, '#5b4737'); R(ctx, x + 6, y + 1, 1, 12, '#c09761');
+      R(ctx, x, y + 1, 15, 6, '#315a49'); R(ctx, x + 2, y + 2, 11, 3, '#9aab69');
+      arrivalGrassCluster(ctx, x + 13, y + 7, 3);
+    }
+  }
+
+  function arrivalVerticalForest(ctx, x, y, h, rightEdge, salt) {
+    /* Sottobosco continuo lungo il bordo; chiome davanti/dietro lo spezzano
+     * in profondita' senza lasciare palline isolate nel prato. */
+    var baseX = rightEdge ? x + 2 : x;
+    for (var by = y, bi = 0; by < y + h; bi++) {
+      var bv = hash(Math.round(x), Math.round(by), salt + bi * 31);
+      var bh = Math.min(y + h - by, 15 + (bv % 10));
+      var bw = 11 + ((bv >>> 5) % 7);
+      var bx = rightEdge ? x + 20 - bw : baseX;
+      R(ctx, bx, by, bw, bh + (by + bh < y + h ? 2 : 0), bi & 1 ? '#315a49' : '#3e725b');
+      R(ctx, bx + (rightEdge ? 1 : 3), by + 3, Math.max(4, bw - 5), Math.max(3, bh - 6), '#4e8067');
+      by += bh;
+    }
+    var step = 31, index = 0;
+    for (var sy = y + 18; sy < y + h + 21; sy += step + ((index * 5 + salt) & 11)) {
+      var center = rightEdge ? x + 13 - ((index & 1) * 5) : x + 7 + ((index & 1) * 5);
+      var recessed = ((index * 3 + salt + (rightEdge ? 1 : 0)) % 5) === 2;
+      drawOrganicTree(ctx, center, sy - (recessed ? 4 : 0),
+        (index + salt) % ORGANIC_TREE_FAMILIES.length,
+        recessed || (index & 3) === 0, salt + index * 17);
+      if (!recessed) {
+        pixelCrownLobe(ctx, center + (rightEdge ? -5 : 5), sy - 4, 8, 7,
+          ['#24382f','#315a49','#3e725b','#639b72','#80b878'], salt + index);
+      }
+      index++;
+    }
+  }
+
+  function arrivalHorizontalForest(ctx, x, y, w, h, salt) {
+    /* Gruppi di corone sovrapposte, confinati alle celle solide. */
+    arrivalFusedForestGroup(ctx, x, y, w, h, salt);
+  }
+
   GAME.Retro2D = GAME.Retro2D || {};
   GAME.Retro2D.drawArrivalBackdrop = function (ctx, cx, cy, vw, vh) {
-    ctx.save(); ctx.translate(-Math.round(cx || 0), -Math.round(cy || 0));
-    R(ctx, 0, 0, 160, 144, '#eee6b5');
-    /* Ciuffi minuti + cluster authored: radura leggibile, non vuoto uniforme. */
-    for (var gy = 5; gy < 93; gy += 11) for (var gx = 6; gx < 156; gx += 13) {
-      if (((gx * 3 + gy) % 17) < 7) {
-        R(ctx, gx, gy, 1, 2, '#9aab69'); R(ctx, gx + 2, gy + 1, 2, 1, '#6a8a43');
-      }
+    var ox = Math.max(0, Math.floor(((vw || 256) - 160) / 2));
+    var oy = Math.max(0, Math.floor(((vh || 192) - 144) / 2));
+    ctx.save();
+    var fullW = vw || 256, fullH = vh || 192;
+    R(ctx, 0, 0, fullW, fullH, HG.grass);
+    /* Corona forestale: due file sfalsate di alberi veri. Niente bande
+     * rettangolari dietro le chiome; prato continua fra tronchi e ombre. */
+    for (var ex = -14, exi = 0; ex < fullW + 20; ex += 63 + ((exi * 7) & 15), exi++) {
+      drawOrganicTree(ctx, ex + 9, 50 + (hash(exi, 0, 0x6af) % 22), exi % 5, true, exi * 17);
+      drawOrganicTree(ctx, ex + 16, fullH + 9 - ((exi * 3) & 11), (exi + 2) % 5,
+        (exi & 3) === 0, exi * 29);
     }
-    [[23,40,1],[37,47,3],[54,40,0],[75,39,1],[134,42,2],
-     [25,56,2],[45,61,1],[61,53,3],[86,55,1],[137,58,3],
-     [21,72,3],[38,78,0],[57,69,2],[91,72,1],[119,68,2],[137,77,1],
-     [61,86,3],[82,84,0],[96,88,2]].forEach(function (g) {
+    for (var ey = 32, eyi = 0; ey < fullH - 15; ey += 35 + ((eyi * 5) & 7), eyi++) {
+      drawOrganicTree(ctx, 4 + ((eyi & 1) * 4), ey, (eyi + 1) % 5, false, eyi * 31);
+      drawOrganicTree(ctx, fullW - 5 - ((eyi & 1) * 4), ey + 4, (eyi + 3) % 5, true, eyi * 43);
+    }
+    /* Vegetazione alta rada dietro i tetti: riempie il vuoto mint senza
+     * ricostruire una parete forestale o suggerire collisioni nuove. */
+    var upperWest = Math.round(fullW * .30), upperEast = Math.round(fullW * .72);
+    grassDriftBlob(ctx, upperWest, 32, 14, 4, '#78c79d', 0x6b7);
+    arrivalGrassCluster(ctx, Math.round(fullW * .46), 25, 2);
+    grassDriftBlob(ctx, upperEast, 36, 15, 4, '#80c9a0', 0x6c9);
+    /* Il display e' piu' largo della piccola mappa collisionale. Il margine
+     * ovest diventa quindi un vero giardino di arrivo: campo quieto, aiuola,
+     * staccionata, rocce e due grandi chiome. Tutto resta solo render. */
+    R(ctx, 14, 32, 52, 116, '#86d5aa');
+    R(ctx, 18, 37, 43, 44, '#89d7ad'); R(ctx, 11, 88, 54, 48, '#7fd0a3');
+    arrivalSharedGround(ctx, 17, 123, 45, 0x6e3);
+    R(ctx, 20, 103, 42, 27, HG.shadow);
+    R(ctx, 18, 100, 44, 27, '#5b8d72'); R(ctx, 21, 103, 38, 21, '#86d5aa');
+    R(ctx, 25, 107, 30, 14, '#a7d88e');
+    /* Serra: tetto stepped traslucido, stessa impronta del giardino. */
+    R(ctx, 25, 88, 30, 2, '#705b3e'); R(ctx, 22, 90, 36, 2, '#b18a56');
+    R(ctx, 19, 92, 42, 4, '#705b3e'); R(ctx, 22, 93, 36, 2, '#b9ddba');
+    R(ctx, 17, 95, 46, 3, '#5b4737'); R(ctx, 21, 95, 38, 1, '#c49b5c');
+    R(ctx, 29, 90, 2, 6, '#705b3e'); R(ctx, 49, 90, 2, 6, '#705b3e');
+    for (var gf = 0; gf < 4; gf++) {
+      R(ctx, 20 + gf * 10, 91, 3, 35, '#705b3e');
+      R(ctx, 21 + gf * 10, 91, 1, 33, '#b18a56');
+    }
+    R(ctx, 17, 96, 45, 4, '#705b3e'); R(ctx, 19, 97, 41, 2, '#c49b5c');
+    R(ctx, 18, 125, 44, 3, '#705b3e'); R(ctx, 22, 125, 36, 1, '#c49b5c');
+    arrivalGroundOcclusion(ctx, 18, 126, 44, 0x6e3);
+    [[26,108,0],[39,105,1],[49,113,0],[30,118,1],[45,120,0]].forEach(function (p) {
+      arrivalFlowerPatch(ctx, p[0], p[1], p[2]);
+    });
+    arrivalShrubCluster(ctx, 14, 70, 2); arrivalShrubCluster(ctx, 41, 76, 4);
+    R(ctx, 15, 137, 18, 6, HG.shadowDark); R(ctx, 37, 142, 12, 5, HG.shadow);
+    R(ctx, 17, 134, 12, 7, '#6d715a'); R(ctx, 19, 134, 7, 2, '#c8c39b');
+    arrivalBroadleaf(ctx, 4, 43, 42, false, true);
+    arrivalBroadleaf(ctx, 30, 58, 40, true, false);
+    ctx.translate(ox - Math.round(cx || 0), oy - Math.round(cy || 0));
+    R(ctx, 0, 0, 160, 144, HG.grass);
+    /* Deriva macro a blob: valori sottili, profili curvi, nessun rettangolo. */
+    [[18,17,42,19,1],[76,10,39,24,2],[119,25,34,22,3],
+     [7,53,38,25,2],[91,62,46,22,1],[38,86,41,19,3]].forEach(function (p, i) {
+      var tone = [HG.grass, '#86d5aa', '#80d1a5', '#88d5ac'][p[4]];
+      grassDriftBlob(ctx, p[0] + Math.round(p[2] / 2), p[1] + Math.round(p[3] / 2),
+        Math.round(p[2] / 2), Math.round(p[3] / 2), tone, 0x6b0 + i * 19);
+    });
+    /* Pochi cluster locali; pause grandi dominano. */
+    [[18,35,1],[82,39,0],[137,43,2],[24,61,2],[111,55,3],
+     [33,76,3],[94,76,1],[58,89,3]].forEach(function (g) {
       arrivalGrassCluster(ctx, g[0], g[1], g[2]);
     });
-    /* masse continue: foresta, non collezione di icone isolate */
-    R(ctx, 0, 0, 20, 95, '#34572d'); R(ctx, 143, 0, 17, 95, '#34572d');
+    /* Sottobosco macro dietro i due tetti. Rafforza la gerarchia della
+     * quinta alta senza aggiungere nuovi alberi o cambiare coordinate. */
+    grassDriftBlob(ctx, 74, 36, 14, 4, '#78c79d', 0x6d7);
+    grassDriftBlob(ctx, 128, 39, 15, 4, '#80c9a0', 0x6e9);
+    /* Piazza sterrata e corridoio sud: guida l'occhio fra negozio, auto e
+     * ingresso senza modificare collisioni. Due toni intermedi formano
+     * transizione continua 1–3px; nessun profilo cyan uniforme. */
+    for (var py = 42; py < 82; py++) {
+      var lowerTaper = Math.max(0, py - 60);
+      var plazaInset = 1 + (hash(py >> 3, 7, 0x6c1) % 3);
+      var plazaLeft = 21 + Math.floor(lowerTaper * .9) + plazaInset + ((py & 15) === 0 ? 1 : 0);
+      var plazaRight = 141 - Math.floor(lowerTaper * 1.1) - plazaInset - ((py & 15) === 7 ? 1 : 0);
+      R(ctx, plazaLeft - 2, py, plazaRight - plazaLeft + 4, 1, HG.pathMid);
+      R(ctx, plazaLeft, py, plazaRight - plazaLeft, 1, HG.path);
+    }
+    for (py = 82; py < 144; py++) {
+      var laneWobble = (hash(py >> 2, 11, 0x6c2) % 5) - 2;
+      var laneWidth = 48 + ((py >> 3) & 3);
+      R(ctx, 56 + laneWobble, py, laneWidth + 4, 1, HG.pathMid);
+      R(ctx, 58 + laneWobble, py, laneWidth, 1, HG.path);
+    }
+    [[45,61,0],[91,55,1],[76,105,2]].forEach(function (p, i) {
+      var tone = HG_PATH_DETAIL[(i * 3 + 1) % HG_PATH_DETAIL.length];
+      R(ctx, p[0], p[1], 5 - (i & 1), 2, tone);
+      R(ctx, p[0] + 3, p[1] + 3, 3, 2, i === 1 ? HG.pathHi : HG.pathMid);
+      if (i === 2) R(ctx, p[0] - 3, p[1] + 6, 4, 2, HG.pathDark);
+    });
+    arrivalFlowerPatch(ctx, 36, 72, 1);
+    arrivalFlowerPatch(ctx, 139, 58, 0);
+    /* Giardino occidentale e bordi del forecourt: gruppi, non coriandoli.
+     * Restano sopra righe non-collisionali e non fingono nuovi ostacoli. */
+    arrivalShrubCluster(ctx, 3, 34, 1);
+    arrivalFlowerPatch(ctx, 8, 48, 0);
+    arrivalFlowerPatch(ctx, 18, 50, 1);
+    arrivalShrubCluster(ctx, 9, 72, 2);
+    arrivalShrubCluster(ctx, 138, 68, 3);
+    arrivalFlowerPatch(ctx, 49, 91, 0);
+    /* Masse di contatto = alberi sovrapposti; mai nucleo a lastra. */
+    arrivalVerticalForest(ctx, 0, 0, 95, false, 3);
+    arrivalVerticalForest(ctx, 140, 0, 95, true, 11);
     /* Riga 5 = TT......TT: la massa di contatto segue le due coppie T.
      * Chiome alte possono sporgere pochi pixel, mai riempire il corridoio. */
-    R(ctx, 0, 78, 32, 17, '#34572d'); R(ctx, 128, 78, 32, 17, '#34572d');
-    /* Imbuto sud: contatto forestale identico alle righe T 6–8. Prima il
-     * fondale finiva a y95, lasciando 49px crema sopra collisioni d'albero. */
-    R(ctx, 0, 96, 48, 16, '#34572d'); R(ctx, 112, 96, 48, 16, '#34572d');
-    R(ctx, 0, 112, 64, 16, '#34572d'); R(ctx, 96, 112, 64, 16, '#34572d');
-    R(ctx, 0, 128, 64, 16, '#34572d'); R(ctx, 80, 128, 80, 16, '#34572d');
-    /* Branch bands su masse: niente stipple casuale. */
-    [[0,0,20,95,3],[143,0,17,95,11],[0,76,32,19,19],[128,76,32,19,29],
-     [0,96,48,16,31],[112,96,48,16,37],[0,112,64,16,41],[96,112,64,16,43],
-     [0,128,64,16,47],[80,128,80,16,53]].forEach(function (q) {
-      for (var fy = q[1] + 1; fy < q[1] + q[3]; fy += 6) {
-        for (var fx = q[0] + 1; fx < q[0] + q[2]; fx += 11) {
-          var phase = hash(fx, fy, q[4]);
-          R(ctx, fx + (phase & 3), fy, 6 + ((phase >> 2) & 2), 2, (phase & 4) ? '#072619' : '#6a8a43');
-          R(ctx, fx + 2 + ((phase >> 3) & 2), fy + 2, 4, 2, '#34572d');
-          if (phase & 8) R(ctx, fx + 3, fy, 2, 1, '#9aab69');
-        }
-      }
+    arrivalTreeWall(ctx,
+      [[7,93,1],[20,98,0],[8,112,0],[21,117,1],
+       [7,129,1],[20,134,0],[10,143,0],[22,143,1]], 0, 32, 19);
+    arrivalTreeWall(ctx,
+      [[153,93,0],[140,98,1],[152,112,1],[139,117,0],
+       [153,129,0],[140,134,1],[150,143,1],[138,143,0]], 128, 32, 29);
+    /* Imbuto sud: estensioni basse confinate alle celle T aggiuntive. */
+    arrivalStepForest(ctx, 32, 96, 48, 31);
+    arrivalStepForest(ctx, 112, 96, 48, 37);
+    arrivalStepForest(ctx, 48, 112, 32, 41);
+    arrivalStepForest(ctx, 96, 112, 32, 43);
+    arrivalStepForest(ctx, 80, 128, 16, 53);
+    /* Profondità solo sui lati. Centro piazza e facciate restano dominanti. */
+    [-8,9,139,154].forEach(function (fx, i) {
+      arrivalMixedTree(ctx, fx, 18 + (i & 1) * 20, 39, (i & 2) !== 0, 61 + i * 17);
     });
-    for (var my = 3; my < 94; my += 7) {
-      R(ctx, 2 + (my % 11), my, 2, 2, '#6a8a43');
-      R(ctx, 148 + (my % 7), my + 2, 3, 1, '#9aab69');
-    }
-    /* profondita dietro, poi prima fila sovrapposta */
-    [-8,3,14,143,153].forEach(function (fx, i) { arrivalFir(ctx, fx, i & 1 ? 9 : -7, 36, true); });
-    [-7,4,15,144,154].forEach(function (fx, i) { arrivalFir(ctx, fx, 25 + (i & 1) * 8, 39, false); });
-    [17,29,41,101,114,128].forEach(function (fx, i) {
-      arrivalFir(ctx, fx, 48 + (i & 1) * 4, 35, true);
-    });
-    [-8,2,12,128,138,148,158].forEach(function (fx, i) {
-      arrivalFir(ctx, fx, 60 + (i % 3) * 5, 38 - (i & 1) * 4, i % 3 === 0);
-    });
-    [[0,90],[16,93],[32,90],[112,92],[128,89],[144,93],
-     [0,106],[16,109],[32,105],[48,109],[96,107],[112,104],[128,109],[144,106],
-     [0,122],[16,119],[32,123],[48,120],[80,121],[96,118],[112,123],[128,119],[144,122]]
-      .forEach(function (p, i) { arrivalFir(ctx, p[0], p[1], 36 + (i & 3), i % 4 === 0); });
+    /* Patch di contatto sotto shop e cabin: verde compresso, suolo e ombra
+     * precedono i volumi, quindi le basi non galleggiano sulla piazza. */
+    grassDriftBlob(ctx, 49, 48, 31, 5, HG.shadow, 0x6f1);
+    R(ctx, 24, 47, 17, 2, HG.vergeSoil); R(ctx, 57, 49, 15, 1, HG.grassDark);
+    grassDriftBlob(ctx, 120, 48, 34, 5, HG.shadow, 0x6f7);
+    R(ctx, 91, 47, 18, 2, HG.vergeSoil); R(ctx, 129, 49, 17, 1, HG.grassDark);
+    /* Tre ancore diseguali ricompongono la radura. Stanno sui bordi della
+     * foresta/imbuto: il corridoio centrale 56–108px resta completamente
+     * aperto e il percorso verso le due facciate diventa un vero fuoco. */
+    arrivalEdgeIsland(ctx, 25, 66, 0);
+    arrivalEdgeIsland(ctx, 128, 69, 1);
+    arrivalEdgeIsland(ctx, 39, 105, 2);
     arrivalShop(ctx); arrivalCabinHero(ctx); arrivalMailboxHero(ctx); arrivalCarHero(ctx);
+    /* Landscaping ancorato alle facciate; asse centrale resta aperto. */
+    arrivalFlowerPatch(ctx, 38, 49, 1);
+    arrivalGrassCluster(ctx, 70, 51, 2);
+    arrivalFlowerPatch(ctx, 106, 50, 0);
+    arrivalShrubCluster(ctx, 137, 47, 3);
     ctx.restore();
   };
 
@@ -523,6 +1147,11 @@
      * Tronco condivide outline; niente seconda palette di erba sotto. */
     if (paleGround) arrivalGround(ctx, x, y, tx, ty);
     else R(ctx, x, y, 16, 16, night ? '#7770a8' : C.grass);
+    /* Town costruisce alberi completi nel passaggio macro/depth. Lasciare qui
+     * un tronco per ogni cella T separava tronchi e chiome, perché ancore macro
+     * non coincidono volutamente con griglia 16px. Tile town fornisce soltanto
+     * terreno; ombra, tronco e chioma nascono insieme da drawOrganicTree. */
+    if (paleGround && !night) return;
     if (!night && !paleGround) {
       /* Stesso prato periodico delle tile d'erba vicine: senza questo il
        * fondo restava un verde piatto sotto/fra le chiome, ed essendo un
@@ -540,8 +1169,8 @@
       /* Conifere di bordo: tre valori verdi scuri presi direttamente dalla
        * master palette. La chioma resta distinta dal prato crema e forma la
        * cornice 65-75% scura del riferimento, senza filtro o nuova logica. */
-      (sycamore ? { 1: '#a8be72', 2: '#63834a', 3: '#31543a', 4: '#31543a' } :
-                   { 1: '#63834a', 2: '#31543a', 3: '#183225', 4: '#183225' });
+      (sycamore ? { 1: '#80b878', 2: '#4e8067', 3: '#315a49', 4: '#24382f' } :
+                   { 1: '#639b72', 2: '#3e725b', 3: '#294f42', 4: '#1d372f' });
     /* Nelle fasce con almeno tre vicini, una chioma arretrata continua
      * riempie i grandi fori crema tra conifere. Alberi isolati conservano
      * invece terreno visibile e silhouette autonoma. */
@@ -565,16 +1194,16 @@
        * rettangolo 16px perfetto o una siepe a baseline continua. */
       var edgePhase = hash(tx, ty, 0x631) & 3;
       if (treeNeighborCount(tx - 1, ty) < 3) {
-        R(ctx, x, y - 5 + edgePhase, 1, 2, '#eee6b5');
-        R(ctx, x, y + 5 + edgePhase, 2, 2, '#eee6b5');
+        R(ctx, x, y - 5 + edgePhase, 1, 2, HG.grass);
+        R(ctx, x, y + 5 + edgePhase, 2, 2, HG.grass);
       }
       if (treeNeighborCount(tx + 1, ty) < 3) {
-        R(ctx, x + 15, y - 2 + edgePhase, 1, 2, '#eee6b5');
-        R(ctx, x + 14, y + 8 - edgePhase, 2, 2, '#eee6b5');
+        R(ctx, x + 15, y - 2 + edgePhase, 1, 2, HG.grass);
+        R(ctx, x + 14, y + 8 - edgePhase, 2, 2, HG.grass);
       }
       if (treeNeighborCount(tx, ty + 1) < 3) {
-        R(ctx, x + 2 + edgePhase * 2, y + 15, 5, 1, '#eee6b5');
-        R(ctx, x + 10 - edgePhase, y + 14, 2, 2, '#eee6b5');
+        R(ctx, x + 2 + edgePhase * 2, y + 15, 5, 1, HG.grass);
+        R(ctx, x + 10 - edgePhase, y + 14, 2, 2, HG.grass);
       }
     }
     /* Conifera 16x24: silhouette Gen II stretta, terrazze irregolari.
@@ -589,10 +1218,10 @@
      * riferimento, senza introdurre rumore nel terreno sottostante. */
     var h = hash(tx, ty, sycamore ? 71 : 43);
     var treePhase = ((tx + (ty & 1) * 3) % 4 + 4) % 4;
-    var shapeIdx = [0, 1, 0, 2][treePhase];
+    var shapeIdx = [0, 1, 2, 1][treePhase];
     var flip = treePhase === 2;
     var dx = [0, -1, -2, -1][treePhase];
-    var dy = [0, -2, -1, -3][treePhase];
+    var dy = [0, -4, -1, -3][treePhase];
     if (night) {
       /* Dither terreno con un colore gia' presente nella palette albero:
        * quattro colori totali per tile, non una seconda palette sottostante. */
@@ -603,16 +1232,39 @@
      * fisso a colonna centrale in ogni tile, ripetendosi identico a ogni
      * passo di 16 px (quindi anche a 32) indipendentemente dalla sagoma
      * scelta sopra. */
-    if (!night) paint(ctx, TREE_TRUNK, treePalette, x + dx, y + 7, false);
+    if (!night) {
+      softPixelShadow(ctx, x + 2 + dx, y + 11, 14, 4, HG.shadowDark, HG.shadow);
+      paint(ctx, TREE_TRUNK, treePalette, x + dx, y + 7, false);
+    }
     if (night) {
-      /* Rami laterali contenuti: silhouette resta netta a 1× e l'overlap
-       * non produce fasce orizzontali fra alberi adiacenti. */
-      R(ctx, x - 2, y + 1, 4, 1, treePalette[3]); R(ctx, x + 14, y + 1, 4, 1, treePalette[3]);
-      R(ctx, x - 1, y + 7, 3, 1, treePalette[2]); R(ctx, x + 14, y + 7, 3, 1, treePalette[2]);
-      R(ctx, x - 2, y + 13, 4, 1, treePalette[3]); R(ctx, x + 14, y + 13, 4, 1, treePalette[3]);
+      /* Due letture esterne: abete alto e stretto oppure basso e largo.
+       * Non condividono baseline o rami, quindi la parete del bosco perde
+       * la cadenza 16/32px pur restando scura e solida. */
+      if (shapeIdx === 1) {
+        R(ctx, x + dx + 6, y - 11 + dy, 5, 4, treePalette[3]);
+        R(ctx, x + dx - 1, y + 5 + dy, 4, 1, treePalette[2]);
+        R(ctx, x + dx + 13, y + 11 + dy, 4, 2, treePalette[3]);
+      } else {
+        R(ctx, x + dx - 2, y + 2 + dy, 5, 2, treePalette[3]);
+        R(ctx, x + dx + 12, y + 7 + dy, 6, 1, treePalette[2]);
+        R(ctx, x + dx - 1, y + 14 + dy, 4, 1, treePalette[3]);
+      }
     }
     paint(ctx, shapeIdx === 0 ? TREE_CANOPY : (shapeIdx === 1 ? TREE_CANOPY_B : TREE_CANOPY_C),
       treePalette, x + dx, y - 8 + dy, flip);
+    if (night) {
+      /* Piccoli recessi soltanto sul perimetro esposto. Sono aperture nel
+       * profilo, non buchi nelle collisioni o pattern ripetuti interni. */
+      var inset = (h >>> 5) & 3;
+      if (cell(rows, tx - 1, ty) !== 'T' && cell(rows, tx - 1, ty) !== 'Y') {
+        R(ctx, x, y + 2 + inset * 2, 2, 4, '#7770a8');
+        R(ctx, x + 1, y + 3 + inset * 2, 1, 2, '#958db8');
+      }
+      if (cell(rows, tx + 1, ty) !== 'T' && cell(rows, tx + 1, ty) !== 'Y') {
+        R(ctx, x + 14, y + 7 - inset, 2, 4, '#7770a8');
+        R(ctx, x + 14, y + 8 - inset, 1, 2, '#5b5684');
+      }
+    }
     /* Tre silhouette esterne, non solo tre riempimenti interni. Rami corti
      * spezzano cadenza 16/32px senza chiudere i varchi chiari del bosco. */
     if (!night) {
@@ -656,6 +1308,9 @@
   }
 
   function roadCell(ch) { return ch === 'r' || ch === '-' || ch === ':'; }
+  function townTravelCell(ch) {
+    return roadCell(ch) || ch === 'p' || ch === '=' || ch === 'u';
+  }
 
   function road(ctx, x, y, tx, ty, rows) {
     var yy, seam;
@@ -786,96 +1441,593 @@
     groundShadow(ctx, x, y, tx, ty, rows);
   }
 
-  /* R76 — vocabolario della radura esteso alla cittadina. La topologia
-   * narrativa resta a tile, ma tutte le superfici usano la stessa carta
-   * crema e la stessa rampa della reference R69. Strada e marciapiede si
-   * distinguono per ritmo, non tramite grandi campi moderni verde/bianco. */
-  function townGround(ctx, x, y, tx, ty, rows) {
-    /* Oro/Rosso tengono il terreno quasi vuoto e concentrano dettaglio in
-     * piccoli cluster. Prima quattro pixel isolati PER TILE creavano
-     * confetti uniforme e competevano con porte, NPC e props. */
-    R(ctx, x, y, 16, 16, '#eee6b5');
-    var tuft = hash(tx, ty, 0x72) & 7;
-    if (tuft < 2) {
-      var ox = 3 + (hash(tx, ty, 0x721) % 7), oy = 6 + (hash(tx, ty, 0x722) % 5);
-      R(ctx, x + ox, y + oy, 1, 3, '#6a8a43');
-      R(ctx, x + ox - 2, y + oy + 1, 2, 1, '#9aab69');
-      R(ctx, x + ox + 1, y + oy + 2, 3, 1, '#6a8a43');
-    } else if (tuft === 2) {
-      R(ctx, x + 4, y + 9, 3, 1, '#9aab69');
-      R(ctx, x + 11, y + 4, 1, 1, '#6a8a43');
+  function townGrassFieldTone(tx, ty) {
+    return [HG.grass, '#86d5aa', '#80d1a5', '#88d5ac'][hash(Math.floor(tx / 6), Math.floor(ty / 5), 0x72f) & 3];
+  }
+
+  /* Profilo continuo in coordinate mondo. Bordi adiacenti condividono
+   * campione, quindi nessuna cucitura verticale ogni 16px. */
+  function townContinuousEdge(boundary, worldY, salt) {
+    /* Profilo macro continuo. Ogni superblocco contiene quattro segmenti
+     * irregolari da 40–73px; endpoint condivisi eliminano seam fra
+     * tile e superblocchi. Nessun impulso/tick a passo 8px. */
+    var macro = Math.floor(worldY / 256);
+    var local = ((worldY % 256) + 256) % 256;
+    var patterns = [
+      [53,71,61,71], [67,43,73,73], [59,69,57,71],
+      [73,53,67,63], [47,71,65,73]
+    ];
+    var lengths = patterns[hash(boundary, macro, salt ^ 0x2e7) % patterns.length];
+    var segment = 0, start = 0;
+    while (segment < 3 && local >= start + lengths[segment]) {
+      start += lengths[segment]; segment++;
     }
+    var len = lengths[segment], at = local - start;
+    function point(index) {
+      if (index === 0) return 1 + (hash(boundary, macro, salt ^ 0x4a1) % 5);
+      if (index === 4) return 1 + (hash(boundary, macro + 1, salt ^ 0x4a1) % 5);
+      return 1 + (hash(boundary, macro * 7 + index, salt ^ 0x5b3) % 5);
+    }
+    var a = point(segment), b = point(segment + 1);
+    var shape = hash(boundary, macro * 5 + segment, salt ^ 0x6c7);
+    /* Interpolazione smooth fra endpoint condivisi: il bordo curva lungo
+     * tutto il segmento invece di restare fermo per 10–20px alle estremita'. */
+    var t = at / Math.max(1, len - 1);
+    var smooth = t * t * (3 - 2 * t);
+    var depth = Math.round(a + (b - a) * smooth);
+    /* Ogni segmento macro riceve una sola erosione asimmetrica 16–27px.
+     * Le spalle da 1px e il cuore 2–3px formano una cap rotonda leggibile;
+     * posizione e verso non dipendono mai dal reticolo tile. */
+    var erosionW = 16 + ((shape >>> 8) % 12);
+    var centered = Math.round((len - erosionW) / 2);
+    var erosionAt = Math.max(5, Math.min(len - erosionW - 5,
+      centered + ((shape >>> 15) % 17) - 8));
+    if (at >= erosionAt && at < erosionAt + erosionW) {
+      var erosionLocal = at - erosionAt;
+      var shoulderL = 2 + ((shape >>> 21) & 3);
+      var shoulderR = 2 + ((shape >>> 24) & 3);
+      var erosionDepth = erosionLocal < shoulderL || erosionLocal >= erosionW - shoulderR ? 1 :
+        (erosionLocal < shoulderL + 2 || erosionLocal >= erosionW - shoulderR - 2 ? 2 : 3);
+      var signedErosion = (shape & 4) ? erosionDepth : -erosionDepth;
+      var eroded = depth + signedErosion;
+      depth = eroded < 1 || eroded > 5 ? depth - signedErosion : eroded;
+    }
+    return Math.max(1, Math.min(5, depth));
+  }
+
+  function townSurfaceInsets(tx, ty, salt, band, left, right, up, down) {
+    var worldY = ty * 16 + band;
+    var il = left ? 0 : townContinuousEdge(tx, worldY, salt);
+    var ir = right ? 0 : townContinuousEdge(tx + 1, worldY, salt ^ 0x51);
+    return [Math.min(7, il), Math.min(7, ir)];
+  }
+
+  function townSurfaceBand(ctx, x, y, band, il, ir, fill, middle) {
+    /* Solo sabbia nell'interno. Sul bordo reale: suolo scuro esterno,
+     * verde compresso, frangia chiara e spalla sabbia. Quattro letture
+     * distinte a 1x, ma l'invasione resta al massimo cinque pixel. */
+    R(ctx, x + il, y + band, 16 - il - ir, 1, fill);
+    if (il > 0) {
+      if (il > 2) R(ctx, x, y + band, 1, 1, HG.vergeSoil);
+      if (il > 1) R(ctx, x + (il > 2 ? 1 : 0), y + band, il - (il > 2 ? 2 : 1), 1, HG.vergeMid);
+      R(ctx, x + il - 1, y + band, 1, 1, HG.vergeWarm);
+      if (middle && il < 15 - ir) R(ctx, x + il, y + band, 1, 1, middle);
+    }
+    if (ir > 0) {
+      if (ir > 2) R(ctx, x + 15, y + band, 1, 1, HG.vergeSoil);
+      if (ir > 1) R(ctx, x + 17 - ir, y + band, ir - (ir > 2 ? 2 : 1), 1, HG.vergeMid);
+      R(ctx, x + 16 - ir, y + band, 1, 1, HG.vergeWarm);
+      if (middle && 15 - ir > il) R(ctx, x + 15 - ir, y + band, 1, 1, middle);
+    }
+  }
+
+  function townMaterialJoin(ctx, x, y, side, tone, phase) {
+    /* Join corto e connesso: indica cambio materia senza disegnare una
+     * cucitura intermittente lungo tutto il bordo della tile. */
+    if ((phase & 7) !== 0) return;
+    phase = phase >>> 3;
+    var start = 3 + (phase & 3);
+    var span = 5 + ((phase >>> 3) & 3);
+    if (side === 'left' || side === 'right') {
+      var sx = side === 'left' ? x : x + 15;
+      var inwardX = side === 'left' ? sx + 1 : sx - 2;
+      R(ctx, sx, y + start, 1, Math.min(span, 16 - start), tone);
+      R(ctx, inwardX, y + start + 2, 2, Math.max(2, Math.min(span - 3, 13 - start)), HG.vergeWarm);
+    } else {
+      var sy = side === 'up' ? y : y + 15;
+      var inwardY = side === 'up' ? sy + 1 : sy - 2;
+      R(ctx, x + start, sy, Math.min(span, 16 - start), 1, tone);
+      R(ctx, x + start + 2, inwardY, Math.max(2, Math.min(span - 3, 13 - start)), 2, HG.vergeWarm);
+    }
+  }
+
+  function townHorizontalCap(ctx, x, y, tx, ty, salt, top, field) {
+    for (var col = 0; col < 16; col++) {
+      var worldX = tx * 16 + col;
+      var depth = townContinuousEdge(ty + (top ? 0 : 1), worldX, salt);
+      if (top) {
+        if (depth > 2) R(ctx, x + col, y, 1, 1, HG.vergeSoil);
+        if (depth > 1) R(ctx, x + col, y + (depth > 2 ? 1 : 0), 1,
+          depth - (depth > 2 ? 2 : 1), HG.vergeMid);
+        R(ctx, x + col, y + depth - 1, 1, 1, HG.vergeWarm);
+        if (depth < 15) R(ctx, x + col, y + depth, 1, 1, HG.pathMid);
+      } else {
+        if (depth > 2) R(ctx, x + col, y + 15, 1, 1, HG.vergeSoil);
+        if (depth > 1) R(ctx, x + col, y + 17 - depth, 1,
+          depth - (depth > 2 ? 2 : 1), HG.vergeMid);
+        R(ctx, x + col, y + 16 - depth, 1, 1, HG.vergeWarm);
+        if (depth < 15) R(ctx, x + col, y + 15 - depth, 1, 1, HG.pathMid);
+      }
+    }
+  }
+
+  function townGrassBay(ctx, x, y, side, field, salt) {
+    var depth = 5 + (salt & 1), row;
+    for (row = 0; row < depth; row++) {
+      var reach = 1 + (Math.abs(row - ((depth - 1) / 2)) < 1.6 ? 2 : 1);
+      var yy = y + row;
+      if (side === 'left') {
+        if (reach > 2) R(ctx, x, yy, 1, 1, HG.vergeSoil);
+        R(ctx, x + (reach > 2 ? 1 : 0), yy, reach - (reach > 2 ? 1 : 0), 1, HG.vergeMid);
+        R(ctx, x + reach, yy, 1, 1, HG.vergeWarm);
+      } else if (side === 'right') {
+        if (reach > 2) R(ctx, x + 15, yy, 1, 1, HG.vergeSoil);
+        R(ctx, x + 16 - reach, yy, reach - (reach > 2 ? 1 : 0), 1, HG.vergeMid);
+        R(ctx, x + 15 - reach, yy, 1, 1, HG.vergeWarm);
+      } else if (side === 'up') {
+        if (reach > 2) R(ctx, x + row, y, 1, 1, HG.vergeSoil);
+        R(ctx, x + row, y + (reach > 2 ? 1 : 0), 1, reach - (reach > 2 ? 1 : 0), HG.vergeMid);
+        R(ctx, x + row, y + reach, 1, 1, HG.vergeWarm);
+      } else {
+        if (reach > 2) R(ctx, x + row, y + 15, 1, 1, HG.vergeSoil);
+        R(ctx, x + row, y + 16 - reach, 1, reach - (reach > 2 ? 1 : 0), HG.vergeMid);
+        R(ctx, x + row, y + 15 - reach, 1, 1, HG.vergeWarm);
+      }
+    }
+  }
+
+  function townCornerBay(ctx, x, y, corner, field, salt) {
+    /* Angolo smussato, non cuneo: massimo tre pixel di prato. */
+    for (var row = 0; row < 5; row++) {
+      var reach = Math.max(1, 3 - Math.floor(row / 2));
+      var yy = corner.indexOf('s') === 0 ? y + 15 - row : y + row;
+      if (corner.charAt(1) === 'w') {
+        if (reach > 2) R(ctx, x, yy, 1, 1, HG.vergeSoil);
+        R(ctx, x + (reach > 2 ? 1 : 0), yy, reach - (reach > 2 ? 1 : 0), 1, HG.vergeMid);
+        R(ctx, x + reach, yy, 1, 1, HG.vergeWarm);
+      } else {
+        if (reach > 2) R(ctx, x + 15, yy, 1, 1, HG.vergeSoil);
+        R(ctx, x + 16 - reach, yy, reach - (reach > 2 ? 1 : 0), 1, HG.vergeMid);
+        R(ctx, x + 15 - reach, yy, 1, 1, HG.vergeWarm);
+      }
+    }
+  }
+
+  function townJunctionFeather(ctx, x, y, corner, field, depth, salt) {
+    depth = Math.max(2, Math.min(3, depth));
+    for (var row = 0; row < depth; row++) {
+      var reach = Math.max(1, Math.min(3, depth - row));
+      var yy = corner.charAt(0) === 's' ? y + 15 - row : y + row;
+      if (corner.charAt(1) === 'w') {
+        if (reach > 2) R(ctx, x, yy, 1, 1, HG.vergeSoil);
+        R(ctx, x + (reach > 2 ? 1 : 0), yy, reach - (reach > 2 ? 1 : 0), 1, HG.vergeMid);
+        R(ctx, x + reach, yy, 1, 1, HG.vergeWarm);
+      } else {
+        if (reach > 2) R(ctx, x + 15, yy, 1, 1, HG.vergeSoil);
+        R(ctx, x + 16 - reach, yy, reach - (reach > 2 ? 1 : 0), 1, HG.vergeMid);
+        R(ctx, x + 15 - reach, yy, 1, 1, HG.vergeWarm);
+      }
+    }
+  }
+
+  function townCornerPixel(ctx, x, y, corner, u, v, tone) {
+    var px = corner.charAt(1) === 'e' ? 15 - u : u;
+    var py = corner.charAt(0) === 's' ? 15 - v : v;
+    R(ctx, x + px, y + py, 1, 1, tone);
+  }
+
+  function townLayeredCorner(ctx, x, y, corner, field, inner, middle, salt) {
+    /* Set completo interno/esterno. Ogni diagonale conserva nell'ordine
+     * prato, suolo, verde, luce e spalla: nessun angolo ritorna a un
+     * cuneo monocolore. Ingombro massimo 4px. */
+    var limit = 3, variant = (salt || 0) & 3;
+    for (var v = 0; v <= limit; v++) for (var u = 0; u <= limit; u++) {
+      var bias = variant === 1 && u > v ? 1 :
+        (variant === 2 && v > u ? 1 : (variant === 3 && u === 0 && v > 1 ? 1 : 0));
+      var sum = u + v + bias, tone = null;
+      if (inner) {
+        if (sum === 0) tone = field;
+        else if (sum === 1) tone = HG.vergeSoil;
+        else if (sum === 2) tone = HG.vergeMid;
+        else if (sum === 3) tone = HG.vergeWarm;
+        else if (sum === 4) tone = middle;
+      } else {
+        if (sum <= 1) tone = field;
+        else if (sum === 2) tone = HG.vergeSoil;
+        else if (sum === 3) tone = HG.vergeMid;
+        else if (sum === 4) tone = HG.vergeWarm;
+        else if (sum === 5) tone = middle;
+      }
+      if (tone) townCornerPixel(ctx, x, y, corner, u, v, tone);
+    }
+  }
+
+  function townSandNotch(ctx, x, y, side, fill, middle, start) {
+    /* Concavita' sabbia di un pixel. Le estremita' mantengono il verde;
+     * soltanto il cuore avanza verso l'esterno, quindi non e' un dente. */
+    for (var i = 0; i < 6; i++) {
+      var core = i >= 2 && i <= 3;
+      if (side === 'left' || side === 'right') {
+        var yy = y + start + i;
+        if (side === 'left') {
+          R(ctx, x, yy, 1, 1, HG.vergeSoil);
+          R(ctx, x + 1, yy, 1, 1, core ? HG.vergeWarm : HG.vergeMid);
+          R(ctx, x + 2, yy, 1, 1, core ? fill : HG.vergeWarm);
+          R(ctx, x + 3, yy, 1, 1, middle);
+        } else {
+          R(ctx, x + 15, yy, 1, 1, HG.vergeSoil);
+          R(ctx, x + 14, yy, 1, 1, core ? HG.vergeWarm : HG.vergeMid);
+          R(ctx, x + 13, yy, 1, 1, core ? fill : HG.vergeWarm);
+          R(ctx, x + 12, yy, 1, 1, middle);
+        }
+      } else {
+        var xx = x + start + i;
+        if (side === 'up') {
+          R(ctx, xx, y, 1, 1, HG.vergeSoil);
+          R(ctx, xx, y + 1, 1, 1, core ? HG.vergeWarm : HG.vergeMid);
+          R(ctx, xx, y + 2, 1, 1, core ? fill : HG.vergeWarm);
+          R(ctx, xx, y + 3, 1, 1, middle);
+        } else {
+          R(ctx, xx, y + 15, 1, 1, HG.vergeSoil);
+          R(ctx, xx, y + 14, 1, 1, core ? HG.vergeWarm : HG.vergeMid);
+          R(ctx, xx, y + 13, 1, 1, core ? fill : HG.vergeWarm);
+          R(ctx, xx, y + 12, 1, 1, middle);
+        }
+      }
+    }
+  }
+
+  function townShoulderTuft(ctx, x, y, side, start, salt) {
+    var dark = (salt & 1) ? HG.grassDark : HG.vergeShadow;
+    if (side === 'left' || side === 'right') {
+      var bx = side === 'left' ? x : x + 12, by = y + start;
+      R(ctx, bx, by + 2, 4, 2, dark);
+      R(ctx, bx + (side === 'left' ? 1 : 2), by, 1, 3, HG.vergeMid);
+      R(ctx, bx + (side === 'left' ? 3 : 0), by + 1, 1, 3, HG.vergeWarm);
+    } else {
+      var bxx = x + start, byy = side === 'up' ? y : y + 12;
+      R(ctx, bxx + 1, byy, 2, 4, dark);
+      R(ctx, bxx, byy + (side === 'up' ? 1 : 2), 3, 1, HG.vergeMid);
+      R(ctx, bxx + 2, byy + (side === 'up' ? 3 : 0), 3, 1, HG.vergeWarm);
+    }
+  }
+
+  function townSeamFeature(ctx, x, y, tx, ty, side, field, fill, middle, salt) {
+    var vertical = side === 'left' || side === 'right';
+    var boundary = vertical ? tx + (side === 'right' ? 1 : 0) : ty + (side === 'down' ? 1 : 0);
+    var along = vertical ? ty : tx;
+    var event = hash(boundary, along, salt ^ side.length);
+    if ((event & 7) !== 0) return;
+    var ordinal = Math.floor(along / 2);
+    var family = (event >>> 5) % 3;
+    var start = 4 + (hash(boundary, ordinal, salt ^ 0x5a3) % 3);
+    if (family === 0) townGrassBay(ctx, x + (vertical ? 0 : start), y + (vertical ? start : 0), side, field, salt ^ ordinal);
+    else if (family === 1) townSandNotch(ctx, x, y, side, fill, middle, start);
+    else townShoulderTuft(ctx, x, y, side, start, salt ^ ordinal);
+  }
+
+  function townRoadDetailCluster(ctx, x, y, tx, ty, horizontal, junction, salt) {
+    var along = horizontal ? tx : ty, cross = horizontal ? ty : tx;
+    /* Un evento per segmento: i passi reali fra cluster sono sempre 4–7
+     * tile, mentre ordine, famiglia e lato cambiano a ogni macroblocco. */
+    var block = Math.floor(along / 32);
+    var local = ((along % 32) + 32) % 32;
+    var intervalSets = [
+      [4,7,5,6,4,6], [6,4,7,5,6,4],
+      [5,6,4,7,5,5], [7,5,4,6,5,5]
+    ];
+    var intervals = intervalSets[hash(cross, block, salt ^ 0x35) % intervalSets.length];
+    var segment = 0, start = 0;
+    while (segment < intervals.length - 1 && local >= start + intervals[segment]) {
+      start += intervals[segment]; segment++;
+    }
+    if (local !== start) return;
+    var event = block * intervals.length + segment;
+    var v = hash(event, cross, salt ^ 0x6d1), family = (v >>> 4) % 3;
+    var edgeSide = (v & 1) ? 1 : -1;
+    var ox = horizontal ? 5 + ((v >>> 7) % 6) : (edgeSide < 0 ? 3 : 11);
+    var oy = horizontal ? (edgeSide < 0 ? 3 : 11) : 5 + ((v >>> 7) % 6);
+    /* Patch materica 12–15px, connessa e poco contrastata, sempre vicina
+     * alla verge scelta. Il dettaglio direzionale sotto diventa il cuore
+     * della patch, non una costellazione di pixel nel centro corsia. */
+    if (horizontal) {
+      var patchY = edgeSide < 0 ? 2 : 11;
+      R(ctx, x + 1, y + patchY, 14, 2, '#d8c387');
+      R(ctx, x + 3, y + patchY + (edgeSide < 0 ? 1 : -2), 10, 3, '#d4be84');
+      R(ctx, x + 6, y + patchY + (edgeSide < 0 ? 3 : -3), 6, 2, '#d8c387');
+    } else {
+      var patchX = edgeSide < 0 ? 2 : 11;
+      R(ctx, x + patchX, y + 1, 2, 14, '#d8c387');
+      R(ctx, x + patchX + (edgeSide < 0 ? 1 : -2), y + 3, 3, 10, '#d4be84');
+      R(ctx, x + patchX + (edgeSide < 0 ? 3 : -3), y + 6, 2, 6, '#d8c387');
+    }
+    if (family === 0) {
+      /* Tre granelli letti come un unico triangolo. */
+      R(ctx, x + ox - 2, y + oy, 3, 1, HG.roadMid);
+      R(ctx, x + ox + 2, y + oy + 1, 2, 2, '#d4be84');
+      R(ctx, x + ox, y + oy + 3, 3, 1, HG.roadMid);
+    } else if (family === 1) {
+      /* Coppia d'impronte orientata alla corsia. */
+      if (horizontal) {
+        R(ctx, x + ox - 3, y + oy, 2, 1, HG.roadMid);
+        R(ctx, x + ox + 2, y + oy + 2, 2, 1, '#d4be84');
+      } else {
+        R(ctx, x + ox, y + oy - 3, 1, 2, HG.roadMid);
+        R(ctx, x + ox + 2, y + oy + 2, 1, 2, '#d4be84');
+      }
+    } else {
+      /* Piccola abrasione: due barre vicine, non macchia rettangolare. */
+      if (horizontal) {
+        R(ctx, x + ox - 3, y + oy, 7, 1, '#d4be84');
+        R(ctx, x + ox - 1, y + oy + 2, 5, 1, HG.roadMid);
+      } else {
+        R(ctx, x + ox, y + oy - 3, 1, 7, '#d4be84');
+        R(ctx, x + ox + 2, y + oy - 1, 1, 5, HG.roadMid);
+      }
+    }
+    if (((v >>> 11) & 7) === 0) {
+      /* Ciottoli occasionali solo accanto alla verge scelta. */
+      var px = horizontal ? x + ox + 3 : x + (edgeSide < 0 ? 2 : 13);
+      var py = horizontal ? y + (edgeSide < 0 ? 2 : 13) : y + oy + 3;
+      R(ctx, px, py, 3, 2, HG.vergeSoil);
+      R(ctx, px + 1, py, 2, 1, HG.vergeWarm);
+    }
+  }
+
+  function townSurfaceWear(ctx, x, y, tx, ty, horizontal, tones, salt, density) {
+    /* Eventi lungo segmenti 6–9 tile; la selezione avviene sul segmento,
+     * non su ogni tile. Questo elimina distribuzione uniforme e seam visivi. */
+    var along = horizontal ? tx : ty, cross = horizontal ? ty : tx;
+    var block = Math.floor(along / 24), local = ((along % 24) + 24) % 24;
+    var intervalSets = [[7,9,8],[9,6,9],[8,7,9],[6,9,9]];
+    var intervals = intervalSets[hash(cross, block, salt ^ 0x321) % intervalSets.length];
+    var segment = 0, start = 0;
+    while (segment < 2 && local >= start + intervals[segment]) {
+      start += intervals[segment]; segment++;
+    }
+    if (local !== start) return;
+    var event = block * 3 + segment;
+    if ((hash(event, cross, salt ^ 0x347) & 7) >= density) return;
+    var v = hash(event, cross, salt ^ 0x39);
+    var family = (v >>> 6) % 3;
+    var ox = 5 + ((v >>> 9) % 5), oy = 5 + ((v >>> 13) % 5);
+    if (family === 0) {
+      /* Traccia direzionale connessa, 9–11px. */
+      if (horizontal) {
+        R(ctx, x + ox - 3, y + oy, 8, 2, tones[0]);
+        R(ctx, x + ox - 1, y + oy + 2, 5, 2, tones[1]);
+      } else {
+        R(ctx, x + ox, y + oy - 3, 2, 8, tones[0]);
+        R(ctx, x + ox + 2, y + oy - 1, 2, 5, tones[1]);
+      }
+    } else if (family === 1) {
+      /* Abrasione a losanga: due valori vicini, nessun pixel isolato. */
+      R(ctx, x + ox - 4, y + oy, 9, 2, tones[0]);
+      R(ctx, x + ox - 2, y + oy - 2, 5, 6, tones[1]);
+      R(ctx, x + ox - 1, y + oy + 4, 3, 1, tones[0]);
+    } else {
+      /* Solco corto a gomito parallelo al flusso. */
+      if (horizontal) {
+        R(ctx, x + ox - 3, y + oy, 8, 2, tones[1]);
+        R(ctx, x + ox + 2, y + oy + 2, 3, 3, tones[0]);
+      } else {
+        R(ctx, x + ox, y + oy - 3, 2, 8, tones[1]);
+        R(ctx, x + ox + 2, y + oy + 2, 3, 3, tones[0]);
+      }
+    }
+  }
+
+  function townGrassCluster(ctx, x, y, tx, ty, rows) {
+    var near = false;
+    [[-1,0],[1,0],[0,-1],[0,1]].forEach(function (d) {
+      var ch = cell(rows, tx + d[0], ty + d[1]);
+      if (ch && 'TY0123456789Dr-:=pu'.indexOf(ch) >= 0) near = true;
+    });
+    /* Una/due ancore per campo macro 80x64, mai selezione casuale tile-per-tile. */
+    var mx = Math.floor(tx / 5), my = Math.floor(ty / 4);
+    var lx = ((tx % 5) + 5) % 5, ly = ((ty % 4) + 4) % 4;
+    var mh = hash(mx, my, 0x724);
+    var primary = lx === (mh % 5) && ly === ((mh >>> 5) % 4);
+    var secondary = near && lx === ((mh >>> 9) % 5) && ly === ((mh >>> 13) % 4);
+    if (!primary && !secondary) return;
+    var v = hash(tx, ty, mh ^ 0x73b);
+    var family = (v >>> 6) % 3;
+    var ox = 3 + ((v >>> 9) % 7), oy = 4 + ((v >>> 13) % 7);
+    if (near) {
+      var driftTone = (v & 0x10000) ? '#7ecba1' : '#8bd6aa';
+      grassDriftBlob(ctx, x + 8, y + 8,
+        8, 3 + ((v >>> 23) & 1), driftTone, v ^ 0x734);
+      R(ctx, x + 2 + ((v >>> 21) & 1), y + 7 + ((v >>> 22) & 1),
+        11, 2, driftTone);
+    }
+    if (family === 0) {
+      /* Ciuffo corto: tre lame unite e basse, mai tick isolati. */
+      R(ctx, x + ox - 3, y + oy + 1, 8, 2, '#78c79d');
+      R(ctx, x + ox - 1, y + oy - 1, 2, 2, HG.grassHi);
+      R(ctx, x + ox + 3, y + oy, 2, 2, HG.grassMid);
+    } else if (family === 1) {
+      /* Trifoglio scuro: rosetta compatta in un solo gruppo. */
+      R(ctx, x + ox - 3, y + oy, 3, 3, HG.grassDark);
+      R(ctx, x + ox, y + oy - 2, 3, 3, HG.grassMid);
+      R(ctx, x + ox + 2, y + oy + 1, 3, 3, HG.grassDark);
+      R(ctx, x + ox - 1, y + oy + 2, 5, 1, '#639b72');
+    } else {
+      /* Aghi pallidi con un solo bocciolo: chiaro ma sotto attori/porte. */
+      R(ctx, x + ox - 3, y + oy + 2, 8, 1, '#91dab0');
+      R(ctx, x + ox - 1, y + oy - 1, 2, 4, HG.grassMid);
+      R(ctx, x + ox - 3, y + oy + 1, 4, 2, '#78c79d');
+      R(ctx, x + ox + 3, y + oy, 1, 3, '#91dab0');
+      R(ctx, x + ox - 2, y + oy - 2, 3, 2, '#c1ddb0');
+    }
+  }
+
+  /* Superfici cittadine: deriva macro 80–96px, valori vicini e confini
+   * organici 1–3px. Nessuna zona rettangolare o checkerboard tile. */
+  function townGround(ctx, x, y, tx, ty, rows) {
+    var base = townGrassFieldTone(tx, ty);
+    R(ctx, x, y, 16, 16, base);
+    var macroX = ((tx % 6) + 6) % 6, macroY = ((ty % 5) + 5) % 5;
+    var edge, band;
+    if (macroX === 0) {
+      edge = townGrassFieldTone(tx - 1, ty);
+      for (band = 0; band < 16; band++) {
+        var ew = townContinuousEdge(tx, ty * 16 + band, 0x733);
+        R(ctx, x, y + band, ew, 1, edge);
+      }
+    }
+    if (macroY === 0) {
+      edge = townGrassFieldTone(tx, ty - 1);
+      for (band = 0; band < 16; band++) {
+        var eh = townContinuousEdge(ty, tx * 16 + band, 0x734);
+        R(ctx, x + band, y, 1, eh, edge);
+      }
+    }
+    /* Quasi tutto il campo resta quieto. Tre famiglie connesse, piu'
+     * presenti vicino a chiome e facciate: prato, non coriandoli. */
+    townGrassCluster(ctx, x, y, tx, ty, rows);
     groundShadow(ctx, x, y, tx, ty, rows);
   }
 
   function townPath(ctx, x, y, tx, ty, rows) {
-    /* Sentiero distinto dal prato: stessa rampa crema, valore medio diverso.
-     * Questo rende corsie e forecourt leggibili senza inventare asfalto. */
-    R(ctx, x, y, 16, 16, '#dcd9a9');
-    var phase = hash(tx, ty, 0x76) & 3;
-    var px = [3, 9, 5, 11][phase], py = [5, 3, 11, 9][phase];
-    R(ctx, x + px, y + py, 3, 1, '#9aab69');
-    R(ctx, x + 13 - (phase & 1) * 3, y + 13 - ((phase >> 1) & 1) * 4, 1, 1, '#6a8a43');
-    R(ctx, x + 2 + ((tx + ty) & 7), y + 8, 2, 1, '#eee6b5');
-    if (cell(rows, tx - 1, ty) !== 'p') R(ctx, x, y + 2, 1, 12, '#9aab69');
-    if (cell(rows, tx + 1, ty) !== 'p') R(ctx, x + 15, y + 2, 1, 12, '#9aab69');
-    if (cell(rows, tx, ty - 1) !== 'p') R(ctx, x + 2, y, 12, 1, '#9aab69');
-    if (cell(rows, tx, ty + 1) !== 'p') R(ctx, x + 2, y + 15, 12, 1, '#9aab69');
+    townGround(ctx, x, y, tx, ty, rows);
+    var leftCh = cell(rows, tx - 1, ty), rightCh = cell(rows, tx + 1, ty);
+    var upCh = cell(rows, tx, ty - 1), downCh = cell(rows, tx, ty + 1);
+    var left = townTravelCell(leftCh), right = townTravelCell(rightCh);
+    var up = townTravelCell(upCh), down = townTravelCell(downCh);
+    var phase = hash(tx, ty, 0x76) & 7;
+    for (var band = 0; band < 16; band++) {
+      var edge = townSurfaceInsets(tx, ty, 0x760, band, left, right, up, down);
+      townSurfaceBand(ctx, x, y, band, edge[0], edge[1], HG.path, HG.pathMid);
+    }
+    var pathField = townGrassFieldTone(tx, ty);
+    if (!up) townHorizontalCap(ctx, x, y, tx, ty, 0x7601, true, pathField);
+    if (!down) townHorizontalCap(ctx, x, y, tx, ty, 0x7602, false, pathField);
+    var pathHorizontal = (left || right) && !(up || down) ? true :
+      (!(left || right) && (up || down) ? false : ((phase & 1) === 0));
+    townSurfaceWear(ctx, x, y, tx, ty, pathHorizontal,
+      [HG.pathMid, '#cbb57d'], 0x7617, 3);
+    if (left && leftCh !== 'p') townMaterialJoin(ctx, x, y, 'left', HG.pathMid, hash(tx, ty, 0x7621));
+    if (right && rightCh !== 'p') townMaterialJoin(ctx, x, y, 'right', HG.pathMid, hash(tx, ty, 0x7622));
+    if (up && upCh !== 'p') townMaterialJoin(ctx, x, y, 'up', HG.pathMid, hash(tx, ty, 0x7623));
+    if (down && downCh !== 'p') townMaterialJoin(ctx, x, y, 'down', HG.pathMid, hash(tx, ty, 0x7624));
     groundShadow(ctx, x, y, tx, ty, rows);
   }
 
   function townRoad(ctx, x, y, tx, ty, rows) {
-    var left = roadCell(cell(rows, tx - 1, ty));
-    var right = roadCell(cell(rows, tx + 1, ty));
-    var up = roadCell(cell(rows, tx, ty - 1));
-    var down = roadCell(cell(rows, tx, ty + 1));
+    var leftCh = cell(rows, tx - 1, ty), rightCh = cell(rows, tx + 1, ty);
+    var upCh = cell(rows, tx, ty - 1), downCh = cell(rows, tx, ty + 1);
+    var left = townTravelCell(leftCh), right = townTravelCell(rightCh);
+    var up = townTravelCell(upCh), down = townTravelCell(downCh);
     var phase = hash(tx, ty, 0x793) & 7;
 
-    /* Quattro valori per metatile: carreggiata quieta, aggregato in cluster
-     * corti, cordolo esplicito. Nessuna fuga attraversa tutta la tile. */
-    R(ctx, x, y, 16, 16, '#a9aaa0');
-    R(ctx, x + 3 + (phase & 3), y + 4, 3, 1, '#c3c4b2');
-    R(ctx, x + 10 - ((phase >> 1) & 3), y + 11, 2, 1, '#85877f');
-    if (phase === 0 || phase === 5) R(ctx, x + 8, y + 7, 1, 1, '#92948a');
-
-    if (!left) {
-      R(ctx, x, y, 1, 16, '#34572d');
-      R(ctx, x + 1, y + 1, 1, 14, '#dcd9a9');
+    /* Terra battuta calda: quattro valori. Profilo nasce da bande globali
+     * 2px, con transizione materica 1–3px invece del vecchio cordolo cyan. */
+    townGround(ctx, x, y, tx, ty, rows);
+    for (var band = 0; band < 16; band++) {
+      var edge = townSurfaceInsets(tx, ty, 0x7930, band, left, right, up, down);
+      townSurfaceBand(ctx, x, y, band, edge[0], edge[1], HG.road, HG.roadMid);
     }
-    if (!right) {
-      R(ctx, x + 15, y, 1, 16, '#34572d');
-      R(ctx, x + 14, y + 1, 1, 14, '#dcd9a9');
+    var roadField = townGrassFieldTone(tx, ty);
+    if (!up) townHorizontalCap(ctx, x, y, tx, ty, 0x7932, true, roadField);
+    if (!down) townHorizontalCap(ctx, x, y, tx, ty, 0x7933, false, roadField);
+    /* Quattro famiglie locali e direzionali; 7/8 resta campo calmo. */
+    var roadHorizontal = (left || right) && !(up || down) ? true :
+      (!(left || right) && (up || down) ? false : ((phase & 1) === 0));
+    var junction = (left ? 1 : 0) + (right ? 1 : 0) + (up ? 1 : 0) + (down ? 1 : 0);
+    townSurfaceWear(ctx, x, y, tx, ty, roadHorizontal,
+      ['#d4be84', HG.roadMid], 0x7931, 2);
+    townRoadDetailCluster(ctx, x, y, tx, ty, roadHorizontal, junction, 0x7935);
+    /* Piccole intrusioni del prato ora vivono nel profilo macro continuo:
+     * nessun hook locale ristampa la costruzione a tile della carreggiata. */
+    var field = townGrassFieldTone(tx, ty);
+    var bay = hash(tx, ty, 0x7937);
+    var nw = townTravelCell(cell(rows, tx - 1, ty - 1));
+    var ne = townTravelCell(cell(rows, tx + 1, ty - 1));
+    var sw = townTravelCell(cell(rows, tx - 1, ty + 1));
+    var se = townTravelCell(cell(rows, tx + 1, ty + 1));
+    if (left && up && !nw) townLayeredCorner(ctx, x, y, 'nw', field, true, HG.roadMid, bay ^ 0x11);
+    if (right && up && !ne) townLayeredCorner(ctx, x, y, 'ne', field, true, HG.roadMid, bay ^ 0x23);
+    if (left && down && !sw) townLayeredCorner(ctx, x, y, 'sw', field, true, HG.roadMid, bay ^ 0x35);
+    if (right && down && !se) townLayeredCorner(ctx, x, y, 'se', field, true, HG.roadMid, bay ^ 0x47);
+    if (!left && !up && (right || down)) townLayeredCorner(ctx, x, y, 'nw', field, false, HG.roadMid, bay ^ 0x59);
+    if (!right && !up && (left || down)) townLayeredCorner(ctx, x, y, 'ne', field, false, HG.roadMid, bay ^ 0x6b);
+    if (!left && !down && (right || up)) townLayeredCorner(ctx, x, y, 'sw', field, false, HG.roadMid, bay ^ 0x7d);
+    if (!right && !down && (left || up)) townLayeredCorner(ctx, x, y, 'se', field, false, HG.roadMid, bay ^ 0x8f);
+    if (junction >= 3) {
+      /* Junction visual-only: offset e feather continuo da 1–3px. */
+      var jd = 2 + (bay & 1);
+      var firstCorner = ['nw','se','ne','sw'][(bay >>> 8) & 3];
+      townJunctionFeather(ctx, x, y, firstCorner, field, jd, bay);
+      if (((bay >>> 10) & 3) === 0) {
+        var secondCorner = firstCorner === 'nw' ? 'se' : (firstCorner === 'se' ? 'nw' :
+          (firstCorner === 'ne' ? 'sw' : 'ne'));
+        townJunctionFeather(ctx, x, y, secondCorner, field, Math.max(2, jd - 1), bay >>> 3);
+      }
     }
-    if (!up) {
-      R(ctx, x, y, 16, 1, '#34572d');
-      R(ctx, x + 1, y + 1, 14, 1, '#dcd9a9');
-    }
-    if (!down) {
-      R(ctx, x, y + 15, 16, 1, '#34572d');
-      R(ctx, x + 1, y + 14, 14, 1, '#85877f');
-    }
-    /* Corner interni: il cordolo gira, non termina con una T smussata. */
-    if (!left && !up) R(ctx, x + 1, y + 1, 2, 2, '#dcd9a9');
-    if (!right && !up) R(ctx, x + 13, y + 1, 2, 2, '#dcd9a9');
-    if (!left && !down) R(ctx, x + 1, y + 13, 2, 2, '#85877f');
-    if (!right && !down) R(ctx, x + 13, y + 13, 2, 2, '#85877f');
+    if (left && !roadCell(leftCh)) townMaterialJoin(ctx, x, y, 'left', HG.roadMid, hash(tx, ty, 0x7941));
+    if (right && !roadCell(rightCh)) townMaterialJoin(ctx, x, y, 'right', HG.roadMid, hash(tx, ty, 0x7942));
+    if (up && !roadCell(upCh)) townMaterialJoin(ctx, x, y, 'up', HG.roadMid, hash(tx, ty, 0x7943));
+    if (down && !roadCell(downCh)) townMaterialJoin(ctx, x, y, 'down', HG.roadMid, hash(tx, ty, 0x7944));
   }
 
+  /* Marciapiede = calcestruzzo, non la stessa terra battuta del sentiero.
+   * Piano piatto (niente speckle), giunto di getto ogni 48px in coordinate
+   * mondo, una scaglia rada da 1px e cordolo sul lato che guarda la
+   * carreggiata. I valori sono diurni come tutto il town: dopo il grade di
+   * js/town-dusk.js atterrano sullo stack del lotto Double R — #a9a38f
+   * base, #898a7a giunto, #777b70 cordolo. Restano tutti sotto la soglia
+   * di saturazione della famiglia vegetazione (0.22) del grade, altrimenti
+   * il marciapiede verrebbe scurito come se fosse prato. */
+  var WALK = { slab: '#ffffd8', seam: '#eaebc4', chip: '#fffff2', kerb: '#d9dfc4' };
+
   function townSidewalk(ctx, x, y, tx, ty, rows, opts) {
-    R(ctx, x, y, 16, 16, '#eee6b5');
-    var vertical = semanticCell(rows, tx, ty - 1, opts) === '=' || semanticCell(rows, tx, ty + 1, opts) === '=';
-    if (vertical) R(ctx, x, y + 7, 16, 1, '#9aab69');
-    else R(ctx, x + 7, y, 1, 16, '#9aab69');
-    R(ctx, x + 2 + ((tx + ty) & 1) * 10, y + 2, 2, 1, '#dcd9a9');
+    townGround(ctx, x, y, tx, ty, rows);
+    var leftCh = semanticCell(rows, tx - 1, ty, opts), rightCh = semanticCell(rows, tx + 1, ty, opts);
+    var upCh = semanticCell(rows, tx, ty - 1, opts), downCh = semanticCell(rows, tx, ty + 1, opts);
+    var left = townTravelCell(leftCh), right = townTravelCell(rightCh);
+    var up = townTravelCell(upCh), down = townTravelCell(downCh);
+    for (var band = 0; band < 16; band++) {
+      var edge = townSurfaceInsets(tx, ty, 0x7810, band, left, right, up, down);
+      townSurfaceBand(ctx, x, y, band, edge[0], edge[1], WALK.slab, WALK.seam);
+    }
+    var walkField = townGrassFieldTone(tx, ty);
+    if (!up) townHorizontalCap(ctx, x, y, tx, ty, 0x7812, true, walkField);
+    if (!down) townHorizontalCap(ctx, x, y, tx, ty, 0x7813, false, walkField);
+    /* Giunti ogni 48px: la lastra resta continua fra le tile, nessun
+     * reticolo per tile. */
+    if ((tx % 3) === 0) R(ctx, x, y, 1, 16, WALK.seam);
+    if ((ty % 3) === 0) R(ctx, x, y, 16, 1, WALK.seam);
+    /* Una sola scaglia ogni otto tile circa: accento, mai tessitura. */
+    var chip = hash(tx, ty, 0x7818);
+    if ((chip & 7) === 0) {
+      R(ctx, x + 4 + ((chip >>> 3) % 8), y + 4 + ((chip >>> 7) % 8), 1, 1, WALK.chip);
+    }
+    /* Cordolo sul lato che guarda la carreggiata. */
+    if (roadCell(upCh)) R(ctx, x, y, 16, 1, WALK.kerb);
+    if (roadCell(downCh)) R(ctx, x, y + 15, 16, 1, WALK.kerb);
+    if (roadCell(leftCh)) R(ctx, x, y, 1, 16, WALK.kerb);
+    if (roadCell(rightCh)) R(ctx, x + 15, y, 1, 16, WALK.kerb);
+    if (left && leftCh !== '=') townMaterialJoin(ctx, x, y, 'left', WALK.seam, hash(tx, ty, 0x7821));
+    if (right && rightCh !== '=') townMaterialJoin(ctx, x, y, 'right', WALK.seam, hash(tx, ty, 0x7822));
+    if (up && upCh !== '=') townMaterialJoin(ctx, x, y, 'up', WALK.seam, hash(tx, ty, 0x7823));
+    if (down && downCh !== '=') townMaterialJoin(ctx, x, y, 'down', WALK.seam, hash(tx, ty, 0x7824));
     groundShadow(ctx, x, y, tx, ty, rows);
   }
 
   function townGravel(ctx, x, y, tx, ty, rows) {
     townGround(ctx, x, y, tx, ty, rows);
-    var phase = hash(tx, ty, 0x77) & 7;
-    R(ctx, x + 2 + phase, y + 4, 1, 1, '#6a8a43');
-    R(ctx, x + 11 - (phase & 3), y + 9, 2, 1, '#9aab69');
-    R(ctx, x + 5, y + 13 - (phase & 1) * 2, 1, 1, '#6a8a43');
+    townSurfaceWear(ctx, x, y, tx, ty, (hash(tx, ty, 0x771) & 1) === 0,
+      [HG.pathMid, '#cbb57d'], 0x772, 6);
   }
 
   function paintGroundSurface(ctx, ground, x, y, tx, ty, rows, opts) {
@@ -890,87 +2042,63 @@
   /* Props urbani authored sul layer terreno esplicito. Forme strette e
    * leggibili a 1x, massimo quattro valori per oggetto. */
   function groundedProp(ctx, ch, ground, x, y, tx, ty, rows, opts) {
-    var i;
+    var i, propInk = opts && opts.mapId === 'town' ? '#315a49' : C.ink;
     paintGroundSurface(ctx, ground, x, y, tx, ty, rows, opts);
     /* Il cartello d'ingresso ha un pannello hero continuo 42x22. Il glifo S
      * conserva collisione/interazione, ma non disegna un secondo pannello. */
     if (ch === 'S' && opts && opts.mapId === 'town' && tx === 30 && ty === 30) return;
+    softPixelShadow(ctx, x + 2, y + 12, 13, 4, HG.shadowDark, HG.shadow);
     if (ch === 'S') {
       R(ctx, x + 3, y + 8, 2, 8, C.ink); R(ctx, x + 11, y + 8, 2, 8, C.ink);
       R(ctx, x + 2, y + 1, 12, 9, C.ink); R(ctx, x + 3, y + 2, 10, 7, C.paper);
       R(ctx, x + 5, y + 4, 6, 1, C.dark); R(ctx, x + 4, y + 6, 8, 1, C.dark);
     } else if (ch === 'L') {
-      R(ctx, x + 5, y + 13, 6, 3, C.ink); R(ctx, x + 7, y + 3, 2, 11, C.ink);
-      R(ctx, x + 4, y, 8, 5, C.ink); R(ctx, x + 5, y + 1, 6, 3, C.gold);
+      R(ctx, x + 5, y + 13, 6, 3, propInk); R(ctx, x + 7, y + 3, 2, 11, propInk);
+      R(ctx, x + 4, y, 8, 5, propInk); R(ctx, x + 5, y + 1, 6, 3, C.gold);
     } else if (ch === 'P') {
-      R(ctx, x + 6, y + 1, 3, 15, C.ink); R(ctx, x + 7, y + 2, 1, 14, C.wood);
-      R(ctx, x + 3, y + 3, 10, 2, C.ink); R(ctx, x + 4, y + 2, 2, 2, C.paper);
+      R(ctx, x + 6, y + 1, 3, 15, propInk); R(ctx, x + 7, y + 2, 1, 14, C.wood);
+      R(ctx, x + 3, y + 3, 10, 2, propInk); R(ctx, x + 4, y + 2, 2, 2, C.paper);
       R(ctx, x + 11, y + 2, 2, 2, C.paper);
     } else if (ch === 'B') {
-      R(ctx, x + 2, y + 5, 12, 3, C.ink); R(ctx, x + 3, y + 5, 10, 2, C.wood);
-      R(ctx, x + 1, y + 8, 14, 4, C.ink); R(ctx, x + 2, y + 8, 12, 2, '#a87542');
-      R(ctx, x + 3, y + 12, 2, 4, C.ink); R(ctx, x + 11, y + 12, 2, 4, C.ink);
+      R(ctx, x + 2, y + 5, 12, 3, propInk); R(ctx, x + 3, y + 5, 10, 2, C.wood);
+      R(ctx, x + 1, y + 8, 14, 4, propInk); R(ctx, x + 2, y + 8, 12, 2, '#a87542');
+      R(ctx, x + 3, y + 12, 2, 4, propInk); R(ctx, x + 11, y + 12, 2, 4, propInk);
     } else if (ch === 'A') {
-      R(ctx, x + 2, y + 3, 12, 11, C.ink); R(ctx, x + 3, y + 4, 10, 9, '#5c4a32');
+      R(ctx, x + 2, y + 3, 12, 11, propInk); R(ctx, x + 3, y + 4, 10, 9, '#5c4a32');
       for (i = 0; i < 5; i++) {
         R(ctx, x + 4 + ((i * 5) % 8), y + 5 + ((i * 3) % 6), 2, 2,
           i % 3 === 0 ? C.gold : (i % 3 === 1 ? C.red : C.paper));
       }
     } else if (ch === 'H') {
-      R(ctx, x + 6, y + 4, 5, 10, C.ink); R(ctx, x + 7, y + 5, 3, 8, C.red);
-      R(ctx, x + 5, y + 3, 7, 3, C.ink); R(ctx, x + 6, y + 3, 5, 2, '#d05a58');
+      R(ctx, x + 6, y + 4, 5, 10, propInk); R(ctx, x + 7, y + 5, 3, 8, C.red);
+      R(ctx, x + 5, y + 3, 7, 3, propInk); R(ctx, x + 6, y + 3, 5, 2, '#d05a58');
       R(ctx, x + 4, y + 8, 3, 3, C.red); R(ctx, x + 10, y + 8, 3, 3, C.red);
-      R(ctx, x + 5, y + 13, 7, 2, C.ink);
+      R(ctx, x + 5, y + 13, 7, 2, propInk);
     } else if (ch === 'E') {
-      R(ctx, x + 7, y + 9, 2, 7, C.ink); R(ctx, x + 3, y + 3, 10, 7, C.ink);
+      R(ctx, x + 7, y + 9, 2, 7, propInk); R(ctx, x + 3, y + 3, 10, 7, propInk);
       R(ctx, x + 4, y + 4, 8, 5, '#59758a'); R(ctx, x + 11, y + 4, 2, 4, C.red);
     } else if (ch === 'G') {
       /* Lapide top-down sul vero sottofondo: niente carrier d'erba quadrato
        * quando la seconda fila poggia sul marciapiede. */
-      R(ctx, x + 3, y + 12, 10, 3, C.ink);
+      R(ctx, x + 3, y + 12, 10, 3, propInk);
       R(ctx, x + 4, y + 4, 8, 9, '#85877f');
       R(ctx, x + 5, y + 3, 6, 2, '#c3c4b2');
       R(ctx, x + 5, y + 5, 6, 6, '#a9aaa0');
       R(ctx, x + 6, y + 7, 4, 1, '#85877f');
       R(ctx, x + 2, y + 14, 12, 2, '#85877f');
     } else if (ch === 'q') {
-      R(ctx, x + 2, y + 3, 12, 12, C.ink); R(ctx, x + 3, y + 4, 10, 9, '#8d6541');
-      R(ctx, x + 4, y + 5, 8, 2, '#c79a57'); R(ctx, x + 7, y + 4, 2, 9, C.ink);
+      R(ctx, x + 2, y + 3, 12, 12, propInk); R(ctx, x + 3, y + 4, 10, 9, '#8d6541');
+      R(ctx, x + 4, y + 5, 8, 2, '#c79a57'); R(ctx, x + 7, y + 4, 2, 9, propInk);
       R(ctx, x + 3, y + 13, 10, 2, '#573d31');
     }
   }
 
-  /* Berlina laterale 32x16 della scena d'arrivo. Due tile solidi, stessa
-   * hitbox della sagoma: niente attraversamento fantasma. Ogni meta' dipinge
-   * solo il proprio rettangolo, quindi la scansione tile non cancella l'altra. */
+  /* Il tile V conserva solo terreno e collisione. Sagoma intera vive nel
+   * pass strutture: nessuna meta' viene cancellata dal tile adiacente. */
   function parkedCar(ctx, x, y, tx, ty, rows, opts) {
     if (opts && opts.mapId === 'arrival') arrivalGround(ctx, x, y, tx, ty);
     else if (opts && opts.mapId === 'town') paintGroundSurface(ctx, groundAt(opts, tx, ty) || 'p', x, y, tx, ty, rows, opts);
     else path(ctx, x, y, tx, ty, rows);
-    var right = cell(rows, tx - 1, ty) === 'V';
-    if (!right) {
-      R(ctx, x + 3, y + 14, 13, 2, C.dark);
-      R(ctx, x + 2, y + 6, 14, 8, C.ink);
-      R(ctx, x + 8, y + 2, 8, 5, C.ink);
-      R(ctx, x + 3, y + 7, 13, 5, '#6a8a43');
-      R(ctx, x + 9, y + 3, 7, 4, '#9aab69');
-      R(ctx, x + 10, y + 4, 6, 3, C.dark);
-      R(ctx, x + 5, y + 10, 7, 6, C.ink);
-      R(ctx, x + 7, y + 12, 3, 3, '#6a8a43');
-      R(ctx, x, y + 9, 3, 3, C.ink); R(ctx, x + 2, y + 8, 2, 1, C.paper);
-      R(ctx, x + 13, y + 7, 3, 1, C.paper);
-    } else {
-      R(ctx, x, y + 14, 13, 2, C.dark);
-      R(ctx, x, y + 6, 14, 8, C.ink);
-      R(ctx, x, y + 2, 8, 5, C.ink);
-      R(ctx, x, y + 7, 13, 5, '#6a8a43');
-      R(ctx, x, y + 3, 7, 4, '#9aab69');
-      R(ctx, x, y + 4, 6, 3, C.dark);
-      R(ctx, x + 5, y + 10, 7, 6, C.ink);
-      R(ctx, x + 7, y + 12, 3, 3, '#6a8a43');
-      R(ctx, x + 13, y + 8, 3, 5, C.ink); R(ctx, x + 11, y + 7, 3, 1, C.paper);
-      R(ctx, x, y + 6, 1, 7, C.dark);
-    }
   }
 
   function bush(ctx, x, y, tx, ty, rows, night, paleGround) {
@@ -1104,7 +2232,7 @@
   var BUILDINGS = {
     '0': ['#713943','#b6625d','#d9c78d','#435a50'], // bottega/casa: tetto bordeaux, fronte salvia
     '1': ['#2f4d63','#5c8098','#dbc78d','#213648'], // sceriffo: tetto blu-ardesia
-    '2': ['#8f2430','#c1585a','#e3ab77','#4c1119'], // diner: tetto rosso
+    '2': ['#8f2430','#c1585a','#e4cfa3','#4c1119'], // diner: tetto rosso, clapboard crema (quality bar 2026-09-07)
     '3': ['#754429','#a9754f','#ecd7a4','#4a2f22'], // Palmer: tetto a due falde marrone
     '4': ['#2c5334','#5c8a52','#a9805a','#3c2a1e'], // Great Northern: tetto verde scuro
     '5': ['#c7d6d2','#ecf5ef','#f1f4e6','#8faaa4'], // ospedale: tetto/facciata chiari
@@ -1582,11 +2710,18 @@
     R(g, x + 1, y + 1, w - 2, h - 2, glass);
     R(g, x + (w >> 1), y + 1, 1, h - 2, trim);
     R(g, x + 1, y + (h >> 1), w - 2, 1, trim);
+    /* Vetro selettivo e davanzale materiale: un riflesso, non reticolo. */
+    if (w >= 12 && h >= 10) {
+      R(g, x + 2, y + 2, Math.max(3, Math.floor(w * .28)), 1, lighter(glass, 28));
+      R(g, x + w - 5, y + 3, 2, 2, lighter(glass, 14));
+    }
+    R(g, x - 1, y + h, w + 2, 2, trim);
+    R(g, x + 1, y + h, w - 2, 1, lighter(trim, 14));
   }
 
   function townRoofTrim(g, x, y, w, cut, salt) {
     var ry = y - ROOF_LIFT, i;
-    R(g, x - 3, ry - 1, w + 6, cut + 1, '#eee6b5');
+    R(g, x - 3, ry - 1, w + 6, cut + 1, HG.grass);
     for (i = 4; i < w; i += 19) {
       if ((hash(i, salt, 0x75) & 1) === 0) R(g, x + i, ry + 2 + (i % Math.max(3, cut - 2)), 2, 1, '#9aab69');
     }
@@ -1597,8 +2732,8 @@
     var ry = y - ROOF_LIFT, i, cut;
     for (i = 0; i < 8; i++) {
       cut = Math.max(2, 24 - i * 3);
-      R(g, x - 2, ry + i * 2, cut, 2, '#eee6b5');
-      R(g, x + w - cut + 2, ry + i * 2, cut, 2, '#eee6b5');
+      R(g, x - 2, ry + i * 2, cut, 2, HG.grass);
+      R(g, x + w - cut + 2, ry + i * 2, cut, 2, HG.grass);
     }
   }
 
@@ -1610,45 +2745,145 @@
   function townFacadeShell(g, x, y, w, h, p, shadowDx) {
     /* Contorno nativo 1px. Il vecchio guscio nero da 3px diventava 18-24px
      * su desktop e faceva sembrare ogni volume una primitive CSS. */
-    var sx = shadowDx == null ? 1 : shadowDx;
-    R(g, x + sx, y + 2, w, h, '#223b24');
+    var sx = shadowDx == null ? 7 : Math.max(6, 7 + shadowDx);
+    var edge = shade(p[2], -68);
+    /* Unica ombra SE morbida sul terreno. Il fianco scuro sotto e' materia,
+     * non una seconda sagoma rettangolare. */
+    /* Due lobi SE corti sostituiscono la vecchia barra larga quanto edificio. */
+    var shadowA = Math.max(14, Math.round(w * .42));
+    var shadowB = Math.max(10, Math.round(w * .24));
+    softPixelShadow(g, x + Math.round(w * .18), y + h + 2, shadowA, 5, HG.shadowDark, HG.shadow);
+    if (w >= 48) softPixelShadow(g, x + Math.round(w * .66), y + h + 3,
+      shadowB, 4, HG.shadowDark, HG.shadow);
     R(g, x, y, w, h, p[2]);
-    R(g, x, y, w, 1, C.ink); R(g, x, y + h - 1, w, 1, C.ink);
-    R(g, x, y, 1, h, C.ink); R(g, x + w - 1, y, 1, h, C.ink);
+    /* Pannelli midtone larghi ma bassi: spezzano la facciata senza creare
+     * nuove finestre o competere con porte e insegne specifiche. */
+    var panelW = Math.max(9, Math.round(w * .25));
+    var panelH = Math.max(8, Math.round(h * .24));
+    R(g, x + 5, y + Math.round(h * .27), panelW, panelH, lighter(p[2], 7));
+    R(g, x + 7, y + Math.round(h * .27) + 2, Math.max(5, panelW - 4), panelH - 3, p[2]);
+    R(g, x + w - panelW - 7, y + Math.round(h * .36), panelW, panelH, shade(p[2], -12));
+    R(g, x + w - panelW - 5, y + Math.round(h * .36) + 2,
+      Math.max(5, panelW - 4), panelH - 3, p[2]);
+    /* Fianco destro visibile: piccolo piano materiale, non solo outline. */
+    R(g, x + w, y + 4, sx, h - 1, shade(p[2], -42));
+    R(g, x + w, y + 5, 1, h - 3, lighter(p[2], 8));
+    R(g, x + w + sx - 1, y + 6, 1, h - 4, edge);
+    R(g, x + w + 1, y + 7, Math.max(2, sx - 2), 2, shade(p[2], -24));
+    R(g, x + w + 2, y + h - 8, Math.max(2, sx - 3), 3, shade(p[2], -55));
+    R(g, x + w + 3, y + h - 5, Math.max(1, sx - 4), 2, edge);
+    R(g, x + w - 4, y + 2, 3, h - 3, shade(p[2], -28));
+    R(g, x + 2, y + h - 5, w - 3, 4, shade(p[2], -36));
+    R(g, x, y, w, 1, edge); R(g, x, y + h - 1, w, 1, edge);
+    R(g, x, y, 1, h, edge); R(g, x + w - 1, y, 1, h, edge);
     R(g, x + 1, y + 1, w - 2, 1, lighter(p[2], 18));
+    /* Gronda, lesene e zoccolo universali: ogni landmark possiede profondità
+     * prima dei dettagli specifici, senza guscio nero sovradimensionato. */
+    R(g, x - 5, y - 6, w + 10, 1, edge);
+    R(g, x - 4, y - 5, w + 8, 2, shade(p[0], -52));
+    R(g, x - 3, y - 3, w + 6, 1, shade(p[0], -34));
+    R(g, x - 1, y - 2, w + 2, 1, p[1]);
+    var eavePart = Math.max(9, Math.round(w * .28));
+    R(g, x - 2, y - 2, eavePart, 2, shade(p[0], -62));
+    R(g, x + Math.round(w * .57), y - 2, eavePart, 2, shade(p[0], -55));
+    R(g, x + 2, y + 4, 2, h - 10, lighter(p[2], 12));
+    R(g, x + w - 6, y + 5, 3, h - 11, shade(p[2], -30));
+    R(g, x + 2, y + h - 7, w - 5, 2, shade(p[2], -48));
+    R(g, x + 4, y + h - 5, w - 9, 1, lighter(p[2], 8));
+    /* La base incontra davvero il terreno: deposito scuro sotto il muro,
+     * linea di luce sulla soglia e ombra corta spostata a sud-est. */
+    R(g, x + 1, y + h - 3, w - 2, 2, shade(p[2], -58));
+    R(g, x + 5, y + h - 3, Math.max(4, w - 13), 1, lighter(p[2], 5));
+    R(g, x + 4, y + h - 1, Math.max(4, w - 9), 2, edge);
+    R(g, x + 8, y + h + 1, Math.max(3, w - 12), 1, HG.vergeSoil);
+    /* Due soli accenti materici: luce alta a sinistra, deposito basso a
+     * destra. Il fianco riceve un giunto corto alla stessa quota. */
+    var accentW = Math.max(5, Math.min(12, Math.floor(w / 7)));
+    R(g, x + 7, y + 9, accentW, 1, lighter(p[2], 10));
+    R(g, x + w - accentW - 9, y + h - 14, accentW, 1, shade(p[2], -22));
+    if (sx > 4) {
+      R(g, x + w + 2, y + 13, sx - 3, 1, lighter(p[2], 5));
+      R(g, x + w + 1, y + h - 12, sx - 2, 1, shade(p[2], -50));
+    }
+  }
+
+  function townRoofClusters(g, x, top, w, h, p, salt) {
+    /* x/top sono coordinate schermo: usarle come seed rigenerava chiazze
+     * tetto a ogni pixel di camera. Materiale e dimensioni identificano il
+     * landmark senza dipendere dal viewport. */
+    var materialSeed = parseInt(String(p[0] || '').replace('#', ''), 16) || 0;
+    var layoutSeed = (salt ^ materialSeed ^ Math.imul(w, 131) ^ Math.imul(h, 313)) >>> 0;
+    var clusters = 3 + (hash(w, h, layoutSeed) & 1);
+    for (var ci = 0; ci < clusters; ci++) {
+      var v = hash(ci, w + h, layoutSeed + ci * 37);
+      var cw = 7 + (v & 7);
+      var cx = x + 4 + ((v >>> 5) % Math.max(1, w - cw - 8));
+      var cy = top + 6 + ((v >>> 11) % Math.max(2, h - 12));
+      R(g, cx, cy, cw, 1, shade(p[0], -28));
+      R(g, cx + 2, cy + 2, Math.max(3, cw - 4), 1, p[1]);
+      if ((v & 0x40) !== 0) R(g, cx - 2, cy + 4, Math.max(4, cw - 2), 1, shade(p[0], -18));
+    }
+    /* Ridge detail in two short pieces, never full-width stripe. */
+    var ridgeW = Math.max(6, Math.min(14, Math.round(w * .18)));
+    R(g, x + Math.round(w * .22), top + 3, ridgeW, 2, p[1]);
+    R(g, x + Math.round(w * .62), top + 4, Math.max(5, ridgeW - 2), 1, shade(p[0], -30));
   }
 
   function townClosedFlat(g, x, y, w, h, p) {
-    var i, roofRow;
+    var roofH = Math.max(34, Math.min(46, Math.round(h * .72)));
+    var roofEdge = shade(p[0], -70);
     townFacadeShell(g, x, y, w, h, p);
-    R(g, x - 1, y - 19, w + 2, 20, C.ink);
-    R(g, x, y - 18, w, 18, p[0]);
-    R(g, x + 1, y - 17, w - 2, 2, p[1]);
-    for (roofRow = 0; roofRow < 2; roofRow++) {
-      for (i = 4 + roofRow * 5; i < w - 5; i += 12) {
-        R(g, x + i, y - 13 + roofRow * 6, 6, 1, shade(p[0], -30));
-        R(g, x + i + 2, y - 12 + roofRow * 6, 3, 1, p[1]);
-      }
-    }
-    R(g, x - 1, y - 1, w + 2, 2, C.ink);
-    R(g, x, y - 1, w, 1, p[1]);
+    R(g, x - 6, y - roofH, w + 12, roofH + 1, C.ink);
+    R(g, x - 4, y - roofH + 2, w + 8, roofH - 2, p[0]);
+    R(g, x - 2, y - roofH + 3, w + 4, 4, p[1]);
+    townRoofClusters(g, x - 2, y - roofH + 2, w + 4, roofH - 4, p, 0x75a);
+    /* Parapetto arretrato + fianco tetto: volume, non tappo frontale. */
+    R(g, x + w + 4, y - roofH + 4, 6, roofH - 5, shade(p[0], -42));
+    R(g, x + w + 4, y - roofH + 5, 2, roofH - 7, p[1]);
+    R(g, x + 4, y - 7, w - 8, 2, shade(p[0], -38));
+    R(g, x - 5, y - 6, w + 10, 1, roofEdge);
+    R(g, x - 4, y - 5, w + 8, 2, shade(p[0], -44));
+    R(g, x - 2, y - 3, w + 4, 1, p[1]);
+    R(g, x, y - 2, w, 1, shade(p[0], -32));
+    R(g, x + 2, y - 2, Math.max(9, Math.round(w * .31)), 2, shade(p[0], -58));
+    R(g, x + Math.round(w * .61), y - 2, Math.max(8, Math.round(w * .25)), 2, shade(p[0], -52));
+    R(g, x + w + 2, y - 3, 6, 3, shade(p[0], -58));
+    R(g, x + w + 2, y - 3, 1, 2, p[1]);
   }
 
   function townClosedGable(g, x, y, w, h, p, shadowDx) {
     var i, inset, rowY, outerX, outerW;
+    var roofH = Math.max(36, Math.min(48, Math.round(h * .75)));
+    var roofSteps = Math.floor(roofH / 2);
+    var maxInset = Math.min(26, Math.floor(w / 2) - 2);
     townFacadeShell(g, x, y, w, h, p, shadowDx);
-    for (i = 0; i < 11; i++) {
-      inset = 22 - i * 2;
-      rowY = y - 22 + i * 2;
+    for (i = 0; i < roofSteps; i++) {
+      inset = Math.max(0, Math.round(maxInset * (roofSteps - 1 - i) / Math.max(1, roofSteps - 1)));
+      rowY = y - roofH + i * 2;
       outerX = x + inset - 2;
       outerW = w - inset * 2 + 4;
-      R(g, outerX, rowY, outerW, 2, C.ink);
-      R(g, outerX + 1, rowY + 1, Math.max(1, outerW - 2), 1, p[0]);
-      if (i > 3 && (i & 1)) R(g, x + inset + 4, rowY + 1, Math.max(2, w - inset * 2 - 8), 1, p[1]);
-      if (i > 4 && !(i & 1) && w - inset * 2 > 24) R(g, x + inset + 8 + (i % 3) * 5, rowY + 1, 7, 1, shade(p[0], -28));
+      R(g, outerX, rowY, outerW, 2, p[0]);
+      R(g, outerX, rowY, 1, 2, C.ink); R(g, outerX + outerW - 1, rowY, 1, 2, C.ink);
+      if (i === 0) R(g, outerX, rowY, outerW, 1, C.ink);
+      if (i > 4 && (i % 5) === 1 && w - inset * 2 > 18) {
+        R(g, x + inset + 5 + ((i * 7) % 11), rowY + 1,
+          Math.min(11, Math.max(4, w - inset * 2 - 12)), 1, p[1]);
+      }
     }
-    R(g, x - 1, y - 1, w + 2, 2, C.ink);
-    R(g, x, y - 1, w, 1, p[1]);
+    /* Falda destra in ombra e gronda spessa separano tetto/facciata. */
+    for (i = 4; i < roofSteps; i += 2) {
+      inset = Math.max(0, Math.round(maxInset * (roofSteps - 1 - i) / Math.max(1, roofSteps - 1)));
+      R(g, x + w - inset - 3, y - roofH + i * 2 + 1, 5, 2, shade(p[0], -42));
+    }
+    townRoofClusters(g, x, y - roofH, w, roofH - 4, p, 0x75b);
+    R(g, x - 5, y - 6, w + 10, 1, shade(p[0], -70));
+    R(g, x - 4, y - 5, w + 8, 2, shade(p[0], -44));
+    R(g, x - 2, y - 3, w + 4, 1, p[1]);
+    R(g, x, y - 2, w, 1, shade(p[0], -32));
+    R(g, x + 2, y - 2, Math.max(10, Math.round(w * .32)), 2, shade(p[0], -60));
+    R(g, x + Math.round(w * .60), y - 2, Math.max(9, Math.round(w * .27)), 2, shade(p[0], -54));
+    R(g, x + w + 1, y - 4, 6, 4, shade(p[0], -58));
+    R(g, x + w + 1, y - 4, 1, 3, p[1]);
   }
 
   function townTwinWindow(g, x, y, glass, trim) {
@@ -1658,8 +2893,13 @@
   }
 
   function townStep(g, x, y, w, light) {
-    R(g, x, y, w, 3, C.ink); R(g, x + 2, y, w - 4, 1, light);
-    R(g, x + 3, y + 3, w - 6, 3, C.ink); R(g, x + 5, y + 3, w - 10, 1, light);
+    R(g, x - 3, y - 3, w + 6, 4, C.ink);
+    R(g, x - 1, y - 2, w + 2, 2, light);
+    R(g, x + 2, y + 1, w - 4, 4, shade(light, -34));
+    R(g, x + 4, y + 1, w - 8, 2, light);
+    R(g, x + 4, y + 5, w - 8, 3, C.ink);
+    R(g, x + 7, y + 5, w - 14, 1, light);
+    R(g, x + 7, y + 8, Math.max(4, w - 12), 3, HG.shadow);
   }
 
   var TOWN_FONT_5X7 = {
@@ -1711,10 +2951,15 @@
   }
 
   var TOWN_FONT_3X5 = {
-    B:['110','101','110','101','110'], D:['110','101','101','101','110'],
+    A:['010','101','111','101','101'], M:['101','111','111','101','101'],
+    '0':['111','101','101','101','111'], '2':['110','001','010','100','111'],
+    '3':['110','001','010','001','110'], '5':['111','100','110','001','110'],
+    '.':['000','000','000','000','010'], Y:['101','101','010','010','010'],
+    B:['110','101','110','101','110'], C:['011','100','100','100','011'], D:['110','101','101','101','110'],
+    F:['111','100','110','100','100'],
     E:['111','100','110','100','111'], L:['100','100','100','100','111'],
-    H:['101','101','111','101','101'], N:['101','111','111','111','101'],
-    O:['010','101','101','101','010'], R:['110','101','110','101','101'],
+    H:['101','101','111','101','101'], I:['111','010','010','010','111'], N:['101','111','111','111','101'],
+    O:['010','101','101','101','010'], P:['110','101','110','100','100'], R:['110','101','110','101','101'],
     S:['011','100','010','001','110'], T:['111','010','010','010','010'],
     U:['101','101','101','101','111']
   };
@@ -1770,9 +3015,24 @@
     R(g, x + 7, y + h - 6, 3, 6, C.ink);
   }
 
-  function townFoundationShadow(g, x, y, w) {
-    R(g, x + 4, y, w - 8, 4, '#34572d');
-    for (var i = 8; i < w - 8; i += 15) R(g, x + i, y + 3, 8, 2, '#6a8a43');
+  function townFoundationShadow(g, x, y, w, salt) {
+    /* Ombra ancorata al landmark, non alla camera. Prima phase cambiava a
+     * ogni scroll: lobi e dither saltavano sotto facciate immobili. */
+    var phase = hash(w, salt || 0, 0x715);
+    var count = w >= 72 ? 3 : 2;
+    var lobeW = Math.max(13, Math.round(w / (count + .65)));
+    var stride = Math.max(10, Math.round((w - lobeW - 12) / Math.max(1, count - 1)));
+    /* Due/tre lobi sovrapposti, tutti spostati a sud-est. Nessuna barra
+     * possiede piu' la larghezza dell'edificio. */
+    for (var i = 0; i < count; i++) {
+      var lx = x + 6 + i * stride + ((phase >>> (i * 3)) & 2);
+      grassDriftBlob(g, lx + Math.round(lobeW * .55), y + 4 + (i & 1),
+        Math.max(7, Math.round(lobeW * .55)), 2 + (i & 1),
+        i === count - 1 ? HG.shadow : '#78c79d', phase ^ (i * 0x37));
+      softPixelShadow(g, lx, y + 1 + (i & 1), lobeW, 4 + (i & 1), HG.shadowDark, HG.shadow);
+      R(g, lx + 2, y, Math.max(8, lobeW - 4), 1, HG.vergeSoil);
+      R(g, lx + 5, y + 1, Math.max(5, lobeW - 9), 1, HG.vergeShadow);
+    }
   }
 
   function townWaterfallAccents(g, cx, cy) {
@@ -1836,6 +3096,9 @@
     townTinyWord(g, 'TWIN', x + 15, y - 20, C.ink);
     townTinyWord(g, 'PEAKS', x + 12, y - 12, C.ink);
     R(g, x + 7, y + 15, 6, 2, C.ink); R(g, x + 8, y + 15, 4, 1, '#9aab69');
+    /* Due gruppi bassi incorniciano insegna; corridoio centrale resta quieto. */
+    townFlowerBed(g, x - 17, y + 10, 2);
+    townShrubCluster(g, x + 29, y + 9, HG.flowerPink);
   }
 
   function townLakeAccents(g, cx, cy) {
@@ -1910,7 +3173,7 @@
     var width = track.w * 16;
     for (var ty = track.y; ty < track.y + track.h; ty++) {
       var y = ty * 16 - cy;
-      if (y > 144 || y + 16 < 0 || x > 160 || x + width < 0) continue;
+      if (y > 192 || y + 16 < 0 || x > 256 || x + width < 0) continue;
       var crossing = roadCell(cell(map.rows, track.x, ty));
       if (!crossing) {
         R(g, x, y, width, 16, '#b7ad83');
@@ -1935,43 +3198,338 @@
     R(g, x + 6, top + 3, width - 12, 1, '#d0c89d');
   }
 
-  function townForestMassAccents(g, map, cx, cy) {
+  function townForestMassAccents(g, map, cx, cy, opts) {
     if (!map || map.id !== 'town' || !map.rows) return;
-    var minTx = Math.max(0, Math.floor(cx / 16) - 1);
-    var maxTx = Math.min(map.width - 1, Math.floor((cx + 159) / 16) + 1);
-    var minTy = Math.max(0, Math.floor(cy / 16) - 1);
-    var maxTy = Math.min(map.height - 1, Math.floor((cy + 143) / 16) + 1);
-    for (var ty = minTy; ty <= maxTy; ty++) {
-      for (var tx = minTx; tx <= maxTx; tx++) {
-        if (!map.rows[ty] || map.rows[ty].charAt(tx) !== 'T') continue;
-        var x = tx * 16 - cx;
-        var y = ty * 16 - cy;
-        var v = hash(tx, ty, 0x4f31);
-        var lean = (v & 3) - 1;
-        var crownY = y - 5 + ((v >> 2) & 1);
+    var viewW = opts && Number(opts.viewportWidth) || 256;
+    var viewH = opts && Number(opts.viewportHeight) || 192;
+    var foregroundOnly = !!(opts && opts.forestForegroundOnly);
+    var depthMin = foregroundOnly && isFinite(Number(opts.forestDepthMin))
+      ? Number(opts.forestDepthMin) : -Infinity;
+    var depthMax = foregroundOnly && isFinite(Number(opts.forestDepthMax))
+      ? Number(opts.forestDepthMax) : Infinity;
+    function depthVisible(rootWorldY) {
+      return !foregroundOnly || (rootWorldY > depthMin && rootWorldY <= depthMax);
+    }
+    /* Layout sempre calcolato nell'intera mappa. Prima min/max seguivano la
+     * camera e assumevano un viewport 256x192, mentre il pass prospettico usa
+     * un buffer mondo 352x240: entrando una nuova tile nel range, il greedy
+     * hash sceglieva ancore diverse e intere chiome saltavano fra due frame. */
+    var minTx = 0, maxTx = map.width - 1;
+    var minTy = 0, maxTy = map.height - 1;
+    var anchors = [], candidates = [];
 
-        /* Aghi e rami dentro chiome fisiche. Cluster variati sostituiscono
-         * barre ripetute: bosco legge come massa sovrapposta, mai recinzione. */
-        R(g, x + 3 + lean, crownY, 8, 2, '#183225');
-        R(g, x + 5 + lean, crownY + 1, 4, 1, '#9aab69');
-        R(g, x + 1 + ((v >> 3) & 2), y + 2, 12, 3, '#31543a');
-        R(g, x + 4 + ((v >> 5) & 1), y + 2, 5, 1, '#63834a');
-        R(g, x + 4 - lean, y + 8, 9, 2, '#183225');
-        R(g, x + 6 - lean, y + 8, 4, 1, '#9aab69');
-        R(g, x + 2 + ((v >> 6) & 2), y + 13, 10, 2, '#31543a');
+    function isTree(tx, ty) {
+      if (tx < 0 || ty < 0 || tx >= map.width || ty >= map.height || !map.rows[ty]) return false;
+      var ch = map.rows[ty].charAt(tx);
+      return ch === 'T' || ch === 'Y';
+    }
+    function covered(tx, ty) {
+      for (var ai = 0; ai < anchors.length; ai++) {
+        if (Math.abs(anchors[ai][0] - tx) <= 1 && Math.abs(anchors[ai][1] - ty) <= 1) return true;
+      }
+      return false;
+    }
 
-        /* Giunti solo fra celle T: chiome adiacenti si fondono senza creare
-         * ostacoli visivi sopra sentieri calpestabili. */
-        if (tx > 0 && map.rows[ty].charAt(tx - 1) === 'T') {
-          R(g, x - 2, y + 4 + ((v >> 7) & 3), 6, 2, '#183225');
-          R(g, x, y + 5 + ((v >> 7) & 3), 4, 1, '#63834a');
+    /* Perimetri lunghi diventano chunk authored 32/48/64px. Ogni chunk
+     * possiede profondità arretrata + prima fila, con ritmo hash non ciclico. */
+    var EDGE_RHYTHMS = [[3,2,4,3,4,2],[2,4,3,2,3,4],[4,3,2,4,2,3]];
+    var edgeCovered = Object.create(null), edgeBack = [], edgeFront = [];
+    function edgeKey(tx, ty) { return tx + ',' + ty; }
+    function queueEdgeRun(start, end, fixed, vertical, salt) {
+      var cursor = start, ordinal = 0;
+      var rhythm = EDGE_RHYTHMS[hash(start, fixed, salt) % EDGE_RHYTHMS.length];
+      while (end - cursor + 1 >= 2) {
+        var remain = end - cursor + 1;
+        var cells = Math.min(remain, rhythm[ordinal % rhythm.length]);
+        if (cells < 2) break;
+        if (remain - cells === 1) cells--;
+        if (cells < 2) break;
+        var spanPx = cells * 16;
+        var v = hash(cursor, fixed, salt + ordinal * 37);
+        var familyA = (v >>> 4) % ORGANIC_TREE_FAMILIES.length;
+        var familyB = (v >>> 17) % ORGANIC_TREE_FAMILIES.length;
+        if (vertical) {
+          var wx = fixed * 16 + 8 + ((v & 7) - 3);
+          var topY = cursor * 16;
+          edgeBack.push([wx - 5, topY + Math.round(spanPx * (.36 + ((v >>> 8) & 3) * .04)), familyA, true, v]);
+          if (((v >>> 2) & 3) !== 0) {
+            edgeFront.push([wx + 5, topY + Math.round(spanPx * (.70 + ((v >>> 10) & 3) * .04)), familyB, false, v ^ 0x4f39]);
+          }
+          for (var vy = cursor; vy < cursor + cells; vy++) edgeCovered[edgeKey(fixed, vy)] = true;
+        } else {
+          var leftX = cursor * 16;
+          var rootY = fixed * 16 + 16 + (((v >>> 7) & 7) - 3);
+          edgeBack.push([leftX + Math.round(spanPx * (.27 + ((v >>> 12) & 3) * .04)), rootY - 6, familyA, true, v]);
+          if (((v >>> 2) & 3) !== 0) {
+            edgeFront.push([leftX + Math.round(spanPx * (.66 + ((v >>> 14) & 3) * .04)), rootY, familyB, false, v ^ 0x4f37]);
+          }
+          for (var vx = cursor; vx < cursor + cells; vx++) edgeCovered[edgeKey(vx, fixed)] = true;
         }
-        if (ty > 0 && map.rows[ty - 1] && map.rows[ty - 1].charAt(tx) === 'T') {
-          R(g, x + 6 + lean, y - 3, 5, 4, '#183225');
-          R(g, x + 7 + lean, y - 2, 3, 2, '#63834a');
-        }
+        cursor += cells;
+        ordinal++;
       }
     }
+
+    var fullTx, fullTy, run;
+    for (fullTy = 0; fullTy < map.height; fullTy++) {
+      run = -1;
+      for (fullTx = 0; fullTx <= map.width; fullTx++) {
+        var horizontalEdge = fullTx < map.width && isTree(fullTx, fullTy) &&
+          (!isTree(fullTx, fullTy - 1) || !isTree(fullTx, fullTy + 1));
+        if (horizontalEdge) { if (run < 0) run = fullTx; continue; }
+        if (run >= 0) queueEdgeRun(run, fullTx - 1, fullTy, false, 0x4f80 + fullTy);
+        run = -1;
+      }
+    }
+    for (fullTx = 0; fullTx < map.width; fullTx++) {
+      run = -1;
+      for (fullTy = 0; fullTy <= map.height; fullTy++) {
+        var verticalEdge = fullTy < map.height && isTree(fullTx, fullTy) &&
+          !edgeCovered[edgeKey(fullTx, fullTy)] &&
+          (!isTree(fullTx - 1, fullTy) || !isTree(fullTx + 1, fullTy));
+        if (verticalEdge) { if (run < 0) run = fullTy; continue; }
+        if (run >= 0) queueEdgeRun(run, fullTy - 1, fullTx, true, 0x4fc0 + fullTx);
+        run = -1;
+      }
+    }
+
+    /* Priorità hash sull'intera fascia visibile: niente anchor pari/pari.
+     * Copertura circa 2x2 resta sufficiente per far coincidere massa visiva
+     * e collisioni, ma distanze e sovrapposizioni non seguono griglia 32px. */
+    for (var ty = minTy; ty <= maxTy; ty++) for (var tx = minTx; tx <= maxTx; tx++) {
+      if (isTree(tx, ty) && !edgeCovered[edgeKey(tx, ty)]) candidates.push([tx, ty, hash(tx, ty, 0x4f30)]);
+    }
+    candidates.sort(function (a, b) { return b[2] - a[2]; });
+    for (var ci = 0; ci < candidates.length; ci++) {
+      if (!covered(candidates[ci][0], candidates[ci][1])) anchors.push(candidates[ci]);
+    }
+    for (ty = minTy; ty <= maxTy; ty++) for (tx = minTx; tx <= maxTx; tx++) {
+      if (isTree(tx, ty) && !edgeCovered[edgeKey(tx, ty)] && !covered(tx, ty)) anchors.push([tx, ty]);
+    }
+    anchors.sort(function (a, b) { return a[1] - b[1] || a[0] - b[0]; });
+
+    /* Ombra forestale aggregata: grandi lobi sovrapposti 36–58px. La
+     * silhouette superiore puo' variare molto, ma il contatto al suolo
+     * legge come una massa unica, non come collana di ellissi/barrette.
+     * Solo passaggio base: ombre e sottobosco devono restare sotto attori. */
+    for (ty = minTy; !foregroundOnly && ty <= maxTy; ty++) {
+      var runStart = -1;
+      for (tx = minTx; tx <= maxTx + 1; tx++) {
+        if (tx <= maxTx && isTree(tx, ty)) {
+          if (runStart < 0) runStart = tx;
+          continue;
+        }
+        if (runStart < 0) continue;
+        var runEnd = tx - 1, runCells = runEnd - runStart + 1;
+        if (runCells >= 2) {
+          var rsx = runStart * 16 - cx;
+          var rsy = ty * 16 - cy + 14;
+          var runW = runCells * 16;
+          var runPhase = hash(runStart, ty, 0x4f32) & 7;
+          if (rsy < -16 || rsy > viewH + 16 || rsx + runW < -80 || rsx > viewW + 80) {
+            runStart = -1;
+            continue;
+          }
+          /* Primo piano continuo aderente alle celle T/Y; le chiome macro
+           * successive lo coprono e lo trasformano in profondita' sfalsata. */
+          forestUnderstoryStrip(g, rsx, rsy + 2, runW, 8, 14,
+            hash(runStart, ty, 0x4f34));
+          var cursor = 1 + runPhase, shadowOrdinal = 0;
+          while (cursor < runW - 6) {
+            var shadowHash = hash(runStart + shadowOrdinal, ty, 0x4f33);
+            var lobeW = Math.min(runW - cursor, 48 + (shadowHash % 33));
+            softPixelShadow(g, rsx + cursor, rsy - 3 + ((shadowHash >>> 5) & 2),
+              lobeW, 5 + ((shadowHash >>> 7) & 1), HG.shadowDark, HG.shadow);
+            cursor += Math.max(28, lobeW - 24 - ((shadowHash >>> 9) & 7));
+            shadowOrdinal++;
+          }
+        }
+        runStart = -1;
+      }
+    }
+
+    function drawEdgeTrees(list) {
+      for (var ei = 0; ei < list.length; ei++) {
+        var e = list[ei], ex = e[0] - cx, ey = e[1] - cy;
+        if (!depthVisible(e[1])) continue;
+        if (ex < -55 || ex > viewW + 55 || ey < -55 || ey > viewH + 55) continue;
+        drawOrganicTree(g, ex, ey, e[2], e[3], e[4], foregroundOnly);
+      }
+    }
+    drawEdgeTrees(edgeBack);
+
+    /* Stesso vocabolario organico dell'Arrivo. Anchor hash evita griglia;
+     * corone 30–46px si sovrappongono 6–10px fra celle vicine. */
+    for (var n = 0; n < anchors.length; n++) {
+      tx = anchors[n][0]; ty = anchors[n][1];
+      var v = hash(tx, ty, 0x4f31);
+      var lean = (v & 7) - 4;
+      var rootWorldY = ty * 16 + 15 + (((v >>> 11) % 3) - 1);
+      var rootY = rootWorldY - cy;
+      var family = (v >>> 18) % ORGANIC_TREE_FAMILIES.length;
+      var centerX = tx * 16 - cx + 8 + lean;
+      if (!depthVisible(rootWorldY)) continue;
+      if (centerX < -55 || centerX > viewW + 55 || rootY < -55 || rootY > viewH + 55) continue;
+      drawOrganicTree(g, centerX, rootY - ((v >>> 7) % 4), family,
+        ((v >>> 5) & 7) === 0, v, foregroundOnly);
+    }
+    drawEdgeTrees(edgeFront);
+  }
+
+  function townParkedCars(g, map, cx, cy) {
+    if (!map || map.id !== 'town' || !map.rows) return;
+    for (var ty = 0; ty < map.height; ty++) for (var tx = 0; tx < map.width - 1; tx++) {
+      if (map.rows[ty].charAt(tx) !== 'V' || map.rows[ty].charAt(tx + 1) !== 'V') continue;
+      /* Varianti minime per funzione urbana; geometria identica e stabile. */
+      var body = '#4e8067', hi = '#80b878', glass = '#9bc0b2', accent = '#d7a351';
+      if (tx === 19 && ty === 8) { body = '#dfe9df'; hi = '#fff8d0'; accent = '#b84858'; }
+      else if (tx === 15 && ty === 22) { body = '#526f98'; hi = '#9bc0b2'; accent = '#dfe9df'; }
+      else if (tx === 12 && ty === 8) { body = '#754429'; hi = '#a9754f'; glass = '#8faaa4'; }
+      drawParkedCarHero(g, tx * 16 - cx, ty * 16 - cy, body, hi, glass, accent);
+      tx++;
+    }
+  }
+
+  /* ------------------------------------------------------------------
+   * Double R Diner — fronte R114, allineato al lotto autoriale
+   * (artifacts/double-r-exterior-v02/native-clean.png): tetto basso di
+   * carbone con filo caldo di gronda, clapboard crema con corsi da 2px,
+   * fascia e zoccolo bordeaux, due vetrine basse a vetro scuro, porta a
+   * due battenti bordeaux con vetri dorati centrata sulla cella D reale
+   * (42,20), insegna DOUBLE R su tavola forestale con bordo crema sopra
+   * la porta e una piccola insegna a bandiera "RR" all'angolo est.
+   *
+   * (x, y) = angolo alto-sinistra della facciata ASCII (tile 39,18),
+   * impronta 96x48 invariata: collisione, porta 42,20, visualBounds e
+   * cameraFocus restano quelli della tabella R80. Tutto cio' che sale
+   * sopra y (tetto, insegna) vive sulla riga 17, prato non calpestabile.
+   *
+   * I valori sono diurni come nel resto del town: il fronte riceve il
+   * grade serale di js/town-dusk.js insieme a tutto lo sfondo, e le sue
+   * parti accese arrivano dall'overlay dei practicals. La crema di
+   * facciata e' volutamente la piu' chiara del frame (parete illuminata
+   * dalle proprie vetrine), il bordeaux resta bordeaux, il tetto scende
+   * sotto la vegetazione.
+   * ------------------------------------------------------------------ */
+  var RR = {
+    roof: '#2b3538', roofHi: '#3d4a4d', roofDk: '#1c2427', rim: '#a9754f',
+    wall: '#fdedbe', wallHi: '#fffbe6', wallLine: '#eddca6', wallDk: '#d3bd8c',
+    cream: '#fff8d0', bordeaux: '#8f2430', bordHi: '#c1585a', plinth: '#4c1119',
+    glass: '#22303a', glassHi: '#3d5561', gold: '#f0d060',
+    board: '#2c5342', metal: '#b9bcae', metalDk: '#6f7368',
+    pine: '#2c5334', pineHi: '#5c8a52'
+  };
+
+  function townDoubleR(g, x, y) {
+    var i, sx;
+    var L = x, Rr = x + 96, Bt = y + 48;
+
+    /* --- 1. TETTO basso a tre terrazze: piano di carbone, nessuna massa
+     * rossa. Il filo caldo di rovere sotto la gronda e' l'unico accento. --- */
+    var rTop = y - 38, rBot = y - 18;
+    R(g, L + 12, rTop, 72, 3, RR.roofDk);
+    R(g, L + 13, rTop + 1, 70, 1, RR.roofHi);
+    R(g, L + 4, rTop + 3, 88, 6, RR.roofDk);
+    R(g, L + 5, rTop + 4, 86, 4, RR.roof);
+    R(g, L - 4, rTop + 9, 104, rBot - rTop - 9, RR.roofDk);
+    R(g, L - 3, rTop + 10, 102, rBot - rTop - 12, RR.roof);
+    R(g, L - 3, rTop + 10, 102, 1, RR.roofHi);
+    for (i = 14; i < 100; i += 18) R(g, L - 3 + i, rTop + 11, 1, rBot - rTop - 13, RR.roofDk);
+    /* Corpo illuminante sul tetto: la stessa scatola pallida del lotto. */
+    R(g, L + 18, rTop + 4, 14, 8, RR.roofDk);
+    R(g, L + 19, rTop + 5, 12, 4, RR.cream);
+    R(g, L + 19, rTop + 9, 12, 2, RR.metalDk);
+    /* Piccola insegna "RR" sul tetto, verso la strada: montata sulla
+     * falda con due staffe, mai a terra, cosi' il marciapiede resta
+     * chiaramente calpestabile. */
+    R(g, L + 74, rTop + 2, 4, 16, RR.metalDk);
+    R(g, L + 86, rTop + 2, 4, 16, RR.metalDk);
+    R(g, L + 70, rTop - 14, 24, 18, RR.plinth);
+    R(g, L + 71, rTop - 13, 22, 16, RR.cream);
+    R(g, L + 72, rTop - 12, 20, 14, RR.board);
+    townTinyWord(g, 'RR', L + 76, rTop - 9, RR.cream);
+    /* Gronda: sottogronda scuro, filo caldo 1px, ombra portata sul muro. */
+    R(g, L - 5, rBot - 3, 106, 2, RR.plinth);
+    R(g, L - 5, rBot - 1, 106, 1, RR.rim);
+    R(g, L - 5, rBot, 106, 2, RR.plinth);
+
+    /* --- 2. FASCIA bordeaux continua sotto la gronda --- */
+    R(g, L - 1, rBot + 2, 98, 6, RR.bordeaux);
+    R(g, L - 1, rBot + 2, 98, 1, RR.bordHi);
+    R(g, L - 1, rBot + 7, 98, 1, RR.plinth);
+
+    /* --- 3. PARETE clapboard crema (y-14 .. y+40), corsi da 2px --- */
+    var wTop = rBot + 8;
+    R(g, L, wTop, 96, Bt - 8 - wTop, RR.wall);
+    for (i = wTop + 7; i < Bt - 10; i += 9) R(g, L + 1, i, 94, 2, RR.wallLine);
+    R(g, L, wTop, 96, 2, RR.wallDk);                  /* sottogronda */
+    R(g, L, wTop, 1, Bt - 8 - wTop, RR.wallHi);       /* spigolo NW illuminato */
+    R(g, L - 1, wTop, 1, Bt - wTop, C.ink);
+    R(g, Rr - 4, wTop, 4, Bt - 8 - wTop, RR.wallDk);  /* fianco est in ombra */
+    R(g, Rr, wTop, 4, Bt - wTop, RR.wallDk);
+    R(g, Rr + 4, wTop, 1, Bt - wTop, C.ink);
+
+    /* --- 4. INSEGNA "DOUBLE R": tavola forestale, bordo crema, sopra la
+     * porta e sotto la fascia. Le lettere si accendono nell'overlay. --- */
+    var sgX = L + 27, sgY = wTop + 2, sgW = 58, sgH = 17;
+    R(g, sgX, sgY, sgW, sgH, RR.plinth);
+    R(g, sgX + 1, sgY + 1, sgW - 2, sgH - 2, RR.cream);
+    R(g, sgX + 2, sgY + 2, sgW - 4, sgH - 4, RR.board);
+    townTinyWord(g, 'DOUBLE R', sgX + 6, sgY + 5, RR.cream);
+
+    /* --- 5. VETRINE basse: vetro scuro, tre riflessi a gradino, banco e
+     * schienali bordeaux appena leggibili dietro il vetro. --- */
+    function rrWindow(wx, wy, ww, wh) {
+      R(g, wx - 2, wy - 2, ww + 4, wh + 4, RR.plinth);
+      R(g, wx - 1, wy - 1, ww + 2, wh + 2, RR.cream);
+      R(g, wx, wy, ww, wh, RR.glass);
+      R(g, wx + 2, wy + 2, Math.round(ww * .28), 2, RR.glassHi);
+      R(g, wx + 2 + Math.round(ww * .32), wy + 4, Math.round(ww * .18), 2, RR.glassHi);
+      /* Interno: schienali bordeaux e filo crema del banco. */
+      R(g, wx + 1, wy + wh - 7, ww - 2, 6, RR.bordeaux);
+      R(g, wx + 2, wy + wh - 8, ww - 4, 1, RR.cream);
+      R(g, wx + 4, wy + wh - 5, 4, 3, RR.plinth);
+      R(g, wx + ww - 9, wy + wh - 5, 4, 3, RR.plinth);
+      /* Davanzale con spessore. */
+      R(g, wx - 3, wy + wh + 2, ww + 6, 2, RR.wallHi);
+      R(g, wx - 3, wy + wh + 4, ww + 6, 1, RR.wallDk);
+    }
+    var winY = wTop + 24, winH = 20;
+    rrWindow(L + 8, winY, 30, winH);
+    rrWindow(L + 68, winY, 24, winH);
+
+    /* --- 6. PORTA a due battenti centrata sulla cella D (42,20) --- */
+    var dX = L + 48, dW = 16, dTop = winY - 4, dBot = Bt;
+    R(g, dX - 3, dTop - 1, dW + 6, dBot - dTop + 1, RR.plinth);
+    R(g, dX - 2, dTop, dW + 4, dBot - dTop, RR.cream);       /* stipiti verniciati */
+    R(g, dX, dTop + 2, dW, dBot - dTop - 2, RR.bordeaux);
+    R(g, dX, dTop + 2, dW, 1, RR.plinth);                     /* ombra architrave */
+    R(g, dX + 7, dTop + 2, 1, dBot - dTop - 2, RR.plinth);    /* battuta centrale */
+    R(g, dX + 1, dTop + 5, 6, 16, RR.plinth); R(g, dX + 9, dTop + 5, 6, 16, RR.plinth);
+    R(g, dX + 2, dTop + 6, 4, 14, RR.gold); R(g, dX + 10, dTop + 6, 4, 14, RR.gold);
+    R(g, dX + 6, dTop + 24, 1, 4, RR.gold); R(g, dX + 9, dTop + 24, 1, 4, RR.gold);
+    R(g, dX + 1, dBot - 5, dW - 2, 3, RR.plinth);             /* battipiede */
+
+    /* --- 7. ZOCCOLO bordeaux, spezzato dalla soglia --- */
+    R(g, L, Bt - 8, dX - 3 - L, 8, RR.plinth);
+    R(g, L, Bt - 8, dX - 3 - L, 1, RR.bordHi);
+    R(g, dX + dW + 3, Bt - 8, Rr - dX - dW - 3, 8, RR.plinth);
+    R(g, dX + dW + 3, Bt - 8, Rr - dX - dW - 3, 1, RR.bordHi);
+    R(g, L, Bt - 1, 96, 1, C.ink);
+
+    /* --- 8. Siepi basse ai piedi della facciata, soglia e ombra --- */
+    function rrHedge(hx, hy, hw) {
+      R(g, hx, hy, hw, 6, RR.pine);
+      R(g, hx + 1, hy - 1, hw - 2, 1, RR.pine);
+      R(g, hx + 2, hy, 3, 2, RR.pineHi); R(g, hx + hw - 7, hy + 1, 3, 2, RR.pineHi);
+      R(g, hx + (hw >> 1) - 1, hy + 2, 2, 1, RR.pineHi);
+      R(g, hx - 1, hy + 4, hw + 2, 2, HG.shadowDark);
+    }
+    rrHedge(L + 6, Bt - 5, 16); rrHedge(L + 26, Bt - 5, 16);
+    rrHedge(L + 70, Bt - 5, 20);
+    for (sx = L + 4; sx < Rr - 4; sx += 24) R(g, sx, Bt - 9, 12, 1, RR.wallDk);
+    townStep(g, dX - 2, Bt, 20, RR.wall);
+    townFoundationShadow(g, L, Bt + 6, 96, 0x74a);
   }
 
   function townHeroAccents(g, map, cx, cy) {
@@ -2001,7 +3559,7 @@
     R(g, x + 36, y + 30, 3, 17, C.ink); R(g, x + 58, y + 30, 3, 17, C.ink);
     R(g, x + 48, y + 29, 16, 19, C.ink); R(g, x + 51, y + 32, 10, 16, '#2c5334');
     townStep(g, x + 45, y + 48, 22, '#d8c98a');
-    townFoundationShadow(g, x, y + 54, 96);
+    townFoundationShadow(g, x, y + 54, 96, 0x741);
 
     /* Calhoun Memorial — volume clinico unico 6x4. Simmetria, croce e
      * ingresso sulla vera tile D: niente ala bianca sospesa o falso varco. */
@@ -2009,10 +3567,15 @@
     townFacadeShell(g, x, y, 96, 64, BUILDINGS['5']);
     /* Tetto clinico arretrato a tre quote. Pattern orizzontale: nessuna
      * sequenza di montanti che possa sembrare testo decorativo. */
-    R(g, x + 12, y - 27, 72, 5, C.ink); R(g, x + 13, y - 26, 70, 3, '#ecf5ef');
-    R(g, x + 7, y - 23, 82, 7, C.ink); R(g, x + 8, y - 22, 80, 5, '#c7d6d2');
+    R(g, x + 24, y - 43, 48, 5, C.ink); R(g, x + 25, y - 42, 46, 3, '#ecf5ef');
+    R(g, x + 18, y - 39, 60, 6, '#718d87'); R(g, x + 19, y - 38, 58, 4, '#c7d6d2');
+    R(g, x + 20, y - 37, 54, 1, '#ecf5ef');
+    R(g, x + 15, y - 33, 66, 7, '#718d87'); R(g, x + 16, y - 32, 64, 5, '#8faaa4');
+    R(g, x + 12, y - 27, 72, 5, '#718d87'); R(g, x + 13, y - 26, 70, 3, '#ecf5ef');
+    R(g, x + 7, y - 23, 82, 7, '#718d87'); R(g, x + 8, y - 22, 80, 5, '#c7d6d2');
     R(g, x + 3, y - 17, 90, 17, C.ink); R(g, x + 4, y - 16, 88, 15, '#c7d6d2');
     R(g, x + 6, y - 14, 84, 2, '#ecf5ef');
+    townRoofClusters(g, x + 6, y - 41, 84, 35, BUILDINGS['5'], 0x755);
     for (i = 9; i < 84; i += 15) {
       R(g, x + i, y - 9, 8, 1, '#8faaa4'); R(g, x + i + 2, y - 8, 4, 1, '#ecf5ef');
     }
@@ -2021,7 +3584,8 @@
       R(g, x + 3 + (((i >> 3) & 1) * 4), y + i, 88, 1, '#c7d6d2');
     }
     /* Insegna clinica e croce: entrambe leggibili a 1x, stesso piano. */
-    R(g, x + 20, y + 3, 53, 12, C.ink); R(g, x + 21, y + 4, 51, 10, '#ecf5ef');
+    R(g, x + 20, y + 3, 53, 12, '#718d87'); R(g, x + 21, y + 4, 51, 9, '#ecf5ef');
+    R(g, x + 23, y + 4, 46, 1, '#ffffff'); R(g, x + 22, y + 13, 49, 2, '#8faaa4');
     townTinyWord(g, 'HOSPITAL', x + 23, y + 5, '#31543a');
     R(g, x + 5, y + 3, 13, 12, C.ink); R(g, x + 6, y + 4, 11, 10, '#ecf5ef');
     R(g, x + 10, y + 5, 3, 8, C.red); R(g, x + 8, y + 8, 7, 3, C.red);
@@ -2032,14 +3596,15 @@
     R(g, x + 6, y + 37, 20, 1, '#8faaa4'); R(g, x + 29, y + 37, 16, 1, '#8faaa4');
     R(g, x + 71, y + 37, 19, 1, '#8faaa4');
     /* Portale sulla quarta tile del footprint, esattamente [23,6]. */
-    R(g, x + 45, y + 34, 22, 4, C.ink); R(g, x + 48, y + 35, 16, 2, '#ecf5ef');
+    R(g, x + 42, y + 31, 28, 7, C.ink); R(g, x + 45, y + 32, 22, 4, '#ecf5ef');
+    R(g, x + 44, y + 37, 4, 6, '#8faaa4'); R(g, x + 64, y + 37, 4, 6, '#8faaa4');
     R(g, x + 48, y + 37, 16, 27, C.ink); R(g, x + 51, y + 40, 10, 24, '#dfe9df');
     R(g, x + 56, y + 40, 1, 24, '#8faaa4'); R(g, x + 59, y + 52, 1, 2, C.red);
     R(g, x + 42, y + 61, 28, 3, '#8faaa4');
     townStep(g, x + 46, y + 64, 20, '#ecf5ef');
     R(g, x + 40, y + 70, 32, 15, '#34572d'); R(g, x + 41, y + 70, 30, 14, '#dfe9df');
     R(g, x + 56, y + 70, 1, 14, '#8faaa4');
-    townFoundationShadow(g, x, y + 64, 96);
+    townFoundationShadow(g, x, y + 64, 96, 0x742);
 
     /* Casa Palmer — grande timpano domestico, portico e ringhiera. */
     x = 40 * 16 - cx; y = 4 * 16 - cy;
@@ -2070,7 +3635,7 @@
     townTwinWindow(g, x + 8, y - 13, '#eee6b5', '#4a2f22');
     R(g, x - 5, y + 20, 18, 5, C.ink); R(g, x - 2, y + 22, 15, 2, '#ecd7a4');
     R(g, x, y + 25, 3, 22, C.ink);
-    townFoundationShadow(g, x, y + 54, 64);
+    townFoundationShadow(g, x, y + 54, 64, 0x743);
 
     /* Bookhouse — lodge civica 3x3. Timpano scuro e insegna BOOK HOUSE:
      * luogo di riunione, mai libreria. Ombra verso sinistra libera il vicolo. */
@@ -2087,12 +3652,14 @@
       R(g, x + 3 + (((i / 7) & 1) * 4), y + i, 40, 1, '#6f5238');
     }
     /* Placca nel timpano/facciata, non fascia commerciale. */
-    R(g, x + 10, y + 2, 28, 15, C.ink); R(g, x + 11, y + 3, 26, 13, '#d8c98a');
+    R(g, x + 10, y + 2, 28, 15, '#6f5238'); R(g, x + 12, y + 3, 24, 12, '#d8c98a');
+    R(g, x + 13, y + 3, 21, 1, '#eee0ad'); R(g, x + 12, y + 15, 24, 2, '#3c2a1e');
     townCompactWord(g, 'BOOK', x + 15, y + 4, '#3c2a1e');
     townCompactWord(g, 'HOUSE', x + 12, y + 10, '#3c2a1e');
     R(g, x + 12, y + 17, 24, 1, '#3c2a1e');
     /* Portico, finestre laterali e ringhiera: cabin/meeting lodge. */
-    R(g, x - 1, y + 20, 50, 4, C.ink); R(g, x + 1, y + 21, 46, 2, '#6f5238');
+    R(g, x - 4, y + 18, 56, 7, C.ink); R(g, x - 1, y + 19, 50, 4, '#6f5238');
+    R(g, x + 1, y + 20, 46, 2, '#d8c98a');
     townWindow(g, x + 3, y + 26, 12, 10, '#d9d49a', '#3c2a1e');
     townWindow(g, x + 33, y + 26, 12, 10, '#d9d49a', '#3c2a1e');
     R(g, x + 18, y + 24, 12, 24, C.ink); R(g, x + 20, y + 27, 8, 21, '#3c2a1e');
@@ -2101,7 +3668,7 @@
     R(g, x + 3, y + 39, 13, 2, '#3c2a1e'); R(g, x + 32, y + 39, 13, 2, '#3c2a1e');
     for (i = 7; i < 43; i += 7) if (i < 18 || i > 29) R(g, x + i, y + 40, 2, 7, '#3c2a1e');
     townStep(g, x + 14, y + 48, 20, '#d8c98a');
-    R(g, x + 3, y + 54, 42, 2, '#31543a');
+    townFoundationShadow(g, x, y + 54, 48, 0x744);
 
     /* Horne's — Art Déco 3x4, contenuto nel proprio footprint. Vicolo da
      * due tile resta visibile: niente ali che si fingono terzo edificio. */
@@ -2115,7 +3682,8 @@
       R(g, x + i, y - 11, 5, 1, '#719098'); R(g, x + i + 1, y - 10, 3, 1, '#355660');
     }
     /* Nome + funzione compatti: targa 28x14, facciata ancora dominante. */
-    R(g, x + 10, y + 2, 28, 14, C.ink); R(g, x + 11, y + 3, 26, 12, '#f0d888');
+    R(g, x + 10, y + 2, 28, 14, '#719098'); R(g, x + 12, y + 3, 24, 10, '#f0d888');
+    R(g, x + 13, y + 3, 21, 1, '#ffe6a1'); R(g, x + 12, y + 13, 24, 2, '#684534');
     townMicroWord(g, 'HORNE', x + 15, y + 4, '#684534');
     townMicroWord(g, 'STORE', x + 15, y + 10, '#684534');
     for (i = 3; i < 44; i += 10) {
@@ -2130,14 +3698,15 @@
     R(g, x + 18, y + 31, 13, 17, C.ink); R(g, x + 20, y + 33, 9, 15, '#355660');
     R(g, x + 24, y + 33, 1, 15, C.ink); R(g, x + 27, y + 41, 1, 1, '#f0d888');
     townStep(g, x + 15, y + 48, 18, '#d4ad68');
-    R(g, x + 3, y + 54, 42, 2, '#31543a');
+    townFoundationShadow(g, x, y + 54, 48, 0x745);
 
     /* Tre botteghe: sagome diverse prima delle icone. */
     x = 15 * 16 - cx; y = 10 * 16 - cy;
     townClosedGable(g, x, y, 48, 48, BUILDINGS['0']);
-    R(g, x + 17, y + 4, 14, 12, C.ink); R(g, x + 19, y + 6, 10, 8, C.paper);
+    R(g, x + 17, y + 4, 14, 12, '#713943'); R(g, x + 19, y + 6, 10, 7, C.paper);
+    R(g, x + 19, y + 13, 10, 2, '#b6625d');
     R(g, x + 23, y + 7, 2, 6, '#713943'); R(g, x + 21, y + 9, 6, 2, '#713943');
-    townAwning(g, x + 3, y + 19, 42, '#713943', '#f0dfb5');
+    townAwning(g, x + 1, y + 18, 46, '#713943', '#f0dfb5');
     townWindow(g, x + 5, y + 29, 38, 14, '#9bc0b2', '#435a50');
     /* Bottiglie e scatole dietro vetro: farmacia leggibile senza sola croce. */
     for (i = 0; i < 5; i++) {
@@ -2145,15 +3714,23 @@
       R(g, x + 10 + i * 6, y + 32 + (i & 1), 1, 2, C.paper);
     }
     R(g, x + 7, y + 40, 34, 2, C.ink);
+    /* Farmacia: zoccolo ceramico e mensola laterale, distinti dal metallo
+     * hardware e dalla base sospesa dell'edicola. */
+    R(g, x + 2, y + 43, 44, 5, '#713943');
+    R(g, x + 4, y + 43, 40, 2, '#f0dfb5');
+    for (i = 9; i < 42; i += 11) R(g, x + i, y + 43, 1, 4, '#b6625d');
+    R(g, x + 44, y + 5, 4, 38, '#5f3136'); R(g, x + 44, y + 6, 1, 34, '#b6625d');
+    townFoundationShadow(g, x, y + 48, 48, 0x746);
 
     x = 19 * 16 - cx;
     townClosedFlat(g, x, y, 32, 48, BUILDINGS['0']);
-    R(g, x + 2, y - 25, 28, 8, C.ink);
+    R(g, x + 2, y - 25, 28, 8, '#713943');
     for (i = 3; i < 28; i += 10) R(g, x + i, y - 29, 7, 7, C.ink);
     R(g, x + 4, y - 23, 24, 4, '#713943');
     R(g, x + 3, y + 6, 26, 16, C.ink); R(g, x + 6, y + 9, 20, 10, C.paper);
     townSignIcon(g, 'hammer', x + 8, y + 6);
-    R(g, x, y + 23, 32, 5, C.ink); R(g, x + 3, y + 24, 26, 2, '#435a50');
+    R(g, x - 3, y + 22, 38, 7, C.ink); R(g, x, y + 23, 32, 4, '#435a50');
+    R(g, x + 3, y + 24, 26, 2, '#d9c78d');
     /* Hardware: serranda metallica profonda, non vetrina da boutique. */
     R(g, x + 1, y + 26, 30, 19, C.ink); R(g, x + 4, y + 29, 18, 13, '#719098');
     for (i = 31; i < 42; i += 4) R(g, x + 5, y + i, 16, 1, '#d9c78d');
@@ -2165,17 +3742,22 @@
     /* Piccola insegna a lama ancorata al muro + zerbino piatto. */
     R(g, x + 28, y + 4, 8, 18, C.ink); R(g, x + 29, y + 6, 6, 13, '#d9c78d');
     R(g, x + 31, y + 8, 2, 8, '#435a50'); R(g, x + 29, y + 11, 6, 2, '#435a50');
+    R(g, x - 2, y + 43, 36, 5, '#334b50');
+    R(g, x + 1, y + 43, 30, 2, '#9eb3ae');
+    R(g, x + 4, y + 46, 4, 2, '#526b70'); R(g, x + 24, y + 46, 5, 2, '#526b70');
     R(g, x + 9, y + 48, 14, 3, '#34572d'); R(g, x + 11, y + 48, 10, 1, '#d9c78d');
+    townFoundationShadow(g, x, y + 51, 32, 0x747);
 
     x = 46 * 16 - cx;
     townClosedFlat(g, x, y, 48, 32, BUILDINGS['0']);
     for (i = 0; i < 7; i++) R(g, x - 4 + i, y - 25 + i, 56 - i * 2, 2, i === 0 ? C.ink : '#435a50');
     R(g, x - 5, y - 13, 58, 4, C.ink); R(g, x - 2, y - 12, 52, 2, '#d9c78d');
-    R(g, x + 9, y + 3, 30, 17, C.ink); R(g, x + 12, y + 6, 24, 11, C.paper);
+    R(g, x + 9, y + 3, 30, 17, '#435a50'); R(g, x + 12, y + 6, 24, 10, C.paper);
+    R(g, x + 13, y + 6, 21, 1, '#fff3cf'); R(g, x + 12, y + 16, 24, 2, '#719098');
     townSignIcon(g, 'paper', x + 16, y + 3);
     townAwning(g, x + 2, y + 20, 44, '#435a50', '#d9c78d');
     /* Edicola aperta: mensole e pile, canopy molto più largo del corpo. */
-    R(g, x - 7, y + 27, 62, 6, C.ink); R(g, x - 3, y + 29, 54, 2, '#d9c78d');
+    R(g, x - 9, y + 26, 66, 8, C.ink); R(g, x - 5, y + 28, 58, 3, '#d9c78d');
     R(g, x + 4, y + 27, 40, 5, C.ink); R(g, x + 7, y + 28, 34, 3, C.paper);
     for (i = 8; i < 40; i += 8) R(g, x + i, y + 29, 5, 2, (i & 8) ? '#435a50' : '#6a8a43');
     /* Testate sovrapposte e legature: edicola, non vetrina generica. */
@@ -2184,81 +3766,137 @@
       R(g, x + 8 + i * 10, y + 23 - (i & 1), 5, 3, C.paper);
       R(g, x + 9 + i * 10, y + 24 - (i & 1), 3, 1, i & 1 ? '#713943' : '#435a50');
     }
+    townFoundationShadow(g, x, y + 35, 48, 0x748);
+    R(g, x - 6, y + 32, 60, 3, '#33453d');
+    R(g, x - 2, y + 32, 52, 1, '#d9c78d');
+    R(g, x, y + 35, 5, 4, '#33453d'); R(g, x + 43, y + 35, 5, 4, '#33453d');
+    R(g, x + 48, y + 4, 5, 27, '#33453d'); R(g, x + 48, y + 5, 1, 23, '#719098');
 
-    /* Distretto — golden sample R99b. Cinque metatile come gli edifici
-     * civici di Gen II: gerarchia tetto/facciata/zoccolo leggibile a 1x,
-     * profili da 1px e porta sulla vera cella D. */
+    /* Distretto dello sceriffo — fronte R114, allineato al lotto autoriale
+     * (artifacts/sheriffs-station-exterior-v01/final.png): tetto verde
+     * carbone a falda bassa con filo caldo di rovere, assito salvia con
+     * corsi da 2px e lesene di rovere agli angoli, corso di pietra alla
+     * base, due finestre basse a vetro scuro, porta a due battenti di
+     * rovere centrata sulla cella D reale (12,20), insegna SHERIFF su
+     * tavola forestale con bordo crema, pennone snello a est.
+     *
+     * Impronta 5x4, porta 12,20, visualBounds e cameraFocus restano quelli
+     * della tabella R80. Valori diurni come il resto del town: il fronte
+     * riceve il grade serale di js/town-dusk.js e le sue parti accese
+     * arrivano dall'overlay dei practicals (fluorescente freddo nelle
+     * vetrine, un solo caldo sulla lampada da scrivania). */
+    var SS = {
+      roofDk: '#1e332c', roof: '#2f4740', roofHi: '#3f5a4e',
+      wall: '#adb191', wallHi: '#c6c9a4', wallLine: '#9a9e80', wallDk: '#83876b',
+      oak: '#a9754f', oakHi: '#c79267', oakDk: '#5c3d28',
+      stone: '#b9bdae', stoneHi: '#d2d5c6', stoneLn: '#8d9184',
+      glass: '#2b3d47', glassHi: '#4f6f78', glassDk: '#1b262d',
+      board: '#2c5342', cream: '#fff8d0', pole: '#c3ccca', gold: '#f0d060'
+    };
     x = 10 * 16 - cx; y = 17 * 16 - cy;
-    townFacadeShell(g, x, y, 80, 64, BUILDINGS['1']);
-    /* Tetto civico a padiglione, 31px: tre terrazze fanno leggere profondita'
-     * top-down. Niente cap rettangolare o motivo centrale a freccia. */
-    R(g, x + 8, y - 31, 64, 4, C.ink); R(g, x + 9, y - 30, 62, 3, '#5c8098');
-    R(g, x + 4, y - 27, 72, 4, C.ink); R(g, x + 5, y - 26, 70, 3, '#2f4d63');
-    R(g, x, y - 23, 80, 23, C.ink); R(g, x + 1, y - 22, 78, 21, '#2f4d63');
-    R(g, x + 2, y - 21, 76, 2, '#5c8098');
-    for (var roofRow = 0; roofRow < 3; roofRow++) {
-      var roofY = y - 19 + roofRow * 6;
-      var roofShift = roofRow & 1 ? 7 : 3;
-      for (i = roofShift; i < 76; i += 10) {
-        R(g, x + i, roofY, 6, 1, '#213648');
-        R(g, x + i + 1, roofY + 1, 3, 1, '#5c8098');
-      }
+    townFacadeShell(g, x, y, 80, 64, [SS.roof, SS.roofHi, SS.wall, SS.roofDk]);
+
+    /* Tetto a falda bassa: tre terrazze corte di verde carbone, correnti
+     * verticali da 1px, filo caldo di rovere sotto la gronda. */
+    var ssTop = y - 32, ssBot = y - 2;
+    R(g, x + 14, ssTop, 52, 3, SS.roofDk);
+    R(g, x + 15, ssTop + 1, 50, 1, SS.roofHi);
+    R(g, x + 6, ssTop + 3, 68, 6, SS.roofDk);
+    R(g, x + 7, ssTop + 4, 66, 4, SS.roof);
+    R(g, x - 4, ssTop + 9, 88, ssBot - ssTop - 9, SS.roofDk);
+    R(g, x - 3, ssTop + 10, 86, ssBot - ssTop - 13, SS.roof);
+    R(g, x - 3, ssTop + 10, 86, 1, SS.roofHi);
+    for (i = 12; i < 84; i += 17) R(g, x - 3 + i, ssTop + 11, 1, ssBot - ssTop - 14, SS.roofDk);
+    /* Plafoniera sul tetto, come nel lotto: unica massa pallida in alto. */
+    R(g, x + 52, ssTop + 4, 13, 8, SS.roofDk);
+    R(g, x + 53, ssTop + 5, 11, 4, SS.cream);
+    R(g, x - 5, ssBot - 3, 90, 2, SS.oakDk);
+    R(g, x - 5, ssBot - 1, 90, 1, SS.oak);
+    R(g, x - 5, ssBot, 90, 2, SS.oakDk);
+
+    /* Facciata: assito salvia, corsi orizzontali da 2px, lesene di rovere
+     * agli angoli, fianco est in ombra. */
+    R(g, x, y, 80, 62, SS.wall);
+    R(g, x, y, 80, 3, SS.wallDk);
+    for (i = 8; i < 46; i += 9) R(g, x + 6, y + i, 68, 2, SS.wallLine);
+    R(g, x, y, 6, 62, SS.oak); R(g, x + 74, y, 6, 62, SS.oak);
+    R(g, x, y, 1, 62, SS.oakDk); R(g, x + 1, y, 1, 62, SS.oakHi);
+    R(g, x + 79, y, 1, 62, SS.oakDk); R(g, x + 74, y, 1, 62, SS.oakDk);
+    R(g, x + 74, y + 30, 6, 2, SS.oakDk); R(g, x, y + 30, 6, 2, SS.oakDk);
+
+    /* Insegna SHERIFF: tavola forestale, bordo crema, sotto la gronda. */
+    R(g, x + 15, y + 2, 50, 16, SS.oakDk);
+    R(g, x + 16, y + 3, 48, 14, SS.cream);
+    R(g, x + 17, y + 4, 46, 12, SS.board);
+    townTinyWord(g, 'SHERIFF', x + 19, y + 6, SS.cream);
+
+    /* Due finestre basse: telaio di rovere, vetro scuro con due riflessi a
+     * gradino, davanzale con spessore. La luce interna arriva dall'overlay. */
+    function ssWindow(wx, wy, ww, wh) {
+      R(g, wx - 2, wy - 2, ww + 4, wh + 4, SS.oakDk);
+      R(g, wx - 1, wy - 1, ww + 2, wh + 2, SS.oak);
+      R(g, wx, wy, ww, wh, SS.glassDk);
+      R(g, wx + 1, wy + 1, ww - 2, wh - 2, SS.glass);
+      R(g, wx + 2, wy + 2, Math.round(ww * .3), 2, SS.glassHi);
+      R(g, wx + 2 + Math.round(ww * .34), wy + 4, Math.round(ww * .2), 2, SS.glassHi);
+      R(g, wx - 3, wy + wh + 2, ww + 6, 2, SS.oakHi);
+      R(g, wx - 3, wy + wh + 4, ww + 6, 1, SS.oakDk);
     }
-    R(g, x - 1, y - 2, 82, 1, C.ink); R(g, x + 1, y - 1, 78, 1, '#5c8098');
+    ssWindow(x + 8, y + 22, 22, 14);
+    ssWindow(x + 50, y + 22, 22, 14);
 
-    /* Facciata: due bay laterali integrati. Corsi di siding corti, mai
-     * attraversamenti full-width; finestre 16x11 coerenti con porta 12x24. */
-    for (i = 7; i < 54; i += 7) {
-      R(g, x + 3 + ((i / 7) & 1) * 3, y + i, 20, 1, '#9aab69');
-      R(g, x + 57 + (((i / 7) + 1) & 1) * 3, y + i, 18, 1, '#9aab69');
+    /* Lampada sopra l'ingresso: la sorgente che motiva la pozza a terra. */
+    R(g, x + 34, y + 24, 12, 2, SS.oakDk);
+    R(g, x + 35, y + 26, 10, 2, SS.cream);
+    R(g, x + 35, y + 28, 10, 1, SS.oakDk);
+
+    /* Corso di pietra alla base, spezzato dalla soglia. */
+    R(g, x + 5, y + 50, 24, 12, SS.stoneLn);
+    R(g, x + 6, y + 51, 22, 10, SS.stone);
+    R(g, x + 51, y + 50, 24, 12, SS.stoneLn);
+    R(g, x + 52, y + 51, 22, 10, SS.stone);
+    for (i = 0; i < 2; i++) {
+      R(g, x + 6, y + 54 + i * 4, 22, 1, SS.stoneLn);
+      R(g, x + 52, y + 54 + i * 4, 22, 1, SS.stoneLn);
+      R(g, x + 13 + (i & 1) * 8, y + 51 + i * 4, 1, 3, SS.stoneLn);
+      R(g, x + 59 + (i & 1) * 8, y + 51 + i * 4, 1, 3, SS.stoneLn);
     }
-    townWindow(g, x + 7, y + 17, 16, 11, '#5c8098', '#213648');
-    townWindow(g, x + 57, y + 17, 16, 11, '#5c8098', '#213648');
-    R(g, x + 8, y + 18, 6, 1, '#dbc78d'); R(g, x + 58, y + 18, 6, 1, '#dbc78d');
+    R(g, x + 6, y + 51, 22, 1, SS.stoneHi);
+    R(g, x + 52, y + 51, 22, 1, SS.stoneHi);
 
-    /* Insegna esplicita, leggibile a 1x: l'identita' non dipende piu' da
-     * croce/stella ambigua. */
-    R(g, x + 18, y + 3, 45, 11, C.ink); R(g, x + 19, y + 4, 43, 9, '#dbc78d');
-    townTinyWord(g, 'SHERIFF', x + 20, y + 5, '#213648');
+    /* Porta a due battenti di rovere, centrata sulla cella D (12,20). */
+    var ssD = x + 32, ssDT = y + 30;
+    R(g, ssD - 4, ssDT - 1, 24, 33, SS.oakDk);
+    R(g, ssD - 3, ssDT, 22, 32, SS.oak);
+    R(g, ssD - 1, ssDT + 2, 18, 30, SS.oakDk);
+    R(g, ssD, ssDT + 3, 16, 29, SS.oak);
+    R(g, ssD + 7, ssDT + 3, 1, 29, SS.oakDk);
+    R(g, ssD + 1, ssDT + 5, 6, 13, SS.glassDk);
+    R(g, ssD + 9, ssDT + 5, 6, 13, SS.glassDk);
+    R(g, ssD + 2, ssDT + 6, 4, 11, SS.glass);
+    R(g, ssD + 10, ssDT + 6, 4, 11, SS.glass);
+    R(g, ssD + 6, ssDT + 21, 1, 4, SS.gold);
+    R(g, ssD + 9, ssDT + 21, 1, 4, SS.gold);
+    R(g, ssD, ssDT + 28, 16, 3, SS.oakDk);
 
-    /* Portico stretto: la soglia indica chiaramente cella D. Colonne da
-     * 2px, porta incassata con vetro, maniglia e zoccolo. */
-    R(g, x + 25, y + 28, 30, 3, C.ink); R(g, x + 28, y + 28, 24, 1, '#dbc78d');
-    R(g, x + 27, y + 31, 2, 31, C.ink); R(g, x + 51, y + 31, 2, 31, C.ink);
-    R(g, x + 32, y + 32, 16, 31, C.ink);
-    R(g, x + 34, y + 34, 12, 8, '#5c8098'); R(g, x + 34, y + 42, 12, 1, C.ink);
-    R(g, x + 34, y + 43, 12, 19, '#2f4d63');
-    R(g, x + 43, y + 52, 2, 2, '#dbc78d');
-    R(g, x + 3, y + 35, 23, 2, '#5c8098'); R(g, x + 54, y + 35, 23, 2, '#5c8098');
-    R(g, x + 5, y + 56, 20, 3, '#213648'); R(g, x + 55, y + 56, 20, 3, '#213648');
+    /* Pennone snello all'estremita' est, sul piazzale. */
+    R(g, x + 82, y - 16, 2, 76, SS.pole);
+    R(g, x + 83, y - 16, 1, 76, SS.oakDk);
+    R(g, x + 81, y - 19, 4, 3, SS.gold);
+    R(g, x + 80, y + 58, 7, 4, SS.stoneLn);
+    R(g, x + 81, y + 58, 5, 1, SS.stoneHi);
+
     /* Piazzola 2x1 sulla vera riga calpestabile 21. Collega porta e
      * marciapiede senza sembrare prato casuale. */
+    townFoundationShadow(g, x, y + 64, 80, 0x749);
     R(g, x + 24, y + 64, 32, 16, '#34572d');
     R(g, x + 25, y + 65, 30, 14, '#dcd9a9');
-    R(g, x + 40, y + 65, 1, 14, '#9aab69'); R(g, x + 25, y + 72, 30, 1, '#9aab69');
+    R(g, x + 40, y + 65, 1, 14, '#b5b8ab'); R(g, x + 25, y + 72, 30, 1, '#b5b8ab');
     R(g, x + 4, y + 63, 24, 2, '#34572d'); R(g, x + 52, y + 63, 24, 2, '#34572d');
-    townStep(g, x + 30, y + 63, 20, '#dbc78d');
+    townStep(g, x + 30, y + 63, 20, SS.stone);
 
-    /* Double R — vetrata lunga e iconica tenda a scacchi. */
-    x = 39 * 16 - cx; y = 18 * 16 - cy;
-    townClosedFlat(g, x, y, 96, 48, BUILDINGS['2']);
-    R(g, x + 5, y - 22, 86, 4, C.ink); R(g, x + 7, y - 21, 82, 2, '#c1585a');
-    for (i = 5; i < 44; i += 7) {
-      R(g, x + 3 + (((i / 7) & 1) * 5), y + i, 85, 1, '#c1585a');
-    }
-    R(g, x + 30, y - 20, 36, 13, C.ink); R(g, x + 32, y - 18, 32, 9, C.paper);
-    townMicroWord(g, 'DOUBLE R', x + 34, y - 16, '#713943');
-    /* Tazzina secondaria 10x9: non compete con parola DOUBLE R. */
-    R(g, x + 74, y - 18, 12, 10, C.ink); R(g, x + 75, y - 17, 10, 8, C.paper);
-    R(g, x + 77, y - 15, 5, 4, '#713943'); R(g, x + 82, y - 14, 2, 3, '#713943');
-    R(g, x + 77, y - 10, 7, 1, '#713943');
-    townAwning(g, x + 3, y + 10, 90, '#8f2430', C.paper);
-    R(g, x + 5, y + 20, 86, 22, C.ink); R(g, x + 8, y + 23, 80, 16, '#f8e078');
-    for (i = 20; i < 82; i += 20) R(g, x + i, y + 23, 2, 16, '#8f2430');
-    R(g, x + 48, y + 23, 16, 25, C.ink); R(g, x + 51, y + 26, 10, 22, '#713943');
-    R(g, x + 59, y + 38, 1, 2, C.paper);
-    townStep(g, x + 46, y + 48, 20, '#e3ab77');
-    townFoundationShadow(g, x, y + 54, 96);
+    /* Double R — landmark autoriale, quality bar edifici (2026-09-07). */
+    townDoubleR(g, 39 * 16 - cx, 18 * 16 - cy);
 
     /* Roadhouse — massa scura, insegna luminosa, portico basso. */
     x = 44 * 16 - cx; y = 25 * 16 - cy;
@@ -2292,7 +3930,7 @@
     R(g, x + 17, y + 38, 18, 14, C.ink); R(g, x + 20, y + 41, 12, 8, '#c06a4e');
     R(g, x + 73, y + 38, 18, 14, C.ink); R(g, x + 76, y + 41, 12, 8, '#c06a4e');
     townStep(g, x + 46, y + 64, 20, '#caa15a');
-    townFoundationShadow(g, x, y + 70, 96);
+    townFoundationShadow(g, x, y + 70, 96, 0x74b);
   }
 
   function redRoomHeroAccents(g) {
@@ -2372,7 +4010,7 @@
   /* Contratto semantico dei props R75. `physical` deve stare solo su tile
    * solidi reali; `soft` descrive tende/decorazioni volutamente passabili. */
   var INTERIOR_PROP_FOOTPRINTS = [
-    { id:'sheriff-phones', map:'sheriff', kind:'physical', cells:[[2,2],[6,2]] },
+    { id:'sheriff-phones', map:'sheriff', kind:'physical', cells:[[8,4],[2,7]] },
     { id:'palmer-sofa', map:'palmer', kind:'physical', cells:[[3,6]] },
     { id:'palmer-dining', map:'palmer', kind:'physical', cells:[[2,8],[3,8],[2,9],[3,9]] },
     { id:'palmer-sideboard', map:'palmer', kind:'physical', cells:[[14,6]] },
@@ -2382,13 +4020,15 @@
     { id:'hotel-seating', map:'hotel_gn', kind:'physical', cells:[[8,6],[9,6],[10,6]] },
     { id:'hotel-hearth', map:'hotel_gn', kind:'physical', cells:[[12,2],[12,3]] },
     { id:'hotel-staircase', map:'hotel_gn', kind:'physical', cells:[[6,4],[7,4],[8,4],[9,4]] },
-    { id:'hospital-curtains', map:'hospital', kind:'soft', cells:[[3,1],[7,3],[8,5]] },
-    { id:'hospital-monitor', map:'hospital', kind:'physical', cells:[[9,5]] },
-    { id:'hospital-reception', map:'hospital', kind:'physical', cells:[[1,7],[2,7],[3,7]] },
-    { id:'hospital-waiting', map:'hospital', kind:'physical', cells:[[7,8],[9,8]] },
-    { id:'diner-coffee', map:'diner', kind:'physical', cells:[[4,2],[5,2]] },
-    { id:'diner-booths', map:'diner', kind:'physical', cells:[[2,5],[3,5],[8,5],[9,5],[2,7],[3,7],[8,7],[9,7]] },
-    { id:'diner-counter-stools', map:'diner', kind:'physical', cells:[[4,3],[6,3],[2,4],[9,4],[2,6],[9,6]] },
+    /* Reparto nativo (js/hospital-art.js): la tenda e' una struttura solida a tutta altezza. */
+    { id:'hospital-curtain', map:'hospital', kind:'physical', cells:[[8,3],[8,4],[8,5]] },
+    { id:'hospital-monitor', map:'hospital', kind:'physical', cells:[[1,3],[2,3]] },
+    { id:'hospital-beds', map:'hospital', kind:'physical', cells:[[3,3],[4,3],[3,4],[4,4],[3,5],[4,5],[9,3],[10,3],[9,4],[10,4],[9,5],[10,5]] },
+    { id:'hospital-counter', map:'hospital', kind:'physical', cells:[[12,8],[13,8],[14,8]] },
+    { id:'hospital-chair', map:'hospital', kind:'physical', cells:[[1,6]] },
+    { id:'diner-coffee', map:'diner', kind:'physical', cells:[[4,3],[5,3]] },
+    { id:'diner-booths', map:'diner', kind:'physical', cells:[[1,6],[2,6],[3,6],[10,6],[11,6],[12,6],[1,8],[2,8],[3,8],[10,8],[11,8],[12,8],[6,6],[8,6]] },
+    { id:'diner-counter-stools', map:'diner', kind:'physical', cells:[[2,4],[4,4],[6,4],[8,4],[10,4],[2,5],[12,5],[2,7],[12,7]] },
     { id:'oej-felt-tables', map:'oej', kind:'physical', cells:[[3,2],[4,2],[11,2],[12,2],[3,7],[4,7],[11,7],[12,7]] },
     { id:'oej-roulette', map:'oej', kind:'physical', cells:[[6,4],[7,4],[8,4],[9,4]] },
     { id:'oej-seating', map:'oej', kind:'physical', cells:[[3,3],[12,3],[3,6],[12,6]] },
@@ -2413,6 +4053,620 @@
     { id:'double-r', ch:'2', anchor:[39,18], component:[39,18,6,3], door:[42,20], visualBounds:[-1,-22,98,81], cameraFocus:[42,21], materialKit:'diner' },
     { id:'roadhouse', ch:'6', anchor:[44,25], component:[44,25,6,4], door:[47,28], visualBounds:[-4,-29,101,104], cameraFocus:[47,29], materialKit:'venue' }
   ];
+
+  function townShrubCluster(g, x, y, flower) {
+    softPixelShadow(g, x + 1, y + 6, 18, 4, HG.shadowDark, HG.shadow);
+    var lobes = [[0,4,6,4],[3,2,7,6],[8,1,7,7],[13,3,6,5],[6,5,7,4]];
+    for (var li = 0; li < lobes.length; li++) {
+      var l = lobes[li];
+      R(g, x + l[0], y + l[1], l[2], l[3], li & 1 ? HG.grassDark : '#5b8d72');
+      R(g, x + l[0] + 2, y + l[1] + 1, Math.max(2, l[2] - 4), 2,
+        li === 2 ? '#80b878' : '#639b72');
+    }
+    if (flower) {
+      R(g, x + 2, y + 4, 2, 2, flower);
+      R(g, x + 8, y + 1, 2, 2, HG.flowerGold);
+      R(g, x + 14, y + 3, 2, 2, HG.flowerWhite);
+    }
+  }
+
+  function townFlowerBed(g, x, y, salt) {
+    softPixelShadow(g, x + 1, y + 5, 21, 4, HG.shadowDark, HG.shadow);
+    R(g, x, y + 2, 22, 5, '#6f6446');
+    R(g, x + 1, y + 2, 20, 2, '#9b8254');
+    for (var i = 0; i < 5; i++) {
+      var fx = x + 1 + i * 4, fy = y + 1 + ((i + salt) & 1);
+      R(g, fx, fy, 2, 2, i & 1 ? HG.flowerPink : HG.flowerWhite);
+      R(g, fx + 1, fy - 1, 1, 1, i === 2 ? HG.flowerGold : HG.grassHi);
+      R(g, fx + 1, fy + 2, 1, 2, HG.grassMid);
+    }
+  }
+
+  function townPlanterAnchor(g, x, y, flower) {
+    softPixelShadow(g, x + 2, y + 6, 19, 4, HG.shadowDark, HG.shadow);
+    R(g, x + 1, y + 4, 20, 6, '#5d4d37');
+    R(g, x + 2, y + 4, 18, 2, '#9b8254');
+    R(g, x + 4, y + 2, 3, 3, HG.grassDark);
+    R(g, x + 9, y, 4, 5, '#639b72');
+    R(g, x + 15, y + 2, 3, 3, HG.grassMid);
+    R(g, x + 5, y + 1, 2, 2, flower || HG.flowerWhite);
+    R(g, x + 10, y - 1, 2, 2, HG.flowerGold);
+    R(g, x + 16, y + 1, 2, 2, flower === HG.flowerPink ? HG.flowerWhite : HG.flowerPink);
+  }
+
+  function townFenceAnchor(g, x, y, w, flip) {
+    softPixelShadow(g, x + 2, y + 8, w, 4, HG.shadowDark, HG.shadow);
+    R(g, x, y + 3, w, 2, '#5d4935');
+    R(g, x + 1, y + 3, w - 2, 1, '#c49b5c');
+    R(g, x + 2, y + 8, w - 1, 2, '#5d4935');
+    R(g, x + 3, y + 8, w - 3, 1, '#b18a56');
+    for (var i = flip ? 4 : 1; i < w; i += 10) {
+      R(g, x + i, y, 4, 12, '#5d4935');
+      R(g, x + i + 1, y + 1, 2, 10, '#c49b5c');
+    }
+  }
+
+  function townBenchAnchor(g, x, y, flip) {
+    softPixelShadow(g, x + 1, y + 9, 25, 4, HG.shadowDark, HG.shadow);
+    R(g, x + 2, y + 1, 22, 3, '#4a382d');
+    R(g, x + 3, y + 1, 20, 1, '#b88758');
+    R(g, x, y + 6, 27, 3, '#4a382d');
+    R(g, x + 2, y + 6, 23, 1, '#c09761');
+    R(g, x + (flip ? 19 : 4), y + 9, 3, 4, '#4a382d');
+    R(g, x + (flip ? 5 : 20), y + 9, 3, 4, '#4a382d');
+  }
+
+  function townUtilityAnchor(g, x, y, kind) {
+    var body = kind === 'red' ? '#a84b45' : (kind === 'blue' ? '#527f89' : '#718d70');
+    var light = kind === 'red' ? '#db8a72' : (kind === 'blue' ? '#8fb7b1' : '#a9b98e');
+    softPixelShadow(g, x + 1, y + 10, 15, 4, HG.shadowDark, HG.shadow);
+    R(g, x + 2, y + 1, 14, 13, '#33453d');
+    R(g, x + 3, y + 2, 12, 10, body);
+    R(g, x + 4, y + 3, 10, 2, light);
+    R(g, x + 5, y + 7, 8, 1, '#33453d');
+    R(g, x + 11, y + 9, 2, 2, light);
+    R(g, x, y + 13, 18, 2, '#33453d');
+  }
+
+  function townCargoAnchor(g, x, y, salt) {
+    softPixelShadow(g, x + 1, y + 9, 22, 4, HG.shadowDark, HG.shadow);
+    R(g, x, y + 4, 13, 10, '#49372d');
+    R(g, x + 2, y + 5, 9, 7, '#a8734d');
+    R(g, x + 3, y + 7, 7, 1, '#d0a068');
+    R(g, x + 12, y, 11, 14, '#49372d');
+    R(g, x + 14, y + 2, 7, 10, salt & 1 ? '#8f7650' : '#b88758');
+    R(g, x + 15, y + 4, 5, 1, '#d0a068');
+  }
+
+  /* R113 — un kit asimmetrico per luogo. Tutto resta aderente agli angoli
+   * solidi della facciata; asse porta e due tile di avvicinamento restano
+   * vuoti. La decorazione non cambia collisione. */
+  function townBuildingLandscape(g, map, cx, cy) {
+    if (!map || map.id !== 'town') return;
+    for (var i = 0; i < TOWN_STRUCTURE_DEFS.length; i++) {
+      var d = TOWN_STRUCTURE_DEFS[i];
+      var x = d.component[0] * 16 - cx;
+      var y = (d.component[1] + d.component[3]) * 16 - cy - 7;
+      var w = d.component[2] * 16;
+      /* Solo undici landmark: disegnarli tutti costa poco e impedisce che
+       * panchine/fioriere con sporto appaiano quando l'anchor entra nel
+       * range camera. Canvas clippa naturalmente elementi fuori schermo. */
+      if (d.id === 'great-northern') {
+        townFenceAnchor(g, x - 18, y - 2, 29, false);
+        townPlanterAnchor(g, x + w - 22, y + 1, HG.flowerPink);
+      } else if (d.id === 'hospital') {
+        townUtilityAnchor(g, x + 3, y - 4, 'blue');
+        townPlanterAnchor(g, x + w - 23, y + 1, HG.flowerWhite);
+      } else if (d.id === 'palmer') {
+        townPlanterAnchor(g, x - 3, y + 1, HG.flowerPink);
+        townFenceAnchor(g, x + w - 10, y - 2, 27, true);
+      } else if (d.id === 'bookhouse') {
+        townBenchAnchor(g, x - 8, y - 2, false);
+        townShrubCluster(g, x + w - 16, y, HG.flowerGold);
+      } else if (d.id === 'hornes') {
+        townUtilityAnchor(g, x - 5, y - 4, 'red');
+        townPlanterAnchor(g, x + w - 18, y + 1, HG.flowerWhite);
+      } else if (d.id === 'pharmacy') {
+        townPlanterAnchor(g, x - 5, y + 1, HG.flowerWhite);
+        townUtilityAnchor(g, x + w - 13, y - 4, 'blue');
+      } else if (d.id === 'hardware') {
+        townCargoAnchor(g, x - 7, y - 4, i);
+        townFenceAnchor(g, x + w - 6, y - 1, 22, true);
+      } else if (d.id === 'newsstand') {
+        townBenchAnchor(g, x - 10, y - 1, true);
+        townPlanterAnchor(g, x + w - 18, y + 2, HG.flowerGold);
+      } else if (d.id === 'sheriff') {
+        /* Tre isole laterali ricompongono la radura; centro e porta liberi. */
+        townBenchAnchor(g, x - 27, y - 2, false);
+        townPlanterAnchor(g, x + 2, y + 2, HG.flowerWhite);
+        townUtilityAnchor(g, x + w + 5, y - 4, 'blue');
+      } else if (d.id === 'double-r') {
+        townBenchAnchor(g, x - 14, y - 2, true);
+        townPlanterAnchor(g, x + w - 22, y + 2, HG.flowerPink);
+      } else if (d.id === 'roadhouse') {
+        townFenceAnchor(g, x - 17, y - 2, 29, false);
+        townUtilityAnchor(g, x + w - 14, y - 4, 'red');
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------------
+   * Double R — INTERNO v2 (2026-09-07), quality bar per gli interni.
+   * Riferimento: board "Interior Redesign". La mappa 14x10 e' la verita'
+   * della collisione; il disegno la legge (i/C/h/t/D) e usa i 16px di
+   * margine fuori mappa per pareti alte: fondo 32px, fianchi 32px, fronte
+   * 32px. Ordine: pavimento → pareti → bancone → sedute → tavoli → props.
+   * ------------------------------------------------------------------ */
+  /* Shared interior kit: native pixel coordinates, world-space anchors.
+   * Furniture rises above its existing collision footprint; decorative wall
+   * pieces never introduce invisible obstacles. Palettes are per room. */
+  var INTERIOR_MATERIALS = {
+    diner: { ink:'#292b26', cream:'#f4e6c8', creamShade:'#cfbc92', gold:'#e9bd5d',
+      red:'#8c2f3e', redHi:'#c45a61', redLight:'#e28b80', redDark:'#501f29',
+      wood:'#5b3a28', woodHi:'#946345', woodLight:'#b88759', woodDark:'#35271f',
+      green:'#223b2f', leaf:'#567345', leafHi:'#879452', metal:'#81918b',
+      metalHi:'#d9dfc9', tile:'#898b75', tileShade:'#80836e', floorLight:'#c5bc9c', floorShade:'#b9ae90' }
+  };
+  function interiorContact(g,x,y,w,p) {
+    // Three crisp native rows: diffuse footprint, tight occlusion, tapered edge.
+    R(g,x+1,y,w-2,1,'rgba(41,43,38,.28)');
+    R(g,x,y+1,w,1,'rgba(41,43,38,.36)');
+    R(g,x+2,y+1,w-4,1,'rgba(53,39,31,.45)');
+    R(g,x+2,y+2,w-4,1,'rgba(41,43,38,.20)');
+  }
+  function interiorActorLight(wx,wy) {
+    var px=wx+8,py=wy+7,best=0;
+    [[38,22],[68,22],[188,22],[7,83],[216,83],[7,134],[216,134]].forEach(function(l){
+      var dx=px-l[0],dy=py-l[1],d=dx*dx+dy*dy;
+      best=Math.max(best,d<900?.24:d<2304?.13:0);
+    });
+    return best;
+  }
+  function interiorPanel(g,x,y,w,h,p) {
+    R(g,x,y,w,h,p.woodDark);
+    for(var i=1;i<w-1;i+=9) {
+      R(g,x+i,y+1,7,h-2,p.wood); R(g,x+i,y+1,1,h-2,p.woodHi);
+      R(g,x+i+5,y+3,1,h-5,'#654632');
+      if(i%27===10) R(g,x+i+2,y+8,1,5,p.woodDark);
+    }
+    R(g,x,y,w,2,p.woodLight); R(g,x,y+h-3,w,2,p.woodHi);
+  }
+  function interiorCup(g,x,y,p) {
+    R(g,x,y+5,7,1,'rgba(53,39,31,.27)');
+    R(g,x-1,y+4,8,1,p.metalHi); R(g,x,y,5,4,p.cream);
+    R(g,x+1,y,3,1,p.woodDark); R(g,x+5,y+1,2,2,p.cream);
+    R(g,x+1,y+3,3,1,p.creamShade); R(g,x+1,y+1,1,2,p.metalHi);
+  }
+  function interiorDinerMenu(g,x,y,p) {
+    // One recurring house detail: burgundy menus with the Double R monogram.
+    R(g,x,y,11,8,p.woodDark); R(g,x+1,y,9,7,p.redDark);
+    R(g,x+1,y,1,7,p.redHi); interiorChalk(g,'RR',x+3,y+2,p.creamShade);
+  }
+  function interiorTableProps(g,x,y,p,variant) {
+    if(variant===3) {
+      // Recently cleared: empty plate, folded napkin, one faint coffee ring.
+      R(g,x+19,y+4,10,5,p.metal); R(g,x+20,y+3,8,5,p.cream);
+      R(g,x+22,y+4,4,2,p.creamShade);
+      R(g,x+5,y+5,5,3,p.metalHi); R(g,x+6,y+6,3,1,p.cream);
+      R(g,x+32,y+4,4,1,p.creamShade); R(g,x+31,y+5,1,2,p.creamShade);
+      R(g,x+35,y+5,1,2,p.creamShade); R(g,x+32,y+7,3,1,p.creamShade);
+      return;
+    }
+    interiorDinerMenu(g,x+1,y+3,p);
+    interiorCup(g,x+17,y+3,p);
+    R(g,x+28,y+4,9,5,p.metal); R(g,x+29,y+3,7,5,p.cream);
+    R(g,x+31,y+3,4,3,p.gold); R(g,x+32,y+4,2,1,p.redDark);
+  }
+  function interiorSeatedGuest(g,x,y,guest,gesture) {
+    // A complete 16x20 seated pose. Tabletop intersects below the chest at row 17,
+    // leaving the head, neck, shoulders and chest visible at cast scale.
+    var c={ outline:'#302927', hair:guest.hair, hairHi:guest.hairHi || '#89644d',
+      skin:guest.skin || '#e0b48e', skinHi:'#f0c9a1', skinShadow:'#bd876c',
+      coat:guest.coat, coatHi:guest.coatHi || '#b78476', coatShadow:guest.coatShadow || '#754f4e',
+      shirt:'#e9ddbb', eye:'#342c2b' };
+    var pose={x:x,y:y,gesture:gesture===undefined?-1:gesture,mirror:guest.seat==='right',skin:c.skin,skinHi:c.skinHi,
+      skinShadow:c.skinShadow,coat:c.coat,coatHi:c.coatHi,shirt:c.shirt};
+    function P(px,py,w,h,color) { interiorPoseRect(g,pose,px,py,w,h,color); }
+    // Three-quarter face turns toward the aisle. Hair wraps the far cheek.
+    P(4,0,8,1,c.outline); P(2,1,12,2,c.outline);
+    P(1,3,14,7,c.outline); P(3,10,10,2,c.outline);
+    P(3,1,10,4,c.hair); P(4,1,7,1,c.hairHi);
+    P(2,3,3,7,c.hair); P(12,3,2,3,c.hair);
+    P(5,4,8,6,c.skin); P(6,4,6,2,c.skinHi);
+    P(4,6,2,3,c.skinShadow); P(5,6,1,2,c.skin);
+    P(6,10,6,1,c.skinShadow);
+    P(7,6,1,2,c.eye); P(11,6,1,2,c.eye);
+    P(13,7,1,2,c.skin); P(11,9,2,1,'#996953');
+    if(guest.hairStyle==='bob') {
+      P(2,5,2,7,c.hair); P(3,2,8,2,c.hair);
+      P(4,2,4,1,c.hairHi); P(4,9,1,3,c.hairHi);
+    } else {
+      P(3,2,8,1,c.hairHi); P(3,3,6,2,c.hair);
+      P(4,3,3,1,c.hairHi);
+    }
+    P(7,11,4,2,c.skinShadow); P(8,11,2,2,c.skin);
+    // Sloped shoulders and diagonal collar follow the turned upper body.
+    P(4,12,4,1,c.outline); P(3,13,10,5,c.outline);
+    P(2,14,12,3,c.outline); P(4,13,8,5,c.coat);
+    P(4,13,3,1,c.coatHi); P(7,13,3,1,c.shirt);
+    P(8,14,3,1,c.shirt); P(9,15,2,1,c.shirt);
+    P(5,14,2,3,c.coatHi); P(11,14,1,4,c.coatShadow);
+    P(3,14,2,3,c.coat); P(12,14,2,2,c.coat);
+    P(4,18,8,2,c.coatShadow);
+    interiorSeatedHands(g,pose);
+    return pose;
+  }
+  function interiorPoseRect(g,pose,x,y,w,h,color) {
+    R(g,pose.x+(pose.mirror?16-x-w:x),pose.y+y,w,h,color);
+  }
+  function interiorSeatedHands(g,pose) {
+    if(pose.gesture>=0 && GAME.CharacterActivity && GAME.CharacterActivity.drawSip(g,pose,INTERIOR_MATERIALS.diner))return;
+    // One elbow supports a horizontal forearm; the far hand rests near the rim.
+    // Redraw these same arm pixels over the tabletop, never another torso.
+    function P(x,y,w,h,color) { interiorPoseRect(g,pose,x,y,w,h,color); }
+    P(3,16,3,2,pose.coat); P(4,17,4,2,pose.coat);
+    P(4,17,3,1,pose.coatHi); P(7,17,1,2,pose.shirt);
+    P(8,17,3,2,pose.skinShadow); P(8,17,3,1,pose.skinHi);
+    P(12,15,2,1,pose.shirt); P(12,16,2,2,pose.skinShadow);
+    P(12,16,2,1,pose.skinHi);
+  }
+
+  function interiorOccupiedTable(g,x,y,w,p,guest,gesture) {
+    // The first three table rows are reserved for cuffs and resting hands.
+    var propX=guest.seat==='left' ? x+w-11 : x+5;
+    R(g,propX,y+4,4,6,p.ink); R(g,propX+1,y+5,2,4,p.metalHi);
+    R(g,propX+1,y+6,2,1,p.metal);
+    if(guest.seat==='left') {
+      R(g,x+22,y+4,11,6,'#dfd4b4');
+      R(g,x+23,y+5,4,1,'#7e7966'); R(g,x+28,y+5,4,1,'#7e7966');
+      R(g,x+23,y+7,8,1,'#a49b7f'); R(g,x+23,y+9,6,1,'#a49b7f');
+      interiorCup(g,x+7,y+5,p);
+    } else {
+      interiorDinerMenu(g,x+12,y+4,p);
+      if(GAME.CharacterActivity && GAME.CharacterActivity.sipLiftsCup(gesture)) {
+        R(g,x+w-16,y+9,8,1,p.metalHi);R(g,x+w-15,y+10,7,1,'rgba(53,39,31,.27)');
+      } else interiorCup(g,x+w-15,y+5,p);
+    }
+  }
+  function interiorBooth(g,x,y,w,p,variant,guest) {
+    // Base occupies the table's two solid tiles; backrest projects north.
+    R(g,x+1,y+13,w,5,'rgba(30,26,20,.32)');
+    interiorContact(g,x+1,y+16,w-1,p);
+    R(g,x+w-1,y-9,2,25,'rgba(41,43,38,.23)');
+    R(g,x,y-15,w,31,p.woodDark); R(g,x+1,y-14,w-2,28,p.redDark);
+    R(g,x+2,y-15,w-4,1,p.woodLight);
+    for(var i=3;i<w-3;i+=6) {
+      R(g,x+i,y-13,5,16,p.red); R(g,x+i+1,y-12,3,2,p.redHi);
+      R(g,x+i,y-11,1,10,p.redHi); R(g,x+i+4,y-10,1,13,p.redDark);
+      R(g,x+i+2,y-3,1,1,p.redDark);
+      if((i+variant)%3===0) R(g,x+i+1,y-11,2,1,p.redLight);
+    }
+    R(g,x+2,y-1,w-4,6,p.redDark); R(g,x+3,y,w-6,3,p.red);
+    R(g,x+4,y,w-8,1,p.redHi); R(g,x+2,y+5,w-4,2,p.redDark);
+    R(g,x+1,y+7,w-2,2,p.woodLight);
+    if(guest) {
+      var seatX=guest.seat==='left'?x+8:x+w-25;
+      R(g,seatX+3,y-4,11,3,p.redDark);
+    }
+    var gesture=variant===1 && GAME.CharacterActivity ? GAME.CharacterActivity.seatedFrame() : -1;
+    var seatedPose=guest ? interiorSeatedGuest(g,guest.seat==='left'?x+8:x+w-25,y-16,guest,gesture) : null;
+    R(g,x+3,y+1,w-6,13,p.woodDark);
+    R(g,x+4,y+1,w-8,11,p.creamShade); R(g,x+4,y+1,w-8,3,p.cream);
+    R(g,x+3,y+12,w-6,2,p.woodHi); R(g,x+5,y+14,w-10,2,p.red);
+    R(g,x+1,y-12,2,27,p.redHi); R(g,x+w-3,y-12,2,27,p.redDark);
+    R(g,x+3,y+13,w-6,1,p.woodHi); R(g,x+4,y+15,w-8,1,p.metal);
+    if(guest) interiorOccupiedTable(g,x,y,w,p,guest,gesture);
+    else interiorTableProps(g,x+5,y,p,variant);
+    if(seatedPose) {
+      interiorSeatedHands(g,seatedPose);
+      interiorPoseRect(g,seatedPose,4,1,3,1,guest.hairHi);
+      interiorPoseRect(g,seatedPose,4,13,2,1,guest.coatHi);
+      // Small lamp-side highlights use existing warm material tones.
+      interiorPoseRect(g,seatedPose,4,2,2,1,'rgba(244,230,200,.18)');
+      interiorPoseRect(g,seatedPose,3,14,1,1,'rgba(244,230,200,.18)');
+    }
+  }
+  function interiorStool(g,x,y,p) {
+    interiorContact(g,x+2,y+13,12,p);
+    R(g,x+3,y+12,10,2,p.ink); R(g,x+5,y+11,6,1,p.metalHi);
+    R(g,x+7,y+4,3,8,p.metal); R(g,x+7,y+5,1,6,p.metalHi);
+    R(g,x+2,y,12,5,p.ink); R(g,x+3,y-1,10,6,p.redDark);
+    R(g,x+3,y,10,3,p.red); R(g,x+4,y,8,1,p.redHi);
+    R(g,x+4,y+4,8,1,p.metalHi);
+    R(g,x+8,y+6,1,4,p.ink); R(g,x+5,y+12,3,1,p.metalHi);
+  }
+  function interiorLamp(g,x,y,p) {
+    R(g,x-7,y+5,15,15,'rgba(241,171,58,.07)');
+    R(g,x-5,y+7,11,12,'rgba(255,190,79,.13)');
+    R(g,x,y,1,8,p.ink); R(g,x+1,y,1,7,p.woodLight); R(g,x-3,y+8,7,1,p.gold);
+    R(g,x-4,y+9,9,7,p.woodDark); R(g,x-3,y+9,7,6,p.gold);
+    R(g,x-2,y+10,5,4,'#ffdc82'); R(g,x-1,y+10,3,3,'#fff4ce');
+    R(g,x-2,y+16,5,1,p.woodLight);
+    R(g,x-5,y+10,1,4,p.woodLight); R(g,x+5,y+10,1,4,p.woodLight);
+  }
+  function interiorPicture(g,x,y,w,h,p,kind) {
+    R(g,x,y,w,h,p.ink); R(g,x+1,y+1,w-2,h-2,p.woodLight);
+    R(g,x+2,y+2,w-4,h-4,p.creamShade); R(g,x+3,y+3,w-6,h-6,p.green);
+    if(kind==='clock') {
+      R(g,x+3,y+3,w-6,h-6,p.cream); R(g,x+w/2,y+4,1,4,p.ink);
+      R(g,x+w/2,y+7,3,1,p.ink);
+    } else if(kind==='portrait') {
+      R(g,x+4,y+4,w-8,h-8,p.woodDark); R(g,x+5,y+5,4,5,p.creamShade);
+      R(g,x+4,y+10,6,4,p.redDark);
+    } else {
+      for(var i=4;i<w-4;i+=4) {
+        R(g,x+i,y+5,1,h-8,p.woodHi); R(g,x+i-1,y+7,3,2,p.leafHi);
+      }
+      R(g,x+4,y+h-5,w-8,1,p.gold);
+    }
+  }
+  function interiorPlant(g,x,y,p) {
+    R(g,x+3,y+12,10,2,p.ink); R(g,x+4,y+6,8,7,p.woodHi);
+    R(g,x+5,y+8,6,1,p.gold); R(g,x+7,y-4,2,12,p.woodDark);
+    [[0,0],[7,-3],[2,-6],[10,2],[0,5],[6,4]].forEach(function(a,i){
+      R(g,x+a[0],y+a[1],6,4,p.green); R(g,x+a[0]+1,y+a[1],4,2,i%2?p.leaf:p.leafHi);
+    });
+  }
+  function interiorCoffeeMachine(g,x,y,p) {
+    interiorContact(g,x,y+15,17,p);
+    R(g,x,y,16,16,p.ink); R(g,x+1,y+1,14,11,p.metal);
+    R(g,x+2,y+2,12,2,p.metalHi); R(g,x+3,y+5,10,5,p.ink);
+    R(g,x+4,y+6,1,3,p.metalHi); R(g,x+10,y+6,1,3,p.metalHi);
+    R(g,x+2,y+12,12,2,p.metalHi); R(g,x+3,y+15,10,1,p.woodDark);
+    interiorCup(g,x+5,y+9,p);
+    R(g,x+2,y-3,4,3,p.cream); R(g,x+8,y-2,5,2,p.creamShade);
+    R(g,x+1,y+3,1,7,p.metalHi); R(g,x+14,y+4,1,8,p.woodDark);
+  }
+  function interiorPieCase(g,x,y,w,p) {
+    interiorContact(g,x+1,y+17,w-1,p);
+    R(g,x,y,w,18,p.ink); R(g,x+1,y+1,w-2,15,p.metal);
+    R(g,x+2,y+2,w-4,5,'#adc0b0'); R(g,x+2,y+8,w-4,7,p.woodHi);
+    for(var row=0;row<2;row++) for(var i=4;i<w-5;i+=10) {
+      R(g,x+i-1,y+6+row*7,8,1,p.cream); R(g,x+i,y+4+row*7,6,2,'#d89345'); R(g,x+i+1,y+4+row*7,4,1,'#edb96b');
+      R(g,x+i+1,y+3+row*7,4,1,(i+row)%3===0?p.creamShade:p.gold); R(g,x+i+2,y+4+row*7,1,1,p.woodHi); R(g,x+i+4,y+4+row*7,1,1,p.woodHi);
+    }
+    R(g,x+1,y+8,w-2,1,p.metalHi); R(g,x+1,y+16,w-2,1,p.gold);
+    R(g,x+3,y+2,2,5,'#e5e6cd'); R(g,x+w-5,y+2,1,12,p.metalHi);
+    R(g,x+7,y+2,w-14,1,p.metalHi);
+    // Front glass differs from warm pastry mass without hiding it.
+    R(g,x+2,y+9,w-5,6,'rgba(129,145,139,.13)');
+    R(g,x+10,y+3,3,1,p.metalHi); R(g,x+9,y+4,2,1,p.metalHi);
+    R(g,x+27,y+10,3,1,p.metalHi); R(g,x+26,y+11,2,1,p.metalHi);
+    R(g,x+2,y+9,1,5,p.metalHi); R(g,x+w-3,y+9,1,6,p.ink);
+    R(g,x+3,y+15,w-7,1,'rgba(41,43,38,.22)');
+  }
+  function interiorPendant(g,x,y,p) {
+    R(g,x,y,2,17,p.ink); R(g,x+1,y,1,16,p.woodHi);
+    interiorPool(g,x-12,y+10,26,27,'rgba(249,169,49,.10)');
+    interiorPool(g,x-8,y+14,18,20,'rgba(255,192,70,.26)');
+    R(g,x-5,y+16,12,2,p.woodDark); R(g,x-4,y+16,10,1,p.gold);
+    R(g,x-6,y+18,14,7,p.woodDark); R(g,x-5,y+18,12,8,'#c88d36');
+    R(g,x-4,y+18,10,9,'#efb84d'); R(g,x-3,y+19,8,7,'#ffdb7d');
+    R(g,x-1,y+19,4,6,'#fff1b9'); R(g,x-5,y+19,1,5,p.woodHi);
+    R(g,x+6,y+19,1,5,p.woodHi); R(g,x-2,y+27,6,1,p.gold);
+  }
+  function interiorFloorPlant(g,x,y,p) {
+    R(g,x+1,y+12,17,4,'rgba(28,28,20,.3)');
+    interiorContact(g,x,y+15,19,p);
+    R(g,x+1,y+6,15,10,p.woodDark); R(g,x+2,y+7,13,7,p.woodHi);
+    R(g,x+3,y+8,11,1,p.woodLight); R(g,x+3,y+13,11,1,p.woodDark);
+    R(g,x+7,y-9,2,18,p.woodDark);
+    [[-3,-3],[0,-10],[6,-13],[11,-8],[13,-1],[6,-3],[1,3]].forEach(function(a,n) {
+      var lx=x+a[0],ly=y+a[1];
+      R(g,lx,ly+2,7,4,p.green); R(g,lx+2,ly,5,6,p.green);
+      R(g,lx+1,ly+1,5,3,n%2?p.leaf:p.leafHi);
+      R(g,lx+2,ly+2,1,4,p.leaf); R(g,lx+3,ly+1,3,1,'#a4a55c');
+    });
+  }
+  function interiorNeon(g,x,y,p) {
+    R(g,x,y,68,26,p.woodDark); R(g,x+1,y+1,66,24,p.woodLight);
+    R(g,x+3,y+2,62,22,p.green); R(g,x+4,y+3,60,19,'#26312b');
+    // Slanted pixel lettering and a large looped R form one custom brand mark.
+    var points=[], word='DOUBLE';
+    for(var c=0;c<word.length;c++) {
+      var glyph=TOWN_FONT_5X7[word[c]];
+      for(var row=0;row<7;row++) for(var col=0;col<5;col++) if(glyph[row][col]==='1') {
+        points.push([x+6+c*6+col+Math.floor((6-row)/3),y+8+row]);
+      }
+    }
+    // Two passes prevent one glyph's glow from erasing adjacent neon strokes.
+    points.forEach(function(a){R(g,a[0]+1,a[1]+1,1,1,'#713740');});
+    points.forEach(function(a){R(g,a[0],a[1],1,1,'#e48480');});
+    var pattern=['...RRRRRR..','..RR....RR.','..RR....RR.','..RR...RR..','..RRRRRR...','..RR.RR....','.RR...RR...','.RR....RR..','RR......RR.'];
+    for(var ry=0;ry<pattern.length;ry++) for(var rx=0;rx<pattern[ry].length;rx++) if(pattern[ry][rx]==='R') {
+      R(g,x+43+rx,y+5+ry*2,2,2,p.redHi); R(g,x+43+rx,y+5+ry*2,1,1,p.redLight);
+    }
+    R(g,x+7,y+20,30,1,p.redHi); R(g,x+10,y+19,33,1,p.redDark);
+    // Reflected neon only on adjacent wood; the sign itself is unchanged.
+    R(g,x+7,y+26,52,1,'rgba(196,90,97,.20)');
+    R(g,x+14,y+27,38,1,'rgba(196,90,97,.12)');
+    R(g,x-2,y+9,2,9,'rgba(196,90,97,.12)');
+  }
+
+  function interiorPool(g,x,y,w,h,color) {
+    // Stepped pixel ellipse: translucent light retains checker/material texture.
+    for(var row=0;row<h;row+=2) {
+      var edge=Math.abs((row+1)/h*2-1), inset=Math.round(w*.32*edge*edge);
+      R(g,x+inset,y+row,w-inset*2,2,color);
+    }
+  }
+  function interiorChalk(g,text,x,y,color) {
+    var letters={A:['010','101','111','101'],C:['011','100','100','011'],E:['111','110','100','111'],
+      H:['101','111','101','101'],L:['100','100','100','111'],N:['101','111','111','101'],
+      P:['110','101','110','100'],R:['110','101','110','101'],Y:['101','101','010','010']};
+    for(var i=0;i<text.length;i++) {
+      var glyph=letters[text[i]]; if(!glyph) continue;
+      for(var row=0;row<4;row++) for(var col=0;col<3;col++) if(glyph[row][col]==='1') R(g,x+i*4+col,y+row,1,1,color);
+    }
+  }
+  function interiorWarmLight(g,x,y,w,h,strength) {
+    var k=strength===undefined?1:strength;
+    interiorPool(g,x,y,w,h,'rgba(255,183,61,'+(.08*k)+')');
+    interiorPool(g,x+3,y+2,w-6,h-4,'rgba(255,195,87,'+(.10*k)+')');
+    interiorPool(g,x+7,y+4,w-14,h-8,'rgba(255,217,130,'+(.13*k)+')');
+  }
+  function interiorSpecials(g,x,y,p) {
+    // Compact 23x26 board; one collision cell, set beside the right booths.
+    R(g,x-2,y+12,24,4,'rgba(28,25,18,.28)');
+    interiorContact(g,x-2,y+14,23,p);
+    R(g,x-3,y-11,23,25,p.woodDark); R(g,x-2,y-10,21,22,p.woodHi);
+    R(g,x-1,y-9,19,20,p.green);
+    townMicroWord(g,'TODAY',x-1,y-7,p.creamShade);
+    townMicroWord(g,'PIE',x+3,y,p.cream);
+    townMicroWord(g,'3.50',x+2,y+6,p.gold);
+    R(g,x-2,y+12,3,3,p.woodDark); R(g,x+16,y+12,3,3,p.woodDark);
+  }
+  function interiorServiceCluster(g,x,y,p,kind) {
+    if(kind==='coffee') {
+      interiorCoffeeMachine(g,x,y,p);
+      R(g,x+19,y+4,9,11,p.ink); R(g,x+20,y+6,7,6,p.woodDark);
+      R(g,x+21,y+7,5,3,'#906744'); R(g,x+20,y+12,7,1,p.metalHi);
+      R(g,x+21,y+2,5,3,p.metal); R(g,x+22,y+1,3,1,p.ink);
+      R(g,x+27,y+6,3,6,p.ink); R(g,x+28,y+7,1,3,p.metal);
+    } else if(kind==='plates') {
+      for(var i=0;i<3;i++) { R(g,x,y+9-i*2,9,2,p.metal); R(g,x+1,y+8-i*2,7,1,p.cream); }
+      interiorCup(g,x+12,y+5,p); interiorCup(g,x+19,y+5,p);
+    } else if(kind==='register') {
+      interiorContact(g,x,y+15,16,p);
+      R(g,x,y+6,15,10,p.ink); R(g,x+1,y+7,13,7,p.metal);
+      R(g,x+3,y,10,9,p.ink); R(g,x+4,y+1,8,5,p.metalHi);
+      R(g,x+5,y+2,6,3,p.green); R(g,x+2,y+11,10,1,p.metalHi);
+      R(g,x+3,y+13,2,1,p.ink); R(g,x+7,y+13,2,1,p.ink);
+    }
+  }
+  function interiorBackbar(g,x,y,p) {
+    interiorPanel(g,x,y-14,224,58,p);
+    // A service floor and plinth separate working space from the back wall.
+    R(g,x+16,y+30,192,18,'#67513b');
+    for(var py=32;py<48;py+=5) R(g,x+16,y+py,192,1,'#493a2d');
+    R(g,x+28,y+25,154,6,p.woodDark); R(g,x+29,y+25,152,2,p.woodLight);
+    // Side service door, clock and local coffee pledge.
+    R(g,x+17,y+2,21,36,p.woodDark); R(g,x+19,y+3,17,33,p.redDark);
+    R(g,x+21,y+5,13,21,p.red); R(g,x+24,y+10,7,7,p.gold);
+    R(g,x+25,y+11,5,5,p.metal); R(g,x+32,y+25,2,2,p.gold);
+    interiorPicture(g,x+18,y-11,18,12,p,'photo');
+    interiorPicture(g,x+187,y-11,16,16,p,'clock');
+    R(g,x+184,y+7,25,23,p.woodDark); R(g,x+185,y+8,23,21,p.creamShade);
+    townMicroWord(g,'DAMN',x+188,y+10,p.ink); townMicroWord(g,'GOOD',x+188,y+16,p.ink);
+    townMicroWord(g,'COFFEE',x+186,y+22,p.ink);
+    interiorNeon(g,x+72,y-13,p);
+    // The menu owns a quiet dark panel; equipment sits below, never over text.
+    R(g,x+143,y-12,39,31,p.woodDark); R(g,x+145,y-10,35,27,p.ink);
+    townMicroWord(g,'COFFEE',x+147,y-7,p.cream); townMicroWord(g,'2.00',x+164,y-1,p.gold);
+    townMicroWord(g,'PIE',x+147,y+5,p.cream); townMicroWord(g,'3.50',x+164,y+11,p.gold);
+    // Asymmetric clusters: family photos, stacked crockery and pantry jars.
+    interiorPicture(g,x+43,y-10,14,14,p,'photo');
+    R(g,x+41,y+10,29,2,p.woodLight); R(g,x+41,y+23,29,2,p.woodLight);
+    [43,53,64].forEach(function(dx,n) {
+      R(g,x+dx,y+14-(n%2)*3,4,8+(n%2)*3,n===2?p.green:p.creamShade);
+      R(g,x+dx,y+13-(n%2)*3,4,2,n===2?p.gold:p.metal);
+      R(g,x+dx+1,y+17,2,2,n%2?p.red:p.woodHi);
+    });
+    [77,85,111,126,151,159,168].forEach(function(dx,n) {
+      var shelfY=n<4?17:23;
+      if(n===3) { R(g,x+dx,y+shelfY-4,5,8,p.green); R(g,x+dx+1,y+shelfY-6,3,2,p.gold); }
+      else { R(g,x+dx,y+shelfY,5,5,p.creamShade); R(g,x+dx+1,y+shelfY,3,1,p.cream); }
+    });
+    R(g,x+76,y+23,57,2,p.woodLight); R(g,x+76,y+25,57,2,'#282820');
+    // Lower cabinets, warming shelf, service tins and chrome urns form masses.
+    R(g,x+40,y+26,139,9,p.woodDark); R(g,x+41,y+26,137,2,p.woodLight);
+    for(var dx=42;dx<176;dx+=17) {
+      R(g,x+dx,y+29,15,5,p.wood); R(g,x+dx+6,y+30,4,1,p.gold);
+    }
+    R(g,x+106,y+24,22,12,p.ink); R(g,x+107,y+25,20,9,p.metal);
+    R(g,x+109,y+27,6,5,p.woodDark); R(g,x+118,y+27,7,5,p.woodDark);
+    R(g,x+109,y+27,6,1,p.gold); R(g,x+118,y+27,7,1,p.gold);
+    R(g,x+108,y+34,17,1,p.metalHi);
+    R(g,x+106,y+36,23,1,'rgba(41,43,38,.40)');
+    R(g,x+55,y+22,7,13,p.ink); R(g,x+56,y+23,5,10,p.metal);
+    R(g,x+57,y+24,1,7,p.metalHi); R(g,x+56,y+32,5,1,p.woodDark);
+    R(g,x+140,y+24,10,11,p.creamShade); R(g,x+141,y+25,8,1,p.cream);
+    townMicroWord(g,'PIE',x+140,y+28,p.redDark);
+    // Dark upper corners give warm practicals an actual value range.
+    R(g,x,y-12,15,55,'rgba(19,21,16,.26)'); R(g,x+208,y-12,16,55,'rgba(19,21,16,.3)');
+    [38,68,188].forEach(function(lx) {
+      interiorWarmLight(g,x+lx-20,y+9,43,34,lx===188?.85:.65);
+      interiorPendant(g,x+lx,y-14,p);
+      R(g,x+lx-8,y+19,8,1,p.woodLight);
+      R(g,x+lx+3,y+20,4,1,p.woodHi);
+    });
+  }
+
+  function drawDinerCounter(g,model,x,y,p) {
+    var i;
+    // Furniture bases and widths come from the same generated collision model.
+    var counterX=x+model.counter[0]*16, counterY=y+model.counter[1]*16, counterW=model.counter[2]*16;
+    R(g,counterX+2,counterY+16,counterW-2,5,'rgba(32,26,19,.28)');
+    interiorContact(g,counterX+1,counterY+18,counterW-2,p);
+    R(g,counterX,counterY,counterW,17,p.ink); R(g,counterX+1,counterY+6,counterW-2,8,p.redDark);
+    R(g,counterX+2,counterY+6,counterW-4,6,p.red); R(g,counterX+3,counterY+6,counterW-6,1,p.redHi);
+    for(i=4;i<counterW-5;i+=22) { R(g,counterX+i,counterY+8,18,3,p.redDark); R(g,counterX+i+1,counterY+8,16,1,p.redHi); }
+    R(g,counterX,counterY-2,counterW,7,p.creamShade); R(g,counterX+1,counterY-2,counterW-2,4,p.cream);
+    R(g,counterX+1,counterY+4,counterW-2,1,p.metalHi); R(g,counterX+2,counterY+15,counterW-4,1,p.metal);
+    // Broken specular strips keep polished laminate distinct from matte wood.
+    R(g,counterX+10,counterY-1,20,1,p.metalHi);
+    R(g,counterX+53,counterY,16,1,p.metalHi);
+    R(g,counterX+94,counterY-1,26,1,p.gold);
+    interiorServiceCluster(g,counterX+3,counterY-17,p,'coffee');
+    interiorServiceCluster(g,counterX+67,counterY-14,p,'plates'); interiorPieCase(g,counterX+counterW-49,counterY-15,48,p);
+    interiorCup(g,counterX+35,counterY-3,p); interiorCup(g,counterX+75,counterY-3,p);
+    interiorServiceCluster(g,x+185,y+31,p,'register');
+    interiorWarmLight(g,counterX+2,counterY-6,44,19,.8);
+    interiorWarmLight(g,counterX+counterW-43,counterY-10,43,24,1.25);
+    if(GAME.CharacterActivity) GAME.CharacterActivity.drawWipe(g,-x,-y);
+  }
+  function drawDinerInterior(g,map,cx,cy) {
+    var model=map.interior, p=INTERIOR_MATERIALS[model.material], x=-cx, y=-cy, i;
+    R(g,0,0,g.canvas ? g.canvas.width : 256,g.canvas ? g.canvas.height : 192,'#17251e');
+    // Restore a continuous floor beneath furniture, with 8px checker tiles.
+    for(var fy=16;fy<144;fy+=8) for(var fx=16;fx<208;fx+=8) {
+      var dark=((fx+fy)/8)&1;
+      R(g,x+fx,y+fy,8,8,dark?p.tile:p.floorLight);
+      R(g,x+fx,y+fy+7,8,1,dark?p.tileShade:p.floorShade);
+      // Sparse, deterministic value changes; no random dirt or per-frame noise.
+      var tileKey=(fx/8*7+fy/8*11)%19;
+      if(tileKey===3) R(g,x+fx+1,y+fy+1,6,5,'rgba(207,188,146,.055)');
+      if(tileKey===12) R(g,x+fx+1,y+fy+2,5,4,'rgba(41,43,38,.035)');
+      if(fx>=104 && fx<=120 && fy>=80 && fy%24===8)
+        R(g,x+fx+2,y+fy+3,4,1,'rgba(244,230,200,.09)');
+    }
+    // Lower-contrast floor, wall contact shadows and localized warm pools.
+    R(g,x+16,y+44,192,8,'rgba(32,28,21,.20)');
+    R(g,x+16,y+48,5,96,'rgba(34,29,21,.19)'); R(g,x+202,y+48,6,96,'rgba(34,29,21,.23)');
+    interiorWarmLight(g,x+25,y+55,58,25,.65);
+    interiorWarmLight(g,x+140,y+55,57,25,.9);
+    interiorPanel(g,x,y+28,16,116,p); interiorPanel(g,x+208,y+28,16,116,p);
+    interiorBackbar(g,x,y,p);
+    drawDinerCounter(g,model,x,y,p);
+    model.stools.forEach(function(a){interiorStool(g,x+a[0]*16,y+a[1]*16,p);});
+    model.booths.forEach(function(a,n){
+      interiorBooth(g,x+a[0]*16,y+a[1]*16,a[2]*16,p,n,model.guests[n]);
+      interiorWarmLight(g,x+a[0]*16+3,y+a[1]*16-4,42,19,[.55,.85,.7,.3][n]);
+    });
+    interiorSpecials(g,x+model.specials[0]*16,y+model.specials[1]*16,p);
+    interiorFloorPlant(g,x+model.islandPlant[0]*16-4,y+model.islandPlant[1]*16,p);
+    interiorPlant(g,x+model.plant[0]*16,y+model.plant[1]*16+2,p);
+    var coatX=x+model.coatRack[0]*16, coatY=y+model.coatRack[1]*16;
+    R(g,coatX+7,coatY,2,14,p.woodHi); R(g,coatX+3,coatY+13,10,2,p.ink);
+    R(g,coatX+2,coatY+1,12,2,p.woodLight); R(g,coatX+2,coatY+3,4,7,p.redDark); R(g,coatX+11,coatY+3,3,9,p.green);
+    // Hanging plants occupy side-wall trim; aisle remains truly walkable.
+    interiorPicture(g,x+1,y+30,13,18,p,'portrait');
+    // Local-history cluster on the left; one quieter portrait on the right.
+    interiorPicture(g,x+1,y+49,13,16,p,'photo');
+    interiorPicture(g,x+1,y+99,13,16,p,'photo');
+    interiorPicture(g,x+210,y+53,12,15,p,'portrait');
+    [68,119].forEach(function(ly){
+      interiorWarmLight(g,x+1,y+ly+1,30,20,ly===119?.7:.9); interiorWarmLight(g,x+193,y+ly+1,30,20,ly===119?.35:.8);
+      interiorLamp(g,x+7,y+ly,p);interiorLamp(g,x+216,y+ly,p);
+    });
+    // Low cutaway front wall and the two genuine entrance tiles.
+    R(g,x+16,y+144,192,16,p.redDark); R(g,x+16,y+145,192,8,p.cream);
+    for(i=16;i<208;i+=8) R(g,x+i,y+144,4,3,p.redHi);
+    R(g,x+16,y+154,192,2,p.red); R(g,x+16,y+159,192,1,p.woodLight);
+    R(g,x+96,y+144,32,16,p.woodDark); R(g,x+97,y+145,30,14,p.red);
+    R(g,x+111,y+146,2,13,p.woodDark);
+    [99,115].forEach(function(dx){R(g,x+dx,y+147,10,6,p.gold);R(g,x+dx+1,y+148,8,4,p.cream);});
+  }
 
   function interiorHeroAccents(g, map, cx, cy) {
     if (!map || !map.indoor) return;
@@ -2596,15 +4850,7 @@
       R(g, x - 4, y - 4, 40, 4, C.ink); R(g, x, y - 2, 32, 2, '#dfe9df');
       R(g, x - 3, y, 3, 16, C.ink); R(g, x + 32, y, 3, 16, C.ink);
     } else if (map.id === 'diner') {
-      /* Macchina del caffè sul bancone + sedute booth sugli stessi tavoli. */
-      x = 3 * 16 - cx; y = 2 * 16 - cy;
-      R(g, x + 28, y - 1, 20, 13, C.ink); R(g, x + 30, y + 1, 16, 9, '#d9c78d');
-      R(g, x + 32, y + 2, 6, 5, '#9aab69'); R(g, x + 40, y + 2, 4, 5, C.paper);
-      R(g, x + 34, y + 8, 10, 1, C.ink); R(g, x + 36, y + 10, 2, 4, C.ink);
-      [[2,5],[8,5],[2,7],[8,7]].forEach(function (p) {
-        var px = p[0] * 16 - cx, py = p[1] * 16 - cy;
-        R(g, px - 2, py + 1, 20, 5, C.ink); R(g, px, py + 2, 16, 3, '#8f2430');
-      });
+      drawDinerInterior(g, map, cx, cy);
     } else if (map.id === 'oej') {
       /* Parete a pannelli e tappeto d'asse: profondità prima dei tavoli. */
       R(g, 10, 17, 140, 23, '#271a24');
@@ -2688,24 +4934,27 @@
    * entita'" subito dopo il loop di paintGround: il momento esatto in cui
    * ogni tile della mappa e' gia' stato dipinto una volta. */
   GAME.sprites = GAME.sprites || {};
-  GAME.sprites.drawStructures = function (g, map, cx, cy) {
+  GAME.sprites.drawStructures = function (g, map, cx, cy, opts) {
     if (!map || !map.rows) return;
     var rects = roofRects(map), i, r, p, sy, ey, h, leftX, rightX;
     for (i = 0; i < rects.length; i++) {
       r = rects[i]; p = BUILDINGS[r.ch];
-      if (!p) continue;
+      if (!p || r.ch === '2') continue; /* Double R: volume intero in townDoubleR */
       sy = r.by * 16 - ROOF_LIFT - cy;
       ey = (r.by + 1) * 16 - cy;
       h = ey - sy;
-      if (h <= 0 || ey < 0 || sy > 144) continue;
+      if (h <= 0 || ey < 0 || sy > 192) continue;
       leftX = r.bx * 16 - cx; rightX = (r.bx + r.bw) * 16 - cx;
-      if (rightX < -4 || leftX > 164) continue;
+      if (rightX < -4 || leftX > 260) continue;
       R(g, leftX - 2, sy, 1, h, C.ink);
       R(g, leftX - 1, sy, 1, h, p[1]);
       R(g, rightX, sy, 1, h, p[1]);
       R(g, rightX + 1, sy, 1, h, C.ink);
     }
+    townForestMassAccents(g, map, cx, cy, opts);
     townHeroAccents(g, map, cx, cy);
+    townBuildingLandscape(g, map, cx, cy);
+    townParkedCars(g, map, cx, cy);
     sceneHeroAccents(g, map, cx, cy);
     interiorHeroAccents(g, map, cx, cy);
     /* Soglia esterna: pavimento grafico, non nuovo tile e non collisione.
@@ -2726,13 +4975,35 @@
           /* Lodge alza facciata e porta di 8px; sua soglia segue il piede
            * visivo. Altri esterni poggiano sulla riga subito successiva. */
           py = (side === '8' ? ty * 16 + 8 : (ty + 1) * 16) - cy;
-          if (px < -16 || px > 160 || py < -4 || py > 144) continue;
+          if (px < -16 || px > 256 || py < -4 || py > 192) continue;
           R(g, px, py, 16, 4, C.ink);
           R(g, px + 1, py, 14, 2, p[1]);
           R(g, px + 2, py + 2, 12, 1, shade(p[1], -22));
         }
       }
     }
+  };
+
+  /* Passaggio depth separato: engine lo inserisce fra attori ordinati per
+   * piedi. Ridisegna solo corpi degli alberi nel range di profondita'; case,
+   * arredi, ombre e sottobosco restano nel passaggio terreno. */
+  GAME.sprites.drawForegroundStructures = function (g, map, cx, cy, opts) {
+    if (!map) return;
+    opts = opts || {};
+    if (map.id === 'diner' && map.interior) {
+      var m=map.interior, p=INTERIOR_MATERIALS[m.material];
+      var min=opts.forestDepthMin, max=opts.forestDepthMax;
+      var counterDepth=(m.counter[1]+1)*16;
+      if(counterDepth>=min && counterDepth<max) drawDinerCounter(g,m,-cx,-cy,p);
+      var boardDepth=(m.specials[1]+m.specials[3])*16;
+      if(boardDepth>=min && boardDepth<max) interiorSpecials(g,m.specials[0]*16-cx,m.specials[1]*16-cy,p);
+      var plantDepth=(m.islandPlant[1]+1)*16;
+      if(plantDepth>=min && plantDepth<max) interiorFloorPlant(g,m.islandPlant[0]*16-4-cx,m.islandPlant[1]*16-cy,p);
+      return;
+    }
+    if (map.id !== 'town') return;
+    opts.forestForegroundOnly = true;
+    townForestMassAccents(g, map, cx, cy, opts);
   };
 
   function door(ctx, x, y, tx, ty, rows) {
@@ -4530,31 +6801,75 @@
     return HEAD_PAD;
   }
 
-  function drawCastWalkSheet(ctx, name, x, y, dir, frame, alpha, moving) {
+  var dinerActorLightCanvas=null;
+  function drawCastWalkSheet(ctx, name, x, y, dir, frame, alpha, moving, environment) {
     var castIndex = CAST_SHEET_ORDER.indexOf(name);
-    if (castIndex < 0 || !castWalkSheet || !castWalkSheet.complete || castWalkSheet.naturalWidth !== 240 || castWalkSheet.naturalHeight !== 240 || !ctx.drawImage) return false;
-    var blockX = (castIndex % 5) * 48;
-    var blockY = Math.floor(castIndex / 5) * 48;
+    if (castIndex < 0 || !castWalkSheet || !castWalkSheet.complete || castWalkSheet.naturalWidth !== 360 || castWalkSheet.naturalHeight !== 360 || !ctx.drawImage) return false;
+    var blockX = (castIndex % 5) * 72;
+    var blockY = Math.floor(castIndex / 5) * 72;
     var row = dir === 'up' ? 1 : (dir === 'left' || dir === 'right' ? 2 : 0);
-    var col = moving ? ((frame & 1) ? 2 : 1) : 0;
-    var ox = Math.round(x), oy = Math.round(y);
+    var phase = moving ? (frame & 3) : 0;
+    var col = phase === 1 ? 1 : (phase === 3 ? 2 : 0);
+    var ox = Math.round(x) - 4, oy = Math.round(y) - 8;
+    var source=castWalkSheet,sx=blockX+col*24,sy=blockY+row*24;
+    var life = !moving && environment && environment.characterLife;
+    var idleFrame = life && LIFE_FRAMES[life.spriteFrame];
+    if (idleFrame && idleFrame.actor === name && idleFrame.direction === (dir === 'left' ? 'right' : dir) &&
+        lifeSheet && lifeSheet.complete && lifeSheet.naturalWidth === 192 && lifeSheet.naturalHeight === 24) {
+      source=lifeSheet; sx=idleFrame.x; sy=0;
+    }
+    if(environment && environment.mapId==='diner' && typeof document!=='undefined') {
+      var warmth=interiorActorLight(environment.wx,environment.wy);
+      if(warmth && document.createElement) {
+        if(!dinerActorLightCanvas) { dinerActorLightCanvas=document.createElement('canvas'); dinerActorLightCanvas.width=24; dinerActorLightCanvas.height=24; }
+        var light=dinerActorLightCanvas.getContext('2d');
+        light.clearRect(0,0,24,24); light.imageSmoothingEnabled=false;
+        light.drawImage(source,sx,sy,24,24,0,0,24,24);
+        light.globalCompositeOperation='source-atop';
+        light.fillStyle='rgba(244,230,200,'+warmth+')';
+        light.fillRect(7,1,7,1); light.fillRect(6,2,3,1);
+        light.fillRect(5,14,2,1); light.fillRect(16,14,2,1);
+        light.globalCompositeOperation='source-over';
+        source=dinerActorLightCanvas; sx=0; sy=0;
+      }
+    }
     ctx.save();
     ctx.globalAlpha *= alpha == null ? 1 : alpha;
     ctx.imageSmoothingEnabled = false;
     if (dir === 'left') {
-      ctx.translate(ox + 16, 0);
+      ctx.translate(ox + 24, 0);
       ctx.scale(-1, 1);
-      ctx.drawImage(castWalkSheet, blockX + col * 16, blockY + row * 16, 16, 16, 0, oy, 16, 16);
+      ctx.drawImage(source, sx, sy, 24, 24, 0, oy, 24, 24);
     } else {
-      ctx.drawImage(castWalkSheet, blockX + col * 16, blockY + row * 16, 16, 16, ox, oy, 16, 16);
+      ctx.drawImage(source, sx, sy, 24, 24, ox, oy, 24, 24);
     }
     ctx.restore();
     return true;
   }
 
-  Spr.drawChar = function (ctx, x, y, pal, dir, frame, alpha, moving, night) {
+  function drawActorContactShadow(ctx, x, y, alpha) {
+    var oldAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = oldAlpha * (alpha == null ? 1 : alpha);
+    /* Ellisse pixel compatta: punte affusolate e due valori, mai barra. */
+    var sy = y + 14;
+    R(ctx, x + 5, sy, 6, 1, 'rgba(49,90,73,.18)');
+    R(ctx, x + 2, sy + 1, 12, 1, 'rgba(49,90,73,.24)');
+    R(ctx, x + 1, sy + 2, 14, 1, 'rgba(49,90,73,.38)');
+    R(ctx, x + 3, sy + 3, 11, 1, 'rgba(49,90,73,.28)');
+    R(ctx, x + 5, sy + 4, 6, 1, 'rgba(49,90,73,.18)');
+    ctx.globalAlpha = oldAlpha;
+  }
+
+  Spr.drawChar = function (ctx, x, y, pal, dir, frame, alpha, moving, night, time, environment) {
     var p = pal || CHARS.cooper;
     var name = nameOf(p);
+    /* Ombra runtime unica: player e ogni NPC condividono ellisse 14x5. */
+    if(environment && environment.mapId==='diner') {
+      var shadowAlpha=ctx.globalAlpha; ctx.globalAlpha*=alpha==null?1:alpha;
+      interiorContact(ctx,Math.round(x)+2,Math.round(y)+15,12,INTERIOR_MATERIALS.diner);
+      ctx.globalAlpha=shadowAlpha;
+    } else drawActorContactShadow(ctx, x, y, alpha);
+    if (drawCastWalkSheet(ctx, name, x, y, dir, frame, alpha, moving, environment)) return;
     /* Cadenza Gen II a quattro fasi: contatto, passo A, contatto, passo B.
      * Down/up specchiano il solo passo B; il profilo alterna davvero idle e
      * passo, mentre left resta il mirror esatto di right. */
@@ -4578,12 +6893,13 @@
   };
 
   GAME.Retro2D = GAME.Retro2D || {};
+  GAME.Retro2D.characterLifeFrames = {src:LIFE_SHEET_SRC, frame:[24,24], frames:LIFE_FRAMES};
   GAME.Retro2D.castWalkSheet = {
     src: CAST_SHEET_SRC,
-    production: false,
-    size: [240, 240],
-    block: [48, 48],
-    frame: [16, 16],
+    production: true,
+    size: [360, 360],
+    block: [72, 72],
+    frame: [24, 24],
     rows: ['down', 'up', 'right'],
     columns: ['idle', 'stepA', 'stepB'],
     mirrorsLeft: true,
@@ -4591,14 +6907,15 @@
   };
   GAME.Retro2D.castRenderer = {
     id: CAST_RENDERER,
-    kind: 'explicit-authored-matrices',
-    frame: [16, 16],
-    opaqueTones: 3,
+    kind: 'authored-master-derived-atlas',
+    frame: [24, 24],
+    visibleHeight: [20, 24],
+    opaqueTones: 14,
     directions: ['down', 'up', 'right'],
     mirrorsLeft: true,
-    gait: 'front-back-mirror-x; side-reuse',
-    sourceAtlas: false,
-    productionFallback: false,
+    gait: 'contact-stepA-contact-stepB; left-mirror-right',
+    sourceAtlas: true,
+    productionFallback: 'authored-matrices-error-only',
     matrixFiles: ['retro-cast-matrices-a.js', 'retro-cast-matrices-b.js']
   };
   GAME.Retro2D.interiorPropFootprints = INTERIOR_PROP_FOOTPRINTS.map(function (p) {
@@ -4620,10 +6937,10 @@
     return dr * dr + dg * dg + db * db;
   }
 
-  /* Normalizzazione BG hardware: griglia 8x8 ancorata alle coordinate mondo,
-   * massimo quattro colori per cella prima degli OBJ. Un solo get/put per
-   * frame; nessun cambiamento palette durante lo scroll. */
-  GAME.Retro2D.limitBackgroundPalettes = function (ctx, cx, cy, w, h) {
+  /* Interni conservano disciplina palette GBC. Esterni usano rampe materiche
+   * più ricche, coerenti col bar DS, senza quantizzazione per blocchi 8x8. */
+  GAME.Retro2D.limitBackgroundPalettes = function (ctx, cx, cy, w, h, mapId) {
+    if (mapId === 'town' || mapId === 'arrival' || mapId === 'woods' || INTERIOR_MATERIALS[mapId]) return;
     if (!ctx || !ctx.getImageData || !ctx.putImageData) return;
     var image;
     try { image = ctx.getImageData(0, 0, w, h); } catch (e) { return; }
@@ -4666,6 +6983,15 @@
       }
     }
     ctx.putImageData(image, 0, 0);
+  };
+  GAME.Retro2D.interiorKit = {
+    materials: INTERIOR_MATERIALS, contactShadow: interiorContact, actorLight: interiorActorLight,
+    pendant: interiorPendant, floorPlant: interiorFloorPlant, lightPool: interiorPool, specials: interiorSpecials, serviceCluster: interiorServiceCluster,
+    occupiedTable: interiorOccupiedTable, seatedGuest: interiorSeatedGuest, seatedHands: interiorSeatedHands,
+    panel: interiorPanel, booth: interiorBooth, stool: interiorStool,
+    cup: interiorCup, tableProps: interiorTableProps, lamp: interiorLamp,
+    picture: interiorPicture, plant: interiorPlant,
+    coffeeMachine: interiorCoffeeMachine, pieCase: interiorPieCase
   };
   GAME.Retro2D.authored = true;
   GAME.Retro2D.tileSize = 16;

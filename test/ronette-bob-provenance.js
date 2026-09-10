@@ -50,7 +50,7 @@ function addDialogue(screens, label, id) {
 
 // Il diario conserva la traccia seriale Laura/Robert, ma non può introdurre T1.
 ok(/ROBERT/.test(D.clues.diario.desc), 'il diario visibile conserva ROBERT');
-ok(/nome un pezzo alla volta/.test(D.clues.diario.desc), 'il diario visibile conserva la regola seriale');
+ok(/un pezzo alla volta/.test(D.clues.diario.desc), 'il diario visibile conserva la regola seriale');
 ok(!BOB.test(D.clues.diario.desc), 'il diario visibile non introduce BOB');
 ok(D.dialogues.truman.pages.some((page) => /ROBERT/.test(page.text)), 'il primo Truman espone la traccia ROBERT');
 ok(!D.dialogues.truman.pages.some((page) => BOB.test(page.text)), 'il primo Truman non introduce BOB');

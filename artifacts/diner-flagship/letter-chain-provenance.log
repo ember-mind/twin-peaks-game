@@ -1,0 +1,32 @@
+# acquisizione classica al lago
+  ok - Invio al lago apre lago_maddy
+  ok - acquisizione non afferma composizione o identità ROBERT
+  ok - Cooper marca esplicitamente teoria provvisoria e limite
+  ok - lettera O assente prima del commit del dialogo
+  ok - chiusura del dialogo acquisisce lettera_o
+  ok - chiusura del dialogo registra maddy_trovata
+# descrizione visibile nel menu indizi
+  ok - UI indizio non compone ROBERT e non assegna identità
+  ok - UI distingue osservazione da ipotesi
+  ok - UI conserva lettere, ordine e provenienza osservabile
+# confronto narrativo resta volontario
+  ok - m8_discovery: apertura volontaria preparabile
+  ok - m8_discovery: commit volontario riuscito
+  ok - ritrovamento non formula P8
+  ok - ritrovamento non auto-esegue confronti
+  ok - m8_promise_echo: apertura volontaria preparabile
+  ok - m8_promise_echo: commit volontario riuscito
+  ok - eco obbligatoria non formula P8
+  ok - dopo eco, confronti disponibili ma non eseguiti
+  ok - m8_cmp_letters: apertura volontaria preparabile
+  ok - m8_cmp_letters: commit volontario riuscito
+  ok - confronto R/O annota metodo, non identità
+  ok - m8_cmp_diary: apertura volontaria preparabile
+  ok - m8_cmp_diary: commit volontario riuscito
+  ok - aprire confronto col diario non sceglie teoria
+  ok - teoria progressiva richiede scelta esplicita diary_a
+  ok - prepare della scelta resta puro
+  ok - scelta volontaria committata
+  ok - solo scelta volontaria formula P8
+  ok - P8 non diventa identità confermata
+letter-chain-provenance: PASS (28 checks)

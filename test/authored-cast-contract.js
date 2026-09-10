@@ -124,4 +124,4 @@ for (const name of cast) {
 }
 
 assert.equal(failures.length, 0, 'authored matrix failures:\n' + failures.join('\n'));
-console.log('AUTHORED-CAST-PASS — 24 actors × 3 views × 2 poses, source matrices clean');
+console.log('AUTHORED-CAST-PASS — 25 actors × 3 views × 2 poses, source matrices clean');

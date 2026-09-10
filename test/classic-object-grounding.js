@@ -108,7 +108,7 @@ E.init(canvas);
 E.start();
 E.state.mode = 'play';
 E.state.flags.intro_town = true;
-E.loadMap('traincar', 13, 4, 'down');
+E.loadMap('traincar', 13, 6, 'up');
 key('Enter');
 pump(16);
 ok(E.state.dialogue && E.state.dialogue.id === 'anello_interact' && !E.state.dialogue.replay, 'primo Enter apre first anello');

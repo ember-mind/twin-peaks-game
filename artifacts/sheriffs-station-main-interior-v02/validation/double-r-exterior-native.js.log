@@ -1,0 +1,3 @@
+Command: node test/double-r-exterior-native.js
+Exit: 0
+Output: DOUBLE-R-EXTERIOR-NATIVE-PASS 18/18

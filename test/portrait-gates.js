@@ -46,7 +46,8 @@ for (const file of hiresFiles) {
 const indexSource = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const engineSource = fs.readFileSync(path.join(root, 'js/engine.js'), 'utf8');
 assert(/id="speaker-portrait-hires"[\s\S]*assets\/portraits\/hires\/cooper\.png/.test(indexSource), 'hi-res portrait not mounted in stage');
-assert(/left: 8\.125%;[\s\S]*top: 42\.361111%;[\s\S]*width: 20%;[\s\S]*height: 22\.916667%/.test(indexSource), 'hi-res portrait not aligned to native portrait well');
+// R129: card canvas a (13,102) nel frame 256x192 -> volto 34x36 da (16,104).
+assert(/left: 6\.25%;[\s\S]*top: 54\.166667%;[\s\S]*width: 13\.28125%;[\s\S]*height: 18\.75%/.test(indexSource), 'hi-res portrait not aligned to native portrait well');
 assert(/GAME\.Portraits\.faces\[key\]/.test(engineSource), 'hi-res portrait visibility not cast-scoped');
 assert(/assetRoot \+ nextKey \+ '\.png'/.test(engineSource), 'hi-res portrait source not switched with speaker');
 const progressSource = fs.readFileSync(path.join(root, 'portrait-progress.html'), 'utf8');

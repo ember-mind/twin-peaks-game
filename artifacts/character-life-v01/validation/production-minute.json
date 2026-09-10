@@ -1,0 +1,110 @@
+{
+  "accelerated": false,
+  "animation": null,
+  "atlasId": "heartgold-atlas-r116",
+  "behaviors": [
+    {
+      "active": false,
+      "events": 2,
+      "id": "character:sheriffs_station_main_interior:station-truman:blink",
+      "next": 73181
+    },
+    {
+      "active": false,
+      "events": 1,
+      "id": "character:sheriffs_station_main_interior:station-truman:read-file",
+      "next": 91718
+    }
+  ],
+  "blinkSeen": true,
+  "canvas": {
+    "height": 192,
+    "width": 256
+  },
+  "characterLifeFrames": [
+    "truman.blink.down",
+    "truman.blink.right",
+    "truman.reading.fileRaised",
+    "truman.reading.eyesLowered"
+  ],
+  "contextual": false,
+  "direction": null,
+  "events": 3,
+  "frame": -1,
+  "history": [
+    {
+      "animation": "blink",
+      "category": "idle",
+      "time": 23132.399999999998,
+      "variant": 0
+    },
+    {
+      "animation": "blink",
+      "category": "idle",
+      "time": 40548.399999999994,
+      "variant": 0
+    },
+    {
+      "animation": "reading",
+      "category": "contextual",
+      "time": 44698.2,
+      "variant": 0
+    }
+  ],
+  "interactionVerified": true,
+  "logicalObservationMs": 61014.2,
+  "mapId": "sheriffs_station_main_interior",
+  "nextIdleEvent": 12166.800000000003,
+  "npc": {
+    "dir": "down",
+    "id": "station-truman",
+    "moving": false,
+    "sprite": "truman",
+    "x": 10,
+    "y": 4
+  },
+  "npcCount": 1,
+  "observationComplete": true,
+  "observationMs": 61024.5,
+  "paused": false,
+  "player": {
+    "dir": "up",
+    "moving": false,
+    "tx": 7,
+    "ty": 10
+  },
+  "quietMinute": true,
+  "rate": 1,
+  "reactionProof": {
+    "history": [
+      {
+        "animation": "look-toward-interactor",
+        "category": "reactive",
+        "direction": "right",
+        "time": 2586.4999999880793
+      }
+    ],
+    "npc": {
+      "dir": "down",
+      "id": "station-truman",
+      "moving": false,
+      "sprite": "truman",
+      "x": 10,
+      "y": 4
+    },
+    "player": {
+      "dir": "left",
+      "moving": false,
+      "tx": 11,
+      "ty": 4
+    }
+  },
+  "reactive": false,
+  "readingSeen": true,
+  "ready": true,
+  "spriteFrame": null,
+  "state": "still",
+  "stillFraction": 0.9426379432984454,
+  "stillMs": 57514.3,
+  "consoleSevere": []
+}

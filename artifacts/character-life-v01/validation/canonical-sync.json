@@ -1,0 +1,135 @@
+{
+  "files": [
+    {
+      "file": "js/engine.js",
+      "action": "updated matched pre-task source",
+      "sha256": "7fdcc82214136afa46cac7345640b27abe0d6f2bbf80036ff16909fcfc63e24a"
+    },
+    {
+      "file": "js/character-activity.js",
+      "action": "updated matched pre-task source",
+      "sha256": "26fa546dbb4df3489b966c719d12fe332df2bf4283ec763440697463e551b0b5"
+    },
+    {
+      "file": "js/retro-authored.js",
+      "action": "updated matched pre-task source",
+      "sha256": "fabd678e848c2eec70453fdec01e82fa1e9918a8267c54d0a17ceb11902b5d66"
+    },
+    {
+      "file": "js/sheriffs-station-scene.js",
+      "action": "updated matched pre-task source",
+      "sha256": "177af407b86f6e77212bf94e83226ec31a08f13036e326e6f0a69602bd6e2641"
+    },
+    {
+      "file": "js/character-life-scenes.js",
+      "action": "added scoped source",
+      "sha256": "4e0dd32ec4df4ec71a3c11a74072fcb29b39fb6659a9f4bd860e74548020e0b4"
+    },
+    {
+      "file": "assets/sprites/character-life-v01.png",
+      "action": "added scoped source",
+      "sha256": "c7ee161139c445fe5ca8e61badb658d7f69fdbe1adfd69f69bc9949b04af19cb"
+    },
+    {
+      "file": "assets/sprites/character-life-v01.manifest.json",
+      "action": "added scoped source",
+      "sha256": "0eb491a21954a53709ff6d0fa13a7a4faeb4941af608f3f411a41a6284b6367a"
+    },
+    {
+      "file": "tools/build-character-life-frames.js",
+      "action": "added scoped source",
+      "sha256": "f0d8a0774fddc6d46a795fe41fa51d5cd30c288e47d8b423ba32192d8efd6b2b"
+    },
+    {
+      "file": "test/character-life.html",
+      "action": "added scoped source",
+      "sha256": "09c6ded1a8957418c566b8b223d481e1a8afd6ccc925e84f957cac82a7645ccc"
+    },
+    {
+      "file": "test/character-life-preview.js",
+      "action": "added scoped source",
+      "sha256": "a381720bcd2ee90da632583d81b1603cf32a2f7de9b5700485dfc5b044c1e71b"
+    },
+    {
+      "file": "test/character-life.js",
+      "action": "added scoped source",
+      "sha256": "79ea27ce6611eeca8dbbc3791c62b70d0080fcb5a139e48fafa0c377ab41c352"
+    },
+    {
+      "file": "test/sheriffs-station.html",
+      "action": "added scoped source",
+      "sha256": "172bc85d828b4c5de4ea547267ce8ecca3594296c9bb57e294eac8da984b116a"
+    },
+    {
+      "file": "test/sheriffs-station-preview.js",
+      "action": "added scoped source",
+      "sha256": "60263b874787a007ec897a8863e527ca51118aa38cf7a42c245f81a410790a9e"
+    },
+    {
+      "file": "test/sheriffs-station-native.js",
+      "action": "added scoped source",
+      "sha256": "bb1b5140e0cee016a2669669f8f0bdd0349ff4896402b90bbb9243e4c14b9300"
+    },
+    {
+      "file": "index.html",
+      "action": "inserted only Character Life profile script; preserved pre-existing entrypoint differences",
+      "sha256": "54cdd099d637c5d2d59f4625ee4b6766adef6c83ac4eec1d2306569d682ad194"
+    },
+    {
+      "file": "js/double-r-exterior-art.js",
+      "action": "restored missing existing preview dependency without code changes",
+      "sha256": "803651cbd46c6378139249bf1cfa72f1a444ee5969ab99de4fb4debed7d7549d"
+    },
+    {
+      "file": "js/double-r-exterior-scene.js",
+      "action": "restored missing existing preview dependency without code changes",
+      "sha256": "cece02d1c051144e0259607e7a9ac7abd9137b75631444274adc900195bd1a4d"
+    },
+    {
+      "file": "js/double-r-location-data.js",
+      "action": "restored missing existing preview dependency without code changes",
+      "sha256": "daee86895b54b903bfbeb3d540d86b4049bea325325da082fe61098296f4165e"
+    },
+    {
+      "file": "js/double-r-location-production.js",
+      "action": "restored missing existing preview dependency without code changes",
+      "sha256": "5cfacde5c53a5d43bd24ba9ee8b4203ce66a69de5623410e251a2d6bed5e171f"
+    },
+    {
+      "file": "js/traincar-location-data.js",
+      "action": "restored missing existing preview dependency without code changes",
+      "sha256": "bed1dde5a4423e32d9a6caeb559d4e534fda42b27934090c319eda345d797f67"
+    },
+    {
+      "file": "js/traincar-location-production.js",
+      "action": "restored missing existing preview dependency without code changes",
+      "sha256": "5930bd2fbe62fcfa46e6740ef8bd4d34971088a4d278320680c098f2a4bee3db"
+    },
+    {
+      "file": "js/world-engine.js",
+      "action": "restored missing existing preview dependency without code changes",
+      "sha256": "2437a8ba14a371b37bdf1f2679fe9dcccfac08a986da87a219cb6aa2a2acf00f"
+    },
+    {
+      "file": "js/world-catalog.js",
+      "action": "restored missing existing preview dependency without code changes",
+      "sha256": "da3c46fe42b6363381d5a03bdab7c47945b0c8b1f632640c98ab21aa8a12308d"
+    }
+  ],
+  "note": "Only scoped source and missing existing preview dependencies synced; existing canonical entrypoint differences preserved. World Engine and catalog bytes unchanged from local pre-task source.",
+  "existingCanonicalPreviewDependenciesRestored": [
+    "js/double-r-exterior-art.js",
+    "js/double-r-exterior-scene.js",
+    "js/double-r-location-data.js",
+    "js/double-r-location-production.js",
+    "js/traincar-location-data.js",
+    "js/traincar-location-production.js",
+    "js/world-engine.js",
+    "js/world-catalog.js"
+  ],
+  "canonicalCheck": {
+    "command": "node test/character-life.js",
+    "exitCode": 1,
+    "limitation": "Canonical js/maps.js has pre-existing divergence from the workspace preservation receipt. It was not overwritten. Local production-backed validation passed."
+  }
+}

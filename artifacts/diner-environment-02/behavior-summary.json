@@ -1,0 +1,44 @@
+{
+  "seed": 1989,
+  "durationMs": 60000,
+  "pass01SnapshotsIdentical": true,
+  "machineActiveMs": 2600,
+  "machineDuty": 0.043333333333333335,
+  "machineEvents": [
+    {
+      "start": 12294,
+      "end": 13058,
+      "variant": 0
+    },
+    {
+      "start": 22953,
+      "end": 23472,
+      "variant": 1
+    },
+    {
+      "start": 48058,
+      "end": 48579,
+      "variant": 1
+    },
+    {
+      "start": 56984,
+      "end": 57751,
+      "variant": 0
+    }
+  ],
+  "clockSteps": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "doorEventMs": 2000
+}

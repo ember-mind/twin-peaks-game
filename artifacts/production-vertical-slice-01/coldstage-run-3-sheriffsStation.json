@@ -1,0 +1,45 @@
+{
+  "status": "pass",
+  "reportPath": ".coldstage/runs/2026-09-09T08-04-53-043Z-sheriffsStation/report.json",
+  "environment": {
+    "lane": "selenium-release",
+    "browser": "Chrome",
+    "browserVersion": "152.0.7977.83",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "changedFileCount": null,
+  "baseline": null,
+  "pixelGate": {
+    "status": "pending",
+    "aiReviewNeeded": true
+  },
+  "scenarios": [
+    {
+      "name": "sheriffsStation",
+      "status": "pass",
+      "attestation": {
+        "runtime": "pass",
+        "visualReview": "not-performed"
+      },
+      "durationMs": 46905,
+      "checks": {
+        "passed": 9,
+        "total": 9,
+        "failed": []
+      },
+      "consoleSevere": 0,
+      "storage": "isolated",
+      "pixelDiff": {
+        "status": "review-required",
+        "aiReviewNeeded": true,
+        "nextAction": "visual-review",
+        "reviewSheet": ".coldstage/diffs/2026-09-09T08-04-53-043Z-sheriffsStation/sheriffsStation/sheriffsStation-diff-sheet.webp"
+      },
+      "error": null,
+      "screenshot": null,
+      "localArtifacts": 8,
+      "captureDeterminism": []
+    }
+  ]
+}

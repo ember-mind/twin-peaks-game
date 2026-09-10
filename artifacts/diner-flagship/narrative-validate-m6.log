@@ -1,0 +1,25 @@
+# autorità canonica e provenienza
+# registro pagine (globale, incluso M4+M5)
+# igiene participant-facing (nessun token interno nei testi/label)
+# nessuna attribuzione dell'omicidio (fuori dall'opzione respinta di P5)
+# flag deprecati mai OPERATIVI (effetti/condizioni) — le invarianti li citano solo per documentare
+# writer unici (mappa scrittura → nodi)
+# valori tipizzati e cataloghi (contro i domini)
+# nodo tattica (B4): una tattica, write-once, nessuna corretta
+# tre rami: value_is esclusivo, 2 domande esclusive, ammissione
+# differenziazione delle tattiche sui 7 assi (contratto §6)
+# beat P5 (B6b): giocato, A/B/C, feedback per-ramo, milestone
+# catena arresto → notte → notizia → Gigante → rapporto → ospedale
+# obiettivi: esattamente uno vero in ogni combinazione raggiungibile
+# binding ambientali e kind
+# nodes_done mai come gate narrativo (solo fisico)
+# C6-A.1: binding contro il catalogo reale del motore
+# C6-A.1: continuazione tattica→ramo (goto per valore selezionato)
+# C6-A.1: feedback/pagine per-valore coprono il dominio m6_tactic
+# C6-A.1: nessun world-root oscura un nodo irrisolto (softlock del root contract)
+# C6-A.1: M4/M5 stato e dati invariati (i diff solo AGGIUNGONO)
+# C6-A.2: continuazione P5→arresto + pulizia contrattuale (semantica unica)
+# C6-A.3: chiusura del contratto documentale (feedback in prepareChoice, obj_m6_3 allineato)
+# conteggio nodi e completamento
+
+3553 controlli statici M6 superati ✔ (proposta C6-A — copertura dinamica in C6-B); 69 pagine M6 registrate, 12 nodi

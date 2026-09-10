@@ -1,0 +1,16 @@
+{
+  "pass": true,
+  "capture": [
+    1280,
+    960
+  ],
+  "native": [
+    256,
+    192
+  ],
+  "integerScale": 5,
+  "verifiedBlocks": 49152,
+  "nonuniformChannelSamples": 0,
+  "nativeRGBAsha256": "2b1e311e1a307b7324fce5d471f05e9c876f5e7186fb099fedad0ae797688c94",
+  "method": "Every 5x5 capture block checked for exact RGBA equality; native frame extracted without filtering."
+}
