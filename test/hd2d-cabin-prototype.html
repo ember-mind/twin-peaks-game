@@ -18,17 +18,17 @@
     #vignette{pointer-events:none;position:absolute;inset:0;box-shadow:inset 0 0 100px 15px #06100ac9,inset 0 -50px 80px #02040385}
     footer{display:flex;justify-content:space-between;align-items:center;margin:14px 4px 0;color:#8f8c7d;font:10px/1.4 system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase}
     .keys{display:flex;gap:9px}.keys span{white-space:nowrap}.key{color:#d6cbaa;border:1px solid #4e5148;border-radius:2px;padding:3px 5px;background:#111514}
-    .switch{display:flex;gap:6px}button{border:1px solid #565649;background:#121716;color:#bcb7a4;padding:7px 10px;font:600 9px system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}button.active{color:#f0ce85;border-color:#a27f45;background:#292317}
+    .switch{display:flex;gap:6px;flex-wrap:wrap}button{border:1px solid #565649;background:#121716;color:#bcb7a4;padding:7px 10px;font:600 9px system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}button.active{color:#f0ce85;border-color:#a27f45;background:#292317}
     @media(max-width:650px){body{padding:10px}header{margin-bottom:8px}footer{align-items:flex-start;gap:8px;flex-direction:column}.hint{display:none}}
   </style>
 </head>
 <body>
   <main>
     <header><div><div class="eyebrow">Throwaway visual prototype · Twin Peaks</div><h1 id="title">Pine Clearing, 6:47 PM</h1></div><div id="state">Loading diorama</div></header>
-    <section id="frame" aria-label="Interactive forest cabin diorama"><div id="grain"></div><div id="vignette"></div></section>
+    <section id="frame" aria-label="Interactive forest cabin and town diorama"><div id="grain"></div><div id="vignette"></div></section>
     <footer>
       <div class="keys"><span><b class="key">WASD</b> walk</span><span><b class="key">R</b> reset</span><span class="hint"><b class="key">Space</b> compare light</span></div>
-      <div class="switch"><button data-variant="flat">Flat baseline</button><button data-variant="hd2d">HD-2D depth</button></div>
+      <div class="switch"><button data-location="cabin">Cabin</button><button data-location="diner">Double R</button><button data-location="sheriff">Sheriff</button><button data-variant="flat">Flat baseline</button><button data-variant="hd2d">HD-2D depth</button></div>
     </footer>
   </main>
   <script src="../js/vendor/three.min.js"></script>

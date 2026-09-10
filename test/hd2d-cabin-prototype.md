@@ -19,3 +19,12 @@ Bounded Gauntlet result: **BAR_WINS**, scene 7/10, materials 6/10, actor/navigat
 Official reference: https://dragonquest.square-enix-games.com/games/en-us/dragon-quest-3-hd2d-remake/ . Detailed local evidence and source measurements: `.gauntlet/hd2d-cabin-prototype/progress.md`.
 
 Recheck: `coldstage run changed --config test/hd2d-cabin-coldstage.config.mjs --json`.
+
+
+## Quick town extension
+
+The same prototype now connects the cabin clearing to a roadside Double R diner and sheriff office. Walk east along z=5.5, or use the Cabin / Double R / Sheriff shortcuts. The camera follows Cooper continuously. `?location=diner` and `?location=sheriff` open the other locations directly; lighting variants remain available. Buildings and parked car block movement. Location shortcuts are prototype navigation, not campaign transitions.
+
+This is an expanded graphical study, not a replacement for the production game. New views have no independent visual score; the earlier DQIII BAR_WINS verdict remains applicable to the original study only.
+
+Extension validation: six focused native guards pass; Coldstage 11/11 runtime checks pass, including the complete outward/return road walk and camera tracking. Visual review skipped because `pixelGate.aiReviewNeeded=false`.

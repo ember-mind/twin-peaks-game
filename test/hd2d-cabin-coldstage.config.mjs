@@ -25,13 +25,30 @@ export default {
         const reset = JSON.stringify(p.snapshot().player) === JSON.stringify(before);
         p.setVariant('flat'); const flat = p.snapshot().variant === 'flat';
         p.setVariant('hd2d');
-        window.__cabinProof = { walked: walked && after.z < before.z, cabinBlocked, boundaryBlocked, reset, variants: flat && p.snapshot().variant === 'hd2d' };
+        p.move(0, 0.7);
+        let outward = true, homeward = true;
+        for (let i = 0; i < 74; i++) outward = p.move(0.5, 0) && outward;
+        const far = p.snapshot();
+        const tracked = far.cameraCenter.x > 20;
+        for (let i = 0; i < 74; i++) homeward = p.move(-0.5, 0) && homeward;
+        const roundTrip = outward && homeward && p.snapshot().player.x === before.x;
+        const visits = ['cabin', 'diner', 'sheriff'].every(name => {
+          p.visit(name);
+          return p.snapshot().location === name && p.snapshot().collision === 'clear';
+        });
+        p.visit('diner'); const dinerBlocked = !p.move(0, -5);
+        p.visit('sheriff'); const sheriffBlocked = !p.move(0, -7);
+        p.visit('cabin');
+        window.__cabinProof = { walked: walked && after.z < before.z, cabinBlocked, boundaryBlocked, reset, variants: flat && p.snapshot().variant === 'hd2d', roundTrip, tracked, visits, dinerBlocked, sheriffBlocked };
       `,
       evidenceScript: 'return {...GAME.HD2DPrototype.snapshot(), ...window.__cabinProof, canvas: {width: document.querySelector("canvas").width, height: document.querySelector("canvas").height}};',
-      checks: ['ready', 'walked', 'cabinBlocked', 'boundaryBlocked', 'reset', 'variants'].map(path => ({path, equals: true})),
+      scriptTimeoutMs: 90000,
+      checks: ['ready', 'walked', 'cabinBlocked', 'boundaryBlocked', 'reset', 'variants', 'roundTrip', 'tracked', 'visits', 'dinerBlocked', 'sheriffBlocked'].map(path => ({path, equals: true})),
       captures: [
         { name: 'flat-comparison', readyScript: "GAME.HD2DPrototype.setVariant('flat'); return true;", settleMs: 50 },
-        { name: 'hd2d-spawn', readyScript: "GAME.HD2DPrototype.setVariant('hd2d'); return true;", settleMs: 50 }
+        { name: 'hd2d-spawn', readyScript: "GAME.HD2DPrototype.setVariant('hd2d'); return true;", settleMs: 50 },
+        { name: 'hd2d-diner', readyScript: "GAME.HD2DPrototype.visit('diner'); return true;", settleMs: 50 },
+        { name: 'hd2d-sheriff', readyScript: "GAME.HD2DPrototype.visit('sheriff'); return true;", settleMs: 50 }
       ]
     }
   },
