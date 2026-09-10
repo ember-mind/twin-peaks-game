@@ -1,0 +1,554 @@
+{
+  "results": [
+    {
+      "name": "[B] setup: build reale in partita (testMode=false)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] setup: seme di fine Atto 3 installato (atto4, gigante1, jacques_dead, E3, E1) e M8 corrente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] setup: M8 caricata con i nodi dello split",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: all'apertura dell'Atto 4 l'obiettivo è obj_m8_0",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: Maddy e Leland presenti al bancone prima della promessa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: Maddy e Leland alle caselle del registro (10,1 / 11,1)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: Leland prima della promessa rende esattamente m8.a.leland_waiting.p01 + p02",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: l'attesa di Leland non scrive nulla",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: prima della promessa l'obiettivo è obj_m8_0",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: la promessa apre le tre opzioni",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: il feedback della promessa «autonomia» è la sua pagina",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: promise_stance = autonomia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: Maddy sparisce dopo la promessa, Leland resta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: dopo la promessa l'obiettivo è obj_m8_25",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: la testimonianza del taxi rende le pagine della promessa «autonomia»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: T_LELAND_TAXI acquisita",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: Leland sparisce dopo la testimonianza",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: dopo il taxi l'obiettivo è obj_m8_1",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Log Lady: il ceppo indica il Roadhouse (classico loglady_a4)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Log Lady: nessuna pagina narrativa né rifiuto dell'adapter",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Sarah: attiva a casa Palmer fra il diner e il Roadhouse",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Sarah: il dialogo classico rende almeno le pagine 1–2 (fra il diner e il Roadhouse)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Sarah: mai il token «BOB» nella visione (fra il diner e il Roadhouse)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Sarah: sarah_visione_ascoltata scritto (fra il diner e il Roadhouse)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: la città ha una porta per il Roadhouse",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: la porta si apre con atto4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: Truman e la folla presenti all'arrivo, Gigante assente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: nessuna entità sul telefono o sulle caselle sopra/sotto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: la dichiarazione al tavolo rende m8.b.truman.p01…p05",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: la dichiarazione non apre il telefono nello stesso lease",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: presagio_status = active dopo la dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: m8_roadhouse_truman committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: il Gigante è sul palco (8,1) dopo la dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: dopo la dichiarazione il testo è esattamente «Il telefono del Roadhouse.»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: gigante2 classico derivato dalla dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: Sarah non è più a casa Palmer dopo la dichiarazione (npcActive)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: bobby e donna assenti dalla città dopo la dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: il Gigante rende solo m8.b.giant.p01",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: la ripetizione del Gigante non aggiunge enunciati",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: il Gigante non scrive nulla",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: il telefono si raggiunge e apre le tre opzioni",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: il telefono rende m8.b.phone.p01 e p02",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: il feedback dell'avviso «centrale» è quello scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: warning_target = centrale",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: dopo la telefonata Gigante e folla non ci sono più",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: dopo la telefonata l'obiettivo è obj_m8_2",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] reload dopo il telefono: promessa e avviso persistono",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] reload dopo il telefono: stato narrativo identico",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] reload dopo il telefono: obiettivo HUD identico",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] reload dopo il telefono: il Gigante NON ricompare (fuori finestra)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] reload dopo il telefono: entità identiche",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] soglia: si esce dal Roadhouse in città",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] soglia: town_crossroads è a 47,30",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] soglia: si arriva sulla casella sopra il crocevia, rivolti in basso",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] soglia: un tasto in basso apre il crocevia (m8_focus_choice)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] soglia: il widget si apre a 47,29 guardando 47,30",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] soglia: le pagine del crocevia precedono la scelta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] soglia: focus_destination = lago",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] rotta lago: si cammina dal crocevia alla riva e la rotta risponde",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] rotta lago: body_found_by = cooper",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: dopo la rotta l'obiettivo resta obj_m8_2 (fino al ritrovamento)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] riva: le due collocazioni di Hawk sono registrate nell'adapter",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] riva: la riva del lago si raggiunge a piedi",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] riva: Hawk sulla riva PRIMA del ritrovamento assente (body_found_by=cooper)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] riva: il ritrovamento rende la versione «cooper»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] riva: l'eco della promessa è la versione «autonomia»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] riva: maddy_trovata, E9A/E9B, presagio verified, eco committata",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] riva: letter_o_observation_source deriva da body_found_by",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] riva: dopo il ritrovamento un solo Hawk, hawk_shore_after",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: dopo il ritrovamento l'obiettivo è obj_m8_3",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: maddy_trovata attraversa al classico",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] taccuino: lettere R + O → m8_cmp_letters",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] taccuino: m8_cmp_letters committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] taccuino: lettera O + diario → m8_cmp_diary con tre letture",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] taccuino: le pagine del diario precedono la scelta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] taccuino: la lettura «diary_c» risponde col suo feedback e resta ritentabile",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] taccuino: P8 non formulata dopo «diary_c»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] taccuino: «diary_a» rende il suo feedback",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] taccuino: P8 formulata solo al commit di diary_a",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: con P8 formulata l'obiettivo è obj_m8_35",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] stazione: Truman risponde con m8_station (p01…p03), mai con M4/M6",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] stazione: il caso Sarah è «vice» (m8.f.station.sarah_vice)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] stazione: p_valigia assente (avviso=centrale, focus=lago)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] stazione: p_lago presente (focus=lago)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] stazione: l'aggancio dell'orario (hook p01/p02) chiude la scena",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] stazione: m8_station committato, T_LELAND_TAXI ancora una sola acquisizione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] obiettivo M8 dopo la stazione: obj_m8_4 «Porta a Truman una contraddizione che regga.»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: bobby e donna ancora assenti dalla città dopo la stazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: Sarah ancora assente da casa Palmer dopo la stazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] trascrizione: pagine registrate",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] voce: lo speaker emesso coincide con quello scritto su ogni pagina",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] voce: ogni pagina emessa è una pagina scritta in una missione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] testo: nessuna deriva fra pagina scritta e pagina emessa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] testo: nessun id di risultato/nodo o metadato «[…]» a schermo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] testo: nessun «BOB», conteggio di lettere, «salvat», «troppo tardi», «se fossi», «bugia/mentito» nelle pagine M8 emesse",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: ogni testo di obiettivo osservato è un obiettivo scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: i pioli M8 si susseguono nell'ordine scritto, mai all'indietro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: nessun dialogo classico ritirato (truman_atto4, truman_atto5, lago_maddy, maddy_a4, leland_a4, leland_dove, leland_dopo, gerard_a4)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: nessun dialogo classico di Maddy/Leland/Gigante/Norma/Truman sulle mappe dell'Atto 4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] adapter: nessuna pagina adapter.no_roots, nessun rifiuto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] guida: nessun ripiego sull'API dell'adapter, tutto coi tasti",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] adapter: nessuna root ambigua",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] guida: nessun teletrasporto lungo la rotta scelta o verso la riva",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] stato: T_LELAND_TAXI scritta una sola volta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] stato: nessun nodo one-shot committato due volte",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: mai due Hawk, due Maddy, due Leland o due Giganti sulla stessa mappa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: Maddy e Leland mai a casa Palmer nell'Atto 4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] console: nessun errore del browser durante il percorso",
+      "pass": true,
+      "detail": null
+    }
+  ],
+  "observations": [
+    {
+      "path": "B",
+      "kind": "console (harness)",
+      "text": "favicon.ico 404 dal server di prova"
+    }
+  ],
+  "console_errors": [
+    "Failed to load resource: the server responded with a status of 404 (File not found)  <http://127.0.0.1:25933/favicon.ico>"
+  ]
+}

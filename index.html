@@ -276,6 +276,17 @@
     box-shadow: 0 0 0 2px #4f6747, 0 16px 60px rgba(0,0,0,.72);
     --native-scale: 1;
   }
+  /* Desktop cabinet: 3x native screen remains maximal and integer-scaled;
+     authored surround uses the otherwise unavoidable side/top gutters. */
+  @media (min-width: 900px) and (min-height: 600px) {
+    #stage {
+      box-shadow:
+        0 0 0 3px #d8d0a0,
+        0 0 0 7px #344438,
+        10px 14px 0 #080c09,
+        0 24px 64px rgba(0,0,0,.72);
+    }
+  }
   #game {
     display: block;
     width: 100%; height: 100%;
@@ -286,7 +297,9 @@
     image-rendering: crisp-edges !important;
   }
   /* Volti speaker conservano risoluzione ImageGen sul compositor. Mondo e
-     cornice restano nel framebuffer nativo 256x192. */
+     cornice restano nel framebuffer nativo 256x192. Card canvas a (13,102):
+     volto 34x36 da (16,104). R129: percentuali ricalcolate sul frame 256x192
+     (prima erano ancora sul 160x144 e il ritratto galleggiava sopra la card). */
   #speaker-portrait-hires {
     position: absolute;
     z-index: 8;
@@ -300,6 +313,15 @@
     pointer-events: none;
   }
   #speaker-portrait-hires[hidden] { display: none; }
+  /* Widget narrativo (retro-ui.js): card disegnata a (8,96) invece di
+     (13,102), stesso pozzo 34x36 ma a (11,98). #retro-ui-canvas sta a
+     z-index:14, quindi il ritratto deve salire sopra per coprire il volto
+     pixel disegnato nella card. */
+  #speaker-portrait-hires[data-speaker-source="narrative"] {
+    z-index: 15;
+    left: 4.296875%;
+    top: 51.041667%;
+  }
   /* Testo dialogo composto a risoluzione display. Sotto resta il bitmap
      nativo come fallback; fondi crema coprono soltanto i vecchi glifi. */
   #speaker-name-hires,
@@ -317,6 +339,7 @@
     overflow: hidden;
   }
   #speaker-name-hires {
+    /* Targhetta canvas: (15,141) 36x7 dentro la cornice 40x9 a (13,140). */
     left: 5.859375%;
     top: 73.4375%;
     width: 14.0625%;
@@ -328,7 +351,15 @@
     font-size: calc(var(--native-scale) * 4px);
     line-height: 1;
   }
+  /* Widget narrativo: targhetta a (10,135) invece di (15,141), stessa
+     dimensione 36x7 (card a (8,96) invece di (13,102), vedi ritratto sopra). */
+  #speaker-name-hires[data-speaker-source="narrative"] {
+    z-index: 15;
+    left: 3.90625%;
+    top: 70.3125%;
+  }
   #speaker-dialogue-hires {
+    /* Testo canvas: da (15,155), due righe passo 11, wrap 144 px. */
     left: 5.859375%;
     top: 80.729167%;
     width: 56.25%;

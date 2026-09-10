@@ -1,0 +1,454 @@
+
+=== PATH A (accompagno → avviso Palmer → focus Palmer; Sarah prima del diner, Lucy) ===
+  PASS - [A] setup: build reale in partita (testMode=false)
+  PASS - [A] setup: seme di fine Atto 3 installato (atto4, gigante1, jacques_dead, E3, E1) e M8 corrente
+  PASS - [A] setup: M8 caricata con i nodi dello split
+  PASS - [A] HUD: all'apertura dell'Atto 4 l'obiettivo è obj_m8_0
+  PASS - [A] Lucy (prima del presagio): pagine attese ["m8.lucy.p01","m8.lucy.p02"]
+  PASS - [A] Lucy (prima del presagio): nessun widget, nessun effetto
+  PASS - [A] Sarah: attiva a casa Palmer prima del diner
+  PASS - [A] Sarah: il dialogo classico rende almeno le pagine 1–2 (prima del diner)
+  PASS - [A] Sarah: mai il token «BOB» nella visione (prima del diner)
+  PASS - [A] Sarah: sarah_visione_ascoltata scritto (prima del diner)
+  PASS - [A] diner: Maddy e Leland presenti al bancone prima della promessa
+  PASS - [A] diner: Maddy e Leland alle caselle del registro (10,1 / 11,1)
+  shot -> artifacts/act-4-implementation/diner-maddy-leland.png
+  PASS - [A] diner: Leland prima della promessa rende m8.a.leland_waiting.p01
+  PASS - [A] diner: l'attesa di Leland non scrive nulla
+  PASS - [A] HUD: prima della promessa l'obiettivo è obj_m8_0
+  PASS - [A] diner: la promessa apre le tre opzioni
+  PASS - [A] diner: il feedback della promessa «accompagno» è la sua pagina
+  PASS - [A] diner: promise_stance = accompagno
+  PASS - [A] diner: Maddy sparisce dopo la promessa, Leland resta
+  PASS - [A] HUD: dopo la promessa l'obiettivo è obj_m8_25
+  PASS - [A] diner: la testimonianza del taxi rende le pagine della promessa «accompagno»
+  PASS - [A] diner: T_LELAND_TAXI acquisita
+  PASS - [A] diner: Leland sparisce dopo la testimonianza
+  PASS - [A] HUD: dopo il taxi l'obiettivo è obj_m8_1
+  PASS - [A] Roadhouse: la città ha una porta per il Roadhouse
+  PASS - [A] Roadhouse: la porta si apre con atto4
+  PASS - [A] Roadhouse: Truman e la folla presenti all'arrivo, Gigante assente
+  PASS - [A] Roadhouse: nessuna entità sul telefono o sulle caselle sopra/sotto
+  shot -> artifacts/act-4-implementation/roadhouse-populated.png
+  PASS - [A] Roadhouse: la dichiarazione al tavolo rende m8.b.truman.p01…p05
+  PASS - [A] Roadhouse: la dichiarazione non apre il telefono nello stesso lease
+  PASS - [A] Roadhouse: presagio_status = active dopo la dichiarazione
+  PASS - [A] Roadhouse: m8_roadhouse_truman committato
+  PASS - [A] Roadhouse: il Gigante è sul palco (8,1) dopo la dichiarazione
+  PASS - [A] HUD: dopo la dichiarazione il testo è esattamente «Il telefono del Roadhouse.»
+  PASS - [A] mondo: gigante2 classico derivato dalla dichiarazione
+  PASS - [A] mondo: Sarah non è più a casa Palmer dopo la dichiarazione (npcActive)
+  PASS - [A] mondo: bobby e donna assenti dalla città dopo la dichiarazione
+  shot -> artifacts/act-4-implementation/roadhouse-giant-stage.png
+  FAIL - [A] Roadhouse: il Gigante rende solo m8.b.giant.p01  ::  {"got":["m8.b.giant.p01"],"viaApi":true}
+  PASS - [A] Roadhouse: la ripetizione del Gigante non aggiunge enunciati
+  PASS - [A] Roadhouse: il Gigante non scrive nulla
+  PASS - [A] Roadhouse: il telefono si raggiunge e apre le tre opzioni
+  PASS - [A] Roadhouse: il telefono rende m8.b.phone.p01 e p02
+  shot -> artifacts/act-4-implementation/roadhouse-phone-widget.png
+  PASS - [A] Roadhouse: il feedback dell'avviso «palmer» è quello scritto
+  PASS - [A] Roadhouse: warning_target = palmer
+  PASS - [A] Roadhouse: dopo la telefonata Gigante e folla non ci sono più
+  PASS - [A] HUD: dopo la telefonata l'obiettivo è obj_m8_2
+  PASS - [A] reload dopo il telefono: promessa e avviso persistono
+  PASS - [A] reload dopo il telefono: stato narrativo identico
+  PASS - [A] reload dopo il telefono: obiettivo HUD identico
+  PASS - [A] reload dopo il telefono: il Gigante NON ricompare (fuori finestra)
+  PASS - [A] reload dopo il telefono: entità identiche
+  PASS - [A] soglia: si esce dal Roadhouse in città
+  PASS - [A] soglia: town_crossroads è a 47,30
+  FAIL - [A] soglia: si arriva sulla casella sopra il crocevia, rivolti in basso  ::  {"pos":{"map":"town","x":47,"y":30,"dir":"down"},"target":{"x":47,"y":30,"kind":"landmark"}}
+  PASS - [A] soglia: un tasto in basso apre il crocevia (m8_focus_choice)
+  PASS - [A] soglia: il widget si apre a 47,29 guardando 47,30
+  PASS - [A] soglia: le pagine del crocevia precedono la scelta
+  shot -> artifacts/act-4-implementation/threshold-widget-47-30.png
+  PASS - [A] soglia: focus_destination = palmer
+  PASS - [A] reload dopo il crocevia: promessa, avviso e focus persistono
+  PASS - [A] rotta Palmer: si cammina dal crocevia fino alla porta dei Palmer
+  shot -> artifacts/act-4-implementation/route-arrival-A.png
+  PASS - [A] rotta Palmer: la casa vuota, la valigia (avviso=palmer), la chiamata di Lucy
+  PASS - [A] rotta Palmer: body_found_by = hawk
+  PASS - [A] rotta Palmer: si torna in città a piedi
+  PASS - [A] HUD: dopo la rotta l'obiettivo resta obj_m8_2 (fino al ritrovamento)
+  PASS - [A] riva: le due collocazioni di Hawk sono registrate nell'adapter
+  PASS - [A] riva: la riva del lago si raggiunge a piedi
+  PASS - [A] riva: Hawk sulla riva PRIMA del ritrovamento presente (body_found_by=hawk)
+  PASS - [A] riva: Hawk non blocca l'approccio alla riva
+  shot -> artifacts/act-4-implementation/shore-before-discovery.png
+  PASS - [A] riva: il ritrovamento rende la versione «hawk»
+  PASS - [A] riva: l'eco della promessa è la versione «accompagno»
+  PASS - [A] riva: maddy_trovata, E9A/E9B, presagio verified, eco committata
+  PASS - [A] riva: letter_o_observation_source deriva da body_found_by
+  PASS - [A] riva: dopo il ritrovamento un solo Hawk, hawk_shore_after
+  shot -> artifacts/act-4-implementation/shore-after-discovery.png
+  PASS - [A] HUD: dopo il ritrovamento l'obiettivo è obj_m8_3
+  PASS - [A] mondo: maddy_trovata attraversa al classico
+  PASS - [A] taccuino: lettere R + O → m8_cmp_letters
+  PASS - [A] taccuino: m8_cmp_letters committato
+  PASS - [A] taccuino: lettera O + diario → m8_cmp_diary con tre letture
+  PASS - [A] taccuino: le pagine del diario precedono la scelta
+  PASS - [A] taccuino: la lettura «diary_b» risponde col suo feedback e resta ritentabile
+  PASS - [A] taccuino: P8 non formulata dopo «diary_b»
+  PASS - [A] taccuino: «diary_a» rende il suo feedback
+  PASS - [A] taccuino: P8 formulata solo al commit di diary_a
+  PASS - [A] HUD: con P8 formulata l'obiettivo è obj_m8_35
+  shot -> artifacts/act-4-implementation/station-hook.png
+  PASS - [A] stazione: Truman risponde con m8_station (p01…p03), mai con M4/M6
+  PASS - [A] stazione: il caso Sarah è «none» (m8.f.station.sarah_truman)
+  PASS - [A] stazione: p_valigia assente (avviso=palmer, focus=palmer)
+  PASS - [A] stazione: p_lago assente (focus=palmer)
+  PASS - [A] stazione: l'aggancio dell'orario (hook p01/p02) chiude la scena
+  PASS - [A] stazione: m8_station committato, T_LELAND_TAXI ancora una sola acquisizione
+  PASS - [A] obiettivo M8 dopo la stazione: obj_m8_4 «Porta a Truman una contraddizione che regga.»
+  PASS - [A] mondo: bobby e donna ancora assenti dalla città dopo la stazione
+  PASS - [A] mondo: Sarah ancora assente da casa Palmer dopo la stazione
+  PASS - [A] trascrizione: pagine registrate
+  PASS - [A] voce: lo speaker emesso coincide con quello scritto su ogni pagina
+  PASS - [A] voce: ogni pagina emessa è una pagina scritta in una missione
+  PASS - [A] testo: nessuna deriva fra pagina scritta e pagina emessa
+  PASS - [A] testo: nessun id di risultato/nodo o metadato «[…]» a schermo
+  PASS - [A] testo: nessun «BOB», conteggio di lettere, «salvat», «troppo tardi», «se fossi», «bugia/mentito» nelle pagine M8 emesse
+  PASS - [A] HUD: ogni testo di obiettivo osservato è un obiettivo scritto
+  PASS - [A] HUD: i pioli M8 si susseguono nell'ordine scritto, mai all'indietro
+  PASS - [A] mondo: nessun dialogo classico ritirato (truman_atto4, truman_atto5, lago_maddy, maddy_a4, leland_a4, leland_dove, leland_dopo, gerard_a4)
+  PASS - [A] mondo: nessun dialogo classico di Maddy/Leland/Gigante/Norma/Truman sulle mappe dell'Atto 4
+  PASS - [A] adapter: nessuna pagina adapter.no_roots, nessun rifiuto
+  FAIL - [A] guida: nessun ripiego sull'API dell'adapter, tutto coi tasti  ::  [{"where":"roadhouse/gigante","why":"NPC \"gigante\" a 8,1 presente ma nessuna casella adiacente raggiungibile: {\"ok\":false,\"error\":\"unreachable\",\"target\":[8,1],\"candidates\":[[8,2,\"up\"]],\"diag\":{\"from\":[3,8],\"to\":[8,2],\"reason\":\"no_path\",\"attempt\":4}} · NPC: [\"truman@4,8\",\"bobby@3,2\",\"donna@5,2\",\"james@9,2\",\"shelly@11,2\",\"norma@3,6\",\"loglady@11,6\",\"gigante@8,1\"]"},{"where":"roadhouse/gigante","why":"NPC \"gigante\" a 8,1 presente ma nessuna casella adiacente raggiungibile: {\"ok\":false,\"error\":\"unreachable\",\"target\":[8,1],\"candidates\":[[8,2,\"up\"]],\"diag\":{\"from\":[3,8],\"to\":[8,2],\"reason\":\"no_path\",\"attempt\":4}} · NPC: [\"truman@4,8\",\"bobby@3,2\",\"donna@5,2\",\"james@9,2\",\"shelly@11,2\",\"norma@3,6\",\"loglady@11,6\",\"gigante@8,1\"]"}]
+  PASS - [A] adapter: nessuna root ambigua
+  PASS - [A] guida: nessun teletrasporto lungo la rotta scelta o verso la riva
+  PASS - [A] stato: T_LELAND_TAXI scritta una sola volta
+  PASS - [A] stato: nessun nodo one-shot committato due volte
+  PASS - [A] mondo: mai due Hawk, due Maddy, due Leland o due Giganti sulla stessa mappa
+  PASS - [A] mondo: Maddy e Leland mai a casa Palmer nell'Atto 4
+  FAIL - [A] console: nessun errore del browser durante il percorso  ::  ["Failed to load resource: the server responded with a status of 404 (File not found)  <http://127.0.0.1:29495/favicon.ico>"]
+  transcript -> artifacts/act-4-implementation/transcripts/A.{json,md}
+
+=== PATH B (autonomia → avviso centrale → focus lago; Log Lady, Sarah fra diner e Roadhouse) ===
+  PASS - [B] setup: build reale in partita (testMode=false)
+  PASS - [B] setup: seme di fine Atto 3 installato (atto4, gigante1, jacques_dead, E3, E1) e M8 corrente
+  PASS - [B] setup: M8 caricata con i nodi dello split
+  PASS - [B] HUD: all'apertura dell'Atto 4 l'obiettivo è obj_m8_0
+  PASS - [B] diner: Maddy e Leland presenti al bancone prima della promessa
+  PASS - [B] diner: Maddy e Leland alle caselle del registro (10,1 / 11,1)
+  PASS - [B] diner: Leland prima della promessa rende m8.a.leland_waiting.p01
+  PASS - [B] diner: l'attesa di Leland non scrive nulla
+  PASS - [B] HUD: prima della promessa l'obiettivo è obj_m8_0
+  PASS - [B] diner: la promessa apre le tre opzioni
+  PASS - [B] diner: il feedback della promessa «autonomia» è la sua pagina
+  PASS - [B] diner: promise_stance = autonomia
+  PASS - [B] diner: Maddy sparisce dopo la promessa, Leland resta
+  PASS - [B] HUD: dopo la promessa l'obiettivo è obj_m8_25
+  PASS - [B] diner: la testimonianza del taxi rende le pagine della promessa «autonomia»
+  PASS - [B] diner: T_LELAND_TAXI acquisita
+  PASS - [B] diner: Leland sparisce dopo la testimonianza
+  PASS - [B] HUD: dopo il taxi l'obiettivo è obj_m8_1
+  PASS - [B] Log Lady: il ceppo indica il Roadhouse (classico loglady_a4)
+  PASS - [B] Log Lady: nessuna pagina narrativa né rifiuto dell'adapter
+  PASS - [B] Sarah: attiva a casa Palmer fra il diner e il Roadhouse
+  PASS - [B] Sarah: il dialogo classico rende almeno le pagine 1–2 (fra il diner e il Roadhouse)
+  PASS - [B] Sarah: mai il token «BOB» nella visione (fra il diner e il Roadhouse)
+  PASS - [B] Sarah: sarah_visione_ascoltata scritto (fra il diner e il Roadhouse)
+  PASS - [B] Roadhouse: la città ha una porta per il Roadhouse
+  PASS - [B] Roadhouse: la porta si apre con atto4
+  PASS - [B] Roadhouse: Truman e la folla presenti all'arrivo, Gigante assente
+  PASS - [B] Roadhouse: nessuna entità sul telefono o sulle caselle sopra/sotto
+  PASS - [B] Roadhouse: la dichiarazione al tavolo rende m8.b.truman.p01…p05
+  PASS - [B] Roadhouse: la dichiarazione non apre il telefono nello stesso lease
+  PASS - [B] Roadhouse: presagio_status = active dopo la dichiarazione
+  PASS - [B] Roadhouse: m8_roadhouse_truman committato
+  PASS - [B] Roadhouse: il Gigante è sul palco (8,1) dopo la dichiarazione
+  PASS - [B] HUD: dopo la dichiarazione il testo è esattamente «Il telefono del Roadhouse.»
+  PASS - [B] mondo: gigante2 classico derivato dalla dichiarazione
+  PASS - [B] mondo: Sarah non è più a casa Palmer dopo la dichiarazione (npcActive)
+  PASS - [B] mondo: bobby e donna assenti dalla città dopo la dichiarazione
+  FAIL - [B] Roadhouse: il Gigante rende solo m8.b.giant.p01  ::  {"got":["m8.b.giant.p01","m8.b.giant.p02"],"viaApi":true}
+  PASS - [B] Roadhouse: la ripetizione del Gigante non aggiunge enunciati
+  PASS - [B] Roadhouse: il Gigante non scrive nulla
+  PASS - [B] Roadhouse: il telefono si raggiunge e apre le tre opzioni
+  PASS - [B] Roadhouse: il telefono rende m8.b.phone.p01 e p02
+  PASS - [B] Roadhouse: il feedback dell'avviso «centrale» è quello scritto
+  PASS - [B] Roadhouse: warning_target = centrale
+  PASS - [B] Roadhouse: dopo la telefonata Gigante e folla non ci sono più
+  PASS - [B] HUD: dopo la telefonata l'obiettivo è obj_m8_2
+  PASS - [B] reload dopo il telefono: promessa e avviso persistono
+  PASS - [B] reload dopo il telefono: stato narrativo identico
+  PASS - [B] reload dopo il telefono: obiettivo HUD identico
+  PASS - [B] reload dopo il telefono: il Gigante NON ricompare (fuori finestra)
+  PASS - [B] reload dopo il telefono: entità identiche
+  PASS - [B] soglia: si esce dal Roadhouse in città
+  PASS - [B] soglia: town_crossroads è a 47,30
+  FAIL - [B] soglia: si arriva sulla casella sopra il crocevia, rivolti in basso  ::  {"pos":{"map":"town","x":47,"y":30,"dir":"down"},"target":{"x":47,"y":30,"kind":"landmark"}}
+  PASS - [B] soglia: un tasto in basso apre il crocevia (m8_focus_choice)
+  PASS - [B] soglia: il widget si apre a 47,29 guardando 47,30
+  PASS - [B] soglia: le pagine del crocevia precedono la scelta
+  PASS - [B] soglia: focus_destination = lago
+  shot -> artifacts/act-4-implementation/route-arrival-B.png
+  PASS - [B] rotta lago: si cammina dal crocevia alla riva e la rotta risponde
+  PASS - [B] rotta lago: body_found_by = cooper
+  PASS - [B] HUD: dopo la rotta l'obiettivo resta obj_m8_2 (fino al ritrovamento)
+  PASS - [B] riva: le due collocazioni di Hawk sono registrate nell'adapter
+  PASS - [B] riva: la riva del lago si raggiunge a piedi
+  PASS - [B] riva: Hawk sulla riva PRIMA del ritrovamento assente (body_found_by=cooper)
+  PASS - [B] riva: il ritrovamento rende la versione «cooper»
+  PASS - [B] riva: l'eco della promessa è la versione «autonomia»
+  PASS - [B] riva: maddy_trovata, E9A/E9B, presagio verified, eco committata
+  PASS - [B] riva: letter_o_observation_source deriva da body_found_by
+  PASS - [B] riva: dopo il ritrovamento un solo Hawk, hawk_shore_after
+  PASS - [B] HUD: dopo il ritrovamento l'obiettivo è obj_m8_3
+  PASS - [B] mondo: maddy_trovata attraversa al classico
+  PASS - [B] taccuino: lettere R + O → m8_cmp_letters
+  PASS - [B] taccuino: m8_cmp_letters committato
+  PASS - [B] taccuino: lettera O + diario → m8_cmp_diary con tre letture
+  PASS - [B] taccuino: le pagine del diario precedono la scelta
+  PASS - [B] taccuino: la lettura «diary_c» risponde col suo feedback e resta ritentabile
+  PASS - [B] taccuino: P8 non formulata dopo «diary_c»
+  PASS - [B] taccuino: «diary_a» rende il suo feedback
+  PASS - [B] taccuino: P8 formulata solo al commit di diary_a
+  PASS - [B] HUD: con P8 formulata l'obiettivo è obj_m8_35
+  PASS - [B] stazione: Truman risponde con m8_station (p01…p03), mai con M4/M6
+  PASS - [B] stazione: il caso Sarah è «vice» (m8.f.station.sarah_vice)
+  PASS - [B] stazione: p_valigia assente (avviso=centrale, focus=lago)
+  PASS - [B] stazione: p_lago presente (focus=lago)
+  PASS - [B] stazione: l'aggancio dell'orario (hook p01/p02) chiude la scena
+  PASS - [B] stazione: m8_station committato, T_LELAND_TAXI ancora una sola acquisizione
+  PASS - [B] obiettivo M8 dopo la stazione: obj_m8_4 «Porta a Truman una contraddizione che regga.»
+  PASS - [B] mondo: bobby e donna ancora assenti dalla città dopo la stazione
+  PASS - [B] mondo: Sarah ancora assente da casa Palmer dopo la stazione
+  PASS - [B] trascrizione: pagine registrate
+  FAIL - [B] voce: lo speaker emesso coincide con quello scritto su ogni pagina  ::  [{"page":"m8.b.giant.repeat","emitted":["cooper","COOPER"],"authored":[null,null]}]
+  FAIL - [B] voce: ogni pagina emessa è una pagina scritta in una missione  ::  ["m8.a.leland_waiting.p02","m8.b.truman.p06","m8.b.giant.p02"]
+  FAIL - [B] testo: nessuna deriva fra pagina scritta e pagina emessa  ::  [{"page":"m8.b.giant.repeat","emitted":"È ancora sul palco. Nessun altro lo nota, mai.","authored":"(Sul palco, dietro la banda, un uomo alto. Nessuno lo guarda. Non indica niente.)"}]
+  PASS - [B] testo: nessun id di risultato/nodo o metadato «[…]» a schermo
+  PASS - [B] testo: nessun «BOB», conteggio di lettere, «salvat», «troppo tardi», «se fossi», «bugia/mentito» nelle pagine M8 emesse
+  PASS - [B] HUD: ogni testo di obiettivo osservato è un obiettivo scritto
+  PASS - [B] HUD: i pioli M8 si susseguono nell'ordine scritto, mai all'indietro
+  PASS - [B] mondo: nessun dialogo classico ritirato (truman_atto4, truman_atto5, lago_maddy, maddy_a4, leland_a4, leland_dove, leland_dopo, gerard_a4)
+  PASS - [B] mondo: nessun dialogo classico di Maddy/Leland/Gigante/Norma/Truman sulle mappe dell'Atto 4
+  PASS - [B] adapter: nessuna pagina adapter.no_roots, nessun rifiuto
+  FAIL - [B] guida: nessun ripiego sull'API dell'adapter, tutto coi tasti  ::  [{"where":"roadhouse/gigante","why":"NPC \"gigante\" a 8,1 presente ma nessuna casella adiacente raggiungibile: {\"ok\":false,\"error\":\"unreachable\",\"target\":[8,1],\"candidates\":[[8,2,\"up\"]],\"diag\":{\"from\":[3,8],\"to\":[8,2],\"reason\":\"no_path\",\"attempt\":4}} · NPC: [\"truman@4,8\",\"bobby@3,2\",\"donna@5,2\",\"james@9,2\",\"shelly@11,2\",\"norma@3,6\",\"loglady@11,6\",\"gigante@8,1\"]"},{"where":"roadhouse/gigante","why":"NPC \"gigante\" a 8,1 presente ma nessuna casella adiacente raggiungibile: {\"ok\":false,\"error\":\"unreachable\",\"target\":[8,1],\"candidates\":[[8,2,\"up\"]],\"diag\":{\"from\":[3,8],\"to\":[8,2],\"reason\":\"no_path\",\"attempt\":4}} · NPC: [\"truman@4,8\",\"bobby@3,2\",\"donna@5,2\",\"james@9,2\",\"shelly@11,2\",\"norma@3,6\",\"loglady@11,6\",\"gigante@8,1\"]"}]
+  PASS - [B] adapter: nessuna root ambigua
+  PASS - [B] guida: nessun teletrasporto lungo la rotta scelta o verso la riva
+  PASS - [B] stato: T_LELAND_TAXI scritta una sola volta
+  PASS - [B] stato: nessun nodo one-shot committato due volte
+  PASS - [B] mondo: mai due Hawk, due Maddy, due Leland o due Giganti sulla stessa mappa
+  PASS - [B] mondo: Maddy e Leland mai a casa Palmer nell'Atto 4
+  PASS - [B] console: nessun errore del browser durante il percorso
+  transcript -> artifacts/act-4-implementation/transcripts/B.{json,md}
+
+=== PATH C (prudenza → nessun avviso → focus diner; nessuna visita facoltativa) ===
+  PASS - [C] setup: build reale in partita (testMode=false)
+  PASS - [C] setup: seme di fine Atto 3 installato (atto4, gigante1, jacques_dead, E3, E1) e M8 corrente
+  PASS - [C] setup: M8 caricata con i nodi dello split
+  PASS - [C] HUD: all'apertura dell'Atto 4 l'obiettivo è obj_m8_0
+  PASS - [C] diner: Maddy e Leland presenti al bancone prima della promessa
+  PASS - [C] diner: Maddy e Leland alle caselle del registro (10,1 / 11,1)
+  PASS - [C] diner: Leland prima della promessa rende m8.a.leland_waiting.p01
+  PASS - [C] diner: l'attesa di Leland non scrive nulla
+  PASS - [C] HUD: prima della promessa l'obiettivo è obj_m8_0
+  PASS - [C] diner: la promessa apre le tre opzioni
+  PASS - [C] diner: il feedback della promessa «prudenza» è la sua pagina
+  PASS - [C] diner: promise_stance = prudenza
+  PASS - [C] diner: Maddy sparisce dopo la promessa, Leland resta
+  PASS - [C] HUD: dopo la promessa l'obiettivo è obj_m8_25
+  PASS - [C] diner: la testimonianza del taxi rende le pagine della promessa «prudenza»
+  PASS - [C] diner: T_LELAND_TAXI acquisita
+  PASS - [C] diner: Leland sparisce dopo la testimonianza
+  PASS - [C] HUD: dopo il taxi l'obiettivo è obj_m8_1
+  PASS - [C] Roadhouse: la città ha una porta per il Roadhouse
+  PASS - [C] Roadhouse: la porta si apre con atto4
+  PASS - [C] Roadhouse: Truman e la folla presenti all'arrivo, Gigante assente
+  PASS - [C] Roadhouse: nessuna entità sul telefono o sulle caselle sopra/sotto
+  PASS - [C] Roadhouse: la dichiarazione al tavolo rende m8.b.truman.p01…p05
+  PASS - [C] Roadhouse: la dichiarazione non apre il telefono nello stesso lease
+  PASS - [C] Roadhouse: presagio_status = active dopo la dichiarazione
+  PASS - [C] Roadhouse: m8_roadhouse_truman committato
+  PASS - [C] Roadhouse: il Gigante è sul palco (8,1) dopo la dichiarazione
+  PASS - [C] HUD: dopo la dichiarazione il testo è esattamente «Il telefono del Roadhouse.»
+  PASS - [C] mondo: gigante2 classico derivato dalla dichiarazione
+  PASS - [C] mondo: Sarah non è più a casa Palmer dopo la dichiarazione (npcActive)
+  PASS - [C] mondo: bobby e donna assenti dalla città dopo la dichiarazione
+  FAIL - [C] Roadhouse: il Gigante rende solo m8.b.giant.p01  ::  {"got":["m8.b.giant.p01"],"viaApi":true}
+  PASS - [C] Roadhouse: la ripetizione del Gigante non aggiunge enunciati
+  PASS - [C] Roadhouse: il Gigante non scrive nulla
+  PASS - [C] Roadhouse: il telefono si raggiunge e apre le tre opzioni
+  PASS - [C] Roadhouse: il telefono rende m8.b.phone.p01 e p02
+  PASS - [C] Roadhouse: il feedback dell'avviso «nessuno» è quello scritto
+  PASS - [C] Roadhouse: warning_target = nessuno
+  PASS - [C] Roadhouse: dopo la telefonata Gigante e folla non ci sono più
+  PASS - [C] HUD: dopo la telefonata l'obiettivo è obj_m8_2
+  PASS - [C] reload dopo il telefono: promessa e avviso persistono
+  PASS - [C] reload dopo il telefono: stato narrativo identico
+  PASS - [C] reload dopo il telefono: obiettivo HUD identico
+  PASS - [C] reload dopo il telefono: il Gigante NON ricompare (fuori finestra)
+  PASS - [C] reload dopo il telefono: entità identiche
+  PASS - [C] soglia: si esce dal Roadhouse in città
+  PASS - [C] soglia: town_crossroads è a 47,30
+  FAIL - [C] soglia: si arriva sulla casella sopra il crocevia, rivolti in basso  ::  {"pos":{"map":"town","x":47,"y":30,"dir":"down"},"target":{"x":47,"y":30,"kind":"landmark"}}
+  PASS - [C] soglia: un tasto in basso apre il crocevia (m8_focus_choice)
+  PASS - [C] soglia: il widget si apre a 47,29 guardando 47,30
+  PASS - [C] soglia: le pagine del crocevia precedono la scelta
+  PASS - [C] soglia: focus_destination = diner
+  PASS - [C] rotta diner: si cammina dal crocevia al piazzale del Double R
+  PASS - [C] rotta diner: dal piazzale si entra nel Double R
+  shot -> artifacts/act-4-implementation/route-arrival-C.png
+  PASS - [C] rotta diner: Norma, il locale vuoto, la chiamata
+  PASS - [C] rotta diner: body_found_by = hawk
+  PASS - [C] rotta diner: si esce dal Double R a piedi
+  PASS - [C] rotta diner: dal piazzale si torna in città
+  PASS - [C] HUD: dopo la rotta l'obiettivo resta obj_m8_2 (fino al ritrovamento)
+  PASS - [C] riva: le due collocazioni di Hawk sono registrate nell'adapter
+  PASS - [C] riva: la riva del lago si raggiunge a piedi
+  PASS - [C] riva: Hawk sulla riva PRIMA del ritrovamento presente (body_found_by=hawk)
+  PASS - [C] riva: Hawk non blocca l'approccio alla riva
+  PASS - [C] riva: il ritrovamento rende la versione «hawk»
+  PASS - [C] riva: l'eco della promessa è la versione «prudenza»
+  PASS - [C] riva: maddy_trovata, E9A/E9B, presagio verified, eco committata
+  PASS - [C] riva: letter_o_observation_source deriva da body_found_by
+  PASS - [C] riva: dopo il ritrovamento un solo Hawk, hawk_shore_after
+  PASS - [C] HUD: dopo il ritrovamento l'obiettivo è obj_m8_3
+  PASS - [C] mondo: maddy_trovata attraversa al classico
+  PASS - [C] taccuino: lettere R + O → m8_cmp_letters
+  PASS - [C] taccuino: m8_cmp_letters committato
+  PASS - [C] taccuino: lettera O + diario → m8_cmp_diary con tre letture
+  PASS - [C] taccuino: le pagine del diario precedono la scelta
+  PASS - [C] taccuino: «diary_a» rende il suo feedback
+  PASS - [C] taccuino: P8 formulata solo al commit di diary_a
+  PASS - [C] HUD: con P8 formulata l'obiettivo è obj_m8_35
+  PASS - [C] stazione: Truman risponde con m8_station (p01…p03), mai con M4/M6
+  PASS - [C] stazione: il caso Sarah è «none» (m8.f.station.sarah_truman)
+  PASS - [C] stazione: p_valigia assente (avviso=nessuno, focus=diner)
+  PASS - [C] stazione: p_lago assente (focus=diner)
+  PASS - [C] stazione: l'aggancio dell'orario (hook p01/p02) chiude la scena
+  PASS - [C] stazione: m8_station committato, T_LELAND_TAXI ancora una sola acquisizione
+  PASS - [C] obiettivo M8 dopo la stazione: obj_m8_4 «Porta a Truman una contraddizione che regga.»
+  PASS - [C] mondo: bobby e donna ancora assenti dalla città dopo la stazione
+  PASS - [C] mondo: Sarah ancora assente da casa Palmer dopo la stazione
+  PASS - [C] trascrizione: pagine registrate
+  PASS - [C] voce: lo speaker emesso coincide con quello scritto su ogni pagina
+  PASS - [C] voce: ogni pagina emessa è una pagina scritta in una missione
+  PASS - [C] testo: nessuna deriva fra pagina scritta e pagina emessa
+  PASS - [C] testo: nessun id di risultato/nodo o metadato «[…]» a schermo
+  PASS - [C] testo: nessun «BOB», conteggio di lettere, «salvat», «troppo tardi», «se fossi», «bugia/mentito» nelle pagine M8 emesse
+  PASS - [C] HUD: ogni testo di obiettivo osservato è un obiettivo scritto
+  PASS - [C] HUD: i pioli M8 si susseguono nell'ordine scritto, mai all'indietro
+  PASS - [C] mondo: nessun dialogo classico ritirato (truman_atto4, truman_atto5, lago_maddy, maddy_a4, leland_a4, leland_dove, leland_dopo, gerard_a4)
+  PASS - [C] mondo: nessun dialogo classico di Maddy/Leland/Gigante/Norma/Truman sulle mappe dell'Atto 4
+  PASS - [C] adapter: nessuna pagina adapter.no_roots, nessun rifiuto
+  FAIL - [C] guida: nessun ripiego sull'API dell'adapter, tutto coi tasti  ::  [{"where":"roadhouse/gigante","why":"NPC \"gigante\" a 8,1 presente ma nessuna casella adiacente raggiungibile: {\"ok\":false,\"error\":\"unreachable\",\"target\":[8,1],\"candidates\":[[8,2,\"up\"]],\"diag\":{\"from\":[3,8],\"to\":[8,2],\"reason\":\"no_path\",\"attempt\":4}} · NPC: [\"truman@4,8\",\"bobby@3,2\",\"donna@5,2\",\"james@9,2\",\"shelly@11,2\",\"norma@3,6\",\"loglady@11,6\",\"gigante@8,1\"]"},{"where":"roadhouse/gigante","why":"NPC \"gigante\" a 8,1 presente ma nessuna casella adiacente raggiungibile: {\"ok\":false,\"error\":\"unreachable\",\"target\":[8,1],\"candidates\":[[8,2,\"up\"]],\"diag\":{\"from\":[3,8],\"to\":[8,2],\"reason\":\"no_path\",\"attempt\":4}} · NPC: [\"truman@4,8\",\"bobby@3,2\",\"donna@5,2\",\"james@9,2\",\"shelly@11,2\",\"norma@3,6\",\"loglady@11,6\",\"gigante@8,1\"]"}]
+  PASS - [C] adapter: nessuna root ambigua
+  PASS - [C] guida: nessun teletrasporto lungo la rotta scelta o verso la riva
+  PASS - [C] stato: T_LELAND_TAXI scritta una sola volta
+  PASS - [C] stato: nessun nodo one-shot committato due volte
+  PASS - [C] mondo: mai due Hawk, due Maddy, due Leland o due Giganti sulla stessa mappa
+  PASS - [C] mondo: Maddy e Leland mai a casa Palmer nell'Atto 4
+  PASS - [C] console: nessun errore del browser durante il percorso
+  transcript -> artifacts/act-4-implementation/transcripts/C.{json,md}
+
+=== PATH D (accompagno → avviso Palmer → focus lago; nessuna visita facoltativa (valigia per rapporto)) ===
+  PASS - [D] setup: build reale in partita (testMode=false)
+  PASS - [D] setup: seme di fine Atto 3 installato (atto4, gigante1, jacques_dead, E3, E1) e M8 corrente
+  PASS - [D] setup: M8 caricata con i nodi dello split
+  PASS - [D] HUD: all'apertura dell'Atto 4 l'obiettivo è obj_m8_0
+  PASS - [D] diner: Maddy e Leland presenti al bancone prima della promessa
+  PASS - [D] diner: Maddy e Leland alle caselle del registro (10,1 / 11,1)
+  PASS - [D] diner: Leland prima della promessa rende m8.a.leland_waiting.p01
+  PASS - [D] diner: l'attesa di Leland non scrive nulla
+  PASS - [D] HUD: prima della promessa l'obiettivo è obj_m8_0
+  PASS - [D] diner: la promessa apre le tre opzioni
+  PASS - [D] diner: il feedback della promessa «accompagno» è la sua pagina
+  PASS - [D] diner: promise_stance = accompagno
+  PASS - [D] diner: Maddy sparisce dopo la promessa, Leland resta
+  PASS - [D] HUD: dopo la promessa l'obiettivo è obj_m8_25
+  PASS - [D] diner: la testimonianza del taxi rende le pagine della promessa «accompagno»
+  PASS - [D] diner: T_LELAND_TAXI acquisita
+  PASS - [D] diner: Leland sparisce dopo la testimonianza
+  PASS - [D] HUD: dopo il taxi l'obiettivo è obj_m8_1
+  PASS - [D] Roadhouse: la città ha una porta per il Roadhouse
+  PASS - [D] Roadhouse: la porta si apre con atto4
+  PASS - [D] Roadhouse: Truman e la folla presenti all'arrivo, Gigante assente
+  PASS - [D] Roadhouse: nessuna entità sul telefono o sulle caselle sopra/sotto
+  PASS - [D] Roadhouse: la dichiarazione al tavolo rende m8.b.truman.p01…p05
+  PASS - [D] Roadhouse: la dichiarazione non apre il telefono nello stesso lease
+  PASS - [D] Roadhouse: presagio_status = active dopo la dichiarazione
+  PASS - [D] Roadhouse: m8_roadhouse_truman committato
+  PASS - [D] Roadhouse: il Gigante è sul palco (8,1) dopo la dichiarazione
+  PASS - [D] HUD: dopo la dichiarazione il testo è esattamente «Il telefono del Roadhouse.»
+  PASS - [D] mondo: gigante2 classico derivato dalla dichiarazione
+  PASS - [D] mondo: Sarah non è più a casa Palmer dopo la dichiarazione (npcActive)
+  PASS - [D] mondo: bobby e donna assenti dalla città dopo la dichiarazione
+  FAIL - [D] Roadhouse: il Gigante rende solo m8.b.giant.p01  ::  {"got":["m8.b.giant.p01"],"viaApi":true}
+  PASS - [D] Roadhouse: la ripetizione del Gigante non aggiunge enunciati
+  PASS - [D] Roadhouse: il Gigante non scrive nulla
+  PASS - [D] Roadhouse: il telefono si raggiunge e apre le tre opzioni
+  PASS - [D] Roadhouse: il telefono rende m8.b.phone.p01 e p02
+  PASS - [D] Roadhouse: il feedback dell'avviso «palmer» è quello scritto
+  PASS - [D] Roadhouse: warning_target = palmer
+  PASS - [D] Roadhouse: dopo la telefonata Gigante e folla non ci sono più
+  PASS - [D] HUD: dopo la telefonata l'obiettivo è obj_m8_2
+  PASS - [D] reload dopo il telefono: promessa e avviso persistono
+  PASS - [D] reload dopo il telefono: stato narrativo identico
+  PASS - [D] reload dopo il telefono: obiettivo HUD identico
+  PASS - [D] reload dopo il telefono: il Gigante NON ricompare (fuori finestra)
+  PASS - [D] reload dopo il telefono: entità identiche
+  PASS - [D] soglia: si esce dal Roadhouse in città
+  PASS - [D] soglia: town_crossroads è a 47,30
+  FAIL - [D] soglia: si arriva sulla casella sopra il crocevia, rivolti in basso  ::  {"pos":{"map":"town","x":47,"y":30,"dir":"down"},"target":{"x":47,"y":30,"kind":"landmark"}}
+  PASS - [D] soglia: un tasto in basso apre il crocevia (m8_focus_choice)
+  PASS - [D] soglia: il widget si apre a 47,29 guardando 47,30
+  PASS - [D] soglia: le pagine del crocevia precedono la scelta
+  PASS - [D] soglia: focus_destination = lago
+  shot -> artifacts/act-4-implementation/route-arrival-D.png
+  PASS - [D] rotta lago: si cammina dal crocevia alla riva e la rotta risponde
+  PASS - [D] rotta lago: body_found_by = cooper
+  PASS - [D] HUD: dopo la rotta l'obiettivo resta obj_m8_2 (fino al ritrovamento)
+  PASS - [D] riva: le due collocazioni di Hawk sono registrate nell'adapter
+  PASS - [D] riva: la riva del lago si raggiunge a piedi
+  PASS - [D] riva: Hawk sulla riva PRIMA del ritrovamento assente (body_found_by=cooper)
+  PASS - [D] riva: il ritrovamento rende la versione «cooper»
+  PASS - [D] riva: l'eco della promessa è la versione «accompagno»
+  PASS - [D] riva: maddy_trovata, E9A/E9B, presagio verified, eco committata
+  PASS - [D] riva: letter_o_observation_source deriva da body_found_by
+  PASS - [D] riva: dopo il ritrovamento un solo Hawk, hawk_shore_after
+  PASS - [D] HUD: dopo il ritrovamento l'obiettivo è obj_m8_3
+  PASS - [D] mondo: maddy_trovata attraversa al classico
+  PASS - [D] taccuino: lettere R + O → m8_cmp_letters
+  PASS - [D] taccuino: m8_cmp_letters committato
+  PASS - [D] taccuino: lettera O + diario → m8_cmp_diary con tre letture
+  PASS - [D] taccuino: le pagine del diario precedono la scelta
+  PASS - [D] taccuino: «diary_a» rende il suo feedback
+  PASS - [D] taccuino: P8 formulata solo al commit di diary_a
+  PASS - [D] HUD: con P8 formulata l'obiettivo è obj_m8_35
+  PASS - [D] stazione: Truman risponde con m8_station (p01…p03), mai con M4/M6
+  PASS - [D] stazione: il caso Sarah è «none» (m8.f.station.sarah_truman)
+  PASS - [D] stazione: p_valigia presente (avviso=palmer, focus=lago)
+  PASS - [D] stazione: p_lago presente (focus=lago)
+  PASS - [D] stazione: l'aggancio dell'orario (hook p01/p02) chiude la scena
+  PASS - [D] stazione: m8_station committato, T_LELAND_TAXI ancora una sola acquisizione
+  PASS - [D] obiettivo M8 dopo la stazione: obj_m8_4 «Porta a Truman una contraddizione che regga.»
+  PASS - [D] mondo: bobby e donna ancora assenti dalla città dopo la stazione
+  PASS - [D] mondo: Sarah ancora assente da casa Palmer dopo la stazione
+  PASS - [D] trascrizione: pagine registrate
+  PASS - [D] voce: lo speaker emesso coincide con quello scritto su ogni pagina
+  FAIL - [D] voce: ogni pagina emessa è una pagina scritta in una missione  ::  ["m8.a.leland_waiting.p02"]
+  PASS - [D] testo: nessuna deriva fra pagina scritta e pagina emessa
+  PASS - [D] testo: nessun id di risultato/nodo o metadato «[…]» a schermo
+  PASS - [D] testo: nessun «BOB», conteggio di lettere, «salvat», «troppo tardi», «se fossi», «bugia/mentito» nelle pagine M8 emesse
+  PASS - [D] HUD: ogni testo di obiettivo osservato è un obiettivo scritto
+  PASS - [D] HUD: i pioli M8 si susseguono nell'ordine scritto, mai all'indietro
+  PASS - [D] mondo: nessun dialogo classico ritirato (truman_atto4, truman_atto5, lago_maddy, maddy_a4, leland_a4, leland_dove, leland_dopo, gerard_a4)
+  PASS - [D] mondo: nessun dialogo classico di Maddy/Leland/Gigante/Norma/Truman sulle mappe dell'Atto 4
+  PASS - [D] adapter: nessuna pagina adapter.no_roots, nessun rifiuto
+  FAIL - [D] guida: nessun ripiego sull'API dell'adapter, tutto coi tasti  ::  [{"where":"roadhouse/gigante","why":"NPC \"gigante\" a 8,1 presente ma nessuna casella adiacente raggiungibile: {\"ok\":false,\"error\":\"unreachable\",\"target\":[8,1],\"candidates\":[[8,2,\"up\"]],\"diag\":{\"from\":[3,8],\"to\":[8,2],\"reason\":\"no_path\",\"attempt\":4}} · NPC: [\"truman@4,8\",\"bobby@3,2\",\"donna@5,2\",\"james@9,2\",\"shelly@11,2\",\"norma@3,6\",\"loglady@11,6\",\"gigante@8,1\"]"},{"where":"roadhouse/gigante","why":"NPC \"gigante\" a 8,1 presente ma nessuna casella adiacente raggiungibile: {\"ok\":false,\"error\":\"unreachable\",\"target\":[8,1],\"candidates\":[[8,2,\"up\"]],\"diag\":{\"from\":[3,8],\"to\":[8,2],\"reason\":\"no_path\",\"attempt\":4}} · NPC: [\"truman@4,8\",\"bobby@3,2\",\"donna@5,2\",\"james@9,2\",\"shelly@11,2\",\"norma@3,6\",\"loglady@11,6\",\"gigante@8,1\"]"}]
+  PASS - [D] adapter: nessuna root ambigua
+  PASS - [D] guida: nessun teletrasporto lungo la rotta scelta o verso la riva
+  PASS - [D] stato: T_LELAND_TAXI scritta una sola volta
+  PASS - [D] stato: nessun nodo one-shot committato due volte
+  PASS - [D] mondo: mai due Hawk, due Maddy, due Leland o due Giganti sulla stessa mappa
+  PASS - [D] mondo: Maddy e Leland mai a casa Palmer nell'Atto 4
+  PASS - [D] console: nessun errore del browser durante il percorso
+  transcript -> artifacts/act-4-implementation/transcripts/D.{json,md}
+
+act-4-playthrough: 408/425 assertions passed
+console errors: 1
+  Failed to load resource: the server responded with a status of 404 (File not found)  <http://127.0.0.1:29495/favicon.ico>
+EXIT 1

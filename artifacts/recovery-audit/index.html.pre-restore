@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>TWIN PEAKS — Il Mistero di Laura Palmer</title>
+<style>
+  .sr-only {
+    position: absolute !important; width: 1px !important; height: 1px !important;
+    padding: 0 !important; margin: -1px !important; overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important;
+  }
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%; height: 100dvh;
+    background: #000; overflow: hidden; overscroll-behavior: none; touch-action: none;
+  }
+  body { position: fixed; inset: 0; }
+  #stage { position: fixed; inset: 0; touch-action: none; }
+  #stage canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+  }
+  #presentation {
+    z-index: 0;
+    background: #08070b;
+    image-rendering: auto;
+    pointer-events: none;
+    transition: opacity 480ms ease;
+  }
+  #gl {
+    z-index: 1;
+    background: #000;
+    image-rendering: auto;
+    transition: opacity 320ms ease;
+  }
+  #game {
+    z-index: 7;
+    background: transparent;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    object-fit: contain;
+    object-position: center bottom;
+    transition: opacity 240ms ease;
+  }
+  body[data-ui-mode="full"] #game {
+    object-position: center center;
+    image-rendering: auto;
+  }
+  body[data-ui-mode="full"] #presentation { opacity: 1; }
+  body[data-ui-mode="full"] #gl { opacity: 0; }
+  body[data-ui-mode="play"] #presentation { opacity: 0; }
+  body[data-screen="title"] #game,
+  body[data-screen="intro"] #game,
+  body[data-screen="end"] #game { opacity: 0; }
+  body[data-dialogue="true"] #game { opacity: 0; }
+  #cinematic-ui {
+    position: absolute;
+    left: 50%;
+    z-index: 9;
+    width: min(650px, calc(100vw - 48px));
+    box-sizing: border-box;
+    color: #efe8da;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, 12px);
+    transition: opacity 420ms ease, transform 520ms cubic-bezier(.2,.8,.2,1);
+    font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    text-align: center;
+    text-shadow: 0 2px 14px rgba(0,0,0,.78);
+  }
+  body[data-screen="title"] #cinematic-ui,
+  body[data-screen="intro"] #cinematic-ui,
+  body[data-screen="end"] #cinematic-ui {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  body[data-screen="title"] #cinematic-ui {
+    bottom: 7vh;
+    padding: 16px 26px 14px;
+    background: radial-gradient(ellipse at center, rgba(9,5,8,.58), rgba(9,5,8,0) 72%);
+  }
+  body[data-screen="intro"] #cinematic-ui,
+  body[data-screen="end"] #cinematic-ui {
+    top: 50%;
+    transform: translate(-50%, -47%);
+    padding: 34px 42px 31px;
+    background: linear-gradient(145deg, rgba(12,7,11,.88), rgba(19,10,14,.70));
+    border: 1px solid rgba(210,167,92,.54);
+    box-shadow: 0 22px 70px rgba(0,0,0,.42), inset 0 0 0 1px rgba(255,255,255,.035);
+    backdrop-filter: blur(8px);
+  }
+  #cinematic-kicker {
+    color: #cdb27a;
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+  }
+  #cinematic-title {
+    margin: 11px 0 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(24px, 3.1vw, 38px);
+    font-weight: 500;
+    letter-spacing: .04em;
+  }
+  body[data-screen="title"] #cinematic-title,
+  body[data-screen="title"] #cinematic-body { display: none; }
+  #cinematic-body {
+    margin: 17px auto 0;
+    max-width: 540px;
+    color: #ddd6ca;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(16px, 1.8vw, 20px);
+    font-style: italic;
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+  #cinematic-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 19px;
+    padding: 10px 16px 9px;
+    border-top: 1px solid rgba(210,167,92,.68);
+    border-bottom: 1px solid rgba(210,167,92,.68);
+    color: #fff2d0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .17em;
+    text-transform: uppercase;
+    animation: breathe 2.4s ease-in-out infinite;
+  }
+  #cinematic-action::before {
+    content: "◆";
+    color: #cda75b;
+    font-size: 8px;
+  }
+  #cinematic-meta {
+    margin-top: 14px;
+    color: rgba(239,231,220,.88);
+    font-size: 12px;
+    font-weight: 550;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+  }
+  @keyframes breathe {
+    0%, 100% { opacity: .68; }
+    50% { opacity: 1; }
+  }
+  @media (max-width: 620px) {
+    body[data-screen="title"] #cinematic-ui { bottom: 5vh; }
+    body[data-screen="intro"] #cinematic-ui,
+    body[data-screen="end"] #cinematic-ui { padding: 25px 22px 23px; }
+    #cinematic-meta { letter-spacing: .05em; }
+  }
+  #dialogue-ui {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(18px, 4vh, 44px);
+    z-index: 10;
+    width: min(920px, calc(100vw - 44px));
+    min-height: 102px;
+    box-sizing: border-box;
+    padding: 27px 62px 21px 32px;
+    color: #f1eadf;
+    background:
+      linear-gradient(100deg, rgba(13,17,27,.96), rgba(9,11,19,.90)),
+      radial-gradient(circle at 15% 0%, rgba(112,37,54,.24), transparent 45%);
+    border: 1px solid rgba(205,178,122,.82);
+    box-shadow:
+      0 22px 70px rgba(0,0,0,.50),
+      inset 0 0 0 3px rgba(74,86,119,.32);
+    opacity: 0;
+    transform: translate(-50%, 18px);
+    transition: opacity 210ms ease, transform 280ms cubic-bezier(.2,.8,.2,1);
+    pointer-events: none;
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  body[data-dialogue="true"] #dialogue-ui {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  #dialogue-speaker {
+    position: absolute;
+    top: -18px;
+    left: 24px;
+    padding: 10px 18px 9px 22px;
+    color: #fff0c9;
+    background: linear-gradient(100deg, #4b1724, #27111a);
+    border: 1px solid rgba(205,178,122,.88);
+    box-shadow: 0 8px 25px rgba(0,0,0,.35);
+    font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 12px;
+    font-weight: 750;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+  #dialogue-speaker::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 9px;
+    bottom: 8px;
+    width: 3px;
+    background: #a44d61;
+  }
+  #dialogue-text {
+    font-size: clamp(18px, 1.7vw, 22px);
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: .005em;
+    text-shadow: 0 2px 12px rgba(0,0,0,.58);
+  }
+  #dialogue-next {
+    position: absolute;
+    right: 25px;
+    bottom: 22px;
+    color: #d9ba75;
+    font-size: 13px;
+    animation: breathe 1.5s ease-in-out infinite;
+  }
+  #dialogue-context {
+    position: absolute;
+    top: 10px;
+    right: 18px;
+    color: rgba(201,184,129,.56);
+    font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 8px;
+    font-weight: 650;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  @media (max-width: 620px) {
+    #dialogue-ui {
+      width: calc(100vw - 24px);
+      min-height: 105px;
+      padding: 27px 44px 20px 22px;
+    }
+    #dialogue-text { font-size: 17px; line-height: 1.42; }
+  }
+  #grade {
+    position: absolute; inset: 0; pointer-events: none; z-index: 4;
+    background:
+      radial-gradient(ellipse at 48% 38%, rgba(255,222,170,0.10), transparent 48%),
+      linear-gradient(145deg, rgba(22,52,68,0.14), transparent 46%, rgba(74,29,38,0.11));
+    mix-blend-mode: soft-light;
+  }
+  #vignette {
+    position: absolute; inset: 0; pointer-events: none; z-index: 5;
+    background:
+      linear-gradient(to bottom, rgba(8,14,18,0.12), transparent 24%, transparent 76%, rgba(5,8,12,0.20)),
+      radial-gradient(ellipse at 50% 46%, transparent 58%, rgba(2,6,10,0.38) 100%);
+  }
+  #grain {
+    position: absolute; inset: 0; pointer-events: none; z-index: 6; opacity: 0.028;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%25" height="100%25" filter="url(%23n)"/></svg>');
+    background-size: 96px 96px;
+  }
+  /* Produzione retro 2D: viewport nativo 256x192 (4:3), pixel netti. */
+  html, body {
+    background-color: #0b130e;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(216,208,160,.018) 0 2px, transparent 2px 32px),
+      radial-gradient(ellipse at 50% 44%, #17241b 0, #101b14 48%, #080d0a 100%);
+  }
+  #stage {
+    inset: auto;
+    left: 50%; top: 50%;
+    width: min(100vw, 133.3333vh);
+    height: min(100vh, 75vw);
+    max-width: 100vw; max-height: 100dvh;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    transform: translate(-50%, -50%);
+    background: #17261d;
+    box-shadow: 0 0 0 2px #4f6747, 0 16px 60px rgba(0,0,0,.72);
+    --native-scale: 1;
+  }
+  #game {
+    display: block;
+    width: 100%; height: 100%;
+    object-fit: fill;
+    object-position: center;
+    opacity: 1 !important;
+    image-rendering: pixelated !important;
+    image-rendering: crisp-edges !important;
+  }
+  /* Volti speaker conservano risoluzione ImageGen sul compositor. Mondo e
+     cornice restano nel framebuffer nativo 256x192. */
+  #speaker-portrait-hires {
+    position: absolute;
+    z-index: 8;
+    left: 6.25%;
+    top: 54.166667%;
+    width: 13.28125%;
+    height: 18.75%;
+    display: block;
+    object-fit: fill;
+    image-rendering: auto;
+    pointer-events: none;
+  }
+  #speaker-portrait-hires[hidden] { display: none; }
+  /* Testo dialogo composto a risoluzione display. Sotto resta il bitmap
+     nativo come fallback; fondi crema coprono soltanto i vecchi glifi. */
+  #speaker-name-hires,
+  #speaker-dialogue-hires,
+  #speaker-advance-hires {
+    position: absolute;
+    z-index: 9;
+    color: #072619;
+    background: #eee6b5;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-weight: 700;
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  #speaker-name-hires {
+    left: 5.859375%;
+    top: 73.4375%;
+    width: 14.0625%;
+    height: 3.645833%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    font-size: calc(var(--native-scale) * 4px);
+    line-height: 1;
+  }
+  #speaker-dialogue-hires {
+    left: 5.859375%;
+    top: 80.729167%;
+    width: 56.25%;
+    height: 9.375%;
+    font-size: calc(var(--native-scale) * 6.4px);
+    line-height: 1;
+    letter-spacing: calc(var(--native-scale) * 0.08px);
+  }
+  #speaker-dialogue-hires .speaker-line {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    white-space: nowrap;
+  }
+  #speaker-dialogue-hires .speaker-line:first-child { top: 0; }
+  #speaker-dialogue-hires .speaker-line:last-child { top: 61.111111%; }
+  #speaker-advance-hires {
+    right: 4.296875%;
+    top: 92.708333%;
+    width: 20.3125%;
+    height: 2.604167%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    white-space: nowrap;
+    font-size: max(10px, calc(var(--native-scale) * 2.8px));
+    line-height: 1;
+  }
+  #speaker-name-hires[hidden],
+  #speaker-dialogue-hires[hidden],
+  #speaker-advance-hires[hidden] { display: none; }
+  #presentation, #gl, #grade, #vignette, #grain,
+  #cinematic-ui, #dialogue-ui { display: none !important; }
+  #narrative {
+    position: absolute; inset: 0; z-index: 12; pointer-events: none;
+    font-family: ui-monospace, Menlo, Monaco, "Courier New", monospace;
+  }
+  /* DOM resta semantico/accessibile; retro-ui.js lo dipinge pixel-per-pixel. */
+  .retro-semantic-ui { opacity: 0 !important; pointer-events: none !important; }
+  #retro-ui-canvas {
+    position: absolute; inset: 0; z-index: 14;
+    width: 100%; height: 100%;
+    image-rendering: pixelated; image-rendering: crisp-edges;
+  }
+  #narrative .nw-root { pointer-events: auto; }
+  .nw-root {
+    position: absolute; left: 2.5%; right: 2.5%; bottom: 2.5%;
+    box-sizing: border-box;
+    max-height: 74%; overflow: auto;
+    padding: clamp(10px, 1.8vh, 18px) clamp(13px, 2.1vw, 24px);
+    color: #17261d; background: #f4f0d2;
+    border: clamp(3px, .5vh, 6px) double #17261d;
+    box-shadow: .5vh .7vh 0 rgba(23,38,29,.82);
+    font-size: clamp(15px, 2.25vh, 23px); line-height: 1.38;
+  }
+  .nb-root { top: 4%; bottom: 4%; max-height: none; }
+  .nw-title { color: #36543b; font-weight: 800; margin-bottom: .55em; }
+  .nw-opt { padding: .12em .35em; white-space: pre-wrap; }
+  .nw-focus { color: #f4f0d2; background: #36543b; }
+  .nw-name { color: #36543b; font-weight: 800; }
+  .nw-hint { color: #526b46; text-align: right; margin-top: .55em; }
+  #objective {
+    position: absolute; z-index: 11; top: 2.5%; left: 50%;
+    transform: translateX(-50%); max-width: 88%; box-sizing: border-box;
+    padding: .45em .8em; pointer-events: none;
+    color: #17261d; background: #f4f0d2; border: 3px double #17261d;
+    font: 700 clamp(10px, 1.45vh, 15px)/1.25 ui-monospace, Menlo, Monaco, "Courier New", monospace;
+    text-align: center;
+  }
+  /* Fascicolo leggibile a risoluzione schermo. Il mondo resta 160×144;
+     testi lunghi e legenda tasti non vengono ingranditi da una griglia 5×7. */
+  #case-ui {
+    position: absolute; inset: 0; z-index: 20;
+    display: none; align-items: center; justify-content: center;
+    box-sizing: border-box; padding: clamp(8px, 1.8vh, 18px);
+    color: #173524; background: rgba(12, 27, 19, .78);
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: clamp(12px, 1.9vh, 17px); line-height: 1.36;
+    letter-spacing: .01em; pointer-events: none;
+  }
+  body[data-menu="true"] #case-ui { display: flex; }
+  #case-panel {
+    width: min(880px, 100%); max-height: 100%; overflow: hidden;
+    box-sizing: border-box; padding: clamp(12px, 2.2vh, 22px);
+    background: #fffdf0; border: 3px solid #18231b;
+    box-shadow: 0 0 0 4px #fffdf0, 0 0 0 7px #18231b, 8px 10px 0 rgba(0,0,0,.35);
+    display: grid; grid-template-rows: auto auto auto minmax(72px, 1fr) auto;
+    gap: clamp(6px, 1.2vh, 12px);
+  }
+  #case-heading {
+    display: flex; justify-content: space-between; gap: 16px;
+    color: #173524; font-size: 1.08em; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .055em;
+  }
+  #case-objective {
+    padding-bottom: .65em; border-bottom: 2px solid #756b4c;
+  }
+  .case-label {
+    display: block; margin-bottom: .18em; color: #54713f;
+    font-size: .76em; font-weight: 800; text-transform: uppercase; letter-spacing: .08em;
+  }
+  #case-evidence-list { display: grid; gap: 3px; }
+  .case-evidence {
+    min-height: 1.45em; box-sizing: border-box; padding: .18em .5em;
+    border-left: 4px solid transparent;
+  }
+  .case-evidence.is-selected {
+    color: #fffdf0; background: #31543a; border-left-color: #91ad58; font-weight: 700;
+  }
+  #case-note {
+    min-height: 0; overflow: auto; padding: .7em .8em;
+    color: #173524; background: #d7e98e; border-left: 5px solid #668448;
+    font-size: 1.02em; line-height: 1.48;
+  }
+  #case-document {
+    display: none; min-height: 0; overflow: hidden;
+    grid-template-rows: auto auto minmax(3.5em, 1fr); gap: clamp(8px, 1.4vh, 14px);
+    padding: clamp(14px, 2.4vh, 26px);
+    color: #173524; background: #f7f0cf;
+    border: 2px solid #756b4c; box-shadow: inset 0 0 0 5px #e8deb1;
+  }
+  #case-document-title {
+    margin: 0; color: #173524; font: 800 1.25em/1.2 Georgia, "Times New Roman", serif;
+  }
+  #case-document-label {
+    color: #668448; font-size: .78em; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .1em;
+  }
+  #case-document-copy {
+    min-height: 0; overflow: auto; white-space: pre-line;
+    font: 1.08em/1.65 Georgia, "Times New Roman", serif;
+  }
+  body[data-case-view="document"] #case-panel {
+    grid-template-rows: auto minmax(120px, 1fr) auto;
+  }
+  body[data-case-view="document"] #case-objective,
+  body[data-case-view="document"] #case-evidence-block,
+  body[data-case-view="document"] #case-note { display: none; }
+  body[data-case-view="document"] #case-document { display: grid; }
+  #case-help {
+    display: flex; justify-content: center; flex-wrap: wrap; gap: .35em 1.5em;
+    padding-top: .65em; border-top: 2px solid #394566;
+    color: #294c34; font-size: .9em; font-weight: 800;
+  }
+  #case-help kbd {
+    padding: .1em .42em; color: #fffdf0; background: #294c34;
+    border: 0; border-radius: 3px; box-shadow: inset 0 -2px 0 rgba(0,0,0,.24);
+    font: inherit;
+  }
+  @media (max-height: 560px) {
+    #case-ui { font-size: 11px; padding: 8px; }
+    #case-panel { padding: 10px; gap: 5px; }
+    #case-note { line-height: 1.35; }
+  }
+  @media (max-width: 560px) {
+    #case-ui { padding: 6px; font-size: 12px; }
+    #case-panel { padding: 8px; gap: 4px; }
+    #case-heading { gap: 8px; font-size: .96em; }
+    #case-document { padding: 10px; gap: 4px; }
+    #case-document-copy { line-height: 1.45; }
+    #case-help { gap: .25em .7em; padding-top: .45em; font-size: .82em; }
+  }
+  .tp-touch-ctrl {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="presentation" width="960" height="640"></canvas>
+  <canvas id="gl" width="960" height="640"></canvas>
+  <div id="grade"></div>
+  <div id="vignette"></div>
+  <div id="grain"></div>
+  <canvas id="game" width="256" height="192"></canvas>
+  <img id="speaker-portrait-hires" src="assets/portraits/hires/cooper.png" data-portrait-root="assets/portraits/hires/" alt="" aria-hidden="true" hidden>
+  <div id="speaker-name-hires" aria-hidden="true" hidden></div>
+  <div id="speaker-dialogue-hires" aria-hidden="true" hidden><span id="speaker-dialogue-line-1" class="speaker-line"></span><span id="speaker-dialogue-line-2" class="speaker-line"></span></div>
+  <div id="speaker-advance-hires" aria-hidden="true" hidden></div>
+  <section id="cinematic-ui" aria-live="polite">
+    <div id="cinematic-kicker"></div>
+    <h1 id="cinematic-title"></h1>
+    <div id="cinematic-body"></div>
+    <div id="cinematic-action"></div>
+    <div id="cinematic-meta"></div>
+  </section>
+  <section id="dialogue-ui" aria-live="polite">
+    <div id="dialogue-speaker"></div>
+    <div id="dialogue-context"></div>
+    <div id="dialogue-text"></div>
+    <div id="dialogue-next">◆</div>
+  </section>
+  <div id="dialogue-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  <section id="case-ui" aria-live="polite" aria-hidden="true">
+    <div id="case-panel">
+      <header id="case-heading"><span id="case-heading-copy">Fascicolo · Caso Palmer</span><span id="case-count"></span></header>
+      <div id="case-objective"><span class="case-label">Obiettivo attuale</span><span id="case-objective-copy"></span></div>
+      <div id="case-evidence-block"><span class="case-label">Prove raccolte</span><div id="case-evidence-list"></div></div>
+      <div id="case-note"></div>
+      <article id="case-document" aria-live="polite">
+        <h2 id="case-document-title"></h2>
+        <div id="case-document-label"></div>
+        <div id="case-document-copy"></div>
+      </article>
+      <footer id="case-help"></footer>
+    </div>
+  </section>
+  <div id="narrative" aria-live="polite"></div>
+  <div id="objective"></div>
+</div>
+<!-- Script classici, nessun modulo ES: funziona da file:// -->
+<script src="js/tiles.js?v=r60i2"></script>
+<script src="js/chars.js?v=char9"></script>
+<script src="js/houses.js"></script>
+<script src="js/maps.js?v=r100q-diner-polish"></script>
+<script src="js/data.js?v=13act2"></script>
+<script src="js/environmental-inspect.js?v=r101act2"></script>
+<script src="js/retro-font.js?v=r74space1"></script>
+<script src="js/portraits.js?v=r75name-tag-dom"></script>
+<script src="js/gold-tone.js?v=r69i13"></script>
+<script src="js/engine.js?v=r142-narrative-portrait"></script>
+<script src="js/glue.js?v=gold49n3-flagship-act2"></script>
+<script src="js/retro.js?v=r60i2"></script>
+<script src="js/retro-cast-matrices-a.js?v=r102e"></script>
+<script src="js/retro-cast-matrices-b.js?v=r102e"></script>
+<link rel="preload" as="image" href="assets/sprites/cast-walkcycles-hg-24.png?v=r129-cast">
+<script src="js/retro-authored.js?v=r141-gestures"></script>
+<script src="js/town-dusk.js?v=1"></script>
+<script src="js/ambient-life.js?v=5"></script>
+<script src="js/character-activity.js?v=1.1"></script>
+<script src="js/environment-reactions.js?v=2"></script>
+<script src="js/ambient-life-scenes.js?v=4"></script>
+<script src="js/location-connections.js"></script>
+<script src="js/double-r-exterior-art.js"></script>
+<script src="js/double-r-exterior-scene.js"></script>
+<script src="js/double-r-location-data.js"></script>
+<script src="js/double-r-location-production.js"></script>
+<script src="js/sheriffs-station-art.js"></script>
+<script src="js/sheriffs-station-exterior-art.js"></script>
+<script src="js/sheriffs-station-scene.js"></script>
+<script src="js/sheriffs-station-exterior-scene.js"></script>
+<script src="js/sheriffs-station-location-data.js"></script>
+<script src="js/sheriffs-station-production.js"></script>
+<script src="js/room-315-art.js"></script>
+<script src="js/room-315-scene.js"></script>
+<script src="js/room-315-location-data.js"></script>
+<script src="js/room-315-production.js"></script>
+<script src="js/hospital-art.js"></script>
+<script src="js/hospital-scene.js"></script>
+<script src="js/hospital-production.js"></script>
+<script src="js/character-life-scenes.js"></script>
+<script src="js/traincar-art.js"></script>
+<script src="js/traincar-scene.js"></script>
+<script src="js/traincar-production.js"></script>
+<script src="js/traincar-location-data.js"></script>
+<script src="js/traincar-location-production.js"></script>
+<script src="js/world-engine.js"></script>
+<script src="js/world-catalog.js"></script>
+<script src="js/main.js?v=r111portrait-tight"></script>
+<script src="js/touch.js?v=r112gutter"></script>
+<script src="js/audio.js"></script>
+<script src="js/narrative-runtime.js?v=2"></script>
+<script src="js/narrative-ui.js?v=gold54p2"></script>
+<script src="js/narrative-notebook.js?v=5"></script>
+<script src="js/narrative-data.gen.js?v=19act4b1"></script>
+<script src="js/narrative-bootstrap.js"></script>
+<script src="js/narrative-engine-adapter.js?v=11"></script>
+<script src="js/narrative-save.js?v=4"></script>
+<script src="js/narrative-finale.js?v=gold54p5"></script>
+<script src="js/narrative-finale-production.js?v=14"></script>
+<script src="js/narrative-production.js?v=22"></script>
+<script src="js/retro-ui.js?v=gold54p8-narrative-name-tag"></script>
+</body>
+</html>

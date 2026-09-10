@@ -1,0 +1,306 @@
+{
+  "results": [
+    {
+      "name": "[impeto-kept] setup: sogno_fatto raggiunto col gioco reale",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] setup: confronto M4 disponibile nel taccuino reale",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] setup: Atto 3 aperto dal gioco (atto3 + P2 accettata)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: la porta est di città porta al vagone",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: la porta di One Eyed Jacks è chiusa prima di east_route_confirmed (oej_bloccato)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: il parapetto del ponte si raggiunge dalle assi (4,7)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: dopo la scena del ponte il vagone resta raggiungibile a piedi",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: un solo Hawk sul vagone dopo il ponte",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: la soglia del vagone apre il prompt della teoria preliminare",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: il prompt preliminare non offre «disposizione»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: un solo Hawk dopo la scoperta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: il confronto dell'anello si apre dal taccuino reale",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: la lettura sbagliata dell'anello risponde con la sua pagina",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: la lettura sbagliata dell'anello resta ritentabile",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: la milestone della teoria si riapre dalla soglia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: il taglio nord prima di S1 risponde col rinvio, non con la rotta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: il rapporto porta le pagine attese per la teoria «degeneration»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: il prompt S1 arriva nella stessa sessione del rapporto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: l'anello sparisce dalla scena dopo S1",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: un solo Hawk dopo S1, al taglio a nord",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: il taglio a nord conferma la rotta est",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M5: con la rotta confermata la porta di One Eyed Jacks si apre",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: Jacques e Audrey esistono come NPC sulla sala di One Eyed Jacks",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: il tavolo di Jacques risponde all'ingresso in sala",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: Audrey vista sotto copertura a One Eyed Jacks",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: richiamo alle carte del vagone presente al tavolo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: tre tattiche offerte",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: la catena tattica→interrogatorio→P5 gira sotto un solo lease",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: «ha ucciso Laura» è respinta e ritentabile",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: confronto carte ↔ testimonianza disponibile",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: fermo di Renault committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: prima dell'ospedale Truman rinvia il rapporto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: il piantone è in fondo al reparto, davanti alla porta nord (7,3)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: il piantone non chiude nessun percorso del reparto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: il registro di turno rende le quattro pagine del piantone",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: un piantone davanti alla stanza, nessun doppione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: reload dopo il fermo — obiettivo HUD identico",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: reload dopo il fermo — entità identiche",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: reload dopo il fermo — stato narrativo identico",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: la riga di Truman su Audrey compare",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: la correzione «impeto» compare da Lucy",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: la morte di Renault è registrata",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: il registro riletto dopo la morte rende la coda B8b",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: morto Renault la sorveglianza si sposta su Ronette",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: il Gigante non è ancora apparso prima della 315",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: la prima apparizione del Gigante arriva SOLO dallo specchio della 315",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] Atto 4: la riga sul registro compare",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] Atto 4: eco S1 corretta (m6.b9.atto4.s1_safe)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] trascrizione: pagine registrate",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] voce: lo speaker emesso coincide con quello scritto su ogni pagina",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] testo: nessuna deriva fra pagina scritta e pagina emessa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] testo: nessun id di risultato/nodo o metadato «[…]» a schermo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] HUD: ogni testo di obiettivo osservato è un obiettivo scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] HUD: gli obiettivi si susseguono nell'ordine scritto, mai all'indietro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] mondo: nessun dialogo classico di hawk/jacques/audrey/truman su vagone o One Eyed Jacks",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] mondo: mai due Hawk o due piantoni sulla stessa mappa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] guida: nessun ripiego sull'API dell'adapter, tutto coi tasti",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] adapter: nessuna root ambigua",
+      "pass": true,
+      "detail": null
+    }
+  ],
+  "observations": [
+    {
+      "path": "impeto-kept",
+      "kind": "obiettivo mai mostrato",
+      "objectives": [
+        "Segui la rotta oltre il confine: One Eyed Jacks."
+      ]
+    }
+  ],
+  "console_errors": [
+    "Failed to load resource: the server responded with a status of 404 (File not found)"
+  ]
+}

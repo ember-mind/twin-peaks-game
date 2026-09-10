@@ -1,0 +1,1393 @@
+{
+  "transcript": [
+    {
+      "kind": "travel",
+      "to": "diner",
+      "at": [
+        6,
+        8,
+        "up"
+      ],
+      "why": "viaggio: Double R"
+    },
+    {
+      "kind": "press",
+      "at": [
+        "diner",
+        11,
+        2,
+        "up"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_leland_waiting",
+      "page_id": "m8.a.leland_waiting.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Leland al bancone, accanto a Maddy. Il conto è già sotto la sua mano; aspetta che lei finisca.)",
+      "dom_text": "(Leland al bancone, accanto a Maddy. Il conto è già sotto la sua mano; aspetta che lei finisca.)",
+      "objective": "Passa dal diner, questo pomeriggio.",
+      "map": "diner"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_leland_waiting",
+      "page_id": "m8.a.leland_waiting.p02",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Aspetto che lei finisca.",
+      "dom_text": "COOPER: Aspetto che lei finisca.",
+      "objective": "Passa dal diner, questo pomeriggio.",
+      "map": "diner"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m8_leland_waiting",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m8_leland_waiting"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Passa dal diner, questo pomeriggio.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "press",
+      "at": [
+        "diner",
+        10,
+        2,
+        "up"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_diner",
+      "page_id": "m8.a.diner.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Maddy al bancone, un tovagliolo pieno di numeri. Norma le riempie la tazza senza chiedere.)",
+      "dom_text": "(Maddy al bancone, un tovagliolo pieno di numeri. Norma le riempie la tazza senza chiedere.)",
+      "objective": "Passa dal diner, questo pomeriggio.",
+      "map": "diner"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_diner",
+      "page_id": "m8.a.diner.p02",
+      "speaker_id": "maddy",
+      "display_name": "MADDY",
+      "text": "La 7:40 prende la coincidenza a Spokane. Passa alla fermata del lago — quella delle 11 no, ma parte a orario.",
+      "dom_text": "MADDY: La 7:40 prende la coincidenza a Spokane. Passa alla fermata del lago — quella delle 11 no, ma parte a orario.",
+      "objective": "Passa dal diner, questo pomeriggio.",
+      "map": "diner"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_diner",
+      "page_id": "m8.a.diner.p03",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Torna a casa, signorina Ferguson?",
+      "dom_text": "COOPER: Torna a casa, signorina Ferguson?",
+      "objective": "Passa dal diner, questo pomeriggio.",
+      "map": "diner"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_diner",
+      "page_id": "m8.a.diner.p04",
+      "speaker_id": "maddy",
+      "display_name": "MADDY",
+      "text": "Torno al centralino della biblioteca. Mi tengono il posto fino a lunedì — l'ho fatto promettere per iscritto.",
+      "dom_text": "MADDY: Torno al centralino della biblioteca. Mi tengono il posto fino a lunedì — l'ho fatto promettere per iscritto.",
+      "objective": "Passa dal diner, questo pomeriggio.",
+      "map": "diner"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_diner",
+      "page_id": "m8.a.diner.p05",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Un avventore la saluta: \"Ciao, Laura\". Maddy non si volta subito.)",
+      "dom_text": "(Un avventore la saluta: \"Ciao, Laura\". Maddy non si volta subito.)",
+      "objective": "Passa dal diner, questo pomeriggio.",
+      "map": "diner"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_diner",
+      "page_id": "m8.a.diner.p06",
+      "speaker_id": "maddy",
+      "display_name": "MADDY",
+      "text": "(senza acidità) Maddy. Con due D. Laura era mia cugina — io sono quella che porta gli occhiali nelle foto.",
+      "dom_text": "MADDY: (senza acidità) Maddy. Con due D. Laura era mia cugina — io sono quella che porta gli occhiali nelle foto.",
+      "objective": "Passa dal diner, questo pomeriggio.",
+      "map": "diner"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_diner",
+      "page_id": "m8.a.diner.p07",
+      "speaker_id": "maddy",
+      "display_name": "MADDY",
+      "text": "Sono rimasta un giorno in più per zia Sarah. Uno. Poi Missoula si riprende il suo centralino.",
+      "dom_text": "MADDY: Sono rimasta un giorno in più per zia Sarah. Uno. Poi Missoula si riprende il suo centralino.",
+      "objective": "Passa dal diner, questo pomeriggio.",
+      "map": "diner"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_diner",
+      "page_id": "m8.a.diner.p08",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Maddy piega il tovagliolo sugli orari e aspetta.)",
+      "dom_text": "(Maddy piega il tovagliolo sugli orari e aspetta.)",
+      "objective": "Passa dal diner, questo pomeriggio.",
+      "map": "diner"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m8_diner",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "widget",
+      "node_id": "m8_diner",
+      "choices": [
+        "promise_accompagno",
+        "promise_autonomia",
+        "promise_prudenza"
+      ],
+      "objective": "Passa dal diner, questo pomeriggio.",
+      "map": "diner",
+      "at": [
+        10,
+        2,
+        "up"
+      ]
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m8_diner"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Passa dal diner, questo pomeriggio.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "choice",
+      "node_id": "m8_diner",
+      "choice_id": "promise_prudenza"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_diner",
+      "page_id": "m8.a.diner.feedback.prudenza",
+      "speaker_id": "maddy",
+      "display_name": "MADDY",
+      "text": "(ride) Lei parla come il mio centralino. Va bene: chiamerò. Sempre.",
+      "dom_text": "MADDY: (ride) Lei parla come il mio centralino. Va bene: chiamerò. Sempre.",
+      "objective": "Passa dal diner, questo pomeriggio.",
+      "map": "diner"
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "values": {
+          "promise_stance": "prudenza"
+        }
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Prima di uscire dal diner, parla con Leland.",
+      "where": "dopo l'avanzamento"
+    },
+    {
+      "kind": "press",
+      "at": [
+        "diner",
+        10,
+        1,
+        "right"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_leland_taxi",
+      "page_id": "m8.b0.leland_taxi.p00",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Maddy saluta ed esce. Leland posa il conto sul bancone.)",
+      "dom_text": "(Maddy saluta ed esce. Leland posa il conto sul bancone.)",
+      "objective": "Prima di uscire dal diner, parla con Leland.",
+      "map": "diner"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_leland_taxi",
+      "page_id": "m8.b0.leland_taxi.p01",
+      "speaker_id": "leland",
+      "display_name": "LELAND",
+      "text": "Maddy prende la prima corriera domattina. Ho chiamato la Twin Peaks Taxi: passa da casa alle sette.",
+      "dom_text": "LELAND: Maddy prende la prima corriera domattina. Ho chiamato la Twin Peaks Taxi: passa da casa alle sette.",
+      "objective": "Prima di uscire dal diner, parla con Leland.",
+      "map": "diner"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_leland_taxi",
+      "page_id": "m8.b0.leland_taxi.prudenza.p01",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Ho chiesto a Maddy una telefonata. Il taxi delle sette aggiunge un orario, non una garanzia.",
+      "dom_text": "COOPER: Ho chiesto a Maddy una telefonata. Il taxi delle sette aggiunge un orario, non una garanzia.",
+      "objective": "Prima di uscire dal diner, parla con Leland.",
+      "map": "diner"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_leland_taxi",
+      "page_id": "m8.b0.leland_taxi.p02",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "Prima del Roadhouse, al diner: Leland dice di aver prenotato il taxi di Maddy.",
+      "dom_text": "Prima del Roadhouse, al diner: Leland dice di aver prenotato il taxi di Maddy.",
+      "objective": "Prima di uscire dal diner, parla con Leland.",
+      "map": "diner"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m8_leland_taxi",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "evidence": [
+          "T_LELAND_TAXI"
+        ],
+        "nodes_done": [
+          "m8_leland_taxi"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Il paese si ritrova al Roadhouse, stasera.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "travel",
+      "to": "town",
+      "at": [
+        47,
+        29,
+        "up"
+      ],
+      "why": "viaggio: davanti al Roadhouse"
+    },
+    {
+      "kind": "door",
+      "from": "town",
+      "to": "roadhouse",
+      "blocked": null,
+      "arrival": [
+        7,
+        8,
+        "up"
+      ]
+    },
+    {
+      "kind": "press",
+      "at": [
+        "roadhouse",
+        3,
+        8,
+        "right"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_roadhouse_truman",
+      "page_id": "m8.b.truman.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(La banda suona. Il paese c'è tutto: birre, risate basse, il microfono che fischia una volta.)",
+      "dom_text": "(La banda suona. Il paese c'è tutto: birre, risate basse, il microfono che fischia una volta.)",
+      "objective": "Il paese si ritrova al Roadhouse, stasera.",
+      "map": "roadhouse"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_roadhouse_truman",
+      "page_id": "m8.b.truman.p02",
+      "speaker_id": "truman",
+      "display_name": "TRUMAN",
+      "text": "Se i tuoi enigmi avevano un seguito, questo è il posto che mi hai chiesto di aspettare.",
+      "dom_text": "TRUMAN: Se i tuoi enigmi avevano un seguito, questo è il posto che mi hai chiesto di aspettare.",
+      "objective": "Il paese si ritrova al Roadhouse, stasera.",
+      "map": "roadhouse"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_roadhouse_truman",
+      "page_id": "m8.b.truman.p03",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(La musica non si ferma. Ma per Cooper la sala rallenta — solo per lui.)",
+      "dom_text": "(La musica non si ferma. Ma per Cooper la sala rallenta — solo per lui.)",
+      "objective": "Il paese si ritrova al Roadhouse, stasera.",
+      "map": "roadhouse"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_roadhouse_truman",
+      "page_id": "m8.b.truman.p04",
+      "speaker_id": "gigante",
+      "display_name": "GIGANTE",
+      "text": "Sta accadendo di nuovo.",
+      "dom_text": "GIGANTE: Sta accadendo di nuovo.",
+      "objective": "Il paese si ritrova al Roadhouse, stasera.",
+      "map": "roadhouse"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_roadhouse_truman",
+      "page_id": "m8.b.truman.p05",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(La sala riprende il suo tempo. Nessuno ha visto niente.)",
+      "dom_text": "(La sala riprende il suo tempo. Nessuno ha visto niente.)",
+      "objective": "Il paese si ritrova al Roadhouse, stasera.",
+      "map": "roadhouse"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m8_roadhouse_truman",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m8_roadhouse_truman"
+        ],
+        "values": {
+          "presagio_status": "active"
+        }
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Il telefono del Roadhouse.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "press",
+      "at": [
+        "roadhouse",
+        8,
+        2,
+        "up"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_giant_stage",
+      "page_id": "m8.b.giant.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Sul palco, dietro la banda, un uomo alto. Nessuno lo guarda. Non indica niente.)",
+      "dom_text": "(Sul palco, dietro la banda, un uomo alto. Nessuno lo guarda. Non indica niente.)",
+      "objective": "Il telefono del Roadhouse.",
+      "map": "roadhouse"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m8_giant_stage",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m8_giant_stage"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Il telefono del Roadhouse.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "press",
+      "at": [
+        "roadhouse",
+        8,
+        2,
+        "up"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_giant_stage",
+      "page_id": "m8.b.giant.repeat",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Sul palco, dietro la banda, un uomo alto. Nessuno lo guarda. Non indica niente.)",
+      "dom_text": "(Sul palco, dietro la banda, un uomo alto. Nessuno lo guarda. Non indica niente.)",
+      "objective": "Il telefono del Roadhouse.",
+      "map": "roadhouse"
+    },
+    {
+      "kind": "objective",
+      "text": "Il telefono del Roadhouse.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "press",
+      "at": [
+        "roadhouse",
+        8,
+        4,
+        "down"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_roadhouse_phone",
+      "page_id": "m8.b.phone.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "Il telefono del Roadhouse.",
+      "dom_text": "Il telefono del Roadhouse.",
+      "objective": "Il telefono del Roadhouse.",
+      "map": "roadhouse"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_roadhouse_phone",
+      "page_id": "m8.b.phone.p02",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Harry, non so ancora cosa si ripeta. La linea è libera; quello che dico adesso farà muovere qualcuno.",
+      "dom_text": "COOPER: Harry, non so ancora cosa si ripeta. La linea è libera; quello che dico adesso farà muovere qualcuno.",
+      "objective": "Il telefono del Roadhouse.",
+      "map": "roadhouse"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m8_roadhouse_phone",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "widget",
+      "node_id": "m8_roadhouse_phone",
+      "choices": [
+        "warning_palmer",
+        "warning_centrale",
+        "warning_nessuno"
+      ],
+      "objective": "Il telefono del Roadhouse.",
+      "map": "roadhouse",
+      "at": [
+        8,
+        4,
+        "down"
+      ]
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m8_roadhouse_phone"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Il telefono del Roadhouse.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "choice",
+      "node_id": "m8_roadhouse_phone",
+      "choice_id": "warning_nessuno"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_roadhouse_phone",
+      "page_id": "m8.b.roadhouse.feedback.nessuno",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Il telefono resta sulla forcella. La porta del Roadhouse è già alle spalle.)",
+      "dom_text": "(Il telefono resta sulla forcella. La porta del Roadhouse è già alle spalle.)",
+      "objective": "Il telefono del Roadhouse.",
+      "map": "roadhouse"
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "values": {
+          "warning_target": "nessuno",
+          "maddy_action_after_warning": "none",
+          "sarah_support_state": "none"
+        }
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Torna all’incrocio: casa Palmer, lago o diner.",
+      "where": "dopo l'avanzamento"
+    },
+    {
+      "kind": "reload",
+      "before": {
+        "map": "roadhouse",
+        "x": 8,
+        "y": 5,
+        "dir": "down",
+        "objective": "Torna all’incrocio: casa Palmer, lago o diner.",
+        "digest": {
+          "flags": [
+            "atto3",
+            "atto4",
+            "east_route_confirmed",
+            "gigante1",
+            "jacques_dead",
+            "jacques_preso",
+            "sogno_fatto"
+          ],
+          "values": {
+            "promise_stance": "prudenza",
+            "presagio_status": "active",
+            "warning_target": "nessuno",
+            "maddy_action_after_warning": "none",
+            "sarah_support_state": "none"
+          },
+          "evidence": [
+            "E1_DIARIO",
+            "E3_LETTERA_R",
+            "T_LELAND_TAXI"
+          ],
+          "nodes_done": [
+            "m6_atto4_bridge",
+            "m8_diner",
+            "m8_giant_stage",
+            "m8_leland_taxi",
+            "m8_leland_waiting",
+            "m8_roadhouse_phone",
+            "m8_roadhouse_truman"
+          ]
+        },
+        "npcs": [],
+        "saved": {
+          "narrative": true,
+          "classic": true,
+          "revision": 10
+        }
+      },
+      "after": {
+        "map": "roadhouse",
+        "x": 8,
+        "y": 5,
+        "dir": "down",
+        "objective": "Torna all’incrocio: casa Palmer, lago o diner.",
+        "digest": {
+          "flags": [
+            "atto3",
+            "atto4",
+            "east_route_confirmed",
+            "gigante1",
+            "jacques_dead",
+            "jacques_preso",
+            "sogno_fatto"
+          ],
+          "values": {
+            "promise_stance": "prudenza",
+            "presagio_status": "active",
+            "warning_target": "nessuno",
+            "maddy_action_after_warning": "none",
+            "sarah_support_state": "none"
+          },
+          "evidence": [
+            "E1_DIARIO",
+            "E3_LETTERA_R",
+            "T_LELAND_TAXI"
+          ],
+          "nodes_done": [
+            "m6_atto4_bridge",
+            "m8_diner",
+            "m8_giant_stage",
+            "m8_leland_taxi",
+            "m8_leland_waiting",
+            "m8_roadhouse_phone",
+            "m8_roadhouse_truman"
+          ]
+        },
+        "npcs": []
+      }
+    },
+    {
+      "kind": "door",
+      "from": "roadhouse",
+      "to": "town",
+      "blocked": null,
+      "arrival": [
+        47,
+        29,
+        "down"
+      ]
+    },
+    {
+      "kind": "press",
+      "at": [
+        "town",
+        47,
+        29,
+        "down"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_focus_choice",
+      "page_id": "m8.c.focus.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Lo stesso paese di ogni giorno. Stanotte le strade sono solo distanza.)",
+      "dom_text": "(Lo stesso paese di ogni giorno. Stanotte le strade sono solo distanza.)",
+      "objective": "Torna all’incrocio: casa Palmer, lago o diner.",
+      "map": "town"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_focus_choice",
+      "page_id": "m8.c.focus.p02",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "Sul taccuino, tre luoghi restano senza segni di priorità.",
+      "dom_text": "Sul taccuino, tre luoghi restano senza segni di priorità.",
+      "objective": "Torna all’incrocio: casa Palmer, lago o diner.",
+      "map": "town"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_focus_choice",
+      "page_id": "m8.c.focus.p03",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Nessun fatto ne preferisce uno. Il primo costo è la distanza.",
+      "dom_text": "COOPER: Nessun fatto ne preferisce uno. Il primo costo è la distanza.",
+      "objective": "Torna all’incrocio: casa Palmer, lago o diner.",
+      "map": "town"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m8_focus_choice",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "widget",
+      "node_id": "m8_focus_choice",
+      "choices": [
+        "focus_palmer",
+        "focus_lago",
+        "focus_diner"
+      ],
+      "objective": "Torna all’incrocio: casa Palmer, lago o diner.",
+      "map": "town",
+      "at": [
+        47,
+        29,
+        "down"
+      ]
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m8_focus_choice"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Torna all’incrocio: casa Palmer, lago o diner.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "choice",
+      "node_id": "m8_focus_choice",
+      "choice_id": "focus_diner"
+    },
+    {
+      "kind": "objective",
+      "text": "Torna all’incrocio: casa Palmer, lago o diner.",
+      "where": "dopo l'avanzamento"
+    },
+    {
+      "kind": "door",
+      "from": "town",
+      "to": "double_r_exterior_prototype",
+      "blocked": null,
+      "arrival": [
+        6,
+        10,
+        "up"
+      ]
+    },
+    {
+      "kind": "door",
+      "from": "double_r_exterior_prototype",
+      "to": "diner",
+      "blocked": null,
+      "arrival": [
+        6,
+        8,
+        "up"
+      ]
+    },
+    {
+      "kind": "press",
+      "at": [
+        "diner",
+        5,
+        1,
+        "down"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_route_diner",
+      "page_id": "m8.c.route_diner.p01",
+      "speaker_id": "norma",
+      "display_name": "NORMA",
+      "text": "Maddy? Ha chiesto della fermata del lago. Poi è tornata dai Palmer. Non era ancora partita.",
+      "dom_text": "NORMA: Maddy? Ha chiesto della fermata del lago. Poi è tornata dai Palmer. Non era ancora partita.",
+      "objective": "Torna all’incrocio: casa Palmer, lago o diner.",
+      "map": "diner"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_route_diner",
+      "page_id": "m8.c.route_diner.p02",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Il tempo di uscire: la radio di Hawk gracchia il nome del lago — una chiamata anonima ha segnalato qualcosa sulla riva.)",
+      "dom_text": "(Il tempo di uscire: la radio di Hawk gracchia il nome del lago — una chiamata anonima ha segnalato qualcosa sulla riva.)",
+      "objective": "Torna all’incrocio: casa Palmer, lago o diner.",
+      "map": "diner"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_route_diner",
+      "page_id": "m8.c.route_diner.p03",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Hawk ha il lago. Norma conferma che Maddy è tornata dai Palmer; porto con me questo ordine.",
+      "dom_text": "COOPER: Hawk ha il lago. Norma conferma che Maddy è tornata dai Palmer; porto con me questo ordine.",
+      "objective": "Torna all’incrocio: casa Palmer, lago o diner.",
+      "map": "diner"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m8_route_diner",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m8_route_diner"
+        ],
+        "values": {
+          "body_found_by": "hawk"
+        }
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Torna all’incrocio: casa Palmer, lago o diner.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "door",
+      "from": "diner",
+      "to": "double_r_exterior_prototype",
+      "blocked": null,
+      "arrival": [
+        6,
+        7,
+        "down"
+      ]
+    },
+    {
+      "kind": "door",
+      "from": "double_r_exterior_prototype",
+      "to": "town",
+      "blocked": null,
+      "arrival": [
+        42,
+        21,
+        "down"
+      ]
+    },
+    {
+      "kind": "press",
+      "at": [
+        "town",
+        16,
+        28,
+        "left"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_discovery",
+      "page_id": "m8.d.discovery.hawk.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Quando Cooper arriva, il perimetro è già segnato. Hawk gli va incontro, si toglie il cappello.)",
+      "dom_text": "(Quando Cooper arriva, il perimetro è già segnato. Hawk gli va incontro, si toglie il cappello.)",
+      "objective": "Torna all’incrocio: casa Palmer, lago o diner.",
+      "map": "town"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_discovery",
+      "page_id": "m8.d.discovery.hawk.p02",
+      "speaker_id": "hawk",
+      "display_name": "HAWK",
+      "text": "L'ho trovata io. Non l'ho mossa. Non ho toccato le mani. Guarda l'anulare.",
+      "dom_text": "HAWK: L'ho trovata io. Non l'ho mossa. Non ho toccato le mani. Guarda l'anulare.",
+      "objective": "Torna all’incrocio: casa Palmer, lago o diner.",
+      "map": "town"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_discovery",
+      "page_id": "m8.d.discovery.hawk.p03",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Hawk, hai fatto bene. Osservo da dove ti sei fermato; una scena preservata ha due paia d'occhi.",
+      "dom_text": "COOPER: Hawk, hai fatto bene. Osservo da dove ti sei fermato; una scena preservata ha due paia d'occhi.",
+      "objective": "Torna all’incrocio: casa Palmer, lago o diner.",
+      "map": "town"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m8_discovery",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_promise_echo",
+      "page_id": "m8.d.echo.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Cooper prende il registratore. Non lo accende.)",
+      "dom_text": "(Cooper prende il registratore. Non lo accende.)",
+      "objective": "Torna all’incrocio: casa Palmer, lago o diner.",
+      "map": "town"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_promise_echo",
+      "page_id": "m8.d.echo.prudenza",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Diane. Rise della mia voce da centralino. Disse che avrebbe chiamato.",
+      "dom_text": "COOPER: Diane. Rise della mia voce da centralino. Disse che avrebbe chiamato.",
+      "objective": "Rileggi le lettere e il diario di Laura.",
+      "map": "town"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_promise_echo",
+      "page_id": "m8.d.echo.p02",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Sul tovagliolo aveva scritto tre partenze. Ne aveva scelta una.",
+      "dom_text": "COOPER: Sul tovagliolo aveva scritto tre partenze. Ne aveva scelta una.",
+      "objective": "Rileggi le lettere e il diario di Laura.",
+      "map": "town"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_promise_echo",
+      "page_id": "m8.d.echo.p03",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Silenzio.)",
+      "dom_text": "(Silenzio.)",
+      "objective": "Rileggi le lettere e il diario di Laura.",
+      "map": "town"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m8_promise_echo",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "flags": [
+          "maddy_trovata"
+        ],
+        "evidence": [
+          "E9A_LETTERA_O",
+          "E9B_STESSO_METODO"
+        ],
+        "nodes_done": [
+          "m8_discovery",
+          "m8_promise_echo"
+        ],
+        "values": {
+          "presagio_status": "verified",
+          "letter_o_observation_source": "hawk_preserved",
+          "letter_o_chain": "standard"
+        }
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Rileggi le lettere e il diario di Laura.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "objective",
+      "text": "Rileggi le lettere e il diario di Laura.",
+      "where": "prima del taccuino"
+    },
+    {
+      "kind": "objective",
+      "text": "OBIETTIVO: Rileggi le lettere e il diario di Laura.",
+      "where": "nel taccuino"
+    },
+    {
+      "kind": "pair",
+      "pair": [
+        "E9A_LETTERA_O",
+        "E3_LETTERA_R"
+      ],
+      "status": "available",
+      "matched": "m8_cmp_letters"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_cmp_letters",
+      "page_id": "m8.e.cmp_letters.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Confronta: la O incisa sotto l'unghia ↔ la lettera R)",
+      "dom_text": "(Confronta: la O incisa sotto l'unghia ↔ la lettera R)",
+      "objective": "",
+      "map": "town"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m8_cmp_letters",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "objective",
+      "text": "Rileggi le lettere e il diario di Laura.",
+      "where": "prima del taccuino"
+    },
+    {
+      "kind": "objective",
+      "text": "OBIETTIVO: Rileggi le lettere e il diario di Laura.",
+      "where": "nel taccuino"
+    },
+    {
+      "kind": "pair",
+      "pair": [
+        "E9A_LETTERA_O",
+        "E1_DIARIO"
+      ],
+      "status": "available",
+      "matched": "m8_cmp_diary"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_cmp_diary",
+      "page_id": "m8.e.cmp_diary.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Confronta: le lettere ↔ il diario di Laura)",
+      "dom_text": "(Confronta: le lettere ↔ il diario di Laura)",
+      "objective": "",
+      "map": "town"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_cmp_diary",
+      "page_id": "m8.e.cmp_diary.p02",
+      "speaker_id": null,
+      "display_name": "DIARIO DI LAURA",
+      "text": "«Ha un nome da persona perbene.»",
+      "dom_text": "DIARIO DI LAURA: «Ha un nome da persona perbene.»",
+      "objective": "",
+      "map": "town"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_cmp_diary",
+      "page_id": "m8.e.cmp_diary.p02b",
+      "speaker_id": null,
+      "display_name": "DIARIO DI LAURA",
+      "text": "«Dice che me lo darà un pezzo alla volta, come le cose che non si possono restituire.»",
+      "dom_text": "DIARIO DI LAURA: «Dice che me lo darà un pezzo alla volta, come le cose che non si possono restituire.»",
+      "objective": "",
+      "map": "town"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_cmp_diary",
+      "page_id": "m8.e.cmp_diary.p03",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "Cooper affianca la promessa del diario alla sequenza R–O.",
+      "dom_text": "Cooper affianca la promessa del diario alla sequenza R–O.",
+      "objective": "",
+      "map": "town"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m8_cmp_diary",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "widget",
+      "node_id": "m8_cmp_diary",
+      "choices": [
+        "diary_a",
+        "diary_b",
+        "diary_c"
+      ],
+      "objective": "",
+      "map": "town",
+      "at": [
+        16,
+        28,
+        "left"
+      ]
+    },
+    {
+      "kind": "choice",
+      "node_id": "m8_cmp_diary",
+      "choice_id": "diary_a"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_cmp_diary",
+      "page_id": "m8.e.cmp_diary.feedback.a",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "Le lettere seguono una firma progressiva che il diario aveva annunciato. Resta ignoto se la firma sia dell'assassino, di \"lui\", o una messinscena.",
+      "dom_text": "Le lettere seguono una firma progressiva che il diario aveva annunciato. Resta ignoto se la firma sia dell'assassino, di \"lui\", o una messinscena.",
+      "objective": "",
+      "map": "town"
+    },
+    {
+      "kind": "objective",
+      "text": "",
+      "where": "dopo l'avanzamento"
+    },
+    {
+      "kind": "travel",
+      "to": "sheriff",
+      "at": [
+        11,
+        4,
+        "left"
+      ],
+      "why": "viaggio: centrale"
+    },
+    {
+      "kind": "press",
+      "at": [
+        "sheriff",
+        11,
+        4,
+        "left"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_station",
+      "page_id": "m8.f.station.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(La centrale, prima dell'alba.)",
+      "dom_text": "(La centrale, prima dell'alba.)",
+      "objective": "Porta il nesso a Truman, alla centrale.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_station",
+      "page_id": "m8.f.station.sarah_truman",
+      "speaker_id": "truman",
+      "display_name": "TRUMAN",
+      "text": "Sono passato io da Sarah prima di tornare qui. Adesso Andy resta con lei.",
+      "dom_text": "TRUMAN: Sono passato io da Sarah prima di tornare qui. Adesso Andy resta con lei.",
+      "objective": "Porta il nesso a Truman, alla centrale.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_station",
+      "page_id": "m8.f.station.p02",
+      "speaker_id": "truman",
+      "display_name": "TRUMAN",
+      "text": "Dimmi che cosa abbiamo, oltre a quello che abbiamo perso.",
+      "dom_text": "TRUMAN: Dimmi che cosa abbiamo, oltre a quello che abbiamo perso.",
+      "objective": "Porta il nesso a Truman, alla centrale.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_station",
+      "page_id": "m8.f.station.p03",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Una firma che procede, Harry. Il diario dice che qualcuno le prometteva il proprio nome a pezzi.",
+      "dom_text": "COOPER: Una firma che procede, Harry. Il diario dice che qualcuno le prometteva il proprio nome a pezzi.",
+      "objective": "Porta il nesso a Truman, alla centrale.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_station",
+      "page_id": "m8.f.station.hook.p01",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "E un orario. Ieri al diner Leland ha detto di aver chiamato la Twin Peaks Taxi per le sette, da casa. L'ho scritto io, alla luce del giorno.",
+      "dom_text": "COOPER: E un orario. Ieri al diner Leland ha detto di aver chiamato la Twin Peaks Taxi per le sette, da casa. L'ho scritto io, alla luce del giorno.",
+      "objective": "Porta il nesso a Truman, alla centrale.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m8_station",
+      "page_id": "m8.f.station.hook.p02",
+      "speaker_id": "truman",
+      "display_name": "TRUMAN",
+      "text": "Allora abbiamo un'ora. Prima delle sette, Lucy chiama la compagnia: una corsa prenotata, o niente.",
+      "dom_text": "TRUMAN: Allora abbiamo un'ora. Prima delle sette, Lucy chiama la compagnia: una corsa prenotata, o niente.",
+      "objective": "Porta il nesso a Truman, alla centrale.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m8_station",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m8_station"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Chiedi a Lucy se il taxi di Leland era prenotato.",
+      "where": "dopo l'interazione"
+    }
+  ],
+  "classic": [],
+  "mapEntries": [
+    {
+      "map": "diner",
+      "at": [
+        6,
+        8,
+        "up"
+      ],
+      "npcs": [
+        "norma@5,2",
+        "shelly@9,7",
+        "loglady@4,5",
+        "james@9,6",
+        "maddy@10,1",
+        "leland@11,1"
+      ]
+    },
+    {
+      "map": "town",
+      "at": [
+        47,
+        29,
+        "up"
+      ],
+      "npcs": [
+        "bobby@31,16",
+        "donna@44,10",
+        "jacoby@16,25"
+      ]
+    },
+    {
+      "map": "roadhouse",
+      "at": [
+        7,
+        8,
+        "up"
+      ],
+      "npcs": [
+        "truman@4,8",
+        "bobby@3,4",
+        "donna@5,4",
+        "james@2,4",
+        "shelly@3,6",
+        "norma@5,6",
+        "loglady@2,6"
+      ]
+    },
+    {
+      "map": "town",
+      "at": [
+        47,
+        30,
+        "down"
+      ],
+      "npcs": [
+        "jacoby@16,25"
+      ]
+    },
+    {
+      "map": "double_r_exterior_prototype",
+      "at": [
+        6,
+        9,
+        "up"
+      ],
+      "npcs": []
+    },
+    {
+      "map": "diner",
+      "at": [
+        6,
+        8,
+        "up"
+      ],
+      "npcs": [
+        "norma@5,2",
+        "shelly@9,7",
+        "loglady@4,5",
+        "james@9,6"
+      ]
+    },
+    {
+      "map": "double_r_exterior_prototype",
+      "at": [
+        6,
+        7,
+        "down"
+      ],
+      "npcs": []
+    },
+    {
+      "map": "town",
+      "at": [
+        42,
+        22,
+        "down"
+      ],
+      "npcs": [
+        "jacoby@16,25",
+        "hawk_shore_first@16,27"
+      ]
+    },
+    {
+      "map": "sheriff",
+      "at": [
+        11,
+        4,
+        "left"
+      ],
+      "npcs": [
+        "truman@10,4",
+        "andy@10,7",
+        "hawk@12,8",
+        "lucy@2,6"
+      ]
+    }
+  ],
+  "fallbacks": [],
+  "notes": [
+    {
+      "text": "soglia: dopo l'arrivo Cooper si è mosso di una casella prima del tasto",
+      "data": {
+        "arrival": [
+          47,
+          29,
+          "down"
+        ],
+        "pos": {
+          "map": "town",
+          "x": 47,
+          "y": 30,
+          "dir": "down"
+        }
+      }
+    },
+    {
+      "text": "soglia: posizione d'uscita diversa dall'attesa, si raggiunge il crocevia camminando",
+      "data": {
+        "map": "town",
+        "x": 47,
+        "y": 30,
+        "dir": "down"
+      }
+    },
+    {
+      "text": "HUD dopo la stazione (M9 diventa corrente)",
+      "data": {
+        "hud": "Chiedi a Lucy se il taxi di Leland era prenotato.",
+        "m8": {
+          "id": "obj_m8_4",
+          "text": "Porta a Truman una contraddizione che regga."
+        },
+        "m9": {
+          "id": "obj_m9_1",
+          "text": "Chiedi a Lucy se il taxi di Leland era prenotato."
+        }
+      }
+    }
+  ],
+  "console_errors": []
+}

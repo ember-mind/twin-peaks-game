@@ -11,7 +11,7 @@ global.setInterval=()=>0;
 global.addEventListener=(t,fn)=>{handlers[t]=fn;};
 global.KeyboardEvent=function(type,opts){return Object.assign({type},opts||{});};
 const noop=()=>{}; const ctx=new Proxy({measureText:t=>({width:String(t).length*5}),imageSmoothingEnabled:false},{get:(o,k)=>k in o?o[k]:noop,set:()=>true});
-const els={}; function el(id){return els[id]||(els[id]={id,hidden:false,textContent:'',style:{},getContext:()=>ctx,classList:{toggle:noop},setAttribute:noop,addEventListener:noop});}
+const els={}; function el(id){return els[id]||(els[id]={id,hidden:false,textContent:'',style:{},getContext:()=>ctx,classList:{toggle:noop},_attrs:{},setAttribute(n,v){this._attrs[n]=v;},getAttribute(n){return n in this._attrs?this._attrs[n]:null;},removeAttribute(n){delete this._attrs[n];},addEventListener:noop});}
 global.document={body:{classList:{toggle:noop},setAttribute:noop},getElementById:el,addEventListener:noop};
 let storageWrites=0;
 global.localStorage={getItem:()=>null,setItem:()=>{storageWrites++;},removeItem:noop};

@@ -16,7 +16,7 @@
   var speakerTypographySignature = '';
   var caseUiSignature = '';
   var dialogueLiveSignature = '';
-  var TILE = 16, VW = 256, VH = 192; // viewport nativo: 16x12 metatile
+  var TILE = 16, VW = 256, VH = 192; // viewport DS-like: 16x12 metatile
   // Primo frame giocabile: ingresso sud della città, accanto al cartello.
   // Coordinate già validate da genmaps contro collisioni e occlusione camera.
   var START_MAP = 'town', START_TX = 28, START_TY = 31, START_DIR = 'up';
@@ -935,7 +935,7 @@
   // terreno + strutture + sparkle su un contesto, finestra (cx,cy,vw,vh) in px mondo
   function paintGround(g, cx, cy, vw, vh) {
     var map = S.map, rows = map.rows;
-    /* Stanza d'arrivo: fondale authored, centrato nel viewport.
+    /* Stanza d'arrivo: fondale authored, centrato nel viewport 256x192.
      * Collisioni restano nella mappa ASCII; raster non eredita ingombri 16px. */
     if (map.id === 'arrival' && GAME.Retro2D && GAME.Retro2D.drawArrivalBackdrop) {
       GAME.Retro2D.drawArrivalBackdrop(g, cx, cy, vw, vh);

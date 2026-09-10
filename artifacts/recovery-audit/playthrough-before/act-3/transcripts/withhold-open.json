@@ -1,0 +1,1961 @@
+{
+  "transcript": [
+    {
+      "kind": "travel",
+      "to": "town",
+      "at": [
+        54,
+        14,
+        "right"
+      ],
+      "why": "viaggio: strada a est"
+    },
+    {
+      "kind": "door",
+      "from": "town",
+      "to": "traincar",
+      "blocked": null
+    },
+    {
+      "kind": "classic",
+      "map": "traincar",
+      "id": "oej_bloccato",
+      "pages": [
+        "Il sentiero sale a\nnord, fra gli alberi.",
+        "Non ancora. Prima\nle impronte che ci",
+        "arrivano, poi\nil sentiero."
+      ]
+    },
+    {
+      "kind": "door",
+      "from": "traincar",
+      "to": "traincar",
+      "blocked": {
+        "id": "oej_bloccato",
+        "text": "Il sentiero sale a\nnord, fra gli alberi."
+      }
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_bridge",
+      "page_id": "m5.b1.bridge.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Le case finiscono dove aveva detto James. Dopo il ponte, solo la massicciata.)",
+      "dom_text": "(Le case finiscono dove aveva detto James. Dopo il ponte, solo la massicciata.)",
+      "objective": "Verifica la rotta di James: oltre il ponte, verso i binari.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_bridge",
+      "page_id": "m5.b1.bridge.p02",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Sulla sponda del paese, un paletto della contea con un nastro. Le assi sono consumate da questa parte del torrente; dall'altra, no.)",
+      "dom_text": "(Sulla sponda del paese, un paletto della contea con un nastro. Le assi sono consumate da questa parte del torrente; dall'altra, no.)",
+      "objective": "Verifica la rotta di James: oltre il ponte, verso i binari.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_bridge",
+      "page_id": "m5.b1.bridge.p03",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "La rotta di James e la strada di Ronette sono la stessa strada.",
+      "dom_text": "COOPER: La rotta di James e la strada di Ronette sono la stessa strada.",
+      "objective": "Verifica la rotta di James: oltre il ponte, verso i binari.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_bridge",
+      "page_id": "m5.b1.bridge.p04",
+      "speaker_id": "hawk",
+      "display_name": "HAWK",
+      "text": "(raggiungendolo) Truman mi manda a farti da ombra. Da qui in poi le impronte sono mie e tue.",
+      "dom_text": "HAWK: (raggiungendolo) Truman mi manda a farti da ombra. Da qui in poi le impronte sono mie e tue.",
+      "objective": "Verifica la rotta di James: oltre il ponte, verso i binari.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_bridge",
+      "page_id": "m5.b1.bridge.p05",
+      "speaker_id": "hawk",
+      "display_name": "HAWK",
+      "text": "Le altre sono più vecchie della pioggia. Portano a est, nessuna torna indietro.",
+      "dom_text": "HAWK: Le altre sono più vecchie della pioggia. Portano a est, nessuna torna indietro.",
+      "objective": "Verifica la rotta di James: oltre il ponte, verso i binari.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_bridge",
+      "page_id": "m5.b1.bridge.p06",
+      "speaker_id": "hawk",
+      "display_name": "HAWK",
+      "text": "Il paletto l'ha messo la contea, tre giorni fa. La terra la leggo io. Il resto lo leggi tu.",
+      "dom_text": "HAWK: Il paletto l'ha messo la contea, tre giorni fa. La terra la leggo io. Il resto lo leggi tu.",
+      "objective": "Verifica la rotta di James: oltre il ponte, verso i binari.",
+      "map": "traincar"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m5_bridge",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "evidence": [
+          "E_PONTE_DIREZIONE"
+        ],
+        "nodes_done": [
+          "m5_bridge"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Verifica la rotta di James: oltre il ponte, verso i binari.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_discovery",
+      "page_id": "m5.b3.discovery.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Oltre la curva, fermo dove i binari muoiono: un vagone merci. Solo.)",
+      "dom_text": "(Oltre la curva, fermo dove i binari muoiono: un vagone merci. Solo.)",
+      "objective": "Verifica la rotta di James: oltre il ponte, verso i binari.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_discovery",
+      "page_id": "m5.b3.discovery.p02",
+      "speaker_id": "hawk",
+      "display_name": "HAWK",
+      "text": "Io tengo fuori gli altri. Tu fai il primo passaggio.",
+      "dom_text": "HAWK: Io tengo fuori gli altri. Tu fai il primo passaggio.",
+      "objective": "Verifica la rotta di James: oltre il ponte, verso i binari.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_discovery",
+      "page_id": "m5.b3.discovery.p03",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Dalla porta, tutto in una volta: un mucchio di terra sulla soglia. A sinistra un sedile divelto, a destra una lamiera piegata. Al centro una traversa, e sopra qualcosa di piccolo. In fondo, una stufa.)",
+      "dom_text": "(Dalla porta, tutto in una volta: un mucchio di terra sulla soglia. A sinistra un sedile divelto, a destra una lamiera piegata. Al centro una traversa, e sopra qualcosa di piccolo. In fondo, una stufa.)",
+      "objective": "Verifica la rotta di James: oltre il ponte, verso i binari.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_discovery",
+      "page_id": "m5.b3.discovery.p04",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Prima terra, lamiera e distanze. Il vagone può aspettare un minuto prima di diventare una storia.",
+      "dom_text": "COOPER: Prima terra, lamiera e distanze. Il vagone può aspettare un minuto prima di diventare una storia.",
+      "objective": "Verifica la rotta di James: oltre il ponte, verso i binari.",
+      "map": "traincar"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m5_discovery",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_theory_initial",
+      "page_id": "m5.b8a.theory.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "Terra sulla soglia. Segni ai lati. Una cosa piccola al centro.",
+      "dom_text": "Terra sulla soglia. Segni ai lati. Una cosa piccola al centro.",
+      "objective": "Verifica la rotta di James: oltre il ponte, verso i binari.",
+      "map": "traincar"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m5_theory_initial",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "widget",
+      "node_id": "m5_theory_initial",
+      "choices": [
+        "theory_degeneration",
+        "theory_withhold"
+      ],
+      "objective": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "map": "traincar"
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "flags": [
+          "vagone_scoperto"
+        ],
+        "nodes_done": [
+          "m5_discovery",
+          "m5_theory_initial"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "choice",
+      "node_id": "m5_theory_initial",
+      "choice_id": "theory_withhold"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_theory_initial",
+      "page_id": "m5.b8a.feedback.withhold",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(La pagina resta bianca. La data, sì.)",
+      "dom_text": "(La pagina resta bianca. La data, sì.)",
+      "objective": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "map": "traincar"
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "values": {
+          "m5_initial_theory": "withheld"
+        }
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "where": "dopo l'avanzamento"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_ring",
+      "page_id": "m5.b6.ring.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Su una traversa di legno, al centro esatto: un anello.)",
+      "dom_text": "(Su una traversa di legno, al centro esatto: un anello.)",
+      "objective": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_ring",
+      "page_id": "m5.b6.ring.p02",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "Un anello, in piano, al centro esatto della traversa.",
+      "dom_text": "Un anello, in piano, al centro esatto della traversa.",
+      "objective": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_ring",
+      "page_id": "m5.b6.ring.p03",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Cooper si abbassa. Non lo tocca.)",
+      "dom_text": "(Cooper si abbassa. Non lo tocca.)",
+      "objective": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_ring",
+      "page_id": "m5.b6.ring.p04",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "La polvere intorno è intatta fino al bordo. Nessuna striscia, nessun percorso di caduta. Caduto, o fermato?",
+      "dom_text": "La polvere intorno è intatta fino al bordo. Nessuna striscia, nessun percorso di caduta. Caduto, o fermato?",
+      "objective": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_ring",
+      "page_id": "m5.b6.ring.p05",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Centro esatto, polvere intatta. Prima di chiedere di chi fosse, annotiamo come stava qui.",
+      "dom_text": "COOPER: Centro esatto, polvere intatta. Prima di chiedere di chi fosse, annotiamo come stava qui.",
+      "objective": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "map": "traincar"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m5_ring",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "evidence": [
+          "E8A_ANELLO_POSIZIONE",
+          "E8B_ANELLO_SUPERFICIE"
+        ],
+        "nodes_done": [
+          "m5_ring"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_mound",
+      "page_id": "m5.b5.mound.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Un mucchio di terra sulla soglia. Dentro, non fuori: il primo passo di chiunque entri.)",
+      "dom_text": "(Un mucchio di terra sulla soglia. Dentro, non fuori: il primo passo di chiunque entri.)",
+      "objective": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_mound",
+      "page_id": "m5.b5.mound.p02",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "Un biglietto piegato in quattro, nella terra. Pieghe interne pulite. Un lembo lasciato sopra la terra, alla luce. Nascosto a chi?",
+      "dom_text": "Un biglietto piegato in quattro, nella terra. Pieghe interne pulite. Un lembo lasciato sopra la terra, alla luce. Nascosto a chi?",
+      "objective": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_mound",
+      "page_id": "m5.b5.mound.p03",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Cooper lo apre con la penna. Lettere maiuscole, incise più che scritte.)",
+      "dom_text": "(Cooper lo apre con la penna. Lettere maiuscole, incise più che scritte.)",
+      "objective": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_mound",
+      "page_id": "m5.b5.mound.p04",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "\"FUOCO CAMMINA CON ME\".",
+      "dom_text": "\"FUOCO CAMMINA CON ME\".",
+      "objective": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_mound",
+      "page_id": "m5.b5.mound.p05",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Sotto terra le pieghe sono pulite. Sopra, un lembo, dove passa ogni piede. Registro posizione e testo separatamente.",
+      "dom_text": "COOPER: Sotto terra le pieghe sono pulite. Sopra, un lembo, dove passa ogni piede. Registro posizione e testo separatamente.",
+      "objective": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "map": "traincar"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m5_mound",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "evidence": [
+          "E7A_BIGLIETTO_TESTO",
+          "E7B_BIGLIETTO_POSIZIONE"
+        ],
+        "nodes_done": [
+          "m5_mound"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_scene",
+      "page_id": "m5.b7.scene.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Dal centro: la porta, il mucchio sulla soglia, la traversa sotto i piedi. Una linea sola. Il sedile e la lamiera restano agli angoli. Fra gli angoli e qui, la polvere non ha strisce.)",
+      "dom_text": "(Dal centro: la porta, il mucchio sulla soglia, la traversa sotto i piedi. Una linea sola. Il sedile e la lamiera restano agli angoli. Fra gli angoli e qui, la polvere non ha strisce.)",
+      "objective": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_scene",
+      "page_id": "m5.b7.scene.p02",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "I segni ai bordi. Il centro vuoto. Nessun trascinamento fra i due. Che cosa ha attraversato questo spazio, e come?",
+      "dom_text": "I segni ai bordi. Il centro vuoto. Nessun trascinamento fra i due. Che cosa ha attraversato questo spazio, e come?",
+      "objective": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_scene",
+      "page_id": "m5.b7.scene.p03",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Hawk, la soglia è tua. Io fotografo il vuoto fra questi segni.",
+      "dom_text": "COOPER: Hawk, la soglia è tua. Io fotografo il vuoto fra questi segni.",
+      "objective": "Esamina il vagone senza spostare nulla: la terra, la traversa, il centro.",
+      "map": "traincar"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m5_scene",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "evidence": [
+          "E_SCENE"
+        ],
+        "nodes_done": [
+          "m5_scene"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Taccuino (T): l'anello e la polvere intorno.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "objective",
+      "text": "Taccuino (T): l'anello e la polvere intorno.",
+      "where": "prima del taccuino"
+    },
+    {
+      "kind": "objective",
+      "text": "OBIETTIVO: Taccuino (T): l'anello e la polvere intorno.",
+      "where": "nel taccuino"
+    },
+    {
+      "kind": "pair",
+      "pair": [
+        "E8A_ANELLO_POSIZIONE",
+        "E8B_ANELLO_SUPERFICIE"
+      ],
+      "status": "available",
+      "matched": "m5_cmp_ring"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_cmp_ring",
+      "page_id": "m5.b8c.cmp_ring.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "Anello al centro esatto. Polvere continua fino al bordo dell'anello.",
+      "dom_text": "Anello al centro esatto. Polvere continua fino al bordo dell'anello.",
+      "objective": "",
+      "map": "traincar"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m5_cmp_ring",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "widget",
+      "node_id": "m5_cmp_ring",
+      "choices": [
+        "ring_a",
+        "ring_b",
+        "ring_c"
+      ],
+      "objective": "",
+      "map": "traincar"
+    },
+    {
+      "kind": "choice",
+      "node_id": "m5_cmp_ring",
+      "choice_id": "ring_a"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_cmp_ring",
+      "page_id": "m5.b8c.feedback.deliberate",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Cooper non lo tocca. Fotografa il bordo della polvere, poi il centro. Due scatti, nessuna parola.)",
+      "dom_text": "(Cooper non lo tocca. Fotografa il bordo della polvere, poi il centro. Due scatti, nessuna parola.)",
+      "objective": "",
+      "map": "traincar"
+    },
+    {
+      "kind": "objective",
+      "text": "",
+      "where": "dopo l'avanzamento"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_theory_first",
+      "page_id": "m5.b8b.first.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "La pagina è ancora bianca. Sotto la data: lembo fuori dalla terra, centro senza strisce, polvere intatta fino al bordo.",
+      "dom_text": "La pagina è ancora bianca. Sotto la data: lembo fuori dalla terra, centro senza strisce, polvere intatta fino al bordo.",
+      "objective": "Torna sulla soglia del vagone. La prima lettura regge?",
+      "map": "traincar"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m5_theory_first",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "widget",
+      "node_id": "m5_theory_first",
+      "choices": [
+        "first_degeneration",
+        "first_staging",
+        "first_open"
+      ],
+      "objective": "Torna sulla soglia del vagone. La prima lettura regge?",
+      "map": "traincar"
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m5_theory_first"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Torna sulla soglia del vagone. La prima lettura regge?",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "choice",
+      "node_id": "m5_theory_first",
+      "choice_id": "first_open"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_theory_first",
+      "page_id": "m5.b8b.feedback.first_open",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Due righe, una sotto l'altra. Nessuna cancellata.)",
+      "dom_text": "(Due righe, una sotto l'altra. Nessuna cancellata.)",
+      "objective": "Torna sulla soglia del vagone. La prima lettura regge?",
+      "map": "traincar"
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "values": {
+          "m5_final_theory": "open"
+        }
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Truman è sui binari. Riferisci la scena prima che cali la luce.",
+      "where": "dopo l'avanzamento"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_tracks_north_early",
+      "page_id": "m5.a14.early.p01",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Le impronte proseguono. Hawk è ancora alla porta: le impronte aspettano, la luce no. Prima il vagone.",
+      "dom_text": "COOPER: Le impronte proseguono. Hawk è ancora alla porta: le impronte aspettano, la luce no. Prima il vagone.",
+      "objective": "Truman è sui binari. Riferisci la scena prima che cali la luce.",
+      "map": "traincar"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m5_tracks_north_early",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m5_tracks_north_early"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Truman è sui binari. Riferisci la scena prima che cali la luce.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_report_intro",
+      "page_id": "m5.b9.report.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Truman arriva lungo i binari, col passo di chi non vuole arrivare.)",
+      "dom_text": "(Truman arriva lungo i binari, col passo di chi non vuole arrivare.)",
+      "objective": "Truman è sui binari. Riferisci la scena prima che cali la luce.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_report_intro",
+      "page_id": "m5.b9.report.p02",
+      "speaker_id": "truman",
+      "display_name": "TRUMAN",
+      "text": "Non avete toccato niente. Bene: adesso tocca a me guardare.",
+      "dom_text": "TRUMAN: Non avete toccato niente. Bene: adesso tocca a me guardare.",
+      "objective": "Truman è sui binari. Riferisci la scena prima che cali la luce.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_report_intro",
+      "page_id": "m5.b9.report.theory_open",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Ho due letture, Harry, e la scena le regge entrambe. Le porto tutte e due.",
+      "dom_text": "COOPER: Ho due letture, Harry, e la scena le regge entrambe. Le porto tutte e due.",
+      "objective": "Truman è sui binari. Riferisci la scena prima che cali la luce.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_report_intro",
+      "page_id": "m5.b9.report.open.p01",
+      "speaker_id": "truman",
+      "display_name": "TRUMAN",
+      "text": "Due letture, tutte e due a nome tuo. I fatti, uno solo: il nostro.",
+      "dom_text": "TRUMAN: Due letture, tutte e due a nome tuo. I fatti, uno solo: il nostro.",
+      "objective": "Truman è sui binari. Riferisci la scena prima che cali la luce.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_report_intro",
+      "page_id": "m5.b9.report.p04",
+      "speaker_id": "truman",
+      "display_name": "TRUMAN",
+      "text": "(guarda l'anello senza toccarlo) Questo va nella cassaforte delle prove. Stasera.",
+      "dom_text": "TRUMAN: (guarda l'anello senza toccarlo) Questo va nella cassaforte delle prove. Stasera.",
+      "objective": "Truman è sui binari. Riferisci la scena prima che cali la luce.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_report_intro",
+      "page_id": "m5.b9.report.p05",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "È l'unico oggetto la cui posizione non riesco ancora a leggere come accidentale. Vorrei poterlo guardare finché non ci riesco.",
+      "dom_text": "COOPER: È l'unico oggetto la cui posizione non riesco ancora a leggere come accidentale. Vorrei poterlo guardare finché non ci riesco.",
+      "objective": "Truman è sui binari. Riferisci la scena prima che cali la luce.",
+      "map": "traincar"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m5_report_intro",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "widget",
+      "node_id": "m5_s1",
+      "choices": [
+        "s1_institutional",
+        "s1_documented"
+      ],
+      "objective": "Truman è sui binari. Riferisci la scena prima che cali la luce.",
+      "map": "traincar"
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m5_report_intro"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Truman è sui binari. Riferisci la scena prima che cali la luce.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "choice",
+      "node_id": "m5_s1",
+      "choice_id": "s1_documented"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_s1",
+      "page_id": "m5.b9.s1.documented.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Cooper fotografa l'anello sul posto e compila il trasferimento.)",
+      "dom_text": "(Cooper fotografa l'anello sul posto e compila il trasferimento.)",
+      "objective": "Truman è sui binari. Riferisci la scena prima che cali la luce.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_s1",
+      "page_id": "m5.b9.s1.documented.p01b",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Sigilla l'anello in una busta. Firma e la ripone nella tasca interna.)",
+      "dom_text": "(Sigilla l'anello in una busta. Firma e la ripone nella tasca interna.)",
+      "objective": "Truman è sui binari. Riferisci la scena prima che cali la luce.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_s1",
+      "page_id": "m5.b9.s1.documented.p02",
+      "speaker_id": "truman",
+      "display_name": "TRUMAN",
+      "text": "(firma, senza fretta) Metto a verbale che non sono d'accordo. E che ti conosco abbastanza da firmare lo stesso.",
+      "dom_text": "TRUMAN: (firma, senza fretta) Metto a verbale che non sono d'accordo. E che ti conosco abbastanza da firmare lo stesso.",
+      "objective": "Truman è sui binari. Riferisci la scena prima che cali la luce.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_report_close",
+      "page_id": "m5.b9.report.p06",
+      "speaker_id": "hawk",
+      "display_name": "HAWK",
+      "text": "(dalla porta) Le impronte non si fermano al vagone. Non te lo dico da qui. Vieni.",
+      "dom_text": "HAWK: (dalla porta) Le impronte non si fermano al vagone. Non te lo dico da qui. Vieni.",
+      "objective": "Truman è sui binari. Riferisci la scena prima che cali la luce.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_report_close",
+      "page_id": "m5.b9.report.p07",
+      "speaker_id": "truman",
+      "display_name": "TRUMAN",
+      "text": "Prima che faccia buio. Se il sentiero va dove penso, laggiù il banco lo tiene Renault. Io resto con l'anello e con il verbale.",
+      "dom_text": "TRUMAN: Prima che faccia buio. Se il sentiero va dove penso, laggiù il banco lo tiene Renault. Io resto con l'anello e con il verbale.",
+      "objective": "Hawk è ai binari, oltre il vagone.",
+      "map": "traincar"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m5_report_close",
+      "ok": true,
+      "branch": true
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m5_report_close"
+        ],
+        "values": {
+          "s1": "documented_custody"
+        }
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Hawk è ai binari, oltre il vagone.",
+      "where": "dopo l'avanzamento"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_tracks_north",
+      "page_id": "m5.a14.tracks.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Le impronte vecchie passano l'angolo del vagone ed entrano nel taglio fra gli alberi. Accanto, il cartello.)",
+      "dom_text": "(Le impronte vecchie passano l'angolo del vagone ed entrano nel taglio fra gli alberi. Accanto, il cartello.)",
+      "objective": "Hawk è ai binari, oltre il vagone.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_tracks_north",
+      "page_id": "m5.a14.tracks.p02",
+      "speaker_id": "hawk",
+      "display_name": "HAWK",
+      "text": "Dal cartello in poi il sentiero non serve altre proprietà. Un'ora di cammino. Finisce a One Eyed Jacks.",
+      "dom_text": "HAWK: Dal cartello in poi il sentiero non serve altre proprietà. Un'ora di cammino. Finisce a One Eyed Jacks.",
+      "objective": "Hawk è ai binari, oltre il vagone.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_tracks_north",
+      "page_id": "m5.a14.tracks.p03",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Chi tiene il banco, allora. Cominciamo da lui.",
+      "dom_text": "COOPER: Chi tiene il banco, allora. Cominciamo da lui.",
+      "objective": "Hawk è ai binari, oltre il vagone.",
+      "map": "traincar"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m5_tracks_north",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "flags": [
+          "east_route_confirmed"
+        ],
+        "evidence": [
+          "E_TRACCE_EST"
+        ],
+        "nodes_done": [
+          "m5_tracks_north"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "reload",
+      "before": {
+        "map": "traincar",
+        "x": 21,
+        "y": 2,
+        "dir": "down",
+        "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+        "digest": {
+          "flags": [
+            "atto3",
+            "audrey_indaga",
+            "east_route_confirmed",
+            "ronette_visita",
+            "sogno_fatto",
+            "sogno_raccontato",
+            "vagone_scoperto"
+          ],
+          "values": {
+            "m5_initial_theory": "withheld",
+            "m5_final_theory": "open",
+            "s1": "documented_custody"
+          },
+          "evidence": [
+            "E5_POESIA",
+            "E6A_CUORE_INTERO",
+            "E7A_BIGLIETTO_TESTO",
+            "E7B_BIGLIETTO_POSIZIONE",
+            "E8A_ANELLO_POSIZIONE",
+            "E8B_ANELLO_SUPERFICIE",
+            "E_PONTE_DIREZIONE",
+            "E_SCENE",
+            "E_TRACCE_EST",
+            "T1_RONETTE_BOB",
+            "T_JAMES_EST"
+          ],
+          "nodes_done": [
+            "cmp_e6a_tjames",
+            "gerard_a2",
+            "james_a2",
+            "m5_bridge",
+            "m5_cmp_ring",
+            "m5_discovery",
+            "m5_mound",
+            "m5_report_close",
+            "m5_report_intro",
+            "m5_ring",
+            "m5_scene",
+            "m5_theory_first",
+            "m5_theory_initial",
+            "m5_tracks_north",
+            "m5_tracks_north_early",
+            "present_truman_m4",
+            "ronette_q",
+            "ronette_uomo",
+            "truman_a2"
+          ]
+        },
+        "npcs": [
+          "hawk_cut@22,3"
+        ]
+      },
+      "after": {
+        "map": "traincar",
+        "x": 21,
+        "y": 2,
+        "dir": "down",
+        "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+        "digest": {
+          "flags": [
+            "atto3",
+            "audrey_indaga",
+            "east_route_confirmed",
+            "ronette_visita",
+            "sogno_fatto",
+            "sogno_raccontato",
+            "vagone_scoperto"
+          ],
+          "values": {
+            "m5_initial_theory": "withheld",
+            "m5_final_theory": "open",
+            "s1": "documented_custody"
+          },
+          "evidence": [
+            "E5_POESIA",
+            "E6A_CUORE_INTERO",
+            "E7A_BIGLIETTO_TESTO",
+            "E7B_BIGLIETTO_POSIZIONE",
+            "E8A_ANELLO_POSIZIONE",
+            "E8B_ANELLO_SUPERFICIE",
+            "E_PONTE_DIREZIONE",
+            "E_SCENE",
+            "E_TRACCE_EST",
+            "T1_RONETTE_BOB",
+            "T_JAMES_EST"
+          ],
+          "nodes_done": [
+            "cmp_e6a_tjames",
+            "gerard_a2",
+            "james_a2",
+            "m5_bridge",
+            "m5_cmp_ring",
+            "m5_discovery",
+            "m5_mound",
+            "m5_report_close",
+            "m5_report_intro",
+            "m5_ring",
+            "m5_scene",
+            "m5_theory_first",
+            "m5_theory_initial",
+            "m5_tracks_north",
+            "m5_tracks_north_early",
+            "present_truman_m4",
+            "ronette_q",
+            "ronette_uomo",
+            "truman_a2"
+          ]
+        },
+        "npcs": [
+          "hawk_cut@22,3"
+        ]
+      }
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_sign_oej",
+      "page_id": "m5.sign_oej.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "\"ONE EYED JACKS — oltre il confine\". Una freccia indica il sentiero a nord.",
+      "dom_text": "\"ONE EYED JACKS — oltre il confine\". Una freccia indica il sentiero a nord.",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "traincar"
+    },
+    {
+      "kind": "page",
+      "node_id": "m5_sign_oej",
+      "page_id": "m5.sign_oej.p02",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Una freccia oltre confine non è una prova. È però un invito geograficamente molto preciso.",
+      "dom_text": "COOPER: Una freccia oltre confine non è una prova. È però un invito geograficamente molto preciso.",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "traincar"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m5_sign_oej",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m5_sign_oej"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "door",
+      "from": "traincar",
+      "to": "oej",
+      "blocked": null
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_ferry",
+      "page_id": "m6.b1.ferry.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Il traghetto attraversa senza registro.)",
+      "dom_text": "(Il traghetto attraversa senza registro.)",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_ferry",
+      "page_id": "m6.b1.ferry.p02",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Dentro, nessuno guarda Cooper.)",
+      "dom_text": "(Dentro, nessuno guarda Cooper.)",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_ferry",
+      "page_id": "m6.b1.ferry.p03",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Jacques controlla la passerella prima del mazzo.)",
+      "dom_text": "(Jacques controlla la passerella prima del mazzo.)",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_ferry",
+      "page_id": "m6.b1.ferry.p04",
+      "speaker_id": "hawk",
+      "display_name": "HAWK",
+      "text": "(fuori, piano) Io resto qui. Se chiudono il molo, restiamo dentro.",
+      "dom_text": "HAWK: (fuori, piano) Io resto qui. Se chiudono il molo, restiamo dentro.",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_ferry",
+      "page_id": "m6.b1.ferry.p05",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Tieni libera la passerella. Io vado al tavolo.",
+      "dom_text": "COOPER: Tieni libera la passerella. Io vado al tavolo.",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m6_ferry",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_tactic",
+      "page_id": "m6.b4.tactic.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Jacques mescola. Il posto di fronte a lui è vuoto: un invito e una trappola.)",
+      "dom_text": "(Jacques mescola. Il posto di fronte a lui è vuoto: un invito e una trappola.)",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_tactic",
+      "page_id": "m6.b4.tactic.p02",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Jacques spinge il mazzo al centro del tavolo.)",
+      "dom_text": "(Jacques spinge il mazzo al centro del tavolo.)",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_tactic",
+      "page_id": "m6.b4.tactic.p03",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Jacques. Prima di cominciare, il mazzo resta sul tavolo.",
+      "dom_text": "COOPER: Jacques. Prima di cominciare, il mazzo resta sul tavolo.",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m6_tactic",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "widget",
+      "node_id": "m6_tactic",
+      "choices": [
+        "tactic_prova",
+        "tactic_pressione",
+        "tactic_falsa_sicurezza"
+      ],
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m6_ferry",
+          "m6_tactic"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "choice",
+      "node_id": "m6_tactic",
+      "choice_id": "tactic_prova"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_interrogation_prova",
+      "page_id": "m6.b5.prova.q1",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "(si siede, posa la foto del biglietto) Questo passava di mano, al vagone. La tua?",
+      "dom_text": "COOPER: (si siede, posa la foto del biglietto) Questo passava di mano, al vagone. La tua?",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_interrogation_prova",
+      "page_id": "m6.b5.prova.p02",
+      "speaker_id": "jacques",
+      "display_name": "JACQUES",
+      "text": "(la guarda a lungo, poi la gira a faccia in giù) Io porto le carte, non i messaggi.",
+      "dom_text": "JACQUES: (la guarda a lungo, poi la gira a faccia in giù) Io porto le carte, non i messaggi.",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_interrogation_prova",
+      "page_id": "m6.b5.prova.p03",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Non ho chiesto dei messaggi. Ho chiesto del vagone.",
+      "dom_text": "COOPER: Non ho chiesto dei messaggi. Ho chiesto del vagone.",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_interrogation_prova",
+      "page_id": "m6.b5.prova.p04",
+      "speaker_id": "jacques",
+      "display_name": "JACQUES",
+      "text": "C'ero. Giocavamo. Questo è tutto quello che dico.",
+      "dom_text": "JACQUES: C'ero. Giocavamo. Questo è tutto quello che dico.",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_interrogation_prova",
+      "page_id": "m6.b5.prova.p05",
+      "speaker_id": "jacques",
+      "display_name": "JACQUES",
+      "text": "Se volete una firma, portatemi un avvocato e riportatemi il foglio.",
+      "dom_text": "JACQUES: Se volete una firma, portatemi un avvocato e riportatemi il foglio.",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_interrogation_prova",
+      "page_id": "m6.b5.prova.q2",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "(seconda domanda) A che ora te ne sei andato?",
+      "dom_text": "COOPER: (seconda domanda) A che ora te ne sei andato?",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_interrogation_prova",
+      "page_id": "m6.b5.prova.p07",
+      "speaker_id": "jacques",
+      "display_name": "JACQUES",
+      "text": "Col merci di mezzanotte. Chiedete ai binari, se sanno l'ora.",
+      "dom_text": "JACQUES: Col merci di mezzanotte. Chiedete ai binari, se sanno l'ora.",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_interrogation_prova",
+      "page_id": "m6.b5.prova.p08",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "E chi restava, quando il merci è passato?",
+      "dom_text": "COOPER: E chi restava, quando il merci è passato?",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_interrogation_prova",
+      "page_id": "m6.b5.prova.p09",
+      "speaker_id": "jacques",
+      "display_name": "JACQUES",
+      "text": "(mescola) L'avvocato, agente. Poi il foglio. Poi vediamo chi restava.",
+      "dom_text": "JACQUES: (mescola) L'avvocato, agente. Poi il foglio. Poi vediamo chi restava.",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m6_interrogation_prova",
+      "ok": true,
+      "branch": true
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_p5",
+      "page_id": "m6.b6b.p5.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "Ammissione registrata: Jacques era al vagone.",
+      "dom_text": "Ammissione registrata: Jacques era al vagone.",
+      "objective": "One Eyed Jacks: siediti al tavolo di Jacques Renault.",
+      "map": "oej"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m6_p5",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "widget",
+      "node_id": "m6_p5",
+      "choices": [
+        "p5_present",
+        "p5_killed",
+        "p5_no_third_man"
+      ],
+      "objective": "Metti a fuoco che cosa puoi sostenere su Jacques.",
+      "map": "oej"
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "flags": [
+          "jacques_admitted_presence"
+        ],
+        "evidence": [
+          "JACQUES_MIDNIGHT_CLAIM"
+        ],
+        "nodes_done": [
+          "m6_interrogation_prova",
+          "m6_p5"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Metti a fuoco che cosa puoi sostenere su Jacques.",
+      "where": "dopo l'avanzamento"
+    },
+    {
+      "kind": "choice",
+      "node_id": "m6_p5",
+      "choice_id": "p5_present"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_p5",
+      "page_id": "m6.b6b.p5.feedback.present",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "Jacques può essere collocato sulla scena. La sua presenza non basta ad attribuirgli l'omicidio.",
+      "dom_text": "Jacques può essere collocato sulla scena. La sua presenza non basta ad attribuirgli l'omicidio.",
+      "objective": "Metti a fuoco che cosa puoi sostenere su Jacques.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_arrest",
+      "page_id": "m6.b7.arrest.p01",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Metti per iscritto ciò che hai ammesso. Con un avvocato, se lo vuoi.",
+      "dom_text": "COOPER: Metti per iscritto ciò che hai ammesso. Con un avvocato, se lo vuoi.",
+      "objective": "Metti a fuoco che cosa puoi sostenere su Jacques.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_arrest",
+      "page_id": "m6.b7.arrest.p02",
+      "speaker_id": "jacques",
+      "display_name": "JACQUES",
+      "text": "E se dico di no?",
+      "dom_text": "JACQUES: E se dico di no?",
+      "objective": "Accompagna Jacques oltre il fiume per formalizzare la dichiarazione.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_arrest",
+      "page_id": "m6.b7.arrest.p03",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Allora torneremo con più domande e meno discrezione.",
+      "dom_text": "COOPER: Allora torneremo con più domande e meno discrezione.",
+      "objective": "Accompagna Jacques oltre il fiume per formalizzare la dichiarazione.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_arrest",
+      "page_id": "m6.b7.arrest.p04",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Jacques guarda la sala. Poi raccoglie il cappotto.)",
+      "dom_text": "(Jacques guarda la sala. Poi raccoglie il cappotto.)",
+      "objective": "Accompagna Jacques oltre il fiume per formalizzare la dichiarazione.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_arrest",
+      "page_id": "m6.b7.arrest.p05",
+      "speaker_id": "jacques",
+      "display_name": "JACQUES",
+      "text": "Un foglio. Poi torno. (al traghetto) Il fiume ha due lati, agente. Ricordatevelo quando lo riattraversate.",
+      "dom_text": "JACQUES: Un foglio. Poi torno. (al traghetto) Il fiume ha due lati, agente. Ricordatevelo quando lo riattraversate.",
+      "objective": "Accompagna Jacques oltre il fiume per formalizzare la dichiarazione.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_arrest",
+      "page_id": "m6.b7.arrest.p06",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Sul molo della contea, Jacques spinge Hawk e prova a correre. Il piede scivola fra due assi.)",
+      "dom_text": "(Sul molo della contea, Jacques spinge Hawk e prova a correre. Il piede scivola fra due assi.)",
+      "objective": "Accompagna Jacques oltre il fiume per formalizzare la dichiarazione.",
+      "map": "oej"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_arrest",
+      "page_id": "m6.b7.arrest.p07",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Jacques cade fra le assi. Quando Hawk lo gira, la gamba non segue.)",
+      "dom_text": "(Jacques cade fra le assi. Quando Hawk lo gira, la gamba non segue.)",
+      "objective": "Accompagna Jacques oltre il fiume per formalizzare la dichiarazione.",
+      "map": "oej"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m6_arrest",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "flags": [
+          "jacques_preso"
+        ],
+        "nodes_done": [
+          "m6_arrest"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Passa dall'ospedale: Renault è piantonato.",
+      "where": "dopo l'avanzamento"
+    },
+    {
+      "kind": "travel",
+      "to": "hospital",
+      "at": [
+        13,
+        7,
+        "down"
+      ],
+      "why": "viaggio: reparto"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_hospital_guard",
+      "page_id": "m6.b7c.guard.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Fine visite. In fondo al reparto, davanti a una porta chiusa, un agente della contea su una sedia. Non legge.)",
+      "dom_text": "(Fine visite. In fondo al reparto, davanti a una porta chiusa, un agente della contea su una sedia. Non legge.)",
+      "objective": "Passa dall'ospedale: Renault è piantonato.",
+      "map": "hospital"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_hospital_guard",
+      "page_id": "m6.b7c.guard.p02",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Il registro del turno è aperto sul banco. Ultima riga: la firma di Hawk, ora del ricovero.)",
+      "dom_text": "(Il registro del turno è aperto sul banco. Ultima riga: la firma di Hawk, ora del ricovero.)",
+      "objective": "Passa dall'ospedale: Renault è piantonato.",
+      "map": "hospital"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_hospital_guard",
+      "page_id": "m6.b7c.guard.p03",
+      "speaker_id": "infermiera",
+      "display_name": "INFERMIERA",
+      "text": "Piantonato. Firma domattina.",
+      "dom_text": "INFERMIERA: Piantonato. Firma domattina.",
+      "objective": "Passa dall'ospedale: Renault è piantonato.",
+      "map": "hospital"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_hospital_guard",
+      "page_id": "m6.b7c.guard.p04",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Diane, nove e dieci. Porta chiusa, sedia occupata. La firma è domattina.",
+      "dom_text": "COOPER: Diane, nove e dieci. Porta chiusa, sedia occupata. La firma è domattina.",
+      "objective": "Passa dall'ospedale: Renault è piantonato.",
+      "map": "hospital"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m6_hospital_guard",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m6_hospital_guard"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Torna alla centrale e chiudi il rapporto sul fermo di Renault.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "travel",
+      "to": "sheriff",
+      "at": [
+        11,
+        4,
+        "left"
+      ],
+      "why": "viaggio: centrale"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_return_night",
+      "page_id": "m6.b7b.night.p01",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Il traghetto di ritorno è più lento. O sembra.)",
+      "dom_text": "(Il traghetto di ritorno è più lento. O sembra.)",
+      "objective": "Torna alla centrale e chiudi il rapporto sul fermo di Renault.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_return_night",
+      "page_id": "m6.b7b.night.p02",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(In centrale: il rapporto preliminare porta via la sera. Hawk scrive, Cooper firma, la finestra diventa nera.)",
+      "dom_text": "(In centrale: il rapporto preliminare porta via la sera. Hawk scrive, Cooper firma, la finestra diventa nera.)",
+      "objective": "Torna alla centrale e chiudi il rapporto sul fermo di Renault.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_return_night",
+      "page_id": "m6.b7b.night.p03",
+      "speaker_id": "truman",
+      "display_name": "TRUMAN",
+      "text": "Domattina l'ospedale, con il foglio. Adesso a casa, Cooper. Il paese ha già una notte in meno.",
+      "dom_text": "TRUMAN: Domattina l'ospedale, con il foglio. Adesso a casa, Cooper. Il paese ha già una notte in meno.",
+      "objective": "Torna alla centrale e chiudi il rapporto sul fermo di Renault.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_return_night",
+      "page_id": "m6.b7b.night.p04",
+      "speaker_id": null,
+      "display_name": null,
+      "text": "(Il telefono di Lucy squilla. Risponde, poi alza lo sguardo verso Cooper.)",
+      "dom_text": "(Il telefono di Lucy squilla. Risponde, poi alza lo sguardo verso Cooper.)",
+      "objective": "Torna alla centrale e chiudi il rapporto sul fermo di Renault.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_return_night",
+      "page_id": "m6.b7b.night.p05",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Diane, Jacques è in custodia. Firmo il rapporto prima che la memoria cominci a correggerlo.",
+      "dom_text": "COOPER: Diane, Jacques è in custodia. Firmo il rapporto prima che la memoria cominci a correggerlo.",
+      "objective": "Torna alla centrale e chiudi il rapporto sul fermo di Renault.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m6_return_night",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m6_return_night"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Vai da Lucy: l'ospedale è in linea.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "travel",
+      "to": "sheriff",
+      "at": [
+        3,
+        6,
+        "down"
+      ],
+      "why": "viaggio: reception"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_news",
+      "page_id": "m6.b8.news.p01",
+      "speaker_id": "lucy",
+      "display_name": "LUCY",
+      "text": "Agente Cooper? L'ospedale è in linea. È terribile.",
+      "dom_text": "LUCY: Agente Cooper? L'ospedale è in linea. È terribile.",
+      "objective": "Vai da Lucy: l'ospedale è in linea.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_news",
+      "page_id": "m6.b8.news.p02",
+      "speaker_id": "lucy",
+      "display_name": "LUCY",
+      "text": "Jacques Renault... soffocato nel suo letto. Un cuscino. Nessun testimone.",
+      "dom_text": "LUCY: Jacques Renault... soffocato nel suo letto. Un cuscino. Nessun testimone.",
+      "objective": "Vai da Lucy: l'ospedale è in linea.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_news",
+      "page_id": "m6.b8.news.p03",
+      "speaker_id": "lucy",
+      "display_name": "LUCY",
+      "text": "Chi entra ed esce da un ospedale senza farsi notare, agente? Chi?",
+      "dom_text": "LUCY: Chi entra ed esce da un ospedale senza farsi notare, agente? Chi?",
+      "objective": "Vai da Lucy: l'ospedale è in linea.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_news",
+      "page_id": "m6.b8.news.cooper_prova",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Aveva una dichiarazione da firmare, Harry. Termini suoi, foglio davanti. La firma non arriverà mai.",
+      "dom_text": "COOPER: Aveva una dichiarazione da firmare, Harry. Termini suoi, foglio davanti. La firma non arriverà mai.",
+      "objective": "Vai da Lucy: l'ospedale è in linea.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m6_news",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "flags": [
+          "jacques_dead",
+          "jacques_testimony_lost"
+        ],
+        "nodes_done": [
+          "m6_news"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Torna alla stanza 315.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "travel",
+      "to": "room_315",
+      "at": [
+        13,
+        4,
+        "up"
+      ],
+      "why": "viaggio: stanza 315"
+    },
+    {
+      "kind": "classic",
+      "map": "room_315",
+      "id": "hotel_risveglio",
+      "pages": [
+        "Diane, 6:20. Stanza\n315, Great Northern.",
+        "Ho dormito vestito,\ncon la lampada accesa.",
+        "Nel sogno Laura mi ha\ndetto chi e stato. Lo",
+        "avevo. L'ho tenuto fino\nalla porta della stanza",
+        "rossa; poi la\nporta si e chiusa.",
+        "Il nome e andato.\nIl resto no.",
+        "Nel fascicolo di Harry\nc'e un secondo nome.",
+        "Ronette Pulaski.\nRespira ancora.",
+        "Harry per\nprimo. Poi lei."
+      ]
+    },
+    {
+      "kind": "classic",
+      "map": "room_315",
+      "id": "gigante1_dlg",
+      "pages": [
+        "Lo specchio vibra. La\nstanza si fa fredda.",
+        "Un'ombra alta prende\nforma nel riflesso.",
+        "Mi perdoni l'intrusione.\nLe diro tre cose.",
+        "E successo di nuovo.\nE accadra ancora.",
+        "I gufi non sono\ncio che sembrano.",
+        "Senza sostanze\nchimiche, lui torna.",
+        "Questo le apparterra\nquando sara vero.",
+        "Tre avvertimenti,\nnessuna istruzione.",
+        "Comincero dai gufi:\nalmeno lasciano tracce."
+      ]
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "flags": [
+          "gigante1"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Riferisci a Truman ciò che hai visto nella 315.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "travel",
+      "to": "sheriff",
+      "at": [
+        11,
+        4,
+        "left"
+      ],
+      "why": "viaggio: centrale"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_atto4_bridge",
+      "page_id": "m6.b9.atto4.p01",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Harry, devo dirle una cosa che suonerà incredibile. Un gigante mi è apparso, allo specchio.",
+      "dom_text": "COOPER: Harry, devo dirle una cosa che suonerà incredibile. Un gigante mi è apparso, allo specchio.",
+      "objective": "Riferisci a Truman ciò che hai visto nella 315.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_atto4_bridge",
+      "page_id": "m6.b9.atto4.p02",
+      "speaker_id": "truman",
+      "display_name": "TRUMAN",
+      "text": "Un gigante non so dove metterlo. Jacques sì: qualcuno ha superato un piantone.",
+      "dom_text": "TRUMAN: Un gigante non so dove metterlo. Jacques sì: qualcuno ha superato un piantone.",
+      "objective": "Riferisci a Truman ciò che hai visto nella 315.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_atto4_bridge",
+      "page_id": "m6.b9.atto4.p03",
+      "speaker_id": "cooper",
+      "display_name": "COOPER",
+      "text": "Cominciamo dal piantone. Sul Gigante non scrivo ancora nulla.",
+      "dom_text": "COOPER: Cominciamo dal piantone. Sul Gigante non scrivo ancora nulla.",
+      "objective": "Riferisci a Truman ciò che hai visto nella 315.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_atto4_bridge",
+      "page_id": "m6.b9.atto4.p04",
+      "speaker_id": "truman",
+      "display_name": "TRUMAN",
+      "text": "Se qualcuno temeva ciò che Jacques sapeva, ora abbiamo perso il modo di verificarlo.",
+      "dom_text": "TRUMAN: Se qualcuno temeva ciò che Jacques sapeva, ora abbiamo perso il modo di verificarlo.",
+      "objective": "Riferisci a Truman ciò che hai visto nella 315.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m6_atto4_bridge",
+      "page_id": "m6.b9.atto4.s1_pocket",
+      "speaker_id": "truman",
+      "display_name": "TRUMAN",
+      "text": "L'anello ce l'hai tu, con la mia firma sotto. Non lo cito.",
+      "dom_text": "TRUMAN: L'anello ce l'hai tu, con la mia firma sotto. Non lo cito.",
+      "objective": "Riferisci a Truman ciò che hai visto nella 315.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m6_atto4_bridge",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "flags": [
+          "atto4"
+        ],
+        "nodes_done": [
+          "m6_atto4_bridge"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Passa dal diner, questo pomeriggio.",
+      "where": "dopo l'interazione"
+    }
+  ],
+  "classic": [
+    {
+      "map": "traincar",
+      "label": null,
+      "id": "oej_bloccato",
+      "pages": 3,
+      "first": "Il sentiero sale a\nnord, fra gli alberi."
+    },
+    {
+      "map": "room_315",
+      "label": "ingresso 315",
+      "id": "hotel_risveglio",
+      "pages": 9,
+      "first": "Diane, 6:20. Stanza\n315, Great Northern."
+    },
+    {
+      "map": "room_315",
+      "label": "after-interact",
+      "id": "gigante1_dlg",
+      "pages": 9,
+      "first": "Lo specchio vibra. La\nstanza si fa fredda."
+    }
+  ],
+  "mapEntries": [
+    {
+      "map": "town",
+      "at": [
+        54,
+        14,
+        "right"
+      ],
+      "npcs": [
+        "bobby@31,16",
+        "donna@44,10",
+        "jacoby@16,25"
+      ]
+    },
+    {
+      "map": "traincar",
+      "at": [
+        2,
+        7,
+        "right"
+      ],
+      "npcs": []
+    },
+    {
+      "map": "oej",
+      "at": [
+        8,
+        7,
+        "up"
+      ],
+      "npcs": [
+        "jacques@7,5",
+        "audrey@13,7"
+      ]
+    },
+    {
+      "map": "hospital",
+      "at": [
+        13,
+        7,
+        "down"
+      ],
+      "npcs": [
+        "gerard@11,4",
+        "ronette@3,5",
+        "infermiera@11,8",
+        "piantone@7,3"
+      ]
+    },
+    {
+      "map": "sheriff",
+      "at": [
+        11,
+        4,
+        "left"
+      ],
+      "npcs": [
+        "truman@10,4",
+        "andy@10,7",
+        "hawk@12,8",
+        "lucy@2,6",
+        "leland@8,5"
+      ]
+    },
+    {
+      "map": "sheriff",
+      "at": [
+        3,
+        6,
+        "down"
+      ],
+      "npcs": [
+        "truman@10,4",
+        "andy@10,7",
+        "hawk@12,8",
+        "lucy@2,6",
+        "leland@8,5"
+      ]
+    },
+    {
+      "map": "room_315",
+      "at": [
+        13,
+        4,
+        "up"
+      ],
+      "npcs": []
+    },
+    {
+      "map": "sheriff",
+      "at": [
+        11,
+        4,
+        "left"
+      ],
+      "npcs": [
+        "truman@10,4",
+        "andy@10,7",
+        "hawk@12,8",
+        "lucy@2,6",
+        "leland@8,5"
+      ]
+    }
+  ],
+  "fallbacks": [],
+  "notes": [
+    {
+      "text": "315: intro_hotel prima dell'arrivo notturno",
+      "data": {
+        "intro_hotel": false
+      }
+    },
+    {
+      "text": "315: dialogo d'ingresso notturno",
+      "data": {
+        "id": "hotel_risveglio",
+        "i": 0,
+        "pages": 9,
+        "text": "Diane, 6:20. Stanza\n315, Great Northern.",
+        "box_visible": false,
+        "box_text": ""
+      }
+    },
+    {
+      "text": "315: intro_hotel dopo l'arrivo",
+      "data": {
+        "intro_hotel": true
+      }
+    }
+  ]
+}
