@@ -1365,18 +1365,54 @@
   function drawTitle() {
     var touch = !!GAME.touchMode;
     var save = hasSave();
-    // Cartolina Game Boy: montagne, due cime, abeti e insegna.
+    // Cartolina Game Boy: cielo, doppia catena con due cime innevate,
+    // due file di abeti, prato e insegna del Benvenuti sui pali.
     ctx.fillStyle = '#9abf5a'; ctx.fillRect(0, 0, UW, VH);
+    // Cresta lontana: piu' chiara e bassa, stacca il monte principale.
+    ctx.fillStyle = '#8ab252';
+    ctx.beginPath(); ctx.moveTo(0, 88); ctx.lineTo(30, 62); ctx.lineTo(64, 86);
+    ctx.lineTo(104, 58); ctx.lineTo(150, 88); ctx.lineTo(196, 60); ctx.lineTo(UW, 84);
+    ctx.lineTo(UW, 104); ctx.lineTo(0, 104); ctx.fill();
+    // Monte principale con le due vette.
     ctx.fillStyle = '#63834a';
     ctx.beginPath(); ctx.moveTo(0, 76); ctx.lineTo(48, 28); ctx.lineTo(88, 72);
     ctx.lineTo(132, 20); ctx.lineTo(198, 75); ctx.lineTo(UW, 48); ctx.lineTo(UW, 104);
     ctx.lineTo(0, 104); ctx.fill();
-    ctx.fillStyle = '#31543a';
-    for (var px = 0; px < UW; px += 13) {
-      var ph = 13 + ((px * 7) % 17);
-      ctx.fillRect(px + 5, 83 - ph, 2, ph + 19);
-      ctx.beginPath(); ctx.moveTo(px + 6, 62 - ph); ctx.lineTo(px, 90); ctx.lineTo(px + 12, 90); ctx.fill();
+    // Nevai a gradini sulle due vette, in crema come il pannello insegna.
+    ctx.fillStyle = '#f5efcf';
+    ctx.beginPath(); ctx.moveTo(40, 38); ctx.lineTo(44, 31); ctx.lineTo(48, 34);
+    ctx.lineTo(52, 30); ctx.lineTo(56, 38); ctx.lineTo(52, 36); ctx.lineTo(44, 36);
+    ctx.fill();
+    ctx.beginPath(); ctx.moveTo(123, 31); ctx.lineTo(128, 24); ctx.lineTo(132, 27);
+    ctx.lineTo(137, 23); ctx.lineTo(141, 31); ctx.lineTo(136, 29); ctx.lineTo(128, 29);
+    ctx.fill();
+    // Prato sotto la foresta, appena piu' scuro del cielo, con ciuffi e fiori.
+    ctx.fillStyle = '#93b957'; ctx.fillRect(0, 104, UW, 48);
+    ctx.fillStyle = '#63834a';
+    for (var gx = 6; gx < UW; gx += 22) {
+      var gh = 2 + ((gx * 5) % 3);
+      ctx.fillRect(gx, 146 - gh, 6, gh);
     }
+    ctx.fillStyle = '#f5efcf';
+    for (var fx = 15; fx < UW; fx += 29) ctx.fillRect(fx, 128 + ((fx * 3) % 12), 2, 2);
+    // Due file di abeti sovrapposte: il fondo chiaro resta sul monte,
+    // il davanti scuro copre il prato. Triangoli larghi e ravvicinati.
+    function titlePine(color, base, spacing, offset, minH, varH, w) {
+      ctx.fillStyle = color;
+      for (var tx = -offset; tx < UW + w; tx += spacing) {
+        var h = minH + ((tx * 7) % varH + varH) % varH;
+        ctx.beginPath(); ctx.moveTo(tx, base); ctx.lineTo(tx + w / 2, base - h);
+        ctx.lineTo(tx + w, base); ctx.fill();
+        ctx.fillRect(tx + w / 2 - 1, base - 3, 2, 5);
+      }
+    }
+    titlePine('#557a44', 108, 14, 4, 20, 10, 14);
+    titlePine('#31543a', 114, 16, 6, 24, 12, 18);
+    // Pali dell'insegna: escono dal bordo e scendono nella fila di abeti.
+    ctx.fillStyle = '#183225';
+    ctx.fillRect(64, 86, 4, 28); ctx.fillRect(188, 86, 4, 28);
+    ctx.fillStyle = '#f5efcf';
+    ctx.fillRect(64, 86, 1, 28); ctx.fillRect(188, 86, 1, 28);
     ctx.fillStyle = '#183225'; ctx.fillRect(10, 37, UW - 20, 49);
     ctx.fillStyle = '#f5efcf'; ctx.fillRect(13, 40, UW - 26, 43);
     ctx.strokeStyle = '#63834a'; ctx.strokeRect(16.5, 43.5, UW - 33, 36);

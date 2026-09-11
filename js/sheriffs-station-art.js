@@ -11,7 +11,7 @@
     ink: '#252a27',
     sageDeep: '#3b4940', sageDark: '#4b5c50', sage: '#71806b', sageMid: '#83907a', sageHi: '#a3ad98',
     oakDeep: '#34231c', oakDark: '#4a3023', oak: '#6d4930', oakMid: '#835b3b', oakHi: '#ad7a50',
-    floorDark: '#919b93', floor: '#979f95', floorMid: '#9ca49a', floorHi: '#a3aa9e', floorLight: '#abb2a9',
+    floorDark: '#828d84', floor: '#939c92', floorMid: '#a3ab9f', floorHi: '#b0b8ab', floorLight: '#bcc3b6',
     steelDeep: '#394548', steelDark: '#536164', steel: '#738083', steelHi: '#aeb9b5', steelLight: '#c0c9c3',
     paperDark: '#a2997e', paper: '#d7cfad', paperHi: '#eee4bf',
     greenDark: '#29392f', green: '#3f5742', greenHi: '#70825a',
@@ -70,6 +70,23 @@
         start=col; value=rows[row].charAt(col);
       }
     }
+
+    /* One-pixel seams on the 16px module make the linoleum read as tiles
+     * without turning the field into a contrasty checkerboard. */
+    for (col=1;col<14;col++) R(16+col*16,48,1,128,p.floorDark);
+    for (row=1;row<8;row++) R(16,48+row*16,224,1,p.floorDark);
+
+    /* A bordered sage area rug anchors the otherwise empty central aisle.
+     * It stays clear of the entrance mat (y165+) and every prop shadow. */
+    R(92,118,76,44,p.ink);
+    R(94,120,72,40,p.sageDark);
+    R(96,122,68,36,p.sageDeep);
+    R(100,126,60,28,p.sageDark);
+    R(100,126,60,2,p.sageHi); R(100,152,60,2,p.sageHi);
+    R(100,126,2,28,p.sageHi); R(158,126,2,28,p.sageHi);
+    R(118,134,24,2,p.sageHi); R(118,142,24,2,p.sageHi);
+    R(128,128,2,22,p.sageDeep);
+    R(92,118,76,1,p.shadowMid); R(92,161,76,1,p.shadowMid);
 
     /* Fluorescent spill stays hard stepped and local to the back work zones. */
     R(20,49,42,3,p.floorLight); R(20,52,34,4,p.floorHi); R(20,56,19,3,p.floorMid);

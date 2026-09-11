@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>loading</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  iframe { display: block; width: 100vw; height: 100vh; border: 0; }
+</style>
+</head>
+<body>
+<iframe id="game" src="../index.html"></iframe>
+<script>
+  var frame = document.getElementById('game');
+  var ready = false;
+  frame.addEventListener('load', function () {
+    var doc = frame.contentDocument;
+    var started = Date.now();
+    var timer = setInterval(function () {
+      if (ready) { clearInterval(timer); return; }
+      var screen = doc.body && doc.body.getAttribute('data-screen');
+      if (screen === 'title' || Date.now() - started > 10000) {
+        ready = true;
+        clearInterval(timer);
+        setTimeout(function () { document.title = 'TP-SHOT-READY title'; }, 400);
+      }
+    }, 100);
+  });
+</script>
+</body>
+</html>
