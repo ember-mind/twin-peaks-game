@@ -41,12 +41,14 @@ The canonical catalog lives in `js/world-catalog.js`. It registers the establish
 {
   id: 'twin-peaks',
   locations: [
-    { id: 'double-r', environments: [{ id: 'exterior', sceneId: 'double_r_exterior_prototype' }, { id: 'interior', sceneId: 'diner' }], connections: ['double-r-front-entrance', 'town-double-r-lot'] },
-    { id: 'town', environments: [{ id: 'town', sceneId: 'town' }], connections: ['town-traincar-east', 'town-sheriffs-station-lot', 'town-double-r-lot'] },
-    { id: 'sheriffs-station', environments: [{ id: 'exterior', sceneId: 'sheriffs_station_exterior' }, { id: 'interior', sceneId: 'sheriff' }], connections: ['sheriffs-station-front-entrance', 'town-sheriffs-station-lot'] },
-    { id: 'traincar-crossing', environments: [{ id: 'traincar', sceneId: 'traincar' }], connections: ['town-traincar-east', 'traincar-oej-entrance'] },
-    { id: 'one-eyed-jacks', environments: [{ id: 'interior', sceneId: 'oej' }], connections: ['traincar-oej-entrance'] }
-  ]
+     { id: 'double-r', environments: [{ id: 'exterior', sceneId: 'double_r_exterior_prototype' }, { id: 'interior', sceneId: 'diner' }], connections: ['double-r-front-entrance', 'town-double-r-lot'] },
+     { id: 'town', environments: [{ id: 'town', sceneId: 'town' }], connections: ['town-traincar-east', 'town-sheriffs-station-lot', 'town-double-r-lot'] },
+     { id: 'sheriffs-station', environments: [{ id: 'exterior', sceneId: 'sheriffs_station_exterior' }, { id: 'interior', sceneId: 'sheriff' }], connections: ['sheriffs-station-front-entrance', 'town-sheriffs-station-lot'] },
+     { id: 'traincar-crossing', environments: [{ id: 'traincar', sceneId: 'traincar' }], connections: ['town-traincar-east', 'traincar-oej-entrance'] },
+     { id: 'one-eyed-jacks', environments: [{ id: 'interior', sceneId: 'oej' }], connections: ['traincar-oej-entrance'] },
+     { id: 'great-northern', environments: [{ id: 'room-315', sceneId: 'room_315' }, { id: 'lobby', sceneId: 'hotel_gn' }], connections: ['great-northern-room-315-hall'] },
+     { id: 'hospital', environments: [{ id: 'ward', sceneId: 'hospital' }], connections: [] }
+   ]
 }
 ```
 
@@ -66,7 +68,7 @@ Environment IDs are local to their location. Reusing `interior` under `double-r`
 | `GAME.World.getConnections()` | Frozen, deduplicated list of connection IDs across the catalog, preserving catalog order. |
 | `GAME.World.getConnections(locationId)` | Frozen connection-reference list for that location; `undefined` when the location is missing. |
 
-**REFERENCED EXISTING SYSTEM.** Connection IDs correspond to descriptors authored by `GAME.DoubleRLocationConnection` and `GAME.TraincarLocationConnections`, which existing scene setup passes through `GAME.LocationConnections.install`. World Engine does not create a connection registry, copy endpoint descriptors, or perform traversal.
+**REFERENCED EXISTING SYSTEM.** Connection IDs correspond to descriptors authored by `GAME.DoubleRLocationConnections`, `GAME.SheriffsStationLocationConnections`, `GAME.TraincarLocationConnections`, and `GAME.Room315LocationConnections`, which existing scene setup passes through `GAME.LocationConnections.install`. World Engine does not create a connection registry, copy endpoint descriptors, or perform traversal.
 
 ## 5. Double R example
 
