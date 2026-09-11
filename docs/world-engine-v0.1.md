@@ -23,6 +23,7 @@ World Engine v0.1 is the implemented data layer and registration boundary for au
 | `GAME.Maps`, scene installers, renderer hooks, Ambient Life, Environment Reactions, `LocationConnections` | **REFERENCED EXISTING SYSTEM.** Current APIs and authored registrations remain authoritative. |
 | Engine movement, collision, depth drawing, fade, audio, save transaction, committed-arrival event | **REFERENCED EXISTING SYSTEM.** `engine.js` continues to own runtime behavior. |
 | Narrative, dialogue, quests, AI, social simulation, audio authoring | **DEFERRED / OUTSIDE.** These are not World Engine v0.1 concerns. |
+| Physical presence of named characters (who is in which scene for a given story state) | **OUTSIDE — owned by Cast Continuity** (`docs/cast-continuity-contract-v0.1.md`, 2026-09-11). World Engine validates the `sceneId`s that cast windows name; it never places or removes bodies. Location briefs must carry the Cast Continuity fields (contract §7). |
 
 Current accidental Double R coupling remains visible, not generalized: town door `42,20` names `double_r_exterior_prototype`; exterior installer uses map-ID-gated global renderer overrides; `front-door` reaction is registered from existing Double R setup. v0.1 records these boundaries; it does not refactor them.
 

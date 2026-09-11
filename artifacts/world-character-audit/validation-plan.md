@@ -1,36 +1,55 @@
-# Validation plan — cast presence (deterministic, node-only)
+# Validation plan — cast continuity (deterministic, node-only) — amended 2026-09-11
 
-Reuse: `test/act-3-flow.js` / `test/act-4-flow.js` route loops (`NR.prepareNode` / `commitNode` over every choice combination), `test/walkthrough.js` classic seeds, `GAME.NarrativeAdapter.setState(state)` bootstrap (`test/act-4-mirror-gate.js:19-40`), and the audit's `tools/presence-enumerator.js` (already resolves classic `cond` + adapter `when` per map for a seeded state).
+Supersedes the first version (V1 "≤1", V7 ghost, V8 overlap-warning). Normative list: `docs/cast-continuity-contract-v0.1.md` §9. All eight are **hard** gates.
 
-## V1 — cast uniqueness over reachable states (the G10 test)
+Reuse: `test/act-3-flow.js` / `test/act-4-flow.js` route loops (`NR.prepareNode` / `commitNode` over every choice combination), `test/walkthrough.js` classic seeds, `GAME.NarrativeAdapter.setState(state)` bootstrap (`test/act-4-mirror-gate.js:19-40`), `tools/presence-enumerator.js` (resolves classic `cond` + adapter `when` per map for a seeded state — the pre-migration oracle the validators must fail against).
+
 ```
-for state in reachableStates():          # Act 1 seeds ∪ M4..M8 route enumeration ∪ post-station
-    placements = resolveCast(state)      # after migration: registry; before: enumerator fallback
-    for character in NAMED:
-        bodies = placements[character]   # list of (sceneId, x, y, source)
-        assert len(bodies) <= 1, (state.label, character, bodies)
+reachable = act1Seeds ∪ M4..M8 routeEnumeration ∪ postStation   # never the free boolean product
 ```
-Would have printed for pass 01: `(act4_presagio_active, norma, [(diner,5,2,classic), (roadhouse,5,6,adapter)])` and `(act4_after_discovery_hawk, hawk, [(sheriff,12,8,classic), (town,16,27,adapter)])`. Runs before any screenshot.
 
-## V2 — expected presence / absence pins (from scene contracts)
-Table of `(state, character, sceneId | offscreen)` taken from `scene-contracts.md` and `offscreen-timeline.md` per act: e.g. W8 `norma → roadhouse`, `norma ↛ diner`; W9 palmer-vice `andy → palmer`; W10 hawk `→ town` and `↛ sheriff`; post-`jacques_preso` `jacques → offscreen`. Each act's design pass adds its rows; the lint fails on a missing row for any named character the act moves.
+## V1 — exactly one presence
+```
+for state in reachable:
+    for c in REGISTRY:
+        r = resolveCharacterPresence(c, state)      # {placement | OFFSCREEN | TERMINAL_REMOVED}
+        assert count(r) == 1, (state.label, c, r)
+```
+Pre-migration (through the enumerator) this prints `(act4_presagio_active, norma, [diner, roadhouse])` and `(act4_after_discovery_hawk, hawk, [sheriff, town])` as **failures**.
 
-## V3 — handoff / return
-For every windowed rule R of character C: pick a reachable state s1 where R matches and the reachable successor s2 where it stops matching (the flow harness gives the node that flips it); assert `resolve(s1)[C].sceneId == R.sceneId` and `resolve(s2)[C]` equals the next rule (home or offscreen) — i.e. the return is authored by fall-through, never by a second flag.
+## V2 — zero overlaps
+```
+for state in reachable:
+    for c in REGISTRY:
+        assert len([w for w in windows(c) if w.pred(state)]) <= 1
+```
+Any overlap fails the build. No `shadowed_by`, no allowlist.
 
-## V4 — save / reload determinism
-For each state: `resolve(classicSnapshot(state) ∘ narrativeSnapshot(state)) == resolve(liveState)`; plus a browser probe (existing `test/production-persistence-fault-probe.html` pattern): save mid-window, reload, list `S.npcs` per map, compare to V1's expected bodies.
+## V3 — no implicit absence
+For every registry character: baseline defined (placement, `OFFSCREEN`, or `TERMINAL_REMOVED`), or every reachable state matched by a window. A character whose only "absence" is a missing sprite fails.
 
-## V5 — dead / removed
-For characters with a terminal `offscreen` rule (jacques after `jacques_preso`, maddy after discovery, leland after `leland_morto`): assert zero bodies in every reachable state after the flag.
+## V4 — order independence
+```
+base = {s: resolveCast(s) for s in reachable}
+for seed in SEEDS:
+    shuffledRegistry = shuffle(windows, baselines, mission order, file order, seed)
+    assert {s: resolveCast(s, shuffledRegistry) for s in reachable} == base
+```
+Any difference invalidates the architecture, not the data.
 
-## V6 — no classic shadow copy (mirror gate extension)
-`js/glue.js` `NPCS` must contain no id that the cast registry owns (named set); the adapter's `NARRATIVE_ENTITIES` must contain no body for a registry character (bodies only via rules). Fails loudly on the next "just inject a sprite".
+## V5 — world window pins
+For every window in `cast-windows-acts-1-4.md`, one table `(window state seed, character → expected)` covering the **whole relevant cast**, e.g. `ACT4_ROADHOUSE_PRE_PHONE`: truman=roadhouse, hawk=OFFSCREEN, norma/shelly/bobby/donna/james/loglady=roadhouse, giant=roadhouse, sarah=palmer|OFFSCREEN (lead decision), leland=OFFSCREEN, maddy=OFFSCREEN, andy=sheriff, lucy=sheriff, jacoby=(lead decision). The lint fails on a missing pin row for any character the window names.
 
-## V7 — interaction ghost
-For every classic dialogue cascade keyed to a named character on map M, there exists a reachable state where the registry places that character on M; otherwise warn (dialogue without body).
+## V6 — causal transition
+For every change record (BEFORE → CAUSE → AFTER): pick a reachable state before the cause, assert the old placement; apply the causal node/effect through the flow harness, assert the new placement; assert the record exists in the windows file (a window naming a character without a change record fails).
 
-## V8 — overlap warning
-For every state and character, count matching rules; >1 is a warning unless the registry marks the lower rule `shadowed_by` the upper (declared precedence).
+## V7 — single body owner
+`js/glue.js` `NPCS`, `js/narrative-engine-adapter.js` `NARRATIVE_ENTITIES`, and scene modules' manual bodies must contain no id the registry owns. Fails on the next "just inject a sprite".
 
-Gate placement: V1, V3, V5, V6 hard; V2 hard for rows present; V4 browser probe in the act playthrough drivers; V7, V8 warnings with an allowlist file (Narrative System lint convention).
+## V8 — save determinism
+`resolve(classicSnapshot(state) ∘ narrativeSnapshot(state)) == resolve(liveState)` for every reachable state; grep gate: no `cast`/location key in the save payload; browser probe (existing `test/production-persistence-fault-probe.html` pattern): save mid-window, reload, list `S.npcs` per map, compare with V5.
+
+## Warning (allowlisted)
+Ghost interaction: a classic dialogue cascade keyed to a named character on map M with no window ever placing them on M.
+
+Gate placement: all V1–V8 in `test/cast-continuity-validate.js` (node), run in the test order before any browser gate; V8 browser probe inside the act playthrough drivers.

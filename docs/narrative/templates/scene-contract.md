@@ -15,11 +15,18 @@ FULL FIELDS (ten answers, numbered, one or two lines each):
 9. Unsaid, inferable: what the player can infer that nobody says.
 10. Channel / limits: pages max, interruption rules, what is PROPOSED vs reused (page ids).
 Per central speaker: `self_image · declared_content · leak · protected_truth · exit_cost`.
+
+CAST CONTINUITY (only when this beat changes where a named character physically is; omit otherwise — `docs/cast-continuity-contract-v0.1.md` §5–§6):
+- CAST BEFORE: the characters this beat touches and where they are (window id if inside one).
+- CAST MOVES / REMOVALS: `name → scene | OFFSCREEN (label) | TERMINAL_REMOVED`.
+- CAST AFTER.
+- CAUSE: the event in this beat that moves them.
+- RETURN / NEXT STATE: the later story event (flag/value/node) that ends the move — the window's EXIT.
 Verdict: READY / READY WITH STUB (name the stub) / STRUCTURALLY NOT READY.
 
 LIGHTWEIGHT FIELDS: what changes · what the player must be able to infer · the one page that carries it · channel · what must not be said yet.
 
 PASS: answer 8 is performable (deleting it changes the scene); answer 3 shows at least one protected truth with two leak channels or a reason for silence; every PROPOSED line is a specification, not final prose; no answer contradicts the fact ledger.
-FAIL: a want that is "to explain"; a proof of the turn that is a sentence; a scene whose deletion test leaves the next scene identical; a contract written after the prose to justify it.
+FAIL: a CAST CONTINUITY move without a CAUSE or without a RETURN; a want that is "to explain"; a proof of the turn that is a sentence; a scene whose deletion test leaves the next scene identical; a contract written after the prose to justify it.
 
 WHAT NOT TO PUT HERE: final dialogue, voice mechanics (voice contract), truth (docs/story).
