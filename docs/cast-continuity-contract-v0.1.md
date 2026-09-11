@@ -18,6 +18,8 @@ For every reachable story state, every registry-owned named character resolves t
 
 Never zero by omission. Never more than one.
 
+**Semantics (clarified 2026-09-11).** `OFFSCREEN` does NOT mean absent from story reality: it may mean physically present somewhere that is deliberately not represented as a body (Jacques alive in the guarded room, Hawk on patrol, Sarah asleep upstairs); the world may render it through traces (a guard, a register, a dark house, a line). `TERMINAL_REMOVED` means the named physical character can never return under the current story truth (dead, or gone from the story). Hiding a sprite is never a reason for `TERMINAL_REMOVED`.
+
 ## 2. Vocabulary
 
 | term | meaning |
@@ -47,6 +49,7 @@ resolveCharacterPresence(characterId, storyState):
 - **Reachable states only**: mutual exclusion is required over the reachable story-state space (the flow harness enumeration + walkthrough seeds), not over the free boolean product of every flag. `atto4` implies `east_route_confirmed` in every reachable state, so a traincar window and a Roadhouse window for Truman are exclusive by reachability, not by an extra `¬atto4` clause.
 - **Derived**: nothing about presence is persisted. `resolve(saved state) == resolve(live state)`.
 - **Pure**: the resolver reads story state only; no clock, no player position, no previous resolution.
+- **No silent vanish** (added 2026-09-11): a window may end only on an authored story event. A character may not leave a room the player is standing in when that event fires unless a visible authored beat (a page, a caption, the character's own line) carries the departure. A flag changing while Cooper stands in the Roadhouse does not send the town home; the room empties after Cooper has reached the authored threshold (`focus_destination`). The state that ends a window must therefore be one the player reaches *after* leaving the room, or one whose node authors the exit on screen.
 
 Debug contract: `resolveCast(storyState)` returns, per character, the placement and the **window id** that produced it (or `baseline`). One table answers "where is everyone and why".
 
@@ -135,8 +138,8 @@ Population is part of world building, decided with the brief, not added after vi
 | **V2 zero overlaps** | matching explicit windows per character per reachable state ≤ 1; any overlap fails the build | hard |
 | **V3 no implicit absence** | a character with no matching window and no authored baseline is an error; `OFFSCREEN` is never inferred from missing sprite data | hard |
 | **V4 order independence** | shuffle registry/window/rule order (several seeds); resolution identical for every state; otherwise the architecture is invalid | hard |
-| **V5 world window pins** | for every load-bearing window, assert the whole relevant cast snapshot, not one NPC (tables in `cast-windows-acts-1-4.md`) | hard for rows present |
-| **V6 causal transition** | for every authored move: a reachable predecessor state resolves to the old placement, the transitioning event/state resolves to the new one, and the change record exists; no unexplained teleport | hard |
+| **V5 world window pins** | for every load-bearing window, assert the whole relevant cast snapshot, not one NPC (tables in `cast-windows-acts-1-4.md`). **V5b scene-required presence**: every mission node with an `actor_id` naming a registry character must resolve that character to the node's `map_id` in every state where the node's conditions hold; every page whose text asserts a named character's presence in the scene (a pin list per act) must agree | hard for rows present |
+| **V6 causal transition** | for every authored move: a reachable predecessor state resolves to the old placement, the transitioning event/state resolves to the new one, and the change record exists; no unexplained teleport. **V6b no silent vanish**: for every window exit whose setting node has a `map_id`, the departing character must either not be placed on that map, or the window must be marked `exit_authored_by: <page id>` naming the page that shows the departure | hard |
 | **V7 single body owner** | no registry character id in classic `NPCS`, adapter `NARRATIVE_ENTITIES`, or manual environment rendering | hard |
 | **V8 save determinism** | `resolve(snapshot(state)) == resolve(live state)` for every seeded state; browser reload probe in the act drivers; no character-location persistence anywhere | hard (node) + probe |
 

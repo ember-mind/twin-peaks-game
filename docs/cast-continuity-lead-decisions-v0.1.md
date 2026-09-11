@@ -247,6 +247,17 @@ No transition is justified by "the next scene needs them there".
 - Coordinates, facing, `dialogue: null` policy per crowd body: the Act 4 environment pass, inside the S3 "full and still" rule.
 - Ronette's bed draw special case: stays a scene special referencing the resolved body.
 
+## 8b. Amendment (final consistency pass, 2026-09-11)
+
+`docs/cast-continuity-final-consistency-report.md` corrects this document where it contradicted frozen Act 3 / Act 4 text. The corrections supersede the matching lines above:
+
+- **Hawk, Act 3**: after the north cut Hawk is at the **OEJ landing** (`ACT3_HAWK_OEJ_DOCK`, `east_route_confirmed ∧ ¬jacques_preso`; "(fuori, piano) Io resto qui"; B1/B6), then **`OFFSCREEN` escorting Jacques** to the ward (`jacques_preso ∧ ¬m6_hospital_guard`; the register's last line is his signature), then the station ("Hawk scrive"). The earlier "sheriff during OEJ" is withdrawn.
+- **Truman, Act 3**: he **stays at the traincar** with the ring and the file after the report (`m5_report_close`: "Io resto con l'anello e con il verbale") until `jacques_preso` (station for `m6_return_night_early`), or until `audrey_vista_oej`, when he is `OFFSCREEN` meeting the eight o'clock boat (T42). The earlier exit at `east_route_confirmed` is withdrawn.
+- **Jacques**: `OFFSCREEN` (guarded room, alive) from `jacques_preso` to `jacques_dead`; `TERMINAL_REMOVED` only from `jacques_dead`. The earlier terminal at arrest is withdrawn.
+- **D7 / D7b — Roadhouse exit**: the town gathering and Truman end at **`focus_destination`** (the route commit at the crossroads, outside the Roadhouse), not at `warning_target`. Only the Giant ends at the phone. Post-phone, pre-threshold, the room is intact. `ACT4_TOWN_HOME_NIGHT` starts at `focus_destination`.
+- **Maddy**: she leaves the diner at **`T_LELAND_TAXI`** (the page "(Maddy saluta ed esce…)" is the first page of the node that sets it), not at `promise_stance`.
+- **D7 entry for the diner regulars is reopened as lead blocker B1** (`cast-windows-acts-1-4.md` §8): the only nightfall state, `T_LELAND_TAXI`, fires while Cooper stands at the counter, and no page authors Norma, Shelly, the Log Lady and James leaving. Truman, Bobby and Donna keep `T_LELAND_TAXI` as their entry (Cooper is not in their room).
+
 ## 9. Confirmation
 
 No implementation occurred: no registry, resolver, validator, mission JSON, adapter, or classic data was created or changed. Files changed by this pass: this document, `artifacts/world-character-audit/cast-windows-acts-1-4.md` (open decisions closed; windows, pins and change records resolved), `CANONICAL-SYNC.md`. Success condition: every Act 4 cluster character has a baseline and exclusive windows with a cause; a coder can compile them without deciding where anyone "should probably be".

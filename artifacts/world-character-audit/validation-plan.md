@@ -53,3 +53,18 @@ For every change record (BEFORE → CAUSE → AFTER): pick a reachable state bef
 Ghost interaction: a classic dialogue cascade keyed to a named character on map M with no window ever placing them on M.
 
 Gate placement: all V1–V8 in `test/cast-continuity-validate.js` (node), run in the test order before any browser gate; V8 browser probe inside the act playthrough drivers.
+
+## Regression corpus (added 2026-09-11 by the final consistency pass)
+
+These cases encode *why* the corrected truth was wrong. Each must FAIL against the pre-correction tables and PASS against `cast-windows-acts-1-4.md` as corrected. They live in `test/cast-continuity-validate.js` as named fixtures.
+
+| id | defect class | seeded state | assertion | validator |
+|---|---|---|---|---|
+| RC1 Hawk at OEJ | 3 frozen scene needs a character placed elsewhere | `east_route_confirmed ∧ ¬jacques_preso` (with and without `audrey_indaga`) | `hawk → oej` (landing), never `sheriff`; `m6_arrest` (map oej) requires him: V5b | V5, V5b |
+| RC2 Roadhouse depopulation | 7 room empties on a flag while the player is inside | `warning_target ∧ ¬focus_destination` (all three branches) | truman + norma/shelly/loglady/james/bobby/donna → `roadhouse`; giant → `OFFSCREEN` | V5, V6b (`m8_roadhouse_phone.map_id = roadhouse`, crowd placed there, exit not authored → the old `warning_target` exit fails) |
+| RC3 Jacques alive | 2 TERMINAL used for a hidden sprite | `jacques_preso ∧ ¬jacques_dead` | `jacques → OFFSCREEN` (label guarded), not `TERMINAL_REMOVED`; `TERMINAL_REMOVED` only when `jacques_dead` | V5; new lint: a `TERMINAL_REMOVED` window whose entry is not a death/removal event listed in `docs/story` fails |
+| RC4 Maddy leaves before her caption | 1/7 return before the player left the room | `promise_stance ∧ ¬T_LELAND_TAXI` | `maddy → diner`; at `T_LELAND_TAXI` → `OFFSCREEN` with `exit_authored_by: m8.b0.leland_taxi.p00` | V5, V6b |
+| RC5 Truman leaves the car | 7/4 "returns home" with no cause while Cooper is on the map | `east_route_confirmed ∧ ¬jacques_preso ∧ ¬audrey_vista_oej` | `truman → traincar` (he stays with the ring); `audrey_vista_oej` → `OFFSCREEN` (boat); `jacques_preso` → `sheriff` | V5, V6 |
+| RC6 Hawk escort | 5 OFFSCREEN as shorthand | `jacques_preso ∧ ¬m6_hospital_guard` | `hawk → OFFSCREEN` with label `escort`, record C2b present, exit `m6_hospital_guard` (the register) | V6 (record required) |
+| RC7 gathering entry (B1) | 7 | `T_LELAND_TAXI ∧ ¬presagio_status` | until B1 closes: the diner four have no compiled window here → V3 must FAIL loudly (no implicit absence, no silent move); after B1: they resolve per the chosen event | V3, V6b |
+| RC8 order independence on the Act 3 chain | — | every Act 3 seed | shuffled registry gives identical Hawk/Truman/Jacques results | V4 |
