@@ -2,7 +2,7 @@
 
 Date: 2026-09-11 · closed by `docs/cast-continuity-lead-decisions-v0.1.md` (D1–D11) · corrected by `docs/cast-continuity-final-consistency-report.md` (final consistency pass, same day). Companion of `docs/cast-continuity-contract-v0.1.md`. **Not implemented.** This file is what the implementation pass compiles into the registry and what V5/V6 pin.
 
-Status: every row LOCKED except **one lead blocker, B1** (§8): the entry event of the Roadhouse gathering for the four diner regulars. Everything else is internally consistent.
+Status: every row LOCKED. B1 (the entry of the Roadhouse gathering for the four diner regulars) CLOSED 2026-09-11 by lead decision, option B: the closing beat of `m8_leland_taxi` authors the Double R closing for the Roadhouse evening (`docs/cast-continuity-b1-resolution.md`).
 
 Authority order: `docs/story/*` > frozen act designs and closure reports > mission JSON (boundaries, node placement, page text) > sprite lists as "engine today" only. Inventories: `cast-window-inventory-acts-1-3.md`, `cast-window-inventory-act-4.md`.
 
@@ -28,7 +28,7 @@ Placement coordinates are today's entity/NPC coordinates kept as data; the envir
 | Giant, first statement | `flag gigante1` | classic `specchio315` |
 | Act 4 opens | `flag atto4` | M6 `m6_atto4_bridge` |
 | promise made | `value_set promise_stance` | M8 `m8_diner` |
-| Maddy leaves, Leland's taxi claim | `evidence T_LELAND_TAXI` (`m8_leland_taxi`; p00 "(Maddy saluta ed esce. Leland posa il conto sul bancone.)") | M8 |
+| Maddy leaves, Leland's taxi claim, the Double R closes for the evening | `evidence T_LELAND_TAXI` (`m8_leland_taxi`; p00 "(Maddy saluta ed esce. Leland posa il conto sul bancone.)"; closing beat `m8.b0.leland_taxi.chiusura.p01` "(Norma gira il cartello sulla porta e spegne l'insegna. Sedie sui tavoli, cappotti dagli attaccapanni: il Double R chiude alle sei, stasera si va al Roadhouse.)" — approved prose, B1 resolution) | M8 |
 | the statement | `value_is presagio_status=active` | M8 `m8_roadhouse_truman` |
 | the phone | `value_set warning_target`; `sarah_support_state`; `maddy_action_after_warning` | M8 `m8_roadhouse_phone` (roadhouse, object `roadhouse_phone` 8,5) |
 | the threshold / route commit | `value_set focus_destination` | M8 `m8_focus_choice` (town, landmark `town_crossroads` 47,30 — outside the Roadhouse) |
@@ -108,7 +108,7 @@ Giant in Room 315: no body (mirror interact); no window.
 | `ACT4_LELAND_HIDDEN` | `evidence T_LELAND_TAXI ∧ ¬atto5` | `atto5` | leland → `OFFSCREEN` (HIDDEN) | — |
 | `ACT5_LELAND_STATION` (placeholder) | `atto5 ∧ ¬leland_morto` | `leland_morto` | leland → `sheriff` 8,5 | M9 |
 | `LELAND_DEAD` | `leland_morto` | never | leland → `TERMINAL_REMOVED` | — |
-| `ACT4_EVENING_GATHERING` (corrected exit; **entry = B1**) | **B1** for norma, shelly, loglady, james (see §8); `evidence T_LELAND_TAXI` for truman, bobby, donna (not in the player's room when it fires) | `value_set focus_destination` (Cooper is at the crossroads outside; "Il Roadhouse ha chiuso") | truman → `roadhouse` 4,8; norma 5,6, shelly 3,6, loglady 2,6, james 2,4, bobby 3,4, donna 5,4 → `roadhouse` (the town gathers, T52) | the Roadhouse closes after Cooper has left it |
+| `ACT4_EVENING_GATHERING` (corrected exit; entry closed, B1) | `evidence T_LELAND_TAXI` for all seven. For norma, shelly, loglady, james the entry displaces them from the map Cooper stands on, so it carries `entry_authored_by: m8.b0.leland_taxi.chiusura.p01` (the closing beat of the same node: the Double R closes for the Roadhouse evening). Truman, bobby, donna are not in the player's room when it fires | `value_set focus_destination` (Cooper is at the crossroads outside; "Il Roadhouse ha chiuso") | truman → `roadhouse` 4,8; norma 5,6, shelly 3,6, loglady 2,6, james 2,4, bobby 3,4, donna 5,4 → `roadhouse` (the town gathers, T52) | the departure is visible before the state commits; the Roadhouse closes after Cooper has left it |
 | `ACT4_GIANT_STAGE` | `value_is presagio_status=active ∧ ¬value_set warning_target` | `warning_target` (p05 "La sala riprende il suo tempo. Nessuno ha visto niente.") | giant → `roadhouse` 8,1 | supernatural narrow window; accepted |
 | `ACT4_HAWK_PATROL` | `evidence T_LELAND_TAXI ∧ ¬value_is body_found_by=hawk ∧ ¬(value_is body_found_by=cooper ∧ maddy_trovata)` | the anonymous call | hawk → `OFFSCREEN` (patrol; D6) | Cooper at the diner when it starts |
 | `ACT4_HAWK_SHORE` | `(value_is body_found_by=hawk ∨ (value_is body_found_by=cooper ∧ maddy_trovata)) ∧ ¬atto5` | `atto5` | hawk → `town` 16,27 (T7; keeps the scene until dawn, D5) | — |
@@ -139,7 +139,7 @@ SH sheriff · DR diner · TW town · RH roadhouse · PL palmer · HG hotel_gn ·
 | `ACT3_NIGHT_STATION` (`jacques_dead`, ¬`gigante1`) | SH | SH | SH | SH | PL | OFF | OFF | DR | DR | DR | DR | TW | TW | TW | HG | **TERM** | OFF (mirror) | piantone_ronette HO 3,6 |
 | `ACT4_AFTERNOON` (`atto4`, ¬`promise_stance`) | SH | SH | SH | SH | PL | **DR 11,1** | **DR 10,1** | DR | DR | DR | DR | TW | TW | TW | HG | TERM | OFF | HO 3,6 |
 | `ACT4_PROMISE_MADE` (`promise_stance`, ¬`T_LELAND_TAXI`) | SH | SH | SH | SH | PL | DR 11,1 | **DR 10,1** | DR | DR | DR | DR | TW | TW | TW | HG | TERM | OFF | HO 3,6 |
-| `ACT4_EVENING_GATHERING` (`T_LELAND_TAXI`, ¬`presagio_status`) | **RH 4,8** | **OFF patrol** | SH | SH | PL | **OFF** | **OFF** | **B1** | **B1** | **B1** | **B1** | **RH** | **RH** | **OFF** | HG | TERM | OFF | HO 3,6 |
+| `ACT4_EVENING_GATHERING` (`T_LELAND_TAXI`, ¬`presagio_status`) | **RH 4,8** | **OFF patrol** | SH | SH | PL | **OFF** | **OFF** | **RH 5,6** | **RH 3,6** | **RH 2,6** | **RH 2,4** | **RH** | **RH** | **OFF** | HG | TERM | OFF | HO 3,6 |
 | **`ACT4_ROADHOUSE_PRE_PHONE`** (`presagio_status=active`, ¬`warning_target`) | RH 4,8 | OFF patrol | SH | SH | **OFF asleep** | OFF | OFF | **RH** | **RH** | **RH** | **RH** | RH | RH | OFF | HG | TERM | **RH 8,1** | HO 3,6 |
 | **`ACT4_POST_PHONE_INSIDE`** (`warning_target`, ¬`focus_destination`; all three branches; `centrale` adds andy OFF) | **RH 4,8** | OFF | SH | SH / OFF | OFF | OFF | OFF | **RH** | **RH** | **RH** | **RH** | **RH** | **RH** | OFF | HG | TERM | **OFF** | HO 3,6 |
 | `ACT4_ROUTE_PALMER` (`focus_destination=palmer`, ¬`body_found_by`) — Palmer map: nobody | **SH** | OFF | SH | per branch | OFF | OFF | OFF | **DR** | **OFF** | **OFF** | **OFF** | **OFF** | **OFF** | OFF | HG | TERM | OFF | HO 3,6 |
@@ -166,7 +166,7 @@ SH sheriff · DR diner · TW town · RH roadhouse · PL palmer · HG hotel_gn ·
 | C8 | leland | OFF | `atto4` (T50) | DR 11,1 | `T_LELAND_TAXI` ("posa il conto") → OFF HIDDEN → `atto5` → SH → `leland_morto` → TERM |
 | C9 | hawk | SH | `T_LELAND_TAXI`: on the road for the night (D6) | OFF patrol | `body_found_by` (T7) → TW 16,27 → `atto5` → SH |
 | C10 | truman, bobby, donna | baselines | `T_LELAND_TAXI`: the town gathers (T52) | RH | `focus_destination` ("Il Roadhouse ha chiuso") → truman SH, bobby/donna OFF home → `atto5` |
-| C10b | norma, shelly, loglady, james | DR | **B1** (the same gathering; the event that lets them leave the diner without vanishing in front of Cooper is not yet authored) | RH | `focus_destination` → norma DR, others OFF home → `atto5` |
+| C10b | norma, shelly, loglady, james | DR | `T_LELAND_TAXI`: the Double R closes for the Roadhouse evening, authored on screen by `m8.b0.leland_taxi.chiusura.p01` (sign turned, lights off, chairs up, coats down) in the same node that commits the state | RH | `focus_destination` → norma DR, others OFF home → `atto5` |
 | C11 | giant | OFF | `presagio_status=active` (T52) | RH 8,1 | `warning_target` (p05) → OFF |
 | C12 | andy | SH | `sarah_support_state=vice` (T4′) | OFF (Palmer) | `atto5` → SH |
 | C13 | andy | SH | `sarah_support_state=none ∧ maddy_trovata` (T7′) | OFF (Palmer) | `atto5` → SH |
@@ -187,7 +187,7 @@ SH sheriff · DR diner · TW town · RH roadhouse · PL palmer · HG hotel_gn ·
 | fact today | truth | migration action |
 |---|---|---|
 | classic `truman`, `hawk`, `lucy`, `andy` at `sheriff` (no cond) | baselines | registry baselines; classic entries deleted (V7) |
-| adapter roadhouse crowd `atto4 ∧ ¬warning_target` | GATHERING: entry B1 / `T_LELAND_TAXI`, exit `focus_destination` | replace; adapter bodies deleted |
+| adapter roadhouse crowd `atto4 ∧ ¬warning_target` | GATHERING: entry `T_LELAND_TAXI` (closing beat authored), exit `focus_destination` | replace; adapter bodies deleted |
 | adapter `maddy` diner `atto4 ∧ ¬promise_stance` | exit `T_LELAND_TAXI` (her exit caption) | window |
 | adapter `truman` traincar `m5_final_theory ∧ ¬east_route_confirmed` | REPORT exits at `jacques_preso` / `audrey_vista_oej` | window |
 | no Hawk body at OEJ; `hawk_cut` never exits | OEJ_DOCK, ESCORT; CUT exits at `east_route_confirmed` | windows |
@@ -199,7 +199,7 @@ SH sheriff · DR diner · TW town · RH roadhouse · PL palmer · HG hotel_gn ·
 
 ## 8. Lead blockers and accepted residuals
 
-**B1 — entry of the gathering for the diner regulars (norma, shelly, loglady, james).** The town gathers at the Roadhouse at nightfall ("Norma chiude alle sei per andarci"; S3 "Il paese c'è tutto" requires them present when Cooper walks in). The only existing story state at nightfall is `T_LELAND_TAXI`, which is written at the diner counter with Cooper standing there; the four would vanish from the room in front of him, and no page authors their leaving (p00 authors Maddy's exit and Leland's bill only). No existing state marks Cooper leaving the diner or entering the Roadhouse; `presagio_status=active` is too late (p01 needs the crowd). Frozen design does not establish the moment, so this is not fixed here. Options for the lead: (a) one new derived world state (e.g. `roadhouse_reached`, set once from the engine's committed-arrival event on the `roadhouse` map and mirrored into narrative state) used as the gathering's entry for all seven and for Hawk's patrol and Jacoby's night — the contract permits new state when existing state cannot represent the transition; (b) a one-line caption in `m8_leland_taxi` authoring Norma's closing (dialogue change: forbidden in this pass; lead may allow it in the implementation pass); (c) accept the vanish as authored by Lucy's line (rejected by the invariant). Until B1 closes, `ACT4_EVENING_GATHERING` compiles for truman, bobby, donna only.
+**B1 — CLOSED (2026-09-11, lead decision, option B).** Norma, Shelly, the Log Lady and James leave the Double R at `T_LELAND_TAXI` because the node that commits it, `m8_leland_taxi`, now ends with an authored closing beat: `m8.b0.leland_taxi.chiusura.p01` (mode `action`, unconditional, placed after the last dialogue page and before the notebook page `m8.b0.leland_taxi.p02`): "(Norma gira il cartello sulla porta e spegne l'insegna. Sedie sui tavoli, cappotti dagli attaccapanni: il Double R chiude alle sei, stasera si va al Roadhouse.)". Sequence: Maddy leaves (p00) → Leland pays and states the taxi (p01/p02) → the Double R closes early for the Roadhouse evening (closing beat) → `T_LELAND_TAXI` commits → the four resolve to `ACT4_EVENING_GATHERING`. The state change and its visible cause are one narrative transaction; no new flag, value, evidence or proposition; player map position is not Cast Continuity state. Rejected: (a) a derived arrival state; (c) the vanish. The page is not yet in `narrative/missions/M8.json`: the Cast Presence implementation pass adds it (spec: `docs/cast-continuity-b1-resolution.md`), and V6b fails until it exists.
 
 **R1 (accepted residual)** — Audrey's OEJ window ends at `jacques_preso` if Cooper never speaks to her: she leaves at the arrest, while Cooper is on the OEJ map, with T42 (the eight o'clock boat) as the offscreen cause. The arrest ends the visit (Jacques: "Ricordatevelo quando lo riattraversate"); accepted.
 

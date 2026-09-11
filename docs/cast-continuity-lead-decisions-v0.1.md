@@ -80,7 +80,7 @@ Format per item: CHARACTER · WINDOW · BEFORE · EVENT/CAUSE · AFTER · NEXT T
 
 - **Truman, Norma, Shelly, Log Lady, James, Bobby, Donna** · `ACT4_EVENING_GATHERING` = `T_LELAND_TAXI ∧ ¬warning_target`.
 - BEFORE: baselines (Truman station; Norma, Shelly, Log Lady, James diner; Bobby, Donna town).
-- CAUSE: the afternoon ends when Leland pays and leaves the diner (T0.5, `T_LELAND_TAXI`); "Norma chiude alle sei per andarci" (Lucy p01); the town gathers (T52). Truman goes to wait for Cooper there (S3 actor node; Lucy p01 "Lei ci va?").
+- CAUSE: the afternoon ends when Leland pays and leaves the diner (T0.5, `T_LELAND_TAXI`) and the Double R closes early for the Roadhouse evening, shown on screen by the closing beat of the same node (`m8.b0.leland_taxi.chiusura.p01`, §8c); "Norma chiude alle sei per andarci" (Lucy p01); the town gathers (T52). Truman goes to wait for Cooper there (S3 actor node; Lucy p01 "Lei ci va?").
 - AFTER: all → `roadhouse` (S3 table placements; Truman 4,8 near the door).
 - NEXT TRANSITION: `warning_target` — the phone; "Il Roadhouse ha chiuso" (`m8.c.focus.repeat`).
 - **D7b — after the Roadhouse closes** (`ACT4_TOWN_HOME_NIGHT` = `warning_target ∧ ¬atto5`): Shelly, Log Lady, James, Bobby, Donna → `OFFSCREEN` (gone home; "Stanotte le strade sono solo distanza"). Norma → baseline `diner` (the Double R is her house; `m8_route_diner` finds her there: "Poi è tornata dai Palmer. Non era ancora partita"). Truman → baseline `sheriff` (he returns to coordinate; `p_lago`: "La chiamata sulla riva è arrivata qui").
@@ -256,7 +256,17 @@ No transition is justified by "the next scene needs them there".
 - **Jacques**: `OFFSCREEN` (guarded room, alive) from `jacques_preso` to `jacques_dead`; `TERMINAL_REMOVED` only from `jacques_dead`. The earlier terminal at arrest is withdrawn.
 - **D7 / D7b — Roadhouse exit**: the town gathering and Truman end at **`focus_destination`** (the route commit at the crossroads, outside the Roadhouse), not at `warning_target`. Only the Giant ends at the phone. Post-phone, pre-threshold, the room is intact. `ACT4_TOWN_HOME_NIGHT` starts at `focus_destination`.
 - **Maddy**: she leaves the diner at **`T_LELAND_TAXI`** (the page "(Maddy saluta ed esce…)" is the first page of the node that sets it), not at `promise_stance`.
-- **D7 entry for the diner regulars is reopened as lead blocker B1** (`cast-windows-acts-1-4.md` §8): the only nightfall state, `T_LELAND_TAXI`, fires while Cooper stands at the counter, and no page authors Norma, Shelly, the Log Lady and James leaving. Truman, Bobby and Donna keep `T_LELAND_TAXI` as their entry (Cooper is not in their room).
+- **D7 entry for the diner regulars was reopened as lead blocker B1** (`cast-windows-acts-1-4.md` §8): the only nightfall state, `T_LELAND_TAXI`, fires while Cooper stands at the counter, and no page authored Norma, Shelly, the Log Lady and James leaving. Closed in §8c.
+
+## 8c. B1 closed (lead decision, 2026-09-11)
+
+Option B. `m8_leland_taxi` ends with an authored closing beat, `m8.b0.leland_taxi.chiusura.p01` (action caption, unconditional, before the notebook page): "(Norma gira il cartello sulla porta e spegne l'insegna. Sedie sui tavoli, cappotti dagli attaccapanni: il Double R chiude alle sei, stasera si va al Roadhouse.)". The transition is:
+
+| from | via | to | cast | cause |
+|---|---|---|---|---|
+| DINER AFTERNOON (`promise_stance ∧ ¬T_LELAND_TAXI`) | `m8_leland_taxi` closing beat | EVENING GATHERING (`T_LELAND_TAXI ∧ ¬focus_destination`) | Norma, Shelly, Log Lady, James: Double R → Roadhouse | the Double R closes for the Roadhouse evening |
+
+Entry stays `T_LELAND_TAXI` (no new flag, value, evidence or proposition; player position is never Cast Continuity state). The gathering window carries `entry_authored_by: m8.b0.leland_taxi.chiusura.p01` for the four. Truman, Bobby and Donna are unchanged (Cooper is not in their origin rooms). Full record: `docs/cast-continuity-b1-resolution.md`.
 
 ## 9. Confirmation
 
