@@ -18,7 +18,7 @@ Bounded Gauntlet result: **BAR_WINS**, scene 7/10, materials 6/10, actor/navigat
 
 Official reference: https://dragonquest.square-enix-games.com/games/en-us/dragon-quest-3-hd2d-remake/ . Detailed local evidence and source measurements: `.gauntlet/hd2d-cabin-prototype/progress.md`.
 
-Recheck: `coldstage run changed --config test/hd2d-cabin-coldstage.config.mjs --json`.
+Coldstage rimosso il 2026-09-11 (decisione esplicita); validazione visiva = test/*-gates.js + capture headless.
 
 
 ## Quick town extension
