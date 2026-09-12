@@ -5196,6 +5196,11 @@
        }
       },
       {
+       "id": "m8.b0.leland_taxi.chiusura.p01",
+       "mode": "action",
+       "text": "(Norma gira il cartello sulla porta e spegne l'insegna. Sedie sui tavoli, cappotti dagli attaccapanni: il Double R chiude alle sei, stasera si va al Roadhouse.)"
+      },
+      {
        "id": "m8.b0.leland_taxi.p02",
        "mode": "notebook",
        "text": "Prima del Roadhouse, al diner: Leland dice di aver prenotato il taxi di Maddy."
@@ -7468,5 +7473,1434 @@
      "never_quantified": true
     }
    }
+  };
+  D.cast = {
+   "version": "cast-continuity-v0.1",
+   "source": "artifacts/world-character-audit/cast-windows-acts-1-4.md",
+   "characters": {
+    "truman": {
+     "class": "PERSISTENT",
+     "sprite": "truman",
+     "name": "Truman",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "sheriff",
+      "x": 10,
+      "y": 4,
+      "dir": "down",
+      "dialogue": [
+       {
+        "cond": "flag:leland_morto",
+        "then": "truman_fine"
+       },
+       {
+        "cond": "flag:atto3",
+        "then": "truman_wait3"
+       },
+       {
+        "cond": "clues6",
+        "then": "truman_atto3"
+       },
+       {
+        "cond": "flag:sogno_fatto",
+        "then": "truman_a2"
+       },
+       "truman"
+      ],
+      "wander": false
+     },
+     "authority": "T20, T25, T32, T36, T55"
+    },
+    "hawk": {
+     "class": "PERSISTENT",
+     "sprite": "hawk",
+     "name": "Hawk",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "sheriff",
+      "x": 12,
+      "y": 8,
+      "dir": "down",
+      "dialogue": [
+       {
+        "cond": "flag:sogno_fatto",
+        "then": "hawk_a2"
+       },
+       "hawk"
+      ],
+      "wander": false
+     },
+     "authority": "T11, T32 (\"Hawk scrive\"), M8 Lucy routes calls from the station"
+    },
+    "lucy": {
+     "class": "PERSISTENT",
+     "sprite": "lucy",
+     "name": "Lucy",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "sheriff",
+      "x": 2,
+      "y": 6,
+      "dir": "down",
+      "dialogue": [
+       {
+        "cond": "flag:jacques_preso",
+        "then": "lucy_a3"
+       },
+       "lucy"
+      ],
+      "wander": false
+     },
+     "authority": "T32, T34; M8 Lucy pages"
+    },
+    "andy": {
+     "class": "PERSISTENT",
+     "sprite": "andy",
+     "name": "Andy",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "sheriff",
+      "x": 10,
+      "y": 7,
+      "dir": "down",
+      "dialogue": "andy",
+      "wander": false
+     },
+     "authority": "scene-contracts S3"
+    },
+    "sarah": {
+     "class": "PERSISTENT",
+     "sprite": "sarah",
+     "name": "Sarah",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "palmer",
+      "x": 9,
+      "y": 7,
+      "dir": "down",
+      "dialogue": [
+       {
+        "cond": "flag:atto4",
+        "then": "sarah_visione"
+       },
+       "sarah"
+      ],
+      "wander": false
+     },
+     "authority": "Act 1 witness; L3"
+    },
+    "leland": {
+     "class": "PERSISTENT",
+     "sprite": "leland",
+     "name": "Leland",
+     "baseline": {
+      "status": "OFFSCREEN",
+      "label": "mourning"
+     },
+     "authority": "T40; D9"
+    },
+    "maddy": {
+     "class": "STORY_BOUND",
+     "sprite": "maddy",
+     "name": "Maddy",
+     "baseline": {
+      "status": "OFFSCREEN",
+      "label": "not_in_town"
+     },
+     "authority": "arrives Act 4"
+    },
+    "norma": {
+     "class": "PERSISTENT",
+     "sprite": "norma",
+     "name": "Norma",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "diner",
+      "x": 5,
+      "y": 2,
+      "dir": "down",
+      "dialogue": [
+       {
+        "cond": [
+         "flag:sogno_fatto",
+         "flag:done_norma"
+        ],
+        "then": "norma_a2"
+       },
+       "norma"
+      ],
+      "wander": false
+     },
+     "authority": "environment-requirements; `m8_route_diner`"
+    },
+    "shelly": {
+     "class": "PERSISTENT",
+     "sprite": "shelly",
+     "name": "Shelly",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "diner",
+      "x": 9,
+      "y": 7,
+      "dir": "down",
+      "dialogue": [
+       {
+        "cond": "flag:done_bobby",
+        "then": "shelly_bobby"
+       },
+       "shelly"
+      ],
+      "wander": false
+     },
+     "authority": "works there"
+    },
+    "loglady": {
+     "class": "PERSISTENT",
+     "sprite": "loglady",
+     "name": "Log Lady",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "diner",
+      "x": 4,
+      "y": 5,
+      "dir": "down",
+      "dialogue": [
+       {
+        "cond": "flag:atto4",
+        "then": "loglady_a4"
+       },
+       "loglady"
+      ],
+      "wander": false
+     },
+     "authority": "the regular; classic `atto4 → a4`"
+    },
+    "james": {
+     "class": "PERSISTENT",
+     "sprite": "james",
+     "name": "James",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "diner",
+      "x": 9,
+      "y": 6,
+      "dir": "down",
+      "dialogue": "james_a2",
+      "wander": false
+     },
+     "authority": "T24"
+    },
+    "bobby": {
+     "class": "PERSISTENT",
+     "sprite": "bobby",
+     "name": "Bobby",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "town",
+      "x": 31,
+      "y": 16,
+      "dir": "down",
+      "dialogue": [
+       {
+        "cond": "flag:done_shelly",
+        "then": "bobby_shelly"
+       },
+       {
+        "cond": "flag:done_shelly_bobby",
+        "then": "bobby_shelly"
+       },
+       "bobby"
+      ],
+      "wander": true
+     },
+     "authority": "Act 1 classic"
+    },
+    "donna": {
+     "class": "PERSISTENT",
+     "sprite": "donna",
+     "name": "Donna",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "town",
+      "x": 44,
+      "y": 10,
+      "dir": "down",
+      "dialogue": "donna",
+      "wander": true
+     },
+     "authority": "Act 1 classic (`js/data.js:283`)"
+    },
+    "jacoby": {
+     "class": "PERSISTENT",
+     "sprite": "jacoby",
+     "name": "Jacoby",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "town",
+      "x": 16,
+      "y": 25,
+      "dir": "down",
+      "dialogue": "jacoby",
+      "wander": false
+     },
+     "authority": "Act 1 classic (`js/data.js:290`)"
+    },
+    "audrey": {
+     "class": "PERSISTENT",
+     "sprite": "audrey",
+     "name": "Audrey",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "hotel_gn",
+      "x": 12,
+      "y": 9,
+      "dir": "down",
+      "dialogue": [
+       {
+        "cond": "flag:done_benhorne_a2",
+        "then": "audrey_a2_ben"
+       },
+       "audrey_a2"
+      ],
+      "wander": true
+     },
+     "authority": "Act 1 classic (`js/data.js:297`)"
+    },
+    "benhorne": {
+     "class": "PERSISTENT",
+     "sprite": "benhorne",
+     "name": "Ben Horne",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "hotel_gn",
+      "x": 5,
+      "y": 7,
+      "dir": "down",
+      "dialogue": "benhorne_a2",
+      "wander": false
+     },
+     "authority": "Act 2 classic"
+    },
+    "gerard": {
+     "class": "PERSISTENT",
+     "sprite": "gerard",
+     "name": "Gerard",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "hospital",
+      "x": 11,
+      "y": 4,
+      "dir": "left",
+      "dialogue": "gerard_a2",
+      "wander": false
+     },
+     "authority": "T23"
+    },
+    "ronette": {
+     "class": "PERSISTENT",
+     "sprite": "ronette",
+     "name": "Ronette",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "hospital",
+      "x": 3,
+      "y": 5,
+      "dir": "up",
+      "dialogue": null,
+      "wander": false
+     },
+     "authority": "T11"
+    },
+    "infermiera": {
+     "class": "PERSISTENT",
+     "sprite": "infermiera",
+     "name": "Infermiera",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "hospital",
+      "x": 11,
+      "y": 8,
+      "dir": "down",
+      "dialogue": null,
+      "wander": false
+     },
+     "authority": "T23"
+    },
+    "jacques": {
+     "class": "STORY_BOUND",
+     "sprite": "jacques",
+     "name": "Jacques",
+     "baseline": {
+      "status": "TERMINAL_REMOVED",
+      "event": "jacques_dead"
+     },
+     "authority": "T30–T34"
+    },
+    "giant": {
+     "class": "STORY_BOUND",
+     "sprite": "giant",
+     "name": "Gigante",
+     "baseline": {
+      "status": "OFFSCREEN",
+      "label": "offscreen"
+     },
+     "authority": "T35 mirror; T52 window"
+    },
+    "laura": {
+     "class": "STORY_BOUND",
+     "sprite": "laura",
+     "name": "Ombra",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "redroom",
+      "x": 11,
+      "y": 2,
+      "dir": "down",
+      "dialogue": [
+       {
+        "cond": "flag:leland_morto",
+        "then": "laura_finale2"
+       },
+       {
+        "cond": "flag:met_mfap",
+        "then": "laura_sogno"
+       },
+       "laura_hint"
+      ],
+      "wander": false
+     },
+     "authority": "T22, T58"
+    },
+    "mfap": {
+     "class": "STORY_BOUND",
+     "sprite": "mfap",
+     "name": "???",
+     "baseline": {
+      "status": "PLACED",
+      "map_id": "redroom",
+      "x": 8,
+      "y": 4,
+      "dir": "down",
+      "dialogue": [
+       {
+        "cond": "flag:leland_morto",
+        "then": "mfap_finale"
+       },
+       "mfap"
+      ],
+      "wander": false
+     },
+     "authority": "T22, T58"
+    },
+    "bob": {
+     "class": "STORY_BOUND",
+     "sprite": "bob",
+     "name": "BOB",
+     "baseline": {
+      "status": "OFFSCREEN",
+      "label": "force"
+     },
+     "authority": "a force, no body in Acts 1–4"
+    },
+    "piantone": {
+     "class": "STORY_BOUND_SCENOGRAPHY",
+     "sprite": "andy",
+     "name": "Agente",
+     "baseline": {
+      "status": "OFFSCREEN",
+      "label": "scenography"
+     },
+     "authority": "M6 \"SCENOGRAFIA\""
+    },
+    "piantone_ronette": {
+     "class": "STORY_BOUND_SCENOGRAPHY",
+     "sprite": "andy",
+     "name": "Agente",
+     "baseline": {
+      "status": "OFFSCREEN",
+      "label": "scenography"
+     },
+     "authority": "M6 \"SCENOGRAFIA\""
+    }
+   },
+   "windows": [
+    {
+     "id": "JAMES_NOT_YET",
+     "owner": "classic",
+     "when": {
+      "not": {
+       "flag": "sogno_fatto"
+      }
+     },
+     "cast": {
+      "james": {
+       "status": "OFFSCREEN",
+       "label": "not_met"
+      }
+     },
+     "cause": "james → OFFSCREEN (not met)",
+     "exit": "player is in Room 315; James appears at the diner"
+    },
+    {
+     "id": "ACT3_HAWK_BRIDGE",
+     "owner": "M5",
+     "when": {
+      "all": [
+       {
+        "flag": "atto3"
+       },
+       {
+        "not": {
+         "flag": "vagone_scoperto"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "hawk": {
+       "status": "PLACED",
+       "map_id": "traincar",
+       "x": 5,
+       "y": 6,
+       "dir": "left",
+       "dialogue": null,
+       "wander": false
+      }
+     },
+     "cause": "hawk → traincar 5,6 (leads Cooper to the footbridge, T26; \"Hawk resta sulle impronte\")",
+     "exit": "the discovery; the door node's own line \"La soglia la tengo io\" authors his new post",
+     "exit_authored_by": {
+      "hawk": "m5.hawk.hawk_door.p01"
+     },
+     "entry_authored_by": {
+      "hawk": "classic:truman_atto3"
+     }
+    },
+    {
+     "id": "ACT3_HAWK_DOOR",
+     "owner": "M5",
+     "when": {
+      "all": [
+       {
+        "flag": "vagone_scoperto"
+       },
+       {
+        "not": {
+         "node_done": "m5_report_close"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "hawk": {
+       "status": "PLACED",
+       "map_id": "traincar",
+       "x": 14,
+       "y": 8,
+       "dir": "down",
+       "dialogue": null,
+       "wander": false
+      }
+     },
+     "cause": "hawk → traincar 14,8 (holds the threshold, T27; \"(dalla porta) … Non te lo dico da qui. Vieni.\")",
+     "exit": "Hawk himself says he leads on",
+     "exit_authored_by": {
+      "hawk": "m5.b9.report.p06"
+     }
+    },
+    {
+     "id": "ACT3_HAWK_CUT",
+     "owner": "M5",
+     "when": {
+      "all": [
+       {
+        "node_done": "m5_report_close"
+       },
+       {
+        "not": {
+         "flag": "east_route_confirmed"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "hawk": {
+       "status": "PLACED",
+       "map_id": "traincar",
+       "x": 22,
+       "y": 3,
+       "dir": "up",
+       "dialogue": null,
+       "wander": false
+      }
+     },
+     "cause": "hawk → traincar 22,3 (north cut; T29; Cooper's own line: \"Hawk viene fino alla riva. Dalla riva in poi, io.\")",
+     "exit": "authored by the line above: he goes ahead to the bank",
+     "exit_authored_by": {
+      "hawk": "m5.hawk.hawk_cut.repeat"
+     }
+    },
+    {
+     "id": "ACT3_HAWK_OEJ_DOCK",
+     "owner": "M6",
+     "when": {
+      "all": [
+       {
+        "flag": "east_route_confirmed"
+       },
+       {
+        "not": {
+         "flag": "jacques_preso"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "hawk": {
+       "status": "PLACED",
+       "map_id": "oej",
+       "x": 6,
+       "y": 8,
+       "dir": "up",
+       "dialogue": null,
+       "wander": false
+      }
+     },
+     "cause": "hawk → oej 6,8 (the landing by the south door; \"(fuori, piano) Io resto qui. Se chiudono il molo, restiamo dentro.\")",
+     "exit": "the arrest pages",
+     "exit_authored_by": {
+      "hawk": "m6.b7.arrest.p06"
+     }
+    },
+    {
+     "id": "ACT3_HAWK_ESCORT",
+     "owner": "M6",
+     "when": {
+      "all": [
+       {
+        "flag": "jacques_preso"
+       },
+       {
+        "not": {
+         "node_done": "m6_hospital_guard"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "hawk": {
+       "status": "OFFSCREEN",
+       "label": "escort"
+      }
+     },
+     "cause": "hawk → OFFSCREEN (escorts Jacques to the ward, signs him in, T31; the register: \"Ultima riga: la firma di Hawk, ora del ricovero\")",
+     "exit": "Cooper is at OEJ/town/station; the signature is the rendered trace; back at the station for \"Hawk scrive\" (m6_return_night)"
+    },
+    {
+     "id": "ACT3_TRUMAN_REPORT",
+     "owner": "M5",
+     "when": {
+      "all": [
+       {
+        "value_set": "m5_final_theory"
+       },
+       {
+        "proposition_path": "P3A.formulation.status",
+        "equals": "formulated"
+       },
+       {
+        "not": {
+         "flag": "jacques_preso"
+        }
+       },
+       {
+        "not": {
+         "flag": "audrey_vista_oej"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "truman": {
+       "status": "PLACED",
+       "map_id": "traincar",
+       "x": 9,
+       "y": 8,
+       "dir": "right",
+       "dialogue": null,
+       "wander": false
+      }
+     },
+     "cause": "truman → traincar 9,8 (comes to receive the report, T28; stays: \"Io resto con l'anello e con il verbale\", m5_report_close)",
+     "exit": "jacques_preso (the site closes; he is at the station with the file for m6_return_night_early) or audrey_vista_oej (→ BOAT)"
+    },
+    {
+     "id": "ACT3_TRUMAN_BOAT",
+     "owner": "M6",
+     "when": {
+      "all": [
+       {
+        "flag": "audrey_vista_oej"
+       },
+       {
+        "not": {
+         "flag": "jacques_preso"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "truman": {
+       "status": "OFFSCREEN",
+       "label": "boat"
+      }
+     },
+     "cause": "truman → OFFSCREEN (meets the eight o'clock boat and walks Audrey home: \"La nuova del guardaroba è rientrata con la barca delle otto. L'ho accompagnata io.\", T42)",
+     "exit": "Cooper is at OEJ"
+    },
+    {
+     "id": "ACT3_JACQUES_AT_OEJ",
+     "owner": "M6",
+     "when": {
+      "not": {
+       "flag": "jacques_preso"
+      }
+     },
+     "cast": {
+      "jacques": {
+       "status": "PLACED",
+       "map_id": "oej",
+       "x": 7,
+       "y": 5,
+       "dir": "down",
+       "dialogue": null,
+       "wander": false
+      }
+     },
+     "cause": "jacques → oej 7,5",
+     "exit": "the arrest pages (he falls between the planks)",
+     "exit_authored_by": {
+      "jacques": "m6.b7.arrest.p06"
+     }
+    },
+    {
+     "id": "ACT3_JACQUES_GUARDED",
+     "owner": "M6",
+     "when": {
+      "all": [
+       {
+        "flag": "jacques_preso"
+       },
+       {
+        "not": {
+         "flag": "jacques_dead"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "jacques": {
+       "status": "OFFSCREEN",
+       "label": "guarded"
+      }
+     },
+     "cause": "jacques → OFFSCREEN (\"piantonato, stanza in fondo al reparto\" — alive, in custody, deliberately not a body; the guard, the door and the register render it)",
+     "exit": "Cooper is at the station when Lucy's call lands"
+    },
+    {
+     "id": "JACQUES_DEAD",
+     "owner": "M6",
+     "when": {
+      "flag": "jacques_dead"
+     },
+     "cast": {
+      "jacques": {
+       "status": "TERMINAL_REMOVED",
+       "event": "jacques_dead"
+      }
+     },
+     "cause": "jacques → TERMINAL_REMOVED",
+     "exit": "never"
+    },
+    {
+     "id": "ACT3_AUDREY_AT_OEJ",
+     "owner": "M6",
+     "when": {
+      "all": [
+       {
+        "flag": "audrey_indaga"
+       },
+       {
+        "not": {
+         "flag": "audrey_vista_oej"
+        }
+       },
+       {
+        "not": {
+         "flag": "jacques_preso"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "audrey": {
+       "status": "PLACED",
+       "map_id": "oej",
+       "x": 13,
+       "y": 7,
+       "dir": "down",
+       "dialogue": null,
+       "wander": false
+      }
+     },
+     "cause": "audrey → oej 13,7 (\"esce da quella porta entro dieci minuti\")",
+     "exit": "her own line; at the arrest the visit is over (residual R1, §8)",
+     "exit_authored_by": {
+      "audrey": "m6.b3.audrey.p02"
+     },
+     "exit_residual": {
+      "audrey": "R1"
+     },
+     "entry_authored_by": {
+      "audrey": "classic:audrey_a2"
+     }
+    },
+    {
+     "id": "ACT3_GUARD_JACQUES",
+     "owner": "M6",
+     "when": {
+      "all": [
+       {
+        "flag": "jacques_preso"
+       },
+       {
+        "not": {
+         "flag": "jacques_dead"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "piantone": {
+       "status": "PLACED",
+       "map_id": "hospital",
+       "x": 7,
+       "y": 3,
+       "dir": "up",
+       "dialogue": null,
+       "wander": false
+      }
+     },
+     "cause": "piantone → hospital 7,3",
+     "exit": "—"
+    },
+    {
+     "id": "ACT3_GUARD_RONETTE",
+     "owner": "M6",
+     "when": {
+      "all": [
+       {
+        "flag": "jacques_dead"
+       },
+       {
+        "not": {
+         "flag": "leland_morto"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "piantone_ronette": {
+       "status": "PLACED",
+       "map_id": "hospital",
+       "x": 3,
+       "y": 6,
+       "dir": "up",
+       "dialogue": null,
+       "wander": false
+      }
+     },
+     "cause": "piantone_ronette → hospital 3,6 (D11)",
+     "exit": "—"
+    },
+    {
+     "id": "ACT4_MADDY_DINER",
+     "owner": "M8",
+     "when": {
+      "all": [
+       {
+        "flag": "atto4"
+       },
+       {
+        "not": {
+         "evidence": "T_LELAND_TAXI"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "maddy": {
+       "status": "PLACED",
+       "map_id": "diner",
+       "x": 10,
+       "y": 1,
+       "dir": "down",
+       "dialogue": null,
+       "wander": false
+      }
+     },
+     "cause": "maddy → diner 10,1 (T50)",
+     "exit": "her exit is the first page of the node that sets the exit state",
+     "exit_authored_by": {
+      "maddy": "m8.b0.leland_taxi.p00"
+     }
+    },
+    {
+     "id": "ACT4_MADDY_HOME",
+     "owner": "M8",
+     "when": {
+      "all": [
+       {
+        "evidence": "T_LELAND_TAXI"
+       },
+       {
+        "not": {
+         "flag": "maddy_trovata"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "maddy": {
+       "status": "OFFSCREEN",
+       "label": "home"
+      }
+     },
+     "cause": "maddy → OFFSCREEN (home; the house with Leland inside, HIDDEN)",
+     "exit": "—"
+    },
+    {
+     "id": "ACT4_MADDY_GONE",
+     "owner": "M8",
+     "when": {
+      "flag": "maddy_trovata"
+     },
+     "cast": {
+      "maddy": {
+       "status": "TERMINAL_REMOVED",
+       "event": "maddy_trovata"
+      }
+     },
+     "cause": "maddy → TERMINAL_REMOVED (T54)",
+     "exit": "never"
+    },
+    {
+     "id": "ACT4_LELAND_DINER",
+     "owner": "M8",
+     "when": {
+      "all": [
+       {
+        "flag": "atto4"
+       },
+       {
+        "not": {
+         "evidence": "T_LELAND_TAXI"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "leland": {
+       "status": "PLACED",
+       "map_id": "diner",
+       "x": 11,
+       "y": 1,
+       "dir": "down",
+       "dialogue": null,
+       "wander": false
+      }
+     },
+     "cause": "leland → diner 11,1 (pays, states the taxi, leaves: T0.5)",
+     "exit": "the bill caption",
+     "exit_authored_by": {
+      "leland": "m8.b0.leland_taxi.p00"
+     }
+    },
+    {
+     "id": "ACT4_LELAND_HIDDEN",
+     "owner": "M8",
+     "when": {
+      "all": [
+       {
+        "evidence": "T_LELAND_TAXI"
+       },
+       {
+        "not": {
+         "flag": "atto5"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "leland": {
+       "status": "OFFSCREEN",
+       "label": "hidden"
+      }
+     },
+     "cause": "leland → OFFSCREEN (HIDDEN)",
+     "exit": "—"
+    },
+    {
+     "id": "ACT5_LELAND_STATION",
+     "owner": "story",
+     "when": {
+      "all": [
+       {
+        "flag": "atto5"
+       },
+       {
+        "not": {
+         "flag": "leland_morto"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "leland": {
+       "status": "PLACED",
+       "map_id": "sheriff",
+       "x": 8,
+       "y": 5,
+       "dir": "down",
+       "dialogue": [
+        {
+         "cond": "flag:leland_confessa",
+         "then": "leland_morte"
+        },
+        "leland_interr"
+       ],
+       "wander": false
+      }
+     },
+     "cause": "leland → sheriff 8,5",
+     "exit": "—"
+    },
+    {
+     "id": "LELAND_DEAD",
+     "owner": "story",
+     "when": {
+      "flag": "leland_morto"
+     },
+     "cast": {
+      "leland": {
+       "status": "TERMINAL_REMOVED",
+       "event": "leland_morto"
+      }
+     },
+     "cause": "leland → TERMINAL_REMOVED",
+     "exit": "never"
+    },
+    {
+     "id": "ACT4_EVENING_GATHERING",
+     "owner": "M8",
+     "when": {
+      "all": [
+       {
+        "evidence": "T_LELAND_TAXI"
+       },
+       {
+        "not": {
+         "value_set": "focus_destination"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "truman": {
+       "status": "PLACED",
+       "map_id": "roadhouse",
+       "x": 4,
+       "y": 8,
+       "dir": "up",
+       "dialogue": null,
+       "wander": false
+      },
+      "norma": {
+       "status": "PLACED",
+       "map_id": "roadhouse",
+       "x": 5,
+       "y": 6,
+       "dir": "up",
+       "dialogue": null,
+       "wander": false
+      },
+      "shelly": {
+       "status": "PLACED",
+       "map_id": "roadhouse",
+       "x": 3,
+       "y": 6,
+       "dir": "down",
+       "dialogue": null,
+       "wander": false
+      },
+      "loglady": {
+       "status": "PLACED",
+       "map_id": "roadhouse",
+       "x": 2,
+       "y": 6,
+       "dir": "up",
+       "dialogue": null,
+       "wander": false
+      },
+      "james": {
+       "status": "PLACED",
+       "map_id": "roadhouse",
+       "x": 2,
+       "y": 4,
+       "dir": "down",
+       "dialogue": null,
+       "wander": false
+      },
+      "bobby": {
+       "status": "PLACED",
+       "map_id": "roadhouse",
+       "x": 3,
+       "y": 4,
+       "dir": "down",
+       "dialogue": null,
+       "wander": false
+      },
+      "donna": {
+       "status": "PLACED",
+       "map_id": "roadhouse",
+       "x": 5,
+       "y": 4,
+       "dir": "down",
+       "dialogue": null,
+       "wander": false
+      }
+     },
+     "cause": "truman → roadhouse 4,8; norma, shelly, loglady, james, bobby, donna → roadhouse (the town gathers, T52)",
+     "exit": "the departure is visible before the state commits; the Roadhouse closes after Cooper has left it",
+     "entry_authored_by": {
+      "norma": "m8.b0.leland_taxi.chiusura.p01",
+      "shelly": "m8.b0.leland_taxi.chiusura.p01",
+      "loglady": "m8.b0.leland_taxi.chiusura.p01",
+      "james": "m8.b0.leland_taxi.chiusura.p01"
+     }
+    },
+    {
+     "id": "ACT4_GIANT_STAGE",
+     "owner": "M8",
+     "when": {
+      "all": [
+       {
+        "value_is": {
+         "name": "presagio_status",
+         "equals": "active"
+        }
+       },
+       {
+        "not": {
+         "value_set": "warning_target"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "giant": {
+       "status": "PLACED",
+       "map_id": "roadhouse",
+       "x": 8,
+       "y": 1,
+       "dir": "down",
+       "dialogue": null,
+       "wander": false
+      }
+     },
+     "cause": "giant → roadhouse 8,1",
+     "exit": "supernatural narrow window; accepted",
+     "exit_residual": {
+      "giant": "R2"
+     }
+    },
+    {
+     "id": "ACT4_HAWK_PATROL",
+     "owner": "M8",
+     "when": {
+      "all": [
+       {
+        "evidence": "T_LELAND_TAXI"
+       },
+       {
+        "not": {
+         "value_is": {
+          "name": "body_found_by",
+          "equals": "hawk"
+         }
+        }
+       },
+       {
+        "not": {
+         "all": [
+          {
+           "value_is": {
+            "name": "body_found_by",
+            "equals": "cooper"
+           }
+          },
+          {
+           "flag": "maddy_trovata"
+          }
+         ]
+        }
+       }
+      ]
+     },
+     "cast": {
+      "hawk": {
+       "status": "OFFSCREEN",
+       "label": "patrol"
+      }
+     },
+     "cause": "hawk → OFFSCREEN (patrol; D6)",
+     "exit": "the anonymous call"
+    },
+    {
+     "id": "ACT4_HAWK_SHORE_FOUND_BY_HAWK",
+     "owner": "M8",
+     "when": {
+      "all": [
+       {
+        "value_is": {
+         "name": "body_found_by",
+         "equals": "hawk"
+        }
+       },
+       {
+        "not": {
+         "flag": "atto5"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "hawk": {
+       "status": "PLACED",
+       "map_id": "town",
+       "x": 16,
+       "y": 27,
+       "dir": "down",
+       "dialogue": null,
+       "wander": false
+      }
+     },
+     "cause": "hawk → town 16,27 (T7; keeps the scene until dawn, D5)",
+     "exit": "—"
+    },
+    {
+     "id": "ACT4_HAWK_SHORE_COOPER",
+     "owner": "M8",
+     "when": {
+      "all": [
+       {
+        "value_is": {
+         "name": "body_found_by",
+         "equals": "cooper"
+        }
+       },
+       {
+        "flag": "maddy_trovata"
+       },
+       {
+        "not": {
+         "flag": "atto5"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "hawk": {
+       "status": "PLACED",
+       "map_id": "town",
+       "x": 16,
+       "y": 27,
+       "dir": "down",
+       "dialogue": null,
+       "wander": false
+      }
+     },
+     "cause": "hawk → town 16,27 (T7; keeps the scene until dawn, D5)",
+     "exit": "—"
+    },
+    {
+     "id": "ACT4_SARAH_ASLEEP",
+     "owner": "M8",
+     "when": {
+      "all": [
+       {
+        "value_is": {
+         "name": "presagio_status",
+         "equals": "active"
+        }
+       },
+       {
+        "not": {
+         "flag": "atto5"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "sarah": {
+       "status": "OFFSCREEN",
+       "label": "asleep"
+      }
+     },
+     "cause": "sarah → OFFSCREEN (asleep upstairs; D1)",
+     "exit": "Cooper at the Roadhouse"
+    },
+    {
+     "id": "ACT4_ANDY_WITH_SARAH_VICE",
+     "owner": "M8",
+     "when": {
+      "all": [
+       {
+        "value_is": {
+         "name": "sarah_support_state",
+         "equals": "vice"
+        }
+       },
+       {
+        "not": {
+         "flag": "atto5"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "andy": {
+       "status": "OFFSCREEN",
+       "label": "with_sarah"
+      }
+     },
+     "cause": "andy → OFFSCREEN (dispatched, T4′; D2)",
+     "exit": "Cooper at the Roadhouse"
+    },
+    {
+     "id": "ACT4_ANDY_WITH_SARAH_LATE",
+     "owner": "M8",
+     "when": {
+      "all": [
+       {
+        "value_is": {
+         "name": "sarah_support_state",
+         "equals": "none"
+        }
+       },
+       {
+        "flag": "maddy_trovata"
+       },
+       {
+        "not": {
+         "flag": "atto5"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "andy": {
+       "status": "OFFSCREEN",
+       "label": "with_sarah"
+      }
+     },
+     "cause": "andy → OFFSCREEN (Truman left him with Sarah, T7′; D2)",
+     "exit": "Cooper at the shore"
+    },
+    {
+     "id": "ACT4_TOWN_HOME_NIGHT",
+     "owner": "M8",
+     "when": {
+      "all": [
+       {
+        "value_set": "focus_destination"
+       },
+       {
+        "not": {
+         "flag": "atto5"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "shelly": {
+       "status": "OFFSCREEN",
+       "label": "home"
+      },
+      "loglady": {
+       "status": "OFFSCREEN",
+       "label": "home"
+      },
+      "james": {
+       "status": "OFFSCREEN",
+       "label": "home"
+      },
+      "bobby": {
+       "status": "OFFSCREEN",
+       "label": "home"
+      },
+      "donna": {
+       "status": "OFFSCREEN",
+       "label": "home"
+      }
+     },
+     "cause": "shelly, loglady, james, bobby, donna → OFFSCREEN (home; D7b). Norma → baseline diner and Truman → baseline sheriff by the gathering's exit",
+     "exit": "—"
+    },
+    {
+     "id": "ACT4_JACOBY_HOME_NIGHT",
+     "owner": "M8",
+     "when": {
+      "all": [
+       {
+        "evidence": "T_LELAND_TAXI"
+       },
+       {
+        "not": {
+         "flag": "atto5"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "jacoby": {
+       "status": "OFFSCREEN",
+       "label": "home"
+      }
+     },
+     "cause": "jacoby → OFFSCREEN (D4)",
+     "exit": "Cooper at the diner"
+    },
+    {
+     "id": "BOB_FINALE",
+     "owner": "classic",
+     "when": {
+      "flag": "leland_morto"
+     },
+     "cast": {
+      "bob": {
+       "status": "PLACED",
+       "map_id": "redroom",
+       "x": 14,
+       "y": 2,
+       "dir": "down",
+       "dialogue": "bob_finale",
+       "wander": false
+      }
+     },
+     "cause": "bob → redroom 14,2 (classic leland_morto reveal)",
+     "exit": "never"
+    }
+   ]
   };
 })();

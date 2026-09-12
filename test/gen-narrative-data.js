@@ -16,6 +16,7 @@ const m9 = JSON.parse(fs.readFileSync(path.join(root, 'narrative/missions/M9.jso
 const enums = JSON.parse(fs.readFileSync(path.join(root, 'narrative/state-enums.json'), 'utf8'));
 const evidence = JSON.parse(fs.readFileSync(path.join(root, 'narrative/evidence.json'), 'utf8'));
 const propositions = JSON.parse(fs.readFileSync(path.join(root, 'narrative/propositions.json'), 'utf8'));
+const cast = JSON.parse(fs.readFileSync(path.join(root, 'narrative/cast/windows.json'), 'utf8'));
 const m9EvidenceDiff = JSON.parse(fs.readFileSync(path.join(root, 'narrative/schema-deltas/diff-evidence-M9.json'), 'utf8'));
 Object.keys(m9EvidenceDiff.ui_origin_add || {}).forEach(id => {
   if (!evidence.evidence[id]) throw new Error('M9 ui_origin target missing: ' + id);
@@ -44,6 +45,7 @@ const out = [
   '  D.enums = ' + JSON.stringify(enums, null, 1).replace(/\n/g, '\n  ') + ';',
   '  D.evidence = ' + JSON.stringify(evidence, null, 1).replace(/\n/g, '\n  ') + ';',
   '  D.propositions = ' + JSON.stringify(propositions, null, 1).replace(/\n/g, '\n  ') + ';',
+  '  D.cast = ' + JSON.stringify(cast, null, 1).replace(/\n/g, '\n  ') + ';',
   '})();',
   ''
 ].join('\n');

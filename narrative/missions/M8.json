@@ -708,6 +708,11 @@
           }
         },
         {
+          "id": "m8.b0.leland_taxi.chiusura.p01",
+          "mode": "action",
+          "text": "(Norma gira il cartello sulla porta e spegne l'insegna. Sedie sui tavoli, cappotti dagli attaccapanni: il Double R chiude alle sei, stasera si va al Roadhouse.)"
+        },
+        {
           "id": "m8.b0.leland_taxi.p02",
           "mode": "notebook",
           "text": "Prima del Roadhouse, al diner: Leland dice di aver prenotato il taxi di Maddy."

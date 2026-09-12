@@ -1,0 +1,1792 @@
+{
+ "version": "cast-continuity-v0.1",
+ "source": "artifacts/world-character-audit/cast-windows-acts-1-4.md §4 (V5 pin tables) — test truth, never runtime data",
+ "expect_grammar": "\"<map>@<x>,<y>\" | \"<map>\" | \"OFFSCREEN\" | \"OFFSCREEN:<label>\" | \"TERMINAL_REMOVED\"; every registry character must be listed (no implicit baseline in a pin)",
+ "seeds": {
+  "ACT1_TOWN": {
+   "flags": {},
+   "values": {},
+   "evidence": {},
+   "nodes_done": {},
+   "props": {}
+  },
+  "ACT2_DAY2": {
+   "flags": {
+    "sogno_fatto": true
+   },
+   "values": {},
+   "evidence": {},
+   "nodes_done": {},
+   "props": {}
+  },
+  "ACT3_BRIDGE": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true
+   },
+   "values": {},
+   "evidence": {},
+   "nodes_done": {},
+   "props": {}
+  },
+  "ACT3_TRAINCAR_REPORT": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration"
+   },
+   "evidence": {},
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT3_NORTH_CUT": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional"
+   },
+   "evidence": {},
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m5_report_intro": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT3_OEJ": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional"
+   },
+   "evidence": {},
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT3_OEJ_AUDREY_SEEN": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "audrey_vista_oej": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional"
+   },
+   "evidence": {},
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_audrey": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT3_OEJ_NO_AUDREY": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional"
+   },
+   "evidence": {},
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT3_AFTER_ARREST": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_admitted_presence": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "m6_tactic": "prova"
+   },
+   "evidence": {},
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT3_GUARDED_HOSPITAL": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_admitted_presence": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "m6_tactic": "prova"
+   },
+   "evidence": {},
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT3_NIGHT_STATION": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "jacques_admitted_presence": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "m6_tactic": "prova"
+   },
+   "evidence": {},
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT4_AFTERNOON": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "jacques_admitted_presence": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "m6_tactic": "prova"
+   },
+   "evidence": {},
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT4_PROMISE_MADE": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "jacques_admitted_presence": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "promise_stance": "prudenza",
+    "m6_tactic": "prova"
+   },
+   "evidence": {},
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m8_diner": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT4_EVENING_GATHERING": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "jacques_admitted_presence": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "promise_stance": "prudenza",
+    "m6_tactic": "prova"
+   },
+   "evidence": {
+    "T_LELAND_TAXI": true
+   },
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m8_diner": true,
+    "m8_leland_taxi": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT4_ROADHOUSE_PRE_PHONE": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "jacques_admitted_presence": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "promise_stance": "prudenza",
+    "presagio_status": "active",
+    "m6_tactic": "prova"
+   },
+   "evidence": {
+    "T_LELAND_TAXI": true
+   },
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m8_diner": true,
+    "m8_leland_taxi": true,
+    "m8_roadhouse_truman": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT4_POST_PHONE_INSIDE_PALMER": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "jacques_admitted_presence": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "promise_stance": "prudenza",
+    "presagio_status": "active",
+    "warning_target": "palmer",
+    "sarah_support_state": "none",
+    "maddy_action_after_warning": "none",
+    "m6_tactic": "prova"
+   },
+   "evidence": {
+    "T_LELAND_TAXI": true
+   },
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m8_diner": true,
+    "m8_leland_taxi": true,
+    "m8_roadhouse_truman": true,
+    "m8_roadhouse_phone": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT4_POST_PHONE_INSIDE_CENTRALE": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "jacques_admitted_presence": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "promise_stance": "prudenza",
+    "presagio_status": "active",
+    "warning_target": "centrale",
+    "sarah_support_state": "vice",
+    "maddy_action_after_warning": "none",
+    "m6_tactic": "prova"
+   },
+   "evidence": {
+    "T_LELAND_TAXI": true
+   },
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m8_diner": true,
+    "m8_leland_taxi": true,
+    "m8_roadhouse_truman": true,
+    "m8_roadhouse_phone": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT4_POST_PHONE_INSIDE_NESSUNO": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "jacques_admitted_presence": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "promise_stance": "prudenza",
+    "presagio_status": "active",
+    "warning_target": "nessuno",
+    "sarah_support_state": "none",
+    "maddy_action_after_warning": "none",
+    "m6_tactic": "prova"
+   },
+   "evidence": {
+    "T_LELAND_TAXI": true
+   },
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m8_diner": true,
+    "m8_leland_taxi": true,
+    "m8_roadhouse_truman": true,
+    "m8_roadhouse_phone": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT4_ROUTE_PALMER": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "jacques_admitted_presence": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "promise_stance": "prudenza",
+    "presagio_status": "active",
+    "warning_target": "palmer",
+    "sarah_support_state": "none",
+    "maddy_action_after_warning": "none",
+    "focus_destination": "palmer",
+    "m6_tactic": "prova"
+   },
+   "evidence": {
+    "T_LELAND_TAXI": true
+   },
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m8_diner": true,
+    "m8_leland_taxi": true,
+    "m8_roadhouse_truman": true,
+    "m8_roadhouse_phone": true,
+    "m8_focus_choice": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT4_ROUTE_DINER": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "jacques_admitted_presence": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "promise_stance": "prudenza",
+    "presagio_status": "active",
+    "warning_target": "nessuno",
+    "sarah_support_state": "none",
+    "maddy_action_after_warning": "none",
+    "focus_destination": "diner",
+    "m6_tactic": "prova"
+   },
+   "evidence": {
+    "T_LELAND_TAXI": true
+   },
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m8_diner": true,
+    "m8_leland_taxi": true,
+    "m8_roadhouse_truman": true,
+    "m8_roadhouse_phone": true,
+    "m8_focus_choice": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT4_ROUTE_LAKE": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "jacques_admitted_presence": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "promise_stance": "prudenza",
+    "presagio_status": "active",
+    "warning_target": "centrale",
+    "sarah_support_state": "vice",
+    "maddy_action_after_warning": "none",
+    "focus_destination": "lago",
+    "m6_tactic": "prova"
+   },
+   "evidence": {
+    "T_LELAND_TAXI": true
+   },
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m8_diner": true,
+    "m8_leland_taxi": true,
+    "m8_roadhouse_truman": true,
+    "m8_roadhouse_phone": true,
+    "m8_focus_choice": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT4_SHORE_HAWK": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "maddy_trovata": true,
+    "jacques_admitted_presence": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "promise_stance": "prudenza",
+    "presagio_status": "active",
+    "warning_target": "palmer",
+    "sarah_support_state": "none",
+    "maddy_action_after_warning": "none",
+    "focus_destination": "palmer",
+    "body_found_by": "hawk",
+    "m6_tactic": "prova"
+   },
+   "evidence": {
+    "T_LELAND_TAXI": true
+   },
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m8_diner": true,
+    "m8_leland_taxi": true,
+    "m8_roadhouse_truman": true,
+    "m8_roadhouse_phone": true,
+    "m8_focus_choice": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT4_SHORE_COOPER_AFTER": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "maddy_trovata": true,
+    "jacques_admitted_presence": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "promise_stance": "prudenza",
+    "presagio_status": "active",
+    "warning_target": "centrale",
+    "sarah_support_state": "vice",
+    "maddy_action_after_warning": "none",
+    "focus_destination": "lago",
+    "body_found_by": "cooper",
+    "m6_tactic": "prova"
+   },
+   "evidence": {
+    "T_LELAND_TAXI": true
+   },
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m8_diner": true,
+    "m8_leland_taxi": true,
+    "m8_roadhouse_truman": true,
+    "m8_roadhouse_phone": true,
+    "m8_focus_choice": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  },
+  "ACT4_STATION_BEFORE_DAWN": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "maddy_trovata": true,
+    "jacques_admitted_presence": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "promise_stance": "prudenza",
+    "presagio_status": "active",
+    "warning_target": "palmer",
+    "sarah_support_state": "none",
+    "maddy_action_after_warning": "none",
+    "focus_destination": "palmer",
+    "body_found_by": "hawk",
+    "m6_tactic": "prova"
+   },
+   "evidence": {
+    "T_LELAND_TAXI": true
+   },
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m8_diner": true,
+    "m8_leland_taxi": true,
+    "m8_roadhouse_truman": true,
+    "m8_roadhouse_phone": true,
+    "m8_focus_choice": true,
+    "m8_station": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    }
+   }
+  }
+ },
+ "pins": [
+  {
+   "id": "ACT1_TOWN",
+   "seed": "ACT1_TOWN",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "sheriff@12,8",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "OFFSCREEN",
+    "maddy": "OFFSCREEN",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "OFFSCREEN:not_met",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "oej@7,5",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "OFFSCREEN",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT2_DAY2",
+   "seed": "ACT2_DAY2",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "sheriff@12,8",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "OFFSCREEN",
+    "maddy": "OFFSCREEN",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "diner@9,6",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "oej@7,5",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "OFFSCREEN",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT3_BRIDGE",
+   "seed": "ACT3_BRIDGE",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "traincar@5,6",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "OFFSCREEN",
+    "maddy": "OFFSCREEN",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "diner@9,6",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "oej@7,5",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "OFFSCREEN",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT3_TRAINCAR_REPORT",
+   "seed": "ACT3_TRAINCAR_REPORT",
+   "expect": {
+    "truman": "traincar@9,8",
+    "hawk": "traincar@14,8",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "OFFSCREEN",
+    "maddy": "OFFSCREEN",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "diner@9,6",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "oej@7,5",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "OFFSCREEN",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT3_NORTH_CUT",
+   "seed": "ACT3_NORTH_CUT",
+   "expect": {
+    "truman": "traincar@9,8",
+    "hawk": "traincar@22,3",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "OFFSCREEN",
+    "maddy": "OFFSCREEN",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "diner@9,6",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "oej@7,5",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "OFFSCREEN",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT3_OEJ",
+   "seed": "ACT3_OEJ",
+   "expect": {
+    "truman": "traincar@9,8",
+    "hawk": "oej@6,8",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "OFFSCREEN",
+    "maddy": "OFFSCREEN",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "diner@9,6",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "oej@13,7",
+    "jacques": "oej@7,5",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "OFFSCREEN",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT3_OEJ_AUDREY_SEEN",
+   "seed": "ACT3_OEJ_AUDREY_SEEN",
+   "expect": {
+    "truman": "OFFSCREEN:boat",
+    "hawk": "oej@6,8",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "OFFSCREEN",
+    "maddy": "OFFSCREEN",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "diner@9,6",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "oej@7,5",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "OFFSCREEN",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT3_OEJ_NO_AUDREY",
+   "seed": "ACT3_OEJ_NO_AUDREY",
+   "expect": {
+    "truman": "traincar@9,8",
+    "hawk": "oej@6,8",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "OFFSCREEN",
+    "maddy": "OFFSCREEN",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "diner@9,6",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "oej@7,5",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "OFFSCREEN",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT3_AFTER_ARREST",
+   "seed": "ACT3_AFTER_ARREST",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "OFFSCREEN:escort",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "OFFSCREEN",
+    "maddy": "OFFSCREEN",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "diner@9,6",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "OFFSCREEN:guarded",
+    "giant": "OFFSCREEN",
+    "piantone": "hospital@7,3",
+    "piantone_ronette": "OFFSCREEN",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT3_GUARDED_HOSPITAL",
+   "seed": "ACT3_GUARDED_HOSPITAL",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "sheriff@12,8",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "OFFSCREEN",
+    "maddy": "OFFSCREEN",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "diner@9,6",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "OFFSCREEN:guarded",
+    "giant": "OFFSCREEN",
+    "piantone": "hospital@7,3",
+    "piantone_ronette": "OFFSCREEN",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT3_NIGHT_STATION",
+   "seed": "ACT3_NIGHT_STATION",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "sheriff@12,8",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "OFFSCREEN",
+    "maddy": "OFFSCREEN",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "diner@9,6",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT4_AFTERNOON",
+   "seed": "ACT4_AFTERNOON",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "sheriff@12,8",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "diner@11,1",
+    "maddy": "diner@10,1",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "diner@9,6",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT4_PROMISE_MADE",
+   "seed": "ACT4_PROMISE_MADE",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "sheriff@12,8",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "diner@11,1",
+    "maddy": "diner@10,1",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "diner@9,6",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT4_EVENING_GATHERING",
+   "seed": "ACT4_EVENING_GATHERING",
+   "expect": {
+    "truman": "roadhouse@4,8",
+    "hawk": "OFFSCREEN:patrol",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "OFFSCREEN:hidden",
+    "maddy": "OFFSCREEN:home",
+    "norma": "roadhouse@5,6",
+    "shelly": "roadhouse@3,6",
+    "loglady": "roadhouse@2,6",
+    "james": "roadhouse@2,4",
+    "bobby": "roadhouse@3,4",
+    "donna": "roadhouse@5,4",
+    "jacoby": "OFFSCREEN:home",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT4_ROADHOUSE_PRE_PHONE",
+   "seed": "ACT4_ROADHOUSE_PRE_PHONE",
+   "expect": {
+    "truman": "roadhouse@4,8",
+    "hawk": "OFFSCREEN:patrol",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "OFFSCREEN:asleep",
+    "leland": "OFFSCREEN:hidden",
+    "maddy": "OFFSCREEN:home",
+    "norma": "roadhouse@5,6",
+    "shelly": "roadhouse@3,6",
+    "loglady": "roadhouse@2,6",
+    "james": "roadhouse@2,4",
+    "bobby": "roadhouse@3,4",
+    "donna": "roadhouse@5,4",
+    "jacoby": "OFFSCREEN:home",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "roadhouse@8,1",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT4_POST_PHONE_INSIDE_PALMER",
+   "seed": "ACT4_POST_PHONE_INSIDE_PALMER",
+   "expect": {
+    "truman": "roadhouse@4,8",
+    "hawk": "OFFSCREEN:patrol",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "OFFSCREEN:asleep",
+    "leland": "OFFSCREEN:hidden",
+    "maddy": "OFFSCREEN:home",
+    "norma": "roadhouse@5,6",
+    "shelly": "roadhouse@3,6",
+    "loglady": "roadhouse@2,6",
+    "james": "roadhouse@2,4",
+    "bobby": "roadhouse@3,4",
+    "donna": "roadhouse@5,4",
+    "jacoby": "OFFSCREEN:home",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT4_POST_PHONE_INSIDE_CENTRALE",
+   "seed": "ACT4_POST_PHONE_INSIDE_CENTRALE",
+   "expect": {
+    "truman": "roadhouse@4,8",
+    "hawk": "OFFSCREEN:patrol",
+    "lucy": "sheriff@2,6",
+    "andy": "OFFSCREEN:with_sarah",
+    "sarah": "OFFSCREEN:asleep",
+    "leland": "OFFSCREEN:hidden",
+    "maddy": "OFFSCREEN:home",
+    "norma": "roadhouse@5,6",
+    "shelly": "roadhouse@3,6",
+    "loglady": "roadhouse@2,6",
+    "james": "roadhouse@2,4",
+    "bobby": "roadhouse@3,4",
+    "donna": "roadhouse@5,4",
+    "jacoby": "OFFSCREEN:home",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT4_POST_PHONE_INSIDE_NESSUNO",
+   "seed": "ACT4_POST_PHONE_INSIDE_NESSUNO",
+   "expect": {
+    "truman": "roadhouse@4,8",
+    "hawk": "OFFSCREEN:patrol",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "OFFSCREEN:asleep",
+    "leland": "OFFSCREEN:hidden",
+    "maddy": "OFFSCREEN:home",
+    "norma": "roadhouse@5,6",
+    "shelly": "roadhouse@3,6",
+    "loglady": "roadhouse@2,6",
+    "james": "roadhouse@2,4",
+    "bobby": "roadhouse@3,4",
+    "donna": "roadhouse@5,4",
+    "jacoby": "OFFSCREEN:home",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT4_ROUTE_PALMER",
+   "seed": "ACT4_ROUTE_PALMER",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "OFFSCREEN:patrol",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "OFFSCREEN:asleep",
+    "leland": "OFFSCREEN:hidden",
+    "maddy": "OFFSCREEN:home",
+    "norma": "diner@5,2",
+    "shelly": "OFFSCREEN:home",
+    "loglady": "OFFSCREEN:home",
+    "james": "OFFSCREEN:home",
+    "bobby": "OFFSCREEN:home",
+    "donna": "OFFSCREEN:home",
+    "jacoby": "OFFSCREEN:home",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT4_ROUTE_DINER",
+   "seed": "ACT4_ROUTE_DINER",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "OFFSCREEN:patrol",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "OFFSCREEN:asleep",
+    "leland": "OFFSCREEN:hidden",
+    "maddy": "OFFSCREEN:home",
+    "norma": "diner@5,2",
+    "shelly": "OFFSCREEN:home",
+    "loglady": "OFFSCREEN:home",
+    "james": "OFFSCREEN:home",
+    "bobby": "OFFSCREEN:home",
+    "donna": "OFFSCREEN:home",
+    "jacoby": "OFFSCREEN:home",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT4_ROUTE_LAKE",
+   "seed": "ACT4_ROUTE_LAKE",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "OFFSCREEN:patrol",
+    "lucy": "sheriff@2,6",
+    "andy": "OFFSCREEN:with_sarah",
+    "sarah": "OFFSCREEN:asleep",
+    "leland": "OFFSCREEN:hidden",
+    "maddy": "OFFSCREEN:home",
+    "norma": "diner@5,2",
+    "shelly": "OFFSCREEN:home",
+    "loglady": "OFFSCREEN:home",
+    "james": "OFFSCREEN:home",
+    "bobby": "OFFSCREEN:home",
+    "donna": "OFFSCREEN:home",
+    "jacoby": "OFFSCREEN:home",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT4_SHORE_HAWK",
+   "seed": "ACT4_SHORE_HAWK",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "town@16,27",
+    "lucy": "sheriff@2,6",
+    "andy": "OFFSCREEN:with_sarah",
+    "sarah": "OFFSCREEN:asleep",
+    "leland": "OFFSCREEN:hidden",
+    "maddy": "TERMINAL_REMOVED",
+    "norma": "diner@5,2",
+    "shelly": "OFFSCREEN:home",
+    "loglady": "OFFSCREEN:home",
+    "james": "OFFSCREEN:home",
+    "bobby": "OFFSCREEN:home",
+    "donna": "OFFSCREEN:home",
+    "jacoby": "OFFSCREEN:home",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT4_SHORE_COOPER_AFTER",
+   "seed": "ACT4_SHORE_COOPER_AFTER",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "town@16,27",
+    "lucy": "sheriff@2,6",
+    "andy": "OFFSCREEN:with_sarah",
+    "sarah": "OFFSCREEN:asleep",
+    "leland": "OFFSCREEN:hidden",
+    "maddy": "TERMINAL_REMOVED",
+    "norma": "diner@5,2",
+    "shelly": "OFFSCREEN:home",
+    "loglady": "OFFSCREEN:home",
+    "james": "OFFSCREEN:home",
+    "bobby": "OFFSCREEN:home",
+    "donna": "OFFSCREEN:home",
+    "jacoby": "OFFSCREEN:home",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT4_STATION_BEFORE_DAWN",
+   "seed": "ACT4_STATION_BEFORE_DAWN",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "town@16,27",
+    "lucy": "sheriff@2,6",
+    "andy": "OFFSCREEN:with_sarah",
+    "sarah": "OFFSCREEN:asleep",
+    "leland": "OFFSCREEN:hidden",
+    "maddy": "TERMINAL_REMOVED",
+    "norma": "diner@5,2",
+    "shelly": "OFFSCREEN:home",
+    "loglady": "OFFSCREEN:home",
+    "james": "OFFSCREEN:home",
+    "bobby": "OFFSCREEN:home",
+    "donna": "OFFSCREEN:home",
+    "jacoby": "OFFSCREEN:home",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  }
+ ]
+}
