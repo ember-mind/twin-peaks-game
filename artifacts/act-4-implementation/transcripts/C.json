@@ -1284,9 +1284,7 @@
         30,
         "down"
       ],
-      "npcs": [
-        "jacoby@16,25"
-      ]
+      "npcs": []
     },
     {
       "map": "double_r_exterior_prototype",
@@ -1315,7 +1313,7 @@
       "map": "double_r_exterior_prototype",
       "at": [
         6,
-        7,
+        8,
         "down"
       ],
       "npcs": []
@@ -1328,7 +1326,6 @@
         "down"
       ],
       "npcs": [
-        "jacoby@16,25",
         "hawk_shore_first@16,27"
       ]
     },

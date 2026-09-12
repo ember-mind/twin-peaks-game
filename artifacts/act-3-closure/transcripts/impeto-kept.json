@@ -2244,6 +2244,14 @@
       ]
     },
     {
+      "kind": "delta",
+      "delta": {
+        "flags": [
+          "gigante1"
+        ]
+      }
+    },
+    {
       "kind": "objective",
       "text": "Riferisci a Truman ciò che hai visto nella 315.",
       "where": "dopo l'interazione"
@@ -2387,7 +2395,7 @@
     {
       "map": "traincar",
       "at": [
-        2,
+        1,
         7,
         "right"
       ],

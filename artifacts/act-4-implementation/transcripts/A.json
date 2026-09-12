@@ -333,9 +333,9 @@
       "kind": "press",
       "at": [
         "diner",
-        10,
-        1,
-        "right"
+        11,
+        2,
+        "up"
       ]
     },
     {
@@ -928,9 +928,7 @@
             "m8_roadhouse_truman"
           ]
         },
-        "npcs": [
-          "jacoby@16,25"
-        ],
+        "npcs": [],
         "saved": {
           "narrative": true,
           "classic": true,
@@ -979,9 +977,7 @@
             "m8_roadhouse_truman"
           ]
         },
-        "npcs": [
-          "jacoby@16,25"
-        ]
+        "npcs": []
       }
     },
     {
@@ -999,9 +995,9 @@
       "kind": "press",
       "at": [
         "palmer",
-        7,
-        10,
-        "right"
+        8,
+        9,
+        "down"
       ]
     },
     {
@@ -1601,15 +1597,13 @@
         30,
         "down"
       ],
-      "npcs": [
-        "jacoby@16,25"
-      ]
+      "npcs": []
     },
     {
       "map": "palmer",
       "at": [
         7,
-        10,
+        9,
         "up"
       ],
       "npcs": []
@@ -1622,7 +1616,6 @@
         "down"
       ],
       "npcs": [
-        "jacoby@16,25",
         "hawk_shore_first@16,27"
       ]
     },
@@ -1684,6 +1677,6 @@
     }
   ],
   "console_errors": [
-    "Failed to load resource: the server responded with a status of 404 (File not found)  <http://127.0.0.1:20934/favicon.ico>"
+    "Failed to load resource: the server responded with a status of 404 (File not found)  <http://127.0.0.1:23431/favicon.ico>"
   ]
 }

@@ -18,11 +18,11 @@ testo dal DOM, obiettivo HUD in quel momento. Stato di partenza: fine Atto 3
 | diner | 6,8,up | norma@5,2 · shelly@9,7 · loglady@4,5 · james@9,6 · maddy@10,1 · leland@11,1 |
 | town | 47,29,up | bobby@31,16 · donna@44,10 · jacoby@16,25 |
 | roadhouse | 7,8,up | truman@4,8 · bobby@3,4 · donna@5,4 · james@2,4 · shelly@3,6 · norma@5,6 · loglady@2,6 |
-| town | 47,30,down | jacoby@16,25 |
+| town | 47,30,down | (nessuno) |
 | double_r_exterior_prototype | 6,9,up | (nessuno) |
 | diner | 6,8,up | norma@5,2 · shelly@9,7 · loglady@4,5 · james@9,6 |
-| double_r_exterior_prototype | 6,7,down | (nessuno) |
-| town | 42,22,down | jacoby@16,25 · hawk_shore_first@16,27 |
+| double_r_exterior_prototype | 6,8,down | (nessuno) |
+| town | 42,22,down | hawk_shore_first@16,27 |
 | sheriff | 11,4,left | truman@10,4 · andy@10,7 · hawk@12,8 · lucy@2,6 |
 
 ## Sequenza

@@ -7,7 +7,7 @@ testo dal DOM, obiettivo HUD in quel momento. Stato di partenza: fine Atto 3
 
 ## Errori di console
 
-- Failed to load resource: the server responded with a status of 404 (File not found)  <http://127.0.0.1:20934/favicon.ico>
+- Failed to load resource: the server responded with a status of 404 (File not found)  <http://127.0.0.1:23431/favicon.ico>
 
 ## Osservazioni del driver
 
@@ -24,9 +24,9 @@ testo dal DOM, obiettivo HUD in quel momento. Stato di partenza: fine Atto 3
 | diner | 6,8,up | norma@5,2 · shelly@9,7 · loglady@4,5 · james@9,6 · maddy@10,1 · leland@11,1 |
 | town | 47,29,up | bobby@31,16 · donna@44,10 · jacoby@16,25 |
 | roadhouse | 7,8,up | truman@4,8 · bobby@3,4 · donna@5,4 · james@2,4 · shelly@3,6 · norma@5,6 · loglady@2,6 |
-| town | 47,30,down | jacoby@16,25 |
-| palmer | 7,10,up | (nessuno) |
-| town | 42,8,down | jacoby@16,25 · hawk_shore_first@16,27 |
+| town | 47,30,down | (nessuno) |
+| palmer | 7,9,up | (nessuno) |
+| town | 42,8,down | hawk_shore_first@16,27 |
 | sheriff | 11,4,left | truman@10,4 · andy@10,7 · hawk@12,8 · lucy@2,6 |
 
 ## Sequenza
@@ -76,7 +76,7 @@ lei non deve difendersi.
 - `m8.a.diner.feedback.accompagno` [m8_diner] **MADDY** — (sorride) Alle 7:10, agente. Io i federali li faccio aspettare al massimo cinque minuti.
 - _stato_: {"values":{"promise_stance":"accompagno"}}
 - _obiettivo (dopo l'avanzamento)_: Prima di uscire dal diner, parla con Leland.
-- _tasto A_ @diner 10,1 right
+- _tasto A_ @diner 11,2 up
 
 > **HUD:** Prima di uscire dal diner, parla con Leland.
 
@@ -148,11 +148,11 @@ lei non deve difendersi.
 
 > **SALVA + RICARICA** — town 47,30 → town 47,30
 > obiettivo prima: «Torna all’incrocio: casa Palmer, lago o diner.» · dopo: «Torna all’incrocio: casa Palmer, lago o diner.»
-> entità prima: jacoby@16,25 · dopo: jacoby@16,25
+> entità prima: (nessuna) · dopo: (nessuna)
 > valori dopo: {"promise_stance":"accompagno","presagio_status":"active","warning_target":"palmer","maddy_action_after_warning":"departure_prepared","sarah_support_state":"none","focus_destination":"palmer"}
 
 - **porta** town → palmer
-- _tasto A_ @palmer 7,10 right
+- _tasto A_ @palmer 8,9 down
 - `m8.c.route_palmer.p01` [m8_route_palmer] _(scena)_ — (La casa: buio al piano di sopra.)
 - `m8.c.route_palmer.p02` [m8_route_palmer] _(scena)_ — (In ingresso, la valigia. Sotto la porta di Sarah, un biglietto: "Torno lunedì. Non svegliarla." Di Maddy, nessuna traccia.)
 - `m8.c.route_palmer.p03` [m8_route_palmer] _(scena)_ — (Il telefono squilla: è la centrale.)

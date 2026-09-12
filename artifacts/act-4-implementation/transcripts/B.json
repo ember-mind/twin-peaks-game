@@ -358,6 +358,14 @@
       ]
     },
     {
+      "kind": "delta",
+      "delta": {
+        "flags": [
+          "sarah_visione_ascoltata"
+        ]
+      }
+    },
+    {
       "kind": "objective",
       "text": "Il paese si ritrova al Roadhouse, stasera.",
       "where": "dopo l'interazione"
@@ -1402,9 +1410,7 @@
         30,
         "down"
       ],
-      "npcs": [
-        "jacoby@16,25"
-      ]
+      "npcs": []
     },
     {
       "map": "sheriff",

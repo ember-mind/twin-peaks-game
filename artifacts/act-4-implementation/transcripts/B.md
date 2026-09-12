@@ -19,7 +19,7 @@ testo dal DOM, obiettivo HUD in quel momento. Stato di partenza: fine Atto 3
 | palmer | 7,10,up | sarah@9,7 |
 | town | 47,29,up | bobby@31,16 · donna@44,10 · jacoby@16,25 |
 | roadhouse | 7,8,up | truman@4,8 · bobby@3,4 · donna@5,4 · james@2,4 · shelly@3,6 · norma@5,6 · loglady@2,6 |
-| town | 47,30,down | jacoby@16,25 |
+| town | 47,30,down | (nessuno) |
 | sheriff | 11,4,left | truman@10,4 · andy@10,7 · hawk@12,8 · lucy@2,6 |
 
 ## Sequenza
@@ -78,6 +78,7 @@ sorriso che vedo quando / SARAH: chiudo gli occhi. / SARAH: Ha un nome, so che c
 l'ha. Mi arriva fino ai / SARAH: denti e poi- / COOPER: Signora Palmer, descriva
 ancora il sorriso. / COOPER: Questa volta io scrivo e
 lei non deve difendersi.
+- _stato_: {"flags":["sarah_visione_ascoltata"]}
 - _obiettivo (dopo l'interazione)_: Il paese si ritrova al Roadhouse, stasera.
 - _viaggio_ → town 47,29,up (viaggio: davanti al Roadhouse)
 - **porta** town → roadhouse

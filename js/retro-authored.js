@@ -435,6 +435,7 @@
   ];
 
   function pixelCrownLobe(ctx, cx, cy, rx, ry, tones, phase) {
+    if (GAME.Diorama && GAME.Diorama.crown(ctx, cx, cy, rx, ry, tones, phase)) return;
     var row, dy, ratio, half, left, span;
     for (row = -ry; row <= ry; row++) {
       dy = row / Math.max(1, ry);
@@ -725,8 +726,8 @@
     var heightLift = ((phase >>> 1) % 7) - 3;
     var top = rootY - spec.h - heightLift;
     var tones = back
-      ? ['#315a49','#3e725b','#639b72','#80b878','#9aab69']
-      : ['#24382f','#315a49','#3e725b','#639b72','#80b878'];
+      ? ['#294c40','#406e49','#6b9254','#a1b66b','#c6ce89']
+      : ['#192f2c','#2e5138','#507744','#83a454','#b4c773'];
     /* Nel passaggio depth, chioma/tronco vengono ridisegnati sopra attori
      * arretrati. Ombra di contatto resta nel passaggio terreno: ridisegnarla
      * sopra piedi/personaggi produrrebbe una macchia semitrasparente falsa. */
@@ -749,6 +750,21 @@
     /* Nucleo interno fonde giunti fra lobi: corona unica, non grappolo. */
     var blend = [tones[1], tones[2], tones[3], tones[3], tones[4]];
     pixelCrownLobe(ctx, cx, rootY - Math.round(spec.h * .52), 8, 8, blend, phase + 23);
+    // Needle clusters follow each lobe's volume, with a warm upper-left rim.
+    // Stable world seeds avoid sparkling texture when the camera moves.
+    for (var li = 0; li < spec.lobes.length; li++) {
+      var leaf = spec.lobes[li];
+      for (var ni = 0; ni < 12; ni++) {
+        var seed = hash(salt + li * 19, ni, 907);
+        var nx = (seed & 255) / 255 * 1.6 - .8;
+        var ny = ((seed >>> 8) & 255) / 255 * 1.4 - .7;
+        if (nx * nx + ny * ny > .75) continue;
+        var lx = cx + leaf[0] + nx * leaf[2];
+        var ly = top + leaf[1] + ny * leaf[3];
+        R(ctx, lx, ly, 2, 1, nx + ny < -.15 ? tones[4] : tones[2]);
+        if (ni % 3 === 0) R(ctx, lx + 1, ly + 1, 1, 2, tones[1]);
+      }
+    }
     /* Base intenzionalmente asimmetrica: due masse di diversa taglia e quota
      * spezzano la cadenza di cerchi gemelli. */
     pixelCrownLobe(ctx, cx - 6, rootY - 14, 5 + (phase & 1), 5, tones, phase + 29);
@@ -1145,7 +1161,8 @@
   function tree(ctx, x, y, tx, ty, rows, sycamore, night, paleGround) {
     /* Tile BG 2bpp credibile: un solo colore terreno + tre colori chioma.
      * Tronco condivide outline; niente seconda palette di erba sotto. */
-    if (paleGround) arrivalGround(ctx, x, y, tx, ty);
+    if (paleGround && GAME.Diorama) GAME.Diorama.surface(ctx, '.', x, y, tx, ty, rows, false);
+    else if (paleGround) arrivalGround(ctx, x, y, tx, ty);
     else R(ctx, x, y, 16, 16, night ? '#7770a8' : C.grass);
     /* Town costruisce alberi completi nel passaggio macro/depth. Lasciare qui
      * un tronco per ogni cella T separava tronchi e chiome, perché ancore macro
@@ -1874,6 +1891,10 @@
   /* Superfici cittadine: deriva macro 80–96px, valori vicini e confini
    * organici 1–3px. Nessuna zona rettangolare o checkerboard tile. */
   function townGround(ctx, x, y, tx, ty, rows) {
+    if (GAME.Diorama && GAME.Diorama.surface(ctx, '.', x, y, tx, ty, rows, false)) {
+      groundShadow(ctx, x, y, tx, ty, rows);
+      return;
+    }
     var base = townGrassFieldTone(tx, ty);
     R(ctx, x, y, 16, 16, base);
     var macroX = ((tx % 6) + 6) % 6, macroY = ((ty % 5) + 5) % 5;
@@ -2756,6 +2777,17 @@
     if (w >= 48) softPixelShadow(g, x + Math.round(w * .66), y + h + 3,
       shadowB, 4, HG.shadowDark, HG.shadow);
     R(g, x, y, w, h, p[2]);
+    // Weathered horizontal timber: recessed joints, warm upper edges and
+    // irregular grain remain behind all authored windows, signs and doors.
+    for (var sidingY = 4; sidingY < h - 5; sidingY += 4) {
+      R(g, x + 2, y + sidingY, w - 4, 1, shade(p[2], -18));
+      R(g, x + 2, y + sidingY + 1, w - 4, 1, shade(p[2], 8));
+      for (var grainX = 5; grainX < w - 8; grainX += 13) {
+        var grain = hash(grainX, sidingY, w * 17 + h);
+        R(g, x + grainX, y + sidingY + 2, 3 + (grain & 3), 1,
+          shade(p[2], (grain & 4) ? -9 : 12));
+      }
+    }
     /* Pannelli midtone larghi ma bassi: spezzano la facciata senza creare
      * nuove finestre o competere con porte e insegne specifiche. */
     var panelW = Math.max(9, Math.round(w * .25));
@@ -2813,6 +2845,17 @@
      * landmark senza dipendere dal viewport. */
     var materialSeed = parseInt(String(p[0] || '').replace('#', ''), 16) || 0;
     var layoutSeed = (salt ^ materialSeed ^ Math.imul(w, 131) ^ Math.imul(h, 313)) >>> 0;
+    // Overlapping courses give the roof a material scale distinct from walls.
+    // Inset follows the gable silhouette so texture cannot escape the roof.
+    for (var course = 6; course < h - 3; course += 3) {
+      var roofInset = Math.max(4, Math.ceil((1 - course / h) * Math.min(26, w * .28)));
+      for (var shingle = roofInset + ((course & 1) ? 2 : 0); shingle < w - roofInset - 5; shingle += 6) {
+        var wear = hash(shingle, course, layoutSeed);
+        R(g, x + shingle, top + course, 5, 1, shade(p[0], 12 + (wear & 7)));
+        R(g, x + shingle + 5, top + course, 1, 3, shade(p[0], -23));
+        R(g, x + shingle, top + course + 2, 5, 1, shade(p[0], -15));
+      }
+    }
     var clusters = 3 + (hash(w, h, layoutSeed) & 1);
     for (var ci = 0; ci < clusters; ci++) {
       var v = hash(ci, w + h, layoutSeed + ci * 37);
@@ -3093,6 +3136,16 @@
     R(g, x + 5, y - 23, 42, 22, C.ink);
     R(g, x + 6, y - 22, 40, 20, '#dcd9a9');
     R(g, x + 8, y - 20, 36, 16, '#9aab69');
+    // Weathered painted cedar: grain stays behind the lettering.
+    R(g, x + 6, y - 22, 40, 1, '#eee1af');
+    R(g, x + 45, y - 21, 1, 19, '#605b3b');
+    R(g, x + 8, y - 4, 36, 1, '#68744b');
+    for (var grain = 0; grain < 6; grain++) {
+      R(g, x + 9 + grain % 3, y - 19 + grain * 2.5, 31 - grain % 4, .5, 'rgba(49,65,38,.18)');
+    }
+    [[7,-21],[44,-21],[7,-3],[44,-3]].forEach(function (bolt) {
+      R(g, x + bolt[0], y + bolt[1], 1, 1, '#545746');
+    });
     townTinyWord(g, 'TWIN', x + 15, y - 20, C.ink);
     townTinyWord(g, 'PEAKS', x + 12, y - 12, C.ink);
     R(g, x + 7, y + 15, 6, 2, C.ink); R(g, x + 8, y + 15, 4, 1, '#9aab69');
@@ -6802,6 +6855,7 @@
   }
 
   var dinerActorLightCanvas=null;
+  var outdoorActorLightCanvas=null;
   function drawCastWalkSheet(ctx, name, x, y, dir, frame, alpha, moving, environment) {
     var castIndex = CAST_SHEET_ORDER.indexOf(name);
     if (castIndex < 0 || !castWalkSheet || !castWalkSheet.complete || castWalkSheet.naturalWidth !== 360 || castWalkSheet.naturalHeight !== 360 || !ctx.drawImage) return false;
@@ -6817,6 +6871,26 @@
     if (idleFrame && idleFrame.actor === name && idleFrame.direction === (dir === 'left' ? 'right' : dir) &&
         lifeSheet && lifeSheet.complete && lifeSheet.naturalWidth === 192 && lifeSheet.naturalHeight === 24) {
       source=lifeSheet; sx=idleFrame.x; sy=0;
+    }
+    if(environment && (environment.mapId==='town' || environment.mapId==='woods') && typeof document!=='undefined') {
+      if(!outdoorActorLightCanvas) {
+        outdoorActorLightCanvas=document.createElement('canvas');
+        outdoorActorLightCanvas.width=24; outdoorActorLightCanvas.height=24;
+      }
+      var daylight=outdoorActorLightCanvas.getContext('2d');
+      if(daylight && daylight.createLinearGradient) {
+        daylight.clearRect(0,0,24,24); daylight.imageSmoothingEnabled=false;
+        daylight.drawImage(source,sx,sy,24,24,0,0,24,24);
+        daylight.globalCompositeOperation='source-atop';
+        // Light follows world direction even when the atlas is mirrored.
+        var keylight=daylight.createLinearGradient(dir==='left'?24:0,0,dir==='left'?0:24,20);
+        keylight.addColorStop(0,environment.mapId==='woods'?'rgba(173,205,217,.28)':'rgba(255,225,163,.38)');
+        keylight.addColorStop(.48,'rgba(214,224,207,.08)');
+        keylight.addColorStop(1,'rgba(18,37,50,.13)');
+        daylight.fillStyle=keylight; daylight.fillRect(0,0,24,24);
+        daylight.globalCompositeOperation='source-over';
+        source=outdoorActorLightCanvas; sx=0; sy=0;
+      }
     }
     if(environment && environment.mapId==='diner' && typeof document!=='undefined') {
       var warmth=interiorActorLight(environment.wx,environment.wy);

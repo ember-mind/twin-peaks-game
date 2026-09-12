@@ -43,8 +43,8 @@
    * atterrano sull'ardesia #485665 misurata sul lotto.
    * ------------------------------------------------------------------ */
   var KNEE = 60, SHOULDER = 215, FLOOR = 30;
-  var MID_GAIN = 0.375, HI_GAIN = 1.45;
-  var A_KNEE = 50, A_MID_GAIN = 0.24, A_HI_GAIN = 2.30;
+  var MID_GAIN = 0.94, HI_GAIN = 1.08;
+  var A_KNEE = 50, A_MID_GAIN = 0.78, A_HI_GAIN = 1.12;
   var SLATE = [72, 86, 101];       /* #485665 — ardesia del lotto Double R */
   var VEG_ANCHOR = [47, 77, 59];   /* #2f4d3b — arbusto del lotto */
   var MIN_CHANNEL = 20;            /* mai nero pieno; contorni ~#1a1f1f */
@@ -53,8 +53,8 @@
    * compresso; cool = quota di miscela verso l'ardesia; anchor = quota di
    * miscela verso l'ancora di famiglia. */
   var FAMILY = {
-    ground:     { id: 'ground', keep: 0.44, dark: 1.00, cool: 0.10, anchor: null, anchorMix: 0 },
-    vegetation: { id: 'vegetation', keep: 0.80, dark: 0.70, cool: 0.00, anchor: VEG_ANCHOR, anchorMix: 0.25 },
+    ground:     { id: 'ground', keep: 0.88, dark: 1.00, cool: 0.04, anchor: null, anchorMix: 0 },
+    vegetation: { id: 'vegetation', keep: 1.00, dark: 0.95, cool: 0.00, anchor: VEG_ANCHOR, anchorMix: 0.06 },
     warm:       { id: 'warm', keep: 1.00, dark: 1.00, cool: 0.06, anchor: null, anchorMix: 0 },
     blue:       { id: 'blue', keep: 0.70, dark: 1.00, cool: 0.10, anchor: null, anchorMix: 0 }
   };
@@ -437,6 +437,20 @@
       if (!sctx) return originalForeground.apply(this, arguments);
       originalForeground.call(this, sctx, map, cx, cy, opts);
       gradeRect(sctx, 0, y0, w, y1 - y0, true);
+      // Canopies retain depth while the controlled actor remains legible.
+      // Only foreground vegetation is cut away, never collision or scenery.
+      var player = GAME.Engine && GAME.Engine.state && GAME.Engine.state.player;
+      if (player && sctx.createRadialGradient) {
+        var px = player.x + 8 - cx, py = player.y + 3 - cy;
+        var cutout = sctx.createRadialGradient(px, py, 8, px, py, 22);
+        cutout.addColorStop(0, 'rgba(0,0,0,.92)');
+        cutout.addColorStop(1, 'rgba(0,0,0,0)');
+        sctx.save();
+        sctx.globalCompositeOperation = 'destination-out';
+        sctx.fillStyle = cutout;
+        sctx.fillRect(px - 22, py - 22, 44, 44);
+        sctx.restore();
+      }
       ctx.drawImage(scratch, 0, y0, w, y1 - y0, 0, y0, w, y1 - y0);
     };
     return true;

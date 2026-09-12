@@ -1008,11 +1008,13 @@
     if (GAME.Retro2D && GAME.Retro2D.limitBackgroundPalettes) {
       GAME.Retro2D.limitBackgroundPalettes(g, cx, cy, vw, vh, S.mapId);
     }
+    if (GAME.Diorama) GAME.Diorama.groundLight(g, S.map, cx, cy, vw, vh, tGlobal);
     var entities = entityList();
     if (GAME.AmbientLife) GAME.AmbientLife.draw(g,S.mapId,cx,cy,-Infinity,entities.length?entities[0].wy+TILE:Infinity);
     if (GAME.EnvironmentReactions) GAME.EnvironmentReactions.draw(g,S.mapId,cx,cy,-Infinity,entities.length?entities[0].wy+TILE:Infinity);
     entities.forEach(function (e, index) {
       var pal = GAME.Sprites.CHARS[e.sprite] || GAME.Sprites.CHARS.cooper;
+      if (GAME.Diorama) GAME.Diorama.actorGround(g, S.map, e, cx, cy, tGlobal);
       GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, pal, e.dir, e.fr, e.alpha, e.moving, S.mapId === 'woods', tGlobal, {mapId:S.mapId,wx:e.wx,wy:e.wy,npcId:e.id,characterLife:GAME.CharacterActivity&&GAME.CharacterActivity.actorPose?GAME.CharacterActivity.actorPose(e.id):null});
       /* Painter's algorithm completo. Alberi erano tutti nel ground pass,
        * quindi Cooper compariva davanti anche quando suoi piedi erano a nord
@@ -1034,6 +1036,7 @@
         if (GAME.EnvironmentReactions) GAME.EnvironmentReactions.draw(g,S.mapId,cx,cy,footY,nextFootY);
       }
     });
+    if (GAME.Diorama) GAME.Diorama.atmosphere(g, S.map, cx, cy, vw, vh, tGlobal);
   }
 
   // camera con easing verso il centro del giocatore
@@ -1046,7 +1049,7 @@
      * il volume intero invece di tagliarne il tetto. Due tile verso nord,
      * uno sugli altri assi; nessun cambio a coordinate o collisioni. */
     if (!S.dialogue && !map.indoor) {
-      if (p.dir === 'up' && mh > vh) tyy = clamp(tyy - 40, 0, mh - vh);
+      if (p.dir === 'up' && mh > vh) tyy = clamp(tyy - 24, 0, mh - vh);
       else if (p.dir === 'down' && mh > vh) tyy = clamp(tyy + 16, 0, mh - vh);
       if (p.dir === 'left' && mw > vw) txx = clamp(txx - 16, 0, mw - vw);
       else if (p.dir === 'right' && mw > vw) txx = clamp(txx + 16, 0, mw - vw);
