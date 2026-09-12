@@ -157,7 +157,14 @@
      var sc = kindCounts(scene);
    ok(sid + ' render-plan per-kind counts match source (' + sc.exit + '/' + sc.object + '/' + sc.npc + ')',
       pc.exit === sc.exit && pc.object === sc.object && pc.npc === sc.npc);
-     // M3: picking the center pixel of a real exit selects that exact overlay.
+      // M2 spawn markers are a SEPARATE pass and must NOT alter the overlay per-kind counts above.
+   var sp = WBUI.planSpawns(snap, sid);
+  ok(sid + ' planSpawns returns an array of endpoint markers', Array.isArray(sp));
+     if (sid === 'diner') {
+    var bEnd = sp.filter(function (s) { return s.which === 'b' && s.id === 'double-r-front-entrance'; })[0];
+       ok("planSpawns('diner') has double-r-front-entrance B@(6,8)/up", !!bEnd && bEnd.tx === 6 && bEnd.ty === 8 && bEnd.dir === 'up');
+     }
+      // M3: picking the center pixel of a real exit selects that exact overlay.
     var exit = plan.markers.filter(function (m) { return m.kind === 'exit'; })[0];
      if (exit) {
       var z = Math.max(4, Math.floor((360 - 12) / scene.width));

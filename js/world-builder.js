@@ -34,9 +34,25 @@
     function planScene(scene) {
       if (!scene) return { width: 0, height: 0, markers: [] };
        var order = { object: 0, npc: 1, exit: 2 }; // paint objects first so npcs/exits sit on top.
-      var markers = scene.overlays.slice().sort(function (a, b) { return (order[a.kind] || 0) - (order[b.kind] || 0); });
-      return { width: scene.width, height: scene.height, indoor: !!scene.indoor, markers: markers };
-     }
+          var markers = scene.overlays.slice().sort(function (a, b) { return (order[a.kind] || 0) - (order[b.kind] || 0); });
+         return { width: scene.width, height: scene.height, indoor: !!scene.indoor, markers: markers };
+        }
+
+       // Connection-endpoint spawn markers for a scene, SEPARATE from tile overlays so the M2 overlay-count
+       // test stays exact: an endpoint "lands" on this scene when its connection.a/b.scene === sceneId.
+        // Pure + node-testable; drawn as a diamond+label on top of the grid in renderScene.
+      function planSpawns(snap, sceneId) {
+       var out = [];
+       (snap.connections || []).forEach(function (c) {
+         ['a', 'b'].forEach(function (which) {
+          var e = c[which];
+          if (!e || e.scene !== sceneId || !e.spawn) return;
+           out.push({ which: which, id: c.id, tx: e.spawn.tx, ty: e.spawn.ty, dir: e.spawn.dir });
+            });
+             });
+         return out.sort(function (x, y) { return x.which < y.which ? -1 : 1; });
+          }
+
 
   function mount() {
     var snapshot = WB.buildWorldSnapshot(WB.collectWorldSource(window.GAME));
@@ -119,17 +135,35 @@
     for (var y = 0; y <= sc.height; y++) { ctx.beginPath(); ctx.moveTo(0, y * zoom + .5); ctx.lineTo(canvas.width, y * zoom + .5); ctx.stroke(); }
 
      // overlays via the pure planScene() so paint order is identical to what the node test checks.
-    planScene(sc).markers.forEach(function (o) {
+      planScene(sc).markers.forEach(function (o) {
       drawOverlay(ctx, o, zoom, selected === o);
-       });
+        });
+
+       // connection-endpoint spawn markers for THIS scene: a diamond + A/B label at each landing tile.
+    planSpawns(snapshot, sceneId).forEach(function (s) {
+     var cx = s.tx * zoom + zoom / 2, cy = s.ty * zoom + zoom / 2, r = Math.max(4, zoom * 0.38);
+      ctx.save();
+     ctx.fillStyle = 'rgba(255,120,200,0.85)';
+      ctx.strokeStyle = '#ff78c8'; ctx.lineWidth = 1;
+      ctx.beginPath();
+       ctx.moveTo(cx, cy - r); ctx.lineTo(cx + r, cy); ctx.lineTo(cx, cy + r); ctx.lineTo(cx - r, cy); ctx.closePath();
+      ctx.fill(); ctx.stroke();
+     ctx.fillStyle = '#fff'; ctx.font = 'bold ' + Math.max(8, zoom * 0.7) + 'px monospace';
+       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(s.which.toUpperCase(), cx, cy);
+       ctx.restore();
+        });
+
 
      // legend + status reflect what is actually on screen.
    var counts = countByKind(sc.overlays);
-   status.textContent = sc.sceneId + '  ·  ' + sc.width + '×' + sc.height + (sc.indoor ? ' (interior)' : '') +
-      '  ·  exits:' + counts.exit + '  objects:' + counts.object + '  npcs:' + counts.npc;
-   legend.innerHTML = '<span style="color:#5ec8ff">■</span> exit → target   ' +
-     '<span style="color:#e6b84a">●</span> object/region   ' +
-     '<span style="color:#7ee07e">▲</span> npc';
+   var spawns = planSpawns(snapshot, sceneId);
+   status.textContent = sc.sceneId + '    ·    ' + sc.width + '×' + sc.height + (sc.indoor ? ' (interior)' : '') +
+        '    ·  exits:' + counts.exit + '  objects:' + counts.object + '  npcs:' + counts.npc + '  spawns:' + spawns.length;
+    legend.innerHTML = '<span style="color:#5ec8ff">■</span> exit → target      ' +
+       '<span style="color:#e6b84a">●</span> object/region      ' +
+        '<span style="color:#7ee07e">▲</span> npc      ' +
+         '<span style="color:#ff78c8">◆</span> connection spawn (A/B)';
    }
 
     function drawOverlay(ctx, o, zoom, isSel) {
@@ -235,7 +269,7 @@
     else boot();
    }
 
-  var api = { mount: mount, planScene: planScene };
+  var api = { mount: mount, planScene: planScene, planSpawns: planSpawns };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
    if (typeof window !== 'undefined') { window.GAME = window.GAME || {}; window.GAME.WorldBuilder = api; }
 })();
