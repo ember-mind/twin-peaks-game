@@ -1,3 +1,5 @@
 .gauntlet/
 .vite/
 artifacts/visual-audit/**
+.DS_Store
+.phi/
