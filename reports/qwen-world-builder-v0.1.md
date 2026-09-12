@@ -27,12 +27,14 @@ world-engine bootstrap, then renders it read-only on a canvas.
 | `test/world-builder.js` | Node test (**44 checks**, no jsdom/canvas): loads the real chain via tolerant bootstrap, asserts discovery + per-scene overlay accuracy + M2 render-plan + M3 click-select over three distinct locations, plus the read-only/inert guards. |
 
 ## Verification
-- `node test/world-builder.js` → **WORLD-BUILDER-PASS 44/44**.
-  - **M1:** all 7 catalog locations discovered; `double-r` = {exterior, diner}, `sheriffs-station` =
-    {interior, exterior}, `great-northern` / `hospital` (no connections), `town` single-env.
-  - **M2:** render-plan per-kind counts equal the source overlay counts for **three distinct scenes**:
+- `node test/world-builder.js` → **WORLD-BUILDER-PASS 48/48**.
+   - **M1:** all 7 catalog locations discovered; `double-r` = {exterior, diner}, `sheriffs-station` =
+     {interior, exterior}, `great-northern` / `hospital` (no connections), `town` single-env.
+   - **M2:** render-plan per-kind counts equal the source overlay counts for **three distinct scenes**:
     town interior-exterior **9 exits / 7 objects / 3 npcs**, diner **2/0/4** (indoor), sheriff **2/0/5**
-    (interior 16×12, 5 npcs). One marker per overlay, in the documented paint order.
+     (interior 16×12, 5 npcs). One marker per overlay, in the documented paint order. Connection-endpoint
+    spawn markers are a *separate* `planSpawns` pass (diamond+A/B label) and do not perturb these counts;
+     it asserts `planSpawns('diner')` carries `double-r-front-entrance` B@(6,8)/up.
   - **M3:** clicking the center pixel of a real exit selects that exact overlay on each of the three scenes.
   - **Connection resolution:** `double-r-front-entrance` resolves to b = `diner` spawn **(6,8) dir up**;
     a-endpoint is the exterior with triggers on row 6.
