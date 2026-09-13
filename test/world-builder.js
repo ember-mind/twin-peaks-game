@@ -42,6 +42,8 @@
   ].forEach(tryReq);
   req('world-engine.js');
   req('world-catalog.js');
+  // Cast Presence: baseline bodies for the npc overlay
+  ['narrative-runtime.js','narrative-data.gen.js','cast-presence.js'].forEach(tryReq);
 
   var WB = req('world-builder-data.js');
   var CO = req('world-builder-coords.js');
@@ -75,11 +77,16 @@
   ok('real core scenes present', ['town','diner','sheriff','traincar','oej','room_315','hospital'].every(function (s) { return !!snap.scenes[s]; }));
 
    // ---- M2 overlay accuracy: counts match the live source exactly ----
+  // Cast Presence: the npc overlay source is the authored baseline cast of the scene
+  function npcSource(map) {
+    var id = null; Object.keys(G.Maps).forEach(function (k) { if (G.Maps[k] === map) id = k; });
+    return (G.CastPresence && G.NarrativeData && G.NarrativeData.cast && id) ? G.CastPresence.bodiesFor(id, null) : (map.npcs || []);
+  }
   function countByKind(map, kind) {
     var n = 0;
     if (kind === 'exit') n += Object.keys(map.doors || {}).length;
     else if (kind === 'object') n += (map.objects || []).length;
-    else if (kind === 'npc') n += (map.npcs || []).length;
+    else if (kind === 'npc') n += npcSource(map).length;
     return n;
   }
   ['town','diner','sheriff'].forEach(function (s) {
@@ -88,8 +95,9 @@
     ok(s + ' object overlay count matches source', s1.overlays.filter(function (o) { return o.kind === 'object'; }).length === countByKind(G.Maps[s], 'object'));
     ok(s + ' npc overlay count matches source', s1.overlays.filter(function (o) { return o.kind === 'npc'; }).length === countByKind(G.Maps[s], 'npc'));
   });
-  ok('sheriff is interior 16x12 with 5 npcs', snap.scenes.sheriff.indoor && snap.scenes.sheriff.width === 16 && snap.scenes.sheriff.height === 12 &&
-    snap.scenes.sheriff.overlays.filter(function (o) { return o.kind === 'npc'; }).length === 5);
+  // baseline sheriff cast = truman, andy, hawk, lucy (Leland is a story window, atto5)
+  ok('sheriff is interior 16x12 with 4 npcs', snap.scenes.sheriff.indoor && snap.scenes.sheriff.width === 16 && snap.scenes.sheriff.height === 12 &&
+    snap.scenes.sheriff.overlays.filter(function (o) { return o.kind === 'npc'; }).length === 4);
 
    // ---- M3 connection normalization: a real paired exit resolves both endpoints ----
   var front = null;

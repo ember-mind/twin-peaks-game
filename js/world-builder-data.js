@@ -60,7 +60,8 @@
   // Each overlay carries only real fields plus a canonical {kind, tx, ty} the renderer /
   // hit-test rely on. w/h default to 1 so single-tile objects and multi-tile landmarks share
   // the same shape; landmark regions (town waterfall/cemetery) keep their real w/h.
-  function sceneOverlays(map) {
+  function sceneOverlays(map, sceneId) {
+    var G = (typeof window !== 'undefined' && window.GAME) || (typeof globalThis !== 'undefined' && globalThis.GAME) || {};
     var overlays = [];
 
     Object.keys(map.doors || {}).forEach(function (key) {
@@ -89,7 +90,16 @@
         }));
     });
 
-    (map.npcs || []).forEach(function (n) {
+    // Cast Presence v0.1 (2026-09-13): named-character bodies are no longer map
+    // data (js/glue.js NPCS is empty). The builder shows the authored BASELINE
+    // cast of the scene (GAME.CastPresence.bodiesFor(scene, null)); story
+    // windows are not previewed here. Falls back to map.npcs when the resolver
+    // or its data is not loaded.
+    var castBodies = null;
+    try {
+      if (G.CastPresence && G.NarrativeData && G.NarrativeData.cast) castBodies = G.CastPresence.bodiesFor(sceneId, null);
+    } catch (e) { castBodies = null; }
+    (castBodies || map.npcs || []).forEach(function (n) {
       overlays.push(freezeDeep({
         kind: 'npc',
         id: n.id || null,
@@ -124,7 +134,7 @@
      // would make the back-fills below (locationId / overlayCount) throw in strict mode.
     sceneIds.forEach(function (sceneId) {
       var map = maps[sceneId];
-      var overlays = sceneOverlays(map);
+      var overlays = sceneOverlays(map, sceneId);
       scenesById[sceneId] = {
         sceneId: sceneId,
         name: humanize(sceneId),
