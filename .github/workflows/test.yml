@@ -1,0 +1,26 @@
+# WORLD BUILDER / core regression gate (Issue 10).
+# Runs the pure node test suites that back the World Builder v0.1 PR plus the two project-wide
+# gates. No browser, no build step: each checked file is a plain `node test/<name>.js` that
+# exits non-zero on failure. Node 24 to match the local dev target (the fixtures rely on the
+# Node-24 read-only `navigator` global; older runtimes are tolerated by the try/catch shims).
+name: tests
+
+on:
+  push:
+    branches: [main, 'qwen/*']
+  pull_request:
+
+jobs:
+  node-tests:
+    runs-on: ubuntu-latest
+    steps:
+       - uses: actions/checkout@v4
+       - uses: actions/setup-node@v4
+         with:
+           node-version: '24'
+       - name: World Builder data + UI layer (M1-M3)
+         run: node test/world-builder.js
+       - name: Project smoke gate
+         run: node test/smoke.js
+       - name: Project walkthrough gate
+         run: node test/walkthrough.js
