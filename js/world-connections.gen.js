@@ -280,36 +280,36 @@
           "scene": "town",
           "triggers": [
             [
-              22,
-              0
+              55,
+              14
+            ],
+            [
+              55,
+              15
             ]
           ],
           "spawn": {
-            "tx": 22,
-            "ty": 1,
-            "dir": "down"
+            "tx": 54,
+            "ty": 14,
+            "dir": "left"
           },
           "door": {
             "needsFlag": "atto3",
-            "blockedMsg": "train_bloccato"
+            "blockedMsg": "est_bloccato"
           }
         },
         "b": {
           "scene": "traincar",
           "triggers": [
             [
-              14,
-              5
-            ],
-            [
-              15,
-              5
+              0,
+              7
             ]
           ],
           "spawn": {
-            "tx": 14,
-            "ty": 6,
-            "dir": "up"
+            "tx": 1,
+            "ty": 7,
+            "dir": "right"
           }
         }
       },
@@ -337,17 +337,17 @@
           "scene": "oej",
           "triggers": [
             [
-              13,
-              6
+              7,
+              9
             ],
             [
-              14,
-              6
+              8,
+              9
             ]
           ],
           "spawn": {
-            "tx": 13,
-            "ty": 7,
+            "tx": 8,
+            "ty": 8,
             "dir": "up"
           }
         }

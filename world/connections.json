@@ -1,41 +1,343 @@
 {
- "version": 1,
- "source": "Canonical location-connection registry. Generated from the seven authored records that previously lived in js/{double-r,sheriffs-station,room-315,traincar}-location-data.js. Human-edited source of truth; js/world-connections.gen.js is GENERATED from this file by test/gen-world-data.js (never edited by hand). A record has a paired a/b endpoint; each endpoint names its scene, trigger tiles [[x,y],...], and an arrival spawn {tx,ty,dir}. Optional endpoint.door {needsFlag,blockedMsg} gates the door. Records sorted by id for a stable order.",
- "connections": [
-   {
-    "id": "double-r-front-entrance",
-    "a": {"scene": "double_r_exterior_prototype", "triggers": [[6, 6], [7, 6]], "spawn": {"tx": 6, "ty": 7, "dir": "down"}},
-    "b": {"scene": "diner", "triggers": [[6, 9], [7, 9]], "spawn": {"tx": 6, "ty": 8, "dir": "up"}, "departureReaction": "front-door"}
-   },
-   {
-    "id": "great-northern-room-315-hall",
-    "a": {"scene": "room_315", "triggers": [[7, 11]], "spawn": {"tx": 7, "ty": 10, "dir": "up"}},
-    "b": {"scene": "hotel_gn", "triggers": [[14, 1]], "spawn": {"tx": 14, "ty": 2, "dir": "down"}}
-   },
-   {
-    "id": "sheriffs-station-front-entrance",
-    "a": {"scene": "sheriffs_station_exterior", "triggers": [[7, 6], [8, 6]], "spawn": {"tx": 7, "ty": 7, "dir": "down"}},
-    "b": {"scene": "sheriff", "triggers": [[7, 11], [8, 11]], "spawn": {"tx": 7, "ty": 10, "dir": "up"}}
-   },
-   {
-    "id": "town-double-r-lot",
-    "a": {"scene": "town", "triggers": [[42, 20]], "spawn": {"tx": 42, "ty": 21, "dir": "down"}},
-    "b": {"scene": "double_r_exterior_prototype", "triggers": [[2, 11], [3, 11], [4, 11], [5, 11], [6, 11], [7, 11], [8, 11], [9, 11], [10, 11], [11, 11], [12, 11], [13, 11]], "spawn": {"tx": 6, "ty": 10, "dir": "up"}}
-   },
-   {
-    "id": "town-sheriffs-station-lot",
-    "a": {"scene": "town", "triggers": [[12, 20]], "spawn": {"tx": 12, "ty": 21, "dir": "down"}},
-    "b": {"scene": "sheriffs_station_exterior", "triggers": [[2, 11], [3, 11], [4, 11], [5, 11], [6, 11], [7, 11], [8, 11], [9, 11], [10, 11], [11, 11], [12, 11], [13, 11]], "spawn": {"tx": 7, "ty": 10, "dir": "up"}}
-   },
-   {
-    "id": "town-traincar-east",
-    "a": {"scene": "town", "triggers": [[22, 0]], "spawn": {"tx": 22, "ty": 1, "dir": "down"}, "door": {"needsFlag": "atto3", "blockedMsg": "train_bloccato"}},
-    "b": {"scene": "traincar", "triggers": [[14, 5], [15, 5]], "spawn": {"tx": 14, "ty": 6, "dir": "up"}}
-   },
-   {
-    "id": "traincar-oej-entrance",
-    "a": {"scene": "traincar", "triggers": [[21, 0]], "spawn": {"tx": 21, "ty": 1, "dir": "down"}, "door": {"needsFlag": "east_route_confirmed", "blockedMsg": "oej_bloccato"}},
-    "b": {"scene": "oej", "triggers": [[13, 6], [14, 6]], "spawn": {"tx": 13, "ty": 7, "dir": "up"}}
-   }
+  "version": 1,
+  "connections": [
+    {
+      "id": "double-r-front-entrance",
+      "a": {
+        "scene": "double_r_exterior_prototype",
+        "triggers": [
+          [
+            6,
+            6
+          ],
+          [
+            7,
+            6
+          ]
+        ],
+        "spawn": {
+          "tx": 6,
+          "ty": 7,
+          "dir": "down"
+        }
+      },
+      "b": {
+        "scene": "diner",
+        "triggers": [
+          [
+            6,
+            9
+          ],
+          [
+            7,
+            9
+          ]
+        ],
+        "spawn": {
+          "tx": 6,
+          "ty": 8,
+          "dir": "up"
+        },
+        "departureReaction": "front-door"
+      }
+    },
+    {
+      "id": "great-northern-room-315-hall",
+      "a": {
+        "scene": "room_315",
+        "triggers": [
+          [
+            7,
+            11
+          ]
+        ],
+        "spawn": {
+          "tx": 7,
+          "ty": 10,
+          "dir": "up"
+        }
+      },
+      "b": {
+        "scene": "hotel_gn",
+        "triggers": [
+          [
+            14,
+            1
+          ]
+        ],
+        "spawn": {
+          "tx": 14,
+          "ty": 2,
+          "dir": "down"
+        }
+      }
+    },
+    {
+      "id": "sheriffs-station-front-entrance",
+      "a": {
+        "scene": "sheriffs_station_exterior",
+        "triggers": [
+          [
+            7,
+            6
+          ],
+          [
+            8,
+            6
+          ]
+        ],
+        "spawn": {
+          "tx": 7,
+          "ty": 7,
+          "dir": "down"
+        }
+      },
+      "b": {
+        "scene": "sheriff",
+        "triggers": [
+          [
+            7,
+            11
+          ],
+          [
+            8,
+            11
+          ]
+        ],
+        "spawn": {
+          "tx": 7,
+          "ty": 10,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "town-double-r-lot",
+      "a": {
+        "scene": "town",
+        "triggers": [
+          [
+            42,
+            20
+          ]
+        ],
+        "spawn": {
+          "tx": 42,
+          "ty": 21,
+          "dir": "down"
+        }
+      },
+      "b": {
+        "scene": "double_r_exterior_prototype",
+        "triggers": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            11
+          ],
+          [
+            4,
+            11
+          ],
+          [
+            5,
+            11
+          ],
+          [
+            6,
+            11
+          ],
+          [
+            7,
+            11
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            9,
+            11
+          ],
+          [
+            10,
+            11
+          ],
+          [
+            11,
+            11
+          ],
+          [
+            12,
+            11
+          ],
+          [
+            13,
+            11
+          ]
+        ],
+        "spawn": {
+          "tx": 6,
+          "ty": 10,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "town-sheriffs-station-lot",
+      "a": {
+        "scene": "town",
+        "triggers": [
+          [
+            12,
+            20
+          ]
+        ],
+        "spawn": {
+          "tx": 12,
+          "ty": 21,
+          "dir": "down"
+        }
+      },
+      "b": {
+        "scene": "sheriffs_station_exterior",
+        "triggers": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            11
+          ],
+          [
+            4,
+            11
+          ],
+          [
+            5,
+            11
+          ],
+          [
+            6,
+            11
+          ],
+          [
+            7,
+            11
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            9,
+            11
+          ],
+          [
+            10,
+            11
+          ],
+          [
+            11,
+            11
+          ],
+          [
+            12,
+            11
+          ],
+          [
+            13,
+            11
+          ]
+        ],
+        "spawn": {
+          "tx": 7,
+          "ty": 10,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "town-traincar-east",
+      "a": {
+        "scene": "town",
+        "triggers": [
+          [
+            55,
+            14
+          ],
+          [
+            55,
+            15
+          ]
+        ],
+        "spawn": {
+          "tx": 54,
+          "ty": 14,
+          "dir": "left"
+        },
+        "door": {
+          "needsFlag": "atto3",
+          "blockedMsg": "est_bloccato"
+        }
+      },
+      "b": {
+        "scene": "traincar",
+        "triggers": [
+          [
+            0,
+            7
+          ]
+        ],
+        "spawn": {
+          "tx": 1,
+          "ty": 7,
+          "dir": "right"
+        }
+      }
+    },
+    {
+      "id": "traincar-oej-entrance",
+      "a": {
+        "scene": "traincar",
+        "triggers": [
+          [
+            21,
+            0
+          ]
+        ],
+        "spawn": {
+          "tx": 21,
+          "ty": 1,
+          "dir": "down"
+        },
+        "door": {
+          "needsFlag": "east_route_confirmed",
+          "blockedMsg": "oej_bloccato"
+        }
+      },
+      "b": {
+        "scene": "oej",
+        "triggers": [
+          [
+            7,
+            9
+          ],
+          [
+            8,
+            9
+          ]
+        ],
+        "spawn": {
+          "tx": 8,
+          "ty": 8,
+          "dir": "up"
+        }
+      }
+    }
   ]
 }
