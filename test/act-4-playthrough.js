@@ -187,6 +187,7 @@ async function main() {
     fs.writeFileSync(path.join(TX_DIR, 'assertions.json'),
       JSON.stringify({ results, observations: notesOut, console_errors: consoleErrors.slice(0, 80) }, null, 2));
     if (notesOut.length) console.log('\nosservazioni: ' + JSON.stringify(notesOut));
+    writeCastPresenceArtifacts();
 
     const failed = results.filter((r) => !r.pass);
     console.log(`\nact-4-playthrough: ${results.length - failed.length}/${results.length} assertions passed`);
@@ -226,7 +227,10 @@ function ev(cdp) {
     raw: (expr) => cdp.evaluate(expr),
     call,
     boot: () => call('return await A4.boot();'),
-    seed: () => call('return await A4.seed();'),
+    // il seme è il pin ACT4_AFTERNOON della fixture (storia intera fino alla
+    // soglia dell'Atto 4, raggiungibile): il set minimo di confine usato prima
+    // lasciava finestre di M5/M6 in overlap (CastPresence OVERLAP su hawk).
+    seed: () => call(`return await A4.seed(${J(CAST_FIXTURE.seeds.ACT4_AFTERNOON)});`),
     reload: () => call('return await A4.reload();'),
     travel: (m, x, y, d, why) => call(`return await A4.travel(${J(m)},${x},${y},${J(d)},${J(why || '')});`),
     walkTo: (x, y) => call(`var r = await A4.walkTo(${x},${y}); return { ok: r, diag: A4.walkDiag(), pos: A4.pos() };`),
@@ -257,6 +261,9 @@ function ev(cdp) {
     worldTarget: (m, id) => cdp.evaluate(`A4.worldTarget(${J(m)},${J(id)})`),
     entityDefs: (m) => cdp.evaluate(`A4.entityDefs(${J(m)})`),
     entityDef: (m, id) => cdp.evaluate(`A4.entityDef(${J(m)},${J(id)})`),
+    castWhere: () => cdp.evaluate('A4.castWhere()'),
+    castResolve: (id) => cdp.evaluate(`A4.castResolve(${J(id)})`),
+    bodiesOn: (m) => cdp.evaluate(`A4.bodiesOn(${J(m)})`),
     doorAt: (m, x, y) => cdp.evaluate(`A4.doorAt(${J(m)},${x},${y})`),
     doorsOf: (m) => cdp.evaluate(`A4.doorsOf(${J(m)})`),
     isSolid: (m, x, y) => cdp.evaluate(`A4.isSolid(${J(m)},${x},${y})`),
@@ -264,6 +271,7 @@ function ev(cdp) {
     classicFlags: () => cdp.evaluate('A4.classicFlags()'),
     widgetOpts: () => cdp.evaluate('A4.widgetOpts()'),
     savedNow: () => cdp.evaluate('A4.savedNow()'),
+    savedRaw: () => cdp.evaluate('A4.savedRaw()'),
     dump: () => cdp.evaluate('A4.dump()'),
     note: (t, d) => cdp.evaluate(`A4.note(${J(t)},${J(d === undefined ? null : d)})`),
     reset: () => cdp.evaluate('A4.reset()'),
@@ -350,6 +358,103 @@ const PATHS = {
     shots: false
   }
 };
+/* --------------------- Cast Continuity: pin comparator --------------------- */
+/* Verità di prova (mai dati di produzione):
+   test/fixtures/cast-pins-acts-1-4.json §4 (tabelle pin V5). Ogni "seme" della
+   fixture NON è lo stato reale del percorso giocato: è uno stato sintetico
+   costruito per validare il resolver. Un pin si applica a un momento reale
+   solo quando le combinazioni di valori che contano per la collocazione
+   (warning_target, focus_destination, body_found_by — mai promise_stance: nessuna
+   finestra del registro la legge) coincidono; altrimenti si cattura lo
+   scatto senza confrontarlo (nessun pin adatto), ma si controlla comunque
+   che nessuna mappa viva abbia due corpi con lo stesso id. */
+const CAST_FIXTURE = JSON.parse(fs.readFileSync(path.join(ROOT, 'test', 'fixtures', 'cast-pins-acts-1-4.json'), 'utf8'));
+const castCaptures = [];   // { path, moment, pinId, snapshot, mismatches } per gli artefatti
+const reloadResults = [];  // { path, moment, digestEqual, castEqual, saveLeaks } per il report salva+ricarica
+function parseActualPresence(s) {
+  let m;
+  if ((m = /^PLACED@([a-z0-9_]+) (-?\d+),(-?\d+) (\w+) \[(.*)\]$/i.exec(s || ''))) return { status: 'PLACED', map: m[1], x: Number(m[2]), y: Number(m[3]), dir: m[4], source: m[5] };
+  if ((m = /^OFFSCREEN\(([^)]*)\) \[(.*)\]$/.exec(s || ''))) return { status: 'OFFSCREEN', label: m[1] || null, source: m[2] };
+  if ((m = /^TERMINAL_REMOVED\(([^)]*)\) \[(.*)\]$/.exec(s || ''))) return { status: 'TERMINAL_REMOVED', event: m[1] || null, source: m[2] };
+  return { status: 'UNKNOWN', raw: s };
+}
+function parsePinExpect(exp) {
+  if (exp === 'TERMINAL_REMOVED') return { status: 'TERMINAL_REMOVED' };
+  if (exp === 'OFFSCREEN') return { status: 'OFFSCREEN' };
+  if (exp.indexOf('OFFSCREEN:') === 0) return { status: 'OFFSCREEN', label: exp.slice('OFFSCREEN:'.length) };
+  const m = /^([a-z0-9_]+)(?:@(-?\d+),(-?\d+))?$/i.exec(exp);
+  if (!m) throw new Error('pin illeggibile: ' + exp);
+  return { status: 'PLACED', map: m[1], x: m[2] !== undefined ? Number(m[2]) : undefined, y: m[3] !== undefined ? Number(m[3]) : undefined };
+}
+function matchesPin(actual, expect) {
+  if (actual.status !== expect.status) return false;
+  if (expect.status === 'PLACED') {
+    if (expect.map !== undefined && actual.map !== expect.map) return false;
+    if (expect.x !== undefined && actual.x !== expect.x) return false;
+    if (expect.y !== undefined && actual.y !== expect.y) return false;
+  } else if (expect.status === 'OFFSCREEN' && expect.label !== undefined) {
+    if (actual.label !== expect.label) return false;
+  }
+  return true;
+}
+function pinPostPhone(opts) {
+  return { palmer: 'ACT4_POST_PHONE_INSIDE_PALMER', centrale: 'ACT4_POST_PHONE_INSIDE_CENTRALE', nessuno: 'ACT4_POST_PHONE_INSIDE_NESSUNO' }[opts.warning] || null;
+}
+function pinRoute(opts) {
+  if (opts.warning === 'palmer' && opts.focus === 'palmer') return 'ACT4_ROUTE_PALMER';
+  if (opts.warning === 'nessuno' && opts.focus === 'diner') return 'ACT4_ROUTE_DINER';
+  if (opts.warning === 'centrale' && opts.focus === 'lago') return 'ACT4_ROUTE_LAKE';
+  return null;
+}
+function pinShore(opts) {
+  if (opts.warning === 'palmer' && opts.focus === 'palmer') return 'ACT4_SHORE_HAWK';
+  if (opts.warning === 'centrale' && opts.focus === 'lago') return 'ACT4_SHORE_COOPER_AFTER';
+  return null;
+}
+function pinStation(opts) {
+  if (opts.warning === 'palmer' && opts.focus === 'palmer') return 'ACT4_STATION_BEFORE_DAWN';
+  return null;
+}
+// nessuna mappa viva ha due corpi del registro con lo stesso id
+async function assertNoDuplicateBodies(P, name, moment, cw) {
+  const maps = new Set();
+  for (const id of Object.keys(cw)) { const a = parseActualPresence(cw[id]); if (a.status === 'PLACED') maps.add(a.map); }
+  const dups = [];
+  for (const map of maps) {
+    const bodies = await P.bodiesOn(map);
+    const counts = {};
+    for (const b of bodies) counts[b.id] = (counts[b.id] || 0) + 1;
+    for (const [id, n] of Object.entries(counts)) if (n > 1) dups.push({ map, id, n });
+  }
+  check(`[${name}] presenza (${moment}): nessuna mappa viva ha due corpi con lo stesso id`, dups.length === 0, dups);
+}
+// scatto del registro Cast Continuity in un momento chiave: confronta col pin
+// (se ne esiste uno per la combinazione warning/focus/foundBy di questo
+// percorso), controlla i doppioni, e lo registra per gli artefatti.
+async function captureCast(P, name, moment, pinId) {
+  const cw = await P.castWhere();
+  const mismatches = [];
+  if (pinId) {
+    const pin = CAST_FIXTURE.pins.find((p) => p.id === pinId);
+    if (!pin) mismatches.push({ error: 'pin_not_found', pinId });
+    else {
+      for (const [id, expect] of Object.entries(pin.expect)) {
+        const actualRaw = cw[id];
+        if (actualRaw === undefined) { mismatches.push({ id, error: 'missing_from_snapshot' }); continue; }
+        const parsed = parseActualPresence(actualRaw);
+        const expObj = parsePinExpect(expect);
+        if (!matchesPin(parsed, expObj)) mismatches.push({ id, expect, actual: actualRaw });
+      }
+    }
+  }
+  check(`[${name}] presenza (${moment}): il registro combacia col pin${pinId ? ' ' + pinId : ' (nessun pin adatto: solo cattura + doppioni)'}`,
+    mismatches.length === 0, mismatches);
+  await assertNoDuplicateBodies(P, name, moment, cw);
+  await P.note('scatto registro Cast Continuity: ' + moment + (pinId ? ' (pin ' + pinId + ')' : ''), cw);
+  castCaptures.push({ path: name, moment, pinId, snapshot: cw, mismatches });
+  return cw;
+}
+
 const RETIRED_CLASSIC = ['truman_atto4', 'truman_atto5', 'lago_maddy', 'maddy_a4', 'leland_a4', 'leland_dove', 'leland_dopo', 'gerard_a4'];
 const OBJ_M8 = (() => {
   const m = JSON.parse(fs.readFileSync(path.join(ROOT, 'narrative', 'missions', 'M8.json'), 'utf8'));
@@ -399,16 +504,17 @@ async function visitLucy(P, name, phase, expectPages, forbidPages) {
 /* --------------------------------- diner --------------------------------- */
 async function playDiner(P, name, opts, shot) {
   await P.travel('diner', DINER_SPAWN[0], DINER_SPAWN[1], DINER_SPAWN[2], 'viaggio: Double R');
-  const maddyDef = await P.entityDef('diner', 'maddy');
-  const lelandDef = await P.entityDef('diner', 'leland');
+  await captureCast(P, name, 'pomeriggio al diner (prima della promessa)', 'ACT4_AFTERNOON');
+  const maddyR = await P.castResolve('maddy');
+  const lelandR = await P.castResolve('leland');
   let npcs = await P.npcsHere();
   check(`[${name}] diner: Maddy e Leland presenti al bancone prima della promessa`,
-    npcs.some((n) => n.id === 'maddy') && npcs.some((n) => n.id === 'leland'), { npcs, maddyDef, lelandDef });
-  if (maddyDef && lelandDef) {
-    const m = npcs.find((n) => n.id === 'maddy'), l = npcs.find((n) => n.id === 'leland');
-    check(`[${name}] diner: Maddy e Leland alle caselle del registro (${maddyDef.x},${maddyDef.y} / ${lelandDef.x},${lelandDef.y})`,
-      m && l && m.x === maddyDef.x && m.y === maddyDef.y && l.x === lelandDef.x && l.y === lelandDef.y, { m, l });
-  }
+    npcs.some((n) => n.id === 'maddy') && npcs.some((n) => n.id === 'leland') &&
+    maddyR.status === 'PLACED' && maddyR.sceneId === 'diner' && lelandR.status === 'PLACED' && lelandR.sceneId === 'diner',
+    { npcs, maddyR, lelandR });
+  const m = npcs.find((n) => n.id === 'maddy'), l = npcs.find((n) => n.id === 'leland');
+  check(`[${name}] diner: Maddy e Leland alle caselle del registro (${maddyR.x},${maddyR.y} / ${lelandR.x},${lelandR.y})`,
+    m && l && m.x === maddyR.x && m.y === maddyR.y && l.x === lelandR.x && l.y === lelandR.y, { m, l });
   if (shot) await shot('diner-maddy-leland.png');
 
   // Leland PRIMA della promessa: attende che Maddy finisca
@@ -430,10 +536,16 @@ async function playDiner(P, name, opts, shot) {
   let st = await P.state();
   check(`[${name}] diner: promise_stance = ${opts.promise}`, st.values.promise_stance === opts.promise, st.values);
   npcs = await P.npcsHere();
-  check(`[${name}] diner: Maddy sparisce dopo la promessa, Leland resta`,
-    !npcs.some((n) => n.id === 'maddy') && npcs.some((n) => n.id === 'leland'), npcs);
+  const maddyAfterPromise = await P.castResolve('maddy');
+  check(`[${name}] diner: Maddy resta al bancone dopo la promessa (lascia solo a T_LELAND_TAXI), Leland resta`,
+    npcs.some((n) => n.id === 'maddy') && npcs.some((n) => n.id === 'leland') &&
+    maddyAfterPromise.status === 'PLACED' && maddyAfterPromise.sceneId === 'diner', { npcs, maddyAfterPromise });
+  await captureCast(P, name, 'diner dopo la promessa', 'ACT4_PROMISE_MADE');
   const obj25 = await P.objective();
   check(`[${name}] HUD: dopo la promessa l'obiettivo è obj_m8_25`, obj25 === OBJ_M8.obj_m8_25, { got: obj25, want: OBJ_M8.obj_m8_25 });
+
+  // Log Lady: PRIMA del taxi — dopo la chiusura del Double R (T_LELAND_TAXI) è al Roadhouse (Cast Continuity D7/B1)
+  if (opts.loglady) await visitLogLady(P, name);
 
   // Leland: il taxi
   const taxi = await useActor(P, 'diner', 'leland', 'm8_leland_taxi');
@@ -445,11 +557,18 @@ async function playDiner(P, name, opts, shot) {
   st = await P.state();
   check(`[${name}] diner: T_LELAND_TAXI acquisita`, st.evidence.includes('T_LELAND_TAXI'), st.evidence);
   npcs = await P.npcsHere();
-  check(`[${name}] diner: Leland sparisce dopo la testimonianza`, !npcs.some((n) => n.id === 'leland'), npcs);
+  const maddyAfterTaxi = await P.castResolve('maddy');
+  check(`[${name}] diner: Leland e Maddy spariscono dopo la testimonianza (T_LELAND_TAXI)`,
+    !npcs.some((n) => n.id === 'leland') && !npcs.some((n) => n.id === 'maddy') &&
+    maddyAfterTaxi.status === 'OFFSCREEN' && maddyAfterTaxi.label === 'home', { npcs, maddyAfterTaxi });
   const obj1 = await P.objective();
   check(`[${name}] HUD: dopo il taxi l'obiettivo è obj_m8_1`, obj1 === OBJ_M8.obj_m8_1, { got: obj1, want: OBJ_M8.obj_m8_1 });
-
-  if (opts.loglady) await visitLogLady(P, name);
+  // Cast Continuity (B1): con la chiusura del Double R i quattro habitué sono già al Roadhouse
+  const regulars = ['norma', 'shelly', 'loglady', 'james'];
+  const regularsAfter = {};
+  for (const id of regulars) regularsAfter[id] = await P.castResolve(id);
+  check(`[${name}] diner: dopo la chiusura (T_LELAND_TAXI) Norma, Shelly, Log Lady e James sono al Roadhouse, non più al diner`,
+    regulars.every((id) => !npcs.some((n) => n.id === id) && regularsAfter[id].status === 'PLACED' && regularsAfter[id].sceneId === 'roadhouse'), { npcs, regularsAfter });
 }
 
 /* ------------------------------- Roadhouse ------------------------------- */
@@ -462,14 +581,14 @@ async function playRoadhouse(P, name, opts, shot) {
   const door = await P.enterDoor(dx, dy, dx, dy + 1);
   check(`[${name}] Roadhouse: la porta si apre con atto4`, door.ok && door.map === 'roadhouse', door);
 
-  const defs = await P.entityDefs('roadhouse');
-  const crowdIds = defs.filter((d) => d.id !== 'truman' && d.id !== 'gigante').map((d) => d.id);
-  const giantDef = defs.find((d) => d.id === 'gigante') || { x: 8, y: 1 };
+  const cwArrival = await captureCast(P, name, 'ingresso al Roadhouse (raduno serale)', 'ACT4_EVENING_GATHERING');
+  const crowdIds = Object.keys(cwArrival).filter((id) => id !== 'truman' && id !== 'giant' &&
+    parseActualPresence(cwArrival[id]).status === 'PLACED' && parseActualPresence(cwArrival[id]).map === 'roadhouse');
   let npcs = await P.npcsHere();
   const ids = npcs.map((n) => n.id);
   check(`[${name}] Roadhouse: Truman e la folla presenti all'arrivo, Gigante assente`,
-    ids.includes('truman') && crowdIds.length > 0 && crowdIds.every((c) => ids.includes(c)) && !ids.includes('gigante'),
-    { npcs: ids, crowdIds, defs });
+    ids.includes('truman') && crowdIds.length > 0 && crowdIds.every((c) => ids.includes(c)) && !ids.includes('giant'),
+    { npcs: ids, crowdIds, cast: cwArrival });
   const phone = (await P.worldTarget('roadhouse', 'roadhouse_phone')) || { x: 8, y: 5 };
   check(`[${name}] Roadhouse: nessuna entità sul telefono o sulle caselle sopra/sotto`,
     !npcs.some((n) => n.x === phone.x && Math.abs(n.y - phone.y) <= 1), { phone, npcs });
@@ -487,26 +606,43 @@ async function playRoadhouse(P, name, opts, shot) {
   check(`[${name}] Roadhouse: m8_roadhouse_truman committato`, st.nodes_done.includes('m8_roadhouse_truman'), st.nodes_done);
   await P.wait(500);
   npcs = await P.npcsHere();
-  const giant = npcs.find((n) => n.id === 'gigante');
-  check(`[${name}] Roadhouse: il Gigante è sul palco (${giantDef.x},${giantDef.y}) dopo la dichiarazione`,
-    !!giant && giant.x === giantDef.x && giant.y === giantDef.y, { giant, giantDef, npcs });
+  const giant = npcs.find((n) => n.id === 'giant');
+  const giantR = await P.castResolve('giant');
+  check(`[${name}] Roadhouse: il Gigante è sul palco (${giantR.x},${giantR.y}) dopo la dichiarazione`,
+    !!giant && giantR.status === 'PLACED' && giantR.sceneId === 'roadhouse' && giant.x === giantR.x && giant.y === giantR.y, { giant, giantR, npcs });
   const obj15 = await P.objective();
   check(`[${name}] HUD: dopo la dichiarazione il testo è esattamente «Il telefono del Roadhouse.»`,
     obj15 === 'Il telefono del Roadhouse.', obj15);
   const cf = await P.classicFlags();
   check(`[${name}] mondo: gigante2 classico derivato dalla dichiarazione`, cf.gigante2 === true, cf.gigante2);
   const sarah = await P.npcActive('palmer', 'sarah');
-  check(`[${name}] mondo: Sarah non è più a casa Palmer dopo la dichiarazione (npcActive)`, sarah.present && !sarah.active, sarah);
+  // Cast Presence: Sarah è OFFSCREEN (dorme di sopra) da presagio_status=active — nessun corpo, non un corpo spento
+  check(`[${name}] mondo: Sarah non è più a casa Palmer dopo la dichiarazione (nessun corpo: OFFSCREEN asleep)`, !sarah.present, sarah);
   const bobby = await P.npcActive('town', 'bobby'), donna = await P.npcActive('town', 'donna');
   check(`[${name}] mondo: bobby e donna assenti dalla città dopo la dichiarazione`, !bobby.active && !donna.active, { bobby, donna });
+  await captureCast(P, name, 'Roadhouse dopo la dichiarazione (pre-telefono)', 'ACT4_ROADHOUSE_PRE_PHONE');
+  if (name === 'A') {
+    const cwPreBefore = await P.castWhere();
+    const rlPre = await P.reload();
+    check(`[${name}] reload prima del telefono: registro narrativo identico`,
+      JSON.stringify(rlPre.before.digest) === JSON.stringify(rlPre.after.digest), { before: rlPre.before.digest, after: rlPre.after.digest });
+    const cwPreAfter = await captureCast(P, name, 'pre-telefono: dopo il reload', 'ACT4_ROADHOUSE_PRE_PHONE');
+    check(`[${name}] reload prima del telefono: il registro Cast Continuity è identico prima e dopo`,
+      JSON.stringify(cwPreBefore) === JSON.stringify(cwPreAfter), { before: cwPreBefore, after: cwPreAfter });
+    reloadResults.push({ path: name, moment: 'Roadhouse pre-telefono', digestEqual: JSON.stringify(rlPre.before.digest) === JSON.stringify(rlPre.after.digest), castEqual: JSON.stringify(cwPreBefore) === JSON.stringify(cwPreAfter) });
+    if (rlPre.after.map !== 'roadhouse') {
+      await P.note(`reload pre-telefono: la build ha ripristinato ${rlPre.after.map} invece del Roadhouse`, rlPre.after);
+      await P.travel('roadhouse', 7, 8, 'up', 'ritorno al Roadhouse dopo il reload pre-telefono');
+    }
+  }
 
   // il Gigante: una sola pagina, mai un secondo enunciato
-  const g1 = await useActor(P, 'roadhouse', 'gigante', 'm8_giant_stage');
+  const g1 = await useActor(P, 'roadhouse', 'giant', 'm8_giant_stage');
   if (shot) await shot('roadhouse-giant-stage.png');
   const g1Ids = pageIds(g1.rows);
   check(`[${name}] Roadhouse: il Gigante rende solo m8.b.giant.p01`,
     g1Ids.join(',') === 'm8.b.giant.p01' && !hasWidget(g1.rows) && !g1.viaApi, { got: g1Ids, viaApi: !!g1.viaApi });
-  const g2 = await useActor(P, 'roadhouse', 'gigante', 'm8_giant_stage (ripetizione)');
+  const g2 = await useActor(P, 'roadhouse', 'giant', 'm8_giant_stage (ripetizione)');
   const g2Ids = pageIds(g2.rows);
   check(`[${name}] Roadhouse: la ripetizione del Gigante non aggiunge enunciati`,
     g2Ids.length >= 1 && g2Ids.every((p) => p === 'm8.b.giant.p01' || p === 'm8.b.giant.repeat') && !hasWidget(g2.rows), g2Ids);
@@ -532,12 +668,36 @@ async function playRoadhouse(P, name, opts, shot) {
   check(`[${name}] Roadhouse: warning_target = ${opts.warning}`, st.values.warning_target === opts.warning, st.values);
   await P.wait(400);
   npcs = await P.npcsHere();
-  check(`[${name}] Roadhouse: dopo la telefonata Gigante e folla non ci sono più`,
-    !npcs.some((n) => n.id === 'gigante') && !crowdIds.some((c) => npcs.some((n) => n.id === c)), npcs.map((n) => n.id));
+  check(`[${name}] Roadhouse: dopo la telefonata il Gigante non c'è più, Truman e la folla restano (fino a focus_destination)`,
+    !npcs.some((n) => n.id === 'giant') && npcs.some((n) => n.id === 'truman') && crowdIds.every((c) => npcs.some((n) => n.id === c)),
+    npcs.map((n) => n.id));
+  const cwPostPhone = await captureCast(P, name, 'Roadhouse dopo il telefono (dentro la sala)', pinPostPhone(opts));
   const obj2 = await P.objective();
   check(`[${name}] HUD: dopo la telefonata l'obiettivo è obj_m8_2`, obj2 === OBJ_M8.obj_m8_2, { got: obj2, want: OBJ_M8.obj_m8_2 });
 
+  // regressione di rientro: si esce e si rientra dal Roadhouse fra il
+  // telefono e il crocevia — la folla e Truman devono esserci ancora, il
+  // Gigante no (era solo per la finestra della dichiarazione).
+  const doorsRH = await P.doorsOf('roadhouse');
+  const exitEntry = Object.entries(doorsRH).find(([, d]) => d.to === 'town');
+  const [rex, rey] = exitEntry ? exitEntry[0].split(',').map(Number) : [7, 9];
+  const outAgain = await P.enterDoor(rex, rey, rex, rey - 1);
+  check(`[${name}] Roadhouse: regressione di rientro — si esce a piedi prima del crocevia`, outAgain.ok && outAgain.map === 'town', outAgain);
+  const doorsTownAgain = await P.doorsOf('town');
+  const rhDoorAgain = Object.entries(doorsTownAgain).find(([, d]) => d.to === 'roadhouse');
+  const [rdx, rdy] = rhDoorAgain ? rhDoorAgain[0].split(',').map(Number) : [dx, dy];
+  const backIn = await P.enterDoor(rdx, rdy, rdx, rdy + 1);
+  check(`[${name}] Roadhouse: regressione di rientro — si rientra a piedi`, backIn.ok && backIn.map === 'roadhouse', backIn);
+  const npcsBackIn = await P.npcsHere();
+  const cwBackIn = await captureCast(P, name, 'Roadhouse: rientro dopo il telefono, prima del crocevia', pinPostPhone(opts));
+  check(`[${name}] Roadhouse: al rientro Truman e la folla ci sono ancora, il Gigante no`,
+    npcsBackIn.some((n) => n.id === 'truman') && crowdIds.every((c) => npcsBackIn.some((n) => n.id === c)) && !npcsBackIn.some((n) => n.id === 'giant'),
+    { npcs: npcsBackIn.map((n) => n.id), cast: cwBackIn });
+  check(`[${name}] Roadhouse: il registro Cast Continuity è identico prima e dopo il rientro`,
+    JSON.stringify(cwPostPhone) === JSON.stringify(cwBackIn), { before: cwPostPhone, after: cwBackIn });
+
   // salva + ricarica (persistenza reale di produzione)
+  const cwBeforeReload = await P.castWhere();
   const rl = await P.reload();
   check(`[${name}] reload dopo il telefono: promessa e avviso persistono`,
     rl.after.digest.values.promise_stance === opts.promise && rl.after.digest.values.warning_target === opts.warning,
@@ -546,8 +706,22 @@ async function playRoadhouse(P, name, opts, shot) {
     JSON.stringify(rl.before.digest) === JSON.stringify(rl.after.digest), { before: rl.before.digest, after: rl.after.digest });
   check(`[${name}] reload dopo il telefono: obiettivo HUD identico`, rl.before.objective === rl.after.objective, { before: rl.before.objective, after: rl.after.objective });
   check(`[${name}] reload dopo il telefono: il Gigante NON ricompare (fuori finestra)`,
-    !rl.after.npcs.some((n) => n.startsWith('gigante@')), rl.after.npcs);
+    !rl.after.npcs.some((n) => n.startsWith('giant@')), rl.after.npcs);
   check(`[${name}] reload dopo il telefono: entità identiche`, JSON.stringify(rl.before.npcs) === JSON.stringify(rl.after.npcs), { before: rl.before.npcs, after: rl.after.npcs });
+  const cwAfterReload = await P.castWhere();
+  check(`[${name}] reload dopo il telefono: il registro Cast Continuity è identico prima e dopo`,
+    JSON.stringify(cwBeforeReload) === JSON.stringify(cwAfterReload), { before: cwBeforeReload, after: cwAfterReload });
+  const saveRaw = await P.savedRaw();
+  const saveText = (saveRaw.narrative || '') + '\n' + (saveRaw.classic || '');
+  const leakedKeys = ['cast_source', 'sceneId', 'homeX'].filter((k) => saveText.indexOf(k) >= 0);
+  check(`[${name}] reload dopo il telefono: il salvataggio persistito non contiene chiavi di posizione (cast_source/sceneId/homeX)`,
+    leakedKeys.length === 0, leakedKeys);
+  reloadResults.push({
+    path: name, moment: 'Roadhouse dopo il telefono',
+    digestEqual: JSON.stringify(rl.before.digest) === JSON.stringify(rl.after.digest),
+    castEqual: JSON.stringify(cwBeforeReload) === JSON.stringify(cwAfterReload),
+    saveLeaks: leakedKeys
+  });
   if (rl.after.map !== 'roadhouse') {
     await P.note(`reload: la build ha ripristinato ${rl.after.map} ${rl.after.x},${rl.after.y} invece del Roadhouse`, rl.after);
     await P.travel('roadhouse', 7, 8, 'up', 'ritorno al Roadhouse dopo il reload (posizione non ripristinata)');
@@ -591,10 +765,15 @@ async function playThreshold(P, name, opts, shot) {
   check(`[${name}] soglia: focus_destination = ${opts.focus}`, ch.ok && st.values.focus_destination === opts.focus, st.values);
 
   if (opts.reloadAfterFocus) {
+    const cwFocusBefore = await P.castWhere();
     const rl = await P.reload();
     check(`[${name}] reload dopo il crocevia: promessa, avviso e focus persistono`,
       rl.after.digest.values.promise_stance === opts.promise && rl.after.digest.values.warning_target === opts.warning &&
       rl.after.digest.values.focus_destination === opts.focus, rl.after.digest.values);
+    const cwFocusAfter = await P.castWhere();
+    check(`[${name}] reload dopo il crocevia: il registro Cast Continuity è identico prima e dopo`,
+      JSON.stringify(cwFocusBefore) === JSON.stringify(cwFocusAfter), { before: cwFocusBefore, after: cwFocusAfter });
+    reloadResults.push({ path: name, moment: 'crocevia dopo la scelta di focus', digestEqual: true, castEqual: JSON.stringify(cwFocusBefore) === JSON.stringify(cwFocusAfter) });
     if (rl.after.map !== 'town') {
       await P.note(`reload: la build ha ripristinato ${rl.after.map} invece della città`, rl.after);
       await P.travel('town', target.x, target.y - 1, 'down', 'ritorno al crocevia dopo il reload (posizione non ripristinata)');
@@ -606,6 +785,7 @@ async function playThreshold(P, name, opts, shot) {
 /* -------------------------------- rotte -------------------------------- */
 // dal crocevia (47,29) fino al target scelto, SOLO coi tasti
 async function walkRoute(P, name, opts, shot, crossroads) {
+  await captureCast(P, name, 'dopo la scelta di focus, al crocevia', pinRoute(opts));
   const lake = (await P.worldTarget('town', 'lago_maddy')) || { x: 15, y: 28 };
   if (opts.focus === 'palmer') {
     const pd = Object.entries(await P.doorsOf('town')).find(([, d]) => d.to === 'palmer');
@@ -673,18 +853,20 @@ async function walkRoute(P, name, opts, shot, crossroads) {
 async function playShore(P, name, opts, shot, lake) {
   const st0 = await P.state();
   const foundBy = st0.values.body_found_by;
-  const hawkFirst = await P.entityDef('town', 'hawk_shore_first');
-  const hawkAfter = await P.entityDef('town', 'hawk_shore_after');
-  check(`[${name}] riva: le due collocazioni di Hawk sono registrate nell'adapter`, !!hawkFirst && !!hawkAfter, { hawkFirst, hawkAfter });
+  const hawkR0 = await P.castResolve('hawk');
+  check(`[${name}] riva: la collocazione di Hawk prima del ritrovamento è quella del registro`,
+    foundBy === 'hawk'
+      ? (hawkR0.status === 'PLACED' && hawkR0.sceneId === 'town' && hawkR0.x === 16 && hawkR0.y === 27)
+      : (hawkR0.status === 'OFFSCREEN' && hawkR0.label === 'patrol'),
+    { hawkR0, foundBy });
   // si cammina fino alla riva (per lago si è già lì)
   const rr = await P.reach(lake.x, lake.y);
   check(`[${name}] riva: la riva del lago si raggiunge a piedi`, rr.ok, rr);
   let npcs = await P.npcsHere();
   const hawksBefore = npcs.filter((n) => n.id.startsWith('hawk'));
   check(`[${name}] riva: Hawk sulla riva PRIMA del ritrovamento ${foundBy === 'hawk' ? 'presente' : 'assente'} (body_found_by=${foundBy})`,
-    (foundBy === 'hawk') === (hawksBefore.length === 1 && hawksBefore[0].id === 'hawk_shore_first') &&
-    (foundBy === 'hawk' || hawksBefore.length === 0), { hawksBefore, foundBy });
-  if (hawkFirst && foundBy === 'hawk' && hawksBefore.length === 1) {
+    (foundBy === 'hawk') === (hawksBefore.length === 1) && (foundBy === 'hawk' || hawksBefore.length === 0), { hawksBefore, foundBy });
+  if (foundBy === 'hawk' && hawksBefore.length === 1) {
     check(`[${name}] riva: Hawk non blocca l'approccio alla riva`, rr.ok && !(hawksBefore[0].x === rr.from[0] && hawksBefore[0].y === rr.from[1]), { hawk: hawksBefore[0], from: rr.from });
   }
   if (shot) await shot('shore-before-discovery.png');
@@ -717,9 +899,12 @@ async function playShore(P, name, opts, shot, lake) {
   await P.wait(400);
   npcs = await P.npcsHere();
   const hawksAfter = npcs.filter((n) => n.id.startsWith('hawk'));
-  check(`[${name}] riva: dopo il ritrovamento un solo Hawk, hawk_shore_after`,
-    hawksAfter.length === 1 && hawksAfter[0].id === 'hawk_shore_after', hawksAfter);
+  const hawkR1 = await P.castResolve('hawk');
+  check(`[${name}] riva: dopo il ritrovamento un solo Hawk, PLACED@town 16,27 dal registro`,
+    hawksAfter.length === 1 && hawkR1.status === 'PLACED' && hawkR1.sceneId === 'town' && hawkR1.x === 16 && hawkR1.y === 27 &&
+    hawksAfter[0].x === hawkR1.x && hawksAfter[0].y === hawkR1.y, { hawksAfter, hawkR1 });
   if (shot) await shot('shore-after-discovery.png');
+  await captureCast(P, name, 'riva dopo il ritrovamento', pinShore(opts));
   const obj3 = await P.objective();
   check(`[${name}] HUD: dopo il ritrovamento l'obiettivo è obj_m8_3`, obj3 === OBJ_M8.obj_m8_3, { got: obj3, want: OBJ_M8.obj_m8_3 });
   const cf = await P.classicFlags();
@@ -790,7 +975,11 @@ async function playStation(P, name, opts, shot) {
   const bobby = await P.npcActive('town', 'bobby'), donna = await P.npcActive('town', 'donna');
   check(`[${name}] mondo: bobby e donna ancora assenti dalla città dopo la stazione`, !bobby.active && !donna.active, { bobby, donna });
   const sarah = await P.npcActive('palmer', 'sarah');
-  check(`[${name}] mondo: Sarah ancora assente da casa Palmer dopo la stazione`, sarah.present && !sarah.active, sarah);
+  // Cast Presence (D1): Sarah resta OFFSCREEN fino ad atto5, poi torna alla baseline (casa Palmer)
+  const stAfter = await P.state();
+  const atto5Now = !!(stAfter && stAfter.flags && stAfter.flags.includes('atto5'));
+  check(`[${name}] mondo: Sarah ${atto5Now ? 'di nuovo a casa Palmer (atto5 aperto)' : 'ancora assente da casa Palmer (prima di atto5)'} dopo la stazione`, sarah.present === atto5Now, { sarah, atto5Now });
+  await captureCast(P, name, 'centrale prima dell\'alba (fine giocata)', pinStation(opts));
 }
 
 /* ------------------------------ un percorso ------------------------------ */
@@ -947,13 +1136,60 @@ function auditTranscript(name, dump, opts) {
   check(`[${name}] stato: nessun nodo one-shot committato due volte`, doubled.length === 0, doubled);
 
   // 8. attori mai raddoppiati sulle mappe dell'Atto 4
-  const dup = dump.mapEntries.map((e) => ({ map: e.map, hawks: e.npcs.filter((n) => n.startsWith('hawk')), maddy: e.npcs.filter((n) => n.startsWith('maddy@')), leland: e.npcs.filter((n) => n.startsWith('leland@')), giants: e.npcs.filter((n) => n.startsWith('gigante@')) }))
+  const dup = dump.mapEntries.map((e) => ({ map: e.map, hawks: e.npcs.filter((n) => n.startsWith('hawk')), maddy: e.npcs.filter((n) => n.startsWith('maddy@')), leland: e.npcs.filter((n) => n.startsWith('leland@')), giants: e.npcs.filter((n) => n.startsWith('giant@')) }))
     .filter((e) => e.hawks.length > 1 || e.maddy.length > 1 || e.leland.length > 1 || e.giants.length > 1);
   check(`[${name}] mondo: mai due Hawk, due Maddy, due Leland o due Giganti sulla stessa mappa`, dup.length === 0, dup);
   // Maddy mai a casa Palmer (il duplicato classico è ritirato)
   const maddyPalmer = dump.mapEntries.filter((e) => e.map === 'palmer' && e.npcs.some((n) => n.startsWith('maddy@') || n.startsWith('leland@')));
   check(`[${name}] mondo: Maddy e Leland mai a casa Palmer nell'Atto 4`, maddyPalmer.length === 0, maddyPalmer);
 
+}
+
+/* ---------------- artefatti Cast Continuity (v0.1) ---------------- */
+const CP_DIR = path.join(ROOT, 'artifacts', 'cast-presence-v0.1');
+function writeCastPresenceArtifacts() {
+  if (!fs.existsSync(CP_DIR)) return;   // artefatto non ancora inizializzato: nulla da appendere
+  const stamp = new Date().toISOString().slice(0, 10);
+  const L = [];
+  L.push('');
+  L.push(`## Real-build capture (Chrome headless, ${stamp})`);
+  L.push('');
+  L.push('Scatti presi con `node test/act-4-playthrough.js` sulla build reale');
+  L.push('(`index.html`), leggendo `GAME.CastPresence.where()` (js/cast-presence.js)');
+  L.push('nei momenti chiave della giocata. Confrontati coi pin di');
+  L.push('`test/fixtures/cast-pins-acts-1-4.json` quando la combinazione');
+  L.push('avviso/focus/ritrovamento del percorso coincide con quella del pin;');
+  L.push('altrimenti solo catturati (nessun pin adatto) e controllati per doppioni.');
+  L.push('');
+  for (const c of castCaptures) {
+    L.push(`### ${c.path} — ${c.moment}`);
+    L.push('');
+    L.push(c.pinId ? `Pin di riferimento: \`${c.pinId}\` — ${c.mismatches.length === 0 ? 'combacia' : 'DISCREPANZE: ' + JSON.stringify(c.mismatches)}` : '_nessun pin adatto a questa combinazione: solo cattura + controllo doppioni_');
+    L.push('');
+    L.push('| personaggio | presenza |');
+    L.push('|---|---|');
+    for (const id of Object.keys(c.snapshot).sort()) L.push(`| ${id} | \`${c.snapshot[id]}\` |`);
+    L.push('');
+  }
+  fs.appendFileSync(path.join(CP_DIR, 'act4-presence-trace.md'), L.join('\n') + '\n');
+  console.log(`  cast-presence trace -> ${path.relative(ROOT, path.join(CP_DIR, 'act4-presence-trace.md'))} (appended)`);
+
+  const R = [];
+  R.push('');
+  R.push(`## Browser reloads (Chrome headless, ${stamp})`);
+  R.push('');
+  R.push('Ricariche reali dell\'iframe di produzione durante `act-4-playthrough.js`.');
+  R.push('«registro» = `GAME.CastPresence.where()`; «narrativo» = lo stato serializzato');
+  R.push('(flags/values/evidence/nodes_done) letto da `A4.stateDigest()`.');
+  R.push('');
+  R.push('| percorso | momento | stato narrativo identico | registro Cast Continuity identico | salvataggio senza chiavi di posizione |');
+  R.push('|---|---|---|---|---|');
+  for (const r of reloadResults) {
+    R.push(`| ${r.path} | ${r.moment} | ${r.digestEqual ? 'sì' : 'NO'} | ${r.castEqual ? 'sì' : 'NO'} | ${r.saveLeaks === undefined ? '—' : (r.saveLeaks.length === 0 ? 'sì' : 'NO: ' + r.saveLeaks.join(', '))} |`);
+  }
+  R.push('');
+  fs.appendFileSync(path.join(CP_DIR, 'save-reload-report.md'), R.join('\n') + '\n');
+  console.log(`  save-reload report -> ${path.relative(ROOT, path.join(CP_DIR, 'save-reload-report.md'))} (appended)`);
 }
 
 /* ------------------------------ artefatti ------------------------------ */

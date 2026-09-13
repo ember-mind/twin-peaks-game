@@ -62,6 +62,8 @@ WINDOW ID          ACT4_ROADHOUSE_PRE_PHONE
 ENTRY              value_is presagio_status=active
 EXIT / TRANSITION  value_set warning_target   (m8_roadhouse_phone)
 CAST CHANGES       (only characters that differ from the previous window / baseline)
+                   a PLACED placement may carry actor_ids: the mission actor ids this body answers to
+                   when they differ from the character id (authored interaction reference, no alias table)
   truman   → roadhouse / truman_table     cause: the town gathers; he waits for Cooper
   hawk     → OFFSCREEN (patrol)           cause: sent out for the night (Lucy: "è di pattuglia")
   norma, shelly, bobby, donna, james, loglady → roadhouse   cause: the town gathers

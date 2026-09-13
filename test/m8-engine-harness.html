@@ -24,7 +24,8 @@
 <script src="../js/narrative-runtime.js"></script>
 <script src="../js/narrative-ui.js"></script>
 <script src="../js/narrative-notebook.js"></script>
-<script src="../js/narrative-data.gen.js?v=harness-r9"></script>
+<script src="../js/narrative-data.gen.js?v=harness-r10"></script>
+<script src="../js/cast-presence.js?v=harness-r10"></script>
 <script src="../js/narrative-bootstrap.js"></script>
 <script src="../js/narrative-engine-adapter.js?v=harness-r9"></script>
 <script src="../js/narrative-save.js"></script>
@@ -126,7 +127,21 @@ async function run() {
 
   // ---------- costruttori di stato PURI (runtime) ----------
   function nodeM8(id) { return M8.nodes.filter(function (n) { return n.id === id; })[0]; }
-  function seedBase() { var s = NR.createState(); NR.applyEffects(s, [{ set: 'atto4' }, { evidence: 'E3_LETTERA_R' }, { evidence: 'E1_DIARIO' }]); return s; }
+  // Cast Presence v0.1 (2026-09-13): il seme dell'Atto 4 deve essere uno stato
+  // RAGGIUNGIBILE (storia dell'Atto 3 completa), altrimenti il resolver segnala
+  // giustamente un mondo contraddittorio (OVERLAP). Stesso seme del fixture
+  // test/fixtures/cast-pins-acts-1-4.json::seeds.ACT4_AFTERNOON + le due prove.
+  var ACT4_HISTORY = {"flags": {"sogno_fatto": true, "atto3": true, "vagone_scoperto": true, "east_route_confirmed": true, "audrey_indaga": true, "jacques_preso": true, "jacques_dead": true, "gigante1": true, "atto4": true, "jacques_admitted_presence": true}, "values": {"m5_final_theory": "degeneration", "s1": "institutional", "m6_tactic": "prova"}, "evidence": {}, "nodes_done": {"m5_bridge": true, "m5_discovery": true, "m5_report_close": true, "m6_ferry": true, "m6_arrest": true, "m6_hospital_guard": true, "m6_return_night": true, "m6_atto4_bridge": true, "m5_report_intro": true, "m5_tracks_north": true, "m6_tactic": true, "m6_interrogation_prova": true}, "props": {"P3A": {"formulation": {"status": "formulated"}}, "P5": {"formulation": {"status": "formulated"}}}};
+  function seedBase() {
+    var s = NR.createState();
+    Object.keys(ACT4_HISTORY.flags).forEach(function (k) { s.flags[k] = true; });
+    Object.keys(ACT4_HISTORY.values).forEach(function (k) { s.values[k] = ACT4_HISTORY.values[k]; });
+    Object.keys(ACT4_HISTORY.evidence).forEach(function (k) { s.evidence[k] = true; });
+    Object.keys(ACT4_HISTORY.nodes_done).forEach(function (k) { s.nodes_done[k] = true; });
+    s.props = JSON.parse(JSON.stringify(ACT4_HISTORY.props));
+    NR.applyEffects(s, [{ evidence: 'E3_LETTERA_R' }, { evidence: 'E1_DIARIO' }]);
+    return s;
+  }
   function pdn(s, id) { var p = NR.prepareNode(s, M8, id); if (!p.ok) throw new Error('pdn ' + id + ': ' + p.error); if (!p.continuation && !p.resume_choice) NR.commitNode(s, M8, p); return p; }
   function pdc(s, id, ch) { var n = nodeM8(id); var p = NR.prepareChoice(s, M8, n, ch); if (!p.ok) throw new Error('pdc ' + id + '/' + ch + ': ' + p.error); return NR.commitChoice(s, M8, n, p); }
   function routeOf(focus) { return focus === 'palmer' ? 'm8_route_palmer' : (focus === 'lago' ? 'm8_route_lake' : 'm8_route_diner'); }
@@ -663,22 +678,23 @@ async function run() {
     function inMapData(map, id) { return (GAME.Maps[map].npcs || []).some(function (n) { return n.id === id; }); }
     function inLive(id) { return (E.state.npcs || []).some(function (n) { return n.id === id; }); }
     async function loadDiner() { clearClassic(); E.loadMap('diner', 1, 1, 'down'); await wait(90); clearClassic(); }
-    // il registro è generico: forma dichiarativa, nessuna missione nel sorgente
-    var REG = A._debugNarrativeEntities;
-    out.checks['G9 registry_exposed'] = (Array.isArray(REG) && REG.length >= 4);
-    out.checks['G9 registry_entries_are_declarative'] = REG.every(function (e) {
-      return typeof e.map_id === 'string' && e.npc && typeof e.npc.id === 'string' && (e.when === null || typeof e.when === 'object');
+    // Cast Presence v0.1 (2026-09-13): la sorgente delle presenze è
+    // narrative/cast/windows.json risolta da GAME.CastPresence; nessuna
+    // missione nel sorgente dell'adapter, nessun registro di entità.
+    var CP = GAME.CastPresence;
+    var CAST = GAME.NarrativeData && GAME.NarrativeData.cast;
+    out.checks['G9 registry_exposed'] = (!!CP && !!CAST && Array.isArray(CAST.windows) && CAST.windows.length >= 4);
+    out.checks['G9 registry_entries_are_declarative'] = !!CAST && CAST.windows.every(function (w) {
+      return typeof w.id === 'string' && w.cast && typeof w.cast === 'object' && (w.when === null || typeof w.when === 'object');
     });
     out.checks['G9 adapter_has_no_mission_branch'] = (String(A.enable).indexOf("=== 'M8'") < 0 && String(A.syncNarrativeEntities).indexOf("'M8'") < 0);
-    var maddyEntry = REG.filter(function (e) { return e.npc.id === 'maddy'; })[0];
-    var lelandEntry = REG.filter(function (e) { return e.npc.id === 'leland'; })[0];
+    var maddyWin = CAST && CAST.windows.filter(function (w) { return w.id === 'ACT4_MADDY_DINER'; })[0];
+    var lelandWin = CAST && CAST.windows.filter(function (w) { return w.id === 'ACT4_LELAND_DINER'; })[0];
+    // Maddy resta al diner fino a T_LELAND_TAXI (la sua uscita è la p00 del nodo taxi)
     out.checks['G9 maddy_registered_conditional'] =
-      (!!maddyEntry && maddyEntry.map_id === 'diner' && JSON.stringify(maddyEntry.when) === JSON.stringify({ all: [{ flag: 'atto4' }, { not: { value_set: 'promise_stance' } }] }));
-    // C1 (pass 01): Leland non e' piu' condizionato a promise_stance — copre
-    // l'intera finestra atto4..T_LELAND_TAXI (m8_leland_waiting/m8_leland_taxi
-    // si dividono i due nodi sullo stesso attore, mai due root vive insieme).
+      (!!maddyWin && maddyWin.cast.maddy.map_id === 'diner' && JSON.stringify(maddyWin.when) === JSON.stringify({ all: [{ flag: 'atto4' }, { not: { evidence: 'T_LELAND_TAXI' } }] }));
     out.checks['G9 leland_registered_conditional_at_diner'] =
-      (!!lelandEntry && lelandEntry.map_id === 'diner' && lelandEntry.npc.x === 11 && lelandEntry.npc.y === 1 && JSON.stringify(lelandEntry.when) === JSON.stringify({ all: [{ flag: 'atto4' }, { not: { evidence: 'T_LELAND_TAXI' } }] }));
+      (!!lelandWin && lelandWin.cast.leland.map_id === 'diner' && lelandWin.cast.leland.x === 11 && lelandWin.cast.leland.y === 1 && JSON.stringify(lelandWin.when) === JSON.stringify({ all: [{ flag: 'atto4' }, { not: { evidence: 'T_LELAND_TAXI' } }] }));
     // 9a atto4, promessa non fatta → PRESENTE (dati mappa + motore)
     A.setState(seedBase());
     await loadDiner();
@@ -695,8 +711,9 @@ async function run() {
     await chooseChoice('promise_accompagno');
     await advanceUntil(function () { return !A.active(); }, 20);
     out.checks['G9 promise_committed'] = (val(S(), 'promise_stance') === 'accompagno');
-    out.checks['G9 maddy_removed_after_promise_map'] = !inMapData('diner', 'maddy');
-    out.checks['G9 maddy_removed_after_promise_live'] = !inLive('maddy');
+    // Cast Continuity: Maddy RESTA al bancone dopo la promessa (esce con la p00 del nodo taxi)
+    out.checks['G9 maddy_stays_after_promise_map'] = inMapData('diner', 'maddy');
+    out.checks['G9 maddy_stays_after_promise_live'] = inLive('maddy');
     out.checks['G9 leland_appears_after_promise_map'] = inMapData('diner', 'leland');
     out.checks['G9 leland_appears_after_promise_live'] = inLive('leland');
     // 9c testimonianza vera dalla UI → Leland sparisce; poi entrambi assenti
@@ -705,6 +722,8 @@ async function run() {
     out.checks['G9 taxi_committed'] = S().evidence.T_LELAND_TAXI === true;
     out.checks['G9 leland_removed_after_taxi_map'] = !inMapData('diner', 'leland');
     out.checks['G9 leland_removed_after_taxi_live'] = !inLive('leland');
+    out.checks['G9 maddy_removed_after_taxi_map'] = !inMapData('diner', 'maddy');
+    out.checks['G9 maddy_removed_after_taxi_live'] = !inLive('maddy');
     // 9d durante il Roadhouse / dopo il ritrovamento / dopo la morte → ASSENTI
     ['postRoadhouse', 'postFocus', 'postRoute', 'postDiscovery', 'postEcho'].forEach(function (stage) {
       A.setState(stateAt(stage, { warn: 'palmer', focus: 'palmer' }));

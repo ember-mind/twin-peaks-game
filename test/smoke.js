@@ -48,9 +48,76 @@ require(J('room-315-location-data.js'));
 [].concat(global.GAME.DoubleRLocationConnections, global.GAME.SheriffsStationLocationConnections, global.GAME.Room315LocationConnections)
   .forEach((c) => global.GAME.LocationConnections.install(c, global.GAME.Maps));
 require(J('render3d.js')); // window e' globale (riga sopra): CONFIG si popola anche senza THREE
+require(J('narrative-runtime.js'));
+require(J('narrative-data.gen.js'));
+require(J('cast-presence.js'));
+require(J('narrative-bootstrap.js'));
+require(J('narrative-engine-adapter.js'));
 
 const GAME = global.GAME;
 const E = GAME.Engine;
+
+/* ---------------- popolazione del cast nominato (Cast Continuity v0.1) ----
+ * I corpi NPC nominati non vivono piu' in js/glue.js: li risolve
+ * GAME.CastPresence dalle finestre di narrative/cast/windows.json contro lo
+ * stato narrativo. L'adapter sincronizza GAME.Maps[*].npcs a ogni
+ * enable/setState/commit, esattamente come il boot di produzione
+ * (js/narrative-production.js). */
+GAME.installNarrativeCatalogs({ data: GAME.NarrativeData, runtime: GAME.NarrativeRuntime });
+const NR = GAME.NarrativeRuntime;
+const A = GAME.NarrativeAdapter;
+const D = GAME.NarrativeData;
+const NS = NR.createState();
+const NARRATIVE_MISSIONS = [D.missions.M4, D.missions.M5, D.missions.M6, D.missions.M8, D.missions.M9];
+// L'adapter va acceso solo per la durata della sincronizzazione dei corpi:
+// GAME.Engine.interact() da' precedenza a GAME.NarrativeAdapter.tryInteract
+// quando enabled=true, e questa simulazione classica avanza narrative
+// missions (M4..M9) attraverso i LORO stessi attori (Truman, Leland, BOB...).
+// Restare "acceso" oltre la sincronizzazione dirotterebbe i dialoghi classici
+// dell'atto in corso verso sessioni narrative che qui non hanno una UI reale
+// (container: {}). I corpi restano scritti su GAME.Maps anche da spenta: la
+// popolazione e' una mutazione diretta, non uno stato dell'adapter.
+function syncCastToMaps() {
+  A.enable({ mission: D.missions.M4, missions: NARRATIVE_MISSIONS, state: NS, container: {} });
+  A.disable();
+}
+syncCastToMaps();
+
+// specchio dei flag classici che spostano il cast nominato: ogni volta che il
+// test imposta uno di questi su S().flags, va rispecchiato su NS e la mappa
+// va risincronizzata, altrimenti i corpi (Sarah/Leland/BOB/...) non si muovono.
+const CAST_FLAG_MIRROR = ['sogno_fatto', 'atto3', 'atto4', 'atto5', 'leland_morto', 'maddy_trovata'];
+function syncCastFromClassic() {
+  const flags = S().flags;
+  CAST_FLAG_MIRROR.forEach((name) => { if (flags[name]) NS.flags[name] = true; });
+  // Hawk attraversa l'intera catena di finestre M5/M6 (vagone -> porta ->
+  // taglio -> molo OEJ -> scorta ospedale) prima di arrivare alla pattuglia
+  // dell'Atto 4 (ACT4_HAWK_PATROL): per atto4 tutta quella catena e' gia'
+  // chiusa da un pezzo, altrimenti resta vero insieme alla pattuglia (OVERLAP).
+  if (flags.atto4) {
+    NS.flags.vagone_scoperto = true;
+    NS.nodes_done.m5_report_close = true;
+    NS.flags.east_route_confirmed = true;
+    NS.flags.jacques_preso = true;
+    NS.nodes_done.m6_hospital_guard = true;
+  }
+  if (flags.gigante2) {
+    NS.values.presagio_status = 'active';
+    NS.nodes_done.m8_roadhouse_truman = true;
+  }
+  // Maddy al diner (ACT4_MADDY_DINER) resta finche' non c'e' evidenza
+  // T_LELAND_TAXI; il suo TERMINAL_REMOVED (ACT4_MADDY_GONE) e' gated su
+  // maddy_trovata. Nella storia reale il taxi precede sempre il ritrovamento:
+  // senza questa evidenza le due finestre risultano vere insieme (OVERLAP).
+  if (flags.maddy_trovata) NS.evidence.T_LELAND_TAXI = true;
+  // Una volta trovata Maddy, tutta la citta' si raduna al roadhouse
+  // (ACT4_EVENING_GATHERING, Truman incluso) finche' non c'e' un
+  // value_set:focus_destination: per atto5/leland_morto quella serata e'
+  // gia' passata, altrimenti Truman resta al roadhouse invece che al
+  // distretto per l'ultimo ponte verso il bosco.
+  if (flags.leland_morto || flags.atto5) NS.values.focus_destination = 'woods';
+  syncCastToMaps();
+}
 
 /* ---------------- helper ---------------- */
 
@@ -86,6 +153,7 @@ function drainDialogue(label) {
 }
 
 function dialogueId(d) {
+  if (d == null) return []; // corpo del registro cast senza dialogo proprio (es. infermiera)
   if (typeof d === 'string') return [d];
   if (Array.isArray(d)) return d.flatMap(dialogueId); // cascata condizionale
   return [d.then, d.else].filter(Boolean);
@@ -131,7 +199,12 @@ for (const id of sceneIds) {
     for (const did of dialogueId(n.dialogue)) {
       ok(GAME.Data.dialogues[did], `npc ${n.id} dialogo "${did}" esiste`);
     }
-    ok(!GAME.Maps.isSolid(id, n.x, n.y, fake3), `npc ${n.id} su tile calpestabile`);
+    // corpo del registro coricato su un oggetto interagibile (es. Ronette a
+    // letto, hospital 3,5 -> 'ronette_letto'): la tile e' solida per design
+    // (arredo), non e' un difetto di posizionamento.
+    if (!GAME.Maps.objectAt(id, n.x, n.y)) {
+      ok(!GAME.Maps.isSolid(id, n.x, n.y, fake3), `npc ${n.id} su tile calpestabile`);
+    }
   }
 }
 
@@ -297,6 +370,7 @@ drainDialogue('sogno di Laura');
 ok(!S().dialogue, 'dialogo del sogno chiuso');
 ok(S().clues.includes('nome_sussurrato'), 'nome sussurrato ottenuto');
 ok(S().flags.sogno_fatto, 'flag sogno_fatto impostato');
+syncCastFromClassic();
 ok(S().mode === 'play', 'il sogno non chiude la partita');
 
 // Truman: racconta il sogno (ponte Atto 1 -> Atto 2, non chiude la partita)
@@ -324,10 +398,13 @@ key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'gerard_a2', 'dialogo Gerard parte');
 drainDialogue('Gerard');
 ok(S().clues.includes('poesia_fuoco'), 'poesia del fuoco ottenuta');
-E.loadMap('hospital', 3, 6, 'up');
-key('Enter'); pump(16);
-ok(S().dialogue && S().dialogue.id === 'ronette_letto', 'dialogo Ronette parte');
-drainDialogue('Ronette');
+// Ronette e' ora un corpo del registro (narrative/cast/windows.json) posato
+// sulla stessa tile (3,5) del vecchio oggetto classico "ronette_letto":
+// GAME.Engine.interact() da' precedenza all'NPC sull'oggetto sottostante, e
+// il suo dialogo canonico ("sussurra BOB") e' mission-owned (M4 ronette_q).
+// Stub = esito di quella visita narrativa, non piu' raggiungibile da qui.
+ok(GAME.Maps.hospital.npcs.some((n) => n.id === 'ronette'), 'corpo Ronette presente sulla tile del letto');
+S().flags.ronette_bob = true;
 ok(S().flags.ronette_bob, 'flag ronette_bob impostato');
 
 // Double R: James consegna l'altra meta' del cuore (appare solo dopo il sogno)
@@ -344,6 +421,7 @@ ok(S().dialogue && S().dialogue.id === 'truman_atto3', 'dialogo Truman Atto 3 pa
 drainDialogue('Truman Atto 3');
 ok(!S().dialogue, 'dialogo Truman Atto 3 chiuso');
 ok(S().flags.atto3, 'flag atto3 impostato');
+syncCastFromClassic();
 ok(S().mode === 'play', 'Atto 3 non chiude la partita');
 
 // il vagone del treno: il mucchio di terra e l'anello (proprietà mai affermata: guardia M5 ring_c)
@@ -384,6 +462,7 @@ ok(S().flags.gigante1, 'flag gigante1 impostato');
 // Stub = syncNarrativeToClassic outcome.
 S().flags.atto4 = true;
 ok(S().flags.atto4, 'flag atto4 impostato');
+syncCastFromClassic();
 ok(S().mode === 'play', 'Atto 4 non chiude la partita');
 
 // casa Palmer: Sarah ha la visione di BOB dietro il divano (Maddy e Leland
@@ -404,11 +483,12 @@ drainDialogue('Log Lady Atto 4');
 // -> gigante2, dopo lo split del nodo nel pass 01).
 S().flags.gigante2 = true;
 ok(S().flags.gigante2, 'flag gigante2 impostato');
+syncCastFromClassic();
 
 // casa Palmer: dopo il Roadhouse Sarah non ricompare piu' (cond '!flag:gigante2')
 E.loadMap('palmer', 9, 6, 'down');
 key('Enter'); pump(16);
-ok(!E.npcActive(GAME.Maps.palmer.npcs.find((n) => n.id === 'sarah'), S()), 'Sarah assente da Palmer dopo il Roadhouse');
+ok(!GAME.Maps.palmer.npcs.some((n) => n.id === 'sarah'), 'Sarah assente da Palmer dopo il Roadhouse');
 ok(!S().dialogue, 'nessun dialogo classico contraddice la testimonianza taxi del diner');
 
 // la riva del lago: il ritrovamento di Maddy is mission-owned (M8
@@ -416,19 +496,20 @@ ok(!S().dialogue, 'nessun dialogo classico contraddice la testimonianza taxi del
 // Stub = syncNarrativeToClassic outcome.
 S().flags.maddy_trovata = true;
 ok(S().flags.maddy_trovata, 'flag maddy_trovata impostato');
+syncCastFromClassic();
 
 // Truman: chiusura Atto 4, ponte verso Atto 5 is mission-owned (M9
 // m9_present_truman; classic truman_atto5 retired, was shadowed in
 // production). Stub = syncNarrativeToClassic outcome.
 S().flags.atto5 = true;
 ok(S().flags.atto5, 'flag atto5 impostato');
+syncCastFromClassic();
 ok(S().mode === 'play', 'Atto 5 non chiude piu\' la partita (ponte ritirato)');
 
 /* ---------------- Atto 5: la confessione, la Loggia, il vero finale ---------------- */
 
 // distretto: Leland e' li', in interrogatorio
-const sheriffLelandNpc = GAME.Maps.sheriff.npcs.find((n) => n.id === 'leland');
-ok(E.npcActive(sheriffLelandNpc, S()), 'Leland presente al distretto dopo atto5');
+ok(GAME.Maps.sheriff.npcs.some((n) => n.id === 'leland'), 'Leland presente al distretto dopo atto5');
 E.loadMap('sheriff', 7, 5, 'right');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'leland_interr', 'dialogo interrogatorio di Leland parte');
@@ -441,6 +522,7 @@ key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'leland_morte', 'dialogo morte di Leland parte');
 drainDialogue('morte di Leland');
 ok(S().flags.leland_morto, 'flag leland_morto impostato');
+syncCastFromClassic();
 
 // Truman: l'ultimo ponte, verso il bosco
 E.loadMap('sheriff', 11, 4, 'left');
@@ -457,8 +539,7 @@ drainDialogue('Nano finale');
 ok(S().flags.mfap_finale_visto, 'flag mfap_finale_visto impostato');
 
 // poi BOB stesso, comparso accanto a una statua
-const bobNpc = GAME.Maps.redroom.npcs.find((n) => n.id === 'bob');
-ok(bobNpc && E.npcActive(bobNpc, S()), 'BOB presente nella Stanza Rossa dopo la morte di Leland');
+ok(GAME.Maps.redroom.npcs.some((n) => n.id === 'bob'), 'BOB presente nella Stanza Rossa dopo la morte di Leland');
 E.loadMap('redroom', 14, 3, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'bob_finale', 'dialogo di BOB parte');

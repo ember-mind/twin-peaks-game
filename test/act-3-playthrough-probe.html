@@ -610,6 +610,23 @@
   A3.ringHidden = function () {
     return G().TraincarScene ? G().TraincarScene.ringHidden() : null;
   };
+  // registro Cast Continuity (js/cast-presence.js): DOVE STA ogni personaggio
+  // nominato secondo lo stato narrativo corrente.
+  A3.castWhere = function () { return G().CastPresence.where(); };
+  A3.castResolve = function (characterId) {
+    var r = JSON.parse(JSON.stringify(G().CastPresence.resolve(characterId)));
+    delete r.text;
+    return r;
+  };
+  A3.bodiesOn = function (map) {
+    return ((G().Maps[map] && G().Maps[map].npcs) || []).map(function (n) { return { id: n.id, x: n.x, y: n.y }; });
+  };
+  A3.savedRaw = function () {
+    try {
+      var key = W.GAME.NarrativeSave.keyFor('main');
+      return { narrative: W.localStorage.getItem(key) || '', classic: W.localStorage.getItem('tp_save') || '' };
+    } catch (e) { return { error: String(e && e.message || e) }; }
+  };
   A3.classicFlags = function () { return JSON.parse(JSON.stringify(S().flags)); };
   A3.dialogueNow = function () {
     var d = S().dialogue;

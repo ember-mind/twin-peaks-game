@@ -10,80 +10,14 @@
 
   /* ---------------- NPC per mappa (posizioni dai commenti di maps.js) -- */
 
+  /* NPC classici per mappa: VUOTO dal 2026-09-13 (Cast Presence v0.1). I corpi
+   * dei personaggi nominati — coordinate, direzione, cascata di dialogo, wander —
+   * vivono in narrative/cast/windows.json (baseline per personaggio) e vengono
+   * posati da GAME.CastPresence.syncMaps tramite l'adapter narrativo. Qui non si
+   * aggiunge più nessun corpo e nessun `cond` di presenza (V7 single body owner). */
   var NPCS = {
-    town: [
-      { id: 'bobby',  x: 31, y: 16, sprite: 'bobby',  name: 'Bobby',
-        cond: ['!flag:gigante2'],
-        dialogue: [
-          { cond: 'flag:done_shelly', then: 'bobby_shelly' },
-          { cond: 'flag:done_shelly_bobby', then: 'bobby_shelly' },
-          'bobby'
-        ], wander: true },
-      { id: 'donna',  x: 44, y: 10, sprite: 'donna',  name: 'Donna',
-        cond: ['!flag:gigante2'],
-        dialogue: 'donna', wander: true },
-      { id: 'jacoby', x: 16, y: 25, sprite: 'jacoby', name: 'Jacoby',
-        cond: ['!flag:gigante2'],
-        dialogue: 'jacoby' }
-    ],
-    sheriff: [
-      { id: 'truman', x: 10, y: 4, sprite: 'truman', name: 'Truman',
-        dialogue: [
-          { cond: 'flag:leland_morto', then: 'truman_fine' },
-          { cond: 'flag:atto3', then: 'truman_wait3' },
-          { cond: 'clues6', then: 'truman_atto3' },
-          { cond: 'flag:sogno_fatto', then: 'truman_a2' },
-          'truman'
-        ], dir: 'down' },
-      { id: 'andy',   x: 10, y: 7, sprite: 'andy',   name: 'Andy',   dialogue: 'andy',   dir: 'down' },
-      { id: 'hawk',   x: 12, y: 8, sprite: 'hawk',   name: 'Hawk',
-        dialogue: [{ cond: 'flag:sogno_fatto', then: 'hawk_a2' }, 'hawk'], dir: 'down' },
-      { id: 'lucy',   x: 2,  y: 6, sprite: 'lucy',   name: 'Lucy',
-        dialogue: [{ cond: 'flag:jacques_preso', then: 'lucy_a3' }, 'lucy'], dir: 'down' },
-      { id: 'leland', x: 8,  y: 5, sprite: 'leland', name: 'Leland',
-        cond: ['flag:atto5', '!flag:leland_morto'],
-        dialogue: [{ cond: 'flag:leland_confessa', then: 'leland_morte' }, 'leland_interr'], dir: 'down' }
-    ],
-    palmer: [
-      { id: 'sarah',  x: 9,  y: 7, sprite: 'sarah',  name: 'Sarah',
-        cond: ['!flag:gigante2'],
-        dialogue: [{ cond: 'flag:atto4', then: 'sarah_visione' }, 'sarah'], dir: 'down' }
-    ],
-    hotel_gn: [
-      { id: 'benhorne', x: 5,  y: 7, sprite: 'benhorne', name: 'Ben Horne', dialogue: 'benhorne_a2', dir: 'down' },
-      { id: 'audrey',   x: 12, y: 9, sprite: 'audrey',   name: 'Audrey',
-        dialogue: [{ cond: 'flag:done_benhorne_a2', then: 'audrey_a2_ben' }, 'audrey_a2'],
-        dir: 'down', wander: true }
-    ],
-    hospital: [
-      { id: 'gerard', x: 11, y: 4, sprite: 'gerard', name: 'Gerard',
-        dialogue: 'gerard_a2', dir: 'left' }
-    ],
-    diner: [
-      { id: 'norma',   x: 5, y: 2, sprite: 'norma',   name: 'Norma',
-        dialogue: [{ cond: ['flag:sogno_fatto', 'flag:done_norma'], then: 'norma_a2' }, 'norma'],
-        dir: 'down' },
-      { id: 'shelly',  x: 9, y: 7, sprite: 'shelly',  name: 'Shelly',
-        dialogue: [{ cond: 'flag:done_bobby', then: 'shelly_bobby' }, 'shelly'], dir: 'down' },
-      { id: 'loglady', x: 4, y: 5, sprite: 'loglady', name: 'Log Lady',
-        dialogue: [{ cond: 'flag:atto4', then: 'loglady_a4' }, 'loglady'], dir: 'down' },
-      { id: 'james',   x: 9, y: 6, sprite: 'james',  name: 'James',    dialogue: 'james_a2', dir: 'down', cond: 'flag:sogno_fatto' }
-    ],
-    woods: [],
-    redroom: [
-      { id: 'mfap',  x: 8,  y: 4, sprite: 'mfap',  name: '???',
-        dialogue: [{ cond: 'flag:leland_morto', then: 'mfap_finale' }, 'mfap'], dir: 'down' },
-      { id: 'laura', x: 11, y: 2, sprite: 'laura', name: 'Ombra',
-        dialogue: [
-          { cond: 'flag:leland_morto', then: 'laura_finale2' },
-          { cond: 'flag:met_mfap', then: 'laura_sogno' },
-          'laura_hint'
-        ], dir: 'down' },
-      { id: 'bob', x: 14, y: 2, sprite: 'bob', name: 'BOB', dialogue: 'bob_finale',
-        cond: ['flag:leland_morto'], dir: 'down' }
-    ],
-    traincar: [],
-    oej: []
+    town: [], sheriff: [], palmer: [], hotel_gn: [], hospital: [], diner: [],
+    woods: [], redroom: [], traincar: [], oej: []
   };
 
   /* interact id (maps.js) -> dialogue id (data.js), oppure cascata condizionale

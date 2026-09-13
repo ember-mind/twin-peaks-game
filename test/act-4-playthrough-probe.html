@@ -607,24 +607,39 @@
   // 315, jacques_dead da Lucy, sogno_fatto/atto3 per porte e NPC classici).
   // I flag classici corrispondenti vengono scritti sul motore: il ciclo di
   // sync di produzione (180 ms) allinea il resto nei due sensi.
-  A4.seed = async function () {
+  // A4.seed(seed): seed è il pin ACT4_AFTERNOON di
+  // test/fixtures/cast-pins-acts-1-4.json §4 (flags/values/evidence/
+  // nodes_done/props), passato dal driver node. Il set minimo di confine
+  // usato prima (solo atto3/atto4/jacques_preso/jacques_dead/gigante1) è
+  // uno stato NON raggiungibile: manca vagone_scoperto/east_route_confirmed/
+  // m6_hospital_guard/ecc., quindi il registro Cast Continuity (che pretende
+  // esattamente una finestra vera per personaggio) trova finestre di M5/M6 in
+  // overlap (es. hawk: ACT3_HAWK_BRIDGE + ACT3_HAWK_ESCORT). Si semina invece
+  // l'intera storia fino alla soglia dell'Atto 4 come da pin, così ogni
+  // finestra si chiude nell'ordine giusto prima di aprire la successiva.
+  A4.seed = async function (seed) {
     // IN PLACE sullo stato vivo: narrative-production.js tiene un riferimento
     // chiuso allo stato di boot per il sync classico↔narrativo; un setState
     // lo staccherebbe (sync su uno stato morto: gigante2 mai derivato, flag
     // classici mai riportati) — artefatto della semina, non della build.
     var nr = NR(), a = A();
     var s = a.getState();
-    nr.applyEffects(s, [
-      { set: 'sogno_fatto' }, { set: 'atto3' }, { set: 'east_route_confirmed' },
-      { set: 'jacques_preso' }, { set: 'jacques_dead' }, { set: 'gigante1' }, { set: 'atto4' },
-      { evidence: 'E3_LETTERA_R' }, { evidence: 'E1_DIARIO' }
-    ]);
-    s.nodes_done.m6_atto4_bridge = true;          // il ponte M6 è ciò che scrive atto4
+    var effects = [];
+    Object.keys((seed && seed.flags) || {}).forEach(function (k) { if (seed.flags[k]) effects.push({ set: k }); });
+    Object.keys((seed && seed.values) || {}).forEach(function (k) { effects.push({ value: k, to: seed.values[k] }); });
+    Object.keys((seed && seed.evidence) || {}).forEach(function (k) { if (seed.evidence[k]) effects.push({ evidence: k }); });
+    effects.push({ evidence: 'E3_LETTERA_R' }, { evidence: 'E1_DIARIO' });
+    Object.keys((seed && seed.props) || {}).forEach(function (id) {
+      var p = seed.props[id];
+      if (p && p.formulation && p.formulation.status === 'formulated') effects.push({ proposition: id, to: 'formulated' });
+    });
+    nr.applyEffects(s, effects);
+    Object.keys((seed && seed.nodes_done) || {}).forEach(function (k) { if (seed.nodes_done[k]) s.nodes_done[k] = true; });
     nr.deserialize(nr.serialize(s));             // valida il seme come farebbe il save layer
     s.revision++;
     var rf = a.refreshFromState();
     var f = S().flags;
-    ['sogno_fatto', 'atto3', 'east_route_confirmed', 'jacques_preso', 'jacques_morto', 'gigante1', 'atto4'].forEach(function (k) { f[k] = true; });
+    Object.keys((seed && seed.flags) || {}).forEach(function (k) { if (seed.flags[k]) f[k] = true; });
     await wait(700);   // due giri del sync di produzione
     transcript.push({ kind: 'seed', digest: stateDigest(), refreshed: rf });
     return { refreshed: rf, digest: stateDigest(), classicFlags: JSON.parse(JSON.stringify(S().flags)) };
@@ -635,6 +650,16 @@
       var raw = W.localStorage.getItem(key);
       var classic = W.localStorage.getItem('tp_save');
       return { narrative: raw !== null, classic: classic !== null, revision: A().getState().revision };
+    } catch (e) { return { error: String(e && e.message || e) }; }
+  };
+  // testo grezzo del salvataggio persistito: serve a cercare tracce di
+  // posizione (cast_source, sceneId, homeX) che il salvataggio NON deve
+  // contenere — il registro Cast Continuity deriva la collocazione dallo
+  // stato, non la persiste.
+  A4.savedRaw = function () {
+    try {
+      var key = W.GAME.NarrativeSave.keyFor('main');
+      return { narrative: W.localStorage.getItem(key) || '', classic: W.localStorage.getItem('tp_save') || '' };
     } catch (e) { return { error: String(e && e.message || e) }; }
   };
   A4.reload = async function () {
@@ -685,6 +710,19 @@
   };
   A4.entityDef = function (map, id) {
     return A4.entityDefs(map).filter(function (e) { return e.id === id; })[0] || null;
+  };
+  // registro Cast Continuity (js/cast-presence.js): DOVE STA ogni personaggio
+  // nominato secondo lo stato narrativo corrente. Sostituisce entityDefs/
+  // entityDef come fonte di verità sulla collocazione (il vecchio registro
+  // dell'adapter non esiste più: _debugNarrativeEntities è sempre vuoto).
+  A4.castWhere = function () { return G().CastPresence.where(); };
+  A4.castResolve = function (characterId) {
+    var r = JSON.parse(JSON.stringify(G().CastPresence.resolve(characterId)));
+    delete r.text;
+    return r;
+  };
+  A4.bodiesOn = function (map) {
+    return ((G().Maps[map] && G().Maps[map].npcs) || []).map(function (n) { return { id: n.id, x: n.x, y: n.y }; });
   };
   A4.doorAt = function (map, x, y) { var d = G().Maps.doorAt(map, x, y); return d ? JSON.parse(JSON.stringify(d)) : null; };
   A4.doorsOf = function (map) { return JSON.parse(JSON.stringify(G().Maps[map].doors || {})); };

@@ -1,10 +1,10 @@
-# Migration matrix (2026-09-12)
+# Migration matrix (2026-09-13, post-migration)
 
-Truth (`artifacts/world-character-audit/cast-windows-acts-1-4.md`) → data (`narrative/cast/windows.json`) → old body owner to delete (Phase 10, pending on the adapter collision).
+Truth (`artifacts/world-character-audit/cast-windows-acts-1-4.md`) → data (`narrative/cast/windows.json`). Old body owners (classic NPCS, NARRATIVE_ENTITIES) were removed on 2026-09-13; V7 PASS. The "old owner" column records what was deleted.
 
 ## Characters (baselines)
 
-| character | class | baseline | old owner today |
+| character | class | baseline | old owner (deleted) |
 |---|---|---|---|
 | andy | PERSISTENT | sheriff 10,7 | classic sheriff |
 | audrey | PERSISTENT | hotel_gn 12,9 | classic hotel_gn + adapter oej |
@@ -35,12 +35,12 @@ Truth (`artifacts/world-character-audit/cast-windows-acts-1-4.md`) → data (`na
 
 ## Windows
 
-| window | owner | when | cast → placement | authored (V6b) |
+| window | owner | when | cast → placement | authored (V6b) / actor_ids |
 |---|---|---|---|---|
 | JAMES_NOT_YET | classic | `{"not":{"flag":"sogno_fatto"}}` | james → OFFSCREEN(not_met) | — |
-| ACT3_HAWK_BRIDGE | M5 | `{"all":[{"flag":"atto3"},{"not":{"flag":"vagone_scoperto"}}]}` | hawk → traincar 5,6 | entry: {"hawk":"classic:truman_atto3"} · exit: {"hawk":"m5.hawk.hawk_door.p01"} |
-| ACT3_HAWK_DOOR | M5 | `{"all":[{"flag":"vagone_scoperto"},{"not":{"node_done":"m5_report_close"}}]}` | hawk → traincar 14,8 | exit: {"hawk":"m5.b9.report.p06"} |
-| ACT3_HAWK_CUT | M5 | `{"all":[{"node_done":"m5_report_close"},{"not":{"flag":"east_route_confirmed"}}]}` | hawk → traincar 22,3 | exit: {"hawk":"m5.hawk.hawk_cut.repeat"} |
+| ACT3_HAWK_BRIDGE | M5 | `{"all":[{"flag":"atto3"},{"not":{"flag":"vagone_scoperto"}}]}` | hawk → traincar 5,6 | entry: {"hawk":"classic:truman_atto3"} · exit: {"hawk":"m5.hawk.hawk_door.p01"} · actor_ids hawk: hawk_bridge |
+| ACT3_HAWK_DOOR | M5 | `{"all":[{"flag":"vagone_scoperto"},{"not":{"node_done":"m5_report_close"}}]}` | hawk → traincar 14,8 | exit: {"hawk":"m5.b9.report.p06"} · actor_ids hawk: hawk_door |
+| ACT3_HAWK_CUT | M5 | `{"all":[{"node_done":"m5_report_close"},{"not":{"flag":"east_route_confirmed"}}]}` | hawk → traincar 22,3 | exit: {"hawk":"m5.hawk.hawk_cut.repeat"} · actor_ids hawk: hawk_cut |
 | ACT3_HAWK_OEJ_DOCK | M6 | `{"all":[{"flag":"east_route_confirmed"},{"not":{"flag":"jacques_preso"}}]}` | hawk → oej 6,8 | exit: {"hawk":"m6.b7.arrest.p06"} |
 | ACT3_HAWK_ESCORT | M6 | `{"all":[{"flag":"jacques_preso"},{"not":{"node_done":"m6_hospital_guard"}}]}` | hawk → OFFSCREEN(escort) | — |
 | ACT3_TRUMAN_REPORT | M5 | `{"all":[{"value_set":"m5_final_theory"},{"proposition_path":"P3A.formulation.status","equals":"formulated"},{"not":{"flag":"jacques_preso"}},{"not":{"flag":"audrey_vista_oej"}}]}` | truman → traincar 9,8 | — |
@@ -59,11 +59,11 @@ Truth (`artifacts/world-character-audit/cast-windows-acts-1-4.md`) → data (`na
 | ACT5_LELAND_STATION | story | `{"all":[{"flag":"atto5"},{"not":{"flag":"leland_morto"}}]}` | leland → sheriff 8,5 | — |
 | LELAND_DEAD | story | `{"flag":"leland_morto"}` | leland → TERMINAL_REMOVED | — |
 | ACT4_EVENING_GATHERING | M8 | `{"all":[{"evidence":"T_LELAND_TAXI"},{"not":{"value_set":"focus_destination"}}]}` | truman → roadhouse 4,8; norma → roadhouse 5,6; shelly → roadhouse 3,6; loglady → roadhouse 2,6; james → roadhouse 2,4; bobby → roadhouse 3,4; donna → roadhouse 5,4 | entry: {"norma":"m8.b0.leland_taxi.chiusura.p01","shelly":"m8.b0.leland_taxi.chiusura.p01","loglady":"m8.b0.leland_taxi.chiusura.p01","james":"m8.b0.leland_taxi.chiusura.p01"} |
-| ACT4_GIANT_STAGE | M8 | `{"all":[{"value_is":{"name":"presagio_status","equals":"active"}},{"not":{"value_set":"warning_target"}}]}` | giant → roadhouse 8,1 | residual: {"giant":"R2"} |
+| ACT4_GIANT_STAGE | M8 | `{"all":[{"value_is":{"name":"presagio_status","equals":"active"}},{"not":{"value_set":"warning_target"}}]}` | giant → roadhouse 8,1 | residual: {"giant":"R2"} · actor_ids giant: gigante |
 | ACT4_HAWK_PATROL | M8 | `{"all":[{"evidence":"T_LELAND_TAXI"},{"not":{"value_is":{"name":"body_found_by","equals":"hawk"}}},{"not":{"all":[{"value_is":{"name":"body_found_by","equals":"cooper"}},{"flag":"maddy_trovata"}]}}]}` | hawk → OFFSCREEN(patrol) | — |
 | ACT4_HAWK_SHORE_FOUND_BY_HAWK | M8 | `{"all":[{"value_is":{"name":"body_found_by","equals":"hawk"}},{"not":{"flag":"atto5"}}]}` | hawk → town 16,27 | — |
 | ACT4_HAWK_SHORE_COOPER | M8 | `{"all":[{"value_is":{"name":"body_found_by","equals":"cooper"}},{"flag":"maddy_trovata"},{"not":{"flag":"atto5"}}]}` | hawk → town 16,27 | — |
-| ACT4_SARAH_ASLEEP | M8 | `{"all":[{"value_is":{"name":"presagio_status","equals":"active"}},{"not":{"flag":"atto5"}}]}` | sarah → OFFSCREEN(asleep) | — |
+| ACT4_SARAH_ASLEEP | M8 | `{"all":[{"value_set":"presagio_status"},{"not":{"flag":"atto5"}}]}` | sarah → OFFSCREEN(asleep) | — |
 | ACT4_ANDY_WITH_SARAH_VICE | M8 | `{"all":[{"value_is":{"name":"sarah_support_state","equals":"vice"}},{"not":{"flag":"atto5"}}]}` | andy → OFFSCREEN(with_sarah) | — |
 | ACT4_ANDY_WITH_SARAH_LATE | M8 | `{"all":[{"value_is":{"name":"sarah_support_state","equals":"none"}},{"flag":"maddy_trovata"},{"not":{"flag":"atto5"}}]}` | andy → OFFSCREEN(with_sarah) | — |
 | ACT4_TOWN_HOME_NIGHT | M8 | `{"all":[{"value_set":"focus_destination"},{"not":{"flag":"atto5"}}]}` | shelly → OFFSCREEN(home); loglady → OFFSCREEN(home); james → OFFSCREEN(home); bobby → OFFSCREEN(home); donna → OFFSCREEN(home) | — |

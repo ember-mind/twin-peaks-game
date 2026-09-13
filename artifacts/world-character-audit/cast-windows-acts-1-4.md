@@ -112,7 +112,7 @@ Giant in Room 315: no body (mirror interact); no window.
 | `ACT4_GIANT_STAGE` | `value_is presagio_status=active ∧ ¬value_set warning_target` | `warning_target` (p05 "La sala riprende il suo tempo. Nessuno ha visto niente.") | giant → `roadhouse` 8,1 | supernatural narrow window; accepted |
 | `ACT4_HAWK_PATROL` | `evidence T_LELAND_TAXI ∧ ¬value_is body_found_by=hawk ∧ ¬(value_is body_found_by=cooper ∧ maddy_trovata)` | the anonymous call | hawk → `OFFSCREEN` (patrol; D6) | Cooper at the diner when it starts |
 | `ACT4_HAWK_SHORE` | `(value_is body_found_by=hawk ∨ (value_is body_found_by=cooper ∧ maddy_trovata)) ∧ ¬atto5` | `atto5` | hawk → `town` 16,27 (T7; keeps the scene until dawn, D5) | — |
-| `ACT4_SARAH_ASLEEP` | `value_is presagio_status=active ∧ ¬atto5` | `atto5` | sarah → `OFFSCREEN` (asleep upstairs; D1) | Cooper at the Roadhouse |
+| `ACT4_SARAH_ASLEEP` (predicate corrected 2026-09-13) | `value_set presagio_status ∧ ¬atto5` (`=active` was wrong: `m8_discovery` turns it to `verified`, which would have put Sarah back in her living room at night) | `atto5` | sarah → `OFFSCREEN` (asleep upstairs; D1) | Cooper at the Roadhouse |
 | `ACT4_ANDY_WITH_SARAH_VICE` | `value_is sarah_support_state=vice ∧ ¬atto5` | `atto5` | andy → `OFFSCREEN` (dispatched, T4′; D2) | Cooper at the Roadhouse |
 | `ACT4_ANDY_WITH_SARAH_LATE` | `value_is sarah_support_state=none ∧ maddy_trovata ∧ ¬atto5` | `atto5` | andy → `OFFSCREEN` (Truman left him with Sarah, T7′; D2) | Cooper at the shore |
 | `ACT4_TOWN_HOME_NIGHT` (corrected entry) | `value_set focus_destination ∧ ¬atto5` | `atto5` | shelly, loglady, james, bobby, donna → `OFFSCREEN` (home; D7b). Norma → baseline `diner` and Truman → baseline `sheriff` by the gathering's exit | — |

@@ -70,7 +70,7 @@ const load = (name) => require(path.join(root, 'js', name));
   'tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'retro-font.js',
   'portraits.js', 'gold-tone.js', 'engine.js', 'glue.js', 'retro.js',
   'retro-cast-matrices-a.js', 'retro-cast-matrices-b.js', 'retro-authored.js',
-  'ambient-life.js'
+  'ambient-life.js', 'narrative-runtime.js', 'narrative-data.gen.js', 'cast-presence.js'
 ].forEach(load);
 const { create } = load('character-activity.js');
 load('location-connections.js');
@@ -269,8 +269,10 @@ assert(rendered.draw[0].src.includes('cast-walkcycles-hg-24.png'), 'Cooper ignor
 rendered = renderCharacter(G.Sprites.CHARS.truman, 'up', 0, false, { spriteFrame: 'truman.blink.down' });
 assert(rendered.draw[0].src.includes('cast-walkcycles-hg-24.png'), 'unsupported up pose uses original atlas');
 
-// Il cast del distretto vive in js/glue.js: il profilo si risolve per id NPC.
-const productionTrumans = G.Maps[MAP_ID].npcs.filter((npc) => npc.id === ACTOR_ID);
+// Il corpo di Truman non vive piu' in js/glue.js ma nel registro cast
+// (narrative/cast/windows.json), risolto da GAME.CastPresence contro lo
+// stato narrativo. Stato nullo = baseline autorale (nessuna finestra attiva).
+const productionTrumans = G.CastPresence.bodiesFor(MAP_ID, null).filter((npc) => npc.id === ACTOR_ID);
 assert.equal(productionTrumans.length, 1, 'the population pass preserves exactly one Truman record');
 assert.deepEqual([productionTrumans[0].x, productionTrumans[0].y, productionTrumans[0].sprite, productionTrumans[0].dir],
   [10, 4, 'truman', 'down']);
@@ -300,6 +302,10 @@ for (const [frameId, frame] of Object.entries(manifest.frames)) {
 assert.equal(manifest.source.sha256, beforeHashes['assets/sprites/cast-walkcycles-hg-24.png']);
 
 // Engine keeps locomotion ownership and invokes the real interaction reaction hook.
+// Il corpo di Truman non arriva piu' da js/glue.js: lo si posa a mano su
+// GAME.Maps[MAP_ID] prima del loadMap, come farebbe l'adapter narrativo in
+// produzione (GAME.CastPresence.syncMaps), per stato baseline (nessuna missione).
+G.Maps[MAP_ID].npcs = G.CastPresence.bodiesFor(MAP_ID, null);
 G.CharacterActivity.reset(1989);
 G.Engine.init(canvas, null);
 G.Engine.start();

@@ -175,6 +175,7 @@ async function main() {
     fs.writeFileSync(path.join(TX_DIR, 'assertions.json'),
       JSON.stringify({ results, observations: notesOut, console_errors: consoleErrors.slice(0, 40) }, null, 2));
     if (notesOut.length) console.log('\nosservazioni: ' + JSON.stringify(notesOut));
+    writeCastPresenceArtifacts();
 
     const failed = results.filter((r) => !r.pass);
     console.log(`\nact-3-playthrough: ${results.length - failed.length}/${results.length} assertions passed`);
@@ -238,6 +239,10 @@ function ev(cdp) {
     npcsHere: () => cdp.evaluate('A3.npcsHere()'),
     mapNpcs: (m) => cdp.evaluate(`A3.mapNpcs(${JSON.stringify(m)})`),
     ringHidden: () => cdp.evaluate('A3.ringHidden()'),
+    castWhere: () => cdp.evaluate('A3.castWhere()'),
+    castResolve: (id) => cdp.evaluate(`A3.castResolve(${JSON.stringify(id)})`),
+    bodiesOn: (m) => cdp.evaluate(`A3.bodiesOn(${JSON.stringify(m)})`),
+    savedRaw: () => cdp.evaluate('A3.savedRaw()'),
     classicFlags: () => cdp.evaluate('A3.classicFlags()'),
     dialogueNow: () => cdp.evaluate('A3.dialogueNow()'),
     unreachable: () => cdp.evaluate('A3.unreachableTiles()'),
@@ -373,7 +378,10 @@ async function playM5(P, name, opts, shot) {
   check(`[${name}] M5: dopo la scena del ponte il vagone resta raggiungibile a piedi`,
     !trapped, { note: 'hawk_bridge (5,7) chiude l\'unico varco fra le assi del ponte e la radura', pos: await P.pos() });
   const hawks1 = (await P.npcsHere()).filter((n) => n.sprite === 'hawk');
-  check(`[${name}] M5: un solo Hawk sul vagone dopo il ponte`, hawks1.length === 1 && hawks1[0].id === 'hawk_bridge', hawks1);
+  const hawkR1 = await P.castResolve('hawk');
+  check(`[${name}] M5: un solo Hawk sul vagone dopo il ponte, PLACED@traincar 5,6 dal registro`,
+    hawks1.length === 1 && hawkR1.status === 'PLACED' && hawkR1.sceneId === 'traincar' && hawkR1.x === 5 && hawkR1.y === 6 &&
+    hawks1[0].x === hawkR1.x && hawks1[0].y === hawkR1.y, { hawks1, hawkR1 });
 
   // scoperta + prompt della teoria preliminare (stessa sessione)
   const disc = await useTarget(P, T.traincar_entrance[0], T.traincar_entrance[1], 'm5_discovery');
@@ -384,7 +392,10 @@ async function playM5(P, name, opts, shot) {
   await P.choose(opts.initialTheory);
 
   const hawks2 = (await P.npcsHere()).filter((n) => n.sprite === 'hawk');
-  check(`[${name}] M5: un solo Hawk dopo la scoperta`, hawks2.length === 1 && hawks2[0].id === 'hawk_door', hawks2);
+  const hawkR2 = await P.castResolve('hawk');
+  check(`[${name}] M5: un solo Hawk dopo la scoperta, PLACED@traincar 14,8 dal registro`,
+    hawks2.length === 1 && hawkR2.status === 'PLACED' && hawkR2.sceneId === 'traincar' && hawkR2.x === 14 && hawkR2.y === 8 &&
+    hawks2[0].x === hawkR2.x && hawks2[0].y === hawkR2.y, { hawks2, hawkR2 });
 
   for (const step of opts.observationOrder) {
     await useTarget(P, T[step][0], T[step][1], 'm5_' + step);
@@ -421,6 +432,13 @@ async function playM5(P, name, opts, shot) {
     earlyPages.includes('m5.a14.early.p01') && !earlyPages.includes('m5.a14.tracks.p01'), earlyPages);
 
   // rapporto a Truman sul posto + S1
+  // NOTA: il pin ACT3_TRAINCAR_REPORT della fixture semina audrey_indaga=false,
+  // ma nella giocata reale quel flag è già vero da playActs12 (audrey_a2,
+  // js/data.js) — prima ancora che l'Atto 3 inizi. La combinazione del pin è
+  // irraggiungibile per questo percorso: si cattura senza confrontare con quel
+  // pin (nessun pin adatto), il controllo doppioni resta.
+  await captureCast(P, name, 'vagone: prima del rapporto a Truman', null);
+  await P.note('presenza: il pin ACT3_TRAINCAR_REPORT non è applicabile qui — audrey_indaga è già vero dall\'Atto 2 reale, il pin lo semina falso', null);
   const ringBefore = await P.ringHidden();
   const rep = await useActor(P, 'traincar', 'truman', 'm5_report_intro',
     shot ? 'm5.b9.report.contest.p01' : null, shot, 'truman-contest-impeto.png');
@@ -438,7 +456,10 @@ async function playM5(P, name, opts, shot) {
     { before: ringBefore, after: ringAfter });
 
   const hawks3 = (await P.npcsHere()).filter((n) => n.sprite === 'hawk');
-  check(`[${name}] M5: un solo Hawk dopo S1, al taglio a nord`, hawks3.length === 1 && hawks3[0].id === 'hawk_cut', hawks3);
+  const hawkR3 = await P.castResolve('hawk');
+  check(`[${name}] M5: un solo Hawk dopo S1, al taglio a nord, PLACED@traincar 22,3 dal registro`,
+    hawks3.length === 1 && hawkR3.status === 'PLACED' && hawkR3.sceneId === 'traincar' && hawkR3.x === 22 && hawkR3.y === 3 &&
+    hawks3[0].x === hawkR3.x && hawks3[0].y === hawkR3.y, { hawks3, hawkR3 });
 
   await useTarget(P, T.tracks_north[0], T.tracks_north[1], 'm5_tracks_north');
   const afterTracks = await P.state();
@@ -487,6 +508,17 @@ async function playM6(P, name, opts, shot) {
       st.flags.includes('audrey_vista_oej'), (aud.rows || []).map((r) => r.page_id));
     tac = await useActor(P, 'oej', 'jacques', 'm6_tactic');
   }
+  // NOTA: i pin ACT3_OEJ / ACT3_OEJ_NO_AUDREY seminano audrey_indaga=false, ma
+  // nella giocata reale quel flag è già vero dall'Atto 2 (stessa causa del
+  // rapporto al vagone sopra): irraggiungibili quando Audrey non è ancora
+  // stata vista a One Eyed Jacks. Solo ACT3_OEJ_AUDREY_SEEN (che richiede
+  // audrey_indaga=true) è raggiungibile e si confronta.
+  if (opts.audrey) {
+    await captureCast(P, name, 'One Eyed Jacks (prima del fermo)', 'ACT3_OEJ_AUDREY_SEEN');
+  } else {
+    await captureCast(P, name, 'One Eyed Jacks (prima del fermo)', null);
+    await P.note('presenza: ACT3_OEJ_NO_AUDREY non applicabile qui — audrey_indaga è già vero dall\'Atto 2 reale, il pin lo semina falso', null);
+  }
   const tacPages = [...(ferry.rows || []), ...(tac === ferry ? [] : tac.rows || [])]
     .filter((r) => r.kind === 'page').map((r) => r.page_id);
   check(`[${name}] M6: richiamo alle carte del vagone ${opts.cards ? 'presente' : 'assente'} al tavolo`,
@@ -526,6 +558,7 @@ async function playM6(P, name, opts, shot) {
     st = await P.state();
   }
   check(`[${name}] M6: fermo di Renault committato`, st.flags.includes('jacques_preso'), st.flags);
+  await captureCast(P, name, 'One Eyed Jacks: dopo il fermo', 'ACT3_AFTER_ARREST');
 
   if (opts.trumanBeforeHospital) {
     await P.travel('sheriff', 11, 4, 'left', 'viaggio: centrale');
@@ -553,8 +586,10 @@ async function playM6(P, name, opts, shot) {
   check(`[${name}] M6: un piantone davanti alla stanza, nessun doppione`,
     wardNpcs.filter((n) => n.id === 'piantone').length === 1 &&
     wardNpcs.filter((n) => n.id === 'piantone_ronette').length === 0, wardNpcs.map((n) => n.id));
+  await captureCast(P, name, 'ospedale sorvegliato (dopo il registro di turno)', 'ACT3_GUARDED_HOSPITAL');
 
   if (opts.reloadAfterArrest) {
+    const cwGuardBefore = await P.castWhere();
     const rl = await P.reload();
     check(`[${name}] M6: reload dopo il fermo — obiettivo HUD identico`,
       rl.before.objective === rl.after.objective, { before: rl.before.objective, after: rl.after.objective });
@@ -562,6 +597,20 @@ async function playM6(P, name, opts, shot) {
       JSON.stringify(rl.before.npcs) === JSON.stringify(rl.after.npcs), { before: rl.before.npcs, after: rl.after.npcs });
     check(`[${name}] M6: reload dopo il fermo — stato narrativo identico`,
       JSON.stringify(rl.before.digest) === JSON.stringify(rl.after.digest), 'digest diverso');
+    const cwGuardAfter = await P.castWhere();
+    check(`[${name}] M6: reload nell'ospedale sorvegliato — il registro Cast Continuity è identico prima e dopo`,
+      JSON.stringify(cwGuardBefore) === JSON.stringify(cwGuardAfter), { before: cwGuardBefore, after: cwGuardAfter });
+    const saveRaw = await P.savedRaw();
+    const saveText = (saveRaw.narrative || '') + '\n' + (saveRaw.classic || '');
+    const leakedKeys = ['cast_source', 'sceneId', 'homeX'].filter((k) => saveText.indexOf(k) >= 0);
+    check(`[${name}] M6: reload nell'ospedale sorvegliato — il salvataggio non contiene chiavi di posizione`,
+      leakedKeys.length === 0, leakedKeys);
+    reloadResults.push({
+      path: name, moment: 'ospedale sorvegliato (dopo il fermo)',
+      digestEqual: JSON.stringify(rl.before.digest) === JSON.stringify(rl.after.digest),
+      castEqual: JSON.stringify(cwGuardBefore) === JSON.stringify(cwGuardAfter),
+      saveLeaks: leakedKeys
+    });
   }
 
   // rapporto notturno
@@ -580,6 +629,7 @@ async function playM6(P, name, opts, shot) {
     lucyPages.includes('m6.b8.news.cooper_impeto') === !!opts.impeto, lucyPages);
   const afterLucy = await P.state();
   check(`[${name}] M6: la morte di Renault è registrata`, afterLucy.flags.includes('jacques_dead'), afterLucy.flags);
+  await captureCast(P, name, 'centrale, notte (dopo la chiamata di Lucy)', 'ACT3_NIGHT_STATION');
 
   if (opts.revisitRegister) {
     await P.travel('hospital', 13, 7, 'down', 'viaggio: reparto');
@@ -620,6 +670,77 @@ async function playM6(P, name, opts, shot) {
   check(`[${name}] Atto 4: eco S1 corretta (${opts.expectS1Echo})`,
     bridgePages.includes(opts.expectS1Echo) &&
     bridgePages.filter((p) => p.startsWith('m6.b9.atto4.s1_')).length === 1, bridgePages);
+}
+
+/* --------------------- Cast Continuity: pin comparator --------------------- */
+/* Stessa logica di test/act-4-playthrough.js: test/fixtures/cast-pins-acts-1-4.json
+   §4 è verità di prova, non stato reale del percorso. Un pin si applica a un
+   momento quando la combinazione di valori che conta per la collocazione
+   (qui: le fasi dell'Atto 3 — teoria, S1, fermo, ospedale) coincide con quella
+   della semina sintetica; altrimenti si cattura senza confronto. */
+const CAST_FIXTURE = JSON.parse(fs.readFileSync(path.join(ROOT, 'test', 'fixtures', 'cast-pins-acts-1-4.json'), 'utf8'));
+const castCaptures = [];
+const reloadResults = [];
+function parseActualPresence(s) {
+  let m;
+  if ((m = /^PLACED@([a-z0-9_]+) (-?\d+),(-?\d+) (\w+) \[(.*)\]$/i.exec(s || ''))) return { status: 'PLACED', map: m[1], x: Number(m[2]), y: Number(m[3]), dir: m[4], source: m[5] };
+  if ((m = /^OFFSCREEN\(([^)]*)\) \[(.*)\]$/.exec(s || ''))) return { status: 'OFFSCREEN', label: m[1] || null, source: m[2] };
+  if ((m = /^TERMINAL_REMOVED\(([^)]*)\) \[(.*)\]$/.exec(s || ''))) return { status: 'TERMINAL_REMOVED', event: m[1] || null, source: m[2] };
+  return { status: 'UNKNOWN', raw: s };
+}
+function parsePinExpect(exp) {
+  if (exp === 'TERMINAL_REMOVED') return { status: 'TERMINAL_REMOVED' };
+  if (exp === 'OFFSCREEN') return { status: 'OFFSCREEN' };
+  if (exp.indexOf('OFFSCREEN:') === 0) return { status: 'OFFSCREEN', label: exp.slice('OFFSCREEN:'.length) };
+  const m = /^([a-z0-9_]+)(?:@(-?\d+),(-?\d+))?$/i.exec(exp);
+  if (!m) throw new Error('pin illeggibile: ' + exp);
+  return { status: 'PLACED', map: m[1], x: m[2] !== undefined ? Number(m[2]) : undefined, y: m[3] !== undefined ? Number(m[3]) : undefined };
+}
+function matchesPin(actual, expect) {
+  if (actual.status !== expect.status) return false;
+  if (expect.status === 'PLACED') {
+    if (expect.map !== undefined && actual.map !== expect.map) return false;
+    if (expect.x !== undefined && actual.x !== expect.x) return false;
+    if (expect.y !== undefined && actual.y !== expect.y) return false;
+  } else if (expect.status === 'OFFSCREEN' && expect.label !== undefined) {
+    if (actual.label !== expect.label) return false;
+  }
+  return true;
+}
+async function assertNoDuplicateBodies(P, name, moment, cw) {
+  const maps = new Set();
+  for (const id of Object.keys(cw)) { const a = parseActualPresence(cw[id]); if (a.status === 'PLACED') maps.add(a.map); }
+  const dups = [];
+  for (const map of maps) {
+    const bodies = await P.bodiesOn(map);
+    const counts = {};
+    for (const b of bodies) counts[b.id] = (counts[b.id] || 0) + 1;
+    for (const [id, n] of Object.entries(counts)) if (n > 1) dups.push({ map, id, n });
+  }
+  check(`[${name}] presenza (${moment}): nessuna mappa viva ha due corpi con lo stesso id`, dups.length === 0, dups);
+}
+async function captureCast(P, name, moment, pinId) {
+  const cw = await P.castWhere();
+  const mismatches = [];
+  if (pinId) {
+    const pin = CAST_FIXTURE.pins.find((p) => p.id === pinId);
+    if (!pin) mismatches.push({ error: 'pin_not_found', pinId });
+    else {
+      for (const [id, expect] of Object.entries(pin.expect)) {
+        const actualRaw = cw[id];
+        if (actualRaw === undefined) { mismatches.push({ id, error: 'missing_from_snapshot' }); continue; }
+        const parsed = parseActualPresence(actualRaw);
+        const expObj = parsePinExpect(expect);
+        if (!matchesPin(parsed, expObj)) mismatches.push({ id, expect, actual: actualRaw });
+      }
+    }
+  }
+  check(`[${name}] presenza (${moment}): il registro combacia col pin${pinId ? ' ' + pinId : ' (nessun pin adatto: solo cattura + doppioni)'}`,
+    mismatches.length === 0, mismatches);
+  await assertNoDuplicateBodies(P, name, moment, cw);
+  await P.note('scatto registro Cast Continuity: ' + moment + (pinId ? ' (pin ' + pinId + ')' : ''), cw);
+  castCaptures.push({ path: name, moment, pinId, snapshot: cw, mismatches });
+  return cw;
 }
 
 /* ------------------------------ percorsi ------------------------------ */
@@ -814,6 +935,53 @@ function auditTranscript(name, dump, opts) {
   // 7. errori d'ambiguità delle root
   const amb = dump.transcript.filter((r) => r.kind === 'ERROR_ambiguous_roots');
   check(`[${name}] adapter: nessuna root ambigua`, amb.length === 0, amb);
+}
+
+/* ---------------- artefatti Cast Continuity (v0.1) ---------------- */
+const CP_DIR = path.join(ROOT, 'artifacts', 'cast-presence-v0.1');
+function writeCastPresenceArtifacts() {
+  if (!fs.existsSync(CP_DIR)) return;   // artefatto non ancora inizializzato: nulla da appendere
+  const stamp = new Date().toISOString().slice(0, 10);
+  const L = [];
+  L.push('');
+  L.push(`## Real-build capture (Chrome headless, ${stamp})`);
+  L.push('');
+  L.push('Scatti presi con `node test/act-3-playthrough.js` sulla build reale');
+  L.push('(`index.html`), leggendo `GAME.CastPresence.where()` (js/cast-presence.js)');
+  L.push('nei momenti chiave della giocata. Confrontati coi pin di');
+  L.push('`test/fixtures/cast-pins-acts-1-4.json` quando la fase (teoria/S1/fermo/');
+  L.push('ospedale) coincide con quella della semina sintetica; altrimenti solo');
+  L.push('catturati (nessun pin adatto) e controllati per doppioni.');
+  L.push('');
+  for (const c of castCaptures) {
+    L.push(`### ${c.path} — ${c.moment}`);
+    L.push('');
+    L.push(c.pinId ? `Pin di riferimento: \`${c.pinId}\` — ${c.mismatches.length === 0 ? 'combacia' : 'DISCREPANZE: ' + JSON.stringify(c.mismatches)}` : '_nessun pin adatto a questa combinazione: solo cattura + controllo doppioni_');
+    L.push('');
+    L.push('| personaggio | presenza |');
+    L.push('|---|---|');
+    for (const id of Object.keys(c.snapshot).sort()) L.push(`| ${id} | \`${c.snapshot[id]}\` |`);
+    L.push('');
+  }
+  fs.appendFileSync(path.join(CP_DIR, 'act3-presence-trace.md'), L.join('\n') + '\n');
+  console.log(`  cast-presence trace -> ${path.relative(ROOT, path.join(CP_DIR, 'act3-presence-trace.md'))} (appended)`);
+
+  const R = [];
+  R.push('');
+  R.push(`## Browser reloads — Atto 3 (Chrome headless, ${stamp})`);
+  R.push('');
+  R.push('Ricariche reali dell\'iframe di produzione durante `act-3-playthrough.js`.');
+  R.push('«registro» = `GAME.CastPresence.where()`; «narrativo» = lo stato serializzato');
+  R.push('(flags/values/evidence/nodes_done) letto da `A3.stateDigest()`.');
+  R.push('');
+  R.push('| percorso | momento | stato narrativo identico | registro Cast Continuity identico | salvataggio senza chiavi di posizione |');
+  R.push('|---|---|---|---|---|');
+  for (const r of reloadResults) {
+    R.push(`| ${r.path} | ${r.moment} | ${r.digestEqual ? 'sì' : 'NO'} | ${r.castEqual ? 'sì' : 'NO'} | ${r.saveLeaks === undefined ? '—' : (r.saveLeaks.length === 0 ? 'sì' : 'NO: ' + r.saveLeaks.join(', '))} |`);
+  }
+  R.push('');
+  fs.appendFileSync(path.join(CP_DIR, 'save-reload-report.md'), R.join('\n') + '\n');
+  console.log(`  save-reload report -> ${path.relative(ROOT, path.join(CP_DIR, 'save-reload-report.md'))} (appended)`);
 }
 
 /* ------------------------------ artefatti ------------------------------ */

@@ -68,6 +68,9 @@
         dialogue: (pl.dialogue === undefined ? null : pl.dialogue), dir: pl.dir || 'down',
         wander: !!pl.wander, cast_source: source
       };
+      // id-attore delle missioni a cui questo corpo risponde (es. hawk → hawk_bridge):
+      // riferimento d'interazione autorale, MAI un alias implicito.
+      if (Array.isArray(pl.actor_ids) && pl.actor_ids.length) r.body.actor_ids = pl.actor_ids.slice();
     } else if (pl.status === STATUS.OFFSCREEN) {
       r.label = pl.label || null;
     } else if (pl.status === STATUS.TERMINAL_REMOVED) {

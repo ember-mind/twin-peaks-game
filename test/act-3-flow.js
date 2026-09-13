@@ -23,6 +23,13 @@ const M8 = JSON.parse(fs.readFileSync(path.join(ROOT, 'missions', 'M8.json'), 'u
 const M9path = path.join(ROOT, 'missions', 'M9.json');
 const M9 = fs.existsSync(M9path) ? JSON.parse(fs.readFileSync(M9path, 'utf8')) : null;
 const enums = JSON.parse(fs.readFileSync(path.join(ROOT, 'state-enums.json'), 'utf8'));
+// Cast Continuity: pin table authored against js/cast-presence.js — the single
+// source of truth for "where a named character stands" replacing the old
+// NARRATIVE_ENTITIES registry (see js/narrative-engine-adapter.js).
+const PINS = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'cast-pins-acts-1-4.json'), 'utf8'));
+const PIN_SEEDS = PINS.seeds;
+const PIN_BY_ID = {};
+PINS.pins.forEach((p) => { PIN_BY_ID[p.id] = p; });
 
 /* ===================== (a) runtime path ===================== */
 (function runtimePath() {
@@ -254,72 +261,93 @@ const enums = JSON.parse(fs.readFileSync(path.join(ROOT, 'state-enums.json'), 'u
   global.requestAnimationFrame = function () {};
   const J = (f) => path.join(__dirname, '..', 'js', f);
   ['tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'retro-font.js', 'engine.js', 'glue.js',
-    'narrative-runtime.js', 'narrative-data.gen.js', 'narrative-engine-adapter.js']
+    'narrative-runtime.js', 'narrative-data.gen.js', 'cast-presence.js', 'narrative-engine-adapter.js']
     .forEach((f) => require(J(f)));
   const GAME = global.GAME;
   const NR = GAME.NarrativeRuntime;
   const A = GAME.NarrativeAdapter;
+  const CP = GAME.CastPresence;
   const M5d = GAME.NarrativeData.missions.M5;
   const M4d = GAME.NarrativeData.missions.M4;
 
-  console.log('# act-3-flow: adapter path (Hawk placements on traincar)');
+  console.log('# act-3-flow: adapter path (Hawk/Truman/Jacques/Audrey via CastPresence)');
 
-  const state = NR.createState();
-  A.enable({ mission: M5d, missions: [M4d, M5d], state: state, container: {} });
-  const entities = A._debugNarrativeEntities.filter(e => e.map_id === 'traincar');
-  const hawkBridge = entities.find(e => e.npc.id === 'hawk_bridge');
-  const hawkDoor = entities.find(e => e.npc.id === 'hawk_door');
-  const hawkCut = entities.find(e => e.npc.id === 'hawk_cut');
-  const truman = entities.find(e => e.npc.id === 'truman');
-  ok(!!hawkBridge && !!hawkDoor && !!hawkCut, 'traincar: tre collocazioni di Hawk registrate');
-  ok(hawkBridge.npc.x === 5 && hawkBridge.npc.y === 6, 'hawk_bridge: (5,6) sulla sponda est, prima della scoperta');
-  // Playthrough E1: la riga 7 fra il ponte (x<=4) e il vagone (x>=9) è l'unico
-  // attraversamento del torrente; un attore lì chiude Cooper sulle assi.
-  entities.filter(e => e.map_id === 'traincar').forEach(e => {
-    ok(!(e.npc.y === 7 && e.npc.x >= 3 && e.npc.x <= 8), e.npc.id + ': mai sulla riga 7 dell\'attraversamento (softlock)');
-  });
-  ok(hawkDoor.npc.x === 14 && hawkDoor.npc.y === 8, 'hawk_door: (14,8) fuori dalla porta, dopo la scoperta e prima di S1');
-  ok(hawkCut.npc.x === 22 && hawkCut.npc.y === 3, 'hawk_cut: (22,3) dopo S1');
-  ok(truman.npc.x === 9 && truman.npc.y === 8, 'truman: (9,8) sul bordo sud dei binari');
-
-  function evalWhen(when) { return A._debugEvalWhen(when); }
-  // Playthrough E1 (2026-09-10): One Eyed Jacks arrivava senza NPC (il pass 01
-  // aveva ritirato i classici senza registrare i sostituti narrativi).
-  const allEntities = A._debugNarrativeEntities;
-  const jq = allEntities.find(e => e.npc.id === 'jacques' && e.map_id === 'oej');
-  const au = allEntities.find(e => e.npc.id === 'audrey' && e.map_id === 'oej');
-  ok(!!jq && jq.npc.x === 7 && jq.npc.y === 5, 'oej: Jacques narrativo al banco (7,5)');
-  ok(!!au && au.npc.x === 13 && au.npc.y === 7, 'oej: Audrey narrativa al tavolo (13,7)');
-
-  const HAWKS = [hawkBridge, hawkDoor, hawkCut];
-  function hawksPresent(s) { A.setState(s); return HAWKS.filter(e => evalWhen(e.when)); }
-  function assertExactlyOneHawk(s, label) {
-    const present = hawksPresent(s);
-    ok(present.length === 1, label + ': esattamente un hawk_* presente (trovati: ' + present.map(e => e.npc.id).join(',') + ')');
-    return present[0];
-  }
+  // -- riga 7 dell'attraversamento (softlock): nessuna collocazione narrativa
+  //    sul vagone finisce lì. Playthrough E1: la riga fra il ponte (x<=4) e il
+  //    vagone (x>=9) è l'unico attraversamento del torrente; un attore lì
+  //    chiude Cooper sulle assi. Controllo statico su tutte le finestre.
   {
-    const s = NR.createState();
-    A.setState(s);
-    ok(hawksPresent(s).length === 0, 'stato vergine (m5_bridge non fatto): nessun hawk_* presente');
-    ok(evalWhen(hawkBridge.when) === false, 'hawk_bridge: assente su stato vergine (m5_bridge non fatto)');
-    doNode(M5d, s, 'm5_bridge');
-    ok(assertExactlyOneHawk(s, 'dopo il ponte').npc.id === 'hawk_bridge', 'dopo il ponte: solo hawk_bridge presente');
-    ok(evalWhen(hawkDoor.when) === false, 'hawk_door: assente prima della scoperta');
-    doNode(M5d, s, 'm5_discovery');
-    ok(assertExactlyOneHawk(s, 'dopo la scoperta').npc.id === 'hawk_door', 'dopo la scoperta: solo hawk_door presente');
-    ok(evalWhen(hawkCut.when) === false, 'hawk_cut: assente prima di S1');
-    ok(evalWhen(truman.when) === false, 'truman: assente senza teoria finale');
-    s.values.m5_final_theory = 'degeneration';
-    ok(evalWhen(truman.when) === true, 'truman: presente con teoria finale, prima di east_route');
-    s.flags.east_route_confirmed = true;
-    ok(evalWhen(truman.when) === false, 'truman: assente dopo east_route_confirmed');
-    ok(evalWhen(hawkCut.when) === false, 'hawk_cut: ancora assente senza s1');
-    s.values.s1 = 'institutional';
-    ok(assertExactlyOneHawk(s, 'dopo s1').npc.id === 'hawk_cut', 'dopo s1: solo hawk_cut presente');
-    ok(evalWhen(hawkDoor.when) === false, 'hawk_door: assente dopo s1');
-    ok(evalWhen(hawkCut.when) === true, 'hawk_cut: presente dopo s1');
+    const placements = [];
+    CP.windows().forEach((w) => {
+      Object.keys(w.cast).forEach((id) => {
+        const pl = w.cast[id];
+        if (pl.status === 'PLACED' && pl.map_id === 'traincar') placements.push({ id: id, x: pl.x, y: pl.y, window: w.id });
+      });
+    });
+    ok(placements.length > 0, 'traincar: almeno una collocazione narrativa registrata');
+    placements.forEach((p) => {
+      ok(!(p.y === 7 && p.x >= 3 && p.x <= 8), p.id + ' (' + p.window + '): mai sulla riga 7 dell\'attraversamento (softlock)');
+    });
   }
+
+  // -- collocazioni via il resolver, sui pin autorevoli di
+  //    test/fixtures/cast-pins-acts-1-4.json (grammatica: "<map>@<x>,<y>" |
+  //    "OFFSCREEN" | "OFFSCREEN:<label>" | "TERMINAL_REMOVED") --
+  function seedState(seed) {
+    const s = NR.createState();
+    Object.assign(s.flags, seed.flags || {});
+    Object.assign(s.values, seed.values || {});
+    Object.assign(s.evidence, seed.evidence || {});
+    Object.assign(s.nodes_done, seed.nodes_done || {});
+    Object.keys(seed.props || {}).forEach((id) => {
+      const p = seed.props[id];
+      s.props[id] = {
+        formulation: Object.assign({ status: 'unformulated', created_from: [] }, p.formulation),
+        presentations: [], social_status: { accepted_by: [] }, factual_status: 'unconfirmed'
+      };
+    });
+    return s;
+  }
+  function assertPresence(charId, s, expectStr, label) {
+    const r = CP.resolveCharacterPresence(charId, s);
+    if (expectStr === 'OFFSCREEN') {
+      ok(r.status === 'OFFSCREEN', label + ': ' + charId + ' OFFSCREEN (trovato ' + r.status + ')');
+    } else if (expectStr.indexOf('OFFSCREEN:') === 0) {
+      const wantLabel = expectStr.slice('OFFSCREEN:'.length);
+      ok(r.status === 'OFFSCREEN' && r.label === wantLabel,
+        label + ': ' + charId + ' OFFSCREEN(' + wantLabel + ') (trovato ' + r.status + (r.label ? '(' + r.label + ')' : '') + ')');
+    } else if (expectStr === 'TERMINAL_REMOVED') {
+      ok(r.status === 'TERMINAL_REMOVED', label + ': ' + charId + ' TERMINAL_REMOVED (trovato ' + r.status + ')');
+    } else {
+      const m = /^([^@]+)@(-?\d+),(-?\d+)$/.exec(expectStr);
+      ok(!!m, label + ': grammatica del pin leggibile (' + expectStr + ')');
+      const placed = r.status === 'PLACED' && r.sceneId === m[1] && r.x === Number(m[2]) && r.y === Number(m[3]);
+      ok(placed, label + ': ' + charId + ' PLACED@' + m[1] + ' ' + m[2] + ',' + m[3] +
+        ' (trovato ' + (r.status === 'PLACED' ? r.sceneId + ' ' + r.x + ',' + r.y : r.status) + ')');
+    }
+  }
+  function checkPin(pinId, charIds) {
+    const pin = PIN_BY_ID[pinId];
+    const s = seedState(PIN_SEEDS[pin.seed]);
+    charIds.forEach((id) => assertPresence(id, s, pin.expect[id], pinId));
+    return s;
+  }
+
+  // hawk: bridge (5,6) -> door (14,8) -> cut (22,3) -> oej dock (6,8) -> escort
+  checkPin('ACT3_BRIDGE', ['hawk', 'truman']);
+  checkPin('ACT3_TRAINCAR_REPORT', ['hawk', 'truman']);
+  checkPin('ACT3_NORTH_CUT', ['hawk', 'truman']);
+  // oej: Jacques narrativo al banco, Audrey narrativa al tavolo, hawk al molo
+  checkPin('ACT3_OEJ', ['hawk', 'truman', 'jacques', 'audrey']);
+  // truman -> OFFSCREEN(boat) SOLO se ha visto Audrey a OEJ prima del fermo
+  checkPin('ACT3_OEJ_AUDREY_SEEN', ['hawk', 'truman', 'jacques', 'audrey']);
+  checkPin('ACT3_OEJ_NO_AUDREY', ['hawk', 'truman', 'jacques', 'audrey']);
+  // dopo il fermo: hawk in escort, jacques guarded, un piantone in corsia
+  checkPin('ACT3_AFTER_ARREST', ['hawk', 'truman', 'jacques', 'piantone']);
+  checkPin('ACT3_GUARDED_HOSPITAL', ['hawk', 'truman', 'jacques', 'piantone']);
+  // morto Renault: jacques TERMINAL_REMOVED, la sorveglianza passa a Ronette
+  checkPin('ACT3_NIGHT_STATION', ['hawk', 'truman', 'jacques', 'piantone', 'piantone_ronette']);
+
   // Maintenance 2026-09-10 (story-truth v0.1, issue 1): la traversa (13,5) è
   // un target narrativo di M5 (`ring`) e coincide con l'interact classico
   // `anello_interact`; l'adapter consuma la casella ogni volta che M5 è entrata
@@ -327,6 +355,8 @@ const enums = JSON.parse(fs.readFileSync(path.join(ROOT, 'state-enums.json'), 'u
   // di tryInteractAt), quindi il testo classico non è raggiungibile in
   // produzione. Il testo classico stesso non afferma più la proprietà.
   {
+    const state = NR.createState();
+    A.enable({ mission: M5d, missions: [M4d, M5d], state: state, container: {} });
     const reg = A._debugWorldTargets.traincar;
     ok(reg && reg.ring && reg.ring.x === 13 && reg.ring.y === 5, 'traincar: target narrativo ring a (13,5)');
     const classicObj = GAME.Maps.objectAt('traincar', 13, 5);
@@ -338,7 +368,6 @@ const enums = JSON.parse(fs.readFileSync(path.join(ROOT, 'state-enums.json'), 'u
     const cd = cl.document.pages.map(p => p.text).join(' ') + ' ' + cl.name + ' ' + cl.desc;
     ok(!/Laura|monile/.test(dl) && !/Laura|monile/.test(cd), 'indizio classico anello: nessuna attribuzione di proprietà (guardia ring_c)');
   }
-  function doNode(mission, s, id) { const p = NR.prepareNode(s, mission, id); if (!p.ok) return p; return NR.commitNode(s, mission, p); }
 
   console.log('act-3-flow: adapter path OK');
 })();
@@ -559,39 +588,53 @@ const enums = JSON.parse(fs.readFileSync(path.join(ROOT, 'state-enums.json'), 'u
   const GAME = global.GAME;
   const NR = GAME.NarrativeRuntime;
   const A = GAME.NarrativeAdapter;
+  const CP = GAME.CastPresence;
   const D = GAME.NarrativeData;
-  A.enable({ mission: D.missions.M6, missions: [D.missions.M4, D.missions.M5, D.missions.M6], state: NR.createState(), container: {} });
+  const stateGuarded = NR.createState();
+  NR.applyEffects(stateGuarded, [{ set: 'jacques_preso' }]);
+  A.enable({ mission: D.missions.M6, missions: [D.missions.M4, D.missions.M5, D.missions.M6], state: stateGuarded, container: {} });
 
-  console.log('# act-3-flow: M6 stitch (piantoni, adapter)');
-  const ward = A._debugNarrativeEntities.filter(e => e.map_id === 'hospital');
-  const piantone = ward.find(e => e.npc.id === 'piantone');
-  const doubled = ward.find(e => e.npc.id === 'piantone_ronette');
-  const ronette = ward.find(e => e.npc.id === 'ronette');
-  ok(!!piantone && !!doubled, 'ospedale: le due collocazioni del piantone sono registrate');
-  ok(piantone.npc.id !== doubled.npc.id, 'ospedale: id distinti (la sync identifica per npc.id)');
-  ok(piantone.npc.dialogue === null && doubled.npc.dialogue === null, 'ospedale: i piantoni sono scenografia, mai attori con dialogo');
-  ok(piantone.npc.sprite === 'andy' && doubled.npc.sprite === 'andy', 'ospedale: sprite da vice della contea, mai hawk/truman');
+  console.log('# act-3-flow: M6 stitch (piantoni, CastPresence)');
+  const piantone = CP.resolveCharacterPresence('piantone', stateGuarded);
+  const ronetteGuarded = CP.resolveCharacterPresence('ronette', stateGuarded);
+  ok(piantone.status === 'PLACED' && piantone.sceneId === 'hospital', 'ospedale: il piantone è piazzato in corsia con Renault in custodia');
+  ok(GAME.Maps.hospital.npcs.some((n) => n.id === 'piantone'), 'ospedale: il corpo del piantone è sincronizzato sulla mappa (GAME.Maps.hospital.npcs)');
+
+  const stateDead = NR.createState();
+  NR.applyEffects(stateDead, [{ set: 'jacques_preso' }, { set: 'jacques_dead' }]);
+  A.setState(stateDead);
+  const doubled = CP.resolveCharacterPresence('piantone_ronette', stateDead);
+  const ronetteDead = CP.resolveCharacterPresence('ronette', stateDead);
+  ok(doubled.status === 'PLACED' && doubled.sceneId === 'hospital', 'ospedale: il piantone raddoppiato è piazzato dopo la morte di Renault');
+  ok(GAME.Maps.hospital.npcs.some((n) => n.id === 'piantone_ronette'), 'ospedale: il corpo del piantone raddoppiato è sincronizzato sulla mappa');
+  ok(!GAME.Maps.hospital.npcs.some((n) => n.id === 'piantone'), 'ospedale: il piantone originale è tolto dalla mappa dopo la morte di Renault');
+
+  ok(piantone.characterId !== doubled.characterId, 'ospedale: id distinti (il resolver identifica per characterId)');
+  ok(piantone.body.dialogue === null && doubled.body.dialogue === null, 'ospedale: i piantoni sono scenografia, mai attori con dialogo');
+  ok(piantone.body.sprite === 'andy' && doubled.body.sprite === 'andy', 'ospedale: sprite da vice della contea, mai hawk/truman');
   ok(!!GAME.sprites.CHARS.andy, 'ospedale: lo sprite del piantone esiste nel catalogo chars.js');
   const rows = GAME.Maps.hospital.rows;
   const walkable = (x, y) => rows[y][x] === '.';
-  ok(walkable(piantone.npc.x, piantone.npc.y), 'piantone: casella calpestabile (7,3), davanti alla porta doppia nord');
+  ok(walkable(piantone.x, piantone.y), 'piantone: casella calpestabile (7,3), davanti alla porta doppia nord');
   // Playthrough E1: il testo dice "in fondo al reparto, davanti a una porta
   // chiusa" — l'unica porta interna disegnata e' la doppia porta nord (6-7,1-2).
-  ok(rows[piantone.npc.y - 1][piantone.npc.x] === 'T' && piantone.npc.dir === 'up',
+  ok(rows[piantone.y - 1][piantone.x] === 'T' && piantone.dir === 'up',
     'piantone: contro la parete nord, rivolto alla porta chiusa');
-  ok(Math.abs(piantone.npc.x - ronette.npc.x) >= 4, 'piantone: lontano dal letto di Ronette (' + piantone.npc.x + ' vs ' + ronette.npc.x + ')');
+  ok(Math.abs(piantone.x - ronetteGuarded.x) >= 4, 'piantone: lontano dal letto di Ronette (' + piantone.x + ' vs ' + ronetteGuarded.x + ')');
   ok(walkable(2, 5), 'piantone: la casella d\'accesso al letto di Ronette resta libera');
-  ok(doubled.npc.x === ronette.npc.x && doubled.npc.y === ronette.npc.y + 1, 'piantone raddoppiato: davanti al letto di Ronette');
-  ok(walkable(doubled.npc.x, doubled.npc.y), 'piantone raddoppiato: casella calpestabile');
+  ok(doubled.x === ronetteDead.x && doubled.y === ronetteDead.y + 1, 'piantone raddoppiato: davanti al letto di Ronette');
+  ok(walkable(doubled.x, doubled.y), 'piantone raddoppiato: casella calpestabile');
 
-  const when = (e, s) => { A.setState(s); return A._debugEvalWhen(e.when); };
   {
     const s = NR.createState();
-    ok(when(piantone, s) === false && when(doubled, s) === false, 'ospedale: nessun piantone prima del fermo');
+    ok(CP.resolveCharacterPresence('piantone', s).status === 'OFFSCREEN' && CP.resolveCharacterPresence('piantone_ronette', s).status === 'OFFSCREEN',
+      'ospedale: nessun piantone prima del fermo');
     NR.applyEffects(s, [{ set: 'jacques_preso' }]);
-    ok(when(piantone, s) === true && when(doubled, s) === false, 'ospedale: con Renault in custodia, un piantone davanti alla porta');
+    ok(CP.resolveCharacterPresence('piantone', s).status === 'PLACED' && CP.resolveCharacterPresence('piantone_ronette', s).status === 'OFFSCREEN',
+      'ospedale: con Renault in custodia, un piantone davanti alla porta');
     NR.applyEffects(s, [{ set: 'jacques_dead' }]);
-    ok(when(piantone, s) === false && when(doubled, s) === true, 'ospedale: morto Renault, la sorveglianza si sposta su Ronette');
+    ok(CP.resolveCharacterPresence('piantone', s).status === 'OFFSCREEN' && CP.resolveCharacterPresence('piantone_ronette', s).status === 'PLACED',
+      'ospedale: morto Renault, la sorveglianza si sposta su Ronette');
   }
   console.log('act-3-flow: M6 stitch guards OK');
 })();

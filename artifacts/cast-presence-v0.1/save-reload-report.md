@@ -1,6 +1,6 @@
 # Save / reload determinism (2026-09-12)
 
-V8 on every seed: snapshot(state) === snapshot(JSON.parse(NR.serialize(state))). Presence is never persisted (the serialized state has no location keys). Browser reloads on the real build are pending on the population hook (see report §13).
+V8 on every seed: snapshot(state) === snapshot(JSON.parse(NR.serialize(state))). Presence is never persisted (the serialized state has no location keys). Browser reloads on the real build: see the sections appended by the playthrough drivers below.
 
 | seed | identical after round-trip | serialized bytes | location keys in save |
 |---|---|---|---|
@@ -28,3 +28,59 @@ V8 on every seed: snapshot(state) === snapshot(JSON.parse(NR.serialize(state))).
 | ACT4_SHORE_HAWK | yes | 1055 | none |
 | ACT4_SHORE_COOPER_AFTER | yes | 1057 | none |
 | ACT4_STATION_BEFORE_DAWN | yes | 1073 | none |
+
+## Browser reloads — Atto 3 (Chrome headless, 2026-09-13)
+
+Ricariche reali dell'iframe di produzione durante `act-3-playthrough.js`.
+«registro» = `GAME.CastPresence.where()`; «narrativo» = lo stato serializzato
+(flags/values/evidence/nodes_done) letto da `A3.stateDigest()`.
+
+| percorso | momento | stato narrativo identico | registro Cast Continuity identico | salvataggio senza chiavi di posizione |
+|---|---|---|---|---|
+| impeto-kept | ospedale sorvegliato (dopo il fermo) | sì | sì | sì |
+
+
+## Browser reloads (Chrome headless, 2026-09-13)
+
+Ricariche reali dell'iframe di produzione durante `act-4-playthrough.js`.
+«registro» = `GAME.CastPresence.where()`; «narrativo» = lo stato serializzato
+(flags/values/evidence/nodes_done) letto da `A4.stateDigest()`.
+
+| percorso | momento | stato narrativo identico | registro Cast Continuity identico | salvataggio senza chiavi di posizione |
+|---|---|---|---|---|
+| A | Roadhouse pre-telefono | sì | sì | — |
+| A | Roadhouse dopo il telefono | sì | sì | sì |
+| A | crocevia dopo la scelta di focus | sì | sì | — |
+
+## Browser reloads (Chrome headless, 2026-09-13)
+
+Ricariche reali dell'iframe di produzione durante `act-4-playthrough.js`.
+«registro» = `GAME.CastPresence.where()`; «narrativo» = lo stato serializzato
+(flags/values/evidence/nodes_done) letto da `A4.stateDigest()`.
+
+| percorso | momento | stato narrativo identico | registro Cast Continuity identico | salvataggio senza chiavi di posizione |
+|---|---|---|---|---|
+| B | Roadhouse dopo il telefono | sì | sì | sì |
+
+
+## Browser reloads (Chrome headless, 2026-09-13)
+
+Ricariche reali dell'iframe di produzione durante `act-4-playthrough.js`.
+«registro» = `GAME.CastPresence.where()`; «narrativo» = lo stato serializzato
+(flags/values/evidence/nodes_done) letto da `A4.stateDigest()`.
+
+| percorso | momento | stato narrativo identico | registro Cast Continuity identico | salvataggio senza chiavi di posizione |
+|---|---|---|---|---|
+| C | Roadhouse dopo il telefono | sì | sì | sì |
+
+
+## Browser reloads (Chrome headless, 2026-09-13)
+
+Ricariche reali dell'iframe di produzione durante `act-4-playthrough.js`.
+«registro» = `GAME.CastPresence.where()`; «narrativo» = lo stato serializzato
+(flags/values/evidence/nodes_done) letto da `A4.stateDigest()`.
+
+| percorso | momento | stato narrativo identico | registro Cast Continuity identico | salvataggio senza chiavi di posizione |
+|---|---|---|---|---|
+| D | Roadhouse dopo il telefono | sì | sì | sì |
+

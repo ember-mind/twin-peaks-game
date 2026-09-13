@@ -7964,7 +7964,10 @@
        "y": 6,
        "dir": "left",
        "dialogue": null,
-       "wander": false
+       "wander": false,
+       "actor_ids": [
+        "hawk_bridge"
+       ]
       }
      },
      "cause": "hawk → traincar 5,6 (leads Cooper to the footbridge, T26; \"Hawk resta sulle impronte\")",
@@ -7999,7 +8002,10 @@
        "y": 8,
        "dir": "down",
        "dialogue": null,
-       "wander": false
+       "wander": false,
+       "actor_ids": [
+        "hawk_door"
+       ]
       }
      },
      "cause": "hawk → traincar 14,8 (holds the threshold, T27; \"(dalla porta) … Non te lo dico da qui. Vieni.\")",
@@ -8031,7 +8037,10 @@
        "y": 3,
        "dir": "up",
        "dialogue": null,
-       "wander": false
+       "wander": false,
+       "actor_ids": [
+        "hawk_cut"
+       ]
       }
      },
      "cause": "hawk → traincar 22,3 (north cut; T29; Cooper's own line: \"Hawk viene fino alla riva. Dalla riva in poi, io.\")",
@@ -8615,7 +8624,10 @@
        "y": 1,
        "dir": "down",
        "dialogue": null,
-       "wander": false
+       "wander": false,
+       "actor_ids": [
+        "gigante"
+       ]
       }
      },
      "cause": "giant → roadhouse 8,1",
@@ -8739,10 +8751,7 @@
      "when": {
       "all": [
        {
-        "value_is": {
-         "name": "presagio_status",
-         "equals": "active"
-        }
+        "value_set": "presagio_status"
        },
        {
         "not": {
@@ -8757,7 +8766,7 @@
        "label": "asleep"
       }
      },
-     "cause": "sarah → OFFSCREEN (asleep upstairs; D1)",
+     "cause": "sarah → OFFSCREEN (asleep upstairs; D1) — predicate corrected 2026-09-13 on the real build: presagio_status becomes \"verified\" at m8_discovery (the shore), so the window keys on value_set, not on =active",
      "exit": "Cooper at the Roadhouse"
     },
     {

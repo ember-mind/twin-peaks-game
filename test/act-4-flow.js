@@ -311,16 +311,17 @@ const enums = JSON.parse(fs.readFileSync(path.join(ROOT, 'state-enums.json'), 'u
   global.requestAnimationFrame = function () {};
   const J = (f) => path.join(__dirname, '..', 'js', f);
   ['tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'retro-font.js', 'engine.js', 'glue.js',
-    'narrative-runtime.js', 'narrative-data.gen.js', 'narrative-engine-adapter.js', 'narrative-bootstrap.js']
+    'narrative-runtime.js', 'narrative-data.gen.js', 'cast-presence.js', 'narrative-engine-adapter.js', 'narrative-bootstrap.js']
     .forEach((f) => require(J(f)));
   const GAME = global.GAME;
   const NR = GAME.NarrativeRuntime;
   const A = GAME.NarrativeAdapter;
+  const CP = GAME.CastPresence;
   const D = GAME.NarrativeData;
   const M8d = D.missions.M8;
   GAME.installNarrativeCatalogs({ data: D, runtime: NR }); // stesso cablaggio del boot reale (js/narrative-bootstrap.js)
 
-  console.log('# act-4-flow: adapter path (diner/roadhouse/town)');
+  console.log('# act-4-flow: adapter path (diner/roadhouse/town via CastPresence)');
 
   function doNode(mission, s, id) { const p = NR.prepareNode(s, mission, id); if (!p.ok) return p; return NR.commitNode(s, mission, p); }
   function doChoice(mission, s, atId, choiceId) {
@@ -334,28 +335,26 @@ const enums = JSON.parse(fs.readFileSync(path.join(ROOT, 'state-enums.json'), 'u
   state0.flags.atto4 = true;
   A.enable({ mission: M8d, missions: [M8d], state: state0, container: {} });
 
-  const all = A._debugNarrativeEntities;
-  const diner = all.filter((e) => e.map_id === 'diner');
-  const roadhouse = all.filter((e) => e.map_id === 'roadhouse');
-  const town = all.filter((e) => e.map_id === 'town');
-
-  function when(e, s) { A.setState(s); return A._debugEvalWhen(e.when); }
+  function presence(id, s) { return CP.resolveCharacterPresence(id, s); }
+  function placedAt(id, s, mapId, x, y) {
+    const r = presence(id, s);
+    return r.status === 'PLACED' && r.sceneId === mapId && (x === undefined || (r.x === x && r.y === y));
+  }
 
   // -- Leland: root live PRIMA della promessa, mai insieme alle due root --
   {
-    const lelandWaiting = diner.find((e) => e.npc.id === 'leland');
-    ok(!!lelandWaiting, 'diner: entità Leland registrata (m8_leland_waiting/m8_leland_taxi condividono l\'attore)');
-    const s = NR.createState(); s.flags.atto4 = true;
-    ok(when(lelandWaiting, s) === true, 'Leland: presente al diner prima della promessa');
+    const s = NR.createState(); s.flags.atto4 = true; s.flags.sogno_fatto = true;
+    ok(placedAt('leland', s, 'diner', 11, 1), 'Leland: presente al diner prima della promessa');
     doNode(M8d, s, 'm8_diner'); doChoice(M8d, s, 'm8_diner', 'promise_accompagno');
-    ok(when(lelandWaiting, s) === true, 'Leland: ancora presente dopo la promessa, prima del taxi (m8_leland_taxi)');
+    ok(placedAt('leland', s, 'diner', 11, 1), 'Leland: ancora presente dopo la promessa, prima del taxi (m8_leland_taxi)');
     doNode(M8d, s, 'm8_leland_taxi');
-    ok(when(lelandWaiting, s) === false, 'Leland: root chiusa dopo T_LELAND_TAXI (nessuna root ambigua)');
+    ok(presence('leland', s).status === 'OFFSCREEN' && presence('leland', s).label === 'hidden',
+      'Leland: OFFSCREEN(hidden) dopo T_LELAND_TAXI (nessuna root ambigua)');
   }
 
   // -- T_LELAND_TAXI: scritta esattamente una volta --
   {
-    const s = NR.createState(); s.flags.atto4 = true;
+    const s = NR.createState(); s.flags.atto4 = true; s.flags.sogno_fatto = true;
     doNode(M8d, s, 'm8_diner'); doChoice(M8d, s, 'm8_diner', 'promise_autonomia');
     doNode(M8d, s, 'm8_leland_taxi');
     const rev = s.revision;
@@ -364,44 +363,51 @@ const enums = JSON.parse(fs.readFileSync(path.join(ROOT, 'state-enums.json'), 'u
     ok(s.revision === rev, 'T_LELAND_TAXI: la seconda interazione (bloccata) non incrementa la revisione dello stato');
   }
 
-  // -- Roadhouse: Truman + sei entità di scenografia, finestra atto4 ∧ ¬warning_target --
+  // -- Roadhouse: Truman + sei personaggi di scenografia restano finché non è
+  //    scelta la destinazione (focus_destination), NON al solo avvertimento:
+  //    il gruppo tiene la scena durante la telefonata e il crocevia (T52). --
   {
     const CROWD_IDS = ['bobby', 'donna', 'james', 'shelly', 'norma', 'loglady'];
-    const truman = roadhouse.find((e) => e.npc.id === 'truman');
-    const crowd = CROWD_IDS.map((id) => roadhouse.find((e) => e.npc.id === id));
-    ok(!!truman, 'roadhouse: entità Truman registrata');
-    ok(crowd.every(Boolean), 'roadhouse: le sei entità di scenografia sono registrate (' + CROWD_IDS.join(',') + ')');
-    const s = NR.createState(); s.flags.atto4 = true;
-    ok(when(truman, s) === true, 'roadhouse: Truman presente in finestra atto4 ∧ ¬warning_target');
-    crowd.forEach((e, i) => ok(when(e, s) === true, 'roadhouse: ' + CROWD_IDS[i] + ' presente nella stessa finestra'));
+    const s = NR.createState(); s.flags.atto4 = true; s.flags.sogno_fatto = true;
+    NR.applyEffects(s, [{ evidence: 'T_LELAND_TAXI' }]);
+    ok(placedAt('truman', s, 'roadhouse', 4, 8), 'roadhouse: Truman presente prima della destinazione');
+    CROWD_IDS.forEach((id) => ok(presence(id, s).status === 'PLACED' && presence(id, s).sceneId === 'roadhouse',
+      'roadhouse: ' + id + ' presente nella stessa finestra'));
     s.values.warning_target = 'nessuno';
-    ok(when(truman, s) === false, 'roadhouse: Truman assente dopo warning_target scritto');
-    crowd.forEach((e, i) => ok(when(e, s) === false, 'roadhouse: ' + CROWD_IDS[i] + ' assente dopo warning_target scritto'));
+    ok(placedAt('truman', s, 'roadhouse', 4, 8), 'roadhouse: Truman resta dopo warning_target (lascia solo a destinazione scelta)');
+    CROWD_IDS.forEach((id) => ok(presence(id, s).status === 'PLACED' && presence(id, s).sceneId === 'roadhouse',
+      'roadhouse: ' + id + ' resta dopo warning_target'));
+    s.values.focus_destination = 'palmer';
+    ok(!placedAt('truman', s, 'roadhouse'), 'roadhouse: Truman assente dopo focus_destination scritto');
+    // norma è PERSISTENT con una baseline al diner: senza finestra viva ci
+    // ricade, non sparisce OFFSCREEN come gli altri cinque (senza baseline).
+    CROWD_IDS.filter((id) => id !== 'norma').forEach((id) => ok(presence(id, s).status === 'OFFSCREEN' && presence(id, s).label === 'home',
+      'roadhouse: ' + id + ' OFFSCREEN(home) dopo focus_destination scritto'));
+    ok(placedAt('norma', s, 'diner', 5, 2), 'roadhouse: norma torna alla sua baseline al diner (5,2) dopo focus_destination scritto');
   }
 
-  // -- Gigante: presente solo in presagio_status=active ∧ ¬warning_target, a 8,1, dialogue:null, un solo statico --
+  // -- Giant: presente solo in presagio_status=active ∧ ¬warning_target, a 8,1, dialogue:null, un solo statico --
   {
-    const gigante = roadhouse.find((e) => e.npc.id === 'gigante');
-    ok(!!gigante, 'roadhouse: entità Gigante registrata');
-    ok(gigante.npc.x === 8 && gigante.npc.y === 1, 'Gigante: posizione (8,1)');
-    ok(gigante.npc.dialogue === null, 'Gigante: dialogue null (l\'interazione appartiene al nodo m8_giant_stage, mai un NPC muto)');
+    const s = NR.createState(); s.flags.atto4 = true; s.flags.sogno_fatto = true;
+    ok(presence('giant', s).status === 'OFFSCREEN', 'Giant: assente prima che presagio_status sia active');
+    s.values.presagio_status = 'active';
+    const giant = presence('giant', s);
+    ok(giant.status === 'PLACED' && giant.sceneId === 'roadhouse' && giant.x === 8 && giant.y === 1,
+      'Giant: presente con presagio_status=active e nessun warning_target, a (8,1)');
+    ok(giant.body.dialogue === null, 'Giant: dialogue null (l\'interazione appartiene al nodo m8_giant_stage, mai un NPC muto)');
+    s.values.warning_target = 'palmer';
+    ok(presence('giant', s).status === 'OFFSCREEN', 'Giant: assente dopo warning_target scritto');
+
     const giantNode = M8d.nodes.find((n) => n.id === 'm8_giant_stage');
     ok(!!giantNode, 'm8_giant_stage: nodo presente');
     ok((giantNode.effects || []).length === 0, 'm8_giant_stage: nessun effetto (presenza silenziosa, nessuno stato scritto qui)');
     ok(!giantNode.choices || giantNode.choices.length === 0, 'm8_giant_stage: nessuna scelta');
     ok(giantNode.pages.length === 1, 'm8_giant_stage: una sola pagina');
-
-    const s = NR.createState(); s.flags.atto4 = true;
-    ok(when(gigante, s) === false, 'Gigante: assente prima che presagio_status sia active');
-    s.values.presagio_status = 'active';
-    ok(when(gigante, s) === true, 'Gigante: presente con presagio_status=active e nessun warning_target');
-    s.values.warning_target = 'palmer';
-    ok(when(gigante, s) === false, 'Gigante: assente dopo warning_target scritto');
   }
 
   // -- m8_roadhouse_phone: nessuna root prima che m8_roadhouse_truman sia fatto --
   {
-    const s = NR.createState(); s.flags.atto4 = true;
+    const s = NR.createState(); s.flags.atto4 = true; s.flags.sogno_fatto = true;
     doNode(M8d, s, 'm8_diner'); doChoice(M8d, s, 'm8_diner', 'promise_accompagno');
     doNode(M8d, s, 'm8_leland_taxi');
     ok(!NR.prepareNode(s, M8d, 'm8_roadhouse_phone').ok, 'm8_roadhouse_phone: nessuna root prima di m8_roadhouse_truman');
@@ -417,35 +423,49 @@ const enums = JSON.parse(fs.readFileSync(path.join(ROOT, 'state-enums.json'), 'u
     ok(GAME.Maps.isSolid('town', 47, 29, {}) === false, 'town: (47,29) — spawn di ritorno dal Roadhouse — calpestabile');
   }
 
-  // -- riva del lago: hawk_shore_first/hawk_shore_after, mai entrambi --
+  // -- riva del lago: Hawk è un solo personaggio le cui finestre non si
+  //    sovrappongono mai (il resolver lancerebbe OVERLAP altrimenti); prima
+  //    del ritrovamento è in pattuglia (OFFSCREEN), poi fisso a (16,27) fino
+  //    all'atto 5 — la seconda finestra (body_found_by=cooper) richiede anche
+  //    maddy_trovata, quindi il testo non dipende da node_done m8_station. --
   {
-    const first = town.find((e) => e.npc.id === 'hawk_shore_first');
-    const after = town.find((e) => e.npc.id === 'hawk_shore_after');
-    ok(!!first && !!after, 'town: le due collocazioni di Hawk sulla riva sono registrate');
-    const s = NR.createState();
-    ok(when(first, s) === false && when(after, s) === false, 'riva: nessun hawk prima del ritrovamento');
+    const s = NR.createState(); s.flags.atto4 = true; s.flags.sogno_fatto = true;
+    NR.applyEffects(s, [{ evidence: 'T_LELAND_TAXI' }]);
+    ok(presence('hawk', s).status === 'OFFSCREEN' && presence('hawk', s).label === 'patrol', 'riva: hawk in pattuglia prima del ritrovamento');
     s.values.body_found_by = 'hawk';
-    ok(when(first, s) === true && when(after, s) === false, 'riva: hawk_shore_first iff body_found_by=hawk ∧ ¬maddy_trovata');
-    s.flags.maddy_trovata = true;
-    ok(when(first, s) === false && when(after, s) === true, 'riva: hawk_shore_after iff maddy_trovata ∧ ¬node_done m8_station (mai insieme al primo)');
+    ok(placedAt('hawk', s, 'town', 16, 27), 'riva: hawk a (16,27) con body_found_by=hawk');
+    // stazione giocata: la finestra resta vera finché non è scritto atto5 (D5)
     s.nodes_done.m8_station = true;
-    ok(when(first, s) === false && when(after, s) === false, 'riva: nessun hawk dopo la stazione');
+    ok(placedAt('hawk', s, 'town', 16, 27), 'riva: hawk resta a (16,27) dopo la stazione, prima di atto5');
+    s.flags.atto5 = true;
+    ok(!placedAt('hawk', s, 'town'), 'riva: hawk lascia la riva con atto5');
+
+    // ramo alternativo: trovato da Cooper, richiede anche maddy_trovata
+    const s2 = NR.createState(); s2.flags.atto4 = true; s2.flags.sogno_fatto = true;
+    NR.applyEffects(s2, [{ evidence: 'T_LELAND_TAXI' }]);
+    s2.values.body_found_by = 'cooper';
+    ok(presence('hawk', s2).status === 'OFFSCREEN' && presence('hawk', s2).label === 'patrol',
+      'riva: body_found_by=cooper da solo non basta, hawk resta in pattuglia');
+    s2.flags.maddy_trovata = true;
+    ok(placedAt('hawk', s2, 'town', 16, 27), 'riva: hawk a (16,27) con body_found_by=cooper ∧ maddy_trovata');
   }
 
-  // -- classici: sarah/bobby/donna condizionati a !flag:gigante2 --
+  // -- classici: sarah/bobby/donna vivono ora solo nel registro cast-presence
+  //    (js/glue.js NPCS è vuoto, cfr. js/narrative-engine-adapter.js); nessuna
+  //    voce classica duplicata, il resolver soltanto governa la loro visibilità --
   {
     const src = fs.readFileSync(J('glue.js'), 'utf8');
-    const npcBlock = (id) => {
-      const re = new RegExp("id: '" + id + "'[\\s\\S]{0,200}?cond: \\[([\\s\\S]{0,80}?)\\]");
-      const m = re.exec(src);
-      return m ? m[1] : null;
-    };
     ['sarah', 'bobby', 'donna'].forEach((id) => {
-      const cond = npcBlock(id);
-      ok(!!cond && cond.indexOf("'!flag:gigante2'") !== -1, 'js/glue.js: NPC ' + id + ' ha cond !flag:gigante2');
+      ok(!new RegExp("id: '" + id + "'").test(src), 'js/glue.js: nessuna voce NPC classica per ' + id + ' (unica fonte: cast-presence)');
     });
     ok(GAME.Data.dialogues.sarah_visione && !/\bBOB\b/.test(GAME.Data.dialogues.sarah_visione.pages.map((p) => p.text).join(' ')),
       'sarah_visione: nessun "BOB" nel testo classico della visione');
+    const s = NR.createState(); s.flags.atto4 = true; s.flags.sogno_fatto = true;
+    ok(presence('sarah', s).status === 'PLACED' && presence('sarah', s).sceneId === 'palmer',
+      'sarah: presente al Palmer prima del presagio (nessuna visione ancora attiva)');
+    s.values.presagio_status = 'active';
+    ok(presence('sarah', s).status === 'OFFSCREEN' && presence('sarah', s).label === 'asleep',
+      'sarah: OFFSCREEN(asleep) con presagio_status=active (D1)');
   }
 
   // -- retired classic ids assenti --
@@ -460,10 +480,14 @@ const enums = JSON.parse(fs.readFileSync(path.join(ROOT, 'state-enums.json'), 'u
   // -- nessuna fuga di contenuto Atto 2/3 in M8 --
   {
     ok(!M8d.nodes.some((n) => n.map_id === 'oej' || n.map_id === 'traincar'), 'M8: nessun nodo su oej/traincar (contenuto Atto 2/3)');
-    ok(!all.some((e) => e.npc.id === 'audrey' && e.map_id !== 'oej'), 'entità narrative: audrey non compare fuori da oej (M8 non la usa)');
-    const m8EntityIds = new Set();
-    ['diner', 'roadhouse', 'town'].forEach((mapId) => all.filter((e) => e.map_id === mapId).forEach((e) => m8EntityIds.add(e.npc.id)));
-    ok(!m8EntityIds.has('audrey'), 'M8: audrey non è tra le entità di diner/roadhouse/town');
+    const audreyWindows = CP.windows().filter((w) => w.cast && Object.prototype.hasOwnProperty.call(w.cast, 'audrey'));
+    ok(!audreyWindows.some((w) => w.owner === 'M8'), 'registro: nessuna finestra di M8 nomina audrey (M8 non la usa)');
+    ok(!audreyWindows.some((w) => w.cast.audrey.status === 'PLACED' && w.cast.audrey.map_id !== 'oej'),
+      'registro: audrey non compare piazzata fuori da oej');
+    ['diner', 'roadhouse', 'town'].forEach((mapId) => {
+      const s = NR.createState(); s.flags.atto4 = true; s.flags.sogno_fatto = true; s.flags.sogno_fatto = true;
+      ok(CP.bodiesFor(mapId, s).every((b) => b.id !== 'audrey'), 'M8: audrey non è tra i corpi di ' + mapId);
+    });
   }
 
   console.log('act-4-flow: adapter path OK');

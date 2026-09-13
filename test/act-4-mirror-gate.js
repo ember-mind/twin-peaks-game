@@ -94,18 +94,36 @@ const NR = GAME.NarrativeRuntime;
 const state0 = NR.createState();
 state0.flags.atto4 = true;
 A.enable({ mission: M8, missions: [M8], state: state0, container: {} });
+// C8-C.1 le entità narrative statiche (NARRATIVE_ENTITIES) sono state
+// sostituite dalle finestre del registro cast (Cast Presence v0.1): la stessa
+// guardia ora scandisce i predicati `when` di narrative/cast/windows.json.
 const entityHits = [];
-A._debugNarrativeEntities.forEach((e) => scanConds(e.when, e.map_id + ':' + e.npc.id, entityHits));
-ok(entityHits.length === 0, '(b) nessuna entità narrativa condiziona la presenza su flag:gigante2 (trovati: ' + entityHits.join(',') + ')');
+GAME.NarrativeData.cast.windows.forEach((w) => scanConds(w.when, w.id, entityHits));
+ok(entityHits.length === 0, '(b) nessuna finestra del registro cast condiziona la presenza su flag:gigante2 (trovati: ' + entityHits.join(',') + ')');
 
-/* ---------------- (c) classici sarah/bobby/donna/jacoby: !flag:gigante2 ---------------- */
+/* ---------------- (c) sarah/bobby/donna/jacoby: nessun corpo classico,
+ * presenza/assenza governata SOLO dalle finestre del registro cast ------- */
 
+// (c) i corpi NPC nominati non vivono piu' in js/glue.js (Cast Presence v0.1):
+// il registro statico NPCS deve avere ogni mappa vuota, PRIMA che l'adapter
+// (gia' abilitato sopra per il check (b)) sincronizzi corpi su GAME.Maps.
 const glueSource = fs.readFileSync(J('glue.js'), 'utf8');
-['sarah', 'bobby', 'donna', 'jacoby'].forEach((id) => {
-  const re = new RegExp("id: '" + id + "'[\\s\\S]{0,200}?cond: \\[([\\s\\S]{0,80}?)\\]");
-  const m = re.exec(glueSource);
-  ok(!!m && m[1].indexOf("'!flag:gigante2'") !== -1, '(c) NPC classico ' + id + ' ha cond !flag:gigante2 (js/glue.js)');
-});
+const npcsBlockMatch = /var NPCS = \{([\s\S]*?)\n  \};/.exec(glueSource);
+ok(!!npcsBlockMatch && !/\{\s*id:/.test(npcsBlockMatch[1]),
+  '(c) nessuna mappa del registro statico NPCS in js/glue.js porta un corpo NPC (tutte vuote)');
+
+// (c') la presenza/assenza di sarah/bobby/donna/jacoby all'Atto 4 e' governata
+// dalle finestre di narrative/cast/windows.json, non da un cond classico:
+// ACT4_SARAH_ASLEEP (Sarah addormentata, ex '!flag:gigante2'), ACT4_TOWN_HOME_NIGHT
+// (bobby/donna a casa dopo il raduno) e ACT4_JACOBY_HOME_NIGHT.
+const castWindows = GAME.NarrativeData.cast.windows;
+function windowFor(id, characterId) {
+  return castWindows.find((w) => w.id === id && w.cast && Object.prototype.hasOwnProperty.call(w.cast, characterId));
+}
+ok(!!windowFor('ACT4_SARAH_ASLEEP', 'sarah'), "(c') ACT4_SARAH_ASLEEP governa la presenza di sarah");
+ok(!!windowFor('ACT4_TOWN_HOME_NIGHT', 'bobby') && !!windowFor('ACT4_TOWN_HOME_NIGHT', 'donna'),
+  "(c') ACT4_TOWN_HOME_NIGHT governa la presenza di bobby e donna");
+ok(!!windowFor('ACT4_JACOBY_HOME_NIGHT', 'jacoby'), "(c') ACT4_JACOBY_HOME_NIGHT governa la presenza di jacoby");
 /* ---------------- (d) WORLD_TARGETS.town.town_crossroads ---------------- */
 
 const reg = A._debugWorldTargets.town;

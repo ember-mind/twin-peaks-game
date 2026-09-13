@@ -42,9 +42,56 @@ global.GAME.SheriffsStationExteriorScene.install();
 global.GAME.SheriffsStationScene.install();
 [].concat(global.GAME.DoubleRLocationConnections, global.GAME.SheriffsStationLocationConnections)
   .forEach((c) => global.GAME.LocationConnections.install(c, global.GAME.Maps));
+require(J('narrative-runtime.js'));
+require(J('narrative-data.gen.js'));
+require(J('cast-presence.js'));
 
 const GAME = global.GAME;
 const E = GAME.Engine;
+const NR = GAME.NarrativeRuntime;
+const CP = GAME.CastPresence;
+
+/* ---------------- popolazione del cast nominato (Cast Continuity v0.1) ----
+ * I corpi NPC nominati non vivono piu' in js/glue.js: li risolve
+ * GAME.CastPresence dalle finestre di narrative/cast/windows.json contro uno
+ * stato narrativo. Il simulatore classico non ha una missione in corso, ma
+ * deve comunque vedere gli stessi corpi che vedrebbe il motore di produzione,
+ * quindi rispecchia qui i flag classici rilevanti a ogni passo. */
+const CAST_FLAG_MIRROR = [
+  'sogno_fatto', 'atto3', 'atto4', 'atto5', 'gigante1', 'maddy_trovata',
+  'leland_morto', 'sarah_visione_ascoltata', 'audrey_indaga', 'jacques_preso',
+  'east_route_confirmed'
+];
+const narrativeStateCache = {};
+function narrativeStateFor(st) {
+  // cache per firma dei flag rilevanti: la mappa BFS interroga bodiesFor molte
+  // volte per iterazione a punto fisso con lo stesso stato di fatto.
+  const sig = CAST_FLAG_MIRROR.map((k) => (st.flags[k] ? '1' : '0')).join('') +
+    (st.flags.gigante2 ? 'g' : '') + (st.flags.done_leland_dove ? 't' : '');
+  if (narrativeStateCache[sig]) return narrativeStateCache[sig];
+  const ns = NR.createState();
+  CAST_FLAG_MIRROR.forEach((name) => { if (st.flags[name]) ns.flags[name] = true; });
+  if (st.flags.gigante2) {
+    ns.values.presagio_status = 'active';
+    ns.nodes_done.m8_roadhouse_truman = true;
+  }
+  if (st.flags.done_leland_dove) ns.evidence.T_LELAND_TAXI = true;
+  // Le stesse chiusure scoperte in test/smoke.js: senza di queste, le finestre
+  // a cascata di Hawk (M5/M6) e il raduno al roadhouse (M8) restano vere
+  // insieme alla finestra successiva quando gli atti avanzano (OVERLAP).
+  if (st.flags.jacques_preso) {
+    ns.flags.vagone_scoperto = true;
+    ns.nodes_done.m5_report_close = true;
+    ns.nodes_done.m6_hospital_guard = true;
+  }
+  if (st.flags.maddy_trovata) ns.evidence.T_LELAND_TAXI = true;
+  if (st.flags.leland_morto || st.flags.atto5) ns.values.focus_destination = 'woods';
+  narrativeStateCache[sig] = ns;
+  return ns;
+}
+function castBodies(mapId, st) {
+  return CP.bodiesFor(mapId, narrativeStateFor(st));
+}
 
 /* ---------------- tabella invarianti (estendere qui per atti futuri) -------- */
 
@@ -121,10 +168,10 @@ function tileBlocked(mapId, x, y) {
     if (door.needsFlag && !E.checkCond('flag:' + door.needsFlag, simSt)) return true;
     if (door.needsClues && simSt.clues.length < door.needsClues) return true;
   }
-  const map = GAME.Maps[mapId];
-  for (let i = 0; i < map.npcs.length; i++) {
-    const n = map.npcs[i];
-    if (n.x === x && n.y === y && E.npcActive(n, simSt)) return true;
+  const bodies = castBodies(mapId, simSt);
+  for (let i = 0; i < bodies.length; i++) {
+    const n = bodies[i];
+    if (n.x === x && n.y === y) return true;
   }
   if (GAME.Maps.objectAt(mapId, x, y)) return true;
   return false;
@@ -234,8 +281,7 @@ while (changed && iterations < 200) {
     });
 
     const map = GAME.Maps[mapId];
-    map.npcs.forEach((n) => {
-      if (!E.npcActive(n, simSt)) return;
+    castBodies(mapId, simSt).forEach((n) => {
       if (!adjacentReachable(res.seen, n.x, n.y)) return;
       if (applyDialogue(n.dialogue, mapId)) changed = true;
     });

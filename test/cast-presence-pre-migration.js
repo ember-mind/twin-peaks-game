@@ -20,6 +20,23 @@
  * index.html, and does not touch any existing file.
  */
 'use strict';
+
+/* Post-migration guard (2026-09-13): once js/glue.js NPCS and NARRATIVE_ENTITIES
+ * carry no registry-owned body, there is nothing left to prove here. The
+ * pre-migration run is preserved in artifacts/cast-presence-v0.1/pre-migration-failures.md.
+ * Exit 0 with a note so the regression suite stays green; V7 in
+ * test/cast-continuity-validate.js is the live guard against old owners. */
+(function postMigrationGuard() {
+  const fs0 = require('fs'), path0 = require('path');
+  const glue = fs0.readFileSync(path0.join(__dirname, '..', 'js', 'glue.js'), 'utf8');
+  const adapter = fs0.readFileSync(path0.join(__dirname, '..', 'js', 'narrative-engine-adapter.js'), 'utf8');
+  const glueEmpty = /var NPCS = \{[^}]*\}/.test(glue) && !/id: '[a-z_]+',\s*x:/.test(glue.slice(glue.indexOf('var NPCS'), glue.indexOf('};', glue.indexOf('var NPCS'))));
+  const adapterEmpty = /var NARRATIVE_ENTITIES = \[\];/.test(adapter);
+  if (glueEmpty && adapterEmpty) {
+    console.log('cast-presence-pre-migration: old body owners already removed (glue NPCS empty, NARRATIVE_ENTITIES empty) — nothing to prove; historical proof in artifacts/cast-presence-v0.1/pre-migration-failures.md');
+    process.exit(0);
+  }
+})();
 const fs = require('fs');
 const path = require('path');
 

@@ -10,7 +10,7 @@ Format per item: CHARACTER · WINDOW · BEFORE · EVENT/CAUSE · AFTER · NEXT T
 
 ### D1 — Sarah at night
 
-- **Sarah** · `ACT4_SARAH_ASLEEP` = `presagio_status=active ∧ ¬atto5`
+- **Sarah** · `ACT4_SARAH_ASLEEP` = `value_set presagio_status ∧ ¬atto5` (2026-09-13: was `=active`; `presagio_status` becomes `verified` at the shore, the intent "asleep until dawn" is unchanged)
 - BEFORE: `palmer` 9,7 (baseline; afternoon and evening, the optional vision `sarah_visione` reachable — D8).
 - CAUSE: night. Maddy came home in the evening (T51) and Sarah went upstairs; by the phone she is asleep (M8 `m8_station.invariant`: "Sarah non è mai oracolo (dorme; il vice la sostiene)"; feedback `warning_palmer`: "Svegli Sarah").
 - AFTER: **`OFFSCREEN` — asleep upstairs, the house dark.** The night Palmer map is authored as an empty dark ground floor (`m8.c.route_palmer.p01` "La casa: buio al piano di sopra"; valise page). A visible Sarah body would contradict that page on every route.

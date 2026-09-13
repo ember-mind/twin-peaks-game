@@ -137,184 +137,17 @@
     return added;
   }
 
-  /* ------- registro GENERICO delle entità narrative condizionali (C8-C.1) -------
-   * Gli NPC che esistono solo per il layer narrativo vengono posizionati a
-   * runtime nelle mappe reali (i dati del gioco classico non si toccano).
-   * Fino a C8-C erano INIETTATI E BASTA: nessuna condizione di presenza, nessuna
-   * rimozione, nessuna sincronizzazione — Maddy restava al diner dopo la
-   * promessa, durante il Roadhouse, dopo il ritrovamento e dopo la sua morte
-   * (stato del mondo FALSO, stessa classe del bug James).
-   *
-   * Ora ogni entità dichiara una condizione di presenza `when` valutata sullo
-   * STATO NARRATIVO; l'adapter sincronizza la mappa reale (aggiunge/rimuove)
-   * a enable, dopo setState, dopo refreshFromState e dopo OGNI commit.
-   * `when: null` = presenza incondizionata (il gating narrativo resta ai
-   * worldRoots: è il caso di ronette/infermiera/truman, invariati).
-   * Generico: nessun `if (mission === ...)`, altre entità future si registrano
-   * qui con la stessa forma. */
-  var NARRATIVE_ENTITIES = [
-    // B2 — ospedale: ronette e infermiera hanno entrambe uno sprite dedicato
-    // in chars.js (R129). Presenza incondizionata come prima di C8-C.1.
-    { map_id: 'hospital', when: null, npc: { id: 'ronette', x: 3, y: 5, sprite: 'ronette', name: 'Ronette', dialogue: null, dir: 'up' } },
-    { map_id: 'hospital', when: null, npc: { id: 'infermiera', x: 11, y: 8, sprite: 'infermiera', name: 'Infermiera', dialogue: null, dir: 'down' } },
-    // M6 stitch C2 — il piantone della contea è SCENOGRAFIA, non un attore:
-    // dialogue null, nessun nodo narrativo. La porta piantonata è quella della
-    // stanza in fondo al reparto (alcova nord-est, 11-14 righe 3-5), lontana dal
-    // letto di Ronette (3,5); l'agente siede davanti, sulla riga 6.
-    // Finché Renault è vivo e in custodia: un solo piantone davanti alla porta.
-    {
-      map_id: 'hospital',
-      when: { all: [{ flag: 'jacques_preso' }, { not: { flag: 'jacques_dead' } }] },
-      npc: { id: 'piantone', x: 7, y: 3, sprite: 'andy', name: 'Agente', dialogue: null, dir: 'up' } // davanti alla porta doppia nord ("in fondo al reparto, davanti a una porta chiusa")
-    },
-    // Dopo la morte di Renault la sorveglianza si sposta su Ronette: è il
-    // «piantone raddoppiato» che m6.b8b.hospital.p01 descrive.
-    {
-      map_id: 'hospital',
-      when: { flag: 'jacques_dead' },
-      npc: { id: 'piantone_ronette', x: 3, y: 6, sprite: 'andy', name: 'Agente', dialogue: null, dir: 'up' }
-    },
-    // Playthrough E1 (2026-09-10): il pass 01 ha ritirato i NPC classici di One
-    // Eyed Jacks (jacques_a3, audrey_oej) senza registrare i sostituti: la mappa
-    // arrivava vuota e M6 non poteva partire. Le presenze ora sono narrative:
-    // Jacques al banco finché non è fermato; Audrey al tavolo solo se indaga e
-    // finché Cooper non l'ha vista (m6_audrey è l'unico writer di audrey_vista_oej).
-    {
-      map_id: 'oej',
-      when: { not: { flag: 'jacques_preso' } },
-      npc: { id: 'jacques', x: 7, y: 5, sprite: 'jacques', name: 'Jacques', dialogue: null, dir: 'down' }
-    },
-    {
-      map_id: 'oej',
-      when: { all: [{ flag: 'audrey_indaga' }, { not: { flag: 'audrey_vista_oej' } }, { not: { flag: 'jacques_preso' } }] },
-      npc: { id: 'audrey', x: 13, y: 7, sprite: 'audrey', name: 'Audrey', dialogue: null, dir: 'down' }
-    },
-    // C5-C — Truman arriva al vagone solo quando Cooper ha una teoria finale
-    // da riferire. Prima restava visibile ma senza root attive e quindi muto.
-    // Dopo il rapporto torna alla centrale: nessun doppione fisico fra mappe.
-    {
-      map_id: 'traincar',
-      when: { all: [{ value_set: 'm5_final_theory' }, { not: { flag: 'east_route_confirmed' } }] },
-      npc: { id: 'truman', x: 9, y: 8, sprite: 'truman', name: 'Truman', dialogue: null, dir: 'right' }
-    },
-    // Act 3 pass 01 — Hawk resta FUORI dal vagone, tre collocazioni condizionate
-    // (report §7): ponte dopo il suo arrivo e prima della scoperta; fuori dalla
-    // porta, di spalle, fino alla custodia; al taglio a nord dopo il rapporto.
-    // Un id per collocazione: syncNarrativeEntities identifica per npc.id, e
-    // tre voci con lo stesso id si rimuoverebbero a vicenda. Ogni collocazione
-    // ha un nodo-attore M5 di una riga (mai un NPC muto). Il classico
-    // hawk_vagone dentro il vagone è ritirato.
-    // Playthrough E1 (2026-09-10): mai sulla riga 7 — è l'unico attraversamento
-    // del torrente; a (5,7) Hawk chiudeva Cooper sulle assi (softlock). Sta
-    // sulla sponda est, accanto al parapetto, fuori dalla linea dei binari.
-    {
-      map_id: 'traincar',
-      when: { all: [{ node_done: 'm5_bridge' }, { not: { flag: 'vagone_scoperto' } }] },
-      npc: { id: 'hawk_bridge', x: 5, y: 6, sprite: 'hawk', name: 'Hawk', dialogue: null, dir: 'left' }
-    },
-    {
-      map_id: 'traincar',
-      when: { all: [{ flag: 'vagone_scoperto' }, { not: { value_set: 's1' } }] },
-      npc: { id: 'hawk_door', x: 14, y: 8, sprite: 'hawk', name: 'Hawk', dialogue: null, dir: 'down' }
-    },
-    {
-      map_id: 'traincar',
-      when: { value_set: 's1' },
-      npc: { id: 'hawk_cut', x: 22, y: 3, sprite: 'hawk', name: 'Hawk', dialogue: null, dir: 'up' }
-    },
-    // C8-C.1 — Maddy al diner SOLO nella finestra della promessa (m8_diner):
-    // atto4 aperto e promessa non ancora fatta. Dopo la promessa torna a casa
-    // Palmer (timeline della Bible): il mondo non la mostra più al diner.
-    // norma@diner e truman@sheriff sono NPC del gioco classico, non del registro.
-    {
-      map_id: 'diner',
-      when: { all: [{ flag: 'atto4' }, { not: { value_set: 'promise_stance' } }] },
-      npc: { id: 'maddy', x: 10, y: 1, sprite: 'maddy', name: 'Maddy', dialogue: null, dir: 'down' }
-    },
-    // R8 — Leland resta al bancone dall'apertura dell'atto fino alla sua
-    // dichiarazione (C1, pass 01): non piu' condizionato a promise_stance —
-    // m8_leland_waiting (¬promise_stance) e m8_leland_taxi (promise_stance)
-    // si dividono la finestra sullo stesso attore, mai due root vive insieme
-    // (O10). Testimonianza prima del presagio; nessun viaggio a Palmer.
-    {
-      map_id: 'diner',
-      when: { all: [{ flag: 'atto4' }, { not: { evidence: 'T_LELAND_TAXI' } }] },
-      npc: { id: 'leland', x: 11, y: 1, sprite: 'leland', name: 'Leland', dialogue: null, dir: 'down' }
-    },
-    // C2 (pass 01) — Roadhouse come stanza: Truman al tavolo (nodo-attore
-    // m8_roadhouse_truman), il Gigante sul palco (nodo-attore m8_giant_stage,
-    // O4/O5) e la folla di scenografia (dialogue:null, nessun nodo — precedente
-    // piantone). Tavole/sedie sono 't'/'h' solide (js/maps.js:416/420); righe
-    // 2/4/6/8 sono 'f' libere. Truman su una tessera libera adiacente al
-    // tavolo lato porta (riga 8, sotto le tessere tavolo 3-4 di riga 7),
-    // faceable da 8,9/7,9 (porte) o dal corridoio; MAI su 8,4/8,5/8,6 (telefono
-    // e le due tessere adiacenti). La folla sta sulle righe 2 e 6 (libere,
-    // sotto il palco / sopra il bancone), lontana dalla colonna 8 (palco/telefono).
-    {
-      map_id: 'roadhouse',
-      when: { all: [{ flag: 'atto4' }, { not: { value_set: 'warning_target' } }] },
-      npc: { id: 'truman', x: 4, y: 8, sprite: 'truman', name: 'Truman', dialogue: null, dir: 'up' }
-    },
-    {
-      map_id: 'roadhouse',
-      when: { all: [{ flag: 'atto4' }, { not: { value_set: 'warning_target' } }] },
-      /* Playthrough RUN 1 (2026-09-10): a crowd on row 2 walled off the stage corridor
-       * (8,2 unreachable, the Giant unfaceable). The town sits at the west tables
-       * (rows 4 and 6, x<=5); rows 2/4/6 stay open from the east margin, so 8,2
-       * (the Giant), 8,4 and 8,6 (the phone) are all walkable by keys. */
-      npc: { id: 'bobby', x: 3, y: 4, sprite: 'bobby', name: 'Bobby', dialogue: null, dir: 'down' }
-    },
-    {
-      map_id: 'roadhouse',
-      when: { all: [{ flag: 'atto4' }, { not: { value_set: 'warning_target' } }] },
-      npc: { id: 'donna', x: 5, y: 4, sprite: 'donna', name: 'Donna', dialogue: null, dir: 'down' }
-    },
-    {
-      map_id: 'roadhouse',
-      when: { all: [{ flag: 'atto4' }, { not: { value_set: 'warning_target' } }] },
-      npc: { id: 'james', x: 2, y: 4, sprite: 'james', name: 'James', dialogue: null, dir: 'down' }
-    },
-    {
-      map_id: 'roadhouse',
-      when: { all: [{ flag: 'atto4' }, { not: { value_set: 'warning_target' } }] },
-      npc: { id: 'shelly', x: 3, y: 6, sprite: 'shelly', name: 'Shelly', dialogue: null, dir: 'down' }
-    },
-    {
-      map_id: 'roadhouse',
-      when: { all: [{ flag: 'atto4' }, { not: { value_set: 'warning_target' } }] },
-      npc: { id: 'norma', x: 5, y: 6, sprite: 'norma', name: 'Norma', dialogue: null, dir: 'up' }
-    },
-    {
-      map_id: 'roadhouse',
-      when: { all: [{ flag: 'atto4' }, { not: { value_set: 'warning_target' } }] },
-      npc: { id: 'loglady', x: 2, y: 6, sprite: 'loglady', name: 'Log Lady', dialogue: null, dir: 'up' }
-    },
-    // Il Gigante (C2/O4/O5): sul palco, 8,1 (tessera 'C' solida, faceable da
-    // 8,2 — interact() risolve npcAt prima di ogni test di solidità).
-    // dialogue:null: l'interazione appartiene al nodo m8_giant_stage.
-    {
-      map_id: 'roadhouse',
-      when: { all: [{ value_is: { name: 'presagio_status', equals: 'active' } }, { not: { value_set: 'warning_target' } }] },
-      npc: { id: 'gigante', x: 8, y: 1, sprite: 'giant', name: 'Gigante', dialogue: null, dir: 'down' }
-    },
-    // C4 (pass 01) — la riva del lago: Hawk in due collocazioni condizionate
-    // sullo stesso tile, un id per finestra (come i tre hawk_* del vagone).
-    // 16,27 è '.' libero (js/maps.js riga 27), a nord della corsia di
-    // avvicinamento da est (riga 28, dove il player cammina da 47,29 verso
-    // il cartello 15,28): non sulla traiettoria, adiacente in diagonale al
-    // landmark lago_maddy (15,28, 'F' solida). Nessun vice: la didascalia
-    // porta le torce (O-list, "il deputato non esiste come sprite proprio").
-    {
-      map_id: 'town',
-      when: { all: [{ value_is: { name: 'body_found_by', equals: 'hawk' } }, { not: { flag: 'maddy_trovata' } }] },
-      npc: { id: 'hawk_shore_first', x: 16, y: 27, sprite: 'hawk', name: 'Hawk', dialogue: null, dir: 'down' }
-    },
-    {
-      map_id: 'town',
-      when: { all: [{ flag: 'maddy_trovata' }, { not: { node_done: 'm8_station' } }] },
-      npc: { id: 'hawk_shore_after', x: 16, y: 27, sprite: 'hawk', name: 'Hawk', dialogue: null, dir: 'down' }
-    }
-  ];
+  /* ------- presenza fisica dei personaggi nominati: Cast Continuity v0.1 -------
+   * Dal 2026-09-13 NESSUN corpo di personaggio nominato è dichiarato qui né in
+   * js/glue.js NPCS: la sorgente unica è narrative/cast/windows.json (baseline +
+   * finestre autorali, docs/cast-continuity-contract-v0.1.md), risolta da
+   * js/cast-presence.js (GAME.CastPresence) — esattamente UNA risposta per
+   * personaggio e stato: PLACED / OFFSCREEN / TERMINAL_REMOVED, senza priorità
+   * né first-match. L'adapter non decide posizioni: chiama il seam
+   * CastPresence.syncMaps agli stessi punti di prima (enable, setState,
+   * refreshFromState, ogni commit). Il vecchio registro NARRATIVE_ENTITIES è
+   * vuoto e resta solo come simbolo per gli strumenti che lo leggono. */
+  var NARRATIVE_ENTITIES = [];
   A._debugNarrativeEntities = NARRATIVE_ENTITIES;
 
   // valutatore delle condizioni di presenza. Riusa la SEMANTICA UNICA delle
@@ -329,18 +162,6 @@
     return NR.evalCond(state, when, null);
   }
   A._debugEvalWhen = evalWhen;
-
-  // ids presenti nei DATI CLASSICI di ogni mappa, fotografati prima di qualunque
-  // iniezione: il registro può rimuovere SOLO ciò che il registro possiede.
-  var classicNpcIds = {};
-  function classicIdsFor(mapId, map) {
-    if (!classicNpcIds[mapId]) {
-      var owned = {};
-      NARRATIVE_ENTITIES.forEach(function (e) { if (e.map_id === mapId) owned[e.npc.id] = true; });
-      classicNpcIds[mapId] = map.npcs.filter(function (n) { return !owned[n.id]; }).map(function (n) { return n.id; });
-    }
-    return classicNpcIds[mapId];
-  }
 
   // stessa forma che loadMap dà agli NPC (js/engine.js): l'entità aggiunta a
   // mappa GIÀ CARICATA deve essere indistinguibile da una posata dal caricamento.
@@ -358,32 +179,26 @@
     return -1;
   }
 
-  /* sincronizza TUTTE le entità del registro con lo stato narrativo corrente:
-   * sui dati della mappa (GAME.Maps[map_id].npcs) e — se quella mappa è la
-   * mappa CARICATA — anche sugli NPC vivi del motore (E.state.npcs), perché
+  /* sincronizza i corpi dei personaggi nominati con lo stato narrativo corrente
+   * (Cast Presence, Fase 6): su TUTTE le mappe (GAME.Maps[*].npcs) e — se quella
+   * mappa è la mappa CARICATA — sugli NPC vivi del motore (E.state.npcs), perché
    * loadMap ne fa una copia allo spawn. Idempotente e silenziosa quando non
-   * cambia nulla; logga un evento solo sui cambi effettivi. */
+   * cambia nulla; logga un evento solo sui cambi effettivi. Una risoluzione che
+   * fallisce (OVERLAP / NO_PLACEMENT) è un mondo autoriale contraddittorio:
+   * viene loggata come hard error e nessun corpo viene toccato. */
   function syncNarrativeEntities(reason) {
     if (!enabled || !state || !NR) return [];
+    var CP = GAME.CastPresence;
+    if (!CP || !GAME.Maps) { logEv({ event: 'cast_presence_missing', reason: reason || null }); return []; }
     var E = GAME.Engine;
-    var live = (E && E.state && E.state.npcs) ? E.state.npcs : null;
-    var liveMapId = (E && E.state) ? E.state.mapId : null;
-    var changes = [];
-    NARRATIVE_ENTITIES.forEach(function (ent) {
-      var map = GAME.Maps && GAME.Maps[ent.map_id];
-      if (!map || !map.npcs) return;
-      var classic = classicIdsFor(ent.map_id, map);
-      if (classic.indexOf(ent.npc.id) !== -1) return; // id del gioco classico: mai toccato
-      var present = evalWhen(ent.when);
-      var at = indexOfNpc(map.npcs, ent.npc.id);
-      if (present && at === -1) { map.npcs.push(ent.npc); changes.push({ id: ent.npc.id, map: ent.map_id, to: 'present' }); }
-      else if (!present && at !== -1) { map.npcs.splice(at, 1); changes.push({ id: ent.npc.id, map: ent.map_id, to: 'absent' }); }
-      if (live && liveMapId === ent.map_id) {
-        var lat = indexOfNpc(live, ent.npc.id);
-        if (present && lat === -1) live.push(hydrateNpc(ent.npc));
-        else if (!present && lat !== -1) live.splice(lat, 1);
-      }
-    });
+    var live = (E && E.state && E.state.npcs) ? { mapId: E.state.mapId, npcs: E.state.npcs } : null;
+    var changes;
+    try {
+      changes = CP.syncMaps(GAME.Maps, state, live, { hydrate: hydrateNpc });
+    } catch (e) {
+      logEv({ event: 'cast_presence_error', reason: reason || null, code: e && e.code, detail: e && e.detail, error: String(e && e.message || e) });
+      throw e;
+    }
     if (changes.length) logEv({ event: 'narrative_entities_synced', reason: reason || null, changes: changes });
     return changes;
   }
@@ -595,10 +410,26 @@
   }
 
   // true = l'adapter ha gestito l'interazione (il motore non apre il vecchio dialogo)
-  A.tryInteract = function (mapId, actorId) {
+  /* Cast Presence: un corpo del registro risponde agli id-attore autorali della
+   * sua placement (body.actor_ids, es. hawk → hawk_bridge; giant → gigante).
+   * L'elenco viene dai DATI mappa (GAME.Maps[map].npcs), non dal corpo vivo,
+   * perché loadMap copia solo i campi classici. Nessun alias implicito. */
+  function actorIdsFor(mapId, npcId) {
+    var map = GAME.Maps && GAME.Maps[mapId];
+    var body = map && map.npcs ? map.npcs.filter(function (n) { return n.id === npcId; })[0] : null;
+    var ids = (body && Array.isArray(body.actor_ids) && body.actor_ids.length) ? body.actor_ids.slice() : [];
+    if (ids.indexOf(npcId) === -1) ids.push(npcId);
+    return ids;
+  }
+  A.tryInteract = function (mapId, npcId) {
     if (!enabled) return false;
     syncCarryoverEvidence('interaction');
     if (A.active()) return true; // sessione già in corso: consuma
+    var ids = actorIdsFor(mapId, npcId);
+    for (var k = 0; k < ids.length; k++) if (tryInteractAs(mapId, ids[k])) return true;
+    return false;
+  };
+  function tryInteractAs(mapId, actorId) {
     var ent = enteredMissions();
     var owner = null, roots = [];
     // C6-C: quando più missioni hanno un nodo sullo STESSO target attore
@@ -632,7 +463,7 @@
     if (roots.length > 1) { logEv({ event: 'ambiguous_world_roots', map: mapId, actor: actorId, roots: roots.map(function (n) { return n.id; }) }); partialError = true; return true; }
     runSession(owner, roots[0], actorId);
     return true;
-  };
+  }
 
   // target ambientali (object/landmark/sign): risoluzione GENERICA
   // casella → target_id (registro) → nodi world compatibili per identità
