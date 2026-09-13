@@ -161,3 +161,18 @@ on earlier branches). Always trust the printed output.
 - **Pixel/clickable UI unverified.** Needs a browser (or a CI playwright job) to confirm the canvas renders real
   geometry and the accept/cancel editor is wired — M4 *core* is proven, the *surface* is not.
 - **No main merge intended.** This is a feature PR for review; it must not merge into `main` until approved.
+
+---
+
+## 8. PR status (STEP 7)
+
+- **Branch pushed & verified:** `qwen/world-registry-editor` @ `030a88e` exists on `origin`, upstream set, with
+   exactly the M4 scope staged (13 `js/editor/*` + apply layer, editor tests, `world-builder-core.js`,
+   `world-builder-data.js`/`index.html`/`world-builder.html` load-order edits, four legacy `*-location-data.js`
+  deletions, this report). No PNG artifacts or unrelated working-tree edits were swept in.
+- **`main` untouched:** remote and local `main` are both `20f2766`; this work did not merge into `main`.
+- **Real PR object: BLOCKED by permission.** The push succeeded via the `github-embermind` SSH credential, but
+   `gh pr create` failed with `GraphQL: must be a collaborator` because the `gh`-authenticated account
+    (`escapemanuele`) is not a collaborator on `ember-mind/twin-peaks-game`. No PR could be auto-opened.
+- **Openable fallback (per the project's qwen-\* convention):** a collaborator opens it in one click —
+   <https://github.com/ember-mind/twin-peaks-game/pull/new/qwen/world-registry-editor>
