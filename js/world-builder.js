@@ -50,11 +50,51 @@
            out.push({ which: which, id: c.id, tx: e.spawn.tx, ty: e.spawn.ty, dir: e.spawn.dir });
             });
              });
-         return out.sort(function (x, y) { return x.which < y.which ? -1 : 1; });
-          }
+              return out.sort(function (x, y) { return x.which < y.which ? -1 : 1; });
+                }
+
+          // ---- Issue 3 + 4: ONE canonical draw/hit plan for a scene.
+          // Every VISIBLE selectable marker lives in one z-ordered list — overlay markers first
+           // (object<npc<exit), connection-spawn markers last so they paint on top. The SAME array is used to
+           // render and to hit-test, so "topmost painted" always equals "what a click selects". Spawn markers are
+            // first-class here (Issue 3): if the user can see one, clicking it selects it. Each item is enriched
+             // with sceneId/locationId for the ownership header (Issue 5) WITHOUT mutating the frozen snapshot
+              // (Object.assign copies; the source overlay object is never written).
+          function pairedEndpoint(snap, id, which) {
+            var rec = (snap && snap.connections || []).filter(function (c) { return c.id === id; })[0];
+            if (!rec) return null;
+              var e = rec[which === 'a' ? 'b' : 'a']; // the OTHER endpoint of this connection pair
+             return e ? { scene: e.scene, tx: e.spawn && e.spawn.tx, ty: e.spawn && e.spawn.ty, dir: e.spawn && e.spawn.dir } : null;
+               }
+
+         function selectablePlan(snap, sceneId) {
+          var sc = snap && snap.scenes[sceneId];
+            if (!sc) return { width: 0, height: 0, items: [] };
+              // overlay markers carry real source fields plus the ownership a renderer/inspector need.
+           var overlays = planScene(sc).markers.map(function (m) {
+             var o = {};
+               Object.keys(m).forEach(function (k) { o[k] = m[k]; });
+                o.sceneId = sc.sceneId; o.locationId = sc.locationId;
+              return o;
+                });
+           // connection endpoints that LAND on this scene become selectable spawn markers (Issue 3).
+          var spawns = planSpawns(snap, sceneId).map(function (s) {
+            return { kind: 'connection-spawn', which: s.which, id: s.id, connectionId: s.id,
+                tx: s.tx, ty: s.ty, w: 1, h: 1, dir: s.dir || null, sceneId: sc.sceneId, locationId: sc.locationId,
+                 paired: pairedEndpoint(snap, s.id, s.which) };
+              });
+            // z-order == paint order == hit-test precedence (hitTest scans items end-first).
+         var items = overlays.concat(spawns);
+           return { width: sc.width, height: sc.height, indoor: !!sc.indoor,
+                    baseMap: WB.planBaseMap(sc), overlays: overlays, spawns: spawns, items: items };
+                         }
+
+                 // Module-level so the API can expose it; hit-test and draw share this key for stable selection (Issue 4).
+              function selKey(o) { return o.kind + ':' + o.tx + ',' + o.ty; }
 
 
-  function mount() {
+             function mount() {
+
     var snapshot = WB.buildWorldSnapshot(WB.collectWorldSource(window.GAME));
     var root = document.getElementById('wb-root');
      if (!root) { // attach a floating panel instead of overwriting the page body.
@@ -63,8 +103,11 @@
       document.body.appendChild(root);
       }
 
-   var selected = null;            // currently inspected overlay
-  var selectedSceneKey = null;     // "locationId/sceneId"
+   var selected = null;              // currently inspected selectable item (for the inspector)
+  var selectedSceneKey = null;       // "locationId/sceneId"
+   var selectedKey = null;           // stable "kind:tx,ty" key so a highlight survives scene re-renders
+
+
 
     // ---- M1: location/scene selector built from the real catalog ----
    var sel = document.createElement('select');
@@ -127,43 +170,38 @@
      canvas.width = sc.width * zoom;
      canvas.height = sc.height * zoom;
 
-      // grid
-   ctx.fillStyle = sc.indoor ? '#10171f' : '#0a140e';
-   ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-     for (var x = 0; x <= sc.width; x++) { ctx.beginPath(); ctx.moveTo(x * zoom + .5, 0); ctx.lineTo(x * zoom + .5, canvas.height); ctx.stroke(); }
-    for (var y = 0; y <= sc.height; y++) { ctx.beginPath(); ctx.moveTo(0, y * zoom + .5); ctx.lineTo(canvas.width, y * zoom + .5); ctx.stroke(); }
+       // base map: real per-tile geometry (from the scene's row strings) so Town/Diner/Sheriff read as
+        // DIFFERENT layouts, not an empty grid (BLOCKER 2). Rendered UNDER overlays; one colour per cell.
+    var plan = selectablePlan(snapshot, sceneId);
+     var base = plan.baseMap || { rows: [] };
+ ctx.fillStyle = sc.indoor ? '#10171f' : '#0a140e';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  for (var by = 0; by < base.rows.length; by++) {
+    var rowc = base.rows[by];
+     for (var bx = 0; bx < rowc.length; bx++) {
+      ctx.fillStyle = rowc[bx].color;
+        ctx.fillRect(bx * zoom, by * zoom, zoom, zoom);
+           }
+             }
+ // faint grid OVER the base keeps tile boundaries readable without erasing the geometry underneath.
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  for (var x = 0; x <= sc.width; x++) { ctx.beginPath(); ctx.moveTo(x * zoom + .5, 0); ctx.lineTo(x * zoom + .5, canvas.height); ctx.stroke(); }
+   for (var y = 0; y <= sc.height; y++) { ctx.beginPath(); ctx.moveTo(0, y * zoom + .5); ctx.lineTo(canvas.width, y * zoom + .5); ctx.stroke(); }
 
-     // overlays via the pure planScene() so paint order is identical to what the node test checks.
-      planScene(sc).markers.forEach(function (o) {
-      drawOverlay(ctx, o, zoom, selected === o);
-        });
+    // ONE canonical z-ordered list drives both paint and hit-test: overlays then spawns, topmost painted last.
+  plan.items.forEach(function (o) { drawOverlay(ctx, o, zoom, selKey(o) === selectedKey); });
 
-       // connection-endpoint spawn markers for THIS scene: a diamond + A/B label at each landing tile.
-    planSpawns(snapshot, sceneId).forEach(function (s) {
-     var cx = s.tx * zoom + zoom / 2, cy = s.ty * zoom + zoom / 2, r = Math.max(4, zoom * 0.38);
-      ctx.save();
-     ctx.fillStyle = 'rgba(255,120,200,0.85)';
-      ctx.strokeStyle = '#ff78c8'; ctx.lineWidth = 1;
-      ctx.beginPath();
-       ctx.moveTo(cx, cy - r); ctx.lineTo(cx + r, cy); ctx.lineTo(cx, cy + r); ctx.lineTo(cx - r, cy); ctx.closePath();
-      ctx.fill(); ctx.stroke();
-     ctx.fillStyle = '#fff'; ctx.font = 'bold ' + Math.max(8, zoom * 0.7) + 'px monospace';
-       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(s.which.toUpperCase(), cx, cy);
-       ctx.restore();
-        });
-
-
-     // legend + status reflect what is actually on screen.
-   var counts = countByKind(sc.overlays);
-   var spawns = planSpawns(snapshot, sceneId);
-   status.textContent = sc.sceneId + '    ·    ' + sc.width + '×' + sc.height + (sc.indoor ? ' (interior)' : '') +
-        '    ·  exits:' + counts.exit + '  objects:' + counts.object + '  npcs:' + counts.npc + '  spawns:' + spawns.length;
-    legend.innerHTML = '<span style="color:#5ec8ff">■</span> exit → target      ' +
-       '<span style="color:#e6b84a">●</span> object/region      ' +
-        '<span style="color:#7ee07e">▲</span> npc      ' +
+   // legend + status reflect what is actually on screen, including any unresolved catalog connection ids.
+  var counts = countByKind(sc.overlays);
+    var spawnItems = plan.spawns;
+  status.textContent = sc.sceneId + '     ·     ' + sc.width + '×' + sc.height + (sc.indoor ? ' (interior)' : '') +
+        '     ·  exits:' + counts.exit + '  objects:' + counts.object + '  npcs:' + counts.npc + '  spawns:' + spawnItems.length +
+         ((snapshot.unresolved && snapshot.unresolved.length) ? ('   ⚠ unresolved connections: ' + snapshot.unresolved.join(', ')) : '');
+   legend.innerHTML = '<span style="color:#5ec8ff">■</span> exit → target       ' +
+       '<span style="color:#e6b84a">●</span> object/region       ' +
+        '<span style="color:#7ee07e">▲</span> npc       ' +
          '<span style="color:#ff78c8">◆</span> connection spawn (A/B)';
+
    }
 
     function drawOverlay(ctx, o, zoom, isSel) {
@@ -185,8 +223,22 @@
       ctx.fillStyle = isSel ? 'rgba(230,184,74,.55)' : 'rgba(230,184,74,.25)';
         if (isSel) { ctx.strokeStyle = '#e6b84a'; ctx.lineWidth = 2; }
        ctx.fillRect(px + 1, py + 1, w - 2, hh - 2);
-      if (isSel) ctx.strokeRect(px + .5, py + .5, w - 1, hh - 1);
+        if (isSel) ctx.strokeRect(px + .5, py + .5, w - 1, hh - 1);
+          } else if (o.kind === 'connection-spawn') {
+       // a connection endpoint landing on this scene: diamond + A/B label. Selectable via the unified plan (Issue 3).
+       var cx2 = px + zoom / 2, cy2 = py + zoom / 2, r = Math.max(4, zoom * 0.38);
+        ctx.save();
+      ctx.fillStyle = isSel ? 'rgba(255,160,220,.95)' : 'rgba(255,120,200,.85)';
+       ctx.strokeStyle = '#ff78c8'; ctx.lineWidth = isSel ? 2 : 1;
+        ctx.beginPath();
+         ctx.moveTo(cx2, cy2 - r); ctx.lineTo(cx2 + r, cy2); ctx.lineTo(cx2, cy2 + r); ctx.lineTo(cx2 - r, cy2); ctx.closePath();
+       ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.font = 'bold ' + Math.max(8, zoom * 0.7) + 'px monospace';
+         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+       ctx.fillText((o.which || '?').toUpperCase(), cx2, cy2);
+         ctx.restore();
         } else { // npc
+
        ctx.fillStyle = '#7ee07e';
         var nx = px + zoom / 2, ny = py + zoom / 2;
       ctx.beginPath(); ctx.moveTo(nx, ny - zoom * .35); ctx.lineTo(nx + zoom * .3, ny + zoom * .3);
@@ -205,12 +257,15 @@
    canvas.addEventListener('click', function (ev) {
      var rect = canvas.getBoundingClientRect();
      var px = ev.clientX - rect.left, py = ev.clientY - rect.top;
-     var sc = snapshot.scenes[(String(selectedSceneKey).split('/')[1] || '')];
-      if (!sc) return;
-    selected = CO.hitTest(sc.overlays, px, py, currentZoom());
-    renderScene(selectedSceneKey); // re-draw with selection highlight
-   renderInspector(selected, snapshot);
-   });
+      var sceneId = String(selectedSceneKey).split('/')[1] || '';
+       // hit-test the SAME z-ordered list renderScene paints, so a visible spawn is selectable too (Issues 3+4).
+     var items = selectablePlan(snapshot, sceneId).items;
+    selected = CO.hitTest(items, px, py, currentZoom());
+      selectedKey = selected ? selKey(selected) : null;
+   renderScene(selectedSceneKey); // re-draw with selection highlight
+  renderInspector(selected, snapshot);
+    });
+
 
      function currentZoom() {
       var sc = snapshot.scenes[(String(selectedSceneKey).split('/')[1] || '')];
@@ -228,29 +283,45 @@
         var v = h('span', String(val == null ? '—' : val));
       r.appendChild(l); r.appendChild(v); insp.appendChild(r);
        }
-    row('TYPE / KIND', o.kind + (o.subkind ? '/' + o.subkind : '') + (o.type ? (' (' + o.type + ')') : ''));
-     if (o.id) row('NPC ID', o.id);
-     if (o.name && o.kind === 'npc') row('NAME', o.name);
-    row('SOURCE (tile)', 'x=' + o.tx + '  y=' + o.ty + ((o.w && o.w > 1) ? ('  w=' + o.w + ' h=' + (o.h || 1)) : ''));
-     if (o.kind === 'exit') {
-      row('TARGET scene', o.target.scene);
-       row('TARGET SPAWN', 'x=' + o.target.x + '  y=' + o.target.y + (o.dir ? '  dir=' + o.dir : ''));
-      // find the paired connection record so we can show its canonical id + both endpoints.
-     var rec = snap.connections.filter(function (c) { return c.id === o.connectionId; })[0];
-       if (rec) {
-        row('CONNECTION ID', rec.id);
-         row('A endpoint', rec.a ? (rec.a.scene + ' spawn@' + (rec.a.spawn && rec.a.spawn.tx) + ',' + (rec.a.spawn && rec.a.spawn.ty)) : '—');
-        row('B endpoint', rec.b ? (rec.b.scene + ' spawn@' + (rec.b.spawn && rec.b.spawn.tx) + ',' + (rec.b.spawn && rec.b.spawn.ty)) : '—');
+    // Ownership first (Issue 5): every selectable reports the location + scene it belongs to.
+   row('LOCATION', o.locationId || '—');
+    row('SCENE', o.sceneId || '—');
+   row('TYPE / KIND', o.kind + (o.subkind ? '/' + o.subkind : '') + (o.type ? (' (' + o.type + ')') : ''));
+  if (o.kind === 'npc') { if (o.id) row('NPC ID', o.id); if (o.name) row('NAME', o.name); }
+   else if (o.id && o.kind !== 'connection-spawn') row('ID', o.id);
+     // SOURCE tile plus real dimensions for multi-cell objects.
+  row('SOURCE (tile)', 'x=' + o.tx + '  y=' + o.ty + (o.w || o.h ? ('  w=' + (o.w || 1) + ' h=' + (o.h || 1)) : ''));
+   if (o.kind === 'npc' && o.sprite) row('SPRITE', o.sprite);
+    if (o.dir) row('DIRECTION', o.dir);
+     if (o.dialogue != null) row('DIALOGUE', typeof o.dialogue === 'string' ? o.dialogue : JSON.stringify(o.dialogue));
+
+    // exits: target scene + landing spawn, then the canonical connection id and BOTH paired endpoints.
+   if (o.kind === 'exit') {
+     row('TARGET scene', o.target && o.target.scene);
+      row('TARGET SPAWN', o.target ? ('x=' + o.target.x + '  y=' + o.target.y + (o.dir ? '  dir=' + o.dir : '')) : '—');
+    var rec = snap.connections.filter(function (c) { return c.id === o.connectionId; })[0];
+      if (rec) {
+       row('CONNECTION ID', rec.id);
+        row('A endpoint', rec.a ? (rec.a.scene + ' spawn@' + (rec.a.spawn && rec.a.spawn.tx) + ',' + (rec.a.spawn && rec.a.spawn.ty)) : '—');
+       row('B endpoint', rec.b ? (rec.b.scene + ' spawn@' + (rec.b.spawn && rec.b.spawn.tx) + ',' + (rec.b.spawn && rec.b.spawn.ty)) : '—');
          } else if (o.connectionId) {
-      row('CONNECTION ID', o.connectionId + ' (no paired record loaded)');
+     row('CONNECTION ID', o.connectionId + ' (no paired record loaded)');
        }
      }
-     if (o.dialogue != null) row('DIALOGUE', typeof o.dialogue === 'string' ? o.dialogue : JSON.stringify(o.dialogue));
-    if (o.sprite) row('SPRITE', o.sprite);
+
+    // connection-spawn: the endpoint landing on this scene, plus its partner across the pair.
+   if (o.kind === 'connection-spawn') {
+    row('CONNECTION ID', o.id);
+      row('LANDS HERE at', 'side ' + (o.which || '?').toUpperCase() + '  x=' + o.tx + ' y=' + o.ty);
+     var p = o.paired;
+       row('PARTNER endpoint', p ? (p.scene + ' spawn@' + p.tx + ',' + p.ty + (p.dir ? '  dir=' + p.dir : '')) : '—');
+      }
+
    }
 
       // default: first location's first environment; select it and render.
-  sel.onchange = function () { renderScene(sel.value); selected = null; renderInspector(null, snapshot); };
+  sel.onchange = function () { renderScene(sel.value); selected = null; selectedKey = null; renderInspector(null, snapshot); };
+
      sel.selectedIndex = 0;
   renderScene(sel.value);
    renderInspector(null, snapshot);
@@ -269,7 +340,8 @@
     else boot();
    }
 
-  var api = { mount: mount, planScene: planScene, planSpawns: planSpawns };
+  var api = { mount: mount, planScene: planScene, planSpawns: planSpawns, selectablePlan: selectablePlan, selKey: selKey };
+
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
    if (typeof window !== 'undefined') { window.GAME = window.GAME || {}; window.GAME.WorldBuilder = api; }
 })();

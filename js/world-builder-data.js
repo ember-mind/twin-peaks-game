@@ -18,8 +18,22 @@
   function freezeDeep(o) {
     if (o === null || typeof o !== 'object') return o;
     Object.keys(o).forEach(function (k) { freezeDeep(o[k]); });
-    return Object.freeze(o);
-  }
+     return Object.freeze(o);
+   }
+
+  // Deep structural copy of plain data (arrays/objects/primitives), returning a tree OWNED by the
+   // caller. This is what makes the snapshot read-only without side effects: every nested value in
+   // the snapshot is a fresh copy, so freezeDeep() below can never reach back and freeze an
+   // authoritative source array (e.g. a connection's .triggers or an object's .dialogue). Functions
+   // are dropped (the builder needs no behaviour), and cycles are not expected in authored world data.
+  function clone(v) {
+    if (v === null || typeof v !== 'object') return v;
+    if (Array.isArray(v)) return v.map(clone);
+    var out = {};
+    Object.keys(v).forEach(function (k) { if (typeof v[k] !== 'function') out[k] = clone(v[k]); });
+     return out;
+   }
+
 
   // "double-r" -> "Double R", "sheriffs_station_exterior" -> "Sheriffs Station Exterior".
   function humanize(id) {
@@ -32,11 +46,11 @@
   function normalizeConnection(record) {
     var out = {};
     if (record && record.a) {
-      out.a = { endpoint: 'a', scene: record.a.scene, triggers: record.a.triggers || [],
+      out.a = { endpoint: 'a', scene: record.a.scene, triggers: clone(record.a.triggers || []),
                 spawn: record.a.spawn ? { tx: record.a.spawn.tx, ty: record.a.spawn.ty, dir: record.a.spawn.dir } : null };
     }
     if (record && record.b) {
-      out.b = { endpoint: 'b', scene: record.b.scene, triggers: record.b.triggers || [],
+      out.b = { endpoint: 'b', scene: record.b.scene, triggers: clone(record.b.triggers || []),
                 spawn: record.b.spawn ? { tx: record.b.spawn.tx, ty: record.b.spawn.ty, dir: record.b.spawn.dir } : null };
     }
     return out;
@@ -69,10 +83,10 @@
         subkind: o.kind || null,
         tx: o.x,
         ty: o.y,
-        w: (o.w || 1),
-        h: (o.h || 1),
-        dialogue: o.dialogue || null
-      }));
+            w: (o.w || 1),
+             h: (o.h || 1),
+          dialogue: o.dialogue == null ? null : clone(o.dialogue)
+        }));
     });
 
     (map.npcs || []).forEach(function (n) {
@@ -115,10 +129,14 @@
         sceneId: sceneId,
         name: humanize(sceneId),
         locationId: null, // filled below from the catalog
-        width: map.width,
-        height: map.height,
-        indoor: !!map.indoor,
-        overlayCount: overlays.length,
+          width: map.width,
+          height: map.height,
+          indoor: !!map.indoor,
+           // rows are arrays of single-char tile strings; .slice() detaches the array while keeping the
+           // immutable cell strings. The base-map renderer (BLOCKER 2) reads real geometry from here, and
+            // freezeDeep never reaches a source row reference.
+        rows: map.rows ? map.rows.slice() : null,
+          overlayCount: overlays.length,
         overlays: overlays
         };
       });
@@ -139,41 +157,98 @@
       return {
         id: loc.id,
         name: humanize(loc.id),
-        environments: environments,
-        connections: loc.connections || []
-        };
-      });
+         environments: environments,
+         connections: clone(loc.connections || [])
+         };
+        });
 
     var connectionsNorm = connections.map(function (rec) {
       var n = normalizeConnection(rec);
       return { id: rec.id, a: n.a, b: n.b };
-      });
+       });
 
-     // Deep-freeze the assembled tree in one pass. The renderer / inspector then get an
-     // immutable view-model: a write to any overlay throws (strict mode), proving read-only.
+     // Issue 7: every connection id the catalog exposes must resolve to exactly one authored record.
+    // The builder cannot invent a connection, so any catalog id with no loaded record is surfaced here
+    // (fail loud) instead of silently dropping it. A canonical connectionId->record registry is a
+    // future architecture improvement; for now we detect the gap rather than hide it.
+    var authoredIds = {}; connectionsNorm.forEach(function (c) { authoredIds[c.id] = true; });
+     var unresolved = [];
+    locations.forEach(function (loc) {
+      loc.connections.forEach(function (cid) {
+        if (!authoredIds[cid] && unresolved.indexOf(cid) === -1) unresolved.push(cid);
+       });
+       });
+
+      // Deep-freeze the assembled tree in one pass. The renderer / inspector then get an
+    // immutable view-model: a write to any overlay throws (strict mode), proving read-only.
     return freezeDeep({
       tile: tile,
       sceneCount: sceneIds.length,
       locationCount: locations.length,
       locations: locations,
       scenes: scenesById,
-      connections: connectionsNorm
-      });
+      connections: connectionsNorm,
+      unresolved: unresolved
+       });
+
   }
 
-  // Browser entry point: pull the source straight out of the live GAME global. The four
-  // *LocationConnections arrays are the only connection groups in the catalog today.
+    // Browser entry point: pull the source straight out of the live GAME global.
+    // ISSUE 7 — temporary adapter, NOT a second catalog: paired connection records live in four
+    // separate runtime globals (one per location group). We only READ and concat them; we never
+    // re-author. Adding a new *LocationConnections group means adding its name to CONNECTION_GROUP_NAMES,
+    // and buildWorldSnapshot().unresolved surfaces any catalog connection id with no loaded record, so
+    // the builder can't silently drop connections. A canonical connectionId->record registry is future work.
+  var CONNECTION_GROUP_NAMES = [
+     'DoubleRLocationConnections', 'TraincarLocationConnections',
+     'SheriffsStationLocationConnections', 'Room315LocationConnections'
+   ];
+
   function collectWorldSource(GAME) {
     var G = GAME || (typeof window !== 'undefined' && window.GAME) || {};
-    var cats = [G.DoubleRLocationConnections, G.TraincarLocationConnections,
-                G.SheriffsStationLocationConnections, G.Room315LocationConnections];
     var connections = [];
-    cats.forEach(function (c) { if (Array.isArray(c)) connections = connections.concat(c); });
+    CONNECTION_GROUP_NAMES.forEach(function (name) {
+      if (Array.isArray(G[name])) connections = connections.concat(G[name]);
+      });
     return { maps: G.Maps || {}, catalog: (G.World && G.World.catalog) || { locations: [] },
-             connections: connections, tile: TILE };
-  }
+            connections: connections, tile: TILE };
+    }
 
-  var api = { TILE: TILE, buildWorldSnapshot: buildWorldSnapshot, collectWorldSource: collectWorldSource };
+     // BLOCKER 2 — real geometry. Map rows are single-char-per-tile strings; this projects each cell to a
+    // small semantic category+colour so Town/Diner/Sheriff read as DIFFERENT real layouts, not an empty
+    // grid. Recognised chars use a fixed palette; any other char falls back to a stable hue by code point
+     // so every tile still renders distinctly and deterministically (faithful, no invented art). Pure + node-testable.
+  var TILE_CATEGORY = {
+      T: { cat: 'tree', color: '#1f4d2b' }, '.': { cat: 'open', color: '#241f18' },
+       g: { cat: 'grass', color: '#35603a' }, w: { cat: 'water', color: '#1d4e6b' },
+        i: { cat: 'floor', color: '#7a6a53' }, f: { cat: 'floor', color: '#8a7860' },
+         r: { cat: 'road', color: '#5a5148' }, D: { cat: 'door', color: '#caa04a' },
+          d: { cat: 'door', color: '#b98a3a' }
+       };
+  function tileColorFor(ch) {
+    var c = TILE_CATEGORY[ch];
+     if (c) return { cat: c.cat, color: c.color };
+     var hue = (ch.charCodeAt(0) * 47) % 360;
+      return { cat: 'tile-' + ch, color: 'hsl(' + hue + ',45%,42%)' };
+       }
+
+    // Per-cell base-map plan for one scene, aligned to overlay tile units (cell.x == tx). Rendered UNDER overlays.
+  function planBaseMap(scene) {
+   if (!scene || !scene.rows) return { width: 0, height: 0, rows: [] };
+   var out = [];
+     scene.rows.forEach(function (row, y) {
+       var cells = [];
+        for (var x = 0; x < row.length; x++) {
+         var c = tileColorFor(row.charAt(x));
+          cells.push({ x: x, y: y, ch: row.charAt(x), cat: c.cat, color: c.color });
+           }
+       out.push(cells);
+     });
+   return { width: out.length ? out[0].length : 0, height: out.length, rows: out };
+    }
+
+  var api = { TILE: TILE, buildWorldSnapshot: buildWorldSnapshot, collectWorldSource: collectWorldSource,
+               planBaseMap: planBaseMap, tileColorFor: tileColorFor, clone: clone };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   if (typeof window !== 'undefined') window.GAME = window.GAME || {}, window.GAME.WorldBuilderData = api;
 })();

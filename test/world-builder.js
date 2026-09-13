@@ -184,13 +184,103 @@
    var wbSrc = fs.readFileSync(path.join(DIR, 'world-builder.js'), 'utf8');
   ok('world-builder.js has NO persistence (localStorage/writeFile absent)',
      wbSrc.indexOf('localStorage') === -1 && wbSrc.indexOf('writeFile') === -1);
-        // Building + planning a view-model must never write back into the live source maps.
-   var doorsBefore = G.Maps.sheriff.doors.length;
-  WBUI.planScene(WB.buildWorldSnapshot(WB.collectWorldSource(G)).scenes.town);
-  WBUI.planScene(WB.buildWorldSnapshot(WB.collectWorldSource(G)).scenes.sheriff);
-   ok('planning scenes leaves source map door count intact', G.Maps.sheriff.doors.length === doorsBefore);
+         // ---- Issue 6: planning must not mutate live source; the guard must be non-vacuous ----------
+        var doorsBefore = Object.keys(G.Maps.sheriff.doors || {}).length;
+        ok('the sheriff scene actually HAS doors (guard is not vacuously true)', doorsBefore > 0);
+        WBUI.planScene(WB.buildWorldSnapshot(WB.collectWorldSource(G)).scenes.town);
+        WBUI.planScene(WB.buildWorldSnapshot(WB.collectWorldSource(G)).scenes.sheriff);
+         ok('planning scenes leaves source map door SET intact', Object.keys(G.Maps.sheriff.doors || {}).length === doorsBefore);
 
-   console.log('\nWORLD-BUILDER: ' + (checks - failed.length) + '/' + checks + ' passed');
+       // ---- BLOCKER 1: building the snapshot must NOT deep-freeze LIVE source data --------------
+        // Three leak sites were fixed by cloning at the boundary (connection triggers, object dialogue,
+         // catalog location connections). Capture a LIVE reference to each kind BEFORE building and prove
+          // the source stays writable while the snapshot copy is a distinct, frozen object.
+     var src = WB.collectWorldSource(G);
+
+       // (a) a live connection trigger array, scanned across the concatenated connection groups.
+        var liveTrig = null, trigRecord = null;
+      src.connections.forEach(function (rec) {
+       if (liveTrig || !rec) return;
+         if (Array.isArray(rec.a && rec.a.triggers) && rec.a.triggers.length) { liveTrig = rec.a.triggers; trigRecord = rec; }
+          else if (Array.isArray(rec.b && rec.b.triggers) && rec.b.triggers.length) { liveTrig = rec.b.triggers; trigRecord = rec; }
+            });
+    var snap1 = WB.buildWorldSnapshot(WB.collectWorldSource(G));
+     ok('the authored connections carry triggers to exercise the clone path', !!liveTrig);
+        if (liveTrig) {
+      ok('source connection triggers are NOT frozen after snapshot (deep-freeze leak fixed)', !Object.isFrozen(liveTrig));
+       var normRec = snap1.connections.filter(function (c) { return c.id === trigRecord.id; })[0];
+         var liveOther = trigRecord.a && Array.isArray(trigRecord.a.triggers) ? trigRecord.a.triggers : (trigRecord.b && trigRecord.b.triggers);
+         ok('snapshot connection trigger copy is a DIFFERENT object from the source',
+          normRec && normRec.a && normRec.b &&
+           normRec.a.triggers !== liveTrig && normRec.b.triggers !== liveOther);
+           }
+
+            // (b) a live map-object dialogue reference.
+         var liveDial = null;
+        Object.keys(src.maps).forEach(function (mkey) {
+      var m = src.maps[mkey];
+       if (!liveDial || !Array.isArray(m && m.objects)) return;
+        m.objects.forEach(function (o) { if (!liveDial && o && o.dialogue != null) liveDial = o.dialogue; });
+          });
+    if (liveDial) ok('source object dialogue is NOT frozen after snapshot (no leak)', !Object.isFrozen(liveDial));
+
+           // (c) a live catalog-location connections array.
+        var catalog = (G.World && G.World.catalog) || { locations: [] };
+     var liveLocConns = null, liveLocId = null;
+     (catalog.locations || []).forEach(function (loc) {
+         if (!liveLocConns && Array.isArray(loc.connections) && loc.connections.length) { liveLocConns = loc.connections; liveLocId = loc.id; }
+             });
+    ok('a catalog location exposes a non-empty connections array', !!liveLocConns);
+       // The source connection list is itself pre-frozen by world-catalog (correctly so), so the no-leak
+        // invariant to check here is that the SNAPSHOT OWNS A DISTINCT COPY, never shares the live reference.
+   if (liveLocConns) {
+     var snapLoc = snap1.locations.filter(function (l) { return l.id === liveLocId; })[0];
+    ok('snapshot owns its OWN copy of a location connection list (no shared-reference leak)',
+       snapLoc && Array.isArray(snapLoc.connections) && snapLoc.connections !== liveLocConns);
+        }
+
+
+
+         // ---- BLOCKER 2: scenes carry REAL, DISTINCT per-tile geometry ------------------------------
+        var baseTown = WB.planBaseMap(snap1.scenes.town);
+         var baseDiner = WB.planBaseMap(snap1.scenes.diner);
+        ok('base map yields per-cell coloured geometry for the town scene',
+           baseTown.rows.length > 0 && baseTown.rows[0].length > 0 && typeof baseTown.rows[0][0].color === 'string');
+         function baseSig(bm) { return bm.rows.map(function (r) { return r.map(function (c) { return c.color; }).join('|'); }).join('\n'); }
+        ok('town and diner base maps DIFFER (real geometry, not an empty grid)', baseSig(baseTown) !== baseSig(baseDiner));
+         ok('planBaseMap is inert without a scene', WB.planBaseMap(undefined).rows.length === 0);
+
+         // ---- Issue 3 + 4: one z-ordered list drives BOTH paint and hit-test ------------------------
+        var plan = WBUI.selectablePlan(snap1, 'diner');
+
+        ok('selectablePlan returns a single overlay+spawn item list', Array.isArray(plan.items) && plan.items.length > 0);
+         // z-order invariant: overlays first, spawns last => a visible spawn is the topmost and must be selectable.
+         if (plan.spawns.length > 0) {
+            ok('diner has landing connection-spawn markers in the unified list', plan.items.some(function (it) { return it.kind === 'connection-spawn'; }));
+             var sp0 = plan.spawns[0]; var zoom = 8;
+              var hit = CO.hitTest(plan.items, sp0.tx * zoom + zoom / 2, sp0.ty * zoom + zoom / 2, zoom);
+            ok('clicking a visible spawn tile selects that spawn', !!hit && hit.kind === 'connection-spawn' && hit.tx === sp0.tx && hit.ty === sp0.ty);
+              // topmost wins: the LAST item overlapping a pixel is what hitTest returns.
+           var last = plan.items[plan.items.length - 1];
+             var topHit = CO.hitTest(plan.items, last.tx * zoom + zoom / 2, last.ty * zoom + zoom / 2, zoom);
+          ok('hit-test resolves to the topmost-painted item on overlap', !!topHit && WBUI.selKey(topHit) === WBUI.selKey(last));
+            } else {
+           ok('a scene with no landing spawns yields overlays-only items (consistent)', plan.items.length === plan.overlays.length);
+              }
+
+         // ---- Issue 7: catalog connection ids without an authored record are surfaced loudly ---------
+        ok('snapshot exposes an unresolved list for the real fixture', Array.isArray(snap1.unresolved));
+        ok('the real authored fixture has NO unresolved connections', snap1.unresolved.length === 0);
+          // Inject via a SYNTHETIC snapshot input (the live catalog is frozen, and correctly so): a location
+            // that references a connection id with no authored record must surface in .unresolved.
+     var ghostCatalog = { locations: [{ id: 'synthetic-loc', environments: [], connections: ['ghost-connection-no-record'] }] };
+      var snap2 = WB.buildWorldSnapshot({ maps: {}, catalog: ghostCatalog, connections: src.connections.slice() });
+  ok('a catalog connection id with no authored record is flagged unresolved',
+    snap2.unresolved.indexOf('ghost-connection-no-record') !== -1);
+
+
+         console.log('\nWORLD-BUILDER: ' + (checks - failed.length) + '/' + checks + ' passed');
+
   if (failed.length) {
     console.error('FAILED:');
     failed.forEach(function (f) { console.error('  - ' + f); });
