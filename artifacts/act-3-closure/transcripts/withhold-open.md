@@ -9,13 +9,13 @@ testo dal DOM, obiettivo HUD in quel momento.
 | mappa | arrivo | NPC |
 |---|---|---|
 | town | 54,14,right | bobby@31,16 · donna@44,10 · jacoby@16,25 |
-| traincar | 2,7,right | (nessuno) |
-| oej | 8,7,up | jacques@7,5 · audrey@13,7 |
-| hospital | 13,7,down | gerard@11,4 · ronette@3,5 · infermiera@11,8 · piantone@7,3 |
-| sheriff | 11,4,left | truman@10,4 · andy@10,7 · hawk@12,8 · lucy@2,6 · leland@8,5 |
-| sheriff | 3,6,down | truman@10,4 · andy@10,7 · hawk@12,8 · lucy@2,6 · leland@8,5 |
+| traincar | 1,7,right | hawk@5,6 |
+| oej | 8,7,up | jacques@7,5 · audrey@13,7 · hawk@6,8 |
+| hospital | 13,7,down | gerard@11,4 · infermiera@11,8 · ronette@3,5 · piantone@7,3 |
+| sheriff | 11,4,left | andy@10,7 · lucy@2,6 · truman@10,4 · hawk@12,8 |
+| sheriff | 3,6,down | andy@10,7 · lucy@2,6 · truman@10,4 · hawk@12,8 |
 | room_315 | 13,4,up | (nessuno) |
-| sheriff | 11,4,left | truman@10,4 · andy@10,7 · hawk@12,8 · lucy@2,6 · leland@8,5 |
+| sheriff | 11,4,left | andy@10,7 · lucy@2,6 · truman@10,4 · hawk@12,8 |
 
 ## Sequenza
 
@@ -139,7 +139,7 @@ nord, fra gli alberi.» (`oej_bloccato`)
 - _obiettivo (dopo l'interazione)_: One Eyed Jacks: siediti al tavolo di Jacques Renault.
 
 > **SALVA + RICARICA** — obiettivo prima: «One Eyed Jacks: siediti al tavolo di Jacques Renault.» · dopo: «One Eyed Jacks: siediti al tavolo di Jacques Renault.»
-> entità prima: hawk_cut@22,3 · dopo: hawk_cut@22,3
+> entità prima: truman@9,8 · dopo: truman@9,8
 
 
 > **HUD:** One Eyed Jacks: siediti al tavolo di Jacques Renault.

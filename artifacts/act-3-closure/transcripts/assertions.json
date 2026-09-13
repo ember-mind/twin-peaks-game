@@ -36,7 +36,7 @@
       "detail": null
     },
     {
-      "name": "[impeto-kept] M5: un solo Hawk sul vagone dopo il ponte",
+      "name": "[impeto-kept] M5: un solo Hawk sul vagone dopo il ponte, PLACED@traincar 5,6 dal registro",
       "pass": true,
       "detail": null
     },
@@ -51,7 +51,7 @@
       "detail": null
     },
     {
-      "name": "[impeto-kept] M5: un solo Hawk dopo la scoperta",
+      "name": "[impeto-kept] M5: un solo Hawk dopo la scoperta, PLACED@traincar 14,8 dal registro",
       "pass": true,
       "detail": null
     },
@@ -81,6 +81,16 @@
       "detail": null
     },
     {
+      "name": "[impeto-kept] presenza (vagone: prima del rapporto a Truman): il registro combacia col pin (nessun pin adatto: solo cattura + doppioni)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] presenza (vagone: prima del rapporto a Truman): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
       "name": "[impeto-kept] M5: il rapporto porta le pagine attese per la teoria «degeneration»",
       "pass": true,
       "detail": null
@@ -96,7 +106,7 @@
       "detail": null
     },
     {
-      "name": "[impeto-kept] M5: un solo Hawk dopo S1, al taglio a nord",
+      "name": "[impeto-kept] M5: un solo Hawk dopo S1, al taglio a nord, PLACED@traincar 22,3 dal registro",
       "pass": true,
       "detail": null
     },
@@ -122,6 +132,16 @@
     },
     {
       "name": "[impeto-kept] M6: Audrey vista sotto copertura a One Eyed Jacks",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] presenza (One Eyed Jacks (prima del fermo)): il registro combacia col pin ACT3_OEJ_AUDREY_SEEN",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] presenza (One Eyed Jacks (prima del fermo)): nessuna mappa viva ha due corpi con lo stesso id",
       "pass": true,
       "detail": null
     },
@@ -156,6 +176,16 @@
       "detail": null
     },
     {
+      "name": "[impeto-kept] presenza (One Eyed Jacks: dopo il fermo): il registro combacia col pin ACT3_AFTER_ARREST",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] presenza (One Eyed Jacks: dopo il fermo): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
       "name": "[impeto-kept] M6: prima dell'ospedale Truman rinvia il rapporto",
       "pass": true,
       "detail": null
@@ -181,6 +211,16 @@
       "detail": null
     },
     {
+      "name": "[impeto-kept] presenza (ospedale sorvegliato (dopo il registro di turno)): il registro combacia col pin ACT3_GUARDED_HOSPITAL",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] presenza (ospedale sorvegliato (dopo il registro di turno)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
       "name": "[impeto-kept] M6: reload dopo il fermo — obiettivo HUD identico",
       "pass": true,
       "detail": null
@@ -196,6 +236,16 @@
       "detail": null
     },
     {
+      "name": "[impeto-kept] M6: reload nell'ospedale sorvegliato — il registro Cast Continuity è identico prima e dopo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] M6: reload nell'ospedale sorvegliato — il salvataggio non contiene chiavi di posizione",
+      "pass": true,
+      "detail": null
+    },
+    {
       "name": "[impeto-kept] M6: la riga di Truman su Audrey compare",
       "pass": true,
       "detail": null
@@ -207,6 +257,16 @@
     },
     {
       "name": "[impeto-kept] M6: la morte di Renault è registrata",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] presenza (centrale, notte (dopo la chiamata di Lucy)): il registro combacia col pin ACT3_NIGHT_STATION",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[impeto-kept] presenza (centrale, notte (dopo la chiamata di Lucy)): nessuna mappa viva ha due corpi con lo stesso id",
       "pass": true,
       "detail": null
     },
@@ -326,7 +386,7 @@
       "detail": null
     },
     {
-      "name": "[withhold-open] M5: un solo Hawk sul vagone dopo il ponte",
+      "name": "[withhold-open] M5: un solo Hawk sul vagone dopo il ponte, PLACED@traincar 5,6 dal registro",
       "pass": true,
       "detail": null
     },
@@ -341,7 +401,7 @@
       "detail": null
     },
     {
-      "name": "[withhold-open] M5: un solo Hawk dopo la scoperta",
+      "name": "[withhold-open] M5: un solo Hawk dopo la scoperta, PLACED@traincar 14,8 dal registro",
       "pass": true,
       "detail": null
     },
@@ -361,6 +421,16 @@
       "detail": null
     },
     {
+      "name": "[withhold-open] presenza (vagone: prima del rapporto a Truman): il registro combacia col pin (nessun pin adatto: solo cattura + doppioni)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[withhold-open] presenza (vagone: prima del rapporto a Truman): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
       "name": "[withhold-open] M5: il rapporto porta le pagine attese per la teoria «open»",
       "pass": true,
       "detail": null
@@ -376,7 +446,7 @@
       "detail": null
     },
     {
-      "name": "[withhold-open] M5: un solo Hawk dopo S1, al taglio a nord",
+      "name": "[withhold-open] M5: un solo Hawk dopo S1, al taglio a nord, PLACED@traincar 22,3 dal registro",
       "pass": true,
       "detail": null
     },
@@ -416,6 +486,16 @@
       "detail": null
     },
     {
+      "name": "[withhold-open] presenza (One Eyed Jacks (prima del fermo)): il registro combacia col pin (nessun pin adatto: solo cattura + doppioni)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[withhold-open] presenza (One Eyed Jacks (prima del fermo)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
       "name": "[withhold-open] M6: richiamo alle carte del vagone assente al tavolo",
       "pass": true,
       "detail": null
@@ -432,6 +512,16 @@
     },
     {
       "name": "[withhold-open] M6: fermo di Renault committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[withhold-open] presenza (One Eyed Jacks: dopo il fermo): il registro combacia col pin ACT3_AFTER_ARREST",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[withhold-open] presenza (One Eyed Jacks: dopo il fermo): nessuna mappa viva ha due corpi con lo stesso id",
       "pass": true,
       "detail": null
     },
@@ -456,6 +546,16 @@
       "detail": null
     },
     {
+      "name": "[withhold-open] presenza (ospedale sorvegliato (dopo il registro di turno)): il registro combacia col pin ACT3_GUARDED_HOSPITAL",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[withhold-open] presenza (ospedale sorvegliato (dopo il registro di turno)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
       "name": "[withhold-open] M6: la riga di Truman su Audrey non compare",
       "pass": true,
       "detail": null
@@ -467,6 +567,16 @@
     },
     {
       "name": "[withhold-open] M6: la morte di Renault è registrata",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[withhold-open] presenza (centrale, notte (dopo la chiamata di Lucy)): il registro combacia col pin ACT3_NIGHT_STATION",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[withhold-open] presenza (centrale, notte (dopo la chiamata di Lucy)): nessuna mappa viva ha due corpi con lo stesso id",
       "pass": true,
       "detail": null
     },
@@ -576,7 +686,7 @@
       "detail": null
     },
     {
-      "name": "[withhold-staging] M5: un solo Hawk sul vagone dopo il ponte",
+      "name": "[withhold-staging] M5: un solo Hawk sul vagone dopo il ponte, PLACED@traincar 5,6 dal registro",
       "pass": true,
       "detail": null
     },
@@ -591,7 +701,7 @@
       "detail": null
     },
     {
-      "name": "[withhold-staging] M5: un solo Hawk dopo la scoperta",
+      "name": "[withhold-staging] M5: un solo Hawk dopo la scoperta, PLACED@traincar 14,8 dal registro",
       "pass": true,
       "detail": null
     },
@@ -611,6 +721,16 @@
       "detail": null
     },
     {
+      "name": "[withhold-staging] presenza (vagone: prima del rapporto a Truman): il registro combacia col pin (nessun pin adatto: solo cattura + doppioni)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[withhold-staging] presenza (vagone: prima del rapporto a Truman): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
       "name": "[withhold-staging] M5: il rapporto porta le pagine attese per la teoria «staging»",
       "pass": true,
       "detail": null
@@ -626,7 +746,7 @@
       "detail": null
     },
     {
-      "name": "[withhold-staging] M5: un solo Hawk dopo S1, al taglio a nord",
+      "name": "[withhold-staging] M5: un solo Hawk dopo S1, al taglio a nord, PLACED@traincar 22,3 dal registro",
       "pass": true,
       "detail": null
     },
@@ -651,6 +771,16 @@
       "detail": null
     },
     {
+      "name": "[withhold-staging] presenza (One Eyed Jacks (prima del fermo)): il registro combacia col pin (nessun pin adatto: solo cattura + doppioni)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[withhold-staging] presenza (One Eyed Jacks (prima del fermo)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
       "name": "[withhold-staging] M6: richiamo alle carte del vagone assente al tavolo",
       "pass": true,
       "detail": null
@@ -667,6 +797,16 @@
     },
     {
       "name": "[withhold-staging] M6: fermo di Renault committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[withhold-staging] presenza (One Eyed Jacks: dopo il fermo): il registro combacia col pin ACT3_AFTER_ARREST",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[withhold-staging] presenza (One Eyed Jacks: dopo il fermo): nessuna mappa viva ha due corpi con lo stesso id",
       "pass": true,
       "detail": null
     },
@@ -691,6 +831,16 @@
       "detail": null
     },
     {
+      "name": "[withhold-staging] presenza (ospedale sorvegliato (dopo il registro di turno)): il registro combacia col pin ACT3_GUARDED_HOSPITAL",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[withhold-staging] presenza (ospedale sorvegliato (dopo il registro di turno)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
       "name": "[withhold-staging] M6: la riga di Truman su Audrey non compare",
       "pass": true,
       "detail": null
@@ -702,6 +852,16 @@
     },
     {
       "name": "[withhold-staging] M6: la morte di Renault è registrata",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[withhold-staging] presenza (centrale, notte (dopo la chiamata di Lucy)): il registro combacia col pin ACT3_NIGHT_STATION",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[withhold-staging] presenza (centrale, notte (dopo la chiamata di Lucy)): nessuna mappa viva ha due corpi con lo stesso id",
       "pass": true,
       "detail": null
     },

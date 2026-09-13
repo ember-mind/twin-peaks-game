@@ -1801,11 +1801,13 @@
     {
       "map": "traincar",
       "at": [
-        2,
+        1,
         7,
         "right"
       ],
-      "npcs": []
+      "npcs": [
+        "hawk@5,6"
+      ]
     },
     {
       "map": "oej",
@@ -1816,7 +1818,8 @@
       ],
       "npcs": [
         "jacques@7,5",
-        "audrey@13,7"
+        "audrey@13,7",
+        "hawk@6,8"
       ]
     },
     {
@@ -1828,8 +1831,8 @@
       ],
       "npcs": [
         "gerard@11,4",
-        "ronette@3,5",
         "infermiera@11,8",
+        "ronette@3,5",
         "piantone@7,3"
       ]
     },
@@ -1841,11 +1844,10 @@
         "left"
       ],
       "npcs": [
-        "truman@10,4",
         "andy@10,7",
-        "hawk@12,8",
         "lucy@2,6",
-        "leland@8,5"
+        "truman@10,4",
+        "hawk@12,8"
       ]
     },
     {
@@ -1856,11 +1858,10 @@
         "down"
       ],
       "npcs": [
-        "truman@10,4",
         "andy@10,7",
-        "hawk@12,8",
         "lucy@2,6",
-        "leland@8,5"
+        "truman@10,4",
+        "hawk@12,8"
       ]
     },
     {
@@ -1872,8 +1873,8 @@
       ],
       "npcs": [
         "gerard@11,4",
-        "ronette@3,5",
         "infermiera@11,8",
+        "ronette@3,5",
         "piantone_ronette@3,6"
       ]
     },
@@ -1894,16 +1895,178 @@
         "left"
       ],
       "npcs": [
-        "truman@10,4",
         "andy@10,7",
-        "hawk@12,8",
         "lucy@2,6",
-        "leland@8,5"
+        "truman@10,4",
+        "hawk@12,8"
       ]
     }
   ],
   "fallbacks": [],
   "notes": [
+    {
+      "text": "scatto registro Cast Continuity: vagone: prima del rapporto a Truman",
+      "data": {
+        "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+        "audrey": "PLACED@oej 13,7 down [ACT3_AUDREY_AT_OEJ]",
+        "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+        "bob": "OFFSCREEN(force) [BASELINE]",
+        "bobby": "PLACED@town 31,16 down [BASELINE]",
+        "donna": "PLACED@town 44,10 down [BASELINE]",
+        "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+        "giant": "OFFSCREEN(offscreen) [BASELINE]",
+        "hawk": "PLACED@traincar 14,8 down [ACT3_HAWK_DOOR]",
+        "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+        "jacoby": "PLACED@town 16,25 down [BASELINE]",
+        "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+        "james": "PLACED@diner 9,6 down [BASELINE]",
+        "laura": "PLACED@redroom 11,2 down [BASELINE]",
+        "leland": "OFFSCREEN(mourning) [BASELINE]",
+        "loglady": "PLACED@diner 4,5 down [BASELINE]",
+        "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+        "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+        "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+        "norma": "PLACED@diner 5,2 down [BASELINE]",
+        "piantone": "OFFSCREEN(scenography) [BASELINE]",
+        "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+        "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+        "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+        "shelly": "PLACED@diner 9,7 down [BASELINE]",
+        "truman": "PLACED@traincar 9,8 right [ACT3_TRUMAN_REPORT]"
+      }
+    },
+    {
+      "text": "presenza: il pin ACT3_TRAINCAR_REPORT non è applicabile qui — audrey_indaga è già vero dall'Atto 2 reale, il pin lo semina falso",
+      "data": null
+    },
+    {
+      "text": "scatto registro Cast Continuity: One Eyed Jacks (prima del fermo)",
+      "data": {
+        "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+        "audrey": "PLACED@oej 13,7 down [ACT3_AUDREY_AT_OEJ]",
+        "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+        "bob": "OFFSCREEN(force) [BASELINE]",
+        "bobby": "PLACED@town 31,16 down [BASELINE]",
+        "donna": "PLACED@town 44,10 down [BASELINE]",
+        "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+        "giant": "OFFSCREEN(offscreen) [BASELINE]",
+        "hawk": "PLACED@oej 6,8 up [ACT3_HAWK_OEJ_DOCK]",
+        "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+        "jacoby": "PLACED@town 16,25 down [BASELINE]",
+        "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+        "james": "PLACED@diner 9,6 down [BASELINE]",
+        "laura": "PLACED@redroom 11,2 down [BASELINE]",
+        "leland": "OFFSCREEN(mourning) [BASELINE]",
+        "loglady": "PLACED@diner 4,5 down [BASELINE]",
+        "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+        "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+        "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+        "norma": "PLACED@diner 5,2 down [BASELINE]",
+        "piantone": "OFFSCREEN(scenography) [BASELINE]",
+        "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+        "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+        "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+        "shelly": "PLACED@diner 9,7 down [BASELINE]",
+        "truman": "PLACED@traincar 9,8 right [ACT3_TRUMAN_REPORT]"
+      }
+    },
+    {
+      "text": "presenza: ACT3_OEJ_NO_AUDREY non applicabile qui — audrey_indaga è già vero dall'Atto 2 reale, il pin lo semina falso",
+      "data": null
+    },
+    {
+      "text": "scatto registro Cast Continuity: One Eyed Jacks: dopo il fermo (pin ACT3_AFTER_ARREST)",
+      "data": {
+        "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+        "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+        "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+        "bob": "OFFSCREEN(force) [BASELINE]",
+        "bobby": "PLACED@town 31,16 down [BASELINE]",
+        "donna": "PLACED@town 44,10 down [BASELINE]",
+        "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+        "giant": "OFFSCREEN(offscreen) [BASELINE]",
+        "hawk": "OFFSCREEN(escort) [ACT3_HAWK_ESCORT]",
+        "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+        "jacoby": "PLACED@town 16,25 down [BASELINE]",
+        "jacques": "OFFSCREEN(guarded) [ACT3_JACQUES_GUARDED]",
+        "james": "PLACED@diner 9,6 down [BASELINE]",
+        "laura": "PLACED@redroom 11,2 down [BASELINE]",
+        "leland": "OFFSCREEN(mourning) [BASELINE]",
+        "loglady": "PLACED@diner 4,5 down [BASELINE]",
+        "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+        "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+        "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+        "norma": "PLACED@diner 5,2 down [BASELINE]",
+        "piantone": "PLACED@hospital 7,3 up [ACT3_GUARD_JACQUES]",
+        "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+        "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+        "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+        "shelly": "PLACED@diner 9,7 down [BASELINE]",
+        "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+      }
+    },
+    {
+      "text": "scatto registro Cast Continuity: ospedale sorvegliato (dopo il registro di turno) (pin ACT3_GUARDED_HOSPITAL)",
+      "data": {
+        "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+        "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+        "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+        "bob": "OFFSCREEN(force) [BASELINE]",
+        "bobby": "PLACED@town 31,16 down [BASELINE]",
+        "donna": "PLACED@town 44,10 down [BASELINE]",
+        "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+        "giant": "OFFSCREEN(offscreen) [BASELINE]",
+        "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+        "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+        "jacoby": "PLACED@town 16,25 down [BASELINE]",
+        "jacques": "OFFSCREEN(guarded) [ACT3_JACQUES_GUARDED]",
+        "james": "PLACED@diner 9,6 down [BASELINE]",
+        "laura": "PLACED@redroom 11,2 down [BASELINE]",
+        "leland": "OFFSCREEN(mourning) [BASELINE]",
+        "loglady": "PLACED@diner 4,5 down [BASELINE]",
+        "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+        "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+        "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+        "norma": "PLACED@diner 5,2 down [BASELINE]",
+        "piantone": "PLACED@hospital 7,3 up [ACT3_GUARD_JACQUES]",
+        "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+        "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+        "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+        "shelly": "PLACED@diner 9,7 down [BASELINE]",
+        "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+      }
+    },
+    {
+      "text": "scatto registro Cast Continuity: centrale, notte (dopo la chiamata di Lucy) (pin ACT3_NIGHT_STATION)",
+      "data": {
+        "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+        "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+        "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+        "bob": "OFFSCREEN(force) [BASELINE]",
+        "bobby": "PLACED@town 31,16 down [BASELINE]",
+        "donna": "PLACED@town 44,10 down [BASELINE]",
+        "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+        "giant": "OFFSCREEN(offscreen) [BASELINE]",
+        "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+        "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+        "jacoby": "PLACED@town 16,25 down [BASELINE]",
+        "jacques": "TERMINAL_REMOVED(jacques_dead) [JACQUES_DEAD]",
+        "james": "PLACED@diner 9,6 down [BASELINE]",
+        "laura": "PLACED@redroom 11,2 down [BASELINE]",
+        "leland": "OFFSCREEN(mourning) [BASELINE]",
+        "loglady": "PLACED@diner 4,5 down [BASELINE]",
+        "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+        "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+        "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+        "norma": "PLACED@diner 5,2 down [BASELINE]",
+        "piantone": "OFFSCREEN(scenography) [BASELINE]",
+        "piantone_ronette": "PLACED@hospital 3,6 up [ACT3_GUARD_RONETTE]",
+        "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+        "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+        "shelly": "PLACED@diner 9,7 down [BASELINE]",
+        "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+      }
+    },
     {
       "text": "315: intro_hotel prima dell'arrivo notturno",
       "data": {
