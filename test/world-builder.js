@@ -34,6 +34,7 @@
    // --- real world chain, mirroring index.html load order up to world-catalog ---
   ['tiles.js','chars.js','houses.js','maps.js','data.js','environmental-inspect.js',
    'retro-font.js','portraits.js','gold-tone.js','engine.js','glue.js','location-connections.js',
+   'world-connections.gen.js',
    'double-r-exterior-art.js','double-r-exterior-scene.js','double-r-location-data.js','double-r-location-production.js',
    'sheriffs-station-art.js','sheriffs-station-exterior-art.js','sheriffs-station-scene.js','sheriffs-station-exterior-scene.js','sheriffs-station-location-data.js','sheriffs-station-production.js',
    'room-315-art.js','room-315-scene.js','room-315-location-data.js','room-315-production.js',

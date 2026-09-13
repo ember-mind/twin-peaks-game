@@ -4,9 +4,10 @@
 
   var G = window.GAME;
   G.DoubleRExteriorScene.install();
-  G.DoubleRLocationConnections.forEach(function (connection) {
+   /* Records come from the canonical registry, not the retired group array. */
+  G.LocationConnections.connectionRecordsFor(['double-r-front-entrance', 'town-double-r-lot']).forEach(function (connection) {
     G.LocationConnections.install(connection, G.Maps);
-  });
+   });
   G.EnvironmentReactions.register('diner', [{
     id: 'front-door', trigger: 'ENTITY_ENTERED_DOORWAY', x: 96, y: 144, depth: 160,
     frames: G.EnvironmentReactions.doorEntryFrames,

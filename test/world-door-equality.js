@@ -52,7 +52,9 @@
   req('../js/tiles.js'); req('../js/chars.js'); req('../js/houses.js'); req('../js/maps.js');
   req('../js/data.js'); req('../js/glue.js');
   req('../js/location-connections.js');
-  req('../js/double-r-exterior-scene.js');
+   // Registry must exist before the production installers, which now source records from GAME.WorldData.
+    req('../js/world-connections.gen.js');
+   req('../js/double-r-exterior-scene.js');
    tryReq('../js/double-r-location-data.js');
     tryReq('../js/traincar-location-data.js');
      tryReq('../js/sheriffs-station-art.js'); tryReq('../js/sheriffs-station-exterior-art.js');

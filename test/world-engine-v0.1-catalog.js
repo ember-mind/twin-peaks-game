@@ -114,7 +114,9 @@ require('../js/sheriffs-station-location-data.js');
 require('../js/room-315-location-data.js');
 require('../js/environment-reactions.js');
 GAME.DoubleRExteriorScene.install();
-require('../js/sheriffs-station-production.js');
+    // Registry must exist before the production installers, which source records from GAME.WorldData.
+    require('../js/world-connections.gen.js');
+   require('../js/sheriffs-station-production.js');
 require('../js/world-engine.js'); require('../js/world-catalog.js');
 const World = GAME.World;
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
