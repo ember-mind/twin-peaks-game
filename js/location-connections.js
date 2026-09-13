@@ -131,5 +131,26 @@
     };
   }
 
-  GAME.LocationConnections = { install: install };
-}());
+     /* validateConnection runs the SAME endpoint checks as install() but returns a {valid,errors} list
+      * instead of mutating GAME.Maps — the editor and the node apply tool call this to validate an edited
+      * connection before it ever becomes a changeset or touches a map. It catches each endpoint's throw so
+      * every problem is reported at once rather than crashing on the first. */
+    function validateConnection(connection, maps) {
+      maps = maps || GAME.Maps;
+      if (!maps) return { valid: false, errors: ['maps are required'] };
+      if (!connection || typeof connection.id !== 'string' || !connection.id) {
+        return { valid: false, errors: ['id is required'] };
+        }
+       var errors = [];
+      ['a', 'b'].forEach(function (side) {
+        try { validateEndpoint(side, connection[side], maps); }
+        catch (e) { errors.push(e.message.replace(/^LocationConnections: /, '')); }
+         });
+      if (connection.a && connection.b && connection.a.scene === connection.b.scene) {
+        errors.push('endpoints must use different scenes');
+        }
+      return { valid: errors.length === 0, errors: errors };
+      }
+
+     GAME.LocationConnections = { install: install, validateEndpoint: validateEndpoint, validateConnection: validateConnection };
+  }());

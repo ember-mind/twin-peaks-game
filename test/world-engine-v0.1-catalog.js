@@ -158,7 +158,30 @@ for (const connectionId of World.getConnections()) {
     assert(location, `${connectionId} endpoint ${endpoint.scene} is cataloged`);
     assert(!endpoint.triggers.some(([x, y]) => x === endpoint.spawn.tx && y === endpoint.spawn.ty), `${connectionId} spawn is non-trigger`);
     assert(GAME.Maps[endpoint.scene].doors, `${connectionId} references authored map doors`);
-    assert(World.getConnections(location.id).includes(connectionId), `${connectionId} belongs to endpoint location`);
-  }
-}
-console.log('WORLD-ENGINE-V0.1-CATALOG-PASS registration, immutable catalog, scoped lookups, shared connections, validation, authored references');
+       assert(World.getConnections(location.id).includes(connectionId), `${connectionId} belongs to endpoint location`);
+      }
+    }
+
+     // ---- SINGLE REGISTRY (Phase 1): connection RECORDS now live in GAME.WorldData (js/world-connections.gen.js),
+    // replacing the four *-location-data groups as the authoritative source. Bijection between the catalog's id
+     // membership and the registry record set, checked BOTH ways, is what makes deleting the group globals safe:
+      //    - every catalog connection id resolves to exactly one registry record (no missing record);
+      //    - every registry record id is referenced by at least one location (no orphan record).
+     require('../js/world-connections.gen.js');
+      var registry = GAME.WorldData.connections;
+    assert.equal(registry.length, World.getConnections().length, 'registry record count equals catalog connection count');
+     assert(Object.isFrozen(registry), 'registry array is frozen — editors work on drafts, never the source');
+      var regIds = new Map(registry.map(record => [record.id, record]));
+      for (const cid of World.getConnections()) {
+      const record = regIds.get(cid);
+       assert(record, `catalog id ${cid} resolves to a registry record`);
+       for (const endpoint of [record.a, record.b]) {
+         assert(GAME.World.getLocationForScene(endpoint.scene), `${cid}.${endpoint.scene} is a cataloged scene`);
+          }
+        }
+      var referencedIds = new Set([...World.getConnections()]);
+     for (const record of registry) {
+       assert(referencedIds.has(record.id), `registry record ${record.id} is referenced by a catalog location`);
+         }
+
+    console.log('WORLD-ENGINE-V0.1-CATALOG-PASS registration, immutable catalog, scoped lookups, shared connections, validation, authored references, single registry bijection');
