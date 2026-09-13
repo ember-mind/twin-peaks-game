@@ -47,3 +47,42 @@ The automated suite covers all M1–M3 logic and guards. A human should open `wo
 browser over a local server (so image/audio deps resolve) to visually confirm the canvas overlays on at
 least town, diner, and sheriff — the renderer's *data* is fully asserted; only pixel-on-screen confirmation
 needs a browser, which cannot be done without jsdom/canvas in this environment.
+
+---
+
+## PR #2 corrections (BLOCKER 1/2 + issues 3–7, 10)
+
+Applied on commit `857dd10`. The review found two blockers and five issues; all are closed below with
+automated guards, and the global gates stay at baseline (**smoke 420**, **walkthrough 81**).
+
+- **BLOCKER 1 — deep-freeze leak.** `buildWorldSnapshot` used to `freezeDeep` values that still
+  *referenced* live source arrays (a connection's `.triggers`, an object's `.dialogue`, a location's
+  `.connections`), so building the snapshot froze authoritative data. Now every such value is cloned at
+  the source boundary (`clone()` in `world-builder-data.js`); the snapshot owns its own frozen copies and
+  the live source stays writable or pre-frozen as authored. Guard: reference-distinctness between a live
+  trigger/connections array and its snapshot copy (the source being itself pre-frozen is *correct*, so we
+  assert "own distinct copy", not "source unfrozen").
+- **BLOCKER 2 — base geometry.** Added `planBaseMap(scene)`: real per-tile chars map to a fixed semantic
+  colour palette (`T`/`.`/`g`/`w`/`i`/`f`/`r`/`D`/`d`) so Town/Diner/Sheriff render distinct layouts, not
+  an empty grid. The snapshot keeps detached row copies (`rows.slice()`) for the renderer; guard asserts
+  `planBaseMap(town) ≠ planBaseMap(diner)` by signature and is inert without a scene.
+- **Issue 3 + 4 — one source of truth.** `selectablePlan(snap, sceneId)` returns a single z-ordered item
+  list (`overlays` then first-class `{kind:'connection-spawn'}` markers) that drives BOTH the paint loop
+  and the hit-test. A visible overlay/exit/spawn is therefore always selectable; selection identity is a
+  `selKey` (`kind:tx,ty`) so it survives re-renders. Guard: clicking a spawn-tile pixel selects that spawn,
+  and the topmost-painted item wins an overlap hit-test.
+- **Issue 5 — inspector fields.** The property inspector now shows `LOCATION`, `SCENE`, `TYPE` for every
+  overlay kind (exit/object/npc/spawn), and connection overlays expose `CONNECTION ID` plus both paired
+  endpoints' scene / spawn tile+dir, with a "no paired record loaded" fallback when `connectionId` is unset.
+- **Issue 6 — non-vacuous guard.** The no-mutation check now counts the live door *SET* via `Object.keys`
+  (the source has no `.length`) and asserts a non-zero baseline, so it can't pass vacuously.
+- **Issue 7 — fail loud on missing connections.** `buildWorldSnapshot` builds an `unresolved` list: every
+  catalog connection id with no authored record surfaces there instead of being silently dropped; the real
+  fixture asserts `unresolved.length === 0`, and a synthetic injection proves detection. (Note: connected
+  locations are pre-frozen, so injection is done on a snapshot input copy, not the live object.)
+- **Issue 10 — CI.** `.github/workflows/test.yml` runs `world-builder.js`, `smoke.js`, and
+  `walkthrough.js` on push/PR (Node 24), turning the local gates into an automated pipeline. No project-wide
+  `.github` existed before; this is branch-scoped and game-logic-neutral.
+
+Suite grew to **64 checks** (`WORLD-BUILDER-PASS 64/64`); `smoke`/`walkthrough` unchanged.
+
