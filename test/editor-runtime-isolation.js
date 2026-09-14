@@ -47,13 +47,20 @@ ok(tainted.length === 0, `no core file names the game (offenders: ${tainted.join
 function stripComments(src) {
   return src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
 }
-const UI_USAGE = /document\.|\bwindow\b|\.getContext\(|requestAnimationFrame|cancelAnimationFrame|\blocalStorage\b|\bsessionStorage\b/;
+// Message text is not usage either ('unknown window "X"' in js/editor/core/cast.js): blank single/double-quoted literals.
+function stripStrings(src) {
+  return src.replace(/'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"/g, "''");
+}
+// `window` as a data field (a cast window: `op.window`, `{ window: id }`, `'window'`) is not the browser global.
+const UI_USAGE = /document\.|(?<![.\w'"])window\b(?!\s*:|['"])|\.getContext\(|requestAnimationFrame|cancelAnimationFrame|\blocalStorage\b|\bsessionStorage\b/;
 let uiTainted = [];
 for (const f of coreFiles) {
-  if (UI_USAGE.test(stripComments(fs.readFileSync(f, 'utf8')))) uiTainted.push(path.relative(root, f));
+  if (UI_USAGE.test(stripStrings(stripComments(fs.readFileSync(f, 'utf8'))))) uiTainted.push(path.relative(root, f));
 }
 ok(uiTainted.length === 0, `core is UI-free: no DOM/canvas/rAF/storage usage (offenders: ${uiTainted.join(', ') || 'none'})`);
 // Evidence the exact files scanned, so any module later added under js/editor/core/ is visibly auto-covered.
+ok(UI_USAGE.test(stripStrings('if (typeof window !== "undefined") window.GAME = 1;')) && UI_USAGE.test('var w = window;') && UI_USAGE.test(stripStrings("document.body")) &&
+  !UI_USAGE.test(stripStrings("op.window + { window: id }['window'] + fail('unknown window ' + id)")), 'UI guard still catches the window global, not a cast window field or message text');
 console.log('EDITOR-RUNTIME-ISOLATION-SCAN core=[' + coreFiles.map(f => path.relative(root, f)).join(', ') + ']');
 
 console.log(`EDITOR-RUNTIME-ISOLATION-PASS ${pass}`);

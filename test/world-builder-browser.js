@@ -29,6 +29,12 @@
  *          (2 triggers on b) asks for the source side before CONFIRM is enabled
  *  12  M7: one-way arrival-town: CONVERT TO PAIRED stays disabled until a.spawn (arrival 4,7) and a b trigger
  *          (town 29,34) are placed, CONFIRM, inspector paired, export upsert, --dry-run VALID
+ *  13  M7: story moment ACT3_TRAINCAR_REPORT, traincar: Truman's inspector names window ACT3_TRUMAN_REPORT (owner M5); EDIT,
+ *          MOVE to 10,8, arrow keys set facing, export a cast-windows-changeset; --dry-run's windows.json diff is that
+ *          window's x line only, and the run fails on the V6 transitions that pin Truman (never repinned)
+ *  14  M7: ACT4_AFTERNOON, sheriff: MOVE Truman (baseline) onto Lucy's tile 2,6 is refused with a message
+ *  15  M7: same body onto the station door trigger 7,11 and onto a wall refused; then Lucy MOVE 3,6 plus a door field on
+ *          sheriffs-station-front-entrance exports a world-builder-bundle; --dry-run --repin on it exits 0
  * Ids created here are assembled at runtime: a literal id in this file would count as a reference to world-apply.
  */
 
@@ -181,6 +187,11 @@ async function main() {
   }
   async function typeInput(id, value) {
     await cdp.eval(`(() => { const s = document.getElementById('${id}'); s.value = ${JSON.stringify(String(value))}; s.dispatchEvent(new Event('input')); })()`);
+    await sleep(80);
+  }
+  async function pressKey(key, code, vk) {
+    await cdp.send('Input.dispatchKeyEvent', { type: 'keyDown', key, code, windowsVirtualKeyCode: vk });
+    await cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, windowsVirtualKeyCode: vk });
     await sleep(80);
   }
   const text = (id) => cdp.eval(`(() => { const e = document.getElementById('${id}'); return e ? e.innerText : null; })()`);
@@ -684,6 +695,121 @@ async function main() {
       s = await state();
       check('case 12: UNDO restores the one-way record', s.draft[AT].one_way === true && s.unsaved === 0, s.draft[AT]);
       check('case 12: world/connections.json unchanged', sha() === shaStart);
+    }
+
+    // ---------------- case 13 (M7): move Truman inside his story window, export, dry-run
+    const windowsSha = () => sha(path.join(ROOT, 'narrative', 'cast', 'windows.json'));
+    const windowsShaStart = windowsSha();
+    {
+      console.log('\ncase 13: MOVE Truman at ACT3_TRAINCAR_REPORT');
+      await load();
+      await setSelect('wb-moment', 'ACT3_TRAINCAR_REPORT');
+      await setSelect('wb-scene', 'traincar');
+      await clickTile(9, 8);
+      let s = await state();
+      const truman = s.npcs.find((n) => n.characterId === 'truman');
+      check('case 13: Truman resolves at traincar 9,8 through window ACT3_TRUMAN_REPORT (owner M5)', s.selectedId === 'npc:truman:traincar' && truman && truman.source === 'ACT3_TRUMAN_REPORT' && truman.owner === 'M5' && truman.editable, truman);
+      check('case 13: inspector names the source window and owner', (await text('wb-npc-source')) === 'window ACT3_TRUMAN_REPORT · owner M5', await text('wb-npc-source'));
+      check('case 13: VIEW offers no MOVE', !(await cdp.eval("!!document.querySelector('[data-action=\"move-npc\"]')")));
+      await shot('case13-truman-view.png', OUT7);
+      await clickAction('mode-edit');
+      await clickAction('move-npc');
+      s = await state();
+      check('case 13: MOVE arms a tile pick for truman', s.pendingNpc && s.pendingNpc.character === 'truman' && s.pendingNpc.window === 'ACT3_TRUMAN_REPORT', s.pendingNpc);
+      await clickTile(10, 8);
+      s = await state();
+      let t = s.npcs.find((n) => n.characterId === 'truman');
+      check('case 13: Truman drawn at 10,8 at once, still selected, 1 unsaved change', t.tx === 10 && t.ty === 8 && s.selectedId === 'npc:truman:traincar' && s.unsaved === 1 && !s.pendingNpc, t);
+      await pressKey('ArrowUp', 'ArrowUp', 38);
+      s = await state();
+      check('case 13: ArrowUp sets facing up', s.npcs.find((n) => n.characterId === 'truman').dir === 'up' && s.castOps[0].dir === 'up', s.castOps);
+      await pressKey('ArrowRight', 'ArrowRight', 39);
+      s = await state();
+      check('case 13: ArrowRight sets facing back to right; one place op, x only', JSON.stringify(s.castOps) === JSON.stringify([{ op: 'place', window: 'ACT3_TRUMAN_REPORT', character: 'truman', map_id: 'traincar', x: 10, y: 8, dir: 'right' }]), s.castOps);
+      check('case 13: validation lists the place op', (await text('wb-draft-ops')).includes('place ACT3_TRUMAN_REPORT / truman → traincar 10,8 right'), await text('wb-draft-ops'));
+      await shot('case13-truman-moved.png', OUT7);
+      await pressUndo();
+      s = await state();
+      check('case 13: Ctrl+Z undoes the facing change', s.castOps[0].dir === 'up', s.castOps);
+      await clickAction('redo');
+      await clickAction('export');
+      const exported = await cdp.eval("document.getElementById('wb-export-text').value");
+      const cs = JSON.parse(exported);
+      check('case 13: export is a bare cast-windows-changeset (no connection drafts)', cs.format === 'cast-windows-changeset' && cs.version === 1 && cs.target === 'narrative/cast/windows.json' && cs.operations.length === 1 && cs.operations[0].x === 10, cs);
+      await shot('case13-export.png', OUT7);
+      const file = path.join(OUT7, 'case13-changeset.json');
+      fs.writeFileSync(file, exported);
+      const dry = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'world-apply.js'), file, '--dry-run'], { encoding: 'utf8' });
+      fs.writeFileSync(path.join(OUT7, 'case13-dry-run.txt'), dry.stdout + dry.stderr);
+      const diff = dry.stdout.split('\n').filter((l) => /^ {2}(@@|-|\+)/.test(l));
+      const windowsLines = fs.readFileSync(path.join(ROOT, 'narrative', 'cast', 'windows.json'), 'utf8').split('\n');
+      const hunk = diff[0] ? Number(/@@ line (\d+)/.exec(diff[0])[1]) : -1;
+      const owner = windowsLines.slice(0, hunk).reverse().find((l) => /"id": "/.test(l));
+      check('case 13: dry-run diff is one hunk: that window\'s "x": 9 -> 10', diff.length === 3 && /^-\s+"x": 9,$/.test(diff[1].trim()) && /^\+\s+"x": 10,$/.test(diff[2].trim()) && owner && owner.includes('"id": "ACT3_TRUMAN_REPORT"'), diff);
+      check('case 13: dry-run fails on the V6 transitions that pin Truman (C3.1/C3.2/C3.3), nothing written', dry.status === 1 && /TRANSITION .* C3\.1 character=truman/.test(dry.stderr) && /C3\.3 character=truman/.test(dry.stderr) && windowsSha() === windowsShaStart, dry.stderr);
+      check('case 13: world/connections.json and narrative/cast/windows.json unchanged', sha() === shaStart && windowsSha() === windowsShaStart);
+    }
+
+    // ---------------- case 14 (M7): refuse a move onto Lucy
+    {
+      console.log('\ncase 14: MOVE Truman onto Lucy refused');
+      await load();
+      await setSelect('wb-moment', 'ACT4_AFTERNOON');
+      await setSelect('wb-scene', 'sheriff');
+      await clickTile(10, 4);
+      await clickAction('mode-edit');
+      let s = await state();
+      check('case 14: Truman at ACT4_AFTERNOON is the baseline body', s.selectedId === 'npc:truman:sheriff' && (await text('wb-npc-source')) === 'baseline (PERSISTENT)', await text('wb-npc-source'));
+      const lucy = s.npcs.find((n) => n.characterId === 'lucy');
+      check('case 14: Lucy stands at sheriff 2,6', lucy && lucy.tx === 2 && lucy.ty === 6, lucy);
+      await clickAction('move-npc');
+      await clickTile(2, 6);
+      s = await state();
+      check('case 14: MOVE onto Lucy refused with a message, draft unchanged, pick still armed', /MOVE refused: sheriff 2,6 is occupied by lucy/.test(s.notice || '') && s.castOps.length === 0 && s.unsaved === 0 && s.pendingNpc && s.pendingNpc.character === 'truman', s.notice);
+      await shot('case14-refused-lucy.png', OUT7);
+    }
+
+    // ---------------- case 15 (M7): refuse door tile and wall; bundle export
+    {
+      console.log('\ncase 15: MOVE onto a door refused; bundle export');
+      await clickTile(7, 11);
+      let s = await state();
+      check('case 15: MOVE onto the station door trigger 7,11 refused', /MOVE refused: sheriff 7,11 is a door trigger tile \(trigger of sheriffs-station-front-entrance\)/.test(s.notice || '') && s.castOps.length === 0, s.notice);
+      await shot('case15-refused-door.png', OUT7);
+      await clickTile(0, 0);
+      s = await state();
+      check('case 15: MOVE onto a wall refused', /MOVE refused: sheriff 0,0 is not walkable/.test(s.notice || '') && s.castOps.length === 0, s.notice);
+      await pressKey('Escape', 'Escape', 27);
+      s = await state();
+      check('case 15: Escape disarms the pick', !s.pendingNpc, s.pendingNpc);
+
+      await clickTile(2, 6);
+      await clickAction('move-npc');
+      await clickTile(3, 6);
+      s = await state();
+      check('case 15: Lucy (baseline) moves to 3,6', JSON.stringify(s.castOps) === JSON.stringify([{ op: 'place', window: 'baseline', character: 'lucy', map_id: 'sheriff', x: 3, y: 6, dir: 'down' }]), s.castOps);
+      await clickTile(7, 11);
+      s = await state();
+      check('case 15: the door trigger selects its endpoint', s.selectedId === 'trigger:sheriffs-station-front-entrance:b:0', s.selectedId);
+      await setInput('wb-door-needsFlag', 'sogno_fatto');
+      s = await state();
+      check('case 15: 2 unsaved changes across connections and cast', s.unsaved === 2 && s.ops.length === 1 && s.castOps.length === 1, s);
+      await clickAction('export');
+      const exported = await cdp.eval("document.getElementById('wb-export-text').value");
+      const bundle = JSON.parse(exported);
+      check('case 15: export is a world-builder-bundle with one changeset per target', bundle.format === 'world-builder-bundle' && bundle.version === 1 && bundle.changesets.length === 2 &&
+        bundle.changesets[0].target === 'world/connections.json' && bundle.changesets[1].target === 'narrative/cast/windows.json' && (await text('wb-export-summary')).includes('(bundle)'), bundle);
+      await shot('case15-bundle-export.png', OUT7);
+      const file = path.join(OUT7, 'case15-bundle.json');
+      fs.writeFileSync(file, exported);
+      const dry = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'world-apply.js'), file, '--dry-run', '--repin'], { encoding: 'utf8' });
+      fs.writeFileSync(path.join(OUT7, 'case15-dry-run.txt'), dry.stdout + dry.stderr);
+      check('case 15: --dry-run --repin on the bundle exits 0 with both parts and 24 repins previewed', dry.status === 0 && dry.stdout.includes('TARGET world/connections.json :: sheriffs-station-front-entrance') &&
+        dry.stdout.includes('TARGET narrative/cast/windows.json :: baseline / lucy') && (dry.stdout.match(/^REPIN /gm) || []).length === 24 && dry.stdout.includes('DRY-RUN 1 cast placement change(s), 24 repin(s); nothing written'), dry.stdout + dry.stderr);
+      await clickAction('revert-all');
+      s = await state();
+      check('case 15: REVERT ALL clears both drafts', s.unsaved === 0 && s.castOps.length === 0, s.unsaved);
+      check('case 15: world/connections.json and narrative/cast/windows.json unchanged', sha() === shaStart && windowsSha() === windowsShaStart);
     }
   } catch (e) {
     check('driver completed without exception', false, String(e && e.stack || e));

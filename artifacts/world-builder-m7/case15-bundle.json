@@ -1,0 +1,78 @@
+{
+  "format": "world-builder-bundle",
+  "version": 1,
+  "changesets": [
+    {
+      "format": "world-connections-changeset",
+      "version": 2,
+      "target": "world/connections.json",
+      "operations": [
+        {
+          "op": "upsert",
+          "id": "sheriffs-station-front-entrance",
+          "endpoints": [
+            "b"
+          ],
+          "connection": {
+            "id": "sheriffs-station-front-entrance",
+            "a": {
+              "scene": "sheriffs_station_exterior",
+              "triggers": [
+                [
+                  7,
+                  6
+                ],
+                [
+                  8,
+                  6
+                ]
+              ],
+              "spawn": {
+                "tx": 7,
+                "ty": 7,
+                "dir": "down"
+              }
+            },
+            "b": {
+              "scene": "sheriff",
+              "triggers": [
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ]
+              ],
+              "spawn": {
+                "tx": 7,
+                "ty": 10,
+                "dir": "up"
+              },
+              "door": {
+                "needsFlag": "sogno_fatto"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "format": "cast-windows-changeset",
+      "version": 1,
+      "target": "narrative/cast/windows.json",
+      "operations": [
+        {
+          "op": "place",
+          "window": "baseline",
+          "character": "lucy",
+          "map_id": "sheriff",
+          "x": 3,
+          "y": 6,
+          "dir": "down"
+        }
+      ]
+    }
+  ]
+}
