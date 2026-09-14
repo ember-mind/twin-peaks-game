@@ -35,11 +35,11 @@
   ['tiles.js','chars.js','houses.js','maps.js','data.js','environmental-inspect.js',
    'retro-font.js','portraits.js','gold-tone.js','engine.js','glue.js','location-connections.js',
    'world-connections.gen.js',
-   'double-r-exterior-art.js','double-r-exterior-scene.js','double-r-location-data.js','double-r-location-production.js',
-   'sheriffs-station-art.js','sheriffs-station-exterior-art.js','sheriffs-station-scene.js','sheriffs-station-exterior-scene.js','sheriffs-station-location-data.js','sheriffs-station-production.js',
-   'room-315-art.js','room-315-scene.js','room-315-location-data.js','room-315-production.js',
+   'double-r-exterior-art.js','double-r-exterior-scene.js','double-r-location-production.js',
+   'sheriffs-station-art.js','sheriffs-station-exterior-art.js','sheriffs-station-scene.js','sheriffs-station-exterior-scene.js','sheriffs-station-production.js',
+   'room-315-art.js','room-315-scene.js','room-315-production.js',
    'hospital-art.js','hospital-scene.js','hospital-production.js',
-   'traincar-art.js','traincar-scene.js','traincar-location-data.js','traincar-location-production.js'
+   'traincar-art.js','traincar-scene.js','traincar-location-production.js'
   ].forEach(tryReq);
   req('world-engine.js');
   req('world-catalog.js');
@@ -203,7 +203,8 @@
        // ---- BLOCKER 1: building the snapshot must NOT deep-freeze LIVE source data --------------
         // Three leak sites were fixed by cloning at the boundary (connection triggers, object dialogue,
          // catalog location connections). Capture a LIVE reference to each kind BEFORE building and prove
-          // the source stays writable while the snapshot copy is a distinct, frozen object.
+          // the registry (WorldData / world-catalog) intentionally FREEZES connection triggers and the
+          // catalog location-connection lists, so for those kinds the guard is that the snapshot OWNS a distinct copy. Object dialogue lives in unfrozen map objects, where the source must stay writable.
      var src = WB.collectWorldSource(G);
 
        // (a) a live connection trigger array, scanned across the concatenated connection groups.
@@ -216,7 +217,7 @@
     var snap1 = WB.buildWorldSnapshot(WB.collectWorldSource(G));
      ok('the authored connections carry triggers to exercise the clone path', !!liveTrig);
         if (liveTrig) {
-      ok('source connection triggers are NOT frozen after snapshot (deep-freeze leak fixed)', !Object.isFrozen(liveTrig));
+      ok('source WorldData connections ARE deep-frozen by design (immutable registry): the leak guard is the distinct-copy check immediately below', Object.isFrozen(liveTrig));
        var normRec = snap1.connections.filter(function (c) { return c.id === trigRecord.id; })[0];
          var liveOther = trigRecord.a && Array.isArray(trigRecord.a.triggers) ? trigRecord.a.triggers : (trigRecord.b && trigRecord.b.triggers);
          ok('snapshot connection trigger copy is a DIFFERENT object from the source',
@@ -285,10 +286,123 @@
      var ghostCatalog = { locations: [{ id: 'synthetic-loc', environments: [], connections: ['ghost-connection-no-record'] }] };
       var snap2 = WB.buildWorldSnapshot({ maps: {}, catalog: ghostCatalog, connections: src.connections.slice() });
   ok('a catalog connection id with no authored record is flagged unresolved',
-    snap2.unresolved.indexOf('ghost-connection-no-record') !== -1);
+      snap2.unresolved.indexOf('ghost-connection-no-record') !== -1);
 
 
-         console.log('\nWORLD-BUILDER: ' + (checks - failed.length) + '/' + checks + ' passed');
+          // ---- SOLE ADAPTER: adaptWorld(GAME) -> {source, snapshot, model} over the REAL catalog --------
+          // The one game-aware bridge into the view-agnostic editor core. Drives collectWorldSource ->
+           // buildWorldSnapshot (== buildWorldModel input shape) -> Editor.model.buildWorldModel, all from
+            // the same loaded GAME this file already built.
+    var adapted = WB.adaptWorld(G);
+     ok('adaptWorld returns a frozen {source,snapshot,model}',
+        Object.isFrozen(adapted) && typeof adapted.source === 'object' && typeof adapted.snapshot === 'object');
+       ok('adaptWorld.model is the single read-only model core builds from the snapshot',
+          !!adapted.model && Object.isFrozen(adapted.model));
+         ok('model scene/location counts match the snapshot over the real catalog',
+           adapted.model.sceneCount === snap1.sceneCount && adapted.model.locationCount === 7,
+            'model=' + JSON.stringify([adapted.model.sceneCount, adapted.model.locationCount]));
+
+            // The model's connection index is a bijection with the authored records (Issue 6/7 spirit).
+      var modelConnIds = Object.keys(adapted.model.connectionsById).sort();
+       var snapConnIds = snap1.connections.map(function (c) { return c.id; }).sort();
+        ok('model.connectionsById has exactly the authored connection ids',
+           modelConnIds.length === snapConnIds.length && modelConnIds.every(function (id, i) { return id === snapConnIds[i]; }));
+
+          // A scene's overlay counts survive the source->snapshot->model chain unchanged.
+      var dinerScene = adapted.model.scenes['diner'];
+       ok('chained model keeps diner overlay membership',
+          !!dinerScene && Object.keys(dinerScene.overlays).length === snap1.scenes['diner'].overlays.length);
+
+         // Fail loud: a GAME with no connection registry never assembles a half world.
+      var adaptedThrew = false;
+       try { WB.adaptWorld({}); } catch (e) { adaptedThrew = true; }
+        ok('adaptWorld fails loud when the connection registry is absent', adaptedThrew);
+
+                   // PROVE THE CHAIN INPUT SHAPE: buildWorldModel over adaptWorld's OWN snapshot must reproduce the very
+                  // same read-only tree. This pins "snapshot === buildWorldModel's input" — a divergence would mean the
+                     // bridge handed the core a view it could not consume as-is. Same real GAME, no hand-built stub.
+              var M = req('editor/core/model.js');
+               var rebuilt = M.buildWorldModel(adapted.snapshot);
+                ok('buildWorldModel(adapted.snapshot) reproduces model scene/location counts',
+                    rebuilt.sceneCount === adapted.model.sceneCount && rebuilt.locationCount === adapted.model.locationCount,
+                       'rebuilt=' + JSON.stringify([rebuilt.sceneCount, rebuilt.locationCount]) +
+                         ' model=' + JSON.stringify([adapted.model.sceneCount, adapted.model.locationCount]));
+               var rebuiltConn = Object.keys(rebuilt.connectionsById).sort();
+                ok('rebuild is a deterministic bijection over the same connection ids',
+                    rebuiltConn.length === modelConnIds.length && rebuiltConn.every(function (id, i) { return id === modelConnIds[i]; }));
+                 ok('a scene resolves through BOTH snapshot and model layers with non-empty overlays',
+                     !!adapted.model.scenes['diner'] && Object.keys(adapted.model.scenes['diner'].overlays).length > 0);
+
+                 // ---- VERIFY: public surface unchanged + adaptWorld shapes, model LAZY ------------------
+                 // (a) API pin: the module exports EXACTLY the six pre-existing keys plus adaptWorld. Pinning the
+                  //     whole set proves originals were not renamed/removed and adaptWorld was ADDED additively
+                   //     (no surprise 8th key), so old-surface consumers still resolve everything.
+               var apiKeys = Object.keys(WB).sort();
+                ok('module api is the 6 original keys + adaptWorld, nothing else (additive)',
+                     JSON.stringify(apiKeys) === JSON.stringify(
+                            ["TILE","adaptWorld","buildWorldSnapshot","clone",
+                             "collectWorldSource","planBaseMap","tileColorFor"]));
+
+                 // (b) Source shape: the sole GAME read yields exactly the four input buckets.
+               ok('adaptWorld.source has exactly {maps,catalog,connections,tile}',
+                    JSON.stringify(Object.keys(adapted.source).sort()) === JSON.stringify(
+                            ["catalog","connections","maps","tile"]));
+
+                 // (c) Snapshot stands alone: a complete deep-frozen view-model with NO model dependency, so a
+                  //     core-absent load yields model:null while the snapshot still validates on its own.
+               var loneSnap = WB.buildWorldSnapshot(WB.collectWorldSource(G));
+                ok('snapshot (model-independent) is frozen and has 7 locations',
+                     Object.isFrozen(loneSnap) && loneSnap.locationCount === 7);
+
+                 // (d) model is LAZY: the slot always exists but may be null; when present it carries exactly the
+                  //     four read-only model keys. Proves adaptWorld never force-builds a broken model and
+                   //     tolerates a core-absent runtime load by degrading to null, not throwing.
+               var modelKeys = adapted.model === null ? [] : Object.keys(adapted.model).sort();
+                ok('adaptWorld.model is lazy (null, else the full read-only model view); tuple locked + snapshot frozen',
+                       (modelKeys.length === 0 ||
+                      JSON.stringify(modelKeys) === JSON.stringify(
+                              ["connectionsById","legacyDoors","locationCount","locationsById","sceneCount","scenes","tileMap","unresolved"])) &&
+                     Object.isFrozen(adapted) && Object.isFrozen(adapted.snapshot));
+
+
+            
+   // -----------------------------------------------------------------------------
+   // CHAIN TEST — end-to-end: adaptWorld(G) -> snapshot -> Editor.model.buildWorldModel(snapshot).
+   // Proves the model is built FROM this exact snapshot (identity, not a fresh clone), is one frozen tree,
+   // and that a real scene + a real connection each resolve through BOTH the snapshot layer and the model layer.
+  var RealModel = req('editor/core/model.js');       // same cached module adaptWorld resolves in node
+  var consumedArg = null;
+   // R.model is Object.frozen, so its buildWorldModel cannot be reassigned; expose a spy on the globalThis.Editor
+   // hook that adaptWorld consults FIRST, delegating to the real builder (identical result, captured argument).
+  var prevEditor = typeof globalThis !== 'undefined' ? globalThis.Editor : undefined;
+  try {
+    if (typeof globalThis !== 'undefined') {
+      globalThis.Editor = { model: { buildWorldModel: function (snap) { consumedArg = snap; return RealModel.buildWorldModel(snap); } } };
+     }
+    var chainAdapted = WB.adaptWorld(G);
+    ok('CHAIN: the snapshot returned IS by reference the input buildWorldModel consumes', consumedArg === chainAdapted.snapshot);
+    ok('CHAIN: model is non-null and Object.frozen — the single read-only root every view indexes', !!(chainAdapted.model) && Object.isFrozen(chainAdapted.model));
+    ok('CHAIN: single tree — scenes/connectionsById/locationsById are frozen sub-trees of that one model',
+          !!chainAdapted.model && Object.isFrozen(chainAdapted.model.scenes)
+                && Object.isFrozen(chainAdapted.model.connectionsById)
+                && Object.isFrozen(chainAdapted.model.locationsById));
+    var locId = chainAdapted.snapshot.locations[0].id;
+    ok('CHAIN: single tree — model reuses the snapshot location ref by identity (no second cloned tree)',
+          chainAdapted.model.locationsById[locId] === chainAdapted.snapshot.locations.find(function (l) { return l.id === locId; }));
+    var scId = 'diner';    // real fixture, M2-confirmed present across the editor suites
+    ok('CHAIN: a scene resolves through BOTH the snapshot layer and the model layer',
+          !!chainAdapted.snapshot.scenes[scId] && !!RealModel.scene(chainAdapted.model, scId)
+                && RealModel.scene(chainAdapted.model, scId).locationId === chainAdapted.snapshot.scenes[scId].locationId);
+    var cn = chainAdapted.snapshot.connections[0];
+    ok('CHAIN: a real connection resolves through BOTH layers with stable endpoint ids',
+          !!cn && Object.keys(chainAdapted.model.connectionsById).length === chainAdapted.snapshot.connections.length
+                && !!RealModel.connection(chainAdapted.model, cn.id)
+                && !!(RealModel.connection(chainAdapted.model, cn.id).endpointIds.a));
+   } finally {
+    if (typeof globalThis !== 'undefined') { globalThis.Editor = prevEditor; }    // never leak the spy into other suites
+   }
+
+console.log('\nWORLD-BUILDER: ' + (checks - failed.length) + '/' + checks + ' passed');
 
   if (failed.length) {
     console.error('FAILED:');

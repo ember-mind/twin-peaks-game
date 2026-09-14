@@ -37,12 +37,11 @@ const js = (name) => path.join(__dirname, '..', 'js', name);
   'engine.js', 'glue.js', 'ambient-life.js', 'character-activity.js',
   'environment-reactions.js', 'ambient-life-scenes.js', 'location-connections.js',
    'world-connections.gen.js',
-    'double-r-exterior-art.js', 'double-r-exterior-scene.js', 'double-r-location-data.js',
+    'double-r-exterior-art.js', 'double-r-exterior-scene.js',
   'double-r-location-production.js',
   'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js',
-  'sheriffs-station-scene.js', 'sheriffs-station-exterior-scene.js',
-  'sheriffs-station-location-data.js', 'sheriffs-station-production.js',
-  'character-life-scenes.js', 'traincar-location-data.js', 'traincar-location-production.js',
+  'sheriffs-station-scene.js', 'sheriffs-station-exterior-scene.js', 'sheriffs-station-production.js',
+  'character-life-scenes.js', 'traincar-location-production.js',
   'world-engine.js', 'world-catalog.js'
 ].forEach((name) => require(js(name)));
 
@@ -101,7 +100,7 @@ function cross(dir, expectedMap, expectedSpawn) {
 
 /* ---------------- 1. le connessioni sono compilate in porte reali ---------- */
 
-const installed = [].concat(G.DoubleRLocationConnections, G.SheriffsStationLocationConnections)
+const installed = global.GAME.LocationConnections.connectionRecordsFor(['double-r-front-entrance','town-double-r-lot','sheriffs-station-front-entrance','town-sheriffs-station-lot'])
   .map((connection) => connection.id);
 assert.deepEqual(installed, [
   'double-r-front-entrance', 'town-double-r-lot',

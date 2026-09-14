@@ -40,7 +40,7 @@ global.performance = { now: () => tnow };
 global.setInterval = () => 0;
 // stub minimo di `document`: necessario perché js/engine.js legge
 // `typeof document !== 'undefined'` per far scattare l'onEnter automatico
-// di room_315 (hotel_risveglio) — stesso stub di test/room-315-location.js.
+// di room_315 (hotel_risveglio) — stesso stub di test/world-connections.gen.js.
 global.document = {
   body: { classList: { toggle() {} }, setAttribute() {} },
   getElementById: () => null,
@@ -57,10 +57,9 @@ const J = (f) => path.join(__dirname, '..', 'js', f);
 [
   'tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'retro-font.js',
   'engine.js', 'glue.js', 'location-connections.js', 'environment-reactions.js','world-connections.gen.js',
-  'double-r-exterior-art.js', 'double-r-exterior-scene.js', 'double-r-location-data.js', 'double-r-location-production.js',
-  'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js', 'sheriffs-station-scene.js', 'sheriffs-station-exterior-scene.js',
-  'sheriffs-station-location-data.js', 'sheriffs-station-production.js',
-  'room-315-art.js', 'room-315-scene.js', 'room-315-location-data.js', 'room-315-production.js'
+  'double-r-exterior-art.js', 'double-r-exterior-scene.js', 'double-r-location-production.js',
+  'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js', 'sheriffs-station-scene.js', 'sheriffs-station-exterior-scene.js', 'sheriffs-station-production.js',
+  'room-315-art.js', 'room-315-scene.js', 'room-315-production.js'
 ].forEach((f) => require(J(f)));
 
 const GAME = global.GAME;
@@ -349,7 +348,7 @@ drainDialogueAndLog('Risveglio (hotel_risveglio)');
 
 notesGeneral.push(
   'room_315.doors e\' {} in js/maps.js (statico): la porta verso hotel_gn e\' installata a runtime dalla ' +
-  'connessione "great-northern-room-315-hall" (js/room-315-location-data.js, applicata da js/room-315-production.js). ' +
+  'connessione "great-northern-room-315-hall" (js/world-connections.gen.js, applicata da js/room-315-production.js). ' +
   'Dump a runtime: room_315.doors["7,11"] -> hotel_gn(14,2,down); hotel_gn.doors["14,1"] -> room_315(7,10,up).'
 );
 

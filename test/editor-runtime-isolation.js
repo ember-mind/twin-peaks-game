@@ -41,4 +41,19 @@ for (const f of coreFiles) {
 }
 ok(tainted.length === 0, `no core file names the game (offenders: ${tainted.join(', ') || 'none'})`);
 
+// ---- core is also UI-free: it never touches DOM/canvas/rAF/storage, even in code with comments removed ----
+// hit-test.js / interaction.js MENTION canvas/document/window in comments that assert they avoid it, so the
+// scan strips block + line comments first; otherwise a naive token match would false-fail on those very guards.
+function stripComments(src) {
+  return src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+}
+const UI_USAGE = /document\.|\bwindow\b|\.getContext\(|requestAnimationFrame|cancelAnimationFrame|\blocalStorage\b|\bsessionStorage\b/;
+let uiTainted = [];
+for (const f of coreFiles) {
+  if (UI_USAGE.test(stripComments(fs.readFileSync(f, 'utf8')))) uiTainted.push(path.relative(root, f));
+}
+ok(uiTainted.length === 0, `core is UI-free: no DOM/canvas/rAF/storage usage (offenders: ${uiTainted.join(', ') || 'none'})`);
+// Evidence the exact files scanned, so any module later added under js/editor/core/ is visibly auto-covered.
+console.log('EDITOR-RUNTIME-ISOLATION-SCAN core=[' + coreFiles.map(f => path.relative(root, f)).join(', ') + ']');
+
 console.log(`EDITOR-RUNTIME-ISOLATION-PASS ${pass}`);

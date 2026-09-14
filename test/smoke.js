@@ -42,10 +42,8 @@ global.GAME.SheriffsStationExteriorScene.install();
 require(J('sheriffs-station-scene.js'));
 global.GAME.SheriffsStationScene.install();
 require(J('location-connections.js'));
-require(J('double-r-location-data.js'));
-require(J('sheriffs-station-location-data.js'));
-require(J('room-315-location-data.js'));
-[].concat(global.GAME.DoubleRLocationConnections, global.GAME.SheriffsStationLocationConnections, global.GAME.Room315LocationConnections)
+require(J('world-connections.gen.js'));
+global.GAME.LocationConnections.connectionRecordsFor(['double-r-front-entrance','town-double-r-lot','sheriffs-station-front-entrance','town-sheriffs-station-lot','great-northern-room-315-hall'])
   .forEach((c) => global.GAME.LocationConnections.install(c, global.GAME.Maps));
 require(J('render3d.js')); // window e' globale (riga sopra): CONFIG si popola anche senza THREE
 require(J('narrative-runtime.js'));

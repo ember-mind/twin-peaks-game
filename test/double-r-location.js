@@ -4,6 +4,7 @@
   var q = new URLSearchParams(location.search), debug = q.get('debug') === '1';
   var status = document.getElementById('status'), overlay = document.getElementById('debug'), dctx = overlay.getContext('2d');
   var connectionHandle, ready = false, busy = false, token = 0, history = [], saveCount = 0, lastMap = '';
+  var connection = G.LocationConnections.connectionRecordsFor(['double-r-front-entrance'])[0]; // single authoritative record from GAME.WorldData
   var clean = q.get('clean') === '1', staticMode = q.get('static') === '1';
   document.body.classList.toggle('clean', clean);
   dctx.imageSmoothingEnabled = false;
@@ -17,7 +18,7 @@
   }
   function installConnection() {
     if (connectionHandle) connectionHandle.uninstall();
-    connectionHandle = G.LocationConnections.install(G.DoubleRLocationConnection, G.Maps);
+    connectionHandle = G.LocationConnections.install(connection, G.Maps);
   }
   function install() {
     scene.map.doors = scene.map.doors || {};
@@ -43,11 +44,11 @@
     dctx.fillStyle='rgba(35,220,100,.40)';
     if (E.state.mapId===MAP) [[6,6],[7,6]].forEach(function(xy){dctx.fillRect(xy[0]*16-cx,xy[1]*16-cy,16,16);});
     if (E.state.mapId==='diner') [[6,9],[7,9]].forEach(function(xy){dctx.fillStyle='rgba(35,220,100,.40)';dctx.fillRect(xy[0]*16-cx,xy[1]*16-cy,16,16);});
-    var spawn=E.state.mapId===MAP?G.DoubleRLocationConnection.a.spawn:G.DoubleRLocationConnection.b.spawn;
+    var spawn=E.state.mapId===MAP?connection.a.spawn:connection.b.spawn;
     dctx.fillStyle='rgba(70,220,255,.65)'; dctx.fillRect(spawn.tx*16-cx+4,spawn.ty*16-cy+4,8,8);
   }
   function snapshot() { var p=E.state.player, cv=document.getElementById('game'); return {ready:ready,mapId:E.state.mapId,
-    player:{tx:p.tx,ty:p.ty,dir:p.dir,moving:!!p.moving},connectionId:G.DoubleRLocationConnection.id,history:history.slice(),
+    player:{tx:p.tx,ty:p.ty,dir:p.dir,moving:!!p.moving},connectionId:connection.id,history:history.slice(),
     reactionEvents:G.EnvironmentReactions.snapshot('diner').map(function(x){return x.events;}),saveCount:saveCount,
     roundTripComplete:history.length>=2&&E.state.mapId===MAP,fadePhase:E.state.fadePhase,canvas:{width:cv.width,height:cv.height}}; }
   function waitUntil(fn, ms, operation) {

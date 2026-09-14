@@ -55,16 +55,12 @@
    // Registry must exist before the production installers, which now source records from GAME.WorldData.
     req('../js/world-connections.gen.js');
    req('../js/double-r-exterior-scene.js');
-   tryReq('../js/double-r-location-data.js');
-    tryReq('../js/traincar-location-data.js');
      tryReq('../js/sheriffs-station-art.js'); tryReq('../js/sheriffs-station-exterior-art.js');
       tryReq('../js/sheriffs-station-scene.js'); tryReq('../js/sheriffs-station-exterior-scene.js');
        tryReq('../js/room-315-scene.js');
         tryReq('../js/hospital-scene.js');
           tryReq('../js/traincar-scene.js');
            tryReq('../js/oej-scene.js');
-     tryReq('../js/sheriffs-station-location-data.js');
-   tryReq('../js/room-315-location-data.js');
  req('../js/environment-reactions.js');
  global.GAME.DoubleRExteriorScene.install();
    // A: run every production installer FIRST — this registers sheriffs_station_exterior and places all doors in
@@ -75,7 +71,6 @@
      ].forEach(function (f) { tryReq(f); });
 
   req('../js/world-engine.js');
-    req('../js/world-connections.gen.js');
 
    var G = global.GAME;
   assert.ok(G.WorldData && Array.isArray(G.WorldData.connections), 'GAME.WorldData.connections not loaded');
