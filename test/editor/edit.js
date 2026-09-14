@@ -41,7 +41,7 @@ ok(Edit.changedEndpoints(store, d, 'zeta-door').join() === 'b', 'changedEndpoint
 
 // ---- changeset: only changed connections, sorted by id
 const cs = Edit.buildChangeset(store, d);
-ok(cs.format === 'world-connections-changeset' && cs.version === 1 && cs.target === 'world/connections.json', 'changeset header');
+ok(cs.format === 'world-connections-changeset' && cs.version === 2 && cs.target === 'world/connections.json', 'changeset header');
 ok(cs.operations.map((o) => o.id).join() === 'alpha-door,zeta-door', 'operations sorted by id');
 ok(cs.operations.every((o) => o.op === 'upsert' && o.connection.id === o.id), 'whole-record upserts');
 ok(cs.operations[0].endpoints.join() === 'a' && cs.operations[1].endpoints.join() === 'b', 'endpoints listed per op');
@@ -134,5 +134,100 @@ const seenOpts = [];
 Edit.validateDraft(owd['dream-exit'], Object.assign({}, ctx, { knownIds: () => true, validateConnection: () => ({ errors: [] }),
   validateEndpoint: (side, ep, o) => { seenOpts.push(side + ':' + (o && o.oneWay)); return null; } }), { changedSides: ['a'] });
 ok(seenOpts.join() === 'b:true', 'paired-endpoint check validates b under the one-way schema');
+
+// ---- M6: create / delete drafts
+ok(Edit.suggestId('sheriffs_station_exterior', 'room_315') === 'sheriffs-station-exterior-room-315', 'suggestId kebab-cases both scenes');
+assert.deepEqual(Edit.spawnInFront(5, 0, 20, 10), { tx: 5, ty: 1, dir: 'down' });       // top edge
+assert.deepEqual(Edit.spawnInFront(5, 9, 20, 10), { tx: 5, ty: 8, dir: 'up' });         // bottom edge
+assert.deepEqual(Edit.spawnInFront(0, 5, 20, 12), { tx: 1, ty: 5, dir: 'right' });      // left edge
+assert.deepEqual(Edit.spawnInFront(19, 5, 20, 12), { tx: 18, ty: 5, dir: 'left' });     // right edge
+assert.deepEqual(Edit.spawnInFront(3, 3, 7, 7), { tx: 3, ty: 4, dir: 'down' });         // centre tie -> vertical
+pass += 5;
+
+const picks = { a: { scene: 's1', tx: 2, ty: 9, width: 10, height: 10 }, b: { scene: 's3', tx: 0, ty: 4, width: 12, height: 9 } };
+const paired = Edit.newConnection(Object.assign({ id: 's1-s3' }, picks));
+assert.deepEqual(paired, { id: 's1-s3', a: { scene: 's1', triggers: [[2, 9]], spawn: { tx: 2, ty: 8, dir: 'up' } },
+  b: { scene: 's3', triggers: [[0, 4]], spawn: { tx: 1, ty: 4, dir: 'right' } } });
+const oneWayNew = Edit.newConnection(Object.assign({ id: 's1-s3-dream', oneWay: true }, picks));
+assert.deepEqual(oneWayNew, { id: 's1-s3-dream', one_way: true, a: { scene: 's1', triggers: [[2, 9]] },
+  b: { scene: 's3', triggers: [], spawn: { tx: 1, ty: 4, dir: 'right' } } });
+const moved = Edit.newConnection(Object.assign({ id: 's1-s3', spawn: { b: { tx: 5, ty: 5 } } }, picks));
+assert.deepEqual(moved.b.spawn, { tx: 5, ty: 5, dir: 'right' });
+pass += 3;
+
+let cd = Edit.createConnection(store, store.draft, paired);
+ok(cd['s1-s3'] && Object.isFrozen(cd['s1-s3'].a.triggers) && cd['zeta-door'] === store.base['zeta-door'], 'create adds a frozen record, others keep their reference');
+ok(Edit.isCreated(store, cd, 's1-s3') && !Edit.isCreated(store, cd, 'zeta-door'), 'isCreated');
+ok(Edit.changedEndpoints(store, cd, 's1-s3').join() === 'a,b', 'a created record changes both endpoints');
+cd = Edit.createConnection(store, cd, oneWayNew);
+cd = Edit.deleteConnection(store, cd, 'alpha-door');
+ok(Edit.isDeleted(store, cd, 'alpha-door'), 'isDeleted');
+const cs2 = Edit.buildChangeset(store, cd);
+ok(cs2.version === 2, 'export is version 2');
+assert.deepEqual(cs2.operations.map((o) => o.op + ':' + o.id), ['delete:alpha-door', 'create:s1-s3', 'create:s1-s3-dream']);
+pass++;
+assert.deepEqual(cs2.operations[1], { op: 'create', id: 's1-s3', connection: paired });
+assert.deepEqual(cs2.operations[0], { op: 'delete', id: 'alpha-door' });
+pass += 2;
+ok(Edit.canonical(Edit.reapply(SOURCE, JSON.parse(Edit.serialize(cs2)))) === Edit.canonical(cd), 'v2 serialize -> reapply reproduces create + delete draft');
+
+// deleting a record created in the same draft leaves nothing to export
+ok(Edit.buildChangeset(store, Edit.deleteConnection(store, Edit.createConnection(store, store.draft, paired), 's1-s3')).operations.length === 0, 'create then delete exports nothing');
+// revert of a created record drops it; revert of a deleted record restores it
+ok(!('s1-s3' in Edit.revertConnection(store, cd, 's1-s3')), 'revert drops a created record');
+ok(Edit.revertConnection(store, cd, 'alpha-door')['alpha-door'] === store.base['alpha-door'], 'revert restores a deleted record');
+
+// undo / redo through history
+let hh = History.create(store.draft);
+hh = History.commit(hh, Edit.createConnection(store, hh.present, paired), { label: 'create s1-s3' });
+hh = History.commit(hh, Edit.deleteConnection(store, hh.present, 'zeta-door'), { label: 'delete zeta-door' });
+hh = History.undo(hh);
+ok('zeta-door' in hh.present && 's1-s3' in hh.present, 'undo restores the deleted record, keeps the created one');
+hh = History.undo(hh);
+ok(!('s1-s3' in hh.present) && hh.present === store.draft, 'second undo removes the created record');
+hh = History.redo(hh);
+ok('s1-s3' in hh.present && History.nextRedoLabel(hh) === 'delete zeta-door', 'redo re-creates, delete is next redo');
+
+// create guards
+assert.throws(() => Edit.createConnection(store, store.draft, Object.assign({}, paired, { id: 'zeta-door' })), /already exists in the registry/);
+assert.throws(() => Edit.createConnection(store, cd, Object.assign({}, paired)), /already exists in the draft/);
+assert.throws(() => Edit.createConnection(store, store.draft, Object.assign({}, paired, { id: 'Bad_Id' })), /kebab-case/);
+assert.throws(() => Edit.createConnection(store, store.draft, Object.assign({}, paired, { id: 'a--b' })), /kebab-case/);
+assert.throws(() => Edit.createConnection(store, store.draft, paired, { catalogHasId: (id) => id === 's1-s3' }), /already listed in js\/world-catalog\.js/);
+assert.throws(() => Edit.createConnection(store, store.draft, { id: 'x-y', a: paired.a }), /missing endpoint "b"/);
+const owBadNew = JSON.parse(JSON.stringify(oneWayNew)); owBadNew.b.triggers = [[1, 1]];
+assert.throws(() => Edit.createConnection(store, store.draft, owBadNew), /takes no triggers/);
+assert.throws(() => Edit.deleteConnection(store, store.draft, 'ghost'), /unknown connection id "ghost"/);
+pass += 8;
+
+// v2 reapply refusals
+const v2 = (ops) => ({ format: 'world-connections-changeset', version: 2, target: 'world/connections.json', operations: ops });
+assert.throws(() => Edit.reapply(SOURCE, v2([{ op: 'create', id: 'zeta-door', connection: Object.assign({}, paired, { id: 'zeta-door' }) }])), /creates connection id "zeta-door", which already exists/);
+assert.throws(() => Edit.reapply(SOURCE, v2([{ op: 'create', id: 'x', connection: paired }])), /disagrees/);
+assert.throws(() => Edit.reapply(SOURCE, v2([{ op: 'create', id: 'Bad', connection: Object.assign({}, paired, { id: 'Bad' }) }])), /kebab-case/);
+assert.throws(() => Edit.reapply(SOURCE, v2([{ op: 'delete', id: 'ghost' }])), /unknown connection id "ghost"/);
+assert.throws(() => Edit.reapply(SOURCE, v2([{ op: 'delete', id: 'zeta-door' }, { op: 'delete', id: 'zeta-door' }])), /second operation on connection id "zeta-door"/);
+assert.throws(() => Edit.reapply(SOURCE, v2([{ op: 'create', id: 's1-s3', connection: paired }, { op: 'create', id: 's1-s3', connection: paired }])), /second operation/);
+assert.throws(() => Edit.reapply(SOURCE, v2([{ op: 'remove', id: 'zeta-door' }])), /not allowed in a version 2 changeset \(use delete\)/);
+assert.throws(() => Edit.reapply(SOURCE, { version: 1, operations: [{ op: 'create', id: 's1-s3', connection: paired }] }), /not allowed in a version 1 changeset \(needs version 2\)/);
+assert.throws(() => Edit.reapply(SOURCE, { version: 3, operations: [] }), /version must be 1 or 2/);
+pass += 9;
+ok(!('zeta-door' in Edit.reapply(SOURCE, { version: 1, operations: [{ op: 'remove', id: 'zeta-door' }] })), 'version 1 remove still accepted');
+
+// validateDraft for created records + claim conflicts
+const cctx = Object.assign({}, ctx, { knownIds: (id) => id === 'zeta-door' || id === 'alpha-door',
+  validateConnection: () => ({ errors: [] }), catalogHasId: (id) => id === 'listed-id', sceneLocation: (s) => (s === 's3' ? null : 'loc') });
+const created = Edit.createConnection(store, store.draft, Object.assign({}, paired, { b: Object.assign({}, paired.b, { scene: 's2' }) }));
+ok(Edit.validateDraft(created['s1-s3'], cctx, { created: true, draft: created }).length === 0, 'valid created record -> no errors');
+const noLoc = Edit.validateDraft(paired, cctx, { created: true });
+ok(noLoc.includes('endpoint b scene "s3" has no catalog location in js/world-catalog.js'), 'created record needs a catalog location');
+ok(Edit.validateDraft(Object.assign({}, paired, { id: 'listed-id' }), cctx, { created: true }).some((e) => /already listed/.test(e)), 'created id already in catalog');
+ok(Edit.validateDraft(Object.assign({}, paired, { id: 'zeta-door' }), cctx, { created: true }).some((e) => /already exists in the registry/.test(e)), 'created id already in registry');
+const clash = JSON.parse(JSON.stringify(paired)); clash.id = 'clash'; clash.a.triggers = [[1, 1]]; clash.b.scene = 's2';
+const clashDraft = Edit.createConnection(store, store.draft, clash);
+ok(Edit.validateDraft(clash, cctx, { created: true, draft: clashDraft }).includes('s1 1,1 is claimed by both zeta-door and clash'), 'trigger tile claimed by another draft record');
+ok(Edit.validateDraft(Object.assign({}, paired, { b: Object.assign({}, paired.b, { scene: 's1' }) }), cctx, { created: true }).includes('endpoints a and b must be in different scenes'), 'created record needs two scenes');
+ok(Edit.validateDraft(paired, Object.assign({}, cctx, { sceneLocation: () => 'loc', legacyDoorAt: (s, x, y) => s === 's1' && x === 2 && y === 9 }), { created: true }).includes('a.triggers[0] s1 2,9 holds a legacy map door'), 'legacy door on a trigger tile');
+ok(Edit.claimConflicts(SOURCE).length === 0 && Edit.claimConflicts(SOURCE.concat([clash])).join() === 's1 1,1 is claimed by both zeta-door and clash', 'claimConflicts over a record list');
 
 console.log(`EDITOR-EDIT-PASS ${pass}`);

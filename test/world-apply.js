@@ -3,10 +3,15 @@
 
 /* test/world-apply.js — tools/world-apply.js on a TEMP COPY fixture (the repo registry is never touched).
  *
- * Fixture root: world/connections.json + test/gen-world-data.js + js/ (gen output dir), copied to a tmp dir.
- *   dry-run leaves the fixture byte-identical; apply rewrites deterministically and regenerates the .gen.js;
- *   a second apply is a no-op; strict refusals (unknown id / endpoint / foreign target) and invalid records
- *   exit non-zero without writing.
+ * Fixture root: a copy of js/ test/ world/ narrative/ index.html in a tmp dir (the tool boots <root>/js, runs
+ * <root>/test/gen-world-data.js and <root>/test/world-engine-v0.1-catalog.js, and scans js/test/narrative for
+ * references before a delete).
+ *   M4b (version 1): dry-run leaves the fixture byte-identical; apply rewrites deterministically and regenerates
+ *   the .gen.js; a second apply is a no-op; strict refusals and invalid records exit non-zero without writing.
+ *   M6 (version 2): create + catalog write, delete + catalog write (bytes return to the original), dry-run prints
+ *   the catalog diff, rollback of all three files on an injected gen or catalog-check failure, refused delete of
+ *   a referenced id, refused duplicate id (registry, catalog, same changeset), scene with no catalog location.
+ * Ids created here are assembled at runtime: a literal id in this file would count as a reference.
  */
 
 const assert = require('node:assert/strict');
@@ -16,23 +21,24 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const REPO = path.resolve(__dirname, '..');
+const Edit = require(path.join(REPO, 'js', 'editor', 'core', 'edit.js'));
 const CLI = path.join(REPO, 'tools', 'world-apply.js');
 let pass = 0;
 function ok(cond, label, detail) { assert.ok(cond, label + (detail ? ' :: ' + detail : '')); pass++; }
 
 const repoRegistryBefore = fs.readFileSync(path.join(REPO, 'world', 'connections.json'));
 const repoGenBefore = fs.readFileSync(path.join(REPO, 'js', 'world-connections.gen.js'));
+const repoCatalogBefore = fs.readFileSync(path.join(REPO, 'js', 'world-catalog.js'));
 
+const FIXTURES = [];
 function makeFixture() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'tp-world-apply-'));
-  fs.mkdirSync(path.join(root, 'world'));
-  fs.mkdirSync(path.join(root, 'test'));
-  fs.mkdirSync(path.join(root, 'js'));
-  fs.copyFileSync(path.join(REPO, 'world', 'connections.json'), path.join(root, 'world', 'connections.json'));
-  fs.copyFileSync(path.join(REPO, 'test', 'gen-world-data.js'), path.join(root, 'test', 'gen-world-data.js'));
-  fs.copyFileSync(path.join(REPO, 'js', 'world-connections.gen.js'), path.join(root, 'js', 'world-connections.gen.js'));
+  for (const d of ['js', 'test', 'world', 'narrative']) fs.cpSync(path.join(REPO, d), path.join(root, d), { recursive: true });
+  fs.copyFileSync(path.join(REPO, 'index.html'), path.join(root, 'index.html'));
+  FIXTURES.push(root);
   return root;
 }
+process.on('exit', () => FIXTURES.forEach((r) => fs.rmSync(r, { recursive: true, force: true })));
 function run(root, csObj, extra) {
   const file = path.join(root, 'changeset-' + Math.random().toString(36).slice(2) + '.json');
   fs.writeFileSync(file, typeof csObj === 'string' ? csObj : JSON.stringify(csObj, null, 2));
@@ -105,7 +111,114 @@ const wall = JSON.parse(JSON.stringify(base.connections.find((c) => c.id === 'do
 wall.b.triggers.push([8, 9]);
 ok(/b\.triggers\[2\] must be walkable/.test(refused('diner wall trigger', { operations: [{ op: 'upsert', id: wall.id, endpoints: ['b'], connection: wall }] }, 1).err), 'wall trigger rejected against real maps');
 
+// ================= M6: version-2 create / delete with catalog write =================
+const CatalogWrite = require(path.join(REPO, 'js', 'editor', 'apply', 'catalog-write.js'));
+const NEW_ID = ['town', 'hospital', 'm6', 'probe'].join('-');
+const OW_ID = ['town', 'hospital', 'm6', 'drop'].join('-');
+const created = { id: NEW_ID, a: { scene: 'town', triggers: [[30, 9]], spawn: { tx: 30, ty: 10, dir: 'down' } },
+  b: { scene: 'hospital', triggers: [[14, 9]], spawn: { tx: 13, ty: 9, dir: 'left' } } };
+const oneWay = { id: OW_ID, one_way: true, a: { scene: 'town', triggers: [[34, 9]] }, b: { scene: 'hospital', triggers: [], spawn: { tx: 2, ty: 9, dir: 'right' } } };
+const v2 = (ops) => ({ format: 'world-connections-changeset', version: 2, target: 'world/connections.json', operations: ops });
+const CREATE = v2([{ op: 'create', id: NEW_ID, connection: created }]);
+const catalogOf = (root) => CatalogWrite.membership(CatalogWrite.readCatalog(read(root, 'js/world-catalog.js').toString('utf8')));
+const nodeIn = (root, rel) => spawnSync(process.execPath, [path.join(root, rel)], { cwd: root, encoding: 'utf8' });
+const three = (root) => ['world/connections.json', 'js/world-connections.gen.js', 'js/world-catalog.js'].map((rel) => read(root, rel));
+const sameThree = (root, snap) => three(root).every((b, i) => b.equals(snap[i]));
+
+// ---- create: dry-run prints VALID 16 + catalog diff, writes nothing
+const cf = makeFixture();
+const snap0 = three(cf);
+r = run(cf, CREATE, ['--dry-run']);
+ok(r.code === 0, 'create dry-run exits 0', r.out + r.err);
+ok(r.out.includes('CREATE ' + NEW_ID + ' (paired)') && r.out.includes('BEFORE null') && r.out.includes('AFTER  ' + JSON.stringify(created.a)), 'create dry-run prints CREATE + BEFORE null / AFTER', r.out);
+ok(r.out.includes('VALID 16 record(s) against real maps'), 'create dry-run VALID 16', r.out);
+ok(r.out.includes('CATALOG js/world-catalog.js create ' + NEW_ID + ' -> town + hospital'), 'dry-run names the catalog locations', r.out);
+ok(r.out.includes("-         connections: ['town-hospital']") && r.out.includes("+         connections: ['town-hospital', '" + NEW_ID + "']") && r.out.includes("'arrival-town', '" + NEW_ID + "']"), 'dry-run prints the catalog diff for both locations', r.out);
+ok(r.out.includes('DRY-RUN 2 endpoint change(s)') && sameThree(cf, snap0), 'create dry-run writes nothing');
+
+// ---- create: apply writes registry + gen + catalog, catalog check green inside the tool and after
+r = run(cf, CREATE);
+ok(r.code === 0 && r.out.includes('WROTE world/connections.json') && r.out.includes('WROTE js/world-catalog.js') && r.out.includes('CHECK WORLD-ENGINE-V0.1-CATALOG-PASS'), 'create apply writes and passes the catalog check', r.out + r.err);
+const reg2 = JSON.parse(read(cf, 'world/connections.json').toString('utf8'));
+ok(reg2.connections.length === 16 && Edit.canonical(reg2.connections[15]) === Edit.canonical(created), 'created record appended last');
+ok(JSON.stringify(reg2.connections.slice(0, 15)) === JSON.stringify(base.connections), 'existing records untouched, order kept');
+ok(read(cf, 'js/world-connections.gen.js').toString('utf8').includes('"id": "' + NEW_ID + '"'), 'gen binding regenerated with the new record');
+const cat2 = catalogOf(cf);
+ok(cat2.town.includes(NEW_ID) && cat2.hospital.includes(NEW_ID) && Object.keys(cat2).filter((k) => cat2[k].includes(NEW_ID)).length === 2, 'catalog lists the id in exactly town + hospital');
+ok(nodeIn(cf, 'test/world-engine-v0.1-catalog.js').status === 0, 'catalog test green on the fixture after create');
+const inv = nodeIn(cf, 'test/legacy-door-inventory.js');
+ok(inv.status === 0 && /booted-doors=61 unowned=0/.test(inv.stdout), 'legacy-door-inventory green, 2 more booted doors, all owned', inv.stdout + inv.stderr);
+ok(nodeIn(cf, 'test/test-world-registry.js').status !== 0, 'the real-repo registry pin (15 ids) notices the fixture change');
+
+// ---- delete: apply removes the record and the catalog ids; all three files return to the original bytes
+const DELETE = v2([{ op: 'delete', id: NEW_ID }]);
+r = run(cf, DELETE, ['--dry-run']);
+ok(r.code === 0 && r.out.includes('DELETE ' + NEW_ID) && r.out.includes('VALID 15 record(s)') && r.out.includes("+         connections: ['town-hospital']"), 'delete dry-run prints VALID 15 + catalog diff', r.out + r.err);
+r = run(cf, DELETE);
+ok(r.code === 0 && r.out.includes('CHECK WORLD-ENGINE-V0.1-CATALOG-PASS'), 'delete apply exits 0 and passes the catalog check', r.out + r.err);
+ok(sameThree(cf, snap0), 'create then delete leaves registry, gen and catalog byte-identical to the original');
+
+// ---- one-way create
+r = run(makeFixture(), v2([{ op: 'create', id: OW_ID, connection: oneWay }]), ['--dry-run']);
+ok(r.code === 0 && r.out.includes('CREATE ' + OW_ID + ' (one-way)') && r.out.includes('VALID 16 record(s)'), 'one-way create validates', r.out + r.err);
+const owBad = JSON.parse(JSON.stringify(oneWay)); owBad.a.spawn = { tx: 34, ty: 10, dir: 'down' };
+r = run(makeFixture(), v2([{ op: 'create', id: OW_ID, connection: owBad }]), ['--dry-run']);
+ok(r.code === 2 && /endpoint a of one-way connection .* has no spawn/.test(r.err), 'one-way create with a.spawn refused', r.err);
+
+// ---- rollback: injected failure in the catalog check, then in the generator
+for (const [label, rel, body] of [['catalog check', 'test/world-engine-v0.1-catalog.js', "console.error('injected catalog failure'); process.exit(3);\n"],
+  ['generator', 'test/gen-world-data.js', "console.error('injected gen failure'); process.exit(4);\n"]]) {
+  const rf = makeFixture();
+  const snap = three(rf);
+  fs.writeFileSync(path.join(rf, rel), body);
+  const res = run(rf, CREATE);
+  ok(res.code === 1, 'injected ' + label + ' failure exits 1', res.out + res.err);
+  ok(res.err.includes('injected') && res.err.includes('ROLLED BACK world/connections.json, js/world-connections.gen.js, js/world-catalog.js (byte-identical to the pre-run copy)'), 'injected ' + label + ' failure reports rollback', res.err);
+  ok(sameThree(rf, snap), 'injected ' + label + ' failure restores all three files');
+}
+
+// ---- refuse delete of a referenced id (every registry record is referenced by tests)
+{
+  const f = makeFixture(); const snap = three(f);
+  const res = run(f, v2([{ op: 'delete', id: 'town-roadhouse' }]));
+  ok(res.code === 1 && /REFUSED delete town-roadhouse: referenced by \d+ file\(s\)/.test(res.err) && res.err.includes('test/world-builder-browser.js'), 'delete of a referenced id refused, files listed', res.err);
+  ok(!/\n    js\/world-catalog\.js|\n    js\/world-connections\.gen\.js/.test(res.err), 'catalog and generated binding are not counted as references');
+  ok(sameThree(f, snap), 'refused delete writes nothing');
+  const legacy = run(makeFixture(), { version: 1, operations: [{ op: 'remove', id: 'town-roadhouse' }] });
+  ok(legacy.code === 1 && /REFUSED delete town-roadhouse/.test(legacy.err), 'version 1 remove goes through the same delete guards', legacy.err);
+}
+
+// ---- refuse duplicate id: registry, catalog, same changeset
+{
+  const dupReg = JSON.parse(JSON.stringify(created)); dupReg.id = 'town-hospital';
+  const res = run(makeFixture(), v2([{ op: 'create', id: 'town-hospital', connection: dupReg }]));
+  ok(res.code === 2 && res.err.includes('creates connection id "town-hospital", which already exists in the registry'), 'create of a registry id refused', res.err);
+  const f = makeFixture();
+  fs.writeFileSync(path.join(f, 'js', 'world-catalog.js'), CatalogWrite.addId(read(f, 'js/world-catalog.js').toString('utf8'), 'hospital', NEW_ID));
+  const snap = three(f);
+  const res2 = run(f, CREATE);
+  ok(res2.code === 1 && res2.err.includes('CATALOG [catalog-write] connection id "' + NEW_ID + '" is already listed in js/world-catalog.js (hospital)'), 'create of an id already in the catalog refused', res2.err);
+  ok(sameThree(f, snap), 'catalog duplicate writes nothing');
+  const res3 = run(makeFixture(), v2([{ op: 'create', id: NEW_ID, connection: created }, { op: 'create', id: NEW_ID, connection: created }]));
+  ok(res3.code === 2 && res3.err.includes('second operation on connection id "' + NEW_ID + '"'), 'two creates of one id refused', res3.err);
+  const bad = JSON.parse(JSON.stringify(created)); bad.id = 'Town_Door';
+  ok(/kebab-case/.test(run(makeFixture(), v2([{ op: 'create', id: 'Town_Door', connection: bad }])).err), 'non-kebab id refused');
+}
+
+// ---- trigger tile already claimed, scene without catalog location
+{
+  const clash = JSON.parse(JSON.stringify(created)); clash.b.triggers = [[7, 11]];
+  const res = run(makeFixture(), v2([{ op: 'create', id: NEW_ID, connection: clash }]));
+  ok(res.code === 1 && res.err.includes('INVALID hospital 7,11 is claimed by both town-hospital and ' + NEW_ID), 'trigger tile claimed by an existing record refused', res.err);
+  const f = makeFixture();
+  fs.writeFileSync(path.join(f, 'js', 'world-catalog.js'), read(f, 'js/world-catalog.js').toString('utf8').replace("{ id: 'ward', sceneId: 'hospital' }", "{ id: 'ward', sceneId: 'hospital_ward' }"));
+  const res2 = run(f, CREATE, ['--dry-run']);
+  ok(res2.code === 1 && res2.err.includes('scene "hospital" has no catalog location') && res2.err.includes('Locations: double-r (double_r_exterior_prototype, diner); town (town)') && res2.err.includes('hospital (hospital_ward)'), 'scene with no catalog location fails with the location list', res2.err);
+}
+
 ok(fs.readFileSync(path.join(REPO, 'world', 'connections.json')).equals(repoRegistryBefore), 'repo world/connections.json untouched');
 ok(fs.readFileSync(path.join(REPO, 'js', 'world-connections.gen.js')).equals(repoGenBefore), 'repo js/world-connections.gen.js untouched');
+
+ok(fs.readFileSync(path.join(REPO, 'js', 'world-catalog.js')).equals(repoCatalogBefore), 'repo js/world-catalog.js untouched');
 
 console.log(`WORLD-APPLY-PASS ${pass}`);

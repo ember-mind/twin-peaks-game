@@ -8,8 +8,9 @@
 //
 // Contract (kept deliberately small — see the audit trail in this module's git history for
 // why nested-path patches were rejected: they are hard to validate and easy to mis-audit):
-//   changeset = { operations: [ {op:'upsert', connection:{id,a,b}}, {op:'remove', id} ] }
-// Upsert replaces-or-adds a whole record by id; remove deletes one. No partial paths.
+//   changeset = { operations: [ {op:'upsert', connection:{id,a,b}}, {op:'remove', id},
+//                               {op:'create', connection:{id,a,b}}, {op:'delete', id} ] }
+// Upsert replaces-or-adds a whole record by id; create adds a NEW id only; remove/delete drop one. No partial paths.
 //
 // The audit log lives in a SEPARATE append-only sidecar (world/connections.audit.jsonl),
 // not inside the registry: consumers (gen-world-data, world-engine) parse only {version,
@@ -62,8 +63,8 @@ function validateChangeset(changeset) {
   }
   changeset.operations.forEach(function (op, i) {
     if (!op || typeof op !== 'object') fail(`operations[${i}] is not an object`);
-    if (op.op === 'upsert') validateRecord(op.connection, `operations[${i}].connection`);
-    else if (op.op === 'remove') {
+    if (op.op === 'upsert' || op.op === 'create') validateRecord(op.connection, `operations[${i}].connection`);
+    else if (op.op === 'remove' || op.op === 'delete') {
       if (typeof op.id !== 'string' || !op.id) fail(`operations[${i}].id must be a non-empty string`);
     } else {
       fail(`operations[${i}].op is unknown: ${String(op.op)}`);
@@ -101,14 +102,21 @@ function apply(registry, changeset, opts) {
         nextConnections.push(rec);
       }
       changes.push({ op: 'upsert', id: rec.id, existed: existed });
-    } else if (op.op === 'remove') {
+    } else if (op.op === 'create') {
+      // M6 (changeset v2): create never overwrites an existing record.
+      if (Object.prototype.hasOwnProperty.call(byId, op.connection.id)) fail(`operations[${i}] creates existing id "${op.connection.id}"`);
+      const rec = JSON.parse(JSON.stringify(op.connection));
+      byId[rec.id] = rec;
+      nextConnections.push(rec);
+      changes.push({ op: 'create', id: rec.id });
+    } else if (op.op === 'remove' || op.op === 'delete') {
       // Fail loud on an unknown id: a silent no-op here would let a typo masquerade as success.
       if (!Object.prototype.hasOwnProperty.call(byId, op.id)) fail(`operations[${i}] removes unknown id "${op.id}"`);
       delete byId[op.id];
       for (let j = nextConnections.length - 1; j >= 0; j--) {
         if (nextConnections[j].id === op.id) nextConnections.splice(j, 1);
       }
-      changes.push({ op: 'remove', id: op.id });
+      changes.push({ op: op.op, id: op.id });
     }
   });
 
