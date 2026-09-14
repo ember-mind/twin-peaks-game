@@ -91,3 +91,4 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-13 mirror: assets/ref/ (7 art-direction targets) + docs/art-direction-pass-e-briefs.md (Pass E brief pack)
 - 2026-09-14 mirror: merge M4a 93c5f05 (world/connections.json registry, world-connections.gen.js, js/editor/*, tests; four *-location-data.js deleted)
 - 2026-09-14 mirror: assets/ref/ second pack (8 targets) + docs/art-direction-pass-e-briefs.md briefs E5–E10
+- 2026-09-14 mirror: merge M4b eef0326 (World Builder editing UI, tools/world-apply.js, CI 21 suites, editor core loader fix)
