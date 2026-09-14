@@ -230,4 +230,65 @@ ok(Edit.validateDraft(Object.assign({}, paired, { b: Object.assign({}, paired.b,
 ok(Edit.validateDraft(paired, Object.assign({}, cctx, { sceneLocation: () => 'loc', legacyDoorAt: (s, x, y) => s === 's1' && x === 2 && y === 9 }), { created: true }).includes('a.triggers[0] s1 2,9 holds a legacy map door'), 'legacy door on a trigger tile');
 ok(Edit.claimConflicts(SOURCE).length === 0 && Edit.claimConflicts(SOURCE.concat([clash])).join() === 's1 1,1 is claimed by both zeta-door and clash', 'claimConflicts over a record list');
 
+// ---- M7: door gating fields
+let g = Edit.setDoorField(store.draft, 'zeta-door', 'b', 'needsFlag', 'atto3');
+g = Edit.setDoorField(g, 'zeta-door', 'b', 'blockedMsg', 'est_bloccato');
+g = Edit.setDoorField(g, 'zeta-door', 'b', 'needsClues', '3');
+assert.deepEqual(g['zeta-door'].b.door, { needsFlag: 'atto3', blockedMsg: 'est_bloccato', needsClues: 3 });
+ok(g['zeta-door'].a === store.base['zeta-door'].a || JSON.stringify(g['zeta-door'].a) === JSON.stringify(store.base['zeta-door'].a), 'door edit leaves the other endpoint alone');
+ok(Edit.buildChangeset(store, g).operations[0].op === 'upsert' && Edit.buildChangeset(store, g).operations[0].endpoints.join() === 'b', 'door fields export as an upsert of b');
+g = Edit.setDoorField(g, 'zeta-door', 'b', 'needsClues', '');
+g = Edit.setDoorField(g, 'zeta-door', 'b', 'blockedMsg', null);
+assert.deepEqual(g['zeta-door'].b.door, { needsFlag: 'atto3' });
+g = Edit.setDoorField(g, 'zeta-door', 'b', 'needsFlag', undefined);
+ok(!('door' in g['zeta-door'].b) && !Edit.isChanged(store, g, 'zeta-door'), 'clearing every field removes door and returns to base');
+ok(!('needsFlag' in Edit.setDoorField(store.draft, 'alpha-door', 'a', 'needsFlag', '')['alpha-door'].a), 'clear removes an existing key');
+assert.throws(() => Edit.setDoorField(store.draft, 'zeta-door', 'b', 'needsClues', 0), /needsClues must be an integer >= 1/);
+assert.throws(() => Edit.setDoorField(store.draft, 'zeta-door', 'b', 'needsClues', 1.5), /must be an integer/);
+assert.throws(() => Edit.setDoorField(store.draft, 'zeta-door', 'b', 'needsFlag', 7), /must be a string/);
+assert.throws(() => Edit.setDoorField(store.draft, 'zeta-door', 'b', 'gate', 'x'), /unknown door field "gate"/);
+pass += 6;
+
+// ---- M7: PAIRED -> ONE-WAY
+const OW_SRC = SOURCE.concat([
+  { id: 'one-trig', a: { scene: 's4', triggers: [[2, 2]], spawn: { tx: 2, ty: 3, dir: 'down' } },
+    b: { scene: 's5', triggers: [[6, 0]], spawn: { tx: 6, ty: 1, dir: 'down' }, door: { needsFlag: 'q' }, departureReaction: 'r' } }
+]);
+const ows = Edit.createStore(OW_SRC);
+let o1 = Edit.toOneWay(ows.draft, 'one-trig');
+assert.deepEqual(o1['one-trig'], { id: 'one-trig', one_way: true, a: { scene: 's4', triggers: [[2, 2]] }, b: { scene: 's5', triggers: [], spawn: { tx: 6, ty: 1, dir: 'down' } } });
+const plan1 = Edit.planOneWay(ows.base['one-trig']);
+ok(plan1.dropped.join('|') === 'a.spawn 2,3 down|b.triggers 6,0|b.door {"needsFlag":"q"}|b.departureReaction "r"', 'planOneWay lists every dropped field');
+const csOw = Edit.buildChangeset(ows, o1).operations[0];
+ok(csOw.op === 'upsert' && csOw.endpoints.join() === 'a,b' && csOw.connection.one_way === true, 'to one-way exports an upsert of both endpoints');
+ok(Edit.reapply(OW_SRC, JSON.parse(Edit.serialize(Edit.buildChangeset(ows, o1))))['one-trig'].one_way === true, 'one-way conversion round-trips through reapply');
+// b has two triggers: refused until the author picks the source side
+const plan2 = Edit.planOneWay(ows.base['zeta-door']);
+ok(plan2.needsChoice && /endpoint b of zeta-door has 2 triggers; pick which endpoint/.test(plan2.reason), 'two b triggers need a choice');
+assert.throws(() => Edit.toOneWay(ows.draft, 'zeta-door'), /has 2 triggers; pick which endpoint keeps its triggers/);
+const keepA = Edit.toOneWay(ows.draft, 'zeta-door', { source: 'a' })['zeta-door'];
+ok(keepA.a.triggers.length === 1 && keepA.b.triggers.length === 0 && keepA.b.spawn.tx === 4 && !keepA.b.departureReaction, 'source a: b triggers dropped');
+const keepB = Edit.toOneWay(ows.draft, 'zeta-door', { source: 'b' })['zeta-door'];
+assert.deepEqual(keepB, { id: 'zeta-door', one_way: true, a: { scene: 's2', triggers: [[4, 9], [5, 9]], departureReaction: 'front-door' }, b: { scene: 's1', triggers: [], spawn: { tx: 1, ty: 2, dir: 'down' } } });
+assert.throws(() => Edit.toOneWay(o1, 'one-trig'), /already one-way/);
+assert.throws(() => Edit.toOneWay(ows.draft, 'zeta-door', { source: 'c' }), /source must be "a" or "b"/);
+pass += 4;
+
+// ---- M7: ONE-WAY -> PAIRED needs both placements
+assert.throws(() => Edit.toPaired(o1, 'one-trig', {}), /place a\.spawn and a b trigger first/);
+assert.throws(() => Edit.toPaired(o1, 'one-trig', { aSpawn: { tx: 2, ty: 3, dir: 'down' } }), /place a b trigger first/);
+assert.throws(() => Edit.toPaired(o1, 'one-trig', { bTrigger: [6, 0] }), /place a\.spawn first/);
+assert.throws(() => Edit.toPaired(o1, 'one-trig', { aSpawn: { tx: 2, ty: 3, dir: 'north' }, bTrigger: [6, 0] }), /facing must be/);
+assert.throws(() => Edit.toPaired(ows.draft, 'one-trig', { aSpawn: { tx: 2, ty: 3, dir: 'down' }, bTrigger: [6, 0] }), /already paired/);
+const paired7 = Edit.toPaired(o1, 'one-trig', { aSpawn: { tx: 2, ty: 3, dir: 'down' }, bTrigger: [6, 0] });
+ok(!('one_way' in paired7['one-trig']) && paired7['one-trig'].a.spawn.ty === 3 && JSON.stringify(paired7['one-trig'].b.triggers) === '[[6,0]]', 'to paired places spawn and trigger');
+ok(Edit.changedEndpoints(ows, paired7, 'one-trig').join() === 'b', 'round trip loses only the dropped b door fields');
+const hist7 = History.commit(History.commit(History.create(ows.base), o1, { label: 'one-way' }), paired7, { label: 'paired' });
+ok(History.undo(hist7).present['one-trig'].one_way === true && History.undo(History.undo(hist7)).present === ows.base, 'conversions undo like any edit');
+// validateDraft on a converted record uses the one-way endpoint rules
+const vctx7 = { knownIds: () => true, sceneExists: () => true, validateConnection: () => ({ errors: [] }),
+  validateEndpoint: (s, ep, opt) => (opt.oneWay && s === 'b' && ep.triggers.length ? 'b.triggers must be empty on a one-way connection' : null) };
+ok(Edit.validateDraft(o1['one-trig'], vctx7, { changedSides: ['a', 'b'] }).length === 0, 'converted one-way record validates');
+pass += 5;
+
 console.log(`EDITOR-EDIT-PASS ${pass}`);

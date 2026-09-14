@@ -1,0 +1,9 @@
+TARGET world/connections.json :: great-northern-room-315-hall
+BEFORE {"scene":"room_315","triggers":[[7,11]],"spawn":{"tx":7,"ty":10,"dir":"up"}}
+AFTER  {"scene":"room_315","triggers":[[7,11]]}
+TARGET world/connections.json :: great-northern-room-315-hall
+BEFORE {"scene":"hotel_gn","triggers":[[14,1]],"spawn":{"tx":14,"ty":2,"dir":"down"}}
+AFTER  {"scene":"hotel_gn","triggers":[],"spawn":{"tx":14,"ty":2,"dir":"down"}}
+VALID 15 record(s) against real maps
+CATALOG js/world-catalog.js unchanged
+DRY-RUN 2 endpoint change(s); nothing written

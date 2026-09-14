@@ -1,0 +1,46 @@
+{
+  "format": "world-connections-changeset",
+  "version": 2,
+  "target": "world/connections.json",
+  "operations": [
+    {
+      "op": "upsert",
+      "id": "arrival-town",
+      "endpoints": [
+        "a",
+        "b"
+      ],
+      "connection": {
+        "id": "arrival-town",
+        "a": {
+          "scene": "arrival",
+          "triggers": [
+            [
+              4,
+              8
+            ]
+          ],
+          "spawn": {
+            "tx": 4,
+            "ty": 7,
+            "dir": "up"
+          }
+        },
+        "b": {
+          "scene": "town",
+          "triggers": [
+            [
+              29,
+              34
+            ]
+          ],
+          "spawn": {
+            "tx": 30,
+            "ty": 33,
+            "dir": "up"
+          }
+        }
+      }
+    }
+  ]
+}

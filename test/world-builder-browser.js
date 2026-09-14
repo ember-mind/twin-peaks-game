@@ -24,6 +24,11 @@
  *  10  M6: a temp repo copy gets case 8's changeset applied for real (--root=); the Builder served from that copy
  *          deletes the record (confirm step), the v2 delete is applied, and test/world-engine-v0.1-catalog.js +
  *          test/legacy-door-inventory.js pass on the copy; the real repo's registry and catalog hashes never change
+ *  11  M7: great-northern-room-315-hall / a (room_315): door fields set + cleared in EDIT, CONVERT TO ONE-WAY with the
+ *          dropped-field list and CONFIRM, export upsert, tools/world-apply.js --dry-run VALID; double-r-front-entrance
+ *          (2 triggers on b) asks for the source side before CONFIRM is enabled
+ *  12  M7: one-way arrival-town: CONVERT TO PAIRED stays disabled until a.spawn (arrival 4,7) and a b trigger
+ *          (town 29,34) are placed, CONFIRM, inspector paired, export upsert, --dry-run VALID
  * Ids created here are assembled at runtime: a literal id in this file would count as a reference to world-apply.
  */
 
@@ -36,6 +41,7 @@ const { spawn, spawnSync } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'artifacts', 'world-builder-m6');
+const OUT7 = path.join(ROOT, 'artifacts', 'world-builder-m7');
 const CATALOG = path.join(ROOT, 'js', 'world-catalog.js');
 const CHROME = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const REGISTRY = path.join(ROOT, 'world', 'connections.json');
@@ -94,6 +100,7 @@ class Cdp {
 
 async function main() {
   fs.mkdirSync(OUT, { recursive: true });
+  fs.mkdirSync(OUT7, { recursive: true });
   const shaStart = sha();
   const catalogShaStart = sha(CATALOG);
   const port = await freePort();
@@ -139,10 +146,10 @@ async function main() {
     if (fatal) throw new Error(fatal);
     await waitFor('WB.state().momentsLoaded');
   }
-  async function shot(name) {
+  async function shot(name, dir = OUT) {
     await sleep(120);
     const r = await cdp.send('Page.captureScreenshot', { format: 'png' });
-    const file = path.join(OUT, name);
+    const file = path.join(dir, name);
     fs.writeFileSync(file, Buffer.from(r.data, 'base64'));
     console.log('  shot ' + path.relative(ROOT, file));
     return file;
@@ -562,6 +569,121 @@ async function main() {
       fs.writeFileSync(path.join(OUT, 'case10-copy-checks.txt'), cat.stdout.trim().split('\n').pop() + '\n' + inv.stdout.trim().split('\n').pop() + '\n');
       check('case 10: copy registry, gen and catalog are byte-identical to before the create', three().every((b, i) => b.equals(original[i])));
       check('case 10: real repo world/connections.json and js/world-catalog.js hashes unchanged', sha() === shaStart && sha(CATALOG) === catalogShaStart);
+    }
+
+    // ---------------- case 11 (M7): door gating fields + PAIRED -> ONE-WAY
+    {
+      console.log('\ncase 11: door fields + CONVERT TO ONE-WAY on great-northern-room-315-hall');
+      await load();
+      const HALL = 'great-northern-room-315-hall';
+      const orig = registryRecord(HALL);
+      await setSelect('wb-scene', 'room_315');
+      await clickTile(orig.a.spawn.tx, orig.a.spawn.ty);
+      let s = await state();
+      check('case 11: VIEW inspector shows the endpoint ungated', s.selectedId === `connection-endpoint:${HALL}:a` && (await text('wb-door')) === 'ungated', s.selectedId);
+      await clickAction('mode-edit');
+      check('case 11: EDIT shows the three door fields', await cdp.eval("['needsFlag','blockedMsg','needsClues'].every((k) => !!document.getElementById('wb-door-' + k))"));
+      await setInput('wb-door-needsFlag', 'atto3');
+      await setInput('wb-door-needsClues', '2');
+      s = await state();
+      check('case 11: needsFlag + needsClues land on endpoint a as an upsert', JSON.stringify(s.draft[HALL].a.door) === '{"needsFlag":"atto3","needsClues":2}' && JSON.stringify(s.ops) === JSON.stringify([{ id: HALL, op: 'upsert' }]) && Object.keys(s.errors).length === 0, s.draft[HALL].a);
+      await setInput('wb-door-needsClues', '0');
+      s = await state();
+      check('case 11: needsClues 0 refused with a message, draft unchanged', /needsClues must be an integer >= 1/.test(s.notice || '') && s.draft[HALL].a.door.needsClues === 2, s.notice);
+      await shot('case11-door-fields.png', OUT7);
+      await setInput('wb-door-needsClues', '');
+      s = await state();
+      check('case 11: clearing a field removes the key', JSON.stringify(s.draft[HALL].a.door) === '{"needsFlag":"atto3"}', s.draft[HALL].a);
+      await setInput('wb-door-needsFlag', '');
+      s = await state();
+      check('case 11: clearing the last field removes door and the draft', !('door' in s.draft[HALL].a) && s.unsaved === 0, s.draft[HALL].a);
+
+      await clickAction('convert-one-way');
+      s = await state();
+      check('case 11: CONVERT TO ONE-WAY lists what it drops and is valid', s.converting && s.converting.to === 'one-way' && s.converting.errors.length === 0 &&
+        JSON.stringify(s.converting.dropped) === JSON.stringify([`a.spawn ${orig.a.spawn.tx},${orig.a.spawn.ty} ${orig.a.spawn.dir}`, `b.triggers ${orig.b.triggers.map((t) => t.join(',')).join(' ')}`]) && (await enabled('convert-confirm')), s.converting);
+      check('case 11: world/connections.json unchanged before confirm', sha() === shaStart);
+      await shot('case11-convert-one-way.png', OUT7);
+      await clickAction('convert-confirm');
+      s = await state();
+      const ow = s.draft[HALL];
+      check('case 11: CONFIRM makes the record one-way in the draft', !s.converting && ow.one_way === true && !ow.a.spawn && ow.b.triggers.length === 0 && JSON.stringify(ow.b.spawn) === JSON.stringify(orig.b.spawn) && Object.keys(s.errors).length === 0, ow);
+      const insp = await text('wb-inspector');
+      check('case 11: inspector shows ONE-WAY room_315 → hotel_gn at once', insp.includes('ONE-WAY room_315 → hotel_gn') && !s.items.some((i) => i.id === `connection-endpoint:${HALL}:a`), insp);
+      await shot('case11-one-way.png', OUT7);
+      await clickAction('export');
+      const exported = await cdp.eval("document.getElementById('wb-export-text').value");
+      const cs = JSON.parse(exported);
+      check('case 11: export is one upsert naming a and b', cs.version === 2 && cs.operations.length === 1 && cs.operations[0].op === 'upsert' && cs.operations[0].endpoints.join() === 'a,b' && cs.operations[0].connection.one_way === true, cs);
+      const file = path.join(OUT7, 'case11-changeset.json');
+      fs.writeFileSync(file, exported);
+      const dry = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'world-apply.js'), file, '--dry-run'], { encoding: 'utf8' });
+      fs.writeFileSync(path.join(OUT7, 'case11-dry-run.txt'), dry.stdout + dry.stderr);
+      check('case 11: world-apply --dry-run VALID 15, catalog unchanged', dry.status === 0 && dry.stdout.includes('VALID 15 record(s)') && dry.stdout.includes('CATALOG js/world-catalog.js unchanged'), dry.stdout + dry.stderr);
+
+      // two triggers on the arrival side: the author has to pick the source
+      await clickAction('revert-all');
+      await setSelect('wb-scene', 'diner');
+      const dr = registryRecord('double-r-front-entrance');
+      await clickTile(dr.b.spawn.tx, dr.b.spawn.ty);
+      await clickAction('convert-one-way');
+      s = await state();
+      check('case 11: 2 triggers on b -> pick the source first, CONFIRM disabled', s.converting.needsChoice && /endpoint b of double-r-front-entrance has 2 triggers/.test(s.converting.errors[0]) && !(await enabled('convert-confirm')), s.converting);
+      await shot('case11-pick-source.png', OUT7);
+      await clickAction('convert-source-b');
+      s = await state();
+      check('case 11: source b keeps b triggers as the one-way source, CONFIRM enabled once valid', s.converting.record && s.converting.record.a.scene === 'diner' && s.converting.record.a.triggers.length === 2 && s.converting.errors.length === 0 && (await enabled('convert-confirm')), s.converting);
+      await clickAction('convert-cancel');
+      s = await state();
+      check('case 11: CANCEL leaves the draft untouched', !s.converting && s.unsaved === 0, s.unsaved);
+      check('case 11: world/connections.json unchanged', sha() === shaStart);
+    }
+
+    // ---------------- case 12 (M7): ONE-WAY -> PAIRED
+    {
+      console.log('\ncase 12: CONVERT TO PAIRED on arrival-town');
+      await load();
+      const AT = 'arrival-town';
+      await setSelect('wb-scene', 'arrival');
+      await clickTile(4, 8);
+      await clickAction('mode-edit');
+      let s = await state();
+      check('case 12: one-way source trigger selected, CONVERT TO PAIRED offered', s.selectedId === `trigger:${AT}:a:0` && (await enabled('convert-paired')), s.selectedId);
+      await clickAction('convert-paired');
+      s = await state();
+      check('case 12: CONFIRM disabled until a.spawn and b trigger are placed', s.converting.to === 'paired' && s.converting.errors.join('|') === 'place a.spawn in arrival|place a b trigger in town' && !(await enabled('convert-confirm')), s.converting);
+      await clickAction('convert-place-a-spawn');
+      await clickTile(4, 7);
+      s = await state();
+      check('case 12: a.spawn placed at arrival 4,7, still waiting for the b trigger', JSON.stringify(s.converting.aSpawn) === '{"tx":4,"ty":7}' && s.converting.errors.join('|') === 'place a b trigger in town' && !(await enabled('convert-confirm')), s.converting);
+      await shot('case12-a-spawn-placed.png', OUT7);
+      await clickAction('convert-place-b-trigger');
+      s = await state();
+      check('case 12: PLACE B TRIGGER switches to town', s.sceneId === 'town' && s.converting.placing === 'bTrigger', s.sceneId);
+      await clickTile(29, 34);
+      s = await state();
+      check('case 12: both placed -> valid, CONFIRM enabled', JSON.stringify(s.converting.bTrigger) === '[29,34]' && s.converting.errors.length === 0 && (await enabled('convert-confirm')), s.converting);
+      await shot('case12-b-trigger-placed.png', OUT7);
+      check('case 12: world/connections.json unchanged before confirm', sha() === shaStart);
+      await clickAction('convert-confirm');
+      s = await state();
+      const pr = s.draft[AT];
+      check('case 12: CONFIRM makes arrival-town paired in the draft', !s.converting && !('one_way' in pr) && JSON.stringify(pr.a.spawn) === '{"tx":4,"ty":7,"dir":"up"}' && JSON.stringify(pr.b.triggers) === '[[29,34]]' && Object.keys(s.errors).length === 0, pr);
+      check('case 12: inspector shows paired and the a spawn marker at once', (await text('wb-direction')) === 'paired' && s.sceneId === 'arrival' && s.items.some((i) => i.id === `connection-endpoint:${AT}:a` && i.tx === 4 && i.ty === 7), s.items);
+      await shot('case12-paired.png', OUT7);
+      await clickAction('export');
+      const exported = await cdp.eval("document.getElementById('wb-export-text').value");
+      const cs = JSON.parse(exported);
+      check('case 12: export is one upsert naming a and b without one_way', cs.operations.length === 1 && cs.operations[0].op === 'upsert' && cs.operations[0].endpoints.join() === 'a,b' && !('one_way' in cs.operations[0].connection), cs);
+      const file = path.join(OUT7, 'case12-changeset.json');
+      fs.writeFileSync(file, exported);
+      const dry = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'world-apply.js'), file, '--dry-run'], { encoding: 'utf8' });
+      fs.writeFileSync(path.join(OUT7, 'case12-dry-run.txt'), dry.stdout + dry.stderr);
+      check('case 12: world-apply --dry-run VALID 15', dry.status === 0 && dry.stdout.includes('VALID 15 record(s)') && dry.stdout.includes('DRY-RUN 2 endpoint change(s)'), dry.stdout + dry.stderr);
+      await clickAction('undo');
+      s = await state();
+      check('case 12: UNDO restores the one-way record', s.draft[AT].one_way === true && s.unsaved === 0, s.draft[AT]);
+      check('case 12: world/connections.json unchanged', sha() === shaStart);
     }
   } catch (e) {
     check('driver completed without exception', false, String(e && e.stack || e));
