@@ -18,7 +18,9 @@
       {
         id: 'town',
         environments: [{ id: 'town', sceneId: 'town' }],
-        connections: ['town-traincar-east', 'town-sheriffs-station-lot', 'town-double-r-lot']
+        connections: ['town-traincar-east', 'town-sheriffs-station-lot', 'town-double-r-lot',
+          'town-great-northern-lobby', 'town-hospital', 'town-palmer-house', 'town-roadhouse', 'town-woods-north',
+          'arrival-town']
       },
       {
         id: 'sheriffs-station',
@@ -45,12 +47,37 @@
           // lobby: legacy glyph map (hotel_gn), not a native-authored environment
           { id: 'lobby', sceneId: 'hotel_gn' }
         ],
-        connections: ['great-northern-room-315-hall']
+        connections: ['great-northern-room-315-hall', 'town-great-northern-lobby', 'redroom-room-315-wake']
       },
       {
         id: 'hospital',
         environments: [{ id: 'ward', sceneId: 'hospital' }],
-        connections: []
+        connections: ['town-hospital']
+      },
+      {
+        id: 'palmer-house',
+        environments: [{ id: 'interior', sceneId: 'palmer' }],
+        connections: ['town-palmer-house']
+      },
+      {
+        id: 'roadhouse',
+        environments: [{ id: 'interior', sceneId: 'roadhouse' }],
+        connections: ['town-roadhouse']
+      },
+      {
+        id: 'ghostwood',
+        environments: [{ id: 'woods', sceneId: 'woods' }],
+        connections: ['town-woods-north', 'woods-redroom-dream']
+      },
+      {
+        id: 'red-room',
+        environments: [{ id: 'dream', sceneId: 'redroom' }],
+        connections: ['woods-redroom-dream', 'redroom-room-315-wake']
+      },
+      {
+        id: 'arrival',
+        environments: [{ id: 'arrival', sceneId: 'arrival' }],
+        connections: ['arrival-town']
       }
     ]
   });

@@ -42,7 +42,7 @@ const script = (name) => path.join(__dirname, '..', 'js', name);
   'double-r-location-production.js',
   'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js',
   'sheriffs-station-scene.js', 'sheriffs-station-exterior-scene.js', 'sheriffs-station-production.js',
-  'character-life-scenes.js', 'traincar-location-production.js',
+  'character-life-scenes.js', 'world-connections-production.js',
   'world-engine.js', 'world-catalog.js'
 ].forEach((name) => require(script(name)));
 

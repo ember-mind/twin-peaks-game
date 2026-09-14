@@ -24,7 +24,12 @@ const byType={}; props.forEach(p=>byType[p.type]=(byType[p.type]||0)+1);
 console.log('  per tipo:', Object.entries(byType).map(([k,v])=>k+':'+v).join(' '));
 
 // ---- interattivi
-const interact = T.interact||{}; const doors = T.doors||{}; const gate = T.gate;
+// Door tiles live in the connection registry (world/connections.json) since M5, not in js/maps.js.
+const REG = JSON.parse(require('fs').readFileSync(require('path').join(__dirname,'..','world','connections.json'),'utf8')).connections;
+const doors = {}; let gate = null;
+REG.forEach(c=>['a','b'].forEach(s=>{ const ep=c[s], other=c[s==='a'?'b':'a']; if(ep.scene!=='town') return;
+  ep.triggers.forEach(([x,y])=>{ if(ep.door&&ep.door.needsClues) gate={x,y,to:other.scene}; else doors[x+','+y]={to:other.scene,needsFlag:ep.door&&ep.door.needsFlag}; }); }));
+const interact = T.interact||{};
 console.log('\nESAMINABILI (interact):', Object.entries(interact).map(([k,v])=>k+'='+v).join(' '));
 console.log('PORTE:', Object.keys(doors).length, '+ gate woods a', gate.x+','+gate.y);
 Object.entries(doors).forEach(([k,d])=>console.log('  ',k,'->',d.to, d.needsFlag?('[needs '+d.needsFlag+']'):''));

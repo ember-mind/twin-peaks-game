@@ -56,8 +56,8 @@ function expectRejected(mutator, maps) {
   assert.equal(World.getEnvironment('double-r', 'interior').sceneId, 'diner', 'environment IDs are location-scoped');
   assert.equal(World.getEnvironment('double-r', 'missing'), undefined);
   assert.equal(World.getLocationForScene('diner').id, 'double-r');
-  assert.deepEqual(Array.from(World.getConnections()), ['double-r-front-entrance', 'town-double-r-lot', 'town-traincar-east', 'town-sheriffs-station-lot', 'sheriffs-station-front-entrance', 'traincar-oej-entrance', 'great-northern-room-315-hall'], 'world connections deduplicate in author order');
-  assert.deepEqual(Array.from(World.getConnections('town')), ['town-traincar-east', 'town-sheriffs-station-lot', 'town-double-r-lot']);
+  assert.deepEqual(Array.from(World.getConnections()), ['double-r-front-entrance', 'town-double-r-lot', 'town-traincar-east', 'town-sheriffs-station-lot', 'town-great-northern-lobby', 'town-hospital', 'town-palmer-house', 'town-roadhouse', 'town-woods-north', 'arrival-town', 'sheriffs-station-front-entrance', 'traincar-oej-entrance', 'great-northern-room-315-hall', 'redroom-room-315-wake', 'woods-redroom-dream'], 'world connections deduplicate in author order');
+  assert.deepEqual(Array.from(World.getConnections('town')), ['town-traincar-east', 'town-sheriffs-station-lot', 'town-double-r-lot', 'town-great-northern-lobby', 'town-hospital', 'town-palmer-house', 'town-roadhouse', 'town-woods-north', 'arrival-town']);
   assert.deepEqual(Array.from(World.getConnections('traincar-crossing')), ['town-traincar-east', 'traincar-oej-entrance']);
   assert.throws(() => World.register(validCatalog()), 'only one catalog may be registered');
 }
@@ -101,7 +101,12 @@ assert.doesNotThrow(() => isolated({
   oej: {},
   room_315: {},
   hotel_gn: {},
-  hospital: {}
+  hospital: {},
+  palmer: {},
+  roadhouse: {},
+  woods: {},
+  redroom: {},
+  arrival: {}
 }).GAME.World.register(validCatalog()));
 
 global.window = global;
@@ -115,21 +120,32 @@ GAME.DoubleRExteriorScene.install();
     // Registry must exist before the production installers, which source records from GAME.WorldData.
     require('../js/world-connections.gen.js');
    require('../js/sheriffs-station-production.js');
+require('../js/world-connections-production.js');
 require('../js/world-engine.js'); require('../js/world-catalog.js');
 const World = GAME.World;
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const scriptOrder = [
   'double-r-location-production.js',
   'sheriffs-station-production.js',
-  'traincar-location-production.js',
+  'room-315-production.js',
+  'hospital-production.js',
+  'traincar-production.js',
+  'world-connections-production.js',
   'world-engine.js',
   'world-catalog.js',
   'main.js'
 ].map(name => html.indexOf(name));
 assert(scriptOrder.every(index => index >= 0), 'production includes location installers and World scripts');
+assert.equal(html.indexOf('traincar-location-production.js'), -1, 'the per-location traincar installer is gone');
+assert.equal(html.split('world-connections-production.js').length - 1, 1, 'production loads the single door installer exactly once');
 assert(scriptOrder.every((index, position) => position === 0 || scriptOrder[position - 1] < index), 'production loads installers before World engine, catalog, and main');
 assert.equal(World.catalog.id, 'twin-peaks');
-assert.deepEqual(World.catalog.locations.map(location => location.id), ['double-r', 'town', 'sheriffs-station', 'traincar-crossing', 'one-eyed-jacks', 'great-northern', 'hospital']);
+assert.deepEqual(World.catalog.locations.map(location => location.id), ['double-r', 'town', 'sheriffs-station', 'traincar-crossing', 'one-eyed-jacks', 'great-northern', 'hospital', 'palmer-house', 'roadhouse', 'ghostwood', 'red-room', 'arrival']);
+for (const [loc, scene] of [['palmer-house', 'palmer'], ['roadhouse', 'roadhouse'], ['ghostwood', 'woods'], ['red-room', 'redroom'], ['arrival', 'arrival']]) {
+  assert.equal(World.getLocationForScene(scene).id, loc, scene + ' belongs to ' + loc);
+}
+assert.deepEqual(World.getConnections('hospital'), ['town-hospital']);
+assert.deepEqual(World.getConnections('red-room'), ['woods-redroom-dream', 'redroom-room-315-wake']);
 assert.deepEqual(World.getLocation('sheriffs-station').environments.map(environment => environment.id), ['exterior', 'interior']);
 assert.equal(World.getEnvironment('sheriffs-station', 'exterior').sceneId, 'sheriffs_station_exterior');
 assert.equal(World.getEnvironment('sheriffs-station', 'interior').sceneId, 'sheriff');
@@ -156,7 +172,8 @@ for (const connectionId of World.getConnections()) {
   for (const endpoint of [record.a, record.b]) {
     const location = World.getLocationForScene(endpoint.scene);
     assert(location, `${connectionId} endpoint ${endpoint.scene} is cataloged`);
-    assert(!endpoint.triggers.some(([x, y]) => x === endpoint.spawn.tx && y === endpoint.spawn.ty), `${connectionId} spawn is non-trigger`);
+    if (endpoint.spawn) assert(!endpoint.triggers.some(([x, y]) => x === endpoint.spawn.tx && y === endpoint.spawn.ty), `${connectionId} spawn is non-trigger`);
+    else assert(record.one_way === true && endpoint === record.a, `${connectionId} only a one-way source endpoint has no spawn`);
     assert(GAME.Maps[endpoint.scene].doors, `${connectionId} references authored map doors`);
        assert(World.getConnections(location.id).includes(connectionId), `${connectionId} belongs to endpoint location`);
       }

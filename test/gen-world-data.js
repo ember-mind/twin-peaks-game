@@ -46,7 +46,7 @@ for (let i = 0; i < json.connections.length; i++) {
     }
   }
 }
-ok(json.connections.length === 7, 'exactly seven records (' + json.connections.length + ')');
+ok(json.connections.length === 15, 'exactly fifteen records (' + json.connections.length + ')');
 
 // ---- emit the generated module --------------------------------------------
 // Records are sorted by id for a stable load order (the registry is the single source, so its order

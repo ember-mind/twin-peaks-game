@@ -43,6 +43,12 @@ require(script('world-connections.gen.js'));
 require(script('double-r-exterior-art.js'));
 require(script('double-r-exterior-scene.js'));
 require(script('double-r-location-production.js'));
+require(script('sheriffs-station-art.js'));
+require(script('sheriffs-station-exterior-art.js'));
+require(script('sheriffs-station-scene.js'));
+require(script('sheriffs-station-exterior-scene.js'));
+require(script('sheriffs-station-production.js'));
+require(script('world-connections-production.js'));
 const E = global.GAME.Engine;
 
 function press(code) {

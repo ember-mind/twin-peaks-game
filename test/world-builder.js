@@ -2,7 +2,7 @@
  *
  * Verifies the pure view-model + coordinate layers against the REAL world catalog/maps/
  * connections, the same modules the browser page consumes:
- *   - M1 discovery: snapshot lists all 7 catalog locations with correct scene membership.
+ *   - M1 discovery: snapshot lists all 12 catalog locations with correct scene membership.
  *   - M2 overlay accuracy: per-scene overlay counts match GAME.Maps exactly (town/diner/sheriff).
  *   - M3 read-only: connection records normalize to canonical a/b endpoints; the snapshot is
  *     deep-frozen and building it never mutates the live source maps.
@@ -39,7 +39,7 @@
    'sheriffs-station-art.js','sheriffs-station-exterior-art.js','sheriffs-station-scene.js','sheriffs-station-exterior-scene.js','sheriffs-station-production.js',
    'room-315-art.js','room-315-scene.js','room-315-production.js',
    'hospital-art.js','hospital-scene.js','hospital-production.js',
-   'traincar-art.js','traincar-scene.js','traincar-location-production.js'
+   'traincar-art.js','traincar-scene.js','world-connections-production.js'
   ].forEach(tryReq);
   req('world-engine.js');
   req('world-catalog.js');
@@ -61,14 +61,14 @@
   var source = WB.collectWorldSource(G);
   var snap = WB.buildWorldSnapshot(source);
 
-   // ---- M1 discovery: all 7 locations, correct membership ----
-  ok('catalog has 7 locations', snap.locationCount === 7, 'got ' + snap.locationCount);
+   // ---- M1 discovery: all 12 locations, correct membership ----
+  ok('catalog has 12 locations', snap.locationCount === 12, 'got ' + snap.locationCount);
   var byId = {};
   snap.locations.forEach(function (l) { byId[l.id] = l; });
   ok('double-r exposes exterior+interior(diner)',
     byId['double-r'] && byId['double-r'].environments.some(function (e) { return e.sceneId === 'diner'; }) &&
     byId['double-r'].environments.some(function (e) { return e.sceneId === 'double_r_exterior_prototype'; }));
-  ok('hospital has no connections', byId['hospital'] && byId['hospital'].connections.length === 0);
+  ok('hospital joins town through town-hospital', byId['hospital'] && JSON.stringify(byId['hospital'].connections) === '["town-hospital"]');
   ok('town is a single-environment location', byId['town'] && byId['town'].environments.length === 1 && byId['town'].environments[0].sceneId === 'town');
 
    // scene table only contains real scenes (helper fns filtered out)
@@ -284,7 +284,7 @@
        ok('adaptWorld.model is the single read-only model core builds from the snapshot',
           !!adapted.model && Object.isFrozen(adapted.model));
          ok('model scene/location counts match the snapshot over the real catalog',
-           adapted.model.sceneCount === snap1.sceneCount && adapted.model.locationCount === 7,
+           adapted.model.sceneCount === snap1.sceneCount && adapted.model.locationCount === 12,
             'model=' + JSON.stringify([adapted.model.sceneCount, adapted.model.locationCount]));
 
             // The model's connection index is a bijection with the authored records (Issue 6/7 spirit).
@@ -336,8 +336,8 @@
                  // (c) Snapshot stands alone: a complete deep-frozen view-model with NO model dependency, so a
                   //     core-absent load yields model:null while the snapshot still validates on its own.
                var loneSnap = WB.buildWorldSnapshot(WB.collectWorldSource(G));
-                ok('snapshot (model-independent) is frozen and has 7 locations',
-                     Object.isFrozen(loneSnap) && loneSnap.locationCount === 7);
+                ok('snapshot (model-independent) is frozen and has 12 locations',
+                     Object.isFrozen(loneSnap) && loneSnap.locationCount === 12);
 
                  // (d) model is LAZY: the slot always exists but may be null; when present it carries exactly the
                   //     four read-only model keys. Proves adaptWorld never force-builds a broken model and
@@ -422,12 +422,17 @@
     ok('M4b: selection id survives spawn move', ep && ep.tx === 8 && ep.ty === 8);
     ok('M4b: selection id survives trigger move', tr && tr.tx === 8 && tr.ty === 7);
 
-    // legacy doors: read-only kind with target + spawn
+    // M5: no legacy doors remain; the roadhouse doors are the town-roadhouse registry endpoint
     var inv = Core.legacyDoorInventory(model);
-    ok('M4b: legacy inventory lists the maps still on classic doors',
-      JSON.stringify(Object.keys(inv).sort()) === JSON.stringify(['arrival','hospital','hotel_gn','palmer','redroom','roadhouse','town','woods']), JSON.stringify(Object.keys(inv)));
-    var road = Core.sceneItems(model, 'roadhouse').filter(function (it) { return it.kind === 'legacy-door'; });
-    ok('M4b: roadhouse legacy doors are read-only with target town', road.length === 2 && road.every(function (it) { return it.readOnly && it.target && it.target.scene === 'town' && /^legacy-door:roadhouse:\d+,\d+$/.test(it.id); }));
+    ok('M5: legacy inventory is empty (every door belongs to a registry connection)', Object.keys(inv).length === 0, JSON.stringify(inv));
+    ok('M5: no scene carries a legacy-door item', Object.keys(model.scenes).every(function (s) { return Core.sceneItems(model, s).every(function (it) { return it.kind !== 'legacy-door'; }); }));
+    var road = Core.sceneItems(model, 'roadhouse');
+    ok('M5: roadhouse doors are town-roadhouse endpoint b (triggers + spawn)',
+      road.filter(function (it) { return it.kind === 'trigger' && it.connectionId === 'town-roadhouse' && it.side === 'b'; }).length === 2 &&
+      !!Core.findItem(road, 'connection-endpoint:town-roadhouse:b'));
+    var arrival = Core.sceneItems(model, 'arrival');
+    ok('M5: one-way source has a trigger item and no endpoint item',
+      !!Core.findItem(arrival, 'trigger:arrival-town:a:0') && !Core.findItem(arrival, 'connection-endpoint:arrival-town:a'));
 
     // validation: runtime messages verbatim + editor checks
     var ctx = WB.validationContext(G);

@@ -35,6 +35,11 @@ require(J('data.js'));
 require(J('retro-font.js'));
 require(J('engine.js'));
 require(J('glue.js'));
+// Doors come from the connection registry since M5 (js/maps.js carries none).
+require(J('location-connections.js'));
+require(J('world-connections.gen.js'));
+global.GAME.LocationConnections.connectionRecordsFor(['town-traincar-east', 'traincar-oej-entrance'])
+  .forEach((c) => global.GAME.LocationConnections.install(c, global.GAME.Maps));
 
 const GAME = global.GAME;
 const E = GAME.Engine;

@@ -65,7 +65,7 @@ function loadWorld() {
      'double-r-exterior-art.js', 'double-r-exterior-scene.js', 'double-r-location-production.js',
      'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js', 'sheriffs-station-scene.js', 'sheriffs-station-exterior-scene.js', 'sheriffs-station-production.js',
      'room-315-art.js', 'room-315-scene.js', 'room-315-production.js', 'hospital-art.js', 'hospital-scene.js', 'hospital-production.js',
-     'traincar-art.js', 'traincar-scene.js', 'traincar-location-production.js'
+     'traincar-art.js', 'traincar-scene.js', 'world-connections-production.js'
     ].forEach(function (f) { try { require(path.join(REPO, 'js', f)); } catch (e) { /* scene installers needing audio */ } });
   } finally { console.log = quiet; }
   const G = global.GAME;

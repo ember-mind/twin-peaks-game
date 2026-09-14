@@ -75,6 +75,24 @@ rejectsAtomically(c => { c.a.door = { needsClues: 0 }; }, /door\.needsClues/);
 rejectsAtomically(c => { c.b.triggers = []; }, /b\.triggers must not be empty/);
 rejectsAtomically(c => { c.one_way = false; }, /one_way must be true/);
 
+// ---- needsClues gate: a trigger on a clue-barrier tile is judged with the gate open
+{
+  const m = fixture();
+  m.street.rows[0] = 'X....';
+  const clueSolid = m.isSolid;
+  m.isSolid = (id, x, y, state) => (m[id].rows[y][x] === 'X' ? !(state && state.clues.length >= 3) : clueSolid(id, x, y));
+  const gated = { id: 'gate', a: { scene: 'street', triggers: [[0, 0]], spawn: { tx: 0, ty: 1, dir: 'down' }, door: { needsClues: 3 } },
+    b: { scene: 'cafe', triggers: [[0, 3]], spawn: { tx: 0, ty: 2, dir: 'up' } } };
+  assert.deepEqual(GAME.LocationConnections.validateConnection(gated, m), { valid: true, errors: [] }, 'clue-gated trigger is walkable with the gate open');
+  GAME.LocationConnections.install(gated, m);
+  assert.deepEqual(m.street.doors['0,0'], { connectionId: 'gate', to: 'cafe', tx: 0, ty: 2, dir: 'up', needsClues: 3 });
+  const ungated = JSON.parse(JSON.stringify(gated)); delete ungated.a.door;
+  assert.deepEqual(GAME.LocationConnections.validateConnection(ungated, fixture2()).errors, ['a.triggers[0] must be walkable'], 'same tile without the gate is solid');
+  function fixture2() { const f = fixture(); f.street.rows[0] = 'X....'; f.isSolid = m.isSolid; return f; }
+  const spawnOnGate = JSON.parse(JSON.stringify(gated)); spawnOnGate.b.triggers = [[1, 3]]; spawnOnGate.a.triggers = [[1, 1]]; spawnOnGate.a.spawn = { tx: 0, ty: 0, dir: 'down' };
+  assert.deepEqual(GAME.LocationConnections.validateConnection(spawnOnGate, fixture2()).errors, ['a.spawn must be walkable'], 'spawn tiles never assume the gate is open');
+}
+
 // ---- one-way records: a = triggers only, b = spawn only; install writes a's map only
 {
   const local = fixture();

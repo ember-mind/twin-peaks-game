@@ -80,7 +80,11 @@ load('sheriffs-station-scene.js');
 load('sheriffs-station-exterior-scene.js');
 load('world-connections.gen.js');
 load('environment-reactions.js');
+load('double-r-exterior-art.js');
+load('double-r-exterior-scene.js');
+load('double-r-location-production.js');
 load('sheriffs-station-production.js');
+load('world-connections-production.js');
 load('character-life-scenes.js');
 
 const G = global.GAME;

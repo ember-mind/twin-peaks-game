@@ -43,8 +43,7 @@ require(J('sheriffs-station-scene.js'));
 global.GAME.SheriffsStationScene.install();
 require(J('location-connections.js'));
 require(J('world-connections.gen.js'));
-global.GAME.LocationConnections.connectionRecordsFor(['double-r-front-entrance','town-double-r-lot','sheriffs-station-front-entrance','town-sheriffs-station-lot','great-northern-room-315-hall'])
-  .forEach((c) => global.GAME.LocationConnections.install(c, global.GAME.Maps));
+require(J('world-connections-production.js')); // every registry door (js/maps.js carries none)
 require(J('render3d.js')); // window e' globale (riga sopra): CONFIG si popola anche senza THREE
 require(J('narrative-runtime.js'));
 require(J('narrative-data.gen.js'));

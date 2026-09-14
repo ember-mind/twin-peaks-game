@@ -20,8 +20,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-// Phase 1 (main b284dd2): 26 doors{} entries + 1 gate. Phase 3 migrates every live door and deletes the rest.
-const EXPECT = { sources: 27, shadowed: 10, conflict: 0, paired: 14, oneWay: 3 };
+// Phase 1 (main b284dd2) was { sources: 27, shadowed: 10, conflict: 0, paired: 14, oneWay: 3 } — 26 doors{}
+// entries + the town gate. M5 migrated every live door into world/connections.json and deleted the rest.
+const EXPECT = { sources: 0, shadowed: 0, conflict: 0, paired: 0, oneWay: 0 };
 
 global.window = global;
 global.addEventListener = function () {};

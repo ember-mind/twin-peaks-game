@@ -88,8 +88,11 @@ PINS.pins.forEach((p) => { PIN_BY_ID[p.id] = p; });
     ok(writersOf(M6, writesEast).length === 0, 'east_route_confirmed: nessun writer in M6');
     ok(writersOf(M8, writesEast).length === 0, 'east_route_confirmed: nessun writer in M8');
     if (M9) ok(writersOf(M9, writesEast).length === 0, 'east_route_confirmed: nessun writer in M9');
-    const mapsSrc = fs.readFileSync(path.join(__dirname, '..', 'js', 'maps.js'), 'utf8');
-    ok(mapsSrc.indexOf("needsFlag: 'east_route_confirmed'") >= 0, 'js/maps.js: la porta OEJ richiede east_route_confirmed');
+    // Le porte vivono nel registro (world/connections.json), non più in js/maps.js.
+    const registry = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'world', 'connections.json'), 'utf8'));
+    const oejDoor = registry.connections.find((c) => c.id === 'traincar-oej-entrance');
+    ok(oejDoor && oejDoor.a.scene === 'traincar' && oejDoor.a.door && oejDoor.a.door.needsFlag === 'east_route_confirmed',
+      'world/connections.json: la porta OEJ (traincar-oej-entrance) richiede east_route_confirmed');
   }
 
   // -- preliminare: due sole opzioni, mai «disposizione»/staging --

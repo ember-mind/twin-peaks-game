@@ -20,7 +20,9 @@
     return tile[0] + ',' + tile[1];
   }
 
-  function validateTile(label, tile, map, maps) {
+  /* state: the player state the walkability check assumes. Spawn tiles use no clues; trigger tiles of a
+   * door gated by needsClues are judged with that many clues held (glue's 'X' barrier opens at 3). */
+  function validateTile(label, tile, map, maps, state) {
     if (!Array.isArray(tile) || tile.length !== 2 ||
         !Number.isInteger(tile[0]) || !Number.isInteger(tile[1])) {
       fail(label + ' must be an integer [x,y] tile');
@@ -30,7 +32,7 @@
       fail(label + ' is outside map bounds');
     }
     var solid = typeof maps.isSolid === 'function'
-      ? maps.isSolid(map.id, x, y, { clues: [] })
+      ? maps.isSolid(map.id, x, y, state || { clues: [] })
       : (typeof map.isSolid === 'function' ? map.isSolid(x, y) : false);
     if (solid) fail(label + ' must be walkable');
   }
@@ -55,8 +57,10 @@
       fail(name + '.triggers must not be empty');
     }
     var triggerKeys = {};
+    var gate = endpoint.door && Number.isInteger(endpoint.door.needsClues) && endpoint.door.needsClues > 0
+      ? { clues: new Array(endpoint.door.needsClues).fill('gate') } : { clues: [] };
     endpoint.triggers.forEach(function (tile, index) {
-      validateTile(name + '.triggers[' + index + ']', tile, map, maps);
+      validateTile(name + '.triggers[' + index + ']', tile, map, maps, gate);
       var key = tileKey(tile);
       if (triggerKeys[key]) fail(name + '.triggers contains duplicate tile ' + key);
       triggerKeys[key] = true;
