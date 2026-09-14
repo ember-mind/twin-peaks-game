@@ -39,9 +39,9 @@ require(script('ambient-life.js'));
 require(script('environment-reactions.js'));
 require(script('ambient-life-scenes.js'));
 require(script('location-connections.js'));
+require(script('world-connections.gen.js'));
 require(script('double-r-exterior-art.js'));
 require(script('double-r-exterior-scene.js'));
-require(script('double-r-location-data.js'));
 require(script('double-r-location-production.js'));
 const E = global.GAME.Engine;
 

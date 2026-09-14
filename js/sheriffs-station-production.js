@@ -7,9 +7,9 @@
   var G = window.GAME;
   G.SheriffsStationExteriorScene.install();
   G.SheriffsStationScene.install();
-  G.SheriffsStationLocationConnections.forEach(function (connection) {
+  G.LocationConnections.connectionRecordsFor(['sheriffs-station-front-entrance', 'town-sheriffs-station-lot']).forEach(function (connection) {
     G.LocationConnections.install(connection, G.Maps);
-  });
+    });
 
   /* Reactive entrance door: the closed double leaves at x112..144,y176..192
    * (js/sheriffs-station-art.js, south wall) react only to a committed

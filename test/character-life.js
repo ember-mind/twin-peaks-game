@@ -78,7 +78,7 @@ load('sheriffs-station-art.js');
 load('sheriffs-station-exterior-art.js');
 load('sheriffs-station-scene.js');
 load('sheriffs-station-exterior-scene.js');
-load('sheriffs-station-location-data.js');
+load('world-connections.gen.js');
 load('environment-reactions.js');
 load('sheriffs-station-production.js');
 load('character-life-scenes.js');

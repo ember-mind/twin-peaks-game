@@ -31,16 +31,15 @@ require(J('retro-font.js'));
 require(J('engine.js'));
 require(J('glue.js'));
 require(J('location-connections.js'));
+require(J('world-connections.gen.js'));
 require(J('double-r-exterior-art.js'));
 require(J('double-r-exterior-scene.js'));
-require(J('double-r-location-data.js'));
 require(J('sheriffs-station-exterior-scene.js'));
 require(J('sheriffs-station-scene.js'));
-require(J('sheriffs-station-location-data.js'));
 global.GAME.DoubleRExteriorScene.install();
 global.GAME.SheriffsStationExteriorScene.install();
 global.GAME.SheriffsStationScene.install();
-[].concat(global.GAME.DoubleRLocationConnections, global.GAME.SheriffsStationLocationConnections)
+global.GAME.LocationConnections.connectionRecordsFor(['double-r-front-entrance','town-double-r-lot','sheriffs-station-front-entrance','town-sheriffs-station-lot'])
   .forEach((c) => global.GAME.LocationConnections.install(c, global.GAME.Maps));
 require(J('narrative-runtime.js'));
 require(J('narrative-data.gen.js'));

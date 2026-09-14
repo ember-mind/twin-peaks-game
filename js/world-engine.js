@@ -131,12 +131,26 @@
       var locationId = locationsByScene && locationsByScene[sceneId];
       return locationId === undefined ? undefined : locationsById[locationId];
     },
-    getConnections: function (locationId) {
-      if (locationId === undefined) return allConnections;
-      var location = locationsById && locationsById[locationId];
-      return location && location.connections;
-    }
-  };
+     getConnections: function (locationId) {
+       if (locationId === undefined) return allConnections;
+       var location = locationsById && locationsById[locationId];
+       return location && location.connections;
+      },
+    /* connections() returns the canonical connection RECORDS from GAME.WorldData — the single registry
+     * that replaced the four *-location-data groups. getConnections() above resolves a location to its
+     * list of ids (catalog membership); this resolves the authoritative record bodies (a/b endpoints,
+     * door fields) that install into GAME.Maps.<scene>.doors and that the World Builder edits through
+     * changesets. Read lazily from WorldData so it is independent of load order: catalog registers its
+     * ids while records live in the registry module, which may load before or after this one. The
+     * returned array is a fresh frozen copy; each record is already deep-frozen by world-connections.gen.js. */
+     connections: function () {
+       var data = G.GAME.WorldData;
+       if (!data || !Array.isArray(data.connections)) {
+         throw new Error('World.connections(): GAME.WorldData.connections missing — load js/world-connections.gen.js');
+         }
+       return Object.freeze(data.connections.slice());
+      }
+     };
   Object.defineProperty(World, 'catalog', { enumerable: true, get: function () { return catalog; } });
   GAME.World = Object.freeze(World);
 }());

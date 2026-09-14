@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var G = window.GAME;
-  G.TraincarLocationConnections.forEach(function (connection) {
+  G.LocationConnections.connectionRecordsFor(['town-traincar-east', 'traincar-oej-entrance']).forEach(function (connection) {
     G.LocationConnections.install(connection, G.Maps);
-  });
+     });
 }());

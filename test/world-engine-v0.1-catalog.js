@@ -107,14 +107,14 @@ assert.doesNotThrow(() => isolated({
 global.window = global;
 global.GAME = {};
 require('../js/tiles.js'); require('../js/chars.js'); require('../js/houses.js'); require('../js/maps.js'); require('../js/data.js'); require('../js/glue.js');
-require('../js/location-connections.js'); require('../js/double-r-exterior-scene.js'); require('../js/double-r-location-data.js'); require('../js/traincar-location-data.js');
+require('../js/location-connections.js'); require('../js/double-r-exterior-scene.js'); require('../js/world-connections.gen.js');
 require('../js/sheriffs-station-art.js'); require('../js/sheriffs-station-exterior-art.js');
 require('../js/sheriffs-station-scene.js'); require('../js/sheriffs-station-exterior-scene.js');
-require('../js/sheriffs-station-location-data.js');
-require('../js/room-315-location-data.js');
 require('../js/environment-reactions.js');
 GAME.DoubleRExteriorScene.install();
-require('../js/sheriffs-station-production.js');
+    // Registry must exist before the production installers, which source records from GAME.WorldData.
+    require('../js/world-connections.gen.js');
+   require('../js/sheriffs-station-production.js');
 require('../js/world-engine.js'); require('../js/world-catalog.js');
 const World = GAME.World;
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
@@ -148,7 +148,7 @@ assert.equal(World.getEnvironment('great-northern', 'lobby').sceneId, 'hotel_gn'
 assert.equal(World.getLocationForScene('room_315').id, 'great-northern');
 assert.equal(World.getLocationForScene('hotel_gn').id, 'great-northern');
 assert(World.getConnections('great-northern').includes('great-northern-room-315-hall'));
-const connections = [].concat(GAME.DoubleRLocationConnections, GAME.TraincarLocationConnections, GAME.SheriffsStationLocationConnections, GAME.Room315LocationConnections);
+const connections = GAME.WorldData.connections;
 const recordById = new Map(connections.map(record => [record.id, record]));
 for (const connectionId of World.getConnections()) {
   const record = recordById.get(connectionId);
@@ -158,7 +158,83 @@ for (const connectionId of World.getConnections()) {
     assert(location, `${connectionId} endpoint ${endpoint.scene} is cataloged`);
     assert(!endpoint.triggers.some(([x, y]) => x === endpoint.spawn.tx && y === endpoint.spawn.ty), `${connectionId} spawn is non-trigger`);
     assert(GAME.Maps[endpoint.scene].doors, `${connectionId} references authored map doors`);
-    assert(World.getConnections(location.id).includes(connectionId), `${connectionId} belongs to endpoint location`);
-  }
-}
-console.log('WORLD-ENGINE-V0.1-CATALOG-PASS registration, immutable catalog, scoped lookups, shared connections, validation, authored references');
+       assert(World.getConnections(location.id).includes(connectionId), `${connectionId} belongs to endpoint location`);
+      }
+    }
+
+     // ---- SINGLE REGISTRY (Phase 1): connection RECORDS now live in GAME.WorldData (js/world-connections.gen.js),
+    // replacing the four *-location-data groups as the authoritative source. Bijection between the catalog's id
+     // membership and the registry record set, checked BOTH ways, is what makes deleting the group globals safe:
+      //    - every catalog connection id resolves to exactly one registry record (no missing record);
+      //    - every registry record id is referenced by at least one location (no orphan record).
+     require('../js/world-connections.gen.js');
+      var registry = GAME.WorldData.connections;
+    assert.equal(registry.length, World.getConnections().length, 'registry record count equals catalog connection count');
+     assert(Object.isFrozen(registry), 'registry array is frozen — editors work on drafts, never the source');
+      var regIds = new Map(registry.map(record => [record.id, record]));
+      for (const cid of World.getConnections()) {
+      const record = regIds.get(cid);
+       assert(record, `catalog id ${cid} resolves to a registry record`);
+       for (const endpoint of [record.a, record.b]) {
+         assert(GAME.World.getLocationForScene(endpoint.scene), `${cid}.${endpoint.scene} is a cataloged scene`);
+          }
+        }
+  var referencedIds = new Set([...World.getConnections()]);
+for (const record of registry) {
+  assert(referencedIds.has(record.id), `registry record ${record.id} is referenced by a catalog location`);
+ }
+
+// ---- PRODUCTION CAN FILTER THE REGISTRY: location-connections.connectionRecordsFor() resolves a location's
+ // id-list to its exact records, and fails loud (never silent) when an id is unknown or the registry is not
+  // loaded yet. This is what lets the production installers survive the *-location-data deletion: they call this
+   // filter instead of reading a group global. A silent skip would let a missing record masquerade as "no doors".
+    assert(typeof GAME.LocationConnections.connectionRecordsFor === 'function',
+     'LocationConnections.connectionRecordsFor must exist so production can filter the registry');
+    var tcIds = World.getConnections('traincar-crossing'); // ['town-traincar-east','traincar-oej-entrance']
+     var filtered = GAME.LocationConnections.connectionRecordsFor(tcIds);
+      assert.deepEqual(filtered.map(r => r.id), tcIds, 'connectionRecordsFor filters the registry by a location id-list in order');
+       for (const cid of World.getConnections()) {
+        const one = GAME.LocationConnections.connectionRecordsFor([cid]);
+         assert.equal(one.length, 1, `${cid} resolves to exactly one record via the filter`);
+          assert.equal(one[0].id, cid, `${cid} filter returns its own record`);
+           }
+            assert.throws(() => GAME.LocationConnections.connectionRecordsFor(['no-such-connection']),
+             'filtering an unknown id fails loud rather than skipping silently');
+
+// ---- LEGACY-DOOR REPORT: which GAME.Maps still carry classic js/maps.js-authored doors, i.e. door descriptors
+ // that are NOT produced by any connection record. The registry owns a fixed key set (built fresh, exactly like
+  // world-door-equality's "B"); every live door outside that set is a classic authoring that a future migration
+   // could express as a connection record. This is observability, not a gate — it must not assert a count we do
+    // not control, only report it and prove the diff itself ran.
+     var registryOwnedKeys = {};
+      var freshDoors = {};
+       GAME.WorldData.connections.forEach(function (record) {
+         ['a', 'b'].forEach(function (side) {
+           const sceneId = record[side].scene;
+            if (!freshDoors[sceneId]) {
+              const real = GAME.Maps[sceneId];
+               freshDoors[sceneId] = { id: sceneId, width: real.width, height: real.height, doors: {},
+                 isSolid: function () { return false; } };
+                  }
+                });
+              });
+               GAME.WorldData.connections.forEach(function (record) { GAME.LocationConnections.install(record, freshDoors); });
+                Object.keys(freshDoors).forEach(function (sceneId) {
+                  Object.keys(freshDoors[sceneId].doors).forEach(function (key) { registryOwnedKeys[sceneId + '|' + key] = true; });
+                    });
+                   const classicDoors = [];
+                     let scenesStillClassic = 0;
+                      Object.keys(GAME.Maps).forEach(function (sceneId) {
+                        const map = GAME.Maps[sceneId];
+                         if (!map || !map.doors) return;
+                          const sceneKeys = Object.keys(map.doors);
+                           if (!sceneKeys.length) return;
+                            let classicCount = 0;
+                             sceneKeys.forEach(function (key) { if (!registryOwnedKeys[sceneId + '|' + key]) classicCount++; });
+                              if (classicCount > 0) { scenesStillClassic++; classicDoors.push(`${sceneId}:${classicCount}`); }
+                                });
+                                 console.log('LEGACY-DOOR-REPORT registry-owned doors across ' + Object.keys(registryOwnedKeys).length + ' key(s); '
+                                  + 'classic js/maps.js-authored doors still in GAME.Maps: ' + classicDoors.length + ' descriptor(s) in '
+                                   + scenesStillClassic + ' scene(s) -> ' + (classicDoors.join(', ') || 'none'));
+
+console.log('WORLD-ENGINE-V0.1-CATALOG-PASS registration, immutable catalog, scoped lookups, shared connections, validation, authored references, single registry bijection, filter load-order, legacy-door report');

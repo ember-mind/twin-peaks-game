@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
-/* room-315-location.js — Red Room wake-up spawn and the Great Northern
- * corridor <-> room 315 hall, modelled on test/sheriffs-station-location.js.
+/* world-connections.gen.js — Red Room wake-up spawn and the Great Northern
+ * corridor <-> room 315 hall, modelled on test/world-connections.gen.js.
  * Covers: redroom -> room_315 wake spawn + onEnter once flag, room_315 <->
  * hotel_gn hall both ways, held-input no-bounce, hotel_gn -> town still
  * works, save round-trip in room_315. Walks with the real Engine on
@@ -44,8 +44,7 @@ const js = (name) => path.join(__dirname, '..', 'js', name);
   'engine.js', 'glue.js', 'location-connections.js', 'environment-reactions.js',
   'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js',
   'sheriffs-station-scene.js', 'sheriffs-station-exterior-scene.js',
-  'sheriffs-station-location-data.js', 'sheriffs-station-production.js',
-  'room-315-location-data.js', 'room-315-production.js'
+  'world-connections.gen.js', 'sheriffs-station-production.js', 'room-315-production.js'
 ].forEach((name) => require(js(name)));
 
 const G = global.GAME;

@@ -203,26 +203,19 @@
 
   }
 
-    // Browser entry point: pull the source straight out of the live GAME global.
-    // ISSUE 7 — temporary adapter, NOT a second catalog: paired connection records live in four
-    // separate runtime globals (one per location group). We only READ and concat them; we never
-    // re-author. Adding a new *LocationConnections group means adding its name to CONNECTION_GROUP_NAMES,
-    // and buildWorldSnapshot().unresolved surfaces any catalog connection id with no loaded record, so
-    // the builder can't silently drop connections. A canonical connectionId->record registry is future work.
-  var CONNECTION_GROUP_NAMES = [
-     'DoubleRLocationConnections', 'TraincarLocationConnections',
-     'SheriffsStationLocationConnections', 'Room315LocationConnections'
-   ];
-
+     // Browser entry point: pull the source straight out of the live GAME global.
+     // Connection records now live in a SINGLE registry, GAME.WorldData.connections
+     // (js/world-connections.gen.js, loaded by world-builder.html before this file) — so we READ one
+     // authoritative frozen array instead of concatenating legacy per-location groups, which were deleted.
+     // buildWorldSnapshot().unresolved still surfaces any catalog connection id with no loaded record, so
+     // the builder can't silently drop a connection.
   function collectWorldSource(GAME) {
     var G = GAME || (typeof window !== 'undefined' && window.GAME) || {};
-    var connections = [];
-    CONNECTION_GROUP_NAMES.forEach(function (name) {
-      if (Array.isArray(G[name])) connections = connections.concat(G[name]);
-      });
+    var registry = (G.WorldData && Array.isArray(G.WorldData.connections)) ? G.WorldData.connections : null;
+     if (!registry) throw new Error('collectWorldSource: GAME.WorldData.connections is missing — load js/world-connections.gen.js first');
     return { maps: G.Maps || {}, catalog: (G.World && G.World.catalog) || { locations: [] },
-            connections: connections, tile: TILE };
-    }
+            connections: registry.slice(), tile: TILE };
+     }
 
      // BLOCKER 2 — real geometry. Map rows are single-char-per-tile strings; this projects each cell to a
     // small semantic category+colour so Town/Diner/Sheriff read as DIFFERENT real layouts, not an empty
@@ -257,8 +250,29 @@
    return { width: out.length ? out[0].length : 0, height: out.length, rows: out };
     }
 
+  // adaptWorld(GAME) — THE ONLY game-aware bridge between the runtime and the editor core. Every editor-core
+  // module is game-free by construction; this function is the single point where a live GAME becomes a
+  // view-agnostic source, so no view ever reads the runtime global itself. The chain is one direction only:
+  //   collectWorldSource(GAME)  -> buildWorldSnapshot's INPUT ({maps,catalog,connections,tile}); fails loud
+  //                                if the connection registry is absent (the builder never invents a world).
+  //   buildWorldSnapshot(source)-> the frozen view-model; its output IS buildWorldModel's input shape.
+  //   Editor.model.buildWorldModel(snapshot) -> the ONE read-only model every view shares, resolved lazily
+  //                                only when core is present. A runtime-only load (no core) still yields a
+  //                                complete snapshot with model:null rather than throwing — the page can run.
+  function adaptWorld(GAME) {
+    var source = collectWorldSource(GAME);          // sole GAME read in the whole editor
+    var snapshot = buildWorldSnapshot(source);       // existing api; counts/shape unchanged
+    var model = null;
+     try {
+      var E = (typeof globalThis !== 'undefined') ? globalThis.Editor : null;
+      var M = (E && E.model) || (typeof require !== 'undefined' ? require('./editor/core/model.js') : null);
+       model = M ? M.buildWorldModel(snapshot) : null;
+        } catch (e) { model = null; } // core absent in a runtime-only load: the snapshot stands alone.
+    return Object.freeze({ source: source, snapshot: snapshot, model: model });
+  }
+
   var api = { TILE: TILE, buildWorldSnapshot: buildWorldSnapshot, collectWorldSource: collectWorldSource,
-               planBaseMap: planBaseMap, tileColorFor: tileColorFor, clone: clone };
-  if (typeof module !== 'undefined' && module.exports) module.exports = api;
-  if (typeof window !== 'undefined') window.GAME = window.GAME || {}, window.GAME.WorldBuilderData = api;
+                 planBaseMap: planBaseMap, tileColorFor: tileColorFor, clone: clone, adaptWorld: adaptWorld };
+    if (typeof module !== 'undefined' && module.exports) module.exports = api;
+    if (typeof window !== 'undefined') window.GAME = window.GAME || {}, window.GAME.WorldBuilderData = api;
 })();

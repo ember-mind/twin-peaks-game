@@ -11,7 +11,7 @@
   } else if (typeof console !== 'undefined') {
     console.warn('room-315-production: GAME.Room315Scene not found, skipping install (art/scene not built yet)');
   }
-  G.Room315LocationConnections.forEach(function (connection) {
+  G.LocationConnections.connectionRecordsFor(['great-northern-room-315-hall']).forEach(function (connection) {
     G.LocationConnections.install(connection, G.Maps);
-  });
+      });
 }());

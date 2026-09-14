@@ -86,3 +86,57 @@ automated guards, and the global gates stay at baseline (**smoke 420**, **walkth
 
 Suite grew to **64 checks** (`WORLD-BUILDER-PASS 64/64`); `smoke`/`walkthrough` unchanged.
 
+
+---
+
+## M4 / Registry Editing — STEP 6 manual verification (headless)
+
+**Verdict: shared code paths CONFIRMED headlessly; pixel rendering + clicking BLOCKED (no browser driver).**
+
+### What is automated here
+This environment has **no browser-automation tooling** — no `playwright`, no `puppeteer`, no CDP client —
+and `/Applications/Google Chrome.app` is installed but undriven. `world-builder.html` is also a
+**read-only M3 UI** (scene dropdown + canvas + click-to-inspect) with **no clickable accept/cancel endpoint
+editor yet**, so literal pixel rendering and mouse clicks cannot be confirmed in this environment. That part is
+recorded as **MANUAL VERIFICATION: BLOCKED — no browser driver**, not as a code defect.
+
+Instead, `test/step6-driver.js` drives the **shared code paths the UI would call** over the real catalog and
+prints concrete before/after values (run: `node test/step6-driver.js`, prints `PASS`):
+
+1. **Scene selection (≥3 incl. traincar + sheriff).** `selection.createSelection` over a model built by
+   `buildWorldModel`:
+   - `traincar` → ok, overlays=1, exits/objects/npcs = 1/0/0, 2×2
+   - `sheriff` (interior) → ok, overlays=3, **1/1/1** (exit + object + npc grouped), 2×2 interior
+   - `town` → ok, overlays=1, 1/0/0, 2×2
+
+   _Limitation:_ real map **rows** install into `G.Maps` only when the browser runs each location's production
+   step, so geometry is absent in this headless node load — the driver feeds a catalog-faithful demo snapshot
+   (authentic scene ids + real connection records) and clearly labels the rows as a placeholder. **Only the tile
+   pixel layer needs the browser**; the select→inspect logic itself runs end to end.
+
+2. **Endpoint edit → changeset diff → accept / cancel.** The real connection `double-r-front-entrance` is edited
+   through `draft.createDraft('...') → upsertConnection → toChangeset`, then `changeset.applyChangeset`:
+   - **ACCEPT** — registry version bumps **v1 → v2**, result is `Object.frozen`, connection count 7→7, and the
+     edited trigger value changes (`[6,6]` → `{0:6,1:6,"text":"(EDITED) "}`).
+   - **CANCEL** — discarding the changeset leaves the baseline **byte-identical** to before.
+   - `history.commit(cs)` then `history.undo()` both succeed (undo label present), confirming the cancel path
+     through history as well.
+
+3. **Story-moment cast view, read-only.** `CastPresence.snapshot(null)` returns a map of **26 sprite
+   placements** (e.g. `andy → PLACED@sheriff 10,7 down [BASELINE]`, `bobby → PLACED@town 31,16 down`). The
+   snapshot is a **deterministic re-derivation**: calling it twice yields identical output and mutates no
+   authoritative state, which is the read-only guarantee. (It is not `Object.frozen` — a plain derived map —
+   which is correct; "read-only" means no write-back into world state.)
+
+### What remains blocked / manual
+- **Pixel rendering** of the three scene geometries on the canvas: needs a real browser (or an added
+  playwright/puppeteer job in CI) to confirm visually.
+- **Clickable accept/cancel + live changeset diff panel**: does not exist in `world-builder.html` yet — that is
+   M4 UI wiring, distinct from the M4 core pipeline (`draft/changeset/history/inspector`) proven above.
+
+### API notes captured while driving this
+- `buildWorldModel(input)` returns **`model.scenes`** (a frozen map of sceneId → scene model), **not**
+  `scenesById`; each scene carries `byKind`, `overlays`, `width`, `height`, `indoor`. The earlier M4 core
+  work and this driver both key off `model.scenes`.
+- `applyChangeset(registry, {operations:[{op:'upsert',connection}|{op:'remove',id}]})` returns a new
+  **frozen** registry with `version + 1`; it never mutates the input (dry-run by design).

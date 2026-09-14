@@ -13,19 +13,18 @@ global.localStorage = { getItem: () => null, setItem: () => {}, removeItem: () =
 const noop = () => {};
 const ctx = new Proxy({ measureText: (text) => ({ width: String(text).length * 5 }) }, { get: (target, key) => key in target ? target[key] : noop, set: () => true });
 const js = (name) => path.join(__dirname, '..', 'js', name);
-['tiles.js','chars.js','houses.js','maps.js','data.js','retro-font.js','engine.js','glue.js','location-connections.js','traincar-location-data.js','double-r-exterior-scene.js','double-r-location-data.js'].forEach(name => require(js(name)));
+['tiles.js','chars.js','houses.js','maps.js','data.js','retro-font.js','engine.js','glue.js','location-connections.js','world-connections.gen.js','double-r-exterior-scene.js'].forEach(name => require(js(name)));
 GAME.DoubleRExteriorScene.install();
 require(js('sheriffs-station-art.js'));
 require(js('sheriffs-station-exterior-art.js'));
 require(js('sheriffs-station-scene.js'));
 require(js('sheriffs-station-exterior-scene.js'));
-require(js('sheriffs-station-location-data.js'));
 require(js('environment-reactions.js'));
 require(js('sheriffs-station-production.js'));
 require(js('world-engine.js'));
 require(js('world-catalog.js'));
 const E = GAME.Engine;
-GAME.TraincarLocationConnections.forEach(connection => GAME.LocationConnections.install(connection, GAME.Maps));
+GAME.LocationConnections.connectionRecordsFor(['town-traincar-east','traincar-oej-entrance']).forEach(connection => GAME.LocationConnections.install(connection, GAME.Maps));
 GAME.NarrativeProduction = { onClassicSave() { saveCount++; return failSave ? { handled: true, ok: false, error: 'fixture disk full' } : { handled: true, ok: true }; } };
 
 function frame() { now += 20; queue.splice(0).forEach(fn => fn(now)); }

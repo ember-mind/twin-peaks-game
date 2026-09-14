@@ -42,7 +42,8 @@ require(js('ambient-life-scenes.js'));
 require(js('location-connections.js'));
 require(js('double-r-exterior-art.js'));
 require(js('double-r-exterior-scene.js'));
-const connection = require(js('double-r-location-data.js'));
+require(js('world-connections.gen.js'));
+const connection = global.GAME.WorldData.connections.find((c) => c.id === 'double-r-front-entrance');
 
 const E = global.GAME.Engine;
 const exterior = global.GAME.DoubleRExteriorScene;
@@ -61,12 +62,10 @@ global.GAME.NarrativeProduction = {
 };
 
 exterior.install();
-require(js('traincar-location-data.js'));
 require(js('sheriffs-station-art.js'));
 require(js('sheriffs-station-exterior-art.js'));
 require(js('sheriffs-station-scene.js'));
 require(js('sheriffs-station-exterior-scene.js'));
-require(js('sheriffs-station-location-data.js'));
 require(js('sheriffs-station-production.js'));
 require(js('world-engine.js'));
 require(js('world-catalog.js'));
