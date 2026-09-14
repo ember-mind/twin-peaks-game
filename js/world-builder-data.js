@@ -311,8 +311,21 @@
     var ids = {};
     ((G.WorldData && G.WorldData.connections) || []).forEach(function (c) { ids[c.id] = true; });
     var maps = G.Maps || {};
+    var locations = (G.World && G.World.catalog && G.World.catalog.locations) || [];
+    var catalogIds = {};
+    locations.forEach(function (loc) { (loc.connections || []).forEach(function (cid) { catalogIds[cid] = true; }); });
     return Object.freeze({
       knownIds: function (id) { return Object.prototype.hasOwnProperty.call(ids, id); },
+      // M6 create/delete predicates — the same rules tools/world-apply.js enforces on disk
+      catalogHasId: function (id) { return Object.prototype.hasOwnProperty.call(catalogIds, id); },
+      sceneLocation: function (scene) {
+        var hits = locations.filter(function (loc) { return (loc.environments || []).some(function (env) { return env.sceneId === scene; }); });
+        return hits.length === 1 ? hits[0].id : null; // zero or several locations: the author has to fix the catalog
+      },
+      legacyDoorAt: function (scene, tx, ty) {
+        var m = maps[scene], d = m && m.doors && m.doors[tx + ',' + ty];
+        return !!(d && !d.connectionId);
+      },
       sceneExists: function (scene) { var m = maps[scene]; return !!(m && typeof m.width === 'number'); },
       validateConnection: function (rec) { return LC.validateConnection(rec, maps); },
       validateEndpoint: function (side, ep, opts) {

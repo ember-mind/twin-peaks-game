@@ -1,0 +1,11 @@
+{
+  "format": "world-connections-changeset",
+  "version": 2,
+  "target": "world/connections.json",
+  "operations": [
+    {
+      "op": "delete",
+      "id": "town-hospital-side-door"
+    }
+  ]
+}

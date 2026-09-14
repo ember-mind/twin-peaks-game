@@ -1,0 +1,2 @@
+WORLD-ENGINE-V0.1-CATALOG-PASS registration, immutable catalog, scoped lookups, shared connections, validation, authored references, single registry bijection, filter load-order, legacy-door report
+LEGACY-DOOR-INVENTORY-PASS sources=0 live=0 shadowed=0 conflict=0 booted-doors=59 unowned=0

@@ -1,6 +1,6 @@
 'use strict';
 
-// EDITOR CORE — changeset. A versioned, serializable list of upsert/remove operations over a
+// EDITOR CORE — changeset. A versioned, serializable list of upsert/remove (v1) and create/delete (v2) operations over a
 // connection registry, plus the PURE reducer that turns (registry, changeset) into the next
 // registry with NO filesystem and NO audit sidecar. The apply layer reuses this exact math for
 // its dry-run; the only difference is that apply additionally writes + audits, which lives there.
@@ -61,7 +61,14 @@
          } else {
           nextConnections.push(rec);
          }
-       } else if (op.op === 'remove') {
+       } else if (op.op === 'create') {
+        // M6 (changeset v2): a create never overwrites — the id must be new to the registry.
+        if (!op.connection || typeof op.connection !== 'object') fail(`operations[${i}].connection missing`);
+        if (has(byId, op.connection.id)) fail(`operations[${i}] creates existing id "${op.connection.id}"`);
+        const rec = clone(op.connection);
+        byId[rec.id] = rec;
+        nextConnections.push(rec);
+       } else if (op.op === 'remove' || op.op === 'delete') {
         if (!has(byId, op.id)) fail(`operations[${i}] removes unknown id "${op.id}"`);
         delete byId[op.id];
         for (let j = nextConnections.length - 1; j >= 0; j--) {

@@ -46,7 +46,9 @@ for (let i = 0; i < json.connections.length; i++) {
     }
   }
 }
-ok(json.connections.length === 15, 'exactly fifteen records (' + json.connections.length + ')');
+// The record count is not pinned here: tools/world-apply.js runs this generator after create/delete.
+// test/test-world-registry.js pins the real repo's exact id set.
+ok(json.connections.length > 0, 'registry has records (' + json.connections.length + ')');
 
 // ---- emit the generated module --------------------------------------------
 // Records are sorted by id for a stable load order (the registry is the single source, so its order

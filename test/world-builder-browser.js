@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 'use strict';
 
-/* test/world-builder-browser.js — WORLD BUILDER M4b + M5 browser proof on the real page.
+/* test/world-builder-browser.js — WORLD BUILDER M4b + M5 + M6 browser proof on the real page.
  *
  *   node test/world-builder-browser.js
  *
  * Serves the repo on loopback, opens world-builder.html in headless Chrome (same flags as test/shot.sh:
  * --headless=new --enable-unsafe-swiftshader --use-angle=swiftshader), drives it with real CDP mouse
- * clicks on canvas tiles and DOM button clicks, and records screenshots in artifacts/world-builder-m5/
- * (the M4b run's screenshots stay in artifacts/world-builder-m4b/ as its record).
+ * clicks on canvas tiles and DOM button clicks, and records screenshots in artifacts/world-builder-m6/
+ * (the M4b and M5 runs' screenshots stay in artifacts/world-builder-m4b/ and artifacts/world-builder-m5/).
  * world/connections.json is hashed before and after every case: the editor must never touch it.
  *
  *   1  double-r-front-entrance / b  (diner): EDIT, MOVE SPAWN -> 8,8, facing left, ADD trigger 8,9
@@ -18,6 +18,13 @@
  *   5  M5: town-roadhouse / b (roadhouse, a migrated classic door): MOVE SPAWN -> 6,8, export, CLI dry-run
  *   6  M5: one-way arrival-town: inspector shows ONE-WAY, endpoint b offers no ADD TRIGGER
  *   7  M5: every scene header reports legacy doors 0
+ *   8  M6: NEW CONNECTION paired town 30,9 <-> hospital 14,9, id edited to the town + hospital side-door id, MOVE SPAWN b,
+ *          undo/redo, export v2, tools/world-apply.js --dry-run prints VALID 16 record(s) + the catalog diff
+ *   9  M6: NEW CONNECTION one-way town 34,9 -> hospital 1,9: inspector ONE-WAY, no spawn on a, no ADD TRIGGER on b
+ *  10  M6: a temp repo copy gets case 8's changeset applied for real (--root=); the Builder served from that copy
+ *          deletes the record (confirm step), the v2 delete is applied, and test/world-engine-v0.1-catalog.js +
+ *          test/legacy-door-inventory.js pass on the copy; the real repo's registry and catalog hashes never change
+ * Ids created here are assembled at runtime: a literal id in this file would count as a reference to world-apply.
  */
 
 const fs = require('node:fs');
@@ -28,7 +35,8 @@ const crypto = require('node:crypto');
 const { spawn, spawnSync } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..');
-const OUT = path.join(ROOT, 'artifacts', 'world-builder-m5');
+const OUT = path.join(ROOT, 'artifacts', 'world-builder-m6');
+const CATALOG = path.join(ROOT, 'js', 'world-catalog.js');
 const CHROME = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const REGISTRY = path.join(ROOT, 'world', 'connections.json');
 
@@ -38,7 +46,9 @@ function check(name, cond, detail) {
   console.log(`  ${cond ? 'PASS' : 'FAIL'} - ${name}${cond ? '' : '  ::  ' + JSON.stringify(detail)}`);
   return !!cond;
 }
-const sha = () => crypto.createHash('sha256').update(fs.readFileSync(REGISTRY)).digest('hex');
+const sha = (file = REGISTRY) => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+const SIDE_DOOR = ['town', 'hospital', 'side', 'door'].join('-');
+const DROP = ['town', 'hospital', 'drop'].join('-');
 
 async function freePort() {
   const s = net.createServer();
@@ -85,6 +95,7 @@ class Cdp {
 async function main() {
   fs.mkdirSync(OUT, { recursive: true });
   const shaStart = sha();
+  const catalogShaStart = sha(CATALOG);
   const port = await freePort();
   const server = spawn('python3', ['-m', 'http.server', String(port), '--bind', '127.0.0.1', '--directory', ROOT], { stdio: 'ignore' });
   const devPort = await freePort();
@@ -92,7 +103,13 @@ async function main() {
   const chrome = spawn(CHROME, ['--headless=new', '--enable-unsafe-swiftshader', '--use-angle=swiftshader',
     `--remote-debugging-port=${devPort}`, `--user-data-dir=${profile}`, '--hide-scrollbars', '--no-first-run',
     '--no-default-browser-check', 'about:blank'], { stdio: 'ignore' });
-  const cleanup = () => { try { chrome.kill(); } catch (_) {} try { server.kill(); } catch (_) {} };
+  const extraServers = [];
+  const tempRoots = [];
+  const cleanup = () => {
+    try { chrome.kill(); } catch (_) {} try { server.kill(); } catch (_) {}
+    extraServers.forEach((sv) => { try { sv.kill(); } catch (_) {} });
+    tempRoots.forEach((r) => { try { fs.rmSync(r, { recursive: true, force: true }); } catch (_) {} });
+  };
   process.on('exit', cleanup);
   for (let i = 0; i < 200; i++) {
     if (spawnSync('curl', ['-fsS', `http://127.0.0.1:${port}/world-builder.html`], { stdio: 'ignore' }).status === 0) break;
@@ -114,8 +131,8 @@ async function main() {
     while (Date.now() < end) { try { if (await cdp.eval(expr)) return true; } catch (_) {} await sleep(80); }
     throw new Error('timeout waiting for ' + expr + '\n' + cdp.logs.join('\n'));
   }
-  async function load() {
-    await cdp.send('Page.navigate', { url: `http://127.0.0.1:${port}/world-builder.html` });
+  async function load(base = `http://127.0.0.1:${port}`) {
+    await cdp.send('Page.navigate', { url: `${base}/world-builder.html` });
     await sleep(300);
     await waitFor("document.body && (document.body.getAttribute('data-wb-ready') === '1' || !!document.getElementById('wb-fatal'))");
     const fatal = await cdp.eval("document.getElementById('wb-fatal') && document.getElementById('wb-fatal').textContent");
@@ -155,6 +172,12 @@ async function main() {
     await cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'z', code: 'KeyZ', modifiers: 2, windowsVirtualKeyCode: 90 });
     await sleep(80);
   }
+  async function typeInput(id, value) {
+    await cdp.eval(`(() => { const s = document.getElementById('${id}'); s.value = ${JSON.stringify(String(value))}; s.dispatchEvent(new Event('input')); })()`);
+    await sleep(80);
+  }
+  const text = (id) => cdp.eval(`(() => { const e = document.getElementById('${id}'); return e ? e.innerText : null; })()`);
+  const enabled = (action) => cdp.eval(`(() => { const b = document.querySelector('[data-action="${action}"]'); return !!b && !b.disabled; })()`);
   const registryRecord = (id) => JSON.parse(fs.readFileSync(REGISTRY, 'utf8')).connections.find((c) => c.id === id);
 
   // Shared workflow for cases 1 and 2.
@@ -362,6 +385,183 @@ async function main() {
       check('case 7: every scene header reports legacy doors 0 (' + scenes.length + ' scenes)', scenes.length >= 15 && bad.length === 0, bad);
       await setSelect('wb-scene', 'town');
       await shot('case7-town-header.png');
+    }
+
+    // ---------------- case 8 (M6): create a paired connection
+    let case8File = null;
+    {
+      console.log('\ncase 8: NEW CONNECTION paired town <-> hospital');
+      await load();
+      await clickAction('mode-edit');
+      await clickAction('new-connection');
+      await setSelect('wb-scene', 'town');
+      let s = await state();
+      check('case 8: NEW CONNECTION waits for the scene A tile', s.creating && s.creating.step === 'a' && (await text('wb-create-step')).includes('scene A'), s.creating);
+      await clickTile(30, 9);
+      s = await state();
+      check('case 8: tile A recorded, waiting for B', s.creating.step === 'b' && JSON.stringify(s.creating.a) === '{"scene":"town","tx":30,"ty":9}', s.creating);
+      await setSelect('wb-scene', 'hospital');
+      await clickTile(14, 9);
+      s = await state();
+      check('case 8: id prefilled <sceneA>-<sceneB>', s.creating.step === 'confirm' && s.creating.id === 'town-hospital' && (await cdp.eval("document.getElementById('wb-create-id').value")) === 'town-hospital', s.creating);
+      check('case 8: candidate spawns default to the tile in front of each trigger',
+        JSON.stringify(s.creating.candidate.a) === '{"scene":"town","triggers":[[30,9]],"spawn":{"tx":30,"ty":10,"dir":"down"}}' &&
+        JSON.stringify(s.creating.candidate.b) === '{"scene":"hospital","triggers":[[14,9]],"spawn":{"tx":13,"ty":9,"dir":"left"}}', s.creating.candidate);
+      check('case 8: prefilled id collides with the registry, CONFIRM disabled', s.creating.errors.includes('connection id "town-hospital" already exists in the registry') && !(await enabled('create-confirm')), s.creating.errors);
+      await shot('case8-id-collision.png');
+      await typeInput('wb-create-id', 'Town Side');
+      s = await state();
+      check('case 8: live validation flags a non-kebab id', s.creating.errors.some((e) => /kebab-case/.test(e)) && !(await enabled('create-confirm')), s.creating.errors);
+      await typeInput('wb-create-id', SIDE_DOOR);
+      s = await state();
+      check('case 8: edited id is valid, CONFIRM enabled', s.creating.errors.length === 0 && (await enabled('create-confirm')) && !!(await cdp.eval("!!document.getElementById('wb-create-valid')")), s.creating.errors);
+      await clickAction('create-move-spawn-b');
+      await clickTile(12, 9);
+      s = await state();
+      check('case 8: MOVE SPAWN b on the candidate -> 12,9 left, still valid', JSON.stringify(s.creating.candidate.b.spawn) === '{"tx":12,"ty":9,"dir":"left"}' && s.creating.errors.length === 0, s.creating);
+      await shot('case8-create-confirm.png');
+      check('case 8: world/connections.json unchanged before confirm', sha() === shaStart);
+      await clickAction('create-confirm');
+      s = await state();
+      const expected = { id: SIDE_DOOR, a: { scene: 'town', triggers: [[30, 9]], spawn: { tx: 30, ty: 10, dir: 'down' } },
+        b: { scene: 'hospital', triggers: [[14, 9]], spawn: { tx: 12, ty: 9, dir: 'left' } } };
+      check('case 8: CONFIRM puts the record in the draft store', !s.creating && JSON.stringify(s.draft[SIDE_DOOR]) === JSON.stringify(expected), s.draft[SIDE_DOOR]);
+      check('case 8: Builder shows the new record at once (town trigger + spawn items, selected)', s.sceneId === 'town' && s.selectedId === `connection-endpoint:${SIDE_DOOR}:a` &&
+        s.items.some((i) => i.id === `trigger:${SIDE_DOOR}:a:0` && i.tx === 30 && i.ty === 9) && s.items.some((i) => i.id === `connection-endpoint:${SIDE_DOOR}:a` && i.tx === 30 && i.ty === 10), s.items.filter((i) => i.id.includes(SIDE_DOOR)));
+      const insp = await text('wb-inspector');
+      check('case 8: inspector marks the record new (create), paired', insp.includes('new (create)') && insp.includes('paired') && insp.includes(SIDE_DOOR), insp);
+      check('case 8: header counts 1 unsaved change, legacy doors 0', (await text('wb-title')) === 'WORLD BUILDER · 1 unsaved change' && / · legacy doors 0 · /.test(await text('wb-stage-info')));
+      check('case 8: validation lists "create" and the draft is valid', JSON.stringify(s.ops) === JSON.stringify([{ id: SIDE_DOOR, op: 'create' }]) && Object.keys(s.errors).length === 0, s);
+      await shot('case8-created-town.png');
+      await pressUndo();
+      s = await state();
+      check('case 8: Ctrl+Z removes the created record', !s.draft[SIDE_DOOR] && s.unsaved === 0 && s.canRedo, s.unsaved);
+      await clickAction('redo');
+      s = await state();
+      check('case 8: REDO brings it back', JSON.stringify(s.draft[SIDE_DOOR]) === JSON.stringify(expected) && s.unsaved === 1, s.draft[SIDE_DOOR]);
+      await setSelect('wb-scene', 'hospital');
+      s = await state();
+      check('case 8: hospital shows endpoint b of the new record', s.items.some((i) => i.id === `trigger:${SIDE_DOOR}:b:0`) && s.items.some((i) => i.id === `connection-endpoint:${SIDE_DOOR}:b` && i.tx === 12 && i.ty === 9), s.items);
+      await shot('case8-created-hospital.png');
+      await clickAction('export');
+      const exported = await cdp.eval("document.getElementById('wb-export-text') && document.getElementById('wb-export-text').value");
+      const cs = exported ? JSON.parse(exported) : null;
+      check('case 8: export is a version-2 changeset with one create op', cs && cs.version === 2 && cs.operations.length === 1 && cs.operations[0].op === 'create' &&
+        cs.operations[0].id === SIDE_DOOR && JSON.stringify(cs.operations[0].connection) === JSON.stringify(expected), cs);
+      case8File = path.join(OUT, 'case8-changeset.json');
+      fs.writeFileSync(case8File, exported || '');
+      await shot('case8-export.png');
+      const cli = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'world-apply.js'), case8File, '--dry-run'], { encoding: 'utf8' });
+      fs.writeFileSync(path.join(OUT, 'case8-dry-run.txt'), cli.stdout + cli.stderr);
+      check('case 8: world-apply --dry-run prints VALID 16 record(s)', cli.status === 0 && cli.stdout.includes('VALID 16 record(s) against real maps') && cli.stdout.includes('CREATE ' + SIDE_DOOR + ' (paired)'), cli.stdout + cli.stderr);
+      check('case 8: dry-run prints the catalog diff for town + hospital', cli.stdout.includes('CATALOG js/world-catalog.js create ' + SIDE_DOOR + ' -> town + hospital') &&
+        cli.stdout.includes("+         connections: ['town-hospital', '" + SIDE_DOOR + "']") && cli.stdout.includes("'arrival-town', '" + SIDE_DOOR + "']") && cli.stdout.includes('DRY-RUN'), cli.stdout);
+      check('case 8: real registry + catalog unchanged', sha() === shaStart && sha(CATALOG) === catalogShaStart);
+    }
+
+    // ---------------- case 9 (M6): create a one-way connection
+    {
+      console.log('\ncase 9: NEW CONNECTION one-way town -> hospital');
+      await load();
+      await clickAction('mode-edit');
+      await clickAction('new-connection');
+      await setSelect('wb-scene', 'town');
+      await clickTile(34, 9);
+      await setSelect('wb-scene', 'hospital');
+      await clickTile(1, 9);
+      await clickAction('create-one-way');
+      await typeInput('wb-create-id', DROP);
+      let s = await state();
+      check('case 9: ONE-WAY candidate: a trigger only, b spawn only', s.creating.oneWay && JSON.stringify(s.creating.candidate) ===
+        JSON.stringify({ id: DROP, one_way: true, a: { scene: 'town', triggers: [[34, 9]] }, b: { scene: 'hospital', triggers: [], spawn: { tx: 2, ty: 9, dir: 'right' } } }) && s.creating.errors.length === 0, s.creating);
+      check('case 9: candidate offers MOVE SPAWN for b only', !(await cdp.eval("!!document.querySelector('[data-action=\"create-move-spawn-a\"]')")) && (await enabled('create-move-spawn-b')));
+      await shot('case9-create-one-way.png');
+      await clickAction('create-confirm');
+      s = await state();
+      check('case 9: confirmed one-way record selected by its a trigger', s.draft[DROP] && s.draft[DROP].one_way === true && s.draft[DROP].a.spawn === undefined && s.selectedId === `trigger:${DROP}:a:0`, s);
+      check('case 9: no spawn item for a in town', !s.items.some((i) => i.id === `connection-endpoint:${DROP}:a`) && s.items.some((i) => i.id === `trigger:${DROP}:a:0`), s.items);
+      const dirText = await cdp.eval("document.getElementById('wb-direction').textContent");
+      check('case 9: inspector shows ONE-WAY town → hospital', dirText === 'ONE-WAY town → hospital', dirText);
+      check('case 9: one-way source offers no MOVE SPAWN', !(await cdp.eval("!!document.querySelector('[data-action=\"move-spawn\"]')")));
+      await shot('case9-one-way-source.png');
+      await clickAction('jump');
+      s = await state();
+      check('case 9: jump lands on hospital endpoint b', s.sceneId === 'hospital' && s.selectedId === `connection-endpoint:${DROP}:b`, s);
+      check('case 9: endpoint b offers no ADD TRIGGER', await cdp.eval("!document.querySelector('[data-action=\"add-trigger\"]') && !!document.getElementById('wb-oneway-note')"));
+      await shot('case9-one-way-arrival.png');
+      await clickAction('export');
+      const cs = JSON.parse(await cdp.eval("document.getElementById('wb-export-text').value"));
+      check('case 9: export carries the one-way create', cs.version === 2 && cs.operations.length === 1 && cs.operations[0].op === 'create' && cs.operations[0].connection.one_way === true, cs);
+      fs.writeFileSync(path.join(OUT, 'case9-changeset.json'), JSON.stringify(cs, null, 2) + '\n');
+      check('case 9: world/connections.json unchanged', sha() === shaStart);
+    }
+
+    // ---------------- case 10 (M6): delete, on a temp repo copy after a real apply
+    {
+      console.log('\ncase 10: DELETE CONNECTION on a temp copy');
+      const copy = fs.mkdtempSync(path.join(os.tmpdir(), 'tp-wb-m6-copy-'));
+      tempRoots.push(copy);
+      for (const d of ['js', 'test', 'world', 'narrative']) fs.cpSync(path.join(ROOT, d), path.join(copy, d), { recursive: true });
+      for (const f of ['index.html', 'world-builder.html']) fs.copyFileSync(path.join(ROOT, f), path.join(copy, f));
+      fs.symlinkSync(path.join(ROOT, 'assets'), path.join(copy, 'assets'));
+      const three = () => ['world/connections.json', 'js/world-connections.gen.js', 'js/world-catalog.js'].map((rel) => fs.readFileSync(path.join(copy, rel)));
+      const original = three();
+      const applyCreate = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'world-apply.js'), case8File, '--root=' + copy], { encoding: 'utf8' });
+      fs.writeFileSync(path.join(OUT, 'case10-apply-create.txt'), applyCreate.stdout + applyCreate.stderr);
+      check('case 10: case 8 changeset applied for real on the copy', applyCreate.status === 0 && applyCreate.stdout.includes('WROTE js/world-catalog.js') && applyCreate.stdout.includes('CHECK WORLD-ENGINE-V0.1-CATALOG-PASS') &&
+        JSON.parse(fs.readFileSync(path.join(copy, 'world', 'connections.json'), 'utf8')).connections.length === 16, applyCreate.stdout + applyCreate.stderr);
+
+      const copyPort = await freePort();
+      const sv = spawn('python3', ['-m', 'http.server', String(copyPort), '--bind', '127.0.0.1', '--directory', copy], { stdio: 'ignore' });
+      extraServers.push(sv);
+      for (let i = 0; i < 200; i++) {
+        if (spawnSync('curl', ['-fsS', `http://127.0.0.1:${copyPort}/world-builder.html`], { stdio: 'ignore' }).status === 0) break;
+        spawnSync('sleep', ['0.05']);
+      }
+      await load(`http://127.0.0.1:${copyPort}`);
+      await setSelect('wb-scene', 'town');
+      let s = await state();
+      check('case 10: Builder on the copy loads the applied record from the registry', s.items.some((i) => i.id === `trigger:${SIDE_DOOR}:a:0`) && s.unsaved === 0 && / · legacy doors 0 · /.test(await text('wb-stage-info')), s.items.filter((i) => i.id.includes(SIDE_DOOR)));
+      await clickTile(30, 10);
+      await clickAction('mode-edit');
+      s = await state();
+      check('case 10: its town spawn selects the endpoint', s.selectedId === `connection-endpoint:${SIDE_DOOR}:a`, s.selectedId);
+      await shot('case10-before-delete.png');
+      await clickAction('delete-connection');
+      s = await state();
+      check('case 10: DELETE CONNECTION asks for confirmation first', s.confirmDelete === SIDE_DOOR && !!s.draft[SIDE_DOOR] && (await text('wb-delete-confirm')).includes('Delete ' + SIDE_DOOR), s.confirmDelete);
+      await shot('case10-delete-confirm.png');
+      await clickAction('delete-cancel');
+      s = await state();
+      check('case 10: CANCEL keeps the record', !s.confirmDelete && !!s.draft[SIDE_DOOR] && s.unsaved === 0, s);
+      await clickAction('delete-connection');
+      await clickAction('delete-confirm');
+      s = await state();
+      check('case 10: CONFIRM DELETE drops the record from the draft and the canvas', !s.draft[SIDE_DOOR] && !s.items.some((i) => i.id.includes(SIDE_DOOR)) && s.selectedId === null, s.items.filter((i) => i.id.includes(SIDE_DOOR)));
+      check('case 10: validation lists "delete", draft valid, legacy doors 0', JSON.stringify(s.ops) === JSON.stringify([{ id: SIDE_DOOR, op: 'delete' }]) && Object.keys(s.errors).length === 0 && / · legacy doors 0 · /.test(await text('wb-stage-info')), s);
+      await shot('case10-deleted.png');
+      await pressUndo();
+      s = await state();
+      check('case 10: Ctrl+Z restores the deleted record', !!s.draft[SIDE_DOOR] && s.unsaved === 0, s.unsaved);
+      await clickAction('redo');
+      await clickAction('export');
+      const exported = await cdp.eval("document.getElementById('wb-export-text') && document.getElementById('wb-export-text').value");
+      const cs = exported ? JSON.parse(exported) : null;
+      check('case 10: export is a version-2 delete op', cs && cs.version === 2 && JSON.stringify(cs.operations) === JSON.stringify([{ op: 'delete', id: SIDE_DOOR }]), cs);
+      const delFile = path.join(OUT, 'case10-changeset.json');
+      fs.writeFileSync(delFile, exported || '');
+      await shot('case10-export.png');
+      const applyDelete = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'world-apply.js'), delFile, '--root=' + copy], { encoding: 'utf8' });
+      fs.writeFileSync(path.join(OUT, 'case10-apply-delete.txt'), applyDelete.stdout + applyDelete.stderr);
+      check('case 10: world-apply deletes on the copy (catalog diff + catalog check)', applyDelete.status === 0 && applyDelete.stdout.includes('VALID 15 record(s)') &&
+        applyDelete.stdout.includes("-         connections: ['town-hospital', '" + SIDE_DOOR + "']") && applyDelete.stdout.includes('CHECK WORLD-ENGINE-V0.1-CATALOG-PASS'), applyDelete.stdout + applyDelete.stderr);
+      const cat = spawnSync(process.execPath, [path.join(copy, 'test', 'world-engine-v0.1-catalog.js')], { cwd: copy, encoding: 'utf8' });
+      check('case 10: node test/world-engine-v0.1-catalog.js green on the copy', cat.status === 0 && cat.stdout.includes('WORLD-ENGINE-V0.1-CATALOG-PASS'), cat.stdout + cat.stderr);
+      const inv = spawnSync(process.execPath, [path.join(copy, 'test', 'legacy-door-inventory.js')], { cwd: copy, encoding: 'utf8' });
+      check('case 10: node test/legacy-door-inventory.js green on the copy', inv.status === 0 && inv.stdout.includes('LEGACY-DOOR-INVENTORY-PASS sources=0 live=0 shadowed=0 conflict=0'), inv.stdout + inv.stderr);
+      fs.writeFileSync(path.join(OUT, 'case10-copy-checks.txt'), cat.stdout.trim().split('\n').pop() + '\n' + inv.stdout.trim().split('\n').pop() + '\n');
+      check('case 10: copy registry, gen and catalog are byte-identical to before the create', three().every((b, i) => b.equals(original[i])));
+      check('case 10: real repo world/connections.json and js/world-catalog.js hashes unchanged', sha() === shaStart && sha(CATALOG) === catalogShaStart);
     }
   } catch (e) {
     check('driver completed without exception', false, String(e && e.stack || e));
