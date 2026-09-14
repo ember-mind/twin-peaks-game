@@ -53,6 +53,35 @@
       {x:136,y:55,w:22,h:4,depth:80},{x:141,y:56,w:17,h:4,depth:80},
       {x:148,y:57,w:10,h:3,depth:80}]}
   ]);
+  /* Roadhouse: same deterministic clocks and existing archetypes as diner.
+   * Anchors are authored world pixels; marks sit on visible fixtures rather
+   * than inventing free-floating light. */
+  life.register('roadhouse',[
+    {id:'roadhouse-neon',type:'LIGHT_NEON',duration:[620,840],x:18,y:15,depth:0,variants:3,
+      tubes:[
+        {x:0,y:14,w:64,h:2},{x:4,y:17,w:52,h:4},{x:0,y:26,w:66,h:2},
+        {x:10,y:9,w:4,h:3},{x:18,y:5,w:4,h:4},{x:26,y:9,w:4,h:3},
+        {x:34,y:5,w:4,h:4},{x:42,y:9,w:4,h:3}
+      ],regions:[{x:13,y:10,w:76,h:35,depth:0}]},
+    {id:'table-candle-west',type:'LIGHT_WARM_VARIATION',x:95,y:67,depth:80,
+      delay:[2600,6200],duration:[700,1100],intensity:.75,
+      regions:[{x:82,y:66,w:30,h:10,depth:80}]},
+    {id:'table-candle-middle',type:'LIGHT_WARM_VARIATION',x:155,y:89,depth:112,
+      delay:[2800,6800],duration:[680,1080],intensity:.72,
+      regions:[{x:142,y:88,w:30,h:10,depth:112}]},
+    {id:'table-candle-south',type:'LIGHT_WARM_VARIATION',x:107,y:116,depth:144,
+      delay:[2500,6500],duration:[720,1140],intensity:.72,
+      regions:[{x:94,y:115,w:30,h:10,depth:144}]},
+    {id:'jukebox-cycle',type:'MACHINE_IDLE_ACTIVITY',x:218,y:115,depth:160,variants:2,
+      delay:[1800,4200],duration:[900,1300],intensity:1.2,marks:[
+        [{x:4,y:3,w:3,h:27,color:'#d64948'},{x:9,y:3,w:12,h:2,color:'#f4c568'}],
+        [{x:20,y:3,w:3,h:27,color:'#d64948'},{x:7,y:7,w:14,h:2,color:'#ff7352'}]
+      ]},
+    {id:'cigarette-west',type:'STEAM_SMALL',x:55,y:93,depth:112,variants:3,
+      duration:[1280,1460],intensity:.72},
+    {id:'cigarette-east',type:'STEAM_SMALL',x:193,y:133,depth:144,variants:3,
+      duration:[1360,1540],intensity:.62}
+  ]);
   var reactions=root.GAME.EnvironmentReactions;
   if(reactions)reactions.register('diner',[{id:'front-door',trigger:'ENTITY_ENTERED_DOORWAY',
     arrivalKey:'6,8',fromMapId:'town',x:96,y:144,depth:160,frames:reactions.doorEntryFrames,
