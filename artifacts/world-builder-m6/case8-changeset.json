@@ -1,0 +1,42 @@
+{
+  "format": "world-connections-changeset",
+  "version": 2,
+  "target": "world/connections.json",
+  "operations": [
+    {
+      "op": "create",
+      "id": "town-hospital-side-door",
+      "connection": {
+        "id": "town-hospital-side-door",
+        "a": {
+          "scene": "town",
+          "triggers": [
+            [
+              30,
+              9
+            ]
+          ],
+          "spawn": {
+            "tx": 30,
+            "ty": 10,
+            "dir": "down"
+          }
+        },
+        "b": {
+          "scene": "hospital",
+          "triggers": [
+            [
+              14,
+              9
+            ]
+          ],
+          "spawn": {
+            "tx": 12,
+            "ty": 9,
+            "dir": "left"
+          }
+        }
+      }
+    }
+  ]
+}
