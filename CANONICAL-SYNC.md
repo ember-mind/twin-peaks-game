@@ -94,3 +94,5 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-14 mirror: merge M4b eef0326 (World Builder editing UI, tools/world-apply.js, CI 21 suites, editor core loader fix)
 
 - 2026-09-14 — merged E3 Roadhouse gauntlet (34d8ab3): native roadhouse scene + ambient + evidence; lighting unit 6.5/10 below floor, see reports/gauntlet-e3-roadhouse.md. Mirrored changed files to vault.
+
+- 2026-09-14 — merged M5 legacy doors → registry (569267c): 15 records, 3 one-way, single installer js/world-connections-production.js, js/maps.js door-free; merge fix removed E3 roadhouse-scene door assertion. Mirrored to vault, deleted js/traincar-location-production.js in vault.
