@@ -12,7 +12,7 @@
 // THIS FILE STAYS RUNTIME-FREE ON PURPOSE (it carries no runtime token): it only composes siblings, never
 // reaches the runtime or world data. That is what keeps the core grep-guard clean; the sole game-aware
 // bridge lives in js/world-builder-data.js (the adapter), which is outside this guarded directory.
-const Editor = (function () {
+(function () {
     // module file -> canonical key under which its API is exposed on the assembled Editor.
   const PIECES = [
      ['identity', 'identity'],
@@ -24,7 +24,8 @@ const Editor = (function () {
      ['history', 'history'],
      ['validation', 'validation'],
      ['interaction', 'interaction'],
-     ['inspector', 'inspector']
+     ['inspector', 'inspector'],
+     ['edit', 'edit']
     ];
 
     // node: require each sibling so it exports its API; the core stays game-agnostic because no piece reads

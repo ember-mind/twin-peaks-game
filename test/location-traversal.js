@@ -69,7 +69,7 @@ require(js('sheriffs-station-exterior-scene.js'));
 require(js('sheriffs-station-production.js'));
 require(js('world-engine.js'));
 require(js('world-catalog.js'));
-global.GAME.LocationConnections.install(connection, global.GAME.Maps);
+require(js('world-connections-production.js'));
 // Exercise the production reaction implementation with the connection's named
 // departure hook. The preview uses the same unconstrained front-door reaction.
 const R = global.GAME.EnvironmentReactions;

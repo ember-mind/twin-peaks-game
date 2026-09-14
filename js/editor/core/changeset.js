@@ -10,7 +10,7 @@
 // a drift here means the editor would preview something the real commit would not. Keep both in
 // sync and let test/editor/changeset.js + test/apply-changeset.js catch divergence.
 
-const Editor = (function () {
+(function () {
   const R = globalThis.Editor || {};
 
   function clone(v) { return JSON.parse(JSON.stringify(v)); }

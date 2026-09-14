@@ -10,7 +10,7 @@
 // truth for z-order: callers feed it in paint order and get the topmost match back, so the test's
 // "two items on one tile -> the topmost" assertion holds trivially and deterministically.
 
-const Editor = (function () {
+(function () {
   const R = globalThis.Editor || {};
 
    // A selectable covers a tile when its rectangle contains it. Missing w/h default to 1 (a single-tile

@@ -1,6 +1,7 @@
 # WORLD BUILDER / core regression gate (Issue 10).
-# Runs the pure node test suites that back the World Builder v0.1 PR plus the two project-wide
-# gates. No browser, no build step: each checked file is a plain `node test/<name>.js` that
+# Runs the pure node test suites that back the World Builder (v0.1 -> M5 legacy doors) plus the two
+# project-wide gates. test/world-builder-browser.js needs a local Chrome and is run by hand (see reports/).
+# No browser, no build step: each checked file is a plain `node test/<name>.js` that
 # exits non-zero on failure. Node 24 to match the local dev target (the fixtures rely on the
 # Node-24 read-only `navigator` global; older runtimes are tolerated by the try/catch shims).
 name: tests
@@ -18,8 +19,50 @@ jobs:
        - uses: actions/setup-node@v4
          with:
            node-version: '24'
-       - name: World Builder data + UI layer (M1-M3)
+       - name: World Builder data + UI layer (M1-M4b)
          run: node test/world-builder.js
+       - name: Editor core - changeset
+         run: node test/editor/changeset.js
+       - name: Editor core - edit
+         run: node test/editor/edit.js
+       - name: Editor core - history
+         run: node test/editor/history.js
+       - name: Editor core - hit-test
+         run: node test/editor/hit-test.js
+       - name: Editor core - identity
+         run: node test/editor/identity.js
+       - name: Editor core - inspector
+         run: node test/editor/inspector.js
+       - name: Editor core - interaction
+         run: node test/editor/interaction.js
+       - name: Editor core - model
+         run: node test/editor/model.js
+       - name: Editor core - world-builder-core
+         run: node test/editor/world-builder-core.js
+       - name: World door equality (all maps vs pre-M5 fixture)
+         run: node test/world-door-equality.js
+       - name: Legacy door inventory (0 classic doors)
+         run: node test/legacy-door-inventory.js
+       - name: Location connections (paired, one-way, needsClues)
+         run: node test/location-connections.js
+       - name: Migrated door traversal (real engine input)
+         run: node test/migrated-door-traversal.js
+       - name: World connection registry
+         run: node test/test-world-registry.js
+       - name: Apply changeset pipeline
+         run: node test/apply-changeset.js
+       - name: Editor apply preflight
+         run: node test/editor-apply-preflight.js
+       - name: Editor runtime isolation
+         run: node test/editor-runtime-isolation.js
+       - name: World apply CLI (temp fixture)
+         run: node test/world-apply.js
+       - name: Cast continuity validators
+         run: node test/cast-continuity-validate.js
+       - name: Cast presence sync
+         run: node test/cast-presence-sync.js
+       - name: World engine v0.1 catalog
+         run: node test/world-engine-v0.1-catalog.js
        - name: Project smoke gate
          run: node test/smoke.js
        - name: Project walkthrough gate

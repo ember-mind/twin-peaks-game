@@ -1,0 +1,647 @@
+{
+  "note": "GAME.Maps.<id>.doors before M5 (main b284dd2). source = classic js/maps.js doors{} + glue gate as glue compiles them; booted = descriptors after the full production chain.",
+  "source": {
+    "arrival": {
+      "4,8": {
+        "to": "town",
+        "tx": 30,
+        "ty": 33,
+        "dir": "up"
+      }
+    },
+    "town": {
+      "9,6": {
+        "to": "hotel_gn",
+        "tx": 8,
+        "ty": 10,
+        "dir": "up",
+        "needsFlag": "sogno_fatto",
+        "blockedMsg": "hotel_locked"
+      },
+      "23,6": {
+        "to": "hospital",
+        "tx": 7,
+        "ty": 10,
+        "dir": "up",
+        "needsFlag": "sogno_fatto",
+        "blockedMsg": "hospital_locked"
+      },
+      "42,6": {
+        "to": "palmer",
+        "tx": 7,
+        "ty": 10,
+        "dir": "up"
+      },
+      "12,20": {
+        "to": "sheriffs_station_exterior",
+        "tx": 7,
+        "ty": 10,
+        "dir": "up"
+      },
+      "42,20": {
+        "to": "double_r_exterior_prototype",
+        "tx": 6,
+        "ty": 10,
+        "dir": "up"
+      },
+      "47,28": {
+        "to": "roadhouse",
+        "tx": 7,
+        "ty": 8,
+        "dir": "up",
+        "needsFlag": "atto4",
+        "blockedMsg": "roadhouse_chiuso"
+      },
+      "55,14": {
+        "to": "traincar",
+        "tx": 1,
+        "ty": 7,
+        "dir": "right",
+        "needsFlag": "atto3",
+        "blockedMsg": "est_bloccato"
+      },
+      "55,15": {
+        "to": "traincar",
+        "tx": 1,
+        "ty": 7,
+        "dir": "right",
+        "needsFlag": "atto3",
+        "blockedMsg": "est_bloccato"
+      },
+      "50,0": {
+        "to": "woods",
+        "tx": 14,
+        "ty": 20,
+        "dir": "up",
+        "needsClues": 3
+      }
+    },
+    "sheriff": {},
+    "palmer": {
+      "7,11": {
+        "to": "town",
+        "tx": 42,
+        "ty": 7,
+        "dir": "down"
+      },
+      "8,11": {
+        "to": "town",
+        "tx": 42,
+        "ty": 7,
+        "dir": "down"
+      }
+    },
+    "room_315": {},
+    "hotel_gn": {
+      "8,11": {
+        "to": "town",
+        "tx": 9,
+        "ty": 7,
+        "dir": "down"
+      },
+      "9,11": {
+        "to": "town",
+        "tx": 9,
+        "ty": 7,
+        "dir": "down"
+      }
+    },
+    "hospital": {
+      "7,11": {
+        "to": "town",
+        "tx": 23,
+        "ty": 7,
+        "dir": "down"
+      },
+      "8,11": {
+        "to": "town",
+        "tx": 23,
+        "ty": 7,
+        "dir": "down"
+      }
+    },
+    "diner": {
+      "6,9": {
+        "to": "town",
+        "tx": 42,
+        "ty": 21,
+        "dir": "down"
+      },
+      "7,9": {
+        "to": "town",
+        "tx": 42,
+        "ty": 21,
+        "dir": "down"
+      }
+    },
+    "woods": {
+      "14,4": {
+        "to": "redroom",
+        "tx": 8,
+        "ty": 9,
+        "dir": "up"
+      },
+      "14,21": {
+        "to": "town",
+        "tx": 50,
+        "ty": 1,
+        "dir": "down"
+      }
+    },
+    "redroom": {
+      "8,11": {
+        "to": "room_315",
+        "tx": 2,
+        "ty": 6,
+        "dir": "down"
+      }
+    },
+    "traincar": {
+      "0,7": {
+        "to": "town",
+        "tx": 54,
+        "ty": 14,
+        "dir": "left"
+      },
+      "21,0": {
+        "to": "oej",
+        "tx": 8,
+        "ty": 8,
+        "dir": "up",
+        "needsFlag": "east_route_confirmed",
+        "blockedMsg": "oej_bloccato"
+      }
+    },
+    "oej": {
+      "7,9": {
+        "to": "traincar",
+        "tx": 21,
+        "ty": 1,
+        "dir": "down"
+      },
+      "8,9": {
+        "to": "traincar",
+        "tx": 21,
+        "ty": 1,
+        "dir": "down"
+      }
+    },
+    "roadhouse": {
+      "7,9": {
+        "to": "town",
+        "tx": 47,
+        "ty": 29,
+        "dir": "down"
+      },
+      "8,9": {
+        "to": "town",
+        "tx": 47,
+        "ty": 29,
+        "dir": "down"
+      }
+    }
+  },
+  "booted": {
+    "arrival": {
+      "4,8": {
+        "to": "town",
+        "tx": 30,
+        "ty": 33,
+        "dir": "up"
+      }
+    },
+    "diner": {
+      "6,9": {
+        "connectionId": "double-r-front-entrance",
+        "to": "double_r_exterior_prototype",
+        "tx": 6,
+        "ty": 7,
+        "dir": "down",
+        "departureReaction": "front-door"
+      },
+      "7,9": {
+        "connectionId": "double-r-front-entrance",
+        "to": "double_r_exterior_prototype",
+        "tx": 6,
+        "ty": 7,
+        "dir": "down",
+        "departureReaction": "front-door"
+      }
+    },
+    "double_r_exterior_prototype": {
+      "6,6": {
+        "connectionId": "double-r-front-entrance",
+        "to": "diner",
+        "tx": 6,
+        "ty": 8,
+        "dir": "up"
+      },
+      "7,6": {
+        "connectionId": "double-r-front-entrance",
+        "to": "diner",
+        "tx": 6,
+        "ty": 8,
+        "dir": "up"
+      },
+      "2,11": {
+        "connectionId": "town-double-r-lot",
+        "to": "town",
+        "tx": 42,
+        "ty": 21,
+        "dir": "down"
+      },
+      "3,11": {
+        "connectionId": "town-double-r-lot",
+        "to": "town",
+        "tx": 42,
+        "ty": 21,
+        "dir": "down"
+      },
+      "4,11": {
+        "connectionId": "town-double-r-lot",
+        "to": "town",
+        "tx": 42,
+        "ty": 21,
+        "dir": "down"
+      },
+      "5,11": {
+        "connectionId": "town-double-r-lot",
+        "to": "town",
+        "tx": 42,
+        "ty": 21,
+        "dir": "down"
+      },
+      "6,11": {
+        "connectionId": "town-double-r-lot",
+        "to": "town",
+        "tx": 42,
+        "ty": 21,
+        "dir": "down"
+      },
+      "7,11": {
+        "connectionId": "town-double-r-lot",
+        "to": "town",
+        "tx": 42,
+        "ty": 21,
+        "dir": "down"
+      },
+      "8,11": {
+        "connectionId": "town-double-r-lot",
+        "to": "town",
+        "tx": 42,
+        "ty": 21,
+        "dir": "down"
+      },
+      "9,11": {
+        "connectionId": "town-double-r-lot",
+        "to": "town",
+        "tx": 42,
+        "ty": 21,
+        "dir": "down"
+      },
+      "10,11": {
+        "connectionId": "town-double-r-lot",
+        "to": "town",
+        "tx": 42,
+        "ty": 21,
+        "dir": "down"
+      },
+      "11,11": {
+        "connectionId": "town-double-r-lot",
+        "to": "town",
+        "tx": 42,
+        "ty": 21,
+        "dir": "down"
+      },
+      "12,11": {
+        "connectionId": "town-double-r-lot",
+        "to": "town",
+        "tx": 42,
+        "ty": 21,
+        "dir": "down"
+      },
+      "13,11": {
+        "connectionId": "town-double-r-lot",
+        "to": "town",
+        "tx": 42,
+        "ty": 21,
+        "dir": "down"
+      }
+    },
+    "hospital": {
+      "7,11": {
+        "to": "town",
+        "tx": 23,
+        "ty": 7,
+        "dir": "down"
+      },
+      "8,11": {
+        "to": "town",
+        "tx": 23,
+        "ty": 7,
+        "dir": "down"
+      }
+    },
+    "hotel_gn": {
+      "8,11": {
+        "to": "town",
+        "tx": 9,
+        "ty": 7,
+        "dir": "down"
+      },
+      "9,11": {
+        "to": "town",
+        "tx": 9,
+        "ty": 7,
+        "dir": "down"
+      },
+      "14,1": {
+        "connectionId": "great-northern-room-315-hall",
+        "to": "room_315",
+        "tx": 7,
+        "ty": 10,
+        "dir": "up"
+      }
+    },
+    "oej": {
+      "7,9": {
+        "connectionId": "traincar-oej-entrance",
+        "to": "traincar",
+        "tx": 21,
+        "ty": 1,
+        "dir": "down"
+      },
+      "8,9": {
+        "connectionId": "traincar-oej-entrance",
+        "to": "traincar",
+        "tx": 21,
+        "ty": 1,
+        "dir": "down"
+      }
+    },
+    "palmer": {
+      "7,11": {
+        "to": "town",
+        "tx": 42,
+        "ty": 7,
+        "dir": "down"
+      },
+      "8,11": {
+        "to": "town",
+        "tx": 42,
+        "ty": 7,
+        "dir": "down"
+      }
+    },
+    "redroom": {
+      "8,11": {
+        "to": "room_315",
+        "tx": 2,
+        "ty": 6,
+        "dir": "down"
+      }
+    },
+    "roadhouse": {
+      "7,9": {
+        "to": "town",
+        "tx": 47,
+        "ty": 29,
+        "dir": "down"
+      },
+      "8,9": {
+        "to": "town",
+        "tx": 47,
+        "ty": 29,
+        "dir": "down"
+      }
+    },
+    "room_315": {
+      "7,11": {
+        "connectionId": "great-northern-room-315-hall",
+        "to": "hotel_gn",
+        "tx": 14,
+        "ty": 2,
+        "dir": "down"
+      }
+    },
+    "sheriff": {
+      "7,11": {
+        "connectionId": "sheriffs-station-front-entrance",
+        "to": "sheriffs_station_exterior",
+        "tx": 7,
+        "ty": 7,
+        "dir": "down"
+      },
+      "8,11": {
+        "connectionId": "sheriffs-station-front-entrance",
+        "to": "sheriffs_station_exterior",
+        "tx": 7,
+        "ty": 7,
+        "dir": "down"
+      }
+    },
+    "sheriffs_station_exterior": {
+      "7,6": {
+        "connectionId": "sheriffs-station-front-entrance",
+        "to": "sheriff",
+        "tx": 7,
+        "ty": 10,
+        "dir": "up"
+      },
+      "8,6": {
+        "connectionId": "sheriffs-station-front-entrance",
+        "to": "sheriff",
+        "tx": 7,
+        "ty": 10,
+        "dir": "up"
+      },
+      "2,11": {
+        "connectionId": "town-sheriffs-station-lot",
+        "to": "town",
+        "tx": 12,
+        "ty": 21,
+        "dir": "down"
+      },
+      "3,11": {
+        "connectionId": "town-sheriffs-station-lot",
+        "to": "town",
+        "tx": 12,
+        "ty": 21,
+        "dir": "down"
+      },
+      "4,11": {
+        "connectionId": "town-sheriffs-station-lot",
+        "to": "town",
+        "tx": 12,
+        "ty": 21,
+        "dir": "down"
+      },
+      "5,11": {
+        "connectionId": "town-sheriffs-station-lot",
+        "to": "town",
+        "tx": 12,
+        "ty": 21,
+        "dir": "down"
+      },
+      "6,11": {
+        "connectionId": "town-sheriffs-station-lot",
+        "to": "town",
+        "tx": 12,
+        "ty": 21,
+        "dir": "down"
+      },
+      "7,11": {
+        "connectionId": "town-sheriffs-station-lot",
+        "to": "town",
+        "tx": 12,
+        "ty": 21,
+        "dir": "down"
+      },
+      "8,11": {
+        "connectionId": "town-sheriffs-station-lot",
+        "to": "town",
+        "tx": 12,
+        "ty": 21,
+        "dir": "down"
+      },
+      "9,11": {
+        "connectionId": "town-sheriffs-station-lot",
+        "to": "town",
+        "tx": 12,
+        "ty": 21,
+        "dir": "down"
+      },
+      "10,11": {
+        "connectionId": "town-sheriffs-station-lot",
+        "to": "town",
+        "tx": 12,
+        "ty": 21,
+        "dir": "down"
+      },
+      "11,11": {
+        "connectionId": "town-sheriffs-station-lot",
+        "to": "town",
+        "tx": 12,
+        "ty": 21,
+        "dir": "down"
+      },
+      "12,11": {
+        "connectionId": "town-sheriffs-station-lot",
+        "to": "town",
+        "tx": 12,
+        "ty": 21,
+        "dir": "down"
+      },
+      "13,11": {
+        "connectionId": "town-sheriffs-station-lot",
+        "to": "town",
+        "tx": 12,
+        "ty": 21,
+        "dir": "down"
+      }
+    },
+    "town": {
+      "9,6": {
+        "to": "hotel_gn",
+        "tx": 8,
+        "ty": 10,
+        "dir": "up",
+        "needsFlag": "sogno_fatto",
+        "blockedMsg": "hotel_locked"
+      },
+      "23,6": {
+        "to": "hospital",
+        "tx": 7,
+        "ty": 10,
+        "dir": "up",
+        "needsFlag": "sogno_fatto",
+        "blockedMsg": "hospital_locked"
+      },
+      "42,6": {
+        "to": "palmer",
+        "tx": 7,
+        "ty": 10,
+        "dir": "up"
+      },
+      "12,20": {
+        "connectionId": "town-sheriffs-station-lot",
+        "to": "sheriffs_station_exterior",
+        "tx": 7,
+        "ty": 10,
+        "dir": "up"
+      },
+      "42,20": {
+        "connectionId": "town-double-r-lot",
+        "to": "double_r_exterior_prototype",
+        "tx": 6,
+        "ty": 10,
+        "dir": "up"
+      },
+      "47,28": {
+        "to": "roadhouse",
+        "tx": 7,
+        "ty": 8,
+        "dir": "up",
+        "needsFlag": "atto4",
+        "blockedMsg": "roadhouse_chiuso"
+      },
+      "55,14": {
+        "connectionId": "town-traincar-east",
+        "to": "traincar",
+        "tx": 1,
+        "ty": 7,
+        "dir": "right",
+        "needsFlag": "atto3",
+        "blockedMsg": "est_bloccato"
+      },
+      "55,15": {
+        "connectionId": "town-traincar-east",
+        "to": "traincar",
+        "tx": 1,
+        "ty": 7,
+        "dir": "right",
+        "needsFlag": "atto3",
+        "blockedMsg": "est_bloccato"
+      },
+      "50,0": {
+        "to": "woods",
+        "tx": 14,
+        "ty": 20,
+        "dir": "up",
+        "needsClues": 3
+      }
+    },
+    "traincar": {
+      "0,7": {
+        "connectionId": "town-traincar-east",
+        "to": "town",
+        "tx": 54,
+        "ty": 14,
+        "dir": "left"
+      },
+      "21,0": {
+        "connectionId": "traincar-oej-entrance",
+        "to": "oej",
+        "tx": 8,
+        "ty": 8,
+        "dir": "up",
+        "needsFlag": "east_route_confirmed",
+        "blockedMsg": "oej_bloccato"
+      }
+    },
+    "woods": {
+      "14,4": {
+        "to": "redroom",
+        "tx": 8,
+        "ty": 9,
+        "dir": "up"
+      },
+      "14,21": {
+        "to": "town",
+        "tx": 50,
+        "ty": 1,
+        "dir": "down"
+      }
+    }
+  }
+}

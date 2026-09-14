@@ -90,3 +90,9 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 2026-09-13: Merged PR #2 (qwen/night-world-builder-m1-m3: `js/world-builder.js`, `js/world-builder-data.js`, `js/world-builder-coords.js`, `world-builder.html`, `test/world-builder.js`, `.github/workflows/test.yml`, report). Adapted to Cast Presence: the builder's npc overlay reads the authored baseline cast (`GAME.CastPresence.bodiesFor(scene, null)`), page loads narrative-runtime/narrative-data.gen/cast-presence; sheriff baseline = 4 bodies (Leland is an Act 5 window). WORLD-BUILDER 64/64. Mirrored to the vault.
 - 2026-09-13 mirror: assets/ref/ (7 art-direction targets) + docs/art-direction-pass-e-briefs.md (Pass E brief pack)
 - 2026-09-14 mirror: merge M4a 93c5f05 (world/connections.json registry, world-connections.gen.js, js/editor/*, tests; four *-location-data.js deleted)
+- 2026-09-14 mirror: assets/ref/ second pack (8 targets) + docs/art-direction-pass-e-briefs.md briefs E5–E10
+- 2026-09-14 mirror: merge M4b eef0326 (World Builder editing UI, tools/world-apply.js, CI 21 suites, editor core loader fix)
+
+- 2026-09-14 — merged E3 Roadhouse gauntlet (34d8ab3): native roadhouse scene + ambient + evidence; lighting unit 6.5/10 below floor, see reports/gauntlet-e3-roadhouse.md. Mirrored changed files to vault.
+
+- 2026-09-14 — merged M5 legacy doors → registry (569267c): 15 records, 3 one-way, single installer js/world-connections-production.js, js/maps.js door-free; merge fix removed E3 roadhouse-scene door assertion. Mirrored to vault, deleted js/traincar-location-production.js in vault.

@@ -44,7 +44,8 @@ const js = (name) => path.join(__dirname, '..', 'js', name);
   'engine.js', 'glue.js', 'location-connections.js', 'environment-reactions.js',
   'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js',
   'sheriffs-station-scene.js', 'sheriffs-station-exterior-scene.js',
-  'world-connections.gen.js', 'sheriffs-station-production.js', 'room-315-production.js'
+  'world-connections.gen.js', 'double-r-exterior-art.js', 'double-r-exterior-scene.js', 'double-r-location-production.js',
+  'sheriffs-station-production.js', 'room-315-production.js', 'world-connections-production.js'
 ].forEach((name) => require(js(name)));
 
 const G = global.GAME;

@@ -45,6 +45,7 @@
   // renderer can show "from scene X at trigger tiles -> arrive on scene Y at spawn".
   function normalizeConnection(record) {
     var out = {};
+    if (record && record.one_way === true) out.one_way = true;
     if (record && record.a) {
       out.a = { endpoint: 'a', scene: record.a.scene, triggers: clone(record.a.triggers || []),
                 spawn: record.a.spawn ? { tx: record.a.spawn.tx, ty: record.a.spawn.ty, dir: record.a.spawn.dir } : null };
@@ -271,8 +272,59 @@
     return Object.freeze({ source: source, snapshot: snapshot, model: model });
   }
 
+  // ---- M4b game-aware helpers (still the ONLY place the editor touches the runtime) ----------------
+
+  // storyStateFromSeed(GAME, seed) — a narrative state built exactly as test/cast-continuity-validate.js
+  // stateFromSeed() does: fresh createState(), then flags/values/evidence/nodes_done merged, props cloned.
+  function storyStateFromSeed(GAME, seed) {
+    var G = GAME || {};
+    if (!G.NarrativeRuntime || typeof G.NarrativeRuntime.createState !== 'function') throw new Error('storyStateFromSeed: NarrativeRuntime not loaded');
+    var st = G.NarrativeRuntime.createState();
+    ['flags', 'values', 'evidence', 'nodes_done'].forEach(function (k) { Object.assign(st[k], (seed && seed[k]) || {}); });
+    if (seed && seed.props) st.props = JSON.parse(JSON.stringify(seed.props));
+    return st;
+  }
+
+  // castForSeed(GAME, seed|null) -> frozen { sceneId: [{id,name,sprite,x,y,dir,source}] } from
+  // GAME.CastPresence.resolveCast(state). seed null = baseline (resolveCast(null)). Read-only projection.
+  function castForSeed(GAME, seed) {
+    var G = GAME || {};
+    if (!G.CastPresence || typeof G.CastPresence.resolveCast !== 'function') throw new Error('castForSeed: CastPresence not loaded');
+    var all = G.CastPresence.resolveCast(seed ? storyStateFromSeed(G, seed) : null);
+    var out = {};
+    Object.keys(all).sort().forEach(function (id) {
+      var r = all[id];
+      if (r.status !== 'PLACED') return;
+      var b = r.body || {};
+      (out[r.sceneId] = out[r.sceneId] || []).push({ id: id, name: b.name || id, sprite: b.sprite || null,
+        x: r.x, y: r.y, dir: r.dir || 'down', source: r.source || null });
+    });
+    return freezeDeep(out);
+  }
+
+  // validationContext(GAME) -> the injected ctx for Editor.edit.validateDraft: real registry ids, real maps,
+  // and GAME.LocationConnections' own validators so every message is the runtime's, verbatim.
+  function validationContext(GAME) {
+    var G = GAME || {};
+    var LC = G.LocationConnections;
+    if (!LC || typeof LC.validateConnection !== 'function') throw new Error('validationContext: LocationConnections not loaded');
+    var ids = {};
+    ((G.WorldData && G.WorldData.connections) || []).forEach(function (c) { ids[c.id] = true; });
+    var maps = G.Maps || {};
+    return Object.freeze({
+      knownIds: function (id) { return Object.prototype.hasOwnProperty.call(ids, id); },
+      sceneExists: function (scene) { var m = maps[scene]; return !!(m && typeof m.width === 'number'); },
+      validateConnection: function (rec) { return LC.validateConnection(rec, maps); },
+      validateEndpoint: function (side, ep, opts) {
+        try { LC.validateEndpoint(side, ep, maps, opts); return null; }
+        catch (e) { return String(e.message || e).replace(/^LocationConnections: /, ''); }
+      }
+    });
+  }
+
   var api = { TILE: TILE, buildWorldSnapshot: buildWorldSnapshot, collectWorldSource: collectWorldSource,
-                 planBaseMap: planBaseMap, tileColorFor: tileColorFor, clone: clone, adaptWorld: adaptWorld };
+                 planBaseMap: planBaseMap, tileColorFor: tileColorFor, clone: clone, adaptWorld: adaptWorld,
+                 storyStateFromSeed: storyStateFromSeed, castForSeed: castForSeed, validationContext: validationContext };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     if (typeof window !== 'undefined') window.GAME = window.GAME || {}, window.GAME.WorldBuilderData = api;
 })();

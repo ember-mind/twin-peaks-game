@@ -21,7 +21,7 @@ function ok(cond, msg) { if (!cond) throw new Error('FAIL: ' + msg); pass++; }
 const repoRoot = path.join(__dirname, '..');
 const registryPath = path.join(repoRoot, 'world', 'connections.json');
 const base = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
-ok(Array.isArray(base.connections) && base.connections.length === 7, 'base registry has 7 records');
+ok(Array.isArray(base.connections) && base.connections.length === 15, 'base registry has 15 records');
 const baseVersion = base.version == null ? 1 : base.version;
 
 // ---- (a) DRY-RUN apply bumps the version and is pure (no disk write). ----------------------------
@@ -46,7 +46,7 @@ const csTwo = { operations: [
 const two = CA.apply(base, csTwo);
 ok(two.next.connections.some(c => c.id === '__test-scratch-door__'), 'apply added the new connection');
 ok(!two.next.connections.some(c => c.id === base.connections[0].id), 'apply removed the targeted connection');
-assert.equal(two.next.connections.length, 7, 'add + remove keep the record count at 7');
+assert.equal(two.next.connections.length, base.connections.length, 'add + remove keep the record count');
 
 // ---- (c) COMMIT writes json v+1 to a caller-chosen temp path + appends an audit sidecar. ---------
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'changeset-'));
@@ -91,7 +91,7 @@ ok(view.some(function (v) { return v.live; }), 'a connection touching the diner 
 
 // ---- (g) Idempotence: applying an empty changeset only bumps the version, nothing else. ----------
 const noop = CA.apply(base, { operations: [] });
-assert.equal(noop.next.connections.length, 7, 'empty changeset keeps record count');
+assert.equal(noop.next.connections.length, base.connections.length, 'empty changeset keeps record count');
 assert.deepEqual(JSON.parse(JSON.stringify(noop.next.connections)).sort(function (a, b) { return a.id < b.id ? -1 : 1; }),
   base.connections.slice().map(c => JSON.parse(JSON.stringify(c))).sort(function (a, b) { return a.id < b.id ? -1 : 1; }),
   'empty changeset leaves every record unchanged');

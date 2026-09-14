@@ -80,8 +80,9 @@ ok(WB.inspect(st, town)[0].value === 'town' && !WB.inspect(st, town)[0].editable
 
 const conn = st.model.connectionsById['town-to-traincar'];
 const connRows = WB.inspect(st, conn);
-ok(connRows.map(function (r) { return r.key; }).join(',') === 'id,a.scene,b.scene,a.spawn.tx,a.spawn.ty,b.spawn.tx,b.spawn.ty', 'inspect(connection) emits nested dot-path fields');
-ok(connRows[1].value === 'town' && connRows[3].value === 5, 'connection dot-paths resolve (a.scene=town, a.spawn.tx=5)');
+ok(connRows.map(function (r) { return r.key; }).join(',') === 'id,one_way,a.scene,b.scene,a.spawn.tx,a.spawn.ty,b.spawn.tx,b.spawn.ty', 'inspect(connection) emits nested dot-path fields');
+ok(connRows[2].value === 'town' && connRows[4].value === 5, 'connection dot-paths resolve (a.scene=town, a.spawn.tx=5)');
+ok(connRows[1].value === false, 'inspect(connection) shows one_way (false for a paired record)');
 
 // an overlay exposes only its common fields; an unknown shape yields no rows (never a guess).
 ok(WB.inspect(st, town.byKind.objects[0]).map(function (r) { return r.key; }).join(',') === 'tx,ty', 'inspect(object overlay) -> tx,ty');

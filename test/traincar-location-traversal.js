@@ -24,7 +24,7 @@ require(js('sheriffs-station-production.js'));
 require(js('world-engine.js'));
 require(js('world-catalog.js'));
 const E = GAME.Engine;
-GAME.LocationConnections.connectionRecordsFor(['town-traincar-east','traincar-oej-entrance']).forEach(connection => GAME.LocationConnections.install(connection, GAME.Maps));
+require(js('world-connections-production.js'));
 GAME.NarrativeProduction = { onClassicSave() { saveCount++; return failSave ? { handled: true, ok: false, error: 'fixture disk full' } : { handled: true, ok: true }; } };
 
 function frame() { now += 20; queue.splice(0).forEach(fn => fn(now)); }

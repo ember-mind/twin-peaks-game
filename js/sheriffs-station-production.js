@@ -1,15 +1,14 @@
-/* sheriffs-station-production.js — install the production sheriff exterior,
- * the canonical interior ('sheriff') and the two connections that join them
- * to Town. Le scene devono esistere prima delle connessioni. */
+/* sheriffs-station-production.js — install the production sheriff exterior
+ * and the canonical interior ('sheriff'). Their connections are installed by
+ * js/world-connections-production.js, which loads after every scene. */
 (function () {
   'use strict';
 
   var G = window.GAME;
   G.SheriffsStationExteriorScene.install();
   G.SheriffsStationScene.install();
-  G.LocationConnections.connectionRecordsFor(['sheriffs-station-front-entrance', 'town-sheriffs-station-lot']).forEach(function (connection) {
-    G.LocationConnections.install(connection, G.Maps);
-    });
+  /* Doors (sheriffs-station-front-entrance, town-sheriffs-station-lot) are installed by
+   * js/world-connections-production.js. */
 
   /* Reactive entrance door: the closed double leaves at x112..144,y176..192
    * (js/sheriffs-station-art.js, south wall) react only to a committed

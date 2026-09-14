@@ -61,6 +61,10 @@ function load(name) { return require(path.join(root, 'js', name)); }
 ].forEach(load);
 load('hospital-art.js');
 load('hospital-scene.js');
+// Doors come from the connection registry since M5 (js/maps.js carries none).
+load('location-connections.js');
+load('world-connections.gen.js');
+global.GAME.LocationConnections.connectionRecordsFor(['town-hospital']).forEach((c) => global.GAME.LocationConnections.install(c, global.GAME.Maps));
 
 const G = global.GAME;
 const Engine = G.Engine;

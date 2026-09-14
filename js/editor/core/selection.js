@@ -7,7 +7,7 @@
 // drag layer just parses the id via identity.kindOf. This module never imports the runtime; it holds
 // ids, not entities.
 
-const Editor = (function () {
+(function () {
   const R = globalThis.Editor || {};
 
    // createSelection() -> an empty frozen selection. The canonical starting point after a scene change.

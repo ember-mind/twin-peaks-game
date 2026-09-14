@@ -20,7 +20,7 @@
 // "hovered in place". A connection endpoint's stable id encodes connId+side via identity.js, so a
 // hit tells us exactly which record side to move without recomputing it.
 
-const Editor = (function () {
+(function () {
   const R = globalThis.Editor || {};
 
   // Sibling core modules are fetched lazily: in the browser they already live on Editor.* by load
