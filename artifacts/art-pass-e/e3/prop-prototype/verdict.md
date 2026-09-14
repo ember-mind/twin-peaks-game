@@ -26,6 +26,18 @@ test/shot.sh roadhouse 7 8 up /tmp/prop-C.png \
   --ready-prefix=TP-PROP-PROTOTYPE-READY --gpu=swiftshader
 ```
 
-Decision: do not migrate Roadhouse props yet. Next useful round changes chair geometry
-only: taller exposed wooden backs, narrower red seats, stronger separation from table.
+## Round 2
 
+Verdict remains **technical YES, visual NOT YET**.
+
+- Luna xhigh rebuilt the Blender source around exactly two inward-facing chairs.
+- The native render is 48×36 with 46×35 occupied bounds and 13 hard colours.
+- One definition drives the integrated Roadhouse placement and two catalog instances.
+- Chair orientation is derived from position to table anchor with local `FRONT = -Y`;
+  four-direction contact-sheet evidence confirms the authoring convention.
+- Astra scored round 2 `6/10`, ranked `BETTER` than before, still below floor 7.
+- One gap: the tabletop reads as a bright orange disc rather than the reference's dark
+  wooden surface with a distinct shaded rim.
+
+Decision: do not migrate Roadhouse props yet. Round 3 must fix tabletop value/material
+grammar while preserving the clearer two-chair structure.
