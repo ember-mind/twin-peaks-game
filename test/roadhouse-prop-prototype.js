@@ -10,8 +10,8 @@
 
   var variants = {
     A: { label: 'A — current native scene', image: null, smoothing: false },
-    B: { label: 'B — round 2 Blender diagnostic', image: 'round-2-diagnostic.png', smoothing: false },
-    C: { label: 'C — round 2 native 48×36 in 64×48 bounds', image: 'round-2-asset.png', smoothing: false }
+    B: { label: 'B — round 3 Blender diagnostic', image: 'round-3-diagnostic.png', smoothing: false },
+    C: { label: 'C — round 3 native 48×36 in 64×48 bounds', image: 'round-3-asset.png', smoothing: false }
   };
   var keys = Object.keys(variants);
   var params = new URLSearchParams(location.search);
@@ -31,9 +31,9 @@
     frontAxis: '-Y',
     backAxis: '+Y',
     variants: {
-      native: 'round-2-native.png',
-      asset: 'round-2-asset.png',
-      diagnostic: 'round-2-diagnostic.png'
+      native: 'round-3-native.png',
+      asset: 'round-3-asset.png',
+      diagnostic: 'round-3-diagnostic.png'
     },
     collisionOwner: 'map-rows',
     atomic: 'TP_PREFAB_TableTwoChairs',

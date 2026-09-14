@@ -3,7 +3,9 @@
 Question: can one Blender-authored prop definition render in the Roadhouse and a
 World Builder-style catalog without owning collision?
 
-Verdict: **technical YES, visual NOT YET**.
+Final verdict: **technical YES, visual floor reached**.
+
+## Round 1
 
 - One `.blend` source produces high-resolution and native-size transparent PNGs.
 - One frozen definition drives a Roadhouse placement and two catalog-preview instances.
@@ -15,8 +17,8 @@ Verdict: **technical YES, visual NOT YET**.
 Variants:
 
 - `A`: current native scene.
-- `B`: raw Blender render, browser downsampling.
-- `C`: 96x72 Blender render, nearest-neighbor hybrid.
+- `B`: current diagnostic Blender render.
+- `C`: current 48×36 hard-palette render in reusable 64×48 bounds.
 
 Run one variant:
 
@@ -41,3 +43,20 @@ Verdict remains **technical YES, visual NOT YET**.
 
 Decision: do not migrate Roadhouse props yet. Round 3 must fix tabletop value/material
 grammar while preserving the clearer two-chair structure.
+
+## Round 3 — final
+
+Verdict: **technical YES, visual floor reached at 7/10**.
+
+- Astra high changed only tabletop material bands and rim assignment in Blender.
+- The 48×36 native render keeps the round-2 46×35 silhouette and uses explicit
+  palettes of at most four useful tones per atomic prop.
+- The table now reads as a dark wooden plane with a distinct shaded rim.
+- Astra scored round 3 `7/10`, ranked `BETTER` than round 2.
+- Remaining gap: chair backs remain squat and visually crowded, lacking the reference's
+  tall, clearly separated wooden slats.
+
+Stop condition reached, so round 4 did not run. Prototype proves one Blender-authored
+definition can serve Roadhouse placement and two World Builder-style catalog instances
+without moving collision ownership out of map rows. Treat result as prototype evidence,
+not authorization for a production migration.
