@@ -10,7 +10,7 @@
 // the changeset pipeline treats records as JSON-serializable (an invariant apply relies on too):
 // an owned copy stops a live editor object's later edits bleeding into a frozen changeset.
 
-const Editor = (function () {
+(function () {
   const R = globalThis.Editor || {};
 
   function clone(v) { return JSON.parse(JSON.stringify(v)); }
