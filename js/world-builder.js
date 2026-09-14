@@ -7,7 +7,10 @@
  *   selection   stable ids from js/editor/core/identity.js, hit-tested topmost-wins over the same
  *               paint-ordered list the canvas draws (GameWorldBuilderCore.sceneItems)
  *   VIEW/EDIT   EDIT unlocks spawn x/y/facing, MOVE SPAWN, trigger MOVE/ADD/REMOVE, revert, export
- *   drafts      Editor.edit store (id -> whole record), every edit committed to Editor.history (Ctrl+Z)
+ *   M6          NEW CONNECTION (pick a tile in scene A, a tile in scene B, PAIRED/ONE-WAY, id, live validation,
+ *               CONFIRM) and DELETE CONNECTION (with a confirm step); both land in the draft store, so the
+ *               record shows (or disappears) at once and the export carries a version-2 create/delete op
+ *   drafts      Editor.edit store (id -> whole record), every edit committed to Editor.history (Ctrl+Z / Ctrl+Shift+Z)
  *   validation  GAME.LocationConnections messages verbatim + registry/endpoint/scene/paired checks
  *   story       read-only NPC overlay from GAME.CastPresence.resolveCast(seed state)
  *   legacy      map doors with no connection id: read-only `legacy-door` items
@@ -61,6 +64,8 @@
       mode: 'view',             // 'view' | 'edit'
       selectedId: null,
       pending: null,            // null | {action:'move-spawn'|'move-trigger'|'add-trigger', connId, side, index?}
+      creating: null,           // null | {step:'a'|'b'|'confirm', oneWay, a, b, id, idEdited, spawn:{a,b}, moving}
+      confirmDelete: null,      // connection id awaiting DELETE confirmation
       hover: null,
       notice: null,
       exportOpen: false,
@@ -102,6 +107,8 @@
     var viewBtn = modeGroup.appendChild(el('button', { 'data-action': 'mode-view' }, 'VIEW'));
     var editBtn = modeGroup.appendChild(el('button', { 'data-action': 'mode-edit' }, 'EDIT'));
     var undoBtn = bar.appendChild(el('button', { 'data-action': 'undo', title: 'Ctrl+Z' }, 'UNDO'));
+    var redoBtn = bar.appendChild(el('button', { 'data-action': 'redo', title: 'Ctrl+Shift+Z' }, 'REDO'));
+    var newBtn = bar.appendChild(el('button', { 'data-action': 'new-connection' }, 'NEW CONNECTION'));
     var revertAllBtn = bar.appendChild(el('button', { 'data-action': 'revert-all' }, 'REVERT ALL'));
     var exportBtn = bar.appendChild(el('button', { 'data-action': 'export', class: 'wb-primary' }, 'EXPORT CHANGESET'));
 
@@ -119,7 +126,7 @@
     legend.innerHTML =
       '<span class="lg lg-ep">◆</span> endpoint spawn&nbsp;&nbsp; <span class="lg lg-tr">■</span> trigger&nbsp;&nbsp; ' +
       '<span class="lg lg-ghost">◇</span> original (dimmed)&nbsp;&nbsp; <span class="lg lg-bad">◆</span> invalid draft&nbsp;&nbsp; ' +
-      '<span class="lg lg-npc">▲</span> npc&nbsp;&nbsp; <span class="lg lg-obj">▭</span> object&nbsp;&nbsp; <span class="lg lg-leg">□</span> legacy door (read-only)';
+      '<span class="lg lg-new">◈</span> new connection (unconfirmed)&nbsp;&nbsp; <span class="lg lg-npc">▲</span> npc&nbsp;&nbsp; <span class="lg lg-obj">▭</span> object&nbsp;&nbsp; <span class="lg lg-leg">□</span> legacy door (read-only)';
 
     // ------------------------------------------------------------------ scene + moment selectors
     var catalogScenes = {};
@@ -168,8 +175,34 @@
     }
     function errorsFor(connId) {
       var d = draft();
-      if (!d[connId]) return ['connection id "' + connId + '" does not exist in the draft'];
-      return E.validateDraft(d[connId], vctx, { changedSides: E.changedEndpoints(store, d, connId) });
+      if (!d[connId]) return store.base[connId] ? [] : ['connection id "' + connId + '" does not exist in the draft']; // a delete is a valid draft
+      if (E.isCreated(store, d, connId)) return E.validateDraft(d[connId], vctx, { created: true, draft: d });
+      return E.validateDraft(d[connId], vctx, { changedSides: E.changedEndpoints(store, d, connId), draft: d });
+    }
+
+    // ---- NEW CONNECTION candidate (not in the draft until CONFIRM)
+    function candidate() {
+      var c = ui.creating;
+      if (!c || !c.a || !c.b) return null;
+      var sa = model.scenes[c.a.scene], sb = model.scenes[c.b.scene];
+      return E.newConnection({ id: c.id, oneWay: c.oneWay, spawn: c.spawn,
+        a: { scene: c.a.scene, tx: c.a.tx, ty: c.a.ty, width: sa.width, height: sa.height },
+        b: { scene: c.b.scene, tx: c.b.tx, ty: c.b.ty, width: sb.width, height: sb.height } });
+    }
+    function candidateErrors() {
+      var rec = candidate();
+      if (!rec) return ['pick ' + (ui.creating && ui.creating.a ? 'a tile in scene B' : 'a tile in scene A') + ' first'];
+      var d = Object.assign({}, draft());
+      var errs = E.idErrors(rec.id, store, d, null);
+      d[rec.id] = rec;
+      E.validateDraft(rec, vctx, { created: true, draft: d }).forEach(function (e) { errs.push(e); });
+      return errs.filter(function (e, i) { return errs.indexOf(e) === i; });
+    }
+    function draftOps() {
+      var d = draft();
+      return E.changedIds(store, d).map(function (id) {
+        return { id: id, op: !d[id] ? 'delete' : (E.isCreated(store, d, id) ? 'create' : 'upsert') };
+      });
     }
     function allErrors() {
       var out = {};
@@ -246,7 +279,24 @@
         else if (it.kind === 'connection-endpoint') drawSpawn(ctx, sc, it.tx, it.ty, it.dir, it.side, z, { sel: isSel, bad: bad });
       });
 
-      if (ui.pending && ui.hover) {
+      var c = ui.creating;
+      if (c) {
+        var cand = candidate();
+        var cbad = cand && candidateErrors().length > 0;
+        ['a', 'b'].forEach(function (s) {
+          var pick = c[s];
+          if (!pick || pick.scene !== sc.sceneId) return;
+          if (cand) {
+            (cand[s].triggers || []).forEach(function (t) { drawTrigger(ctx, sc, t[0], t[1], z, { bad: cbad, label: 'new ' + s, sel: true }); });
+            if (cand[s].spawn) drawSpawn(ctx, sc, cand[s].spawn.tx, cand[s].spawn.ty, cand[s].spawn.dir, s, z, { bad: cbad, sel: c.moving === s });
+            if (!(cand[s].triggers || []).length) drawPick(ctx, pick.tx, pick.ty, z, s);
+          } else {
+            drawPick(ctx, pick.tx, pick.ty, z, s);
+          }
+        });
+      }
+
+      if ((ui.pending || (c && (c.step !== 'confirm' || c.moving))) && ui.hover) {
         ctx.save();
         ctx.strokeStyle = '#ffe36e'; ctx.lineWidth = 2; ctx.setLineDash([4, 3]);
         ctx.strokeRect(ui.hover.tx * z + 1.5, ui.hover.ty * z + 1.5, z - 3, z - 3);
@@ -312,6 +362,17 @@
       ctx.restore();
     }
 
+    function drawPick(ctx, tx, ty, z, sideName) {
+      ctx.save();
+      ctx.strokeStyle = '#7fd4ff'; ctx.lineWidth = 3;
+      ctx.strokeRect(tx * z + 2.5, ty * z + 2.5, z - 5, z - 5);
+      ctx.fillStyle = '#7fd4ff';
+      ctx.font = 'bold ' + Math.max(8, Math.round(z * 0.3)) + 'px ui-monospace, Menlo, monospace';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('◈' + sideName.toUpperCase(), tx * z + z / 2, ty * z + z / 2);
+      ctx.restore();
+    }
+
     function drawLegacy(ctx, it, z, isSel) {
       var px = it.tx * z, py = it.ty * z;
       ctx.save();
@@ -372,8 +433,73 @@
     }
     function fmtTile(t) { return t[0] + ',' + t[1]; }
 
+    function renderCreate() {
+      var c = ui.creating;
+      insp.appendChild(el('h2', null, 'NEW CONNECTION'));
+      var box = insp.appendChild(el('div', { id: 'wb-create' }));
+      var step = { a: 'click the TRIGGER tile in scene A (any scene)', b: 'switch scene if needed, click the tile in scene B', confirm: 'check direction, id and spawns, then CONFIRM' }[c.step];
+      box.appendChild(el('div', { class: 'wb-hint', id: 'wb-create-step' }, (c.moving ? 'MOVE SPAWN ' + c.moving.toUpperCase() + ' · click a tile in ' + c[c.moving].scene : step)));
+      function pickText(side) {
+        var p = c[side];
+        return p ? p.scene + ' @ ' + p.tx + ',' + p.ty : '—';
+      }
+      row(box, 'A (trigger)', pickText('a'));
+      row(box, 'B (' + (c.oneWay ? 'arrival' : 'trigger') + ')', pickText('b'));
+      var seg = el('span', { class: 'wb-seg', id: 'wb-create-direction' });
+      var pBtn = seg.appendChild(el('button', { 'data-action': 'create-paired', class: c.oneWay ? '' : 'on' }, 'PAIRED'));
+      var oBtn = seg.appendChild(el('button', { 'data-action': 'create-one-way', class: c.oneWay ? 'on' : '' }, 'ONE-WAY'));
+      pBtn.addEventListener('click', function () { c.oneWay = false; render(); });
+      oBtn.addEventListener('click', function () { c.oneWay = true; if (c.moving === 'a') c.moving = null; render(); });
+      row(box, 'DIRECTION', seg);
+      var idIn = el('input', { type: 'text', id: 'wb-create-id', spellcheck: 'false', value: c.id });
+      row(box, 'ID', idIn);
+      var cand = candidate();
+      ['a', 'b'].forEach(function (side) {
+        if (!cand) return;
+        var sp = cand[side].spawn;
+        var v = el('span', { class: 'wb-inline' });
+        v.appendChild(el('span', { id: 'wb-create-spawn-' + side }, sp ? sp.tx + ',' + sp.ty + ' ' + sp.dir : '— (one-way source)'));
+        if (sp) {
+          var mv = v.appendChild(el('button', { 'data-action': 'create-move-spawn-' + side, class: c.moving === side ? 'on' : '' }, 'MOVE SPAWN'));
+          mv.addEventListener('click', function () {
+            guard(function () { setScene(c[side].scene); c.moving = side; });
+          });
+        }
+        row(box, 'SPAWN ' + side.toUpperCase(), v);
+      });
+      var errBox = box.appendChild(el('ul', { id: 'wb-create-errors' }));
+      var acts = box.appendChild(el('div', { class: 'wb-actions' }));
+      var confirmBtn = button(acts, 'CONFIRM', 'create-confirm', function () {
+        guard(function () {
+          var rec = candidate();
+          var errs = candidateErrors();
+          if (errs.length) throw new Error('NEW CONNECTION invalid: ' + errs.join('; '));
+          commit(E.createConnection(store, draft(), rec, vctx), 'create ' + rec.id);
+          ui.creating = null;
+          setScene(rec.a.scene);
+          ui.selectedId = E.isOneWay(rec) ? ID.triggerId(rec.id, 'a', 0) : ID.endpointId(rec.id, 'a');
+          ui.notice = { level: 'info', text: 'Created ' + rec.id + ' in the draft (export to apply).' };
+        });
+      }, { cls: 'wb-primary' });
+      button(acts, 'CANCEL', 'create-cancel', function () { ui.creating = null; render(); });
+      function refreshErrors() {
+        errBox.textContent = '';
+        var errs = candidateErrors();
+        errs.forEach(function (e) { errBox.appendChild(el('li', { class: 'wb-error' }, e)); });
+        if (!errs.length && cand) errBox.appendChild(el('li', { class: 'wb-ok', id: 'wb-create-valid' }, '✓ valid'));
+        confirmBtn.disabled = errs.length > 0;
+      }
+      idIn.addEventListener('input', function () {
+        c.id = idIn.value; c.idEdited = true;
+        refreshErrors();
+        drawCanvas(model.scenes[ui.sceneId], items(), allErrors());
+      });
+      refreshErrors();
+    }
+
     function renderInspector(list) {
       insp.textContent = '';
+      if (ui.creating) { renderCreate(); return; }
       insp.appendChild(el('h2', null, 'INSPECTOR'));
       if (!ui.selectedId) { insp.appendChild(el('div', { class: 'wb-muted' }, 'Click a marker on the canvas.')); return; }
       var it = Core.findItem(list, ui.selectedId);
@@ -393,7 +519,7 @@
           oneWay ? 'ONE-WAY ' + rec.a.scene + ' → ' + rec.b.scene : 'paired'));
         row(insp, 'ENDPOINT', ref.side + (oneWay ? (ref.side === 'a' ? ' (source: triggers only)' : ' (arrival: spawn only)') : ''));
         row(insp, 'SCENE', ep.scene);
-        row(insp, 'DRAFT', changed ? 'modified (' + E.changedEndpoints(store, draft(), ref.connId).join(', ') + ')' : 'unchanged');
+        row(insp, 'DRAFT', E.isCreated(store, draft(), ref.connId) ? 'new (create)' : changed ? 'modified (' + E.changedEndpoints(store, draft(), ref.connId).join(', ') + ')' : 'unchanged');
 
         var trList = el('div', { class: 'wb-triggers' });
         (ep.triggers || []).forEach(function (t, i) {
@@ -484,6 +610,24 @@
           button(acts, 'REVERT SELECTED', 'revert-selected', function () {
             guard(function () { commit(E.revertConnection(store, draft(), ref.connId), 'revert ' + ref.connId); ui.pending = null; });
           }, { disabled: !changed });
+          button(acts, 'DELETE CONNECTION', 'delete-connection', function () {
+            ui.pending = null; ui.confirmDelete = ref.connId; render();
+          }, { cls: 'wb-danger' });
+          if (ui.confirmDelete === ref.connId) {
+            var conf = insp.appendChild(el('div', { class: 'wb-warn', id: 'wb-delete-confirm' }));
+            conf.appendChild(el('div', null, 'Delete ' + ref.connId + '? Both endpoints (' + rec.a.scene + ' and ' + rec.b.scene +
+              ') leave the draft. tools/world-apply.js removes the id from the catalog and refuses ids still referenced in js/ test/ narrative/.'));
+            var ca = conf.appendChild(el('div', { class: 'wb-actions' }));
+            button(ca, 'CONFIRM DELETE', 'delete-confirm', function () {
+              guard(function () {
+                var id = ui.confirmDelete;
+                commit(E.deleteConnection(store, draft(), id), 'delete ' + id);
+                ui.confirmDelete = null; ui.selectedId = null;
+                ui.notice = { level: 'info', text: 'Deleted ' + id + ' from the draft (export to apply).' };
+              });
+            }, { cls: 'wb-danger' });
+            button(ca, 'CANCEL', 'delete-cancel', function () { ui.confirmDelete = null; render(); });
+          }
           if (ui.pending) insp.appendChild(el('div', { class: 'wb-hint' }, 'Esc cancels. Tiles snap to integers.'));
         }
         return;
@@ -516,6 +660,8 @@
       var ids = Object.keys(errs);
       var changed = E.changedIds(store, draft());
       if (!changed.length) { valBox.appendChild(el('div', { class: 'wb-muted' }, 'No drafts.')); return; }
+      var opsBox = valBox.appendChild(el('ul', { id: 'wb-draft-ops' }));
+      draftOps().forEach(function (o) { opsBox.appendChild(el('li', { class: 'wb-op wb-op-' + o.op, 'data-op': o.op }, o.op + ' ' + o.id)); });
       if (!ids.length) { valBox.appendChild(el('div', { class: 'wb-ok', id: 'wb-valid' }, '✓ ' + changed.length + ' draft(s) valid')); return; }
       ids.forEach(function (id) {
         var box = valBox.appendChild(el('div', { class: 'wb-errors', 'data-connection': id }));
@@ -560,11 +706,14 @@
       viewBtn.className = ui.mode === 'view' ? 'on' : '';
       editBtn.className = ui.mode === 'edit' ? 'on' : '';
       undoBtn.disabled = !H.canUndo(hist);
+      redoBtn.disabled = !H.canRedo(hist);
+      newBtn.disabled = ui.mode !== 'edit';
+      newBtn.className = ui.creating ? 'on' : '';
       revertAllBtn.disabled = ui.mode !== 'edit' || n === 0;
       exportBtn.disabled = ui.mode !== 'edit';
       if (sceneSel.value !== ui.sceneId) sceneSel.value = ui.sceneId;
       if (momentSel.value !== ui.momentKey) momentSel.value = ui.momentKey;
-      canvas.style.cursor = ui.pending ? 'crosshair' : 'pointer';
+      canvas.style.cursor = ui.pending || (ui.creating && (ui.creating.step !== 'confirm' || ui.creating.moving)) ? 'crosshair' : 'pointer';
 
       var counts = { 'connection-endpoint': 0, trigger: 0, npc: 0, object: 0, 'legacy-door': 0 };
       list.forEach(function (it) { counts[it.kind]++; });
@@ -599,7 +748,7 @@
     }
 
     canvas.addEventListener('mousemove', function (ev) {
-      if (!ui.pending) return;
+      if (!ui.pending && !(ui.creating && (ui.creating.step !== 'confirm' || ui.creating.moving))) return;
       var t = tileFromEvent(ev);
       if (!t || (ui.hover && ui.hover.tx === t.tx && ui.hover.ty === t.ty)) return;
       ui.hover = t;
@@ -610,6 +759,27 @@
       var t = tileFromEvent(ev);
       if (!t) return;
       var p = ui.pending;
+      var c = ui.creating;
+      if (c) {
+        guard(function () {
+          if (c.moving) {
+            var side = c.moving;
+            if (c[side].scene !== ui.sceneId) throw new Error('spawn ' + side + ' belongs to ' + c[side].scene + ' — switch to that scene first');
+            var cur = candidate()[side].spawn;
+            c.spawn[side] = { tx: t.tx, ty: t.ty, dir: cur.dir };
+            c.moving = null;
+          } else if (c.step === 'a') {
+            c.a = { scene: ui.sceneId, tx: t.tx, ty: t.ty };
+            c.step = 'b';
+          } else if (c.step === 'b') {
+            c.b = { scene: ui.sceneId, tx: t.tx, ty: t.ty };
+            c.step = 'confirm';
+            if (!c.idEdited) c.id = E.suggestId(c.a.scene, c.b.scene);
+          }
+          ui.hover = null;
+        });
+        return;
+      }
       if (!p) {
         var hit = Core.itemAt(items(), t.tx, t.ty);
         ui.selectedId = hit ? hit.id : null;
@@ -648,7 +818,13 @@
         if (p && p.kind === ID.KINDS.NPC) ui.selectedId = null;
       });
     });
-    viewBtn.addEventListener('click', function () { ui.mode = 'view'; ui.pending = null; ui.exportOpen = false; render(); });
+    viewBtn.addEventListener('click', function () { ui.mode = 'view'; ui.pending = null; ui.creating = null; ui.confirmDelete = null; ui.exportOpen = false; render(); });
+    newBtn.addEventListener('click', function () {
+      if (ui.mode !== 'edit') return;
+      ui.pending = null; ui.confirmDelete = null; ui.selectedId = null; ui.exportOpen = false;
+      ui.creating = { step: 'a', oneWay: false, a: null, b: null, id: '', idEdited: false, spawn: { a: null, b: null }, moving: null };
+      render();
+    });
     editBtn.addEventListener('click', function () { ui.mode = 'edit'; render(); });
     function undo() {
       if (!H.canUndo(hist)) return;
@@ -662,15 +838,28 @@
       render();
     }
     undoBtn.addEventListener('click', undo);
+    function redo() {
+      if (!H.canRedo(hist)) return;
+      hist = H.redo(hist);
+      ui.pending = null; ui.confirmDelete = null;
+      render();
+    }
+    redoBtn.addEventListener('click', redo);
     revertAllBtn.addEventListener('click', function () { guard(function () { commit(E.revertAll(store), 'revert all'); ui.pending = null; }); });
     exportBtn.addEventListener('click', function () { ui.exportOpen = true; render(); });
     document.addEventListener('keydown', function (ev) {
-      if ((ev.ctrlKey || ev.metaKey) && !ev.shiftKey && (ev.key === 'z' || ev.key === 'Z')) {
-        if (ev.target && ev.target.tagName === 'TEXTAREA') return;
+      var typing = ev.target && (ev.target.tagName === 'TEXTAREA' || ev.target.tagName === 'INPUT');
+      if ((ev.ctrlKey || ev.metaKey) && (ev.key === 'z' || ev.key === 'Z' || ev.key === 'y' || ev.key === 'Y')) {
+        if (typing) return;
         ev.preventDefault();
-        undo();
-      } else if (ev.key === 'Escape' && ui.pending) {
-        ui.pending = null; ui.hover = null; render();
+        if (ev.shiftKey || ev.key === 'y' || ev.key === 'Y') redo(); else undo();
+      } else if (ev.key === 'Escape') {
+        if (ui.pending) ui.pending = null;
+        else if (ui.creating && ui.creating.moving) ui.creating.moving = null;
+        else if (ui.creating) ui.creating = null;
+        else if (ui.confirmDelete) ui.confirmDelete = null;
+        else return;
+        ui.hover = null; render();
       }
     });
     window.addEventListener('resize', function () { render(); });
@@ -690,7 +879,10 @@
           sceneId: ui.sceneId, mode: ui.mode, selectedId: ui.selectedId, pending: ui.pending && ui.pending.action,
           momentKey: ui.momentKey, unsaved: E.changedIds(store, draft()).length, changedIds: E.changedIds(store, draft()),
           errors: errs, exportOpen: ui.exportOpen, exportBlocked: ui.exportOpen && Object.keys(errs).length > 0,
-          canUndo: H.canUndo(hist), momentsLoaded: !momentSel.disabled, notice: ui.notice && ui.notice.text,
+          canUndo: H.canUndo(hist), canRedo: H.canRedo(hist), ops: draftOps(), confirmDelete: ui.confirmDelete,
+          creating: ui.creating && { step: ui.creating.step, oneWay: ui.creating.oneWay, a: ui.creating.a, b: ui.creating.b, id: ui.creating.id,
+            moving: ui.creating.moving, candidate: candidate(), errors: candidateErrors() },
+          momentsLoaded: !momentSel.disabled, notice: ui.notice && ui.notice.text,
           draft: JSON.parse(JSON.stringify(draft())),
           items: list.map(function (it) { return { id: it.id, kind: it.kind, tx: it.tx, ty: it.ty }; }),
           npcIds: list.filter(function (it) { return it.kind === 'npc'; }).map(function (it) { return it.characterId; })
