@@ -1,38 +1,21 @@
 {
-  "version": 1,
+  "version": 2,
   "prototype": true,
-  "atlas": "assets/prototypes/direct-reference/runtime/roadhouse-props-atlas.png",
+  "atlas": "assets/prototypes/direct-reference/expanded/runtime/roadhouse-props-expanded-atlas.png",
   "nativeTilePx": 16,
   "collisionOwner": "map-rows",
   "props": [
-    {
-      "id": "roadhouse.chair.red",
-      "label": "Red chair",
-      "frame": [0, 0, 18, 30],
-      "anchor": [9, 28],
-      "footprint": [[0, 0]],
-      "facing": "south-east"
-    },
-    {
-      "id": "roadhouse.table.round",
-      "label": "Round table",
-      "frame": [20, 0, 21, 22],
-      "anchor": [10, 20],
-      "footprint": [[0, 0], [1, 0]]
-    },
-    {
-      "id": "roadhouse.candle.brass",
-      "label": "Table candle",
-      "frame": [48, 0, 8, 10],
-      "anchor": [4, 9],
-      "footprint": []
-    },
-    {
-      "id": "roadhouse.pendant.brass",
-      "label": "Pendant light",
-      "frame": [56, 0, 16, 23],
-      "anchor": [8, 2],
-      "footprint": []
-    }
+    { "id": "roadhouse.stage.velvet", "label": "Velvet stage", "frame": [0, 0, 112, 46], "anchor": [56, 44], "footprint": [[-3,0],[-2,0],[-1,0],[0,0],[1,0],[2,0],[3,0]] },
+    { "id": "roadhouse.neon.sign", "label": "Neon sign", "frame": [112, 0, 64, 17], "anchor": [32, 2], "footprint": [] },
+    { "id": "roadhouse.trophy.deer", "label": "Deer trophy", "frame": [176, 0, 19, 24], "anchor": [9, 2], "footprint": [] },
+    { "id": "roadhouse.payphone.wall", "label": "Pay phone", "frame": [196, 0, 11, 26], "anchor": [5, 24], "footprint": [] },
+    { "id": "roadhouse.piano.upright", "label": "Upright piano", "frame": [208, 0, 30, 30], "anchor": [15, 28], "footprint": [[0,0],[1,0]] },
+    { "id": "roadhouse.bar.segment", "label": "Bar segment", "frame": [0, 48, 72, 17], "anchor": [36, 15], "footprint": [[-2,0],[-1,0],[0,0],[1,0],[2,0]] },
+    { "id": "roadhouse.booth.red", "label": "Red booth", "frame": [72, 48, 44, 30], "anchor": [22, 28], "footprint": [[-1,0],[0,0],[1,0]] },
+    { "id": "roadhouse.door.double", "label": "Double door", "frame": [116, 48, 30, 26], "anchor": [15, 25], "footprint": [[0,0],[1,0]] },
+    { "id": "roadhouse.chair.red", "label": "Red chair", "frame": [160, 48, 18, 30], "anchor": [9, 28], "footprint": [[0,0]], "facing": "south-east" },
+    { "id": "roadhouse.table.round", "label": "Round table", "frame": [180, 48, 21, 22], "anchor": [10, 20], "footprint": [[0,0],[1,0]] },
+    { "id": "roadhouse.candle.brass", "label": "Table candle", "frame": [208, 48, 8, 10], "anchor": [4, 9], "footprint": [] },
+    { "id": "roadhouse.pendant.brass", "label": "Pendant light", "frame": [216, 48, 16, 23], "anchor": [8, 2], "footprint": [] }
   ]
 }
