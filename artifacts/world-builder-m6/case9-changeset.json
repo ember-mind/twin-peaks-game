@@ -1,0 +1,33 @@
+{
+  "format": "world-connections-changeset",
+  "version": 2,
+  "target": "world/connections.json",
+  "operations": [
+    {
+      "op": "create",
+      "id": "town-hospital-drop",
+      "connection": {
+        "id": "town-hospital-drop",
+        "one_way": true,
+        "a": {
+          "scene": "town",
+          "triggers": [
+            [
+              34,
+              9
+            ]
+          ]
+        },
+        "b": {
+          "scene": "hospital",
+          "triggers": [],
+          "spawn": {
+            "tx": 2,
+            "ty": 9,
+            "dir": "right"
+          }
+        }
+      }
+    }
+  ]
+}

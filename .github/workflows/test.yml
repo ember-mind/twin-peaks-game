@@ -1,5 +1,5 @@
 # WORLD BUILDER / core regression gate (Issue 10).
-# Runs the pure node test suites that back the World Builder (v0.1 -> M5 legacy doors) plus the two
+# Runs the pure node test suites that back the World Builder (v0.1 -> M6 create/delete connections) plus the two
 # project-wide gates. test/world-builder-browser.js needs a local Chrome and is run by hand (see reports/).
 # No browser, no build step: each checked file is a plain `node test/<name>.js` that
 # exits non-zero on failure. Node 24 to match the local dev target (the fixtures rely on the
@@ -21,9 +21,9 @@ jobs:
            node-version: '24'
        - name: World Builder data + UI layer (M1-M4b)
          run: node test/world-builder.js
-       - name: Editor core - changeset
+       - name: Editor core - changeset (v1 + v2 create/delete)
          run: node test/editor/changeset.js
-       - name: Editor core - edit
+       - name: Editor core - edit (incl. create/delete drafts)
          run: node test/editor/edit.js
        - name: Editor core - history
          run: node test/editor/history.js
@@ -55,8 +55,10 @@ jobs:
          run: node test/editor-apply-preflight.js
        - name: Editor runtime isolation
          run: node test/editor-runtime-isolation.js
-       - name: World apply CLI (temp fixture)
+       - name: World apply CLI (create/delete + catalog write, rollback, temp fixture)
          run: node test/world-apply.js
+       - name: Catalog writer (js/world-catalog.js text rewrite)
+         run: node test/catalog-write.js
        - name: Cast continuity validators
          run: node test/cast-continuity-validate.js
        - name: Cast presence sync

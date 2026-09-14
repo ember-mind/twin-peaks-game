@@ -1,0 +1,53 @@
+{
+  "format": "world-connections-changeset",
+  "version": 2,
+  "target": "world/connections.json",
+  "operations": [
+    {
+      "op": "upsert",
+      "id": "town-roadhouse",
+      "endpoints": [
+        "b"
+      ],
+      "connection": {
+        "id": "town-roadhouse",
+        "a": {
+          "scene": "town",
+          "triggers": [
+            [
+              47,
+              28
+            ]
+          ],
+          "spawn": {
+            "tx": 47,
+            "ty": 29,
+            "dir": "down"
+          },
+          "door": {
+            "needsFlag": "atto4",
+            "blockedMsg": "roadhouse_chiuso"
+          }
+        },
+        "b": {
+          "scene": "roadhouse",
+          "triggers": [
+            [
+              7,
+              9
+            ],
+            [
+              8,
+              9
+            ]
+          ],
+          "spawn": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up"
+          }
+        }
+      }
+    }
+  ]
+}

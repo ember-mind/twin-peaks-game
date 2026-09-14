@@ -1,0 +1,19 @@
+CREATE town-hospital-side-door (paired)
+TARGET world/connections.json :: town-hospital-side-door
+BEFORE null
+AFTER  {"scene":"town","triggers":[[30,9]],"spawn":{"tx":30,"ty":10,"dir":"down"}}
+TARGET world/connections.json :: town-hospital-side-door
+BEFORE null
+AFTER  {"scene":"hospital","triggers":[[14,9]],"spawn":{"tx":12,"ty":9,"dir":"left"}}
+VALID 16 record(s) against real maps
+CATALOG js/world-catalog.js create town-hospital-side-door -> town + hospital
+  @@ line 23
+  -           'arrival-town']
+  +           'arrival-town', 'town-hospital-side-door']
+  @@ line 55
+  -         connections: ['town-hospital']
+  +         connections: ['town-hospital', 'town-hospital-side-door']
+WROTE world/connections.json (2 endpoint change(s))
+[gen-world-data] wrote js/world-connections.gen.js (16 records, version 1)
+WROTE js/world-catalog.js
+CHECK WORLD-ENGINE-V0.1-CATALOG-PASS registration, immutable catalog, scoped lookups, shared connections, validation, authored references, single registry bijection, filter load-order, legacy-door report

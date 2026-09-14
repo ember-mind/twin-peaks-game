@@ -1,0 +1,19 @@
+DELETE town-hospital-side-door
+TARGET world/connections.json :: town-hospital-side-door
+BEFORE {"scene":"town","triggers":[[30,9]],"spawn":{"tx":30,"ty":10,"dir":"down"}}
+AFTER  null
+TARGET world/connections.json :: town-hospital-side-door
+BEFORE {"scene":"hospital","triggers":[[14,9]],"spawn":{"tx":12,"ty":9,"dir":"left"}}
+AFTER  null
+VALID 15 record(s) against real maps
+CATALOG js/world-catalog.js delete town-hospital-side-door -> town + hospital
+  @@ line 23
+  -           'arrival-town', 'town-hospital-side-door']
+  +           'arrival-town']
+  @@ line 55
+  -         connections: ['town-hospital', 'town-hospital-side-door']
+  +         connections: ['town-hospital']
+WROTE world/connections.json (2 endpoint change(s))
+[gen-world-data] wrote js/world-connections.gen.js (15 records, version 1)
+WROTE js/world-catalog.js
+CHECK WORLD-ENGINE-V0.1-CATALOG-PASS registration, immutable catalog, scoped lookups, shared connections, validation, authored references, single registry bijection, filter load-order, legacy-door report

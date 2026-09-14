@@ -9,6 +9,8 @@ const assert = require('node:assert/strict');
 const Draft = require('../../js/editor/core/draft.js');
 const Changeset = require('../../js/editor/core/changeset.js');
 const Validation = require('../../js/editor/core/validation.js');
+const Edit = require('../../js/editor/core/edit.js');
+const ApplyLayer = require('../../js/editor/apply/changeset-apply.js');
 let pass = 0;
 function ok(cond, label) { assert.ok(cond, label); pass++; }
 
@@ -79,5 +81,59 @@ const owBad = JSON.parse(JSON.stringify(oneWayRec)); owBad.b.triggers = [[2, 2]]
 ok(Validation.recordCompleteness(owBad, 'r').join('|') === 'r.a.spawn is not allowed on a one-way connection|r.b.triggers must be empty on a one-way connection', 'one-way shape violations reported');
 const noFlag = JSON.parse(JSON.stringify(oneWayRec)); delete noFlag.one_way;
 ok(Validation.recordCompleteness(noFlag, 'r').join('|') === 'r.a.spawn.tx must be numeric', 'without one_way the record is paired and needs a.spawn');
+
+// ---- M6: version-2 changesets (create / delete), exported by Editor.edit and reduced in lockstep ----
+{
+  const registry = { version: 1, connections: [conn('seed', 's-a', 's-b'), conn('gone', 's-c', 's-d')] };
+  // conn() records have empty triggers; give them one so the edit store's shapes are realistic
+  registry.connections.forEach((c) => { c.a.triggers = [[0, 1]]; c.b.triggers = [[1, 2]]; });
+  const store = Edit.createStore(registry.connections);
+  const fresh = { id: 'seed-new', a: { scene: 's-a', triggers: [[4, 4]], spawn: { tx: 4, ty: 5, dir: 'down' } },
+    b: { scene: 's-d', triggers: [[2, 2]], spawn: { tx: 2, ty: 3, dir: 'down' } } };
+  const oneWay = { id: 'dream-drop', one_way: true, a: { scene: 's-b', triggers: [[3, 3]] }, b: { scene: 's-c', triggers: [], spawn: { tx: 1, ty: 1, dir: 'up' } } };
+  let d = Edit.createConnection(store, store.draft, fresh);
+  d = Edit.createConnection(store, d, oneWay);
+  d = Edit.deleteConnection(store, d, 'gone');
+  d = Edit.setSpawn(d, 'seed', 'a', { dir: 'left' });
+  const cs = JSON.parse(Edit.serialize(Edit.buildChangeset(store, d)));
+  ok(cs.format === 'world-connections-changeset' && cs.version === 2 && cs.target === 'world/connections.json', 'v2 header');
+  assert.deepEqual(cs.operations.map((o) => o.op + ':' + o.id), ['create:dream-drop', 'delete:gone', 'upsert:seed', 'create:seed-new']);
+  pass++;
+  ok(!('endpoints' in cs.operations[0]) && cs.operations[0].connection.one_way === true, 'create carries the whole record, one_way kept, no endpoints list');
+  ok(Object.keys(cs.operations[1]).join() === 'op,id', 'delete carries only op + id');
+
+  // every reducer agrees: edit.reapply (draft map), changeset.applyChangeset (core), changeset-apply.apply (node apply layer)
+  const viaEdit = Edit.reapply(registry.connections, cs);
+  const viaCore = Changeset.applyChangeset(registry, cs);
+  const viaApply = ApplyLayer.apply(registry, cs).next;
+  const ids = (list) => list.map((c) => c.id).sort().join();
+  ok(Object.keys(viaEdit).sort().join() === 'dream-drop,seed,seed-new' && ids(viaCore.connections) === ids(viaApply.connections) && ids(viaCore.connections) === Object.keys(viaEdit).sort().join(), 'edit / core / apply reducers produce the same id set');
+  ok(viaCore.connections.every((c) => Edit.canonical(c) === Edit.canonical(viaEdit[c.id])) && viaApply.connections.every((c) => Edit.canonical(c) === Edit.canonical(viaEdit[c.id])), 'and the same records');
+  ok(ApplyLayer.apply(registry, cs).auditEntry.changes.map((c) => c.op).join() === 'create,delete,upsert,create', 'apply layer audits create/delete');
+  ok(Validation.runValidators(cs, { registry }).ok, 'v2 changeset passes the validator pipeline');
+
+  // create never overwrites, delete of unknown fails, in all three reducers + the validator pipeline
+  const dup = { version: 2, operations: [{ op: 'create', id: 'seed', connection: Object.assign({}, fresh, { id: 'seed' }) }] };
+  assert.throws(() => Edit.reapply(registry.connections, dup), /already exists in the registry/);
+  assert.throws(() => Changeset.applyChangeset(registry, dup), /creates existing id "seed"/);
+  assert.throws(() => ApplyLayer.apply(registry, dup), /creates existing id "seed"/);
+  ok(Validation.runValidators(dup, { registry }).errors.includes('operations[0] creates existing id "seed"'), 'validator reports create of an existing id');
+  const ghost = { version: 2, operations: [{ op: 'delete', id: 'ghost' }] };
+  assert.throws(() => Edit.reapply(registry.connections, ghost), /unknown connection id "ghost"/);
+  assert.throws(() => Changeset.applyChangeset(registry, ghost), /unknown id "ghost"/);
+  assert.throws(() => ApplyLayer.apply(registry, ghost), /unknown id "ghost"/);
+  pass += 6;
+  const badOneWay = { version: 2, operations: [{ op: 'create', id: 'dream-bad', connection: Object.assign({}, oneWay, { id: 'dream-bad', b: Object.assign({}, oneWay.b, { triggers: [[1, 1]] }) }) }] };
+  assert.throws(() => Edit.reapply(registry.connections, badOneWay), /takes no triggers/);
+  assert.throws(() => ApplyLayer.apply(registry, badOneWay), /b\.triggers must be empty on a one-way connection/);
+  ok(Validation.runValidators(badOneWay, { registry }).errors.some((e) => /b\.triggers must be empty/.test(e)), 'one-way create validated with the M5 rules');
+  pass += 2;
+
+  // version 1 still accepted (upsert + remove), create/delete refused there
+  const v1 = { version: 1, operations: [{ op: 'remove', id: 'gone' }, { op: 'upsert', id: 'seed', connection: registry.connections[0] }] };
+  ok(Object.keys(Edit.reapply(registry.connections, v1)).join() === 'seed', 'version 1 upsert/remove still reapplies');
+  assert.throws(() => Edit.reapply(registry.connections, { version: 1, operations: [{ op: 'delete', id: 'gone' }] }), /not allowed in a version 1 changeset/);
+  pass++;
+}
 
 console.log(`EDITOR-CHANGESET-PASS ${pass}`);

@@ -56,9 +56,18 @@ function expectRejected(mutator, maps) {
   assert.equal(World.getEnvironment('double-r', 'interior').sceneId, 'diner', 'environment IDs are location-scoped');
   assert.equal(World.getEnvironment('double-r', 'missing'), undefined);
   assert.equal(World.getLocationForScene('diner').id, 'double-r');
-  assert.deepEqual(Array.from(World.getConnections()), ['double-r-front-entrance', 'town-double-r-lot', 'town-traincar-east', 'town-sheriffs-station-lot', 'town-great-northern-lobby', 'town-hospital', 'town-palmer-house', 'town-roadhouse', 'town-woods-north', 'arrival-town', 'sheriffs-station-front-entrance', 'traincar-oej-entrance', 'great-northern-room-315-hall', 'redroom-room-315-wake', 'woods-redroom-dream'], 'world connections deduplicate in author order');
-  assert.deepEqual(Array.from(World.getConnections('town')), ['town-traincar-east', 'town-sheriffs-station-lot', 'town-double-r-lot', 'town-great-northern-lobby', 'town-hospital', 'town-palmer-house', 'town-roadhouse', 'town-woods-north', 'arrival-town']);
-  assert.deepEqual(Array.from(World.getConnections('traincar-crossing')), ['town-traincar-east', 'traincar-oej-entrance']);
+  // M6: membership is derived from js/world-catalog.js itself (tools/world-apply.js rewrites it on create/delete),
+  // so this runs green on a repo copy after an apply. The exact id set on the real repo is pinned by
+  // test/test-world-registry.js; the bijection with world/connections.json is checked below.
+  const authorOrder = [];
+  canonicalFixture.locations.forEach(location => location.connections.forEach(id => { if (!authorOrder.includes(id)) authorOrder.push(id); }));
+  assert.deepEqual(Array.from(World.getConnections()), Array.from(authorOrder), 'world connections deduplicate in author order');
+  for (const location of canonicalFixture.locations) {
+    assert.deepEqual(Array.from(World.getConnections(location.id)), Array.from(location.connections), location.id + ' connections keep author order');
+  }
+  for (const id of ['double-r-front-entrance', 'town-double-r-lot', 'town-traincar-east', 'traincar-oej-entrance', 'arrival-town']) {
+    assert(World.getConnections().includes(id), id + ' is cataloged');
+  }
   assert.throws(() => World.register(validCatalog()), 'only one catalog may be registered');
 }
 
@@ -144,8 +153,8 @@ assert.deepEqual(World.catalog.locations.map(location => location.id), ['double-
 for (const [loc, scene] of [['palmer-house', 'palmer'], ['roadhouse', 'roadhouse'], ['ghostwood', 'woods'], ['red-room', 'redroom'], ['arrival', 'arrival']]) {
   assert.equal(World.getLocationForScene(scene).id, loc, scene + ' belongs to ' + loc);
 }
-assert.deepEqual(World.getConnections('hospital'), ['town-hospital']);
-assert.deepEqual(World.getConnections('red-room'), ['woods-redroom-dream', 'redroom-room-315-wake']);
+assert(World.getConnections('hospital').includes('town-hospital'));
+assert(World.getConnections('red-room').includes('woods-redroom-dream') && World.getConnections('red-room').includes('redroom-room-315-wake'));
 assert.deepEqual(World.getLocation('sheriffs-station').environments.map(environment => environment.id), ['exterior', 'interior']);
 assert.equal(World.getEnvironment('sheriffs-station', 'exterior').sceneId, 'sheriffs_station_exterior');
 assert.equal(World.getEnvironment('sheriffs-station', 'interior').sceneId, 'sheriff');
@@ -154,7 +163,7 @@ assert.deepEqual(World.getLocation('double-r').environments.map(environment => e
 assert.equal(World.getEnvironment('double-r', 'exterior').sceneId, 'double_r_exterior_prototype');
 assert.equal(World.getEnvironment('double-r', 'interior').sceneId, 'diner');
 assert.equal(World.getLocationForScene('traincar').id, 'traincar-crossing');
-assert.deepEqual(World.getConnections('traincar-crossing'), ['town-traincar-east', 'traincar-oej-entrance']);
+assert(World.getConnections('traincar-crossing').includes('traincar-oej-entrance'));
 assert(World.getConnections('town').includes('town-traincar-east'));
 assert(World.getConnections('traincar-crossing').includes('town-traincar-east'), 'shared connection belongs to both endpoint locations');
 assert(World.getConnections('one-eyed-jacks').includes('traincar-oej-entrance'));
@@ -177,6 +186,10 @@ for (const connectionId of World.getConnections()) {
     assert(GAME.Maps[endpoint.scene].doors, `${connectionId} references authored map doors`);
        assert(World.getConnections(location.id).includes(connectionId), `${connectionId} belongs to endpoint location`);
       }
+  // ...and to no other location: catalog membership is exactly the set of endpoint locations
+  const endpointLocations = new Set([record.a, record.b].map(endpoint => World.getLocationForScene(endpoint.scene).id));
+  const listedIn = World.catalog.locations.filter(location => location.connections.includes(connectionId)).map(location => location.id);
+  assert.deepEqual(listedIn.slice().sort(), [...endpointLocations].sort(), `${connectionId} is listed exactly in its endpoint locations`);
     }
 
      // ---- SINGLE REGISTRY (Phase 1): connection RECORDS now live in GAME.WorldData (js/world-connections.gen.js),
@@ -207,7 +220,7 @@ for (const record of registry) {
    // filter instead of reading a group global. A silent skip would let a missing record masquerade as "no doors".
     assert(typeof GAME.LocationConnections.connectionRecordsFor === 'function',
      'LocationConnections.connectionRecordsFor must exist so production can filter the registry');
-    var tcIds = World.getConnections('traincar-crossing'); // ['town-traincar-east','traincar-oej-entrance']
+    var tcIds = World.getConnections('traincar-crossing');
      var filtered = GAME.LocationConnections.connectionRecordsFor(tcIds);
       assert.deepEqual(filtered.map(r => r.id), tcIds, 'connectionRecordsFor filters the registry by a location id-list in order');
        for (const cid of World.getConnections()) {

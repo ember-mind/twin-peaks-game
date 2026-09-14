@@ -17,9 +17,10 @@
   function opShape(op, i) {
     const out = [];
     if (!op || typeof op !== 'object') return [`operations[${i}] is not an object`];
-    if (op.op === 'upsert' && (!op.connection || typeof op.connection !== 'object')) out.push(`operations[${i}].connection missing`);
-    else if (op.op === 'remove' && typeof op.id !== 'string') out.push(`operations[${i}].id must be a string`);
-    else if (op.op !== 'upsert' && op.op !== 'remove') out.push(`operations[${i}].op is unknown: ${String(op.op)}`);
+    const withRecord = op.op === 'upsert' || op.op === 'create', byId = op.op === 'remove' || op.op === 'delete';
+    if (withRecord && (!op.connection || typeof op.connection !== 'object')) out.push(`operations[${i}].connection missing`);
+    else if (byId && typeof op.id !== 'string') out.push(`operations[${i}].id must be a string`);
+    else if (!withRecord && !byId) out.push(`operations[${i}].op is unknown: ${String(op.op)}`);
     return out;
    }
 
@@ -45,7 +46,8 @@
 
    // unknown-remove: a remove naming an id absent from the registry is almost always a typo.
   function unknownRemove(op, i, knownIds) {
-    if (op.op !== 'remove') return [];
+    if (op.op === 'create' && op.connection && knownIds && knownIds.has(op.connection.id)) return [`operations[${i}] creates existing id "${op.connection.id}"`];
+    if (op.op !== 'remove' && op.op !== 'delete') return [];
     if (!knownIds || !knownIds.has(op.id)) return [`operations[${i}] removes unknown id "${op.id}"`];
     return [];
    }
@@ -68,7 +70,7 @@
     function opShapes(cs, ctx) { const o = []; cs.operations.forEach(function (op, i) { opShape(op, i).forEach(e => o.push(e)); }); return o; },
     function recordShapes(cs, ctx) {
       const o = [];
-      cs.operations.forEach(function (op, i) { if (op.op === 'upsert') recordCompleteness(op.connection, `operations[${i}].connection`).forEach(e => o.push(e)); });
+      cs.operations.forEach(function (op, i) { if (op.op === 'upsert' || op.op === 'create') recordCompleteness(op.connection, `operations[${i}].connection`).forEach(e => o.push(e)); });
       return o;
      },
     function registryRefs(cs, ctx) {
