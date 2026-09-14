@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "prototype": true,
+  "atlas": "assets/prototypes/direct-reference/runtime/roadhouse-props-atlas.png",
+  "nativeTilePx": 16,
+  "collisionOwner": "map-rows",
+  "props": [
+    {
+      "id": "roadhouse.chair.red",
+      "label": "Red chair",
+      "frame": [0, 0, 18, 30],
+      "anchor": [9, 28],
+      "footprint": [[0, 0]],
+      "facing": "south-east"
+    },
+    {
+      "id": "roadhouse.table.round",
+      "label": "Round table",
+      "frame": [20, 0, 21, 22],
+      "anchor": [10, 20],
+      "footprint": [[0, 0], [1, 0]]
+    },
+    {
+      "id": "roadhouse.candle.brass",
+      "label": "Table candle",
+      "frame": [48, 0, 8, 10],
+      "anchor": [4, 9],
+      "footprint": []
+    },
+    {
+      "id": "roadhouse.pendant.brass",
+      "label": "Pendant light",
+      "frame": [56, 0, 16, 23],
+      "anchor": [8, 2],
+      "footprint": []
+    }
+  ]
+}
