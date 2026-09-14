@@ -87,9 +87,8 @@
     if (!Number.isInteger(map.width)) map.width = 16;
     if (!Number.isInteger(map.height)) map.height = 10;
     if (map.indoor === undefined) map.indoor = true;
-    if (!map.doors || !map.doors['7,9'] || !map.doors['8,9']) {
-      throw new Error('RoadhouseScene: south double-door records are missing');
-    }
+    /* South double door (7,9 / 8,9) is the registry record town-roadhouse, installed later by
+     * world-connections-production.js; test/world-door-equality.js guards its presence. */
 
     originalTile = GAME.Sprites && GAME.Sprites.drawTile;
     originalStructures = GAME.sprites && GAME.sprites.drawStructures;

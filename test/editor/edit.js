@@ -116,4 +116,23 @@ pass++;
 const sameScene = JSON.parse(JSON.stringify(store.base['zeta-door'])); sameScene.b.scene = 's1';
 ok(Edit.validateDraft(sameScene, ctx, { changedSides: ['b'] }).includes('paired endpoint a no longer valid: same scene as b'), 'paired endpoint check');
 
+// ---- one-way records: b takes no triggers, a has no spawn; export/reapply keep one_way
+const ONE_WAY = [{ id: 'dream-exit', one_way: true,
+  a: { scene: 's1', triggers: [[3, 3]] }, b: { scene: 's2', triggers: [], spawn: { tx: 2, ty: 6, dir: 'down' } } }];
+const ow = Edit.createStore(ONE_WAY);
+ok(Edit.isOneWay(ow.base['dream-exit']) && !Edit.isOneWay(store.base['zeta-door']), 'isOneWay reads one_way');
+assert.throws(() => Edit.addTrigger(ow.draft, 'dream-exit', 'b', 1, 1), /endpoint b of one-way connection dream-exit takes no triggers/);
+assert.throws(() => Edit.moveTrigger(ow.draft, 'dream-exit', 'b', 0, 1, 1), /takes no triggers/);
+assert.throws(() => Edit.setSpawn(ow.draft, 'dream-exit', 'a', { tx: 1 }), /endpoint a of one-way connection dream-exit has no spawn/);
+pass += 3;
+let owd = Edit.addTrigger(ow.draft, 'dream-exit', 'a', 4, 3);
+owd = Edit.setSpawn(owd, 'dream-exit', 'b', { tx: 3 });
+const owcs = Edit.buildChangeset(ow, owd);
+ok(owcs.operations[0].connection.one_way === true && owcs.operations[0].endpoints.join() === 'a,b', 'one-way export keeps one_way');
+ok(Edit.canonical(Edit.reapply(ONE_WAY, JSON.parse(Edit.serialize(owcs)))) === Edit.canonical(owd), 'one-way changeset reapplies');
+const seenOpts = [];
+Edit.validateDraft(owd['dream-exit'], Object.assign({}, ctx, { knownIds: () => true, validateConnection: () => ({ errors: [] }),
+  validateEndpoint: (side, ep, o) => { seenOpts.push(side + ':' + (o && o.oneWay)); return null; } }), { changedSides: ['a'] });
+ok(seenOpts.join() === 'b:true', 'paired-endpoint check validates b under the one-way schema');
+
 console.log(`EDITOR-EDIT-PASS ${pass}`);

@@ -47,7 +47,7 @@
       ground: { '4,1': '.', '6,3': '.', '7,3': '.' },
       /* La radura continua nel margine sud della cittadina. Prima Cooper
        * compariva direttamente sull'asfalto civico: salto visivo netto. */
-      doors: { '4,8': { to: 'town', tx: 30, ty: 33, dir: 'up' } },
+      doors: {},
       interact: {},
       onEnter: { dialogue: 'town_arrivo', once: 'intro_town' }
     },
@@ -111,16 +111,7 @@
         '33,28': 'u', '35,28': '=', '24,29': '.', '34,29': 'u',
         '25,30': '.', '30,30': 'u', '33,30': 'u', '51,30': '.'
       },
-      doors: {
-        '9,6':  { to: 'hotel_gn', tx: 8, ty: 10, dir: 'up', needsFlag: 'sogno_fatto', blockedMsg: 'hotel_locked' },
-        '23,6': { to: 'hospital', tx: 7, ty: 10, dir: 'up', needsFlag: 'sogno_fatto', blockedMsg: 'hospital_locked' },
-        '42,6': { to: 'palmer', tx: 7, ty: 10, dir: 'up' },
-        '12,20': { to: 'sheriffs_station_exterior', tx: 7, ty: 10, dir: 'up' },
-        '42,20': { to: 'double_r_exterior_prototype', tx: 6, ty: 10, dir: 'up' },
-        '47,28': { to: 'roadhouse', tx: 7, ty: 8, dir: 'up', needsFlag: 'atto4', blockedMsg: 'roadhouse_chiuso' },
-        '55,14': { to: 'traincar', tx: 1, ty: 7, dir: 'right', needsFlag: 'atto3', blockedMsg: 'est_bloccato' },
-        '55,15': { to: 'traincar', tx: 1, ty: 7, dir: 'right', needsFlag: 'atto3', blockedMsg: 'est_bloccato' }
-      },
+      doors: {},
       interact: { '30,30': 'cartello', '15,28': 'lago_riva', '50,22': 'tomba_laura' },
       objects: [
         { type: 'landmark', kind: 'waterfall', x: 1, y: 0, w: 5, h: 6, dialogue: 'landmark_waterfall' },
@@ -132,7 +123,6 @@
         ] },
         { type: 'landmark', kind: 'welcomesign', x: 30, y: 30, dialogue: 'sign_town' }
       ],
-      gate: { x: 50, y: 0, to: 'woods', tx: 14, ty: 20, dir: 'up' },
       onEnter: { dialogue: 'town_arrivo', once: 'intro_town' }
     },
 
@@ -180,10 +170,7 @@
         'iffffffffffffffi', // 10 (spawn 7,10)
         'iiiiiiiDDiiiiiii'  // 11
       ],
-      doors: {
-        '7,11': { to: 'town', tx: 42, ty: 7, dir: 'down' },
-        '8,11': { to: 'town', tx: 42, ty: 7, dir: 'down' }
-      },
+      doors: {},
       interact: { '6,1': 'cameraLaura' }
     },
 
@@ -226,10 +213,7 @@
         'iffffffffffffffffi', // 10 (spawn 8,10)
         'iiiiiiiiDDiiiiiiii'  // 11
       ],
-      doors: {
-        '8,11': { to: 'town', tx: 9, ty: 7, dir: 'down' },
-        '9,11': { to: 'town', tx: 9, ty: 7, dir: 'down' }
-      },
+      doors: {},
       interact: {}
     },
 
@@ -255,10 +239,7 @@
         'T..............T', // 10
         'TTTTTTT..TTTTTTT'  // 11
       ],
-      doors: {
-        '7,11': { to: 'town', tx: 23, ty: 7, dir: 'down' },
-        '8,11': { to: 'town', tx: 23, ty: 7, dir: 'down' }
-      },
+      doors: {},
       interact: { '3,5': 'ronette_letto' }
     },
 
@@ -278,10 +259,7 @@
         'itttffffffttti',
         'iiiiiiDDiiiiii'
       ],
-      doors: {
-        '6,9': { to: 'town', tx: 42, ty: 21, dir: 'down' },
-        '7,9': { to: 'town', tx: 42, ty: 21, dir: 'down' }
-      },
+      doors: {},
       interact: {}
     },
 
@@ -313,10 +291,7 @@
         'TTTTTTTTTTTgTpppngTTTTTTTTTT', // 20 (spawn 14,20), cespuglio al sentiero
         'TTTTTTTTTTTTTTpTTTTTTTTTTTTT'  // 21 uscita sud -> città
       ],
-      doors: {
-        '14,4': { to: 'redroom', tx: 8, ty: 9, dir: 'up' },
-        '14,21': { to: 'town', tx: 50, ty: 1, dir: 'down' }
-      },
+      doors: {},
       interact: { '14,12': 'olio', '11,16': 'cartelloBosco' }
     },
 
@@ -337,9 +312,7 @@
         'RZZZZZZZZZZZZZZR', // 10
         'RRRRRRRRDRRRRRRR'  // 11 uscita tra le tende -> bosco
       ],
-      doors: {
-        '8,11': { to: 'room_315', tx: 2, ty: 6, dir: 'down' } // risveglio: Cooper si sveglia nella stanza 315 del Great Northern
-      },
+      doors: {},
       interact: {},
       onEnter: 'redroom'
     },
@@ -370,10 +343,7 @@
         'TggwwggggggggggggggggpgT', // 10
         'TTTTTTTTTTTTTTTTTTTTTTTT'  // 11  linea di alberi a sud
       ],
-      doors: {
-        '0,7': { to: 'town', tx: 54, ty: 14, dir: 'left' },
-        '21,0': { to: 'oej', tx: 8, ty: 8, dir: 'up', needsFlag: 'east_route_confirmed', blockedMsg: 'oej_bloccato' }
-      },
+      doors: {},
       interact: {
         '4,6': 'sign_ponte',
         '20,2': 'sign_oej',
@@ -397,10 +367,7 @@
         'iffffffffffffffi', // 8  (spawn 8,8)
         'iiiiiiiDDiiiiiii'  // 9  porta sud -> vagone del treno
       ],
-      doors: {
-        '7,9': { to: 'traincar', tx: 21, ty: 1, dir: 'down' },
-        '8,9': { to: 'traincar', tx: 21, ty: 1, dir: 'down' }
-      },
+      doors: {},
       interact: {}
     },
 
@@ -421,10 +388,7 @@
         'iffffffffffffffi', // 8  (spawn 7,8 / 8,8)
         'iiiiiiiDDiiiiiii'  // 9  uscita -> città
       ],
-      doors: {
-        '7,9': { to: 'town', tx: 47, ty: 29, dir: 'down' },
-        '8,9': { to: 'town', tx: 47, ty: 29, dir: 'down' }
-      },
+      doors: {},
       interact: {}
     }
   };

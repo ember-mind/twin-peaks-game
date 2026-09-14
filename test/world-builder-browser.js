@@ -1,19 +1,23 @@
 #!/usr/bin/env node
 'use strict';
 
-/* test/world-builder-browser.js — WORLD BUILDER M4b browser proof on the real page.
+/* test/world-builder-browser.js — WORLD BUILDER M4b + M5 browser proof on the real page.
  *
  *   node test/world-builder-browser.js
  *
  * Serves the repo on loopback, opens world-builder.html in headless Chrome (same flags as test/shot.sh:
  * --headless=new --enable-unsafe-swiftshader --use-angle=swiftshader), drives it with real CDP mouse
- * clicks on canvas tiles and DOM button clicks, and records screenshots in artifacts/world-builder-m4b/.
+ * clicks on canvas tiles and DOM button clicks, and records screenshots in artifacts/world-builder-m5/
+ * (the M4b run's screenshots stay in artifacts/world-builder-m4b/ as its record).
  * world/connections.json is hashed before and after every case: the editor must never touch it.
  *
  *   1  double-r-front-entrance / b  (diner): EDIT, MOVE SPAWN -> 8,8, facing left, ADD trigger 8,9
  *   2  sheriffs-station-front-entrance / a  (sheriffs_station_exterior): same workflow
  *   3  invalid: spawn x=19 on diner -> red marker + error text, export blocked
  *   4  story moment ACT4_EVENING_GATHERING: diner without Norma/Shelly, roadhouse with them
+ *   5  M5: town-roadhouse / b (roadhouse, a migrated classic door): MOVE SPAWN -> 6,8, export, CLI dry-run
+ *   6  M5: one-way arrival-town: inspector shows ONE-WAY, endpoint b offers no ADD TRIGGER
+ *   7  M5: every scene header reports legacy doors 0
  */
 
 const fs = require('node:fs');
@@ -24,7 +28,7 @@ const crypto = require('node:crypto');
 const { spawn, spawnSync } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..');
-const OUT = path.join(ROOT, 'artifacts', 'world-builder-m4b');
+const OUT = path.join(ROOT, 'artifacts', 'world-builder-m5');
 const CHROME = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const REGISTRY = path.join(ROOT, 'world', 'connections.json');
 
@@ -271,15 +275,93 @@ async function main() {
       await setSelect('wb-scene', 'roadhouse');
       s = await state();
       check('case 4: roadhouse at ACT4_EVENING_GATHERING has norma + shelly', s.npcIds.includes('norma') && s.npcIds.includes('shelly'), s.npcIds);
+      // M5: the roadhouse doors are registry items (town-roadhouse endpoint b), no longer read-only legacy doors
       const legacy = s.items.filter((i) => i.kind === 'legacy-door');
-      check('case 4: roadhouse classic doors appear as legacy-door items', legacy.length === 2 && legacy.every((i) => /^legacy-door:roadhouse:\d+,\d+$/.test(i.id)), legacy);
-      await clickTile(legacy[0].tx, legacy[0].ty);
+      const roadTriggers = s.items.filter((i) => i.kind === 'trigger' && /^trigger:town-roadhouse:b:\d+$/.test(i.id));
+      check('case 4: roadhouse doors are town-roadhouse registry triggers, no legacy-door items', legacy.length === 0 && roadTriggers.length === 2, s.items);
+      await clickTile(roadTriggers[0].tx, roadTriggers[0].ty);
       const insp = await cdp.eval("document.getElementById('wb-inspector').innerText");
-      check('case 4: legacy door inspector is read-only with target + spawn', insp.includes('legacy-door (read-only)') && insp.includes('TARGET') && insp.includes('town'), insp);
+      check('case 4: roadhouse door inspector names town-roadhouse, paired with town', insp.includes('town-roadhouse') && insp.includes('PAIRED ENDPOINT') && insp.includes('town'), insp);
       await setSelect('wb-scene', 'roadhouse');
       await clickTile(5, 6);
       await shot('case4-roadhouse.png');
       check('case 4: world/connections.json unchanged', sha() === shaStart);
+    }
+
+    // ---------------- case 5 (M5): edit a migrated classic door and export it
+    {
+      console.log('\ncase 5: town-roadhouse endpoint b spawn');
+      await load();
+      const rec = registryRecord('town-roadhouse');
+      await setSelect('wb-scene', 'roadhouse');
+      await clickTile(rec.b.spawn.tx, rec.b.spawn.ty);
+      let s = await state();
+      check('case 5: click on roadhouse spawn selects connection-endpoint:town-roadhouse:b', s.selectedId === 'connection-endpoint:town-roadhouse:b', s.selectedId);
+      const insp = await cdp.eval("document.getElementById('wb-inspector').innerText");
+      check('case 5: inspector shows a paired record with its town door flag endpoint', insp.includes('paired') && insp.includes('town-roadhouse') && insp.includes('a · town @ 47,29 down'), insp);
+      await shot('case5-before.png');
+      await clickAction('mode-edit');
+      await clickAction('move-spawn');
+      await clickTile(6, 8);
+      s = await state();
+      const d = s.draft['town-roadhouse'];
+      check('case 5: draft b.spawn is 6,8 up, triggers untouched', d.b.spawn.tx === 6 && d.b.spawn.ty === 8 && d.b.spawn.dir === 'up' && JSON.stringify(d.b.triggers) === JSON.stringify(rec.b.triggers), d.b);
+      check('case 5: draft valid, 1 unsaved change', Object.keys(s.errors).length === 0 && s.unsaved === 1, s);
+      await clickAction('export');
+      const text = await cdp.eval("document.getElementById('wb-export-text') && document.getElementById('wb-export-text').value");
+      const cs = text ? JSON.parse(text) : null;
+      const op = cs && cs.operations[0];
+      check('case 5: export holds only town-roadhouse endpoint b; a keeps atto4/roadhouse_chiuso',
+        cs && cs.operations.length === 1 && op.id === 'town-roadhouse' && op.endpoints.join() === 'b' &&
+        JSON.stringify(op.connection.b.spawn) === '{"tx":6,"ty":8,"dir":"up"}' && JSON.stringify(op.connection.a) === JSON.stringify(rec.a), cs);
+      const csFile = path.join(OUT, 'case5-changeset.json');
+      fs.writeFileSync(csFile, text || '');
+      await shot('case5-export.png');
+      const cli = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'world-apply.js'), csFile, '--dry-run'], { encoding: 'utf8' });
+      check('case 5: tools/world-apply.js --dry-run accepts the exported changeset', cli.status === 0 && cli.stdout.includes('VALID 15 record(s)') && cli.stdout.includes('TARGET world/connections.json :: town-roadhouse') && cli.stdout.includes('DRY-RUN 1 endpoint change'), cli.stdout + cli.stderr);
+      check('case 5: world/connections.json unchanged', sha() === shaStart);
+    }
+
+    // ---------------- case 6 (M5): one-way record
+    {
+      console.log('\ncase 6: one-way arrival-town');
+      await load();
+      await setSelect('wb-scene', 'arrival');
+      await clickTile(4, 8);
+      let s = await state();
+      check('case 6: arrival 4,8 selects trigger:arrival-town:a:0', s.selectedId === 'trigger:arrival-town:a:0', s.selectedId);
+      check('case 6: one-way source has no endpoint item in arrival', !s.items.some((i) => i.id === 'connection-endpoint:arrival-town:a'), s.items);
+      let dirText = await cdp.eval("document.getElementById('wb-direction').textContent");
+      check('case 6: inspector shows ONE-WAY arrival → town', dirText === 'ONE-WAY arrival → town', dirText);
+      await clickAction('mode-edit');
+      check('case 6: one-way source offers no MOVE SPAWN', !(await cdp.eval("!!document.querySelector('[data-action=\"move-spawn\"]')")));
+      await shot('case6-arrival-source.png');
+      await clickAction('jump');
+      s = await state();
+      check('case 6: jump lands on town endpoint b', s.sceneId === 'town' && s.selectedId === 'connection-endpoint:arrival-town:b', s);
+      await clickTile(30, 33);
+      s = await state();
+      check('case 6: town 30,33 selects connection-endpoint:arrival-town:b', s.selectedId === 'connection-endpoint:arrival-town:b', s.selectedId);
+      const noAdd = await cdp.eval("!document.querySelector('[data-action=\"add-trigger\"]') && !!document.getElementById('wb-oneway-note')");
+      check('case 6: endpoint b of a one-way record offers no ADD TRIGGER', noAdd);
+      await shot('case6-town-arrival.png');
+      check('case 6: world/connections.json unchanged', sha() === shaStart);
+    }
+
+    // ---------------- case 7 (M5): no legacy doors anywhere
+    {
+      console.log('\ncase 7: legacy door count in every scene header');
+      await load();
+      const scenes = await cdp.eval("Array.from(document.getElementById('wb-scene').options).map((o) => o.value)");
+      const bad = [];
+      for (const sc of scenes) {
+        await setSelect('wb-scene', sc);
+        const info = await cdp.eval("document.getElementById('wb-stage-info').textContent");
+        if (!/ · legacy doors 0 · /.test(info)) bad.push(sc + ': ' + info);
+      }
+      check('case 7: every scene header reports legacy doors 0 (' + scenes.length + ' scenes)', scenes.length >= 15 && bad.length === 0, bad);
+      await setSelect('wb-scene', 'town');
+      await shot('case7-town-header.png');
     }
   } catch (e) {
     check('driver completed without exception', false, String(e && e.stack || e));

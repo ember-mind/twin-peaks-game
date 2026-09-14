@@ -39,8 +39,7 @@ require(J('sheriffs-station-scene.js'));
 global.GAME.DoubleRExteriorScene.install();
 global.GAME.SheriffsStationExteriorScene.install();
 global.GAME.SheriffsStationScene.install();
-global.GAME.LocationConnections.connectionRecordsFor(['double-r-front-entrance','town-double-r-lot','sheriffs-station-front-entrance','town-sheriffs-station-lot'])
-  .forEach((c) => global.GAME.LocationConnections.install(c, global.GAME.Maps));
+require(J('world-connections-production.js')); // every registry door (js/maps.js carries none)
 require(J('narrative-runtime.js'));
 require(J('narrative-data.gen.js'));
 require(J('cast-presence.js'));

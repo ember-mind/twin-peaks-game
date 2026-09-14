@@ -16,7 +16,11 @@ require('../js/data.js');
 require('../js/glue.js');
 
 const sourceMap = GAME.maps.maps.town;
-const arrivalMap = GAME.maps.maps.arrival;
+// Doors live in the connection registry since M5 (js/maps.js carries none): read tiles and spawns from it.
+const registry = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'world', 'connections.json'), 'utf8')).connections;
+const townTriggers = {};
+registry.forEach((c) => ['a', 'b'].forEach((s) => { if (c[s].scene === 'town') c[s].triggers.forEach(([x, y]) => { townTriggers[x + ',' + y] = c.id; }); }));
+const arrivalTown = registry.find((c) => c.id === 'arrival-town');
 const map = GAME.Maps.town;
 const rows = sourceMap.rows;
 const W = sourceMap.width;
@@ -57,11 +61,12 @@ function coordsWhere(chars) {
 ok(rows.length === 36 && rows.every((row) => row.length === 56), 'town reale resta 56x36 rettangolare');
 ok(!GAME.maps.SOLID.u, 'piazza u e calpestabile');
 ok(!GAME.maps.SOLID[':'], 'zebra est-ovest : e calpestabile');
-ok(arrivalMap.doors['4,8'].to === 'town' && arrivalMap.doors['4,8'].tx === 30 && arrivalMap.doors['4,8'].ty === 33 &&
+ok(arrivalTown.a.scene === 'arrival' && JSON.stringify(arrivalTown.a.triggers) === '[[4,8]]' && arrivalTown.b.scene === 'town' &&
+  arrivalTown.b.spawn.tx === 30 && arrivalTown.b.spawn.ty === 33 &&
   !GAME.maps.SOLID[at(30, 33)], 'radura sbocca sul margine sud calpestabile, non sulla strada');
 
 const expectedDoors = ['9,6', '23,6', '42,6', '12,20', '42,20', '47,28', '55,14', '55,15'];
-ok(expectedDoors.every((k) => sourceMap.doors[k]), 'coordinate porte storiche invariate');
+ok(expectedDoors.every((k) => townTriggers[k]), 'coordinate porte storiche invariate');
 for (const k of expectedDoors.slice(0, 6)) {
   const [x, y] = k.split(',').map(Number);
   ok(at(x, y + 1) === 'p' || at(x, y + 1) === '=', 'approccio authored subito sotto porta ' + k);

@@ -72,4 +72,12 @@ const throwing = Validation.runValidators(csA, { registry: reg }, [ () => { thro
 ok(throwing.ok === false && /threw/.test(throwing.errors[0]), 'a validator that throws is captured as an error entry, not fatal to the pipeline');
 assert.throws(() => Validation.assertValid(csA, { registry: reg }, [ () => { throw new Error('validator boom'); } ]), /threw/, 'assertValid surfaces a throwing validator as a loud failure too');
 
+// ---- one-way record completeness: a has triggers and no spawn, b has a spawn and no triggers
+const oneWayRec = { id: 'dream', one_way: true, a: { scene: 'x', triggers: [[1, 1]] }, b: { scene: 'y', triggers: [], spawn: { tx: 1, ty: 1, dir: 'up' } } };
+ok(Validation.recordCompleteness(oneWayRec, 'r').length === 0, 'one-way record is complete without a.spawn');
+const owBad = JSON.parse(JSON.stringify(oneWayRec)); owBad.b.triggers = [[2, 2]]; owBad.a.spawn = { tx: 0, ty: 0 };
+ok(Validation.recordCompleteness(owBad, 'r').join('|') === 'r.a.spawn is not allowed on a one-way connection|r.b.triggers must be empty on a one-way connection', 'one-way shape violations reported');
+const noFlag = JSON.parse(JSON.stringify(oneWayRec)); delete noFlag.one_way;
+ok(Validation.recordCompleteness(noFlag, 'r').join('|') === 'r.a.spawn.tx must be numeric', 'without one_way the record is paired and needs a.spawn');
+
 console.log(`EDITOR-CHANGESET-PASS ${pass}`);

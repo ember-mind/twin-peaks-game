@@ -20,7 +20,9 @@ ok(json && typeof json === 'object' && Array.isArray(json.connections), 'file ha
 const version = (json.version == null) ? 1 : json.version;
 ok(typeof version === 'number', 'version is numeric (' + version + ')');
 
-// Each record must have a unique id and a paired a/b endpoint with a named scene.
+// Each record must have a unique id and an a/b endpoint pair with a named scene. A paired record carries
+// triggers + spawn on both sides; a one-way record ("one_way": true) carries triggers and no spawn on a,
+// a spawn and empty triggers on b.
 const seen = new Set();
 for (let i = 0; i < json.connections.length; i++) {
   const c = json.connections[i];
@@ -28,15 +30,23 @@ for (let i = 0; i < json.connections.length; i++) {
   ok(typeof c.id === 'string' && c.id, '[' + i + '] has a non-empty id');
   if (seen.has(c.id)) die('duplicate connection id: ' + c.id);
   seen.add(c.id);
+  ok(c.one_way === undefined || c.one_way === true, '[' + c.id + '] one_way absent or true');
+  const oneWay = c.one_way === true;
   for (const key of ['a', 'b']) {
     const ep = c[key];
     ok(ep && typeof ep === 'object', '[' + c.id + '].' + key + ' endpoint present');
     ok(typeof ep.scene === 'string' && ep.scene, '[' + c.id + '].' + key + '.scene names a scene');
     ok(Array.isArray(ep.triggers), '[' + c.id + '].' + key + '.triggers is an array');
-    ok(ep.spawn && typeof ep.spawn.tx === 'number', '[' + c.id + '].' + key + '.spawn.tx numeric');
+    if (oneWay && key === 'a') {
+      ok(ep.triggers.length > 0 && ep.spawn === undefined, '[' + c.id + '].a one-way source: triggers, no spawn');
+    } else {
+      ok(ep.triggers.length > 0 || oneWay, '[' + c.id + '].' + key + '.triggers not empty (paired)');
+      if (oneWay) ok(ep.triggers.length === 0, '[' + c.id + '].b one-way arrival: no triggers');
+      ok(ep.spawn && typeof ep.spawn.tx === 'number', '[' + c.id + '].' + key + '.spawn.tx numeric');
+    }
   }
 }
-ok(json.connections.length === 7, 'exactly seven records (' + json.connections.length + ')');
+ok(json.connections.length === 15, 'exactly fifteen records (' + json.connections.length + ')');
 
 // ---- emit the generated module --------------------------------------------
 // Records are sorted by id for a stable load order (the registry is the single source, so its order

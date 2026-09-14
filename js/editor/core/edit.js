@@ -14,6 +14,9 @@
 // id disagrees with its op, or a record missing an endpoint — a stale or hand-edited changeset fails
 // loudly instead of silently landing on the wrong record.
 //
+// One-way records ("one_way": true) are edited under the runtime schema: endpoint b takes no triggers
+// (addTrigger/moveTrigger refuse), endpoint a has no spawn (setSpawn refuses).
+//
 // Validation is injected: validateDraft(record, ctx) knows the rule list, the caller supplies the
 // world-aware predicates (scene lookup, the runtime connection validator), so this file stays game-free.
 
@@ -83,8 +86,17 @@
     return n;
   }
 
+  function isOneWay(rec) { return !!rec && rec.one_way === true; }
+  function refuseOneWay(draft, connId, side, what) {
+    const rec = requireEndpoint(draft, connId, side);
+    if (!isOneWay(rec)) return;
+    if (what === 'trigger' && side === 'b') fail('endpoint b of one-way connection ' + connId + ' takes no triggers');
+    if (what === 'spawn' && side === 'a') fail('endpoint a of one-way connection ' + connId + ' has no spawn');
+  }
+
   // setSpawn(draft, connId, side, {tx?, ty?, dir?}) — integer tile, facing in up/down/left/right.
   function setSpawn(draft, connId, side, patch) {
+    refuseOneWay(draft, connId, side, 'spawn');
     return withEndpoint(draft, connId, side, function (ep) {
       const spawn = Object.assign({}, ep.spawn || {});
       if (patch.tx !== undefined) spawn.tx = toInt(patch.tx, 'spawn.tx');
@@ -104,6 +116,7 @@
   }
 
   function moveTrigger(draft, connId, side, index, tx, ty) {
+    refuseOneWay(draft, connId, side, 'trigger');
     return withEndpoint(draft, connId, side, function (ep) {
       requireTrigger(ep, index, connId, side);
       ep.triggers[index] = [toInt(tx, 'trigger x'), toInt(ty, 'trigger y')];
@@ -111,6 +124,7 @@
   }
 
   function addTrigger(draft, connId, side, tx, ty) {
+    refuseOneWay(draft, connId, side, 'trigger');
     return withEndpoint(draft, connId, side, function (ep) {
       if (!Array.isArray(ep.triggers)) ep.triggers = [];
       ep.triggers.push([toInt(tx, 'trigger x'), toInt(ty, 'trigger y')]);
@@ -191,7 +205,7 @@
         if (SIDES.indexOf(s) === -1) fail(where + ' names unknown endpoint "' + s + '" on ' + id);
       });
       Object.keys(rec).forEach(function (k) {
-        if (k !== 'id' && SIDES.indexOf(k) === -1) fail(where + ' carries unknown endpoint "' + k + '" on ' + id);
+        if (k !== 'id' && k !== 'one_way' && SIDES.indexOf(k) === -1) fail(where + ' carries unknown endpoint "' + k + '" on ' + id);
       });
       SIDES.forEach(function (s) {
         if (!rec[s] || typeof rec[s] !== 'object') fail(where + ' is missing endpoint "' + s + '" on ' + id);
@@ -218,11 +232,12 @@
       if (typeof ep.scene !== 'string' || !ctx.sceneExists(ep.scene)) errors.push('endpoint ' + s + ' scene "' + ep.scene + '" does not exist');
     });
     const res = ctx.validateConnection(record) || { errors: [] };
+    const oneWay = isOneWay(record);
     (res.errors || []).forEach(function (e) { errors.push(e); });
     changedSides.forEach(function (s) {
       const other = s === 'a' ? 'b' : 'a';
       if (!record[other]) return;
-      const err = ctx.validateEndpoint(other, record[other]);
+      const err = ctx.validateEndpoint(other, record[other], { oneWay: oneWay });
       if (err) errors.push('paired endpoint ' + other + ' no longer valid: ' + err);
       else if (record[s] && record[s].scene === record[other].scene) errors.push('paired endpoint ' + other + ' no longer valid: same scene as ' + s);
     });
@@ -231,7 +246,7 @@
 
   R.edit = Object.freeze({
     SIDES, FACINGS, FORMAT, TARGET,
-    canonical, createStore, setSpawn, moveTrigger, addTrigger, removeTrigger,
+    canonical, isOneWay, createStore, setSpawn, moveTrigger, addTrigger, removeTrigger,
     revertConnection, revertAll, changedEndpoints, changedIds, isChanged,
     buildChangeset, serialize, reapply, validateDraft
   });

@@ -28,11 +28,16 @@
     const out = [];
     if (!connection || typeof connection !== 'object' || Array.isArray(connection)) return [`${where}: connection is not an object`];
     if (typeof connection.id !== 'string' || !connection.id) out.push(`${where}.id must be a non-empty string`);
+    if (connection.one_way !== undefined && connection.one_way !== true) out.push(`${where}.one_way must be true when present`);
+    const oneWay = connection.one_way === true;
     for (const key of ['a', 'b']) {
       const ep = connection[key];
       if (!ep || typeof ep !== 'object') { out.push(`${where}.${key}: endpoint missing`); continue; }
       if (typeof ep.scene !== 'string' || !ep.scene) out.push(`${where}.${key}.scene must name a scene`);
       if (!Array.isArray(ep.triggers)) out.push(`${where}.${key}.triggers must be an array`);
+      // one-way: a is trigger-only (no spawn), b is arrival-only (spawn, no triggers)
+      if (oneWay && key === 'a') { if (ep.spawn !== undefined) out.push(`${where}.a.spawn is not allowed on a one-way connection`); continue; }
+      if (oneWay && key === 'b' && Array.isArray(ep.triggers) && ep.triggers.length) out.push(`${where}.b.triggers must be empty on a one-way connection`);
       if (!ep.spawn || typeof ep.spawn.tx !== 'number') out.push(`${where}.${key}.spawn.tx must be numeric`);
      }
     return out;

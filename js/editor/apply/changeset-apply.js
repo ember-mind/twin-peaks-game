@@ -27,11 +27,15 @@ function fail(msg) { throw new Error('[changeset-apply] ' + msg); }
 function validateRecord(c, where) {
   if (!c || typeof c !== 'object' || Array.isArray(c)) fail(where + ': connection is not an object');
   if (typeof c.id !== 'string' || !c.id) fail(where + ': connection has no non-empty id');
+  if (c.one_way !== undefined && c.one_way !== true) fail(where + ': one_way must be true when present');
+  const oneWay = c.one_way === true;
   for (const key of ['a', 'b']) {
     const ep = c[key];
     if (!ep || typeof ep !== 'object') fail(`${where}.${key}: endpoint missing`);
     if (typeof ep.scene !== 'string' || !ep.scene) fail(`${where}.${key}.scene must name a scene`);
     if (!Array.isArray(ep.triggers)) fail(`${where}.${key}.triggers must be an array`);
+    if (oneWay && key === 'a') { if (ep.spawn !== undefined) fail(`${where}.a.spawn is not allowed on a one-way connection`); continue; }
+    if (oneWay && key === 'b' && ep.triggers.length) fail(`${where}.b.triggers must be empty on a one-way connection`);
     if (!ep.spawn || typeof ep.spawn.tx !== 'number') fail(`${where}.${key}.spawn.tx must be numeric`);
   }
   return c;

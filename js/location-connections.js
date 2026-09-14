@@ -1,4 +1,10 @@
-/* location-connections.js — compile a semantic two-way connection into map doors. */
+/* location-connections.js — compile a semantic connection into map doors.
+ *
+ * Paired record (default): both endpoints carry triggers + spawn; install writes doors on both maps.
+ * One-way record ("one_way": true): a carries triggers and no spawn (nobody arrives there through this
+ * record), b carries a spawn and an empty triggers list; install writes doors only on a's map.
+ * Door fields on the endpoint that owns the trigger: needsFlag, blockedMsg (strings), needsClues
+ * (positive integer, the engine's clue-count gate). */
 (function () {
   'use strict';
 
@@ -14,7 +20,9 @@
     return tile[0] + ',' + tile[1];
   }
 
-  function validateTile(label, tile, map, maps) {
+  /* state: the player state the walkability check assumes. Spawn tiles use no clues; trigger tiles of a
+   * door gated by needsClues are judged with that many clues held (glue's 'X' barrier opens at 3). */
+  function validateTile(label, tile, map, maps, state) {
     if (!Array.isArray(tile) || tile.length !== 2 ||
         !Number.isInteger(tile[0]) || !Number.isInteger(tile[1])) {
       fail(label + ' must be an integer [x,y] tile');
@@ -24,12 +32,15 @@
       fail(label + ' is outside map bounds');
     }
     var solid = typeof maps.isSolid === 'function'
-      ? maps.isSolid(map.id, x, y, { clues: [] })
+      ? maps.isSolid(map.id, x, y, state || { clues: [] })
       : (typeof map.isSolid === 'function' ? map.isSolid(x, y) : false);
     if (solid) fail(label + ' must be walkable');
   }
 
-  function validateEndpoint(name, endpoint, maps) {
+  /* opts.oneWay: the endpoint belongs to a one-way record. Only b of a one-way record may have empty
+   * triggers (and must); only a of a one-way record has no spawn (and must not). */
+  function validateEndpoint(name, endpoint, maps, opts) {
+    var oneWay = !!(opts && opts.oneWay);
     if (!endpoint || typeof endpoint.scene !== 'string' || !endpoint.scene) {
       fail(name + '.scene is required');
     }
@@ -39,17 +50,27 @@
     if (!Number.isInteger(map.width) || !Number.isInteger(map.height)) {
       fail(endpoint.scene + ' must have integer dimensions');
     }
-    if (!Array.isArray(endpoint.triggers) || endpoint.triggers.length === 0) {
+    if (!Array.isArray(endpoint.triggers)) fail(name + '.triggers must be an array');
+    if (oneWay && name === 'b') {
+      if (endpoint.triggers.length !== 0) fail('b.triggers must be empty on a one-way connection');
+    } else if (endpoint.triggers.length === 0) {
       fail(name + '.triggers must not be empty');
     }
     var triggerKeys = {};
+    var gate = endpoint.door && Number.isInteger(endpoint.door.needsClues) && endpoint.door.needsClues > 0
+      ? { clues: new Array(endpoint.door.needsClues).fill('gate') } : { clues: [] };
     endpoint.triggers.forEach(function (tile, index) {
-      validateTile(name + '.triggers[' + index + ']', tile, map, maps);
+      validateTile(name + '.triggers[' + index + ']', tile, map, maps, gate);
       var key = tileKey(tile);
       if (triggerKeys[key]) fail(name + '.triggers contains duplicate tile ' + key);
       triggerKeys[key] = true;
     });
     var spawn = endpoint.spawn;
+    if (oneWay && name === 'a') {
+      if (spawn !== undefined) fail('a.spawn is not allowed on a one-way connection');
+      validateDoor(name, endpoint);
+      return { endpoint: endpoint, map: map, triggerKeys: Object.keys(triggerKeys) };
+    }
     if (!spawn || !Number.isInteger(spawn.tx) || !Number.isInteger(spawn.ty)) {
       fail(name + '.spawn must contain integer tx and ty');
     }
@@ -60,22 +81,36 @@
     if (triggerKeys[spawn.tx + ',' + spawn.ty]) {
       fail(name + '.spawn must be outside its trigger tiles');
     }
-    if (endpoint.door !== undefined) {
-      if (!endpoint.door || typeof endpoint.door !== 'object' || Array.isArray(endpoint.door)) {
-        fail(name + '.door must be an object');
-      }
-      ['needsFlag', 'blockedMsg'].forEach(function (key) {
-        if (endpoint.door[key] !== undefined && typeof endpoint.door[key] !== 'string') {
-          fail(name + '.door.' + key + ' must be a string');
-        }
-      });
-    }
+    validateDoor(name, endpoint);
     return { endpoint: endpoint, map: map, triggerKeys: Object.keys(triggerKeys) };
+  }
+
+  function validateDoor(name, endpoint) {
+    if (endpoint.door === undefined) return;
+    if (!endpoint.door || typeof endpoint.door !== 'object' || Array.isArray(endpoint.door)) {
+      fail(name + '.door must be an object');
+    }
+    if (oneWayB(name, endpoint)) fail(name + '.door is not allowed without triggers');
+    ['needsFlag', 'blockedMsg'].forEach(function (key) {
+      if (endpoint.door[key] !== undefined && typeof endpoint.door[key] !== 'string') {
+        fail(name + '.door.' + key + ' must be a string');
+      }
+    });
+    if (endpoint.door.needsClues !== undefined &&
+        (!Number.isInteger(endpoint.door.needsClues) || endpoint.door.needsClues < 1)) {
+      fail(name + '.door.needsClues must be a positive integer');
+    }
+  }
+  function oneWayB(name, endpoint) { return name === 'b' && Array.isArray(endpoint.triggers) && endpoint.triggers.length === 0; }
+
+  function isOneWay(connection) {
+    if (connection.one_way !== undefined && connection.one_way !== true) fail('one_way must be true when present');
+    return connection.one_way === true;
   }
 
   function copyDoorFields(target, endpoint) {
     if (!endpoint.door) return;
-    ['needsFlag', 'blockedMsg'].forEach(function (key) {
+    ['needsFlag', 'blockedMsg', 'needsClues'].forEach(function (key) {
       if (endpoint.door[key] !== undefined) target[key] = endpoint.door[key];
     });
   }
@@ -85,8 +120,9 @@
     if (!maps) fail('maps are required');
     if (!connection || typeof connection.id !== 'string' || !connection.id) fail('id is required');
 
-    var a = validateEndpoint('a', connection.a, maps);
-    var b = validateEndpoint('b', connection.b, maps);
+    var oneWay = isOneWay(connection);
+    var a = validateEndpoint('a', connection.a, maps, { oneWay: oneWay });
+    var b = validateEndpoint('b', connection.b, maps, { oneWay: oneWay });
     if (connection.a.scene === connection.b.scene) fail('endpoints must use different scenes');
 
     var descriptorA = {
@@ -96,21 +132,23 @@
       ty: connection.b.spawn.ty,
       dir: connection.b.spawn.dir
     };
-    var descriptorB = {
-      connectionId: connection.id,
-      to: connection.a.scene,
-      tx: connection.a.spawn.tx,
-      ty: connection.a.spawn.ty,
-      dir: connection.a.spawn.dir
-    };
     if (connection.a.departureReaction) descriptorA.departureReaction = connection.a.departureReaction;
-    if (connection.b.departureReaction) descriptorB.departureReaction = connection.b.departureReaction;
     copyDoorFields(descriptorA, connection.a);
-    copyDoorFields(descriptorB, connection.b);
 
     var writes = [];
     a.triggerKeys.forEach(function (key) { writes.push({ doors: a.map.doors, key: key, value: descriptorA }); });
-    b.triggerKeys.forEach(function (key) { writes.push({ doors: b.map.doors, key: key, value: descriptorB }); });
+    if (!oneWay) {
+      var descriptorB = {
+        connectionId: connection.id,
+        to: connection.a.scene,
+        tx: connection.a.spawn.tx,
+        ty: connection.a.spawn.ty,
+        dir: connection.a.spawn.dir
+      };
+      if (connection.b.departureReaction) descriptorB.departureReaction = connection.b.departureReaction;
+      copyDoorFields(descriptorB, connection.b);
+      b.triggerKeys.forEach(function (key) { writes.push({ doors: b.map.doors, key: key, value: descriptorB }); });
+    }
     writes.forEach(function (write) {
       write.hadOwn = Object.prototype.hasOwnProperty.call(write.doors, write.key);
       write.previous = write.doors[write.key];
@@ -142,8 +180,11 @@
         return { valid: false, errors: ['id is required'] };
         }
        var errors = [];
+      var oneWay = false;
+      try { oneWay = isOneWay(connection); }
+      catch (e) { errors.push(e.message.replace(/^LocationConnections: /, '')); }
       ['a', 'b'].forEach(function (side) {
-        try { validateEndpoint(side, connection[side], maps); }
+        try { validateEndpoint(side, connection[side], maps, { oneWay: oneWay }); }
         catch (e) { errors.push(e.message.replace(/^LocationConnections: /, '')); }
          });
       if (connection.a && connection.b && connection.a.scene === connection.b.scene) {
@@ -169,5 +210,5 @@
             });
           }
 
-       GAME.LocationConnections = { install: install, validateEndpoint: validateEndpoint, validateConnection: validateConnection, connectionRecordsFor: connectionRecordsFor };
+       GAME.LocationConnections = { install: install, validateEndpoint: validateEndpoint, validateConnection: validateConnection, connectionRecordsFor: connectionRecordsFor, isOneWay: function (c) { return !!c && c.one_way === true; } };
       }());

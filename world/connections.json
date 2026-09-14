@@ -2,6 +2,28 @@
   "version": 1,
   "connections": [
     {
+      "id": "arrival-town",
+      "one_way": true,
+      "a": {
+        "scene": "arrival",
+        "triggers": [
+          [
+            4,
+            8
+          ]
+        ]
+      },
+      "b": {
+        "scene": "town",
+        "triggers": [],
+        "spawn": {
+          "tx": 30,
+          "ty": 33,
+          "dir": "up"
+        }
+      }
+    },
+    {
       "id": "double-r-front-entrance",
       "a": {
         "scene": "double_r_exterior_prototype",
@@ -68,6 +90,28 @@
         "spawn": {
           "tx": 14,
           "ty": 2,
+          "dir": "down"
+        }
+      }
+    },
+    {
+      "id": "redroom-room-315-wake",
+      "one_way": true,
+      "a": {
+        "scene": "redroom",
+        "triggers": [
+          [
+            8,
+            11
+          ]
+        ]
+      },
+      "b": {
+        "scene": "room_315",
+        "triggers": [],
+        "spawn": {
+          "tx": 2,
+          "ty": 6,
           "dir": "down"
         }
       }
@@ -187,6 +231,158 @@
       }
     },
     {
+      "id": "town-great-northern-lobby",
+      "a": {
+        "scene": "town",
+        "triggers": [
+          [
+            9,
+            6
+          ]
+        ],
+        "spawn": {
+          "tx": 9,
+          "ty": 7,
+          "dir": "down"
+        },
+        "door": {
+          "needsFlag": "sogno_fatto",
+          "blockedMsg": "hotel_locked"
+        }
+      },
+      "b": {
+        "scene": "hotel_gn",
+        "triggers": [
+          [
+            8,
+            11
+          ],
+          [
+            9,
+            11
+          ]
+        ],
+        "spawn": {
+          "tx": 8,
+          "ty": 10,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "town-hospital",
+      "a": {
+        "scene": "town",
+        "triggers": [
+          [
+            23,
+            6
+          ]
+        ],
+        "spawn": {
+          "tx": 23,
+          "ty": 7,
+          "dir": "down"
+        },
+        "door": {
+          "needsFlag": "sogno_fatto",
+          "blockedMsg": "hospital_locked"
+        }
+      },
+      "b": {
+        "scene": "hospital",
+        "triggers": [
+          [
+            7,
+            11
+          ],
+          [
+            8,
+            11
+          ]
+        ],
+        "spawn": {
+          "tx": 7,
+          "ty": 10,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "town-palmer-house",
+      "a": {
+        "scene": "town",
+        "triggers": [
+          [
+            42,
+            6
+          ]
+        ],
+        "spawn": {
+          "tx": 42,
+          "ty": 7,
+          "dir": "down"
+        }
+      },
+      "b": {
+        "scene": "palmer",
+        "triggers": [
+          [
+            7,
+            11
+          ],
+          [
+            8,
+            11
+          ]
+        ],
+        "spawn": {
+          "tx": 7,
+          "ty": 10,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "town-roadhouse",
+      "a": {
+        "scene": "town",
+        "triggers": [
+          [
+            47,
+            28
+          ]
+        ],
+        "spawn": {
+          "tx": 47,
+          "ty": 29,
+          "dir": "down"
+        },
+        "door": {
+          "needsFlag": "atto4",
+          "blockedMsg": "roadhouse_chiuso"
+        }
+      },
+      "b": {
+        "scene": "roadhouse",
+        "triggers": [
+          [
+            7,
+            9
+          ],
+          [
+            8,
+            9
+          ]
+        ],
+        "spawn": {
+          "tx": 7,
+          "ty": 8,
+          "dir": "up"
+        }
+      }
+    },
+    {
       "id": "town-sheriffs-station-lot",
       "a": {
         "scene": "town",
@@ -301,6 +497,40 @@
       }
     },
     {
+      "id": "town-woods-north",
+      "a": {
+        "scene": "town",
+        "triggers": [
+          [
+            50,
+            0
+          ]
+        ],
+        "spawn": {
+          "tx": 50,
+          "ty": 1,
+          "dir": "down"
+        },
+        "door": {
+          "needsClues": 3
+        }
+      },
+      "b": {
+        "scene": "woods",
+        "triggers": [
+          [
+            14,
+            21
+          ]
+        ],
+        "spawn": {
+          "tx": 14,
+          "ty": 20,
+          "dir": "up"
+        }
+      }
+    },
+    {
       "id": "traincar-oej-entrance",
       "a": {
         "scene": "traincar",
@@ -335,6 +565,28 @@
         "spawn": {
           "tx": 8,
           "ty": 8,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "woods-redroom-dream",
+      "one_way": true,
+      "a": {
+        "scene": "woods",
+        "triggers": [
+          [
+            14,
+            4
+          ]
+        ]
+      },
+      "b": {
+        "scene": "redroom",
+        "triggers": [],
+        "spawn": {
+          "tx": 8,
+          "ty": 9,
           "dir": "up"
         }
       }

@@ -125,6 +125,7 @@
        };
       connectionsById[c.id] = Object.freeze({
         id: c.id,
+        one_way: c.one_way === true,
         a: c.a || null,
         b: c.b || null,
         endpointIds: Object.freeze({ a: Identity.endpointId(c.id, 'a'), b: Identity.endpointId(c.id, 'b') }),

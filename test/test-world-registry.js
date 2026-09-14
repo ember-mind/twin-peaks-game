@@ -46,7 +46,7 @@
    'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js', 'sheriffs-station-scene.js', 'sheriffs-station-exterior-scene.js', 'sheriffs-station-production.js',
    'room-315-art.js', 'room-315-scene.js', 'room-315-production.js',
    'hospital-art.js', 'hospital-scene.js', 'hospital-production.js',
-   'traincar-art.js', 'traincar-scene.js', 'traincar-location-production.js'
+   'traincar-art.js', 'traincar-scene.js', 'world-connections-production.js'
   ].forEach(tryReq);
   req('world-engine.js');
   req('world-catalog.js');
@@ -54,12 +54,16 @@
   var G = global.GAME;
   var records = G.WorldData.connections;
 
-   // ---- 1. SHAPE: exactly seven records, ids sorted, door fields intact ----
-  assert.equal(records.length, 7, 'registry holds the seven authored connections');
+   // ---- 1. SHAPE: exactly fifteen records (seven authored + eight migrated classic doors in M5), ids sorted ----
+  assert.equal(records.length, 15, 'registry holds the fifteen connections');
   var ids = records.map(function (c) { return c.id; });
-  assert.deepEqual(ids, ['double-r-front-entrance', 'great-northern-room-315-hall', 'sheriffs-station-front-entrance',
-   'town-double-r-lot', 'town-sheriffs-station-lot', 'town-traincar-east', 'traincar-oej-entrance'],
+  assert.deepEqual(ids, ['arrival-town', 'double-r-front-entrance', 'great-northern-room-315-hall', 'redroom-room-315-wake',
+   'sheriffs-station-front-entrance', 'town-double-r-lot', 'town-great-northern-lobby', 'town-hospital', 'town-palmer-house',
+   'town-roadhouse', 'town-sheriffs-station-lot', 'town-traincar-east', 'town-woods-north', 'traincar-oej-entrance', 'woods-redroom-dream'],
    'registry ids are present and in stable sorted order');
+  assert.deepEqual(records.filter(function (c) { return c.one_way === true; }).map(function (c) { return c.id; }),
+   ['arrival-town', 'redroom-room-315-wake', 'woods-redroom-dream'], 'exactly the three one-way records');
+  assert.equal(records.find(function (c) { return c.id === 'town-woods-north'; }).a.door.needsClues, 3, 'woods gate keeps its clue count');
   assert.equal(records.find(function (c) { return c.id === 'town-traincar-east'; }).a.door.needsFlag, 'atto3',
    'gating door fields survive into the registry');
   assert.equal(records.find(function (c) { return c.id === 'traincar-oej-entrance'; }).a.door.needsFlag, 'east_route_confirmed',
@@ -118,9 +122,9 @@
   var genOnDisk = fs.readFileSync(genPath, 'utf8');
    // Re-run the generator's own logic into a temp buffer and compare.
   var child = require('node:child_process').execSync('node ' + path.join(__dirname, 'gen-world-data.js'), { cwd: ROOT });
-   assert.ok(/wrote js\/world-connections\.gen\.js \(7 records/.test(child.toString()), 'generator reports seven records');
+   assert.ok(/wrote js\/world-connections\.gen\.js \(15 records/.test(child.toString()), 'generator reports fifteen records');
    var genAfter = fs.readFileSync(genPath, 'utf8');
   assert.equal(genAfter, genOnDisk, 'committed world-connections.gen.js is in sync with world/connections.json (run node test/gen-world-data.js on drift)');
 
-  console.log('WORLD-REGISTRY-PASS shape(7 sorted), deep-frozen, validates-vs-real-maps non-mutating, stale-guard in sync');
+  console.log('WORLD-REGISTRY-PASS shape(15 sorted, 3 one-way), deep-frozen, validates-vs-real-maps non-mutating, stale-guard in sync');
 }());

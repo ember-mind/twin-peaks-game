@@ -1,5 +1,5 @@
 # WORLD BUILDER / core regression gate (Issue 10).
-# Runs the pure node test suites that back the World Builder (v0.1 -> M4b editing) plus the two
+# Runs the pure node test suites that back the World Builder (v0.1 -> M5 legacy doors) plus the two
 # project-wide gates. test/world-builder-browser.js needs a local Chrome and is run by hand (see reports/).
 # No browser, no build step: each checked file is a plain `node test/<name>.js` that
 # exits non-zero on failure. Node 24 to match the local dev target (the fixtures rely on the
@@ -39,8 +39,14 @@ jobs:
          run: node test/editor/model.js
        - name: Editor core - world-builder-core
          run: node test/editor/world-builder-core.js
-       - name: World door equality
+       - name: World door equality (all maps vs pre-M5 fixture)
          run: node test/world-door-equality.js
+       - name: Legacy door inventory (0 classic doors)
+         run: node test/legacy-door-inventory.js
+       - name: Location connections (paired, one-way, needsClues)
+         run: node test/location-connections.js
+       - name: Migrated door traversal (real engine input)
+         run: node test/migrated-door-traversal.js
        - name: World connection registry
          run: node test/test-world-registry.js
        - name: Apply changeset pipeline
