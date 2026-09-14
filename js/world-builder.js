@@ -387,8 +387,11 @@
         if (!ep) { insp.appendChild(el('div', { class: 'wb-warn' }, 'endpoint missing from draft')); return; }
         var editing = ui.mode === 'edit';
         var changed = E.isChanged(store, draft(), ref.connId);
+        var oneWay = E.isOneWay(rec);
         row(insp, 'CONNECTION', ref.connId);
-        row(insp, 'ENDPOINT', ref.side);
+        row(insp, 'DIRECTION', el('span', { id: 'wb-direction', class: oneWay ? 'wb-oneway' : '' },
+          oneWay ? 'ONE-WAY ' + rec.a.scene + ' → ' + rec.b.scene : 'paired'));
+        row(insp, 'ENDPOINT', ref.side + (oneWay ? (ref.side === 'a' ? ' (source: triggers only)' : ' (arrival: spawn only)') : ''));
         row(insp, 'SCENE', ep.scene);
         row(insp, 'DRAFT', changed ? 'modified (' + E.changedEndpoints(store, draft(), ref.connId).join(', ') + ')' : 'unchanged');
 
@@ -407,7 +410,10 @@
         }
 
         var spawn = ep.spawn || {};
-        if (editing) {
+        var hasSpawn = !(oneWay && ref.side === 'a');
+        if (!hasSpawn) {
+          row(insp, 'SPAWN x/y', '— (one-way source)');
+        } else if (editing) {
           var xy = el('span', { class: 'wb-inline' });
           var inX = xy.appendChild(el('input', { type: 'number', step: '1', id: 'wb-spawn-x', value: spawn.tx }));
           var inY = xy.appendChild(el('input', { type: 'number', step: '1', id: 'wb-spawn-y', value: spawn.ty }));
@@ -453,11 +459,11 @@
         if (editing) {
           var acts = insp.appendChild(el('div', { class: 'wb-actions' }));
           var pend = ui.pending && ui.pending.connId === ref.connId && ui.pending.side === ref.side ? ui.pending.action : null;
-          if (ref.kind === ID.KINDS.ENDPOINT) {
+          if (ref.kind === ID.KINDS.ENDPOINT && hasSpawn) {
             button(acts, pend === 'move-spawn' ? 'MOVE SPAWN · click a tile…' : 'MOVE SPAWN', 'move-spawn', function () {
               ui.pending = { action: 'move-spawn', connId: ref.connId, side: ref.side }; render();
             }, { cls: pend === 'move-spawn' ? 'on' : '' });
-          } else {
+          } else if (ref.kind === ID.KINDS.TRIGGER) {
             button(acts, pend === 'move-trigger' ? 'MOVE · click a tile…' : 'MOVE', 'move-trigger', function () {
               ui.pending = { action: 'move-trigger', connId: ref.connId, side: ref.side, index: ref.index }; render();
             }, { cls: pend === 'move-trigger' ? 'on' : '', disabled: !(ep.triggers || [])[ref.index] });
@@ -468,9 +474,13 @@
               });
             }, { cls: 'wb-danger', disabled: !(ep.triggers || [])[ref.index] });
           }
-          button(acts, pend === 'add-trigger' ? 'ADD TRIGGER · click an empty tile…' : 'ADD TRIGGER', 'add-trigger', function () {
-            ui.pending = { action: 'add-trigger', connId: ref.connId, side: ref.side }; render();
-          }, { cls: pend === 'add-trigger' ? 'on' : '' });
+          if (oneWay && ref.side === 'b') {
+            acts.appendChild(el('div', { class: 'wb-muted', id: 'wb-oneway-note' }, 'One-way arrival: endpoint b takes no triggers.'));
+          } else {
+            button(acts, pend === 'add-trigger' ? 'ADD TRIGGER · click an empty tile…' : 'ADD TRIGGER', 'add-trigger', function () {
+              ui.pending = { action: 'add-trigger', connId: ref.connId, side: ref.side }; render();
+            }, { cls: pend === 'add-trigger' ? 'on' : '' });
+          }
           button(acts, 'REVERT SELECTED', 'revert-selected', function () {
             guard(function () { commit(E.revertConnection(store, draft(), ref.connId), 'revert ' + ref.connId); ui.pending = null; });
           }, { disabled: !changed });

@@ -45,6 +45,7 @@
   // renderer can show "from scene X at trigger tiles -> arrive on scene Y at spawn".
   function normalizeConnection(record) {
     var out = {};
+    if (record && record.one_way === true) out.one_way = true;
     if (record && record.a) {
       out.a = { endpoint: 'a', scene: record.a.scene, triggers: clone(record.a.triggers || []),
                 spawn: record.a.spawn ? { tx: record.a.spawn.tx, ty: record.a.spawn.ty, dir: record.a.spawn.dir } : null };
@@ -314,8 +315,8 @@
       knownIds: function (id) { return Object.prototype.hasOwnProperty.call(ids, id); },
       sceneExists: function (scene) { var m = maps[scene]; return !!(m && typeof m.width === 'number'); },
       validateConnection: function (rec) { return LC.validateConnection(rec, maps); },
-      validateEndpoint: function (side, ep) {
-        try { LC.validateEndpoint(side, ep, maps); return null; }
+      validateEndpoint: function (side, ep, opts) {
+        try { LC.validateEndpoint(side, ep, maps, opts); return null; }
         catch (e) { return String(e.message || e).replace(/^LocationConnections: /, ''); }
       }
     });

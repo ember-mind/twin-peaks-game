@@ -39,7 +39,7 @@
     exit: ['tx', 'ty', 'target'],
     object: ['tx', 'ty'],
     npc: ['tx', 'ty'],
-    connection: ['id', 'a.scene', 'b.scene', 'a.spawn.tx', 'a.spawn.ty', 'b.spawn.tx', 'b.spawn.ty']
+    connection: ['id', 'one_way', 'a.scene', 'b.scene', 'a.spawn.tx', 'a.spawn.ty', 'b.spawn.tx', 'b.spawn.ty']
       };
 
      // Detect an entity's kind from the MODEL's shapes — no caller has to name it. A scene carries byKind+
