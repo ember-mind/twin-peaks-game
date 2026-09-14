@@ -1,32 +1,71 @@
 <!DOCTYPE html>
 <!--
-  world-builder.html — WORLD BUILDER v0.1 (M1–M3) dev tool, read-only.
+  world-builder.html — WORLD BUILDER M4b dev tool.
 
-  Loads the SAME real-world chain as index.html up to world-catalog so the editor renders the
-  actual catalog/maps/connections that ship in the game — not a second fake model. After that it
-  loads the three builder modules; js/world-builder.js self-mounts a fixed overlay panel (M1
-  selector, M2 canvas overlays, M3 click-to-inspect). No save UI, no tile editing: every mark on
-  the grid comes straight from GAME.Maps. Open over a local server so image/audio deps resolve,
-  or file:// for the data-only layers.
+  Loads the SAME real-world chain as index.html up to world-catalog (+ narrative data and cast presence), then
+  the game-free editor core (js/editor/core/*.js), the view-agnostic builder core, the sole game adapter
+  (world-builder-data.js) and finally the browser glue. The page renders from ONE frozen model
+  (GAME.WorldBuilderData.adaptWorld(GAME)); EDIT mode only ever changes drafts in memory. The single way out is
+  EXPORT CHANGESET -> tools/world-apply.js. Serve the repo over http (story moments fetch a test fixture).
 -->
 <html lang="it">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Twin Peaks — World Builder (read-only)</title>
+<title>World Builder</title>
 <style>
-  html,body { margin:0; background:#05070a; }
-  #wb-banner { position:fixed; top:8px; left:8px; z-index:9999; color:#5ec8ff;
-     font:12px/1.4 ui-monospace,Menlo,Consolas,monospace; background:#0b0f14;
-     border:1px solid #2a3646; border-radius:8px; padding:8px 10px; max-width:300px; }
+  :root { --bg:#05070a; --panel:#0b0f14; --line:#223041; --text:#cdd7e5; --muted:#7f93a8; --accent:#5ec8ff;
+          --pink:#ff5fb8; --warn:#ff6b6b; --ok:#7ee07e; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--text);
+    font:12px/1.45 ui-monospace,Menlo,Consolas,monospace; }
+  #wb-root { display:grid; grid-template-rows:auto auto 1fr; height:100vh; }
+  #wb-header { display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--line);
+    font-size:15px; letter-spacing:.08em; font-weight:700; }
+  #wb-mode-badge { font-size:11px; padding:2px 8px; border-radius:10px; border:1px solid var(--line); }
+  #wb-mode-badge.edit { background:#3a1030; border-color:var(--pink); color:#ffd0ec; }
+  #wb-mode-badge.view { color:var(--muted); }
+  #wb-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; padding:8px 16px;
+    border-bottom:1px solid var(--line); background:var(--panel); }
+  .wb-field { display:flex; align-items:center; gap:6px; color:var(--muted); }
+  select, input, button, textarea { font:inherit; color:var(--text); background:#111821; border:1px solid #2c3b4e;
+    border-radius:5px; padding:4px 8px; }
+  button { cursor:pointer; }
+  button:hover:not(:disabled) { border-color:var(--accent); }
+  button:disabled { opacity:.4; cursor:default; }
+  button.on { background:#16384e; border-color:var(--accent); color:#e6f6ff; }
+  button.wb-primary { border-color:#3c6e8c; }
+  button.wb-danger { border-color:#7a2d35; }
+  .wb-seg { display:flex; } .wb-seg button { border-radius:0; } .wb-seg button:first-child { border-radius:5px 0 0 5px; }
+  .wb-seg button:last-child { border-radius:0 5px 5px 0; margin-left:-1px; }
+  #wb-main { display:grid; grid-template-columns:minmax(0,1fr) 390px; min-height:0; }
+  #wb-stage { overflow:auto; padding:12px 16px; }
+  #wb-stage-info { color:var(--muted); margin-bottom:8px; }
+  #wb-canvas { display:block; border:1px solid var(--line); image-rendering:pixelated; }
+  #wb-legend { margin-top:8px; color:var(--muted); }
+  .lg-ep { color:var(--pink); } .lg-tr { color:#ffaa3c; } .lg-ghost { color:#a86b8e; } .lg-bad { color:#e0303a; }
+  .lg-npc { color:var(--ok); } .lg-obj { color:#e6b84a; } .lg-leg { color:var(--accent); }
+  #wb-side { overflow:auto; border-left:1px solid var(--line); background:var(--panel); padding:10px 14px 24px; }
+  #wb-side h2 { font-size:11px; letter-spacing:.12em; color:var(--muted); margin:14px 0 6px; font-weight:700; }
+  .wb-id { color:var(--accent); word-break:break-all; margin-bottom:6px; }
+  .wb-row { display:grid; grid-template-columns:120px minmax(0,1fr); gap:8px; padding:3px 0; border-bottom:1px solid #141c26; }
+  .wb-k { color:var(--muted); } .wb-v { word-break:break-word; }
+  .wb-inline { display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+  .wb-inline input { width:64px; }
+  .wb-triggers { display:flex; flex-wrap:wrap; gap:4px; }
+  .wb-chip { padding:1px 6px; font-size:11px; }
+  .wb-actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .wb-muted { color:var(--muted); } .wb-hint { color:#ffe36e; margin-top:6px; }
+  .wb-ok { color:var(--ok); }
+  .wb-warn { color:#ffd6d6; background:#3a1116; border:1px solid var(--warn); border-radius:5px; padding:6px 8px; margin:6px 0; }
+  .wb-errors { border:1px solid var(--warn); border-radius:5px; padding:6px 8px; margin-bottom:6px; background:#1d0b0e; }
+  .wb-errors-head { color:var(--warn); font-weight:700; } .wb-errors ul { margin:4px 0 0 16px; padding:0; }
+  .wb-error { color:#ffc4c4; }
+  #wb-export-text { width:100%; box-sizing:border-box; height:300px; margin:6px 0; white-space:pre; }
+  #wb-fatal { color:var(--warn); padding:16px; white-space:pre-wrap; }
 </style>
 </head>
 <body>
-<div id="wb-banner">
-  WORLD BUILDER v0.1 — read-only dev tool.<br>
-  M1 location/scene picker · M2 canvas overlays (exits / objects / npcs) · M3 click to inspect.<br>
-  No save, no tile editing. Data: GAME.World.catalog + GAME.Maps.
-</div>
+<div id="wb-root"></div>
 
 <!-- Real world chain (identical order to index.html lines 575–621). -->
 <script src="js/tiles.js"></script>
@@ -66,7 +105,20 @@
 <script src="js/narrative-data.gen.js"></script>
 <script src="js/cast-presence.js"></script>
 
-<!-- WORLD BUILDER v0.1 modules (pure data + coords, then browser glue). -->
+<!-- Editor core (game-free), then the builder core, the sole game adapter, the browser glue. -->
+<script src="js/editor/core/identity.js"></script>
+<script src="js/editor/core/hit-test.js"></script>
+<script src="js/editor/core/selection.js"></script>
+<script src="js/editor/core/model.js"></script>
+<script src="js/editor/core/changeset.js"></script>
+<script src="js/editor/core/draft.js"></script>
+<script src="js/editor/core/history.js"></script>
+<script src="js/editor/core/validation.js"></script>
+<script src="js/editor/core/interaction.js"></script>
+<script src="js/editor/core/inspector.js"></script>
+<script src="js/editor/core/edit.js"></script>
+<script src="js/editor/core/index.js"></script>
+<script src="js/world-builder-core.js"></script>
 <script src="js/world-builder-data.js"></script>
 <script src="js/world-builder-coords.js"></script>
 <script src="js/world-builder.js"></script>

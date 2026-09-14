@@ -260,23 +260,8 @@
         ok('town and diner base maps DIFFER (real geometry, not an empty grid)', baseSig(baseTown) !== baseSig(baseDiner));
          ok('planBaseMap is inert without a scene', WB.planBaseMap(undefined).rows.length === 0);
 
-         // ---- Issue 3 + 4: one z-ordered list drives BOTH paint and hit-test ------------------------
-        var plan = WBUI.selectablePlan(snap1, 'diner');
-
-        ok('selectablePlan returns a single overlay+spawn item list', Array.isArray(plan.items) && plan.items.length > 0);
-         // z-order invariant: overlays first, spawns last => a visible spawn is the topmost and must be selectable.
-         if (plan.spawns.length > 0) {
-            ok('diner has landing connection-spawn markers in the unified list', plan.items.some(function (it) { return it.kind === 'connection-spawn'; }));
-             var sp0 = plan.spawns[0]; var zoom = 8;
-              var hit = CO.hitTest(plan.items, sp0.tx * zoom + zoom / 2, sp0.ty * zoom + zoom / 2, zoom);
-            ok('clicking a visible spawn tile selects that spawn', !!hit && hit.kind === 'connection-spawn' && hit.tx === sp0.tx && hit.ty === sp0.ty);
-              // topmost wins: the LAST item overlapping a pixel is what hitTest returns.
-           var last = plan.items[plan.items.length - 1];
-             var topHit = CO.hitTest(plan.items, last.tx * zoom + zoom / 2, last.ty * zoom + zoom / 2, zoom);
-          ok('hit-test resolves to the topmost-painted item on overlap', !!topHit && WBUI.selKey(topHit) === WBUI.selKey(last));
-            } else {
-           ok('a scene with no landing spawns yields overlays-only items (consistent)', plan.items.length === plan.overlays.length);
-              }
+         // ---- Issue 3 + 4 (paint order == hit-test, stable selection) now live in the M4b section below,
+         //      over identity ids from js/editor/core/identity.js instead of the retired kind:tx,ty key.
 
          // ---- Issue 7: catalog connection ids without an authored record are surfaced loudly ---------
         ok('snapshot exposes an unresolved list for the real fixture', Array.isArray(snap1.unresolved));
@@ -338,10 +323,10 @@
                   //     whole set proves originals were not renamed/removed and adaptWorld was ADDED additively
                    //     (no surprise 8th key), so old-surface consumers still resolve everything.
                var apiKeys = Object.keys(WB).sort();
-                ok('module api is the 6 original keys + adaptWorld, nothing else (additive)',
+                ok('module api is the original keys + adaptWorld + the M4b story/validation helpers, nothing else',
                      JSON.stringify(apiKeys) === JSON.stringify(
-                            ["TILE","adaptWorld","buildWorldSnapshot","clone",
-                             "collectWorldSource","planBaseMap","tileColorFor"]));
+                            ["TILE","adaptWorld","buildWorldSnapshot","castForSeed","clone",
+                             "collectWorldSource","planBaseMap","storyStateFromSeed","tileColorFor","validationContext"]));
 
                  // (b) Source shape: the sole GAME read yields exactly the four input buckets.
                ok('adaptWorld.source has exactly {maps,catalog,connections,tile}',
@@ -401,6 +386,94 @@
    } finally {
     if (typeof globalThis !== 'undefined') { globalThis.Editor = prevEditor; }    // never leak the spy into other suites
    }
+
+   // ==== M4b: selection identity, edit store, validation, story moments, legacy doors (real world) ====
+  (function () {
+    var fs = require('fs');
+    ['identity','hit-test','selection','model','history','edit'].forEach(function (f) { require(path.join(DIR, 'editor', 'core', f + '.js')); });
+    var Core = require(path.join(DIR, 'world-builder-core.js'));
+    var Edit = require(path.join(DIR, 'editor', 'core', 'edit.js'));
+    var world = WB.adaptWorld(G);
+    var model = world.model;
+    var store = Edit.createStore(world.source.connections);
+
+    var diner = Core.sceneItems(model, 'diner', { connections: store.draft });
+    ok('M4b: diner items use identity ids, never kind:tx,ty', diner.length > 0 && diner.every(function (it) { return /^(connection-endpoint|trigger|npc|object|legacy-door):/.test(it.id) && !/^[a-z-]+:\d+,\d+$/.test(it.id); }));
+    ok('M4b: diner endpoint b id', !!Core.findItem(diner, 'connection-endpoint:double-r-front-entrance:b'));
+    ok('M4b: diner trigger ids carry side + index', !!Core.findItem(diner, 'trigger:double-r-front-entrance:b:0') && !!Core.findItem(diner, 'trigger:double-r-front-entrance:b:1'));
+    ok('M4b: diner npc ids are npc:<characterId>:diner', !!Core.findItem(diner, 'npc:norma:diner') && !!Core.findItem(diner, 'npc:shelly:diner'));
+    ok('M4b: diner has no legacy door (its doors belong to a connection)', diner.filter(function (it) { return it.kind === 'legacy-door'; }).length === 0);
+
+    // two items on one tile stay distinct; topmost (last painted) wins
+    var d1 = Edit.setSpawn(store.draft, 'double-r-front-entrance', 'b', { tx: 5, ty: 2 }); // onto Norma
+    var stacked = Core.sceneItems(model, 'diner', { connections: d1 });
+    var onTile = stacked.filter(function (it) { return it.tx === 5 && it.ty === 2; });
+    ok('M4b: two items on one tile keep distinct ids', onTile.length === 2 && onTile[0].id !== onTile[1].id, JSON.stringify(onTile));
+    ok('M4b: topmost wins (endpoint painted above npc)', Core.itemAt(stacked, 5, 2).id === 'connection-endpoint:double-r-front-entrance:b');
+    var d2 = Edit.addTrigger(d1, 'double-r-front-entrance', 'b', 9, 7); // onto Shelly
+    ok('M4b: trigger painted above npc wins its tile', Core.itemAt(Core.sceneItems(model, 'diner', { connections: d2 }), 9, 7).id === 'trigger:double-r-front-entrance:b:2');
+
+    // identity survives rerender and movement
+    var ids1 = Core.sceneItems(model, 'diner', { connections: store.draft }).map(function (i) { return i.id; });
+    var ids2 = Core.sceneItems(model, 'diner', { connections: store.draft }).map(function (i) { return i.id; });
+    ok('M4b: ids identical across rerenders', JSON.stringify(ids1) === JSON.stringify(ids2));
+    var moved = Core.sceneItems(model, 'diner', { connections: Edit.moveTrigger(Edit.setSpawn(store.draft, 'double-r-front-entrance', 'b', { tx: 8, ty: 8 }), 'double-r-front-entrance', 'b', 1, 8, 7) });
+    var ep = Core.findItem(moved, 'connection-endpoint:double-r-front-entrance:b'), tr = Core.findItem(moved, 'trigger:double-r-front-entrance:b:1');
+    ok('M4b: selection id survives spawn move', ep && ep.tx === 8 && ep.ty === 8);
+    ok('M4b: selection id survives trigger move', tr && tr.tx === 8 && tr.ty === 7);
+
+    // legacy doors: read-only kind with target + spawn
+    var inv = Core.legacyDoorInventory(model);
+    ok('M4b: legacy inventory lists the maps still on classic doors',
+      JSON.stringify(Object.keys(inv).sort()) === JSON.stringify(['arrival','hospital','hotel_gn','palmer','redroom','roadhouse','town','woods']), JSON.stringify(Object.keys(inv)));
+    var road = Core.sceneItems(model, 'roadhouse').filter(function (it) { return it.kind === 'legacy-door'; });
+    ok('M4b: roadhouse legacy doors are read-only with target town', road.length === 2 && road.every(function (it) { return it.readOnly && it.target && it.target.scene === 'town' && /^legacy-door:roadhouse:\d+,\d+$/.test(it.id); }));
+
+    // validation: runtime messages verbatim + editor checks
+    var ctx = WB.validationContext(G);
+    function errs(draft, id) { return Edit.validateDraft(draft[id], ctx, { changedSides: Edit.changedEndpoints(store, draft, id) }); }
+    ok('M4b: every registry record validates clean', world.source.connections.every(function (c) { return errs(store.draft, c.id).length === 0; }));
+    var bad = Edit.setSpawn(store.draft, 'double-r-front-entrance', 'b', { tx: 19 });
+    ok('M4b: spawn x=19 on diner -> "b.spawn is outside map bounds"', errs(bad, 'double-r-front-entrance').indexOf('b.spawn is outside map bounds') !== -1, JSON.stringify(errs(bad, 'double-r-front-entrance')));
+    var wall = Edit.addTrigger(store.draft, 'double-r-front-entrance', 'b', 8, 9);
+    ok('M4b: trigger on diner wall -> "b.triggers[2] must be walkable"', errs(wall, 'double-r-front-entrance').indexOf('b.triggers[2] must be walkable') !== -1);
+    var sher = Edit.addTrigger(Edit.setSpawn(store.draft, 'sheriffs-station-front-entrance', 'a', { tx: 8, ty: 8, dir: 'left' }), 'sheriffs-station-front-entrance', 'a', 8, 9);
+    ok('M4b: sheriffs exterior spawn 8,8 left + trigger 8,9 is valid', errs(sher, 'sheriffs-station-front-entrance').length === 0, JSON.stringify(errs(sher, 'sheriffs-station-front-entrance')));
+    var ghostRec = JSON.parse(JSON.stringify(store.base['double-r-front-entrance'])); ghostRec.id = 'nope'; ghostRec.b.scene = 'atlantis';
+    var ge = Edit.validateDraft(ghostRec, ctx, { changedSides: ['b'] });
+    ok('M4b: unknown id + unknown scene reported', ge.indexOf('connection id "nope" does not exist in the registry') !== -1 && ge.indexOf('endpoint b scene "atlantis" does not exist') !== -1, JSON.stringify(ge));
+    var same = JSON.parse(JSON.stringify(store.base['double-r-front-entrance'])); same.b.scene = same.a.scene;
+    ok('M4b: paired endpoint check fires when both sides share a scene', Edit.validateDraft(same, ctx, { changedSides: ['b'] }).some(function (e) { return e.indexOf('paired endpoint a no longer valid') === 0; }));
+    var noEp = { id: 'double-r-front-entrance', a: store.base['double-r-front-entrance'].a };
+    ok('M4b: missing endpoint reported', Edit.validateDraft(noEp, ctx, {}).indexOf('endpoint b does not exist') !== -1);
+
+    // story moments via GAME.CastPresence.resolveCast(state built like cast-continuity-validate)
+    var pins = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'cast-pins-acts-1-4.json'), 'utf8'));
+    var eve = WB.castForSeed(G, pins.seeds.ACT4_EVENING_GATHERING);
+    function npcIds(sceneId, cast) { return Core.sceneItems(model, sceneId, { npcs: cast ? (cast[sceneId] || []) : null }).filter(function (i) { return i.kind === 'npc'; }).map(function (i) { return i.characterId; }); }
+    ok('M4b: baseline diner shows norma + shelly', npcIds('diner').indexOf('norma') !== -1 && npcIds('diner').indexOf('shelly') !== -1);
+    ok('M4b: ACT4_EVENING_GATHERING diner has no norma/shelly', npcIds('diner', eve).indexOf('norma') === -1 && npcIds('diner', eve).indexOf('shelly') === -1);
+    ok('M4b: ACT4_EVENING_GATHERING roadhouse has norma + shelly', npcIds('roadhouse', eve).indexOf('norma') !== -1 && npcIds('roadhouse', eve).indexOf('shelly') !== -1);
+    ok('M4b: castForSeed agrees with CastPresence.bodiesFor for every seed + scene', Object.keys(pins.seeds).every(function (k) {
+      var cast = WB.castForSeed(G, pins.seeds[k]);
+      var st = WB.storyStateFromSeed(G, pins.seeds[k]);
+      return ['diner', 'roadhouse', 'sheriff', 'town'].every(function (sc) {
+        return JSON.stringify((cast[sc] || []).map(function (b) { return b.id + '@' + b.x + ',' + b.y; })) ===
+               JSON.stringify(G.CastPresence.bodiesFor(sc, st).map(function (b) { return b.id + '@' + b.x + ',' + b.y; }));
+      });
+    }));
+    ok('M4b: castForSeed is read-only (frozen)', Object.isFrozen(eve) && Object.isFrozen(eve.roadhouse));
+
+    // page wiring: core before builder core before glue; glue reads no GAME world data directly
+    var html = fs.readFileSync(path.join(__dirname, '..', 'world-builder.html'), 'utf8');
+    function at(src) { return html.indexOf('src="' + src + '"'); }
+    var coreFiles = fs.readdirSync(path.join(DIR, 'editor', 'core')).filter(function (f) { return /\.js$/.test(f); });
+    ok('M4b: world-builder.html loads every js/editor/core/*.js', coreFiles.every(function (f) { return at('js/editor/core/' + f) !== -1; }));
+    ok('M4b: core + world-builder-core load before world-builder.js', coreFiles.every(function (f) { return at('js/editor/core/' + f) < at('js/world-builder-core.js'); }) && at('js/world-builder-core.js') < at('js/world-builder.js') && at('js/world-builder-data.js') < at('js/world-builder.js'));
+    var glue = fs.readFileSync(path.join(DIR, 'world-builder.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+    ok('M4b: glue never reads GAME.Maps / GAME.WorldData / GAME.CastPresence directly', !/GAME\.(Maps|WorldData|CastPresence|LocationConnections|World\b)/.test(glue));
+    ok('M4b: glue never selects by kind:tx,ty', glue.indexOf("kind + ':' + ") === -1 && glue.indexOf('selKey') === -1);
+  })();
 
 console.log('\nWORLD-BUILDER: ' + (checks - failed.length) + '/' + checks + ' passed');
 

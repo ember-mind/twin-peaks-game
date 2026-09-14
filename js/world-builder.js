@@ -1,347 +1,720 @@
-/* world-builder.js — WORLD BUILDER v0.1 (M1–M3 browser glue; NO game-logic change).
+/* world-builder.js — WORLD BUILDER M4b browser glue (dev page only; index.html never loads it).
  *
- * A dev-only overlay page that renders the REAL world catalog + scene maps read-only:
- *    M1  location/scene selector built from GAME.World.catalog (all 7 locations) + status.
- *    M2  canvas renders the selected scene's tile grid with semantic overlays (exits,
- *        interactive objects, NPC positions, connection spawn points) + a legend.
- *    M3  clicking the grid selects an overlay; the inspector shows its read-only fields.
+ * Renders ONE frozen model — GAME.WorldBuilderData.adaptWorld(GAME) — and edits connection endpoints as
+ * DRAFTS. Nothing here writes to disk or to the runtime registry: the only way out is EXPORT CHANGESET
+ * (a JSON textarea), which tools/world-apply.js turns into a world/connections.json change.
  *
- * This is intentionally thin: it reads the pure view-model from js/world-builder-data.js and
- * geometry from js/world-builder-coords.js. It performs NO save / persistence and offers NO
- * tile editing — every drawn mark comes straight from GAME.Maps, so what you see is what runs.
- * Inert by construction: it only mounts once the DOM + canvas exist; outside a page it does
- * nothing, so the production game and node suites are unaffected.
+ *   selection   stable ids from js/editor/core/identity.js, hit-tested topmost-wins over the same
+ *               paint-ordered list the canvas draws (GameWorldBuilderCore.sceneItems)
+ *   VIEW/EDIT   EDIT unlocks spawn x/y/facing, MOVE SPAWN, trigger MOVE/ADD/REMOVE, revert, export
+ *   drafts      Editor.edit store (id -> whole record), every edit committed to Editor.history (Ctrl+Z)
+ *   validation  GAME.LocationConnections messages verbatim + registry/endpoint/scene/paired checks
+ *   story       read-only NPC overlay from GAME.CastPresence.resolveCast(seed state)
+ *   legacy      map doors with no connection id: read-only `legacy-door` items
  */
 (function () {
   'use strict';
 
-  var WB = null, CO = null;
+  var WB = null, Core = null, Ed = null;
   if (typeof window !== 'undefined') {
     WB = window.GAME && window.GAME.WorldBuilderData;
-    CO = window.GAME && window.GAME.WorldBuilderCoords;
+    Core = window.GameWorldBuilderCore;
+    Ed = window.Editor;
   }
 
-   // Guard: with no view-model / coords layers we cannot render anything true, so bail out
-   // rather than draw a fake world. This keeps the page inert when loaded in isolation.
-  if (!WB || !CO) {
-     if (typeof console !== 'undefined') console.warn('[world-builder] data layer missing — not mounting.');
-    return;
-   }
+  // Pure scene -> draw-spec list over the snapshot overlays (kept for the node data-layer suite).
+  function planScene(scene) {
+    if (!scene) return { width: 0, height: 0, markers: [] };
+    var order = { object: 0, npc: 1, exit: 2 };
+    var markers = scene.overlays.slice().sort(function (a, b) { return (order[a.kind] || 0) - (order[b.kind] || 0); });
+    return { width: scene.width, height: scene.height, indoor: !!scene.indoor, markers: markers };
+  }
 
-  // Pure scene -> draw-spec list: the geometry of every overlay marker, in paint order, with NO
-  // DOM/ctx. Kept separate from the pixel renderer so a Node test can assert "N markers of each
-  // kind for this scene" against the real source without a browser or canvas (M2 correctness).
-    function planScene(scene) {
-      if (!scene) return { width: 0, height: 0, markers: [] };
-       var order = { object: 0, npc: 1, exit: 2 }; // paint objects first so npcs/exits sit on top.
-          var markers = scene.overlays.slice().sort(function (a, b) { return (order[a.kind] || 0) - (order[b.kind] || 0); });
-         return { width: scene.width, height: scene.height, indoor: !!scene.indoor, markers: markers };
-        }
+  // Connection spawns landing on a scene (pure; node-tested).
+  function planSpawns(snap, sceneId) {
+    var out = [];
+    (snap.connections || []).forEach(function (c) {
+      ['a', 'b'].forEach(function (which) {
+        var e = c[which];
+        if (!e || e.scene !== sceneId || !e.spawn) return;
+        out.push({ which: which, id: c.id, tx: e.spawn.tx, ty: e.spawn.ty, dir: e.spawn.dir });
+      });
+    });
+    return out.sort(function (x, y) { return x.which < y.which ? -1 : 1; });
+  }
 
-       // Connection-endpoint spawn markers for a scene, SEPARATE from tile overlays so the M2 overlay-count
-       // test stays exact: an endpoint "lands" on this scene when its connection.a/b.scene === sceneId.
-        // Pure + node-testable; drawn as a diamond+label on top of the grid in renderScene.
-      function planSpawns(snap, sceneId) {
-       var out = [];
-       (snap.connections || []).forEach(function (c) {
-         ['a', 'b'].forEach(function (which) {
-          var e = c[which];
-          if (!e || e.scene !== sceneId || !e.spawn) return;
-           out.push({ which: which, id: c.id, tx: e.spawn.tx, ty: e.spawn.ty, dir: e.spawn.dir });
-            });
-             });
-              return out.sort(function (x, y) { return x.which < y.which ? -1 : 1; });
-                }
+  var PIECES_OK = !!(WB && Core && Ed && Ed.edit && Ed.history && Ed.identity && Ed.hitTest && Ed.model);
 
-          // ---- Issue 3 + 4: ONE canonical draw/hit plan for a scene.
-          // Every VISIBLE selectable marker lives in one z-ordered list — overlay markers first
-           // (object<npc<exit), connection-spawn markers last so they paint on top. The SAME array is used to
-           // render and to hit-test, so "topmost painted" always equals "what a click selects". Spawn markers are
-            // first-class here (Issue 3): if the user can see one, clicking it selects it. Each item is enriched
-             // with sceneId/locationId for the ownership header (Issue 5) WITHOUT mutating the frozen snapshot
-              // (Object.assign copies; the source overlay object is never written).
-          function pairedEndpoint(snap, id, which) {
-            var rec = (snap && snap.connections || []).filter(function (c) { return c.id === id; })[0];
-            if (!rec) return null;
-              var e = rec[which === 'a' ? 'b' : 'a']; // the OTHER endpoint of this connection pair
-             return e ? { scene: e.scene, tx: e.spawn && e.spawn.tx, ty: e.spawn && e.spawn.ty, dir: e.spawn && e.spawn.dir } : null;
-               }
+  var DIRV = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
-         function selectablePlan(snap, sceneId) {
-          var sc = snap && snap.scenes[sceneId];
-            if (!sc) return { width: 0, height: 0, items: [] };
-              // overlay markers carry real source fields plus the ownership a renderer/inspector need.
-           var overlays = planScene(sc).markers.map(function (m) {
-             var o = {};
-               Object.keys(m).forEach(function (k) { o[k] = m[k]; });
-                o.sceneId = sc.sceneId; o.locationId = sc.locationId;
-              return o;
-                });
-           // connection endpoints that LAND on this scene become selectable spawn markers (Issue 3).
-          var spawns = planSpawns(snap, sceneId).map(function (s) {
-            return { kind: 'connection-spawn', which: s.which, id: s.id, connectionId: s.id,
-                tx: s.tx, ty: s.ty, w: 1, h: 1, dir: s.dir || null, sceneId: sc.sceneId, locationId: sc.locationId,
-                 paired: pairedEndpoint(snap, s.id, s.which) };
-              });
-            // z-order == paint order == hit-test precedence (hitTest scans items end-first).
-         var items = overlays.concat(spawns);
-           return { width: sc.width, height: sc.height, indoor: !!sc.indoor,
-                    baseMap: WB.planBaseMap(sc), overlays: overlays, spawns: spawns, items: items };
-                         }
+  function mount() {
+    var G = window.GAME;
+    var world = WB.adaptWorld(G);
+    if (!world.model) throw new Error('[world-builder] editor core model missing — load js/editor/core/*.js first');
+    var model = world.model;
+    var E = Ed.edit, H = Ed.history, ID = Ed.identity;
+    var store = E.createStore(world.source.connections);
+    var vctx = WB.validationContext(G);
 
-                 // Module-level so the API can expose it; hit-test and draw share this key for stable selection (Issue 4).
-              function selKey(o) { return o.kind + ':' + o.tx + ',' + o.ty; }
+    var ui = {
+      sceneId: null,
+      mode: 'view',             // 'view' | 'edit'
+      selectedId: null,
+      pending: null,            // null | {action:'move-spawn'|'move-trigger'|'add-trigger', connId, side, index?}
+      hover: null,
+      notice: null,
+      exportOpen: false,
+      momentKey: 'baseline',
+      moments: {},              // seed key -> seed (from test/fixtures/cast-pins-acts-1-4.json)
+      momentCast: null,         // castForSeed result for the chosen seed
+      zoom: 16
+    };
+    var hist = H.create(store.base);
+    function draft() { return hist.present; }
 
+    // ------------------------------------------------------------------ DOM
+    function el(tag, attrs, text) {
+      var e = document.createElement(tag);
+      Object.keys(attrs || {}).forEach(function (k) {
+        if (k === 'class') e.className = attrs[k]; else e.setAttribute(k, attrs[k]);
+      });
+      if (text != null) e.textContent = text;
+      return e;
+    }
+    var root = document.getElementById('wb-root') || document.body.appendChild(el('div', { id: 'wb-root' }));
+    root.textContent = '';
+    var header = root.appendChild(el('header', { id: 'wb-header' }));
+    var title = header.appendChild(el('span', { id: 'wb-title' }));
+    var modeBadge = header.appendChild(el('span', { id: 'wb-mode-badge' }));
 
-             function mount() {
+    var bar = root.appendChild(el('div', { id: 'wb-toolbar' }));
+    function labelled(text, control) {
+      var w = el('label', { class: 'wb-field' });
+      w.appendChild(el('span', null, text));
+      w.appendChild(control);
+      return w;
+    }
+    var sceneSel = el('select', { id: 'wb-scene' });
+    bar.appendChild(labelled('SCENE', sceneSel));
+    var momentSel = el('select', { id: 'wb-moment' });
+    bar.appendChild(labelled('STORY MOMENT', momentSel));
+    var modeGroup = bar.appendChild(el('div', { class: 'wb-seg', id: 'wb-mode' }));
+    var viewBtn = modeGroup.appendChild(el('button', { 'data-action': 'mode-view' }, 'VIEW'));
+    var editBtn = modeGroup.appendChild(el('button', { 'data-action': 'mode-edit' }, 'EDIT'));
+    var undoBtn = bar.appendChild(el('button', { 'data-action': 'undo', title: 'Ctrl+Z' }, 'UNDO'));
+    var revertAllBtn = bar.appendChild(el('button', { 'data-action': 'revert-all' }, 'REVERT ALL'));
+    var exportBtn = bar.appendChild(el('button', { 'data-action': 'export', class: 'wb-primary' }, 'EXPORT CHANGESET'));
 
-    var snapshot = WB.buildWorldSnapshot(WB.collectWorldSource(window.GAME));
-    var root = document.getElementById('wb-root');
-     if (!root) { // attach a floating panel instead of overwriting the page body.
-      root = document.createElement('div');
-      root.id = 'wb-root';
-      document.body.appendChild(root);
-      }
+    var main = root.appendChild(el('main', { id: 'wb-main' }));
+    var stage = main.appendChild(el('section', { id: 'wb-stage' }));
+    var stageInfo = stage.appendChild(el('div', { id: 'wb-stage-info' }));
+    var canvas = stage.appendChild(el('canvas', { id: 'wb-canvas' }));
+    var legend = stage.appendChild(el('div', { id: 'wb-legend' }));
+    var side = main.appendChild(el('aside', { id: 'wb-side' }));
+    var noticeBox = side.appendChild(el('div', { id: 'wb-notice' }));
+    var insp = side.appendChild(el('div', { id: 'wb-inspector' }));
+    var valBox = side.appendChild(el('div', { id: 'wb-validation' }));
+    var exportBox = side.appendChild(el('div', { id: 'wb-export' }));
 
-   var selected = null;              // currently inspected selectable item (for the inspector)
-  var selectedSceneKey = null;       // "locationId/sceneId"
-   var selectedKey = null;           // stable "kind:tx,ty" key so a highlight survives scene re-renders
+    legend.innerHTML =
+      '<span class="lg lg-ep">◆</span> endpoint spawn&nbsp;&nbsp; <span class="lg lg-tr">■</span> trigger&nbsp;&nbsp; ' +
+      '<span class="lg lg-ghost">◇</span> original (dimmed)&nbsp;&nbsp; <span class="lg lg-bad">◆</span> invalid draft&nbsp;&nbsp; ' +
+      '<span class="lg lg-npc">▲</span> npc&nbsp;&nbsp; <span class="lg lg-obj">▭</span> object&nbsp;&nbsp; <span class="lg lg-leg">□</span> legacy door (read-only)';
 
+    // ------------------------------------------------------------------ scene + moment selectors
+    var catalogScenes = {};
+    world.snapshot.locations.forEach(function (loc) {
+      var grp = el('optgroup', { label: loc.name });
+      loc.environments.forEach(function (env) {
+        var sc = model.scenes[env.sceneId];
+        catalogScenes[env.sceneId] = true;
+        grp.appendChild(el('option', { value: env.sceneId }, env.sceneId + (sc ? ' (' + sc.width + '×' + sc.height + ')' : ' (not loaded)')));
+      });
+      sceneSel.appendChild(grp);
+    });
+    var others = Object.keys(model.scenes).filter(function (s) { return !catalogScenes[s]; }).sort();
+    if (others.length) {
+      var og = el('optgroup', { label: 'Other maps (not in catalog)' });
+      others.forEach(function (s) { og.appendChild(el('option', { value: s }, s + ' (' + model.scenes[s].width + '×' + model.scenes[s].height + ')')); });
+      sceneSel.appendChild(og);
+    }
+    momentSel.appendChild(el('option', { value: 'baseline' }, 'baseline (default)'));
+    momentSel.disabled = true;
 
+    function loadMoments() {
+      if (typeof fetch !== 'function') return;
+      fetch('test/fixtures/cast-pins-acts-1-4.json').then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      }).then(function (json) {
+        Object.keys(json.seeds || {}).forEach(function (k) {
+          ui.moments[k] = json.seeds[k];
+          momentSel.appendChild(el('option', { value: k }, k));
+        });
+        momentSel.disabled = false;
+        render();
+      }).catch(function (e) {
+        momentSel.title = 'story moments unavailable (' + e.message + ') — serve the repo over http';
+      });
+    }
 
-    // ---- M1: location/scene selector built from the real catalog ----
-   var sel = document.createElement('select');
-   sel.className = 'wb-sel';
-   snapshot.locations.forEach(function (loc) {
-     loc.environments.forEach(function (env) {
-      var opt = document.createElement('option');
-       // "Double R / interior — diner (14x10)" reads as both a location and a scene.
-       var sc = snapshot.scenes[env.sceneId];
-       opt.value = loc.id + '/' + env.sceneId;
-        var dims = sc ? (sc.width + 'x' + sc.height) : '?';
-      opt.textContent = loc.name + ' / ' + env.name + ' — ' + env.sceneId + ' (' + dims + ')';
-       sel.appendChild(opt);
-       });
-     if (loc.environments.length === 0) { // e.g. a location whose scenes did not load
-      var empty = document.createElement('option');
-      empty.textContent = loc.name + ' / (no environments loaded)';
-      empty.value = loc.id + '/';
-      sel.appendChild(empty);
-      }
-     });
+    // ------------------------------------------------------------------ derived state
+    function sceneNpcs(sceneId) {
+      if (ui.momentKey === 'baseline' || !ui.momentCast) return null; // model baseline overlay
+      return ui.momentCast[sceneId] || [];
+    }
+    function items(sceneId) {
+      return Core.sceneItems(model, sceneId || ui.sceneId, { connections: draft(), npcs: sceneNpcs(sceneId || ui.sceneId) });
+    }
+    function errorsFor(connId) {
+      var d = draft();
+      if (!d[connId]) return ['connection id "' + connId + '" does not exist in the draft'];
+      return E.validateDraft(d[connId], vctx, { changedSides: E.changedEndpoints(store, d, connId) });
+    }
+    function allErrors() {
+      var out = {};
+      E.changedIds(store, draft()).forEach(function (id) {
+        var errs = errorsFor(id);
+        if (errs.length) out[id] = errs;
+      });
+      return out;
+    }
+    function selectedRef() {
+      var p = ui.selectedId ? ID.parse(ui.selectedId) : null;
+      if (!p) return null;
+      if (p.kind === ID.KINDS.ENDPOINT) return { kind: p.kind, connId: p.connId, side: p.side };
+      if (p.kind === ID.KINDS.TRIGGER) return { kind: p.kind, connId: p.connId, side: p.side, index: p.n };
+      return { kind: p.kind };
+    }
 
-   root.innerHTML = '';
-  root.style.cssText =
-    'position:fixed;top:8px;right:8px;width:360px;max-height:92vh;overflow:auto;' +
-    'background:#0b0f14;color:#cdd7e5;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;' +
-    'border:1px solid #2a3646;border-radius:8px;padding:10px;z-index:9998;' +
-    'box-shadow:0 6px 24px rgba(0,0,0,.5);';
-   root.textContent = '';
+    function commit(next, label) {
+      if (next === draft()) return;
+      hist = H.commit(hist, next, { label: label });
+    }
+    function guard(fn) {
+      try { ui.notice = null; fn(); }
+      catch (e) { ui.notice = { level: 'error', text: String(e.message || e) }; }
+      render();
+    }
 
-    function h(tag, text) { var e = document.createElement(tag); if (text != null) e.textContent = text; return e; }
-   root.appendChild(h('div', 'WORLD BUILDER · read-only'));
-   root.appendChild(sel);
+    // ------------------------------------------------------------------ canvas
+    function fitZoom(sc) {
+      var availW = Math.max(200, stage.clientWidth - 24);
+      var availH = Math.max(200, window.innerHeight - 170);
+      return Math.max(8, Math.min(56, Math.floor(Math.min(availW / sc.width, availH / sc.height))));
+    }
+    function clampTile(sc, tx, ty) {
+      return { tx: Math.max(0, Math.min(sc.width - 1, tx)), ty: Math.max(0, Math.min(sc.height - 1, ty)),
+               out: tx < 0 || ty < 0 || tx >= sc.width || ty >= sc.height };
+    }
 
-    var status = h('div'); status.className = 'wb-status';
-  root.appendChild(status);
+    function drawCanvas(sc, list, errs) {
+      var z = ui.zoom = fitZoom(sc);
+      canvas.width = sc.width * z;
+      canvas.height = sc.height * z;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = sc.indoor ? '#10171f' : '#0a140e';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      var base = WB.planBaseMap(world.snapshot.scenes[sc.sceneId]);
+      base.rows.forEach(function (row, y) {
+        row.forEach(function (cell, x) { ctx.fillStyle = cell.color; ctx.fillRect(x * z, y * z, z, z); });
+      });
+      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+      ctx.lineWidth = 1;
+      for (var gx = 0; gx <= sc.width; gx++) { ctx.beginPath(); ctx.moveTo(gx * z + .5, 0); ctx.lineTo(gx * z + .5, canvas.height); ctx.stroke(); }
+      for (var gy = 0; gy <= sc.height; gy++) { ctx.beginPath(); ctx.moveTo(0, gy * z + .5); ctx.lineTo(canvas.width, gy * z + .5); ctx.stroke(); }
 
-     var legend = document.createElement('div');
-  root.appendChild(legend);
+      // originals of changed connections, dimmed, UNDER the draft markers
+      E.changedIds(store, draft()).forEach(function (id) {
+        var rec = store.base[id];
+        if (!rec) return;
+        ['a', 'b'].forEach(function (s) {
+          var ep = rec[s];
+          if (!ep || ep.scene !== sc.sceneId) return;
+          (ep.triggers || []).forEach(function (t) { drawTrigger(ctx, sc, t[0], t[1], z, { ghost: true }); });
+          if (ep.spawn) drawSpawn(ctx, sc, ep.spawn.tx, ep.spawn.ty, ep.spawn.dir, s, z, { ghost: true });
+        });
+      });
 
-     var canvas = document.createElement('canvas');
-  canvas.className = 'wb-canvas';
-  root.appendChild(canvas);
+      list.forEach(function (it) {
+        var isSel = it.id === ui.selectedId;
+        var bad = !!(it.connectionId && errs[it.connectionId]);
+        if (it.kind === 'legacy-door') drawLegacy(ctx, it, z, isSel);
+        else if (it.kind === 'object') drawObject(ctx, it, z, isSel);
+        else if (it.kind === 'npc') drawNpc(ctx, it, z, isSel);
+        else if (it.kind === 'trigger') drawTrigger(ctx, sc, it.tx, it.ty, z, { sel: isSel, bad: bad, label: it.side + it.index });
+        else if (it.kind === 'connection-endpoint') drawSpawn(ctx, sc, it.tx, it.ty, it.dir, it.side, z, { sel: isSel, bad: bad });
+      });
 
-    var insp = h('div', null); insp.className = 'wb-insp';
-  root.appendChild(insp);
-
-     // ---- M2: render the scene grid + overlays onto the canvas at an integer zoom ----
-   function renderScene(key) {
-    selectedSceneKey = key;
-    var parts = String(key).split('/');
-    var sceneId = parts[1] || '';
-    var sc = snapshot.scenes[sceneId];
-     if (!sc) { status.textContent = 'scene not loaded: ' + sceneId; canvas.width = 1; canvas.height = 1; return; }
-
-     var ctx = canvas.getContext('2d');
-      // Choose a zoom that fits the (often wide) town map on screen but never distorts tiles.
-    var zoom = Math.max(4, Math.floor((360 - 12) / sc.width));
-    if (zoom < 4) zoom = 4;
-     canvas.width = sc.width * zoom;
-     canvas.height = sc.height * zoom;
-
-       // base map: real per-tile geometry (from the scene's row strings) so Town/Diner/Sheriff read as
-        // DIFFERENT layouts, not an empty grid (BLOCKER 2). Rendered UNDER overlays; one colour per cell.
-    var plan = selectablePlan(snapshot, sceneId);
-     var base = plan.baseMap || { rows: [] };
- ctx.fillStyle = sc.indoor ? '#10171f' : '#0a140e';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  for (var by = 0; by < base.rows.length; by++) {
-    var rowc = base.rows[by];
-     for (var bx = 0; bx < rowc.length; bx++) {
-      ctx.fillStyle = rowc[bx].color;
-        ctx.fillRect(bx * zoom, by * zoom, zoom, zoom);
-           }
-             }
- // faint grid OVER the base keeps tile boundaries readable without erasing the geometry underneath.
-  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-  for (var x = 0; x <= sc.width; x++) { ctx.beginPath(); ctx.moveTo(x * zoom + .5, 0); ctx.lineTo(x * zoom + .5, canvas.height); ctx.stroke(); }
-   for (var y = 0; y <= sc.height; y++) { ctx.beginPath(); ctx.moveTo(0, y * zoom + .5); ctx.lineTo(canvas.width, y * zoom + .5); ctx.stroke(); }
-
-    // ONE canonical z-ordered list drives both paint and hit-test: overlays then spawns, topmost painted last.
-  plan.items.forEach(function (o) { drawOverlay(ctx, o, zoom, selKey(o) === selectedKey); });
-
-   // legend + status reflect what is actually on screen, including any unresolved catalog connection ids.
-  var counts = countByKind(sc.overlays);
-    var spawnItems = plan.spawns;
-  status.textContent = sc.sceneId + '     ·     ' + sc.width + '×' + sc.height + (sc.indoor ? ' (interior)' : '') +
-        '     ·  exits:' + counts.exit + '  objects:' + counts.object + '  npcs:' + counts.npc + '  spawns:' + spawnItems.length +
-         ((snapshot.unresolved && snapshot.unresolved.length) ? ('   ⚠ unresolved connections: ' + snapshot.unresolved.join(', ')) : '');
-   legend.innerHTML = '<span style="color:#5ec8ff">■</span> exit → target       ' +
-       '<span style="color:#e6b84a">●</span> object/region       ' +
-        '<span style="color:#7ee07e">▲</span> npc       ' +
-         '<span style="color:#ff78c8">◆</span> connection spawn (A/B)';
-
-   }
-
-    function drawOverlay(ctx, o, zoom, isSel) {
-     var px = o.tx * zoom, py = o.ty * zoom;
-      if (o.kind === 'exit') {
-       // arrow pointing toward the target spawn tile within this scene's grid where possible.
-      ctx.fillStyle = '#5ec8ff';
-      ctx.strokeStyle = isSel ? '#ffffff' : 'rgba(94,200,255,.5)';
-        var cx = px + zoom / 2, cy = py + zoom / 2;
-       if (isSel) { ctx.lineWidth = 2; ctx.strokeRect(px + .5, py + .5, zoom - 1, zoom - 1); }
-      ctx.beginPath(); ctx.arc(cx, cy, Math.max(3, zoom * 0.32), 0, Math.PI * 2); ctx.fill();
-        // direction tick
-     var dir = o.dir || 'down';
-      var dv = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[dir] || [0, 0];
-      ctx.strokeStyle = '#5ec8ff'; ctx.lineWidth = 2;
-       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + dv[0] * zoom * .6, cy + dv[1] * zoom * .6); ctx.stroke();
-        } else if (o.kind === 'object') {
-       var w = (o.w || 1) * zoom, hh = (o.h || 1) * zoom;
-      ctx.fillStyle = isSel ? 'rgba(230,184,74,.55)' : 'rgba(230,184,74,.25)';
-        if (isSel) { ctx.strokeStyle = '#e6b84a'; ctx.lineWidth = 2; }
-       ctx.fillRect(px + 1, py + 1, w - 2, hh - 2);
-        if (isSel) ctx.strokeRect(px + .5, py + .5, w - 1, hh - 1);
-          } else if (o.kind === 'connection-spawn') {
-       // a connection endpoint landing on this scene: diamond + A/B label. Selectable via the unified plan (Issue 3).
-       var cx2 = px + zoom / 2, cy2 = py + zoom / 2, r = Math.max(4, zoom * 0.38);
+      if (ui.pending && ui.hover) {
         ctx.save();
-      ctx.fillStyle = isSel ? 'rgba(255,160,220,.95)' : 'rgba(255,120,200,.85)';
-       ctx.strokeStyle = '#ff78c8'; ctx.lineWidth = isSel ? 2 : 1;
-        ctx.beginPath();
-         ctx.moveTo(cx2, cy2 - r); ctx.lineTo(cx2 + r, cy2); ctx.lineTo(cx2, cy2 + r); ctx.lineTo(cx2 - r, cy2); ctx.closePath();
-       ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#fff'; ctx.font = 'bold ' + Math.max(8, zoom * 0.7) + 'px monospace';
-         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-       ctx.fillText((o.which || '?').toUpperCase(), cx2, cy2);
-         ctx.restore();
-        } else { // npc
+        ctx.strokeStyle = '#ffe36e'; ctx.lineWidth = 2; ctx.setLineDash([4, 3]);
+        ctx.strokeRect(ui.hover.tx * z + 1.5, ui.hover.ty * z + 1.5, z - 3, z - 3);
+        ctx.restore();
+      }
+    }
 
-       ctx.fillStyle = '#7ee07e';
-        var nx = px + zoom / 2, ny = py + zoom / 2;
-      ctx.beginPath(); ctx.moveTo(nx, ny - zoom * .35); ctx.lineTo(nx + zoom * .3, ny + zoom * .3);
-        ctx.lineTo(nx - zoom * .3, ny + zoom * .3); ctx.closePath(); ctx.fill();
-       if (isSel) { ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke(); }
+    function drawSpawn(ctx, sc, tx, ty, dir, sideName, z, o) {
+      var c = clampTile(sc, tx, ty);
+      var cx = c.tx * z + z / 2, cy = c.ty * z + z / 2, r = z * 0.42;
+      ctx.save();
+      ctx.globalAlpha = o.ghost ? 0.4 : 1;
+      if (o.ghost) ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - r); ctx.lineTo(cx + r, cy); ctx.lineTo(cx, cy + r); ctx.lineTo(cx - r, cy); ctx.closePath();
+      ctx.fillStyle = o.ghost ? 'rgba(255,120,200,0.15)' : (o.bad ? '#e0303a' : '#ff5fb8');
+      ctx.fill();
+      ctx.strokeStyle = o.sel ? '#ffffff' : (o.bad ? '#ff9a9a' : '#ffc0e4');
+      ctx.lineWidth = o.sel ? 3 : 1.5;
+      ctx.stroke();
+      var dv = DIRV[dir] || [0, 0];
+      ctx.setLineDash([]);
+      ctx.strokeStyle = o.ghost ? '#ffc0e4' : '#ffffff';
+      ctx.lineWidth = Math.max(2, z * 0.08);
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + dv[0] * z * 0.62, cy + dv[1] * z * 0.62); ctx.stroke();
+      if (!o.ghost) {
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold ' + Math.max(9, Math.round(z * 0.36)) + 'px ui-monospace, Menlo, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(sideName.toUpperCase(), cx - dv[0] * z * 0.12, cy - dv[1] * z * 0.12);
+      }
+      if (c.out) {
+        ctx.fillStyle = '#ff5a5a';
+        ctx.font = 'bold ' + Math.max(9, Math.round(z * 0.28)) + 'px ui-monospace, Menlo, monospace';
+        var label = 'OUT ' + tx + ',' + ty, lw = ctx.measureText(label).width;
+        ctx.textAlign = 'left';
+        ctx.fillText(label, Math.max(2, Math.min(canvas.width - lw - 2, cx - lw / 2)), Math.max(z * 0.3, cy - z * 0.7));
+      }
+      ctx.restore();
+    }
+
+    function drawTrigger(ctx, sc, tx, ty, z, o) {
+      var c = clampTile(sc, tx, ty);
+      var px = c.tx * z, py = c.ty * z;
+      ctx.save();
+      if (o.ghost) {
+        ctx.globalAlpha = 0.45; ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = '#ffb347'; ctx.lineWidth = 1.5;
+        ctx.strokeRect(px + 3.5, py + 3.5, z - 7, z - 7);
+      } else {
+        ctx.fillStyle = o.bad ? 'rgba(224,48,58,0.85)' : 'rgba(255,170,60,0.72)';
+        ctx.fillRect(px + 3, py + 3, z - 6, z - 6);
+        ctx.strokeStyle = o.sel ? '#ffffff' : (o.bad ? '#ff9a9a' : '#ffd79a');
+        ctx.lineWidth = o.sel ? 3 : 1.5;
+        ctx.strokeRect(px + 3.5, py + 3.5, z - 7, z - 7);
+        if (o.label && z >= 14) {
+          ctx.fillStyle = '#1a1206';
+          ctx.font = 'bold ' + Math.max(8, Math.round(z * 0.26)) + 'px ui-monospace, Menlo, monospace';
+          ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+          ctx.fillText(o.label, px + 5, py + 5);
         }
+      }
+      ctx.restore();
     }
 
-     function countByKind(overlays) {
-      var c = { exit: 0, object: 0, npc: 0 };
-      overlays.forEach(function (o) { if (c[o.kind] != null) c[o.kind]++; });
-       return c;
+    function drawLegacy(ctx, it, z, isSel) {
+      var px = it.tx * z, py = it.ty * z;
+      ctx.save();
+      ctx.strokeStyle = isSel ? '#ffffff' : '#5ec8ff';
+      ctx.lineWidth = isSel ? 3 : 1.5;
+      ctx.setLineDash([2, 2]);
+      ctx.strokeRect(px + 2.5, py + 2.5, z - 5, z - 5);
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#5ec8ff';
+      ctx.font = 'bold ' + Math.max(8, Math.round(z * 0.34)) + 'px ui-monospace, Menlo, monospace';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('L', px + z / 2, py + z / 2);
+      ctx.restore();
     }
 
-    // ---- M3: click selects an overlay -> read-only inspector with the documented fields ----
-   canvas.addEventListener('click', function (ev) {
-     var rect = canvas.getBoundingClientRect();
-     var px = ev.clientX - rect.left, py = ev.clientY - rect.top;
-      var sceneId = String(selectedSceneKey).split('/')[1] || '';
-       // hit-test the SAME z-ordered list renderScene paints, so a visible spawn is selectable too (Issues 3+4).
-     var items = selectablePlan(snapshot, sceneId).items;
-    selected = CO.hitTest(items, px, py, currentZoom());
-      selectedKey = selected ? selKey(selected) : null;
-   renderScene(selectedSceneKey); // re-draw with selection highlight
-  renderInspector(selected, snapshot);
+    function drawObject(ctx, it, z, isSel) {
+      ctx.save();
+      ctx.fillStyle = isSel ? 'rgba(230,184,74,.5)' : 'rgba(230,184,74,.2)';
+      ctx.fillRect(it.tx * z + 1, it.ty * z + 1, it.w * z - 2, it.h * z - 2);
+      ctx.strokeStyle = isSel ? '#ffffff' : 'rgba(230,184,74,.8)';
+      ctx.lineWidth = isSel ? 3 : 1;
+      ctx.strokeRect(it.tx * z + 1.5, it.ty * z + 1.5, it.w * z - 3, it.h * z - 3);
+      ctx.restore();
+    }
+
+    function drawNpc(ctx, it, z, isSel) {
+      var cx = it.tx * z + z / 2, cy = it.ty * z + z / 2;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - z * 0.34); ctx.lineTo(cx + z * 0.3, cy + z * 0.28); ctx.lineTo(cx - z * 0.3, cy + z * 0.28); ctx.closePath();
+      ctx.fillStyle = '#7ee07e'; ctx.fill();
+      ctx.strokeStyle = isSel ? '#ffffff' : '#244d24'; ctx.lineWidth = isSel ? 3 : 1; ctx.stroke();
+      var name = String(it.name || it.characterId);
+      ctx.font = 'bold ' + Math.max(9, Math.round(z * 0.26)) + 'px ui-monospace, Menlo, monospace';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      var w = ctx.measureText(name).width + 6;
+      var ly = Math.max(z * 0.34, it.ty * z + 2);
+      ctx.fillStyle = 'rgba(5,10,5,.78)';
+      ctx.fillRect(cx - w / 2, ly - Math.max(10, z * 0.3), w, Math.max(10, z * 0.3));
+      ctx.fillStyle = '#b9f5b9';
+      ctx.fillText(name, cx, ly);
+      ctx.restore();
+    }
+
+    // ------------------------------------------------------------------ side panel
+    function row(parent, label, value) {
+      var r = parent.appendChild(el('div', { class: 'wb-row' }));
+      r.appendChild(el('span', { class: 'wb-k' }, label));
+      var v = r.appendChild(el('span', { class: 'wb-v' }));
+      if (value instanceof Node) v.appendChild(value); else v.textContent = value == null ? '—' : String(value);
+      return v;
+    }
+    function button(parent, label, action, onClick, opts) {
+      var b = parent.appendChild(el('button', { 'data-action': action, class: (opts && opts.cls) || '' }, label));
+      if (opts && opts.disabled) b.disabled = true;
+      b.addEventListener('click', onClick);
+      return b;
+    }
+    function fmtTile(t) { return t[0] + ',' + t[1]; }
+
+    function renderInspector(list) {
+      insp.textContent = '';
+      insp.appendChild(el('h2', null, 'INSPECTOR'));
+      if (!ui.selectedId) { insp.appendChild(el('div', { class: 'wb-muted' }, 'Click a marker on the canvas.')); return; }
+      var it = Core.findItem(list, ui.selectedId);
+      var ref = selectedRef();
+      insp.appendChild(el('div', { class: 'wb-id', id: 'wb-selected-id' }, ui.selectedId));
+      if (!it && !(ref && ref.connId)) { insp.appendChild(el('div', { class: 'wb-muted' }, 'selection not in this scene')); return; }
+
+      if (ref && (ref.kind === ID.KINDS.ENDPOINT || ref.kind === ID.KINDS.TRIGGER)) {
+        var rec = draft()[ref.connId];
+        var ep = rec && rec[ref.side];
+        if (!ep) { insp.appendChild(el('div', { class: 'wb-warn' }, 'endpoint missing from draft')); return; }
+        var editing = ui.mode === 'edit';
+        var changed = E.isChanged(store, draft(), ref.connId);
+        row(insp, 'CONNECTION', ref.connId);
+        row(insp, 'ENDPOINT', ref.side);
+        row(insp, 'SCENE', ep.scene);
+        row(insp, 'DRAFT', changed ? 'modified (' + E.changedEndpoints(store, draft(), ref.connId).join(', ') + ')' : 'unchanged');
+
+        var trList = el('div', { class: 'wb-triggers' });
+        (ep.triggers || []).forEach(function (t, i) {
+          var tid = ID.triggerId(ref.connId, ref.side, i);
+          var b = trList.appendChild(el('button', { class: 'wb-chip' + (tid === ui.selectedId ? ' on' : ''), 'data-trigger': tid }, '#' + i + '  ' + fmtTile(t)));
+          b.addEventListener('click', function () { ui.selectedId = tid; ui.pending = null; render(); });
+        });
+        if (!(ep.triggers || []).length) trList.textContent = '(none)';
+        row(insp, 'TRIGGERS', trList);
+
+        if (ref.kind === ID.KINDS.TRIGGER) {
+          var t = (ep.triggers || [])[ref.index];
+          row(insp, 'TRIGGER', t ? '#' + ref.index + ' at ' + fmtTile(t) : '(removed)');
+        }
+
+        var spawn = ep.spawn || {};
+        if (editing) {
+          var xy = el('span', { class: 'wb-inline' });
+          var inX = xy.appendChild(el('input', { type: 'number', step: '1', id: 'wb-spawn-x', value: spawn.tx }));
+          var inY = xy.appendChild(el('input', { type: 'number', step: '1', id: 'wb-spawn-y', value: spawn.ty }));
+          row(insp, 'SPAWN x/y', xy);
+          [[inX, 'tx'], [inY, 'ty']].forEach(function (pair) {
+            pair[0].addEventListener('change', function () {
+              var v = pair[0].value;
+              guard(function () {
+                var patch = {}; patch[pair[1]] = Number(v);
+                commit(E.setSpawn(draft(), ref.connId, ref.side, patch), 'spawn ' + pair[1]);
+              });
+            });
+          });
+          var face = el('select', { id: 'wb-facing' });
+          E.FACINGS.forEach(function (f) {
+            var o = face.appendChild(el('option', { value: f }, f));
+            if (f === spawn.dir) o.selected = true;
+          });
+          face.addEventListener('change', function () {
+            guard(function () { commit(E.setSpawn(draft(), ref.connId, ref.side, { dir: face.value }), 'facing'); });
+          });
+          row(insp, 'FACING', face);
+        } else {
+          row(insp, 'SPAWN x/y', spawn.tx + ', ' + spawn.ty);
+          row(insp, 'FACING', spawn.dir);
+        }
+
+        var otherSide = ref.side === 'a' ? 'b' : 'a';
+        var pair = rec[otherSide];
+        var pairBox = el('span', { class: 'wb-inline' });
+        pairBox.appendChild(el('span', null, pair ? otherSide + ' · ' + pair.scene + ' @ ' + (pair.spawn ? pair.spawn.tx + ',' + pair.spawn.ty + ' ' + pair.spawn.dir : '?') : '—'));
+        if (pair) {
+          var jump = pairBox.appendChild(el('button', { 'data-action': 'jump' }, 'jump'));
+          jump.addEventListener('click', function () {
+            ui.pending = null;
+            setScene(pair.scene);
+            ui.selectedId = ID.endpointId(ref.connId, otherSide);
+            render();
+          });
+        }
+        row(insp, 'PAIRED ENDPOINT', pairBox);
+
+        if (editing) {
+          var acts = insp.appendChild(el('div', { class: 'wb-actions' }));
+          var pend = ui.pending && ui.pending.connId === ref.connId && ui.pending.side === ref.side ? ui.pending.action : null;
+          if (ref.kind === ID.KINDS.ENDPOINT) {
+            button(acts, pend === 'move-spawn' ? 'MOVE SPAWN · click a tile…' : 'MOVE SPAWN', 'move-spawn', function () {
+              ui.pending = { action: 'move-spawn', connId: ref.connId, side: ref.side }; render();
+            }, { cls: pend === 'move-spawn' ? 'on' : '' });
+          } else {
+            button(acts, pend === 'move-trigger' ? 'MOVE · click a tile…' : 'MOVE', 'move-trigger', function () {
+              ui.pending = { action: 'move-trigger', connId: ref.connId, side: ref.side, index: ref.index }; render();
+            }, { cls: pend === 'move-trigger' ? 'on' : '', disabled: !(ep.triggers || [])[ref.index] });
+            button(acts, 'REMOVE', 'remove-trigger', function () {
+              guard(function () {
+                commit(E.removeTrigger(draft(), ref.connId, ref.side, ref.index), 'remove trigger');
+                ui.selectedId = ID.endpointId(ref.connId, ref.side);
+              });
+            }, { cls: 'wb-danger', disabled: !(ep.triggers || [])[ref.index] });
+          }
+          button(acts, pend === 'add-trigger' ? 'ADD TRIGGER · click an empty tile…' : 'ADD TRIGGER', 'add-trigger', function () {
+            ui.pending = { action: 'add-trigger', connId: ref.connId, side: ref.side }; render();
+          }, { cls: pend === 'add-trigger' ? 'on' : '' });
+          button(acts, 'REVERT SELECTED', 'revert-selected', function () {
+            guard(function () { commit(E.revertConnection(store, draft(), ref.connId), 'revert ' + ref.connId); ui.pending = null; });
+          }, { disabled: !changed });
+          if (ui.pending) insp.appendChild(el('div', { class: 'wb-hint' }, 'Esc cancels. Tiles snap to integers.'));
+        }
+        return;
+      }
+
+      if (!it) return;
+      row(insp, 'KIND', it.kind + (it.readOnly ? ' (read-only)' : ''));
+      row(insp, 'SCENE', it.scene);
+      if (it.kind === 'npc') {
+        row(insp, 'CHARACTER', it.characterId);
+        row(insp, 'NAME', it.name);
+        row(insp, 'TILE', it.tx + ',' + it.ty);
+        row(insp, 'FACING', it.dir);
+        row(insp, 'SOURCE', ui.momentKey === 'baseline' ? 'baseline cast' : 'story moment ' + ui.momentKey);
+      } else if (it.kind === 'legacy-door') {
+        row(insp, 'TILE', it.tx + ',' + it.ty);
+        row(insp, 'TARGET', it.target ? it.target.scene : '—');
+        row(insp, 'SPAWN', it.target ? it.target.x + ',' + it.target.y + (it.dir ? ' ' + it.dir : '') : '—');
+        insp.appendChild(el('div', { class: 'wb-muted' }, 'Classic js/maps.js door — not in world/connections.json, not editable.'));
+      } else if (it.kind === 'object') {
+        row(insp, 'TYPE', (it.type || '—') + (it.subkind ? ' / ' + it.subkind : ''));
+        row(insp, 'TILE', it.tx + ',' + it.ty + '  ' + it.w + '×' + it.h);
+        if (it.dialogue != null) row(insp, 'DIALOGUE', typeof it.dialogue === 'string' ? it.dialogue : JSON.stringify(it.dialogue));
+      }
+    }
+
+    function renderValidation(errs) {
+      valBox.textContent = '';
+      valBox.appendChild(el('h2', null, 'VALIDATION'));
+      var ids = Object.keys(errs);
+      var changed = E.changedIds(store, draft());
+      if (!changed.length) { valBox.appendChild(el('div', { class: 'wb-muted' }, 'No drafts.')); return; }
+      if (!ids.length) { valBox.appendChild(el('div', { class: 'wb-ok', id: 'wb-valid' }, '✓ ' + changed.length + ' draft(s) valid')); return; }
+      ids.forEach(function (id) {
+        var box = valBox.appendChild(el('div', { class: 'wb-errors', 'data-connection': id }));
+        box.appendChild(el('div', { class: 'wb-errors-head' }, id));
+        var ul = box.appendChild(el('ul'));
+        errs[id].forEach(function (msg) { ul.appendChild(el('li', { class: 'wb-error' }, msg)); });
+      });
+    }
+
+    function renderExport(errs) {
+      exportBox.textContent = '';
+      if (!ui.exportOpen) return;
+      exportBox.appendChild(el('h2', null, 'EXPORT CHANGESET'));
+      var bad = Object.keys(errs);
+      if (bad.length) {
+        exportBox.appendChild(el('div', { class: 'wb-warn', id: 'wb-export-blocked' },
+          'EXPORT BLOCKED — ' + bad.length + ' invalid draft(s): ' + bad.join(', ') + '. Fix or revert them first.'));
+        return;
+      }
+      var cs = E.buildChangeset(store, draft());
+      exportBox.appendChild(el('div', { class: 'wb-muted' },
+        cs.operations.length + ' changed connection(s). Save as a file, then: node tools/world-apply.js <file> --dry-run'));
+      var ta = exportBox.appendChild(el('textarea', { id: 'wb-export-text', readonly: 'readonly', spellcheck: 'false' }));
+      ta.value = E.serialize(cs);
+      var copy = button(exportBox, 'COPY', 'copy', function () {
+        ta.select();
+        var done = function () { copy.textContent = 'COPIED'; };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(ta.value).then(done, function () { document.execCommand('copy'); done(); });
+        else { document.execCommand('copy'); done(); }
+      });
+    }
+
+    // ------------------------------------------------------------------ render
+    function render() {
+      var sc = model.scenes[ui.sceneId];
+      var list = items();
+      var errs = allErrors();
+      var n = E.changedIds(store, draft()).length;
+      title.textContent = 'WORLD BUILDER · ' + n + ' unsaved change' + (n === 1 ? '' : 's');
+      modeBadge.textContent = ui.mode === 'edit' ? 'EDIT' : 'VIEW';
+      modeBadge.className = ui.mode === 'edit' ? 'edit' : 'view';
+      viewBtn.className = ui.mode === 'view' ? 'on' : '';
+      editBtn.className = ui.mode === 'edit' ? 'on' : '';
+      undoBtn.disabled = !H.canUndo(hist);
+      revertAllBtn.disabled = ui.mode !== 'edit' || n === 0;
+      exportBtn.disabled = ui.mode !== 'edit';
+      if (sceneSel.value !== ui.sceneId) sceneSel.value = ui.sceneId;
+      if (momentSel.value !== ui.momentKey) momentSel.value = ui.momentKey;
+      canvas.style.cursor = ui.pending ? 'crosshair' : 'pointer';
+
+      var counts = { 'connection-endpoint': 0, trigger: 0, npc: 0, object: 0, 'legacy-door': 0 };
+      list.forEach(function (it) { counts[it.kind]++; });
+      stageInfo.textContent = sc.sceneId + ' · ' + sc.width + '×' + sc.height + (sc.indoor ? ' interior' : '') +
+        ' · endpoints ' + counts['connection-endpoint'] + ' · triggers ' + counts.trigger + ' · npcs ' + counts.npc +
+        ' · objects ' + counts.object + ' · legacy doors ' + counts['legacy-door'] +
+        ' · cast: ' + (ui.momentKey === 'baseline' ? 'baseline' : ui.momentKey);
+
+      drawCanvas(sc, list, errs);
+      noticeBox.textContent = '';
+      if (ui.notice) noticeBox.appendChild(el('div', { class: ui.notice.level === 'error' ? 'wb-warn' : 'wb-hint' }, ui.notice.text));
+      renderInspector(list);
+      renderValidation(errs);
+      renderExport(errs);
+    }
+
+    function setScene(sceneId) {
+      if (!model.scenes[sceneId]) throw new Error('unknown scene ' + sceneId);
+      ui.sceneId = sceneId;
+      ui.hover = null;
+    }
+
+    // ------------------------------------------------------------------ events
+    function tileFromEvent(ev) {
+      var rect = canvas.getBoundingClientRect();
+      var sx = canvas.width / rect.width, sy = canvas.height / rect.height;
+      var tx = Math.floor((ev.clientX - rect.left) * sx / ui.zoom);
+      var ty = Math.floor((ev.clientY - rect.top) * sy / ui.zoom);
+      var sc = model.scenes[ui.sceneId];
+      if (tx < 0 || ty < 0 || tx >= sc.width || ty >= sc.height) return null;
+      return { tx: tx, ty: ty };
+    }
+
+    canvas.addEventListener('mousemove', function (ev) {
+      if (!ui.pending) return;
+      var t = tileFromEvent(ev);
+      if (!t || (ui.hover && ui.hover.tx === t.tx && ui.hover.ty === t.ty)) return;
+      ui.hover = t;
+      render();
     });
 
-
-     function currentZoom() {
-      var sc = snapshot.scenes[(String(selectedSceneKey).split('/')[1] || '')];
-      if (!sc) return 4;
-       return Math.max(4, Math.floor((360 - 12) / sc.width));
-    }
-
-   // Inspector mirrors the M3 example: TYPE/KIND · SOURCE · TARGET scene+spawn · tile · connection id.
-  function renderInspector(o, snap) {
-     insp.textContent = '';
-      if (!o) { insp.appendChild(h('div', '— select a highlighted overlay —')); return; }
-     function row(label, val) {
-       var r = h('div');
-      var l = h('span', label + ': '); l.style.color = '#7f93a8';
-        var v = h('span', String(val == null ? '—' : val));
-      r.appendChild(l); r.appendChild(v); insp.appendChild(r);
-       }
-    // Ownership first (Issue 5): every selectable reports the location + scene it belongs to.
-   row('LOCATION', o.locationId || '—');
-    row('SCENE', o.sceneId || '—');
-   row('TYPE / KIND', o.kind + (o.subkind ? '/' + o.subkind : '') + (o.type ? (' (' + o.type + ')') : ''));
-  if (o.kind === 'npc') { if (o.id) row('NPC ID', o.id); if (o.name) row('NAME', o.name); }
-   else if (o.id && o.kind !== 'connection-spawn') row('ID', o.id);
-     // SOURCE tile plus real dimensions for multi-cell objects.
-  row('SOURCE (tile)', 'x=' + o.tx + '  y=' + o.ty + (o.w || o.h ? ('  w=' + (o.w || 1) + ' h=' + (o.h || 1)) : ''));
-   if (o.kind === 'npc' && o.sprite) row('SPRITE', o.sprite);
-    if (o.dir) row('DIRECTION', o.dir);
-     if (o.dialogue != null) row('DIALOGUE', typeof o.dialogue === 'string' ? o.dialogue : JSON.stringify(o.dialogue));
-
-    // exits: target scene + landing spawn, then the canonical connection id and BOTH paired endpoints.
-   if (o.kind === 'exit') {
-     row('TARGET scene', o.target && o.target.scene);
-      row('TARGET SPAWN', o.target ? ('x=' + o.target.x + '  y=' + o.target.y + (o.dir ? '  dir=' + o.dir : '')) : '—');
-    var rec = snap.connections.filter(function (c) { return c.id === o.connectionId; })[0];
-      if (rec) {
-       row('CONNECTION ID', rec.id);
-        row('A endpoint', rec.a ? (rec.a.scene + ' spawn@' + (rec.a.spawn && rec.a.spawn.tx) + ',' + (rec.a.spawn && rec.a.spawn.ty)) : '—');
-       row('B endpoint', rec.b ? (rec.b.scene + ' spawn@' + (rec.b.spawn && rec.b.spawn.tx) + ',' + (rec.b.spawn && rec.b.spawn.ty)) : '—');
-         } else if (o.connectionId) {
-     row('CONNECTION ID', o.connectionId + ' (no paired record loaded)');
-       }
-     }
-
-    // connection-spawn: the endpoint landing on this scene, plus its partner across the pair.
-   if (o.kind === 'connection-spawn') {
-    row('CONNECTION ID', o.id);
-      row('LANDS HERE at', 'side ' + (o.which || '?').toUpperCase() + '  x=' + o.tx + ' y=' + o.ty);
-     var p = o.paired;
-       row('PARTNER endpoint', p ? (p.scene + ' spawn@' + p.tx + ',' + p.ty + (p.dir ? '  dir=' + p.dir : '')) : '—');
+    canvas.addEventListener('click', function (ev) {
+      var t = tileFromEvent(ev);
+      if (!t) return;
+      var p = ui.pending;
+      if (!p) {
+        var hit = Core.itemAt(items(), t.tx, t.ty);
+        ui.selectedId = hit ? hit.id : null;
+        ui.notice = null;
+        render();
+        return;
       }
+      guard(function () {
+        if (p.action === 'move-spawn') {
+          commit(E.setSpawn(draft(), p.connId, p.side, { tx: t.tx, ty: t.ty }), 'move spawn');
+          ui.selectedId = ID.endpointId(p.connId, p.side);
+        } else if (p.action === 'move-trigger') {
+          commit(E.moveTrigger(draft(), p.connId, p.side, p.index, t.tx, t.ty), 'move trigger');
+          ui.selectedId = ID.triggerId(p.connId, p.side, p.index);
+        } else if (p.action === 'add-trigger') {
+          var occupant = Core.itemAt(items(), t.tx, t.ty);
+          if (occupant) { ui.pending = p; throw new Error('ADD needs an empty tile — ' + t.tx + ',' + t.ty + ' holds ' + occupant.id); }
+          var next = E.addTrigger(draft(), p.connId, p.side, t.tx, t.ty);
+          commit(next, 'add trigger');
+          ui.selectedId = ID.triggerId(p.connId, p.side, next[p.connId][p.side].triggers.length - 1);
+        }
+        ui.pending = null;
+        ui.hover = null;
+      });
+    });
 
-   }
+    sceneSel.addEventListener('change', function () {
+      guard(function () { setScene(sceneSel.value); ui.selectedId = null; ui.pending = null; });
+    });
+    momentSel.addEventListener('change', function () {
+      guard(function () {
+        var key = momentSel.value;
+        ui.momentCast = key === 'baseline' ? null : WB.castForSeed(G, ui.moments[key]);
+        ui.momentKey = key;
+        var p = ui.selectedId && ID.parse(ui.selectedId);
+        if (p && p.kind === ID.KINDS.NPC) ui.selectedId = null;
+      });
+    });
+    viewBtn.addEventListener('click', function () { ui.mode = 'view'; ui.pending = null; ui.exportOpen = false; render(); });
+    editBtn.addEventListener('click', function () { ui.mode = 'edit'; render(); });
+    function undo() {
+      if (!H.canUndo(hist)) return;
+      hist = H.undo(hist);
+      ui.pending = null;
+      var ref = selectedRef();
+      if (ref && ref.kind === ID.KINDS.TRIGGER) {
+        var ep = draft()[ref.connId] && draft()[ref.connId][ref.side];
+        if (!ep || !ep.triggers[ref.index]) ui.selectedId = ID.endpointId(ref.connId, ref.side);
+      }
+      render();
+    }
+    undoBtn.addEventListener('click', undo);
+    revertAllBtn.addEventListener('click', function () { guard(function () { commit(E.revertAll(store), 'revert all'); ui.pending = null; }); });
+    exportBtn.addEventListener('click', function () { ui.exportOpen = true; render(); });
+    document.addEventListener('keydown', function (ev) {
+      if ((ev.ctrlKey || ev.metaKey) && !ev.shiftKey && (ev.key === 'z' || ev.key === 'Z')) {
+        if (ev.target && ev.target.tagName === 'TEXTAREA') return;
+        ev.preventDefault();
+        undo();
+      } else if (ev.key === 'Escape' && ui.pending) {
+        ui.pending = null; ui.hover = null; render();
+      }
+    });
+    window.addEventListener('resize', function () { render(); });
 
-      // default: first location's first environment; select it and render.
-  sel.onchange = function () { renderScene(sel.value); selected = null; selectedKey = null; renderInspector(null, snapshot); };
+    // ------------------------------------------------------------------ boot
+    setScene(sceneSel.options.length ? sceneSel.options[0].value : Object.keys(model.scenes)[0]);
+    render();
+    loadMoments();
 
-     sel.selectedIndex = 0;
-  renderScene(sel.value);
-   renderInspector(null, snapshot);
-
-    // expose for debugging / manual verification (read-only handles only)
-  if (typeof window !== 'undefined') window.WB = { snapshot: snapshot, select: function () {} };
+    // Read-only debug/test handle: state readers + tile->client geometry. Mutations go through the UI.
+    window.WB = {
+      model: model,
+      state: function () {
+        var list = items();
+        var errs = allErrors();
+        return {
+          sceneId: ui.sceneId, mode: ui.mode, selectedId: ui.selectedId, pending: ui.pending && ui.pending.action,
+          momentKey: ui.momentKey, unsaved: E.changedIds(store, draft()).length, changedIds: E.changedIds(store, draft()),
+          errors: errs, exportOpen: ui.exportOpen, exportBlocked: ui.exportOpen && Object.keys(errs).length > 0,
+          canUndo: H.canUndo(hist), momentsLoaded: !momentSel.disabled, notice: ui.notice && ui.notice.text,
+          draft: JSON.parse(JSON.stringify(draft())),
+          items: list.map(function (it) { return { id: it.id, kind: it.kind, tx: it.tx, ty: it.ty }; }),
+          npcIds: list.filter(function (it) { return it.kind === 'npc'; }).map(function (it) { return it.characterId; })
+        };
+      },
+      tileToClient: function (tx, ty) {
+        var rect = canvas.getBoundingClientRect();
+        var k = rect.width / canvas.width;
+        return { x: rect.left + (tx + 0.5) * ui.zoom * k, y: rect.top + (ty + 0.5) * ui.zoom * k };
+      }
+    };
+    document.title = 'World Builder — ready';
+    document.body.setAttribute('data-wb-ready', '1');
   }
 
-   // Mount when the DOM is ready; tolerate scripts loading before/after body.
   function boot() {
-     if (document.getElementById('wb-root')) return; // idempotent
-    mount();
-   }
-  if (typeof window !== 'undefined') {
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+    if (document.body.getAttribute('data-wb-ready')) return;
+    try { mount(); }
+    catch (e) {
+      console.error('[world-builder] mount failed', e);
+      var pre = document.createElement('pre');
+      pre.id = 'wb-fatal';
+      pre.textContent = 'WORLD BUILDER failed to mount:\n' + (e && e.stack || e);
+      document.body.appendChild(pre);
+    }
+  }
+  if (typeof window !== 'undefined' && typeof document !== 'undefined' && document) {
+    if (!PIECES_OK) {
+      if (typeof console !== 'undefined') console.warn('[world-builder] data layer or editor core missing — not mounting.');
+    } else if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
     else boot();
-   }
+  }
 
-  var api = { mount: mount, planScene: planScene, planSpawns: planSpawns, selectablePlan: selectablePlan, selKey: selKey };
-
+  var api = { mount: mount, planScene: planScene, planSpawns: planSpawns };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
-   if (typeof window !== 'undefined') { window.GAME = window.GAME || {}; window.GAME.WorldBuilder = api; }
+  if (typeof window !== 'undefined') { window.GAME = window.GAME || {}; window.GAME.WorldBuilder = api; }
 })();
