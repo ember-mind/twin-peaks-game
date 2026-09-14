@@ -1,0 +1,57 @@
+{
+  "format": "world-connections-changeset",
+  "version": 1,
+  "target": "world/connections.json",
+  "operations": [
+    {
+      "op": "upsert",
+      "id": "sheriffs-station-front-entrance",
+      "endpoints": [
+        "a"
+      ],
+      "connection": {
+        "id": "sheriffs-station-front-entrance",
+        "a": {
+          "scene": "sheriffs_station_exterior",
+          "triggers": [
+            [
+              7,
+              6
+            ],
+            [
+              8,
+              6
+            ],
+            [
+              8,
+              9
+            ]
+          ],
+          "spawn": {
+            "tx": 8,
+            "ty": 8,
+            "dir": "left"
+          }
+        },
+        "b": {
+          "scene": "sheriff",
+          "triggers": [
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ]
+          ],
+          "spawn": {
+            "tx": 7,
+            "ty": 10,
+            "dir": "up"
+          }
+        }
+      }
+    }
+  ]
+}

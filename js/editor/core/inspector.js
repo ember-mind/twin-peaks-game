@@ -23,7 +23,7 @@
 //    loaded" fallback intent: show the gap rather than pretend the field does not exist.
 //   - PURE + FROZEN: no DOM, no mutation of the entity or schema; inspect() returns a frozen row array.
 
-const Editor = (function () {
+(function () {
   const R = globalThis.Editor || {};
 
     // read a dotted key out of an object; any missing hop yields null rather than throwing, so an unset

@@ -19,7 +19,7 @@
 // identity.js (3a) so a drag/select can refer to an endpoint without recomputing it; (4) a legacy-door
 // classification, since map.doors predate the trigger/spawn records.
 
-const Editor = (function () {
+(function () {
   const R = globalThis.Editor || {};
 
    // Resolve identity lazily: in the browser the adapter loads identity.js first and attaches it to
@@ -118,11 +118,10 @@ const Editor = (function () {
     (snapshot.connections || []).forEach(function (c) {
       const aTriggers = c.a && c.a.triggers ? c.a.triggers : [];
       const bTriggers = c.b && c.b.triggers ? c.b.triggers : [];
-       // 3a's triggerId encodes conn+index only (not side): the two ends are namespaced by the
-       // enclosing a/b field, so a's 0th and b's 0th share a string but differ in path.
+       // triggerId encodes conn+side+index, so a's 0th and b's 0th are distinct selectable ids.
       const triggerIds = {
-        a: aTriggers.map(function (_, i) { return Identity.triggerId(c.id, i); }),
-        b: bTriggers.map(function (_, i) { return Identity.triggerId(c.id, i); })
+        a: aTriggers.map(function (_, i) { return Identity.triggerId(c.id, 'a', i); }),
+        b: bTriggers.map(function (_, i) { return Identity.triggerId(c.id, 'b', i); })
        };
       connectionsById[c.id] = Object.freeze({
         id: c.id,

@@ -84,7 +84,7 @@ assert.equal(room.byKind.npcs.length, 0, 'room has no npc overlays');
 const c1 = Model.connection(model, 'conn-1');
 assert.equal(c1.endpointIds.a, Identity.endpointId('conn-1', 'a'), 'endpoint a id matches 3a scheme exactly');
 assert.equal(c1.endpointIds.b, Identity.endpointId('conn-1', 'b'), 'endpoint b id matches 3a scheme exactly');
-ok(c1.triggerIds.a[0] === Identity.triggerId('conn-1', 0), 'trigger id a/0 matches 3a scheme');
+ok(c1.triggerIds.a[0] === Identity.triggerId('conn-1', 'a', 0), 'trigger id a/0 matches 3a scheme');
 assert.equal(c1.triggerIds.a.length, 1, 'endpoint a exposes one trigger id (matches its triggers[])');
 assert.equal(c1.triggerIds.b.length, 0, 'endpoint b exposes zero trigger ids (empty triggers[])');
 

@@ -15,16 +15,22 @@
 //
 // Grammar (one line per kind):
 //   connection-endpoint:<connId>:<a|b>      endpoint of a connection record
-//   trigger:<connId>:<n>                    the n-th trigger pair of a connection
-//   npc:<npcId>:<scene>                     an npc placement on a scene
+//   trigger:<connId>:<a|b>:<n>              the n-th trigger tile of one endpoint
+//   npc:<characterId>:<scene>               an npc placement on a scene
 //   legacy-door:<scene>:<x>,<y>             a classic js/maps.js door tile not yet
 //                                           owned by any connection record
+//   object:<scene>:<index|sourceId>         a map object, by source id when it has
+//                                           one, else by its array index in the scene
+//
+// None of these ids encodes a tile for a MOVABLE item (endpoints, triggers, npcs, objects),
+// so a selection survives the item being moved. legacy-door is read-only, never moves.
 
 const KINDS = {
   ENDPOINT: 'connection-endpoint',
   TRIGGER: 'trigger',
   NPC: 'npc',
-  LEGACY_DOOR: 'legacy-door'
+  LEGACY_DOOR: 'legacy-door',
+  OBJECT: 'object'
 };
 
 function isNonNegativeInt(v) {
@@ -47,10 +53,18 @@ function endpointId(connId, side) {
   return `${KINDS.ENDPOINT}:${id}:${side}`;
 }
 
-function triggerId(connId, n) {
+function triggerId(connId, side, n) {
   const id = requireComponent(connId, 'connId');
+  if (side !== 'a' && side !== 'b') throw new Error(`identity: trigger side must be 'a' or 'b', got ${JSON.stringify(side)}`);
   if (!isNonNegativeInt(n)) throw new Error(`identity: trigger index must be a non-negative integer, got ${JSON.stringify(n)}`);
-  return `${KINDS.TRIGGER}:${id}:${n}`;
+  return `${KINDS.TRIGGER}:${id}:${side}:${n}`;
+}
+
+// objectId(scene, key): key is the object's source id (colon-free string) or its integer index.
+function objectId(scene, key) {
+  const sc = requireComponent(scene, 'scene');
+  if (isNonNegativeInt(key)) return `${KINDS.OBJECT}:${sc}:${key}`;
+  return `${KINDS.OBJECT}:${sc}:${requireComponent(key, 'object key')}`;
 }
 
 function npcId(npcIdValue, scene) {
@@ -89,13 +103,20 @@ function parse(id) {
   }
 
   if (kind === KINDS.TRIGGER) {
-    // rest is "<connId>:<n>" — last segment must be a non-negative integer.
-    const last = rest.lastIndexOf(':');
-    if (last <= 0 || last === rest.length - 1) return null;
-    const connId = rest.slice(0, last);
-    const nStr = rest.slice(last + 1);
-    if (connId.indexOf(':') !== -1 || !/^\d+$/.test(nStr)) return null;
-    return { kind: KINDS.TRIGGER, connId, n: Number(nStr) };
+    // rest is "<connId>:<a|b>:<n>" — exactly three colon-free parts.
+    const parts = rest.split(':');
+    if (parts.length !== 3) return null;
+    const [connId, side, nStr] = parts;
+    if (!connId || (side !== 'a' && side !== 'b') || !/^\d+$/.test(nStr)) return null;
+    return { kind: KINDS.TRIGGER, connId, side, n: Number(nStr) };
+  }
+
+  if (kind === KINDS.OBJECT) {
+    // rest is "<scene>:<index|sourceId>" — two colon-free parts; an all-digit key is an index.
+    const parts = rest.split(':');
+    if (parts.length !== 2 || !parts[0] || !parts[1]) return null;
+    if (/^\d+$/.test(parts[1])) return { kind: KINDS.OBJECT, scene: parts[0], index: Number(parts[1]) };
+    return { kind: KINDS.OBJECT, scene: parts[0], sourceId: parts[1] };
   }
 
   if (kind === KINDS.NPC) {
@@ -163,7 +184,7 @@ function dedupe(ids) {
 function factory() {
   return Object.freeze({
     KINDS,
-    endpointId, triggerId, npcId, legacyDoorId,
+    endpointId, triggerId, npcId, legacyDoorId, objectId,
     parse, validate, kindOf, dedupe
   });
 }

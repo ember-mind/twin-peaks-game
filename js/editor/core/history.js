@@ -10,7 +10,7 @@
 // a model), so history never deep-copies and never mutates what it stores. This module is generic — it
 // knows nothing about connections or the runtime; it only moves an opaque value between slots.
 
-const Editor = (function () {
+(function () {
   const R = globalThis.Editor || {};
 
     // freezeHistory deep-freezes the three-level structure: Object.freeze is SHALLOW, so each stack array

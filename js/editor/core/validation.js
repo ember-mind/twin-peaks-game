@@ -10,7 +10,7 @@
 // so the editor cannot draft something the apply layer would then reject. The check lives in BOTH
 // places on purpose: core rejects early and cheaply, the apply layer re-checks as its last gate.
 
-const Editor = (function () {
+(function () {
   const R = globalThis.Editor || {};
 
    // --- individual validators: each returns an array of error strings (empty == passed) ---
