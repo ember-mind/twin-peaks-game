@@ -92,3 +92,5 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-14 mirror: merge M4a 93c5f05 (world/connections.json registry, world-connections.gen.js, js/editor/*, tests; four *-location-data.js deleted)
 - 2026-09-14 mirror: assets/ref/ second pack (8 targets) + docs/art-direction-pass-e-briefs.md briefs E5–E10
 - 2026-09-14 mirror: merge M4b eef0326 (World Builder editing UI, tools/world-apply.js, CI 21 suites, editor core loader fix)
+
+- 2026-09-14 — merged E3 Roadhouse gauntlet (34d8ab3): native roadhouse scene + ambient + evidence; lighting unit 6.5/10 below floor, see reports/gauntlet-e3-roadhouse.md. Mirrored changed files to vault.
