@@ -4,7 +4,7 @@
   "mode": "execute",
   "status": "stopped-budget-cap",
   "createdAt": "2026-09-14T15:01:14.133Z",
-  "updatedAt": "2026-09-14T16:31:07Z",
+  "updatedAt": "2026-09-14T18:35:26Z",
   "goal": "Roadhouse native scene reaches supplied Roadhouse reference grammar while preserving map, door, pay phone, stage, walkability, and Act 4 flow",
   "domain": "visual-games",
   "externalBar": "/Users/ebuccelli/Code/solo/projects/twin-peaks-game/assets/ref/roadhouse-B.png plus neon sign, upright piano, and trophies from roadhouse-A.png",
@@ -71,7 +71,7 @@
     {"id":"stage","unit":"Stage","bar":"Top red curtain stage with stepped spotlight, mic stand, speakers; upright piano from A","floor":7,"status":"below-floor-latest","baselineEvidence":["evidence/baseline.png"],"baselineScore":1,"currentEvidence":["evidence/round-16.png"],"score":6.5,"bestScore":7.2,"criticVerdict":"BAR_WINS — latest below floor; best pre-amendment round reached floor"},
     {"id":"bar","unit":"Bar","bar":"Right-side bar mass with bottle shelves, pendants and red stools; pay phone remains readable/free","floor":7,"status":"pass","baselineEvidence":["evidence/baseline.png"],"baselineScore":1,"currentEvidence":["evidence/round-16.png"],"score":7,"bestScore":7.1,"criticVerdict":"Pass"},
     {"id":"booths-tables","unit":"Booths + tables","bar":"Red vinyl booths and round tables with lamps/candles, chair shadows, open Cast routes","floor":7,"status":"below-floor-latest","baselineEvidence":["evidence/baseline.png"],"baselineScore":2,"currentEvidence":["evidence/round-16.png"],"score":6.5,"bestScore":7.1,"criticVerdict":"BAR_WINS — latest below floor; best pre-amendment round reached floor"},
-    {"id":"lighting","unit":"Lighting","bar":"Mostly dark scene; only stepped amber candle/pendant, stage, jukebox and neon pools","floor":7,"status":"below-floor","baselineEvidence":["evidence/baseline.png"],"baselineScore":1,"currentEvidence":["evidence/round-16.png"],"score":6,"bestScore":6.5,"criticVerdict":"BAR_WINS — practical lights still read more as symbols than surface-shaping light"},
+    {"id":"lighting","unit":"Lighting","bar":"Mostly dark scene; only stepped amber candle/pendant, stage, jukebox and neon pools","floor":7,"status":"below-floor","baselineEvidence":["evidence/baseline.png"],"baselineScore":1,"currentEvidence":["evidence/lighting-round-1.png"],"score":6,"bestScore":6.5,"postAmendmentRoundsUsed":1,"criticVerdict":"BETTER — floor remains uniformly dim beneath wall lamps and candlelit tables"},
     {"id":"door","unit":"Door","bar":"Bottom double door with lit panes, readable threshold and foreground occlusion; unchanged cells 7,9 and 8,9","floor":7,"status":"pass","baselineEvidence":["evidence/baseline.png"],"baselineScore":6,"currentEvidence":["evidence/round-16.png"],"score":7,"bestScore":7.8,"criticVerdict":"Pass"}
   ],
   "regressionGates": [
@@ -105,6 +105,9 @@
     {"id":"round-6","evidence":["evidence/round-6.png"],"critic":"fresh-context visual critic","verdict":"BAR_WINS","accepted":true,"scores":{"floor-walls":7,"stage":7.2,"bar":7.1,"booths-tables":7.1,"lighting":6.5,"door":7.5},"biggestGap":"Lighting pools remain less readable than isolated bright pixels and strips"},
     {"id":"round-7","evidence":["evidence/round-7.png"],"critic":"fresh-context visual critic","verdict":"BAR_WINS","accepted":true,"scores":{"floor-walls":6,"stage":7.2,"bar":7.1,"booths-tables":6.8,"lighting":6.2,"door":7.8},"biggestGap":"Floor lacks visible checker structure and wall separation"}
   ],
+  "postAmendmentRounds": [
+    {"id":"lighting-round-1","unit":"lighting","evidence":["evidence/lighting-round-1.png"],"builder":"fresh Astra","critic":"fresh Astra; reference/before/after PNG only","score":6,"rankVsPrevious":"BETTER","gap":"Floor remains uniformly dim beneath wall lamps and candlelit tables, missing localized stepped pools separated by dark gaps","commit":"7e8c129","accepted":true}
+  ],
   "finalGate": {
     "allUnitsCovered": true,
     "hardGatesPass": true,
@@ -113,5 +116,5 @@
     "unresolvedHighGaps": ["Lighting best score 6.5; latest score 6.0", "Latest floor+walls, stage, and booths+tables scores 6.5"]
   },
   "progressSurface": ".gauntlet/e3/progress.md",
-  "stopPolicy": "User amendment at 2026-09-14T16:31Z: max four rounds per unit and 90 minutes per unit from receipt onward. Existing shared run had already exceeded four rounds; freeze immediately, run no further critic, ship checkpoint, report below-floor units honestly."
+  "stopPolicy": "User amendment at 2026-09-14T16:31Z: max four rounds per unit and 90 minutes per unit from receipt onward. User later explicitly authorized one Astra lighting demonstration round; lighting usage is 1/4. Stop after that one round and report score honestly."
 }

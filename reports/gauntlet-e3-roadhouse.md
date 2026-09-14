@@ -4,7 +4,7 @@
 
 Native Roadhouse scene shipped on `qwen/night-art-e3-roadhouse` from main `d199a28`. Bar: `assets/ref/roadhouse-B.png`; only neon sign, upright piano, and trophies borrowed from A.
 
-Budget amendment arrived after 16 shared full-scene build/critic rounds. Existing run had already exceeded new four-round limit. Work stopped immediately: zero post-amendment build/critic rounds. One material revision already in flight completed before amendment receipt; it was checkpointed but not sent to another critic. Latest scored verdict remains `BAR_WINS`.
+Budget amendment arrived after 16 shared full-scene build/critic rounds. Existing run had already exceeded new four-round limit, so work stopped immediately. User later authorized one simple Astra demonstration round on lighting only. Post-amendment lighting usage is now 1/4 rounds. Latest lighting verdict remains below floor.
 
 ## Before / after
 
@@ -26,7 +26,7 @@ Every critic before amendment scored all six units from same locked scene captur
 | Stage | 1 → 6.5 | 7.2 | 7 | 16 pre-cap / 0 post-cap | cap checkpoint after R16, unscored | best met; latest below |
 | Bar | 1 → 7.0 | 7.1 | 7 | 16 pre-cap / 0 post-cap | cap checkpoint after R16, unscored | pass |
 | Booths + tables | 2 → 6.5 | 7.1 | 7 | 16 pre-cap / 0 post-cap | cap checkpoint after R16, unscored | best met; latest below |
-| Lighting | 1 → 6.0 | 6.5 | 7 | 16 pre-cap / 0 post-cap | cap checkpoint after R16, unscored | **below floor** |
+| Lighting | 1 → 6.0 | 6.5 | 7 | 16 pre-cap / 1 post-cap | Astra lighting R1 (`7e8c129`) | **below floor; critic ranked it better** |
 | Door | 6 → 7.0 | 7.8 | 7 | 16 pre-cap / 0 post-cap | cap checkpoint after R16, unscored | pass |
 
 Scores per shared round (`R1…R16`):
@@ -51,7 +51,18 @@ Scores per shared round (`R1…R16`):
 | 14–15 | Booth/table silhouettes merged; tabletops lacked clear candlelit usable surfaces. |
 | 16 | Practical lights still shaped nearby wood/floor insufficiently. |
 
-Best unresolved gap: lighting, 6.5/10. Latest critic also placed floor+walls, stage, and booths+tables at 6.5. No extra round ran after budget amendment.
+Best unresolved gap before demonstration: lighting, 6.5/10. Latest full-scene critic also placed floor+walls, stage, and booths+tables at 6.5.
+
+## Post-amendment Astra demonstration
+
+One explicitly requested lighting round used Roadhouse-B plus before image as Astra builder bar. Separate fresh Astra critic saw only reference, before, and after PNGs.
+
+| Evidence | Path | SHA-256 |
+|---|---|---|
+| Before | `artifacts/art-pass-e/e3/final.png` | `9aed59c81cc0648791e0a5f27e52fc6e2c9bd83eab50d04b5e85737578101fa9` |
+| After | `artifacts/art-pass-e/e3/lighting/round-1.png` | `cadd99de8a186f8c1682a39304a6b292479dac7de31a053a218d98439b934506` |
+
+Critic: `6/10`; rank versus previous: `BETTER`. One remaining gap: floor stays uniformly dim beneath wall lamps and candlelit tables, lacking localized stepped pools separated by dark gaps. No second round ran.
 
 ## Scene and invariants
 
@@ -81,6 +92,7 @@ Best unresolved gap: lighting, 6.5/10. Latest critic also placed floor+walls, st
 |---|---|
 | `59dbb7a8930b4f3dda88c58fe1fae11e67da9ec9` | Native scene, registration, ambient, test-token repair, shipped checkpoint PNG |
 | `e0229eeba34bae9966d3b128c6dddec56023d906` | Gauntlet evidence, critic notes, progress, run state, manifest |
+| `7e8c129` | One Astra lighting round, after PNG, fresh critic note |
 
 No push performed.
 

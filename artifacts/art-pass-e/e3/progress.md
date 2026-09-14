@@ -41,3 +41,13 @@ Latest scored verdict: `BAR_WINS`. Shipped cap checkpoint contains one already-s
 - Act 4 Chrome headless SwiftShader playthrough: 530/530 PASS across A/B/C/D; only harness favicon 404 observation
 
 Map rows, door, phone, stage/body coordinates, `js/retro.js`, `js/retro-authored.js`, and `js/tiles.js` unchanged. Ambient uses existing archetypes only.
+
+## Post-amendment Astra lighting round 1
+
+- Builder input: Roadhouse-B reference plus shipped `final.png` before image.
+- After: `lighting/round-1.png`, SHA-256 `cadd99de8a186f8c1682a39304a6b292479dac7de31a053a218d98439b934506`.
+- Fresh critic input: reference, before, after only; no repository/code.
+- Critic: 6/10; `BETTER`; one gap: floor remains uniformly dim beneath wall lamps and candlelit tables, missing localized stepped pools separated by dark gaps.
+- Round checkpoint: `7e8c129`.
+- Gates: 415, 85, 54/54, 20/20, cast continuity, 1611/1611, Chrome SwiftShader 530/530 — PASS.
+- Lighting remains below 7. No second round ran.
