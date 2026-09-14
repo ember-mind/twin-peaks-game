@@ -444,7 +444,7 @@
         var otherSide = ref.side === 'a' ? 'b' : 'a';
         var pair = rec[otherSide];
         var pairBox = el('span', { class: 'wb-inline' });
-        pairBox.appendChild(el('span', null, pair ? otherSide + ' · ' + pair.scene + ' @ ' + (pair.spawn ? pair.spawn.tx + ',' + pair.spawn.ty + ' ' + pair.spawn.dir : '?') : '—'));
+        pairBox.appendChild(el('span', null, pair ? otherSide + ' · ' + pair.scene + ' @ ' + (pair.spawn ? pair.spawn.tx + ',' + pair.spawn.ty + ' ' + pair.spawn.dir : (oneWay ? 'no spawn (one-way source)' : '?')) : '—'));
         if (pair) {
           var jump = pairBox.appendChild(el('button', { 'data-action': 'jump' }, 'jump'));
           jump.addEventListener('click', function () {
