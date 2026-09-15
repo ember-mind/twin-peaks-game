@@ -19,7 +19,18 @@
   ];
   function painter(ctx,cx,cy){
     cx=Math.round(cx||0);cy=Math.round(cy||0);
-    return function(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(x-cx,y-cy,w,h);};
+    return function(x,y,w,h,c){
+      if(c===p.ink||c===p.light){ctx.fillStyle=c;ctx.fillRect(x-cx,y-cy,w,h);return;}
+      /* Relight the authored material in opaque integer runs, retaining its
+       * grain/motif boundaries rather than painting a shape over the art. */
+      for(var yy=y;yy<y+h;yy++){
+        var start=x,color=litColor(x,yy,c);
+        for(var xx=x+1;xx<=x+w;xx++){
+          var next=xx<x+w?litColor(xx,yy,c):null;
+          if(next!==color){ctx.fillStyle=color;ctx.fillRect(start-cx,yy-cy,xx-start,1);start=xx;color=next;}
+        }
+      }
+    };
   }
   function diamond(R,x,y,r,c){for(var d=-r;d<=r;d++)R(x-r+Math.abs(d),y+d,2*(r-Math.abs(d))+1,1,c);}
   function rug(R,x,y,w,h){
@@ -108,15 +119,31 @@
       R(dx+12,189,1,1,p.gold);
     });
   }
-  function pool(R,x,y,rx,ry){
-    /* Discrete receiving light: plank grain survives, no full-scene wash. */
-    for(var yy=-ry;yy<=ry;yy++)for(var xx=-rx;xx<=rx;xx++){
-      if(xx*xx*ry*ry+yy*yy*rx*rx>rx*rx*ry*ry)continue;
-      var wx=x+xx,wy=y+yy;if(wx<16||wx>=272||wy<16||wy>=176)continue;
-      var inner=Math.abs(xx)<rx/2&&Math.abs(yy)<ry/2;
-      if((wx+wy*3)%4===0)R(wx,wy,1,1,inner?p.gold:p.woodLight);
-      else if(inner&&wy%8===1)R(wx,wy,1,1,p.woodLight);
+  var receivingLights=[
+    {x:144,y:57,rx:53,ry:28}, // chandelier, wall and floor beneath it
+    {x:144,y:82,rx:38,ry:20}, // hearth, front stones, lounge edges
+    {x:91,y:130,rx:38,ry:20}, // reception lamp, top and floor apron
+    {x:152,y:106,rx:25,ry:16}, // lounge table practical
+    {x:14,y:52,rx:25,ry:20},{x:274,y:61,rx:25,ry:20},
+    {x:14,y:140,rx:25,ry:21},{x:274,y:147,rx:25,ry:21}
+  ];
+  var warm={},hot={};
+  [[p.woodDark,p.wood,p.woodLight],[p.wood,p.woodLight,p.gold],
+    [p.woodLight,p.gold,p.cream],[p.gold,p.cream,p.cream],
+    [p.stoneDark,p.stone,p.stoneLight],[p.stone,p.stoneLight,p.cream],
+    [p.stoneLight,p.cream,p.cream],[p.redDark,p.red,p.red],
+    [p.red,p.redLight,p.redLight],[p.cream,p.light,p.light]].forEach(function(a){warm[a[0]]=a[1];hot[a[0]]=a[2];});
+  function litColor(x,y,c){
+    if(!warm[c])return c;
+    var level=0;
+    for(var i=0;i<receivingLights.length;i++){
+      var light=receivingLights[i],dx=x-light.x,dy=y-light.y;
+      if(Math.abs(dx)>light.rx||Math.abs(dy)>light.ry)continue;
+      var distance=dx*dx*light.ry*light.ry+dy*dy*light.rx*light.rx;
+      var edge=light.rx*light.rx*light.ry*light.ry;
+      if(distance<=edge){level=1;if(distance*4<=edge){level=2;break;}}
     }
+    return level===2?hot[c]:level===1?warm[c]:c;
   }
   function stairs(R){
     /* Right-hand architectural flight, with its original logical furniture
@@ -310,7 +337,11 @@
   function draw(ctx,cx,cy){
     var R=painter(ctx,cx,cy),alpha=ctx.globalAlpha;ctx.globalAlpha=1;
     R(0,0,288,192,p.ink);floor(R);walls(R);
-    pool(R,145,84,30,12);pool(R,116,146,21,8);pool(R,70,52,24,14);
+    /* Wider stepped contact shadows remain the palette's darkest tone even
+     * where the receiving material is lit. They precede every prop body. */
+    R(49,144,78,2,p.ink);R(52,146,72,1,p.ink);
+    R(112,111,29,3,p.ink);R(115,114,23,1,p.ink);
+    R(163,111,29,3,p.ink);R(166,114,23,1,p.ink);
     props.forEach(function(d){R(d.x+1,d.footY-1,d.cells.length*16-2,2,p.ink);prop(R,d);});
     chandelier(R);ctx.globalAlpha=alpha;
   }
