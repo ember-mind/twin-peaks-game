@@ -36,10 +36,19 @@ assets/ref/red-room-sheet.png top panel; style anchor artifacts/act-4-implementa
 
 ## Latest verdict
 
-Light round 4, fresh Luna: 6/10; rank versus round 3: BETTER. Unit capped below floor.
+Gauntlet stopped under user caps. Curtains pass at 7/10. Floor, furniture + statue, and light each ship their best round at 6/10 and remain below 7/10 floor. Final verdict: **BAR_WINS**.
+
+All structural, production, narrative, door, and browser gates pass. Act 4: 530/530. Act 3: 189/189. Both browser drivers record one harmless test-server `favicon.ico` 404.
 
 ## Gap queue
 
 1. Furniture ends below floor. Best round 3 remains dark and blocky; round 4 saturated bright red and regressed.
 2. Floor ends below floor. Best R2/R3 scored 6; R4 overcorrected to sparse oversized chevrons.
 3. Light ends below floor. Lighting remains too flat/uniform versus reference's warm dimensional spotlight and shadow falloff.
+
+## Shipped mix
+
+- Curtains: round 2 (7/10)
+- Chevron floor: round 2 (6/10)
+- Furniture + statue: round 3 (6/10)
+- Light: round 4 (6/10)

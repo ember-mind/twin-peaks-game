@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "slug": "e7",
   "mode": "execute",
-  "status": "preflight",
+  "status": "complete-bar-wins",
   "createdAt": "2026-09-15T11:41:07.507Z",
-  "updatedAt": "2026-09-15T13:05:00.000Z",
+  "updatedAt": "2026-09-15T12:59:37.000Z",
   "goal": "Native Red Room reaches reference top-panel grammar while preserving gameplay geometry",
   "domain": "games",
   "externalBar": "assets/ref/red-room-sheet.png top panel; style anchor artifacts/act-4-implementation/diner-maddy-leland.png",
@@ -33,35 +33,47 @@
     "hashManifest": ".gauntlet/e7/evidence-manifest.json"
   },
   "inventory": [
-    {"id": "curtains", "unit": "Curtains", "bar": "Floor-to-ceiling curtain mass, readable 2px shaded folds, slow 3-frame sway", "floor": 7, "status": "passed", "baselineEvidence": ["../../artifacts/art-pass-e/e7/baseline.png"], "baselineScore": null, "currentEvidence": ["../../artifacts/art-pass-e/e7/curtains/round-2.png"], "score": 7, "criticVerdict": "FLOOR_MET"},
-    {"id": "floor", "unit": "Chevron floor", "bar": "Clean cream/near-black chevrons with 4px vertical step, seamless tile-scale rhythm and strong perspective field", "floor": 7, "status": "capped-below-floor", "baselineEvidence": ["../../artifacts/art-pass-e/e7/baseline.png"], "baselineScore": null, "currentEvidence": ["../../artifacts/art-pass-e/e7/floor/round-4.png"], "score": 3, "criticVerdict": "BAR_WINS"},
-    {"id": "furniture-statue", "unit": "Furniture + statue", "bar": "Two dark armchairs, side table, white Venus statue; grounded silhouettes; walk spine and actor tiles readable", "floor": 7, "status": "capped-below-floor", "baselineEvidence": ["../../artifacts/art-pass-e/e7/baseline.png"], "baselineScore": null, "currentEvidence": ["../../artifacts/art-pass-e/e7/furniture-statue/round-4.png"], "score": 5, "criticVerdict": "BAR_WINS"},
-    {"id": "light", "unit": "Light", "bar": "Small table lamp plus two torchieres, sparse white peaks, bounded red/cream receiving light, slow LIGHT_WARM_VARIATION flicker", "floor": 7, "status": "capped-below-floor", "baselineEvidence": ["../../artifacts/art-pass-e/e7/baseline.png"], "baselineScore": null, "currentEvidence": ["../../artifacts/art-pass-e/e7/light/round-4.png"], "score": 6, "criticVerdict": "BAR_WINS"}
+    {"id": "curtains", "unit": "Curtains", "bar": "Floor-to-ceiling curtain mass, readable 2px shaded folds, slow 3-frame sway", "floor": 7, "status": "pass", "baselineEvidence": ["evidence/round-1.png"], "baselineScore": 5, "currentEvidence": ["evidence/curtains-r2.png"], "score": 7, "criticVerdict": "PASS"},
+    {"id": "floor", "unit": "Chevron floor", "bar": "Clean cream/near-black chevrons with 4px vertical step, seamless tile-scale rhythm and strong perspective field", "floor": 7, "status": "capped-below-floor", "baselineEvidence": ["evidence/round-1.png"], "baselineScore": 5, "currentEvidence": ["evidence/floor-r2.png"], "score": 6, "criticVerdict": "BAR_WINS"},
+    {"id": "furniture-statue", "unit": "Furniture + statue", "bar": "Two dark armchairs, side table, white Venus statue; grounded silhouettes; walk spine and actor tiles readable", "floor": 7, "status": "capped-below-floor", "baselineEvidence": ["evidence/round-1.png"], "baselineScore": 3, "currentEvidence": ["evidence/furniture-r3.png"], "score": 6, "criticVerdict": "BAR_WINS"},
+    {"id": "light", "unit": "Light", "bar": "Small table lamp plus two torchieres, sparse white peaks, bounded red/cream receiving light, slow LIGHT_WARM_VARIATION flicker", "floor": 7, "status": "capped-below-floor", "baselineEvidence": ["evidence/round-1.png"], "baselineScore": 4, "currentEvidence": ["evidence/light-r4.png"], "score": 6, "criticVerdict": "BAR_WINS"}
   ],
   "regressionGates": [
-    {"id": "smoke", "criterion": "structural and full simulated playthrough", "command": "node test/smoke.js", "status": "pending", "evidence": []},
-    {"id": "walkthrough", "criterion": "data-driven acquisition graph", "command": "node test/walkthrough.js", "status": "pending", "evidence": []},
-    {"id": "retro-production", "criterion": "retro production contract", "command": "node test/retro-production.js", "status": "pending", "evidence": []},
-    {"id": "mobile-production", "criterion": "mobile production contract", "command": "node test/mobile-production.js", "status": "pending", "evidence": []},
-    {"id": "cast-continuity", "criterion": "all named redroom bodies remain on valid walkable tiles", "command": "node test/cast-continuity-validate.js", "status": "pending", "evidence": []},
-    {"id": "narrative-finale", "criterion": "finale state machine remains green", "command": "node test/narrative-finale.js", "status": "pending", "evidence": []},
-    {"id": "act-4-flow", "criterion": "Act 4 flow count remains 1611", "command": "node test/act-4-flow.js", "status": "pending", "evidence": []},
-    {"id": "world-door-equality", "criterion": "registry-installed doors unchanged", "command": "node test/world-door-equality.js", "status": "pending", "evidence": []},
-    {"id": "act-4-playthrough", "criterion": "Chrome all-path driver remains 530/530", "command": "node test/act-4-playthrough.js --path=all", "status": "pending", "evidence": []},
-    {"id": "act-3-playthrough", "criterion": "Act 3 driver remains 189/189", "command": "node test/act-3-playthrough.js", "status": "pending", "evidence": []}
+    {"id": "smoke", "criterion": "structural and full simulated playthrough", "command": "node test/smoke.js", "status": "pass", "evidence": ["415/415 assertions passed"]},
+    {"id": "walkthrough", "criterion": "data-driven acquisition graph", "command": "node test/walkthrough.js", "status": "pass", "evidence": ["85/85 assertions passed"]},
+    {"id": "retro-production", "criterion": "retro production contract", "command": "node test/retro-production.js", "status": "pass", "evidence": ["54/54 assertions passed"]},
+    {"id": "mobile-production", "criterion": "mobile production contract", "command": "node test/mobile-production.js", "status": "pass", "evidence": ["20/20 assertions passed"]},
+    {"id": "cast-continuity", "criterion": "all named redroom bodies remain on valid walkable tiles", "command": "node test/cast-continuity-validate.js", "status": "pass", "evidence": ["validator passed"]},
+    {"id": "narrative-finale", "criterion": "finale state machine remains green", "command": "node test/narrative-finale.js", "status": "pass", "evidence": ["27/27 assertions passed"]},
+    {"id": "act-4-flow", "criterion": "Act 4 flow count remains 1611", "command": "node test/act-4-flow.js", "status": "pass", "evidence": ["1611/1611 assertions passed"]},
+    {"id": "world-door-equality", "criterion": "registry-installed doors unchanged", "command": "node test/world-door-equality.js", "status": "pass", "evidence": ["59/59 assertions passed"]},
+    {"id": "act-4-playthrough", "criterion": "Chrome all-path driver remains 530/530", "command": "node test/act-4-playthrough.js --path=all", "status": "pass", "evidence": ["530/530 assertions passed; one harness favicon.ico 404"]},
+    {"id": "act-3-playthrough", "criterion": "Act 3 driver remains 189/189", "command": "node test/act-3-playthrough.js", "status": "pass", "evidence": ["189/189 assertions passed; one harness favicon.ico 404"]}
   ],
   "agents": {
     "builderCriticSeparated": true,
     "criticFreshContext": true
   },
   "gapQueue": [{"unitId": "furniture-statue", "priority": "high", "gap": "Best scored furniture remains dark/blocky and below floor; round 4 saturated bright red and regressed.", "owner": "stopped at cap"}, {"unitId": "floor", "priority": "high", "gap": "Best R2/R3 scored 6; R4 overcorrected to sparse oversized chevrons.", "owner": "stopped at cap"}, {"unitId": "light", "priority": "high", "gap": "Lighting remains too flat/uniform versus warm dimensional spotlight and shadow falloff.", "owner": "stopped at cap"}],
-  "rounds": [{"round": 1, "units": ["curtains", "floor", "furniture-statue", "light"], "builder": "Astra/high", "critic": "Luna/high fresh context", "evidence": "../../artifacts/art-pass-e/e7/round-1.png", "scores": {"curtains": 5, "floor": 5, "furniture-statue": 3, "light": 4}, "rankVsPrevious": "BETTER", "gap": "Furniture arrangement lacks readable armchairs, central table and figure, and detailed statue."}, {"round": 2, "units": ["furniture-statue"], "builder": "Astra/high", "critic": "Luna/high fresh context", "evidence": "../../artifacts/art-pass-e/e7/furniture-statue/round-2.png", "scores": {"furniture-statue": 6}, "rankVsPrevious": "BETTER", "gap": "Chairs and tables remain flatter, blockier, and less richly shaded than reference furniture."}, {"round": 3, "units": ["furniture-statue"], "builder": "Astra/high", "critic": "Luna/high fresh context", "evidence": "../../artifacts/art-pass-e/e7/furniture-statue/round-3.png", "scores": {"furniture-statue": 6}, "rankVsPrevious": "BETTER", "gap": "Furniture remains too dark and blocky, lacking readable shading and dimensional chair details."}, {"round": 4, "units": ["furniture-statue"], "builder": "Astra/high", "critic": "Luna/high fresh context", "evidence": "../../artifacts/art-pass-e/e7/furniture-statue/round-4.png", "scores": {"furniture-statue": 5}, "rankVsPrevious": "WORSE", "gap": "Furniture is saturated bright red and visually flat versus reference's dark dimensional chairs and table."}, {"round": 2, "sequence": 5, "units": ["curtains"], "builder": "Astra/high", "critic": "Luna/high fresh context", "evidence": "../../artifacts/art-pass-e/e7/curtains/round-2.png", "scores": {"curtains": 7}, "rankVsPrevious": "BETTER", "gap": "Curtain folds remain coarse and flat versus reference fabric texture."}, {"round": 2, "sequence": 6, "units": ["floor"], "builder": "Astra/high", "critic": "Luna/high fresh context", "evidence": "../../artifacts/art-pass-e/e7/floor/round-2.png", "scores": {"floor": 6}, "rankVsPrevious": "BETTER", "gap": "Evenly spaced horizontal chevrons lack reference's large perspective-driven zigzag variation."}],
+  "rounds": [
+    {"round": 1, "sequence": 1, "units": ["curtains", "floor", "furniture-statue", "light"], "builder": "Astra/high (/root/e7_builder)", "critic": "Luna/high fresh (/root/e7_critic_r1)", "evidence": "artifacts/art-pass-e/e7/round-1.png", "scores": {"curtains": 5, "floor": 5, "furniture-statue": 3, "light": 4}, "rankVsPrevious": "BETTER", "gap": "Furniture arrangement lacks readable armchairs, central table and figure, and detailed statue."},
+    {"round": 2, "sequence": 2, "units": ["furniture-statue"], "builder": "Astra/high (/root/e7_builder)", "critic": "Luna/high fresh (/root/e7_critic_furniture_r2)", "evidence": "artifacts/art-pass-e/e7/furniture-statue/round-2.png", "scores": {"furniture-statue": 6}, "rankVsPrevious": "BETTER", "gap": "Chairs and tables remain flatter, blockier, and less richly shaded than reference furniture."},
+    {"round": 3, "sequence": 3, "units": ["furniture-statue"], "builder": "Astra/high (/root/e7_builder)", "critic": "Luna/high fresh (/root/e7_critic_furniture_r3)", "evidence": "artifacts/art-pass-e/e7/furniture-statue/round-3.png", "scores": {"furniture-statue": 6}, "rankVsPrevious": "BETTER", "gap": "Furniture remains too dark and blocky, lacking readable shading and dimensional chair details."},
+    {"round": 4, "sequence": 4, "units": ["furniture-statue"], "builder": "Astra/high (/root/e7_builder)", "critic": "Luna/high fresh (/root/e7_critic_furniture_r4)", "evidence": "artifacts/art-pass-e/e7/furniture-statue/round-4.png", "scores": {"furniture-statue": 5}, "rankVsPrevious": "WORSE", "gap": "Furniture is saturated bright red and visually flat versus reference's dark dimensional chairs and table."},
+    {"round": 2, "sequence": 5, "units": ["curtains"], "builder": "Astra/high (/root/e7_builder)", "critic": "Luna/high fresh (/root/e7_critic_curtains_r2)", "evidence": "artifacts/art-pass-e/e7/curtains/round-2.png", "scores": {"curtains": 7}, "rankVsPrevious": "BETTER", "gap": "Curtain folds remain coarse and flat versus reference fabric texture."},
+    {"round": 2, "sequence": 6, "units": ["floor"], "builder": "Astra/high (/root/e7_builder)", "critic": "Luna/high fresh (/root/e7_critic_floor_r2)", "evidence": "artifacts/art-pass-e/e7/floor/round-2.png", "scores": {"floor": 6}, "rankVsPrevious": "BETTER", "gap": "Evenly spaced horizontal chevrons lack reference's large perspective-driven zigzag variation."},
+    {"round": 3, "sequence": 7, "units": ["floor"], "builder": "Astra/high (/root/e7_builder)", "critic": "Luna/high fresh (/root/e7_critic_floor_r3)", "evidence": "artifacts/art-pass-e/e7/floor/round-3.png", "scores": {"floor": 6}, "rankVsPrevious": "SAME", "gap": "Chevrons remain too dense and uniformly scaled versus reference's larger perspective pattern."},
+    {"round": 4, "sequence": 8, "units": ["floor"], "builder": "Astra/high (/root/e7_builder)", "critic": "Luna/high fresh (/root/e7_critic_floor_r4)", "evidence": "artifacts/art-pass-e/e7/floor/round-4.png", "scores": {"floor": 3}, "rankVsPrevious": "WORSE", "gap": "Chevrons became too sparse and oversized versus reference."},
+    {"round": 2, "sequence": 9, "units": ["light"], "builder": "Astra/high (/root/e7_builder)", "critic": "Luna/high fresh (/root/e7_critic_light_r2)", "evidence": "artifacts/art-pass-e/e7/light/round-2.png", "scores": {"light": 4}, "rankVsPrevious": "BETTER", "gap": "Lighting remains uniformly flat and overbright, lacking localized light and deep shadows."},
+    {"round": 3, "sequence": 10, "units": ["light"], "builder": "Astra/high (/root/e7_builder)", "critic": "Luna/high fresh (/root/e7_critic_light_r3)", "evidence": "artifacts/art-pass-e/e7/light/round-3.png", "scores": {"light": 4}, "rankVsPrevious": "WORSE", "gap": "Lighting became too dark and high-contrast versus reference's broad cream illumination."},
+    {"round": 4, "sequence": 11, "units": ["light"], "builder": "Astra/high (/root/e7_builder)", "critic": "Luna/high fresh (/root/e7_critic_light_r4)", "evidence": "artifacts/art-pass-e/e7/light/round-4.png", "scores": {"light": 6}, "rankVsPrevious": "BETTER", "gap": "Lighting remains too flat and uniform versus warm dimensional spotlight and shadow falloff."}
+  ],
   "finalGate": {
-    "allUnitsCovered": false,
-    "hardGatesPass": false,
-    "independentVerdict": null,
-    "floor": null,
-    "unresolvedHighGaps": []
+    "allUnitsCovered": true,
+    "hardGatesPass": true,
+    "independentVerdict": "BAR_WINS",
+    "floor": 6,
+    "unresolvedHighGaps": ["floor", "furniture-statue", "light"]
   },
   "progressSurface": ".gauntlet/e7/progress.md",
   "stopPolicy": "Per unit: stop at score >=7 or after round 4; score >=8 stops immediately. Time box 90 minutes per unit and 5 hours total. Global stop also on explicit human stop, lost authority, or genuine external blocker."
