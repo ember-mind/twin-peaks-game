@@ -38,6 +38,9 @@ require(J('retro-font.js'));
 require(J('engine.js'));
 require(J('scene-objects.gen.js'));
 require(J('glue.js'));
+// Named bodies come from the Cast Presence registry since b529711 (glue.js NPCS is empty); null state = authored baseline.
+['narrative-runtime.js', 'narrative-data.gen.js', 'cast-presence.js'].forEach((f) => require(J(f)));
+Object.keys(global.GAME.Maps).forEach((m) => { if (global.GAME.Maps[m] && global.GAME.Maps[m].rows) global.GAME.Maps[m].npcs = global.GAME.CastPresence.bodiesFor(m, null); });
 
 const evidenceCatalog = require(path.join(__dirname, '..', 'narrative', 'evidence.json')).evidence;
 const GAME = global.GAME;

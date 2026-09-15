@@ -62,6 +62,9 @@ require(J('retro-font.js'));
 require(J('engine.js'));
 require(J('scene-objects.gen.js'));
 require(J('glue.js'));
+// Named bodies come from the Cast Presence registry since b529711 (glue.js NPCS is empty); null state = authored baseline.
+['narrative-runtime.js', 'narrative-data.gen.js', 'cast-presence.js'].forEach((f) => require(J(f)));
+global.GAME.Maps.sheriff.npcs = global.GAME.CastPresence.bodiesFor('sheriff', null);
 
 global.GAME.Render3D = {
   init() { return true; },

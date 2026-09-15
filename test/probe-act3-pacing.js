@@ -70,9 +70,18 @@ const GAME = global.GAME;
 const E = GAME.Engine;
 const S = () => E.state;
 
-require(J('narrative-runtime.js'));
-require(J('narrative-data.gen.js'));
-require(J('narrative-engine-adapter.js')); // requisito SOLO per leggere WORLD_TARGETS (A._debugWorldTargets), non abilitato (A.enable() mai chiamato)
+// Named bodies come from Cast Presence since b529711 (glue.js NPCS is empty): sync them through the adapter, as test/smoke.js does.
+['narrative-runtime.js', 'narrative-data.gen.js', 'cast-presence.js', 'narrative-bootstrap.js', 'narrative-engine-adapter.js'].forEach((f) => require(J(f)));
+function syncCast(flags) {
+  const G2 = global.GAME, D = G2.NarrativeData, NS = G2.NarrativeRuntime.createState();
+  Object.assign(NS.flags, flags || {});
+  G2.NarrativeAdapter.enable({ mission: D.missions.M4, missions: [D.missions.M4, D.missions.M5, D.missions.M6, D.missions.M8, D.missions.M9], state: NS, container: {} });
+  G2.NarrativeAdapter.disable();
+}
+global.GAME.installNarrativeCatalogs({ data: global.GAME.NarrativeData, runtime: global.GAME.NarrativeRuntime });
+syncCast();
+
+require(J('narrative-engine-adapter.js')); // WORLD_TARGETS (A._debugWorldTargets); abilitato solo dentro syncCast() per piazzare i corpi Cast Presence
 const NR = GAME.NarrativeRuntime;
 const M4 = GAME.NarrativeData.missions.M4;
 const M5 = GAME.NarrativeData.missions.M5;

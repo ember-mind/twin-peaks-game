@@ -15,7 +15,7 @@ assert.ok(/runtime mirror/.test(manifest.policy));
 
 const report = guard.audit({ repoRoot: root, canonicalRoot: manifest.canonical_root });
 assert.deepStrictEqual(report.errors, [], JSON.stringify(report.errors, null, 2));
-assert.strictEqual(report.checked, 96, 'playable runtime scope changed; audit manifest before sync'); // Act 3 closure: +traincar-art/-scene/-production
+assert.strictEqual(report.checked, 102, 'playable runtime scope changed; audit manifest before sync'); // Act 3 closure: +traincar-art/-scene/-production; M5 f927658: +world-connections-production/.gen, -4 location-data, -traincar-location-production; b75ed10 +cast-presence; M8 9332786 +scene-objects.gen; E3 59dbb7a +roadhouse-art/-scene/-production; E7 3bc873b +redroom-art/-scene/-production; DQ3 bf6c2c2 +diorama
 assert.deepStrictEqual(manifest.known_divergences, {});
 assert.strictEqual(report.known.length, 0);
 

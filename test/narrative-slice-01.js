@@ -38,6 +38,9 @@ global.GAME.DoubleRExteriorScene.install();
 global.GAME.SheriffsStationExteriorScene.install();
 global.GAME.SheriffsStationScene.install();
 require(J('world-connections-production.js')); // every registry door (js/maps.js carries none)
+// Named bodies come from the Cast Presence registry since b529711 (glue.js NPCS is empty); null state = authored baseline.
+['narrative-runtime.js', 'narrative-data.gen.js', 'cast-presence.js'].forEach((f) => require(J(f)));
+Object.keys(global.GAME.Maps).forEach((m) => { if (global.GAME.Maps[m] && global.GAME.Maps[m].rows) global.GAME.Maps[m].npcs = global.GAME.CastPresence.bodiesFor(m, null); });
 
 const GAME = global.GAME;
 const E = GAME.Engine;
