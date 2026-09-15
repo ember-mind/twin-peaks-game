@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "slug": "e8",
   "mode": "execute",
-  "status": "running",
+  "status": "complete-bar-wins",
   "createdAt": "2026-09-15T15:40:40.857Z",
-  "updatedAt": "2026-09-15T15:40:40.857Z",
+  "updatedAt": "2026-09-15T17:12:22.000Z",
   "goal": "Native Great Northern lobby reaches bottom-panel reference grammar while preserving world geometry and Act 2 continuity",
   "domain": "games",
   "externalBar": "assets/ref/great-northern-lobby-sheet.png bottom panel; artifacts/act-4-implementation/diner-maddy-leland.png style anchor",
@@ -33,36 +33,56 @@
     "hashManifest": ".gauntlet/e8/evidence-manifest.json"
   },
   "inventory": [
-    {"id": "walls-floor-rugs", "unit": "Log walls + floor + rugs", "bar": "Readable log rounds, warm plank floor, patterned rugs, red runner preserving entrance spine", "floor": 7, "status": "pending", "baselineEvidence": ["evidence/baseline.png"], "baselineScore": 0, "currentEvidence": [], "score": null, "criticVerdict": null},
-    {"id": "fireplace-corner", "unit": "Fireplace corner", "bar": "Stone hearth, readable three-frame fire, bear head, two grounded red leather armchairs", "floor": 7, "status": "pending", "baselineEvidence": ["evidence/baseline.png"], "baselineScore": 0, "currentEvidence": [], "score": null, "criticVerdict": null},
-    {"id": "reception-desk", "unit": "Reception desk", "bar": "Desk with pigeonholes, bell, lamp, and GREAT NORTHERN mountain sign", "floor": 7, "status": "pending", "baselineEvidence": ["evidence/baseline.png"], "baselineScore": 0, "currentEvidence": [], "score": null, "criticVerdict": null},
-    {"id": "stairs-runner-chandelier", "unit": "Stairs + red runner + chandelier", "bar": "Readable stair flight, red stair runner connected compositionally to entrance runner, chandelier anchor", "floor": 7, "status": "pending", "baselineEvidence": ["evidence/baseline.png"], "baselineScore": 0, "currentEvidence": [], "score": null, "criticVerdict": null},
-    {"id": "light", "unit": "Light", "bar": "Warm localized practicals and fire/chandelier hierarchy; lodge remains dark and dimensional", "floor": 7, "status": "pending", "baselineEvidence": ["evidence/baseline.png"], "baselineScore": 0, "currentEvidence": [], "score": null, "criticVerdict": null}
+    {"id": "walls-floor-rugs", "unit": "Log walls + floor + rugs", "bar": "Readable log rounds, warm plank floor, patterned rugs, red runner preserving entrance spine", "floor": 7, "status": "capped-below-floor", "baselineEvidence": ["evidence/round-1.png"], "baselineScore": 5, "currentEvidence": ["evidence/walls-r3.png"], "score": 4, "criticVerdict": "BAR_WINS"},
+    {"id": "fireplace-corner", "unit": "Fireplace corner", "bar": "Stone hearth, readable three-frame fire, bear head, two grounded red leather armchairs", "floor": 7, "status": "capped-below-floor", "baselineEvidence": ["evidence/round-1.png"], "baselineScore": 5, "currentEvidence": ["evidence/fireplace-r4.png"], "score": 5, "criticVerdict": "BAR_WINS"},
+    {"id": "reception-desk", "unit": "Reception desk", "bar": "Desk with pigeonholes, bell, lamp, and GREAT NORTHERN mountain sign", "floor": 7, "status": "pass", "baselineEvidence": ["evidence/round-1.png"], "baselineScore": 5, "currentEvidence": ["evidence/reception-r4.png"], "score": 7, "criticVerdict": "PASS"},
+    {"id": "stairs-runner-chandelier", "unit": "Stairs + red runner + chandelier", "bar": "Readable stair flight, red stair runner connected compositionally to entrance runner, chandelier anchor", "floor": 7, "status": "pass", "baselineEvidence": ["evidence/round-1.png"], "baselineScore": 6, "currentEvidence": ["evidence/stairs-r3.png"], "score": 8, "criticVerdict": "PASS"},
+    {"id": "light", "unit": "Light", "bar": "Warm localized practicals and fire/chandelier hierarchy; lodge remains dark and dimensional", "floor": 7, "status": "capped-below-floor", "baselineEvidence": ["evidence/round-1.png"], "baselineScore": 5, "currentEvidence": ["evidence/light-r3.png"], "score": 4, "criticVerdict": "BAR_WINS"}
   ],
   "regressionGates": [
-    {"id": "smoke", "criterion": "structural and full simulated playthrough", "command": "node test/smoke.js", "status": "pending", "evidence": []},
-    {"id": "walkthrough", "criterion": "data-driven acquisition graph", "command": "node test/walkthrough.js", "status": "pending", "evidence": []},
-    {"id": "retro-production", "criterion": "retro production contract", "command": "node test/retro-production.js", "status": "pending", "evidence": []},
-    {"id": "mobile-production", "criterion": "mobile production contract", "command": "node test/mobile-production.js", "status": "pending", "evidence": []},
-    {"id": "cast-continuity", "criterion": "Ben and Audrey remain on valid walkable lobby tiles", "command": "node test/cast-continuity-validate.js", "status": "pending", "evidence": []},
-    {"id": "world-door-equality", "criterion": "registry door records and installed doors unchanged", "command": "node test/world-door-equality.js", "status": "pending", "evidence": []},
-    {"id": "room-315-location", "criterion": "Room 315 and lobby hall round-trip remain unchanged", "command": "node test/room-315-location.js", "status": "pending", "evidence": []},
-    {"id": "act-4-flow", "criterion": "Act 4 flow count remains 1611", "command": "node test/act-4-flow.js", "status": "pending", "evidence": []},
-    {"id": "act-4-playthrough", "criterion": "Chrome all-path driver remains 530/530", "command": "node test/act-4-playthrough.js --path=all", "status": "pending", "evidence": []},
-    {"id": "act-3-playthrough", "criterion": "Act 3 browser driver remains 189/189", "command": "node test/act-3-playthrough.js", "status": "pending", "evidence": []}
+    {"id": "smoke", "criterion": "structural and full simulated playthrough", "command": "node test/smoke.js", "status": "pass", "evidence": ["415/415 assertions passed"]},
+    {"id": "walkthrough", "criterion": "data-driven acquisition graph", "command": "node test/walkthrough.js", "status": "pass", "evidence": ["85/85 acquisitions passed"]},
+    {"id": "retro-production", "criterion": "retro production contract", "command": "node test/retro-production.js", "status": "pass", "evidence": ["54/54 assertions passed"]},
+    {"id": "mobile-production", "criterion": "mobile production contract", "command": "node test/mobile-production.js", "status": "pass", "evidence": ["20/20 assertions passed"]},
+    {"id": "cast-continuity", "criterion": "Ben and Audrey remain on valid walkable lobby tiles", "command": "node test/cast-continuity-validate.js", "status": "pass", "evidence": ["all continuity validators passed"]},
+    {"id": "world-door-equality", "criterion": "registry door records and installed doors unchanged", "command": "node test/world-door-equality.js", "status": "pass", "evidence": ["59/59 descriptors passed"]},
+    {"id": "room-315-location", "criterion": "Room 315 and lobby hall round-trip remain unchanged", "command": "node test/room-315-location.js", "status": "pass", "evidence": ["location and round-trip passed"]},
+    {"id": "act-4-flow", "criterion": "Act 4 flow count remains 1611", "command": "node test/act-4-flow.js", "status": "pass", "evidence": ["1611/1611 assertions passed"]},
+    {"id": "act-4-playthrough", "criterion": "Chrome all-path driver remains 530/530", "command": "node test/act-4-playthrough.js --path=all", "status": "pass", "evidence": ["530/530 assertions passed; one favicon.ico 404"]},
+    {"id": "act-3-playthrough", "criterion": "Act 3 browser driver remains 189/189", "command": "node test/act-3-playthrough.js", "status": "pass", "evidence": ["189/189 assertions passed; one favicon.ico 404"]}
   ],
   "agents": {
     "builderCriticSeparated": true,
     "criticFreshContext": true
   },
-  "gapQueue": [],
-  "rounds": [],
+  "gapQueue": [
+    {"unitId": "walls-floor-rugs", "priority": "high", "gap": "Best round remains flatter and less compositionally faithful than reference timber-wall and floor treatment.", "owner": "stopped at cap"},
+    {"unitId": "fireplace-corner", "priority": "high", "gap": "Best round still lacks reference's unmistakable large gray stone surround and bright fire mass.", "owner": "stopped at cap"},
+    {"unitId": "light", "priority": "high", "gap": "Best round remains flatter than reference's deep directional warm shadows.", "owner": "stopped at cap"}
+  ],
+  "rounds": [
+    {"round": 1, "sequence": 1, "units": ["walls-floor-rugs", "fireplace-corner", "reception-desk", "stairs-runner-chandelier", "light"], "builder": "Astra/high (/root/e8_builder)", "critic": "Luna/high fresh (/root/e8_critic_r1)", "evidence": "artifacts/art-pass-e/e8/round-1.png", "scores": {"walls-floor-rugs": 5, "fireplace-corner": 5, "reception-desk": 5, "stairs-runner-chandelier": 6, "light": 5}, "rankVsPrevious": "BETTER", "gap": "Scene remains much flatter and darker than reference's warm, richly dimensional lodge interior."},
+    {"round": 2, "sequence": 2, "units": ["walls-floor-rugs"], "builder": "Astra/high (/root/e8_builder)", "critic": "Luna/high fresh (/root/e8_critic_walls_r2)", "evidence": "artifacts/art-pass-e/e8/walls-floor-rugs/round-2.png", "scores": {"walls-floor-rugs": 4}, "rankVsPrevious": "BETTER", "gap": "Flat top-down plank treatment lacks warm perspective depth and rich rug patterning."},
+    {"round": 3, "sequence": 3, "units": ["walls-floor-rugs"], "builder": "Astra/high (/root/e8_builder)", "critic": "Luna/high fresh (/root/e8_critic_walls_r3)", "evidence": "artifacts/art-pass-e/e8/walls-floor-rugs/round-3.png", "scores": {"walls-floor-rugs": 4}, "rankVsPrevious": "BETTER", "gap": "Walls and floor read as flat horizontal-plank top-down surfaces."},
+    {"round": 4, "sequence": 4, "units": ["walls-floor-rugs"], "builder": "Astra/high (/root/e8_builder)", "critic": "Luna/high fresh (/root/e8_critic_walls_r4)", "evidence": "artifacts/art-pass-e/e8/walls-floor-rugs/round-4.png", "scores": {"walls-floor-rugs": 4}, "rankVsPrevious": "WORSE", "gap": "Radial floor perspective lines conflict with reference's horizontal plank structure."},
+    {"round": 2, "sequence": 5, "units": ["fireplace-corner"], "builder": "Astra/high (/root/e8_builder)", "critic": "Luna/high fresh (/root/e8_critic_fire_r2)", "evidence": "artifacts/art-pass-e/e8/fireplace-corner/round-2.png", "scores": {"fireplace-corner": 5}, "rankVsPrevious": "BETTER", "gap": "Defining stacked-stone surround is missing."},
+    {"round": 3, "sequence": 6, "units": ["fireplace-corner"], "builder": "Astra/high (/root/e8_builder)", "critic": "Luna/high fresh (/root/e8_critic_fire_r3)", "evidence": "artifacts/art-pass-e/e8/fireplace-corner/round-3.png", "scores": {"fireplace-corner": 4}, "rankVsPrevious": "SAME", "gap": "Top-down composition and side-by-side chairs miss frontal flanking composition."},
+    {"round": 4, "sequence": 7, "units": ["fireplace-corner"], "builder": "Astra/high (/root/e8_builder)", "critic": "Luna/high fresh (/root/e8_critic_fire_r4)", "evidence": "artifacts/art-pass-e/e8/fireplace-corner/round-4.png", "scores": {"fireplace-corner": 5}, "rankVsPrevious": "BETTER", "gap": "Fireplace lacks unmistakable gray stone surround and bright readable flames."},
+    {"round": 2, "sequence": 8, "units": ["reception-desk"], "builder": "Astra/high (/root/e8_builder)", "critic": "Luna/high fresh (/root/e8_critic_desk_r2)", "evidence": "artifacts/art-pass-e/e8/reception-desk/round-2.png", "scores": {"reception-desk": 6}, "rankVsPrevious": "BETTER", "gap": "Mountain silhouette absent; pigeonholes, bell, and lamp vague or misplaced."},
+    {"round": 3, "sequence": 9, "units": ["reception-desk"], "builder": "Astra/high (/root/e8_builder)", "critic": "Luna/high fresh (/root/e8_critic_desk_r3)", "evidence": "artifacts/art-pass-e/e8/reception-desk/round-3.png", "scores": {"reception-desk": 6}, "rankVsPrevious": "BETTER", "gap": "Desk remains small and low without a wide counter and clear surface props."},
+    {"round": 4, "sequence": 10, "units": ["reception-desk"], "builder": "Astra/high (/root/e8_builder)", "critic": "Luna/high fresh (/root/e8_critic_desk_r4)", "evidence": "artifacts/art-pass-e/e8/reception-desk/round-4.png", "scores": {"reception-desk": 7}, "rankVsPrevious": "BETTER", "gap": "Lamp obscures pigeonholes instead of sitting at far right."},
+    {"round": 2, "sequence": 11, "units": ["stairs-runner-chandelier"], "builder": "Astra/high (/root/e8_builder)", "critic": "Luna/high fresh (/root/e8_critic_stairs_r2)", "evidence": "artifacts/art-pass-e/e8/stairs-runner-chandelier/round-2.png", "scores": {"stairs-runner-chandelier": 5}, "rankVsPrevious": "BETTER", "gap": "Stair/runner reads narrow and detached instead of broad right-side flight."},
+    {"round": 3, "sequence": 12, "units": ["stairs-runner-chandelier"], "builder": "Astra/high (/root/e8_builder)", "critic": "Luna/high fresh (/root/e8_critic_stairs_r3)", "evidence": "artifacts/art-pass-e/e8/stairs-runner-chandelier/round-3.png", "scores": {"stairs-runner-chandelier": 8}, "rankVsPrevious": "BETTER", "gap": "Stair runner is wider and more slab-like than reference."},
+    {"round": 2, "sequence": 13, "units": ["light"], "builder": "Astra/high (/root/e8_builder)", "critic": "Luna/high fresh (/root/e8_critic_light_r2)", "evidence": "artifacts/art-pass-e/e8/light/round-2.png", "scores": {"light": 4}, "rankVsPrevious": "BETTER", "gap": "Composition and perspective diverge from wide frontal reference."},
+    {"round": 3, "sequence": 14, "units": ["light"], "builder": "Astra/high (/root/e8_builder)", "critic": "Luna/high fresh (/root/e8_critic_light_r3)", "evidence": "artifacts/art-pass-e/e8/light/round-3.png", "scores": {"light": 4}, "rankVsPrevious": "BETTER", "gap": "Lighting remains flat and top-down without deep directional warm shadows."},
+    {"round": 4, "sequence": 15, "units": ["light"], "builder": "Astra/high (/root/e8_builder)", "critic": "Luna/high fresh (/root/e8_critic_light_r4)", "evidence": "artifacts/art-pass-e/e8/light/round-4.png", "scores": {"light": 2}, "rankVsPrevious": "WORSE", "gap": "Heavy dark banding further reduces readability."}
+  ],
   "finalGate": {
-    "allUnitsCovered": false,
-    "hardGatesPass": false,
-    "independentVerdict": null,
-    "floor": null,
-    "unresolvedHighGaps": []
+    "allUnitsCovered": true,
+    "hardGatesPass": true,
+    "independentVerdict": "BAR_WINS",
+    "floor": 4,
+    "unresolvedHighGaps": ["walls-floor-rugs", "fireplace-corner", "light"]
   },
   "progressSurface": ".gauntlet/e8/progress.md",
   "stopPolicy": "Per unit: stop at score >=7 or after round 4; score >=8 stops immediately. Two rounds stalled on same gap force a mechanical pixel/tone spec. Time box 90 minutes per unit and 6 hours total. No xhigh."
