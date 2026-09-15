@@ -21,8 +21,8 @@
     cx=Math.round(cx||0);cy=Math.round(cy||0);
     return function(x,y,w,h,c){
       if(c===p.ink||c===p.light){ctx.fillStyle=c;ctx.fillRect(x-cx,y-cy,w,h);return;}
-      /* Relight the authored material in opaque integer runs, retaining its
-       * grain/motif boundaries rather than painting a shape over the art. */
+      /* Sparse horizontal receiving marks preserve the authored material;
+       * the common world grid prevents overlapping lights adding density. */
       for(var yy=y;yy<y+h;yy++){
         var start=x,color=litColor(x,yy,c);
         for(var xx=x+1;xx<=x+w;xx++){
@@ -120,30 +120,25 @@
     });
   }
   var receivingLights=[
-    {x:144,y:57,rx:53,ry:28}, // chandelier, wall and floor beneath it
-    {x:144,y:82,rx:38,ry:20}, // hearth, front stones, lounge edges
-    {x:91,y:130,rx:38,ry:20}, // reception lamp, top and floor apron
-    {x:152,y:106,rx:25,ry:16}, // lounge table practical
-    {x:14,y:52,rx:25,ry:20},{x:274,y:61,rx:25,ry:20},
-    {x:14,y:140,rx:25,ry:21},{x:274,y:147,rx:25,ry:21}
+    {x:118,y:47,w:53,h:52}, {x:116,y:48,w:59,h:69},
+    {x:100,y:96,w:37,h:51},
+    {x:0,y:37,w:24,h:28},{x:264,y:46,w:24,h:28},
+    {x:0,y:125,w:24,h:28},{x:264,y:132,w:24,h:28}
   ];
-  var warm={},hot={};
-  [[p.woodDark,p.wood,p.woodLight],[p.wood,p.woodLight,p.gold],
-    [p.woodLight,p.gold,p.cream],[p.gold,p.cream,p.cream],
-    [p.stoneDark,p.stone,p.stoneLight],[p.stone,p.stoneLight,p.cream],
-    [p.stoneLight,p.cream,p.cream],[p.redDark,p.red,p.red],
-    [p.red,p.redLight,p.redLight],[p.cream,p.light,p.light]].forEach(function(a){warm[a[0]]=a[1];hot[a[0]]=a[2];});
   function litColor(x,y,c){
-    if(!warm[c])return c;
+    /* Source cores, lettering and dark pattern outlines are never painted
+     * over. Even with overlapping zones the two grids cover under 24%. */
+    if([p.woodDark,p.wood,p.woodLight,p.stoneDark,p.stone,p.stoneLight,p.redDark,p.red,p.redLight].indexOf(c)<0)return c;
     var level=0;
     for(var i=0;i<receivingLights.length;i++){
-      var light=receivingLights[i],dx=x-light.x,dy=y-light.y;
-      if(Math.abs(dx)>light.rx||Math.abs(dy)>light.ry)continue;
-      var distance=dx*dx*light.ry*light.ry+dy*dy*light.rx*light.rx;
-      var edge=light.rx*light.rx*light.ry*light.ry;
-      if(distance<=edge){level=1;if(distance*4<=edge){level=2;break;}}
+      var light=receivingLights[i];
+      if(x<light.x||x>=light.x+light.w||y<light.y||y>=light.y+light.h)continue;
+      level=1;
+      var ix=light.x+Math.floor(light.w/4),iy=light.y+Math.floor(light.h/4);
+      if(x>=ix&&x<light.x+light.w-Math.floor(light.w/4)&&y>=iy&&y<light.y+light.h-Math.floor(light.h/4)){level=2;break;}
     }
-    return level===2?hot[c]:level===1?warm[c]:c;
+    if(level===2)return y%3===1&&x%6<3?p.gold:c;
+    return level===1&&y%4===0&&x%8<2?p.woodLight:c;
   }
   function stairs(R){
     /* Right-hand architectural flight, with its original logical furniture
@@ -175,7 +170,7 @@
     /* Five tongues, exactly three heights, behind two dark logs. */
     [[132,60],[137,57],[142,63],[147,57],[152,60]].forEach(function(a){
       R(a[0],a[1],3,73-a[1],p.fire);
-      R(a[0],a[1]+4,3,69-a[1],p.cream);R(a[0]+1,69,1,4,p.light);
+      R(a[0],a[1]+4,3,69-a[1],p.cream);R(a[0]+1,69,1,3,p.light);
     });
     R(132,73,11,2,p.woodDark);R(145,72,11,2,p.woodDark);
     R(134,73,7,1,p.wood);R(147,72,7,1,p.wood);R(143,73,1,1,p.fire);
@@ -241,7 +236,7 @@
   function lamp(R,x,y){
     R(x-4,y-2,9,2,p.ink);R(x-3,y-3,7,1,p.gold);R(x,y-13,1,10,p.gold);
     R(x-3,y-22,7,3,p.cream);R(x-4,y-19,9,4,p.cream);R(x-5,y-15,11,2,p.gold);
-    R(x-2,y-21,4,2,p.light);R(x-3,y-19,6,4,p.light);R(x,y-23,1,1,p.ink);
+    R(x-2,y-21,4,1,p.light);R(x-3,y-18,6,2,p.light);R(x,y-23,1,1,p.ink);
   }
   function table(R){
     [10,16,18,16,10].forEach(function(w,row){
@@ -299,7 +294,7 @@
       L(118,101,1,16,p.gold);
       L(112,94,13,2,p.gold);L(111,96,15,3,p.gold);L(109,99,19,5,p.gold);
       L(113,95,11,2,p.cream);L(112,97,13,3,p.cream);L(111,100,15,2,p.cream);
-      L(115,96,7,2,p.light);L(114,98,9,3,p.light);
+      L(115,96,7,1,p.light);L(114,98,9,3,p.light);
     }
     /* Bell's glint retains its exact ambient anchor at (99,119). */
     R(91,123,14,2,p.ink);R(92,119,12,4,p.gold);R(93,116,10,3,p.gold);
@@ -325,7 +320,7 @@
     [[128,20],[136,27],[144,33],[152,27],[160,20]].forEach(function(a){
       R(a[0],a[1]-3,1,3,p.ink);R(a[0]-4,a[1],9,10,p.ink);
       R(a[0]-3,a[1],7,8,p.gold);R(a[0]-2,a[1]+1,5,6,p.cream);
-      R(a[0]-1,a[1]+1,3,5,p.light);R(a[0]-4,a[1]+8,9,2,p.gold);
+      R(a[0]-1,a[1]+2,3,4,p.light);R(a[0]-4,a[1]+8,9,2,p.gold);
       R(a[0]-1,a[1]+10,3,2,p.woodDark);
     });
   }
@@ -337,11 +332,16 @@
   function draw(ctx,cx,cy){
     var R=painter(ctx,cx,cy),alpha=ctx.globalAlpha;ctx.globalAlpha=1;
     R(0,0,288,192,p.ink);floor(R);walls(R);
-    /* Wider stepped contact shadows remain the palette's darkest tone even
-     * where the receiving material is lit. They precede every prop body. */
-    R(49,144,78,2,p.ink);R(52,146,72,1,p.ink);
-    R(112,111,29,3,p.ink);R(115,114,23,1,p.ink);
-    R(163,111,29,3,p.ink);R(166,114,23,1,p.ink);
+    /* Narrow broken reflections: three gold pixels, then two wood pixels. */
+    [[137,151,15,3],[110,146,16,2],[137,112,21,3]].forEach(function(a){
+      for(var y=a[1];y<a[1]+a[3];y++)for(var x=a[0];x<a[0]+a[2];x+=5){
+        R(x,y,Math.min(3,a[0]+a[2]-x),1,p.gold);
+        if(x+3<a[0]+a[2])R(x+3,y,Math.min(2,a[0]+a[2]-x-3),1,p.wood);
+      }
+    });
+    /* Two-pixel shadows touch actual counter, feet, hearth and stair edges. */
+    R(48,144,80,2,p.ink);R(128,113,16,2,p.ink);R(160,113,16,2,p.ink);
+    R(124,83,40,2,p.ink);R(208,128,48,2,p.ink);
     props.forEach(function(d){R(d.x+1,d.footY-1,d.cells.length*16-2,2,p.ink);prop(R,d);});
     chandelier(R);ctx.globalAlpha=alpha;
   }
