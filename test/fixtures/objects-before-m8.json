@@ -1,0 +1,331 @@
+{
+ "source": {
+  "arrival": {
+   "objects": [],
+   "interact": {}
+  },
+  "town": {
+   "objects": [
+    {
+     "type": "landmark",
+     "kind": "waterfall",
+     "x": 1,
+     "y": 0,
+     "w": 5,
+     "h": 6,
+     "dialogue": "landmark_waterfall"
+    },
+    {
+     "type": "landmark",
+     "kind": "cemetery",
+     "x": 48,
+     "y": 21,
+     "w": 6,
+     "h": 4,
+     "dialogue": "landmark_cemetery"
+    },
+    {
+     "type": "landmark",
+     "kind": "tracks",
+     "x": 53,
+     "y": 1,
+     "w": 2,
+     "h": 33,
+     "dialogue": [
+      {
+       "cond": "nflag:vagone_scoperto",
+       "then": "landmark_tracks_vagone"
+      },
+      {
+       "cond": [
+        "evidence:E6A_CUORE_INTERO",
+        "evidence:T_JAMES_EST"
+       ],
+       "then": "landmark_tracks_route"
+      },
+      "landmark_tracks"
+     ]
+    },
+    {
+     "type": "landmark",
+     "kind": "welcomesign",
+     "x": 30,
+     "y": 30,
+     "dialogue": "sign_town"
+    }
+   ],
+   "interact": {
+    "30,30": "cartello",
+    "15,28": "lago_riva",
+    "50,22": "tomba_laura"
+   }
+  },
+  "sheriff": {
+   "objects": [],
+   "interact": {}
+  },
+  "palmer": {
+   "objects": [],
+   "interact": {
+    "6,1": "cameraLaura"
+   }
+  },
+  "room_315": {
+   "objects": [],
+   "interact": {
+    "13,3": "specchio315",
+    "1,5": "letto_315",
+    "2,5": "letto_315",
+    "3,5": "letto_315",
+    "8,3": "scrivania_315"
+   }
+  },
+  "hotel_gn": {
+   "objects": [],
+   "interact": {}
+  },
+  "hospital": {
+   "objects": [],
+   "interact": {
+    "3,5": "ronette_letto"
+   }
+  },
+  "diner": {
+   "objects": [],
+   "interact": {}
+  },
+  "woods": {
+   "objects": [],
+   "interact": {
+    "14,12": "olio",
+    "11,16": "cartelloBosco"
+   }
+  },
+  "redroom": {
+   "objects": [],
+   "interact": {}
+  },
+  "traincar": {
+   "objects": [],
+   "interact": {
+    "4,6": "sign_ponte",
+    "20,2": "sign_oej",
+    "13,6": "mucchio_terra",
+    "13,5": "anello_interact"
+   }
+  },
+  "oej": {
+   "objects": [],
+   "interact": {}
+  },
+  "roadhouse": {
+   "objects": [],
+   "interact": {}
+  }
+ },
+ "booted": {
+  "arrival": [],
+  "diner": [],
+  "double_r_exterior_prototype": [],
+  "hospital": [
+   {
+    "x": 3,
+    "y": 5,
+    "dialogue": "ronette_letto",
+    "type": "plain"
+   }
+  ],
+  "hotel_gn": [],
+  "oej": [],
+  "palmer": [
+   {
+    "x": 6,
+    "y": 1,
+    "dialogue": [
+     {
+      "cond": "flag:done_andy",
+      "then": "laura_room_andy"
+     },
+     "laura_room"
+    ],
+    "type": "sparkle"
+   }
+  ],
+  "redroom": [],
+  "roadhouse": [],
+  "room_315": [
+   {
+    "x": 13,
+    "y": 3,
+    "dialogue": [
+     {
+      "cond": "flag:gigante1",
+      "then": "specchio_dopo"
+     },
+     {
+      "cond": "flag:jacques_morto",
+      "then": "gigante1_dlg"
+     },
+     "specchio315"
+    ],
+    "type": "sparkle"
+   },
+   {
+    "x": 1,
+    "y": 5,
+    "dialogue": "letto_315",
+    "type": "plain"
+   },
+   {
+    "x": 2,
+    "y": 5,
+    "dialogue": "letto_315",
+    "type": "plain"
+   },
+   {
+    "x": 3,
+    "y": 5,
+    "dialogue": "letto_315",
+    "type": "plain"
+   },
+   {
+    "x": 8,
+    "y": 3,
+    "dialogue": [
+     {
+      "cond": "evidence:T1_RONETTE_BOB",
+      "then": "scrivania_315_bob"
+     },
+     "scrivania_315"
+    ],
+    "type": "plain"
+   }
+  ],
+  "sheriff": [],
+  "sheriffs_station_exterior": [
+   {
+    "x": 9,
+    "y": 6,
+    "dialogue": "bacheca_centrale",
+    "type": "plain"
+   }
+  ],
+  "town": [
+   {
+    "type": "landmark",
+    "kind": "waterfall",
+    "x": 1,
+    "y": 0,
+    "w": 5,
+    "h": 6,
+    "dialogue": "landmark_waterfall"
+   },
+   {
+    "type": "landmark",
+    "kind": "cemetery",
+    "x": 48,
+    "y": 21,
+    "w": 6,
+    "h": 4,
+    "dialogue": "landmark_cemetery"
+   },
+   {
+    "type": "landmark",
+    "kind": "tracks",
+    "x": 53,
+    "y": 1,
+    "w": 2,
+    "h": 33,
+    "dialogue": [
+     {
+      "cond": "nflag:vagone_scoperto",
+      "then": "landmark_tracks_vagone"
+     },
+     {
+      "cond": [
+       "evidence:E6A_CUORE_INTERO",
+       "evidence:T_JAMES_EST"
+      ],
+      "then": "landmark_tracks_route"
+     },
+     "landmark_tracks"
+    ]
+   },
+   {
+    "type": "landmark",
+    "kind": "welcomesign",
+    "x": 30,
+    "y": 30,
+    "dialogue": "sign_town"
+   },
+   {
+    "x": 30,
+    "y": 30,
+    "dialogue": "sign_town",
+    "type": "plain"
+   },
+   {
+    "x": 15,
+    "y": 28,
+    "dialogue": [
+     {
+      "cond": "flag:maddy_trovata",
+      "then": "lago_dopo"
+     },
+     {
+      "cond": "flag:sogno_fatto",
+      "then": "lago_sguardo"
+     },
+     "lago_laura"
+    ],
+    "type": "plain"
+   },
+   {
+    "x": 50,
+    "y": 22,
+    "dialogue": "tomba_laura",
+    "type": "plain"
+   }
+  ],
+  "traincar": [
+   {
+    "x": 4,
+    "y": 6,
+    "dialogue": "sign_ponte",
+    "type": "plain"
+   },
+   {
+    "x": 20,
+    "y": 2,
+    "dialogue": "sign_oej",
+    "type": "plain"
+   },
+   {
+    "x": 13,
+    "y": 6,
+    "dialogue": "mucchio_terra",
+    "type": "sparkle"
+   },
+   {
+    "x": 13,
+    "y": 5,
+    "dialogue": "anello_interact",
+    "type": "sparkle"
+   }
+  ],
+  "woods": [
+   {
+    "x": 14,
+    "y": 12,
+    "dialogue": "olio",
+    "type": "sparkle"
+   },
+   {
+    "x": 11,
+    "y": 16,
+    "dialogue": "sign_grove",
+    "type": "plain"
+   }
+  ]
+ }
+}
