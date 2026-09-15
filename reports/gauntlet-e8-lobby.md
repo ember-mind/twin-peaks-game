@@ -11,6 +11,10 @@ Stairs + runner + chandelier met it at 8/10. Walls + floor + rugs (4/10),
 fireplace corner (5/10), and light (4/10) stopped at the four-round cap and are
 plainly below the required 7/10 floor.
 
+After that capped run, a user-directed single Astra integration pass rebuilt
+the full composition closer to the reference. It is documented below and is
+not assigned a critic score retroactively.
+
 No push performed.
 
 ## Fixed evidence
@@ -28,15 +32,58 @@ Reference crop contains only the bottom panel of
 |---|---|---|
 | Reference bottom panel | `artifacts/art-pass-e/e8/reference-bottom.png` | `0e49c07239a1c4edfcb6a9bf981e321050582d6979cdc485f8a6e24025c4e8c7` |
 | Before | `artifacts/art-pass-e/e8/baseline.png` | `3d0e261fb26a283a6a2ed4a7ddc3fe04290e12e98d9b4324f673d6adf50636fa` |
-| After, shipped mix | `artifacts/art-pass-e/e8/after.png` | `1bd589265e792322bb00ffb80171cdd22f027551d0edf68fba2f7772e807fb3b` |
+| After, capped gauntlet mix | `artifacts/art-pass-e/e8/gauntlet-after.png` | `1bd589265e792322bb00ffb80171cdd22f027551d0edf68fba2f7772e807fb3b` |
+| After, Astra integration | `artifacts/art-pass-e/e8/after.png` | `b247a80719a400c988090c8129921ad7e59c1864b549d0bb9542c6df3e1ecdbc` |
 
 ### Before
 
 ![Great Northern lobby before](../artifacts/art-pass-e/e8/baseline.png)
 
-### After
+### Capped gauntlet after
+
+![Great Northern lobby capped gauntlet result](../artifacts/art-pass-e/e8/gauntlet-after.png)
+
+### Astra integration after
 
 ![Great Northern lobby after](../artifacts/art-pass-e/e8/after.png)
+
+## User-directed Astra integration
+
+One Astra/high builder pass compared the current production capture directly
+with the reference bottom panel, then rebuilt the composition holistically.
+This was outside the completed scored gauntlet and used no critic pass.
+
+Changes:
+
+- replaced top-down wall/floor sameness with a tall frontal timber backdrop and
+  quieter floor plane;
+- integrated fireplace, bear, stone, fire, smaller chairs, table, and rug into
+  one lounge mass;
+- regrouped reception counter, pigeonholes, sign, bell, and lamp;
+- moved visual stair emphasis to a recessed far-right flight with narrow red
+  runner;
+- separated chandelier from bear/fireplace silhouette and re-anchored only E8
+  ambient coordinates;
+- extended central carpet route around real locked lounge collision cells.
+
+Map rows, connection registry, door lifecycle, Cast Presence positions, Room
+315, protected files, collision coverage, palette, and ambient archetypes were
+preserved.
+
+| Item | Result |
+|---|---|
+| Builder | Astra/high `/root/e8_builder`, one pass |
+| Production capture | `artifacts/art-pass-e/e8/astra-integration.png` |
+| SHA-256 | `b247a80719a400c988090c8129921ad7e59c1864b549d0bb9542c6df3e1ecdbc` |
+| Commit | `c77a11ed19efbd39ea446bdb687050a7470e5cea` |
+| Focused scene | Pass |
+| Smoke | 415/415 |
+| Retro production | 54/54 |
+| Mobile production | 20/20 |
+| Cast continuity | Pass |
+| World door equality | 59/59 |
+| Room 315 location | Pass |
+| Narrative finale | 27/27 |
 
 ## Unit results
 
@@ -217,7 +264,7 @@ tracked artifacts were restored afterward; only E8 evidence remains changed.
 
 Engineering and continuity gates: **PASS**.
 
-Visual floor: **FAIL**. Reception 7/10 and stairs/chandelier 8/10 pass. Walls,
+Formal capped-gauntlet visual floor: **FAIL**. Reception 7/10 and stairs/chandelier 8/10 pass. Walls,
 floor and rugs 4/10; fireplace 5/10; light 4/10. Per-unit round caps reached, so
 gauntlet stops and reports the bar winning rather than claiming parity.
 
@@ -227,3 +274,7 @@ shared round 1, and every shipped unit round. No push performed.
 Gauntlet baseline audit passes. Release audit fails only on the three recorded
 below-floor units plus the consequent final-floor, final-verdict, and unresolved
 high-gap checks.
+
+Later Astra integration is current shipped visual, materially closer to the
+reference, and intentionally unscored because user requested one builder run,
+not another builder–critic round.
