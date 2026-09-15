@@ -224,42 +224,48 @@
   function label(R,text,x,y){Array.from(text).forEach(function(c,i){(font[c]||[]).forEach(function(row,dy){
     Array.from(row).forEach(function(v,dx){if(v==='1')R(x+i*6+dx,y+dy,1,1,p.cream);});
   });});}
-  function reception(R){
-    /* Taller sign occupies the clear strip between luggage and stairs. The
-     * bold filled mountain crown has its own space above both text lines. */
-    R(48,70,48,34,p.woodDark);R(48,70,48,1,p.gold);R(48,72,48,30,p.ink);R(48,103,48,1,p.gold);
-    [[61,77,6],[75,73,10],[87,77,6]].forEach(function(peak){
-      for(var dy=0;dy<peak[2];dy++)R(peak[0]-dy,peak[1]+dy,dy*2+1,1,p.gold);
-    });
-    R(55,83,38,1,p.gold);R(75,76,1,3,p.cream);R(74,77,1,2,p.cream);R(76,77,1,1,p.cream);
-    label(R,'GREAT',57,86);label(R,'NORTHERN',48,95);
-    /* One substantial four-column, three-row key bank behind the counter;
-     * its right edge is outside Ben's x=76..99 sprite envelope. */
-    R(48,104,28,21,p.woodDark);R(48,104,28,1,p.gold);R(49,105,26,19,p.woodLight);
-    for(var y=106;y<124;y+=6)for(var x=51;x<75;x+=6){
-      R(x,y,5,5,p.ink);R(x+2,y+1,1,3,p.gold);R(x+2,y+3,2,1,p.cream);
+  function reception(R,foreground){
+    /* Rear furnishings belong before actors; Ben can occlude the bank's
+     * east edge without a foreground redraw covering his body. */
+    if(!foreground){
+    R(50,88,32,32,p.woodDark);
+    for(var row=0;row<4;row++)for(var col=0;col<4;col++){
+      var x=51+col*8,y=89+row*8;R(x,y,7,7,p.gold);R(x+1,y+1,5,5,p.ink);
+      if((row+col)%2===0)R(x+2,y+3,2,1,p.cream);
     }
-    R(100,114,15,11,p.woodDark);R(100,114,15,1,p.gold);R(101,115,13,9,p.woodLight);
-    for(var cy=116;cy<124;cy+=4)for(var cx=102;cx<114;cx+=6){R(cx,cy,5,3,p.ink);R(cx+2,cy+1,1,2,p.gold);}
+    /* Retain every sign pixel, raised eighteen pixels above all four rows
+     * of cubbies, in the clear strip between luggage and stairs. */
+    function S(x,y,w,h,c){R(x,y-18,w,h,c);}
+    S(48,70,48,34,p.woodDark);S(48,70,48,1,p.gold);S(48,72,48,30,p.ink);S(48,103,48,1,p.gold);
+    [[61,77,6],[75,73,10],[87,77,6]].forEach(function(peak){
+      for(var dy=0;dy<peak[2];dy++)S(peak[0]-dy,peak[1]+dy,dy*2+1,1,p.gold);
+    });
+    S(55,83,38,1,p.gold);S(75,76,1,3,p.cream);S(74,77,1,2,p.cream);S(76,77,1,1,p.cream);
+    label(S,'GREAT',57,86);label(S,'NORTHERN',48,95);
+    }
     /* A broad projecting top, recessed panels, lower rail, and black contact
      * strip read as one substantial counter on the existing four C tiles. */
-    R(64,126,64,18,p.ink);R(65,128,62,14,p.woodDark);
-    [66,86,106].forEach(function(px){
-      R(px,130,19,11,p.woodLight);R(px+1,131,17,9,p.wood);R(px+2,131,15,1,p.gold);
-      R(px+2,133,1,6,p.woodDark);R(px+2,139,15,1,p.woodDark);
+    R(48,120,80,26,p.ink);R(48,125,80,20,p.woodDark);
+    [52,77,102].forEach(function(px){
+      R(px,129,22,13,p.wood);R(px,129,22,1,p.woodLight);R(px,129,1,13,p.woodLight);
+      R(px,141,22,1,p.ink);R(px+21,129,1,13,p.ink);
     });
-    R(64,141,64,2,p.woodLight);R(66,141,60,1,p.gold);R(65,143,62,1,p.ink);
-    R(62,122,68,6,p.ink);R(63,122,66,4,p.woodLight);R(64,122,64,1,p.cream);
-    R(64,123,64,1,p.gold);R(63,126,66,1,p.woodDark);
-    /* Compact shaded lamp rests on the counter's east side, below the
-     * chair silhouette and clear of the key grids and both actor bodies. */
-    R(120,125,9,2,p.ink);R(121,124,7,1,p.gold);R(123,119,2,5,p.gold);
-    R(121,113,7,2,p.gold);R(120,115,9,2,p.cream);R(118,117,13,2,p.gold);
-    R(122,114,5,2,p.light);R(121,116,7,2,p.light);R(120,119,9,1,p.ink);
+    R(48,144,80,2,p.ink);
+    R(46,119,84,7,p.ink);R(47,120,82,2,p.gold);R(47,122,82,2,p.woodLight);R(47,124,82,1,p.woodDark);
+    /* Shift the lamp left to x=91: its shade sits between cubbies and chair.
+     * Ben may stand in front of the tall stem; its base remains on the slab. */
+    function L(x,y,w,h,c){R(x-27,y,w,h,c);}
+    L(112,123,13,2,p.ink);L(113,121,11,2,p.gold);L(115,119,7,2,p.woodLight);L(117,116,3,4,p.gold);
+    if(!foreground){
+      L(118,101,1,16,p.gold);
+      L(112,94,13,2,p.gold);L(111,96,15,3,p.gold);L(109,99,19,5,p.gold);
+      L(113,95,11,2,p.cream);L(112,97,13,3,p.cream);L(111,100,15,2,p.cream);
+      L(115,96,7,2,p.light);L(114,98,9,3,p.light);
+    }
     /* Bell's glint retains its exact ambient anchor at (99,119). */
-    R(95,124,12,2,p.ink);R(96,120,10,4,p.ink);R(97,120,8,3,p.gold);
-    R(98,119,6,2,p.cream);R(98,121,6,2,p.gold);R(100,117,2,2,p.gold);
-    R(98,121,3,1,p.light);R(104,122,1,1,p.woodLight);R(96,124,10,1,p.gold);
+    R(91,123,14,2,p.ink);R(92,119,12,4,p.gold);R(93,116,10,3,p.gold);
+    R(95,115,6,2,p.gold);R(97,112,2,2,p.gold);R(96,114,4,1,p.woodDark);
+    R(94,117,3,2,p.cream);R(99,119,3,2,p.cream);R(93,122,10,1,p.woodLight);
   }
   function luggage(R){
     R(32,109,16,2,p.ink);R(33,86,2,23,p.gold);R(45,86,2,23,p.gold);
@@ -275,10 +281,10 @@
       R(a[0]-3,a[1],7,8,p.gold);R(a[0]-2,a[1]+1,5,5,p.cream);R(a[0]-1,a[1]+1,3,4,p.light);
     });
   }
-  function prop(R,d){
+  function prop(R,d,foreground){
     if(d.id==='stairs')stairs(R);else if(d.id==='fireplace')fireplace(R);
     else if(d.id==='chairWest'||d.id==='chairEast')chair(R,d.x,d.footY,d.id==='chairEast');
-    else if(d.id==='table')table(R);else if(d.id==='reception')reception(R);else luggage(R);
+    else if(d.id==='table')table(R);else if(d.id==='reception')reception(R,foreground);else luggage(R);
   }
   function draw(ctx,cx,cy){
     var R=painter(ctx,cx,cy),alpha=ctx.globalAlpha;ctx.globalAlpha=1;
@@ -290,7 +296,7 @@
   function foreground(ctx,cx,cy,min,max){
     min=min==null?-Infinity:min;max=max==null?Infinity:max;
     var R=painter(ctx,cx,cy),alpha=ctx.globalAlpha;ctx.globalAlpha=1;
-    props.forEach(function(d){if(d.footY>=min&&d.footY<max)prop(R,d);});
+    props.forEach(function(d){if(d.footY>=min&&d.footY<max)prop(R,d,true);});
     if(192>=min&&192<max)chandelier(R);
     ctx.globalAlpha=alpha;
   }
