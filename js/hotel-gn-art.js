@@ -119,29 +119,29 @@
     }
   }
   function stairs(R){
-    /* Broad flight ascends to the northeast, behind the chimney. Treads
-     * overhang their narrower, unchanged two-cell contact at the foot. */
-    for(var step=0;step<9;step++){
-      var x=118-step*4,y=26+step*6;
-      R(x,y,42,6,p.ink);R(x+1,y,40,3,p.woodLight);R(x+2,y,38,1,p.gold);
-      R(x+1,y+3,40,2,p.woodDark);R(x+2,y+3,38,1,p.wood);
-      R(x+14,y,16,6,p.redDark);R(x+15,y,14,3,p.red);R(x+15,y,14,1,p.redLight);
-      R(x+14,y,1,6,p.gold);R(x+29,y,1,6,p.gold);R(x+16,y+3,12,1,p.red);
+    /* Right-hand architectural flight, with its original logical furniture
+     * contacts retained separately. The hall opening at y=16..31 stays clear. */
+    R(208,40,48,88,p.ink);R(220,32,36,16,p.woodDark);R(222,34,32,12,p.wood);
+    R(224,34,18,14,p.redDark);R(226,34,14,14,p.red);R(224,34,1,14,p.gold);R(241,34,1,14,p.gold);
+    for(var step=0;step<10;step++){
+      var x=212-Math.floor(step/2),y=48+step*8;
+      R(x,y,44,1,p.gold);R(x,y+1,44,4,p.wood);R(x,y+5,44,2,p.woodDark);
+      /* Eight-row carpet segments fill the seven-row tread and its join. */
+      R(224,y,18,8,p.redDark);R(225,y,1,8,p.redDark);R(226,y,14,8,p.red);
+      R(224,y,1,8,p.gold);R(241,y,1,8,p.gold);R(226,y,14,1,p.redLight);R(226,y+7,14,1,p.redDark);
     }
-    /* Raking rails have regularly spaced upright balusters. The east one
-     * naturally disappears behind the opaque stone surround. */
     for(var side=0;side<2;side++){
-      for(var post=0;post<5;post++){
-        var px=118-post*8+side*40,py=20+post*12;
-        R(px,py,3,12,p.ink);R(px,py,2,10,p.woodLight);R(px,py,1,8,p.gold);
+      var points=[[207,126],[211,104],[215,82],[219,60],[223,38]];
+      for(var segment=0;segment<4;segment++)for(var dy=0;dy<22;dy++){
+        var x=points[segment][0]+side*34+Math.round(dy*4/22),y=points[segment][1]-dy;
+        R(x,y,3,1,p.woodDark);R(x+1,y,1,1,p.woodLight);R(x+2,y,1,1,p.gold);
       }
-      for(var rail=0;rail<57;rail++){
-        var rx=120-Math.floor(rail*2/3)+side*40;
-        R(rx,17+rail,4,2,p.woodDark);R(rx,17+rail,2,1,p.gold);
-      }
+      points.forEach(function(point){var x=point[0]+side*34,y=point[1];
+        var top=Math.max(32,y-7),cap=Math.max(32,y-8);
+        R(x,top,3,y+2-top,p.woodDark);R(x+1,Math.max(32,y-6),1,y+1-Math.max(32,y-6),p.woodLight);R(x-1,cap,5,2,p.gold);
+      });
     }
-    R(86,69,5,11,p.woodDark);R(87,69,2,10,p.woodLight);R(85,67,7,3,p.gold);R(87,66,3,1,p.cream);
-    R(96,79,32,1,p.woodLight);R(96,80,32,2,p.ink);
+    R(96,78,32,2,p.ink);
   }
   function fire(R){
     R(131,57,26,17,p.ink);
@@ -287,16 +287,15 @@
     R(33,111,3,1,p.ink);R(44,111,3,1,p.ink);
   }
   function chandelier(R){
-    /* Five warm lanterns on curved brass arms, east of the chimney and
-     * nearer the room center. Chain links and finials stay hard pixel shapes. */
-    R(195,0,3,18,p.ink);
-    for(var link=1;link<18;link+=4){R(195,link,2,2,p.gold);R(196,link+2,2,2,p.woodLight);}
-    R(193,18,7,3,p.gold);R(195,20,3,13,p.woodLight);R(196,21,1,11,p.gold);
-    for(var dx=-19;dx<=19;dx++){
-      var yy=23+Math.round(10*(1-dx*dx/361));
-      R(196+dx,yy,2,3,p.woodDark);R(196+dx,yy,1,2,p.gold);
+    /* Centered mechanical-spec chandelier: a 42-pixel arc and five bulbs. */
+    R(143,10,3,10,p.ink);
+    for(var link=10;link<18;link+=4){R(143,link,2,2,p.gold);R(144,link+2,2,2,p.woodLight);}
+    R(141,20,7,3,p.gold);R(143,22,3,11,p.woodLight);R(144,23,1,10,p.gold);
+    for(var dx=-21;dx<21;dx++){
+      var yy=22+Math.round(10*(1-dx*dx/441));
+      R(144+dx,yy,1,3,p.woodDark);R(144+dx,yy,1,1,p.gold);
     }
-    [[178,18],[187,25],[196,31],[205,25],[214,18]].forEach(function(a){
+    [[128,20],[136,27],[144,33],[152,27],[160,20]].forEach(function(a){
       R(a[0],a[1]-3,1,3,p.ink);R(a[0]-4,a[1],9,10,p.ink);
       R(a[0]-3,a[1],7,8,p.gold);R(a[0]-2,a[1]+1,5,6,p.cream);
       R(a[0]-1,a[1]+1,3,5,p.light);R(a[0]-4,a[1]+8,9,2,p.gold);
