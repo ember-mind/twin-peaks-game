@@ -308,7 +308,7 @@
           "mode": "dialogue",
           "speaker_id": "cooper",
           "display_name": "COOPER",
-          "text": "La O di Maddy: l'ho vista io, sotto l'unghia. Non me l'ha descritta nessuno.",
+          "text": "La O di Maddy: l'ho vista io, sotto l'unghia.",
           "condition": {
             "value_is": {
               "name": "letter_o_observation_source",
@@ -424,15 +424,17 @@
                   },
                   {
                     "id": "m9.b2.p6.accept.sarah.none",
-                    "mode": "action",
-                    "text": "(Truman si alza; prende il cappello come si prende un peso.)",
+                    "mode": "dialogue",
+                    "speaker_id": "truman",
+                    "display_name": "TRUMAN",
+                    "text": "(si alza; prende il cappello come si prende un peso)",
                     "condition": {
                       "value_is": {
                         "name": "sarah_support_state",
                         "equals": "none"
                       }
                     },
-                    "conditional_note": "eco M8 [Lock §3-B2]: ramo «altrimenti», testo esatto reso come didascalia"
+                    "conditional_note": "eco M8 [Lock §3-B2]: ramo «altrimenti», testo e speaker esatti del Lock (Act 5 pass 01: era didascalia)"
                   },
                   {
                     "id": "m9.b2.p6.accept.p06",
