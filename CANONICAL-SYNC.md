@@ -110,3 +110,5 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-15 — merged Act 5 pass 01 (M9 refresh + M10 from confession lock, act-5-playthrough 203/203) and E7 Red Room native scene (3c086b2). Lead sign-off pending on SG-1..8; E7b floor follow-up open. Mirrored to vault.
 
 - 2026-09-15 — merged E7b floor evidence (0f2ade1): Red Room zigzag 7/10, floor unit met. Mirrored.
+
+- 2026-09-15 — merged test debt triage (ef1e7e3): 23/28 red tests closed, 64 CI steps; vault refreshed from HEAD for diorama.js, engine.js, sheriffs-station-art.js, town-dusk.js, retro-authored.js (canonical-sync stays red only on retro-authored.js while another session has WIP there).
