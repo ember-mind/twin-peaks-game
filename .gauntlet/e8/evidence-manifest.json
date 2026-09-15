@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "slug": "e8",
+  "generatedAt": "2026-09-15T15:41:56.110Z",
+  "files": [
+    {
+      "path": "evidence/baseline.png",
+      "bytes": 8749,
+      "sha256": "3d0e261fb26a283a6a2ed4a7ddc3fe04290e12e98d9b4324f673d6adf50636fa"
+    }
+  ],
+  "duplicateHashes": []
+}
