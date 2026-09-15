@@ -27,11 +27,11 @@
     };
   }
   function floorColor(x, y) {
-    /* Four-pixel bands and four stepped rows of rise, across a 32px repeat.
-     * Each crest spans two tiles: the broader rhythm halves the ripple count.
+    /* Four-pixel bands climb eight stepped rows across a 32px repeat.
+     * The deeper V keeps a broad two-tile rhythm instead of shallow ripples.
      * World coordinates preserve the phase through both 16px tile seams. */
     var phase = ((x % 32) + 32) % 32;
-    var rise = phase < 16 ? Math.floor(phase/4) : 7-Math.floor(phase/4);
+    var rise = phase < 16 ? Math.floor(phase/2) : 15-Math.floor(phase/2);
     return ((((y-rise)%8)+8)%8)<4 ? palette.cream : palette.ink;
   }
   function floor(R) {

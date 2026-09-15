@@ -68,6 +68,11 @@ for(let x=0;x<32;x++){
 for(let y=0;y<8;y++)for(let seam=16;seam<256;seam+=16){
   assert.equal(art.floorColor(seam-1,y),art.floorColor(seam,y),'the two sides of each tile seam share a continuous crest/trough');
 }
+/* A 2px horizontal step climbs one pixel, then descends symmetrically. */
+for(let y=0;y<8;y++){
+  for(let x=0;x<14;x+=2)assert.equal(art.floorColor(x,y),art.floorColor(x+2,y+1),'rising V edge');
+  for(let x=16;x<30;x+=2)assert.equal(art.floorColor(x,y),art.floorColor(x+2,y-1),'falling V edge');
+}
 G.AmbientLife.reset(7);
 let ambientDraws=0;
 const ambientCtx={globalAlpha:.8,fillStyle:art.palette.cream,fillRect(x,y,w,h){
