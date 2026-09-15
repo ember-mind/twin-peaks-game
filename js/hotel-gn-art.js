@@ -213,28 +213,46 @@
     R(147,106,2,5,p.ink);R(155,106,2,5,p.ink);R(146,111,3,2,p.ink);R(155,111,3,2,p.ink);
     R(148,106,1,3,p.woodLight);R(155,106,1,3,p.wood);lamp(R,152,101);
   }
-  var font={G:['111','100','101','101','111'],R:['110','101','110','101','101'],E:['111','100','110','100','111'],
-    A:['010','101','111','101','101'],T:['111','010','010','010','010'],N:['101','111','111','111','101'],
-    O:['111','101','101','101','111'],H:['101','101','111','101','101']};
+  var font={G:['01110','10001','10000','10111','10001','10001','01110'],
+    R:['11110','10001','10001','11110','10100','10010','10001'],
+    E:['11111','10000','10000','11110','10000','10000','11111'],
+    A:['01110','10001','10001','11111','10001','10001','10001'],
+    T:['11111','00100','00100','00100','00100','00100','00100'],
+    N:['10001','11001','11001','10101','10011','10011','10001'],
+    O:['01110','10001','10001','10001','10001','10001','01110'],
+    H:['10001','10001','10001','11111','10001','10001','10001']};
   function label(R,text,x,y){Array.from(text).forEach(function(c,i){(font[c]||[]).forEach(function(row,dy){
-    Array.from(row).forEach(function(v,dx){if(v==='1')R(x+i*4+dx,y+dy,1,1,p.cream);});
+    Array.from(row).forEach(function(v,dx){if(v==='1')R(x+i*6+dx,y+dy,1,1,p.cream);});
   });});}
   function reception(R){
-    /* Low key cubbies flank Ben's baseline at x=88. No backboard crosses him. */
-    R(64,111,17,17,p.woodDark);R(64,111,17,1,p.gold);
-    for(var y=113;y<127;y+=5)for(var x=66;x<80;x+=5){R(x,y,4,4,p.ink);R(x+1,y+1,1,2,p.gold);}
-    R(64,128,64,16,p.ink);R(65,128,62,14,p.woodDark);R(65,130,62,1,p.woodLight);
-    R(64,125,64,4,p.woodLight);R(65,125,62,1,p.gold);R(65,128,62,1,p.wood);
-    R(66,132,13,9,p.wood);R(67,132,11,1,p.woodLight);R(119,132,7,9,p.wood);
-    /* Compact two-line hotel plaque and twin peaks, entirely on counter face. */
-    R(80,130,38,13,p.gold);R(81,131,36,11,p.ink);
-    label(R,'GREAT',87,131);label(R,'NORTHERN',83,137);
-    R(109,135,2,1,p.gold);R(111,133,2,1,p.gold);R(113,135,2,1,p.gold);
-    R(65,142,62,1,p.woodLight);
+    /* Large two-line sign ends above Ben's 24px body band. Its right edge
+     * stops before the west lounge chair; separate cubby banks flank him. */
+    R(48,80,62,24,p.ink);R(49,81,60,22,p.gold);R(51,82,56,20,p.woodDark);
+    R(52,83,54,18,p.ink);R(49,102,60,1,p.woodLight);
+    [[67,85,3,1],[70,84,2,1],[72,83,2,1],[74,84,2,1],[76,85,2,1],
+      [78,85,2,1],[80,83,2,2],[82,82,2,1],[84,83,2,1],[86,84,2,1],[88,85,2,1]].forEach(function(a){R(a[0],a[1],a[2],a[3],p.gold);});
+    label(R,'GREAT',64,87);label(R,'NORTHERN',55,95);
+    R(64,104,12,21,p.woodDark);R(64,104,12,1,p.gold);R(65,105,1,19,p.woodLight);
+    for(var y=106;y<124;y+=6)for(var x=67;x<75;x+=4){
+      R(x,y,3,5,p.ink);R(x+1,y+1,1,2,p.gold);R(x+1,y+3,2,1,p.cream);
+    }
+    R(100,114,15,11,p.woodDark);R(100,114,15,1,p.gold);
+    for(var cy=116;cy<124;cy+=4)for(var cx=102;cx<114;cx+=4){R(cx,cy,3,3,p.ink);R(cx+1,cy+1,1,1,p.gold);}
+    /* A broad projecting top, recessed panels, lower rail, and black contact
+     * strip read as one substantial counter on the existing four C tiles. */
+    R(64,126,64,18,p.ink);R(65,128,62,14,p.woodDark);
+    [66,86,106].forEach(function(px){
+      R(px,130,19,11,p.woodLight);R(px+1,131,17,9,p.wood);R(px+2,131,15,1,p.gold);
+      R(px+2,133,1,6,p.woodDark);R(px+2,139,15,1,p.woodDark);
+    });
+    R(64,141,64,2,p.woodLight);R(66,141,60,1,p.gold);R(65,143,62,1,p.ink);
+    R(62,122,68,6,p.ink);R(63,122,66,4,p.woodLight);R(64,122,64,1,p.cream);
+    R(64,123,64,1,p.gold);R(63,126,66,1,p.woodDark);
     lamp(R,121,125);
-    /* Brass service bell has a black foot, dome and top button. */
-    R(96,123,9,2,p.ink);R(97,120,7,3,p.gold);R(98,119,5,2,p.cream);
-    R(100,117,1,2,p.gold);R(98,121,2,1,p.light);R(96,124,9,1,p.gold);
+    /* Bell's glint retains its exact ambient anchor at (99,119). */
+    R(95,124,12,2,p.ink);R(96,123,10,1,p.gold);R(96,121,10,2,p.gold);
+    R(97,120,8,2,p.cream);R(99,119,4,1,p.cream);R(100,117,2,2,p.gold);
+    R(98,121,3,1,p.light);R(104,122,2,1,p.woodLight);
   }
   function luggage(R){
     R(32,109,16,2,p.ink);R(33,86,2,23,p.gold);R(45,86,2,23,p.gold);
