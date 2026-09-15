@@ -119,17 +119,29 @@
     }
   }
   function stairs(R){
-    /* Both feet land on solid C cells (6,4),(7,4). The flight rises north. */
-    R(96,29,32,51,p.ink);R(97,29,30,49,p.woodDark);
-    for(var y=32;y<80;y+=6){
-      R(99,y,26,5,p.wood);R(100,y,24,1,p.gold);R(107,y,12,5,p.redDark);
-      R(108,y,10,1,p.redLight);R(108,y+1,10,3,p.red);R(107,y,1,5,p.gold);R(118,y,1,5,p.gold);
+    /* Broad flight ascends to the northeast, behind the chimney. Treads
+     * overhang their narrower, unchanged two-cell contact at the foot. */
+    for(var step=0;step<9;step++){
+      var x=118-step*4,y=26+step*6;
+      R(x,y,42,6,p.ink);R(x+1,y,40,3,p.woodLight);R(x+2,y,38,1,p.gold);
+      R(x+1,y+3,40,2,p.woodDark);R(x+2,y+3,38,1,p.wood);
+      R(x+14,y,16,6,p.redDark);R(x+15,y,14,3,p.red);R(x+15,y,14,1,p.redLight);
+      R(x+14,y,1,6,p.gold);R(x+29,y,1,6,p.gold);R(x+16,y+3,12,1,p.red);
     }
-    [96,125].forEach(function(x){R(x,24,3,53,p.woodLight);R(x+1,25,1,48,p.gold);
-      for(var y=33;y<74;y+=10)R(x-1,y,5,2,p.woodDark);
-      R(x-1,22,5,3,p.gold);R(x,21,3,1,p.cream);
-    });
-    R(99,78,26,2,p.ink);
+    /* Raking rails have regularly spaced upright balusters. The east one
+     * naturally disappears behind the opaque stone surround. */
+    for(var side=0;side<2;side++){
+      for(var post=0;post<5;post++){
+        var px=118-post*8+side*40,py=20+post*12;
+        R(px,py,3,12,p.ink);R(px,py,2,10,p.woodLight);R(px,py,1,8,p.gold);
+      }
+      for(var rail=0;rail<57;rail++){
+        var rx=120-Math.floor(rail*2/3)+side*40;
+        R(rx,17+rail,4,2,p.woodDark);R(rx,17+rail,2,1,p.gold);
+      }
+    }
+    R(86,69,5,11,p.woodDark);R(87,69,2,10,p.woodLight);R(85,67,7,3,p.gold);R(87,66,3,1,p.cream);
+    R(96,79,32,1,p.woodLight);R(96,80,32,2,p.ink);
   }
   function fire(R){
     R(131,57,26,17,p.ink);
@@ -275,10 +287,20 @@
     R(33,111,3,1,p.ink);R(44,111,3,1,p.ink);
   }
   function chandelier(R){
-    R(70,0,1,14,p.ink);R(69,11,3,9,p.gold);R(57,19,27,2,p.gold);
-    R(60,21,21,1,p.woodLight);R(65,22,11,2,p.gold);R(69,24,3,4,p.gold);
-    [[58,14],[70,16],[82,14],[70,28]].forEach(function(a){
-      R(a[0]-3,a[1],7,8,p.gold);R(a[0]-2,a[1]+1,5,5,p.cream);R(a[0]-1,a[1]+1,3,4,p.light);
+    /* Five warm lanterns on curved brass arms, east of the chimney and
+     * nearer the room center. Chain links and finials stay hard pixel shapes. */
+    R(195,0,3,18,p.ink);
+    for(var link=1;link<18;link+=4){R(195,link,2,2,p.gold);R(196,link+2,2,2,p.woodLight);}
+    R(193,18,7,3,p.gold);R(195,20,3,13,p.woodLight);R(196,21,1,11,p.gold);
+    for(var dx=-19;dx<=19;dx++){
+      var yy=23+Math.round(10*(1-dx*dx/361));
+      R(196+dx,yy,2,3,p.woodDark);R(196+dx,yy,1,2,p.gold);
+    }
+    [[178,18],[187,25],[196,31],[205,25],[214,18]].forEach(function(a){
+      R(a[0],a[1]-3,1,3,p.ink);R(a[0]-4,a[1],9,10,p.ink);
+      R(a[0]-3,a[1],7,8,p.gold);R(a[0]-2,a[1]+1,5,6,p.cream);
+      R(a[0]-1,a[1]+1,3,5,p.light);R(a[0]-4,a[1]+8,9,2,p.gold);
+      R(a[0]-1,a[1]+10,3,2,p.woodDark);
     });
   }
   function prop(R,d,foreground){
