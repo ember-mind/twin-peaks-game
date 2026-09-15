@@ -14,7 +14,7 @@ assets/ref/red-room-sheet.png top panel; style anchor artifacts/act-4-implementa
 |---|---:|---:|---|
 | Curtains | 7 | 5 | pending |
 | Chevron floor | 7 | 5 | pending |
-| Furniture + statue | 7 | 3 | pending |
+| Furniture + statue | 7 | 3 → 6 | pending |
 | Light | 7 | 4 | pending |
 
 ## Evidence
@@ -22,12 +22,13 @@ assets/ref/red-room-sheet.png top panel; style anchor artifacts/act-4-implementa
 - Reference: `artifacts/art-pass-e/e7/reference-top.png`
 - Baseline: `artifacts/art-pass-e/e7/baseline.png`
 - Round 1: `artifacts/art-pass-e/e7/round-1.png`
+- Furniture round 2: `artifacts/art-pass-e/e7/furniture-statue/round-2.png`
 - Fixed capture: `test/shot.sh redroom 8 9 up <out> --retro`
 
 ## Latest verdict
 
-Round 1, fresh Luna: curtains 5; floor 5; furniture + statue 3; light 4. Rank versus baseline: BETTER.
+Furniture round 2, fresh Luna: 6/10; rank versus round 1: BETTER.
 
 ## Gap queue
 
-1. Furniture arrangement lacks readable armchairs, central table and figure, and detailed statue.
+1. Chairs and tables remain flatter, blockier, and less richly shaded than reference furniture.
