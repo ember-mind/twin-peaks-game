@@ -100,3 +100,5 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-14 — merged M6 create/delete connections (1371fff): changeset v2, atomic world-apply with catalog write + rollback, Builder NEW/DELETE CONNECTION. Mirrored to vault.
 
 - 2026-09-15 — merged M7 door gating + cast placement editing (38179ca): bundle changesets, world-apply --repin (V5 only). Mirrored to vault.
+
+- 2026-09-15 — merged E3 follow-up (98489bc): roadhouse lighting round, Blender + ImageGen prop prototypes, World Builder prop handoff; prototype browser scripts relocated to assets/prototypes/direct-reference/browser/. Mirrored to vault.
