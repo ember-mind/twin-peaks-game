@@ -1,0 +1,285 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>m10-engine-harness</title>
+<style>body{margin:0;background:#000}#narrative{position:fixed;inset:0;pointer-events:none}.nw-focus{font-weight:bold}#log{position:fixed;left:0;bottom:0;max-height:40%;overflow:auto;background:#111;color:#ddd;font:11px monospace;white-space:pre-wrap;padding:6px;z-index:99}</style>
+</head>
+<body>
+<canvas id="gl" width="960" height="640"></canvas>
+<canvas id="game" width="480" height="320"></canvas>
+<div id="narrative"></div>
+<div id="log">running…</div>
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=m10h1"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=m10h1"></script>
+<script src="../js/engine.js?v=m10h1"></script>
+<script src="../js/render3d.js"></script>
+<script src="../js/scene-objects.gen.js"></script>
+<script src="../js/glue.js?v=m10h1"></script>
+<script src="../js/main.js"></script>
+<script src="../js/narrative-runtime.js?v=m10h1"></script>
+<script src="../js/narrative-ui.js"></script>
+<script src="../js/narrative-notebook.js"></script>
+<script src="../js/narrative-data.gen.js?v=m10h1"></script>
+<script src="../js/cast-presence.js?v=m10h1"></script>
+<script src="../js/narrative-bootstrap.js"></script>
+<script src="../js/narrative-engine-adapter.js?v=m10h1"></script>
+<script src="../js/narrative-save.js"></script>
+<script>
+/* Act 5 pass 01 — M10 ENGINE INTEGRATION harness (pattern: test/m8-engine-harness.html).
+ * Guida M10 «L'interrogatorio» attraverso il VERO motore + adapter + runtime + UI,
+ * con tasti veri sul widget/pagine. Seme RAGGIUNGIBILE: test/fixtures/cast-pins-acts-1-4.json
+ * seeds.ACT5_THRESHOLD (M9 consegnata), con le eco M6/M8 variate per percorso.
+ * Screen-truth = eventi page_shown del DOM, mai screenshot. Esito: document.title +
+ * window.__M10ENG_RESULT. */
+var LOCK = 30;
+var out = { checks: {}, errors: [], notes: [], run_log: {} };
+window.__M10ENG_RESULT = out;
+window.onerror = function (m, s, l) { out.errors.push(String(m) + ' @' + l); };
+window.addEventListener('unhandledrejection', function (e) { out.errors.push('unhandled: ' + (e.reason && e.reason.message || e.reason)); });
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function key(c) { window.dispatchEvent(new KeyboardEvent('keydown', { code: c, bubbles: true })); window.dispatchEvent(new KeyboardEvent('keyup', { code: c, bubbles: true })); }
+function widgetOpts() { return [].map.call(document.querySelectorAll('.nw-root:not(.nb-root) .nw-opt'), function (o) { return o.getAttribute('data-choice-id'); }); }
+async function press(c) { key(c); await wait(LOCK + 40); }
+async function chooseChoice(id) { var o = widgetOpts(), idx = o.indexOf(id); if (idx < 0) return false; for (var k = 0; k < idx; k++) await press('ArrowDown'); await press('Enter'); return true; }
+function ok(name, cond) { out.checks[name] = !!cond; }
+
+async function run() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter, D = GAME.NarrativeData, CP = GAME.CastPresence;
+  if (GAME.Render3D) GAME.Render3D.render = function () {};
+  var M = D.missions, M10 = M.M10;
+  var MISSIONS = [M.M4, M.M5, M.M6, M.M8, M.M9, M.M10];
+  function S() { return A.getState(); }
+
+  ok('B0 bootstrap_present', typeof GAME.installNarrativeCatalogs === 'function');
+  GAME.installNarrativeCatalogs();
+  ok('B0 m10_in_generated_data', !!M10 && M10.mission === 'M10' && M10.nodes.length === 10);
+  ok('B0 admission_domains_installed', ['taxi_lie', 'letters'].every(function (f) { return NR.valueDomains['material_admissions.' + f] === D.enums.enums.speaker_register; }));
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK, missions: MISSIONS });
+
+  var FIX = await (await fetch('fixtures/cast-pins-acts-1-4.json?v=m10h1')).json();
+  var SEED = FIX.seeds.ACT5_THRESHOLD;
+  ok('B0 fixture_seed_present', !!SEED && SEED.flags.atto5 && SEED.nodes_done.m9_arrivo);
+
+  var TACTIC_EV = { prova: 'JACQUES_MIDNIGHT_CLAIM', pressione: 'JACQUES_LIST_GIVEN', falsa_sicurezza: 'JACQUES_THIRD_MAN_DETAIL' };
+  function fullProp(p) {
+    return {
+      formulation: { status: (p && p.formulation && p.formulation.status) || 'unformulated', created_from: (p && p.formulation && p.formulation.created_from) || [] },
+      presentations: (p && p.presentations) || [], social_status: { accepted_by: (p && p.social_status && p.social_status.accepted_by) || [] },
+      factual_status: (p && p.factual_status) || 'unconfirmed'
+    };
+  }
+  // seme raggiungibile + varianti coerenti delle eco lette da M10 (tattica M6, avviso/rotta M8)
+  function seedState(v) {
+    var s = NR.createState(), src = JSON.parse(JSON.stringify(SEED));
+    Object.keys(src.flags).forEach(function (k) { s.flags[k] = src.flags[k]; });
+    Object.keys(src.values).forEach(function (k) { s.values[k] = src.values[k]; });
+    Object.keys(src.evidence).forEach(function (k) { s.evidence[k] = src.evidence[k]; });
+    Object.keys(src.nodes_done).forEach(function (k) { s.nodes_done[k] = src.nodes_done[k]; });
+    Object.keys(src.props).forEach(function (k) { s.props[k] = fullProp(src.props[k]); });
+    s.props.P6.formulation.created_from = ['T_LELAND_TAXI', 'D_TAXI'];
+    s.props.P6.presentations = [{ proposition: 'P6', target: 'truman', mission: 'M9', result: 'accepted', reason_code: 'SUFFICIENT_RELEVANT_SUPPORT', acceptance_type: 'colloquio_necessario', evidence_attached: ['T_LELAND_TAXI', 'D_TAXI'] }];
+    s.props.P8 = fullProp({ formulation: { status: 'formulated', created_from: ['E3_LETTERA_R', 'E9A_LETTERA_O', 'E9B_STESSO_METODO', 'E1_DIARIO'] } });
+    ['E3_LETTERA_R', 'E9A_LETTERA_O', 'E9B_STESSO_METODO', 'E1_DIARIO'].forEach(function (e) { s.evidence[e] = true; });
+    delete s.nodes_done.m6_interrogation_prova;
+    s.values.m6_tactic = v.tactic; s.nodes_done['m6_interrogation_' + (v.tactic === 'falsa_sicurezza' ? 'falsa' : v.tactic)] = true;
+    s.evidence[TACTIC_EV[v.tactic]] = true;
+    s.values.warning_target = v.warning; s.values.focus_destination = v.focus;
+    s.values.body_found_by = v.focus === 'lago' ? 'cooper' : 'hawk';
+    s.values.maddy_action_after_warning = v.warning === 'palmer' ? 'departure_prepared' : 'none';
+    s.values.promise_stance = v.promise;
+    return s;
+  }
+  function node(id) { return M10.nodes.filter(function (n) { return n.id === id; })[0]; }
+  var CHAIN = ['m10_soglia', 'm10_apertura', 'm10_domande', 'm10_affioramento', 'm10_confessione', 'm10_s3', 'm10_post_s3', 'm10_vittime', 'm10_fermo', 'm10_morte'];
+  // sequenza ATTESA: il runtime PURO su una copia dello stesso seme, stesse scelte
+  function expectedSequence(v) {
+    var s = seedState(v), ids = [];
+    CHAIN.forEach(function (id) {
+      var p = NR.prepareNode(s, M10, id);
+      if (!p.ok) throw new Error('expected prepare ' + id + ': ' + p.error);
+      p.pages.forEach(function (pg) { ids.push(pg.id); });
+      NR.commitNode(s, M10, p);
+      var ch = id === 'm10_soglia' ? 'method_' + v.method : id === 'm10_s3' ? 's3_' + v.s3 : null;
+      if (ch) {
+        var pc = NR.prepareChoice(s, M10, node(id), ch);
+        if (!pc.ok) throw new Error('expected choice ' + ch + ': ' + pc.error);
+        pc.feedback_pages.forEach(function (pg) { ids.push(pg.id); });
+        NR.commitChoice(s, M10, node(id), pc);
+      }
+    });
+    return ids;
+  }
+  function presence(id) { try { return CP.resolveCharacterPresence(id, S()); } catch (e) { return { status: 'ERROR', error: String(e.message || e) }; } }
+  function snapshotAt(pageId) {
+    var st = S();
+    var adm = Object.keys(st.values).filter(function (k) { return k.indexOf('material_admissions.') === 0; });
+    return {
+      id: pageId, method: st.values.m10_method, s3: st.values.s3, adm: adm.length,
+      admReg: adm.every(function (k) { return st.values[k] === 'leland_first_person'; }),
+      p6: st.props.P6 && st.props.P6.factual_status, p8: st.props.P8 && st.props.P8.factual_status,
+      truman: presence('truman'), leland: presence('leland'), active: A.active(),
+      fermo: !!st.nodes_done.m10_fermo, morto: !!st.flags.leland_morto
+    };
+  }
+  var shots = [], widgets = [];
+  A.onLog = function (e) { if (e.event === 'page_shown') shots.push(snapshotAt(e.page_id)); };
+
+  async function resetEngine() {
+    for (var i = 0; i < 20 && A.active(); i++) { key('Escape'); await wait(80); }
+    if (E.state) { E.state.dialogue = null; E.state.menu = null; E.state.mode = 'play'; }
+    E.loadMap('sheriff', 8, 6, 'up');
+    if (E.state) { E.state.dialogue = null; E.state.menu = null; }
+    await wait(80);
+  }
+  // pilota una sessione finché il lease si rilascia; sceglie metodo/nastro nel widget;
+  // opzionale: Escape quando appare la pagina `abortAt` (una volta).
+  async function driveSession(v, abortAt, state) {
+    var aborted = false;
+    for (var guard = 0; guard < 260; guard++) {
+      await wait(10);
+      if (!A.active()) return { closed: true, aborted: aborted };
+      var opts = widgetOpts();
+      if (opts.length) {
+        var want = opts.indexOf('method_' + v.method) >= 0 ? 'method_' + v.method : opts.indexOf('s3_' + v.s3) >= 0 ? 's3_' + v.s3 : null;
+        if (!want) { out.errors.push('unexpected widget ' + opts.join(',')); return { closed: false }; }
+        widgets.push({ choice: want, before: snapshotAt('widget:' + want) });
+        await chooseChoice(want);
+        continue;
+      }
+      var last = shots.length ? shots[shots.length - 1].id : null;
+      if (abortAt && !aborted && last === abortAt) { aborted = true; await press('Escape'); await wait(80); continue; }
+      await press('Enter');
+    }
+    return { closed: !A.active(), aborted: aborted, guard_exhausted: true };
+  }
+
+  var PATHS = [
+    { method: 'probatorio', s3: 'on', tactic: 'prova', warning: 'palmer', focus: 'palmer', promise: 'accompagno' },
+    { method: 'probatorio', s3: 'off', tactic: 'pressione', warning: 'centrale', focus: 'diner', promise: 'autonomia' },
+    { method: 'personale', s3: 'on', tactic: 'falsa_sicurezza', warning: 'palmer', focus: 'lago', promise: 'prudenza' },
+    { method: 'personale', s3: 'off', tactic: 'prova', warning: 'nessuno', focus: 'palmer', promise: 'accompagno' },
+    { method: 'intuitivo', s3: 'on', tactic: 'pressione', warning: 'palmer', focus: 'palmer', promise: 'autonomia' },
+    { method: 'intuitivo', s3: 'off', tactic: 'falsa_sicurezza', warning: 'centrale', focus: 'lago', promise: 'prudenza' }
+  ];
+
+  for (var pi = 0; pi < PATHS.length; pi++) {
+    var v = PATHS[pi], P = 'P' + (pi + 1) + ' ' + v.method + '/s3=' + v.s3 + ' ';
+    try {
+      await resetEngine();
+      A.setState(seedState(v));
+      shots = []; widgets = [];
+      ok(P + 'entry_state_enters_M10', NR.evalCond(S(), M10.entry_condition, M10));
+      ok(P + 'leland_placed_at_station', presence('leland').status === 'PLACED' && presence('leland').sceneId === 'sheriff');
+      var roots = NR.worldRoots(S(), M10, 'sheriff', 'leland').map(function (n) { return n.id; });
+      ok(P + 'single_root_m10_soglia', roots.length === 1 && roots[0] === 'm10_soglia');
+      var consumed = A.tryInteract('sheriff', 'leland');
+      ok(P + 'adapter_consumes_leland', consumed === true);
+      var r = await driveSession(v);
+      ok(P + 'session_closed', r.closed && !r.guard_exhausted);
+      var got = shots.map(function (s) { return s.id; });
+      var exp = expectedSequence(v);
+      ok(P + 'pages_in_order_equal_runtime_expectation (' + got.length + '/' + exp.length + ')', JSON.stringify(got) === JSON.stringify(exp));
+      if (JSON.stringify(got) !== JSON.stringify(exp)) out.run_log['diff ' + P] = { got: got, exp: exp };
+      function at(id) { return shots.filter(function (s) { return s.id === id; })[0]; }
+      var tape = at('m10.b2.apertura.p04');
+      ok(P + 'method_written_before_tape_page', !!tape && tape.method === v.method);
+      var firstSoglia = at('m10.b1.soglia.p01');
+      ok(P + 'no_method_at_threshold', !!firstSoglia && firstSoglia.method === undefined);
+      var b6 = shots.filter(function (s) { return s.id.indexOf('m10.b6.') === 0; });
+      ok(P + 'no_admission_or_factual_status_during_B6_pages', b6.length > 0 && b6.every(function (s) { return s.adm === 0 && s.p6 === 'unconfirmed' && s.p8 === 'unconfirmed'; }));
+      var s3w = widgets.filter(function (w) { return w.choice.indexOf('s3_') === 0; })[0];
+      ok(P + 's3_widget_only_after_six_admissions', !!s3w && s3w.before.adm === 6 && s3w.before.admReg && s3w.before.p6 === 'confirmed_as_lie' && s3w.before.p8 === 'corroborated');
+      var mw = widgets.filter(function (w) { return w.choice.indexOf('method_') === 0; })[0];
+      ok(P + 'method_widget_before_any_tape_page', !!mw && shots.findIndex(function (s) { return s.id === 'm10.b2.apertura.p04'; }) > shots.findIndex(function (s) { return s.id === 'm10.b1.soglia.p03'; }));
+      var s3p = at('m10.b7.s3.p01');
+      ok(P + 'admissions_committed_after_last_B6_page', !!s3p && s3p.adm === 6 && s3p.p6 === 'confirmed_as_lie');
+      // Truman: fuori solo nell'intuitivo, fra domande (commit) e confessione (commit)
+      var b5 = shots.filter(function (s) { return s.id.indexOf('m10.b5.') === 0; });
+      var b3 = shots.filter(function (s) { return s.id.indexOf('m10.b3.') === 0; });
+      if (v.method === 'intuitivo') {
+        ok(P + 'truman_offscreen_corridor_during_B5_B6', b5.concat(b6).every(function (s) { return s.truman.status === 'OFFSCREEN' && s.truman.label === 'corridor'; }));
+        ok(P + 'truman_placed_during_B3_questions', b3.every(function (s) { return s.truman.status === 'PLACED'; }));
+        ok(P + 'truman_back_at_S3', !!s3p && s3p.truman.status === 'PLACED' && s3p.truman.sceneId === 'sheriff');
+        ok(P + 'list_echo_absent_in_intuitivo', got.indexOf('m10.b5.affioramento.list') < 0);
+      } else {
+        ok(P + 'truman_never_offscreen', shots.every(function (s) { return s.truman.status === 'PLACED'; }));
+      }
+      var ECHO = { prova: v.method === 'probatorio' ? 'm10.b3.probatorio.midnight' : null, pressione: v.method === 'intuitivo' ? null : 'm10.b5.affioramento.list', falsa_sicurezza: 'm10.b5.affioramento.stove' }[v.tactic];
+      if (ECHO) ok(P + 'tactic_echo_rendered ' + ECHO, got.indexOf(ECHO) >= 0);
+      ['m10.b3.probatorio.midnight', 'm10.b5.affioramento.list', 'm10.b5.affioramento.stove'].filter(function (id) { return id !== ECHO; })
+        .forEach(function (id) { ok(P + 'other_tactic_echo_absent ' + id, got.indexOf(id) < 0); });
+      var b9 = shots.filter(function (s) { return s.id.indexOf('m10.b9.') === 0; });
+      var morte1 = at('m10.b10.morte.p01');
+      ok(P + 'leland_placed_until_fermo', b9.length === 3 && b9.every(function (s) { return s.leland.status === 'PLACED'; }));
+      ok(P + 'leland_offscreen_cell_after_fermo', !!morte1 && morte1.leland.status === 'OFFSCREEN' && morte1.leland.label === 'cell' && !morte1.morto);
+      var liveLeland = (E.state.npcs || []).filter(function (n) { return n.id === 'leland'; });
+      ok(P + 'no_live_leland_body_after_death', liveLeland.length === 0);
+      var fin = S();
+      ok(P + 'leland_morto_at_end', !!fin.flags.leland_morto && presence('leland').status === 'TERMINAL_REMOVED');
+      ok(P + 'values_written', fin.values.m10_method === v.method && fin.values.s3 === v.s3 && fin.values.truman_testimony_state === (v.s3 === 'on' ? 'not_needed' : 'voluntary_witness'));
+      var objs = NR.trueObjectives(fin, M10);
+      ok(P + 'exactly_one_objective_true', objs.length === 1 && objs[0].id === 'obj_m10_2');
+      ok(P + 'mission_complete', NR.checkCompletion(fin, M10) === true);
+      ok(P + 'lease_released', !A.active());
+    } catch (e) { out.errors.push(P + (e && e.message || e)); }
+  }
+
+  // ---- abort & resume: prima del fermo riprende da Leland, dopo il fermo da Truman ----
+  try {
+    var va = PATHS[4];
+    await resetEngine();
+    A.setState(seedState(va));
+    shots = []; widgets = [];
+    A.tryInteract('sheriff', 'leland');
+    var r1 = await driveSession(va, 'm10.b3.intuitivo.p02');
+    ok('R abort_mid_B3_closes_session', r1.closed && r1.aborted && !A.active());
+    var sa = S();
+    ok('R abort_state_apertura_done_domande_not', !!sa.nodes_done.m10_apertura && !sa.nodes_done.m10_domande && sa.values.m10_method === 'intuitivo');
+    shots = [];
+    var rootsA = NR.worldRoots(sa, M10, 'sheriff', 'leland').map(function (n) { return n.id; });
+    ok('R leland_root_still_m10_soglia', rootsA.length === 1 && rootsA[0] === 'm10_soglia');
+    A.tryInteract('sheriff', 'leland');
+    await wait(80);
+    ok('R resume_from_leland_continues_at_domande', shots.length > 0 && shots[0].id === 'm10.b3.intuitivo.p01');
+    var r2 = await driveSession(va, 'm10.b10.morte.p03');
+    ok('R abort_mid_B10_closes_session', r2.closed && r2.aborted && !A.active());
+    var sb = S();
+    ok('R abort_state_fermo_done_morte_not', !!sb.nodes_done.m10_fermo && !sb.nodes_done.m10_morte && !sb.flags.leland_morto);
+    var objB = NR.trueObjectives(sb, M10);
+    ok('R interrupted_state_single_objective', objB.length === 1 && objB[0].id === 'obj_m10_1');
+    ok('R leland_offscreen_after_fermo_no_body', presence('leland').status === 'OFFSCREEN' && (E.state.npcs || []).every(function (n) { return n.id !== 'leland'; }));
+    ok('R no_leland_root_after_fermo', NR.worldRoots(sb, M10, 'sheriff', 'leland').length === 0);
+    var rootsT = NR.worldRoots(sb, M10, 'sheriff', 'truman').map(function (n) { return n.id; });
+    ok('R truman_root_is_m10_morte', rootsT.length === 1 && rootsT[0] === 'm10_morte');
+    shots = [];
+    A.tryInteract('sheriff', 'truman');
+    await wait(80);
+    ok('R resume_from_truman_restarts_B10', shots.length > 0 && shots[0].id === 'm10.b10.morte.p01');
+    var r3 = await driveSession(va);
+    ok('R resumed_run_reaches_leland_morto', r3.closed && !!S().flags.leland_morto && NR.trueObjectives(S(), M10).length === 1);
+
+  } catch (e) { out.errors.push('abort/resume: ' + (e && e.message || e)); }
+
+  ok('Z zero_console_errors', out.errors.length === 0);
+  var allOk = out.errors.length === 0 && Object.keys(out.checks).every(function (k) { return out.checks[k] === true; });
+  out.pass = allOk; out.total = Object.keys(out.checks).length;
+  out.passed = Object.keys(out.checks).filter(function (k) { return out.checks[k] === true; }).length;
+  out.failed = Object.keys(out.checks).filter(function (k) { return out.checks[k] !== true; });
+  document.getElementById('log').textContent = JSON.stringify(out, null, 1);
+  document.title = allOk ? ('M10-ENGINE-HARNESS-PASS ' + out.passed + '/' + out.total) : ('M10-ENGINE-HARNESS-FAIL ' + out.failed.length + '/' + out.total);
+}
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    run().catch(function (e) { out.errors.push('run: ' + (e && e.message || e)); document.getElementById('log').textContent = JSON.stringify(out, null, 1); document.title = 'M10-ENGINE-HARNESS-ERR ' + (e && e.message || e); });
+  }, 400);
+});
+</script>
+</body>
+</html>
