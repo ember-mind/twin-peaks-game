@@ -27,10 +27,11 @@
     };
   }
   function floorColor(x, y) {
-    /* A stripe is exactly four pixels thick, with a four-pixel zigzag rise.
-     * World coordinates, not local tile coordinates, fix phase at every seam. */
-    var phase = ((x % 16) + 16) % 16;
-    var rise = phase < 8 ? Math.floor(phase/2) : 7-Math.floor(phase/2);
+    /* Four-pixel bands and four stepped rows of rise, across a 32px repeat.
+     * Each crest spans two tiles: the broader rhythm halves the ripple count.
+     * World coordinates preserve the phase through both 16px tile seams. */
+    var phase = ((x % 32) + 32) % 32;
+    var rise = phase < 16 ? Math.floor(phase/4) : 7-Math.floor(phase/4);
     return ((((y-rise)%8)+8)%8)<4 ? palette.cream : palette.ink;
   }
   function floor(R) {

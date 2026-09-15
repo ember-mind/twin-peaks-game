@@ -51,11 +51,22 @@ const ctx={globalAlpha:1,fillStyle:art.palette.ink,fillRect(x,y,w,h){
 G.sprites.drawStructures(ctx,map,0,0);
 G.sprites.drawForegroundStructures(ctx,map,0,0,{forestDepthMin:48,forestDepthMax:112});
 assert.equal(seen.size,5,'all five colors rendered');
-/* All floor coordinates tile in both axes; every vertical band is four pixels. */
+/* A full chevron spans two 16px tiles; vertical bands remain exactly 4px. */
 for(let x=0;x<256;x++)for(let y=32;y<176;y++){
-  assert.equal(art.floorColor(x,y),art.floorColor(x+16,y));
+  assert.equal(art.floorColor(x,y),art.floorColor(x+32,y));
   assert.equal(art.floorColor(x,y),art.floorColor(x,y+8));
   assert.notEqual(art.floorColor(x,y),art.floorColor(x,y+4));
+  assert.ok([art.palette.cream,art.palette.ink].includes(art.floorColor(x,y)));
+}
+for(let x=0;x<32;x++){
+  let start=0;
+  while(art.floorColor(x,start)===art.floorColor(x,start-1))start++;
+  for(let band=0;band<4;band++)for(let dy=0;dy<4;dy++){
+    assert.equal(art.floorColor(x,start+band*4+dy),art.floorColor(x,start+band*4),'every contiguous band is exactly four pixels');
+  }
+}
+for(let y=0;y<8;y++)for(let seam=16;seam<256;seam+=16){
+  assert.equal(art.floorColor(seam-1,y),art.floorColor(seam,y),'the two sides of each tile seam share a continuous crest/trough');
 }
 G.AmbientLife.reset(7);
 let ambientDraws=0;

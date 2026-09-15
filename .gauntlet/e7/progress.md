@@ -13,7 +13,7 @@ assets/ref/red-room-sheet.png top panel; style anchor artifacts/act-4-implementa
 | Unit | Floor | Round 1 | Status |
 |---|---:|---:|---|
 | Curtains | 7 | 5 → 7 | passed; ship R2 |
-| Chevron floor | 7 | 5 | pending |
+| Chevron floor | 7 | 5 → 6 | pending |
 | Furniture + statue | 7 | 3 → 6 → 6 → 5 | **capped below floor; ship R3 (6)** |
 | Light | 7 | 4 | pending |
 
@@ -23,6 +23,7 @@ assets/ref/red-room-sheet.png top panel; style anchor artifacts/act-4-implementa
 - Baseline: `artifacts/art-pass-e/e7/baseline.png`
 - Round 1: `artifacts/art-pass-e/e7/round-1.png`
 - Curtains round 2: `artifacts/art-pass-e/e7/curtains/round-2.png`
+- Floor round 2: `artifacts/art-pass-e/e7/floor/round-2.png`
 - Furniture round 2: `artifacts/art-pass-e/e7/furniture-statue/round-2.png`
 - Furniture round 3: `artifacts/art-pass-e/e7/furniture-statue/round-3.png`
 - Furniture round 4: `artifacts/art-pass-e/e7/furniture-statue/round-4.png`
@@ -30,8 +31,9 @@ assets/ref/red-room-sheet.png top panel; style anchor artifacts/act-4-implementa
 
 ## Latest verdict
 
-Curtains round 2, fresh Luna: 7/10; rank versus round 1: BETTER. Unit passed and stopped.
+Floor round 2, fresh Luna: 6/10; rank versus round 1: BETTER.
 
 ## Gap queue
 
 1. Furniture ends below floor. Best round 3 remains dark and blocky; round 4 saturated bright red and regressed.
+2. Floor chevrons remain too evenly spaced and lack reference's large perspective-driven variation.
