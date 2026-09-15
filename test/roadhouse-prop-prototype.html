@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PROTOTYPE — Roadhouse reusable prop</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #100d0f; color: #ead39b; font: 14px/1.35 ui-monospace, monospace; }
+    body { display: grid; place-items: center; padding: 22px 22px 72px; }
+    main { width: min(916px, 100%); display: grid; grid-template-columns: minmax(0, 3fr) minmax(240px, 1fr); gap: 18px; }
+    section, aside { border: 2px solid #5b3529; background: #1b1518; box-shadow: 0 12px 30px #0009; }
+    h1, h2, p, pre { margin: 0; }
+    h1 { padding: 10px 12px 4px; color: #ff7352; font-size: 16px; }
+    .question { padding: 0 12px 10px; color: #b87943; }
+    #scene { display: block; width: 100%; aspect-ratio: 4/3; image-rendering: pixelated; background: #171418; }
+    aside { padding: 12px; display: grid; align-content: start; gap: 12px; }
+    aside canvas { width: 100%; image-rendering: pixelated; background: #302321; border: 1px solid #75422f; }
+    pre { white-space: pre-wrap; color: #d5b979; font-size: 12px; }
+    .pass { color: #9fbd72; }
+    nav { position: fixed; left: 50%; bottom: 18px; translate: -50% 0; display: flex; align-items: center; gap: 12px; padding: 8px 12px; border: 2px solid #d18a39; border-radius: 999px; background: #171418f2; box-shadow: 0 8px 25px #000b; }
+    button { border: 0; background: #75422f; color: #ffe2a0; width: 32px; height: 28px; cursor: pointer; font: inherit; }
+    #variant-label { min-width: 190px; text-align: center; }
+  </style>
+</head>
+<body>
+  <main>
+    <section>
+      <h1>PROTOTYPE — three Roadhouse asset pipelines</h1>
+      <p class="question">Can reusable reference-derived props rebuild a stronger native scene without owning collision?</p>
+      <canvas id="scene" width="256" height="192"></canvas>
+    </section>
+    <aside>
+      <h2>Catalog preview</h2>
+      <canvas id="catalog" width="192" height="128"></canvas>
+      <pre id="manifest"></pre>
+      <p class="pass">A: procedural · B: Blender prefab · C: atomic reference kit. Footprints remain metadata.</p>
+    </aside>
+  </main>
+  <nav aria-label="prototype variants">
+    <button id="prev" aria-label="previous variant">&larr;</button>
+    <span id="variant-label"></span>
+    <button id="next" aria-label="next variant">&rarr;</button>
+  </nav>
+  <script>window.GAME = window.GAME || {};</script>
+  <script src="../js/retro-font.js"></script>
+  <script src="../js/roadhouse-art.js"></script>
+  <script src="../assets/prototypes/direct-reference/browser/roadhouse-prop-prototype.js"></script>
+</body>
+</html>

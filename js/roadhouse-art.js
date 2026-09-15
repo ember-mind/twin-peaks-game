@@ -149,15 +149,17 @@
      * becoming a solid box: walnut outer shoulders, intermediate side glints,
      * then the dark framed source and its bright core. */
     R(x - 5, y - 7, 10, 1, p.walnutDark);
-    R(x - 7, y - 5, 14, 2, p.walnutDark);
-    R(x - 8, y - 3, 2, 8, p.walnutDark);
-    R(x + 6, y - 3, 2, 8, p.walnutDark);
-    R(x - 6, y + 5, 12, 2, p.walnutDark);
+    R(x - 7, y - 5, 14, 2, p.walnutMid);
+    R(x - 8, y - 3, 2, 8, p.walnutMid);
+    R(x + 6, y - 3, 2, 8, p.walnutMid);
+    R(x - 6, y + 5, 12, 2, p.walnutMid);
     R(x - 5, y + 7, 10, 2, p.walnutDark);
-    R(x - 4, y - 4, 8, 1, p.walnut);
-    R(x - 5, y - 2, 3, 5, p.walnut);
-    R(x + 2, y - 2, 3, 5, p.walnut);
-    R(x - 4, y + 3, 8, 2, p.walnut);
+    R(x - 4, y - 4, 8, 1, p.walnutHi);
+    R(x - 5, y - 2, 3, 5, p.walnutGold);
+    R(x + 2, y - 2, 3, 5, p.walnutGold);
+    R(x - 4, y + 3, 8, 2, p.walnutHi);
+    R(x - 4, y + 11, 5, 3, p.walnutMid);
+    R(x + 2, y + 13, 3, 2, p.walnutMid);
     R(x - 1, y - 5, 2, 2, p.ink);
     R(x - 2, y - 3, 4, 2, p.walnutGold);
     R(x - 4, y - 1, 8, 2, p.ink);
@@ -204,10 +206,13 @@
     R(105, 48, 46, 1, p.ink);
     R(100, 49, 56, 1, p.amberDeep);
     R(96, 50, 64, 2, p.amber);
-    R(102, 52, 52, 2, p.amberMid);
-    R(109, 54, 38, 2, p.amber);
-    R(116, 56, 24, 1, p.amberDeep);
-    R(121, 52, 14, 2, p.amberHi);
+    R(102, 52, 52, 1, p.amberMid);
+    R(109, 53, 38, 2, p.amberMid);
+    R(116, 55, 24, 2, p.amber);
+    R(118, 51, 20, 1, p.amberHi);
+    R(121, 53, 14, 2, p.amberHi);
+    /* Board seams interrupt the receiving pool; light never fills the recess. */
+    R(102, 52, 9, 1, p.amberDeep); R(143, 54, 7, 1, p.amberDeep);
     R(123, 57, 10, 1, p.ink);
     /* Mic, stand, and two speakers. */
     R(126, 29, 4, 22, p.ink); R(127, 31, 2, 18, p.metalHi);
@@ -227,8 +232,11 @@
     R(18, 15, 66, 2, p.walnutMid); R(18, 40, 66, 2, p.neonDeep);
     /* Red receiving strips sit on the walnut pilasters beside the sign; the
      * stepped foot below it stops before the floor lamps and tables. */
-    R(10, 18, 3, 20, p.redDeep); R(89, 18, 3, 20, p.redDeep);
-    R(20, 43, 60, 2, p.redDark); R(28, 45, 44, 1, p.redDeep);
+    R(10, 18, 3, 20, p.redDark); R(89, 18, 3, 20, p.redDark);
+    R(20, 43, 60, 2, p.redDark); R(28, 45, 44, 2, p.redDeep);
+    R(18, 46, 11, 2, p.redMid); R(19, 49, 8, 3, p.redDark);
+    R(67, 46, 12, 2, p.redMid); R(69, 49, 8, 3, p.redDark);
+    R(32, 46, 8, 1, p.redDark); R(56, 46, 7, 1, p.redDark);
     /* Mountain outline and down-pointing arrow borrowed from the A plate. */
     var mountain = [[20,29,4,2],[24,27,4,2],[28,24,4,3],[32,20,4,4],
       [36,24,4,3],[40,27,4,2],[44,24,4,3],[48,20,4,4],[52,24,4,3],
@@ -276,22 +284,25 @@
   }
 
   function pendantPool(R, x, y, p) {
-    /* Three short steps fall onto the dark wall below each pendant, bounded
-     * above and below by a one-tone walnut/ink moat. */
-    R(x - 7, y + 14, 24, 1, p.ink);
-    R(x - 2, y + 15, 14, 2, p.amberDeep);
-    R(x - 5, y + 17, 20, 2, p.amberMid);
-    R(x - 5, y + 19, 20, 2, p.amber);
-    R(x - 5, y + 21, 20, 1, p.ink);
+    /* Broken shoulders catch the wood behind the bottles. Each pool stays
+     * narrower than the spacing of its neighbours and exposes dark seams. */
+    R(x, y + 15, 10, 3, p.walnutGold);
+    R(x - 2, y + 18, 14, 3, p.walnutHi);
+    R(x - 4, y + 21, 18, 2, p.walnutMid);
+    R(x - 3, y + 24, 7, 2, p.walnutGold);
+    R(x + 6, y + 24, 6, 2, p.walnutHi);
+    R(x - 1, y + 27, 11, 4, p.walnutMid);
+    R(x + 2, y + 33, 5, 3, p.walnutMid);
   }
 
   function counterHighlight(R, x, p) {
     /* Compact pools cast by each pendant: a bright centre, a warm shoulder,
      * and a dark stop.  The eight-pixel gaps remain the counter's walnut. */
-    R(x - 7, 81, 14, 1, p.walnutHi);
-    R(x - 5, 82, 10, 2, p.amberDeep);
-    R(x - 3, 84, 6, 2, p.amberHi);
-    R(x - 5, 86, 10, 1, p.amberMid);
+    R(x - 7, 80, 14, 1, p.walnutMid);
+    R(x - 9, 81, 18, 2, p.walnutGold);
+    R(x - 6, 83, 12, 2, p.walnutGold);
+    R(x - 3, 83, 6, 1, p.amberHi);
+    R(x - 5, 85, 10, 1, p.walnutGold);
     R(x - 7, 87, 14, 1, p.ink);
   }
 
@@ -313,8 +324,8 @@
     /* Counter front: a dark rim, segmented pendant pools, and a deep front
      * fascia make the long bar read as a thick built object, not one tan
      * plank.  All edges remain pixel-orthographic rectangles. */
-    R(158, 78, 91, 12, p.ink); R(160, 79, 87, 7, p.walnutMid);
-    R(164, 80, 79, 4, p.walnut);
+    R(158, 78, 91, 12, p.ink); R(160, 79, 87, 7, p.walnutDeep);
+    R(164, 80, 79, 4, p.walnutMid);
     counterHighlight(R, 176, p); counterHighlight(R, 207, p); counterHighlight(R, 229, p);
     R(160, 88, 87, 3, p.ink);
     R(160, 90, 87, 21, p.walnutDeep); R(164, 92, 79, 15, p.walnutDark);
@@ -322,7 +333,17 @@
     R(160, 107, 87, 4, p.ink); R(164, 107, 79, 1, p.walnutHi);
     R(165, 97, 18, 5, p.walnut); R(192, 97, 18, 5, p.walnut);
     R(216, 97, 22, 5, p.walnut);
-    R(170, 95, 4, 2, p.amberHi); R(201, 94, 4, 2, p.amberHi);
+    /* Light falls over the lip in three separate short vertical patches. */
+    for (var lightX = 0; lightX < 3; lightX++) {
+      var centre = [176, 207, 229][lightX];
+      R(centre - 6, 91, 12, 2, p.walnutGold);
+      R(centre - 4, 93, 8, 4, p.walnutMid);
+      R(centre - 2, 98, 4, 3, p.walnut);
+      /* The floor receives the same source after the bar's dark foot. */
+      R(centre - 7, 113, 14, 2, p.floorHi);
+      R(centre - 9, 116, 8, 2, p.floorMid);
+      R(centre + 2, 116, 7, 2, p.floorMid);
+    }
     /* Back-bar attendant window. */
     R(211, 56, 22, 22, p.ink); R(214, 59, 16, 15, p.walnut);
     R(217, 61, 10, 11, p.glass); R(218, 62, 8, 2, p.glassHi);
@@ -343,6 +364,10 @@
     R(120, 62, 16, 1, p.amberDeep);
     R(125, 59, 6, 2, p.amberHi);
     R(76, 63, 106, 1, p.walnutHi);
+    /* The raised apron casts a dark break before a few lit floor boards. */
+    R(113, 66, 30, 2, p.floorMid);
+    R(118, 68, 20, 2, p.amberDeep);
+    R(108, 70, 11, 2, p.floorMid); R(132, 71, 12, 2, p.floorMid);
   }
 
   function drawPayPhone(R, p) {
@@ -367,9 +392,9 @@
     R(x + 4, y + 2, w - 8, 1, p.redDeep);
     R(x + 2, y + 3, w - 4, 2, p.redDark);
     R(x + 3, y + 5, w - 6, 22, p.redDark);
-    R(x + 5, y + 7, w - 10, 18, p.red);
+    R(x + 5, y + 7, w - 10, 18, p.redDark);
     R(x + 7, y + 5, w - 14, 2, p.redMid);
-    R(x + 9, y + 6, w - 18, 1, p.redHi);
+    R(x + 9, y + 6, 12, 1, p.redHi);
     for (var i = x + 7; i < x + w - 7; i += 11) {
       R(i, y + 8, 3, 15, p.redMid); R(i + 4, y + 9, 2, 14, p.redDark);
     }
@@ -386,6 +411,15 @@
     R(x + 5, y + 34, w - 10, 2, p.redDeep);
     R(x + 10, y + 36, w - 20, 1, p.walnutDark);
     R(x + 8, y + 8, 2, 10, p.redHi);
+    /* A nearby sconce (left) or jukebox (right) warms only the facing padded
+     * section. Four upholstery tones retain the unlit pleats between steps. */
+    var litX = x < 128 ? x + 5 : x + w - 20;
+    R(litX, y + 8, 12, 3, p.redMid);
+    R(litX, y + 11, 8, 5, p.redMid);
+    R(litX + 1, y + 8, 4, 5, p.redHi);
+    R(litX + 1, y + 18, 5, 3, p.redMid);
+    R(litX, y + 24, 14, 2, p.redHi);
+    R(litX + 3, y + 28, 8, 2, p.redMid);
   }
 
   function table(R, x, y, p) {
@@ -433,14 +467,15 @@
     /* A warm, low-contrast ellipse begins just above the tabletop and runs
      * behind the chairs through the feet.  Warm moats replace black outlines;
      * the open checker remains the dark separator between each pool. */
-    R(x - 14, y - 3, 28, 2, p.floorDark);
-    R(x - 20, y - 1, 40, 2, p.floorDark);
-    R(x - 22, y + 1, 44, 4, p.floorMid);
-    R(x - 20, y + 5, 40, 4, p.floorMid);
-    R(x - 16, y + 9, 32, 5, p.amberDeep);
-    R(x - 12, y + 14, 24, 5, p.floorMid);
-    R(x - 9, y + 19, 18, 4, p.floorDark);
-    R(x - 6, y + 23, 12, 3, p.floorDark);
+    R(x - 13, y - 2, 26, 2, p.floorMid);
+    R(x - 18, y + 1, 36, 3, p.floorHi);
+    R(x - 20, y + 5, 13, 3, p.floorMid);
+    R(x + 9, y + 5, 11, 3, p.floorMid);
+    R(x - 16, y + 9, 32, 3, p.amberDeep);
+    R(x - 12, y + 13, 24, 3, p.floorHi);
+    R(x - 10, y + 17, 8, 3, p.floorMid);
+    R(x + 3, y + 18, 7, 3, p.floorMid);
+    R(x - 7, y + 22, 12, 2, p.floorMid);
   }
 
   function tableTopGlow(R, x, y, p) {
@@ -448,15 +483,18 @@
      * compact stepped amber response gathers around the candle. */
     R(x - 14, y, 28, 2, p.ink);
     R(x - 12, y + 2, 24, 2, p.walnutDark);
-    R(x - 10, y + 4, 20, 2, p.walnut);
+    R(x - 10, y + 4, 20, 2, p.walnutGold);
     R(x - 9, y + 6, 18, 2, p.walnutDark);
-    R(x - 8, y + 8, 16, 4, p.walnut);
+    R(x - 8, y + 8, 16, 4, p.walnutGold);
     R(x - 6, y + 12, 12, 2, p.walnutDark);
-    /* 12px -> 10px -> 6px stepped candle response. */
-    R(x - 6, y + 6, 12, 1, p.amberDeep);
-    R(x - 5, y + 7, 10, 2, p.amber);
-    R(x - 3, y + 9, 6, 2, p.amberHi);
-    R(x - 5, y + 11, 10, 1, p.amberDeep);
+    /* Candle contact and nearby wood form one stepped receiving cluster;
+     * short grain breaks keep the warm top from becoming a luminous stripe. */
+    R(x - 4, y + 2, 8, 2, p.walnutGold);
+    R(x - 6, y + 4, 12, 2, p.amberHi);
+    R(x - 4, y + 6, 8, 3, p.walnutGold);
+    R(x - 2, y + 6, 4, 2, p.amberHi);
+    R(x - 6, y + 9, 4, 1, p.walnutDark);
+    R(x + 3, y + 10, 4, 1, p.walnutDark);
     R(x - 6, y + 14, 12, 1, p.walnutDark);
     R(x - 4, y + 15, 8, 1, p.ink);
   }

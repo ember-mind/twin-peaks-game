@@ -1,12 +1,17 @@
 {
   "schemaVersion": 1,
   "slug": "e3",
-  "generatedAt": "2026-09-14T16:33:24.639Z",
+  "generatedAt": "2026-09-14T18:36:39.397Z",
   "files": [
     {
       "path": "evidence/baseline.png",
       "bytes": 7701,
       "sha256": "c48a416cd523d4cb4fee9491c89fb93d1d8a5358a9ff17e200946a92aa6475f0"
+    },
+    {
+      "path": "evidence/lighting-round-1.png",
+      "bytes": 14234,
+      "sha256": "cadd99de8a186f8c1682a39304a6b292479dac7de31a053a218d98439b934506"
     },
     {
       "path": "evidence/reference-roadhouse-A.png",

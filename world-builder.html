@@ -129,5 +129,13 @@
 <script src="js/world-builder-data.js"></script>
 <script src="js/world-builder-coords.js"></script>
 <script src="js/world-builder.js"></script>
+<script>
+  /* Throwaway opt-in prototype. Default World Builder remains unchanged. */
+  if (new URLSearchParams(location.search).has('propPrototype')) {
+    var propPrototype = document.createElement('script');
+    propPrototype.src = 'assets/prototypes/direct-reference/browser/world-builder-props-prototype.js';
+    document.body.appendChild(propPrototype);
+  }
+</script>
 </body>
 </html>

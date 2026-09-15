@@ -9,3 +9,5 @@ Stopped by user budget amendment after 16 pre-amendment shared scene rounds. No 
 - Best scores: floor+walls 7; stage 7.2; bar 7.1; booths+tables 7.1; lighting 6.5; door 7.8.
 - Below floor: lighting; latest snapshot also places floor+walls, stage, booths+tables below 7.
 - Gates: smoke 415, walkthrough 85, retro 54/54, mobile 20/20, cast continuity, Act 4 flow 1611/1611, Chrome SwiftShader playthrough 530/530 — all PASS.
+
+Post-amendment lighting round 1: `7e8c129`; evidence `evidence/lighting-round-1.png`; score 6/10; rank `BETTER`; unresolved floor-pool gap. Lighting round usage: 1/4. No second round.
