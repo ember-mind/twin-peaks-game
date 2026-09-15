@@ -27,6 +27,8 @@ jobs:
          run: node test/editor/edit.js
        - name: Editor core - cast placement (M7)
          run: node test/editor/cast.js
+       - name: Editor core - scene objects (M8)
+         run: node test/editor/scene-objects.js
        - name: Editor core - history
          run: node test/editor/history.js
        - name: Editor core - hit-test
@@ -45,6 +47,10 @@ jobs:
          run: node test/world-door-equality.js
        - name: Legacy door inventory (0 classic doors)
          run: node test/legacy-door-inventory.js
+       - name: Scene objects inventory (0 entries left in js/maps.js)
+         run: node test/scene-objects-inventory.js
+       - name: Scene objects equality (all maps vs pre-M8 fixture)
+         run: node test/scene-objects-equality.js
        - name: Location connections (paired, one-way, needsClues)
          run: node test/location-connections.js
        - name: Migrated door traversal (real engine input)
@@ -63,6 +69,8 @@ jobs:
          run: node test/catalog-write.js
        - name: World apply CLI - cast placement, --repin, bundle, rollback (M7, temp fixture)
          run: node test/world-apply-cast.js
+       - name: World apply CLI - scene objects, delete guard, bundle, rollback (M8, temp fixture)
+         run: node test/world-apply-objects.js
        - name: Cast continuity validators
          run: node test/cast-continuity-validate.js
        - name: Cast presence sync

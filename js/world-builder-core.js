@@ -116,12 +116,16 @@
     // what was painted on top. Ids come from identity.js and never encode the tile of a movable item, so
     // a selection survives rerenders AND the item being moved:
     //   legacy-door:<scene>:<x>,<y>          read-only classic door (map door with no connection id)
-    //   object:<scene>:<index>                map object (no authored object carries a source id today)
+    //   object:<scene>:<index>                booted map object with no registry entry (read-only)
+    //   object:<scene>:<sourceId>             registry object (M8, opts.objects)
+    //   object:<scene>:interact-<ref>         registry interact key (M8, opts.objects); ref is its base "x-y" or new-<n>
     //   npc:<characterId>:<scene>             cast body (baseline, or opts.npcs for a story moment)
     //   trigger:<connId>:<a|b>:<index>        trigger tile of an endpoint in this scene
     //   connection-endpoint:<connId>:<a|b>    spawn of an endpoint in this scene (painted last = on top)
     // opts.connections: id -> record (the current DRAFT); defaults to the model's registry records.
     // opts.npcs: [{id,name,sprite,x,y,dir}] overriding the model's baseline npc overlay for this scene.
+    // opts.objects (M8): editable registry entries for this scene, replacing the model's booted objects:
+    //   [{ key, entry: 'object'|'interact', sourceId?, ref?, interactId?, type, subkind, tx, ty, w, h, rect, dialogue }]
   var PAINT_ORDER = ['legacy-door', 'object', 'npc', 'trigger', 'connection-endpoint'];
 
   function sceneItems(model, sceneId, opts) {
@@ -139,7 +143,13 @@
         target: ex.target ? { scene: ex.target.scene, x: ex.target.x, y: ex.target.y } : null });
     });
 
-    scene.byKind.objects.forEach(function (o, i) {
+    if (opts.objects) opts.objects.forEach(function (o, i) {
+      buckets.object.push({ id: Identity.objectId(sceneId, o.key), kind: 'object', readOnly: false, entry: o.entry,
+        sourceId: o.sourceId || null, ref: o.ref || null, interactId: o.interactId || null, scene: sceneId, index: i,
+        type: o.type || null, subkind: o.subkind || null, tx: o.tx, ty: o.ty, w: o.w || 1, h: o.h || 1, rect: !!o.rect,
+        dialogue: o.dialogue == null ? null : o.dialogue });
+    });
+    else scene.byKind.objects.forEach(function (o, i) {
       buckets.object.push({ id: Identity.objectId(sceneId, o.id != null ? String(o.id) : i), kind: 'object', readOnly: true,
         scene: sceneId, index: i, type: o.type || null, subkind: o.subkind || null, tx: o.tx, ty: o.ty, w: o.w || 1, h: o.h || 1,
         dialogue: o.dialogue == null ? null : o.dialogue });

@@ -356,7 +356,32 @@
     });
   }
 
-  var api = { TILE: TILE, castContext: castContext, buildWorldSnapshot: buildWorldSnapshot, collectWorldSource: collectWorldSource,
+  // objectsContext(GAME) -> the injected ctx for Editor.sceneObjects (M8): the registry (GAME.WorldData.sceneObjects),
+  // real map sizes (only maps glue builds from js/maps.js carry registry objects), dialogue ids (GAME.Data.dialogues),
+  // glue's interact table (INTERACT_DLG ids, sparkle flags) and the mission nodes the delete guard scans.
+  function objectsContext(GAME) {
+    var G = GAME || {};
+    var reg = G.WorldData && G.WorldData.sceneObjects;
+    if (!reg || !reg.scenes) throw new Error('objectsContext: GAME.WorldData.sceneObjects missing — load js/scene-objects.gen.js first');
+    var maps = G.Maps || {}, source = (G.maps && G.maps.maps) || {};
+    var dialogues = (G.Data && G.Data.dialogues) || {};
+    var dlg = G.INTERACT_DLG || {}, sparkle = G.INTERACT_SPARKLE || {};
+    return Object.freeze({
+      registry: reg,
+      missions: (G.NarrativeData && G.NarrativeData.missions) || {},
+      sceneSize: function (scene) {
+        var m = source[scene] && maps[scene];
+        return m && typeof m.width === 'number' ? { width: m.width, height: m.height } : null;
+      },
+      dialogueExists: function (id) { return Object.prototype.hasOwnProperty.call(dialogues, id); },
+      interactIdKnown: function (id) { return Object.prototype.hasOwnProperty.call(dlg, id); },
+      interactIds: function () { return Object.keys(dlg).sort(); },
+      resolveInteract: function (id) { return Object.prototype.hasOwnProperty.call(dlg, id) ? dlg[id] : id; },
+      isSparkle: function (id) { return Object.prototype.hasOwnProperty.call(sparkle, id); }
+    });
+  }
+
+  var api = { TILE: TILE, castContext: castContext, objectsContext: objectsContext, buildWorldSnapshot: buildWorldSnapshot, collectWorldSource: collectWorldSource,
                  planBaseMap: planBaseMap, tileColorFor: tileColorFor, clone: clone, adaptWorld: adaptWorld,
                  storyStateFromSeed: storyStateFromSeed, castForSeed: castForSeed, validationContext: validationContext };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;

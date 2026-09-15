@@ -35,6 +35,15 @@
  *  14  M7: ACT4_AFTERNOON, sheriff: MOVE Truman (baseline) onto Lucy's tile 2,6 is refused with a message
  *  15  M7: same body onto the station door trigger 7,11 and onto a wall refused; then Lucy MOVE 3,6 plus a door field on
  *          sheriffs-station-front-entrance exports a world-builder-bundle; --dry-run --repin on it exits 0
+ *  16  M8: town welcome sign: the click on 30,30 lands on the cartello interact key, ON THIS TILE selects the sign; EDIT, MOVE
+ *          to 31,30, export a scene-objects-changeset; --dry-run shows one x line
+ *  17  M8: town tracks landmark (rect): RESIZE to 2x30, the cascade is copied untouched, --dry-run VALID
+ *  18  M8: traincar 20,2 sign_oej interact key: MISSION REFS names M5 m5_sign_oej, DELETE disabled with the refusal; an
+ *          unreferenced key (sign_ponte 4,6) deletes with a confirm step and undoes
+ *  19  M8: NEW INTERACT on woods with the INTERACT_DLG id olio: a tile already holding a key is refused, a free tile confirms,
+ *          the entry is a sparkle, export + --dry-run VALID
+ * WB_ONLY_M8=1 runs cases 16-19 only (M8 iteration); the committed proof runs every case.
+ * world/scene-objects.json is hashed before and after every M8 case: the editor never writes it.
  * Ids created here are assembled at runtime: a literal id in this file would count as a reference to world-apply.
  */
 
@@ -48,6 +57,9 @@ const { spawn, spawnSync } = require('node:child_process');
 const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'artifacts', 'world-builder-m6');
 const OUT7 = path.join(ROOT, 'artifacts', 'world-builder-m7');
+const OUT8 = path.join(ROOT, 'artifacts', 'world-builder-m8');
+const OBJECTS = path.join(ROOT, 'world', 'scene-objects.json');
+const ONLY_M8 = process.env.WB_ONLY_M8 === '1';
 const CATALOG = path.join(ROOT, 'js', 'world-catalog.js');
 const CHROME = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const REGISTRY = path.join(ROOT, 'world', 'connections.json');
@@ -107,6 +119,8 @@ class Cdp {
 async function main() {
   fs.mkdirSync(OUT, { recursive: true });
   fs.mkdirSync(OUT7, { recursive: true });
+  fs.mkdirSync(OUT8, { recursive: true });
+  const objectsShaStart = sha(OBJECTS);
   const shaStart = sha();
   const catalogShaStart = sha(CATALOG);
   const port = await freePort();
@@ -235,6 +249,7 @@ async function main() {
   }
 
   try {
+   if (!ONLY_M8) {
     // ---------------- case 1
     {
       const { s } = await editWorkflow(1, 'diner', 'double-r-front-entrance', 'b');
@@ -810,6 +825,164 @@ async function main() {
       s = await state();
       check('case 15: REVERT ALL clears both drafts', s.unsaved === 0 && s.castOps.length === 0, s.unsaved);
       check('case 15: world/connections.json and narrative/cast/windows.json unchanged', sha() === shaStart && windowsSha() === windowsShaStart);
+    }
+   }
+
+    const dryRun = (file, name) => {
+      const r = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'world-apply.js'), file, '--dry-run'], { encoding: 'utf8' });
+      fs.writeFileSync(path.join(OUT8, name), r.stdout + r.stderr);
+      return r;
+    };
+    const exportText = async () => { await clickAction('export'); return cdp.eval("document.getElementById('wb-export-text').value"); };
+
+    // ---------------- case 16 (M8): move the welcome sign
+    {
+      console.log('\ncase 16: MOVE the town welcome sign');
+      await load();
+      await setSelect('wb-scene', 'town');
+      await clickTile(30, 30);
+      let s = await state();
+      const here = s.objectItems.filter((o) => o.tx === 30 && o.ty === 30 && o.w === 1);
+      check('case 16: town 30,30 holds the welcome-sign object and the cartello interact key, both registry entries',
+        here.map((o) => o.entry + ':' + (o.sourceId || o.interactId)).join() === 'object:welcome-sign,interact:cartello' && here.every((o) => !o.readOnly), here);
+      check('case 16: the click lands on the topmost item, the cartello key', s.selectedId === 'object:town:interact-30-30', s.selectedId);
+      const stack = await text('wb-stack');
+      check('case 16: ON THIS TILE lists both', stack && stack.includes('object:town:welcome-sign') && stack.includes('object:town:interact-30-30'), stack);
+      await cdp.eval("document.querySelector('[data-stack=\"object:town:welcome-sign\"]').click()");
+      await sleep(80);
+      s = await state();
+      const insp = await cdp.eval("document.getElementById('wb-inspector').innerText");
+      check('case 16: the chip selects the sign; inspector shows source id, kind, tile, dialogue, no mission refs',
+        s.selectedId === 'object:town:welcome-sign' && insp.includes('welcome-sign') && insp.includes('landmark / welcomesign') && (await text('wb-obj-tile')) === '30,30' &&
+        (await text('wb-obj-dialogue')) === 'sign_town' && (await text('wb-obj-refs')) === 'none', insp);
+      check('case 16: VIEW offers no MOVE', !(await cdp.eval("!!document.querySelector('[data-action=\"move-object\"]')")));
+      await shot('case16-before.png', OUT8);
+      await clickAction('mode-edit');
+      await clickAction('move-object');
+      s = await state();
+      check('case 16: MOVE arms a tile pick', s.pending === 'move-object', s.pending);
+      await clickTile(31, 30);
+      s = await state();
+      check('case 16: one upsert, only x changed, sign still selected, 1 unsaved change',
+        JSON.stringify(s.objectOps) === JSON.stringify([{ op: 'upsert', scene: 'town', sourceId: 'welcome-sign', object: { sourceId: 'welcome-sign', type: 'landmark', kind: 'welcomesign', x: 31, y: 30, dialogue: 'sign_town' } }]) &&
+        s.selectedId === 'object:town:welcome-sign' && s.unsaved === 1 && !s.pending, s.objectOps);
+      check('case 16: inspector and validation show the move', (await text('wb-obj-draft')) === 'changed (was 30,30)' && (await text('wb-draft-ops')).includes('upsert town object welcome-sign → 31,30'), await text('wb-draft-ops'));
+      await shot('case16-moved.png', OUT8);
+      const exported = await exportText();
+      const cs = JSON.parse(exported);
+      check('case 16: export is a bare scene-objects-changeset', cs.format === 'scene-objects-changeset' && cs.version === 1 && cs.target === 'world/scene-objects.json' && cs.operations.length === 1 &&
+        (await text('wb-export-summary')).includes('1 scene object change(s)'), cs);
+      await shot('case16-export.png', OUT8);
+      const file = path.join(OUT8, 'case16-changeset.json');
+      fs.writeFileSync(file, exported);
+      const dry = dryRun(file, 'case16-dry-run.txt');
+      const diff = dry.stdout.split('\n').filter((l) => /^ {2}(@@|-|\+)/.test(l)).map((l) => l.trim());
+      check('case 16: --dry-run exits 0 and its diff is one x,y line: "x": 30 -> 31', dry.status === 0 && diff.length === 3 && /^@@ line \d+$/.test(diff[0]) && /^-\s+"x": 30,$/.test(diff[1]) && /^\+\s+"x": 31,$/.test(diff[2]) &&
+        dry.stdout.includes('DRY-RUN 1 scene object change(s); nothing written'), dry.stdout + dry.stderr);
+      await pressUndo();
+      s = await state();
+      check('case 16: Ctrl+Z puts the sign back', s.objectOps.length === 0 && s.unsaved === 0, s.objectOps);
+      check('case 16: world/scene-objects.json unchanged', sha(OBJECTS) === objectsShaStart);
+    }
+
+    // ---------------- case 17 (M8): resize the tracks landmark
+    {
+      console.log('\ncase 17: RESIZE the tracks landmark');
+      await load();
+      await setSelect('wb-scene', 'town');
+      await clickTile(53, 10);
+      let s = await state();
+      check('case 17: a click inside the rect selects object:town:tracks', s.selectedId === 'object:town:tracks', s.selectedId);
+      check('case 17: inspector shows the 2x33 rect and marks the cascade hand-edited', (await text('wb-obj-size')) === '2×33' && (await text('wb-obj-dialogue')).includes('(cascade: conditions are hand-edited)'), await text('wb-obj-dialogue'));
+      await clickAction('mode-edit');
+      await setInput('wb-obj-h', 30);
+      s = await state();
+      const tracks = JSON.parse(fs.readFileSync(OBJECTS, 'utf8')).scenes.town.objects.find((o) => o.sourceId === 'tracks');
+      const op = s.objectOps[0];
+      check('case 17: one upsert with h 30, x/y/w and the cascade untouched', s.objectOps.length === 1 && op.op === 'upsert' && op.object.h === 30 && op.object.w === 2 && op.object.x === 53 && op.object.y === 1 &&
+        JSON.stringify(op.object.dialogue) === JSON.stringify(tracks.dialogue), s.objectOps);
+      check('case 17: inspector size follows at once', (await text('wb-obj-size')) === '2×30' && (await text('wb-obj-draft')) === 'changed (was 53,1 2×33)', await text('wb-obj-draft'));
+      await setInput('wb-obj-h', 40);
+      s = await state();
+      check('case 17: a rect past the map edge is an invalid draft and blocks export', s.errors['scene-objects:town'] && /town tracks: 53,1 2x40 falls outside town \(56x36\)/.test(s.errors['scene-objects:town'].join()), s.errors);
+      await clickAction('export');
+      check('case 17: EXPORT BLOCKED names the scene', (await text('wb-export-blocked') || '').includes('scene-objects:town'), await text('wb-export-blocked'));
+      await shot('case17-invalid.png', OUT8);
+      await setInput('wb-obj-h', 30);
+      const exported = await exportText();
+      await shot('case17-resized.png', OUT8);
+      const file = path.join(OUT8, 'case17-changeset.json');
+      fs.writeFileSync(file, exported);
+      const dry = dryRun(file, 'case17-dry-run.txt');
+      check('case 17: --dry-run VALID, one h line', dry.status === 0 && dry.stdout.includes('VALID 1 scene object change(s)') && /-\s+"h": 33,\n\s+\+\s+"h": 30,/.test(dry.stdout), dry.stdout + dry.stderr);
+      check('case 17: world/scene-objects.json unchanged', sha(OBJECTS) === objectsShaStart);
+    }
+
+    // ---------------- case 18 (M8): delete refused for a mission-referenced entry
+    {
+      console.log('\ncase 18: DELETE refused for sign_oej');
+      await load();
+      await setSelect('wb-scene', 'traincar');
+      await clickTile(20, 2);
+      let s = await state();
+      check('case 18: traincar 20,2 selects the sign_oej interact key', s.selectedId === 'object:traincar:interact-20-2', s.selectedId);
+      check('case 18: MISSION REFS names M5 node m5_sign_oej', (await text('wb-obj-refs')) === 'M5 m5_sign_oej (sign_oej)', await text('wb-obj-refs'));
+      await clickAction('mode-edit');
+      check('case 18: DELETE is disabled and the refusal is explained', !(await enabled('delete-object')) &&
+        /DELETE refused: M5 node m5_sign_oej references "sign_oej"/.test(await text('wb-obj-delete-refused')), await text('wb-obj-delete-refused'));
+      await shot('case18-delete-refused.png', OUT8);
+      await clickTile(4, 6);
+      s = await state();
+      check('case 18: sign_ponte (4,6) has no mission reference, DELETE enabled', s.selectedId === 'object:traincar:interact-4-6' && (await text('wb-obj-refs')) === 'none' && (await enabled('delete-object')), s.selectedId);
+      await clickAction('delete-object');
+      s = await state();
+      check('case 18: DELETE asks for confirmation first', s.confirmObjectDelete === 'object:traincar:interact-4-6' && s.objectOps.length === 0, s.confirmObjectDelete);
+      await clickAction('delete-object-confirm');
+      s = await state();
+      check('case 18: CONFIRM DELETE drops the key from the draft', JSON.stringify(s.objectOps) === JSON.stringify([{ op: 'delete', scene: 'traincar', interact: '4,6' }]) && !s.objectItems.some((o) => o.id === 'object:traincar:interact-4-6'), s.objectOps);
+      await pressUndo();
+      s = await state();
+      check('case 18: Ctrl+Z restores it in key order', s.objectOps.length === 0 && s.objectItems.filter((o) => o.entry === 'interact').map((o) => o.interactId).join() === 'sign_ponte,sign_oej,mucchio_terra,anello_interact', s.objectItems);
+      check('case 18: world/scene-objects.json unchanged', sha(OBJECTS) === objectsShaStart);
+    }
+
+    // ---------------- case 19 (M8): NEW INTERACT with an INTERACT_DLG id
+    {
+      console.log('\ncase 19: NEW INTERACT on woods');
+      await load();
+      await setSelect('wb-scene', 'woods');
+      check('case 19: NEW INTERACT needs EDIT', !(await enabled('new-interact')));
+      await clickAction('mode-edit');
+      await clickAction('new-interact');
+      let s = await state();
+      const ids = await cdp.eval("Array.from(document.querySelectorAll('#wb-new-interact-id option')).map((o) => o.value)");
+      check('case 19: the id list is glue\'s INTERACT_DLG keys', JSON.stringify(ids) === JSON.stringify(['bacheca', 'cameraLaura', 'cartello', 'cartelloBosco', 'lago_riva', 'letto_315', 'olio', 'scrivania_315', 'specchio315', 'tomba_laura']) && s.newInteract.placing, ids);
+      await setSelect('wb-new-interact-id', 'olio');
+      await clickTile(14, 12);
+      s = await state();
+      check('case 19: a tile that already holds a key is refused, CONFIRM disabled', s.newInteract.errors.join() === 'woods: two interact keys on 14,12' && !(await enabled('new-interact-confirm')), s.newInteract.errors);
+      await clickAction('new-interact-pick');
+      await clickTile(13, 12);
+      s = await state();
+      check('case 19: a free tile is valid, CONFIRM enabled', s.newInteract.errors.length === 0 && JSON.stringify(s.newInteract.tile) === '{"tx":13,"ty":12}' && (await enabled('new-interact-confirm')), s.newInteract);
+      await shot('case19-new-interact.png', OUT8);
+      await clickAction('new-interact-confirm');
+      s = await state();
+      const insp = await cdp.eval("document.getElementById('wb-inspector').innerText");
+      check('case 19: CONFIRM creates the key, selects it, shows it as a sparkle bound to olio',
+        !s.newInteract && s.selectedId === 'object:woods:interact-new-1' && JSON.stringify(s.objectOps) === JSON.stringify([{ op: 'create', scene: 'woods', interact: '13,12', id: 'olio' }]) &&
+        /SPARKLE\s+yes/.test(insp) && (await text('wb-obj-draft')) === 'new (create)', s.objectOps);
+      const exported = await exportText();
+      await shot('case19-export.png', OUT8);
+      const file = path.join(OUT8, 'case19-changeset.json');
+      fs.writeFileSync(file, exported);
+      const dry = dryRun(file, 'case19-dry-run.txt');
+      check('case 19: --dry-run VALID, one added key line', dry.status === 0 && dry.stdout.includes('CREATE world/scene-objects.json :: woods interact 13,12') && dry.stdout.includes('VALID 1 scene object change(s)') &&
+        /\+\s+"13,12": "olio"/.test(dry.stdout), dry.stdout + dry.stderr);
+      await clickAction('revert-object');
+      s = await state();
+      check('case 19: REVERT on a created key removes it', s.objectOps.length === 0 && s.selectedId === null, s.objectOps);
+      check('case 19: world/scene-objects.json and world/connections.json unchanged', sha(OBJECTS) === objectsShaStart && sha() === shaStart);
     }
   } catch (e) {
     check('driver completed without exception', false, String(e && e.stack || e));

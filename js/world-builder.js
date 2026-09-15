@@ -20,6 +20,11 @@
  *               and owner or "baseline"; the export is a cast-windows-changeset, or a world-builder-bundle when
  *               connections changed too
  *   legacy      map doors with no connection id: read-only `legacy-door` items
+ *   M8          scene objects and interact keys of world/scene-objects.json (Editor.sceneObjects drafts): in EDIT an object
+ *               gets MOVE (origin tile), RESIZE (w/h, rects only), DELETE (refused while a mission node references its
+ *               dialogue), REVERT; an interact key gets MOVE / DELETE / REVERT; NEW OBJECT (kind already present, existing
+ *               dialogue id, tile picked on the canvas) and NEW INTERACT (an INTERACT_DLG id). Export: a
+ *               scene-objects-changeset, or part of the world-builder-bundle. ON THIS TILE lists stacked items.
  */
 (function () {
   'use strict';
@@ -52,7 +57,7 @@
     return out.sort(function (x, y) { return x.which < y.which ? -1 : 1; });
   }
 
-  var PIECES_OK = !!(WB && Core && Ed && Ed.edit && Ed.cast && Ed.history && Ed.identity && Ed.hitTest && Ed.model);
+  var PIECES_OK = !!(WB && Core && Ed && Ed.edit && Ed.cast && Ed.sceneObjects && Ed.history && Ed.identity && Ed.hitTest && Ed.model);
 
   var DIRV = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
@@ -61,10 +66,12 @@
     var world = WB.adaptWorld(G);
     if (!world.model) throw new Error('[world-builder] editor core model missing — load js/editor/core/*.js first');
     var model = world.model;
-    var E = Ed.edit, C = Ed.cast, H = Ed.history, ID = Ed.identity;
+    var E = Ed.edit, C = Ed.cast, S = Ed.sceneObjects, H = Ed.history, ID = Ed.identity;
     var store = E.createStore(world.source.connections);
     var vctx = WB.validationContext(G);
     var castStore = G.NarrativeData && G.NarrativeData.cast ? C.createCastStore(G.NarrativeData.cast) : null;
+    var octx = WB.objectsContext(G);
+    var objStore = S.createObjectStore(octx.registry);
     var cctx = WB.castContext(G, function (scene, x, y) {
       var d = draft(), hit = null;
       Object.keys(d).sort().forEach(function (id) {
@@ -90,12 +97,17 @@
       momentKey: 'baseline',
       moments: {},              // seed key -> seed (from test/fixtures/cast-pins-acts-1-4.json)
       momentCast: null,         // castForSeed result for the chosen seed
-      zoom: 16
+      zoom: 16,
+      newObject: null,          // null | {scene, kind, sourceId, sourceIdEdited, dialogue, w, h, tile, placing}
+      newInteract: null,        // null | {scene, id, tile, placing}
+      confirmObjectDelete: null, // item id awaiting DELETE confirmation
+      stackTile: null           // {scene, tx, ty} of the last canvas click (ON THIS TILE)
     };
-    // history holds { conn, cast }: one undo stack across connection and cast edits
-    var hist = H.create({ conn: store.base, cast: castStore ? castStore.base : null });
+    // history holds { conn, cast, objects }: one undo stack across connection, cast and scene object edits
+    var hist = H.create({ conn: store.base, cast: castStore ? castStore.base : null, objects: objStore.base });
     function draft() { return hist.present.conn; }
     function castDraft() { return hist.present.cast; }
+    function objDraft() { return hist.present.objects; }
 
     // ------------------------------------------------------------------ DOM
     function el(tag, attrs, text) {
@@ -129,6 +141,8 @@
     var undoBtn = bar.appendChild(el('button', { 'data-action': 'undo', title: 'Ctrl+Z' }, 'UNDO'));
     var redoBtn = bar.appendChild(el('button', { 'data-action': 'redo', title: 'Ctrl+Shift+Z' }, 'REDO'));
     var newBtn = bar.appendChild(el('button', { 'data-action': 'new-connection' }, 'NEW CONNECTION'));
+    var newObjBtn = bar.appendChild(el('button', { 'data-action': 'new-object' }, 'NEW OBJECT'));
+    var newIntBtn = bar.appendChild(el('button', { 'data-action': 'new-interact' }, 'NEW INTERACT'));
     var revertAllBtn = bar.appendChild(el('button', { 'data-action': 'revert-all' }, 'REVERT ALL'));
     var exportBtn = bar.appendChild(el('button', { 'data-action': 'export', class: 'wb-primary' }, 'EXPORT CHANGESET'));
 
@@ -146,7 +160,7 @@
     legend.innerHTML =
       '<span class="lg lg-ep">◆</span> endpoint spawn&nbsp;&nbsp; <span class="lg lg-tr">■</span> trigger&nbsp;&nbsp; ' +
       '<span class="lg lg-ghost">◇</span> original (dimmed)&nbsp;&nbsp; <span class="lg lg-bad">◆</span> invalid draft&nbsp;&nbsp; ' +
-      '<span class="lg lg-new">◈</span> new connection (unconfirmed)&nbsp;&nbsp; <span class="lg lg-npc">▲</span> npc&nbsp;&nbsp; <span class="lg lg-obj">▭</span> object&nbsp;&nbsp; <span class="lg lg-leg">□</span> legacy door (read-only)';
+      '<span class="lg lg-new">◈</span> new connection (unconfirmed)&nbsp;&nbsp; <span class="lg lg-npc">▲</span> npc&nbsp;&nbsp; <span class="lg lg-obj">▭</span> object&nbsp;&nbsp; <span class="lg" style="color:#96d7ff">▫</span> interact key&nbsp;&nbsp; <span class="lg lg-leg">□</span> legacy door (read-only)';
 
     // ------------------------------------------------------------------ scene + moment selectors
     var catalogScenes = {};
@@ -217,8 +231,58 @@
       var mc = momentCast() || {};
       return (mc[sceneId] || []).filter(function (b) { return b.id !== except && b.x === x && b.y === y; }).map(function (b) { return b.id; });
     }
+    // registry objects + interact keys of one scene as sceneItems specs (null: the scene has no registry entry)
+    function objectOverlays(sceneId) {
+      var ds = objDraft()[sceneId];
+      if (!ds) return null;
+      return ds.objects.map(function (o) {
+        return { key: o.sourceId, entry: 'object', sourceId: o.sourceId, type: o.type, subkind: o.kind || null, tx: o.x, ty: o.y,
+          w: o.w || 1, h: o.h || 1, rect: o.w !== undefined, dialogue: o.dialogue };
+      }).concat(ds.interact.map(function (e) {
+        return { key: S.interactItemKey(e.ref), entry: 'interact', ref: e.ref, interactId: e.id, type: octx.isSparkle(e.id) ? 'sparkle' : 'plain',
+          subkind: null, tx: e.x, ty: e.y, w: 1, h: 1, rect: false, dialogue: octx.resolveInteract(e.id) };
+      }));
+    }
     function items(sceneId) {
-      return Core.sceneItems(model, sceneId || ui.sceneId, { connections: draft(), npcs: sceneNpcs(sceneId || ui.sceneId) });
+      var sid = sceneId || ui.sceneId;
+      return Core.sceneItems(model, sid, { connections: draft(), npcs: sceneNpcs(sid), objects: objectOverlays(sid) });
+    }
+    function objectChanges() { return S.changes(objStore, objDraft()); }
+    function objectOpsList() { return S.buildObjectsChangeset(objStore, objDraft()).operations; }
+    // the base and draft entries behind a registry object item
+    function objectEntry(it) {
+      var bs = objStore.base[it.scene], ds = objDraft()[it.scene];
+      if (!bs || !ds) return { base: null, now: null };
+      if (it.entry === 'object') {
+        return { base: bs.objects.filter(function (o) { return o.sourceId === it.sourceId; })[0] || null,
+          now: ds.objects.filter(function (o) { return o.sourceId === it.sourceId; })[0] || null };
+      }
+      return { base: bs.interact.filter(function (e) { return e.ref === it.ref; })[0] || null,
+        now: ds.interact.filter(function (e) { return e.ref === it.ref; })[0] || null };
+    }
+    function objectRefs(it) {
+      var ids = it.entry === 'object' ? S.dialogueIds(it.dialogue) : [it.interactId].concat(S.dialogueIds(octx.resolveInteract(it.interactId)));
+      return S.missionReferences(octx.missions, ids);
+    }
+    function cleanMsg(e) { return String(e.message || e).replace(/^[scene-objects] /, ''); }
+    // NEW OBJECT / NEW INTERACT candidates: the draft they would commit, or the reason they cannot
+    function newObjectPlan() {
+      var n = ui.newObject;
+      if (!n) return null;
+      if (!n.tile) return { draft: null, errors: ['pick the origin tile on the canvas'] };
+      try {
+        var next = S.createObject(objStore, objDraft(), n.scene, { sourceId: n.sourceId, kind: n.kind, x: n.tile.tx, y: n.tile.ty, w: n.w, h: n.h, dialogue: n.dialogue });
+        return { draft: next, errors: (S.draftErrors(octx, objStore, next)[n.scene] || []) };
+      } catch (e) { return { draft: null, errors: [cleanMsg(e)] }; }
+    }
+    function newInteractPlan() {
+      var n = ui.newInteract;
+      if (!n) return null;
+      if (!n.tile) return { draft: null, ref: null, errors: ['pick the tile on the canvas'] };
+      try {
+        var res = S.createInteract(objStore, objDraft(), n.scene, { x: n.tile.tx, y: n.tile.ty, id: n.id });
+        return { draft: res.draft, ref: res.ref, errors: (S.draftErrors(octx, objStore, res.draft)[n.scene] || []) };
+      } catch (e) { return { draft: null, ref: null, errors: [cleanMsg(e)] }; }
     }
     function errorsFor(connId) {
       var d = draft();
@@ -284,6 +348,8 @@
         var errs = errorsFor(id);
         if (errs.length) out[id] = errs;
       });
+      var oe = S.draftErrors(octx, objStore, objDraft());
+      Object.keys(oe).forEach(function (sc) { out['scene-objects:' + sc] = oe[sc]; });
       return out;
     }
     function selectedRef() {
@@ -296,15 +362,20 @@
 
     function commit(next, label) {
       if (next === draft()) return;
-      hist = H.commit(hist, { conn: next, cast: castDraft() }, { label: label });
+      hist = H.commit(hist, { conn: next, cast: castDraft(), objects: objDraft() }, { label: label });
     }
     function commitCast(next, label) {
       if (next === castDraft()) return;
-      hist = H.commit(hist, { conn: draft(), cast: next }, { label: label });
+      hist = H.commit(hist, { conn: draft(), cast: next, objects: objDraft() }, { label: label });
     }
-    function unsavedCount() { return E.changedIds(store, draft()).length + castChanged().length; }
+    function commitObjects(next, label) {
+      if (next === objDraft()) return;
+      hist = H.commit(hist, { conn: draft(), cast: castDraft(), objects: next }, { label: label });
+    }
+    function unsavedCount() { return E.changedIds(store, draft()).length + castChanged().length + objectChanges().length; }
     function exportObject() {
-      return C.buildBundle([E.buildChangeset(store, draft()), castStore ? C.buildCastChangeset(castStore, castDraft()) : null]);
+      return C.buildBundle([E.buildChangeset(store, draft()), castStore ? C.buildCastChangeset(castStore, castDraft()) : null,
+        S.buildObjectsChangeset(objStore, objDraft())]);
     }
     function guard(fn) {
       try { ui.notice = null; fn(); }
@@ -351,11 +422,22 @@
         });
       });
 
+      // originals of changed scene objects / interact keys, dashed, under the draft
+      var objBad = !!errs['scene-objects:' + sc.sceneId];
+      objectChanges().forEach(function (ch) {
+        if (ch.scene !== sc.sceneId || !ch.before) return;
+        var b = ch.before;
+        drawObject(ctx, { tx: b.x, ty: b.y, w: b.w || 1, h: b.h || 1 }, z, false, { ghost: true });
+      });
+
       list.forEach(function (it) {
         var isSel = it.id === ui.selectedId;
         var bad = !!(it.connectionId && errs[it.connectionId]);
         if (it.kind === 'legacy-door') drawLegacy(ctx, it, z, isSel);
-        else if (it.kind === 'object') drawObject(ctx, it, z, isSel);
+        else if (it.kind === 'object') {
+          var oe = it.entry ? objectEntry(it) : null;
+          drawObject(ctx, it, z, isSel, { bad: objBad && !!oe && JSON.stringify(oe.base) !== JSON.stringify(oe.now), interact: it.entry === 'interact' });
+        }
         else if (it.kind === 'npc') drawNpc(ctx, it, z, isSel);
         else if (it.kind === 'trigger') drawTrigger(ctx, sc, it.tx, it.ty, z, { sel: isSel, bad: bad, label: it.side + it.index });
         else if (it.kind === 'connection-endpoint') drawSpawn(ctx, sc, it.tx, it.ty, it.dir, it.side, z, { sel: isSel, bad: bad });
@@ -378,6 +460,13 @@
         });
       }
 
+      [ui.newObject, ui.newInteract].forEach(function (n) {
+        if (!n || !n.tile || n.scene !== sc.sceneId) return;
+        var w = n === ui.newObject ? Math.max(1, Number(n.w) || 1) : 1, h = n === ui.newObject ? Math.max(1, Number(n.h) || 1) : 1;
+        if (w > 1 || h > 1) drawObject(ctx, { tx: n.tile.tx, ty: n.tile.ty, w: w, h: h }, z, true, {});
+        drawPick(ctx, n.tile.tx, n.tile.ty, z, 'new');
+      });
+
       var cv = ui.converting;
       if (cv && cv.to === 'paired') {
         var crec = draft()[cv.connId];
@@ -385,7 +474,7 @@
         if (crec && cv.bTrigger && crec.b.scene === sc.sceneId) drawTrigger(ctx, sc, cv.bTrigger[0], cv.bTrigger[1], z, { sel: true, label: 'new b' });
       }
 
-      if ((ui.pending || (c && (c.step !== 'confirm' || c.moving)) || (cv && cv.placing)) && ui.hover) {
+      if ((ui.pending || (c && (c.step !== 'confirm' || c.moving)) || (cv && cv.placing) || placingObject()) && ui.hover) {
         ctx.save();
         ctx.strokeStyle = '#ffe36e'; ctx.lineWidth = 2; ctx.setLineDash([4, 3]);
         ctx.strokeRect(ui.hover.tx * z + 1.5, ui.hover.ty * z + 1.5, z - 3, z - 3);
@@ -477,15 +566,25 @@
       ctx.restore();
     }
 
-    function drawObject(ctx, it, z, isSel) {
+    function drawObject(ctx, it, z, isSel, o) {
+      o = o || {};
       ctx.save();
-      ctx.fillStyle = isSel ? 'rgba(230,184,74,.5)' : 'rgba(230,184,74,.2)';
-      ctx.fillRect(it.tx * z + 1, it.ty * z + 1, it.w * z - 2, it.h * z - 2);
-      ctx.strokeStyle = isSel ? '#ffffff' : 'rgba(230,184,74,.8)';
+      if (o.ghost) {
+        ctx.globalAlpha = 0.5; ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = '#e6b84a'; ctx.lineWidth = 1.5;
+        ctx.strokeRect(it.tx * z + 2.5, it.ty * z + 2.5, it.w * z - 5, it.h * z - 5);
+        ctx.restore();
+        return;
+      }
+      var inset = o.interact ? Math.round(z * 0.18) : 1;
+      ctx.fillStyle = o.bad ? 'rgba(224,48,58,.55)' : isSel ? 'rgba(230,184,74,.5)' : o.interact ? 'rgba(120,200,255,.25)' : 'rgba(230,184,74,.2)';
+      ctx.fillRect(it.tx * z + inset, it.ty * z + inset, it.w * z - 2 * inset, it.h * z - 2 * inset);
+      ctx.strokeStyle = isSel ? '#ffffff' : o.bad ? '#ff9a9a' : o.interact ? 'rgba(150,215,255,.9)' : 'rgba(230,184,74,.8)';
       ctx.lineWidth = isSel ? 3 : 1;
-      ctx.strokeRect(it.tx * z + 1.5, it.ty * z + 1.5, it.w * z - 3, it.h * z - 3);
+      ctx.strokeRect(it.tx * z + inset + 0.5, it.ty * z + inset + 0.5, it.w * z - 2 * inset - 1, it.h * z - 2 * inset - 1);
       ctx.restore();
     }
+    function placingObject() { return !!((ui.newObject && ui.newObject.placing) || (ui.newInteract && ui.newInteract.placing)); }
 
     function drawNpc(ctx, it, z, isSel) {
       var cx = it.tx * z + z / 2, cy = it.ty * z + z / 2;
@@ -670,11 +769,14 @@
       insp.textContent = '';
       if (ui.creating) { renderCreate(); return; }
       if (ui.converting) { renderConvert(); return; }
+      if (ui.newObject) { renderNewObject(); return; }
+      if (ui.newInteract) { renderNewInteract(); return; }
       insp.appendChild(el('h2', null, 'INSPECTOR'));
       if (!ui.selectedId) { insp.appendChild(el('div', { class: 'wb-muted' }, 'Click a marker on the canvas.')); return; }
       var it = Core.findItem(list, ui.selectedId);
       var ref = selectedRef();
       insp.appendChild(el('div', { class: 'wb-id', id: 'wb-selected-id' }, ui.selectedId));
+      renderStack(list);
       if (!it && !(ref && ref.connId)) { insp.appendChild(el('div', { class: 'wb-muted' }, 'selection not in this scene')); return; }
 
       if (ref && (ref.kind === ID.KINDS.ENDPOINT || ref.kind === ID.KINDS.TRIGGER)) {
@@ -821,6 +923,7 @@
 
       if (!it) return;
       if (it.kind === 'npc') { renderNpc(it); return; }
+      if (it.kind === 'object' && it.entry) { renderSceneObject(it); return; }
       row(insp, 'KIND', it.kind + (it.readOnly ? ' (read-only)' : ''));
       row(insp, 'SCENE', it.scene);
       if (it.kind === 'legacy-door') {
@@ -833,6 +936,174 @@
         row(insp, 'TILE', it.tx + ',' + it.ty + '  ' + it.w + '×' + it.h);
         if (it.dialogue != null) row(insp, 'DIALOGUE', typeof it.dialogue === 'string' ? it.dialogue : JSON.stringify(it.dialogue));
       }
+    }
+
+    // ON THIS TILE: every item covering the last clicked tile, so a stacked entry (the town welcome sign under its
+    // cartello interact key) stays selectable.
+    function renderStack(list) {
+      var st = ui.stackTile;
+      if (!st || st.scene !== ui.sceneId) return;
+      var here = list.filter(function (x) { return Ed.hitTest.covers(x, st.tx, st.ty); });
+      if (here.length < 2) return;
+      var chips = el('div', { class: 'wb-triggers', id: 'wb-stack' });
+      here.slice().reverse().forEach(function (x) {
+        var b = chips.appendChild(el('button', { class: 'wb-chip' + (x.id === ui.selectedId ? ' on' : ''), 'data-stack': x.id }, x.id));
+        b.addEventListener('click', function () { ui.selectedId = x.id; ui.pending = null; ui.confirmObjectDelete = null; render(); });
+      });
+      row(insp, 'ON THIS TILE', chips);
+    }
+
+    function renderSceneObject(it) {
+      var ent = objectEntry(it), isObj = it.entry === 'object';
+      var created = !ent.base, changed = JSON.stringify(ent.base) !== JSON.stringify(ent.now);
+      var editing = ui.mode === 'edit';
+      row(insp, 'KIND', isObj ? 'object (world/scene-objects.json)' : 'interact key (world/scene-objects.json)');
+      row(insp, 'SCENE', it.scene);
+      if (isObj) {
+        row(insp, 'SOURCE ID', it.sourceId);
+        row(insp, 'TYPE', (it.type || '—') + (it.subkind ? ' / ' + it.subkind : ''));
+      } else {
+        row(insp, 'INTERACT ID', it.interactId);
+        row(insp, 'KEY', created ? '(new)' : '"' + it.ref + '" in the registry');
+        row(insp, 'SPARKLE', it.type === 'sparkle' ? 'yes' : 'no');
+      }
+      row(insp, 'TILE', el('span', { id: 'wb-obj-tile' }, it.tx + ',' + it.ty));
+      if (isObj) row(insp, 'SIZE', el('span', { id: 'wb-obj-size' }, it.rect ? it.w + '×' + it.h : 'single tile'));
+      var cascade = typeof it.dialogue !== 'string';
+      row(insp, 'DIALOGUE', el('span', { id: 'wb-obj-dialogue' }, (cascade ? JSON.stringify(it.dialogue) + '  (cascade: conditions are hand-edited)' : it.dialogue)));
+      var was = ent.base ? ent.base.x + ',' + ent.base.y + (ent.base.w !== undefined ? ' ' + ent.base.w + '×' + ent.base.h : '') : '';
+      row(insp, 'DRAFT', el('span', { id: 'wb-obj-draft' }, created ? 'new (create)' : changed ? 'changed (was ' + was + ')' : 'unchanged'));
+      var refs = objectRefs(it);
+      row(insp, 'MISSION REFS', el('span', { id: 'wb-obj-refs' }, refs.length ? refs.map(function (r) { return r.mission + ' ' + r.node + ' (' + r.id + ')'; }).join(', ') : 'none'));
+      if (!editing) return;
+
+      var acts = insp.appendChild(el('div', { class: 'wb-actions' }));
+      var pend = ui.pending && ui.pending.action === 'move-object' && ui.pending.itemId === it.id;
+      button(acts, pend ? 'MOVE · click a tile…' : 'MOVE', 'move-object', function () {
+        ui.pending = { action: 'move-object', itemId: it.id, scene: it.scene, entry: it.entry, sourceId: it.sourceId, ref: it.ref };
+        ui.confirmObjectDelete = null; render();
+      }, { cls: pend ? 'on' : '' });
+      button(acts, 'REVERT', 'revert-object', function () {
+        guard(function () {
+          commitObjects(S.revertEntry(objStore, objDraft(), it.scene, isObj ? { sourceId: it.sourceId } : { ref: it.ref }), 'revert ' + it.id);
+          ui.pending = null;
+          if (created) ui.selectedId = null;
+        });
+      }, { disabled: !changed });
+      button(acts, 'DELETE', 'delete-object', function () {
+        ui.pending = null; ui.confirmObjectDelete = it.id; render();
+      }, { cls: 'wb-danger', disabled: refs.length > 0 });
+      if (isObj && it.rect) {
+        var wh = el('span', { class: 'wb-inline' });
+        var inW = wh.appendChild(el('input', { type: 'number', step: '1', min: '1', id: 'wb-obj-w', value: it.w }));
+        var inH = wh.appendChild(el('input', { type: 'number', step: '1', min: '1', id: 'wb-obj-h', value: it.h }));
+        [inW, inH].forEach(function (input) {
+          input.addEventListener('change', function () {
+            guard(function () { commitObjects(S.resizeObject(objDraft(), it.scene, it.sourceId, inW.value, inH.value), 'resize ' + it.sourceId); });
+          });
+        });
+        row(insp, 'RESIZE w/h', wh);
+      }
+      if (refs.length) {
+        insp.appendChild(el('div', { class: 'wb-warn', id: 'wb-obj-delete-refused' }, 'DELETE refused: ' + refs.map(function (r) { return r.mission + ' node ' + r.node; }).join(', ') +
+          ' reference' + (refs.length === 1 ? 's' : '') + ' "' + refs[0].id + '". Remove the mission reference under narrative/ first; tools/world-apply.js refuses the same delete.'));
+      }
+      if (ui.confirmObjectDelete === it.id) {
+        var conf = insp.appendChild(el('div', { class: 'wb-warn', id: 'wb-obj-delete-confirm' }));
+        conf.appendChild(el('div', null, 'Delete ' + (isObj ? 'object ' + it.sourceId : 'interact key ' + it.tx + ',' + it.ty + ' (' + it.interactId + ')') + ' from ' + it.scene + '?'));
+        var ca = conf.appendChild(el('div', { class: 'wb-actions' }));
+        button(ca, 'CONFIRM DELETE', 'delete-object-confirm', function () {
+          guard(function () {
+            commitObjects(isObj ? S.deleteObject(objDraft(), it.scene, it.sourceId) : S.deleteInteract(objDraft(), it.scene, it.ref), 'delete ' + it.id);
+            ui.confirmObjectDelete = null; ui.selectedId = null;
+            ui.notice = { level: 'info', text: 'Deleted ' + it.id + ' from the draft (export to apply).' };
+          });
+        }, { cls: 'wb-danger' });
+        button(ca, 'CANCEL', 'delete-object-cancel', function () { ui.confirmObjectDelete = null; render(); });
+      }
+      if (pend) insp.appendChild(el('div', { class: 'wb-hint' }, 'Click the new ' + (it.rect ? 'origin (top-left) ' : '') + 'tile. Esc cancels.'));
+    }
+
+    function renderNewPanel(kindLabel, n, plan, fields, onConfirm, prefix) {
+      insp.appendChild(el('h2', null, kindLabel));
+      var box = insp.appendChild(el('div', { id: 'wb-' + prefix }));
+      box.appendChild(el('div', { class: 'wb-hint', id: 'wb-' + prefix + '-step' }, n.placing ? 'click the ' + (prefix === 'new-object' ? 'origin ' : '') + 'tile in ' + n.scene : 'check the fields, then CONFIRM'));
+      row(box, 'SCENE', n.scene);
+      fields(box);
+      var tile = el('span', { class: 'wb-inline' });
+      tile.appendChild(el('span', { id: 'wb-' + prefix + '-tile' }, n.tile ? n.tile.tx + ',' + n.tile.ty : '— not picked'));
+      button(tile, 'PICK TILE', prefix + '-pick', function () { n.placing = true; render(); }, { cls: n.placing ? 'on' : '' });
+      row(box, 'TILE', tile);
+      var errBox = box.appendChild(el('ul', { id: 'wb-' + prefix + '-errors' }));
+      var acts = box.appendChild(el('div', { class: 'wb-actions' }));
+      var confirmBtn = button(acts, 'CONFIRM', prefix + '-confirm', function () { guard(onConfirm); }, { cls: 'wb-primary' });
+      button(acts, 'CANCEL', prefix + '-cancel', function () { ui.newObject = null; ui.newInteract = null; render(); });
+      function refresh() {
+        var p = plan();
+        errBox.textContent = '';
+        p.errors.forEach(function (e) { errBox.appendChild(el('li', { class: 'wb-error' }, e)); });
+        if (!p.errors.length && p.draft) errBox.appendChild(el('li', { class: 'wb-ok', id: 'wb-' + prefix + '-valid' }, '✓ valid'));
+        confirmBtn.disabled = !p.draft || p.errors.length > 0;
+      }
+      refresh();
+      return refresh;
+    }
+
+    function renderNewObject() {
+      var n = ui.newObject, refresh = null;
+      refresh = renderNewPanel('NEW OBJECT', n, newObjectPlan, function (box) {
+        var kindSel = el('select', { id: 'wb-new-object-kind' });
+        S.kinds(objStore).forEach(function (k) { var o = kindSel.appendChild(el('option', { value: k.kind }, k.kind + ' (' + k.type + ')')); if (k.kind === n.kind) o.selected = true; });
+        kindSel.addEventListener('change', function () {
+          n.kind = kindSel.value;
+          if (!n.sourceIdEdited) n.sourceId = S.suggestSourceId(objDraft(), n.scene, n.kind);
+          render();
+        });
+        row(box, 'KIND', kindSel);
+        var idIn = el('input', { type: 'text', spellcheck: 'false', id: 'wb-new-object-id', value: n.sourceId });
+        idIn.addEventListener('input', function () { n.sourceId = idIn.value; n.sourceIdEdited = true; if (refresh) refresh(); });
+        row(box, 'SOURCE ID', idIn);
+        var dlgIn = el('input', { type: 'text', spellcheck: 'false', id: 'wb-new-object-dialogue', value: n.dialogue, placeholder: 'dialogue id in js/data.js' });
+        dlgIn.addEventListener('input', function () { n.dialogue = dlgIn.value.trim(); if (refresh) refresh(); });
+        row(box, 'DIALOGUE', dlgIn);
+        var wh = el('span', { class: 'wb-inline' });
+        var inW = wh.appendChild(el('input', { type: 'number', step: '1', min: '1', id: 'wb-new-object-w', value: n.w }));
+        var inH = wh.appendChild(el('input', { type: 'number', step: '1', min: '1', id: 'wb-new-object-h', value: n.h }));
+        [inW, inH].forEach(function (input) { input.addEventListener('change', function () { n.w = inW.value; n.h = inH.value; render(); }); });
+        row(box, 'SIZE w/h', wh);
+        box.appendChild(el('div', { class: 'wb-muted' }, 'One dialogue id; cascades with conditions are hand-edited in world/scene-objects.json.'));
+      }, function () {
+        var p = newObjectPlan();
+        if (!p.draft || p.errors.length) throw new Error('NEW OBJECT invalid: ' + p.errors.join('; '));
+        commitObjects(p.draft, 'create ' + n.sourceId);
+        ui.selectedId = ID.objectId(n.scene, n.sourceId);
+        ui.stackTile = { scene: n.scene, tx: n.tile.tx, ty: n.tile.ty };
+        ui.newObject = null;
+        ui.notice = { level: 'info', text: 'Created object ' + n.sourceId + ' in ' + n.scene + ' (export to apply).' };
+      }, 'new-object');
+    }
+
+    function renderNewInteract() {
+      var n = ui.newInteract;
+      renderNewPanel('NEW INTERACT', n, newInteractPlan, function (box) {
+        var idSel = el('select', { id: 'wb-new-interact-id' });
+        octx.interactIds().forEach(function (k) {
+          var d = octx.resolveInteract(k);
+          var o = idSel.appendChild(el('option', { value: k }, k + ' → ' + (typeof d === 'string' ? d : 'cascade') + (octx.isSparkle(k) ? ' ✦' : '')));
+          if (k === n.id) o.selected = true;
+        });
+        idSel.addEventListener('change', function () { n.id = idSel.value; render(); });
+        row(box, 'INTERACT ID', idSel);
+        box.appendChild(el('div', { class: 'wb-muted' }, 'Ids come from glue\'s INTERACT_DLG table (js/glue.js); a new id needs a hand edit there first.'));
+      }, function () {
+        var p = newInteractPlan();
+        if (!p.draft || p.errors.length) throw new Error('NEW INTERACT invalid: ' + p.errors.join('; '));
+        commitObjects(p.draft, 'create interact ' + n.id);
+        ui.selectedId = ID.objectId(n.scene, S.interactItemKey(p.ref));
+        ui.stackTile = { scene: n.scene, tx: n.tile.tx, ty: n.tile.ty };
+        ui.newInteract = null;
+        ui.notice = { level: 'info', text: 'Created interact key ' + n.tile.tx + ',' + n.tile.ty + ' = ' + n.id + ' in ' + n.scene + ' (export to apply).' };
+      }, 'new-interact');
     }
 
     function renderNpc(it) {
@@ -878,11 +1149,18 @@
       var ids = Object.keys(errs);
       var changed = E.changedIds(store, draft());
       var castOps = castOpsList();
-      if (!changed.length && !castOps.length) { valBox.appendChild(el('div', { class: 'wb-muted' }, 'No drafts.')); return; }
+      var objOps = objectOpsList();
+      if (!changed.length && !castOps.length && !objOps.length) { valBox.appendChild(el('div', { class: 'wb-muted' }, 'No drafts.')); return; }
       var opsBox = valBox.appendChild(el('ul', { id: 'wb-draft-ops' }));
       draftOps().forEach(function (o) { opsBox.appendChild(el('li', { class: 'wb-op wb-op-' + o.op, 'data-op': o.op }, o.op + ' ' + o.id)); });
       castOps.forEach(function (o) { opsBox.appendChild(el('li', { class: 'wb-op wb-op-place', 'data-op': 'place' }, 'place ' + o.window + ' / ' + o.character + ' → ' + o.map_id + ' ' + o.x + ',' + o.y + ' ' + o.dir)); });
-      if (!ids.length) { valBox.appendChild(el('div', { class: 'wb-ok', id: 'wb-valid' }, '✓ ' + (changed.length + castOps.length) + ' draft(s) valid')); return; }
+      objOps.forEach(function (o) {
+        var what = o.sourceId !== undefined
+          ? ' object ' + o.sourceId + (o.object ? ' → ' + o.object.x + ',' + o.object.y + (o.object.w !== undefined ? ' ' + o.object.w + '×' + o.object.h : '') : '')
+          : ' interact ' + o.interact + (o.to ? ' → ' + o.to : o.id ? ' = ' + o.id : '');
+        opsBox.appendChild(el('li', { class: 'wb-op wb-op-' + o.op, 'data-op': o.op }, o.op + ' ' + o.scene + what));
+      });
+      if (!ids.length) { valBox.appendChild(el('div', { class: 'wb-ok', id: 'wb-valid' }, '✓ ' + (changed.length + castOps.length + objOps.length) + ' draft(s) valid')); return; }
       ids.forEach(function (id) {
         var box = valBox.appendChild(el('div', { class: 'wb-errors', 'data-connection': id }));
         box.appendChild(el('div', { class: 'wb-errors-head' }, id));
@@ -905,7 +1183,7 @@
       var castOps = castOpsList();
       var out = exportObject() || cs;
       exportBox.appendChild(el('div', { class: 'wb-muted', id: 'wb-export-summary' },
-        cs.operations.length + ' changed connection(s), ' + castOps.length + ' cast placement(s)' + (out.format === C.BUNDLE_FORMAT ? ' (bundle)' : '') +
+        cs.operations.length + ' changed connection(s), ' + castOps.length + ' cast placement(s), ' + objectOpsList().length + ' scene object change(s)' + (out.format === C.BUNDLE_FORMAT ? ' (bundle)' : '') +
         '. Save as a file, then: node tools/world-apply.js <file> --dry-run' + (castOps.length ? ' (add --repin if V5 pins must follow)' : '')));
       var ta = exportBox.appendChild(el('textarea', { id: 'wb-export-text', readonly: 'readonly', spellcheck: 'false' }));
       ta.value = JSON.stringify(out, null, 2) + '\n';
@@ -932,11 +1210,17 @@
       redoBtn.disabled = !H.canRedo(hist);
       newBtn.disabled = ui.mode !== 'edit';
       newBtn.className = ui.creating ? 'on' : '';
+      newObjBtn.disabled = ui.mode !== 'edit' || !objStore.base[ui.sceneId];
+      newObjBtn.className = ui.newObject ? 'on' : '';
+      newObjBtn.title = objStore.base[ui.sceneId] ? '' : ui.sceneId + ' has no entry in world/scene-objects.json';
+      newIntBtn.disabled = newObjBtn.disabled;
+      newIntBtn.className = ui.newInteract ? 'on' : '';
+      newIntBtn.title = newObjBtn.title;
       revertAllBtn.disabled = ui.mode !== 'edit' || n === 0;
       exportBtn.disabled = ui.mode !== 'edit';
       if (sceneSel.value !== ui.sceneId) sceneSel.value = ui.sceneId;
       if (momentSel.value !== ui.momentKey) momentSel.value = ui.momentKey;
-      canvas.style.cursor = ui.pending || (ui.creating && (ui.creating.step !== 'confirm' || ui.creating.moving)) || (ui.converting && ui.converting.placing) ? 'crosshair' : 'pointer';
+      canvas.style.cursor = ui.pending || (ui.creating && (ui.creating.step !== 'confirm' || ui.creating.moving)) || (ui.converting && ui.converting.placing) || placingObject() ? 'crosshair' : 'pointer';
 
       var counts = { 'connection-endpoint': 0, trigger: 0, npc: 0, object: 0, 'legacy-door': 0 };
       list.forEach(function (it) { counts[it.kind]++; });
@@ -971,7 +1255,7 @@
     }
 
     canvas.addEventListener('mousemove', function (ev) {
-      if (!ui.pending && !(ui.creating && (ui.creating.step !== 'confirm' || ui.creating.moving)) && !(ui.converting && ui.converting.placing)) return;
+      if (!ui.pending && !(ui.creating && (ui.creating.step !== 'confirm' || ui.creating.moving)) && !(ui.converting && ui.converting.placing) && !placingObject()) return;
       var t = tileFromEvent(ev);
       if (!t || (ui.hover && ui.hover.tx === t.tx && ui.hover.ty === t.ty)) return;
       ui.hover = t;
@@ -984,6 +1268,16 @@
       var p = ui.pending;
       var c = ui.creating;
       var cv = ui.converting;
+      var no = ui.newObject || ui.newInteract;
+      if (no && no.placing) {
+        guard(function () {
+          if (ui.sceneId !== no.scene) throw new Error((ui.newObject ? 'NEW OBJECT' : 'NEW INTERACT') + ' belongs to ' + no.scene + ' — switch back to that scene');
+          no.tile = { tx: t.tx, ty: t.ty };
+          no.placing = false;
+          ui.hover = null;
+        });
+        return;
+      }
       if (cv) {
         guard(function () {
           if (!cv.placing) return;
@@ -1020,12 +1314,21 @@
       if (!p) {
         var hit = Core.itemAt(items(), t.tx, t.ty);
         ui.selectedId = hit ? hit.id : null;
+        ui.stackTile = { scene: ui.sceneId, tx: t.tx, ty: t.ty };
+        ui.confirmObjectDelete = null;
         ui.notice = null;
         render();
         return;
       }
       guard(function () {
-        if (p.action === 'move-npc') {
+        if (p.action === 'move-object') {
+          if (ui.sceneId !== p.scene) { ui.pending = null; throw new Error('MOVE keeps ' + p.itemId + ' on ' + p.scene + ' — switch back to that scene'); }
+          if (p.entry === 'object') commitObjects(S.moveObject(objDraft(), p.scene, p.sourceId, t.tx, t.ty), 'move ' + p.sourceId);
+          else commitObjects(S.moveInteract(objDraft(), p.scene, p.ref, t.tx, t.ty), 'move interact ' + p.ref);
+          ui.selectedId = p.itemId;
+          ui.stackTile = { scene: p.scene, tx: t.tx, ty: t.ty };
+          ui.notice = { level: 'info', text: 'Moved ' + p.itemId + ' to ' + t.tx + ',' + t.ty + ' in the draft (export to apply).' };
+        } else if (p.action === 'move-npc') {
           if (ui.sceneId !== p.sceneId) { ui.pending = null; throw new Error('MOVE keeps ' + p.character + ' on ' + p.sceneId + ' — switch back to that scene'); }
           var errs = C.placementErrors(cctx, { map_id: ui.sceneId, x: t.tx, y: t.ty }, occupantsAt(ui.sceneId, t.tx, t.ty, p.character));
           if (errs.length) { ui.pending = p; ui.hover = null; throw new Error('MOVE refused: ' + errs.join('; ')); }
@@ -1051,7 +1354,7 @@
     });
 
     sceneSel.addEventListener('change', function () {
-      guard(function () { setScene(sceneSel.value); ui.selectedId = null; ui.pending = null; });
+      guard(function () { setScene(sceneSel.value); ui.selectedId = null; ui.pending = null; ui.newObject = null; ui.newInteract = null; ui.confirmObjectDelete = null; ui.stackTile = null; });
     });
     momentSel.addEventListener('change', function () {
       guard(function () {
@@ -1063,10 +1366,24 @@
         if (p && p.kind === ID.KINDS.NPC) ui.selectedId = null;
       });
     });
-    viewBtn.addEventListener('click', function () { ui.mode = 'view'; ui.pending = null; ui.creating = null; ui.converting = null; ui.confirmDelete = null; ui.exportOpen = false; render(); });
+    viewBtn.addEventListener('click', function () { ui.mode = 'view'; ui.pending = null; ui.creating = null; ui.converting = null; ui.confirmDelete = null; ui.newObject = null; ui.newInteract = null; ui.confirmObjectDelete = null; ui.exportOpen = false; render(); });
+    newObjBtn.addEventListener('click', function () {
+      if (ui.mode !== 'edit' || !objStore.base[ui.sceneId]) return;
+      ui.pending = null; ui.creating = null; ui.converting = null; ui.confirmDelete = null; ui.newInteract = null; ui.confirmObjectDelete = null; ui.selectedId = null; ui.exportOpen = false;
+      var k = S.kinds(objStore)[0];
+      ui.newObject = { scene: ui.sceneId, kind: k ? k.kind : '', sourceId: S.suggestSourceId(objDraft(), ui.sceneId, k && k.kind), sourceIdEdited: false,
+        dialogue: '', w: '1', h: '1', tile: null, placing: true };
+      render();
+    });
+    newIntBtn.addEventListener('click', function () {
+      if (ui.mode !== 'edit' || !objStore.base[ui.sceneId]) return;
+      ui.pending = null; ui.creating = null; ui.converting = null; ui.confirmDelete = null; ui.newObject = null; ui.confirmObjectDelete = null; ui.selectedId = null; ui.exportOpen = false;
+      ui.newInteract = { scene: ui.sceneId, id: octx.interactIds()[0], tile: null, placing: true };
+      render();
+    });
     newBtn.addEventListener('click', function () {
       if (ui.mode !== 'edit') return;
-      ui.pending = null; ui.confirmDelete = null; ui.converting = null; ui.selectedId = null; ui.exportOpen = false;
+      ui.pending = null; ui.confirmDelete = null; ui.converting = null; ui.selectedId = null; ui.exportOpen = false; ui.newObject = null; ui.newInteract = null; ui.confirmObjectDelete = null;
       ui.creating = { step: 'a', oneWay: false, a: null, b: null, id: '', idEdited: false, spawn: { a: null, b: null }, moving: null };
       render();
     });
@@ -1074,7 +1391,7 @@
     function undo() {
       if (!H.canUndo(hist)) return;
       hist = H.undo(hist);
-      ui.pending = null;
+      ui.pending = null; ui.confirmObjectDelete = null;
       var ref = selectedRef();
       if (ref && ref.kind === ID.KINDS.TRIGGER) {
         var ep = draft()[ref.connId] && draft()[ref.connId][ref.side];
@@ -1092,8 +1409,8 @@
     redoBtn.addEventListener('click', redo);
     revertAllBtn.addEventListener('click', function () {
       guard(function () {
-        var next = { conn: E.revertAll(store), cast: castStore ? castStore.base : null };
-        if (next.conn !== draft() || next.cast !== castDraft()) hist = H.commit(hist, next, { label: 'revert all' });
+        var next = { conn: E.revertAll(store), cast: castStore ? castStore.base : null, objects: objStore.base };
+        if (next.conn !== draft() || next.cast !== castDraft() || next.objects !== objDraft()) hist = H.commit(hist, next, { label: 'revert all' });
         ui.pending = null;
       });
     });
@@ -1113,6 +1430,11 @@
         guard(function () { commitCast(C.placeBody(castStore, castDraft(), { window: ref.window, character: ref.character, dir: C.arrowDir(ev.key) }), 'face ' + ev.key); });
       } else if (ev.key === 'Escape') {
         if (ui.pending) ui.pending = null;
+        else if (ui.newObject && ui.newObject.placing && ui.newObject.tile) ui.newObject.placing = false;
+        else if (ui.newObject) ui.newObject = null;
+        else if (ui.newInteract && ui.newInteract.placing && ui.newInteract.tile) ui.newInteract.placing = false;
+        else if (ui.newInteract) ui.newInteract = null;
+        else if (ui.confirmObjectDelete) ui.confirmObjectDelete = null;
         else if (ui.converting && ui.converting.placing) ui.converting.placing = null;
         else if (ui.converting) ui.converting = null;
         else if (ui.creating && ui.creating.moving) ui.creating.moving = null;
@@ -1153,6 +1475,13 @@
           }()),
           creating: ui.creating && { step: ui.creating.step, oneWay: ui.creating.oneWay, a: ui.creating.a, b: ui.creating.b, id: ui.creating.id,
             moving: ui.creating.moving, candidate: candidate(), errors: candidateErrors() },
+          objectOps: JSON.parse(JSON.stringify(objectOpsList())), objectChangeCount: objectChanges().length, confirmObjectDelete: ui.confirmObjectDelete,
+          newObject: ui.newObject && Object.assign(JSON.parse(JSON.stringify(ui.newObject)), { errors: newObjectPlan().errors }),
+          newInteract: ui.newInteract && Object.assign(JSON.parse(JSON.stringify(ui.newInteract)), { errors: newInteractPlan().errors }),
+          objectItems: list.filter(function (it) { return it.kind === 'object'; }).map(function (it) {
+            return { id: it.id, entry: it.entry || null, sourceId: it.sourceId || null, ref: it.ref || null, interactId: it.interactId || null,
+              tx: it.tx, ty: it.ty, w: it.w, h: it.h, readOnly: !!it.readOnly, refs: it.entry ? objectRefs(it) : [] };
+          }),
           momentsLoaded: !momentSel.disabled, notice: ui.notice && ui.notice.text,
           draft: JSON.parse(JSON.stringify(draft())),
           items: list.map(function (it) { return { id: it.id, kind: it.kind, tx: it.tx, ty: it.ty }; }),

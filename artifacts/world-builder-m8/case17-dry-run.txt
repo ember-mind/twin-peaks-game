@@ -1,0 +1,9 @@
+TARGET world/scene-objects.json :: town object tracks
+BEFORE {"sourceId":"tracks","type":"landmark","kind":"tracks","x":53,"y":1,"w":2,"h":33,"dialogue":[{"cond":"nflag:vagone_scoperto","then":"landmark_tracks_vagone"},{"cond":["evidence:E6A_CUORE_INTERO","evidence:T_JAMES_EST"],"then":"landmark_tracks_route"},"landmark_tracks"]}
+AFTER  {"sourceId":"tracks","type":"landmark","kind":"tracks","x":53,"y":1,"w":2,"h":30,"dialogue":[{"cond":"nflag:vagone_scoperto","then":"landmark_tracks_vagone"},{"cond":["evidence:E6A_CUORE_INTERO","evidence:T_JAMES_EST"],"then":"landmark_tracks_route"},"landmark_tracks"]}
+DIFF world/scene-objects.json
+  @@ line 37
+  -           "h": 33,
+  +           "h": 30,
+VALID 1 scene object change(s) against real maps and dialogues
+DRY-RUN 1 scene object change(s); nothing written

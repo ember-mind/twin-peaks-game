@@ -1,0 +1,10 @@
+CREATE world/scene-objects.json :: woods interact 13,12
+BEFORE null
+AFTER  {"key":"13,12","id":"olio"}
+DIFF world/scene-objects.json
+  @@ line 106
+  -         "11,16": "cartelloBosco"
+  +         "11,16": "cartelloBosco",
+  +         "13,12": "olio"
+VALID 1 scene object change(s) against real maps and dialogues
+DRY-RUN 1 scene object change(s); nothing written
