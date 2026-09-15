@@ -82,6 +82,30 @@
     {id:'cigarette-east',type:'STEAM_SMALL',x:193,y:133,depth:144,variants:3,
       duration:[1360,1540],intensity:.62}
   ]);
+  /* Red Room uses the existing intermittent device archetype with three
+   * authored column positions. Long holds make the curtains breathe slowly.
+   * RedRoomScene converts archetype alpha to opaque palette coverage. */
+  var curtainFrames=[-2,0,2].map(function(shift){
+    var marks=[];
+    for(var x=32;x<224;x+=48){
+      marks.push({x:x,y:6,w:8,h:26,color:'#a62932'});
+      marks.push({x:x+2+shift,y:6,w:2,h:26,color:'#541824'});
+    }
+    return marks;
+  });
+  life.register('redroom',[
+    {id:'curtain-sway',type:'MACHINE_IDLE_ACTIVITY',x:0,y:0,depth:0,variants:3,
+      delay:[2800,4200],duration:[9000,12000],intensity:3,marks:curtainFrames},
+    {id:'redroom-table-lamp',type:'LIGHT_WARM_VARIATION',x:55,y:19,depth:48,
+      delay:[7000,12000],duration:[1600,2400],intensity:.7,
+      regions:[{x:51,y:38,w:10,h:1,depth:48}]},
+    {id:'redroom-torchiere-west',type:'LIGHT_WARM_VARIATION',x:12,y:42,depth:80,
+      delay:[10000,16000],duration:[2000,3000],intensity:.5,
+      regions:[{x:8,y:43,w:9,h:1,depth:80}]},
+    {id:'redroom-torchiere-east',type:'LIGHT_WARM_VARIATION',x:244,y:42,depth:80,
+      delay:[12000,19000],duration:[1800,2800],intensity:.5,
+      regions:[{x:240,y:43,w:9,h:1,depth:80}]}
+  ]);
   var reactions=root.GAME.EnvironmentReactions;
   if(reactions)reactions.register('diner',[{id:'front-door',trigger:'ENTITY_ENTERED_DOORWAY',
     arrivalKey:'6,8',fromMapId:'town',x:96,y:144,depth:160,frames:reactions.doorEntryFrames,
