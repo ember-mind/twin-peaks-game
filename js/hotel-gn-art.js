@@ -172,19 +172,32 @@
     R(125,80,38,1,p.stoneDark);R(124,81,40,2,p.ink);
   }
   function chair(R,x,y,mirror){
-    function C(dx,dy,w,h,c){R(x+(mirror?16-dx-w:dx),y+dy,w,h,c);}
-    C(1,-1,14,2,p.ink);C(-1,-2,18,2,p.ink);
-    /* Stepped curved back and rolled arms over a recessed seat cushion. */
-    C(1,-31,13,2,p.ink);C(-1,-29,17,18,p.ink);C(0,-29,15,14,p.redDark);
-    C(2,-30,10,2,p.redLight);C(1,-28,13,3,p.redLight);C(1,-25,13,10,p.red);
-    C(2,-25,2,8,p.redLight);C(12,-25,2,10,p.redDark);
-    C(5,-24,2,2,p.redDark);C(10,-24,2,2,p.redDark);C(6,-23,1,1,p.redLight);C(11,-23,1,1,p.redLight);
-    C(4,-17,9,3,p.redDark);C(3,-14,12,9,p.ink);
-    C(4,-14,10,2,p.redLight);C(4,-12,10,4,p.red);C(5,-11,8,1,p.redLight);
-    C(4,-8,10,3,p.redDark);C(5,-8,8,1,p.redLight);
-    C(-2,-18,6,13,p.ink);C(-1,-18,5,3,p.redLight);C(-1,-15,4,8,p.red);C(0,-14,1,6,p.redLight);
-    C(13,-19,5,14,p.ink);C(13,-19,4,3,p.redLight);C(14,-16,3,9,p.redDark);C(14,-16,1,8,p.red);
-    C(1,-5,15,2,p.redDark);C(3,-3,2,3,p.ink);C(12,-3,2,3,p.ink);
+    var left=mirror?163:110,top=82;
+    function C(dx,dy,w,h,c){R(left+(mirror?31-dx-w:dx),top+dy,w,h,c);}
+    /* Thirty-one-pixel flanking silhouettes; the outer side steps outward
+     * every six rows while the inward arm remains a vertical five-pixel roll. */
+    for(var dy=0;dy<31;dy++){
+      var edge=Math.max(0,4-Math.floor(dy/6));
+      C(edge,dy,31-edge,1,p.ink);
+      if(dy>=2&&dy<29){C(edge+2,dy,27-edge,1,p.red);C(edge+2,dy,4,1,p.redDark);}
+    }
+    /* The back is 23x17; two-pixel piping separates its inset red panel. */
+    C(6,0,23,17,p.ink);C(8,2,19,13,p.red);C(8,2,19,2,p.redLight);C(25,4,2,11,p.redLight);
+    C(10,5,2,9,p.redDark);C(14,7,2,2,p.redDark);C(22,7,2,2,p.redDark);
+    C(8,18,21,8,p.ink);C(10,18,17,2,p.redLight);C(10,20,17,4,p.red);C(10,24,17,2,p.redDark);
+    /* Seat apron on y=106..111 projects three pixels toward the table. */
+    for(var front=0;front<6;front++){
+      var shift=Math.round(front*3/5);C(5+shift,24+front,21,1,p.redDark);
+      if(front<2)C(7+shift,24+front,17,1,p.redLight);
+    }
+    for(var arm=13;arm<29;arm++){
+      var side=Math.max(0,4-Math.floor(arm/6));
+      C(side,arm,5,1,p.ink);C(side+2,arm,3,1,arm<15?p.redLight:p.redDark);
+    }
+    C(26,13,5,16,p.ink);C(26,13,5,2,p.redLight);C(26,15,2,12,p.redLight);C(28,15,1,12,p.red);
+    /* Keep the original occupied body tiles visibly grounded despite the
+     * widened inward-facing upper silhouette. */
+    R(x,111,16,2,p.ink);
   }
   function lamp(R,x,y){
     R(x-4,y-2,9,2,p.ink);R(x-3,y-3,7,1,p.gold);R(x,y-13,1,10,p.gold);
@@ -192,11 +205,12 @@
     R(x-2,y-21,4,2,p.light);R(x-3,y-19,6,4,p.light);R(x,y-23,1,1,p.ink);
   }
   function table(R){
-    R(148,97,8,1,p.ink);R(145,98,14,1,p.ink);R(143,99,18,4,p.ink);
-    R(145,103,14,2,p.ink);R(147,105,10,1,p.ink);
-    R(148,98,8,1,p.gold);R(145,99,14,2,p.woodLight);R(147,99,10,1,p.gold);
-    R(145,101,14,1,p.wood);R(147,102,10,1,p.woodLight);R(146,103,12,1,p.woodDark);
-    R(147,105,2,6,p.ink);R(155,105,2,6,p.ink);R(146,110,3,2,p.ink);R(155,110,3,2,p.ink);
+    [10,16,18,16,10].forEach(function(w,row){
+      var x=143+(18-w)/2,y=96+row*2;R(x,y,w,2,p.ink);
+      if(row>0&&row<4)R(x+2,y,w-4,2,p.wood);
+    });
+    R(147,98,10,1,p.gold);R(146,100,12,1,p.woodLight);
+    R(147,106,2,5,p.ink);R(155,106,2,5,p.ink);R(146,111,3,2,p.ink);R(155,111,3,2,p.ink);
     R(148,106,1,3,p.woodLight);R(155,106,1,3,p.wood);lamp(R,152,101);
   }
   var font={G:['111','100','101','101','111'],R:['110','101','110','101','101'],E:['111','100','110','100','111'],
