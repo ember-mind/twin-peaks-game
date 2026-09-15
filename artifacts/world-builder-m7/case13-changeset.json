@@ -1,0 +1,16 @@
+{
+  "format": "cast-windows-changeset",
+  "version": 1,
+  "target": "narrative/cast/windows.json",
+  "operations": [
+    {
+      "op": "place",
+      "window": "ACT3_TRUMAN_REPORT",
+      "character": "truman",
+      "map_id": "traincar",
+      "x": 10,
+      "y": 8,
+      "dir": "right"
+    }
+  ]
+}

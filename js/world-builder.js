@@ -7,12 +7,18 @@
  *   selection   stable ids from js/editor/core/identity.js, hit-tested topmost-wins over the same
  *               paint-ordered list the canvas draws (GameWorldBuilderCore.sceneItems)
  *   VIEW/EDIT   EDIT unlocks spawn x/y/facing, MOVE SPAWN, trigger MOVE/ADD/REMOVE, revert, export
+ *   M7          door gating fields (needsFlag / blockedMsg / needsClues) on the endpoint that owns the trigger, and
+ *               CONVERT TO ONE-WAY / CONVERT TO PAIRED with a confirm step (one-way asks for the source side when
+ *               the losing side holds several triggers; paired asks for the missing a.spawn and b trigger)
  *   M6          NEW CONNECTION (pick a tile in scene A, a tile in scene B, PAIRED/ONE-WAY, id, live validation,
  *               CONFIRM) and DELETE CONNECTION (with a confirm step); both land in the draft store, so the
  *               record shows (or disappears) at once and the export carries a version-2 create/delete op
  *   drafts      Editor.edit store (id -> whole record), every edit committed to Editor.history (Ctrl+Z / Ctrl+Shift+Z)
  *   validation  GAME.LocationConnections messages verbatim + registry/endpoint/scene/paired checks
- *   story       read-only NPC overlay from GAME.CastPresence.resolveCast(seed state)
+ *   story       NPC overlay from GAME.CastPresence.resolveCast(seed state) over the cast DRAFT (Editor.cast); in EDIT
+ *               a PLACED body gets MOVE (click a tile, arrow keys set facing): the inspector names the source window
+ *               and owner or "baseline"; the export is a cast-windows-changeset, or a world-builder-bundle when
+ *               connections changed too
  *   legacy      map doors with no connection id: read-only `legacy-door` items
  */
 (function () {
@@ -46,7 +52,7 @@
     return out.sort(function (x, y) { return x.which < y.which ? -1 : 1; });
   }
 
-  var PIECES_OK = !!(WB && Core && Ed && Ed.edit && Ed.history && Ed.identity && Ed.hitTest && Ed.model);
+  var PIECES_OK = !!(WB && Core && Ed && Ed.edit && Ed.cast && Ed.history && Ed.identity && Ed.hitTest && Ed.model);
 
   var DIRV = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
@@ -55,9 +61,20 @@
     var world = WB.adaptWorld(G);
     if (!world.model) throw new Error('[world-builder] editor core model missing — load js/editor/core/*.js first');
     var model = world.model;
-    var E = Ed.edit, H = Ed.history, ID = Ed.identity;
+    var E = Ed.edit, C = Ed.cast, H = Ed.history, ID = Ed.identity;
     var store = E.createStore(world.source.connections);
     var vctx = WB.validationContext(G);
+    var castStore = G.NarrativeData && G.NarrativeData.cast ? C.createCastStore(G.NarrativeData.cast) : null;
+    var cctx = WB.castContext(G, function (scene, x, y) {
+      var d = draft(), hit = null;
+      Object.keys(d).sort().forEach(function (id) {
+        ['a', 'b'].forEach(function (sd) {
+          var ep = d[id] && d[id][sd];
+          if (ep && ep.scene === scene && (ep.triggers || []).some(function (t) { return t[0] === x && t[1] === y; })) hit = hit || id;
+        });
+      });
+      return hit;
+    });
 
     var ui = {
       sceneId: null,
@@ -66,6 +83,7 @@
       pending: null,            // null | {action:'move-spawn'|'move-trigger'|'add-trigger', connId, side, index?}
       creating: null,           // null | {step:'a'|'b'|'confirm', oneWay, a, b, id, idEdited, spawn:{a,b}, moving}
       confirmDelete: null,      // connection id awaiting DELETE confirmation
+      converting: null,         // null | {connId, to:'one-way'|'paired', source, aSpawn, bTrigger, facing, placing}
       hover: null,
       notice: null,
       exportOpen: false,
@@ -74,8 +92,10 @@
       momentCast: null,         // castForSeed result for the chosen seed
       zoom: 16
     };
-    var hist = H.create(store.base);
-    function draft() { return hist.present; }
+    // history holds { conn, cast }: one undo stack across connection and cast edits
+    var hist = H.create({ conn: store.base, cast: castStore ? castStore.base : null });
+    function draft() { return hist.present.conn; }
+    function castDraft() { return hist.present.cast; }
 
     // ------------------------------------------------------------------ DOM
     function el(tag, attrs, text) {
@@ -166,9 +186,36 @@
     }
 
     // ------------------------------------------------------------------ derived state
+    // resolved cast for the chosen moment over the cast draft (cached per draft + moment)
+    var castCache = { draft: null, key: null, value: null };
+    function castChanged() { return castStore ? C.changedKeys(castStore, castDraft()) : []; }
+    function momentCast() {
+      if (!castStore) return ui.momentKey === 'baseline' ? null : ui.momentCast;
+      if (castCache.draft !== castDraft() || castCache.key !== ui.momentKey) {
+        var data = C.castDataWithDraft(castStore.data, castStore, castDraft());
+        castCache = { draft: castDraft(), key: ui.momentKey, value: WB.castForSeed(G, ui.momentKey === 'baseline' ? null : ui.moments[ui.momentKey], data) };
+      }
+      return castCache.value;
+    }
     function sceneNpcs(sceneId) {
-      if (ui.momentKey === 'baseline' || !ui.momentCast) return null; // model baseline overlay
-      return ui.momentCast[sceneId] || [];
+      var mc = momentCast();
+      if (!mc) return null; // model baseline overlay
+      return mc[sceneId] || [];
+    }
+    function castBody(characterId) {
+      var mc = momentCast() || {}, hit = null;
+      Object.keys(mc).forEach(function (sc) { (mc[sc] || []).forEach(function (b) { if (b.id === characterId) hit = Object.assign({ sceneId: sc }, b); }); });
+      return hit;
+    }
+    // the editable identity of a resolved body: its source window (or baseline) in the cast store
+    function bodyRef(body) {
+      if (!castStore || !body) return null;
+      var win = body.source === 'BASELINE' ? C.BASELINE : body.source;
+      return castDraft()[C.key(win, body.id)] ? { window: win, character: body.id } : null;
+    }
+    function occupantsAt(sceneId, x, y, except) {
+      var mc = momentCast() || {};
+      return (mc[sceneId] || []).filter(function (b) { return b.id !== except && b.x === x && b.y === y; }).map(function (b) { return b.id; });
     }
     function items(sceneId) {
       return Core.sceneItems(model, sceneId || ui.sceneId, { connections: draft(), npcs: sceneNpcs(sceneId || ui.sceneId) });
@@ -198,6 +245,33 @@
       E.validateDraft(rec, vctx, { created: true, draft: d }).forEach(function (e) { errs.push(e); });
       return errs.filter(function (e, i) { return errs.indexOf(e) === i; });
     }
+    // ---- M7 PAIRED <-> ONE-WAY conversion candidate (not in the draft until CONFIRM)
+    function conversion() {
+      var cv = ui.converting;
+      if (!cv) return null;
+      var rec = draft()[cv.connId];
+      if (!rec) return { record: null, errors: ['connection ' + cv.connId + ' left the draft'], dropped: [] };
+      if (cv.to === 'one-way') {
+        var plan = E.planOneWay(rec, cv.source ? { source: cv.source } : {});
+        if (plan.needsChoice) return { record: null, errors: [plan.reason], dropped: [], needsChoice: true };
+        return { record: plan.record, errors: conversionErrors(plan.record), dropped: plan.dropped };
+      }
+      var missing = [];
+      if (!cv.aSpawn) missing.push('place a.spawn in ' + rec.a.scene);
+      if (!cv.bTrigger) missing.push('place a b trigger in ' + rec.b.scene);
+      if (missing.length) return { record: null, errors: missing, dropped: [] };
+      var paired = E.planPaired(rec, { aSpawn: { tx: cv.aSpawn.tx, ty: cv.aSpawn.ty, dir: cv.facing }, bTrigger: cv.bTrigger });
+      return { record: paired, errors: conversionErrors(paired), dropped: [] };
+    }
+    function conversionErrors(rec) {
+      var d = Object.assign({}, draft());
+      d[rec.id] = rec;
+      var errs = E.validateDraft(rec, vctx, { changedSides: ['a', 'b'], draft: d });
+      return errs.filter(function (e, i) { return errs.indexOf(e) === i; });
+    }
+
+    function castOpsList() { return castStore ? C.buildCastChangeset(castStore, castDraft()).operations : []; }
+
     function draftOps() {
       var d = draft();
       return E.changedIds(store, d).map(function (id) {
@@ -222,7 +296,15 @@
 
     function commit(next, label) {
       if (next === draft()) return;
-      hist = H.commit(hist, next, { label: label });
+      hist = H.commit(hist, { conn: next, cast: castDraft() }, { label: label });
+    }
+    function commitCast(next, label) {
+      if (next === castDraft()) return;
+      hist = H.commit(hist, { conn: draft(), cast: next }, { label: label });
+    }
+    function unsavedCount() { return E.changedIds(store, draft()).length + castChanged().length; }
+    function exportObject() {
+      return C.buildBundle([E.buildChangeset(store, draft()), castStore ? C.buildCastChangeset(castStore, castDraft()) : null]);
     }
     function guard(fn) {
       try { ui.notice = null; fn(); }
@@ -296,7 +378,14 @@
         });
       }
 
-      if ((ui.pending || (c && (c.step !== 'confirm' || c.moving))) && ui.hover) {
+      var cv = ui.converting;
+      if (cv && cv.to === 'paired') {
+        var crec = draft()[cv.connId];
+        if (crec && cv.aSpawn && crec.a.scene === sc.sceneId) drawSpawn(ctx, sc, cv.aSpawn.tx, cv.aSpawn.ty, cv.facing, 'a', z, { sel: true });
+        if (crec && cv.bTrigger && crec.b.scene === sc.sceneId) drawTrigger(ctx, sc, cv.bTrigger[0], cv.bTrigger[1], z, { sel: true, label: 'new b' });
+      }
+
+      if ((ui.pending || (c && (c.step !== 'confirm' || c.moving)) || (cv && cv.placing)) && ui.hover) {
         ctx.save();
         ctx.strokeStyle = '#ffe36e'; ctx.lineWidth = 2; ctx.setLineDash([4, 3]);
         ctx.strokeRect(ui.hover.tx * z + 1.5, ui.hover.ty * z + 1.5, z - 3, z - 3);
@@ -405,6 +494,9 @@
       ctx.moveTo(cx, cy - z * 0.34); ctx.lineTo(cx + z * 0.3, cy + z * 0.28); ctx.lineTo(cx - z * 0.3, cy + z * 0.28); ctx.closePath();
       ctx.fillStyle = '#7ee07e'; ctx.fill();
       ctx.strokeStyle = isSel ? '#ffffff' : '#244d24'; ctx.lineWidth = isSel ? 3 : 1; ctx.stroke();
+      var fv = DIRV[it.dir] || [0, 1];
+      ctx.strokeStyle = '#eaffea'; ctx.lineWidth = Math.max(2, z * 0.07);
+      ctx.beginPath(); ctx.moveTo(cx, cy + z * 0.05); ctx.lineTo(cx + fv[0] * z * 0.46, cy + z * 0.05 + fv[1] * z * 0.46); ctx.stroke();
       var name = String(it.name || it.characterId);
       ctx.font = 'bold ' + Math.max(9, Math.round(z * 0.26)) + 'px ui-monospace, Menlo, monospace';
       ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
@@ -497,9 +589,87 @@
       refreshErrors();
     }
 
+    function renderConvert() {
+      var cv = ui.converting;
+      var rec = draft()[cv.connId];
+      insp.appendChild(el('h2', null, cv.to === 'one-way' ? 'CONVERT TO ONE-WAY' : 'CONVERT TO PAIRED'));
+      var box = insp.appendChild(el('div', { id: 'wb-convert' }));
+      row(box, 'CONNECTION', cv.connId);
+      var res = conversion();
+      if (cv.to === 'one-way') {
+        box.appendChild(el('div', { class: 'wb-hint' }, 'The source keeps its triggers; the arrival keeps its spawn and loses its triggers.'));
+        var seg = el('span', { class: 'wb-seg', id: 'wb-convert-source' });
+        ['a', 'b'].forEach(function (sd) {
+          var b = seg.appendChild(el('button', { 'data-action': 'convert-source-' + sd, class: cv.source === sd ? 'on' : '' },
+            sd.toUpperCase() + ' · ' + rec[sd].scene + ' (' + (rec[sd].triggers || []).length + ' trigger' + ((rec[sd].triggers || []).length === 1 ? '' : 's') + ')'));
+          b.addEventListener('click', function () { cv.source = sd; render(); });
+        });
+        row(box, 'SOURCE', seg);
+        var drop = box.appendChild(el('ul', { id: 'wb-convert-dropped' }));
+        (res.dropped || []).forEach(function (t) { drop.appendChild(el('li', { class: 'wb-warn' }, 'drops ' + t)); });
+      } else {
+        box.appendChild(el('div', { class: 'wb-hint', id: 'wb-convert-step' },
+          cv.placing === 'aSpawn' ? 'click the a.spawn tile in ' + rec.a.scene : cv.placing === 'bTrigger' ? 'click the b trigger tile in ' + rec.b.scene
+            : 'Place the missing a.spawn and b trigger, then CONFIRM.'));
+        var sp = el('span', { class: 'wb-inline' });
+        sp.appendChild(el('span', { id: 'wb-convert-a-spawn' }, cv.aSpawn ? rec.a.scene + ' ' + cv.aSpawn.tx + ',' + cv.aSpawn.ty : '— not placed'));
+        button(sp, 'PLACE A SPAWN', 'convert-place-a-spawn', function () { guard(function () { setScene(rec.a.scene); cv.placing = 'aSpawn'; }); }, { cls: cv.placing === 'aSpawn' ? 'on' : '' });
+        row(box, 'A SPAWN', sp);
+        var face = el('select', { id: 'wb-convert-facing' });
+        E.FACINGS.forEach(function (f) { var o = face.appendChild(el('option', { value: f }, f)); if (f === cv.facing) o.selected = true; });
+        face.addEventListener('change', function () { cv.facing = face.value; render(); });
+        row(box, 'A FACING', face);
+        var tr = el('span', { class: 'wb-inline' });
+        tr.appendChild(el('span', { id: 'wb-convert-b-trigger' }, cv.bTrigger ? rec.b.scene + ' ' + cv.bTrigger[0] + ',' + cv.bTrigger[1] : '— not placed'));
+        button(tr, 'PLACE B TRIGGER', 'convert-place-b-trigger', function () { guard(function () { setScene(rec.b.scene); cv.placing = 'bTrigger'; }); }, { cls: cv.placing === 'bTrigger' ? 'on' : '' });
+        row(box, 'B TRIGGER', tr);
+      }
+      var errBox = box.appendChild(el('ul', { id: 'wb-convert-errors' }));
+      res.errors.forEach(function (e) { errBox.appendChild(el('li', { class: 'wb-error' }, e)); });
+      if (!res.errors.length && res.record) errBox.appendChild(el('li', { class: 'wb-ok', id: 'wb-convert-valid' }, '✓ valid'));
+      var acts = box.appendChild(el('div', { class: 'wb-actions' }));
+      button(acts, 'CONFIRM', 'convert-confirm', function () {
+        guard(function () {
+          var r = conversion();
+          if (!r.record || r.errors.length) throw new Error('conversion invalid: ' + r.errors.join('; '));
+          var next = cv.to === 'one-way' ? E.toOneWay(draft(), cv.connId, cv.source ? { source: cv.source } : {})
+            : E.toPaired(draft(), cv.connId, { aSpawn: { tx: cv.aSpawn.tx, ty: cv.aSpawn.ty, dir: cv.facing }, bTrigger: cv.bTrigger });
+          commit(next, 'to ' + cv.to + ' ' + cv.connId);
+          ui.converting = null;
+          ui.selectedId = ID.endpointId(r.record.id, 'a');
+          setScene(r.record.a.scene);
+          ui.notice = { level: 'info', text: cv.connId + ' is now ' + cv.to + ' in the draft (export to apply).' };
+        });
+      }, { cls: 'wb-primary', disabled: !res.record || res.errors.length > 0 });
+      button(acts, 'CANCEL', 'convert-cancel', function () { ui.converting = null; render(); });
+    }
+
+    function renderDoor(parent, rec, ref, ep, editing) {
+      if (!(ep.triggers || []).length) {
+        row(parent, 'DOOR', el('span', { class: 'wb-muted', id: 'wb-door-none' }, '— (no trigger on this endpoint)'));
+        return;
+      }
+      var door = ep.door || {};
+      if (!editing) {
+        row(parent, 'DOOR', el('span', { id: 'wb-door' }, Object.keys(door).length ? E.DOOR_KEYS.filter(function (k) { return door[k] !== undefined; }).map(function (k) { return k + '=' + door[k]; }).join(' · ') : 'ungated'));
+        return;
+      }
+      E.DOOR_KEYS.forEach(function (key) {
+        var input = el('input', key === 'needsClues' ? { type: 'number', step: '1', min: '1', id: 'wb-door-' + key, placeholder: '(none)' }
+          : { type: 'text', spellcheck: 'false', id: 'wb-door-' + key, placeholder: '(none)' });
+        input.value = door[key] === undefined ? '' : String(door[key]);
+        input.addEventListener('change', function () {
+          var v = input.value.trim();
+          guard(function () { commit(E.setDoorField(draft(), ref.connId, ref.side, key, v === '' ? null : (key === 'needsClues' ? Number(v) : v)), 'door ' + key); });
+        });
+        row(parent, 'DOOR ' + key, input);
+      });
+    }
+
     function renderInspector(list) {
       insp.textContent = '';
       if (ui.creating) { renderCreate(); return; }
+      if (ui.converting) { renderConvert(); return; }
       insp.appendChild(el('h2', null, 'INSPECTOR'));
       if (!ui.selectedId) { insp.appendChild(el('div', { class: 'wb-muted' }, 'Click a marker on the canvas.')); return; }
       var it = Core.findItem(list, ui.selectedId);
@@ -581,6 +751,7 @@
           });
         }
         row(insp, 'PAIRED ENDPOINT', pairBox);
+        renderDoor(insp, rec, ref, ep, editing);
 
         if (editing) {
           var acts = insp.appendChild(el('div', { class: 'wb-actions' }));
@@ -610,6 +781,21 @@
           button(acts, 'REVERT SELECTED', 'revert-selected', function () {
             guard(function () { commit(E.revertConnection(store, draft(), ref.connId), 'revert ' + ref.connId); ui.pending = null; });
           }, { disabled: !changed });
+          if (oneWay) {
+            button(acts, 'CONVERT TO PAIRED', 'convert-paired', function () {
+              ui.pending = null; ui.confirmDelete = null;
+              var sa = model.scenes[rec.a.scene], t0 = rec.a.triggers[0];
+              ui.converting = { connId: ref.connId, to: 'paired', source: null, aSpawn: null, bTrigger: null, placing: null,
+                facing: t0 && sa ? E.interiorFacing(t0[0], t0[1], sa.width, sa.height) : 'down' };
+              render();
+            });
+          } else {
+            button(acts, 'CONVERT TO ONE-WAY', 'convert-one-way', function () {
+              ui.pending = null; ui.confirmDelete = null;
+              ui.converting = { connId: ref.connId, to: 'one-way', source: null, aSpawn: null, bTrigger: null, placing: null, facing: null };
+              render();
+            });
+          }
           button(acts, 'DELETE CONNECTION', 'delete-connection', function () {
             ui.pending = null; ui.confirmDelete = ref.connId; render();
           }, { cls: 'wb-danger' });
@@ -634,15 +820,10 @@
       }
 
       if (!it) return;
+      if (it.kind === 'npc') { renderNpc(it); return; }
       row(insp, 'KIND', it.kind + (it.readOnly ? ' (read-only)' : ''));
       row(insp, 'SCENE', it.scene);
-      if (it.kind === 'npc') {
-        row(insp, 'CHARACTER', it.characterId);
-        row(insp, 'NAME', it.name);
-        row(insp, 'TILE', it.tx + ',' + it.ty);
-        row(insp, 'FACING', it.dir);
-        row(insp, 'SOURCE', ui.momentKey === 'baseline' ? 'baseline cast' : 'story moment ' + ui.momentKey);
-      } else if (it.kind === 'legacy-door') {
+      if (it.kind === 'legacy-door') {
         row(insp, 'TILE', it.tx + ',' + it.ty);
         row(insp, 'TARGET', it.target ? it.target.scene : '—');
         row(insp, 'SPAWN', it.target ? it.target.x + ',' + it.target.y + (it.dir ? ' ' + it.dir : '') : '—');
@@ -654,15 +835,54 @@
       }
     }
 
+    function renderNpc(it) {
+      var body = castBody(it.characterId);
+      var ref = bodyRef(body);
+      var editing = ui.mode === 'edit' && !!ref;
+      row(insp, 'KIND', 'npc' + (editing ? ' (PLACED body)' : ' (read-only)'));
+      row(insp, 'SCENE', it.scene);
+      row(insp, 'CHARACTER', it.characterId);
+      row(insp, 'NAME', it.name);
+      row(insp, 'TILE', it.tx + ',' + it.ty);
+      row(insp, 'FACING', it.dir);
+      row(insp, 'MOMENT', ui.momentKey === 'baseline' ? 'baseline cast' : 'story moment ' + ui.momentKey);
+      row(insp, 'SOURCE', el('span', { id: 'wb-npc-source' }, !body ? '—' : body.source === 'BASELINE' ? 'baseline' + (body.owner ? ' (' + body.owner + ')' : '')
+        : 'window ' + body.source + (body.owner ? ' · owner ' + body.owner : '')));
+      if (!ref) {
+        if (ui.mode === 'edit') insp.appendChild(el('div', { class: 'wb-muted' }, 'Not a registry cast body: not editable here.'));
+        return;
+      }
+      var entry = castDraft()[C.key(ref.window, ref.character)];
+      var changed = !!castStore.base[C.key(ref.window, ref.character)] && JSON.stringify(castStore.base[C.key(ref.window, ref.character)]) !== JSON.stringify(entry);
+      row(insp, 'DRAFT', changed ? 'moved (was ' + castStore.base[C.key(ref.window, ref.character)].map_id + ' ' + castStore.base[C.key(ref.window, ref.character)].x + ',' + castStore.base[C.key(ref.window, ref.character)].y + ' ' + castStore.base[C.key(ref.window, ref.character)].dir + ')' : 'unchanged');
+      if (!editing) return;
+      var twins = C.sameWhenConflicts(castStore.data, ref.window, ref.character);
+      var acts = insp.appendChild(el('div', { class: 'wb-actions' }));
+      var pend = ui.pending && ui.pending.action === 'move-npc' && ui.pending.character === ref.character;
+      button(acts, pend ? 'MOVE · click a tile…' : 'MOVE', 'move-npc', function () {
+        ui.pending = { action: 'move-npc', character: ref.character, window: ref.window, sceneId: it.scene }; ui.confirmDelete = null; render();
+      }, { cls: pend ? 'on' : '', disabled: twins.length > 0 });
+      button(acts, 'REVERT BODY', 'revert-npc', function () {
+        guard(function () { commitCast(C.revertBody(castStore, castDraft(), ref.window, ref.character), 'revert ' + ref.character); ui.pending = null; });
+      }, { disabled: !changed });
+      if (twins.length) {
+        insp.appendChild(el('div', { class: 'wb-warn', id: 'wb-npc-refused' }, 'MOVE refused: ' + ref.character + ' is placed by ' + ref.window +
+          ' and, under the same `when`, elsewhere by ' + twins.join(', ') + '. Fix the overlap in narrative/cast/windows.json first (V2).'));
+      }
+      insp.appendChild(el('div', { class: 'wb-hint', id: 'wb-npc-hint' }, 'Arrow keys set the facing. Only map/x/y/facing move here; windows, when, status and dialogue stay hand-authored (docs/cast-presence-authoring.md).'));
+    }
+
     function renderValidation(errs) {
       valBox.textContent = '';
       valBox.appendChild(el('h2', null, 'VALIDATION'));
       var ids = Object.keys(errs);
       var changed = E.changedIds(store, draft());
-      if (!changed.length) { valBox.appendChild(el('div', { class: 'wb-muted' }, 'No drafts.')); return; }
+      var castOps = castOpsList();
+      if (!changed.length && !castOps.length) { valBox.appendChild(el('div', { class: 'wb-muted' }, 'No drafts.')); return; }
       var opsBox = valBox.appendChild(el('ul', { id: 'wb-draft-ops' }));
       draftOps().forEach(function (o) { opsBox.appendChild(el('li', { class: 'wb-op wb-op-' + o.op, 'data-op': o.op }, o.op + ' ' + o.id)); });
-      if (!ids.length) { valBox.appendChild(el('div', { class: 'wb-ok', id: 'wb-valid' }, '✓ ' + changed.length + ' draft(s) valid')); return; }
+      castOps.forEach(function (o) { opsBox.appendChild(el('li', { class: 'wb-op wb-op-place', 'data-op': 'place' }, 'place ' + o.window + ' / ' + o.character + ' → ' + o.map_id + ' ' + o.x + ',' + o.y + ' ' + o.dir)); });
+      if (!ids.length) { valBox.appendChild(el('div', { class: 'wb-ok', id: 'wb-valid' }, '✓ ' + (changed.length + castOps.length) + ' draft(s) valid')); return; }
       ids.forEach(function (id) {
         var box = valBox.appendChild(el('div', { class: 'wb-errors', 'data-connection': id }));
         box.appendChild(el('div', { class: 'wb-errors-head' }, id));
@@ -682,10 +902,13 @@
         return;
       }
       var cs = E.buildChangeset(store, draft());
-      exportBox.appendChild(el('div', { class: 'wb-muted' },
-        cs.operations.length + ' changed connection(s). Save as a file, then: node tools/world-apply.js <file> --dry-run'));
+      var castOps = castOpsList();
+      var out = exportObject() || cs;
+      exportBox.appendChild(el('div', { class: 'wb-muted', id: 'wb-export-summary' },
+        cs.operations.length + ' changed connection(s), ' + castOps.length + ' cast placement(s)' + (out.format === C.BUNDLE_FORMAT ? ' (bundle)' : '') +
+        '. Save as a file, then: node tools/world-apply.js <file> --dry-run' + (castOps.length ? ' (add --repin if V5 pins must follow)' : '')));
       var ta = exportBox.appendChild(el('textarea', { id: 'wb-export-text', readonly: 'readonly', spellcheck: 'false' }));
-      ta.value = E.serialize(cs);
+      ta.value = JSON.stringify(out, null, 2) + '\n';
       var copy = button(exportBox, 'COPY', 'copy', function () {
         ta.select();
         var done = function () { copy.textContent = 'COPIED'; };
@@ -699,7 +922,7 @@
       var sc = model.scenes[ui.sceneId];
       var list = items();
       var errs = allErrors();
-      var n = E.changedIds(store, draft()).length;
+      var n = unsavedCount();
       title.textContent = 'WORLD BUILDER · ' + n + ' unsaved change' + (n === 1 ? '' : 's');
       modeBadge.textContent = ui.mode === 'edit' ? 'EDIT' : 'VIEW';
       modeBadge.className = ui.mode === 'edit' ? 'edit' : 'view';
@@ -713,7 +936,7 @@
       exportBtn.disabled = ui.mode !== 'edit';
       if (sceneSel.value !== ui.sceneId) sceneSel.value = ui.sceneId;
       if (momentSel.value !== ui.momentKey) momentSel.value = ui.momentKey;
-      canvas.style.cursor = ui.pending || (ui.creating && (ui.creating.step !== 'confirm' || ui.creating.moving)) ? 'crosshair' : 'pointer';
+      canvas.style.cursor = ui.pending || (ui.creating && (ui.creating.step !== 'confirm' || ui.creating.moving)) || (ui.converting && ui.converting.placing) ? 'crosshair' : 'pointer';
 
       var counts = { 'connection-endpoint': 0, trigger: 0, npc: 0, object: 0, 'legacy-door': 0 };
       list.forEach(function (it) { counts[it.kind]++; });
@@ -748,7 +971,7 @@
     }
 
     canvas.addEventListener('mousemove', function (ev) {
-      if (!ui.pending && !(ui.creating && (ui.creating.step !== 'confirm' || ui.creating.moving))) return;
+      if (!ui.pending && !(ui.creating && (ui.creating.step !== 'confirm' || ui.creating.moving)) && !(ui.converting && ui.converting.placing)) return;
       var t = tileFromEvent(ev);
       if (!t || (ui.hover && ui.hover.tx === t.tx && ui.hover.ty === t.ty)) return;
       ui.hover = t;
@@ -760,6 +983,20 @@
       if (!t) return;
       var p = ui.pending;
       var c = ui.creating;
+      var cv = ui.converting;
+      if (cv) {
+        guard(function () {
+          if (!cv.placing) return;
+          var crec = draft()[cv.connId];
+          var sceneFor = cv.placing === 'aSpawn' ? crec.a.scene : crec.b.scene;
+          if (ui.sceneId !== sceneFor) throw new Error((cv.placing === 'aSpawn' ? 'a.spawn' : 'the b trigger') + ' belongs to ' + sceneFor + ' — switch to that scene first');
+          if (cv.placing === 'aSpawn') cv.aSpawn = { tx: t.tx, ty: t.ty };
+          else cv.bTrigger = [t.tx, t.ty];
+          cv.placing = null;
+          ui.hover = null;
+        });
+        return;
+      }
       if (c) {
         guard(function () {
           if (c.moving) {
@@ -788,7 +1025,14 @@
         return;
       }
       guard(function () {
-        if (p.action === 'move-spawn') {
+        if (p.action === 'move-npc') {
+          if (ui.sceneId !== p.sceneId) { ui.pending = null; throw new Error('MOVE keeps ' + p.character + ' on ' + p.sceneId + ' — switch back to that scene'); }
+          var errs = C.placementErrors(cctx, { map_id: ui.sceneId, x: t.tx, y: t.ty }, occupantsAt(ui.sceneId, t.tx, t.ty, p.character));
+          if (errs.length) { ui.pending = p; ui.hover = null; throw new Error('MOVE refused: ' + errs.join('; ')); }
+          commitCast(C.placeBody(castStore, castDraft(), { window: p.window, character: p.character, map_id: ui.sceneId, x: t.tx, y: t.ty }), 'move ' + p.character);
+          ui.selectedId = ID.npcId(p.character, ui.sceneId);
+          ui.notice = { level: 'info', text: 'Moved ' + p.character + ' (' + p.window + ') to ' + ui.sceneId + ' ' + t.tx + ',' + t.ty + ' in the draft (export to apply).' };
+        } else if (p.action === 'move-spawn') {
           commit(E.setSpawn(draft(), p.connId, p.side, { tx: t.tx, ty: t.ty }), 'move spawn');
           ui.selectedId = ID.endpointId(p.connId, p.side);
         } else if (p.action === 'move-trigger') {
@@ -814,14 +1058,15 @@
         var key = momentSel.value;
         ui.momentCast = key === 'baseline' ? null : WB.castForSeed(G, ui.moments[key]);
         ui.momentKey = key;
+        ui.pending = null;
         var p = ui.selectedId && ID.parse(ui.selectedId);
         if (p && p.kind === ID.KINDS.NPC) ui.selectedId = null;
       });
     });
-    viewBtn.addEventListener('click', function () { ui.mode = 'view'; ui.pending = null; ui.creating = null; ui.confirmDelete = null; ui.exportOpen = false; render(); });
+    viewBtn.addEventListener('click', function () { ui.mode = 'view'; ui.pending = null; ui.creating = null; ui.converting = null; ui.confirmDelete = null; ui.exportOpen = false; render(); });
     newBtn.addEventListener('click', function () {
       if (ui.mode !== 'edit') return;
-      ui.pending = null; ui.confirmDelete = null; ui.selectedId = null; ui.exportOpen = false;
+      ui.pending = null; ui.confirmDelete = null; ui.converting = null; ui.selectedId = null; ui.exportOpen = false;
       ui.creating = { step: 'a', oneWay: false, a: null, b: null, id: '', idEdited: false, spawn: { a: null, b: null }, moving: null };
       render();
     });
@@ -845,7 +1090,13 @@
       render();
     }
     redoBtn.addEventListener('click', redo);
-    revertAllBtn.addEventListener('click', function () { guard(function () { commit(E.revertAll(store), 'revert all'); ui.pending = null; }); });
+    revertAllBtn.addEventListener('click', function () {
+      guard(function () {
+        var next = { conn: E.revertAll(store), cast: castStore ? castStore.base : null };
+        if (next.conn !== draft() || next.cast !== castDraft()) hist = H.commit(hist, next, { label: 'revert all' });
+        ui.pending = null;
+      });
+    });
     exportBtn.addEventListener('click', function () { ui.exportOpen = true; render(); });
     document.addEventListener('keydown', function (ev) {
       var typing = ev.target && (ev.target.tagName === 'TEXTAREA' || ev.target.tagName === 'INPUT');
@@ -853,8 +1104,17 @@
         if (typing) return;
         ev.preventDefault();
         if (ev.shiftKey || ev.key === 'y' || ev.key === 'Y') redo(); else undo();
+      } else if (C.arrowDir(ev.key) && !typing && ui.mode === 'edit' && ui.selectedId && !ui.creating && !ui.converting) {
+        var sel = ID.parse(ui.selectedId);
+        if (!sel || sel.kind !== ID.KINDS.NPC) return;
+        var ref = bodyRef(castBody(sel.npcId));
+        if (!ref) return;
+        ev.preventDefault();
+        guard(function () { commitCast(C.placeBody(castStore, castDraft(), { window: ref.window, character: ref.character, dir: C.arrowDir(ev.key) }), 'face ' + ev.key); });
       } else if (ev.key === 'Escape') {
         if (ui.pending) ui.pending = null;
+        else if (ui.converting && ui.converting.placing) ui.converting.placing = null;
+        else if (ui.converting) ui.converting = null;
         else if (ui.creating && ui.creating.moving) ui.creating.moving = null;
         else if (ui.creating) ui.creating = null;
         else if (ui.confirmDelete) ui.confirmDelete = null;
@@ -877,9 +1137,20 @@
         var errs = allErrors();
         return {
           sceneId: ui.sceneId, mode: ui.mode, selectedId: ui.selectedId, pending: ui.pending && ui.pending.action,
-          momentKey: ui.momentKey, unsaved: E.changedIds(store, draft()).length, changedIds: E.changedIds(store, draft()),
+          momentKey: ui.momentKey, unsaved: unsavedCount(), changedIds: E.changedIds(store, draft()),
           errors: errs, exportOpen: ui.exportOpen, exportBlocked: ui.exportOpen && Object.keys(errs).length > 0,
           canUndo: H.canUndo(hist), canRedo: H.canRedo(hist), ops: draftOps(), confirmDelete: ui.confirmDelete,
+          castOps: castOpsList(), pendingNpc: ui.pending && ui.pending.action === 'move-npc' ? { character: ui.pending.character, window: ui.pending.window } : null,
+          npcs: list.filter(function (it) { return it.kind === 'npc'; }).map(function (it) {
+            var b = castBody(it.characterId);
+            return { characterId: it.characterId, tx: it.tx, ty: it.ty, dir: it.dir, source: b ? b.source : null, owner: b ? b.owner : null, editable: !!bodyRef(b) };
+          }),
+          converting: ui.converting && (function () {
+            var r = conversion();
+            return { connId: ui.converting.connId, to: ui.converting.to, source: ui.converting.source, aSpawn: ui.converting.aSpawn,
+              bTrigger: ui.converting.bTrigger, facing: ui.converting.facing, placing: ui.converting.placing,
+              record: r.record, errors: r.errors, dropped: r.dropped, needsChoice: !!r.needsChoice };
+          }()),
           creating: ui.creating && { step: ui.creating.step, oneWay: ui.creating.oneWay, a: ui.creating.a, b: ui.creating.b, id: ui.creating.id,
             moving: ui.creating.moving, candidate: candidate(), errors: candidateErrors() },
           momentsLoaded: !momentSel.disabled, notice: ui.notice && ui.notice.text,

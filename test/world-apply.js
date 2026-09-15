@@ -11,6 +11,8 @@
  *   M6 (version 2): create + catalog write, delete + catalog write (bytes return to the original), dry-run prints
  *   the catalog diff, rollback of all three files on an injected gen or catalog-check failure, refused delete of
  *   a referenced id, refused duplicate id (registry, catalog, same changeset), scene with no catalog location.
+ *   M7: door gating fields (set, clear, needsClues 0 refused) and PAIRED <-> ONE-WAY conversion as ordinary upserts;
+ *   converting back with the original placements returns every file to its original bytes.
  * Ids created here are assembled at runtime: a literal id in this file would count as a reference.
  */
 
@@ -214,6 +216,53 @@ for (const [label, rel, body] of [['catalog check', 'test/world-engine-v0.1-cata
   fs.writeFileSync(path.join(f, 'js', 'world-catalog.js'), read(f, 'js/world-catalog.js').toString('utf8').replace("{ id: 'ward', sceneId: 'hospital' }", "{ id: 'ward', sceneId: 'hospital_ward' }"));
   const res2 = run(f, CREATE, ['--dry-run']);
   ok(res2.code === 1 && res2.err.includes('scene "hospital" has no catalog location') && res2.err.includes('Locations: double-r (double_r_exterior_prototype, diner); town (town)') && res2.err.includes('hospital (hospital_ward)'), 'scene with no catalog location fails with the location list', res2.err);
+}
+
+// ================= M7: door gating fields + PAIRED <-> ONE-WAY through the ordinary upsert =================
+{
+  const f = makeFixture();
+  const snap = three(f);
+  const baseStore = Edit.createStore(base.connections);
+  // gating: town-hospital endpoint a gets needsClues 2 next to its existing needsFlag/blockedMsg
+  const gated = Edit.setDoorField(baseStore.draft, 'town-hospital', 'a', 'needsClues', 2);
+  const GATE = JSON.parse(Edit.serialize(Edit.buildChangeset(baseStore, gated)));
+  let res = run(f, GATE, ['--dry-run']);
+  ok(res.code === 0 && res.out.includes('TARGET world/connections.json :: town-hospital') && res.out.includes('"needsClues":2') && !res.out.includes('BEFORE {"scene":"hospital"'), 'gating dry-run prints only endpoint a with needsClues', res.out + res.err);
+  res = run(f, GATE);
+  ok(res.code === 0 && JSON.parse(read(f, 'world/connections.json').toString('utf8')).connections.find((c) => c.id === 'town-hospital').a.door.needsClues === 2, 'gating apply writes needsClues', res.out + res.err);
+  ok(read(f, 'js/world-connections.gen.js').toString('utf8').includes('"needsClues": 2'), 'gating lands in the generated binding');
+  const clearStore = Edit.createStore(JSON.parse(read(f, 'world/connections.json').toString('utf8')).connections);
+  const cleared = Edit.setDoorField(clearStore.draft, 'town-hospital', 'a', 'needsClues', '');
+  res = run(f, JSON.parse(Edit.serialize(Edit.buildChangeset(clearStore, cleared))));
+  ok(res.code === 0 && sameThree(f, snap), 'clearing the field returns all three files to the original bytes', res.out + res.err);
+  const zero = JSON.parse(JSON.stringify(GATE)); zero.operations[0].connection.a.door.needsClues = 0;
+  ok(/INVALID town-hospital: a\.door\.needsClues must be a positive integer/.test(refused('needsClues 0', zero, 1).err), 'needsClues 0 refused by the runtime validator verbatim');
+
+  // PAIRED -> ONE-WAY: great-northern-room-315-hall keeps a (room_315) as the source
+  const ow = Edit.toOneWay(baseStore.draft, 'great-northern-room-315-hall');
+  const OW = JSON.parse(Edit.serialize(Edit.buildChangeset(baseStore, ow)));
+  ok(OW.operations.length === 1 && OW.operations[0].op === 'upsert' && OW.operations[0].endpoints.join() === 'a,b', 'to one-way exports one upsert of a,b');
+  res = run(f, OW);
+  const owRec = JSON.parse(read(f, 'world/connections.json').toString('utf8')).connections.find((c) => c.id === 'great-northern-room-315-hall');
+  ok(res.code === 0 && owRec.one_way === true && !owRec.a.spawn && owRec.b.triggers.length === 0 && res.out.includes('CHECK WORLD-ENGINE-V0.1-CATALOG-PASS'), 'to one-way applies and the catalog check stays green', res.out + res.err);
+  ok(catalogOf(f)['great-northern'].includes('great-northern-room-315-hall') && read(f, 'js/world-catalog.js').equals(snap[2]), 'conversion leaves the catalog untouched');
+  const inv7 = nodeIn(f, 'test/legacy-door-inventory.js');
+  ok(inv7.status === 0 && /unowned=0/.test(inv7.stdout), 'legacy-door-inventory green after to one-way', inv7.stdout + inv7.stderr);
+
+  // ONE-WAY -> PAIRED back with the original spawn and trigger: bytes return to the original
+  const owStore = Edit.createStore(JSON.parse(read(f, 'world/connections.json').toString('utf8')).connections);
+  const orig = base.connections.find((c) => c.id === 'great-northern-room-315-hall');
+  assert.throws(() => Edit.toPaired(owStore.draft, 'great-northern-room-315-hall', { aSpawn: orig.a.spawn }), /place a b trigger first/); pass++;
+  const pd = Edit.toPaired(owStore.draft, 'great-northern-room-315-hall', { aSpawn: orig.a.spawn, bTrigger: orig.b.triggers[0] });
+  res = run(f, JSON.parse(Edit.serialize(Edit.buildChangeset(owStore, pd))));
+  ok(res.code === 0 && sameThree(f, snap), 'to paired with the original placements restores all three files byte-identical', res.out + res.err);
+
+  // a hand-edited paired conversion missing b's trigger is refused before writing
+  const half = JSON.parse(JSON.stringify(OW)); delete half.operations[0].connection.one_way;
+  ok(/INVALID great-northern-room-315-hall: (a\.spawn must contain integer tx and ty|b\.triggers must not be empty)/.test(refused('paired without spawn/trigger', half, 1).err), 'paired record without a.spawn / b trigger refused');
+  // a one-way record that still carries a b door is refused
+  const bdoor = JSON.parse(JSON.stringify(OW)); bdoor.operations[0].connection.b.door = { needsFlag: 'x' };
+  ok(/b\.door is not allowed without triggers/.test(refused('one-way b door', bdoor, 1).err), 'one-way arrival with door fields refused');
 }
 
 ok(fs.readFileSync(path.join(REPO, 'world', 'connections.json')).equals(repoRegistryBefore), 'repo world/connections.json untouched');

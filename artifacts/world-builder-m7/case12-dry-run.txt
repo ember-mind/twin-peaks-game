@@ -1,0 +1,9 @@
+TARGET world/connections.json :: arrival-town
+BEFORE {"scene":"arrival","triggers":[[4,8]]}
+AFTER  {"scene":"arrival","triggers":[[4,8]],"spawn":{"tx":4,"ty":7,"dir":"up"}}
+TARGET world/connections.json :: arrival-town
+BEFORE {"scene":"town","triggers":[],"spawn":{"tx":30,"ty":33,"dir":"up"}}
+AFTER  {"scene":"town","triggers":[[29,34]],"spawn":{"tx":30,"ty":33,"dir":"up"}}
+VALID 15 record(s) against real maps
+CATALOG js/world-catalog.js unchanged
+DRY-RUN 2 endpoint change(s); nothing written

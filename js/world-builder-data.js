@@ -285,19 +285,20 @@
     return st;
   }
 
-  // castForSeed(GAME, seed|null) -> frozen { sceneId: [{id,name,sprite,x,y,dir,source}] } from
-  // GAME.CastPresence.resolveCast(state). seed null = baseline (resolveCast(null)). Read-only projection.
-  function castForSeed(GAME, seed) {
+  // castForSeed(GAME, seed|null, castData?) -> frozen { sceneId: [{id,name,sprite,x,y,dir,source,owner}] } from
+  // GAME.CastPresence.resolveCast(state). seed null = baseline (resolveCast(null)). castData (M7): the Builder's
+  // draft copy of narrative/cast/windows.json, resolved by the same resolver through its opts.data.
+  function castForSeed(GAME, seed, castData) {
     var G = GAME || {};
     if (!G.CastPresence || typeof G.CastPresence.resolveCast !== 'function') throw new Error('castForSeed: CastPresence not loaded');
-    var all = G.CastPresence.resolveCast(seed ? storyStateFromSeed(G, seed) : null);
+    var all = G.CastPresence.resolveCast(seed ? storyStateFromSeed(G, seed) : null, castData ? { data: castData } : undefined);
     var out = {};
     Object.keys(all).sort().forEach(function (id) {
       var r = all[id];
       if (r.status !== 'PLACED') return;
       var b = r.body || {};
       (out[r.sceneId] = out[r.sceneId] || []).push({ id: id, name: b.name || id, sprite: b.sprite || null,
-        x: r.x, y: r.y, dir: r.dir || 'down', source: r.source || null });
+        x: r.x, y: r.y, dir: r.dir || 'down', source: r.source || null, owner: r.owner || null });
     });
     return freezeDeep(out);
   }
@@ -335,7 +336,27 @@
     });
   }
 
-  var api = { TILE: TILE, buildWorldSnapshot: buildWorldSnapshot, collectWorldSource: collectWorldSource,
+  // castContext(GAME) -> the injected ctx for Editor.cast.placementErrors: real maps, the runtime's own collision
+  // (GAME.Maps.isSolid with no clues held, the state the door validation assumes for spawns) and legacy map doors.
+  // Registry trigger tiles come from the caller's connection draft (triggerAt), so a moved trigger counts at once.
+  function castContext(GAME, triggerAt) {
+    var G = GAME || {};
+    var maps = G.Maps || {};
+    if (typeof maps.isSolid !== 'function') throw new Error('castContext: GAME.Maps.isSolid not loaded');
+    return Object.freeze({
+      castData: (G.NarrativeData && G.NarrativeData.cast) || null,
+      sceneExists: function (scene) { var m = maps[scene]; return !!(m && typeof m.width === 'number'); },
+      isWalkable: function (scene, x, y) { return !maps.isSolid(scene, x, y, { clues: [] }); },
+      doorAt: function (scene, x, y) {
+        var id = triggerAt ? triggerAt(scene, x, y) : null;
+        if (id) return 'trigger of ' + id;
+        var d = maps[scene] && maps[scene].doors && maps[scene].doors[x + ',' + y];
+        return d && !d.connectionId ? 'legacy map door' : null;
+      }
+    });
+  }
+
+  var api = { TILE: TILE, castContext: castContext, buildWorldSnapshot: buildWorldSnapshot, collectWorldSource: collectWorldSource,
                  planBaseMap: planBaseMap, tileColorFor: tileColorFor, clone: clone, adaptWorld: adaptWorld,
                  storyStateFromSeed: storyStateFromSeed, castForSeed: castForSeed, validationContext: validationContext };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;

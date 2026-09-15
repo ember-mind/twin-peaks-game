@@ -1,0 +1,16 @@
+TARGET narrative/cast/windows.json :: ACT3_TRUMAN_REPORT / truman (owner M5)
+BEFORE {"map_id":"traincar","x":9,"y":8,"dir":"right"}
+AFTER  {"map_id":"traincar","x":10,"y":8,"dir":"right"}
+DIFF narrative/cast/windows.json
+  @@ line 660
+  -           "x": 9,
+  +           "x": 10,
+TRANSITION test/fixtures/cast-transitions-acts-1-4.json C3.1 character=truman after (ACT3_TRAINCAR_REPORT) expected=traincar@9,8 got=traincar@10,8 right [ACT3_TRUMAN_REPORT] — transitions are never repinned
+TRANSITION test/fixtures/cast-transitions-acts-1-4.json C3.2 character=truman before (ACT3_OEJ) expected=traincar@9,8 got=traincar@10,8 right [ACT3_TRUMAN_REPORT] — transitions are never repinned
+TRANSITION test/fixtures/cast-transitions-acts-1-4.json C3.3 character=truman before (ACT3_OEJ) expected=traincar@9,8 got=traincar@10,8 right [ACT3_TRUMAN_REPORT] — transitions are never repinned
+PIN test/fixtures/cast-pins-acts-1-4.json:1123  "truman": "traincar@9,8",  ->  "traincar@10,8"  (ACT3_TRAINCAR_REPORT, resolves traincar@10,8 right [ACT3_TRUMAN_REPORT])
+PIN test/fixtures/cast-pins-acts-1-4.json:1155  "truman": "traincar@9,8",  ->  "traincar@10,8"  (ACT3_NORTH_CUT, resolves traincar@10,8 right [ACT3_TRUMAN_REPORT])
+PIN test/fixtures/cast-pins-acts-1-4.json:1187  "truman": "traincar@9,8",  ->  "traincar@10,8"  (ACT3_OEJ, resolves traincar@10,8 right [ACT3_TRUMAN_REPORT])
+PIN test/fixtures/cast-pins-acts-1-4.json:1251  "truman": "traincar@9,8",  ->  "traincar@10,8"  (ACT3_OEJ_NO_AUDREY, resolves traincar@10,8 right [ACT3_TRUMAN_REPORT])
+PINS 4 V5 pin entries disagree with the new placement; rerun with --repin to update exactly these entries
+world-apply: 8 problem(s); nothing written

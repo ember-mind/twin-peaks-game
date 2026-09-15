@@ -23,6 +23,9 @@
 // One-way records ("one_way": true) are edited under the runtime schema: endpoint b takes no triggers
 // (addTrigger/moveTrigger refuse), endpoint a has no spawn (setSpawn refuses).
 //
+// M7: door gating fields (setDoorField) and PAIRED <-> ONE-WAY conversion (toOneWay / toPaired) are ordinary
+// draft edits, so they export as an `upsert` naming both endpoints; no new op, no new changeset version.
+//
 // Validation is injected: validateDraft(record, ctx) knows the rule list, the caller supplies the
 // world-aware predicates (scene lookup, the runtime connection validator), so this file stays game-free.
 
@@ -270,6 +273,103 @@
     return out;
   }
 
+  // ---- M7: door gating fields + PAIRED <-> ONE-WAY conversion (both land as an upsert) ---------------
+
+  const DOOR_KEYS = ['needsFlag', 'blockedMsg', 'needsClues'];
+
+  // setDoorField(draft, connId, side, key, value) — door fields live on the endpoint that owns the trigger.
+  // value null / undefined / '' removes the key (and the door object once it is empty). needsFlag and
+  // blockedMsg are non-empty strings; needsClues is an integer >= 1.
+  function setDoorField(draft, connId, side, key, value) {
+    const rec = requireEndpoint(draft, connId, side);
+    if (DOOR_KEYS.indexOf(key) === -1) fail('unknown door field "' + key + '" (use ' + DOOR_KEYS.join(', ') + ')');
+    if (!Array.isArray(rec[side].triggers) || rec[side].triggers.length === 0) {
+      fail('endpoint ' + side + ' of ' + connId + ' owns no trigger; door fields live on the endpoint that owns the trigger');
+    }
+    const clear = value === null || value === undefined || value === '';
+    let v = value;
+    if (!clear) {
+      if (key === 'needsClues') {
+        v = toInt(value, 'door.needsClues');
+        if (v < 1) fail('door.needsClues must be an integer >= 1, got ' + v);
+      } else if (typeof value !== 'string') {
+        fail('door.' + key + ' must be a string, got ' + JSON.stringify(value));
+      }
+    }
+    return withEndpoint(draft, connId, side, function (ep) {
+      const door = Object.assign({}, ep.door || {});
+      if (clear) delete door[key]; else door[key] = v;
+      if (Object.keys(door).length) ep.door = door; else delete ep.door;
+    });
+  }
+
+  function replaceRecord(draft, rec) {
+    const next = Object.assign({}, draft);
+    next[rec.id] = freezeDeep(rec);
+    return Object.freeze(next);
+  }
+
+  // planOneWay(record, opts) -> { record, dropped: [text], needsChoice } — the pure conversion, no draft.
+  // opts.source 'a' (default) keeps a's triggers and b's spawn; 'b' swaps the sides first so b's triggers
+  // become a's. The side that loses its triggers may hold at most one unless opts.source is given
+  // explicitly (the author picked). Fields that cannot exist on the arrival side (door, departureReaction)
+  // and the source side's spawn are dropped and listed.
+  function planOneWay(record, opts) {
+    opts = opts || {};
+    if (!record) fail('planOneWay needs a record');
+    if (isOneWay(record)) fail('connection ' + record.id + ' is already one-way');
+    if (opts.source !== undefined && SIDES.indexOf(opts.source) === -1) fail('one-way source must be "a" or "b", got ' + JSON.stringify(opts.source));
+    const source = opts.source || 'a', arrival = source === 'a' ? 'b' : 'a';
+    const lost = (record[arrival].triggers || []).length;
+    if (opts.source === undefined && lost > 1) {
+      return { record: null, dropped: [], needsChoice: true,
+        reason: 'endpoint ' + arrival + ' of ' + record.id + ' has ' + lost + ' triggers; pick which endpoint keeps its triggers as the one-way source' };
+    }
+    const src = clone(record[source]), arr = clone(record[arrival]);
+    const dropped = [];
+    if (src.spawn) dropped.push(source + '.spawn ' + src.spawn.tx + ',' + src.spawn.ty + ' ' + src.spawn.dir);
+    if (lost) dropped.push(arrival + '.triggers ' + arr.triggers.map(function (t) { return t[0] + ',' + t[1]; }).join(' '));
+    if (arr.door) dropped.push(arrival + '.door ' + JSON.stringify(arr.door));
+    if (arr.departureReaction !== undefined) dropped.push(arrival + '.departureReaction ' + JSON.stringify(arr.departureReaction));
+    delete src.spawn;
+    arr.triggers = [];
+    delete arr.door;
+    delete arr.departureReaction;
+    return { record: { id: record.id, one_way: true, a: src, b: arr }, dropped: dropped, needsChoice: false };
+  }
+
+  // toOneWay(draft, connId, opts) -> draft; refuses when planOneWay needs the author's choice.
+  function toOneWay(draft, connId, opts) {
+    if (!has(draft, connId)) fail('unknown connection id "' + connId + '"');
+    const plan = planOneWay(draft[connId], opts);
+    if (plan.needsChoice) fail(plan.reason);
+    return replaceRecord(draft, plan.record);
+  }
+
+  // planPaired(record, place) -> record. place = { aSpawn: {tx,ty,dir}, bTrigger: [x,y] }: a one-way record
+  // has no a.spawn and no b trigger, so both must be placed by the author; nothing is defaulted.
+  function planPaired(record, place) {
+    if (!record) fail('planPaired needs a record');
+    if (!isOneWay(record)) fail('connection ' + record.id + ' is already paired');
+    place = place || {};
+    const missing = [];
+    if (!place.aSpawn) missing.push('a.spawn');
+    if (!place.bTrigger) missing.push('a b trigger');
+    if (missing.length) fail('to make ' + record.id + ' paired, place ' + missing.join(' and ') + ' first');
+    if (FACINGS.indexOf(place.aSpawn.dir) === -1) fail('facing must be up/down/left/right, got ' + JSON.stringify(place.aSpawn.dir));
+    const rec = clone(record);
+    delete rec.one_way;
+    const out = { id: rec.id, a: rec.a, b: rec.b };
+    out.a.spawn = { tx: toInt(place.aSpawn.tx, 'a.spawn.tx'), ty: toInt(place.aSpawn.ty, 'a.spawn.ty'), dir: place.aSpawn.dir };
+    out.b.triggers = [[toInt(place.bTrigger[0], 'b trigger x'), toInt(place.bTrigger[1], 'b trigger y')]];
+    return out;
+  }
+
+  function toPaired(draft, connId, place) {
+    if (!has(draft, connId)) fail('unknown connection id "' + connId + '"');
+    return replaceRecord(draft, planPaired(draft[connId], place));
+  }
+
   // revertConnection: put the base record back (or drop a record the base never had).
   function revertConnection(store, draft, connId) {
     if (!has(store.base, connId) && !has(draft, connId)) fail('unknown connection id "' + connId + '"');
@@ -415,6 +515,7 @@
     canonical, isOneWay, createStore, setSpawn, moveTrigger, addTrigger, removeTrigger,
     suggestId, interiorFacing, spawnInFront, newConnection, idErrors, createConnection, deleteConnection,
     isCreated, isDeleted, claimConflicts,
+    DOOR_KEYS, setDoorField, planOneWay, toOneWay, planPaired, toPaired,
     revertConnection, revertAll, changedEndpoints, changedIds, isChanged,
     buildChangeset, serialize, reapply, validateDraft
   });

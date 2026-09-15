@@ -24,6 +24,17 @@
  *  10  M6: a temp repo copy gets case 8's changeset applied for real (--root=); the Builder served from that copy
  *          deletes the record (confirm step), the v2 delete is applied, and test/world-engine-v0.1-catalog.js +
  *          test/legacy-door-inventory.js pass on the copy; the real repo's registry and catalog hashes never change
+ *  11  M7: great-northern-room-315-hall / a (room_315): door fields set + cleared in EDIT, CONVERT TO ONE-WAY with the
+ *          dropped-field list and CONFIRM, export upsert, tools/world-apply.js --dry-run VALID; double-r-front-entrance
+ *          (2 triggers on b) asks for the source side before CONFIRM is enabled
+ *  12  M7: one-way arrival-town: CONVERT TO PAIRED stays disabled until a.spawn (arrival 4,7) and a b trigger
+ *          (town 29,34) are placed, CONFIRM, inspector paired, export upsert, --dry-run VALID
+ *  13  M7: story moment ACT3_TRAINCAR_REPORT, traincar: Truman's inspector names window ACT3_TRUMAN_REPORT (owner M5); EDIT,
+ *          MOVE to 10,8, arrow keys set facing, export a cast-windows-changeset; --dry-run's windows.json diff is that
+ *          window's x line only, and the run fails on the V6 transitions that pin Truman (never repinned)
+ *  14  M7: ACT4_AFTERNOON, sheriff: MOVE Truman (baseline) onto Lucy's tile 2,6 is refused with a message
+ *  15  M7: same body onto the station door trigger 7,11 and onto a wall refused; then Lucy MOVE 3,6 plus a door field on
+ *          sheriffs-station-front-entrance exports a world-builder-bundle; --dry-run --repin on it exits 0
  * Ids created here are assembled at runtime: a literal id in this file would count as a reference to world-apply.
  */
 
@@ -36,6 +47,7 @@ const { spawn, spawnSync } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'artifacts', 'world-builder-m6');
+const OUT7 = path.join(ROOT, 'artifacts', 'world-builder-m7');
 const CATALOG = path.join(ROOT, 'js', 'world-catalog.js');
 const CHROME = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const REGISTRY = path.join(ROOT, 'world', 'connections.json');
@@ -94,6 +106,7 @@ class Cdp {
 
 async function main() {
   fs.mkdirSync(OUT, { recursive: true });
+  fs.mkdirSync(OUT7, { recursive: true });
   const shaStart = sha();
   const catalogShaStart = sha(CATALOG);
   const port = await freePort();
@@ -139,10 +152,10 @@ async function main() {
     if (fatal) throw new Error(fatal);
     await waitFor('WB.state().momentsLoaded');
   }
-  async function shot(name) {
+  async function shot(name, dir = OUT) {
     await sleep(120);
     const r = await cdp.send('Page.captureScreenshot', { format: 'png' });
-    const file = path.join(OUT, name);
+    const file = path.join(dir, name);
     fs.writeFileSync(file, Buffer.from(r.data, 'base64'));
     console.log('  shot ' + path.relative(ROOT, file));
     return file;
@@ -174,6 +187,11 @@ async function main() {
   }
   async function typeInput(id, value) {
     await cdp.eval(`(() => { const s = document.getElementById('${id}'); s.value = ${JSON.stringify(String(value))}; s.dispatchEvent(new Event('input')); })()`);
+    await sleep(80);
+  }
+  async function pressKey(key, code, vk) {
+    await cdp.send('Input.dispatchKeyEvent', { type: 'keyDown', key, code, windowsVirtualKeyCode: vk });
+    await cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, windowsVirtualKeyCode: vk });
     await sleep(80);
   }
   const text = (id) => cdp.eval(`(() => { const e = document.getElementById('${id}'); return e ? e.innerText : null; })()`);
@@ -562,6 +580,236 @@ async function main() {
       fs.writeFileSync(path.join(OUT, 'case10-copy-checks.txt'), cat.stdout.trim().split('\n').pop() + '\n' + inv.stdout.trim().split('\n').pop() + '\n');
       check('case 10: copy registry, gen and catalog are byte-identical to before the create', three().every((b, i) => b.equals(original[i])));
       check('case 10: real repo world/connections.json and js/world-catalog.js hashes unchanged', sha() === shaStart && sha(CATALOG) === catalogShaStart);
+    }
+
+    // ---------------- case 11 (M7): door gating fields + PAIRED -> ONE-WAY
+    {
+      console.log('\ncase 11: door fields + CONVERT TO ONE-WAY on great-northern-room-315-hall');
+      await load();
+      const HALL = 'great-northern-room-315-hall';
+      const orig = registryRecord(HALL);
+      await setSelect('wb-scene', 'room_315');
+      await clickTile(orig.a.spawn.tx, orig.a.spawn.ty);
+      let s = await state();
+      check('case 11: VIEW inspector shows the endpoint ungated', s.selectedId === `connection-endpoint:${HALL}:a` && (await text('wb-door')) === 'ungated', s.selectedId);
+      await clickAction('mode-edit');
+      check('case 11: EDIT shows the three door fields', await cdp.eval("['needsFlag','blockedMsg','needsClues'].every((k) => !!document.getElementById('wb-door-' + k))"));
+      await setInput('wb-door-needsFlag', 'atto3');
+      await setInput('wb-door-needsClues', '2');
+      s = await state();
+      check('case 11: needsFlag + needsClues land on endpoint a as an upsert', JSON.stringify(s.draft[HALL].a.door) === '{"needsFlag":"atto3","needsClues":2}' && JSON.stringify(s.ops) === JSON.stringify([{ id: HALL, op: 'upsert' }]) && Object.keys(s.errors).length === 0, s.draft[HALL].a);
+      await setInput('wb-door-needsClues', '0');
+      s = await state();
+      check('case 11: needsClues 0 refused with a message, draft unchanged', /needsClues must be an integer >= 1/.test(s.notice || '') && s.draft[HALL].a.door.needsClues === 2, s.notice);
+      await shot('case11-door-fields.png', OUT7);
+      await setInput('wb-door-needsClues', '');
+      s = await state();
+      check('case 11: clearing a field removes the key', JSON.stringify(s.draft[HALL].a.door) === '{"needsFlag":"atto3"}', s.draft[HALL].a);
+      await setInput('wb-door-needsFlag', '');
+      s = await state();
+      check('case 11: clearing the last field removes door and the draft', !('door' in s.draft[HALL].a) && s.unsaved === 0, s.draft[HALL].a);
+
+      await clickAction('convert-one-way');
+      s = await state();
+      check('case 11: CONVERT TO ONE-WAY lists what it drops and is valid', s.converting && s.converting.to === 'one-way' && s.converting.errors.length === 0 &&
+        JSON.stringify(s.converting.dropped) === JSON.stringify([`a.spawn ${orig.a.spawn.tx},${orig.a.spawn.ty} ${orig.a.spawn.dir}`, `b.triggers ${orig.b.triggers.map((t) => t.join(',')).join(' ')}`]) && (await enabled('convert-confirm')), s.converting);
+      check('case 11: world/connections.json unchanged before confirm', sha() === shaStart);
+      await shot('case11-convert-one-way.png', OUT7);
+      await clickAction('convert-confirm');
+      s = await state();
+      const ow = s.draft[HALL];
+      check('case 11: CONFIRM makes the record one-way in the draft', !s.converting && ow.one_way === true && !ow.a.spawn && ow.b.triggers.length === 0 && JSON.stringify(ow.b.spawn) === JSON.stringify(orig.b.spawn) && Object.keys(s.errors).length === 0, ow);
+      const insp = await text('wb-inspector');
+      check('case 11: inspector shows ONE-WAY room_315 → hotel_gn at once', insp.includes('ONE-WAY room_315 → hotel_gn') && !s.items.some((i) => i.id === `connection-endpoint:${HALL}:a`), insp);
+      await shot('case11-one-way.png', OUT7);
+      await clickAction('export');
+      const exported = await cdp.eval("document.getElementById('wb-export-text').value");
+      const cs = JSON.parse(exported);
+      check('case 11: export is one upsert naming a and b', cs.version === 2 && cs.operations.length === 1 && cs.operations[0].op === 'upsert' && cs.operations[0].endpoints.join() === 'a,b' && cs.operations[0].connection.one_way === true, cs);
+      const file = path.join(OUT7, 'case11-changeset.json');
+      fs.writeFileSync(file, exported);
+      const dry = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'world-apply.js'), file, '--dry-run'], { encoding: 'utf8' });
+      fs.writeFileSync(path.join(OUT7, 'case11-dry-run.txt'), dry.stdout + dry.stderr);
+      check('case 11: world-apply --dry-run VALID 15, catalog unchanged', dry.status === 0 && dry.stdout.includes('VALID 15 record(s)') && dry.stdout.includes('CATALOG js/world-catalog.js unchanged'), dry.stdout + dry.stderr);
+
+      // two triggers on the arrival side: the author has to pick the source
+      await clickAction('revert-all');
+      await setSelect('wb-scene', 'diner');
+      const dr = registryRecord('double-r-front-entrance');
+      await clickTile(dr.b.spawn.tx, dr.b.spawn.ty);
+      await clickAction('convert-one-way');
+      s = await state();
+      check('case 11: 2 triggers on b -> pick the source first, CONFIRM disabled', s.converting.needsChoice && /endpoint b of double-r-front-entrance has 2 triggers/.test(s.converting.errors[0]) && !(await enabled('convert-confirm')), s.converting);
+      await shot('case11-pick-source.png', OUT7);
+      await clickAction('convert-source-b');
+      s = await state();
+      check('case 11: source b keeps b triggers as the one-way source, CONFIRM enabled once valid', s.converting.record && s.converting.record.a.scene === 'diner' && s.converting.record.a.triggers.length === 2 && s.converting.errors.length === 0 && (await enabled('convert-confirm')), s.converting);
+      await clickAction('convert-cancel');
+      s = await state();
+      check('case 11: CANCEL leaves the draft untouched', !s.converting && s.unsaved === 0, s.unsaved);
+      check('case 11: world/connections.json unchanged', sha() === shaStart);
+    }
+
+    // ---------------- case 12 (M7): ONE-WAY -> PAIRED
+    {
+      console.log('\ncase 12: CONVERT TO PAIRED on arrival-town');
+      await load();
+      const AT = 'arrival-town';
+      await setSelect('wb-scene', 'arrival');
+      await clickTile(4, 8);
+      await clickAction('mode-edit');
+      let s = await state();
+      check('case 12: one-way source trigger selected, CONVERT TO PAIRED offered', s.selectedId === `trigger:${AT}:a:0` && (await enabled('convert-paired')), s.selectedId);
+      await clickAction('convert-paired');
+      s = await state();
+      check('case 12: CONFIRM disabled until a.spawn and b trigger are placed', s.converting.to === 'paired' && s.converting.errors.join('|') === 'place a.spawn in arrival|place a b trigger in town' && !(await enabled('convert-confirm')), s.converting);
+      await clickAction('convert-place-a-spawn');
+      await clickTile(4, 7);
+      s = await state();
+      check('case 12: a.spawn placed at arrival 4,7, still waiting for the b trigger', JSON.stringify(s.converting.aSpawn) === '{"tx":4,"ty":7}' && s.converting.errors.join('|') === 'place a b trigger in town' && !(await enabled('convert-confirm')), s.converting);
+      await shot('case12-a-spawn-placed.png', OUT7);
+      await clickAction('convert-place-b-trigger');
+      s = await state();
+      check('case 12: PLACE B TRIGGER switches to town', s.sceneId === 'town' && s.converting.placing === 'bTrigger', s.sceneId);
+      await clickTile(29, 34);
+      s = await state();
+      check('case 12: both placed -> valid, CONFIRM enabled', JSON.stringify(s.converting.bTrigger) === '[29,34]' && s.converting.errors.length === 0 && (await enabled('convert-confirm')), s.converting);
+      await shot('case12-b-trigger-placed.png', OUT7);
+      check('case 12: world/connections.json unchanged before confirm', sha() === shaStart);
+      await clickAction('convert-confirm');
+      s = await state();
+      const pr = s.draft[AT];
+      check('case 12: CONFIRM makes arrival-town paired in the draft', !s.converting && !('one_way' in pr) && JSON.stringify(pr.a.spawn) === '{"tx":4,"ty":7,"dir":"up"}' && JSON.stringify(pr.b.triggers) === '[[29,34]]' && Object.keys(s.errors).length === 0, pr);
+      check('case 12: inspector shows paired and the a spawn marker at once', (await text('wb-direction')) === 'paired' && s.sceneId === 'arrival' && s.items.some((i) => i.id === `connection-endpoint:${AT}:a` && i.tx === 4 && i.ty === 7), s.items);
+      await shot('case12-paired.png', OUT7);
+      await clickAction('export');
+      const exported = await cdp.eval("document.getElementById('wb-export-text').value");
+      const cs = JSON.parse(exported);
+      check('case 12: export is one upsert naming a and b without one_way', cs.operations.length === 1 && cs.operations[0].op === 'upsert' && cs.operations[0].endpoints.join() === 'a,b' && !('one_way' in cs.operations[0].connection), cs);
+      const file = path.join(OUT7, 'case12-changeset.json');
+      fs.writeFileSync(file, exported);
+      const dry = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'world-apply.js'), file, '--dry-run'], { encoding: 'utf8' });
+      fs.writeFileSync(path.join(OUT7, 'case12-dry-run.txt'), dry.stdout + dry.stderr);
+      check('case 12: world-apply --dry-run VALID 15', dry.status === 0 && dry.stdout.includes('VALID 15 record(s)') && dry.stdout.includes('DRY-RUN 2 endpoint change(s)'), dry.stdout + dry.stderr);
+      await clickAction('undo');
+      s = await state();
+      check('case 12: UNDO restores the one-way record', s.draft[AT].one_way === true && s.unsaved === 0, s.draft[AT]);
+      check('case 12: world/connections.json unchanged', sha() === shaStart);
+    }
+
+    // ---------------- case 13 (M7): move Truman inside his story window, export, dry-run
+    const windowsSha = () => sha(path.join(ROOT, 'narrative', 'cast', 'windows.json'));
+    const windowsShaStart = windowsSha();
+    {
+      console.log('\ncase 13: MOVE Truman at ACT3_TRAINCAR_REPORT');
+      await load();
+      await setSelect('wb-moment', 'ACT3_TRAINCAR_REPORT');
+      await setSelect('wb-scene', 'traincar');
+      await clickTile(9, 8);
+      let s = await state();
+      const truman = s.npcs.find((n) => n.characterId === 'truman');
+      check('case 13: Truman resolves at traincar 9,8 through window ACT3_TRUMAN_REPORT (owner M5)', s.selectedId === 'npc:truman:traincar' && truman && truman.source === 'ACT3_TRUMAN_REPORT' && truman.owner === 'M5' && truman.editable, truman);
+      check('case 13: inspector names the source window and owner', (await text('wb-npc-source')) === 'window ACT3_TRUMAN_REPORT · owner M5', await text('wb-npc-source'));
+      check('case 13: VIEW offers no MOVE', !(await cdp.eval("!!document.querySelector('[data-action=\"move-npc\"]')")));
+      await shot('case13-truman-view.png', OUT7);
+      await clickAction('mode-edit');
+      await clickAction('move-npc');
+      s = await state();
+      check('case 13: MOVE arms a tile pick for truman', s.pendingNpc && s.pendingNpc.character === 'truman' && s.pendingNpc.window === 'ACT3_TRUMAN_REPORT', s.pendingNpc);
+      await clickTile(10, 8);
+      s = await state();
+      let t = s.npcs.find((n) => n.characterId === 'truman');
+      check('case 13: Truman drawn at 10,8 at once, still selected, 1 unsaved change', t.tx === 10 && t.ty === 8 && s.selectedId === 'npc:truman:traincar' && s.unsaved === 1 && !s.pendingNpc, t);
+      await pressKey('ArrowUp', 'ArrowUp', 38);
+      s = await state();
+      check('case 13: ArrowUp sets facing up', s.npcs.find((n) => n.characterId === 'truman').dir === 'up' && s.castOps[0].dir === 'up', s.castOps);
+      await pressKey('ArrowRight', 'ArrowRight', 39);
+      s = await state();
+      check('case 13: ArrowRight sets facing back to right; one place op, x only', JSON.stringify(s.castOps) === JSON.stringify([{ op: 'place', window: 'ACT3_TRUMAN_REPORT', character: 'truman', map_id: 'traincar', x: 10, y: 8, dir: 'right' }]), s.castOps);
+      check('case 13: validation lists the place op', (await text('wb-draft-ops')).includes('place ACT3_TRUMAN_REPORT / truman → traincar 10,8 right'), await text('wb-draft-ops'));
+      await shot('case13-truman-moved.png', OUT7);
+      await pressUndo();
+      s = await state();
+      check('case 13: Ctrl+Z undoes the facing change', s.castOps[0].dir === 'up', s.castOps);
+      await clickAction('redo');
+      await clickAction('export');
+      const exported = await cdp.eval("document.getElementById('wb-export-text').value");
+      const cs = JSON.parse(exported);
+      check('case 13: export is a bare cast-windows-changeset (no connection drafts)', cs.format === 'cast-windows-changeset' && cs.version === 1 && cs.target === 'narrative/cast/windows.json' && cs.operations.length === 1 && cs.operations[0].x === 10, cs);
+      await shot('case13-export.png', OUT7);
+      const file = path.join(OUT7, 'case13-changeset.json');
+      fs.writeFileSync(file, exported);
+      const dry = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'world-apply.js'), file, '--dry-run'], { encoding: 'utf8' });
+      fs.writeFileSync(path.join(OUT7, 'case13-dry-run.txt'), dry.stdout + dry.stderr);
+      const diff = dry.stdout.split('\n').filter((l) => /^ {2}(@@|-|\+)/.test(l));
+      const windowsLines = fs.readFileSync(path.join(ROOT, 'narrative', 'cast', 'windows.json'), 'utf8').split('\n');
+      const hunk = diff[0] ? Number(/@@ line (\d+)/.exec(diff[0])[1]) : -1;
+      const owner = windowsLines.slice(0, hunk).reverse().find((l) => /"id": "/.test(l));
+      check('case 13: dry-run diff is one hunk: that window\'s "x": 9 -> 10', diff.length === 3 && /^-\s+"x": 9,$/.test(diff[1].trim()) && /^\+\s+"x": 10,$/.test(diff[2].trim()) && owner && owner.includes('"id": "ACT3_TRUMAN_REPORT"'), diff);
+      check('case 13: dry-run fails on the V6 transitions that pin Truman (C3.1/C3.2/C3.3), nothing written', dry.status === 1 && /TRANSITION .* C3\.1 character=truman/.test(dry.stderr) && /C3\.3 character=truman/.test(dry.stderr) && windowsSha() === windowsShaStart, dry.stderr);
+      check('case 13: world/connections.json and narrative/cast/windows.json unchanged', sha() === shaStart && windowsSha() === windowsShaStart);
+    }
+
+    // ---------------- case 14 (M7): refuse a move onto Lucy
+    {
+      console.log('\ncase 14: MOVE Truman onto Lucy refused');
+      await load();
+      await setSelect('wb-moment', 'ACT4_AFTERNOON');
+      await setSelect('wb-scene', 'sheriff');
+      await clickTile(10, 4);
+      await clickAction('mode-edit');
+      let s = await state();
+      check('case 14: Truman at ACT4_AFTERNOON is the baseline body', s.selectedId === 'npc:truman:sheriff' && (await text('wb-npc-source')) === 'baseline (PERSISTENT)', await text('wb-npc-source'));
+      const lucy = s.npcs.find((n) => n.characterId === 'lucy');
+      check('case 14: Lucy stands at sheriff 2,6', lucy && lucy.tx === 2 && lucy.ty === 6, lucy);
+      await clickAction('move-npc');
+      await clickTile(2, 6);
+      s = await state();
+      check('case 14: MOVE onto Lucy refused with a message, draft unchanged, pick still armed', /MOVE refused: sheriff 2,6 is occupied by lucy/.test(s.notice || '') && s.castOps.length === 0 && s.unsaved === 0 && s.pendingNpc && s.pendingNpc.character === 'truman', s.notice);
+      await shot('case14-refused-lucy.png', OUT7);
+    }
+
+    // ---------------- case 15 (M7): refuse door tile and wall; bundle export
+    {
+      console.log('\ncase 15: MOVE onto a door refused; bundle export');
+      await clickTile(7, 11);
+      let s = await state();
+      check('case 15: MOVE onto the station door trigger 7,11 refused', /MOVE refused: sheriff 7,11 is a door trigger tile \(trigger of sheriffs-station-front-entrance\)/.test(s.notice || '') && s.castOps.length === 0, s.notice);
+      await shot('case15-refused-door.png', OUT7);
+      await clickTile(0, 0);
+      s = await state();
+      check('case 15: MOVE onto a wall refused', /MOVE refused: sheriff 0,0 is not walkable/.test(s.notice || '') && s.castOps.length === 0, s.notice);
+      await pressKey('Escape', 'Escape', 27);
+      s = await state();
+      check('case 15: Escape disarms the pick', !s.pendingNpc, s.pendingNpc);
+
+      await clickTile(2, 6);
+      await clickAction('move-npc');
+      await clickTile(3, 6);
+      s = await state();
+      check('case 15: Lucy (baseline) moves to 3,6', JSON.stringify(s.castOps) === JSON.stringify([{ op: 'place', window: 'baseline', character: 'lucy', map_id: 'sheriff', x: 3, y: 6, dir: 'down' }]), s.castOps);
+      await clickTile(7, 11);
+      s = await state();
+      check('case 15: the door trigger selects its endpoint', s.selectedId === 'trigger:sheriffs-station-front-entrance:b:0', s.selectedId);
+      await setInput('wb-door-needsFlag', 'sogno_fatto');
+      s = await state();
+      check('case 15: 2 unsaved changes across connections and cast', s.unsaved === 2 && s.ops.length === 1 && s.castOps.length === 1, s);
+      await clickAction('export');
+      const exported = await cdp.eval("document.getElementById('wb-export-text').value");
+      const bundle = JSON.parse(exported);
+      check('case 15: export is a world-builder-bundle with one changeset per target', bundle.format === 'world-builder-bundle' && bundle.version === 1 && bundle.changesets.length === 2 &&
+        bundle.changesets[0].target === 'world/connections.json' && bundle.changesets[1].target === 'narrative/cast/windows.json' && (await text('wb-export-summary')).includes('(bundle)'), bundle);
+      await shot('case15-bundle-export.png', OUT7);
+      const file = path.join(OUT7, 'case15-bundle.json');
+      fs.writeFileSync(file, exported);
+      const dry = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'world-apply.js'), file, '--dry-run', '--repin'], { encoding: 'utf8' });
+      fs.writeFileSync(path.join(OUT7, 'case15-dry-run.txt'), dry.stdout + dry.stderr);
+      check('case 15: --dry-run --repin on the bundle exits 0 with both parts and 24 repins previewed', dry.status === 0 && dry.stdout.includes('TARGET world/connections.json :: sheriffs-station-front-entrance') &&
+        dry.stdout.includes('TARGET narrative/cast/windows.json :: baseline / lucy') && (dry.stdout.match(/^REPIN /gm) || []).length === 24 && dry.stdout.includes('DRY-RUN 1 cast placement change(s), 24 repin(s); nothing written'), dry.stdout + dry.stderr);
+      await clickAction('revert-all');
+      s = await state();
+      check('case 15: REVERT ALL clears both drafts', s.unsaved === 0 && s.castOps.length === 0, s.unsaved);
+      check('case 15: world/connections.json and narrative/cast/windows.json unchanged', sha() === shaStart && windowsSha() === windowsShaStart);
     }
   } catch (e) {
     check('driver completed without exception', false, String(e && e.stack || e));

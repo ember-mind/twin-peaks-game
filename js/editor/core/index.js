@@ -25,7 +25,8 @@
      ['validation', 'validation'],
      ['interaction', 'interaction'],
      ['inspector', 'inspector'],
-     ['edit', 'edit']
+     ['edit', 'edit'],
+     ['cast', 'cast']
     ];
 
     // node: require each sibling so it exports its API; the core stays game-agnostic because no piece reads

@@ -1,0 +1,40 @@
+TARGET world/connections.json :: sheriffs-station-front-entrance
+BEFORE {"scene":"sheriff","triggers":[[7,11],[8,11]],"spawn":{"tx":7,"ty":10,"dir":"up"}}
+AFTER  {"scene":"sheriff","triggers":[[7,11],[8,11]],"spawn":{"tx":7,"ty":10,"dir":"up"},"door":{"needsFlag":"sogno_fatto"}}
+TARGET narrative/cast/windows.json :: baseline / lucy (owner PERSISTENT)
+BEFORE {"map_id":"sheriff","x":2,"y":6,"dir":"down"}
+AFTER  {"map_id":"sheriff","x":3,"y":6,"dir":"down"}
+DIFF narrative/cast/windows.json
+  @@ line 66
+  -         "x": 2,
+  +         "x": 3,
+VALID 15 record(s) against real maps
+CATALOG js/world-catalog.js unchanged
+VALID 1 cast placement(s): walkable, no door tile, unoccupied; V6 transitions agree
+REPIN test/fixtures/cast-pins-acts-1-4.json:1029  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT1_TOWN, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1061  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT2_DAY2, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1093  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT3_BRIDGE, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1125  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT3_TRAINCAR_REPORT, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1157  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT3_NORTH_CUT, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1189  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT3_OEJ, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1221  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT3_OEJ_AUDREY_SEEN, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1253  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT3_OEJ_NO_AUDREY, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1285  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT3_AFTER_ARREST, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1317  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT3_GUARDED_HOSPITAL, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1349  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT3_NIGHT_STATION, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1381  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT4_AFTERNOON, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1413  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT4_PROMISE_MADE, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1445  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT4_EVENING_GATHERING, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1477  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT4_ROADHOUSE_PRE_PHONE, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1509  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT4_POST_PHONE_INSIDE_PALMER, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1541  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT4_POST_PHONE_INSIDE_CENTRALE, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1573  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT4_POST_PHONE_INSIDE_NESSUNO, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1605  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT4_ROUTE_PALMER, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1637  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT4_ROUTE_DINER, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1669  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT4_ROUTE_LAKE, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1701  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT4_SHORE_HAWK, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1733  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT4_SHORE_COOPER_AFTER, resolves sheriff@3,6 down [BASELINE])
+REPIN test/fixtures/cast-pins-acts-1-4.json:1765  "lucy": "sheriff@2,6",  ->  "sheriff@3,6"  (ACT4_STATION_BEFORE_DAWN, resolves sheriff@3,6 down [BASELINE])
+AUDIT artifacts/world-character-audit/cast-windows-acts-1-4.md - 2026-09-14 · window baseline (PERSISTENT) · lucy · sheriff@2,6 down → sheriff@3,6 down · pins ACT1_TOWN, ACT2_DAY2, ACT3_BRIDGE, ACT3_TRAINCAR_REPORT, ACT3_NORTH_CUT, ACT3_OEJ, ACT3_OEJ_AUDREY_SEEN, ACT3_OEJ_NO_AUDREY, ACT3_AFTER_ARREST, ACT3_GUARDED_HOSPITAL, ACT3_NIGHT_STATION, ACT4_AFTERNOON, ACT4_PROMISE_MADE, ACT4_EVENING_GATHERING, ACT4_ROADHOUSE_PRE_PHONE, ACT4_POST_PHONE_INSIDE_PALMER, ACT4_POST_PHONE_INSIDE_CENTRALE, ACT4_POST_PHONE_INSIDE_NESSUNO, ACT4_ROUTE_PALMER, ACT4_ROUTE_DINER, ACT4_ROUTE_LAKE, ACT4_SHORE_HAWK, ACT4_SHORE_COOPER_AFTER, ACT4_STATION_BEFORE_DAWN · changeset case15-bundle.json
+DRY-RUN 1 endpoint change(s); nothing written
+DRY-RUN 1 cast placement change(s), 24 repin(s); nothing written

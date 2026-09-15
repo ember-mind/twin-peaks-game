@@ -23,8 +23,10 @@ jobs:
          run: node test/world-builder.js
        - name: Editor core - changeset (v1 + v2 create/delete)
          run: node test/editor/changeset.js
-       - name: Editor core - edit (incl. create/delete drafts)
+       - name: Editor core - edit (incl. create/delete drafts, door gating, paired/one-way conversion)
          run: node test/editor/edit.js
+       - name: Editor core - cast placement (M7)
+         run: node test/editor/cast.js
        - name: Editor core - history
          run: node test/editor/history.js
        - name: Editor core - hit-test
@@ -59,6 +61,8 @@ jobs:
          run: node test/world-apply.js
        - name: Catalog writer (js/world-catalog.js text rewrite)
          run: node test/catalog-write.js
+       - name: World apply CLI - cast placement, --repin, bundle, rollback (M7, temp fixture)
+         run: node test/world-apply-cast.js
        - name: Cast continuity validators
          run: node test/cast-continuity-validate.js
        - name: Cast presence sync
