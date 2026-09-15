@@ -800,6 +800,49 @@
   }
   NF.start = function (opts) { return transaction(function () { return start(opts); }, opts || {}); };
 
+  /* Act 5 pass 01: M10 «L'interrogatorio» è posseduta dalla missione dati
+   * (narrative/missions/M10.json). Il finale entra DOPO leland_morto, in pausa
+   * sulla Loggia, e riceve dal ledger narrativo i fatti che la Loggia legge:
+   * m10_method, s3, le sei material_admissions per-fatto e lo stato di P6.
+   * Fail-closed: un ingresso senza questi fatti è un errore esplicito, mai un
+   * default silenzioso. Le fasi m10_* di questo modulo restano solo per i test
+   * storici e non sono raggiungibili dalla produzione. */
+  var ADMISSION_NAMES = ['taxi_lie', 'traincar_presence', 'laura_homicide', 'maddy_homicide', 'maddy_body_transport', 'letters'];
+  function startAtLodge(opts) {
+    opts = opts || {};
+    if (run && run.state.active) return { ok: false, error: 'finale_already_active' };
+    if (run && run.state.stage !== 'complete') return { ok: false, error: 'finale_already_pending' };
+    var carryover = clone(opts.carryover || {});
+    var values = valuesFrom(carryover), flags = clone(carryover.flags || {}), admissions = {}, i, v;
+    if (!flags.leland_morto) return { ok: false, error: 'lodge_entry_without_leland_morto' };
+    if (['probatorio', 'personale', 'intuitivo'].indexOf(values.m10_method) < 0) return { ok: false, error: 'lodge_entry_missing_m10_method' };
+    if (['on', 'off'].indexOf(values.s3) < 0) return { ok: false, error: 'lodge_entry_missing_s3' };
+    for (i = 0; i < ADMISSION_NAMES.length; i++) {
+      v = values['material_admissions.' + ADMISSION_NAMES[i]];
+      if (v !== 'leland_first_person' && v !== 'voice') return { ok: false, error: 'lodge_entry_missing_admission_' + ADMISSION_NAMES[i] };
+      admissions[ADMISSION_NAMES[i]] = { recorded: true, speaker_register: v };
+    }
+    if (carryover.p6_status !== 'confirmed_as_lie') return { ok: false, error: 'lodge_entry_p6_not_confirmed_as_lie' };
+    run = {
+      opts: opts,
+      state: {
+        version: VERSION, active: false, stage: 'await_lodge', page_index: 0, page_id: null,
+        values: values, carryover: carryover, flags: flags,
+        p6_status: carryover.p6_status, material_admissions: admissions,
+        encounters: [], epilogue_seen: {},
+        history: [{ type: 'entry', from: 'M10', stage: 'await_lodge' }],
+        last_screen: null, consequences: null
+      }
+    };
+    var snapshot = clone(run.state);
+    notifyState(snapshot);
+    if (run.opts.onPause) run.opts.onPause('await_lodge', snapshot);
+    return { ok: true, paused: true, stage: 'await_lodge', state: snapshot };
+  }
+  NF.startAtLodge = function (opts) { return transaction(function () { return startAtLodge(opts); }, opts || {}); };
+  NF.RETIRED_M10_STAGES = ['m10_threshold', 'method_choice', 'm10_open', 'm10_questions', 'm10_surface', 'm10_admissions',
+    's3_threshold', 's3_choice', 's3_feedback', 'await_post_s3', 'post_s3', 'victims', 'death'];
+
   function advance() {
     if (!run || !run.state.active) return { ok: false, error: 'finale_not_active' };
     var screen = currentScreen();

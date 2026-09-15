@@ -164,6 +164,13 @@
     // e' ora m8_roadhouse_truman; il telefono e' un nodo separato
     // (m8_roadhouse_phone) che NON deve pilotare gigante2.
     if (state.nodes_done.m8_roadhouse_truman) classicFlags.gigante2 = true;
+    // Act 5 pass 01: M10 scrive leland_morto; il mondo classico (obiettivo
+    // Loggia, porta del sogno) legge anche i due flag del vecchio dialogo.
+    if (state.flags.leland_morto) {
+      classicFlags.leland_morto = true;
+      classicFlags.leland_confessa = true;
+      classicFlags.done_leland_interr = true;
+    }
   }
 
   function objectiveText(NR, A) {
@@ -282,7 +289,7 @@
     NP.testMode = testMode;
     GAME.installNarrativeCatalogs();
     if (GAME.NarrativeLoadBlocked) { showSaveRecovery(NP.loadError || { source: 'finale', error: 'save_invalid' }); return; }
-    var missions = ['M4', 'M5', 'M6', 'M8', 'M9'].map(function (id) { return D.missions[id]; }).filter(Boolean);
+    var missions = ['M4', 'M5', 'M6', 'M8', 'M9', 'M10'].map(function (id) { return D.missions[id]; }).filter(Boolean);
     var classicLoad = testMode ? { ok: true, state: null } : inspectClassicSave();
     if (!classicLoad.ok) { showSaveRecovery({ source: 'classic', error: classicLoad.error }); return; }
     var classic = classicLoad.state;
@@ -338,8 +345,9 @@
         renderObjective(NR, A);
         persist(NR, NS, A);
 
-        // M9 chiusa e lease rilasciato: conserva stato, poi avvia M10 causale.
-        if (A.isEnabled() && state.nodes_done.m9_arrivo && !A.active()) {
+        // M10 chiusa (leland_morto dalla missione) e lease rilasciato: conserva
+        // stato, poi consegna la Loggia al finale (Act 5 pass 01).
+        if (A.isEnabled() && state.flags.leland_morto && state.nodes_done.m10_morte && !A.active()) {
           persist(NR, NS, A);
           if (GAME.NarrativeFinaleProduction && GAME.NarrativeFinaleProduction.arm) {
             var armed = GAME.NarrativeFinaleProduction.arm(state);
@@ -369,6 +377,7 @@
   };
   NP.inspectClassicSave = inspectClassicSave;
   NP.syncClassicToNarrative = syncClassicToNarrative;
+  NP.syncNarrativeToClassic = syncNarrativeToClassic;
   NP.renderObjective = renderObjective;
   NP.showSaveRecovery = showSaveRecovery;
   NP.onClassicSave = function (classic) {

@@ -1,0 +1,18 @@
+{
+ "_comment": "diff APPLICATO a state-enums.json (Act 5 pass 01) — SOLO aggiunte. Domini già a catalogo dal pacchetto narrative-v1.0 (m10_method, s3, truman_testimony_state, speaker_register): M10 li rende valori tipizzati scrivibili.",
+ "values_allowed_add": {
+  "m10_method": "m10_method",
+  "s3": "s3",
+  "truman_testimony_state": "truman_testimony_state",
+  "material_admissions.taxi_lie": "speaker_register",
+  "material_admissions.traincar_presence": "speaker_register",
+  "material_admissions.laura_homicide": "speaker_register",
+  "material_admissions.maddy_homicide": "speaker_register",
+  "material_admissions.maddy_body_transport": "speaker_register",
+  "material_admissions.letters": "speaker_register"
+ },
+ "booleans_allowed_add": [],
+ "enums_add": {},
+ "value_transitions_add": {},
+ "note": "material_admissions: un record per FATTO (Lock §6), mai un booleano. recorded = value_set; speaker_register = il valore (leland_first_person | voice). S3 è gated sui sei value_set. dream_face_recognized_in_leland_scene e leland_morto erano già in booleans_allowed."
+}

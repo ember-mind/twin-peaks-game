@@ -17,18 +17,6 @@
       "reason": "INTENTIONAL: docs/act-3-design-report.md §6, same \"plain observations\" verdict as E_PONTE_DIREZIONE."
     },
     {
-      "key": "JACQUES_MIDNIGHT_CLAIM",
-      "reason": "INTENTIONAL-UNRESOLVED: docs/act-3-design-report.md §6 verdict is KEEP (\"all three JACQUES_* atoms\") with verification hooks explicitly DEFERRED (\"DEFER: ... verification hooks for JACQUES_MIDNIGHT_CLAIM / LIST (M9 per LOCK)\"). The M9 reader does not exist yet."
-    },
-    {
-      "key": "JACQUES_LIST_GIVEN",
-      "reason": "INTENTIONAL-UNRESOLVED: same DEFER verdict as JACQUES_MIDNIGHT_CLAIM, docs/act-3-design-report.md §6."
-    },
-    {
-      "key": "JACQUES_THIRD_MAN_DETAIL",
-      "reason": "INTENTIONAL-UNRESOLVED: docs/act-3-design-report.md §6 KEEP verdict covers \"all three JACQUES_* atoms\"; this one has no verification-hook mention at all in the LOCK/DEFER note, same unresolved-reader status as its siblings."
-    },
-    {
       "key": "ronette_visita",
       "reason": "intentional: visit-entry marker, gate is node_done ronette_uomo -- docs/act-2-closure-report.md."
     },
@@ -43,6 +31,14 @@
     {
       "key": "P9.formulation.status",
       "reason": "open TODO: design report §5 'give the register one reader'; owner Act 3 step C3."
+    },
+    {
+      "key": "dream_face_recognized_in_leland_scene",
+      "reason": "INTENTIONAL-UNRESOLVED: Lock M9-M10 v1.1.1 §5-B5/§6 — an observation Cooper records (never possession). Written by M10 m10_affioramento; the reader is the Loggia/epilogue exercise, not yet migrated to mission data (js/narrative-finale.js still owns the Loggia). Owner: Loggia pass after the Act 5 human test."
+    },
+    {
+      "key": "truman_testimony_state",
+      "reason": "INTENTIONAL-UNRESOLVED: Lock M9-M10 v1.1.1 §5-B7/§6 — written with s3 by m10_s3 (not_needed | voluntary_witness). The Loggia/epilogue in js/narrative-finale.js reads s3 only; the typed testimony state pays in the Loggia/epilogue pass. Owner: Loggia pass after the Act 5 human test."
     }
   ],
   "external_writers": [

@@ -1,0 +1,4 @@
+{
+ "_comment": "diff a propositions.json (Act 5 pass 01): NESSUNA modifica ai testi o ai support_min. M10-B6 esegue i factual_path già dichiarati: P6 unconfirmed→confirmed_as_lie (confirmed_in M10-B6), P8 unconfirmed→corroborated (factual_ceiling corroborated), tramite l effetto generico {proposition, factual_status} (schema-delta M10 §2).",
+ "factual_status_writes": { "P6": "confirmed_as_lie", "P8": "corroborated" }
+}

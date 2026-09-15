@@ -77,6 +77,16 @@ jobs:
          run: node test/cast-presence-sync.js
        - name: World engine v0.1 catalog
          run: node test/world-engine-v0.1-catalog.js
+       - name: M9 static validator (Cast Presence actors)
+         run: node test/narrative-validate-m9.js
+       - name: M10 static validator (confession lock verbatim)
+         run: node test/narrative-validate-m10.js
+       - name: Act 5 flow (M9 reason codes + M10 matrix, runtime)
+         run: node test/act-5-flow.js
+       - name: Act 5 mirror gate (mission / classic / finale ownership)
+         run: node test/act-5-mirror-gate.js
+       - name: Narrative lint
+         run: node test/narrative-lint.js
        - name: Project smoke gate
          run: node test/smoke.js
        - name: Project walkthrough gate

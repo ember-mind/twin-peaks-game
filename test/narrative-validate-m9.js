@@ -34,7 +34,24 @@ const SDELTA = fs.readFileSync(path.join(ROOT, 'schema-deltas', 'M9.md'), 'utf8'
 const SRCMAP = fs.readFileSync(path.join(ROOT, 'schema-deltas', 'M9-source-map.md'), 'utf8');
 const MATRIX = fs.readFileSync(path.join(ROOT, 'schema-deltas', 'M9-validation-matrix.md'), 'utf8');
 const MAPSJS = fs.readFileSync(path.join(PROJ, 'js', 'maps.js'), 'utf8');
-const GLUEJS = fs.readFileSync(path.join(PROJ, 'js', 'glue.js'), 'utf8');
+// Cast Presence (Cast Continuity v0.1): la presenza fisica degli attori non vive più
+// in js/glue.js NPCS ma in narrative/cast/windows.json, risolta da GAME.CastPresence.
+global.window = global.window || global;
+require(path.join(PROJ, 'js', 'narrative-runtime.js'));
+require(path.join(PROJ, 'js', 'narrative-data.gen.js'));
+require(path.join(PROJ, 'js', 'narrative-bootstrap.js'));
+require(path.join(PROJ, 'js', 'cast-presence.js'));
+const GAME = global.GAME;
+GAME.installNarrativeCatalogs({ data: GAME.NarrativeData, runtime: GAME.NarrativeRuntime });
+const CP = GAME.CastPresence;
+const CAST_PINS = JSON.parse(fs.readFileSync(path.join(PROJ, 'test', 'fixtures', 'cast-pins-acts-1-4.json'), 'utf8'));
+// stato d'ingresso M9 = seed RAGGIUNGIBILE del fixture (M8 consegnata alla centrale, taxi ascoltato)
+function m9EntryState() {
+  const st = GAME.NarrativeRuntime.createState();
+  const seed = JSON.parse(JSON.stringify(CAST_PINS.seeds.ACT4_STATION_BEFORE_DAWN));
+  Object.keys(seed).forEach(k => { st[k] = Object.assign(st[k] || {}, seed[k]); });
+  return st;
+}
 const LOCK = fs.readFileSync(path.join(PROJ, M9.source.file), 'utf8');
 
 function node(id) { return M9.nodes.find(n => n.id === id); }
@@ -461,8 +478,20 @@ ok(/Lucy/.test(M9.objectives.find(o => o.id === 'obj_m9_1').text), 'l\'obiettivo
 console.log('# binding world: map_id e attori REALI del motore');
 const worldNodes = M9.nodes.filter(n => n.channel === 'world');
 function isRealMap(id) { return MAPSJS.indexOf('\n    ' + id + ': {') !== -1; }
-const sheriffBlock = GLUEJS.slice(GLUEJS.indexOf('sheriff: ['), GLUEJS.indexOf('palmer: ['));
-ok(sheriffBlock.length > 100, 'blocco NPC sheriff estratto da js/glue.js');
+const entryState = m9EntryState();
+ok(entryState.flags.atto4 && entryState.nodes_done.m8_station && entryState.evidence.T_LELAND_TAXI && !entryState.flags.atto5,
+  'seed Cast Presence ACT4_STATION_BEFORE_DAWN soddisfa entry_condition M9 (atto4, m8_station, T_LELAND_TAXI; atto5 falso)');
+ok(GAME.NarrativeRuntime.evalCond(entryState, M9.entry_condition, M9), 'entry_condition M9 vera sul seed raggiungibile (valutata dal runtime)');
+// stato alla consegna di m9_arrivo: presentazione accettata → atto5 (unico writer M9)
+const arrivalState = m9EntryState();
+arrivalState.evidence.D_TAXI = true;
+arrivalState.flags.atto5 = true;
+arrivalState.nodes_done.m9_verifica_taxi = true;
+arrivalState.nodes_done.m9_present_truman = true;
+function presence(id, st) {
+  try { return CP.resolveCharacterPresence(id, st); } catch (e) { return { status: 'ERROR', error: String(e.message || e) }; }
+}
+function placedOnSheriff(r) { return r.status === 'PLACED' && r.sceneId === 'sheriff'; }
 for (const n of worldNodes) {
   ok(!!n.map_id && !!n.target_kind && !!n.target_id, n.id + ': binding world completo');
   ok(isRealMap(n.map_id), n.id + ': map_id REALE del motore (' + n.map_id + ')');
@@ -470,15 +499,24 @@ for (const n of worldNodes) {
   ok(n.x === undefined && n.y === undefined, n.id + ': nessuna coordinata nei dati');
   if (n.target_kind === 'actor') {
     ok(!!n.actor_id && n.actor_id === n.target_id, n.id + ': attore coerente');
-    ok(sheriffBlock.indexOf("id: '" + n.actor_id + "'") !== -1, n.id + ': l\'attore ' + n.actor_id + ' è un NPC REALE di sheriff (js/glue.js)');
+    // lo stato in cui il nodo diventa azionabile: arrivo per leland, ingresso per gli altri
+    const st = n.actor_id === 'leland' ? arrivalState : entryState;
+    const r = presence(n.actor_id, st);
+    ok(placedOnSheriff(r), n.id + ': CastPresence.resolve(' + n.actor_id + ') = PLACED su sheriff (' + (r.sceneId || r.status) + ', ' + (r.source || r.error) + ')');
   }
 }
 ok(worldNodes.every(n => n.map_id === 'sheriff') && JSON.stringify(M9).indexOf('"goto"') === -1, 'M9 si svolge alla centrale; testimonianza Palmer già acquisita in M8');
 // gli speaker delle pagine sono attori reali della scena (o Cooper)
 const SPEAKERS = ['cooper', 'truman', 'lucy', 'leland', 'andy'];
 for (const [id, p] of allPages) if (id.indexOf('m9.') === 0 && p.speaker_id) ok(SPEAKERS.includes(p.speaker_id), id + ': speaker della scena (' + p.speaker_id + ')');
-['lucy', 'truman', 'leland', 'andy'].forEach(a => ok(sheriffBlock.indexOf("id: '" + a + "'") !== -1, 'NPC reale su sheriff: ' + a));
-ok(/leland[^]{0,200}flag:atto5/.test(sheriffBlock), 'leland@sheriff è condizionato ad atto5 in js/glue.js: gate narrativo e presenza fisica coincidono');
+['lucy', 'truman'].forEach(a => ok(placedOnSheriff(presence(a, entryState)), 'Cast Presence all\'ingresso M9: ' + a + ' PLACED su sheriff'));
+ok(presence('leland', entryState).status === 'OFFSCREEN', 'Cast Presence all\'ingresso M9: leland OFFSCREEN (non ancora convocato)');
+ok(!placedOnSheriff(presence('andy', entryState)), 'Cast Presence all\'ingresso M9: andy NON in centrale (è con Sarah: la riga di Lucy lo nomina assente)');
+const lelandArrival = presence('leland', arrivalState);
+ok(placedOnSheriff(lelandArrival) && lelandArrival.source === 'ACT5_LELAND_STATION',
+  'leland@sheriff nasce da ACT5_LELAND_STATION (atto5): gate narrativo e presenza fisica coincidono');
+const beforeAtto5 = m9EntryState(); beforeAtto5.evidence.D_TAXI = true; beforeAtto5.nodes_done.m9_verifica_taxi = true;
+ok(!placedOnSheriff(presence('leland', beforeAtto5)), 'leland NON in centrale prima dell\'accettazione (atto5 assente)');
 const KINDS = ['dialogue', 'comparison'];
 for (const n of M9.nodes) ok(KINDS.includes(n.kind), n.id + ': kind nello schema (' + n.kind + ')');
 

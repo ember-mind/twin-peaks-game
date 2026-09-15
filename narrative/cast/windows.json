@@ -985,11 +985,16 @@
     },
     {
       "id": "ACT5_LELAND_STATION",
-      "owner": "story",
+      "owner": "M10",
       "when": {
         "all": [
           {
             "flag": "atto5"
+          },
+          {
+            "not": {
+              "node_done": "m10_fermo"
+            }
           },
           {
             "not": {
@@ -1015,8 +1020,71 @@
           "wander": false
         }
       },
-      "cause": "leland → sheriff 8,5",
-      "exit": "—"
+      "cause": "leland → sheriff 8,5 (atto5: Truman calls him in, M9 m9_present_truman; he walks in alone, m9.b3.arrivo.p01)",
+      "exit": "m10_fermo: Truman opens the cell himself (M10-B9)",
+      "exit_authored_by": {
+        "leland": "m10.b9.fermo.p03"
+      }
+    },
+    {
+      "id": "ACT5_LELAND_CELL",
+      "owner": "M10",
+      "when": {
+        "all": [
+          {
+            "node_done": "m10_fermo"
+          },
+          {
+            "not": {
+              "flag": "leland_morto"
+            }
+          }
+        ]
+      },
+      "cast": {
+        "leland": {
+          "status": "OFFSCREEN",
+          "label": "cell"
+        }
+      },
+      "cause": "leland → OFFSCREEN (cell): fermo per i fatti ammessi, Truman apre la cella (M10-B9). The station map has no playable cell: the cell is authored on screen by m10.b9.fermo.p02-p03 and stays offscreen.",
+      "exit": "leland_morto (M10-B10, m10_morte)"
+    },
+    {
+      "id": "ACT5_TRUMAN_OUT_INTUITIVE",
+      "owner": "M10",
+      "when": {
+        "all": [
+          {
+            "value_is": {
+              "name": "m10_method",
+              "equals": "intuitivo"
+            }
+          },
+          {
+            "node_done": "m10_domande"
+          },
+          {
+            "not": {
+              "node_done": "m10_confessione"
+            }
+          }
+        ]
+      },
+      "cast": {
+        "truman": {
+          "status": "OFFSCREEN",
+          "label": "corridor"
+        }
+      },
+      "cause": "truman → OFFSCREEN (corridor): intuitive method only, he puts the pen down and leaves the room (M10-B3-B4 cost)",
+      "exit": "m10_confessione: «(Truman rientra. Il blocco è aperto.)» (M10-B6 intuitivo)",
+      "entry_authored_by": {
+        "truman": "m10.b3.intuitivo.p09"
+      },
+      "exit_authored_by": {
+        "truman": "m10.b6.intuitivo.p07"
+      }
     },
     {
       "id": "LELAND_DEAD",

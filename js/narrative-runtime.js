@@ -100,7 +100,8 @@
     return false;
   };
 
-  var EFFECT_KEYS = ['set', 'evidence', 'notebook', 'notebook_observation', 'notebook_question', 'proposition', 'to', 'created_from', 'value', 'from_value', 'opposite_of', 'within', 'value_transition', 'from_derivation'];
+  var EFFECT_KEYS = ['set', 'evidence', 'notebook', 'notebook_observation', 'notebook_question', 'proposition', 'to', 'created_from', 'value', 'from_value', 'opposite_of', 'within', 'value_transition', 'from_derivation', 'factual_status'];
+  var FACTUAL_STATUSES = ['unconfirmed', 'corroborated', 'confirmed', 'confirmed_as_lie', 'contested', 'refuted'];
 
   // validazione PURA degli effetti-valore (chiamata nei prepare*): dominio,
   // sorgente presente per from_value/opposite_of, within coerente
@@ -108,6 +109,16 @@
     var effs = effects || [];
     for (var i = 0; i < effs.length; i++) {
       var e = effs[i];
+      // stato fattuale di una proposizione (M10-B6): transizione UNICA dal
+      // default `unconfirmed`, solo su una proposizione già formulata; mai
+      // regressione, mai un secondo stato. Validata qui (prepare), fail-closed.
+      if (e.proposition && e.factual_status !== undefined) {
+        if (FACTUAL_STATUSES.indexOf(e.factual_status) === -1) return 'factual_status_out_of_domain: ' + e.proposition + '=' + e.factual_status;
+        var fp = peekProp(state, e.proposition);
+        if (fp.formulation.status !== 'formulated') return 'factual_status_unformulated: ' + e.proposition;
+        if (fp.factual_status !== 'unconfirmed' && fp.factual_status !== e.factual_status) return 'factual_status_already_set: ' + e.proposition + '=' + fp.factual_status;
+        continue;
+      }
       if (!e.value) continue;
       var dom = NR.valueDomains[e.value];
       if (!dom) return 'value_without_domain: ' + e.value;
@@ -199,6 +210,11 @@
           }
           if (v2 !== undefined) state.values[eff.value] = v2;
         }
+        return;
+      }
+      if (eff.proposition && eff.factual_status !== undefined) {
+        var fprop = ensureProp(state, eff.proposition);
+        if (fprop.factual_status === 'unconfirmed') fprop.factual_status = eff.factual_status;
         return;
       }
       if (eff.proposition && eff.to === 'formulated') {
@@ -465,14 +481,20 @@
         if (evCatalog && !evCatalog[eid]) return { ok: false, error: 'unknown_attachment: ' + eid };
         seenAttachment[eid] = true;
       }
-      var by = branch.by_support || {}, picked = null;
-      for (var bk in by) {
-        var rule = by[bk], all = rule.when_attached_all || [], missing = rule.when_missing_any || [];
-        if (all.length && all.every(function (id) { return !!seenAttachment[id]; })) { picked = rule; break; }
-        if (!picked && missing.length && missing.some(function (id) { return !seenAttachment[id]; })) picked = rule;
+      // Un ramo SENZA by_support (P7/P8 in M9: VALID_BUT_NOT_PROCEDURAL) ha un
+      // verdetto che non dipende dall'allegato: resta il ramo stesso. Prima di
+      // Act 5 pass 01 cadeva in attachment_partition_no_match (errore, nessuna
+      // risposta diegetica) — trovato da test/act-5-flow.js.
+      if (branch.by_support) {
+        var by = branch.by_support, picked = null;
+        for (var bk in by) {
+          var rule = by[bk], all = rule.when_attached_all || [], missing = rule.when_missing_any || [];
+          if (all.length && all.every(function (id) { return !!seenAttachment[id]; })) { picked = rule; break; }
+          if (!picked && missing.length && missing.some(function (id) { return !seenAttachment[id]; })) picked = rule;
+        }
+        if (!picked) return { ok: false, error: 'attachment_partition_no_match' };
+        branch = picked;
       }
-      if (!picked) return { ok: false, error: 'attachment_partition_no_match' };
-      branch = picked;
     }
     if (already.some(function (r) { return r.result === 'rejected' && r.reason_code === branch.reason_code; })) {
       // memoria del rifiuto: pagina diegetica STABILE dai dati (mai commit invisibile)

@@ -202,7 +202,16 @@
   "letter_o_chain": "letter_o_chain",
   "presagio_status": "presagio_status",
   "maddy_action_after_warning": "maddy_action_after_warning",
-  "sarah_support_state": "sarah_support_state"
+  "sarah_support_state": "sarah_support_state",
+  "m10_method": "m10_method",
+  "s3": "s3",
+  "truman_testimony_state": "truman_testimony_state",
+  "material_admissions.taxi_lie": "speaker_register",
+  "material_admissions.traincar_presence": "speaker_register",
+  "material_admissions.laura_homicide": "speaker_register",
+  "material_admissions.maddy_homicide": "speaker_register",
+  "material_admissions.maddy_body_transport": "speaker_register",
+  "material_admissions.letters": "speaker_register"
  },
  "value_transitions": {
   "presagio_status": [

@@ -1,0 +1,5 @@
+{
+ "_comment": "diff a evidence.json (Act 5 pass 01): NESSUNA aggiunta. Gli atomi del Lock §1 (T_LELAND_TAXI, D_TAXI) sono a catalogo da M8/M9; C_TAXI è il confronto m9_cmp_taxi (born_from_comparison cmp_taxi di P6). M10 legge JACQUES_MIDNIGHT_CLAIM / JACQUES_LIST_GIVEN / JACQUES_THIRD_MAN_DETAIL, scritte da M6.",
+ "evidence_add": {},
+ "ui_origin_add": {}
+}

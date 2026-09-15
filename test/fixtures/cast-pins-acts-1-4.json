@@ -1017,6 +1017,360 @@
      }
     }
    }
+  },
+  "ACT5_THRESHOLD": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "maddy_trovata": true,
+    "jacques_admitted_presence": true,
+    "atto5": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "promise_stance": "prudenza",
+    "presagio_status": "verified",
+    "warning_target": "palmer",
+    "sarah_support_state": "none",
+    "maddy_action_after_warning": "none",
+    "focus_destination": "palmer",
+    "body_found_by": "hawk",
+    "m6_tactic": "prova"
+   },
+   "evidence": {
+    "T_LELAND_TAXI": true,
+    "D_TAXI": true
+   },
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m8_diner": true,
+    "m8_leland_taxi": true,
+    "m8_roadhouse_truman": true,
+    "m8_roadhouse_phone": true,
+    "m8_focus_choice": true,
+    "m8_station": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true,
+    "m9_verifica_taxi": true,
+    "m9_present_truman": true,
+    "m9_arrivo": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P6": {
+     "formulation": {
+      "status": "formulated"
+     },
+     "social_status": {
+      "accepted_by": [
+       "truman"
+      ]
+     }
+    }
+   }
+  },
+  "ACT5_TRUMAN_OUT_INTUITIVE": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "maddy_trovata": true,
+    "jacques_admitted_presence": true,
+    "atto5": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "promise_stance": "prudenza",
+    "presagio_status": "verified",
+    "warning_target": "palmer",
+    "sarah_support_state": "none",
+    "maddy_action_after_warning": "none",
+    "focus_destination": "palmer",
+    "body_found_by": "hawk",
+    "m6_tactic": "prova",
+    "m10_method": "intuitivo"
+   },
+   "evidence": {
+    "T_LELAND_TAXI": true,
+    "D_TAXI": true
+   },
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m8_diner": true,
+    "m8_leland_taxi": true,
+    "m8_roadhouse_truman": true,
+    "m8_roadhouse_phone": true,
+    "m8_focus_choice": true,
+    "m8_station": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true,
+    "m9_verifica_taxi": true,
+    "m9_present_truman": true,
+    "m9_arrivo": true,
+    "m10_soglia": true,
+    "m10_apertura": true,
+    "m10_domande": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P6": {
+     "formulation": {
+      "status": "formulated"
+     },
+     "social_status": {
+      "accepted_by": [
+       "truman"
+      ]
+     }
+    }
+   }
+  },
+  "ACT5_LELAND_CELL": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "maddy_trovata": true,
+    "jacques_admitted_presence": true,
+    "atto5": true,
+    "dream_face_recognized_in_leland_scene": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "promise_stance": "prudenza",
+    "presagio_status": "verified",
+    "warning_target": "palmer",
+    "sarah_support_state": "none",
+    "maddy_action_after_warning": "none",
+    "focus_destination": "palmer",
+    "body_found_by": "hawk",
+    "m6_tactic": "prova",
+    "m10_method": "intuitivo",
+    "material_admissions.taxi_lie": "leland_first_person",
+    "material_admissions.traincar_presence": "leland_first_person",
+    "material_admissions.laura_homicide": "leland_first_person",
+    "material_admissions.maddy_homicide": "leland_first_person",
+    "material_admissions.maddy_body_transport": "leland_first_person",
+    "material_admissions.letters": "leland_first_person",
+    "s3": "off",
+    "truman_testimony_state": "voluntary_witness"
+   },
+   "evidence": {
+    "T_LELAND_TAXI": true,
+    "D_TAXI": true
+   },
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m8_diner": true,
+    "m8_leland_taxi": true,
+    "m8_roadhouse_truman": true,
+    "m8_roadhouse_phone": true,
+    "m8_focus_choice": true,
+    "m8_station": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true,
+    "m9_verifica_taxi": true,
+    "m9_present_truman": true,
+    "m9_arrivo": true,
+    "m10_soglia": true,
+    "m10_apertura": true,
+    "m10_domande": true,
+    "m10_affioramento": true,
+    "m10_confessione": true,
+    "m10_s3": true,
+    "m10_post_s3": true,
+    "m10_vittime": true,
+    "m10_fermo": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P6": {
+     "formulation": {
+      "status": "formulated"
+     },
+     "social_status": {
+      "accepted_by": [
+       "truman"
+      ]
+     },
+     "factual_status": "confirmed_as_lie"
+    }
+   }
+  },
+  "ACT5_LELAND_DEAD": {
+   "flags": {
+    "sogno_fatto": true,
+    "atto3": true,
+    "vagone_scoperto": true,
+    "east_route_confirmed": true,
+    "audrey_indaga": true,
+    "jacques_preso": true,
+    "jacques_dead": true,
+    "gigante1": true,
+    "atto4": true,
+    "maddy_trovata": true,
+    "jacques_admitted_presence": true,
+    "atto5": true,
+    "dream_face_recognized_in_leland_scene": true,
+    "leland_morto": true
+   },
+   "values": {
+    "m5_final_theory": "degeneration",
+    "s1": "institutional",
+    "promise_stance": "prudenza",
+    "presagio_status": "verified",
+    "warning_target": "palmer",
+    "sarah_support_state": "none",
+    "maddy_action_after_warning": "none",
+    "focus_destination": "palmer",
+    "body_found_by": "hawk",
+    "m6_tactic": "prova",
+    "m10_method": "intuitivo",
+    "material_admissions.taxi_lie": "leland_first_person",
+    "material_admissions.traincar_presence": "leland_first_person",
+    "material_admissions.laura_homicide": "leland_first_person",
+    "material_admissions.maddy_homicide": "leland_first_person",
+    "material_admissions.maddy_body_transport": "leland_first_person",
+    "material_admissions.letters": "leland_first_person",
+    "s3": "off",
+    "truman_testimony_state": "voluntary_witness"
+   },
+   "evidence": {
+    "T_LELAND_TAXI": true,
+    "D_TAXI": true
+   },
+   "nodes_done": {
+    "m5_bridge": true,
+    "m5_discovery": true,
+    "m5_report_close": true,
+    "m6_ferry": true,
+    "m6_arrest": true,
+    "m6_hospital_guard": true,
+    "m6_return_night": true,
+    "m6_atto4_bridge": true,
+    "m8_diner": true,
+    "m8_leland_taxi": true,
+    "m8_roadhouse_truman": true,
+    "m8_roadhouse_phone": true,
+    "m8_focus_choice": true,
+    "m8_station": true,
+    "m5_report_intro": true,
+    "m5_tracks_north": true,
+    "m6_tactic": true,
+    "m6_interrogation_prova": true,
+    "m9_verifica_taxi": true,
+    "m9_present_truman": true,
+    "m9_arrivo": true,
+    "m10_soglia": true,
+    "m10_apertura": true,
+    "m10_domande": true,
+    "m10_affioramento": true,
+    "m10_confessione": true,
+    "m10_s3": true,
+    "m10_post_s3": true,
+    "m10_vittime": true,
+    "m10_fermo": true,
+    "m10_morte": true
+   },
+   "props": {
+    "P3A": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P5": {
+     "formulation": {
+      "status": "formulated"
+     }
+    },
+    "P6": {
+     "formulation": {
+      "status": "formulated"
+     },
+     "social_status": {
+      "accepted_by": [
+       "truman"
+      ]
+     },
+     "factual_status": "confirmed_as_lie"
+    }
+   }
   }
  },
  "pins": [
@@ -1786,6 +2140,134 @@
     "laura": "redroom@11,2",
     "mfap": "redroom@8,4",
     "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT5_THRESHOLD",
+   "seed": "ACT5_THRESHOLD",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "sheriff@12,8",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "sheriff@8,5",
+    "maddy": "TERMINAL_REMOVED",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "diner@9,6",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT5_TRUMAN_OUT_INTUITIVE",
+   "seed": "ACT5_TRUMAN_OUT_INTUITIVE",
+   "expect": {
+    "truman": "OFFSCREEN:corridor",
+    "hawk": "sheriff@12,8",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "sheriff@8,5",
+    "maddy": "TERMINAL_REMOVED",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "diner@9,6",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT5_LELAND_CELL",
+   "seed": "ACT5_LELAND_CELL",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "sheriff@12,8",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "OFFSCREEN:cell",
+    "maddy": "TERMINAL_REMOVED",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "diner@9,6",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "hospital@3,6",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "OFFSCREEN"
+   }
+  },
+  {
+   "id": "ACT5_LELAND_DEAD",
+   "seed": "ACT5_LELAND_DEAD",
+   "expect": {
+    "truman": "sheriff@10,4",
+    "hawk": "sheriff@12,8",
+    "lucy": "sheriff@2,6",
+    "andy": "sheriff@10,7",
+    "sarah": "palmer@9,7",
+    "leland": "TERMINAL_REMOVED",
+    "maddy": "TERMINAL_REMOVED",
+    "norma": "diner@5,2",
+    "shelly": "diner@9,7",
+    "loglady": "diner@4,5",
+    "james": "diner@9,6",
+    "bobby": "town@31,16",
+    "donna": "town@44,10",
+    "jacoby": "town@16,25",
+    "audrey": "hotel_gn@12,9",
+    "jacques": "TERMINAL_REMOVED",
+    "giant": "OFFSCREEN",
+    "piantone": "OFFSCREEN",
+    "piantone_ronette": "OFFSCREEN",
+    "benhorne": "hotel_gn@5,7",
+    "gerard": "hospital@11,4",
+    "ronette": "hospital@3,5",
+    "infermiera": "hospital@11,8",
+    "laura": "redroom@11,2",
+    "mfap": "redroom@8,4",
+    "bob": "redroom@14,2"
    }
   }
  ]

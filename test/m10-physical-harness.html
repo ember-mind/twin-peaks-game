@@ -1,0 +1,358 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>m10-physical-harness</title>
+<style>body{margin:0;background:#000}#narrative{position:fixed;inset:0;pointer-events:none}.nw-focus{font-weight:bold}#log{position:fixed;left:0;bottom:0;max-height:40%;overflow:auto;background:#111;color:#ddd;font:11px monospace;white-space:pre-wrap;padding:6px;z-index:99}</style>
+</head>
+<body>
+<canvas id="gl" width="960" height="640"></canvas>
+<canvas id="game" width="480" height="320"></canvas>
+<div id="narrative"></div>
+<div id="log">running…</div>
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/tiles.js"></script>
+<script src="../js/chars.js"></script>
+<script src="../js/houses.js"></script>
+<script src="../js/maps.js?v=m10h1"></script>
+<script src="../js/data.js"></script>
+<script src="../js/retro-font.js?v=m10h1"></script>
+<script src="../js/engine.js?v=m10h1"></script>
+<script src="../js/render3d.js"></script>
+<script src="../js/scene-objects.gen.js"></script>
+<script src="../js/glue.js?v=m10h1"></script>
+<script src="../js/main.js"></script>
+<script src="../js/narrative-runtime.js?v=m10h1"></script>
+<script src="../js/narrative-ui.js"></script>
+<script src="../js/narrative-notebook.js"></script>
+<script src="../js/narrative-data.gen.js?v=m10h1"></script>
+<script src="../js/cast-presence.js?v=m10h1"></script>
+<script src="../js/narrative-bootstrap.js"></script>
+<script src="../js/narrative-engine-adapter.js?v=m10h1"></script>
+<script src="../js/narrative-save.js"></script>
+<script>
+/* Act 5 pass 01 — M10 PHYSICAL harness (pattern: test/m8-physical-harness.html).
+ * UN solo spawn (E.loadMap all'ingresso della centrale), poi SOLO input di gioco:
+ * cammino tile-per-tile col walker BFS sul motore vero, facing, Invio → E.interact() →
+ * adapter. L'harness non chiama MAI le API di interazione dell'adapter.
+ * Prova: (1) lease — nessun frame di gameplay fra i nodi concatenati di una sessione
+ * (m10_soglia → … → m10_morte è UNA sessione), le frecce premute durante le pagine non
+ * muovono Cooper; (2) zero lock residui dopo chiusura e dopo Escape; (3) input doppio
+ * (due Invio nello stesso tick) non raddoppia commit né salta pagine; (4) interruzione e
+ * ripresa camminando: prima del fermo da Leland, dopo il fermo da Truman (Leland in cella,
+ * nessun corpo). Clock compresso come in m8-physical: rAF servito da una coda dell'harness.
+ * Esito: document.title + window.__M10PHYS_RESULT. */
+var out = { checks: {}, errors: [], notes: [], run_log: {}, trace: [] };
+window.__M10PHYS_RESULT = out;
+window.onerror = function (m, s, l) { out.errors.push(String(m) + ' @' + l); };
+window.addEventListener('unhandledrejection', function (e) { out.errors.push('unhandled: ' + (e.reason && e.reason.message || e.reason)); });
+function mark(s) { out.trace.push(s + ' t=' + Math.round(performance.now())); document.title = 'M10PHYS-RUNNING ' + s; }
+
+var VT_DT = 16, vtNow = 0, rafQ = [], framesPumped = 0;
+var sessionOpen = false, gameplayFramesInSession = 0;
+(function installCompressedClock() {
+  vtNow = (typeof performance !== 'undefined' ? performance.now() : 0);
+  window.requestAnimationFrame = function (cb) { rafQ.push(cb); return rafQ.length; };
+})();
+function pump(frames) {
+  for (var i = 0; i < (frames || 1); i++) {
+    var q = rafQ; rafQ = [];
+    vtNow += VT_DT; framesPumped++;
+    // un frame servito mentre la sessione narrativa è aperta ma senza lease = frame di gameplay
+    if (sessionOpen && window.GAME && GAME.NarrativeAdapter && !GAME.NarrativeAdapter.active()) gameplayFramesInSession++;
+    for (var j = 0; j < q.length; j++) { try { q[j](vtNow); } catch (e) { out.errors.push('frame: ' + (e && e.message || e)); } }
+  }
+}
+function pumpUntil(pred, maxFrames) { for (var i = 0; i < (maxFrames || 400); i++) { if (pred()) return true; pump(1); } return pred(); }
+var LOCK = 30;
+var DIRC = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function keydown(c) { window.dispatchEvent(new KeyboardEvent('keydown', { code: c, bubbles: true })); }
+function keyup(c) { window.dispatchEvent(new KeyboardEvent('keyup', { code: c, bubbles: true })); }
+function key(c) { keydown(c); keyup(c); }
+async function press(c) { key(c); pump(2); await wait(LOCK + 40); pump(2); }
+function widgetOpts() { return [].map.call(document.querySelectorAll('.nw-root:not(.nb-root) .nw-opt'), function (o) { return o.getAttribute('data-choice-id'); }); }
+function ok(name, cond) { out.checks[name] = !!cond; }
+
+async function run() {
+  var E = GAME.Engine, NR = GAME.NarrativeRuntime, A = GAME.NarrativeAdapter, D = GAME.NarrativeData, CP = GAME.CastPresence;
+  if (GAME.Render3D) { GAME.Render3D.render = function () {}; if (GAME.Render3D.prewarm) GAME.Render3D.prewarm = function () {}; }
+  if (GAME.Presentation3D && GAME.Presentation3D.render) GAME.Presentation3D.render = function () {};
+  var M = D.missions, M10 = M.M10;
+  function S() { return A.getState(); }
+
+  ok('B0 bootstrap_present', typeof GAME.installNarrativeCatalogs === 'function');
+  ok('B0 nothing_enabled_before_bootstrap', A.isEnabled() === false);
+  GAME.installNarrativeCatalogs();
+  var ownSrc = [].slice.call(document.scripts).filter(function (s) { return !s.src; }).map(function (s) { return s.textContent; }).join('');
+  ok('B0 harness_never_calls_adapter_interact', ownSrc.indexOf('A.try' + 'Interact') < 0 && ownSrc.indexOf('try' + 'InteractAt(') < 0);
+  E.state.mode = 'play';
+  A.enable({ container: document.getElementById('narrative'), advanceLockMs: LOCK, missions: [M.M4, M.M5, M.M6, M.M8, M.M9, M.M10] });
+  var FIX = await (await fetch('fixtures/cast-pins-acts-1-4.json?v=m10h1')).json();
+  var SEED = FIX.seeds.ACT5_THRESHOLD;
+  var TACTIC_EV = { prova: 'JACQUES_MIDNIGHT_CLAIM', pressione: 'JACQUES_LIST_GIVEN', falsa_sicurezza: 'JACQUES_THIRD_MAN_DETAIL' };
+  function fullProp(p) {
+    return {
+      formulation: { status: (p && p.formulation && p.formulation.status) || 'unformulated', created_from: (p && p.formulation && p.formulation.created_from) || [] },
+      presentations: (p && p.presentations) || [], social_status: { accepted_by: (p && p.social_status && p.social_status.accepted_by) || [] },
+      factual_status: (p && p.factual_status) || 'unconfirmed'
+    };
+  }
+  // seme raggiungibile + varianti coerenti delle eco lette da M10 (tattica M6, avviso/rotta M8)
+  function seedState(v) {
+    var s = NR.createState(), src = JSON.parse(JSON.stringify(SEED));
+    Object.keys(src.flags).forEach(function (k) { s.flags[k] = src.flags[k]; });
+    Object.keys(src.values).forEach(function (k) { s.values[k] = src.values[k]; });
+    Object.keys(src.evidence).forEach(function (k) { s.evidence[k] = src.evidence[k]; });
+    Object.keys(src.nodes_done).forEach(function (k) { s.nodes_done[k] = src.nodes_done[k]; });
+    Object.keys(src.props).forEach(function (k) { s.props[k] = fullProp(src.props[k]); });
+    s.props.P6.formulation.created_from = ['T_LELAND_TAXI', 'D_TAXI'];
+    s.props.P6.presentations = [{ proposition: 'P6', target: 'truman', mission: 'M9', result: 'accepted', reason_code: 'SUFFICIENT_RELEVANT_SUPPORT', acceptance_type: 'colloquio_necessario', evidence_attached: ['T_LELAND_TAXI', 'D_TAXI'] }];
+    s.props.P8 = fullProp({ formulation: { status: 'formulated', created_from: ['E3_LETTERA_R', 'E9A_LETTERA_O', 'E9B_STESSO_METODO', 'E1_DIARIO'] } });
+    ['E3_LETTERA_R', 'E9A_LETTERA_O', 'E9B_STESSO_METODO', 'E1_DIARIO'].forEach(function (e) { s.evidence[e] = true; });
+    delete s.nodes_done.m6_interrogation_prova;
+    s.values.m6_tactic = v.tactic; s.nodes_done['m6_interrogation_' + (v.tactic === 'falsa_sicurezza' ? 'falsa' : v.tactic)] = true;
+    s.evidence[TACTIC_EV[v.tactic]] = true;
+    s.values.warning_target = v.warning; s.values.focus_destination = v.focus;
+    s.values.body_found_by = v.focus === 'lago' ? 'cooper' : 'hawk';
+    s.values.maddy_action_after_warning = v.warning === 'palmer' ? 'departure_prepared' : 'none';
+    s.values.promise_stance = v.promise;
+    return s;
+  }
+  function node(id) { return M10.nodes.filter(function (n) { return n.id === id; })[0]; }
+  var CHAIN = ['m10_soglia', 'm10_apertura', 'm10_domande', 'm10_affioramento', 'm10_confessione', 'm10_s3', 'm10_post_s3', 'm10_vittime', 'm10_fermo', 'm10_morte'];
+  // sequenza ATTESA: il runtime PURO su una copia dello stesso seme, stesse scelte
+  function expectedSequence(v) {
+    var s = seedState(v), ids = [];
+    CHAIN.forEach(function (id) {
+      var p = NR.prepareNode(s, M10, id);
+      if (!p.ok) throw new Error('expected prepare ' + id + ': ' + p.error);
+      p.pages.forEach(function (pg) { ids.push(pg.id); });
+      NR.commitNode(s, M10, p);
+      var ch = id === 'm10_soglia' ? 'method_' + v.method : id === 'm10_s3' ? 's3_' + v.s3 : null;
+      if (ch) {
+        var pc = NR.prepareChoice(s, M10, node(id), ch);
+        if (!pc.ok) throw new Error('expected choice ' + ch + ': ' + pc.error);
+        pc.feedback_pages.forEach(function (pg) { ids.push(pg.id); });
+        NR.commitChoice(s, M10, node(id), pc);
+      }
+    });
+    return ids;
+  }
+
+  function presence(id) { try { return CP.resolveCharacterPresence(id, S()); } catch (e) { return { status: 'ERROR', error: String(e.message || e) }; } }
+
+  /* ---- walker BFS sul motore vero (da m8-physical) ---- */
+  var loadMapCalls = 0, origLoadMap = E.loadMap;
+  E.loadMap = function () { loadMapCalls++; return origLoadMap.apply(E, arguments); };
+  var walkSteps = 0, maxStepDistance = 0;
+  function npcBlocking(x, y) { return (E.state.npcs || []).some(function (n) { return E.npcActive(n) && n.x === x && n.y === y; }); }
+  function walkable(mapId, x, y) { if (npcBlocking(x, y)) return false; if (GAME.Maps.doorAt(mapId, x, y)) return false; return !GAME.Maps.isSolid(mapId, x, y, E.state); }
+  function bfs(mapId, from, to) {
+    var m = GAME.Maps[mapId], W = m.width || m.rows[0].length, H = m.height || m.rows.length;
+    var seenB = {}, prev = {}, q = [from]; seenB[from[0] + ',' + from[1]] = true;
+    while (q.length) {
+      var cur = q.shift();
+      if (cur[0] === to[0] && cur[1] === to[1]) { var path = [cur]; while (prev[cur[0] + ',' + cur[1]]) { cur = prev[cur[0] + ',' + cur[1]]; path.unshift(cur); } return path; }
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) {
+        var nx = cur[0] + d[0], ny = cur[1] + d[1], k = nx + ',' + ny;
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H || seenB[k] || !walkable(mapId, nx, ny)) return;
+        seenB[k] = true; prev[k] = cur; q.push([nx, ny]);
+      });
+    }
+    return null;
+  }
+  function dirOf(a, b) { return b[0] > a[0] ? 'right' : b[0] < a[0] ? 'left' : b[1] > a[1] ? 'down' : 'up'; }
+  function stepToSync(next) {
+    var p0 = E.state.player, px = p0.tx, py = p0.ty, dir = dirOf([px, py], next);
+    keydown(DIRC[dir]);
+    var engaged = pumpUntil(function () { return E.state.player.moving; }, 30);
+    keyup(DIRC[dir]);
+    if (!engaged) { pump(2); return false; }
+    pumpUntil(function () { return !E.state.player.moving; }, 40);
+    var d = Math.abs(E.state.player.tx - px) + Math.abs(E.state.player.ty - py);
+    if (d > maxStepDistance) maxStepDistance = d;
+    return d === 1;
+  }
+  function walkToSync(tx, ty) {
+    var stalls = 0;
+    for (var guard = 0; guard < 600; guard++) {
+      if (E.state.dialogue) { key('Enter'); pump(4); continue; }
+      if (A.active()) return false;
+      var p = E.state.player;
+      if (p.tx === tx && p.ty === ty && !p.moving) return true;
+      var path = bfs(E.state.mapId, [p.tx, p.ty], [tx, ty]);
+      if (!path || path.length < 2) { if (++stalls >= 10) return false; pump(8); continue; }
+      if (stepToSync(path[1])) { walkSteps++; stalls = 0; } else { if (++stalls >= 25) return false; pump(12); }
+    }
+    return false;
+  }
+  function faceSync(dir, x, y) {
+    for (var i = 0; i < 12; i++) {
+      var p = E.state.player;
+      if (p.dir === dir && !p.moving && p.tx === x && p.ty === y) return true;
+      keydown(DIRC[dir]); pumpUntil(function () { return E.state.player.dir === dir; }, 8); keyup(DIRC[dir]); pump(2);
+      if (E.state.player.moving) pumpUntil(function () { return !E.state.player.moving; }, 40);
+      if (E.state.player.tx !== x || E.state.player.ty !== y) walkToSync(x, y);
+    }
+    var q = E.state.player; return q.dir === dir && q.tx === x && q.ty === y;
+  }
+  function walkNextToSync(tx, ty) {
+    var neigh = [[tx, ty + 1, 'up'], [tx - 1, ty, 'right'], [tx + 1, ty, 'left'], [tx, ty - 1, 'down']];
+    for (var i = 0; i < neigh.length; i++) {
+      var nb = neigh[i];
+      if (!walkable(E.state.mapId, nb[0], nb[1])) continue;
+      if (!bfs(E.state.mapId, [E.state.player.tx, E.state.player.ty], [nb[0], nb[1]])) continue;
+      if (walkToSync(nb[0], nb[1]) && faceSync(nb[2], nb[0], nb[1])) return { x: nb[0], y: nb[1], dir: nb[2] };
+    }
+    return null;
+  }
+  // walk + face + Invio del motore; true se si apre un lease narrativo
+  async function interactByWalking(tx, ty, label) {
+    var s0 = walkSteps, pick = walkNextToSync(tx, ty), ev0 = A.events.length;
+    for (var k = 0; k < 3; k++) {
+      if (E.state) { E.state.dialogue = null; E.state.menu = null; E.state.mode = 'play'; }
+      key('Enter'); pump(2); await wait(120); pump(2);
+      if (A.events.slice(ev0).some(function (e) { return e.event === 'lease_acquire'; })) break;
+    }
+    var opened = A.active();
+    out.run_log[label] = { walked: walkSteps - s0, placed: !!pick, at: pick, lease: opened };
+    if (opened) sessionOpen = true;
+    return opened;
+  }
+
+  var pageLog = [];
+  A.onLog = function (e) { if (e.event === 'page_shown') pageLog.push(e.page_id); if (e.event === 'session_closed') sessionOpen = false; };
+  function leaseDepth() { for (var i = A.events.length - 1; i >= 0; i--) { var e = A.events[i]; if (e.event === 'lease_acquire' || e.event === 'lease_release') return e.depth; } return 0; }
+
+  // pilota la sessione aperta; opzioni: scegli, input doppio, frecce durante le pagine, Escape su una pagina
+  async function driveSession(v, o) {
+    o = o || {};
+    var res = { closed: false, aborted: false, doubleChoice: null, doublePage: null, arrowsMovedCooper: false, releasesToZeroInside: 0 };
+    var evStart = A.events.length;
+    for (var guard = 0; guard < 300; guard++) {
+      pump(1); await wait(8);
+      if (!A.active()) { res.closed = true; break; }
+      var opts = widgetOpts();
+      if (opts.length) {
+        var want = opts.indexOf('method_' + v.method) >= 0 ? 'method_' + v.method : opts.indexOf('s3_' + v.s3) >= 0 ? 's3_' + v.s3 : null;
+        if (!want) { out.errors.push('unexpected widget ' + opts.join(',')); break; }
+        for (var k = 0; k < opts.indexOf(want); k++) await press('ArrowDown');
+        if (o.doubleInput && res.doubleChoice === null) {
+          var c0 = A.events.length, rev0 = S().revision;
+          key('Enter'); key('Enter');                 // due Invio nello stesso tick
+          pump(2); await wait(LOCK + 60); pump(2);
+          var commits = A.events.slice(c0).filter(function (e) { return e.event === 'commit'; }).length;
+          res.doubleChoice = { commits: commits, revision_delta: S().revision - rev0 };
+        } else await press('Enter');
+        continue;
+      }
+      var last = pageLog[pageLog.length - 1];
+      if (o.abortAt && !res.aborted && last === o.abortAt) { res.aborted = true; await press('Escape'); continue; }
+      if (o.arrowsDuringPages && last === 'm10.b2.apertura.p02' && !res.arrowsTried) {
+        res.arrowsTried = true;
+        var p0 = [E.state.player.tx, E.state.player.ty];
+        keydown('ArrowLeft'); pump(30); keyup('ArrowLeft'); pump(10);
+        res.arrowsMovedCooper = (E.state.player.tx !== p0[0] || E.state.player.ty !== p0[1] || E.state.player.moving);
+      }
+      if (o.doubleInput && res.doublePage === null && last === 'm10.b2.apertura.p01') {
+        var n0 = pageLog.length;
+        key('Enter'); key('Enter');                   // due Invio nello stesso tick sulla pagina
+        pump(2); await wait(LOCK + 60); pump(2);
+        res.doublePage = { pages_advanced: pageLog.length - n0 };
+        continue;
+      }
+      await press('Enter');
+    }
+    var inside = A.events.slice(evStart);
+    var closeIdx = -1; inside.forEach(function (e, i) { if (e.event === 'session_closed') closeIdx = i; });
+    res.releasesToZeroInside = inside.filter(function (e, i) { return e.event === 'lease_release' && e.depth === 0 && (closeIdx < 0 || i < closeIdx - 1); }).length;
+    res.sessionsClosed = inside.filter(function (e) { return e.event === 'session_closed'; }).length;
+    for (var w = 0; w < 10; w++) { pump(2); await wait(20); }
+    sessionOpen = false;
+    return res;
+  }
+
+  /* ---------------- percorso 1: intuitivo / off, ininterrotto ---------------- */
+  var v1 = { method: 'intuitivo', s3: 'off', tactic: 'pressione', warning: 'palmer', focus: 'lago', promise: 'accompagno' };
+  mark('p1');
+  A.setState(seedState(v1));
+  E.loadMap('sheriff', 7, 10, 'up');                  // UNICO spawn: l'ingresso della centrale
+  pump(10); await wait(60); pump(10);
+  ok('P1 leland_body_live_at_8_5', (E.state.npcs || []).some(function (n) { return n.id === 'leland' && n.x === 8 && n.y === 5; }));
+  gameplayFramesInSession = 0;
+  var opened1 = await interactByWalking(8, 5, 'p1_leland');
+  ok('P1 walked_to_leland_and_engine_enter_opened_session', opened1 && out.run_log.p1_leland.walked >= 2);
+  var r1 = await driveSession(v1, { doubleInput: true, arrowsDuringPages: true });
+  ok('P1 one_session_whole_chain_to_leland_morto', r1.closed && r1.sessionsClosed === 1 && !!S().flags.leland_morto);
+  ok('P1 zero_gameplay_frames_inside_session (' + gameplayFramesInSession + ')', gameplayFramesInSession === 0);
+  ok('P1 no_lease_release_to_zero_between_chained_nodes', r1.releasesToZeroInside === 0);
+  ok('P1 arrows_during_pages_do_not_move_cooper', r1.arrowsTried && !r1.arrowsMovedCooper);
+  ok('P1 double_enter_on_widget_single_commit', !!r1.doubleChoice && r1.doubleChoice.commits === 1);
+  ok('P1 double_enter_on_page_advances_one_page', !!r1.doublePage && r1.doublePage.pages_advanced === 1);
+  ok('P1 zero_locks_after_close', !A.active() && leaseDepth() === 0);
+  ok('P1 all_chain_nodes_done_once', ['m10_soglia', 'm10_apertura', 'm10_domande', 'm10_affioramento', 'm10_confessione', 'm10_s3', 'm10_post_s3', 'm10_vittime', 'm10_fermo', 'm10_morte'].every(function (id) { return S().nodes_done[id] === true; }));
+  ok('P1 leland_body_removed_from_live_map', (E.state.npcs || []).every(function (n) { return n.id !== 'leland'; }));
+  ok('P1 no_duplicate_page_shown', (function () { var seen = {}, dup = false; pageLog.forEach(function (id) { if (seen[id]) dup = true; seen[id] = true; }); return !dup; })());
+  out.run_log.p1_pages = pageLog.length;
+
+  /* ---------------- percorso 2: probatorio / on, interrotto due volte ---------------- */
+  var v2 = { method: 'probatorio', s3: 'on', tactic: 'prova', warning: 'centrale', focus: 'diner', promise: 'prudenza' };
+  mark('p2');
+  A.setState(seedState(v2));
+  pageLog = [];
+  // spawn di ritorno NON usato: Cooper cammina dalla posizione in cui si trova
+  var opened2 = await interactByWalking(8, 5, 'p2_leland');
+  ok('P2 session_opened_by_walking', opened2);
+  var beforeAbort = null;
+  var r2a = await driveSession(v2, { abortAt: 'm10.b6.probatorio.p05' });
+  var sA = S();
+  ok('P2 escape_closes_session', r2a.aborted && r2a.closed);
+  ok('P2 zero_locks_after_escape', !A.active() && leaseDepth() === 0);
+  ok('P2 escape_left_B6_uncommitted', !!sA.nodes_done.m10_affioramento && !sA.nodes_done.m10_confessione && !Object.keys(sA.values).some(function (k) { return k.indexOf('material_admissions.') === 0; }));
+  pump(20); await wait(60); pump(20);
+  out.run_log.after_escape = { menu: !!E.state.menu, dialogue: !!E.state.dialogue, mode: E.state.mode, fade: E.state.fadePhase, moving: E.state.player.moving, active: A.active(),
+    npcs: (E.state.npcs || []).filter(function (n) { return E.npcActive(n); }).map(function (n) { return n.id + '@' + n.x + ',' + n.y; }) };
+  var from = [E.state.player.tx, E.state.player.ty];
+  // turn-in-place usa il clock di gioco: fino a 3 pressioni reali (come m8-physical), mai un teleport
+  var stepped = false;
+  for (var tries = 0; tries < 3 && !stepped && walkable('sheriff', from[0] + 1, from[1]); tries++) { stepped = stepToSync([from[0] + 1, from[1]]); if (!stepped) pump(12); }
+  out.run_log.after_escape.step_tries = tries;
+  ok('P2 gameplay_resumes_after_escape (a real step ' + from + ' -> ' + E.state.player.tx + ',' + E.state.player.ty + ')', stepped && E.state.player.tx === from[0] + 1);
+  if (stepped) walkSteps++;
+  pageLog = [];
+  var opened2b = await interactByWalking(8, 5, 'p2_leland_resume');
+  pump(4); await wait(80); pump(4);
+  ok('P2 resume_by_walking_to_leland_restarts_B6', opened2b && pageLog[0] === 'm10.b6.probatorio.p01');
+  var r2b = await driveSession(v2, { abortAt: 'm10.b10.morte.p02' });
+  var sB = S();
+  ok('P2 escape_in_B10_leaves_leland_in_cell', r2b.aborted && !!sB.nodes_done.m10_fermo && !sB.flags.leland_morto && presence('leland').status === 'OFFSCREEN');
+  ok('P2 zero_locks_after_second_escape', !A.active() && leaseDepth() === 0);
+  ok('P2 no_leland_body_after_fermo', (E.state.npcs || []).every(function (n) { return n.id !== 'leland'; }));
+  pageLog = [];
+  var opened2c = await interactByWalking(10, 4, 'p2_truman');
+  pump(4); await wait(80); pump(4);
+  ok('P2 resume_by_walking_to_truman_restarts_B10', opened2c && pageLog[0] === 'm10.b10.morte.p01');
+  var r2c = await driveSession(v2, {});
+  ok('P2 resumed_to_leland_morto', r2c.closed && !!S().flags.leland_morto && S().values.s3 === 'on');
+  ok('P2 zero_locks_at_end', !A.active() && leaseDepth() === 0);
+
+  ok('Z single_spawn_no_teleport (loadMap calls ' + loadMapCalls + ')', loadMapCalls === 1);
+  ok('Z one_tile_per_step', maxStepDistance === 1);
+  ok('Z zero_console_errors', out.errors.length === 0);
+  var allOk = out.errors.length === 0 && Object.keys(out.checks).every(function (k) { return out.checks[k] === true; });
+  out.pass = allOk; out.total = Object.keys(out.checks).length;
+  out.passed = Object.keys(out.checks).filter(function (k) { return out.checks[k] === true; }).length;
+  out.failed = Object.keys(out.checks).filter(function (k) { return out.checks[k] !== true; });
+  out.run_log.frames_pumped = framesPumped; out.run_log.walk_steps = walkSteps;
+  document.getElementById('log').textContent = JSON.stringify(out, null, 1);
+  document.title = allOk ? ('M10-PHYSICAL-HARNESS-PASS ' + out.passed + '/' + out.total) : ('M10-PHYSICAL-HARNESS-FAIL ' + out.failed.length + '/' + out.total);
+}
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    run().catch(function (e) { out.errors.push('run: ' + (e && e.message || e)); document.getElementById('log').textContent = JSON.stringify(out, null, 1); document.title = 'M10-PHYSICAL-HARNESS-ERR ' + (e && e.message || e); });
+  }, 400);
+});
+</script>
+</body>
+</html>

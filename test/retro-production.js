@@ -31,13 +31,13 @@ const checks = {
     /lines\.slice\(part \* 7, part \* 7 \+ 7\)/.test(engine),
   production_cache_busts_layout_fix: /js\/engine\.js\?v=r142-narrative-portrait/.test(index) &&
     /js\/touch\.js\?v=r112gutter/.test(index) && /js\/data\.js\?v=13act2/.test(index) &&
-    /js\/narrative-data\.gen\.js\?v=20cast/.test(index) &&
-    /js\/narrative-finale\.js\?v=gold54p5/.test(index) &&
-    /js\/narrative-finale-production\.js\?v=14/.test(index),
+    /js\/narrative-data\.gen\.js\?v=21act5/.test(index) &&
+    /js\/narrative-finale\.js\?v=gold54p6act5/.test(index) &&
+    /js\/narrative-finale-production\.js\?v=15act5/.test(index),
   production_cache_busts_objective_notebook_fix:
     /js\/narrative-notebook\.js\?v=5/.test(index) &&
     /js\/narrative-engine-adapter\.js\?v=12/.test(index) &&
-    /js\/narrative-production\.js\?v=22/.test(index),
+    /js\/narrative-production\.js\?v=23act5/.test(index),
   css_stage_preserves_native_aspect: /aspect-ratio: 4 \/ 3/.test(index) &&
     /max-width: 100vw; max-height: 100dvh/.test(index),
   production_loads_retro_renderer: /js\/retro\.js/.test(index),
