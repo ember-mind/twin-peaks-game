@@ -21,6 +21,7 @@
 // Bundle (one export carrying both targets):
 //   { format: 'world-builder-bundle', version: 1, changesets: [ <world-connections-changeset>, <cast-windows-changeset> ] }
 // At most one changeset per target; splitChangesets() turns a plain changeset or a bundle into that list.
+// M8 adds a third target: scene-objects-changeset -> world/scene-objects.json (js/editor/core/scene-objects.js).
 
 (function () {
   const R = globalThis.Editor || {};
@@ -33,6 +34,8 @@
   const BUNDLE_VERSION = 1;
   const CONNECTIONS_FORMAT = 'world-connections-changeset';
   const CONNECTIONS_TARGET = 'world/connections.json';
+  const OBJECTS_FORMAT = 'scene-objects-changeset';
+  const OBJECTS_TARGET = 'world/scene-objects.json';
   const FACINGS = ['up', 'down', 'left', 'right'];
   const ARROWS = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
 
@@ -256,11 +259,14 @@
       if (!cs || typeof cs !== 'object') fail(where + ' is not an object');
       let target;
       if (cs.format === FORMAT) target = TARGET;
+      else if (cs.format === OBJECTS_FORMAT) target = cs.target;
       else if (cs.format === BUNDLE_FORMAT) fail(where + ' nests a bundle');
       else if (cs.format === CONNECTIONS_FORMAT || cs.format === undefined) target = cs.target === undefined ? CONNECTIONS_TARGET : cs.target;
       else fail(where + ' has unknown format ' + JSON.stringify(cs.format));
-      if (target !== CONNECTIONS_TARGET && target !== TARGET) fail(where + ' targets ' + JSON.stringify(target) + '; only ' + CONNECTIONS_TARGET + ' and ' + TARGET + ' are writable');
+      if (target !== CONNECTIONS_TARGET && target !== TARGET && target !== OBJECTS_TARGET) fail(where + ' targets ' + JSON.stringify(target) + '; only ' + CONNECTIONS_TARGET + ', ' + TARGET + ' and ' + OBJECTS_TARGET + ' are writable');
       if (cs.format === FORMAT && cs.target !== TARGET) fail(where + ' is a cast changeset targeting ' + JSON.stringify(cs.target));
+      if (cs.format === OBJECTS_FORMAT && cs.target !== OBJECTS_TARGET) fail(where + ' is a scene objects changeset targeting ' + JSON.stringify(cs.target));
+      if (cs.format !== OBJECTS_FORMAT && target === OBJECTS_TARGET) fail(where + ' targets ' + OBJECTS_TARGET + ' without format ' + OBJECTS_FORMAT);
       if (has(seen, target)) fail(where + ' is a second changeset for ' + target);
       seen[target] = true;
       return { target: target, changeset: cs };

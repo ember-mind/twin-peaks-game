@@ -8,6 +8,7 @@
  * The file holds one of (js/editor/core/cast.js splitChangesets):
  *   - a world-connections-changeset (target world/connections.json), versions 1 and 2, below;
  *   - a cast-windows-changeset (target narrative/cast/windows.json, M7), see CAST below;
+ *   - a scene-objects-changeset (target world/scene-objects.json, M8), see SCENE OBJECTS below;
  *   - { format: 'world-builder-bundle', version: 1, changesets: [...] } with at most one changeset per target.
  * Every part is validated before anything is written; the write is atomic across every file of every part.
  *
@@ -47,8 +48,20 @@
  * Writes narrative/cast/windows.json (2-space JSON, only the four fields change), runs test/gen-narrative-data.js,
  * writes the pins fixture and the audit record when repinning, then runs test/cast-continuity-validate.js.
  *
+ * SCENE OBJECTS (M8): world/scene-objects.json entries (js/editor/core/scene-objects.js for the schema).
+ *   1. apply STRICTLY (Editor.sceneObjects.applyObjectsChangeset): unknown scene or entry, create of an existing
+ *      entry, two ops on one entry, an upsert changing anything but x/y/w/h, an interact key collision exits 2
+ *   2. boot <root>/js; every touched entry must fit its map, bind existing dialogue ids (GAME.Data.dialogues), and a
+ *      created object must be a kind already present, bound to one dialogue id; a created interact key must use a
+ *      GAME.INTERACT_DLG id
+ *   3. delete: refused when a mission node under <root>/narrative/missions holds the entry's dialogue id (or its
+ *      interact id) as an exact string value; the nodes are listed
+ * Writes world/scene-objects.json (2-space JSON), runs test/gen-world-data.js, then
+ * test/scene-objects-equality.js --registry-only (glue reproduces the new registry, js/maps.js still empty).
+ *
  * Any failure after the first write restores every written file (registry, gen, catalog, windows.json,
- * narrative-data.gen.js, pins fixture, audit record) from the pre-run bytes and exits 1.
+ * narrative-data.gen.js, pins fixture, audit record, scene-objects.json, scene-objects.gen.js) from the pre-run
+ * bytes and exits 1.
  *
  * Exit codes: 0 ok / no-op, 1 validation failed, refused delete, pin/transition disagreement, or rolled back,
  * 2 usage or refused changeset.
@@ -68,10 +81,14 @@ const NARRATIVE_GEN_REL = 'js/narrative-data.gen.js';
 const PINS_REL = 'test/fixtures/cast-pins-acts-1-4.json';
 const TRANSITIONS_REL = 'test/fixtures/cast-transitions-acts-1-4.json';
 const AUDIT_REL = 'artifacts/world-character-audit/cast-windows-acts-1-4.md';
+const OBJECTS_REL = 'world/scene-objects.json';
+const OBJECTS_GEN_REL = 'js/scene-objects.gen.js';
+const MISSIONS_REL = 'narrative/missions';
 const Edit = require(path.join(REPO, 'js', 'editor', 'core', 'edit.js'));
 const Cast = require(path.join(REPO, 'js', 'editor', 'core', 'cast.js'));
 const CatalogWrite = require(path.join(REPO, 'js', 'editor', 'apply', 'catalog-write.js'));
 const CastWrite = require(path.join(REPO, 'js', 'editor', 'apply', 'cast-write.js'));
+const SceneObjects = require(path.join(REPO, 'js', 'editor', 'core', 'scene-objects.js'));
 
 // index.html order (test/legacy-door-inventory.js): every file must load; a skipped installer would hide doors.
 const CHAIN = ['tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'environmental-inspect.js', 'retro-font.js',
@@ -389,6 +406,90 @@ function planCast(args, changeset, G, finalConnections, problems) {
   };
 }
 
+// ---- scene objects part (M8) ----------------------------------------------------------------------------------
+function planSceneObjects(args, changeset, boot, problems) {
+  for (const rel of [OBJECTS_REL, OBJECTS_GEN_REL, GEN_REL, 'test/gen-world-data.js', 'test/scene-objects-equality.js', MISSIONS_REL]) {
+    if (!fs.existsSync(path.join(args.root, rel))) usage('no ' + rel + ' under ' + args.root);
+  }
+  const target = path.join(args.root, OBJECTS_REL);
+  const sourceText = fs.readFileSync(target, 'utf8');
+  const registry = JSON.parse(sourceText);
+  if (JSON.stringify(registry, null, 2) + '\n' !== sourceText) usage(OBJECTS_REL + ' is not canonical 2-space JSON; refusing to rewrite it');
+  let applied;
+  try { applied = SceneObjects.applyObjectsChangeset(registry, changeset); }
+  catch (e) { throw new Refused(e.message); }
+  const G = boot();
+
+  const describe = function (c) { return c.scene + (c.entry === 'object' ? ' object ' : ' interact ') + c.key; };
+  applied.changes.forEach(function (c) {
+    console.log((c.op === 'create' ? 'CREATE ' : c.op === 'delete' ? 'DELETE ' : 'TARGET ') + OBJECTS_REL + ' :: ' + describe(c));
+    console.log('BEFORE ' + JSON.stringify(c.before));
+    console.log('AFTER  ' + JSON.stringify(c.after));
+  });
+  const nextText = JSON.stringify(applied.data, null, 2) + '\n';
+  if (nextText !== sourceText) {
+    console.log('DIFF ' + OBJECTS_REL);
+    CatalogWrite.diffLines(sourceText, nextText).forEach(function (l) { console.log('  ' + l); });
+  }
+
+  // validate touched entries against the booted game, with the same rules the Builder uses
+  const ctx = {
+    sceneSize: function (scene) { const m = G.maps.maps[scene] && G.Maps[scene]; return m ? { width: m.width, height: m.height } : null; },
+    dialogueExists: function (id) { return !!(G.Data && G.Data.dialogues && G.Data.dialogues[id]); },
+    interactIdKnown: function (id) { return !!(G.INTERACT_DLG && Object.prototype.hasOwnProperty.call(G.INTERACT_DLG, id)); }
+  };
+  const knownKinds = {};
+  Object.keys(registry.scenes).forEach(function (sc) { registry.scenes[sc].objects.forEach(function (o) { if (o.kind) knownKinds[o.kind] = o.type; }); });
+  const resolveInteract = function (id) { return (G.INTERACT_DLG && G.INTERACT_DLG[id]) || id; };
+  applied.changes.forEach(function (c) {
+    if (c.op === 'delete') return;
+    if (c.entry === 'object') {
+      SceneObjects.objectErrors(ctx, c.scene, c.after, { created: c.op === 'create' }).forEach(function (e) { problems.push('INVALID ' + e); });
+      if (c.op === 'create' && knownKinds[c.after.kind] !== c.after.type) {
+        problems.push('INVALID ' + c.scene + ' ' + c.key + ': kind/type ' + c.after.kind + '/' + c.after.type + ' is not a kind already present in ' + OBJECTS_REL);
+      }
+    } else {
+      const xy = c.after.key.split(',');
+      SceneObjects.interactErrors(ctx, c.scene, { x: +xy[0], y: +xy[1], id: c.after.id }, { created: c.op === 'create' }).forEach(function (e) { problems.push('INVALID ' + e); });
+      SceneObjects.dialogueIds(resolveInteract(c.after.id)).forEach(function (id) {
+        if (!ctx.dialogueExists(id)) problems.push('INVALID ' + describe(c) + ': dialogue "' + id + '" does not exist');
+      });
+    }
+  });
+
+  // delete guard: mission nodes under narrative/missions that hold the entry's dialogue (or interact id) as a value
+  const deletes = applied.changes.filter(function (c) { return c.op === 'delete'; });
+  if (deletes.length) {
+    const missionsDir = path.join(args.root, MISSIONS_REL);
+    const missions = fs.readdirSync(missionsDir).filter(function (f) { return /\.json$/.test(f); }).sort().map(function (f) {
+      const m = JSON.parse(fs.readFileSync(path.join(missionsDir, f), 'utf8'));
+      return { mission: MISSIONS_REL + '/' + f, nodes: m.nodes || [] };
+    });
+    deletes.forEach(function (c) {
+      const ids = c.entry === 'object' ? SceneObjects.dialogueIds(c.before.dialogue) : [c.before.id].concat(SceneObjects.dialogueIds(resolveInteract(c.before.id)));
+      const refs = SceneObjects.missionReferences(missions, ids);
+      if (refs.length) {
+        problems.push('REFUSED delete ' + describe(c) + ': referenced by ' + refs.length + ' mission node(s):\n    ' +
+          refs.map(function (r) { return r.mission + ' ' + r.node + ' (' + r.id + ')'; }).join('\n    '));
+      }
+    });
+  }
+
+  return {
+    noop: nextText === sourceText,
+    report: function () { console.log('VALID ' + applied.changes.length + ' scene object change(s) against real maps and dialogues'); },
+    noopLine: 'NO-OP ' + OBJECTS_REL + ' already matches the changeset',
+    dryLine: 'DRY-RUN ' + applied.changes.length + ' scene object change(s); nothing written',
+    files: [OBJECTS_REL, OBJECTS_GEN_REL, GEN_REL],
+    write: function (run) {
+      writeAtomic(target, nextText);
+      console.log('WROTE ' + OBJECTS_REL + ' (' + applied.changes.length + ' change(s))');
+      console.log(run('test/gen-world-data.js').trim().split('\n')[0]);
+      console.log('CHECK ' + run('test/scene-objects-equality.js', ['--registry-only']).trim().split('\n').pop());
+    }
+  };
+}
+
 function writeAtomic(file, text) {
   const tmp = file + '.tmp-' + process.pid;
   fs.writeFileSync(tmp, text);
@@ -408,6 +509,7 @@ function main() {
   }
   const conn = parts.find(function (p) { return p.target === TARGET_REL; });
   const cast = parts.find(function (p) { return p.target === CAST_REL; });
+  const objects = parts.find(function (p) { return p.target === OBJECTS_REL; });
 
   const problems = [];
   const planned = [];
@@ -423,6 +525,7 @@ function main() {
       const finalConnections = connPlan ? connPlan.nextConnections : JSON.parse(fs.readFileSync(path.join(args.root, TARGET_REL), 'utf8')).connections;
       planned.push(planCast(args, cast.changeset, boot(), finalConnections, problems));
     }
+    if (objects) planned.push(planSceneObjects(args, objects.changeset, boot, problems));
   } catch (e) {
     if (e instanceof Refused) { console.error('world-apply: REFUSED — ' + e.message); process.exit(2); }
     throw e;
@@ -445,8 +548,8 @@ function main() {
   const rels = [];
   live.forEach(function (p) { p.files.forEach(function (rel) { if (rels.indexOf(rel) === -1) rels.push(rel); }); });
   const saved = rels.map(function (rel) { const f = path.join(args.root, rel); return [f, fs.readFileSync(f)]; });
-  function run(rel) {
-    const r = spawnSync(process.execPath, [path.join(args.root, rel)], { cwd: args.root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  function run(rel, extra) {
+    const r = spawnSync(process.execPath, [path.join(args.root, rel)].concat(extra || []), { cwd: args.root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
     if (r.status !== 0) {
       const all = String((r.stdout || '') + (r.stderr || '')).trim().split('\n');
       const failing = all.filter(function (l) { return /FAIL|expected=|Error/.test(l); }).slice(0, 30);

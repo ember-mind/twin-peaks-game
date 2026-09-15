@@ -40,6 +40,7 @@ function ok(cond, msg) { if (!cond) die(msg); else console.log('  ✓ ' + msg); 
       if (!o || typeof o !== 'object') bad(at + ' is not an object');
       Object.keys(o).forEach(function (k) { if (!OBJECT_KEYS[k]) bad(at + ' has unknown field "' + k + '"'); });
       if (typeof o.sourceId !== 'string' || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(o.sourceId)) bad(at + '.sourceId must be kebab-case');
+      if (/^interact-/.test(o.sourceId)) bad(at + '.sourceId may not start with "interact-" (reserved for interact keys in the World Builder)');
       if (ids.has(o.sourceId)) bad(scene + ': duplicate sourceId ' + o.sourceId);
       ids.add(o.sourceId);
       if (typeof o.type !== 'string' || !o.type) bad(at + '.type must be a non-empty string');
