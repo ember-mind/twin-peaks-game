@@ -51,28 +51,34 @@ const ctx={globalAlpha:1,fillStyle:art.palette.ink,fillRect(x,y,w,h){
 G.sprites.drawStructures(ctx,map,0,0);
 G.sprites.drawForegroundStructures(ctx,map,0,0,{forestDepthMin:48,forestDepthMax:112});
 assert.equal(seen.size,5,'all five colors rendered');
-/* A full chevron spans two 16px tiles; vertical bands remain exactly 4px. */
-for(let x=0;x<256;x++)for(let y=32;y<176;y++){
-  assert.equal(art.floorColor(x,y),art.floorColor(x+32,y));
-  assert.equal(art.floorColor(x,y),art.floorColor(x,y+8));
-  assert.notEqual(art.floorColor(x,y),art.floorColor(x,y+4));
-  assert.ok([art.palette.cream,art.palette.ink].includes(art.floorColor(x,y)));
-}
-for(let x=0;x<32;x++){
-  let start=0;
-  while(art.floorColor(x,start)===art.floorColor(x,start-1))start++;
-  for(let band=0;band<4;band++)for(let dy=0;dy<4;dy++){
-    assert.equal(art.floorColor(x,start+band*4+dy),art.floorColor(x,start+band*4),'every contiguous band is exactly four pixels');
+/* Perspective spacing changes ink gaps, never the explicit 4px cream band.
+ * Scan complete stripes beyond the room's clipped edges, including every
+ * 16px seam. A tile boundary may cross a slope: it must not reset its phase. */
+const stripeStarts=[];
+for(let x=0;x<256;x++){
+  const starts=[];
+  for(let y=0;y<224;y++){
+    const color=art.floorColor(x,y);
+    assert.ok([art.palette.cream,art.palette.ink].includes(color));
+    assert.equal(color,art.floorColor(x+960,y),'world-aligned common repeat');
+    if(x%2===0)assert.equal(color,art.floorColor(x+1,y),'integer 2px drawing runs preserve every sample');
+    if(color===art.palette.cream&&art.floorColor(x,y-1)===art.palette.ink){
+      starts.push(y);
+      for(let dy=0;dy<4;dy++)assert.equal(art.floorColor(x,y+dy),art.palette.cream,'cream band exactly four pixels');
+      assert.equal(art.floorColor(x,y+4),art.palette.ink,'cream band ends after four pixels');
+    }
   }
+  assert.equal(starts.length,10,'no stripe lost at a perspective change');
+  for(let i=1;i<starts.length;i++)assert.ok(starts[i]-starts[i-1]>=8,'at least four dark pixels separate whole chevrons');
+  if(x>0)starts.forEach((start,i)=>assert.ok(Math.abs(start-stripeStarts[x-1][i])<=1,'unbroken slope through every pixel and tile seam'));
+  stripeStarts.push(starts);
 }
-for(let y=0;y<8;y++)for(let seam=16;seam<256;seam+=16){
-  assert.equal(art.floorColor(seam-1,y),art.floorColor(seam,y),'the two sides of each tile seam share a continuous crest/trough');
-}
-/* A 2px horizontal step climbs one pixel, then descends symmetrically. */
-for(let y=0;y<8;y++){
-  for(let x=0;x<14;x+=2)assert.equal(art.floorColor(x,y),art.floorColor(x+2,y+1),'rising V edge');
-  for(let x=16;x<30;x+=2)assert.equal(art.floorColor(x,y),art.floorColor(x+2,y-1),'falling V edge');
-}
+const spacing=stripeStarts[0].slice(1).map((start,i)=>start-stripeStarts[0][i]);
+function riseSpan(band){const ys=stripeStarts.map(starts=>starts[band]);return Math.max(...ys)-Math.min(...ys);}
+assert.ok(riseSpan(8)>riseSpan(0),'near-field V scale exceeds distant chevrons');
+assert.ok(spacing[spacing.length-1]>spacing[0],'foreground spacing grows');
+spacing.forEach((gap,i)=>assert.ok(i===0||gap>=spacing[i-1],'deterministic perspective spacing'));
+assert.ok(stripeStarts[0].filter(y=>y>=40&&y<176).length<10,'foreground has fewer complete rows');
 G.AmbientLife.reset(7);
 let ambientDraws=0;
 const ambientCtx={globalAlpha:.8,fillStyle:art.palette.cream,fillRect(x,y,w,h){

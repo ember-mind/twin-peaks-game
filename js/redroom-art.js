@@ -26,13 +26,23 @@
       ctx.fillStyle = color; ctx.fillRect(x-cx, y-cy, w, h);
     };
   }
+  /* Each stripe owns its world-space baseline and V width. Dark intervals
+   * widen toward the foreground; cream stays exactly four pixels thick.
+   * Width changes happen BETWEEN complete chevrons, never at a horizontal
+   * clipping boundary through a stripe. Widths are multiples of a 16px tile. */
+  var floorBands=[
+    [20,32],[32,32],[44,32],[60,48],[76,48],
+    [94,48],[116,64],[140,64],[166,64],[194,80]
+  ];
   function floorColor(x, y) {
-    /* Four-pixel bands climb eight stepped rows across a 32px repeat.
-     * The deeper V keeps a broad two-tile rhythm instead of shallow ripples.
-     * World coordinates preserve the phase through both 16px tile seams. */
-    var phase = ((x % 32) + 32) % 32;
-    var rise = phase < 16 ? Math.floor(phase/2) : 15-Math.floor(phase/2);
-    return ((((y-rise)%8)+8)%8)<4 ? palette.cream : palette.ink;
+    for(var i=0;i<floorBands.length;i++){
+      var band=floorBands[i],width=band[1];
+      if(y<band[0]||y>band[0]+width/4+2)continue;
+      var phase=((x%width)+width)%width;
+      var rise=phase<width/2?Math.floor(phase/2):width/2-1-Math.floor(phase/2);
+      if(y>=band[0]+rise&&y<band[0]+rise+4)return palette.cream;
+    }
+    return palette.ink;
   }
   function floor(R) {
     for (var y=30; y<176; y++) {
