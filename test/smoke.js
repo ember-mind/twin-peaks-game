@@ -33,6 +33,7 @@ require(J('maps.js'));
 require(J('data.js'));
 require(J('retro-font.js'));
 require(J('engine.js'));
+require(J('scene-objects.gen.js'));
 require(J('glue.js'));
 require(J('double-r-exterior-art.js'));
 require(J('double-r-exterior-scene.js'));
@@ -267,9 +268,12 @@ for (const ch of URBAN_PROPS) {
 
 // guardia interact -> dialogo: ogni chiave interact usata in una mappa deve
 // risolvere (via INTERACT_DLG, o come id diretto) a un dialogo reale in
-// data.js. Cattura il gap "serve una voce sia in maps.js che in glue.js".
+// data.js. Cattura il gap "serve una voce sia nel registro che in glue.js".
+// Dal M8 le chiavi interact vivono in world/scene-objects.json
+// (GAME.WorldData.sceneObjects), non piu' in maps.js.
 for (const id of mapIds) {
-  const interact = GAME.maps.maps[id].interact || {};
+  const reg = GAME.WorldData.sceneObjects.scenes[id];
+  const interact = reg ? reg.interact : {};
   for (const [xy, key] of Object.entries(interact)) {
     const dlg = GAME.INTERACT_DLG[key] || key;
     for (const did of dialogueId(dlg)) {

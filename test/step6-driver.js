@@ -24,7 +24,7 @@ var DIR = path.join(process.cwd(), 'js');
 function req(f) { return require(path.join(DIR, f)); }
 function tryReq(f) { try { req(f); } catch (e) {} }
 ['tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'environmental-inspect.js',
- 'retro-font.js', 'portraits.js', 'gold-tone.js', 'engine.js', 'glue.js', 'location-connections.js',
+ 'retro-font.js', 'portraits.js', 'gold-tone.js', 'engine.js', 'scene-objects.gen.js', 'glue.js', 'location-connections.js',
  'world-connections.gen.js', 'double-r-exterior-art.js', 'double-r-exterior-scene.js', 'double-r-location-production.js',
  'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js', 'sheriffs-station-scene.js', 'sheriffs-station-exterior-scene.js', 'sheriffs-station-production.js',
  'room-315-art.js', 'room-315-scene.js', 'room-315-production.js',

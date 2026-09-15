@@ -48,6 +48,7 @@
   var SPARKLE = { cameraLaura: 1, olio: 1, mucchio_terra: 1, anello_interact: 1, specchio315: 1 };
 
   GAME.INTERACT_DLG = INTERACT_DLG; // esposto per test/smoke.js (guardia interact -> dialogo)
+  GAME.INTERACT_SPARKLE = SPARKLE; // esposto per test/scene-objects-equality.js e il World Builder (M8)
 
   /* ---------------- GAME.Maps: mappe normalizzate + helper ------------- */
 
@@ -61,6 +62,26 @@
   // bisogno di toccare questo file. test/smoke.js verifica che nessun campo
   // src venga perso in silenzio.
   var TRANSFORMED_KEYS = { doors: 1, gate: 1, interact: 1, objects: 1 };
+
+  /* Oggetti di scena e chiavi interact (M8): l'unica fonte e' il registro
+   * world/scene-objects.json (GAME.WorldData.sceneObjects, generato in
+   * js/scene-objects.gen.js e caricato prima di questo file). Una mappa di
+   * maps.js che porta ancora objects/interact e' una doppia fonte: errore.
+   * Senza registro nessuna mappa avrebbe oggetti: errore anche quello, niente
+   * scomparsa silenziosa. */
+  var SceneObjects = GAME.WorldData && GAME.WorldData.sceneObjects;
+  if (!SceneObjects || !SceneObjects.scenes) {
+    throw new Error('[glue] GAME.WorldData.sceneObjects missing: load js/scene-objects.gen.js before js/glue.js');
+  }
+  Object.keys(SceneObjects.scenes).forEach(function (id) {
+    if (!Mp.maps[id]) throw new Error('[glue] world/scene-objects.json names unknown map "' + id + '"');
+  });
+  function copyEntry(o) {
+    var out = {};
+    Object.keys(o).forEach(function (k) { if (k !== 'sourceId') out[k] = JSON.parse(JSON.stringify(o[k])); });
+    out.sourceId = o.sourceId; // identita' stabile per il World Builder; engine/renderer la ignorano
+    return out;
+  }
 
   Object.keys(Mp.maps).forEach(function (id) {
     var src = Mp.maps[id];
@@ -77,9 +98,13 @@
       };
     }
 
-    var objects = (src.objects || []).concat(Object.keys(src.interact || {}).map(function (k) {
+    if (Object.prototype.hasOwnProperty.call(src, 'objects') || Object.prototype.hasOwnProperty.call(src, 'interact')) {
+      throw new Error('[glue] js/maps.js map "' + id + '" still carries objects/interact; they live in world/scene-objects.json');
+    }
+    var reg = SceneObjects.scenes[id] || { objects: [], interact: {} };
+    var objects = reg.objects.map(copyEntry).concat(Object.keys(reg.interact).map(function (k) {
       var xy = k.split(',');
-      var key = src.interact[k];
+      var key = reg.interact[k];
       return {
         x: +xy[0], y: +xy[1],
         dialogue: INTERACT_DLG[key] || key,

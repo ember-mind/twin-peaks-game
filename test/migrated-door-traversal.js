@@ -26,7 +26,7 @@ const ctx = new Proxy({ measureText: (text) => ({ width: String(text).length * 5
 const js = (name) => path.join(__dirname, '..', 'js', name);
 const quiet = console.warn;
 console.warn = noop;
-['tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'retro-font.js', 'engine.js', 'glue.js', 'environment-reactions.js',
+['tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'retro-font.js', 'engine.js', 'scene-objects.gen.js', 'glue.js', 'environment-reactions.js',
   'location-connections.js', 'world-connections.gen.js',
   'double-r-exterior-art.js', 'double-r-exterior-scene.js', 'double-r-location-production.js',
   'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js', 'sheriffs-station-scene.js', 'sheriffs-station-exterior-scene.js',

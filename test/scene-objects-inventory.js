@@ -21,7 +21,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const EXPECT = { mapsObjects: 4, mapsInteract: 16 };
+const EXPECT = { mapsObjects: 0, mapsInteract: 0 };
 
 global.window = global;
 global.addEventListener = function () {};

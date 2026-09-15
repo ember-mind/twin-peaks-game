@@ -144,7 +144,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
   global.addEventListener = function () {};
   global.requestAnimationFrame = function () {};
   const J = (f) => path.join(__dirname, '..', 'js', f);
-  ['tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'retro-font.js', 'engine.js', 'glue.js']
+  ['tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'retro-font.js', 'engine.js', 'scene-objects.gen.js', 'glue.js']
     .forEach((f) => require(J(f)));
   const GAME = global.GAME;
   const D = GAME.Data.dialogues;

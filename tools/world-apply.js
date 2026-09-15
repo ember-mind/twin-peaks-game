@@ -75,7 +75,7 @@ const CastWrite = require(path.join(REPO, 'js', 'editor', 'apply', 'cast-write.j
 
 // index.html order (test/legacy-door-inventory.js): every file must load; a skipped installer would hide doors.
 const CHAIN = ['tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'environmental-inspect.js', 'retro-font.js',
-  'portraits.js', 'gold-tone.js', 'engine.js', 'glue.js', 'environment-reactions.js', 'location-connections.js',
+  'portraits.js', 'gold-tone.js', 'engine.js', 'scene-objects.gen.js', 'glue.js', 'environment-reactions.js', 'location-connections.js',
   'world-connections.gen.js',
   'double-r-exterior-art.js', 'double-r-exterior-scene.js', 'double-r-location-production.js',
   'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js', 'sheriffs-station-scene.js',

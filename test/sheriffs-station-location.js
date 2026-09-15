@@ -34,7 +34,7 @@ const js = (name) => path.join(__dirname, '..', 'js', name);
 
 [
   'tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'retro-font.js',
-  'engine.js', 'glue.js', 'ambient-life.js', 'character-activity.js',
+  'engine.js', 'scene-objects.gen.js', 'glue.js', 'ambient-life.js', 'character-activity.js',
   'environment-reactions.js', 'ambient-life-scenes.js', 'location-connections.js',
    'world-connections.gen.js',
     'double-r-exterior-art.js', 'double-r-exterior-scene.js',

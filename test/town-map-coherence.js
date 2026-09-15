@@ -13,9 +13,11 @@ require('../js/chars.js');
 require('../js/houses.js');
 require('../js/maps.js');
 require('../js/data.js');
-require('../js/glue.js');
+require('../js/scene-objects.gen.js'); require('../js/glue.js');
 
 const sourceMap = GAME.maps.maps.town;
+// objects/interact live in the scene objects registry since M8 (world/scene-objects.json).
+const sceneObjects = GAME.WorldData.sceneObjects.scenes.town;
 // Doors live in the connection registry since M5 (js/maps.js carries none): read tiles and spawns from it.
 const registry = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'world', 'connections.json'), 'utf8')).connections;
 const townTriggers = {};
@@ -75,7 +77,7 @@ for (const k of expectedDoors.slice(0, 6)) {
 const walkable = flood([30, 31], (x, y) => x >= 0 && y >= 0 && x < W && y < H && !GAME.maps.SOLID[at(x, y)]);
 for (const k of expectedDoors) ok(walkable.has(k), 'porta raggiungibile dalla piazza ' + k);
 for (const npc of map.npcs) ok(walkable.has(key(npc.x, npc.y)), 'NPC raggiungibile: ' + npc.id);
-for (const k of Object.keys(sourceMap.interact)) ok(walkable.has(k) || GAME.maps.SOLID[at(...k.split(',').map(Number))], 'interact presente nel distretto: ' + k);
+for (const k of Object.keys(sceneObjects.interact)) ok(walkable.has(k) || GAME.maps.SOLID[at(...k.split(',').map(Number))], 'interact presente nel distretto: ' + k);
 
 const roadChars = 'r-:';
 const roadTiles = coordsWhere(roadChars);
@@ -130,8 +132,8 @@ ok([30, 31, 32].every((x) => [28, 29, 30].every((y) =>
    [28, 29].every((y) => at(29, y) === ':') && at(29, 30) === 'r' && at(35, 27) === '=' &&
    sourceMap.ground['35,28'] === '=',
   'corte civica ha bocca 3-wide diretta dalla strada e solo bordo est');
-ok(at(30, 30) === 'S' && sourceMap.interact['30,30'] === 'cartello' &&
-  sourceMap.objects.some((obj) => obj.kind === 'welcomesign' && obj.x === 30 && obj.y === 30),
+ok(at(30, 30) === 'S' && sceneObjects.interact['30,30'] === 'cartello' &&
+  sceneObjects.objects.some((obj) => obj.kind === 'welcomesign' && obj.x === 30 && obj.y === 30),
   'cartello visibile, interazione e landmark coincidono a 30,30');
 
 ok([23, 24, 25].every((y) =>

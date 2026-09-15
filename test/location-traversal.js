@@ -35,6 +35,7 @@ require(js('maps.js'));
 require(js('data.js'));
 require(js('retro-font.js'));
 require(js('engine.js'));
+require(js('scene-objects.gen.js'));
 require(js('glue.js'));
 require(js('ambient-life.js'));
 require(js('environment-reactions.js'));

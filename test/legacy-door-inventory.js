@@ -46,7 +46,7 @@ const JS = path.join(__dirname, '..', 'js');
 // index.html order. Connection installers are listed as they exist on disk before and after M5; a listed file
 // that exists must load (require, not try): a silently skipped installer would read as "classic door live".
 const CHAIN = ['tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'environmental-inspect.js', 'retro-font.js',
-  'portraits.js', 'gold-tone.js', 'engine.js', 'glue.js', 'environment-reactions.js', 'location-connections.js',
+  'portraits.js', 'gold-tone.js', 'engine.js', 'scene-objects.gen.js', 'glue.js', 'environment-reactions.js', 'location-connections.js',
   'world-connections.gen.js',
   'double-r-exterior-art.js', 'double-r-exterior-scene.js', 'double-r-location-production.js',
   'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js', 'sheriffs-station-scene.js',

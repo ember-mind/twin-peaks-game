@@ -34,6 +34,7 @@ require(J('maps.js'));
 require(J('data.js'));
 require(J('retro-font.js'));
 require(J('engine.js'));
+require(J('scene-objects.gen.js'));
 require(J('glue.js'));
 // Doors come from the connection registry since M5 (js/maps.js carries none).
 require(J('location-connections.js'));

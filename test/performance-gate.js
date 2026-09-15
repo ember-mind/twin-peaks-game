@@ -212,7 +212,7 @@ function harnessHtml() {
     'js/presentation3d.js',
     'js/engine.js',
     'js/render3d.js',
-    'js/glue.js'
+    'js/scene-objects.gen.js', 'js/glue.js'
   ].map((src) => `<script src="/${src}"></script>`).join('\n');
   return `<!doctype html>
 <html lang="en">
