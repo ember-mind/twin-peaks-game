@@ -12,7 +12,7 @@ assets/ref/red-room-sheet.png top panel; style anchor artifacts/act-4-implementa
 
 | Unit | Floor | Round 1 | Status |
 |---|---:|---:|---|
-| Curtains | 7 | 5 | pending |
+| Curtains | 7 | 5 → 7 | passed; ship R2 |
 | Chevron floor | 7 | 5 | pending |
 | Furniture + statue | 7 | 3 → 6 → 6 → 5 | **capped below floor; ship R3 (6)** |
 | Light | 7 | 4 | pending |
@@ -22,6 +22,7 @@ assets/ref/red-room-sheet.png top panel; style anchor artifacts/act-4-implementa
 - Reference: `artifacts/art-pass-e/e7/reference-top.png`
 - Baseline: `artifacts/art-pass-e/e7/baseline.png`
 - Round 1: `artifacts/art-pass-e/e7/round-1.png`
+- Curtains round 2: `artifacts/art-pass-e/e7/curtains/round-2.png`
 - Furniture round 2: `artifacts/art-pass-e/e7/furniture-statue/round-2.png`
 - Furniture round 3: `artifacts/art-pass-e/e7/furniture-statue/round-3.png`
 - Furniture round 4: `artifacts/art-pass-e/e7/furniture-statue/round-4.png`
@@ -29,7 +30,7 @@ assets/ref/red-room-sheet.png top panel; style anchor artifacts/act-4-implementa
 
 ## Latest verdict
 
-Furniture round 4, fresh Luna: 5/10; rank versus round 3: WORSE. Unit capped. Best/shipped evidence: round 3 at 6/10.
+Curtains round 2, fresh Luna: 7/10; rank versus round 1: BETTER. Unit passed and stopped.
 
 ## Gap queue
 

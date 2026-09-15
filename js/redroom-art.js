@@ -40,28 +40,47 @@
   }
   function curtains(R) {
     var p=palette;
-    R(0,0,256,30,p.curtainDark);
-    /* Front-facing hang, no swags: two-pixel fold columns and staggered hems. */
-    for(var x=16; x<240; x+=8) {
-      var hem=30+((x/8)%3===0?2:0);
-      R(x,0,6,hem,p.curtainRed);
-      R(x+2,0,2,hem-2,p.curtainDark);
-      R(x+6,0,2,hem+2,p.ink);
-      R(x,hem,6,2,p.curtainDark);
+    R(0,0,256,34,p.curtainDark);
+    /* A full red cloth wall, grouped into broad hanging folds. Every column
+     * is still 2px; adjacent lit columns make a belly rather than pinstripes.
+     * The dark crease tapers out before the rounded, irregular lower hems. */
+    var hems=[36,38,34,38,36,40,36];
+    var curve=[-2,0,2,2,2,0,-2,-4];
+    for(var x=16,n=0; x<240; x+=16,n++) {
+      var hem=hems[n%hems.length];
+      for(var col=0;col<8;col++) {
+        var end=hem+curve[col];
+        R(x+col*2,0,2,end,p.curtainRed);
+        R(x+col*2,end,2,2,p.curtainDark);
+      }
+      R(x+2,0,2,hem-5,p.curtainDark);
+      R(x+4,0,2,5+(n%3)*2,p.curtainDark);
+      R(x+12,8+(n%2)*4,2,hem-11-(n%2)*4,p.curtainDark);
+      R(x+14,0,2,8+(n%3)*3,p.curtainDark);
+      R(x+14,hem-10,2,8,p.curtainDark);
+      R(x+8,hem-6,2,4,p.curtainDark);
+      R(x+14,hem-2,2,2,p.ink);
     }
     for(var side=0;side<2;side++) {
       var sx=side?240:0;
       R(sx,0,16,176,p.curtainDark);
-      R(sx+2,0,2,172,p.curtainRed);
-      R(sx+6,0,2,174,p.curtainRed);
-      R(sx+10,0,2,170,p.curtainRed);
+      /* Heavy straight wings, with one broad red face and a crease that
+       * bends across two-pixel columns as the fabric gathers toward the hem. */
+      for(var wing=2;wing<=10;wing+=2)R(sx+wing,0,2,174-(wing===2?2:0),p.curtainRed);
+      R(sx+10,0,2,52,p.curtainDark);
+      R(sx+8,52,2,68,p.curtainDark);
+      R(sx+10,120,2,54,p.curtainDark);
+      R(sx+4,155,2,17,p.curtainDark);
+      R(sx+6,173,2,3,p.curtainDark);
       R(sx+14,0,2,176,p.ink);
     }
     /* South curtain is drawn low so the only exit remains easy to read. */
     R(0,176,256,16,p.curtainDark);
-    for(var bx=0;bx<256;bx+=8) {
+    for(var bx=0;bx<256;bx+=16) {
       if(bx>=128&&bx<144)continue;
-      R(bx+2,178,2,14,p.curtainRed); R(bx+6,178,2,14,p.ink);
+      for(var south=2;south<=10;south+=2)R(bx+south,178+(south===2?2:0),2,14-(south===2?2:0),p.curtainRed);
+      R(bx+4,184,2,8,p.curtainDark);
+      R(bx+14,186,2,6,p.ink);
     }
     R(128,176,16,16,p.ink);
     R(128,176,16,2,p.cream);
@@ -102,42 +121,34 @@
         }
       }
     }
-    /* Broad lit upholstery planes separate from the black recesses. Sparse
-     * cream catches use the existing floor tone, with no blended sixth hue. */
-    P([[3,4],[17,0],[20,0],[23,3],[23,20],[7,25],[2,21],[2,7]],p.ink);
+    /* The back, seat, arms and side have separate planes; both chairs turn
+     * toward the table. Leather stays dark, with red confined to caught edges. */
+    P([[3,4],[19,0],[23,2],[23,21],[7,25],[2,21]],p.ink);
     P([[4,4],[19,1],[22,3],[7,7]],p.curtainDark);
     P([[6,4],[18,2],[20,3],[7,6]],p.curtainRed);
-    C(10,3,2,1,p.cream);C(15,2,2,1,p.cream);
-    P([[6,7],[21,4],[21,18],[8,22]],p.curtainRed);
-    P([[8,8],[19,5],[20,16],[9,19]],p.curtainDark);
-    P([[9,8],[18,6],[18,10],[10,12]],p.curtainRed);
-    P([[10,12],[18,10],[19,15],[11,18]],p.curtainDark);
+    P([[6,7],[21,4],[21,18],[8,22]],p.curtainDark);
+    P([[8,8],[19,5],[20,16],[9,19]],p.ink);
+    P([[9,8],[18,6],[18,10],[10,12]],p.curtainDark);
     C(12,9,1,2,p.ink);C(16,8,1,2,p.ink);
-    C(10,15,2,1,p.ink);C(17,13,2,1,p.ink);
-    C(8,8,1,3,p.cream);
+    C(10,15,2,1,p.curtainDark);C(17,13,2,1,p.curtainDark);
     P([[3,7],[6,8],[8,23],[3,21]],p.curtainDark);
     /* Recessed cushion tilts toward the viewer, then drops into a dark apron. */
     P([[7,22],[21,18],[27,22],[13,27]],p.ink);
-    P([[9,22],[21,19],[25,22],[13,25]],p.curtainRed);
-    P([[12,22],[21,20],[23,21],[14,24]],p.curtainDark);
-    C(16,21,2,1,p.cream);C(13,22,1,1,p.cream);
+    P([[9,22],[21,19],[25,22],[13,25]],p.curtainDark);
+    P([[12,22],[21,20],[23,21],[14,24]],p.ink);
     P([[13,25],[25,22],[25,24],[14,27]],p.curtainRed);
-    P([[13,27],[26,24],[25,30],[13,33]],p.curtainDark);
-    P([[15,28],[24,26],[24,28],[15,30]],p.curtainRed);
-    P([[15,30],[24,28],[24,30],[15,32]],p.ink);
+    P([[13,27],[26,24],[25,30],[13,33]],p.ink);
+    P([[15,28],[24,26],[24,29],[15,31]],p.curtainDark);
     /* Broad outer rolled arm and dark front face give the seat real depth. */
-    P([[0,20],[2,18],[5,16],[8,17],[12,20],[12,31],[10,33],[6,34],[0,29]],p.ink);
-    P([[1,19],[5,17],[10,20],[6,22]],p.curtainRed);
+    P([[0,19],[5,16],[12,20],[12,32],[6,34],[0,29]],p.ink);
+    P([[1,19],[5,17],[10,20],[6,22]],p.curtainDark);
     P([[2,19],[5,18],[8,20],[6,21]],p.curtainRed);
-    C(4,18,2,1,p.cream);
     P([[1,21],[6,24],[6,32],[1,28]],p.curtainDark);
-    P([[2,23],[4,24],[4,28],[2,26]],p.curtainRed);
-    P([[7,23],[10,21],[10,30],[7,32]],p.curtainRed);
-    P([[7,28],[10,26],[10,30],[7,32]],p.curtainDark);
+    P([[2,23],[4,24],[4,29],[2,27]],p.ink);
+    P([[7,23],[10,21],[10,30],[7,32]],p.curtainDark);
     C(8,25,1,4,p.ink);
     P([[22,17],[25,15],[28,17],[28,27],[25,30],[25,20]],p.ink);
     P([[23,17],[25,16],[27,17],[25,19]],p.curtainRed);
-    C(25,16,1,1,p.cream);
     P([[26,20],[28,18],[28,26],[26,28]],p.curtainDark);
     C(6,32,3,2,p.ink);C(23,30,2,3,p.ink);
   }
@@ -175,8 +186,7 @@
     R(x-3,foot-14,6,1,p.ink);R(x-6,foot-13,12,1,p.ink);
     R(x-8,foot-12,16,3,p.ink);R(x-6,foot-9,12,2,p.ink);
     R(x-4,foot-13,8,1,p.curtainDark);R(x-6,foot-12,12,2,p.curtainDark);
-    R(x-4,foot-12,7,1,p.curtainRed);R(x-5,foot-10,10,1,p.curtainRed);
-    R(x-2,foot-12,2,1,p.cream);
+    R(x-3,foot-12,5,1,p.curtainRed);R(x-5,foot-10,10,1,p.curtainRed);
     R(x-4,foot-9,8,1,p.curtainDark);R(x-1,foot-9,3,1,p.curtainRed);
     R(x-4,foot-7,2,5,p.ink);R(x-5,foot-2,3,2,p.ink);
     R(x+2,foot-7,2,5,p.ink);R(x+2,foot-2,3,2,p.ink);

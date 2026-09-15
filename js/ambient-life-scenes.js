@@ -87,9 +87,9 @@
    * RedRoomScene converts archetype alpha to opaque palette coverage. */
   var curtainFrames=[-2,0,2].map(function(shift){
     var marks=[];
-    for(var x=24;x<232;x+=24){
-      marks.push({x:x,y:4,w:8,h:22,color:'#a62932'});
-      marks.push({x:x+2+shift,y:4,w:2,h:22,color:'#541824'});
+    for(var x=32;x<224;x+=48){
+      marks.push({x:x,y:6,w:8,h:26,color:'#a62932'});
+      marks.push({x:x+2+shift,y:6,w:2,h:26,color:'#541824'});
     }
     return marks;
   });
