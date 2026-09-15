@@ -98,3 +98,5 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-14 — merged M5 legacy doors → registry (569267c): 15 records, 3 one-way, single installer js/world-connections-production.js, js/maps.js door-free; merge fix removed E3 roadhouse-scene door assertion. Mirrored to vault, deleted js/traincar-location-production.js in vault.
 
 - 2026-09-14 — merged M6 create/delete connections (1371fff): changeset v2, atomic world-apply with catalog write + rollback, Builder NEW/DELETE CONNECTION. Mirrored to vault.
+
+- 2026-09-15 — merged M7 door gating + cast placement editing (38179ca): bundle changesets, world-apply --repin (V5 only). Mirrored to vault.
