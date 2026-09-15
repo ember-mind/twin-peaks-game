@@ -148,16 +148,29 @@
     A:['010','101','111','101','101'],T:['111','010','010','010','010'],N:['101','111','111','101','101'],
     O:['111','101','101','101','111'],H:['101','101','111','101','101']};
   function label(R,text,x,y){Array.from(text).forEach(function(c,i){(font[c]||[]).forEach(function(row,dy){Array.from(row).forEach(function(v,dx){if(v==='1')R(x+i*4+dx,y+dy,1,1,p.cream);});});});}
-  function reception(R,front){
-    if(!front){
-      /* One compact backboard, bank and counter grouping. Background-only
-       * keyholes allow Ben's full head and torso to render in front of them. */
-      R(64,86,64,41,p.woodDark);R(65,87,62,1,p.woodLight);
-      R(68,88,53,21,p.ink);R(69,89,51,19,p.gold);R(71,90,47,17,p.ink);
-      [[83,96,5],[93,96,8],[103,96,5]].forEach(function(a){for(var n=0;n<a[2];n++)R(a[0]-n,a[1]-a[2]+n,2*n+1,1,p.woodLight);});
-      label(R,'GREAT',84,97);label(R,'NORTHERN',78,103);
-      for(var y=111;y<126;y+=5)for(var x=67;x<126;x+=6){R(x,y,5,4,p.ink);R(x+2,y+1,1,2,p.gold);}
-    }
+  function receptionBack(R){
+    /* Reception is construction, not loose furniture. This west-wall service
+     * alcove gives the clerk a staff side, a wall for keys/signage, and one
+     * open counter edge facing guests arriving from the south. */
+    R(16,76,114,52,p.ink);R(18,78,110,48,p.woodDark);
+    R(18,78,110,4,p.woodLight);R(18,82,110,3,p.wood);R(18,85,110,2,p.ink);
+    /* Bellhop/luggage bay remains against the same service wall. */
+    for(var x=20;x<62;x+=10){R(x,87,8,37,p.wood);R(x+1,88,1,34,p.woodLight);R(x+7,88,1,35,p.ink);}
+    R(18,121,44,3,p.woodDark);R(19,121,42,1,p.gold);
+    /* Structural jamb separates bellhop bay from staffed check-in opening. */
+    R(60,78,7,50,p.ink);R(61,79,5,47,p.wood);R(62,80,1,44,p.woodLight);R(65,80,1,46,p.woodDark);
+    R(125,78,5,50,p.ink);R(126,79,3,47,p.wood);R(126,80,1,44,p.woodLight);
+    /* Sign and key bank are fixed to the clerk's rear wall. Ben renders in
+     * front through normal depth ordering; these never float over the floor. */
+    R(67,87,56,22,p.ink);R(68,88,54,20,p.gold);R(70,89,50,18,p.ink);
+    [[82,96,5],[93,96,8],[105,96,5]].forEach(function(a){for(var n=0;n<a[2];n++)R(a[0]-n,a[1]-a[2]+n,2*n+1,1,p.woodLight);});
+    label(R,'GREAT',84,97);label(R,'NORTHERN',78,103);
+    R(67,109,56,17,p.woodDark);
+    for(var y=111;y<126;y+=5)for(var x=68;x<123;x+=6){R(x,y,5,4,p.ink);R(x+2,y+1,1,2,p.gold);}
+  }
+  function reception(R){
+    /* Counter closes only the guest-facing edge. Staff stands north of it;
+     * guest approaches from entrance runner on its south/east side. */
     R(64,126,64,18,p.ink);R(65,128,62,14,p.woodDark);
     [67,87,107].forEach(function(x){R(x,131,17,10,p.wood);R(x,130,17,1,p.woodLight);R(x,131,1,9,p.woodLight);R(x+16,132,1,9,p.ink);});
     R(65,141,62,1,p.woodLight);R(64,143,64,1,p.ink);
@@ -196,20 +209,20 @@
       R(a[0],a[1]+2,1,3,p.light);R(a[0]-3,a[1]+7,7,1,p.gold);
     });
   }
-  function prop(R,d,front){
+  function prop(R,d){
     if(d.id==='fireplace')fireplace(R);else if(d.id==='stairs')stairs(R);else if(d.id==='luggage')luggage(R);
-    else if(d.id==='chairWest'||d.id==='chairEast')chair(R,d.x,d.footY,d.id==='chairEast');else if(d.id==='table')table(R);else reception(R,front);
+    else if(d.id==='chairWest'||d.id==='chairEast')chair(R,d.x,d.footY,d.id==='chairEast');else if(d.id==='table')table(R);else reception(R);
   }
   function draw(ctx,cx,cy){
     var R=painter(ctx,cx,cy),alpha=ctx.globalAlpha;ctx.globalAlpha=1;
-    R(0,0,288,192,p.ink);floor(R);walls(R);
-    props.forEach(function(d){if(d.cells.length)R(d.x,d.footY-1,d.cells.length*16,2,p.ink);prop(R,d,false);});
+    R(0,0,288,192,p.ink);floor(R);walls(R);receptionBack(R);
+    props.forEach(function(d){if(d.cells.length)R(d.x,d.footY-1,d.cells.length*16,2,p.ink);prop(R,d);});
     chandelier(R);ctx.globalAlpha=alpha;
   }
   function foreground(ctx,cx,cy,min,max){
     min=min==null?-Infinity:min;max=max==null?Infinity:max;
     var R=painter(ctx,cx,cy),alpha=ctx.globalAlpha;ctx.globalAlpha=1;
-    props.forEach(function(d){if(d.footY>=min&&d.footY<max)prop(R,d,true);});
+    props.forEach(function(d){if(d.footY>=min&&d.footY<max)prop(R,d);});
     if(192>=min&&192<max)chandelier(R);ctx.globalAlpha=alpha;
   }
   GAME.HotelGNArt={draw:draw,foreground:foreground,palette:p,props:props};

@@ -33,7 +33,8 @@ Reference crop contains only the bottom panel of
 | Reference bottom panel | `artifacts/art-pass-e/e8/reference-bottom.png` | `0e49c07239a1c4edfcb6a9bf981e321050582d6979cdc485f8a6e24025c4e8c7` |
 | Before | `artifacts/art-pass-e/e8/baseline.png` | `3d0e261fb26a283a6a2ed4a7ddc3fe04290e12e98d9b4324f673d6adf50636fa` |
 | After, capped gauntlet mix | `artifacts/art-pass-e/e8/gauntlet-after.png` | `1bd589265e792322bb00ffb80171cdd22f027551d0edf68fba2f7772e807fb3b` |
-| After, Astra integration | `artifacts/art-pass-e/e8/after.png` | `b247a80719a400c988090c8129921ad7e59c1864b549d0bb9542c6df3e1ecdbc` |
+| After, Astra integration | `artifacts/art-pass-e/e8/astra-integration.png` | `b247a80719a400c988090c8129921ad7e59c1864b549d0bb9542c6df3e1ecdbc` |
+| After, semantic construction | `artifacts/art-pass-e/e8/after.png` | `22d2468949dcbbb8b44c7c2431aa77fdf7f8f0cb0fb3d0426b84181951b982cf` |
 
 ### Before
 
@@ -43,7 +44,7 @@ Reference crop contains only the bottom panel of
 
 ![Great Northern lobby capped gauntlet result](../artifacts/art-pass-e/e8/gauntlet-after.png)
 
-### Astra integration after
+### Semantic construction after
 
 ![Great Northern lobby after](../artifacts/art-pass-e/e8/after.png)
 
@@ -84,6 +85,26 @@ preserved.
 | World door equality | 59/59 |
 | Room 315 location | Pass |
 | Narrative finale | 27/27 |
+
+## Semantic construction follow-up
+
+Reception was then treated as room construction rather than another decorated
+object. Current version gives every major object an operational role:
+
+- entrance runner carries guest circulation north from doors and turns toward
+  lounge, stairs, and hall route;
+- reception counter faces arriving guests and separates them from staff side;
+- sign and pigeonholes mount on a built west-wall service alcove behind clerk;
+- luggage cart occupies adjacent bellhop bay instead of arbitrary floor space;
+- fireplace remains structural wall anchor for seated lounge group;
+- chairs and table face hearth and sit wholly inside lounge rug zone;
+- stair flight joins right wall and upper landing rather than standing alone;
+- chandelier hangs over circulation/lobby axis instead of competing with bear.
+
+This pass changes only `js/hotel-gn-art.js`. Locked map collision remains source
+of gameplay truth; visual counter still covers its four authored solid cells.
+Focused scene, smoke 415/415, retro 54/54, mobile 20/20, Cast Continuity,
+world-door equality 59/59, and Room 315 location all pass.
 
 ## Unit results
 
@@ -275,6 +296,6 @@ Gauntlet baseline audit passes. Release audit fails only on the three recorded
 below-floor units plus the consequent final-floor, final-verdict, and unresolved
 high-gap checks.
 
-Later Astra integration is current shipped visual, materially closer to the
-reference, and intentionally unscored because user requested one builder run,
-not another builder–critic round.
+Later Astra integration plus semantic construction follow-up form current
+shipped visual. Both remain intentionally unscored because neither was another
+builder–critic round.
