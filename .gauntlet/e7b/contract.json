@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "slug": "e7b",
+  "mode": "execute",
+  "status": "complete",
+  "createdAt": "2026-09-15T14:36:10.835Z",
+  "updatedAt": "2026-09-15T14:56:33.000Z",
+  "goal": "Red Room floor uses exact period-16 diagonal zigzag formula and reaches 7/10 against reference top panel",
+  "domain": "games",
+  "externalBar": "assets/ref/red-room-sheet.png top panel; mechanical floor formula supplied by user",
+  "hardFloor": 7,
+  "scope": {
+    "included": ["js/redroom-art.js floorColor", "test/redroom-scene.js floor formula assertions", "E7b floor evidence", "E7 report appendix"],
+    "excluded": ["curtains", "furniture", "statue", "light geometry", "ambient", "map geometry", "doors", "cast"],
+    "immutable": ["period 16 triangle wave", "amplitude 8", "4px bands", "no perspective scaling", "five-color scene palette", "all E7 locks"],
+    "platforms": ["production retro renderer", "desktop Chrome"]
+  },
+  "referencePack": {
+    "reconstructed": true,
+    "sources": [
+      {"path": "assets/ref/red-room-sheet.png", "selection": "top panel only"},
+      {"path": "artifacts/art-pass-e/e7b/floor/before.png", "selection": "E7 shipped floor baseline"}
+    ],
+    "measurements": ["v = abs((x mod 16) - 8)", "band = floor((y + v) / 4) mod 2", "band colors near-black; inverse band cream", "period 16px = two 8px tiles", "4px thick bands", "no perspective scaling or density tuning", "bottom-row darker cream skipped unless existing five-color lock permits it"]
+  },
+  "evidenceProtocol": {
+    "stable": true,
+    "representativeStates": ["redroom finale entry tile (8,9), facing up, production retro renderer"],
+    "commands": ["test/shot.sh redroom 8 9 up <out> --retro"],
+    "artifactTypes": ["PNG", "critic Markdown", "SHA-256 manifest"],
+    "fixedConditions": {"mapId": "redroom", "x": 8, "y": 9, "direction": "up", "renderer": "retro", "referencePanel": "top only"},
+    "hashManifest": ".gauntlet/e7b/evidence-manifest.json"
+  },
+  "inventory": [
+    {"id": "floor", "unit": "E7b Red Room floor", "bar": "Exact user-supplied period-16 diagonal zigzag, visually judged against reference top panel", "floor": 7, "status": "pass", "baselineEvidence": ["evidence/before.png"], "baselineScore": 6, "currentEvidence": ["evidence/round-1.png"], "score": 7, "criticVerdict": "PASS"}
+  ],
+  "regressionGates": [
+    {"id": "smoke", "criterion": "full structural/simulated playthrough stays green", "command": "node test/smoke.js", "status": "pass", "evidence": ["415/415 assertions passed"]},
+    {"id": "retro-production", "criterion": "retro production contract stays green", "command": "node test/retro-production.js", "status": "pass", "evidence": ["54/54 assertions passed"]},
+    {"id": "narrative-finale", "criterion": "finale state machine stays green", "command": "node test/narrative-finale.js", "status": "pass", "evidence": ["27/27 assertions passed"]},
+    {"id": "act-4-playthrough", "criterion": "Chrome all-path driver remains 530/530", "command": "node test/act-4-playthrough.js --path=all", "status": "pass", "evidence": ["530/530 assertions passed; one harness favicon.ico 404"]}
+  ],
+  "agents": {
+    "builderCriticSeparated": true,
+    "criticFreshContext": true
+  },
+  "gapQueue": [],
+  "rounds": [
+    {"round": 1, "unit": "floor", "builder": "Astra/high (/root/e7b_builder)", "critic": "Luna/high fresh (/root/e7b_critic_r1)", "evidence": "artifacts/art-pass-e/e7b/floor/round-1.png", "score": 7, "rankVsPrevious": "BETTER", "gap": "Zigzag bands are denser and thinner than reference's broad floor pattern; geometry locked by user formula.", "commit": "531817ece5089ead6fba5cdc863cfc21eb332f6f"}
+  ],
+  "finalGate": {
+    "allUnitsCovered": true,
+    "hardGatesPass": true,
+    "independentVerdict": "PASS",
+    "floor": 7,
+    "unresolvedHighGaps": []
+  },
+  "progressSurface": ".gauntlet/e7b/progress.md",
+  "stopPolicy": "Floor-only: stop at score >=7 or after round 3. After exact mechanical formula lands, tune colors only. No xhigh."
+}

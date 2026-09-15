@@ -12,6 +12,9 @@ their best 6/10 rounds. Those three units are plainly below floor.
 
 No push performed.
 
+**E7b follow-up:** floor result below is historical E7 evidence. E7b supersedes
+that unit with a 7/10 pass; see [E7b floor](#e7b-floor).
+
 ## Fixed evidence
 
 Capture command for every scene frame:
@@ -177,3 +180,55 @@ winning instead of claiming parity.
 
 Gauntlet baseline audit passes. Release audit fails only on the three recorded
 below-floor units and their resulting final-floor/verdict/high-gap checks.
+
+## E7b floor
+
+E7b continued from E7 HEAD on the same branch and rescoped the loop to one
+unit: Red Room floor. Result: **PASS, 7/10 in round 1**. Loop stopped
+immediately; no color-tuning rounds were needed.
+
+### Mechanical correction
+
+`floorColor(x, y)` now implements the supplied map-pixel formula exactly:
+
+```text
+v = abs((x mod 16) - 8)
+band = floor((y + v) / 4) mod 2
+colour = band ? chevron_near_black : chevron_cream
+```
+
+Floor renderer changed from 2px horizontal runs to 1px pixels. Without this,
+odd `x` columns could not obey the formula. Tests exhaustively compare every
+pixel in the 256×192 map space, prove the 16px period, 4px bands, palette
+mapping, and camera-translated production draw stream.
+
+No perspective scaling or density tuning exists. Optional lower-row darker
+cream was skipped because E7 palette already consumes all five allowed scene
+colors; adding it would trigger the sixth-hue veto.
+
+### Evidence and critic
+
+| Item | Result |
+|---|---|
+| Before | `artifacts/art-pass-e/e7b/floor/before.png` — SHA-256 `beb1b822df2ea4393f02e97373c57a75c692c92a18866700ce83f81553156c09` |
+| Round 1 | `artifacts/art-pass-e/e7b/floor/round-1.png` — SHA-256 `17d406345caef69d942d21700f5d8b678b67e206950440781f0e9a8451f77fbb` |
+| Builder | Astra/high, `/root/e7b_builder` |
+| Critic | Luna/high, fresh context, `/root/e7b_critic_r1`; reference top + before + after PNG only |
+| Score | 7/10 |
+| Rank | BETTER |
+| One gap | Zigzag bands remain denser and thinner than reference's broad pattern. Geometry stayed unchanged because formula is locked. |
+| Shipped round | Round 1 |
+| Commit | `531817ece5089ead6fba5cdc863cfc21eb332f6f` |
+
+### E7b gates
+
+| Gate | Result |
+|---|---|
+| `node test/redroom-scene.js` | Pass — exact formula, period, bands, palette, 1px production draw stream |
+| `node test/smoke.js` | 415/415 |
+| `node test/retro-production.js` | 54/54 |
+| `node test/narrative-finale.js` | 27/27 |
+| `node test/act-4-playthrough.js --path=all` | Chrome 530/530; one harness `favicon.ico` 404, no path browser errors |
+
+Browser-regenerated tracked artifacts were restored after the gate. No push
+performed.
