@@ -30,15 +30,39 @@
       R(x+2,yy,1,2,p.gold);R(x+w-3,yy,1,2,p.gold);
       diamond(R,x+Math.floor(w/2),yy,4,p.gold);diamond(R,x+Math.floor(w/2),yy,2,p.red);
     }
+    if(w>32){
+      /* Wide lodge rugs carry woven corner hooks and linked medallions. The
+       * narrow entrance runner retains its independent authored pattern. */
+      R(x+6,y+6,w-12,h-12,p.red);
+      for(var edge=x+7;edge<x+w-7;edge+=5){R(edge,y+4,2,1,p.gold);R(edge,y+h-5,2,1,p.gold);}
+      for(var ry=y+9;ry<y+h-8;ry+=10){
+        var center=x+Math.floor(w/2);
+        diamond(R,center,ry,5,p.gold);diamond(R,center,ry,4,p.redDark);
+        diamond(R,center,ry,2,p.gold);R(center,ry,1,1,p.cream);
+        R(x+7,ry-1,3,1,p.gold);R(x+8,ry,1,3,p.gold);
+        R(x+w-10,ry-1,3,1,p.gold);R(x+w-9,ry,1,3,p.gold);
+        if(w>48){diamond(R,center-16,ry,2,p.gold);diamond(R,center+16,ry,2,p.gold);}
+      }
+      R(x+2,y+h-1,w-4,1,p.redDark);
+      for(var fringe=x+4;fringe<x+w-4;fringe+=3)R(fringe,y+h,1,1,p.woodLight);
+    }
   }
   function floor(R){
-    R(16,16,256,160,p.woodDark);
+    R(16,16,256,160,p.wood);
     for(var y=16;y<176;y+=8){
-      for(var x=16;x<272;x+=32){
-        var color=((x/32|0)+(y/8|0))%3===0?p.wood:p.woodDark;
-        R(x,y,31,7,color);R(x+1,y,30,1,p.wood);
-        R(x+4+(y%3),y+3,12,1,color===p.wood?p.woodLight:p.wood);
-        R(x+21,y+5,6,1,p.wood);R(x+2,y+6,1,1,p.ink);
+      /* Long staggered boards, bevelled edges, and restrained grain replace
+       * the dark equal-size brick grid. Broad warm faces remain readable. */
+      R(16,y,256,1,p.woodLight);R(16,y+7,256,1,p.woodDark);
+      for(var start=16-((y/8|0)%3)*16;start<272;start+=64){
+        var x=Math.max(16,start),end=Math.min(272,start+64),w=end-x;
+        R(x,y+1,w,5,p.wood);
+        if((y/8|0)%3===1)R(x+1,y+1,w-1,1,p.woodLight);
+        if(start>=16){R(x,y+1,1,6,p.woodDark);R(x+1,y+1,1,4,p.woodLight);}
+        if(w>24){
+          R(x+6,y+3,Math.min(17,w-10),1,p.woodLight);
+          R(x+12,y+5,Math.min(11,w-16),1,p.woodDark);
+        }
+        if(w>45){R(x+36,y+4,7,1,p.woodDark);R(x+38,y+3,3,1,p.woodLight);}
       }
     }
     /* Runner stops at the reception approach, with open floor beyond it. */
@@ -49,12 +73,24 @@
     R(x,y,w,h,p.woodDark);
     for(var yy=y;yy<y+h;yy+=8){
       var hh=Math.min(8,y+h-yy);R(x,yy,w,hh,p.wood);
-      R(x+1,yy+1,w-2,1,p.woodLight);R(x,yy+hh-2,w,2,p.woodDark);
-      if(w>20){R(x+9,yy+3,12,1,p.woodDark);R(x+40,yy+4,9,1,p.woodLight);}
+      R(x+1,yy+1,w-2,2,p.woodLight);R(x,yy+hh-2,w,2,p.woodDark);
+      R(x+2,yy+2,w-4,1,p.gold);
+      if(w>20){
+        for(var knot=x+14;knot<x+w-8;knot+=48){
+          R(knot,yy+4,8,1,p.woodDark);R(knot+2,yy+3,4,1,p.wood);
+        }
+      }else{
+        /* Cut ends: a faceted round silhouette with an inner growth ring. */
+        R(x+2,yy,Math.max(1,w-4),1,p.woodDark);
+        R(x+3,yy+1,Math.max(1,w-6),1,p.gold);
+        R(x+3,yy+3,2,2,p.woodDark);R(x+w-5,yy+3,2,2,p.woodDark);
+        R(x+5,yy+5,Math.max(1,w-10),1,p.woodDark);
+      }
     }
   }
   function post(R,x,y,h){
-    R(x,y,12,h,p.woodDark);R(x+2,y,7,h,p.wood);R(x+3,y,2,h,p.woodLight);
+    R(x,y,12,h,p.woodDark);R(x+1,y,9,h,p.wood);R(x+2,y,5,h,p.woodLight);
+    R(x+3,y,1,h,p.gold);R(x+8,y,2,h,p.woodDark);
     for(var yy=y+10;yy<y+h;yy+=24){
       R(x+1,yy,10,3,p.ink);R(x+2,yy,8,1,p.gold);
       R(x+3,yy+1,6,1,p.woodLight);R(x+5,yy-5,2,3,p.woodDark);
