@@ -6758,6 +6758,1500 @@
     "runtime_total": 4
    }
   };
+  D.missions.M10 = {
+   "narrative_package": "narrative-v1.0",
+   "mission": "M10",
+   "title": "L'interrogatorio",
+   "source": {
+    "document": "M9-M10 v1.1.1 CONFESSION LOCK.md",
+    "file": "M9-M10 v1.1 (confession lock).md",
+    "sections": "§4 (ordine della scena e matrice) + §5 (script, sorgente unica; B1-B10 come sezioni) + §6 (dati) + §7 (scope/test)",
+    "package": "narrative-v1.0"
+   },
+   "schema_delta": "narrative/schema-deltas/M10.md",
+   "entry_condition": {
+    "all": [
+     {
+      "flag": "atto5"
+     },
+     {
+      "node_done": "m9_arrivo"
+     }
+    ]
+   },
+   "entry_note": "[N] M10 comincia dove M9 consegna Leland alla centrale (node_done m9_arrivo == M9.completion.when) con atto5 scritto dall'unica presentazione accettata. La scena vive su sheriff, attore leland (ACT5_LELAND_STATION): una sola root (m10_soglia), il resto della scena è una catena `next` di nodi non esposti.",
+   "reads_from_earlier": {
+    "note": "M10 legge valori/evidenze scritti prima e non ne riscrive nessuno.",
+    "values": [
+     {
+      "name": "promise_stance",
+      "used_in": "m10_apertura (taccuino chiuso sugli orari)",
+      "coverage": "totale (value_set; M8 lo scrive sempre)"
+     },
+     {
+      "name": "warning_target",
+      "used_in": "m10_domande personale (biglietto)",
+      "coverage": "palmer (letto / riferito da Truman) + fallback"
+     },
+     {
+      "name": "focus_destination",
+      "used_in": "m10_domande personale (chi ha reso il biglietto)",
+      "coverage": "palmer | altro"
+     }
+    ],
+    "evidence": [
+     {
+      "id": "JACQUES_MIDNIGHT_CLAIM",
+      "used_in": "m10_domande probatorio",
+      "writer": "M6 (tattica prova)"
+     },
+     {
+      "id": "JACQUES_LIST_GIVEN",
+      "used_in": "m10_affioramento",
+      "writer": "M6 (tattica pressione)"
+     },
+     {
+      "id": "JACQUES_THIRD_MAN_DETAIL",
+      "used_in": "m10_affioramento",
+      "writer": "M6 (tattica falsa sicurezza)"
+     }
+    ]
+   },
+   "material_admissions": {
+    "record_shape": "{ recorded, speaker_register } per fatto: `recorded` = value_set, `speaker_register` = il valore (dominio speaker_register)",
+    "facts": [
+     {
+      "fact": "taxi_lie",
+      "value": "material_admissions.taxi_lie",
+      "domain": "speaker_register"
+     },
+     {
+      "fact": "traincar_presence",
+      "value": "material_admissions.traincar_presence",
+      "domain": "speaker_register"
+     },
+     {
+      "fact": "laura_homicide",
+      "value": "material_admissions.laura_homicide",
+      "domain": "speaker_register"
+     },
+     {
+      "fact": "maddy_homicide",
+      "value": "material_admissions.maddy_homicide",
+      "domain": "speaker_register"
+     },
+     {
+      "fact": "maddy_body_transport",
+      "value": "material_admissions.maddy_body_transport",
+      "domain": "speaker_register"
+     },
+     {
+      "fact": "letters",
+      "value": "material_admissions.letters",
+      "domain": "speaker_register"
+     }
+    ],
+    "never_boolean": true
+   },
+   "completion": {
+    "when": {
+     "flag": "leland_morto"
+    },
+    "sets": []
+   },
+   "objectives": [
+    {
+     "id": "obj_m10_2",
+     "priority": 200,
+     "when": {
+      "flag": "leland_morto"
+     },
+     "text": "Torna alla Loggia (Glastonbury Grove).",
+     "provenance_note": "[L] testo esatto del Lock §5-B10 («obiettivo: Torna alla Loggia (Glastonbury Grove).»)."
+    },
+    {
+     "id": "obj_m10_1",
+     "priority": 100,
+     "when": {
+      "all": [
+       {
+        "node_done": "m9_arrivo"
+       },
+       {
+        "not": {
+         "flag": "leland_morto"
+        }
+       }
+      ]
+     },
+     "text": "Leland Palmer è alla centrale. Decidete come parlargli.",
+     "provenance_note": "[L] testo esatto del Lock §3-B2 (obiettivo consegnato da M9, identico a obj_m9_4). Il Lock non scrive un obiettivo per il colloquio già iniziato: SCRIPT GAP dichiarato nel report; l'obiettivo resta questo fino a leland_morto."
+    }
+   ],
+   "nodes": [
+    {
+     "id": "m10_soglia",
+     "beat": "B1",
+     "source_section": "M10-B1",
+     "prompt": "Il metodo.",
+     "conditions": [
+      {
+       "node_done": "m9_arrivo"
+      },
+      {
+       "flag": "atto5"
+      },
+      {
+       "not": {
+        "node_done": "m10_fermo"
+       }
+      }
+     ],
+     "pages": [
+      {
+       "id": "m10.b1.soglia.p01",
+       "mode": "action",
+       "text": "(Prima della porta. Il corridoio nord è vuoto: Truman l'ha voluto così.)"
+      },
+      {
+       "id": "m10.b1.soglia.p02",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "(al registratore personale, a voce bassissima) Diane. Ipotesi da non verbalizzare: chi ha disposto quella scena voleva essere letto. Vado a vedere se vale anche per le parole.",
+       "recorded_on": "personal_recorder"
+      },
+      {
+       "id": "m10.b1.soglia.p03",
+       "mode": "dialogue",
+       "speaker_id": "truman",
+       "display_name": "TRUMAN",
+       "text": "Da che parte lo prendiamo, Cooper? Dalle carte, dalla famiglia — o da quello che tu sai e io no?"
+      }
+     ],
+     "choices": [
+      {
+       "id": "method_probatorio",
+       "label": "Dalle carte",
+       "effects": [
+        {
+         "value": "m10_method",
+         "to": "probatorio"
+        }
+       ]
+      },
+      {
+       "id": "method_personale",
+       "label": "Dalla famiglia",
+       "effects": [
+        {
+         "value": "m10_method",
+         "to": "personale"
+        }
+       ]
+      },
+      {
+       "id": "method_intuitivo",
+       "label": "Da ciò che ho visto",
+       "effects": [
+        {
+         "value": "m10_method",
+         "to": "intuitivo"
+        }
+       ]
+      }
+     ],
+     "next": "m10_apertura",
+     "completion_when": {
+      "value_set": "m10_method"
+     },
+     "role": "tactic",
+     "mandatory_beat": true,
+     "invariant": "unico writer di m10_method (write-once); la scelta avviene sulla SOGLIA, prima dell'ingresso, del consenso e del nastro (Lock §4 ordine definitivo); l'ipotesi di Cooper vive SOLO nel registratore personale, mai sul verbale; nessuna guardia `not value_set` sulle condizioni: a scelta fatta il nodo resta la root e riprende la catena (continuation) fino al fermo; guardia `not node_done m10_fermo` su tutti i nodi di Leland: dopo il fermo il corpo non c'è (V5b) e la ripresa passa a m10_morte su Truman",
+     "kind": "choice",
+     "channel": "world",
+     "map_id": "sheriff",
+     "target_kind": "actor",
+     "target_id": "leland",
+     "actor_id": "leland",
+     "interaction_slot": "primary",
+     "provenance_note": "[L] prompt = intestazione del Lock «[SCELTA — il metodo]» (la battuta di Truman è già l'ultima pagina: test/choice-prompt-dedup vieta di ripeterla); etichette = i tre sintagmi della stessa battuta / del Lock «[SCELTA — il metodo]» senza il tag tra parentesi (probatorio/personale/intuitivo sono valori di dominio, mai testo a schermo)."
+    },
+    {
+     "id": "m10_apertura",
+     "beat": "B2",
+     "source_section": "M10-B2",
+     "conditions": [
+      {
+       "value_set": "m10_method"
+      },
+      {
+       "not": {
+        "node_done": "m10_fermo"
+       }
+      }
+     ],
+     "pages": [
+      {
+       "id": "m10.b2.apertura.p01",
+       "mode": "action",
+       "text": "(La stanza: il tavolo, la lampada, il registratore troppo grande. Leland al centro esatto.)"
+      },
+      {
+       "id": "m10.b2.apertura.p02",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Signor Palmer, vorremmo registrare. È un colloquio, non un interrogatorio: può fermarci quando vuole."
+      },
+      {
+       "id": "m10.b2.apertura.p03",
+       "mode": "dialogue",
+       "speaker_id": "leland",
+       "display_name": "LELAND",
+       "text": "Registrate. Le parole scritte male sono l'unica cosa che temo."
+      },
+      {
+       "id": "m10.b2.apertura.p04",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "(avvia. La spia: due pixel rossi.) Verbale di colloquio. Presenti: l'interessato, lo sceriffo Truman, l'agente Cooper. Oggetto: chiarire il resoconto della partenza di Madeleine Ferguson e le circostanze connesse.",
+       "recorded_on": "tape",
+       "tape_opening": "neutral"
+      },
+      {
+       "id": "m10.b2.apertura.promise",
+       "mode": "action",
+       "text": "(Il taccuino di Cooper resta chiuso su una pagina con tre orari.)",
+       "condition": {
+        "value_set": "promise_stance"
+       },
+       "conditional_note": "eco M8 promise_stance [Lock §5-B2, §6]: il taccuino chiuso sugli orari"
+      }
+     ],
+     "effects": [],
+     "next": "m10_domande",
+     "exposed": false,
+     "mandatory_beat": true,
+     "invariant": "consenso al colloquio PRIMA dell'avvio del nastro; l'apertura del verbale è NEUTRA (presenti + oggetto, nessuna ipotesi a nastro); il metodo è già scritto (value_set m10_method)",
+     "kind": "dialogue",
+     "channel": "world",
+     "map_id": "sheriff",
+     "target_kind": "actor",
+     "target_id": "leland",
+     "actor_id": "leland",
+     "interaction_slot": "primary"
+    },
+    {
+     "id": "m10_domande",
+     "beat": "B3-B4",
+     "source_section": "M10-B3-B4",
+     "conditions": [
+      {
+       "node_done": "m10_apertura"
+      },
+      {
+       "not": {
+        "node_done": "m10_fermo"
+       }
+      }
+     ],
+     "pages": [],
+     "pages_by_value": {
+      "value": "m10_method",
+      "cases": {
+       "probatorio": [
+        {
+         "id": "m10.b3.probatorio.p01",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Il taxi, signor Palmer. Ci dia il nome dell'autista e l'ora della corsa."
+        },
+        {
+         "id": "m10.b3.probatorio.p02",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "Eddie, credo. O il ragazzo nuovo. Le sette, le sette e un quarto. Il dolore archivia male, agente."
+        },
+        {
+         "id": "m10.b3.probatorio.p03",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "La compagnia non ha prenotazioni per casa Palmer. Né oggi né per domattina."
+        },
+        {
+         "id": "m10.b3.probatorio.p04",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "(una pausa da avvocato) Allora ho sbagliato compagnia. O il registro ha un difetto. Quale preferisce mettere a verbale?"
+        },
+        {
+         "id": "m10.b3.probatorio.p05",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "(seconda domanda) Mi mostri il viaggio, allora. Un biglietto, una telefonata a Missoula — qualcosa che dica che Maddy è partita davvero."
+        },
+        {
+         "id": "m10.b3.probatorio.p06",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "(le mani si fermano sul tavolo) Le telefonate le faccio dal mio studio. Lo studio è casa mia. Casa mia non si tocca."
+        },
+        {
+         "id": "m10.b3.probatorio.midnight",
+         "mode": "dialogue",
+         "speaker_id": "truman",
+         "display_name": "TRUMAN",
+         "text": "(piatto, dal suo angolo) La finestra di quella notte è stretta, Leland. Il merci di mezzanotte l'ha stretta lui.",
+         "condition": {
+          "evidence": "JACQUES_MIDNIGHT_CLAIM"
+         },
+         "conditional_note": "eco M6 jacques_midnight_claim [Lock §4, §5-B3-B4]: finestra via Truman"
+        },
+        {
+         "id": "m10.b3.probatorio.nota",
+         "mode": "notebook",
+         "text": "la precisione si incrina dove finiscono le carte e comincia la casa."
+        }
+       ],
+       "personale": [
+        {
+         "id": "m10.b3.personale.p01",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Quando ha smesso di dormire, Leland?"
+        },
+        {
+         "id": "m10.b3.personale.p02",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "(la cordialità si ferma) Si vede così tanto? (pausa) Da febbraio. Sarah dice che parlo, di notte. Io non ricordo mai con chi."
+        },
+        {
+         "id": "m10.b3.personale.biglietto_letto",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Ha visto il biglietto? «Torno lunedì. Non svegliarla.»",
+         "condition": {
+          "all": [
+           {
+            "value_is": {
+             "name": "warning_target",
+             "equals": "palmer"
+            }
+           },
+           {
+            "value_is": {
+             "name": "focus_destination",
+             "equals": "palmer"
+            }
+           }
+          ]
+         },
+         "conditional_note": "[Lock §5] «[se il player ha letto il biglietto a Palmer]»: warning_target=palmer ∧ focus_destination=palmer (m8.c.route_palmer.p02 rende il biglietto)"
+        },
+        {
+         "id": "m10.b3.personale.biglietto_truman",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Truman ha trovato un biglietto per Sarah. Lei lo aveva visto?",
+         "condition": {
+          "all": [
+           {
+            "value_is": {
+             "name": "warning_target",
+             "equals": "palmer"
+            }
+           },
+           {
+            "not": {
+             "value_is": {
+              "name": "focus_destination",
+              "equals": "palmer"
+             }
+            }
+           }
+          ]
+         },
+         "conditional_note": "[Lock §5] «[biglietto riferito da Truman]»: warning_target=palmer ∧ focus_destination≠palmer (m8.f.station.p_valigia rende il biglietto)"
+        },
+        {
+         "id": "m10.b3.personale.corriera",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Maddy parlava della corriera delle 7:40. Lei conosceva il suo piano?",
+         "condition": {
+          "not": {
+           "value_is": {
+            "name": "warning_target",
+            "equals": "palmer"
+           }
+          }
+         },
+         "conditional_note": "[Lock §4, §5] «[fallback senza biglietto]»: warning_target≠palmer — nessuna valigia inventata"
+        },
+        {
+         "id": "m10.b3.personale.visto",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "(guarda le proprie mani) L'ho visto.",
+         "condition": {
+          "value_is": {
+           "name": "warning_target",
+           "equals": "palmer"
+          }
+         },
+         "lock_composite": [
+          "(guarda le proprie mani)",
+          "L'ho visto."
+         ],
+         "conditional_note": "[Lock §5] «[se biglietto]»: didascalia comune della riga + variante"
+        },
+        {
+         "id": "m10.b3.personale.orario",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "(guarda le proprie mani) Conoscevo l'orario. Ho pensato: anche lei. Da quella casa vogliono andarsene tutte.",
+         "condition": {
+          "not": {
+           "value_is": {
+            "name": "warning_target",
+            "equals": "palmer"
+           }
+          }
+         },
+         "lock_composite": [
+          "(guarda le proprie mani)",
+          "Conoscevo l'orario. Ho pensato: anche lei. Da quella casa vogliono andarsene tutte."
+         ],
+         "conditional_note": "[Lock §5] «[fallback]»: lettura letterale — «Ho pensato: anche lei…» appartiene al fallback (vedi report, ambiguità di script)"
+        },
+        {
+         "id": "m10.b3.personale.p05",
+         "mode": "dialogue",
+         "speaker_id": "truman",
+         "display_name": "TRUMAN",
+         "text": "(si sporge) Cooper. Piano. C'è un limite anche qui dentro."
+        },
+        {
+         "id": "m10.b3.personale.p06",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Laura nascondeva le cose dove pensava che lei non guardasse. Il biglietto era sul sedile divelto."
+        },
+        {
+         "id": "m10.b3.personale.p07",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "No. Nella terra.",
+         "killer_only_bridge": true
+        },
+        {
+         "id": "m10.b3.personale.p08",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Questo non gliel'ho detto."
+        },
+        {
+         "id": "m10.b3.personale.nota",
+         "mode": "notebook",
+         "text": "la casa risponde prima dell'uomo."
+        }
+       ],
+       "intuitivo": [
+        {
+         "id": "m10.b3.intuitivo.p01",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Le dice niente: \"FUOCO CAMMINA CON ME\"?"
+        },
+        {
+         "id": "m10.b3.intuitivo.p02",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "(senza pausa) ...il mago desidera vedere. Uno canta fra due mondi. (si ferma, come svegliato) Che cosa stavo..."
+        },
+        {
+         "id": "m10.b3.intuitivo.p03",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Sono parole che non le ho dato. Continui.",
+         "recorded_as": "behaviour_not_evidence"
+        },
+        {
+         "id": "m10.b3.intuitivo.p04",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "(seconda domanda) Ho visto un uomo. Capelli lunghi, grigi. Sorrideva. Le è familiare?"
+        },
+        {
+         "id": "m10.b3.intuitivo.p05",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "(la testa si inclina, lentamente) E lei dov'era, agente, quando l'ha visto? Da che parte del sonno?"
+        },
+        {
+         "id": "m10.b3.intuitivo.p06",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "(la voce si abbassa, ma il volto non cambia) Il vagone canta ancora. Il biglietto dorme nella terra.",
+         "killer_only_bridge": true
+        },
+        {
+         "id": "m10.b3.intuitivo.p07",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Il biglietto era nella terra. Dettaglio mai reso pubblico."
+        },
+        {
+         "id": "m10.b3.intuitivo.p08",
+         "mode": "action",
+         "text": "(Truman posa la penna. Si alza.)"
+        },
+        {
+         "id": "m10.b3.intuitivo.p09",
+         "mode": "dialogue",
+         "speaker_id": "truman",
+         "display_name": "TRUMAN",
+         "text": "(sulla porta, senza alzare la voce) Ho bisogno che quello che sento abbia un ordine. Torno quando ce l'ha. (esce)",
+         "cast_exit": "truman"
+        },
+        {
+         "id": "m10.b3.intuitivo.p10",
+         "mode": "action",
+         "text": "(La stanza resta in due. Il fruscio del nastro è l'unico terzo.)"
+        },
+        {
+         "id": "m10.b3.intuitivo.nota",
+         "mode": "notebook",
+         "text": "risponde a domande che non ho fatto. Completa quelle che non finisco."
+        }
+       ]
+      }
+     },
+     "effects": [],
+     "next": "m10_affioramento",
+     "exposed": false,
+     "mandatory_beat": true,
+     "invariant": "tre operazioni diverse sul TESTO: probatorio = le carte fino alla soglia di casa; personale = il biglietto (tre varianti, mai valigia inventata) e il ponte killer-only «Nella terra»; intuitivo = versi non forniti da Cooper, il ponte killer-only e il COSTO scritto (Truman esce: ACT5_TRUMAN_OUT_INTUITIVE); nessuna ammissione qui",
+     "kind": "dialogue",
+     "channel": "world",
+     "map_id": "sheriff",
+     "target_kind": "actor",
+     "target_id": "leland",
+     "actor_id": "leland",
+     "interaction_slot": "primary"
+    },
+    {
+     "id": "m10_affioramento",
+     "beat": "B5",
+     "source_section": "M10-B5",
+     "conditions": [
+      {
+       "node_done": "m10_domande"
+      },
+      {
+       "not": {
+        "node_done": "m10_fermo"
+       }
+      }
+     ],
+     "pages": [
+      {
+       "id": "m10.b5.affioramento.p01",
+       "mode": "action",
+       "text": "(Il ritratto della battuta cambia: il volto è quello dello sconosciuto del sogno. Il corpo sulla sedia resta Leland.)",
+       "portrait": "bob",
+       "bob_surface": "portrait_shown"
+      },
+      {
+       "id": "m10.b5.affioramento.p02",
+       "mode": "dialogue",
+       "speaker_id": "voce",
+       "display_name": "VOCE",
+       "text": "Leland dice che dorme. Leland dice molte cose.",
+       "portrait": "bob",
+       "bob_surface": "register_shift"
+      },
+      {
+       "id": "m10.b5.affioramento.list",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "(piano, a Truman) Accendeva e spegneva. Senza fumare. (nessuna risposta: la ricorrenza resta un appunto)",
+       "condition": {
+        "all": [
+         {
+          "evidence": "JACQUES_LIST_GIVEN"
+         },
+         {
+          "not": {
+           "value_is": {
+            "name": "m10_method",
+            "equals": "intuitivo"
+           }
+          }
+         }
+        ]
+       },
+       "conditional_note": "eco M6 jacques_list_given [Lock §5-B5]. La riga è rivolta «a Truman»: nell'intuitivo Truman è FUORI dalla stanza (B3-B4), quindi la pagina è esclusa da quel ramo invece di contraddire la presenza — SCRIPT GAP, vedi report"
+      },
+      {
+       "id": "m10.b5.affioramento.stove",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "(al nastro) Ricorrenza a verbale: la stufa, guardata come si guarda una persona.",
+       "condition": {
+        "evidence": "JACQUES_THIRD_MAN_DETAIL"
+       },
+       "conditional_note": "eco M6 jacques_third_man_detail [Lock §5-B5]: ricorrenza, mai diagnosi"
+      },
+      {
+       "id": "m10.b5.affioramento.osservazione",
+       "mode": "notebook",
+       "text": "il volto del sogno appare nel ritratto mentre parla Leland. Il corpo nella stanza resta il suo. Non so ancora come nominare il rapporto fra i due."
+      }
+     ],
+     "effects": [
+      {
+       "set": "dream_face_recognized_in_leland_scene"
+      }
+     ],
+     "next": "m10_confessione",
+     "exposed": false,
+     "mandatory_beat": true,
+     "invariant": "DUE segnali soltanto (bob_surface: portrait_shown + register_shift), identici in tutti i metodi; osservazione, mai possessione: nessun flag di ospite, nessuna percentuale; dream_face_recognized_in_leland_scene è un'osservazione di Cooper",
+     "kind": "dialogue",
+     "channel": "world",
+     "map_id": "sheriff",
+     "target_kind": "actor",
+     "target_id": "leland",
+     "actor_id": "leland",
+     "interaction_slot": "primary"
+    },
+    {
+     "id": "m10_confessione",
+     "beat": "B6",
+     "source_section": "M10-B6",
+     "conditions": [
+      {
+       "node_done": "m10_affioramento"
+      },
+      {
+       "not": {
+        "node_done": "m10_fermo"
+       }
+      }
+     ],
+     "pages": [],
+     "pages_by_value": {
+      "value": "m10_method",
+      "cases": {
+       "probatorio": [
+        {
+         "id": "m10.b6.probatorio.p01",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Torniamo alla scena. Il biglietto era appoggiato sul sedile divelto."
+        },
+        {
+         "id": "m10.b6.probatorio.p02",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "Nella terra. (silenzio) Era nella terra."
+        },
+        {
+         "id": "m10.b6.probatorio.p03",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Questo dettaglio non è mai uscito da questa centrale, signor Palmer. Come lo sa?"
+        },
+        {
+         "id": "m10.b6.probatorio.p04",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "(guarda le mani, a lungo. Quando parla, la voce è precisa — ed è peggio del tremito.) Perché ce l'ho messa io."
+        },
+        {
+         "id": "m10.b6.probatorio.p05",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Il taxi."
+        },
+        {
+         "id": "m10.b6.probatorio.p06",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "Mai chiamato. Ho mentito io. Questo è mio.",
+         "admits": [
+          "taxi_lie"
+         ]
+        },
+        {
+         "id": "m10.b6.probatorio.p07",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Chi ha ucciso Maddy Ferguson?"
+        },
+        {
+         "id": "m10.b6.probatorio.p08",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "Io. (la precisione non trema) Dopo, l'ho portata al lago.",
+         "admits": [
+          "maddy_homicide",
+          "maddy_body_transport"
+         ]
+        },
+        {
+         "id": "m10.b6.probatorio.p09",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Laura Palmer?"
+        },
+        {
+         "id": "m10.b6.probatorio.p10",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "(la voce di un uomo che detta un atto) Io. Al vagone.",
+         "admits": [
+          "laura_homicide",
+          "traincar_presence"
+         ]
+        },
+        {
+         "id": "m10.b6.probatorio.p11",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Le lettere."
+        },
+        {
+         "id": "m10.b6.probatorio.p12",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "R. O. Le ho lasciate io. Un pezzo alla volta. (il registro cambia a metà frase: il ritratto, per tre parole, non è il suo)",
+         "admits": [
+          "letters"
+         ],
+         "bob_surface": "register_shift"
+        },
+        {
+         "id": "m10.b6.probatorio.p13",
+         "mode": "action",
+         "text": "(Truman scrive fitto. Il verbale, in questo metodo, è il più completo che la contea vedrà mai.)"
+        }
+       ],
+       "personale": [
+        {
+         "id": "m10.b6.personale.p01",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "Volevano andarsene tutte, agente. Da quella casa se ne vanno tutte."
+        },
+        {
+         "id": "m10.b6.personale.p02",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Non \"tutte\", signor Palmer. Laura. Cominci da Laura."
+        },
+        {
+         "id": "m10.b6.personale.p03",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "(piange senza rumore) Laura aveva paura di me. Da febbraio. Aveva ragione."
+        },
+        {
+         "id": "m10.b6.personale.p04",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Dica che cosa ha fatto a Laura. Per lei — non per noi."
+        },
+        {
+         "id": "m10.b6.personale.p05",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "L'ho uccisa io. Al vagone.",
+         "admits": [
+          "laura_homicide",
+          "traincar_presence"
+         ]
+        },
+        {
+         "id": "m10.b6.personale.p06",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Maddy."
+        },
+        {
+         "id": "m10.b6.personale.p07",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "Voleva solo il suo centralino. Conoscevo il suo orario e io... L'ho uccisa io. Poi l'ho portata al lago.",
+         "admits": [
+          "maddy_homicide",
+          "maddy_body_transport"
+         ]
+        },
+        {
+         "id": "m10.b6.personale.p08",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Il taxi che ci ha raccontato."
+        },
+        {
+         "id": "m10.b6.personale.p09",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "Mai chiamato. Ho mentito. Volevo che fosse partita. Che fosse vero.",
+         "admits": [
+          "taxi_lie"
+         ]
+        },
+        {
+         "id": "m10.b6.personale.p10",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Le lettere."
+        },
+        {
+         "id": "m10.b6.personale.p11",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "R. O. Le ho lasciate io.",
+         "admits": [
+          "letters"
+         ]
+        },
+        {
+         "id": "m10.b6.personale.p12",
+         "mode": "action",
+         "text": "(Il blocco di Truman ha righe più corte, qui. Il verbale è vero e fragile insieme: emozioni agli atti.)"
+        }
+       ],
+       "intuitivo": [
+        {
+         "id": "m10.b6.intuitivo.p01",
+         "mode": "dialogue",
+         "speaker_id": "voce",
+         "display_name": "VOCE",
+         "text": "Il vagone canta ancora. Chiedete alla terra che cosa le abbiamo dato.",
+         "portrait": "bob",
+         "bob_surface": "register_shift"
+        },
+        {
+         "id": "m10.b6.intuitivo.p02",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Con parole sue, signor Palmer. Dov'era, la notte del vagone?"
+        },
+        {
+         "id": "m10.b6.intuitivo.p03",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "(piatto, come chi legge) Al vagone. C'ero io.",
+         "admits": [
+          "traincar_presence"
+         ]
+        },
+        {
+         "id": "m10.b6.intuitivo.p04",
+         "mode": "dialogue",
+         "speaker_id": "voce",
+         "display_name": "VOCE",
+         "text": "La piccola voleva volare a ovest. L'acqua l'ha tenuta.",
+         "portrait": "bob",
+         "bob_surface": "register_shift"
+        },
+        {
+         "id": "m10.b6.intuitivo.p05",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "In forma semplice. Chi ha ucciso Maddy?"
+        },
+        {
+         "id": "m10.b6.intuitivo.p06",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "Io. (piatto) Poi l'ho portata al lago.",
+         "admits": [
+          "maddy_homicide",
+          "maddy_body_transport"
+         ]
+        },
+        {
+         "id": "m10.b6.intuitivo.p07",
+         "mode": "action",
+         "text": "(Truman rientra. Il blocco è aperto.)",
+         "cast_entry": "truman"
+        },
+        {
+         "id": "m10.b6.intuitivo.p08",
+         "mode": "dialogue",
+         "speaker_id": "truman",
+         "display_name": "TRUMAN",
+         "text": "Il taxi, Leland. A verbale."
+        },
+        {
+         "id": "m10.b6.intuitivo.p09",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "Mai chiamato. La bugia è mia.",
+         "admits": [
+          "taxi_lie"
+         ]
+        },
+        {
+         "id": "m10.b6.intuitivo.p10",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "Le lettere. Parole sue, signor Palmer."
+        },
+        {
+         "id": "m10.b6.intuitivo.p11",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "R sotto Laura. O sotto Maddy. Le ho lasciate io.",
+         "admits": [
+          "letters"
+         ]
+        },
+        {
+         "id": "m10.b6.intuitivo.p12",
+         "mode": "dialogue",
+         "speaker_id": "cooper",
+         "display_name": "COOPER",
+         "text": "E Laura?"
+        },
+        {
+         "id": "m10.b6.intuitivo.p13",
+         "mode": "dialogue",
+         "speaker_id": "leland",
+         "display_name": "LELAND",
+         "text": "(un silenzio lungo; poi, semplicemente) Io.",
+         "admits": [
+          "laura_homicide"
+         ]
+        },
+        {
+         "id": "m10.b6.intuitivo.p14",
+         "mode": "action",
+         "text": "(Il verbale alterna il semplice e l'impossibile: la contea leggerà, e deciderà come chiamarlo.)"
+        }
+       ]
+      }
+     },
+     "effects": [
+      {
+       "value": "material_admissions.taxi_lie",
+       "to": "leland_first_person"
+      },
+      {
+       "value": "material_admissions.traincar_presence",
+       "to": "leland_first_person"
+      },
+      {
+       "value": "material_admissions.laura_homicide",
+       "to": "leland_first_person"
+      },
+      {
+       "value": "material_admissions.maddy_homicide",
+       "to": "leland_first_person"
+      },
+      {
+       "value": "material_admissions.maddy_body_transport",
+       "to": "leland_first_person"
+      },
+      {
+       "value": "material_admissions.letters",
+       "to": "leland_first_person"
+      },
+      {
+       "proposition": "P6",
+       "factual_status": "confirmed_as_lie"
+      },
+      {
+       "proposition": "P8",
+       "factual_status": "corroborated"
+      }
+     ],
+     "next": "m10_s3",
+     "exposed": false,
+     "mandatory_beat": true,
+     "invariant": "stessi SEI fatti fissi in ogni metodo, tre operazioni (precisazioni forzate / ritorno ai nomi / distillazione); ogni ammissione materiale in PRIMA PERSONA di Leland (speaker LELAND, mai VOCE); effetti (sei record material_admissions per-fatto con speaker_register, P6 confirmed_as_lie, P8 corroborated) committati SOLO dopo l'ultima pagina; nessuna battuta assolve",
+     "kind": "dialogue",
+     "channel": "world",
+     "map_id": "sheriff",
+     "target_kind": "actor",
+     "target_id": "leland",
+     "actor_id": "leland",
+     "interaction_slot": "primary"
+    },
+    {
+     "id": "m10_s3",
+     "beat": "B7",
+     "source_section": "M10-B7",
+     "prompt": "Il nastro.",
+     "conditions": [
+      {
+       "value_set": "material_admissions.taxi_lie"
+      },
+      {
+       "value_set": "material_admissions.traincar_presence"
+      },
+      {
+       "value_set": "material_admissions.laura_homicide"
+      },
+      {
+       "value_set": "material_admissions.maddy_homicide"
+      },
+      {
+       "value_set": "material_admissions.maddy_body_transport"
+      },
+      {
+       "value_set": "material_admissions.letters"
+      },
+      {
+       "node_done": "m10_confessione"
+      },
+      {
+       "not": {
+        "node_done": "m10_fermo"
+       }
+      }
+     ],
+     "pages": [
+      {
+       "id": "m10.b7.s3.p01",
+       "mode": "action",
+       "text": "(Leland si ferma. Quando riprende, la voce cerca qualcosa che non è nella stanza.)"
+      },
+      {
+       "id": "m10.b7.s3.p02",
+       "mode": "dialogue",
+       "speaker_id": "leland",
+       "display_name": "LELAND",
+       "text": "Adesso viene la parte che nessun foglio sa tenere, agente. Vuole che continui?"
+      },
+      {
+       "id": "m10.b7.s3.p03",
+       "mode": "action",
+       "text": "(Truman rilegge il blocco: i fatti ci sono tutti. Guarda Cooper.)"
+      }
+     ],
+     "choices": [
+      {
+       "id": "s3_on",
+       "label": "Lascia girare.",
+       "effects": [
+        {
+         "value": "s3",
+         "to": "on"
+        },
+        {
+         "value": "truman_testimony_state",
+         "to": "not_needed"
+        }
+       ],
+       "feedback_pages": [
+        {
+         "id": "m10.b7.s3.on.p01",
+         "mode": "action",
+         "text": "(La spia resta accesa.)"
+        }
+       ]
+      },
+      {
+       "id": "s3_off",
+       "label": "Ferma il registratore.",
+       "effects": [
+        {
+         "value": "s3",
+         "to": "off"
+        },
+        {
+         "value": "truman_testimony_state",
+         "to": "voluntary_witness"
+        }
+       ],
+       "feedback_pages": [
+        {
+         "id": "m10.b7.s3.off.p01",
+         "mode": "action",
+         "text": "(Click. La spia muore.)"
+        },
+        {
+         "id": "m10.b7.s3.off.p02",
+         "mode": "dialogue",
+         "speaker_id": "truman",
+         "display_name": "TRUMAN",
+         "text": "(chiude il blocco) Quello che sento da qui in poi, lo porto io. Se servirà, lo giuro a voce."
+        }
+       ]
+      }
+     ],
+     "next": "m10_post_s3",
+     "completion_when": {
+      "value_set": "s3"
+     },
+     "exposed": false,
+     "mandatory_beat": true,
+     "invariant": "S3 disponibile SOLO con TUTTE e sei le material_admissions registrate (gate per-fatto, mai un booleano); unico writer di s3 e truman_testimony_state (write-once); S3-off NON cancella nulla: le ammissioni sono già committate in m10_confessione",
+     "kind": "choice",
+     "channel": "world",
+     "map_id": "sheriff",
+     "target_kind": "actor",
+     "target_id": "leland",
+     "actor_id": "leland",
+     "interaction_slot": "primary",
+     "role": "stance",
+     "provenance_note": "[L] prompt = intestazione del Lock «[SCELTA — il nastro]» (la domanda di Leland è già una pagina); etichette testuali del Lock «[SCELTA — il nastro]»."
+    },
+    {
+     "id": "m10_post_s3",
+     "beat": "B7b",
+     "source_section": "M10-B7b",
+     "conditions": [
+      {
+       "value_set": "s3"
+      },
+      {
+       "not": {
+        "node_done": "m10_fermo"
+       }
+      }
+     ],
+     "spoken_in_all_paths": true,
+     "recorded_if": {
+      "value_is": {
+       "name": "s3",
+       "equals": "on"
+      }
+     },
+     "witnessed_by_truman": true,
+     "formal_testimony_if": {
+      "value_is": {
+       "name": "s3",
+       "equals": "off"
+      }
+     },
+     "pages": [
+      {
+       "id": "m10.b7b.segmento.p01",
+       "mode": "dialogue",
+       "speaker_id": "leland",
+       "display_name": "LELAND",
+       "text": "Avevo dodici anni. C'era una casa bianca, vicino al lago dei nonni. E un uomo che chiedeva di giocare."
+      },
+      {
+       "id": "m10.b7b.segmento.p02",
+       "mode": "dialogue",
+       "speaker_id": "leland",
+       "display_name": "LELAND",
+       "text": "Diceva: ho un nome da persona perbene, piccolo. Come il tuo."
+      },
+      {
+       "id": "m10.b7b.segmento.p03",
+       "mode": "action",
+       "text": "(Il ritratto della battuta cambia, per una frase sola.)",
+       "portrait": "bob",
+       "bob_surface": "portrait_shown"
+      },
+      {
+       "id": "m10.b7b.segmento.p04",
+       "mode": "dialogue",
+       "speaker_id": "voce",
+       "display_name": "VOCE",
+       "text": "I pezzi del nome sono nostri. Li abbiamo lasciati perché qualcuno contasse.",
+       "portrait": "bob",
+       "bob_surface": "register_shift"
+      },
+      {
+       "id": "m10.b7b.segmento.p05",
+       "mode": "dialogue",
+       "speaker_id": "leland",
+       "display_name": "LELAND",
+       "text": "(di nuovo il suo ritratto; la voce è stanca) Quando dormo, lui non dorme. Questo lo so. Il resto... il resto non so più di chi sia."
+      },
+      {
+       "id": "m10.b7b.segmento.p06",
+       "mode": "dialogue",
+       "speaker_id": "leland",
+       "display_name": "LELAND",
+       "text": "Agente. Mia figlia... Laura. Potrà mai—"
+      },
+      {
+       "id": "m10.b7b.segmento.p07",
+       "mode": "action",
+       "text": "(Cooper non risponde. Sposta la foto di Laura fuori dalla linea degli occhi di Leland: la tiene davanti a sé.)",
+       "laura_photo": "kept_before_cooper"
+      }
+     ],
+     "effects": [],
+     "next": "m10_vittime",
+     "exposed": false,
+     "mandatory_beat": true,
+     "invariant": "le STESSE parole in entrambi i rami S3 (nessuna pagina condizionata a s3); cambia solo se il nastro lo registra (recorded_if) e se Truman ne fa testimonianza formale (formal_testimony_if); la foto di Laura non va mai a faccia in giù; la domanda del perdono resta senza risposta",
+     "kind": "dialogue",
+     "channel": "world",
+     "map_id": "sheriff",
+     "target_kind": "actor",
+     "target_id": "leland",
+     "actor_id": "leland",
+     "interaction_slot": "primary"
+    },
+    {
+     "id": "m10_vittime",
+     "beat": "B8",
+     "source_section": "M10-B8",
+     "conditions": [
+      {
+       "node_done": "m10_post_s3"
+      },
+      {
+       "not": {
+        "node_done": "m10_fermo"
+       }
+      }
+     ],
+     "pages": [
+      {
+       "id": "m10.b8.vittime.p01",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "(al taccuino, dopo) Maddy Ferguson aveva scelto la corriera delle 7:40. Laura Palmer aveva nascosto un secondo diario. Le loro azioni restano nel fascicolo. Il perdono non è materia nostra."
+      }
+     ],
+     "effects": [],
+     "next": "m10_fermo",
+     "exposed": false,
+     "mandatory_beat": true,
+     "invariant": "il beat-vittime viene DOPO la domanda del perdono: le due vittime nominate per le loro azioni; nessuna assoluzione",
+     "kind": "dialogue",
+     "channel": "world",
+     "map_id": "sheriff",
+     "target_kind": "actor",
+     "target_id": "leland",
+     "actor_id": "leland",
+     "interaction_slot": "primary"
+    },
+    {
+     "id": "m10_fermo",
+     "beat": "B9",
+     "source_section": "M10-B9",
+     "conditions": [
+      {
+       "node_done": "m10_vittime"
+      },
+      {
+       "not": {
+        "node_done": "m10_fermo"
+       }
+      }
+     ],
+     "pages": [
+      {
+       "id": "m10.b9.fermo.p01",
+       "mode": "dialogue",
+       "speaker_id": "truman",
+       "display_name": "TRUMAN",
+       "text": "(in piedi, formale per la prima volta in vent'anni) Da questo momento sei in stato di fermo, Leland. Per i fatti che hai ammesso."
+      },
+      {
+       "id": "m10.b9.fermo.p02",
+       "mode": "action",
+       "text": "(La cella: la branda rifatta con gli angoli tesi. Truman apre la porta lui stesso.)"
+      },
+      {
+       "id": "m10.b9.fermo.p03",
+       "mode": "action",
+       "text": "(La porta si vede per intero, da fuori. La serratura fa il suo suono.)",
+       "cast_exit": "leland"
+      }
+     ],
+     "effects": [],
+     "next": "m10_morte",
+     "exposed": false,
+     "mandatory_beat": true,
+     "invariant": "Truman agisce da sceriffo: il fermo è per i fatti AMMESSI; Leland passa in cella (ACT5_LELAND_CELL, OFFSCREEN: la stazione non ha una cella giocabile)",
+     "kind": "dialogue",
+     "channel": "world",
+     "map_id": "sheriff",
+     "target_kind": "actor",
+     "target_id": "leland",
+     "actor_id": "leland",
+     "interaction_slot": "primary"
+    },
+    {
+     "id": "m10_morte",
+     "beat": "B10",
+     "source_section": "M10-B10",
+     "conditions": [
+      {
+       "node_done": "m10_fermo"
+      },
+      {
+       "not": {
+        "flag": "leland_morto"
+       }
+      }
+     ],
+     "pages": [
+      {
+       "id": "m10.b10.morte.p01",
+       "mode": "action",
+       "text": "(Il grido di Truman arriva dal corridoio. Le chiavi le ha lui: la cella è aperta in un secondo.)"
+      },
+      {
+       "id": "m10.b10.morte.p02",
+       "mode": "action",
+       "text": "(Truman in ginocchio, due dita sul collo. Conta. Poi smette di contare.)"
+      },
+      {
+       "id": "m10.b10.morte.p03",
+       "mode": "dialogue",
+       "speaker_id": "truman",
+       "display_name": "TRUMAN",
+       "text": "(senza voltarsi) Lucy — il dottore. E Andy alla porta."
+      },
+      {
+       "id": "m10.b10.morte.p04",
+       "mode": "action",
+       "text": "(Cooper resta sulla soglia: due persone nella cella sono già una di troppo.)"
+      },
+      {
+       "id": "m10.b10.morte.p05",
+       "mode": "action",
+       "text": "(Poi il dottore, le firme, la barella. L'ambulanza se ne va senza fretta — che è il modo peggiore.)"
+      },
+      {
+       "id": "m10.b10.morte.p06",
+       "mode": "action",
+       "text": "(Restano la stanza e il radiatore. Solo il radiatore.)"
+      },
+      {
+       "id": "m10.b10.morte.p07",
+       "mode": "action",
+       "text": "(Cooper prende il proprio registratore. Lo guarda. Non lo accende.)"
+      },
+      {
+       "id": "m10.b10.morte.p08",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Diane... (si ferma. Abbassa la mano.)"
+      },
+      {
+       "id": "m10.b10.morte.p09",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "(alla stanza) So ciò che ha fatto. Non so più dire dove finisse la sua volontà. Una cosa non cancella l'altra."
+      },
+      {
+       "id": "m10.b10.morte.p10",
+       "mode": "dialogue",
+       "speaker_id": "truman",
+       "display_name": "TRUMAN",
+       "text": "La contea lo chiamerà chiuso."
+      },
+      {
+       "id": "m10.b10.morte.p11",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Non lo è."
+      },
+      {
+       "id": "m10.b10.morte.p12",
+       "mode": "dialogue",
+       "speaker_id": "truman",
+       "display_name": "TRUMAN",
+       "text": "E adesso?"
+      },
+      {
+       "id": "m10.b10.morte.p13",
+       "mode": "dialogue",
+       "speaker_id": "cooper",
+       "display_name": "COOPER",
+       "text": "Un posto. Non è in nessun fascicolo."
+      }
+     ],
+     "effects": [
+      {
+       "set": "leland_morto"
+      }
+     ],
+     "mandatory_beat": true,
+     "invariant": "la morte è UMANA prima che composta: Truman apre, controlla, chiama; Cooper resta sulla soglia; la composizione DOPO; il rituale «Diane» interrotto è visibile; unico writer mission di leland_morto, committato dopo l'ultima pagina; ogni percorso arriva qui; root esposta su TRUMAN (non su Leland): dopo il fermo Leland è in cella (ACT5_LELAND_CELL, nessun corpo), quindi una sessione interrotta fra B9 e B10 riprende da Truman — nessun softlock (V5b)",
+     "kind": "dialogue",
+     "channel": "world",
+     "map_id": "sheriff",
+     "target_kind": "actor",
+     "target_id": "truman",
+     "actor_id": "truman",
+     "interaction_slot": "primary"
+    }
+   ],
+   "node_count": {
+    "runtime_total": 10
+   }
+  };
   D.enums = {
    "narrative_schema_version": "1.1.0",
    "narrative_package": "narrative-v1.0",
@@ -6962,7 +8456,16 @@
     "letter_o_chain": "letter_o_chain",
     "presagio_status": "presagio_status",
     "maddy_action_after_warning": "maddy_action_after_warning",
-    "sarah_support_state": "sarah_support_state"
+    "sarah_support_state": "sarah_support_state",
+    "m10_method": "m10_method",
+    "s3": "s3",
+    "truman_testimony_state": "truman_testimony_state",
+    "material_admissions.taxi_lie": "speaker_register",
+    "material_admissions.traincar_presence": "speaker_register",
+    "material_admissions.laura_homicide": "speaker_register",
+    "material_admissions.maddy_homicide": "speaker_register",
+    "material_admissions.maddy_body_transport": "speaker_register",
+    "material_admissions.letters": "speaker_register"
    },
    "value_transitions": {
     "presagio_status": [
@@ -8463,11 +9966,16 @@
     },
     {
      "id": "ACT5_LELAND_STATION",
-     "owner": "story",
+     "owner": "M10",
      "when": {
       "all": [
        {
         "flag": "atto5"
+       },
+       {
+        "not": {
+         "node_done": "m10_fermo"
+        }
        },
        {
         "not": {
@@ -8493,8 +10001,71 @@
        "wander": false
       }
      },
-     "cause": "leland → sheriff 8,5",
-     "exit": "—"
+     "cause": "leland → sheriff 8,5 (atto5: Truman calls him in, M9 m9_present_truman; he walks in alone, m9.b3.arrivo.p01)",
+     "exit": "m10_fermo: Truman opens the cell himself (M10-B9)",
+     "exit_authored_by": {
+      "leland": "m10.b9.fermo.p03"
+     }
+    },
+    {
+     "id": "ACT5_LELAND_CELL",
+     "owner": "M10",
+     "when": {
+      "all": [
+       {
+        "node_done": "m10_fermo"
+       },
+       {
+        "not": {
+         "flag": "leland_morto"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "leland": {
+       "status": "OFFSCREEN",
+       "label": "cell"
+      }
+     },
+     "cause": "leland → OFFSCREEN (cell): fermo per i fatti ammessi, Truman apre la cella (M10-B9). The station map has no playable cell: the cell is authored on screen by m10.b9.fermo.p02-p03 and stays offscreen.",
+     "exit": "leland_morto (M10-B10, m10_morte)"
+    },
+    {
+     "id": "ACT5_TRUMAN_OUT_INTUITIVE",
+     "owner": "M10",
+     "when": {
+      "all": [
+       {
+        "value_is": {
+         "name": "m10_method",
+         "equals": "intuitivo"
+        }
+       },
+       {
+        "node_done": "m10_domande"
+       },
+       {
+        "not": {
+         "node_done": "m10_confessione"
+        }
+       }
+      ]
+     },
+     "cast": {
+      "truman": {
+       "status": "OFFSCREEN",
+       "label": "corridor"
+      }
+     },
+     "cause": "truman → OFFSCREEN (corridor): intuitive method only, he puts the pen down and leaves the room (M10-B3-B4 cost)",
+     "exit": "m10_confessione: «(Truman rientra. Il blocco è aperto.)» (M10-B6 intuitivo)",
+     "entry_authored_by": {
+      "truman": "m10.b3.intuitivo.p09"
+     },
+     "exit_authored_by": {
+      "truman": "m10.b6.intuitivo.p07"
+     }
     },
     {
      "id": "LELAND_DEAD",

@@ -55,7 +55,7 @@ Object.keys(GAME.Maps).forEach((mapId) => { CLASSIC_NPCS_SNAPSHOT[mapId] = (GAME
 const NR0 = GAME.NarrativeRuntime;
 GAME.NarrativeAdapter.enable({
   mission: GAME.NarrativeData.missions.M4,
-  missions: [GAME.NarrativeData.missions.M4, GAME.NarrativeData.missions.M5, GAME.NarrativeData.missions.M6, GAME.NarrativeData.missions.M8, GAME.NarrativeData.missions.M9],
+  missions: [GAME.NarrativeData.missions.M4, GAME.NarrativeData.missions.M5, GAME.NarrativeData.missions.M6, GAME.NarrativeData.missions.M8, GAME.NarrativeData.missions.M9, GAME.NarrativeData.missions.M10],
   state: NR0.createState(),
   container: {}
 });
@@ -65,7 +65,7 @@ const D = GAME.NarrativeData;
 const CAST = D.cast;
 const PINS = require(path.join(root, 'test', 'fixtures', 'cast-pins-acts-1-4.json'));
 const TRANS = require(path.join(root, 'test', 'fixtures', 'cast-transitions-acts-1-4.json'));
-const MISSIONS = [D.missions.M5, D.missions.M6, D.missions.M8];
+const MISSIONS = [D.missions.M5, D.missions.M6, D.missions.M8, D.missions.M10];
 
 if (!CP) throw new Error('GAME.CastPresence non caricato');
 

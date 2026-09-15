@@ -76,18 +76,18 @@ const pinLines = r.err.split('\n').filter((l) => /^PIN test\/fixtures\/cast-pins
 ok(pinLines.length === benPins.length, 'one PIN line per disagreeing entry with file:line, old text and new value', r.err);
 const fixtureLines = read(fx, 'test/fixtures/cast-pins-acts-1-4.json').toString('utf8').split('\n');
 ok(pinLines.every((l) => fixtureLines[Number(/:(\d+) /.exec(l)[1]) - 1].trim() === '"benhorne": "hotel_gn@5,7",'), 'every printed line number points at that pin entry');
-ok(r.err.includes('PINS 24 V5 pin entries disagree with the new placement; rerun with --repin'), 'names --repin', r.err);
+ok(r.err.includes('PINS ' + benPins.length + ' V5 pin entries disagree with the new placement; rerun with --repin'), 'names --repin', r.err);
 ok(r.out.includes('DIFF narrative/cast/windows.json') && r.out.includes('-         "x": 5,') && r.out.includes('+         "x": 6,'), 'prints the windows.json diff', r.out);
 ok(same(fx, snap0), 'pin disagreement writes nothing');
 
 // ---- dry-run --repin previews repins + audit line, writes nothing
 r = run(fx, BEN, ['--dry-run', '--repin'], 'ben-move.json');
-ok(r.code === 0 && (r.out.match(/^REPIN /gm) || []).length === 24 && /^AUDIT artifacts\/world-character-audit\/cast-windows-acts-1-4\.md - \d{4}-\d{2}-\d{2} · window baseline \(PERSISTENT\) · benhorne · hotel_gn@5,7 down → hotel_gn@6,7 down · pins ACT1_TOWN, .* · changeset ben-move\.json$/m.test(r.out) && r.out.includes('DRY-RUN 1 cast placement change(s), 24 repin(s); nothing written'), 'dry-run --repin previews', r.all);
+ok(r.code === 0 && (r.out.match(/^REPIN /gm) || []).length === benPins.length && /^AUDIT artifacts\/world-character-audit\/cast-windows-acts-1-4\.md - \d{4}-\d{2}-\d{2} · window baseline \(PERSISTENT\) · benhorne · hotel_gn@5,7 down → hotel_gn@6,7 down · pins ACT1_TOWN, .* · changeset ben-move\.json$/m.test(r.out) && r.out.includes('DRY-RUN 1 cast placement change(s), ' + benPins.length + ' repin(s); nothing written'), 'dry-run --repin previews', r.all);
 ok(same(fx, snap0), 'dry-run --repin writes nothing');
 
 // ---- --repin: applies, validator green, exactly those entries, audit line
 r = run(fx, BEN, ['--repin'], 'ben-move.json');
-ok(r.code === 0 && r.out.includes('WROTE narrative/cast/windows.json (1 placement change(s))') && r.out.includes('WROTE test/fixtures/cast-pins-acts-1-4.json (24 repinned entries)') &&
+ok(r.code === 0 && r.out.includes('WROTE narrative/cast/windows.json (1 placement change(s))') && r.out.includes('WROTE test/fixtures/cast-pins-acts-1-4.json (' + benPins.length + ' repinned entries)') &&
   r.out.includes('WROTE artifacts/world-character-audit/cast-windows-acts-1-4.md (1 change record line(s))') && /CHECK cast-continuity-validate: V1 exactly-one PASS .*V5 world-window-pins PASS .*V6 causal-transitions PASS/.test(r.out), '--repin applies and the validator passes inside the tool', r.all);
 const castAfter = read(fx, 'narrative/cast/windows.json').toString('utf8');
 const castDiff = castAfter.split('\n').filter((l, i) => l !== snap0[0].toString('utf8').split('\n')[i]);
@@ -95,7 +95,7 @@ ok(castDiff.length === 1 && castDiff[0].trim() === '"x": 6,', 'windows.json: exa
 const pinsAfter = read(fx, 'test/fixtures/cast-pins-acts-1-4.json').toString('utf8').split('\n');
 const pinsBefore = snap0[2].toString('utf8').split('\n');
 const changedPinLines = pinsAfter.filter((l, i) => l !== pinsBefore[i]);
-ok(pinsAfter.length === pinsBefore.length && changedPinLines.length === 24 && changedPinLines.every((l) => l.trim() === '"benhorne": "hotel_gn@6,7",'), 'pins: exactly the 24 benhorne entries changed', changedPinLines.slice(0, 3));
+ok(pinsAfter.length === pinsBefore.length && changedPinLines.length === benPins.length && changedPinLines.every((l) => l.trim() === '"benhorne": "hotel_gn@6,7",'), 'pins: exactly the ' + benPins.length + ' benhorne entries changed', changedPinLines.slice(0, 3));
 ok(read(fx, 'js/narrative-data.gen.js').toString('utf8').includes('"x": 6') && !read(fx, 'js/narrative-data.gen.js').equals(snap0[1]), 'narrative-data.gen.js regenerated');
 ok(read(fx, 'test/fixtures/cast-transitions-acts-1-4.json').equals(snap0[3]), 'transitions fixture untouched');
 const audit = read(fx, 'artifacts/world-character-audit/cast-windows-acts-1-4.md').toString('utf8');
@@ -173,7 +173,7 @@ for (const [label, rel, body] of [['validator', 'test/cast-continuity-validate.j
   const f = makeFixture(); const snap = snapshot(f);
   let res = run(f, bundle, ['--dry-run', '--repin']);
   ok(res.code === 0 && res.out.includes('TARGET world/connections.json :: town-hospital') && res.out.includes('TARGET narrative/cast/windows.json :: baseline / lucy') &&
-    res.out.includes('DRY-RUN 1 endpoint change(s); nothing written') && res.out.includes('DRY-RUN 1 cast placement change(s), 24 repin(s); nothing written'), 'bundle dry-run reports both parts', res.all);
+    res.out.includes('DRY-RUN 1 endpoint change(s); nothing written') && res.out.includes('DRY-RUN 1 cast placement change(s), ' + benPins.length + ' repin(s); nothing written'), 'bundle dry-run reports both parts', res.all);
   ok(same(f, snap), 'bundle dry-run writes nothing');
 
   const g = makeFixture(); const gsnap = snapshot(g);

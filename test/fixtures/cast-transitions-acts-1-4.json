@@ -480,6 +480,64 @@
    "cause": "T_LELAND_TAXI: home (D4)",
    "event_node": "m8_leland_taxi",
    "event_map": "diner"
+  },
+  {
+   "id": "C16",
+   "character": "leland",
+   "before": "ACT4_STATION_BEFORE_DAWN",
+   "after": "ACT5_THRESHOLD",
+   "from": "OFFSCREEN:hidden",
+   "to": "sheriff@8,5",
+   "cause": "atto5: Truman accepts P6 and calls him in; he walks in alone (M9-B2/B3)",
+   "event_node": "m9_present_truman",
+   "event_map": "sheriff"
+  },
+  {
+   "id": "C17",
+   "character": "truman",
+   "before": "ACT5_THRESHOLD",
+   "after": "ACT5_TRUMAN_OUT_INTUITIVE",
+   "from": "sheriff@10,4",
+   "to": "OFFSCREEN:corridor",
+   "cause": "m10_method=intuitivo, m10_domande: Truman puts the pen down and leaves the room (M10-B3-B4 cost)",
+   "event_node": "m10_domande",
+   "event_map": "sheriff",
+   "authored_by": "m10.b3.intuitivo.p09"
+  },
+  {
+   "id": "C18",
+   "character": "truman",
+   "before": "ACT5_TRUMAN_OUT_INTUITIVE",
+   "after": "ACT5_LELAND_CELL",
+   "from": "OFFSCREEN:corridor",
+   "to": "sheriff@10,4",
+   "cause": "m10_confessione (intuitivo): Truman comes back to the facts (M10-B6)",
+   "event_node": "m10_confessione",
+   "event_map": "sheriff",
+   "authored_by": "m10.b6.intuitivo.p07"
+  },
+  {
+   "id": "C19",
+   "character": "leland",
+   "before": "ACT5_TRUMAN_OUT_INTUITIVE",
+   "after": "ACT5_LELAND_CELL",
+   "from": "sheriff@8,5",
+   "to": "OFFSCREEN:cell",
+   "cause": "m10_fermo: stato di fermo per i fatti ammessi, Truman opens the cell himself (M10-B9)",
+   "event_node": "m10_fermo",
+   "event_map": "sheriff",
+   "authored_by": "m10.b9.fermo.p03"
+  },
+  {
+   "id": "C20",
+   "character": "leland",
+   "before": "ACT5_LELAND_CELL",
+   "after": "ACT5_LELAND_DEAD",
+   "from": "OFFSCREEN:cell",
+   "to": "TERMINAL_REMOVED",
+   "cause": "leland_morto (M10-B10, m10_morte)",
+   "event_node": "m10_morte",
+   "event_map": "sheriff"
   }
  ]
 }

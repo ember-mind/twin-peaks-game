@@ -106,7 +106,9 @@ Giant in Room 315: no body (mirror interact); no window.
 | `ACT4_MADDY_GONE` | `maddy_trovata` | never | maddy → `TERMINAL_REMOVED` (T54) | — |
 | `ACT4_LELAND_DINER` | `atto4 ∧ ¬evidence T_LELAND_TAXI` | `T_LELAND_TAXI` — p00 "Leland posa il conto sul bancone" (pays, states the taxi, leaves: T0.5) | leland → `diner` 11,1 | the bill caption |
 | `ACT4_LELAND_HIDDEN` | `evidence T_LELAND_TAXI ∧ ¬atto5` | `atto5` | leland → `OFFSCREEN` (HIDDEN) | — |
-| `ACT5_LELAND_STATION` (placeholder) | `atto5 ∧ ¬leland_morto` | `leland_morto` | leland → `sheriff` 8,5 | M9 |
+| `ACT5_LELAND_STATION` (owner M10 since Act 5 pass 01) | `atto5 ∧ ¬node_done m10_fermo ∧ ¬leland_morto` | `m10_fermo` — `exit_authored_by m10.b9.fermo.p03` «(La porta si vede per intero, da fuori. La serratura fa il suo suono.)» | leland → `sheriff` 8,5 | M9-B3 arrival; M10-B9 cell |
+| `ACT5_LELAND_CELL` (Act 5 pass 01) | `node_done m10_fermo ∧ ¬leland_morto` | `leland_morto` (M10-B10) | leland → `OFFSCREEN` (cell: the station map has no playable cell; authored by m10.b9.fermo.p02–p03) | — |
+| `ACT5_TRUMAN_OUT_INTUITIVE` (Act 5 pass 01) | `value_is m10_method=intuitivo ∧ node_done m10_domande ∧ ¬node_done m10_confessione` | `m10_confessione` — `exit_authored_by m10.b6.intuitivo.p07` «(Truman rientra. Il blocco è aperto.)» | truman → `OFFSCREEN` (corridor; `entry_authored_by m10.b3.intuitivo.p09` «… Torno quando ce l'ha. (esce)») | Cooper in the room: both pages on sheriff |
 | `LELAND_DEAD` | `leland_morto` | never | leland → `TERMINAL_REMOVED` | — |
 | `ACT4_EVENING_GATHERING` (corrected exit; entry closed, B1) | `evidence T_LELAND_TAXI` for all seven. For norma, shelly, loglady, james the entry displaces them from the map Cooper stands on, so it carries `entry_authored_by: m8.b0.leland_taxi.chiusura.p01` (the closing beat of the same node: the Double R closes for the Roadhouse evening). Truman, bobby, donna are not in the player's room when it fires | `value_set focus_destination` (Cooper is at the crossroads outside; "Il Roadhouse ha chiuso") | truman → `roadhouse` 4,8; norma 5,6, shelly 3,6, loglady 2,6, james 2,4, bobby 3,4, donna 5,4 → `roadhouse` (the town gathers, T52) | the departure is visible before the state commits; the Roadhouse closes after Cooper has left it |
 | `ACT4_GIANT_STAGE` | `value_is presagio_status=active ∧ ¬value_set warning_target` | `warning_target` (p05 "La sala riprende il suo tempo. Nessuno ha visto niente.") | giant → `roadhouse` 8,1 | supernatural narrow window; accepted |
@@ -149,6 +151,13 @@ SH sheriff · DR diner · TW town · RH roadhouse · PL palmer · HG hotel_gn ·
 | `ACT4_SHORE_COOPER_AFTER` (`body_found_by=cooper`, `maddy_trovata`, ¬`m8_station`) | SH | **TW 16,27** | SH | OFF | OFF | OFF | TERM | DR | OFF | OFF | OFF | OFF | OFF | OFF | HG | TERM | OFF | HO 3,6 |
 | **`ACT4_STATION_BEFORE_DAWN`** (`m8_station`, ¬`atto5`) | **SH** | TW 16,27 | SH | OFF | OFF | OFF | TERM | DR | OFF | OFF | OFF | OFF | OFF | OFF | HG | TERM | OFF | HO 3,6 |
 
+| `ACT5_THRESHOLD` (`m9_arrivo`, `atto5`) | SH | **SH** | SH | **SH** | **PL** | **SH 8,5** | TERM | DR | **DR** | **DR** | **DR** | **TW** | **TW** | **TW** | HG | TERM | OFF | HO 3,6 |
+| `ACT5_TRUMAN_OUT_INTUITIVE` (`m10_method=intuitivo`, `m10_domande`, ¬`m10_confessione`) | **OFF corridor** | SH | SH | SH | PL | SH 8,5 | TERM | DR | DR | DR | DR | TW | TW | TW | HG | TERM | OFF | HO 3,6 |
+| `ACT5_LELAND_CELL` (`m10_fermo`, ¬`leland_morto`) | **SH** | SH | SH | SH | PL | **OFF cell** | TERM | DR | DR | DR | DR | TW | TW | TW | HG | TERM | OFF | HO 3,6 |
+| `ACT5_LELAND_DEAD` (`leland_morto`) | SH | SH | SH | SH | PL | **TERM** | TERM | DR | DR | DR | DR | TW | TW | TW | HG | TERM | OFF | **OFF** (bob `redroom` 14,2) |
+
+Act 5 rows (pass 01) verified against §5 C6/C8/C9/C12–C15 return columns: `atto5` returns hawk, andy, sarah, jacoby and the town to their baselines; `leland_morto` removes piantone_ronette and places bob in the redroom.
+
 "per branch" (Andy) = OFF on `centrale`; SH on `palmer`/`nessuno` until `maddy_trovata`. Ronette, nurse, Gerard, Ben Horne: baseline everywhere. Laura/mfap `redroom`; Bob OFF.
 
 ## 5. Cast change records (V6)
@@ -172,6 +181,14 @@ SH sheriff · DR diner · TW town · RH roadhouse · PL palmer · HG hotel_gn ·
 | C13 | andy | SH | `sarah_support_state=none ∧ maddy_trovata` (T7′) | OFF (Palmer) | `atto5` → SH |
 | C14 | sarah | PL | `presagio_status=active`: asleep | OFF | `atto5` → PL |
 | C15 | jacoby | TW | `T_LELAND_TAXI`: home | OFF | `atto5` → TW |
+
+| C16 | leland | OFF HIDDEN | `atto5`: Truman accepts P6 and calls him in; he walks in alone (M9-B2/B3) | SH 8,5 | `m10_fermo` → OFF cell |
+| C17 | truman | SH | `m10_method=intuitivo` ∧ `m10_domande`: pen down, leaves the room (authored m10.b3.intuitivo.p09) | OFF corridor | `m10_confessione` → SH (m10.b6.intuitivo.p07) |
+| C18 | truman | OFF corridor | `m10_confessione` (intuitivo): back to the facts | SH | — |
+| C19 | leland | SH 8,5 | `m10_fermo`: fermo per i fatti ammessi, Truman opens the cell (authored m10.b9.fermo.p03) | OFF cell | `leland_morto` → TERM |
+| C20 | leland | OFF cell | `leland_morto` (M10-B10) | TERM | never |
+
+Change record 2026-09-15 (Act 5 pass 01): `ACT5_LELAND_STATION` placeholder replaced by the M10 window pair (station → cell), `ACT5_TRUMAN_OUT_INTUITIVE` added; fixtures `cast-pins-acts-1-4.json` (+4 seeds/pins) and `cast-transitions-acts-1-4.json` (+C16–C20) updated in the same change; V1–V8 green.
 
 ## 6. Per-character exclusion (V2 proves over reachable states)
 
