@@ -60,6 +60,10 @@ function load(name) { return require(path.join(root, 'js', name)); }
 ].forEach(load);
 load('traincar-art.js');
 load('traincar-scene.js');
+['environment-reactions.js', 'location-connections.js', 'world-connections.gen.js',
+  'double-r-exterior-art.js', 'double-r-exterior-scene.js', 'double-r-location-production.js',
+  'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js', 'sheriffs-station-scene.js', 'sheriffs-station-exterior-scene.js',
+  'sheriffs-station-production.js', 'world-connections-production.js'].forEach(load);
 
 const captures = require(path.join(root, 'tools', 'traincar-captures.js'));
 
@@ -224,6 +228,7 @@ for (const id of targetIds) {
 }
 
 // Hawk e Truman restano FUORI dal vagone, sempre.
+const castWindows = JSON.parse(require('node:fs').readFileSync(path.join(root, 'narrative', 'cast', 'windows.json'), 'utf8'));
 const carInterior = new Set();
 for (let y = Art.interior.y0; y <= Art.interior.y1; y++) {
   for (let x = Art.interior.x0; x <= Art.interior.x1; x++) carInterior.add(x + ',' + y);
@@ -232,11 +237,13 @@ for (const [id, actor] of Object.entries(Scene.actors)) {
   assert.equal(isSolid(actor.x, actor.y), false, id + ' stands on a walkable tile');
   assert(reachable.has(actor.x + ',' + actor.y), id + ' stands somewhere the player can reach');
   assert(!carInterior.has(actor.x + ',' + actor.y), id + ' never stands inside the car');
-  const npcRe = new RegExp("id: '" + id + "', x: (\\d+), y: (\\d+)");
-  const m = npcRe.exec(adapterSource);
-  assert(m, 'the adapter registers ' + id);
-  assert.deepEqual([Number(m[1]), Number(m[2])], [actor.x, actor.y],
-    'the adapter places ' + id + ' on the authored tile');
+  // Corpi posseduti da Cast Presence (narrative/cast/windows.json), non piu' dall'adapter.
+  const placements = castWindows.windows.flatMap((w) => Object.entries(w.cast)
+    .filter(([cid, pl]) => pl.map_id === MAP_ID && (cid === id || (pl.actor_ids || []).includes(id)))
+    .map(([, pl]) => pl));
+  assert.equal(placements.length, 1, 'Cast Presence places ' + id + ' on the traincar exactly once');
+  assert.deepEqual([placements[0].x, placements[0].y], [actor.x, actor.y],
+    'Cast Presence places ' + id + ' on the authored tile');
 }
 /* Nessuno sta nella colonna della porta (13-14, righe 8..10). */
 for (const actor of Object.values(Scene.actors)) {

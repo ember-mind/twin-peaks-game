@@ -181,6 +181,16 @@ load('double-r-location-production.js');
 load('sheriffs-station-production.js');
 load('world-connections-production.js');
 load('character-life-scenes.js');
+// Named bodies come from Cast Presence since b529711 (glue.js NPCS is empty): sync them through the adapter, as test/smoke.js does.
+['narrative-runtime.js', 'narrative-data.gen.js', 'cast-presence.js', 'narrative-bootstrap.js', 'narrative-engine-adapter.js'].forEach(load);
+function syncCast(flags) {
+  const G2 = global.GAME, D = G2.NarrativeData, NS = G2.NarrativeRuntime.createState();
+  Object.assign(NS.flags, flags || {});
+  G2.NarrativeAdapter.enable({ mission: D.missions.M4, missions: [D.missions.M4, D.missions.M5, D.missions.M6, D.missions.M8, D.missions.M9], state: NS, container: {} });
+  G2.NarrativeAdapter.disable();
+}
+global.GAME.installNarrativeCatalogs({ data: global.GAME.NarrativeData, runtime: global.GAME.NarrativeRuntime });
+syncCast();
 
 const G = global.GAME;
 const scene = G.SheriffsStationScene;
@@ -189,17 +199,21 @@ assert.equal(scene.mapId, mapId);
 
 /* Il cast narrativo resta in js/glue.js: la scena non pubblica piu' NPC. */
 const staff = map.npcs.filter((npc) => actorIds.includes(npc.id));
-assert.deepEqual(staff.map((npc) => [npc.id, npc.sprite, npc.x, npc.y]), [
+// The registry is a set (docs/cast-continuity-contract-v0.1.md:48): resolver order is by id, so compare sorted.
+assert.deepEqual(staff.map((npc) => [npc.id, npc.sprite, npc.x, npc.y]).sort(), [
   ['truman', 'truman', 10, 4],
   ['andy', 'andy', 10, 7],
   ['lucy', 'lucy', 2, 6]
-]);
+].sort());
 const hawk = map.npcs.find((npc) => npc.id === 'hawk');
 assert(hawk, 'Hawk is present on the station map');
 assert.deepEqual([hawk.sprite, hawk.x, hawk.y], ['hawk', 12, 8]);
 assert.equal(populationRegistration.profiles.some((profile) => profile.id === 'hawk'), false,
   'Hawk has no registered Character Life profile (stillness + existing reactive facing only)');
+// Leland stands at the station only in act 5 (window ACT5_LELAND_STATION).
+syncCast({ atto5: true });
 assert.deepEqual(map.npcs.filter((npc) => npc.id === 'leland').map((npc) => [npc.x, npc.y]), [[8, 5]]);
+syncCast();
 
 /* maps.js e' la sorgente unica della geometria; la scena fallisce a install()
  * se le due divergono, qui lo verifichiamo esplicitamente. */
@@ -287,11 +301,11 @@ for (const id of actorIds) {
 }
 assert(totalStill / totalObserved >= 0.9, 'population average remains dominated by stillness');
 assert.equal(new Set(eventStarts).size, actorIds.length, 'actors do not share a synchronized first event start');
-assert.deepEqual(state.npcs.map((npc) => [npc.id, npc.x, npc.y, npc.moving]), [
+assert.deepEqual(state.npcs.map((npc) => [npc.id, npc.x, npc.y, npc.moving]).sort(), [
   ['truman', 10, 4, false],
   ['andy', 10, 7, false],
   ['lucy', 2, 6, false]
-]);
+].sort());
 
 for (const [id, reactiveDirection] of [['truman', 'right'], ['lucy', 'right'], ['andy', 'left']]) {
   const sample = create(1989);

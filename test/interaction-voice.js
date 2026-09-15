@@ -21,6 +21,14 @@ const J = (file) => path.join(__dirname, '..', 'js', file);
   'engine.js',
   'scene-objects.gen.js', 'glue.js'
 ].forEach((file) => require(J(file)));
+// NPC targets: every authored Cast Presence placement (baseline + windows), since b529711 emptied glue.js NPCS.
+['narrative-runtime.js', 'narrative-data.gen.js'].forEach((f) => require(J(f)));
+{
+  const cast = global.GAME.NarrativeData.cast;
+  const put = (id, p) => { if (p && p.status === 'PLACED' && p.dialogue) global.GAME.Maps[p.map_id].npcs.push({ id, dialogue: p.dialogue }); };
+  Object.keys(cast.characters).forEach((id) => put(id, cast.characters[id].baseline));
+  cast.windows.forEach((w) => Object.keys(w.cast).forEach((id) => put(id, w.cast[id])));
+}
 
 const GAME = global.GAME;
 const failures = [];

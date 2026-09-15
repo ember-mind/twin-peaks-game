@@ -146,6 +146,9 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
   const J = (f) => path.join(__dirname, '..', 'js', f);
   ['tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'retro-font.js', 'engine.js', 'scene-objects.gen.js', 'glue.js']
     .forEach((f) => require(J(f)));
+  // Named bodies come from the Cast Presence registry since b529711 (glue.js NPCS is empty); null state = authored baseline.
+  ['narrative-runtime.js', 'narrative-data.gen.js', 'cast-presence.js'].forEach((f) => require(J(f)));
+  Object.keys(global.GAME.Maps).forEach((m) => { if (global.GAME.Maps[m] && global.GAME.Maps[m].rows) global.GAME.Maps[m].npcs = global.GAME.CastPresence.bodiesFor(m, null); });
   const GAME = global.GAME;
   const D = GAME.Data.dialogues;
   const E = GAME.Engine;

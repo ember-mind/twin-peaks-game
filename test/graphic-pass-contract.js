@@ -159,12 +159,19 @@ GAME.Sprites = { CHARS: GAME.sprites.CHARS, drawTile: originalTile };
 require(path.join(ROOT, 'js/retro-authored.js'));
 
 const maps = GAME.maps.maps;
+// Scene objects live in world/scene-objects.json since M8 9332786; copy them onto the raw maps as glue.js does.
+require(path.join(ROOT, 'js/scene-objects.gen.js'));
+for (const [id, scene] of Object.entries(GAME.WorldData.sceneObjects.scenes)) {
+  if (maps[id]) maps[id].objects = JSON.parse(JSON.stringify(scene.objects));
+}
 const matrix = JSON.parse(read('test/visual-audit-matrix.json'));
 const engineSource = read('js/engine.js');
 const cameraBody = functionBody(engineSource, 'updateCamera');
 const upLookaheadMatch = /p\.dir\s*===\s*['"]up['"][\s\S]*?tyy\s*=\s*clamp\(tyy\s*-\s*(\d+)/.exec(cameraBody);
 assert(upLookaheadMatch, 'upward landmark camera look-ahead must exist');
 const upLookaheadPixels = Number(upLookaheadMatch[1]);
+// View height from engine.js (VH = 192, 12 tiles); the old 9-tile model predates the DS viewport.
+const viewportHeight = Number(/\bVH\s*=\s*(\d+)/.exec(engineSource)[1]);
 assert(upLookaheadPixels >= 16 && upLookaheadPixels <= 48,
   'upward look-ahead must reveal landmarks without skipping more than three tiles');
 
@@ -189,8 +196,8 @@ for (const capture of townCaptures) {
     const [x0, y0, x1, y1] = building.bbox;
     const roofY = building.glyph === '7' ? y0 : y0 - 1;
     const centerX = (x0 + x1) / 2;
-    const viewTop = capture.y - 4 - upLookaheadPixels / 16;
-    const viewBottom = viewTop + 9;
+    const viewTop = (capture.y * 16 + 8 - viewportHeight / 2 - upLookaheadPixels) / 16;
+    const viewBottom = viewTop + viewportHeight / 16;
     return Math.abs(capture.x - centerX) <= 2 &&
       x0 >= capture.x - 4.5 && x1 <= capture.x + 5.5 &&
       roofY >= viewTop && y1 <= viewBottom;

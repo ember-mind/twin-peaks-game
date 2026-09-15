@@ -62,6 +62,16 @@ function load(name) {
 ].forEach(load);
 load('sheriffs-station-art.js');
 load('sheriffs-station-scene.js');
+// Named bodies come from Cast Presence since b529711 (glue.js NPCS is empty): sync them through the adapter, as test/smoke.js does.
+['narrative-runtime.js', 'narrative-data.gen.js', 'cast-presence.js', 'narrative-bootstrap.js', 'narrative-engine-adapter.js'].forEach(load);
+function syncCast(flags) {
+  const G2 = global.GAME, D = G2.NarrativeData, NS = G2.NarrativeRuntime.createState();
+  Object.assign(NS.flags, flags || {});
+  G2.NarrativeAdapter.enable({ mission: D.missions.M4, missions: [D.missions.M4, D.missions.M5, D.missions.M6, D.missions.M8, D.missions.M9], state: NS, container: {} });
+  G2.NarrativeAdapter.disable();
+}
+global.GAME.installNarrativeCatalogs({ data: global.GAME.NarrativeData, runtime: global.GAME.NarrativeRuntime });
+syncCast();
 
 const G = global.GAME;
 const Engine = G.Engine;
@@ -129,8 +139,13 @@ assert.equal(stationMap.width * 16, 256, 'map spans the full native viewport wid
 assert.equal(stationMap.rows.every((row) => row.length === stationMap.width), true);
 assert.equal(stationMap.indoor, true);
 assert.deepEqual(stationMap.doors, {}, 'rear door is closed scenery; entrance doors come from the connection');
-assert.deepEqual(stationMap.npcs.map((npc) => npc.id), ['truman', 'andy', 'hawk', 'lucy', 'leland'],
-  'narrative cast stays owned by glue.js');
+// The registry is a set (docs/cast-continuity-contract-v0.1.md:48): resolver order is by id, so compare sorted.
+assert.deepEqual(stationMap.npcs.map((npc) => npc.id).sort(), ['andy', 'hawk', 'lucy', 'truman'],
+  'narrative cast is owned by Cast Presence (baseline)');
+syncCast({ atto5: true });
+assert.deepEqual(stationMap.npcs.map((npc) => npc.id).sort(), ['andy', 'hawk', 'leland', 'lucy', 'truman'],
+  'Leland joins the station cast in act 5 (window ACT5_LELAND_STATION)');
+syncCast();
 
 const isSolid = (x, y) => G.Maps.isSolid(MAP_ID, x, y, { clues: [], flags: {} });
 const freeTiles = [];

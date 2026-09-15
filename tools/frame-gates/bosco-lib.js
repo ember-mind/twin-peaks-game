@@ -1,6 +1,6 @@
 'use strict';
-/* test/bosco-lib.js — decoder PNG + encoder + palette del contratto bosco.
- * Condiviso da test/bosco-gates.js e dagli script di ritaglio: builder e
+/* tools/frame-gates/bosco-lib.js — decoder PNG + encoder + palette del contratto bosco.
+ * Condiviso da tools/frame-gates/bosco-gates.js e dagli script di ritaglio: builder e
  * critico devono leggere lo stesso numero dallo stesso codice. */
 const fs = require('node:fs');
 const zlib = require('node:zlib');

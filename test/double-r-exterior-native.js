@@ -20,7 +20,7 @@ const js=n=>require(path.join(__dirname,'..','js',n));
 ['tiles.js','chars.js','houses.js','maps.js','data.js','retro-font.js','portraits.js','gold-tone.js','engine.js','scene-objects.gen.js','glue.js','retro.js','retro-authored.js','retro-cast-matrices-a.js','retro-cast-matrices-b.js'].forEach(js);
 js('double-r-exterior-art.js');
 js('double-r-exterior-scene.js');
-require('./double-r-exterior-prototype.js');
+require('./pages/double-r-exterior-prototype.js');
 const P=GAME.__EXTERIOR_PREVIEW__, E=GAME.Engine;
 function pump(frames=1){for(let i=0;i<frames;i++){now+=16;const fn=queue.shift();if(fn)fn(now);}}
 function press(code){handlers.keydown({code,preventDefault:noop,repeat:false});handlers.keyup({code});for(let i=0;i<24;i++)pump();}

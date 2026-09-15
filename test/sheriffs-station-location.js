@@ -45,6 +45,17 @@ const js = (name) => path.join(__dirname, '..', 'js', name);
   'world-engine.js', 'world-catalog.js'
 ].forEach((name) => require(js(name)));
 
+// Named bodies come from Cast Presence since b529711 (glue.js NPCS is empty): sync them through the adapter, as test/smoke.js does.
+['narrative-runtime.js', 'narrative-data.gen.js', 'cast-presence.js', 'narrative-bootstrap.js', 'narrative-engine-adapter.js'].forEach((name) => require(js(name)));
+function syncCast(flags) {
+  const G2 = global.GAME, D = G2.NarrativeData, NS = G2.NarrativeRuntime.createState();
+  Object.assign(NS.flags, flags || {});
+  G2.NarrativeAdapter.enable({ mission: D.missions.M4, missions: [D.missions.M4, D.missions.M5, D.missions.M6, D.missions.M8, D.missions.M9], state: NS, container: {} });
+  G2.NarrativeAdapter.disable();
+}
+global.GAME.installNarrativeCatalogs({ data: global.GAME.NarrativeData, runtime: global.GAME.NarrativeRuntime });
+syncCast();
+
 const G = global.GAME;
 const E = G.Engine;
 const World = G.World;
@@ -128,9 +139,10 @@ assert.deepEqual([E.state.player.tx, E.state.player.ty], [7, 7], 'the lot is cro
 cross('up', 'sheriff', [7, 10, 'up']);
 
 const cast = E.state.npcs.filter((npc) => E.npcActive(npc, E.state));
-assert.deepEqual(cast.map((npc) => [npc.id, npc.x, npc.y]), [
+// The registry is a set (docs/cast-continuity-contract-v0.1.md:48): resolver order is by id, so compare sorted.
+assert.deepEqual(cast.map((npc) => [npc.id, npc.x, npc.y]).sort(), [
   ['truman', 10, 4], ['andy', 10, 7], ['hawk', 12, 8], ['lucy', 2, 6]
-], 'Truman, Andy, Hawk and Lucy staff the canonical station');
+].sort(), 'Truman, Andy, Hawk and Lucy staff the canonical station');
 assert.equal(cast.some((npc) => npc.id === 'leland'), false, 'Leland only appears in act 5');
 assert(E.state.npcs.some((npc) => npc.id === 'hawk'), 'Hawk is back at the station');
 

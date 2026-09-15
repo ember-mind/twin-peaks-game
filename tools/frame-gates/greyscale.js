@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 'use strict';
 
-// test/greyscale.js — versione desaturata di un frame nativo.
+// tools/frame-gates/greyscale.js — versione desaturata di un frame nativo.
 // Serve al critico sprite: se due personaggi si distinguono solo per colore,
 // in scala di grigi diventano lo stesso sprite. Rende visibile il difetto.
-// Uso: node test/greyscale.js <in.png> <out.png>
+// Uso: node tools/frame-gates/greyscale.js <in.png> <out.png>
 
 const fs = require('node:fs');
 const zlib = require('node:zlib');

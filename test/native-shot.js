@@ -63,7 +63,7 @@ function distinctColors(file) {
   const buf = fs.readFileSync(file);
   if (buf.length < 1200) return 0;
   const { spawnSync: run } = require('node:child_process');
-  const r = run(process.execPath, [path.join(root, 'test', 'pixel-gates.js'), file,
+  const r = run(process.execPath, [path.join(root, 'tools', 'frame-gates', 'pixel-gates.js'), file,
     '--rect=0,0,255,191'], { encoding: 'utf8' });
   if (r.status !== 0) return 0;
   try { return JSON.parse(r.stdout).colors || 0; } catch (_) { return 0; }

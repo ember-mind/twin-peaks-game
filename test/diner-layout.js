@@ -6,7 +6,13 @@ require('../js/chars.js');
 require('../js/maps.js');
 require('../js/data.js');
 require('../js/scene-objects.gen.js'); require('../js/glue.js');
+for (const n of ['ambient-life.js','environment-reactions.js','ambient-life-scenes.js','location-connections.js','world-connections.gen.js','double-r-exterior-art.js','double-r-exterior-scene.js','double-r-location-production.js','sheriffs-station-art.js','sheriffs-station-exterior-art.js','sheriffs-station-scene.js','sheriffs-station-exterior-scene.js','sheriffs-station-production.js','world-connections-production.js','narrative-runtime.js','narrative-data.gen.js','cast-presence.js']) require('../js/'+n);
 const map = GAME.Maps.diner;
+// Named bodies come from Cast Presence since b529711; doors from the registry since M5 f927658.
+// James sits at the diner once the dream is done: reachable seed ACT2_DAY2 from test/fixtures/cast-pins-acts-1-4.json.
+const SEED = require('./fixtures/cast-pins-acts-1-4.json').seeds.ACT2_DAY2;
+const S0 = GAME.NarrativeRuntime.createState(); Object.assign(S0.flags, SEED.flags);
+map.npcs = GAME.CastPresence.bodiesFor('diner', S0);
 const model = map.interior;
 assert(model, 'generated interior model survives glue normalization');
 assert.equal(map.width,14); assert.equal(map.height,10);

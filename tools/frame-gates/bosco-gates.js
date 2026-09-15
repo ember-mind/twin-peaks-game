@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 'use strict';
 
-/* test/bosco-gates.js — misure riproducibili su conifere, sottobosco e ciuffi
+/* tools/frame-gates/bosco-gates.js — misure riproducibili su conifere, sottobosco e ciuffi
  * del tableau di arrivo. Builder e critico devono leggere lo stesso numero
  * dallo stesso codice, quindi le regioni non sono a occhio: sono derivate dal
  * frame stesso.
  *
- *   node test/bosco-gates.js artifacts/bosco/base-arrival.png
- *   node test/bosco-gates.js artifacts/reference/target.png \
+ *   node tools/frame-gates/bosco-gates.js artifacts/bosco/base-arrival.png
+ *   node tools/frame-gates/bosco-gates.js artifacts/reference/target.png \
  *        --mockup=18,27,5.9375 --exclude=8,55,52,94
  *
  * Regioni, definite una volta:
@@ -225,7 +225,7 @@ const out = {
 };
 
 /* RIF = gli stessi campi letti da questo script su artifacts/reference/target.png
- *   node test/bosco-gates.js artifacts/reference/target.png \
+ *   node tools/frame-gates/bosco-gates.js artifacts/reference/target.png \
  *     --mockup=18,27,5.9375 --exclude=8,55,52,94 --skyline=52,139
  * Dove la soglia del contratto e la lettura del riferimento non coincidono
  * (run orizzontale, copertura ciuffi) vince il riferimento: la barra e'
