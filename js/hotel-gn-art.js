@@ -1,356 +1,216 @@
-/* Great Northern: native, opaque map-pixel lodge art. Cast Presence draws bodies. */
-(function () {
+/* Great Northern: one frontal lodge composition, drawn in native map pixels. */
+(function(){
   'use strict';
-  var root=typeof window!=='undefined'?window:globalThis;
-  var GAME=root.GAME=root.GAME||{};
+  var root=typeof window!=='undefined'?window:globalThis,GAME=root.GAME=root.GAME||{};
   var p=Object.freeze({ink:'#211e1c',woodDark:'#3b2c24',wood:'#65432d',woodLight:'#8b5c39',
     gold:'#b5864c',cream:'#e9c582',light:'#ffe7a6',redDark:'#4c2327',red:'#803338',redLight:'#aa5350',
     stoneDark:'#47423a',stone:'#776957',stoneLight:'#a28c6a',green:'#46513a',greenLight:'#77805a',fire:'#d77b37'});
-  /* Ground contacts exactly occupy the existing furniture glyphs. Art may
-   * rise north of its cell; foreground depth uses its south edge. */
+  /* All furniture collision cells have an actual visible body. The four
+   * northern C cells form one masonry hearth; the decorative stair treads
+   * remain walkable on the existing route toward the hall door. */
   var props=[
-    {id:'stairs',cells:[[6,4],[7,4]],x:96,footY:80},
-    {id:'fireplace',cells:[[8,4],[9,4]],x:128,footY:80},
+    {id:'fireplace',cells:[[6,4],[7,4],[8,4],[9,4]],x:96,footY:80},
     {id:'luggage',cells:[[2,6]],x:32,footY:112},
     {id:'chairWest',cells:[[8,6]],x:128,footY:112},
-    {id:'table',cells:[[9,6]],x:144,footY:112},
     {id:'chairEast',cells:[[10,6]],x:160,footY:112},
+    {id:'table',cells:[[9,6]],x:144,footY:112},
+    {id:'stairs',cells:[],x:208,footY:128},
     {id:'reception',cells:[[4,8],[5,8],[6,8],[7,8]],x:64,footY:144}
   ];
-  function painter(ctx,cx,cy){
-    cx=Math.round(cx||0);cy=Math.round(cy||0);
-    return function(x,y,w,h,c){
-      if(c===p.ink||c===p.light){ctx.fillStyle=c;ctx.fillRect(x-cx,y-cy,w,h);return;}
-      /* Sparse horizontal receiving marks preserve the authored material;
-       * the common world grid prevents overlapping lights adding density. */
-      for(var yy=y;yy<y+h;yy++){
-        var start=x,color=litColor(x,yy,c);
-        for(var xx=x+1;xx<=x+w;xx++){
-          var next=xx<x+w?litColor(xx,yy,c):null;
-          if(next!==color){ctx.fillStyle=color;ctx.fillRect(start-cx,yy-cy,xx-start,1);start=xx;color=next;}
-        }
-      }
-    };
-  }
-  function diamond(R,x,y,r,c){for(var d=-r;d<=r;d++)R(x-r+Math.abs(d),y+d,2*(r-Math.abs(d))+1,1,c);}
-  function rug(R,x,y,w,h){
-    if(w>32){
-      /* Mechanical surface spec: exact footprint, two-pixel keyline,
-       * one-pixel border, linked diamonds on an eight-pixel local grid. */
-      R(x,y,w,h,p.ink);R(x+2,y+2,w-4,h-4,p.gold);R(x+3,y+3,w-6,h-6,p.red);
-      for(var ry=y+8;ry<=y+h-8;ry+=8)for(var rx=x+8;rx<=x+w-8;rx+=8){
-        diamond(R,rx,ry+1,4,p.redDark);diamond(R,rx,ry,4,p.gold);
-        diamond(R,rx,ry,3,p.red);R(rx,ry,1,1,p.cream);
-      }
-      return;
-    }
+  function painter(ctx,cx,cy){cx=Math.round(cx||0);cy=Math.round(cy||0);return function(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(x-cx,y-cy,w,h);};}
+  function diamond(R,x,y,r,c){for(var dy=-r;dy<=r;dy++)R(x-r+Math.abs(dy),y+dy,2*(r-Math.abs(dy))+1,1,c);}
+  function rug(R,x,y,w,h,runner){
     R(x,y,w,h,p.ink);R(x+1,y+1,w-2,h-2,p.gold);R(x+2,y+2,w-4,h-4,p.redDark);
     R(x+4,y+4,w-8,h-8,p.red);R(x+5,y+5,w-10,h-10,p.redDark);
-    for(var xx=x+4;xx<x+w-4;xx+=6){R(xx,y+2,2,1,p.cream);R(xx,y+h-3,2,1,p.gold);}
-    for(var yy=y+7;yy<y+h-6;yy+=10){
+    for(var xx=x+5;xx<x+w-4;xx+=7){R(xx,y+2,2,1,p.woodLight);R(xx,y+h-3,2,1,p.gold);}
+    for(var yy=y+9;yy<y+h-7;yy+=runner?18:14){
+      var mid=x+Math.floor(w/2);diamond(R,mid,yy,5,p.gold);diamond(R,mid,yy,4,p.redDark);diamond(R,mid,yy,1,p.woodLight);
       R(x+2,yy,1,2,p.gold);R(x+w-3,yy,1,2,p.gold);
-      diamond(R,x+Math.floor(w/2),yy,4,p.gold);diamond(R,x+Math.floor(w/2),yy,2,p.red);
+      if(!runner){diamond(R,mid-23,yy,3,p.woodLight);diamond(R,mid+23,yy,3,p.woodLight);}
     }
   }
   function floor(R){
-    R(16,16,256,160,p.wood);
-    for(var y=16;y<176;y+=8){
-      /* 48x8 boards; alternating 24px joints. All three depth bands use
-       * the specified 1/5/2 bevel-face-seam recipe and the same palette. */
-      for(var start=16-((y/8|0)%2)*24,n=0;start<272;start+=48,n++){
-        var x=Math.max(16,start),end=Math.min(272,start+48),w=end-x;
-        R(x,y,w,1,p.woodLight);
-        R(x,y+1,w,5,p.wood);
-        R(x,y+6,w,2,p.woodDark);
-        if(start>=16)R(x,y+1,1,5,p.woodDark);
-        var grain=Math.min(w-4,8+(n%3)*4);
-        R(x+3,y+3,grain,1,p.gold);
-        if(y>=72&&y<120){
-          /* Only the middle band receives sparse one-step face marks. */
-          for(var mark=x+4;mark<end-3;mark+=12)R(mark,y+5,2,1,p.woodLight);
-        }
+    R(16,16,256,160,p.woodDark);
+    var seams=[64,73,84,97,112,129,149,176];
+    for(var band=0;band<seams.length-1;band++){
+      var y=seams[band],h=seams[band+1]-y;
+      R(16,y,256,h-1,band<2?p.woodDark:p.wood);R(16,y+h-1,256,1,p.woodDark);
+      for(var x=24+(band%2)*21;x<264;x+=52){
+        R(x,y+3,Math.min(11,272-x),1,band<2?p.wood:p.woodLight);
+        R(x+8,y+h-3,Math.min(7,272-x-8),1,p.woodDark);
       }
     }
-    /* Runner stops at the reception approach, with open floor beyond it. */
-    rug(R,128,122,32,54);rug(R,121,83,64,36);rug(R,41,29,45,47);
-    R(133,174,22,18,p.redDark);R(135,175,1,17,p.gold);R(152,175,1,17,p.gold);
+    /* Sparse perspective joints establish the floor plane without a grid. */
+    [16,80,144,208,272].forEach(function(end){for(var y=65;y<176;y++){
+      var x=Math.round(144+(end-144)*(y-64)/112);if(y%9<5)R(x,y,1,1,p.woodDark);
+    }});
+    /* Practical warmth follows the boards and is hidden naturally by props. */
+    R(96,80,68,3,p.wood);R(102,83,59,2,p.woodLight);R(109,86,44,1,p.gold);
+    R(76,145,50,2,p.woodLight);R(87,148,25,1,p.gold);
+    R(18,124,15,2,p.woodLight);R(256,137,14,2,p.woodLight);
+    /* The entrance carpet bends around the genuinely solid lounge. Its
+     * right-hand aisle is clear at x=11..12 rather than through the table. */
+    rug(R,176,72,26,63,true);rug(R,126,118,76,18,true);rug(R,128,130,32,46,true);
+    R(178,118,22,15,p.redDark);R(178,121,20,1,p.gold);R(178,130,20,1,p.gold);
+    R(130,130,28,4,p.redDark);R(130,133,28,1,p.gold);
+    rug(R,116,83,71,36,false);
   }
-  function logs(R,x,y,w,h){
-    R(x,y,w,h,p.woodDark);
-    for(var yy=y;yy<y+h;yy+=8){
-      R(x,yy,w,1,p.woodLight);R(x,yy+1,w,5,p.wood);R(x,yy+6,w,2,p.woodDark);
-    }
+  function column(R,x,y,h){
+    R(x,y,14,h,p.ink);R(x+1,y,12,h,p.woodDark);R(x+3,y,7,h,p.wood);R(x+4,y,2,h,p.woodLight);
+    for(var yy=y+20;yy<y+h-3;yy+=31){R(x+1,yy,12,3,p.woodDark);R(x+2,yy,10,1,p.woodLight);R(x+4,yy+1,6,1,p.gold);}
+    R(x+1,y+h-3,12,3,p.woodDark);R(x+3,y+h-3,8,1,p.woodLight);
   }
-  function post(R,x,y,h){
-    R(x,y,12,h,p.woodDark);R(x+1,y,9,h,p.wood);R(x+2,y,5,h,p.woodLight);
-    R(x+3,y,1,h,p.gold);R(x+10,y,2,h,p.woodDark);
-    for(var yy=y+10;yy<y+h;yy+=24){
-      R(x+1,yy,10,3,p.ink);R(x+2,yy,8,1,p.gold);
-      R(x+3,yy+1,6,1,p.woodLight);R(x+5,yy-5,2,3,p.woodDark);
-    }
-  }
-  function sconce(R,x,y){
-    R(x-3,y-3,7,15,p.woodDark);R(x,y-4,1,4,p.ink);
-    R(x-4,y,9,10,p.gold);R(x-3,y+1,7,8,p.cream);R(x-2,y+2,5,6,p.light);
-    R(x-4,y+10,9,2,p.ink);R(x,y+2,1,5,p.gold);
+  function lantern(R,x,y){
+    R(x-2,y-3,5,3,p.ink);R(x,y-5,1,2,p.gold);R(x-4,y,9,12,p.ink);
+    R(x-3,y,7,10,p.gold);R(x-2,y+1,5,8,p.cream);R(x-1,y+2,3,6,p.light);
+    R(x-4,y+10,9,2,p.woodDark);R(x-3,y+10,7,1,p.gold);
   }
   function plant(R,x,y){
-    R(x-4,y-5,9,5,p.woodDark);R(x-5,y-7,11,3,p.gold);R(x-4,y-6,9,2,p.wood);
-    R(x,y-19,1,12,p.greenLight);
-    [[-5,-17],[-3,-13],[2,-18],[3,-12],[-4,-22],[1,-25]].forEach(function(v){
-      R(x+v[0],y+v[1],4,3,p.green);R(x+v[0],y+v[1],2,1,p.greenLight);
+    R(x-5,y-7,10,7,p.woodDark);R(x-6,y-9,12,3,p.woodLight);R(x-4,y-6,1,5,p.gold);
+    R(x,y-28,1,20,p.greenLight);
+    [[-7,-24],[-5,-19],[-4,-13],[2,-25],[3,-18],[1,-31]].forEach(function(v){
+      R(x+v[0],y+v[1],5,3,p.green);R(x+v[0],y+v[1],3,1,p.greenLight);
     });
   }
   function walls(R){
-    logs(R,0,0,288,16);logs(R,0,16,16,160);logs(R,272,16,16,160);
-    for(var x=0;x<288;x+=32)post(R,x,0,16);
-    post(R,2,16,160);post(R,274,16,160);
-    /* Locked north-east wall partitions frame the route to the 315 hall. */
-    logs(R,192,16,16,48);logs(R,208,16,16,16);logs(R,240,16,48,16);
-    R(224,16,16,16,p.ink);R(225,17,14,1,p.gold);R(226,18,12,14,p.woodDark);
+    /* Timber bays create a single frontal backdrop; horizontal flooring
+     * begins at its dark sill, so furniture no longer floats in a plank sea. */
+    R(0,0,288,65,p.woodDark);
+    for(var x=16;x<272;x+=8){R(x,3,6,57,p.wood);R(x+1,4,1,53,p.woodLight);R(x+5,5,1,55,p.woodDark);}
+    R(16,0,256,4,p.ink);R(16,4,256,2,p.woodLight);R(16,58,256,5,p.woodDark);R(16,63,256,2,p.ink);
+    [18,73,167,257].forEach(function(x){column(R,x,0,65);});
+    /* Decorative framed landscape and a recessed upper hall opening. */
+    R(37,20,24,30,p.ink);R(38,21,22,28,p.gold);R(40,23,18,24,p.woodDark);
+    R(42,25,14,11,p.stoneDark);R(42,36,14,9,p.green);
+    for(var i=0;i<8;i++){R(43+i,35-i,1,2,p.stoneLight);R(50+i,28+i,1,2,p.stoneLight);}
+    R(224,16,16,16,p.ink);R(225,17,14,1,p.gold);R(226,18,12,12,p.woodDark);
     R(228,20,8,5,p.gold);R(230,21,4,3,p.cream);R(226,30,12,2,p.red);
-    sconce(R,8,39);sconce(R,280,48);sconce(R,8,127);sconce(R,280,134);
-    plant(R,8,101);plant(R,280,116);
-    /* South logs and real paired entrance tiles. */
-    logs(R,0,176,128,16);logs(R,160,176,128,16);
-    [128,144].forEach(function(dx){
-      R(dx,178,16,14,p.woodDark);R(dx+1,179,14,11,p.woodLight);
-      R(dx+3,180,10,7,p.gold);R(dx+4,181,8,5,p.cream);R(dx+7,181,1,5,p.wood);
-      R(dx+12,189,1,1,p.gold);
-    });
-  }
-  var receivingLights=[
-    {x:118,y:47,w:53,h:52}, {x:116,y:48,w:59,h:69},
-    {x:100,y:96,w:37,h:51},
-    {x:0,y:37,w:24,h:28},{x:264,y:46,w:24,h:28},
-    {x:0,y:125,w:24,h:28},{x:264,y:132,w:24,h:28}
-  ];
-  function litColor(x,y,c){
-    /* Source cores, lettering and dark pattern outlines are never painted
-     * over. Even with overlapping zones the two grids cover under 24%. */
-    if([p.woodDark,p.wood,p.woodLight,p.stoneDark,p.stone,p.stoneLight,p.redDark,p.red,p.redLight].indexOf(c)<0)return c;
-    var level=0;
-    for(var i=0;i<receivingLights.length;i++){
-      var light=receivingLights[i];
-      if(x<light.x||x>=light.x+light.w||y<light.y||y>=light.y+light.h)continue;
-      level=1;
-      var ix=light.x+Math.floor(light.w/4),iy=light.y+Math.floor(light.h/4);
-      if(x>=ix&&x<light.x+light.w-Math.floor(light.w/4)&&y>=iy&&y<light.y+light.h-Math.floor(light.h/4)){level=2;break;}
-    }
-    if(level===2)return y%3===1&&x%6<3?p.gold:c;
-    return level===1&&y%4===0&&x%8<2?p.woodLight:c;
-  }
-  function stairs(R){
-    /* Right-hand architectural flight, with its original logical furniture
-     * contacts retained separately. The hall opening at y=16..31 stays clear. */
-    R(208,40,48,88,p.ink);R(220,32,36,16,p.woodDark);R(222,34,32,12,p.wood);
-    R(224,34,18,14,p.redDark);R(226,34,14,14,p.red);R(224,34,1,14,p.gold);R(241,34,1,14,p.gold);
-    for(var step=0;step<10;step++){
-      var x=212-Math.floor(step/2),y=48+step*8;
-      R(x,y,44,1,p.gold);R(x,y+1,44,4,p.wood);R(x,y+5,44,2,p.woodDark);
-      /* Eight-row carpet segments fill the seven-row tread and its join. */
-      R(224,y,18,8,p.redDark);R(225,y,1,8,p.redDark);R(226,y,14,8,p.red);
-      R(224,y,1,8,p.gold);R(241,y,1,8,p.gold);R(226,y,14,1,p.redLight);R(226,y+7,14,1,p.redDark);
-    }
-    for(var side=0;side<2;side++){
-      var points=[[207,126],[211,104],[215,82],[219,60],[223,38]];
-      for(var segment=0;segment<4;segment++)for(var dy=0;dy<22;dy++){
-        var x=points[segment][0]+side*34+Math.round(dy*4/22),y=points[segment][1]-dy;
-        R(x,y,3,1,p.woodDark);R(x+1,y,1,1,p.woodLight);R(x+2,y,1,1,p.gold);
-      }
-      points.forEach(function(point){var x=point[0]+side*34,y=point[1];
-        var top=Math.max(32,y-7),cap=Math.max(32,y-8);
-        R(x,top,3,y+2-top,p.woodDark);R(x+1,Math.max(32,y-6),1,y+1-Math.max(32,y-6),p.woodLight);R(x-1,cap,5,2,p.gold);
-      });
-    }
-    R(96,78,32,2,p.ink);
-  }
-  function fire(R){
-    R(131,57,26,17,p.ink);
-    /* Five tongues, exactly three heights, behind two dark logs. */
-    [[132,60],[137,57],[142,63],[147,57],[152,60]].forEach(function(a){
-      R(a[0],a[1],3,73-a[1],p.fire);
-      R(a[0],a[1]+4,3,69-a[1],p.cream);R(a[0]+1,69,1,3,p.light);
-    });
-    R(132,73,11,2,p.woodDark);R(145,72,11,2,p.woodDark);
-    R(134,73,7,1,p.wood);R(147,72,7,1,p.wood);R(143,73,1,1,p.fire);
+    R(224,32,16,30,p.woodDark);R(226,32,12,30,p.redDark);
+    /* Side log faces recede to the south entrance, leaving the actual doors. */
+    R(0,64,16,112,p.woodDark);R(272,64,16,112,p.woodDark);
+    for(var y=66;y<174;y+=8){R(1,y,14,1,p.woodLight);R(2,y+1,12,4,p.wood);R(273,y,14,1,p.woodLight);R(274,y+1,12,4,p.wood);}
+    column(R,1,0,176);column(R,273,0,176);
+    lantern(R,26,30);lantern(R,179,28);lantern(R,264,35);lantern(R,8,118);lantern(R,280,130);
+    plant(R,8,101);plant(R,280,108);plant(R,280,166);
+    R(0,176,128,16,p.woodDark);R(160,176,128,16,p.woodDark);
+    R(0,176,128,2,p.woodLight);R(160,176,128,2,p.woodLight);
+    [128,144].forEach(function(x){R(x,176,16,16,p.ink);R(x+1,178,14,14,p.wood);
+      R(x+3,180,10,7,p.gold);R(x+4,181,8,5,p.cream);R(x+7,181,1,5,p.wood);R(x+12,189,1,1,p.gold);});
   }
   function fireplace(R){
-    /* Exact round-three surround, 48x66. Its black field supplies one-pixel
-     * mortar around staggered 8x6 courses, continuously behind every inset. */
-    R(120,16,48,66,p.ink);
-    for(var y=16,row=0;y<82;y+=6,row++)for(var start=120-(row%2)*4,col=0;start<168;start+=8,col++){
-      var x=Math.max(120,start),end=Math.min(168,start+7),w=end-x;
-      if(w>0){
-        R(x,y,w,4,(row+col)%2?p.stone:p.stoneLight);R(x,y+4,w,1,p.stoneDark);
-        R(x,y+1,Math.min(w,1+(row+col)%3),1,p.cream);
-      }
+    /* The complete four-cell stone footprint carries the chimney and its
+     * east return. Bear, mantel and fire now share one dominant silhouette. */
+    R(88,5,72,70,p.ink);R(90,7,52,67,p.stoneDark);R(142,9,17,65,p.stoneDark);
+    for(var y=8,row=0;y<74;y+=7,row++)for(var start=90-(row%2)*6;start<142;start+=13){
+      var x=Math.max(90,start),w=Math.min(142,start+12)-x;
+      if(w>0){R(x,y,w,6,p.stone);R(x+1,y,Math.max(1,w-1),1,p.stoneLight);R(x,y+5,w,1,p.stoneDark);}
     }
-    /* Thirty-by-twenty-seven stepped plaque within the locked bear box. */
-    R(133,20,22,27,p.woodDark);R(130,22,28,23,p.woodDark);R(129,25,30,17,p.woodDark);
-    R(133,21,22,1,p.woodLight);R(130,25,1,15,p.woodLight);
-    R(132,22,7,7,p.ink);R(149,22,7,7,p.ink);R(133,23,5,5,p.woodLight);R(150,23,5,5,p.woodLight);
-    R(133,25,22,20,p.wood);R(132,30,24,10,p.wood);R(135,44,18,3,p.woodDark);
-    R(137,25,14,3,p.woodLight);R(134,28,4,3,p.woodLight);R(150,28,4,3,p.woodLight);
-    R(135,31,7,2,p.woodDark);R(146,31,7,2,p.woodDark);
-    R(137,32,3,2,p.ink);R(148,32,3,2,p.ink);R(138,32,1,1,p.cream);R(149,32,1,1,p.cream);
-    R(139,34,11,9,p.woodLight);R(141,34,7,3,p.ink);R(142,34,3,1,p.woodDark);
-    R(139,40,11,5,p.ink);R(140,40,2,2,p.cream);R(147,40,2,2,p.cream);R(142,43,5,2,p.redDark);
-    R(135,35,2,5,p.woodDark);R(152,35,2,5,p.woodDark);
-    R(117,48,54,7,p.woodDark);R(117,48,54,1,p.ink);R(117,49,54,1,p.gold);R(117,50,54,1,p.woodLight);
-    /* Thirty-four-by-twenty-four firebox and three-pixel stone jambs. */
-    R(127,54,34,24,p.stoneDark);R(127,55,3,22,p.stone);R(158,55,3,22,p.stone);
-    R(127,55,1,22,p.stoneLight);R(158,55,1,22,p.stoneLight);R(128,54,32,2,p.stoneLight);
-    fire(R);
-    R(122,77,44,6,p.ink);R(122,77,44,1,p.stoneLight);R(123,78,42,2,p.stone);
-    R(125,80,38,1,p.stoneDark);R(124,81,40,2,p.ink);
+    for(var y=11;y<72;y+=8){R(144,y,13,6,p.stoneDark);R(144,y,11,1,p.stone);R(155,y+2,2,3,p.ink);}
+    R(101,13,29,26,p.woodDark);R(98,17,35,18,p.woodDark);R(102,14,27,1,p.woodLight);
+    R(103,15,6,6,p.ink);R(123,15,6,6,p.ink);R(104,16,4,4,p.woodLight);R(124,16,4,4,p.woodLight);
+    R(105,18,22,17,p.wood);R(103,23,26,9,p.wood);R(108,18,15,3,p.woodLight);
+    R(106,23,7,2,p.woodDark);R(119,23,7,2,p.woodDark);R(108,24,3,2,p.ink);R(121,24,3,2,p.ink);
+    R(112,26,10,9,p.woodLight);R(113,26,8,3,p.ink);R(113,32,8,5,p.ink);
+    R(113,32,2,2,p.cream);R(119,32,2,2,p.cream);R(116,35,3,2,p.redDark);
+    R(87,41,74,7,p.ink);R(88,42,72,2,p.woodLight);R(89,42,70,1,p.gold);R(89,45,70,2,p.woodDark);
+    R(97,48,42,26,p.stoneDark);R(99,49,38,24,p.ink);
+    R(95,49,4,24,p.stoneLight);R(137,49,5,24,p.stone);R(138,49,2,23,p.stoneLight);
+    R(100,69,36,4,p.fire);
+    [[102,60],[108,54],[115,58],[123,52],[130,59]].forEach(function(a){
+      R(a[0],a[1],4,72-a[1],p.fire);R(a[0]+1,a[1]+4,2,68-a[1],p.cream);R(a[0]+1,68,2,4,p.light);
+    });
+    R(101,72,16,2,p.woodDark);R(119,71,17,2,p.woodDark);R(105,72,7,1,p.wood);R(124,71,8,1,p.wood);
+    R(96,74,64,6,p.ink);R(96,74,64,1,p.stoneLight);R(98,75,60,2,p.stone);R(98,77,60,1,p.stoneDark);
+    R(101,75,34,1,p.gold);
   }
   function chair(R,x,y,mirror){
-    var left=mirror?163:110,top=82;
-    function C(dx,dy,w,h,c){R(left+(mirror?31-dx-w:dx),top+dy,w,h,c);}
-    /* Thirty-one-pixel flanking silhouettes; the outer side steps outward
-     * every six rows while the inward arm remains a vertical five-pixel roll. */
-    for(var dy=0;dy<31;dy++){
-      var edge=Math.max(0,4-Math.floor(dy/6));
-      C(edge,dy,31-edge,1,p.ink);
-      if(dy>=2&&dy<29){C(edge+2,dy,27-edge,1,p.red);C(edge+2,dy,4,1,p.redDark);}
-    }
-    /* The back is 23x17; two-pixel piping separates its inset red panel. */
-    C(6,0,23,17,p.ink);C(8,2,19,13,p.red);C(8,2,19,2,p.redLight);C(25,4,2,11,p.redLight);
-    C(10,5,2,9,p.redDark);C(14,7,2,2,p.redDark);C(22,7,2,2,p.redDark);
-    C(8,18,21,8,p.ink);C(10,18,17,2,p.redLight);C(10,20,17,4,p.red);C(10,24,17,2,p.redDark);
-    /* Seat apron on y=106..111 projects three pixels toward the table. */
-    for(var front=0;front<6;front++){
-      var shift=Math.round(front*3/5);C(5+shift,24+front,21,1,p.redDark);
-      if(front<2)C(7+shift,24+front,17,1,p.redLight);
-    }
-    for(var arm=13;arm<29;arm++){
-      var side=Math.max(0,4-Math.floor(arm/6));
-      C(side,arm,5,1,p.ink);C(side+2,arm,3,1,arm<15?p.redLight:p.redDark);
-    }
-    C(26,13,5,16,p.ink);C(26,13,5,2,p.redLight);C(26,15,2,12,p.redLight);C(28,15,1,12,p.red);
-    /* Keep the original occupied body tiles visibly grounded despite the
-     * widened inward-facing upper silhouette. */
-    R(x,111,16,2,p.ink);
+    /* Compact leather seats turn inward and land on their actual h cells. */
+    function C(dx,dy,w,h,c){R(x+(mirror?18-dx-w:dx)-1,y+dy,w,h,c);}
+    C(2,-28,15,2,p.ink);C(0,-26,19,20,p.ink);C(2,-26,14,13,p.redDark);
+    C(3,-26,12,2,p.redLight);C(3,-24,12,9,p.red);C(3,-24,2,8,p.redLight);C(14,-24,2,10,p.redDark);
+    C(7,-22,1,1,p.redDark);C(12,-22,1,1,p.redDark);C(5,-15,10,2,p.redDark);
+    C(4,-13,13,7,p.ink);C(5,-13,10,2,p.redLight);C(5,-11,11,3,p.red);C(5,-8,11,2,p.redDark);
+    C(0,-16,5,13,p.ink);C(0,-16,5,2,p.redLight);C(1,-14,3,9,p.redDark);C(1,-14,1,7,p.red);
+    C(15,-17,5,13,p.ink);C(15,-17,5,2,p.redLight);C(16,-15,3,9,p.redDark);
+    C(3,-4,14,2,p.redDark);C(3,-2,3,2,p.ink);C(14,-2,3,2,p.ink);R(x,112,16,1,p.ink);
   }
   function lamp(R,x,y){
-    R(x-4,y-2,9,2,p.ink);R(x-3,y-3,7,1,p.gold);R(x,y-13,1,10,p.gold);
-    R(x-3,y-22,7,3,p.cream);R(x-4,y-19,9,4,p.cream);R(x-5,y-15,11,2,p.gold);
-    R(x-2,y-21,4,1,p.light);R(x-3,y-18,6,2,p.light);R(x,y-23,1,1,p.ink);
+    R(x-4,y-1,9,2,p.ink);R(x-3,y-2,7,1,p.gold);R(x,y-13,1,11,p.gold);
+    R(x-3,y-21,7,3,p.gold);R(x-4,y-18,9,4,p.cream);R(x-5,y-14,11,2,p.gold);
+    R(x-2,y-20,5,2,p.cream);R(x-2,y-17,5,3,p.light);
   }
   function table(R){
-    [10,16,18,16,10].forEach(function(w,row){
-      var x=143+(18-w)/2,y=96+row*2;R(x,y,w,2,p.ink);
-      if(row>0&&row<4)R(x+2,y,w-4,2,p.wood);
-    });
-    R(147,98,10,1,p.gold);R(146,100,12,1,p.woodLight);
-    R(147,106,2,5,p.ink);R(155,106,2,5,p.ink);R(146,111,3,2,p.ink);R(155,111,3,2,p.ink);
-    R(148,106,1,3,p.woodLight);R(155,106,1,3,p.wood);lamp(R,152,101);
+    R(147,96,10,1,p.ink);R(145,97,14,2,p.woodLight);R(144,99,16,3,p.ink);R(146,102,12,2,p.woodDark);
+    R(145,99,14,2,p.wood);R(147,98,10,1,p.gold);R(146,101,12,1,p.woodLight);
+    R(147,104,2,8,p.ink);R(155,104,2,8,p.ink);R(148,105,1,4,p.woodLight);lamp(R,152,99);
   }
-  var font={G:['01110','10001','10000','10111','10001','10001','01110'],
-    R:['11110','10001','10001','11110','10100','10010','10001'],
-    E:['11111','10000','10000','11110','10000','10000','11111'],
-    A:['01110','10001','10001','11111','10001','10001','10001'],
-    T:['11111','00100','00100','00100','00100','00100','00100'],
-    N:['10001','11001','11001','10101','10011','10011','10001'],
-    O:['01110','10001','10001','10001','10001','10001','01110'],
-    H:['10001','10001','10001','11111','10001','10001','10001']};
-  function label(R,text,x,y){Array.from(text).forEach(function(c,i){(font[c]||[]).forEach(function(row,dy){
-    Array.from(row).forEach(function(v,dx){if(v==='1')R(x+i*6+dx,y+dy,1,1,p.cream);});
-  });});}
-  function reception(R,foreground){
-    /* Rear furnishings belong before actors; Ben can occlude the bank's
-     * east edge without a foreground redraw covering his body. */
-    if(!foreground){
-    R(50,88,32,32,p.woodDark);
-    for(var row=0;row<4;row++)for(var col=0;col<4;col++){
-      var x=51+col*8,y=89+row*8;R(x,y,7,7,p.gold);R(x+1,y+1,5,5,p.ink);
-      if((row+col)%2===0)R(x+2,y+3,2,1,p.cream);
+  var font={G:['111','100','101','101','111'],R:['110','101','110','101','101'],E:['111','100','110','100','111'],
+    A:['010','101','111','101','101'],T:['111','010','010','010','010'],N:['101','111','111','101','101'],
+    O:['111','101','101','101','111'],H:['101','101','111','101','101']};
+  function label(R,text,x,y){Array.from(text).forEach(function(c,i){(font[c]||[]).forEach(function(row,dy){Array.from(row).forEach(function(v,dx){if(v==='1')R(x+i*4+dx,y+dy,1,1,p.cream);});});});}
+  function reception(R,front){
+    if(!front){
+      /* One compact backboard, bank and counter grouping. Background-only
+       * keyholes allow Ben's full head and torso to render in front of them. */
+      R(64,86,64,41,p.woodDark);R(65,87,62,1,p.woodLight);
+      R(68,88,53,21,p.ink);R(69,89,51,19,p.gold);R(71,90,47,17,p.ink);
+      [[83,96,5],[93,96,8],[103,96,5]].forEach(function(a){for(var n=0;n<a[2];n++)R(a[0]-n,a[1]-a[2]+n,2*n+1,1,p.woodLight);});
+      label(R,'GREAT',84,97);label(R,'NORTHERN',78,103);
+      for(var y=111;y<126;y+=5)for(var x=67;x<126;x+=6){R(x,y,5,4,p.ink);R(x+2,y+1,1,2,p.gold);}
     }
-    /* Retain every sign pixel, raised eighteen pixels above all four rows
-     * of cubbies, in the clear strip between luggage and stairs. */
-    function S(x,y,w,h,c){R(x,y-18,w,h,c);}
-    S(48,70,48,34,p.woodDark);S(48,70,48,1,p.gold);S(48,72,48,30,p.ink);S(48,103,48,1,p.gold);
-    [[61,77,6],[75,73,10],[87,77,6]].forEach(function(peak){
-      for(var dy=0;dy<peak[2];dy++)S(peak[0]-dy,peak[1]+dy,dy*2+1,1,p.gold);
-    });
-    S(55,83,38,1,p.gold);S(75,76,1,3,p.cream);S(74,77,1,2,p.cream);S(76,77,1,1,p.cream);
-    label(S,'GREAT',57,86);label(S,'NORTHERN',48,95);
-    }
-    /* A broad projecting top, recessed panels, lower rail, and black contact
-     * strip read as one substantial counter on the existing four C tiles. */
-    R(48,120,80,26,p.ink);R(48,125,80,20,p.woodDark);
-    [52,77,102].forEach(function(px){
-      R(px,129,22,13,p.wood);R(px,129,22,1,p.woodLight);R(px,129,1,13,p.woodLight);
-      R(px,141,22,1,p.ink);R(px+21,129,1,13,p.ink);
-    });
-    R(48,144,80,2,p.ink);
-    R(46,119,84,7,p.ink);R(47,120,82,2,p.gold);R(47,122,82,2,p.woodLight);R(47,124,82,1,p.woodDark);
-    /* Shift the lamp left to x=91: its shade sits between cubbies and chair.
-     * Ben may stand in front of the tall stem; its base remains on the slab. */
-    function L(x,y,w,h,c){R(x-27,y,w,h,c);}
-    L(112,123,13,2,p.ink);L(113,121,11,2,p.gold);L(115,119,7,2,p.woodLight);L(117,116,3,4,p.gold);
-    if(!foreground){
-      L(118,101,1,16,p.gold);
-      L(112,94,13,2,p.gold);L(111,96,15,3,p.gold);L(109,99,19,5,p.gold);
-      L(113,95,11,2,p.cream);L(112,97,13,3,p.cream);L(111,100,15,2,p.cream);
-      L(115,96,7,1,p.light);L(114,98,9,3,p.light);
-    }
-    /* Bell's glint retains its exact ambient anchor at (99,119). */
-    R(91,123,14,2,p.ink);R(92,119,12,4,p.gold);R(93,116,10,3,p.gold);
-    R(95,115,6,2,p.gold);R(97,112,2,2,p.gold);R(96,114,4,1,p.woodDark);
-    R(94,117,3,2,p.cream);R(99,119,3,2,p.cream);R(93,122,10,1,p.woodLight);
+    R(64,126,64,18,p.ink);R(65,128,62,14,p.woodDark);
+    [67,87,107].forEach(function(x){R(x,131,17,10,p.wood);R(x,130,17,1,p.woodLight);R(x,131,1,9,p.woodLight);R(x+16,132,1,9,p.ink);});
+    R(65,141,62,1,p.woodLight);R(64,143,64,1,p.ink);
+    R(62,123,68,5,p.ink);R(63,123,66,1,p.gold);R(63,124,66,2,p.woodLight);R(64,126,64,1,p.wood);
+    R(95,124,11,2,p.ink);R(96,120,9,4,p.gold);R(98,119,5,2,p.cream);R(100,117,1,2,p.gold);R(98,121,3,1,p.light);
+    R(117,125,9,1,p.ink);R(118,124,7,1,p.gold);R(121,119,1,5,p.gold);
+    R(118,112,7,2,p.gold);R(117,114,9,3,p.cream);R(116,117,11,2,p.gold);R(119,114,5,3,p.light);
   }
   function luggage(R){
-    R(32,109,16,2,p.ink);R(33,86,2,23,p.gold);R(45,86,2,23,p.gold);
-    R(35,83,10,2,p.gold);R(33,85,3,2,p.gold);R(44,85,3,2,p.gold);R(36,83,8,1,p.cream);
-    R(35,98,10,10,p.woodDark);R(36,98,8,1,p.woodLight);R(38,98,1,9,p.gold);R(42,98,1,9,p.gold);
-    R(36,93,8,5,p.redDark);R(37,93,6,1,p.redLight);R(39,91,3,2,p.ink);
-    R(33,111,3,1,p.ink);R(44,111,3,1,p.ink);
+    R(32,109,16,3,p.ink);R(32,85,2,24,p.gold);R(46,85,2,24,p.gold);
+    R(35,80,10,2,p.gold);R(33,82,3,3,p.gold);R(44,82,3,3,p.gold);R(37,80,6,1,p.cream);
+    R(34,98,12,10,p.woodDark);R(35,98,10,1,p.woodLight);R(37,98,1,10,p.gold);R(42,98,1,10,p.gold);
+    R(36,92,8,6,p.redDark);R(37,92,6,1,p.redLight);R(38,90,4,2,p.ink);R(32,111,3,1,p.ink);R(45,111,3,1,p.ink);
+  }
+  function stairs(R){
+    /* Stair treads are passable floor leading into the existing 315 hall,
+     * framed by a diagonal handrail rather than a freestanding ladder. */
+    R(213,34,45,94,p.woodDark);R(216,35,39,91,p.wood);
+    for(var step=0;step<11;step++){
+      var y=40+step*8,x=215-Math.floor(step/4);
+      R(x,y,43,2,p.woodLight);R(x,y+2,43,4,p.wood);R(x,y+6,43,2,p.woodDark);
+      R(232,y,14,8,p.redDark);R(233,y,12,3,p.red);R(233,y,12,1,p.redLight);R(232,y,1,8,p.gold);R(245,y,1,8,p.gold);
+    }
+    for(var y=34;y<127;y++){
+      var x=228-Math.floor((y-34)*15/93);R(x,y,3,1,p.ink);R(x,y,1,1,p.woodLight);
+    }
+    for(var n=0;n<6;n++){var y=37+n*17,x=229-Math.floor((y-34)*15/93);R(x,y,3,10,p.woodDark);R(x,y,1,9,p.gold);}
+    R(212,125,45,3,p.ink);R(232,125,14,2,p.redDark);
   }
   function chandelier(R){
-    /* Centered mechanical-spec chandelier: a 42-pixel arc and five bulbs. */
-    R(143,10,3,10,p.ink);
-    for(var link=10;link<18;link+=4){R(143,link,2,2,p.gold);R(144,link+2,2,2,p.woodLight);}
-    R(141,20,7,3,p.gold);R(143,22,3,11,p.woodLight);R(144,23,1,10,p.gold);
-    for(var dx=-21;dx<21;dx++){
-      var yy=22+Math.round(10*(1-dx*dx/441));
-      R(144+dx,yy,1,3,p.woodDark);R(144+dx,yy,1,1,p.gold);
-    }
-    [[128,20],[136,27],[144,33],[152,27],[160,20]].forEach(function(a){
-      R(a[0],a[1]-3,1,3,p.ink);R(a[0]-4,a[1],9,10,p.ink);
-      R(a[0]-3,a[1],7,8,p.gold);R(a[0]-2,a[1]+1,5,6,p.cream);
-      R(a[0]-1,a[1]+2,3,4,p.light);R(a[0]-4,a[1]+8,9,2,p.gold);
-      R(a[0]-1,a[1]+10,3,2,p.woodDark);
+    /* A high central practical is separated from the bear and staircase. */
+    R(155,0,2,11,p.ink);R(156,1,1,10,p.gold);R(153,11,7,3,p.gold);R(155,13,2,13,p.woodLight);
+    for(var dx=-17;dx<=17;dx++){var y=15+Math.round(8*(1-dx*dx/289));R(156+dx,y,1,2,p.gold);}
+    [[140,12],[148,18],[156,24],[164,18],[172,12]].forEach(function(a){
+      R(a[0]-3,a[1],7,9,p.ink);R(a[0]-2,a[1],5,7,p.gold);R(a[0]-1,a[1]+1,3,5,p.cream);
+      R(a[0],a[1]+2,1,3,p.light);R(a[0]-3,a[1]+7,7,1,p.gold);
     });
   }
-  function prop(R,d,foreground){
-    if(d.id==='stairs')stairs(R);else if(d.id==='fireplace')fireplace(R);
-    else if(d.id==='chairWest'||d.id==='chairEast')chair(R,d.x,d.footY,d.id==='chairEast');
-    else if(d.id==='table')table(R);else if(d.id==='reception')reception(R,foreground);else luggage(R);
+  function prop(R,d,front){
+    if(d.id==='fireplace')fireplace(R);else if(d.id==='stairs')stairs(R);else if(d.id==='luggage')luggage(R);
+    else if(d.id==='chairWest'||d.id==='chairEast')chair(R,d.x,d.footY,d.id==='chairEast');else if(d.id==='table')table(R);else reception(R,front);
   }
   function draw(ctx,cx,cy){
     var R=painter(ctx,cx,cy),alpha=ctx.globalAlpha;ctx.globalAlpha=1;
     R(0,0,288,192,p.ink);floor(R);walls(R);
-    /* Narrow broken reflections: three gold pixels, then two wood pixels. */
-    [[137,151,15,3],[110,146,16,2],[137,112,21,3]].forEach(function(a){
-      for(var y=a[1];y<a[1]+a[3];y++)for(var x=a[0];x<a[0]+a[2];x+=5){
-        R(x,y,Math.min(3,a[0]+a[2]-x),1,p.gold);
-        if(x+3<a[0]+a[2])R(x+3,y,Math.min(2,a[0]+a[2]-x-3),1,p.wood);
-      }
-    });
-    /* Two-pixel shadows touch actual counter, feet, hearth and stair edges. */
-    R(48,144,80,2,p.ink);R(128,113,16,2,p.ink);R(160,113,16,2,p.ink);
-    R(124,83,40,2,p.ink);R(208,128,48,2,p.ink);
-    props.forEach(function(d){R(d.x+1,d.footY-1,d.cells.length*16-2,2,p.ink);prop(R,d);});
+    props.forEach(function(d){if(d.cells.length)R(d.x,d.footY-1,d.cells.length*16,2,p.ink);prop(R,d,false);});
     chandelier(R);ctx.globalAlpha=alpha;
   }
   function foreground(ctx,cx,cy,min,max){
     min=min==null?-Infinity:min;max=max==null?Infinity:max;
     var R=painter(ctx,cx,cy),alpha=ctx.globalAlpha;ctx.globalAlpha=1;
     props.forEach(function(d){if(d.footY>=min&&d.footY<max)prop(R,d,true);});
-    if(192>=min&&192<max)chandelier(R);
-    ctx.globalAlpha=alpha;
+    if(192>=min&&192<max)chandelier(R);ctx.globalAlpha=alpha;
   }
   GAME.HotelGNArt={draw:draw,foreground:foreground,palette:p,props:props};
   if(typeof module!=='undefined'&&module.exports)module.exports=GAME.HotelGNArt;
