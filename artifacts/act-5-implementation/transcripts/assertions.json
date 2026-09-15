@@ -1,0 +1,1029 @@
+{
+  "results": [
+    {
+      "name": "[P1] setup: build reale in partita (testMode=false)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] setup: stato di completamento dell'Atto 4 installato (m8_station, T_LELAND_TAXI, JACQUES_MIDNIGHT_CLAIM)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] setup: la partita riparte dal SALVATAGGIO di fine Atto 4 (digest identico dopo ricarica)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] M9: Lucy verifica il taxi (D_TAXI dalla richiesta del player)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] M9: confronto nel taccuino → P6 formulata",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] M9 UI: P8 → Truman «Lo tengo a mente…» (VALID_BUT_NOT_PROCEDURAL, prima era un errore silenzioso)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] M9 UI: P6 senza la verifica → NO_CORROBORATION",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] M9 UI: stesso allegato → ALREADY_REJECTED",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] M9 UI: P6 completa → accettata, atto5",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] M9: Leland alla centrale (corpo reale), arrivo committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] M10: dopo M9 il finale NON è armato (M10 possiede l'interrogatorio)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] Cast Presence alla soglia = pin ACT5_THRESHOLD (truman, leland, lucy, andy, hawk)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] HUD alla soglia: testo del Lock",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] M10-B1: A su Leland apre la soglia (pagine del Lock)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] M10-B1: widget del metodo con tre scelte",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] M10: nessun metodo scritto prima della scelta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] M10-B7: widget del nastro dopo le ammissioni",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] M10-B6: sei material_admissions registrate prima di S3, in prima persona",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] M10-B6: P6 confirmed_as_lie, P8 corroborated",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] M10-B10: leland_morto scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] M10: m10_method=probatorio, s3=on, truman_testimony_state coerente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] finale armato SOLO ora, in pausa sulla Loggia, con metodo e nastro dal ledger",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] HUD dopo la morte: obiettivo della Loggia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] Cast Presence dopo la morte: leland TERMINAL_REMOVED, truman in centrale, bob nella Loggia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] classico: leland_morto + leland_confessa + done_leland_interr",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] screen truth: sequenza delle pagine M10 emesse = runtime per questo stato (60)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] screen truth: ogni testo e speaker a schermo = M10.json (verbatim dal Lock)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] BOB: le battute VOCE mostrano il ritratto del sogno",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] nessun ID di design a schermo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] ordine: widget del metodo PRIMA della pagina del nastro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] ordine: widget del nastro DOPO l'ultima ammissione resa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] Truman esce e rientra solo nell'intuitivo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] nessuna radice ambigua e nessun ripiego API",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P1] console: nessun errore del browser durante il percorso",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] setup: build reale in partita (testMode=false)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] setup: stato di completamento dell'Atto 4 installato (m8_station, T_LELAND_TAXI, JACQUES_MIDNIGHT_CLAIM)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] setup: la partita riparte dal SALVATAGGIO di fine Atto 4 (digest identico dopo ricarica)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] M9: Lucy verifica il taxi (D_TAXI dalla richiesta del player)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] M9: confronto nel taccuino → P6 formulata",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] M9 UI: P6 completa → accettata, atto5",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] M9: Leland alla centrale (corpo reale), arrivo committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] M10: dopo M9 il finale NON è armato (M10 possiede l'interrogatorio)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] Cast Presence alla soglia = pin ACT5_THRESHOLD (truman, leland, lucy, andy, hawk)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] HUD alla soglia: testo del Lock",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] M10-B1: A su Leland apre la soglia (pagine del Lock)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] M10-B1: widget del metodo con tre scelte",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] M10: nessun metodo scritto prima della scelta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] interruzione: raggiunta m10.b5.affioramento.p02",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] interruzione: Escape chiude la sessione senza lease residui",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] interruzione: m10_affioramento NON committato, l'anello precedente sì",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] ricarica a metà scena: stato identico (digest)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] ripresa: A su leland riprende da m10_affioramento (m10.b5.affioramento.p01)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] M10-B7: widget del nastro dopo le ammissioni",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] M10-B6: sei material_admissions registrate prima di S3, in prima persona",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] M10-B6: P6 confirmed_as_lie, P8 corroborated",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] M10-B10: leland_morto scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] M10: m10_method=probatorio, s3=off, truman_testimony_state coerente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] finale armato SOLO ora, in pausa sulla Loggia, con metodo e nastro dal ledger",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] HUD dopo la morte: obiettivo della Loggia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] Cast Presence dopo la morte: leland TERMINAL_REMOVED, truman in centrale, bob nella Loggia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] classico: leland_morto + leland_confessa + done_leland_interr",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] screen truth: sequenza delle pagine M10 emesse = runtime per questo stato (63)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] screen truth: ogni testo e speaker a schermo = M10.json (verbatim dal Lock)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] BOB: le battute VOCE mostrano il ritratto del sogno",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] nessun ID di design a schermo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] ordine: widget del metodo PRIMA della pagina del nastro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] ordine: widget del nastro DOPO l'ultima ammissione resa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] Truman esce e rientra solo nell'intuitivo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] nessuna radice ambigua e nessun ripiego API",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P2] console: nessun errore del browser durante il percorso",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] setup: build reale in partita (testMode=false)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] setup: stato di completamento dell'Atto 4 installato (m8_station, T_LELAND_TAXI, JACQUES_LIST_GIVEN)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] setup: la partita riparte dal SALVATAGGIO di fine Atto 4 (digest identico dopo ricarica)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] M9: Lucy verifica il taxi (D_TAXI dalla richiesta del player)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] M9: confronto nel taccuino → P6 formulata",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] M9 UI: P6 completa → accettata, atto5",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] M9: Leland alla centrale (corpo reale), arrivo committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] M10: dopo M9 il finale NON è armato (M10 possiede l'interrogatorio)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] Cast Presence alla soglia = pin ACT5_THRESHOLD (truman, leland, lucy, andy, hawk)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] HUD alla soglia: testo del Lock",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] M10-B1: A su Leland apre la soglia (pagine del Lock)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] M10-B1: widget del metodo con tre scelte",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] M10: nessun metodo scritto prima della scelta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] M10-B7: widget del nastro dopo le ammissioni",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] M10-B6: sei material_admissions registrate prima di S3, in prima persona",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] M10-B6: P6 confirmed_as_lie, P8 corroborated",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] M10-B10: leland_morto scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] M10: m10_method=personale, s3=on, truman_testimony_state coerente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] finale armato SOLO ora, in pausa sulla Loggia, con metodo e nastro dal ledger",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] HUD dopo la morte: obiettivo della Loggia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] Cast Presence dopo la morte: leland TERMINAL_REMOVED, truman in centrale, bob nella Loggia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] classico: leland_morto + leland_confessa + done_leland_interr",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] screen truth: sequenza delle pagine M10 emesse = runtime per questo stato (61)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] screen truth: ogni testo e speaker a schermo = M10.json (verbatim dal Lock)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] BOB: le battute VOCE mostrano il ritratto del sogno",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] nessun ID di design a schermo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] ordine: widget del metodo PRIMA della pagina del nastro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] ordine: widget del nastro DOPO l'ultima ammissione resa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] Truman esce e rientra solo nell'intuitivo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] nessuna radice ambigua e nessun ripiego API",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P3] console: nessun errore del browser durante il percorso",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] setup: build reale in partita (testMode=false)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] setup: stato di completamento dell'Atto 4 installato (m8_station, T_LELAND_TAXI, JACQUES_THIRD_MAN_DETAIL)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] setup: la partita riparte dal SALVATAGGIO di fine Atto 4 (digest identico dopo ricarica)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] M9: Lucy verifica il taxi (D_TAXI dalla richiesta del player)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] M9: confronto nel taccuino → P6 formulata",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] M9 UI: P6 completa → accettata, atto5",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] M9: Leland alla centrale (corpo reale), arrivo committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] M10: dopo M9 il finale NON è armato (M10 possiede l'interrogatorio)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] Cast Presence alla soglia = pin ACT5_THRESHOLD (truman, leland, lucy, andy, hawk)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] HUD alla soglia: testo del Lock",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] M10-B1: A su Leland apre la soglia (pagine del Lock)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] M10-B1: widget del metodo con tre scelte",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] M10: nessun metodo scritto prima della scelta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] M10-B7: widget del nastro dopo le ammissioni",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] M10-B6: sei material_admissions registrate prima di S3, in prima persona",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] M10-B6: P6 confirmed_as_lie, P8 corroborated",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] M10-B10: leland_morto scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] M10: m10_method=personale, s3=off, truman_testimony_state coerente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] finale armato SOLO ora, in pausa sulla Loggia, con metodo e nastro dal ledger",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] HUD dopo la morte: obiettivo della Loggia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] Cast Presence dopo la morte: leland TERMINAL_REMOVED, truman in centrale, bob nella Loggia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] classico: leland_morto + leland_confessa + done_leland_interr",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] ricarica dopo la morte: finale ripristinato sulla Loggia, M10 non rigiocata",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] screen truth: sequenza delle pagine M10 emesse = runtime per questo stato (62)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] screen truth: ogni testo e speaker a schermo = M10.json (verbatim dal Lock)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] BOB: le battute VOCE mostrano il ritratto del sogno",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] nessun ID di design a schermo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] ordine: widget del metodo PRIMA della pagina del nastro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] ordine: widget del nastro DOPO l'ultima ammissione resa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] Truman esce e rientra solo nell'intuitivo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] nessuna radice ambigua e nessun ripiego API",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P4] console: nessun errore del browser durante il percorso",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] setup: build reale in partita (testMode=false)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] setup: stato di completamento dell'Atto 4 installato (m8_station, T_LELAND_TAXI, JACQUES_THIRD_MAN_DETAIL)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] setup: la partita riparte dal SALVATAGGIO di fine Atto 4 (digest identico dopo ricarica)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] M9: Lucy verifica il taxi (D_TAXI dalla richiesta del player)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] M9: confronto nel taccuino → P6 formulata",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] M9 UI: P6 completa → accettata, atto5",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] M9: Leland alla centrale (corpo reale), arrivo committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] M10: dopo M9 il finale NON è armato (M10 possiede l'interrogatorio)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] Cast Presence alla soglia = pin ACT5_THRESHOLD (truman, leland, lucy, andy, hawk)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] HUD alla soglia: testo del Lock",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] M10-B1: A su Leland apre la soglia (pagine del Lock)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] M10-B1: widget del metodo con tre scelte",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] M10: nessun metodo scritto prima della scelta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] interruzione: raggiunta m10.b5.affioramento.p01",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] interruzione: Escape chiude la sessione senza lease residui",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] interruzione: m10_affioramento NON committato, l'anello precedente sì",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] intuitivo: Truman OFFSCREEN:corridor nel mondo (corpo assente), Leland in centrale",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] ripresa: A su leland riprende da m10_affioramento (m10.b5.affioramento.p01)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] M10-B7: widget del nastro dopo le ammissioni",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] M10-B6: sei material_admissions registrate prima di S3, in prima persona",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] M10-B6: P6 confirmed_as_lie, P8 corroborated",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] M10-B10: leland_morto scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] M10: m10_method=intuitivo, s3=on, truman_testimony_state coerente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] finale armato SOLO ora, in pausa sulla Loggia, con metodo e nastro dal ledger",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] HUD dopo la morte: obiettivo della Loggia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] Cast Presence dopo la morte: leland TERMINAL_REMOVED, truman in centrale, bob nella Loggia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] classico: leland_morto + leland_confessa + done_leland_interr",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] screen truth: sequenza delle pagine M10 emesse = runtime per questo stato (66)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] screen truth: ogni testo e speaker a schermo = M10.json (verbatim dal Lock)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] BOB: le battute VOCE mostrano il ritratto del sogno",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] nessun ID di design a schermo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] ordine: widget del metodo PRIMA della pagina del nastro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] ordine: widget del nastro DOPO l'ultima ammissione resa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] Truman esce e rientra solo nell'intuitivo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] nessuna radice ambigua e nessun ripiego API",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P5] console: nessun errore del browser durante il percorso",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] setup: build reale in partita (testMode=false)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] setup: stato di completamento dell'Atto 4 installato (m8_station, T_LELAND_TAXI, JACQUES_LIST_GIVEN)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] setup: la partita riparte dal SALVATAGGIO di fine Atto 4 (digest identico dopo ricarica)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] M9: Lucy verifica il taxi (D_TAXI dalla richiesta del player)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] M9: confronto nel taccuino → P6 formulata",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] M9 UI: P6 completa → accettata, atto5",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] M9: Leland alla centrale (corpo reale), arrivo committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] M10: dopo M9 il finale NON è armato (M10 possiede l'interrogatorio)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] Cast Presence alla soglia = pin ACT5_THRESHOLD (truman, leland, lucy, andy, hawk)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] HUD alla soglia: testo del Lock",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] M10-B1: A su Leland apre la soglia (pagine del Lock)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] M10-B1: widget del metodo con tre scelte",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] M10: nessun metodo scritto prima della scelta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] interruzione: raggiunta m10.b10.morte.p03",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] interruzione: Escape chiude la sessione senza lease residui",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] interruzione: m10_morte NON committato, l'anello precedente sì",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] dopo il fermo: Leland in cella (OFFSCREEN:cell, nessun corpo), Truman presente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] ricarica a metà scena: stato identico (digest)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] ripresa: A su truman riprende da m10_morte (m10.b10.morte.p01)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] M10-B10: leland_morto scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] M10: m10_method=intuitivo, s3=off, truman_testimony_state coerente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] finale armato SOLO ora, in pausa sulla Loggia, con metodo e nastro dal ledger",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] HUD dopo la morte: obiettivo della Loggia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] Cast Presence dopo la morte: leland TERMINAL_REMOVED, truman in centrale, bob nella Loggia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] classico: leland_morto + leland_confessa + done_leland_interr",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] screen truth: sequenza delle pagine M10 emesse = runtime per questo stato (68)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] screen truth: ogni testo e speaker a schermo = M10.json (verbatim dal Lock)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] BOB: le battute VOCE mostrano il ritratto del sogno",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] nessun ID di design a schermo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] ordine: widget del metodo PRIMA della pagina del nastro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] ordine: widget del nastro DOPO l'ultima ammissione resa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] Truman esce e rientra solo nell'intuitivo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] nessuna radice ambigua e nessun ripiego API",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[P6] console: nessun errore del browser durante il percorso",
+      "pass": true,
+      "detail": null
+    }
+  ],
+  "observations": [
+    {
+      "path": "P1",
+      "kind": "console (harness)",
+      "text": "favicon.ico 404 dal server di prova"
+    }
+  ],
+  "console_errors": [
+    "Failed to load resource: the server responded with a status of 404 (File not found)  <http://127.0.0.1:24723/favicon.ico>"
+  ]
+}

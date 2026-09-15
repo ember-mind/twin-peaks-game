@@ -1,0 +1,1552 @@
+{
+  "transcript": [
+    {
+      "kind": "press",
+      "at": [
+        "sheriff",
+        2,
+        5,
+        "down"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_verifica_taxi",
+      "page_id": "m9.b1.verifica.p01",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "Prima del ritrovamento, Leland ha detto: «Ho chiamato la Twin Peaks Taxi: passa da casa alle sette.» Quella corsa era prenotata?",
+      "dom_text": "Prima del ritrovamento, Leland ha detto: «Ho chiamato la Twin Peaks Taxi: passa da casa alle sette.» Quella corsa era prenotata?",
+      "objective": "Chiedi a Lucy se il taxi di Leland era prenotato.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_verifica_taxi",
+      "page_id": "m9.b1.verifica.p02",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "Lucy. Leland dice di aver prenotato la Twin Peaks Taxi per le sette, a casa Palmer. Può verificare?",
+      "dom_text": "COOPER: Lucy. Leland dice di aver prenotato la Twin Peaks Taxi per le sette, a casa Palmer. Può verificare?",
+      "objective": "Chiedi a Lucy se il taxi di Leland era prenotato.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_verifica_taxi",
+      "page_id": "m9.b1.verifica.p03",
+      "speaker_id": "lucy",
+      "portrait": null,
+      "display_name": "LUCY",
+      "text": "(solleva la cornetta. Tre minuti dopo:) Ho chiamato la Twin Peaks Taxi. Nessuna corsa per casa Palmer alle sette. Nessuna prenotazione di Leland, né oggi né per domattina.",
+      "dom_text": "LUCY: (solleva la cornetta. Tre minuti dopo:) Ho chiamato la Twin Peaks Taxi. Nessuna corsa per casa Palmer alle sette. Nessuna prenotazione di Leland, né oggi né per domattina.",
+      "objective": "Chiedi a Lucy se il taxi di Leland era prenotato.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m9_verifica_taxi",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "evidence": [
+          "D_TAXI"
+        ],
+        "nodes_done": [
+          "m9_verifica_taxi"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Nel taccuino: metti il racconto di Leland accanto alla verifica.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "objective",
+      "text": "Nel taccuino: metti il racconto di Leland accanto alla verifica.",
+      "where": "prima del taccuino"
+    },
+    {
+      "kind": "objective",
+      "text": "OBIETTIVO: Nel taccuino: metti il racconto di Leland accanto alla verifica.",
+      "where": "nel taccuino"
+    },
+    {
+      "kind": "pair",
+      "pair": [
+        "T_LELAND_TAXI",
+        "D_TAXI"
+      ],
+      "status": "available",
+      "matched": "m9_cmp_taxi"
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_cmp_taxi",
+      "page_id": "m9.b1.cmp_taxi.p01",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Confronta: il racconto della partenza ↔ la verifica della corsa)",
+      "dom_text": "(Confronta: il racconto della partenza ↔ la verifica della corsa)",
+      "objective": "",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_cmp_taxi",
+      "page_id": "m9.b1.cmp_taxi.p02",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "\"Ho chiamato la Twin Peaks Taxi\" — e la compagnia non ha ricevuto alcuna prenotazione.",
+      "dom_text": "\"Ho chiamato la Twin Peaks Taxi\" — e la compagnia non ha ricevuto alcuna prenotazione.",
+      "objective": "",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m9_cmp_taxi",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "press",
+      "at": [
+        "sheriff",
+        10,
+        3,
+        "down"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_present_truman",
+      "page_id": "m9.b2.present.p01",
+      "speaker_id": "truman",
+      "portrait": null,
+      "display_name": "TRUMAN",
+      "text": "(non alza gli occhi dal fascicolo) Dimmi che non sei qui per la casa Palmer.",
+      "dom_text": "TRUMAN: (non alza gli occhi dal fascicolo) Dimmi che non sei qui per la casa Palmer.",
+      "objective": "Porta a Truman una contraddizione che regga.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_present_truman",
+      "page_id": "m9.b2.present.eco_o.cooper",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "La O di Maddy: l'ho vista io, sotto l'unghia.",
+      "dom_text": "COOPER: La O di Maddy: l'ho vista io, sotto l'unghia.",
+      "objective": "Porta a Truman una contraddizione che regga.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "objective",
+      "text": "Porta a Truman una contraddizione che regga.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "attachment_menu",
+      "proposition": "P6",
+      "candidates": [
+        "T_LELAND_TAXI",
+        "D_TAXI"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_present_truman",
+      "page_id": "m9.b2.p6.accept.p01",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "Prima del ritrovamento, Leland disse che Maddy sarebbe partita domattina e che aveva chiamato lui il taxi. Non esiste alcuna prenotazione.",
+      "dom_text": "COOPER: Prima del ritrovamento, Leland disse che Maddy sarebbe partita domattina e che aveva chiamato lui il taxi. Non esiste alcuna prenotazione.",
+      "objective": "Porta a Truman una contraddizione che regga.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "attached",
+      "proposition": "P6",
+      "evidence": [
+        "T_LELAND_TAXI",
+        "D_TAXI"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_present_truman",
+      "page_id": "m9.b2.p6.accept.p02",
+      "speaker_id": "truman",
+      "portrait": null,
+      "display_name": "TRUMAN",
+      "text": "Il lutto confonde, Cooper. Un uomo che ha perso la figlia—",
+      "dom_text": "TRUMAN: Il lutto confonde, Cooper. Un uomo che ha perso la figlia—",
+      "objective": "Porta a Truman una contraddizione che regga.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_present_truman",
+      "page_id": "m9.b2.p6.accept.p03",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "Ha nominato la compagnia, casa Palmer e le sette. Il registro non ha la prenotazione.",
+      "dom_text": "COOPER: Ha nominato la compagnia, casa Palmer e le sette. Il registro non ha la prenotazione.",
+      "objective": "Porta a Truman una contraddizione che regga.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_present_truman",
+      "page_id": "m9.b2.p6.accept.p04",
+      "speaker_id": "truman",
+      "portrait": null,
+      "display_name": "TRUMAN",
+      "text": "(pausa lunga) La compagnia può aver perso la corsa.",
+      "dom_text": "TRUMAN: (pausa lunga) La compagnia può aver perso la corsa.",
+      "objective": "Porta a Truman una contraddizione che regga.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_present_truman",
+      "page_id": "m9.b2.p6.accept.p05",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "Può. Allora lo chiariamo: di persona, con calma, da persona informata. È il suo diritto — ed è il nostro lavoro.",
+      "dom_text": "COOPER: Può. Allora lo chiariamo: di persona, con calma, da persona informata. È il suo diritto — ed è il nostro lavoro.",
+      "objective": "Porta a Truman una contraddizione che regga.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_present_truman",
+      "page_id": "m9.b2.p6.accept.sarah.none",
+      "speaker_id": "truman",
+      "portrait": null,
+      "display_name": "TRUMAN",
+      "text": "(si alza; prende il cappello come si prende un peso)",
+      "dom_text": "TRUMAN: (si alza; prende il cappello come si prende un peso)",
+      "objective": "Porta a Truman una contraddizione che regga.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_present_truman",
+      "page_id": "m9.b2.p6.accept.p06",
+      "speaker_id": "truman",
+      "portrait": null,
+      "display_name": "TRUMAN",
+      "text": "Lo chiamo io. A casa sua non mando nessuno con la divisa.",
+      "dom_text": "TRUMAN: Lo chiamo io. A casa sua non mando nessuno con la divisa.",
+      "objective": "Porta a Truman una contraddizione che regga.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "presentation",
+      "result": "accepted",
+      "reason": "SUFFICIENT_RELEVANT_SUPPORT"
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "flags": [
+          "atto5"
+        ],
+        "nodes_done": [
+          "m9_present_truman"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "where": "dopo l'avanzamento"
+    },
+    {
+      "kind": "press",
+      "at": [
+        "sheriff",
+        8,
+        6,
+        "up"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_arrivo",
+      "page_id": "m9.b3.arrivo.p01",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Leland arriva da solo, a piedi. Saluta Lucy per nome. Il nodo della cravatta è perfetto; la barba, di tre giorni.)",
+      "dom_text": "(Leland arriva da solo, a piedi. Saluta Lucy per nome. Il nodo della cravatta è perfetto; la barba, di tre giorni.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_arrivo",
+      "page_id": "m9.b3.arrivo.p02",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "Lucy. Tuo padre ha poi sistemato la grondaia?",
+      "dom_text": "LELAND: Lucy. Tuo padre ha poi sistemato la grondaia?",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_arrivo",
+      "page_id": "m9.b3.arrivo.p03",
+      "speaker_id": "lucy",
+      "portrait": null,
+      "display_name": "LUCY",
+      "text": "(la macchina si ferma; guarda la stanza in fondo; riprende) Sì, signor Palmer. A ottobre.",
+      "dom_text": "LUCY: (la macchina si ferma; guarda la stanza in fondo; riprende) Sì, signor Palmer. A ottobre.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_arrivo",
+      "page_id": "m9.b3.arrivo.p04",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "(a Truman) Harry. Mi hai chiesto di chiarire una partenza. Le partenze, di questi tempi, sono la cosa più difficile da chiarire.",
+      "dom_text": "LELAND: (a Truman) Harry. Mi hai chiesto di chiarire una partenza. Le partenze, di questi tempi, sono la cosa più difficile da chiarire.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_arrivo",
+      "page_id": "m9.b3.arrivo.p05",
+      "speaker_id": "truman",
+      "portrait": null,
+      "display_name": "TRUMAN",
+      "text": "Ti ringrazio di essere venuto, Leland. È una formalità che dobbiamo a tutti.",
+      "dom_text": "TRUMAN: Ti ringrazio di essere venuto, Leland. È una formalità che dobbiamo a tutti.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_arrivo",
+      "page_id": "m9.b3.arrivo.p06",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "(posa il cappotto, siede al centro esatto della sedia) Allora facciamola bene.",
+      "dom_text": "LELAND: (posa il cappotto, siede al centro esatto della sedia) Allora facciamola bene.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m9_arrivo",
+      "page_id": "m9.b3.arrivo.p07",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "Diane. Nodo perfetto, barba di tre giorni. Due righe separate.",
+      "dom_text": "COOPER: Diane. Nodo perfetto, barba di tre giorni. Due righe separate.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m9_arrivo",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m9_arrivo"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "where": "dopo l'interazione"
+    },
+    {
+      "kind": "press",
+      "at": [
+        "sheriff",
+        8,
+        6,
+        "up"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_soglia",
+      "page_id": "m10.b1.soglia.p01",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Prima della porta. Il corridoio nord è vuoto: Truman l'ha voluto così.)",
+      "dom_text": "(Prima della porta. Il corridoio nord è vuoto: Truman l'ha voluto così.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_soglia",
+      "page_id": "m10.b1.soglia.p02",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "(al registratore personale, a voce bassissima) Diane. Ipotesi da non verbalizzare: chi ha disposto quella scena voleva essere letto. Vado a vedere se vale anche per le parole.",
+      "dom_text": "COOPER: (al registratore personale, a voce bassissima) Diane. Ipotesi da non verbalizzare: chi ha disposto quella scena voleva essere letto. Vado a vedere se vale anche per le parole.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_soglia",
+      "page_id": "m10.b1.soglia.p03",
+      "speaker_id": "truman",
+      "portrait": null,
+      "display_name": "TRUMAN",
+      "text": "Da che parte lo prendiamo, Cooper? Dalle carte, dalla famiglia — o da quello che tu sai e io no?",
+      "dom_text": "TRUMAN: Da che parte lo prendiamo, Cooper? Dalle carte, dalla famiglia — o da quello che tu sai e io no?",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m10_soglia",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "widget",
+      "node_id": "m10_soglia",
+      "choices": [
+        "method_probatorio",
+        "method_personale",
+        "method_intuitivo"
+      ],
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff",
+      "at": [
+        8,
+        6,
+        "up"
+      ]
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "nodes_done": [
+          "m10_soglia"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "where": "dopo l'avanzamento"
+    },
+    {
+      "kind": "choice",
+      "node_id": "m10_soglia",
+      "choice_id": "method_intuitivo"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_apertura",
+      "page_id": "m10.b2.apertura.p01",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(La stanza: il tavolo, la lampada, il registratore troppo grande. Leland al centro esatto.)",
+      "dom_text": "(La stanza: il tavolo, la lampada, il registratore troppo grande. Leland al centro esatto.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_apertura",
+      "page_id": "m10.b2.apertura.p02",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "Signor Palmer, vorremmo registrare. È un colloquio, non un interrogatorio: può fermarci quando vuole.",
+      "dom_text": "COOPER: Signor Palmer, vorremmo registrare. È un colloquio, non un interrogatorio: può fermarci quando vuole.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_apertura",
+      "page_id": "m10.b2.apertura.p03",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "Registrate. Le parole scritte male sono l'unica cosa che temo.",
+      "dom_text": "LELAND: Registrate. Le parole scritte male sono l'unica cosa che temo.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_apertura",
+      "page_id": "m10.b2.apertura.p04",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "(avvia. La spia: due pixel rossi.) Verbale di colloquio. Presenti: l'interessato, lo sceriffo Truman, l'agente Cooper. Oggetto: chiarire il resoconto della partenza di Madeleine Ferguson e le circostanze connesse.",
+      "dom_text": "COOPER: (avvia. La spia: due pixel rossi.) Verbale di colloquio. Presenti: l'interessato, lo sceriffo Truman, l'agente Cooper. Oggetto: chiarire il resoconto della partenza di Madeleine Ferguson e le circostanze connesse.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_apertura",
+      "page_id": "m10.b2.apertura.promise",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Il taccuino di Cooper resta chiuso su una pagina con tre orari.)",
+      "dom_text": "(Il taccuino di Cooper resta chiuso su una pagina con tre orari.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m10_apertura",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_domande",
+      "page_id": "m10.b3.intuitivo.p01",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "Le dice niente: \"FUOCO CAMMINA CON ME\"?",
+      "dom_text": "COOPER: Le dice niente: \"FUOCO CAMMINA CON ME\"?",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_domande",
+      "page_id": "m10.b3.intuitivo.p02",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "(senza pausa) ...il mago desidera vedere. Uno canta fra due mondi. (si ferma, come svegliato) Che cosa stavo...",
+      "dom_text": "LELAND: (senza pausa) ...il mago desidera vedere. Uno canta fra due mondi. (si ferma, come svegliato) Che cosa stavo...",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_domande",
+      "page_id": "m10.b3.intuitivo.p03",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "Sono parole che non le ho dato. Continui.",
+      "dom_text": "COOPER: Sono parole che non le ho dato. Continui.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_domande",
+      "page_id": "m10.b3.intuitivo.p04",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "(seconda domanda) Ho visto un uomo. Capelli lunghi, grigi. Sorrideva. Le è familiare?",
+      "dom_text": "COOPER: (seconda domanda) Ho visto un uomo. Capelli lunghi, grigi. Sorrideva. Le è familiare?",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_domande",
+      "page_id": "m10.b3.intuitivo.p05",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "(la testa si inclina, lentamente) E lei dov'era, agente, quando l'ha visto? Da che parte del sonno?",
+      "dom_text": "LELAND: (la testa si inclina, lentamente) E lei dov'era, agente, quando l'ha visto? Da che parte del sonno?",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_domande",
+      "page_id": "m10.b3.intuitivo.p06",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "(la voce si abbassa, ma il volto non cambia) Il vagone canta ancora. Il biglietto dorme nella terra.",
+      "dom_text": "LELAND: (la voce si abbassa, ma il volto non cambia) Il vagone canta ancora. Il biglietto dorme nella terra.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_domande",
+      "page_id": "m10.b3.intuitivo.p07",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "Il biglietto era nella terra. Dettaglio mai reso pubblico.",
+      "dom_text": "COOPER: Il biglietto era nella terra. Dettaglio mai reso pubblico.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_domande",
+      "page_id": "m10.b3.intuitivo.p08",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Truman posa la penna. Si alza.)",
+      "dom_text": "(Truman posa la penna. Si alza.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_domande",
+      "page_id": "m10.b3.intuitivo.p09",
+      "speaker_id": "truman",
+      "portrait": null,
+      "display_name": "TRUMAN",
+      "text": "(sulla porta, senza alzare la voce) Ho bisogno che quello che sento abbia un ordine. Torno quando ce l'ha. (esce)",
+      "dom_text": "TRUMAN: (sulla porta, senza alzare la voce) Ho bisogno che quello che sento abbia un ordine. Torno quando ce l'ha. (esce)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_domande",
+      "page_id": "m10.b3.intuitivo.p10",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(La stanza resta in due. Il fruscio del nastro è l'unico terzo.)",
+      "dom_text": "(La stanza resta in due. Il fruscio del nastro è l'unico terzo.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_domande",
+      "page_id": "m10.b3.intuitivo.nota",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "risponde a domande che non ho fatto. Completa quelle che non finisco.",
+      "dom_text": "risponde a domande che non ho fatto. Completa quelle che non finisco.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m10_domande",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_affioramento",
+      "page_id": "m10.b5.affioramento.p01",
+      "speaker_id": null,
+      "portrait": "bob",
+      "display_name": null,
+      "text": "(Il ritratto della battuta cambia: il volto è quello dello sconosciuto del sogno. Il corpo sulla sedia resta Leland.)",
+      "dom_text": "(Il ritratto della battuta cambia: il volto è quello dello sconosciuto del sogno. Il corpo sulla sedia resta Leland.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_affioramento",
+      "page_id": "m10.b5.affioramento.p02",
+      "speaker_id": "voce",
+      "portrait": "bob",
+      "display_name": "VOCE",
+      "text": "Leland dice che dorme. Leland dice molte cose.",
+      "dom_text": "VOCE: Leland dice che dorme. Leland dice molte cose.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_affioramento",
+      "page_id": "m10.b5.affioramento.osservazione",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "il volto del sogno appare nel ritratto mentre parla Leland. Il corpo nella stanza resta il suo. Non so ancora come nominare il rapporto fra i due.",
+      "dom_text": "il volto del sogno appare nel ritratto mentre parla Leland. Il corpo nella stanza resta il suo. Non so ancora come nominare il rapporto fra i due.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m10_affioramento",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_confessione",
+      "page_id": "m10.b6.intuitivo.p01",
+      "speaker_id": "voce",
+      "portrait": "bob",
+      "display_name": "VOCE",
+      "text": "Il vagone canta ancora. Chiedete alla terra che cosa le abbiamo dato.",
+      "dom_text": "VOCE: Il vagone canta ancora. Chiedete alla terra che cosa le abbiamo dato.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_confessione",
+      "page_id": "m10.b6.intuitivo.p02",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "Con parole sue, signor Palmer. Dov'era, la notte del vagone?",
+      "dom_text": "COOPER: Con parole sue, signor Palmer. Dov'era, la notte del vagone?",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_confessione",
+      "page_id": "m10.b6.intuitivo.p03",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "(piatto, come chi legge) Al vagone. C'ero io.",
+      "dom_text": "LELAND: (piatto, come chi legge) Al vagone. C'ero io.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_confessione",
+      "page_id": "m10.b6.intuitivo.p04",
+      "speaker_id": "voce",
+      "portrait": "bob",
+      "display_name": "VOCE",
+      "text": "La piccola voleva volare a ovest. L'acqua l'ha tenuta.",
+      "dom_text": "VOCE: La piccola voleva volare a ovest. L'acqua l'ha tenuta.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_confessione",
+      "page_id": "m10.b6.intuitivo.p05",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "In forma semplice. Chi ha ucciso Maddy?",
+      "dom_text": "COOPER: In forma semplice. Chi ha ucciso Maddy?",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_confessione",
+      "page_id": "m10.b6.intuitivo.p06",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "Io. (piatto) Poi l'ho portata al lago.",
+      "dom_text": "LELAND: Io. (piatto) Poi l'ho portata al lago.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_confessione",
+      "page_id": "m10.b6.intuitivo.p07",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Truman rientra. Il blocco è aperto.)",
+      "dom_text": "(Truman rientra. Il blocco è aperto.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_confessione",
+      "page_id": "m10.b6.intuitivo.p08",
+      "speaker_id": "truman",
+      "portrait": null,
+      "display_name": "TRUMAN",
+      "text": "Il taxi, Leland. A verbale.",
+      "dom_text": "TRUMAN: Il taxi, Leland. A verbale.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_confessione",
+      "page_id": "m10.b6.intuitivo.p09",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "Mai chiamato. La bugia è mia.",
+      "dom_text": "LELAND: Mai chiamato. La bugia è mia.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_confessione",
+      "page_id": "m10.b6.intuitivo.p10",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "Le lettere. Parole sue, signor Palmer.",
+      "dom_text": "COOPER: Le lettere. Parole sue, signor Palmer.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_confessione",
+      "page_id": "m10.b6.intuitivo.p11",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "R sotto Laura. O sotto Maddy. Le ho lasciate io.",
+      "dom_text": "LELAND: R sotto Laura. O sotto Maddy. Le ho lasciate io.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_confessione",
+      "page_id": "m10.b6.intuitivo.p12",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "E Laura?",
+      "dom_text": "COOPER: E Laura?",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_confessione",
+      "page_id": "m10.b6.intuitivo.p13",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "(un silenzio lungo; poi, semplicemente) Io.",
+      "dom_text": "LELAND: (un silenzio lungo; poi, semplicemente) Io.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_confessione",
+      "page_id": "m10.b6.intuitivo.p14",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Il verbale alterna il semplice e l'impossibile: la contea leggerà, e deciderà come chiamarlo.)",
+      "dom_text": "(Il verbale alterna il semplice e l'impossibile: la contea leggerà, e deciderà come chiamarlo.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m10_confessione",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_s3",
+      "page_id": "m10.b7.s3.p01",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Leland si ferma. Quando riprende, la voce cerca qualcosa che non è nella stanza.)",
+      "dom_text": "(Leland si ferma. Quando riprende, la voce cerca qualcosa che non è nella stanza.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_s3",
+      "page_id": "m10.b7.s3.p02",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "Adesso viene la parte che nessun foglio sa tenere, agente. Vuole che continui?",
+      "dom_text": "LELAND: Adesso viene la parte che nessun foglio sa tenere, agente. Vuole che continui?",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_s3",
+      "page_id": "m10.b7.s3.p03",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Truman rilegge il blocco: i fatti ci sono tutti. Guarda Cooper.)",
+      "dom_text": "(Truman rilegge il blocco: i fatti ci sono tutti. Guarda Cooper.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m10_s3",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "widget",
+      "node_id": "m10_s3",
+      "choices": [
+        "s3_on",
+        "s3_off"
+      ],
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff",
+      "at": [
+        8,
+        6,
+        "up"
+      ]
+    },
+    {
+      "kind": "choice",
+      "node_id": "m10_s3",
+      "choice_id": "s3_off"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_s3",
+      "page_id": "m10.b7.s3.off.p01",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Click. La spia muore.)",
+      "dom_text": "(Click. La spia muore.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_s3",
+      "page_id": "m10.b7.s3.off.p02",
+      "speaker_id": "truman",
+      "portrait": null,
+      "display_name": "TRUMAN",
+      "text": "(chiude il blocco) Quello che sento da qui in poi, lo porto io. Se servirà, lo giuro a voce.",
+      "dom_text": "TRUMAN: (chiude il blocco) Quello che sento da qui in poi, lo porto io. Se servirà, lo giuro a voce.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_post_s3",
+      "page_id": "m10.b7b.segmento.p01",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "Avevo dodici anni. C'era una casa bianca, vicino al lago dei nonni. E un uomo che chiedeva di giocare.",
+      "dom_text": "LELAND: Avevo dodici anni. C'era una casa bianca, vicino al lago dei nonni. E un uomo che chiedeva di giocare.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_post_s3",
+      "page_id": "m10.b7b.segmento.p02",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "Diceva: ho un nome da persona perbene, piccolo. Come il tuo.",
+      "dom_text": "LELAND: Diceva: ho un nome da persona perbene, piccolo. Come il tuo.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_post_s3",
+      "page_id": "m10.b7b.segmento.p03",
+      "speaker_id": null,
+      "portrait": "bob",
+      "display_name": null,
+      "text": "(Il ritratto della battuta cambia, per una frase sola.)",
+      "dom_text": "(Il ritratto della battuta cambia, per una frase sola.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_post_s3",
+      "page_id": "m10.b7b.segmento.p04",
+      "speaker_id": "voce",
+      "portrait": "bob",
+      "display_name": "VOCE",
+      "text": "I pezzi del nome sono nostri. Li abbiamo lasciati perché qualcuno contasse.",
+      "dom_text": "VOCE: I pezzi del nome sono nostri. Li abbiamo lasciati perché qualcuno contasse.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_post_s3",
+      "page_id": "m10.b7b.segmento.p05",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "(di nuovo il suo ritratto; la voce è stanca) Quando dormo, lui non dorme. Questo lo so. Il resto... il resto non so più di chi sia.",
+      "dom_text": "LELAND: (di nuovo il suo ritratto; la voce è stanca) Quando dormo, lui non dorme. Questo lo so. Il resto... il resto non so più di chi sia.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_post_s3",
+      "page_id": "m10.b7b.segmento.p06",
+      "speaker_id": "leland",
+      "portrait": null,
+      "display_name": "LELAND",
+      "text": "Agente. Mia figlia... Laura. Potrà mai—",
+      "dom_text": "LELAND: Agente. Mia figlia... Laura. Potrà mai—",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_post_s3",
+      "page_id": "m10.b7b.segmento.p07",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Cooper non risponde. Sposta la foto di Laura fuori dalla linea degli occhi di Leland: la tiene davanti a sé.)",
+      "dom_text": "(Cooper non risponde. Sposta la foto di Laura fuori dalla linea degli occhi di Leland: la tiene davanti a sé.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m10_post_s3",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_vittime",
+      "page_id": "m10.b8.vittime.p01",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "(al taccuino, dopo) Maddy Ferguson aveva scelto la corriera delle 7:40. Laura Palmer aveva nascosto un secondo diario. Le loro azioni restano nel fascicolo. Il perdono non è materia nostra.",
+      "dom_text": "COOPER: (al taccuino, dopo) Maddy Ferguson aveva scelto la corriera delle 7:40. Laura Palmer aveva nascosto un secondo diario. Le loro azioni restano nel fascicolo. Il perdono non è materia nostra.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m10_vittime",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_fermo",
+      "page_id": "m10.b9.fermo.p01",
+      "speaker_id": "truman",
+      "portrait": null,
+      "display_name": "TRUMAN",
+      "text": "(in piedi, formale per la prima volta in vent'anni) Da questo momento sei in stato di fermo, Leland. Per i fatti che hai ammesso.",
+      "dom_text": "TRUMAN: (in piedi, formale per la prima volta in vent'anni) Da questo momento sei in stato di fermo, Leland. Per i fatti che hai ammesso.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_fermo",
+      "page_id": "m10.b9.fermo.p02",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(La cella: la branda rifatta con gli angoli tesi. Truman apre la porta lui stesso.)",
+      "dom_text": "(La cella: la branda rifatta con gli angoli tesi. Truman apre la porta lui stesso.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_fermo",
+      "page_id": "m10.b9.fermo.p03",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(La porta si vede per intero, da fuori. La serratura fa il suo suono.)",
+      "dom_text": "(La porta si vede per intero, da fuori. La serratura fa il suo suono.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m10_fermo",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_morte",
+      "page_id": "m10.b10.morte.p01",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Il grido di Truman arriva dal corridoio. Le chiavi le ha lui: la cella è aperta in un secondo.)",
+      "dom_text": "(Il grido di Truman arriva dal corridoio. Le chiavi le ha lui: la cella è aperta in un secondo.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_morte",
+      "page_id": "m10.b10.morte.p02",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Truman in ginocchio, due dita sul collo. Conta. Poi smette di contare.)",
+      "dom_text": "(Truman in ginocchio, due dita sul collo. Conta. Poi smette di contare.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_morte",
+      "page_id": "m10.b10.morte.p03",
+      "speaker_id": "truman",
+      "portrait": null,
+      "display_name": "TRUMAN",
+      "text": "(senza voltarsi) Lucy — il dottore. E Andy alla porta.",
+      "dom_text": "TRUMAN: (senza voltarsi) Lucy — il dottore. E Andy alla porta.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "reload",
+      "before": {
+        "map": "sheriff",
+        "x": 8,
+        "y": 6,
+        "dir": "up",
+        "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+        "digest": {
+          "flags": [
+            "atto3",
+            "atto4",
+            "atto5",
+            "audrey_indaga",
+            "dream_face_recognized_in_leland_scene",
+            "east_route_confirmed",
+            "gigante1",
+            "jacques_admitted_presence",
+            "jacques_dead",
+            "jacques_preso",
+            "maddy_trovata",
+            "sogno_fatto",
+            "vagone_scoperto"
+          ],
+          "values": {
+            "m5_final_theory": "degeneration",
+            "s1": "institutional",
+            "promise_stance": "prudenza",
+            "presagio_status": "verified",
+            "warning_target": "centrale",
+            "sarah_support_state": "none",
+            "maddy_action_after_warning": "none",
+            "focus_destination": "diner",
+            "body_found_by": "hawk",
+            "m6_tactic": "pressione",
+            "letter_o_observation_source": "cooper_primary",
+            "m10_method": "intuitivo",
+            "material_admissions.taxi_lie": "leland_first_person",
+            "material_admissions.traincar_presence": "leland_first_person",
+            "material_admissions.laura_homicide": "leland_first_person",
+            "material_admissions.maddy_homicide": "leland_first_person",
+            "material_admissions.maddy_body_transport": "leland_first_person",
+            "material_admissions.letters": "leland_first_person",
+            "s3": "off",
+            "truman_testimony_state": "voluntary_witness"
+          },
+          "evidence": [
+            "D_TAXI",
+            "E1_DIARIO",
+            "E3_LETTERA_R",
+            "JACQUES_LIST_GIVEN",
+            "T_LELAND_TAXI"
+          ],
+          "nodes_done": [
+            "m10_affioramento",
+            "m10_apertura",
+            "m10_confessione",
+            "m10_domande",
+            "m10_fermo",
+            "m10_post_s3",
+            "m10_s3",
+            "m10_soglia",
+            "m10_vittime",
+            "m5_bridge",
+            "m5_discovery",
+            "m5_report_close",
+            "m5_report_intro",
+            "m5_tracks_north",
+            "m6_arrest",
+            "m6_atto4_bridge",
+            "m6_ferry",
+            "m6_hospital_guard",
+            "m6_interrogation_prova",
+            "m6_return_night",
+            "m6_tactic",
+            "m8_diner",
+            "m8_focus_choice",
+            "m8_leland_taxi",
+            "m8_roadhouse_phone",
+            "m8_roadhouse_truman",
+            "m8_station",
+            "m9_arrivo",
+            "m9_cmp_taxi",
+            "m9_present_truman",
+            "m9_verifica_taxi"
+          ]
+        },
+        "npcs": [
+          "andy@10,7",
+          "hawk@12,8",
+          "lucy@2,6",
+          "truman@10,4"
+        ],
+        "saved": {
+          "narrative": true,
+          "classic": true,
+          "revision": 16
+        }
+      },
+      "after": {
+        "map": "sheriff",
+        "x": 8,
+        "y": 6,
+        "dir": "up",
+        "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+        "digest": {
+          "flags": [
+            "atto3",
+            "atto4",
+            "atto5",
+            "audrey_indaga",
+            "dream_face_recognized_in_leland_scene",
+            "east_route_confirmed",
+            "gigante1",
+            "jacques_admitted_presence",
+            "jacques_dead",
+            "jacques_preso",
+            "maddy_trovata",
+            "sogno_fatto",
+            "vagone_scoperto"
+          ],
+          "values": {
+            "m5_final_theory": "degeneration",
+            "s1": "institutional",
+            "promise_stance": "prudenza",
+            "presagio_status": "verified",
+            "warning_target": "centrale",
+            "sarah_support_state": "none",
+            "maddy_action_after_warning": "none",
+            "focus_destination": "diner",
+            "body_found_by": "hawk",
+            "m6_tactic": "pressione",
+            "letter_o_observation_source": "cooper_primary",
+            "m10_method": "intuitivo",
+            "material_admissions.taxi_lie": "leland_first_person",
+            "material_admissions.traincar_presence": "leland_first_person",
+            "material_admissions.laura_homicide": "leland_first_person",
+            "material_admissions.maddy_homicide": "leland_first_person",
+            "material_admissions.maddy_body_transport": "leland_first_person",
+            "material_admissions.letters": "leland_first_person",
+            "s3": "off",
+            "truman_testimony_state": "voluntary_witness"
+          },
+          "evidence": [
+            "D_TAXI",
+            "E1_DIARIO",
+            "E3_LETTERA_R",
+            "JACQUES_LIST_GIVEN",
+            "T_LELAND_TAXI"
+          ],
+          "nodes_done": [
+            "m10_affioramento",
+            "m10_apertura",
+            "m10_confessione",
+            "m10_domande",
+            "m10_fermo",
+            "m10_post_s3",
+            "m10_s3",
+            "m10_soglia",
+            "m10_vittime",
+            "m5_bridge",
+            "m5_discovery",
+            "m5_report_close",
+            "m5_report_intro",
+            "m5_tracks_north",
+            "m6_arrest",
+            "m6_atto4_bridge",
+            "m6_ferry",
+            "m6_hospital_guard",
+            "m6_interrogation_prova",
+            "m6_return_night",
+            "m6_tactic",
+            "m8_diner",
+            "m8_focus_choice",
+            "m8_leland_taxi",
+            "m8_roadhouse_phone",
+            "m8_roadhouse_truman",
+            "m8_station",
+            "m9_arrivo",
+            "m9_cmp_taxi",
+            "m9_present_truman",
+            "m9_verifica_taxi"
+          ]
+        },
+        "npcs": [
+          "andy@10,7",
+          "hawk@12,8",
+          "lucy@2,6",
+          "truman@10,4"
+        ]
+      }
+    },
+    {
+      "kind": "press",
+      "at": [
+        "sheriff",
+        10,
+        3,
+        "down"
+      ]
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_morte",
+      "page_id": "m10.b10.morte.p01",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Il grido di Truman arriva dal corridoio. Le chiavi le ha lui: la cella è aperta in un secondo.)",
+      "dom_text": "(Il grido di Truman arriva dal corridoio. Le chiavi le ha lui: la cella è aperta in un secondo.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_morte",
+      "page_id": "m10.b10.morte.p02",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Truman in ginocchio, due dita sul collo. Conta. Poi smette di contare.)",
+      "dom_text": "(Truman in ginocchio, due dita sul collo. Conta. Poi smette di contare.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_morte",
+      "page_id": "m10.b10.morte.p03",
+      "speaker_id": "truman",
+      "portrait": null,
+      "display_name": "TRUMAN",
+      "text": "(senza voltarsi) Lucy — il dottore. E Andy alla porta.",
+      "dom_text": "TRUMAN: (senza voltarsi) Lucy — il dottore. E Andy alla porta.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_morte",
+      "page_id": "m10.b10.morte.p04",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Cooper resta sulla soglia: due persone nella cella sono già una di troppo.)",
+      "dom_text": "(Cooper resta sulla soglia: due persone nella cella sono già una di troppo.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_morte",
+      "page_id": "m10.b10.morte.p05",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Poi il dottore, le firme, la barella. L'ambulanza se ne va senza fretta — che è il modo peggiore.)",
+      "dom_text": "(Poi il dottore, le firme, la barella. L'ambulanza se ne va senza fretta — che è il modo peggiore.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_morte",
+      "page_id": "m10.b10.morte.p06",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Restano la stanza e il radiatore. Solo il radiatore.)",
+      "dom_text": "(Restano la stanza e il radiatore. Solo il radiatore.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_morte",
+      "page_id": "m10.b10.morte.p07",
+      "speaker_id": null,
+      "portrait": null,
+      "display_name": null,
+      "text": "(Cooper prende il proprio registratore. Lo guarda. Non lo accende.)",
+      "dom_text": "(Cooper prende il proprio registratore. Lo guarda. Non lo accende.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_morte",
+      "page_id": "m10.b10.morte.p08",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "Diane... (si ferma. Abbassa la mano.)",
+      "dom_text": "COOPER: Diane... (si ferma. Abbassa la mano.)",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_morte",
+      "page_id": "m10.b10.morte.p09",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "(alla stanza) So ciò che ha fatto. Non so più dire dove finisse la sua volontà. Una cosa non cancella l'altra.",
+      "dom_text": "COOPER: (alla stanza) So ciò che ha fatto. Non so più dire dove finisse la sua volontà. Una cosa non cancella l'altra.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_morte",
+      "page_id": "m10.b10.morte.p10",
+      "speaker_id": "truman",
+      "portrait": null,
+      "display_name": "TRUMAN",
+      "text": "La contea lo chiamerà chiuso.",
+      "dom_text": "TRUMAN: La contea lo chiamerà chiuso.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_morte",
+      "page_id": "m10.b10.morte.p11",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "Non lo è.",
+      "dom_text": "COOPER: Non lo è.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_morte",
+      "page_id": "m10.b10.morte.p12",
+      "speaker_id": "truman",
+      "portrait": null,
+      "display_name": "TRUMAN",
+      "text": "E adesso?",
+      "dom_text": "TRUMAN: E adesso?",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "page",
+      "node_id": "m10_morte",
+      "page_id": "m10.b10.morte.p13",
+      "speaker_id": "cooper",
+      "portrait": null,
+      "display_name": "COOPER",
+      "text": "Un posto. Non è in nessun fascicolo.",
+      "dom_text": "COOPER: Un posto. Non è in nessun fascicolo.",
+      "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
+      "map": "sheriff"
+    },
+    {
+      "kind": "commit",
+      "node_id": "m10_morte",
+      "ok": true,
+      "repeated": false
+    },
+    {
+      "kind": "delta",
+      "delta": {
+        "flags": [
+          "leland_morto"
+        ],
+        "nodes_done": [
+          "m10_morte"
+        ]
+      }
+    },
+    {
+      "kind": "objective",
+      "text": "Nella Loggia: scegli chi affrontare per primo.",
+      "where": "dopo l'avanzamento"
+    }
+  ],
+  "classic": [],
+  "mapEntries": [],
+  "fallbacks": [],
+  "notes": [],
+  "console_errors": []
+}
