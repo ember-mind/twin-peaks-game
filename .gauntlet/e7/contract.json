@@ -4,7 +4,7 @@
   "mode": "execute",
   "status": "preflight",
   "createdAt": "2026-09-15T11:41:07.507Z",
-  "updatedAt": "2026-09-15T12:08:00.000Z",
+  "updatedAt": "2026-09-15T12:14:00.000Z",
   "goal": "Native Red Room reaches reference top-panel grammar while preserving gameplay geometry",
   "domain": "games",
   "externalBar": "assets/ref/red-room-sheet.png top panel; style anchor artifacts/act-4-implementation/diner-maddy-leland.png",
@@ -54,8 +54,8 @@
     "builderCriticSeparated": true,
     "criticFreshContext": true
   },
-  "gapQueue": [{"unitId": "furniture-statue", "priority": "high", "gap": "Chairs and tables remain flatter, blockier, and less richly shaded than reference furniture.", "owner": "Astra builder"}],
-  "rounds": [{"round": 1, "units": ["curtains", "floor", "furniture-statue", "light"], "builder": "Astra/high", "critic": "Luna/high fresh context", "evidence": "../../artifacts/art-pass-e/e7/round-1.png", "scores": {"curtains": 5, "floor": 5, "furniture-statue": 3, "light": 4}, "rankVsPrevious": "BETTER", "gap": "Furniture arrangement lacks readable armchairs, central table and figure, and detailed statue."}, {"round": 2, "units": ["furniture-statue"], "builder": "Astra/high", "critic": "Luna/high fresh context", "evidence": "../../artifacts/art-pass-e/e7/furniture-statue/round-2.png", "scores": {"furniture-statue": 6}, "rankVsPrevious": "BETTER", "gap": "Chairs and tables remain flatter, blockier, and less richly shaded than reference furniture."}],
+  "gapQueue": [{"unitId": "furniture-statue", "priority": "high", "gap": "Furniture remains too dark and blocky, lacking readable shading and dimensional chair details.", "owner": "Astra builder"}],
+  "rounds": [{"round": 1, "units": ["curtains", "floor", "furniture-statue", "light"], "builder": "Astra/high", "critic": "Luna/high fresh context", "evidence": "../../artifacts/art-pass-e/e7/round-1.png", "scores": {"curtains": 5, "floor": 5, "furniture-statue": 3, "light": 4}, "rankVsPrevious": "BETTER", "gap": "Furniture arrangement lacks readable armchairs, central table and figure, and detailed statue."}, {"round": 2, "units": ["furniture-statue"], "builder": "Astra/high", "critic": "Luna/high fresh context", "evidence": "../../artifacts/art-pass-e/e7/furniture-statue/round-2.png", "scores": {"furniture-statue": 6}, "rankVsPrevious": "BETTER", "gap": "Chairs and tables remain flatter, blockier, and less richly shaded than reference furniture."}, {"round": 3, "units": ["furniture-statue"], "builder": "Astra/high", "critic": "Luna/high fresh context", "evidence": "../../artifacts/art-pass-e/e7/furniture-statue/round-3.png", "scores": {"furniture-statue": 6}, "rankVsPrevious": "BETTER", "gap": "Furniture remains too dark and blocky, lacking readable shading and dimensional chair details."}],
   "finalGate": {
     "allUnitsCovered": false,
     "hardGatesPass": false,

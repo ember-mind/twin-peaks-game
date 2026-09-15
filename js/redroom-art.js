@@ -86,43 +86,76 @@
   function chair(R,x,foot,mirror) {
     var p=palette,y=foot-34;
     function C(dx,dy,w,h,color){R(x+(mirror?14-dx-w:dx-14),y+dy,w,h,color);}
-    /* Turned slightly toward the table: curved upholstered back, deep seat,
-     * substantial rolled arms, and an exposed outer side panel. The dark red
-     * belongs to the leather planes; short red seams catch the curtain light. */
-    C(4,0,17,1,p.ink);C(2,1,21,2,p.ink);C(1,3,23,18,p.ink);
-    C(4,2,17,2,p.curtainDark);C(3,4,18,13,p.curtainDark);
-    C(5,3,14,1,p.curtainRed);C(4,5,2,10,p.ink);
-    C(6,5,14,10,p.ink);C(7,5,12,8,p.curtainDark);
-    C(8,6,9,5,p.ink);C(7,11,11,3,p.ink);
-    C(9,7,1,1,p.curtainDark);C(15,8,1,1,p.curtainDark);
-    C(8,13,10,1,p.curtainRed);C(7,15,14,2,p.ink);
-    /* Seat cushion is a broad usable horizontal plane inside the arms. */
-    C(7,17,16,7,p.curtainDark);C(8,18,13,2,p.ink);
-    C(9,20,13,2,p.curtainDark);C(8,23,15,1,p.curtainRed);
-    C(7,24,17,3,p.ink);C(9,25,13,2,p.curtainDark);
-    /* Outer arm has a visible vertical face; inner arm sits a pixel higher. */
-    C(0,16,7,14,p.ink);C(1,15,6,3,p.curtainDark);
-    C(2,15,4,1,p.curtainRed);C(1,19,4,10,p.curtainDark);
-    C(2,20,2,8,p.ink);C(5,18,2,12,p.ink);
-    C(23,15,5,15,p.ink);C(23,14,4,3,p.curtainDark);
-    C(24,14,3,1,p.curtainRed);C(24,18,2,10,p.curtainDark);
-    C(3,30,23,2,p.ink);C(4,32,3,2,p.ink);C(22,32,3,2,p.ink);
-    C(6,29,17,1,p.curtainDark);
+    /* Rasterize tilted upholstery planes to opaque integer runs. This avoids
+     * canvas polygon antialiasing and its extra colors at diagonal seams. */
+    function P(points,color){
+      for(var yy=0;yy<34;yy++){
+        var cuts=[],scan=yy+.5;
+        for(var i=0;i<points.length;i++){
+          var a=points[i],b=points[(i+1)%points.length];
+          if((a[1]<=scan&&b[1]>scan)||(b[1]<=scan&&a[1]>scan))cuts.push(a[0]+(scan-a[1])*(b[0]-a[0])/(b[1]-a[1]));
+        }
+        cuts.sort(function(a,b){return a-b;});
+        for(var j=0;j+1<cuts.length;j+=2){
+          var left=Math.ceil(cuts[j]-.5),right=Math.ceil(cuts[j+1]-.5);
+          if(right>left)C(left,yy,right-left,1,color);
+        }
+      }
+    }
+    /* The back, seat, arms and side have separate planes; both chairs turn
+     * toward the table. Leather stays dark, with red confined to caught edges. */
+    P([[3,4],[19,0],[23,2],[23,21],[7,25],[2,21]],p.ink);
+    P([[4,4],[19,1],[22,3],[7,7]],p.curtainDark);
+    P([[6,4],[18,2],[20,3],[7,6]],p.curtainRed);
+    P([[6,7],[21,4],[21,18],[8,22]],p.curtainDark);
+    P([[8,8],[19,5],[20,16],[9,19]],p.ink);
+    P([[9,8],[18,6],[18,10],[10,12]],p.curtainDark);
+    C(12,9,1,2,p.ink);C(16,8,1,2,p.ink);
+    C(10,15,2,1,p.curtainDark);C(17,13,2,1,p.curtainDark);
+    P([[3,7],[6,8],[8,23],[3,21]],p.curtainDark);
+    /* Recessed cushion tilts toward the viewer, then drops into a dark apron. */
+    P([[7,22],[21,18],[27,22],[13,27]],p.ink);
+    P([[9,22],[21,19],[25,22],[13,25]],p.curtainDark);
+    P([[12,22],[21,20],[23,21],[14,24]],p.ink);
+    P([[13,25],[25,22],[25,24],[14,27]],p.curtainRed);
+    P([[13,27],[26,24],[25,30],[13,33]],p.ink);
+    P([[15,28],[24,26],[24,29],[15,31]],p.curtainDark);
+    /* Broad outer rolled arm and dark front face give the seat real depth. */
+    P([[0,19],[5,16],[12,20],[12,32],[6,34],[0,29]],p.ink);
+    P([[1,19],[5,17],[10,20],[6,22]],p.curtainDark);
+    P([[2,19],[5,18],[8,20],[6,21]],p.curtainRed);
+    P([[1,21],[6,24],[6,32],[1,28]],p.curtainDark);
+    P([[2,23],[4,24],[4,29],[2,27]],p.ink);
+    P([[7,23],[10,21],[10,30],[7,32]],p.curtainDark);
+    C(8,25,1,4,p.ink);
+    P([[22,17],[25,15],[28,17],[28,27],[25,30],[25,20]],p.ink);
+    P([[23,17],[25,16],[27,17],[25,19]],p.curtainRed);
+    P([[26,20],[28,18],[28,26],[26,28]],p.curtainDark);
+    C(6,32,3,2,p.ink);C(23,30,2,3,p.ink);
   }
   function stool(R,x,foot) {
     var p=palette;
-    R(x-7,foot-10,14,2,p.ink);R(x-8,foot-8,16,6,p.ink);
-    R(x-6,foot-8,12,3,p.curtainDark);R(x-5,foot-7,10,1,p.ink);
-    R(x-6,foot-2,2,2,p.curtainDark);R(x+4,foot-2,2,2,p.curtainDark);
+    R(x-4,foot-12,9,1,p.ink);R(x-6,foot-11,12,1,p.ink);
+    R(x-7,foot-10,14,2,p.ink);R(x-8,foot-8,16,4,p.ink);
+    R(x-4,foot-11,8,1,p.curtainDark);R(x-6,foot-10,10,2,p.curtainDark);
+    R(x-5,foot-10,8,1,p.curtainRed);R(x-3,foot-9,7,1,p.ink);
+    R(x-5,foot-8,11,1,p.curtainDark);R(x-4,foot-7,10,1,p.curtainRed);
+    R(x-6,foot-7,2,3,p.curtainDark);R(x+4,foot-6,2,3,p.curtainDark);
+    R(x-6,foot-3,2,3,p.ink);R(x+4,foot-3,2,3,p.ink);
   }
   function table(R,x,foot) {
     var p=palette;
-    R(x-5,foot-13,10,1,p.ink);R(x-8,foot-12,16,2,p.ink);
-    R(x-9,foot-10,18,3,p.ink);R(x-7,foot-11,14,2,p.curtainDark);
-    R(x-5,foot-11,10,1,p.cream);R(x-7,foot-8,14,1,p.curtainRed);
-    R(x-7,foot-7,3,7,p.ink);R(x+4,foot-7,3,7,p.ink);
-    R(x-6,foot-6,1,5,p.curtainDark);R(x+5,foot-6,1,5,p.curtainDark);
-    R(x-2,foot-7,3,5,p.ink);R(x-5,foot-3,10,1,p.curtainDark);
+    /* Elliptical top, rounded apron, and splayed legs instead of a square frame. */
+    R(x-4,foot-14,8,1,p.ink);R(x-7,foot-13,14,1,p.ink);
+    R(x-9,foot-12,18,3,p.ink);R(x-8,foot-9,16,2,p.ink);
+    R(x-6,foot-8,12,2,p.ink);
+    R(x-5,foot-13,10,1,p.curtainDark);R(x-7,foot-12,14,2,p.curtainDark);
+    R(x-4,foot-12,8,1,p.cream);R(x-6,foot-10,12,1,p.curtainRed);
+    R(x-5,foot-9,10,1,p.curtainDark);R(x-2,foot-9,4,1,p.curtainRed);
+    R(x-5,foot-6,2,4,p.ink);R(x-6,foot-2,3,2,p.ink);
+    R(x+3,foot-6,2,4,p.ink);R(x+3,foot-2,3,2,p.ink);
+    R(x-4,foot-5,1,3,p.curtainDark);R(x+3,foot-5,1,3,p.curtainDark);
+    R(x-1,foot-6,2,3,p.ink);
     R(x-3,foot-14,6,2,p.ink);R(x-1,foot-23,2,9,p.cream);
     R(x-3,foot-31,6,3,p.white);R(x-4,foot-28,8,4,p.white);
     R(x-5,foot-24,10,2,p.cream);R(x+2,foot-29,1,5,p.cream);
@@ -131,12 +164,15 @@
     var p=palette;
     /* Small occasional table between the armchairs, entirely north of the
      * row-4 walk spine/MFAP. The existing lamp stays at its fixed light anchor. */
-    R(x-4,foot-13,8,1,p.ink);R(x-6,foot-12,12,2,p.ink);
-    R(x-7,foot-10,14,3,p.ink);R(x-5,foot-11,10,3,p.curtainDark);
-    R(x-3,foot-11,6,1,p.curtainRed);R(x-5,foot-8,10,1,p.curtainRed);
-    R(x-5,foot-7,2,6,p.ink);R(x+3,foot-7,2,6,p.ink);
-    R(x-4,foot-6,1,4,p.curtainDark);R(x+3,foot-6,1,4,p.curtainDark);
-    R(x-3,foot-3,6,1,p.curtainDark);
+    R(x-3,foot-14,6,1,p.ink);R(x-6,foot-13,12,1,p.ink);
+    R(x-8,foot-12,16,3,p.ink);R(x-6,foot-9,12,2,p.ink);
+    R(x-4,foot-13,8,1,p.curtainDark);R(x-6,foot-12,12,2,p.curtainDark);
+    R(x-3,foot-12,5,1,p.curtainRed);R(x-5,foot-10,10,1,p.curtainRed);
+    R(x-4,foot-9,8,1,p.curtainDark);R(x-1,foot-9,3,1,p.curtainRed);
+    R(x-4,foot-7,2,5,p.ink);R(x-5,foot-2,3,2,p.ink);
+    R(x+2,foot-7,2,5,p.ink);R(x+2,foot-2,3,2,p.ink);
+    R(x-3,foot-6,1,4,p.curtainDark);R(x+2,foot-6,1,4,p.curtainDark);
+    R(x-1,foot-7,2,3,p.ink);
   }
   function venus(R,x,foot) {
     var p=palette,y=foot-47;
