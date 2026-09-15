@@ -134,7 +134,7 @@ Somma di tile/secondi camminati dallo spawn in `room_315` (dopo il monologo del 
 
 ## Altre note
 
-- room_315.doors e' {} in js/maps.js (statico): la porta verso hotel_gn e' installata a runtime dalla connessione "great-northern-room-315-hall" (js/room-315-location-data.js, applicata da js/room-315-production.js). Dump a runtime: room_315.doors["7,11"] -> hotel_gn(14,2,down); hotel_gn.doors["14,1"] -> room_315(7,10,up).
+- room_315.doors e' {} in js/maps.js (statico): la porta verso hotel_gn e' installata a runtime dalla connessione "great-northern-room-315-hall" (js/world-connections.gen.js, applicata da js/room-315-production.js). Dump a runtime: room_315.doors["7,11"] -> hotel_gn(14,2,down); hotel_gn.doors["14,1"] -> room_315(7,10,up).
 
 ## Limiti dichiarati
 

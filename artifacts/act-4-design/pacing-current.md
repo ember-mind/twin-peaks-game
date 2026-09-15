@@ -8,13 +8,13 @@ Velocita': 213.33 ms/tile (4.688 tile/s). Lettura: 12/15 car/s + 0.6s/pagina.
 
 | Metrica | Valore |
 |---|---|
-| Percorso obbligato canonico (accompagno/palmer/palmer) | 562 tile (119.9s), 50 pagine, 3757 car, 12 opzioni su 4 scelte -> **463.0s (~7.72 min) @12cps / 400.4s (~6.67 min) @15cps** |
-| Range percorso obbligato, 27 varianti (promessa x avviso x destinazione) | 404.2-473.3s (~6.74-7.89 min) @12cps; 347.7-409.8s @15cps |
-| Obbligato + tutto l'opzionale (solo layer classico atto4, sola lettura) | 509.5s (~8.49 min) @12cps; cammino opzionale NON modellato |
+| Percorso obbligato canonico (accompagno/palmer/palmer) | 608 tile (129.7s), 51 pagine, 3917 car, 12 opzioni su 4 scelte -> **486.7s (~8.11 min) @12cps / 421.4s (~7.02 min) @15cps** |
+| Range percorso obbligato, 27 varianti (promessa x avviso x destinazione) | 428.0-497.0s (~7.13-8.28 min) @12cps; 368.8-430.8s @15cps |
+| Obbligato + tutto l'opzionale (solo layer classico atto4, sola lettura) | 533.3s (~8.89 min) @12cps; cammino opzionale NON modellato |
 | Tempo prima della prima scelta significativa (promise_stance) | 129 tile (27.5s) + 59.7s di lettura = **87.2s** |
 | Blocco passivo piu' lungo (pagine senza scelta ne' cambio mappa) | 12 pagine, 743 car (~69.1s): m8_discovery + m8_promise_echo + m8_cmp_letters + m8_cmp_diary |
-| Tratto a piedi ininterrotto piu' lungo | 142 tile (30.3s) verso "Roadhouse: il Gigante, al tavolo (B)" via double_r_exterior_prototype > town > roadhouse |
-| Pagine per modo (canonico, feedback inclusi) | action 15 (di cui 4 dentro nodi a scelta, prima della scelta) / dialogue 26 / notebook 9 |
+| Tratto a piedi ininterrotto piu' lungo | 170 tile (36.3s) verso "Roadhouse: il Gigante, al tavolo (B)" via double_r_exterior_prototype > town > roadhouse |
+| Pagine per modo (canonico, feedback inclusi) | action 16 (di cui 4 dentro nodi a scelta, prima della scelta) / dialogue 26 / notebook 9 |
 | Nodi M8 attraversati / totali | 11 / 16 (i 2 route node non scelti sono alternative esclusive; nessun nodo opzionale in M8) |
 
 ## Beat per beat (canonico: promessa accompagno, avviso palmer, destinazione palmer)
@@ -22,9 +22,9 @@ Velocita': 213.33 ms/tile (4.688 tile/s). Lettura: 12/15 car/s + 0.6s/pagina.
 | # | Beat | Mappa | Nodo | Cammino dal beat prec. | Sec. cammino | Pagine | Car | Sec. lettura (12cps) | Opzioni |
 |---|---|---|---|---:|---:|---:|---:|---:|---:|
 | 1 | A | diner | Diner: la promessa a Maddy (A, accompagno) (`m8_diner + promise_accompagno`) | 129 ~ via sheriffs_station_exterior>town>double_r_exterior_prototype>diner | 27.52 | 9 | 747 | 67.65 | 3 |
-| 2 | B0 | diner | Diner: Leland e il taxi (B0) (`m8_leland_taxi`) | 1 | 0.21 | 5 | 435 | 39.25 |  |
-| 3 | B | roadhouse | Roadhouse: il Gigante, al tavolo (B) (`m8_roadhouse_truman`) | 142 ~ via double_r_exterior_prototype>town>roadhouse | 30.29 | 5 | 333 | 30.75 |  |
-| 4 | B | roadhouse | Roadhouse: la telefonata (B, palmer) (`m8_roadhouse_phone + warning_palmer`) | 10 | 2.13 | 4 | 331 | 29.98 | 3 |
+| 2 | B0 | diner | Diner: Leland e il taxi (B0) (`m8_leland_taxi`) | 1 | 0.21 | 6 | 595 | 53.18 |  |
+| 3 | B | roadhouse | Roadhouse: il Gigante, al tavolo (B) (`m8_roadhouse_truman`) | 170 ~ via double_r_exterior_prototype>town>roadhouse | 36.27 | 5 | 333 | 30.75 |  |
+| 4 | B | roadhouse | Roadhouse: la telefonata (B, palmer) (`m8_roadhouse_phone + warning_palmer`) | 28 | 5.97 | 4 | 331 | 29.98 | 3 |
 | 5 | C | town | Crocevia: dove vai? (C, palmer) (`m8_focus_choice + focus_palmer`) | 74 ~ via town | 15.79 | 3 | 190 | 17.63 | 3 |
 | 6 | C | palmer | Casa Palmer: la chiamata della centrale (C) (`m8_route_palmer`) | 73 ~ via palmer | 15.57 | 5 | 337 | 31.08 |  |
 | 7 | D | town | Il ritrovamento (D) (`m8_discovery`) | 86 ~ via town | 18.35 | 3 | 265 | 23.88 |  |
@@ -39,17 +39,17 @@ Velocita': 213.33 ms/tile (4.688 tile/s). Lettura: 12/15 car/s + 0.6s/pagina.
 
 | Avviso | Destinazione | Tile | Pagine | Car | 12cps | 15cps |
 |---|---|---:|---:|---:|---:|---:|
-| palmer | palmer | 562 | 50 | 3757 | 463.0s (~7.72 min) | 400.4s |
-| palmer | lago | 438 | 50 | 3760 | 436.8s (~7.28 min) | 374.1s |
-| palmer | diner | 592 | 49 | 3811 | 473.3s (~7.89 min) | 409.8s |
-| centrale | palmer | 562 | 48 | 3499 | 440.3s (~7.34 min) | 382.0s |
-| centrale | lago | 438 | 48 | 3538 | 417.1s (~6.95 min) | 358.1s |
-| centrale | diner | 592 | 47 | 3589 | 453.6s (~7.56 min) | 393.8s |
-| nessuno | palmer | 562 | 48 | 3506 | 440.9s (~7.35 min) | 382.4s |
-| nessuno | lago | 438 | 48 | 3545 | 417.7s (~6.96 min) | 358.6s |
-| nessuno | diner | 592 | 47 | 3596 | 454.2s (~7.57 min) | 394.2s |
+| palmer | palmer | 608 | 51 | 3917 | 486.7s (~8.11 min) | 421.4s |
+| palmer | lago | 484 | 51 | 3920 | 460.5s (~7.68 min) | 395.2s |
+| palmer | diner | 638 | 50 | 3971 | 497.0s (~8.28 min) | 430.8s |
+| centrale | palmer | 608 | 49 | 3659 | 464.0s (~7.73 min) | 403.0s |
+| centrale | lago | 484 | 49 | 3698 | 440.8s (~7.35 min) | 379.2s |
+| centrale | diner | 638 | 48 | 3749 | 477.3s (~7.96 min) | 414.8s |
+| nessuno | palmer | 608 | 49 | 3666 | 464.6s (~7.74 min) | 403.5s |
+| nessuno | lago | 484 | 49 | 3705 | 441.4s (~7.36 min) | 379.7s |
+| nessuno | diner | 638 | 48 | 3756 | 477.9s (~7.97 min) | 415.3s |
 
-Per promessa (12cps): accompagno 417.1-473.3s; autonomia 404.2-460.4s; prudenza 404.5-460.7s.
+Per promessa (12cps): accompagno 440.8-497.0s; autonomia 428.0-484.2s; prudenza 428.2-484.4s.
 
 ## Contenuto non obbligatorio (misurato a parte)
 
@@ -61,7 +61,7 @@ Per promessa (12cps): accompagno 417.1-473.3s; autonomia 404.2-460.4s; prudenza 
 
 - `m8_discovery` -> `m8_promise_echo`: `next` dichiarativo, il runtime non restituisce goto al commit; qui preparato come nodo consecutivo senza cammino (stesso schema del harness M8). Il passaggio scenico in produzione (fade, sync adapter) non e' misurato.
 - I beat E (`m8_cmp_letters`, `m8_cmp_diary`) sono a canale taccuino: l'apertura del taccuino e la navigazione fra sezioni non hanno costo modellato (solo pagine).
-- Cambio mappa = Manhattan fra la porta di uscita e lo spawn di arrivo (coordinate di mappe diverse, metodo del riferimento): 12 tratti nel canonico per 332 tile (70.8s) su 562; e' un artefatto sistematico (es. roadhouse(7,9)->town(47,29) = 60 tile), da leggere come limite superiore. Nessun BFS intra-mappa e' fallito.
+- Cambio mappa = Manhattan fra la porta di uscita e lo spawn di arrivo (coordinate di mappe diverse, metodo del riferimento): 12 tratti nel canonico per 332 tile (70.8s) su 608; e' un artefatto sistematico (es. roadhouse(7,9)->town(47,29) = 60 tile), da leggere come limite superiore. Nessun BFS intra-mappa e' fallito.
 - Le pagine con `condition` (es. valigia a Palmer, `p_valigia` alla centrale) sono conteggiate solo nelle varianti in cui il runtime le include.
 - Attesa della banda al Roadhouse, transizioni notte/alba e cutscene grafiche: nessuna e' rappresentata come pagina in M8, quindi non misurata.
 - Lettura: stima lineare caratteri/velocita' + costante per pagina; non modella riletture, esitazioni o skip.

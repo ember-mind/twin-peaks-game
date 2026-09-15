@@ -73,6 +73,15 @@ const S = () => E.state;
  * processo). */
 require(J('narrative-runtime.js'));
 const NR = GAME.NarrativeRuntime;
+// Named bodies come from Cast Presence since b529711 (glue.js NPCS is empty).
+// The probe keeps its own M4 state, so it places bodies straight from
+// GAME.CastPresence against that state, once per approach.
+['narrative-data.gen.js', 'cast-presence.js', 'narrative-bootstrap.js'].forEach((f) => require(J(f)));
+GAME.installNarrativeCatalogs({ data: GAME.NarrativeData, runtime: NR });
+function syncCast(narrativeState) {
+  GAME.CastPresence.syncMaps(GAME.Maps, narrativeState, null);
+}
+const snapshotState = (st) => JSON.parse(JSON.stringify(st));
 const M4 = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'narrative', 'missions', 'M4.json'), 'utf8'));
 
 /* ---------------- helper input (identico a smoke.js) ---------------- */
@@ -356,10 +365,12 @@ notesGeneral.push(
 // di E.state usati sopra per far scattare l'onEnter.
 const m4State = NR.createState();
 m4State.flags.sogno_fatto = true;
+syncCast(m4State);
 
 /* -------- room_315 -> hotel_gn (passaggio, nessun dialogo obbligatorio) - */
 crossDoor('hotel_gn', 'down');
 const hotelGnEntry = { x: lastX, y: lastY };
+const stateAtHotelGn = snapshotState(m4State);
 
 /* -------- hotel_gn -> town -> piazzale sceriffo -> sceriffo (Truman) ---- */
 crossDoor('town', 'down');
@@ -367,6 +378,8 @@ crossDoor('sheriffs_station_exterior', 'up');
 crossDoor('sheriff', 'up');
 const sheriffEntry1 = { x: lastX, y: lastY };
 
+syncCast(m4State);
+const stateAtSheriff1 = snapshotState(m4State);
 const trumanApproach1 = approachNpcTile('sheriff', 'truman', [11, 4]);
 loadMapAndLog('sheriff', trumanApproach1.x, trumanApproach1.y, 'left');
 
@@ -385,6 +398,8 @@ crossDoor('town', 'down');
 crossDoor('hospital', 'up');
 const hospitalEntry = { x: lastX, y: lastY };
 
+syncCast(m4State);
+const stateAtHospital = snapshotState(m4State);
 const ronetteBedApproach = findApproachTile('hospital', 3, 5, [3, 6]);
 loadMapAndLog('hospital', ronetteBedApproach.x, ronetteBedApproach.y, 'up');
 
@@ -400,6 +415,8 @@ crossDoor('double_r_exterior_prototype', 'up');
 crossDoor('diner', 'up');
 const dinerEntry = { x: lastX, y: lastY };
 
+syncCast(m4State);
+const stateAtDiner = snapshotState(m4State);
 const jamesApproach = approachNpcTile('diner', 'james', [9, 7]);
 loadMapAndLog('diner', jamesApproach.x, jamesApproach.y, 'up');
 
@@ -421,6 +438,8 @@ crossDoor('town', 'down');
 crossDoor('sheriffs_station_exterior', 'up');
 crossDoor('sheriff', 'up');
 
+syncCast(m4State);
+const stateBeforeAtto3 = snapshotState(m4State);
 const trumanApproach2 = approachNpcTile('sheriff', 'truman', [11, 4]);
 loadMapAndLog('sheriff', trumanApproach2.x, trumanApproach2.y, 'left');
 
@@ -440,7 +459,11 @@ if (!m4State.flags.atto3) throw new Error('atteso flags.atto3 (M4) impostato al 
  * semplice a un secondo passaggio integrale, pur restituendo tiles/pagine/
  * caratteri MISURATI e non solo enumerati (si veda "Limiti dichiarati"). */
 
+// Every optional beat is measured against the M4 state at the mandatory
+// point it departs from, all before atto3: the classic E.state never gets
+// atto3, and ACT3_HAWK_BRIDGE would otherwise move Hawk to the traincar.
 // hotel_gn: Ben Horne, Audrey (variante "_ben", visitata dopo Ben Horne)
+syncCast(stateAtHotelGn);
 const benhorneApproach = approachNpcTile('hotel_gn', 'benhorne', [5, 6]);
 recordOptional('Ben Horne', 'hotel_gn', 'classico', 'benhorne_a2', hotelGnEntry, benhorneApproach, dialoguePagesInfo('benhorne_a2'));
 const audreyNpc = GAME.Maps.hotel_gn.npcs.find((n) => n.id === 'audrey');
@@ -449,13 +472,15 @@ const audreyApproach = approachNpcTile('hotel_gn', 'audrey', [12, 10]);
 recordOptional('Audrey (dopo Ben Horne)', 'hotel_gn', 'classico', audreyResolved, hotelGnEntry, audreyApproach, dialoguePagesInfo(audreyResolved));
 
 // sceriffo: Hawk (dal punto in cui si e' raggiunto Truman la prima volta)
+syncCast(stateAtSheriff1);
 const hawkApproach = approachNpcTile('sheriff', 'hawk', [13, 8]);
 recordOptional('Hawk', 'sheriff', 'classico', 'hawk_a2', trumanApproach1, hawkApproach, dialoguePagesInfo('hawk_a2'));
 
 // ospedale: Gerard (dal letto di Ronette), infermiera_ctx (nodo M4, stesso comodino: 0 tile)
+syncCast(stateAtHospital);
 const gerardApproach = approachNpcTile('hospital', 'gerard', [12, 4]);
 recordOptional('Gerard', 'hospital', 'classico', 'gerard_a2', ronetteBedApproach, gerardApproach, dialoguePagesInfo('gerard_a2'));
-const infNode = doNode(m4State, 'infermiera_ctx');
+const infNode = doNode(snapshotState(stateBeforeAtto3), 'infermiera_ctx');
 optionalBeats.push({
   label: 'Infermiera (contesto, M4)', mapId: 'hospital', system: 'narrativo(M4)', id: 'infermiera_ctx',
   walkTiles: 0, approx: false,
@@ -463,6 +488,7 @@ optionalBeats.push({
 });
 
 // diner: Norma (dal punto in cui si e' raggiunto James)
+syncCast(stateAtDiner);
 const normaApproach = approachNpcTile('diner', 'norma', [5, 1]);
 recordOptional('Norma', 'diner', 'classico', 'norma_a2', jamesApproach, normaApproach, dialoguePagesInfo('norma_a2'));
 

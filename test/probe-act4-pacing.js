@@ -12,9 +12,10 @@
  *
  * Coordinate: porte da GAME.Maps[id].doors a runtime (incluse quelle
  * registrate da location-connections), target ambientali da WORLD_TARGETS
- * (A._debugWorldTargets), attori iniettati (maddy/leland al diner) da
- * NARRATIVE_ENTITIES (A._debugNarrativeEntities), NPC classici (norma, truman)
- * da GAME.Maps[id].npcs. Tutto validato con isWalkableTile.
+ * (A._debugWorldTargets), corpi nominati (maddy/leland/norma/truman) da
+ * GAME.CastPresence, sincronizzati su GAME.Maps prima di ogni avvicinamento
+ * (Cast Presence b529711: NARRATIVE_ENTITIES e glue.js NPCS sono vuoti).
+ * Tutto validato con isWalkableTile.
  *
  * Esegui con: node test/probe-act4-pacing.js
  */
@@ -57,6 +58,8 @@ const S = () => E.state;
 
 require(J('narrative-runtime.js'));
 require(J('narrative-data.gen.js'));
+require(J('cast-presence.js'));
+require(J('narrative-bootstrap.js'));
 require(J('narrative-engine-adapter.js'));
 const NR = GAME.NarrativeRuntime;
 const MD = GAME.NarrativeData.missions;
@@ -70,7 +73,20 @@ if (!A) throw new Error('GAME.NarrativeAdapter non esposto');
   A.disable && A.disable();
 })();
 const WORLD_TARGETS = A._debugWorldTargets;
-const ENTITIES = A._debugNarrativeEntities || [];
+// Cast Presence resolves bodies on a REACHABLE story state: the bare M8 seed
+// (atto4, no sogno_fatto) is an OVERLAP at the roadhouse: james in both
+// ACT4_EVENING_GATHERING and JAMES_NOT_YET. Bodies are resolved on
+// the fixture's ACT4_AFTERNOON history with the live M8 state on top; the M8
+// run itself keeps the probe's seed, so pages and characters do not move.
+const ACT4_HISTORY = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'cast-pins-acts-1-4.json'), 'utf8')).seeds.ACT4_AFTERNOON;
+function castStateOf(s) {
+  const c = JSON.parse(JSON.stringify(s));
+  ['flags', 'values', 'evidence', 'nodes_done', 'props'].forEach((k) => { c[k] = Object.assign({}, ACT4_HISTORY[k], s[k]); });
+  return c;
+}
+function syncCast(s) {
+  GAME.CastPresence.syncMaps(GAME.Maps, castStateOf(s), null);
+}
 ['roadhouse', 'town', 'palmer'].forEach((m) => { if (!WORLD_TARGETS || !WORLD_TARGETS[m]) throw new Error(`WORLD_TARGETS.${m} mancante`); });
 
 (function installValueDomains() {
@@ -138,15 +154,15 @@ function findApproachTile(mapId, nx, ny, preferred) {
   for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) { const x = nx + dx, y = ny + dy; if (isWalkableTile(mapId, x, y)) return { x, y }; }
   throw new Error(`nessuna tile calpestabile adiacente a ${mapId} (${nx},${ny})`);
 }
-function approachNpcTile(mapId, npcId, preferred) {
+function approachNpcTile(mapId, npcId, preferred, s) {
+  syncCast(s);
   const npc = GAME.Maps[mapId].npcs.find((n) => n.id === npcId);
-  if (!npc) throw new Error(`npc "${npcId}" non trovato su ${mapId}`);
+  if (!npc) throw new Error(`CastPresence: "${npcId}" non posato su ${mapId}`);
   return findApproachTile(mapId, npc.x, npc.y, preferred);
 }
-function approachEntityTile(mapId, npcId) {
-  const ent = ENTITIES.find((e) => e.map_id === mapId && e.npc && e.npc.id === npcId);
-  if (!ent) throw new Error(`NARRATIVE_ENTITIES: "${npcId}" non registrato su ${mapId}`);
-  return findApproachTile(mapId, ent.npc.x, ent.npc.y, null);
+// ex attori iniettati da NARRATIVE_ENTITIES: nessuna tile preferita, come prima
+function approachEntityTile(mapId, npcId, s) {
+  return approachNpcTile(mapId, npcId, null, s);
 }
 function approachWorldTarget(mapId, targetId) {
   const reg = WORLD_TARGETS[mapId];
@@ -242,7 +258,7 @@ function runRequiredPath(promise, warning, focus) {
   }
 
   // partenza: davanti a Truman, dove M6 B9 lascia Cooper
-  const t0 = approachNpcTile('sheriff', 'truman', [11, 4]);
+  const t0 = approachNpcTile('sheriff', 'truman', [11, 4], s);
   load('sheriff', t0.x, t0.y, 'left', 'partenza (fine Atto 3, m6_atto4_bridge)');
 
   // A — diner: la promessa
@@ -250,8 +266,8 @@ function runRequiredPath(promise, warning, focus) {
   crossDoor('town', 'down');
   crossDoor('double_r_exterior_prototype', 'up');
   crossDoor('diner', 'up');
-  const maddyTile = approachEntityTile('diner', 'maddy');
-  load('diner', maddyTile.x, maddyTile.y, 'up', 'Maddy (NARRATIVE_ENTITIES)');
+  const maddyTile = approachEntityTile('diner', 'maddy', s);
+  load('diner', maddyTile.x, maddyTile.y, 'up', 'Maddy (Cast Presence)');
   const walkBeforeFirstChoice = log.filter((b) => b.kind === 'map').reduce((a, b) => a + b.walkTiles, 0);
   const dinerPre = doNode(s, 'm8_diner');
   const dinerFb = doChoice(s, 'm8_diner', 'promise_' + promise);
@@ -259,8 +275,8 @@ function runRequiredPath(promise, warning, focus) {
   const readingBeforeFirstChoice = chars(dinerPre) / CHARS_PER_SEC + dinerPre.length * SEC_PER_PAGE_INPUT;
 
   // B0 — Leland al bancone
-  const lelandTile = approachEntityTile('diner', 'leland');
-  load('diner', lelandTile.x, lelandTile.y, 'up', 'Leland (NARRATIVE_ENTITIES)');
+  const lelandTile = approachEntityTile('diner', 'leland', s);
+  load('diner', lelandTile.x, lelandTile.y, 'up', 'Leland (Cast Presence)');
   narr('Diner: Leland e il taxi (B0)', 'm8_leland_taxi', 'B0', doNode(s, 'm8_leland_taxi'));
 
   // B — Roadhouse (pass 01, split B1: si CAMMINA dal tavolo di Truman al
@@ -268,8 +284,8 @@ function runRequiredPath(promise, warning, focus) {
   crossDoor('double_r_exterior_prototype', 'down');
   crossDoor('town', 'down');
   crossDoor('roadhouse', 'up');
-  const trumanTile = approachEntityTile('roadhouse', 'truman');
-  load('roadhouse', trumanTile.x, trumanTile.y, 'up', 'Truman al tavolo (NARRATIVE_ENTITIES)');
+  const trumanTile = approachEntityTile('roadhouse', 'truman', s);
+  load('roadhouse', trumanTile.x, trumanTile.y, 'up', 'Truman al tavolo (Cast Presence)');
   narr('Roadhouse: il Gigante, al tavolo (B)', 'm8_roadhouse_truman', 'B', doNode(s, 'm8_roadhouse_truman'));
   const phone = approachWorldTarget('roadhouse', 'roadhouse_phone');
   load('roadhouse', phone.x, phone.y, 'up', 'telefono (WORLD_TARGETS)');
@@ -295,8 +311,8 @@ function runRequiredPath(promise, warning, focus) {
   } else if (focus === 'diner') {
     crossDoor('double_r_exterior_prototype', 'up');
     crossDoor('diner', 'up');
-    const nt = approachNpcTile('diner', 'norma', [5, 3]);
-    load('diner', nt.x, nt.y, 'up', 'Norma (NPC classico)');
+    const nt = approachNpcTile('diner', 'norma', [5, 3], s);
+    load('diner', nt.x, nt.y, 'up', 'Norma (Cast Presence)');
     narr('Diner: Norma (C)', 'm8_route_diner', 'C', doNode(s, 'm8_route_diner'));
     crossDoor('double_r_exterior_prototype', 'down');
     crossDoor('town', 'down');
@@ -320,7 +336,7 @@ function runRequiredPath(promise, warning, focus) {
   // F — centrale
   crossDoor('sheriffs_station_exterior', 'up');
   crossDoor('sheriff', 'up');
-  const t1 = approachNpcTile('sheriff', 'truman', [11, 4]);
+  const t1 = approachNpcTile('sheriff', 'truman', [11, 4], s);
   load('sheriff', t1.x, t1.y, 'left', 'Truman');
   narr('Centrale, prima dell\'alba (F)', 'm8_station', 'F', doNode(s, 'm8_station'));
   if (!s.nodes_done.m8_station) throw new Error('attesa completion M8 (node_done m8_station)');
