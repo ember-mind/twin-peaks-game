@@ -132,35 +132,57 @@
     R(99,78,26,2,p.ink);
   }
   function fire(R){
-    R(134,57,20,15,p.ink);R(135,68,18,4,p.fire);
-    [[136,63,3,7],[140,59,3,11],[144,63,3,7],[148,58,3,12]].forEach(function(a){R(a[0],a[1],a[2],a[3],p.fire);});
-    R(138,65,3,6,p.cream);R(143,63,3,9,p.light);R(148,65,3,6,p.cream);
-    R(136,72,17,2,p.woodDark);R(139,72,2,1,p.fire);R(148,72,3,1,p.fire);
+    R(132,55,24,20,p.ink);R(133,67,22,6,p.fire);
+    /* Interlocking flame tongues: orange envelope, gold middle and tiny
+     * ivory roots. The three ambient silhouettes move within this opening. */
+    [[134,60,3,10],[138,56,3,15],[143,60,4,12],[150,57,3,15]].forEach(function(a){R(a[0],a[1],a[2],a[3],p.fire);});
+    R(135,64,3,8,p.cream);R(138,61,3,11,p.cream);R(144,63,4,10,p.cream);R(150,62,3,11,p.cream);
+    R(139,67,2,6,p.light);R(143,70,3,3,p.light);R(149,67,2,6,p.light);
+    R(133,73,22,2,p.woodDark);R(135,72,9,2,p.wood);R(145,73,8,1,p.wood);
+    R(137,72,2,1,p.fire);R(148,73,3,1,p.fire);R(153,71,1,1,p.light);
   }
   function fireplace(R){
-    R(128,23,32,57,p.ink);R(129,24,30,52,p.stoneDark);
-    for(var y=24;y<75;y+=7)for(var x=130;x<159;x+=9){
-      var shift=(y%2)*3,w=Math.min(8,159-x);R(x,y,w,6,p.stone);R(x+1,y+1,Math.max(1,w-2),1,p.stoneLight);
-      R(x+shift%2,y+4,Math.max(1,w-2),1,p.stoneDark);
+    /* Tall chimney and projecting east return; the tapered hearth still
+     * contacts only the original two C tiles at its south edge. */
+    R(128,9,39,43,p.ink);R(129,10,33,41,p.stoneDark);R(162,12,5,40,p.stoneDark);
+    for(var y=11,row=0;y<48;y+=7,row++)for(var start=129-(row%2)*6;start<162;start+=12){
+      var x=Math.max(129,start),w=Math.min(162,start+11)-x;
+      if(w>0){R(x,y,w,6,p.stone);R(x,y,w,2,p.stoneLight);if(w>3)R(x+1,y+5,w-2,1,p.stoneDark);}
     }
-    /* Heavy muzzle, rounded ears, oval plaque: bear rather than antlers. */
-    R(135,27,18,20,p.woodDark);R(133,30,22,14,p.woodDark);
-    R(136,26,5,5,p.wood);R(148,26,5,5,p.wood);R(137,29,15,13,p.wood);
-    R(139,29,10,2,p.woodLight);R(138,33,3,2,p.ink);R(147,33,3,2,p.ink);
-    R(141,34,6,8,p.woodLight);R(142,35,4,3,p.ink);R(141,40,6,3,p.ink);R(142,40,1,1,p.cream);R(146,40,1,1,p.cream);
-    R(127,49,34,5,p.woodDark);R(127,49,34,1,p.gold);R(129,51,30,1,p.woodLight);
-    R(133,55,22,20,p.stoneDark);fire(R);
-    R(128,76,32,4,p.stoneDark);R(129,76,30,1,p.stoneLight);R(130,78,28,1,p.stone);
+    for(var sy=14;sy<48;sy+=7){R(163,sy,3,5,p.stone);R(163,sy,2,1,p.stoneLight);}
+    /* Broad carved plaque surrounds a shaggy head with round ears, brows,
+     * cheek tufts, projecting muzzle and a dark open mouth. */
+    R(135,15,22,31,p.woodDark);R(132,19,28,23,p.woodDark);R(134,17,24,27,p.wood);
+    R(135,17,22,1,p.gold);R(133,20,1,19,p.woodLight);R(158,20,1,19,p.ink);
+    R(136,18,6,6,p.ink);R(150,18,6,6,p.ink);R(137,19,4,4,p.woodLight);R(151,19,4,4,p.woodLight);
+    R(138,21,16,18,p.wood);R(136,25,20,11,p.wood);R(137,36,18,4,p.wood);
+    R(140,21,12,3,p.woodLight);R(138,24,3,3,p.woodLight);R(151,24,3,3,p.woodLight);
+    R(139,27,5,2,p.ink);R(148,27,5,2,p.ink);R(141,28,1,1,p.gold);R(149,28,1,1,p.gold);
+    R(142,29,8,10,p.woodLight);R(143,30,6,3,p.ink);R(144,30,3,1,p.woodDark);
+    R(141,36,10,6,p.ink);R(142,36,2,2,p.cream);R(148,36,2,2,p.cream);R(143,40,6,2,p.redDark);
+    R(139,32,2,4,p.woodDark);R(151,32,2,4,p.woodDark);R(140,41,12,2,p.wood);
+    /* Thick mantel catches firelight; stone jambs have separately lit faces. */
+    R(128,48,39,5,p.woodDark);R(128,48,38,1,p.gold);R(129,49,36,1,p.woodLight);
+    R(128,53,32,23,p.stoneDark);R(129,54,4,21,p.stone);R(155,54,4,21,p.stone);
+    R(130,54,2,21,p.stoneLight);R(155,54,2,21,p.stoneLight);
+    R(129,53,30,2,p.stoneLight);R(130,60,3,1,p.stoneDark);R(155,62,4,1,p.stoneDark);R(129,68,4,1,p.stoneDark);
+    fire(R);
+    R(128,76,32,4,p.stoneDark);R(128,76,32,1,p.stoneLight);R(130,77,28,1,p.stone);R(132,77,24,1,p.gold);
   }
   function chair(R,x,y,mirror){
     function C(dx,dy,w,h,c){R(x+(mirror?16-dx-w:dx),y+dy,w,h,c);}
-    C(1,-1,14,2,p.ink);C(0,-25,15,23,p.ink);C(1,-24,13,15,p.redDark);
-    C(2,-24,11,2,p.redLight);C(2,-22,11,9,p.red);C(3,-22,1,8,p.redLight);
-    C(6,-19,1,1,p.redDark);C(10,-19,1,1,p.redDark);
-    C(4,-12,10,7,p.redDark);C(5,-11,8,3,p.red);C(5,-11,7,1,p.redLight);
-    C(0,-14,4,11,p.redDark);C(0,-14,4,2,p.redLight);C(1,-12,2,6,p.red);
-    C(12,-15,4,12,p.redDark);C(12,-15,4,2,p.redLight);C(13,-13,2,7,p.red);
-    C(3,-4,10,2,p.redDark);C(3,-2,2,2,p.ink);C(12,-2,2,2,p.ink);
+    C(1,-1,14,2,p.ink);C(-1,-2,18,2,p.ink);
+    /* Stepped curved back and rolled arms over a recessed seat cushion. */
+    C(1,-31,13,2,p.ink);C(-1,-29,17,18,p.ink);C(0,-29,15,14,p.redDark);
+    C(2,-30,10,2,p.redLight);C(1,-28,13,3,p.redLight);C(1,-25,13,10,p.red);
+    C(2,-25,2,8,p.redLight);C(12,-25,2,10,p.redDark);
+    C(5,-24,2,2,p.redDark);C(10,-24,2,2,p.redDark);C(6,-23,1,1,p.redLight);C(11,-23,1,1,p.redLight);
+    C(4,-17,9,3,p.redDark);C(3,-14,12,9,p.ink);
+    C(4,-14,10,2,p.redLight);C(4,-12,10,4,p.red);C(5,-11,8,1,p.redLight);
+    C(4,-8,10,3,p.redDark);C(5,-8,8,1,p.redLight);
+    C(-2,-18,6,13,p.ink);C(-1,-18,5,3,p.redLight);C(-1,-15,4,8,p.red);C(0,-14,1,6,p.redLight);
+    C(13,-19,5,14,p.ink);C(13,-19,4,3,p.redLight);C(14,-16,3,9,p.redDark);C(14,-16,1,8,p.red);
+    C(1,-5,15,2,p.redDark);C(3,-3,2,3,p.ink);C(12,-3,2,3,p.ink);
   }
   function lamp(R,x,y){
     R(x-4,y-2,9,2,p.ink);R(x-3,y-3,7,1,p.gold);R(x,y-13,1,10,p.gold);
@@ -168,8 +190,12 @@
     R(x-2,y-21,4,2,p.light);R(x-3,y-19,6,4,p.light);R(x,y-23,1,1,p.ink);
   }
   function table(R){
-    R(145,100,14,7,p.ink);R(146,99,12,5,p.wood);R(148,98,8,1,p.gold);
-    R(146,100,12,1,p.woodLight);R(147,106,2,6,p.ink);R(155,106,2,6,p.ink);lamp(R,152,102);
+    R(148,97,8,1,p.ink);R(145,98,14,1,p.ink);R(143,99,18,4,p.ink);
+    R(145,103,14,2,p.ink);R(147,105,10,1,p.ink);
+    R(148,98,8,1,p.gold);R(145,99,14,2,p.woodLight);R(147,99,10,1,p.gold);
+    R(145,101,14,1,p.wood);R(147,102,10,1,p.woodLight);R(146,103,12,1,p.woodDark);
+    R(147,105,2,6,p.ink);R(155,105,2,6,p.ink);R(146,110,3,2,p.ink);R(155,110,3,2,p.ink);
+    R(148,106,1,3,p.woodLight);R(155,106,1,3,p.wood);lamp(R,152,101);
   }
   var font={G:['111','100','101','101','111'],R:['110','101','110','101','101'],E:['111','100','110','100','111'],
     A:['010','101','111','101','101'],T:['111','010','010','010','010'],N:['101','111','111','111','101'],
