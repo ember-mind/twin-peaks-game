@@ -108,3 +108,5 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-15 — merged E3 cohesion round (ebd6466): props at native scale vs sprites, critic 7/10 borderline, gap = grounding shadows. Mirrored.
 
 - 2026-09-15 — merged Act 5 pass 01 (M9 refresh + M10 from confession lock, act-5-playthrough 203/203) and E7 Red Room native scene (3c086b2). Lead sign-off pending on SG-1..8; E7b floor follow-up open. Mirrored to vault.
+
+- 2026-09-15 — merged E7b floor evidence (0f2ade1): Red Room zigzag 7/10, floor unit met. Mirrored.
