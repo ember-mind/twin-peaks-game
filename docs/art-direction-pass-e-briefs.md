@@ -139,7 +139,7 @@ Goal: the two existing native exteriors get a second light state matching `doubl
 Grammar, Double R: neon DOUBLE R lit with red glow on the wet lot, windows warm with silhouettes inside, red awning, EAT sign on the pole, lamppost pool, phone booth lit, two parked cars with taillight reflections, rain streaks, puddles reflecting neon. Sheriff: SHERIFF sign lit under two lamps, warm windows, two patrol cars with light bars off, flagpole with flag, lamppost pool, notice board, damp lot, forest wall dark.
 Ambient: neon flicker, rain (new `RAIN_STREAKS` archetype if none fits: sparse 1px diagonal streaks, 3 frames), window warm variation.
 Scope fence: `js/double-r-exterior-art.js`, `js/double-r-exterior-scene.js`, `js/sheriffs-station-exterior-art.js`, `js/sheriffs-station-exterior-scene.js`, `js/ambient-life.js` (rain archetype only), `js/ambient-life-scenes.js`. Map rows, doors, connection registry untouched.
-Units per exterior: building + sign, lot + cars, light + rain. Floor 7 each. Extra gate: `node test/double-r-location.js`, `node test/sheriffs-station-location.js`, `node test/world-door-equality.js`.
+Units per exterior: building + sign, lot + cars, light + rain. Floor 7 each. Extra gate: `node test/double-r-location-native.js`, `node test/sheriffs-station-location.js`, `node test/world-door-equality.js`.
 
 ## Brief E10 — Act title cards (engagement)
 

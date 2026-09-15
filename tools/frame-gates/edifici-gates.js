@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 'use strict';
 
-/* test/edifici-gates.js — misure riproducibili su negozio, casa e cartello
+/* tools/frame-gates/edifici-gates.js — misure riproducibili su negozio, casa e cartello
  * del tableau d'arrivo. Stesso codice per il riferimento e per il build:
  * ogni numero del build va letto accanto al numero che QUESTO script legge
  * sul target, non accanto a un numero scritto in un contratto.
  *
- *   node test/edifici-gates.js artifacts/edifici/base.png
- *   node test/edifici-gates.js artifacts/reference/target.png \
+ *   node tools/frame-gates/edifici-gates.js artifacts/edifici/base.png
+ *   node tools/frame-gates/edifici-gates.js artifacts/reference/target.png \
  *        --mockup=32,22.5,5.844,5.880
  *
  * La normalizzazione del mockup (X0=32, Y0=22,5, SX=5,844, SY=5,880) e'

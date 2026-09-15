@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 'use strict';
 
-// test/pixel-gates.js — misure riproducibili su un frame nativo 160x144.
+// tools/frame-gates/pixel-gates.js — misure riproducibili su un frame nativo 160x144.
 // Nasce dalle misure del critico grammatica-pixel R53: il terreno dev'essere
 // una texture con dither periodico, non un fondale piatto con macchioline,
 // e la fascia alberi non dev'essere uno stampo ripetuto a passo fisso.
 //
 // Uso:
-//   node test/pixel-gates.js <frame.png> --rect=x0,y0,x1,y1 [--label=prato]
-//   node test/pixel-gates.js <frame.png> --mask-a=x,y,w,h --mask-b=x,y \
+//   node tools/frame-gates/pixel-gates.js <frame.png> --rect=x0,y0,x1,y1 [--label=prato]
+//   node tools/frame-gates/pixel-gates.js <frame.png> --mask-a=x,y,w,h --mask-b=x,y \
 //        [--mask-b-file=<altro.png>] [--bg=#rrggbb,...]
-//   node test/pixel-gates.js <frame.png> --tile-discipline
-//   node test/pixel-gates.js <frame.png> --stamp=y0,y1
+//   node tools/frame-gates/pixel-gates.js <frame.png> --tile-discipline
+//   node tools/frame-gates/pixel-gates.js <frame.png> --stamp=y0,y1
 //
 // Nessuna dipendenza esterna: decoder PNG minimale (RGB/RGBA 8 bit).
 
