@@ -125,6 +125,19 @@ throws(bad([{ op: 'upsert', scene: 'yard', interact: '4,4', to: '2,5', id: 'x' }
 throws(bad([{ op: 'move', scene: 'yard', sourceId: 'pond' }]), /op must be upsert, create or delete/);
 throws(bad([{ op: 'delete', scene: 'yard', sourceId: 'pond', interact: '4,4' }]), /exactly one of sourceId or interact/);
 throws(() => SO.applyObjectsChangeset(DATA, { format: SO.FORMAT, version: 1, target: 'world/connections.json', operations: [] }), /target must be world\/scene-objects.json/);
+throws(bad([{ op: 'upsert', scene: 'yard', sourceId: 'pond', object: Object.assign({}, DATA.scenes.yard.objects[0], { x: -3 }) }]), /object x,y must be non-negative integers/);
+throws(bad([{ op: 'upsert', scene: 'yard', sourceId: 'pond', object: Object.assign({}, DATA.scenes.yard.objects[0], { h: 0 }) }]), /object w,h must be integers >= 1/);
+throws(bad([{ op: 'create', scene: 'hall', sourceId: 'c', object: { sourceId: 'c', type: '', kind: 'k', x: 0, y: 0, dialogue: 'x' } }]), /object type must be a non-empty string/);
+// a new key on the tile a base key just left is a different entry: the draft is valid, so apply must accept it too
+{
+  let d2 = SO.moveInteract(st.draft, 'yard', '4,4', 4, 6);
+  d2 = SO.createInteract(st, d2, 'yard', { x: 4, y: 4, id: 'lamp' }).draft;
+  ok(Object.keys(SO.draftErrors(ctx, st, d2)).length === 0 && JSON.stringify(SO.applyObjectsChangeset(DATA, SO.buildObjectsChangeset(st, d2)).data.scenes.yard.interact) === '{"4,6":"bell","2,5":"gate","4,4":"lamp"}', 'move a key away, create a new one on its tile: draft valid and apply agrees');
+  let d3 = SO.deleteInteract(st.draft, 'yard', '2,5');
+  d3 = SO.createInteract(st, d3, 'yard', { x: 2, y: 5, id: 'lamp' }).draft;
+  ok(Object.keys(SO.draftErrors(ctx, st, d3)).length === 0 && JSON.stringify(SO.applyObjectsChangeset(DATA, SO.buildObjectsChangeset(st, d3)).data.scenes.yard.interact) === '{"4,4":"bell","2,5":"lamp"}', 'delete a key, create another on its tile: draft valid and apply agrees');
+  throws(bad([{ op: 'create', scene: 'yard', interact: '2,5', id: 'lamp' }]), /two interact keys on 2,5 after the changeset/);
+}
 
 // ---- history over drafts
 let h = History.create(st.draft);

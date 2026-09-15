@@ -57,7 +57,11 @@
  *   3. delete: refused when a mission node under <root>/narrative/missions holds the entry's dialogue id (or its
  *      interact id) as an exact string value; the nodes are listed
  * Writes world/scene-objects.json (2-space JSON), runs test/gen-world-data.js, then
- * test/scene-objects-equality.js --registry-only (glue reproduces the new registry, js/maps.js still empty).
+ * test/scene-objects-equality.js --registry-only (glue reproduces the new registry, js/maps.js still empty), then
+ * test/smoke.js and test/walkthrough.js after the write: either failing, or walkthrough's acquisition count dropping below
+ * its count before the write (the project acceptance rule), rolls back. Smoke's check count is not compared: it has one
+ * check per dialogue binding, so it follows the number of entries. That is the guard for entries a classic clue
+ * or act gate needs: the act 1 clue sources are not mission nodes (deleting woods 14,12 olio drops 85 -> 84 acquisitions).
  *
  * Any failure after the first write restores every written file (registry, gen, catalog, windows.json,
  * narrative-data.gen.js, pins fixture, audit record, scene-objects.json, scene-objects.gen.js) from the pre-run
@@ -408,7 +412,7 @@ function planCast(args, changeset, G, finalConnections, problems) {
 
 // ---- scene objects part (M8) ----------------------------------------------------------------------------------
 function planSceneObjects(args, changeset, boot, problems) {
-  for (const rel of [OBJECTS_REL, OBJECTS_GEN_REL, GEN_REL, 'test/gen-world-data.js', 'test/scene-objects-equality.js', MISSIONS_REL]) {
+  for (const rel of [OBJECTS_REL, OBJECTS_GEN_REL, GEN_REL, 'test/gen-world-data.js', 'test/scene-objects-equality.js', 'test/smoke.js', 'test/walkthrough.js', MISSIONS_REL]) {
     if (!fs.existsSync(path.join(args.root, rel))) usage('no ' + rel + ' under ' + args.root);
   }
   const target = path.join(args.root, OBJECTS_REL);
@@ -482,10 +486,20 @@ function planSceneObjects(args, changeset, boot, problems) {
     dryLine: 'DRY-RUN ' + applied.changes.length + ' scene object change(s); nothing written',
     files: [OBJECTS_REL, OBJECTS_GEN_REL, GEN_REL],
     write: function (run) {
+      // gameplay baseline on the untouched files: the acquisition count the written registry must not drop below
+      const ACQUISITIONS = /(\d+) acquisizioni/;
+      const before = ACQUISITIONS.exec(run('test/walkthrough.js').trim().split('\n').pop());
+      if (!before) throw new Error('test/walkthrough.js printed no acquisition count before the write');
+      const acquisitionsBefore = Number(before[1]);
       writeAtomic(target, nextText);
       console.log('WROTE ' + OBJECTS_REL + ' (' + applied.changes.length + ' change(s))');
       console.log(run('test/gen-world-data.js').trim().split('\n')[0]);
       console.log('CHECK ' + run('test/scene-objects-equality.js', ['--registry-only']).trim().split('\n').pop());
+      console.log('CHECK smoke ' + run('test/smoke.js').trim().split('\n').pop().trim());
+      const last = run('test/walkthrough.js').trim().split('\n').pop().trim();
+      const m = ACQUISITIONS.exec(last);
+      if (!m || Number(m[1]) < acquisitionsBefore) throw new Error('test/walkthrough.js acquisitions dropped: ' + acquisitionsBefore + ' before, ' + (m ? m[1] : '?') + ' after (' + last + ')');
+      console.log('CHECK walkthrough ' + last);
     }
   };
 }

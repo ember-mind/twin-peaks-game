@@ -373,6 +373,19 @@
     return { version: store.data.version, scenes: scenes };
   }
 
+  // shapeErrors(o) -> scene-independent shape problems of one object entry (apply refuses them; bounds and dialogue ids
+  // need the game and are checked by objectErrors)
+  function shapeErrors(o) {
+    const errs = [];
+    if (typeof o.sourceId !== 'string' || !SOURCE_ID.test(o.sourceId) || /^interact-/.test(o.sourceId)) errs.push('sourceId must be kebab-case and may not start with "interact-"');
+    if (typeof o.type !== 'string' || !o.type) errs.push('type must be a non-empty string');
+    if (o.kind !== undefined && (typeof o.kind !== 'string' || !o.kind)) errs.push('kind must be a non-empty string when present');
+    if (!isTile(o.x) || !isTile(o.y)) errs.push('x,y must be non-negative integers');
+    if ((o.w === undefined) !== (o.h === undefined)) errs.push('w and h go together');
+    else if (o.w !== undefined && (!Number.isInteger(o.w) || o.w < 1 || !Number.isInteger(o.h) || o.h < 1)) errs.push('w,h must be integers >= 1');
+    return errs;
+  }
+
   // applyObjectsChangeset(data, changeset) -> { data, changes: [{ scene, entry, op, key, before, after }] }. STRICT.
   function applyObjectsChangeset(data, changeset) {
     requireRegistry(data);
@@ -398,7 +411,9 @@
       const allowed = isObject ? (op.op === 'delete' ? ['op', 'scene', 'sourceId'] : ['op', 'scene', 'sourceId', 'object'])
         : (op.op === 'delete' ? ['op', 'scene', 'interact'] : op.op === 'upsert' ? ['op', 'scene', 'interact', 'to'] : ['op', 'scene', 'interact', 'id']);
       Object.keys(op).forEach(function (k) { if (allowed.indexOf(k) === -1) fail(where + ' carries unknown field "' + k + '"'); });
-      const entryKey = op.scene + (isObject ? '/' + op.sourceId : '/@' + op.interact);
+      // a created interact key is a new entry even on a tile a moved or deleted base key just left, so it is keyed
+      // apart from base keys; a real duplicate is caught by the key collision pass at the end
+      const entryKey = op.scene + (isObject ? '/' + op.sourceId : (op.op === 'create' ? '/@new:' : '/@') + op.interact);
       if (has(seen, entryKey)) fail(where + ' is a second operation on ' + entryKey + ' (' + seen[entryKey] + ' already)');
       seen[entryKey] = where;
       if (isObject) {
@@ -408,6 +423,7 @@
           if (!op.object || typeof op.object !== 'object' || op.object.sourceId !== op.sourceId) fail(where + '.object must carry sourceId ' + JSON.stringify(op.sourceId));
           Object.keys(op.object).forEach(function (k) { if (OBJECT_KEYS.indexOf(k) === -1) fail(where + '.object carries unknown field "' + k + '"'); });
           if (typeof op.object.dialogue !== 'string') fail(where + '.object.dialogue must be one dialogue id (cascades are hand-edited)');
+          shapeErrors(op.object).forEach(function (e) { fail(where + '.object ' + e); });
           const created = {};
           OBJECT_KEYS.forEach(function (k) { if (op.object[k] !== undefined) created[k] = clone(op.object[k]); });
           sc.objects.push(created);
@@ -430,6 +446,7 @@
         if (isRect(before) !== isRect(obj)) fail(where + (isRect(before) ? ' drops w/h from rect ' : ' adds w/h to single-tile object ') + op.sourceId);
         const next = clone(before);
         MOVABLE.forEach(function (k) { if (before[k] !== undefined) next[k] = obj[k]; });
+        shapeErrors(next).forEach(function (e) { fail(where + '.object ' + e); });
         sc.objects[idx] = next;
         result.push({ scene: op.scene, entry: 'object', op: 'upsert', key: op.sourceId, before: before, after: clone(next) });
         return;

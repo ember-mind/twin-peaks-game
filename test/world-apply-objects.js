@@ -6,7 +6,8 @@
  * Fixture root: a copy of js/ test/ world/ narrative/ index.html (as test/world-apply.js). Covers: dry-run of the welcome
  * sign move (one x line, nothing written), apply + regenerate + registry-only equality inside the tool, NO-OP rerun,
  * moving back restores bytes; resizing the tracks landmark; create + delete of an object and of an interact key; the
- * mission reference guard on delete; strict refusals (exit 2) and validation failures (exit 1); rollback on an injected
+ * mission reference guard on delete; the gameplay guard (smoke green, walkthrough acquisitions not dropping) rolling back a
+ * deleted act 1 clue source; strict refusals (exit 2) and validation failures (exit 1); rollback on an injected
  * generator or equality failure; a bundle with a connections part, applied and rolled back as one write.
  */
 
@@ -66,7 +67,7 @@ const SIGN_BACK = { format: SO.FORMAT, version: 1, target: SO.TARGET, operations
 {
   const f = makeFixture(), s0 = snap(f);
   let r = run(f, SIGN);
-  ok(r.code === 0 && r.out.includes('WROTE world/scene-objects.json (1 change(s))'), 'apply exits 0 and writes', r.out + r.err);
+  ok(r.code === 0 && r.out.includes('WROTE world/scene-objects.json (1 change(s))') && r.out.includes('CHECK smoke 415 controlli superati') && r.out.includes('CHECK walkthrough OK: cammino completo simulato, 85 acquisizioni'), 'apply exits 0, writes, smoke 415 and walkthrough 85 green', r.out + r.err);
   ok(r.out.includes('[gen-world-data] wrote js/scene-objects.gen.js') && r.out.includes('CHECK SCENE-OBJECTS-REGISTRY-PASS 20 entries on 13 maps'), 'gen + registry-only equality ran inside the tool', r.out);
   ok(readJson(f).scenes.town.objects[3].x === 31 && fs.readFileSync(path.join(f, 'js', 'scene-objects.gen.js'), 'utf8').includes('"x": 31'), 'registry and binding carry the move');
   const s1 = snap(f);
@@ -112,6 +113,15 @@ const SIGN_BACK = { format: SO.FORMAT, version: 1, target: SO.TARGET, operations
   ok(same(snap(f), s0), 'refused delete writes nothing');
   const ok2 = run(f, cs(SO.deleteObject(store.draft, 'town', 'cemetery')), ['--dry-run']);
   ok(ok2.code === 0 && ok2.out.includes('DELETE world/scene-objects.json :: town object cemetery'), 'an unreferenced object may be deleted', ok2.out + ok2.err);
+}
+
+// ---- a classic clue source deleted: walkthrough's acquisition count drops after the write and the tool rolls back
+{
+  const f = makeFixture(), s0 = snap(f);
+  const r = run(f, cs(SO.deleteInteract(store.draft, 'woods', '14,12')));
+  ok(r.code === 1 && r.out.includes('CHECK SCENE-OBJECTS-REGISTRY-PASS') && r.err.includes('test/walkthrough.js acquisitions dropped: 85 before, 84 after') &&
+    r.err.includes('ROLLED BACK world/scene-objects.json, js/scene-objects.gen.js, js/world-connections.gen.js (byte-identical to the pre-run copy)'), 'deleting the woods olio clue source rolls back on the gameplay checks', r.out + r.err);
+  ok(same(snap(f), s0), 'that rollback restores every file');
 }
 
 // ---- refusals (exit 2) and validation failures (exit 1)
@@ -169,8 +179,15 @@ for (const [label, rel, body] of [
   ok(same(snap(f), s0), 'bundle rollback restores all five files');
   f = makeFixture(); s0 = snap(f);
   r = run(f, bundle);
-  ok(r.code === 0 && r.out.includes('CHECK WORLD-ENGINE-V0.1-CATALOG-PASS') && r.out.includes('CHECK SCENE-OBJECTS-REGISTRY-PASS'), 'bundle applies both parts', r.out + r.err);
-  ok(readJson(f).scenes.town.objects[3].x === 31 && JSON.parse(fs.readFileSync(path.join(f, 'world', 'connections.json'), 'utf8')).connections.find((c) => c.id === conn.id).a.door.needsFlag === 'atto3', 'both targets written');
+  ok(r.code === 1 && r.err.includes('test/walkthrough.js exited') && r.err.includes('ROLLED BACK world/connections.json') && same(snap(f), s0),
+    'gating the station door on atto3 breaks the act 1 walkthrough: the gameplay check rolls the whole bundle back', r.out + r.err);
+  const facing = JSON.parse(JSON.stringify(conn)); facing.b.spawn.dir = facing.b.spawn.dir === 'down' ? 'left' : 'down';
+  const harmless = { format: 'world-builder-bundle', version: 1, changesets: [
+    { format: 'world-connections-changeset', version: 2, target: 'world/connections.json', operations: [{ op: 'upsert', id: conn.id, endpoints: ['b'], connection: facing }] },
+    SIGN] };
+  r = run(f, harmless);
+  ok(r.code === 0 && r.out.includes('CHECK WORLD-ENGINE-V0.1-CATALOG-PASS') && r.out.includes('CHECK SCENE-OBJECTS-REGISTRY-PASS') && r.out.includes('CHECK walkthrough OK'), 'bundle applies both parts', r.out + r.err);
+  ok(readJson(f).scenes.town.objects[3].x === 31 && JSON.parse(fs.readFileSync(path.join(f, 'world', 'connections.json'), 'utf8')).connections.find((c) => c.id === conn.id).b.spawn.dir === facing.b.spawn.dir, 'both targets written');
 }
 
 ok(same(snap(REPO), repoBefore), 'the real repo registry files are byte-identical');

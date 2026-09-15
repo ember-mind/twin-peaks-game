@@ -52,6 +52,7 @@ function ok(cond, msg) { if (!cond) die(msg); else console.log('  ✓ ' + msg); 
         if (!o.dialogue.length) bad(at + '.dialogue cascade is empty');
         o.dialogue.forEach(function (step, j) {
           if (isDialogueId(step)) return;
+          if (!step || typeof step !== 'object') bad(at + '.dialogue[' + j + '] must be a dialogue id or { cond, then }');
           const condOk = typeof step.cond === 'string' || (Array.isArray(step.cond) && step.cond.length && step.cond.every(function (c) { return typeof c === 'string'; }));
           if (!step || typeof step !== 'object' || !condOk || !isDialogueId(step.then) || Object.keys(step).length !== 2) bad(at + '.dialogue[' + j + '] must be a dialogue id or { cond, then }');
         });
