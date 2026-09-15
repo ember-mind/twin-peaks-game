@@ -27,16 +27,14 @@
     };
   }
   function floorColor(x, y) {
-    /* Four-pixel bands and four stepped rows of rise, across a 32px repeat.
-     * Each crest spans two tiles: the broader rhythm halves the ripple count.
-     * World coordinates preserve the phase through both 16px tile seams. */
-    var phase = ((x % 32) + 32) % 32;
-    var rise = phase < 16 ? Math.floor(phase/4) : 7-Math.floor(phase/4);
-    return ((((y-rise)%8)+8)%8)<4 ? palette.cream : palette.ink;
+    /* Map-pixel coordinates: a 16px chevron with exactly 4px bands. */
+    var v = Math.abs((x % 16) - 8);
+    var band = Math.floor((y + v) / 4) % 2;
+    return band ? palette.ink : palette.cream;
   }
   function floor(R) {
     for (var y=30; y<176; y++) {
-      for (var x=16; x<240; x+=2) R(x,y,2,1,floorColor(x,y));
+      for (var x=16; x<240; x++) R(x,y,1,1,floorColor(x,y));
     }
   }
   function curtains(R) {

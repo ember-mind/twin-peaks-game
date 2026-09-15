@@ -51,22 +51,46 @@ const ctx={globalAlpha:1,fillStyle:art.palette.ink,fillRect(x,y,w,h){
 G.sprites.drawStructures(ctx,map,0,0);
 G.sprites.drawForegroundStructures(ctx,map,0,0,{forestDepthMin:48,forestDepthMax:112});
 assert.equal(seen.size,5,'all five colors rendered');
-/* A full chevron spans two 16px tiles; vertical bands remain exactly 4px. */
-for(let x=0;x<256;x++)for(let y=32;y<176;y++){
-  assert.equal(art.floorColor(x,y),art.floorColor(x+32,y));
+/* Exact map-pixel formula over the full 256x192 scene, including odd x. */
+function expectedFloor(x,y){
+  const v=Math.abs((x%16)-8),band=Math.floor((y+v)/4)%2;
+  return band?art.palette.ink:art.palette.cream;
+}
+assert.equal(art.palette.cream,'#caba9f');assert.equal(art.palette.ink,'#211d21');
+for(let x=0;x<256;x++)for(let y=0;y<192;y++){
+  assert.equal(art.floorColor(x,y),expectedFloor(x,y),'exact floor formula at '+x+','+y);
+  assert.equal(art.floorColor(x,y),art.floorColor(x+16,y));
   assert.equal(art.floorColor(x,y),art.floorColor(x,y+8));
   assert.notEqual(art.floorColor(x,y),art.floorColor(x,y+4));
   assert.ok([art.palette.cream,art.palette.ink].includes(art.floorColor(x,y)));
 }
-for(let x=0;x<32;x++){
-  let start=0;
-  while(art.floorColor(x,start)===art.floorColor(x,start-1))start++;
+/* Independent phase examples fix the crest, slopes, and color order. */
+assert.equal(Array.from({length:16},(_,x)=>art.floorColor(x,0)===art.palette.ink?'I':'C').join(''),'CIIIICCCCCCCIIII');
+assert.equal(Array.from({length:16},(_,x)=>art.floorColor(x,3)===art.palette.ink?'I':'C').join(''),'CCCCIIIICIIIICCC');
+for(let period=1;period<16;period++){
+  assert.ok(Array.from({length:16},(_,x)=>[0,1,2,3].some(y=>art.floorColor(x,y)!==art.floorColor(x+period,y))).some(Boolean),'no horizontal period shorter than 16px');
+}
+for(let x=0;x<16;x++){
+  const start=8-Math.abs(x-8);
   for(let band=0;band<4;band++)for(let dy=0;dy<4;dy++){
-    assert.equal(art.floorColor(x,start+band*4+dy),art.floorColor(x,start+band*4),'every contiguous band is exactly four pixels');
+    assert.equal(art.floorColor(x,start+band*4+dy),band%2?art.palette.ink:art.palette.cream,'every contiguous band is exactly four pixels');
   }
 }
-for(let y=0;y<8;y++)for(let seam=16;seam<256;seam+=16){
-  assert.equal(art.floorColor(seam-1,y),art.floorColor(seam,y),'the two sides of each tile seam share a continuous crest/trough');
+/* Check the actual base-floor draw before curtains/props cover it. Camera
+ * translation must move pixels without changing their map-space color. */
+const floorPixelCount=224*146;
+for(const [cx,cy] of [[0,0],[37,19]]){
+  let calls=0,floorPixels=0;
+  art.draw({globalAlpha:1,fillStyle:null,fillRect(x,y,w,h){
+    if(calls>0&&calls<=floorPixelCount){
+      const mapX=16+floorPixels%224,mapY=30+Math.floor(floorPixels/224);
+      assert.deepEqual([x,y,w,h],[mapX-cx,mapY-cy,1,1]);
+      assert.equal(this.fillStyle,expectedFloor(mapX,mapY),'rendered floor pixel uses exact map-space formula');
+      floorPixels++;
+    }
+    calls++;
+  }},cx,cy);
+  assert.equal(floorPixels,floorPixelCount);
 }
 G.AmbientLife.reset(7);
 let ambientDraws=0;
