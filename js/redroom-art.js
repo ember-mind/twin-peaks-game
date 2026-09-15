@@ -88,44 +88,22 @@
     R(128,179,2,13,p.curtainRed);R(142,179,2,13,p.curtainRed);
   }
   function pool(R,x,y,rx,ry) {
-    /* Compact, three-step receiving patches. Whole cream floor fragments
-     * catch light together; no sparse ring of isolated sparkle pixels. */
+    /* Broad cream receiving light, built from connected 2px clusters inside
+     * three stepped edges. Ink chevrons retain half their pixels in the pool;
+     * the tiny white center belongs immediately beneath the practical. */
     for(var dy=-ry;dy<=ry;dy++){
       var edge=Math.abs(dy),half=rx-(edge>=ry-1?6:edge>=ry-3?2:0);
       for(var dx=-half;dx<=half;dx++){
         var px=x+dx,py=y+dy;
         if(px<16||px>=240||py<34||py>=176)continue;
-        if(floorColor(px,py)===palette.cream)R(px,py,1,1,palette.white);
+        var floorTone=floorColor(px,py);
+        if(floorTone===palette.ink&&Math.abs(dx)<=half-2&&(px&3)<2){
+          R(px,py,1,1,palette.cream);
+        }else if(floorTone===palette.cream&&Math.abs(dx)<=4&&edge<=1){
+          R(px,py,1,1,palette.white);
+        }
       }
     }
-  }
-  function lightingShadows(R) {
-    /* A fixed ordered mask darkens the unlit floor without a new gray or
-     * alpha blend. The cream zigzags remain continuous enough to navigate;
-     * only the three bounded practical zones retain their full floor value. */
-    var practicals=[[56,51,24,13],[21,79,19,12],[234,79,19,12]];
-    var coverage=[[0,4,1,5],[6,2,7,3]];
-    for(var y=44;y<176;y++)for(var x=16;x<240;x++){
-      if(floorColor(x,y)!==palette.cream)continue;
-      var near=false;
-      for(var i=0;i<practicals.length;i++){
-        var lamp=practicals[i],dx=(x-lamp[0])/lamp[2],dy=(y-lamp[1])/lamp[3];
-        if(dx*dx+dy*dy<1){near=true;break;}
-      }
-      if(near)continue;
-      var edge=Math.min(x-16,239-x),count=y>116?3:2;
-      if(edge<18||y>160)count=4;
-      if(coverage[y&1][x&3]<count)R(x,y,1,1,palette.ink);
-    }
-    /* Directional chair shadows stretch away from the north practicals;
-     * stepped taper and the existing foot shadows keep each mass grounded. */
-    [112,158].forEach(function(x){
-      for(var step=0;step<8;step++){
-        R(x-9+step,65+step*2,21-Math.floor(step/2),2,palette.ink);
-      }
-    });
-    R(207,49,16,2,palette.ink);R(211,51,15,2,palette.ink);
-    R(214,53,11,2,palette.ink);
   }
   function shadow(R,x,y,w) {
     R(x-w/2+2,y,w-4,1,palette.ink);
@@ -273,8 +251,8 @@
   function draw(ctx,cx,cy) {
     var R=painter(ctx,cx,cy),alpha=ctx.globalAlpha;
     ctx.globalAlpha=1;
-    R(0,0,256,192,palette.ink);floor(R);curtains(R);lightingShadows(R);
-    pool(R,56,51,12,5);pool(R,21,79,11,5);pool(R,234,79,11,5);
+    R(0,0,256,192,palette.ink);floor(R);curtains(R);
+    pool(R,56,54,16,7);pool(R,21,79,14,7);pool(R,234,79,14,7);
     props.forEach(function(d){shadow(R,d.x,d.footY,d.id.indexOf('chair')===0?26:16);prop(R,d);});
     ctx.globalAlpha=alpha;
   }
