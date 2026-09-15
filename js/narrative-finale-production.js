@@ -229,18 +229,23 @@
     return true;
   }
 
+  /* Act 5 pass 01: la missione M10 possiede l'interrogatorio; il finale viene
+   * armato solo a leland_morto e parte in pausa sulla Loggia. */
   FP.arm = function (narrativeState) {
     var NF = finale(); if (!NF) return { ok: false, error: 'finale_module_missing' };
     if (NF.isPending && NF.isPending()) return { ok: true, repeated: true };
+    if (!narrativeState || !narrativeState.flags || !narrativeState.flags.leland_morto) return { ok: false, error: 'finale_arm_before_leland_morto' };
+    var p6 = narrativeState.props && narrativeState.props.P6;
     var carry = {
       values: mergedValues(narrativeState),
       flags: JSON.parse(JSON.stringify((narrativeState && narrativeState.flags) || {})),
+      p6_status: p6 ? p6.factual_status : undefined,
       narrative_revision: narrativeState && narrativeState.revision
     };
     var opts = callbacks(); opts.carryover = carry;
     FP.checkpointError = null;
     woodsRetryBlocked = false;
-    var started = NF.start(opts);
+    var started = NF.startAtLodge(opts);
     if (started.ok && FP.checkpointError) {
       var checkpointError = FP.checkpointError;
       NF.reset();
@@ -350,6 +355,12 @@
     finally { restoring = false; }
     if (!restored || !restored.ok) {
       return rollbackRestore(restored && restored.error || 'finale_save_invalid');
+    }
+    // M10 retro ritirata (Act 5 pass 01): un checkpoint salvato dentro le fasi
+    // parafrasate dell'interrogatorio non viene rigiocato. Fail loud: la UI di
+    // recupero lo mostra, nessuna conversione silenziosa.
+    if (finale().RETIRED_M10_STAGES && finale().RETIRED_M10_STAGES.indexOf(restored.state.stage) >= 0) {
+      return rollbackRestore('finale_save_in_retired_m10_stage: ' + restored.state.stage);
     }
     if (restored.migrated && !saveCheckpoint()) {
       return rollbackRestore(FP.checkpointError || 'finale_migration_save_failed');
