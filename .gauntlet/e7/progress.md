@@ -14,7 +14,7 @@ assets/ref/red-room-sheet.png top panel; style anchor artifacts/act-4-implementa
 |---|---:|---:|---|
 | Curtains | 7 | 5 | pending |
 | Chevron floor | 7 | 5 | pending |
-| Furniture + statue | 7 | 3 → 6 → 6 | pending |
+| Furniture + statue | 7 | 3 → 6 → 6 → 5 | **capped below floor; ship R3 (6)** |
 | Light | 7 | 4 | pending |
 
 ## Evidence
@@ -24,12 +24,13 @@ assets/ref/red-room-sheet.png top panel; style anchor artifacts/act-4-implementa
 - Round 1: `artifacts/art-pass-e/e7/round-1.png`
 - Furniture round 2: `artifacts/art-pass-e/e7/furniture-statue/round-2.png`
 - Furniture round 3: `artifacts/art-pass-e/e7/furniture-statue/round-3.png`
+- Furniture round 4: `artifacts/art-pass-e/e7/furniture-statue/round-4.png`
 - Fixed capture: `test/shot.sh redroom 8 9 up <out> --retro`
 
 ## Latest verdict
 
-Furniture round 3, fresh Luna: 6/10; rank versus round 2: BETTER.
+Furniture round 4, fresh Luna: 5/10; rank versus round 3: WORSE. Unit capped. Best/shipped evidence: round 3 at 6/10.
 
 ## Gap queue
 
-1. Furniture remains too dark and blocky, lacking readable shading and dimensional chair details.
+1. Furniture ends below floor. Best round 3 remains dark and blocky; round 4 saturated bright red and regressed.
