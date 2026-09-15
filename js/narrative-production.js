@@ -377,6 +377,7 @@
   };
   NP.inspectClassicSave = inspectClassicSave;
   NP.syncClassicToNarrative = syncClassicToNarrative;
+  NP.syncNarrativeToClassic = syncNarrativeToClassic;
   NP.renderObjective = renderObjective;
   NP.showSaveRecovery = showSaveRecovery;
   NP.onClassicSave = function (classic) {

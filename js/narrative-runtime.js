@@ -481,14 +481,20 @@
         if (evCatalog && !evCatalog[eid]) return { ok: false, error: 'unknown_attachment: ' + eid };
         seenAttachment[eid] = true;
       }
-      var by = branch.by_support || {}, picked = null;
-      for (var bk in by) {
-        var rule = by[bk], all = rule.when_attached_all || [], missing = rule.when_missing_any || [];
-        if (all.length && all.every(function (id) { return !!seenAttachment[id]; })) { picked = rule; break; }
-        if (!picked && missing.length && missing.some(function (id) { return !seenAttachment[id]; })) picked = rule;
+      // Un ramo SENZA by_support (P7/P8 in M9: VALID_BUT_NOT_PROCEDURAL) ha un
+      // verdetto che non dipende dall'allegato: resta il ramo stesso. Prima di
+      // Act 5 pass 01 cadeva in attachment_partition_no_match (errore, nessuna
+      // risposta diegetica) — trovato da test/act-5-flow.js.
+      if (branch.by_support) {
+        var by = branch.by_support, picked = null;
+        for (var bk in by) {
+          var rule = by[bk], all = rule.when_attached_all || [], missing = rule.when_missing_any || [];
+          if (all.length && all.every(function (id) { return !!seenAttachment[id]; })) { picked = rule; break; }
+          if (!picked && missing.length && missing.some(function (id) { return !seenAttachment[id]; })) picked = rule;
+        }
+        if (!picked) return { ok: false, error: 'attachment_partition_no_match' };
+        branch = picked;
       }
-      if (!picked) return { ok: false, error: 'attachment_partition_no_match' };
-      branch = picked;
     }
     if (already.some(function (r) { return r.result === 'rejected' && r.reason_code === branch.reason_code; })) {
       // memoria del rifiuto: pagina diegetica STABILE dai dati (mai commit invisibile)
