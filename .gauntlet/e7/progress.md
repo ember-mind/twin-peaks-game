@@ -15,7 +15,7 @@ assets/ref/red-room-sheet.png top panel; style anchor artifacts/act-4-implementa
 | Curtains | 7 | 5 → 7 | passed; ship R2 |
 | Chevron floor | 7 | 5 → 6 → 6 → 3 | **capped below floor; ship R2 (6)** |
 | Furniture + statue | 7 | 3 → 6 → 6 → 5 | **capped below floor; ship R3 (6)** |
-| Light | 7 | 4 | pending |
+| Light | 7 | 4 → 4 | pending |
 
 ## Evidence
 
@@ -26,6 +26,7 @@ assets/ref/red-room-sheet.png top panel; style anchor artifacts/act-4-implementa
 - Floor round 2: `artifacts/art-pass-e/e7/floor/round-2.png`
 - Floor round 3: `artifacts/art-pass-e/e7/floor/round-3.png`
 - Floor round 4: `artifacts/art-pass-e/e7/floor/round-4.png`
+- Light round 2: `artifacts/art-pass-e/e7/light/round-2.png`
 - Furniture round 2: `artifacts/art-pass-e/e7/furniture-statue/round-2.png`
 - Furniture round 3: `artifacts/art-pass-e/e7/furniture-statue/round-3.png`
 - Furniture round 4: `artifacts/art-pass-e/e7/furniture-statue/round-4.png`
@@ -33,9 +34,10 @@ assets/ref/red-room-sheet.png top panel; style anchor artifacts/act-4-implementa
 
 ## Latest verdict
 
-Floor round 4, fresh Luna: 3/10; rank versus round 3: WORSE. Unit capped. Best/shipped evidence: round 2 at 6/10.
+Light round 2, fresh Luna: 4/10; rank versus round 1: BETTER.
 
 ## Gap queue
 
 1. Furniture ends below floor. Best round 3 remains dark and blocky; round 4 saturated bright red and regressed.
 2. Floor ends below floor. Best R2/R3 scored 6; R4 overcorrected to sparse oversized chevrons.
+3. Light lacks dramatic localized pools and deep shadow modeling; scene reads uniformly flat and overbright.

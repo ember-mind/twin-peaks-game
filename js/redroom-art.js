@@ -26,23 +26,13 @@
       ctx.fillStyle = color; ctx.fillRect(x-cx, y-cy, w, h);
     };
   }
-  /* Each stripe owns its world-space baseline and V width. Dark intervals
-   * widen toward the foreground; cream stays exactly four pixels thick.
-   * Width changes happen BETWEEN complete chevrons, never at a horizontal
-   * clipping boundary through a stripe. Widths are multiples of a 16px tile. */
-  var floorBands=[
-    [20,32],[32,32],[44,32],[60,48],[76,48],
-    [94,48],[116,64],[140,64],[166,64],[194,80]
-  ];
   function floorColor(x, y) {
-    for(var i=0;i<floorBands.length;i++){
-      var band=floorBands[i],width=band[1];
-      if(y<band[0]||y>band[0]+width/4+2)continue;
-      var phase=((x%width)+width)%width;
-      var rise=phase<width/2?Math.floor(phase/2):width/2-1-Math.floor(phase/2);
-      if(y>=band[0]+rise&&y<band[0]+rise+4)return palette.cream;
-    }
-    return palette.ink;
+    /* Four-pixel bands and four stepped rows of rise, across a 32px repeat.
+     * Each crest spans two tiles: the broader rhythm halves the ripple count.
+     * World coordinates preserve the phase through both 16px tile seams. */
+    var phase = ((x % 32) + 32) % 32;
+    var rise = phase < 16 ? Math.floor(phase/4) : 7-Math.floor(phase/4);
+    return ((((y-rise)%8)+8)%8)<4 ? palette.cream : palette.ink;
   }
   function floor(R) {
     for (var y=30; y<176; y++) {
@@ -98,14 +88,15 @@
     R(128,179,2,13,p.curtainRed);R(142,179,2,13,p.curtainRed);
   }
   function pool(R,x,y,rx,ry) {
-    /* Light replaces only cream floor pixels: bounded stepped receiving
-     * pools retain the zigzag instead of washing it into a flat ellipse. */
-    for(var dy=-ry;dy<=ry;dy++)for(var dx=-rx;dx<=rx;dx++) {
-      var distance=dx*dx/(rx*rx)+dy*dy/(ry*ry);
-      var px=x+dx,py=y+dy;
-      if(px<16||px>=240||py<34||py>=176||distance>1)continue;
-      if(floorColor(px,py)!==palette.cream)continue;
-      if(distance<.45||((px+py)&3)===0)R(px,py,1,1,palette.white);
+    /* Compact, three-step receiving patches. Whole cream floor fragments
+     * catch light together; no sparse ring of isolated sparkle pixels. */
+    for(var dy=-ry;dy<=ry;dy++){
+      var edge=Math.abs(dy),half=rx-(edge>=ry-1?6:edge>=ry-3?2:0);
+      for(var dx=-half;dx<=half;dx++){
+        var px=x+dx,py=y+dy;
+        if(px<16||px>=240||py<34||py>=176)continue;
+        if(floorColor(px,py)===palette.cream)R(px,py,1,1,palette.white);
+      }
     }
   }
   function shadow(R,x,y,w) {
@@ -187,8 +178,12 @@
     R(x-4,foot-5,1,3,p.curtainDark);R(x+3,foot-5,1,3,p.curtainDark);
     R(x-1,foot-6,2,3,p.ink);
     R(x-3,foot-14,6,2,p.ink);R(x-1,foot-23,2,9,p.cream);
-    R(x-3,foot-31,6,3,p.white);R(x-4,foot-28,8,4,p.white);
-    R(x-5,foot-24,10,2,p.cream);R(x+2,foot-29,1,5,p.cream);
+    /* Framed tapered diffuser: a bright core, cream fabric edge, dark finial. */
+    R(x-1,foot-35,2,1,p.ink);
+    R(x-3,foot-34,6,3,p.cream);R(x-2,foot-33,4,2,p.white);
+    R(x-4,foot-31,8,4,p.cream);R(x-3,foot-31,6,4,p.white);
+    R(x-5,foot-27,10,4,p.cream);R(x-4,foot-27,8,3,p.white);
+    R(x-6,foot-23,12,1,p.ink);R(x-4,foot-24,8,1,p.white);
   }
   function centerTable(R,x,foot) {
     var p=palette;
@@ -233,8 +228,11 @@
     var p=palette;
     R(x-6,foot-1,12,2,p.ink);R(x-4,foot-2,8,2,p.cream);
     R(x-1,foot-33,3,31,p.ink);R(x,foot-32,1,30,p.cream);
-    R(x-3,foot-34,7,2,p.cream);R(x-5,foot-36,11,2,p.cream);
-    R(x-6,foot-38,13,2,p.white);
+    /* Open upward bowl with a white emitter held inside its rolled rim. */
+    R(x-6,foot-40,13,1,p.ink);R(x-6,foot-39,13,1,p.cream);
+    R(x-5,foot-38,11,2,p.white);
+    R(x-4,foot-36,9,1,p.cream);R(x-3,foot-36,7,1,p.white);
+    R(x-3,foot-35,7,2,p.cream);R(x-2,foot-33,5,1,p.ink);
   }
   function prop(R,d) {
     if(d.id.indexOf('chair')===0)chair(R,d.x,d.footY,d.id==='chairEast');
@@ -248,7 +246,7 @@
     var R=painter(ctx,cx,cy),alpha=ctx.globalAlpha;
     ctx.globalAlpha=1;
     R(0,0,256,192,palette.ink);floor(R);curtains(R);
-    pool(R,56,50,17,9);pool(R,20,79,14,12);pool(R,235,79,14,12);
+    pool(R,56,51,12,5);pool(R,21,79,11,5);pool(R,234,79,11,5);
     props.forEach(function(d){shadow(R,d.x,d.footY,d.id.indexOf('chair')===0?26:16);prop(R,d);});
     ctx.globalAlpha=alpha;
   }
