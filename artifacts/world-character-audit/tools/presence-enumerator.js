@@ -50,7 +50,7 @@ global.requestAnimationFrame = function () {};
 const J = (f) => path.join(__dirname, '..', '..', '..', 'js', f);
 [
   'tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'retro-font.js',
-  'engine.js', 'glue.js', 'narrative-runtime.js', 'narrative-data.gen.js',
+  'engine.js', 'scene-objects.gen.js', 'glue.js', 'narrative-runtime.js', 'narrative-data.gen.js',
   'narrative-engine-adapter.js', 'narrative-bootstrap.js'
 ].forEach((f) => require(J(f)));
 

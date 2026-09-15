@@ -1,0 +1,9 @@
+TARGET world/scene-objects.json :: town object welcome-sign
+BEFORE {"sourceId":"welcome-sign","type":"landmark","kind":"welcomesign","x":30,"y":30,"dialogue":"sign_town"}
+AFTER  {"sourceId":"welcome-sign","type":"landmark","kind":"welcomesign","x":31,"y":30,"dialogue":"sign_town"}
+DIFF world/scene-objects.json
+  @@ line 57
+  -           "x": 30,
+  +           "x": 31,
+VALID 1 scene object change(s) against real maps and dialogues
+DRY-RUN 1 scene object change(s); nothing written

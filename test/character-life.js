@@ -68,7 +68,7 @@ const load = (name) => require(path.join(root, 'js', name));
 
 [
   'tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'retro-font.js',
-  'portraits.js', 'gold-tone.js', 'engine.js', 'glue.js', 'retro.js',
+  'portraits.js', 'gold-tone.js', 'engine.js', 'scene-objects.gen.js', 'glue.js', 'retro.js',
   'retro-cast-matrices-a.js', 'retro-cast-matrices-b.js', 'retro-authored.js',
   'ambient-life.js', 'narrative-runtime.js', 'narrative-data.gen.js', 'cast-presence.js'
 ].forEach(load);

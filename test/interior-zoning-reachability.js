@@ -11,7 +11,7 @@ require('../js/chars.js');
 require('../js/houses.js');
 require('../js/maps.js');
 require('../js/data.js');
-require('../js/glue.js');
+require('../js/scene-objects.gen.js'); require('../js/glue.js');
 
 const starts = {
   sheriff: [7, 10], palmer: [7, 10], hotel_gn: [8, 10], room_315: [2, 6], hospital: [7, 10],

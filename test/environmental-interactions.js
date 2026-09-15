@@ -36,6 +36,7 @@ require(J('data.js'));
 require(J('environmental-inspect.js'));
 require(J('retro-font.js'));
 require(J('engine.js'));
+require(J('scene-objects.gen.js'));
 require(J('glue.js'));
 
 const evidenceCatalog = require(path.join(__dirname, '..', 'narrative', 'evidence.json')).evidence;

@@ -33,6 +33,7 @@ require(script('maps.js'));
 require(script('data.js'));
 require(script('retro-font.js'));
 require(script('engine.js'));
+require(script('scene-objects.gen.js'));
 require(script('glue.js'));
 
 const E = global.GAME.Engine;

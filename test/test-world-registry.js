@@ -41,7 +41,7 @@
 
    // Same real chain as world-builder.js up to world-catalog, plus the registry module.
   ['tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'environmental-inspect.js',
-   'retro-font.js', 'portraits.js', 'gold-tone.js', 'engine.js', 'glue.js', 'location-connections.js',
+   'retro-font.js', 'portraits.js', 'gold-tone.js', 'engine.js', 'scene-objects.gen.js', 'glue.js', 'location-connections.js',
    'double-r-exterior-art.js', 'double-r-exterior-scene.js', 'world-connections.gen.js', 'double-r-location-production.js',
    'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js', 'sheriffs-station-scene.js', 'sheriffs-station-exterior-scene.js', 'sheriffs-station-production.js',
    'room-315-art.js', 'room-315-scene.js', 'room-315-production.js',

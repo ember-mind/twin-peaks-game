@@ -60,7 +60,7 @@ const canvasStub = { getContext: () => ctxStub };
 const J = (f) => path.join(__dirname, '..', 'js', f);
 [
   'tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'retro-font.js',
-  'engine.js', 'glue.js', 'location-connections.js', 'environment-reactions.js','world-connections.gen.js',
+  'engine.js', 'scene-objects.gen.js', 'glue.js', 'location-connections.js', 'environment-reactions.js','world-connections.gen.js',
   'double-r-exterior-art.js', 'double-r-exterior-scene.js', 'double-r-location-production.js',
   'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js', 'sheriffs-station-scene.js', 'sheriffs-station-exterior-scene.js', 'sheriffs-station-production.js',
   'room-315-art.js', 'room-315-scene.js', 'room-315-production.js', 'world-connections-production.js'

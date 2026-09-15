@@ -1,0 +1,20 @@
+{
+  "format": "scene-objects-changeset",
+  "version": 1,
+  "target": "world/scene-objects.json",
+  "operations": [
+    {
+      "op": "upsert",
+      "scene": "town",
+      "sourceId": "welcome-sign",
+      "object": {
+        "sourceId": "welcome-sign",
+        "type": "landmark",
+        "kind": "welcomesign",
+        "x": 31,
+        "y": 30,
+        "dialogue": "sign_town"
+      }
+    }
+  ]
+}

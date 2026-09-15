@@ -1,0 +1,13 @@
+{
+  "format": "scene-objects-changeset",
+  "version": 1,
+  "target": "world/scene-objects.json",
+  "operations": [
+    {
+      "op": "create",
+      "scene": "woods",
+      "interact": "13,12",
+      "id": "olio"
+    }
+  ]
+}

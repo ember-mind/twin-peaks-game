@@ -45,7 +45,7 @@
   console.warn = function () {};
   try {
     ['tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'environmental-inspect.js', 'retro-font.js', 'portraits.js',
-      'gold-tone.js', 'engine.js', 'glue.js', 'environment-reactions.js', 'location-connections.js', 'world-connections.gen.js',
+      'gold-tone.js', 'engine.js', 'scene-objects.gen.js', 'glue.js', 'environment-reactions.js', 'location-connections.js', 'world-connections.gen.js',
       'double-r-exterior-art.js', 'double-r-exterior-scene.js', 'double-r-location-production.js',
       'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js', 'sheriffs-station-scene.js',
       'sheriffs-station-exterior-scene.js', 'sheriffs-station-production.js',

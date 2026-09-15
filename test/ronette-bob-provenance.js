@@ -15,7 +15,7 @@ const ROOT = path.join(__dirname, '..');
 const J = (file) => path.join(ROOT, 'js', file);
 [
   'tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js',
-  'retro-font.js', 'engine.js', 'glue.js', 'narrative-runtime.js'
+  'retro-font.js', 'engine.js', 'scene-objects.gen.js', 'glue.js', 'narrative-runtime.js'
 ].forEach((file) => require(J(file)));
 
 const GAME = global.GAME;

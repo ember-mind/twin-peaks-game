@@ -17,7 +17,7 @@ let storageWrites=0;
 global.localStorage={getItem:()=>null,setItem:()=>{storageWrites++;},removeItem:noop};
 global.GAME={};
 const js=n=>require(path.join(__dirname,'..','js',n));
-['tiles.js','chars.js','houses.js','maps.js','data.js','retro-font.js','portraits.js','gold-tone.js','engine.js','glue.js','retro.js','retro-authored.js','retro-cast-matrices-a.js','retro-cast-matrices-b.js'].forEach(js);
+['tiles.js','chars.js','houses.js','maps.js','data.js','retro-font.js','portraits.js','gold-tone.js','engine.js','scene-objects.gen.js','glue.js','retro.js','retro-authored.js','retro-cast-matrices-a.js','retro-cast-matrices-b.js'].forEach(js);
 js('double-r-exterior-art.js');
 js('double-r-exterior-scene.js');
 require('./double-r-exterior-prototype.js');

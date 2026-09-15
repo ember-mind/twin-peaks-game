@@ -48,7 +48,6 @@
       /* La radura continua nel margine sud della cittadina. Prima Cooper
        * compariva direttamente sull'asfalto civico: salto visivo netto. */
       doors: {},
-      interact: {},
       onEnter: { dialogue: 'town_arrivo', once: 'intro_town' }
     },
 
@@ -112,17 +111,6 @@
         '25,30': '.', '30,30': 'u', '33,30': 'u', '51,30': '.'
       },
       doors: {},
-      interact: { '30,30': 'cartello', '15,28': 'lago_riva', '50,22': 'tomba_laura' },
-      objects: [
-        { type: 'landmark', kind: 'waterfall', x: 1, y: 0, w: 5, h: 6, dialogue: 'landmark_waterfall' },
-        { type: 'landmark', kind: 'cemetery', x: 48, y: 21, w: 6, h: 4, dialogue: 'landmark_cemetery' },
-        { type: 'landmark', kind: 'tracks', x: 53, y: 1, w: 2, h: 33, dialogue: [
-          { cond: 'nflag:vagone_scoperto', then: 'landmark_tracks_vagone' },
-          { cond: ['evidence:E6A_CUORE_INTERO', 'evidence:T_JAMES_EST'], then: 'landmark_tracks_route' },
-          'landmark_tracks'
-        ] },
-        { type: 'landmark', kind: 'welcomesign', x: 30, y: 30, dialogue: 'sign_town' }
-      ],
       onEnter: { dialogue: 'town_arrivo', once: 'intro_town' }
     },
 
@@ -149,8 +137,7 @@
         'TTTT........T..T', // 10 panca d'attesa(1-3,10), sedia(12,10); spawn ingresso 7,10
         'TTTTTTT..TTTTTTT'  // 11 ingresso 7,11 / 8,11
       ],
-      doors: {},
-      interact: {}
+      doors: {}
     },
 
     palmer: {
@@ -170,8 +157,7 @@
         'iffffffffffffffi', // 10 (spawn 7,10)
         'iiiiiiiDDiiiiiii'  // 11
       ],
-      doors: {},
-      interact: { '6,1': 'cameraLaura' }
+      doors: {}
     },
 
     room_315: {
@@ -192,7 +178,6 @@
         'TTTTTTT.TTTTTTTT'  // 11 porta 315 -> corridoio Great Northern (7,11)
       ],
       doors: {},
-      interact: { '13,3': 'specchio315', '1,5': 'letto_315', '2,5': 'letto_315', '3,5': 'letto_315', '8,3': 'scrivania_315' },
       onEnter: { dialogue: 'hotel_risveglio', once: 'intro_hotel' }
     },
 
@@ -213,8 +198,7 @@
         'iffffffffffffffffi', // 10 (spawn 8,10)
         'iiiiiiiiDDiiiiiiii'  // 11
       ],
-      doors: {},
-      interact: {}
+      doors: {}
     },
 
     hospital: {
@@ -239,8 +223,7 @@
         'T..............T', // 10
         'TTTTTTT..TTTTTTT'  // 11
       ],
-      doors: {},
-      interact: { '3,5': 'ronette_letto' }
+      doors: {}
     },
 
     diner: {
@@ -259,8 +242,7 @@
         'itttffffffttti',
         'iiiiiiDDiiiiii'
       ],
-      doors: {},
-      interact: {}
+      doors: {}
     },
 
     woods: {
@@ -291,8 +273,7 @@
         'TTTTTTTTTTTgTpppngTTTTTTTTTT', // 20 (spawn 14,20), cespuglio al sentiero
         'TTTTTTTTTTTTTTpTTTTTTTTTTTTT'  // 21 uscita sud -> città
       ],
-      doors: {},
-      interact: { '14,12': 'olio', '11,16': 'cartelloBosco' }
+      doors: {}
     },
 
     redroom: {
@@ -313,7 +294,6 @@
         'RRRRRRRRDRRRRRRR'  // 11 uscita tra le tende -> bosco
       ],
       doors: {},
-      interact: {},
       onEnter: 'redroom'
     },
 
@@ -343,13 +323,7 @@
         'TggwwggggggggggggggggpgT', // 10
         'TTTTTTTTTTTTTTTTTTTTTTTT'  // 11  linea di alberi a sud
       ],
-      doors: {},
-      interact: {
-        '4,6': 'sign_ponte',
-        '20,2': 'sign_oej',
-        '13,6': 'mucchio_terra',
-        '13,5': 'anello_interact'
-      }
+      doors: {}
     },
 
     oej: {
@@ -367,8 +341,7 @@
         'iffffffffffffffi', // 8  (spawn 8,8)
         'iiiiiiiDDiiiiiii'  // 9  porta sud -> vagone del treno
       ],
-      doors: {},
-      interact: {}
+      doors: {}
     },
 
     /* ---------------- Atto 4: il roadhouse ---------------- */
@@ -388,8 +361,7 @@
         'iffffffffffffffi', // 8  (spawn 7,8 / 8,8)
         'iiiiiiiDDiiiiiii'  // 9  uscita -> città
       ],
-      doors: {},
-      interact: {}
+      doors: {}
     }
   };
 

@@ -41,7 +41,7 @@ const js = (name) => path.join(__dirname, '..', 'js', name);
 
 [
   'tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'retro-font.js',
-  'engine.js', 'glue.js', 'location-connections.js', 'environment-reactions.js',
+  'engine.js', 'scene-objects.gen.js', 'glue.js', 'location-connections.js', 'environment-reactions.js',
   'sheriffs-station-art.js', 'sheriffs-station-exterior-art.js',
   'sheriffs-station-scene.js', 'sheriffs-station-exterior-scene.js',
   'world-connections.gen.js', 'double-r-exterior-art.js', 'double-r-exterior-scene.js', 'double-r-location-production.js',

@@ -5,7 +5,7 @@ require('../js/tiles.js');
 require('../js/chars.js');
 require('../js/maps.js');
 require('../js/data.js');
-require('../js/glue.js');
+require('../js/scene-objects.gen.js'); require('../js/glue.js');
 const map = GAME.Maps.diner;
 const model = map.interior;
 assert(model, 'generated interior model survives glue normalization');

@@ -120,7 +120,7 @@ assert.doesNotThrow(() => isolated({
 
 global.window = global;
 global.GAME = {};
-require('../js/tiles.js'); require('../js/chars.js'); require('../js/houses.js'); require('../js/maps.js'); require('../js/data.js'); require('../js/glue.js');
+require('../js/tiles.js'); require('../js/chars.js'); require('../js/houses.js'); require('../js/maps.js'); require('../js/data.js'); require('../js/scene-objects.gen.js'); require('../js/glue.js');
 require('../js/location-connections.js'); require('../js/double-r-exterior-scene.js'); require('../js/world-connections.gen.js');
 require('../js/sheriffs-station-art.js'); require('../js/sheriffs-station-exterior-art.js');
 require('../js/sheriffs-station-scene.js'); require('../js/sheriffs-station-exterior-scene.js');

@@ -13,7 +13,7 @@ global.localStorage = { getItem: () => null, setItem: () => {}, removeItem: () =
 const noop = () => {};
 const ctx = new Proxy({ measureText: (text) => ({ width: String(text).length * 5 }) }, { get: (target, key) => key in target ? target[key] : noop, set: () => true });
 const js = (name) => path.join(__dirname, '..', 'js', name);
-['tiles.js','chars.js','houses.js','maps.js','data.js','retro-font.js','engine.js','glue.js','location-connections.js','world-connections.gen.js','double-r-exterior-scene.js'].forEach(name => require(js(name)));
+['tiles.js','chars.js','houses.js','maps.js','data.js','retro-font.js','engine.js','scene-objects.gen.js','glue.js','location-connections.js','world-connections.gen.js','double-r-exterior-scene.js'].forEach(name => require(js(name)));
 GAME.DoubleRExteriorScene.install();
 require(js('sheriffs-station-art.js'));
 require(js('sheriffs-station-exterior-art.js'));

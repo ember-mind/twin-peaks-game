@@ -19,7 +19,7 @@ const J = (file) => path.join(__dirname, '..', 'js', file);
   'data.js',
   'retro-font.js',
   'engine.js',
-  'glue.js'
+  'scene-objects.gen.js', 'glue.js'
 ].forEach((file) => require(J(file)));
 
 const GAME = global.GAME;

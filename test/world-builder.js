@@ -33,7 +33,7 @@
 
    // --- real world chain, mirroring index.html load order up to world-catalog ---
   ['tiles.js','chars.js','houses.js','maps.js','data.js','environmental-inspect.js',
-   'retro-font.js','portraits.js','gold-tone.js','engine.js','glue.js','location-connections.js',
+   'retro-font.js','portraits.js','gold-tone.js','engine.js','scene-objects.gen.js','glue.js','location-connections.js',
    'world-connections.gen.js',
    'double-r-exterior-art.js','double-r-exterior-scene.js','double-r-location-production.js',
    'sheriffs-station-art.js','sheriffs-station-exterior-art.js','sheriffs-station-scene.js','sheriffs-station-exterior-scene.js','sheriffs-station-production.js',
@@ -323,10 +323,10 @@
                   //     whole set proves originals were not renamed/removed and adaptWorld was ADDED additively
                    //     (no surprise 8th key), so old-surface consumers still resolve everything.
                var apiKeys = Object.keys(WB).sort();
-                ok('module api is the original keys + adaptWorld + the M4b story/validation helpers + M7 castContext, nothing else',
+                ok('module api is the original keys + adaptWorld + the M4b story/validation helpers + M7 castContext + M8 objectsContext, nothing else',
                      JSON.stringify(apiKeys) === JSON.stringify(
                             ["TILE","adaptWorld","buildWorldSnapshot","castContext","castForSeed","clone",
-                             "collectWorldSource","planBaseMap","storyStateFromSeed","tileColorFor","validationContext"]));
+                             "collectWorldSource","objectsContext","planBaseMap","storyStateFromSeed","tileColorFor","validationContext"]));
 
                  // (b) Source shape: the sole GAME read yields exactly the four input buckets.
                ok('adaptWorld.source has exactly {maps,catalog,connections,tile}',

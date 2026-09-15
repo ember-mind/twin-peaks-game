@@ -1,0 +1,35 @@
+{
+  "format": "scene-objects-changeset",
+  "version": 1,
+  "target": "world/scene-objects.json",
+  "operations": [
+    {
+      "op": "upsert",
+      "scene": "town",
+      "sourceId": "tracks",
+      "object": {
+        "sourceId": "tracks",
+        "type": "landmark",
+        "kind": "tracks",
+        "x": 53,
+        "y": 1,
+        "w": 2,
+        "h": 30,
+        "dialogue": [
+          {
+            "cond": "nflag:vagone_scoperto",
+            "then": "landmark_tracks_vagone"
+          },
+          {
+            "cond": [
+              "evidence:E6A_CUORE_INTERO",
+              "evidence:T_JAMES_EST"
+            ],
+            "then": "landmark_tracks_route"
+          },
+          "landmark_tracks"
+        ]
+      }
+    }
+  ]
+}
