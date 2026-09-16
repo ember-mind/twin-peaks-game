@@ -237,11 +237,16 @@ function tap(direction) {
   const code = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[direction];
   const before = [Engine.state.player.tx, Engine.state.player.ty];
   handlers.keydown({ code, preventDefault: noop, repeat: false });
-  handlers.keyup({ code });
   let guard = 40;
-  while (guard-- && (Engine.state.player.moving || (Engine.state.player.tx === before[0] && Engine.state.player.ty === before[1]))) frame();
+  // Walking holds the key through a turn; a released short tap only faces.
+  try {
+    while (guard-- && !Engine.state.player.moving &&
+      Engine.state.player.tx === before[0] && Engine.state.player.ty === before[1]) frame();
+  } finally { handlers.keyup({ code }); }
   while (Engine.state.player.moving && guard-- > -40) frame();
-  return before[0] !== Engine.state.player.tx || before[1] !== Engine.state.player.ty;
+  const distance = Math.abs(before[0] - Engine.state.player.tx) + Math.abs(before[1] - Engine.state.player.ty);
+  assert(distance <= 1, 'one held step must not overshoot');
+  return distance === 1;
 }
 function routeTo(target) {
   const start = [Engine.state.player.tx, Engine.state.player.ty];
