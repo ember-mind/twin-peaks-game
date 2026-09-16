@@ -134,17 +134,45 @@
     if (!state.evidence[name]) NR.applyEffects(state, [{ evidence: name }]);
   }
 
+  // Explicit aliases for evidence genuinely acquired by the opening classic
+  // dialogues. Act flags are not proof of acquisition. Do not formulate any
+  // proposition here: the later notebook comparisons remain player actions.
+  function syncClassicEvidence(NR, state, classicClues) {
+    if (!Array.isArray(classicClues)) return [];
+    var aliases = { diario: 'E1_DIARIO', lettera_r: 'E3_LETTERA_R' };
+    var added = [];
+    Object.keys(aliases).forEach(function (clue) {
+      var evidence = aliases[clue];
+      if (classicClues.indexOf(clue) >= 0 && !state.evidence[evidence]) {
+        ensureEvidence(NR, state, evidence);
+        added.push(evidence);
+      }
+    });
+    // A repaired older save must be persisted even if its classic fingerprint
+    // did not change. Repeated polling must not bump revision or duplicate data.
+    if (added.length) state.revision++;
+    return added;
+  }
+
   function syncClassicToNarrative(NR, state, classicFlags) {
+    var changed = false;
     // audrey_indaga è scritto dal layer classico (data.js audrey_a2 /
     // audrey_a2_ben): senza questo ponte il nodo facoltativo m6_audrey resta
     // irraggiungibile a runtime (M6 stitch C4).
     ['sogno_fatto', 'atto3', 'atto4', 'atto5', 'gigante1', 'maddy_trovata', 'leland_morto', 'sarah_visione_ascoltata', 'audrey_indaga'].forEach(function (name) {
-      if (classicFlags[name]) ensureFlag(NR, state, name);
+      if (classicFlags[name] && !state.flags[name]) {
+        ensureFlag(NR, state, name);
+        changed = true;
+      }
     });
     // Compatibilità salvataggi legacy: il vecchio dialogo classico vale come
     // testimonianza. Nelle nuove partite la sorgente canonica è m8_leland_taxi,
     // fisicamente prima del ritrovamento; M9 non la scrive mai.
-    if (classicFlags.done_leland_dove) ensureEvidence(NR, state, 'T_LELAND_TAXI');
+    if (classicFlags.done_leland_dove && !state.evidence.T_LELAND_TAXI) {
+      ensureEvidence(NR, state, 'T_LELAND_TAXI');
+      changed = true;
+    }
+    return changed;
   }
 
   function syncNarrativeToClassic(state, classicFlags) {
@@ -304,9 +332,10 @@
       return;
     }
     state = loaded.state;
+    lastSavedRevision = state.revision; // Durable revision, before any import repair.
     if (classic && classic.flags) syncClassicToNarrative(NR, state, classic.flags);
+    if (classic) syncClassicEvidence(NR, state, classic.clues);
     A.setState(state);
-    lastSavedRevision = state.revision;
     lastSavedClassicFingerprint = classic && NS ? NS.classicFingerprint(classic) : null;
     var finaleRestore = { ok: true, absent: true };
     if (GAME.NarrativeFinaleProduction && GAME.NarrativeFinaleProduction.restoreFromStorage) {
@@ -339,8 +368,15 @@
 
       if (E.state.mode === 'play') {
         if (GAME.NarrativeFinaleProduction && GAME.NarrativeFinaleProduction.poll) GAME.NarrativeFinaleProduction.poll();
-        syncClassicToNarrative(NR, state, E.state.flags);
-        if (A.syncCarryoverEvidence) A.syncCarryoverEvidence();
+        var classicChanged = syncClassicToNarrative(NR, state, E.state.flags);
+        var classicEvidence = syncClassicEvidence(NR, state, E.state.clues);
+        var carryoverEvidence = A.syncCarryoverEvidence ? A.syncCarryoverEvidence() : [];
+        // Classic acquisitions bypass NR.commit* hooks. Reconcile the same
+        // authored cast before persisting the imported state, not only after
+        // the next narrative interaction or a page reload.
+        if (classicChanged || classicEvidence.length || carryoverEvidence.length) {
+          if (A.syncNarrativeEntities) A.syncNarrativeEntities('classic-progress');
+        }
         syncNarrativeToClassic(state, E.state.flags);
         renderObjective(NR, A);
         persist(NR, NS, A);
@@ -377,6 +413,7 @@
   };
   NP.inspectClassicSave = inspectClassicSave;
   NP.syncClassicToNarrative = syncClassicToNarrative;
+  NP.syncClassicEvidence = syncClassicEvidence;
   NP.syncNarrativeToClassic = syncNarrativeToClassic;
   NP.renderObjective = renderObjective;
   NP.showSaveRecovery = showSaveRecovery;

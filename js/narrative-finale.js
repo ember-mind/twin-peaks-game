@@ -15,6 +15,7 @@
   var LEGACY_VERSION = 2;
   var run = null;
   var ui = null;
+  var completingCheckpoint = false;
 
   function own(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
@@ -704,7 +705,12 @@
     run.state.history.push({ type: 'complete' });
     finishInput();
     var outcome = clone(run.state);
-    notifyState(outcome);
+    // The terminal state is no longer pending, but its final checkpoint must
+    // commit before onComplete clears the saves and opens the ending screen.
+    // Authority exists only during this callback; failure still rolls back.
+    completingCheckpoint = true;
+    try { notifyState(outcome); }
+    finally { completingCheckpoint = false; }
     if (run.opts.onComplete) run.opts.onComplete(outcome);
     return { ok: true, complete: true, state: outcome };
   }
@@ -1133,6 +1139,9 @@
 
   NF.isActive = function () { return !!(run && run.state.active); };
   NF.isPending = function () { return !!(run && run.state.stage !== 'complete'); };
+  NF.isCompletingCheckpoint = function () {
+    return !!(completingCheckpoint && run && run.state.stage === 'complete' && !run.state.active);
+  };
   NF.objective = function () {
     if (!run || run.state.stage === 'complete') return '';
     if (run.state.stage === 'await_post_s3') return 'Torna da Leland per chiudere il verbale.';

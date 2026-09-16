@@ -1,0 +1,31 @@
+name: release-baseline
+on:
+  pull_request:
+  push:
+    branches: [main, 'codex/playable-03*']
+permissions:
+  contents: read
+jobs:
+  release-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Runner contracts including failed and timed-out fixtures
+        run: node test/release-runner.js
+      - name: Reproduce the exact existing Node release suite
+        shell: bash
+        run: node tools/run-release-tests.js --out="$RUNNER_TEMP/release-baseline"
+      - name: Preserve baseline and individual logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-baseline-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/release-baseline
+          retention-days: 7
+          if-no-files-found: error

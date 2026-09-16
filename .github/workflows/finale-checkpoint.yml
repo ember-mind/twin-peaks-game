@@ -1,0 +1,27 @@
+name: finale-checkpoint
+on:
+  pull_request:
+  push:
+    branches: [main, 'codex/playable-08*']
+permissions:
+  contents: read
+jobs:
+  terminal-save:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Real save-layer terminal write, rollback and retry
+        run: node test/finale-completion-persistence.js
+      - name: Existing finale and production ownership gates
+        run: |
+          node test/narrative-finale.js
+          node test/act-5-mirror-gate.js
+          node test/act-5-flow.js
+          node test/smoke.js
+          node test/walkthrough.js

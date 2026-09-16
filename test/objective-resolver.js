@@ -17,6 +17,7 @@ global.GAME = {
   NarrativeUI: {}
 };
 
+require(path.resolve(__dirname, '../js/scene-objects.gen.js'));
 require(path.resolve(__dirname, '../js/narrative-runtime.js'));
 require(path.resolve(__dirname, '../js/narrative-engine-adapter.js'));
 

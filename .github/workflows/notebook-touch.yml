@@ -1,0 +1,39 @@
+{
+  "name": "notebook-touch",
+  "on": {
+    "pull_request": null,
+    "push": {
+      "branches": [
+        "main",
+        "codex/playable-12*"
+      ]
+    }
+  },
+  "permissions": {
+    "contents": "read"
+  },
+  "jobs": {
+    "notebook-back": {
+      "runs-on": "ubuntu-latest",
+      "timeout-minutes": 10,
+      "steps": [
+        {
+          "uses": "actions/checkout@v4",
+          "with": {
+            "persist-credentials": false
+          }
+        },
+        {
+          "uses": "actions/setup-node@v4",
+          "with": {
+            "node-version": "24"
+          }
+        },
+        {
+          "name": "Notebook exit, nested ownership and existing touch behavior",
+          "run": "node test/touch-notebook-navigation.js\nnode test/touch-runtime.js\nnode test/mobile-production.js\nnode test/turn-in-place.js\nnode test/smoke.js\nnode test/walkthrough.js"
+        }
+      ]
+    }
+  }
+}

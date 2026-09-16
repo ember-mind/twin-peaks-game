@@ -1,0 +1,48 @@
+name: earned-campaign-recovery
+on:
+  pull_request:
+  push:
+    branches: [main, 'codex/playable-09*']
+permissions:
+  contents: read
+concurrency:
+  group: earned-recovery-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  earned-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      CHROME_NO_SANDBOX: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Browser and source identity
+        run: |
+          echo "CHROME_BIN=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          google-chrome --version
+          node --version
+          git rev-parse HEAD
+      - name: Recovery checker and existing harness contracts
+        run: |
+          node test/campaign-recovery.js
+          node test/campaign-player.js
+          node test/campaign-report-safety.js
+          node test/classic-evidence-bridge.js
+          node test/finale-completion-persistence.js
+          node test/smoke.js
+          node test/walkthrough.js
+      - name: Earn progress, reload and resume, then complete the actual ending
+        run: CAMPAIGN_RECOVERY=1 CAMPAIGN_OUT="$RUNNER_TEMP/earned-recovery/run" node test/campaign-playthrough.js
+      - name: Retain actual recovery evidence including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: earned-recovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/earned-recovery
+          retention-days: 7
+          if-no-files-found: error
