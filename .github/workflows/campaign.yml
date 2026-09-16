@@ -36,6 +36,8 @@ jobs:
           node test/narrative-lint.js
           node test/story-truth-lint.js
           node test/turn-in-place.js
+          node test/classic-evidence-bridge.js
+          node test/finale-completion-persistence.js
           node test/campaign-player.js
           node test/campaign-report-safety.js
       - name: First fresh-profile complete journey
