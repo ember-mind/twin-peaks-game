@@ -216,15 +216,12 @@ assert.equal(Scene.targets.traincar_entrance.x, 13);
 assert.equal(Scene.targets.scene_center.x, 12, 'the positional page is earned one tile west of the column');
 
 // Il registro dell'adapter deve puntare esattamente alle stesse tessere.
-const adapterSource = require('node:fs').readFileSync(path.join(root, 'js', 'narrative-engine-adapter.js'), 'utf8');
-const traincarBlock = adapterSource.slice(adapterSource.indexOf('traincar: {'), adapterSource.indexOf('hospital: {'));
+const runtimeTargets = GAME.WorldData.narrativeTargets.traincar;
 for (const id of targetIds) {
-  const t = Scene.targets[id];
-  const re = new RegExp(id + ':\\s*\\{\\s*x:\\s*(\\d+),\\s*y:\\s*(\\d+)');
-  const m = re.exec(traincarBlock);
-  assert(m, 'WORLD_TARGETS.traincar declares ' + id);
-  assert.deepEqual([Number(m[1]), Number(m[2])], [t.x, t.y],
-    'WORLD_TARGETS.traincar.' + id + ' matches the authored tile');
+  const t = Scene.targets[id], actual = runtimeTargets[id];
+  assert(actual, 'canonical narrative targets declare ' + id);
+  assert.deepEqual([actual.x, actual.y], [t.x, t.y],
+    'canonical traincar target ' + id + ' matches the authored tile');
 }
 
 // Hawk e Truman restano FUORI dal vagone, sempre.

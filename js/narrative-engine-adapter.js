@@ -65,56 +65,9 @@
 
   /* ---------------- setup ---------------- */
   // registro dei target ambientali: coords per (mappa, target_id) — l'identità
-  // narrativa resta l'id logico nel nodo; le coordinate vivono QUI (C5-C §2)
-  var WORLD_TARGETS = {
-    traincar: {
-      // Act 3 pass 01 (D5): coordinate ri-chiavate sulla radura nativa 24x12
-      // (js/traincar-scene.js). sign_ponte → bridge_rail (il parapetto est del
-      // ponte, sopra le assi); porta → mucchio → traversa/anello stanno sulla
-      // stessa colonna x=13, scene_center una tessera a ovest perché la pagina
-      // posizionale si guadagni camminando nel vuoto in mezzo al vagone.
-      bridge_rail: { x: 4, y: 6, kind: 'landmark' },
-      sign_oej: { x: 20, y: 2, kind: 'sign' },
-      mound: { x: 13, y: 6, kind: 'object' },
-      ring: { x: 13, y: 5, kind: 'object' },
-      scene_center: { x: 12, y: 5, kind: 'landmark' },
-      traincar_entrance: { x: 13, y: 7, kind: 'landmark' },
-      stove: { x: 12, y: 3, kind: 'object' },
-      cards: { x: 10, y: 6, kind: 'object' },
-      tracks_north: { x: 21, y: 2, kind: 'landmark' }
-    },
-    // C6-C: target ambientali di M6 (gli attori jacques/audrey/truman/lucy sono
-    // già NPC di glue.js e passano per tryInteract per actor_id; qui SOLO i
-    // landmark/object risolti per coordinata da tryInteractAt).
-    hospital: {
-      night_register: { x: 13, y: 8, kind: 'object' }
-    },
-    // C8-C: target ambientali di M8 (stesso schema di C6-C). Gli attori maddy
-    // (diner, iniettato sotto), norma (diner, già NPC) e truman (sheriff, già
-    // NPC) passano per tryInteract per actor_id; qui SOLO i landmark/object
-    // risolti per coordinata da tryInteractAt. lago_maddy [P] town 15,28 dal
-    // repository (coincide col tile classico lago_riva: target CONDIVISO, la
-    // missione corrente vince latest-first, altrimenti il classico risponde).
-    // Il crocevia usa il cartello cittadino: landmark visibile, solido e
-    // raggiungibile da più lati. La missione ha precedenza sul dialogo classico
-    // soltanto mentre M8 è corrente.
-    roadhouse: {
-      roadhouse_phone: { x: 8, y: 5, kind: 'object' }
-    },
-    town: {
-      // pass 01 (B4/O8): 30,30 e' la tessera di SPAWN del cartello (mai
-      // raggiungibile via tryInteractAt, che risolve solo la tessera FACCIATA)
-      // ed e' condivisa col classico sign_town/welcomesign, spento per tutto
-      // l'atto. 47,30 e' un passo dallo spawn di ritorno dal Roadhouse
-      // (47,29, dir down): un solo tasto per il crocevia; il cartello
-      // classico torna libero a 30,30.
-      town_crossroads: { x: 47, y: 30, kind: 'landmark' },
-      lago_maddy: { x: 15, y: 28, kind: 'landmark' }
-    },
-    palmer: {
-      palmer_entrance: { x: 8, y: 10, kind: 'landmark' }
-    }
-  };
+  // narrativa resta l'id logico nel nodo; la posizione deriva dal registro.
+  // Compiled authored identities; no coordinate-based fallback.
+  var WORLD_TARGETS = null;
   A._debugWorldTargets = null; // per i gate di allineamento nei test
   var missionsList = [];
   function enteredMissions() {
@@ -227,6 +180,10 @@
 
   A.enable = function (opts) {
     opts = opts || {};
+    if (!GAME.WorldData || !GAME.WorldData.narrativeTargets) {
+      throw new Error('NarrativeAdapter: load generated narrative targets before enabling');
+    }
+    WORLD_TARGETS = GAME.WorldData.narrativeTargets;
     NR = GAME.NarrativeRuntime; UI = GAME.NarrativeUI;
     // C8-C.1 Fix 1 — rete di sicurezza: se un boot dimenticasse il bootstrap dei
     // cataloghi, l'adapter lo esegue (stessa funzione, idempotente) e lo dichiara
