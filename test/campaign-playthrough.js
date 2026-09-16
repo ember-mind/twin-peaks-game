@@ -8,19 +8,26 @@ const path = require('node:path');
 const { openPlayableBrowser } = require('./lib/playable-browser.js');
 const { createPlayer } = require('./lib/campaign-player.js');
 const completeCampaign = require('./lib/campaign-acts.js');
+const { createRecovery } = require('./lib/campaign-recovery.js');
 const ROOT = path.resolve(__dirname, '..');
 async function main() {
   const output = path.resolve(process.env.CAMPAIGN_OUT || path.join(ROOT, 'artifacts', 'playable-build-01', String(Date.now())));
   const events = [], checkpoints = [];
-  let b, error = null;
+  const withRecovery = process.env.CAMPAIGN_RECOVERY === '1';
+  if (process.env.CAMPAIGN_RECOVERY && !['0', '1'].includes(process.env.CAMPAIGN_RECOVERY)) {
+    throw new Error('CAMPAIGN_RECOVERY must be 0 or 1');
+  }
+  let b, recovery, error = null;
   try {
     b = await openPlayableBrowser({ root: ROOT, outputDir: output,
       noSandbox: process.env.CHROME_NO_SANDBOX === '1' });
     const p = createPlayer(b, (e) => { events.push(e); if (e.type !== 'page') console.log(JSON.stringify(e)); });
+    recovery = withRecovery ? createRecovery(p, b, (e) => { events.push(e); console.log(JSON.stringify(e)); }) : null;
     async function checkpoint(name, predicate) {
       const s = await b.waitFor(name, predicate);
       checkpoints.push({ name, map: s.mapId, flags: s.flags, objective: s.semanticUi.objective });
       await b.capture(name); console.log('CHECKPOINT ' + name);
+      if (recovery) await recovery.checkpoint(name);
     }
     await p.start();
     await checkpoint('new-game', (s) => s.mode === 'play' && !s.flags.sogno_fatto);
@@ -37,6 +44,7 @@ async function main() {
     await checkpoint('act2-entry', (s) => !!(s.narrative && s.narrative.flags.sogno_raccontato));
     await completeCampaign(p, checkpoint, b);
     assert.equal(checkpoints.at(-1).name, 'title-after-ending');
+    if (recovery) recovery.finish();
   } catch (e) {
     error = String(e.stack || e); console.error(error);
     if (b) { try { await b.capture('failure'); } catch (_) {} }
@@ -55,6 +63,8 @@ async function main() {
       }
       const report = { milestone: 'New Game through final epilogue and return to title', automated: error ? 'FAIL' : 'PASS',
         fullCampaign: error ? 'FAIL' : 'PASS', humanPlaytest: 'NOT_RUN', source: session && session.metadata.source,
+        recovery: { status: withRecovery ? (error ? 'FAIL' : 'PASS') : 'NOT_RUN',
+          checks: recovery ? recovery.results() : [] },
         checkpoints, error, faults, events };
       await fs.writeFile(path.join(output, 'campaign.json'), JSON.stringify(report, null, 2) + '\n', { flag: 'wx' });
       console.log('CAMPAIGN-MILESTONE ' + report.automated + ' (unseeded full route; human playtest NOT_RUN)');
