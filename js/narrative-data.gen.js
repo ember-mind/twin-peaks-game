@@ -8511,7 +8511,8 @@
     "jacques_death_suspicious",
     "ronette_visita",
     "east_route_confirmed",
-    "vagone_scoperto"
+    "vagone_scoperto",
+    "loglady_ceppo_ascoltato"
    ],
    "deprecated_forbidden": [
     "clues6_gate",
