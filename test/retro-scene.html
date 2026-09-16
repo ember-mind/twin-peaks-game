@@ -28,7 +28,16 @@
 (function () {
   var raw = new URLSearchParams(location.search).get('freezeMs');
   if (raw === null) return;
-  var t = Number(raw) || 0;
+  /* engine.js tick() drops every frame while now-lastTick < 8, and lastTick
+   * starts at 0, so a clock pinned below 8 never paints at all. Clamp to the
+   * first frozen clock that renders, and say so instead of shipping a blank
+   * frame. Values >= 16 (every existing Chrome gate uses 1000) are untouched. */
+  var requested = Number(raw);
+  if (!Number.isFinite(requested)) requested = 0;
+  var t = Math.max(16, requested);
+  if (t !== requested) {
+    console.log('retro-scene: freezeMs=' + raw + ' clamped to ' + t + ' (engine.js tick needs now-lastTick >= 8)');
+  }
   performance.now = function () { return t; };
   Date.now = function () { return t; };
   var raf = window.requestAnimationFrame.bind(window);
