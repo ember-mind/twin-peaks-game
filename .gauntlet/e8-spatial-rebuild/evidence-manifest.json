@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "slug": "e8-spatial-rebuild",
-  "generatedAt": "2026-09-16T19:33:57.147Z",
+  "generatedAt": "2026-09-16T19:34:48.681Z",
   "files": [
     {
       "path": "evidence/baseline.png",
@@ -17,6 +17,11 @@
       "path": "evidence/hall-r1.png",
       "bytes": 13800,
       "sha256": "6bd8d6c7e5176f55d67048343a6781a1e9aede81e1ce5dc6be3406785f38df7e"
+    },
+    {
+      "path": "evidence/hall-r2.png",
+      "bytes": 13659,
+      "sha256": "be2b5de3565243f9f932be637bd45235789435249da34dd4485e7da1177d927e"
     },
     {
       "path": "evidence/reference-bottom.png",
