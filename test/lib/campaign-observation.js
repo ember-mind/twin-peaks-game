@@ -44,6 +44,17 @@ module.exports = function observeGame() {
       solid: s.map.rows.map((row, y) => Array.from(row, (_, x) =>
         g.Maps.isSolid(s.mapId, x, y, s) ? '1' : '0').join('')) };
   }
+  // Fixed observational projection of the real touch UI; routes cannot query
+  // arbitrary selectors or execute page code. Rectangles use CSS viewport pixels.
+  const touchControls = Array.from(document.querySelectorAll('.tp-touch-ctrl')).map((el) => {
+    const r = el.getBoundingClientRect(), style = window.getComputedStyle(el);
+    return { label: el.getAttribute('aria-label'), role: el.getAttribute('role'),
+      tag: el.tagName, text: el.textContent,
+      visible: !el.hidden && el.getAttribute('aria-hidden') !== 'true' &&
+        style.display !== 'none' && style.visibility !== 'hidden' &&
+        style.pointerEvents !== 'none' && Number(style.opacity) > 0 && r.width > 0 && r.height > 0,
+      rect: { x: r.x, y: r.y, width: r.width, height: r.height } };
+  });
   const nf = g && g.NarrativeFinale;
   const page = Array.from(document.querySelectorAll('#narrative .nw-page')).find(shown);
   return {
@@ -54,7 +65,7 @@ module.exports = function observeGame() {
     clues: s ? clone(s.clues) : null, dialogue: s ? clone(s.dialogue) : null,
     menu: s ? !!s.menu : null, fadePhase: s ? s.fadePhase : null,
     liveNpcs: s ? clone((s.npcs || []).filter((n) => !e.npcActive || e.npcActive(n, s))) : null,
-    map, doors, populations, narrative,
+    map, doors, populations, narrative, touchControls,
     narrativeActive: !!(a && a.active && a.active()),
     targets: clone(a && a._debugWorldTargets),
     finale: nf && nf.getState ? clone(nf.getState()) : null,
@@ -66,6 +77,7 @@ module.exports = function observeGame() {
       attachments: options('#narrative [data-attachment-evidence]', 'data-attachment-evidence'),
       attachmentConfirm: options('#narrative [data-attachment-confirm]', 'data-attachment-confirm'),
       notebookSections: options('#narrative [data-nb-section]', 'data-nb-section'),
+      notebookClose: options('#narrative [data-nb-close]', 'data-nb-close'),
       notebookEvidence: options('#narrative [data-nb-compare]', 'data-nb-compare'),
       notebook: Array.from(document.querySelectorAll('#narrative .nb-root')).some(shown),
       recovery: !!document.querySelector('#narrative .nw-save-recovery') },

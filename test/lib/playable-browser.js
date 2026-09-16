@@ -237,10 +237,19 @@ async function openPlayableBrowser(options) {
   async function tap(x, y) {
     assertOpen();
     integer(x, 'x', 0, width - 1); integer(y, 'y', 0, height - 1);
-    record('tap', { x, y, pointer: options.mobile ? 'touch' : 'mouse' });
+    record('tap', { x, y, pointer: options.mobile ? 'touch' : 'mouse', release: options.mobile ? 'queued-with-start' : 'after-down' });
     if (options.mobile) {
-      try { await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y, id: 0 }] }); }
-      finally { await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); }
+      // Queue both events before awaiting either response. Waiting for the
+      // touchStart acknowledgement can turn a short tap into a held direction
+      // while Chrome is busy rendering. WebSocket order preserves down -> up.
+      const down = cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y, id: 0 }] });
+      const up = cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      const results = await Promise.allSettled([down, up]);
+      const failed = results.find((result) => result.status === 'rejected');
+      if (failed) {
+        try { await cdp.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] }); } catch (_) {}
+        throw failed.reason;
+      }
     } else {
       try { await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', clickCount: 1 }); }
       finally { await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 }); }
