@@ -264,7 +264,7 @@ async function openPlayableBrowser(options) {
     server = await serve(root);
     profile = await fsp.mkdtemp(path.join(os.tmpdir(), 'tp-playable-'));
     logFd = fs.openSync(path.join(out, 'chrome.log'), 'wx');
-    const args = ['--headless=new', '--enable-unsafe-swiftshader', '--use-angle=swiftshader',
+    const args = ['--headless=new', '--mute-audio', '--enable-unsafe-swiftshader', '--use-angle=swiftshader',
       '--remote-debugging-port=0', '--remote-debugging-address=127.0.0.1', `--user-data-dir=${profile}`,
       '--no-first-run', '--no-default-browser-check', '--disable-background-timer-throttling',
       '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', 'about:blank'];

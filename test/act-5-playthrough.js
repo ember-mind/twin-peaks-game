@@ -138,7 +138,7 @@ async function main() {
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'tp-a5-chrome-'));
   const logFd = fs.openSync(path.join(profile, 'chrome.log'), 'w');
   const child = spawn(CHROME, [
-    '--headless=new',
+    '--headless=new', '--mute-audio',
     '--enable-unsafe-swiftshader',
     '--use-angle=swiftshader',
     `--remote-debugging-port=${devPort}`,

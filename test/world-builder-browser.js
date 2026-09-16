@@ -127,7 +127,7 @@ async function main() {
   const server = spawn('python3', ['-m', 'http.server', String(port), '--bind', '127.0.0.1', '--directory', ROOT], { stdio: 'ignore' });
   const devPort = await freePort();
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'tp-wb-chrome-'));
-  const chrome = spawn(CHROME, ['--headless=new', '--enable-unsafe-swiftshader', '--use-angle=swiftshader',
+  const chrome = spawn(CHROME, ['--headless=new', '--mute-audio', '--enable-unsafe-swiftshader', '--use-angle=swiftshader',
     `--remote-debugging-port=${devPort}`, `--user-data-dir=${profile}`, '--hide-scrollbars', '--no-first-run',
     '--no-default-browser-check', 'about:blank'], { stdio: 'ignore' });
   const extraServers = [];
