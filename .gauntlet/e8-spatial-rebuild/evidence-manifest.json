@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "slug": "e8-spatial-rebuild",
-  "generatedAt": "2026-09-16T20:02:01.289Z",
+  "generatedAt": "2026-09-16T20:24:54.567Z",
   "files": [
     {
       "path": "evidence/ambient-before/frame-000.png",
@@ -77,6 +77,11 @@
       "path": "evidence/entry-r1.png",
       "bytes": 14426,
       "sha256": "b51adcc917b181c0f20aca6864eacdef380b40ab0a441a2e2f9b1881c3c81c8a"
+    },
+    {
+      "path": "evidence/gate-ledger.md",
+      "bytes": 1290,
+      "sha256": "bf5e9e1ffa7c8af603d771430e68342688d2b8924076fdbb26a97740a94eb17a"
     },
     {
       "path": "evidence/hall-r1.png",

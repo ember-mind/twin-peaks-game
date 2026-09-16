@@ -32,3 +32,10 @@ Round 1 judged by fresh Luna/xhigh critic on PNGs only. Entry integrated 8; hall
 ## Gap queue
 
 Desk/counter and bell still lack PNG-proven source-linked motion. Remaining non-blocking visual gap: hall frame is right-heavy versus reference. No further visual round authorized under cap.
+
+## Final gate
+
+Native gates pass; Chrome Act 4 all paths 530/530 and Act 3 189/189 pass on
+selected Round 3 build. Tracked test-generated artifacts restored. Release
+audit remains FAIL solely on ambient visual floor 6.5/10 and unresolved
+source-linked desk/bell light gap.

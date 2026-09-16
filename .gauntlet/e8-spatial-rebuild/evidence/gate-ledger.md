@@ -20,5 +20,7 @@ terminal results, not a substitute for the tests themselves.
 | `node test/migrated-door-traversal.js` | 45 checks |
 | `node test/interior-zoning-reachability.js` | 42/42 |
 
-Chrome Act 4 and Act 3 full-route outcomes pending. Gauntlet release still
-fails visual light floor regardless of runtime gate outcome.
+| `node test/act-3-playthrough.js` | 189/189 assertions; one console error reported by harness |
+| `node test/act-4-playthrough.js --path=all` | 530/530 assertions; one test-server `favicon.ico` 404, no failed path assertions |
+
+All runtime gates passed. Gauntlet release still fails visual light floor.

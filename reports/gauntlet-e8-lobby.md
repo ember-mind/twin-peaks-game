@@ -114,8 +114,8 @@ archetypes or palette hues added; no push.
 | Act 4 flow | 1611/1611 |
 | Migrated door traversal | 45 checks |
 | Interior zoning reachability | 42/42 |
-| Chrome Act 4 all paths | Running final selected-build gate |
-| Chrome Act 3 | Running final selected-build gate |
+| Chrome Act 4 all paths | 530/530; one test-server `favicon.ico` 404, no failed path assertions |
+| Chrome Act 3 | 189/189; one console error reported by harness |
 
 Visual release verdict remains **FAIL** because temporal ambient is 6.5/10,
 despite passing room-function layout and native runtime gates. Selected
