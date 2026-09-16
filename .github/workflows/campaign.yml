@@ -29,6 +29,8 @@ jobs:
           echo "CAMPAIGN_OUT=$RUNNER_TEMP/campaign" >> "$GITHUB_ENV"
       - name: Pure navigation contracts
         run: node test/campaign-player.js
+      - name: Existing evidence survives a refused rerun
+        run: node test/campaign-report-safety.js
       - name: New Game to Act 2 through player input
         run: node test/campaign-playthrough.js
       - name: Retain actual route and failure evidence
