@@ -237,10 +237,16 @@ async function openPlayableBrowser(options) {
   async function tap(x, y) {
     assertOpen();
     integer(x, 'x', 0, width - 1); integer(y, 'y', 0, height - 1);
-    record('tap', { x, y, pointer: options.mobile ? 'touch' : 'mouse' });
+    record('tap', { x, y, pointer: options.mobile ? 'touch' : 'mouse', durationMs: options.mobile ? 20 : null });
     if (options.mobile) {
-      try { await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y, id: 0 }] }); }
-      finally { await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); }
+      // Browser-owned duration: waiting for a touchStart acknowledgement before
+      // sending touchEnd can stretch a tap into a hold on a busy renderer.
+      // This emits real touch input, not DOM clicks or runtime calls.
+      try { await cdp.send('Input.synthesizeTapGesture', { x, y, duration: 20, tapCount: 1, gestureSourceType: 'touch' }); }
+      catch (error) {
+        try { await cdp.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] }); } catch (_) {}
+        throw error;
+      }
     } else {
       try { await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', clickCount: 1 }); }
       finally { await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 }); }

@@ -25,6 +25,7 @@ jobs:
           git rev-parse HEAD
       - name: Geometry and existing physical input contracts
         run: |
+          node test/touch-gesture-transport.js
           node test/touch-preflight.js
           node test/playable-browser.js
           node test/campaign-player.js
