@@ -35,6 +35,7 @@
  *  14  M7: ACT4_AFTERNOON, sheriff: MOVE Truman (baseline) onto Lucy's tile 2,6 is refused with a message
  *  15  M7: same body onto the station door trigger 7,11 and onto a wall refused; then Lucy MOVE 3,6 plus a door field on
  *          sheriffs-station-front-entrance exports a world-builder-bundle; --dry-run --repin on it exits 0
+ *          with one repin per V5 pin that expects Lucy on her baseline tile (counted from the fixture)
  *  16  M8: town welcome sign: the click on 30,30 lands on the cartello interact key, ON THIS TILE selects the sign; EDIT, MOVE
  *          to 31,30, export a scene-objects-changeset; --dry-run shows one x line
  *  17  M8: town tracks landmark (rect): RESIZE to 2x30, the cascade is copied untouched, --dry-run VALID
@@ -819,8 +820,15 @@ async function main() {
       fs.writeFileSync(file, exported);
       const dry = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'world-apply.js'), file, '--dry-run', '--repin'], { encoding: 'utf8' });
       fs.writeFileSync(path.join(OUT7, 'case15-dry-run.txt'), dry.stdout + dry.stderr);
-      check('case 15: --dry-run --repin on the bundle exits 0 with both parts and 24 repins previewed', dry.status === 0 && dry.stdout.includes('TARGET world/connections.json :: sheriffs-station-front-entrance') &&
-        dry.stdout.includes('TARGET narrative/cast/windows.json :: baseline / lucy') && (dry.stdout.match(/^REPIN /gm) || []).length === 24 && dry.stdout.includes('DRY-RUN 1 cast placement change(s), 24 repin(s); nothing written'), dry.stdout + dry.stderr);
+      /* The repin count is DERIVED, never hardcoded: moving Lucy off her baseline tile disagrees with exactly
+       * those V5 pins that expect her there, so the fixture decides how many. It was pinned at 24 and the
+       * fixture has since grown to 28 with the Act 5 pins — a hardcoded number silently ages out. */
+      const pinsFixture = JSON.parse(fs.readFileSync(path.join(ROOT, 'test', 'fixtures', 'cast-pins-acts-1-4.json'), 'utf8'));
+      const expectedRepins = pinsFixture.pins.filter((pin) => pin.expect && pin.expect.lucy === 'sheriff@2,6').length;
+      check('case 15: every V5 pin that expects Lucy on her baseline tile is a repin candidate', expectedRepins > 0 && expectedRepins <= pinsFixture.pins.length,
+        expectedRepins + ' of ' + pinsFixture.pins.length + ' pins');
+      check('case 15: --dry-run --repin on the bundle exits 0 with both parts and ' + expectedRepins + ' repins previewed', dry.status === 0 && dry.stdout.includes('TARGET world/connections.json :: sheriffs-station-front-entrance') &&
+        dry.stdout.includes('TARGET narrative/cast/windows.json :: baseline / lucy') && (dry.stdout.match(/^REPIN /gm) || []).length === expectedRepins && dry.stdout.includes('DRY-RUN 1 cast placement change(s), ' + expectedRepins + ' repin(s); nothing written'), dry.stdout + dry.stderr);
       await clickAction('revert-all');
       s = await state();
       check('case 15: REVERT ALL clears both drafts', s.unsaved === 0 && s.castOps.length === 0, s.unsaved);

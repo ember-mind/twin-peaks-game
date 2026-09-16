@@ -1,8 +1,11 @@
 /* props-production.js — the runtime consumer of the M9 prop registry (GAME.WorldData.props, js/props.gen.js).
  *
- * One installer. It wraps GAME.sprites.drawForegroundStructures so a scene that has prop instances paints its
- * atlas frames on the native scene canvas after the authored art of that scene, at integer scale with
- * imageSmoothingEnabled = false, sorted by layer, then by anchor foot y, then by instance id.
+ * One installer, three hooks on the frame the engine already paints (js/engine.js paintWorld): the ground pass
+ * (GAME.sprites.drawStructures) starts the frame, GAME.Sprites.drawChar releases the props each actor must draw
+ * over just before that actor, and the open-ended depth band of GAME.sprites.drawForegroundStructures releases
+ * whatever is left. Frames are drawn on the native scene canvas at integer scale with
+ * imageSmoothingEnabled = false, sorted by layer, then by anchor foot y, then by instance id — and INTERLEAVED
+ * with the actors by foot y, so Cooper and every Cast Presence body pass in front of and behind them.
  *
  * Ownership, as the handoff requires: map rows stay authoritative for collision and walkability. This module
  * NEVER writes a row, a door or an interact key; footprints are metadata the World Builder uses for selection
@@ -108,8 +111,8 @@
     return true;
   }
 
-  /* drawScene(ctx, sceneId, cx, cy) -> instances drawn. Public so the browser harnesses and
-   * test/props-render-order.js can drive one scene without the installer. */
+  /* drawScene(ctx, sceneId, cx, cy) -> every instance of the scene, ignoring depth. Public for the browser
+   * harnesses and for a preview canvas that has no actors to interleave with. */
   function drawScene(ctx, sceneId, cx, cy) {
     if (!GAME.PROPS_ENABLED) return 0;
     var list = instancesFor(sceneId);
@@ -120,29 +123,107 @@
     return drawn;
   }
 
+  /* ---- depth ----------------------------------------------------------------------------------------------
+   * Props interleave with actors by foot y: an actor whose foot y is greater than a prop's anchor foot draws
+   * OVER that prop, a smaller one draws behind it. On a tie the prop goes first.
+   *
+   * ACTOR_LAYER is the escape hatch the sort order needs: an instance on a layer STRICTLY ABOVE it is not a
+   * floor object at all and always draws after every actor, whatever its foot y. Layers at or below it
+   * interleave. 6 is the highest layer the seeded Roadhouse gives a floor object (the chairs); see the report
+   * for which definitions sit above it.
+   */
+  var ACTOR_LAYER = 6;
+
+  /* The engine paints a frame as: ground (one drawStructures call) -> for each actor, sorted by foot y:
+   * drawChar, then drawForegroundStructures with the band [thisFoot, nextFoot) (the last one open-ended).
+   * There is no hook BEFORE the first actor, so a prop behind everybody cannot be released from a band call.
+   * Hooking drawChar instead gives the one moment that is missing — immediately before each actor — and keeps
+   * every edit inside this file. `pending` is the frame's undrawn instances, in (layer, foot, id) order. */
+  var pending = null;
+  var pendingScene = null;
+
+  function beginFrame(sceneId) {
+    var list = instancesFor(sceneId);
+    pending = list.length ? list.slice() : null;
+    pendingScene = pending ? sceneId : null;
+  }
+
+  /* drawBand(ctx, sceneId, cx, cy, upToFoot) -> instances released. Draws every still-undrawn instance on a
+   * layer <= ACTOR_LAYER whose foot y is <= upToFoot, in list order, so the (layer, foot, id) order is kept
+   * among everything released together. upToFoot Infinity also releases the layers above ACTOR_LAYER: that is
+   * the end of the frame, after the last actor. */
+  function drawBand(ctx, sceneId, cx, cy, upToFoot) {
+    if (!GAME.PROPS_ENABLED || !pending || pendingScene !== sceneId) return 0;
+    cx = Math.round(cx || 0); cy = Math.round(cy || 0);
+    var last = upToFoot === Infinity;
+    var keep = [], drawn = 0;
+    for (var i = 0; i < pending.length; i++) {
+      var e = pending[i];
+      var release = e.layer > ACTOR_LAYER ? last : (last || e.foot <= upToFoot);
+      if (!release) { keep.push(e); continue; }
+      drawInstance(ctx, e, cx, cy);
+      drawn++;
+    }
+    pending = keep.length ? keep : null;
+    if (!pending) pendingScene = null;
+    return drawn;
+  }
+
   var installed = false;
-  var originalForeground;
+  var originalForeground, originalDrawChar;
   function install() {
     if (installed || !registry) return false;
     if (!GAME.sprites || typeof GAME.sprites.drawForegroundStructures !== 'function') return false;
     installed = true;
     preload();
+
+    /* Ground pass: once per frame, before any actor. Only bookkeeping — nothing is drawn here. */
+    var originalStructures = GAME.sprites.drawStructures;
+    if (typeof originalStructures === 'function') {
+      GAME.sprites.drawStructures = function (ctx, m, cx, cy, opts) {
+        if (GAME.PROPS_ENABLED && m && m.id) beginFrame(m.id);
+        return originalStructures.apply(this, arguments);
+      };
+      uninstallStructures = function () { GAME.sprites.drawStructures = originalStructures; };
+    }
+
+    /* Immediately before an actor: release the props it must draw over (foot y <= the actor's, ties first). */
+    if (GAME.Sprites && typeof GAME.Sprites.drawChar === 'function') {
+      originalDrawChar = GAME.Sprites.drawChar;
+      GAME.Sprites.drawChar = function (ctx, x, y, pal, dir, fr, alpha, moving, woods, t, meta) {
+        if (GAME.PROPS_ENABLED && meta && meta.mapId && meta.mapId === pendingScene && typeof meta.wy === 'number') {
+          /* drawChar is handed screen coordinates; the camera is the difference from the world ones. */
+          drawBand(ctx, meta.mapId, meta.wx - x, meta.wy - y, meta.wy + TILE);
+        }
+        return originalDrawChar.apply(this, arguments);
+      };
+    }
+
+    /* End of frame: the open-ended band, after the last actor. Releases whatever is left, the layers above
+     * ACTOR_LAYER included. A scene whose ground pass never ran (a harness drawing one pass by hand) still
+     * gets its props here. */
     originalForeground = GAME.sprites.drawForegroundStructures;
     GAME.sprites.drawForegroundStructures = function (ctx, m, cx, cy, opts) {
       var out = originalForeground.apply(this, arguments);
-      /* Props are painted after the scene's own foreground pass, and only on the last depth band, so a banded
-       * scene does not draw them once per band. */
-      var banded = opts && opts.forestDepthMax != null && opts.forestDepthMax !== Infinity;
-      if (m && m.id && !banded) drawScene(ctx, m.id, cx, cy);
+      var open = !opts || opts.forestDepthMax == null || opts.forestDepthMax === Infinity;
+      if (GAME.PROPS_ENABLED && m && m.id && open) {
+        if (pendingScene !== m.id) beginFrame(m.id);
+        drawBand(ctx, m.id, cx, cy, Infinity);
+      }
       return out;
     };
     return true;
   }
 
+  var uninstallStructures = null;
   function uninstall() {
     if (!installed) return;
     installed = false;
     GAME.sprites.drawForegroundStructures = originalForeground;
+    if (originalDrawChar) GAME.Sprites.drawChar = originalDrawChar;
+    if (uninstallStructures) uninstallStructures();
+    originalDrawChar = null; uninstallStructures = null;
+    pending = null; pendingScene = null;
   }
 
   GAME.Props = {
@@ -151,11 +232,14 @@
     instancesFor: instancesFor,
     originOf: originOf,
     drawScene: drawScene,
+    drawBand: drawBand,
+    beginFrame: beginFrame,
+    ACTOR_LAYER: ACTOR_LAYER,
     install: install,
     uninstall: uninstall,
     /* test seam: js/props.gen.js is loaded once, so test/props-render-order.js swaps in fake instances */
     preload: preload,
-    _setRegistry: function (next) { registry = next; TILE = (next && next.tilePx) || 16; byScene = null; atlases = {}; },
+    _setRegistry: function (next) { registry = next; TILE = (next && next.tilePx) || 16; byScene = null; atlases = {}; pending = null; pendingScene = null; },
     _setAtlas: function (src, img) { atlases[src] = img; }
   };
 

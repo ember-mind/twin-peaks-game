@@ -162,5 +162,98 @@ global.GAME.PROPS_ENABLED = true;
   ok(JSON.stringify(map) === snapshot, 'drawing writes no map row, door, object or interact key');
 }
 
+
+/* ---- depth banding (M10a) ------------------------------------------------------------------------------------
+ * Props interleave with actors by foot y. The engine paints a frame as ground -> for each actor sorted by foot y:
+ * drawChar, then drawForegroundStructures with that actor's band. This drives the real installed hooks with fake
+ * sprites and asserts the exact sequence of props and actors that reaches the context.
+ */
+global.GAME.PROPS_ENABLED = true;
+{
+  const ATLAS2 = 'assets/fake/depth.png';
+  // Distinct frame x per definition, so a recorded drawImage names its prop.
+  const NAMES = { 0: 'far', 20: 'near', 40: 'ceiling' };
+  const def = (fx, layer) => ({ label: 'd' + fx, atlas: ATLAS2, frame: [fx, 0, 16, 16], anchor: [8, 16],
+    footprint: [[0, 0]], defaultLayer: layer, tags: ['fake'], transforms: [] });
+  const FOOT_FAR = 96, FOOT_NEAR = 192, FOOT_CEILING = 48;
+  const DEPTH = {
+    version: 1, tilePx: 16,
+    scenes: { depthscene: { canvas: [256, 256] } },
+    definitions: { 'd.far': def(0, 4), 'd.near': def(20, 4), 'd.ceiling': def(40, 8) },
+    instances: {
+      'p-far': { propId: 'd.far', sceneId: 'depthscene', tx: 4, ty: FOOT_FAR / 16 },
+      'p-near': { propId: 'd.near', sceneId: 'depthscene', tx: 4, ty: FOOT_NEAR / 16 },
+      'p-ceiling': { propId: 'd.ceiling', sceneId: 'depthscene', tx: 4, ty: FOOT_CEILING / 16 }
+    }
+  };
+  ok(Props.ACTOR_LAYER === 6, 'ACTOR_LAYER is 6', String(Props.ACTOR_LAYER));
+  ok(DEPTH.definitions['d.ceiling'].defaultLayer > Props.ACTOR_LAYER &&
+     DEPTH.definitions['d.far'].defaultLayer <= Props.ACTOR_LAYER, 'the fixture has one prop above ACTOR_LAYER and two at or below it');
+
+  const MAP = { id: 'depthscene' };
+  const seq = [];
+  // Fake sprite surface the installer hooks. Each records into `seq` so the real order is observed, not inferred.
+  global.GAME.sprites = {
+    drawStructures: function () { seq.push('ground'); },
+    drawForegroundStructures: function () {}
+  };
+  global.GAME.Sprites = {
+    drawChar: function (ctx, x, y, pal, dir, fr, alpha, moving, woods, t, meta) { seq.push('@' + meta.npcId); }
+  };
+  Props.uninstall();
+  Props._setRegistry(DEPTH);
+  const atlas2 = new global.Image(); atlas2.width = 64; atlas2.height = 16;
+  ok(Props.install(), 'the installer takes the fake sprite surface');
+  Props._setAtlas(ATLAS2, atlas2);
+
+  function frame(actors) {
+    seq.length = 0;
+    const ctx = {
+      imageSmoothingEnabled: true, save() {}, restore() {}, translate() {}, scale() {},
+      drawImage(img, sx) { seq.push(NAMES[sx]); }
+    };
+    global.GAME.sprites.drawStructures(ctx, MAP, 0, 0, {});
+    const sorted = actors.slice().sort((a, b) => (a.foot - b.foot) || (a.id < b.id ? -1 : 1));
+    sorted.forEach(function (a, i) {
+      const wy = a.foot - 16, wx = 64;
+      global.GAME.Sprites.drawChar(ctx, wx, wy, null, null, null, null, null, null, 0, { mapId: MAP.id, wx: wx, wy: wy, npcId: a.id });
+      global.GAME.sprites.drawForegroundStructures(ctx, MAP, 0, 0, {
+        forestDepthMin: a.foot, forestDepthMax: i + 1 < sorted.length ? sorted[i + 1].foot : Infinity
+      });
+    });
+    return seq.slice();
+  }
+
+  const A = (id, foot) => ({ id: id, foot: foot });
+  // 1. both actors north of both props: every prop draws last
+  ok(JSON.stringify(frame([A('a', 32), A('b', 48)])) === JSON.stringify(['ground', '@a', '@b', 'far', 'near', 'ceiling']),
+    'both actors north of both props: props draw over them', frame([A('a', 32), A('b', 48)]).join(','));
+  // 2. both actors south of both props: the floor props draw first, the ceiling prop still last
+  ok(JSON.stringify(frame([A('a', 208), A('b', 224)])) === JSON.stringify(['ground', 'far', 'near', '@a', '@b', 'ceiling']),
+    'both actors south of both props: props draw behind them, ceiling still on top', frame([A('a', 208), A('b', 224)]).join(','));
+  // 3. one actor between the two props
+  ok(JSON.stringify(frame([A('a', 128), A('b', 224)])) === JSON.stringify(['ground', 'far', '@a', 'near', '@b', 'ceiling']),
+    'an actor between the props draws over the far one and behind the near one', frame([A('a', 128), A('b', 224)]).join(','));
+  // 4. one actor each side, straddling both props
+  ok(JSON.stringify(frame([A('a', 64), A('b', 224)])) === JSON.stringify(['ground', '@a', 'far', 'near', '@b', 'ceiling']),
+    'actors either side: the north one is behind both props, the south one in front of both', frame([A('a', 64), A('b', 224)]).join(','));
+  // tie: equal foot y draws the prop first, then the actor
+  ok(JSON.stringify(frame([A('a', FOOT_FAR), A('b', 224)])) === JSON.stringify(['ground', 'far', '@a', 'near', '@b', 'ceiling']),
+    'a tie on foot y draws the prop first, then the actor', frame([A('a', FOOT_FAR), A('b', 224)]).join(','));
+  // a layer above ACTOR_LAYER ignores foot y entirely: the ceiling prop's foot (48) is north of every actor here
+  ok(frame([A('a', 208), A('b', 224)]).indexOf('ceiling') === 5, 'a prop above ACTOR_LAYER draws last whatever its foot y');
+  // one actor only: the single band is open-ended, and the props still split around it
+  ok(JSON.stringify(frame([A('solo', 128)])) === JSON.stringify(['ground', 'far', '@solo', 'near', 'ceiling']),
+    'with one actor the props still split around it', frame([A('solo', 128)]).join(','));
+  // the flag still gates everything
+  global.GAME.PROPS_ENABLED = false;
+  ok(JSON.stringify(frame([A('a', 128)])) === JSON.stringify(['ground', '@a']), 'flag off: not one prop in the frame', frame([A('a', 128)]).join(','));
+  global.GAME.PROPS_ENABLED = true;
+
+  Props.uninstall();
+}
+
 global.GAME.PROPS_ENABLED = false;
-console.log('PROPS-RENDER-ORDER-PASS ' + pass + ' checks');
+/* One PASS line, and it stays PROPS-RENDER-ORDER-PASS: tools/world-apply.js prints this file's last line as its
+ * CHECK for the props target, and test/props-changeset.js matches on that exact prefix. */
+console.log('PROPS-RENDER-ORDER-PASS ' + pass + ' checks (order, flip, camera, flag, depth banding)');
