@@ -1,0 +1,85 @@
+# One-use, pinned, feature-branch-only patch. Removed before final review.
+name: materialize-target-registry
+on:
+  push:
+    branches: ['codex/world-01-narrative-targets']
+permissions:
+  contents: write
+jobs:
+  apply-reviewed-patch:
+    if: github.repository == 'ember-mind/twin-peaks-game' && github.ref == 'refs/heads/codex/world-01-narrative-targets'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify and integrate the fixed registry patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          pins = {
+            'test/gen-world-data.js': 'b18f9ef5ab9e428daf57a4b1d98ab891c20d106cea1a6c9c276a68897aff63ae',
+            'js/narrative-engine-adapter.js': 'd2527863628745506357e38e76401f9acf74e8b1c683737d59ed23ac416778fb',
+            'test/scene-objects-equality.js': 'e558cd28f263c94d2f40510523faefc8f8b6c49a6d069312612dc2ef27658db9',
+            'test/traincar-native.js': 'f589cbe21a5ecb39064022202ac4192dc024dc473f9fede5b3d9b6e887c0b94b'
+          }
+          for name, expected in pins.items():
+            assert hashlib.sha256(Path(name).read_bytes()).hexdigest() == expected, 'Unexpected revision: ' + name
+          p=Path('js/narrative-engine-adapter.js'); s=p.read_text()
+          a=s.index('  var WORLD_TARGETS = {'); b=s.index('  A._debugWorldTargets = null;',a)
+          s=s[:a]+'  // Compiled authored identities; no coordinate-based fallback.\n  var WORLD_TARGETS = null;\n'+s[b:]
+          s=s.replace("  // narrativa resta l'id logico nel nodo; le coordinate vivono QUI (C5-C §2)","  // narrativa resta l'id logico nel nodo; la posizione deriva dal registro.")
+          needle='  A.enable = function (opts) {\n    opts = opts || {};\n'
+          assert s.count(needle)==1
+          s=s.replace(needle,needle+"    if (!GAME.WorldData || !GAME.WorldData.narrativeTargets) {\n      throw new Error('NarrativeAdapter: load generated narrative targets before enabling');\n    }\n    WORLD_TARGETS = GAME.WorldData.narrativeTargets;\n")
+          p.write_text(s)
+          p=Path('test/gen-world-data.js');s=p.read_text()
+          needle='  const soBody = JSON.stringify(so.scenes, null, 2).replace(/\\n/g, \'\\n    \');'
+          assert s.count(needle)==1
+          s=s.replace(needle,"  let narrativeTargets;\n  try {\n    const nt = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'world', 'narrative-targets.json'), 'utf8'));\n    narrativeTargets = require('../js/editor/core/narrative-targets.js').compileTargets(nt, so);\n  } catch (e) { die(e.message); }\n"+needle)
+          needle="'  GAME.WorldData.sceneObjects = freezeDeep({ version: ' + so.version + ', scenes: scenes });',"
+          assert s.count(needle)==1
+          s=s.replace(needle,needle+"\n'  GAME.WorldData.narrativeTargets = freezeDeep(' + JSON.stringify(narrativeTargets, null, 2) + ');',")
+          s=s.replace('/* scene-objects.gen.js — GENERATED from world/scene-objects.json by test/gen-world-data.js.','/* scene-objects.gen.js — GENERATED from world/{scene-objects,narrative-targets}.json by test/gen-world-data.js.')
+          p.write_text(s)
+          p=Path('test/scene-objects-equality.js');s=p.read_text();needle="  ['scene-objects.json', 'connections.json'].forEach"
+          assert s.count(needle)==1
+          s=s.replace(needle,"  fs.mkdirSync(path.join(tmp, 'js', 'editor', 'core'), { recursive: true });\n  fs.copyFileSync(path.join(ROOT, 'js', 'editor', 'core', 'narrative-targets.js'), path.join(tmp, 'js', 'editor', 'core', 'narrative-targets.js'));\n  ['scene-objects.json', 'connections.json', 'narrative-targets.json'].forEach")
+          p.write_text(s)
+          p=Path('test/traincar-native.js');s=p.read_text();a=s.index('const adapterSource = ');b=s.index('// Hawk e Truman',a)
+          s=s[:a]+"const runtimeTargets = GAME.WorldData.narrativeTargets.traincar;\nfor (const id of targetIds) {\n  const t = Scene.targets[id], actual = runtimeTargets[id];\n  assert(actual, 'canonical narrative targets declare ' + id);\n  assert.deepEqual([actual.x, actual.y], [t.x, t.y],\n    'canonical traincar target ' + id + ' matches the authored tile');\n}\n\n"+s[b:]
+          p.write_text(s)
+          PY
+          node test/gen-world-data.js
+      - name: Validate parity and actual editor transactions before commit
+        run: |
+          node test/narrative-targets.js
+          node test/narrative-targets-apply.js
+          node test/scene-objects-equality.js
+          node test/traincar-native.js
+          node test/act-3-flow.js
+          node test/act-4-flow.js
+          node test/act-5-flow.js
+          node test/smoke.js
+          node test/walkthrough.js
+      - name: Commit only the validated fixed integration to its feature branch
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          actual=$(git ls-remote origin refs/heads/codex/world-01-narrative-targets | cut -f1)
+          test "$actual" = "$EXPECTED_SHA"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- test/gen-world-data.js js/narrative-engine-adapter.js test/scene-objects-equality.js test/traincar-native.js js/scene-objects.gen.js
+          git diff --cached --check
+          git commit -m 'refactor(world): compile canonical narrative targets with explicit object bindings'
+          git push origin HEAD:refs/heads/codex/world-01-narrative-targets

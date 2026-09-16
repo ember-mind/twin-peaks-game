@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "targets": [
+    { "scene": "traincar", "id": "bridge_rail", "kind": "landmark", "bind": { "interactId": "sign_ponte" } },
+    { "scene": "traincar", "id": "sign_oej", "kind": "sign", "bind": { "interactId": "sign_oej" } },
+    { "scene": "traincar", "id": "mound", "kind": "object", "bind": { "interactId": "mucchio_terra" } },
+    { "scene": "traincar", "id": "ring", "kind": "object", "bind": { "interactId": "anello_interact" } },
+    { "scene": "traincar", "id": "scene_center", "kind": "landmark", "position": { "x": 12, "y": 5 } },
+    { "scene": "traincar", "id": "traincar_entrance", "kind": "landmark", "position": { "x": 13, "y": 7 } },
+    { "scene": "traincar", "id": "stove", "kind": "object", "position": { "x": 12, "y": 3 } },
+    { "scene": "traincar", "id": "cards", "kind": "object", "position": { "x": 10, "y": 6 } },
+    { "scene": "traincar", "id": "tracks_north", "kind": "landmark", "position": { "x": 21, "y": 2 } },
+    { "scene": "hospital", "id": "night_register", "kind": "object", "position": { "x": 13, "y": 8 } },
+    { "scene": "roadhouse", "id": "roadhouse_phone", "kind": "object", "position": { "x": 8, "y": 5 } },
+    { "scene": "town", "id": "town_crossroads", "kind": "landmark", "position": { "x": 47, "y": 30 } },
+    { "scene": "town", "id": "lago_maddy", "kind": "landmark", "bind": { "interactId": "lago_riva" } },
+    { "scene": "palmer", "id": "palmer_entrance", "kind": "landmark", "position": { "x": 8, "y": 10 } }
+  ]
+}
