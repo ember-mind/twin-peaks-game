@@ -155,16 +155,24 @@
   }
 
   function syncClassicToNarrative(NR, state, classicFlags) {
+    var changed = false;
     // audrey_indaga è scritto dal layer classico (data.js audrey_a2 /
     // audrey_a2_ben): senza questo ponte il nodo facoltativo m6_audrey resta
     // irraggiungibile a runtime (M6 stitch C4).
     ['sogno_fatto', 'atto3', 'atto4', 'atto5', 'gigante1', 'maddy_trovata', 'leland_morto', 'sarah_visione_ascoltata', 'audrey_indaga'].forEach(function (name) {
-      if (classicFlags[name]) ensureFlag(NR, state, name);
+      if (classicFlags[name] && !state.flags[name]) {
+        ensureFlag(NR, state, name);
+        changed = true;
+      }
     });
     // Compatibilità salvataggi legacy: il vecchio dialogo classico vale come
     // testimonianza. Nelle nuove partite la sorgente canonica è m8_leland_taxi,
     // fisicamente prima del ritrovamento; M9 non la scrive mai.
-    if (classicFlags.done_leland_dove) ensureEvidence(NR, state, 'T_LELAND_TAXI');
+    if (classicFlags.done_leland_dove && !state.evidence.T_LELAND_TAXI) {
+      ensureEvidence(NR, state, 'T_LELAND_TAXI');
+      changed = true;
+    }
+    return changed;
   }
 
   function syncNarrativeToClassic(state, classicFlags) {
@@ -360,9 +368,15 @@
 
       if (E.state.mode === 'play') {
         if (GAME.NarrativeFinaleProduction && GAME.NarrativeFinaleProduction.poll) GAME.NarrativeFinaleProduction.poll();
-        syncClassicToNarrative(NR, state, E.state.flags);
-        syncClassicEvidence(NR, state, E.state.clues);
-        if (A.syncCarryoverEvidence) A.syncCarryoverEvidence();
+        var classicChanged = syncClassicToNarrative(NR, state, E.state.flags);
+        var classicEvidence = syncClassicEvidence(NR, state, E.state.clues);
+        var carryoverEvidence = A.syncCarryoverEvidence ? A.syncCarryoverEvidence() : [];
+        // Classic acquisitions bypass NR.commit* hooks. Reconcile the same
+        // authored cast before persisting the imported state, not only after
+        // the next narrative interaction or a page reload.
+        if (classicChanged || classicEvidence.length || carryoverEvidence.length) {
+          if (A.syncNarrativeEntities) A.syncNarrativeEntities('classic-progress');
+        }
         syncNarrativeToClassic(state, E.state.flags);
         renderObjective(NR, A);
         persist(NR, NS, A);
