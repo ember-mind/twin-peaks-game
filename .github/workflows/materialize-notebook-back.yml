@@ -1,0 +1,145 @@
+# One-use pinned patch transport. The validated commit deletes this workflow.
+name: materialize-notebook-back
+on:
+  push:
+    branches: ['codex/playable-12-notebook-back']
+permissions:
+  contents: write
+jobs:
+  validate-and-commit:
+    if: github.repository == 'ember-mind/twin-peaks-game' && github.ref == 'refs/heads/codex/playable-12-notebook-back'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Reproduce, apply exact repair, and validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          if node test/touch-notebook-navigation.js > /tmp/notebook-before.log 2>&1; then
+            echo 'Expected the original missing-back failure'; exit 1
+          fi
+          grep 'not ok - notebook_has_back_control' /tmp/notebook-before.log
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p=Path('js/touch.js');raw=p.read_bytes()
+          assert hashlib.sha256(raw).hexdigest()=='7bad80f85bdd81949420566aa083a24de62a8e709a2b384bc9d61b85016631bd'
+          s=raw.decode()
+          old='  function narrativeChoiceActive() {'
+          new='''  // The notebook has its own Escape/back contract. Its semantic DOM is
+            // painted by RetroUI, so a hidden DOM-only Close row is not a touch exit.
+            function notebookActive() {
+              if (!document.querySelectorAll) return false;
+              var roots = document.querySelectorAll('#narrative .nw-root');
+              for (var i = roots.length - 1; i >= 0; i--) {
+                if (roots[i].style.display === 'none') continue;
+                return (' ' + (roots[i].className || '') + ' ').indexOf(' nb-root ') >= 0;
+              }
+              return false;
+            }
+
+            function narrativeChoiceActive() {'''
+          assert s.count(old)==1;s=s.replace(old,new)
+          old="    if (recoveryChoiceActive()) return 'narrative-choice';"
+          assert s.count(old)==1;s=s.replace(old,old+"\n    if (notebookActive()) return 'narrative-notebook';")
+          old="    } else if (mode === 'narrative-choice') {"
+          assert s.count(old)==1;s=s.replace(old,"    } else if (mode === 'narrative-choice' || mode === 'narrative-notebook') {")
+          old='''      showControl(uiA, true, 0.85);
+                showControl(uiB, false, 0);
+              } else if (mode === 'narrative' || mode === 'dialogue' || mode === 'advance') {'''
+          new='''      showControl(uiA, true, 0.85);
+                if (mode === 'narrative-notebook') {
+                  // B emits the notebook's existing Escape action, never KeyT (which
+                  // only opens it from play). Reuse the separated play-button geometry.
+                  if (choiceLayout.gutter) {
+                    placeGutterButton(uiA, 64, choiceLayout.gutterRight, Math.round(viewportSize().height / 2 - 76));
+                    placeGutterButton(uiB, 64, choiceLayout.gutterRight + GUTTER_DIAGONAL, Math.round(viewportSize().height / 2 + 18));
+                  } else if (!choiceLayout.landscape) {
+                    placePortraitButton(uiA, choiceLayout.a, choiceLayout.aRight, choiceLayout.controlTop + 8);
+                    placePortraitButton(uiB, choiceLayout.b, choiceLayout.bRight, choiceLayout.controlTop + 74);
+                  } else {
+                    restorePlayButton(uiA, choiceLayout.a, choiceLayout.aRight, choiceLayout.aBottom);
+                    restorePlayButton(uiB, choiceLayout.b, choiceLayout.bRight, choiceLayout.bBottom);
+                  }
+                  buttonFace(uiB, 'B', 'INDIETRO');
+                  uiB.setAttribute('aria-label', 'Indietro nel taccuino');
+                  showControl(uiB, true, 0.85);
+                } else showControl(uiB, false, 0);
+              } else if (mode === 'narrative' || mode === 'dialogue' || mode === 'advance') {'''
+          assert s.count(old)==1;s=s.replace(old,new);p.write_text(s)
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=='b86a8b29de2d905a13912ad4f1ac3216ed6d2757c6509da957801a3bcc4835eb'
+          p=Path('index.html');s=p.read_text();old='js/touch.js?v=r112gutter'
+          assert s.count(old)==1;p.write_text(s.replace(old,'js/touch.js?v=playable-notebook-back'))
+          PY
+          node test/touch-notebook-navigation.js
+          node - <<'JS'
+          const fs=require('node:fs'),{spawnSync}=require('node:child_process');
+          const text=fs.readFileSync('.github/workflows/test.yml','utf8');
+          const files=[...text.matchAll(/^\s+run: node (test\/[A-Za-z0-9_./-]+\.js)\s*$/gm)].map(m=>m[1]);
+          if(files.length!==100)throw new Error('Expected maintained 100-command baseline');
+          let failures=0;
+          for(const file of files){const r=spawnSync(process.execPath,[file],{encoding:'utf8',timeout:120000,maxBuffer:16*1024*1024});
+            console.log((r.status===0?'PASS ':'FAIL ')+file);if(r.status!==0){failures++;console.log(r.stdout||'',r.stderr||'',r.error||'');}}
+          if(failures)process.exitCode=1;
+          JS
+      - name: Retain permanent read-only regression and commit only the validated repair
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          Path('.github/workflows/notebook-touch.yml').write_text('''name: notebook-touch
+          on:
+            pull_request:
+            push:
+              branches: [main, 'codex/playable-12*']
+          permissions:
+            contents: read
+          jobs:
+            notebook-back:
+              runs-on: ubuntu-latest
+              timeout-minutes: 10
+              steps:
+                - uses: actions/checkout@v4
+                  with:
+                    persist-credentials: false
+                - uses: actions/setup-node@v4
+                  with:
+                    node-version: '24'
+                - name: Notebook exit, nested ownership and existing touch behavior
+                  run: |
+                    node test/touch-notebook-navigation.js
+                    node test/touch-runtime.js
+                    node test/mobile-production.js
+                    node test/turn-in-place.js
+                    node test/smoke.js
+                    node test/walkthrough.js
+          ''')
+          Path('reports/playable-notebook-back.md').write_text('''# Touch notebook exit repair
+
+          The actual touch-only run 35119931033 passed New Game, page advance, turning and one-step movement in both layouts, then could not leave the notebook. The semantic Close row is not in the keyboard focus list, and the touch controller treated the notebook as a normal narrative choice and hid B. Hidden semantic DOM is not an alternative physical touch control.
+
+          This repair recognizes the topmost visible notebook and presents an accessible B/Back control using the notebook existing Escape behavior. It preserves A/D-pad, reuses separated play-button geometry, avoids generic-tap duplication and returns control ownership to an actual nested comparison while the notebook is hidden. In gameplay B still opens the notebook with KeyT. No narrative state, plot, save schema or notebook focus-order change.
+
+          The actual controller fixture preserves all 13 existing contracts and adds seven notebook checks. Original code fails the missing-back assertion; the correction passes 20/20, existing mobile contracts and the maintained 100-command Node suite before commit. The full touch-only browser test is in PR #13 and must pass with this dependency before touch acceptance. Physical devices and human playtests NOT_RUN.
+
+          The temporary pinned validation workflow removes itself from this commit. Permanent CI is read-only. Main, deployment and the local Vault are untouched.
+          ''')
+          Path('.github/workflows/materialize-notebook-back.yml').unlink()
+          PY
+          actual=$(git ls-remote origin refs/heads/codex/playable-12-notebook-back | cut -f1)
+          test "$actual" = "$EXPECTED_SHA"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- js/touch.js index.html .github/workflows/notebook-touch.yml .github/workflows/materialize-notebook-back.yml reports/playable-notebook-back.md
+          git diff --cached --check
+          git commit -m 'fix(touch): expose notebook Back without stealing nested narrative input'
+          git push origin HEAD:refs/heads/codex/playable-12-notebook-back
