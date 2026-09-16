@@ -615,6 +615,46 @@
     else if (prop.id === 'barStoolEast') chair(R, 229, 91, p);
   }
 
+  /* Detail 2 — the Roadhouse neon flickers. One function of time t: an
+   * irregular two-state schedule (bright/dim, never off) dims the authored sign
+   * colour 70% toward the wall behind it. Bounded to the sign's two mountain
+   * peaks so the room's animated-pixel budget stays small and the buzz never
+   * reads as noise. The wall is the sign's own backing (walnutDeep). */
+  function blendToward(from, to, f) {
+    function channel(hex, i) { return parseInt(hex.substr(i, 2), 16); }
+    function byte(v) { var s = Math.round(v).toString(16); return s.length < 2 ? '0' + s : s; }
+    return '#' + byte(channel(from,1)+(channel(to,1)-channel(from,1))*f)
+               + byte(channel(from,3)+(channel(to,3)-channel(from,3))*f)
+               + byte(channel(from,5)+(channel(to,5)-channel(from,5))*f);
+  }
+  var neonFlickerDim = blendToward(palette.neonHi, palette.walnutDeep, .7);
+  /* Bright 1400 / dim 90 / bright 700 / dim 60 as a loop, ordered so the long
+   * bright hold covers the production byte-compare clock (freezeMs=1000, which
+   * is bright: the sign renders exactly as it does without the detail). */
+  var NEON_FLICKER = [[0,60],[1,1400],[0,90],[1,700]];
+  var NEON_FLICKER_TARGETS = [[28,24,4,3],[32,20,4,4],[48,20,4,4],[52,24,4,3]];
+  function neonFlickerBright(t) {
+    var period = 0, i;
+    for (i = 0; i < NEON_FLICKER.length; i++) period += NEON_FLICKER[i][1];
+    var m = ((t % period) + period) % period, acc = 0;
+    for (i = 0; i < NEON_FLICKER.length; i++) {
+      acc += NEON_FLICKER[i][1];
+      if (m < acc) return NEON_FLICKER[i][0] === 1;
+    }
+    return true;
+  }
+  function neonFlicker(R, t) {
+    if (neonFlickerBright(t)) return;
+    for (var i = 0; i < NEON_FLICKER_TARGETS.length; i++) {
+      var r = NEON_FLICKER_TARGETS[i];
+      R(r[0], r[1], r[2], r[3], neonFlickerDim);
+    }
+  }
+  function nowMs() {
+    return (typeof performance !== 'undefined' && performance && typeof performance.now === 'function')
+      ? performance.now() : Date.now();
+  }
+
   function draw(ctx, cx, cy) {
     var R = rectPainter(ctx, cx, cy), p = palette;
     R(0, 0, 256, 192, p.ink);
@@ -638,6 +678,7 @@
     }
     drawPlayerContact(R, p);
     for (var j = 0; j < definitions.length; j++) drawProp(R, definitions[j], p);
+    neonFlicker(R, nowMs());
   }
 
   function foreground(ctx, cx, cy, minFoot, maxFoot) {
@@ -657,7 +698,10 @@
     definitions: definitions,
     props: definitions,
     palette: palette,
-    doorFoot: 160
+    doorFoot: 160,
+    neonFlickerDim: neonFlickerDim,
+    neonFlickerSchedule: NEON_FLICKER,
+    neonFlickerTargets: NEON_FLICKER_TARGETS
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = GAME.RoadhouseArt;
 })();

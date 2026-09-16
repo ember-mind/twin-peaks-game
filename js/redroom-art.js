@@ -26,15 +26,34 @@
       ctx.fillStyle = color; ctx.fillRect(x-cx, y-cy, w, h);
     };
   }
-  function floorColor(x, y) {
-    /* Map-pixel coordinates: a 16px chevron with exactly 4px bands. */
+  function floorColor(x, y, off) {
+    /* Map-pixel coordinates: a 16px chevron with exactly 4px bands. `off` is
+     * the breathe offset in {-1,0,1}; the default keeps the static formula. */
     var v = Math.abs((x % 16) - 8);
-    var band = Math.floor((y + v) / 4) % 2;
+    var band = Math.floor((y + v + (off || 0)) / 4) % 2;
     return band ? palette.ink : palette.cream;
   }
-  function floor(R) {
+  function floor(R, off) {
     for (var y=30; y<176; y++) {
-      for (var x=16; x<240; x++) R(x,y,1,1,floorColor(x,y));
+      for (var x=16; x<240; x++) R(x,y,1,1,floorColor(x,y,off));
+    }
+  }
+  /* Detail 3 — the Red Room floor band breathes. One function of time t: a
+   * 3200ms sine quantises to off in {-1,0,1} and the authored zigzag formula
+   * shifts by that pixel inside one named rectangle. The effect is bounded to
+   * that rectangle so the room's total animated pixels stay far below budget;
+   * nothing else here moves. */
+  var BREATH_RECT={x:112,y:68,w:16,h:4};
+  function breathOffset(t) {
+    return Math.round(Math.sin(2 * Math.PI * t / 3200));
+  }
+  function curtainBreath(R, t) {
+    var off = breathOffset(t);
+    if (!off) return;
+    for (var y=BREATH_RECT.y; y<BREATH_RECT.y+BREATH_RECT.h; y++) {
+      for (var x=BREATH_RECT.x; x<BREATH_RECT.x+BREATH_RECT.w; x++) {
+        R(x,y,1,1,floorColor(x,y,off));
+      }
     }
   }
   function curtains(R) {
@@ -252,7 +271,12 @@
     R(0,0,256,192,palette.ink);floor(R);curtains(R);
     pool(R,56,54,16,7);pool(R,21,79,14,7);pool(R,234,79,14,7);
     props.forEach(function(d){shadow(R,d.x,d.footY,d.id.indexOf('chair')===0?26:16);prop(R,d);});
+    curtainBreath(R,nowMs());
     ctx.globalAlpha=alpha;
+  }
+  function nowMs() {
+    return (typeof performance !== 'undefined' && performance && typeof performance.now === 'function')
+      ? performance.now() : Date.now();
   }
   function foreground(ctx,cx,cy,min,max) {
     min=min==null?-Infinity:min;max=max==null?Infinity:max;
@@ -260,6 +284,6 @@
     props.forEach(function(d){if(d.footY>=min&&d.footY<max)prop(R,d);});
     ctx.globalAlpha=alpha;
   }
-  GAME.RedRoomArt={draw:draw,foreground:foreground,palette:palette,props:props,floorColor:floorColor};
+  GAME.RedRoomArt={draw:draw,foreground:foreground,palette:palette,props:props,floorColor:floorColor,breathRect:BREATH_RECT,breathOffset:breathOffset};
   if(typeof module!=='undefined'&&module.exports)module.exports=GAME.RedRoomArt;
 }());
