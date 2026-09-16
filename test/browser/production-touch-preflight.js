@@ -43,19 +43,19 @@ async function run(name,width,height,output){
     assert.deepEqual([released.player.tx,released.player.ty],[moved.player.tx,moved.player.ty],'Touch release leaves no held direction');
     checks.push('touch-turn-step-and-release');
     await tap('Apri fascicolo indizi');
-    let menu=await b.waitFor('actual touch notebook or classic casebook opens',s=>s.semanticUi.notebook||s.menu);
-    if(menu.semanticUi.notebook){
-      for(let i=0;i<20;i++){
-        menu=await b.snapshot();if((menu.semanticUi.notebookClose||[]).some(c=>c.focused))break;
-        await tap(PAD,'down');
-      }
-      assert.ok((await b.snapshot()).semanticUi.notebookClose.some(c=>c.focused),'Reach the real notebook Close option');
-      await tap('Conferma scelta');
-    }else await tap('Chiudi fascicolo indizi');
+    const menu=await b.waitFor('actual production notebook opens',s=>s.semanticUi.notebook);
+    assert.ok(menu.semanticUi.notebookSections.some(c=>c.focused&&c.id==='Evidenze'));
+    await tap(PAD,'down');
+    await b.waitFor('D-pad navigates one notebook section',s=>s.semanticUi.notebookSections.some(c=>c.focused&&c.id==='Appunti'));
+    await tap('Conferma scelta');
+    await b.waitFor('open the notebook section',s=>s.semanticUi.notebook&&!s.semanticUi.notebookSections.length);
+    await tap('Indietro nel taccuino');
+    await b.waitFor('Back returns from the section to the notebook menu',s=>s.semanticUi.notebook&&s.semanticUi.notebookSections.length>0);
+    await tap('Indietro nel taccuino');
     const closed=await b.waitFor('close notebook returns control',idle);assertLayout(closed,width,height);
     assert.deepEqual(closed.clues,playing.clues,'Touch UI test does not manufacture evidence');
     assert.deepEqual([closed.player.tx,closed.player.ty],[step.x,step.y],'Navigating the notebook does not move Cooper');
-    checks.push('touch-notebook-open-close');await b.capture('touch-ready');
+    checks.push('touch-notebook-section-back-close');await b.capture('touch-ready');
   }catch(e){error=String(e.stack||e);process.exitCode=1;if(b)try{await b.capture('touch-failure');}catch(_){}console.error(error);}
   finally{
     if(b){

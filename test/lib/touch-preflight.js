@@ -28,6 +28,12 @@ function assertLayout(s, width, height) {
     const [x,y]=pointFor(s,c.label);
     assert.ok(x>=0 && y>=0 && x<width && y<height, 'Control centre can be tapped');
   }
+  for (let i=0;i<controls.length;i++) for (let j=i+1;j<controls.length;j++) {
+    const a=controls[i].rect,b=controls[j].rect;
+    const overlapX=Math.min(a.x+a.width,b.x+b.width)-Math.max(a.x,b.x);
+    const overlapY=Math.min(a.y+a.height,b.y+b.height)-Math.max(a.y,b.y);
+    assert.ok(overlapX<=0.5 || overlapY<=0.5, 'Visible controls must not overlap: '+controls[i].label+' / '+controls[j].label);
+  }
 }
 function stepCandidate(s) {
   const occupied = new Set((s.liveNpcs || []).flatMap((n) => [`${n.x},${n.y}`, `${n.mx},${n.my}`]));

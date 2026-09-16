@@ -22,4 +22,5 @@ assert.deepEqual(stepCandidate(world),{dir:'right',x:2,y:1});checks++;
 const door=clone(world);door.doors.town['2,1']={to:'elsewhere'};assert.equal(stepCandidate(door).dir,'down');checks++;
 const npc=clone(world);npc.liveNpcs=[{x:2,y:1}];assert.equal(stepCandidate(npc).dir,'down');checks++;
 const closed=clone(door);closed.liveNpcs=[{x:1,y:2}];assert.throws(()=>stepCandidate(closed));checks++;
+const overlap=clone(s);overlap.touchControls[1].rect.x=50;assert.throws(()=>assertLayout(overlap,390,844),/overlap/);checks++;
 console.log('touch-preflight: '+checks+' pure geometry contracts passed; actual browser test is separate');
