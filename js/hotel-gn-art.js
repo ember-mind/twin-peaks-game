@@ -98,17 +98,23 @@
     R(114,169,60,2,p.woodLight);
     R(116,171,56,3,p.wood);
     R(116,174,56,2,p.woodDark);
-    /* The entrance carpet bends around the genuinely solid lounge. Its
-     * right-hand aisle is clear at x=11..12 rather than through the table;
-     * the east leg ends against the stair's own landing. */
-    rug(R,176,72,32,63,true);rug(R,126,118,82,18,true);rug(R,128,130,32,46,true);
-    R(178,118,28,15,p.redDark);R(178,121,26,1,p.gold);R(178,130,26,1,p.gold);
-    R(130,130,28,4,p.redDark);R(130,133,28,1,p.gold);
-    /* A narrow floor reveal keeps the hearth zone domestic and bounded: the
-     * lounge rug ends before the public turn rather than merging with it. */
-    rug(R,112,82,64,34,false);
-    R(112,116,64,2,p.wood);
-    R(114,116,60,1,p.woodLight);
+    /* The public route is three deliberate orthogonal runs, with the short
+     * east branch turning into the stair aisle and the centered spine
+     * continuing to the entry. Keeping these bounds explicit prevents the
+     * former broad horizontal carpet from reading as an L-shaped room rug. */
+    rug(R,176,72,32,51,true);   // north aisle x176..208, y72..123
+    rug(R,158,122,50,14,true);  // east branch x158..208, y122..136
+    rug(R,128,124,32,52,true);  // entry spine x128..160, y124..176
+    /* Turn motifs make the two one-pixel contacts read as one intentional
+     * route while retaining a single dark/gold keyline around each run. */
+    R(178,121,28,1,p.gold);R(180,122,24,1,p.redDark);
+    R(158,125,2,9,p.gold);R(159,126,1,7,p.redDark);
+    /* A fully bounded hearth rug leaves a real parquet reveal before the
+     * public branch: its bottom edge is y=114, with eight native pixels of
+     * floor before the branch begins at y=122. */
+    rug(R,112,80,64,34,false);
+    R(112,114,64,2,p.wood);
+    R(114,114,60,1,p.woodLight);
     /* Brass side wings and a dark center mat make both door leaves read as
      * an operational lobby threshold while retaining the open center path. */
     R(112,170,12,5,p.woodDark);R(114,170,10,1,p.gold);R(116,171,8,2,p.woodLight);
