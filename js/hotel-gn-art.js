@@ -22,6 +22,10 @@
   function rug(R,x,y,w,h){
     R(x,y,w,h,p.ink);R(x+1,y+1,w-2,h-2,p.gold);R(x+2,y+2,w-4,h-4,p.redDark);
     R(x+4,y+4,w-8,h-8,p.red);R(x+5,y+5,w-10,h-10,p.redDark);
+    /* The upper face turns toward the hearth: broad red fabric catches the
+     * source, while the lower face returns to redDark instead of sparkling. */
+    R(x+2,y+2,w-4,1,p.woodLight);R(x+4,y+4,w-8,2,p.redLight);
+    R(x+5,y+6,w-10,5,p.red);R(x+5,y+h-9,w-10,2,p.redDark);
     /* A single bounded lounge rug, just clear of the east bypass. Its
      * double keyline and paired medallions establish a domestic seating zone
      * rather than letting the chairs dissolve into the public runner. */
@@ -87,20 +91,21 @@
       }
       R(16,y+h-1,256,1,p.woodDark);
     }
-    /* Source-linked receiving surfaces: the hearth warms the edges of its
-     * bounded lounge, while the chandelier's axis catches only the exposed
-     * parquet between the lounge and the south runner. These are deliberately
-     * narrow material accents, not a room-wide glow, so the dark lodge keeps
-     * its depth and actors remain the visual priority. */
-    R(96,82,16,1,p.woodLight);R(176,82,16,1,p.woodLight);
-    R(104,88,8,1,p.woodLight);R(176,88,8,1,p.woodLight);
-    R(96,98,16,1,p.woodLight);R(176,98,16,1,p.woodLight);
-    R(104,106,8,1,p.woodLight);R(176,106,8,1,p.woodLight);
-    R(96,112,16,1,p.woodLight);R(176,112,16,1,p.woodLight);
-    R(160,73,14,1,p.woodLight);
-    R(128,116,44,1,p.woodLight);
-    R(136,118,32,1,p.woodLight);
-    R(140,120,24,1,p.gold);
+    /* Receiving faces are part of the authored floor, not a later effect.
+     * Hearth warmth starts as a compact woodLight face beside the masonry,
+     * then steps into the darker board tone as it travels under the lounge.
+     * The chandelier has a second, wider stepped pool on the exposed parquet;
+     * each span follows the floor grain so the material still reads as boards. */
+    R(96,80,16,4,p.woodLight);R(96,84,16,6,p.wood);
+    R(96,90,24,4,p.woodLight);R(96,94,24,6,p.wood);
+    R(96,100,32,4,p.woodLight);R(96,104,32,6,p.wood);
+    R(96,110,48,2,p.gold);R(96,112,48,4,p.wood);
+    R(150,64,26,4,p.woodLight);R(148,68,30,4,p.wood);
+    R(146,72,38,4,p.woodLight);R(144,76,44,6,p.wood);
+    R(142,82,50,4,p.woodLight);R(140,86,54,6,p.wood);
+    R(138,92,60,4,p.woodLight);R(136,96,66,6,p.wood);
+    R(134,102,72,4,p.woodLight);R(132,106,78,6,p.wood);
+    R(130,112,84,2,p.gold);R(130,114,84,2,p.wood);
     /* Narrow edge bands separate the walkable plane from the log walls and
      * give the south entry a shallow, readable threshold under the runner. */
     R(16,64,2,112,p.ink);R(18,64,1,112,p.woodLight);
@@ -172,7 +177,12 @@
       R(x+2,9,w-4,2,p.woodLight);R(x+3,57,w-6,2,p.wood);
       if(bi%2===1)R(x+8,13,w-16,1,p.woodLight);
     });
-    beam(R,16,0,256,5);beam(R,16,59,256,7);R(16,68,256,3,p.ink);R(16,70,256,2,p.woodLight);
+    beam(R,16,0,256,5);beam(R,16,59,256,7);
+    /* The chandelier is anchored to this central timber beam. A contiguous
+     * receiving face gives the practical a real architectural source instead
+     * of projecting a free-floating triangle below it. */
+    R(144,60,62,2,p.woodLight);R(150,62,50,2,p.wood);R(158,64,34,2,p.woodDark);
+    R(16,68,256,3,p.ink);R(16,70,256,2,p.woodLight);
     [18,73,167,257].forEach(function(x){column(R,x,0,72);});
     /* The real hall door (map cell 14,1) sits in a recessed east bay. Keep
      * the red panel readable above the stair landing, with a real jamb,
@@ -224,7 +234,13 @@
      * nested beneath it with visible jambs and a low stone sill. */
     R(87,41,74,8,p.ink);R(88,42,72,2,p.stoneLight);R(89,42,70,1,p.gold);R(90,45,68,3,p.stoneDark);
     R(95,48,48,27,p.stone);R(97,49,44,25,p.ink);R(98,50,42,23,p.woodDark);
-    R(95,49,3,25,p.stoneLight);R(140,49,4,25,p.stoneDark);R(141,50,2,23,p.stoneLight);
+    /* The jambs are broad receiving faces: stoneLight is strongest beside
+     * the fire and steps back to stone on the outer return. */
+    R(95,49,5,25,p.stoneLight);R(100,50,2,23,p.stone);
+    R(140,49,4,25,p.stoneLight);R(140,50,2,23,p.stoneLight);R(142,50,2,23,p.stone);
+    /* Firebox edges are real wood faces receiving the nearest heat; the
+     * black opening remains intact between them. */
+    R(98,50,2,23,p.woodLight);R(137,50,3,23,p.wood);
     /* Wide layered flame bed leaves the ambient three-frame overlay room to
      * move inside the opening without erasing the authored surround. */
     R(100,69,38,4,p.fire);R(102,71,34,2,p.cream);
@@ -250,8 +266,11 @@
     C(4,-19,2,5,p.redLight);C(12,-18,2,6,p.redDark);C(6,-14,7,2,p.redDark);
     /* Arm caps and front corners create a subtle inward cant instead of a
      * sofa-like horizontal bar; the body stays on the authored h tile. */
-    C(0,-21,4,14,p.ink);C(1,-20,3,3,p.redLight);C(1,-17,2,8,p.redDark);
-    C(14,-20,4,14,p.ink);C(14,-19,3,3,p.redLight);C(15,-16,2,8,p.redDark);
+    /* Both arm faces catch the hearth-facing source as a contiguous fabric
+     * plane, with a one-pixel brass/wood edge and a darker lower return. */
+    C(0,-21,4,14,p.ink);C(1,-20,3,3,p.redLight);C(1,-17,2,8,p.red);
+    C(14,-20,4,14,p.ink);C(14,-19,3,3,p.redLight);C(15,-16,2,8,p.red);
+    C(1,-20,2,1,p.gold);C(14,-19,2,1,p.gold);
     C(2,-1,4,2,p.woodDark);C(12,-1,4,2,p.woodDark);C(2,1,3,2,p.ink);C(13,1,3,2,p.ink);
     R(x,112,16,1,p.ink);
   }
@@ -318,7 +337,8 @@
      * free-standing cabinet or covering the staff sightline. */
     R(98,105,25,12,p.ink);R(99,106,23,10,p.wood);R(100,107,21,8,p.woodDark);R(100,107,21,1,p.woodLight);
     for(var y=108;y<116;y+=5)for(var x=101;x<121;x+=7){
-      R(x,y,6,5,p.ink);R(x+1,y+1,4,3,p.woodDark);R(x+4,y+2,1,2,p.gold);
+      var face=x>=115?p.woodLight:(x>=108?p.wood:p.woodDark);
+      R(x,y,6,5,p.ink);R(x+1,y+1,4,3,face);R(x+4,y+2,1,2,p.gold);
     }
     /* The far-right practical catches the nearest key-bank faces; the marks
      * stop at the cubby openings so they read as mounted brass tags, not a
@@ -335,7 +355,8 @@
      * make the boundary feel built rather than like a floating bar. */
     R(64,126,64,18,p.ink);R(65,128,62,14,p.woodDark);
     [67,87,107].forEach(function(x){
-      R(x,130,17,12,p.wood);R(x,130,17,1,p.woodLight);R(x+1,132,15,1,p.woodLight);
+      var panelTone=x===107?p.woodLight:p.wood;
+      R(x,130,17,12,panelTone);R(x,130,17,1,p.woodLight);R(x+1,132,15,1,p.woodLight);
       R(x+1,132,1,9,p.woodLight);R(x+16,132,1,10,p.ink);R(x+3,140,11,1,p.woodDark);
     });
     R(65,141,62,1,p.woodLight);R(64,143,64,1,p.ink);
@@ -435,50 +456,6 @@
       R(a[0],a[1]+2,1,3,p.light);R(a[0]-3,a[1]+7,7,1,p.gold);
     });
   }
-  /* Practical receiving light is authored as broken native-pixel runs. The
-   * steps widen away from each source so surfaces carry warmth while most of
-   * the dark lodge grain remains untouched. */
-  function lightRun(R,x,y,w,step,phase,c){
-    for(var xx=x+phase;xx<x+w;xx+=step)R(xx,y,Math.min(2,x+w-xx),1,c);
-  }
-  function hearthLight(R){
-    /* Stone jambs and mantel catch the fire before spill reaches chairs and
-     * the exposed parquet strips beside the lounge rug. */
-    R(97,52,1,8,p.woodLight);R(141,52,1,8,p.woodLight);
-    R(97,61,1,7,p.gold);R(141,61,1,7,p.woodLight);
-    lightRun(R,96,47,14,5,1,p.gold);lightRun(R,137,47,16,5,2,p.gold);
-    lightRun(R,114,82,58,8,0,p.woodLight);
-    lightRun(R,114,88,10,6,1,p.gold);lightRun(R,166,88,10,6,0,p.gold);
-    lightRun(R,114,98,10,7,0,p.woodLight);lightRun(R,166,98,10,7,2,p.woodLight);
-    lightRun(R,114,106,12,6,2,p.woodLight);lightRun(R,164,106,12,6,1,p.woodLight);
-    lightRun(R,104,116,28,7,1,p.woodLight);lightRun(R,168,116,24,7,0,p.woodLight);
-  }
-  function chandelierLight(R){
-    /* A tapered receiving band falls from the five bulbs onto central timber
-     * and floor. It is dithered, never a filled cone, so seams remain legible. */
-    lightRun(R,166,31,26,8,1,p.woodLight);
-    lightRun(R,160,39,36,8,0,p.woodLight);
-    lightRun(R,156,47,44,7,2,p.gold);
-    lightRun(R,152,55,50,8,1,p.woodLight);
-    lightRun(R,150,63,54,7,0,p.woodLight);
-    lightRun(R,148,72,58,8,2,p.gold);
-    lightRun(R,144,81,62,7,1,p.woodLight);
-    lightRun(R,140,90,68,8,0,p.woodLight);
-    lightRun(R,136,99,76,9,2,p.woodLight);
-    lightRun(R,132,108,84,8,1,p.gold);
-  }
-  function deskLight(R){
-    /* The desk practical is a short south-east pool: key tags, bell rim and
-     * the guest-facing brass lip receive separate stepped highlights. */
-    lightRun(R,100,107,21,6,0,p.gold);
-    lightRun(R,99,112,22,7,2,p.woodLight);
-    lightRun(R,96,119,12,5,1,p.gold);
-    lightRun(R,64,123,64,8,0,p.gold);
-    lightRun(R,70,130,54,9,2,p.woodLight);
-    lightRun(R,76,136,42,8,1,p.woodLight);
-    lightRun(R,88,146,36,9,0,p.woodLight);
-  }
-  function lightOverlay(R){hearthLight(R);chandelierLight(R);deskLight(R);}
   function prop(R,d){
     if(d.id==='fireplace')fireplace(R);else if(d.id==='stairs')stairs(R);else if(d.id==='luggage')luggage(R);
     else if(d.id==='chairWest'||d.id==='chairEast')chair(R,d.x,d.footY,d.id==='chairEast');else if(d.id==='table')table(R);else reception(R);
@@ -487,7 +464,7 @@
     var R=painter(ctx,cx,cy),alpha=ctx.globalAlpha;ctx.globalAlpha=1;
     R(0,0,288,192,p.ink);floor(R);walls(R);receptionBack(R);
     props.forEach(function(d){if(d.cells.length)R(d.x,d.footY-1,d.cells.length*16,2,p.ink);prop(R,d);});
-    chandelier(R);lightOverlay(R);ctx.globalAlpha=alpha;
+    chandelier(R);ctx.globalAlpha=alpha;
   }
   function foreground(ctx,cx,cy,min,max){
     min=min==null?-Infinity:min;max=max==null?Infinity:max;
