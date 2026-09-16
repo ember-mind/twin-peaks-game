@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "slug": "e8-spatial-rebuild",
-  "generatedAt": "2026-09-16T19:51:06.038Z",
+  "generatedAt": "2026-09-16T20:02:01.289Z",
   "files": [
     {
       "path": "evidence/ambient-before/frame-000.png",
@@ -47,6 +47,26 @@
       "path": "evidence/ambient-r3/frame-040.png",
       "bytes": 11172,
       "sha256": "67eaa574c4f27b39c142160bab2c26bb96ab1d3ee7e2ddfc2c49d6b58bf93fb3"
+    },
+    {
+      "path": "evidence/ambient-r4/frame-020.png",
+      "bytes": 11554,
+      "sha256": "880a52b098f0b777b02b2b82df6e6870165d8d398fcdb2e2e6f3f09c879751f9"
+    },
+    {
+      "path": "evidence/ambient-r4/frame-024.png",
+      "bytes": 11143,
+      "sha256": "b7101616fe4a6299b6b7db894ef893dea95a2c88c3485507def4e5656b068eab"
+    },
+    {
+      "path": "evidence/ambient-r4/frame-040.png",
+      "bytes": 11225,
+      "sha256": "8f9196fa1f725022d9345356c6f3baf16b1d0465b2eba5fc94ad5c3afff28dd6"
+    },
+    {
+      "path": "evidence/ambient-r4/frame-045.png",
+      "bytes": 11562,
+      "sha256": "3a233f4513c2b2773b9f141e6b24221bfb01d86685e7857b43d49b3146d97dd9"
     },
     {
       "path": "evidence/baseline.png",

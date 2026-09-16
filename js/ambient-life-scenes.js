@@ -91,7 +91,9 @@
    * hold, a 2.4--3.0s warm rise/hold, then a clean settle before the next
    * source changes. Fixed 7.2s fire, 9.8s desk, 13.2s chandelier and 19.6s
    * bell rests make the first 25s read as a calm handoff between sources,
-   * without turning the lobby into a flashing effect. */
+   * without turning the lobby into a flashing effect. Desk response is
+   * deliberately visible across the mounted cubbies and counter; bell keeps
+   * the existing slow three-second glass reflection event. */
   life.register('hotel_gn',[
     {id:'lobby-fire',type:'MACHINE_IDLE_ACTIVITY',x:52,y:50,depth:80,variants:3,
       delay:[7200,7200],duration:[2400,2400],intensity:1.45,marks:[

@@ -37,16 +37,16 @@
     {"id":"integrated-world","unit":"Integrated playable hotel lobby","bar":"Whole native scene reads as a livable Great Northern hotel and approaches reference bottom panel in entry and hall views","floor":8,"status":"pass","baselineEvidence":["evidence/baseline.png"],"baselineScore":5,"currentEvidence":["evidence/entry-r1.png","evidence/hall-r2.png"],"score":8,"criticVerdict":"PASS"}
   ],
   "regressionGates": [
-    {"id":"focused","criterion":"geometry, door lifecycle, cast and ambient native scene","command":"node test/hotel-gn-scene.js","status":"pending","evidence":[]},
-    {"id":"smoke","criterion":"whole structural simulation","command":"node test/smoke.js","status":"pending","evidence":[]},
-    {"id":"walkthrough","criterion":"acquisition graph","command":"node test/walkthrough.js","status":"pending","evidence":[]},
-    {"id":"retro","criterion":"retro production renderer","command":"node test/retro-production.js","status":"pending","evidence":[]},
-    {"id":"mobile","criterion":"mobile production contract","command":"node test/mobile-production.js","status":"pending","evidence":[]},
-    {"id":"cast","criterion":"character continuity with revised Ben/Audrey tiles","command":"node test/cast-continuity-validate.js","status":"pending","evidence":[]},
-    {"id":"doors","criterion":"registry door equality after lobby endpoint migration","command":"node test/world-door-equality.js","status":"pending","evidence":[]},
-    {"id":"room315","criterion":"Room 315 interior and hall round trip","command":"node test/room-315-location.js","status":"pending","evidence":[]},
-    {"id":"narrative","criterion":"finale route and character state","command":"node test/narrative-finale.js","status":"pending","evidence":[]},
-    {"id":"act4flow","criterion":"Act 4 flow consistency","command":"node test/act-4-flow.js","status":"pending","evidence":[]},
+    {"id":"focused","criterion":"geometry, door lifecycle, cast and ambient native scene","command":"node test/hotel-gn-scene.js","status":"pass","evidence":[]},
+    {"id":"smoke","criterion":"whole structural simulation","command":"node test/smoke.js","status":"pass","evidence":[]},
+    {"id":"walkthrough","criterion":"acquisition graph","command":"node test/walkthrough.js","status":"pass","evidence":[]},
+    {"id":"retro","criterion":"retro production renderer","command":"node test/retro-production.js","status":"pass","evidence":[]},
+    {"id":"mobile","criterion":"mobile production contract","command":"node test/mobile-production.js","status":"pass","evidence":[]},
+    {"id":"cast","criterion":"character continuity with revised Ben/Audrey tiles","command":"node test/cast-continuity-validate.js","status":"pass","evidence":[]},
+    {"id":"doors","criterion":"registry door equality after lobby endpoint migration","command":"node test/world-door-equality.js","status":"pass","evidence":[]},
+    {"id":"room315","criterion":"Room 315 interior and hall round trip","command":"node test/room-315-location.js","status":"pass","evidence":[]},
+    {"id":"narrative","criterion":"finale route and character state","command":"node test/narrative-finale.js","status":"pass","evidence":[]},
+    {"id":"act4flow","criterion":"Act 4 flow consistency","command":"node test/act-4-flow.js","status":"pass","evidence":[]},
     {"id":"act4chrome","criterion":"all Act 4 browser paths","command":"node test/act-4-playthrough.js --path=all","status":"pending","evidence":[]},
     {"id":"act3chrome","criterion":"all Act 3 browser paths","command":"node test/act-3-playthrough.js","status":"pending","evidence":[]}
   ],
@@ -55,7 +55,7 @@
     "criticFreshContext": true
   },
   "gapQueue": ["Desk/counter and bell do not respond visibly enough to their practical light source"],
-  "rounds": [{"round":1,"builder":"Luna/xhigh /root/e8_spatial_map_builder + /root/e8_spatial_art_builder","critic":"fresh Luna/xhigh /root/e8_spatial_critic_r1","evidence":["artifacts/art-pass-e/e8-spatial-rebuild/round-1/entry.png","artifacts/art-pass-e/e8-spatial-rebuild/round-1/hall.png"],"scores":{"entryIntegrated":8,"hallIntegrated":7},"rankVsPrevious":"BETTER","gap":"Hall frame crops west hearth/lounge; integrated hall below floor."},{"round":2,"builder":"Astra /root; hotel-only camera offset","critic":"fresh Luna/xhigh /root/e8_spatial_critic_r2","evidence":["artifacts/art-pass-e/e8-spatial-rebuild/round-2/hall.png"],"scores":{"hallIntegrated":8.1},"rankVsPrevious":"BETTER","gap":"Right-heavy frame; central aisle/lounge less broad than reference."},{"round":3,"builder":"Luna/xhigh /root/e8_spatial_light_builder_r3","critic":"fresh Luna/xhigh /root/e8_spatial_ambient_critic_r3","evidence":["artifacts/art-pass-e/e8-spatial-rebuild/round-3/ambient-entry.png","artifacts/art-pass-e/e8-spatial-rebuild/round-3/ambient-frames"],"scores":{"lightAmbient":6.5},"rankVsPrevious":"BETTER","gap":"Desk/counter and bell still visually unresponsive."}],
+  "rounds": [{"round":1,"builder":"Luna/xhigh /root/e8_spatial_map_builder + /root/e8_spatial_art_builder","critic":"fresh Luna/xhigh /root/e8_spatial_critic_r1","evidence":["artifacts/art-pass-e/e8-spatial-rebuild/round-1/entry.png","artifacts/art-pass-e/e8-spatial-rebuild/round-1/hall.png"],"scores":{"entryIntegrated":8,"hallIntegrated":7},"rankVsPrevious":"BETTER","gap":"Hall frame crops west hearth/lounge; integrated hall below floor."},{"round":2,"builder":"Astra /root; hotel-only camera offset","critic":"fresh Luna/xhigh /root/e8_spatial_critic_r2","evidence":["artifacts/art-pass-e/e8-spatial-rebuild/round-2/hall.png"],"scores":{"hallIntegrated":8.1},"rankVsPrevious":"BETTER","gap":"Right-heavy frame; central aisle/lounge less broad than reference."},{"round":3,"builder":"Luna/xhigh /root/e8_spatial_light_builder_r3","critic":"fresh Luna/xhigh /root/e8_spatial_ambient_critic_r3","evidence":["artifacts/art-pass-e/e8-spatial-rebuild/round-3/ambient-entry.png","artifacts/art-pass-e/e8-spatial-rebuild/round-3/ambient-frames"],"scores":{"lightAmbient":6.5},"rankVsPrevious":"BETTER","gap":"Desk/counter and bell still visually unresponsive."},{"round":4,"builder":"Luna/xhigh /root/e8_spatial_light_builder_r4","critic":"fresh Luna/xhigh /root/e8_spatial_ambient_critic_r4","evidence":["artifacts/art-pass-e/e8-spatial-rebuild/round-4/ambient-entry.png","artifacts/art-pass-e/e8-spatial-rebuild/round-4/ambient-frames"],"scores":{"lightAmbient":3},"rankVsPrevious":"TIED","gap":"Counter, bell and cubbies still lack PNG-proven source-linked motion; rejected in favor of R3."}],
   "finalGate": {
     "allUnitsCovered": false,
     "hardGatesPass": false,

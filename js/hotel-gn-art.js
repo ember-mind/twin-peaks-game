@@ -354,10 +354,10 @@
     ctx.globalAlpha = oldAlpha; ctx.fillStyle = oldFill;
   }
   /* AmbientLife owns the clocks. The art layer only reads the current frame
-   * and turns it into a clipped receiving-plane pulse, so all animation still
-   * comes from the existing fire/chandelier/desk archetypes. A five-frame
-   * archetype is treated as quiet -> rise -> full warmth -> settle -> quiet;
-   * keeping the pool opacities below .12 preserves the authored grain. */
+   * and turns it into clipped receiving-plane pulses, so all animation still
+   * comes from the existing fire/chandelier/desk/bell archetypes. A warm lamp
+   * is quiet -> rise -> full warmth -> settle -> quiet; glass keeps its own
+   * eight-step reflection envelope. */
   function ambientPulse(id) {
     var life = GAME.AmbientLife;
     if (!life || typeof life.snapshot !== 'function') return 0;
@@ -367,7 +367,10 @@
       item = entry; return true;
     });
     if (!item || !item.active) return 0;
-    return [0.18, 0.58, 1, 0.44, 0][item.frame] || 0;
+    var levels = item.type === 'GLASS_SUBTLE_REFLECTION'
+      ? [0.18, 0.40, 0.62, 0.72, 0.62, 0.40, 0.18, 0]
+      : [0.18, 0.58, 1, 0.44, 0];
+    return levels[item.frame] || 0;
   }
   function lightPools(ctx, cameraX, cameraY, parentAlpha) {
     steppedPool(ctx, cameraX, cameraY, 64, 62, 48, 32, 20, 108, 42, 116, p.fire, .07, [{ x: 34, y: 50, w: 58, h: 27 }], parentAlpha);
@@ -395,8 +398,18 @@
     }
     var deskPulse = ambientPulse('lobby-desk-lamp');
     if (deskPulse) {
-      steppedPool(ctx, cameraX, cameraY, 229, 119, 24, 22, 204, 252, 98, 148, p.fire, .075 * deskPulse, [], parentAlpha);
-      steppedPool(ctx, cameraX, cameraY, 229, 130, 17, 15, 210, 248, 108, 148, p.gold, .105 * deskPulse, [], parentAlpha);
+      /* Desk-lamp response is three stepped planes, each clipped to the
+       * authored receiving surface. The ~30x25px footprint crosses cubbies,
+       * worktop and face while leaving keys, sign and counter grain legible. */
+      steppedPool(ctx, cameraX, cameraY, 212, 97, 28, 13, 182, 242, 84, 112, p.gold, .24 * deskPulse, [], parentAlpha);
+      steppedPool(ctx, cameraX, cameraY, 210, 124, 30, 5, 174, 242, 120, 129, p.fire, .22 * deskPulse, [], parentAlpha);
+      steppedPool(ctx, cameraX, cameraY, 214, 136, 26, 8, 174, 242, 129, 145, p.gold, .14 * deskPulse, [], parentAlpha);
+    }
+    var bellPulse = ambientPulse('lobby-bell');
+    if (bellPulse) {
+      /* The existing glass reflection remains the bell's event; this compact
+       * warm glint is its receiving response on the brass/guest edge only. */
+      steppedPool(ctx, cameraX, cameraY, 202, 119, 4, 2, 197, 208, 117, 123, p.fire, .22 * bellPulse, [], parentAlpha);
     }
   }
 
