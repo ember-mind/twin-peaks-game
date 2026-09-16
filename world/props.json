@@ -1,0 +1,501 @@
+{
+  "version": 1,
+  "scenes": {
+    "roadhouse": {
+      "canvas": [
+        256,
+        192
+      ]
+    }
+  },
+  "definitions": {
+    "roadhouse.stage.velvet": {
+      "label": "Velvet stage",
+      "atlas": "assets/prototypes/direct-reference/expanded/runtime/roadhouse-props-expanded-atlas.png",
+      "frame": [
+        0,
+        0,
+        112,
+        46
+      ],
+      "anchor": [
+        56,
+        44
+      ],
+      "footprint": [
+        [
+          -3,
+          0
+        ],
+        [
+          -2,
+          0
+        ],
+        [
+          -1,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ]
+      ],
+      "defaultLayer": 1,
+      "tags": [
+        "roadhouse",
+        "stage",
+        "architecture"
+      ],
+      "transforms": []
+    },
+    "roadhouse.neon.sign": {
+      "label": "Neon sign",
+      "atlas": "assets/prototypes/direct-reference/expanded/runtime/roadhouse-props-expanded-atlas.png",
+      "frame": [
+        112,
+        0,
+        64,
+        17
+      ],
+      "anchor": [
+        32,
+        2
+      ],
+      "footprint": [],
+      "defaultLayer": 2,
+      "tags": [
+        "roadhouse",
+        "light",
+        "wall"
+      ],
+      "transforms": []
+    },
+    "roadhouse.trophy.deer": {
+      "label": "Deer trophy",
+      "atlas": "assets/prototypes/direct-reference/expanded/runtime/roadhouse-props-expanded-atlas.png",
+      "frame": [
+        176,
+        0,
+        19,
+        24
+      ],
+      "anchor": [
+        9,
+        2
+      ],
+      "footprint": [],
+      "defaultLayer": 2,
+      "tags": [
+        "roadhouse",
+        "decor",
+        "wall"
+      ],
+      "transforms": [
+        "flipX"
+      ]
+    },
+    "roadhouse.payphone.wall": {
+      "label": "Pay phone",
+      "atlas": "assets/prototypes/direct-reference/expanded/runtime/roadhouse-props-expanded-atlas.png",
+      "frame": [
+        196,
+        0,
+        11,
+        26
+      ],
+      "anchor": [
+        5,
+        24
+      ],
+      "footprint": [],
+      "defaultLayer": 5,
+      "tags": [
+        "roadhouse",
+        "decor",
+        "wall"
+      ],
+      "transforms": [
+        "flipX"
+      ]
+    },
+    "roadhouse.piano.upright": {
+      "label": "Upright piano",
+      "atlas": "assets/prototypes/direct-reference/expanded/runtime/roadhouse-props-expanded-atlas.png",
+      "frame": [
+        208,
+        0,
+        30,
+        30
+      ],
+      "anchor": [
+        15,
+        28
+      ],
+      "footprint": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "defaultLayer": 3,
+      "tags": [
+        "roadhouse",
+        "furniture",
+        "music"
+      ],
+      "transforms": [
+        "flipX"
+      ]
+    },
+    "roadhouse.bar.segment": {
+      "label": "Bar segment",
+      "atlas": "assets/prototypes/direct-reference/expanded/runtime/roadhouse-props-expanded-atlas.png",
+      "frame": [
+        0,
+        48,
+        72,
+        17
+      ],
+      "anchor": [
+        36,
+        15
+      ],
+      "footprint": [
+        [
+          -2,
+          0
+        ],
+        [
+          -1,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ]
+      ],
+      "defaultLayer": 4,
+      "tags": [
+        "roadhouse",
+        "furniture",
+        "architecture"
+      ],
+      "transforms": []
+    },
+    "roadhouse.booth.red": {
+      "label": "Red booth",
+      "atlas": "assets/prototypes/direct-reference/expanded/runtime/roadhouse-props-expanded-atlas.png",
+      "frame": [
+        72,
+        48,
+        44,
+        30
+      ],
+      "anchor": [
+        22,
+        28
+      ],
+      "footprint": [
+        [
+          -1,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "defaultLayer": 4,
+      "tags": [
+        "roadhouse",
+        "furniture",
+        "seating"
+      ],
+      "transforms": [
+        "flipX"
+      ]
+    },
+    "roadhouse.door.double": {
+      "label": "Double door",
+      "atlas": "assets/prototypes/direct-reference/expanded/runtime/roadhouse-props-expanded-atlas.png",
+      "frame": [
+        116,
+        48,
+        30,
+        26
+      ],
+      "anchor": [
+        15,
+        25
+      ],
+      "footprint": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "defaultLayer": 8,
+      "tags": [
+        "roadhouse",
+        "architecture",
+        "door"
+      ],
+      "transforms": []
+    },
+    "roadhouse.chair.red": {
+      "label": "Red chair",
+      "atlas": "assets/prototypes/direct-reference/expanded/runtime/roadhouse-props-expanded-atlas.png",
+      "frame": [
+        160,
+        48,
+        18,
+        30
+      ],
+      "anchor": [
+        9,
+        28
+      ],
+      "footprint": [
+        [
+          0,
+          0
+        ]
+      ],
+      "defaultLayer": 6,
+      "tags": [
+        "roadhouse",
+        "furniture",
+        "seating"
+      ],
+      "transforms": [
+        "flipX"
+      ]
+    },
+    "roadhouse.table.round": {
+      "label": "Round table",
+      "atlas": "assets/prototypes/direct-reference/expanded/runtime/roadhouse-props-expanded-atlas.png",
+      "frame": [
+        180,
+        48,
+        21,
+        22
+      ],
+      "anchor": [
+        10,
+        20
+      ],
+      "footprint": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "defaultLayer": 5,
+      "tags": [
+        "roadhouse",
+        "furniture"
+      ],
+      "transforms": []
+    },
+    "roadhouse.candle.brass": {
+      "label": "Table candle",
+      "atlas": "assets/prototypes/direct-reference/expanded/runtime/roadhouse-props-expanded-atlas.png",
+      "frame": [
+        208,
+        48,
+        8,
+        10
+      ],
+      "anchor": [
+        4,
+        9
+      ],
+      "footprint": [],
+      "defaultLayer": 7,
+      "tags": [
+        "roadhouse",
+        "decor",
+        "light"
+      ],
+      "transforms": []
+    },
+    "roadhouse.pendant.brass": {
+      "label": "Pendant light",
+      "atlas": "assets/prototypes/direct-reference/expanded/runtime/roadhouse-props-expanded-atlas.png",
+      "frame": [
+        216,
+        48,
+        16,
+        23
+      ],
+      "anchor": [
+        8,
+        2
+      ],
+      "footprint": [],
+      "defaultLayer": 3,
+      "tags": [
+        "roadhouse",
+        "light",
+        "ceiling"
+      ],
+      "transforms": [
+        "flipX"
+      ]
+    }
+  },
+  "instances": {
+    "roadhouse-neon-01": {
+      "propId": "roadhouse.neon.sign",
+      "sceneId": "roadhouse",
+      "tx": 2.375,
+      "ty": 0.625
+    },
+    "roadhouse-stage-01": {
+      "propId": "roadhouse.stage.velvet",
+      "sceneId": "roadhouse",
+      "tx": 8,
+      "ty": 2.875
+    },
+    "roadhouse-piano-01": {
+      "propId": "roadhouse.piano.upright",
+      "sceneId": "roadhouse",
+      "tx": 5.9375,
+      "ty": 2.6875
+    },
+    "roadhouse-trophy-01": {
+      "propId": "roadhouse.trophy.deer",
+      "sceneId": "roadhouse",
+      "tx": 15,
+      "ty": 0.5625
+    },
+    "roadhouse-pendant-01": {
+      "propId": "roadhouse.pendant.brass",
+      "sceneId": "roadhouse",
+      "tx": 9.9375,
+      "ty": 2.75
+    },
+    "roadhouse-pendant-02": {
+      "propId": "roadhouse.pendant.brass",
+      "sceneId": "roadhouse",
+      "tx": 13.4375,
+      "ty": 2.75
+    },
+    "roadhouse-bar-01": {
+      "propId": "roadhouse.bar.segment",
+      "sceneId": "roadhouse",
+      "tx": 13.125,
+      "ty": 5.4375
+    },
+    "roadhouse-payphone-01": {
+      "propId": "roadhouse.payphone.wall",
+      "sceneId": "roadhouse",
+      "tx": 15.5,
+      "ty": 5.75
+    },
+    "roadhouse-booth-01": {
+      "propId": "roadhouse.booth.red",
+      "sceneId": "roadhouse",
+      "tx": 1.875,
+      "ty": 6.125
+    },
+    "roadhouse-booth-02": {
+      "propId": "roadhouse.booth.red",
+      "sceneId": "roadhouse",
+      "tx": 14.125,
+      "ty": 9.1875
+    },
+    "roadhouse-table-01": {
+      "propId": "roadhouse.table.round",
+      "sceneId": "roadhouse",
+      "tx": 6.5625,
+      "ty": 6.375
+    },
+    "roadhouse-chair-01": {
+      "propId": "roadhouse.chair.red",
+      "sceneId": "roadhouse",
+      "tx": 5.3125,
+      "ty": 7.25,
+      "flipX": true
+    },
+    "roadhouse-chair-02": {
+      "propId": "roadhouse.chair.red",
+      "sceneId": "roadhouse",
+      "tx": 7.8125,
+      "ty": 7.25
+    },
+    "roadhouse-candle-01": {
+      "propId": "roadhouse.candle.brass",
+      "sceneId": "roadhouse",
+      "tx": 6.5625,
+      "ty": 5.4375
+    },
+    "roadhouse-table-02": {
+      "propId": "roadhouse.table.round",
+      "sceneId": "roadhouse",
+      "tx": 8.125,
+      "ty": 8.125
+    },
+    "roadhouse-chair-03": {
+      "propId": "roadhouse.chair.red",
+      "sceneId": "roadhouse",
+      "tx": 6.875,
+      "ty": 9,
+      "flipX": true
+    },
+    "roadhouse-chair-04": {
+      "propId": "roadhouse.chair.red",
+      "sceneId": "roadhouse",
+      "tx": 9.375,
+      "ty": 9
+    },
+    "roadhouse-candle-02": {
+      "propId": "roadhouse.candle.brass",
+      "sceneId": "roadhouse",
+      "tx": 8.125,
+      "ty": 7.1875
+    },
+    "roadhouse-door-01": {
+      "propId": "roadhouse.door.double",
+      "sceneId": "roadhouse",
+      "tx": 8,
+      "ty": 11.875
+    }
+  }
+}
