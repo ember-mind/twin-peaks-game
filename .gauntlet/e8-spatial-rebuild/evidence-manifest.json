@@ -1,8 +1,53 @@
 {
   "schemaVersion": 1,
   "slug": "e8-spatial-rebuild",
-  "generatedAt": "2026-09-16T19:34:48.681Z",
+  "generatedAt": "2026-09-16T19:51:06.038Z",
   "files": [
+    {
+      "path": "evidence/ambient-before/frame-000.png",
+      "bytes": 11241,
+      "sha256": "0f71997b1e403b63d68d7918bddb49ad673b84c26950a87501d739bea7796ee0"
+    },
+    {
+      "path": "evidence/ambient-before/frame-014.png",
+      "bytes": 11120,
+      "sha256": "d91fedd25f9786a5b17a4f5d2f23fddd53447b0bae0bbd66747a70f512c3e01b"
+    },
+    {
+      "path": "evidence/ambient-before/frame-020.png",
+      "bytes": 11111,
+      "sha256": "0668598929cd0f0cebc008cf4b1c6451045624fc739e1ac0b0936be5d89fa11e"
+    },
+    {
+      "path": "evidence/ambient-before/frame-027.png",
+      "bytes": 11391,
+      "sha256": "77bf1d0c54ea79c37746b9c816ed7430de420ed035bee4ef186155fa8e74ab56"
+    },
+    {
+      "path": "evidence/ambient-before/frame-040.png",
+      "bytes": 11305,
+      "sha256": "4a86c325ea8742bdf058527587b238fe1d776d6b34e550c5baa06ab25a2501c9"
+    },
+    {
+      "path": "evidence/ambient-r3/frame-014.png",
+      "bytes": 11986,
+      "sha256": "50dfc5d12b0d100553d94071bf4be91d88274d977f6f37316b0c5c8fd9f174f0"
+    },
+    {
+      "path": "evidence/ambient-r3/frame-020.png",
+      "bytes": 11520,
+      "sha256": "035a3520b3b7d47ea402a11a6df471f2abc248dc53d77264e63f403cf24a8780"
+    },
+    {
+      "path": "evidence/ambient-r3/frame-027.png",
+      "bytes": 12331,
+      "sha256": "a269bcba4f790b3aa777d81b76dd6806773da12359aa19ec486da374c5a04596"
+    },
+    {
+      "path": "evidence/ambient-r3/frame-040.png",
+      "bytes": 11172,
+      "sha256": "67eaa574c4f27b39c142160bab2c26bb96ab1d3ee7e2ddfc2c49d6b58bf93fb3"
+    },
     {
       "path": "evidence/baseline.png",
       "bytes": 17378,

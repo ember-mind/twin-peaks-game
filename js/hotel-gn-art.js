@@ -353,6 +353,22 @@
     }
     ctx.globalAlpha = oldAlpha; ctx.fillStyle = oldFill;
   }
+  /* AmbientLife owns the clocks. The art layer only reads the current frame
+   * and turns it into a clipped receiving-plane pulse, so all animation still
+   * comes from the existing fire/chandelier/desk archetypes. A five-frame
+   * archetype is treated as quiet -> rise -> full warmth -> settle -> quiet;
+   * keeping the pool opacities below .12 preserves the authored grain. */
+  function ambientPulse(id) {
+    var life = GAME.AmbientLife;
+    if (!life || typeof life.snapshot !== 'function') return 0;
+    var snap = life.snapshot('hotel_gn'), item = null;
+    (snap.items || []).some(function (entry) {
+      if (entry.id !== id) return false;
+      item = entry; return true;
+    });
+    if (!item || !item.active) return 0;
+    return [0.18, 0.58, 1, 0.44, 0][item.frame] || 0;
+  }
   function lightPools(ctx, cameraX, cameraY, parentAlpha) {
     steppedPool(ctx, cameraX, cameraY, 64, 62, 48, 32, 20, 108, 42, 116, p.fire, .07, [{ x: 34, y: 50, w: 58, h: 27 }], parentAlpha);
     steppedPool(ctx, cameraX, cameraY, 64, 62, 30, 22, 24, 104, 45, 111, p.fire, .12, [{ x: 34, y: 50, w: 58, h: 27 }], parentAlpha);
@@ -361,6 +377,27 @@
     steppedPool(ctx, cameraX, cameraY, 160, 48, 22, 18, 132, 190, 27, 78, p.fire, .11, [], parentAlpha);
     steppedPool(ctx, cameraX, cameraY, 229, 116, 18, 16, 208, 246, 98, 144, p.fire, .06, [], parentAlpha);
     steppedPool(ctx, cameraX, cameraY, 229, 116, 10, 10, 216, 242, 104, 138, p.gold, .13, [], parentAlpha);
+
+    /* Live receiving planes: the broad spans are clipped to the actual lodge
+     * surfaces rather than painted as a screen-wide wash. They make the
+     * source-to-material relationship legible on the stone sill, red chairs,
+     * lounge rug and parquet; the desk pulse stays on the counter/cubbies. */
+    var firePulse = ambientPulse('lobby-fire');
+    if (firePulse) {
+      steppedPool(ctx, cameraX, cameraY, 64, 72, 48, 34, 24, 108, 40, 118, p.fire, .075 * firePulse,
+        [{ x: 34, y: 50, w: 58, h: 27 }], parentAlpha);
+      steppedPool(ctx, cameraX, cameraY, 68, 101, 40, 25, 42, 118, 82, 132, p.gold, .105 * firePulse, [], parentAlpha);
+    }
+    var chandelierPulse = ambientPulse('lobby-chandelier');
+    if (chandelierPulse) {
+      steppedPool(ctx, cameraX, cameraY, 160, 54, 44, 32, 122, 202, 24, 94, p.gold, .065 * chandelierPulse, [], parentAlpha);
+      steppedPool(ctx, cameraX, cameraY, 160, 89, 35, 28, 126, 196, 58, 122, p.fire, .055 * chandelierPulse, [], parentAlpha);
+    }
+    var deskPulse = ambientPulse('lobby-desk-lamp');
+    if (deskPulse) {
+      steppedPool(ctx, cameraX, cameraY, 229, 119, 24, 22, 204, 252, 98, 148, p.fire, .075 * deskPulse, [], parentAlpha);
+      steppedPool(ctx, cameraX, cameraY, 229, 130, 17, 15, 210, 248, 108, 148, p.gold, .105 * deskPulse, [], parentAlpha);
+    }
   }
 
   function draw(ctx, cx, cy) {
