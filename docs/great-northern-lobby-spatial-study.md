@@ -1,9 +1,9 @@
 # Great Northern lobby — spatial study
 
-Status: architectural brief for next native-scene rebuild, not a claim that
-current scene passes. Visual bar: **bottom panel only** of
+Status: architectural program plus post-rebuild room-use study. Visual bar: **bottom panel only** of
 `assets/ref/great-northern-lobby-sheet.png`. Current production comparison:
-`artifacts/art-pass-e/e8-architecture/after-cast.png`.
+`artifacts/art-pass-e/e8-spatial-rebuild/round-1/entry.png` and
+`artifacts/art-pass-e/e8-spatial-rebuild/round-2/hall.png`.
 
 ## What this room does
 
@@ -18,6 +18,35 @@ rooms**, with **waiting** available to one side. A guest should not need to
 walk through lounge furniture or behind the clerk to reach stairs. Reception
 and stairs should be visible choices from the entry frame; the rear route
 should feel deeper than the foreground threshold.
+
+## How the room should feel in use
+
+The entrance is a moment of orientation, not an obstacle course. A guest with
+luggage needs a wide, legible path and a visible person to ask for help. The
+counter should feel anchored to the building, with a public face and a work
+face; otherwise it reads like furniture dropped in a hall. Check-in needs
+enough standing room for a second guest without blocking the main route.
+
+Waiting should feel sheltered: fire, two seats and a table make a small social
+place at the edge of activity. Chairs face warmth and each other, not a wall
+or the main traffic stream. The rug marks that quieter use but cannot imply
+walkability through a chair. Upstairs travel should feel public and obvious:
+stair foot visible, landing linked to the real Room 315 hall door, luggage
+near service but away from the guest queue. Staff must have a continuous work
+route to the desk and bags; decorative pigeonholes are not enough if nobody
+can stand behind the counter.
+
+Material and light support these uses. Wood and stone give the lodge weight;
+red upholstery/rugs mark places to pause or walk. Fire warms nearby stone and
+chairs, desk lamp warms the working surface, chandelier identifies the shared
+arrival volume. Animation should be slow enough to feel inhabited, not like
+an arcade effect. Human presence must remain legible without trapping Ben at
+his desk or placing Audrey in an entry bottleneck.
+
+Judgment therefore has two layers: spatial proof (walkable guest/staff paths,
+doors, body tiles, collision) and lived visual proof (a first-time player can
+tell where to check in, wait and go upstairs from actual game frames). A
+pretty illustration that fails either layer does not pass.
 
 ## Plan and object relationships
 
@@ -39,9 +68,9 @@ paint a false door or a carpet over solid cells. Existing 16×12-tile camera
 shows less than a wider map; composition must be checked at actual entry and
 hall-arrival frames, not only on a whole-map illustration.
 
-## Current scene: observed failure
+## Former scene: observed failure
 
-Current map is 18×12 tiles (288×192 map pixels), viewed through a 16×12-tile
+Former map was 18×12 tiles (288×192 map pixels), viewed through a 16×12-tile
 retro camera. Counter collision occupies `(4..7,8)`, sign sits behind it, and
 Ben stands at `(5,7)`. In production capture the counter still projects into
 centre-left arrival space. Calling it “fixed to the west wall” was incorrect:
@@ -55,9 +84,9 @@ players. Adding width without relocating functions would merely add empty
 floor. Redesign must change map geometry, authored art, lobby-side connection
 coordinates, Cast Presence positions and tests as one coherent revision.
 
-## Rebuild study, not final coordinates
+## Rebuild study and selected coordinates
 
-Start with **20×12 tiles** as smallest broader plan worth testing (320×192 map
+The rebuild uses **20×12 tiles** as smallest broader plan worth testing (320×192 map
 pixels, 256×192 viewport). Keep room depth so entrance, lounge, desk and rear
 wall share one camera-language. Stage fireplace/lounge in west third, clear
 arrival spine near centre, reception/staff zone in east third, and stair/hall
@@ -67,7 +96,7 @@ walkability require; update registry-generated data and continuity fixtures
 together. Room 315 interior and protected `js/retro.js`,
 `js/retro-authored.js`, `js/tiles.js` remain untouched.
 
-20 tiles is a **hypothesis**, not a visual pass. Viewport shows only 16 tiles:
+20 tiles was a **hypothesis**, not automatic visual pass. Viewport shows only 16 tiles:
 verify entry shot reveals reception and stair approach simultaneously, and
 walking toward hall reveals full stair without losing route meaning. If 20
 tiles cannot do both, revise plan or camera presentation before adding more
@@ -79,6 +108,16 @@ aisle to the hotel's service/luggage side, clear of stair foot and guest queue.
 Ben's body tile sits inside this aisle, with access to keys, register and bag
 handling. Counter cannot seal him into a decorative alcove. A reachable guest
 interaction tile remains on the opposite side of the counter.
+
+Implemented plan: south paired entry at `(9,11)` and `(10,11)` opens onto the
+centre runner; west hearth occupies `(2..5,4)` with chairs/table at
+`(4..6,6)`; east reception counter occupies `(11..14,8)` with Ben at
+`(12,7)` behind it; Audrey remains in public space at `(15,9)`. Staff aisle
+spans the north side of the counter and connects toward luggage at `(17,6)`.
+The stair runs along the east wall to the real hall return at `(16,1)`.
+Entry and hall frames are both necessary because the map is wider than the
+camera. A one-tile west camera bias at the hall return keeps the hearth in
+view while preserving stair legibility.
 
 ## Acceptance checks for a livable level
 

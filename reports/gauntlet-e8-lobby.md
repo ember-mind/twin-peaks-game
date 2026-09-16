@@ -17,6 +17,110 @@ not assigned a critic score retroactively.
 
 No push performed.
 
+## Architect-first spatial rebuild (supersedes earlier verdict)
+
+User approved a wider lobby and coordinated lobby-side endpoints after the
+earlier 7.3/10 scene failed to function as a believable hotel. The
+[room-use study](../docs/great-northern-lobby-spatial-study.md) now treats
+arrival, check-in, waiting, staff work, luggage and upstairs access as
+connected activities. It also states how wood, stone, fabric and people should
+make the room feel occupied, not just where recognizable props should sit.
+
+The rebuilt map is **20×12 tiles**, viewed through the same 16×12 native
+viewport. Paired entry at `(9..10,11)` meets a clear central runner. West
+hearth/lounge occupies `(2..6,4..6)`. East counter occupies `(11..14,8)`;
+Ben stands behind it at `(12,7)`, Audrey in public space at `(15,9)`. Staff
+aisle connects counter work to luggage at `(17,6)`. Stairs occupy east wall
+and lead to the real Room 315 hall lobby endpoint `(16,1)`. Room 315 interior
+and opposite endpoints remain unchanged. Visible furniture footprints match
+solid glyphs. Scene install checks exact geometry, registry records, body
+walkability, guest/staff reachability and late door lifecycle; it never
+asserts map doors before registry install.
+
+### Spatial evidence and independent rounds
+
+| State | Capture | SHA-256 |
+|---|---|---|
+| Before (Cast present) | `artifacts/art-pass-e/e8-architecture/after-cast.png` | `a7c85998413cf336b540a26cacf687aa67988e59be740ac6d8bfe517d4f42d3f` |
+| Round 1 entrance | `artifacts/art-pass-e/e8-spatial-rebuild/round-1/entry.png` | `b51adcc917b181c0f20aca6864eacdef380b40ab0a441a2e2f9b1881c3c81a8a` |
+| Round 1 hall | `artifacts/art-pass-e/e8-spatial-rebuild/round-1/hall.png` | `6bd8d6c7e5176f55d67048343a6781a1e9aede81e1ce5dc6be3406785f38df7e` |
+| Round 2 hall | `artifacts/art-pass-e/e8-spatial-rebuild/round-2/hall.png` | `be2b5de3565243f9f932be637bd45235789435249da34dd4485e7da1177d927e` |
+
+![Before spatial rebuild](../artifacts/art-pass-e/e8-architecture/after-cast.png)
+![Rebuilt entrance](../artifacts/art-pass-e/e8-spatial-rebuild/round-1/entry.png)
+![Rebuilt hall return](../artifacts/art-pass-e/e8-spatial-rebuild/round-2/hall.png)
+
+Round 1: separate Luna/xhigh map and art builders, fresh Luna/xhigh PNG-only
+critic. Entry integrated **8/10**, hall **7/10** because left hearth is cropped.
+Arrival 8, reception 8.5, entry hearth 8, hall stair 9, still-light 8 (motion
+unproven). Checkpoint `111f924`. Round 2: hotel-only camera offset built by
+Astra; fresh Luna/xhigh PNG-only critic ranked hall better at **8.1/10**.
+Remaining composition gap: frame still right-heavy versus reference.
+Checkpoint `734215c`. Entry and hall now each meet visual floor; temporal
+ambient proof is a separate gate.
+
+First live 25-second production sampling exported 50 frames. Fresh Luna/xhigh
+critic scored ambient **4/10**: moving fire is visible, but stone, chairs,
+floor, chandelier and desk receivers do not breathe enough. This unit is
+**below floor** until a new build and independent temporal review pass.
+Round 3 linked slow archetype states to local receiving planes. Fresh
+Luna/xhigh temporal critic ranked it better at **6.5/10**, still below floor:
+fire and chandelier influence nearby material, but desk/counter and bell remain
+too static. Round 3 checkpoint `34ede7a`; 50 live frames and critic note are
+under `artifacts/art-pass-e/e8-spatial-rebuild/round-3/`. Round 4 targeted desk
+and bell only. Fresh Luna/xhigh critic scored it **3/10**, tied with Round 3
+on rank, and found no PNG-proven improvement. Checkpoint `160060d` preserves
+rejected attempt and its 50 live frames. Commit `8fe054b` restored selected
+Round 3 light source. Four rounds used; ambient unit **does not meet floor 8**.
+No fifth taste round.
+
+| Spatial rebuild unit | Baseline | R1 | R2 | R3 | R4 | Selected / floor 8 |
+|---|---:|---:|---:|---:|---:|---|
+| Arrival/circulation | 4 | 8 | — | — | — | R1, yes |
+| Reception/service | 5 | 8.5 | — | — | — | R1, yes |
+| Hearth/lounge | 4 | 8 entry | better framing | — | — | R1 + R2, yes |
+| Stairs/hall | 7 | 9 hall | preserved | — | — | R1 + R2, yes |
+| Light/ambient temporal | 4 | still only | — | 6.5 | 3 | R3, **no** |
+| Integrated playable room | 5 | 8 entry, 7 hall | 8.1 hall | — | — | R1 + R2, yes |
+
+The first temporal baseline and Round 3/4 each contain 50 production frames
+across 25 seconds. Sampled hashes are in
+`.gauntlet/e8-spatial-rebuild/evidence-manifest.json`. Round 4 final still
+SHA-256 `24c5d410c3b1928f2c8e8ff03e38abe5ea02c364afc7bf646f5af9ec5d3b6402`;
+selected Round 3 final still SHA-256
+`d44816bf6d8d355aeedada221944093da03c964f6708c15f8c531134fbd54dcf`.
+Stills alone do not prove animation; the 50-frame series is motion evidence.
+
+Runtime files changed in rebuild: `js/maps.js`, `js/hotel-gn-scene.js`,
+`js/hotel-gn-art.js`, `js/ambient-life-scenes.js`, hotel-only camera rule in
+`js/engine.js`, lobby-side `world/connections.json` and
+`narrative/cast/windows.json`, plus generated equivalents and coordinate-aware
+tests/fixtures. Exact list is in commits `111f924`, `734215c`, `34ede7a`,
+`160060d`, `8fe054b`. Protected `js/retro.js`, `js/retro-authored.js`,
+`js/tiles.js` and Room 315 scene/art stayed untouched. No new ambient
+archetypes or palette hues added; no push.
+
+| Gate on selected Round 3 build | Result |
+|---|---|
+| Focused lobby + ambient clocks | Pass |
+| Smoke | 415/415 |
+| Walkthrough | 85/85 acquisitions, finale reached |
+| Retro production | 54/54 |
+| Mobile production | 20/20 |
+| Cast Continuity | Pass |
+| World door equality | 59/59; only approved lobby endpoint moves |
+| Room 315 | Pass |
+| Narrative finale | 27/27 |
+| Act 4 flow | 1611/1611 |
+| Migrated door traversal | 45 checks |
+| Interior zoning reachability | 42/42 |
+| Chrome Act 4 all paths | Running final selected-build gate |
+| Chrome Act 3 | Running final selected-build gate |
+
+Visual release verdict remains **FAIL** because temporal ambient is 6.5/10,
+despite passing room-function layout and native runtime gates. Selected
+version is best-of-four, not claimed AAA light finish.
+
 ## Fixed evidence
 
 Every capture used the town-entrance spawn and fixed command:
