@@ -1,0 +1,51 @@
+name: full-campaign
+on:
+  pull_request:
+  push:
+    branches: [main, 'codex/playable-04*', 'codex/playable-05*']
+permissions:
+  contents: read
+concurrency:
+  group: full-campaign-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  complete-journey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      CHROME_NO_SANDBOX: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Browser and reproducible source
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "CHROME_BIN=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          node --version
+          google-chrome --version
+          git rev-parse HEAD
+      - name: Existing project gates before the browser
+        run: |
+          node test/smoke.js
+          node test/walkthrough.js
+          node test/narrative-lint.js
+          node test/story-truth-lint.js
+          node test/campaign-player.js
+          node test/playable-browser.js
+      - name: Complete earned journey - fresh profile one
+        run: CAMPAIGN_OUT="$RUNNER_TEMP/full-campaign/first" node test/campaign-playthrough.js --full
+      - name: Complete earned journey - fresh profile two
+        run: CAMPAIGN_OUT="$RUNNER_TEMP/full-campaign/second" node test/campaign-playthrough.js --full
+      - name: Retain both complete routes or the exact failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-campaign-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/full-campaign
+          retention-days: 7
+          if-no-files-found: error
