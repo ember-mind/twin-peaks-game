@@ -295,6 +295,18 @@
     };
   }
 
+  // The notebook has its own Escape/back contract. Its semantic DOM is
+  // painted by RetroUI, so a hidden DOM-only Close row is not a touch exit.
+  function notebookActive() {
+    if (!document.querySelectorAll) return false;
+    var roots = document.querySelectorAll('#narrative .nw-root');
+    for (var i = roots.length - 1; i >= 0; i--) {
+      if (roots[i].style.display === 'none') continue;
+      return (' ' + (roots[i].className || '') + ' ').indexOf(' nb-root ') >= 0;
+    }
+    return false;
+  }
+
   function narrativeChoiceActive() {
     // DOM semantico = fonte immediata; RetroUI.inspect copre anche WebView
     // dove il selettore complesso puo' non essere ancora aggiornato.
@@ -322,6 +334,7 @@
     // Recovery vive sopra titolo/boot, fuori da adapter e finale. Deve comunque
     // usare lo stesso contratto touch delle altre scelte: D-pad + A.
     if (recoveryChoiceActive()) return 'narrative-choice';
+    if (notebookActive()) return 'narrative-notebook';
     if (game.NarrativeFinaleProduction && game.NarrativeFinaleProduction.isActive &&
         game.NarrativeFinaleProduction.isActive()) return narrativeChoiceActive() ? 'narrative-choice' : 'narrative';
     if (game.NarrativeAdapter && game.NarrativeAdapter.active &&
@@ -444,7 +457,7 @@
       showControl(uiDpad, false, 0);
       showControl(uiA, false, 0);
       showControl(uiB, true, 0.72);
-    } else if (mode === 'narrative-choice') {
+    } else if (mode === 'narrative-choice' || mode === 'narrative-notebook') {
       // Il canvas mostra una sola opzione alla volta. D-pad cambia focus;
       // A conferma. Stessi key event della tastiera, quindi nessun secondo
       // percorso di commit e nessun doppio avanzamento da touch sintetico.
@@ -474,7 +487,23 @@
       uiA.setAttribute('aria-label', 'Conferma scelta');
       showControl(uiDpad, true, 0.85);
       showControl(uiA, true, 0.85);
-      showControl(uiB, false, 0);
+      if (mode === 'narrative-notebook') {
+        // B emits the notebook's existing Escape action, never KeyT (which
+        // only opens it from play). Reuse the separated play-button geometry.
+        if (choiceLayout.gutter) {
+          placeGutterButton(uiA, 64, choiceLayout.gutterRight, Math.round(viewportSize().height / 2 - 76));
+          placeGutterButton(uiB, 64, choiceLayout.gutterRight + GUTTER_DIAGONAL, Math.round(viewportSize().height / 2 + 18));
+        } else if (!choiceLayout.landscape) {
+          placePortraitButton(uiA, choiceLayout.a, choiceLayout.aRight, choiceLayout.controlTop + 8);
+          placePortraitButton(uiB, choiceLayout.b, choiceLayout.bRight, choiceLayout.controlTop + 74);
+        } else {
+          restorePlayButton(uiA, choiceLayout.a, choiceLayout.aRight, choiceLayout.aBottom);
+          restorePlayButton(uiB, choiceLayout.b, choiceLayout.bRight, choiceLayout.bBottom);
+        }
+        buttonFace(uiB, 'B', 'INDIETRO');
+        uiB.setAttribute('aria-label', 'Indietro nel taccuino');
+        showControl(uiB, true, 0.85);
+      } else showControl(uiB, false, 0);
     } else if (mode === 'narrative' || mode === 'dialogue' || mode === 'advance') {
       var advanceLayout = playLayout();
       if (advanceLayout.gutter) placeGutterButton(uiA, 64, advanceLayout.gutterRight, Math.round(viewportSize().height / 2 - 32));
