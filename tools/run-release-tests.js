@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 'use strict';
 
-/* Run exactly the single-file Node commands maintained by test.yml.
- * This is intentionally a strict reader of that workflow's current subset,
- * not a YAML parser: unsupported run syntax fails rather than skipping gates.
- * node tools/run-release-tests.js --list
- * node tools/run-release-tests.js --out=/tmp/tp-release-<unique-id>
+/* Run the single-file Node commands maintained by test.yml. This is a strict
+ * reader of the workflow's current command subset, not a general YAML parser.
+ * Unsupported commands fail loudly instead of silently dropping test gates.
  */
 const fs = require('node:fs');
 const path = require('node:path');
@@ -14,10 +12,11 @@ const { spawnSync } = require('node:child_process');
 function commandsFromWorkflow(text) {
   const commands = [];
   for (const line of text.split(/\r?\n/)) {
-    const run = /^\s+run:\s*(.*?)\s*$/.exec(line);
+    // GitHub permits both a named step followed by run: and an unnamed - run:.
+    const run = /^\s+(?:-\s+)?run:\s*(.*?)\s*$/.exec(line);
     if (!run) continue;
     const match = /^node (test\/[A-Za-z0-9_./-]+\.js)$/.exec(run[1]);
-    if (!match || match[1].split('/').includes('..')) throw new Error('Unsupported release command: ' + run[1]);
+    if (!match || match[1].split('/').some((s) => s === '..' || s === '.' || !s)) throw new Error('Unsupported release command: ' + run[1]);
     if (commands.includes(match[1])) throw new Error('Duplicate release command: ' + match[1]);
     commands.push(match[1]);
   }
@@ -43,7 +42,7 @@ function runRelease({ root, out, timeoutMs = 180000 }) {
     workflow: '.github/workflows/test.yml', automatedNode: 'RUNNING', campaign: 'NOT_RUN', human: 'NOT_RUN', results: [] };
   out = path.resolve(out);
   fs.mkdirSync(path.dirname(out), { recursive: true });
-  fs.mkdirSync(out); // Existing evidence must never be overwritten.
+  fs.mkdirSync(out);
   const save = () => fs.writeFileSync(path.join(out, 'report.json'), JSON.stringify(report, null, 2) + '\n');
   save();
   for (const [i, file] of commands.entries()) {
