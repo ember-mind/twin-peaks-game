@@ -25,7 +25,7 @@ Reception counter is boundary, not loose furniture. Clerk stands staff side; sig
 | Reception + service wing | 8 | 8 | pass |
 | Fireplace + lounge | 8 | 8 | pass |
 | Stairs + Room 315 hall | 8 | 8 | pass |
-| Entry + runner + circulation props | 8 | 5 (best 7.1) | blocked by locked layout |
+| Entry + runner + circulation props | 8 | selected R4 7.1 | below floor; locked layout |
 | Lighting + ambient life | 8 | 5 | revise |
 | Integrated lobby world | 8 | — | pending |
 

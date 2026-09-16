@@ -117,20 +117,15 @@
     R(114,169,60,2,p.woodLight);
     R(116,171,56,3,p.wood);
     R(116,174,56,2,p.woodDark);
-    /* The axial runner now reaches the lounge foot. Its short wood cap is a
-     * receiving threshold, with a five-pixel parquet break before the rug;
-     * the west counter and east stair approaches remain exposed floor. */
+    /* The centered guest runner carries the south arrival only to the open
+     * lobby choice point; circulation beyond it remains exposed parquet. */
     guestRunner(R);
-    /* A slightly deeper framed hearth rug gives the lounge a legible domestic
-     * boundary while leaving both side parquet approaches open. */
-    rug(R,112,80,64,36);
-    R(112,116,64,2,p.wood);
-    R(114,116,60,1,p.woodLight);
-    R(126,114,36,6,p.ink);
-    R(128,114,32,1,p.gold);
-    R(128,115,32,2,p.woodLight);
-    R(129,117,30,2,p.wood);
-    R(130,119,28,1,p.woodDark);
+    /* A fully bounded hearth rug leaves an eight-pixel parquet reveal before
+     * the arrival runner: its bottom edge is y=114 and the runner starts at
+     * y=122, so the lounge remains a separate domestic zone. */
+    rug(R,112,80,64,34);
+    R(112,114,64,2,p.wood);
+    R(114,114,60,1,p.woodLight);
     /* Brass side wings and a dark center mat make both door leaves read as
      * an operational lobby threshold while retaining the open center path. */
     R(112,170,12,5,p.woodDark);R(114,170,10,1,p.gold);R(116,171,8,2,p.woodLight);
