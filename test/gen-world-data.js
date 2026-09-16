@@ -65,9 +65,14 @@ function ok(cond, msg) { if (!cond) die(msg); else console.log('  ✓ ' + msg); 
       nInteract++;
     });
   });
+  let narrativeTargets;
+  try {
+    const nt = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'world', 'narrative-targets.json'), 'utf8'));
+    narrativeTargets = require('../js/editor/core/narrative-targets.js').compileTargets(nt, so);
+  } catch (e) { die(e.message); }
   const soBody = JSON.stringify(so.scenes, null, 2).replace(/\n/g, '\n    ');
   fs.writeFileSync(path.join(__dirname, '..', 'js', 'scene-objects.gen.js'), [
-'/* scene-objects.gen.js — GENERATED from world/scene-objects.json by test/gen-world-data.js.',
+'/* scene-objects.gen.js — GENERATED from world/{scene-objects,narrative-targets}.json by test/gen-world-data.js.',
 ' * DO NOT EDIT BY HAND. Change world/scene-objects.json and run `node test/gen-world-data.js`.',
 ' * GAME.WorldData.sceneObjects is the only source of scene objects and interact keys: js/glue.js reads it and',
 ' * refuses a js/maps.js map that still carries objects/interact. Deep-frozen; glue copies every entry.',
@@ -83,6 +88,7 @@ function ok(cond, msg) { if (!cond) die(msg); else console.log('  ✓ ' + msg); 
 '  var scenes =', soBody + ';',
 '  GAME.WorldData = GAME.WorldData || {};',
 '  GAME.WorldData.sceneObjects = freezeDeep({ version: ' + so.version + ', scenes: scenes });',
+'  GAME.WorldData.narrativeTargets = freezeDeep(' + JSON.stringify(narrativeTargets, null, 2) + ');',
 '}());',
 ''
   ].join('\n'));
