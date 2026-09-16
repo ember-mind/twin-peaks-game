@@ -1,6 +1,7 @@
 # World Builder M10a — prop depth banding + World Builder fixture repair
 
 Branch `opus/world-builder-m10a-depth`, cut from `main` (which now carries M9). Not pushed.
+Implementation commit: `6342af6` feat(world-builder): M10a props interleave with actors by foot y.
 
 Two deliverables: props interleave with actors by foot y instead of drawing above
 everything, and `test/world-builder-browser.js` case 15 is 189/189 again — now
@@ -222,4 +223,113 @@ reports/opus-world-builder-m10a-depth.md
 
 ## Gate output
 
-GATE_OUTPUT_PLACEHOLDER
+```
+$ node test/smoke.js
+415 controlli superati ✔
+
+$ node test/walkthrough.js
+OK: cammino completo simulato, 85 acquisizioni, finale raggiunto ✔
+
+$ node test/retro-production.js
+RETRO-PROD-PASS 54/54
+
+$ node test/mobile-production.js
+MOBILE-PROD-PASS 20/20
+
+$ node test/props-registry.js
+PROPS-REGISTRY-PASS 12 definitions, 19 instances, 53 checks
+
+$ node test/props-changeset.js
+PROPS-CHANGESET-PASS 47 checks
+
+$ node test/props-render-order.js
+PROPS-RENDER-ORDER-PASS 32 checks (order, flip, camera, flag, depth banding)
+
+$ node test/props-flag-off.js
+PROPS-FLAG-OFF-PASS 9 checks, roadhouse 7,6 up, 14388 byte shot
+  Unchanged from M9, same shot, same byte count: the flag still means zero change.
+
+$ node test/props-depth-chrome.js
+PROPS-DEPTH-CHROME-PASS 9 checks · roadhouse-table-01 frame [180,48,21,22] anchor [10,20] foot y 102 · Cooper 6,5 (foot 96) vs 6,6 (foot 112)
+
+$ node test/cast-continuity-validate.js
+cast-continuity-validate: V1 exactly-one PASS · V2 zero-overlaps PASS · V3 no-implicit-absence PASS · V4 order-independence PASS · RC8 order independence (Act 3 chain) PASS · V5 world-window-pins PASS · V5b scene-required-presence PASS · V6 causal-transitions PASS · V6b no-silent-vanish-entry PASS · V7 single-body-owner PASS · V8 save-determinism PASS · terminal lint PASS
+
+$ node test/act-4-flow.js
+act-4-flow: 1611/1611
+
+$ node test/act-4-playthrough.js
+act-4-playthrough: 530/530 assertions passed
+
+World Builder suites:
+
+$ node test/world-builder-browser.js
+WORLD-BUILDER-BROWSER 190/190
+  Was 188/189 before this branch. Case 15 is fixed and one check was added, so the
+  denominator moves 189 -> 190.
+
+$ node test/catalog-write.js
+CATALOG-WRITE-PASS 39
+
+$ node test/editor-runtime-isolation.js
+EDITOR-RUNTIME-ISOLATION-PASS 7
+
+$ node test/legacy-door-inventory.js
+LEGACY-DOOR-INVENTORY-PASS sources=0 live=0 shadowed=0 conflict=0 booted-doors=59 unowned=0
+
+$ node test/location-connections.js
+LOCATION-CONNECTIONS-PASS shared endpoint descriptors, generic mapping, atomic validation and uninstall, one-way records
+
+$ node test/migrated-door-traversal.js
+MIGRATED-DOOR-TRAVERSAL-PASS 45 checks: 4 gates, 14 paired leaves, 3 one-way crossings, no way back
+
+$ node test/scene-objects-equality.js
+SCENE-OBJECTS-EQUALITY-PASS 21 booted entries across 15 maps byte-identical to the pre-M8 fixture (+sourceId on 4), registry alone reproduces 20, 0 entries left in js/maps.js, 107 checks
+
+$ node test/scene-objects-inventory.js
+SCENE-OBJECTS-INVENTORY-PASS 21 booted entries, 0 entries left in js/maps.js
+
+$ node test/world-door-equality.js
+WORLD-DOOR-EQUALITY-PASS 59 door descriptors across 15 scenes byte-identical to the pre-M5 fixture (+connectionId on 17), registry alone reproduces 59, 0 classic entries left in js/maps.js
+
+$ node test/world-engine-v0.1-catalog.js
+WORLD-ENGINE-V0.1-CATALOG-PASS registration, immutable catalog, scoped lookups, shared connections, validation, authored references, single registry bijection, filter load-order, legacy-door report
+
+$ node test/world-builder.js
+WORLD-BUILDER-PASS 110/110
+
+$ node test/cast-presence-sync.js
+cast-presence-sync: 264/264
+
+$ node test/world-apply.js
+WORLD-APPLY-PASS 91
+
+$ node test/world-apply-objects.js
+WORLD-APPLY-OBJECTS-PASS 44
+
+$ node test/world-apply-cast.js
+WORLD-APPLY-CAST-PASS 47
+
+Counts vs M9: smoke 415, walkthrough 85 acquisitions, act-4-flow 1611/1611,
+act-4-playthrough 530/530 — none dropped. props-render-order 21 -> 32 and
+world-builder-browser 188/189 -> 190/190 are the two deliberate increases.
+
+A note on how act-4 was measured. Run in this working tree, act-4-flow threw a
+CastPresence OVERLAP for loglady (diner vs roadhouse) and act-4-playthrough
+returned 526/530, every failure in the diner/loglady adapter path. That is a
+concurrent session's uncommitted work on this checkout: narrative/missions/M4.json
+and js/narrative-data.gen.js are modified, and artifacts/m4-loglady/ and
+narrative/contracts/ are new untracked directories, none of them this branch's.
+Those files were left alone. Both suites were re-run from a `git worktree` of this
+branch's commit 6342af6, which carries only this milestone's changes:
+
+  $ git worktree add --detach /private/tmp/m10a-clean HEAD
+  $ cd /private/tmp/m10a-clean && node test/act-4-flow.js
+  act-4-flow: 1611/1611
+  $ cd /private/tmp/m10a-clean && node test/act-4-playthrough.js
+  act-4-playthrough: 530/530 assertions passed
+
+Artifacts rewritten by the Chrome suites (artifacts/world-builder-m6..m8,
+artifacts/act-4-implementation, artifacts/act-3-closure, artifacts/cast-presence-v0.1,
+the C*-validation logs) were restored with `git checkout -- artifacts/`.
+```
