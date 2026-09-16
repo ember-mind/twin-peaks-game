@@ -22,12 +22,31 @@
   function rug(R,x,y,w,h,runner){
     R(x,y,w,h,p.ink);R(x+1,y+1,w-2,h-2,p.gold);R(x+2,y+2,w-4,h-4,p.redDark);
     R(x+4,y+4,w-8,h-8,p.red);R(x+5,y+5,w-10,h-10,p.redDark);
-    for(var xx=x+5;xx<x+w-4;xx+=7){R(xx,y+2,2,1,p.woodLight);R(xx,y+h-3,2,1,p.gold);}
-    for(var yy=y+9;yy<y+h-7;yy+=runner?18:14){
-      var mid=x+Math.floor(w/2);diamond(R,mid,yy,5,p.gold);diamond(R,mid,yy,4,p.redDark);diamond(R,mid,yy,1,p.woodLight);
-      R(x+2,yy,1,2,p.gold);R(x+w-3,yy,1,2,p.gold);
-      if(!runner){diamond(R,mid-23,yy,3,p.woodLight);diamond(R,mid+23,yy,3,p.woodLight);}
+    if(runner){
+      /* The public carpet is a quiet directional stripe: its clipped gold
+       * diamonds reinforce the entrance route without competing with the
+       * hearth vignette. */
+      for(var xx=x+5;xx<x+w-4;xx+=7){R(xx,y+2,2,1,p.woodLight);R(xx,y+h-3,2,1,p.gold);}
+      for(var yy=y+9;yy<y+h-7;yy+=18){
+        var mid=x+Math.floor(w/2);diamond(R,mid,yy,5,p.gold);diamond(R,mid,yy,4,p.redDark);diamond(R,mid,yy,1,p.woodLight);
+        R(x+2,yy,1,2,p.gold);R(x+w-3,yy,1,2,p.gold);
+      }
+      return;
     }
+    /* A single bounded lounge rug, just clear of the east bypass. Its
+     * double keyline and paired medallions establish a domestic seating zone
+     * rather than letting the chairs dissolve into the public runner. */
+    R(x+5,y+5,w-10,1,p.gold);R(x+5,y+h-6,w-10,1,p.gold);
+    R(x+5,y+5,1,h-10,p.gold);R(x+w-6,y+5,1,h-10,p.gold);
+    for(var lx=x+8;lx<x+w-7;lx+=10){R(lx,y+3,3,1,p.woodLight);R(lx,y+h-4,3,1,p.gold);}
+    for(var ly=y+10;ly<y+h-7;ly+=14){
+      diamond(R,x+16,ly,3,p.gold);diamond(R,x+16,ly,2,p.redDark);R(x+16,ly,1,1,p.woodLight);
+      diamond(R,x+w-16,ly,3,p.gold);diamond(R,x+w-16,ly,2,p.redDark);R(x+w-16,ly,1,1,p.woodLight);
+    }
+    /* Small corner stitches keep the frame legible behind the furniture. */
+    [[x+7,y+7],[x+w-8,y+7],[x+7,y+h-8],[x+w-8,y+h-8]].forEach(function(pt){
+      R(pt[0],pt[1],2,1,p.woodLight);R(pt[0]+1,pt[1]+1,1,2,p.gold);
+    });
   }
   function floor(R){
     /* The floor is a shallow, south-facing parquet plane. Courses grow
@@ -81,7 +100,7 @@
     rug(R,176,72,26,63,true);rug(R,126,118,76,18,true);rug(R,128,130,32,46,true);
     R(178,118,22,15,p.redDark);R(178,121,20,1,p.gold);R(178,130,20,1,p.gold);
     R(130,130,28,4,p.redDark);R(130,133,28,1,p.gold);
-    rug(R,116,83,71,36,false);
+    rug(R,112,82,64,36,false);
   }
   function column(R,x,y,h){
     /* Square-hewn posts carry the upper wall into the sill. Small caps and
@@ -146,41 +165,53 @@
       R(x+3,180,10,7,p.gold);R(x+4,181,8,5,p.cream);R(x+7,181,1,5,p.wood);R(x+12,189,1,1,p.gold);});
   }
   function fireplace(R){
-    /* The complete four-cell stone footprint carries the chimney and its
-     * east return. Bear, mantel and fire now share one dominant silhouette. */
-    R(88,5,72,70,p.ink);R(90,7,52,67,p.stoneDark);R(142,9,17,65,p.stoneDark);
-    for(var y=8,row=0;y<74;y+=7,row++)for(var start=90-(row%2)*6;start<142;start+=13){
-      var x=Math.max(90,start),w=Math.min(142,start+12)-x;
-      if(w>0){R(x,y,w,6,p.stone);R(x+1,y,Math.max(1,w-1),1,p.stoneLight);R(x,y+5,w,1,p.stoneDark);}
+    /* The four-cell hearth is a built-in wall mass: broad pilasters, a
+     * stepped lintel, and a deep black firebox give the room one unmistakable
+     * thermal/social focus while the east return reads as masonry, not trim. */
+    R(88,5,72,75,p.ink);R(90,7,68,71,p.stoneDark);
+    R(92,8,64,10,p.stone);R(93,9,62,2,p.stoneLight);R(93,16,62,2,p.stoneDark);
+    for(var row=0;row<5;row++){
+      var yy=18+row*10,offset=row%2?5:0;
+      R(91,yy,13,9,p.stone);R(92,yy+1,11,1,p.stoneLight);R(92,yy+8,11,1,p.stoneDark);
+      R(138+offset,yy,18-offset,9,p.stone);R(139+offset,yy+1,16-offset,1,p.stoneLight);R(139+offset,yy+8,16-offset,1,p.stoneDark);
     }
-    for(var y=11;y<72;y+=8){R(144,y,13,6,p.stoneDark);R(144,y,11,1,p.stone);R(155,y+2,2,3,p.ink);}
-    R(101,13,29,26,p.woodDark);R(98,17,35,18,p.woodDark);R(102,14,27,1,p.woodLight);
-    R(103,15,6,6,p.ink);R(123,15,6,6,p.ink);R(104,16,4,4,p.woodLight);R(124,16,4,4,p.woodLight);
-    R(105,18,22,17,p.wood);R(103,23,26,9,p.wood);R(108,18,15,3,p.woodLight);
-    R(106,23,7,2,p.woodDark);R(119,23,7,2,p.woodDark);R(108,24,3,2,p.ink);R(121,24,3,2,p.ink);
-    R(112,26,10,9,p.woodLight);R(113,26,8,3,p.ink);R(113,32,8,5,p.ink);
-    R(113,32,2,2,p.cream);R(119,32,2,2,p.cream);R(116,35,3,2,p.redDark);
-    R(87,41,74,7,p.ink);R(88,42,72,2,p.woodLight);R(89,42,70,1,p.gold);R(89,45,70,2,p.woodDark);
-    R(97,48,42,26,p.stoneDark);R(99,49,38,24,p.ink);
-    R(95,49,4,24,p.stoneLight);R(137,49,5,24,p.stone);R(138,49,2,23,p.stoneLight);
-    R(100,69,36,4,p.fire);
-    [[102,60],[108,54],[115,58],[123,52],[130,59]].forEach(function(a){
-      R(a[0],a[1],4,72-a[1],p.fire);R(a[0]+1,a[1]+4,2,68-a[1],p.cream);R(a[0]+1,68,2,4,p.light);
+    for(var sy=18;sy<68;sy+=8){R(144,sy,12,6,p.stoneDark);R(145,sy,10,1,p.stoneLight);R(155,sy+2,2,3,p.ink);}
+    /* Mounted bear: dark plaque, blocky ears, muzzle highlight, and eyes
+     * sit above the mantel as a wall trophy rather than a floating icon. */
+    R(103,12,32,29,p.ink);R(105,14,28,25,p.woodDark);R(106,13,7,6,p.wood);R(125,13,7,6,p.wood);
+    R(108,17,22,18,p.wood);R(106,22,26,10,p.wood);R(110,17,16,2,p.woodLight);
+    R(108,22,6,2,p.woodDark);R(122,22,6,2,p.woodDark);R(109,24,3,3,p.ink);R(124,24,3,3,p.ink);
+    R(112,27,16,8,p.woodLight);R(113,27,14,3,p.ink);R(113,33,14,4,p.ink);
+    R(113,32,3,2,p.cream);R(124,32,3,2,p.cream);R(117,36,6,2,p.redDark);
+    R(104,39,30,2,p.woodDark);R(106,39,26,1,p.gold);
+    /* Mantel projects one crisp horizontal plane; the hearth opening is
+     * nested beneath it with visible jambs and a low stone sill. */
+    R(87,41,74,8,p.ink);R(88,42,72,2,p.stoneLight);R(89,42,70,1,p.gold);R(90,45,68,3,p.stoneDark);
+    R(95,48,48,27,p.stone);R(97,49,44,25,p.ink);R(98,50,42,23,p.woodDark);
+    R(95,49,3,25,p.stoneLight);R(140,49,4,25,p.stoneDark);R(141,50,2,23,p.stoneLight);
+    /* Wide layered flame bed leaves the ambient three-frame overlay room to
+     * move inside the opening without erasing the authored surround. */
+    R(100,69,38,4,p.fire);R(102,71,34,2,p.cream);
+    [[102,59,4],[108,53,4],[114,57,4],[121,50,4],[128,56,4],[133,61,3]].forEach(function(a){
+      R(a[0],a[1],a[2],72-a[1],p.fire);R(a[0]+1,a[1]+4,Math.max(2,a[2]-2),68-a[1],p.cream);R(a[0]+1,67,Math.max(1,a[2]-2),5,p.light);
     });
     R(101,72,16,2,p.woodDark);R(119,71,17,2,p.woodDark);R(105,72,7,1,p.wood);R(124,71,8,1,p.wood);
-    R(96,74,64,6,p.ink);R(96,74,64,1,p.stoneLight);R(98,75,60,2,p.stone);R(98,77,60,1,p.stoneDark);
-    R(101,75,34,1,p.gold);
+    R(95,74,64,6,p.ink);R(96,74,62,1,p.stoneLight);R(98,75,58,2,p.stone);R(98,77,58,1,p.stoneDark);R(102,75,34,1,p.gold);
   }
   function chair(R,x,y,mirror){
-    /* Compact leather seats turn inward and land on their actual h cells. */
-    function C(dx,dy,w,h,c){R(x+(mirror?18-dx-w:dx)-1,y+dy,w,h,c);}
-    C(2,-28,15,2,p.ink);C(0,-26,19,20,p.ink);C(2,-26,14,13,p.redDark);
-    C(3,-26,12,2,p.redLight);C(3,-24,12,9,p.red);C(3,-24,2,8,p.redLight);C(14,-24,2,10,p.redDark);
-    C(7,-22,1,1,p.redDark);C(12,-22,1,1,p.redDark);C(5,-15,10,2,p.redDark);
-    C(4,-13,13,7,p.ink);C(5,-13,10,2,p.redLight);C(5,-11,11,3,p.red);C(5,-8,11,2,p.redDark);
-    C(0,-16,5,13,p.ink);C(0,-16,5,2,p.redLight);C(1,-14,3,9,p.redDark);C(1,-14,1,7,p.red);
-    C(15,-17,5,13,p.ink);C(15,-17,5,2,p.redLight);C(16,-15,3,9,p.redDark);
-    C(3,-4,14,2,p.redDark);C(3,-2,3,2,p.ink);C(14,-2,3,2,p.ink);R(x,112,16,1,p.ink);
+    /* The backs sit to the south and the seats open north toward the fire;
+     * mirroring the silhouette makes the pair turn inward around the table. */
+    function C(dx,dy,w,h,c){R(x+(mirror?16-dx-w:dx)-1,y+dy,w,h,c);}
+    C(1,-12,16,14,p.ink);C(3,-12,12,12,p.redDark);C(3,-12,12,2,p.redLight);
+    C(4,-10,10,8,p.red);C(4,-10,2,7,p.redLight);C(13,-9,2,9,p.redDark);C(6,-3,8,2,p.redDark);
+    C(2,-22,14,10,p.ink);C(4,-21,10,8,p.redDark);C(4,-21,10,2,p.redLight);C(5,-19,8,6,p.red);
+    C(4,-19,2,5,p.redLight);C(12,-18,2,6,p.redDark);C(6,-14,7,2,p.redDark);
+    /* Arm caps and front corners create a subtle inward cant instead of a
+     * sofa-like horizontal bar; the body stays on the authored h tile. */
+    C(0,-21,4,14,p.ink);C(1,-20,3,3,p.redLight);C(1,-17,2,8,p.redDark);
+    C(14,-20,4,14,p.ink);C(14,-19,3,3,p.redLight);C(15,-16,2,8,p.redDark);
+    C(2,-1,4,2,p.woodDark);C(12,-1,4,2,p.woodDark);C(2,1,3,2,p.ink);C(13,1,3,2,p.ink);
+    R(x,112,16,1,p.ink);
   }
   function lamp(R,x,y){
     R(x-4,y-1,9,2,p.ink);R(x-3,y-2,7,1,p.gold);R(x,y-13,1,11,p.gold);
@@ -188,9 +219,13 @@
     R(x-2,y-20,5,2,p.cream);R(x-2,y-17,5,3,p.light);
   }
   function table(R){
-    R(147,96,10,1,p.ink);R(145,97,14,2,p.woodLight);R(144,99,16,3,p.ink);R(146,102,12,2,p.woodDark);
-    R(145,99,14,2,p.wood);R(147,98,10,1,p.gold);R(146,101,12,1,p.woodLight);
-    R(147,104,2,8,p.ink);R(155,104,2,8,p.ink);R(148,105,1,4,p.woodLight);lamp(R,152,99);
+    /* Round side table bridges the two chairs: a broad dark rim, warm wood
+     * top, and centered pedestal make its support read beneath the lamp. */
+    R(142,108,20,3,p.ink);R(145,110,14,2,p.woodDark);
+    R(143,97,18,2,p.ink);R(145,96,14,1,p.woodLight);R(144,98,16,4,p.ink);
+    R(146,99,12,2,p.wood);R(147,98,10,1,p.gold);R(146,101,12,1,p.woodLight);R(148,102,8,2,p.woodDark);
+    R(150,103,5,8,p.ink);R(151,104,3,7,p.woodLight);R(152,104,2,7,p.woodDark);
+    lamp(R,152,99);
   }
   var font={G:['111','100','101','101','111'],R:['110','101','110','101','101'],E:['111','100','110','100','111'],
     A:['010','101','111','101','101'],T:['111','010','010','010','010'],N:['101','111','111','101','101'],
