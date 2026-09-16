@@ -83,20 +83,27 @@
       duration:[1360,1540],intensity:.62}
   ]);
   /* Great Northern: three authored flame silhouettes, a warm chandelier,
-   * and a small glint moving only over the brass service bell. */
+   * one restrained transaction lamp, and a small glint moving only over the
+   * brass service bell. Every practical is source-linked to its authored
+   * receiving material; idle windows stay long enough for the lobby to feel
+   * still between changes. */
   life.register('hotel_gn',[
     {id:'lobby-fire',type:'MACHINE_IDLE_ACTIVITY',x:106,y:56,depth:80,variants:3,
-      delay:[160,300],duration:[600,850],intensity:2.4,marks:[
+      delay:[5000,9000],duration:[900,1400],intensity:1.8,marks:[
         [{x:2,y:4,w:3,h:7,color:'#d77b37'},{x:8,y:1,w:3,h:12,color:'#e9c582'},{x:9,y:5,w:2,h:8,color:'#ffe7a6'}],
         [{x:5,y:2,w:3,h:10,color:'#d77b37'},{x:13,y:3,w:3,h:10,color:'#e9c582'},{x:3,y:8,w:2,h:5,color:'#ffe7a6'}],
         [{x:3,y:1,w:3,h:12,color:'#e9c582'},{x:8,y:5,w:3,h:8,color:'#d77b37'},{x:14,y:6,w:2,h:7,color:'#ffe7a6'}]
       ]},
     {id:'lobby-chandelier',type:'LIGHT_WARM_VARIATION',x:156,y:24,depth:192,
-      delay:[5000,10000],duration:[1400,2000],intensity:.55,
+      delay:[9000,18000],duration:[1200,1800],intensity:.6,
       regions:[{x:138,y:13,w:5,h:6,depth:192},{x:146,y:19,w:5,h:6,depth:192},
-        {x:162,y:19,w:5,h:6,depth:192},{x:170,y:13,w:5,h:6,depth:192}]},
+        {x:162,y:19,w:5,h:6,depth:192},{x:170,y:13,w:5,h:6,depth:192},
+        {x:160,y:73,w:14,h:1,depth:80},{x:140,y:116,w:24,h:1,depth:112}]},
+    {id:'lobby-desk-lamp',type:'LIGHT_WARM_VARIATION',x:121,y:112,depth:144,
+      delay:[8000,16000],duration:[1000,1600],intensity:.8,
+      regions:[{x:112,y:123,w:16,h:3,depth:144},{x:110,y:107,w:11,h:9,depth:128}]},
     {id:'lobby-bell',type:'GLASS_SUBTLE_REFLECTION',x:99,y:119,depth:144,variants:2,travel:1,
-      delay:[9000,17000],duration:[1400,1900],intensity:.7}
+      delay:[10000,19000],duration:[1400,1900],intensity:.7}
   ]);
   /* Red Room uses the existing intermittent device archetype with three
    * authored column positions. Long holds make the curtains breathe slowly.

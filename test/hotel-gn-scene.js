@@ -77,10 +77,13 @@ assert.equal(calls[0][2][2],1);assert.equal(calls[0][2][6].length,0);assert.equa
 const engine=fs.readFileSync(path.join(root,'js/engine.js'),'utf8');
 assert.ok(engine.includes('drawForegroundStructures'));
 const defs=definitions.hotel_gn;
-assert.equal(defs.length,3);
-assert.deepEqual(defs.map(d=>d.type),['MACHINE_IDLE_ACTIVITY','LIGHT_WARM_VARIATION','GLASS_SUBTLE_REFLECTION']);
+assert.equal(defs.length,4);
+assert.deepEqual(defs.map(d=>d.type),['MACHINE_IDLE_ACTIVITY','LIGHT_WARM_VARIATION','LIGHT_WARM_VARIATION','GLASS_SUBTLE_REFLECTION']);
 const fire=defs[0];assert.equal(fire.variants,3);assert.equal(fire.marks.length,3);
 assert.equal(new Set(fire.marks.map(JSON.stringify)).size,3,'three distinct flame silhouettes');
+const deskLamp=defs[2];assert.equal(deskLamp.id,'lobby-desk-lamp');
+assert.ok(deskLamp.regions.some(r=>r.x===112&&r.y===123),'desk lamp reaches transaction edge');
+assert.ok(deskLamp.regions.some(r=>r.x===110&&r.y===107),'desk lamp reaches key cubbies');
 G.AmbientLife.reset(7);
 let marks=0;const fireVariants=new Set();
 const ambientCtx={globalAlpha:.8,fillStyle:'original',fillRect(x,y,w,h){

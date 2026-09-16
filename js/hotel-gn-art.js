@@ -88,6 +88,20 @@
       }
       R(16,y+h-1,256,1,p.woodDark);
     }
+    /* Source-linked receiving surfaces: the hearth warms the edges of its
+     * bounded lounge, while the chandelier's axis catches only the exposed
+     * parquet between the lounge and the south runner. These are deliberately
+     * narrow material accents, not a room-wide glow, so the dark lodge keeps
+     * its depth and actors remain the visual priority. */
+    R(96,82,16,1,p.woodLight);R(176,82,16,1,p.woodLight);
+    R(104,88,8,1,p.woodLight);R(176,88,8,1,p.woodLight);
+    R(96,98,16,1,p.woodLight);R(176,98,16,1,p.woodLight);
+    R(104,106,8,1,p.woodLight);R(176,106,8,1,p.woodLight);
+    R(96,112,16,1,p.woodLight);R(176,112,16,1,p.woodLight);
+    R(160,73,14,1,p.woodLight);
+    R(128,116,44,1,p.woodLight);
+    R(136,118,32,1,p.woodLight);
+    R(140,120,24,1,p.gold);
     /* Narrow edge bands separate the walkable plane from the log walls and
      * give the south entry a shallow, readable threshold under the runner. */
     R(16,64,2,112,p.ink);R(18,64,1,112,p.woodLight);
@@ -220,6 +234,11 @@
     });
     R(101,72,16,2,p.woodDark);R(119,71,17,2,p.woodDark);R(105,72,7,1,p.wood);R(124,71,8,1,p.wood);
     R(95,74,64,6,p.ink);R(96,74,62,1,p.stoneLight);R(98,75,58,2,p.stone);R(98,77,58,1,p.stoneDark);R(102,75,34,1,p.gold);
+    /* The fire's warmth terminates in the real stone opening: two small
+     * reflected edges and a broken brass line keep the surround receiving
+     * light without turning the masonry into a flat bright rectangle. */
+    R(97,52,1,8,p.woodLight);R(141,52,1,8,p.woodLight);
+    R(97,60,1,8,p.woodLight);R(141,60,1,8,p.woodLight);R(108,73,8,1,p.gold);
   }
   function chair(R,x,y,mirror){
     /* The backs sit to the south and the seats open north toward the fire;
@@ -227,6 +246,7 @@
     function C(dx,dy,w,h,c){R(x+(mirror?16-dx-w:dx)-1,y+dy,w,h,c);}
     C(1,-12,16,14,p.ink);C(3,-12,12,12,p.redDark);C(3,-12,12,2,p.redLight);
     C(4,-10,10,8,p.red);C(4,-10,2,7,p.redLight);C(13,-9,2,9,p.redDark);C(6,-3,8,2,p.redDark);
+    C(5,-2,6,1,p.woodLight);C(6,-2,4,1,p.gold);
     C(2,-22,14,10,p.ink);C(4,-21,10,8,p.redDark);C(4,-21,10,2,p.redLight);C(5,-19,8,6,p.red);
     C(4,-19,2,5,p.redLight);C(12,-18,2,6,p.redDark);C(6,-14,7,2,p.redDark);
     /* Arm caps and front corners create a subtle inward cant instead of a
@@ -297,10 +317,14 @@
     /* Key cubbies are a separate wall-mounted bank to the right of the
      * opening. Small brass tags catch the lamp without reading as a second
      * free-standing cabinet or covering the staff sightline. */
-    R(98,105,25,12,p.ink);R(99,106,23,10,p.wood);R(100,107,21,8,p.woodDark);
+    R(98,105,25,12,p.ink);R(99,106,23,10,p.wood);R(100,107,21,8,p.woodDark);R(100,107,21,1,p.woodLight);
     for(var y=108;y<116;y+=5)for(var x=101;x<121;x+=7){
       R(x,y,6,5,p.ink);R(x+1,y+1,4,3,p.woodDark);R(x+4,y+2,1,2,p.gold);
     }
+    /* The far-right practical catches the nearest key-bank faces; the marks
+     * stop at the cubby openings so they read as mounted brass tags, not a
+     * free-floating lamp wash over the staff sightline. */
+    R(115,107,6,1,p.woodLight);R(116,112,5,1,p.woodLight);
     /* Open transaction/work strip continues below the cubbies; its shallow
      * back rail ties the recess to the counter without cluttering the edge. */
     R(98,117,25,7,p.woodDark);R(99,117,23,1,p.woodLight);R(100,119,21,1,p.wood);

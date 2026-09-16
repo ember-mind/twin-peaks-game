@@ -10,6 +10,7 @@
 #   --strip --labels=false --suppress-on-enter
 #   --page=test/presentation-harness.html --stop=01
 #   --retro  (usa il renderer 2D di produzione)
+#   --ambient-series  (retro: native canvas samples over 25 s)
 #   --stop-param=shot --ready-prefix=B4-SHOT-
 #   --timeout-ms=20000 --base-url=http://... --gpu=auto|metal|swiftshader
 set -euo pipefail
@@ -47,6 +48,7 @@ TIMEOUT_MS=15000
 BASE_URL=""
 EXTRA_FLAGS=""
 RETRO=0
+AMBIENT_SERIES=0
 CH="${CHROME_BIN:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
 GPU="${TP_SHOT_GPU:-}"
 
@@ -77,6 +79,7 @@ for arg in "$@"; do
     --base-url=*) BASE_URL="${arg#*=}" ;;
     --flags=*) EXTRA_FLAGS="${arg#*=}" ;;
     --retro) RETRO=1 ;;
+    --ambient-series) AMBIENT_SERIES=1 ;;
     --chrome=*) CH="${arg#*=}" ;;
     --gpu=*) GPU="${arg#*=}" ;;
     *) die "opzione sconosciuta: $arg" ;;
@@ -138,6 +141,7 @@ if [[ "$RETRO" == 1 ]]; then
   PAGE="test/retro-scene.html"
   READY_PREFIX="TP-RETRO-READY"
   URL="${BASE_URL}/${PAGE}?map=${MAP}&x=${X}&y=${Y}&dir=${DIR}&seed=${SEED}&season=${SEASON}&frame=${FRAME}&frames=${FRAMES}&stepMs=${STEP_MS}&motion=${MOTION}&suppressOnEnter=${SUPPRESS_ON_ENTER}"
+  [[ "$AMBIENT_SERIES" == 1 ]] && URL="${URL}&ambientSeries=1"
   [[ -n "$WET" ]] && URL="${URL}&wet=${WET}"
   [[ -n "$EXTRA_FLAGS" ]] && URL="${URL}&flags=${EXTRA_FLAGS}"
 elif [[ "$PAGE" == "test/shot.html" ]]; then
