@@ -25,6 +25,7 @@ global.GAME = {
   NarrativeUI: {}
 };
 
+require(path.resolve(__dirname, '../js/scene-objects.gen.js'));
 require(path.resolve(__dirname, '../js/narrative-runtime.js'));
 
 let closeNotebook;

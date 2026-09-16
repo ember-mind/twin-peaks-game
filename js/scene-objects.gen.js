@@ -1,4 +1,4 @@
-/* scene-objects.gen.js — GENERATED from world/scene-objects.json by test/gen-world-data.js.
+/* scene-objects.gen.js — GENERATED from world/{scene-objects,narrative-targets}.json by test/gen-world-data.js.
  * DO NOT EDIT BY HAND. Change world/scene-objects.json and run `node test/gen-world-data.js`.
  * GAME.WorldData.sceneObjects is the only source of scene objects and interact keys: js/glue.js reads it and
  * refuses a js/maps.js map that still carries objects/interact. Deep-frozen; glue copies every entry.
@@ -142,4 +142,86 @@
     };
   GAME.WorldData = GAME.WorldData || {};
   GAME.WorldData.sceneObjects = freezeDeep({ version: 1, scenes: scenes });
+  GAME.WorldData.narrativeTargets = freezeDeep({
+  "traincar": {
+    "bridge_rail": {
+      "x": 4,
+      "y": 6,
+      "kind": "landmark"
+    },
+    "sign_oej": {
+      "x": 20,
+      "y": 2,
+      "kind": "sign"
+    },
+    "mound": {
+      "x": 13,
+      "y": 6,
+      "kind": "object"
+    },
+    "ring": {
+      "x": 13,
+      "y": 5,
+      "kind": "object"
+    },
+    "scene_center": {
+      "x": 12,
+      "y": 5,
+      "kind": "landmark"
+    },
+    "traincar_entrance": {
+      "x": 13,
+      "y": 7,
+      "kind": "landmark"
+    },
+    "stove": {
+      "x": 12,
+      "y": 3,
+      "kind": "object"
+    },
+    "cards": {
+      "x": 10,
+      "y": 6,
+      "kind": "object"
+    },
+    "tracks_north": {
+      "x": 21,
+      "y": 2,
+      "kind": "landmark"
+    }
+  },
+  "hospital": {
+    "night_register": {
+      "x": 13,
+      "y": 8,
+      "kind": "object"
+    }
+  },
+  "roadhouse": {
+    "roadhouse_phone": {
+      "x": 8,
+      "y": 5,
+      "kind": "object"
+    }
+  },
+  "town": {
+    "town_crossroads": {
+      "x": 47,
+      "y": 30,
+      "kind": "landmark"
+    },
+    "lago_maddy": {
+      "x": 15,
+      "y": 28,
+      "kind": "landmark"
+    }
+  },
+  "palmer": {
+    "palmer_entrance": {
+      "x": 8,
+      "y": 10,
+      "kind": "landmark"
+    }
+  }
+});
 }());

@@ -1,0 +1,26 @@
+name: turn-input
+on:
+  pull_request:
+  push:
+    branches: [main, 'codex/playable-05*']
+permissions:
+  contents: read
+jobs:
+  physical-input:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Turn, held movement, between-frame input and phone targeting
+        run: node test/turn-in-place.js
+      - name: Existing movement and core regressions
+        run: |
+          node test/movement-feel.js
+          node test/touch-runtime.js
+          node test/smoke.js
+          node test/walkthrough.js

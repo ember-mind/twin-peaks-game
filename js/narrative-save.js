@@ -294,7 +294,13 @@
   NS.rebindClassicForFinale = function (slotId, classic, opts) {
     opts = opts || {};
     var NF = GAME.NarrativeFinale;
-    if (!NF || !NF.isPending || !NF.isPending()) return { ok: false, error: 'finale_not_pending' };
+    // The completed state needs one last atomic write before onComplete.
+    // The finale grants this authority only inside that synchronous checkpoint;
+    // unrelated writes after completion remain forbidden. No force option.
+    if (!NF || !NF.isPending || (!NF.isPending() &&
+        !(NF.isCompletingCheckpoint && NF.isCompletingCheckpoint()))) {
+      return { ok: false, error: 'finale_not_pending' };
+    }
     if (!classic) return { ok: false, error: 'classic_save_required' };
     var mainKey = keyFor(slotId), tempKey = mainKey + ':tmp', backupKey = mainKey + ':backup';
     var raw = storage.getItem(mainKey);
