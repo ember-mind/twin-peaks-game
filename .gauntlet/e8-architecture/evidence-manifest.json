@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "slug": "e8-architecture",
+  "generatedAt": "2026-09-16T06:26:57.405Z",
+  "files": [
+    {
+      "path": "evidence/baseline.png",
+      "bytes": 12303,
+      "sha256": "22d2468949dcbbb8b44c7c2431aa77fdf7f8f0cb0fb3d0426b84181951b982cf"
+    },
+    {
+      "path": "evidence/reference-bottom.png",
+      "bytes": 860906,
+      "sha256": "0e49c07239a1c4edfcb6a9bf981e321050582d6979cdc485f8a6e24025c4e8c7"
+    }
+  ],
+  "duplicateHashes": []
+}

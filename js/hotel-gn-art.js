@@ -30,22 +30,35 @@
     }
   }
   function floor(R){
-    R(16,16,256,160,p.woodDark);
-    var seams=[64,73,84,97,112,129,149,176];
+    /* The floor is a shallow, south-facing parquet plane. Row heights grow
+     * toward the entry, so the room has a readable vanishing point instead
+     * of a flat checkerboard. */
+    R(16,64,256,112,p.woodDark);
+    R(16,66,256,4,p.wood);
+    R(16,70,256,2,p.woodLight);
+    var seams=[72,80,90,102,116,133,153,176];
+    var shades=[p.wood,p.woodLight,p.wood,p.woodLight,p.wood,p.woodLight,p.wood];
     for(var band=0;band<seams.length-1;band++){
       var y=seams[band],h=seams[band+1]-y;
-      R(16,y,256,h-1,band<2?p.woodDark:p.wood);R(16,y+h-1,256,1,p.woodDark);
-      for(var x=24+(band%2)*21;x<264;x+=52){
-        R(x,y+3,Math.min(11,272-x),1,band<2?p.wood:p.woodLight);
-        R(x+8,y+h-3,Math.min(7,272-x-8),1,p.woodDark);
+      R(16,y,256,h-1,shades[band]);R(16,y+h-1,256,1,p.woodDark);
+      /* Broken board highlights keep the long grain legible under the rugs. */
+      var start=22+((band%3)*17);
+      for(var x=start;x<268;x+=58){
+        var len=Math.min(15,272-x);
+        if(len>2){R(x,y+2,len,1,band%2?p.wood:p.woodLight);}
+        if(h>8&&x+9<272)R(x+9,y+h-3,Math.min(10,272-x-9),1,p.woodDark);
       }
     }
-    /* Sparse perspective joints establish the floor plane without a grid. */
-    [16,80,144,208,272].forEach(function(end){for(var y=65;y<176;y++){
-      var x=Math.round(144+(end-144)*(y-64)/112);if(y%9<5)R(x,y,1,1,p.woodDark);
-    }});
-    /* Practical warmth follows the boards and is hidden naturally by props. */
-    R(96,80,68,3,p.wood);R(102,83,59,2,p.woodLight);R(109,86,44,1,p.gold);
+    /* Board joints converge on the hearth/chandelier axis. They are
+     * intentionally intermittent: a lodge floor has seams, not graph paper. */
+    [24,76,128,181,234,267].forEach(function(end,idx){
+      for(var y=74;y<174;y++){
+        var x=Math.round(144+(end-144)*(y-64)/112);
+        if(((y+idx*3)%11)<6)R(x,y,1,1,p.woodDark);
+      }
+    });
+    /* A few worn boards catch the practicals and sell the material hierarchy. */
+    R(96,80,68,2,p.woodDark);R(101,82,57,1,p.woodLight);R(110,85,39,1,p.gold);
     R(76,145,50,2,p.woodLight);R(87,148,25,1,p.gold);
     R(18,124,15,2,p.woodLight);R(256,137,14,2,p.woodLight);
     /* The entrance carpet bends around the genuinely solid lounge. Its
@@ -56,9 +69,18 @@
     rug(R,116,83,71,36,false);
   }
   function column(R,x,y,h){
+    /* Square-hewn posts carry the upper wall into the sill. Small caps and
+     * irregular braces give depth while staying in the native pixel grid. */
     R(x,y,14,h,p.ink);R(x+1,y,12,h,p.woodDark);R(x+3,y,7,h,p.wood);R(x+4,y,2,h,p.woodLight);
-    for(var yy=y+20;yy<y+h-3;yy+=31){R(x+1,yy,12,3,p.woodDark);R(x+2,yy,10,1,p.woodLight);R(x+4,yy+1,6,1,p.gold);}
-    R(x+1,y+h-3,12,3,p.woodDark);R(x+3,y+h-3,8,1,p.woodLight);
+    R(x+1,y,12,3,p.woodDark);R(x+2,y+1,10,1,p.woodLight);
+    for(var yy=y+18;yy<y+h-4;yy+=30){
+      R(x+1,yy,12,3,p.woodDark);R(x+2,yy,10,1,p.woodLight);R(x+4,yy+1,6,1,p.gold);
+    }
+    R(x+1,y+h-4,12,4,p.woodDark);R(x+3,y+h-3,8,1,p.woodLight);
+  }
+  function beam(R,x,y,w,h){
+    R(x,y,w,h,p.ink);R(x+1,y+1,w-2,h-2,p.woodDark);
+    if(h>3){R(x+2,y+1,w-4,1,p.woodLight);R(x+2,y+h-2,w-4,1,p.wood);}
   }
   function lantern(R,x,y){
     R(x-2,y-3,5,3,p.ink);R(x,y-5,1,2,p.gold);R(x-4,y,9,12,p.ink);
@@ -73,19 +95,30 @@
     });
   }
   function walls(R){
-    /* Timber bays create a single frontal backdrop; horizontal flooring
-     * begins at its dark sill, so furniture no longer floats in a plank sea. */
-    R(0,0,288,65,p.woodDark);
-    for(var x=16;x<272;x+=8){R(x,3,6,57,p.wood);R(x+1,4,1,53,p.woodLight);R(x+5,5,1,55,p.woodDark);}
-    R(16,0,256,4,p.ink);R(16,4,256,2,p.woodLight);R(16,58,256,5,p.woodDark);R(16,63,256,2,p.ink);
-    [18,73,167,257].forEach(function(x){column(R,x,0,65);});
+    /* One frontal timber envelope: the lower sill is deliberately distinct
+     * from the walkable parquet so the furniture reads as built into a room. */
+    R(0,0,288,72,p.woodDark);R(16,0,256,72,p.woodDark);
+    var bays=[[24,45,p.wood],[80,76,p.woodDark],[171,39,p.wood],[214,42,p.woodDark]];
+    bays.forEach(function(b,bi){
+      var x=b[0],w=b[1];R(x,8,w,53,b[2]);R(x+2,10,w-4,49,p.woodDark);
+      for(var xx=x+5;xx<x+w-3;xx+=9){
+        R(xx,11,5,45,p.wood);R(xx+1,12,1,42,p.woodLight);R(xx+4,13,1,41,p.woodDark);
+      }
+      R(x+2,9,w-4,2,p.woodLight);R(x+3,57,w-6,2,p.wood);
+      if(bi%2===1)R(x+8,13,w-16,1,p.woodLight);
+    });
+    beam(R,16,0,256,5);beam(R,16,59,256,7);R(16,68,256,3,p.ink);R(16,70,256,2,p.woodLight);
+    [18,73,167,257].forEach(function(x){column(R,x,0,72);});
+    /* The real hall door (map cell 14,1) sits in a recessed east bay; the
+     * passable stair flight is painted over its lower half later. */
+    R(220,9,23,55,p.ink);R(222,11,19,53,p.woodLight);R(224,14,15,48,p.woodDark);
+    R(225,16,13,43,p.redDark);R(226,18,11,38,p.red);R(226,18,2,37,p.redLight);
+    R(225,16,13,3,p.wood);R(225,55,13,3,p.woodDark);R(235,35,2,2,p.gold);R(236,35,1,1,p.cream);
+    R(224,12,15,2,p.wood);R(226,13,11,1,p.gold);
     /* Decorative framed landscape and a recessed upper hall opening. */
     R(37,20,24,30,p.ink);R(38,21,22,28,p.gold);R(40,23,18,24,p.woodDark);
     R(42,25,14,11,p.stoneDark);R(42,36,14,9,p.green);
     for(var i=0;i<8;i++){R(43+i,35-i,1,2,p.stoneLight);R(50+i,28+i,1,2,p.stoneLight);}
-    R(224,16,16,16,p.ink);R(225,17,14,1,p.gold);R(226,18,12,12,p.woodDark);
-    R(228,20,8,5,p.gold);R(230,21,4,3,p.cream);R(226,30,12,2,p.red);
-    R(224,32,16,30,p.woodDark);R(226,32,12,30,p.redDark);
     /* Side log faces recede to the south entrance, leaving the actual doors. */
     R(0,64,16,112,p.woodDark);R(272,64,16,112,p.woodDark);
     for(var y=66;y<174;y+=8){R(1,y,14,1,p.woodLight);R(2,y+1,12,4,p.wood);R(273,y,14,1,p.woodLight);R(274,y+1,12,4,p.wood);}

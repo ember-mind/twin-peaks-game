@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "slug": "e8-architecture",
+  "mode": "execute",
+  "status": "running",
+  "createdAt": "2026-09-16T06:26:57.364Z",
+  "updatedAt": "2026-09-16T06:26:57.364Z",
+  "goal": "AAA Great Northern lobby whose architecture, object placement, circulation, lighting, and ambient behavior read as a plausible real hotel and match the reference bottom panel",
+  "domain": "games",
+  "externalBar": "assets/ref/great-northern-lobby-sheet.png bottom panel; current legal hotel_gn gameplay geometry",
+  "hardFloor": 8,
+  "scope": {
+    "included": ["js/hotel-gn-art.js", "E8-scoped hotel_gn entries in js/ambient-life-scenes.js", "test/hotel-gn-scene.js", "architecture evidence and report"],
+    "excluded": ["map authoring", "connection registry edits", "Cast Presence edits", "Room 315 edits", "new ambient archetypes", "engine changes"],
+    "immutable": ["hotel_gn map rows", "town-great-northern-lobby record", "great-northern-room-315-hall record", "Ben Horne (5,7)", "Audrey (12,9)", "town arrival (8,10)", "hall arrival (14,2)", "js/retro.js", "js/retro-authored.js", "js/tiles.js", "Room 315"],
+    "platforms": ["production retro renderer", "desktop Chrome", "mobile production contract"]
+  },
+  "referencePack": {
+    "reconstructed": true,
+    "sources": [
+      {"path": "assets/ref/great-northern-lobby-sheet.png", "selection": "bottom panel only; visual bar"},
+      {"path": "artifacts/art-pass-e/e8/after.png", "selection": "legal current production baseline"},
+      {"path": ".gauntlet/e8-architecture/evidence/reference-bottom.png", "selection": "fixed critic reference crop"}
+    ],
+    "measurements": [
+      "native scene 288x192; north wall y0..64, floor y64..176, entry y176..192",
+      "reference program: left hearth lounge, central runner, right reception/stairs; locked collision requires coherent asymmetric variant rather than false horizontal swap",
+      "west reception service wing x16..130 y76..144, counter x64..128 y126..144, Ben staff side at (5,7)",
+      "hearth anchor uses fixed solids (6..9,4); lounge uses h-t-h cells (8..10,6)",
+      "public circulation protects entry spine (8,7..11), east bypass (11..12,6+), Audrey region, and hall corridor (13..16,2..4)",
+      "east stair visual must terminate at hall door (14,1); luggage stays anchored at (2,6) as bellhop bay",
+      "functional light hierarchy: fire primary, chandelier axis secondary, desk lamp/bell tertiary; slow existing archetypes only"
+    ]
+  },
+  "evidenceProtocol": {
+    "stable": true,
+    "representativeStates": ["hotel_gn town entrance spawn (8,10), facing up, production retro renderer", "three deterministic ambient archetype states over 60-second focused test"],
+    "commands": ["test/shot.sh hotel_gn 8 10 up <out> --retro", "node test/hotel-gn-scene.js"],
+    "artifactTypes": ["PNG", "architectural program", "critic Markdown", "test evidence", "SHA-256 manifest"],
+    "fixedConditions": {"mapId": "hotel_gn", "x": 8, "y": 10, "direction": "up", "renderer": "retro", "referencePanel": "bottom only", "floor": 8},
+    "hashManifest": ".gauntlet/e8-architecture/evidence-manifest.json"
+  },
+  "inventory": [
+    {"id": "architecture-shell", "unit": "Architectural shell + floor plane", "bar": "Frontal timber lodge envelope, wall/floor hierarchy, built service/stair edges, believable construction and depth", "floor": 8, "status": "iterating", "baselineEvidence": ["evidence/baseline.png"], "baselineScore": null, "currentEvidence": ["evidence/shell-r1.png"], "score": 6, "criticVerdict": "HARD_GATE_FAIL"},
+    {"id": "reception-service", "unit": "Reception + service wing", "bar": "Counter forms guest/staff boundary; sign/cubbies wall-mounted; bell/lamp operational; luggage/bellhop relationship plausible", "floor": 8, "status": "pending", "baselineEvidence": ["evidence/baseline.png"], "baselineScore": null, "currentEvidence": [], "score": null, "criticVerdict": null},
+    {"id": "hearth-lounge", "unit": "Fireplace + lounge", "bar": "Hearth attached to wall; bear/fire readable; chairs/table face fire on one bounded lounge rug outside traffic", "floor": 8, "status": "pending", "baselineEvidence": ["evidence/baseline.png"], "baselineScore": null, "currentEvidence": [], "score": null, "criticVerdict": null},
+    {"id": "stair-hall", "unit": "Stairs + Room 315 hall relationship", "bar": "Right-wall stair flight, runner, rail and landing visibly terminate at actual hall door without implying false collision", "floor": 8, "status": "pending", "baselineEvidence": ["evidence/baseline.png"], "baselineScore": null, "currentEvidence": [], "score": null, "criticVerdict": null},
+    {"id": "entry-circulation", "unit": "Entry + runner + circulation props", "bar": "South entry, runner, queue/guest paths, plants and luggage explain movement; protected routes remain visually and mechanically open", "floor": 8, "status": "pending", "baselineEvidence": ["evidence/baseline.png"], "baselineScore": null, "currentEvidence": [], "score": null, "criticVerdict": null},
+    {"id": "light-ambient", "unit": "Lighting + ambient life", "bar": "AAA warm material hierarchy with slow fire/chandelier/bell motion; sources and receiving light physically connected and never noisy", "floor": 8, "status": "pending", "baselineEvidence": ["evidence/baseline.png"], "baselineScore": null, "currentEvidence": [], "score": null, "criticVerdict": null},
+    {"id": "integrated-world", "unit": "Integrated lobby world", "bar": "Whole room reads immediately as functional Great Northern hotel, visually approaches reference, and matches collision/navigation semantics", "floor": 8, "status": "pending", "baselineEvidence": ["evidence/baseline.png"], "baselineScore": null, "currentEvidence": [], "score": null, "criticVerdict": null}
+  ],
+  "regressionGates": [
+    {"id": "focused", "criterion": "exact geometry, registry, door lifecycle, collision coverage, ambient contract", "command": "node test/hotel-gn-scene.js", "status": "pending", "evidence": []},
+    {"id": "smoke", "criterion": "full structural simulation", "command": "node test/smoke.js", "status": "pending", "evidence": []},
+    {"id": "walkthrough", "criterion": "whole acquisition graph", "command": "node test/walkthrough.js", "status": "pending", "evidence": []},
+    {"id": "retro", "criterion": "production retro contract", "command": "node test/retro-production.js", "status": "pending", "evidence": []},
+    {"id": "mobile", "criterion": "mobile production contract", "command": "node test/mobile-production.js", "status": "pending", "evidence": []},
+    {"id": "cast", "criterion": "Ben/Audrey positions and routes remain valid", "command": "node test/cast-continuity-validate.js", "status": "pending", "evidence": []},
+    {"id": "doors", "criterion": "all registry doors remain equal", "command": "node test/world-door-equality.js", "status": "pending", "evidence": []},
+    {"id": "room315", "criterion": "Room 315/hall/town round trips remain valid", "command": "node test/room-315-location.js", "status": "pending", "evidence": []}
+  ],
+  "agents": {
+    "builderCriticSeparated": true,
+    "criticFreshContext": true
+  },
+  "gapQueue": [{"unitId": "architecture-shell", "priority": "high", "gap": "Parquet lacks continuous perspective seams, board-level tonal variation, warm reflective grain, and threshold depth.", "owner": "next Luna/xhigh builder"}],
+  "rounds": [{"round": 1, "sequence": 1, "units": ["architecture-shell"], "builder": "Luna/xhigh (/root/e8_arch_shell_builder_r1)", "critic": "Luna/xhigh fresh (/root/e8_arch_shell_critic_r1)", "evidence": "artifacts/art-pass-e/e8-architecture/architecture-shell/round-1.png", "scores": {"architecture-shell": 6}, "rankVsPrevious": "BETTER", "gap": "Parquet lacks continuous perspective seams, board-level tonal variation, and warm reflective grain."}],
+  "finalGate": {
+    "allUnitsCovered": false,
+    "hardGatesPass": false,
+    "independentVerdict": null,
+    "floor": null,
+    "unresolvedHighGaps": []
+  },
+  "progressSurface": ".gauntlet/e8-architecture/progress.md",
+  "stopPolicy": "Verified pass, explicit human stop, lost authority, or genuine external blocker."
+}
