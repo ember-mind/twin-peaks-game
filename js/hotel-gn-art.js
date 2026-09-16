@@ -326,43 +326,56 @@
     diamond(R,50,112,3,p.ink);diamond(R,50,112,2,p.woodDark);R(50,110,1,1,p.gold);
   }
   function stairs(R){
-    /* The flight hugs the east wall but is not a painted block over the
-     * corridor: its left edge opens from x245 at the top to x222 at the
-     * foot, leaving the hall-side floor visible. Each riser has its own
-     * nosing and runner segment so this reads as stairs, not a ladder. */
-    R(222,33,32,11,p.ink);R(224,34,28,8,p.woodDark);R(225,35,26,2,p.woodLight);
-    R(227,37,22,4,p.redDark);R(228,37,20,1,p.redLight);R(224,41,28,2,p.gold);
+    /* The actual hall door is x219..245/y8..64. This landing is its small
+     * built threshold, not a false wall: the visible red runner is painted
+     * over the threshold so the first riser starts in the same stroke. */
+    R(219,34,36,12,p.ink);R(221,35,32,8,p.woodDark);R(223,36,28,2,p.woodLight);
+    R(222,41,23,3,p.woodDark);R(223,41,21,1,p.woodLight);
+    R(224,43,28,2,p.wood);R(225,44,26,1,p.woodDark);
+    R(228,37,17,7,p.redDark);R(229,38,15,1,p.redLight);R(230,39,13,3,p.red);
     for(var step=0;step<11;step++){
-      var y=42+step*8,left=245-Math.floor(step*2.15),right=269,w=right-left;
+      var y=42+step*8,left=220-step,right=252+Math.floor(step*1.7),w=right-left;
+      /* Every band is a real tread/riser with a dark underside and a lit
+       * nosing. The changing edges make the flight widen toward its foot
+       * without filling the corridor with an opaque rectangle. */
       R(left-1,y,w+2,8,p.ink);R(left,y,w,1,p.woodLight);R(left+1,y+1,w-2,2,p.wood);
-      R(left+1,y+3,w-2,3,p.woodLight);R(left,y+6,w,2,p.woodDark);
-      var rw=10+Math.floor(step*.75),rx=257-Math.floor(step*.8);
-      R(rx,y+1,rw,5,p.redDark);R(rx+1,y+1,rw-2,1,p.redLight);R(rx+2,y+5,rw-4,1,p.red);
-      R(rx-1,y+1,2,1,p.gold);R(rx+rw-1,y+1,2,1,p.gold);
-      /* Tiny wear marks turn the broad risers into timber construction. */
+      R(left+2,y+3,w-4,2,p.woodLight);R(left+1,y+5,w-2,1,p.wood);R(left,y+6,w,2,p.woodDark);
+      /* The runner tapers and drifts from x228..245 at the door to
+       * x238..261 at the low landing. One-pixel overlap at each join keeps
+       * the red path continuous while the riser shadows remain legible. */
+      var rx=228+step,rw=17+Math.floor(step*.6);
+      R(rx-1,y+1,rw+2,7,p.ink);R(rx,y+1,rw,7,p.redDark);R(rx+1,y+1,rw-2,1,p.redLight);
+      R(rx+2,y+2,rw-4,3,p.red);R(rx+2,y+5,rw-4,1,p.redLight);R(rx+1,y+6,rw-2,1,p.redDark);
+      R(rx,y+1,1,6,p.gold);R(rx+rw-1,y+1,1,6,p.gold);
       if(step%2===0)R(left+5,y+4,5,1,p.wood);else R(right-13,y+4,6,1,p.woodDark);
     }
-    /* Guest-side banister: the handrail runs above the open edge and its
-     * posts are planted on alternating treads, making the stair depth clear. */
-    for(var y=35;y<130;y++){
-      var railX=242-Math.floor((y-35)*27/95);
-      R(railX,y,3,1,p.ink);R(railX+1,y,1,1,p.gold);
+    /* A narrow fascia and a few exposed braces attach the widening flight
+     * to the east wall. There is no rectangular wall mass behind it. */
+    for(var brace=0;brace<11;brace+=2){
+      var by=47+brace*8,bx=252+Math.floor(brace*1.7);
+      R(bx+1,by,3,2,p.ink);R(bx+2,by+2,2,4,p.woodDark);R(bx+3,by+2,1,3,p.woodLight);
     }
-    for(var n=0;n<6;n++){
-      var py=39+n*17,px=241-Math.floor((py-35)*27/95);
-      R(px,py-7,4,12,p.ink);R(px+1,py-6,1,9,p.gold);R(px+2,py-4,1,7,p.woodLight);
+    /* Guest-side and wall-side rails share the flight's exact edge formulas;
+     * their first and last posts visibly plant on the two landings. */
+    for(var railY=38;railY<=132;railY++){
+      var railT=Math.max(0,Math.min(1,(railY-42)/80));
+      var railLeft=219-Math.floor(railT*10),railRight=253+Math.floor(railT*17);
+      R(railLeft,railY,3,1,p.ink);R(railLeft+1,railY,1,1,p.gold);
+      R(railRight,railY,3,1,p.ink);R(railRight+1,railY,1,1,p.gold);
     }
-    /* Wall-side rail and planted newels keep the staircase attached to the
-     * lodge wall rather than floating beside it. */
-    for(var yy=37;yy<132;yy++){
-      var wallRail=262+Math.floor((yy-37)*7/95);
-      R(wallRail,yy,3,1,p.ink);R(wallRail+1,yy,1,1,p.gold);
+    for(var post=0;post<=5;post++){
+      var postY=42+post*16,postT=Math.max(0,Math.min(1,(postY-42)/80));
+      var postLeft=219-Math.floor(postT*10),postRight=253+Math.floor(postT*17);
+      R(postLeft,postY-7,4,11,p.ink);R(postLeft+1,postY-6,1,8,p.gold);R(postLeft+2,postY-4,1,6,p.woodLight);
+      R(postRight,postY-7,4,11,p.ink);R(postRight+1,postY-6,1,8,p.gold);R(postRight+2,postY-4,1,6,p.woodLight);
     }
-    for(var wn=0;wn<5;wn++){
-      var wy=43+wn*19,wx=262+Math.floor((wy-37)*7/95);
-      R(wx,wy-6,4,11,p.ink);R(wx+1,wy-5,1,8,p.gold);R(wx+2,wy-3,1,6,p.woodLight);
-    }
-    R(218,127,53,4,p.ink);R(222,126,47,2,p.woodLight);R(245,126,20,2,p.redDark);R(246,126,18,1,p.redLight);
+    /* The low foot landing is broad enough to receive the fan and returns
+     * the runner to the lobby floor, x208..271/y127..134. */
+    R(208,127,63,8,p.ink);R(210,128,59,4,p.woodDark);R(211,128,57,1,p.woodLight);
+    R(210,132,59,2,p.wood);R(211,133,57,1,p.woodDark);
+    R(238,127,23,6,p.redDark);R(239,128,21,1,p.redLight);R(240,129,19,3,p.red);
+    R(239,132,21,1,p.redDark);R(238,127,1,5,p.gold);R(260,127,1,5,p.gold);
+    R(208,133,63,1,p.woodLight);R(209,134,61,1,p.ink);
   }
   function chandelier(R){
     /* A high central practical is separated from the bear and staircase. */
