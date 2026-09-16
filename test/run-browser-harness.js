@@ -10,7 +10,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const httpPort = await free(), devPort = await free();
   const http = spawn('python3', ['-m', 'http.server', String(httpPort), '--bind', '127.0.0.1'], { cwd: ROOT, stdio: 'ignore' });
   const prof = fs.mkdtempSync(path.join(os.tmpdir(), 'm10h-'));
-  const chrome = spawn(CHROME, ['--headless=new', '--enable-unsafe-swiftshader', '--use-angle=swiftshader', '--no-first-run', '--no-default-browser-check',
+  const chrome = spawn(CHROME, ['--headless=new', '--mute-audio', '--enable-unsafe-swiftshader', '--use-angle=swiftshader', '--no-first-run', '--no-default-browser-check',
     '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows',
     `--remote-debugging-port=${devPort}`, `--user-data-dir=${prof}`, 'about:blank'], { stdio: 'ignore' });
   const cleanup = () => { try { chrome.kill('SIGKILL'); } catch (e) {} try { http.kill(); } catch (e) {} };

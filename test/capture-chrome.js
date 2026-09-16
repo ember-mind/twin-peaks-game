@@ -196,7 +196,7 @@ async function main() {
   let cdp;
   try {
     const chromeArgs = [
-      '--headless=new',
+      '--headless=new', '--mute-audio',
       `--remote-debugging-port=${port}`,
       `--user-data-dir=${profile}`,
       '--enable-gpu',
