@@ -30,37 +30,52 @@
     }
   }
   function floor(R){
-    /* The floor is a shallow, south-facing parquet plane. Row heights grow
-     * toward the entry, so the room has a readable vanishing point instead
-     * of a flat checkerboard. */
+    /* The floor is a shallow, south-facing parquet plane. Courses grow
+     * toward the entry, while each course is made of real boards: continuous
+     * horizontal seams carry the perspective and short, warm grain strokes
+     * keep the room from becoming one undifferentiated brown slab. */
     R(16,64,256,112,p.woodDark);
-    R(16,66,256,4,p.wood);
+    R(16,64,256,2,p.ink);
+    R(16,66,256,2,p.woodDark);
+    R(16,68,256,2,p.wood);
     R(16,70,256,2,p.woodLight);
     var seams=[72,80,90,102,116,133,153,176];
-    var shades=[p.wood,p.woodLight,p.wood,p.woodLight,p.wood,p.woodLight,p.wood];
     for(var band=0;band<seams.length-1;band++){
       var y=seams[band],h=seams[band+1]-y;
-      R(16,y,256,h-1,shades[band]);R(16,y+h-1,256,1,p.woodDark);
-      /* Broken board highlights keep the long grain legible under the rugs. */
-      var start=22+((band%3)*17);
-      for(var x=start;x<268;x+=58){
-        var len=Math.min(15,272-x);
-        if(len>2){R(x,y+2,len,1,band%2?p.wood:p.woodLight);}
-        if(h>8&&x+9<272)R(x+9,y+h-3,Math.min(10,272-x-9),1,p.woodDark);
+      R(16,y,256,1,p.woodLight);
+      var start=16-(band%2?24:0),board=0;
+      for(var x=start;x<272;x+=48,board++){
+        var bx=Math.max(16,x),bw=Math.min(272,x+48)-bx;
+        if(bw<=0)continue;
+        /* Keep the broad face warm and legible; variation belongs to the
+         * bevel, grain, and wear marks rather than checkerboard-sized fills. */
+        R(bx,y+1,bw,h-2,p.wood);
+        if(bx>16)R(bx,y+1,1,h-2,p.woodDark);
+        /* One deliberate reflective grain stroke per board. It terminates
+         * at every joint, so this reads as timber grain rather than cracks. */
+        if(bw>12){
+          var grain=8+((band+board)%3)*3;
+          var gx=bx+6+((band*11+board*7)%(Math.max(1,bw-grain-7)));
+          R(gx,y+3,grain,1,p.gold);
+          if(grain>10)R(gx+2,y+2,grain-5,1,p.woodLight);
+          if((band+board)%3===1)R(bx+5,y+h-3,bw-10,1,p.woodDark);
+        }
       }
+      R(16,y+h-1,256,1,p.woodDark);
     }
-    /* Board joints converge on the hearth/chandelier axis. They are
-     * intentionally intermittent: a lodge floor has seams, not graph paper. */
-    [24,76,128,181,234,267].forEach(function(end,idx){
-      for(var y=74;y<174;y++){
-        var x=Math.round(144+(end-144)*(y-64)/112);
-        if(((y+idx*3)%11)<6)R(x,y,1,1,p.woodDark);
-      }
-    });
-    /* A few worn boards catch the practicals and sell the material hierarchy. */
-    R(96,80,68,2,p.woodDark);R(101,82,57,1,p.woodLight);R(110,85,39,1,p.gold);
-    R(76,145,50,2,p.woodLight);R(87,148,25,1,p.gold);
-    R(18,124,15,2,p.woodLight);R(256,137,14,2,p.woodLight);
+    /* Narrow edge bands separate the walkable plane from the log walls and
+     * give the south entry a shallow, readable threshold under the runner. */
+    R(16,64,2,112,p.ink);R(18,64,1,112,p.woodLight);
+    R(270,64,2,112,p.woodDark);R(269,64,1,112,p.woodLight);
+    R(16,168,256,1,p.woodLight);
+    R(16,169,256,3,p.wood);
+    R(16,172,256,2,p.woodDark);
+    R(16,174,256,2,p.ink);
+    R(110,168,68,8,p.ink);
+    R(112,168,64,1,p.gold);
+    R(114,169,60,2,p.woodLight);
+    R(116,171,56,3,p.wood);
+    R(116,174,56,2,p.woodDark);
     /* The entrance carpet bends around the genuinely solid lounge. Its
      * right-hand aisle is clear at x=11..12 rather than through the table. */
     rug(R,176,72,26,63,true);rug(R,126,118,76,18,true);rug(R,128,130,32,46,true);

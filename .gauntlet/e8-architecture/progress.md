@@ -21,7 +21,7 @@ Reception counter is boundary, not loose furniture. Clerk stands staff side; sig
 
 | Unit | Floor | Current | Status |
 |---|---:|---:|---|
-| Architectural shell + floor plane | 8 | 6 | iterating |
+| Architectural shell + floor plane | 8 | 8 | pass |
 | Reception + service wing | 8 | — | pending |
 | Fireplace + lounge | 8 | — | pending |
 | Stairs + Room 315 hall | 8 | — | pending |
@@ -38,7 +38,7 @@ Reception counter is boundary, not loose furniture. Clerk stands staff side; sig
 
 ## Latest verdict
 
-Shell R1: 6/10 HARD_GATE_FAIL. Timber envelope improved; parquet remains flat. Next owner: continuous perspective seams, board variation, warm grain, threshold depth.
+Shell R2: 8/10 pass. Continuous parquet and threshold accepted. Remaining value-depth gap belongs to lighting/integration.
 
 ## High constraints
 
