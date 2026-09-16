@@ -26,7 +26,7 @@ Reception counter is boundary, not loose furniture. Clerk stands staff side; sig
 | Fireplace + lounge | 8 | 8 | pass |
 | Stairs + Room 315 hall | 8 | 8 | pass |
 | Entry + runner + circulation props | 8 | selected R4 7.1 | below floor; locked layout |
-| Lighting + ambient life | 8 | 3 (best 5) | revise |
+| Lighting + ambient life | 8 | 6.5 | revise |
 | Integrated lobby world | 8 | — | pending |
 
 ## Evidence
@@ -38,7 +38,7 @@ Reception counter is boundary, not loose furniture. Clerk stands staff side; sig
 
 ## Latest verdict
 
-Shell R2: 8/10 pass. Reception R2: 8/10 pass. Hearth/lounge R1: 8/10 pass. Stair R1: 3/10 reject; R2: 8/10 pass. Entry R1: 7, R2: 5, R3: 6, R4: 7.1, R5: 4, R6: 5/10. R4 remains best legal pass. Literal reference geometry requires moving locked lounge, counter, cart, and Cast Presence. Light R1: 4.5, R2: 5, R3: 3/10; hard bands failed. Ben absent from fixed shot even with Act 2 flags; no fake sprite.
+Shell R2: 8/10 pass. Reception R2: 8/10 pass. Hearth/lounge R1: 8/10 pass. Stair R1: 3/10 reject; R2: 8/10 pass. Entry R1: 7, R2: 5, R3: 6, R4: 7.1, R5: 4, R6: 5/10. R4 remains best legal pass. Literal reference geometry requires moving locked lounge, counter, cart, and Cast Presence. Light R1: 4.5, R2: 5, R3: 3, R4: 6.5/10; overlapping translucent masks produce broad wash. Ben absent from fixed shot even with Act 2 flags; no fake sprite.
 
 ## High constraints
 

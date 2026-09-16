@@ -91,21 +91,9 @@
       }
       R(16,y+h-1,256,1,p.woodDark);
     }
-    /* Receiving faces are part of the authored floor, not a later effect.
-     * Hearth warmth starts as a compact woodLight face beside the masonry,
-     * then steps into the darker board tone as it travels under the lounge.
-     * The chandelier has a second, wider stepped pool on the exposed parquet;
-     * each span follows the floor grain so the material still reads as boards. */
-    R(96,80,16,4,p.woodLight);R(96,84,16,6,p.wood);
-    R(96,90,24,4,p.woodLight);R(96,94,24,6,p.wood);
-    R(96,100,32,4,p.woodLight);R(96,104,32,6,p.wood);
-    R(96,110,48,2,p.gold);R(96,112,48,4,p.wood);
-    R(150,64,26,4,p.woodLight);R(148,68,30,4,p.wood);
-    R(146,72,38,4,p.woodLight);R(144,76,44,6,p.wood);
-    R(142,82,50,4,p.woodLight);R(140,86,54,6,p.wood);
-    R(138,92,60,4,p.woodLight);R(136,96,66,6,p.wood);
-    R(134,102,72,4,p.woodLight);R(132,106,78,6,p.wood);
-    R(130,112,84,2,p.gold);R(130,114,84,2,p.wood);
+    /* Receiving light is a post-art overlay, not a set of opaque floor
+     * bands. The board faces and grain stay intact until lightPools() runs
+     * after every structural pass. */
     /* Narrow edge bands separate the walkable plane from the log walls and
      * give the south entry a shallow, readable threshold under the runner. */
     R(16,64,2,112,p.ink);R(18,64,1,112,p.woodLight);
@@ -178,10 +166,8 @@
       if(bi%2===1)R(x+8,13,w-16,1,p.woodLight);
     });
     beam(R,16,0,256,5);beam(R,16,59,256,7);
-    /* The chandelier is anchored to this central timber beam. A contiguous
-     * receiving face gives the practical a real architectural source instead
-     * of projecting a free-floating triangle below it. */
-    R(144,60,62,2,p.woodLight);R(150,62,50,2,p.wood);R(158,64,34,2,p.woodDark);
+    /* The chandelier is anchored to this central timber beam. Its receiving
+     * surfaces are modulated by the clipped pool drawn after the base art. */
     R(16,68,256,3,p.ink);R(16,70,256,2,p.woodLight);
     [18,73,167,257].forEach(function(x){column(R,x,0,72);});
     /* The real hall door (map cell 14,1) sits in a recessed east bay. Keep
@@ -460,11 +446,74 @@
     if(d.id==='fireplace')fireplace(R);else if(d.id==='stairs')stairs(R);else if(d.id==='luggage')luggage(R);
     else if(d.id==='chairWest'||d.id==='chairEast')chair(R,d.x,d.footY,d.id==='chairEast');else if(d.id==='table')table(R);else reception(R);
   }
+  /* Warm practicals are material light, not a second layer of furniture.
+   * Every ring is rasterized as integer one-pixel row spans, with a two-pixel
+   * quantization on the ellipse radius. This gives a deliberate native-pixel
+   * stair-step while preserving the authored floor grain underneath. The
+   * exclusions keep pools from painting through the masonry/firebox mass. */
+  function steppedPool(ctx,cameraX,cameraY,cx,cy,rx,ry,xMin,xMax,yMin,yMax,color,opacity,exclusions,parentAlpha){
+    var oldAlpha=ctx.globalAlpha,oldFill=ctx.fillStyle;
+    var camX=Math.round(cameraX||0),camY=Math.round(cameraY||0);
+    var floorX=Math.round(cx),floorY=Math.round(cy);
+    ctx.globalAlpha=Math.max(0,Math.min(1,parentAlpha*opacity));
+    ctx.fillStyle=color;
+    for(var dy=-ry;dy<=ry;dy++){
+      var worldY=floorY+dy;
+      if(worldY<yMin||worldY>yMax)continue;
+      var curve=1-(dy*dy)/(ry*ry);
+      if(curve<=0)continue;
+      /* Even half-widths make the silhouette visibly stepped instead of
+       * anti-aliased, while the equation keeps the falloff source-shaped. */
+      var half=Math.floor((rx*Math.sqrt(curve))/2)*2;
+      if(half<2)continue;
+      var left=Math.max(xMin,Math.ceil(floorX-half));
+      var right=Math.min(xMax,Math.floor(floorX+half));
+      if(right<left)continue;
+      var spans=[[left,right]];
+      (exclusions||[]).forEach(function(block){
+        var next=[];
+        spans.forEach(function(span){
+          if(worldY<block.y||worldY>=block.y+block.h||span[1]<block.x||span[0]>=block.x+block.w){next.push(span);return;}
+          if(span[0]<block.x)next.push([span[0],Math.min(span[1],block.x-1)]);
+          if(span[1]>=block.x+block.w)next.push([Math.max(span[0],block.x+block.w),span[1]]);
+        });
+        spans=next;
+      });
+      spans.forEach(function(span){
+        var width=span[1]-span[0]+1;
+        if(width>0)ctx.fillRect(span[0]-camX,worldY-camY,width,1);
+      });
+    }
+    ctx.globalAlpha=oldAlpha;ctx.fillStyle=oldFill;
+  }
+  function lightPools(ctx,cameraX,cameraY,parentAlpha){
+    /* Hearth source is firebox centre 118,67. The receiving-plane centre is
+     * lower on the stone/floor transition so the falloff reads outward from
+     * the opening without laying a slab over the flames. */
+    var firebox=[{x:97,y:48,w:47,h:26}];
+    steppedPool(ctx,cameraX,cameraY,118,84,70,48,90,180,60,116,p.fire,.07,firebox,parentAlpha);
+    steppedPool(ctx,cameraX,cameraY,118,84,52,36,90,180,60,116,p.fire,.12,firebox,parentAlpha);
+    steppedPool(ctx,cameraX,cameraY,118,84,30,22,90,180,60,116,p.gold,.18,firebox,parentAlpha);
+
+    /* The chandelier beam is a broad local ellipse across the nearby wall and
+     * exposed floor. Its left wall exclusion follows the massive hearth, so
+     * this remains a grounded glow rather than a triangular light projection. */
+    var hearthMass=[{x:88,y:5,w:72,h:75}];
+    steppedPool(ctx,cameraX,cameraY,163,75,58,46,125,210,34,125,p.gold,.04,hearthMass,parentAlpha);
+    steppedPool(ctx,cameraX,cameraY,163,75,43,34,125,210,34,125,p.gold,.07,hearthMass,parentAlpha);
+    steppedPool(ctx,cameraX,cameraY,163,75,25,22,125,210,34,125,p.fire,.10,hearthMass,parentAlpha);
+
+    /* Desk lamp source at 121,116: a compact key-bank/counter pool, clipped
+     * to its operational region so the west wall and entry remain dark. */
+    steppedPool(ctx,cameraX,cameraY,110,125,30,27,85,130,100,150,p.fire,.05,[],parentAlpha);
+    steppedPool(ctx,cameraX,cameraY,110,125,22,20,85,130,100,150,p.fire,.09,[],parentAlpha);
+    steppedPool(ctx,cameraX,cameraY,110,125,13,12,85,130,100,150,p.gold,.13,[],parentAlpha);
+  }
   function draw(ctx,cx,cy){
     var R=painter(ctx,cx,cy),alpha=ctx.globalAlpha;ctx.globalAlpha=1;
     R(0,0,288,192,p.ink);floor(R);walls(R);receptionBack(R);
     props.forEach(function(d){if(d.cells.length)R(d.x,d.footY-1,d.cells.length*16,2,p.ink);prop(R,d);});
-    chandelier(R);ctx.globalAlpha=alpha;
+    chandelier(R);lightPools(ctx,cx,cy,alpha);ctx.globalAlpha=alpha;
   }
   function foreground(ctx,cx,cy,min,max){
     min=min==null?-Infinity:min;max=max==null?Infinity:max;

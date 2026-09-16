@@ -89,24 +89,27 @@
    * still between changes. */
   life.register('hotel_gn',[
     {id:'lobby-fire',type:'MACHINE_IDLE_ACTIVITY',x:106,y:56,depth:80,variants:3,
-      delay:[2800,4600],duration:[1500,2200],intensity:1.9,marks:[
+      delay:[3600,6200],duration:[1800,2400],intensity:1.7,marks:[
         [{x:-2,y:7,w:6,h:10,color:'#d77b37'},{x:5,y:1,w:6,h:16,color:'#e9c582'},{x:12,y:6,w:6,h:11,color:'#ffe7a6'},{x:20,y:10,w:5,h:7,color:'#d77b37'}],
         [{x:0,y:4,w:5,h:14,color:'#d77b37'},{x:7,y:0,w:6,h:17,color:'#e9c582'},{x:15,y:7,w:5,h:10,color:'#ffe7a6'},{x:22,y:3,w:4,h:14,color:'#d77b37'}],
         [{x:-1,y:2,w:5,h:16,color:'#e9c582'},{x:6,y:7,w:6,h:11,color:'#d77b37'},{x:14,y:1,w:6,h:17,color:'#ffe7a6'},{x:23,y:8,w:5,h:9,color:'#e9c582'}]
       ]},
-    {id:'lobby-chandelier',type:'LIGHT_WARM_VARIATION',x:156,y:24,depth:192,
-      delay:[4800,8400],duration:[1100,1800],intensity:.78,
+    {id:'lobby-chandelier',type:'LIGHT_WARM_VARIATION',x:156,y:24,depth:192,variants:3,
+      delay:[3600,6800],duration:[1800,2600],intensity:.9,
       regions:[{x:138,y:13,w:5,h:6,depth:192},{x:146,y:19,w:5,h:6,depth:192},
         {x:162,y:19,w:5,h:6,depth:192},{x:170,y:13,w:5,h:6,depth:192},
-        {x:144,y:60,w:62,h:2,depth:0},{x:146,y:72,w:38,h:2,depth:0},
-        {x:138,y:92,w:60,h:2,depth:0},{x:130,y:112,w:84,h:2,depth:0}]},
-    {id:'lobby-desk-lamp',type:'LIGHT_WARM_VARIATION',x:121,y:112,depth:144,
-      delay:[4200,7800],duration:[1100,1800],intensity:.82,
-      regions:[{x:112,y:123,w:16,h:3,depth:144},{x:110,y:107,w:11,h:9,depth:128},
-        {x:100,y:106,w:23,h:2,depth:128},{x:95,y:119,w:12,h:2,depth:144},
-        {x:84,y:130,w:42,h:2,depth:144}]},
-    {id:'lobby-bell',type:'GLASS_SUBTLE_REFLECTION',x:99,y:119,depth:144,variants:2,travel:4,
-      delay:[3200,6200],duration:[1800,2600],intensity:1.25}
+        /* These short rows sit on the same wall/floor ellipse as the static
+         * chandelier pool; no rectangular light beam is introduced. */
+        {x:160,y:34,w:6,h:1,depth:0},{x:166,y:58,w:8,h:1,depth:0},
+        {x:172,y:78,w:10,h:1,depth:0},{x:182,y:96,w:10,h:1,depth:0},
+        {x:190,y:112,w:10,h:1,depth:0}]},
+    {id:'lobby-desk-lamp',type:'LIGHT_WARM_VARIATION',x:121,y:112,depth:144,variants:3,
+      delay:[3600,6800],duration:[1800,2600],intensity:.9,
+      regions:[{x:112,y:123,w:10,h:2,depth:144},{x:110,y:107,w:9,h:2,depth:128},
+        {x:101,y:110,w:10,h:1,depth:128},{x:95,y:119,w:10,h:1,depth:144},
+        {x:87,y:130,w:12,h:1,depth:144},{x:101,y:140,w:12,h:1,depth:144}]},
+    {id:'lobby-bell',type:'GLASS_SUBTLE_REFLECTION',x:99,y:119,depth:144,variants:3,travel:3,
+      delay:[4200,7600],duration:[2000,3000],intensity:1.15}
   ]);
   /* Red Room uses the existing intermittent device archetype with three
    * authored column positions. Long holds make the curtains breathe slowly.

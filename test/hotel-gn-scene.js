@@ -50,14 +50,25 @@ for(const record of canonical)assert.deepEqual(plain(record),records.find(r=>r.i
 for(const d of art.props)for(const [x,y] of d.cells)assert.equal(G.Maps.isSolid('hotel_gn',x,y),true,d.id+' has grounded solid footprint');
 const solidCells=[];for(let y=1;y<11;y++)for(let x=1;x<17;x++)if('CUht'.includes(map.rows[y][x]))solidCells.push(x+','+y);
 assert.deepEqual(plain(art.props.flatMap(d=>d.cells.map(c=>c.join(','))).sort()),solidCells.sort(),'all solid furniture glyphs visibly occupied');
-const ctx={globalAlpha:.75,fillStyle:'before',marks:[],fillRect(x,y,w,h){
+const authoredPalette=new Set(Object.values(art.palette));
+const ctx={globalAlpha:.75,fillStyle:'before',marks:[],overlayMarks:[],fillRect(x,y,w,h){
   assert.ok([x,y,w,h].every(Number.isInteger),'sharp integer pixel rectangles');
-  assert.ok(w>0&&h>0);assert.equal(this.globalAlpha,1,'opaque base art');
-  assert.ok(Object.values(art.palette).includes(this.fillStyle),'authored palette only');
-  this.marks.push([x,y,w,h,this.fillStyle]);
+  assert.ok(w>0&&h>0);
+  assert.ok(authoredPalette.has(this.fillStyle),'authored palette only');
+  if(this.globalAlpha===1){
+    this.marks.push([x,y,w,h,this.fillStyle]);
+  }else{
+    assert.ok(this.globalAlpha>0&&this.globalAlpha<=.19,'light overlays stay low-alpha');
+    assert.ok(this.fillStyle===art.palette.fire||this.fillStyle===art.palette.gold,'light overlays use authored warm colors');
+    assert.equal(h,1,'light pools use one-pixel row spans');
+    this.overlayMarks.push([x,y,w,h,this.fillStyle,this.globalAlpha]);
+  }
 }};
 G.sprites.drawStructures(ctx,map,.25,.75);assert.equal(ctx.globalAlpha,.75);
 assert.equal(new Set(ctx.marks.map(m=>m[4])).size,Object.keys(art.palette).length,'whole scene palette renders');
+assert.ok(ctx.overlayMarks.length>0,'light pools render translucent rows');
+assert.ok(ctx.overlayMarks.some(m=>m[4]===art.palette.fire),'hearth/chandelier fire tone reaches receiving surfaces');
+assert.ok(ctx.overlayMarks.some(m=>m[4]===art.palette.gold),'inner pool uses authored gold tone');
 ctx.marks=[];
 G.sprites.drawForegroundStructures(ctx,map,0,0,{forestDepthMin:80,forestDepthMax:81});
 assert.ok(ctx.marks.length>0,'foreground includes hearth at exact depth');
