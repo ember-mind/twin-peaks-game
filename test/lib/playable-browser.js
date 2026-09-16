@@ -117,49 +117,7 @@ class Cdp {
   close() { this.rejectPending(new Error('Session closed')); this.ws.close(); }
 }
 
-/* The ONLY page expression: route-supplied code is never evaluated.
- * Semantic text is diagnostic evidence, NOT proof of canvas readability.
- */
-function observeGame() {
-  const g = window.GAME, s = g && g.Engine && g.Engine.state;
-  const np = g && g.NarrativeProduction;
-  const a = g && g.NarrativeAdapter;
-  const clone = (value) => value === undefined ? null : JSON.parse(JSON.stringify(value));
-  const text = (selector) => { const el = document.querySelector(selector); return el ? el.textContent : null; };
-  let narrative = null, observationError = null;
-  try { if (a && a.getState) narrative = clone(a.getState()); }
-  catch (e) { observationError = String(e.message || e); }
-  const saves = {};
-  let storageError = null;
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key === 'tp_save' || /^twin-peaks:(narrative:|finale:)/.test(key)) saves[key] = localStorage.getItem(key);
-    }
-  } catch (e) { storageError = String(e.message || e); }
-  const populations = {};
-  if (g && g.Maps) Object.keys(g.Maps).forEach((id) => {
-    const map = g.Maps[id];
-    if (map && Array.isArray(map.npcs)) populations[id] = map.npcs.map((n) => ({
-      id: n.id, x: n.x, y: n.y, homeX: n.homeX, homeY: n.homeY, source: n.cast_source
-    }));
-  });
-  return {
-    ready: !!(s && np && np.ready), url: location.href,
-    testMode: np ? !!np.testMode : null,
-    mode: s ? s.mode : null, mapId: s ? s.mapId : null,
-    player: s ? clone(s.player) : null, flags: s ? clone(s.flags) : null, clues: s ? clone(s.clues) : null,
-    dialogue: s ? clone(s.dialogue) : null,
-    menu: s ? !!s.menu : null, fadePhase: s ? s.fadePhase : null,
-    liveNpcs: s ? clone(s.npcs) : null, populations,
-    narrative, narrativeActive: !!(a && a.active && a.active()),
-    semanticUi: { objective: text('#objective'), page: text('#narrative .nw-page'),
-      choices: Array.from(document.querySelectorAll('#narrative .nw-opt[data-choice-id]'), (el) => ({
-        id: el.getAttribute('data-choice-id'), text: el.textContent, focused: el.classList.contains('nw-focus')
-      })), recovery: !!document.querySelector('#narrative .nw-save-recovery') },
-    saves, storageError, observationError
-  };
-}
+const observeGame = require('./campaign-observation.js');
 const OBSERVE = `(${observeGame.toString()})()`;
 
 async function findChrome(explicit) {
