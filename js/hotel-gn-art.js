@@ -223,18 +223,30 @@
     [[82,91,5],[93,91,8],[105,91,5]].forEach(function(a){for(var n=0;n<a[2];n++)R(a[0]-n,a[1]-a[2]+n,2*n+1,1,p.woodLight);});
     label(R,'GREAT',83,92);label(R,'NORTHERN',77,98);
     R(67,103,56,2,p.ink);R(68,103,54,1,p.gold);
-    /* Key cubbies are a separate wall-mounted bank below the plaque. Small
-     * brass tags catch the lamp without reading as a second free-standing
-     * cabinet. */
-    R(67,105,56,12,p.ink);R(68,106,54,10,p.wood);R(69,107,52,8,p.woodDark);
-    for(var y=108;y<116;y+=5)for(var x=70;x<121;x+=8){
-      R(x,y,7,5,p.ink);R(x+1,y+1,5,3,p.woodDark);R(x+4,y+2,1,2,p.gold);
+    /* Staff service opening: a deep, quiet recess sits directly behind the
+     * transaction edge. The jambs and sill make the work bay legible even
+     * when Cast Presence has no actor in this fixed capture; its clear centre
+     * is deliberately free of decorative marks for the legal Ben placement. */
+    R(67,104,30,21,p.ink);R(68,105,28,2,p.woodLight);R(69,107,26,16,p.woodDark);
+    R(70,108,24,12,p.ink);R(72,110,20,9,p.woodDark);R(72,110,20,1,p.woodLight);
+    /* The inner black field is the open depth; narrow jamb highlights and a
+     * low brass shelf keep it from reading as a blank decorative panel. */
+    R(74,111,16,7,p.ink);R(74,111,16,1,p.woodDark);
+    R(71,111,2,8,p.wood);R(72,111,1,8,p.woodLight);R(91,111,2,8,p.woodDark);R(91,111,1,8,p.woodLight);
+    R(74,118,16,1,p.wood);R(75,118,14,1,p.gold);
+    R(69,120,26,4,p.wood);R(70,120,24,1,p.gold);R(70,122,24,1,p.woodLight);
+    R(67,106,3,18,p.wood);R(68,107,1,16,p.woodLight);R(94,106,3,18,p.woodDark);R(95,107,1,16,p.woodLight);
+    /* Key cubbies are a separate wall-mounted bank to the right of the
+     * opening. Small brass tags catch the lamp without reading as a second
+     * free-standing cabinet or covering the staff sightline. */
+    R(98,105,25,12,p.ink);R(99,106,23,10,p.wood);R(100,107,21,8,p.woodDark);
+    for(var y=108;y<116;y+=5)for(var x=101;x<121;x+=7){
+      R(x,y,6,5,p.ink);R(x+1,y+1,4,3,p.woodDark);R(x+4,y+2,1,2,p.gold);
     }
-    /* Open transaction/work strip: panelled floor and a shallow back rail
-     * keep the staff side architectural while leaving the actor silhouette
-     * unobscured until the counter top begins. */
-    R(67,117,56,7,p.woodDark);R(68,117,54,1,p.woodLight);R(69,119,52,1,p.wood);
-    R(69,123,52,1,p.woodLight);R(69,125,52,1,p.wood);
+    /* Open transaction/work strip continues below the cubbies; its shallow
+     * back rail ties the recess to the counter without cluttering the edge. */
+    R(98,117,25,7,p.woodDark);R(99,117,23,1,p.woodLight);R(100,119,21,1,p.wood);
+    R(99,123,23,1,p.woodLight);R(99,125,23,1,p.wood);
   }
   function reception(R){
     /* Counter closes only the four authored guest-facing C cells. Its wide
@@ -258,12 +270,23 @@
   }
   function luggage(R){
     /* Bellhop cart is inset into the built bay painted by receptionBack:
-     * upright rails meet its canopy and the wheels land on the shared plinth. */
-    R(32,109,16,3,p.ink);R(32,85,2,24,p.gold);R(46,85,2,24,p.gold);
-    R(33,84,14,2,p.ink);R(35,80,10,2,p.gold);R(33,82,3,3,p.gold);R(44,82,3,3,p.gold);R(37,80,6,1,p.cream);
-    R(33,96,14,13,p.woodDark);R(34,97,12,1,p.woodLight);R(35,98,1,10,p.gold);R(44,98,1,10,p.gold);
-    R(36,92,8,6,p.redDark);R(37,92,6,1,p.redLight);R(38,90,4,2,p.ink);R(37,97,8,1,p.woodLight);
-    R(32,111,3,1,p.ink);R(45,111,3,1,p.ink);R(33,111,2,1,p.gold);R(45,111,2,1,p.gold);
+     * tall brass rails, a hooked handle, two stacked bags and two wheels
+     * give this solid tile an unmistakable arrival/logistics silhouette. */
+    R(27,108,28,3,p.ink);R(28,106,26,2,p.woodLight);R(28,109,26,2,p.gold);
+    R(28,84,2,24,p.gold);R(50,84,2,24,p.gold);R(29,83,3,2,p.cream);R(49,83,3,2,p.cream);
+    R(30,81,21,2,p.ink);R(32,79,16,2,p.gold);R(32,80,3,3,p.gold);R(47,80,3,3,p.gold);R(36,79,10,1,p.cream);
+    /* Lower trunk: brass straps and a clear red leather face sit inside the
+     * cart rails instead of blending into the service-wall panels. */
+    R(29,96,23,12,p.woodDark);R(30,96,21,2,p.woodLight);R(31,98,19,9,p.redDark);
+    R(32,99,17,1,p.redLight);R(34,99,1,8,p.gold);R(45,99,1,8,p.gold);R(31,107,20,1,p.woodLight);
+    /* Upper suitcase rides above the trunk; its handle and latch read at
+     * native scale without touching the bay canopy. */
+    R(33,90,15,7,p.ink);R(34,91,13,6,p.wood);R(35,92,11,4,p.red);R(36,92,9,1,p.redLight);
+    R(39,89,5,2,p.ink);R(40,90,3,1,p.gold);R(39,96,2,1,p.gold);R(43,96,2,1,p.gold);
+    /* Wide separated wheels are set on the shared plinth, not painted as
+     * accidental floor grain. */
+    diamond(R,32,112,3,p.ink);diamond(R,32,112,2,p.woodDark);R(32,110,1,1,p.gold);
+    diamond(R,50,112,3,p.ink);diamond(R,50,112,2,p.woodDark);R(50,110,1,1,p.gold);
   }
   function stairs(R){
     /* Stair treads are passable floor leading into the existing 315 hall,
