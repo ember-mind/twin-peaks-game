@@ -17,7 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      PLAYABLE_SELFTEST_OUT: ${{ runner.temp }}/playable-selftest
       # Ephemeral hosted runner only. Local usage keeps Chrome sandbox enabled.
       CHROME_NO_SANDBOX: '1'
     steps:
@@ -34,6 +33,7 @@ jobs:
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           test -n "$CHROME"
           echo "CHROME_BIN=$CHROME" >> "$GITHUB_ENV"
+          echo "PLAYABLE_SELFTEST_OUT=$RUNNER_TEMP/playable-selftest" >> "$GITHUB_ENV"
           "$CHROME" --version
           node --version
           git rev-parse HEAD
