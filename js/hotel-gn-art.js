@@ -90,17 +90,31 @@
     R(16,169,256,3,p.wood);
     R(16,172,256,2,p.woodDark);
     R(16,174,256,2,p.ink);
+    /* The entrance threshold is a built sill, with a red inset mat centered
+     * on the paired doors. It is drawn after the route so the runner visibly
+     * arrives at the doors instead of disappearing into the wall band. */
     R(110,168,68,8,p.ink);
     R(112,168,64,1,p.gold);
     R(114,169,60,2,p.woodLight);
     R(116,171,56,3,p.wood);
     R(116,174,56,2,p.woodDark);
     /* The entrance carpet bends around the genuinely solid lounge. Its
-     * right-hand aisle is clear at x=11..12 rather than through the table. */
-    rug(R,176,72,26,63,true);rug(R,126,118,76,18,true);rug(R,128,130,32,46,true);
-    R(178,118,22,15,p.redDark);R(178,121,20,1,p.gold);R(178,130,20,1,p.gold);
+     * right-hand aisle is clear at x=11..12 rather than through the table;
+     * the east leg ends against the stair's own landing. */
+    rug(R,176,72,32,63,true);rug(R,126,118,82,18,true);rug(R,128,130,32,46,true);
+    R(178,118,28,15,p.redDark);R(178,121,26,1,p.gold);R(178,130,26,1,p.gold);
     R(130,130,28,4,p.redDark);R(130,133,28,1,p.gold);
-    rug(R,112,82,64,36,false);
+    /* A narrow floor reveal keeps the hearth zone domestic and bounded: the
+     * lounge rug ends before the public turn rather than merging with it. */
+    rug(R,112,82,64,34,false);
+    R(112,116,64,2,p.wood);
+    R(114,116,60,1,p.woodLight);
+    /* Brass side wings and a dark center mat make both door leaves read as
+     * an operational lobby threshold while retaining the open center path. */
+    R(112,170,12,5,p.woodDark);R(114,170,10,1,p.gold);R(116,171,8,2,p.woodLight);
+    R(164,170,12,5,p.woodDark);R(164,170,10,1,p.gold);R(164,171,8,2,p.woodLight);
+    R(124,169,40,7,p.ink);R(126,170,36,1,p.gold);R(128,171,32,4,p.redDark);
+    R(130,172,28,2,p.red);R(128,175,32,1,p.gold);
   }
   function column(R,x,y,h){
     /* Square-hewn posts carry the upper wall into the sill. Small caps and
@@ -122,9 +136,9 @@
     R(x-4,y+10,9,2,p.woodDark);R(x-3,y+10,7,1,p.gold);
   }
   function plant(R,x,y){
-    R(x-5,y-7,10,7,p.woodDark);R(x-6,y-9,12,3,p.woodLight);R(x-4,y-6,1,5,p.gold);
-    R(x,y-28,1,20,p.greenLight);
-    [[-7,-24],[-5,-19],[-4,-13],[2,-25],[3,-18],[1,-31]].forEach(function(v){
+    R(x-5,y-7,10,7,p.woodDark);R(x-6,y-9,12,3,p.woodLight);R(x-5,y-8,10,1,p.gold);R(x-4,y-6,1,5,p.gold);
+    R(x-4,y-1,8,1,p.ink);R(x,y-30,1,22,p.greenLight);
+    [[-7,-24],[-5,-19],[-4,-13],[2,-25],[3,-18],[1,-31],[-1,-27]].forEach(function(v){
       R(x+v[0],y+v[1],5,3,p.green);R(x+v[0],y+v[1],3,1,p.greenLight);
     });
   }
@@ -161,6 +175,9 @@
     column(R,1,0,176);column(R,273,0,176);
     lantern(R,26,30);lantern(R,179,28);lantern(R,264,35);lantern(R,8,118);lantern(R,280,130);
     plant(R,8,101);plant(R,280,108);plant(R,280,166);
+    /* Paired entry planters frame the arrival without occupying the public
+     * spine: their pots sit outside x=8's approach and flank the door sill. */
+    plant(R,112,174);plant(R,176,174);
     R(0,176,128,16,p.woodDark);R(160,176,128,16,p.woodDark);
     R(0,176,128,2,p.woodLight);R(160,176,128,2,p.woodLight);
     [128,144].forEach(function(x){R(x,176,16,16,p.ink);R(x+1,178,14,14,p.wood);
@@ -309,6 +326,11 @@
     /* Bellhop cart is inset into the built bay painted by receptionBack:
      * tall brass rails, a hooked handle, two stacked bags and two wheels
      * give this solid tile an unmistakable arrival/logistics silhouette. */
+    /* A shallow parking apron meets the bay plinth under the wheels. It
+     * connects luggage to service circulation without turning the guest rug
+     * into a second carpeted room. */
+    R(24,113,34,8,p.ink);R(26,113,30,1,p.gold);R(27,114,28,4,p.woodDark);
+    R(28,115,26,1,p.woodLight);R(27,119,28,1,p.wood);
     R(27,108,28,3,p.ink);R(28,106,26,2,p.woodLight);R(28,109,26,2,p.gold);
     R(28,84,2,24,p.gold);R(50,84,2,24,p.gold);R(29,83,3,2,p.cream);R(49,83,3,2,p.cream);
     R(30,81,21,2,p.ink);R(32,79,16,2,p.gold);R(32,80,3,3,p.gold);R(47,80,3,3,p.gold);R(36,79,10,1,p.cream);
