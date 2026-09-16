@@ -134,7 +134,22 @@
     if (!state.evidence[name]) NR.applyEffects(state, [{ evidence: name }]);
   }
 
-  function syncClassicToNarrative(NR, state, classicFlags) {
+  // Early classic clues exist only after their dialogue pages finish.
+  // Import their authored notebook identities, never infer them from act
+  // flags or seeds. Observations do not formulate any proposition.
+  function syncClassicEvidence(NR, state, classicClues) {
+    if (classicClues === undefined) return;
+    if (!Array.isArray(classicClues)) throw new Error('classic_clues_must_be_array');
+    var bindings = [['diario', 'E1_DIARIO'], ['lettera_r', 'E3_LETTERA_R']];
+    var effects = [];
+    bindings.forEach(function (entry) {
+      if (classicClues.indexOf(entry[0]) >= 0 && !state.evidence[entry[1]]) effects.push({ evidence: entry[1] });
+    });
+    if (effects.length) { NR.applyEffects(state, effects); state.revision++; }
+  }
+
+  function syncClassicToNarrative(NR, state, classicFlags, classicClues) {
+    syncClassicEvidence(NR, state, classicClues);
     // audrey_indaga è scritto dal layer classico (data.js audrey_a2 /
     // audrey_a2_ben): senza questo ponte il nodo facoltativo m6_audrey resta
     // irraggiungibile a runtime (M6 stitch C4).
@@ -304,9 +319,10 @@
       return;
     }
     state = loaded.state;
-    if (classic && classic.flags) syncClassicToNarrative(NR, state, classic.flags);
+    var loadedRevision = state.revision;
+    if (classic && classic.flags) syncClassicToNarrative(NR, state, classic.flags, classic.clues);
     A.setState(state);
-    lastSavedRevision = state.revision;
+    lastSavedRevision = loadedRevision;
     lastSavedClassicFingerprint = classic && NS ? NS.classicFingerprint(classic) : null;
     var finaleRestore = { ok: true, absent: true };
     if (GAME.NarrativeFinaleProduction && GAME.NarrativeFinaleProduction.restoreFromStorage) {
@@ -339,7 +355,7 @@
 
       if (E.state.mode === 'play') {
         if (GAME.NarrativeFinaleProduction && GAME.NarrativeFinaleProduction.poll) GAME.NarrativeFinaleProduction.poll();
-        syncClassicToNarrative(NR, state, E.state.flags);
+        syncClassicToNarrative(NR, state, E.state.flags, E.state.clues);
         if (A.syncCarryoverEvidence) A.syncCarryoverEvidence();
         syncNarrativeToClassic(state, E.state.flags);
         renderObjective(NR, A);
