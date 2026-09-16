@@ -22,7 +22,7 @@ Reception counter is boundary, not loose furniture. Clerk stands staff side; sig
 | Unit | Floor | Current | Status |
 |---|---:|---:|---|
 | Architectural shell + floor plane | 8 | 8 | pass |
-| Reception + service wing | 8 | — | pending |
+| Reception + service wing | 8 | 6 | iterating |
 | Fireplace + lounge | 8 | — | pending |
 | Stairs + Room 315 hall | 8 | — | pending |
 | Entry + runner + circulation props | 8 | — | pending |
@@ -38,7 +38,7 @@ Reception counter is boundary, not loose furniture. Clerk stands staff side; sig
 
 ## Latest verdict
 
-Shell R2: 8/10 pass. Continuous parquet and threshold accepted. Remaining value-depth gap belongs to lighting/integration.
+Shell R2: 8/10 pass. Continuous parquet and threshold accepted. Reception R1: 6/10; desk reads, bellhop bay weak. Ben absent from fixed shot even with Act 2 flags; no fake sprite.
 
 ## High constraints
 

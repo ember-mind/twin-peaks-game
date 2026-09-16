@@ -197,41 +197,73 @@
     O:['111','101','101','101','111'],H:['101','101','111','101','101']};
   function label(R,text,x,y){Array.from(text).forEach(function(c,i){(font[c]||[]).forEach(function(row,dy){Array.from(row).forEach(function(v,dx){if(v==='1')R(x+i*4+dx,y+dy,1,1,p.cream);});});});}
   function receptionBack(R){
-    /* Reception is construction, not loose furniture. This west-wall service
-     * alcove gives the clerk a staff side, a wall for keys/signage, and one
-     * open counter edge facing guests arriving from the south. */
+    /* Reception is construction, not loose furniture: a west-wall alcove
+     * carries the sign and keys, then opens into a narrow staff work strip
+     * above the guest-facing counter. The rear face is intentionally broken
+     * into wall panels so Ben's fixed body tile remains legible in the gap. */
     R(16,76,114,52,p.ink);R(18,78,110,48,p.woodDark);
-    R(18,78,110,4,p.woodLight);R(18,82,110,3,p.wood);R(18,85,110,2,p.ink);
-    /* Bellhop/luggage bay remains against the same service wall. */
-    for(var x=20;x<62;x+=10){R(x,87,8,37,p.wood);R(x+1,88,1,34,p.woodLight);R(x+7,88,1,35,p.ink);}
-    R(18,121,44,3,p.woodDark);R(19,121,42,1,p.gold);
-    /* Structural jamb separates bellhop bay from staffed check-in opening. */
+    R(18,78,110,4,p.woodLight);R(18,82,110,2,p.wood);R(18,84,110,2,p.ink);
+    /* Bellhop bay: the cart is nested under a built-in canopy and side
+     * posts, with a low plinth tying it to the same service wall. */
+    R(18,86,43,38,p.wood);R(19,87,41,35,p.woodDark);
+    R(18,85,43,3,p.ink);R(19,85,41,1,p.woodLight);R(20,86,39,1,p.gold);
+    R(18,121,44,3,p.ink);R(19,121,42,1,p.gold);R(20,122,40,1,p.woodLight);
+    R(19,88,3,34,p.woodLight);R(58,87,3,36,p.ink);R(59,88,1,33,p.woodLight);
+    for(var x=24;x<57;x+=9){R(x,90,6,29,p.wood);R(x+1,91,1,26,p.woodLight);R(x+5,91,1,27,p.woodDark);}
+    R(22,116,36,4,p.woodDark);R(23,116,34,1,p.gold);R(25,117,30,1,p.woodLight);
+    /* Structural jambs frame the staffed opening without sealing it in.
+     * The area x67..123, y106..125 is deliberately quieter than the panels. */
     R(60,78,7,50,p.ink);R(61,79,5,47,p.wood);R(62,80,1,44,p.woodLight);R(65,80,1,46,p.woodDark);
     R(125,78,5,50,p.ink);R(126,79,3,47,p.wood);R(126,80,1,44,p.woodLight);
-    /* Sign and key bank are fixed to the clerk's rear wall. Ben renders in
-     * front through normal depth ordering; these never float over the floor. */
-    R(67,87,56,22,p.ink);R(68,88,54,20,p.gold);R(70,89,50,18,p.ink);
-    [[82,96,5],[93,96,8],[105,96,5]].forEach(function(a){for(var n=0;n<a[2];n++)R(a[0]-n,a[1]-a[2]+n,2*n+1,1,p.woodLight);});
-    label(R,'GREAT',84,97);label(R,'NORTHERN',78,103);
-    R(67,109,56,17,p.woodDark);
-    for(var y=111;y<126;y+=5)for(var x=68;x<123;x+=6){R(x,y,5,4,p.ink);R(x+2,y+1,1,2,p.gold);}
+    R(67,79,56,25,p.woodDark);R(68,80,54,2,p.woodLight);
+    /* Wall-mounted GREAT NORTHERN sign: the dark plaque, inset trim, and
+     * stepped mountain mark give it a stable back plane above Ben. */
+    R(67,81,56,22,p.ink);R(68,82,54,20,p.gold);R(70,84,50,16,p.woodDark);
+    R(71,85,48,14,p.ink);
+    [[82,91,5],[93,91,8],[105,91,5]].forEach(function(a){for(var n=0;n<a[2];n++)R(a[0]-n,a[1]-a[2]+n,2*n+1,1,p.woodLight);});
+    label(R,'GREAT',83,92);label(R,'NORTHERN',77,98);
+    R(67,103,56,2,p.ink);R(68,103,54,1,p.gold);
+    /* Key cubbies are a separate wall-mounted bank below the plaque. Small
+     * brass tags catch the lamp without reading as a second free-standing
+     * cabinet. */
+    R(67,105,56,12,p.ink);R(68,106,54,10,p.wood);R(69,107,52,8,p.woodDark);
+    for(var y=108;y<116;y+=5)for(var x=70;x<121;x+=8){
+      R(x,y,7,5,p.ink);R(x+1,y+1,5,3,p.woodDark);R(x+4,y+2,1,2,p.gold);
+    }
+    /* Open transaction/work strip: panelled floor and a shallow back rail
+     * keep the staff side architectural while leaving the actor silhouette
+     * unobscured until the counter top begins. */
+    R(67,117,56,7,p.woodDark);R(68,117,54,1,p.woodLight);R(69,119,52,1,p.wood);
+    R(69,123,52,1,p.woodLight);R(69,125,52,1,p.wood);
   }
   function reception(R){
-    /* Counter closes only the guest-facing edge. Staff stands north of it;
-     * guest approaches from entrance runner on its south/east side. */
+    /* Counter closes only the four authored guest-facing C cells. Its wide
+     * top is a real transaction edge, while the recessed panel bays below
+     * make the boundary feel built rather than like a floating bar. */
     R(64,126,64,18,p.ink);R(65,128,62,14,p.woodDark);
-    [67,87,107].forEach(function(x){R(x,131,17,10,p.wood);R(x,130,17,1,p.woodLight);R(x,131,1,9,p.woodLight);R(x+16,132,1,9,p.ink);});
+    [67,87,107].forEach(function(x){
+      R(x,130,17,12,p.wood);R(x,130,17,1,p.woodLight);R(x+1,132,15,1,p.woodLight);
+      R(x+1,132,1,9,p.woodLight);R(x+16,132,1,10,p.ink);R(x+3,140,11,1,p.woodDark);
+    });
     R(65,141,62,1,p.woodLight);R(64,143,64,1,p.ink);
+    /* A continuous brass lip is the guest/staff boundary. The narrow dark
+     * return at either end seats the counter into the jambs. */
     R(62,123,68,5,p.ink);R(63,123,66,1,p.gold);R(63,124,66,2,p.woodLight);R(64,126,64,1,p.wood);
+    R(64,127,64,1,p.woodDark);R(63,124,2,3,p.gold);R(127,124,2,3,p.gold);
+    /* Bell and desk lamp sit on the transaction edge, with the lamp pushed
+     * to the far right so the key bank and clerk stay readable. */
     R(95,124,11,2,p.ink);R(96,120,9,4,p.gold);R(98,119,5,2,p.cream);R(100,117,1,2,p.gold);R(98,121,3,1,p.light);
     R(117,125,9,1,p.ink);R(118,124,7,1,p.gold);R(121,119,1,5,p.gold);
     R(118,112,7,2,p.gold);R(117,114,9,3,p.cream);R(116,117,11,2,p.gold);R(119,114,5,3,p.light);
   }
   function luggage(R){
+    /* Bellhop cart is inset into the built bay painted by receptionBack:
+     * upright rails meet its canopy and the wheels land on the shared plinth. */
     R(32,109,16,3,p.ink);R(32,85,2,24,p.gold);R(46,85,2,24,p.gold);
-    R(35,80,10,2,p.gold);R(33,82,3,3,p.gold);R(44,82,3,3,p.gold);R(37,80,6,1,p.cream);
-    R(34,98,12,10,p.woodDark);R(35,98,10,1,p.woodLight);R(37,98,1,10,p.gold);R(42,98,1,10,p.gold);
-    R(36,92,8,6,p.redDark);R(37,92,6,1,p.redLight);R(38,90,4,2,p.ink);R(32,111,3,1,p.ink);R(45,111,3,1,p.ink);
+    R(33,84,14,2,p.ink);R(35,80,10,2,p.gold);R(33,82,3,3,p.gold);R(44,82,3,3,p.gold);R(37,80,6,1,p.cream);
+    R(33,96,14,13,p.woodDark);R(34,97,12,1,p.woodLight);R(35,98,1,10,p.gold);R(44,98,1,10,p.gold);
+    R(36,92,8,6,p.redDark);R(37,92,6,1,p.redLight);R(38,90,4,2,p.ink);R(37,97,8,1,p.woodLight);
+    R(32,111,3,1,p.ink);R(45,111,3,1,p.ink);R(33,111,2,1,p.gold);R(45,111,2,1,p.gold);
   }
   function stairs(R){
     /* Stair treads are passable floor leading into the existing 315 hall,
