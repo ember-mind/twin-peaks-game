@@ -84,30 +84,27 @@
   ]);
   /* Great Northern: three authored flame silhouettes, a warm chandelier,
    * one restrained transaction lamp, and a small glint moving only over the
-   * brass service bell. Every practical is source-linked to its authored
-   * receiving material; idle windows stay long enough for the lobby to feel
-   * still between changes. */
+   * brass service bell. Anchors follow the 20x12 native lobby plan: hearth
+   * west, open runner centre, staffed counter east, stairs at far right. */
   life.register('hotel_gn',[
-    {id:'lobby-fire',type:'MACHINE_IDLE_ACTIVITY',x:106,y:56,depth:80,variants:3,
+    {id:'lobby-fire',type:'MACHINE_IDLE_ACTIVITY',x:52,y:50,depth:80,variants:3,
       delay:[3600,6200],duration:[1800,2400],intensity:1.7,marks:[
         [{x:-2,y:7,w:6,h:10,color:'#d77b37'},{x:5,y:1,w:6,h:16,color:'#e9c582'},{x:12,y:6,w:6,h:11,color:'#ffe7a6'},{x:20,y:10,w:5,h:7,color:'#d77b37'}],
         [{x:0,y:4,w:5,h:14,color:'#d77b37'},{x:7,y:0,w:6,h:17,color:'#e9c582'},{x:15,y:7,w:5,h:10,color:'#ffe7a6'},{x:22,y:3,w:4,h:14,color:'#d77b37'}],
         [{x:-1,y:2,w:5,h:16,color:'#e9c582'},{x:6,y:7,w:6,h:11,color:'#d77b37'},{x:14,y:1,w:6,h:17,color:'#ffe7a6'},{x:23,y:8,w:5,h:9,color:'#e9c582'}]
       ]},
-    {id:'lobby-chandelier',type:'LIGHT_WARM_VARIATION',x:156,y:24,depth:192,variants:3,
+    {id:'lobby-chandelier',type:'LIGHT_WARM_VARIATION',x:160,y:24,depth:28,variants:3,
       delay:[3600,6800],duration:[1800,2600],intensity:.9,
-      regions:[{x:138,y:13,w:5,h:6,depth:192},{x:146,y:19,w:5,h:6,depth:192},
-        {x:162,y:19,w:5,h:6,depth:192},{x:170,y:13,w:5,h:6,depth:192},
-        /* These short rows sit on the same wall/floor ellipse as the static
-         * chandelier pool; no rectangular light beam is introduced. */
-        {x:160,y:34,w:6,h:1,depth:0},{x:166,y:58,w:8,h:1,depth:0},
-        {x:172,y:78,w:10,h:1,depth:0}]},
-    {id:'lobby-desk-lamp',type:'LIGHT_WARM_VARIATION',x:121,y:112,depth:144,variants:3,
+      regions:[{x:141,y:13,w:5,h:6,depth:28},{x:149,y:19,w:5,h:6,depth:28},
+        {x:165,y:19,w:5,h:6,depth:28},{x:173,y:13,w:5,h:6,depth:28},
+        {x:158,y:34,w:6,h:1,depth:0},{x:164,y:58,w:8,h:1,depth:0},
+        {x:170,y:78,w:10,h:1,depth:0}]},
+    {id:'lobby-desk-lamp',type:'LIGHT_WARM_VARIATION',x:229,y:112,depth:144,variants:3,
       delay:[3600,6800],duration:[1800,2600],intensity:.9,
-      regions:[{x:112,y:123,w:10,h:2,depth:144},{x:110,y:107,w:9,h:2,depth:128},
-        {x:101,y:110,w:10,h:1,depth:128},{x:98,y:119,w:10,h:1,depth:144},
-        {x:98,y:130,w:12,h:1,depth:144},{x:112,y:137,w:8,h:1,depth:144}]},
-    {id:'lobby-bell',type:'GLASS_SUBTLE_REFLECTION',x:99,y:119,depth:144,variants:3,travel:3,
+      regions:[{x:225,y:112,w:9,h:4,depth:128},{x:225,y:122,w:9,h:2,depth:144},
+        {x:224,y:124,w:11,h:2,depth:144},{x:218,y:130,w:12,h:1,depth:144},
+        {x:226,y:140,w:10,h:1,depth:144}]},
+    {id:'lobby-bell',type:'GLASS_SUBTLE_REFLECTION',x:202,y:117,depth:144,variants:3,travel:3,
       delay:[4200,7600],duration:[2000,3000],intensity:1.15}
   ]);
   /* Red Room uses the existing intermittent device archetype with three

@@ -91,9 +91,9 @@ E.state.flags.atto4 = true;
 E.state.clues = ['a', 'b', 'c'];
 
 // ---- paired migrated crossings, both directions, every leaf
-cross('town -> hotel_gn (town-great-northern-lobby)', 'town', [9, 7], 'up', ['hotel_gn', 8, 10, 'up']);
-cross('hotel_gn leaf 8,11 -> town', 'hotel_gn', [8, 10], 'down', ['town', 9, 7, 'down']);
+cross('town -> hotel_gn (town-great-northern-lobby)', 'town', [9, 7], 'up', ['hotel_gn', 9, 10, 'up']);
 cross('hotel_gn leaf 9,11 -> town', 'hotel_gn', [9, 10], 'down', ['town', 9, 7, 'down']);
+cross('hotel_gn leaf 10,11 -> town', 'hotel_gn', [10, 10], 'down', ['town', 9, 7, 'down']);
 cross('town -> hospital (town-hospital)', 'town', [23, 7], 'up', ['hospital', 7, 10, 'up']);
 cross('hospital leaf 7,11 -> town', 'hospital', [7, 10], 'down', ['town', 23, 7, 'down']);
 cross('hospital leaf 8,11 -> town', 'hospital', [8, 10], 'down', ['town', 23, 7, 'down']);

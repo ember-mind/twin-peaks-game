@@ -288,12 +288,12 @@ drainDialogueAndLog('Truman post-sogno');
 logNewFlags(flagsBefore);
 
 // Great Northern: Ben Horne e Audrey
-loadMapAndLog('hotel_gn', 5, 6, 'down');
+loadMapAndLog('hotel_gn', 12, 6, 'down');
 key('Enter'); pump(16);
 drainDialogueAndLog('Ben Horne');
 logNewFlags(flagsBefore);
 
-loadMapAndLog('hotel_gn', 12, 10, 'up');
+loadMapAndLog('hotel_gn', 15, 10, 'up');
 key('Enter'); pump(16);
 drainDialogueAndLog('Audrey (Great Northern)');
 logNewFlags(flagsBefore);

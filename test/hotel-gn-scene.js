@@ -48,7 +48,7 @@ const ids=['town-great-northern-lobby','great-northern-room-315-hall'];
 const canonical=G.LocationConnections.connectionRecordsFor(ids);
 for(const record of canonical)assert.deepEqual(plain(record),records.find(r=>r.id===record.id),'generated and canonical record exact');
 for(const d of art.props)for(const [x,y] of d.cells)assert.equal(G.Maps.isSolid('hotel_gn',x,y),true,d.id+' has grounded solid footprint');
-const solidCells=[];for(let y=1;y<11;y++)for(let x=1;x<17;x++)if('CUht'.includes(map.rows[y][x]))solidCells.push(x+','+y);
+const solidCells=[];for(let y=1;y<11;y++)for(let x=1;x<19;x++)if('CUht'.includes(map.rows[y][x]))solidCells.push(x+','+y);
 assert.deepEqual(plain(art.props.flatMap(d=>d.cells.map(c=>c.join(','))).sort()),solidCells.sort(),'all solid furniture glyphs visibly occupied');
 const authoredPalette=new Set(Object.values(art.palette));
 const ctx={globalAlpha:.75,fillStyle:'before',marks:[],overlayMarks:[],fillRect(x,y,w,h){
@@ -75,7 +75,7 @@ assert.ok(ctx.marks.length>0,'foreground includes hearth at exact depth');
 ctx.marks=[];G.sprites.drawForegroundStructures(ctx,map,0,0,{forestDepthMin:81,forestDepthMax:111});
 assert.equal(ctx.marks.length,0,'foreground excludes props outside depth slice');
 assert.equal(G.Sprites.drawTile(ctx,'f',0,0,0,0,[],{mapId:'hotel_gn'}),undefined);
-assert.equal(G.Retro2D.limitBackgroundPalettes(ctx,0,0,288,192,'hotel_gn'),undefined);
+assert.equal(G.Retro2D.limitBackgroundPalettes(ctx,0,0,320,192,'hotel_gn'),undefined);
 assert.equal(G.Sprites.drawTile(ctx,'f',1,2,3,4,[],{mapId:'town'}),'tile');
 assert.equal(G.sprites.drawStructures(ctx,{id:'diner'},3,5),'structures');
 assert.equal(G.sprites.drawForegroundStructures(ctx,{id:'room_315'},3,5,{forestDepthMin:2}),'foreground');
@@ -93,8 +93,8 @@ assert.deepEqual(defs.map(d=>d.type),['MACHINE_IDLE_ACTIVITY','LIGHT_WARM_VARIAT
 const fire=defs[0];assert.equal(fire.variants,3);assert.equal(fire.marks.length,3);
 assert.equal(new Set(fire.marks.map(JSON.stringify)).size,3,'three distinct flame silhouettes');
 const deskLamp=defs[2];assert.equal(deskLamp.id,'lobby-desk-lamp');
-assert.ok(deskLamp.regions.some(r=>r.x===112&&r.y===123),'desk lamp reaches transaction edge');
-assert.ok(deskLamp.regions.some(r=>r.x===110&&r.y===107),'desk lamp reaches key cubbies');
+assert.ok(deskLamp.regions.some(r=>r.x===225&&r.y===122),'desk lamp reaches transaction edge');
+assert.ok(deskLamp.regions.some(r=>r.x===225&&r.y===112),'desk lamp reaches key cubbies');
 G.AmbientLife.reset(7);
 let marks=0;const fireVariants=new Set();
 const ambientCtx={globalAlpha:.8,fillStyle:'original',fillRect(x,y,w,h){
@@ -133,9 +133,9 @@ for(const record of canonical){
   failMutation(G.WorldData,'connections',changed,/canonical connection diverges/);
 }
 const solid=G.Maps.isSolid;
-G.Maps.isSolid=(id,x,y)=>id==='hotel_gn'&&x===5&&y===7||solid(id,x,y);
+G.Maps.isSolid=(id,x,y)=>id==='hotel_gn'&&x===12&&y===7||solid(id,x,y);
 assert.throws(()=>scene.install(),/blocked Cast Presence body benhorne/);G.Maps.isSolid=solid;
-G.Maps.isSolid=(id,x,y)=>id==='hotel_gn'&&x===8&&y===10||solid(id,x,y);
+G.Maps.isSolid=(id,x,y)=>id==='hotel_gn'&&x===9&&y===10||solid(id,x,y);
 assert.throws(()=>scene.install(),/blocked entrance walk spine/);G.Maps.isSolid=solid;
 scene.validate();installs.forEach(i=>i.uninstall());
 assert.equal(JSON.stringify(map),before);assert.equal(JSON.stringify(room),roomBefore);

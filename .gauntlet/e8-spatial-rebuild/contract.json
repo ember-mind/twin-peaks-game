@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "slug": "e8-spatial-rebuild",
+  "mode": "execute",
+  "status": "building",
+  "createdAt": "2026-09-16T15:40:34.741Z",
+  "updatedAt": "2026-09-16T15:40:34.741Z",
+  "goal": "Functional Great Northern lobby with believable check-in, waiting, upper-floor circulation and source-linked ambience",
+  "domain": "games",
+  "externalBar": "assets/ref/great-northern-lobby-sheet.png bottom panel plus playable hotel circulation",
+  "hardFloor": 8,
+  "scope": {
+    "included": ["hotel_gn map geometry", "lobby-side town and Room 315 connection endpoints", "Ben/Audrey lobby Cast Presence positions", "native lobby art and existing ambient archetypes", "coordinate-dependent generated data, tests, evidence and report"],
+    "excluded": ["Room 315 interior redesign", "new ambient archetypes", "other maps and stories", "renderer core changes"],
+    "immutable": ["Room 315 rows and onEnter", "Town-side Great Northern endpoint", "Room 315-side hall endpoint", "js/retro.js", "js/retro-authored.js", "js/tiles.js", "Cast Presence as sole actor owner", "scene installer must not inspect doors before registry install"],
+    "platforms": ["native retro production", "desktop Chrome", "mobile production contract"]
+  },
+  "referencePack": {
+    "reconstructed": true,
+    "sources": [{"path":"assets/ref/great-northern-lobby-sheet.png","selection":"bottom panel only; external visual bar"},{"path":"docs/great-northern-lobby-spatial-study.md","selection":"functional hotel program and acceptance checks"}],
+    "measurements": ["reference bottom: central uninterrupted arrival runner, west hearth lounge, east staffed reception, far-east stair, south entry", "baseline: 18x12 map in 16x12 viewport; desk projects into centre-left, lounge blocks central arrival route", "candidate: 20x12 map (320x192 map pixels), 16x12 native viewport (256x192); entry and hall views both required", "functional routes: entry to desk guest edge, lounge, stair/Room315; staff-side aisle from service edge to Ben, keys and luggage", "slow existing fire, chandelier, desk lamp and bell archetypes; source-linked receiving surfaces"]
+  },
+  "evidenceProtocol": {
+    "stable": true,
+    "representativeStates": ["south town-entry spawn (9,10), facing up, real Cast Presence", "Room 315 hall return (16,2), facing down", "slow ambient frames from production renderer"],
+    "commands": ["test/shot.sh hotel_gn 9 10 up <out> --retro --narrative", "test/shot.sh hotel_gn 16 2 down <out> --retro --narrative", "node test/hotel-gn-scene.js"],
+    "artifactTypes": ["entry PNG", "hall PNG", "ambient frame series", "critic Markdown", "gate results"],
+    "fixedConditions": {"mapId":"hotel_gn","renderer":"retro production","camera":"native 256x192","seed":104729,"referencePanel":"bottom only","floor":8},
+    "hashManifest": ".gauntlet/e8-spatial-rebuild/evidence-manifest.json"
+  },
+  "inventory": [
+    {"id":"function-circulation","unit":"Arrival and circulation","bar":"Clear south entry to receiving axis, side desk, lounge and stair routes; guest and staff traffic do not conflict","floor":8,"status":"pass","baselineEvidence":["evidence/baseline.png"],"baselineScore":4,"currentEvidence":["evidence/entry-r1.png","evidence/hall-r1.png"],"score":8,"criticVerdict":"PASS"},
+    {"id":"reception-service","unit":"Perimeter reception and service","bar":"Right-wall counter with staff aisle, Ben behind, sign/keys/register/bell/lamp and adjacent luggage function","floor":8,"status":"pass","baselineEvidence":["evidence/baseline.png"],"baselineScore":5,"currentEvidence":["evidence/entry-r1.png","evidence/hall-r1.png"],"score":8.5,"criticVerdict":"PASS"},
+    {"id":"hearth-lounge","unit":"Fireplace and waiting lounge","bar":"West masonry hearth, bear above, chairs/table oriented to fire on bounded rug outside circulation","floor":8,"status":"pass","baselineEvidence":["evidence/baseline.png"],"baselineScore":4,"currentEvidence":["evidence/entry-r1.png"],"score":8,"criticVerdict":"PASS"},
+    {"id":"stairs-hall","unit":"Stairs and upper-room access","bar":"East stair attached to wall, open foot, rail/runner leading to actual hall door","floor":8,"status":"pass","baselineEvidence":["evidence/baseline.png"],"baselineScore":7,"currentEvidence":["evidence/hall-r1.png"],"score":9,"criticVerdict":"PASS"},
+    {"id":"light-ambient","unit":"Light and ambient life","bar":"Slow fire/chandelier/desk/bell motion with visible warm receiving surfaces and no busy noise","floor":8,"status":"pending-temporal","baselineEvidence":["evidence/baseline.png"],"baselineScore":6,"currentEvidence":["evidence/entry-r1.png"],"score":8,"criticVerdict":"STILL_ONLY"},
+    {"id":"integrated-world","unit":"Integrated playable hotel lobby","bar":"Whole native scene reads as a livable Great Northern hotel and approaches reference bottom panel in entry and hall views","floor":8,"status":"below-floor","baselineEvidence":["evidence/baseline.png"],"baselineScore":5,"currentEvidence":["evidence/entry-r1.png","evidence/hall-r1.png"],"score":7,"criticVerdict":"BAR_WINS"}
+  ],
+  "regressionGates": [
+    {"id":"focused","criterion":"geometry, door lifecycle, cast and ambient native scene","command":"node test/hotel-gn-scene.js","status":"pending","evidence":[]},
+    {"id":"smoke","criterion":"whole structural simulation","command":"node test/smoke.js","status":"pending","evidence":[]},
+    {"id":"walkthrough","criterion":"acquisition graph","command":"node test/walkthrough.js","status":"pending","evidence":[]},
+    {"id":"retro","criterion":"retro production renderer","command":"node test/retro-production.js","status":"pending","evidence":[]},
+    {"id":"mobile","criterion":"mobile production contract","command":"node test/mobile-production.js","status":"pending","evidence":[]},
+    {"id":"cast","criterion":"character continuity with revised Ben/Audrey tiles","command":"node test/cast-continuity-validate.js","status":"pending","evidence":[]},
+    {"id":"doors","criterion":"registry door equality after lobby endpoint migration","command":"node test/world-door-equality.js","status":"pending","evidence":[]},
+    {"id":"room315","criterion":"Room 315 interior and hall round trip","command":"node test/room-315-location.js","status":"pending","evidence":[]},
+    {"id":"narrative","criterion":"finale route and character state","command":"node test/narrative-finale.js","status":"pending","evidence":[]},
+    {"id":"act4flow","criterion":"Act 4 flow consistency","command":"node test/act-4-flow.js","status":"pending","evidence":[]},
+    {"id":"act4chrome","criterion":"all Act 4 browser paths","command":"node test/act-4-playthrough.js --path=all","status":"pending","evidence":[]},
+    {"id":"act3chrome","criterion":"all Act 3 browser paths","command":"node test/act-3-playthrough.js","status":"pending","evidence":[]}
+  ],
+  "agents": {
+    "builderCriticSeparated": true,
+    "criticFreshContext": true
+  },
+  "gapQueue": ["Baseline desk protrudes into centre-left instead of east service bay", "Baseline lounge interrupts central runner", "Source-linked light needs visible material response"],
+  "rounds": [{"round":1,"builder":"Luna/xhigh /root/e8_spatial_map_builder + /root/e8_spatial_art_builder","critic":"fresh Luna/xhigh /root/e8_spatial_critic_r1","evidence":["artifacts/art-pass-e/e8-spatial-rebuild/round-1/entry.png","artifacts/art-pass-e/e8-spatial-rebuild/round-1/hall.png"],"scores":{"entryIntegrated":8,"hallIntegrated":7},"rankVsPrevious":"BETTER","gap":"Hall frame crops west hearth/lounge; integrated hall below floor."}],
+  "finalGate": {
+    "allUnitsCovered": false,
+    "hardGatesPass": false,
+    "independentVerdict": null,
+    "floor": null,
+    "unresolvedHighGaps": []
+  },
+  "progressSurface": ".gauntlet/e8-spatial-rebuild/progress.md",
+  "stopPolicy": "Verified pass, explicit human stop, lost authority, or genuine external blocker."
+}
