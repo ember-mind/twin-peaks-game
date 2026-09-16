@@ -1,0 +1,100 @@
+# Temporary branch-only patch transport; delete after the validated code commit.
+name: materialize-evidence-bridge
+on:
+  push:
+    branches: ['codex/playable-07-classic-evidence']
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: github.repository == 'ember-mind/twin-peaks-game' && github.ref == 'refs/heads/codex/playable-07-classic-evidence'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Apply only the reviewed exact-source repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p=Path('js/narrative-production.js'); raw=p.read_bytes()
+          assert hashlib.sha256(raw).hexdigest()=='24357075fcc8f601f34747db52d7ace82bb3f81ecfd940b45a3957832036241b'
+          s=raw.decode()
+          needle='  function syncClassicToNarrative(NR, state, classicFlags) {'
+          insert='''  // Explicit aliases for evidence genuinely acquired by the opening classic
+            // dialogues. Act flags are not proof of acquisition. Do not formulate any
+            // proposition here: the later notebook comparisons remain player actions.
+            function syncClassicEvidence(NR, state, classicClues) {
+              if (!Array.isArray(classicClues)) return [];
+              var aliases = { diario: 'E1_DIARIO', lettera_r: 'E3_LETTERA_R' };
+              var added = [];
+              Object.keys(aliases).forEach(function (clue) {
+                var evidence = aliases[clue];
+                if (classicClues.indexOf(clue) >= 0 && !state.evidence[evidence]) {
+                  ensureEvidence(NR, state, evidence);
+                  added.push(evidence);
+                }
+              });
+              // A repaired older save must be persisted even if its classic fingerprint
+              // did not change. Repeated polling must not bump revision or duplicate data.
+              if (added.length) state.revision++;
+              return added;
+            }
+
+          '''
+          assert s.count(needle)==1
+          s=s.replace(needle,insert+needle)
+          old='''    state = loaded.state;
+              if (classic && classic.flags) syncClassicToNarrative(NR, state, classic.flags);
+              A.setState(state);
+              lastSavedRevision = state.revision;'''
+          new='''    state = loaded.state;
+              lastSavedRevision = state.revision; // Durable revision, before any import repair.
+              if (classic && classic.flags) syncClassicToNarrative(NR, state, classic.flags);
+              if (classic) syncClassicEvidence(NR, state, classic.clues);
+              A.setState(state);'''
+          assert s.count(old)==1
+          s=s.replace(old,new)
+          old='''        syncClassicToNarrative(NR, state, E.state.flags);
+                  if (A.syncCarryoverEvidence)'''
+          new='''        syncClassicToNarrative(NR, state, E.state.flags);
+                  syncClassicEvidence(NR, state, E.state.clues);
+                  if (A.syncCarryoverEvidence)'''
+          assert s.count(old)==1
+          s=s.replace(old,new)
+          needle='  NP.syncClassicToNarrative = syncClassicToNarrative;'
+          assert s.count(needle)==1
+          s=s.replace(needle,needle+'\n  NP.syncClassicEvidence = syncClassicEvidence;')
+          p.write_text(s)
+          PY
+          node test/classic-evidence-bridge.js
+          node test/act-3-flow.js
+          node test/act-4-mirror-gate.js
+          node test/act-4-flow.js
+          node test/act-5-flow.js
+          node test/letter-chain-provenance.js
+          node test/narrative-lint.js
+          node test/story-truth-lint.js
+          node test/smoke.js
+          node test/walkthrough.js
+      - name: Commit only validated production repair to this branch
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          actual=$(git ls-remote origin refs/heads/codex/playable-07-classic-evidence | cut -f1)
+          test "$actual" = "$EXPECTED_SHA"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- js/narrative-production.js
+          git diff --cached --check
+          git commit -m 'fix(narrative): import earned diary and letter into later notebook without granting deductions'
+          git push origin HEAD:refs/heads/codex/playable-07-classic-evidence
