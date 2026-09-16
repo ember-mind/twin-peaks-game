@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 'use strict';
 
-/* Unseeded normal production browser. This opening milestone is explicitly
- * NOT a full campaign pass. Progress is earned through player input only.
- */
+/* Unseeded production journey, including the actual final epilogue. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { openPlayableBrowser } = require('./lib/playable-browser.js');
 const { createPlayer } = require('./lib/campaign-player.js');
+const completeCampaign = require('./lib/campaign-acts.js');
 const ROOT = path.resolve(__dirname, '..');
 async function main() {
   const output = path.resolve(process.env.CAMPAIGN_OUT || path.join(ROOT, 'artifacts', 'playable-build-01', String(Date.now())));
@@ -36,14 +35,14 @@ async function main() {
     await checkpoint('physical-awakening', (s) => s.mapId === 'room_315' && !!s.flags.sogno_fatto);
     await p.actor('sheriff', 'truman');
     await checkpoint('act2-entry', (s) => !!(s.narrative && s.narrative.flags.sogno_raccontato));
-    assert.ok(checkpoints.length >= 6);
+    await completeCampaign(p, checkpoint, b);
+    assert.equal(checkpoints.at(-1).name, 'title-after-ending');
   } catch (e) {
     error = String(e.stack || e); console.error(error);
     if (b) { try { await b.capture('failure'); } catch (_) {} }
     process.exitCode = 1;
   } finally {
-    // The browser boundary alone owns startup failures. A refused existing
-    // output directory must never become an excuse to overwrite its report.
+    // Startup failure must not overwrite an existing run's report.
     if (b) {
       try { await b.close(); } catch (e) {
         process.exitCode = 1; error = (error || '') + '\nCleanup failed: ' + String(e.stack || e);
@@ -54,11 +53,11 @@ async function main() {
         process.exitCode = 1;
         if (!error) error = session ? 'Unexpected browser faults: ' + JSON.stringify(faults) : 'Missing browser session evidence';
       }
-      const report = { milestone: 'New Game to Act 2 entry', automated: error ? 'FAIL' : 'PASS',
-        fullCampaign: 'NOT_RUN', humanPlaytest: 'NOT_RUN', source: session && session.metadata.source,
+      const report = { milestone: 'New Game through final epilogue and return to title', automated: error ? 'FAIL' : 'PASS',
+        fullCampaign: error ? 'FAIL' : 'PASS', humanPlaytest: 'NOT_RUN', source: session && session.metadata.source,
         checkpoints, error, faults, events };
       await fs.writeFile(path.join(output, 'campaign.json'), JSON.stringify(report, null, 2) + '\n', { flag: 'wx' });
-      console.log('CAMPAIGN-MILESTONE ' + report.automated + ' (full campaign NOT_RUN)');
+      console.log('CAMPAIGN-MILESTONE ' + report.automated + ' (unseeded full route; human playtest NOT_RUN)');
       console.log('Evidence: ' + output);
     }
   }

@@ -1,15 +1,17 @@
 'use strict';
 
-/* Route helpers on top of player inputs and serialized observations only.
- * Never import the game runtime here. There is no seed, teleport or API fallback.
+/* Route helpers over player inputs and serialized observations only.
+ * No runtime imports, state seeds, teleportation or interaction API fallback.
  */
 const assert = require('node:assert/strict');
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));
 const DIRS = [[0, -1, 'up'], [1, 0, 'right'], [0, 1, 'down'], [-1, 0, 'left']];
 const KEY = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
 const cell = (x, y) => `${x},${y}`;
-function pathTo(s, tx, ty, allowDoor = false) {
-  const from = [s.player.tx, s.player.ty], q = [from], seen = new Map([[cell(...from), null]]);
+function pathTo(s, tx, ty, allowDoor = false, finalDir = null) {
+  const from = [s.player.tx, s.player.ty, s.player.dir];
+  const key = (p) => finalDir ? cell(p[0], p[1]) + ',' + p[2] : cell(p[0], p[1]);
+  const q = [from], seen = new Map([[key(from), null]]);
   const occupied = new Set();
   for (const n of s.liveNpcs || []) {
     occupied.add(cell(n.x, n.y));
@@ -17,17 +19,17 @@ function pathTo(s, tx, ty, allowDoor = false) {
   }
   const doors = s.doors[s.mapId] || {};
   for (let i = 0; i < q.length; i++) {
-    const [x, y] = q[i];
-    if (x === tx && y === ty) {
-      const result = []; let next = [x, y];
-      while (seen.get(cell(...next))) { result.unshift(next); next = seen.get(cell(...next)); }
+    const [x, y, facing] = q[i];
+    if (x === tx && y === ty && (!finalDir || facing === finalDir)) {
+      const result = []; let next = q[i];
+      while (seen.get(key(next))) { result.unshift(next.slice(0, 2)); next = seen.get(key(next)); }
       return result;
     }
-    for (const [dx, dy] of DIRS) {
-      const nx = x + dx, ny = y + dy, k = cell(nx, ny);
-      if (seen.has(k) || !s.map.solid[ny] || s.map.solid[ny][nx] !== '0' || occupied.has(k)) continue;
+    for (const [dx, dy, dir] of DIRS) {
+      const nx = x + dx, ny = y + dy, k = cell(nx, ny), target = [nx, ny, dir];
+      if (seen.has(key(target)) || !s.map.solid[ny] || s.map.solid[ny][nx] !== '0' || occupied.has(k)) continue;
       if (doors[k] && !(allowDoor && nx === tx && ny === ty)) continue;
-      seen.set(k, [x, y]); q.push([nx, ny]);
+      seen.set(key(target), q[i]); q.push(target);
     }
   }
   return null;
@@ -61,7 +63,6 @@ function digest(s) {
   return { flags: n.flags, evidence: n.evidence, values: n.values, props: n.props,
     nodes_done: n.nodes_done, finale: s.finale && { stage: s.finale.stage, values: s.finale.values } };
 }
-
 function createPlayer(browser, log = () => {}) {
   const snap = () => browser.snapshot();
   async function press(code) { await browser.press(code, 20); await pause(175); }
@@ -96,12 +97,14 @@ function createPlayer(browser, log = () => {}) {
     throw new Error('New Game did not enter play');
   }
   async function face(dir) {
-    let s = await snap();
+    const s = await snap();
     if (s.player.dir === dir) return;
     await press(KEY[dir]);
-    await browser.waitFor('player settles after turning', (t) => !t.player.moving && !t.fadePhase);
+    const t = await browser.waitFor('player settles after turning', (v) => !v.player.moving && !v.fadePhase);
+    assert.deepEqual([t.player.tx, t.player.ty, t.player.dir], [s.player.tx, s.player.ty, dir],
+      'A short changed-direction input must turn without stepping onto the target');
   }
-  async function walk(tx, ty, allowDoor = false) {
+  async function walk(tx, ty, allowDoor = false, finalDir = null) {
     const mapId = (await snap()).mapId;
     for (let attempt = 0; attempt < 12; attempt++) {
       let s = await snap();
@@ -109,9 +112,9 @@ function createPlayer(browser, log = () => {}) {
         if (allowDoor) return;
         throw new Error(`Unexpected map change while walking ${mapId} -> ${s.mapId}`);
       }
-      if (s.player.tx === tx && s.player.ty === ty) return;
+      if (s.player.tx === tx && s.player.ty === ty && (!finalDir || s.player.dir === finalDir)) return;
       assert.ok(idle(s), `Cannot walk while UI owns input: ${JSON.stringify({mode:s.mode,page:s.semanticUi.page,choices:s.semanticUi.choices})}`);
-      const path = pathTo(s, tx, ty, allowDoor);
+      const path = pathTo(s, tx, ty, allowDoor, finalDir);
       if (!path) { await pause(400); continue; }
       let replan = false;
       for (const [nx, ny] of path) {
@@ -158,6 +161,8 @@ function createPlayer(browser, log = () => {}) {
   }
   async function reach(tx, ty) {
     const s = await snap();
+    // With the production turn-input repair, an ordinary short tap can face a
+    // walkable target in a recess. No collision or interaction API is bypassed.
     const candidates = DIRS.map(([dx, dy, dir]) => ({ x: tx - dx, y: ty - dy, dir }))
       .map((c) => ({ ...c, path: pathTo(s, c.x, c.y) })).filter((c) => c.path)
       .sort((a, b) => a.path.length - b.path.length);
@@ -165,6 +170,7 @@ function createPlayer(browser, log = () => {}) {
     const c = candidates[0]; await walk(c.x, c.y); await face(c.dir);
     const t = await snap();
     assert.equal(Math.abs(t.player.tx - tx) + Math.abs(t.player.ty - ty), 1, 'Player must stand beside target');
+    assert.equal(t.player.dir, c.dir, 'Player must face target');
   }
   async function interact() { await press('Enter'); return drain(); }
   async function actor(mapId, id) {
