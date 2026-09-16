@@ -2,7 +2,7 @@ name: unseeded-campaign
 on:
   pull_request:
   push:
-    branches: [main, 'codex/playable-02*', 'codex/playable-03*']
+    branches: [main, 'codex/playable-02*', 'codex/playable-04*']
 permissions:
   contents: read
 concurrency:
@@ -11,7 +11,7 @@ concurrency:
 jobs:
   campaign:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 50
     env:
       CHROME_NO_SANDBOX: '1'
     steps:
@@ -29,7 +29,7 @@ jobs:
           echo "CAMPAIGN_OUT=$RUNNER_TEMP/campaign" >> "$GITHUB_ENV"
       - name: Pure navigation contracts
         run: node test/campaign-player.js
-      - name: New Game to Act 2 through player input
+      - name: New Game through the actual final epilogue and ending
         run: node test/campaign-playthrough.js
       - name: Retain actual route and failure evidence
         if: always()
