@@ -1,0 +1,30 @@
+name: classic-evidence
+on:
+  pull_request:
+  push:
+    branches: [main, 'codex/playable-07*']
+permissions:
+  contents: read
+jobs:
+  earned-clues:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Earned inventory, idempotent repair and voluntary deductions
+        run: |
+          node test/classic-evidence-bridge.js
+          node test/letter-chain-provenance.js
+          node test/act-3-flow.js
+          node test/act-4-mirror-gate.js
+          node test/act-4-flow.js
+          node test/act-5-flow.js
+          node test/narrative-lint.js
+          node test/story-truth-lint.js
+          node test/smoke.js
+          node test/walkthrough.js
