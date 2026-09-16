@@ -38,10 +38,10 @@
     });
   }
   function guestRunner(R){
-    /* The public arrival is one straight, centered runner. It ends cleanly
-     * at y=122 before the eight-pixel parquet reveal below the bounded lounge
-     * rug; the east stair approach and west counter approach stay bare. */
-    var x=128,y=122,w=32,h=54;
+    /* Half-open public arrival spine: x=128..160, y=116..168. It reaches
+     * the built threshold without drifting, while the court below the lounge
+     * can fork around the fixed chairs and table. */
+    var x=128,y=116,w=32,h=52;
     R(x,y,w,h,p.ink);
     R(x+1,y+1,w-2,h-2,p.gold);
     R(x+3,y+2,w-6,h-4,p.redDark);
@@ -49,10 +49,52 @@
     R(x+6,y+5,w-12,h-10,p.redDark);
     /* A centered sequence of small medallions keeps the runner directional
      * without adding a horizontal crossbar or a turn into another route. */
-    for(var markY=134;markY<=166;markY+=16){
+    for(var markY=128;markY<=160;markY+=16){
       diamond(R,144,markY,4,p.gold);diamond(R,144,markY,3,p.redDark);R(144,markY,1,1,p.woodLight);
     }
-    R(130,124,1,44,p.gold);R(157,124,1,44,p.gold);
+    R(130,118,1,48,p.gold);R(157,118,1,48,p.gold);
+  }
+  function receivingCourt(R){
+    /* A wood-and-brass decision court (x=112..224, y=116..126) receives
+     * the arrival axis. It is deliberately parquet, not a red crossbar: the
+     * narrow guest/service inlays and their gold keylines do the wayfinding. */
+    R(112,116,112,10,p.woodDark);
+    R(112,116,112,1,p.ink);R(113,117,110,1,p.woodLight);
+    R(113,124,110,1,p.woodLight);R(112,125,112,1,p.ink);
+    for(var x=128;x<224;x+=32){R(x,118,1,6,p.wood);R(x+1,118,1,6,p.gold);}
+    R(114,119,108,4,p.wood);
+    /* Small board glints stop at joints and keep the receiving court from
+     * becoming a flat filled bar beneath the central runner. */
+    for(var gx=118;gx<220;gx+=24){R(gx,119,7,1,p.gold);R(gx+3,122,5,1,p.woodLight);}
+
+    /* Guest-facing desk apron and the narrower bellhop service inlay. Both
+     * terminate at the physical counter/bay and share the court's brass edge. */
+    R(64,116,48,10,p.woodDark);R(65,117,46,8,p.wood);
+    R(64,118,48,6,p.ink);R(65,118,46,1,p.gold);R(66,119,44,4,p.redDark);
+    R(68,120,40,2,p.red);R(65,123,46,1,p.gold);
+    R(48,116,16,8,p.woodDark);R(49,117,14,6,p.wood);
+    R(48,118,16,6,p.ink);R(49,118,14,1,p.gold);R(50,119,12,3,p.woodDark);
+    R(49,122,14,1,p.gold);
+
+    /* Stair approach stays a slim outlined guest route; the empty lay-by is
+     * only brass so it cannot imply a new solid collision footprint. */
+    R(176,116,48,10,p.woodDark);R(177,117,46,8,p.wood);
+    R(176,118,48,6,p.ink);R(177,118,46,1,p.gold);R(178,119,44,4,p.wood);
+    R(180,120,40,1,p.woodLight);R(177,123,46,1,p.gold);
+    R(208,112,32,1,p.gold);R(208,112,1,16,p.gold);R(239,112,1,16,p.gold);
+
+    /* East return aisle and square hall elbow: exposed parquet bounded by
+     * short brass rails makes the route legible around the lounge rug. */
+    R(192,64,24,52,p.woodDark);R(193,65,22,50,p.wood);
+    R(192,64,24,1,p.ink);R(193,65,1,50,p.gold);R(214,65,1,50,p.gold);
+    R(194,72,20,1,p.woodLight);R(194,96,20,1,p.woodLight);R(192,115,24,1,p.woodLight);
+    diamond(R,204,80,2,p.gold);diamond(R,204,80,1,p.woodLight);
+    diamond(R,204,104,2,p.gold);diamond(R,204,104,1,p.woodLight);
+    R(192,64,48,10,p.woodDark);R(193,65,46,8,p.wood);
+    R(192,64,48,1,p.ink);R(193,65,46,1,p.gold);R(192,73,48,1,p.woodLight);
+    R(224,48,16,16,p.woodDark);R(225,49,14,14,p.wood);
+    R(224,48,16,1,p.ink);R(225,49,1,15,p.gold);R(238,49,1,15,p.gold);
+    R(228,52,8,1,p.woodLight);R(224,63,16,1,p.gold);
   }
   function floor(R){
     /* The floor is a shallow, south-facing parquet plane. Courses grow
@@ -118,12 +160,13 @@
     R(114,169,60,2,p.woodLight);
     R(116,171,56,3,p.wood);
     R(116,174,56,2,p.woodDark);
-    /* The centered guest runner carries the south arrival only to the open
-     * lobby choice point; circulation beyond it remains exposed parquet. */
+    /* A bounded receiving court branches the centered arrival into the desk,
+     * bellhop, stair, and east return routes without an L-shaped carpet. */
+    receivingCourt(R);
     guestRunner(R);
-    /* A fully bounded hearth rug leaves an eight-pixel parquet reveal before
-     * the arrival runner: its bottom edge is y=114 and the runner starts at
-     * y=122, so the lounge remains a separate domestic zone. */
+    /* A fully bounded hearth rug leaves a two-pixel parquet moat before the
+     * receiving court: its bottom edge is y=114 and the court starts at
+     * y=116, so the lounge remains a separate domestic zone. */
     rug(R,112,80,64,34);
     R(112,114,64,2,p.wood);
     R(114,114,60,1,p.woodLight);
