@@ -1,0 +1,26 @@
+# Temporary, branch-scoped source checkpoint for the Room Program pilot audit.
+# No deployment, secrets, or write permissions. Remove when the audit is complete.
+name: Room Program source checkpoint
+on:
+  push:
+    branches: ['chatgpt/intent-driven-station']
+permissions:
+  contents: read
+jobs:
+  checkpoint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Archive this exact tracked checkout
+        run: |
+          git rev-parse HEAD > "$RUNNER_TEMP/room-program-commit.txt"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/room-program-source.tgz" HEAD
+      - uses: actions/upload-artifact@v4
+        with:
+          name: room-program-source
+          path: |
+            ${{ runner.temp }}/room-program-source.tgz
+            ${{ runner.temp }}/room-program-commit.txt
+          retention-days: 1
+          if-no-files-found: error
