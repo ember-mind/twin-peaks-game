@@ -24,7 +24,7 @@ Reception counter is boundary, not loose furniture. Clerk stands staff side; sig
 | Architectural shell + floor plane | 8 | 8 | pass |
 | Reception + service wing | 8 | 8 | pass |
 | Fireplace + lounge | 8 | 8 | pass |
-| Stairs + Room 315 hall | 8 | — | pending |
+| Stairs + Room 315 hall | 8 | 3 | revise |
 | Entry + runner + circulation props | 8 | — | pending |
 | Lighting + ambient life | 8 | — | pending |
 | Integrated lobby world | 8 | — | pending |
@@ -38,7 +38,7 @@ Reception counter is boundary, not loose furniture. Clerk stands staff side; sig
 
 ## Latest verdict
 
-Shell R2: 8/10 pass. Reception R2: 8/10 pass. Hearth/lounge R1: 8/10 pass. Integrated checks: Ben sprite clearance and rug/runner separation. Ben absent from fixed shot even with Act 2 flags; no fake sprite.
+Shell R2: 8/10 pass. Reception R2: 8/10 pass. Hearth/lounge R1: 8/10 pass. Stair R1: 3/10 reject, regressed; runner/rail/flight fail continuous landing. Integrated checks: Ben sprite clearance and rug/runner separation. Ben absent from fixed shot even with Act 2 flags; no fake sprite.
 
 ## High constraints
 

@@ -143,12 +143,14 @@
     });
     beam(R,16,0,256,5);beam(R,16,59,256,7);R(16,68,256,3,p.ink);R(16,70,256,2,p.woodLight);
     [18,73,167,257].forEach(function(x){column(R,x,0,72);});
-    /* The real hall door (map cell 14,1) sits in a recessed east bay; the
-     * passable stair flight is painted over its lower half later. */
-    R(220,9,23,55,p.ink);R(222,11,19,53,p.woodLight);R(224,14,15,48,p.woodDark);
-    R(225,16,13,43,p.redDark);R(226,18,11,38,p.red);R(226,18,2,37,p.redLight);
-    R(225,16,13,3,p.wood);R(225,55,13,3,p.woodDark);R(235,35,2,2,p.gold);R(236,35,1,1,p.cream);
-    R(224,12,15,2,p.wood);R(226,13,11,1,p.gold);
+    /* The real hall door (map cell 14,1) sits in a recessed east bay. Keep
+     * the red panel readable above the stair landing, with a real jamb,
+     * lintel, handle and threshold instead of a decorative wall rectangle. */
+    R(219,8,27,58,p.ink);R(221,10,23,54,p.woodLight);R(223,13,19,49,p.woodDark);
+    R(224,14,17,24,p.ink);R(225,16,15,20,p.redDark);R(226,17,13,18,p.red);
+    R(226,17,2,17,p.redLight);R(237,27,2,2,p.gold);R(238,27,1,1,p.cream);
+    R(224,37,17,4,p.woodDark);R(225,38,15,1,p.woodLight);
+    R(222,10,21,3,p.wood);R(224,11,17,1,p.gold);R(221,61,23,3,p.woodDark);
     /* Decorative framed landscape and a recessed upper hall opening. */
     R(37,20,24,30,p.ink);R(38,21,22,28,p.gold);R(40,23,18,24,p.woodDark);
     R(42,25,14,11,p.stoneDark);R(42,36,14,9,p.green);
@@ -324,19 +326,43 @@
     diamond(R,50,112,3,p.ink);diamond(R,50,112,2,p.woodDark);R(50,110,1,1,p.gold);
   }
   function stairs(R){
-    /* Stair treads are passable floor leading into the existing 315 hall,
-     * framed by a diagonal handrail rather than a freestanding ladder. */
-    R(213,34,45,94,p.woodDark);R(216,35,39,91,p.wood);
+    /* The flight hugs the east wall but is not a painted block over the
+     * corridor: its left edge opens from x245 at the top to x222 at the
+     * foot, leaving the hall-side floor visible. Each riser has its own
+     * nosing and runner segment so this reads as stairs, not a ladder. */
+    R(222,33,32,11,p.ink);R(224,34,28,8,p.woodDark);R(225,35,26,2,p.woodLight);
+    R(227,37,22,4,p.redDark);R(228,37,20,1,p.redLight);R(224,41,28,2,p.gold);
     for(var step=0;step<11;step++){
-      var y=40+step*8,x=215-Math.floor(step/4);
-      R(x,y,43,2,p.woodLight);R(x,y+2,43,4,p.wood);R(x,y+6,43,2,p.woodDark);
-      R(232,y,14,8,p.redDark);R(233,y,12,3,p.red);R(233,y,12,1,p.redLight);R(232,y,1,8,p.gold);R(245,y,1,8,p.gold);
+      var y=42+step*8,left=245-Math.floor(step*2.15),right=269,w=right-left;
+      R(left-1,y,w+2,8,p.ink);R(left,y,w,1,p.woodLight);R(left+1,y+1,w-2,2,p.wood);
+      R(left+1,y+3,w-2,3,p.woodLight);R(left,y+6,w,2,p.woodDark);
+      var rw=10+Math.floor(step*.75),rx=257-Math.floor(step*.8);
+      R(rx,y+1,rw,5,p.redDark);R(rx+1,y+1,rw-2,1,p.redLight);R(rx+2,y+5,rw-4,1,p.red);
+      R(rx-1,y+1,2,1,p.gold);R(rx+rw-1,y+1,2,1,p.gold);
+      /* Tiny wear marks turn the broad risers into timber construction. */
+      if(step%2===0)R(left+5,y+4,5,1,p.wood);else R(right-13,y+4,6,1,p.woodDark);
     }
-    for(var y=34;y<127;y++){
-      var x=228-Math.floor((y-34)*15/93);R(x,y,3,1,p.ink);R(x,y,1,1,p.woodLight);
+    /* Guest-side banister: the handrail runs above the open edge and its
+     * posts are planted on alternating treads, making the stair depth clear. */
+    for(var y=35;y<130;y++){
+      var railX=242-Math.floor((y-35)*27/95);
+      R(railX,y,3,1,p.ink);R(railX+1,y,1,1,p.gold);
     }
-    for(var n=0;n<6;n++){var y=37+n*17,x=229-Math.floor((y-34)*15/93);R(x,y,3,10,p.woodDark);R(x,y,1,9,p.gold);}
-    R(212,125,45,3,p.ink);R(232,125,14,2,p.redDark);
+    for(var n=0;n<6;n++){
+      var py=39+n*17,px=241-Math.floor((py-35)*27/95);
+      R(px,py-7,4,12,p.ink);R(px+1,py-6,1,9,p.gold);R(px+2,py-4,1,7,p.woodLight);
+    }
+    /* Wall-side rail and planted newels keep the staircase attached to the
+     * lodge wall rather than floating beside it. */
+    for(var yy=37;yy<132;yy++){
+      var wallRail=262+Math.floor((yy-37)*7/95);
+      R(wallRail,yy,3,1,p.ink);R(wallRail+1,yy,1,1,p.gold);
+    }
+    for(var wn=0;wn<5;wn++){
+      var wy=43+wn*19,wx=262+Math.floor((wy-37)*7/95);
+      R(wx,wy-6,4,11,p.ink);R(wx+1,wy-5,1,8,p.gold);R(wx+2,wy-3,1,6,p.woodLight);
+    }
+    R(218,127,53,4,p.ink);R(222,126,47,2,p.woodLight);R(245,126,20,2,p.redDark);R(246,126,18,1,p.redLight);
   }
   function chandelier(R){
     /* A high central practical is separated from the bear and staircase. */
