@@ -50,3 +50,7 @@ Shell R2: 8/10 pass. Reception R2: 8/10 pass. Hearth/lounge R1: 8/10 pass. Stair
 ## Final checkpoint
 
 All runtime gates passed, including Act 4 Chrome 530/530 and Act 3 Chrome 189/189. Integrated independent verdict remains **7.3/10, reject**; entry 7.1 and light 6.5 also below 8. Release audit fails honestly. Best legal layout retained, tracked Chrome-generated artifacts restored, no push.
+
+## New spatial-study decision
+
+User accepted reconsidering lobby geometry and coordinated lobby-side door/Cast Presence positions. `docs/great-northern-lobby-spatial-study.md` now specifies real hotel use: central arrival, perimeter reception, staff-side service aisle, off-route lounge, actual stair/hall access, source-linked light, and walkable guest/staff routes. This is a study checkpoint only; no scene or map revision has been built or scored. Historical 8/10 unit scores do not transfer to expanded layout.

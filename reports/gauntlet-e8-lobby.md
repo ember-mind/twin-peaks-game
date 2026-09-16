@@ -319,6 +319,15 @@ chairs/table occupy (8..10,6) on bounded lounge rug. East flight joins actual
 Room 315 hall door (14,1); Audrey wanders from (12,9). Chandelier hangs over
 the public room, with fire, desk lamp and bell as local practicals.
 
+**Later architectural correction:** production image shows that the counter
+projects into arrival space; “fixed to the west service wall” describes the
+old intent, not its visual result. User approved reconsidering lobby map size,
+lobby-side door positions and Cast Presence body positions. The new
+[spatial study](../docs/great-northern-lobby-spatial-study.md) defines room use,
+object relationships, camera framing and acceptance checks before rebuilding.
+Historical scores below belong to the old locked layout; they do not approve
+the proposed revision.
+
 Reference bottom panel instead places lounge left, staffed reception right,
 stair-side luggage, and an uninterrupted center runner to rear doors. That
 literal plan would require moving immutable map solids and Cast Presence
