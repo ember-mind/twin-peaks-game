@@ -134,6 +134,26 @@
     if (!state.evidence[name]) NR.applyEffects(state, [{ evidence: name }]);
   }
 
+  // Explicit aliases for evidence genuinely acquired by the opening classic
+  // dialogues. Act flags are not proof of acquisition. Do not formulate any
+  // proposition here: the later notebook comparisons remain player actions.
+  function syncClassicEvidence(NR, state, classicClues) {
+    if (!Array.isArray(classicClues)) return [];
+    var aliases = { diario: 'E1_DIARIO', lettera_r: 'E3_LETTERA_R' };
+    var added = [];
+    Object.keys(aliases).forEach(function (clue) {
+      var evidence = aliases[clue];
+      if (classicClues.indexOf(clue) >= 0 && !state.evidence[evidence]) {
+        ensureEvidence(NR, state, evidence);
+        added.push(evidence);
+      }
+    });
+    // A repaired older save must be persisted even if its classic fingerprint
+    // did not change. Repeated polling must not bump revision or duplicate data.
+    if (added.length) state.revision++;
+    return added;
+  }
+
   function syncClassicToNarrative(NR, state, classicFlags) {
     // audrey_indaga è scritto dal layer classico (data.js audrey_a2 /
     // audrey_a2_ben): senza questo ponte il nodo facoltativo m6_audrey resta
@@ -304,9 +324,10 @@
       return;
     }
     state = loaded.state;
+    lastSavedRevision = state.revision; // Durable revision, before any import repair.
     if (classic && classic.flags) syncClassicToNarrative(NR, state, classic.flags);
+    if (classic) syncClassicEvidence(NR, state, classic.clues);
     A.setState(state);
-    lastSavedRevision = state.revision;
     lastSavedClassicFingerprint = classic && NS ? NS.classicFingerprint(classic) : null;
     var finaleRestore = { ok: true, absent: true };
     if (GAME.NarrativeFinaleProduction && GAME.NarrativeFinaleProduction.restoreFromStorage) {
@@ -340,6 +361,7 @@
       if (E.state.mode === 'play') {
         if (GAME.NarrativeFinaleProduction && GAME.NarrativeFinaleProduction.poll) GAME.NarrativeFinaleProduction.poll();
         syncClassicToNarrative(NR, state, E.state.flags);
+        syncClassicEvidence(NR, state, E.state.clues);
         if (A.syncCarryoverEvidence) A.syncCarryoverEvidence();
         syncNarrativeToClassic(state, E.state.flags);
         renderObjective(NR, A);
@@ -377,6 +399,7 @@
   };
   NP.inspectClassicSave = inspectClassicSave;
   NP.syncClassicToNarrative = syncClassicToNarrative;
+  NP.syncClassicEvidence = syncClassicEvidence;
   NP.syncNarrativeToClassic = syncNarrativeToClassic;
   NP.renderObjective = renderObjective;
   NP.showSaveRecovery = showSaveRecovery;
