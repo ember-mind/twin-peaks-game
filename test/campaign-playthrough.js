@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-/* Unseeded, normal production browser. Every change to the story must be earned
- * through input. The endpoint is the displayed ending and return to title.
- */
+/* Unseeded production journey, including the actual final epilogue. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs/promises');
 const path = require('node:path');
@@ -44,17 +42,24 @@ async function main() {
     if (b) { try { await b.capture('failure'); } catch (_) {} }
     process.exitCode = 1;
   } finally {
-    if (b) await b.close();
-    await fs.mkdir(output, { recursive: true });
-    const session = await fs.readFile(path.join(output, 'session.json'), 'utf8').then(JSON.parse).catch(() => null);
-    const faults = session ? session.faults.filter((f) => !(f.type === 'http' && f.status === 404 && new URL(f.url).pathname === '/favicon.ico')) : [];
-    if (faults.length) { process.exitCode = 1; if (!error) error = 'Unexpected browser faults: ' + JSON.stringify(faults); }
-    const report = { milestone: 'New Game to final epilogue and return to title', automated: error ? 'FAIL' : 'PASS',
-      fullCampaign: error ? 'FAIL' : 'PASS', humanPlaytest: 'NOT_RUN', source: session && session.metadata.source,
-      checkpoints, error, faults, events };
-    await fs.writeFile(path.join(output, 'campaign.json'), JSON.stringify(report, null, 2) + '\n');
-    console.log('CAMPAIGN-MILESTONE ' + report.automated + ' (unseeded full route; human playtest NOT_RUN)');
-    console.log('Evidence: ' + output);
+    // Startup failure must not overwrite an existing run's report.
+    if (b) {
+      try { await b.close(); } catch (e) {
+        process.exitCode = 1; error = (error || '') + '\nCleanup failed: ' + String(e.stack || e);
+      }
+      const session = await fs.readFile(path.join(output, 'session.json'), 'utf8').then(JSON.parse).catch(() => null);
+      const faults = session ? session.faults.filter((f) => !(f.type === 'http' && f.status === 404 && new URL(f.url).pathname === '/favicon.ico')) : [];
+      if (!session || faults.length) {
+        process.exitCode = 1;
+        if (!error) error = session ? 'Unexpected browser faults: ' + JSON.stringify(faults) : 'Missing browser session evidence';
+      }
+      const report = { milestone: 'New Game through final epilogue and return to title', automated: error ? 'FAIL' : 'PASS',
+        fullCampaign: error ? 'FAIL' : 'PASS', humanPlaytest: 'NOT_RUN', source: session && session.metadata.source,
+        checkpoints, error, faults, events };
+      await fs.writeFile(path.join(output, 'campaign.json'), JSON.stringify(report, null, 2) + '\n', { flag: 'wx' });
+      console.log('CAMPAIGN-MILESTONE ' + report.automated + ' (unseeded full route; human playtest NOT_RUN)');
+      console.log('Evidence: ' + output);
+    }
   }
 }
 main().catch((e) => { console.error(e); process.exitCode = 1; });

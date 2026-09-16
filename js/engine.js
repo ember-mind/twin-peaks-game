@@ -877,6 +877,10 @@
       if (p.dir !== d) {
         // turn-in-place: girati e aspetta un micro-frame prima di partire
         p.dir = d;
+        // A short changed-direction tap is consumed by this turn. A key held
+        // through the delay still walks; a released tap must not force a step
+        // onto a walkable interaction target (e.g. the Roadhouse phone).
+        if (queuedDirection === d) queuedDirection = null;
         p.turnUntil = tGlobal + 60;
       } else if (tGlobal >= (p.turnUntil || 0)) {
         if (queuedDirection === d) queuedDirection = null;

@@ -1,7 +1,7 @@
 'use strict';
 
-/* Route helpers on top of player inputs and serialized observations only.
- * Never import the game runtime here. There is no seed, teleport or API fallback.
+/* Route helpers over player inputs and serialized observations only.
+ * No runtime imports, state seeds, teleportation or interaction API fallback.
  */
 const assert = require('node:assert/strict');
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -63,7 +63,6 @@ function digest(s) {
   return { flags: n.flags, evidence: n.evidence, values: n.values, props: n.props,
     nodes_done: n.nodes_done, finale: s.finale && { stage: s.finale.stage, values: s.finale.values } };
 }
-
 function createPlayer(browser, log = () => {}) {
   const snap = () => browser.snapshot();
   async function press(code) { await browser.press(code, 20); await pause(175); }
@@ -101,7 +100,9 @@ function createPlayer(browser, log = () => {}) {
     const s = await snap();
     if (s.player.dir === dir) return;
     await press(KEY[dir]);
-    await browser.waitFor('player settles after turning', (t) => !t.player.moving && !t.fadePhase);
+    const t = await browser.waitFor('player settles after turning', (v) => !v.player.moving && !v.fadePhase);
+    assert.deepEqual([t.player.tx, t.player.ty, t.player.dir], [s.player.tx, s.player.ty, dir],
+      'A short changed-direction input must turn without stepping onto the target');
   }
   async function walk(tx, ty, allowDoor = false, finalDir = null) {
     const mapId = (await snap()).mapId;
@@ -160,17 +161,13 @@ function createPlayer(browser, log = () => {}) {
   }
   async function reach(tx, ty) {
     const s = await snap();
-    // A direction tap queues a whole step, even after keyup. For a walkable
-    // target, arrive on the adjacent tile facing it; never "turn" into it.
-    const blockedTarget = !s.map.solid[ty] || s.map.solid[ty][tx] !== '0' ||
-      s.liveNpcs.some((n) => n.x === tx && n.y === ty);
+    // With the production turn-input repair, an ordinary short tap can face a
+    // walkable target in a recess. No collision or interaction API is bypassed.
     const candidates = DIRS.map(([dx, dy, dir]) => ({ x: tx - dx, y: ty - dy, dir }))
-      .map((c) => ({ ...c, path: pathTo(s, c.x, c.y, false, blockedTarget ? null : c.dir) }))
-      .filter((c) => c.path).sort((a, b) => a.path.length - b.path.length);
+      .map((c) => ({ ...c, path: pathTo(s, c.x, c.y) })).filter((c) => c.path)
+      .sort((a, b) => a.path.length - b.path.length);
     assert.ok(candidates.length, `Target unreachable ${s.mapId}:${tx},${ty}`);
-    const c = candidates[0];
-    await walk(c.x, c.y, false, blockedTarget ? null : c.dir);
-    if (blockedTarget) await face(c.dir);
+    const c = candidates[0]; await walk(c.x, c.y); await face(c.dir);
     const t = await snap();
     assert.equal(Math.abs(t.player.tx - tx) + Math.abs(t.player.ty - ty), 1, 'Player must stand beside target');
     assert.equal(t.player.dir, c.dir, 'Player must face target');

@@ -2,7 +2,7 @@ name: unseeded-campaign
 on:
   pull_request:
   push:
-    branches: [main, 'codex/playable-02*', 'codex/playable-04*']
+    branches: [main, 'codex/playable-04*', 'codex/playable-06*']
 permissions:
   contents: read
 concurrency:
@@ -11,7 +11,7 @@ concurrency:
 jobs:
   campaign:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 60
     env:
       CHROME_NO_SANDBOX: '1'
     steps:
@@ -21,16 +21,27 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Browser and evidence directory
+      - name: Browser identity
         shell: bash
         run: |
           set -euo pipefail
           echo "CHROME_BIN=$(command -v google-chrome)" >> "$GITHUB_ENV"
-          echo "CAMPAIGN_OUT=$RUNNER_TEMP/campaign" >> "$GITHUB_ENV"
-      - name: Pure navigation contracts
-        run: node test/campaign-player.js
-      - name: New Game through the actual final epilogue and ending
-        run: node test/campaign-playthrough.js
+          google-chrome --version
+          node --version
+          git rev-parse HEAD
+      - name: Core and harness contracts before the browser
+        run: |
+          node test/smoke.js
+          node test/walkthrough.js
+          node test/narrative-lint.js
+          node test/story-truth-lint.js
+          node test/turn-in-place.js
+          node test/campaign-player.js
+          node test/campaign-report-safety.js
+      - name: First fresh-profile complete journey
+        run: CAMPAIGN_OUT="$RUNNER_TEMP/campaign/first" node test/campaign-playthrough.js
+      - name: Second consecutive fresh-profile complete journey
+        run: CAMPAIGN_OUT="$RUNNER_TEMP/campaign/second" node test/campaign-playthrough.js
       - name: Retain actual route and failure evidence
         if: always()
         uses: actions/upload-artifact@v4
