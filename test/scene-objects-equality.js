@@ -141,8 +141,8 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'scene-objects-gen-'));
 try {
   ['test', 'world', 'js'].forEach(function (d) { fs.mkdirSync(path.join(tmp, d)); });
   fs.copyFileSync(path.join(__dirname, 'gen-world-data.js'), path.join(tmp, 'test', 'gen-world-data.js'));
-  fs.mkdirSync(path.join(tmp, 'js', 'editor', 'core'), { recursive: true });
-  fs.copyFileSync(path.join(ROOT, 'js', 'editor', 'core', 'narrative-targets.js'), path.join(tmp, 'js', 'editor', 'core', 'narrative-targets.js'));
+  fs.mkdirSync(path.join(tmp, 'js', 'editor', 'apply'), { recursive: true });
+  fs.copyFileSync(path.join(ROOT, 'js', 'editor', 'apply', 'narrative-targets.js'), path.join(tmp, 'js', 'editor', 'apply', 'narrative-targets.js'));
   ['scene-objects.json', 'connections.json', 'narrative-targets.json'].forEach(function (f) { fs.copyFileSync(path.join(ROOT, 'world', f), path.join(tmp, 'world', f)); });
   const r = spawnSync(process.execPath, [path.join(tmp, 'test', 'gen-world-data.js')], { encoding: 'utf8' });
   assert.equal(r.status, 0, 'generator runs on the copy: ' + r.stderr);

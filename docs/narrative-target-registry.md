@@ -11,7 +11,7 @@ Each target declares exactly one of:
 
 A binding must resolve to exactly one entry. No coordinate join or first-match fallback is used. The five existing shared interactions bind to sign_ponte, sign_oej, mucchio_terra, anello_interact and lago_riva respectively. The other nine retain their exact authored standalone positions.
 
-`js/editor/core/narrative-targets.js` compiles these pure input datasets. `node test/gen-world-data.js` embeds the frozen result as `GAME.WorldData.narrativeTargets` in the existing `js/scene-objects.gen.js`. The adapter reads that table when enabled and refuses missing generated data before becoming active. Existing loaders already load the generated scene data, avoiding a second manually maintained loader chain.
+`js/editor/apply/narrative-targets.js` compiles these pure input datasets. `node test/gen-world-data.js` embeds the frozen result as `GAME.WorldData.narrativeTargets` in the existing `js/scene-objects.gen.js`. The adapter reads that table when enabled and refuses missing generated data before becoming active. Existing loaders already load the generated scene data, avoiding a second manually maintained loader chain.
 
 ## Editor behavior that is actually supported
 
@@ -26,3 +26,5 @@ The before-migration fixture pins all 14 identities and coordinates. Tests also 
 Both generated files are checked for reproducibility in CI. The existing Node suite remains required; the new workflow adds the explicit binding/apply tests. Do not edit generated files manually. Future engine extraction can reuse this compiler and registry contract, but this change alone is not an independent engine or full authoring product.
 
 The temporary feature-branch-only mechanical patch workflow used during implementation is removed from the final tree. No merge, deployment, local Vault sync, locked story edit or human testing is included.
+
+Review correction: this generation-only CommonJS compiler belongs with Node apply tooling, not browser core (whose manifest requires every core module to load in world-builder.html). It moved to js/editor/apply without weakening the loader invariant or shipping an unused browser script. Two objective fixtures now load the real generated registry before enabling the adapter; their assertions are unchanged. All 100 maintained Node commands are rerun, not only the new target tests.

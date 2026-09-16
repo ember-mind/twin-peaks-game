@@ -68,7 +68,7 @@ function ok(cond, msg) { if (!cond) die(msg); else console.log('  ✓ ' + msg); 
   let narrativeTargets;
   try {
     const nt = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'world', 'narrative-targets.json'), 'utf8'));
-    narrativeTargets = require('../js/editor/core/narrative-targets.js').compileTargets(nt, so);
+    narrativeTargets = require('../js/editor/apply/narrative-targets.js').compileTargets(nt, so);
   } catch (e) { die(e.message); }
   const soBody = JSON.stringify(so.scenes, null, 2).replace(/\n/g, '\n    ');
   fs.writeFileSync(path.join(__dirname, '..', 'js', 'scene-objects.gen.js'), [

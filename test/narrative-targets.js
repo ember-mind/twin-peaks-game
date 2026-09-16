@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
-const { compileTargets } = require('../js/editor/core/narrative-targets.js');
+const { compileTargets } = require('../js/editor/apply/narrative-targets.js');
 const root = path.resolve(__dirname, '..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
 const copy = (v) => JSON.parse(JSON.stringify(v));
