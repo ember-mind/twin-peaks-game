@@ -48,6 +48,35 @@
       R(pt[0],pt[1],2,1,p.woodLight);R(pt[0]+1,pt[1]+1,1,2,p.gold);
     });
   }
+  function guestRunner(R){
+    /* One guest route, not three carpets: its edges advance by integer
+     * pixels as the entrance sightline climbs toward the hall. The south
+     * landing is centred on x144, the diagonal clears the fixed lounge and
+     * desk, and the upper aisle settles into the stair-side x176..208 lane. */
+    function center(y){
+      if(y<116)return 192;
+      if(y<132)return 190+Math.round((y-116)*(178-190)/16);
+      return 178+Math.round((y-132)*(144-178)/44);
+    }
+    function width(y){return y<116?32:30;}
+    for(var y=72;y<=176;y++){
+      var w=width(y),left=Math.round(center(y)-w/2);
+      /* Fill each scanline first, then pull the same dark/gold/red keyline
+       * down its two edges. Adjacent rows share paint, so there is no false
+       * horizontal slab at the diagonal or its upper turn. */
+      R(left,y,w,1,p.redDark);
+      R(left+4,y,w-8,1,p.red);
+      R(left+5,y,w-10,1,p.redDark);
+      R(left,y,1,1,p.ink);R(left+1,y,1,1,p.gold);R(left+2,y,2,1,p.redDark);
+      R(left+w-4,y,2,1,p.redDark);R(left+w-2,y,1,1,p.gold);R(left+w-1,y,1,1,p.ink);
+    }
+    /* Small linked medallions keep direction legible without recreating the
+     * old branch. They sit safely inside the 30 px diagonal field. */
+    for(var markY=84;markY<=164;markY+=16){
+      var mid=Math.round(center(markY));
+      diamond(R,mid,markY,3,p.gold);diamond(R,mid,markY,2,p.redDark);R(mid,markY,1,1,p.woodLight);
+    }
+  }
   function floor(R){
     /* The floor is a shallow, south-facing parquet plane. Courses grow
      * toward the entry, while each course is made of real boards: continuous
@@ -98,20 +127,13 @@
     R(114,169,60,2,p.woodLight);
     R(116,171,56,3,p.wood);
     R(116,174,56,2,p.woodDark);
-    /* The public route is three deliberate orthogonal runs, with the short
-     * east branch turning into the stair aisle and the centered spine
-     * continuing to the entry. Keeping these bounds explicit prevents the
-     * former broad horizontal carpet from reading as an L-shaped room rug. */
-    rug(R,176,72,32,51,true);   // north aisle x176..208, y72..123
-    rug(R,158,122,50,14,true);  // east branch x158..208, y122..136
-    rug(R,128,124,32,52,true);  // entry spine x128..160, y124..176
-    /* Turn motifs make the two one-pixel contacts read as one intentional
-     * route while retaining a single dark/gold keyline around each run. */
-    R(178,121,28,1,p.gold);R(180,122,24,1,p.redDark);
-    R(158,125,2,9,p.gold);R(159,126,1,7,p.redDark);
+    /* One angled guest runner carries the south arrival into the north hall
+     * aisle. Its scanline edges keep the lounge-to-route parquet reveal
+     * visible while preserving the clear west desk approach. */
+    guestRunner(R);
     /* A fully bounded hearth rug leaves a real parquet reveal before the
-     * public branch: its bottom edge is y=114, with eight native pixels of
-     * floor before the branch begins at y=122. */
+     * angled route: its bottom edge is y=114 and the runner begins at y=116,
+     * with the remaining floor seam keeping the two zones distinct. */
     rug(R,112,80,64,34,false);
     R(112,114,64,2,p.wood);
     R(114,114,60,1,p.woodLight);
