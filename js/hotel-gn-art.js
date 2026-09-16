@@ -455,59 +455,63 @@
     var oldAlpha=ctx.globalAlpha,oldFill=ctx.fillStyle;
     var camX=Math.round(cameraX||0),camY=Math.round(cameraY||0);
     var floorX=Math.round(cx),floorY=Math.round(cy);
-    ctx.globalAlpha=Math.max(0,Math.min(1,parentAlpha*opacity));
+    var alpha=parentAlpha==null?1:parentAlpha;
+    ctx.globalAlpha=Math.max(0,Math.min(1,alpha*opacity));
     ctx.fillStyle=color;
     for(var dy=-ry;dy<=ry;dy++){
       var worldY=floorY+dy;
-      if(worldY<yMin||worldY>yMax)continue;
+      /* Bounds are half-open: a clipped pool ending at y=108 never leaks a
+       * row onto 109, even when the ellipse equation has another span. */
+      if(worldY<yMin||worldY>=yMax)continue;
       var curve=1-(dy*dy)/(ry*ry);
       if(curve<=0)continue;
       /* Even half-widths make the silhouette visibly stepped instead of
-       * anti-aliased, while the equation keeps the falloff source-shaped. */
+       * anti-aliased, while the equation keeps the falloff source-shaped.
+       * Horizontal spans use the same half-open convention as the clips. */
       var half=Math.floor((rx*Math.sqrt(curve))/2)*2;
       if(half<2)continue;
-      var left=Math.max(xMin,Math.ceil(floorX-half));
-      var right=Math.min(xMax,Math.floor(floorX+half));
-      if(right<left)continue;
+      var left=Math.max(xMin,floorX-half);
+      var right=Math.min(xMax,floorX+half+1);
+      if(right<=left)continue;
       var spans=[[left,right]];
       (exclusions||[]).forEach(function(block){
         var next=[];
         spans.forEach(function(span){
-          if(worldY<block.y||worldY>=block.y+block.h||span[1]<block.x||span[0]>=block.x+block.w){next.push(span);return;}
-          if(span[0]<block.x)next.push([span[0],Math.min(span[1],block.x-1)]);
-          if(span[1]>=block.x+block.w)next.push([Math.max(span[0],block.x+block.w),span[1]]);
+          if(worldY<block.y||worldY>=block.y+block.h||span[1]<=block.x||span[0]>=block.x+block.w){next.push(span);return;}
+          if(span[0]<block.x)next.push([span[0],Math.min(span[1],block.x)]);
+          if(span[1]>block.x+block.w)next.push([Math.max(span[0],block.x+block.w),span[1]]);
         });
         spans=next;
       });
       spans.forEach(function(span){
-        var width=span[1]-span[0]+1;
+        var width=span[1]-span[0];
         if(width>0)ctx.fillRect(span[0]-camX,worldY-camY,width,1);
       });
     }
     ctx.globalAlpha=oldAlpha;ctx.fillStyle=oldFill;
   }
   function lightPools(ctx,cameraX,cameraY,parentAlpha){
-    /* Hearth source is firebox centre 118,67. The receiving-plane centre is
-     * lower on the stone/floor transition so the falloff reads outward from
-     * the opening without laying a slab over the flames. */
+    /* FIRE: source centre (118,78), with the lower hearth and exposed parquet
+     * receiving the falloff. The firebox core is a half-open exclusion, while
+     * the stone jambs and sill remain eligible to catch the warm edge. */
     var firebox=[{x:97,y:48,w:47,h:26}];
-    steppedPool(ctx,cameraX,cameraY,118,84,70,48,90,180,60,116,p.fire,.07,firebox,parentAlpha);
-    steppedPool(ctx,cameraX,cameraY,118,84,52,36,90,180,60,116,p.fire,.12,firebox,parentAlpha);
-    steppedPool(ctx,cameraX,cameraY,118,84,30,22,90,180,60,116,p.gold,.18,firebox,parentAlpha);
+    steppedPool(ctx,cameraX,cameraY,118,78,48,30,90,160,55,109,p.fire,.06,firebox,parentAlpha);
+    steppedPool(ctx,cameraX,cameraY,118,78,32,23,90,160,55,109,p.fire,.11,firebox,parentAlpha);
+    steppedPool(ctx,cameraX,cameraY,118,78,19,16,90,160,55,109,p.gold,.18,firebox,parentAlpha);
 
-    /* The chandelier beam is a broad local ellipse across the nearby wall and
-     * exposed floor. Its left wall exclusion follows the massive hearth, so
-     * this remains a grounded glow rather than a triangular light projection. */
+    /* CHANDELIER: the fixture at y=52 has a compact local pool. The hearth
+     * mass blocks spill through the left wall, and the short y clip keeps the
+     * entry desk, runner, and stairs in their own dark zone. */
     var hearthMass=[{x:88,y:5,w:72,h:75}];
-    steppedPool(ctx,cameraX,cameraY,163,75,58,46,125,210,34,125,p.gold,.04,hearthMass,parentAlpha);
-    steppedPool(ctx,cameraX,cameraY,163,75,43,34,125,210,34,125,p.gold,.07,hearthMass,parentAlpha);
-    steppedPool(ctx,cameraX,cameraY,163,75,25,22,125,210,34,125,p.fire,.10,hearthMass,parentAlpha);
+    steppedPool(ctx,cameraX,cameraY,164,52,35,30,146,196,25,89,p.gold,.04,hearthMass,parentAlpha);
+    steppedPool(ctx,cameraX,cameraY,164,52,25,22,146,196,25,89,p.gold,.08,hearthMass,parentAlpha);
+    steppedPool(ctx,cameraX,cameraY,164,52,14,13,146,196,25,89,p.fire,.12,hearthMass,parentAlpha);
 
-    /* Desk lamp source at 121,116: a compact key-bank/counter pool, clipped
-     * to its operational region so the west wall and entry remain dark. */
-    steppedPool(ctx,cameraX,cameraY,110,125,30,27,85,130,100,150,p.fire,.05,[],parentAlpha);
-    steppedPool(ctx,cameraX,cameraY,110,125,22,20,85,130,100,150,p.fire,.09,[],parentAlpha);
-    steppedPool(ctx,cameraX,cameraY,110,125,13,12,85,130,100,150,p.gold,.13,[],parentAlpha);
+    /* DESK LAMP: a compact receiving island around the transaction edge. The
+     * native clip leaves parquet separators around the fire and stair zones. */
+    steppedPool(ctx,cameraX,cameraY,117,120,19,18,98,130,103,142,p.fire,.05,[],parentAlpha);
+    steppedPool(ctx,cameraX,cameraY,117,120,13,12,98,130,103,142,p.fire,.10,[],parentAlpha);
+    steppedPool(ctx,cameraX,cameraY,117,120,7,8,98,130,103,142,p.gold,.15,[],parentAlpha);
   }
   function draw(ctx,cx,cy){
     var R=painter(ctx,cx,cy),alpha=ctx.globalAlpha;ctx.globalAlpha=1;

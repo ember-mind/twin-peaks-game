@@ -101,13 +101,12 @@
         /* These short rows sit on the same wall/floor ellipse as the static
          * chandelier pool; no rectangular light beam is introduced. */
         {x:160,y:34,w:6,h:1,depth:0},{x:166,y:58,w:8,h:1,depth:0},
-        {x:172,y:78,w:10,h:1,depth:0},{x:182,y:96,w:10,h:1,depth:0},
-        {x:190,y:112,w:10,h:1,depth:0}]},
+        {x:172,y:78,w:10,h:1,depth:0}]},
     {id:'lobby-desk-lamp',type:'LIGHT_WARM_VARIATION',x:121,y:112,depth:144,variants:3,
       delay:[3600,6800],duration:[1800,2600],intensity:.9,
       regions:[{x:112,y:123,w:10,h:2,depth:144},{x:110,y:107,w:9,h:2,depth:128},
-        {x:101,y:110,w:10,h:1,depth:128},{x:95,y:119,w:10,h:1,depth:144},
-        {x:87,y:130,w:12,h:1,depth:144},{x:101,y:140,w:12,h:1,depth:144}]},
+        {x:101,y:110,w:10,h:1,depth:128},{x:98,y:119,w:10,h:1,depth:144},
+        {x:98,y:130,w:12,h:1,depth:144},{x:112,y:137,w:8,h:1,depth:144}]},
     {id:'lobby-bell',type:'GLASS_SUBTLE_REFLECTION',x:99,y:119,depth:144,variants:3,travel:3,
       delay:[4200,7600],duration:[2000,3000],intensity:1.15}
   ]);
