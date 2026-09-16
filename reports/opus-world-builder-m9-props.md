@@ -1,7 +1,7 @@
 # World Builder M9 — prop registry data layer (no UI)
 
 Branch `opus/world-builder-m9-props`, cut from `main` at `ba8e67f`. Not pushed.
-One commit: `2bd65ba` feat(world-builder): M9 prop registry data layer.
+Implementation commit: `0f4b85c` feat(world-builder): M9 prop registry data layer.
 
 Delivers the data layer the prop-prototype handoff asked for: a validated registry
 (`world/props.json`), its generated runtime binding (`js/props.gen.js`), a `props`
