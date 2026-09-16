@@ -398,9 +398,10 @@ console.log(`  pagine COOPER uniche: ${missionVoicePages.size}`);
 // m8_roadhouse_truman, m8_giant_stage al posto di m8_roadhouse; m8_lucy),
 // +3 repeat autoriali (m8_leland_waiting, m8_giant_stage, m8_focus_choice);
 // value_set ora enumerato (UNSET) aggiunge le varianti reali su m8_lucy.
-if (worldRoots !== 54) fail(`world roots attese 54, trovate ${worldRoots}`);
-if (renderedVariants !== 77) fail(`varianti entry/reopen attese 77, trovate ${renderedVariants}`);
-if (repeatVariants !== 24) fail(`repeat autoriali attesi 24, trovati ${repeatVariants}`);
+// M4 loglady_ceppo (beat opzionale Act 2): +1 world root, +1 variante, +1 repeat.
+if (worldRoots !== 55) fail(`world roots attese 55, trovate ${worldRoots}`);
+if (renderedVariants !== 78) fail(`varianti entry/reopen attese 78, trovate ${renderedVariants}`);
+if (repeatVariants !== 25) fail(`repeat autoriali attesi 25, trovati ${repeatVariants}`);
 
 if (failures.length) {
   throw new Error(`interaction-voice: ${failures.length} errore/i`);
