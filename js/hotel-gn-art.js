@@ -436,6 +436,50 @@
       R(a[0],a[1]+2,1,3,p.light);R(a[0]-3,a[1]+7,7,1,p.gold);
     });
   }
+  /* Practical receiving light is authored as broken native-pixel runs. The
+   * steps widen away from each source so surfaces carry warmth while most of
+   * the dark lodge grain remains untouched. */
+  function lightRun(R,x,y,w,step,phase,c){
+    for(var xx=x+phase;xx<x+w;xx+=step)R(xx,y,Math.min(2,x+w-xx),1,c);
+  }
+  function hearthLight(R){
+    /* Stone jambs and mantel catch the fire before spill reaches chairs and
+     * the exposed parquet strips beside the lounge rug. */
+    R(97,52,1,8,p.woodLight);R(141,52,1,8,p.woodLight);
+    R(97,61,1,7,p.gold);R(141,61,1,7,p.woodLight);
+    lightRun(R,96,47,14,5,1,p.gold);lightRun(R,137,47,16,5,2,p.gold);
+    lightRun(R,114,82,58,8,0,p.woodLight);
+    lightRun(R,114,88,10,6,1,p.gold);lightRun(R,166,88,10,6,0,p.gold);
+    lightRun(R,114,98,10,7,0,p.woodLight);lightRun(R,166,98,10,7,2,p.woodLight);
+    lightRun(R,114,106,12,6,2,p.woodLight);lightRun(R,164,106,12,6,1,p.woodLight);
+    lightRun(R,104,116,28,7,1,p.woodLight);lightRun(R,168,116,24,7,0,p.woodLight);
+  }
+  function chandelierLight(R){
+    /* A tapered receiving band falls from the five bulbs onto central timber
+     * and floor. It is dithered, never a filled cone, so seams remain legible. */
+    lightRun(R,166,31,26,8,1,p.woodLight);
+    lightRun(R,160,39,36,8,0,p.woodLight);
+    lightRun(R,156,47,44,7,2,p.gold);
+    lightRun(R,152,55,50,8,1,p.woodLight);
+    lightRun(R,150,63,54,7,0,p.woodLight);
+    lightRun(R,148,72,58,8,2,p.gold);
+    lightRun(R,144,81,62,7,1,p.woodLight);
+    lightRun(R,140,90,68,8,0,p.woodLight);
+    lightRun(R,136,99,76,9,2,p.woodLight);
+    lightRun(R,132,108,84,8,1,p.gold);
+  }
+  function deskLight(R){
+    /* The desk practical is a short south-east pool: key tags, bell rim and
+     * the guest-facing brass lip receive separate stepped highlights. */
+    lightRun(R,100,107,21,6,0,p.gold);
+    lightRun(R,99,112,22,7,2,p.woodLight);
+    lightRun(R,96,119,12,5,1,p.gold);
+    lightRun(R,64,123,64,8,0,p.gold);
+    lightRun(R,70,130,54,9,2,p.woodLight);
+    lightRun(R,76,136,42,8,1,p.woodLight);
+    lightRun(R,88,146,36,9,0,p.woodLight);
+  }
+  function lightOverlay(R){hearthLight(R);chandelierLight(R);deskLight(R);}
   function prop(R,d){
     if(d.id==='fireplace')fireplace(R);else if(d.id==='stairs')stairs(R);else if(d.id==='luggage')luggage(R);
     else if(d.id==='chairWest'||d.id==='chairEast')chair(R,d.x,d.footY,d.id==='chairEast');else if(d.id==='table')table(R);else reception(R);
@@ -444,7 +488,7 @@
     var R=painter(ctx,cx,cy),alpha=ctx.globalAlpha;ctx.globalAlpha=1;
     R(0,0,288,192,p.ink);floor(R);walls(R);receptionBack(R);
     props.forEach(function(d){if(d.cells.length)R(d.x,d.footY-1,d.cells.length*16,2,p.ink);prop(R,d);});
-    chandelier(R);ctx.globalAlpha=alpha;
+    chandelier(R);lightOverlay(R);ctx.globalAlpha=alpha;
   }
   function foreground(ctx,cx,cy,min,max){
     min=min==null?-Infinity:min;max=max==null?Infinity:max;

@@ -89,21 +89,28 @@
    * still between changes. */
   life.register('hotel_gn',[
     {id:'lobby-fire',type:'MACHINE_IDLE_ACTIVITY',x:106,y:56,depth:80,variants:3,
-      delay:[5000,9000],duration:[900,1400],intensity:1.8,marks:[
-        [{x:2,y:4,w:3,h:7,color:'#d77b37'},{x:8,y:1,w:3,h:12,color:'#e9c582'},{x:9,y:5,w:2,h:8,color:'#ffe7a6'}],
-        [{x:5,y:2,w:3,h:10,color:'#d77b37'},{x:13,y:3,w:3,h:10,color:'#e9c582'},{x:3,y:8,w:2,h:5,color:'#ffe7a6'}],
-        [{x:3,y:1,w:3,h:12,color:'#e9c582'},{x:8,y:5,w:3,h:8,color:'#d77b37'},{x:14,y:6,w:2,h:7,color:'#ffe7a6'}]
+      delay:[2800,4600],duration:[1500,2200],intensity:1.9,marks:[
+        [{x:-2,y:7,w:6,h:10,color:'#d77b37'},{x:5,y:1,w:6,h:16,color:'#e9c582'},{x:12,y:6,w:6,h:11,color:'#ffe7a6'},{x:20,y:10,w:5,h:7,color:'#d77b37'}],
+        [{x:0,y:4,w:5,h:14,color:'#d77b37'},{x:7,y:0,w:6,h:17,color:'#e9c582'},{x:15,y:7,w:5,h:10,color:'#ffe7a6'},{x:22,y:3,w:4,h:14,color:'#d77b37'}],
+        [{x:-1,y:2,w:5,h:16,color:'#e9c582'},{x:6,y:7,w:6,h:11,color:'#d77b37'},{x:14,y:1,w:6,h:17,color:'#ffe7a6'},{x:23,y:8,w:5,h:9,color:'#e9c582'}]
       ]},
     {id:'lobby-chandelier',type:'LIGHT_WARM_VARIATION',x:156,y:24,depth:192,
-      delay:[9000,18000],duration:[1200,1800],intensity:.6,
+      delay:[2800,5200],duration:[1500,2200],intensity:1.1,
       regions:[{x:138,y:13,w:5,h:6,depth:192},{x:146,y:19,w:5,h:6,depth:192},
         {x:162,y:19,w:5,h:6,depth:192},{x:170,y:13,w:5,h:6,depth:192},
+        {x:164,y:31,w:28,h:2,depth:0},{x:158,y:39,w:38,h:2,depth:0},
+        {x:154,y:47,w:44,h:2,depth:0},{x:150,y:55,w:50,h:2,depth:0},
+        {x:148,y:63,w:54,h:2,depth:0},{x:146,y:72,w:58,h:1,depth:80},
+        {x:142,y:81,w:62,h:1,depth:112},{x:138,y:90,w:68,h:1,depth:112},
         {x:160,y:73,w:14,h:1,depth:80},{x:140,y:116,w:24,h:1,depth:112}]},
     {id:'lobby-desk-lamp',type:'LIGHT_WARM_VARIATION',x:121,y:112,depth:144,
-      delay:[8000,16000],duration:[1000,1600],intensity:.8,
-      regions:[{x:112,y:123,w:16,h:3,depth:144},{x:110,y:107,w:11,h:9,depth:128}]},
-    {id:'lobby-bell',type:'GLASS_SUBTLE_REFLECTION',x:99,y:119,depth:144,variants:2,travel:1,
-      delay:[10000,19000],duration:[1400,1900],intensity:.7}
+      delay:[2400,4600],duration:[1400,2200],intensity:1.1,
+      regions:[{x:112,y:123,w:16,h:3,depth:144},{x:110,y:107,w:11,h:9,depth:128},
+        {x:100,y:106,w:23,h:2,depth:128},{x:99,y:111,w:24,h:2,depth:128},
+        {x:95,y:119,w:12,h:2,depth:144},{x:64,y:123,w:64,h:2,depth:144},
+        {x:70,y:130,w:54,h:2,depth:144},{x:84,y:138,w:42,h:2,depth:144}]},
+    {id:'lobby-bell',type:'GLASS_SUBTLE_REFLECTION',x:99,y:119,depth:144,variants:2,travel:4,
+      delay:[3200,6200],duration:[1800,2600],intensity:1.25}
   ]);
   /* Red Room uses the existing intermittent device archetype with three
    * authored column positions. Long holds make the curtains breathe slowly.
