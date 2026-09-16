@@ -27,7 +27,7 @@ Reception counter is boundary, not loose furniture. Clerk stands staff side; sig
 | Stairs + Room 315 hall | 8 | 8 | pass |
 | Entry + runner + circulation props | 8 | selected R4 7.1 | below floor; locked layout |
 | Lighting + ambient life | 8 | 6.5 | below floor |
-| Integrated lobby world | 8 | — | pending |
+| Integrated lobby world | 8 | 7.3 with real Cast Presence | below floor |
 
 ## Evidence
 
@@ -38,7 +38,7 @@ Reception counter is boundary, not loose furniture. Clerk stands staff side; sig
 
 ## Latest verdict
 
-Shell R2: 8/10 pass. Reception R2: 8/10 pass. Hearth/lounge R1: 8/10 pass. Stair R1: 3/10 reject; R2: 8/10 pass. Entry R1: 7, R2: 5, R3: 6, R4: 7.1, R5: 4, R6: 5/10; R4 best legal pass. Literal reference geometry requires moving locked lounge, counter, cart, and Cast Presence. Light R1: 4.5, R2: 5, R3: 3, R4: 6.5, R5: 6.5/10; R5 cleaner local masks but motion remains subtle. Ben absent from fixed shot even with Act 2 flags; no fake sprite.
+Shell R2: 8/10 pass. Reception R2: 8/10 pass. Hearth/lounge R1: 8/10 pass. Stair R1: 3/10 reject; R2: 8/10 pass. Entry R1: 7, R2: 5, R3: 6, R4: 7.1, R5: 4, R6: 5/10; R4 best legal version. Literal reference geometry requires moving locked lounge, counter, cart, and Cast Presence. Light R1: 4.5, R2: 5, R3: 3, R4: 6.5, R5: 6.5/10; R5 cleaner local masks but motion remains subtle. Integrated independent critic: 7.3 fixed, 7.3 with real Cast Presence. No fake sprite; short arrival axis remains.
 
 ## High constraints
 
@@ -46,3 +46,7 @@ Shell R2: 8/10 pass. Reception R2: 8/10 pass. Hearth/lounge R1: 8/10 pass. Stair
 - Keep entry spine, east bypass, Audrey wander region, and hall corridor open.
 - No visual solid may lie about collision semantics.
 - Fresh Luna/xhigh critic approves each unit only at >=8/10.
+
+## Final checkpoint
+
+All runtime gates passed, including Act 4 Chrome 530/530 and Act 3 Chrome 189/189. Integrated independent verdict remains **7.3/10, reject**; entry 7.1 and light 6.5 also below 8. Release audit fails honestly. Best legal layout retained, tracked Chrome-generated artifacts restored, no push.

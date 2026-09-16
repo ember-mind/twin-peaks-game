@@ -299,3 +299,133 @@ high-gap checks.
 Later Astra integration plus semantic construction follow-up form current
 shipped visual. Both remain intentionally unscored because neither was another
 builder–critic round.
+
+---
+
+## Architect-first follow-up (2026-09-16)
+
+This section records the subsequent user-directed Luna/xhigh builder–critic
+loop. It does not rewrite the historical capped E8 verdict above. The new hard
+floor is **8/10 per unit and integrated scene**. Current result is **below
+floor**: no AAA/reference parity claim. No push.
+
+### Spatial program and lock conflict
+
+The south double doors are arrival; a centered runner should lead into a
+receiving space. Reception is a guest/staff boundary fixed to the west service
+wall, with Ben at legal tile (5,7), keys/sign behind, luggage in adjacent
+bellhop bay (2,6). Hearth is built into north wall at solid cells (6..9,4);
+chairs/table occupy (8..10,6) on bounded lounge rug. East flight joins actual
+Room 315 hall door (14,1); Audrey wanders from (12,9). Chandelier hangs over
+the public room, with fire, desk lamp and bell as local practicals.
+
+Reference bottom panel instead places lounge left, staffed reception right,
+stair-side luggage, and an uninterrupted center runner to rear doors. That
+literal plan would require moving immutable map solids and Cast Presence
+positions. Six legal circulation attempts could not reach 8 without painting a
+false walkable carpet through the chairs/table. Strongest legal R4 floor was
+restored; other rejected rounds remain committed as evidence.
+
+### Fixed and playable-state evidence
+
+Every scored fixed still uses
+`test/shot.sh hotel_gn 8 10 up <out> --retro`. An additional
+`--narrative` capture shows real Cast Presence Ben and Audrey, without
+drawing fake sprites. Optional `--ambient-series` exports 50 live production
+canvas frames across 25 seconds.
+
+| Evidence | PNG | SHA-256 |
+|---|---|---|
+| Reference bottom panel | `.gauntlet/e8-architecture/evidence/reference-bottom.png` | `0e49c07239a1c4edfcb6a9bf981e321050582d6979cdc485f8a6e24025c4e8c7` |
+| Before | `.gauntlet/e8-architecture/evidence/baseline.png` | `22d2468949dcbbb8b44c7c2431aa77fdf7f8f0cb0fb3d0426b84181951b982cf` |
+| Selected after | `artifacts/art-pass-e/e8-architecture/after.png` | `1f514e8e60dbc4f6f2aaa4f08453bd424a0cffe1f900bb5c9e46f981f748c9a5` |
+| Cast-present after | `artifacts/art-pass-e/e8-architecture/after-cast.png` | `a7c85998413cf336b540a26cacf687aa67988e59be740ac6d8bfe517d4f42d3f` |
+
+![Before follow-up](../.gauntlet/e8-architecture/evidence/baseline.png)
+![Selected native lobby](../artifacts/art-pass-e/e8-architecture/after.png)
+![Real Ben and Audrey present](../artifacts/art-pass-e/e8-architecture/after-cast.png)
+
+### New unit ledger
+
+| Unit | Scores by round | Selected | Floor 8? | Critic's last gap |
+|---|---|---:|---|---|
+| Architectural shell/floor | 6 → 8 | R2 8 | Yes | Floor value depth |
+| Reception/service wing | 6 → 8 | R2 8 | Yes | Staff-side entry implicit in empty fixed capture |
+| Hearth/lounge | 8 | R1 8 | Yes | Separate rug from public route |
+| Stair/hall | 3 → 8 | R2 8 | Yes | Broad stair/foot transition |
+| Entry/circulation | 7 → 5 → 6 → 7.1 → 4 → 5 | R4 7.1 | **No** | Reference's uninterrupted center axis conflicts with fixed lounge solids |
+| Light/ambient | 4.5 → 5 → 3 → 6.5 → 6.5 | R5 6.5 | **No** | Source-linked material breathing still too subtle |
+| Integrated world | 7.3 fixed; 7.3 with Cast Presence | current 7.3 | **No** | Arrival route hierarchy remains short |
+
+Independent integrated critic found strong improvement over baseline, but
+rejected both final states at 7.3. Its [two-state verdict](../artifacts/art-pass-e/e8-architecture/integrated-world-critic.md) records one gap per state. Staffed Cast Presence resolved the
+empty-desk objection without changing the score; remaining gap is spatial.
+Warm masks, three fire silhouettes, chandelier and desk warm variation, and
+bell reflection use only existing ambient archetypes. Slow motion is real in
+live production frames, but critic found it insufficiently perceptible.
+
+Each round has its own PNG, independent one-gap critic note and commit under
+`artifacts/art-pass-e/e8-architecture/<unit>/round-<n>*`. Rejected R5/R6
+entry layouts were not silently shipped. `.gauntlet/e8-architecture/contract.json`
+and `progress.md` retain round evidence and unresolved gaps.
+
+### Agents and round commits
+
+All builders and judges were separate Luna/xhigh agents. Each critic had fresh
+context and saw only reference bottom panel, before/after PNGs (plus temporal
+PNGs for light), not source or builder rationale.
+
+| Unit round | Builder / fresh critic | Commit |
+|---|---|---|
+| Shell R1 | `e8_arch_shell_builder_r1` / `e8_arch_shell_critic_r1` | `5552a08` |
+| Shell R2 | `e8_arch_shell_builder_r2` / `e8_arch_shell_critic_r2` | `7d6363e` |
+| Reception R1 | `e8_reception_builder_r1` / `e8_reception_critic_r1` | `ea5651b` |
+| Reception R2 | `e8_reception_builder_r2` / `e8_reception_critic_r2` | `01e0e00` |
+| Hearth R1 | `e8_hearth_builder_r1` / `e8_hearth_critic_r1` | `19a288b` |
+| Stair R1 | `e8_stair_builder_r1` / `e8_stair_critic_r1` | `ed38de1` |
+| Stair R2 | `e8_stair_builder_r2` / `e8_stair_critic_r2` | `0025d4c` |
+| Entry R1–R4 | matching `e8_entry_builder_rN` / fresh `e8_entry_critic_rN` | `7a36c82`, `2718a7a`, `673d2b0`, `1fc4fa0` |
+| Entry R5–R6 | matching `e8_entry_builder_rN` / fresh `e8_entry_critic_rN` | `437c3f0`, `030596f` |
+| Selected floor restore | R4 legal floor, later light retained | `272b940` |
+| Light R1–R3 | matching `e8_light_builder_rN` / fresh `e8_light_critic_rN` | `94d88e9`, `74bb355`, `d3f102f` |
+| Light R4–R5 | matching `e8_light_builder_rN` / fresh `e8_light_critic_rN` | `0ec6509`, `7d5f87f` |
+
+Read-only architecture analysts: `e8_arch_program`, `e8_ref_measure`,
+`e8_game_arch`, and `e8_route_arch_solution`. They measured room use,
+reference zones, fixed collision routes and legal alternatives.
+
+### Locks, files and follow-up gates
+
+Scene installer still fails loud on exact map rows, registry records, Room 315,
+Cast Presence body walkability and route reachability; it does **not** assert
+doors before the registry installer. `js/maps.js`,
+`world/connections.json`, `narrative/cast/windows.json`, Room 315 and
+protected `js/retro.js`, `js/retro-authored.js`, `js/tiles.js` have
+no follow-up branch diff. No extra hue or ambient archetype veto.
+
+Changed follow-up runtime/test files: `js/hotel-gn-art.js`,
+`js/ambient-life-scenes.js`, `test/hotel-gn-scene.js`,
+`test/retro-scene.html`, `test/shot.sh`. Evidence lives under
+`artifacts/art-pass-e/e8-architecture/` and
+`.gauntlet/e8-architecture/`.
+
+| Gate | Follow-up result |
+|---|---|
+| Focused lobby | Pass: geometry, registry lifecycle, Cast Presence, ambient 60 s |
+| Smoke | 415/415 |
+| Walkthrough | 85/85 |
+| Retro production | 54/54 |
+| Mobile production | 20/20 |
+| Cast Continuity | Pass |
+| World door equality | 59/59 |
+| Room 315 | Pass |
+| Narrative finale | 27/27 |
+| Act 4 flow | 1611/1611 |
+| Chrome Act 4 all paths | 530/530; one test-server `favicon.ico` 404, no path browser errors |
+| Chrome Act 3 | 189/189; one test-server console error |
+
+Visual release audit remains **FAIL** because entry, light, and integrated
+world are below 8/10, although all runtime gates passed. Prior E8 baseline was not separately scored against
+these new architecture units; no baseline scores were invented for audit.
+All tracked images and transcripts regenerated by Chrome gates were restored.
+No push performed.
