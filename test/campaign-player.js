@@ -19,4 +19,12 @@ assert.equal(api.travel,undefined);
 assert.equal(api.seed,undefined);
 assert.equal(api.evaluate,undefined);
 assert.ok(!/\b(?:loadMap|applyEffects|commitNode|setState)\s*\(/.test(source));
-console.log('campaign-player: 12 contracts passed; no browser or game completion claimed');
+// A queued direction is movement, not a reliable turn-in-place. The final
+// approach must end with the intended facing without standing on the target.
+s.player.dir = 'right';
+const oriented = pathTo(s, 0, 1, false, 'down');
+assert.ok(oriented.length > 0);
+assert.deepEqual(oriented.at(-1), [0, 1]);
+assert.deepEqual(oriented.at(-2), [0, 0]);
+assert.deepEqual(pathTo(s, 0, 1, false, 'right'), []);
+console.log('campaign-player: 16 contracts passed; no browser or game completion claimed');
