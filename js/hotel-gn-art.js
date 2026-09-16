@@ -19,20 +19,9 @@
   ];
   function painter(ctx,cx,cy){cx=Math.round(cx||0);cy=Math.round(cy||0);return function(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(x-cx,y-cy,w,h);};}
   function diamond(R,x,y,r,c){for(var dy=-r;dy<=r;dy++)R(x-r+Math.abs(dy),y+dy,2*(r-Math.abs(dy))+1,1,c);}
-  function rug(R,x,y,w,h,runner){
+  function rug(R,x,y,w,h){
     R(x,y,w,h,p.ink);R(x+1,y+1,w-2,h-2,p.gold);R(x+2,y+2,w-4,h-4,p.redDark);
     R(x+4,y+4,w-8,h-8,p.red);R(x+5,y+5,w-10,h-10,p.redDark);
-    if(runner){
-      /* The public carpet is a quiet directional stripe: its clipped gold
-       * diamonds reinforce the entrance route without competing with the
-       * hearth vignette. */
-      for(var xx=x+5;xx<x+w-4;xx+=7){R(xx,y+2,2,1,p.woodLight);R(xx,y+h-3,2,1,p.gold);}
-      for(var yy=y+9;yy<y+h-7;yy+=18){
-        var mid=x+Math.floor(w/2);diamond(R,mid,yy,5,p.gold);diamond(R,mid,yy,4,p.redDark);diamond(R,mid,yy,1,p.woodLight);
-        R(x+2,yy,1,2,p.gold);R(x+w-3,yy,1,2,p.gold);
-      }
-      return;
-    }
     /* A single bounded lounge rug, just clear of the east bypass. Its
      * double keyline and paired medallions establish a domestic seating zone
      * rather than letting the chairs dissolve into the public runner. */
@@ -49,33 +38,21 @@
     });
   }
   function guestRunner(R){
-    /* One guest route, not three carpets: its edges advance by integer
-     * pixels as the entrance sightline climbs toward the hall. The south
-     * landing is centred on x144, the diagonal clears the fixed lounge and
-     * desk, and the upper aisle settles into the stair-side x176..208 lane. */
-    function center(y){
-      if(y<116)return 192;
-      if(y<132)return 190+Math.round((y-116)*(178-190)/16);
-      return 178+Math.round((y-132)*(144-178)/44);
+    /* The public arrival is one straight, centered runner. It ends cleanly
+     * at y=122 before the eight-pixel parquet reveal below the bounded lounge
+     * rug; the east stair approach and west counter approach stay bare. */
+    var x=128,y=122,w=32,h=54;
+    R(x,y,w,h,p.ink);
+    R(x+1,y+1,w-2,h-2,p.gold);
+    R(x+3,y+2,w-6,h-4,p.redDark);
+    R(x+5,y+4,w-10,h-8,p.red);
+    R(x+6,y+5,w-12,h-10,p.redDark);
+    /* A centered sequence of small medallions keeps the runner directional
+     * without adding a horizontal crossbar or a turn into another route. */
+    for(var markY=134;markY<=166;markY+=16){
+      diamond(R,144,markY,4,p.gold);diamond(R,144,markY,3,p.redDark);R(144,markY,1,1,p.woodLight);
     }
-    function width(y){return y<116?32:30;}
-    for(var y=72;y<=176;y++){
-      var w=width(y),left=Math.round(center(y)-w/2);
-      /* Fill each scanline first, then pull the same dark/gold/red keyline
-       * down its two edges. Adjacent rows share paint, so there is no false
-       * horizontal slab at the diagonal or its upper turn. */
-      R(left,y,w,1,p.redDark);
-      R(left+4,y,w-8,1,p.red);
-      R(left+5,y,w-10,1,p.redDark);
-      R(left,y,1,1,p.ink);R(left+1,y,1,1,p.gold);R(left+2,y,2,1,p.redDark);
-      R(left+w-4,y,2,1,p.redDark);R(left+w-2,y,1,1,p.gold);R(left+w-1,y,1,1,p.ink);
-    }
-    /* Small linked medallions keep direction legible without recreating the
-     * old branch. They sit safely inside the 30 px diagonal field. */
-    for(var markY=84;markY<=164;markY+=16){
-      var mid=Math.round(center(markY));
-      diamond(R,mid,markY,3,p.gold);diamond(R,mid,markY,2,p.redDark);R(mid,markY,1,1,p.woodLight);
-    }
+    R(130,124,1,44,p.gold);R(157,124,1,44,p.gold);
   }
   function floor(R){
     /* The floor is a shallow, south-facing parquet plane. Courses grow
@@ -127,14 +104,13 @@
     R(114,169,60,2,p.woodLight);
     R(116,171,56,3,p.wood);
     R(116,174,56,2,p.woodDark);
-    /* One angled guest runner carries the south arrival into the north hall
-     * aisle. Its scanline edges keep the lounge-to-route parquet reveal
-     * visible while preserving the clear west desk approach. */
+    /* The centered guest runner carries the south arrival only to the open
+     * lobby choice point; circulation beyond it remains exposed parquet. */
     guestRunner(R);
-    /* A fully bounded hearth rug leaves a real parquet reveal before the
-     * angled route: its bottom edge is y=114 and the runner begins at y=116,
-     * with the remaining floor seam keeping the two zones distinct. */
-    rug(R,112,80,64,34,false);
+    /* A fully bounded hearth rug leaves an eight-pixel parquet reveal before
+     * the arrival runner: its bottom edge is y=114 and the runner starts at
+     * y=122, so the lounge remains a separate domestic zone. */
+    rug(R,112,80,64,34);
     R(112,114,64,2,p.wood);
     R(114,114,60,1,p.woodLight);
     /* Brass side wings and a dark center mat make both door leaves read as
