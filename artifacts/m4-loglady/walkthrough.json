@@ -1,0 +1,101 @@
+{
+ "transcript": [
+  {
+   "name": "page-01.png",
+   "page": "m4.attesa.loglady_ceppo.p01",
+   "dialogueId": null
+  },
+  {
+   "name": "page-02.png",
+   "page": "m4.attesa.loglady_ceppo.p02",
+   "dialogueId": null
+  },
+  {
+   "name": "page-03.png",
+   "page": "m4.attesa.loglady_ceppo.p03",
+   "dialogueId": null
+  },
+  {
+   "name": "page-04.png",
+   "page": "m4.attesa.loglady_ceppo.p04",
+   "dialogueId": null
+  },
+  {
+   "name": "page-05.png",
+   "page": "m4.attesa.loglady_ceppo.p05",
+   "dialogueId": null
+  },
+  {
+   "name": "commit",
+   "state": {
+    "mapId": "diner",
+    "px": 4,
+    "py": 6,
+    "dir": "up",
+    "mode": "play",
+    "narrativeActive": false,
+    "narrActiveFlag": true,
+    "atto3": false,
+    "classicAtto3": false,
+    "asc": true,
+    "dialogueId": null,
+    "page": null,
+    "lastNarr": "m4.attesa.loglady_ceppo.p05"
+   }
+  },
+  {
+   "name": "page-06-repeat.png",
+   "page": "m4.repeat.loglady_ceppo",
+   "dialogueId": null
+  },
+  {
+   "name": "act3-enter",
+   "state": {
+    "mapId": "diner",
+    "px": 4,
+    "py": 6,
+    "dir": "up",
+    "mode": "play",
+    "narrativeActive": false,
+    "narrActiveFlag": true,
+    "atto3": true,
+    "classicAtto3": true,
+    "asc": true,
+    "dialogueId": null,
+    "page": null,
+    "lastNarr": "m4.repeat.loglady_ceppo"
+   }
+  },
+  {
+   "name": "act3-classic-01.png",
+   "page": "loglady",
+   "dialogueId": "loglady"
+  },
+  {
+   "name": "act3-classic-02.png",
+   "page": "loglady",
+   "dialogueId": "loglady"
+  }
+ ],
+ "results": {
+  "mapId": "diner",
+  "px": 4,
+  "py": 6,
+  "dir": "up",
+  "mode": "play",
+  "narrativeActive": false,
+  "narrActiveFlag": true,
+  "atto3": true,
+  "classicAtto3": true,
+  "asc": true,
+  "dialogueId": "loglady",
+  "page": {
+   "kind": "classic",
+   "id": "loglady",
+   "i": 1,
+   "name": "LOG LADY",
+   "text": "Lui vede sempre tutto."
+  },
+  "lastNarr": "m4.repeat.loglady_ceppo"
+ }
+}

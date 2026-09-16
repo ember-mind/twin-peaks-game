@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>HL-BOOT</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #000; height: 100%; overflow: hidden; }
+  #stage { position: fixed; inset: 0; }
+  #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+  #gl { background: #000; }
+  #game { background: transparent; }
+  #narrative { position: absolute; left: 0; right: 0; bottom: 0; top: 0; z-index: 10; pointer-events: none; }
+  #narrative .nw-root { pointer-events: auto; }
+  .nw-root { position: absolute; left: 8%; right: 8%; bottom: 6%; background: rgba(12,14,20,0.94); border: 3px solid #c8b06a; border-radius: 4px; padding: 16px 20px; font: 17px/1.65 monospace; color: #e8e4d8; }
+  .nb-root { top: 10%; bottom: 8%; overflow: auto; }
+  .nw-title { color: #c8b06a; margin-bottom: 8px; }
+  .nw-opt { padding: 2px 6px; white-space: pre-wrap; }
+  .nw-focus { background: #2e3442; color: #ffe9a8; }
+  .nw-page { min-height: 56px; }
+  .nw-name { color: #c8b06a; }
+  .nw-hint { text-align: right; color: #888; margin-top: 8px; }
+  #truth { position: absolute; top: 0; left: 0; right: 0; z-index: 11; font: 13px monospace; color: #9fe8a0; background: rgba(0,0,0,0.72); padding: 4px 8px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl" width="960" height="640"></canvas>
+  <canvas id="game" width="480" height="320"></canvas>
+  <div id="narrative"></div>
+  <div id="truth"></div>
+</div>
+
+<script src="../../js/vendor/three.min.js"></script>
+<script src="../../js/tiles.js"></script>
+<script src="../../js/chars.js"></script>
+<script src="../../js/houses.js"></script>
+<script src="../../js/maps.js"></script>
+<script src="../../js/data.js"></script>
+<script src="../../js/retro-font.js"></script>
+<script src="../../js/engine.js"></script>
+<script src="../../js/render3d.js"></script>
+<script src="../../js/scene-objects.gen.js"></script>
+<script src="../../js/glue.js"></script>
+<script src="../../js/main.js"></script>
+<script src="../../js/narrative-runtime.js"></script>
+<script src="../../js/narrative-ui.js"></script>
+<script src="../../js/narrative-notebook.js"></script>
+<script src="../../js/narrative-data.gen.js"></script>
+<script src="../../js/cast-presence.js"></script>
+<script src="../../js/narrative-engine-adapter.js"></script>
+<script src="../../js/narrative-save.js"></script>
+
+<script>
+/* artifacts/m4-loglady/loglady-harness.html — scoped Act 2 walkthrough harness.
+ * Boots the real game with the M4-only adapter (same opt-in as
+ * test/m4-end2end-harness.html), seeds ONLY sogno_fatto, walks to the Log Lady
+ * at diner 4,5 and exposes a tiny step API so a CDP driver can screenshot every
+ * page, then flip to Act 3 and screenshot the classic voice. No production file
+ * is modified; this lives under artifacts/ by the task fence. */
+(function () {
+  var results = window.HL_RESULTS = { pages: [], classic: [], steps: [], errors: [] };
+  window.onerror = function (m, s, l) { results.errors.push(String(m) + ' @' + l); };
+  window.addEventListener('unhandledrejection', function (e) {
+    results.errors.push('unhandled: ' + (e.reason && e.reason.message || e.reason));
+  });
+
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function key(code) {
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: code, bubbles: true }));
+    window.dispatchEvent(new KeyboardEvent('keyup', { code: code, bubbles: true }));
+  }
+  var DIR = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+  function holdKey(c) { window.dispatchEvent(new KeyboardEvent('keydown', { code: c, bubbles: true })); }
+  function liftKey(c) { window.dispatchEvent(new KeyboardEvent('keyup', { code: c, bubbles: true })); }
+
+  var HL = window.HL = {};
+  var lastNarr = null;
+
+  function G() { return GAME.Engine; }
+  function A() { return GAME.NarrativeAdapter; }
+  function NR() { return GAME.NarrativeRuntime; }
+  function S() { return A().getState(); }
+
+  function livePage() {
+    var d = G().state.dialogue;
+    if (d) {
+      var pg = d.pages[d.i] || {};
+      return { kind: 'classic', id: d.id, i: d.i, name: pg.name || '', text: pg.text || '' };
+    }
+    var el = document.querySelector('#narrative .nw-page[data-page-id]');
+    if (el) return { kind: 'narrative', id: el.getAttribute('data-page-id'), text: el.textContent };
+    return null;
+  }
+  HL.state = function () {
+    var E = G();
+    var st = S();
+    return {
+      mapId: E.state.mapId, px: E.state.player.tx, py: E.state.player.ty, dir: E.state.player.dir,
+      mode: E.state.mode, narrativeActive: A().active(),
+      narrActiveFlag: st.flags.sogno_fatto === true,
+      atto3: st.flags.atto3 === true, classicAtto3: E.state.flags.atto3 === true,
+      asc: st.flags.loglady_ceppo_ascoltato === true,
+      dialogueId: E.state.dialogue ? E.state.dialogue.id : null,
+      page: livePage(), lastNarr: lastNarr
+    };
+  };
+  HL.press = function (code) { key(code); return wait(320); };
+
+  /* --- map walking (same shape as the act-2 harness) --- */
+  function walkable(mapId, x, y) {
+    var E = G();
+    for (var i = 0; i < E.state.npcs.length; i++) {
+      var n = E.state.npcs[i];
+      if (E.npcActive(n) && n.x === x && n.y === y) return false;
+    }
+    if (GAME.Maps.doorAt(mapId, x, y)) return true;
+    return !GAME.Maps.isSolid(mapId, x, y, E.state);
+  }
+  function bfs(mapId, from, to) {
+    var m = GAME.Maps[mapId];
+    var W = m.width || m.rows[0].length, H = m.height || m.rows.length;
+    var seen = {}, prev = {}, q = [from];
+    seen[from[0] + ',' + from[1]] = true;
+    while (q.length) {
+      var cur = q.shift();
+      if (cur[0] === to[0] && cur[1] === to[1]) {
+        var path = [cur];
+        while (prev[cur[0] + ',' + cur[1]]) { cur = prev[cur[0] + ',' + cur[1]]; path.unshift(cur); }
+        return path;
+      }
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) {
+        var nx = cur[0] + d[0], ny = cur[1] + d[1], k = nx + ',' + ny;
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H || seen[k]) return;
+        if (!walkable(mapId, nx, ny)) return;
+        seen[k] = true; prev[k] = cur; q.push([nx, ny]);
+      });
+    }
+    return null;
+  }
+  async function walkTo(tx, ty) {
+    for (var guard = 0; guard < 400; guard++) {
+      if (G().state.dialogue) { key('Enter'); await wait(150); continue; }
+      var p = G().state.player;
+      if (p.tx === tx && p.ty === ty && !p.moving) return true;
+      var path = bfs(G().state.mapId, [p.tx, p.ty], [tx, ty]);
+      if (!path || path.length < 2) { await wait(200); continue; }
+      var next = path[1];
+      var dir = next[0] > p.tx ? 'right' : next[0] < p.tx ? 'left' : next[1] > p.ty ? 'down' : 'up';
+      holdKey(DIR[dir]);
+      var t0 = 0;
+      while ((G().state.player.tx !== next[0] || G().state.player.ty !== next[1]) && t0 < 2400) { await wait(60); t0 += 60; }
+      liftKey(DIR[dir]);
+      await wait(90);
+    }
+    return false;
+  }
+  async function face(dir) {
+    holdKey(DIR[dir]);
+    var t0 = 0;
+    while (G().state.player.dir !== dir && t0 < 1500) { await wait(40); t0 += 40; }
+    liftKey(DIR[dir]);
+    await wait(150);
+  }
+
+  HL.boot = async function () {
+    var E = G();
+    E.state.mode = 'play';
+    A().enable({ container: document.getElementById('narrative'), advanceLockMs: 100 });
+    E.loadMap('diner', 4, 6, 'up');
+    NR().applyEffects(S(), [{ set: 'sogno_fatto' }]);
+    E.state.flags.sogno_fatto = true;
+    A().onLog = function (e) {
+      if (e.event === 'page_shown') { lastNarr = e.page_id; results.pages.push(e.page_id); }
+    };
+    A().setState(S());
+    await wait(400);
+    var st = HL.state();
+    results.steps.push({ boot: st });
+    document.title = 'HL-BOOTED';
+    return st;
+  };
+
+  /* Stand next to the Log Lady (diner 4,5) and face her. The player is spawned
+   * on the adjacent tile (4,6) by boot(); this only sets facing. */
+  HL.approach = async function () {
+    await face('up');
+    var st = HL.state();
+    results.steps.push({ approach: { at: st.px + ',' + st.py, dir: st.dir, page: st.page } });
+    document.title = 'HL-APPROACHED';
+    return st;
+  };
+
+  /* Flip to Act 3 on BOTH layers, re-sync Cast Presence, keep position. */
+  HL.enterAct3 = function () {
+    NR().applyEffects(S(), [{ set: 'atto3' }]);
+    G().state.flags.atto3 = true;
+    A().setState(S());
+    var st = HL.state();
+    results.steps.push({ act3: st });
+    document.title = 'HL-ACT3';
+    return st;
+  };
+
+  HL.finish = function () {
+    results.all = HL.state();
+    document.title = 'HL-DONE';
+    return results.all;
+  };
+  HL.results = results;
+})();
+</script>
+</body>
+</html>

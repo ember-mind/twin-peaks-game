@@ -7,7 +7,16 @@
     "package": "narrative-v1.0"
   },
   "entry_condition": {
-    "flag": "sogno_fatto"
+    "all": [
+      {
+        "flag": "sogno_fatto"
+      },
+      {
+        "not": {
+          "flag": "atto3"
+        }
+      }
+    ]
   },
   "completion": {
     "when": {
@@ -296,6 +305,76 @@
       "channel": "world",
       "map_id": "hospital",
       "actor_id": "ronette",
+      "interaction_slot": "primary"
+    },
+    {
+      "id": "loglady_ceppo",
+      "new": true,
+      "beat": "attesa",
+      "source_section": "attesa-loglady",
+      "optional": true,
+      "conditions": [
+        { "flag": "sogno_fatto" },
+        { "not": { "flag": "atto3" } }
+      ],
+      "pages": [
+        {
+          "name": "LOG LADY",
+          "text": "Il mio ceppo ha visto qualcosa, quella notte. Si è voltato verso la porta. La porta era chiusa.",
+          "id": "m4.attesa.loglady_ceppo.p01",
+          "mode": "dialogue",
+          "speaker_id": "loglady",
+          "display_name": "LOG LADY"
+        },
+        {
+          "name": "LOG LADY",
+          "text": "A casa mia non ci sono correnti. Da allora si volta ancora: due volte, poi si ferma.",
+          "id": "m4.attesa.loglady_ceppo.p02",
+          "mode": "dialogue",
+          "speaker_id": "loglady",
+          "display_name": "LOG LADY"
+        },
+        {
+          "name": "COOPER",
+          "text": "Margaret, il ceppo lo lascio a lei. Mi dica cosa vuole da me.",
+          "id": "m4.attesa.loglady_ceppo.p03",
+          "mode": "dialogue",
+          "speaker_id": "cooper",
+          "display_name": "COOPER"
+        },
+        {
+          "name": "LOG LADY",
+          "text": "Vuole il nome che le è stato detto stanotte. Quello che non ha più.",
+          "id": "m4.attesa.loglady_ceppo.p04",
+          "mode": "dialogue",
+          "speaker_id": "loglady",
+          "display_name": "LOG LADY"
+        },
+        {
+          "name": "",
+          "text": "(La signora si alza e prende il ceppo. Va verso la porta senza salutare. Il tavolo resta vuoto.)",
+          "id": "m4.attesa.loglady_ceppo.p05",
+          "mode": "action"
+        }
+      ],
+      "effects": [
+        { "set": "loglady_ceppo_ascoltato" }
+      ],
+      "repeat": {
+        "name": "COOPER",
+        "text": "Il ceppo aspetta un nome che non ho più. Non c'è altro da chiedere, qui.",
+        "id": "m4.repeat.loglady_ceppo",
+        "mode": "dialogue",
+        "speaker_id": "cooper",
+        "display_name": "COOPER"
+      },
+      "repeat_when": {
+        "flag": "loglady_ceppo_ascoltato"
+      },
+      "kind": "dialogue",
+      "channel": "world",
+      "map_id": "diner",
+      "actor_id": "loglady",
       "interaction_slot": "primary"
     },
     {
@@ -1250,8 +1329,8 @@
     }
   ],
   "node_count": {
-    "new": 12,
+    "new": 13,
     "modified": 3,
-    "runtime_total": 15
+    "runtime_total": 16
   }
 }
