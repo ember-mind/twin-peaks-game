@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const {create}=require('../js/ambient-life.js');
 function scene(seed=1989){global.GAME={AmbientLife:create(seed)};delete require.cache[require.resolve('../js/ambient-life-scenes.js')];require('../js/ambient-life-scenes.js');return GAME.AmbientLife;}
 const a=scene(),b=scene();a.update(0,'diner');b.update(0,'diner');
-assert.equal(a.snapshot('diner').items.length,9);
+assert.equal(a.snapshot('diner').items.length,10);
 const first=a.snapshot('diner').items;
 assert.equal(new Set(first.filter(x=>x.type==='LIGHT_WARM_VARIATION').map(x=>x.next)).size,3,'lamps have independent start clocks');
 const active={},frames=new Set();

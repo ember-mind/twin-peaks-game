@@ -1,6 +1,23 @@
 'use strict';
 const assert=require('node:assert/strict');require('../js/ambient-life.js');const {create}=require('../js/character-activity.js');
 const state=()=>({mapId:'diner',mode:'play',fadePhase:0,dialogue:null,menu:null,npcs:[{id:'norma',x:5,y:2,dir:'left',moving:false}]});
+const cadence=create(1989);cadence.update(0,state());
+const scheduled=Object.fromEntries(cadence.snapshot().items.map(item=>[item.id,item.next]));
+assert(scheduled['booth-sip']>=15000&&scheduled['booth-sip']<=18000,'guest sip starts after quiet opening');
+assert(scheduled['counter-wipe']>=25000&&scheduled['counter-wipe']<=28000,'counter service follows guest moment');
+assert(scheduled['counter-wipe']-scheduled['booth-sip']>=7000,'first two gestures do not overlap');
+const painter=global.GAME.CharacterActivity;painter.update(0,state());
+function clothXAt(time){
+  painter.preview('counter-wipe',time);
+  const marks=[],g={fillStyle:'',fillRect(x,y,w,h){marks.push({x,y,w,h,color:this.fillStyle});}};
+  painter.drawWipe(g,0,0);
+  const cloth=marks.find(mark=>mark.color==='#81918b'&&mark.y===46&&mark.w===7&&mark.h===2);
+  assert(cloth,'seven-pixel cloth remains on the authored counter plane');
+  return cloth.x;
+}
+assert.equal(clothXAt(0),90,'wipe begins near Norma');
+assert.equal(clothXAt(1500),101,'wipe reaches across the counter');
+assert.equal(clothXAt(2900),90,'wipe returns, not a one-way slide');
 const a=create(1989),b=create(1989),s=state();a.update(0,s);b.update(0,state());
 assert.equal(a.pose('booth-sip'),-1);a.play('booth-sip');a.update(100,s);assert.equal(a.pose('booth-sip'),0);a.update(900,s);assert.equal(a.pose('booth-sip'),3);
 a.setPaused(true);a.update(1000,s);assert.equal(a.pose('booth-sip'),3);a.setPaused(false);
@@ -10,5 +27,10 @@ a.reset(1989);a.update(0,s);for(let i=0;i<6000;i++)a.update(20,s);b.update(12000
 const starts=a.snapshot().items.map(e=>e.next);assert.notEqual(starts[0],starts[1]);
 a.preview('booth-sip',1000);a.setEnabled(false);assert.equal(a.pose('booth-sip'),-1);a.setEnabled(true);
 s.npcs[0].x=6;a.play('counter-wipe');a.update(0,s);assert.equal(a.pose('counter-wipe'),-1,'cannot wipe from another tile');
-s.npcs[0].x=5;s.mapId='town';a.update(0,s);assert.equal(a.pose('booth-sip'),-1,'scene scope');
-console.log('CHARACTER-ACTIVITY-PASS seeded clocks, distinct starts, preview, dialogue cancellation, pause, disable, workstation and map guards');
+s.npcs=[];a.play('counter-wipe');a.update(0,s);assert.equal(a.pose('counter-wipe'),-1,'absent Norma never draws a disembodied wipe');
+s.npcs=[{id:'norma',x:5,y:2,dir:'left',moving:false}];s.mapId='town';a.update(0,s);assert.equal(a.pose('booth-sip'),-1,'scene scope');
+const reentry=create(1989),reState=state();reentry.update(0,reState);reentry.play('counter-wipe');reentry.update(100,reState);
+assert(reentry.pose('counter-wipe')>=0,'wipe starts in diner with Norma present');
+reState.mapId='town';reentry.update(0,reState);assert.equal(reentry.pose('counter-wipe'),-1,'wipe ends on exit');
+reState.mapId='diner';reentry.update(0,reState);assert.equal(reentry.pose('counter-wipe'),-1,'wipe does not resume mid-gesture on reentry');
+console.log('CHARACTER-ACTIVITY-PASS seeded clocks, separated diner gestures, preview, dialogue cancellation, pause, disable, absent actor, workstation, exit/reentry and map guards');

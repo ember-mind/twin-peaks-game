@@ -9,6 +9,7 @@
   });
   life.register('diner',[
     {id:'counter-coffee',type:'STEAM_SMALL',x:69,y:45,depth:64,variants:3,duration:[1200,1360]},
+    {id:'counter-cup-steam',type:'STEAM_SMALL',x:113,y:47,depth:64,variants:3,duration:[1800,1800]},
     {id:'booth-coffee',type:'STEAM_SMALL',x:40,y:99,depth:112,variants:3,duration:[1320,1480],intensity:.85},
     {id:'pendant-west',type:'LIGHT_WARM_VARIATION',duration:[1200,1600],x:37,y:5,depth:0,regions:[{x:31,y:19,w:8,h:1,depth:0},{x:42,y:47,w:12,h:1,depth:64}]},
     {id:'pendant-middle',type:'LIGHT_WARM_VARIATION',duration:[1200,1600],x:67,y:5,depth:0,regions:[{x:61,y:19,w:8,h:1,depth:0},{x:85,y:48,w:10,h:1,depth:64}]},
@@ -111,53 +112,4 @@
     arrivalKey:'6,8',fromMapId:'town',x:96,y:144,depth:160,frames:reactions.doorEntryFrames,
     palette:{frame:'#35271f',void:'#17251e',threshold:'#81918b',red:'#8c2f3e',edge:'#501f29',gold:'#e9bd5d',glass:'#f4e6c8'}}]);
 
-  /* Detail 1 — steam from one coffee cup on the Double R counter. The diner has
-   * no -art.js (its interior pixels live in retro-authored.js) and its ambient
-   * loop is registered here, so this function lives here too. The cup already
-   * exists in the art: drawDinerCounter places interiorCup at counterX+75,
-   * counterY-3 with counter [2,3,9] => world (107,45). That is the second cup,
-   * so the one steam already registered on the first cup is left alone. Muted
-   * warm-grey tones are the diner palette's tile and creamShade values. */
-  var DINER_CUP_STEAM={'bx':113,'by':47,'loop':6,'step':300,
-    'rect':{'xMin':111,'xMax':115,'yMin':39,'yMax':47},
-    'tones':['#cfbc92','#898b75'],
-    'wisps':[
-      [[0,-1],[0,-2]],
-      [[0,-2],[0,-3]],
-      [[1,-3],[0,-4],[1,-2]],
-      [[0,-4],[-1,-5]],
-      [[-1,-5],[0,-6],[-1,-4]],
-      [[0,-6],[1,-7]]
-    ]};
-  function dinerCupSteam(g,cx,cy,t){
-    if(!g||typeof g.fillRect!=='function')return;
-    var frame=Math.floor(t/DINER_CUP_STEAM.step)%DINER_CUP_STEAM.loop;
-    var wisp=DINER_CUP_STEAM.wisps[frame];
-    var oldAlpha=g.globalAlpha,oldFill=g.fillStyle;
-    g.globalAlpha=1;
-    for(var i=0;i<wisp.length;i++){
-      g.fillStyle=DINER_CUP_STEAM.tones[i%DINER_CUP_STEAM.tones.length];
-      g.fillRect(DINER_CUP_STEAM.bx+wisp[i][0]-cx,DINER_CUP_STEAM.by+wisp[i][1]-cy,1,1);
-    }
-    g.globalAlpha=oldAlpha;g.fillStyle=oldFill;
-  }
-  function nowMs(){
-    return (typeof performance!=='undefined'&&performance&&typeof performance.now==='function')
-      ? performance.now() : Date.now();
-  }
-  /* The diner interior is produced by GAME.sprites.drawStructures; append the
-   * steam there. Guarded so data-only harnesses without the renderer skip it. */
-  (function installDinerCupSteam(){
-    var G=root.GAME;
-    if(!G||!G.sprites||typeof G.sprites.drawStructures!=='function')return;
-    var base=G.sprites.drawStructures;
-    if(base.__tpDinerCupSteam)return;
-    var wrapped=function(g,map,cx,cy){
-      var out=base.apply(this,arguments);
-      if(g&&map&&map.id==='diner')dinerCupSteam(g,cx||0,cy||0,nowMs());
-      return out;
-    };
-    wrapped.__tpDinerCupSteam=true;
-    G.sprites.drawStructures=wrapped;
-  })();
 })(typeof window!=='undefined'?window:globalThis);
