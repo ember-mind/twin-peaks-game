@@ -1,0 +1,290 @@
+# act-3-flow: runtime path (M5)
+  ok - east_route_confirmed: unico writer in M5 (m5_tracks_north)
+  ok - east_route_confirmed: nessun writer in M4
+  ok - east_route_confirmed: nessun writer in M6
+  ok - east_route_confirmed: nessun writer in M8
+  ok - east_route_confirmed: nessun writer in M9
+  ok - world/connections.json: la porta OEJ (traincar-oej-entrance) richiede east_route_confirmed
+  ok - prompt preliminare: esattamente due scelte
+  ok - prompt preliminare: nessuna opzione «staging»/«disposizione»
+  ok - m5_theory_initial: pagina «m5.b8a.theory.p01» senza id di design (Terra sulla soglia. Segni ai lati. Una cosa piccola al centro.)
+  ok - m5_mound/m5_ring/m5_scene: revisione bloccata dopo m5_mound
+  ok - m5_mound/m5_ring/m5_scene: revisione bloccata dopo m5_ring
+  ok - m5_mound/m5_ring/m5_scene: revisione bloccata dopo m5_scene
+  ok - m5_mound/m5_ring/m5_scene: P3A created_from esatto
+  ok - m5_mound/m5_ring/m5_scene: M5 completa
+  ok - m5_mound/m5_scene/m5_ring: revisione bloccata dopo m5_mound
+  ok - m5_mound/m5_scene/m5_ring: revisione bloccata dopo m5_scene
+  ok - m5_mound/m5_scene/m5_ring: revisione bloccata dopo m5_ring
+  ok - m5_mound/m5_scene/m5_ring: P3A created_from esatto
+  ok - m5_mound/m5_scene/m5_ring: M5 completa
+  ok - m5_ring/m5_mound/m5_scene: revisione bloccata dopo m5_ring
+  ok - m5_ring/m5_mound/m5_scene: revisione bloccata dopo m5_mound
+  ok - m5_ring/m5_mound/m5_scene: revisione bloccata dopo m5_scene
+  ok - m5_ring/m5_mound/m5_scene: P3A created_from esatto
+  ok - m5_ring/m5_mound/m5_scene: M5 completa
+  ok - m5_ring/m5_scene/m5_mound: revisione bloccata dopo m5_ring
+  ok - m5_ring/m5_scene/m5_mound: revisione bloccata dopo m5_scene
+  ok - m5_ring/m5_scene/m5_mound: revisione bloccata dopo m5_mound
+  ok - m5_ring/m5_scene/m5_mound: P3A created_from esatto
+  ok - m5_ring/m5_scene/m5_mound: M5 completa
+  ok - m5_scene/m5_mound/m5_ring: revisione bloccata dopo m5_scene
+  ok - m5_scene/m5_mound/m5_ring: revisione bloccata dopo m5_mound
+  ok - m5_scene/m5_mound/m5_ring: revisione bloccata dopo m5_ring
+  ok - m5_scene/m5_mound/m5_ring: P3A created_from esatto
+  ok - m5_scene/m5_mound/m5_ring: M5 completa
+  ok - m5_scene/m5_ring/m5_mound: revisione bloccata dopo m5_scene
+  ok - m5_scene/m5_ring/m5_mound: revisione bloccata dopo m5_ring
+  ok - m5_scene/m5_ring/m5_mound: revisione bloccata dopo m5_mound
+  ok - m5_scene/m5_ring/m5_mound: P3A created_from esatto
+  ok - m5_scene/m5_ring/m5_mound: M5 completa
+  ok - 6 ordini di osservazione, tutti completati (6)
+  ok - confronto obbligatorio: P3A ancora unformulated
+  ok - confronto obbligatorio: rapporto bloccato anche con teoria finale forzata, senza P3A
+  ok - m5_report_intro/degeneration: pagina «m5.b9.report.p01» senza id di design ((Truman arriva lungo i binari, col passo di chi non vuole arrivare.))
+  ok - m5_report_intro/degeneration: pagina «m5.b9.report.p02» senza id di design (Non avete toccato niente. Bene: adesso tocca a me guardare.)
+  ok - m5_report_intro/degeneration: pagina «m5.b9.report.theory_degeneration» senza id di design (Una lettura: qualcuno aveva fissato un incontro qui. E qualcosa si è rotto.)
+  ok - m5_report_intro/degeneration: pagina «m5.b9.report.contest.p01» senza id di design (La polvere, Cooper. L'hai scritta tu: intatta fino al bordo. Cosa la tiene al centro?)
+  ok - m5_report_intro/degeneration: pagina «m5.b9.report.contest.p02» senza id di design (Non lo so ancora, Harry. Ho fotografato il bordo, non la risposta.)
+  ok - m5_report_intro/degeneration: pagina «m5.b9.report.contest.p03» senza id di design (Allora a verbale vanno i fatti. La lettura resta tua.)
+  ok - m5_report_intro/degeneration: pagina «m5.b9.report.p04» senza id di design ((guarda l'anello senza toccarlo) Questo va nella cassaforte delle prove. Stasera.)
+  ok - m5_report_intro/degeneration: pagina «m5.b9.report.p05» senza id di design (È l'unico oggetto la cui posizione non riesco ancora a leggere come accidentale. Vorrei poterlo guardare finché non ci riesco.)
+  ok - impeto: le 3 pagine di contestazione appaiono
+  ok - impeto: nessuna pagina «come tua»
+  ok - impeto: teoria finale resta degeneration (contestata, non refutata)
+  ok - impeto: rapporto committato, nessun loop
+  ok - impeto: senza east_route ancora nessun repeat (continuation, non already_completed)
+  ok - impeto: repeat SOLO dopo east_route_confirmed
+  ok - m5_report_intro/staging: pagina «m5.b9.report.p01» senza id di design ((Truman arriva lungo i binari, col passo di chi non vuole arrivare.))
+  ok - m5_report_intro/staging: pagina «m5.b9.report.p02» senza id di design (Non avete toccato niente. Bene: adesso tocca a me guardare.)
+  ok - m5_report_intro/staging: pagina «m5.b9.report.theory_staging» senza id di design (Il centro è stato lasciato così perché venisse letto. Lo firmo io, Harry.)
+  ok - m5_report_intro/staging: pagina «m5.b9.report.accept.p01» senza id di design (La lettura la verbalizziamo come tua. I fatti come nostri.)
+  ok - m5_report_intro/staging: pagina «m5.b9.report.p04» senza id di design ((guarda l'anello senza toccarlo) Questo va nella cassaforte delle prove. Stasera.)
+  ok - m5_report_intro/staging: pagina «m5.b9.report.p05» senza id di design (È l'unico oggetto la cui posizione non riesco ancora a leggere come accidentale. Vorrei poterlo guardare finché non ci riesco.)
+  ok - sospensione→staging: pagina «come tua» presente
+  ok - sospensione→staging: nessuna pagina di contestazione
+  ok - m5_report_intro/open: pagina «m5.b9.report.p01» senza id di design ((Truman arriva lungo i binari, col passo di chi non vuole arrivare.))
+  ok - m5_report_intro/open: pagina «m5.b9.report.p02» senza id di design (Non avete toccato niente. Bene: adesso tocca a me guardare.)
+  ok - m5_report_intro/open: pagina «m5.b9.report.theory_open» senza id di design (Ho due letture, Harry, e la scena le regge entrambe. Le porto tutte e due.)
+  ok - m5_report_intro/open: pagina «m5.b9.report.open.p01» senza id di design (Due letture, tutte e due a nome tuo. I fatti, uno solo: il nostro.)
+  ok - m5_report_intro/open: pagina «m5.b9.report.p04» senza id di design ((guarda l'anello senza toccarlo) Questo va nella cassaforte delle prove. Stasera.)
+  ok - m5_report_intro/open: pagina «m5.b9.report.p05» senza id di design (È l'unico oggetto la cui posizione non riesco ancora a leggere come accidentale. Vorrei poterlo guardare finché non ci riesco.)
+  ok - open: entrambe le letture portate a verbale
+  ok - stufa/carte facoltative: base non completa
+  ok - stufa/carte saltate: M5 completa comunque
+  ok - stufa/carte saltate: nessuna evidenza facoltativa scritta
+  ok - stufa presa da sola: nessuna riga condizionata
+  ok - stufa poi carte: riga condizionata esattamente una volta
+  ok - stufa+carte: entrambe le evidenze scritte
+  ok - round-trip dopo la revisione: valori/flag/evidenze/nodes_done/comparisons/obiettivi preservati
+  ok - round-trip dopo la revisione: contenuto verificato
+  ok - round-trip dopo il taglio nord: stato preservato
+  ok - round-trip dopo il taglio nord: east_route + evidenza preservati
+  ok - round-trip: obiettivo finale invariato dopo deserialize del runtime
+act-3-flow: runtime path OK (82 controlli finora)
+# act-3-flow: adapter path (Hawk/Truman/Jacques/Audrey via CastPresence)
+  ok - traincar: almeno una collocazione narrativa registrata
+  ok - hawk (ACT3_HAWK_BRIDGE): mai sulla riga 7 dell'attraversamento (softlock)
+  ok - hawk (ACT3_HAWK_DOOR): mai sulla riga 7 dell'attraversamento (softlock)
+  ok - hawk (ACT3_HAWK_CUT): mai sulla riga 7 dell'attraversamento (softlock)
+  ok - truman (ACT3_TRUMAN_REPORT): mai sulla riga 7 dell'attraversamento (softlock)
+  ok - ACT3_BRIDGE: grammatica del pin leggibile (traincar@5,6)
+  ok - ACT3_BRIDGE: hawk PLACED@traincar 5,6 (trovato traincar 5,6)
+  ok - ACT3_BRIDGE: grammatica del pin leggibile (sheriff@10,4)
+  ok - ACT3_BRIDGE: truman PLACED@sheriff 10,4 (trovato sheriff 10,4)
+  ok - ACT3_TRAINCAR_REPORT: grammatica del pin leggibile (traincar@14,8)
+  ok - ACT3_TRAINCAR_REPORT: hawk PLACED@traincar 14,8 (trovato traincar 14,8)
+  ok - ACT3_TRAINCAR_REPORT: grammatica del pin leggibile (traincar@9,8)
+  ok - ACT3_TRAINCAR_REPORT: truman PLACED@traincar 9,8 (trovato traincar 9,8)
+  ok - ACT3_NORTH_CUT: grammatica del pin leggibile (traincar@22,3)
+  ok - ACT3_NORTH_CUT: hawk PLACED@traincar 22,3 (trovato traincar 22,3)
+  ok - ACT3_NORTH_CUT: grammatica del pin leggibile (traincar@9,8)
+  ok - ACT3_NORTH_CUT: truman PLACED@traincar 9,8 (trovato traincar 9,8)
+  ok - ACT3_OEJ: grammatica del pin leggibile (oej@6,8)
+  ok - ACT3_OEJ: hawk PLACED@oej 6,8 (trovato oej 6,8)
+  ok - ACT3_OEJ: grammatica del pin leggibile (traincar@9,8)
+  ok - ACT3_OEJ: truman PLACED@traincar 9,8 (trovato traincar 9,8)
+  ok - ACT3_OEJ: grammatica del pin leggibile (oej@7,5)
+  ok - ACT3_OEJ: jacques PLACED@oej 7,5 (trovato oej 7,5)
+  ok - ACT3_OEJ: grammatica del pin leggibile (oej@13,7)
+  ok - ACT3_OEJ: audrey PLACED@oej 13,7 (trovato oej 13,7)
+  ok - ACT3_OEJ_AUDREY_SEEN: grammatica del pin leggibile (oej@6,8)
+  ok - ACT3_OEJ_AUDREY_SEEN: hawk PLACED@oej 6,8 (trovato oej 6,8)
+  ok - ACT3_OEJ_AUDREY_SEEN: truman OFFSCREEN(boat) (trovato OFFSCREEN(boat))
+  ok - ACT3_OEJ_AUDREY_SEEN: grammatica del pin leggibile (oej@7,5)
+  ok - ACT3_OEJ_AUDREY_SEEN: jacques PLACED@oej 7,5 (trovato oej 7,5)
+  ok - ACT3_OEJ_AUDREY_SEEN: grammatica del pin leggibile (hotel_gn@12,9)
+  ok - ACT3_OEJ_AUDREY_SEEN: audrey PLACED@hotel_gn 12,9 (trovato hotel_gn 12,9)
+  ok - ACT3_OEJ_NO_AUDREY: grammatica del pin leggibile (oej@6,8)
+  ok - ACT3_OEJ_NO_AUDREY: hawk PLACED@oej 6,8 (trovato oej 6,8)
+  ok - ACT3_OEJ_NO_AUDREY: grammatica del pin leggibile (traincar@9,8)
+  ok - ACT3_OEJ_NO_AUDREY: truman PLACED@traincar 9,8 (trovato traincar 9,8)
+  ok - ACT3_OEJ_NO_AUDREY: grammatica del pin leggibile (oej@7,5)
+  ok - ACT3_OEJ_NO_AUDREY: jacques PLACED@oej 7,5 (trovato oej 7,5)
+  ok - ACT3_OEJ_NO_AUDREY: grammatica del pin leggibile (hotel_gn@12,9)
+  ok - ACT3_OEJ_NO_AUDREY: audrey PLACED@hotel_gn 12,9 (trovato hotel_gn 12,9)
+  ok - ACT3_AFTER_ARREST: hawk OFFSCREEN(escort) (trovato OFFSCREEN(escort))
+  ok - ACT3_AFTER_ARREST: grammatica del pin leggibile (sheriff@10,4)
+  ok - ACT3_AFTER_ARREST: truman PLACED@sheriff 10,4 (trovato sheriff 10,4)
+  ok - ACT3_AFTER_ARREST: jacques OFFSCREEN(guarded) (trovato OFFSCREEN(guarded))
+  ok - ACT3_AFTER_ARREST: grammatica del pin leggibile (hospital@7,3)
+  ok - ACT3_AFTER_ARREST: piantone PLACED@hospital 7,3 (trovato hospital 7,3)
+  ok - ACT3_GUARDED_HOSPITAL: grammatica del pin leggibile (sheriff@12,8)
+  ok - ACT3_GUARDED_HOSPITAL: hawk PLACED@sheriff 12,8 (trovato sheriff 12,8)
+  ok - ACT3_GUARDED_HOSPITAL: grammatica del pin leggibile (sheriff@10,4)
+  ok - ACT3_GUARDED_HOSPITAL: truman PLACED@sheriff 10,4 (trovato sheriff 10,4)
+  ok - ACT3_GUARDED_HOSPITAL: jacques OFFSCREEN(guarded) (trovato OFFSCREEN(guarded))
+  ok - ACT3_GUARDED_HOSPITAL: grammatica del pin leggibile (hospital@7,3)
+  ok - ACT3_GUARDED_HOSPITAL: piantone PLACED@hospital 7,3 (trovato hospital 7,3)
+  ok - ACT3_NIGHT_STATION: grammatica del pin leggibile (sheriff@12,8)
+  ok - ACT3_NIGHT_STATION: hawk PLACED@sheriff 12,8 (trovato sheriff 12,8)
+  ok - ACT3_NIGHT_STATION: grammatica del pin leggibile (sheriff@10,4)
+  ok - ACT3_NIGHT_STATION: truman PLACED@sheriff 10,4 (trovato sheriff 10,4)
+  ok - ACT3_NIGHT_STATION: jacques TERMINAL_REMOVED (trovato TERMINAL_REMOVED)
+  ok - ACT3_NIGHT_STATION: piantone OFFSCREEN (trovato OFFSCREEN)
+  ok - ACT3_NIGHT_STATION: grammatica del pin leggibile (hospital@3,6)
+  ok - ACT3_NIGHT_STATION: piantone_ronette PLACED@hospital 3,6 (trovato hospital 3,6)
+  ok - traincar: target narrativo ring a (13,5)
+  ok - traincar: interact classico anello_interact a (13,5) (stessa casella del target ring)
+  ok - M5 possiede nodi sul target ring: tryInteractAt consuma sempre la casella
+  ok - M5 entra con atto3: nessuna finestra classica prima della missione
+  ok - indizio classico anello: nessuna attribuzione di proprietà (guardia ring_c)
+act-3-flow: adapter path OK
+# act-3-flow: M6 stitch (runtime)
+  ok - piantone: base = Renault fermato
+  ok - piantone: rapporto notturno NON preparabile senza il registro di turno
+  ok - piantone: al suo posto è preparabile il rinvio di Truman
+  ok - piantone: obiettivo = passa dall'ospedale
+  ok - piantone: il rinvio si gioca
+  ok - piantone: il rinvio non scrive nessun flag
+  ok - piantone: tornando da Truman prima dell'ospedale il rinvio si ripete
+  ok - piantone: il rapporto resta chiuso anche dopo il rinvio
+  ok - piantone: le quattro pagine del registro di turno
+  ok - piantone: sola annotazione, nessun flag di registro
+  ok - piantone: nessun flag nuovo (preso + east_route + admitted)
+  ok - piantone: visto il piantone, il rinvio sparisce dalla root Truman
+  ok - piantone: ora il rapporto notturno è preparabile
+  ok - piantone: obiettivo torna alla centrale
+  ok - piantone: la coda B8b resta chiusa finché Renault è vivo
+  ok - Audrey: la riga di Truman sulla barca delle otto compare SOLO se è stata vista (false)
+  ok - Audrey: vista a One Eyed Jacks
+  ok - Audrey: la riga di Truman sulla barca delle otto compare SOLO se è stata vista (true)
+  ok - impeto: la correzione a verbale compare SOLO con teoria finale degeneration (degeneration)
+  ok - impeto: la battuta per tattica resta sempre resa (degeneration)
+  ok - impeto: la correzione segue la battuta per tattica
+  ok - impeto: la correzione a verbale compare SOLO con teoria finale degeneration (staging)
+  ok - impeto: la battuta per tattica resta sempre resa (staging)
+  ok - impeto: la correzione a verbale compare SOLO con teoria finale degeneration (open)
+  ok - impeto: la battuta per tattica resta sempre resa (open)
+  ok - ponte Atto 4: la riga sul registro compare SOLO dopo la coda B8b (hospfalse)
+  ok - ponte Atto 4: eco S1 cassaforte solo con custodia istituzionale (institutional)
+  ok - ponte Atto 4: eco S1 tasca solo con custodia documentata (institutional)
+  ok - ponte Atto 4: le due eco S1 sono esclusive (institutional)
+  ok - ponte Atto 4: la riga sul registro compare SOLO dopo la coda B8b (hospfalse)
+  ok - ponte Atto 4: eco S1 cassaforte solo con custodia istituzionale (documented_custody)
+  ok - ponte Atto 4: eco S1 tasca solo con custodia documentata (documented_custody)
+  ok - ponte Atto 4: le due eco S1 sono esclusive (documented_custody)
+  ok - ponte Atto 4: la riga sul registro compare SOLO dopo la coda B8b (hosptrue)
+  ok - ponte Atto 4: eco S1 cassaforte solo con custodia istituzionale (institutional)
+  ok - ponte Atto 4: eco S1 tasca solo con custodia documentata (institutional)
+  ok - ponte Atto 4: le due eco S1 sono esclusive (institutional)
+  ok - ponte Atto 4: la riga sul registro compare SOLO dopo la coda B8b (hosptrue)
+  ok - ponte Atto 4: eco S1 cassaforte solo con custodia istituzionale (documented_custody)
+  ok - ponte Atto 4: eco S1 tasca solo con custodia documentata (documented_custody)
+  ok - ponte Atto 4: le due eco S1 sono esclusive (documented_custody)
+  ok - carte: senza il mazzo del vagone Cooper non fa il richiamo al tavolo
+  ok - carte: senza E_CARTE il confronto m6_cmp_cards_prova è chiuso
+  ok - carte: senza E_CARTE il confronto m6_cmp_cards_pressione è chiuso
+  ok - carte: senza E_CARTE il confronto m6_cmp_cards_falsa è chiuso
+  ok - carte: senza E_CARTE nessun confronto carte nel taccuino
+  ok - carte: con E_CARTE il richiamo al mazzo precede il prompt (prova)
+  ok - carte: prima dell'ammissione il confronto m6_cmp_cards_prova è chiuso (prova)
+  ok - carte: prima dell'ammissione il confronto m6_cmp_cards_pressione è chiuso (prova)
+  ok - carte: prima dell'ammissione il confronto m6_cmp_cards_falsa è chiuso (prova)
+  ok - carte: nel taccuino UN solo confronto carte, quello della testimonianza raccolta (prova)
+  ok - carte: la coppia richiesta è E_CARTE + la testimonianza del ramo (prova)
+  ok - carte: la coppia si risolve senza ambiguità (prova)
+  ok - carte: gli altri due confronti restano chiusi (m6_cmp_cards_pressione)
+  ok - carte: gli altri due confronti restano chiusi (m6_cmp_cards_falsa)
+  ok - carte: «ha ucciso lui» è una lettura respinta con retry (prova)
+  ok - carte: la lettura respinta non formula P5 (prova)
+  ok - carte: la lettura sulla mano al banco è disponibile (prova)
+  ok - carte: nemmeno la lettura accettata formula P5 — m6_p5 resta l'unico formulatore (prova)
+  ok - carte: il confronto lascia SOLO un'annotazione (prova)
+  ok - carte: nessun flag nuovo (prova)
+  ok - carte: il confronto resta riconsultabile, mai «nessun filo» (prova)
+  ok - carte: alla seconda visita entrambe le letture restano offerte, mai un'interazione muta (prova)
+  ok - carte: la coppia resta risolvibile, mai «nessun filo» (prova)
+  ok - carte: rigiocare non duplica l'annotazione (upsert per id) (prova)
+  ok - carte: P5 nasce ancora e solo dal beat B6b (prova)
+  ok - carte: con E_CARTE il richiamo al mazzo precede il prompt (pressione)
+  ok - carte: prima dell'ammissione il confronto m6_cmp_cards_prova è chiuso (pressione)
+  ok - carte: prima dell'ammissione il confronto m6_cmp_cards_pressione è chiuso (pressione)
+  ok - carte: prima dell'ammissione il confronto m6_cmp_cards_falsa è chiuso (pressione)
+  ok - carte: nel taccuino UN solo confronto carte, quello della testimonianza raccolta (pressione)
+  ok - carte: la coppia richiesta è E_CARTE + la testimonianza del ramo (pressione)
+  ok - carte: la coppia si risolve senza ambiguità (pressione)
+  ok - carte: gli altri due confronti restano chiusi (m6_cmp_cards_prova)
+  ok - carte: gli altri due confronti restano chiusi (m6_cmp_cards_falsa)
+  ok - carte: «ha ucciso lui» è una lettura respinta con retry (pressione)
+  ok - carte: la lettura respinta non formula P5 (pressione)
+  ok - carte: la lettura sulla mano al banco è disponibile (pressione)
+  ok - carte: nemmeno la lettura accettata formula P5 — m6_p5 resta l'unico formulatore (pressione)
+  ok - carte: il confronto lascia SOLO un'annotazione (pressione)
+  ok - carte: nessun flag nuovo (pressione)
+  ok - carte: il confronto resta riconsultabile, mai «nessun filo» (pressione)
+  ok - carte: alla seconda visita entrambe le letture restano offerte, mai un'interazione muta (pressione)
+  ok - carte: la coppia resta risolvibile, mai «nessun filo» (pressione)
+  ok - carte: rigiocare non duplica l'annotazione (upsert per id) (pressione)
+  ok - carte: P5 nasce ancora e solo dal beat B6b (pressione)
+  ok - carte: con E_CARTE il richiamo al mazzo precede il prompt (falsa_sicurezza)
+  ok - carte: prima dell'ammissione il confronto m6_cmp_cards_prova è chiuso (falsa_sicurezza)
+  ok - carte: prima dell'ammissione il confronto m6_cmp_cards_pressione è chiuso (falsa_sicurezza)
+  ok - carte: prima dell'ammissione il confronto m6_cmp_cards_falsa è chiuso (falsa_sicurezza)
+  ok - carte: nel taccuino UN solo confronto carte, quello della testimonianza raccolta (falsa_sicurezza)
+  ok - carte: la coppia richiesta è E_CARTE + la testimonianza del ramo (falsa_sicurezza)
+  ok - carte: la coppia si risolve senza ambiguità (falsa_sicurezza)
+  ok - carte: gli altri due confronti restano chiusi (m6_cmp_cards_prova)
+  ok - carte: gli altri due confronti restano chiusi (m6_cmp_cards_pressione)
+  ok - carte: «ha ucciso lui» è una lettura respinta con retry (falsa_sicurezza)
+  ok - carte: la lettura respinta non formula P5 (falsa_sicurezza)
+  ok - carte: la lettura sulla mano al banco è disponibile (falsa_sicurezza)
+  ok - carte: nemmeno la lettura accettata formula P5 — m6_p5 resta l'unico formulatore (falsa_sicurezza)
+  ok - carte: il confronto lascia SOLO un'annotazione (falsa_sicurezza)
+  ok - carte: nessun flag nuovo (falsa_sicurezza)
+  ok - carte: il confronto resta riconsultabile, mai «nessun filo» (falsa_sicurezza)
+  ok - carte: alla seconda visita entrambe le letture restano offerte, mai un'interazione muta (falsa_sicurezza)
+  ok - carte: la coppia resta risolvibile, mai «nessun filo» (falsa_sicurezza)
+  ok - carte: rigiocare non duplica l'annotazione (upsert per id) (falsa_sicurezza)
+  ok - carte: P5 nasce ancora e solo dal beat B6b (falsa_sicurezza)
+  ok - sync Audrey: i dialoghi classici vivono in GAME.Data.dialogues
+  ok - sync Audrey: il dialogo classico scrive audrey_indaga
+  ok - sync Audrey: il dialogo classico scrive audrey_indaga
+  ok - sync Audrey: lo stato narrativo parte senza il flag
+  ok - sync Audrey: senza ponte il nodo facoltativo è irraggiungibile
+  ok - sync Audrey: syncClassicToNarrative porta il flag nel runtime
+  ok - sync Audrey: dopo il ponte m6_audrey è preparabile
+  ok - sync Audrey: il nodo si gioca e scrive audrey_vista_oej
+act-3-flow: M6 stitch runtime OK
+# act-3-flow: M6 stitch (piantoni, CastPresence)
+  ok - ospedale: il piantone è piazzato in corsia con Renault in custodia
+  ok - ospedale: il corpo del piantone è sincronizzato sulla mappa (GAME.Maps.hospital.npcs)
+  ok - ospedale: il piantone raddoppiato è piazzato dopo la morte di Renault
+  ok - ospedale: il corpo del piantone raddoppiato è sincronizzato sulla mappa
+  ok - ospedale: il piantone originale è tolto dalla mappa dopo la morte di Renault
+  ok - ospedale: id distinti (il resolver identifica per characterId)
+  ok - ospedale: i piantoni sono scenografia, mai attori con dialogo
+  ok - ospedale: sprite da vice della contea, mai hawk/truman
+  ok - ospedale: lo sprite del piantone esiste nel catalogo chars.js
+  ok - piantone: casella calpestabile (7,3), davanti alla porta doppia nord
+  ok - piantone: contro la parete nord, rivolto alla porta chiusa
+  ok - piantone: lontano dal letto di Ronette (7 vs 3)
+  ok - piantone: la casella d'accesso al letto di Ronette resta libera
+  ok - piantone raddoppiato: davanti al letto di Ronette
+  ok - piantone raddoppiato: casella calpestabile
+  ok - ospedale: nessun piantone prima del fermo
+  ok - ospedale: con Renault in custodia, un piantone davanti alla porta
+  ok - ospedale: morto Renault, la sorveglianza si sposta su Ronette
+act-3-flow: M6 stitch guards OK
+
+act-3-flow: 280/280

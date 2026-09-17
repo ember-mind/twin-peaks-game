@@ -76,13 +76,11 @@
     for (col=1;col<14;col++) R(16+col*16,48,1,128,p.floorDark);
     for (row=1;row<8;row++) R(16,48+row*16,224,1,p.floorDark);
 
-    /* Muted area rug: texture for the aisle, not a second focal point. */
-    R(101,123,58,35,p.floorDark);
-    R(103,125,54,31,p.sageMid);
-    R(105,127,50,27,p.sage);
-    R(105,127,50,1,p.sageHi); R(105,153,50,1,p.sageHi);
-    R(105,127,1,27,p.sageHi); R(154,127,1,27,p.sageHi);
-    R(119,135,22,1,p.sageMid); R(119,143,22,1,p.sageMid);
+    R(110,113,36,50,p.sageDark);
+    R(112,115,32,46,p.sageMid);
+    R(112,115,32,1,p.sageHi); R(112,160,32,1,p.sageHi);
+
+    /* A narrow entry runner leaves quiet floor on both sides of the aisle. */
 
     /* Fluorescent spill stays hard stepped and local to the back work zones. */
     R(20,49,42,3,p.floorLight); R(20,52,34,4,p.floorHi); R(20,56,19,3,p.floorMid);
@@ -121,6 +119,9 @@
     for (var x=32; x<240; x+=16) {
       R(x,34,2,12,p.oakDeep); R(x+2,35,1,9,p.oakHi);
     }
+    R(88,35,80,11,p.oakDark);
+    R(90,35,76,1,p.oakMid);
+    R(90,45,76,1,p.oakDeep);
     R(38,39,10,1,p.oakMid); R(88,42,9,1,p.oakHi); R(132,38,12,1,p.oakMid);
     R(166,43,8,1,p.oakHi); R(214,39,12,1,p.oakMid);
     R(16,47,224,2,p.ink);
@@ -165,8 +166,8 @@
 
   function countyMap(R,p) {
     R(86,3,84,32,p.ink); R(88,5,80,29,p.oakDeep); R(89,6,78,27,p.oak);
-    R(90,7,76,25,p.oakHi); R(92,9,72,21,p.paperDark); R(93,10,70,19,p.paper);
-    R(93,10,70,1,p.paperHi); R(163,10,1,20,p.oakDark); R(92,30,72,2,p.oakDeep);
+    R(90,7,76,25,p.oakHi); R(92,9,72,21,p.paperDark); R(93,10,70,19,'#c2ba9e');
+    R(93,10,70,1,p.paper); R(163,10,1,20,p.oakDark); R(92,30,72,2,p.oakDeep);
     /* County, forest and lake parcels are medium-sized, stepped masses. */
     R(94,11,20,6,'#a2aa80'); R(97,17,17,4,'#acaa82');
     R(115,11,10,5,'#b5b08a'); R(132,10,14,6,'#9ba47f');

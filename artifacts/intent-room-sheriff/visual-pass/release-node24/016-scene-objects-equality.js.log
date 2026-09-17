@@ -1,0 +1,8 @@
+SCENE-OBJECTS-EQUALITY-DIFF vs test/fixtures/objects-before-m8.json
+migrated (block deleted from js/maps.js; entry now in world/scene-objects.json): 20 source entries on 13 maps
+booted entries: 21 before, 21 after; byte-identical except +sourceId on 4
+  town[0] +sourceId waterfall  {"type":"landmark","kind":"waterfall","x":1,"y":0,"w":5,"h":6,"dialogue":"landmark_waterfall"}
+  town[1] +sourceId cemetery  {"type":"landmark","kind":"cemetery","x":48,"y":21,"w":6,"h":4,"dialogue":"landmark_cemetery"}
+  town[2] +sourceId tracks  {"type":"landmark","kind":"tracks","x":53,"y":1,"w":2,"h":33,"dialogue":[{"cond":"nflag:vagone_scoperto","then":"landmark_tracks_vagone"},{"cond":["evidence:E6A_CUORE_INTERO","evidence:T_JAMES_EST"],"then":"landmark_tracks_route"},"landmark_tracks"]}
+  town[3] +sourceId welcome-sign  {"type":"landmark","kind":"welcomesign","x":30,"y":30,"dialogue":"sign_town"}
+SCENE-OBJECTS-EQUALITY-PASS 21 booted entries across 15 maps byte-identical to the pre-M8 fixture (+sourceId on 4), registry alone reproduces 20, 0 entries left in js/maps.js, 107 checks

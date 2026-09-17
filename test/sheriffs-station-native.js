@@ -78,6 +78,16 @@ const Engine = G.Engine;
 const Scene = G.SheriffsStationScene;
 const Art = G.SheriffsStationArt;
 const MAP_ID = 'sheriff';
+assert.deepEqual(
+  Art.props.map((prop) => prop.id).sort(),
+  Object.keys(Scene.layout.footprints).sort(),
+  'Sheriff art props mirror the scene footprint IDs'
+);
+for (const prop of Art.props) {
+  assert.deepEqual(prop.cells, Scene.layout.footprints[prop.id], prop.id + ' cells mirror the scene footprint');
+  const maxRow = Math.max(...prop.cells.map((cell) => cell[1]));
+  assert.equal(prop.footY, (maxRow + 1) * 16, prop.id + ' footY follows its occupied south edge');
+}
 const priorCalls = { tile: [], structures: [], foreground: [], palette: [] };
 const prior = {
   tile: G.Sprites.drawTile,
@@ -211,10 +221,20 @@ function hasPaintRect(calls, x, y, width, height, color) {
     call.args[0] === x && call.args[1] === y && call.args[2] === width && call.args[3] === height &&
     call.color === color);
 }
-assert(hasPaintRect(authoredPixels.calls, 101, 123, 58, 35, Art.palette.floorDark),
-  'M2 rug keeps a muted floor-dark base block');
-assert(hasPaintRect(authoredPixels.calls, 105, 127, 50, 27, Art.palette.sage),
-  'M2 rug keeps a restrained sage field');
+assert(hasPaintRect(authoredPixels.calls, 93, 10, 70, 19, '#c2ba9e'),
+  'county map keeps the moderated paper field');
+assert(hasPaintRect(authoredPixels.calls, 93, 10, 70, 1, Art.palette.paper),
+  'county map keeps the paper top rim');
+assert(hasPaintRect(authoredPixels.calls, 88, 35, 80, 11, Art.palette.oakDark),
+  'central work-wall panel keeps its recessed oak face');
+assert(hasPaintRect(authoredPixels.calls, 110, 113, 36, 50, Art.palette.sageDark),
+  'entry runner keeps its narrow dark outer edge');
+assert(hasPaintRect(authoredPixels.calls, 112, 115, 32, 46, Art.palette.sageMid),
+  'entry runner keeps its lighter inner field');
+assert(!hasPaintRect(authoredPixels.calls, 101, 123, 58, 35, Art.palette.floorDark),
+  'clear aisle has no former rug floor-dark base block');
+assert(!hasPaintRect(authoredPixels.calls, 105, 127, 50, 27, Art.palette.sage),
+  'clear aisle has no former rug sage field');
 assert(hasPaintRect(authoredPixels.calls, 134, 79, 31, 2, '#b1a381'),
   'M2 desk reflection begins as a local stepped warm strip');
 assert(hasPaintRect(authoredPixels.calls, 146, 84, 21, 3, '#afa283'),

@@ -69,7 +69,7 @@ Independent critic also questioned the rear frosted door from a static frame. So
 
 Independent hostile review found **no second World Engine**: Program carries no coordinates, actor placement, narrative flags, doors, collision, prop registry, or scene lifecycle. It found a real stale-anchor risk. Response: native Sheriff installer now exposes its existing `layout` by a non-enumerable, non-replaceable reference on the map; World Engine resolves group, contribution, relationship, and residue IDs at registration. A loaded map with Program anchors but no native layout fails loudly. Registration fails on unknown IDs; pilot tests still check actual adjacency and route reachability. No new coordinate table was introduced.
 
-Review also noted free-form ambient prose cannot be mechanically proven non-narrative. Current entries were checked against existing art and Ambient Life; `residue.narrative` is rejected until a canonical-state binding is designed. A closed, explicit Program shape in World Engine is intentional for this one pilot; no generic decorator/solver or editable Builder export was added. Visual review found M2 improvement modest, so a small native-art rectangle sentinel now guards the muted rug and desk reflection. Program registration also has a no-map-mutation test.
+Review also noted free-form ambient prose cannot be mechanically proven non-narrative. Current entries were checked against existing art and Ambient Life; `residue.narrative` is rejected until a canonical-state binding is designed. A closed, explicit Program shape in World Engine is intentional for this one pilot; no generic decorator/solver or editable Builder export was added. At M4, native-art rectangle sentinels guarded the muted rug and desk reflection; the later visual pass replaces the rug sentinel with a narrow-runner check. Program registration also has a no-map-mutation test.
 
 ## Gate status
 
@@ -86,3 +86,7 @@ Review also noted free-form ambient prose cannot be mechanically proven non-narr
 | Act 4 Chrome `--path=all` | 530/530 PASS | Four paths, including station arrival, Truman interaction, and return. One non-assertion favicon 404 from the test server. |
 
 M10 drift keys: `m10.b5.affioramento.list`, `m10.b6.probatorio.p04`, `m10.b6.probatorio.p10`, `m10.b6.intuitivo.p13` (4/1773). All four fail identically in the main checkout; this pilot does not edit narrative content. CI uses Node 24. Node 26's separate cast-PNG failure is a byte-level zlib compression difference with matching decoded pixels, not a changed sprite; it disappears on Node 24.
+
+## Later visual pass
+
+The subsequent [capture-led Sheriff visual pass](intent-room-sheriff-visual-pass.md) re-tests this report's muted-rug recommendation. Its final composition replaces the broad rug with a narrow directional runner and makes the map/desk work wall more coherent. This section preserves the original M1–M4 findings as historical evidence; the later report owns the updated art verdict.

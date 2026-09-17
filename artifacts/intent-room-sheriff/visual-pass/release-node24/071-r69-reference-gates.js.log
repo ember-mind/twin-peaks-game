@@ -1,0 +1,25 @@
+ok - reference_is_vaulted
+ok - native_canvas_256x192
+ok - dialogue_bottom_panel_53_49
+ok - portrait_card_40x47
+ok - portrait_anchor_overlaps_world
+ok - legacy_reference_palette_remains_available
+ok - portrait_uses_same_display_ramp
+ok - production_uses_per_tile_bg_palette_banks
+ok - production_keeps_obj_palette_separate
+ok - hero_spawn_starts_at_town_entrance
+ok - hero_dialogue_camera_lift
+ok - arrival_is_rectangular_10x9
+ok - arrival_has_shop_cabin_car_mailbox
+ok - hero_car_uses_large_two_tile_vehicle
+ok - car_collision_matches_art
+ok - car_preserves_path_ground
+ok - hero_forest_left_mass
+ok - hero_forest_right_mass
+ok - corridor_stays_open
+ok - bitmap_only_portraits
+ok - integer_scale_above_one
+ok - hard_pixel_edges
+ok - touch_controls_outside_canvas
+
+R69-REFERENCE-PASS 23/23

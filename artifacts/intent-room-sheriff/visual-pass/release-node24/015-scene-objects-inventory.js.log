@@ -1,0 +1,25 @@
+| scene | origin | type/kind | tile or rect | dialogue | sparkle |
+| --- | --- | --- | --- | --- | --- |
+| hospital | registry interact "3,5" = ronette_letto | plain | 3,5 | ronette_letto | no |
+| palmer | registry interact "6,1" = cameraLaura | sparkle | 6,1 | cascade [{"cond":"flag:done_andy","then":"laura_room_andy"},"laura_room"] | yes |
+| room_315 | registry interact "13,3" = specchio315 | sparkle | 13,3 | cascade [{"cond":"flag:gigante1","then":"specchio_dopo"},{"cond":"flag:jacques_morto","then":"gigante1_dlg"},"specchio315"] | yes |
+| room_315 | registry interact "1,5" = letto_315 | plain | 1,5 | letto_315 | no |
+| room_315 | registry interact "2,5" = letto_315 | plain | 2,5 | letto_315 | no |
+| room_315 | registry interact "3,5" = letto_315 | plain | 3,5 | letto_315 | no |
+| room_315 | registry interact "8,3" = scrivania_315 | plain | 8,3 | cascade [{"cond":"evidence:T1_RONETTE_BOB","then":"scrivania_315_bob"},"scrivania_315"] | no |
+| sheriffs_station_exterior | native scene (own map record) | plain | 9,6 | bacheca_centrale | no |
+| town | registry objects[0] waterfall | landmark/waterfall | 1,0 5x6 | landmark_waterfall | no |
+| town | registry objects[1] cemetery | landmark/cemetery | 48,21 6x4 | landmark_cemetery | no |
+| town | registry objects[2] tracks | landmark/tracks | 53,1 2x33 | cascade [{"cond":"nflag:vagone_scoperto","then":"landmark_tracks_vagone"},{"cond":["evidence:E6A_CUORE_INTERO","evidence:T_JAMES_EST"],"then":"landmark_tracks_route"},"landmark_tracks"] | no |
+| town | registry objects[3] welcome-sign | landmark/welcomesign | 30,30 | sign_town | no |
+| town | registry interact "30,30" = cartello | plain | 30,30 | sign_town | no |
+| town | registry interact "15,28" = lago_riva | plain | 15,28 | cascade [{"cond":"flag:maddy_trovata","then":"lago_dopo"},{"cond":"flag:sogno_fatto","then":"lago_sguardo"},"lago_laura"] | no |
+| town | registry interact "50,22" = tomba_laura | plain | 50,22 | tomba_laura | no |
+| traincar | registry interact "4,6" = sign_ponte | plain | 4,6 | sign_ponte | no |
+| traincar | registry interact "20,2" = sign_oej | plain | 20,2 | sign_oej | no |
+| traincar | registry interact "13,6" = mucchio_terra | sparkle | 13,6 | mucchio_terra | yes |
+| traincar | registry interact "13,5" = anello_interact | sparkle | 13,5 | anello_interact | yes |
+| woods | registry interact "14,12" = olio | sparkle | 14,12 | olio | yes |
+| woods | registry interact "11,16" = cartelloBosco | plain | 11,16 | sign_grove | no |
+js/maps.js: objects[] entries 0, interact keys 0; booted entries 21 on 15 maps; registry loaded
+SCENE-OBJECTS-INVENTORY-PASS 21 booted entries, 0 entries left in js/maps.js
