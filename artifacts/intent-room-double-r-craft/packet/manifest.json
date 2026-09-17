@@ -90,7 +90,77 @@
         "command": "magick booth-table-unpopulated-native.png -filter point -resize 400% -strip booth-table-unpopulated-4x.png"
       }
     ],
-    "note": "The two booth crops are byte-identical: this authored lower-left guest is map.interior visual life, not a named Cast Presence body. The whole-room frames carry the named Cast differences."
+    "additionalBaselineCrops": [
+      {
+        "id": "booth-0-top-left-empty-ready",
+        "mapAnchor": "interior.booths[0] = [1,6,3]",
+        "crop": {
+          "x": 24,
+          "y": 96,
+          "width": 64,
+          "height": 48,
+          "inclusivePixels": "x=24..87, y=96..143",
+          "reason": "The 3-tile upper-left booth starts at map pixel (32,112); the backrest begins one 16px tile above that anchor, with the same 8px lateral margin used by the lower-left crop."
+        },
+        "tableState": "empty/ready (variant 0; menu, cup and plate)",
+        "native": {
+          "file": "booth-0-top-left-empty-ready-native.png",
+          "dimensions": [64, 48],
+          "sha256": "e5814232e3dd048dc28f983f22d44532732469d87373611b24f96f5240c5ca26",
+          "command": "magick normal-populated-native.png -crop 64x48+24+96 +repage booth-0-top-left-empty-ready-native.png"
+        },
+        "nearest4x": {
+          "file": "booth-0-top-left-empty-ready-4x.png",
+          "dimensions": [256, 192],
+          "sha256": "3bdc3d547a59ffd390a88f3fd733d54c62f30a909a7dfe872bf3da68e8f81c0e",
+          "command": "magick booth-0-top-left-empty-ready-native.png -filter point -resize 400% -strip booth-0-top-left-empty-ready-4x.png"
+        },
+        "note": "A small slice of the nearby Log Lady sprite touches the right edge because this crop is taken from the normal populated frame; no layout pixels were removed."
+      },
+      {
+        "id": "booth-3-bottom-right-empty-cleared",
+        "mapAnchor": "interior.booths[3] = [10,8,3]",
+        "crop": {
+          "x": 168,
+          "y": 128,
+          "width": 64,
+          "height": 48,
+          "inclusivePixels": "x=168..231, y=128..175",
+          "reason": "The 3-tile lower-right booth starts at map pixel (176,144); the backrest begins one 16px tile above that anchor, with the same 8px lateral margin used by the lower-left crop."
+        },
+        "tableState": "empty/cleared (variant 3; empty plate, folded napkin and faint coffee ring)",
+        "native": {
+          "file": "booth-3-bottom-right-empty-cleared-native.png",
+          "dimensions": [64, 48],
+          "sha256": "85da92f28a0b04abdb8f38ce38983d410d198b38a314af94d6975a5553850665",
+          "command": "magick normal-populated-native.png -crop 64x48+168+128 +repage booth-3-bottom-right-empty-cleared-native.png"
+        },
+        "nearest4x": {
+          "file": "booth-3-bottom-right-empty-cleared-4x.png",
+          "dimensions": [256, 192],
+          "sha256": "0b7b10f1195a14e23250221a097659a7d34c3e2f20c42c8c8294c2b2996c51d1",
+          "command": "magick booth-3-bottom-right-empty-cleared-native.png -filter point -resize 400% -strip booth-3-bottom-right-empty-cleared-4x.png"
+        }
+      }
+    ],
+    "referenceCrop": {
+      "file": "booth-table-reference-final-5x.png",
+      "source": "artifacts/diner-final-art/final.png",
+      "sourceDimensions": [1280, 960],
+      "sourceCrop": {
+        "x": 120,
+        "y": 640,
+        "width": 320,
+        "height": 240,
+        "inclusivePixels": "x=120..439, y=640..879",
+        "relation": "exact 5x coordinates of the current lower-left native crop (24,128,64,48)"
+      },
+      "dimensions": [320, 240],
+      "sha256": "277293969d038008dc20328538878e61d511673136ef2c04e45be47f7399c7e4",
+      "command": "magick artifacts/diner-final-art/final.png -crop 320x240+120+640 +repage artifacts/intent-room-double-r-craft/packet/booth-table-reference-final-5x.png",
+      "label": "approved golden reference crop; not a current baseline/runtime capture"
+    },
+    "note": "The two lower-left booth crops are byte-identical: this authored guest is map.interior visual life, not a named Cast Presence body. The additional top-left and bottom-right crops isolate the empty/ready and empty/cleared table variants. The whole-room frames carry the named Cast differences."
   },
   "provenance": {
     "nativeHarness": "test/native-shot.js",
@@ -105,6 +175,8 @@
     "castRegistrySha256": "9213ff57ada8a66a22f9e68ffe5eb56affdf4fb8e316e3bf7405890435d44bce",
     "castFixture": "test/fixtures/cast-pins-acts-1-4.json",
     "castFixtureSha256": "eb1e7138048eeef6f7a0a744956bc19c5da2d5218ffa9c07101756efa866354b",
+    "approvedGoldenReference": "artifacts/diner-final-art/final.png",
+    "approvedGoldenReferenceSha256": "2c86b7361c5312d82d0be8b6fdf64b289e102215f1436384df35423095d5f844",
     "upscale": "ImageMagick point filter, 400%; no smoothing"
   },
   "limitations": [
