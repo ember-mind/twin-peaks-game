@@ -118,3 +118,4 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-17 9b71b48 main: M10 confession-lock rulings v1.1.2 (SG-3/5/6/8), CLAUDE.md rewrite; 4 files mirrored
 - 2026-09-17 35198df main: opus/campaign-turn-mac (focus emulation fix) + deep/harness-ready-race (freezeMs clamp); 6 files mirrored
 - 2026-09-17 0267c30 main: E0b closed as already grounded, test/retro-contact-shadow.js gate added; 1 file mirrored
+- 2026-09-17 9afa14a main: E0 evidence shots artifacts/art-pass-e/e0 (4 png) mirrored; stale worktrees pruned
