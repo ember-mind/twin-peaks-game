@@ -29,7 +29,8 @@ node tools/run-release-tests.js --out=/tmp/tp-release-UNIQUE
 ```
 
 The runner consumes exactly the single-file Node commands in
-`.github/workflows/test.yml`; it refuses unsupported command syntax and duplicate
+`.github/workflows/tests.yml` (skipping the documented generated-data diff and
+its own self-invocation); it refuses unsupported command syntax and duplicate
 entries rather than silently skipping a gate. The report records commit, dirty
 state, Node version, individual exit codes, timeouts and logs. It continues after
 a failed test to expose the complete baseline and exits nonzero if any fail.

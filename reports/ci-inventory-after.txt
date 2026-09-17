@@ -1,0 +1,144 @@
+browser.yml	unseeded-campaign	set -euo pipefail
+browser.yml	unseeded-campaign	echo "CHROME_BIN=$(command -v google-chrome)" >> "$GITHUB_ENV"
+browser.yml	unseeded-campaign	google-chrome --version
+browser.yml	unseeded-campaign	node --version
+browser.yml	unseeded-campaign	git rev-parse HEAD
+browser.yml	unseeded-campaign	CAMPAIGN_OUT="$RUNNER_TEMP/campaign/first" node test/campaign-playthrough.js
+browser.yml	unseeded-campaign	CAMPAIGN_OUT="$RUNNER_TEMP/campaign/second" node test/campaign-playthrough.js
+browser.yml	earned-campaign-recovery	echo "CHROME_BIN=$(command -v google-chrome)" >> "$GITHUB_ENV"
+browser.yml	earned-campaign-recovery	google-chrome --version
+browser.yml	earned-campaign-recovery	node --version
+browser.yml	earned-campaign-recovery	git rev-parse HEAD
+browser.yml	earned-campaign-recovery	CAMPAIGN_RECOVERY=1 CAMPAIGN_OUT="$RUNNER_TEMP/earned-recovery/run" node test/campaign-playthrough.js
+browser.yml	production-touch	echo "CHROME_BIN=$(command -v google-chrome)" >> "$GITHUB_ENV"
+browser.yml	production-touch	google-chrome --version
+browser.yml	production-touch	git rev-parse HEAD
+browser.yml	production-touch	TOUCH_PREFLIGHT_OUT="$RUNNER_TEMP/production-touch" node test/browser/production-touch-preflight.js
+browser.yml	playable-build	set -euo pipefail
+browser.yml	playable-build	CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+browser.yml	playable-build	test -n "$CHROME"
+browser.yml	playable-build	echo "CHROME_BIN=$CHROME" >> "$GITHUB_ENV"
+browser.yml	playable-build	echo "PLAYABLE_SELFTEST_OUT=$RUNNER_TEMP/playable-selftest" >> "$GITHUB_ENV"
+browser.yml	playable-build	"$CHROME" --version
+browser.yml	playable-build	node --version
+browser.yml	playable-build	git rev-parse HEAD
+browser.yml	playable-build	node test/browser/playable-browser-selftest.js
+browser.yml	playable-build	git rev-parse HEAD > "$RUNNER_TEMP/playable-source-sha.txt"
+browser.yml	playable-build	git archive --format=tar.gz HEAD -- index.html js world narrative assets/sprites assets/portraits test docs reports .github '*.md' > "$RUNNER_TEMP/playable-source.tar.gz"
+tests.yml	node-tests	node test/world-builder.js
+tests.yml	node-tests	node test/editor/changeset.js
+tests.yml	node-tests	node test/editor/edit.js
+tests.yml	node-tests	node test/editor/cast.js
+tests.yml	node-tests	node test/editor/scene-objects.js
+tests.yml	node-tests	node test/editor/history.js
+tests.yml	node-tests	node test/editor/hit-test.js
+tests.yml	node-tests	node test/editor/identity.js
+tests.yml	node-tests	node test/editor/inspector.js
+tests.yml	node-tests	node test/editor/interaction.js
+tests.yml	node-tests	node test/editor/model.js
+tests.yml	node-tests	node test/editor/world-builder-core.js
+tests.yml	node-tests	node test/world-door-equality.js
+tests.yml	node-tests	node test/legacy-door-inventory.js
+tests.yml	node-tests	node test/scene-objects-inventory.js
+tests.yml	node-tests	node test/scene-objects-equality.js
+tests.yml	node-tests	node test/location-connections.js
+tests.yml	node-tests	node test/migrated-door-traversal.js
+tests.yml	node-tests	node test/test-world-registry.js
+tests.yml	node-tests	node test/apply-changeset.js
+tests.yml	node-tests	node test/editor-apply-preflight.js
+tests.yml	node-tests	node test/editor-runtime-isolation.js
+tests.yml	node-tests	node test/world-apply.js
+tests.yml	node-tests	node test/catalog-write.js
+tests.yml	node-tests	node test/world-apply-cast.js
+tests.yml	node-tests	node test/world-apply-objects.js
+tests.yml	node-tests	node test/cast-continuity-validate.js
+tests.yml	node-tests	node test/cast-presence-sync.js
+tests.yml	node-tests	node test/world-engine-v0.1-catalog.js
+tests.yml	node-tests	node test/narrative-validate-m9.js
+tests.yml	node-tests	node test/narrative-validate-m10.js
+tests.yml	node-tests	node test/act-5-flow.js
+tests.yml	node-tests	node test/act-5-mirror-gate.js
+tests.yml	node-tests	node test/act-2-flow.js
+tests.yml	node-tests	node test/act-2-ronette-required.js
+tests.yml	node-tests	node test/act-3-flow.js
+tests.yml	node-tests	node test/act-3-mirror-gate.js
+tests.yml	node-tests	node test/act-4-flow.js
+tests.yml	node-tests	node test/act-4-mirror-gate.js
+tests.yml	node-tests	node test/narrative-finale.js
+tests.yml	node-tests	node test/narrative-m9-runtime.js
+tests.yml	node-tests	node test/narrative-repair-contract.js
+tests.yml	node-tests	node test/narrative-slice-01.js
+tests.yml	node-tests	node test/narrative-validate-m5.js
+tests.yml	node-tests	node test/narrative-validate-m6.js
+tests.yml	node-tests	node test/narrative-validate-m8.js
+tests.yml	node-tests	node test/story-truth-lint.js
+tests.yml	node-tests	node test/letter-chain-provenance.js
+tests.yml	node-tests	node test/ronette-bob-provenance.js
+tests.yml	node-tests	node test/tracks-provenance.js
+tests.yml	node-tests	node test/objective-resolver.js
+tests.yml	node-tests	node test/notebook-objective.js
+tests.yml	node-tests	node test/objective-notebook-visibility.js
+tests.yml	node-tests	node test/choice-prompts.js
+tests.yml	node-tests	node test/choice-prompt-dedup.js
+tests.yml	node-tests	node test/dialogue-craft-regression.js
+tests.yml	node-tests	node test/dialogue-presentation.js
+tests.yml	node-tests	node test/interaction-voice.js
+tests.yml	node-tests	node test/classic-object-grounding.js
+tests.yml	node-tests	node test/environmental-interactions.js
+tests.yml	node-tests	node test/environment-entry.js
+tests.yml	node-tests	node test/environment-life.js
+tests.yml	node-tests	node test/ambient-life.js
+tests.yml	node-tests	node test/character-activity.js
+tests.yml	node-tests	node test/character-quality.js
+tests.yml	node-tests	node test/character-runtime-contract.js
+tests.yml	node-tests	node test/cast-sprite-sheet.js
+tests.yml	node-tests	node test/cooper-sprite-sheet.js
+tests.yml	node-tests	node test/gold-tone-gates.js
+tests.yml	node-tests	node test/portrait-gates.js
+tests.yml	node-tests	node test/r69-reference-gates.js
+tests.yml	node-tests	node test/graphic-pass-contract.js
+tests.yml	node-tests	node test/retro-font.js
+tests.yml	node-tests	node test/retro-production.js
+tests.yml	node-tests	node test/mobile-production.js
+tests.yml	node-tests	node test/touch-runtime.js
+tests.yml	node-tests	node test/movement-feel.js
+tests.yml	node-tests	node test/walk-phase-contract.js
+tests.yml	node-tests	node test/initial-spawn.js
+tests.yml	node-tests	node test/location-traversal.js
+tests.yml	node-tests	node test/traincar-location-traversal.js
+tests.yml	node-tests	node test/town-map-coherence.js
+tests.yml	node-tests	node test/town-structure-semantics.js
+tests.yml	node-tests	node test/interior-prop-semantics.js
+tests.yml	node-tests	node test/interior-zoning-reachability.js
+tests.yml	node-tests	node test/world-catalog-coverage.js
+tests.yml	node-tests	node test/diner-layout.js
+tests.yml	node-tests	node test/hospital-native.js
+tests.yml	node-tests	node test/room-315-location.js
+tests.yml	node-tests	node test/room-315-native.js
+tests.yml	node-tests	node test/sheriffs-station-location.js
+tests.yml	node-tests	node test/sheriffs-station-native.js
+tests.yml	node-tests	node test/sheriffs-station-door.js
+tests.yml	node-tests	node test/sheriffs-station-ambient.js
+tests.yml	node-tests	node test/station-population.js
+tests.yml	node-tests	node test/traincar-native.js
+tests.yml	node-tests	node test/redroom-scene.js
+tests.yml	node-tests	node test/narrative-lint.js
+tests.yml	node-tests	node test/smoke.js
+tests.yml	node-tests	node test/walkthrough.js
+tests.yml	node-tests	node test/turn-in-place.js
+tests.yml	node-tests	node test/classic-evidence-bridge.js
+tests.yml	node-tests	node test/finale-completion-persistence.js
+tests.yml	node-tests	node test/campaign-player.js
+tests.yml	node-tests	node test/campaign-report-safety.js
+tests.yml	node-tests	node test/campaign-recovery.js
+tests.yml	node-tests	node test/classic-cast-sync.js
+tests.yml	node-tests	node test/gen-world-data.js
+tests.yml	node-tests	git diff --exit-code -- js/scene-objects.gen.js js/world-connections.gen.js
+tests.yml	node-tests	node test/narrative-targets.js
+tests.yml	node-tests	node test/narrative-targets-apply.js
+tests.yml	node-tests	node test/touch-notebook-navigation.js
+tests.yml	node-tests	node test/playable-browser.js
+tests.yml	node-tests	node test/touch-gesture-transport.js
+tests.yml	node-tests	node test/touch-preflight.js
+tests.yml	node-tests	node test/release-runner.js
+tests.yml	release-baseline	node tools/run-release-tests.js --out="$RUNNER_TEMP/release-baseline"

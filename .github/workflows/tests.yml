@@ -1,0 +1,284 @@
+# Consolidated Node gate. Replaces test.yml and every Node-only command that
+# the eleven single-purpose playable-* workflows used to run.
+# The release subset is reported by tools/run-release-tests.js --list.
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  node-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: World Builder data + UI layer (M1-M4b)
+        run: node test/world-builder.js
+      - name: Editor core - changeset (v1 + v2 create/delete)
+        run: node test/editor/changeset.js
+      - name: Editor core - edit (incl. create/delete drafts, door gating, paired/one-way conversion)
+        run: node test/editor/edit.js
+      - name: Editor core - cast placement (M7)
+        run: node test/editor/cast.js
+      - name: Editor core - scene objects (M8)
+        run: node test/editor/scene-objects.js
+      - name: Editor core - history
+        run: node test/editor/history.js
+      - name: Editor core - hit-test
+        run: node test/editor/hit-test.js
+      - name: Editor core - identity
+        run: node test/editor/identity.js
+      - name: Editor core - inspector
+        run: node test/editor/inspector.js
+      - name: Editor core - interaction
+        run: node test/editor/interaction.js
+      - name: Editor core - model
+        run: node test/editor/model.js
+      - name: Editor core - world-builder-core
+        run: node test/editor/world-builder-core.js
+      - name: World door equality (all maps vs pre-M5 fixture)
+        run: node test/world-door-equality.js
+      - name: Legacy door inventory (0 classic doors)
+        run: node test/legacy-door-inventory.js
+      - name: Scene objects inventory (0 entries left in js/maps.js)
+        run: node test/scene-objects-inventory.js
+      - name: Scene objects equality (all maps vs pre-M8 fixture)
+        run: node test/scene-objects-equality.js
+      - name: Location connections (paired, one-way, needsClues)
+        run: node test/location-connections.js
+      - name: Migrated door traversal (real engine input)
+        run: node test/migrated-door-traversal.js
+      - name: World connection registry
+        run: node test/test-world-registry.js
+      - name: Apply changeset pipeline
+        run: node test/apply-changeset.js
+      - name: Editor apply preflight
+        run: node test/editor-apply-preflight.js
+      - name: Editor runtime isolation
+        run: node test/editor-runtime-isolation.js
+      - name: World apply CLI (create/delete + catalog write, rollback, temp fixture)
+        run: node test/world-apply.js
+      - name: Catalog writer (js/world-catalog.js text rewrite)
+        run: node test/catalog-write.js
+      - name: World apply CLI - cast placement, --repin, bundle, rollback (M7, temp fixture)
+        run: node test/world-apply-cast.js
+      - name: World apply CLI - scene objects, delete guard, bundle, rollback (M8, temp fixture)
+        run: node test/world-apply-objects.js
+      - name: Cast continuity validators
+        run: node test/cast-continuity-validate.js
+      - name: Cast presence sync
+        run: node test/cast-presence-sync.js
+      - name: World engine v0.1 catalog
+        run: node test/world-engine-v0.1-catalog.js
+      - name: M9 static validator (Cast Presence actors)
+        run: node test/narrative-validate-m9.js
+      - name: M10 static validator (confession lock verbatim)
+        run: node test/narrative-validate-m10.js
+      - name: Act 5 flow (M9 reason codes + M10 matrix, runtime)
+        run: node test/act-5-flow.js
+      - name: Act 5 mirror gate (mission / classic / finale ownership)
+        run: node test/act-5-mirror-gate.js
+      - name: Act 2 flow (M4 runtime + classic path on Cast Presence bodies)
+        run: node test/act-2-flow.js
+      - name: Act 2 Ronette required gate
+        run: node test/act-2-ronette-required.js
+      - name: Act 3 flow
+        run: node test/act-3-flow.js
+      - name: Act 3 mirror gate
+        run: node test/act-3-mirror-gate.js
+      - name: Act 4 flow
+        run: node test/act-4-flow.js
+      - name: Act 4 mirror gate
+        run: node test/act-4-mirror-gate.js
+      - name: Narrative finale
+        run: node test/narrative-finale.js
+      - name: Narrative M9 runtime
+        run: node test/narrative-m9-runtime.js
+      - name: Narrative repair contract
+        run: node test/narrative-repair-contract.js
+      - name: Narrative vertical slice 01
+        run: node test/narrative-slice-01.js
+      - name: M5 static validator
+        run: node test/narrative-validate-m5.js
+      - name: M6 static validator
+        run: node test/narrative-validate-m6.js
+      - name: M8 static validator
+        run: node test/narrative-validate-m8.js
+      - name: Story truth lint
+        run: node test/story-truth-lint.js
+      - name: Letter chain provenance
+        run: node test/letter-chain-provenance.js
+      - name: Ronette / BOB provenance
+        run: node test/ronette-bob-provenance.js
+      - name: Tracks provenance
+        run: node test/tracks-provenance.js
+      - name: Objective resolver
+        run: node test/objective-resolver.js
+      - name: Notebook objective
+        run: node test/notebook-objective.js
+      - name: Objective notebook visibility
+        run: node test/objective-notebook-visibility.js
+      - name: Choice prompts
+        run: node test/choice-prompts.js
+      - name: Choice prompt dedup
+        run: node test/choice-prompt-dedup.js
+      - name: Dialogue craft regression
+        run: node test/dialogue-craft-regression.js
+      - name: Dialogue presentation (HTML panel)
+        run: node test/dialogue-presentation.js
+      - name: Interaction voice
+        run: node test/interaction-voice.js
+      - name: Classic object grounding
+        run: node test/classic-object-grounding.js
+      - name: Environmental interactions
+        run: node test/environmental-interactions.js
+      - name: Environment entry
+        run: node test/environment-entry.js
+      - name: Environment life
+        run: node test/environment-life.js
+      - name: Ambient life
+        run: node test/ambient-life.js
+      - name: Character activity
+        run: node test/character-activity.js
+      - name: Character quality
+        run: node test/character-quality.js
+      - name: Character runtime contract
+        run: node test/character-runtime-contract.js
+      - name: Cast sprite sheet
+        run: node test/cast-sprite-sheet.js
+      - name: Cooper sprite sheet
+        run: node test/cooper-sprite-sheet.js
+      - name: Gold tone gates
+        run: node test/gold-tone-gates.js
+      - name: Portrait gates
+        run: node test/portrait-gates.js
+      - name: R69 reference gates
+        run: node test/r69-reference-gates.js
+      - name: Graphic pass contract
+        run: node test/graphic-pass-contract.js
+      - name: Retro font
+        run: node test/retro-font.js
+      - name: Retro production
+        run: node test/retro-production.js
+      - name: Mobile production
+        run: node test/mobile-production.js
+      - name: Touch runtime
+        run: node test/touch-runtime.js
+      - name: Movement feel
+        run: node test/movement-feel.js
+      - name: Walk phase contract
+        run: node test/walk-phase-contract.js
+      - name: Initial spawn
+        run: node test/initial-spawn.js
+      - name: Location traversal
+        run: node test/location-traversal.js
+      - name: Traincar location traversal
+        run: node test/traincar-location-traversal.js
+      - name: Town map coherence
+        run: node test/town-map-coherence.js
+      - name: Town structure semantics
+        run: node test/town-structure-semantics.js
+      - name: Interior prop semantics
+        run: node test/interior-prop-semantics.js
+      - name: Interior zoning reachability
+        run: node test/interior-zoning-reachability.js
+      - name: World catalog coverage
+        run: node test/world-catalog-coverage.js
+      - name: Diner layout
+        run: node test/diner-layout.js
+      - name: Hospital native scene
+        run: node test/hospital-native.js
+      - name: Room 315 location
+        run: node test/room-315-location.js
+      - name: Room 315 native scene
+        run: node test/room-315-native.js
+      - name: Sheriff's station location
+        run: node test/sheriffs-station-location.js
+      - name: Sheriff's station native scene
+        run: node test/sheriffs-station-native.js
+      - name: Sheriff's station door
+        run: node test/sheriffs-station-door.js
+      - name: Sheriff's station ambient
+        run: node test/sheriffs-station-ambient.js
+      - name: Station population
+        run: node test/station-population.js
+      - name: Traincar native scene
+        run: node test/traincar-native.js
+      - name: Red Room native scene
+        run: node test/redroom-scene.js
+      - name: Narrative lint
+        run: node test/narrative-lint.js
+      - name: Project smoke gate
+        run: node test/smoke.js
+      - name: Project walkthrough gate
+        run: node test/walkthrough.js
+      - name: Turn, held movement, between-frame input and phone targeting
+        run: node test/turn-in-place.js
+      - name: Classic evidence bridge (earned inventory, idempotent repair, deductions)
+        run: node test/classic-evidence-bridge.js
+      - name: Finale completion persistence (terminal write, rollback, retry)
+        run: node test/finale-completion-persistence.js
+      - name: Campaign player contract
+        run: node test/campaign-player.js
+      - name: Campaign report safety
+        run: node test/campaign-report-safety.js
+      - name: Campaign recovery checker
+        run: node test/campaign-recovery.js
+      - name: Classic-to-narrative cast parity
+        run: node test/classic-cast-sync.js
+      - name: Regenerate world data from canonical sources
+        run: node test/gen-world-data.js
+      - name: Generated world data matches canonical sources
+        run: git diff --exit-code -- js/scene-objects.gen.js js/world-connections.gen.js
+      - name: Narrative target identity, parity and failure contracts
+        run: node test/narrative-targets.js
+      - name: Narrative targets editor move, reverse move and referenced delete rollback
+        run: node test/narrative-targets-apply.js
+      - name: Notebook exit and nested touch ownership
+        run: node test/touch-notebook-navigation.js
+      - name: Playable browser-boundary contracts
+        run: node test/playable-browser.js
+      - name: Touch gesture transport geometry
+        run: node test/touch-gesture-transport.js
+      - name: Touch preflight contracts
+        run: node test/touch-preflight.js
+      - name: Release runner contracts including failed and timed-out fixtures
+        run: node test/release-runner.js
+
+  release-baseline:
+    # On-demand reproduction with a machine-readable evidence artifact. The
+    # per-test steps above already run the same suite on every push/PR, so this
+    # job is not repeated on routine triggers.
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Reproduce the existing Node release suite with evidence
+        shell: bash
+        run: node tools/run-release-tests.js --out="$RUNNER_TEMP/release-baseline"
+      - name: Preserve baseline and individual logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-baseline-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/release-baseline
+          retention-days: 7
+          if-no-files-found: error
