@@ -593,8 +593,8 @@
       "speaker_id": "cooper",
       "portrait": null,
       "display_name": "COOPER",
-      "text": "(seconda domanda) Ho visto un uomo. Capelli lunghi, grigi. Sorrideva. Le è familiare?",
-      "dom_text": "COOPER: (seconda domanda) Ho visto un uomo. Capelli lunghi, grigi. Sorrideva. Le è familiare?",
+      "text": "Ho visto un uomo. Capelli lunghi, grigi. Sorrideva. Le è familiare?",
+      "dom_text": "COOPER: Ho visto un uomo. Capelli lunghi, grigi. Sorrideva. Le è familiare?",
       "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
       "map": "sheriff"
     },
@@ -914,8 +914,8 @@
       "speaker_id": "leland",
       "portrait": null,
       "display_name": "LELAND",
-      "text": "(un silenzio lungo; poi, semplicemente) Io.",
-      "dom_text": "LELAND: (un silenzio lungo; poi, semplicemente) Io.",
+      "text": "(un silenzio lungo; poi, senza alzare la voce) Laura l'ho uccisa io.",
+      "dom_text": "LELAND: (un silenzio lungo; poi, senza alzare la voce) Laura l'ho uccisa io.",
       "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
       "map": "sheriff"
     },

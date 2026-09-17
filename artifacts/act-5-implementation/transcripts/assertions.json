@@ -971,7 +971,7 @@
       "detail": null
     },
     {
-      "name": "[P6] screen truth: sequenza delle pagine M10 emesse = runtime per questo stato (68)",
+      "name": "[P6] screen truth: sequenza delle pagine M10 emesse = runtime per questo stato (69)",
       "pass": true,
       "detail": null
     },
@@ -1024,6 +1024,6 @@
     }
   ],
   "console_errors": [
-    "Failed to load resource: the server responded with a status of 404 (File not found)  <http://127.0.0.1:24723/favicon.ico>"
+    "Failed to load resource: the server responded with a status of 404 (File not found)  <http://127.0.0.1:18901/favicon.ico>"
   ]
 }

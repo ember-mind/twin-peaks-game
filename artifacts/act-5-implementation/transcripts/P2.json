@@ -593,8 +593,8 @@
       "speaker_id": "cooper",
       "portrait": null,
       "display_name": "COOPER",
-      "text": "(seconda domanda) Mi mostri il viaggio, allora. Un biglietto, una telefonata a Missoula — qualcosa che dica che Maddy è partita davvero.",
-      "dom_text": "COOPER: (seconda domanda) Mi mostri il viaggio, allora. Un biglietto, una telefonata a Missoula — qualcosa che dica che Maddy è partita davvero.",
+      "text": "Mi mostri il viaggio, allora. Un biglietto, una telefonata a Missoula — qualcosa che dica che Maddy è partita davvero.",
+      "dom_text": "COOPER: Mi mostri il viaggio, allora. Un biglietto, una telefonata a Missoula — qualcosa che dica che Maddy è partita davvero.",
       "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
       "map": "sheriff"
     },
@@ -922,8 +922,8 @@
       "speaker_id": "leland",
       "portrait": null,
       "display_name": "LELAND",
-      "text": "(guarda le mani, a lungo. Quando parla, la voce è precisa — ed è peggio del tremito.) Perché ce l'ho messa io.",
-      "dom_text": "LELAND: (guarda le mani, a lungo. Quando parla, la voce è precisa — ed è peggio del tremito.) Perché ce l'ho messa io.",
+      "text": "(guarda le mani, a lungo. Quando parla, la voce è precisa — ed è peggio del tremito.) Perché ce l'ho messo io.",
+      "dom_text": "LELAND: (guarda le mani, a lungo. Quando parla, la voce è precisa — ed è peggio del tremito.) Perché ce l'ho messo io.",
       "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
       "map": "sheriff"
     },
@@ -994,8 +994,8 @@
       "speaker_id": "leland",
       "portrait": null,
       "display_name": "LELAND",
-      "text": "(la voce di un uomo che detta un atto) Io. Al vagone.",
-      "dom_text": "LELAND: (la voce di un uomo che detta un atto) Io. Al vagone.",
+      "text": "(la voce di un uomo che detta un atto) L'ho uccisa io. Al vagone.",
+      "dom_text": "LELAND: (la voce di un uomo che detta un atto) L'ho uccisa io. Al vagone.",
       "objective": "Leland Palmer è alla centrale. Decidete come parlargli.",
       "map": "sheriff"
     },
