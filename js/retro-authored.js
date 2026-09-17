@@ -4382,41 +4382,41 @@
     }
   }
   function interiorBooth(g,x,y,w,p,variant,guest) {
-    // Booth remains within canonical footprint; broad cushion replaces locker ribs.
+    // Base occupies the table's two solid tiles; backrest projects north.
+    R(g,x+1,y+13,w,5,'rgba(30,26,20,.32)');
     interiorContact(g,x+1,y+16,w-1,p);
-    R(g,x+1,y+12,w-2,5,'rgba(30,26,20,.35)');
-    // Low upholstered banquette: stepped cap, one broad cushion, exposed oak.
-    R(g,x+2,y-16,w-4,3,p.woodDark);
-    R(g,x+4,y-17,w-8,2,p.woodLight);
-    R(g,x,y-13,w,22,p.woodDark);
-    R(g,x+1,y-12,w-2,16,p.redDark);
-    R(g,x+3,y-10,w-6,10,p.red);
-    R(g,x+4,y-9,w-8,2,p.redHi);
-    R(g,x+4,y-6,w-8,1,p.redDark);
-    R(g,x+5,y-2,w-10,2,p.redLight);
-    R(g,x+1,y+3,w-2,3,p.woodHi);
-    R(g,x+2,y+5,w-4,2,p.redDark);
-    R(g,x,y-8,4,23,p.woodDark);R(g,x+1,y-6,2,19,p.woodHi);
-    R(g,x+w-4,y-8,4,23,p.woodDark);R(g,x+w-3,y-6,2,19,p.woodHi);
-    R(g,x+2,y+12,5,2,p.woodLight);
-    R(g,x+w-7,y+12,5,2,p.woodLight);
+    R(g,x+w-1,y-9,2,25,'rgba(41,43,38,.23)');
+    R(g,x,y-15,w,31,p.woodDark); R(g,x+1,y-14,w-2,28,p.redDark);
+    R(g,x+2,y-15,w-4,1,p.woodLight);
+    for(var i=3;i<w-3;i+=6) {
+      R(g,x+i,y-13,5,16,p.red); R(g,x+i+1,y-12,3,2,p.redHi);
+      R(g,x+i,y-11,1,10,p.redHi); R(g,x+i+4,y-10,1,13,p.redDark);
+      R(g,x+i+2,y-3,1,1,p.redDark);
+      if((i+variant)%3===0) R(g,x+i+1,y-11,2,1,p.redLight);
+    }
+    R(g,x+2,y-1,w-4,6,p.redDark); R(g,x+3,y,w-6,3,p.red);
+    R(g,x+4,y,w-8,1,p.redHi); R(g,x+2,y+5,w-4,2,p.redDark);
+    R(g,x+1,y+7,w-2,2,p.woodLight);
+    if(guest) {
+      var seatX=guest.seat==='left'?x+8:x+w-25;
+      R(g,seatX+3,y-4,11,3,p.redDark);
+    }
     var gesture=variant===1 && GAME.CharacterActivity ? GAME.CharacterActivity.seatedFrame() : -1;
     var seatedPose=guest ? interiorSeatedGuest(g,guest.seat==='left'?x+8:x+w-25,y-16,guest,gesture) : null;
-    R(g,x+5,y+1,w-10,13,p.woodDark);
-    // Wider near edge and narrow far edge make tabletop read as a plane.
-    R(g,x+8,y+1,w-16,2,p.cream);
-    R(g,x+6,y+3,w-12,8,p.creamShade);
-    R(g,x+6,y+3,w-12,2,p.cream);
-    R(g,x+5,y+10,w-10,2,p.creamShade);
-    R(g,x+6,y+4,1,6,p.metalHi);
-    R(g,x+5,y+12,w-10,2,p.woodHi);
-    R(g,x+7,y+14,w-14,2,p.woodDark);
+    R(g,x+3,y+1,w-6,13,p.woodDark);
+    R(g,x+4,y+1,w-8,11,p.creamShade); R(g,x+4,y+1,w-8,3,p.cream);
+    R(g,x+3,y+12,w-6,2,p.woodHi); R(g,x+5,y+14,w-10,2,p.red);
+    R(g,x+1,y-12,2,27,p.redHi); R(g,x+w-3,y-12,2,27,p.redDark);
+    R(g,x+3,y+13,w-6,1,p.woodHi); R(g,x+4,y+15,w-8,1,p.metal);
     if(guest) interiorOccupiedTable(g,x,y,w,p,guest,gesture);
     else interiorTableProps(g,x+5,y,p,variant);
     if(seatedPose) {
       interiorSeatedHands(g,seatedPose);
       interiorPoseRect(g,seatedPose,4,1,3,1,guest.hairHi);
       interiorPoseRect(g,seatedPose,4,13,2,1,guest.coatHi);
+      // Small lamp-side highlights use existing warm material tones.
+      interiorPoseRect(g,seatedPose,4,2,2,1,'rgba(244,230,200,.18)');
+      interiorPoseRect(g,seatedPose,3,14,1,1,'rgba(244,230,200,.18)');
     }
   }
   function interiorStool(g,x,y,p) {
@@ -4643,14 +4643,6 @@
       R(g,x+lx-8,y+19,8,1,p.woodLight);
       R(g,x+lx+3,y+20,4,1,p.woodHi);
     });
-    R(g,x+38,y+19,144,3,p.creamShade);
-    R(g,x+38,y+22,144,3,p.woodDark);
-    for(var rail=42;rail<176;rail+=24) {
-      R(g,x+rail,y+25,18,10,p.woodDark);
-      R(g,x+rail+2,y+27,14,6,p.woodHi);
-      R(g,x+rail+5,y+28,8,1,p.gold);
-    }
-    R(g,x+38,y+36,144,2,p.redDark);
   }
 
   function drawDinerCounter(g,model,x,y,p) {
@@ -4668,14 +4660,6 @@
     R(g,counterX+10,counterY-1,20,1,p.metalHi);
     R(g,counterX+53,counterY,16,1,p.metalHi);
     R(g,counterX+94,counterY-1,26,1,p.gold);
-    R(g,counterX+1,counterY+5,counterW-2,11,p.redDark);
-    R(g,counterX+3,counterY+7,counterW-6,5,p.red);
-    for(i=8;i<counterW-13;i+=24) {
-      R(g,counterX+i,counterY+7,15,4,p.redHi);
-      R(g,counterX+i+2,counterY+8,11,1,p.redLight);
-      R(g,counterX+i,counterY+13,15,1,p.woodLight);
-    }
-    R(g,counterX+1,counterY+16,counterW-2,2,p.woodDark);
     interiorServiceCluster(g,counterX+3,counterY-17,p,'coffee');
     interiorServiceCluster(g,counterX+67,counterY-14,p,'plates'); interiorPieCase(g,counterX+counterW-49,counterY-15,48,p);
     interiorCup(g,counterX+35,counterY-3,p); interiorCup(g,counterX+75,counterY-3,p);
@@ -4698,12 +4682,6 @@
       if(tileKey===12) R(g,x+fx+1,y+fy+2,5,4,'rgba(41,43,38,.035)');
       if(fx>=104 && fx<=120 && fy>=80 && fy%24===8)
         R(g,x+fx+2,y+fy+3,4,1,'rgba(244,230,200,.09)');
-    }
-    // Inlaid center path joins entrance, service and seating without a rug.
-    R(g,x+102,y+53,20,91,'rgba(53,39,31,.20)');
-    R(g,x+105,y+53,14,91,'rgba(244,230,200,.19)');
-    for(var ry=61;ry<136;ry+=16) {
-      R(g,x+107,y+ry,10,1,'rgba(53,39,31,.25)');
     }
     // Lower-contrast floor, wall contact shadows and localized warm pools.
     R(g,x+16,y+44,192,8,'rgba(32,28,21,.20)');
