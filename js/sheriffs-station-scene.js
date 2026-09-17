@@ -83,6 +83,14 @@
     if (!Number.isInteger(map.width)) map.width = 16;
     if (!Number.isInteger(map.height)) map.height = 12;
     if (map.indoor === undefined) map.indoor = true;
+    /* Expose the existing native layout by reference for Program anchor checks.
+     * This does not copy cells or transfer collision ownership. */
+    Object.defineProperty(map, 'layout', {
+      value: GAME.SheriffsStationScene.layout,
+      enumerable: false,
+      writable: false,
+      configurable: false
+    });
 
     originalTile = GAME.Sprites && GAME.Sprites.drawTile;
     originalStructures = GAME.sprites && GAME.sprites.drawStructures;

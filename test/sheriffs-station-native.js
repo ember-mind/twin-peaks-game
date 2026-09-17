@@ -206,6 +206,19 @@ function hasRect(calls, x, y, width, height) {
   return calls.some((call) =>
     call.args[0] === x && call.args[1] === y && call.args[2] === width && call.args[3] === height);
 }
+function hasPaintRect(calls, x, y, width, height, color) {
+  return calls.some((call) =>
+    call.args[0] === x && call.args[1] === y && call.args[2] === width && call.args[3] === height &&
+    call.color === color);
+}
+assert(hasPaintRect(authoredPixels.calls, 101, 123, 58, 35, Art.palette.floorDark),
+  'M2 rug keeps a muted floor-dark base block');
+assert(hasPaintRect(authoredPixels.calls, 105, 127, 50, 27, Art.palette.sage),
+  'M2 rug keeps a restrained sage field');
+assert(hasPaintRect(authoredPixels.calls, 134, 79, 31, 2, '#b1a381'),
+  'M2 desk reflection begins as a local stepped warm strip');
+assert(hasPaintRect(authoredPixels.calls, 146, 84, 21, 3, '#afa283'),
+  'M2 desk reflection carries the lower stepped warm strip');
 const depth80 = foregroundCalls(80, 112);
 assert(hasRect(depth80, 17, 43, 15, 37), '80px interval selects file cabinets');
 assert(hasRect(depth80, 96, 55, 64, 9), '80px interval selects sheriff desk');

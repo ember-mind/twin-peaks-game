@@ -1,0 +1,15 @@
+ok - controls_created
+ok - touch_mode_enabled
+ok - portrait_targets_large
+ok - dpad_holds_and_releases
+ok - ab_emit_engine_keys
+ok - mobile_b_opens_narrative_notebook
+ok - blur_releases_direction
+ok - narrative_choice_controls_visible
+ok - narrative_choice_dpad_changes_focus
+ok - narrative_choice_a_confirms_once
+ok - narrative_tap_not_duplicated
+ok - narrative_page_has_single_advance_control
+ok - recovery_choice_has_mobile_dpad_and_confirm
+
+TOUCH-RUNTIME-PASS 13/13

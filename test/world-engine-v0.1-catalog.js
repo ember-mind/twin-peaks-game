@@ -95,6 +95,32 @@ function attachProgram(catalog) {
   if (!target.environment.program) target.environment.program = programFixture();
   return target;
 }
+function sheriffLayoutFixture() {
+  return {
+    footprints: {
+      sheriffDesk: {}, sheriffChair: {}, files: {}, reception: {}, receptionReturn: {}, bench: {},
+      rightDeskNorth: {}, rightChairNorth: {}, rightDeskSouth: {}, rightChairSouth: {}
+    },
+    targets: { entrance: {}, sheriffDesk: {} }
+  };
+}
+function mapsForCatalog(catalog, sheriffLayout) {
+  const maps = {};
+  catalog.locations.forEach((location) => location.environments.forEach((environment) => {
+    maps[environment.sceneId] = environment.sceneId === 'sheriff' ? { layout: sheriffLayout } : {};
+  }));
+  return maps;
+}
+function expectRejectedSheriffAnchor(mutator, label) {
+  const fixture = validCatalog();
+  const target = fixture.locations.find((location) => location.id === 'sheriffs-station')
+    .environments.find((environment) => environment.sceneId === 'sheriff');
+  assert(target && target.program, 'canonical fixture must carry the Sheriff program');
+  mutator(target.program);
+  const context = isolated(mapsForCatalog(fixture, sheriffLayoutFixture()));
+  assert.throws(() => context.GAME.World.register(fixture), /references unknown anchor/, label);
+  assert.equal(context.GAME.World.catalog, undefined, label + ': rejected registration leaves no catalog');
+}
 function assertFrozenProgram(program, label) {
   assert(Object.isFrozen(program), label + ' program frozen');
   assert(Object.isFrozen(program.intent), label + ' intent frozen');
@@ -317,6 +343,47 @@ expectRejectedM3Program((p) => { p.residue.ambient[0].unexpected = 'must not be 
 expectRejectedM3Program((p) => { p.residue.unexpected = true; }, 'residue unknown fields must be rejected');
 expectRejectedM3Program((p) => { p.residue.narrative = []; }, 'narrative residue must remain absent');
 
+// A map-owned layout validates authored Sheriff anchors at registration while keeping legacy maps
+// layout-agnostic. The real program must pass; each anchor-bearing section must reject a dangling id.
+{
+  const fixture = validCatalog();
+  const maps = mapsForCatalog(fixture, sheriffLayoutFixture());
+  maps.sheriff.rows = ['unchanged collision'];
+  maps.sheriff.doors = { entrance: { tx: 7, ty: 11 } };
+  const beforeMap = JSON.stringify(maps.sheriff);
+  const context = isolated(maps);
+  context.GAME.CastPresence = { bodiesFor() { throw new Error('Program must not query Cast Presence'); } };
+  context.GAME.AmbientLife = { step() { throw new Error('Program must not step Ambient Life'); } };
+  assert.doesNotThrow(() => context.GAME.World.register(fixture),
+    'real Sheriff program registers against its map layout');
+  assert.equal(JSON.stringify(maps.sheriff), beforeMap,
+    'Program registration does not mutate collision, doors, or native scene layout');
+}
+expectRejectedSheriffAnchor((p) => { p.groups[0].anchors[0] = 'missing-group-footprint'; },
+  'unknown group footprint anchor is rejected');
+expectRejectedSheriffAnchor((p) => { p.contributions[0].anchor = 'missing-contribution-footprint'; },
+  'unknown contribution footprint anchor is rejected');
+expectRejectedSheriffAnchor((p) => { p.relationships[0].from = 'missing-near-footprint'; },
+  'unknown NEAR footprint anchor is rejected');
+expectRejectedSheriffAnchor((p) => { p.relationships[2].to = 'missing-reachable-target'; },
+  'unknown REACHABLE target anchor is rejected');
+expectRejectedSheriffAnchor((p) => { p.residue.ambient[0].anchor = 'missing-residue-footprint'; },
+  'unknown residue footprint anchor is rejected');
+{
+  const fixture = validCatalog();
+  const context = isolated(mapsForCatalog(fixture));
+  assert.throws(() => context.GAME.World.register(fixture), /native map layout is missing/,
+    'program anchors require a native map layout when the map is loaded');
+}
+{
+  const fixture = validCatalog();
+  const layout = sheriffLayoutFixture();
+  delete layout.footprints;
+  const context = isolated(mapsForCatalog(fixture, layout));
+  assert.throws(() => context.GAME.World.register(fixture), /native layout\.footprints/,
+    'present native layout must expose footprint anchors');
+}
+
 {
   const World = isolated().GAME.World;
   const fixture = validCatalog();
@@ -351,7 +418,7 @@ assert.doesNotThrow(() => isolated({
   diner: {},
   town: {},
   sheriffs_station_exterior: {},
-  sheriff: {},
+  sheriff: { layout: sheriffLayoutFixture() },
   traincar: {},
   oej: {},
   room_315: {},
@@ -404,6 +471,16 @@ assert(World.getConnections('red-room').includes('woods-redroom-dream') && World
 assert.deepEqual(World.getLocation('sheriffs-station').environments.map(environment => environment.id), ['exterior', 'interior']);
 assert.equal(World.getEnvironment('sheriffs-station', 'exterior').sceneId, 'sheriffs_station_exterior');
 assert.equal(World.getEnvironment('sheriffs-station', 'interior').sceneId, 'sheriff');
+assert.strictEqual(GAME.Maps.sheriff.layout, GAME.SheriffsStationScene.layout,
+  'installed Sheriff map exposes the native scene layout by reference');
+assert.strictEqual(GAME.Maps.sheriff.layout.footprints, GAME.SheriffsStationScene.layout.footprints,
+  'installed Sheriff map shares native footprint anchors');
+assert.strictEqual(GAME.Maps.sheriff.layout.targets, GAME.SheriffsStationScene.layout.targets,
+  'installed Sheriff map shares native target anchors');
+assert.equal(Object.prototype.propertyIsEnumerable.call(GAME.Maps.sheriff, 'layout'), false,
+  'native layout alias does not enter full-map serialization');
+assert.equal(Object.getOwnPropertyDescriptor(GAME.Maps.sheriff, 'layout').writable, false,
+  'native layout alias cannot be replaced through the map');
 const sheriffProgramEnvironment = World.getLocation('sheriffs-station').environments.find(environment => environment.program);
 assert(sheriffProgramEnvironment, 'real Sheriff catalog carries an environment.program');
 assertFrozenProgram(sheriffProgramEnvironment.program, 'real Sheriff environment.program');

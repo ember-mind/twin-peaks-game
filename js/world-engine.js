@@ -48,9 +48,17 @@
     }));
   }
 
+  function requireAnchor(id, table, label) {
+    if (table && !Object.prototype.hasOwnProperty.call(table, id)) fail(label + ' references unknown anchor "' + id + '"');
+  }
+
   /* Authoring metadata only. No spatial or actor state is owned here. */
-  function copyProgram(source, label) {
+  function copyProgram(source, label, layout, mapExists) {
     requireRecord(source, label);
+    if (layout) {
+      requireRecord(layout.footprints, label + ' native layout.footprints');
+      requireRecord(layout.targets, label + ' native layout.targets');
+    }
     requireKeys(source, ['intent', 'visualGoals', 'activities', 'groups', 'contributions', 'relationships', 'residue'], label);
     var intent = requireRecord(source.intent, label + '.intent');
     requireKeys(intent, ['function', 'playerExperience', 'tone'], label + '.intent');
@@ -86,10 +94,12 @@
       groupActivities.forEach(function (activityId) {
         if (!activityIds[activityId]) fail(at + ' references unknown activity "' + activityId + '"');
       });
+      var anchors = copyStrings(group.anchors, at + '.anchors');
+      anchors.forEach(function (anchor) { requireAnchor(anchor, layout && layout.footprints, at + '.anchors'); });
       return Object.freeze({
         id: id,
         role: requireId(group.role, at + '.role'),
-        anchors: copyStrings(group.anchors, at + '.anchors'),
+        anchors: anchors,
         activities: groupActivities,
         visual: requireId(group.visual, at + '.visual')
       });
@@ -113,8 +123,10 @@
         var kinds = copyStrings(item.contributesTo, at + '.contributesTo');
         if (!kinds.length) fail(at + '.contributesTo must not be empty');
         kinds.forEach(function (kind) { if (categories.indexOf(kind) === -1) fail(at + ' has unknown contribution "' + kind + '"'); });
+        var anchor = requireId(item.anchor, at + '.anchor');
+        requireAnchor(anchor, layout && layout.footprints, at + '.anchor');
         return Object.freeze({
-          anchor: requireId(item.anchor, at + '.anchor'),
+          anchor: anchor,
           contributesTo: kinds,
           reason: requireId(item.reason, at + '.reason')
         });
@@ -129,6 +141,9 @@
         var from = requireId(item.from, at + '.from');
         var to = requireId(item.to, at + '.to');
         if (from === to) fail(at + ' must name two different anchors');
+        var anchorTable = layout && (item.kind === 'NEAR' ? layout.footprints : layout.targets);
+        requireAnchor(from, anchorTable, at + '.from');
+        requireAnchor(to, anchorTable, at + '.to');
         return Object.freeze({
           kind: item.kind,
           from: from,
@@ -145,12 +160,19 @@
         var at = label + '.residue.ambient[' + index + ']';
         requireRecord(item, at);
         requireKeys(item, ['anchor', 'detail', 'reason'], at);
+        var anchor = requireId(item.anchor, at + '.anchor');
+        requireAnchor(anchor, layout && layout.footprints, at + '.anchor');
         return Object.freeze({
-          anchor: requireId(item.anchor, at + '.anchor'),
+          anchor: anchor,
           detail: requireId(item.detail, at + '.detail'),
           reason: requireId(item.reason, at + '.reason')
         });
       })) });
+    }
+    if (mapExists && !layout && (groups.some(function (group) { return group.anchors.length > 0; }) ||
+        (copy.contributions && copy.contributions.length) || (copy.relationships && copy.relationships.length) ||
+        (copy.residue && copy.residue.ambient.length))) {
+      fail(label + ' references anchors but native map layout is missing');
     }
     return Object.freeze(copy);
   }
@@ -200,7 +222,8 @@
         environmentIds[environmentId] = true;
         var environmentCopy = { id: environmentId, sceneId: sceneId };
         if (Object.prototype.hasOwnProperty.call(environment, 'program')) {
-          environmentCopy.program = copyProgram(environment.program, environmentLabel + '.program');
+          var map = GAME.Maps && GAME.Maps[sceneId];
+          environmentCopy.program = copyProgram(environment.program, environmentLabel + '.program', map && map.layout, !!map);
         }
         var copy = Object.freeze(environmentCopy);
         environmentIndex[environmentId] = copy;

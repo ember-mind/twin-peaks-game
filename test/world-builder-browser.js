@@ -835,7 +835,7 @@ async function main() {
       check('case 15: world/connections.json and narrative/cast/windows.json unchanged', sha() === shaStart && windowsSha() === windowsShaStart);
     }
 
-    // ---------------- case 20 (M1): scene-scoped environment program
+    // ---------------- case 20: full scene-scoped, read-only environment program
     {
       console.log('\ncase 20: sheriff environment program is read-only and scene-scoped');
       await load();
@@ -851,10 +851,12 @@ async function main() {
       })()`);
       check('case 20: sheriff scene shows the read-only environment program',
         program.exists && program.text.includes('ENVIRONMENT PROGRAM · READ ONLY') &&
-        ['INTENT', 'VISUAL GOALS', 'ACTIVITIES', 'GROUPS'].every((heading) => program.headings.includes(heading)), program);
+        ['INTENT', 'VISUAL GOALS', 'ACTIVITIES', 'GROUPS', 'CONTRIBUTIONS', 'RELATIONSHIPS', 'AMBIENT RESIDUE'].every((heading) => program.headings.includes(heading)), program);
       check('case 20: sheriff-work group exposes sheriffDesk and sheriffChair anchors',
-        program.text.includes('sheriff-work') && /ANCHORS\s+sheriffDesk, sheriffChair/.test(program.text), program.text);
+        program.text.includes('sheriff-work') && /ANCHORS\s+sheriffDesk, sheriffChair/.test(program.text) &&
+        program.text.includes('One mug with steam'), program.text);
       check('case 20: sheriff environment program has no editable controls', program.controls === 0, program);
+      await shot('builder-program.png', path.join(ROOT, 'artifacts', 'intent-room-sheriff'));
 
       await setSelect('wb-scene', 'sheriffs_station_exterior');
       const exteriorProgram = await cdp.eval(`(() => {
