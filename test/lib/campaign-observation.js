@@ -59,6 +59,10 @@ module.exports = function observeGame() {
   const page = Array.from(document.querySelectorAll('#narrative .nw-page')).find(shown);
   return {
     ready: !!(s && np && np.ready), url: location.href, testMode: np ? !!np.testMode : null,
+    // A hidden page stops requestAnimationFrame, so the engine freezes between
+    // frames while inputs still arrive. Report it, or the symptom reads as a
+    // game bug: taps that never turn and UI that never closes.
+    pageHidden: !!document.hidden,
     mode: s ? s.mode : null, mapId: s ? s.mapId : null,
     introPage: s ? s.introPage : null, endPage: s ? s.endPage : null,
     player: s ? clone(s.player) : null, flags: s ? clone(s.flags) : null,

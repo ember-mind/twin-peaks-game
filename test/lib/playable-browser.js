@@ -187,6 +187,9 @@ async function openPlayableBrowser(options) {
     if (result.exceptionDetails) throw new Error('Read-only observation failed: ' + JSON.stringify(result.exceptionDetails));
     const value = result.result && result.result.value;
     if (!value || typeof value !== 'object') throw new Error('Read-only observation returned no snapshot');
+    if (value.pageHidden && !faults.some((f) => f.type === 'visibility')) {
+      faults.push({ type: 'visibility', text: 'Page became document.hidden; the frame loop is stopped' });
+    }
     return value;
   }
   async function capture(label) {
@@ -303,6 +306,12 @@ async function openPlayableBrowser(options) {
     await cdp.send('Page.enable'); await cdp.send('Runtime.enable'); await cdp.send('Network.enable');
     metadata.browser = await cdp.send('Browser.getVersion');
     metadata.url = server.url;
+    // Headless Chrome on macOS lets the page fall to document.hidden partway
+    // through a long run. requestAnimationFrame then stops, the engine freezes
+    // between frames, and every later input is delivered but never consumed:
+    // a short tap does not turn, and whatever UI was open stays open. Pin the
+    // page focused so the frame loop keeps running for the whole campaign.
+    await cdp.send('Emulation.setFocusEmulationEnabled', { enabled: true });
     await cdp.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: !!options.mobile });
     if (options.mobile) await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
     record('navigate', { url: server.url });
