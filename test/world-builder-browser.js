@@ -858,6 +858,26 @@ async function main() {
       check('case 20: sheriff environment program has no editable controls', program.controls === 0, program);
       await shot('builder-program.png', path.join(ROOT, 'artifacts', 'intent-room-sheriff'));
 
+      await setSelect('wb-scene', 'diner');
+      const dinerProgram = await cdp.eval(`(() => {
+        const box = document.getElementById('wb-program');
+        return {
+          exists: !!box,
+          text: box ? box.innerText : '',
+          headings: box ? Array.from(box.querySelectorAll('h2,h3')).map((e) => e.textContent.trim()) : [],
+          controls: box ? box.querySelectorAll('button,input,select,textarea,[contenteditable="true"]').length : -1
+        };
+      })()`);
+      check('case 20: Double R uses the same read-only Program inspector',
+        dinerProgram.exists && dinerProgram.text.includes('ENVIRONMENT PROGRAM · READ ONLY') &&
+        ['INTENT', 'VISUAL GOALS', 'ACTIVITIES', 'GROUPS', 'CONTRIBUTIONS', 'RELATIONSHIPS', 'AMBIENT RESIDUE'].every((heading) => dinerProgram.headings.includes(heading)) &&
+        dinerProgram.controls === 0, dinerProgram);
+      check('case 20: diner Program exposes repeated seating and two-branch circulation',
+        dinerProgram.text.includes('booth-seating') &&
+        /ANCHORS\s+booth-0, booth-1, booth-2, booth-3/.test(dinerProgram.text) &&
+        dinerProgram.text.includes('checker-circulation') && dinerProgram.text.includes('service-approach'), dinerProgram.text);
+      await shot('builder-program.png', path.join(ROOT, 'artifacts', 'intent-room-double-r'));
+
       await setSelect('wb-scene', 'sheriffs_station_exterior');
       const exteriorProgram = await cdp.eval(`(() => {
         const box = document.getElementById('wb-program');

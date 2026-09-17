@@ -104,10 +104,21 @@ function sheriffLayoutFixture() {
     targets: { entrance: {}, sheriffDesk: {} }
   };
 }
+function dinerLayoutFixture() {
+  return {
+    footprints: Object.fromEntries([
+      'counter', 'stool-0', 'stool-1', 'stool-2', 'stool-3', 'stool-4',
+      'booth-0', 'booth-1', 'booth-2', 'booth-3', 'wall-plant', 'coat-rack',
+      'specials', 'island-plant'
+    ].map(id => [id, {}])),
+    targets: { entrance: {}, 'service-approach': {} }
+  };
+}
 function mapsForCatalog(catalog, sheriffLayout) {
   const maps = {};
   catalog.locations.forEach((location) => location.environments.forEach((environment) => {
-    maps[environment.sceneId] = environment.sceneId === 'sheriff' ? { layout: sheriffLayout } : {};
+    maps[environment.sceneId] = environment.sceneId === 'sheriff' ? { layout: sheriffLayout } :
+      environment.sceneId === 'diner' ? { layout: dinerLayoutFixture() } : {};
   }));
   return maps;
 }
@@ -415,7 +426,7 @@ expectRejected(c => { c.locations[0].environments[0].sceneId = 'constructor'; },
 expectRejected(c => { c.locations[0].environments[0].sceneId = 'toString'; }, {});
 assert.doesNotThrow(() => isolated({
   double_r_exterior_prototype: {},
-  diner: {},
+  diner: { layout: dinerLayoutFixture() },
   town: {},
   sheriffs_station_exterior: {},
   sheriff: { layout: sheriffLayoutFixture() },
@@ -438,7 +449,7 @@ require('../js/location-connections.js'); require('../js/double-r-exterior-scene
 require('../js/sheriffs-station-art.js'); require('../js/sheriffs-station-exterior-art.js');
 require('../js/sheriffs-station-scene.js'); require('../js/sheriffs-station-exterior-scene.js');
 require('../js/environment-reactions.js');
-GAME.DoubleRExteriorScene.install();
+require('../js/double-r-location-production.js');
     // Registry must exist before the production installers, which source records from GAME.WorldData.
     require('../js/world-connections.gen.js');
    require('../js/sheriffs-station-production.js');
@@ -473,6 +484,8 @@ assert.equal(World.getEnvironment('sheriffs-station', 'exterior').sceneId, 'sher
 assert.equal(World.getEnvironment('sheriffs-station', 'interior').sceneId, 'sheriff');
 assert.strictEqual(GAME.Maps.sheriff.layout, GAME.SheriffsStationScene.layout,
   'installed Sheriff map exposes the native scene layout by reference');
+assert(GAME.Maps.diner.layout && GAME.Maps.diner.layout.footprints.counter,
+  'installed Double R map exposes footprint anchors derived from its interior model');
 assert.strictEqual(GAME.Maps.sheriff.layout.footprints, GAME.SheriffsStationScene.layout.footprints,
   'installed Sheriff map shares native footprint anchors');
 assert.strictEqual(GAME.Maps.sheriff.layout.targets, GAME.SheriffsStationScene.layout.targets,

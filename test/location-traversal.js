@@ -62,7 +62,7 @@ global.GAME.NarrativeProduction = {
   }
 };
 
-exterior.install();
+require(js('double-r-location-production.js'));
 require(js('sheriffs-station-art.js'));
 require(js('sheriffs-station-exterior-art.js'));
 require(js('sheriffs-station-scene.js'));

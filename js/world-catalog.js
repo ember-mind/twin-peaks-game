@@ -11,7 +11,50 @@
         id: 'double-r',
         environments: [
           { id: 'exterior', sceneId: 'double_r_exterior_prototype' },
-          { id: 'interior', sceneId: 'diner' }
+          { id: 'interior', sceneId: 'diner', program: {
+            intent: {
+              function: 'A working public diner for food service, eating, and conversation.',
+              playerExperience: 'Enter a warm, occupied room and read several social destinations without losing the service counter.',
+              tone: 'Familiar, hospitable, and actively used; composed rather than cluttered.'
+            },
+            visualGoals: [
+              { id: 'distributed-attention', aim: 'Counter and pie case orient the player while booths retain independent social pulls; no single isolated focal point.' },
+              { id: 'booth-rhythm', aim: 'Four red booth modules establish diner rhythm, with occupancy and table states supplying controlled variation.' },
+              { id: 'warm-continuity', aim: 'Local practical lights link counter service and seating without a room-wide glow.' },
+              { id: 'checker-circulation', aim: 'Checker floor keeps its diner identity and branching routes, but should not overpower small people and tables.' },
+              { id: 'island-break', aim: 'Plant and specials board interrupt rigid repetition while both routes around the center island stay legible.' }
+            ],
+            activities: [
+              { id: 'ordering', description: 'Choose food or coffee at the counter and specials board.' },
+              { id: 'serving', description: 'Prepare and hand over food and coffee across the counter.' },
+              { id: 'eating', description: 'Eat and drink at the booths or counter.' },
+              { id: 'conversation', description: 'Talk across tables, stools, and the service counter.' },
+              { id: 'staff-work', description: 'Keep the counter, cups, and service equipment in use.' },
+              { id: 'circulation', description: 'Move between entrance, booths, and counter by either side of the center island.' }
+            ],
+            groups: [
+              { id: 'service-counter', role: 'Shared service and orientation band', anchors: ['counter', 'stool-0', 'stool-1', 'stool-2', 'stool-3', 'stool-4'], activities: ['ordering', 'serving', 'eating', 'conversation', 'staff-work'], visual: 'Long, dense, warm horizontal mass with pale top, red face, lit pie case and equipment.' },
+              { id: 'booth-seating', role: 'Repeated social rooms within the room', anchors: ['booth-0', 'booth-1', 'booth-2', 'booth-3'], activities: ['eating', 'conversation'], visual: 'Four related red modules on both sides; table states and occupancy vary without dissolving rhythm.' },
+              { id: 'center-island', role: 'Small specials and organic break in circulation', anchors: ['specials', 'island-plant'], activities: ['ordering', 'circulation'], visual: 'One low sign and one green vertical silhouette divide the checker floor into two readable paths.' }
+            ],
+            contributions: [
+              { anchor: 'counter', contributesTo: ['function', 'composition', 'spatial_readability'], reason: 'Supports service and gives an arriving player a clear horizontal orientation landmark.' },
+              { anchor: 'booth-0', contributesTo: ['function', 'composition', 'atmosphere'], reason: 'One module of the repeated red seating rhythm that makes the room recognizably a diner.' },
+              { anchor: 'booth-1', contributesTo: ['function', 'composition', 'ambient_life'], reason: 'Continues the booth rhythm while its occupied table gives the seating a social scale.' },
+              { anchor: 'booth-3', contributesTo: ['composition', 'ambient_life'], reason: 'A cleared table varies the repeated module and suggests ordinary turnover without asserting a plot event.' },
+              { anchor: 'island-plant', contributesTo: ['composition', 'atmosphere', 'spatial_readability'], reason: 'Breaks the rigid counter-and-booth grid with an organic silhouette and separates two circulation branches.' },
+              { anchor: 'specials', contributesTo: ['function', 'world_building', 'composition'], reason: 'Advertises everyday food service and gives the center island a small authored vertical accent.' }
+            ],
+            relationships: [
+              { kind: 'NEAR', from: 'counter', to: 'stool-0', reason: 'Counter seating must remain next to the service surface.' },
+              { kind: 'REACHABLE', from: 'entrance', to: 'service-approach', reason: 'Both branches around the center island should still let a visitor approach service.' }
+            ],
+            residue: { ambient: [
+              { anchor: 'counter', detail: 'Cups, coffee equipment, pie case, and working service light', reason: 'Daily service remains visible even when named staff are absent.' },
+              { anchor: 'booth-0', detail: 'Menu, cup, and plate on a ready table', reason: 'Ordinary table use keeps repetition from becoming sterile.' },
+              { anchor: 'booth-3', detail: 'One recently cleared plate and folded napkin', reason: 'Routine turnover varies the seating without implying a canonical event.' }
+            ] }
+          } }
         ],
         connections: ['double-r-front-entrance', 'town-double-r-lot']
       },
