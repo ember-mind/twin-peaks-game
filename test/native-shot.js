@@ -48,6 +48,7 @@ let url = `http://127.0.0.1:${port}/test/retro-scene.html?map=${map}&x=${x}&y=${
 if (dialogue) url += `&dialogue=${dialogue}`;
 if (silhouette) url += `&silhouette=${silhouette}`;
 if (narrative) url += `&narrative=${narrative}`;
+if (args.get('diner-art')) url += `&dinerArt=${encodeURIComponent(args.get('diner-art'))}`;
 if (args.get('nstate')) url += `&nstate=${encodeURIComponent(args.get('nstate'))}`;
 
 // Cattura + gate anti-frame-bianco. La pipeline headless ogni tanto consegna
