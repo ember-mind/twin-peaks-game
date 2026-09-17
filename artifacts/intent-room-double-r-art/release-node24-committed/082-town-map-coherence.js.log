@@ -1,0 +1,86 @@
+ok - town reale resta 56x36 rettangolare
+ok - piazza u e calpestabile
+ok - zebra est-ovest : e calpestabile
+ok - radura sbocca sul margine sud calpestabile, non sulla strada
+ok - coordinate porte storiche invariate
+ok - approccio authored subito sotto porta 9,6
+ok - approccio authored subito sotto porta 23,6
+ok - approccio authored subito sotto porta 42,6
+ok - approccio authored subito sotto porta 12,20
+ok - approccio authored subito sotto porta 42,20
+ok - approccio authored subito sotto porta 47,28
+ok - porta raggiungibile dalla piazza 9,6
+ok - porta raggiungibile dalla piazza 23,6
+ok - porta raggiungibile dalla piazza 42,6
+ok - porta raggiungibile dalla piazza 12,20
+ok - porta raggiungibile dalla piazza 42,20
+ok - porta raggiungibile dalla piazza 47,28
+ok - porta raggiungibile dalla piazza 55,14
+ok - porta raggiungibile dalla piazza 55,15
+ok - interact presente nel distretto: 30,30
+ok - interact presente nel distretto: 15,28
+ok - interact presente nel distretto: 50,22
+ok - strada e attraversamenti formano una componente unica
+ok - nessun tile strada isolato
+ok - asse est-ovest continuo e largo due tile
+ok - asse nord-sud attraversa piazza e bordo sud, largo tre tile
+ok - rete primaria collega porta 9,6
+ok - rete primaria collega porta 23,6
+ok - rete primaria collega porta 42,6
+ok - rete primaria collega porta 12,20
+ok - rete primaria collega porta 42,20
+ok - rete primaria collega porta 47,28
+ok - rete primaria collega porta 55,14
+ok - rete primaria collega porta 55,15
+ok - ghiaia limitata a corte civica 6x4 e ingresso visibile
+ok - ogni prop urbano dichiara sottofondo
+ok - le tre botteghe dichiarano sottofondo su footprint 3x3, 2x3 e 3x2
+ok - layer sottofondo non contiene coordinate stale
+ok - frame piazza contiene anchor u
+ok - frame piazza contiene anchor r
+ok - frame piazza contiene anchor :
+ok - frame piazza contiene anchor =
+ok - frame piazza contiene anchor S
+ok - frame piazza contiene anchor B
+ok - frame piazza contiene anchor A
+ok - frame piazza contiene anchor H
+ok - frame piazza contiene anchor E
+ok - frame piazza contiene anchor L
+ok - asse rosa domina piazza e uscita sud includendo la zebra semantica
+ok - spawn piazza sulla bocca 3-wide e adiacente alla strada
+ok - corte 5x4 continua, props interni sullo stesso sottofondo
+ok - corte civica ha bocca 3-wide diretta dalla strada e solo bordo est
+ok - cartello visibile, interazione e landmark coincidono a 30,30
+ok - passeggiata civica larga tre righe su entrambi i lati della strada
+ok - crosswalk 3-wide allineati solo a hotel, ospedale e Palmer
+ok - zebra E-O 3x2 attraversa la strada verticale davanti alla corte
+ok - footprint 4 entro 6x4 con porta invariata
+ok - footprint 5 entro 6x4 con porta invariata
+ok - footprint 3 entro 4x3 con porta invariata
+ok - footprint 1 entro 5x4 con porta invariata
+ok - footprint 2 entro 6x3 con porta invariata
+ok - footprint 6 entro 6x4 con porta invariata
+ok - Bookhouse e Horne's 3x3 sono autonomi e sfalsati verticalmente
+ok - vicolo largo due tile fra edifici sfalsati, calpestabile e connesso
+ok - camera street x32,y5 in vicolo reale e connessa
+ok - frame street contiene entrambi gli edifici interi
+ok - frame street contiene esattamente due componenti edificio, nessuna terza slice
+ok - frame street usa meno del 40% prato
+ok - nessuna massa blu o rail residua accanto alla coppia street
+ok - approccio hotel largo tre tile dalla porta alla strada
+ok - approcci ospedale e Palmer larghi tre tile fino alla strada
+ok - corsia nord 36x3 continua: solo auto V su fondo p e riga interna libera
+ok - raccordo hotel-sheriff largo tre tile e svolta 7x3
+ok - diner e Roadhouse collegati da corridoi e forecourt larghi almeno tre tile
+ok - botteghe formano tre volumi fisicamente diversi fuori dal frame street
+ok - carrier frame @16,9 contiene landmark intero con tetto
+ok - carrier frame @20,9 contiene landmark intero con tetto
+ok - carrier frame @47,13 contiene landmark intero con tetto
+ok - nessun cambio materiale tramite rettangolo di coordinate
+ok - strada, zebra orientata e piazza hanno renderer distinti
+ok - marciapiede usa autotile orizzontale verticale e giunzioni
+ok - Horne's usa storefront authored dedicato
+ok - bottega/casa compatta ha renderer distinto
+ok - town estende terreno crema R69 a prato, sentieri, strada, marciapiedi e sotto-alberi
+
+TOWN-MAP-COHERENCE-PASS 84/84

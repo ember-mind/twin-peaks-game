@@ -1,0 +1,1 @@
+APPLY-CHANGESET-PASS 14 checks — dry-run version bump, add/remove, atomic commit+audit sidecar, frozen reload, loud rejection, cast view, idempotence

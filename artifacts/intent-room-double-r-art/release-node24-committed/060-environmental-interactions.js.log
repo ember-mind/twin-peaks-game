@@ -1,0 +1,103 @@
+# registro
+  ok - archetipo solido "T" registrato
+  ok - archetipo solido "S" registrato
+  ok - archetipo solido "w" registrato
+  ok - archetipo solido "0" registrato
+  ok - archetipo solido "1" registrato
+  ok - archetipo solido "2" registrato
+  ok - archetipo solido "3" registrato
+  ok - archetipo solido "4" registrato
+  ok - archetipo solido "5" registrato
+  ok - archetipo solido "6" registrato
+  ok - archetipo solido "7" registrato
+  ok - archetipo solido "8" registrato
+  ok - archetipo solido "9" registrato
+  ok - archetipo solido "i" registrato
+  ok - archetipo solido "C" registrato
+  ok - archetipo solido "t" registrato
+  ok - archetipo solido "h" registrato
+  ok - archetipo solido "K" registrato
+  ok - archetipo solido "U" registrato
+  ok - archetipo solido "Y" registrato
+  ok - archetipo solido "R" registrato
+  ok - archetipo solido "M" registrato
+  ok - archetipo solido "v" registrato
+  ok - archetipo solido "G" registrato
+  ok - archetipo solido "L" registrato
+  ok - archetipo solido "P" registrato
+  ok - archetipo solido "B" registrato
+  ok - archetipo solido "F" registrato
+  ok - archetipo solido "A" registrato
+  ok - archetipo solido "H" registrato
+  ok - archetipo solido "E" registrato
+  ok - archetipo solido "n" registrato
+  ok - archetipo solido "q" registrato
+  ok - archetipo solido "V" registrato
+  ok - archetipo solido "J" registrato
+  ok - terreno passabile resta muto
+  ok - spazio fuori mappa resta muto
+  ok - transenna dinamica non usa fallback ambientale
+  ok - 84 dialoghi COOPER unici, <=129, senza effetti
+  ok - cadenza variata: 60 righe a una frase, 24 a due
+  ok - diversità R19K: ; 12, negazioni 7, astratti 1, cluster 2-frasi 10/30
+# copertura fisica
+  ok - tile "T" affrontabile coperta
+  ok - tile "S" affrontabile coperta
+  ok - tile "w" affrontabile coperta
+  ok - tile "0" affrontabile coperta
+  ok - tile "1" affrontabile coperta
+  ok - tile "2" affrontabile coperta
+  ok - tile "3" affrontabile coperta
+  ok - tile "4" affrontabile coperta
+  ok - tile "5" affrontabile coperta
+  ok - tile "6" affrontabile coperta
+  ok - tile "7" affrontabile coperta
+  ok - tile "8" affrontabile coperta
+  ok - tile "9" affrontabile coperta
+  ok - tile "i" affrontabile coperta
+  ok - tile "C" affrontabile coperta
+  ok - tile "t" affrontabile coperta
+  ok - tile "h" affrontabile coperta
+  ok - tile "K" affrontabile coperta
+  ok - tile "U" affrontabile coperta
+  ok - tile "Y" affrontabile coperta
+  ok - tile "R" affrontabile coperta
+  ok - tile "M" affrontabile coperta
+  ok - tile "G" affrontabile coperta
+  ok - tile "L" affrontabile coperta
+  ok - tile "P" affrontabile coperta
+  ok - tile "B" affrontabile coperta
+  ok - tile "F" affrontabile coperta
+  ok - tile "A" affrontabile coperta
+  ok - tile "H" affrontabile coperta
+  ok - tile "E" affrontabile coperta
+  ok - tile "n" affrontabile coperta
+  ok - tile "q" affrontabile coperta
+  ok - tile "V" affrontabile coperta
+  ok - tile "J" affrontabile coperta
+  ok - 1070/1070 tile solide affrontabili risolte
+  ok - scope verificato su ogni coordinata; linee condivise prive di geometria non garantita
+  ok - override di stato sceglie osservazione diversa
+  ok - scope override di stato verificato
+  ok - variante lapidi fondata su flag leland_morto
+  ok - variante vagone fondata su indizio anello
+  ok - variante letti fondata su evidence T1_RONETTE_BOB
+  ok - evidence T1_RONETTE_BOB non si estende al letto di Gerard
+  ok - override per coordinata vince
+  ok - override mappa+tile vince
+  ok - muro Room 315 non risponde più con testo evergreen
+  ok - casa Palmer e Horne's hanno archetipi distinti
+  ok - tile C distingue palco da bancone Roadhouse
+# Invio reale
+  ok - Invio town:T apre env_town_evergreen senza mutare stato
+  ok - Invio town:0 apre env_mixed_use_shop senza mutare stato
+  ok - Invio town:1 apre env_sheriff_building senza mutare stato
+  ok - Invio town:7 apre env_bookhouse_building senza mutare stato
+  ok - Invio town:9 apre env_horne_department_store senza mutare stato
+  ok - Invio town:B apre env_bench senza mutare stato
+  ok - Invio diner:t apre env_diner_table senza mutare stato
+  ok - Invio redroom:R apre env_red_curtain senza mutare stato
+  ok - oggetto esplicito precede fallback per coordinata
+  ok - NPC precede fallback ambientale
+
+98 controlli ambientali superati.
