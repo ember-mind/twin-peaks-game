@@ -32,7 +32,7 @@ const MIME = {
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function parse(argv) {
-  const out = { root: DEFAULT_ROOT, output: DEFAULT_OUTPUT, durationMs: 30000, sampleMs: 1000, chrome: null, noVideo: false, canonicalOnly: false, rebuildVideo: null };
+  const out = { root: DEFAULT_ROOT, output: DEFAULT_OUTPUT, durationMs: 30000, sampleMs: 1000, chrome: null, noVideo: false, canonicalOnly: false, rebuildVideo: null, seed: null };
   for (const arg of argv) {
     if (arg.startsWith('--root=')) out.root = path.resolve(arg.slice(7));
     else if (arg.startsWith('--output=')) out.output = path.resolve(arg.slice(9));
@@ -42,8 +42,9 @@ function parse(argv) {
     else if (arg === '--no-video') out.noVideo = true;
     else if (arg === '--canonical-only') out.canonicalOnly = true;
     else if (arg.startsWith('--rebuild-video=')) out.rebuildVideo = path.resolve(arg.slice(16));
+    else if (arg.startsWith('--seed=')) out.seed = Number(arg.slice(7));
     else if (arg === '--help' || arg === '-h') {
-      console.log('node test/double-r-real-cdp-capture.js [--root=DIR] [--output=DIR] [--duration-ms=30000] [--sample-ms=1000] [--chrome=PATH] [--no-video] [--canonical-only]');
+      console.log('node test/double-r-real-cdp-capture.js [--root=DIR] [--output=DIR] [--duration-ms=30000] [--sample-ms=1000] [--seed=UINT32] [--chrome=PATH] [--no-video] [--canonical-only] [--rebuild-video=DIR]');
       process.exit(0);
     } else throw new Error(`unknown option: ${arg}`);
   }
@@ -52,6 +53,9 @@ function parse(argv) {
   }
   if (!Number.isInteger(out.sampleMs) || out.sampleMs < 250 || out.sampleMs > 5000) {
     throw new Error('--sample-ms must be an integer in 250..5000');
+  }
+  if (out.seed !== null && (!Number.isInteger(out.seed) || out.seed < 0 || out.seed > 0xffffffff)) {
+    throw new Error('--seed must be a uint32');
   }
   return out;
 }
@@ -252,6 +256,7 @@ async function main() {
     format: 'double-r-real-cdp-evidence.v2', status: 'running', source: {},
     pages: { route: ROUTE_PAGE, canonical: CANONICAL_PAGE },
     viewport: { css: [256, 192], native: [256, 192], deviceScaleFactor: 1 },
+    seed: options.seed,
     chromeFlags: ['--headless=new', '--mute-audio', '--enable-unsafe-swiftshader', '--use-angle=swiftshader',
       '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows'],
     stationary: { durationRequestedMs: options.durationMs, sampleMs: options.sampleMs, frames: [], uniqueFrameCount: 0 },
@@ -408,6 +413,11 @@ async function main() {
       s.ready && s.mapId === 'diner' && s.mode === 'play' && s.canvas &&
       s.canvas.width === 256 && s.canvas.height === 192);
     if (!canonicalState.npcs.length) throw new Error('canonical retro-scene diner has no Cast Presence bodies');
+    if (options.seed !== null) await cdp.evaluate(`(() => {
+      GAME.AmbientLife.reset(${options.seed});
+      GAME.CharacterActivity.reset(${options.seed});
+      return true;
+    })()`);
     await installRafObserver();
     await sleep(750);
     canonicalState = await readCanonicalState();
