@@ -58,6 +58,34 @@
     else console.log('   ok - ' + name);
     }
 
+  function footprintsAreAdjacent(footprints, from, to) {
+    var left = footprints && footprints[from], right = footprints && footprints[to];
+    if (!Array.isArray(left) || !Array.isArray(right)) return false;
+    for (var i = 0; i < left.length; i++) {
+      for (var j = 0; j < right.length; j++) {
+        if (Math.abs(left[i][0] - right[j][0]) + Math.abs(left[i][1] - right[j][1]) === 1) return true;
+      }
+    }
+    return false;
+  }
+
+  function hasWalkablePath(mapId, from, to) {
+    if (!from || !to || !G.Maps || typeof G.Maps.isSolid !== 'function') return false;
+    var queue = [{ x: from.x, y: from.y }], seen = {};
+    seen[from.x + ',' + from.y] = true;
+    for (var i = 0; i < queue.length; i++) {
+      var current = queue[i];
+      if (current.x === to.x && current.y === to.y) return true;
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (step) {
+        var x = current.x + step[0], y = current.y + step[1], key = x + ',' + y;
+        if (seen[key] || G.Maps.isSolid(mapId, x, y)) return;
+        seen[key] = true;
+        queue.push({ x: x, y: y });
+      });
+    }
+    return false;
+  }
+
   var source = WB.collectWorldSource(G);
   var snap = WB.buildWorldSnapshot(source);
 
@@ -87,6 +115,13 @@
     Object.isFrozen(sheriffSnapshotProgram) && Object.isFrozen(sheriffSnapshotProgram.intent) &&
     Object.isFrozen(sheriffSnapshotProgram.visualGoals) && Object.isFrozen(sheriffSnapshotProgram.activities) &&
     Object.isFrozen(sheriffSnapshotProgram.groups));
+  ok('Builder owns and freezes nested contribution and relationship data',
+    !!sheriffProgram && !!sheriffSnapshotProgram &&
+    sheriffSnapshotProgram.contributions !== sheriffProgram.contributions &&
+    sheriffSnapshotProgram.contributions[0].contributesTo !== sheriffProgram.contributions[0].contributesTo &&
+    sheriffSnapshotProgram.relationships !== sheriffProgram.relationships &&
+    Object.isFrozen(sheriffSnapshotProgram.contributions[0].contributesTo) &&
+    Object.isFrozen(sheriffSnapshotProgram.relationships[0]));
   var sheriffFootprints = G.SheriffsStationScene && G.SheriffsStationScene.layout && G.SheriffsStationScene.layout.footprints;
   var sheriffAnchorsResolve = !!sheriffSnapshotProgram && !!sheriffFootprints && sheriffSnapshotProgram.groups.every(function (group) {
     return group.anchors.every(function (anchor) {
@@ -94,6 +129,29 @@
     });
   });
   ok('Sheriff program anchors resolve against SheriffsStationScene.layout.footprints', sheriffAnchorsResolve);
+  var contributionCategories = ['function', 'gameplay', 'narrative', 'character', 'atmosphere', 'composition', 'spatial_readability', 'world_building', 'ambient_life'];
+  var sheriffContributions = sheriffSnapshotProgram && sheriffSnapshotProgram.contributions || [];
+  ok('Sheriff program has authored contributions', sheriffContributions.length > 0);
+  ok('Sheriff contribution anchors resolve against station footprints', sheriffContributions.length > 0 && sheriffContributions.every(function (contribution) {
+    return Object.prototype.hasOwnProperty.call(sheriffFootprints || {}, contribution.anchor) &&
+      Array.isArray(contribution.contributesTo) && contribution.contributesTo.length > 0 &&
+      contribution.contributesTo.every(function (category) { return contributionCategories.indexOf(category) !== -1; });
+  }));
+  var sheriffRelationships = sheriffSnapshotProgram && sheriffSnapshotProgram.relationships || [];
+  var nearRelationships = sheriffRelationships.filter(function (relationship) { return relationship.kind === 'NEAR'; });
+  ok('Sheriff NEAR relationships use tile-adjacent footprints', nearRelationships.length > 0 && nearRelationships.every(function (relationship) {
+    return footprintsAreAdjacent(sheriffFootprints, relationship.from, relationship.to);
+  }));
+  var stationTargets = G.SheriffsStationScene && G.SheriffsStationScene.layout && G.SheriffsStationScene.layout.targets;
+  var clearRelationship = sheriffRelationships.filter(function (relationship) {
+    return relationship.kind === 'REACHABLE' &&
+      ((relationship.from === 'entrance' && relationship.to === 'sheriffDesk') ||
+       (relationship.from === 'sheriffDesk' && relationship.to === 'entrance'));
+  })[0];
+  ok('Sheriff program declares an entrance-to-sheriffDesk REACHABLE relationship', !!clearRelationship);
+  ok('Sheriff REACHABLE endpoints resolve and have a walkable map path',
+    !!clearRelationship && !!stationTargets && !!stationTargets[clearRelationship.from] && !!stationTargets[clearRelationship.to] &&
+    hasWalkablePath('sheriff', stationTargets[clearRelationship.from], stationTargets[clearRelationship.to]));
 
    // scene table only contains real scenes (helper fns filtered out)
   var sceneKeys = Object.keys(snap.scenes);
@@ -310,6 +368,14 @@
          ok('model scene/location counts match the snapshot over the real catalog',
            adapted.model.sceneCount === snap1.sceneCount && adapted.model.locationCount === 12,
             'model=' + JSON.stringify([adapted.model.sceneCount, adapted.model.locationCount]));
+      var sheriffModelLocation = adapted.model && adapted.model.locationsById && adapted.model.locationsById['sheriffs-station'];
+      var sheriffModelEnvironment = sheriffModelLocation && sheriffModelLocation.environments.filter(function (e) {
+        return e.sceneId === 'sheriff';
+      })[0];
+      ok('Builder model retains Sheriff program metadata for the inspector',
+        !!sheriffModelEnvironment && !!sheriffModelEnvironment.program &&
+        JSON.stringify(sheriffModelEnvironment.program) === JSON.stringify(sheriffSnapshotProgram) &&
+        Object.isFrozen(sheriffModelEnvironment.program));
 
             // The model's connection index is a bijection with the authored records (Issue 6/7 spirit).
       var modelConnIds = Object.keys(adapted.model.connectionsById).sort();

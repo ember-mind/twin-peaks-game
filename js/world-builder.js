@@ -653,6 +653,18 @@
         row(item, 'ACTIVITIES', group.activities.join(', '));
         row(item, 'VISUAL', group.visual);
       });
+      if (program.contributions && program.contributions.length) {
+        programBox.appendChild(el('h3', null, 'CONTRIBUTIONS'));
+        program.contributions.forEach(function (item) {
+          row(programBox, item.anchor + ' · ' + item.contributesTo.join(', '), item.reason);
+        });
+      }
+      if (program.relationships && program.relationships.length) {
+        programBox.appendChild(el('h3', null, 'RELATIONSHIPS'));
+        program.relationships.forEach(function (item) {
+          row(programBox, item.from + ' ' + item.kind + ' ' + item.to, item.reason);
+        });
+      }
     }
 
     function renderCreate() {

@@ -76,17 +76,13 @@
     for (col=1;col<14;col++) R(16+col*16,48,1,128,p.floorDark);
     for (row=1;row<8;row++) R(16,48+row*16,224,1,p.floorDark);
 
-    /* A bordered sage area rug anchors the otherwise empty central aisle.
-     * It stays clear of the entrance mat (y165+) and every prop shadow. */
-    R(92,118,76,44,p.ink);
-    R(94,120,72,40,p.sageDark);
-    R(96,122,68,36,p.sageDeep);
-    R(100,126,60,28,p.sageDark);
-    R(100,126,60,2,p.sageHi); R(100,152,60,2,p.sageHi);
-    R(100,126,2,28,p.sageHi); R(158,126,2,28,p.sageHi);
-    R(118,134,24,2,p.sageHi); R(118,142,24,2,p.sageHi);
-    R(128,128,2,22,p.sageDeep);
-    R(92,118,76,1,p.shadowMid); R(92,161,76,1,p.shadowMid);
+    /* Muted area rug: texture for the aisle, not a second focal point. */
+    R(101,123,58,35,p.floorDark);
+    R(103,125,54,31,p.sageMid);
+    R(105,127,50,27,p.sage);
+    R(105,127,50,1,p.sageHi); R(105,153,50,1,p.sageHi);
+    R(105,127,1,27,p.sageHi); R(154,127,1,27,p.sageHi);
+    R(119,135,22,1,p.sageMid); R(119,143,22,1,p.sageMid);
 
     /* Fluorescent spill stays hard stepped and local to the back work zones. */
     R(20,49,42,3,p.floorLight); R(20,52,34,4,p.floorHi); R(20,56,19,3,p.floorMid);
@@ -98,8 +94,9 @@
     R(224,119,8,1,p.floorDark); R(228,120,3,1,p.floorMid);
     R(70,169,9,1,p.floorDark); R(74,168,3,1,p.floorMid);
 
-    /* A restrained pool of reflected task light below the sheriff desk. */
-    R(142,79,22,3,'#a69f82'); R(147,82,18,3,'#aaa185'); R(154,85,10,2,'#9f9c85');
+    /* Stepped task-lamp reflection ties the desk to its nearby floor. */
+    R(134,79,31,2,'#b1a381'); R(140,81,27,3,'#b4a580');
+    R(146,84,21,3,'#afa283'); R(153,87,13,2,'#a89c81');
   }
 
   function drawArchitecture(R,ctx,cx,cy,p) {

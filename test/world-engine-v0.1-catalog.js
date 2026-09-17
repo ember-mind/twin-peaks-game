@@ -54,6 +54,26 @@ function programFixture() {
     ]
   };
 }
+function m2ProgramFixture() {
+  const program = programFixture();
+  program.contributions = [
+    {
+      anchor: 'front-desk',
+      contributesTo: ['function', 'gameplay', 'narrative', 'character', 'atmosphere', 'composition', 'spatial_readability', 'world_building', 'ambient_life'],
+      reason: 'The threshold makes the station legible as an active workplace.'
+    },
+    {
+      anchor: 'evidence-wall',
+      contributesTo: ['narrative', 'world_building'],
+      reason: 'The investigative anchor supports clue review and local history.'
+    }
+  ];
+  program.relationships = [
+    { kind: 'NEAR', from: 'front-desk', to: 'evidence-wall', reason: 'Public intake stays close to the working investigation.' },
+    { kind: 'REACHABLE', from: 'entrance', to: 'front-desk', reason: 'Arrival retains a readable path into the station.' }
+  ];
+  return program;
+}
 function firstEnvironment(catalog) {
   const location = catalog.locations.find((l) => l.id === 'sheriffs-station') || catalog.locations[0];
   const environment = location && location.environments[0];
@@ -78,11 +98,23 @@ function assertFrozenProgram(program, label) {
     assert(Object.isFrozen(group.anchors), label + ' group anchors frozen');
     assert(Object.isFrozen(group.activities), label + ' group activities frozen');
   });
+  if (Object.prototype.hasOwnProperty.call(program, 'contributions')) {
+    assert(Object.isFrozen(program.contributions), label + ' contributions frozen');
+    program.contributions.forEach((contribution) => {
+      assert(Object.isFrozen(contribution), label + ' contribution frozen');
+      assert(Object.isFrozen(contribution.contributesTo), label + ' contribution categories frozen');
+    });
+  }
+  if (Object.prototype.hasOwnProperty.call(program, 'relationships')) {
+    assert(Object.isFrozen(program.relationships), label + ' relationships frozen');
+    program.relationships.forEach((relationship) => assert(Object.isFrozen(relationship), label + ' relationship frozen'));
+  }
 }
-function expectRejectedProgram(mutator, label) {
+function expectRejectedProgram(mutator, label, m2) {
   const context = isolated();
   const fixture = validCatalog();
   const target = attachProgram(fixture);
+  if (m2) target.environment.program = m2ProgramFixture();
   mutator(target.environment.program);
   assert.throws(() => context.GAME.World.register(fixture), label);
   assert.equal(context.GAME.World.catalog, undefined, label + ': rejected registration leaves no catalog');
@@ -171,6 +203,54 @@ expectRejectedProgram((p) => { p.activities.push({ id: 'intake', description: 'd
 expectRejectedProgram((p) => { p.groups.push({ id: 'station-team', role: 'duplicate id', anchors: [], activities: [], visual: 'duplicate id' }); }, 'program group ids must be unique');
 expectRejectedProgram((p) => { p.groups[0].activities = ['missing-activity']; }, 'program group activity references must resolve');
 expectRejectedProgram((p) => { p.unexpected = 'must not be silently dropped'; }, 'program unknown fields must be rejected');
+
+// M2 optional metadata keeps the same immutable boundary and accepts only the published semantic vocabulary.
+{
+  const World = isolated().GAME.World;
+  const fixture = validCatalog();
+  const target = firstEnvironment(fixture);
+  target.environment.program = m2ProgramFixture();
+  const authoredProgram = target.environment.program;
+  const registered = World.register(fixture);
+  const registeredProgram = World.getEnvironment(target.location.id, target.environment.id).program;
+  assert.deepEqual(JSON.parse(JSON.stringify(registeredProgram)), authoredProgram, 'M2 program metadata survives registration');
+  assert.notStrictEqual(registeredProgram, authoredProgram, 'M2 program is cloned');
+  assert.notStrictEqual(registeredProgram.contributions, authoredProgram.contributions, 'contributions are cloned');
+  assert.notStrictEqual(registeredProgram.contributions[0].contributesTo, authoredProgram.contributions[0].contributesTo, 'contribution categories are cloned');
+  assert.notStrictEqual(registeredProgram.relationships, authoredProgram.relationships, 'relationships are cloned');
+  assertFrozenProgram(registeredProgram, 'registered M2 program');
+  authoredProgram.contributions[0].reason = 'mutated after register';
+  authoredProgram.contributions[0].contributesTo[0] = 'mutated after register';
+  authoredProgram.relationships[0].reason = 'mutated after register';
+  assert.equal(registeredProgram.contributions[0].reason, 'The threshold makes the station legible as an active workplace.', 'contribution reason is isolated from source mutation');
+  assert.equal(registeredProgram.contributions[0].contributesTo[0], 'function', 'contribution categories are isolated from source mutation');
+  assert.equal(registeredProgram.relationships[0].reason, 'Public intake stays close to the working investigation.', 'relationship reason is isolated from source mutation');
+  assert.strictEqual(registered, World.catalog, 'M2 registration returns the stored catalog');
+}
+
+// M2 optional fields and validation failures remain isolated from the one-shot registration state.
+{
+  const World = isolated().GAME.World;
+  const fixture = validCatalog();
+  const target = firstEnvironment(fixture);
+  if (target.environment.program) {
+    delete target.environment.program.contributions;
+    delete target.environment.program.relationships;
+  }
+  World.register(fixture);
+  const program = World.getEnvironment(target.location.id, target.environment.id).program;
+  assert.equal(program && program.contributions, undefined, 'program contributions remain optional');
+  assert.equal(program && program.relationships, undefined, 'program relationships remain optional');
+}
+expectRejectedProgram((p) => { p.contributions = {}; }, 'program contributions must be an array', true);
+expectRejectedProgram((p) => { p.contributions[0].contributesTo = []; }, 'contribution categories must be non-empty', true);
+expectRejectedProgram((p) => { p.contributions[0].contributesTo[0] = 'unknown-category'; }, 'unknown contribution category must be rejected', true);
+expectRejectedProgram((p) => { p.contributions[0].anchor = ''; }, 'contribution anchor must be non-empty', true);
+expectRejectedProgram((p) => { p.relationships = {}; }, 'program relationships must be an array', true);
+expectRejectedProgram((p) => { p.relationships[0].kind = 'TOUCHES'; }, 'relationship kind must be recognized', true);
+expectRejectedProgram((p) => { p.relationships[0].from = ''; }, 'relationship from must be non-empty', true);
+expectRejectedProgram((p) => { p.relationships[0].to = p.relationships[0].from; }, 'relationship must not reference itself', true);
+expectRejectedProgram((p) => { p.relationships[0].unexpected = 'must not be silently dropped'; }, 'relationship unknown fields must be rejected', true);
 
 {
   const World = isolated().GAME.World;

@@ -25,3 +25,14 @@ Capture: [native before](../artifacts/intent-room-sheriff/before-native.png), `t
 | Asymmetry should feel controlled. | Left reception/files and right paired desks balance without exact mirror. | MATCH | Strong large-scale arrangement, though right desks repeat closely. |
 
 M1 metadata records observed design aims. It does not claim these aims already succeed.
+
+## M2 composition and spatial claims
+
+The Program now gives selected furniture an optional contribution: function, atmosphere, composition, and other reasons can coexist. This is not a prop inventory. Relationships are limited to `NEAR` (two footprint masses touch within one tile) and `REACHABLE` (a walkable route exists between existing scene targets). No orientation, direct corridor, or exact prop positions are claimed. Generic registration checks shape; pilot tests resolve Sheriff anchors against canonical scene layout.
+
+| M1 mismatch | Smallest change | Observed after |
+| --- | --- | --- |
+| Rug competed with primary work desk. | Shrink and mute only the native rug's value blocks. | Center reads quieter; desk/reception remain visually distinct. |
+| Warm task light was weak against broad cool floor. | Expand the desk lamp's stepped reflection by a few native pixels. | Warm accent reads locally, without a global light wash. |
+
+Before: [native frame](../artifacts/intent-room-sheriff/before-native.png). After: [M2 native frame](../artifacts/intent-room-sheriff/after-m2-native.png). Both use the same scene, spawn `(7,10)`, facing up, narrative population enabled. Furniture footprints, map rows, door registry, actor windows, and collisions are unchanged. The change is authored visual weighting, not generated clutter.

@@ -50,6 +50,18 @@
               { id: 'reception', role: 'Public-to-staff threshold', anchors: ['reception', 'receptionReturn'], activities: ['reception', 'conversation'], visual: 'Grounded oak counter; readable from entrance.' },
               { id: 'waiting', role: 'Quiet pause near arrival', anchors: ['bench'], activities: ['waiting'], visual: 'Low-density, simple silhouette; does not block aisle.' },
               { id: 'shared-work', role: 'Secondary everyday work', anchors: ['rightDeskNorth', 'rightChairNorth', 'rightDeskSouth', 'rightChairSouth'], activities: ['case-work'], visual: 'Repeated desks with lighter emphasis than sheriff work.' }
+            ],
+            contributions: [
+              { anchor: 'sheriffDesk', contributesTo: ['function', 'atmosphere', 'composition'], reason: 'Holds active case work and the room’s warm, human focal light.' },
+              { anchor: 'files', contributesTo: ['function', 'composition', 'world_building'], reason: 'Makes records work credible and gives the left wall a tall institutional mass.' },
+              { anchor: 'reception', contributesTo: ['function', 'spatial_readability'], reason: 'Marks the public-to-staff boundary without blocking the entry route.' },
+              { anchor: 'bench', contributesTo: ['function', 'composition'], reason: 'Makes waiting legible and keeps this low corner visually occupied.' },
+              { anchor: 'rightDeskNorth', contributesTo: ['function', 'composition'], reason: 'Suggests shared routine work and balances the heavy reception side.' }
+            ],
+            relationships: [
+              { kind: 'NEAR', from: 'sheriffChair', to: 'sheriffDesk', reason: 'A working seat belongs beside the primary desk.' },
+              { kind: 'NEAR', from: 'receptionReturn', to: 'reception', reason: 'Return and counter read as one public threshold.' },
+              { kind: 'REACHABLE', from: 'entrance', to: 'sheriffDesk', reason: 'Visitor can move from front door toward the primary work area.' }
             ]
           } }
         ],

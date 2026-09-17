@@ -51,7 +51,7 @@
   /* Authoring metadata only. No spatial or actor state is owned here. */
   function copyProgram(source, label) {
     requireRecord(source, label);
-    requireKeys(source, ['intent', 'visualGoals', 'activities', 'groups'], label);
+    requireKeys(source, ['intent', 'visualGoals', 'activities', 'groups', 'contributions', 'relationships'], label);
     var intent = requireRecord(source.intent, label + '.intent');
     requireKeys(intent, ['function', 'playerExperience', 'tone'], label + '.intent');
     var activityIds = Object.create(null);
@@ -94,7 +94,7 @@
         visual: requireId(group.visual, at + '.visual')
       });
     });
-    return Object.freeze({
+    var copy = {
       intent: Object.freeze({
         function: requireId(intent.function, label + '.intent.function'),
         playerExperience: requireId(intent.playerExperience, label + '.intent.playerExperience'),
@@ -103,7 +103,41 @@
       visualGoals: Object.freeze(goals),
       activities: Object.freeze(activities),
       groups: Object.freeze(groups)
-    });
+    };
+    if (Object.prototype.hasOwnProperty.call(source, 'contributions')) {
+      var categories = ['function', 'gameplay', 'narrative', 'character', 'atmosphere', 'composition', 'spatial_readability', 'world_building', 'ambient_life'];
+      copy.contributions = Object.freeze(requireList(source.contributions, label + '.contributions').map(function (item, index) {
+        var at = label + '.contributions[' + index + ']';
+        requireRecord(item, at);
+        requireKeys(item, ['anchor', 'contributesTo', 'reason'], at);
+        var kinds = copyStrings(item.contributesTo, at + '.contributesTo');
+        if (!kinds.length) fail(at + '.contributesTo must not be empty');
+        kinds.forEach(function (kind) { if (categories.indexOf(kind) === -1) fail(at + ' has unknown contribution "' + kind + '"'); });
+        return Object.freeze({
+          anchor: requireId(item.anchor, at + '.anchor'),
+          contributesTo: kinds,
+          reason: requireId(item.reason, at + '.reason')
+        });
+      }));
+    }
+    if (Object.prototype.hasOwnProperty.call(source, 'relationships')) {
+      copy.relationships = Object.freeze(requireList(source.relationships, label + '.relationships').map(function (item, index) {
+        var at = label + '.relationships[' + index + ']';
+        requireRecord(item, at);
+        requireKeys(item, ['kind', 'from', 'to', 'reason'], at);
+        if (item.kind !== 'NEAR' && item.kind !== 'REACHABLE') fail(at + '.kind must be NEAR or REACHABLE');
+        var from = requireId(item.from, at + '.from');
+        var to = requireId(item.to, at + '.to');
+        if (from === to) fail(at + ' must name two different anchors');
+        return Object.freeze({
+          kind: item.kind,
+          from: from,
+          to: to,
+          reason: requireId(item.reason, at + '.reason')
+        });
+      }));
+    }
+    return Object.freeze(copy);
   }
 
   function prepare(source) {
