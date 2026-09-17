@@ -185,7 +185,7 @@ function runM10(state, combo, label) {
     if (id === 'm10_apertura') ok(prep.pages.some((p) => p.id === 'm10.b2.apertura.promise'), label + ': eco promise_stance (taccuino chiuso)');
     if (id === 'm10_affioramento') {
       const echoes = ids(prep.pages.filter((p) => p.condition));
-      const want = combo.tactic === 'pressione' && combo.method !== 'intuitivo' ? ['m10.b5.affioramento.list'] : combo.tactic === 'falsa_sicurezza' ? ['m10.b5.affioramento.stove'] : [];
+      const want = combo.tactic === 'pressione' ? ['m10.b5.affioramento.list'] : combo.tactic === 'falsa_sicurezza' ? ['m10.b5.affioramento.stove'] : [];
       ok(JSON.stringify(echoes) === JSON.stringify(want), label + ': eco M6 in B5 ' + JSON.stringify(echoes));
       ok(prep.pages.filter((p) => p.bob_surface).map((p) => p.bob_surface).join() === 'portrait_shown,register_shift', label + ': due segnali BOB');
     }

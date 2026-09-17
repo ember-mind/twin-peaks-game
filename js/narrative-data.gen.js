@@ -7182,7 +7182,7 @@
          "mode": "dialogue",
          "speaker_id": "cooper",
          "display_name": "COOPER",
-         "text": "(seconda domanda) Mi mostri il viaggio, allora. Un biglietto, una telefonata a Missoula — qualcosa che dica che Maddy è partita davvero."
+         "text": "Mi mostri il viaggio, allora. Un biglietto, una telefonata a Missoula — qualcosa che dica che Maddy è partita davvero."
         },
         {
          "id": "m10.b3.probatorio.p06",
@@ -7390,7 +7390,7 @@
          "mode": "dialogue",
          "speaker_id": "cooper",
          "display_name": "COOPER",
-         "text": "(seconda domanda) Ho visto un uomo. Capelli lunghi, grigi. Sorrideva. Le è familiare?"
+         "text": "Ho visto un uomo. Capelli lunghi, grigi. Sorrideva. Le è familiare?"
         },
         {
          "id": "m10.b3.intuitivo.p05",
@@ -7489,23 +7489,11 @@
        "mode": "dialogue",
        "speaker_id": "cooper",
        "display_name": "COOPER",
-       "text": "(piano, a Truman) Accendeva e spegneva. Senza fumare. (nessuna risposta: la ricorrenza resta un appunto)",
+       "text": "(piano, quasi a sé) Accendeva e spegneva. Senza fumare.",
        "condition": {
-        "all": [
-         {
-          "evidence": "JACQUES_LIST_GIVEN"
-         },
-         {
-          "not": {
-           "value_is": {
-            "name": "m10_method",
-            "equals": "intuitivo"
-           }
-          }
-         }
-        ]
+        "evidence": "JACQUES_LIST_GIVEN"
        },
-       "conditional_note": "eco M6 jacques_list_given [Lock §5-B5]. La riga è rivolta «a Truman»: nell'intuitivo Truman è FUORI dalla stanza (B3-B4), quindi la pagina è esclusa da quel ramo invece di contraddire la presenza — SCRIPT GAP, vedi report"
+       "conditional_note": "eco M6 jacques_list_given [Lock §5-B5, ruling v1.1.2 SG-3]: detta a mezza voce, senza destinatario, così vale anche nell'intuitivo dove Truman è fuori dalla stanza"
       },
       {
        "id": "m10.b5.affioramento.stove",
@@ -7586,7 +7574,7 @@
          "mode": "dialogue",
          "speaker_id": "leland",
          "display_name": "LELAND",
-         "text": "(guarda le mani, a lungo. Quando parla, la voce è precisa — ed è peggio del tremito.) Perché ce l'ho messa io."
+         "text": "(guarda le mani, a lungo. Quando parla, la voce è precisa — ed è peggio del tremito.) Perché ce l'ho messo io."
         },
         {
          "id": "m10.b6.probatorio.p05",
@@ -7635,7 +7623,7 @@
          "mode": "dialogue",
          "speaker_id": "leland",
          "display_name": "LELAND",
-         "text": "(la voce di un uomo che detta un atto) Io. Al vagone.",
+         "text": "(la voce di un uomo che detta un atto) L'ho uccisa io. Al vagone.",
          "admits": [
           "laura_homicide",
           "traincar_presence"
@@ -7869,7 +7857,7 @@
          "mode": "dialogue",
          "speaker_id": "leland",
          "display_name": "LELAND",
-         "text": "(un silenzio lungo; poi, semplicemente) Io.",
+         "text": "(un silenzio lungo; poi, senza alzare la voce) Laura l'ho uccisa io.",
          "admits": [
           "laura_homicide"
          ]
