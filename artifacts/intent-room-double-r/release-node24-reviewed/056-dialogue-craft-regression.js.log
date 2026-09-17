@@ -1,0 +1,172 @@
+# scene primo arco
+  ok - bobby: scena presente
+  ok - bobby: turni e numero pagine stabili
+  ok - bobby: testo entro limite UI di 129 caratteri
+  ok - bobby: conserva dettaglio concreto /Shelly/i
+  ok - bobby: conserva dettaglio concreto /guardi me/i
+  ok - bobby: conserva dettaglio concreto /dove si trovava/i
+  ok - bobby: l'NPC riprende il turno dopo la domanda di Cooper
+  ok - bobby: la contro-risposta protegge una propria agenda
+  ok - jacoby: scena presente
+  ok - jacoby: turni e numero pagine stabili
+  ok - jacoby: testo entro limite UI di 129 caratteri
+  ok - jacoby: conserva dettaglio concreto /cocco/i
+  ok - jacoby: conserva dettaglio concreto /penna/i
+  ok - jacoby: conserva dettaglio concreto /quale domanda/i
+  ok - jacoby: l'NPC riprende il turno dopo la domanda di Cooper
+  ok - jacoby: la contro-risposta protegge una propria agenda
+  ok - truman: scena presente
+  ok - truman: turni e numero pagine stabili
+  ok - truman: testo entro limite UI di 129 caratteri
+  ok - truman: conserva dettaglio concreto /diario/i
+  ok - truman: conserva dettaglio concreto /ROBERT/i
+  ok - truman: conserva dettaglio concreto /pasti a domicilio/i
+  ok - truman: contratto indizi invariato
+  ok - lucy: scena presente
+  ok - lucy: turni e numero pagine stabili
+  ok - lucy: testo entro limite UI di 129 caratteri
+  ok - lucy: conserva dettaglio concreto /centralino/i
+  ok - lucy: conserva dettaglio concreto /respiro/i
+  ok - lucy: conserva dettaglio concreto /orari/i
+  ok - andy: scena presente
+  ok - andy: turni e numero pagine stabili
+  ok - andy: testo entro limite UI di 129 caratteri
+  ok - andy: conserva dettaglio concreto /diciassette/i
+  ok - andy: conserva dettaglio concreto /rapporto/i
+  ok - andy: conserva dettaglio concreto /cinque minuti/i
+  ok - hawk: scena presente
+  ok - hawk: turni e numero pagine stabili
+  ok - hawk: testo entro limite UI di 129 caratteri
+  ok - hawk: conserva dettaglio concreto /animale/i
+  ok - hawk: conserva dettaglio concreto /passi/i
+  ok - hawk: conserva dettaglio concreto /dove ti sei fermato/i
+  ok - hawk: l'NPC riprende il turno dopo la domanda di Cooper
+  ok - hawk: la contro-risposta protegge una propria agenda
+  ok - sarah: scena presente
+  ok - sarah: turni e numero pagine stabili
+  ok - sarah: testo entro limite UI di 129 caratteri
+  ok - sarah: conserva dettaglio concreto /corridoio/i
+  ok - sarah: conserva dettaglio concreto /sorriso/i
+  ok - sarah: conserva dettaglio concreto /letto, la finestra o la porta/i
+  ok - sarah: l'NPC riprende il turno dopo la domanda di Cooper
+  ok - sarah: la contro-risposta protegge una propria agenda
+  ok - leland: scena presente
+  ok - leland: turni e numero pagine stabili
+  ok - leland: testo entro limite UI di 129 caratteri
+  ok - leland: conserva dettaglio concreto /ballo/i
+  ok - leland: conserva dettaglio concreto /salotto/i
+  ok - leland: conserva dettaglio concreto /che disco/i
+  ok - leland: l'NPC riprende il turno dopo la domanda di Cooper
+  ok - leland: la contro-risposta protegge una propria agenda
+  ok - benhorne_a2: scena presente
+  ok - benhorne_a2: turni e numero pagine stabili
+  ok - benhorne_a2: testo entro limite UI di 129 caratteri
+  ok - benhorne_a2: conserva dettaglio concreto /315/i
+  ok - benhorne_a2: conserva dettaglio concreto /nulla\. Nulla/i
+  ok - benhorne_a2: conserva dettaglio concreto /la sera l'ha portata lei/i
+  ok - audrey_a2: scena presente
+  ok - audrey_a2: turni e numero pagine stabili
+  ok - audrey_a2: testo entro limite UI di 129 caratteri
+  ok - audrey_a2: conserva dettaglio concreto /banco profumi/i
+  ok - audrey_a2: conserva dettaglio concreto /nessuno, e in questo sono brava/i
+  ok - audrey_a2: conserva dettaglio concreto /chiamo suo padre/i
+  ok - audrey_a2: contratto flag invariato
+  ok - shelly: scena presente
+  ok - shelly: turni e numero pagine stabili
+  ok - shelly: testo entro limite UI di 129 caratteri
+  ok - shelly: conserva dettaglio concreto /con Laura/i
+  ok - shelly: conserva dettaglio concreto /prima controllava la porta/i
+  ok - shelly: conserva dettaglio concreto /niente da sapere/i
+  ok - shelly: l'NPC riprende il turno dopo la domanda di Cooper
+  ok - shelly: la contro-risposta protegge una propria agenda
+  ok - loglady: scena presente
+  ok - loglady: turni e numero pagine stabili
+  ok - loglady: testo entro limite UI di 129 caratteri
+  ok - loglady: conserva dettaglio concreto /ceppo/i
+  ok - loglady: conserva dettaglio concreto /fuoco/i
+  ok - loglady: conserva dettaglio concreto /dov'era lei/i
+  ok - loglady: l'NPC riprende il turno dopo la domanda di Cooper
+  ok - loglady: la contro-risposta protegge una propria agenda
+# ponti Atto 2-5
+  ok - truman_a2: ponte presente
+  ok - truman_a2: turni e numero pagine stabili
+  ok - truman_a2: testo entro limite UI di 129 caratteri
+  ok - truman_a2: conserva funzione drammatica /nome che non abbiamo/i
+  ok - truman_a2: conserva funzione drammatica /qualcosa che abbiamo/i
+  ok - truman_a2: conserva funzione drammatica /venditore di scarpe/i
+  ok - truman_atto3: ponte presente
+  ok - truman_atto3: turni e numero pagine stabili
+  ok - truman_atto3: testo entro limite UI di 129 caratteri
+  ok - truman_atto3: conserva funzione drammatica /due fatti/i
+  ok - truman_atto3: conserva funzione drammatica /e il luogo/i
+  ok - truman_atto3: conserva funzione drammatica /partiamo dalla scena/i
+  ok - truman_atto3: contratto flag invariato
+  ok - sarah_visione: ponte presente
+  ok - sarah_visione: turni e numero pagine stabili
+  ok - sarah_visione: testo entro limite UI di 129 caratteri
+  ok - sarah_visione: conserva funzione drammatica /sorriso/i
+  ok - sarah_visione: conserva funzione drammatica /io scrivo/i
+  ok - sarah_visione: conserva funzione drammatica /non deve difendersi/i
+  ok - sarah_visione: contratto flag invariato
+  ok - loglady_a4: ponte presente
+  ok - loglady_a4: turni e numero pagine stabili
+  ok - loglady_a4: testo entro limite UI di 129 caratteri
+  ok - loglady_a4: conserva funzione drammatica /luogo e ora/i
+  ok - loglady_a4: conserva funzione drammatica /ci sarò/i
+  ok - leland_interr: ponte presente
+  ok - leland_interr: turni e numero pagine stabili
+  ok - leland_interr: testo entro limite UI di 129 caratteri
+  ok - leland_interr: conserva funzione drammatica /dov'era lei/i
+  ok - leland_interr: conserva funzione drammatica /dall'infanzia/i
+  ok - leland_interr: conserva funzione drammatica /stesso volto/i
+  ok - leland_interr: contratto flag invariato
+  ok - bob_finale: ponte presente
+  ok - bob_finale: turni e numero pagine stabili
+  ok - bob_finale: testo entro limite UI di 129 caratteri
+  ok - bob_finale: conserva funzione drammatica /guanto/i
+  ok - bob_finale: conserva funzione drammatica /firma sotto le ammissioni/i
+  ok - bob_finale: conserva funzione drammatica /Leland Palmer/i
+# vecchie formule autoriali rimosse
+  ok - formula rimossa: "Shelly è una persona, non un alibi"
+  ok - formula rimossa: "Quale porta ha provato ad aprire"
+  ok - formula rimossa: "La sua precisione sarà più utile della paura"
+  ok - formula rimossa: "Il dolore non rende debole il rapporto"
+  ok - formula rimossa: "La visione è un dato, non una colpa"
+  ok - formula rimossa: "Il dolore ha un ritmo"
+  ok - formula rimossa: "Una difesa così precisa indica il punto da verificare"
+  ok - formula rimossa: "L’invisibilità non è un piano"
+  ok - formula rimossa: "L'invisibilità non è un piano"
+  ok - formula rimossa: "Quale dettaglio ricorda davvero, e quale ha aggiunto dopo"
+  ok - formula rimossa: "Il ceppo non è un testimone verificabile"
+  ok - formula rimossa: "la lista dei sospetti cresce più in fretta"
+  ok - formula rimossa: "Questo non è un gioco, per te"
+  ok - formula rimossa: "con lei succede sempre qualcosa di strano"
+  ok - formula rimossa: "il suo ceppo ha un ottimo senso della procedura"
+  ok - formula rimossa: "Domani chiudo questo cerchio"
+  ok - formula rimossa: "Una mano senza impronte è una vanteria"
+# Cooper agisce nella conversazione
+  ok - bobby: almeno una contromossa Cooper leggibile
+  ok - bobby: ogni battuta di Cooper contiene domanda, ordine o pressione concreta
+  ok - jacoby: almeno una contromossa Cooper leggibile
+  ok - jacoby: ogni battuta di Cooper contiene domanda, ordine o pressione concreta
+  ok - truman: almeno una contromossa Cooper leggibile
+  ok - truman: ogni battuta di Cooper contiene domanda, ordine o pressione concreta
+  ok - lucy: almeno una contromossa Cooper leggibile
+  ok - lucy: ogni battuta di Cooper contiene domanda, ordine o pressione concreta
+  ok - andy: almeno una contromossa Cooper leggibile
+  ok - andy: ogni battuta di Cooper contiene domanda, ordine o pressione concreta
+  ok - hawk: almeno una contromossa Cooper leggibile
+  ok - hawk: ogni battuta di Cooper contiene domanda, ordine o pressione concreta
+  ok - sarah: almeno una contromossa Cooper leggibile
+  ok - sarah: ogni battuta di Cooper contiene domanda, ordine o pressione concreta
+  ok - leland: almeno una contromossa Cooper leggibile
+  ok - leland: ogni battuta di Cooper contiene domanda, ordine o pressione concreta
+  ok - benhorne_a2: almeno una contromossa Cooper leggibile
+  ok - benhorne_a2: ogni battuta di Cooper contiene domanda, ordine o pressione concreta
+  ok - audrey_a2: almeno una contromossa Cooper leggibile
+  ok - audrey_a2: ogni battuta di Cooper contiene domanda, ordine o pressione concreta
+  ok - shelly: almeno una contromossa Cooper leggibile
+  ok - shelly: ogni battuta di Cooper contiene domanda, ordine o pressione concreta
+  ok - loglady: almeno una contromossa Cooper leggibile
+  ok - loglady: ogni battuta di Cooper contiene domanda, ordine o pressione concreta
+dialogue-craft-regression: PASS (167 checks; 12 scene, 6 ponti)

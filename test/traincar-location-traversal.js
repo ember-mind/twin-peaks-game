@@ -14,12 +14,13 @@ const noop = () => {};
 const ctx = new Proxy({ measureText: (text) => ({ width: String(text).length * 5 }) }, { get: (target, key) => key in target ? target[key] : noop, set: () => true });
 const js = (name) => path.join(__dirname, '..', 'js', name);
 ['tiles.js','chars.js','houses.js','maps.js','data.js','retro-font.js','engine.js','scene-objects.gen.js','glue.js','location-connections.js','world-connections.gen.js','double-r-exterior-scene.js'].forEach(name => require(js(name)));
-GAME.DoubleRExteriorScene.install();
 require(js('sheriffs-station-art.js'));
 require(js('sheriffs-station-exterior-art.js'));
 require(js('sheriffs-station-scene.js'));
 require(js('sheriffs-station-exterior-scene.js'));
 require(js('environment-reactions.js'));
+// World Catalog validates every Program, including the diner's derived anchors.
+require(js('double-r-location-production.js'));
 require(js('sheriffs-station-production.js'));
 require(js('world-engine.js'));
 require(js('world-catalog.js'));

@@ -4258,7 +4258,7 @@
       red:'#8c2f3e', redHi:'#c45a61', redLight:'#e28b80', redDark:'#501f29',
       wood:'#5b3a28', woodHi:'#946345', woodLight:'#b88759', woodDark:'#35271f',
       green:'#223b2f', leaf:'#567345', leafHi:'#879452', metal:'#81918b',
-      metalHi:'#d9dfc9', tile:'#898b75', tileShade:'#80836e', floorLight:'#c5bc9c', floorShade:'#b9ae90' }
+      metalHi:'#d9dfc9', tile:'#9b9b85', tileShade:'#90917b', floorLight:'#c5bc9c', floorShade:'#b9ae90' }
   };
   function interiorContact(g,x,y,w,p) {
     // Three crisp native rows: diffuse footprint, tight occlusion, tapered edge.
@@ -4694,7 +4694,7 @@
     model.stools.forEach(function(a){interiorStool(g,x+a[0]*16,y+a[1]*16,p);});
     model.booths.forEach(function(a,n){
       interiorBooth(g,x+a[0]*16,y+a[1]*16,a[2]*16,p,n,model.guests[n]);
-      interiorWarmLight(g,x+a[0]*16+3,y+a[1]*16-4,42,19,[.55,.85,.7,.3][n]);
+      interiorWarmLight(g,x+a[0]*16+3,y+a[1]*16-4,42,19,[.75,1.05,.9,.5][n]);
     });
     interiorSpecials(g,x+model.specials[0]*16,y+model.specials[1]*16,p);
     interiorFloorPlant(g,x+model.islandPlant[0]*16-4,y+model.islandPlant[1]*16,p);

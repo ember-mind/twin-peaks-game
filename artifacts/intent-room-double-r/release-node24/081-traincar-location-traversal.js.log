@@ -1,0 +1,17 @@
+/Users/ebuccelli/Code/solo/projects/twin-peaks-game/.worktrees/intent-room-double-r/js/world-engine.js:14
+    throw new Error('World: ' + message);
+    ^
+
+Error: World: catalog.locations[0].environments[1].program references anchors but native map layout is missing
+    at fail (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/.worktrees/intent-room-double-r/js/world-engine.js:14:11)
+    at copyProgram (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/.worktrees/intent-room-double-r/js/world-engine.js:175:7)
+    at /Users/ebuccelli/Code/solo/projects/twin-peaks-game/.worktrees/intent-room-double-r/js/world-engine.js:226:37
+    at Array.map (<anonymous>)
+    at /Users/ebuccelli/Code/solo/projects/twin-peaks-game/.worktrees/intent-room-double-r/js/world-engine.js:208:52
+    at Array.map (<anonymous>)
+    at prepare (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/.worktrees/intent-room-double-r/js/world-engine.js:194:42)
+    at Object.register (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/.worktrees/intent-room-double-r/js/world-engine.js:269:20)
+    at /Users/ebuccelli/Code/solo/projects/twin-peaks-game/.worktrees/intent-room-double-r/js/world-catalog.js:7:14
+    at Object.<anonymous> (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/.worktrees/intent-room-double-r/js/world-catalog.js:171:2)
+
+Node.js v24.16.0

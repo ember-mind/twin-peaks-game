@@ -1,0 +1,28 @@
+  ok - bobby (town) e shelly (diner) trovati in GAME.Maps
+  ok - shelly risolve a shelly_bobby dopo done_bobby (got "shelly_bobby")
+  ok - shelly risolve al dialogo base senza done_bobby (got "shelly")
+  ok - bobby risolve a bobby_shelly dopo done_shelly (got "bobby_shelly")
+  ok - bobby risolve a bobby_shelly dopo done_shelly_bobby (got "bobby_shelly")
+  ok - bobby risolve al dialogo base senza flag (got "bobby")
+  ok - cameraLaura risolve a laura_room_andy dopo done_andy (got "laura_room_andy")
+  ok - cameraLaura risolve al dialogo base senza done_andy (got "laura_room")
+  ok - laura_room_andy da' lo stesso set di indizi di laura_room (got ["cuore","lettera_r"])
+  ok - obiettivo prima della visita al Double R (got "Il Double R, poi casa Palmer.")
+  ok - obiettivo dopo double_r_visitato (got "Casa Palmer: la camera di Laura.")
+  ok - lago_riva risolve a lago_laura di default (got "lago_laura")
+  ok - lago_riva risolve a lago_sguardo con sogno_fatto (got "lago_sguardo")
+  ok - lago_riva non risolve piu' a lago_maddy con gigante2 (branch ritirato: il ritrovamento e' mission-owned in M8) (got "lago_laura")
+  ok - lago_riva risolve a lago_dopo con maddy_trovata (cascata pre-esistente intatta) (got "lago_dopo")
+  ok - room_315.onEnter ha la forma attesa (got {"dialogue":"hotel_risveglio","once":"intro_hotel"})
+  ok - hotel_gn.onEnter assente (spostato su room_315)
+  ok - redroom porta 8,11 punta a room_315 (2,6)
+  ok - D.dialogues.shelly_bobby esiste
+  ok - D.dialogues.bobby_shelly esiste
+  ok - D.dialogues.laura_room_andy esiste
+  ok - D.dialogues.lago_laura esiste
+  ok - D.dialogues.bacheca_centrale esiste
+  ok - D.dialogues.hotel_risveglio esiste
+  ok - oggetto bacheca a (9,6) risolve a bacheca_centrale (got "bacheca_centrale")
+  ok - la cella (9,7) da cui affrontare la bacheca e' percorribile
+
+OK: narrative-vertical-slice-01, tutti i controlli superati ✔

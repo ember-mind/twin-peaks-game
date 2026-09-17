@@ -1,0 +1,33 @@
+DOOR-EQUALITY-DIFF vs test/fixtures/doors-before-m5.json
+migrated (classic entry deleted from js/maps.js; same descriptor now installed by the registry): 17
+  ~ arrival 4,8 {"to":"town","tx":30,"ty":33,"dir":"up"}  -> arrival-town
+  ~ town 9,6 {"to":"hotel_gn","tx":8,"ty":10,"dir":"up","needsFlag":"sogno_fatto","blockedMsg":"hotel_locked"}  -> town-great-northern-lobby
+  ~ town 23,6 {"to":"hospital","tx":7,"ty":10,"dir":"up","needsFlag":"sogno_fatto","blockedMsg":"hospital_locked"}  -> town-hospital
+  ~ town 42,6 {"to":"palmer","tx":7,"ty":10,"dir":"up"}  -> town-palmer-house
+  ~ town 47,28 {"to":"roadhouse","tx":7,"ty":8,"dir":"up","needsFlag":"atto4","blockedMsg":"roadhouse_chiuso"}  -> town-roadhouse
+  ~ town 50,0 {"to":"woods","tx":14,"ty":20,"dir":"up","needsClues":3}  -> town-woods-north
+  ~ palmer 7,11 {"to":"town","tx":42,"ty":7,"dir":"down"}  -> town-palmer-house
+  ~ palmer 8,11 {"to":"town","tx":42,"ty":7,"dir":"down"}  -> town-palmer-house
+  ~ hotel_gn 8,11 {"to":"town","tx":9,"ty":7,"dir":"down"}  -> town-great-northern-lobby
+  ~ hotel_gn 9,11 {"to":"town","tx":9,"ty":7,"dir":"down"}  -> town-great-northern-lobby
+  ~ hospital 7,11 {"to":"town","tx":23,"ty":7,"dir":"down"}  -> town-hospital
+  ~ hospital 8,11 {"to":"town","tx":23,"ty":7,"dir":"down"}  -> town-hospital
+  ~ woods 14,4 {"to":"redroom","tx":8,"ty":9,"dir":"up"}  -> woods-redroom-dream
+  ~ woods 14,21 {"to":"town","tx":50,"ty":1,"dir":"down"}  -> town-woods-north
+  ~ redroom 8,11 {"to":"room_315","tx":2,"ty":6,"dir":"down"}  -> redroom-room-315-wake
+  ~ roadhouse 7,9 {"to":"town","tx":47,"ty":29,"dir":"down"}  -> town-roadhouse
+  ~ roadhouse 8,9 {"to":"town","tx":47,"ty":29,"dir":"down"}  -> town-roadhouse
+shadowed (classic entry deleted from js/maps.js; tile was already registry-owned, descriptor unchanged): 10
+  - town 12,20 {"to":"sheriffs_station_exterior","tx":7,"ty":10,"dir":"up"}  (dead before M5: town-sheriffs-station-lot)
+  - town 42,20 {"to":"double_r_exterior_prototype","tx":6,"ty":10,"dir":"up"}  (dead before M5: town-double-r-lot)
+  - town 55,14 {"to":"traincar","tx":1,"ty":7,"dir":"right","needsFlag":"atto3","blockedMsg":"est_bloccato"}  (dead before M5: town-traincar-east)
+  - town 55,15 {"to":"traincar","tx":1,"ty":7,"dir":"right","needsFlag":"atto3","blockedMsg":"est_bloccato"}  (dead before M5: town-traincar-east)
+  - diner 6,9 {"to":"town","tx":42,"ty":21,"dir":"down"}  (dead before M5: double-r-front-entrance)
+  - diner 7,9 {"to":"town","tx":42,"ty":21,"dir":"down"}  (dead before M5: double-r-front-entrance)
+  - traincar 0,7 {"to":"town","tx":54,"ty":14,"dir":"left"}  (dead before M5: town-traincar-east)
+  - traincar 21,0 {"to":"oej","tx":8,"ty":8,"dir":"up","needsFlag":"east_route_confirmed","blockedMsg":"oej_bloccato"}  (dead before M5: traincar-oej-entrance)
+  - oej 7,9 {"to":"traincar","tx":21,"ty":1,"dir":"down"}  (dead before M5: traincar-oej-entrance)
+  - oej 8,9 {"to":"traincar","tx":21,"ty":1,"dir":"down"}  (dead before M5: traincar-oej-entrance)
+dead conflict crossings deleted: 0
+booted descriptors: 59 before, 59 after; byte-identical except +connectionId on 17
+WORLD-DOOR-EQUALITY-PASS 59 door descriptors across 15 scenes byte-identical to the pre-M5 fixture (+connectionId on 17), registry alone reproduces 59, 0 classic entries left in js/maps.js

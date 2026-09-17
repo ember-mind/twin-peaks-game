@@ -1,0 +1,2 @@
+EDITOR-RUNTIME-ISOLATION-SCAN core=[js/editor/core/cast.js, js/editor/core/changeset.js, js/editor/core/draft.js, js/editor/core/edit.js, js/editor/core/history.js, js/editor/core/hit-test.js, js/editor/core/identity.js, js/editor/core/index.js, js/editor/core/inspector.js, js/editor/core/interaction.js, js/editor/core/model.js, js/editor/core/scene-objects.js, js/editor/core/selection.js, js/editor/core/validation.js]
+EDITOR-RUNTIME-ISOLATION-PASS 7

@@ -3,7 +3,9 @@
 
 /* Double R authoring Program: real production chain, native geometry only. */
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 
 const noop = () => {};
 let now = 0;
@@ -61,6 +63,26 @@ const map = GAME.Maps.diner;
 assert(map, 'real normalized diner map loads before the native installer');
 const rowsBefore = map.rows.slice();
 const interiorBefore = JSON.parse(JSON.stringify(map.interior));
+
+/* Fail loudly when two named anchors claim one canonical tile, or collision
+ * cannot be checked. Isolate the installer so negative cases do not mutate
+ * the production map used by the rest of this test. */
+const installerSource = fs.readFileSync(path.join(__dirname, '..', 'js', 'double-r-location-production.js'), 'utf8');
+function isolatedInstall(change) {
+  const diner = { rows: rowsBefore.slice(), interior: JSON.parse(JSON.stringify(interiorBefore)) };
+  const game = {
+    Maps: { diner, isSolid: GAME.Maps.isSolid.bind(GAME.Maps) },
+    DoubleRExteriorScene: { install: noop },
+    EnvironmentReactions: { register: noop, doorEntryFrames: noop }
+  };
+  change(game);
+  vm.runInNewContext(installerSource, { window: { GAME: game } });
+}
+assert.throws(() => isolatedInstall(game => {
+  game.Maps.diner.interior.stools[1] = game.Maps.diner.interior.stools[0].slice();
+}), /footprints "stool-0" and "stool-1" overlap/, 'duplicate native anchor cells fail at install');
+assert.throws(() => isolatedInstall(game => { delete game.Maps.isSolid; }),
+  /GAME.Maps.isSolid is required/, 'missing collision owner fails at install');
 
 /* The installer derives and exposes layout; it must not become a second
  * source of rows/interior/collision. */

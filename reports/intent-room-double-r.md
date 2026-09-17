@@ -20,6 +20,8 @@ Observed eye flow is **branching**: entrance → center island / checker floor �
 
 The existing two occupied booths, two differently used empty tables, cups/menus/plates, counter equipment, working lights and staff gestures already provide ordinary activity traces. They are not evidence of a particular plot event. No new clutter is justified by this first observation.
 
+Canonical ownership map: `js/maps.js` provides the diner tuple model; generated `map.rows` provide collision and door glyphs; `js/retro-authored.js` paints the native room from that model. `world/connections.json` owns front-door links and spawns, installed later by `js/world-connections-production.js`. `narrative/cast/windows.json` and Cast Presence own named NPC placement; the tuple model's two generic booth guests are authored visual life, not named-cast claims. Narrative Runtime owns story state. `js/ambient-life-scenes.js` and `js/character-activity.js` own steam, lamps, reflections, sipping and staff motion. Diner has no separate scene-object, prop, or narrative-target records. `environment.program` in the World Catalog refers to these facts; it owns no geometry, actors, doors, animation, or event state. The 256×192 camera and player frame remain Engine-owned.
+
 ## Frozen-framework diagnosis before code changes
 
 `visualGoals` can describe several linked social pulls in plain language. One `groups` record can name the four booth modules without creating runtime Zone entities. `composition` plus a concrete reason can justify rhythm and asymmetry; no new contribution enum is needed. `NEAR` can express counter-to-stool adjacency; `REACHABLE` can express entry-to-service approach without pretending to verify facing or sightline. Ambient residue can describe existing cups, menus, cleared plate and staff traces; no new story state is needed. Thus the Program shape and Room Critic can be tested unchanged.
@@ -41,6 +43,8 @@ The authored [Double R Program](../js/world-catalog.js) uses exactly the existin
 [Program-only native capture](../artifacts/intent-room-double-r/program-only-native.png) uses the same entrance and state. It is evidence that authoring metadata alone is not a visual pass; actual art experiments begin only after this baseline. Baseline frame SHA-256 `05f69db06fa0f6547756d9f270685bfb9a3592c29a66ec2b2bf0cf486fdbf419`; unpopulated frame `5bd5a70d01da7e5fc87911f3a750d3f723b4baacaa5711e3a86b56c24a5316d0`.
 
 Independent hostile architecture review found no second Cast Presence or Narrative Runtime owner, but identified three concrete risks. Response: deeply freeze the derived layout view (not only its map property); read booth backrests from canonical row glyphs rather than repeating the generator's side rule; and add `test/diner-program.js` to the Node 24 release workflow so anchor/collision/route integrity is gated. Re-ran diner Program, World Engine catalog and diner layout checks after those fixes.
+
+Final independent architecture review found two more adapter integrity gaps: two footprint IDs could claim one cell, and collision checks could be skipped if the collision helper were missing. The installer now rejects overlapping footprint cells, requires `GAME.Maps.isSolid`, checks every footprint cell solid and both targets walkable, and has isolated negative tests for duplicate stools and absent collision helper. Reviewer rechecked the fixes and found no blocker. These validations protect the existing geometry owner; they do not add a second geometry source.
 
 Real Chrome World Builder passed **196/196**, including two new Double R checks. Its [read-only Program inspector capture](../artifacts/intent-room-double-r/builder-program.png) shows diner goals in the same UI as Sheriff; changing scene hides/shows the appropriate Program and exposes no edit controls. Builder-generated tracked test artifacts were restored after the run.
 
@@ -80,3 +84,118 @@ Shared world grammar: integer pixel rectangles, hard cluster edges, oak/cream/me
 3. **Booth light/rhythm, only if a later capture proves the seating weak.** Problem: counter may outrank booth social zones. Hypothesis: source-linked booth value change could strengthen social legibility without changing module count. Smallest intervention: local booth lighting/value only, preserving repeated geometry. Expected: distributed attention. Risk: flatten hierarchy or make authored table states look noisy.
 
 These are hypotheses, not authorization for three cosmetic changes. Each gets one change, a fresh native frame and an independent comparison; otherwise revert.
+
+## Native visual trials — fixed entrance, one cause at a time
+
+All captures use `test/native-shot.js --map=diner --x=6 --y=8 --dir=up --narrative=1` at the same 256×192 native camera. Independent Luna xhigh reviewers saw only anonymous A/B PNGs, without code, hypothesis, or which image was new. Main-model judgment kept changes only when the image still respected the room's social structure.
+
+| Trial | One intervention | Blind comparison | Decision |
+| --- | --- | --- | --- |
+| [1: floor values](../artifacts/intent-room-double-r/experiment-1-floor-soft.png) | Checker dark `#898b75`→`#9b9b85`, edge shade `#80836e`→`#90917b`; no pattern/geometry change. | New frame **narrowly wins**: checker recedes, people and saturated booths read first. Reviewer also noted older floor's moodier quality. | **KEEP**. Modest improvement, not a room transformation. |
+| [2: booth practical light](../artifacts/intent-room-double-r/experiment-2-booth-light.png) | Raise only four existing booth light strengths from `[.55,.85,.7,.3]` to `[.75,1.05,.9,.5]`; no new lights or assets. | New frame **narrowly wins**, difference minor: upholstery separates slightly better from floor while layout stays warm. | **KEEP**. Useful but restrained. |
+| [3: brighter booth panels](../artifacts/intent-room-double-r/experiment-3-booth-red.png) | Render the broad booth panels in existing `redHi` instead of `red`; no geometry, palette expansion, or light change. | Older/darker frame **clearly wins**: coral-bright panels compete with counter, sign, and central people; new frame feels friendlier but less moody. | **REVERT**. Preserved failed capture as evidence. |
+
+Trial 1 SHA-256 `5ed4e792144c0281255312f7cffd2ee6172a387a85206ce3f4fc44ae53ddb7b8`; trial 2 `6b2bda006f7e32e7feba1713c966cae6d4bdb6434f600219355e8dddbc913792`; rejected trial 3 `9ca3dcf6b7cb7c67dec7df7b3bdbe09fd980a927ef04b58573b32f6d05bee7c2`. Local tests after trial 2: `diner-layout`, `diner-program`, `retro-production` **54/54**, and `ambient-life` pass.
+
+Final [after frame](../artifacts/intent-room-double-r/after-native.png) has SHA-256 `0837faae4a1399d36329dbf9e08702fa13c2c582dac077e755fe3c923fe7c1ed`. Against baseline: checker darks are less insistent, booth seating has slightly more localized warmth, and red furniture remains restrained. Same masses, circulation, NPC staging and ambient machinery. A fourth fresh blind reviewer ranked the final after over before **slightly**, explicitly calling the difference **modest, not material**. The scene was already compositionally strong; increasing booth saturation made it worse.
+
+## Final synthesis
+
+### 1. ELI10
+
+We gave the same room-intent method to a diner instead of a police station. It described the diner without adding another world system: counter says “food service,” repeated booths say “people gather here,” and ordinary table traces say “this place gets used.” It helped us make two small visual improvements and reject one tempting but worse change. It struggled most where critic language assumed one main focal point, and where the diner lacked named anchors for its existing geometry.
+
+### 2. Double R before
+
+The baseline already has strong identity: dark wood upper wall, branded neon, pale counter and pie case, four burgundy booth modules, checker floor, two occupied tables, plant/specials island, warm practicals. First glance goes to the service band; next glance branches toward booth conversations. The center is not a Sheriff-style quiet corridor; its floor rhythm and small island support two routes. Weaknesses are **relative**, not broken: high-contrast checker competes somewhat with small figures, and the counter can outrank the social seating. No new decor is necessary.
+
+### 3. Final Environment Program, human-readable
+
+- **Intent:** working public diner; warm, familiar, occupied; several social destinations alongside clear service orientation.
+- **Visual goals:** distributed attention; coherent four-booth rhythm with controlled variation; source-linked warm continuity; recognizable but subordinated checker; plant/sign island as grid break and route split.
+- **Activities:** ordering, serving, eating, conversation, staff work, circulation. These describe normal use, not which named person is present.
+- **Groups:** `service-counter` is dense horizontal orientation/service band (counter + five stools); `booth-seating` is four repeated social modules with varied table state; `center-island` is the small specials/plant hinge between two walkable branches.
+- **Contributions:** counter supplies service and orientation; booths supply function, social scale and visual rhythm; the cleared table supplies mundane turnover; plant supplies organic silhouette and path cue; specials board supplies menu information and compositional accent. Aesthetic contribution alone is accepted.
+- **Relationships:** counter `NEAR` first stool; entrance `REACHABLE` service approach. Both are checked against actual map data, not invented orientation data.
+- **Residue:** cups, coffee equipment, pie case, ready table and recently cleared table are baseline ambient residue. No narrative residue authored: no supported event-state detail is needed.
+
+### 4–5. Visual experiments and fixed before/after
+
+See trial table above and [before](../artifacts/intent-room-double-r/before-native.png) / [after](../artifacts/intent-room-double-r/after-native.png). **KEEP** compressed checker values and modest booth practical-light rise; **REVERT** brighter red upholstery. Three fresh blind reviewers, one per intervention, ranked each change without being told which PNG was new. Final gain is narrow but repeatable in those comparisons. No floor geometry, booth footprint, doors, actors, or ambient timing was changed. This experiment does **not** demonstrate a dramatic art-direction improvement.
+
+### 6. Sheriff versus Double R
+
+| Dimension | Sheriff's Station | Double R |
+| --- | --- | --- |
+| Intent | Legible small-town work; focused case activity | Public food service plus social life |
+| Visual structure | Several work groups under one warm sheriff-desk priority | Long service band and repeated booth modules share attention |
+| Density | Edge-weighted, quieter center | Dense service edge; patterned shared floor; lively side booths |
+| Focal strategy | One main work pool | Branching service **and** social pulls |
+| Group strategy | Distinct work/reception/waiting vignettes | Repeated seating group plus counter and small island |
+| Repetition | Duplicate desks needed stronger distinction | Similar booth modules establish diner identity |
+| Negative space | Directional circulation/rest was useful | Over-quieting center would erase checker identity |
+| Ambient residue | Papers, mug, desk-use traces | Cups, plates, menus, cleared table, routine service |
+| Eye flow | Entrance toward primary work area | Entrance → island/checker → counter **or** booth conversations |
+| Local art direction | Sage/steel against oak, restrained work light | Burgundy/cream/gold, wood/chrome, distributed practicals |
+
+Same Program fields produce different room strategies. No Sheriff palette, runner, single-focal goal, or desk-cluster assumption was copied into diner data.
+
+### 7. Generalization gaps, prioritized
+
+| Priority / class | Evidence | Required response |
+| --- | --- | --- |
+| 1 — **CRITIC / AUTHORING** | Existing group question asks whether each group supports “the main focal point.” Diner's booths are intentionally independent social pulls; forcing one focus would make it worse. | Later revise critic guidance to let Program declare focal topology in prose (singular, distributed, sequential); evaluate against that declared strategy. No schema field yet. |
+| 2 — **TOOLING** | Diner tuple model and rows had no named `map.layout`, so anchor-bearing Program failed validation. Local adapter can derive and freeze named anchors from existing sources, but took more code than Program itself. | Keep adapter local for pilot; later consider a reusable *read-only derivation helper* only if a third room repeats this need. Do not create a new coordinates owner. |
+| 3 — **ART-DIRECTION** | `docs/world-visual-bible-v0.1.md` says “one focal object” and leans function-only for props; Double R benefits from distributed attention and purely compositional repetition. | Later qualify shared guidance with room-specific focal strategy and contributions; retain common native-pixel/material grammar. |
+| 4 — **GENERATION** | Initial floor and light hypotheses helped only slightly; a stronger booth-red hypothesis damaged hierarchy. Wording alone did not guarantee useful visual changes. | Keep native capture and independent keep/revert loop; no automatic decorator or generative framework. |
+| 5 — **ROOM-SPECIFIC** | Counter has stronger service weight than social seating, and center figures can feel isolated. These are diner composition questions, not model failures. | Address only with future room-specific visual evidence, not generic code. |
+
+**DATA MODEL gap: none proven.** Existing `visualGoals` prose, groups, composition contribution reasons, `NEAR`/`REACHABLE`, and ambient residue expressed the important claims. Current representation cannot verify sightlines, but we did not claim it could; image review handles visual judgment.
+
+### 8–9. What stays and what changes
+
+**Do not change:** Environment Program schema; World Engine canonical ownership; Cast Presence; Narrative Runtime; Ambient Life; group-as-metadata concept; optional contributions; current spatial verbs. No generic framework code changed in this experiment.
+
+**Must change now:** nothing generic. A traincar test fixture had to install diner production before registering the expanded catalog; that local regression was fixed without weakening validation.
+
+**Worth changing later:** critic/art-direction wording around focal topology and useful repetition; possibly a source-derived read-only anchor helper if more tuple-based rooms need one. **Do not change:** add a procedural clutter pass, universal room solver, single-focus requirement, new runtime Zone entity, or new narrative-state owner.
+
+### 10. Tests and gameplay
+
+| Gate | Result | Evidence |
+| --- | --- | --- |
+| CI-pinned Node 24 release suite after all code/review fixes | **100/101** | [Full report](../artifacts/intent-room-double-r/release-node24-reviewed/report.json); only `test/narrative-validate-m10.js` fails on four verbatim keys, reproduced exactly on unchanged main. |
+| Diner Program/layout + route tests | **PASS** | Release suite: source-derived anchor parity, no overlapping footprints, mandatory collision, both island bypasses, registered Program references, freeze/ownership checks. |
+| World Engine, door equality, Cast Presence, Ambient Life, retro/mobile, smoke, simulator walkthrough | **PASS** | Included in Node 24 report. |
+| Real Chrome World Builder Program inspector | **196/196 PASS** | Same read-only UI for Sheriff and Double R; [capture](../artifacts/intent-room-double-r/builder-program.png). |
+| Real Chrome Act 3, all paths | **189/189 PASS** | Browser-driven walking, doors, Cast Presence and narrative; one benign harness `favicon.ico` 404 console entry, also documented in prior project reports. |
+| Real Chrome Act 4, all four paths | **530/530 PASS** | Diner encounter, cast moves, and route C walking from lot into diner and back; one benign harness `favicon.ico` 404. |
+
+An earlier release run exposed our traincar fixture's missing diner installer (**99/101**). After restoring canonical installer load order, the final run returned to the one pre-existing M10 failure (**100/101**). Node 24 is required by CI; local default Node 26 has unrelated cast-PNG byte-compression drift already documented in the Sheriff pilot. Targeted `diner-layout`, `diner-program`, `world-engine-v0.1-catalog`, `traincar-location-traversal`, `retro-production` (54/54), and `ambient-life` also pass.
+
+First Act 4 Chrome attempt passed gameplay assertions through path A but stopped while writing its transcript with `ENOSPC` (host disk at 122 MiB free); this was an environment-capacity failure, not a game assertion. Three inactive, regenerable temporary Chrome test profiles were removed after exact-path/process checks (61 + 151 + 155 MiB); no project asset was deleted. The all-path gate was restarted from the beginning with adequate free space.
+
+### 11. Verdict
+
+**PARTIALLY.** Architecture/generalization test passes: same Program and Builder can describe a markedly different room without schema redesign or Sheriff exceptions. Visual proof is weaker: two blind-reviewed improvements are small, and third attempt was worse. This is better evidence for the *method* than for a major Double R art leap. Do not claim full success on “materially improved visual design.”
+
+### 12. Research notes for eventual article
+
+- The strongest result came from what **not** to import: Sheriff's quiet center, single warm focal desk and anti-repetition instinct would each damage diner identity.
+- Program could describe distributed social attention with existing text goals; critic phrasing, not data structure, was the limiting assumption.
+- An exact map/collision owner mattered: adding anchor metadata without deriving it from tuple model would have created a second room geometry. The first hostile review caught mutability and a repeated booth rule; both were removed.
+- First two blind comparisons preferred new frames only **narrowly**. “We added warmth” is not equivalent to a meaningful improvement at 256×192.
+- Brighter booth panels sounded like a stronger social read; independent reviewer preferred the darker baseline and explained why: saturation fought the counter/sign. Failed PNG is preserved.
+- Final blind reviewer preferred retained after only slightly and called it non-material. They suggested more central activity/clutter; main review rejects automatic clutter as a shortcut because current cast and authored table traces already have canonical/intentional roles. A future change would need a concrete social staging hypothesis and gameplay check.
+- A broad release run caught a traincar fixture that loaded World Catalog without diner installer. Fail-loud Program validation exposed a real integration oversight; fixing fixture load order was better than disabling validation.
+- Independent overfitting reviewer found no Sheriff-specific code or catalog assumptions in Double R. It did flag Sheriff-scoped critic wording and one-focal/quiet-ground defaults in the visual bible; those are guidance gaps, not grounds for a new Program schema. It also noted Builder unit tests freeze-check Sheriff only; Double R's own freeze test and real Builder inspector check cover this pilot, while a later multi-environment unit test could reduce future risk.
+
+### 13. Single next generic improvement — recommendation only
+
+Revise **Room Critic guidance** to assess the Program's chosen *focal topology*—one focus, distributed parallel foci, or a sequence—rather than implicitly demanding a single dominant object. Include repetition-as-structure and purely aesthetic contributions in examples. This is a small guidance change supported by Sheriff **and** Double R; do **not** add fields or implement it in this branch.
+
+## Implementation inventory and final review
+
+`js/world-catalog.js` authors only the Double R interior Program. `js/double-r-location-production.js` derives validated, frozen anchors from canonical tuple/row/collision data. `js/retro-authored.js` changes only two diner floor values and four existing booth-light strengths. `test/diner-program.js` exercises real registration, references, route reachability, immutable metadata, collision parity and install-time negative cases; catalog/traversal/Builder tests and CI workflow include the new room. This report and `artifacts/intent-room-double-r/` preserve before/after, rejected trial and test evidence. No generic World Engine, Room Critic, Cast, Narrative, Ambient Life, door registry, map row, or collision file changed.
+
+Independent reviews: first architecture pass found mutable derived layout, repeated booth-backrest rule and missing CI gate; all fixed. Final hostile architecture pass found overlapping anchor cells and optional solidity; both fixed and rechecked, with no remaining blocker. Separate overfitting pass found no Sheriff-specific code leak, but identified single-focus/quiet-ground guidance and limited multi-room Builder unit coverage. Three fresh PNG-only critics reviewed individual art trials, and a fourth reviewed final before/after blind. Their narrow rankings—not Program prose—set the KEEP/REVERT decisions. Tracked artifacts regenerated by tests were restored after the gates; only Double R evidence remains.

@@ -1,0 +1,21 @@
+# confronto narrativo resta volontario
+  ok - m8_discovery: apertura volontaria preparabile
+  ok - m8_discovery: commit volontario riuscito
+  ok - ritrovamento non formula P8
+  ok - ritrovamento non auto-esegue confronti
+  ok - m8_promise_echo: apertura volontaria preparabile
+  ok - m8_promise_echo: commit volontario riuscito
+  ok - eco obbligatoria non formula P8
+  ok - dopo eco, confronti disponibili ma non eseguiti
+  ok - m8_cmp_letters: apertura volontaria preparabile
+  ok - m8_cmp_letters: commit volontario riuscito
+  ok - confronto R/O annota metodo, non identità
+  ok - m8_cmp_diary: apertura volontaria preparabile
+  ok - m8_cmp_diary: commit volontario riuscito
+  ok - aprire confronto col diario non sceglie teoria
+  ok - teoria progressiva richiede scelta esplicita diary_a
+  ok - prepare della scelta resta puro
+  ok - scelta volontaria committata
+  ok - solo scelta volontaria formula P8
+  ok - P8 non diventa identità confermata
+letter-chain-provenance: PASS (19 checks)

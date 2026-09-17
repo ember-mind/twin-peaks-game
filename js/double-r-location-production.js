@@ -44,6 +44,8 @@
     var width = rows[0].length;
     var height = rows.length;
     var footprints = {};
+    var occupiedBy = {};
+    if (typeof G.Maps.isSolid !== 'function') fail('GAME.Maps.isSolid is required for anchor validation');
 
     function cell(x, y, label, glyph) {
       if (!Number.isInteger(x) || !Number.isInteger(y) ||
@@ -54,11 +56,21 @@
       if (actual !== glyph) {
         fail(label + ' expects glyph "' + glyph + '" but found "' + actual + '" at ' + x + ',' + y);
       }
+      if (!G.Maps.isSolid('diner', x, y, { clues: [] })) {
+        fail(label + ' expects a solid collision cell at ' + x + ',' + y);
+      }
       return [x, y];
     }
 
     function addFootprint(id, cells) {
       if (Object.prototype.hasOwnProperty.call(footprints, id)) fail('duplicate footprint "' + id + '"');
+      cells.forEach(function (point) {
+        var key = point[0] + ',' + point[1];
+        if (Object.prototype.hasOwnProperty.call(occupiedBy, key)) {
+          fail('footprints "' + occupiedBy[key] + '" and "' + id + '" overlap at ' + key);
+        }
+        occupiedBy[key] = id;
+      });
       footprints[id] = cells;
     }
 
@@ -146,7 +158,7 @@
       if (glyph !== 'f') {
         fail(id + ' target expects glyph "f" but found "' + glyph + '" at ' + target.x + ',' + target.y);
       }
-      if (G.Maps.isSolid && G.Maps.isSolid('diner', target.x, target.y, { clues: [] })) {
+      if (G.Maps.isSolid('diner', target.x, target.y, { clues: [] })) {
         fail(id + ' target must be walkable at ' + target.x + ',' + target.y + ' (glyph "' + glyph + '")');
       }
     }

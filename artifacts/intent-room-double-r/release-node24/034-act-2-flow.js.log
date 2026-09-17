@@ -1,0 +1,54 @@
+# act-2-flow: runtime path (M4)
+  ok - hospital/ronette root pre-racconto è ronette_attesa (trovato: ronette_attesa)
+  ok - diner/james root pre-racconto è james_attesa (trovato: james_attesa)
+  ok - hospital/gerard root pre-racconto è gerard_attesa
+  ok - hospital/infermiera root pre-racconto è infermiera_attesa
+  ok - ladder @100 pre-racconto
+  ok - ronette_attesa: prima entrata rende pagine
+  ok - ronette_attesa: ri-entrata rende UNA pagina COOPER (repeat), mai stub
+  ok - gerard_attesa: prima entrata rende pagine
+  ok - gerard_attesa: ri-entrata rende UNA pagina COOPER (repeat), mai stub
+  ok - infermiera_attesa: prima entrata rende pagine
+  ok - infermiera_attesa: ri-entrata rende UNA pagina COOPER (repeat), mai stub
+  ok - james_attesa: prima entrata rende pagine
+  ok - james_attesa: ri-entrata rende UNA pagina COOPER (repeat), mai stub
+  ok - truman_a2 imposta sogno_raccontato
+  ok - post-racconto: unica root hospital/ronette è ronette_q
+  ok - post-racconto: unica root diner/james è james_a2
+  ok - post-racconto: unica root hospital/gerard è gerard_a2
+  ok - ladder @200 post-racconto, pre-James
+  ok - ladder @225 dopo James, prima di Ronette
+  ok - james_a2 ripetuto rende repeat COOPER
+  ok - ronette_q entry imposta ronette_visita
+  ok - ladder @225 ancora attivo: visita aperta ma T1_RONETTE_BOB non ancora scritta
+  ok - ronette_uomo scrive T1_RONETTE_BOB
+  ok - ladder @250 dopo James e Ronette (visita completata)
+  ok - gerard_a2 ripetuto rende repeat COOPER
+  ok - infermiera_ctx ripetuto rende repeat COOPER
+  ok - ladder @300 dopo formulazione P2
+  ok - presentazione P2 accettata
+  ok - presentazione P2 rende le 6 pagine nuove (trovate: 6)
+  ok - id pagine P2 accettata nell'ordine atteso
+  ok - presentazione P2 accettata → atto3 via completion
+  ok - ladder @400 dopo accettazione
+act-2-flow: runtime path OK (32 controlli finora)
+# act-2-flow: classic path (js/data.js + js/glue.js)
+  ok - hotel_gn espone Ben Horne e Audrey
+  ok - Audrey pre-Ben Horne risolve audrey_a2
+  ok - Audrey dopo Ben Horne risolve audrey_a2_ben
+  ok - entrambe le varianti di Audrey impostano audrey_indaga
+  ok - Hawk pre-sogno risolve hawk
+  ok - Hawk post-sogno risolve hawk_a2
+  ok - Norma pre-condizioni risolve norma
+  ok - Norma con solo sogno_fatto (senza done_norma) resta su norma
+  ok - Norma con sogno_fatto e done_norma risolve norma_a2
+  ok - scrivania_315 senza evidenza risolve scrivania_315
+  ok - scrivania_315 con evidence T1_RONETTE_BOB risolve scrivania_315_bob
+  ok - ospedale espone Gerard
+  ok - Gerard è adiacente al secondo letto (11,4)
+  ok - la tile di Gerard è calpestabile
+  ok - hotel_risveglio ha 7 pagine (trovate: 7)
+  ok - ultima pagina di hotel_risveglio è di COOPER
+act-2-flow: classic path OK
+
+ACT-2-FLOW-PASS 48/48

@@ -1,0 +1,2 @@
+WARN  [read-before-write] KNOWN-OPEN: proposition_path "P7.formulation.status" is read but never written by any mission effect, and has no declared external writer [owner: M9 pass: formulate P7 or cut the dead presentation branch; found 2026-09-10, narrative-lint v0.1 first run; M9's m9_present_truman node (narrative/missions/M9.json:517) has a presentation.on.P7 branch, but no mission node anywhere formulates P7 (no {proposition: "P7", to: "formulated"} effect exists); the branch is currently dead code.]
+narrative-lint: PASS (7 checks, 1 warnings)
