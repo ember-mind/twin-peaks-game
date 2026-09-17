@@ -74,6 +74,16 @@ function m2ProgramFixture() {
   ];
   return program;
 }
+function m3ProgramFixture() {
+  const program = m2ProgramFixture();
+  program.residue = {
+    ambient: [
+      { anchor: 'front-desk', detail: 'a mug with a cooling ring', reason: 'Small signs of ordinary work keep the threshold lived-in.' },
+      { anchor: 'evidence-wall', detail: 'a clipped stack of copies', reason: 'The working surface reads as maintained without asserting a story event.' }
+    ]
+  };
+  return program;
+}
 function firstEnvironment(catalog) {
   const location = catalog.locations.find((l) => l.id === 'sheriffs-station') || catalog.locations[0];
   const environment = location && location.environments[0];
@@ -109,12 +119,26 @@ function assertFrozenProgram(program, label) {
     assert(Object.isFrozen(program.relationships), label + ' relationships frozen');
     program.relationships.forEach((relationship) => assert(Object.isFrozen(relationship), label + ' relationship frozen'));
   }
+  if (Object.prototype.hasOwnProperty.call(program, 'residue')) {
+    assert(Object.isFrozen(program.residue), label + ' residue frozen');
+    assert(Object.isFrozen(program.residue.ambient), label + ' ambient residue frozen');
+    program.residue.ambient.forEach((item) => assert(Object.isFrozen(item), label + ' ambient residue item frozen'));
+  }
 }
 function expectRejectedProgram(mutator, label, m2) {
   const context = isolated();
   const fixture = validCatalog();
   const target = attachProgram(fixture);
   if (m2) target.environment.program = m2ProgramFixture();
+  mutator(target.environment.program);
+  assert.throws(() => context.GAME.World.register(fixture), label);
+  assert.equal(context.GAME.World.catalog, undefined, label + ': rejected registration leaves no catalog');
+}
+function expectRejectedM3Program(mutator, label) {
+  const context = isolated();
+  const fixture = validCatalog();
+  const target = firstEnvironment(fixture);
+  target.environment.program = m3ProgramFixture();
   mutator(target.environment.program);
   assert.throws(() => context.GAME.World.register(fixture), label);
   assert.equal(context.GAME.World.catalog, undefined, label + ': rejected registration leaves no catalog');
@@ -251,6 +275,47 @@ expectRejectedProgram((p) => { p.relationships[0].kind = 'TOUCHES'; }, 'relation
 expectRejectedProgram((p) => { p.relationships[0].from = ''; }, 'relationship from must be non-empty', true);
 expectRejectedProgram((p) => { p.relationships[0].to = p.relationships[0].from; }, 'relationship must not reference itself', true);
 expectRejectedProgram((p) => { p.relationships[0].unexpected = 'must not be silently dropped'; }, 'relationship unknown fields must be rejected', true);
+
+// M3 ambient residue is optional authored texture: it remains JSON-only, immutable, and separate from narrative state.
+{
+  const World = isolated().GAME.World;
+  const fixture = validCatalog();
+  const target = firstEnvironment(fixture);
+  target.environment.program = m3ProgramFixture();
+  const authoredProgram = target.environment.program;
+  const registered = World.register(fixture);
+  const registeredProgram = World.getEnvironment(target.location.id, target.environment.id).program;
+  assert.deepEqual(JSON.parse(JSON.stringify(registeredProgram)), authoredProgram, 'M3 residue survives registration');
+  assert.notStrictEqual(registeredProgram.residue, authoredProgram.residue, 'residue is cloned');
+  assert.notStrictEqual(registeredProgram.residue.ambient, authoredProgram.residue.ambient, 'ambient residue list is cloned');
+  assert.notStrictEqual(registeredProgram.residue.ambient[0], authoredProgram.residue.ambient[0], 'ambient residue item is cloned');
+  assertFrozenProgram(registeredProgram, 'registered M3 program');
+  authoredProgram.residue.ambient[0].detail = 'mutated after register';
+  assert.equal(registeredProgram.residue.ambient[0].detail, 'a mug with a cooling ring', 'ambient residue is isolated from source mutation');
+  assert.strictEqual(registered, World.catalog, 'M3 registration returns the stored catalog');
+}
+
+// Residue is optional, while narrative residue and unknown residue fields are deliberately rejected.
+{
+  const World = isolated().GAME.World;
+  const fixture = validCatalog();
+  const target = attachProgram(fixture);
+  if (target.environment.program) delete target.environment.program.residue;
+  World.register(fixture);
+  const program = World.getEnvironment(target.location.id, target.environment.id).program;
+  assert(program, 'program remains present when only residue is omitted');
+  assert.equal(program.residue, undefined,
+    'program residue remains optional');
+}
+expectRejectedM3Program((p) => { p.residue = null; }, 'program residue must be an object');
+expectRejectedM3Program((p) => { p.residue.ambient = {}; }, 'residue ambient must be an array');
+expectRejectedM3Program((p) => { p.residue.ambient[0] = null; }, 'ambient residue item must be an object');
+expectRejectedM3Program((p) => { p.residue.ambient[0].anchor = ''; }, 'ambient residue anchor must be non-empty');
+expectRejectedM3Program((p) => { p.residue.ambient[0].detail = ''; }, 'ambient residue detail must be non-empty');
+expectRejectedM3Program((p) => { p.residue.ambient[0].reason = ''; }, 'ambient residue reason must be non-empty');
+expectRejectedM3Program((p) => { p.residue.ambient[0].unexpected = 'must not be silently dropped'; }, 'ambient residue unknown fields must be rejected');
+expectRejectedM3Program((p) => { p.residue.unexpected = true; }, 'residue unknown fields must be rejected');
+expectRejectedM3Program((p) => { p.residue.narrative = []; }, 'narrative residue must remain absent');
 
 {
   const World = isolated().GAME.World;

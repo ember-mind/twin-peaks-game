@@ -36,3 +36,11 @@ The Program now gives selected furniture an optional contribution: function, atm
 | Warm task light was weak against broad cool floor. | Expand the desk lamp's stepped reflection by a few native pixels. | Warm accent reads locally, without a global light wash. |
 
 Before: [native frame](../artifacts/intent-room-sheriff/before-native.png). After: [M2 native frame](../artifacts/intent-room-sheriff/after-m2-native.png). Both use the same scene, spawn `(7,10)`, facing up, narrative population enabled. Furniture footprints, map rows, door registry, actor windows, and collisions are unchanged. The change is authored visual weighting, not generated clutter.
+
+## M3 ordinary life and narrative boundary
+
+The Program classifies existing mug/steam, desk papers/phone/lamp, file-bank plant, reception forms/tray/phone, and secondary desk stationery as **ambient residue**. These are visible in native art already; steam and lamp variation already have Ambient Life registrations. No random scattering, new prop registry, or duplicate artwork was added in M3. The M2 after frame is also the M3 frame.
+
+No Sheriff's Station detail in the current scene safely proves a specific canonical event. The pilot therefore has **no narrative residue**. The current schema rejects a `residue.narrative` field rather than accepting unconditioned story claims. A later narrative-residue entry should be authored only after naming an existing durable Narrative Runtime condition, deriving a read-only scene-state boolean (as traincar art already does), and rendering a non-interactive trace from that state. Program metadata would describe that trace; Narrative Runtime would remain its owner. No new story fact is introduced here.
+
+Independent source audit matched all five ambient entries to visible native art. Anchor IDs are checked against scene footprints in the pilot test. The wording of a detail is an authoring claim, not something a schema can prove; Room Critic must compare it with the rendered scene.

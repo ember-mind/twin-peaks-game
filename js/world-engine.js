@@ -51,7 +51,7 @@
   /* Authoring metadata only. No spatial or actor state is owned here. */
   function copyProgram(source, label) {
     requireRecord(source, label);
-    requireKeys(source, ['intent', 'visualGoals', 'activities', 'groups', 'contributions', 'relationships'], label);
+    requireKeys(source, ['intent', 'visualGoals', 'activities', 'groups', 'contributions', 'relationships', 'residue'], label);
     var intent = requireRecord(source.intent, label + '.intent');
     requireKeys(intent, ['function', 'playerExperience', 'tone'], label + '.intent');
     var activityIds = Object.create(null);
@@ -136,6 +136,21 @@
           reason: requireId(item.reason, at + '.reason')
         });
       }));
+    }
+    if (Object.prototype.hasOwnProperty.call(source, 'residue')) {
+      var residue = requireRecord(source.residue, label + '.residue');
+      /* Narrative residue needs a canonical-state binding; do not accept an inert story claim. */
+      requireKeys(residue, ['ambient'], label + '.residue');
+      copy.residue = Object.freeze({ ambient: Object.freeze(requireList(residue.ambient, label + '.residue.ambient').map(function (item, index) {
+        var at = label + '.residue.ambient[' + index + ']';
+        requireRecord(item, at);
+        requireKeys(item, ['anchor', 'detail', 'reason'], at);
+        return Object.freeze({
+          anchor: requireId(item.anchor, at + '.anchor'),
+          detail: requireId(item.detail, at + '.detail'),
+          reason: requireId(item.reason, at + '.reason')
+        });
+      })) });
     }
     return Object.freeze(copy);
   }

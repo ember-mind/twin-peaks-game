@@ -62,7 +62,14 @@
               { kind: 'NEAR', from: 'sheriffChair', to: 'sheriffDesk', reason: 'A working seat belongs beside the primary desk.' },
               { kind: 'NEAR', from: 'receptionReturn', to: 'reception', reason: 'Return and counter read as one public threshold.' },
               { kind: 'REACHABLE', from: 'entrance', to: 'sheriffDesk', reason: 'Visitor can move from front door toward the primary work area.' }
-            ]
+            ],
+            residue: { ambient: [
+              { anchor: 'sheriffDesk', detail: 'One mug with steam', reason: 'An ordinary sign that desk work is ongoing; it asserts no story event.' },
+              { anchor: 'sheriffDesk', detail: 'Case papers, phone, and working lamp', reason: 'A used workspace with a warm focal point, not random clutter.' },
+              { anchor: 'files', detail: 'One plant on the filing bank', reason: 'Softens repeated steel silhouettes and implies everyday care.' },
+              { anchor: 'reception', detail: 'Phone, in-tray, and public forms', reason: 'Routine intake is visible at the visitor threshold.' },
+              { anchor: 'rightDeskNorth', detail: 'Paper and desk stationery', reason: 'Shows secondary work without inventing a specific case.' }
+            ] }
           } }
         ],
         connections: ['sheriffs-station-front-entrance', 'town-sheriffs-station-lot']

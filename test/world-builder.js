@@ -137,6 +137,26 @@
       Array.isArray(contribution.contributesTo) && contribution.contributesTo.length > 0 &&
       contribution.contributesTo.every(function (category) { return contributionCategories.indexOf(category) !== -1; });
   }));
+  var sheriffResidue = sheriffSnapshotProgram && sheriffSnapshotProgram.residue;
+  var sheriffAmbientResidue = sheriffResidue && sheriffResidue.ambient || [];
+  var sheriffCatalogResidue = sheriffProgram && sheriffProgram.residue;
+  ok('Builder owns and freezes Sheriff ambient residue',
+    !!sheriffCatalogResidue && !!sheriffResidue && sheriffAmbientResidue.length > 0 &&
+    sheriffResidue !== sheriffCatalogResidue && sheriffAmbientResidue !== sheriffCatalogResidue.ambient &&
+    Object.isFrozen(sheriffResidue) && Object.isFrozen(sheriffAmbientResidue) &&
+    Object.isFrozen(sheriffAmbientResidue[0]));
+  ok('Sheriff ambient residue anchors resolve against station footprints',
+    sheriffAmbientResidue.length > 0 && sheriffAmbientResidue.every(function (item) {
+      return Object.prototype.hasOwnProperty.call(sheriffFootprints || {}, item.anchor) &&
+        typeof item.detail === 'string' && item.detail.length > 0 &&
+        typeof item.reason === 'string' && item.reason.length > 0;
+    }));
+  ok('Sheriff program has no narrative residue field',
+    !!sheriffProgram && !!sheriffSnapshotProgram &&
+    !Object.prototype.hasOwnProperty.call(sheriffProgram, 'narrative') &&
+    !Object.prototype.hasOwnProperty.call(sheriffSnapshotProgram, 'narrative') &&
+    !!sheriffResidue && !Object.prototype.hasOwnProperty.call(sheriffResidue, 'narrative') &&
+    !!sheriffCatalogResidue && !Object.prototype.hasOwnProperty.call(sheriffCatalogResidue, 'narrative'));
   var sheriffRelationships = sheriffSnapshotProgram && sheriffSnapshotProgram.relationships || [];
   var nearRelationships = sheriffRelationships.filter(function (relationship) { return relationship.kind === 'NEAR'; });
   ok('Sheriff NEAR relationships use tile-adjacent footprints', nearRelationships.length > 0 && nearRelationships.every(function (relationship) {

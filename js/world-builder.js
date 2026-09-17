@@ -665,6 +665,12 @@
           row(programBox, item.from + ' ' + item.kind + ' ' + item.to, item.reason);
         });
       }
+      if (program.residue && program.residue.ambient.length) {
+        programBox.appendChild(el('h3', null, 'AMBIENT RESIDUE'));
+        program.residue.ambient.forEach(function (item) {
+          row(programBox, item.anchor + ' · ' + item.detail, item.reason);
+        });
+      }
     }
 
     function renderCreate() {
