@@ -154,13 +154,15 @@
 
     var locations = (catalog.locations || []).map(function (loc) {
       var environments = (loc.environments || []).map(function (env) {
-        return {
+        var environment = {
           id: env.id,
           name: humanize(env.id),
           sceneId: env.sceneId,
             // indoor follows the live map when present; null if the scene isn't loaded yet.
           indoor: scenesById[env.sceneId] ? scenesById[env.sceneId].indoor : null
           };
+        if (env.program) environment.program = clone(env.program);
+        return environment;
         });
       environments.forEach(function (env) {
         if (scenesById[env.sceneId]) scenesById[env.sceneId].locationId = loc.id;

@@ -7,7 +7,7 @@
 //
 // Snapshot contract consumed (see buildWorldSnapshot):
 //   { tile, sceneCount, locationCount,
-//     locations:[{id,name,environments:[{id,name,sceneId,indoor}],connections:[cid]}],
+//     locations:[{id,name,environments:[{id,name,sceneId,indoor,program?}],connections:[cid]}],
 //     scenes:{[sceneId]:{sceneId,name,locationId,width,height,indoor,rows:string[]|null,
 //                        overlayCount,overlays:[{kind:'exit'|'object'|'npc',tx,ty,w,h,...}]}},
 //     connections:[{id,a:{endpoint,scene,triggers[],spawn|null},b:{...}}],

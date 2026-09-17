@@ -26,7 +26,32 @@
         id: 'sheriffs-station',
         environments: [
           { id: 'exterior', sceneId: 'sheriffs_station_exterior' },
-          { id: 'interior', sceneId: 'sheriff' }
+          { id: 'interior', sceneId: 'sheriff', program: {
+            intent: {
+              function: 'A small-town station for reception, case work, waiting, and conversation.',
+              playerExperience: 'Arrive easily, read the work areas, and feel familiar routine with a faint unease.',
+              tone: 'Functional, warm, lived-in, and imperfect rather than ceremonial.'
+            },
+            visualGoals: [
+              { id: 'warm-focus', aim: 'Sheriff desk and task lamp form the primary warm focal point.' },
+              { id: 'edge-density', aim: 'Work density gathers around the edges; entrance-to-desk circulation stays visually quiet.' },
+              { id: 'material-contrast', aim: 'Steel and institutional green are softened by oak, paper, plant, and warm light.' },
+              { id: 'controlled-asymmetry', aim: 'Left reception and files balance right desks without mirror symmetry or random clutter.' }
+            ],
+            activities: [
+              { id: 'reception', description: 'Receive visitors and handle calls or paperwork.' },
+              { id: 'case-work', description: 'Review files, make calls, and work at desks.' },
+              { id: 'waiting', description: 'Wait near the entrance without blocking circulation.' },
+              { id: 'conversation', description: 'Talk across the public-to-staff boundary.' }
+            ],
+            groups: [
+              { id: 'sheriff-work', role: 'Primary work focal point', anchors: ['sheriffDesk', 'sheriffChair'], activities: ['case-work', 'conversation'], visual: 'Compact, warm, occupied; strongest local light.' },
+              { id: 'records', role: 'Institutional storage mass', anchors: ['files'], activities: ['case-work'], visual: 'Tall, cool, orderly; softened by one plant.' },
+              { id: 'reception', role: 'Public-to-staff threshold', anchors: ['reception', 'receptionReturn'], activities: ['reception', 'conversation'], visual: 'Grounded oak counter; readable from entrance.' },
+              { id: 'waiting', role: 'Quiet pause near arrival', anchors: ['bench'], activities: ['waiting'], visual: 'Low-density, simple silhouette; does not block aisle.' },
+              { id: 'shared-work', role: 'Secondary everyday work', anchors: ['rightDeskNorth', 'rightChairNorth', 'rightDeskSouth', 'rightChairSouth'], activities: ['case-work'], visual: 'Repeated desks with lighter emphasis than sheriff work.' }
+            ]
+          } }
         ],
         connections: ['sheriffs-station-front-entrance', 'town-sheriffs-station-lot']
       },

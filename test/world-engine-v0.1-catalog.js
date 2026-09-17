@@ -24,6 +24,69 @@ function isolated(maps) {
 function validCatalog() {
   return JSON.parse(JSON.stringify(canonicalFixture));
 }
+
+// Optional environment.program contract used by the authored Sheriff environment. Keep the fixture
+// intentionally JSON-only: this is the same shape that must survive World.register() and the Builder
+// snapshot boundary (functions would be dropped by the canonical JSON/export pipeline).
+function programFixture() {
+  return {
+    intent: {
+      function: 'orient the investigation through the station',
+      playerExperience: 'read the station as a working place before it becomes a case surface',
+      tone: 'procedural pressure'
+    },
+    visualGoals: [
+      { id: 'front-desk', aim: 'make the public threshold immediately legible' },
+      { id: 'evidence-wall', aim: 'give the room a visible investigative anchor' }
+    ],
+    activities: [
+      { id: 'intake', description: 'deputies receive people and information' },
+      { id: 'review', description: 'the team compares clues at the wall' }
+    ],
+    groups: [
+      {
+        id: 'station-team',
+        role: 'working deputies',
+        anchors: ['front-desk', 'evidence-wall'],
+        activities: ['intake', 'review'],
+        visual: 'clustered around the public and investigative anchors'
+      }
+    ]
+  };
+}
+function firstEnvironment(catalog) {
+  const location = catalog.locations.find((l) => l.id === 'sheriffs-station') || catalog.locations[0];
+  const environment = location && location.environments[0];
+  assert(location && environment, 'fixture must contain at least one environment');
+  return { location, environment };
+}
+function attachProgram(catalog) {
+  const target = firstEnvironment(catalog);
+  if (!target.environment.program) target.environment.program = programFixture();
+  return target;
+}
+function assertFrozenProgram(program, label) {
+  assert(Object.isFrozen(program), label + ' program frozen');
+  assert(Object.isFrozen(program.intent), label + ' intent frozen');
+  assert(Object.isFrozen(program.visualGoals), label + ' visualGoals frozen');
+  assert(Object.isFrozen(program.activities), label + ' activities frozen');
+  assert(Object.isFrozen(program.groups), label + ' groups frozen');
+  program.visualGoals.forEach((goal) => assert(Object.isFrozen(goal), label + ' visual goal frozen'));
+  program.activities.forEach((activity) => assert(Object.isFrozen(activity), label + ' activity frozen'));
+  program.groups.forEach((group) => {
+    assert(Object.isFrozen(group), label + ' group frozen');
+    assert(Object.isFrozen(group.anchors), label + ' group anchors frozen');
+    assert(Object.isFrozen(group.activities), label + ' group activities frozen');
+  });
+}
+function expectRejectedProgram(mutator, label) {
+  const context = isolated();
+  const fixture = validCatalog();
+  const target = attachProgram(fixture);
+  mutator(target.environment.program);
+  assert.throws(() => context.GAME.World.register(fixture), label);
+  assert.equal(context.GAME.World.catalog, undefined, label + ': rejected registration leaves no catalog');
+}
 function expectRejected(mutator, maps) {
   const context = isolated(maps);
   const fixture = validCatalog();
@@ -45,12 +108,24 @@ function expectRejected(mutator, maps) {
   assert.equal(World.getConnections(), undefined);
   assert.equal(World.getConnections('missing'), undefined);
   const input = validCatalog();
+  const authoredProgramTarget = attachProgram(input);
+  const authoredProgram = authoredProgramTarget.environment.program;
+  const authoredFunction = authoredProgram.intent.function;
+  const authoredGoal = authoredProgram.visualGoals[0].aim;
   const registered = World.register(input);
   assert.strictEqual(registered, World.catalog, 'register returns stored catalog');
   assert.notStrictEqual(registered, input, 'catalog is copied');
   for (const value of [registered, registered.locations, registered.locations[0], registered.locations[0].environments, registered.locations[0].environments[0], registered.locations[0].connections]) assert(Object.isFrozen(value));
+  const registeredProgram = World.getEnvironment(authoredProgramTarget.location.id, authoredProgramTarget.environment.id).program;
+  assert.deepEqual(JSON.parse(JSON.stringify(registeredProgram)), authoredProgram, 'optional environment.program survives registration');
+  assert.notStrictEqual(registeredProgram, authoredProgram, 'environment.program is cloned');
+  assertFrozenProgram(registeredProgram, 'registered environment.program');
   input.id = 'mutated'; input.locations[0].id = 'mutated'; input.locations[0].environments[0].sceneId = 'mutated'; input.locations[0].connections.push('mutated');
+  authoredProgram.intent.function = 'mutated after register';
+  authoredProgram.visualGoals[0].aim = 'mutated after register';
   assert.equal(registered.id, 'twin-peaks', 'source mutations cannot alter registered catalog');
+  assert.equal(registeredProgram.intent.function, authoredFunction, 'program intent is isolated from source mutation');
+  assert.equal(registeredProgram.visualGoals[0].aim, authoredGoal, 'program nested records are isolated from source mutation');
   assert.equal(World.getLocation('double-r').id, 'double-r');
   assert.equal(World.getEnvironment('double-r', 'exterior').sceneId, 'double_r_exterior_prototype');
   assert.equal(World.getEnvironment('double-r', 'interior').sceneId, 'diner', 'environment IDs are location-scoped');
@@ -70,6 +145,32 @@ function expectRejected(mutator, maps) {
   }
   assert.throws(() => World.register(validCatalog()), 'only one catalog may be registered');
 }
+
+// `program` is optional: legacy environments without one remain valid and expose no synthetic default.
+{
+  const World = isolated().GAME.World;
+  const fixture = validCatalog();
+  const target = firstEnvironment(fixture);
+  delete target.environment.program;
+  World.register(fixture);
+  assert.equal(World.getEnvironment(target.location.id, target.environment.id).program, undefined,
+    'environment without program remains valid and has no default program');
+}
+
+// Program shape validation: malformed records, duplicate ids, and dangling activity references fail before
+// any catalog/index state is installed. The exact diagnostic is implementation-owned; this gate is about
+// rejecting the invalid authored shape and preserving the one-shot registration boundary.
+expectRejectedProgram((p) => { p.intent = null; }, 'program intent must be an object');
+expectRejectedProgram((p) => { p.intent.function = ''; }, 'program intent.function must be non-empty');
+expectRejectedProgram((p) => { p.visualGoals = {}; }, 'program visualGoals must be an array');
+expectRejectedProgram((p) => { p.visualGoals[0].id = ''; }, 'program visual goal id must be non-empty');
+expectRejectedProgram((p) => { p.activities[0].description = null; }, 'program activity description must be a string');
+expectRejectedProgram((p) => { p.groups[0].anchors = 'front-desk'; }, 'program group anchors must be an array');
+expectRejectedProgram((p) => { p.visualGoals.push({ id: 'front-desk', aim: 'duplicate id' }); }, 'program visual goal ids must be unique');
+expectRejectedProgram((p) => { p.activities.push({ id: 'intake', description: 'duplicate id' }); }, 'program activity ids must be unique');
+expectRejectedProgram((p) => { p.groups.push({ id: 'station-team', role: 'duplicate id', anchors: [], activities: [], visual: 'duplicate id' }); }, 'program group ids must be unique');
+expectRejectedProgram((p) => { p.groups[0].activities = ['missing-activity']; }, 'program group activity references must resolve');
+expectRejectedProgram((p) => { p.unexpected = 'must not be silently dropped'; }, 'program unknown fields must be rejected');
 
 {
   const World = isolated().GAME.World;
@@ -158,6 +259,11 @@ assert(World.getConnections('red-room').includes('woods-redroom-dream') && World
 assert.deepEqual(World.getLocation('sheriffs-station').environments.map(environment => environment.id), ['exterior', 'interior']);
 assert.equal(World.getEnvironment('sheriffs-station', 'exterior').sceneId, 'sheriffs_station_exterior');
 assert.equal(World.getEnvironment('sheriffs-station', 'interior').sceneId, 'sheriff');
+const sheriffProgramEnvironment = World.getLocation('sheriffs-station').environments.find(environment => environment.program);
+assert(sheriffProgramEnvironment, 'real Sheriff catalog carries an environment.program');
+assertFrozenProgram(sheriffProgramEnvironment.program, 'real Sheriff environment.program');
+assert.strictEqual(World.getEnvironment('sheriffs-station', sheriffProgramEnvironment.id).program, sheriffProgramEnvironment.program,
+  'getEnvironment exposes the canonical Sheriff program');
 assert.equal(World.getLocationForScene('sheriff').id, 'sheriffs-station');
 assert.deepEqual(World.getLocation('double-r').environments.map(environment => environment.id), ['exterior', 'interior']);
 assert.equal(World.getEnvironment('double-r', 'exterior').sceneId, 'double_r_exterior_prototype');

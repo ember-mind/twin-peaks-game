@@ -71,6 +71,30 @@
   ok('hospital joins town through town-hospital', byId['hospital'] && JSON.stringify(byId['hospital'].connections) === '["town-hospital"]');
   ok('town is a single-environment location', byId['town'] && byId['town'].environments.length === 1 && byId['town'].environments[0].sceneId === 'town');
 
+  // Optional authored environment programs must cross the catalog -> Builder snapshot boundary as
+  // owned, immutable data. The generic World engine validates activity references; scene-specific
+  // anchor names are checked here against the Sheriff scene's canonical footprint registry.
+  var sheriffCatalogEnvironment = G.World && G.World.getEnvironment && G.World.getEnvironment('sheriffs-station', 'interior');
+  var sheriffSnapshotEnvironment = byId['sheriffs-station'] && byId['sheriffs-station'].environments.filter(function (e) {
+    return e.sceneId === 'sheriff';
+  })[0];
+  var sheriffProgram = sheriffCatalogEnvironment && sheriffCatalogEnvironment.program;
+  var sheriffSnapshotProgram = sheriffSnapshotEnvironment && sheriffSnapshotEnvironment.program;
+  ok('Sheriff environment.program reaches the Builder snapshot',
+    !!sheriffProgram && !!sheriffSnapshotProgram && JSON.stringify(sheriffSnapshotProgram) === JSON.stringify(sheriffProgram));
+  ok('Builder owns and freezes the Sheriff environment.program',
+    !!sheriffProgram && !!sheriffSnapshotProgram && sheriffSnapshotProgram !== sheriffProgram &&
+    Object.isFrozen(sheriffSnapshotProgram) && Object.isFrozen(sheriffSnapshotProgram.intent) &&
+    Object.isFrozen(sheriffSnapshotProgram.visualGoals) && Object.isFrozen(sheriffSnapshotProgram.activities) &&
+    Object.isFrozen(sheriffSnapshotProgram.groups));
+  var sheriffFootprints = G.SheriffsStationScene && G.SheriffsStationScene.layout && G.SheriffsStationScene.layout.footprints;
+  var sheriffAnchorsResolve = !!sheriffSnapshotProgram && !!sheriffFootprints && sheriffSnapshotProgram.groups.every(function (group) {
+    return group.anchors.every(function (anchor) {
+      return Object.prototype.hasOwnProperty.call(sheriffFootprints, anchor);
+    });
+  });
+  ok('Sheriff program anchors resolve against SheriffsStationScene.layout.footprints', sheriffAnchorsResolve);
+
    // scene table only contains real scenes (helper fns filtered out)
   var sceneKeys = Object.keys(snap.scenes);
   ok('no helper-function keys leaked into scenes',

@@ -154,6 +154,7 @@
     var side = main.appendChild(el('aside', { id: 'wb-side' }));
     var noticeBox = side.appendChild(el('div', { id: 'wb-notice' }));
     var insp = side.appendChild(el('div', { id: 'wb-inspector' }));
+    var programBox = side.appendChild(el('div', { id: 'wb-program' }));
     var valBox = side.appendChild(el('div', { id: 'wb-validation' }));
     var exportBox = side.appendChild(el('div', { id: 'wb-export' }));
 
@@ -623,6 +624,36 @@
       return b;
     }
     function fmtTile(t) { return t[0] + ',' + t[1]; }
+
+    function renderProgram() {
+      programBox.textContent = '';
+      var environment;
+      Object.keys(model.locationsById).some(function (locationId) {
+        var location = model.locationsById[locationId];
+        environment = location.environments.find(function (item) { return item.sceneId === ui.sceneId; });
+        return !!environment;
+      });
+      if (!environment || !environment.program) return;
+      var program = environment.program;
+      programBox.appendChild(el('h2', null, 'ENVIRONMENT PROGRAM · READ ONLY'));
+      programBox.appendChild(el('h3', null, 'INTENT'));
+      row(programBox, 'FUNCTION', program.intent.function);
+      row(programBox, 'PLAYER EXPERIENCE', program.intent.playerExperience);
+      row(programBox, 'TONE', program.intent.tone);
+      programBox.appendChild(el('h3', null, 'VISUAL GOALS'));
+      program.visualGoals.forEach(function (goal) { row(programBox, goal.id, goal.aim); });
+      programBox.appendChild(el('h3', null, 'ACTIVITIES'));
+      program.activities.forEach(function (activity) { row(programBox, activity.id, activity.description); });
+      programBox.appendChild(el('h3', null, 'GROUPS'));
+      program.groups.forEach(function (group) {
+        var item = programBox.appendChild(el('div', { class: 'wb-program-group' }));
+        item.appendChild(el('div', { class: 'wb-id' }, group.id));
+        row(item, 'ROLE', group.role);
+        row(item, 'ANCHORS', group.anchors.join(', '));
+        row(item, 'ACTIVITIES', group.activities.join(', '));
+        row(item, 'VISUAL', group.visual);
+      });
+    }
 
     function renderCreate() {
       var c = ui.creating;
@@ -1233,6 +1264,7 @@
       noticeBox.textContent = '';
       if (ui.notice) noticeBox.appendChild(el('div', { class: ui.notice.level === 'error' ? 'wb-warn' : 'wb-hint' }, ui.notice.text));
       renderInspector(list);
+      renderProgram();
       renderValidation(errs);
       renderExport(errs);
     }

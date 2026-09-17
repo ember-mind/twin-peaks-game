@@ -834,6 +834,36 @@ async function main() {
       check('case 15: REVERT ALL clears both drafts', s.unsaved === 0 && s.castOps.length === 0, s.unsaved);
       check('case 15: world/connections.json and narrative/cast/windows.json unchanged', sha() === shaStart && windowsSha() === windowsShaStart);
     }
+
+    // ---------------- case 20 (M1): scene-scoped environment program
+    {
+      console.log('\ncase 20: sheriff environment program is read-only and scene-scoped');
+      await load();
+      await setSelect('wb-scene', 'sheriff');
+      const program = await cdp.eval(`(() => {
+        const box = document.getElementById('wb-program');
+        return {
+          exists: !!box,
+          text: box ? box.innerText : '',
+          headings: box ? Array.from(box.querySelectorAll('h2,h3')).map((e) => e.textContent.trim()) : [],
+          controls: box ? box.querySelectorAll('button,input,select,textarea,[contenteditable="true"]').length : -1
+        };
+      })()`);
+      check('case 20: sheriff scene shows the read-only environment program',
+        program.exists && program.text.includes('ENVIRONMENT PROGRAM · READ ONLY') &&
+        ['INTENT', 'VISUAL GOALS', 'ACTIVITIES', 'GROUPS'].every((heading) => program.headings.includes(heading)), program);
+      check('case 20: sheriff-work group exposes sheriffDesk and sheriffChair anchors',
+        program.text.includes('sheriff-work') && /ANCHORS\s+sheriffDesk, sheriffChair/.test(program.text), program.text);
+      check('case 20: sheriff environment program has no editable controls', program.controls === 0, program);
+
+      await setSelect('wb-scene', 'sheriffs_station_exterior');
+      const exteriorProgram = await cdp.eval(`(() => {
+        const box = document.getElementById('wb-program');
+        return { exists: !!box, empty: !!box && box.textContent.trim() === '', headings: box ? box.querySelectorAll('h2,h3').length : -1 };
+      })()`);
+      check('case 20: non-sheriff scene has no environment program panel',
+        exteriorProgram.exists && exteriorProgram.empty && exteriorProgram.headings === 0, exteriorProgram);
+    }
    }
 
     const dryRun = (file, name) => {

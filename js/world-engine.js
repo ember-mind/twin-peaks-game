@@ -25,6 +25,87 @@
     }
   }
 
+  function requireRecord(value, label) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) fail(label + ' must be an object');
+    return value;
+  }
+
+  function requireKeys(value, allowed, label) {
+    Object.keys(value).forEach(function (key) {
+      if (allowed.indexOf(key) === -1) fail(label + ' has unknown field "' + key + '"');
+    });
+  }
+
+  function requireList(value, label) {
+    if (!Array.isArray(value)) fail(label + ' must be an array');
+    requireDense(value, label);
+    return value;
+  }
+
+  function copyStrings(value, label) {
+    return Object.freeze(requireList(value, label).map(function (item, index) {
+      return requireId(item, label + '[' + index + ']');
+    }));
+  }
+
+  /* Authoring metadata only. No spatial or actor state is owned here. */
+  function copyProgram(source, label) {
+    requireRecord(source, label);
+    requireKeys(source, ['intent', 'visualGoals', 'activities', 'groups'], label);
+    var intent = requireRecord(source.intent, label + '.intent');
+    requireKeys(intent, ['function', 'playerExperience', 'tone'], label + '.intent');
+    var activityIds = Object.create(null);
+    var groupIds = Object.create(null);
+    var goalIds = Object.create(null);
+    var activities = requireList(source.activities, label + '.activities').map(function (activity, index) {
+      var at = label + '.activities[' + index + ']';
+      requireRecord(activity, at);
+      requireKeys(activity, ['id', 'description'], at);
+      var id = requireId(activity.id, at + '.id');
+      if (activityIds[id]) fail('duplicate activity id "' + id + '" in ' + label);
+      activityIds[id] = true;
+      return Object.freeze({ id: id, description: requireId(activity.description, at + '.description') });
+    });
+    var goals = requireList(source.visualGoals, label + '.visualGoals').map(function (goal, index) {
+      var at = label + '.visualGoals[' + index + ']';
+      requireRecord(goal, at);
+      requireKeys(goal, ['id', 'aim'], at);
+      var id = requireId(goal.id, at + '.id');
+      if (goalIds[id]) fail('duplicate visual goal id "' + id + '" in ' + label);
+      goalIds[id] = true;
+      return Object.freeze({ id: id, aim: requireId(goal.aim, at + '.aim') });
+    });
+    var groups = requireList(source.groups, label + '.groups').map(function (group, index) {
+      var at = label + '.groups[' + index + ']';
+      requireRecord(group, at);
+      requireKeys(group, ['id', 'role', 'anchors', 'activities', 'visual'], at);
+      var id = requireId(group.id, at + '.id');
+      if (groupIds[id]) fail('duplicate group id "' + id + '" in ' + label);
+      groupIds[id] = true;
+      var groupActivities = copyStrings(group.activities, at + '.activities');
+      groupActivities.forEach(function (activityId) {
+        if (!activityIds[activityId]) fail(at + ' references unknown activity "' + activityId + '"');
+      });
+      return Object.freeze({
+        id: id,
+        role: requireId(group.role, at + '.role'),
+        anchors: copyStrings(group.anchors, at + '.anchors'),
+        activities: groupActivities,
+        visual: requireId(group.visual, at + '.visual')
+      });
+    });
+    return Object.freeze({
+      intent: Object.freeze({
+        function: requireId(intent.function, label + '.intent.function'),
+        playerExperience: requireId(intent.playerExperience, label + '.intent.playerExperience'),
+        tone: requireId(intent.tone, label + '.intent.tone')
+      }),
+      visualGoals: Object.freeze(goals),
+      activities: Object.freeze(activities),
+      groups: Object.freeze(groups)
+    });
+  }
+
   function prepare(source) {
     if (!source || typeof source !== 'object' || Array.isArray(source)) fail('catalog must be an object');
     var worldId = requireId(source.id, 'catalog.id');
@@ -68,7 +149,11 @@
           fail('map "' + sceneId + '" does not exist');
         }
         environmentIds[environmentId] = true;
-        var copy = Object.freeze({ id: environmentId, sceneId: sceneId });
+        var environmentCopy = { id: environmentId, sceneId: sceneId };
+        if (Object.prototype.hasOwnProperty.call(environment, 'program')) {
+          environmentCopy.program = copyProgram(environment.program, environmentLabel + '.program');
+        }
+        var copy = Object.freeze(environmentCopy);
         environmentIndex[environmentId] = copy;
         nextLocationsByScene[sceneId] = locationId;
         return copy;
