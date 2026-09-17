@@ -115,3 +115,4 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-15 5951a02 opus/debt-probes-adapter → main: pacing probes on Cast Presence, WORLD_TARGETS gap list, 5 files mirrored
 - 2026-09-16 44ac895 opus/world-builder-m9-props → main: prop registry data layer, flag off, 11 files mirrored
 - 2026-09-17 da1790b main: M10a depth (7aca0e9), Deep loglady + ambient-life-01, GPT Playable Build 01 (#3–#15, #5 minus CLAUDE.md), muted Chrome drivers, gen regenerated; 106 files mirrored
+- 2026-09-17 9b71b48 main: M10 confession-lock rulings v1.1.2 (SG-3/5/6/8), CLAUDE.md rewrite; 4 files mirrored
