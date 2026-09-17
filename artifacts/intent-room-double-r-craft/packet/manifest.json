@@ -1,0 +1,115 @@
+{
+  "packet": "intent-room-double-r-craft",
+  "capturedAtUtc": "2026-09-17T21:07:27Z",
+  "sourceRevision": "7472a39143636dfaf282da6a0041f07082d6a1c2",
+  "scene": {
+    "map": "diner",
+    "camera": {
+      "viewport": [256, 192],
+      "playerTile": [6, 8],
+      "playerFacing": "up",
+      "mapPixelSize": [224, 160],
+      "mapOffsetInViewport": [16, 16],
+      "note": "The 14x10 diner map is smaller than the fixed native viewport and is centered; no composed camera crop or zoom is used."
+    }
+  },
+  "captures": [
+    {
+      "id": "normal-populated",
+      "file": "normal-populated-native.png",
+      "dimensions": [256, 192],
+      "sha256": "84ba070a78a264e3b56f37f154ae46915205b4052f7ed0c1702ee2fbb1b03bd4",
+      "command": "node test/native-shot.js --map=diner --x=6 --y=8 --dir=up --narrative=1 --out=artifacts/intent-room-double-r-craft/packet/normal-populated-native.png",
+      "state": "NarrativeAdapter enabled with its default state; baseline Cast Presence is resolved."
+    },
+    {
+      "id": "unpopulated",
+      "file": "unpopulated-native.png",
+      "dimensions": [256, 192],
+      "sha256": "3711b15478956f35dcd4a805fcb5c0b29ede86afb39c9a9617a25b86c49c0bce",
+      "command": "node test/native-shot.js --map=diner --x=6 --y=8 --dir=up --out=artifacts/intent-room-double-r-craft/packet/unpopulated-native.png",
+      "state": "No NarrativeAdapter/Cast injection; architectural and authored ambient layers remain."
+    },
+    {
+      "id": "act4-maddy-leland",
+      "file": "act4-maddy-leland-native.png",
+      "dimensions": [256, 192],
+      "sha256": "4f1b98aaf32775f010b028ebe62fc4fcfc65c0355e65b7b481e5b73414d075b3",
+      "command": "node -e \"const f=require('./test/fixtures/cast-pins-acts-1-4.json');const s=f.seeds.ACT4_AFTERNOON;const {spawnSync}=require('node:child_process');const a=['test/native-shot.js','--map=diner','--x=6','--y=8','--dir=up','--narrative=1','--nstate='+Buffer.from(JSON.stringify(s)).toString('base64'),'--out=artifacts/intent-room-double-r-craft/packet/act4-maddy-leland-native.png'];const r=spawnSync(process.execPath,a,{stdio:'inherit'});process.exit(r.status===null?2:r.status);\"",
+      "state": {
+        "source": "test/fixtures/cast-pins-acts-1-4.json",
+        "selector": "seeds.ACT4_AFTERNOON",
+        "sha256OfJsonBytes": "94ec48ba3e2517c50f13f5ebb027b4eb021e8e4be4ae1d381b262c8da746d358",
+        "expectedDinerCast": [
+          "maddy@diner:10,1",
+          "leland@diner:11,1",
+          "norma@diner:5,2",
+          "shelly@diner:9,7",
+          "loglady@diner:4,5",
+          "james@diner:9,6"
+        ]
+      }
+    }
+  ],
+  "boothTableCrop": {
+    "sourceFiles": ["normal-populated-native.png", "unpopulated-native.png"],
+    "mapAnchor": "interior.booths[2] = [1,8,3] (lower-left booth)",
+    "crop": {
+      "x": 24,
+      "y": 128,
+      "width": 64,
+      "height": 48,
+      "inclusivePixels": "x=24..87, y=128..175",
+      "reason": "The booth backrest begins at map pixel y=128; the 48x64 window includes its three-tile module, table, guest/table state, contact shadow, south floor edge, and an 8px side margin."
+    },
+    "native": [
+      {
+        "file": "booth-table-populated-native.png",
+        "dimensions": [64, 48],
+        "sha256": "b4c6ddb44569b4a4aee27bb103e9216ed83085e7e22597c12238482fa8f01389",
+        "command": "magick normal-populated-native.png -crop 64x48+24+128 +repage booth-table-populated-native.png"
+      },
+      {
+        "file": "booth-table-unpopulated-native.png",
+        "dimensions": [64, 48],
+        "sha256": "35e89a2892e8417222706b640b9e6b23cbf9ebb0526d0f6a32ed7a87b30a11a7",
+        "command": "magick unpopulated-native.png -crop 64x48+24+128 +repage booth-table-unpopulated-native.png"
+      }
+    ],
+    "nearest4x": [
+      {
+        "file": "booth-table-populated-4x.png",
+        "dimensions": [256, 192],
+        "sha256": "69192471af091b73cf464a3cf716f697897d8f49acf1d543a9cc2981cc8b80ad",
+        "command": "magick booth-table-populated-native.png -filter point -resize 400% -strip booth-table-populated-4x.png"
+      },
+      {
+        "file": "booth-table-unpopulated-4x.png",
+        "dimensions": [256, 192],
+        "sha256": "69192471af091b73cf464a3cf716f697897d8f49acf1d543a9cc2981cc8b80ad",
+        "command": "magick booth-table-unpopulated-native.png -filter point -resize 400% -strip booth-table-unpopulated-4x.png"
+      }
+    ],
+    "note": "The two booth crops are byte-identical: this authored lower-left guest is map.interior visual life, not a named Cast Presence body. The whole-room frames carry the named Cast differences."
+  },
+  "provenance": {
+    "nativeHarness": "test/native-shot.js",
+    "nativeHarnessSha256": "b97bf89d009c4471a14159fba82c367b18e3f4b45e8e263e3aecd383f8e8dfb8",
+    "sceneHarness": "test/retro-scene.html",
+    "sceneHarnessSha256": "07993784c6df104232a20cd19208036dbae09cb80f2e49343520ddc13f56b9f9",
+    "engine": "js/engine.js",
+    "engineSha256": "e54228828aff776fe0620cc362bb3809bc941e63417b84e434e9f07ddb5308aa",
+    "renderer": "js/retro-authored.js",
+    "rendererSha256": "5b867c73ae6796783ef5f4133d91f2df8aa88d0db0fd262f387e21513110e7bf",
+    "castRegistry": "narrative/cast/windows.json",
+    "castRegistrySha256": "9213ff57ada8a66a22f9e68ffe5eb56affdf4fb8e316e3bf7405890435d44bce",
+    "castFixture": "test/fixtures/cast-pins-acts-1-4.json",
+    "castFixtureSha256": "eb1e7138048eeef6f7a0a744956bc19c5da2d5218ffa9c07101756efa866354b",
+    "upscale": "ImageMagick point filter, 400%; no smoothing"
+  },
+  "limitations": [
+    "The no-narrative frame is not a zero-person room: the two authored generic booth guests are part of map.interior and remain visible.",
+    "The Act 4 frame is a single alternate Cast snapshot, not evidence of a temporal sequence or dialogue state.",
+    "Capture provenance covers the native canvas and crop; it does not claim 60fps fluidity, audio quality, or human playtest results."
+  ]
+}
