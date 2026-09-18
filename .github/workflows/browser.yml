@@ -1,0 +1,167 @@
+# Consolidated Chrome gate. Replaces campaign.yml, campaign-recovery.yml,
+# production-touch.yml and the browser half of playable-build.yml. Node-only
+# commands from those workflows moved to tests.yml.
+name: browser
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unseeded-campaign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    concurrency:
+      group: campaign-${{ github.ref }}
+      cancel-in-progress: true
+    env:
+      CHROME_NO_SANDBOX: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Browser identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "CHROME_BIN=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          google-chrome --version
+          node --version
+          git rev-parse HEAD
+      - name: First fresh-profile complete journey
+        run: CAMPAIGN_OUT="$RUNNER_TEMP/campaign/first" node test/campaign-playthrough.js
+      - name: Second consecutive fresh-profile complete journey
+        run: CAMPAIGN_OUT="$RUNNER_TEMP/campaign/second" node test/campaign-playthrough.js
+      - name: Retain actual route and failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: campaign-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/campaign
+          retention-days: 7
+          if-no-files-found: error
+
+  earned-campaign-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    concurrency:
+      group: earned-recovery-${{ github.ref }}
+      cancel-in-progress: true
+    env:
+      CHROME_NO_SANDBOX: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Browser and source identity
+        run: |
+          echo "CHROME_BIN=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          google-chrome --version
+          node --version
+          git rev-parse HEAD
+      - name: Earn progress, reload and resume, then complete the actual ending
+        run: CAMPAIGN_RECOVERY=1 CAMPAIGN_OUT="$RUNNER_TEMP/earned-recovery/run" node test/campaign-playthrough.js
+      - name: Retain actual recovery evidence including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: earned-recovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/earned-recovery
+          retention-days: 7
+          if-no-files-found: error
+
+  production-touch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: production-touch-${{ github.ref }}
+      cancel-in-progress: true
+    env:
+      CHROME_NO_SANDBOX: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Browser identity
+        run: |
+          echo "CHROME_BIN=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          google-chrome --version
+          git rev-parse HEAD
+      - name: Real touch-only opening and notebook in portrait and landscape
+        run: TOUCH_PREFLIGHT_OUT="$RUNNER_TEMP/production-touch" node test/browser/production-touch-preflight.js
+      - name: Preserve actual touch results and failure captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-touch-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/production-touch
+          retention-days: 7
+          if-no-files-found: error
+
+  playable-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: playable-${{ github.ref }}
+      cancel-in-progress: true
+    env:
+      CHROME_NO_SANDBOX: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Locate the hosted browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          test -n "$CHROME"
+          echo "CHROME_BIN=$CHROME" >> "$GITHUB_ENV"
+          echo "PLAYABLE_SELFTEST_OUT=$RUNNER_TEMP/playable-selftest" >> "$GITHUB_ENV"
+          "$CHROME" --version
+          node --version
+          git rev-parse HEAD
+      - name: Trusted input, isolated profiles, reload and diagnostic self-test
+        run: node test/browser/playable-browser-selftest.js
+      - name: Preserve browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playable-foundation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/playable-selftest
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Package committed inputs for offline reproduction
+        if: always()
+        shell: bash
+        run: |
+          git rev-parse HEAD > "$RUNNER_TEMP/playable-source-sha.txt"
+          git archive --format=tar.gz HEAD -- index.html js world narrative assets/sprites assets/portraits test docs reports .github '*.md' > "$RUNNER_TEMP/playable-source.tar.gz"
+      - name: Preserve reproducible source snapshot (no credentials or Git directory)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playable-source-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/playable-source-sha.txt
+            ${{ runner.temp }}/playable-source.tar.gz
+          retention-days: 7
+          if-no-files-found: error

@@ -5,6 +5,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { commandsFromWorkflow, runRelease } = require('../tools/run-release-tests.js');
 assert.deepEqual(commandsFromWorkflow('  run: node test/smoke.js\n  - run: node test/editor/model.js'), ['test/smoke.js','test/editor/model.js']);
+assert.deepEqual(commandsFromWorkflow('  run: git diff --exit-code -- js/a.gen.js\n  run: node tools/run-release-tests.js --out=x\n  run: node test/smoke.js'), ['test/smoke.js']);
 for (const value of ['npm test', 'node test/../secret.js', 'node test/./a.js', 'node test//a.js', 'node test/a.js; echo pass', '|', '']) {
   for (const prefix of ['  run: ', '  - run: ']) assert.throws(() => commandsFromWorkflow('  run: node test/valid.js\n' + prefix + value));
 }
@@ -14,7 +15,7 @@ const root = fs.mkdtempSync(path.join(os.tmpdir(), 'tp-release-runner-'));
 try {
   fs.mkdirSync(path.join(root,'.github/workflows'),{recursive:true});
   fs.mkdirSync(path.join(root,'test'));
-  const workflow = path.join(root,'.github/workflows/test.yml');
+  const workflow = path.join(root,'.github/workflows/tests.yml');
   fs.writeFileSync(workflow, '  run: node test/pass.js\n  - run: node test/fail.js\n  run: node test/hang.js\n');
   fs.writeFileSync(path.join(root,'test/pass.js'), 'console.log("pass fixture")');
   fs.writeFileSync(path.join(root,'test/fail.js'), 'process.exitCode=7');

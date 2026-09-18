@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 'use strict';
 
-/* Run the single-file Node commands maintained by test.yml. This is a strict
+/* Run the single-file Node commands maintained by tests.yml. This is a strict
  * reader of the workflow's current command subset, not a general YAML parser.
- * Unsupported commands fail loudly instead of silently dropping test gates.
+ * Unsupported commands fail loudly instead of silently dropping test gates;
+ * the small documented auxiliary allowlist (generated-data diff, self-invocation)
+ * is skipped.
  */
 const fs = require('node:fs');
 const path = require('node:path');
@@ -11,10 +13,12 @@ const { spawnSync } = require('node:child_process');
 
 function commandsFromWorkflow(text) {
   const commands = [];
+  const auxiliary = /^(?:git diff\b.*|node tools\/run-release-tests\.js\b.*)$/;
   for (const line of text.split(/\r?\n/)) {
     // GitHub permits both a named step followed by run: and an unnamed - run:.
     const run = /^\s+(?:-\s+)?run:\s*(.*?)\s*$/.exec(line);
     if (!run) continue;
+    if (auxiliary.test(run[1])) continue;
     const match = /^node (test\/[A-Za-z0-9_./-]+\.js)$/.exec(run[1]);
     if (!match || match[1].split('/').some((s) => s === '..' || s === '.' || !s)) throw new Error('Unsupported release command: ' + run[1]);
     if (commands.includes(match[1])) throw new Error('Duplicate release command: ' + match[1]);
@@ -26,7 +30,7 @@ function commandsFromWorkflow(text) {
 function runRelease({ root, out, timeoutMs = 180000 }) {
   if (!Number.isInteger(timeoutMs) || timeoutMs < 100 || timeoutMs > 600000) throw new Error('timeoutMs must be 100..600000');
   root = fs.realpathSync(root);
-  const workflow = path.join(root, '.github/workflows/test.yml');
+  const workflow = path.join(root, '.github/workflows/tests.yml');
   const commands = commandsFromWorkflow(fs.readFileSync(workflow, 'utf8'));
   for (const name of commands) {
     const file = fs.realpathSync(path.join(root, name));
@@ -39,7 +43,7 @@ function runRelease({ root, out, timeoutMs = 180000 }) {
   };
   const report = { format: 'release-node-run', version: 1, source: git('rev-parse', 'HEAD'),
     dirty: git('status', '--porcelain'), node: process.version, startedAt: new Date().toISOString(),
-    workflow: '.github/workflows/test.yml', automatedNode: 'RUNNING', campaign: 'NOT_RUN', human: 'NOT_RUN', results: [] };
+    workflow: '.github/workflows/tests.yml', automatedNode: 'RUNNING', campaign: 'NOT_RUN', human: 'NOT_RUN', results: [] };
   out = path.resolve(out);
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.mkdirSync(out);
@@ -62,7 +66,7 @@ function runRelease({ root, out, timeoutMs = 180000 }) {
 function main(args) {
   const root = path.resolve(__dirname, '..');
   if (args.length === 1 && args[0] === '--list') {
-    console.log(commandsFromWorkflow(fs.readFileSync(path.join(root, '.github/workflows/test.yml'), 'utf8')).join('\n'));
+    console.log(commandsFromWorkflow(fs.readFileSync(path.join(root, '.github/workflows/tests.yml'), 'utf8')).join('\n'));
     return;
   }
   let out, timeoutMs = 180000;

@@ -1,0 +1,204 @@
+campaign-recovery.yml	earned-recovery	echo "CHROME_BIN=$(command -v google-chrome)" >> "$GITHUB_ENV"
+campaign-recovery.yml	earned-recovery	google-chrome --version
+campaign-recovery.yml	earned-recovery	node --version
+campaign-recovery.yml	earned-recovery	git rev-parse HEAD
+campaign-recovery.yml	earned-recovery	node test/campaign-recovery.js
+campaign-recovery.yml	earned-recovery	node test/campaign-player.js
+campaign-recovery.yml	earned-recovery	node test/campaign-report-safety.js
+campaign-recovery.yml	earned-recovery	node test/classic-evidence-bridge.js
+campaign-recovery.yml	earned-recovery	node test/finale-completion-persistence.js
+campaign-recovery.yml	earned-recovery	node test/smoke.js
+campaign-recovery.yml	earned-recovery	node test/walkthrough.js
+campaign-recovery.yml	earned-recovery	CAMPAIGN_RECOVERY=1 CAMPAIGN_OUT="$RUNNER_TEMP/earned-recovery/run" node test/campaign-playthrough.js
+campaign.yml	campaign	set -euo pipefail
+campaign.yml	campaign	echo "CHROME_BIN=$(command -v google-chrome)" >> "$GITHUB_ENV"
+campaign.yml	campaign	google-chrome --version
+campaign.yml	campaign	node --version
+campaign.yml	campaign	git rev-parse HEAD
+campaign.yml	campaign	node test/smoke.js
+campaign.yml	campaign	node test/walkthrough.js
+campaign.yml	campaign	node test/narrative-lint.js
+campaign.yml	campaign	node test/story-truth-lint.js
+campaign.yml	campaign	node test/turn-in-place.js
+campaign.yml	campaign	node test/classic-evidence-bridge.js
+campaign.yml	campaign	node test/finale-completion-persistence.js
+campaign.yml	campaign	node test/campaign-player.js
+campaign.yml	campaign	node test/campaign-report-safety.js
+campaign.yml	campaign	CAMPAIGN_OUT="$RUNNER_TEMP/campaign/first" node test/campaign-playthrough.js
+campaign.yml	campaign	CAMPAIGN_OUT="$RUNNER_TEMP/campaign/second" node test/campaign-playthrough.js
+classic-cast-sync.yml	cast-bridge	node test/classic-cast-sync.js
+classic-cast-sync.yml	cast-bridge	node test/classic-evidence-bridge.js
+classic-cast-sync.yml	cast-bridge	node test/cast-presence-sync.js
+classic-cast-sync.yml	cast-bridge	node test/cast-continuity-validate.js
+classic-cast-sync.yml	cast-bridge	node test/act-2-flow.js
+classic-cast-sync.yml	cast-bridge	node test/act-3-flow.js
+classic-cast-sync.yml	cast-bridge	node test/act-4-flow.js
+classic-cast-sync.yml	cast-bridge	node test/act-5-flow.js
+classic-cast-sync.yml	cast-bridge	node test/smoke.js
+classic-cast-sync.yml	cast-bridge	node test/walkthrough.js
+classic-evidence.yml	earned-clues	node test/classic-evidence-bridge.js
+classic-evidence.yml	earned-clues	node test/letter-chain-provenance.js
+classic-evidence.yml	earned-clues	node test/act-3-flow.js
+classic-evidence.yml	earned-clues	node test/act-4-mirror-gate.js
+classic-evidence.yml	earned-clues	node test/act-4-flow.js
+classic-evidence.yml	earned-clues	node test/act-5-flow.js
+classic-evidence.yml	earned-clues	node test/narrative-lint.js
+classic-evidence.yml	earned-clues	node test/story-truth-lint.js
+classic-evidence.yml	earned-clues	node test/smoke.js
+classic-evidence.yml	earned-clues	node test/walkthrough.js
+finale-checkpoint.yml	terminal-save	node test/finale-completion-persistence.js
+finale-checkpoint.yml	terminal-save	node test/narrative-finale.js
+finale-checkpoint.yml	terminal-save	node test/act-5-mirror-gate.js
+finale-checkpoint.yml	terminal-save	node test/act-5-flow.js
+finale-checkpoint.yml	terminal-save	node test/smoke.js
+finale-checkpoint.yml	terminal-save	node test/walkthrough.js
+narrative-targets.yml	identity-and-editor-transactions	node test/gen-world-data.js
+narrative-targets.yml	identity-and-editor-transactions	git diff --exit-code -- js/scene-objects.gen.js js/world-connections.gen.js
+narrative-targets.yml	identity-and-editor-transactions	node test/narrative-targets.js
+narrative-targets.yml	identity-and-editor-transactions	node test/narrative-targets-apply.js
+narrative-targets.yml	identity-and-editor-transactions	node test/scene-objects-equality.js
+narrative-targets.yml	identity-and-editor-transactions	node test/traincar-native.js
+narrative-targets.yml	identity-and-editor-transactions	node test/act-3-flow.js
+narrative-targets.yml	identity-and-editor-transactions	node test/act-4-flow.js
+narrative-targets.yml	identity-and-editor-transactions	node test/act-5-flow.js
+narrative-targets.yml	identity-and-editor-transactions	node test/narrative-lint.js
+narrative-targets.yml	identity-and-editor-transactions	node test/story-truth-lint.js
+narrative-targets.yml	identity-and-editor-transactions	node test/smoke.js
+narrative-targets.yml	identity-and-editor-transactions	node test/walkthrough.js
+notebook-touch.yml	notebook-back	node test/touch-notebook-navigation.js
+notebook-touch.yml	notebook-back	node test/touch-runtime.js
+notebook-touch.yml	notebook-back	node test/mobile-production.js
+notebook-touch.yml	notebook-back	node test/turn-in-place.js
+notebook-touch.yml	notebook-back	node test/smoke.js
+notebook-touch.yml	notebook-back	node test/walkthrough.js
+playable-build.yml	browser-foundation	set -euo pipefail
+playable-build.yml	browser-foundation	CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+playable-build.yml	browser-foundation	test -n "$CHROME"
+playable-build.yml	browser-foundation	echo "CHROME_BIN=$CHROME" >> "$GITHUB_ENV"
+playable-build.yml	browser-foundation	echo "PLAYABLE_SELFTEST_OUT=$RUNNER_TEMP/playable-selftest" >> "$GITHUB_ENV"
+playable-build.yml	browser-foundation	"$CHROME" --version
+playable-build.yml	browser-foundation	node --version
+playable-build.yml	browser-foundation	git rev-parse HEAD
+playable-build.yml	browser-foundation	node test/playable-browser.js
+playable-build.yml	browser-foundation	node test/browser/playable-browser-selftest.js
+playable-build.yml	browser-foundation	git rev-parse HEAD > "$RUNNER_TEMP/playable-source-sha.txt"
+playable-build.yml	browser-foundation	git archive --format=tar.gz HEAD -- index.html js world narrative assets/sprites assets/portraits test docs reports .github '*.md' > "$RUNNER_TEMP/playable-source.tar.gz"
+production-touch.yml	touch-controls	echo "CHROME_BIN=$(command -v google-chrome)" >> "$GITHUB_ENV"
+production-touch.yml	touch-controls	google-chrome --version
+production-touch.yml	touch-controls	git rev-parse HEAD
+production-touch.yml	touch-controls	node test/touch-gesture-transport.js
+production-touch.yml	touch-controls	node test/touch-preflight.js
+production-touch.yml	touch-controls	node test/playable-browser.js
+production-touch.yml	touch-controls	node test/campaign-player.js
+production-touch.yml	touch-controls	node test/campaign-report-safety.js
+production-touch.yml	touch-controls	node test/mobile-production.js
+production-touch.yml	touch-controls	node test/touch-runtime.js
+production-touch.yml	touch-controls	node test/turn-in-place.js
+production-touch.yml	touch-controls	TOUCH_PREFLIGHT_OUT="$RUNNER_TEMP/production-touch" node test/browser/production-touch-preflight.js
+release-baseline.yml	release-baseline	node test/release-runner.js
+release-baseline.yml	release-baseline	node tools/run-release-tests.js --out="$RUNNER_TEMP/release-baseline"
+test.yml	node-tests	node test/world-builder.js
+test.yml	node-tests	node test/editor/changeset.js
+test.yml	node-tests	node test/editor/edit.js
+test.yml	node-tests	node test/editor/cast.js
+test.yml	node-tests	node test/editor/scene-objects.js
+test.yml	node-tests	node test/editor/history.js
+test.yml	node-tests	node test/editor/hit-test.js
+test.yml	node-tests	node test/editor/identity.js
+test.yml	node-tests	node test/editor/inspector.js
+test.yml	node-tests	node test/editor/interaction.js
+test.yml	node-tests	node test/editor/model.js
+test.yml	node-tests	node test/editor/world-builder-core.js
+test.yml	node-tests	node test/world-door-equality.js
+test.yml	node-tests	node test/legacy-door-inventory.js
+test.yml	node-tests	node test/scene-objects-inventory.js
+test.yml	node-tests	node test/scene-objects-equality.js
+test.yml	node-tests	node test/location-connections.js
+test.yml	node-tests	node test/migrated-door-traversal.js
+test.yml	node-tests	node test/test-world-registry.js
+test.yml	node-tests	node test/apply-changeset.js
+test.yml	node-tests	node test/editor-apply-preflight.js
+test.yml	node-tests	node test/editor-runtime-isolation.js
+test.yml	node-tests	node test/world-apply.js
+test.yml	node-tests	node test/catalog-write.js
+test.yml	node-tests	node test/world-apply-cast.js
+test.yml	node-tests	node test/world-apply-objects.js
+test.yml	node-tests	node test/cast-continuity-validate.js
+test.yml	node-tests	node test/cast-presence-sync.js
+test.yml	node-tests	node test/world-engine-v0.1-catalog.js
+test.yml	node-tests	node test/narrative-validate-m9.js
+test.yml	node-tests	node test/narrative-validate-m10.js
+test.yml	node-tests	node test/act-5-flow.js
+test.yml	node-tests	node test/act-5-mirror-gate.js
+test.yml	node-tests	node test/act-2-flow.js
+test.yml	node-tests	node test/act-2-ronette-required.js
+test.yml	node-tests	node test/act-3-flow.js
+test.yml	node-tests	node test/act-3-mirror-gate.js
+test.yml	node-tests	node test/act-4-flow.js
+test.yml	node-tests	node test/act-4-mirror-gate.js
+test.yml	node-tests	node test/narrative-finale.js
+test.yml	node-tests	node test/narrative-m9-runtime.js
+test.yml	node-tests	node test/narrative-repair-contract.js
+test.yml	node-tests	node test/narrative-slice-01.js
+test.yml	node-tests	node test/narrative-validate-m5.js
+test.yml	node-tests	node test/narrative-validate-m6.js
+test.yml	node-tests	node test/narrative-validate-m8.js
+test.yml	node-tests	node test/story-truth-lint.js
+test.yml	node-tests	node test/letter-chain-provenance.js
+test.yml	node-tests	node test/ronette-bob-provenance.js
+test.yml	node-tests	node test/tracks-provenance.js
+test.yml	node-tests	node test/objective-resolver.js
+test.yml	node-tests	node test/notebook-objective.js
+test.yml	node-tests	node test/objective-notebook-visibility.js
+test.yml	node-tests	node test/choice-prompts.js
+test.yml	node-tests	node test/choice-prompt-dedup.js
+test.yml	node-tests	node test/dialogue-craft-regression.js
+test.yml	node-tests	node test/dialogue-presentation.js
+test.yml	node-tests	node test/interaction-voice.js
+test.yml	node-tests	node test/classic-object-grounding.js
+test.yml	node-tests	node test/environmental-interactions.js
+test.yml	node-tests	node test/environment-entry.js
+test.yml	node-tests	node test/environment-life.js
+test.yml	node-tests	node test/ambient-life.js
+test.yml	node-tests	node test/character-activity.js
+test.yml	node-tests	node test/character-quality.js
+test.yml	node-tests	node test/character-runtime-contract.js
+test.yml	node-tests	node test/cast-sprite-sheet.js
+test.yml	node-tests	node test/cooper-sprite-sheet.js
+test.yml	node-tests	node test/gold-tone-gates.js
+test.yml	node-tests	node test/portrait-gates.js
+test.yml	node-tests	node test/r69-reference-gates.js
+test.yml	node-tests	node test/graphic-pass-contract.js
+test.yml	node-tests	node test/retro-font.js
+test.yml	node-tests	node test/retro-production.js
+test.yml	node-tests	node test/mobile-production.js
+test.yml	node-tests	node test/touch-runtime.js
+test.yml	node-tests	node test/movement-feel.js
+test.yml	node-tests	node test/walk-phase-contract.js
+test.yml	node-tests	node test/initial-spawn.js
+test.yml	node-tests	node test/location-traversal.js
+test.yml	node-tests	node test/traincar-location-traversal.js
+test.yml	node-tests	node test/town-map-coherence.js
+test.yml	node-tests	node test/town-structure-semantics.js
+test.yml	node-tests	node test/interior-prop-semantics.js
+test.yml	node-tests	node test/interior-zoning-reachability.js
+test.yml	node-tests	node test/world-catalog-coverage.js
+test.yml	node-tests	node test/diner-layout.js
+test.yml	node-tests	node test/hospital-native.js
+test.yml	node-tests	node test/room-315-location.js
+test.yml	node-tests	node test/room-315-native.js
+test.yml	node-tests	node test/sheriffs-station-location.js
+test.yml	node-tests	node test/sheriffs-station-native.js
+test.yml	node-tests	node test/sheriffs-station-door.js
+test.yml	node-tests	node test/sheriffs-station-ambient.js
+test.yml	node-tests	node test/station-population.js
+test.yml	node-tests	node test/traincar-native.js
+test.yml	node-tests	node test/redroom-scene.js
+test.yml	node-tests	node test/narrative-lint.js
+test.yml	node-tests	node test/smoke.js
+test.yml	node-tests	node test/walkthrough.js
+turn-input.yml	physical-input	node test/turn-in-place.js
+turn-input.yml	physical-input	node test/movement-feel.js
+turn-input.yml	physical-input	node test/touch-runtime.js
+turn-input.yml	physical-input	node test/smoke.js
+turn-input.yml	physical-input	node test/walkthrough.js
