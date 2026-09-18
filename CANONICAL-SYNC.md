@@ -123,3 +123,4 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-18 afbf3cc main: opus M10b props editor UI (b39717c); CI green on 621ebf1 (tests+browser), local release 115/115; 23 files mirrored
 - 2026-09-18 9dbcdaa main: deep town-dusk readback measurement (cba7122, no render change) + town-dusk test contract after DQ3; 6 files mirrored
 - 2026-09-18 4414730 main: deep town-dusk test re-pinned to DQ3 (255bd6a), test in CI (116 gates); 4 files mirrored
+- 2026-09-18 7100c23 main: opus M11 evidence (a7e0294), verdict do not flip props; 20 files mirrored
