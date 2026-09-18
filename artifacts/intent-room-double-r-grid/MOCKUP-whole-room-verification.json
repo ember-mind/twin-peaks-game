@@ -1,0 +1,124 @@
+{
+  "kind": "MOCKUP_ONLY",
+  "selectorVerdict": null,
+  "sources": {
+    "baseline": {
+      "path": "artifacts/intent-room-double-r-visual/packet/baseline-populated-native.png",
+      "sha256": "427cc3060bf1b69e219c5a8a8f60606132e459eb0e98d990bd8a1264c2e1a55f"
+    },
+    "occupiedCrop": {
+      "path": "artifacts/intent-room-double-r-visual/packet/booth-lower-left-occupied-native.png",
+      "sha256": "a080763daae7a16642df6d7c63814627d5cba94fb678be993e363858150d4abd"
+    },
+    "B": {
+      "path": "artifacts/intent-room-double-r-grid/B-native.png",
+      "sha256": "7fc80e9e5d2de1a1de7aa27537d50206d5534423d68f1f1e4cb2586499187b39"
+    },
+    "D": {
+      "path": "artifacts/intent-room-double-r-grid/D-native.png",
+      "sha256": "8c8ab496ee798e9a70f428f67bb69f171012f109f4743e629b1311aed29bc1ea"
+    }
+  },
+  "cropOrigin": {
+    "x": 24,
+    "y": 128,
+    "width": 64,
+    "height": 48
+  },
+  "checks": {
+    "baselineCropEqualsOccupiedSource": true,
+    "changedPixelsAppliedExactlyAtOffset": true,
+    "outsideCropUnchanged": true,
+    "nativeDimensions": "256x192",
+    "comparisonOrder": [
+      "baseline",
+      "B",
+      "D"
+    ]
+  },
+  "patches": {
+    "B": {
+      "expectedDiffPixels": 16,
+      "actualCropDiffPixels": 16,
+      "actualWholeRoomDiffPixels": 16,
+      "relativeCoordinates": [
+        "27,28",
+        "28,28",
+        "29,28",
+        "30,28",
+        "31,28",
+        "32,28",
+        "33,28",
+        "34,28",
+        "27,29",
+        "28,29",
+        "29,29",
+        "30,29",
+        "31,29",
+        "32,29",
+        "33,29",
+        "34,29"
+      ],
+      "absoluteCoordinates": [
+        "51,156",
+        "52,156",
+        "53,156",
+        "54,156",
+        "55,156",
+        "56,156",
+        "57,156",
+        "58,156",
+        "51,157",
+        "52,157",
+        "53,157",
+        "54,157",
+        "55,157",
+        "56,157",
+        "57,157",
+        "58,157"
+      ]
+    },
+    "D": {
+      "expectedDiffPixels": 8,
+      "actualCropDiffPixels": 8,
+      "actualWholeRoomDiffPixels": 8,
+      "relativeCoordinates": [
+        "37,28",
+        "38,28",
+        "39,28",
+        "40,28",
+        "41,28",
+        "42,28",
+        "43,28",
+        "44,28"
+      ],
+      "absoluteCoordinates": [
+        "61,156",
+        "62,156",
+        "63,156",
+        "64,156",
+        "65,156",
+        "66,156",
+        "67,156",
+        "68,156"
+      ]
+    }
+  },
+  "outputs": {
+    "B": {
+      "path": "artifacts/intent-room-double-r-grid/MOCKUP-whole-room-B-native.png",
+      "sha256": "8317551fc1c90bf5dda5769a9482054aacbdfe6a0fe46184fcda46bd4b82bde4",
+      "dimensions": "256x192"
+    },
+    "D": {
+      "path": "artifacts/intent-room-double-r-grid/MOCKUP-whole-room-D-native.png",
+      "sha256": "7566986f113600d1b590f4c017ab98ab568d893ddd5579713efa3e8d34344111",
+      "dimensions": "256x192"
+    },
+    "comparison": {
+      "path": "artifacts/intent-room-double-r-grid/MOCKUP-whole-room-before-B-D-native.png",
+      "sha256": "90dbf5fb459338ca0da66c518c015568e8efca05917a7a58cfad2798f642857d",
+      "dimensions": "768x192"
+    }
+  }
+}

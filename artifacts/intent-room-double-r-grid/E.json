@@ -1,0 +1,105 @@
+{
+  "variant": "E",
+  "source": "artifacts/intent-room-double-r-visual/packet/booth-lower-left-occupied-native.png",
+  "mask": "artifacts/intent-room-double-r-grid/table-front-lip-mask-native.png",
+  "boundaryOverlapExploratory": true,
+  "count": 6,
+  "bbox": {
+    "minX": 20,
+    "minY": 30,
+    "maxX": 25,
+    "maxY": 30
+  },
+  "coordinates": [
+    {
+      "x": 20,
+      "y": 30,
+      "old": "#8c2f3e",
+      "new": "#9c6944",
+      "mask": 255,
+      "copiedFrom": {
+        "x": 20,
+        "y": 29
+      },
+      "source": "#9c6944"
+    },
+    {
+      "x": 21,
+      "y": 30,
+      "old": "#8c2f3e",
+      "new": "#9c6944",
+      "mask": 255,
+      "copiedFrom": {
+        "x": 21,
+        "y": 29
+      },
+      "source": "#9c6944"
+    },
+    {
+      "x": 22,
+      "y": 30,
+      "old": "#8c2f3e",
+      "new": "#9c6944",
+      "mask": 255,
+      "copiedFrom": {
+        "x": 22,
+        "y": 29
+      },
+      "source": "#9c6944"
+    },
+    {
+      "x": 23,
+      "y": 30,
+      "old": "#8c2f3e",
+      "new": "#9c6944",
+      "mask": 255,
+      "copiedFrom": {
+        "x": 23,
+        "y": 29
+      },
+      "source": "#9c6944"
+    },
+    {
+      "x": 24,
+      "y": 30,
+      "old": "#94393e",
+      "new": "#9c6944",
+      "mask": 255,
+      "copiedFrom": {
+        "x": 24,
+        "y": 29
+      },
+      "source": "#9c6944"
+    },
+    {
+      "x": 25,
+      "y": 30,
+      "old": "#94393e",
+      "new": "#9c6944",
+      "mask": 255,
+      "copiedFrom": {
+        "x": 25,
+        "y": 29
+      },
+      "source": "#9c6944"
+    }
+  ],
+  "checks": {
+    "fromBaseIndependently": true,
+    "dimensions": {
+      "native": "64x48",
+      "nearest4x": "256x192"
+    },
+    "allChangedPixelsInsideWhiteMask": true,
+    "outsideMaskByteEquivalentToBase": true,
+    "changedPixelLimit": "<=30",
+    "changedColorsLocalWoodRedFamily": true,
+    "noWinnerSelected": true
+  },
+  "outputs": {
+    "native": "artifacts/intent-room-double-r-grid/E-native.png",
+    "nearest4x": "artifacts/intent-room-double-r-grid/E-4x.png",
+    "diffNative": "artifacts/intent-room-double-r-grid/E-diff-native.png",
+    "diff4x": "artifacts/intent-room-double-r-grid/E-diff-4x.png"
+  }
+}

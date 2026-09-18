@@ -1,0 +1,84 @@
+{
+  "source": "artifacts/intent-room-double-r-visual/packet/booth-lower-left-occupied-native.png",
+  "mask": "artifacts/intent-room-double-r-grid/table-front-lip-mask-native.png",
+  "dimensions": {
+    "native": "64x48",
+    "nearest4x": "256x192"
+  },
+  "variants": {
+    "A": {
+      "count": 8,
+      "bbox": {
+        "minX": 27,
+        "minY": 28,
+        "maxX": 34,
+        "maxY": 28
+      },
+      "boundaryOverlapExploratory": false
+    },
+    "B": {
+      "count": 16,
+      "bbox": {
+        "minX": 27,
+        "minY": 28,
+        "maxX": 34,
+        "maxY": 29
+      },
+      "boundaryOverlapExploratory": false
+    },
+    "C": {
+      "count": 8,
+      "bbox": {
+        "minX": 19,
+        "minY": 28,
+        "maxX": 26,
+        "maxY": 28
+      },
+      "boundaryOverlapExploratory": false
+    },
+    "D": {
+      "count": 8,
+      "bbox": {
+        "minX": 37,
+        "minY": 28,
+        "maxX": 44,
+        "maxY": 28
+      },
+      "boundaryOverlapExploratory": false
+    },
+    "E": {
+      "count": 6,
+      "bbox": {
+        "minX": 20,
+        "minY": 30,
+        "maxX": 25,
+        "maxY": 30
+      },
+      "boundaryOverlapExploratory": true
+    },
+    "F": {
+      "count": 6,
+      "bbox": {
+        "minX": 38,
+        "minY": 30,
+        "maxX": 43,
+        "maxY": 30
+      },
+      "boundaryOverlapExploratory": true
+    }
+  },
+  "checks": {
+    "everyVariantStartsFromBase": true,
+    "allChangedPixelsInsideWhiteMask": true,
+    "baselineOutsideMaskByteEquivalent": true,
+    "everyVariantAtMost30ChangedPixels": true,
+    "changedColorsRestrictedToWoodRedFamily": true,
+    "noWinnerSelected": true
+  },
+  "outputs": {
+    "contactSheetNative": "artifacts/intent-room-double-r-grid/contact-sheet-native.png",
+    "contactSheetNearest4x": "artifacts/intent-room-double-r-grid/contact-sheet-4x.png",
+    "contactSheetMaskDiffNative": "artifacts/intent-room-double-r-grid/contact-sheet-mask-diff-native.png",
+    "contactSheetMaskDiffNearest4x": "artifacts/intent-room-double-r-grid/contact-sheet-mask-diff-4x.png"
+  }
+}
