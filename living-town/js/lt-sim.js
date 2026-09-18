@@ -719,7 +719,16 @@
     }
 
     var shape = Pol.validateResponse(request, response);
-    if (!shape.ok) { actor.pending = null; return this.reject(request, shape.error); }
+    if (!shape.ok) {
+      actor.pending = null;
+      var refused = this.reject(request, shape.error, shape.detail || null);
+      /* The policy, not the world, is what went wrong here, so asking it again
+       * this minute would spin: a policy that answers with garbage once will
+       * answer with garbage again. The character waits instead, tagged as a
+       * fallback so nothing downstream reads it as a choice. */
+      this.fallback(actor, shape.error);
+      return refused;
+    }
     if (shape.unavailable) {
       actor.pending = null;
       this.reject(request, 'policy_unavailable');
@@ -728,6 +737,10 @@
 
     if (actor.activity) { actor.pending = null; return this.reject(request, 'actor_already_busy'); }
 
+    /* The two refusals below are different in kind: the answer was well formed
+     * and the policy is healthy, but the world moved underneath it. No fallback
+     * here — the actor re-asks on the next tick, against the world that
+     * actually exists now, which is the correct response to a stale answer. */
     var nowKey = this.relevanceKey(actor);
     if (nowKey !== request.relevanceKey) {
       actor.pending = null;
@@ -749,7 +762,11 @@
 
     var started = this.startActivity(actor, candidate, response.source || actor.policyId, request.requestId);
     actor.pending = null;
-    if (!started.ok) return this.reject(request, 'execution_refused', started);
+    if (!started.ok) {
+      var refusedExec = this.reject(request, 'execution_refused', started);
+      this.fallback(actor, 'execution_refused');
+      return refusedExec;
+    }
 
     actor.recentDecisions.unshift({
       requestId: request.requestId, stamp: request.clock, day: request.day,

@@ -53,7 +53,7 @@
     if (!response || typeof response !== 'object') return { ok: false, error: 'malformed_response' };
     if (response.requestId !== request.requestId) return { ok: false, error: 'request_id_mismatch' };
     if (response.status === 'unavailable') return { ok: true, unavailable: true };
-    if (response.status === 'error') return { ok: false, error: response.error || 'policy_error' };
+    if (response.status === 'error') return { ok: false, error: 'policy_error', detail: response.error || null };
     if (response.status !== 'selected') return { ok: false, error: 'unknown_status' };
     if (typeof response.selectedId !== 'string') return { ok: false, error: 'missing_selection' };
     var offered = request.candidates.some(function (c) { return c.id === response.selectedId; });
