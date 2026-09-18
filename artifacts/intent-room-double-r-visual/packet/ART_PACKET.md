@@ -2,6 +2,8 @@
 
 This packet is a factual art-review handoff for the current worktree. It contains no production-code edits and makes no design recommendation.
 
+Renderer palette, footprint, draw order, hands and canonical ownership: [CONSTRAINTS.md](CONSTRAINTS.md).
+
 ## Primary frames
 
 - [Fresh whole-room populated baseline, native 256×192](baseline-populated-native.png)
