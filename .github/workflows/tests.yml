@@ -190,6 +190,8 @@ jobs:
         run: node test/town-map-coherence.js
       - name: Town structure semantics
         run: node test/town-structure-semantics.js
+      - name: Town dusk grade contract (DQ3 palette)
+        run: node test/town-dusk.js
       - name: Interior prop semantics
         run: node test/interior-prop-semantics.js
       - name: Interior zoning reachability
