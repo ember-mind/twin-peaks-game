@@ -4589,9 +4589,18 @@
   }
   function interiorBackbar(g,x,y,p) {
     interiorPanel(g,x,y-14,224,58,p);
-    // A service floor and plinth separate working space from the back wall.
-    R(g,x+16,y+30,192,18,'#67513b');
-    for(var py=32;py<48;py+=5) R(g,x+16,y+py,192,1,'#493a2d');
+    // Recess the working bay into the timber wall; its shelves project forward.
+    R(g,x+40,y+9,141,21,'#292f29');
+    R(g,x+40,y+9,141,3,'#20251f');
+    R(g,x+41,y+12,139,15,'#3c4034');
+    [71,100,135].forEach(function(dx) {
+      R(g,x+dx,y+12,2,15,p.woodDark); R(g,x+dx,y+12,1,11,p.woodHi);
+    });
+    R(g,x+39,y+9,2,21,p.woodHi); R(g,x+180,y+9,2,21,p.woodDark);
+    // A quiet service floor keeps the back cupboards behind the customer counter.
+    R(g,x+16,y+30,192,18,'#584936');
+    R(g,x+28,y+31,154,9,'#372e25');
+    R(g,x+28,y+40,154,2,'#493b2d');
     R(g,x+28,y+25,154,6,p.woodDark); R(g,x+29,y+25,152,2,p.woodLight);
     // Side service door, clock and local coffee pledge.
     R(g,x+17,y+2,21,36,p.woodDark); R(g,x+19,y+3,17,33,p.redDark);
@@ -4609,7 +4618,8 @@
     townMicroWord(g,'PIE',x+147,y+5,p.cream); townMicroWord(g,'3.50',x+164,y+11,p.gold);
     // Asymmetric clusters: family photos, stacked crockery and pantry jars.
     interiorPicture(g,x+43,y-10,14,14,p,'photo');
-    R(g,x+41,y+10,29,2,p.woodLight); R(g,x+41,y+23,29,2,p.woodLight);
+    R(g,x+41,y+10,29,2,p.woodLight);
+    R(g,x+41,y+23,29,2,p.woodLight); R(g,x+42,y+25,29,2,'#20251f');
     [43,53,64].forEach(function(dx,n) {
       R(g,x+dx,y+14-(n%2)*3,4,8+(n%2)*3,n===2?p.green:p.creamShade);
       R(g,x+dx,y+13-(n%2)*3,4,2,n===2?p.gold:p.metal);
@@ -4621,11 +4631,15 @@
       else { R(g,x+dx,y+shelfY,5,5,p.creamShade); R(g,x+dx+1,y+shelfY,3,1,p.cream); }
     });
     R(g,x+76,y+23,57,2,p.woodLight); R(g,x+76,y+25,57,2,'#282820');
-    // Lower cabinets, warming shelf, service tins and chrome urns form masses.
-    R(g,x+40,y+26,139,9,p.woodDark); R(g,x+41,y+26,137,2,p.woodLight);
-    for(var dx=42;dx<176;dx+=17) {
-      R(g,x+dx,y+29,15,5,p.wood); R(g,x+dx+6,y+30,4,1,p.gold);
-    }
+    // Three broad cabinet fronts sit under a projecting butcher-block worktop.
+    R(g,x+40,y+26,139,11,p.woodDark);
+    R(g,x+41,y+28,137,7,'#65452e');
+    [42,88,134].forEach(function(dx) {
+      R(g,x+dx,y+29,42,5,p.wood); R(g,x+dx,y+29,1,5,p.woodHi);
+      R(g,x+dx+18,y+30,6,1,'#c19a5c');
+    });
+    R(g,x+40,y+26,139,2,p.woodLight); R(g,x+41,y+28,137,1,'#322b21');
+    R(g,x+41,y+35,137,2,'#29271f');
     R(g,x+106,y+24,22,12,p.ink); R(g,x+107,y+25,20,9,p.metal);
     R(g,x+109,y+27,6,5,p.woodDark); R(g,x+118,y+27,7,5,p.woodDark);
     R(g,x+109,y+27,6,1,p.gold); R(g,x+118,y+27,7,1,p.gold);
@@ -4651,15 +4665,30 @@
     var counterX=x+model.counter[0]*16, counterY=y+model.counter[1]*16, counterW=model.counter[2]*16;
     R(g,counterX+2,counterY+16,counterW-2,5,'rgba(32,26,19,.28)');
     interiorContact(g,counterX+1,counterY+18,counterW-2,p);
-    R(g,counterX,counterY,counterW,17,p.ink); R(g,counterX+1,counterY+6,counterW-2,8,p.redDark);
-    R(g,counterX+2,counterY+6,counterW-4,6,p.red); R(g,counterX+3,counterY+6,counterW-6,1,p.redHi);
-    for(i=4;i<counterW-5;i+=22) { R(g,counterX+i,counterY+8,18,3,p.redDark); R(g,counterX+i+1,counterY+8,16,1,p.redHi); }
-    R(g,counterX,counterY-2,counterW,7,p.creamShade); R(g,counterX+1,counterY-2,counterW-2,4,p.cream);
-    R(g,counterX+1,counterY+4,counterW-2,1,p.metalHi); R(g,counterX+2,counterY+15,counterW-4,1,p.metal);
-    // Broken specular strips keep polished laminate distinct from matte wood.
+    // A thick laminate overhang casts a deep lip over broad enamel panels.
+    R(g,counterX,counterY+3,counterW,14,p.ink);
+    R(g,counterX+1,counterY+5,counterW-2,8,p.redDark);
+    R(g,counterX+2,counterY+7,counterW-4,5,p.red);
+    R(g,counterX+3,counterY+7,counterW-6,1,'#a4434c');
+    for(i=1;i<3;i++) {
+      var seam=counterX+Math.floor(counterW*i/3);
+      R(g,seam-1,counterY+6,3,7,p.redDark);
+      R(g,seam+2,counterY+7,1,5,'#a4434c');
+    }
+    R(g,counterX+2,counterY+12,counterW-4,1,'#6d2934');
+    R(g,counterX+2,counterY+7,1,5,'#b45257');
+    R(g,counterX+counterW-4,counterY+6,3,7,p.redDark);
+    R(g,counterX+3,counterY+14,counterW-6,3,'#252820');
+    R(g,counterX+4,counterY+14,counterW-8,1,'#655a43');
+    R(g,counterX,counterY-2,counterW,6,p.creamShade);
+    R(g,counterX+1,counterY-2,counterW-2,3,p.cream);
+    R(g,counterX+1,counterY+1,counterW-2,1,'#e3cda3');
+    R(g,counterX+1,counterY+4,counterW-2,1,'#aba88d');
+    R(g,counterX+2,counterY+5,counterW-4,2,'#402b29');
+    // Local reflections stay on the horizontal plane, not the shaded apron.
     R(g,counterX+10,counterY-1,20,1,p.metalHi);
-    R(g,counterX+53,counterY,16,1,p.metalHi);
-    R(g,counterX+94,counterY-1,26,1,p.gold);
+    R(g,counterX+53,counterY-1,16,1,p.metalHi);
+    R(g,counterX+94,counterY-1,26,1,'#ead9b3');
     interiorServiceCluster(g,counterX+3,counterY-17,p,'coffee');
     interiorServiceCluster(g,counterX+67,counterY-14,p,'plates'); interiorPieCase(g,counterX+counterW-49,counterY-15,48,p);
     interiorCup(g,counterX+35,counterY-3,p); interiorCup(g,counterX+75,counterY-3,p);
