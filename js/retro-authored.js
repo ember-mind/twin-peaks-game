@@ -4403,21 +4403,27 @@
     R(g,x+1,y+7,w-2,2,p.woodLight);
     if(guest) {
       var seatX=guest.seat==='left'?x+8:x+w-25;
-      // Shoulder and seat contact tuck the figure into the upholstered bay.
-      R(g,seatX+2,y-11,13,10,'rgba(41,24,28,.24)');
-      R(g,seatX+3,y-4,11,3,p.redDark);
+      // Contact follows the seated shoulders and hips, leaving the head clear.
+      R(g,seatX+2,y-5,13,4,'rgba(41,24,28,.14)');
+      R(g,seatX+4,y-1,10,2,'rgba(41,24,28,.20)');
     }
     var gesture=variant===1 && GAME.CharacterActivity ? GAME.CharacterActivity.seatedFrame() : -1;
     var seatedPose=guest ? interiorSeatedGuest(g,guest.seat==='left'?x+8:x+w-25,y-16,guest,gesture) : null;
     // Broad horizontal laminate plane, a turned front lip, then a recessed base.
     R(g,x+3,y+1,w-6,13,p.woodDark);
+    R(g,x+3,y+2,1,9,'#8a6548');
+    R(g,x+4,y+1,1,1,'#8a6548');
     R(g,x+4,y+2,w-8,8,'#e4d2a9');
     R(g,x+5,y+1,w-10,1,p.creamShade);
     R(g,x+4,y+2,1,8,p.cream); R(g,x+w-6,y+2,2,8,'#c7b187');
     R(g,x+5,y+10,w-10,1,p.cream);
     R(g,x+5,y+11,w-10,1,'#b59a72');
-    R(g,x+5,y+12,w-10,1,p.woodDark);
-    R(g,x+6,y+13,w-12,3,'#342923');
+    // Warm reflected wood in the recess keeps the base from becoming a black bar.
+    R(g,x+5,y+12,w-10,1,'#76533f');
+    R(g,x+10,y+12,w-20,1,'#50392e');
+    R(g,x+6,y+13,w-12,3,'#654936');
+    R(g,x+10,y+13,w-20,1,'#533c30');
+    R(g,x+10,y+15,w-20,1,'#573e30');
     R(g,x+7,y+13,3,3,p.woodHi); R(g,x+w-10,y+13,3,3,p.wood);
     R(g,x+7,y+13,1,3,p.woodLight);
     R(g,x+6,y+16,6,1,p.woodDark); R(g,x+w-11,y+16,6,1,p.woodDark);
@@ -4426,10 +4432,12 @@
     if(guest) interiorOccupiedTable(g,x,y,w,p,guest,gesture);
     else interiorTableProps(g,x+5,y,p,variant);
     if(seatedPose) {
-      // Cast a short shadow from the resting forearms onto the table plane.
-      if(!(GAME.CharacterActivity && GAME.CharacterActivity.sipLiftsCup(gesture)))
-        interiorPoseRect(g,seatedPose,5,19,7,1,'rgba(75,53,37,.24)');
-      interiorPoseRect(g,seatedPose,12,18,2,1,'rgba(75,53,37,.20)');
+      // Soft, broken contact sits directly below the resting skin and cuff.
+      if(!(GAME.CharacterActivity && GAME.CharacterActivity.sipLiftsCup(gesture))) {
+        interiorPoseRect(g,seatedPose,5,19,2,1,'rgba(75,53,37,.10)');
+        interiorPoseRect(g,seatedPose,8,19,3,1,'rgba(75,53,37,.17)');
+      }
+      interiorPoseRect(g,seatedPose,12,18,2,1,'rgba(75,53,37,.12)');
       interiorSeatedHands(g,seatedPose);
       interiorPoseRect(g,seatedPose,4,1,3,1,guest.hairHi);
       interiorPoseRect(g,seatedPose,4,13,2,1,guest.coatHi);
