@@ -4390,13 +4390,13 @@
     R(g,x+2,y-15,w-4,1,p.woodLight);
     for(var i=3;i<w-3;i+=6) {
       // Rounded vertical channels roll into shadow toward the seat pocket.
-      R(g,x+i,y-13,5,16,p.red); R(g,x+i+1,y-13,3,1,p.redHi);
+      R(g,x+i,y-13,5,16,p.red); R(g,x+i+1,y-13,3,1,'#b35359');
       R(g,x+i+1,y-12,3,2,p.redHi);
       R(g,x+i,y-11,1,7,p.redHi); R(g,x+i+4,y-10,1,13,p.redDark);
       R(g,x+i,y-4,4,3,'#762b39');
       R(g,x+i+2,y-3,1,1,p.redDark);
       R(g,x+i+2,y-2,1,1,'#aa4650');
-      if((i+variant)%3===0) R(g,x+i+1,y-11,2,1,p.redLight);
+      if((i+variant)%3===0) R(g,x+i+1,y-11,2,1,'#cf7770');
     }
     R(g,x+2,y-1,w-4,6,p.redDark); R(g,x+3,y,w-6,3,p.red);
     R(g,x+4,y,w-8,1,p.redHi); R(g,x+2,y+5,w-4,2,p.redDark);
