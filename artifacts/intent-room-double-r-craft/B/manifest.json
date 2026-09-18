@@ -1,0 +1,183 @@
+{
+  "study": "B",
+  "packet": "intent-room-double-r-craft",
+  "verifiedAtUtc": "2026-09-18T08:04:16Z",
+  "sourceRevision": "7472a39143636dfaf282da6a0041f07082d6a1c2",
+  "independence": {
+    "baseRenderer": "7472a39:js/retro-authored.js",
+    "notCumulativeWith": "Study A",
+    "rendererScope": "interiorBooth replacement only; B widens the outer table slab to x+6..41 and shifts only the right-seat prop to x+6 for edge support"
+  },
+  "spec": {
+    "file": "artifacts/intent-room-double-r-craft/study-B-spec.md",
+    "sha256": "0a9480ac5f5e1a3f7741f75cfd671af54d230da80c5ac2a9256ae86492bc1503"
+  },
+  "scene": {
+    "map": "diner",
+    "viewport": [256, 192],
+    "camera": {
+      "playerTile": [6, 8],
+      "playerFacing": "up",
+      "nativeCapture": "fixed 256x192 canvas; no zoom or composed crop"
+    }
+  },
+  "captures": [
+    {
+      "id": "study-B-populated",
+      "file": "study-B-populated-native.png",
+      "dimensions": [256, 192],
+      "sha256": "a90232535694d002e0a3eae59a889ae40b26ca9fe5b128078bf4d78d3c133721",
+      "command": "node test/native-shot.js --map=diner --x=6 --y=8 --dir=up --narrative=1 --out=artifacts/intent-room-double-r-craft/B/study-B-populated-native.png",
+      "state": "NarrativeAdapter enabled with default state; baseline authored diner guest plus resolved Cast Presence."
+    },
+    {
+      "id": "study-B-unpopulated",
+      "file": "study-B-unpopulated-native.png",
+      "dimensions": [256, 192],
+      "sha256": "e35193a0e611e4ecca0945eba56a487d1b8edf606ed3bcf94f4e45263f3612ac",
+      "command": "node test/native-shot.js --map=diner --x=6 --y=8 --dir=up --out=artifacts/intent-room-double-r-craft/B/study-B-unpopulated-native.png",
+      "state": "No NarrativeAdapter/Cast injection; authored architectural and ambient layers remain."
+    },
+    {
+      "id": "study-B-act4",
+      "file": "study-B-act4-native.png",
+      "dimensions": [256, 192],
+      "sha256": "542c78930e0bd7479041a0737d5a0659030e117b16725abd0bf193c8faa9c5cf",
+      "command": "node -e \"const f=require('./test/fixtures/cast-pins-acts-1-4.json');const s=f.seeds.ACT4_AFTERNOON;const {spawnSync}=require('node:child_process');const a=['test/native-shot.js','--map=diner','--x=6','--y=8','--dir=up','--narrative=1','--nstate='+Buffer.from(JSON.stringify(s)).toString('base64'),'--out=artifacts/intent-room-double-r-craft/B/study-B-act4-native.png'];const r=spawnSync(process.execPath,a,{stdio:'inherit'});process.exit(r.status===null?2:r.status);\"",
+      "state": {
+        "source": "test/fixtures/cast-pins-acts-1-4.json",
+        "selector": "seeds.ACT4_AFTERNOON",
+        "sha256OfJsonBytes": "94ec48ba3e2517c50f13f5ebb027b4eb021e8e4be4ae1d381b262c8da746d358",
+        "expectedDinerCast": [
+          "maddy@diner:10,1",
+          "leland@diner:11,1",
+          "norma@diner:5,2",
+          "shelly@diner:9,7",
+          "loglady@diner:4,5",
+          "james@diner:9,6"
+        ]
+      }
+    }
+  ],
+  "boothCrops": {
+    "source": "study-B-populated-native.png",
+    "cropDimensions": [64, 48],
+    "upscale": "ImageMagick point filter, 400%; no smoothing",
+    "crops": [
+      {
+        "id": "booth-2-occupied",
+        "mapAnchor": "interior.booths[2] = [1,8,3] (lower-left booth)",
+        "crop": {
+          "x": 24,
+          "y": 128,
+          "width": 64,
+          "height": 48,
+          "inclusivePixels": "x=24..87, y=128..175"
+        },
+        "native": {
+          "file": "booth-2-occupied-native.png",
+          "dimensions": [64, 48],
+          "sha256": "ea14b0b4cf582d4c5bcc2d4e968788f6e95453a828cbd47d06fd8baa9e9a57d4",
+          "command": "magick artifacts/intent-room-double-r-craft/B/study-B-populated-native.png -crop 64x48+24+128 +repage artifacts/intent-room-double-r-craft/B/booth-2-occupied-native.png"
+        },
+        "nearest4x": {
+          "file": "booth-2-occupied-4x.png",
+          "dimensions": [256, 192],
+          "sha256": "8467f87b149a89c4a7da9bdc08f4807f1b19f008534232ead4913469a2e257cf",
+          "command": "magick artifacts/intent-room-double-r-craft/B/booth-2-occupied-native.png -filter point -resize 400% -strip artifacts/intent-room-double-r-craft/B/booth-2-occupied-4x.png"
+        },
+        "state": "occupied lower-left booth/table variant"
+      },
+      {
+        "id": "booth-0-ready",
+        "mapAnchor": "interior.booths[0] = [1,6,3] (upper-left booth)",
+        "crop": {
+          "x": 24,
+          "y": 96,
+          "width": 64,
+          "height": 48,
+          "inclusivePixels": "x=24..87, y=96..143"
+        },
+        "native": {
+          "file": "booth-0-ready-native.png",
+          "dimensions": [64, 48],
+          "sha256": "b9c5a65a1f7f607d66cd10af98c05ab113b6abb68405165e19fa58fa8c7c80e2",
+          "command": "magick artifacts/intent-room-double-r-craft/B/study-B-populated-native.png -crop 64x48+24+96 +repage artifacts/intent-room-double-r-craft/B/booth-0-ready-native.png"
+        },
+        "nearest4x": {
+          "file": "booth-0-ready-4x.png",
+          "dimensions": [256, 192],
+          "sha256": "2443c5af74346313f664d8ee0657b4c95827c10482a8ccb5ff763f9d7190b591",
+          "command": "magick artifacts/intent-room-double-r-craft/B/booth-0-ready-native.png -filter point -resize 400% -strip artifacts/intent-room-double-r-craft/B/booth-0-ready-4x.png"
+        },
+        "state": "empty/ready upper-left booth/table variant; nearby Cast pixels at the crop edge are retained"
+      },
+      {
+        "id": "booth-3-cleared",
+        "mapAnchor": "interior.booths[3] = [10,8,3] (lower-right booth)",
+        "crop": {
+          "x": 168,
+          "y": 128,
+          "width": 64,
+          "height": 48,
+          "inclusivePixels": "x=168..231, y=128..175"
+        },
+        "native": {
+          "file": "booth-3-cleared-native.png",
+          "dimensions": [64, 48],
+          "sha256": "40b43b4b9620f3c16da2dbe1852ae59163621604dfd405006426706db5d42f4d",
+          "command": "magick artifacts/intent-room-double-r-craft/B/study-B-populated-native.png -crop 64x48+168+128 +repage artifacts/intent-room-double-r-craft/B/booth-3-cleared-native.png"
+        },
+        "nearest4x": {
+          "file": "booth-3-cleared-4x.png",
+          "dimensions": [256, 192],
+          "sha256": "a807d694fb940367665207a52c8c355d869cf63da2f7c451737d75928fcfc74a",
+          "command": "magick artifacts/intent-room-double-r-craft/B/booth-3-cleared-native.png -filter point -resize 400% -strip artifacts/intent-room-double-r-craft/B/booth-3-cleared-4x.png"
+        },
+        "state": "empty/cleared lower-right booth/table variant"
+      }
+    ]
+  },
+  "provenance": {
+    "nativeHarness": "test/native-shot.js",
+    "nativeHarnessSha256": "b97bf89d009c4471a14159fba82c367b18e3f4b45e8e263e3aecd383f8e8dfb8",
+    "sceneHarness": "test/retro-scene.html",
+    "sceneHarnessSha256": "07993784c6df104232a20cd19208036dbae09cb80f2e49343520ddc13f56b9f9",
+    "engine": "js/engine.js",
+    "engineSha256": "e54228828aff776fe0620cc362bb3809bc941e63417b84e434e9f07ddb5308aa",
+    "renderer": "js/retro-authored.js",
+    "rendererSha256": "c33ccac549cee72f909aa27d06e4c9c7f5b6082d0b4102060a792777e9b474e4",
+    "castRegistry": "narrative/cast/windows.json",
+    "castRegistrySha256": "9213ff57ada8a66a22f9e68ffe5eb56affdf4fb8e316e3bf7405890435d44bce",
+    "castFixture": "test/fixtures/cast-pins-acts-1-4.json",
+    "castFixtureSha256": "eb1e7138048eeef6f7a0a744956bc19c5da2d5218ffa9c07101756efa866354b"
+  },
+  "verification": {
+    "dimensionsVerified": true,
+    "productionDiffFromBase": ["js/retro-authored.js"],
+    "studyAIncluded": false,
+    "edgeSupport": {
+      "outerTableSlab": "x+6..41, y+1..13",
+      "creamTableTop": "x+7..40, y+1..11",
+      "occupied": "right-seat prop x+6..9 and left-seat prop x+37..40 are on the slab",
+      "ready": "menu begins at x+6 and the ready plate reaches at most x+41",
+      "cleared": "cleared-state tableware reaches at most x+41",
+      "visibleCheekReturns": "left x+1..5 and right x+42..46 remain visible as five-pixel side masses"
+    },
+    "targetedGates": {
+      "node test/diner-layout.js": "pass",
+      "node test/diner-program.js": "pass",
+      "node test/retro-production.js": "pass",
+      "node test/interior-prop-semantics.js": "pass",
+      "node test/smoke.js": "pass",
+      "node test/walkthrough.js": "pass",
+      "git diff --check": "pass"
+    }
+  },
+  "limitations": [
+    "The no-narrative frame is not a zero-person room: authored generic diner guests remain visible.",
+    "The Act 4 frame is one fixed Cast snapshot, not evidence of a temporal sequence or dialogue state.",
+    "Crops are evidence of the authored Study B renderer at the fixed camera; they do not claim animation, audio, or human playtest results.",
+    "This checkpoint is an independent alternative from the pre-study renderer and does not include Study A geometry."
+  ]
+}
