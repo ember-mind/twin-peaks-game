@@ -4389,9 +4389,13 @@
     R(g,x,y-15,w,31,p.woodDark); R(g,x+1,y-14,w-2,28,p.redDark);
     R(g,x+2,y-15,w-4,1,p.woodLight);
     for(var i=3;i<w-3;i+=6) {
-      R(g,x+i,y-13,5,16,p.red); R(g,x+i+1,y-12,3,2,p.redHi);
-      R(g,x+i,y-11,1,10,p.redHi); R(g,x+i+4,y-10,1,13,p.redDark);
+      // Rounded vertical channels roll into shadow toward the seat pocket.
+      R(g,x+i,y-13,5,16,p.red); R(g,x+i+1,y-13,3,1,p.redHi);
+      R(g,x+i+1,y-12,3,2,p.redHi);
+      R(g,x+i,y-11,1,7,p.redHi); R(g,x+i+4,y-10,1,13,p.redDark);
+      R(g,x+i,y-4,4,3,'#762b39');
       R(g,x+i+2,y-3,1,1,p.redDark);
+      R(g,x+i+2,y-2,1,1,'#aa4650');
       if((i+variant)%3===0) R(g,x+i+1,y-11,2,1,p.redLight);
     }
     R(g,x+2,y-1,w-4,6,p.redDark); R(g,x+3,y,w-6,3,p.red);
@@ -4399,18 +4403,33 @@
     R(g,x+1,y+7,w-2,2,p.woodLight);
     if(guest) {
       var seatX=guest.seat==='left'?x+8:x+w-25;
+      // Shoulder and seat contact tuck the figure into the upholstered bay.
+      R(g,seatX+2,y-11,13,10,'rgba(41,24,28,.24)');
       R(g,seatX+3,y-4,11,3,p.redDark);
     }
     var gesture=variant===1 && GAME.CharacterActivity ? GAME.CharacterActivity.seatedFrame() : -1;
     var seatedPose=guest ? interiorSeatedGuest(g,guest.seat==='left'?x+8:x+w-25,y-16,guest,gesture) : null;
+    // Broad horizontal laminate plane, a turned front lip, then a recessed base.
     R(g,x+3,y+1,w-6,13,p.woodDark);
-    R(g,x+4,y+1,w-8,11,p.creamShade); R(g,x+4,y+1,w-8,3,p.cream);
-    R(g,x+3,y+12,w-6,2,p.woodHi); R(g,x+5,y+14,w-10,2,p.red);
+    R(g,x+4,y+2,w-8,8,'#e4d2a9');
+    R(g,x+5,y+1,w-10,1,p.creamShade);
+    R(g,x+4,y+2,1,8,p.cream); R(g,x+w-6,y+2,2,8,'#c7b187');
+    R(g,x+5,y+10,w-10,1,p.cream);
+    R(g,x+5,y+11,w-10,1,'#b59a72');
+    R(g,x+5,y+12,w-10,1,p.woodDark);
+    R(g,x+6,y+13,w-12,3,'#342923');
+    R(g,x+7,y+13,3,3,p.woodHi); R(g,x+w-10,y+13,3,3,p.wood);
+    R(g,x+7,y+13,1,3,p.woodLight);
+    R(g,x+6,y+16,6,1,p.woodDark); R(g,x+w-11,y+16,6,1,p.woodDark);
     R(g,x+1,y-12,2,27,p.redHi); R(g,x+w-3,y-12,2,27,p.redDark);
-    R(g,x+3,y+13,w-6,1,p.woodHi); R(g,x+4,y+15,w-8,1,p.metal);
+    R(g,x+3,y+13,3,2,p.red); R(g,x+w-6,y+13,3,2,p.redDark);
     if(guest) interiorOccupiedTable(g,x,y,w,p,guest,gesture);
     else interiorTableProps(g,x+5,y,p,variant);
     if(seatedPose) {
+      // Cast a short shadow from the resting forearms onto the table plane.
+      if(!(GAME.CharacterActivity && GAME.CharacterActivity.sipLiftsCup(gesture)))
+        interiorPoseRect(g,seatedPose,5,19,7,1,'rgba(75,53,37,.24)');
+      interiorPoseRect(g,seatedPose,12,18,2,1,'rgba(75,53,37,.20)');
       interiorSeatedHands(g,seatedPose);
       interiorPoseRect(g,seatedPose,4,1,3,1,guest.hairHi);
       interiorPoseRect(g,seatedPose,4,13,2,1,guest.coatHi);
@@ -4589,18 +4608,9 @@
   }
   function interiorBackbar(g,x,y,p) {
     interiorPanel(g,x,y-14,224,58,p);
-    // Recess the working bay into the timber wall; its shelves project forward.
-    R(g,x+40,y+9,141,21,'#292f29');
-    R(g,x+40,y+9,141,3,'#20251f');
-    R(g,x+41,y+12,139,15,'#3c4034');
-    [71,100,135].forEach(function(dx) {
-      R(g,x+dx,y+12,2,15,p.woodDark); R(g,x+dx,y+12,1,11,p.woodHi);
-    });
-    R(g,x+39,y+9,2,21,p.woodHi); R(g,x+180,y+9,2,21,p.woodDark);
-    // A quiet service floor keeps the back cupboards behind the customer counter.
-    R(g,x+16,y+30,192,18,'#584936');
-    R(g,x+28,y+31,154,9,'#372e25');
-    R(g,x+28,y+40,154,2,'#493b2d');
+    // A service floor and plinth separate working space from the back wall.
+    R(g,x+16,y+30,192,18,'#67513b');
+    for(var py=32;py<48;py+=5) R(g,x+16,y+py,192,1,'#493a2d');
     R(g,x+28,y+25,154,6,p.woodDark); R(g,x+29,y+25,152,2,p.woodLight);
     // Side service door, clock and local coffee pledge.
     R(g,x+17,y+2,21,36,p.woodDark); R(g,x+19,y+3,17,33,p.redDark);
@@ -4618,8 +4628,7 @@
     townMicroWord(g,'PIE',x+147,y+5,p.cream); townMicroWord(g,'3.50',x+164,y+11,p.gold);
     // Asymmetric clusters: family photos, stacked crockery and pantry jars.
     interiorPicture(g,x+43,y-10,14,14,p,'photo');
-    R(g,x+41,y+10,29,2,p.woodLight);
-    R(g,x+41,y+23,29,2,p.woodLight); R(g,x+42,y+25,29,2,'#20251f');
+    R(g,x+41,y+10,29,2,p.woodLight); R(g,x+41,y+23,29,2,p.woodLight);
     [43,53,64].forEach(function(dx,n) {
       R(g,x+dx,y+14-(n%2)*3,4,8+(n%2)*3,n===2?p.green:p.creamShade);
       R(g,x+dx,y+13-(n%2)*3,4,2,n===2?p.gold:p.metal);
@@ -4631,15 +4640,11 @@
       else { R(g,x+dx,y+shelfY,5,5,p.creamShade); R(g,x+dx+1,y+shelfY,3,1,p.cream); }
     });
     R(g,x+76,y+23,57,2,p.woodLight); R(g,x+76,y+25,57,2,'#282820');
-    // Three broad cabinet fronts sit under a projecting butcher-block worktop.
-    R(g,x+40,y+26,139,11,p.woodDark);
-    R(g,x+41,y+28,137,7,'#65452e');
-    [42,88,134].forEach(function(dx) {
-      R(g,x+dx,y+29,42,5,p.wood); R(g,x+dx,y+29,1,5,p.woodHi);
-      R(g,x+dx+18,y+30,6,1,'#c19a5c');
-    });
-    R(g,x+40,y+26,139,2,p.woodLight); R(g,x+41,y+28,137,1,'#322b21');
-    R(g,x+41,y+35,137,2,'#29271f');
+    // Lower cabinets, warming shelf, service tins and chrome urns form masses.
+    R(g,x+40,y+26,139,9,p.woodDark); R(g,x+41,y+26,137,2,p.woodLight);
+    for(var dx=42;dx<176;dx+=17) {
+      R(g,x+dx,y+29,15,5,p.wood); R(g,x+dx+6,y+30,4,1,p.gold);
+    }
     R(g,x+106,y+24,22,12,p.ink); R(g,x+107,y+25,20,9,p.metal);
     R(g,x+109,y+27,6,5,p.woodDark); R(g,x+118,y+27,7,5,p.woodDark);
     R(g,x+109,y+27,6,1,p.gold); R(g,x+118,y+27,7,1,p.gold);
@@ -4665,30 +4670,15 @@
     var counterX=x+model.counter[0]*16, counterY=y+model.counter[1]*16, counterW=model.counter[2]*16;
     R(g,counterX+2,counterY+16,counterW-2,5,'rgba(32,26,19,.28)');
     interiorContact(g,counterX+1,counterY+18,counterW-2,p);
-    // A thick laminate overhang casts a deep lip over broad enamel panels.
-    R(g,counterX,counterY+3,counterW,14,p.ink);
-    R(g,counterX+1,counterY+5,counterW-2,8,p.redDark);
-    R(g,counterX+2,counterY+7,counterW-4,5,p.red);
-    R(g,counterX+3,counterY+7,counterW-6,1,'#a4434c');
-    for(i=1;i<3;i++) {
-      var seam=counterX+Math.floor(counterW*i/3);
-      R(g,seam-1,counterY+6,3,7,p.redDark);
-      R(g,seam+2,counterY+7,1,5,'#a4434c');
-    }
-    R(g,counterX+2,counterY+12,counterW-4,1,'#6d2934');
-    R(g,counterX+2,counterY+7,1,5,'#b45257');
-    R(g,counterX+counterW-4,counterY+6,3,7,p.redDark);
-    R(g,counterX+3,counterY+14,counterW-6,3,'#252820');
-    R(g,counterX+4,counterY+14,counterW-8,1,'#655a43');
-    R(g,counterX,counterY-2,counterW,6,p.creamShade);
-    R(g,counterX+1,counterY-2,counterW-2,3,p.cream);
-    R(g,counterX+1,counterY+1,counterW-2,1,'#e3cda3');
-    R(g,counterX+1,counterY+4,counterW-2,1,'#aba88d');
-    R(g,counterX+2,counterY+5,counterW-4,2,'#402b29');
-    // Local reflections stay on the horizontal plane, not the shaded apron.
+    R(g,counterX,counterY,counterW,17,p.ink); R(g,counterX+1,counterY+6,counterW-2,8,p.redDark);
+    R(g,counterX+2,counterY+6,counterW-4,6,p.red); R(g,counterX+3,counterY+6,counterW-6,1,p.redHi);
+    for(i=4;i<counterW-5;i+=22) { R(g,counterX+i,counterY+8,18,3,p.redDark); R(g,counterX+i+1,counterY+8,16,1,p.redHi); }
+    R(g,counterX,counterY-2,counterW,7,p.creamShade); R(g,counterX+1,counterY-2,counterW-2,4,p.cream);
+    R(g,counterX+1,counterY+4,counterW-2,1,p.metalHi); R(g,counterX+2,counterY+15,counterW-4,1,p.metal);
+    // Broken specular strips keep polished laminate distinct from matte wood.
     R(g,counterX+10,counterY-1,20,1,p.metalHi);
-    R(g,counterX+53,counterY-1,16,1,p.metalHi);
-    R(g,counterX+94,counterY-1,26,1,'#ead9b3');
+    R(g,counterX+53,counterY,16,1,p.metalHi);
+    R(g,counterX+94,counterY-1,26,1,p.gold);
     interiorServiceCluster(g,counterX+3,counterY-17,p,'coffee');
     interiorServiceCluster(g,counterX+67,counterY-14,p,'plates'); interiorPieCase(g,counterX+counterW-49,counterY-15,48,p);
     interiorCup(g,counterX+35,counterY-3,p); interiorCup(g,counterX+75,counterY-3,p);
