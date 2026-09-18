@@ -23,9 +23,14 @@
    * tile 16px; proporzioni, rampe e silhouette seguono bar HGSS misurato. */
   var CAST_RENDERER = 'heartgold-atlas-r116';
   var CAST_SHEET_FILE = 'assets/sprites/cast-walkcycles-hg-24.png?v=r129-cast';
-  var CAST_SHEET_SRC = (typeof document !== 'undefined' && document.currentScript && document.currentScript.src)
+  /* The atlas renderer is mechanism; which people are on the sheet is content.
+   * A host that sets GAME.RetroCastAtlas = { src, order } before this file
+   * loads gets the same 24px walk-cycle renderer over its own sheet (same
+   * 360x360 layout). Absent, this is the Twin Peaks cast, unchanged. */
+  var CAST_ATLAS_CONTENT = GAME.RetroCastAtlas || null;
+  var CAST_SHEET_SRC = CAST_ATLAS_CONTENT ? CAST_ATLAS_CONTENT.src : ((typeof document !== 'undefined' && document.currentScript && document.currentScript.src)
     ? new URL('../' + CAST_SHEET_FILE, document.currentScript.src).href
-    : CAST_SHEET_FILE;
+    : CAST_SHEET_FILE);
   var CAST_SHEET_ORDER = [
     'cooper', 'truman', 'lucy', 'andy', 'hawk',
     'sarah', 'leland', 'norma', 'shelly', 'loglady',
@@ -33,6 +38,7 @@
     'laura', 'gerard', 'benhorne', 'giant', 'maddy',
     'bob', 'james', 'jacques', 'ronette', 'infermiera'
   ];
+  if (CAST_ATLAS_CONTENT) CAST_SHEET_ORDER = CAST_ATLAS_CONTENT.order.slice();
   var castWalkSheet = null;
   var castReady = null;
   if (typeof Image !== 'undefined') {
@@ -4293,7 +4299,7 @@
   function interiorDinerMenu(g,x,y,p) {
     // One recurring house detail: burgundy menus with the Double R monogram.
     R(g,x,y,11,8,p.woodDark); R(g,x+1,y,9,7,p.redDark);
-    R(g,x+1,y,1,7,p.redHi); interiorChalk(g,'RR',x+3,y+2,p.creamShade);
+    R(g,x+1,y,1,7,p.redHi); interiorChalk(g,houseMonogram,x+3,y+2,p.creamShade);
   }
   function interiorTableProps(g,x,y,p,variant) {
     if(variant===3) {
@@ -4511,22 +4517,31 @@
       R(g,lx+2,ly+2,1,4,p.leaf); R(g,lx+3,ly+1,3,1,'#a4a55c');
     });
   }
-  function interiorNeon(g,x,y,p) {
+  /* What the room says is content of its interior model (model.signage);
+   * how a sign is built is not. Without signage this is the Double R. */
+  var DINER_SIGNAGE = { brand:'DOUBLE', mark:'R', pledge:['DAMN','GOOD','COFFEE'],
+    menu:[['COFFEE','2.00'],['PIE','3.50']], caseLabel:'PIE', specials:['TODAY','PIE','3.50'], monogram:'RR' };
+  /* The house monogram is painted deep inside the booth kit, several calls
+   * below the model; the room painter sets it for the duration of its pass. */
+  var houseMonogram = DINER_SIGNAGE.monogram;
+  function signageOf(model) { return (model && model.signage) || DINER_SIGNAGE; }
+  function interiorNeon(g,x,y,p,sign) {
+    sign = sign || DINER_SIGNAGE;
     R(g,x,y,68,26,p.woodDark); R(g,x+1,y+1,66,24,p.woodLight);
     R(g,x+3,y+2,62,22,p.green); R(g,x+4,y+3,60,19,'#26312b');
     // Slanted pixel lettering and a large looped R form one custom brand mark.
-    var points=[], word='DOUBLE';
+    var points=[], word=sign.brand, wordX=sign.mark ? 6 : Math.max(4, Math.round((62 - word.length*6)/2));
     for(var c=0;c<word.length;c++) {
       var glyph=TOWN_FONT_5X7[word[c]];
       for(var row=0;row<7;row++) for(var col=0;col<5;col++) if(glyph[row][col]==='1') {
-        points.push([x+6+c*6+col+Math.floor((6-row)/3),y+8+row]);
+        points.push([x+wordX+c*6+col+Math.floor((6-row)/3),y+8+row]);
       }
     }
     // Two passes prevent one glyph's glow from erasing adjacent neon strokes.
     points.forEach(function(a){R(g,a[0]+1,a[1]+1,1,1,'#713740');});
     points.forEach(function(a){R(g,a[0],a[1],1,1,'#e48480');});
     var pattern=['...RRRRRR..','..RR....RR.','..RR....RR.','..RR...RR..','..RRRRRR...','..RR.RR....','.RR...RR...','.RR....RR..','RR......RR.'];
-    for(var ry=0;ry<pattern.length;ry++) for(var rx=0;rx<pattern[ry].length;rx++) if(pattern[ry][rx]==='R') {
+    if(sign.mark) for(var ry=0;ry<pattern.length;ry++) for(var rx=0;rx<pattern[ry].length;rx++) if(pattern[ry][rx]==='R') {
       R(g,x+43+rx,y+5+ry*2,2,2,p.redHi); R(g,x+43+rx,y+5+ry*2,1,1,p.redLight);
     }
     R(g,x+7,y+20,30,1,p.redHi); R(g,x+10,y+19,33,1,p.redDark);
@@ -4558,15 +4573,16 @@
     interiorPool(g,x+3,y+2,w-6,h-4,'rgba(255,195,87,'+(.10*k)+')');
     interiorPool(g,x+7,y+4,w-14,h-8,'rgba(255,217,130,'+(.13*k)+')');
   }
-  function interiorSpecials(g,x,y,p) {
+  function interiorSpecials(g,x,y,p,lines) {
+    lines = lines || DINER_SIGNAGE.specials;
     // Compact 23x26 board; one collision cell, set beside the right booths.
     R(g,x-2,y+12,24,4,'rgba(28,25,18,.28)');
     interiorContact(g,x-2,y+14,23,p);
     R(g,x-3,y-11,23,25,p.woodDark); R(g,x-2,y-10,21,22,p.woodHi);
     R(g,x-1,y-9,19,20,p.green);
-    townMicroWord(g,'TODAY',x-1,y-7,p.creamShade);
-    townMicroWord(g,'PIE',x+3,y,p.cream);
-    townMicroWord(g,'3.50',x+2,y+6,p.gold);
+    townMicroWord(g,lines[0],x-1,y-7,p.creamShade);
+    townMicroWord(g,lines[1],x+3-Math.max(0,lines[1].length-3)*2,y,p.cream);
+    townMicroWord(g,lines[2],x+2,y+6,p.gold);
     R(g,x-2,y+12,3,3,p.woodDark); R(g,x+16,y+12,3,3,p.woodDark);
   }
   function interiorServiceCluster(g,x,y,p,kind) {
@@ -4587,7 +4603,8 @@
       R(g,x+3,y+13,2,1,p.ink); R(g,x+7,y+13,2,1,p.ink);
     }
   }
-  function interiorBackbar(g,x,y,p) {
+  function interiorBackbar(g,x,y,p,sign) {
+    sign = sign || DINER_SIGNAGE;
     interiorPanel(g,x,y-14,224,58,p);
     // A service floor and plinth separate working space from the back wall.
     R(g,x+16,y+30,192,18,'#67513b');
@@ -4600,13 +4617,13 @@
     interiorPicture(g,x+18,y-11,18,12,p,'photo');
     interiorPicture(g,x+187,y-11,16,16,p,'clock');
     R(g,x+184,y+7,25,23,p.woodDark); R(g,x+185,y+8,23,21,p.creamShade);
-    townMicroWord(g,'DAMN',x+188,y+10,p.ink); townMicroWord(g,'GOOD',x+188,y+16,p.ink);
-    townMicroWord(g,'COFFEE',x+186,y+22,p.ink);
-    interiorNeon(g,x+72,y-13,p);
+    townMicroWord(g,sign.pledge[0],x+188,y+10,p.ink); townMicroWord(g,sign.pledge[1],x+188,y+16,p.ink);
+    townMicroWord(g,sign.pledge[2],x+186,y+22,p.ink);
+    interiorNeon(g,x+72,y-13,p,sign);
     // The menu owns a quiet dark panel; equipment sits below, never over text.
     R(g,x+143,y-12,39,31,p.woodDark); R(g,x+145,y-10,35,27,p.ink);
-    townMicroWord(g,'COFFEE',x+147,y-7,p.cream); townMicroWord(g,'2.00',x+164,y-1,p.gold);
-    townMicroWord(g,'PIE',x+147,y+5,p.cream); townMicroWord(g,'3.50',x+164,y+11,p.gold);
+    townMicroWord(g,sign.menu[0][0],x+147,y-7,p.cream); townMicroWord(g,sign.menu[0][1],x+164,y-1,p.gold);
+    townMicroWord(g,sign.menu[1][0],x+147,y+5,p.cream); townMicroWord(g,sign.menu[1][1],x+164,y+11,p.gold);
     // Asymmetric clusters: family photos, stacked crockery and pantry jars.
     interiorPicture(g,x+43,y-10,14,14,p,'photo');
     R(g,x+41,y+10,29,2,p.woodLight); R(g,x+41,y+23,29,2,p.woodLight);
@@ -4634,7 +4651,7 @@
     R(g,x+55,y+22,7,13,p.ink); R(g,x+56,y+23,5,10,p.metal);
     R(g,x+57,y+24,1,7,p.metalHi); R(g,x+56,y+32,5,1,p.woodDark);
     R(g,x+140,y+24,10,11,p.creamShade); R(g,x+141,y+25,8,1,p.cream);
-    townMicroWord(g,'PIE',x+140,y+28,p.redDark);
+    townMicroWord(g,sign.caseLabel,x+140,y+28,p.redDark);
     // Dark upper corners give warm practicals an actual value range.
     R(g,x,y-12,15,55,'rgba(19,21,16,.26)'); R(g,x+208,y-12,16,55,'rgba(19,21,16,.3)');
     [38,68,188].forEach(function(lx) {
@@ -4670,6 +4687,7 @@
   }
   function drawDinerInterior(g,map,cx,cy) {
     var model=map.interior, p=INTERIOR_MATERIALS[model.material], x=-cx, y=-cy, i;
+    houseMonogram = signageOf(model).monogram || '';
     R(g,0,0,g.canvas ? g.canvas.width : 256,g.canvas ? g.canvas.height : 192,'#17251e');
     // Restore a continuous floor beneath furniture, with 8px checker tiles.
     for(var fy=16;fy<144;fy+=8) for(var fx=16;fx<208;fx+=8) {
@@ -4689,14 +4707,14 @@
     interiorWarmLight(g,x+25,y+55,58,25,.65);
     interiorWarmLight(g,x+140,y+55,57,25,.9);
     interiorPanel(g,x,y+28,16,116,p); interiorPanel(g,x+208,y+28,16,116,p);
-    interiorBackbar(g,x,y,p);
+    interiorBackbar(g,x,y,p,signageOf(model));
     drawDinerCounter(g,model,x,y,p);
     model.stools.forEach(function(a){interiorStool(g,x+a[0]*16,y+a[1]*16,p);});
     model.booths.forEach(function(a,n){
       interiorBooth(g,x+a[0]*16,y+a[1]*16,a[2]*16,p,n,model.guests[n]);
       interiorWarmLight(g,x+a[0]*16+3,y+a[1]*16-4,42,19,[.55,.85,.7,.3][n]);
     });
-    interiorSpecials(g,x+model.specials[0]*16,y+model.specials[1]*16,p);
+    interiorSpecials(g,x+model.specials[0]*16,y+model.specials[1]*16,p,signageOf(model).specials);
     interiorFloorPlant(g,x+model.islandPlant[0]*16-4,y+model.islandPlant[1]*16,p);
     interiorPlant(g,x+model.plant[0]*16,y+model.plant[1]*16+2,p);
     var coatX=x+model.coatRack[0]*16, coatY=y+model.coatRack[1]*16;
@@ -5049,7 +5067,7 @@
       var counterDepth=(m.counter[1]+1)*16;
       if(counterDepth>=min && counterDepth<max) drawDinerCounter(g,m,-cx,-cy,p);
       var boardDepth=(m.specials[1]+m.specials[3])*16;
-      if(boardDepth>=min && boardDepth<max) interiorSpecials(g,m.specials[0]*16-cx,m.specials[1]*16-cy,p);
+      if(boardDepth>=min && boardDepth<max) interiorSpecials(g,m.specials[0]*16-cx,m.specials[1]*16-cy,p,signageOf(m).specials);
       var plantDepth=(m.islandPlant[1]+1)*16;
       if(plantDepth>=min && plantDepth<max) interiorFloorPlant(g,m.islandPlant[0]*16-4-cx,m.islandPlant[1]*16-cy,p);
       return;

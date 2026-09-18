@@ -1011,20 +1011,20 @@
     }
     if (GAME.Diorama) GAME.Diorama.groundLight(g, S.map, cx, cy, vw, vh, tGlobal);
     var entities = entityList();
-    if (GAME.AmbientLife) GAME.AmbientLife.draw(g,S.mapId,cx,cy,-Infinity,entities.length?entities[0].wy+TILE:Infinity);
-    if (GAME.EnvironmentReactions) GAME.EnvironmentReactions.draw(g,S.mapId,cx,cy,-Infinity,entities.length?entities[0].wy+TILE:Infinity);
-    entities.forEach(function (e, index) {
+    /* Painter's algorithm completo. Alberi erano tutti nel ground pass,
+     * quindi Cooper compariva davanti anche quando suoi piedi erano a nord
+     * della radice. Dopo ogni attore ridisegniamo sola fascia di strutture fra
+     * suoi piedi e quelli del prossimo attore: NPC e player mantengono
+     * entrambi profondita' corretta, senza ombre sopra sprite. La scansione
+     * delle fasce e' del motore condiviso; cosa si ridisegna resta qui. */
+    EMBER.Tilemap.paintDepthBands(entities, TILE, function (e) {
       var pal = GAME.Sprites.CHARS[e.sprite] || GAME.Sprites.CHARS.cooper;
       if (GAME.Diorama) GAME.Diorama.actorGround(g, S.map, e, cx, cy, tGlobal);
       GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, pal, e.dir, e.fr, e.alpha, e.moving, S.mapId === 'woods', tGlobal, {mapId:S.mapId,wx:e.wx,wy:e.wy,npcId:e.id,characterLife:GAME.CharacterActivity&&GAME.CharacterActivity.actorPose?GAME.CharacterActivity.actorPose(e.id):null});
-      /* Painter's algorithm completo. Alberi erano tutti nel ground pass,
-       * quindi Cooper compariva davanti anche quando suoi piedi erano a nord
-       * della radice. Dopo ogni attore ridisegniamo sola fascia di alberi fra
-       * suoi piedi e quelli del prossimo attore: NPC e player mantengono
-       * entrambi profondita' corretta, senza ombre sopra sprite. */
-      if (GAME.sprites && GAME.sprites.drawForegroundStructures) {
-        var footY = e.wy + TILE;
-        var nextFootY = index + 1 < entities.length ? entities[index + 1].wy + TILE : Infinity;
+    }, function (footY, nextFootY, afterIndex) {
+      var hasForeground = GAME.sprites && GAME.sprites.drawForegroundStructures;
+      if (afterIndex >= 0 && !hasForeground) return;
+      if (afterIndex >= 0) {
         GAME.sprites.drawForegroundStructures(g, S.map, cx, cy, {
           mapId: S.mapId,
           indoor: !!S.map.indoor,
@@ -1033,9 +1033,9 @@
           forestDepthMin: footY,
           forestDepthMax: nextFootY
         });
-        if (GAME.AmbientLife) GAME.AmbientLife.draw(g,S.mapId,cx,cy,footY,nextFootY);
-        if (GAME.EnvironmentReactions) GAME.EnvironmentReactions.draw(g,S.mapId,cx,cy,footY,nextFootY);
       }
+      if (GAME.AmbientLife) GAME.AmbientLife.draw(g,S.mapId,cx,cy,footY,nextFootY);
+      if (GAME.EnvironmentReactions) GAME.EnvironmentReactions.draw(g,S.mapId,cx,cy,footY,nextFootY);
     });
     if (GAME.Diorama) GAME.Diorama.atmosphere(g, S.map, cx, cy, vw, vh, tGlobal);
   }

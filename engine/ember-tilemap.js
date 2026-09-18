@@ -48,4 +48,22 @@
   T.depthSort = function (entities) {
     return entities.sort(function (a, b) { return a.wy - b.wy; });
   };
+
+  /* Painter's order with scenery interleaved. Entities arrive depth-sorted;
+   * between one entity's feet and the next one's, the scene gets the chance
+   * to redraw whatever stands in that band, so a counter covers the person
+   * behind it and not the person in front. What is redrawn is the caller's
+   * business: drawBand(minFootY, maxFootY, afterIndex) with afterIndex -1 for
+   * the band behind everyone. */
+  T.paintDepthBands = function (entities, footOffset, drawEntity, drawBand) {
+    var first = entities.length ? entities[0].wy + footOffset : Infinity;
+    drawBand(-Infinity, first, -1);
+    for (var i = 0; i < entities.length; i++) {
+      drawEntity(entities[i], i);
+      var foot = entities[i].wy + footOffset;
+      var next = i + 1 < entities.length ? entities[i + 1].wy + footOffset : Infinity;
+      drawBand(foot, next, i);
+    }
+    return entities.length;
+  };
 })();

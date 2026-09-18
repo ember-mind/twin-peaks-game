@@ -42,22 +42,49 @@
       ]
     },
     cafe: {
-      id: 'cafe', name: 'Café Meridiana', kind: 'workplace', indoor: true,
+      id: 'cafe', name: 'Harbour Café', kind: 'workplace', indoor: true,
       opens: 480, closes: 1260,          // 08:00 – 21:00
-      spawn: { x: 6, y: 7, dir: 'up' },
+      spawn: { x: 6, y: 8, dir: 'up' },
       exit: { x: 6, y: 8 },
+      /* Collision is these rows and nothing else. The room is drawn by the
+       * production interior painter from `visual.interior`; a test holds the
+       * two in agreement cell by cell, so nobody walks through a booth the
+       * painter drew or is stopped by one it did not.
+       *   C counter   b stool / seat back / board   t booth table   D door */
       rows: [
         '##############',
-        '#CCCCC.......#',
-        '#.....K......#',
         '#............#',
-        '#..tc...tc...#',
-        '#............#',
-        '#..tc...tc...#',
-        '#............#',
-        '######DD######',
-        ',,,,,,--,,,,,,'
-      ]
+        '#...........b#',
+        '#.CCCCCCCCC..#',
+        '#.b.b.b.b.b.b#',
+        '#bb.........b#',
+        '#ttt..b.t.ttt#',
+        '#bb.........b#',
+        '#ttt......ttt#',
+        '######DD######'
+      ],
+      /* Scene content for the shared interior painter: where the counter,
+       * stools and booths are, and what the signs say. `scene` names the
+       * painter's room kit, not a place in anybody's story. Booths are empty:
+       * anyone seen in this room is an inhabitant the simulation owns. */
+      visual: {
+        scene: 'diner',
+        interior: {
+          material: 'diner',
+          counter: [2, 3, 9],
+          stools: [[2, 4], [4, 4], [6, 4], [8, 4], [10, 4]],
+          booths: [[1, 6, 3], [10, 6, 3], [1, 8, 3], [10, 8, 3]],
+          guests: [null, null, null, null],
+          plant: [12, 2], coatRack: [12, 4], specials: [8, 6, 1, 1], islandPlant: [6, 6],
+          signage: {
+            brand: 'HARBOUR', mark: null,
+            pledge: ['FRESH', 'BREAD', 'DAILY'],
+            menu: [['COFFEE', '2.00'], ['TOAST', '3.00']],
+            caseLabel: 'PIE', monogram: 'HC',
+            specials: ['TODAY', 'SOUP', '3.50']
+          }
+        }
+      }
     },
     park: {
       id: 'park', name: 'Riverside park', kind: 'social', indoor: false,
@@ -156,12 +183,17 @@
     { id: 'obj_guitar', name: 'guitar', location: 'flat_a', x: 10, y: 5,
       tags: ['instrument'], portable: true, owner: 'resident_a', condition: 'worn',
       value: 180, affordances: ['practise_guitar'] },
-    { id: 'obj_counter', name: 'café counter', location: 'cafe', x: 3, y: 1,
+    /* Where someone stands depends on what they are doing with the thing:
+     * staff work the counter from behind it, customers order from the front. */
+    { id: 'obj_counter', name: 'café counter', location: 'cafe', x: 5, y: 3,
       tags: ['work', 'food'], portable: false, owner: 'cafe',
-      affordances: ['work_shift', 'buy_meal'] },
-    { id: 'obj_cafe_table', name: 'café table', location: 'cafe', x: 3, y: 4,
+      affordances: ['work_shift', 'buy_meal'],
+      anchors: { work_shift: { x: 5, y: 2, dir: 'down' }, work_extra_shift: { x: 5, y: 2, dir: 'down' },
+                 buy_meal: { x: 5, y: 4, dir: 'up' } } },
+    { id: 'obj_cafe_table', name: 'café booth', location: 'cafe', x: 3, y: 6,
       tags: ['furniture', 'seat'], portable: false, owner: 'cafe',
-      affordances: ['take_break'] },
+      affordances: ['take_break'],
+      anchors: { take_break: { x: 4, y: 6, dir: 'left' } } },
     { id: 'obj_bench', name: 'park bench', location: 'park', x: 3, y: 2,
       tags: ['furniture', 'seat'], portable: false, owner: 'town',
       affordances: ['sit_and_rest'] },
@@ -210,7 +242,7 @@
     },
     {
       id: 'resident_b', sprite: 'resident_b', homeId: 'flat_b',
-      location: 'cafe', pos: { x: 8, y: 4, dir: 'down' },
+      location: 'cafe', pos: { x: 9, y: 5, dir: 'down' },
       needs: { energy: 80, hunger: 30 },
       money: 41,
       savings: 0,

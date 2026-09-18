@@ -19,6 +19,7 @@
     if (!LT.Perception) require('./lt-perception.js');
     if (!LT.Policy) require('./policy/lt-policy.js');
     if (!LT.Names) require('./lt-names.js');
+    if (!LT.Appearance) require('./lt-appearance.js');
     if (!root.EMBER || !root.EMBER.Grid) require('../../engine/ember-grid.js');
   }
   var U = LT.Util, W = LT.World, A = LT.Actions, P = LT.Perception, Pol = LT.Policy;
@@ -74,12 +75,17 @@
      * From this point the name is authoritative state: nothing regenerates it,
      * and every other system addresses people by id. */
     var nextName = LT.Names.generator(U.rng((this.seed ^ 0x9e3779b9) >>> 0), opts.namePools);
+    /* A look is drawn the same way, from its own stream, and is just as
+     * permanent. It is kept apart from the name on purpose: what someone is
+     * called and what they look like are separate facts about them. */
+    var nextLook = LT.Appearance.generator(U.rng((this.seed ^ 0x51ed270b) >>> 0));
     W.CHARACTERS.forEach(function (seed) {
       var c = deepCopy(seed);
       var drawn = nextName();
       c.name = drawn.name;
       c.familyName = drawn.familyName;
       c.fullName = drawn.fullName;
+      c.appearanceId = nextLook();
       c.activity = null;
       c.transit = null;
       c.pending = null;
@@ -586,6 +592,11 @@
   /* ---------------- activities ---------------- */
 
   Sim.prototype.anchorFor = function (actor, def, target) {
+    /* An object may say where each of its uses is done from. */
+    if (target && target.location === actor.location && target.anchors && target.anchors[def.id]) {
+      var declared = target.anchors[def.id];
+      return { x: declared.x, y: declared.y, dir: declared.dir };
+    }
     if (target && target.location === actor.location && target.x !== undefined) {
       var loc = W.LOCATIONS[actor.location];
       var options = [{ x: target.x, y: target.y + 1 }, { x: target.x, y: target.y - 1 },
@@ -708,24 +719,47 @@
     var loc = W.LOCATIONS[actor.location];
     if (!loc) return;
     var p = actor.pos;
-    if (p.x === t.x && p.y === t.y) { actor.walkTarget = null; return; }
-    var dx = t.x - p.x, dy = t.y - p.y;
-    var tries = [];
-    if (Math.abs(dx) >= Math.abs(dy)) {
-      if (dx) tries.push({ x: p.x + (dx > 0 ? 1 : -1), y: p.y, dir: dx > 0 ? 'right' : 'left' });
-      if (dy) tries.push({ x: p.x, y: p.y + (dy > 0 ? 1 : -1), dir: dy > 0 ? 'down' : 'up' });
-    } else {
-      if (dy) tries.push({ x: p.x, y: p.y + (dy > 0 ? 1 : -1), dir: dy > 0 ? 'down' : 'up' });
-      if (dx) tries.push({ x: p.x + (dx > 0 ? 1 : -1), y: p.y, dir: dx > 0 ? 'right' : 'left' });
-    }
-    for (var i = 0; i < tries.length; i++) {
-      var n = tries[i];
-      var ch = EMBER.Grid.cell(loc.rows, n.x, n.y, '#');
-      if (W.isSolid(ch)) continue;
-      actor.pos = { x: n.x, y: n.y, dir: n.dir };
-      this.touch();
+    if (p.x === t.x && p.y === t.y) {
+      if (t.dir && p.dir !== t.dir) { actor.pos = { x: p.x, y: p.y, dir: t.dir }; this.touch(); }
+      actor.walkTarget = null;
       return;
     }
+    var n = this.nextStep(loc, p, t);
+    if (!n) { actor.walkTarget = null; return; }   // walled off: stay put rather than slide through
+    actor.pos = { x: n.x, y: n.y, dir: n.dir };
+    this.touch();
+  };
+
+  /* One step along a shortest walkable route. Rooms have furniture people have
+   * to walk round — the back of a counter is reached by its end, not through
+   * it — so heading straight at the target is not enough. Breadth-first over a
+   * room of a hundred-odd cells; neighbour order is fixed, so the route is
+   * deterministic. */
+  var STEP_DIRS = [{ x: 0, y: -1, dir: 'up' }, { x: 1, y: 0, dir: 'right' },
+                   { x: 0, y: 1, dir: 'down' }, { x: -1, y: 0, dir: 'left' }];
+  Sim.prototype.nextStep = function (loc, from, to) {
+    var rows = loc.rows, w = rows[0].length, h = rows.length;
+    var key = function (x, y) { return y * w + x; };
+    var cameFrom = {}, queue = [{ x: to.x, y: to.y }], head = 0;
+    cameFrom[key(to.x, to.y)] = true;
+    /* Searched from the target back to the walker, so the answer is simply
+     * the neighbour of `from` that the search reached first. */
+    while (head < queue.length) {
+      var cur = queue[head++];
+      for (var i = 0; i < STEP_DIRS.length; i++) {
+        var d = STEP_DIRS[i], nx = cur.x + d.x, ny = cur.y + d.y;
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+        if (cameFrom[key(nx, ny)]) continue;
+        if (nx === from.x && ny === from.y) {
+          var back = STEP_DIRS[(i + 2) % 4];
+          return { x: cur.x, y: cur.y, dir: back.dir };
+        }
+        if (W.isSolid(EMBER.Grid.cell(rows, nx, ny, '#'))) continue;
+        cameFrom[key(nx, ny)] = true;
+        queue.push({ x: nx, y: ny });
+      }
+    }
+    return null;
   };
 
   /* ---------------- decisions ---------------- */

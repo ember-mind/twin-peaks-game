@@ -1,0 +1,38 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Café visual reuse — comparison</title>
+<style>
+  body { background:#14181a; color:#d8d4c8; font:14px/1.5 -apple-system, sans-serif; margin:24px; }
+  h1 { font-size:18px; } h2 { font-size:14px; color:#e2c15a; margin:28px 0 8px; }
+  .row { display:flex; gap:20px; flex-wrap:wrap; }
+  figure { margin:0; } figcaption { margin-top:6px; max-width:768px; color:#a9a596; }
+  img { width:768px; height:576px; image-rendering:pixelated; display:block; background:#000; }
+  img.native { width:256px; height:192px; }
+  .strip img { width:384px; height:288px; }
+  code { color:#9fc16a; }
+</style>
+<h1>Living Town café — reuse of the Twin Peaks production renderer</h1>
+<p>Every still is the page's own 256×192 canvas read back from real headless Chrome
+(<code>node living-town/tools/capture-cafe.js</code>), shown at exactly 3× with nearest-neighbour scaling. Nothing is retouched.</p>
+
+<h2>1 · Reference — Twin Peaks diner, production build</h2>
+<div class="row"><figure><img src="01-reference-twin-peaks-diner.png"><figcaption>index.html, map <code>diner</code>, in play.</figcaption></figure></div>
+
+<h2>2 · Before — Living Town café at 0f880d4</h2>
+<div class="row"><figure><img src="02-before-living-town-cafe.png"><figcaption>Own tile art through the shared tile-window callback.</figcaption></figure></div>
+
+<h2>3 · After — Living Town café, production renderer</h2>
+<div class="row">
+  <figure><img src="03-after-living-town-cafe.png"><figcaption>10:00 — the first inhabitant working her shift, behind the counter, apron variant of her look; the counter occludes her legs.</figcaption></figure>
+  <figure><img src="03-after-living-town-cafe-ordering.png"><figcaption>19:38 — the same person, off shift, ordering from the customer side.</figcaption></figure>
+</div>
+
+<h2>Activity sequence — 09:00, shift starts, she walks round the counter (simulation ticks, not posed)</h2>
+<div class="row"><figure><img src="03-after-activity-sequence.gif"><figcaption>32 frames, one simulated minute per two frames.</figcaption></figure></div>
+
+<h2>Native scale, side by side (1×)</h2>
+<div class="row">
+  <img class="native" src="01-reference-twin-peaks-diner.png">
+  <img class="native" src="02-before-living-town-cafe.png">
+  <img class="native" src="03-after-living-town-cafe.png">
+</div>

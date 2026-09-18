@@ -173,7 +173,9 @@ const MUST_SHARE = [
 ];
 /* Called directly by one side only, today. Asserted so a side that stops
  * calling the engine and grows its own version shows up here. */
-['Grid.advanceStep', 'Math.clamp', 'Viewport.sizeNative'].forEach((k) => {
+/* Tilemap.paintDepthBands is shared too, but Living Town reaches it only on its
+ * production-rendered locations; living-town/test/cafe-scene.js asserts that side. */
+['Grid.advanceStep', 'Math.clamp', 'Viewport.sizeNative', 'Tilemap.paintDepthBands'].forEach((k) => {
   assert.ok(calls.twinpeaks.has(k), `Twin Peaks must call EMBER.${k} directly`);
 });
 ['Math.approach'].forEach((k) => {

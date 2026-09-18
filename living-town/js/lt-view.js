@@ -25,6 +25,8 @@
     /* Whoever the world generated first; the view never names anybody. */
     this.focusId = sim.actorIds()[0];
     this.render = {};      // actorId -> { x, y, phaseT, dir }
+    this.sceneMaps = {};   // locationId -> the scene object handed to the production painter
+    this.clock = 0;        // seconds of view time, for the renderer's own animation
     this.lastLocation = null;
   }
 
@@ -64,6 +66,7 @@
   /* dt in real milliseconds. Smoothing only. */
   View.prototype.update = function (dt) {
     var state = this.sim.state, self = this;
+    this.clock += dt / 1000;
     this.sim.actorIds().forEach(function (id) {
       var c = state.characters[id];
       var r = self.renderStateFor(c);
@@ -96,6 +99,42 @@
     }
   };
 
+  /* A location with `visual` content is drawn by the production renderer once
+   * it is installed and its character sheet has decoded. */
+  View.prototype.productionScene = function (loc) {
+    var H = LT.ProductionHost, GAME = root.GAME;
+    if (!loc.visual || !H || !H.ready || !GAME || !GAME.sprites) return null;
+    var scene = this.sceneMaps[loc.id];
+    if (!scene) {
+      scene = this.sceneMaps[loc.id] = {
+        id: loc.visual.scene, indoor: !!loc.indoor, rows: loc.rows,
+        width: loc.rows[0].length, height: loc.rows.length, interior: loc.visual.interior
+      };
+    }
+    return scene;
+  };
+
+  /* The production path: the room from the shared interior painter, people
+   * from the shared atlas renderer, and the shared depth-band pass between
+   * them so the counter covers whoever is behind it and nobody in front. All
+   * positions, facings and activities are read from the simulation. */
+  View.prototype.drawProduction = function (g, scene, ents, cx, cy) {
+    var GAME = root.GAME, t = this.clock;
+    var opts = { mapId: scene.id, indoor: true, viewportWidth: VW, viewportHeight: VH, t: t };
+    GAME.sprites.drawStructures(g, scene, cx, cy, opts);
+    EMBER.Tilemap.paintDepthBands(ents, TILE, function (e) {
+      GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, LT.ProductionHost.looks[e.sheetId], e.dir,
+        e.phase, 1, e.moving, false, t,
+        { mapId: scene.id, wx: e.wx, wy: e.wy, npcId: e.id, characterLife: null });
+    }, function (footY, nextFootY, afterIndex) {
+      if (afterIndex < 0) return;
+      GAME.sprites.drawForegroundStructures(g, scene, cx, cy, {
+        mapId: scene.id, indoor: true, viewportWidth: VW, viewportHeight: VH,
+        forestDepthMin: footY, forestDepthMax: nextFootY
+      });
+    });
+  };
+
   View.prototype.draw = function () {
     var g = this.ctx;
     if (!g) return;
@@ -103,6 +142,12 @@
     var loc = LT.World.LOCATIONS[locId];
     var Art = LT.Art;
     var cx = Math.round(this.camX), cy = Math.round(this.camY);
+    var scene = this.productionScene(loc);
+    if (scene) {
+      var actors = this.entitiesAt(locId);
+      this.drawProduction(g, scene, actors, cx, cy);
+      return { location: locId, entities: actors.length, renderer: 'production' };
+    }
 
     g.fillStyle = Art.palette.ink;
     g.fillRect(0, 0, VW, VH);
@@ -115,22 +160,28 @@
       Art.drawCell(ctx, ch, sx, sy, mx, my, rows, opts);
     });
 
-    var ents = this.charactersHere(locId).map(function (e) {
-      return {
-        id: e.character.id, sprite: e.character.sprite,
-        wx: Math.round(e.render.x), wy: Math.round(e.render.y),
-        dir: e.render.dir, moving: e.render.moving,
-        phase: EMBER.Grid.walkPhase(e.render.phaseT % 1)
-      };
-    });
-    EMBER.Tilemap.depthSort(ents);
+    var ents = this.entitiesAt(locId);
     ents.forEach(function (e) {
       Art.drawCharacter(g, e.sprite, e.wx - cx, e.wy - cy - (CH_H - TILE), e.dir,
                         e.moving ? e.phase : 0, { moving: e.moving, alpha: 1 });
     });
 
     this.drawActivityMarks(g, cx, cy, ents);
-    return { location: locId, entities: ents.length };
+    return { location: locId, entities: ents.length, renderer: 'temporary' };
+  };
+
+  /* Depth-sorted projections of whoever the simulation says is here. */
+  View.prototype.entitiesAt = function (locId) {
+    var ents = this.charactersHere(locId).map(function (e) {
+      return {
+        id: e.character.id, sprite: e.character.sprite,
+        sheetId: LT.Appearance ? LT.Appearance.sheetIdFor(e.character) : null,
+        wx: Math.round(e.render.x), wy: Math.round(e.render.y),
+        dir: e.render.dir, moving: e.render.moving,
+        phase: EMBER.Grid.walkPhase(e.render.phaseT % 1)
+      };
+    });
+    return EMBER.Tilemap.depthSort(ents);
   };
 
   /* A viewer must be able to tell working from resting without reading a label.
