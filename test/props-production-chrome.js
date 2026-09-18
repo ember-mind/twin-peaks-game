@@ -50,7 +50,8 @@ const zlib = require('node:zlib');
 const { spawn, spawnSync } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..');
-const OUT = path.join(ROOT, 'artifacts', 'props-m11');
+/* The override preview can redirect its evidence so it never overwrites the canonical artifacts/props-m11. */
+const OUT = process.env.PROPS_M11_OUT ? path.resolve(process.env.PROPS_M11_OUT) : path.join(ROOT, 'artifacts', 'props-m11');
 const CHROME = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const PROBE = 'test/act-4-playthrough-probe.html';
 const SCENE = 'roadhouse';
@@ -73,7 +74,17 @@ function check(name, cond, detail) {
 /* --------------------------------- registry geometry --------------------------------- */
 const PropsCore = require(path.join(ROOT, 'js', 'editor', 'core', 'props.js'));
 const REG = JSON.parse(fs.readFileSync(path.join(ROOT, 'world', 'props.json'), 'utf8'));
-const ACTOR_LAYER = PropsCore.ACTOR_LAYER;
+/* Optional preview of a world/props.json layer edit WITHOUT touching the file:
+ * PROPS_LAYER_OVERRIDE="id:layer,…" (deep/props-below-band runs roadhouse-stage-01:5). Applied to the geometry
+ * here and injected into every served tree before js/props-production.js reads the registry. */
+const LAYER_OVERRIDES = (process.env.PROPS_LAYER_OVERRIDE || '').split(',').filter(Boolean).map((spec) => {
+  const at = spec.lastIndexOf(':');
+  return { id: spec.slice(0, at), layer: Number(spec.slice(at + 1)) };
+});
+LAYER_OVERRIDES.forEach((o) => {
+  if (!REG.instances[o.id] || !Number.isInteger(o.layer)) throw new Error('PROPS_LAYER_OVERRIDE: no instance or bad layer: ' + o.id + ':' + o.layer);
+  REG.instances[o.id].layer = o.layer;
+});
 const INSTANCES = Object.keys(REG.instances)
   .filter((id) => REG.instances[id].sceneId === SCENE)
   .map((id) => {
@@ -180,9 +191,17 @@ process.on('exit', cleanup);
 const PAGE_DIRS = ['js', 'test', 'assets', 'world', 'narrative'];
 const INDEX = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const PROP_TAG = '<script src="js/props.gen.js"></script>';
-// The same injection test/props-depth-chrome.js:206 uses, against index.html's own script path.
+/* The same injection test/props-depth-chrome.js:206 uses, against index.html's own script path. The optional
+ * layer override runs after props.gen.js because the registry is deep-frozen: it is cloned, patched, and swapped
+ * back before props-production.js reads it. */
+const OVERRIDE_SCRIPT = LAYER_OVERRIDES.length
+  ? '<script>(function(){var r=JSON.parse(JSON.stringify(window.GAME.WorldData.props));' +
+    LAYER_OVERRIDES.map((o) => 'r.instances[' + JSON.stringify(o.id) + '].layer=' + o.layer + ';').join('') +
+    'window.GAME.WorldData.props=r;})();</script>'
+  : '';
 const inject = (value) => (html) => html.replace(PROP_TAG,
-  '<script>window.GAME = window.GAME || {}; window.GAME.PROPS_ENABLED = ' + value + ';</script>\n' + PROP_TAG);
+  '<script>window.GAME = window.GAME || {}; window.GAME.PROPS_ENABLED = ' + value + ';</script>\n' + PROP_TAG +
+  (OVERRIDE_SCRIPT ? '\n' + OVERRIDE_SCRIPT : ''));
 function copyTree(name, mutate) {
   const root = path.join(TMP, name);
   fs.mkdirSync(root);
@@ -482,8 +501,11 @@ async function main() {
     flagon: copyTree('flagon', inject(true))
   };
   check('index.html registers the prop layer', INDEX.indexOf(PROP_TAG) !== -1 && /props-production\.js/.test(INDEX));
-  check('the injected page differs from index.html only by the flag script',
-    inject(true)(INDEX) !== INDEX && inject(true)(INDEX).replace(/<script>window\.GAME[^<]*<\/script>\n/, '') === INDEX);
+  const stripInjection = (html) => html
+    .replace(/<script>window\.GAME[^<]*<\/script>\n/, '')
+    .replace(OVERRIDE_SCRIPT ? OVERRIDE_SCRIPT + '\n' : '', '');
+  check('the injected page differs from index.html only by the flag (and any layer-override) script',
+    inject(true)(INDEX) !== INDEX && stripInjection(inject(true)(INDEX)) === INDEX);
   check('the repo default is flag off',
     /GAME\.PROPS_ENABLED === undefined\) GAME\.PROPS_ENABLED = false/.test(fs.readFileSync(path.join(ROOT, 'js', 'props-production.js'), 'utf8')) &&
     !/PROPS_ENABLED/.test(INDEX));
@@ -621,8 +643,10 @@ async function main() {
           if (s[0] < 0 || s[1] < 0 || s[0] >= off.w || s[1] >= off.h) continue;
           if (off.at(s[0], s[1]) !== on.at(s[0], s[1])) changed++;
         }
-        const propInFront = p.layer > ACTOR_LAYER ? true : p.foot > foot;
-        pairs.push({ actor: a.id, tile: a.x + ',' + a.y, foot: foot, prop: p.id, propFoot: p.foot, layer: p.layer,
+        const band = PropsCore.bandOf(p.layer);
+        const propInFront = band === PropsCore.BANDS.ABOVE_ACTORS ? true
+          : band === PropsCore.BANDS.BELOW_ACTORS ? false : p.foot > foot;
+        pairs.push({ actor: a.id, tile: a.x + ',' + a.y, foot: foot, prop: p.id, propFoot: p.foot, layer: p.layer, band: band,
           expect: propInFront ? 'prop in front' : 'actor in front', sampled: pts.length, changed: changed });
       }
     }

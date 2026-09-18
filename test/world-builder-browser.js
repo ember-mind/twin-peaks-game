@@ -1041,9 +1041,9 @@ async function main() {
       s = await state();
       check('case 20: a click on a prop selects the instance, not the tile marker', s.selectedProp === PROP_CHAIR && s.selectedId === null, { p: s.selectedProp, i: s.selectedId });
       const insp = await cdp.eval("document.getElementById('wb-inspector').innerText");
-      check('case 20: the inspector names the definition, anchor, layer and footprint',
+      check('case 20: the inspector names the definition, anchor, layer band and footprint',
         (await text('wb-prop-def')).includes('roadhouse.chair.red') && (await text('wb-prop-anchor')) === '7.8125,7.25' &&
-        (await text('wb-prop-layer')).startsWith('6 (definition default)') && (await text('wb-prop-footprint')) === '7,7', insp);
+        (await text('wb-prop-layer')) === '6 (definition default) — interleaves with the actors' && (await text('wb-prop-footprint')) === '7,7', insp);
       check('case 20: VIEW offers no MOVE', !(await cdp.eval("!!document.querySelector('[data-action=\"move-prop\"]')")));
 
       await clickAction('mode-edit');
