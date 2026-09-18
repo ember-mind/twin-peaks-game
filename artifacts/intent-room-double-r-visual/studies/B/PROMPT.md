@@ -1,0 +1,9 @@
+# Study B — exact image-generation prompt
+
+Tool: built-in `image_gen.imagegen`; default image model (tool response does not expose a model selector). No CLI fallback.
+
+Use case: precise-object-edit. Asset: actual pixel-art furniture mockup for a 256x192 top-down RPG.
+Input 1 is the EDIT TARGET: a 256x192 nearest-4x enlargement of a 64x48 game crop. Input 2 is approved style reference only. Input 3 is whole-room context only; do not generate a whole room.
+Return ONE edited crop, same framing and 4:3 aspect as input 1, with actual changed booth-and-table furniture. Preserve all surrounding non-booth pixels, brown wall at left, floor at right, lower cream/burgundy floor border, guest's pixel face, hair, hands and green clothes, cup/plate/menu tabletop use. Preserve the existing compact 48-native-pixel-wide booth footprint and elevated top-down camera. Aim for an actual 64x48 pixel grid enlarged evenly: large hard square pixel clusters, limited Double R burgundy/cream/dark wood palette, flat color steps, no anti-aliasing, no blur, no gradients, no extra detail smaller than the reference pixel grid. No text, labels, diagrams, watermark, margins or collage.
+Improve solid upholstered seating, distinct back vs seat, a usable independent cream table with edge thickness, floor contact, visible material separation by shape/value. Change furniture construction, not merely hue.
+STUDY B: rebuild booth with TWO broad pillowy back cushions divided by one deep center seam, thick horizontal seat cushion and short raised upholstered end bolsters. Use a cream tabletop with clipped/beveled corners on a single dark central pedestal and a broad flat foot visible beneath. This should be visibly structurally different from a narrow vertical-channel two-legged booth. Keep the original guest pixel face and hands absolutely unchanged. Use only hard discrete flat colors; DO NOT add lighting gradients or smooth painted surfaces.

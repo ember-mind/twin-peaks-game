@@ -1,0 +1,134 @@
+{
+  "artifact": "intent-room-double-r-visual comparison sheets",
+  "purpose": "Mechanical side-by-side comparison only; no winner selected.",
+  "panelOrder": ["BASE", "A", "B", "C", "D", "E"],
+  "sources": [
+    {
+      "label": "BASE",
+      "native": {
+        "file": "../packet/booth-lower-left-occupied-native.png",
+        "dimensions": [64, 48],
+        "sha256": "a080763daae7a16642df6d7c63814627d5cba94fb678be993e363858150d4abd"
+      },
+      "fourX": {
+        "file": "../packet/booth-lower-left-occupied-4x.png",
+        "dimensions": [256, 192],
+        "sha256": "69192471af091b73cf464a3cf716f697897d8f49acf1d543a9cc2981cc8b80ad"
+      }
+    },
+    {
+      "label": "A",
+      "native": {
+        "file": "../studies/A/approximate-native-64x48.png",
+        "dimensions": [64, 48],
+        "sha256": "7258cbdc204e5bfde6bd5a7dcb094c792ff849aa6fb4541d6c66618e1e1c4972"
+      },
+      "fourX": {
+        "file": "../studies/A/approximate-native-4x.png",
+        "dimensions": [256, 192],
+        "sha256": "7d156794d6d9e3bc2e28bd521f88210e0f51d179930ce658d8a61fb4e7efcf92"
+      }
+    },
+    {
+      "label": "B",
+      "native": {
+        "file": "../studies/B/approximate-native-64x48.png",
+        "dimensions": [64, 48],
+        "sha256": "202dcced114e5716e14b3a342efcc5c9affde68830a0c9d9fde0b9afec9a4806"
+      },
+      "fourX": {
+        "file": "../studies/B/approximate-native-4x.png",
+        "dimensions": [256, 192],
+        "sha256": "de425c905d1921f4e4836dae405a0712a664169dd11d5645624a214549649546"
+      }
+    },
+    {
+      "label": "C",
+      "native": {
+        "file": "../studies/C/approximate-native-64x48.png",
+        "dimensions": [64, 48],
+        "sha256": "15b8f2ac1a63e979b7c22163a1a192e66af00a04e09275e4c81537ad64ef7112"
+      },
+      "fourX": {
+        "file": "../studies/C/approximate-native-4x.png",
+        "dimensions": [256, 192],
+        "sha256": "ef900b36e4ef4cea39aa24933ebecea2e00f7e8ff9e34d9eaab0a8948fc1134b"
+      }
+    },
+    {
+      "label": "D",
+      "native": {
+        "file": "../studies/D/approximate-native-64x48.png",
+        "dimensions": [64, 48],
+        "sha256": "f4d6d478fd9920d49d5a455ef950e64171b00c9ea266464a2b13e36844d7de0a"
+      },
+      "fourX": {
+        "file": "../studies/D/approximate-native-4x.png",
+        "dimensions": [256, 192],
+        "sha256": "a4e44425b47a58ec5673fe43dd2f4bce6383218dd8469b00b319fea3ad5f2105"
+      }
+    },
+    {
+      "label": "E",
+      "native": {
+        "file": "../studies/E/approximate-native-64x48.png",
+        "dimensions": [64, 48],
+        "sha256": "bde0a8c9825260ed62da207cd8ffd5faf7083f425269ad0ef2ae3f943cb74b3c"
+      },
+      "fourX": {
+        "file": "../studies/E/approximate-native-4x.png",
+        "dimensions": [256, 192],
+        "sha256": "988b1597c49d3fb5388154b2651e89f9db2f37c5b6c66a9106548f9ec60b9e1b"
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "file": "base-A-E-native.png",
+      "dimensions": [384, 48],
+      "sha256": "aac2cb082e5c80820973d4dff152c6dd1475367337fea941222c7f23271c68a1",
+      "command": "magick artifacts/intent-room-double-r-visual/packet/booth-lower-left-occupied-native.png artifacts/intent-room-double-r-visual/studies/A/approximate-native-64x48.png artifacts/intent-room-double-r-visual/studies/B/approximate-native-64x48.png artifacts/intent-room-double-r-visual/studies/C/approximate-native-64x48.png artifacts/intent-room-double-r-visual/studies/D/approximate-native-64x48.png artifacts/intent-room-double-r-visual/studies/E/approximate-native-64x48.png +append artifacts/intent-room-double-r-visual/comparison/base-A-E-native.png",
+      "panelSize": [64, 48],
+      "panelVerification": "BASE,A,B,C,D,E blocks at x=0,64,128,192,256,320; ImageMagick compare AE=0 for each source block."
+    },
+    {
+      "file": "base-A-E-4x.png",
+      "dimensions": [1536, 192],
+      "sha256": "c373145794ae0ae19bd22c7cade687959af13cb2e4ab929f64ef33109fef6e21",
+      "command": "magick artifacts/intent-room-double-r-visual/packet/booth-lower-left-occupied-4x.png artifacts/intent-room-double-r-visual/studies/A/approximate-native-4x.png artifacts/intent-room-double-r-visual/studies/B/approximate-native-4x.png artifacts/intent-room-double-r-visual/studies/C/approximate-native-4x.png artifacts/intent-room-double-r-visual/studies/D/approximate-native-4x.png artifacts/intent-room-double-r-visual/studies/E/approximate-native-4x.png +append artifacts/intent-room-double-r-visual/comparison/base-A-E-4x.png",
+      "panelSize": [256, 192],
+      "panelVerification": "BASE,A,B,C,D,E blocks at x=0,256,512,768,1024,1280; ImageMagick compare AE=0 for each source block."
+    }
+  ],
+  "wholeRoomMockups": [
+    {
+      "label": "A",
+      "file": "whole-room-A-mockup.png",
+      "dimensions": [256, 192],
+      "sha256": "c59163d11ebfdbdd253d15a4b6ceb651d06fbaacf38c19be7b8a7f0aed767537",
+      "baselineSource": "../packet/baseline-populated-native.png",
+      "studySource": "../studies/A/approximate-native-64x48.png",
+      "paste": {"x": 24, "y": 128, "width": 64, "height": 48},
+      "command": "magick artifacts/intent-room-double-r-visual/packet/baseline-populated-native.png artifacts/intent-room-double-r-visual/studies/A/approximate-native-64x48.png -geometry +24+128 -compose over -composite artifacts/intent-room-double-r-visual/comparison/whole-room-A-mockup.png",
+      "warning": "NOT A GAME RENDER: the entire 64x48 pasted region alters the guest and background pixels from the baseline."
+    },
+    {
+      "label": "E",
+      "file": "whole-room-E-mockup.png",
+      "dimensions": [256, 192],
+      "sha256": "5cd88a86fceb26ccf83be429dced2c0ec5049758728f176309631a60c9013f63",
+      "baselineSource": "../packet/baseline-populated-native.png",
+      "studySource": "../studies/E/approximate-native-64x48.png",
+      "paste": {"x": 24, "y": 128, "width": 64, "height": 48},
+      "command": "magick artifacts/intent-room-double-r-visual/packet/baseline-populated-native.png artifacts/intent-room-double-r-visual/studies/E/approximate-native-64x48.png -geometry +24+128 -compose over -composite artifacts/intent-room-double-r-visual/comparison/whole-room-E-mockup.png",
+      "warning": "NOT A GAME RENDER: the entire 64x48 pasted region alters the guest and background pixels from the baseline."
+    }
+  ],
+  "method": "ImageMagick +append for comparison sheets and direct over-composite for mockups; no filtering, repainting, palette remapping, masking, or interpolation was applied.",
+  "limitations": [
+    "A-E are approximate non-game visual studies derived from generated bitmaps, not production-ready assets.",
+    "Each A-E pasted crop has altered guest/background pixels; surrounding non-booth pixels were not preserved.",
+    "These crop sheets do not validate whole-room integration, four-booth repetition, gameplay, or a winner selection.",
+    "Whole-room A and E mockups are conspicuous approximate non-game composites: the full 64x48 pasted region alters the guest and background, so neither is a game render."
+  ]
+}
