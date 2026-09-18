@@ -546,7 +546,7 @@ async function main() {
       console.log('\ncase 10: DELETE CONNECTION on a temp copy');
       const copy = fs.mkdtempSync(path.join(os.tmpdir(), 'tp-wb-m6-copy-'));
       tempRoots.push(copy);
-      for (const d of ['js', 'test', 'world', 'narrative']) fs.cpSync(path.join(ROOT, d), path.join(copy, d), { recursive: true });
+      for (const d of ['engine', 'js', 'test', 'world', 'narrative']) fs.cpSync(path.join(ROOT, d), path.join(copy, d), { recursive: true });
       for (const f of ['index.html', 'world-builder.html']) fs.copyFileSync(path.join(ROOT, f), path.join(copy, f));
       fs.symlinkSync(path.join(ROOT, 'assets'), path.join(copy, 'assets'));
       const three = () => ['world/connections.json', 'js/world-connections.gen.js', 'js/world-catalog.js'].map((rel) => fs.readFileSync(path.join(copy, rel)));

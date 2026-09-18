@@ -80,7 +80,7 @@ function shot(root, name) {
 const PAGE = fs.readFileSync(path.join(REPO, PAGE_REL), 'utf8');
 const PAGE_NO_PROPS = PAGE.split('\n').filter((l) => !/js\/props(\.gen|-production)\.js/.test(l)).join('\n');
 /* Only what the page loads: the repo also carries ~400MB of artifacts and git objects no capture touches. */
-const PAGE_DIRS = ['js', 'test', 'assets', 'world', 'narrative'];
+const PAGE_DIRS = ['engine', 'js', 'test', 'assets', 'world', 'narrative'];
 function copyTree(name) {
   const root = path.join(TMP, name);
   fs.mkdirSync(root);
