@@ -9,6 +9,22 @@
 
   var E = GAME.Engine = {};
 
+  /* Ember Engine. Grid kinematics, camera clamping, tilemap painting and the
+   * native viewport are shared with Living Town: this file calls them, it does
+   * not keep a second copy. index.html loads engine/ember-*.js before this
+   * script; Node hosts resolve them relatively. */
+  if (typeof require === 'function' && !root.EMBER) {
+    require('../engine/ember-math.js');
+    require('../engine/ember-grid.js');
+    require('../engine/ember-camera.js');
+    require('../engine/ember-tilemap.js');
+    require('../engine/ember-viewport.js');
+  }
+  var EMBER = root.EMBER;
+  if (!EMBER || !EMBER.Grid || !EMBER.Camera || !EMBER.Tilemap || !EMBER.Viewport) {
+    throw new Error('Ember Engine missing: load engine/ember-*.js before js/engine.js');
+  }
+
   var canvas, ctx, S;
   var last = 0, tGlobal = 0;
   var uiLayoutMode = '';
@@ -32,7 +48,7 @@
    * tile riparte da fase 0; progress=1 viene saturato per diagnostica, mentre
    * il runtime torna all'idle appena chiude il movimento. */
   function walkPhase(progress) {
-    return Math.max(0, Math.min(3, Math.floor(progress * 4)));
+    return EMBER.Grid.walkPhase(progress);
   }
   E.walkPhase = walkPhase;
 
@@ -277,10 +293,7 @@
     canvas = cv;
     // Il renderer retro ha un solo buffer logico. Riparalo anche quando un
     // host/test ha mutato gli attributi del canvas prima del boot.
-    if (canvas.width !== VW) canvas.width = VW;
-    if (canvas.height !== VH) canvas.height = VH;
-    ctx = canvas.getContext('2d');
-    ctx.imageSmoothingEnabled = false;
+    ctx = EMBER.Viewport.attachNative(canvas, VW, VH);
     if (glcv && GAME.Render3D && GAME.Render3D.init(glcv)) {
       r3d = true; // motore 3D WebGL attivo: il canvas 2D fa solo da overlay UI
     }
@@ -349,8 +362,7 @@
     // quanto il browser ma alto solo 144px, quindi testo enorme e tagliato.
     UW = VW;
     if (!canvas) return;
-    if (canvas.width !== VW) canvas.width = VW;
-    if (canvas.height !== VH) canvas.height = VH;
+    EMBER.Viewport.sizeNative(canvas, VW, VH);
     if (ctx) ctx.imageSmoothingEnabled = false;
   };
 
@@ -665,12 +677,7 @@
     return null;
   }
 
-  function dirVector(d) {
-    if (d === 'up') return { dx: 0, dy: -1 };
-    if (d === 'down') return { dx: 0, dy: 1 };
-    if (d === 'left') return { dx: -1, dy: 0 };
-    return { dx: 1, dy: 0 };
-  }
+  var dirVector = EMBER.Grid.vector;
 
   function tileBlockedForNPC(nx, ny, self) {
     if (GAME.Maps.isSolid(S.mapId, nx, ny, S)) return true;
@@ -687,16 +694,15 @@
       var n = S.npcs[i];
       if (!E.npcActive(n)) { n.moving = false; continue; }
       if (n.moving) {
-        var tx = n.mx * TILE, ty = n.my * TILE;
-        var dx = tx - n.moveStartX * TILE, dy = ty - n.moveStartY * TILE;
-        n.moveT += dt * NPC_SPEED / TILE;
-        if (n.moveT >= 1) {
-          n.x = n.mx; n.y = n.my; n.vx = n.x; n.vy = n.y; n.moving = false;
+        /* NPC tile fields are x/y, so the shared step writes those on arrival.
+         * vx/vy stay the interpolated render position. */
+        var nstep = EMBER.Grid.advanceStep(n, dt, { speed: NPC_SPEED, tile: TILE, tileX: 'x', tileY: 'y' });
+        if (nstep.arrived) {
+          n.vx = n.x; n.vy = n.y;
           n.nextThink = tGlobal + 800 + Math.random() * 1500;
         } else {
-          var e = n.moveT * n.moveT * (3 - 2 * n.moveT);
-          n.vx = n.moveStartX + (n.mx - n.moveStartX) * e;
-          n.vy = n.moveStartY + (n.my - n.moveStartY) * e;
+          n.vx = n.moveStartX + (n.mx - n.moveStartX) * nstep.ease;
+          n.vy = n.moveStartY + (n.my - n.moveStartY) * nstep.ease;
         }
       } else if (tGlobal >= n.nextThink &&
           !(GAME.CharacterActivity && GAME.CharacterActivity.managedActor && GAME.CharacterActivity.managedActor(n.id) && !n.wander) &&
@@ -721,9 +727,7 @@
     }
   }
 
-  function opposite(d) {
-    return d === 'up' ? 'down' : d === 'down' ? 'up' : d === 'left' ? 'right' : 'left';
-  }
+  var opposite = EMBER.Grid.opposite;
 
   function interact() {
     var p = S.player, dx = 0, dy = 0;
@@ -853,10 +857,9 @@
     if (p.moving) {
       var tx = p.mx * TILE, ty = p.my * TILE;
       var dx = tx - p.moveStartX * TILE, dy = ty - p.moveStartY * TILE;
-      var total = TILE; // sempre un tile alla volta
-      p.moveT += dt * SPEED / total;
-      if (p.moveT >= 1) {
-        p.x = tx; p.y = ty; p.tx = p.mx; p.ty = p.my; p.moving = false;
+      var pstep = EMBER.Grid.advanceStep(p, dt, { speed: SPEED, tile: TILE });
+      if (pstep.arrived) {
+        p.x = tx; p.y = ty;
         var footRow = S.map.rows[p.ty] || '';
         audioSfx('footstep', { surface: footRow.charAt(p.tx) });
         onArrive();
@@ -868,9 +871,8 @@
           tryStep(p.dir);
         }
       } else {
-        var e = p.moveT * p.moveT * (3 - 2 * p.moveT); // smoothstep
-        p.x = p.moveStartX * TILE + dx * e;
-        p.y = p.moveStartY * TILE + dy * e;
+        p.x = p.moveStartX * TILE + dx * pstep.ease;
+        p.y = p.moveStartY * TILE + dy * pstep.ease;
       }
     } else if (held.length || queuedDirection) {
       var d = held.length ? held[held.length - 1] : queuedDirection;
@@ -934,7 +936,7 @@
     text(label, x + 8, y + 3, '#f5efcf', 'bold 7px monospace');
   }
 
-  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  var clamp = EMBER.Math.clamp;
 
   // terreno + strutture + sparkle su un contesto, finestra (cx,cy,vw,vh) in px mondo
   function paintGround(g, cx, cy, vw, vh) {
@@ -949,9 +951,6 @@
      * overdraw, la camera che attraversa un confine tile li faceva apparire
      * o sparire prima che la sagoma avesse lasciato davvero il viewport. */
     var overdraw = 2;
-    var x0 = Math.floor(cx / TILE) - overdraw, y0 = Math.floor(cy / TILE) - overdraw;
-    var x1 = Math.floor((cx + vw - 1) / TILE) + overdraw;
-    var y1 = Math.floor((cy + vh - 1) / TILE) + overdraw;
     var opts = {
       woodsOpen: S.clues.length >= 3,
       t: tGlobal,
@@ -960,14 +959,12 @@
       viewportWidth: vw,
       viewportHeight: vh
     };
-    var x, y, mx, my;
-    for (y = y0; y <= y1; y++) {
-      for (x = x0; x <= x1; x++) {
-        // fuori mappa: estendi il tile del bordo (muri/alberi continuano)
-        mx = clamp(x, 0, map.width - 1); my = clamp(y, 0, map.height - 1);
-        GAME.Sprites.drawTile(g, rows[my][mx], x * TILE - cx, y * TILE - cy, mx, my, rows, opts);
-      }
-    }
+    EMBER.Tilemap.paintWindow(g, {
+      rows: rows, width: map.width, height: map.height, tile: TILE,
+      camX: cx, camY: cy, viewW: vw, viewH: vh, overdraw: overdraw
+    }, function (g2, ch, sx, sy, mx, my, gridRows) {
+      GAME.Sprites.drawTile(g2, ch, sx, sy, mx, my, gridRows, opts);
+    });
     // strutture volumetriche (case 3D) sopra i tile, sotto le entità
     if (GAME.sprites && GAME.sprites.drawStructures) {
       GAME.sprites.drawStructures(g, map, cx, cy, opts);
@@ -1002,7 +999,7 @@
                  * cui il tasto viene premuto e non puo' iniziare a meta'. */
                 fr: p.moving ? walkPhase(p.moveT) : 0,
                 moving: p.moving, alpha: 1 });
-    ents.sort(function (a, b) { return a.wy - b.wy; });
+    EMBER.Tilemap.depthSort(ents);
     return ents;
   }
 
@@ -1047,8 +1044,10 @@
   function updateCamera(dt, vw, vh) {
     var map = S.map, p = S.player;
     var mw = map.width * TILE, mh = map.height * TILE;
-    var txx = mw > vw ? clamp(p.x + 8 - vw / 2, 0, mw - vw) : (mw - vw) / 2;
-    var tyy = mh > vh ? clamp(p.y + 8 - vh / 2, 0, mh - vh) : (mh - vh) / 2;
+    var centred = EMBER.Camera.centerOn(p.x, p.y, {
+      anchorX: 8, anchorY: 8, worldW: mw, worldH: mh, viewW: vw, viewH: vh
+    });
+    var txx = centred.x, tyy = centred.y;
     /* Look-ahead Gen II: quando Cooper guarda un landmark, il frame mostra
      * il volume intero invece di tagliarne il tetto. Due tile verso nord,
      * uno sugli altri assi; nessun cambio a coordinate o collisioni. */
@@ -1077,9 +1076,8 @@
      * arte oltre i confini delle tile o alterare collisioni. */
     if (map.id === 'woods' && mw > vw) txx = clamp(txx - 8, 0, mw - vw);
     if (camSnap) { camX = txx; camY = tyy; camSnap = false; return; }
-    var k = 1 - Math.exp(-dt * 0.012);
-    camX += (txx - camX) * k;
-    camY += (tyy - camY) * k;
+    camX = EMBER.Camera.approach(camX, txx, dt, 0.012);
+    camY = EMBER.Camera.approach(camY, tyy, dt, 0.012);
   }
 
   function drawWorld(dt) {
