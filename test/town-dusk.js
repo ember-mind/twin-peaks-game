@@ -109,7 +109,10 @@ check('la curva asfalto e quella terreno restano separate', () => {
     const ground = Dusk.grade(p[0], p[1], p[2], false);
     const road = Dusk.grade(p[0], p[1], p[2], true);
     assert.ok(luma(road) < luma(ground) - 15, `${h}: asfalto piu' scuro del calcestruzzo`);
-    assert.ok(road[2] > road[0] + 8, `${h}: asfalto freddo (blu > rosso)`);
+    /* DQ3 (bf6c2c2) rebalanced the asphalt to a neutral grey: no longer blue-led,
+     * but never warm, and always far less warm than the concrete beside it. */
+    assert.ok(road[2] >= road[0] - 8, `${h}: asfalto mai caldo (blu >= rosso - 8)`);
+    assert.ok((ground[0] - ground[2]) - (road[0] - road[2]) > 40, `${h}: asfalto molto meno caldo del calcestruzzo`);
     assert.ok(ground[0] > ground[2] + 8, `${h}: calcestruzzo caldo (rosso > blu)`);
   }
 });
