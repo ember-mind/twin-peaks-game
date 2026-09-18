@@ -133,6 +133,19 @@ async function findChrome(explicit) {
   throw new Error('Chrome not found. Set CHROME_BIN to a Chrome/Chromium executable.');
 }
 
+function reapStrays(profile) {
+  if (!profile) return;
+  // pgrep -f matches whole command lines, and this run's profile path appears
+  // only in this run's Chrome processes, so this can never reap another run.
+  const found = spawnSync('pgrep', ['-f', profile], { encoding: 'utf8' });
+  if (found.status !== 0 || !found.stdout) return;
+  for (const line of found.stdout.split('\n')) {
+    const pid = Number(line.trim());
+    if (!Number.isInteger(pid) || pid <= 0 || pid === process.pid) continue;
+    try { process.kill(pid, 'SIGKILL'); } catch (_) { /* already gone */ }
+  }
+}
+
 async function openPlayableBrowser(options) {
   if (!options || typeof options.root !== 'string' || typeof options.outputDir !== 'string') {
     throw new TypeError('root and outputDir are required');
@@ -174,6 +187,12 @@ async function openPlayableBrowser(options) {
       while (child.exitCode === null && child.signalCode === null && Date.now() < deadline) await sleep(25);
       if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
     }
+    // A Chrome that is no longer our child survives the kill above: when the
+    // browser relaunches itself (an auto-update mid-run does exactly this) the
+    // new process is reparented to launchd, keeps rendering this page at 60 fps
+    // and burns whole cores until someone notices. The profile directory is
+    // unique to this run, so whatever still holds it is ours to reap.
+    reapStrays(profile);
     if (server) await server.close();
     if (logFd !== undefined) fs.closeSync(logFd);
     if (profile) await fsp.rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
