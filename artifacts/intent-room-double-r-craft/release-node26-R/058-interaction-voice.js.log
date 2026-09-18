@@ -1,0 +1,231 @@
+# target classici attivabili con Enter
+  - NPC town:bobby -> bobby_shelly, bobby
+  - NPC town:donna -> donna
+  - NPC town:jacoby -> jacoby
+  - OBJ town:1,0 -> landmark_waterfall
+  - OBJ town:48,21 -> landmark_cemetery
+  - OBJ town:53,1 -> landmark_tracks_vagone, landmark_tracks_route, landmark_tracks
+  - OBJ town:30,30 -> sign_town
+  - OBJ town:15,28 -> lago_dopo, lago_sguardo, lago_laura
+  - OBJ town:50,22 -> tomba_laura
+  - NPC sheriff:truman -> truman_fine, truman_wait3, truman_atto3, truman_a2, truman
+  - NPC sheriff:hawk -> hawk_a2, hawk
+  - NPC sheriff:lucy -> lucy_a3, lucy
+  - NPC sheriff:andy -> andy
+  - NPC sheriff:leland -> leland_morte, leland_interr
+  - NPC palmer:sarah -> sarah_visione, sarah
+  - OBJ palmer:6,1 -> laura_room_andy, laura_room
+  - OBJ room_315:13,3 -> specchio_dopo, gigante1_dlg, specchio315
+  - OBJ room_315:1,5 -> letto_315
+  - OBJ room_315:2,5 -> letto_315
+  - OBJ room_315:3,5 -> letto_315
+  - OBJ room_315:8,3 -> scrivania_315_bob, scrivania_315
+  - NPC hotel_gn:audrey -> audrey_a2_ben, audrey_a2
+  - NPC hotel_gn:benhorne -> benhorne_a2
+  - NPC hospital:gerard -> gerard_a2
+  - OBJ hospital:3,5 -> ronette_letto
+  - NPC diner:norma -> norma_a2, norma
+  - NPC diner:shelly -> shelly_bobby, shelly
+  - NPC diner:loglady -> loglady_a4, loglady
+  - NPC diner:james -> james_a2
+  - OBJ woods:14,12 -> olio
+  - OBJ woods:11,16 -> sign_grove
+  - NPC redroom:laura -> laura_finale2, laura_sogno, laura_hint
+  - NPC redroom:mfap -> mfap_finale, mfap
+  - NPC redroom:bob -> bob_finale
+  - OBJ traincar:4,6 -> sign_ponte
+  - OBJ traincar:20,2 -> sign_oej
+  - OBJ traincar:13,6 -> mucchio_terra
+  - OBJ traincar:13,5 -> anello_interact
+# voce Cooper per ramo
+  ok - bobby_shelly:first (1 COOPER)
+  ok - bobby:first (1 COOPER)
+  ok - donna:first (1 COOPER)
+  ok - jacoby:first (1 COOPER)
+  ok - landmark_waterfall:first (2 COOPER)
+  ok - landmark_cemetery:first (1 COOPER)
+  ok - landmark_tracks_vagone:first (1 COOPER)
+  ok - landmark_tracks_route:first (2 COOPER)
+  ok - landmark_tracks:first (1 COOPER)
+  ok - sign_town:first (2 COOPER)
+  ok - lago_dopo:first (1 COOPER)
+  ok - lago_sguardo:first (1 COOPER)
+  ok - lago_laura:first (2 COOPER)
+  ok - tomba_laura:first (1 COOPER)
+  ok - tomba_laura:again (1 COOPER)
+  ok - truman_fine:first (1 COOPER)
+  ok - truman_wait3:first (1 COOPER)
+  ok - truman_atto3:first (2 COOPER)
+  ok - truman_a2:first (2 COOPER)
+  ok - truman:first (2 COOPER)
+  ok - truman:again (1 COOPER)
+  ok - hawk_a2:first (1 COOPER)
+  ok - hawk:first (1 COOPER)
+  ok - lucy_a3:first (1 COOPER)
+  ok - lucy:first (1 COOPER)
+  ok - andy:first (1 COOPER)
+  ok - leland_morte:first (1 COOPER)
+  ok - leland_morte:again (1 COOPER)
+  ok - leland_interr:first (2 COOPER)
+  ok - sarah_visione:first (1 COOPER)
+  ok - sarah:first (1 COOPER)
+  ok - laura_room_andy:first (2 COOPER)
+  ok - laura_room_andy:again (1 COOPER)
+  ok - laura_room:first (2 COOPER)
+  ok - laura_room:again (1 COOPER)
+  ok - specchio_dopo:first (1 COOPER)
+  ok - gigante1_dlg:first (1 COOPER)
+  ok - specchio315:first (1 COOPER)
+  ok - letto_315:first (1 COOPER)
+  ok - letto_315:again (1 COOPER)
+  ok - scrivania_315_bob:first (2 COOPER)
+  ok - scrivania_315_bob:again (1 COOPER)
+  ok - scrivania_315:first (1 COOPER)
+  ok - scrivania_315:again (1 COOPER)
+  ok - audrey_a2_ben:first (1 COOPER)
+  ok - audrey_a2:first (1 COOPER)
+  ok - benhorne_a2:first (1 COOPER)
+  ok - gerard_a2:first (1 COOPER)
+  ok - ronette_letto:first (1 COOPER)
+  ok - ronette_letto:again (1 COOPER)
+  ok - norma_a2:first (1 COOPER)
+  ok - norma:first (2 COOPER)
+  ok - norma:again (1 COOPER)
+  ok - shelly_bobby:first (2 COOPER)
+  ok - shelly:first (1 COOPER)
+  ok - loglady_a4:first (1 COOPER)
+  ok - loglady:first (1 COOPER)
+  ok - james_a2:first (1 COOPER)
+  ok - olio:first (2 COOPER)
+  ok - sign_grove:first (1 COOPER)
+  ok - laura_finale2:first (1 COOPER)
+  ok - laura_sogno:first (1 COOPER)
+  ok - laura_sogno:again (1 COOPER)
+  ok - laura_hint:first (1 COOPER)
+  ok - mfap_finale:first (1 COOPER)
+  ok - mfap:first (1 COOPER)
+  ok - mfap:again (1 COOPER)
+  ok - bob_finale:first (1 COOPER)
+  ok - sign_ponte:first (1 COOPER)
+  ok - sign_oej:first (1 COOPER)
+  ok - mucchio_terra:first (3 COOPER)
+  ok - mucchio_terra:again (1 COOPER)
+  ok - anello_interact:first (3 COOPER)
+  ok - anello_interact:again (1 COOPER)
+# conteggi
+  target fisici: 38
+  rami dialogo unici: 60
+  varianti first/again: 74
+  pagine verificate: 230
+  battute COOPER verificate: 92
+  richiami a Diane giustificati: 6/6
+# voce Cooper nelle missioni narrative
+  ok - M4:truman_a2:entry
+  ok - M4:ronette_attesa:entry
+  ok - M4:ronette_attesa:repeat
+  ok - M4:loglady_ceppo:entry
+  ok - M4:loglady_ceppo:repeat
+  ok - M4:ronette_q:entry
+  ok - M4:ronette_q:reopen
+  ok - M4:infermiera_attesa:entry
+  ok - M4:infermiera_attesa:repeat
+  ok - M4:infermiera_ctx:entry
+  ok - M4:infermiera_ctx:repeat
+  ok - M4:gerard_attesa:entry
+  ok - M4:gerard_attesa:repeat
+  ok - M4:gerard_a2:entry
+  ok - M4:gerard_a2:repeat
+  ok - M4:james_attesa:entry
+  ok - M4:james_attesa:repeat
+  ok - M4:james_a2:entry
+  ok - M4:james_a2:repeat
+  ok - M4:present_truman_m4:entry
+  ok - M4:present_truman_m4:repeat
+  ok - M5:m5_bridge:entry
+  ok - M5:m5_discovery:entry
+  ok - M5:m5_hawk_bridge:entry
+  ok - M5:m5_hawk_bridge:repeat
+  ok - M5:m5_mound:entry
+  ok - M5:m5_ring:entry
+  ok - M5:m5_scene:entry
+  ok - M5:m5_stove:entry
+  ok - M5:m5_cards:entry
+  ok - M5:m5_hawk_door:entry
+  ok - M5:m5_hawk_door:repeat
+  ok - M5:m5_report_intro:entry[1]
+  ok - M5:m5_report_intro:entry[2]
+  ok - M5:m5_report_intro:entry[3]
+  ok - M5:m5_report_intro:repeat
+  ok - M5:m5_tracks_north_early:entry
+  ok - M5:m5_tracks_north_early:repeat
+  ok - M5:m5_tracks_north:entry
+  ok - M5:m5_hawk_cut:entry
+  ok - M5:m5_hawk_cut:repeat
+  ok - M5:m5_sign_oej:entry
+  ok - M6:m6_ferry:entry
+  ok - M6:m6_audrey:entry
+  ok - M6:m6_tactic:entry
+  ok - M6:m6_interrogation_prova:entry
+  ok - M6:m6_interrogation_pressione:entry
+  ok - M6:m6_interrogation_falsa:entry
+  ok - M6:m6_arrest:entry
+  ok - M6:m6_hospital_guard:entry
+  ok - M6:m6_hospital_guard:repeat
+  ok - M6:m6_return_night_early:entry
+  ok - M6:m6_return_night_early:repeat
+  ok - M6:m6_return_night:entry
+  ok - M6:m6_news:entry[1]
+  ok - M6:m6_news:entry[2]
+  ok - M6:m6_news:entry[3]
+  ok - M6:m6_news:entry[4]
+  ok - M6:m6_news:entry[5]
+  ok - M6:m6_news:entry[6]
+  ok - M6:m6_atto4_bridge:entry[1]
+  ok - M6:m6_atto4_bridge:entry[2]
+  ok - M6:m6_atto4_bridge:repeat
+  ok - M6:m6_hospital:entry
+  ok - M8:m8_diner:entry
+  ok - M8:m8_leland_waiting:entry
+  ok - M8:m8_leland_waiting:repeat
+  ok - M8:m8_roadhouse_truman:entry (silenzioso per contratto)
+  ok - M8:m8_giant_stage:entry (silenzioso per contratto)
+  ok - M8:m8_giant_stage:repeat (silenzioso per contratto)
+  ok - M8:m8_roadhouse_phone:entry
+  ok - M8:m8_leland_taxi:entry[1]
+  ok - M8:m8_leland_taxi:entry[2]
+  ok - M8:m8_leland_taxi:entry[3]
+  ok - M8:m8_leland_taxi:repeat
+  ok - M8:m8_lucy:entry[1]
+  ok - M8:m8_lucy:entry[2]
+  ok - M8:m8_lucy:repeat
+  ok - M8:m8_focus_choice:entry
+  ok - M8:m8_focus_choice:repeat
+  ok - M8:m8_route_palmer:entry[1]
+  ok - M8:m8_route_palmer:entry[2]
+  ok - M8:m8_route_lake:entry
+  ok - M8:m8_route_diner:entry
+  ok - M8:m8_discovery:entry[1]
+  ok - M8:m8_discovery:entry[2]
+  ok - M8:m8_promise_echo:entry[1]
+  ok - M8:m8_promise_echo:entry[2]
+  ok - M8:m8_promise_echo:entry[3]
+  ok - M8:m8_station:entry[1]
+  ok - M8:m8_station:entry[2]
+  ok - M8:m8_station:entry[3]
+  ok - M8:m8_station:entry[4]
+  ok - M8:m8_station:entry[5]
+  ok - M8:m8_station:entry[6]
+  ok - M8:m8_station:repeat
+  ok - M9:m9_verifica_taxi:entry[1]
+  ok - M9:m9_verifica_taxi:entry[2]
+  ok - M9:m9_present_truman:entry[1]
+  ok - M9:m9_present_truman:entry[2]
+  ok - M9:m9_present_truman:repeat
+  ok - M9:m9_arrivo:entry
+  ok - M9:m9_arrivo:repeat
+# conteggi missioni narrative
+  world roots: 55
+  varianti entry/reopen rese: 78
+  repeat autoriali: 25
+  pagine COOPER uniche: 111
+interaction-voice: PASS (classici 74/74; narrative 78/78; repeat 25/25)

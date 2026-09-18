@@ -1,0 +1,421 @@
+# struttura
+  ok - mappa town coerente
+  ok - porta town:42,20 -> mappa double_r_exterior_prototype esiste
+  ok - porta town:42,20 -> tile arrivo calpestabile
+  ok - porta town:9,6 -> mappa hotel_gn esiste
+  ok - porta town:9,6 -> tile arrivo calpestabile
+  ok - porta town:23,6 -> mappa hospital esiste
+  ok - porta town:23,6 -> tile arrivo calpestabile
+  ok - porta town:42,6 -> mappa palmer esiste
+  ok - porta town:42,6 -> tile arrivo calpestabile
+  ok - porta town:47,28 -> mappa roadhouse esiste
+  ok - porta town:47,28 -> tile arrivo calpestabile
+  ok - porta town:12,20 -> mappa sheriffs_station_exterior esiste
+  ok - porta town:12,20 -> tile arrivo calpestabile
+  ok - porta town:55,14 -> mappa traincar esiste
+  ok - porta town:55,14 -> tile arrivo calpestabile
+  ok - porta town:55,15 -> mappa traincar esiste
+  ok - porta town:55,15 -> tile arrivo calpestabile
+  ok - porta town:50,0 -> mappa woods esiste
+  ok - porta town:50,0 -> tile arrivo calpestabile
+  ok - oggetto town@1,0 dialogo "landmark_waterfall" esiste
+  ok - oggetto town@48,21 dialogo "landmark_cemetery" esiste
+  ok - oggetto town@53,1 dialogo "landmark_tracks_vagone" esiste
+  ok - oggetto town@53,1 dialogo "landmark_tracks_route" esiste
+  ok - oggetto town@53,1 dialogo "landmark_tracks" esiste
+  ok - oggetto town@30,30 dialogo "sign_town" esiste
+  ok - oggetto town@30,30 dialogo "sign_town" esiste
+  ok - oggetto town@15,28 dialogo "lago_dopo" esiste
+  ok - oggetto town@15,28 dialogo "lago_sguardo" esiste
+  ok - oggetto town@15,28 dialogo "lago_laura" esiste
+  ok - oggetto town@50,22 dialogo "tomba_laura" esiste
+  ok - npc bobby sprite "bobby" esiste
+  ok - npc bobby dialogo "bobby_shelly" esiste
+  ok - npc bobby dialogo "bobby_shelly" esiste
+  ok - npc bobby dialogo "bobby" esiste
+  ok - npc bobby su tile calpestabile
+  ok - npc donna sprite "donna" esiste
+  ok - npc donna dialogo "donna" esiste
+  ok - npc donna su tile calpestabile
+  ok - npc jacoby sprite "jacoby" esiste
+  ok - npc jacoby dialogo "jacoby" esiste
+  ok - npc jacoby su tile calpestabile
+  ok - mappa sheriff coerente
+  ok - porta sheriff:7,11 -> mappa sheriffs_station_exterior esiste
+  ok - porta sheriff:7,11 -> tile arrivo calpestabile
+  ok - porta sheriff:8,11 -> mappa sheriffs_station_exterior esiste
+  ok - porta sheriff:8,11 -> tile arrivo calpestabile
+  ok - npc andy sprite "andy" esiste
+  ok - npc andy dialogo "andy" esiste
+  ok - npc andy su tile calpestabile
+  ok - npc hawk sprite "hawk" esiste
+  ok - npc hawk dialogo "hawk_a2" esiste
+  ok - npc hawk dialogo "hawk" esiste
+  ok - npc hawk su tile calpestabile
+  ok - npc lucy sprite "lucy" esiste
+  ok - npc lucy dialogo "lucy_a3" esiste
+  ok - npc lucy dialogo "lucy" esiste
+  ok - npc lucy su tile calpestabile
+  ok - npc truman sprite "truman" esiste
+  ok - npc truman dialogo "truman_fine" esiste
+  ok - npc truman dialogo "truman_wait3" esiste
+  ok - npc truman dialogo "truman_atto3" esiste
+  ok - npc truman dialogo "truman_a2" esiste
+  ok - npc truman dialogo "truman" esiste
+  ok - npc truman su tile calpestabile
+  ok - mappa palmer coerente
+  ok - porta palmer:7,11 -> mappa town esiste
+  ok - porta palmer:7,11 -> tile arrivo calpestabile
+  ok - porta palmer:8,11 -> mappa town esiste
+  ok - porta palmer:8,11 -> tile arrivo calpestabile
+  ok - oggetto palmer@6,1 dialogo "laura_room_andy" esiste
+  ok - oggetto palmer@6,1 dialogo "laura_room" esiste
+  ok - npc sarah sprite "sarah" esiste
+  ok - npc sarah dialogo "sarah_visione" esiste
+  ok - npc sarah dialogo "sarah" esiste
+  ok - npc sarah su tile calpestabile
+  ok - mappa hotel_gn coerente
+  ok - porta hotel_gn:14,1 -> mappa room_315 esiste
+  ok - porta hotel_gn:14,1 -> tile arrivo calpestabile
+  ok - porta hotel_gn:8,11 -> mappa town esiste
+  ok - porta hotel_gn:8,11 -> tile arrivo calpestabile
+  ok - porta hotel_gn:9,11 -> mappa town esiste
+  ok - porta hotel_gn:9,11 -> tile arrivo calpestabile
+  ok - npc audrey sprite "audrey" esiste
+  ok - npc audrey dialogo "audrey_a2_ben" esiste
+  ok - npc audrey dialogo "audrey_a2" esiste
+  ok - npc audrey su tile calpestabile
+  ok - npc benhorne sprite "benhorne" esiste
+  ok - npc benhorne dialogo "benhorne_a2" esiste
+  ok - npc benhorne su tile calpestabile
+  ok - mappa room_315 coerente
+  ok - porta room_315:7,11 -> mappa hotel_gn esiste
+  ok - porta room_315:7,11 -> tile arrivo calpestabile
+  ok - oggetto room_315@13,3 dialogo "specchio_dopo" esiste
+  ok - oggetto room_315@13,3 dialogo "gigante1_dlg" esiste
+  ok - oggetto room_315@13,3 dialogo "specchio315" esiste
+  ok - oggetto room_315@1,5 dialogo "letto_315" esiste
+  ok - oggetto room_315@2,5 dialogo "letto_315" esiste
+  ok - oggetto room_315@3,5 dialogo "letto_315" esiste
+  ok - oggetto room_315@8,3 dialogo "scrivania_315_bob" esiste
+  ok - oggetto room_315@8,3 dialogo "scrivania_315" esiste
+  ok - mappa hospital coerente
+  ok - porta hospital:7,11 -> mappa town esiste
+  ok - porta hospital:7,11 -> tile arrivo calpestabile
+  ok - porta hospital:8,11 -> mappa town esiste
+  ok - porta hospital:8,11 -> tile arrivo calpestabile
+  ok - oggetto hospital@3,5 dialogo "ronette_letto" esiste
+  ok - npc gerard sprite "gerard" esiste
+  ok - npc gerard dialogo "gerard_a2" esiste
+  ok - npc gerard su tile calpestabile
+  ok - npc infermiera sprite "infermiera" esiste
+  ok - npc infermiera su tile calpestabile
+  ok - npc ronette sprite "ronette" esiste
+  ok - mappa diner coerente
+  ok - porta diner:6,9 -> mappa double_r_exterior_prototype esiste
+  ok - porta diner:6,9 -> tile arrivo calpestabile
+  ok - porta diner:7,9 -> mappa double_r_exterior_prototype esiste
+  ok - porta diner:7,9 -> tile arrivo calpestabile
+  ok - npc loglady sprite "loglady" esiste
+  ok - npc loglady dialogo "loglady_a4" esiste
+  ok - npc loglady dialogo "loglady" esiste
+  ok - npc loglady su tile calpestabile
+  ok - npc norma sprite "norma" esiste
+  ok - npc norma dialogo "norma_a2" esiste
+  ok - npc norma dialogo "norma" esiste
+  ok - npc norma su tile calpestabile
+  ok - npc shelly sprite "shelly" esiste
+  ok - npc shelly dialogo "shelly_bobby" esiste
+  ok - npc shelly dialogo "shelly" esiste
+  ok - npc shelly su tile calpestabile
+  ok - mappa woods coerente
+  ok - porta woods:14,21 -> mappa town esiste
+  ok - porta woods:14,21 -> tile arrivo calpestabile
+  ok - porta woods:14,4 -> mappa redroom esiste
+  ok - porta woods:14,4 -> tile arrivo calpestabile
+  ok - oggetto woods@14,12 dialogo "olio" esiste
+  ok - oggetto woods@11,16 dialogo "sign_grove" esiste
+  ok - mappa redroom coerente
+  ok - porta redroom:8,11 -> mappa room_315 esiste
+  ok - porta redroom:8,11 -> tile arrivo calpestabile
+  ok - npc laura sprite "laura" esiste
+  ok - npc laura dialogo "laura_finale2" esiste
+  ok - npc laura dialogo "laura_sogno" esiste
+  ok - npc laura dialogo "laura_hint" esiste
+  ok - npc laura su tile calpestabile
+  ok - npc mfap sprite "mfap" esiste
+  ok - npc mfap dialogo "mfap_finale" esiste
+  ok - npc mfap dialogo "mfap" esiste
+  ok - npc mfap su tile calpestabile
+  ok - mappa traincar coerente
+  ok - porta traincar:0,7 -> mappa town esiste
+  ok - porta traincar:0,7 -> tile arrivo calpestabile
+  ok - porta traincar:21,0 -> mappa oej esiste
+  ok - porta traincar:21,0 -> tile arrivo calpestabile
+  ok - oggetto traincar@4,6 dialogo "sign_ponte" esiste
+  ok - oggetto traincar@20,2 dialogo "sign_oej" esiste
+  ok - oggetto traincar@13,6 dialogo "mucchio_terra" esiste
+  ok - oggetto traincar@13,5 dialogo "anello_interact" esiste
+  ok - mappa oej coerente
+  ok - porta oej:7,9 -> mappa traincar esiste
+  ok - porta oej:7,9 -> tile arrivo calpestabile
+  ok - porta oej:8,9 -> mappa traincar esiste
+  ok - porta oej:8,9 -> tile arrivo calpestabile
+  ok - npc jacques sprite "jacques" esiste
+  ok - npc jacques su tile calpestabile
+  ok - mappa roadhouse coerente
+  ok - porta roadhouse:7,9 -> mappa town esiste
+  ok - porta roadhouse:7,9 -> tile arrivo calpestabile
+  ok - porta roadhouse:8,9 -> mappa town esiste
+  ok - porta roadhouse:8,9 -> tile arrivo calpestabile
+  ok - mappa sheriffs_station_exterior coerente
+  ok - porta sheriffs_station_exterior:7,6 -> mappa sheriff esiste
+  ok - porta sheriffs_station_exterior:7,6 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:8,6 -> mappa sheriff esiste
+  ok - porta sheriffs_station_exterior:8,6 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:2,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:2,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:3,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:3,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:4,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:4,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:5,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:5,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:6,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:6,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:7,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:7,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:8,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:8,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:9,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:9,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:10,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:10,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:11,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:11,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:12,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:12,11 -> tile arrivo calpestabile
+  ok - porta sheriffs_station_exterior:13,11 -> mappa town esiste
+  ok - porta sheriffs_station_exterior:13,11 -> tile arrivo calpestabile
+  ok - oggetto sheriffs_station_exterior@9,6 dialogo "bacheca_centrale" esiste
+  ok - mappa double_r_exterior_prototype coerente
+  ok - porta double_r_exterior_prototype:6,6 -> mappa diner esiste
+  ok - porta double_r_exterior_prototype:6,6 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:7,6 -> mappa diner esiste
+  ok - porta double_r_exterior_prototype:7,6 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:2,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:2,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:3,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:3,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:4,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:4,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:5,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:5,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:6,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:6,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:7,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:7,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:8,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:8,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:9,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:9,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:10,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:10,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:11,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:11,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:12,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:12,11 -> tile arrivo calpestabile
+  ok - porta double_r_exterior_prototype:13,11 -> mappa town esiste
+  ok - porta double_r_exterior_prototype:13,11 -> tile arrivo calpestabile
+  ok - tutte le pagine di dialogo entrano nel box (<= 129 caratteri)
+  ok - tutte le prove hanno documenti completi e pagine entro 8 righe bitmap
+  ok - tutte le voci di D.objectives entrano in una riga (<= 48 caratteri)
+  ok - town.onEnter punta a un dialogo esistente
+  ok - campo "id" di maps.js:town propagato in GAME.Maps
+  ok - campo "rows" di maps.js:town propagato in GAME.Maps
+  ok - campo "ground" di maps.js:town propagato in GAME.Maps
+  ok - campo "onEnter" di maps.js:town propagato in GAME.Maps
+  ok - campo "height" di maps.js:town propagato in GAME.Maps
+  ok - campo "width" di maps.js:town propagato in GAME.Maps
+  ok - campo "id" di maps.js:sheriff propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:sheriff propagato in GAME.Maps
+  ok - campo "rows" di maps.js:sheriff propagato in GAME.Maps
+  ok - campo "height" di maps.js:sheriff propagato in GAME.Maps
+  ok - campo "width" di maps.js:sheriff propagato in GAME.Maps
+  ok - campo "id" di maps.js:palmer propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:palmer propagato in GAME.Maps
+  ok - campo "rows" di maps.js:palmer propagato in GAME.Maps
+  ok - campo "height" di maps.js:palmer propagato in GAME.Maps
+  ok - campo "width" di maps.js:palmer propagato in GAME.Maps
+  ok - campo "id" di maps.js:hotel_gn propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:hotel_gn propagato in GAME.Maps
+  ok - campo "rows" di maps.js:hotel_gn propagato in GAME.Maps
+  ok - campo "height" di maps.js:hotel_gn propagato in GAME.Maps
+  ok - campo "width" di maps.js:hotel_gn propagato in GAME.Maps
+  ok - campo "id" di maps.js:room_315 propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:room_315 propagato in GAME.Maps
+  ok - campo "rows" di maps.js:room_315 propagato in GAME.Maps
+  ok - campo "onEnter" di maps.js:room_315 propagato in GAME.Maps
+  ok - campo "height" di maps.js:room_315 propagato in GAME.Maps
+  ok - campo "width" di maps.js:room_315 propagato in GAME.Maps
+  ok - campo "id" di maps.js:hospital propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:hospital propagato in GAME.Maps
+  ok - campo "rows" di maps.js:hospital propagato in GAME.Maps
+  ok - campo "height" di maps.js:hospital propagato in GAME.Maps
+  ok - campo "width" di maps.js:hospital propagato in GAME.Maps
+  ok - campo "id" di maps.js:diner propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:diner propagato in GAME.Maps
+  ok - campo "interior" di maps.js:diner propagato in GAME.Maps
+  ok - campo "rows" di maps.js:diner propagato in GAME.Maps
+  ok - campo "height" di maps.js:diner propagato in GAME.Maps
+  ok - campo "width" di maps.js:diner propagato in GAME.Maps
+  ok - campo "id" di maps.js:woods propagato in GAME.Maps
+  ok - campo "rows" di maps.js:woods propagato in GAME.Maps
+  ok - campo "height" di maps.js:woods propagato in GAME.Maps
+  ok - campo "width" di maps.js:woods propagato in GAME.Maps
+  ok - campo "id" di maps.js:redroom propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:redroom propagato in GAME.Maps
+  ok - campo "rows" di maps.js:redroom propagato in GAME.Maps
+  ok - campo "onEnter" di maps.js:redroom propagato in GAME.Maps
+  ok - campo "height" di maps.js:redroom propagato in GAME.Maps
+  ok - campo "width" di maps.js:redroom propagato in GAME.Maps
+  ok - campo "id" di maps.js:traincar propagato in GAME.Maps
+  ok - campo "rows" di maps.js:traincar propagato in GAME.Maps
+  ok - campo "height" di maps.js:traincar propagato in GAME.Maps
+  ok - campo "width" di maps.js:traincar propagato in GAME.Maps
+  ok - campo "id" di maps.js:oej propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:oej propagato in GAME.Maps
+  ok - campo "rows" di maps.js:oej propagato in GAME.Maps
+  ok - campo "height" di maps.js:oej propagato in GAME.Maps
+  ok - campo "width" di maps.js:oej propagato in GAME.Maps
+  ok - campo "id" di maps.js:roadhouse propagato in GAME.Maps
+  ok - campo "indoor" di maps.js:roadhouse propagato in GAME.Maps
+  ok - campo "rows" di maps.js:roadhouse propagato in GAME.Maps
+  ok - campo "height" di maps.js:roadhouse propagato in GAME.Maps
+  ok - campo "width" di maps.js:roadhouse propagato in GAME.Maps
+  ok - arredo urbano "L" e' solido (M.SOLID)
+  ok - arredo urbano "L" e' skip-baked (Render3DConfig.terrain.skipBake)
+  ok - arredo urbano "P" e' solido (M.SOLID)
+  ok - arredo urbano "P" e' skip-baked (Render3DConfig.terrain.skipBake)
+  ok - arredo urbano "B" e' solido (M.SOLID)
+  ok - arredo urbano "B" e' skip-baked (Render3DConfig.terrain.skipBake)
+  ok - arredo urbano "F" e' solido (M.SOLID)
+  ok - arredo urbano "F" e' skip-baked (Render3DConfig.terrain.skipBake)
+  ok - arredo urbano "A" e' solido (M.SOLID)
+  ok - arredo urbano "A" e' skip-baked (Render3DConfig.terrain.skipBake)
+  ok - arredo urbano "H" e' solido (M.SOLID)
+  ok - arredo urbano "H" e' skip-baked (Render3DConfig.terrain.skipBake)
+  ok - arredo urbano "E" e' solido (M.SOLID)
+  ok - arredo urbano "E" e' skip-baked (Render3DConfig.terrain.skipBake)
+  ok - arredo urbano "n" e' solido (M.SOLID)
+  ok - arredo urbano "n" e' skip-baked (Render3DConfig.terrain.skipBake)
+  ok - interact town:30,30 "cartello" -> dialogo "sign_town" esiste
+  ok - interact town:15,28 "lago_riva" -> dialogo "lago_dopo" esiste
+  ok - interact town:15,28 "lago_riva" -> dialogo "lago_sguardo" esiste
+  ok - interact town:15,28 "lago_riva" -> dialogo "lago_laura" esiste
+  ok - interact town:50,22 "tomba_laura" -> dialogo "tomba_laura" esiste
+  ok - interact palmer:6,1 "cameraLaura" -> dialogo "laura_room_andy" esiste
+  ok - interact palmer:6,1 "cameraLaura" -> dialogo "laura_room" esiste
+  ok - interact room_315:13,3 "specchio315" -> dialogo "specchio_dopo" esiste
+  ok - interact room_315:13,3 "specchio315" -> dialogo "gigante1_dlg" esiste
+  ok - interact room_315:13,3 "specchio315" -> dialogo "specchio315" esiste
+  ok - interact room_315:1,5 "letto_315" -> dialogo "letto_315" esiste
+  ok - interact room_315:2,5 "letto_315" -> dialogo "letto_315" esiste
+  ok - interact room_315:3,5 "letto_315" -> dialogo "letto_315" esiste
+  ok - interact room_315:8,3 "scrivania_315" -> dialogo "scrivania_315_bob" esiste
+  ok - interact room_315:8,3 "scrivania_315" -> dialogo "scrivania_315" esiste
+  ok - interact hospital:3,5 "ronette_letto" -> dialogo "ronette_letto" esiste
+  ok - interact woods:14,12 "olio" -> dialogo "olio" esiste
+  ok - interact woods:11,16 "cartelloBosco" -> dialogo "sign_grove" esiste
+  ok - interact traincar:4,6 "sign_ponte" -> dialogo "sign_ponte" esiste
+  ok - interact traincar:20,2 "sign_oej" -> dialogo "sign_oej" esiste
+  ok - interact traincar:13,6 "mucchio_terra" -> dialogo "mucchio_terra" esiste
+  ok - interact traincar:13,5 "anello_interact" -> dialogo "anello_interact" esiste
+# partita
+  ok - parte dal titolo
+  ok - titolo -> intro
+  ok - prologo in tre pagine complete, massimo 7 righe
+  ok - tutto il testo del prologo resta visibile
+  ok - intro -> gioco
+  ok - spawn all'ingresso sud della città
+  ok - spawn iniziale calpestabile
+  ok - bosco transennato a 0 indizi
+  ok - hotel chiuso prima del sogno
+  ok - ospedale chiuso prima del sogno
+  ok - roadhouse chiuso prima di atto4
+  ok - dialogo Truman parte
+  ok - dialogo Truman chiuso
+  ok - diario ottenuto
+  ok - fascicolo apre sulla lista prove
+  ok - diario selezionato si apre con Invio
+  ok - freccia sfoglia pagina diario
+  ok - Esc dal diario torna al fascicolo
+  ok - secondo Esc chiude fascicolo
+  ok - replay Truman usa "again"
+  ok - dialogo camera di Laura parte
+  ok - indizi camera di Laura
+  ok - 3 indizi totali
+  ok - bosco aperto con 3 indizi
+  ok - entrato nella Stanza Rossa
+  ok - dialogo Nano parte
+  ok - flag met_mfap impostato
+  ok - con flag: dialogo del sogno
+  ok - dialogo del sogno chiuso
+  ok - nome sussurrato ottenuto
+  ok - flag sogno_fatto impostato
+  ok - il sogno non chiude la partita
+  ok - dialogo Truman post-sogno parte
+  ok - dialogo Truman post-sogno chiuso
+  ok - il racconto del sogno non chiude la partita
+  ok - dialogo Ben Horne parte
+  ok - dialogo Audrey (Great Northern) parte
+  ok - flag audrey_indaga impostato
+  ok - dialogo Gerard parte
+  ok - poesia del fuoco ottenuta
+  ok - corpo Ronette presente sulla tile del letto
+  ok - flag ronette_bob impostato
+  ok - dialogo James parte
+  ok - cuore ricomposto ottenuto
+  ok - dialogo Truman Atto 3 parte
+  ok - dialogo Truman Atto 3 chiuso
+  ok - flag atto3 impostato
+  ok - Atto 3 non chiude la partita
+  ok - dialogo mucchio di terra parte
+  ok - biglietto del fuoco ottenuto
+  ok - dialogo anello parte
+  ok - anello ottenuto
+  ok - flag jacques_preso impostato
+  ok - flag audrey_salvata impostato
+  ok - dialogo Lucy Atto 3 parte
+  ok - flag jacques_morto impostato
+  ok - dialogo del Gigante parte
+  ok - flag gigante1 impostato
+  ok - flag atto4 impostato
+  ok - Atto 4 non chiude la partita
+  ok - dialogo visione di Sarah parte
+  ok - dialogo Log Lady Atto 4 parte
+  ok - flag gigante2 impostato
+  ok - Sarah assente da Palmer dopo il Roadhouse
+  ok - nessun dialogo classico contraddice la testimonianza taxi del diner
+  ok - flag maddy_trovata impostato
+  ok - flag atto5 impostato
+  ok - Atto 5 non chiude piu' la partita (ponte ritirato)
+  ok - Leland presente al distretto dopo atto5
+  ok - dialogo interrogatorio di Leland parte
+  ok - flag leland_confessa impostato (BOB e' emerso)
+  ok - dialogo morte di Leland parte
+  ok - flag leland_morto impostato
+  ok - dialogo finale di Truman parte
+  ok - il ponte finale non chiude la partita
+  ok - dialogo finale del Nano parte
+  ok - flag mfap_finale_visto impostato
+  ok - BOB presente nella Stanza Rossa dopo la morte di Leland
+  ok - dialogo di BOB parte
+  ok - dialogo finale di Laura parte
+  ok - vero finale raggiunto
+  ok - reset post-finale
+  ok - indizi azzerati al reset
+
+415 controlli superati ✔
+(node:94054) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)

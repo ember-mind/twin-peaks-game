@@ -1,0 +1,19 @@
+# autorità canonica e provenienza
+# ingresso / uscita
+# registro pagine (globale M4+M5+M6+M8+M9)
+# FEDELTÀ AL LOCK: testi verbatim (letti dal file del Lock, non da una copia)
+# igiene participant-facing (nessun token interno a schermo)
+# IGIENE DEL LUTTO: nessuna attribuzione d'omicidio, nessun arresto, nessun BOB (Lock §2/§3)
+# writer unici (effetti di nodo + rami di presentazione)
+# M9 non scrive stato tipizzato: LEGGE M8 e basta
+# eco M8: valori LETTI, domini chiusi, copertura totale
+# P6: contratto di formulazione
+# presentazione: allegato MANUALE, partizione totale, reason code a dominio
+# arrivo: volontario, gated sull'accettazione, repeat raggiungibile
+# obiettivi: esattamente uno vero in ogni combinazione raggiungibile
+# obiettivo d'ingresso: punta a una root DAVVERO azionabile
+# binding world: map_id e attori REALI del motore
+# diff: M4/M5/M6 invariati; carry-in taxi posseduto da M8
+# coerenza DOCUMENTALE (schema-delta / source-map / matrice == dati)
+
+3984 controlli statici M9 superati ✔ (proposta C9-A — copertura dinamica in C9-B); 36 pagine M9, 4 nodi

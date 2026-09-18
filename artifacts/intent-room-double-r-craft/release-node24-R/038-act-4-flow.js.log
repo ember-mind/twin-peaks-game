@@ -1,0 +1,1619 @@
+# act-4-flow: wording guards (M8.json)
+  ok - m8_diner/m8.a.diner.p01: nessun "BOB" nel testo player-facing ("(Maddy al bancone, un tovagliolo pieno di numeri. Norma le riempie la tazza senza chiedere.)")
+  ok - m8_diner/m8.a.diner.p01: nessuna igiene della falsa colpa violata ("(Maddy al bancone, un tovagliolo pieno di numeri. Norma le riempie la tazza senza chiedere.)")
+  ok - m8_diner/m8.a.diner.p01: nessun id di design nel testo player-facing ("(Maddy al bancone, un tovagliolo pieno di numeri. Norma le riempie la tazza senza chiedere.)")
+  ok - m8_diner/m8.a.diner.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Maddy al bancone, un tovagliolo pieno di numeri. Norma le riempie la tazza senza chiedere.)")
+  ok - m8_diner/m8.a.diner.p02: nessun "BOB" nel testo player-facing ("La 7:40 prende la coincidenza a Spokane. Passa alla fermata del lago — quella delle 11 no, ma parte a orario.")
+  ok - m8_diner/m8.a.diner.p02: nessuna igiene della falsa colpa violata ("La 7:40 prende la coincidenza a Spokane. Passa alla fermata del lago — quella delle 11 no, ma parte a orario.")
+  ok - m8_diner/m8.a.diner.p02: nessun id di design nel testo player-facing ("La 7:40 prende la coincidenza a Spokane. Passa alla fermata del lago — quella delle 11 no, ma parte a orario.")
+  ok - m8_diner/m8.a.diner.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("La 7:40 prende la coincidenza a Spokane. Passa alla fermata del lago — quella delle 11 no, ma parte a orario.")
+  ok - m8_diner/m8.a.diner.p03: nessun "BOB" nel testo player-facing ("Torna a casa, signorina Ferguson?")
+  ok - m8_diner/m8.a.diner.p03: nessuna igiene della falsa colpa violata ("Torna a casa, signorina Ferguson?")
+  ok - m8_diner/m8.a.diner.p03: nessun id di design nel testo player-facing ("Torna a casa, signorina Ferguson?")
+  ok - m8_diner/m8.a.diner.p03: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Torna a casa, signorina Ferguson?")
+  ok - m8_diner/m8.a.diner.p04: nessun "BOB" nel testo player-facing ("Torno al centralino della biblioteca. Mi tengono il posto fino a lunedì — l'ho fatto promettere per iscritto.")
+  ok - m8_diner/m8.a.diner.p04: nessuna igiene della falsa colpa violata ("Torno al centralino della biblioteca. Mi tengono il posto fino a lunedì — l'ho fatto promettere per iscritto.")
+  ok - m8_diner/m8.a.diner.p04: nessun id di design nel testo player-facing ("Torno al centralino della biblioteca. Mi tengono il posto fino a lunedì — l'ho fatto promettere per iscritto.")
+  ok - m8_diner/m8.a.diner.p04: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Torno al centralino della biblioteca. Mi tengono il posto fino a lunedì — l'ho fatto promettere per iscritto.")
+  ok - m8_diner/m8.a.diner.p05: nessun "BOB" nel testo player-facing ("(Un avventore la saluta: \"Ciao, Laura\". Maddy non si volta subito.)")
+  ok - m8_diner/m8.a.diner.p05: nessuna igiene della falsa colpa violata ("(Un avventore la saluta: \"Ciao, Laura\". Maddy non si volta subito.)")
+  ok - m8_diner/m8.a.diner.p05: nessun id di design nel testo player-facing ("(Un avventore la saluta: \"Ciao, Laura\". Maddy non si volta subito.)")
+  ok - m8_diner/m8.a.diner.p05: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Un avventore la saluta: \"Ciao, Laura\". Maddy non si volta subito.)")
+  ok - m8_diner/m8.a.diner.p06: nessun "BOB" nel testo player-facing ("(senza acidità) Maddy. Con due D. Laura era mia cugina — io sono quella che porta gli occhiali nelle foto.")
+  ok - m8_diner/m8.a.diner.p06: nessuna igiene della falsa colpa violata ("(senza acidità) Maddy. Con due D. Laura era mia cugina — io sono quella che porta gli occhiali nelle foto.")
+  ok - m8_diner/m8.a.diner.p06: nessun id di design nel testo player-facing ("(senza acidità) Maddy. Con due D. Laura era mia cugina — io sono quella che porta gli occhiali nelle foto.")
+  ok - m8_diner/m8.a.diner.p06: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(senza acidità) Maddy. Con due D. Laura era mia cugina — io sono quella che porta gli occhiali nelle foto.")
+  ok - m8_diner/m8.a.diner.p07: nessun "BOB" nel testo player-facing ("Sono rimasta un giorno in più per zia Sarah. Uno. Poi Missoula si riprende il suo centralino.")
+  ok - m8_diner/m8.a.diner.p07: nessuna igiene della falsa colpa violata ("Sono rimasta un giorno in più per zia Sarah. Uno. Poi Missoula si riprende il suo centralino.")
+  ok - m8_diner/m8.a.diner.p07: nessun id di design nel testo player-facing ("Sono rimasta un giorno in più per zia Sarah. Uno. Poi Missoula si riprende il suo centralino.")
+  ok - m8_diner/m8.a.diner.p07: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Sono rimasta un giorno in più per zia Sarah. Uno. Poi Missoula si riprende il suo centralino.")
+  ok - m8_diner/m8.a.diner.p08: nessun "BOB" nel testo player-facing ("(Maddy piega il tovagliolo sugli orari e aspetta.)")
+  ok - m8_diner/m8.a.diner.p08: nessuna igiene della falsa colpa violata ("(Maddy piega il tovagliolo sugli orari e aspetta.)")
+  ok - m8_diner/m8.a.diner.p08: nessun id di design nel testo player-facing ("(Maddy piega il tovagliolo sugli orari e aspetta.)")
+  ok - m8_diner/m8.a.diner.p08: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Maddy piega il tovagliolo sugli orari e aspetta.)")
+  ok - m8_diner/choice:promise_accompagno: nessun "BOB" nel testo player-facing ("«Lunedì ti accompagno io alla corriera.»")
+  ok - m8_diner/choice:promise_accompagno: nessuna igiene della falsa colpa violata ("«Lunedì ti accompagno io alla corriera.»")
+  ok - m8_diner/choice:promise_accompagno: nessun id di design nel testo player-facing ("«Lunedì ti accompagno io alla corriera.»")
+  ok - m8_diner/choice:promise_accompagno: nessun conteggio di lettere fuori dal ramo respinto diary_b ("«Lunedì ti accompagno io alla corriera.»")
+  ok - m8_diner/m8.a.diner.feedback.accompagno: nessun "BOB" nel testo player-facing ("(sorride) Alle 7:10, agente. Io i federali li faccio aspettare al massimo cinque minuti.")
+  ok - m8_diner/m8.a.diner.feedback.accompagno: nessuna igiene della falsa colpa violata ("(sorride) Alle 7:10, agente. Io i federali li faccio aspettare al massimo cinque minuti.")
+  ok - m8_diner/m8.a.diner.feedback.accompagno: nessun id di design nel testo player-facing ("(sorride) Alle 7:10, agente. Io i federali li faccio aspettare al massimo cinque minuti.")
+  ok - m8_diner/m8.a.diner.feedback.accompagno: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(sorride) Alle 7:10, agente. Io i federali li faccio aspettare al massimo cinque minuti.")
+  ok - m8_diner/choice:promise_autonomia: nessun "BOB" nel testo player-facing ("«Missoula ti aspetta. Vai.»")
+  ok - m8_diner/choice:promise_autonomia: nessuna igiene della falsa colpa violata ("«Missoula ti aspetta. Vai.»")
+  ok - m8_diner/choice:promise_autonomia: nessun id di design nel testo player-facing ("«Missoula ti aspetta. Vai.»")
+  ok - m8_diner/choice:promise_autonomia: nessun conteggio di lettere fuori dal ramo respinto diary_b ("«Missoula ti aspetta. Vai.»")
+  ok - m8_diner/m8.a.diner.feedback.autonomia: nessun "BOB" nel testo player-facing ("(annuisce, piano) È la prima persona in questa città che me lo dice senza un \"ma\".")
+  ok - m8_diner/m8.a.diner.feedback.autonomia: nessuna igiene della falsa colpa violata ("(annuisce, piano) È la prima persona in questa città che me lo dice senza un \"ma\".")
+  ok - m8_diner/m8.a.diner.feedback.autonomia: nessun id di design nel testo player-facing ("(annuisce, piano) È la prima persona in questa città che me lo dice senza un \"ma\".")
+  ok - m8_diner/m8.a.diner.feedback.autonomia: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(annuisce, piano) È la prima persona in questa città che me lo dice senza un \"ma\".")
+  ok - m8_diner/choice:promise_prudenza: nessun "BOB" nel testo player-facing ("«Chiama quando arrivi. Sempre.»")
+  ok - m8_diner/choice:promise_prudenza: nessuna igiene della falsa colpa violata ("«Chiama quando arrivi. Sempre.»")
+  ok - m8_diner/choice:promise_prudenza: nessun id di design nel testo player-facing ("«Chiama quando arrivi. Sempre.»")
+  ok - m8_diner/choice:promise_prudenza: nessun conteggio di lettere fuori dal ramo respinto diary_b ("«Chiama quando arrivi. Sempre.»")
+  ok - m8_diner/m8.a.diner.feedback.prudenza: nessun "BOB" nel testo player-facing ("(ride) Lei parla come il mio centralino. Va bene: chiamerò. Sempre.")
+  ok - m8_diner/m8.a.diner.feedback.prudenza: nessuna igiene della falsa colpa violata ("(ride) Lei parla come il mio centralino. Va bene: chiamerò. Sempre.")
+  ok - m8_diner/m8.a.diner.feedback.prudenza: nessun id di design nel testo player-facing ("(ride) Lei parla come il mio centralino. Va bene: chiamerò. Sempre.")
+  ok - m8_diner/m8.a.diner.feedback.prudenza: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(ride) Lei parla come il mio centralino. Va bene: chiamerò. Sempre.")
+  ok - m8_leland_waiting/m8.a.leland_waiting.p01: nessun "BOB" nel testo player-facing ("(Leland al bancone, accanto a Maddy. Il conto è già sotto la sua mano; aspetta che lei finisca.)")
+  ok - m8_leland_waiting/m8.a.leland_waiting.p01: nessuna igiene della falsa colpa violata ("(Leland al bancone, accanto a Maddy. Il conto è già sotto la sua mano; aspetta che lei finisca.)")
+  ok - m8_leland_waiting/m8.a.leland_waiting.p01: nessun id di design nel testo player-facing ("(Leland al bancone, accanto a Maddy. Il conto è già sotto la sua mano; aspetta che lei finisca.)")
+  ok - m8_leland_waiting/m8.a.leland_waiting.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Leland al bancone, accanto a Maddy. Il conto è già sotto la sua mano; aspetta che lei finisca.)")
+  ok - m8_leland_waiting/m8.a.leland_waiting.p02: nessun "BOB" nel testo player-facing ("Aspetto che lei finisca.")
+  ok - m8_leland_waiting/m8.a.leland_waiting.p02: nessuna igiene della falsa colpa violata ("Aspetto che lei finisca.")
+  ok - m8_leland_waiting/m8.a.leland_waiting.p02: nessun id di design nel testo player-facing ("Aspetto che lei finisca.")
+  ok - m8_leland_waiting/m8.a.leland_waiting.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Aspetto che lei finisca.")
+  ok - m8_leland_waiting/m8.repeat.leland_waiting: nessun "BOB" nel testo player-facing ("Il conto è già sotto la sua mano. Aspetto che lei finisca.")
+  ok - m8_leland_waiting/m8.repeat.leland_waiting: nessuna igiene della falsa colpa violata ("Il conto è già sotto la sua mano. Aspetto che lei finisca.")
+  ok - m8_leland_waiting/m8.repeat.leland_waiting: nessun id di design nel testo player-facing ("Il conto è già sotto la sua mano. Aspetto che lei finisca.")
+  ok - m8_leland_waiting/m8.repeat.leland_waiting: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Il conto è già sotto la sua mano. Aspetto che lei finisca.")
+  ok - m8_roadhouse_truman/m8.b.truman.p01: nessun "BOB" nel testo player-facing ("(La banda suona. Il paese c'è tutto: birre, risate basse, il microfono che fischia una volta.)")
+  ok - m8_roadhouse_truman/m8.b.truman.p01: nessuna igiene della falsa colpa violata ("(La banda suona. Il paese c'è tutto: birre, risate basse, il microfono che fischia una volta.)")
+  ok - m8_roadhouse_truman/m8.b.truman.p01: nessun id di design nel testo player-facing ("(La banda suona. Il paese c'è tutto: birre, risate basse, il microfono che fischia una volta.)")
+  ok - m8_roadhouse_truman/m8.b.truman.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(La banda suona. Il paese c'è tutto: birre, risate basse, il microfono che fischia una volta.)")
+  ok - m8_roadhouse_truman/m8.b.truman.p02: nessun "BOB" nel testo player-facing ("Se i tuoi enigmi avevano un seguito, questo è il posto che mi hai chiesto di aspettare.")
+  ok - m8_roadhouse_truman/m8.b.truman.p02: nessuna igiene della falsa colpa violata ("Se i tuoi enigmi avevano un seguito, questo è il posto che mi hai chiesto di aspettare.")
+  ok - m8_roadhouse_truman/m8.b.truman.p02: nessun id di design nel testo player-facing ("Se i tuoi enigmi avevano un seguito, questo è il posto che mi hai chiesto di aspettare.")
+  ok - m8_roadhouse_truman/m8.b.truman.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Se i tuoi enigmi avevano un seguito, questo è il posto che mi hai chiesto di aspettare.")
+  ok - m8_roadhouse_truman/m8.b.truman.p03: nessun "BOB" nel testo player-facing ("(La musica non si ferma. Ma per Cooper la sala rallenta — solo per lui.)")
+  ok - m8_roadhouse_truman/m8.b.truman.p03: nessuna igiene della falsa colpa violata ("(La musica non si ferma. Ma per Cooper la sala rallenta — solo per lui.)")
+  ok - m8_roadhouse_truman/m8.b.truman.p03: nessun id di design nel testo player-facing ("(La musica non si ferma. Ma per Cooper la sala rallenta — solo per lui.)")
+  ok - m8_roadhouse_truman/m8.b.truman.p03: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(La musica non si ferma. Ma per Cooper la sala rallenta — solo per lui.)")
+  ok - m8_roadhouse_truman/m8.b.truman.p04: nessun "BOB" nel testo player-facing ("Sta accadendo di nuovo.")
+  ok - m8_roadhouse_truman/m8.b.truman.p04: nessuna igiene della falsa colpa violata ("Sta accadendo di nuovo.")
+  ok - m8_roadhouse_truman/m8.b.truman.p04: nessun id di design nel testo player-facing ("Sta accadendo di nuovo.")
+  ok - m8_roadhouse_truman/m8.b.truman.p04: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Sta accadendo di nuovo.")
+  ok - m8_roadhouse_truman/m8.b.truman.p05: nessun "BOB" nel testo player-facing ("(La sala riprende il suo tempo. Nessuno ha visto niente.)")
+  ok - m8_roadhouse_truman/m8.b.truman.p05: nessuna igiene della falsa colpa violata ("(La sala riprende il suo tempo. Nessuno ha visto niente.)")
+  ok - m8_roadhouse_truman/m8.b.truman.p05: nessun id di design nel testo player-facing ("(La sala riprende il suo tempo. Nessuno ha visto niente.)")
+  ok - m8_roadhouse_truman/m8.b.truman.p05: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(La sala riprende il suo tempo. Nessuno ha visto niente.)")
+  ok - m8_giant_stage/m8.b.giant.p01: nessun "BOB" nel testo player-facing ("(Sul palco, dietro la banda, un uomo alto. Nessuno lo guarda. Non indica niente.)")
+  ok - m8_giant_stage/m8.b.giant.p01: nessuna igiene della falsa colpa violata ("(Sul palco, dietro la banda, un uomo alto. Nessuno lo guarda. Non indica niente.)")
+  ok - m8_giant_stage/m8.b.giant.p01: nessun id di design nel testo player-facing ("(Sul palco, dietro la banda, un uomo alto. Nessuno lo guarda. Non indica niente.)")
+  ok - m8_giant_stage/m8.b.giant.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Sul palco, dietro la banda, un uomo alto. Nessuno lo guarda. Non indica niente.)")
+  ok - m8_giant_stage/m8.b.giant.repeat: nessun "BOB" nel testo player-facing ("(Sul palco, dietro la banda, un uomo alto. Nessuno lo guarda. Non indica niente.)")
+  ok - m8_giant_stage/m8.b.giant.repeat: nessuna igiene della falsa colpa violata ("(Sul palco, dietro la banda, un uomo alto. Nessuno lo guarda. Non indica niente.)")
+  ok - m8_giant_stage/m8.b.giant.repeat: nessun id di design nel testo player-facing ("(Sul palco, dietro la banda, un uomo alto. Nessuno lo guarda. Non indica niente.)")
+  ok - m8_giant_stage/m8.b.giant.repeat: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Sul palco, dietro la banda, un uomo alto. Nessuno lo guarda. Non indica niente.)")
+  ok - m8_roadhouse_phone/m8.b.phone.p01: nessun "BOB" nel testo player-facing ("Il telefono del Roadhouse.")
+  ok - m8_roadhouse_phone/m8.b.phone.p01: nessuna igiene della falsa colpa violata ("Il telefono del Roadhouse.")
+  ok - m8_roadhouse_phone/m8.b.phone.p01: nessun id di design nel testo player-facing ("Il telefono del Roadhouse.")
+  ok - m8_roadhouse_phone/m8.b.phone.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Il telefono del Roadhouse.")
+  ok - m8_roadhouse_phone/m8.b.phone.p02: nessun "BOB" nel testo player-facing ("Harry, non so ancora cosa si ripeta. La linea è libera; quello che dico adesso farà muovere qualcuno.")
+  ok - m8_roadhouse_phone/m8.b.phone.p02: nessuna igiene della falsa colpa violata ("Harry, non so ancora cosa si ripeta. La linea è libera; quello che dico adesso farà muovere qualcuno.")
+  ok - m8_roadhouse_phone/m8.b.phone.p02: nessun id di design nel testo player-facing ("Harry, non so ancora cosa si ripeta. La linea è libera; quello che dico adesso farà muovere qualcuno.")
+  ok - m8_roadhouse_phone/m8.b.phone.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Harry, non so ancora cosa si ripeta. La linea è libera; quello che dico adesso farà muovere qualcuno.")
+  ok - m8_roadhouse_phone/choice:warning_palmer: nessun "BOB" nel testo player-facing ("Avverti casa Palmer.")
+  ok - m8_roadhouse_phone/choice:warning_palmer: nessuna igiene della falsa colpa violata ("Avverti casa Palmer.")
+  ok - m8_roadhouse_phone/choice:warning_palmer: nessun id di design nel testo player-facing ("Avverti casa Palmer.")
+  ok - m8_roadhouse_phone/choice:warning_palmer: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Avverti casa Palmer.")
+  ok - m8_roadhouse_phone/m8.b.roadhouse.feedback.palmer.p01: nessun "BOB" nel testo player-facing ("Maddy. Sono Cooper. Svegli Sarah — restate insieme e non aprite a nessuno. Mando qualcuno.")
+  ok - m8_roadhouse_phone/m8.b.roadhouse.feedback.palmer.p01: nessuna igiene della falsa colpa violata ("Maddy. Sono Cooper. Svegli Sarah — restate insieme e non aprite a nessuno. Mando qualcuno.")
+  ok - m8_roadhouse_phone/m8.b.roadhouse.feedback.palmer.p01: nessun id di design nel testo player-facing ("Maddy. Sono Cooper. Svegli Sarah — restate insieme e non aprite a nessuno. Mando qualcuno.")
+  ok - m8_roadhouse_phone/m8.b.roadhouse.feedback.palmer.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Maddy. Sono Cooper. Svegli Sarah — restate insieme e non aprite a nessuno. Mando qualcuno.")
+  ok - m8_roadhouse_phone/m8.b.roadhouse.feedback.palmer.p02: nessun "BOB" nel testo player-facing ("Le porte sono già chiuse, agente. Resto con lei. La valigia la porto nell'ingresso, così domattina non la sveglio.")
+  ok - m8_roadhouse_phone/m8.b.roadhouse.feedback.palmer.p02: nessuna igiene della falsa colpa violata ("Le porte sono già chiuse, agente. Resto con lei. La valigia la porto nell'ingresso, così domattina non la sveglio.")
+  ok - m8_roadhouse_phone/m8.b.roadhouse.feedback.palmer.p02: nessun id di design nel testo player-facing ("Le porte sono già chiuse, agente. Resto con lei. La valigia la porto nell'ingresso, così domattina non la sveglio.")
+  ok - m8_roadhouse_phone/m8.b.roadhouse.feedback.palmer.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Le porte sono già chiuse, agente. Resto con lei. La valigia la porto nell'ingresso, così domattina non la sveglio.")
+  ok - m8_roadhouse_phone/choice:warning_centrale: nessun "BOB" nel testo player-facing ("Chiedi alla centrale di mandare un vice.")
+  ok - m8_roadhouse_phone/choice:warning_centrale: nessuna igiene della falsa colpa violata ("Chiedi alla centrale di mandare un vice.")
+  ok - m8_roadhouse_phone/choice:warning_centrale: nessun id di design nel testo player-facing ("Chiedi alla centrale di mandare un vice.")
+  ok - m8_roadhouse_phone/choice:warning_centrale: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Chiedi alla centrale di mandare un vice.")
+  ok - m8_roadhouse_phone/m8.b.roadhouse.feedback.centrale: nessun "BOB" nel testo player-facing ("Glielo passo— no, è di pattuglia. Mando Andy a casa Palmer, agente. Ci mette dieci minuti.")
+  ok - m8_roadhouse_phone/m8.b.roadhouse.feedback.centrale: nessuna igiene della falsa colpa violata ("Glielo passo— no, è di pattuglia. Mando Andy a casa Palmer, agente. Ci mette dieci minuti.")
+  ok - m8_roadhouse_phone/m8.b.roadhouse.feedback.centrale: nessun id di design nel testo player-facing ("Glielo passo— no, è di pattuglia. Mando Andy a casa Palmer, agente. Ci mette dieci minuti.")
+  ok - m8_roadhouse_phone/m8.b.roadhouse.feedback.centrale: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Glielo passo— no, è di pattuglia. Mando Andy a casa Palmer, agente. Ci mette dieci minuti.")
+  ok - m8_roadhouse_phone/choice:warning_nessuno: nessun "BOB" nel testo player-facing ("Non perdere altro tempo: esci.")
+  ok - m8_roadhouse_phone/choice:warning_nessuno: nessuna igiene della falsa colpa violata ("Non perdere altro tempo: esci.")
+  ok - m8_roadhouse_phone/choice:warning_nessuno: nessun id di design nel testo player-facing ("Non perdere altro tempo: esci.")
+  ok - m8_roadhouse_phone/choice:warning_nessuno: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Non perdere altro tempo: esci.")
+  ok - m8_roadhouse_phone/m8.b.roadhouse.feedback.nessuno: nessun "BOB" nel testo player-facing ("(Il telefono resta sulla forcella. La porta del Roadhouse è già alle spalle.)")
+  ok - m8_roadhouse_phone/m8.b.roadhouse.feedback.nessuno: nessuna igiene della falsa colpa violata ("(Il telefono resta sulla forcella. La porta del Roadhouse è già alle spalle.)")
+  ok - m8_roadhouse_phone/m8.b.roadhouse.feedback.nessuno: nessun id di design nel testo player-facing ("(Il telefono resta sulla forcella. La porta del Roadhouse è già alle spalle.)")
+  ok - m8_roadhouse_phone/m8.b.roadhouse.feedback.nessuno: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Il telefono resta sulla forcella. La porta del Roadhouse è già alle spalle.)")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.p00: nessun "BOB" nel testo player-facing ("(Maddy saluta ed esce. Leland posa il conto sul bancone.)")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.p00: nessuna igiene della falsa colpa violata ("(Maddy saluta ed esce. Leland posa il conto sul bancone.)")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.p00: nessun id di design nel testo player-facing ("(Maddy saluta ed esce. Leland posa il conto sul bancone.)")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.p00: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Maddy saluta ed esce. Leland posa il conto sul bancone.)")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.p01: nessun "BOB" nel testo player-facing ("Maddy prende la prima corriera domattina. Ho chiamato la Twin Peaks Taxi: passa da casa alle sette.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.p01: nessuna igiene della falsa colpa violata ("Maddy prende la prima corriera domattina. Ho chiamato la Twin Peaks Taxi: passa da casa alle sette.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.p01: nessun id di design nel testo player-facing ("Maddy prende la prima corriera domattina. Ho chiamato la Twin Peaks Taxi: passa da casa alle sette.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Maddy prende la prima corriera domattina. Ho chiamato la Twin Peaks Taxi: passa da casa alle sette.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.accompagno.p01: nessun "BOB" nel testo player-facing ("Con Maddy ci siamo accordati: la accompagno alle sette e dieci. Il taxi aspetterà?")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.accompagno.p01: nessuna igiene della falsa colpa violata ("Con Maddy ci siamo accordati: la accompagno alle sette e dieci. Il taxi aspetterà?")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.accompagno.p01: nessun id di design nel testo player-facing ("Con Maddy ci siamo accordati: la accompagno alle sette e dieci. Il taxi aspetterà?")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.accompagno.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Con Maddy ci siamo accordati: la accompagno alle sette e dieci. Il taxi aspetterà?")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.autonomia.p01: nessun "BOB" nel testo player-facing ("Maddy ha scelto Missoula. Non aggiungo un «ma»: verifico gli orari e le lascio la partenza.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.autonomia.p01: nessuna igiene della falsa colpa violata ("Maddy ha scelto Missoula. Non aggiungo un «ma»: verifico gli orari e le lascio la partenza.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.autonomia.p01: nessun id di design nel testo player-facing ("Maddy ha scelto Missoula. Non aggiungo un «ma»: verifico gli orari e le lascio la partenza.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.autonomia.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Maddy ha scelto Missoula. Non aggiungo un «ma»: verifico gli orari e le lascio la partenza.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.prudenza.p01: nessun "BOB" nel testo player-facing ("Ho chiesto a Maddy una telefonata. Il taxi delle sette aggiunge un orario, non una garanzia.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.prudenza.p01: nessuna igiene della falsa colpa violata ("Ho chiesto a Maddy una telefonata. Il taxi delle sette aggiunge un orario, non una garanzia.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.prudenza.p01: nessun id di design nel testo player-facing ("Ho chiesto a Maddy una telefonata. Il taxi delle sette aggiunge un orario, non una garanzia.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.prudenza.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Ho chiesto a Maddy una telefonata. Il taxi delle sette aggiunge un orario, non una garanzia.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.accompagno.p02: nessun "BOB" nel testo player-facing ("Sarah si tranquillizza se c'è un'auto davanti. Aspetterà fino alle sette e dieci. Il suo accompagnamento resta, agente.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.accompagno.p02: nessuna igiene della falsa colpa violata ("Sarah si tranquillizza se c'è un'auto davanti. Aspetterà fino alle sette e dieci. Il suo accompagnamento resta, agente.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.accompagno.p02: nessun id di design nel testo player-facing ("Sarah si tranquillizza se c'è un'auto davanti. Aspetterà fino alle sette e dieci. Il suo accompagnamento resta, agente.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.accompagno.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Sarah si tranquillizza se c'è un'auto davanti. Aspetterà fino alle sette e dieci. Il suo accompagnamento resta, agente.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.chiusura.p01: nessun "BOB" nel testo player-facing ("(Norma gira il cartello sulla porta e spegne l'insegna. Sedie sui tavoli, cappotti dagli attaccapanni: il Double R chiude alle sei, stasera si va al Roadhouse.)")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.chiusura.p01: nessuna igiene della falsa colpa violata ("(Norma gira il cartello sulla porta e spegne l'insegna. Sedie sui tavoli, cappotti dagli attaccapanni: il Double R chiude alle sei, stasera si va al Roadhouse.)")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.chiusura.p01: nessun id di design nel testo player-facing ("(Norma gira il cartello sulla porta e spegne l'insegna. Sedie sui tavoli, cappotti dagli attaccapanni: il Double R chiude alle sei, stasera si va al Roadhouse.)")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.chiusura.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Norma gira il cartello sulla porta e spegne l'insegna. Sedie sui tavoli, cappotti dagli attaccapanni: il Double R chiude alle sei, stasera si va al Roadhouse.)")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.p02: nessun "BOB" nel testo player-facing ("Prima del Roadhouse, al diner: Leland dice di aver prenotato il taxi di Maddy.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.p02: nessuna igiene della falsa colpa violata ("Prima del Roadhouse, al diner: Leland dice di aver prenotato il taxi di Maddy.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.p02: nessun id di design nel testo player-facing ("Prima del Roadhouse, al diner: Leland dice di aver prenotato il taxi di Maddy.")
+  ok - m8_leland_taxi/m8.b0.leland_taxi.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Prima del Roadhouse, al diner: Leland dice di aver prenotato il taxi di Maddy.")
+  ok - m8_leland_taxi/m8.repeat.leland_taxi: nessun "BOB" nel testo player-facing ("Taxi alle sette, corriera alle 7:40. Ripeto gli orari finché non compare una prenotazione.")
+  ok - m8_leland_taxi/m8.repeat.leland_taxi: nessuna igiene della falsa colpa violata ("Taxi alle sette, corriera alle 7:40. Ripeto gli orari finché non compare una prenotazione.")
+  ok - m8_leland_taxi/m8.repeat.leland_taxi: nessun id di design nel testo player-facing ("Taxi alle sette, corriera alle 7:40. Ripeto gli orari finché non compare una prenotazione.")
+  ok - m8_leland_taxi/m8.repeat.leland_taxi: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Taxi alle sette, corriera alle 7:40. Ripeto gli orari finché non compare una prenotazione.")
+  ok - m8_lucy/m8.lucy.p01: nessun "BOB" nel testo player-facing ("Stasera il paese è tutto al Roadhouse, agente. Norma chiude alle sei per andarci. Lei ci va?")
+  ok - m8_lucy/m8.lucy.p01: nessuna igiene della falsa colpa violata ("Stasera il paese è tutto al Roadhouse, agente. Norma chiude alle sei per andarci. Lei ci va?")
+  ok - m8_lucy/m8.lucy.p01: nessun id di design nel testo player-facing ("Stasera il paese è tutto al Roadhouse, agente. Norma chiude alle sei per andarci. Lei ci va?")
+  ok - m8_lucy/m8.lucy.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Stasera il paese è tutto al Roadhouse, agente. Norma chiude alle sei per andarci. Lei ci va?")
+  ok - m8_lucy/m8.lucy.p02: nessun "BOB" nel testo player-facing ("Ci sarò, Lucy. Prima passo dal Double R.")
+  ok - m8_lucy/m8.lucy.p02: nessuna igiene della falsa colpa violata ("Ci sarò, Lucy. Prima passo dal Double R.")
+  ok - m8_lucy/m8.lucy.p02: nessun id di design nel testo player-facing ("Ci sarò, Lucy. Prima passo dal Double R.")
+  ok - m8_lucy/m8.lucy.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Ci sarò, Lucy. Prima passo dal Double R.")
+  ok - m8_lucy/m8.lucy.p03: nessun "BOB" nel testo player-facing ("Linea libera, agente. Hawk è di pattuglia, il resto del paese è al Roadhouse. Le serve qualcuno?")
+  ok - m8_lucy/m8.lucy.p03: nessuna igiene della falsa colpa violata ("Linea libera, agente. Hawk è di pattuglia, il resto del paese è al Roadhouse. Le serve qualcuno?")
+  ok - m8_lucy/m8.lucy.p03: nessun id di design nel testo player-facing ("Linea libera, agente. Hawk è di pattuglia, il resto del paese è al Roadhouse. Le serve qualcuno?")
+  ok - m8_lucy/m8.lucy.p03: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Linea libera, agente. Hawk è di pattuglia, il resto del paese è al Roadhouse. Le serve qualcuno?")
+  ok - m8_lucy/m8.lucy.p03b: nessun "BOB" nel testo player-facing ("Non ancora. Se squilla, segnati l'ora.")
+  ok - m8_lucy/m8.lucy.p03b: nessuna igiene della falsa colpa violata ("Non ancora. Se squilla, segnati l'ora.")
+  ok - m8_lucy/m8.lucy.p03b: nessun id di design nel testo player-facing ("Non ancora. Se squilla, segnati l'ora.")
+  ok - m8_lucy/m8.lucy.p03b: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Non ancora. Se squilla, segnati l'ora.")
+  ok - m8_lucy/m8.lucy.p04: nessun "BOB" nel testo player-facing ("(Lucy al centralino. Nessuna luce accesa sul quadro: a quest'ora non chiama nessuno.)")
+  ok - m8_lucy/m8.lucy.p04: nessuna igiene della falsa colpa violata ("(Lucy al centralino. Nessuna luce accesa sul quadro: a quest'ora non chiama nessuno.)")
+  ok - m8_lucy/m8.lucy.p04: nessun id di design nel testo player-facing ("(Lucy al centralino. Nessuna luce accesa sul quadro: a quest'ora non chiama nessuno.)")
+  ok - m8_lucy/m8.lucy.p04: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Lucy al centralino. Nessuna luce accesa sul quadro: a quest'ora non chiama nessuno.)")
+  ok - m8_lucy/m8.lucy.p04b: nessun "BOB" nel testo player-facing ("Niente da passare. Segna l'ora comunque.")
+  ok - m8_lucy/m8.lucy.p04b: nessuna igiene della falsa colpa violata ("Niente da passare. Segna l'ora comunque.")
+  ok - m8_lucy/m8.lucy.p04b: nessun id di design nel testo player-facing ("Niente da passare. Segna l'ora comunque.")
+  ok - m8_lucy/m8.lucy.p04b: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Niente da passare. Segna l'ora comunque.")
+  ok - m8_lucy/m8.lucy.repeat: nessun "BOB" nel testo player-facing ("Il quadro è tuo, Lucy. Il taccuino è mio.")
+  ok - m8_lucy/m8.lucy.repeat: nessuna igiene della falsa colpa violata ("Il quadro è tuo, Lucy. Il taccuino è mio.")
+  ok - m8_lucy/m8.lucy.repeat: nessun id di design nel testo player-facing ("Il quadro è tuo, Lucy. Il taccuino è mio.")
+  ok - m8_lucy/m8.lucy.repeat: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Il quadro è tuo, Lucy. Il taccuino è mio.")
+  ok - m8_focus_choice/m8.c.focus.p01: nessun "BOB" nel testo player-facing ("(Lo stesso paese di ogni giorno. Stanotte le strade sono solo distanza.)")
+  ok - m8_focus_choice/m8.c.focus.p01: nessuna igiene della falsa colpa violata ("(Lo stesso paese di ogni giorno. Stanotte le strade sono solo distanza.)")
+  ok - m8_focus_choice/m8.c.focus.p01: nessun id di design nel testo player-facing ("(Lo stesso paese di ogni giorno. Stanotte le strade sono solo distanza.)")
+  ok - m8_focus_choice/m8.c.focus.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Lo stesso paese di ogni giorno. Stanotte le strade sono solo distanza.)")
+  ok - m8_focus_choice/m8.c.focus.p02: nessun "BOB" nel testo player-facing ("Sul taccuino, tre luoghi restano senza segni di priorità.")
+  ok - m8_focus_choice/m8.c.focus.p02: nessuna igiene della falsa colpa violata ("Sul taccuino, tre luoghi restano senza segni di priorità.")
+  ok - m8_focus_choice/m8.c.focus.p02: nessun id di design nel testo player-facing ("Sul taccuino, tre luoghi restano senza segni di priorità.")
+  ok - m8_focus_choice/m8.c.focus.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Sul taccuino, tre luoghi restano senza segni di priorità.")
+  ok - m8_focus_choice/m8.c.focus.p03: nessun "BOB" nel testo player-facing ("Nessun fatto ne preferisce uno. Il primo costo è la distanza.")
+  ok - m8_focus_choice/m8.c.focus.p03: nessuna igiene della falsa colpa violata ("Nessun fatto ne preferisce uno. Il primo costo è la distanza.")
+  ok - m8_focus_choice/m8.c.focus.p03: nessun id di design nel testo player-facing ("Nessun fatto ne preferisce uno. Il primo costo è la distanza.")
+  ok - m8_focus_choice/m8.c.focus.p03: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Nessun fatto ne preferisce uno. Il primo costo è la distanza.")
+  ok - m8_focus_choice/choice:focus_palmer: nessun "BOB" nel testo player-facing ("casa Palmer — la casa continua a tornare (a nord, lontana)")
+  ok - m8_focus_choice/choice:focus_palmer: nessuna igiene della falsa colpa violata ("casa Palmer — la casa continua a tornare (a nord, lontana)")
+  ok - m8_focus_choice/choice:focus_palmer: nessun id di design nel testo player-facing ("casa Palmer — la casa continua a tornare (a nord, lontana)")
+  ok - m8_focus_choice/choice:focus_palmer: nessun conteggio di lettere fuori dal ramo respinto diary_b ("casa Palmer — la casa continua a tornare (a nord, lontana)")
+  ok - m8_focus_choice/choice:focus_lago: nessun "BOB" nel testo player-facing ("la fermata del lago — la corriera di Maddy (a ovest, lontana)")
+  ok - m8_focus_choice/choice:focus_lago: nessuna igiene della falsa colpa violata ("la fermata del lago — la corriera di Maddy (a ovest, lontana)")
+  ok - m8_focus_choice/choice:focus_lago: nessun id di design nel testo player-facing ("la fermata del lago — la corriera di Maddy (a ovest, lontana)")
+  ok - m8_focus_choice/choice:focus_lago: nessun conteggio di lettere fuori dal ramo respinto diary_b ("la fermata del lago — la corriera di Maddy (a ovest, lontana)")
+  ok - m8_focus_choice/choice:focus_diner: nessun "BOB" nel testo player-facing ("il Double R — Norma sa se è partita (vicino)")
+  ok - m8_focus_choice/choice:focus_diner: nessuna igiene della falsa colpa violata ("il Double R — Norma sa se è partita (vicino)")
+  ok - m8_focus_choice/choice:focus_diner: nessun id di design nel testo player-facing ("il Double R — Norma sa se è partita (vicino)")
+  ok - m8_focus_choice/choice:focus_diner: nessun conteggio di lettere fuori dal ramo respinto diary_b ("il Double R — Norma sa se è partita (vicino)")
+  ok - m8_focus_choice/m8.c.focus.repeat: nessun "BOB" nel testo player-facing ("Il Roadhouse ha chiuso. Da qui, le strade sono solo distanza.")
+  ok - m8_focus_choice/m8.c.focus.repeat: nessuna igiene della falsa colpa violata ("Il Roadhouse ha chiuso. Da qui, le strade sono solo distanza.")
+  ok - m8_focus_choice/m8.c.focus.repeat: nessun id di design nel testo player-facing ("Il Roadhouse ha chiuso. Da qui, le strade sono solo distanza.")
+  ok - m8_focus_choice/m8.c.focus.repeat: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Il Roadhouse ha chiuso. Da qui, le strade sono solo distanza.")
+  ok - m8_route_palmer/m8.c.route_palmer.p01: nessun "BOB" nel testo player-facing ("(La casa: buio al piano di sopra.)")
+  ok - m8_route_palmer/m8.c.route_palmer.p01: nessuna igiene della falsa colpa violata ("(La casa: buio al piano di sopra.)")
+  ok - m8_route_palmer/m8.c.route_palmer.p01: nessun id di design nel testo player-facing ("(La casa: buio al piano di sopra.)")
+  ok - m8_route_palmer/m8.c.route_palmer.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(La casa: buio al piano di sopra.)")
+  ok - m8_route_palmer/m8.c.route_palmer.p02: nessun "BOB" nel testo player-facing ("(In ingresso, la valigia. Sotto la porta di Sarah, un biglietto: \"Torno lunedì. Non svegliarla.\" Di Maddy, nessuna traccia.)")
+  ok - m8_route_palmer/m8.c.route_palmer.p02: nessuna igiene della falsa colpa violata ("(In ingresso, la valigia. Sotto la porta di Sarah, un biglietto: \"Torno lunedì. Non svegliarla.\" Di Maddy, nessuna traccia.)")
+  ok - m8_route_palmer/m8.c.route_palmer.p02: nessun id di design nel testo player-facing ("(In ingresso, la valigia. Sotto la porta di Sarah, un biglietto: \"Torno lunedì. Non svegliarla.\" Di Maddy, nessuna traccia.)")
+  ok - m8_route_palmer/m8.c.route_palmer.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(In ingresso, la valigia. Sotto la porta di Sarah, un biglietto: \"Torno lunedì. Non svegliarla.\" Di Maddy, nessuna traccia.)")
+  ok - m8_route_palmer/m8.c.route_palmer.p03: nessun "BOB" nel testo player-facing ("(Il telefono squilla: è la centrale.)")
+  ok - m8_route_palmer/m8.c.route_palmer.p03: nessuna igiene della falsa colpa violata ("(Il telefono squilla: è la centrale.)")
+  ok - m8_route_palmer/m8.c.route_palmer.p03: nessun id di design nel testo player-facing ("(Il telefono squilla: è la centrale.)")
+  ok - m8_route_palmer/m8.c.route_palmer.p03: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Il telefono squilla: è la centrale.)")
+  ok - m8_route_palmer/m8.c.route_palmer.p04: nessun "BOB" nel testo player-facing ("Agente — una chiamata anonima, qualcosa sulla riva del lago. Hawk è già in strada.")
+  ok - m8_route_palmer/m8.c.route_palmer.p04: nessuna igiene della falsa colpa violata ("Agente — una chiamata anonima, qualcosa sulla riva del lago. Hawk è già in strada.")
+  ok - m8_route_palmer/m8.c.route_palmer.p04: nessun id di design nel testo player-facing ("Agente — una chiamata anonima, qualcosa sulla riva del lago. Hawk è già in strada.")
+  ok - m8_route_palmer/m8.c.route_palmer.p04: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Agente — una chiamata anonima, qualcosa sulla riva del lago. Hawk è già in strada.")
+  ok - m8_route_palmer/m8.c.route_palmer.p05: nessun "BOB" nel testo player-facing ("Lucy, ricevuto. Non tocco nulla qui; raggiungo Hawk al lago.")
+  ok - m8_route_palmer/m8.c.route_palmer.p05: nessuna igiene della falsa colpa violata ("Lucy, ricevuto. Non tocco nulla qui; raggiungo Hawk al lago.")
+  ok - m8_route_palmer/m8.c.route_palmer.p05: nessun id di design nel testo player-facing ("Lucy, ricevuto. Non tocco nulla qui; raggiungo Hawk al lago.")
+  ok - m8_route_palmer/m8.c.route_palmer.p05: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Lucy, ricevuto. Non tocco nulla qui; raggiungo Hawk al lago.")
+  ok - m8_route_lake/m8.c.route_lake.p01: nessun "BOB" nel testo player-facing ("(L'acqua è ferma. Sulla riva, una forma che l'acqua non reclama. Cooper arriva per primo.)")
+  ok - m8_route_lake/m8.c.route_lake.p01: nessuna igiene della falsa colpa violata ("(L'acqua è ferma. Sulla riva, una forma che l'acqua non reclama. Cooper arriva per primo.)")
+  ok - m8_route_lake/m8.c.route_lake.p01: nessun id di design nel testo player-facing ("(L'acqua è ferma. Sulla riva, una forma che l'acqua non reclama. Cooper arriva per primo.)")
+  ok - m8_route_lake/m8.c.route_lake.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(L'acqua è ferma. Sulla riva, una forma che l'acqua non reclama. Cooper arriva per primo.)")
+  ok - m8_route_lake/m8.c.route_lake.p02: nessun "BOB" nel testo player-facing ("Fermo al perimetro. Prima proteggo la scena; poi troverò le parole per Maddy.")
+  ok - m8_route_lake/m8.c.route_lake.p02: nessuna igiene della falsa colpa violata ("Fermo al perimetro. Prima proteggo la scena; poi troverò le parole per Maddy.")
+  ok - m8_route_lake/m8.c.route_lake.p02: nessun id di design nel testo player-facing ("Fermo al perimetro. Prima proteggo la scena; poi troverò le parole per Maddy.")
+  ok - m8_route_lake/m8.c.route_lake.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Fermo al perimetro. Prima proteggo la scena; poi troverò le parole per Maddy.")
+  ok - m8_route_diner/m8.c.route_diner.p01: nessun "BOB" nel testo player-facing ("Maddy? Ha chiesto della fermata del lago. Poi è tornata dai Palmer. Non era ancora partita.")
+  ok - m8_route_diner/m8.c.route_diner.p01: nessuna igiene della falsa colpa violata ("Maddy? Ha chiesto della fermata del lago. Poi è tornata dai Palmer. Non era ancora partita.")
+  ok - m8_route_diner/m8.c.route_diner.p01: nessun id di design nel testo player-facing ("Maddy? Ha chiesto della fermata del lago. Poi è tornata dai Palmer. Non era ancora partita.")
+  ok - m8_route_diner/m8.c.route_diner.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Maddy? Ha chiesto della fermata del lago. Poi è tornata dai Palmer. Non era ancora partita.")
+  ok - m8_route_diner/m8.c.route_diner.p02: nessun "BOB" nel testo player-facing ("(Il tempo di uscire: la radio di Hawk gracchia il nome del lago — una chiamata anonima ha segnalato qualcosa sulla riva.)")
+  ok - m8_route_diner/m8.c.route_diner.p02: nessuna igiene della falsa colpa violata ("(Il tempo di uscire: la radio di Hawk gracchia il nome del lago — una chiamata anonima ha segnalato qualcosa sulla riva.)")
+  ok - m8_route_diner/m8.c.route_diner.p02: nessun id di design nel testo player-facing ("(Il tempo di uscire: la radio di Hawk gracchia il nome del lago — una chiamata anonima ha segnalato qualcosa sulla riva.)")
+  ok - m8_route_diner/m8.c.route_diner.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Il tempo di uscire: la radio di Hawk gracchia il nome del lago — una chiamata anonima ha segnalato qualcosa sulla riva.)")
+  ok - m8_route_diner/m8.c.route_diner.p03: nessun "BOB" nel testo player-facing ("Hawk ha il lago. Norma conferma che Maddy è tornata dai Palmer; porto con me questo ordine.")
+  ok - m8_route_diner/m8.c.route_diner.p03: nessuna igiene della falsa colpa violata ("Hawk ha il lago. Norma conferma che Maddy è tornata dai Palmer; porto con me questo ordine.")
+  ok - m8_route_diner/m8.c.route_diner.p03: nessun id di design nel testo player-facing ("Hawk ha il lago. Norma conferma che Maddy è tornata dai Palmer; porto con me questo ordine.")
+  ok - m8_route_diner/m8.c.route_diner.p03: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Hawk ha il lago. Norma conferma che Maddy è tornata dai Palmer; porto con me questo ordine.")
+  ok - m8_discovery/m8.d.discovery.cooper.p01: nessun "BOB" nel testo player-facing ("(Sulla riva: Maddy. Cooper si ferma prima del perimetro.)")
+  ok - m8_discovery/m8.d.discovery.cooper.p01: nessuna igiene della falsa colpa violata ("(Sulla riva: Maddy. Cooper si ferma prima del perimetro.)")
+  ok - m8_discovery/m8.d.discovery.cooper.p01: nessun id di design nel testo player-facing ("(Sulla riva: Maddy. Cooper si ferma prima del perimetro.)")
+  ok - m8_discovery/m8.d.discovery.cooper.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Sulla riva: Maddy. Cooper si ferma prima del perimetro.)")
+  ok - m8_discovery/m8.d.discovery.cooper.p02: nessun "BOB" nel testo player-facing ("(fermo) Signorina Ferguson. Maddy. Con due D.")
+  ok - m8_discovery/m8.d.discovery.cooper.p02: nessuna igiene della falsa colpa violata ("(fermo) Signorina Ferguson. Maddy. Con due D.")
+  ok - m8_discovery/m8.d.discovery.cooper.p02: nessun id di design nel testo player-facing ("(fermo) Signorina Ferguson. Maddy. Con due D.")
+  ok - m8_discovery/m8.d.discovery.cooper.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(fermo) Signorina Ferguson. Maddy. Con due D.")
+  ok - m8_discovery/m8.d.discovery.cooper.p03: nessun "BOB" nel testo player-facing ("(Si china senza toccare. Sotto l'unghia dell'anulare: un segno.)")
+  ok - m8_discovery/m8.d.discovery.cooper.p03: nessuna igiene della falsa colpa violata ("(Si china senza toccare. Sotto l'unghia dell'anulare: un segno.)")
+  ok - m8_discovery/m8.d.discovery.cooper.p03: nessun id di design nel testo player-facing ("(Si china senza toccare. Sotto l'unghia dell'anulare: un segno.)")
+  ok - m8_discovery/m8.d.discovery.cooper.p03: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Si china senza toccare. Sotto l'unghia dell'anulare: un segno.)")
+  ok - m8_discovery/m8.d.discovery.cooper.p04: nessun "BOB" nel testo player-facing ("(Arrivano le torce di Hawk e del vice. Cooper non si è mosso di un passo.)")
+  ok - m8_discovery/m8.d.discovery.cooper.p04: nessuna igiene della falsa colpa violata ("(Arrivano le torce di Hawk e del vice. Cooper non si è mosso di un passo.)")
+  ok - m8_discovery/m8.d.discovery.cooper.p04: nessun id di design nel testo player-facing ("(Arrivano le torce di Hawk e del vice. Cooper non si è mosso di un passo.)")
+  ok - m8_discovery/m8.d.discovery.cooper.p04: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Arrivano le torce di Hawk e del vice. Cooper non si è mosso di un passo.)")
+  ok - m8_discovery/m8.d.discovery.hawk.p01: nessun "BOB" nel testo player-facing ("(Quando Cooper arriva, il perimetro è già segnato. Hawk gli va incontro, si toglie il cappello.)")
+  ok - m8_discovery/m8.d.discovery.hawk.p01: nessuna igiene della falsa colpa violata ("(Quando Cooper arriva, il perimetro è già segnato. Hawk gli va incontro, si toglie il cappello.)")
+  ok - m8_discovery/m8.d.discovery.hawk.p01: nessun id di design nel testo player-facing ("(Quando Cooper arriva, il perimetro è già segnato. Hawk gli va incontro, si toglie il cappello.)")
+  ok - m8_discovery/m8.d.discovery.hawk.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Quando Cooper arriva, il perimetro è già segnato. Hawk gli va incontro, si toglie il cappello.)")
+  ok - m8_discovery/m8.d.discovery.hawk.p02: nessun "BOB" nel testo player-facing ("L'ho trovata io. Non l'ho mossa. Non ho toccato le mani. Guarda l'anulare.")
+  ok - m8_discovery/m8.d.discovery.hawk.p02: nessuna igiene della falsa colpa violata ("L'ho trovata io. Non l'ho mossa. Non ho toccato le mani. Guarda l'anulare.")
+  ok - m8_discovery/m8.d.discovery.hawk.p02: nessun id di design nel testo player-facing ("L'ho trovata io. Non l'ho mossa. Non ho toccato le mani. Guarda l'anulare.")
+  ok - m8_discovery/m8.d.discovery.hawk.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("L'ho trovata io. Non l'ho mossa. Non ho toccato le mani. Guarda l'anulare.")
+  ok - m8_discovery/m8.d.discovery.hawk.p03: nessun "BOB" nel testo player-facing ("Hawk, hai fatto bene. Osservo da dove ti sei fermato; una scena preservata ha due paia d'occhi.")
+  ok - m8_discovery/m8.d.discovery.hawk.p03: nessuna igiene della falsa colpa violata ("Hawk, hai fatto bene. Osservo da dove ti sei fermato; una scena preservata ha due paia d'occhi.")
+  ok - m8_discovery/m8.d.discovery.hawk.p03: nessun id di design nel testo player-facing ("Hawk, hai fatto bene. Osservo da dove ti sei fermato; una scena preservata ha due paia d'occhi.")
+  ok - m8_discovery/m8.d.discovery.hawk.p03: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Hawk, hai fatto bene. Osservo da dove ti sei fermato; una scena preservata ha due paia d'occhi.")
+  ok - m8_promise_echo/m8.d.echo.p01: nessun "BOB" nel testo player-facing ("(Cooper prende il registratore. Non lo accende.)")
+  ok - m8_promise_echo/m8.d.echo.p01: nessuna igiene della falsa colpa violata ("(Cooper prende il registratore. Non lo accende.)")
+  ok - m8_promise_echo/m8.d.echo.p01: nessun id di design nel testo player-facing ("(Cooper prende il registratore. Non lo accende.)")
+  ok - m8_promise_echo/m8.d.echo.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Cooper prende il registratore. Non lo accende.)")
+  ok - m8_promise_echo/m8.d.echo.p02: nessun "BOB" nel testo player-facing ("Sul tovagliolo aveva scritto tre partenze. Ne aveva scelta una.")
+  ok - m8_promise_echo/m8.d.echo.p02: nessuna igiene della falsa colpa violata ("Sul tovagliolo aveva scritto tre partenze. Ne aveva scelta una.")
+  ok - m8_promise_echo/m8.d.echo.p02: nessun id di design nel testo player-facing ("Sul tovagliolo aveva scritto tre partenze. Ne aveva scelta una.")
+  ok - m8_promise_echo/m8.d.echo.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Sul tovagliolo aveva scritto tre partenze. Ne aveva scelta una.")
+  ok - m8_promise_echo/m8.d.echo.p03: nessun "BOB" nel testo player-facing ("(Silenzio.)")
+  ok - m8_promise_echo/m8.d.echo.p03: nessuna igiene della falsa colpa violata ("(Silenzio.)")
+  ok - m8_promise_echo/m8.d.echo.p03: nessun id di design nel testo player-facing ("(Silenzio.)")
+  ok - m8_promise_echo/m8.d.echo.p03: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Silenzio.)")
+  ok - m8_promise_echo/m8.d.echo.accompagno: nessun "BOB" nel testo player-facing ("Diane. Aveva fissato le 7:10. Disse che un federale poteva aspettare cinque minuti.")
+  ok - m8_promise_echo/m8.d.echo.accompagno: nessuna igiene della falsa colpa violata ("Diane. Aveva fissato le 7:10. Disse che un federale poteva aspettare cinque minuti.")
+  ok - m8_promise_echo/m8.d.echo.accompagno: nessun id di design nel testo player-facing ("Diane. Aveva fissato le 7:10. Disse che un federale poteva aspettare cinque minuti.")
+  ok - m8_promise_echo/m8.d.echo.accompagno: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Diane. Aveva fissato le 7:10. Disse che un federale poteva aspettare cinque minuti.")
+  ok - m8_promise_echo/m8.d.echo.autonomia: nessun "BOB" nel testo player-facing ("Diane. Disse che Missoula l'aspettava senza un \"ma\".")
+  ok - m8_promise_echo/m8.d.echo.autonomia: nessuna igiene della falsa colpa violata ("Diane. Disse che Missoula l'aspettava senza un \"ma\".")
+  ok - m8_promise_echo/m8.d.echo.autonomia: nessun id di design nel testo player-facing ("Diane. Disse che Missoula l'aspettava senza un \"ma\".")
+  ok - m8_promise_echo/m8.d.echo.autonomia: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Diane. Disse che Missoula l'aspettava senza un \"ma\".")
+  ok - m8_promise_echo/m8.d.echo.prudenza: nessun "BOB" nel testo player-facing ("Diane. Rise della mia voce da centralino. Disse che avrebbe chiamato.")
+  ok - m8_promise_echo/m8.d.echo.prudenza: nessuna igiene della falsa colpa violata ("Diane. Rise della mia voce da centralino. Disse che avrebbe chiamato.")
+  ok - m8_promise_echo/m8.d.echo.prudenza: nessun id di design nel testo player-facing ("Diane. Rise della mia voce da centralino. Disse che avrebbe chiamato.")
+  ok - m8_promise_echo/m8.d.echo.prudenza: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Diane. Rise della mia voce da centralino. Disse che avrebbe chiamato.")
+  ok - m8_cmp_letters/m8.e.cmp_letters.p01: nessun "BOB" nel testo player-facing ("(Confronta: la O incisa sotto l'unghia ↔ la lettera R)")
+  ok - m8_cmp_letters/m8.e.cmp_letters.p01: nessuna igiene della falsa colpa violata ("(Confronta: la O incisa sotto l'unghia ↔ la lettera R)")
+  ok - m8_cmp_letters/m8.e.cmp_letters.p01: nessun id di design nel testo player-facing ("(Confronta: la O incisa sotto l'unghia ↔ la lettera R)")
+  ok - m8_cmp_letters/m8.e.cmp_letters.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Confronta: la O incisa sotto l'unghia ↔ la lettera R)")
+  ok - m8_cmp_diary/m8.e.cmp_diary.p01: nessun "BOB" nel testo player-facing ("(Confronta: le lettere ↔ il diario di Laura)")
+  ok - m8_cmp_diary/m8.e.cmp_diary.p01: nessuna igiene della falsa colpa violata ("(Confronta: le lettere ↔ il diario di Laura)")
+  ok - m8_cmp_diary/m8.e.cmp_diary.p01: nessun id di design nel testo player-facing ("(Confronta: le lettere ↔ il diario di Laura)")
+  ok - m8_cmp_diary/m8.e.cmp_diary.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(Confronta: le lettere ↔ il diario di Laura)")
+  ok - m8_cmp_diary/m8.e.cmp_diary.p02: nessun "BOB" nel testo player-facing ("«Ha un nome da persona perbene.»")
+  ok - m8_cmp_diary/m8.e.cmp_diary.p02: nessuna igiene della falsa colpa violata ("«Ha un nome da persona perbene.»")
+  ok - m8_cmp_diary/m8.e.cmp_diary.p02: nessun id di design nel testo player-facing ("«Ha un nome da persona perbene.»")
+  ok - m8_cmp_diary/m8.e.cmp_diary.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("«Ha un nome da persona perbene.»")
+  ok - m8_cmp_diary/m8.e.cmp_diary.p02b: nessun "BOB" nel testo player-facing ("«Dice che me lo darà un pezzo alla volta, come le cose che non si possono restituire.»")
+  ok - m8_cmp_diary/m8.e.cmp_diary.p02b: nessuna igiene della falsa colpa violata ("«Dice che me lo darà un pezzo alla volta, come le cose che non si possono restituire.»")
+  ok - m8_cmp_diary/m8.e.cmp_diary.p02b: nessun id di design nel testo player-facing ("«Dice che me lo darà un pezzo alla volta, come le cose che non si possono restituire.»")
+  ok - m8_cmp_diary/m8.e.cmp_diary.p02b: nessun conteggio di lettere fuori dal ramo respinto diary_b ("«Dice che me lo darà un pezzo alla volta, come le cose che non si possono restituire.»")
+  ok - m8_cmp_diary/m8.e.cmp_diary.p03: nessun "BOB" nel testo player-facing ("Cooper affianca la promessa del diario alla sequenza R–O.")
+  ok - m8_cmp_diary/m8.e.cmp_diary.p03: nessuna igiene della falsa colpa violata ("Cooper affianca la promessa del diario alla sequenza R–O.")
+  ok - m8_cmp_diary/m8.e.cmp_diary.p03: nessun id di design nel testo player-facing ("Cooper affianca la promessa del diario alla sequenza R–O.")
+  ok - m8_cmp_diary/m8.e.cmp_diary.p03: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Cooper affianca la promessa del diario alla sequenza R–O.")
+  ok - m8_cmp_diary/choice:diary_a: nessun "BOB" nel testo player-facing ("Le lettere seguono una firma progressiva che il diario aveva annunciato.")
+  ok - m8_cmp_diary/choice:diary_a: nessuna igiene della falsa colpa violata ("Le lettere seguono una firma progressiva che il diario aveva annunciato.")
+  ok - m8_cmp_diary/choice:diary_a: nessun id di design nel testo player-facing ("Le lettere seguono una firma progressiva che il diario aveva annunciato.")
+  ok - m8_cmp_diary/choice:diary_a: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Le lettere seguono una firma progressiva che il diario aveva annunciato.")
+  ok - m8_cmp_diary/m8.e.cmp_diary.feedback.a: nessun "BOB" nel testo player-facing ("Le lettere seguono una firma progressiva che il diario aveva annunciato. Resta ignoto se la firma sia dell'assassino, di \"lui\", o una messinscena.")
+  ok - m8_cmp_diary/m8.e.cmp_diary.feedback.a: nessuna igiene della falsa colpa violata ("Le lettere seguono una firma progressiva che il diario aveva annunciato. Resta ignoto se la firma sia dell'assassino, di \"lui\", o una messinscena.")
+  ok - m8_cmp_diary/m8.e.cmp_diary.feedback.a: nessun id di design nel testo player-facing ("Le lettere seguono una firma progressiva che il diario aveva annunciato. Resta ignoto se la firma sia dell'assassino, di \"lui\", o una messinscena.")
+  ok - m8_cmp_diary/m8.e.cmp_diary.feedback.a: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Le lettere seguono una firma progressiva che il diario aveva annunciato. Resta ignoto se la firma sia dell'assassino, di \"lui\", o una messinscena.")
+  ok - m8_cmp_diary/choice:diary_b: nessun "BOB" nel testo player-facing ("R+O compongono un nome.")
+  ok - m8_cmp_diary/choice:diary_b: nessuna igiene della falsa colpa violata ("R+O compongono un nome.")
+  ok - m8_cmp_diary/choice:diary_b: nessun id di design nel testo player-facing ("R+O compongono un nome.")
+  ok - m8_cmp_diary/m8.e.cmp_diary.feedback.b: nessun "BOB" nel testo player-facing ("Due lettere non compongono niente. Un ordine e una promessa, forse.")
+  ok - m8_cmp_diary/m8.e.cmp_diary.feedback.b: nessuna igiene della falsa colpa violata ("Due lettere non compongono niente. Un ordine e una promessa, forse.")
+  ok - m8_cmp_diary/m8.e.cmp_diary.feedback.b: nessun id di design nel testo player-facing ("Due lettere non compongono niente. Un ordine e una promessa, forse.")
+  ok - m8_cmp_diary/choice:diary_c: nessun "BOB" nel testo player-facing ("Il diario accusa qualcuno di casa.")
+  ok - m8_cmp_diary/choice:diary_c: nessuna igiene della falsa colpa violata ("Il diario accusa qualcuno di casa.")
+  ok - m8_cmp_diary/choice:diary_c: nessun id di design nel testo player-facing ("Il diario accusa qualcuno di casa.")
+  ok - m8_cmp_diary/choice:diary_c: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Il diario accusa qualcuno di casa.")
+  ok - m8_cmp_diary/m8.e.cmp_diary.feedback.c: nessun "BOB" nel testo player-facing ("Il diario nomina \"lui\". Non dice chi, né dove abita.")
+  ok - m8_cmp_diary/m8.e.cmp_diary.feedback.c: nessuna igiene della falsa colpa violata ("Il diario nomina \"lui\". Non dice chi, né dove abita.")
+  ok - m8_cmp_diary/m8.e.cmp_diary.feedback.c: nessun id di design nel testo player-facing ("Il diario nomina \"lui\". Non dice chi, né dove abita.")
+  ok - m8_cmp_diary/m8.e.cmp_diary.feedback.c: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Il diario nomina \"lui\". Non dice chi, né dove abita.")
+  ok - m8_station/m8.f.station.p01: nessun "BOB" nel testo player-facing ("(La centrale, prima dell'alba.)")
+  ok - m8_station/m8.f.station.p01: nessuna igiene della falsa colpa violata ("(La centrale, prima dell'alba.)")
+  ok - m8_station/m8.f.station.p01: nessun id di design nel testo player-facing ("(La centrale, prima dell'alba.)")
+  ok - m8_station/m8.f.station.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("(La centrale, prima dell'alba.)")
+  ok - m8_station/m8.f.station.p_lago: nessun "BOB" nel testo player-facing ("La chiamata sulla riva è arrivata qui mentre tu eri già al lago. Un civile, senza nome; Hawk è partito subito.")
+  ok - m8_station/m8.f.station.p_lago: nessuna igiene della falsa colpa violata ("La chiamata sulla riva è arrivata qui mentre tu eri già al lago. Un civile, senza nome; Hawk è partito subito.")
+  ok - m8_station/m8.f.station.p_lago: nessun id di design nel testo player-facing ("La chiamata sulla riva è arrivata qui mentre tu eri già al lago. Un civile, senza nome; Hawk è partito subito.")
+  ok - m8_station/m8.f.station.p_lago: nessun conteggio di lettere fuori dal ramo respinto diary_b ("La chiamata sulla riva è arrivata qui mentre tu eri già al lago. Un civile, senza nome; Hawk è partito subito.")
+  ok - m8_station/m8.f.station.p_valigia: nessun "BOB" nel testo player-facing ("In ingresso c'era la valigia pronta, e un biglietto per Sarah. Voleva partire domattina.")
+  ok - m8_station/m8.f.station.p_valigia: nessuna igiene della falsa colpa violata ("In ingresso c'era la valigia pronta, e un biglietto per Sarah. Voleva partire domattina.")
+  ok - m8_station/m8.f.station.p_valigia: nessun id di design nel testo player-facing ("In ingresso c'era la valigia pronta, e un biglietto per Sarah. Voleva partire domattina.")
+  ok - m8_station/m8.f.station.p_valigia: nessun conteggio di lettere fuori dal ramo respinto diary_b ("In ingresso c'era la valigia pronta, e un biglietto per Sarah. Voleva partire domattina.")
+  ok - m8_station/m8.f.station.p02: nessun "BOB" nel testo player-facing ("Dimmi che cosa abbiamo, oltre a quello che abbiamo perso.")
+  ok - m8_station/m8.f.station.p02: nessuna igiene della falsa colpa violata ("Dimmi che cosa abbiamo, oltre a quello che abbiamo perso.")
+  ok - m8_station/m8.f.station.p02: nessun id di design nel testo player-facing ("Dimmi che cosa abbiamo, oltre a quello che abbiamo perso.")
+  ok - m8_station/m8.f.station.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Dimmi che cosa abbiamo, oltre a quello che abbiamo perso.")
+  ok - m8_station/m8.f.station.p03: nessun "BOB" nel testo player-facing ("Una firma che procede, Harry. Il diario dice che qualcuno le prometteva il proprio nome a pezzi.")
+  ok - m8_station/m8.f.station.p03: nessuna igiene della falsa colpa violata ("Una firma che procede, Harry. Il diario dice che qualcuno le prometteva il proprio nome a pezzi.")
+  ok - m8_station/m8.f.station.p03: nessun id di design nel testo player-facing ("Una firma che procede, Harry. Il diario dice che qualcuno le prometteva il proprio nome a pezzi.")
+  ok - m8_station/m8.f.station.p03: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Una firma che procede, Harry. Il diario dice che qualcuno le prometteva il proprio nome a pezzi.")
+  ok - m8_station/m8.f.station.hook.p01: nessun "BOB" nel testo player-facing ("E un orario. Ieri al diner Leland ha detto di aver chiamato la Twin Peaks Taxi per le sette, da casa. L'ho scritto io, alla luce del giorno.")
+  ok - m8_station/m8.f.station.hook.p01: nessuna igiene della falsa colpa violata ("E un orario. Ieri al diner Leland ha detto di aver chiamato la Twin Peaks Taxi per le sette, da casa. L'ho scritto io, alla luce del giorno.")
+  ok - m8_station/m8.f.station.hook.p01: nessun id di design nel testo player-facing ("E un orario. Ieri al diner Leland ha detto di aver chiamato la Twin Peaks Taxi per le sette, da casa. L'ho scritto io, alla luce del giorno.")
+  ok - m8_station/m8.f.station.hook.p01: nessun conteggio di lettere fuori dal ramo respinto diary_b ("E un orario. Ieri al diner Leland ha detto di aver chiamato la Twin Peaks Taxi per le sette, da casa. L'ho scritto io, alla luce del giorno.")
+  ok - m8_station/m8.f.station.hook.p02: nessun "BOB" nel testo player-facing ("Allora abbiamo un'ora. Prima delle sette, Lucy chiama la compagnia: una corsa prenotata, o niente.")
+  ok - m8_station/m8.f.station.hook.p02: nessuna igiene della falsa colpa violata ("Allora abbiamo un'ora. Prima delle sette, Lucy chiama la compagnia: una corsa prenotata, o niente.")
+  ok - m8_station/m8.f.station.hook.p02: nessun id di design nel testo player-facing ("Allora abbiamo un'ora. Prima delle sette, Lucy chiama la compagnia: una corsa prenotata, o niente.")
+  ok - m8_station/m8.f.station.hook.p02: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Allora abbiamo un'ora. Prima delle sette, Lucy chiama la compagnia: una corsa prenotata, o niente.")
+  ok - m8_station/m8.f.station.sarah_vice: nessun "BOB" nel testo player-facing ("Andy era già con Sarah quando è arrivata la chiamata.")
+  ok - m8_station/m8.f.station.sarah_vice: nessuna igiene della falsa colpa violata ("Andy era già con Sarah quando è arrivata la chiamata.")
+  ok - m8_station/m8.f.station.sarah_vice: nessun id di design nel testo player-facing ("Andy era già con Sarah quando è arrivata la chiamata.")
+  ok - m8_station/m8.f.station.sarah_vice: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Andy era già con Sarah quando è arrivata la chiamata.")
+  ok - m8_station/m8.f.station.sarah_truman: nessun "BOB" nel testo player-facing ("Sono passato io da Sarah prima di tornare qui. Adesso Andy resta con lei.")
+  ok - m8_station/m8.f.station.sarah_truman: nessuna igiene della falsa colpa violata ("Sono passato io da Sarah prima di tornare qui. Adesso Andy resta con lei.")
+  ok - m8_station/m8.f.station.sarah_truman: nessun id di design nel testo player-facing ("Sono passato io da Sarah prima di tornare qui. Adesso Andy resta con lei.")
+  ok - m8_station/m8.f.station.sarah_truman: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Sono passato io da Sarah prima di tornare qui. Adesso Andy resta con lei.")
+  ok - m8_station/m8.repeat.station: nessun "BOB" nel testo player-facing ("Il lago è recintato. Nessuno usa più quel sentiero; la scena, almeno, può restare ferma.")
+  ok - m8_station/m8.repeat.station: nessuna igiene della falsa colpa violata ("Il lago è recintato. Nessuno usa più quel sentiero; la scena, almeno, può restare ferma.")
+  ok - m8_station/m8.repeat.station: nessun id di design nel testo player-facing ("Il lago è recintato. Nessuno usa più quel sentiero; la scena, almeno, può restare ferma.")
+  ok - m8_station/m8.repeat.station: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Il lago è recintato. Nessuno usa più quel sentiero; la scena, almeno, può restare ferma.")
+  ok - objectives/obj:obj_m8_4: nessun "BOB" nel testo player-facing ("Porta a Truman una contraddizione che regga.")
+  ok - objectives/obj:obj_m8_4: nessuna igiene della falsa colpa violata ("Porta a Truman una contraddizione che regga.")
+  ok - objectives/obj:obj_m8_4: nessun id di design nel testo player-facing ("Porta a Truman una contraddizione che regga.")
+  ok - objectives/obj:obj_m8_4: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Porta a Truman una contraddizione che regga.")
+  ok - objectives/obj:obj_m8_35: nessun "BOB" nel testo player-facing ("Porta il nesso a Truman, alla centrale.")
+  ok - objectives/obj:obj_m8_35: nessuna igiene della falsa colpa violata ("Porta il nesso a Truman, alla centrale.")
+  ok - objectives/obj:obj_m8_35: nessun id di design nel testo player-facing ("Porta il nesso a Truman, alla centrale.")
+  ok - objectives/obj:obj_m8_35: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Porta il nesso a Truman, alla centrale.")
+  ok - objectives/obj:obj_m8_3: nessun "BOB" nel testo player-facing ("Rileggi le lettere e il diario di Laura.")
+  ok - objectives/obj:obj_m8_3: nessuna igiene della falsa colpa violata ("Rileggi le lettere e il diario di Laura.")
+  ok - objectives/obj:obj_m8_3: nessun id di design nel testo player-facing ("Rileggi le lettere e il diario di Laura.")
+  ok - objectives/obj:obj_m8_3: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Rileggi le lettere e il diario di Laura.")
+  ok - objectives/obj:obj_m8_25: nessun "BOB" nel testo player-facing ("Prima di uscire dal diner, parla con Leland.")
+  ok - objectives/obj:obj_m8_25: nessuna igiene della falsa colpa violata ("Prima di uscire dal diner, parla con Leland.")
+  ok - objectives/obj:obj_m8_25: nessun id di design nel testo player-facing ("Prima di uscire dal diner, parla con Leland.")
+  ok - objectives/obj:obj_m8_25: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Prima di uscire dal diner, parla con Leland.")
+  ok - objectives/obj:obj_m8_2: nessun "BOB" nel testo player-facing ("Torna all’incrocio: casa Palmer, lago o diner.")
+  ok - objectives/obj:obj_m8_2: nessuna igiene della falsa colpa violata ("Torna all’incrocio: casa Palmer, lago o diner.")
+  ok - objectives/obj:obj_m8_2: nessun id di design nel testo player-facing ("Torna all’incrocio: casa Palmer, lago o diner.")
+  ok - objectives/obj:obj_m8_2: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Torna all’incrocio: casa Palmer, lago o diner.")
+  ok - objectives/obj:obj_m8_15: nessun "BOB" nel testo player-facing ("Il telefono del Roadhouse.")
+  ok - objectives/obj:obj_m8_15: nessuna igiene della falsa colpa violata ("Il telefono del Roadhouse.")
+  ok - objectives/obj:obj_m8_15: nessun id di design nel testo player-facing ("Il telefono del Roadhouse.")
+  ok - objectives/obj:obj_m8_15: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Il telefono del Roadhouse.")
+  ok - objectives/obj:obj_m8_1: nessun "BOB" nel testo player-facing ("Il paese si ritrova al Roadhouse, stasera.")
+  ok - objectives/obj:obj_m8_1: nessuna igiene della falsa colpa violata ("Il paese si ritrova al Roadhouse, stasera.")
+  ok - objectives/obj:obj_m8_1: nessun id di design nel testo player-facing ("Il paese si ritrova al Roadhouse, stasera.")
+  ok - objectives/obj:obj_m8_1: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Il paese si ritrova al Roadhouse, stasera.")
+  ok - objectives/obj:obj_m8_0: nessun "BOB" nel testo player-facing ("Passa dal diner, questo pomeriggio.")
+  ok - objectives/obj:obj_m8_0: nessuna igiene della falsa colpa violata ("Passa dal diner, questo pomeriggio.")
+  ok - objectives/obj:obj_m8_0: nessun id di design nel testo player-facing ("Passa dal diner, questo pomeriggio.")
+  ok - objectives/obj:obj_m8_0: nessun conteggio di lettere fuori dal ramo respinto diary_b ("Passa dal diner, questo pomeriggio.")
+act-4-flow: wording guards OK (108 testi controllati)
+# act-4-flow: runtime path (M8)
+  ok - accompagno/palmer/palmer @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - accompagno/palmer/palmer: m8_diner preparabile
+  ok - accompagno/palmer/palmer: promessa scelta
+  ok - accompagno/palmer/palmer @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - accompagno/palmer/palmer: m8_leland_taxi giocato
+  ok - accompagno/palmer/palmer: T_LELAND_TAXI scritta
+  ok - accompagno/palmer/palmer @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - accompagno/palmer/palmer: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - accompagno/palmer/palmer: il tentativo bloccato non riscrive evidence/flags
+  ok - accompagno/palmer/palmer: m8_roadhouse_truman giocato
+  ok - accompagno/palmer/palmer: presagio_status=active dopo il tavolo
+  ok - accompagno/palmer/palmer @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - accompagno/palmer/palmer: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - accompagno/palmer/palmer: avvertimento scelto
+  ok - accompagno/palmer/palmer: warning_target scritto
+  ok - accompagno/palmer/palmer @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/palmer/palmer: m8_focus_choice preparabile
+  ok - accompagno/palmer/palmer: destinazione scelta
+  ok - accompagno/palmer/palmer: focus_destination scritto
+  ok - accompagno/palmer/palmer @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/palmer/palmer: solo m8_route_palmer ha una root viva, non m8_route_palmer
+  ok - accompagno/palmer/palmer: solo m8_route_palmer ha una root viva, non m8_route_lake
+  ok - accompagno/palmer/palmer: solo m8_route_palmer ha una root viva, non m8_route_diner
+  ok - accompagno/palmer/palmer: strada percorsa (m8_route_palmer)
+  ok - accompagno/palmer/palmer: body_found_by=hawk
+  ok - accompagno/palmer/palmer: ritrovamento giocato
+  ok - accompagno/palmer/palmer: maddy_trovata scritto
+  ok - accompagno/palmer/palmer: presagio_status active->verified al ritrovamento
+  ok - accompagno/palmer/palmer @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - accompagno/palmer/palmer: eco della promessa giocato
+  ok - accompagno/palmer/palmer: confronto lettere R/O
+  ok - accompagno/palmer/palmer: m8_cmp_diary preparabile dopo cmp_letters
+  ok - accompagno/palmer/palmer: lettura «firma progressiva» disponibile
+  ok - accompagno/palmer/palmer: P8 formulata
+  ok - accompagno/palmer/palmer @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - accompagno/palmer/palmer: m8_station giocata
+  ok - accompagno/palmer/palmer: M8 completa
+  ok - accompagno/palmer/palmer @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - accompagno/palmer/palmer: dopo il commit, m8_station si ripete
+  ok - accompagno/palmer/lago @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - accompagno/palmer/lago: m8_diner preparabile
+  ok - accompagno/palmer/lago: promessa scelta
+  ok - accompagno/palmer/lago @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - accompagno/palmer/lago: m8_leland_taxi giocato
+  ok - accompagno/palmer/lago: T_LELAND_TAXI scritta
+  ok - accompagno/palmer/lago @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - accompagno/palmer/lago: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - accompagno/palmer/lago: il tentativo bloccato non riscrive evidence/flags
+  ok - accompagno/palmer/lago: m8_roadhouse_truman giocato
+  ok - accompagno/palmer/lago: presagio_status=active dopo il tavolo
+  ok - accompagno/palmer/lago @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - accompagno/palmer/lago: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - accompagno/palmer/lago: avvertimento scelto
+  ok - accompagno/palmer/lago: warning_target scritto
+  ok - accompagno/palmer/lago @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/palmer/lago: m8_focus_choice preparabile
+  ok - accompagno/palmer/lago: destinazione scelta
+  ok - accompagno/palmer/lago: focus_destination scritto
+  ok - accompagno/palmer/lago @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/palmer/lago: solo m8_route_lago ha una root viva, non m8_route_palmer
+  ok - accompagno/palmer/lago: solo m8_route_lago ha una root viva, non m8_route_lake
+  ok - accompagno/palmer/lago: solo m8_route_lago ha una root viva, non m8_route_diner
+  ok - accompagno/palmer/lago: strada percorsa (m8_route_lake)
+  ok - accompagno/palmer/lago: body_found_by=cooper
+  ok - accompagno/palmer/lago: ritrovamento giocato
+  ok - accompagno/palmer/lago: maddy_trovata scritto
+  ok - accompagno/palmer/lago: presagio_status active->verified al ritrovamento
+  ok - accompagno/palmer/lago @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - accompagno/palmer/lago: eco della promessa giocato
+  ok - accompagno/palmer/lago: confronto lettere R/O
+  ok - accompagno/palmer/lago: m8_cmp_diary preparabile dopo cmp_letters
+  ok - accompagno/palmer/lago: lettura «firma progressiva» disponibile
+  ok - accompagno/palmer/lago: P8 formulata
+  ok - accompagno/palmer/lago @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - accompagno/palmer/lago: m8_station giocata
+  ok - accompagno/palmer/lago: M8 completa
+  ok - accompagno/palmer/lago @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - accompagno/palmer/lago: dopo il commit, m8_station si ripete
+  ok - accompagno/palmer/diner @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - accompagno/palmer/diner: m8_diner preparabile
+  ok - accompagno/palmer/diner: promessa scelta
+  ok - accompagno/palmer/diner @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - accompagno/palmer/diner: m8_leland_taxi giocato
+  ok - accompagno/palmer/diner: T_LELAND_TAXI scritta
+  ok - accompagno/palmer/diner @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - accompagno/palmer/diner: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - accompagno/palmer/diner: il tentativo bloccato non riscrive evidence/flags
+  ok - accompagno/palmer/diner: m8_roadhouse_truman giocato
+  ok - accompagno/palmer/diner: presagio_status=active dopo il tavolo
+  ok - accompagno/palmer/diner @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - accompagno/palmer/diner: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - accompagno/palmer/diner: avvertimento scelto
+  ok - accompagno/palmer/diner: warning_target scritto
+  ok - accompagno/palmer/diner @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/palmer/diner: m8_focus_choice preparabile
+  ok - accompagno/palmer/diner: destinazione scelta
+  ok - accompagno/palmer/diner: focus_destination scritto
+  ok - accompagno/palmer/diner @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/palmer/diner: solo m8_route_diner ha una root viva, non m8_route_palmer
+  ok - accompagno/palmer/diner: solo m8_route_diner ha una root viva, non m8_route_lake
+  ok - accompagno/palmer/diner: solo m8_route_diner ha una root viva, non m8_route_diner
+  ok - accompagno/palmer/diner: strada percorsa (m8_route_diner)
+  ok - accompagno/palmer/diner: body_found_by=hawk
+  ok - accompagno/palmer/diner: ritrovamento giocato
+  ok - accompagno/palmer/diner: maddy_trovata scritto
+  ok - accompagno/palmer/diner: presagio_status active->verified al ritrovamento
+  ok - accompagno/palmer/diner @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - accompagno/palmer/diner: eco della promessa giocato
+  ok - accompagno/palmer/diner: confronto lettere R/O
+  ok - accompagno/palmer/diner: m8_cmp_diary preparabile dopo cmp_letters
+  ok - accompagno/palmer/diner: lettura «firma progressiva» disponibile
+  ok - accompagno/palmer/diner: P8 formulata
+  ok - accompagno/palmer/diner @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - accompagno/palmer/diner: m8_station giocata
+  ok - accompagno/palmer/diner: M8 completa
+  ok - accompagno/palmer/diner @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - accompagno/palmer/diner: dopo il commit, m8_station si ripete
+  ok - accompagno/centrale/palmer @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - accompagno/centrale/palmer: m8_diner preparabile
+  ok - accompagno/centrale/palmer: promessa scelta
+  ok - accompagno/centrale/palmer @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - accompagno/centrale/palmer: m8_leland_taxi giocato
+  ok - accompagno/centrale/palmer: T_LELAND_TAXI scritta
+  ok - accompagno/centrale/palmer @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - accompagno/centrale/palmer: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - accompagno/centrale/palmer: il tentativo bloccato non riscrive evidence/flags
+  ok - accompagno/centrale/palmer: m8_roadhouse_truman giocato
+  ok - accompagno/centrale/palmer: presagio_status=active dopo il tavolo
+  ok - accompagno/centrale/palmer @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - accompagno/centrale/palmer: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - accompagno/centrale/palmer: avvertimento scelto
+  ok - accompagno/centrale/palmer: warning_target scritto
+  ok - accompagno/centrale/palmer @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/centrale/palmer: m8_focus_choice preparabile
+  ok - accompagno/centrale/palmer: destinazione scelta
+  ok - accompagno/centrale/palmer: focus_destination scritto
+  ok - accompagno/centrale/palmer @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/centrale/palmer: solo m8_route_palmer ha una root viva, non m8_route_palmer
+  ok - accompagno/centrale/palmer: solo m8_route_palmer ha una root viva, non m8_route_lake
+  ok - accompagno/centrale/palmer: solo m8_route_palmer ha una root viva, non m8_route_diner
+  ok - accompagno/centrale/palmer: strada percorsa (m8_route_palmer)
+  ok - accompagno/centrale/palmer: body_found_by=hawk
+  ok - accompagno/centrale/palmer: ritrovamento giocato
+  ok - accompagno/centrale/palmer: maddy_trovata scritto
+  ok - accompagno/centrale/palmer: presagio_status active->verified al ritrovamento
+  ok - accompagno/centrale/palmer @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - accompagno/centrale/palmer: eco della promessa giocato
+  ok - accompagno/centrale/palmer: confronto lettere R/O
+  ok - accompagno/centrale/palmer: m8_cmp_diary preparabile dopo cmp_letters
+  ok - accompagno/centrale/palmer: lettura «firma progressiva» disponibile
+  ok - accompagno/centrale/palmer: P8 formulata
+  ok - accompagno/centrale/palmer @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - accompagno/centrale/palmer: m8_station giocata
+  ok - accompagno/centrale/palmer: M8 completa
+  ok - accompagno/centrale/palmer @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - accompagno/centrale/palmer: dopo il commit, m8_station si ripete
+  ok - accompagno/centrale/lago @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - accompagno/centrale/lago: m8_diner preparabile
+  ok - accompagno/centrale/lago: promessa scelta
+  ok - accompagno/centrale/lago @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - accompagno/centrale/lago: m8_leland_taxi giocato
+  ok - accompagno/centrale/lago: T_LELAND_TAXI scritta
+  ok - accompagno/centrale/lago @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - accompagno/centrale/lago: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - accompagno/centrale/lago: il tentativo bloccato non riscrive evidence/flags
+  ok - accompagno/centrale/lago: m8_roadhouse_truman giocato
+  ok - accompagno/centrale/lago: presagio_status=active dopo il tavolo
+  ok - accompagno/centrale/lago @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - accompagno/centrale/lago: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - accompagno/centrale/lago: avvertimento scelto
+  ok - accompagno/centrale/lago: warning_target scritto
+  ok - accompagno/centrale/lago @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/centrale/lago: m8_focus_choice preparabile
+  ok - accompagno/centrale/lago: destinazione scelta
+  ok - accompagno/centrale/lago: focus_destination scritto
+  ok - accompagno/centrale/lago @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/centrale/lago: solo m8_route_lago ha una root viva, non m8_route_palmer
+  ok - accompagno/centrale/lago: solo m8_route_lago ha una root viva, non m8_route_lake
+  ok - accompagno/centrale/lago: solo m8_route_lago ha una root viva, non m8_route_diner
+  ok - accompagno/centrale/lago: strada percorsa (m8_route_lake)
+  ok - accompagno/centrale/lago: body_found_by=cooper
+  ok - accompagno/centrale/lago: ritrovamento giocato
+  ok - accompagno/centrale/lago: maddy_trovata scritto
+  ok - accompagno/centrale/lago: presagio_status active->verified al ritrovamento
+  ok - accompagno/centrale/lago @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - accompagno/centrale/lago: eco della promessa giocato
+  ok - accompagno/centrale/lago: confronto lettere R/O
+  ok - accompagno/centrale/lago: m8_cmp_diary preparabile dopo cmp_letters
+  ok - accompagno/centrale/lago: lettura «firma progressiva» disponibile
+  ok - accompagno/centrale/lago: P8 formulata
+  ok - accompagno/centrale/lago @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - accompagno/centrale/lago: m8_station giocata
+  ok - accompagno/centrale/lago: M8 completa
+  ok - accompagno/centrale/lago @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - accompagno/centrale/lago: dopo il commit, m8_station si ripete
+  ok - accompagno/centrale/diner @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - accompagno/centrale/diner: m8_diner preparabile
+  ok - accompagno/centrale/diner: promessa scelta
+  ok - accompagno/centrale/diner @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - accompagno/centrale/diner: m8_leland_taxi giocato
+  ok - accompagno/centrale/diner: T_LELAND_TAXI scritta
+  ok - accompagno/centrale/diner @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - accompagno/centrale/diner: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - accompagno/centrale/diner: il tentativo bloccato non riscrive evidence/flags
+  ok - accompagno/centrale/diner: m8_roadhouse_truman giocato
+  ok - accompagno/centrale/diner: presagio_status=active dopo il tavolo
+  ok - accompagno/centrale/diner @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - accompagno/centrale/diner: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - accompagno/centrale/diner: avvertimento scelto
+  ok - accompagno/centrale/diner: warning_target scritto
+  ok - accompagno/centrale/diner @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/centrale/diner: m8_focus_choice preparabile
+  ok - accompagno/centrale/diner: destinazione scelta
+  ok - accompagno/centrale/diner: focus_destination scritto
+  ok - accompagno/centrale/diner @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/centrale/diner: solo m8_route_diner ha una root viva, non m8_route_palmer
+  ok - accompagno/centrale/diner: solo m8_route_diner ha una root viva, non m8_route_lake
+  ok - accompagno/centrale/diner: solo m8_route_diner ha una root viva, non m8_route_diner
+  ok - accompagno/centrale/diner: strada percorsa (m8_route_diner)
+  ok - accompagno/centrale/diner: body_found_by=hawk
+  ok - accompagno/centrale/diner: ritrovamento giocato
+  ok - accompagno/centrale/diner: maddy_trovata scritto
+  ok - accompagno/centrale/diner: presagio_status active->verified al ritrovamento
+  ok - accompagno/centrale/diner @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - accompagno/centrale/diner: eco della promessa giocato
+  ok - accompagno/centrale/diner: confronto lettere R/O
+  ok - accompagno/centrale/diner: m8_cmp_diary preparabile dopo cmp_letters
+  ok - accompagno/centrale/diner: lettura «firma progressiva» disponibile
+  ok - accompagno/centrale/diner: P8 formulata
+  ok - accompagno/centrale/diner @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - accompagno/centrale/diner: m8_station giocata
+  ok - accompagno/centrale/diner: M8 completa
+  ok - accompagno/centrale/diner @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - accompagno/centrale/diner: dopo il commit, m8_station si ripete
+  ok - accompagno/nessuno/palmer @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - accompagno/nessuno/palmer: m8_diner preparabile
+  ok - accompagno/nessuno/palmer: promessa scelta
+  ok - accompagno/nessuno/palmer @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - accompagno/nessuno/palmer: m8_leland_taxi giocato
+  ok - accompagno/nessuno/palmer: T_LELAND_TAXI scritta
+  ok - accompagno/nessuno/palmer @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - accompagno/nessuno/palmer: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - accompagno/nessuno/palmer: il tentativo bloccato non riscrive evidence/flags
+  ok - accompagno/nessuno/palmer: m8_roadhouse_truman giocato
+  ok - accompagno/nessuno/palmer: presagio_status=active dopo il tavolo
+  ok - accompagno/nessuno/palmer @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - accompagno/nessuno/palmer: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - accompagno/nessuno/palmer: avvertimento scelto
+  ok - accompagno/nessuno/palmer: warning_target scritto
+  ok - accompagno/nessuno/palmer @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/nessuno/palmer: m8_focus_choice preparabile
+  ok - accompagno/nessuno/palmer: destinazione scelta
+  ok - accompagno/nessuno/palmer: focus_destination scritto
+  ok - accompagno/nessuno/palmer @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/nessuno/palmer: solo m8_route_palmer ha una root viva, non m8_route_palmer
+  ok - accompagno/nessuno/palmer: solo m8_route_palmer ha una root viva, non m8_route_lake
+  ok - accompagno/nessuno/palmer: solo m8_route_palmer ha una root viva, non m8_route_diner
+  ok - accompagno/nessuno/palmer: strada percorsa (m8_route_palmer)
+  ok - accompagno/nessuno/palmer: body_found_by=hawk
+  ok - accompagno/nessuno/palmer: ritrovamento giocato
+  ok - accompagno/nessuno/palmer: maddy_trovata scritto
+  ok - accompagno/nessuno/palmer: presagio_status active->verified al ritrovamento
+  ok - accompagno/nessuno/palmer @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - accompagno/nessuno/palmer: eco della promessa giocato
+  ok - accompagno/nessuno/palmer: confronto lettere R/O
+  ok - accompagno/nessuno/palmer: m8_cmp_diary preparabile dopo cmp_letters
+  ok - accompagno/nessuno/palmer: lettura «firma progressiva» disponibile
+  ok - accompagno/nessuno/palmer: P8 formulata
+  ok - accompagno/nessuno/palmer @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - accompagno/nessuno/palmer: m8_station giocata
+  ok - accompagno/nessuno/palmer: M8 completa
+  ok - accompagno/nessuno/palmer @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - accompagno/nessuno/palmer: dopo il commit, m8_station si ripete
+  ok - accompagno/nessuno/lago @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - accompagno/nessuno/lago: m8_diner preparabile
+  ok - accompagno/nessuno/lago: promessa scelta
+  ok - accompagno/nessuno/lago @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - accompagno/nessuno/lago: m8_leland_taxi giocato
+  ok - accompagno/nessuno/lago: T_LELAND_TAXI scritta
+  ok - accompagno/nessuno/lago @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - accompagno/nessuno/lago: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - accompagno/nessuno/lago: il tentativo bloccato non riscrive evidence/flags
+  ok - accompagno/nessuno/lago: m8_roadhouse_truman giocato
+  ok - accompagno/nessuno/lago: presagio_status=active dopo il tavolo
+  ok - accompagno/nessuno/lago @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - accompagno/nessuno/lago: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - accompagno/nessuno/lago: avvertimento scelto
+  ok - accompagno/nessuno/lago: warning_target scritto
+  ok - accompagno/nessuno/lago @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/nessuno/lago: m8_focus_choice preparabile
+  ok - accompagno/nessuno/lago: destinazione scelta
+  ok - accompagno/nessuno/lago: focus_destination scritto
+  ok - accompagno/nessuno/lago @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/nessuno/lago: solo m8_route_lago ha una root viva, non m8_route_palmer
+  ok - accompagno/nessuno/lago: solo m8_route_lago ha una root viva, non m8_route_lake
+  ok - accompagno/nessuno/lago: solo m8_route_lago ha una root viva, non m8_route_diner
+  ok - accompagno/nessuno/lago: strada percorsa (m8_route_lake)
+  ok - accompagno/nessuno/lago: body_found_by=cooper
+  ok - accompagno/nessuno/lago: ritrovamento giocato
+  ok - accompagno/nessuno/lago: maddy_trovata scritto
+  ok - accompagno/nessuno/lago: presagio_status active->verified al ritrovamento
+  ok - accompagno/nessuno/lago @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - accompagno/nessuno/lago: eco della promessa giocato
+  ok - accompagno/nessuno/lago: confronto lettere R/O
+  ok - accompagno/nessuno/lago: m8_cmp_diary preparabile dopo cmp_letters
+  ok - accompagno/nessuno/lago: lettura «firma progressiva» disponibile
+  ok - accompagno/nessuno/lago: P8 formulata
+  ok - accompagno/nessuno/lago @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - accompagno/nessuno/lago: m8_station giocata
+  ok - accompagno/nessuno/lago: M8 completa
+  ok - accompagno/nessuno/lago @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - accompagno/nessuno/lago: dopo il commit, m8_station si ripete
+  ok - accompagno/nessuno/diner @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - accompagno/nessuno/diner: m8_diner preparabile
+  ok - accompagno/nessuno/diner: promessa scelta
+  ok - accompagno/nessuno/diner @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - accompagno/nessuno/diner: m8_leland_taxi giocato
+  ok - accompagno/nessuno/diner: T_LELAND_TAXI scritta
+  ok - accompagno/nessuno/diner @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - accompagno/nessuno/diner: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - accompagno/nessuno/diner: il tentativo bloccato non riscrive evidence/flags
+  ok - accompagno/nessuno/diner: m8_roadhouse_truman giocato
+  ok - accompagno/nessuno/diner: presagio_status=active dopo il tavolo
+  ok - accompagno/nessuno/diner @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - accompagno/nessuno/diner: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - accompagno/nessuno/diner: avvertimento scelto
+  ok - accompagno/nessuno/diner: warning_target scritto
+  ok - accompagno/nessuno/diner @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/nessuno/diner: m8_focus_choice preparabile
+  ok - accompagno/nessuno/diner: destinazione scelta
+  ok - accompagno/nessuno/diner: focus_destination scritto
+  ok - accompagno/nessuno/diner @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - accompagno/nessuno/diner: solo m8_route_diner ha una root viva, non m8_route_palmer
+  ok - accompagno/nessuno/diner: solo m8_route_diner ha una root viva, non m8_route_lake
+  ok - accompagno/nessuno/diner: solo m8_route_diner ha una root viva, non m8_route_diner
+  ok - accompagno/nessuno/diner: strada percorsa (m8_route_diner)
+  ok - accompagno/nessuno/diner: body_found_by=hawk
+  ok - accompagno/nessuno/diner: ritrovamento giocato
+  ok - accompagno/nessuno/diner: maddy_trovata scritto
+  ok - accompagno/nessuno/diner: presagio_status active->verified al ritrovamento
+  ok - accompagno/nessuno/diner @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - accompagno/nessuno/diner: eco della promessa giocato
+  ok - accompagno/nessuno/diner: confronto lettere R/O
+  ok - accompagno/nessuno/diner: m8_cmp_diary preparabile dopo cmp_letters
+  ok - accompagno/nessuno/diner: lettura «firma progressiva» disponibile
+  ok - accompagno/nessuno/diner: P8 formulata
+  ok - accompagno/nessuno/diner @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - accompagno/nessuno/diner: m8_station giocata
+  ok - accompagno/nessuno/diner: M8 completa
+  ok - accompagno/nessuno/diner @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - accompagno/nessuno/diner: dopo il commit, m8_station si ripete
+  ok - autonomia/palmer/palmer @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - autonomia/palmer/palmer: m8_diner preparabile
+  ok - autonomia/palmer/palmer: promessa scelta
+  ok - autonomia/palmer/palmer @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - autonomia/palmer/palmer: m8_leland_taxi giocato
+  ok - autonomia/palmer/palmer: T_LELAND_TAXI scritta
+  ok - autonomia/palmer/palmer @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - autonomia/palmer/palmer: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - autonomia/palmer/palmer: il tentativo bloccato non riscrive evidence/flags
+  ok - autonomia/palmer/palmer: m8_roadhouse_truman giocato
+  ok - autonomia/palmer/palmer: presagio_status=active dopo il tavolo
+  ok - autonomia/palmer/palmer @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - autonomia/palmer/palmer: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - autonomia/palmer/palmer: avvertimento scelto
+  ok - autonomia/palmer/palmer: warning_target scritto
+  ok - autonomia/palmer/palmer @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/palmer/palmer: m8_focus_choice preparabile
+  ok - autonomia/palmer/palmer: destinazione scelta
+  ok - autonomia/palmer/palmer: focus_destination scritto
+  ok - autonomia/palmer/palmer @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/palmer/palmer: solo m8_route_palmer ha una root viva, non m8_route_palmer
+  ok - autonomia/palmer/palmer: solo m8_route_palmer ha una root viva, non m8_route_lake
+  ok - autonomia/palmer/palmer: solo m8_route_palmer ha una root viva, non m8_route_diner
+  ok - autonomia/palmer/palmer: strada percorsa (m8_route_palmer)
+  ok - autonomia/palmer/palmer: body_found_by=hawk
+  ok - autonomia/palmer/palmer: ritrovamento giocato
+  ok - autonomia/palmer/palmer: maddy_trovata scritto
+  ok - autonomia/palmer/palmer: presagio_status active->verified al ritrovamento
+  ok - autonomia/palmer/palmer @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - autonomia/palmer/palmer: eco della promessa giocato
+  ok - autonomia/palmer/palmer: confronto lettere R/O
+  ok - autonomia/palmer/palmer: m8_cmp_diary preparabile dopo cmp_letters
+  ok - autonomia/palmer/palmer: lettura «firma progressiva» disponibile
+  ok - autonomia/palmer/palmer: P8 formulata
+  ok - autonomia/palmer/palmer @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - autonomia/palmer/palmer: m8_station giocata
+  ok - autonomia/palmer/palmer: M8 completa
+  ok - autonomia/palmer/palmer @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - autonomia/palmer/palmer: dopo il commit, m8_station si ripete
+  ok - autonomia/palmer/lago @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - autonomia/palmer/lago: m8_diner preparabile
+  ok - autonomia/palmer/lago: promessa scelta
+  ok - autonomia/palmer/lago @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - autonomia/palmer/lago: m8_leland_taxi giocato
+  ok - autonomia/palmer/lago: T_LELAND_TAXI scritta
+  ok - autonomia/palmer/lago @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - autonomia/palmer/lago: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - autonomia/palmer/lago: il tentativo bloccato non riscrive evidence/flags
+  ok - autonomia/palmer/lago: m8_roadhouse_truman giocato
+  ok - autonomia/palmer/lago: presagio_status=active dopo il tavolo
+  ok - autonomia/palmer/lago @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - autonomia/palmer/lago: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - autonomia/palmer/lago: avvertimento scelto
+  ok - autonomia/palmer/lago: warning_target scritto
+  ok - autonomia/palmer/lago @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/palmer/lago: m8_focus_choice preparabile
+  ok - autonomia/palmer/lago: destinazione scelta
+  ok - autonomia/palmer/lago: focus_destination scritto
+  ok - autonomia/palmer/lago @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/palmer/lago: solo m8_route_lago ha una root viva, non m8_route_palmer
+  ok - autonomia/palmer/lago: solo m8_route_lago ha una root viva, non m8_route_lake
+  ok - autonomia/palmer/lago: solo m8_route_lago ha una root viva, non m8_route_diner
+  ok - autonomia/palmer/lago: strada percorsa (m8_route_lake)
+  ok - autonomia/palmer/lago: body_found_by=cooper
+  ok - autonomia/palmer/lago: ritrovamento giocato
+  ok - autonomia/palmer/lago: maddy_trovata scritto
+  ok - autonomia/palmer/lago: presagio_status active->verified al ritrovamento
+  ok - autonomia/palmer/lago @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - autonomia/palmer/lago: eco della promessa giocato
+  ok - autonomia/palmer/lago: confronto lettere R/O
+  ok - autonomia/palmer/lago: m8_cmp_diary preparabile dopo cmp_letters
+  ok - autonomia/palmer/lago: lettura «firma progressiva» disponibile
+  ok - autonomia/palmer/lago: P8 formulata
+  ok - autonomia/palmer/lago @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - autonomia/palmer/lago: m8_station giocata
+  ok - autonomia/palmer/lago: M8 completa
+  ok - autonomia/palmer/lago @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - autonomia/palmer/lago: dopo il commit, m8_station si ripete
+  ok - autonomia/palmer/diner @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - autonomia/palmer/diner: m8_diner preparabile
+  ok - autonomia/palmer/diner: promessa scelta
+  ok - autonomia/palmer/diner @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - autonomia/palmer/diner: m8_leland_taxi giocato
+  ok - autonomia/palmer/diner: T_LELAND_TAXI scritta
+  ok - autonomia/palmer/diner @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - autonomia/palmer/diner: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - autonomia/palmer/diner: il tentativo bloccato non riscrive evidence/flags
+  ok - autonomia/palmer/diner: m8_roadhouse_truman giocato
+  ok - autonomia/palmer/diner: presagio_status=active dopo il tavolo
+  ok - autonomia/palmer/diner @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - autonomia/palmer/diner: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - autonomia/palmer/diner: avvertimento scelto
+  ok - autonomia/palmer/diner: warning_target scritto
+  ok - autonomia/palmer/diner @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/palmer/diner: m8_focus_choice preparabile
+  ok - autonomia/palmer/diner: destinazione scelta
+  ok - autonomia/palmer/diner: focus_destination scritto
+  ok - autonomia/palmer/diner @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/palmer/diner: solo m8_route_diner ha una root viva, non m8_route_palmer
+  ok - autonomia/palmer/diner: solo m8_route_diner ha una root viva, non m8_route_lake
+  ok - autonomia/palmer/diner: solo m8_route_diner ha una root viva, non m8_route_diner
+  ok - autonomia/palmer/diner: strada percorsa (m8_route_diner)
+  ok - autonomia/palmer/diner: body_found_by=hawk
+  ok - autonomia/palmer/diner: ritrovamento giocato
+  ok - autonomia/palmer/diner: maddy_trovata scritto
+  ok - autonomia/palmer/diner: presagio_status active->verified al ritrovamento
+  ok - autonomia/palmer/diner @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - autonomia/palmer/diner: eco della promessa giocato
+  ok - autonomia/palmer/diner: confronto lettere R/O
+  ok - autonomia/palmer/diner: m8_cmp_diary preparabile dopo cmp_letters
+  ok - autonomia/palmer/diner: lettura «firma progressiva» disponibile
+  ok - autonomia/palmer/diner: P8 formulata
+  ok - autonomia/palmer/diner @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - autonomia/palmer/diner: m8_station giocata
+  ok - autonomia/palmer/diner: M8 completa
+  ok - autonomia/palmer/diner @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - autonomia/palmer/diner: dopo il commit, m8_station si ripete
+  ok - autonomia/centrale/palmer @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - autonomia/centrale/palmer: m8_diner preparabile
+  ok - autonomia/centrale/palmer: promessa scelta
+  ok - autonomia/centrale/palmer @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - autonomia/centrale/palmer: m8_leland_taxi giocato
+  ok - autonomia/centrale/palmer: T_LELAND_TAXI scritta
+  ok - autonomia/centrale/palmer @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - autonomia/centrale/palmer: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - autonomia/centrale/palmer: il tentativo bloccato non riscrive evidence/flags
+  ok - autonomia/centrale/palmer: m8_roadhouse_truman giocato
+  ok - autonomia/centrale/palmer: presagio_status=active dopo il tavolo
+  ok - autonomia/centrale/palmer @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - autonomia/centrale/palmer: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - autonomia/centrale/palmer: avvertimento scelto
+  ok - autonomia/centrale/palmer: warning_target scritto
+  ok - autonomia/centrale/palmer @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/centrale/palmer: m8_focus_choice preparabile
+  ok - autonomia/centrale/palmer: destinazione scelta
+  ok - autonomia/centrale/palmer: focus_destination scritto
+  ok - autonomia/centrale/palmer @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/centrale/palmer: solo m8_route_palmer ha una root viva, non m8_route_palmer
+  ok - autonomia/centrale/palmer: solo m8_route_palmer ha una root viva, non m8_route_lake
+  ok - autonomia/centrale/palmer: solo m8_route_palmer ha una root viva, non m8_route_diner
+  ok - autonomia/centrale/palmer: strada percorsa (m8_route_palmer)
+  ok - autonomia/centrale/palmer: body_found_by=hawk
+  ok - autonomia/centrale/palmer: ritrovamento giocato
+  ok - autonomia/centrale/palmer: maddy_trovata scritto
+  ok - autonomia/centrale/palmer: presagio_status active->verified al ritrovamento
+  ok - autonomia/centrale/palmer @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - autonomia/centrale/palmer: eco della promessa giocato
+  ok - autonomia/centrale/palmer: confronto lettere R/O
+  ok - autonomia/centrale/palmer: m8_cmp_diary preparabile dopo cmp_letters
+  ok - autonomia/centrale/palmer: lettura «firma progressiva» disponibile
+  ok - autonomia/centrale/palmer: P8 formulata
+  ok - autonomia/centrale/palmer @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - autonomia/centrale/palmer: m8_station giocata
+  ok - autonomia/centrale/palmer: M8 completa
+  ok - autonomia/centrale/palmer @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - autonomia/centrale/palmer: dopo il commit, m8_station si ripete
+  ok - autonomia/centrale/lago @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - autonomia/centrale/lago: m8_diner preparabile
+  ok - autonomia/centrale/lago: promessa scelta
+  ok - autonomia/centrale/lago @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - autonomia/centrale/lago: m8_leland_taxi giocato
+  ok - autonomia/centrale/lago: T_LELAND_TAXI scritta
+  ok - autonomia/centrale/lago @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - autonomia/centrale/lago: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - autonomia/centrale/lago: il tentativo bloccato non riscrive evidence/flags
+  ok - autonomia/centrale/lago: m8_roadhouse_truman giocato
+  ok - autonomia/centrale/lago: presagio_status=active dopo il tavolo
+  ok - autonomia/centrale/lago @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - autonomia/centrale/lago: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - autonomia/centrale/lago: avvertimento scelto
+  ok - autonomia/centrale/lago: warning_target scritto
+  ok - autonomia/centrale/lago @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/centrale/lago: m8_focus_choice preparabile
+  ok - autonomia/centrale/lago: destinazione scelta
+  ok - autonomia/centrale/lago: focus_destination scritto
+  ok - autonomia/centrale/lago @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/centrale/lago: solo m8_route_lago ha una root viva, non m8_route_palmer
+  ok - autonomia/centrale/lago: solo m8_route_lago ha una root viva, non m8_route_lake
+  ok - autonomia/centrale/lago: solo m8_route_lago ha una root viva, non m8_route_diner
+  ok - autonomia/centrale/lago: strada percorsa (m8_route_lake)
+  ok - autonomia/centrale/lago: body_found_by=cooper
+  ok - autonomia/centrale/lago: ritrovamento giocato
+  ok - autonomia/centrale/lago: maddy_trovata scritto
+  ok - autonomia/centrale/lago: presagio_status active->verified al ritrovamento
+  ok - autonomia/centrale/lago @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - autonomia/centrale/lago: eco della promessa giocato
+  ok - autonomia/centrale/lago: confronto lettere R/O
+  ok - autonomia/centrale/lago: m8_cmp_diary preparabile dopo cmp_letters
+  ok - autonomia/centrale/lago: lettura «firma progressiva» disponibile
+  ok - autonomia/centrale/lago: P8 formulata
+  ok - autonomia/centrale/lago @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - autonomia/centrale/lago: m8_station giocata
+  ok - autonomia/centrale/lago: M8 completa
+  ok - autonomia/centrale/lago @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - autonomia/centrale/lago: dopo il commit, m8_station si ripete
+  ok - autonomia/centrale/diner @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - autonomia/centrale/diner: m8_diner preparabile
+  ok - autonomia/centrale/diner: promessa scelta
+  ok - autonomia/centrale/diner @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - autonomia/centrale/diner: m8_leland_taxi giocato
+  ok - autonomia/centrale/diner: T_LELAND_TAXI scritta
+  ok - autonomia/centrale/diner @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - autonomia/centrale/diner: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - autonomia/centrale/diner: il tentativo bloccato non riscrive evidence/flags
+  ok - autonomia/centrale/diner: m8_roadhouse_truman giocato
+  ok - autonomia/centrale/diner: presagio_status=active dopo il tavolo
+  ok - autonomia/centrale/diner @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - autonomia/centrale/diner: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - autonomia/centrale/diner: avvertimento scelto
+  ok - autonomia/centrale/diner: warning_target scritto
+  ok - autonomia/centrale/diner @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/centrale/diner: m8_focus_choice preparabile
+  ok - autonomia/centrale/diner: destinazione scelta
+  ok - autonomia/centrale/diner: focus_destination scritto
+  ok - autonomia/centrale/diner @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/centrale/diner: solo m8_route_diner ha una root viva, non m8_route_palmer
+  ok - autonomia/centrale/diner: solo m8_route_diner ha una root viva, non m8_route_lake
+  ok - autonomia/centrale/diner: solo m8_route_diner ha una root viva, non m8_route_diner
+  ok - autonomia/centrale/diner: strada percorsa (m8_route_diner)
+  ok - autonomia/centrale/diner: body_found_by=hawk
+  ok - autonomia/centrale/diner: ritrovamento giocato
+  ok - autonomia/centrale/diner: maddy_trovata scritto
+  ok - autonomia/centrale/diner: presagio_status active->verified al ritrovamento
+  ok - autonomia/centrale/diner @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - autonomia/centrale/diner: eco della promessa giocato
+  ok - autonomia/centrale/diner: confronto lettere R/O
+  ok - autonomia/centrale/diner: m8_cmp_diary preparabile dopo cmp_letters
+  ok - autonomia/centrale/diner: lettura «firma progressiva» disponibile
+  ok - autonomia/centrale/diner: P8 formulata
+  ok - autonomia/centrale/diner @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - autonomia/centrale/diner: m8_station giocata
+  ok - autonomia/centrale/diner: M8 completa
+  ok - autonomia/centrale/diner @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - autonomia/centrale/diner: dopo il commit, m8_station si ripete
+  ok - autonomia/nessuno/palmer @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - autonomia/nessuno/palmer: m8_diner preparabile
+  ok - autonomia/nessuno/palmer: promessa scelta
+  ok - autonomia/nessuno/palmer @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - autonomia/nessuno/palmer: m8_leland_taxi giocato
+  ok - autonomia/nessuno/palmer: T_LELAND_TAXI scritta
+  ok - autonomia/nessuno/palmer @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - autonomia/nessuno/palmer: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - autonomia/nessuno/palmer: il tentativo bloccato non riscrive evidence/flags
+  ok - autonomia/nessuno/palmer: m8_roadhouse_truman giocato
+  ok - autonomia/nessuno/palmer: presagio_status=active dopo il tavolo
+  ok - autonomia/nessuno/palmer @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - autonomia/nessuno/palmer: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - autonomia/nessuno/palmer: avvertimento scelto
+  ok - autonomia/nessuno/palmer: warning_target scritto
+  ok - autonomia/nessuno/palmer @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/nessuno/palmer: m8_focus_choice preparabile
+  ok - autonomia/nessuno/palmer: destinazione scelta
+  ok - autonomia/nessuno/palmer: focus_destination scritto
+  ok - autonomia/nessuno/palmer @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/nessuno/palmer: solo m8_route_palmer ha una root viva, non m8_route_palmer
+  ok - autonomia/nessuno/palmer: solo m8_route_palmer ha una root viva, non m8_route_lake
+  ok - autonomia/nessuno/palmer: solo m8_route_palmer ha una root viva, non m8_route_diner
+  ok - autonomia/nessuno/palmer: strada percorsa (m8_route_palmer)
+  ok - autonomia/nessuno/palmer: body_found_by=hawk
+  ok - autonomia/nessuno/palmer: ritrovamento giocato
+  ok - autonomia/nessuno/palmer: maddy_trovata scritto
+  ok - autonomia/nessuno/palmer: presagio_status active->verified al ritrovamento
+  ok - autonomia/nessuno/palmer @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - autonomia/nessuno/palmer: eco della promessa giocato
+  ok - autonomia/nessuno/palmer: confronto lettere R/O
+  ok - autonomia/nessuno/palmer: m8_cmp_diary preparabile dopo cmp_letters
+  ok - autonomia/nessuno/palmer: lettura «firma progressiva» disponibile
+  ok - autonomia/nessuno/palmer: P8 formulata
+  ok - autonomia/nessuno/palmer @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - autonomia/nessuno/palmer: m8_station giocata
+  ok - autonomia/nessuno/palmer: M8 completa
+  ok - autonomia/nessuno/palmer @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - autonomia/nessuno/palmer: dopo il commit, m8_station si ripete
+  ok - autonomia/nessuno/lago @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - autonomia/nessuno/lago: m8_diner preparabile
+  ok - autonomia/nessuno/lago: promessa scelta
+  ok - autonomia/nessuno/lago @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - autonomia/nessuno/lago: m8_leland_taxi giocato
+  ok - autonomia/nessuno/lago: T_LELAND_TAXI scritta
+  ok - autonomia/nessuno/lago @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - autonomia/nessuno/lago: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - autonomia/nessuno/lago: il tentativo bloccato non riscrive evidence/flags
+  ok - autonomia/nessuno/lago: m8_roadhouse_truman giocato
+  ok - autonomia/nessuno/lago: presagio_status=active dopo il tavolo
+  ok - autonomia/nessuno/lago @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - autonomia/nessuno/lago: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - autonomia/nessuno/lago: avvertimento scelto
+  ok - autonomia/nessuno/lago: warning_target scritto
+  ok - autonomia/nessuno/lago @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/nessuno/lago: m8_focus_choice preparabile
+  ok - autonomia/nessuno/lago: destinazione scelta
+  ok - autonomia/nessuno/lago: focus_destination scritto
+  ok - autonomia/nessuno/lago @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/nessuno/lago: solo m8_route_lago ha una root viva, non m8_route_palmer
+  ok - autonomia/nessuno/lago: solo m8_route_lago ha una root viva, non m8_route_lake
+  ok - autonomia/nessuno/lago: solo m8_route_lago ha una root viva, non m8_route_diner
+  ok - autonomia/nessuno/lago: strada percorsa (m8_route_lake)
+  ok - autonomia/nessuno/lago: body_found_by=cooper
+  ok - autonomia/nessuno/lago: ritrovamento giocato
+  ok - autonomia/nessuno/lago: maddy_trovata scritto
+  ok - autonomia/nessuno/lago: presagio_status active->verified al ritrovamento
+  ok - autonomia/nessuno/lago @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - autonomia/nessuno/lago: eco della promessa giocato
+  ok - autonomia/nessuno/lago: confronto lettere R/O
+  ok - autonomia/nessuno/lago: m8_cmp_diary preparabile dopo cmp_letters
+  ok - autonomia/nessuno/lago: lettura «firma progressiva» disponibile
+  ok - autonomia/nessuno/lago: P8 formulata
+  ok - autonomia/nessuno/lago @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - autonomia/nessuno/lago: m8_station giocata
+  ok - autonomia/nessuno/lago: M8 completa
+  ok - autonomia/nessuno/lago @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - autonomia/nessuno/lago: dopo il commit, m8_station si ripete
+  ok - autonomia/nessuno/diner @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - autonomia/nessuno/diner: m8_diner preparabile
+  ok - autonomia/nessuno/diner: promessa scelta
+  ok - autonomia/nessuno/diner @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - autonomia/nessuno/diner: m8_leland_taxi giocato
+  ok - autonomia/nessuno/diner: T_LELAND_TAXI scritta
+  ok - autonomia/nessuno/diner @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - autonomia/nessuno/diner: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - autonomia/nessuno/diner: il tentativo bloccato non riscrive evidence/flags
+  ok - autonomia/nessuno/diner: m8_roadhouse_truman giocato
+  ok - autonomia/nessuno/diner: presagio_status=active dopo il tavolo
+  ok - autonomia/nessuno/diner @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - autonomia/nessuno/diner: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - autonomia/nessuno/diner: avvertimento scelto
+  ok - autonomia/nessuno/diner: warning_target scritto
+  ok - autonomia/nessuno/diner @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/nessuno/diner: m8_focus_choice preparabile
+  ok - autonomia/nessuno/diner: destinazione scelta
+  ok - autonomia/nessuno/diner: focus_destination scritto
+  ok - autonomia/nessuno/diner @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - autonomia/nessuno/diner: solo m8_route_diner ha una root viva, non m8_route_palmer
+  ok - autonomia/nessuno/diner: solo m8_route_diner ha una root viva, non m8_route_lake
+  ok - autonomia/nessuno/diner: solo m8_route_diner ha una root viva, non m8_route_diner
+  ok - autonomia/nessuno/diner: strada percorsa (m8_route_diner)
+  ok - autonomia/nessuno/diner: body_found_by=hawk
+  ok - autonomia/nessuno/diner: ritrovamento giocato
+  ok - autonomia/nessuno/diner: maddy_trovata scritto
+  ok - autonomia/nessuno/diner: presagio_status active->verified al ritrovamento
+  ok - autonomia/nessuno/diner @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - autonomia/nessuno/diner: eco della promessa giocato
+  ok - autonomia/nessuno/diner: confronto lettere R/O
+  ok - autonomia/nessuno/diner: m8_cmp_diary preparabile dopo cmp_letters
+  ok - autonomia/nessuno/diner: lettura «firma progressiva» disponibile
+  ok - autonomia/nessuno/diner: P8 formulata
+  ok - autonomia/nessuno/diner @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - autonomia/nessuno/diner: m8_station giocata
+  ok - autonomia/nessuno/diner: M8 completa
+  ok - autonomia/nessuno/diner @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - autonomia/nessuno/diner: dopo il commit, m8_station si ripete
+  ok - prudenza/palmer/palmer @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - prudenza/palmer/palmer: m8_diner preparabile
+  ok - prudenza/palmer/palmer: promessa scelta
+  ok - prudenza/palmer/palmer @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - prudenza/palmer/palmer: m8_leland_taxi giocato
+  ok - prudenza/palmer/palmer: T_LELAND_TAXI scritta
+  ok - prudenza/palmer/palmer @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - prudenza/palmer/palmer: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - prudenza/palmer/palmer: il tentativo bloccato non riscrive evidence/flags
+  ok - prudenza/palmer/palmer: m8_roadhouse_truman giocato
+  ok - prudenza/palmer/palmer: presagio_status=active dopo il tavolo
+  ok - prudenza/palmer/palmer @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - prudenza/palmer/palmer: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - prudenza/palmer/palmer: avvertimento scelto
+  ok - prudenza/palmer/palmer: warning_target scritto
+  ok - prudenza/palmer/palmer @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/palmer/palmer: m8_focus_choice preparabile
+  ok - prudenza/palmer/palmer: destinazione scelta
+  ok - prudenza/palmer/palmer: focus_destination scritto
+  ok - prudenza/palmer/palmer @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/palmer/palmer: solo m8_route_palmer ha una root viva, non m8_route_palmer
+  ok - prudenza/palmer/palmer: solo m8_route_palmer ha una root viva, non m8_route_lake
+  ok - prudenza/palmer/palmer: solo m8_route_palmer ha una root viva, non m8_route_diner
+  ok - prudenza/palmer/palmer: strada percorsa (m8_route_palmer)
+  ok - prudenza/palmer/palmer: body_found_by=hawk
+  ok - prudenza/palmer/palmer: ritrovamento giocato
+  ok - prudenza/palmer/palmer: maddy_trovata scritto
+  ok - prudenza/palmer/palmer: presagio_status active->verified al ritrovamento
+  ok - prudenza/palmer/palmer @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - prudenza/palmer/palmer: eco della promessa giocato
+  ok - prudenza/palmer/palmer: confronto lettere R/O
+  ok - prudenza/palmer/palmer: m8_cmp_diary preparabile dopo cmp_letters
+  ok - prudenza/palmer/palmer: lettura «firma progressiva» disponibile
+  ok - prudenza/palmer/palmer: P8 formulata
+  ok - prudenza/palmer/palmer @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - prudenza/palmer/palmer: m8_station giocata
+  ok - prudenza/palmer/palmer: M8 completa
+  ok - prudenza/palmer/palmer @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - prudenza/palmer/palmer: dopo il commit, m8_station si ripete
+  ok - prudenza/palmer/lago @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - prudenza/palmer/lago: m8_diner preparabile
+  ok - prudenza/palmer/lago: promessa scelta
+  ok - prudenza/palmer/lago @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - prudenza/palmer/lago: m8_leland_taxi giocato
+  ok - prudenza/palmer/lago: T_LELAND_TAXI scritta
+  ok - prudenza/palmer/lago @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - prudenza/palmer/lago: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - prudenza/palmer/lago: il tentativo bloccato non riscrive evidence/flags
+  ok - prudenza/palmer/lago: m8_roadhouse_truman giocato
+  ok - prudenza/palmer/lago: presagio_status=active dopo il tavolo
+  ok - prudenza/palmer/lago @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - prudenza/palmer/lago: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - prudenza/palmer/lago: avvertimento scelto
+  ok - prudenza/palmer/lago: warning_target scritto
+  ok - prudenza/palmer/lago @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/palmer/lago: m8_focus_choice preparabile
+  ok - prudenza/palmer/lago: destinazione scelta
+  ok - prudenza/palmer/lago: focus_destination scritto
+  ok - prudenza/palmer/lago @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/palmer/lago: solo m8_route_lago ha una root viva, non m8_route_palmer
+  ok - prudenza/palmer/lago: solo m8_route_lago ha una root viva, non m8_route_lake
+  ok - prudenza/palmer/lago: solo m8_route_lago ha una root viva, non m8_route_diner
+  ok - prudenza/palmer/lago: strada percorsa (m8_route_lake)
+  ok - prudenza/palmer/lago: body_found_by=cooper
+  ok - prudenza/palmer/lago: ritrovamento giocato
+  ok - prudenza/palmer/lago: maddy_trovata scritto
+  ok - prudenza/palmer/lago: presagio_status active->verified al ritrovamento
+  ok - prudenza/palmer/lago @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - prudenza/palmer/lago: eco della promessa giocato
+  ok - prudenza/palmer/lago: confronto lettere R/O
+  ok - prudenza/palmer/lago: m8_cmp_diary preparabile dopo cmp_letters
+  ok - prudenza/palmer/lago: lettura «firma progressiva» disponibile
+  ok - prudenza/palmer/lago: P8 formulata
+  ok - prudenza/palmer/lago @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - prudenza/palmer/lago: m8_station giocata
+  ok - prudenza/palmer/lago: M8 completa
+  ok - prudenza/palmer/lago @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - prudenza/palmer/lago: dopo il commit, m8_station si ripete
+  ok - prudenza/palmer/diner @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - prudenza/palmer/diner: m8_diner preparabile
+  ok - prudenza/palmer/diner: promessa scelta
+  ok - prudenza/palmer/diner @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - prudenza/palmer/diner: m8_leland_taxi giocato
+  ok - prudenza/palmer/diner: T_LELAND_TAXI scritta
+  ok - prudenza/palmer/diner @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - prudenza/palmer/diner: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - prudenza/palmer/diner: il tentativo bloccato non riscrive evidence/flags
+  ok - prudenza/palmer/diner: m8_roadhouse_truman giocato
+  ok - prudenza/palmer/diner: presagio_status=active dopo il tavolo
+  ok - prudenza/palmer/diner @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - prudenza/palmer/diner: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - prudenza/palmer/diner: avvertimento scelto
+  ok - prudenza/palmer/diner: warning_target scritto
+  ok - prudenza/palmer/diner @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/palmer/diner: m8_focus_choice preparabile
+  ok - prudenza/palmer/diner: destinazione scelta
+  ok - prudenza/palmer/diner: focus_destination scritto
+  ok - prudenza/palmer/diner @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/palmer/diner: solo m8_route_diner ha una root viva, non m8_route_palmer
+  ok - prudenza/palmer/diner: solo m8_route_diner ha una root viva, non m8_route_lake
+  ok - prudenza/palmer/diner: solo m8_route_diner ha una root viva, non m8_route_diner
+  ok - prudenza/palmer/diner: strada percorsa (m8_route_diner)
+  ok - prudenza/palmer/diner: body_found_by=hawk
+  ok - prudenza/palmer/diner: ritrovamento giocato
+  ok - prudenza/palmer/diner: maddy_trovata scritto
+  ok - prudenza/palmer/diner: presagio_status active->verified al ritrovamento
+  ok - prudenza/palmer/diner @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - prudenza/palmer/diner: eco della promessa giocato
+  ok - prudenza/palmer/diner: confronto lettere R/O
+  ok - prudenza/palmer/diner: m8_cmp_diary preparabile dopo cmp_letters
+  ok - prudenza/palmer/diner: lettura «firma progressiva» disponibile
+  ok - prudenza/palmer/diner: P8 formulata
+  ok - prudenza/palmer/diner @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - prudenza/palmer/diner: m8_station giocata
+  ok - prudenza/palmer/diner: M8 completa
+  ok - prudenza/palmer/diner @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - prudenza/palmer/diner: dopo il commit, m8_station si ripete
+  ok - prudenza/centrale/palmer @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - prudenza/centrale/palmer: m8_diner preparabile
+  ok - prudenza/centrale/palmer: promessa scelta
+  ok - prudenza/centrale/palmer @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - prudenza/centrale/palmer: m8_leland_taxi giocato
+  ok - prudenza/centrale/palmer: T_LELAND_TAXI scritta
+  ok - prudenza/centrale/palmer @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - prudenza/centrale/palmer: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - prudenza/centrale/palmer: il tentativo bloccato non riscrive evidence/flags
+  ok - prudenza/centrale/palmer: m8_roadhouse_truman giocato
+  ok - prudenza/centrale/palmer: presagio_status=active dopo il tavolo
+  ok - prudenza/centrale/palmer @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - prudenza/centrale/palmer: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - prudenza/centrale/palmer: avvertimento scelto
+  ok - prudenza/centrale/palmer: warning_target scritto
+  ok - prudenza/centrale/palmer @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/centrale/palmer: m8_focus_choice preparabile
+  ok - prudenza/centrale/palmer: destinazione scelta
+  ok - prudenza/centrale/palmer: focus_destination scritto
+  ok - prudenza/centrale/palmer @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/centrale/palmer: solo m8_route_palmer ha una root viva, non m8_route_palmer
+  ok - prudenza/centrale/palmer: solo m8_route_palmer ha una root viva, non m8_route_lake
+  ok - prudenza/centrale/palmer: solo m8_route_palmer ha una root viva, non m8_route_diner
+  ok - prudenza/centrale/palmer: strada percorsa (m8_route_palmer)
+  ok - prudenza/centrale/palmer: body_found_by=hawk
+  ok - prudenza/centrale/palmer: ritrovamento giocato
+  ok - prudenza/centrale/palmer: maddy_trovata scritto
+  ok - prudenza/centrale/palmer: presagio_status active->verified al ritrovamento
+  ok - prudenza/centrale/palmer @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - prudenza/centrale/palmer: eco della promessa giocato
+  ok - prudenza/centrale/palmer: confronto lettere R/O
+  ok - prudenza/centrale/palmer: m8_cmp_diary preparabile dopo cmp_letters
+  ok - prudenza/centrale/palmer: lettura «firma progressiva» disponibile
+  ok - prudenza/centrale/palmer: P8 formulata
+  ok - prudenza/centrale/palmer @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - prudenza/centrale/palmer: m8_station giocata
+  ok - prudenza/centrale/palmer: M8 completa
+  ok - prudenza/centrale/palmer @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - prudenza/centrale/palmer: dopo il commit, m8_station si ripete
+  ok - prudenza/centrale/lago @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - prudenza/centrale/lago: m8_diner preparabile
+  ok - prudenza/centrale/lago: promessa scelta
+  ok - prudenza/centrale/lago @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - prudenza/centrale/lago: m8_leland_taxi giocato
+  ok - prudenza/centrale/lago: T_LELAND_TAXI scritta
+  ok - prudenza/centrale/lago @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - prudenza/centrale/lago: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - prudenza/centrale/lago: il tentativo bloccato non riscrive evidence/flags
+  ok - prudenza/centrale/lago: m8_roadhouse_truman giocato
+  ok - prudenza/centrale/lago: presagio_status=active dopo il tavolo
+  ok - prudenza/centrale/lago @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - prudenza/centrale/lago: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - prudenza/centrale/lago: avvertimento scelto
+  ok - prudenza/centrale/lago: warning_target scritto
+  ok - prudenza/centrale/lago @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/centrale/lago: m8_focus_choice preparabile
+  ok - prudenza/centrale/lago: destinazione scelta
+  ok - prudenza/centrale/lago: focus_destination scritto
+  ok - prudenza/centrale/lago @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/centrale/lago: solo m8_route_lago ha una root viva, non m8_route_palmer
+  ok - prudenza/centrale/lago: solo m8_route_lago ha una root viva, non m8_route_lake
+  ok - prudenza/centrale/lago: solo m8_route_lago ha una root viva, non m8_route_diner
+  ok - prudenza/centrale/lago: strada percorsa (m8_route_lake)
+  ok - prudenza/centrale/lago: body_found_by=cooper
+  ok - prudenza/centrale/lago: ritrovamento giocato
+  ok - prudenza/centrale/lago: maddy_trovata scritto
+  ok - prudenza/centrale/lago: presagio_status active->verified al ritrovamento
+  ok - prudenza/centrale/lago @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - prudenza/centrale/lago: eco della promessa giocato
+  ok - prudenza/centrale/lago: confronto lettere R/O
+  ok - prudenza/centrale/lago: m8_cmp_diary preparabile dopo cmp_letters
+  ok - prudenza/centrale/lago: lettura «firma progressiva» disponibile
+  ok - prudenza/centrale/lago: P8 formulata
+  ok - prudenza/centrale/lago @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - prudenza/centrale/lago: m8_station giocata
+  ok - prudenza/centrale/lago: M8 completa
+  ok - prudenza/centrale/lago @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - prudenza/centrale/lago: dopo il commit, m8_station si ripete
+  ok - prudenza/centrale/diner @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - prudenza/centrale/diner: m8_diner preparabile
+  ok - prudenza/centrale/diner: promessa scelta
+  ok - prudenza/centrale/diner @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - prudenza/centrale/diner: m8_leland_taxi giocato
+  ok - prudenza/centrale/diner: T_LELAND_TAXI scritta
+  ok - prudenza/centrale/diner @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - prudenza/centrale/diner: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - prudenza/centrale/diner: il tentativo bloccato non riscrive evidence/flags
+  ok - prudenza/centrale/diner: m8_roadhouse_truman giocato
+  ok - prudenza/centrale/diner: presagio_status=active dopo il tavolo
+  ok - prudenza/centrale/diner @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - prudenza/centrale/diner: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - prudenza/centrale/diner: avvertimento scelto
+  ok - prudenza/centrale/diner: warning_target scritto
+  ok - prudenza/centrale/diner @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/centrale/diner: m8_focus_choice preparabile
+  ok - prudenza/centrale/diner: destinazione scelta
+  ok - prudenza/centrale/diner: focus_destination scritto
+  ok - prudenza/centrale/diner @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/centrale/diner: solo m8_route_diner ha una root viva, non m8_route_palmer
+  ok - prudenza/centrale/diner: solo m8_route_diner ha una root viva, non m8_route_lake
+  ok - prudenza/centrale/diner: solo m8_route_diner ha una root viva, non m8_route_diner
+  ok - prudenza/centrale/diner: strada percorsa (m8_route_diner)
+  ok - prudenza/centrale/diner: body_found_by=hawk
+  ok - prudenza/centrale/diner: ritrovamento giocato
+  ok - prudenza/centrale/diner: maddy_trovata scritto
+  ok - prudenza/centrale/diner: presagio_status active->verified al ritrovamento
+  ok - prudenza/centrale/diner @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - prudenza/centrale/diner: eco della promessa giocato
+  ok - prudenza/centrale/diner: confronto lettere R/O
+  ok - prudenza/centrale/diner: m8_cmp_diary preparabile dopo cmp_letters
+  ok - prudenza/centrale/diner: lettura «firma progressiva» disponibile
+  ok - prudenza/centrale/diner: P8 formulata
+  ok - prudenza/centrale/diner @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - prudenza/centrale/diner: m8_station giocata
+  ok - prudenza/centrale/diner: M8 completa
+  ok - prudenza/centrale/diner @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - prudenza/centrale/diner: dopo il commit, m8_station si ripete
+  ok - prudenza/nessuno/palmer @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - prudenza/nessuno/palmer: m8_diner preparabile
+  ok - prudenza/nessuno/palmer: promessa scelta
+  ok - prudenza/nessuno/palmer @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - prudenza/nessuno/palmer: m8_leland_taxi giocato
+  ok - prudenza/nessuno/palmer: T_LELAND_TAXI scritta
+  ok - prudenza/nessuno/palmer @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - prudenza/nessuno/palmer: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - prudenza/nessuno/palmer: il tentativo bloccato non riscrive evidence/flags
+  ok - prudenza/nessuno/palmer: m8_roadhouse_truman giocato
+  ok - prudenza/nessuno/palmer: presagio_status=active dopo il tavolo
+  ok - prudenza/nessuno/palmer @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - prudenza/nessuno/palmer: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - prudenza/nessuno/palmer: avvertimento scelto
+  ok - prudenza/nessuno/palmer: warning_target scritto
+  ok - prudenza/nessuno/palmer @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/nessuno/palmer: m8_focus_choice preparabile
+  ok - prudenza/nessuno/palmer: destinazione scelta
+  ok - prudenza/nessuno/palmer: focus_destination scritto
+  ok - prudenza/nessuno/palmer @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/nessuno/palmer: solo m8_route_palmer ha una root viva, non m8_route_palmer
+  ok - prudenza/nessuno/palmer: solo m8_route_palmer ha una root viva, non m8_route_lake
+  ok - prudenza/nessuno/palmer: solo m8_route_palmer ha una root viva, non m8_route_diner
+  ok - prudenza/nessuno/palmer: strada percorsa (m8_route_palmer)
+  ok - prudenza/nessuno/palmer: body_found_by=hawk
+  ok - prudenza/nessuno/palmer: ritrovamento giocato
+  ok - prudenza/nessuno/palmer: maddy_trovata scritto
+  ok - prudenza/nessuno/palmer: presagio_status active->verified al ritrovamento
+  ok - prudenza/nessuno/palmer @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - prudenza/nessuno/palmer: eco della promessa giocato
+  ok - prudenza/nessuno/palmer: confronto lettere R/O
+  ok - prudenza/nessuno/palmer: m8_cmp_diary preparabile dopo cmp_letters
+  ok - prudenza/nessuno/palmer: lettura «firma progressiva» disponibile
+  ok - prudenza/nessuno/palmer: P8 formulata
+  ok - prudenza/nessuno/palmer @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - prudenza/nessuno/palmer: m8_station giocata
+  ok - prudenza/nessuno/palmer: M8 completa
+  ok - prudenza/nessuno/palmer @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - prudenza/nessuno/palmer: dopo il commit, m8_station si ripete
+  ok - prudenza/nessuno/lago @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - prudenza/nessuno/lago: m8_diner preparabile
+  ok - prudenza/nessuno/lago: promessa scelta
+  ok - prudenza/nessuno/lago @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - prudenza/nessuno/lago: m8_leland_taxi giocato
+  ok - prudenza/nessuno/lago: T_LELAND_TAXI scritta
+  ok - prudenza/nessuno/lago @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - prudenza/nessuno/lago: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - prudenza/nessuno/lago: il tentativo bloccato non riscrive evidence/flags
+  ok - prudenza/nessuno/lago: m8_roadhouse_truman giocato
+  ok - prudenza/nessuno/lago: presagio_status=active dopo il tavolo
+  ok - prudenza/nessuno/lago @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - prudenza/nessuno/lago: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - prudenza/nessuno/lago: avvertimento scelto
+  ok - prudenza/nessuno/lago: warning_target scritto
+  ok - prudenza/nessuno/lago @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/nessuno/lago: m8_focus_choice preparabile
+  ok - prudenza/nessuno/lago: destinazione scelta
+  ok - prudenza/nessuno/lago: focus_destination scritto
+  ok - prudenza/nessuno/lago @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/nessuno/lago: solo m8_route_lago ha una root viva, non m8_route_palmer
+  ok - prudenza/nessuno/lago: solo m8_route_lago ha una root viva, non m8_route_lake
+  ok - prudenza/nessuno/lago: solo m8_route_lago ha una root viva, non m8_route_diner
+  ok - prudenza/nessuno/lago: strada percorsa (m8_route_lake)
+  ok - prudenza/nessuno/lago: body_found_by=cooper
+  ok - prudenza/nessuno/lago: ritrovamento giocato
+  ok - prudenza/nessuno/lago: maddy_trovata scritto
+  ok - prudenza/nessuno/lago: presagio_status active->verified al ritrovamento
+  ok - prudenza/nessuno/lago @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - prudenza/nessuno/lago: eco della promessa giocato
+  ok - prudenza/nessuno/lago: confronto lettere R/O
+  ok - prudenza/nessuno/lago: m8_cmp_diary preparabile dopo cmp_letters
+  ok - prudenza/nessuno/lago: lettura «firma progressiva» disponibile
+  ok - prudenza/nessuno/lago: P8 formulata
+  ok - prudenza/nessuno/lago @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - prudenza/nessuno/lago: m8_station giocata
+  ok - prudenza/nessuno/lago: M8 completa
+  ok - prudenza/nessuno/lago @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - prudenza/nessuno/lago: dopo il commit, m8_station si ripete
+  ok - prudenza/nessuno/diner @entry: esattamente un obiettivo attivo, obj_m8_0 (trovati: obj_m8_0)
+  ok - prudenza/nessuno/diner: m8_diner preparabile
+  ok - prudenza/nessuno/diner: promessa scelta
+  ok - prudenza/nessuno/diner @dopo la promessa: esattamente un obiettivo attivo, obj_m8_25 (trovati: obj_m8_25)
+  ok - prudenza/nessuno/diner: m8_leland_taxi giocato
+  ok - prudenza/nessuno/diner: T_LELAND_TAXI scritta
+  ok - prudenza/nessuno/diner @dopo il taxi: esattamente un obiettivo attivo, obj_m8_1 (trovati: obj_m8_1)
+  ok - prudenza/nessuno/diner: m8_leland_taxi non è più preparabile dopo T_LELAND_TAXI (write-once strutturale)
+  ok - prudenza/nessuno/diner: il tentativo bloccato non riscrive evidence/flags
+  ok - prudenza/nessuno/diner: m8_roadhouse_truman giocato
+  ok - prudenza/nessuno/diner: presagio_status=active dopo il tavolo
+  ok - prudenza/nessuno/diner @dopo il tavolo del Roadhouse (obiettivo 150): esattamente un obiettivo attivo, obj_m8_15 (trovati: obj_m8_15)
+  ok - obj_m8_15: testo esatto
+  ok - prudenza/nessuno/diner: m8_roadhouse_phone preparabile dopo il tavolo
+  ok - prudenza/nessuno/diner: avvertimento scelto
+  ok - prudenza/nessuno/diner: warning_target scritto
+  ok - prudenza/nessuno/diner @dopo il telefono: esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/nessuno/diner: m8_focus_choice preparabile
+  ok - prudenza/nessuno/diner: destinazione scelta
+  ok - prudenza/nessuno/diner: focus_destination scritto
+  ok - prudenza/nessuno/diner @dopo il crocevia (stesso obiettivo, verso il ritrovamento): esattamente un obiettivo attivo, obj_m8_2 (trovati: obj_m8_2)
+  ok - prudenza/nessuno/diner: solo m8_route_diner ha una root viva, non m8_route_palmer
+  ok - prudenza/nessuno/diner: solo m8_route_diner ha una root viva, non m8_route_lake
+  ok - prudenza/nessuno/diner: solo m8_route_diner ha una root viva, non m8_route_diner
+  ok - prudenza/nessuno/diner: strada percorsa (m8_route_diner)
+  ok - prudenza/nessuno/diner: body_found_by=hawk
+  ok - prudenza/nessuno/diner: ritrovamento giocato
+  ok - prudenza/nessuno/diner: maddy_trovata scritto
+  ok - prudenza/nessuno/diner: presagio_status active->verified al ritrovamento
+  ok - prudenza/nessuno/diner @dopo il ritrovamento: esattamente un obiettivo attivo, obj_m8_3 (trovati: obj_m8_3)
+  ok - prudenza/nessuno/diner: eco della promessa giocato
+  ok - prudenza/nessuno/diner: confronto lettere R/O
+  ok - prudenza/nessuno/diner: m8_cmp_diary preparabile dopo cmp_letters
+  ok - prudenza/nessuno/diner: lettura «firma progressiva» disponibile
+  ok - prudenza/nessuno/diner: P8 formulata
+  ok - prudenza/nessuno/diner @P8 formulata, prima della stazione: esattamente un obiettivo attivo, obj_m8_35 (trovati: obj_m8_35)
+  ok - prudenza/nessuno/diner: m8_station giocata
+  ok - prudenza/nessuno/diner: M8 completa
+  ok - prudenza/nessuno/diner @dopo la stazione: esattamente un obiettivo attivo, obj_m8_4 (trovati: obj_m8_4)
+  ok - prudenza/nessuno/diner: dopo il commit, m8_station si ripete
+  ok - 27 percorsi promessa x avvertimento x destinazione, tutti completati (27)
+  ok - m8_station: valigia visibile con warning=palmer, focus=lago (mai passato da Palmer)
+  ok - m8_station: eco lago visibile con focus=lago
+  ok - m8_station: hook sempre presente dopo p03 (warning=palmer/focus=lago)
+  ok - m8_station: valigia NON ripetuta in F se già vista in C (warning=palmer, focus=palmer)
+  ok - m8_station: nessun eco lago con focus=palmer
+  ok - m8_station: hook presente anche con warning=palmer/focus=palmer
+  ok - m8_station: nessuna valigia con warning=centrale
+  ok - m8_station: nessun eco lago con focus=diner
+  ok - m8_station: hook presente su ogni percorso (warning=centrale/focus=diner)
+  ok - m8_station: sarah_support_state=none -> Truman è passato di persona (warning=palmer)
+  ok - m8_station: sarah_support_state=vice -> Andy è già con Sarah (warning=centrale)
+  ok - gate D->E: cmp_letters bloccato prima dell'eco della promessa
+  ok - gate D->E: cmp_diary bloccato prima dell'eco della promessa
+  ok - gate E: cmp_diary bloccato prima di cmp_letters (anche con eco fatto)
+  ok - gate E: cmp_diary si apre solo dopo cmp_letters
+  ok - Leland (m8_leland_waiting): root viva prima della promessa
+  ok - diary_b («R+O compongono un nome»): respinta con retry
+  ok - diary_b: P8 resta unformulated dopo la lettura respinta
+  ok - diary_c (il diario accusa qualcuno di casa): respinta con retry
+  ok - diary_c: P8 resta unformulated dopo la lettura respinta
+  ok - round-trip dopo il telefono: promessa + avvertimento preservati
+  ok - round-trip dopo il telefono: presagio_status preservato
+  ok - round-trip dopo il focus: promessa + avvertimento + destinazione preservati
+  ok - round-trip dopo il focus: la finestra del gigante rivaluta correttamente (falsa, warning_target già scritto)
+act-4-flow: runtime path OK (1535 controlli finora)
+# act-4-flow: adapter path (diner/roadhouse/town via CastPresence)
+  ok - Leland: presente al diner prima della promessa
+  ok - Leland: ancora presente dopo la promessa, prima del taxi (m8_leland_taxi)
+  ok - Leland: OFFSCREEN(hidden) dopo T_LELAND_TAXI (nessuna root ambigua)
+  ok - T_LELAND_TAXI: scritta
+  ok - T_LELAND_TAXI: la seconda interazione (bloccata) non incrementa la revisione dello stato
+  ok - roadhouse: Truman presente prima della destinazione
+  ok - roadhouse: bobby presente nella stessa finestra
+  ok - roadhouse: donna presente nella stessa finestra
+  ok - roadhouse: james presente nella stessa finestra
+  ok - roadhouse: shelly presente nella stessa finestra
+  ok - roadhouse: norma presente nella stessa finestra
+  ok - roadhouse: loglady presente nella stessa finestra
+  ok - roadhouse: Truman resta dopo warning_target (lascia solo a destinazione scelta)
+  ok - roadhouse: bobby resta dopo warning_target
+  ok - roadhouse: donna resta dopo warning_target
+  ok - roadhouse: james resta dopo warning_target
+  ok - roadhouse: shelly resta dopo warning_target
+  ok - roadhouse: norma resta dopo warning_target
+  ok - roadhouse: loglady resta dopo warning_target
+  ok - roadhouse: Truman assente dopo focus_destination scritto
+  ok - roadhouse: bobby OFFSCREEN(home) dopo focus_destination scritto
+  ok - roadhouse: donna OFFSCREEN(home) dopo focus_destination scritto
+  ok - roadhouse: james OFFSCREEN(home) dopo focus_destination scritto
+  ok - roadhouse: shelly OFFSCREEN(home) dopo focus_destination scritto
+  ok - roadhouse: loglady OFFSCREEN(home) dopo focus_destination scritto
+  ok - roadhouse: norma torna alla sua baseline al diner (5,2) dopo focus_destination scritto
+  ok - Giant: assente prima che presagio_status sia active
+  ok - Giant: presente con presagio_status=active e nessun warning_target, a (8,1)
+  ok - Giant: dialogue null (l'interazione appartiene al nodo m8_giant_stage, mai un NPC muto)
+  ok - Giant: assente dopo warning_target scritto
+  ok - m8_giant_stage: nodo presente
+  ok - m8_giant_stage: nessun effetto (presenza silenziosa, nessuno stato scritto qui)
+  ok - m8_giant_stage: nessuna scelta
+  ok - m8_giant_stage: una sola pagina
+  ok - m8_roadhouse_phone: nessuna root prima di m8_roadhouse_truman
+  ok - m8_roadhouse_phone: root viva dopo m8_roadhouse_truman
+  ok - town: target narrativo town_crossroads a (47,30)
+  ok - town: (47,30) calpestabile
+  ok - town: (47,29) — spawn di ritorno dal Roadhouse — calpestabile
+  ok - riva: hawk in pattuglia prima del ritrovamento
+  ok - riva: hawk a (16,27) con body_found_by=hawk
+  ok - riva: hawk resta a (16,27) dopo la stazione, prima di atto5
+  ok - riva: hawk lascia la riva con atto5
+  ok - riva: body_found_by=cooper da solo non basta, hawk resta in pattuglia
+  ok - riva: hawk a (16,27) con body_found_by=cooper ∧ maddy_trovata
+  ok - js/glue.js: nessuna voce NPC classica per sarah (unica fonte: cast-presence)
+  ok - js/glue.js: nessuna voce NPC classica per bobby (unica fonte: cast-presence)
+  ok - js/glue.js: nessuna voce NPC classica per donna (unica fonte: cast-presence)
+  ok - sarah_visione: nessun "BOB" nel testo classico della visione
+  ok - sarah: presente al Palmer prima del presagio (nessuna visione ancora attiva)
+  ok - sarah: OFFSCREEN(asleep) con presagio_status=active (D1)
+  ok - js/data.js: dialogo ritirato "truman_atto4" assente
+  ok - js/data.js: dialogo ritirato "truman_atto5" assente
+  ok - js/data.js: dialogo ritirato "truman_wait5" assente
+  ok - js/data.js: dialogo ritirato "lago_maddy" assente
+  ok - js/data.js: dialogo ritirato "maddy_a4" assente
+  ok - js/data.js: dialogo ritirato "leland_a4" assente
+  ok - js/data.js: dialogo ritirato "leland_dove" assente
+  ok - js/data.js: dialogo ritirato "leland_dopo" assente
+  ok - js/data.js: dialogo ritirato "gerard_a4" assente
+  ok - js/data.js: indizio ritirato lettera_o assente
+  ok - js/glue.js: nessun riferimento all'id ritirato "truman_atto4"
+  ok - js/glue.js: nessun riferimento all'id ritirato "truman_atto5"
+  ok - js/glue.js: nessun riferimento all'id ritirato "truman_wait5"
+  ok - js/glue.js: nessun riferimento all'id ritirato "lago_maddy"
+  ok - js/glue.js: nessun riferimento all'id ritirato "maddy_a4"
+  ok - js/glue.js: nessun riferimento all'id ritirato "leland_a4"
+  ok - js/glue.js: nessun riferimento all'id ritirato "leland_dove"
+  ok - js/glue.js: nessun riferimento all'id ritirato "leland_dopo"
+  ok - js/glue.js: nessun riferimento all'id ritirato "gerard_a4"
+  ok - M8: nessun nodo su oej/traincar (contenuto Atto 2/3)
+  ok - registro: nessuna finestra di M8 nomina audrey (M8 non la usa)
+  ok - registro: audrey non compare piazzata fuori da oej
+  ok - M8: audrey non è tra i corpi di diner
+  ok - M8: audrey non è tra i corpi di roadhouse
+  ok - M8: audrey non è tra i corpi di town
+act-4-flow: adapter path OK
+
+act-4-flow: 1611/1611
