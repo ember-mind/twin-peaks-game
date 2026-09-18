@@ -1,0 +1,5978 @@
+{
+  "format": "double-r-real-cdp-evidence.v2",
+  "status": "PASS",
+  "source": {
+    "root": "/Users/ebuccelli/Code/solo/projects/twin-peaks-game/.worktrees/intent-room-double-r-grid",
+    "head": "2b7abf03fbe8e3c197a1605a7b728dff9f96aa2a",
+    "status": "?? artifacts/intent-room-double-r-grid/new-pass/\n"
+  },
+  "pages": {
+    "route": "/test/double-r-location.html?clean=1",
+    "canonical": "/test/retro-scene.html?map=diner&x=6&y=8&dir=up&narrative=1"
+  },
+  "viewport": {
+    "css": [
+      256,
+      192
+    ],
+    "native": [
+      256,
+      192
+    ],
+    "deviceScaleFactor": 1
+  },
+  "seed": null,
+  "chromeFlags": [
+    "--headless=new",
+    "--mute-audio",
+    "--enable-unsafe-swiftshader",
+    "--use-angle=swiftshader",
+    "--disable-background-timer-throttling",
+    "--disable-renderer-backgrounding",
+    "--disable-backgrounding-occluded-windows"
+  ],
+  "stationary": {
+    "durationRequestedMs": 30000,
+    "sampleMs": 1000,
+    "frames": [
+      {
+        "file": "stationary/t+005332ms-stationary.png",
+        "sha256": "6583fb4fefd1bd7ae767dd06e1da13e09050c056d5e0d46a3b97a310b22c4f4d",
+        "bytes": 23017,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:58:56.340Z",
+        "elapsedMs": 5332,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "down",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "down",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "down",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 4686.899999976158
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 4869.600000023842,
+        "runtime": {
+          "raf": {
+            "count": 42,
+            "first": 2073.1,
+            "last": 4656.4
+          },
+          "ambient": {
+            "time": 2199.600000000001,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 2
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 0,
+                "events": 0,
+                "cycles": 2
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 1,
+                "events": 0,
+                "cycles": 2
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 0,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 2199.600000000001,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+006511ms-stationary.png",
+        "sha256": "c6acd5634bfce73d9b4a697ec2327dfa5c3d327830f57a85709d2f5ab508d31b",
+        "bytes": 22960,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:58:57.519Z",
+        "elapsedMs": 6511,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "up",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "left",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "down",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 5873.700000047684
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 6048.700000047684,
+        "runtime": {
+          "raf": {
+            "count": 64,
+            "first": 2073.1,
+            "last": 5823
+          },
+          "ambient": {
+            "time": 3216.2000000000003,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 3
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 4,
+                "events": 0,
+                "cycles": 2
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 6,
+                "events": 0,
+                "cycles": 2
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 0,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 3216.2000000000003,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+007704ms-stationary.png",
+        "sha256": "6cabdbe9800d9807f4c8408b8c6e3b1d6e05104f1aef04a0bc609538fb529819",
+        "bytes": 23008,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:58:58.712Z",
+        "elapsedMs": 7704,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "up",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "left",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "left",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 7052.700000047684
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 7241.300000071526,
+        "runtime": {
+          "raf": {
+            "count": 86,
+            "first": 2073.1,
+            "last": 7022.9
+          },
+          "ambient": {
+            "time": 4216,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 1,
+                "events": 0,
+                "cycles": 4
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 1,
+                "events": 0,
+                "cycles": 3
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 4,
+                "events": 0,
+                "cycles": 3
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": true,
+                "frame": 0,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 0,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 4216,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+008872ms-stationary.png",
+        "sha256": "f760e037d9c14fd826540ddf604aa4cedf6ebe5ff68a0714984449c33c26b293",
+        "bytes": 22959,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:58:59.880Z",
+        "elapsedMs": 8872,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "up",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "left",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "left",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 8245.700000047684
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 8410.100000023842,
+        "runtime": {
+          "raf": {
+            "count": 108,
+            "first": 2073.1,
+            "last": 8206.2
+          },
+          "ambient": {
+            "time": 5215.799999999999,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 6,
+                "events": 0,
+                "cycles": 4
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 5,
+                "events": 0,
+                "cycles": 3
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 4
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": true,
+                "frame": 4,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 5215.799999999999,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+010076ms-stationary.png",
+        "sha256": "b6a62356d0bd9153e14ee3971928a02283d5341c039438147887fb594cbcc125",
+        "bytes": 22975,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:01.084Z",
+        "elapsedMs": 10076,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "up",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "left",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "left",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 9413.899999976158
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 9613.399999976158,
+        "runtime": {
+          "raf": {
+            "count": 131,
+            "first": 2073.1,
+            "last": 9389.5
+          },
+          "ambient": {
+            "time": 6265.399999999998,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 5,
+                "events": 0,
+                "cycles": 5
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 4
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 1,
+                "events": 0,
+                "cycles": 5
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 6265.399999999998,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+011285ms-stationary.png",
+        "sha256": "bcece5527a17bbc5216801b575b412057f1d5859e8bb0e7cf22f1ed2513a6f5e",
+        "bytes": 22925,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:02.293Z",
+        "elapsedMs": 11285,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "up",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "left",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "up",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 10617.5
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 10823.399999976158,
+        "runtime": {
+          "raf": {
+            "count": 153,
+            "first": 2073.1,
+            "last": 10606.1
+          },
+          "ambient": {
+            "time": 7265.199999999999,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 6
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 6,
+                "events": 0,
+                "cycles": 4
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 6,
+                "events": 0,
+                "cycles": 5
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 7265.199999999999,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+012466ms-stationary.png",
+        "sha256": "bfb692a1fcb50eb410209b7c1f815dfd8f344e5adce54e85fddbc61905437847",
+        "bytes": 22967,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:03.474Z",
+        "elapsedMs": 12466,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "left",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "right",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "up",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 11827.100000023842
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 12004.100000023842,
+        "runtime": {
+          "raf": {
+            "count": 176,
+            "first": 2073.1,
+            "last": 11806
+          },
+          "ambient": {
+            "time": 8315,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 7
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 5
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 4,
+                "events": 0,
+                "cycles": 6
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 8315,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+013677ms-stationary.png",
+        "sha256": "fc05b60dd5fd37bb7e67d4d6d78dc349bb731179c76a51e33d6f45626dfed9ea",
+        "bytes": 22938,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:04.685Z",
+        "elapsedMs": 13677,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "left",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "right",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "up",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 13007.899999976158
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 13214.399999976158,
+        "runtime": {
+          "raf": {
+            "count": 199,
+            "first": 2073.1,
+            "last": 12989.3
+          },
+          "ambient": {
+            "time": 9347.899999999998,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 0,
+                "events": 0,
+                "cycles": 8
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 0,
+                "events": 0,
+                "cycles": 6
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 7
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 9347.899999999998,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+014848ms-stationary.png",
+        "sha256": "79c5015aae52dd834b9af5534401ce53bbc39c83c290e3c99af943afaac4a902",
+        "bytes": 22960,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:05.856Z",
+        "elapsedMs": 14848,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "left",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "right",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "left",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 14219
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 14385.700000047684,
+        "runtime": {
+          "raf": {
+            "count": 221,
+            "first": 2073.1,
+            "last": 14172.6
+          },
+          "ambient": {
+            "time": 10330.899999999996,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 6,
+                "events": 0,
+                "cycles": 8
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 4,
+                "events": 0,
+                "cycles": 6
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 0,
+                "events": 0,
+                "cycles": 8
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": true,
+                "frame": 1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": true,
+                "frame": 4,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 10330.899999999996,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+016053ms-stationary.png",
+        "sha256": "4dd3041912fc325af829cd37b28747b413705362c4a36bcfafa75744e8c67a07",
+        "bytes": 23029,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:07.061Z",
+        "elapsedMs": 16053,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "left",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "right",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "left",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 15390
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 15591.200000047684,
+        "runtime": {
+          "raf": {
+            "count": 244,
+            "first": 2073.1,
+            "last": 15372.6
+          },
+          "ambient": {
+            "time": 11330.599999999999,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 4,
+                "events": 0,
+                "cycles": 9
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 1,
+                "events": 0,
+                "cycles": 7
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 5,
+                "events": 0,
+                "cycles": 8
+              },
+              {
+                "id": "pendant-west",
+                "active": true,
+                "frame": 1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": true,
+                "frame": 4,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 11330.599999999999,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+017249ms-stationary.png",
+        "sha256": "39920db14dc615a1c41927d17b6d84cd2b8dab4bf59c1c2d0a82c5dc0b8244de",
+        "bytes": 23032,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:08.257Z",
+        "elapsedMs": 17249,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "down",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "left",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "left",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 16595.100000023842
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 16786.899999976158,
+        "runtime": {
+          "raf": {
+            "count": 266,
+            "first": 2073.1,
+            "last": 16555.8
+          },
+          "ambient": {
+            "time": 12330.199999999997,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 10
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 5,
+                "events": 0,
+                "cycles": 7
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 9
+              },
+              {
+                "id": "pendant-west",
+                "active": true,
+                "frame": 4,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": true,
+                "frame": 1,
+                "events": 1,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 12330.199999999997,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+018493ms-stationary.png",
+        "sha256": "af10bb7a2ec390693cc4b1bbefca510d75285f512e57df1b77b7e677d9221545",
+        "bytes": 23012,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:09.502Z",
+        "elapsedMs": 18494,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "down",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "left",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "up",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 17867.899999976158
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 18030.899999976158,
+        "runtime": {
+          "raf": {
+            "count": 289,
+            "first": 2073.1,
+            "last": 17855.9
+          },
+          "ambient": {
+            "time": 13396.699999999993,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 11
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 8
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 1,
+                "events": 0,
+                "cycles": 10
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": true,
+                "frame": 3,
+                "events": 1,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 13396.699999999993,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+019713ms-stationary.png",
+        "sha256": "2c770b9d577fdcba1dc8ba9b4cb06af68fd7c5a762a1110bebc3e13f5af3a923",
+        "bytes": 22990,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:10.722Z",
+        "elapsedMs": 19714,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "right",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "left",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "up",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 19035.200000047684
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 19250.899999976158,
+        "runtime": {
+          "raf": {
+            "count": 312,
+            "first": 2073.1,
+            "last": 19022.4
+          },
+          "ambient": {
+            "time": 14412.899999999994,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 0,
+                "events": 0,
+                "cycles": 12
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 6,
+                "events": 0,
+                "cycles": 8
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 6,
+                "events": 0,
+                "cycles": 10
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": true,
+                "frame": 3,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": true,
+                "frame": 5,
+                "events": 1,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 14412.899999999994,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+020946ms-stationary.png",
+        "sha256": "51e15f83b6ec84ace8fb62b53cd49cd98bc75fef7d902a7c2fb5b9d11be85c70",
+        "bytes": 22994,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:11.955Z",
+        "elapsedMs": 20947,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "right",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "down",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "right",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 20255.100000023842
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 20484.399999976158,
+        "runtime": {
+          "raf": {
+            "count": 334,
+            "first": 2073.1,
+            "last": 20239
+          },
+          "ambient": {
+            "time": 15429.399999999998,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 6,
+                "events": 0,
+                "cycles": 12
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 9
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 5,
+                "events": 0,
+                "cycles": 11
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 15429.399999999998,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": true,
+                "frame": 0,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+022138ms-stationary.png",
+        "sha256": "babe07be580d8c82d2d01b3d26e333441c3f31346f716ee115446f171257c289",
+        "bytes": 22954,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:13.147Z",
+        "elapsedMs": 22139,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "right",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "down",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "right",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 21488.300000071526
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 21675.100000023842,
+        "runtime": {
+          "raf": {
+            "count": 355,
+            "first": 2073.1,
+            "last": 21439
+          },
+          "ambient": {
+            "time": 16396.1,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 4,
+                "events": 0,
+                "cycles": 13
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 0,
+                "events": 0,
+                "cycles": 10
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 12
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 16396.1,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": true,
+                "frame": 3,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+023344ms-stationary.png",
+        "sha256": "7b8580182a0da24c6ed7f5158f4d0ed82a105209cabef217688d75b81d0d0564",
+        "bytes": 23004,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:14.352Z",
+        "elapsedMs": 23344,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "up",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "down",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "right",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 22680.300000071526
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 22881.700000047684,
+        "runtime": {
+          "raf": {
+            "count": 377,
+            "first": 2073.1,
+            "last": 22655.6
+          },
+          "ambient": {
+            "time": 17395.899999999998,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 14
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 10
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 1,
+                "events": 0,
+                "cycles": 13
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 17395.899999999998,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": true,
+                "frame": 6,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+024521ms-stationary.png",
+        "sha256": "2d71e383bc858705b897db574e4a5a251c69e73a6986012d5f0a0dad68bee5ce",
+        "bytes": 22987,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:15.529Z",
+        "elapsedMs": 24521,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "up",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "down",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "right",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 23885.800000071526
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 24059.200000047684,
+        "runtime": {
+          "raf": {
+            "count": 399,
+            "first": 2073.1,
+            "last": 23838.9
+          },
+          "ambient": {
+            "time": 18395.8,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 1,
+                "events": 0,
+                "cycles": 15
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 0,
+                "events": 0,
+                "cycles": 11
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 5,
+                "events": 0,
+                "cycles": 13
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 18395.8,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+025727ms-stationary.png",
+        "sha256": "e4f522d7a124b46e65a8347893ed932c05725522e626e782998450d6860ba803",
+        "bytes": 22991,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:16.735Z",
+        "elapsedMs": 25727,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "left",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "down",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "right",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 25062.800000071526
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 25265,
+        "runtime": {
+          "raf": {
+            "count": 421,
+            "first": 2073.1,
+            "last": 25038.9
+          },
+          "ambient": {
+            "time": 19395.600000000002,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 0,
+                "events": 0,
+                "cycles": 16
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 4,
+                "events": 0,
+                "cycles": 11
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 14
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 19395.600000000002,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+026946ms-stationary.png",
+        "sha256": "7367dec3778d088e7e92daae40413dadd12cdeed8f77ac665e0aee661bafcf9a",
+        "bytes": 23066,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:17.955Z",
+        "elapsedMs": 26947,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "left",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "down",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "right",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 26268.600000023842
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 26484.899999976158,
+        "runtime": {
+          "raf": {
+            "count": 443,
+            "first": 2073.1,
+            "last": 26255.5
+          },
+          "ambient": {
+            "time": 20412.1,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 5,
+                "events": 0,
+                "cycles": 16
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 1,
+                "events": 0,
+                "cycles": 12
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 1,
+                "events": 0,
+                "cycles": 15
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": true,
+                "frame": 3,
+                "events": 3,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": true,
+                "frame": 4,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 4,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 20412.1,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+028121ms-stationary.png",
+        "sha256": "c7c5c853723c42780e857771ef610fc1bf7c6975484f3790f6db63d7f9aae044",
+        "bytes": 23085,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:19.129Z",
+        "elapsedMs": 28121,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "left",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "right",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "right",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 27488.399999976158
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 27659.399999976158,
+        "runtime": {
+          "raf": {
+            "count": 462,
+            "first": 2073.1,
+            "last": 27438.8
+          },
+          "ambient": {
+            "time": 21278.7,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 17
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 5,
+                "events": 0,
+                "cycles": 12
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 6,
+                "events": 0,
+                "cycles": 15
+              },
+              {
+                "id": "pendant-west",
+                "active": true,
+                "frame": 2,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 3,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": true,
+                "frame": 0,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 4,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 21278.7,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+029346ms-stationary.png",
+        "sha256": "721c9cea6414ec996238f5eb343d01dd5b7104042e68063787273d1234c6eb81",
+        "bytes": 23019,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:20.355Z",
+        "elapsedMs": 29347,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "down",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "right",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "right",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 28663.899999976158
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 28882.5,
+        "runtime": {
+          "raf": {
+            "count": 485,
+            "first": 2073.1,
+            "last": 28655.3
+          },
+          "ambient": {
+            "time": 22328.4,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 18
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 13
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 4,
+                "events": 0,
+                "cycles": 16
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 3,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 4,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 22328.4,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+030522ms-stationary.png",
+        "sha256": "952a84df57e29e7ce4258b7fe26e2dcc7a147d6025ac747ce590d10cb2480731",
+        "bytes": 23050,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:21.530Z",
+        "elapsedMs": 30522,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "down",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "right",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "right",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 29887.5
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 30059.300000071526,
+        "runtime": {
+          "raf": {
+            "count": 506,
+            "first": 2073.1,
+            "last": 29838.7
+          },
+          "ambient": {
+            "time": 23294.9,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 0,
+                "events": 0,
+                "cycles": 19
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 6,
+                "events": 0,
+                "cycles": 13
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 17
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 3,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": true,
+                "frame": 0,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 4,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": true,
+                "frame": 1,
+                "events": 2,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 23294.9,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+031707ms-stationary.png",
+        "sha256": "0b6c571e683d949139ddca4f49212bb92c77ede167c03cb8d2196f16d2d235d8",
+        "bytes": 23035,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:22.715Z",
+        "elapsedMs": 31707,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "down",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "right",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "right",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 31063.800000071526
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 31245.5,
+        "runtime": {
+          "raf": {
+            "count": 528,
+            "first": 2073.1,
+            "last": 31022
+          },
+          "ambient": {
+            "time": 24294.800000000003,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 5,
+                "events": 0,
+                "cycles": 19
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 14
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 0,
+                "events": 0,
+                "cycles": 18
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 3,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": true,
+                "frame": 4,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 4,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": true,
+                "frame": 3,
+                "events": 2,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 24294.800000000003,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+032872ms-stationary.png",
+        "sha256": "51553bf0371cff079f51d8425ac25ef516c8f6d042f1323987fa37016285babc",
+        "bytes": 23023,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:23.880Z",
+        "elapsedMs": 32872,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "down",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "left",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "right",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 32248.800000071526
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 32410.5,
+        "runtime": {
+          "raf": {
+            "count": 550,
+            "first": 2073.1,
+            "last": 32205.2
+          },
+          "ambient": {
+            "time": 25294.600000000006,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 4,
+                "events": 0,
+                "cycles": 20
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 6,
+                "events": 0,
+                "cycles": 14
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 5,
+                "events": 0,
+                "cycles": 18
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 3,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 5,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": true,
+                "frame": 6,
+                "events": 2,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 25294.600000000006,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+034055ms-stationary.png",
+        "sha256": "ac2d6685a14810bbc8c2f2ad6499464c9f4a1e2c4d2745a89aadcd8417a807d9",
+        "bytes": 22992,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:25.063Z",
+        "elapsedMs": 34055,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "down",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "left",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "right",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 33413.800000071526
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 33593.10000002384,
+        "runtime": {
+          "raf": {
+            "count": 572,
+            "first": 2073.1,
+            "last": 33371.8
+          },
+          "ambient": {
+            "time": 26294.200000000004,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 21
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 15
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 2,
+                "events": 0,
+                "cycles": 19
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 3,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 5,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 26294.200000000004,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "file": "stationary/t+034319ms-stationary.png",
+        "sha256": "7dec293b3f99cf06cc9849aea5fd2a919fddc4bacc8a5bbc49cfc1b580da4fd9",
+        "bytes": 22986,
+        "size": [
+          256,
+          192
+        ],
+        "capturedAt": "2026-09-18T18:59:25.328Z",
+        "elapsedMs": 34320,
+        "state": {
+          "ready": true,
+          "title": "TP-RETRO-READY diner",
+          "mapId": "diner",
+          "mode": "play",
+          "fadePhase": 0,
+          "player": {
+            "tx": 6,
+            "ty": 8,
+            "dir": "up",
+            "moving": false
+          },
+          "npcs": [
+            {
+              "id": "loglady",
+              "x": 4,
+              "y": 5,
+              "dir": "down",
+              "moving": false,
+              "homeX": 4,
+              "homeY": 5
+            },
+            {
+              "id": "norma",
+              "x": 5,
+              "y": 2,
+              "dir": "left",
+              "moving": false,
+              "homeX": 5,
+              "homeY": 2
+            },
+            {
+              "id": "shelly",
+              "x": 9,
+              "y": 7,
+              "dir": "right",
+              "moving": false,
+              "homeX": 9,
+              "homeY": 7
+            }
+          ],
+          "cast": {
+            "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+            "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+            "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+            "bob": "OFFSCREEN(force) [BASELINE]",
+            "bobby": "PLACED@town 31,16 down [BASELINE]",
+            "donna": "PLACED@town 44,10 down [BASELINE]",
+            "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+            "giant": "OFFSCREEN(offscreen) [BASELINE]",
+            "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+            "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+            "jacoby": "PLACED@town 16,25 down [BASELINE]",
+            "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+            "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+            "laura": "PLACED@redroom 11,2 down [BASELINE]",
+            "leland": "OFFSCREEN(mourning) [BASELINE]",
+            "loglady": "PLACED@diner 4,5 down [BASELINE]",
+            "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+            "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+            "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+            "norma": "PLACED@diner 5,2 down [BASELINE]",
+            "piantone": "OFFSCREEN(scenography) [BASELINE]",
+            "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+            "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+            "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+            "shelly": "PLACED@diner 9,7 down [BASELINE]",
+            "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+          },
+          "canvas": {
+            "width": 256,
+            "height": 192,
+            "css": [
+              0,
+              0,
+              256,
+              192
+            ]
+          },
+          "viewport": [
+            256,
+            192
+          ],
+          "hidden": false,
+          "perfNow": 33687.800000071526
+        },
+        "canvas": [
+          256,
+          192
+        ],
+        "viewport": [
+          256,
+          192
+        ],
+        "hidden": false,
+        "pagePerfNow": 33857.60000002384,
+        "runtime": {
+          "raf": {
+            "count": 577,
+            "first": 2073.1,
+            "last": 33638.5
+          },
+          "ambient": {
+            "time": 26444.200000000004,
+            "items": [
+              {
+                "id": "counter-coffee",
+                "active": true,
+                "frame": 4,
+                "events": 0,
+                "cycles": 21
+              },
+              {
+                "id": "counter-cup-steam",
+                "active": true,
+                "frame": 4,
+                "events": 0,
+                "cycles": 15
+              },
+              {
+                "id": "booth-coffee",
+                "active": true,
+                "frame": 3,
+                "events": 0,
+                "cycles": 19
+              },
+              {
+                "id": "pendant-west",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-middle",
+                "active": false,
+                "frame": -1,
+                "events": 3,
+                "cycles": 0
+              },
+              {
+                "id": "pendant-east",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "double-r-neon",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "coffee-machine",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              },
+              {
+                "id": "wall-clock",
+                "active": true,
+                "frame": 5,
+                "events": 0,
+                "cycles": 0
+              },
+              {
+                "id": "pie-glass",
+                "active": false,
+                "frame": -1,
+                "events": 2,
+                "cycles": 0
+              }
+            ]
+          },
+          "character": {
+            "time": 26444.200000000004,
+            "items": [
+              {
+                "id": "booth-sip",
+                "active": false,
+                "frame": -1,
+                "events": 1,
+                "cycles": 0
+              },
+              {
+                "id": "counter-wipe",
+                "active": false,
+                "frame": -1,
+                "events": 0,
+                "cycles": 0
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "uniqueFrameCount": 26,
+    "startState": {
+      "ready": true,
+      "title": "TP-RETRO-READY diner",
+      "mapId": "diner",
+      "mode": "play",
+      "fadePhase": 0,
+      "player": {
+        "tx": 6,
+        "ty": 8,
+        "dir": "up",
+        "moving": false
+      },
+      "npcs": [
+        {
+          "id": "loglady",
+          "x": 4,
+          "y": 5,
+          "dir": "down",
+          "moving": false,
+          "homeX": 4,
+          "homeY": 5
+        },
+        {
+          "id": "norma",
+          "x": 5,
+          "y": 2,
+          "dir": "down",
+          "moving": false,
+          "homeX": 5,
+          "homeY": 2
+        },
+        {
+          "id": "shelly",
+          "x": 9,
+          "y": 7,
+          "dir": "down",
+          "moving": false,
+          "homeX": 9,
+          "homeY": 7
+        }
+      ],
+      "cast": {
+        "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+        "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+        "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+        "bob": "OFFSCREEN(force) [BASELINE]",
+        "bobby": "PLACED@town 31,16 down [BASELINE]",
+        "donna": "PLACED@town 44,10 down [BASELINE]",
+        "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+        "giant": "OFFSCREEN(offscreen) [BASELINE]",
+        "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+        "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+        "jacoby": "PLACED@town 16,25 down [BASELINE]",
+        "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+        "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+        "laura": "PLACED@redroom 11,2 down [BASELINE]",
+        "leland": "OFFSCREEN(mourning) [BASELINE]",
+        "loglady": "PLACED@diner 4,5 down [BASELINE]",
+        "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+        "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+        "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+        "norma": "PLACED@diner 5,2 down [BASELINE]",
+        "piantone": "OFFSCREEN(scenography) [BASELINE]",
+        "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+        "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+        "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+        "shelly": "PLACED@diner 9,7 down [BASELINE]",
+        "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+      },
+      "canvas": {
+        "width": 256,
+        "height": 192,
+        "css": [
+          0,
+          0,
+          256,
+          192
+        ]
+      },
+      "viewport": [
+        256,
+        192
+      ],
+      "hidden": false,
+      "perfNow": 3233.399999976158
+    },
+    "endState": {
+      "ready": true,
+      "title": "TP-RETRO-READY diner",
+      "mapId": "diner",
+      "mode": "play",
+      "fadePhase": 0,
+      "player": {
+        "tx": 6,
+        "ty": 8,
+        "dir": "up",
+        "moving": false
+      },
+      "npcs": [
+        {
+          "id": "loglady",
+          "x": 4,
+          "y": 5,
+          "dir": "down",
+          "moving": false,
+          "homeX": 4,
+          "homeY": 5
+        },
+        {
+          "id": "norma",
+          "x": 5,
+          "y": 2,
+          "dir": "left",
+          "moving": false,
+          "homeX": 5,
+          "homeY": 2
+        },
+        {
+          "id": "shelly",
+          "x": 9,
+          "y": 7,
+          "dir": "right",
+          "moving": false,
+          "homeX": 9,
+          "homeY": 7
+        }
+      ],
+      "cast": {
+        "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+        "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+        "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+        "bob": "OFFSCREEN(force) [BASELINE]",
+        "bobby": "PLACED@town 31,16 down [BASELINE]",
+        "donna": "PLACED@town 44,10 down [BASELINE]",
+        "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+        "giant": "OFFSCREEN(offscreen) [BASELINE]",
+        "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+        "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+        "jacoby": "PLACED@town 16,25 down [BASELINE]",
+        "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+        "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+        "laura": "PLACED@redroom 11,2 down [BASELINE]",
+        "leland": "OFFSCREEN(mourning) [BASELINE]",
+        "loglady": "PLACED@diner 4,5 down [BASELINE]",
+        "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+        "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+        "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+        "norma": "PLACED@diner 5,2 down [BASELINE]",
+        "piantone": "OFFSCREEN(scenography) [BASELINE]",
+        "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+        "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+        "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+        "shelly": "PLACED@diner 9,7 down [BASELINE]",
+        "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+      },
+      "canvas": {
+        "width": 256,
+        "height": 192,
+        "css": [
+          0,
+          0,
+          256,
+          192
+        ]
+      },
+      "viewport": [
+        256,
+        192
+      ],
+      "hidden": false,
+      "perfNow": 33860
+    },
+    "startedAtElapsedMs": 3693,
+    "endedAtElapsedMs": 34320,
+    "durationMeasuredMs": 30627,
+    "runtime": {
+      "start": {
+        "raf": {
+          "count": 14,
+          "first": 2073.1,
+          "last": 3223
+        },
+        "ambient": {
+          "time": 800,
+          "items": [
+            {
+              "id": "counter-coffee",
+              "active": true,
+              "frame": 2,
+              "events": 0,
+              "cycles": 1
+            },
+            {
+              "id": "counter-cup-steam",
+              "active": true,
+              "frame": 2,
+              "events": 0,
+              "cycles": 1
+            },
+            {
+              "id": "booth-coffee",
+              "active": true,
+              "frame": 1,
+              "events": 0,
+              "cycles": 1
+            },
+            {
+              "id": "pendant-west",
+              "active": false,
+              "frame": -1,
+              "events": 0,
+              "cycles": 0
+            },
+            {
+              "id": "pendant-middle",
+              "active": false,
+              "frame": -1,
+              "events": 0,
+              "cycles": 0
+            },
+            {
+              "id": "pendant-east",
+              "active": false,
+              "frame": -1,
+              "events": 0,
+              "cycles": 0
+            },
+            {
+              "id": "double-r-neon",
+              "active": false,
+              "frame": -1,
+              "events": 0,
+              "cycles": 0
+            },
+            {
+              "id": "coffee-machine",
+              "active": false,
+              "frame": -1,
+              "events": 0,
+              "cycles": 0
+            },
+            {
+              "id": "wall-clock",
+              "active": true,
+              "frame": 0,
+              "events": 0,
+              "cycles": 0
+            },
+            {
+              "id": "pie-glass",
+              "active": false,
+              "frame": -1,
+              "events": 0,
+              "cycles": 0
+            }
+          ]
+        },
+        "character": {
+          "time": 800,
+          "items": [
+            {
+              "id": "booth-sip",
+              "active": false,
+              "frame": -1,
+              "events": 0,
+              "cycles": 0
+            },
+            {
+              "id": "counter-wipe",
+              "active": false,
+              "frame": -1,
+              "events": 0,
+              "cycles": 0
+            }
+          ]
+        }
+      },
+      "end": {
+        "raf": {
+          "count": 579,
+          "first": 2073.1,
+          "last": 33855.2
+        },
+        "ambient": {
+          "time": 26544.200000000004,
+          "items": [
+            {
+              "id": "counter-coffee",
+              "active": true,
+              "frame": 4,
+              "events": 0,
+              "cycles": 21
+            },
+            {
+              "id": "counter-cup-steam",
+              "active": true,
+              "frame": 4,
+              "events": 0,
+              "cycles": 15
+            },
+            {
+              "id": "booth-coffee",
+              "active": true,
+              "frame": 4,
+              "events": 0,
+              "cycles": 19
+            },
+            {
+              "id": "pendant-west",
+              "active": false,
+              "frame": -1,
+              "events": 2,
+              "cycles": 0
+            },
+            {
+              "id": "pendant-middle",
+              "active": false,
+              "frame": -1,
+              "events": 3,
+              "cycles": 0
+            },
+            {
+              "id": "pendant-east",
+              "active": false,
+              "frame": -1,
+              "events": 2,
+              "cycles": 0
+            },
+            {
+              "id": "double-r-neon",
+              "active": false,
+              "frame": -1,
+              "events": 1,
+              "cycles": 0
+            },
+            {
+              "id": "coffee-machine",
+              "active": false,
+              "frame": -1,
+              "events": 2,
+              "cycles": 0
+            },
+            {
+              "id": "wall-clock",
+              "active": true,
+              "frame": 5,
+              "events": 0,
+              "cycles": 0
+            },
+            {
+              "id": "pie-glass",
+              "active": false,
+              "frame": -1,
+              "events": 2,
+              "cycles": 0
+            }
+          ]
+        },
+        "character": {
+          "time": 26544.200000000004,
+          "items": [
+            {
+              "id": "booth-sip",
+              "active": false,
+              "frame": -1,
+              "events": 1,
+              "cycles": 0
+            },
+            {
+              "id": "counter-wipe",
+              "active": false,
+              "frame": -1,
+              "events": 0,
+              "cycles": 0
+            }
+          ]
+        }
+      },
+      "rAF": {
+        "countDelta": 565,
+        "elapsedMs": 30632.199999999997
+      }
+    },
+    "invariant": {
+      "sameMap": true,
+      "stationaryPlayer": true,
+      "noFade": true,
+      "nativeSize": true,
+      "visible": true,
+      "changedPixels": true,
+      "rAFAdvanced": true,
+      "ambientClockAdvanced": true,
+      "characterClockAdvanced": true
+    }
+  },
+  "route": {
+    "input": "CDP Input.dispatchKeyEvent",
+    "events": [],
+    "milestones": [],
+    "skipped": true
+  },
+  "limits": [
+    "Route proof uses the existing test/double-r-location.html slice; canonical stationary proof uses retro-scene.html with the narrative stack.",
+    "Frames are direct #game canvas.toDataURL PNGs; no compositor scaling or seeking is used.",
+    "Video is optional and only created when ffmpeg is available."
+  ],
+  "canonical": {
+    "page": "/test/retro-scene.html?map=diner&x=6&y=8&dir=up&narrative=1",
+    "state": {
+      "ready": true,
+      "title": "TP-RETRO-READY diner",
+      "mapId": "diner",
+      "mode": "play",
+      "fadePhase": 0,
+      "player": {
+        "tx": 6,
+        "ty": 8,
+        "dir": "up",
+        "moving": false
+      },
+      "npcs": [
+        {
+          "id": "loglady",
+          "x": 4,
+          "y": 5,
+          "dir": "down",
+          "moving": false,
+          "homeX": 4,
+          "homeY": 5
+        },
+        {
+          "id": "norma",
+          "x": 5,
+          "y": 2,
+          "dir": "down",
+          "moving": false,
+          "homeX": 5,
+          "homeY": 2
+        },
+        {
+          "id": "shelly",
+          "x": 9,
+          "y": 7,
+          "dir": "down",
+          "moving": false,
+          "homeX": 9,
+          "homeY": 7
+        }
+      ],
+      "cast": {
+        "andy": "PLACED@sheriff 10,7 down [BASELINE]",
+        "audrey": "PLACED@hotel_gn 12,9 down [BASELINE]",
+        "benhorne": "PLACED@hotel_gn 5,7 down [BASELINE]",
+        "bob": "OFFSCREEN(force) [BASELINE]",
+        "bobby": "PLACED@town 31,16 down [BASELINE]",
+        "donna": "PLACED@town 44,10 down [BASELINE]",
+        "gerard": "PLACED@hospital 11,4 left [BASELINE]",
+        "giant": "OFFSCREEN(offscreen) [BASELINE]",
+        "hawk": "PLACED@sheriff 12,8 down [BASELINE]",
+        "infermiera": "PLACED@hospital 11,8 down [BASELINE]",
+        "jacoby": "PLACED@town 16,25 down [BASELINE]",
+        "jacques": "PLACED@oej 7,5 down [ACT3_JACQUES_AT_OEJ]",
+        "james": "OFFSCREEN(not_met) [JAMES_NOT_YET]",
+        "laura": "PLACED@redroom 11,2 down [BASELINE]",
+        "leland": "OFFSCREEN(mourning) [BASELINE]",
+        "loglady": "PLACED@diner 4,5 down [BASELINE]",
+        "lucy": "PLACED@sheriff 2,6 down [BASELINE]",
+        "maddy": "OFFSCREEN(not_in_town) [BASELINE]",
+        "mfap": "PLACED@redroom 8,4 down [BASELINE]",
+        "norma": "PLACED@diner 5,2 down [BASELINE]",
+        "piantone": "OFFSCREEN(scenography) [BASELINE]",
+        "piantone_ronette": "OFFSCREEN(scenography) [BASELINE]",
+        "ronette": "PLACED@hospital 3,5 up [BASELINE]",
+        "sarah": "PLACED@palmer 9,7 down [BASELINE]",
+        "shelly": "PLACED@diner 9,7 down [BASELINE]",
+        "truman": "PLACED@sheriff 10,4 down [BASELINE]"
+      },
+      "canvas": {
+        "width": 256,
+        "height": 192,
+        "css": [
+          0,
+          0,
+          256,
+          192
+        ]
+      },
+      "viewport": [
+        256,
+        192
+      ],
+      "hidden": false,
+      "perfNow": 3005.2000000476837
+    },
+    "frame": "canonical/t+003633ms-canonical-diner.png",
+    "castBodies": [
+      {
+        "id": "loglady",
+        "x": 4,
+        "y": 5,
+        "dir": "down",
+        "moving": false,
+        "homeX": 4,
+        "homeY": 5
+      },
+      {
+        "id": "norma",
+        "x": 5,
+        "y": 2,
+        "dir": "down",
+        "moving": false,
+        "homeX": 5,
+        "homeY": 2
+      },
+      {
+        "id": "shelly",
+        "x": 9,
+        "y": 7,
+        "dir": "down",
+        "moving": false,
+        "homeX": 9,
+        "homeY": 7
+      }
+    ],
+    "pixelGate": {
+      "colors": 919,
+      "nonBasePct": 78.5
+    }
+  },
+  "finishedAt": "2026-09-18T18:59:25.329Z"
+}
