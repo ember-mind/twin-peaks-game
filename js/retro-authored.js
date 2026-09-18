@@ -4366,8 +4366,7 @@
 
   function interiorOccupiedTable(g,x,y,w,p,guest,gesture) {
     // The first three table rows are reserved for cuffs and resting hands.
-    // B's widened slab starts at x+6; keep the right-seat prop on its rim.
-    var propX=guest.seat==='left' ? x+w-11 : x+6;
+    var propX=guest.seat==='left' ? x+w-11 : x+5;
     R(g,propX,y+4,4,6,p.ink); R(g,propX+1,y+5,2,4,p.metalHi);
     R(g,propX+1,y+6,2,1,p.metal);
     if(guest.seat==='left') {
@@ -4383,46 +4382,38 @@
     }
   }
   function interiorBooth(g,x,y,w,p,variant,guest) {
-    // Study B: shaped upholstered end cheeks frame a separate booth face.
-    // The dark outer frame is narrow above the stepped cheek shoulders.
-    R(g,x+6,y-14,36,13,p.woodDark);
-    R(g,x+7,y-13,34,11,p.redDark);
-    R(g,x+7,y-14,34,1,p.woodLight);
-    R(g,x+8,y-12,9,8,p.red);
-    R(g,x+19,y-12,9,8,p.red);
-    R(g,x+30,y-12,9,8,p.red);
-    R(g,x+9,y-11,7,1,p.redHi);
-    R(g,x+20,y-11,7,1,p.redHi);
-    R(g,x+31,y-11,7,1,p.redHi);
-    // End cheeks are dark outside, burgundy inside, and stepped out below.
-    R(g,x+3,y-14,4,5,p.woodDark);
-    R(g,x+4,y-13,2,3,p.redDark);
-    R(g,x+4,y-13,2,1,p.redHi);
-    R(g,x+1,y-9,6,18,p.woodDark);
-    R(g,x+2,y-8,4,16,p.redDark);
-    R(g,x+2,y-8,3,1,p.redHi);
-    R(g,x+w-7,y-14,4,5,p.woodDark);
-    R(g,x+w-6,y-13,2,3,p.redDark);
-    R(g,x+w-6,y-13,2,1,p.redHi);
-    R(g,x+w-7,y-9,6,18,p.woodDark);
-    R(g,x+w-6,y-8,4,16,p.redDark);
-    R(g,x+w-5,y-8,3,1,p.redHi);
-    // Seat top is a distinct dark burgundy plane behind the table.
-    R(g,x+7,y-2,34,7,p.redDark);
-    R(g,x+8,y-2,32,1,p.red);
-    R(g,x+8,y+4,32,1,p.redHi);
+    // Study D: keep the burgundy booth recognizable while separating the
+    // tabletop from the floor with a single slim pedestal.
+    R(g,x+1,y-15,46,13,p.woodDark);
+    R(g,x+2,y-14,44,11,p.redDark);
+    R(g,x+3,y-15,42,1,p.woodLight);
+    R(g,x+4,y-12,11,7,p.red);
+    R(g,x+19,y-12,11,7,p.red);
+    R(g,x+34,y-12,10,7,p.red);
+    R(g,x+5,y-11,8,1,p.redHi);
+    R(g,x+20,y-11,8,1,p.redHi);
+    R(g,x+35,y-11,7,1,p.redHi);
+    R(g,x+15,y-11,1,6,p.redDark);
+    R(g,x+30,y-11,1,6,p.redDark);
+    // Restrained end posts remain separate from the tabletop and seat wing.
+    R(g,x+1,y-9,2,18,p.woodDark); R(g,x+2,y-8,1,16,p.redDark);
+    R(g,x+w-3,y-9,2,18,p.woodDark); R(g,x+w-3,y-8,1,16,p.redDark);
+    // The dark seat top is mostly occluded once the tabletop is painted.
+    R(g,x+3,y-2,42,8,p.redDark);
+    R(g,x+4,y-2,40,1,p.red);
     if(guest) {
       var seatX=guest.seat==='left'?x+8:x+w-25;
       R(g,seatX+3,y-4,11,3,p.redDark);
     }
     var gesture=variant===1 && GAME.CharacterActivity ? GAME.CharacterActivity.seatedFrame() : -1;
     var seatedPose=guest ? interiorSeatedGuest(g,guest.seat==='left'?x+8:x+w-25,y-16,guest,gesture) : null;
-    // Independent tabletop sits between the cheek returns, over the guest.
-    R(g,x+6,y+1,36,13,p.woodDark);
-    R(g,x+7,y+1,34,11,p.creamShade);
-    R(g,x+7,y+1,34,3,p.cream);
-    R(g,x+6,y+12,36,1,p.woodHi);
-    R(g,x+6,y+13,36,1,p.woodDark);
+    // Slab top and thickness: cream plan, two-pixel lit north edge, and
+    // woodHi/woodDark front layers with no vertical cream cabinet face.
+    R(g,x+5,y+1,38,13,p.woodDark);
+    R(g,x+6,y+1,36,10,p.creamShade);
+    R(g,x+6,y+1,36,2,p.cream);
+    R(g,x+5,y+11,38,2,p.woodHi);
+    R(g,x+5,y+13,38,1,p.woodDark);
     if(guest) interiorOccupiedTable(g,x,y,w,p,guest,gesture);
     else interiorTableProps(g,x+5,y,p,variant);
     if(seatedPose) {
@@ -4433,16 +4424,15 @@
       interiorPoseRect(g,seatedPose,4,2,2,1,'rgba(244,230,200,.18)');
       interiorPoseRect(g,seatedPose,3,14,1,1,'rgba(244,230,200,.18)');
     }
-    // Short local supports and contacts keep the floor visible under the
-    // cheeks and tabletop; there is no solid cabinet base.
+    // Floor remains visible at both sides of one central pedestal and its
+    // short foot; edge feet receive only tight local contact marks.
     R(g,x+2,y+12,3,5,p.woodDark); R(g,x+3,y+12,1,4,p.woodHi);
     R(g,x+w-5,y+12,3,5,p.woodDark); R(g,x+w-4,y+12,1,4,p.woodHi);
-    R(g,x+10,y+13,2,4,p.woodDark); R(g,x+11,y+13,1,3,p.woodHi);
-    R(g,x+w-12,y+13,2,4,p.woodDark); R(g,x+w-11,y+13,1,3,p.woodHi);
+    R(g,x+22,y+14,4,3,p.woodDark); R(g,x+23,y+14,2,2,p.woodHi);
+    R(g,x+19,y+16,10,2,p.woodDark); R(g,x+20,y+16,8,1,p.woodHi);
     R(g,x+2,y+17,3,1,'rgba(41,43,38,.34)');
     R(g,x+w-5,y+17,3,1,'rgba(41,43,38,.34)');
-    R(g,x+10,y+17,2,1,'rgba(41,43,38,.30)');
-    R(g,x+w-12,y+17,2,1,'rgba(41,43,38,.30)');
+    R(g,x+21,y+18,6,1,'rgba(41,43,38,.30)');
   }
   function interiorStool(g,x,y,p) {
     interiorContact(g,x+2,y+13,12,p);
