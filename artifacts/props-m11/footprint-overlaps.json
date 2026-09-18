@@ -1,0 +1,8 @@
+[
+  {
+    "instance": "roadhouse-booth-01",
+    "tile": "2,6",
+    "kind": "cast body",
+    "what": "loglady (ACT4_EVENING_GATHERING)"
+  }
+]
