@@ -356,7 +356,23 @@ function observerPaceIsIndependentOfCallbackRate() {
   ok(O.clockStep(3600000, 100).sim === 5000, 'a very long suspension is forgiven, not replayed minute by minute');
 }
 
+/* ---------------- persistence readiness ---------------- */
+
+function rngStreamCanBeResumed() {
+  console.log('# schema: a seeded stream can be captured and resumed');
+  const r = LT.Util.rng(7); r(); r();
+  const state = r.getState();
+  const expected = [r(), r(), r()];
+  const resumed = LT.Util.rng(12345).setState(state);
+  assert.deepEqual([resumed(), resumed(), resumed()], expected);
+  ok(true, 'a generator restored from its state continues the same stream');
+  const sim = LT.Scenario.day1({});
+  ok(JSON.stringify(JSON.parse(JSON.stringify(sim.state))) === JSON.stringify(sim.state) && Array.isArray(sim.state.conversations),
+     'authoritative state is JSON-safe and carries its conversations');
+}
+
 async function main() {
+  rngStreamCanBeResumed();
   await defaultDayHasNoRemoteConversation();
   conversationIsOneSharedActivity();
   await simultaneousReciprocalDecisions();

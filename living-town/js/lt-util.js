@@ -19,6 +19,10 @@
       t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
+    /* The whole generator is one 32-bit integer. Exposed so a saved world can
+     * resume the same stream instead of restarting it from the seed. */
+    fn.getState = function () { return a; };
+    fn.setState = function (v) { a = v >>> 0; return fn; };
     fn.int = function (maxExclusive) { return Math.floor(fn() * maxExclusive); };
     fn.pick = function (list) { return list[fn.int(list.length)]; };
     return fn;
