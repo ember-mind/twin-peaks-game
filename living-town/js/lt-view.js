@@ -14,6 +14,8 @@
 
   var VW = 256, VH = 192, TILE = 16;
   var CH_W = 16, CH_H = 24;
+  var WALK_PX_PER_MS = 0.08;   // a tile in 200 ms: just ahead of one tile per minute at 1x
+  var MAX_TRAIL = 6;           // tiles a sprite may lag before it is cut forward
 
   V.NATIVE = { width: VW, height: VH, tile: TILE };
 
@@ -58,29 +60,76 @@
   View.prototype.renderStateFor = function (c) {
     var r = this.render[c.id];
     if (!r) {
-      r = this.render[c.id] = { x: c.pos.x * TILE, y: c.pos.y * TILE, dir: c.pos.dir, phaseT: 0, moving: false };
+      r = this.render[c.id] = { dir: c.pos.dir, phaseT: 0, trail: [] };
+      cut(r, c);
     }
     return r;
   };
 
-  /* dt in real milliseconds. Smoothing only. */
-  View.prototype.update = function (dt) {
+  /* Put the sprite where the person is, now. */
+  function cut(r, c) {
+    r.location = c.location;
+    r.seenX = r.tx = r.mx = c.pos.x;
+    r.seenY = r.ty = r.my = c.pos.y;
+    r.x = c.pos.x * TILE; r.y = c.pos.y * TILE;
+    r.moving = false; r.moveT = 0; r.trail = [];
+  }
+
+  /* What the view remembers between frames is the list of tiles the simulation
+   * has already put someone on and the sprite has not yet reached. It is read
+   * off state after a tick, never computed: the view does not route anybody.
+   * The observer calls this after every tick, so at 20x — more than one tile a
+   * frame — the sprite still goes round the counter the way the person did
+   * instead of sliding across its corner. */
+  View.prototype.observe = function () {
     var state = this.sim.state, self = this;
-    this.clock += dt / 1000;
     this.sim.actorIds().forEach(function (id) {
       var c = state.characters[id];
       var r = self.renderStateFor(c);
-      var tx = c.pos.x * TILE, ty = c.pos.y * TILE;
-      var dx = tx - r.x, dy = ty - r.y;
-      var dist = Math.abs(dx) + Math.abs(dy);
-      if (dist > 48) { r.x = tx; r.y = ty; }   // a scene change is a cut, not a slide
-      else {
-        r.x = EMBER.Math.approach(r.x, tx, dt, 0.010);
-        r.y = EMBER.Math.approach(r.y, ty, dt, 0.010);
+      if (r.location !== c.location) { cut(r, c); return; }   // another place: a cut, however near the numbers are
+      if (c.pos.x === r.seenX && c.pos.y === r.seenY) return;
+      if (Math.abs(c.pos.x - r.seenX) + Math.abs(c.pos.y - r.seenY) !== 1) {
+        cut(r, c);                                // steps the view never saw: cut, do not invent a route
+        return;
       }
-      r.moving = dist > 1.2;
-      r.dir = c.pos.dir || r.dir;
-      if (r.moving) r.phaseT += dt * 0.006;
+      r.seenX = c.pos.x; r.seenY = c.pos.y;
+      r.trail.push({ x: c.pos.x, y: c.pos.y });
+      if (r.trail.length > MAX_TRAIL) {           // far behind: cut forward along the walked route
+        var at = r.trail[r.trail.length - MAX_TRAIL - 1];
+        r.tx = r.mx = at.x; r.ty = r.my = at.y; r.moving = false; r.moveT = 0;
+        r.x = at.x * TILE; r.y = at.y * TILE;
+        r.trail = r.trail.slice(-MAX_TRAIL);
+      }
+    });
+  };
+
+  /* dt in real milliseconds. Smoothing only: each tile of the trail is one
+   * step of the engine's grid mover, the same one Twin Peaks walks with. */
+  View.prototype.update = function (dt) {
+    var state = this.sim.state, self = this;
+    this.clock += dt / 1000;
+    this.observe();
+    this.sim.actorIds().forEach(function (id) {
+      var c = state.characters[id];
+      var r = self.renderStateFor(c);
+      var left = dt, walked = false, dir = null;
+      while (left > 0 && (r.moving || r.trail.length)) {
+        if (!r.moving) {
+          var next = r.trail.shift();
+          r.mx = next.x; r.my = next.y; r.moveT = 0; r.moving = true;
+        }
+        dir = r.mx > r.tx ? 'right' : r.mx < r.tx ? 'left' : r.my > r.ty ? 'down' : 'up';
+        var speed = WALK_PX_PER_MS * (1 + r.trail.length);      // hurry when behind
+        var slice = Math.min(left, (1 - r.moveT) * TILE / speed);
+        var fromX = r.tx, fromY = r.ty;
+        var step = EMBER.Grid.advanceStep(r, slice + 1e-9, { tile: TILE, speed: speed });
+        r.x = (fromX + (r.mx - fromX) * step.ease) * TILE;
+        r.y = (fromY + (r.my - fromY) * step.ease) * TILE;
+        left -= slice; walked = true;
+      }
+      r.walking = walked || r.moving || r.trail.length > 0;
+      r.dir = (r.walking && dir) || c.pos.dir || r.dir;
+      if (r.walking) r.phaseT += dt * 0.006;
       else r.phaseT = 0;
     });
 
@@ -114,18 +163,36 @@
     return scene;
   };
 
-  /* The production path: the room from the shared interior painter, people
-   * from the shared atlas renderer, and the shared depth-band pass between
-   * them so the counter covers whoever is behind it and nobody in front. All
-   * positions, facings and activities are read from the simulation. */
-  View.prototype.drawProduction = function (g, scene, ents, cx, cy) {
-    var GAME = root.GAME, t = this.clock;
-    var opts = { mapId: scene.id, indoor: true, viewportWidth: VW, viewportHeight: VH, t: t };
+  /* Who draws the people is a separate question from who draws the room. An
+   * inhabitant is the same person in the café and on the street, so they come
+   * off the same sheet in both: the look the world generated for them, kept in
+   * state. 'placeholder' only happens while that sheet is still decoding, and
+   * even then the colours are the look's own, never somebody's id. */
+  View.prototype.inhabitantRenderer = function () {
+    var H = LT.ProductionHost, GAME = root.GAME;
+    return (H && H.ready && GAME && GAME.Sprites && GAME.Sprites.drawChar) ? 'atlas' : 'placeholder';
+  };
+
+  View.prototype.drawInhabitant = function (g, e, cx, cy, mapId, how) {
+    if (how === 'atlas') {
+      root.GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, LT.ProductionHost.looks[e.sheetId], e.dir,
+        e.phase, 1, e.moving, false, this.clock,
+        { mapId: mapId, wx: e.wx, wy: e.wy, npcId: e.id, characterLife: null });
+      return;
+    }
+    LT.Art.drawCharacter(g, LT.Appearance.spec(e.sheetId), e.wx - cx, e.wy - cy - (CH_H - TILE), e.dir,
+                         e.moving ? e.phase : 0, { moving: e.moving, alpha: 1 });
+  };
+
+  /* The production room: the shared interior painter, with the shared
+   * depth-band pass between people so the counter covers whoever is behind it
+   * and nobody in front. */
+  View.prototype.drawProductionRoom = function (g, scene, ents, cx, cy, how) {
+    var GAME = root.GAME, self = this;
+    var opts = { mapId: scene.id, indoor: true, viewportWidth: VW, viewportHeight: VH, t: this.clock };
     GAME.sprites.drawStructures(g, scene, cx, cy, opts);
     EMBER.Tilemap.paintDepthBands(ents, TILE, function (e) {
-      GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, LT.ProductionHost.looks[e.sheetId], e.dir,
-        e.phase, 1, e.moving, false, t,
-        { mapId: scene.id, wx: e.wx, wy: e.wy, npcId: e.id, characterLife: null });
+      self.drawInhabitant(g, e, cx, cy, scene.id, how);
     }, function (footY, nextFootY, afterIndex) {
       if (afterIndex < 0) return;
       GAME.sprites.drawForegroundStructures(g, scene, cx, cy, {
@@ -135,49 +202,44 @@
     });
   };
 
-  View.prototype.draw = function () {
-    var g = this.ctx;
-    if (!g) return;
-    var locId = this.visibleLocation();
-    var loc = LT.World.LOCATIONS[locId];
-    var Art = LT.Art;
-    var cx = Math.round(this.camX), cy = Math.round(this.camY);
-    var scene = this.productionScene(loc);
-    if (scene) {
-      var actors = this.entitiesAt(locId);
-      this.drawProduction(g, scene, actors, cx, cy);
-      return { location: locId, entities: actors.length, renderer: 'production' };
-    }
-
+  View.prototype.drawTemporaryPlace = function (g, loc, ents, cx, cy, how) {
+    var Art = LT.Art, self = this;
     g.fillStyle = Art.palette.ink;
     g.fillRect(0, 0, VW, VH);
-
-    var opts = { indoor: !!loc.indoor, locationId: locId, minute: this.sim.state.minute };
+    var opts = { indoor: !!loc.indoor, locationId: loc.id, minute: this.sim.state.minute };
     EMBER.Tilemap.paintWindow(g, {
       rows: loc.rows, width: loc.rows[0].length, height: loc.rows.length, tile: TILE,
       camX: cx, camY: cy, viewW: VW, viewH: VH, overdraw: 1
     }, function (ctx, ch, sx, sy, mx, my, rows) {
       Art.drawCell(ctx, ch, sx, sy, mx, my, rows, opts);
     });
-
-    var ents = this.entitiesAt(locId);
-    ents.forEach(function (e) {
-      Art.drawCharacter(g, e.sprite, e.wx - cx, e.wy - cy - (CH_H - TILE), e.dir,
-                        e.moving ? e.phase : 0, { moving: e.moving, alpha: 1 });
-    });
-
+    /* Never a production map id: no room lighting is borrowed for a place that has none. */
+    ents.forEach(function (e) { self.drawInhabitant(g, e, cx, cy, 'lt_temporary', how); });
     this.drawActivityMarks(g, cx, cy, ents);
-    return { location: locId, entities: ents.length, renderer: 'temporary' };
+  };
+
+  View.prototype.draw = function () {
+    var g = this.ctx;
+    if (!g) return;
+    var locId = this.visibleLocation();
+    var loc = LT.World.LOCATIONS[locId];
+    var cx = Math.round(this.camX), cy = Math.round(this.camY);
+    var ents = this.entitiesAt(locId);
+    var how = this.inhabitantRenderer();
+    var scene = this.productionScene(loc);
+    if (scene) this.drawProductionRoom(g, scene, ents, cx, cy, how);
+    else this.drawTemporaryPlace(g, loc, ents, cx, cy, how);
+    return { location: locId, entities: ents.length,
+             environment: scene ? 'production' : 'temporary', inhabitants: how };
   };
 
   /* Depth-sorted projections of whoever the simulation says is here. */
   View.prototype.entitiesAt = function (locId) {
     var ents = this.charactersHere(locId).map(function (e) {
       return {
-        id: e.character.id, sprite: e.character.sprite,
-        sheetId: LT.Appearance ? LT.Appearance.sheetIdFor(e.character) : null,
+        id: e.character.id, sheetId: LT.Appearance.sheetIdFor(e.character),
         wx: Math.round(e.render.x), wy: Math.round(e.render.y),
-        dir: e.render.dir, moving: e.render.moving,
+        dir: e.render.dir, moving: e.render.walking,
         phase: EMBER.Grid.walkPhase(e.render.phaseT % 1)
       };
     });

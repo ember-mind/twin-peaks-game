@@ -374,11 +374,17 @@
    * 16 wide x 24 tall, (sx, sy) is the top-left of that box; feet sit on
    * the bottom edge (sy + 24). */
 
-  var SPRITES = {
-    resident_a: { hair: '#5a2e1f', hairDark: '#3f1f15', cloth: '#2c5c3f', clothDark: '#1f4630', skin: '#e3b48c' },
-    resident_b: { hair: '#1c1712', hairDark: '#0f0c09', cloth: '#a5652b', clothDark: '#824f20', skin: '#d9a878' },
-    _default: { hair: '#555555', hairDark: '#3d3d3d', cloth: '#777777', clothDark: '#5a5a5a', skin: '#cbb090' }
-  };
+  /* A stand-in for the moment before the inhabitants' sheet has decoded. It
+   * is coloured from the person's own look recipe (lt-appearance.js tone
+   * slots), so it is the same person, only rougher; nothing here is keyed by
+   * who somebody is. */
+  var NEUTRAL = { hair: '#555555', hairDark: '#3d3d3d', cloth: '#777777', clothDark: '#5a5a5a', skin: '#cbb090' };
+  function tonesOf(look) {
+    var c = look && look.colors;
+    if (!c) return NEUTRAL;
+    return { hair: c.h || NEUTRAL.hair, hairDark: c.H || NEUTRAL.hairDark, cloth: c.J || NEUTRAL.cloth,
+             clothDark: c.K || NEUTRAL.clothDark, skin: c.S || NEUTRAL.skin };
+  }
 
   function paintHead(ctx, sx, sy, dir, s) {
     ctx.fillStyle = P.ink;
@@ -425,9 +431,9 @@
     ctx.fillRect(rightX, legY, legW, legH);
   }
 
-  Art.drawCharacter = function (ctx, spriteId, sx, sy, dir, phase, opts) {
+  Art.drawCharacter = function (ctx, look, sx, sy, dir, phase, opts) {
     opts = opts || {};
-    var s = SPRITES[spriteId] || SPRITES._default;
+    var s = tonesOf(look);
     var d = (dir === 'up' || dir === 'left' || dir === 'right') ? dir : 'down';
     var ph = (phase === 1 || phase === 2 || phase === 3) ? phase : 0;
     var moving = !!opts.moving;

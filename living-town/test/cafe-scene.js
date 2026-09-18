@@ -122,7 +122,7 @@ function walkingGoesRoundTheFurniture() {
   const trail = [];
   for (let i = 0; i < 30; i++) { sim.tick(); trail.push(a.pos.x + ',' + a.pos.y); assert(!solid(a.pos.x, a.pos.y), 'stood inside furniture at ' + trail[trail.length - 1]); }
   const spot = W.OBJECTS.find((o) => o.id === 'obj_counter').anchors.work_shift;
-  ok(a.pos.x === spot.x && a.pos.y === spot.y && a.pos.dir === 'down', 'she ends up behind the counter, facing the room (' + a.pos.x + ',' + a.pos.y + ' ' + a.pos.dir + ')');
+  ok(a.pos.x === spot.x && a.pos.y === spot.y && a.pos.dir === 'down', 'the worker ends up behind the counter, facing the room (' + a.pos.x + ',' + a.pos.y + ' ' + a.pos.dir + ')');
   const gap = (plan.counter[0] + plan.counter[2]) + ',' + plan.counter[1];
   ok(trail.indexOf(gap) >= 0, 'having gone round the open end of the counter at ' + gap + ' to get there');
   for (let i = 1; i < trail.length; i++) {
@@ -186,7 +186,7 @@ async function productionRendererDrawsTheRoom() {
   view.update(16);
   const before = JSON.stringify(sim.state);
   const result = view.draw();
-  ok(result.renderer === 'production' && result.entities === 2, 'the café is drawn by the production path, with both inhabitants');
+  ok(result.environment === 'production' && result.inhabitants === 'atlas' && result.entities === 2, 'the café is drawn by the production path, with both inhabitants');
   ok(JSON.stringify(sim.state) === before, 'drawing changed nothing in the simulation');
 
   ok(bandCalls === 1, 'layering goes through the shared engine\'s depth-band pass, the one Twin Peaks uses');
@@ -195,11 +195,11 @@ async function productionRendererDrawsTheRoom() {
   ok(images.length === 2 && images.every((e) => /inhabitants-hg-24\.png$/.test(e.src)), 'both people come off Living Town\'s own sheet');
   const block = (id) => { const i = LT.Appearance.ORDER.indexOf(id); return { x: (i % 5) * 72, y: Math.floor(i / 5) * 72 }; };
   const blockA = block(a.appearanceId + '_work'), blockB = block(b.appearanceId);
-  ok(images[0].sx >= blockA.x && images[0].sx < blockA.x + 72 && images[0].sy >= blockA.y && images[0].sy < blockA.y + 72, 'the worker is drawn from her own look, in its apron variant');
+  ok(images[0].sx >= blockA.x && images[0].sx < blockA.x + 72 && images[0].sy >= blockA.y && images[0].sy < blockA.y + 72, 'the worker is drawn from their own look, in its apron variant');
   ok(images[1].sx >= blockB.x && images[1].sx < blockB.x + 72 && images[1].sy === blockB.y + 24, 'the customer from theirs, on the facing-away row');
 
   /* Real occlusion: between the worker (behind) and the customer (in front)
-   * the counter is painted again, so it covers her legs and not the customer. */
+   * the counter is painted again, so it covers the worker's legs and not the customer. */
   const iA = log.indexOf(images[0]), iB = log.indexOf(images[1]);
   const between = log.slice(iA + 1, iB).filter((e) => e.op === 'rect');
   const counterTop = plan.counter[1] * 16 + 16;   // room is centred: camera offset -16
@@ -218,7 +218,7 @@ async function productionRendererDrawsTheRoom() {
      'a bench is repainted over someone standing behind it');
 
   view.focus('resident_b'); sim.placeCharacter(b, 'park'); view.update(16);
-  ok(view.draw().renderer === 'temporary', 'locations without production content still draw with the temporary art, and say so');
+  ok(view.draw().environment === 'temporary', 'locations without production content still draw with the temporary art, and say so');
 }
 
 (async function main() {

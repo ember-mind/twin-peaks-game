@@ -111,6 +111,7 @@
         return;
       }
       state.sim.tick();
+      state.view.observe();   // every step, so a sprite follows the route and not a chord across it
       state.accumulator -= nowMs;
       Promise.resolve().then(function () { return Promise.resolve(); }).then(step);
     })();

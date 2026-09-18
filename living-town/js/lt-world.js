@@ -211,7 +211,7 @@
    * energy is consumed, the goal target is compared against savings. */
   W.CHARACTERS = [
     {
-      id: 'resident_a', sprite: 'resident_a', homeId: 'flat_a',
+      id: 'resident_a', homeId: 'flat_a',
       location: 'flat_a', pos: { x: 5, y: 5, dir: 'down' },
       needs: { energy: 74, hunger: 38 },
       money: 18.5,
@@ -242,7 +242,7 @@
       relationships: { resident_b: { trust: 68, closeness: 71, lastMetDay: 0 } }
     },
     {
-      id: 'resident_b', sprite: 'resident_b', homeId: 'flat_b',
+      id: 'resident_b', homeId: 'flat_b',
       location: 'cafe', pos: { x: 9, y: 5, dir: 'down' },
       needs: { energy: 80, hunger: 30 },
       money: 41,

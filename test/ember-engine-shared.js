@@ -151,7 +151,14 @@ for (let i = 0; i < 90; i++) sim.tick();
 const view = LT.View.create(makeCanvas(), sim);
 view.update(16);
 view.draw();
+/* Someone has to actually walk for the view to step a sprite: a shift taken
+ * up at the café door, shown to the view tick by tick as the observer does. */
+const walker = sim.state.characters[sim.actorIds()[0]];
+sim.state.minute = 600;
+sim.placeCharacter(walker, 'cafe');
 view.update(16);
+sim.startActivity(walker, { actionId: 'work_shift', targetKind: 'object', targetId: 'obj_counter' }, 'test', null);
+for (let i = 0; i < 20; i++) { sim.tick(); view.observe(); view.update(16); }
 view.draw();
 who = null;
 
@@ -169,17 +176,15 @@ const MUST_SHARE = [
   'Grid.walkPhase',
   'Camera.centerOn', 'Camera.approach',
   'Tilemap.paintWindow', 'Tilemap.depthSort',
+  'Grid.advanceStep',
   'Viewport.attachNative'
 ];
 /* Called directly by one side only, today. Asserted so a side that stops
  * calling the engine and grows its own version shows up here. */
 /* Tilemap.paintDepthBands is shared too, but Living Town reaches it only on its
  * production-rendered locations; living-town/test/cafe-scene.js asserts that side. */
-['Grid.advanceStep', 'Math.clamp', 'Viewport.sizeNative', 'Tilemap.paintDepthBands'].forEach((k) => {
+['Math.clamp', 'Viewport.sizeNative', 'Tilemap.paintDepthBands'].forEach((k) => {
   assert.ok(calls.twinpeaks.has(k), `Twin Peaks must call EMBER.${k} directly`);
-});
-['Math.approach'].forEach((k) => {
-  assert.ok(calls.livingtown.has(k), `Living Town must call EMBER.${k} directly`);
 });
 /* Reached through other engine functions rather than called by the
  * experiences themselves. */
