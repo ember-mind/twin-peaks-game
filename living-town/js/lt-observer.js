@@ -21,7 +21,26 @@
     { label: '4x', msPerMinute: 62 },
     { label: '20x', msPerMinute: 12 }
   ];
-  var MAX_TICKS_PER_FRAME = 30;
+  var MAX_TICKS_PER_FRAME = 120;
+  var VISUAL_DT_CAP = 100;      // ms; a sprite must not lurch after a long gap
+  var BACKLOG_CAP = 5000;       // ms of real time the town will catch up on
+
+  /* Two clocks come out of one gap between callbacks. The town runs on the
+   * time that actually passed, so it keeps the same pace whether frames arrive
+   * every 16 ms or, in a backgrounded tab, every few hundred. Animation runs
+   * on a capped copy. Only a gap longer than BACKLOG_CAP (a suspended laptop)
+   * is forgiven rather than replayed. */
+  O.clockStep = function (now, last) {
+    var real = last ? Math.max(0, now - last) : 16;
+    return { sim: Math.min(BACKLOG_CAP, real), visual: Math.min(VISUAL_DT_CAP, real) };
+  };
+
+  /* How many whole minutes to run now, within the per-callback work budget. */
+  O.dueTicks = function (accumulatorMs, msPerMinute, budget) {
+    if (!msPerMinute) return 0;
+    return Math.min(budget, Math.floor(accumulatorMs / msPerMinute));
+  };
+  O.MAX_TICKS_PER_FRAME = MAX_TICKS_PER_FRAME;
 
   function el(id) { return document.getElementById(id); }
   function text(node, value) { if (node && node.textContent !== value) node.textContent = value; }
@@ -50,10 +69,10 @@
     });
 
     function frame(now) {
-      var dt = state.lastFrame ? Math.min(100, now - state.lastFrame) : 16;
+      var step = O.clockStep(now, state.lastFrame);
       state.lastFrame = now;
-      pump(state, dt);
-      state.view.update(dt);
+      pump(state, step.sim);
+      state.view.update(step.visual);
       state.view.draw();
       paint(state);
     }
@@ -81,17 +100,18 @@
   function pump(state, dt) {
     var ms = SPEEDS[state.speedIndex].msPerMinute;
     if (!ms) return;
-    state.accumulator += dt;
+    state.accumulator = Math.min(BACKLOG_CAP, state.accumulator + dt);
     if (state.pumping) return;
-    var budget = MAX_TICKS_PER_FRAME;
+    var budget = O.dueTicks(state.accumulator, ms, MAX_TICKS_PER_FRAME);
     state.pumping = true;
     (function step() {
-      if (state.accumulator < ms || budget-- <= 0 || !SPEEDS[state.speedIndex].msPerMinute) {
+      var nowMs = SPEEDS[state.speedIndex].msPerMinute;
+      if (budget-- <= 0 || !nowMs || state.accumulator < nowMs) {
         state.pumping = false;
         return;
       }
       state.sim.tick();
-      state.accumulator -= ms;
+      state.accumulator -= nowMs;
       Promise.resolve().then(function () { return Promise.resolve(); }).then(step);
     })();
   }
@@ -204,7 +224,8 @@
     for (var i = events.length - 1; i >= 0 && rows.length < 14; i--) {
       var e = events[i];
       if (NOISE[e.type]) continue;
-      if (e.actorId && e.actorId !== c.id && !involves(e, c.id)) continue;
+      var who = e.actorId || e.subjectId;
+      if (who && who !== c.id && !involves(e, c.id)) continue;
       rows.push(e);
     }
     host.innerHTML = rows.map(function (e) {

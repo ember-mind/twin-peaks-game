@@ -12,6 +12,7 @@
  *   tick(ctx, minutes) -> continuous drain/recovery; survives interruption
  *   onComplete(ctx)    -> discrete settlement; the sim runs it exactly once
  *   onInterrupt(ctx)   -> optional; no discrete settlement is allowed here
+ *   yieldsToConversation -> someone doing this answers when spoken to
  */
 (function () {
   var root = (typeof window !== 'undefined') ? window : global;
@@ -161,8 +162,10 @@
     work_shift: {
       id: 'work_shift', label: 'Work the shift', targetKind: 'object', interruptible: true,
       duration: function (ctx) {
+        /* Never past the end of the shift: eligibility guarantees at least a
+         * minute remains, and a last short block is paid for what it is. */
         var e = ctx.actor.employment;
-        return Math.max(15, Math.min(WORK_BLOCK, e.shiftEnd - ctx.minute));
+        return Math.min(WORK_BLOCK, e.shiftEnd - ctx.minute);
       },
       eligible: function (ctx) {
         var e = ctx.actor.employment;
@@ -191,7 +194,7 @@
     work_extra_shift: {
       id: 'work_extra_shift', label: 'Work the extra shift', targetKind: 'offer', interruptible: true,
       duration: function (ctx) {
-        return Math.max(15, Math.min(WORK_BLOCK, ctx.target.params.endMin - ctx.minute));
+        return Math.min(WORK_BLOCK, ctx.target.endAbs - ctx.absMinute);
       },
       eligible: function (ctx) {
         var o = ctx.target;
@@ -199,23 +202,28 @@
         if (o.status !== 'accepted') return { reason: 'not_accepted' };
         if (!at(ctx, o.params.locationId)) return { reason: 'not_at_workplace' };
         if (!locationOpen(ctx, o.params.locationId)) return { reason: 'workplace_closed' };
-        if (ctx.minute < o.params.startMin) return { reason: 'too_early' };
-        if (ctx.minute >= o.params.endMin) return { reason: 'shift_over' };
+        /* The window is a moment in the town's history, not an hour that comes
+         * round again tomorrow. */
+        if (ctx.absMinute < o.startAbs) return { reason: 'too_early' };
+        if (ctx.absMinute >= o.endAbs) return { reason: 'shift_over' };
         return true;
       },
       tick: function (ctx, m) { need(ctx, 'hunger', 0.03 * m); need(ctx, 'energy', -0.028 * m); },
       onComplete: function (ctx) {
         var o = ctx.target;
-        var total = o.params.endMin - o.params.startMin;
+        var total = o.endAbs - o.startAbs;
         var share = ctx.activity.plannedMinutes / total;
         var gross = Math.round(o.params.pay * share * 100) / 100;
         var saved = Math.round(gross * SAVINGS_SHARE * 100) / 100;
         ctx.sim.credit(ctx.actor, { savings: saved, money: Math.round((gross - saved) * 100) / 100 });
         o.workedMinutes = (o.workedMinutes || 0) + ctx.activity.plannedMinutes;
         ctx.actor.lastWorkAbs = ctx.absMinute;
-        if (ctx.minute >= o.params.endMin) {
+        if (ctx.absMinute >= o.endAbs) {
           o.status = 'completed';
-          ctx.sim.keepCommitment(ctx.actor, 'cmt_extra_' + o.id);
+          /* Being on the floor when it ends is not enough: the promise was to
+           * work the shift, so most of it has to have been worked. */
+          var needed = (o.commitment && o.commitment.minWorkedShare) || 0;
+          if (o.workedMinutes / total >= needed) ctx.sim.keepCommitment(ctx.actor, 'cmt_extra_' + o.id);
         }
         ctx.emit('WORKED_EXTRA', { offerId: o.id, minutes: ctx.activity.plannedMinutes, gross: gross, saved: saved },
           ctx.actor.name + ' worked the extra shift (+' + gross + ' EUR).');
@@ -224,6 +232,7 @@
 
     take_break: {
       id: 'take_break', label: 'Take a break', targetKind: 'object', interruptible: true,
+      yieldsToConversation: true,
       duration: function () { return 15; },
       eligible: function (ctx) {
         if (!at(ctx, 'cafe')) return { reason: 'not_at_cafe' };
@@ -299,23 +308,20 @@
       eligible: function (ctx) {
         if (!ctx.target || ctx.target.id === ctx.actor.id) return { reason: 'no_one_to_talk_to' };
         if (!personPresent(ctx, ctx.target.id)) return { reason: 'not_present' };
+        /* A conversation needs the other person. They join it, so they have to
+         * be free to: idle, or doing something one would look up from. */
+        if (!ctx.sim.availableToTalk(ctx.target)) return { reason: 'partner_busy' };
         /* The same conversation does not restart the moment it ends. */
         var last = (ctx.actor.lastTalk || {})[ctx.target.id];
         if (last !== undefined && ctx.absMinute - last < 90) return { reason: 'just_talked' };
         return true;
       },
+      /* One conversation is one shared thing with two people in it. The sim
+       * owns it: whoever speaks first opens it and the other joins, and it is
+       * settled once, by whichever of them finishes first. */
+      onStart: function (ctx) { ctx.sim.openConversation(ctx.actor, ctx.target, ctx.activity); },
       tick: function (ctx, m) { need(ctx, 'energy', -0.005 * m); },
-      onComplete: function (ctx) {
-        ctx.actor.lastTalk = ctx.actor.lastTalk || {};
-        ctx.target.lastTalk = ctx.target.lastTalk || {};
-        ctx.actor.lastTalk[ctx.target.id] = ctx.absMinute;
-        ctx.target.lastTalk[ctx.actor.id] = ctx.absMinute;
-        ctx.sim.adjustRelationship(ctx.actor, ctx.target.id, { trust: 3, closeness: 4 });
-        ctx.sim.adjustRelationship(ctx.target, ctx.actor.id, { trust: 3, closeness: 4 });
-        ctx.sim.settleMeeting(ctx.actor, ctx.target);
-        ctx.emit('TALKED', { withId: ctx.target.id, minutes: 25 },
-          ctx.actor.name + ' and ' + ctx.target.name + ' talked for 25 minutes.', [ctx.target.id]);
-      }
+      onComplete: function (ctx) { ctx.sim.settleConversation(ctx.activity.conversationId); }
     },
 
     /* ---------------- opportunities ---------------- */
@@ -351,6 +357,7 @@
 
     sit_and_rest: {
       id: 'sit_and_rest', label: 'Sit on the bench', targetKind: 'object', interruptible: true,
+      yieldsToConversation: true,
       duration: function () { return 20; },
       eligible: function (ctx) {
         if (!ctx.target || ctx.target.location !== ctx.actor.location) return { reason: 'no_seat_here' };
@@ -364,6 +371,7 @@
 
     wait: {
       id: 'wait', label: 'Wait', targetKind: null, interruptible: true,
+      yieldsToConversation: true,
       duration: function () { return 10; },
       eligible: function () { return true; },
       onComplete: function () { /* waiting settles nothing; it only spends time */ }

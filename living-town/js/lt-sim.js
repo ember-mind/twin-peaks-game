@@ -46,6 +46,10 @@
     this.inbox = [];
     this.rejections = [];                      // async-safety audit trail
     this.scheduledInterventions = [];
+    /* How long, in simulated minutes, a decision may stay unanswered before the
+     * sim stops waiting for it. Simulated rather than wall-clock so a run does
+     * not depend on how fast the host machine is. */
+    this.decisionTimeoutMinutes = opts.decisionTimeoutMinutes === undefined ? 30 : opts.decisionTimeoutMinutes;
     this.state = this.freshState(opts);
     this.listeners = [];
   }
@@ -60,6 +64,7 @@
       locationNames: {},
       objects: deepCopy(W.OBJECTS),
       offers: [],
+      conversations: [],
       events: [],
       interventions: []
     };
@@ -199,14 +204,17 @@
       day: this.state.day, minute: this.state.minute, absMinute: this.absMinute(),
       stamp: U.stamp(this.state.day, this.state.minute),
       type: type,
+      /* actorId is who did it. subjectId is who it is about, which is not the
+       * same thing and confers no knowledge of it. */
       actorId: opts.actorId || null,
+      subjectId: opts.subjectId || null,
       locationId: opts.locationId || null,
       data: opts.data || {},
       text: opts.text || type
     };
     this.state.events.push(ev);
     this.touch();
-    this.perceive(ev, opts.notify || []);
+    this.perceive(ev, opts.notify || [], !!opts.private);
     for (var i = 0; i < this.listeners.length; i++) this.listeners[i](ev, this);
     return ev;
   };
@@ -216,7 +224,7 @@
   /* Who could know this happened: whoever was in the room, plus anyone the
    * event was explicitly communicated to. Memories are written here and
    * nowhere else. */
-  Sim.prototype.perceive = function (ev, notify) {
+  Sim.prototype.perceive = function (ev, notify, isPrivate) {
     var salience = SALIENCE[ev.type];
     if (salience === undefined) salience = 0.2;
     var self = this;
@@ -224,6 +232,7 @@
     if (ev.actorId) perceivers[ev.actorId] = true;
     Object.keys(this.state.characters).forEach(function (id) {
       var c = self.state.characters[id];
+      if (isPrivate) return;   // nothing to witness: only those told will know
       if (ev.locationId && c.location === ev.locationId && !c.transit) perceivers[id] = true;
     });
     (notify || []).forEach(function (id) { perceivers[id] = true; });
@@ -370,13 +379,14 @@
   };
 
   /* A meeting is kept by both sides at once when the two people actually talk
-   * inside the window they agreed on. */
-  Sim.prototype.settleMeeting = function (actor, other) {
+   * inside the window they agreed on, in the place they agreed on. */
+  Sim.prototype.settleMeeting = function (actor, other, locationId) {
     var self = this;
     [[actor, other], [other, actor]].forEach(function (pair) {
       var who = pair[0], with_ = pair[1];
       (who.commitments || []).forEach(function (c) {
         if (c.status !== 'open' || c.kind !== 'social' || c.withId !== with_.id) return;
+        if (c.locationId && c.locationId !== locationId) return;
         var due = self.abs(c.dueDay, c.dueMin);
         var now = self.absMinute();
         if (now >= due - 30 && now <= due + (c.graceMin || 0)) self.keepCommitment(who, c.id);
@@ -454,16 +464,123 @@
   Sim.prototype.expireOffers = function () {
     var self = this, now = this.absMinute();
     this.state.offers.forEach(function (o) {
+      /* Only those who knew about the offer can know it is gone. The addressee
+       * is its subject, not its actor, and learns nothing by being named. */
+      var informed = Object.keys(o.perceivedBy).sort();
+      if (o.status === 'accepted' && o.endAbs !== undefined && now >= o.endAbs) {
+        /* The window it was accepted for is over. Whatever was not worked
+         * stays unworked; the commitment is judged on its own deadline. */
+        o.status = 'lapsed';
+        self.touch();
+        self.emit('OFFER_LAPSED', {
+          subjectId: o.toId, locationId: o.locationId, private: true, notify: informed,
+          data: { offerId: o.id, type: o.type, workedMinutes: o.workedMinutes || 0 },
+          text: 'The accepted offer ran out: ' + o.summary
+        });
+        return;
+      }
       if (o.status !== 'open') return;
       if (now < self.abs(o.expiresDay, o.expiresMin)) return;
       o.status = 'expired';
       self.touch();
       self.emit('OFFER_EXPIRED', {
-        actorId: o.toId, locationId: o.locationId,
+        subjectId: o.toId, locationId: o.locationId, private: true, notify: informed,
         data: { offerId: o.id, type: o.type },
         text: 'The offer expired: ' + o.summary
       });
     });
+  };
+
+  /* ---------------- conversations ---------------- */
+
+  Sim.prototype.conversationById = function (id) {
+    var list = this.state.conversations;
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    return null;
+  };
+
+  /* Free to be drawn into a conversation: not walking somewhere, not already
+   * in one, and either idle or doing something one looks up from. */
+  Sim.prototype.availableToTalk = function (other) {
+    if (!other || other.transit) return false;
+    if (!other.activity) return true;
+    if (other.activity.conversationId) return false;
+    var def = A.get(other.activity.actionId);
+    return !!(def && def.yieldsToConversation);
+  };
+
+  /* Whoever speaks first opens the conversation and the other person joins it.
+   * The joiner's activity is started by the sim and tagged as joined, so it is
+   * never read as a decision their policy made. */
+  Sim.prototype.openConversation = function (actor, other, activity) {
+    var conv = {
+      id: 'conv_' + (this.state.conversations.length + 1),
+      participants: [actor.id, other.id].sort(),
+      initiatorId: actor.id,
+      locationId: actor.location,
+      startAbs: this.absMinute(), endAbs: this.absMinute() + activity.plannedMinutes,
+      minutes: activity.plannedMinutes,
+      status: 'active'
+    };
+    this.state.conversations.push(conv);
+    activity.conversationId = conv.id;
+    if (other.activity) this.interrupt(other, 'spoken_to');
+    other.pending = null;   // whatever they were about to decide is overtaken
+    this.startActivity(other, { actionId: 'talk_with', targetKind: 'person', targetId: actor.id },
+      'joined:' + conv.id, null, { joining: conv.id, minutes: activity.plannedMinutes });
+    this.touch();
+    return conv;
+  };
+
+  Sim.prototype.conversationIntact = function (conv) {
+    var self = this;
+    return conv.participants.every(function (id) {
+      var c = self.state.characters[id];
+      return c && !c.transit && c.location === conv.locationId &&
+             c.activity && c.activity.conversationId === conv.id;
+    });
+  };
+
+  /* Settlement has the conversation's identity, not an activity's: two people
+   * finishing the same talk settle it once. */
+  Sim.prototype.settleConversation = function (id) {
+    var conv = this.conversationById(id);
+    if (!conv || conv.status !== 'active') return null;
+    conv.status = 'completed';
+    var a = this.state.characters[conv.initiatorId];
+    var bId = conv.participants[0] === a.id ? conv.participants[1] : conv.participants[0];
+    var b = this.state.characters[bId];
+    var now = this.absMinute();
+    a.lastTalk = a.lastTalk || {}; b.lastTalk = b.lastTalk || {};
+    a.lastTalk[b.id] = now; b.lastTalk[a.id] = now;
+    this.adjustRelationship(a, b.id, { trust: 3, closeness: 4 });
+    this.adjustRelationship(b, a.id, { trust: 3, closeness: 4 });
+    this.settleMeeting(a, b, conv.locationId);
+    this.emit('TALKED', {
+      actorId: a.id, locationId: conv.locationId, notify: [b.id],
+      data: { conversationId: conv.id, withId: b.id, participants: conv.participants.slice(), minutes: conv.minutes },
+      text: a.name + ' and ' + b.name + ' talked for ' + conv.minutes + ' minutes.'
+    });
+    return conv;
+  };
+
+  /* A conversation one person leaves is over for both, and settles nothing. */
+  Sim.prototype.endConversation = function (conv, reason) {
+    if (!conv || conv.status !== 'active') return false;
+    conv.status = 'broken_off';
+    conv.endedReason = reason;
+    this.touch();
+    var self = this;
+    conv.participants.forEach(function (id) {
+      var c = self.state.characters[id];
+      if (c && c.activity && c.activity.conversationId === conv.id) self.interrupt(c, 'conversation_ended');
+    });
+    this.emit('CONVERSATION_ENDED', {
+      actorId: null, locationId: conv.locationId, notify: conv.participants.slice(),
+      data: { conversationId: conv.id, participants: conv.participants.slice(), reason: reason },
+      text: 'A conversation broke off (' + reason + ').'
+    });
+    return true;
   };
 
   /* ---------------- activities ---------------- */
@@ -485,16 +602,21 @@
     return null;
   };
 
-  Sim.prototype.startActivity = function (actor, candidate, source, requestId) {
+  Sim.prototype.startActivity = function (actor, candidate, source, requestId, opts) {
+    opts = opts || {};
     var def = A.get(candidate.actionId);
     if (!def) return { ok: false, error: 'unknown_action' };
     var target = this.resolveTarget(candidate);
     var ctx = this.context(actor, target);
-    var verdict;
-    try { verdict = def.eligible(ctx); } catch (e) { verdict = { reason: 'error:' + (e && e.message) }; }
-    if (verdict !== true) return { ok: false, error: (verdict && verdict.reason) || 'ineligible' };
+    /* Joining a shared activity somebody else opened is the one start that is
+     * not the actor's own: its legality was the opener's eligibility check. */
+    if (!opts.joining) {
+      var verdict;
+      try { verdict = def.eligible(ctx); } catch (e) { verdict = { reason: 'error:' + (e && e.message) }; }
+      if (verdict !== true) return { ok: false, error: (verdict && verdict.reason) || 'ineligible' };
+    }
 
-    var minutes = Math.max(1, Math.round(def.duration(ctx)));
+    var minutes = opts.minutes || Math.max(1, Math.round(def.duration(ctx)));
     actor.activity = {
       id: 'act_' + (++this.eventSeq),
       actionId: candidate.actionId,
@@ -507,13 +629,14 @@
       elapsed: 0,
       interruptible: !!def.interruptible,
       settled: false,
+      conversationId: opts.joining || null,
       source: source, requestId: requestId || null
     };
     ctx.activity = actor.activity;
     var anchor = this.anchorFor(actor, def, target);
     if (anchor) actor.walkTarget = anchor;
     this.touch();
-    if (def.onStart) def.onStart(ctx);
+    if (def.onStart && !opts.joining) def.onStart(ctx);
     this.emit('ACTIVITY_STARTED', {
       actorId: actor.id, locationId: actor.location,
       data: { actionId: candidate.actionId, targetId: candidate.targetId || null,
@@ -530,6 +653,13 @@
     var target = this.resolveTarget({ targetKind: act.targetKind, targetId: act.targetId });
     var ctx = this.context(actor, target);
     ctx.activity = act;
+    if (act.conversationId) {
+      var conv = this.conversationById(act.conversationId);
+      if (conv && conv.status === 'active' && !this.conversationIntact(conv)) {
+        this.endConversation(conv, 'participant_left');
+        return;
+      }
+    }
     if (def.tick) def.tick(ctx, minutes);
     act.elapsed += minutes;
     this.touch();
@@ -566,6 +696,7 @@
     });
     actor.activity = null;
     this.touch();
+    if (act.conversationId) this.endConversation(this.conversationById(act.conversationId), reason);
     return true;
   };
 
@@ -609,12 +740,14 @@
       return id !== actor.id && c.location === actor.location && !c.transit;
     }).sort().join(',');
     var offers = this.offersFor(actor).map(function (o) { return o.id + ':' + o.status; }).sort().join(',');
+    /* A promise being kept, broken or newly made changes what is worth doing. */
+    var promises = (actor.commitments || []).map(function (c) { return c.id + ':' + c.status; }).sort().join(',');
     return [
       actor.location,
       actor.activity ? actor.activity.actionId : '-',
       Math.round(actor.money), Math.round(actor.savings),
       Math.floor(actor.needs.energy / 5), Math.floor(actor.needs.hunger / 5),
-      here, offers
+      here, offers, promises
     ].join('|');
   };
 
@@ -643,8 +776,13 @@
       candidates: cand.legal,
       context: { reason: reason }
     };
+    /* The sim's record of the question is its own. Several fields above are
+     * live references into the world (offer params, memory objects), so the
+     * record is a detached copy, and a provider is handed another one. Nothing
+     * a provider does to its request can reach the world or the record. */
+    request = deepCopy(request);
     this.requests[request.requestId] = {
-      request: request, resolved: false, actorId: actor.id,
+      request: request, resolved: false, timedOut: false, actorId: actor.id,
       rejectedCandidates: cand.rejected
     };
     return request;
@@ -661,36 +799,56 @@
     };
     this.touch();
     var self = this;
+    var requestId = request.requestId;
     var result;
-    try { result = policy.decide(request); } catch (e) { result = Promise.resolve(Pol.failed(request, actor.policyId, e)); }
-    Promise.resolve(result).then(function (response) { self.deliver(response); },
-                                 function (err) { self.deliver(Pol.failed(request, actor.policyId, err)); });
+    try { result = policy.decide(deepCopy(request)); } catch (e) { result = Promise.resolve(Pol.failed(request, actor.policyId, e)); }
+    /* The completion is tied to the question that was asked, not to whatever
+     * identity the answer claims, so an answer with no id or the wrong id is
+     * still this request's answer and takes this request's refusal path. */
+    Promise.resolve(result).then(function (response) { self.receive(requestId, response); },
+                                 function (err) { self.receive(requestId, Pol.failed(request, actor.policyId, err)); });
     return request;
   };
 
-  /* Responses never apply where they land. They queue, and the queue is drained
-   * in request order at a tick boundary, so timing jitter cannot reorder the
-   * world. */
+  /* An answer arriving for a known request. Responses never apply where they
+   * land: they queue, and the queue is drained at a tick boundary. */
+  Sim.prototype.receive = function (requestId, response) {
+    var rec = this.requests[requestId];
+    if (!rec) {
+      this.rejections.push({ stamp: this.stamp(), requestId: requestId, reason: 'unknown_request' });
+      return false;
+    }
+    if (rec.resolved) {
+      this.rejections.push({ stamp: this.stamp(), requestId: requestId, actorId: rec.actorId,
+                             reason: rec.timedOut ? 'late_response' : 'duplicate_response' });
+      return false;
+    }
+    var invalid = null, copy = null;
+    if (!response || typeof response !== 'object' || typeof response.requestId !== 'string') invalid = 'malformed_response';
+    else if (response.requestId !== requestId) invalid = 'request_id_mismatch';
+    else { try { copy = deepCopy(response); } catch (e) { invalid = 'malformed_response'; } }
+    rec.resolved = true;
+    rec.response = invalid ? { requestId: requestId, status: 'invalid', invalid: invalid } : copy;
+    this.inbox.push(rec.response);
+    return true;
+  };
+
+  /* The entry point for a transport that only has the answer in hand. With no
+   * usable identity there is no request to route it to, so it can only be
+   * logged; a provider called through requestDecision never ends up here. */
   Sim.prototype.deliver = function (response) {
     if (!response || typeof response !== 'object' || typeof response.requestId !== 'string') {
       this.rejections.push({ stamp: this.stamp(), requestId: null, reason: 'malformed_response' });
       return false;
     }
-    var rec = this.requests[response.requestId];
-    if (!rec) {
-      this.rejections.push({ stamp: this.stamp(), requestId: response.requestId, reason: 'unknown_request' });
-      return false;
-    }
-    if (rec.resolved) {
-      this.rejections.push({ stamp: this.stamp(), requestId: response.requestId, reason: 'duplicate_response' });
-      return false;
-    }
-    rec.resolved = true;
-    rec.response = response;
-    this.inbox.push(response);
-    return true;
+    return this.receive(response.requestId, response);
   };
 
+  /* Ordering promise, stated exactly: answers that have arrived by the same
+   * tick boundary are applied in request order, whatever order they arrived
+   * in. An answer that has not arrived does not hold the others up — one slow
+   * brain must not stop the town — so when an answer arrives does shape what
+   * happens next. Reproducing a run is RecordedPolicy's job, not this queue's. */
   Sim.prototype.flushDecisions = function () {
     var self = this;
     if (!this.inbox.length) return;
@@ -718,7 +876,9 @@
       return this.reject(request, 'superseded');
     }
 
-    var shape = Pol.validateResponse(request, response);
+    var shape = response.status === 'invalid'
+      ? { ok: false, error: response.invalid }
+      : Pol.validateResponse(request, response);
     if (!shape.ok) {
       actor.pending = null;
       var refused = this.reject(request, shape.error, shape.detail || null);
@@ -747,17 +907,17 @@
       return this.reject(request, 'stale_state', { was: request.relevanceKey, now: nowKey });
     }
 
-    var candidate = null;
-    for (var i = 0; i < request.candidates.length; i++) {
-      if (request.candidates[i].id === response.selectedId) { candidate = request.candidates[i]; break; }
-    }
-
-    // Re-derive legality from the present, not from the request snapshot.
+    /* The answer names a candidate; it does not describe one. What executes is
+     * the sim's own candidate of that id, derived from the present world — not
+     * the request snapshot, and never anything a provider could have touched. */
     var live = P.candidates(this, actor).legal;
-    var stillLegal = live.some(function (c) { return c.id === candidate.id; });
-    if (!stillLegal) {
+    var candidate = null;
+    for (var i = 0; i < live.length; i++) {
+      if (live[i].id === response.selectedId) { candidate = live[i]; break; }
+    }
+    if (!candidate) {
       actor.pending = null;
-      return this.reject(request, 'candidate_no_longer_legal', { candidateId: candidate.id });
+      return this.reject(request, 'candidate_no_longer_legal', { candidateId: response.selectedId });
     }
 
     var started = this.startActivity(actor, candidate, response.source || actor.policyId, request.requestId);
@@ -822,6 +982,7 @@
 
     this.evaluateCommitments();
     this.expireOffers();
+    this.expireDecisions();
 
     this.actorIds().forEach(function (id) {
       var actor = self.state.characters[id];
@@ -829,6 +990,24 @@
       self.requestDecision(actor, actor.lastFinishedAbs === self.absMinute() ? 'activity_complete' : 'idle');
     });
     return this.state;
+  };
+
+  /* A provider that never answers must not hold a person still for ever. Past
+   * the timeout the request is closed, the person falls back, and an answer
+   * that turns up afterwards is refused as late. */
+  Sim.prototype.expireDecisions = function () {
+    var self = this, now = this.absMinute();
+    this.actorIds().forEach(function (id) {
+      var actor = self.state.characters[id];
+      if (!actor.pending || now - actor.pending.issuedAbs < self.decisionTimeoutMinutes) return;
+      var rec = self.requests[actor.pending.requestId];
+      if (rec.resolved) return;   // answered, waiting in the inbox for the next flush
+      rec.resolved = true;
+      rec.timedOut = true;
+      actor.pending = null;
+      self.reject(rec.request, 'policy_timeout', { afterMinutes: now - rec.request.absMinute });
+      self.fallback(actor, 'policy_timeout');
+    });
   };
 
   /* Interruptions are rare and named. An offer marked urgent can pull someone

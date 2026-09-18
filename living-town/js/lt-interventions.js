@@ -149,6 +149,10 @@
         summary: 'extra shift ' + U.clock(p.startMin) + '–' + U.clock(p.endMin) + ' for ' + p.pay + ' EUR',
         params: { locationId: p.locationId, startMin: p.startMin, endMin: p.endMin, pay: p.pay },
         status: 'open',
+        /* Absolute, so an accepted shift cannot be worked on some later day
+         * that happens to have the same hours. */
+        startAbs: sim.abs(sim.state.day, p.startMin),
+        endAbs: sim.abs(sim.state.day, p.endMin),
         createdDay: sim.state.day, createdMin: sim.state.minute,
         expiresDay: p.expiresDay === undefined ? sim.state.day : p.expiresDay,
         expiresMin: p.expiresMin,
@@ -157,7 +161,8 @@
         commitment: {
           kind: 'work', strength: 'soft', withId: 'cafe',
           label: 'Work the extra shift until ' + U.clock(p.endMin),
-          dueDay: sim.state.day, dueMin: p.endMin, graceMin: 0
+          dueDay: sim.state.day, dueMin: p.endMin, graceMin: 0,
+          minWorkedShare: 0.5
         }
       };
       sim.state.offers.push(offer);

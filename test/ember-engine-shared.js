@@ -93,12 +93,21 @@ Object.keys(EMBER).forEach((ns) => {
   Object.keys(EMBER[ns]).forEach((fn) => {
     const original = EMBER[ns][fn];
     if (typeof original !== 'function') return;
+    /* Only a call made by the experience itself counts. A call one engine
+     * function makes to another (Camera.approach -> Math.approach) says
+     * nothing about the caller's own call sites, and used to let a private
+     * copy of the inner function go unnoticed. */
     EMBER[ns][fn] = function () {
-      if (who) calls[who].add(ns + '.' + fn);
-      return original.apply(this, arguments);
+      if (who && depth === 0) calls[who].add(ns + '.' + fn);
+      if (who) reached[who].add(ns + '.' + fn);
+      depth++;
+      try { return original.apply(this, arguments); } finally { depth--; }
     };
   });
 });
+
+let depth = 0;
+const reached = { twinpeaks: new Set(), livingtown: new Set() };
 
 /* -- Twin Peaks -- */
 /* Driven exactly as test/smoke.js drives it: start() installs the loop through
@@ -151,27 +160,36 @@ console.log('  twin peaks  :', [...calls.twinpeaks].sort().join(', ') || '(none)
 console.log('  living town :', [...calls.livingtown].sort().join(', ') || '(none)');
 console.log('  shared      :', shared.join(', ') || '(none)');
 
-/* Every one of these is executed by both experiences from the same file. If
- * either side grows a private copy, it drops out of this list and the test
- * fails, which is the only thing that makes "shared" a fact rather than a
- * folder name. */
+/* What this gate is, precisely: shared-call coverage. Each name below is
+ * called by both experiences' own code, directly, from the one file in
+ * engine/. It does not prove that no private copy exists anywhere — the scan
+ * further down covers the copies worth worrying about — and it says nothing
+ * about how either experience looks. */
 const MUST_SHARE = [
-  'Math.clamp', 'Math.approach',
   'Grid.walkPhase',
-  'Camera.clampAxis', 'Camera.centerOn', 'Camera.approach',
-  'Tilemap.visibleRange', 'Tilemap.paintWindow', 'Tilemap.depthSort',
-  'Viewport.attachNative', 'Viewport.sizeNative'
+  'Camera.centerOn', 'Camera.approach',
+  'Tilemap.paintWindow', 'Tilemap.depthSort',
+  'Viewport.attachNative'
 ];
-/* Kinematics and easing are Twin Peaks' today; Living Town's view smooths
- * instead of stepping. Asserted here so a regression is visible either way. */
-['Grid.advanceStep', 'Math.smoothstep'].forEach((k) => {
-  assert.ok(calls.twinpeaks.has(k), `Twin Peaks must execute EMBER.${k}`);
+/* Called directly by one side only, today. Asserted so a side that stops
+ * calling the engine and grows its own version shows up here. */
+['Grid.advanceStep', 'Math.clamp', 'Viewport.sizeNative'].forEach((k) => {
+  assert.ok(calls.twinpeaks.has(k), `Twin Peaks must call EMBER.${k} directly`);
 });
+['Math.approach'].forEach((k) => {
+  assert.ok(calls.livingtown.has(k), `Living Town must call EMBER.${k} directly`);
+});
+/* Reached through other engine functions rather than called by the
+ * experiences themselves. */
+['Camera.clampAxis', 'Tilemap.visibleRange', 'Math.approach'].forEach((k) => {
+  assert.ok(reached.twinpeaks.has(k) && reached.livingtown.has(k), `EMBER.${k} must run under both experiences`);
+});
+assert.ok(reached.twinpeaks.has('Math.smoothstep'), 'Twin Peaks must reach EMBER.Math.smoothstep');
 MUST_SHARE.forEach((k) => {
-  assert.ok(calls.twinpeaks.has(k), `Twin Peaks must execute EMBER.${k}`);
-  assert.ok(calls.livingtown.has(k), `Living Town must execute EMBER.${k}`);
+  assert.ok(calls.twinpeaks.has(k), `Twin Peaks must call EMBER.${k} directly`);
+  assert.ok(calls.livingtown.has(k), `Living Town must call EMBER.${k} directly`);
 });
-ok(`${shared.length} engine functions are executed by both experiences`);
+ok(`${shared.length} engine functions are called directly by both experiences`);
 
 /* ---------------- 4. Living Town does not need Twin Peaks ---------------- */
 
@@ -183,5 +201,48 @@ execFileSync(process.execPath, ['-e', `
   if (!sim.state.events.length) throw new Error('nothing happened');
 `], { stdio: 'pipe' });
 ok('Living Town boots and runs with no Twin Peaks module loaded');
+
+/* ---------------- 5. no private copies, real hosts, real outputs ---------------- */
+
+/* The formulas the engine owns must not reappear in either consumer. The
+ * utility policy keeps a clamp of its own on purpose: a decision policy has to
+ * be able to run where the engine is not loaded. */
+const consumers = ['js/engine.js'].concat(
+  fs.readdirSync(J('living-town', 'js')).filter((f) => /\.js$/.test(f)).map((f) => 'living-town/js/' + f));
+const OWNED = [
+  [/Math\.exp\(\s*-/, 'exponential approach (EMBER.Math.approach)'],
+  [/\*\s*\(3\s*-\s*2\s*\*/, 'smoothstep (EMBER.Math.smoothstep)'],
+  [/Math\.floor\([^)]*\*\s*4\s*\)/, 'walk phase (EMBER.Grid.walkPhase)'],
+  [/\.sort\(function \(a, b\) \{ return a\.wy - b\.wy/, 'depth sort (EMBER.Tilemap.depthSort)']
+];
+consumers.forEach((rel) => {
+  const code = stripComments(fs.readFileSync(J(rel), 'utf8'));
+  OWNED.forEach(([re, what]) => assert.ok(!re.test(code), `${rel} carries a private copy of ${what}`));
+});
+ok(`${consumers.length} consumer files carry no private copy of an engine formula`);
+
+/* The pages people actually open load the engine, and load it first. */
+[['index.html', 'js/engine.js'], ['living-town/index.html', 'js/lt-view.js']].forEach(([host, consumer]) => {
+  const html = fs.readFileSync(J(host), 'utf8');
+  const at = html.indexOf(consumer);
+  assert.ok(at > 0, `${host} loads ${consumer}`);
+  ['ember-math.js', 'ember-grid.js', 'ember-camera.js', 'ember-tilemap.js', 'ember-viewport.js'].forEach((f) => {
+    const e = html.indexOf('engine/' + f);
+    assert.ok(e > 0 && e < at, `${host} must load engine/${f} before ${consumer}`);
+  });
+});
+ok('both production pages load all five engine files ahead of their consumer');
+
+/* Outputs, not just calls: the values both experiences depend on. */
+const E = global.EMBER;
+assert.deepEqual([0, 0.24, 0.25, 0.5, 0.99, 1].map(E.Grid.walkPhase), [0, 0, 1, 2, 3, 3]);
+assert.equal(E.Camera.clampAxis(500, 320, 256), 64);      // clamped to the far edge
+assert.equal(E.Camera.clampAxis(-40, 320, 256), 0);
+assert.equal(E.Camera.clampAxis(0, 160, 256), -48);       // smaller world is centred
+assert.equal(E.Math.smoothstep(0.5), 0.5);
+assert.ok(Math.abs(E.Math.approach(0, 10, 1000, 0) - 0) < 1e-9 && E.Math.approach(0, 10, 1e6, 1) > 9.999);
+assert.deepEqual(E.Tilemap.depthSort([{ wy: 3 }, { wy: 1 }, { wy: 2 }]).map((e) => e.wy), [1, 2, 3]);
+assert.deepEqual(E.Grid.vector('up'), E.Grid.vector(E.Grid.opposite('down')));
+ok('engine outputs match the values both experiences rely on');
 
 console.log(`\nEMBER-SHARED-PASS — ${checks} checks`);

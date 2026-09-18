@@ -166,7 +166,10 @@ async function selectionNotOffered() {
 async function candidateNoLongerLegal() {
   console.log('# async-safety: candidate no longer legal');
   const id = freshId('nolonger');
-  const sim = makeSim(id);
+  // The clock is moved by hand below, across nine hours. The decision timeout
+  // would rightly notice that; it is switched off so this construction keeps
+  // isolating the legality check it exists to exercise.
+  const sim = makeSim(id, { decisionTimeoutMinutes: Infinity });
   const mock = LT.MockPolicy.create({ id: id, script: [{ delayTicks: 5, prefer: 'buy_meal' }] });
   const residentA = sim.state.characters.resident_a;
 
@@ -176,6 +179,13 @@ async function candidateNoLongerLegal() {
   // description calls out explicitly, and the one exercised here.
   sim.state.minute = 700; // café open
   sim.placeCharacter(residentA, 'cafe');
+  // Two things would otherwise get in first, both correctly: resident_b starts
+  // the day in the café and would strike up a conversation (being spoken to
+  // overtakes a pending decision), and the nine-hour jump would break open
+  // commitments (promises are part of relevanceKey). Neither is the subject
+  // here, so resident_b goes home and resident_a has nothing outstanding.
+  sim.placeCharacter(sim.state.characters.resident_b, 'flat_b');
+  residentA.commitments.forEach((c) => { c.status = 'kept'; });
   sim.adjustNeed(residentA, 'hunger', 40);
 
   await sim.runMinutes(1);

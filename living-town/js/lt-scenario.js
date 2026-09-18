@@ -34,7 +34,8 @@
     opts = opts || {};
     var sim = LT.Sim.create({
       seed: opts.seed === undefined ? 20260918 : opts.seed,
-      policies: opts.policies || { resident_a: 'utility', resident_b: 'utility' }
+      policies: opts.policies || { resident_a: 'utility', resident_b: 'utility' },
+      decisionTimeoutMinutes: opts.decisionTimeoutMinutes
     });
     if (opts.intervention !== false) {
       var scheduled = sim.scheduleIntervention(opts.intervention || S.EXTRA_SHIFT);
