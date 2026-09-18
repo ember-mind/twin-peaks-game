@@ -65,7 +65,7 @@
             0
           ]
         ],
-        "defaultLayer": 1,
+        "defaultLayer": 5,
         "tags": [
           "roadhouse",
           "stage",
@@ -133,7 +133,7 @@
           24
         ],
         "footprint": [],
-        "defaultLayer": 5,
+        "defaultLayer": 6,
         "tags": [
           "roadhouse",
           "decor",
@@ -166,7 +166,7 @@
             0
           ]
         ],
-        "defaultLayer": 3,
+        "defaultLayer": 6,
         "tags": [
           "roadhouse",
           "furniture",
@@ -211,7 +211,7 @@
             0
           ]
         ],
-        "defaultLayer": 4,
+        "defaultLayer": 6,
         "tags": [
           "roadhouse",
           "furniture",
@@ -246,7 +246,7 @@
             0
           ]
         ],
-        "defaultLayer": 4,
+        "defaultLayer": 6,
         "tags": [
           "roadhouse",
           "furniture",
@@ -279,7 +279,7 @@
             0
           ]
         ],
-        "defaultLayer": 8,
+        "defaultLayer": 6,
         "tags": [
           "roadhouse",
           "architecture",
@@ -339,7 +339,7 @@
             0
           ]
         ],
-        "defaultLayer": 5,
+        "defaultLayer": 6,
         "tags": [
           "roadhouse",
           "furniture"
@@ -360,7 +360,7 @@
           9
         ],
         "footprint": [],
-        "defaultLayer": 7,
+        "defaultLayer": 6,
         "tags": [
           "roadhouse",
           "decor",
