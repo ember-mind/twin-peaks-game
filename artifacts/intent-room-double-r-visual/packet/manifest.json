@@ -1,0 +1,242 @@
+{
+  "packet": "intent-room-double-r-visual",
+  "capturedAtUtc": "2026-09-18T11:15:16Z",
+  "sourceRevision": "5b65591b5b8cc90598bbff916e677fb488fa1a26",
+  "capturePolicy": {
+    "productionCodeEdited": false,
+    "freshNativeCaptures": true,
+    "nativeViewport": [256, 192],
+    "pixelScale": "native 1x; crops enlarged with ImageMagick point filter only",
+    "wholeRoomCamera": "diner, player tile (6,8), facing up; map centered at viewport offset (16,16)"
+  },
+  "captures": [
+    {
+      "id": "baseline-populated",
+      "file": "baseline-populated-native.png",
+      "dimensions": [256, 192],
+      "sha256": "427cc3060bf1b69e219c5a8a8f60606132e459eb0e98d990bd8a1264c2e1a55f",
+      "command": "node test/native-shot.js --map=diner --x=6 --y=8 --dir=up --narrative=1 --out=artifacts/intent-room-double-r-visual/packet/baseline-populated-native.png",
+      "state": "Fresh canonical narrative population; Cast Presence resolved with default NarrativeAdapter state."
+    },
+    {
+      "id": "architecture-no-narrative",
+      "file": "architecture-no-narrative-native.png",
+      "dimensions": [256, 192],
+      "sha256": "f4421cac886aa9743ce2db778e59631d668c454563bdec24e5abb2aa67b74360",
+      "command": "node test/native-shot.js --map=diner --x=6 --y=8 --dir=up --out=artifacts/intent-room-double-r-visual/packet/architecture-no-narrative-native.png",
+      "state": "Fresh architectural/authored-ambient frame without NarrativeAdapter or named Cast injection; authored generic booth life can remain."
+    },
+    {
+      "id": "act4-afternoon",
+      "file": "act4-afternoon-native.png",
+      "dimensions": [256, 192],
+      "sha256": "838ddd312ce42c27aade585709879a0f762cbf5c1a06aedd192c03f6b06bfab7",
+      "command": "node -e \"const f=require('./test/fixtures/cast-pins-acts-1-4.json');const s=f.seeds.ACT4_AFTERNOON;const {spawnSync}=require('node:child_process');const a=['test/native-shot.js','--map=diner','--x=6','--y=8','--dir=up','--narrative=1','--nstate='+Buffer.from(JSON.stringify(s)).toString('base64'),'--out=artifacts/intent-room-double-r-visual/packet/act4-afternoon-native.png'];const r=spawnSync(process.execPath,a,{stdio:'inherit'});process.exit(r.status===null?2:r.status);\"",
+      "state": {
+        "source": "test/fixtures/cast-pins-acts-1-4.json",
+        "selector": "seeds.ACT4_AFTERNOON",
+        "fixtureSha256": "eb1e7138048eeef6f7a0a744956bc19c5da2d5218ffa9c07101756efa866354b",
+        "expectedDinerCast": [
+          "maddy@diner:10,1",
+          "leland@diner:11,1",
+          "norma@diner:5,2",
+          "shelly@diner:9,7",
+          "loglady@diner:4,5",
+          "james@diner:9,6"
+        ]
+      }
+    }
+  ],
+  "boothCrops": [
+    {
+      "id": "booth-lower-left-occupied",
+      "mapAnchor": "interior.booths[2] = [1,8,3]",
+      "source": "baseline-populated-native.png",
+      "crop": {
+        "x": 24,
+        "y": 128,
+        "width": 64,
+        "height": 48,
+        "inclusivePixels": "x=24..87, y=128..175",
+        "reason": "Three-tile lower-left booth plus 8px side margin; includes backrest, table, occupied guest, table state, contact shadow and south floor edge."
+      },
+      "native": {
+        "file": "booth-lower-left-occupied-native.png",
+        "dimensions": [64, 48],
+        "sha256": "a080763daae7a16642df6d7c63814627d5cba94fb678be993e363858150d4abd",
+        "command": "magick artifacts/intent-room-double-r-visual/packet/baseline-populated-native.png -crop 64x48+24+128 +repage artifacts/intent-room-double-r-visual/packet/booth-lower-left-occupied-native.png"
+      },
+      "nearest4x": {
+        "file": "booth-lower-left-occupied-4x.png",
+        "dimensions": [256, 192],
+        "sha256": "69192471af091b73cf464a3cf716f697897d8f49acf1d543a9cc2981cc8b80ad",
+        "command": "magick artifacts/intent-room-double-r-visual/packet/booth-lower-left-occupied-native.png -filter point -resize 400% -strip artifacts/intent-room-double-r-visual/packet/booth-lower-left-occupied-4x.png"
+      }
+    },
+    {
+      "id": "booth-upper-left-empty-ready",
+      "mapAnchor": "interior.booths[0] = [1,6,3]",
+      "source": "architecture-no-narrative-native.png",
+      "tableState": "empty/ready (variant 0; menu, cup and plate)",
+      "crop": {
+        "x": 24,
+        "y": 96,
+        "width": 64,
+        "height": 48,
+        "inclusivePixels": "x=24..87, y=96..143",
+        "reason": "Three-tile upper-left booth plus 8px side margin; backrest begins one tile above the booth anchor."
+      },
+      "native": {
+        "file": "booth-upper-left-empty-ready-native.png",
+        "dimensions": [64, 48],
+        "sha256": "726017b155bb157c33b9d9d20ab8fd14aac6b7f1899dd4711e629eefc190c66c",
+        "command": "magick artifacts/intent-room-double-r-visual/packet/architecture-no-narrative-native.png -crop 64x48+24+96 +repage artifacts/intent-room-double-r-visual/packet/booth-upper-left-empty-ready-native.png"
+      },
+      "nearest4x": {
+        "file": "booth-upper-left-empty-ready-4x.png",
+        "dimensions": [256, 192],
+        "sha256": "4cd46dc8653e81875348c5bd1b847ce86831e50a45a4ac6f04b2f950389b8595",
+        "command": "magick artifacts/intent-room-double-r-visual/packet/booth-upper-left-empty-ready-native.png -filter point -resize 400% -strip artifacts/intent-room-double-r-visual/packet/booth-upper-left-empty-ready-4x.png"
+      },
+      "note": "The 48px window also clips the neighboring lower-left authored generic guest at its bottom edge; this is contextual crop content, not occupancy of the upper-left table."
+    },
+    {
+      "id": "booth-lower-right-empty-cleared",
+      "mapAnchor": "interior.booths[3] = [10,8,3]",
+      "source": "architecture-no-narrative-native.png",
+      "tableState": "empty/cleared (variant 3; empty plate, folded napkin and faint coffee ring)",
+      "crop": {
+        "x": 168,
+        "y": 128,
+        "width": 64,
+        "height": 48,
+        "inclusivePixels": "x=168..231, y=128..175",
+        "reason": "Three-tile lower-right booth plus 8px side margin; includes table state and south floor edge."
+      },
+      "native": {
+        "file": "booth-lower-right-empty-cleared-native.png",
+        "dimensions": [64, 48],
+        "sha256": "f4891a498067a6e549b61b733d70c1ec9ac902d47251ce22cbfe55e354553a80",
+        "command": "magick artifacts/intent-room-double-r-visual/packet/architecture-no-narrative-native.png -crop 64x48+168+128 +repage artifacts/intent-room-double-r-visual/packet/booth-lower-right-empty-cleared-native.png"
+      },
+      "nearest4x": {
+        "file": "booth-lower-right-empty-cleared-4x.png",
+        "dimensions": [256, 192],
+        "sha256": "d39e739ab98641907f7b9194eb724535f82639954c9908dacb20516f4cd8df19",
+        "command": "magick artifacts/intent-room-double-r-visual/packet/booth-lower-right-empty-cleared-native.png -filter point -resize 400% -strip artifacts/intent-room-double-r-visual/packet/booth-lower-right-empty-cleared-4x.png"
+      }
+    },
+    {
+      "id": "booth-upper-right-act4",
+      "mapAnchor": "interior.booths[1] = [10,6,3]",
+      "source": "act4-afternoon-native.png",
+      "crop": {
+        "x": 168,
+        "y": 96,
+        "width": 64,
+        "height": 48,
+        "inclusivePixels": "x=168..231, y=96..143",
+        "reason": "Upper-right three-tile booth with Act 4 alternate named-Cast occupancy context."
+      },
+      "native": {
+        "file": "booth-upper-right-act4-native.png",
+        "dimensions": [64, 48],
+        "sha256": "f73b11b902aeb881466992bd71c8b1e9e486b7b2174d90adc962f059c5168d26",
+        "command": "magick artifacts/intent-room-double-r-visual/packet/act4-afternoon-native.png -crop 64x48+168+96 +repage artifacts/intent-room-double-r-visual/packet/booth-upper-right-act4-native.png"
+      },
+      "nearest4x": {
+        "file": "booth-upper-right-act4-4x.png",
+        "dimensions": [256, 192],
+        "sha256": "72905dd999859901f2bd0a8e24e58b72d3784e36b90bafe70e059a45c6ed8297",
+        "command": "magick artifacts/intent-room-double-r-visual/packet/booth-upper-right-act4-native.png -filter point -resize 400% -strip artifacts/intent-room-double-r-visual/packet/booth-upper-right-act4-4x.png"
+      }
+    },
+    {
+      "id": "booth-lower-right-act4",
+      "mapAnchor": "interior.booths[3] = [10,8,3]",
+      "source": "act4-afternoon-native.png",
+      "crop": {
+        "x": 168,
+        "y": 128,
+        "width": 64,
+        "height": 48,
+        "inclusivePixels": "x=168..231, y=128..175",
+        "reason": "Lower-right three-tile booth with Act 4 alternate named-Cast occupancy context."
+      },
+      "native": {
+        "file": "booth-lower-right-act4-native.png",
+        "dimensions": [64, 48],
+        "sha256": "58b92d1faf5fd4e12c849d298ced616e34593d33ab0269e176c638866960d6b1",
+        "command": "magick artifacts/intent-room-double-r-visual/packet/act4-afternoon-native.png -crop 64x48+168+128 +repage artifacts/intent-room-double-r-visual/packet/booth-lower-right-act4-native.png"
+      },
+      "nearest4x": {
+        "file": "booth-lower-right-act4-4x.png",
+        "dimensions": [256, 192],
+        "sha256": "0b7b10f1195a14e23250221a097659a7d34c3e2f20c42c8c8294c2b2996c51d1",
+        "command": "magick artifacts/intent-room-double-r-visual/packet/booth-lower-right-act4-native.png -filter point -resize 400% -strip artifacts/intent-room-double-r-visual/packet/booth-lower-right-act4-4x.png"
+      }
+    }
+  ],
+  "approvedReference": {
+    "whole": {
+      "file": "approved-golden-whole-5x.png",
+      "source": "artifacts/diner-final-art/final.png",
+      "dimensions": [1280, 960],
+      "sha256": "2c86b7361c5312d82d0be8b6fdf64b289e102215f1436384df35423095d5f844",
+      "command": "cp artifacts/diner-final-art/final.png artifacts/intent-room-double-r-visual/packet/approved-golden-whole-5x.png",
+      "label": "Approved golden reference copy; not a current runtime capture."
+    },
+    "booth": {
+      "file": "approved-golden-booth-lower-left-5x.png",
+      "source": "approved-golden-whole-5x.png",
+      "sourceCrop": {
+        "x": 120,
+        "y": 640,
+        "width": 320,
+        "height": 240,
+        "relation": "exact 5x coordinates of native crop (24,128,64,48)",
+        "inclusivePixels": "x=120..439, y=640..879"
+      },
+      "dimensions": [320, 240],
+      "sha256": "7db302ea8176a3a3cc3504edb16df685ead25221f4bb0ffba62957b413ce72ec",
+      "command": "magick artifacts/intent-room-double-r-visual/packet/approved-golden-whole-5x.png -crop 320x240+120+640 +repage artifacts/intent-room-double-r-visual/packet/approved-golden-booth-lower-left-5x.png",
+      "label": "Approved golden booth reference crop; art direction only."
+    }
+  },
+  "provenance": {
+    "nativeHarness": "test/native-shot.js",
+    "nativeHarnessSha256": "b97bf89d009c4471a14159fba82c367b18e3f4b45e8e263e3aecd383f8e8dfb8",
+    "sceneHarness": "test/retro-scene.html",
+    "sceneHarnessSha256": "07993784c6df104232a20cd19208036dbae09cb80f2e49343520ddc13f56b9f9",
+    "engine": "js/engine.js",
+    "engineSha256": "e54228828aff776fe0620cc362bb3809bc941e63417b84e434e9f07ddb5308aa",
+    "renderer": "js/retro-authored.js",
+    "rendererSha256": "5b867c73ae6796783ef5f4133d91f2df8aa88d0db0fd262f387e21513110e7bf",
+    "castRegistry": "narrative/cast/windows.json",
+    "castRegistrySha256": "9213ff57ada8a66a22f9e68ffe5eb56affdf4fb8e316e3bf7405890435d44bce",
+    "castFixture": "test/fixtures/cast-pins-acts-1-4.json",
+    "castFixtureSha256": "eb1e7138048eeef6f7a0a744956bc19c5da2d5218ffa9c07101756efa866354b",
+    "chrome": "Google Chrome 153.0.8010.53",
+    "node": "v26.5.0",
+    "imageMagick": "ImageMagick 7.1.1-43 Q16-HDRI aarch64 22550",
+    "approvedGoldenReference": "artifacts/diner-final-art/final.png",
+    "approvedGoldenReferenceSha256": "2c86b7361c5312d82d0be8b6fdf64b289e102215f1436384df35423095d5f844",
+    "upscale": "ImageMagick point filter, 400%; no smoothing"
+  },
+  "comparisons": {
+    "priorCraftPacket": "artifacts/intent-room-double-r-craft/packet/",
+    "rendererSourceAgainstPriorPacketRevision": "git diff --quiet 7472a39143636dfaf282da6a0041f07082d6a1c2 HEAD -- js/retro-authored.js js/engine.js test/native-shot.js test/retro-scene.html narrative/cast/windows.json test/fixtures/cast-pins-acts-1-4.json => unchanged",
+    "pixelComparisonsAgainstPriorCraftPacket": {
+      "wholePopulatedNative": {"absolutePixelDifferenceCount": 172, "note": "fresh capture timing/state frame; not byte-identical"},
+      "architectureNoNarrativeNative": {"absolutePixelDifferenceCount": 13, "note": "fresh capture timing/state frame; not byte-identical"},
+      "occupiedBoothNearest4x": {"absolutePixelDifferenceCount": 0, "note": "pixel-identical to prior craft packet crop"}
+    }
+  },
+  "limitations": [
+    "The no-narrative frame is not a zero-person room: authored generic booth guests remain part of the interior model.",
+    "The upper-left ready crop is a canonical 64x48 context window and clips a neighboring lower-left authored guest at its bottom edge.",
+    "Act 4 is one alternate Cast snapshot, not evidence of a temporal sequence, dialogue state or human playtest.",
+    "The approved golden is a 5x reference copy; it is not a current runtime frame.",
+    "Native capture provenance does not claim 60fps fluidity, audio quality or mobile performance."
+  ]
+}
