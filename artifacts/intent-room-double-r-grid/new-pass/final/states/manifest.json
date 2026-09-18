@@ -1,0 +1,51 @@
+{
+  "format": "double-r-fixed-state-evidence.v1",
+  "head": "dfe16e1",
+  "camera": {
+    "page": "test/retro-scene.html",
+    "map": "diner",
+    "player": { "x": 6, "y": 8, "dir": "up" },
+    "native": [256, 192],
+    "capture": "test/native-shot.js",
+    "chrome": "headless-new, swiftshader, one process per capture"
+  },
+  "states": {
+    "noNarrative": {
+      "query": "map=diner&x=6&y=8&dir=up",
+      "title": "TP-RETRO-READY diner",
+      "native": { "path": "no-narrative-native.png", "sha256": "9adfd8e7b6bb10cff0ad03303155d84772192ed8b091708a0a1306631b6fefe0", "dimensions": [256, 192] },
+      "display3x": { "path": "no-narrative-3x.png", "sha256": "28412016c556c668ac49bd937f3cefc3f2f8eb6b4e21fd939f57ff09d0008c71", "dimensions": [768, 576] }
+    },
+    "act4PromiseMade": {
+      "fixture": "test/fixtures/cast-pins-acts-1-4.json#seeds.ACT4_PROMISE_MADE",
+      "fixtureFileSha256": "eb1e7138048eeef6f7a0a744956bc19c5da2d5218ffa9c07101756efa866354b",
+      "seedJsonSha256": "c30c20cbd70e2c59f617b88688324eef22a19c6531b1d75d588474cfd34ad706",
+      "query": "map=diner&x=6&y=8&dir=up&narrative=1&nstate=<base64 seed JSON>",
+      "title": "TP-RETRO-READY diner",
+      "native": { "path": "act4-promise-made-native.png", "sha256": "7fc77fe4f70d89bba380092550646049f795336f6d783cf68ebc7d29b777cf1d", "dimensions": [256, 192] },
+      "display3x": { "path": "act4-promise-made-3x.png", "sha256": "8996f2d0172498b037ff0c5d4cf6fd7e33398bc38cb6c540d751b9c590f715d6", "dimensions": [768, 576] }
+    }
+  },
+  "boothCropLayout": {
+    "order": ["upper-left-ready", "upper-right-occupied", "lower-left-occupied", "lower-right-cleared"],
+    "cropSize": [64, 48],
+    "sourceRects": {
+      "upper-left-ready": [24, 96, 64, 48],
+      "upper-right-occupied": [168, 96, 64, 48],
+      "lower-left-occupied": [24, 128, 64, 48],
+      "lower-right-cleared": [168, 128, 64, 48]
+    },
+    "checks": {
+      "allFourModulesCaptured": true,
+      "guestAndPropsOverlapVisuallyChecked": true,
+      "statePixelDifferenceNative": 2559
+    },
+    "sheets": {
+      "noNarrativeNative": { "path": "no-narrative-booths-native.png", "sha256": "8e746038a2a59d4a401743d832cabf88b95541a756a0886abe8a3a519200ff30", "dimensions": [256, 48] },
+      "noNarrative3x": { "path": "no-narrative-booths-3x.png", "sha256": "e6d49963c5ba09b799bc2549eee8f163eb4f2597f0d942112e7718aa2c91471a", "dimensions": [768, 144] },
+      "act4PromiseMadeNative": { "path": "act4-promise-made-booths-native.png", "sha256": "b084f5ae29dbeaaf3790f3a12d35b890eeef82f8725a190be426f7248ee18729", "dimensions": [256, 48] },
+      "act4PromiseMade3x": { "path": "act4-promise-made-booths-3x.png", "sha256": "c28fb4c60ea18c7e7d066bf7a0d5e33091650d70a6c96cb3f1ee0024d7779ee8", "dimensions": [768, 144] }
+    }
+  },
+  "fixtureMismatch": null
+}

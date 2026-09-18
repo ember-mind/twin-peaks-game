@@ -1,0 +1,43 @@
+{
+  "format": "double-r-final-comparison.v1",
+  "head": "dfe16e1",
+  "camera": {
+    "page": "test/retro-scene.html",
+    "map": "diner",
+    "player": { "x": 6, "y": 8, "dir": "up" },
+    "native": [256, 192],
+    "displayScale": 3,
+    "displayResampling": "point"
+  },
+  "order": ["BASE", "FINAL"],
+  "sources": {
+    "BASE": {
+      "path": "../baseline/double-r-baseline-native.png",
+      "sha256": "e2c579d8945c5401d639e3cf6d49053884cdcbd7a7f99b89096d0ea3cdd7e923",
+      "dimensions": [256, 192]
+    },
+    "FINAL": {
+      "path": "../B-refine-2/game-native.png",
+      "sha256": "c47f875edb5746c3f7370fb55a73b2a5c06d54ae3cb7d6df8d05d0f23a3d68ed",
+      "dimensions": [256, 192]
+    }
+  },
+  "crops": {
+    "booths": { "x": 16, "y": 88, "width": 224, "height": 80 },
+    "service": { "x": 16, "y": 0, "width": 224, "height": 80 }
+  },
+  "outputs": {
+    "fullRoomNative": { "path": "full-room-native.png", "sha256": "8f38b7bf91527bfab0a3070596d7f8f0eb397f6fdd28133f1c16b8b133f70c36", "dimensions": [512, 192] },
+    "fullRoom3x": { "path": "full-room-3x.png", "sha256": "a4d75dfcce97839d7234c7fd963bacd251bd7ba3eebe9eeaeb88a04e3eae1a27", "dimensions": [1536, 576] },
+    "boothsNative": { "path": "booths-native.png", "sha256": "9885a518a5bc454128659a3fd2a3010ce59a68946edc74dd97dace71aff06adb", "dimensions": [448, 80] },
+    "booths3x": { "path": "booths-3x.png", "sha256": "8e6b54e1fd4df13e2da9573eb5d6b0b0f25b3d2d12fb1ef335a8f43f6dcac0ca", "dimensions": [1344, 240] },
+    "serviceNative": { "path": "service-native.png", "sha256": "55e33d3e5aea0641fefa96d1348056b3365e01081bbe36ae7ee69474d575763f", "dimensions": [448, 80] },
+    "service3x": { "path": "service-3x.png", "sha256": "0c6ec4e153541cb3ec3325ef4fa493ae216a185da2673825726e645f477c2232", "dimensions": [1344, 240] }
+  },
+  "checks": {
+    "sameSourceDimensions": true,
+    "nativePanels": "256x192 each",
+    "pointScale": true,
+    "noProductionEdits": true
+  }
+}

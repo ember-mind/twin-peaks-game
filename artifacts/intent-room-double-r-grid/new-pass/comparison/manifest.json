@@ -1,0 +1,28 @@
+{
+  "sourceSize": [256, 192],
+  "order": ["BASE", "A", "B"],
+  "sources": {
+    "BASE": "../baseline/double-r-baseline-native.png",
+    "A": "../A/game-native.png",
+    "B": "../B/game-native.png"
+  },
+  "outputs": {
+    "fullRoomNative": "full-room-native.png",
+    "fullRoom3x": "full-room-3x.png",
+    "serviceNative": "service-native.png",
+    "service3x": "service-3x.png",
+    "lowerBoothNative": "lower-booth-native.png",
+    "lowerBooth3x": "lower-booth-3x.png"
+  },
+  "crops": {
+    "service": { "x": 16, "y": 0, "width": 224, "height": 80 },
+    "lowerBooth": { "x": 16, "y": 88, "width": 224, "height": 80 }
+  },
+  "layout": "Each output is a horizontal BASE|A|B strip; no labels or gutters are embedded.",
+  "scale": "native is exact source pixels; 3x uses nearest-neighbor point scaling.",
+  "sourceSha256": {
+    "BASE": "e2c579d8945c5401d639e3cf6d49053884cdcbd7a7f99b89096d0ea3cdd7e923",
+    "A": "9747310c0c4ac02ff91499e09d0f95eb4092a07657676d756a438c1a17fac372",
+    "B": "0c113aefb6b94bbebabb1c716e464c21903f4aef324f26bbbef5759a7958d531"
+  }
+}
