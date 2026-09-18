@@ -3,6 +3,7 @@
  * Real headless Chrome, real pages, real canvases read back at 256x192.
  *   node living-town/tools/capture-cafe.js reference   -> Twin Peaks diner
  *   node living-town/tools/capture-cafe.js cafe <tag>  -> Living Town café still + activity sequence
+ *   node living-town/tools/capture-cafe.js continuity  -> one inhabitant followed through every place, and a mid-walk reload
  * Run one Chrome driver at a time. */
 'use strict';
 const fs = require('node:fs');
@@ -85,11 +86,33 @@ async function cafe(page, tag) {
   console.log('  lettering not supported by the kit: ' + await page.evaluate("JSON.stringify(GAME.Retro2D.unsupportedGlyphs)"));
 }
 
+/* The same person at home, on the street, at work and in the park, as the day
+ * puts them there; then the page's own world saved and reloaded while they are
+ * half way round the counter, and looked at again. */
+async function continuity(page) {
+  await page.navigate('living-town/index.html');
+  await sleep(1500);
+  const stops = [['home', 365], ['street', 492], ['cafe', 600], ['park', 1052]];
+  for (const [name, minute] of stops) {
+    await runTo(page, minute);
+    console.log('  ' + name + ': ' + await describe(page) + ' ' + await page.evaluate("JSON.stringify(LT_OBSERVER.view.draw())"));
+    save('05-continuity-' + name + '.png', await page.evaluate(SHOT));
+  }
+  await page.navigate('living-town/index.html');
+  await sleep(1500);
+  await runTo(page, 552);
+  console.log('  before reload: ' + await describe(page));
+  console.log('  reload: ' + await page.evaluate("(async function(){ var st = LT_OBSERVER, a = st.sim.state.characters.resident_a; var was = JSON.stringify([a.name, a.appearanceId, a.pos, a.walkTarget, a.activity && a.activity.actionId, a.money]); var ok = LT.Save.writeLocal(st.sim); var r = LT.Save.readLocal(); if (r.status !== 'loaded') return 'REFUSED ' + r.reason; st.sim = r.sim; st.view.sim = r.sim; var b = r.sim.state.characters.resident_a; var now = JSON.stringify([b.name, b.appearanceId, b.pos, b.walkTarget, b.activity && b.activity.actionId, b.money]); await r.sim.runMinutes(12); for (var i=0;i<60;i++) st.view.update(33); st.view.draw(); return (ok && was === now ? 'same person, same step: ' : 'DIFFERENT: ' + was + ' vs ') + now; })()", true, 60000));
+  console.log('  after reload: ' + await describe(page));
+  save('05-continuity-after-reload.png', await page.evaluate(SHOT));
+}
+
 (async function () {
   const mode = process.argv[2] || 'cafe';
   const page = await launch({ root: ROOT, width: 1200, height: 800 });
   try {
     if (mode === 'reference') await reference(page);
+    else if (mode === 'continuity') await continuity(page);
     else await cafe(page, process.argv[3] || '02-before');
   } finally { await page.close(); }
 })().catch((e) => { console.error(e); process.exit(1); });

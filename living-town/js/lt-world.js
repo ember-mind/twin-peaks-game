@@ -266,5 +266,25 @@
     }
   ];
 
+  /* What a saved world was standing on. Everything here is static content the
+   * save deliberately does not carry: rooms, doors, where furniture is and where
+   * people stand to use it. If any of it changes, a position or a walk target
+   * recorded against the old town may now be inside a counter, so the save
+   * layer compares this value rather than trusting the coordinates. FNV-1a. */
+  W.fingerprint = function () {
+    var ids = Object.keys(W.LOCATIONS).sort();
+    var text = JSON.stringify({
+      locations: ids.map(function (id) {
+        var l = W.LOCATIONS[id];
+        return [id, l.rows, l.spawn, l.exit || null, !!l.indoor];
+      }),
+      portals: W.STREET_PORTALS,
+      objects: W.OBJECTS.map(function (o) { return [o.id, o.location, o.x, o.y, o.anchors || null, o.affordances || null]; })
+    });
+    var h = 0x811c9dc5;
+    for (var i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+    return ('0000000' + h.toString(16)).slice(-8);
+  };
+
   W.START = { day: 1, minute: 360 };   // 06:00
 })();

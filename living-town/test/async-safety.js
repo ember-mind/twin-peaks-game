@@ -53,12 +53,16 @@ async function staleResponse() {
   const residentA = sim.state.characters.resident_a;
 
   await sim.runMinutes(1);
+  const staleId = residentA.pending.requestId;
   sim.credit(residentA, { money: 30 }); // changes resident_a's own relevanceKey while the decision is in flight
   mock.releaseAll();
   await sim.runMinutes(2);
 
   ok(sim.rejections.some((r) => r.actorId === 'resident_a' && r.reason === 'stale_state'), 'the sim records a stale_state rejection');
-  ok(!residentA.activity, 'the stale decision never starts an activity');
+  /* They are asked again straight away, and may well be doing something by
+   * now; what must never happen is that the refused answer is what started it. */
+  ok(!sim.state.events.some((e) => e.type === 'ACTIVITY_STARTED' && e.data.requestId === staleId) &&
+     (!residentA.activity || residentA.activity.requestId !== staleId), 'the stale decision never starts an activity');
 }
 
 async function unrelatedChangeDoesNotInvalidate() {

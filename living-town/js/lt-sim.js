@@ -47,6 +47,7 @@
     this.inbox = [];
     this.rejections = [];                      // async-safety audit trail
     this.scheduledInterventions = [];
+    this.loads = 0;                            // how many times this world has been restored from a save
     /* How long, in simulated minutes, a decision may stay unanswered before the
      * sim stops waiting for it. Simulated rather than wall-clock so a run does
      * not depend on how fast the host machine is. */
@@ -785,11 +786,23 @@
     ].join('|');
   };
 
-  Sim.prototype.buildRequest = function (actor, reason) {
+  Sim.prototype.buildRequest = function (actor, reason, reissuedSeq) {
     var cand = P.candidates(this, actor);
-    var seq = ++this.requestSeq;
+    /* A restored world puts its open questions again under the numbers they
+     * already had: it is the same question, and a recording made of the
+     * uninterrupted run must still line up with it. The id, though, says which
+     * load asked it, so an answer addressed to the question as it was asked
+     * before the save — by a provider that no longer has anything to do with
+     * this world — is an unknown request here, not a second answer. Only the
+     * save layer passes this, and only for a number not live in this sim. */
+    var self = this;
+    if (reissuedSeq && (reissuedSeq > this.requestSeq ||
+        Object.keys(this.requests).some(function (k) { return self.requests[k].request.seq === reissuedSeq; }))) {
+      throw new Error('cannot re-issue request ' + reissuedSeq);
+    }
+    var seq = reissuedSeq || ++this.requestSeq;
     var request = {
-      requestId: 'req_' + seq, seq: seq,
+      requestId: 'req_' + seq + (reissuedSeq ? '.' + (this.loads || 1) : ''), seq: seq,
       actorId: actor.id,
       day: this.state.day, minute: this.state.minute, clock: U.clock(this.state.minute),
       absMinute: this.absMinute(),
@@ -822,10 +835,10 @@
     return request;
   };
 
-  Sim.prototype.requestDecision = function (actor, reason) {
+  Sim.prototype.requestDecision = function (actor, reason, reissuedSeq) {
     var policy = Pol.get(actor.policyId);
     if (!policy) throw new Error('no policy registered for ' + actor.id + ' (' + actor.policyId + ')');
-    var request = this.buildRequest(actor, reason);
+    var request = this.buildRequest(actor, reason, reissuedSeq);
     actor.pending = {
       requestId: request.requestId, seq: request.seq,
       issuedAbs: request.absMinute, relevanceKey: request.relevanceKey,
@@ -1072,7 +1085,11 @@
       self.tick();
       return yieldTurn().then(step);
     }
-    return step();
+    /* The same courtesy before the first minute as between any two: a question
+     * asked just before this call (a world that has only now been restored
+     * re-asks its open ones) gets its answer in before the clock moves, exactly
+     * as it would have had the run never stopped. */
+    return Promise.resolve().then(function () { return Promise.resolve(); }).then(step);
   };
 
   Sim.prototype.runUntil = function (day, minute) {

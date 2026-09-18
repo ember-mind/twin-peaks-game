@@ -48,19 +48,25 @@
   function player(recording, options) {
     options = options || {};
     var entries = (recording && recording.entries) || [];
-    var i = 0;
+    /* Looked up by the question's own number, not by how many questions this
+     * player has been asked: a world restored from a save puts its open
+     * questions again, and a player started in a new process has been asked
+     * none. Either way question n gets the answer recorded for question n. */
+    var bySeq = {}, answered = {}, used = 0;
+    entries.forEach(function (e) { bySeq[e.seq] = e; });
     var api = {
       id: options.id || 'recorded',
       label: 'RecordedPolicy',
       mismatches: [],
       exhausted: false,
-      remaining: function () { return entries.length - i; },
+      remaining: function () { return entries.length - used; },
       decide: function (request) {
-        if (i >= entries.length) {
+        var e = bySeq[request.seq];
+        if (!e) {
           api.exhausted = true;
           return Promise.resolve(Pol.unavailable(request, 'recorded', 'recording_exhausted'));
         }
-        var e = entries[i++];
+        if (!answered[e.seq]) { answered[e.seq] = true; used++; }
         var problems = [];
         if (e.actorId !== request.actorId) problems.push('actor:' + e.actorId + '!=' + request.actorId);
         if (e.seq !== request.seq) problems.push('seq:' + e.seq + '!=' + request.seq);

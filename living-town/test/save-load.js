@@ -171,7 +171,7 @@ async function versionMonotonicity() {
 /* ---------------- 6: a pending decision is dropped and re-asked ---------------- */
 
 async function pendingDecisionIsDropped() {
-  console.log('# 6: a pending decision is never saved');
+  console.log('# 6: a pending decision is never saved; the question is asked again');
   const id = 'save-hold';
   const sim = LT.Scenario.day1({ intervention: false, policies: { resident_a: id, resident_b: 'utility' } });
   LT.MockPolicy.create({ id: id, script: [{ delayTicks: 5 }] });
@@ -187,13 +187,15 @@ async function pendingDecisionIsDropped() {
   ok(a.pending && a.pending.seq === savedSeq, 'the live sim pending decision is untouched by serialising');
 
   const restored = Save.fromJSON(json, { policies: { resident_a: 'utility', resident_b: 'utility' } });
-  ok(restored.state.characters.resident_a.pending === null, 'the restored character starts with no pending decision');
+  const reasked = restored.state.characters.resident_a.pending;
+  ok(reasked && reasked.seq === savedSeq && parsed.reissue.some((r) => r.actorId === 'resident_a' && r.reason === 'idle' && r.seq === savedSeq),
+     'the open question is put again at load, under its own number, to the policy now answering for them');
   const startedBefore = starts(restored, 'resident_a').length;
 
   await restored.runMinutes(6);
   const seqs = Object.keys(restored.requests).map((k) => restored.requests[k].request.seq);
-  ok(seqs.length > 0 && Math.min.apply(null, seqs) > savedSeq,
-     'the re-issued request has a higher sequence than the one that was dropped');
+  ok(seqs.length > 0 && new Set(seqs).size === seqs.length && Math.min.apply(null, seqs) === savedSeq,
+     'request numbers carry on from the re-asked one, none issued twice');
   ok(starts(restored, 'resident_a').length > startedBefore,
      'an activity starts within a few ticks instead of waiting out the 30-minute timeout');
   const ids2 = starts(restored, 'resident_a').map((e) => e.data.requestId);
@@ -340,6 +342,169 @@ async function fullDaySerialises() {
   ok(memOk, 'every memory back-reference still resolves against the restored event log');
 }
 
+/* ---------------- 13: every moment of the day is a safe moment to save ---------------- */
+
+/* version counts touches, and a re-asked question's id names the load that
+ * asked it. Every other byte of the state must match, request numbers included. */
+function facts(sim) {
+  const s = copy(sim.state);
+  delete s.version;
+  return JSON.stringify(s).replace(/"requestId":"req_(\d+)\.\d+"/g, '"requestId":"req_$1"');
+}
+
+async function anyMomentIsSafe() {
+  console.log('# 13: saving mid-walk, mid-transit, mid-activity or mid-question changes nothing that follows');
+  const seen = { walking: 0, transit: 0, activity: 0, question: 0, conversation: 0 };
+  let points = 0;
+  for (let minute = 365; minute < 1435; minute += 23) {
+    const direct = LT.Scenario.day1({}), saver = LT.Scenario.day1({});
+    await direct.runUntil(1, minute); await saver.runUntil(1, minute);
+    const people = Object.values(saver.state.characters);
+    if (people.some((c) => c.walkTarget && !c.transit)) seen.walking++;
+    if (people.some((c) => c.transit)) seen.transit++;
+    if (people.some((c) => c.activity && c.activity.elapsed > 0)) seen.activity++;
+    if (people.some((c) => c.pending)) seen.question++;
+    if (saver.state.conversations.some((c) => !c.endedAbs && c.status !== 'completed' && c.status !== 'ended')) seen.conversation++;
+    const restored = Save.fromJSON(Save.toJSON(saver));
+    await direct.runUntil(2, 480); await restored.runUntil(2, 480);
+    assert.equal(facts(restored), facts(direct), 'a save at minute ' + minute + ' resumed into a different town');
+    points++;
+  }
+  ok(points === 47, points + ' save points across the day each resume into exactly the town that was never saved');
+  ok(seen.walking > 0 && seen.transit > 0 && seen.activity > 0 && seen.question > 0,
+     'including mid-walk (' + seen.walking + '), on the street between places (' + seen.transit + '), mid-activity (' + seen.activity + ') and with a decision in flight (' + seen.question + ')');
+}
+
+async function nothingHappensTwice() {
+  console.log('# 14: no wage, purchase or completion is applied twice by a reload');
+  const direct = LT.Scenario.day1({});
+  await direct.runUntil(2, 480);
+  /* the same day, saved and reloaded every 37 minutes */
+  let sim = LT.Scenario.day1({}), reloads = 0;
+  for (let abs = 360 + 37; abs < 1440 + 480; abs += 37) {
+    await sim.runUntil(abs >= 1440 ? 2 : 1, abs % 1440);
+    sim = Save.fromJSON(Save.toJSON(sim)); reloads++;
+  }
+  await sim.runUntil(2, 480);
+  const a = sim.state.characters.resident_a, d = direct.state.characters.resident_a;
+  ok(a.money === d.money && a.savings === d.savings && a.pantry === d.pantry,
+     reloads + ' reloads later, money ' + a.money + ', savings ' + a.savings + ' and pantry ' + a.pantry + ' equal the uninterrupted day');
+  const completions = (s) => s.state.events.filter((e) => e.type === 'ACTIVITY_COMPLETED').map((e) => e.stamp + e.actorId + e.data.actionId);
+  ok(JSON.stringify(completions(sim)) === JSON.stringify(completions(direct)) && new Set(completions(sim)).size === completions(sim).length,
+     'every activity completes once, at the same minute (' + completions(sim).length + ' completions)');
+  ok(facts(sim) === facts(direct), 'and the whole town is the same town');
+}
+
+/* ---------------- 15: a save that does not fit is refused out loud ---------------- */
+
+function refusalsAreExplicit() {
+  console.log('# 15: a save that does not fit this build is refused, with the reason, and left alone');
+  const fresh = () => copy(Save.serialize(LT.Scenario.day1({})));
+  const refuses = (saved, pattern, msg) => {
+    const before = JSON.stringify(saved);
+    assert.throws(() => Save.deserialize(saved), pattern);
+    ok(JSON.stringify(saved) === before, msg);
+  };
+
+  const otherTown = fresh(); otherTown.world = 'deadbeef';
+  refuses(otherTown, /different version of the town \(deadbeef; this build is [0-9a-f]{8}\).*no migration/, 'a save from a differently laid-out town is refused by fingerprint, not loaded onto the new furniture');
+  const unrecorded = fresh(); delete unrecorded.world;
+  refuses(unrecorded, /different version of the town \(unrecorded/, 'a save that never recorded its town is refused the same way');
+
+  const lostLook = fresh(); lostLook.state.characters.resident_a.appearanceId = 'look_retired';
+  refuses(lostLook, /resident_a has the look "look_retired", which this build cannot draw/, 'a look this build cannot draw is refused rather than drawn as somebody else');
+  const noName = fresh(); noName.state.characters.resident_b.name = '';
+  refuses(noName, /resident_b has no name/, 'a person with no name is refused rather than renamed');
+
+  const inCounter = fresh(); inCounter.state.characters.resident_b.location = 'cafe'; inCounter.state.characters.resident_b.pos = { x: 3, y: 3, dir: 'down' };
+  refuses(inCounter, /resident_b stands 3,3 in cafe, which is not floor/, 'someone saved inside the counter is refused');
+  const badTarget = fresh(); badTarget.state.characters.resident_b.walkTarget = { x: 1, y: 3 };
+  refuses(badTarget, /resident_b is walking to 1,3 in cafe, which is not floor/, 'so is a walk whose destination is furniture');
+  const nowhere = fresh(); nowhere.state.characters.resident_a.location = 'harbour';
+  refuses(nowhere, /resident_a is in "harbour", which is not a place in this town/, 'and a place that does not exist');
+
+  const noBrain = fresh(); noBrain.state.characters.resident_a.policyId = 'model-not-installed'; noBrain.policies.resident_a = 'model-not-installed';
+  refuses(noBrain, /resident_a is decided by the policy "model-not-installed", which is not registered/, 'an unregistered policy is refused at load, not discovered as a crash on the first tick');
+  ok(Save.deserialize(noBrain, { policies: { resident_a: 'utility', resident_b: 'utility' } }).state.characters.resident_a.policyId === 'utility',
+     'and naming a registered policy for them at load is the way through');
+}
+
+function worldMigrationIsVerified() {
+  console.log('# 16: a town migration is a registered, verified step');
+  const old = copy(Save.serialize(LT.Scenario.day1({})));
+  old.world = 'oldtown1';
+  old.state.characters.resident_b.location = 'cafe';
+  old.state.characters.resident_b.pos = { x: 3, y: 3, dir: 'down' };   // floor in the old town, counter in this one
+
+  Save.WORLD_MIGRATIONS.oldtown1 = (s) => { s.world = LT.World.fingerprint(); return s; };   // claims to fit, moves nobody
+  assert.throws(() => Save.deserialize(old), /resident_b stands 3,3 in cafe, which is not floor/);
+  ok(true, 'a migration that leaves someone inside furniture is caught by the same checks as any save');
+
+  Save.WORLD_MIGRATIONS.oldtown1 = (s) => {
+    const spawn = LT.World.LOCATIONS.cafe.spawn;
+    s.state.characters.resident_b.pos = { x: spawn.x, y: spawn.y, dir: 'up' };
+    s.state.characters.resident_b.walkTarget = null;
+    s.world = LT.World.fingerprint();
+    return s;
+  };
+  const moved = Save.deserialize(old).state.characters.resident_b;
+  ok(moved.pos.x === LT.World.LOCATIONS.cafe.spawn.x && moved.name === old.state.characters.resident_b.name && moved.appearanceId === old.state.characters.resident_b.appearanceId,
+     'one that moves them to the door loads, with the same name and look');
+  ok(old.world === 'oldtown1' && old.state.characters.resident_b.pos.x === 3, 'the old save itself is never rewritten by migrating it');
+  Save.WORLD_MIGRATIONS.oldtown1 = (s) => s;
+  assert.throws(() => Save.deserialize(old), /made no progress/);
+  ok(true, 'and one that goes nowhere is stopped');
+  delete Save.WORLD_MIGRATIONS.oldtown1;
+}
+
+function localStorageNeverResetsSilently() {
+  console.log('# 17: the browser helper tells "no save" from "a save I cannot use"');
+  const store = {};
+  global.localStorage = { getItem: (k) => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); } };
+  ok(Save.readLocal().status === 'none', 'nothing stored: none');
+  ok(Save.writeLocal(LT.Scenario.day1({})) === true && Save.readLocal().status === 'loaded' && !!Save.readLocal().sim.state, 'a good save: loaded, with the town');
+  const bad = JSON.parse(store[Save.DEFAULT_KEY]); bad.world = 'deadbeef'; store[Save.DEFAULT_KEY] = JSON.stringify(bad);
+  const kept = store[Save.DEFAULT_KEY];
+  const r = Save.readLocal();
+  ok(r.status === 'refused' && r.sim === null && /different version of the town/.test(r.reason), 'a save from another town: refused, with the sentence to show');
+  ok(store[Save.DEFAULT_KEY] === kept, 'and the refused save is still in storage, untouched');
+  store[Save.DEFAULT_KEY] = '{not json';
+  ok(Save.readLocal().status === 'refused', 'unreadable text is refused too, never mistaken for "no save"');
+  delete global.localStorage;
+}
+
+/* ---------------- 18: a recording still lines up after a reload ---------------- */
+
+async function replaySurvivesReload() {
+  console.log('# 18: a recorded run replays across a save, with or without a question in flight');
+  require(path.resolve(__dirname, '..', 'js', 'policy', 'lt-recorded-policy.js'));
+  const recorded = LT.Sim.create({ seed: 20260918, policies: { resident_a: 'save-recorder', resident_b: 'utility' } });
+  recorded.scheduleIntervention(LT.Scenario.EXTRA_SHIFT);
+  const recorder = LT.RecordedPolicy.record(LT.UtilityPolicy, { id: 'save-recorder' });
+  await recorded.runUntil(1, 1439);
+  const recording = copy(recorder.toJSON());
+
+  let inFlight = 0;
+  for (const minute of [508, 900, 1055, 1170]) {
+    /* first half in one "process" ... */
+    const id1 = 'save-player-a-' + minute, id2 = 'save-player-b-' + minute;
+    LT.RecordedPolicy.replay(recording, { id: id1 });
+    const first = LT.Sim.create({ seed: 20260918, policies: { resident_a: id1, resident_b: 'utility' } });
+    first.scheduleIntervention(LT.Scenario.EXTRA_SHIFT);
+    await first.runUntil(1, minute);
+    if (first.state.characters.resident_a.pending) inFlight++;
+    const text = Save.toJSON(first);
+    /* ... second half with a player that has never been asked anything */
+    const player = LT.RecordedPolicy.replay(recording, { id: id2 });
+    const second = Save.fromJSON(text, { policies: { resident_a: id2, resident_b: 'utility' } });
+    await second.runUntil(1, 1439);
+    assert.equal(player.mismatches.length, 0, 'reload at ' + minute + ': ' + JSON.stringify(player.mismatches.slice(0, 2)));
+    assert.equal(second.state.characters.resident_a.savings, recorded.state.characters.resident_a.savings, 'reload at ' + minute + ' changed the savings');
+    assert.equal(eventTrace(second), eventTrace(recorded), 'reload at ' + minute + ' changed the event sequence');
+  }
+  ok(inFlight >= 2, 'four reload points, ' + inFlight + ' of them with a question in flight: zero replay mismatches, same savings, same event sequence');
+}
+
 async function main() {
   await roundTripMidDay();
   await resumeIsIdentical();
@@ -354,6 +519,12 @@ async function main() {
   acceptedShiftKeepsWindow();
   await noStaticContent();
   await fullDaySerialises();
+  await anyMomentIsSafe();
+  await nothingHappensTwice();
+  refusalsAreExplicit();
+  worldMigrationIsVerified();
+  localStorageNeverResetsSilently();
+  await replaySurvivesReload();
   console.log('\nsave-load: ' + checks + '/' + checks);
 }
 
