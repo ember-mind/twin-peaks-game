@@ -19,33 +19,61 @@ global.Image = class { set src(v) { this._src = v; this.complete = true; this.na
 require(J('living-town', 'js', 'lt-scenario.js'));
 require(J('living-town', 'js', 'lt-production-host.js'));
 require(J('js', 'retro-authored.js'));
+require(J('living-town', 'js', 'lt-cafe-scene.js'));
 require(J('living-town', 'js', 'lt-art.js'));
 require(J('living-town', 'js', 'lt-view.js'));
 const LT = global.LT, GAME = global.GAME, W = LT.World;
 
 let checks = 0;
 function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + msg); }
-const cafe = W.LOCATIONS.cafe, model = cafe.visual.interior;
+const cafe = W.LOCATIONS.cafe, plan = cafe.visual.plan;
 const cell = (x, y) => cafe.rows[y].charAt(x);
 const solid = (x, y) => W.isSolid(cell(x, y));
 
 function rowsAgreeWithPaintedRoom() {
-  console.log('# café: collision rows agree with what the painter draws');
+  console.log('# café: collision rows agree with what the scene arranges');
   const claimed = {};
   const claim = (x, y, what) => { claimed[x + ',' + y] = what; };
-  for (let i = 0; i < model.counter[2]; i++) claim(model.counter[0] + i, model.counter[1], 'counter');
-  model.stools.forEach((s) => claim(s[0], s[1], 'stool'));
-  model.booths.forEach((b) => { for (let i = 0; i < b[2]; i++) claim(b[0] + i, b[1], 'booth table'); });
-  claim(model.specials[0], model.specials[1], 'specials board');
-  claim(model.islandPlant[0], model.islandPlant[1], 'floor plant');
+  for (let i = 0; i < plan.counter[2]; i++) claim(plan.counter[0] + i, plan.counter[1], 'counter');
+  plan.stools.forEach((s) => claim(s[0], s[1], 'stool'));
+  plan.banquettes.forEach((b) => { for (let i = 0; i < b[2]; i++) claim(b[0] + i, b[1], 'bench table'); });
+  claim(plan.board[0], plan.board[1], 'specials board');
+  claim(plan.plant[0], plan.plant[1], 'floor plant');
+  claim(plan.coatRack[0], plan.coatRack[1], 'coat rack');
   Object.keys(claimed).forEach((k) => {
     const [x, y] = k.split(',').map(Number);
-    assert(solid(x, y), claimed[k] + ' at ' + k + ' is painted but walkable');
+    assert(solid(x, y), claimed[k] + ' at ' + k + ' is arranged there but walkable');
   });
-  ok(true, Object.keys(claimed).length + ' painted furniture cells are all solid');
-  ok(cell(2, 3) === 'C' && cell(10, 3) === 'C' && !solid(1, 3) && !solid(11, 3), 'the counter can be walked round at both ends, as painted');
-  ok(cell(6, 9) === 'D' && cell(7, 9) === 'D' && !solid(cafe.spawn.x, cafe.spawn.y), 'the painted doors are the doors, and the spawn inside them is floor');
-  ok(model.guests.every((g) => g === null), 'no painted patrons: everyone seen in the room is someone the simulation owns');
+  /* and the other way round: nothing blocks the floor that the scene does not draw */
+  let phantom = 0;
+  for (let y = plan.floorTop; y < plan.size[1] - 1; y++) for (let x = 1; x < plan.size[0] - 1; x++) {
+    if (solid(x, y) && !claimed[x + ',' + y]) phantom++;
+  }
+  ok(phantom === 0, Object.keys(claimed).length + ' furniture cells are solid, and no floor cell is blocked by something the scene does not draw');
+  ok(cafe.rows.length === plan.size[1] && cafe.rows.every((r) => r.length === plan.size[0]), 'rows and plan describe the same ' + plan.size.join('x') + ' room');
+  for (let y = 0; y < plan.floorTop; y++) assert(cafe.rows[y].split('').every((ch) => W.isSolid(ch)), 'the back wall band must not be walkable');
+  ok(true, 'nobody can walk on the back wall the scene paints over rows 0..' + (plan.floorTop - 1));
+  const sceneSource = require('node:fs').readFileSync(J('living-town', 'js', 'lt-cafe-scene.js'), 'utf8');
+  ok(!/seatedGuest|occupiedTable|seatedHands/.test(sceneSource) && !/kit\.booth\([^)]*,\s*(?!null)[a-z]\w*\)/i.test(sceneSource.replace(/piece\.n, null/g, 'null')),
+     'no painted patrons: every bench is arranged empty, so anyone seen is someone the simulation owns');
+  const dx = plan.door[0], dy = plan.door[1];
+  ok(cell(dx, dy) === 'D' && cell(dx + 1, dy) === 'D' && cafe.rows[dy].split('D').length === 3 && cafe.spawn.x === dx && cafe.spawn.y === dy - 1,
+     'the arranged door is the only door, and people arrive just inside it');
+  const mid = (plan.size[0] - 1) / 2;
+  ok(Math.abs(dx + 0.5 - mid) >= 2 && plan.counter[0] + plan.counter[2] / 2 < mid - 2, 'the door and the counter are both off-centre, as designed');
+}
+
+function signageCanBeLettered() {
+  console.log('# café: every sign can be lettered, with nothing dropped silently');
+  const kit = GAME.Retro2D.interiorKit, sg = plan.signage;
+  ok(kit.unsupported(sg.name, 'sign').length === 0, 'the sign spells ' + sg.name + ' in full — the name was not chosen to fit a font');
+  const micro = [].concat(sg.menu[0], sg.menu[1], sg.specials).join('');
+  ok(kit.unsupported(micro, 'micro').length === 0, 'menu and board lettering is fully supported');
+  ok(kit.unsupported('CAFÉ', 'sign').length === 0, 'accents fold explicitly (É is lettered as E)');
+  ok(kit.unsupported('M@', 'micro').join('') === '@', 'a character the kit cannot letter is reported, not skipped');
+  const calls = [];
+  kit.word({ fillStyle: '', fillRect() { calls.push(1); } }, '@', 0, 0, '#fff');
+  ok(calls.length === 12 && GAME.Retro2D.unsupportedGlyphs['@'] >= 1, 'and if drawn anyway it shows as a box and is counted');
 }
 
 function reachable(from) {
@@ -77,7 +105,7 @@ function anchorsAreStandable() {
   });
   ok(n >= 4, n + ' anchors are on floor, reachable from the door, and belong to real actions');
   const counter = W.OBJECTS.find((o) => o.id === 'obj_counter');
-  ok(counter.anchors.work_shift.y < model.counter[1] && counter.anchors.buy_meal.y > model.counter[1],
+  ok(counter.anchors.work_shift.y < plan.counter[1] && counter.anchors.buy_meal.y > plan.counter[1],
      'staff work the counter from behind it and customers order from the front');
   ok(counter.anchors.work_shift.dir === 'down' && counter.anchors.buy_meal.dir === 'up', 'and they face each other across it');
 }
@@ -93,8 +121,10 @@ function walkingGoesRoundTheFurniture() {
   ok(sim.startActivity(a, { actionId: 'work_shift', targetKind: 'object', targetId: 'obj_counter' }, 'test', null).ok, 'a shift starts at the door');
   const trail = [];
   for (let i = 0; i < 30; i++) { sim.tick(); trail.push(a.pos.x + ',' + a.pos.y); assert(!solid(a.pos.x, a.pos.y), 'stood inside furniture at ' + trail[trail.length - 1]); }
-  ok(a.pos.x === 5 && a.pos.y === 2 && a.pos.dir === 'down', 'she ends up behind the counter, facing the room (' + a.pos.x + ',' + a.pos.y + ' ' + a.pos.dir + ')');
-  ok(trail.some((p) => p === '1,3' || p === '11,3'), 'having gone round the end of the counter to get there');
+  const spot = W.OBJECTS.find((o) => o.id === 'obj_counter').anchors.work_shift;
+  ok(a.pos.x === spot.x && a.pos.y === spot.y && a.pos.dir === 'down', 'she ends up behind the counter, facing the room (' + a.pos.x + ',' + a.pos.y + ' ' + a.pos.dir + ')');
+  const gap = (plan.counter[0] + plan.counter[2]) + ',' + plan.counter[1];
+  ok(trail.indexOf(gap) >= 0, 'having gone round the open end of the counter at ' + gap + ' to get there');
   for (let i = 1; i < trail.length; i++) {
     const [x0, y0] = trail[i - 1].split(',').map(Number), [x1, y1] = trail[i].split(',').map(Number);
     assert(Math.abs(x0 - x1) + Math.abs(y0 - y1) <= 1, 'jumped from ' + trail[i - 1] + ' to ' + trail[i]);
@@ -144,8 +174,8 @@ async function productionRendererDrawsTheRoom() {
   sim.requestDecision = () => null;
   const a = sim.state.characters.resident_a, b = sim.state.characters.resident_b;
   sim.state.minute = 600;
-  sim.placeCharacter(a, 'cafe', { x: 5, y: 2, dir: 'down' });     // behind the counter
-  sim.placeCharacter(b, 'cafe', { x: 5, y: 4, dir: 'up' });       // in front of it
+  sim.placeCharacter(a, 'cafe', { x: 3, y: 2, dir: 'down' });     // behind the counter
+  sim.placeCharacter(b, 'cafe', { x: 4, y: 4, dir: 'up' });       // in front of it
   sim.startActivity(a, { actionId: 'work_shift', targetKind: 'object', targetId: 'obj_counter' }, 'test', null);
   const log = [];
   let bandCalls = 0;
@@ -172,11 +202,20 @@ async function productionRendererDrawsTheRoom() {
    * the counter is painted again, so it covers her legs and not the customer. */
   const iA = log.indexOf(images[0]), iB = log.indexOf(images[1]);
   const between = log.slice(iA + 1, iB).filter((e) => e.op === 'rect');
-  const counterTop = model.counter[1] * 16 + 16;   // room is centred: camera offset -16
-  ok(between.length > 20 && between.some((e) => e.y >= counterTop - 8 && e.y <= counterTop + 20 && e.w >= 100),
+  const counterTop = plan.counter[1] * 16 + 16;   // room is centred: camera offset -16
+  ok(between.length > 20 && between.some((e) => e.y >= counterTop - 8 && e.y <= counterTop + 20 && e.w >= 80),
      'the counter is repainted between the person behind it and the person in front (' + between.length + ' draws)');
   const roomDraws = log.slice(0, iA).filter((e) => e.op === 'rect').length;
-  ok(roomDraws > 2000, 'the room itself is the production painter\'s ' + roomDraws + ' draws, not a tile fill');
+  ok(roomDraws > 1000, 'the room itself is the production painter\'s ' + roomDraws + ' draws, not a tile fill');
+
+  /* The same holds for every piece, not just the counter: someone standing
+   * north of the right-hand booth is covered by its backrest. */
+  const booth = plan.banquettes[1];
+  sim.placeCharacter(b, 'cafe', { x: booth[0] + 1, y: booth[1] - 1, dir: 'down' });
+  log.length = 0; view.update(16); view.update(400); view.draw();
+  const lastImage = log.map((e) => e.op).lastIndexOf('image');
+  ok(log.slice(lastImage + 1).some((e) => e.op === 'rect' && e.x >= booth[0] * 16 + 8 && e.x <= (booth[0] + booth[2]) * 16 + 8 && e.y < booth[1] * 16 + 16 && e.y > booth[1] * 16 - 16 + 16),
+     'a bench is repainted over someone standing behind it');
 
   view.focus('resident_b'); sim.placeCharacter(b, 'park'); view.update(16);
   ok(view.draw().renderer === 'temporary', 'locations without production content still draw with the temporary art, and say so');
@@ -184,6 +223,7 @@ async function productionRendererDrawsTheRoom() {
 
 (async function main() {
   rowsAgreeWithPaintedRoom();
+  signageCanBeLettered();
   anchorsAreStandable();
   walkingGoesRoundTheFurniture();
   looksAreStateNotIdentity();

@@ -42,46 +42,47 @@
       ]
     },
     cafe: {
-      id: 'cafe', name: 'Harbour Café', kind: 'workplace', indoor: true,
+      id: 'cafe', name: 'Café Meridiana', kind: 'workplace', indoor: true,
       opens: 480, closes: 1260,          // 08:00 – 21:00
-      spawn: { x: 6, y: 8, dir: 'up' },
-      exit: { x: 6, y: 8 },
-      /* Collision is these rows and nothing else. The room is drawn by the
-       * production interior painter from `visual.interior`; a test holds the
-       * two in agreement cell by cell, so nobody walks through a booth the
-       * painter drew or is stopped by one it did not.
-       *   C counter   b stool / seat back / board   t booth table   D door */
+      spawn: { x: 3, y: 8, dir: 'up' },
+      exit: { x: 3, y: 8 },
+      /* A small neighbourhood café, and deliberately lopsided: a short counter
+       * in the back-left corner, the door off to the left, a window along the
+       * right half of the back wall with a bench under it, one booth against
+       * the right wall and one bench on the left, none of them facing another. Collision is these rows and
+       * nothing else; a test holds them and `visual.plan` in agreement.
+       *   C counter   b stool / plant / board / rack   t bench table   D door */
       rows: [
-        '##############',
-        '#............#',
-        '#...........b#',
-        '#.CCCCCCCCC..#',
-        '#.b.b.b.b.b.b#',
-        '#bb.........b#',
-        '#ttt..b.t.ttt#',
-        '#bb.........b#',
-        '#ttt......ttt#',
-        '######DD######'
+        '###############',
+        '###############',
+        '#.......b.ttt.#',
+        '#CCCCCC.......#',
+        '#b.b.b........#',
+        '#.............#',
+        '#.....b....ttt#',
+        '#ttt..........#',
+        '#............b#',
+        '###DD##########'
       ],
-      /* Scene content for the shared interior painter: where the counter,
-       * stools and booths are, and what the signs say. `scene` names the
-       * painter's room kit, not a place in anybody's story. Booths are empty:
-       * anyone seen in this room is an inhabitant the simulation owns. */
+      /* What the shared interior kit is asked to arrange (lt-cafe-scene.js).
+       * Tile units unless marked px (room-local pixels, for things on walls). */
       visual: {
-        scene: 'diner',
-        interior: {
-          material: 'diner',
-          counter: [2, 3, 9],
-          stools: [[2, 4], [4, 4], [6, 4], [8, 4], [10, 4]],
-          booths: [[1, 6, 3], [10, 6, 3], [1, 8, 3], [10, 8, 3]],
-          guests: [null, null, null, null],
-          plant: [12, 2], coatRack: [12, 4], specials: [8, 6, 1, 1], islandPlant: [6, 6],
+        scene: 'lt_cafe',
+        plan: {
+          size: [15, 10], floorTop: 2,
+          counter: [1, 3, 6],
+          stools: [[1, 4], [3, 4], [5, 4]],
+          banquettes: [[10, 2, 3], [11, 6, 3], [1, 7, 3]],
+          board: [6, 6], plant: [8, 2], coatRack: [13, 8],
+          door: [3, 9, 2],
+          window: [134, -6, 90, 26],      // px: x, y, w, h on the back wall
+          sign: [14, -12], menu: [92, -12],   // px
+          wallLamps: [[0, 84], [1, 52], [1, 116]],   // [right wall?, y px]
           signage: {
-            brand: 'HARBOUR', mark: null,
-            pledge: ['FRESH', 'BREAD', 'DAILY'],
-            menu: [['COFFEE', '2.00'], ['TOAST', '3.00']],
-            caseLabel: 'PIE', monogram: 'HC',
-            specials: ['TODAY', 'SOUP', '3.50']
+            name: 'MERIDIANA',
+            menu: [['CAFFE', '1.40'], ['FOCACCIA', '3.80']],
+            specials: ['OGGI', 'ZUPPA', '4.50'],
+            monogram: 'CM'
           }
         }
       }
@@ -185,15 +186,15 @@
       value: 180, affordances: ['practise_guitar'] },
     /* Where someone stands depends on what they are doing with the thing:
      * staff work the counter from behind it, customers order from the front. */
-    { id: 'obj_counter', name: 'café counter', location: 'cafe', x: 5, y: 3,
+    { id: 'obj_counter', name: 'café counter', location: 'cafe', x: 3, y: 3,
       tags: ['work', 'food'], portable: false, owner: 'cafe',
       affordances: ['work_shift', 'buy_meal'],
-      anchors: { work_shift: { x: 5, y: 2, dir: 'down' }, work_extra_shift: { x: 5, y: 2, dir: 'down' },
-                 buy_meal: { x: 5, y: 4, dir: 'up' } } },
-    { id: 'obj_cafe_table', name: 'café booth', location: 'cafe', x: 3, y: 6,
+      anchors: { work_shift: { x: 3, y: 2, dir: 'down' }, work_extra_shift: { x: 3, y: 2, dir: 'down' },
+                 buy_meal: { x: 4, y: 4, dir: 'up' } } },
+    { id: 'obj_cafe_table', name: 'café bench', location: 'cafe', x: 3, y: 7,
       tags: ['furniture', 'seat'], portable: false, owner: 'cafe',
       affordances: ['take_break'],
-      anchors: { take_break: { x: 4, y: 6, dir: 'left' } } },
+      anchors: { take_break: { x: 4, y: 7, dir: 'left' } } },
     { id: 'obj_bench', name: 'park bench', location: 'park', x: 3, y: 2,
       tags: ['furniture', 'seat'], portable: false, owner: 'town',
       affordances: ['sit_and_rest'] },

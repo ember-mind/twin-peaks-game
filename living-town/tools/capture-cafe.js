@@ -51,30 +51,38 @@ async function describe(page) {
   return page.evaluate("JSON.stringify(LT_OBSERVER.sim.actorIds().map(function(id){var c=LT_OBSERVER.sim.state.characters[id];return c.name+' ['+c.appearanceId+'] '+c.location+' '+c.pos.x+','+c.pos.y+' '+c.pos.dir+' '+(c.activity?c.activity.actionId:'-')})) + ' @' + LT_OBSERVER.sim.stamp()");
 }
 
+async function frames(page, tag, from, ticks, start) {
+  let n = start;
+  await runTo(page, from);
+  for (let f = 0; f < ticks; f++) {
+    await page.evaluate("(function(){ LT_OBSERVER.sim.tick(); return true; })()");
+    await sleep(30);
+    for (let k = 0; k < 2; k++) {
+      await page.evaluate("(function(){ var st = LT_OBSERVER; for (var i=0;i<4;i++) st.view.update(33); st.view.draw(); return true; })()");
+      save(tag + '-seq-' + String(n++).padStart(2, '0') + '.png', await page.evaluate(SHOT));
+    }
+  }
+  return n;
+}
+
 async function cafe(page, tag) {
   await page.navigate('living-town/index.html');
   await sleep(1500);
   console.log('  renderer host: ' + await page.evaluate("JSON.stringify(window.LT && LT.ProductionHost ? { ready: LT.ProductionHost.ready, failed: LT.ProductionHost.failed } : 'absent')"));
   /* Everything below is the page's own simulation on its own clock. Nothing
-   * is posed: the capture only chooses when to look. */
-  await runTo(page, 539);                       // 08:59, a minute before the shift
-  console.log('  before shift: ' + await describe(page));
-  /* The sequence: the shift starts and she walks round the counter to work it.
-   * One simulated minute per step, six animation updates between frames. */
-  for (let f = 0; f < 16; f++) {
-    await page.evaluate("(function(){ var st = LT_OBSERVER; st.sim.tick(); return true; })()");
-    await sleep(30);
-    for (let k = 0; k < 2; k++) {
-      await page.evaluate("(function(){ var st = LT_OBSERVER; for (var i=0;i<4;i++) st.view.update(33); st.view.draw(); return true; })()");
-      save(tag + '-seq-' + String(f * 2 + k).padStart(2, '0') + '.png', await page.evaluate(SHOT));
-    }
-  }
-  await runTo(page, 600);                       // 10:00, working
-  console.log('  working: ' + await describe(page));
+   * is posed: the capture only chooses when to look. Three real moments are
+   * joined into one sequence — she comes in, she goes to work, she orders. */
+  await runTo(page, 497);
+  console.log('  arriving: ' + await describe(page));
+  let n = await frames(page, tag, 497, 4, 0);          // 08:17 → through the door
+  n = await frames(page, tag, 547, 16, n);             // 09:07 → she takes up the shift and goes round the counter
+  await runTo(page, 600);
+  console.log('  at work: ' + await describe(page));
   save(tag + '-living-town-cafe.png', await page.evaluate(SHOT));
-  await runTo(page, 1178);                      // 19:38, after the extra shift: buying dinner
+  n = await frames(page, tag, 1170, 11, n);            // 19:30 → extra shift ends, out to the customer side
   console.log('  ordering: ' + await describe(page));
   save(tag + '-living-town-cafe-ordering.png', await page.evaluate(SHOT));
+  console.log('  lettering not supported by the kit: ' + await page.evaluate("JSON.stringify(GAME.Retro2D.unsupportedGlyphs)"));
 }
 
 (async function () {

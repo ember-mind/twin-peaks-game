@@ -184,6 +184,8 @@ jobs:
         run: node test/ember-engine-shared.js
       - name: Living Town simulation suite
         run: node test/living-town-suite.js
+      - name: Double R unchanged by composed interior scenes
+        run: node test/interior-scenes-contract.js
       - name: Initial spawn
         run: node test/initial-spawn.js
       - name: Location traversal

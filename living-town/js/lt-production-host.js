@@ -38,6 +38,9 @@
       H.failed = 'production renderer did not install';
       return H;
     }
+    /* Living Town's rooms are arrangements of the renderer's kit; they are
+     * handed over here, once the kit exists. */
+    if (LT.CafeScene) LT.CafeScene.register(GAME.Retro2D);
     if (Spr.castReady && Spr.castReady.then) {
       Spr.castReady.then(function () { H.ready = true; }, function (e) { H.failed = String(e && e.message || e); });
     }

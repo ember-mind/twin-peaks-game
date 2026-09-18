@@ -3013,6 +3013,87 @@
     U:['101','101','101','101','111']
   };
 
+  /* ---- lettering for rooms composed elsewhere ----------------------------
+   * The two town fonts carry only the letters this game's own signs needed,
+   * and townMicroWord skips what it lacks without saying so. Those tables and
+   * that behaviour are left exactly as they are, so nothing already painted
+   * changes. Lettering asked for through the kit uses the same glyphs plus
+   * the rest of the alphabet and digits below, folds accents explicitly, and
+   * never omits silently: an unsupported character is drawn as a box and
+   * listed in GAME.Retro2D.unsupportedGlyphs. */
+  var TOWN_FONT_5X7_EXT = {
+    C:['01110','10001','10000','10000','10000','10001','01110'],
+    J:['00111','00010','00010','00010','00010','10010','01100'],
+    M:['10001','11011','10101','10101','10001','10001','10001'],
+    Q:['01110','10001','10001','10001','10101','10010','01101'],
+    V:['10001','10001','10001','10001','10001','01010','00100'],
+    X:['10001','10001','01010','00100','01010','10001','10001'],
+    Y:['10001','10001','01010','00100','00100','00100','00100'],
+    Z:['11111','00001','00010','00100','01000','10000','11111']
+  };
+  var TOWN_FONT_3X5_EXT = {
+    G:['011','100','101','101','011'], J:['001','001','001','101','010'],
+    K:['101','101','110','101','101'], Q:['010','101','101','111','011'],
+    V:['101','101','101','101','010'], W:['101','101','111','111','101'],
+    X:['101','101','010','101','101'], Z:['111','001','010','100','111'],
+    '1':['010','110','010','010','111'], '4':['101','101','111','001','001'],
+    '6':['011','100','110','101','010'], '7':['111','001','010','010','010'],
+    '8':['010','101','010','101','010'], '9':['010','101','011','001','110'],
+    '-':['000','000','111','000','000'], "'":['010','010','000','000','000']
+  };
+  var ACCENT_FOLD = { 'À':'A','Á':'A','Â':'A','Ä':'A','È':'E','É':'E','Ê':'E','Ë':'E','Ì':'I','Í':'I','Î':'I','Ï':'I',
+    'Ò':'O','Ó':'O','Ô':'O','Ö':'O','Ù':'U','Ú':'U','Û':'U','Ü':'U','Ç':'C','Ñ':'N' };
+  var UNSUPPORTED_5X7 = ['11111','10001','10001','10001','10001','10001','11111'];
+  var UNSUPPORTED_3X5 = ['111','101','101','101','111'];
+  var unsupportedGlyphs = {};
+  function kitGlyph(ch, base, ext, missing) {
+    ch = String(ch).toUpperCase();
+    if (ACCENT_FOLD[ch]) ch = ACCENT_FOLD[ch];
+    if (base[ch]) return base[ch];
+    if (ext[ch]) return ext[ch];
+    unsupportedGlyphs[ch] = (unsupportedGlyphs[ch] || 0) + 1;
+    return missing;
+  }
+  /* What the kit cannot letter, without drawing anything: for content checks. */
+  function kitUnsupported(text, size) {
+    var base = size === 'sign' ? TOWN_FONT_5X7 : TOWN_FONT_3X5, ext = size === 'sign' ? TOWN_FONT_5X7_EXT : TOWN_FONT_3X5_EXT;
+    return String(text).toUpperCase().split('').filter(function (ch) {
+      ch = ACCENT_FOLD[ch] || ch;
+      return ch !== ' ' && !base[ch] && !ext[ch];
+    });
+  }
+  function interiorSignWord(g, value, x, y, color) {
+    var cursor = x;
+    for (var ci = 0; ci < value.length; ci++) {
+      if (value.charAt(ci) === ' ') { cursor += 4; continue; }
+      var glyph = kitGlyph(value.charAt(ci), TOWN_FONT_5X7, TOWN_FONT_5X7_EXT, UNSUPPORTED_5X7);
+      for (var gy = 0; gy < 7; gy++) for (var gx = 0; gx < 5; gx++) {
+        if (glyph[gy].charAt(gx) === '1') R(g, cursor + gx, y + gy, 1, 1, color);
+      }
+      cursor += 6;
+    }
+    return cursor - x;
+  }
+  /* Pieces shared by both kinds of room letter themselves the way their room
+   * does: the Double R with the town font as ever, a composed room with the
+   * complete one. */
+  var composedRoomPass = false;
+  function roomWord(g, value, x, y, color) {
+    return composedRoomPass ? interiorWord(g, value, x, y, color) : townMicroWord(g, value, x, y, color);
+  }
+  function interiorWord(g, value, x, y, color) {
+    var cursor = x;
+    for (var ci = 0; ci < value.length; ci++) {
+      if (value.charAt(ci) === ' ') { cursor += 2; continue; }
+      var glyph = kitGlyph(value.charAt(ci), TOWN_FONT_3X5, TOWN_FONT_3X5_EXT, UNSUPPORTED_3X5);
+      for (var gy = 0; gy < 5; gy++) for (var gx = 0; gx < 3; gx++) {
+        if (glyph[gy].charAt(gx) === '1') R(g, cursor + gx, y + gy, 1, 1, color);
+      }
+      cursor += 4;
+    }
+    return cursor - x;
+  }
+
   function townMicroWord(g, value, x, y, color) {
     var cursor = x;
     for (var ci = 0; ci < value.length; ci++) {
@@ -4273,9 +4354,9 @@
     R(g,x+2,y+1,w-4,1,'rgba(53,39,31,.45)');
     R(g,x+2,y+2,w-4,1,'rgba(41,43,38,.20)');
   }
-  function interiorActorLight(wx,wy) {
+  function interiorActorLight(wx,wy,lights) {
     var px=wx+8,py=wy+7,best=0;
-    [[38,22],[68,22],[188,22],[7,83],[216,83],[7,134],[216,134]].forEach(function(l){
+    (lights || [[38,22],[68,22],[188,22],[7,83],[216,83],[7,134],[216,134]]).forEach(function(l){
       var dx=px-l[0],dy=py-l[1],d=dx*dx+dy*dy;
       best=Math.max(best,d<900?.24:d<2304?.13:0);
     });
@@ -4532,7 +4613,7 @@
     // Slanted pixel lettering and a large looped R form one custom brand mark.
     var points=[], word=sign.brand, wordX=sign.mark ? 6 : Math.max(4, Math.round((62 - word.length*6)/2));
     for(var c=0;c<word.length;c++) {
-      var glyph=TOWN_FONT_5X7[word[c]];
+      var glyph=TOWN_FONT_5X7[word[c]] || kitGlyph(word[c], TOWN_FONT_5X7, TOWN_FONT_5X7_EXT, UNSUPPORTED_5X7);
       for(var row=0;row<7;row++) for(var col=0;col<5;col++) if(glyph[row][col]==='1') {
         points.push([x+wordX+c*6+col+Math.floor((6-row)/3),y+8+row]);
       }
@@ -4561,9 +4642,12 @@
   function interiorChalk(g,text,x,y,color) {
     var letters={A:['010','101','111','101'],C:['011','100','100','011'],E:['111','110','100','111'],
       H:['101','111','101','101'],L:['100','100','100','111'],N:['101','111','111','101'],
-      P:['110','101','110','100'],R:['110','101','110','101'],Y:['101','101','010','010']};
+      P:['110','101','110','100'],R:['110','101','110','101'],Y:['101','101','010','010'],
+      M:['111','111','101','101'],B:['110','111','101','110'],D:['110','101','101','110'],O:['111','101','101','111'],
+      S:['011','110','011','110'],T:['111','010','010','010']};
     for(var i=0;i<text.length;i++) {
-      var glyph=letters[text[i]]; if(!glyph) continue;
+      var glyph=letters[text[i]];
+      if(!glyph) { if(!composedRoomPass) continue; unsupportedGlyphs[text[i]]=(unsupportedGlyphs[text[i]]||0)+1; glyph=['111','101','101','111']; }
       for(var row=0;row<4;row++) for(var col=0;col<3;col++) if(glyph[row][col]==='1') R(g,x+i*4+col,y+row,1,1,color);
     }
   }
@@ -4580,9 +4664,9 @@
     interiorContact(g,x-2,y+14,23,p);
     R(g,x-3,y-11,23,25,p.woodDark); R(g,x-2,y-10,21,22,p.woodHi);
     R(g,x-1,y-9,19,20,p.green);
-    townMicroWord(g,lines[0],x-1,y-7,p.creamShade);
-    townMicroWord(g,lines[1],x+3-Math.max(0,lines[1].length-3)*2,y,p.cream);
-    townMicroWord(g,lines[2],x+2,y+6,p.gold);
+    roomWord(g,lines[0],x-1,y-7,p.creamShade);
+    roomWord(g,lines[1],x+3-Math.max(0,lines[1].length-3)*2,y,p.cream);
+    roomWord(g,lines[2],x+2,y+6,p.gold);
     R(g,x-2,y+12,3,3,p.woodDark); R(g,x+16,y+12,3,3,p.woodDark);
   }
   function interiorServiceCluster(g,x,y,p,kind) {
@@ -4621,9 +4705,7 @@
     townMicroWord(g,sign.pledge[2],x+186,y+22,p.ink);
     interiorNeon(g,x+72,y-13,p,sign);
     // The menu owns a quiet dark panel; equipment sits below, never over text.
-    R(g,x+143,y-12,39,31,p.woodDark); R(g,x+145,y-10,35,27,p.ink);
-    townMicroWord(g,sign.menu[0][0],x+147,y-7,p.cream); townMicroWord(g,sign.menu[0][1],x+164,y-1,p.gold);
-    townMicroWord(g,sign.menu[1][0],x+147,y+5,p.cream); townMicroWord(g,sign.menu[1][1],x+164,y+11,p.gold);
+    interiorMenuBoard(g,x+143,y-12,p,sign.menu);
     // Asymmetric clusters: family photos, stacked crockery and pantry jars.
     interiorPicture(g,x+43,y-10,14,14,p,'photo');
     R(g,x+41,y+10,29,2,p.woodLight); R(g,x+41,y+23,29,2,p.woodLight);
@@ -4662,21 +4744,29 @@
     });
   }
 
-  function drawDinerCounter(g,model,x,y,p) {
-    var i;
-    // Furniture bases and widths come from the same generated collision model.
-    var counterX=x+model.counter[0]*16, counterY=y+model.counter[1]*16, counterW=model.counter[2]*16;
+  /* A service counter of any length: shadow, fascia panels, laminate top. */
+  function interiorCounterSlab(g,counterX,counterY,counterW,p,trimFascia) {
+    /* The Double R's last fascia panel runs a few pixels past the end of its
+     * counter. That is how that room looks and it is left alone; a room
+     * composed elsewhere asks for panels trimmed to the slab. */
+    var i, trim = trimFascia ? function (n, left) { return Math.max(0, Math.min(n, left)); } : function (n) { return n; };
     R(g,counterX+2,counterY+16,counterW-2,5,'rgba(32,26,19,.28)');
     interiorContact(g,counterX+1,counterY+18,counterW-2,p);
     R(g,counterX,counterY,counterW,17,p.ink); R(g,counterX+1,counterY+6,counterW-2,8,p.redDark);
     R(g,counterX+2,counterY+6,counterW-4,6,p.red); R(g,counterX+3,counterY+6,counterW-6,1,p.redHi);
-    for(i=4;i<counterW-5;i+=22) { R(g,counterX+i,counterY+8,18,3,p.redDark); R(g,counterX+i+1,counterY+8,16,1,p.redHi); }
+    for(i=4;i<counterW-5;i+=22) { R(g,counterX+i,counterY+8,trim(18,counterW-5-i),3,p.redDark); R(g,counterX+i+1,counterY+8,trim(16,counterW-7-i),1,p.redHi); }
     R(g,counterX,counterY-2,counterW,7,p.creamShade); R(g,counterX+1,counterY-2,counterW-2,4,p.cream);
     R(g,counterX+1,counterY+4,counterW-2,1,p.metalHi); R(g,counterX+2,counterY+15,counterW-4,1,p.metal);
     // Broken specular strips keep polished laminate distinct from matte wood.
-    R(g,counterX+10,counterY-1,20,1,p.metalHi);
-    R(g,counterX+53,counterY,16,1,p.metalHi);
-    R(g,counterX+94,counterY-1,26,1,p.gold);
+    if(counterW>=34) R(g,counterX+10,counterY-1,20,1,p.metalHi);
+    if(counterW>=72) R(g,counterX+53,counterY,16,1,p.metalHi);
+    if(counterW>=124) R(g,counterX+94,counterY-1,26,1,p.gold);
+  }
+  function drawDinerCounter(g,model,x,y,p) {
+    var i;
+    // Furniture bases and widths come from the same generated collision model.
+    var counterX=x+model.counter[0]*16, counterY=y+model.counter[1]*16, counterW=model.counter[2]*16;
+    interiorCounterSlab(g,counterX,counterY,counterW,p);
     interiorServiceCluster(g,counterX+3,counterY-17,p,'coffee');
     interiorServiceCluster(g,counterX+67,counterY-14,p,'plates'); interiorPieCase(g,counterX+counterW-49,counterY-15,48,p);
     interiorCup(g,counterX+35,counterY-3,p); interiorCup(g,counterX+75,counterY-3,p);
@@ -4685,12 +4775,10 @@
     interiorWarmLight(g,counterX+counterW-43,counterY-10,43,24,1.25);
     if(GAME.CharacterActivity) GAME.CharacterActivity.drawWipe(g,-x,-y);
   }
-  function drawDinerInterior(g,map,cx,cy) {
-    var model=map.interior, p=INTERIOR_MATERIALS[model.material], x=-cx, y=-cy, i;
-    houseMonogram = signageOf(model).monogram || '';
-    R(g,0,0,g.canvas ? g.canvas.width : 256,g.canvas ? g.canvas.height : 192,'#17251e');
-    // Restore a continuous floor beneath furniture, with 8px checker tiles.
-    for(var fy=16;fy<144;fy+=8) for(var fx=16;fx<208;fx+=8) {
+  /* 8px checker tiles over a room-local rectangle. `aisleSheen` is the Double
+   * R's worn centre aisle and belongs to that room only. */
+  function interiorCheckerFloor(g,x,y,x0,y0,x1,y1,p,aisleSheen) {
+    for(var fy=y0;fy<y1;fy+=8) for(var fx=x0;fx<x1;fx+=8) {
       var dark=((fx+fy)/8)&1;
       R(g,x+fx,y+fy,8,8,dark?p.tile:p.floorLight);
       R(g,x+fx,y+fy+7,8,1,dark?p.tileShade:p.floorShade);
@@ -4698,9 +4786,99 @@
       var tileKey=(fx/8*7+fy/8*11)%19;
       if(tileKey===3) R(g,x+fx+1,y+fy+1,6,5,'rgba(207,188,146,.055)');
       if(tileKey===12) R(g,x+fx+1,y+fy+2,5,4,'rgba(41,43,38,.035)');
-      if(fx>=104 && fx<=120 && fy>=80 && fy%24===8)
+      if(aisleSheen && fx>=104 && fx<=120 && fy>=80 && fy%24===8)
         R(g,x+fx+2,y+fy+3,4,1,'rgba(244,230,200,.09)');
     }
+  }
+  /* Long boards with staggered butt joints; same deterministic, noise-free
+   * value discipline as the checker floor. */
+  function interiorPlankFloor(g,x,y,x0,y0,x1,y1,p) {
+    for(var fy=y0,row=0;fy<y1;fy+=8,row++) {
+      R(g,x+x0,y+fy,x1-x0,8,row%2?p.floorLight:p.tile);
+      R(g,x+x0,y+fy+7,x1-x0,1,row%2?p.floorShade:p.tileShade);
+      for(var fx=x0+((row*19)%40);fx<x1;fx+=40) {
+        R(g,x+fx,y+fy,1,7,row%2?p.floorShade:p.tileShade);
+        if((fx+row)%3===0 && fx+9<x1) R(g,x+fx+3,y+fy+2,6,1,'rgba(244,230,200,.07)');
+      }
+      if(row%5===2) R(g,x+x0+((row*31)%(x1-x0-14)),y+fy+3,9,1,'rgba(41,43,38,.05)');
+    }
+  }
+  /* A wall window seen from inside: frame, mullions, sill, and the daylight it
+   * lays on the floor in front of it. */
+  function interiorWindow(g,x,y,w,h,p) {
+    R(g,x-2,y-2,w+4,h+5,p.woodDark); R(g,x-1,y-1,w+2,h+2,p.woodLight);
+    R(g,x,y,w,h,p.ink); R(g,x+1,y+1,w-2,h-2,p.glass||'#9db7b4');
+    R(g,x+1,y+1,w-2,Math.floor((h-2)*.45),p.glassHi||'#c3d4c9');
+    for(var mx=Math.round(w/3);mx<w-4;mx+=Math.round(w/3)) R(g,x+mx,y+1,1,h-2,p.woodLight);
+    R(g,x+1,y+Math.floor(h*.55),w-2,1,p.woodLight);
+    R(g,x+3,y+2,Math.max(3,Math.floor(w*.18)),1,'rgba(255,255,255,.45)');
+    R(g,x+w-7,y+4,3,1,'rgba(255,255,255,.30)');
+    R(g,x-3,y+h+1,w+6,2,p.woodHi); R(g,x-2,y+h+3,w+4,1,'rgba(41,43,38,.30)');
+  }
+  function interiorDaylight(g,x,y,w,h,strength) {
+    var k=strength==null?1:strength;
+    interiorPool(g,x,y,w,h,'rgba(214,226,214,'+(.10*k)+')');
+    interiorPool(g,x+6,y+3,w-12,h-5,'rgba(236,240,222,'+(.09*k)+')');
+  }
+  function interiorCoatRack(g,coatX,coatY,p) {
+    R(g,coatX+7,coatY,2,14,p.woodHi); R(g,coatX+3,coatY+13,10,2,p.ink);
+    R(g,coatX+2,coatY+1,12,2,p.woodLight); R(g,coatX+2,coatY+3,4,7,p.redDark); R(g,coatX+11,coatY+3,3,9,p.green);
+  }
+  /* Low cutaway front wall with a two-leaf door wherever the room has one. */
+  function interiorFrontWall(g,wallX,wallY,wallW,doorX,p) {
+    var i;
+    R(g,wallX,wallY,wallW,16,p.redDark); R(g,wallX,wallY+1,wallW,8,p.cream);
+    for(i=0;i<wallW;i+=8) R(g,wallX+i,wallY,4,3,p.redHi);
+    R(g,wallX,wallY+10,wallW,2,p.red); R(g,wallX,wallY+15,wallW,1,p.woodLight);
+    R(g,doorX,wallY,32,16,p.woodDark); R(g,doorX+1,wallY+1,30,14,p.red);
+    R(g,doorX+15,wallY+2,2,13,p.woodDark);
+    [3,19].forEach(function(dx){R(g,doorX+dx,wallY+3,10,6,p.gold);R(g,doorX+dx+1,wallY+4,8,4,p.cream);});
+  }
+  function interiorMenuBoard(g,bx,by,p,menu) {
+    R(g,bx,by,39,31,p.woodDark); R(g,bx+2,by+2,35,27,p.ink);
+    roomWord(g,menu[0][0],bx+4,by+5,p.cream); roomWord(g,menu[0][1],bx+21,by+11,p.gold);
+    roomWord(g,menu[1][0],bx+4,by+17,p.cream); roomWord(g,menu[1][1],bx+21,by+23,p.gold);
+  }
+
+  /* ---- rooms composed elsewhere ----------------------------------------
+   * The Double R is composed right here, because it is this game's room. A
+   * room that belongs to something else registers a composition instead: it
+   * gets the kit, draws with it, and says which of its pieces must be painted
+   * again in front of an actor standing behind them. Nothing about the kit's
+   * drawing is duplicated; only the arrangement lives with its owner. */
+  var INTERIOR_SCENES = {};
+  var DINER_ACTOR_LIGHTS = [[38,22],[68,22],[188,22],[7,83],[216,83],[7,134],[216,134]];
+  function interiorRoomOf(mapId) {
+    if (mapId === 'diner') return { material: INTERIOR_MATERIALS.diner, lights: DINER_ACTOR_LIGHTS };
+    var scene = INTERIOR_SCENES[mapId];
+    return scene ? { material: INTERIOR_MATERIALS[scene.material], lights: scene.actorLights || [] } : null;
+  }
+  function drawRegisteredInterior(g,map,cx,cy) {
+    var scene = INTERIOR_SCENES[map.id], p = INTERIOR_MATERIALS[scene.material];
+    var previous = houseMonogram;
+    houseMonogram = scene.monogram || '';
+    composedRoomPass = true;
+    try {
+      R(g,0,0,g.canvas ? g.canvas.width : 256,g.canvas ? g.canvas.height : 192,scene.backdrop || '#17251e');
+      scene.draw(g, map, -cx, -cy, p, GAME.Retro2D.interiorKit);
+    } finally { composedRoomPass = false; houseMonogram = previous; }
+  }
+  function drawRegisteredForeground(g,map,cx,cy,min,max) {
+    var scene = INTERIOR_SCENES[map.id], p = INTERIOR_MATERIALS[scene.material];
+    if (!scene.foreground) return;
+    var previous = houseMonogram;
+    houseMonogram = scene.monogram || '';
+    composedRoomPass = true;
+    try { scene.foreground(g, map, -cx, -cy, p, GAME.Retro2D.interiorKit, min, max); }
+    finally { composedRoomPass = false; houseMonogram = previous; }
+  }
+
+  function drawDinerInterior(g,map,cx,cy) {
+    var model=map.interior, p=INTERIOR_MATERIALS[model.material], x=-cx, y=-cy, i;
+    houseMonogram = signageOf(model).monogram || '';
+    R(g,0,0,g.canvas ? g.canvas.width : 256,g.canvas ? g.canvas.height : 192,'#17251e');
+    // Restore a continuous floor beneath furniture, with 8px checker tiles.
+    interiorCheckerFloor(g,x,y,16,16,208,144,p,true);
     // Lower-contrast floor, wall contact shadows and localized warm pools.
     R(g,x+16,y+44,192,8,'rgba(32,28,21,.20)');
     R(g,x+16,y+48,5,96,'rgba(34,29,21,.19)'); R(g,x+202,y+48,6,96,'rgba(34,29,21,.23)');
@@ -4717,9 +4895,7 @@
     interiorSpecials(g,x+model.specials[0]*16,y+model.specials[1]*16,p,signageOf(model).specials);
     interiorFloorPlant(g,x+model.islandPlant[0]*16-4,y+model.islandPlant[1]*16,p);
     interiorPlant(g,x+model.plant[0]*16,y+model.plant[1]*16+2,p);
-    var coatX=x+model.coatRack[0]*16, coatY=y+model.coatRack[1]*16;
-    R(g,coatX+7,coatY,2,14,p.woodHi); R(g,coatX+3,coatY+13,10,2,p.ink);
-    R(g,coatX+2,coatY+1,12,2,p.woodLight); R(g,coatX+2,coatY+3,4,7,p.redDark); R(g,coatX+11,coatY+3,3,9,p.green);
+    interiorCoatRack(g,x+model.coatRack[0]*16,y+model.coatRack[1]*16,p);
     // Hanging plants occupy side-wall trim; aisle remains truly walkable.
     interiorPicture(g,x+1,y+30,13,18,p,'portrait');
     // Local-history cluster on the left; one quieter portrait on the right.
@@ -4731,12 +4907,7 @@
       interiorLamp(g,x+7,y+ly,p);interiorLamp(g,x+216,y+ly,p);
     });
     // Low cutaway front wall and the two genuine entrance tiles.
-    R(g,x+16,y+144,192,16,p.redDark); R(g,x+16,y+145,192,8,p.cream);
-    for(i=16;i<208;i+=8) R(g,x+i,y+144,4,3,p.redHi);
-    R(g,x+16,y+154,192,2,p.red); R(g,x+16,y+159,192,1,p.woodLight);
-    R(g,x+96,y+144,32,16,p.woodDark); R(g,x+97,y+145,30,14,p.red);
-    R(g,x+111,y+146,2,13,p.woodDark);
-    [99,115].forEach(function(dx){R(g,x+dx,y+147,10,6,p.gold);R(g,x+dx+1,y+148,8,4,p.cream);});
+    interiorFrontWall(g,x+16,y+144,192,x+96,p);
   }
 
   function interiorHeroAccents(g, map, cx, cy) {
@@ -4922,6 +5093,8 @@
       R(g, x - 3, y, 3, 16, C.ink); R(g, x + 32, y, 3, 16, C.ink);
     } else if (map.id === 'diner') {
       drawDinerInterior(g, map, cx, cy);
+    } else if (INTERIOR_SCENES[map.id]) {
+      drawRegisteredInterior(g, map, cx, cy);
     } else if (map.id === 'oej') {
       /* Parete a pannelli e tappeto d'asse: profondità prima dei tavoli. */
       R(g, 10, 17, 140, 23, '#271a24');
@@ -5061,6 +5234,10 @@
   GAME.sprites.drawForegroundStructures = function (g, map, cx, cy, opts) {
     if (!map) return;
     opts = opts || {};
+    if (INTERIOR_SCENES[map.id]) {
+      drawRegisteredForeground(g, map, cx, cy, opts.forestDepthMin, opts.forestDepthMax);
+      return;
+    }
     if (map.id === 'diner' && map.interior) {
       var m=map.interior, p=INTERIOR_MATERIALS[m.material];
       var min=opts.forestDepthMin, max=opts.forestDepthMax;
@@ -6910,8 +7087,9 @@
         source=outdoorActorLightCanvas; sx=0; sy=0;
       }
     }
-    if(environment && environment.mapId==='diner' && typeof document!=='undefined') {
-      var warmth=interiorActorLight(environment.wx,environment.wy);
+    var litRoom = environment && interiorRoomOf(environment.mapId);
+    if(litRoom && typeof document!=='undefined') {
+      var warmth=interiorActorLight(environment.wx,environment.wy,litRoom.lights);
       if(warmth && document.createElement) {
         if(!dinerActorLightCanvas) { dinerActorLightCanvas=document.createElement('canvas'); dinerActorLightCanvas.width=24; dinerActorLightCanvas.height=24; }
         var light=dinerActorLightCanvas.getContext('2d');
@@ -6956,9 +7134,10 @@
     var p = pal || CHARS.cooper;
     var name = nameOf(p);
     /* Ombra runtime unica: player e ogni NPC condividono ellisse 14x5. */
-    if(environment && environment.mapId==='diner') {
+    var actorRoom = environment && interiorRoomOf(environment.mapId);
+    if(actorRoom) {
       var shadowAlpha=ctx.globalAlpha; ctx.globalAlpha*=alpha==null?1:alpha;
-      interiorContact(ctx,Math.round(x)+2,Math.round(y)+15,12,INTERIOR_MATERIALS.diner);
+      interiorContact(ctx,Math.round(x)+2,Math.round(y)+15,12,actorRoom.material);
       ctx.globalAlpha=shadowAlpha;
     } else drawActorContactShadow(ctx, x, y, alpha);
     if (drawCastWalkSheet(ctx, name, x, y, dir, frame, alpha, moving, environment)) return;
@@ -7083,7 +7262,23 @@
     panel: interiorPanel, booth: interiorBooth, stool: interiorStool,
     cup: interiorCup, tableProps: interiorTableProps, lamp: interiorLamp,
     picture: interiorPicture, plant: interiorPlant,
-    coffeeMachine: interiorCoffeeMachine, pieCase: interiorPieCase
+    coffeeMachine: interiorCoffeeMachine, pieCase: interiorPieCase,
+    /* Pieces a room composed elsewhere needs; the Double R uses the same ones. */
+    counterSlab: interiorCounterSlab, checkerFloor: interiorCheckerFloor, plankFloor: interiorPlankFloor,
+    frontWall: interiorFrontWall, window: interiorWindow, daylight: interiorDaylight, warmLight: interiorWarmLight,
+    coatRack: interiorCoatRack, menuBoard: interiorMenuBoard, neon: interiorNeon, word: interiorWord, signWord: interiorSignWord, rect: R,
+    unsupported: kitUnsupported
+  };
+  GAME.Retro2D.unsupportedGlyphs = unsupportedGlyphs;
+  /* scene: { material, draw(g,map,x,y,p,kit), foreground?(g,map,x,y,p,kit,min,max),
+   *          actorLights?, monogram?, backdrop? }. The id is the map id it draws. */
+  GAME.Retro2D.registerInteriorScene = function (id, scene) {
+    if (id === 'diner') throw new Error('the Double R is composed by the renderer itself');
+    if (!scene || typeof scene.draw !== 'function' || !INTERIOR_MATERIALS[scene.material]) {
+      throw new Error('interior scene needs a draw function and a known material: ' + id);
+    }
+    INTERIOR_SCENES[id] = scene;
+    return scene;
   };
   GAME.Retro2D.authored = true;
   GAME.Retro2D.tileSize = 16;

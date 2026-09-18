@@ -108,7 +108,7 @@
     if (!scene) {
       scene = this.sceneMaps[loc.id] = {
         id: loc.visual.scene, indoor: !!loc.indoor, rows: loc.rows,
-        width: loc.rows[0].length, height: loc.rows.length, interior: loc.visual.interior
+        width: loc.rows[0].length, height: loc.rows.length
       };
     }
     return scene;
