@@ -463,7 +463,7 @@
     installed = true;
     GAME.Retro2D.limitBackgroundPalettes = function (ctx, cx, cy, w, h, mapId) {
       if (mapId === MAP) {
-        applyGrade(ctx, cx, cy, w, h);
+        GAME.TownDusk.applyGrade(ctx, cx, cy, w, h);
         drawPracticals(ctx, cx, cy);
         return original ? original.apply(this, arguments) : undefined;
       }
