@@ -22,6 +22,7 @@
 //   { format: 'world-builder-bundle', version: 1, changesets: [ <world-connections-changeset>, <cast-windows-changeset> ] }
 // At most one changeset per target; splitChangesets() turns a plain changeset or a bundle into that list.
 // M8 adds a third target: scene-objects-changeset -> world/scene-objects.json (js/editor/core/scene-objects.js).
+// M10b adds a fourth: props-changeset -> world/props.json (js/editor/core/props.js).
 
 (function () {
   const R = globalThis.Editor || {};
@@ -36,6 +37,11 @@
   const CONNECTIONS_TARGET = 'world/connections.json';
   const OBJECTS_FORMAT = 'scene-objects-changeset';
   const OBJECTS_TARGET = 'world/scene-objects.json';
+  const PROPS_FORMAT = 'props-changeset';
+  const PROPS_TARGET = 'world/props.json';
+  // M10b: the fourth writable target. Before it, tools/world-apply.js lifted a props changeset out of the bundle by
+  // hand (liftProps) because js/editor/ was outside the M9 fence; the format lives with the other three now.
+  const WRITABLE = [CONNECTIONS_TARGET, TARGET, OBJECTS_TARGET, PROPS_TARGET];
   const FACINGS = ['up', 'down', 'left', 'right'];
   const ARROWS = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
 
@@ -259,14 +265,16 @@
       if (!cs || typeof cs !== 'object') fail(where + ' is not an object');
       let target;
       if (cs.format === FORMAT) target = TARGET;
-      else if (cs.format === OBJECTS_FORMAT) target = cs.target;
+      else if (cs.format === OBJECTS_FORMAT || cs.format === PROPS_FORMAT) target = cs.target;
       else if (cs.format === BUNDLE_FORMAT) fail(where + ' nests a bundle');
       else if (cs.format === CONNECTIONS_FORMAT || cs.format === undefined) target = cs.target === undefined ? CONNECTIONS_TARGET : cs.target;
       else fail(where + ' has unknown format ' + JSON.stringify(cs.format));
-      if (target !== CONNECTIONS_TARGET && target !== TARGET && target !== OBJECTS_TARGET) fail(where + ' targets ' + JSON.stringify(target) + '; only ' + CONNECTIONS_TARGET + ', ' + TARGET + ' and ' + OBJECTS_TARGET + ' are writable');
+      if (WRITABLE.indexOf(target) === -1) fail(where + ' targets ' + JSON.stringify(target) + '; only ' + WRITABLE.join(', ') + ' are writable');
       if (cs.format === FORMAT && cs.target !== TARGET) fail(where + ' is a cast changeset targeting ' + JSON.stringify(cs.target));
       if (cs.format === OBJECTS_FORMAT && cs.target !== OBJECTS_TARGET) fail(where + ' is a scene objects changeset targeting ' + JSON.stringify(cs.target));
       if (cs.format !== OBJECTS_FORMAT && target === OBJECTS_TARGET) fail(where + ' targets ' + OBJECTS_TARGET + ' without format ' + OBJECTS_FORMAT);
+      if (cs.format === PROPS_FORMAT && cs.target !== PROPS_TARGET) fail(where + ' is a props changeset targeting ' + JSON.stringify(cs.target));
+      if (cs.format !== PROPS_FORMAT && target === PROPS_TARGET) fail(where + ' targets ' + PROPS_TARGET + ' without format ' + PROPS_FORMAT);
       if (has(seen, target)) fail(where + ' is a second changeset for ' + target);
       seen[target] = true;
       return { target: target, changeset: cs };

@@ -43,7 +43,14 @@
  *          unreferenced key (sign_ponte 4,6) deletes with a confirm step and undoes
  *  19  M8: NEW INTERACT on woods with the INTERACT_DLG id olio: a tile already holding a key is refused, a free tile confirms,
  *          the entry is a sparkle, export + --dry-run VALID
- * WB_ONLY_M8=1 runs cases 16-19 only (M8 iteration); the committed proof runs every case.
+ *  20  M10b: roadhouse props: the PROPS layer is off until asked for, then the header counts them, a click selects a
+ *          prop instance (not the tile under it), the inspector names its definition/anchor/layer/footprint, MOVE keeps
+ *          the sub-tile fraction of the anchor, FLIP X toggles, arrow keys nudge by a pixel, export + --dry-run VALID
+ *  21  M10b: NEW PROP: the catalog filters by label/id/tag, the instance id is suggested from the definition, CONFIRM
+ *          creates it, MOVE keeps it a single create op, --dry-run accepts it, REVERT on a created prop removes it
+ *  22  M10b: DELETE with a confirm step and undo/redo; a table moved onto the south door tile 7,9 is refused by
+ *          tools/world-apply.js with the Roadhouse lock (exit 1, nothing written)
+ * WB_ONLY_M8=1 runs cases 16-19 only (M8 iteration); WB_ONLY_M10B=1 runs cases 20-22; the committed proof runs every case.
  * world/scene-objects.json is hashed before and after every M8 case: the editor never writes it.
  * Ids created here are assembled at runtime: a literal id in this file would count as a reference to world-apply.
  */
@@ -59,8 +66,11 @@ const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'artifacts', 'world-builder-m6');
 const OUT7 = path.join(ROOT, 'artifacts', 'world-builder-m7');
 const OUT8 = path.join(ROOT, 'artifacts', 'world-builder-m8');
+const OUT10 = path.join(ROOT, 'artifacts', 'world-builder-m10b');
+const PROPS = path.join(ROOT, 'world', 'props.json');
 const OBJECTS = path.join(ROOT, 'world', 'scene-objects.json');
 const ONLY_M8 = process.env.WB_ONLY_M8 === '1';
+const ONLY_M10B = process.env.WB_ONLY_M10B === '1';
 const CATALOG = path.join(ROOT, 'js', 'world-catalog.js');
 const CHROME = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const REGISTRY = path.join(ROOT, 'world', 'connections.json');
@@ -121,6 +131,7 @@ async function main() {
   fs.mkdirSync(OUT, { recursive: true });
   fs.mkdirSync(OUT7, { recursive: true });
   fs.mkdirSync(OUT8, { recursive: true });
+  fs.mkdirSync(OUT10, { recursive: true });
   const objectsShaStart = sha(OBJECTS);
   const shaStart = sha();
   const catalogShaStart = sha(CATALOG);
@@ -250,7 +261,7 @@ async function main() {
   }
 
   try {
-   if (!ONLY_M8) {
+   if (!ONLY_M8 && !ONLY_M10B) {
     // ---------------- case 1
     {
       const { s } = await editWorkflow(1, 'diner', 'double-r-front-entrance', 'b');
@@ -836,13 +847,14 @@ async function main() {
     }
    }
 
-    const dryRun = (file, name) => {
+    const dryRun = (file, name, dir = OUT8) => {
       const r = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'world-apply.js'), file, '--dry-run'], { encoding: 'utf8' });
-      fs.writeFileSync(path.join(OUT8, name), r.stdout + r.stderr);
+      fs.writeFileSync(path.join(dir, name), r.stdout + r.stderr);
       return r;
     };
     const exportText = async () => { await clickAction('export'); return cdp.eval("document.getElementById('wb-export-text').value"); };
 
+   if (!ONLY_M10B) {
     // ---------------- case 16 (M8): move the welcome sign
     {
       console.log('\ncase 16: MOVE the town welcome sign');
@@ -991,6 +1003,174 @@ async function main() {
       s = await state();
       check('case 19: REVERT on a created key removes it', s.objectOps.length === 0 && s.selectedId === null, s.objectOps);
       check('case 19: world/scene-objects.json and world/connections.json unchanged', sha(OBJECTS) === objectsShaStart && sha() === shaStart);
+    }
+   }
+
+    // ================ M10b: the props editor =====================================================================
+    const propsShaStart = sha(PROPS);
+    const PROP_CHAIR = ['roadhouse', 'chair', '02'].join('-');   // a literal id here would count as a reference
+    const PROP_TABLE = ['roadhouse', 'table', '02'].join('-');
+    async function clickPixel(px, py) {
+      const p = await cdp.eval(`WB.pixelToClient(${px}, ${py})`);
+      await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: p.x, y: p.y, button: 'left', clickCount: 1 });
+      await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: p.x, y: p.y, button: 'left', clickCount: 1 });
+      await sleep(120);
+    }
+
+    // ---------------- case 20 (M10b): the props layer, selection, MOVE, FLIP, nudge
+    {
+      console.log('\ncase 20: roadhouse props layer');
+      await load();
+      await setSelect('wb-scene', 'roadhouse');
+      let s = await state();
+      check('case 20: props are available but the layer starts off', s.propsAvailable && !s.propsOn, { on: s.propsOn, av: s.propsAvailable });
+      check('case 20: NEW PROP needs the layer and EDIT', !(await enabled('new-prop')));
+      await clickPixel(120, 95);
+      s = await state();
+      check('case 20: with the layer off a prop is not selectable', s.selectedProp === null, s.selectedProp);
+      await clickAction('toggle-props');
+      s = await state();
+      const reg = JSON.parse(fs.readFileSync(PROPS, 'utf8'));
+      const inRoadhouse = Object.keys(reg.instances).filter((k) => reg.instances[k].sceneId === 'roadhouse');
+      check('case 20: PROPS on draws every roadhouse instance', s.propsOn && s.propItems.length === inRoadhouse.length, s.propItems.length);
+      check('case 20: the header counts them', (await cdp.eval("document.getElementById('wb-stage-info').textContent")).includes('props ' + inRoadhouse.length));
+      await shot('case20-layer-on.png', OUT10);
+
+      // 120,95 is inside the chair frame (116,88 18x30) and outside every other frame
+      await clickPixel(120, 95);
+      s = await state();
+      check('case 20: a click on a prop selects the instance, not the tile marker', s.selectedProp === PROP_CHAIR && s.selectedId === null, { p: s.selectedProp, i: s.selectedId });
+      const insp = await cdp.eval("document.getElementById('wb-inspector').innerText");
+      check('case 20: the inspector names the definition, anchor, layer and footprint',
+        (await text('wb-prop-def')).includes('roadhouse.chair.red') && (await text('wb-prop-anchor')) === '7.8125,7.25' &&
+        (await text('wb-prop-layer')).startsWith('6 (definition default)') && (await text('wb-prop-footprint')) === '7,7', insp);
+      check('case 20: VIEW offers no MOVE', !(await cdp.eval("!!document.querySelector('[data-action=\"move-prop\"]')")));
+
+      await clickAction('mode-edit');
+      await clickAction('move-prop');
+      s = await state();
+      check('case 20: MOVE arms a pending tile pick', s.pending === 'move-prop', s.pending);
+      await clickTile(4, 7);
+      s = await state();
+      const moved = s.propItems.find((p) => p.id === PROP_CHAIR);
+      check('case 20: MOVE keeps the sub-tile fraction of the anchor', moved.tx === 4.8125 && moved.ty === 7.25, moved);
+      check('case 20: one prop change, and it is an upsert', s.propChangeCount === 1 && s.propOps.length === 1 && s.propOps[0].op === 'upsert' && s.propOps[0].id === PROP_CHAIR, s.propOps);
+      await clickAction('flip-prop');
+      s = await state();
+      check('case 20: FLIP X sets flipX and keeps the anchor', s.propOps[0].instance.flipX === true && s.propItems.find((p) => p.id === PROP_CHAIR).tx === 4.8125, s.propOps[0].instance);
+      await pressKey('ArrowLeft', 'ArrowLeft', 37);
+      s = await state();
+      check('case 20: an arrow key nudges by one pixel (ox)', s.propOps[0].instance.ox === -1, s.propOps[0].instance);
+      check('case 20: the header counts the prop change', (await cdp.eval("document.getElementById('wb-title').textContent")) === 'WORLD BUILDER · 1 unsaved change');
+      await shot('case20-moved.png', OUT10);
+      const exported = await exportText();
+      const cs = JSON.parse(exported);
+      check('case 20: the export is a props-changeset v2 for world/props.json', cs.format === 'props-changeset' && cs.version === 2 && cs.target === 'world/props.json' && cs.operations.length === 1, cs);
+      const file = path.join(OUT10, 'case20-changeset.json');
+      fs.writeFileSync(file, exported);
+      const dry = dryRun(file, 'case20-dry-run.txt', OUT10);
+      check('case 20: --dry-run VALID, the tx line changes', dry.status === 0 && dry.stdout.includes('TARGET world/props.json :: ' + PROP_CHAIR) &&
+        dry.stdout.includes('VALID 19 prop instance(s)') && /-\s+"tx": 7\.8125,/.test(dry.stdout) && /\+\s+"tx": 4\.8125,/.test(dry.stdout) &&
+        /\+\s+"flipX": true/.test(dry.stdout), dry.stdout + dry.stderr);
+      await clickAction('revert-prop');
+      s = await state();
+      check('case 20: REVERT clears the prop draft', s.propChangeCount === 0 && s.unsaved === 0, s.propOps);
+      check('case 20: world/props.json unchanged', sha(PROPS) === propsShaStart);
+    }
+
+    // ---------------- case 21 (M10b): NEW PROP from the catalog
+    {
+      console.log('\ncase 21: NEW PROP on the roadhouse');
+      await load();
+      await setSelect('wb-scene', 'roadhouse');
+      await clickAction('toggle-props');
+      await clickAction('mode-edit');
+      await clickAction('new-prop');
+      let s = await state();
+      const all = await cdp.eval("Array.from(document.querySelectorAll('#wb-prop-catalog [data-prop]')).map((b) => b.getAttribute('data-prop'))");
+      const reg = JSON.parse(fs.readFileSync(PROPS, 'utf8'));
+      check('case 21: the catalog lists every definition and asks for a tile', all.length === Object.keys(reg.definitions).length && s.newProp.placing, all);
+      await typeInput('wb-new-prop-search', 'candle');
+      const filtered = await cdp.eval("Array.from(document.querySelectorAll('#wb-prop-catalog [data-prop]')).map((b) => b.getAttribute('data-prop'))");
+      check('case 21: the search filters the catalog', JSON.stringify(filtered) === JSON.stringify(['roadhouse.candle.brass']), filtered);
+      await cdp.eval("document.querySelector('[data-prop=\"roadhouse.candle.brass\"]').click()");
+      await sleep(80);
+      s = await state();
+      check('case 21: picking a definition suggests a free instance id', s.newProp.propId === 'roadhouse.candle.brass' && s.newProp.id === ['roadhouse', 'candle', '03'].join('-'), s.newProp);
+      await clickAction('new-prop-pick');
+      await clickTile(1, 1);
+      s = await state();
+      check('case 21: a tile pick makes it valid and enables CONFIRM', s.newProp.errors.length === 0 && (await enabled('new-prop-confirm')), s.newProp);
+      await shot('case21-ghost.png', OUT10);
+      await clickAction('new-prop-confirm');
+      s = await state();
+      check('case 21: CONFIRM creates the instance and selects it', !s.newProp && s.selectedProp === s.propOps[0].id && s.propOps.length === 1 && s.propOps[0].op === 'create' &&
+        s.propOps[0].instance.propId === 'roadhouse.candle.brass' && s.propOps[0].instance.tx === 1 && s.propOps[0].instance.ty === 1, s.propOps);
+      check('case 21: the new prop cannot be flipped (its definition allows no transform)', !(await enabled('flip-prop')));
+      check('case 21: the inspector shows it as a create', (await text('wb-prop-draft')) === 'new (create)', await text('wb-prop-draft'));
+      // MOVE a created prop: still one create, at the new anchor. Done before EXPORT, because the export panel grows
+      // the side column and the canvas moves out from under the recorded click point.
+      await clickAction('move-prop');
+      s = await state();
+      check('case 21: MOVE arms on the created prop', s.pending === 'move-prop', s.pending);
+      await clickTile(11, 6);
+      s = await state();
+      const far = s.propItems.find((p) => p.id === s.propOps[0].id);
+      check('case 21: the created prop moves and stays one create', s.propOps.length === 1 && s.propOps[0].op === 'create' && far.tx === 11 && far.ty === 6, s.propOps);
+      const exported = await exportText();
+      const file = path.join(OUT10, 'case21-changeset.json');
+      fs.writeFileSync(file, exported);
+      const dry = dryRun(file, 'case21-dry-run.txt', OUT10);
+      check('case 21: --dry-run accepts the create', dry.status === 0 && dry.stdout.includes('CREATE world/props.json :: ') && dry.stdout.includes('VALID 20 prop instance(s)'), dry.stdout + dry.stderr);
+
+      await clickAction('revert-prop');
+      s = await state();
+      check('case 21: REVERT on a created prop removes it', s.propOps.length === 0 && s.selectedProp === null && s.unsaved === 0, s.propOps);
+      check('case 21: world/props.json unchanged', sha(PROPS) === propsShaStart);
+    }
+
+    // ---------------- case 22 (M10b): DELETE, undo/redo, and the Roadhouse lock
+    {
+      console.log('\ncase 22: DELETE and the Roadhouse lock');
+      await load();
+      await setSelect('wb-scene', 'roadhouse');
+      await clickAction('toggle-props');
+      await clickAction('mode-edit');
+      // 124,120 is inside the table frame (120,110 21x22) and outside the candle above it
+      await clickPixel(124, 120);
+      let s = await state();
+      check('case 22: the click selects the table instance', s.selectedProp === PROP_TABLE, s.selectedProp);
+      await clickAction('delete-prop');
+      s = await state();
+      check('case 22: DELETE asks for confirmation first', s.confirmPropDelete === PROP_TABLE && s.propOps.length === 0, s.confirmPropDelete);
+      await clickAction('delete-prop-confirm');
+      s = await state();
+      check('case 22: CONFIRM DELETE drops it from the draft', JSON.stringify(s.propOps) === JSON.stringify([{ op: 'delete', id: PROP_TABLE }]) &&
+        !s.propItems.some((p) => p.id === PROP_TABLE), s.propOps);
+      await pressUndo();
+      s = await state();
+      check('case 22: Ctrl+Z restores it', s.propOps.length === 0 && s.propItems.some((p) => p.id === PROP_TABLE), s.propOps);
+
+      // the south door tiles are a hard Roadhouse lock: the Builder lets the move happen, the tool refuses it
+      await clickPixel(124, 120);
+      await clickAction('move-prop');
+      await clickTile(7, 9);
+      s = await state();
+      const onDoor = s.propItems.find((p) => p.id === PROP_TABLE);
+      check('case 22: the table sits on the south door tile in the draft', onDoor.tx === 7.125 && onDoor.ty === 9.125, onDoor);
+      check('case 22: the Builder reports no error (the lock is the tool\'s, not the schema\'s)', !s.errors['props:roadhouse'], s.errors);
+      await shot('case22-on-door.png', OUT10);
+      const exported = await exportText();
+      const file = path.join(OUT10, 'case22-changeset.json');
+      fs.writeFileSync(file, exported);
+      const dry = dryRun(file, 'case22-dry-run.txt', OUT10);
+      check('case 22: tools/world-apply.js refuses it with the Roadhouse lock, nothing written',
+        dry.status === 1 && (dry.stderr + dry.stdout).includes('LOCK roadhouse: south door tile 7,9 is claimed by ' + PROP_TABLE) &&
+        (dry.stderr + dry.stdout).includes('problem(s); nothing written'), dry.stdout + dry.stderr);
+      await clickAction('revert-all');
+      s = await state();
+      check('case 22: REVERT ALL clears the prop draft too', s.unsaved === 0 && s.propChangeCount === 0, s.unsaved);
+      check('case 22: world/props.json and world/connections.json unchanged', sha(PROPS) === propsShaStart && sha() === shaStart);
     }
   } catch (e) {
     check('driver completed without exception', false, String(e && e.stack || e));

@@ -108,6 +108,9 @@
 <script src="js/world-connections-production.js"></script>
 <script src="js/world-engine.js"></script>
 <script src="js/world-catalog.js"></script>
+<!-- M10b: the prop registry, for the props editor. js/props-production.js is NOT loaded here: the Builder
+     draws its own preview and must not hook GAME.sprites. -->
+<script src="js/props.gen.js"></script>
 <script src="js/narrative-runtime.js"></script>
 <script src="js/narrative-data.gen.js"></script>
 <script src="js/cast-presence.js"></script>
@@ -126,6 +129,7 @@
 <script src="js/editor/core/edit.js"></script>
 <script src="js/editor/core/cast.js"></script>
 <script src="js/editor/core/scene-objects.js"></script>
+<script src="js/editor/core/props.js"></script>
 <script src="js/editor/core/index.js"></script>
 <script src="js/world-builder-core.js"></script>
 <script src="js/world-builder-data.js"></script>

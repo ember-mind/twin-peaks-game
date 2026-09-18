@@ -1,0 +1,17 @@
+{
+  "format": "props-changeset",
+  "version": 2,
+  "target": "world/props.json",
+  "operations": [
+    {
+      "op": "create",
+      "id": "roadhouse-candle-03",
+      "instance": {
+        "propId": "roadhouse.candle.brass",
+        "sceneId": "roadhouse",
+        "tx": 11,
+        "ty": 6
+      }
+    }
+  ]
+}
