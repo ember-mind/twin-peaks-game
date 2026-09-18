@@ -179,7 +179,7 @@ global.GAME.PROPS_ENABLED = true;
   const DEPTH = {
     version: 1, tilePx: 16,
     scenes: { depthscene: { canvas: [256, 256] } },
-    definitions: { 'd.far': def(0, 4), 'd.near': def(20, 4), 'd.ceiling': def(40, 8) },
+    definitions: { 'd.far': def(0, 6), 'd.near': def(20, 6), 'd.ceiling': def(40, 8) },
     instances: {
       'p-far': { propId: 'd.far', sceneId: 'depthscene', tx: 4, ty: FOOT_FAR / 16 },
       'p-near': { propId: 'd.near', sceneId: 'depthscene', tx: 4, ty: FOOT_NEAR / 16 },
@@ -250,6 +250,68 @@ global.GAME.PROPS_ENABLED = true;
   ok(JSON.stringify(frame([A('a', 128)])) === JSON.stringify(['ground', '@a']), 'flag off: not one prop in the frame', frame([A('a', 128)]).join(','));
   global.GAME.PROPS_ENABLED = true;
 
+  Props.uninstall();
+}
+
+/* ---- the below-actors band (deep/props-below-band) -----------------------------------------------------------
+ * layer < ACTOR_LAYER is scenery the actors stand IN FRONT OF: it draws once, before every actor, whatever its
+ * foot y. ACTOR_LAYER still interleaves by foot; above it still draws last. The three band names are exported
+ * so the editor inspector can label a layer. */
+{
+  const ATLAS3 = 'assets/fake/below.png';
+  const NAMES3 = { 64: 'backdrop' };
+  const BELOW_LAYER = Props.ACTOR_LAYER - 1;
+  ok(Props.bandOf(BELOW_LAYER) === Props.BANDS.BELOW_ACTORS &&
+     Props.bandOf(Props.ACTOR_LAYER) === Props.BANDS.ACTOR_BAND &&
+     Props.bandOf(Props.ACTOR_LAYER + 1) === Props.BANDS.ABOVE_ACTORS,
+    'bandOf names the three bands either side of ACTOR_LAYER');
+
+  const BELOW = {
+    version: 1, tilePx: 16,
+    scenes: { belowscene: { canvas: [256, 256] } },
+    definitions: { 'b.backdrop': { label: 'Backdrop', atlas: ATLAS3, frame: [64, 0, 16, 16], anchor: [8, 16],
+      footprint: [[0, 0]], defaultLayer: BELOW_LAYER, tags: ['fake'], transforms: [] } },
+    instances: { 'p-backdrop': { propId: 'b.backdrop', sceneId: 'belowscene', tx: 4, ty: 240 / 16 } }
+  };
+  const MAP3 = { id: 'belowscene' };
+  const seq3 = [];
+  global.GAME.sprites = {
+    drawStructures: function () { seq3.push('ground'); },
+    drawForegroundStructures: function () {}
+  };
+  global.GAME.Sprites = {
+    drawChar: function (ctx, x, y, pal, dir, fr, alpha, moving, woods, t, meta) { seq3.push('@' + meta.npcId); }
+  };
+  Props.uninstall();
+  Props._setRegistry(BELOW);
+  const atlas3 = new global.Image(); atlas3.width = 80; atlas3.height = 16;
+  ok(Props.install(), 'the installer takes the below-band fixture');
+  Props._setAtlas(ATLAS3, atlas3);
+
+  function frameBelow(actors) {
+    seq3.length = 0;
+    const ctx = {
+      imageSmoothingEnabled: true, save() {}, restore() {}, translate() {}, scale() {},
+      drawImage(img, sx) { seq3.push(NAMES3[sx]); }
+    };
+    global.GAME.sprites.drawStructures(ctx, MAP3, 0, 0, {});
+    const sorted = actors.slice().sort((a, b) => (a.foot - b.foot) || (a.id < b.id ? -1 : 1));
+    sorted.forEach(function (a, i) {
+      const wy = a.foot - 16, wx = 64;
+      global.GAME.Sprites.drawChar(ctx, wx, wy, null, null, null, null, null, null, 0, { mapId: MAP3.id, wx: wx, wy: wy, npcId: a.id });
+      global.GAME.sprites.drawForegroundStructures(ctx, MAP3, 0, 0, {
+        forestDepthMin: a.foot, forestDepthMax: i + 1 < sorted.length ? sorted[i + 1].foot : Infinity
+      });
+    });
+    return seq3.slice();
+  }
+  const B = (id, foot) => ({ id: id, foot: foot });
+  ok(JSON.stringify(frameBelow([B('a', 32), B('b', 48)])) === JSON.stringify(['ground', 'backdrop', '@a', '@b']),
+    'a below-actors prop draws before actors north of it', frameBelow([B('a', 32), B('b', 48)]).join(','));
+  ok(JSON.stringify(frameBelow([B('a', 208), B('b', 224)])) === JSON.stringify(['ground', 'backdrop', '@a', '@b']),
+    'a below-actors prop draws before actors SOUTH of it: foot y is ignored', frameBelow([B('a', 208), B('b', 224)]).join(','));
+  ok(JSON.stringify(frameBelow([B('solo', 128)])) === JSON.stringify(['ground', 'backdrop', '@solo']),
+    'with one actor the below band still draws first', frameBelow([B('solo', 128)]).join(','));
   Props.uninstall();
 }
 

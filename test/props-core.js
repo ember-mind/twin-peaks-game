@@ -174,6 +174,18 @@ ok(P.suggestInstanceId(store, store.draft, 'hall.lamp.brass') === 'hall-lamp-01'
   ok(P.layerOf(def, DATA.instances['hall-chair-01']) === 6 && P.layerOf(DATA.definitions['hall.table.round'], DATA.instances['hall-table-01']) === 4,
     'layerOf prefers the instance override');
 
+  // bandOf: the three actor-relative bands the inspector labels a layer with (js/props-production.js ACTOR_LAYER)
+  ok(P.BANDS.BELOW_ACTORS === 'below the actors' && P.BANDS.ACTOR_BAND === 'interleaves with the actors' &&
+     P.BANDS.ABOVE_ACTORS === 'above the actors', 'the three band labels are exported');
+  ok(P.bandOf(P.ACTOR_LAYER - 1) === P.BANDS.BELOW_ACTORS && P.bandOf(P.ACTOR_LAYER) === P.BANDS.ACTOR_BAND &&
+     P.bandOf(P.ACTOR_LAYER + 1) === P.BANDS.ABOVE_ACTORS, 'bandOf splits exactly on ACTOR_LAYER');
+  ok(P.bandOf(P.LAYER_MIN) === P.BANDS.BELOW_ACTORS && P.bandOf(P.LAYER_MAX) === P.BANDS.ABOVE_ACTORS,
+    'bandOf covers the whole legal layer range');
+  ok(P.bandOf(P.layerOf(DATA.definitions['hall.chair.red'], DATA.instances['hall-chair-01'])) === P.BANDS.ACTOR_BAND &&
+     P.bandOf(P.layerOf(DATA.definitions['hall.table.round'], DATA.instances['hall-table-01'])) === P.BANDS.BELOW_ACTORS &&
+     P.bandOf(P.layerOf(DATA.definitions['hall.lamp.brass'], DATA.instances['yard-lamp-01'])) === P.BANDS.ABOVE_ACTORS,
+    'bandOf labels the fixture layers: chair interleaves, table is below, lamp is above');
+
   // hit-test: the topmost instance covering a scene pixel, null off every frame
   ok(P.hitTest(store, store.draft, 'hall', 4 * 16, 5 * 16 - 1) === 'hall-chair-01', 'hit-test finds the chair');
   ok(P.hitTest(store, store.draft, 'hall', 0, 0) === null, 'empty pixel hits nothing');

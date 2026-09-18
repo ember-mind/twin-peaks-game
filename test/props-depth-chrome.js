@@ -37,6 +37,7 @@ const { spawnSync, spawn } = require('node:child_process');
 const REPO = path.resolve(__dirname, '..');
 const CAPTURE = path.join(REPO, 'test', 'capture-chrome.js');
 const CHROME = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const PropsCore = require(path.join(REPO, 'js', 'editor', 'core', 'props.js'));
 const PAGE_REL = 'test/retro-scene.html';
 const SCENE = 'roadhouse';
 const INSTANCE = 'roadhouse-table-01';
@@ -203,8 +204,14 @@ function serve(root) {
   }
   throw new Error('no server came up for ' + root);
 }
+/* The interleave band is now exactly ACTOR_LAYER (js/props-production.js): below it a prop draws behind every
+ * actor, above it in front of every actor. The registry's table sits at layer 5 (a below band); this gate is about
+ * the INTERLEAVE, so the flag-on tree pins its fixture instance onto ACTOR_LAYER before props-production.js reads
+ * the registry, independent of the default. world/props.json is untouched. */
+const AT_ACTOR_LAYER = '<script>(function(){var r=JSON.parse(JSON.stringify(window.GAME.WorldData.props));' +
+  'r.instances[' + JSON.stringify(INSTANCE) + '].layer=' + PropsCore.ACTOR_LAYER + ';window.GAME.WorldData.props=r;})();</script>';
 const FLAG_ON = (html) => html.replace('<script src="../js/props.gen.js"></script>',
-  '<script>window.GAME = window.GAME || {}; window.GAME.PROPS_ENABLED = true;</script>\n<script src="../js/props.gen.js"></script>');
+  '<script>window.GAME = window.GAME || {}; window.GAME.PROPS_ENABLED = true;</script>\n<script src="../js/props.gen.js"></script>\n' + AT_ACTOR_LAYER);
 
 const onPort = serve(copyTree('flag-on', FLAG_ON));
 const offPort = serve(copyTree('flag-off', null));

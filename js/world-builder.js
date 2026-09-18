@@ -1288,7 +1288,7 @@
       row(insp, 'FLIP X', el('span', { id: 'wb-prop-flip' }, (e.inst.flipX ? 'yes' : 'no') + (canFlip ? '' : ' (not allowed by this definition)')));
       row(insp, 'LAYER', el('span', { id: 'wb-prop-layer' }, (e.def ? P.layerOf(e.def, e.inst) : '?') +
         (e.inst.layer === undefined ? ' (definition default)' : ' (instance override)') +
-        (e.def && P.layerOf(e.def, e.inst) > P.ACTOR_LAYER ? ' — above the actors' : '')));
+        (e.def ? ' — ' + P.bandOf(P.layerOf(e.def, e.inst)) : '')));
       row(insp, 'FOOTPRINT', el('span', { id: 'wb-prop-footprint' }, e.def ? (P.instanceTiles(e.def, e.inst).map(function (t) { return t.join(','); }).join(' ') || 'none (wall/ceiling decoration)') : '—'));
       var was = e.base ? e.base.tx + ',' + e.base.ty : '';
       row(insp, 'DRAFT', el('span', { id: 'wb-prop-draft' }, created ? 'new (create)' : changed ? 'changed (was ' + was + ')' : 'unchanged'));
