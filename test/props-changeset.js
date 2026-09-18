@@ -123,7 +123,9 @@ const CREATE = cs([{ op: 'create', id: NEW_ID, instance: NEW }]);
     [cs([{ op: 'create', id: NEW_ID, instance: Object.assign({}, NEW, { collides: true }) }]), '.instance carries unknown field "collides"'],
     [cs([{ op: 'delete', id: 'roadhouse-chair-02', instance: NEW }]), 'carries unknown field "instance"'],
     [Object.assign(cs([]), { version: 1 }), 'props changeset version must be 2'],
-    [Object.assign(cs([]), { target: 'world/connections.json' }), 'props changeset target must be world/props.json']
+    /* M10b: the target is checked one layer earlier now — js/editor/core/cast.js splitChangesets owns
+    // world/props.json next to the other three, the way it owns world/scene-objects.json. Still exit 2. */
+    [Object.assign(cs([]), { target: 'world/connections.json' }), 'is a props changeset targeting "world/connections.json"']
   ];
   refusals.forEach(function (pair) {
     const r = run(f, pair[0]);
@@ -179,7 +181,7 @@ const CREATE = cs([{ op: 'create', id: NEW_ID, instance: NEW }]);
     'both targets written');
   const dup = { format: 'world-builder-bundle', version: 1, changesets: [MOVE, MOVE_BACK] };
   const r2 = run(f, dup);
-  ok(r2.code === 2 && (r2.err + r2.out).includes('bundle carries a second changeset for world/props.json'), 'a bundle refuses two props changesets', r2.out + r2.err);
+  ok(r2.code === 2 && (r2.err + r2.out).includes('changesets[1] is a second changeset for world/props.json'), 'a bundle refuses two props changesets', r2.out + r2.err);
   ok(!same(snap(f), s0), 'the bundle fixture is the changed one (sanity)');
 }
 

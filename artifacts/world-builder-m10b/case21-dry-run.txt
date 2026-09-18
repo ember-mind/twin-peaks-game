@@ -1,0 +1,15 @@
+CREATE world/props.json :: roadhouse-candle-03
+BEFORE null
+AFTER  {"propId":"roadhouse.candle.brass","sceneId":"roadhouse","tx":11,"ty":6}
+DIFF world/props.json
+  @@ line 499
+  +     },
+  +     "roadhouse-candle-03": {
+  +       "propId": "roadhouse.candle.brass",
+  +       "sceneId": "roadhouse",
+  +       "tx": 11,
+  +       "ty": 6
+WARN roadhouse-booth-01: footprint tile roadhouse 2,6 is a Cast Presence body tile (loglady (ACT4_EVENING_GATHERING))
+VALID 20 prop instance(s) against real maps, atlases and the Roadhouse locks (1 warning(s))
+REPIN --repin does not apply to world/props.json: props carry no pinned placement (Cast Presence owns pins)
+DRY-RUN 1 prop instance change(s); nothing written

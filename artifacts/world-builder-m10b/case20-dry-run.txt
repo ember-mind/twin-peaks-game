@@ -1,0 +1,15 @@
+TARGET world/props.json :: roadhouse-chair-02
+BEFORE {"propId":"roadhouse.chair.red","sceneId":"roadhouse","tx":7.8125,"ty":7.25}
+AFTER  {"propId":"roadhouse.chair.red","sceneId":"roadhouse","tx":4.8125,"ty":7.25,"ox":-1,"flipX":true}
+DIFF world/props.json
+  @@ line 460
+  -       "tx": 7.8125,
+  -       "ty": 7.25
+  +       "tx": 4.8125,
+  +       "ty": 7.25,
+  +       "ox": -1,
+  +       "flipX": true
+WARN roadhouse-booth-01: footprint tile roadhouse 2,6 is a Cast Presence body tile (loglady (ACT4_EVENING_GATHERING))
+VALID 19 prop instance(s) against real maps, atlases and the Roadhouse locks (1 warning(s))
+REPIN --repin does not apply to world/props.json: props carry no pinned placement (Cast Presence owns pins)
+DRY-RUN 1 prop instance change(s); nothing written

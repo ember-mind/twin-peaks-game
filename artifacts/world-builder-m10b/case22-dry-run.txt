@@ -1,0 +1,12 @@
+TARGET world/props.json :: roadhouse-table-02
+BEFORE {"propId":"roadhouse.table.round","sceneId":"roadhouse","tx":8.125,"ty":8.125}
+AFTER  {"propId":"roadhouse.table.round","sceneId":"roadhouse","tx":7.125,"ty":9.125}
+DIFF world/props.json
+  @@ line 472
+  -       "tx": 8.125,
+  -       "ty": 8.125
+  +       "tx": 7.125,
+  +       "ty": 9.125
+LOCK roadhouse: south door tile 7,9 is claimed by roadhouse-table-02; the south door is unchanged
+LOCK roadhouse: south door tile 8,9 is claimed by roadhouse-table-02; the south door is unchanged
+world-apply: 2 problem(s); nothing written

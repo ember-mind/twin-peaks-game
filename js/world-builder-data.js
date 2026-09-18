@@ -381,7 +381,29 @@
     });
   }
 
-  var api = { TILE: TILE, castContext: castContext, objectsContext: objectsContext, buildWorldSnapshot: buildWorldSnapshot, collectWorldSource: collectWorldSource,
+  // propsContext(GAME) -> the injected ctx for Editor.props (M10b): the registry (GAME.WorldData.props, js/props.gen.js)
+  // and the two sizes the core cannot know. The atlases are decoded images here, so atlasSize answers from the loaded
+  // Image instead of a PNG header the way tools/world-apply.js does; an atlas still decoding answers null, which the
+  // core reads as "not checkable here" — never as a frame that fits.
+  function propsContext(GAME, atlasOf) {
+    var G = GAME || {};
+    var reg = G.WorldData && G.WorldData.props;
+    if (!reg || !reg.instances) throw new Error('propsContext: GAME.WorldData.props missing — load js/props.gen.js first');
+    var maps = G.Maps || {}, source = (G.maps && G.maps.maps) || {};
+    return Object.freeze({
+      registry: reg,
+      mapSize: function (scene) {
+        var m = source[scene] && maps[scene];
+        return m && typeof m.width === 'number' ? { width: m.width, height: m.height } : null;
+      },
+      atlasSize: function (atlas) {
+        var img = atlasOf ? atlasOf(atlas) : null;
+        return img && img.width && img.height ? { width: img.width, height: img.height } : null;
+      }
+    });
+  }
+
+  var api = { TILE: TILE, castContext: castContext, objectsContext: objectsContext, propsContext: propsContext, buildWorldSnapshot: buildWorldSnapshot, collectWorldSource: collectWorldSource,
                  planBaseMap: planBaseMap, tileColorFor: tileColorFor, clone: clone, adaptWorld: adaptWorld,
                  storyStateFromSeed: storyStateFromSeed, castForSeed: castForSeed, validationContext: validationContext };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;

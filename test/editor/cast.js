@@ -107,7 +107,7 @@ assert.throws(() => Cast.splitChangesets({ format: 'world-builder-bundle', versi
 assert.throws(() => Cast.splitChangesets({ format: 'world-builder-bundle', version: 1, changesets: [] }), /non-empty changesets/);
 assert.throws(() => Cast.splitChangesets({ format: 'world-builder-bundle', version: 1, changesets: [bundle] }), /nests a bundle/);
 assert.throws(() => Cast.splitChangesets({ format: 'mystery', operations: [] }), /unknown format "mystery"/);
-assert.throws(() => Cast.splitChangesets(Object.assign({}, conn, { target: 'js/maps.js' })), /only world\/connections\.json, narrative\/cast\/windows\.json and world\/scene-objects\.json are writable/);
+assert.throws(() => Cast.splitChangesets(Object.assign({}, conn, { target: 'js/maps.js' })), /only world\/connections\.json, narrative\/cast\/windows\.json, world\/scene-objects\.json, world\/props\.json are writable/);
 pass += 6;
 
 // ---- the real windows.json (read only): every PLACED body is editable, apply round-trips byte-identically

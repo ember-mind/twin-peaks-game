@@ -57,7 +57,7 @@
     return out.sort(function (x, y) { return x.which < y.which ? -1 : 1; });
   }
 
-  var PIECES_OK = !!(WB && Core && Ed && Ed.edit && Ed.cast && Ed.sceneObjects && Ed.history && Ed.identity && Ed.hitTest && Ed.model);
+  var PIECES_OK = !!(WB && Core && Ed && Ed.edit && Ed.cast && Ed.sceneObjects && Ed.props && Ed.history && Ed.identity && Ed.hitTest && Ed.model);
 
   var DIRV = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
@@ -72,6 +72,27 @@
     var castStore = G.NarrativeData && G.NarrativeData.cast ? C.createCastStore(G.NarrativeData.cast) : null;
     var octx = WB.objectsContext(G);
     var objStore = S.createObjectStore(octx.registry);
+    /* M10b props. The registry is js/props.gen.js; a page that does not load it (an older harness) simply gets no
+     * props editor instead of a failed mount. `atlasFor` decodes each atlas once and re-renders when it arrives. */
+    var P = Ed.props;
+    var atlases = {};
+    function atlasFor(src) {
+      if (!Object.prototype.hasOwnProperty.call(atlases, src)) {
+        var img = new Image();
+        img.onload = function () { render(); };
+        img.src = src;
+        atlases[src] = img;
+      }
+      return atlases[src];
+    }
+    var pctx = null, propStore = null;
+    try {
+      pctx = WB.propsContext(G, atlasFor);
+      propStore = P.createPropStore(pctx.registry);
+    } catch (e) {
+      pctx = null; propStore = null;
+      if (typeof console !== 'undefined') console.warn('[world-builder] props editor off: ' + (e && e.message || e));
+    }
     var cctx = WB.castContext(G, function (scene, x, y) {
       var d = draft(), hit = null;
       Object.keys(d).sort().forEach(function (id) {
@@ -101,13 +122,21 @@
       newObject: null,          // null | {scene, kind, sourceId, sourceIdEdited, dialogue, w, h, tile, placing}
       newInteract: null,        // null | {scene, id, tile, placing}
       confirmObjectDelete: null, // item id awaiting DELETE confirmation
-      stackTile: null           // {scene, tx, ty} of the last canvas click (ON THIS TILE)
+      stackTile: null,          // {scene, tx, ty} of the last canvas click (ON THIS TILE)
+      propsOn: false,           // draw and select prop instances (world/props.json); opt-in, so every other
+                                // marker keeps the click it had before M10b
+
+      newProp: null,            // null | {scene, propId, id, idEdited, search, tile, placing}
+      selectedProp: null,       // instance id of the selected prop
+      confirmPropDelete: null   // instance id awaiting DELETE confirmation
     };
-    // history holds { conn, cast, objects }: one undo stack across connection, cast and scene object edits
-    var hist = H.create({ conn: store.base, cast: castStore ? castStore.base : null, objects: objStore.base });
+    // history holds { conn, cast, objects, props }: one undo stack across every registry the Builder edits
+    var hist = H.create({ conn: store.base, cast: castStore ? castStore.base : null, objects: objStore.base,
+      props: propStore ? propStore.base : null });
     function draft() { return hist.present.conn; }
     function castDraft() { return hist.present.cast; }
     function objDraft() { return hist.present.objects; }
+    function propDraft() { return hist.present.props; }
 
     // ------------------------------------------------------------------ DOM
     function el(tag, attrs, text) {
@@ -143,6 +172,8 @@
     var newBtn = bar.appendChild(el('button', { 'data-action': 'new-connection' }, 'NEW CONNECTION'));
     var newObjBtn = bar.appendChild(el('button', { 'data-action': 'new-object' }, 'NEW OBJECT'));
     var newIntBtn = bar.appendChild(el('button', { 'data-action': 'new-interact' }, 'NEW INTERACT'));
+    var propsBtn = bar.appendChild(el('button', { 'data-action': 'toggle-props' }, 'PROPS'));
+    var newPropBtn = bar.appendChild(el('button', { 'data-action': 'new-prop' }, 'NEW PROP'));
     var revertAllBtn = bar.appendChild(el('button', { 'data-action': 'revert-all' }, 'REVERT ALL'));
     var exportBtn = bar.appendChild(el('button', { 'data-action': 'export', class: 'wb-primary' }, 'EXPORT CHANGESET'));
 
@@ -160,7 +191,7 @@
     legend.innerHTML =
       '<span class="lg lg-ep">◆</span> endpoint spawn&nbsp;&nbsp; <span class="lg lg-tr">■</span> trigger&nbsp;&nbsp; ' +
       '<span class="lg lg-ghost">◇</span> original (dimmed)&nbsp;&nbsp; <span class="lg lg-bad">◆</span> invalid draft&nbsp;&nbsp; ' +
-      '<span class="lg lg-new">◈</span> new connection (unconfirmed)&nbsp;&nbsp; <span class="lg lg-npc">▲</span> npc&nbsp;&nbsp; <span class="lg lg-obj">▭</span> object&nbsp;&nbsp; <span class="lg" style="color:#96d7ff">▫</span> interact key&nbsp;&nbsp; <span class="lg lg-leg">□</span> legacy door (read-only)';
+      '<span class="lg lg-new">◈</span> new connection (unconfirmed)&nbsp;&nbsp; <span class="lg lg-npc">▲</span> npc&nbsp;&nbsp; <span class="lg lg-obj">▭</span> object&nbsp;&nbsp; <span class="lg" style="color:#96d7ff">▫</span> interact key&nbsp;&nbsp; <span class="lg" style="color:#c8a2ff">▣</span> prop (world/props.json)&nbsp;&nbsp; <span class="lg lg-leg">□</span> legacy door (read-only)';
 
     // ------------------------------------------------------------------ scene + moment selectors
     var catalogScenes = {};
@@ -248,6 +279,49 @@
       return Core.sceneItems(model, sid, { connections: draft(), npcs: sceneNpcs(sid), objects: objectOverlays(sid) });
     }
     function objectChanges() { return S.changes(objStore, objDraft()); }
+
+    // ---- props (M10b) ------------------------------------------------------------------------------------------
+    // Props are NOT sceneItems: they live in scene pixels, not whole tiles, so they carry their own selection and
+    // hit-test (Editor.props.hitTest, the reverse of the draw order js/props-production.js uses).
+    function propsEnabled() { return !!propStore && ui.propsOn; }
+    function propScene(sceneId) {
+      if (!propStore) return null;
+      return propStore.data.scenes[sceneId] || null;
+    }
+    function propsIn(sceneId) {
+      if (!propStore) return [];
+      var d = propDraft(), out = [];
+      Object.keys(d).forEach(function (id) { if (d[id].sceneId === sceneId) out.push({ id: id, inst: d[id], def: propStore.data.definitions[d[id].propId] || null }); });
+      return out.sort(function (a, b) { return a.id < b.id ? -1 : 1; });
+    }
+    function propChanges() { return propStore ? P.changes(propStore, propDraft()) : []; }
+    function propOpsList() { return propStore ? P.buildPropsChangeset(propStore, propDraft()).operations : []; }
+    function propCatalog() {
+      if (!propStore) return [];
+      return Object.keys(propStore.data.definitions).sort().map(function (id) {
+        var d = propStore.data.definitions[id];
+        return { propId: id, label: d.label, tags: d.tags || [], def: d };
+      });
+    }
+    function cleanPropMsg(e) { return String(e.message || e).replace(/^\[props\] /, ''); }
+    // NEW PROP candidate: the draft it would commit, or the reason it cannot. The anchor lands on the tile centre-ish
+    // origin (tile corner) the click picked; the inspector's NUDGE moves it by single pixels afterwards.
+    function newPropPlan() {
+      var n = ui.newProp;
+      if (!n) return null;
+      if (!n.propId) return { draft: null, errors: ['pick a prop in the catalog'] };
+      if (!n.tile) return { draft: null, errors: ['pick the anchor tile on the canvas'] };
+      try {
+        var next = P.placeProp(propStore, propDraft(), { id: n.id, propId: n.propId, sceneId: n.scene, tx: n.tile.tx, ty: n.tile.ty });
+        return { draft: next, errors: (P.draftErrors(pctx, propStore, next)[n.scene] || []) };
+      } catch (e) { return { draft: null, errors: [cleanPropMsg(e)] }; }
+    }
+    function selectedPropEntry() {
+      if (!propStore || !ui.selectedProp) return null;
+      var d = propDraft(), inst = d[ui.selectedProp];
+      if (!inst || inst.sceneId !== ui.sceneId) return null;
+      return { id: ui.selectedProp, inst: inst, base: propStore.base[ui.selectedProp] || null, def: propStore.data.definitions[inst.propId] || null };
+    }
     function objectOpsList() { return S.buildObjectsChangeset(objStore, objDraft()).operations; }
     // the base and draft entries behind a registry object item
     function objectEntry(it) {
@@ -350,6 +424,10 @@
       });
       var oe = S.draftErrors(octx, objStore, objDraft());
       Object.keys(oe).forEach(function (sc) { out['scene-objects:' + sc] = oe[sc]; });
+      if (propStore) {
+        var pe = P.draftErrors(pctx, propStore, propDraft());
+        Object.keys(pe).forEach(function (sc) { out['props:' + sc] = pe[sc]; });
+      }
       return out;
     }
     function selectedRef() {
@@ -362,20 +440,24 @@
 
     function commit(next, label) {
       if (next === draft()) return;
-      hist = H.commit(hist, { conn: next, cast: castDraft(), objects: objDraft() }, { label: label });
+      hist = H.commit(hist, { conn: next, cast: castDraft(), objects: objDraft(), props: propDraft() }, { label: label });
     }
     function commitCast(next, label) {
       if (next === castDraft()) return;
-      hist = H.commit(hist, { conn: draft(), cast: next, objects: objDraft() }, { label: label });
+      hist = H.commit(hist, { conn: draft(), cast: next, objects: objDraft(), props: propDraft() }, { label: label });
     }
     function commitObjects(next, label) {
       if (next === objDraft()) return;
-      hist = H.commit(hist, { conn: draft(), cast: castDraft(), objects: next }, { label: label });
+      hist = H.commit(hist, { conn: draft(), cast: castDraft(), objects: next, props: propDraft() }, { label: label });
     }
-    function unsavedCount() { return E.changedIds(store, draft()).length + castChanged().length + objectChanges().length; }
+    function commitProps(next, label) {
+      if (!propStore || next === propDraft()) return;
+      hist = H.commit(hist, { conn: draft(), cast: castDraft(), objects: objDraft(), props: next }, { label: label });
+    }
+    function unsavedCount() { return E.changedIds(store, draft()).length + castChanged().length + objectChanges().length + propChanges().length; }
     function exportObject() {
       return C.buildBundle([E.buildChangeset(store, draft()), castStore ? C.buildCastChangeset(castStore, castDraft()) : null,
-        S.buildObjectsChangeset(objStore, objDraft())]);
+        S.buildObjectsChangeset(objStore, objDraft()), propStore ? P.buildPropsChangeset(propStore, propDraft()) : null]);
     }
     function guard(fn) {
       try { ui.notice = null; fn(); }
@@ -459,6 +541,8 @@
           }
         });
       }
+
+      if (propsEnabled()) drawProps(ctx, sc, z, errs);
 
       [ui.newObject, ui.newInteract].forEach(function (n) {
         if (!n || !n.tile || n.scene !== sc.sceneId) return;
@@ -584,7 +668,86 @@
       ctx.strokeRect(it.tx * z + inset + 0.5, it.ty * z + inset + 0.5, it.w * z - 2 * inset - 1, it.h * z - 2 * inset - 1);
       ctx.restore();
     }
-    function placingObject() { return !!((ui.newObject && ui.newObject.placing) || (ui.newInteract && ui.newInteract.placing)); }
+    function placingObject() { return !!((ui.newObject && ui.newObject.placing) || (ui.newInteract && ui.newInteract.placing) || (ui.newProp && ui.newProp.placing)); }
+
+    /* ---- props ---------------------------------------------------------------------------------------------
+     * The Builder canvas is z pixels per tile and a prop is placed in SCENE pixels, so everything here scales by
+     * z / TILE. The sprite is drawn from the atlas when it has decoded; until then the frame box stands in, and a
+     * definition whose atlas never loads still shows where it sits. */
+    function propScale(z) { return z / P.TILE; }
+    function drawPropSprite(ctx, e, z) {
+      var k = propScale(z), o = P.originOf(e.def, e.inst), f = e.def.frame;
+      var img = atlasFor(e.def.atlas);
+      var x = o.left * k, y = o.top * k, w = f[2] * k, h = f[3] * k;
+      ctx.save();
+      if (img && img.width && img.height) {
+        ctx.imageSmoothingEnabled = false;
+        if (e.inst.flipX) {
+          ctx.translate(x + w, y);
+          ctx.scale(-1, 1);
+          ctx.drawImage(img, f[0], f[1], f[2], f[3], 0, 0, w, h);
+        } else {
+          ctx.drawImage(img, f[0], f[1], f[2], f[3], x, y, w, h);
+        }
+      } else {
+        ctx.fillStyle = 'rgba(200,162,255,.18)';
+        ctx.fillRect(x, y, w, h);
+      }
+      ctx.restore();
+      return { x: x, y: y, w: w, h: h };
+    }
+    function drawProps(ctx, sc, z, errs) {
+      var k = propScale(z), bad = !!errs['props:' + sc.sceneId];
+      // the base placement of every changed prop, dashed, under the draft
+      propChanges().forEach(function (ch) {
+        if (!ch.before || ch.before.sceneId !== sc.sceneId) return;
+        var def = propStore.data.definitions[ch.before.propId];
+        if (!def) return;
+        var o = P.originOf(def, ch.before);
+        ctx.save();
+        ctx.globalAlpha = 0.5; ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = '#c8a2ff'; ctx.lineWidth = 1.5;
+        ctx.strokeRect(o.left * k + .5, o.top * k + .5, def.frame[2] * k - 1, def.frame[3] * k - 1);
+        ctx.restore();
+      });
+      propsIn(sc.sceneId).forEach(function (e) {
+        if (!e.def) return; // a missing definition is a validation error; never draw a guess
+        var sel = e.id === ui.selectedProp;
+        var box = drawPropSprite(ctx, e, z);
+        var changed = propStore.base[e.id] ? JSON.stringify(propStore.base[e.id]) !== JSON.stringify(e.inst) : true;
+        ctx.save();
+        ctx.strokeStyle = sel ? '#ffffff' : bad && changed ? '#ff9a9a' : changed ? '#e6b84a' : 'rgba(200,162,255,.55)';
+        ctx.lineWidth = sel ? 2.5 : 1;
+        ctx.strokeRect(box.x + .5, box.y + .5, box.w - 1, box.h - 1);
+        // footprint: the map tiles this prop claims, which is what the overlap warnings talk about
+        if (sel) {
+          P.instanceTiles(e.def, e.inst).forEach(function (t) {
+            ctx.fillStyle = 'rgba(200,162,255,.22)';
+            ctx.fillRect(t[0] * z, t[1] * z, z, z);
+          });
+          var ax = Math.round(e.inst.tx * P.TILE) * k, ay = Math.round(e.inst.ty * P.TILE) * k;
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.moveTo(ax - 4, ay); ctx.lineTo(ax + 4, ay); ctx.moveTo(ax, ay - 4); ctx.lineTo(ax, ay + 4); ctx.stroke();
+        }
+        ctx.restore();
+      });
+      // the prop being placed, ghosted at the hovered tile
+      var n = ui.newProp;
+      if (n && n.propId && n.scene === sc.sceneId) {
+        var def = propStore.data.definitions[n.propId];
+        var at = n.tile || (n.placing ? ui.hover : null);
+        if (def && at) {
+          var o = P.originOf(def, { tx: at.tx, ty: at.ty });
+          ctx.save();
+          ctx.globalAlpha = 0.55;
+          drawPropSprite(ctx, { def: def, inst: { tx: at.tx, ty: at.ty } }, z);
+          ctx.globalAlpha = 1;
+          ctx.strokeStyle = '#7ef0c0'; ctx.lineWidth = 2; ctx.setLineDash([4, 3]);
+          ctx.strokeRect(o.left * k + 1, o.top * k + 1, def.frame[2] * k - 2, def.frame[3] * k - 2);
+          ctx.restore();
+        }
+      }
+    }
 
     function drawNpc(ctx, it, z, isSel) {
       var cx = it.tx * z + z / 2, cy = it.ty * z + z / 2;
@@ -771,7 +934,11 @@
       if (ui.converting) { renderConvert(); return; }
       if (ui.newObject) { renderNewObject(); return; }
       if (ui.newInteract) { renderNewInteract(); return; }
+      if (ui.newProp) { renderNewProp(); return; }
       insp.appendChild(el('h2', null, 'INSPECTOR'));
+      // a selected prop owns the inspector: props are their own selection channel, not sceneItems
+      var pe = selectedPropEntry();
+      if (pe) { insp.appendChild(el('div', { class: 'wb-id', id: 'wb-selected-id' }, 'prop:' + pe.id)); renderProp(pe); return; }
       if (!ui.selectedId) { insp.appendChild(el('div', { class: 'wb-muted' }, 'Click a marker on the canvas.')); return; }
       var it = Core.findItem(list, ui.selectedId);
       var ref = selectedRef();
@@ -1037,7 +1204,7 @@
       var errBox = box.appendChild(el('ul', { id: 'wb-' + prefix + '-errors' }));
       var acts = box.appendChild(el('div', { class: 'wb-actions' }));
       var confirmBtn = button(acts, 'CONFIRM', prefix + '-confirm', function () { guard(onConfirm); }, { cls: 'wb-primary' });
-      button(acts, 'CANCEL', prefix + '-cancel', function () { ui.newObject = null; ui.newInteract = null; render(); });
+      button(acts, 'CANCEL', prefix + '-cancel', function () { ui.newObject = null; ui.newInteract = null; ui.newProp = null; render(); });
       function refresh() {
         var p = plan();
         errBox.textContent = '';
@@ -1104,6 +1271,116 @@
         ui.newInteract = null;
         ui.notice = { level: 'info', text: 'Created interact key ' + n.tile.tx + ',' + n.tile.ty + ' = ' + n.id + ' in ' + n.scene + ' (export to apply).' };
       }, 'new-interact');
+    }
+
+    /* PROP INSPECTOR. Layer is shown, not edited: the seeded layers are the prototype's paint order and re-layering
+     * world/props.json is a decision for the lead (see reports/opus-world-builder-m10a-depth.md). */
+    function renderProp(e) {
+      var created = !e.base, changed = JSON.stringify(e.base) !== JSON.stringify(e.inst);
+      var editing = ui.mode === 'edit';
+      var canFlip = !!e.def && (e.def.transforms || []).indexOf('flipX') !== -1;
+      row(insp, 'KIND', 'prop instance (world/props.json)');
+      row(insp, 'SCENE', e.inst.sceneId);
+      row(insp, 'INSTANCE ID', e.id);
+      row(insp, 'DEFINITION', el('span', { id: 'wb-prop-def' }, e.inst.propId + (e.def ? ' — ' + e.def.label : ' (MISSING)')));
+      row(insp, 'ANCHOR tx,ty', el('span', { id: 'wb-prop-anchor' }, e.inst.tx + ',' + e.inst.ty));
+      row(insp, 'NUDGE ox,oy', el('span', { id: 'wb-prop-offset' }, (e.inst.ox || 0) + ',' + (e.inst.oy || 0) + ' px'));
+      row(insp, 'FLIP X', el('span', { id: 'wb-prop-flip' }, (e.inst.flipX ? 'yes' : 'no') + (canFlip ? '' : ' (not allowed by this definition)')));
+      row(insp, 'LAYER', el('span', { id: 'wb-prop-layer' }, (e.def ? P.layerOf(e.def, e.inst) : '?') +
+        (e.inst.layer === undefined ? ' (definition default)' : ' (instance override)') +
+        (e.def && P.layerOf(e.def, e.inst) > P.ACTOR_LAYER ? ' — above the actors' : '')));
+      row(insp, 'FOOTPRINT', el('span', { id: 'wb-prop-footprint' }, e.def ? (P.instanceTiles(e.def, e.inst).map(function (t) { return t.join(','); }).join(' ') || 'none (wall/ceiling decoration)') : '—'));
+      var was = e.base ? e.base.tx + ',' + e.base.ty : '';
+      row(insp, 'DRAFT', el('span', { id: 'wb-prop-draft' }, created ? 'new (create)' : changed ? 'changed (was ' + was + ')' : 'unchanged'));
+      var over = propStore ? P.overlaps(propStore, propDraft()).filter(function (o) { return o.ids.indexOf(e.id) !== -1; }) : [];
+      if (over.length) {
+        insp.appendChild(el('div', { class: 'wb-warn', id: 'wb-prop-overlap' }, 'Footprint shared with ' +
+          over.map(function (o) { return o.ids.filter(function (x) { return x !== e.id; }).join(', ') + ' on ' + o.tile; }).join('; ') +
+          '. Allowed, but tools/world-apply.js warns about it.'));
+      }
+      if (!editing) return;
+
+      var acts = insp.appendChild(el('div', { class: 'wb-actions' }));
+      var pend = ui.pending && ui.pending.action === 'move-prop' && ui.pending.id === e.id;
+      button(acts, pend ? 'MOVE · click a tile…' : 'MOVE', 'move-prop', function () {
+        ui.pending = { action: 'move-prop', id: e.id, scene: e.inst.sceneId };
+        ui.confirmPropDelete = null; render();
+      }, { cls: pend ? 'on' : '' });
+      button(acts, 'FLIP X', 'flip-prop', function () {
+        guard(function () { commitProps(P.flipProp(propStore, propDraft(), e.id), 'flip ' + e.id); });
+      }, { disabled: !canFlip });
+      button(acts, 'REVERT', 'revert-prop', function () {
+        guard(function () {
+          commitProps(P.revertEntry(propStore, propDraft(), e.id), 'revert ' + e.id);
+          ui.pending = null;
+          if (created) ui.selectedProp = null;
+        });
+      }, { disabled: !changed });
+      button(acts, 'DELETE', 'delete-prop', function () { ui.pending = null; ui.confirmPropDelete = e.id; render(); }, { cls: 'wb-danger' });
+
+      var nudge = el('span', { class: 'wb-inline' });
+      [['←', 'left', -1, 0], ['→', 'right', 1, 0], ['↑', 'up', 0, -1], ['↓', 'down', 0, 1]].forEach(function (b) {
+        button(nudge, b[0], 'nudge-prop-' + b[1], function () {
+          guard(function () { commitProps(P.nudgeProp(propDraft(), e.id, (e.inst.ox || 0) + b[2], (e.inst.oy || 0) + b[3]), 'nudge ' + e.id); });
+        });
+      });
+      row(insp, 'NUDGE 1px', nudge);
+      insp.appendChild(el('div', { class: 'wb-muted' }, 'MOVE keeps the sub-tile fraction of the anchor; NUDGE moves it by single pixels (ox/oy). Arrow keys nudge too.'));
+
+      if (ui.confirmPropDelete === e.id) {
+        var conf = insp.appendChild(el('div', { class: 'wb-warn', id: 'wb-prop-delete-confirm' }));
+        conf.appendChild(el('div', null, 'Delete prop ' + e.id + ' from ' + e.inst.sceneId + '?'));
+        var ca = conf.appendChild(el('div', { class: 'wb-actions' }));
+        button(ca, 'CONFIRM DELETE', 'delete-prop-confirm', function () {
+          guard(function () {
+            commitProps(P.deleteProp(propDraft(), e.id), 'delete ' + e.id);
+            ui.confirmPropDelete = null; ui.selectedProp = null;
+            ui.notice = { level: 'info', text: 'Deleted prop ' + e.id + ' from the draft (export to apply). tools/world-apply.js still refuses a delete whose id is referenced under js/ test/ narrative/.' };
+          });
+        }, { cls: 'wb-danger' });
+        button(ca, 'CANCEL', 'delete-prop-cancel', function () { ui.confirmPropDelete = null; render(); });
+      }
+      if (pend) insp.appendChild(el('div', { class: 'wb-hint' }, 'Click the new anchor tile. Esc cancels.'));
+    }
+
+    /* NEW PROP: the catalog (label, id, tags) filtered by a search box, then a tile pick. Definitions are never
+     * created here — world/props.json definitions stay hand-edited. */
+    function renderNewProp() {
+      var n = ui.newProp, refresh = null;
+      refresh = renderNewPanel('NEW PROP', n, newPropPlan, function (box) {
+        var search = el('input', { type: 'text', spellcheck: 'false', id: 'wb-new-prop-search', value: n.search || '', placeholder: 'filter by label, id or tag' });
+        search.addEventListener('input', function () { n.search = search.value; render(); });
+        row(box, 'SEARCH', search);
+        var q = String(n.search || '').toLowerCase();
+        var list = propCatalog().filter(function (c) {
+          return !q || c.propId.toLowerCase().indexOf(q) !== -1 || c.label.toLowerCase().indexOf(q) !== -1 ||
+            c.tags.some(function (t) { return t.indexOf(q) !== -1; });
+        });
+        var cat = el('div', { class: 'wb-triggers', id: 'wb-prop-catalog' });
+        list.forEach(function (c) {
+          var b = cat.appendChild(el('button', { class: 'wb-chip' + (c.propId === n.propId ? ' on' : ''), 'data-prop': c.propId },
+            c.label + ' · ' + c.propId + ' [' + c.tags.join(' ') + ']'));
+          b.addEventListener('click', function () {
+            n.propId = c.propId;
+            if (!n.idEdited) n.id = P.suggestInstanceId(propStore, propDraft(), c.propId);
+            render();
+          });
+        });
+        if (!list.length) cat.appendChild(el('span', { class: 'wb-muted' }, 'no definition matches "' + n.search + '"'));
+        row(box, 'CATALOG', cat);
+        var idIn = el('input', { type: 'text', spellcheck: 'false', id: 'wb-new-prop-id', value: n.id });
+        idIn.addEventListener('input', function () { n.id = idIn.value; n.idEdited = true; if (refresh) refresh(); });
+        row(box, 'INSTANCE ID', idIn);
+        box.appendChild(el('div', { class: 'wb-muted' }, 'Definitions (atlas, frame, anchor, footprint, layer) are hand-edited in world/props.json; the Builder places instances of them.'));
+      }, function () {
+        var p = newPropPlan();
+        if (!p.draft || p.errors.length) throw new Error('NEW PROP invalid: ' + p.errors.join('; '));
+        commitProps(p.draft, 'create ' + n.id);
+        ui.selectedProp = n.id;
+        ui.selectedId = null;
+        ui.newProp = null;
+        ui.notice = { level: 'info', text: 'Created prop ' + n.id + ' in ' + n.scene + ' (export to apply).' };
+      }, 'new-prop');
     }
 
     function renderNpc(it) {
@@ -1183,7 +1460,7 @@
       var castOps = castOpsList();
       var out = exportObject() || cs;
       exportBox.appendChild(el('div', { class: 'wb-muted', id: 'wb-export-summary' },
-        cs.operations.length + ' changed connection(s), ' + castOps.length + ' cast placement(s), ' + objectOpsList().length + ' scene object change(s)' + (out.format === C.BUNDLE_FORMAT ? ' (bundle)' : '') +
+        cs.operations.length + ' changed connection(s), ' + castOps.length + ' cast placement(s), ' + objectOpsList().length + ' scene object change(s), ' + propOpsList().length + ' prop change(s)' + (out.format === C.BUNDLE_FORMAT ? ' (bundle)' : '') +
         '. Save as a file, then: node tools/world-apply.js <file> --dry-run' + (castOps.length ? ' (add --repin if V5 pins must follow)' : '')));
       var ta = exportBox.appendChild(el('textarea', { id: 'wb-export-text', readonly: 'readonly', spellcheck: 'false' }));
       ta.value = JSON.stringify(out, null, 2) + '\n';
@@ -1216,6 +1493,14 @@
       newIntBtn.disabled = newObjBtn.disabled;
       newIntBtn.className = ui.newInteract ? 'on' : '';
       newIntBtn.title = newObjBtn.title;
+      propsBtn.disabled = !propStore;
+      propsBtn.className = ui.propsOn ? 'on' : '';
+      propsBtn.title = propStore ? 'draw and select prop instances (world/props.json)' : 'js/props.gen.js not loaded';
+      newPropBtn.disabled = ui.mode !== 'edit' || !propsEnabled() || !propScene(ui.sceneId);
+      newPropBtn.className = ui.newProp ? 'on' : '';
+      newPropBtn.title = !propStore ? 'js/props.gen.js not loaded'
+        : !ui.propsOn ? 'turn the PROPS layer on first'
+        : propScene(ui.sceneId) ? '' : ui.sceneId + ' has no canvas in world/props.json';
       revertAllBtn.disabled = ui.mode !== 'edit' || n === 0;
       exportBtn.disabled = ui.mode !== 'edit';
       if (sceneSel.value !== ui.sceneId) sceneSel.value = ui.sceneId;
@@ -1227,6 +1512,7 @@
       stageInfo.textContent = sc.sceneId + ' · ' + sc.width + '×' + sc.height + (sc.indoor ? ' interior' : '') +
         ' · endpoints ' + counts['connection-endpoint'] + ' · triggers ' + counts.trigger + ' · npcs ' + counts.npc +
         ' · objects ' + counts.object + ' · legacy doors ' + counts['legacy-door'] +
+        (propsEnabled() ? ' · props ' + propsIn(sc.sceneId).length : '') +
         ' · cast: ' + (ui.momentKey === 'baseline' ? 'baseline' : ui.momentKey);
 
       drawCanvas(sc, list, errs);
@@ -1254,6 +1540,14 @@
       return { tx: tx, ty: ty };
     }
 
+    // Scene PIXELS under the cursor: props are placed in pixels, not tiles, so their hit-test needs this.
+    function pixelFromEvent(ev) {
+      var rect = canvas.getBoundingClientRect();
+      var sx = canvas.width / rect.width, sy = canvas.height / rect.height;
+      var k = ui.zoom / P.TILE;
+      return { px: (ev.clientX - rect.left) * sx / k, py: (ev.clientY - rect.top) * sy / k };
+    }
+
     canvas.addEventListener('mousemove', function (ev) {
       if (!ui.pending && !(ui.creating && (ui.creating.step !== 'confirm' || ui.creating.moving)) && !(ui.converting && ui.converting.placing) && !placingObject()) return;
       var t = tileFromEvent(ev);
@@ -1268,6 +1562,16 @@
       var p = ui.pending;
       var c = ui.creating;
       var cv = ui.converting;
+      var np = ui.newProp;
+      if (np && np.placing) {
+        guard(function () {
+          if (ui.sceneId !== np.scene) throw new Error('NEW PROP belongs to ' + np.scene + ' — switch back to that scene');
+          np.tile = { tx: t.tx, ty: t.ty };
+          np.placing = false;
+          ui.hover = null;
+        });
+        return;
+      }
       var no = ui.newObject || ui.newInteract;
       if (no && no.placing) {
         guard(function () {
@@ -1312,6 +1616,19 @@
         return;
       }
       if (!p) {
+        /* With the props layer on, a prop wins the click: it is the thing under the cursor, and the tile markers
+         * stay reachable through ON THIS TILE or by turning the layer off. */
+        var pp = propsEnabled() ? pixelFromEvent(ev) : null;
+        var propHit = pp ? P.hitTest(propStore, propDraft(), ui.sceneId, pp.px, pp.py) : null;
+        ui.selectedProp = propHit;
+        if (propHit) {
+          ui.selectedId = null;
+          ui.stackTile = { scene: ui.sceneId, tx: t.tx, ty: t.ty };
+          ui.confirmObjectDelete = null; ui.confirmPropDelete = null; ui.notice = null;
+          render();
+          return;
+        }
+        ui.confirmPropDelete = null;
         var hit = Core.itemAt(items(), t.tx, t.ty);
         ui.selectedId = hit ? hit.id : null;
         ui.stackTile = { scene: ui.sceneId, tx: t.tx, ty: t.ty };
@@ -1321,7 +1638,17 @@
         return;
       }
       guard(function () {
-        if (p.action === 'move-object') {
+        if (p.action === 'move-prop') {
+          if (ui.sceneId !== p.scene) { ui.pending = null; throw new Error('MOVE keeps ' + p.id + ' on ' + p.scene + ' — switch back to that scene'); }
+          /* Keep the sub-tile fraction: the seeded anchors sit on pixel offsets inside a tile (tx 7.8125), and a
+           * move by whole tiles must not silently snap them to the corner. */
+          var cur = propDraft()[p.id];
+          var fx = cur.tx - Math.floor(cur.tx), fy = cur.ty - Math.floor(cur.ty);
+          commitProps(P.moveProp(propDraft(), p.id, t.tx + fx, t.ty + fy), 'move ' + p.id);
+          ui.selectedProp = p.id;
+          ui.stackTile = { scene: p.scene, tx: t.tx, ty: t.ty };
+          ui.notice = { level: 'info', text: 'Moved prop ' + p.id + ' to ' + (t.tx + fx) + ',' + (t.ty + fy) + ' in the draft (export to apply).' };
+        } else if (p.action === 'move-object') {
           if (ui.sceneId !== p.scene) { ui.pending = null; throw new Error('MOVE keeps ' + p.itemId + ' on ' + p.scene + ' — switch back to that scene'); }
           if (p.entry === 'object') commitObjects(S.moveObject(objDraft(), p.scene, p.sourceId, t.tx, t.ty), 'move ' + p.sourceId);
           else commitObjects(S.moveInteract(objDraft(), p.scene, p.ref, t.tx, t.ty), 'move interact ' + p.ref);
@@ -1354,7 +1681,7 @@
     });
 
     sceneSel.addEventListener('change', function () {
-      guard(function () { setScene(sceneSel.value); ui.selectedId = null; ui.pending = null; ui.newObject = null; ui.newInteract = null; ui.confirmObjectDelete = null; ui.stackTile = null; });
+      guard(function () { setScene(sceneSel.value); ui.selectedId = null; ui.pending = null; ui.newObject = null; ui.newInteract = null; ui.newProp = null; ui.confirmObjectDelete = null; ui.selectedProp = null; ui.confirmPropDelete = null; ui.stackTile = null; });
     });
     momentSel.addEventListener('change', function () {
       guard(function () {
@@ -1366,10 +1693,10 @@
         if (p && p.kind === ID.KINDS.NPC) ui.selectedId = null;
       });
     });
-    viewBtn.addEventListener('click', function () { ui.mode = 'view'; ui.pending = null; ui.creating = null; ui.converting = null; ui.confirmDelete = null; ui.newObject = null; ui.newInteract = null; ui.confirmObjectDelete = null; ui.exportOpen = false; render(); });
+    viewBtn.addEventListener('click', function () { ui.mode = 'view'; ui.pending = null; ui.creating = null; ui.converting = null; ui.confirmDelete = null; ui.newObject = null; ui.newInteract = null; ui.newProp = null; ui.confirmObjectDelete = null; ui.confirmPropDelete = null; ui.exportOpen = false; render(); });
     newObjBtn.addEventListener('click', function () {
       if (ui.mode !== 'edit' || !objStore.base[ui.sceneId]) return;
-      ui.pending = null; ui.creating = null; ui.converting = null; ui.confirmDelete = null; ui.newInteract = null; ui.confirmObjectDelete = null; ui.selectedId = null; ui.exportOpen = false;
+      ui.pending = null; ui.creating = null; ui.converting = null; ui.confirmDelete = null; ui.newInteract = null; ui.newProp = null; ui.confirmObjectDelete = null; ui.selectedId = null; ui.exportOpen = false;
       var k = S.kinds(objStore)[0];
       ui.newObject = { scene: ui.sceneId, kind: k ? k.kind : '', sourceId: S.suggestSourceId(objDraft(), ui.sceneId, k && k.kind), sourceIdEdited: false,
         dialogue: '', w: '1', h: '1', tile: null, placing: true };
@@ -1377,13 +1704,28 @@
     });
     newIntBtn.addEventListener('click', function () {
       if (ui.mode !== 'edit' || !objStore.base[ui.sceneId]) return;
-      ui.pending = null; ui.creating = null; ui.converting = null; ui.confirmDelete = null; ui.newObject = null; ui.confirmObjectDelete = null; ui.selectedId = null; ui.exportOpen = false;
+      ui.pending = null; ui.creating = null; ui.converting = null; ui.confirmDelete = null; ui.newObject = null; ui.newProp = null; ui.confirmObjectDelete = null; ui.selectedId = null; ui.exportOpen = false;
       ui.newInteract = { scene: ui.sceneId, id: octx.interactIds()[0], tile: null, placing: true };
+      render();
+    });
+    propsBtn.addEventListener('click', function () {
+      if (!propStore) return;
+      ui.propsOn = !ui.propsOn;
+      if (!ui.propsOn) { ui.newProp = null; ui.selectedProp = null; ui.confirmPropDelete = null; if (ui.pending && ui.pending.action === 'move-prop') ui.pending = null; }
+      render();
+    });
+    newPropBtn.addEventListener('click', function () {
+      if (ui.mode !== 'edit' || !propsEnabled() || !propScene(ui.sceneId)) return;
+      ui.pending = null; ui.creating = null; ui.converting = null; ui.confirmDelete = null; ui.newObject = null; ui.newInteract = null;
+      ui.confirmObjectDelete = null; ui.confirmPropDelete = null; ui.selectedId = null; ui.selectedProp = null; ui.exportOpen = false;
+      var first = propCatalog()[0];
+      ui.newProp = { scene: ui.sceneId, propId: first ? first.propId : '', id: first ? P.suggestInstanceId(propStore, propDraft(), first.propId) : '',
+        idEdited: false, search: '', tile: null, placing: true };
       render();
     });
     newBtn.addEventListener('click', function () {
       if (ui.mode !== 'edit') return;
-      ui.pending = null; ui.confirmDelete = null; ui.converting = null; ui.selectedId = null; ui.exportOpen = false; ui.newObject = null; ui.newInteract = null; ui.confirmObjectDelete = null;
+      ui.pending = null; ui.confirmDelete = null; ui.converting = null; ui.selectedId = null; ui.exportOpen = false; ui.newObject = null; ui.newInteract = null; ui.newProp = null; ui.confirmObjectDelete = null;
       ui.creating = { step: 'a', oneWay: false, a: null, b: null, id: '', idEdited: false, spawn: { a: null, b: null }, moving: null };
       render();
     });
@@ -1391,7 +1733,8 @@
     function undo() {
       if (!H.canUndo(hist)) return;
       hist = H.undo(hist);
-      ui.pending = null; ui.confirmObjectDelete = null;
+      ui.pending = null; ui.confirmObjectDelete = null; ui.confirmPropDelete = null;
+      if (ui.selectedProp && !propDraft()[ui.selectedProp]) ui.selectedProp = null;
       var ref = selectedRef();
       if (ref && ref.kind === ID.KINDS.TRIGGER) {
         var ep = draft()[ref.connId] && draft()[ref.connId][ref.side];
@@ -1403,14 +1746,16 @@
     function redo() {
       if (!H.canRedo(hist)) return;
       hist = H.redo(hist);
-      ui.pending = null; ui.confirmDelete = null;
+      ui.pending = null; ui.confirmDelete = null; ui.confirmPropDelete = null;
+      if (ui.selectedProp && !propDraft()[ui.selectedProp]) ui.selectedProp = null;
       render();
     }
     redoBtn.addEventListener('click', redo);
     revertAllBtn.addEventListener('click', function () {
       guard(function () {
-        var next = { conn: E.revertAll(store), cast: castStore ? castStore.base : null, objects: objStore.base };
-        if (next.conn !== draft() || next.cast !== castDraft() || next.objects !== objDraft()) hist = H.commit(hist, next, { label: 'revert all' });
+        var next = { conn: E.revertAll(store), cast: castStore ? castStore.base : null, objects: objStore.base,
+          props: propStore ? propStore.base : null };
+        if (next.conn !== draft() || next.cast !== castDraft() || next.objects !== objDraft() || next.props !== propDraft()) hist = H.commit(hist, next, { label: 'revert all' });
         ui.pending = null;
       });
     });
@@ -1421,6 +1766,11 @@
         if (typing) return;
         ev.preventDefault();
         if (ev.shiftKey || ev.key === 'y' || ev.key === 'Y') redo(); else undo();
+      } else if (C.arrowDir(ev.key) && !typing && ui.mode === 'edit' && selectedPropEntry() && !ui.creating && !ui.converting && !ui.newProp) {
+        var pe = selectedPropEntry();
+        var dv = DIRV[C.arrowDir(ev.key)];
+        ev.preventDefault();
+        guard(function () { commitProps(P.nudgeProp(propDraft(), pe.id, (pe.inst.ox || 0) + dv[0], (pe.inst.oy || 0) + dv[1]), 'nudge ' + pe.id); });
       } else if (C.arrowDir(ev.key) && !typing && ui.mode === 'edit' && ui.selectedId && !ui.creating && !ui.converting) {
         var sel = ID.parse(ui.selectedId);
         if (!sel || sel.kind !== ID.KINDS.NPC) return;
@@ -1430,6 +1780,9 @@
         guard(function () { commitCast(C.placeBody(castStore, castDraft(), { window: ref.window, character: ref.character, dir: C.arrowDir(ev.key) }), 'face ' + ev.key); });
       } else if (ev.key === 'Escape') {
         if (ui.pending) ui.pending = null;
+        else if (ui.newProp && ui.newProp.placing && ui.newProp.tile) ui.newProp.placing = false;
+        else if (ui.newProp) ui.newProp = null;
+        else if (ui.confirmPropDelete) ui.confirmPropDelete = null;
         else if (ui.newObject && ui.newObject.placing && ui.newObject.tile) ui.newObject.placing = false;
         else if (ui.newObject) ui.newObject = null;
         else if (ui.newInteract && ui.newInteract.placing && ui.newInteract.tile) ui.newInteract.placing = false;
@@ -1482,11 +1835,26 @@
             return { id: it.id, entry: it.entry || null, sourceId: it.sourceId || null, ref: it.ref || null, interactId: it.interactId || null,
               tx: it.tx, ty: it.ty, w: it.w, h: it.h, readOnly: !!it.readOnly, refs: it.entry ? objectRefs(it) : [] };
           }),
+          propsOn: ui.propsOn, propsAvailable: !!propStore, selectedProp: ui.selectedProp, confirmPropDelete: ui.confirmPropDelete,
+          propOps: JSON.parse(JSON.stringify(propOpsList())), propChangeCount: propChanges().length,
+          newProp: ui.newProp && Object.assign(JSON.parse(JSON.stringify(ui.newProp)), { errors: newPropPlan().errors }),
+          propItems: propsIn(ui.sceneId).map(function (e) {
+            return { id: e.id, propId: e.inst.propId, tx: e.inst.tx, ty: e.inst.ty, ox: e.inst.ox || 0, oy: e.inst.oy || 0,
+              flipX: !!e.inst.flipX, layer: e.def ? P.layerOf(e.def, e.inst) : null,
+              origin: e.def ? P.originOf(e.def, e.inst) : null, frame: e.def ? e.def.frame.slice() : null };
+          }),
+          propOverlaps: propStore ? P.overlaps(propStore, propDraft()) : [],
           momentsLoaded: !momentSel.disabled, notice: ui.notice && ui.notice.text,
           draft: JSON.parse(JSON.stringify(draft())),
           items: list.map(function (it) { return { id: it.id, kind: it.kind, tx: it.tx, ty: it.ty }; }),
           npcIds: list.filter(function (it) { return it.kind === 'npc'; }).map(function (it) { return it.characterId; })
         };
+      },
+      // scene PIXEL -> client point, for a test that must click a prop rather than a tile
+      pixelToClient: function (px, py) {
+        var rect = canvas.getBoundingClientRect();
+        var k = rect.width / canvas.width, z = ui.zoom / P.TILE;
+        return { x: rect.left + (px + 0.5) * z * k, y: rect.top + (py + 0.5) * z * k };
       },
       tileToClient: function (tx, ty) {
         var rect = canvas.getBoundingClientRect();
