@@ -120,3 +120,6 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-17 0267c30 main: E0b closed as already grounded, test/retro-contact-shadow.js gate added; 1 file mirrored
 - 2026-09-17 9afa14a main: E0 evidence shots artifacts/art-pass-e/e0 (4 png) mirrored; stale worktrees pruned
 - 2026-09-18 410f2d4 main: opus reaper (03f6c27) + deep CI consolidation (12 workflows → tests.yml/browser.yml); 11 files mirrored, 12 removed
+- 2026-09-18 afbf3cc main: opus M10b props editor UI (b39717c); CI green on 621ebf1 (tests+browser), local release 115/115; 23 files mirrored
+- 2026-09-18 9dbcdaa main: deep town-dusk readback measurement (cba7122, no render change) + town-dusk test contract after DQ3; 6 files mirrored
+- 2026-09-18 4414730 main: deep town-dusk test re-pinned to DQ3 (255bd6a), test in CI (116 gates); 4 files mirrored

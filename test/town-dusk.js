@@ -109,36 +109,50 @@ check('la curva asfalto e quella terreno restano separate', () => {
     const ground = Dusk.grade(p[0], p[1], p[2], false);
     const road = Dusk.grade(p[0], p[1], p[2], true);
     assert.ok(luma(road) < luma(ground) - 15, `${h}: asfalto piu' scuro del calcestruzzo`);
-    assert.ok(road[2] > road[0] + 8, `${h}: asfalto freddo (blu > rosso)`);
+    /* DQ3 (bf6c2c2) rebalanced the asphalt to a neutral grey: no longer blue-led,
+     * but never warm, and always far less warm than the concrete beside it. */
+    assert.ok(road[2] >= road[0] - 8, `${h}: asfalto mai caldo (blu >= rosso - 8)`);
+    assert.ok((ground[0] - ground[2]) - (road[0] - road[2]) > 40, `${h}: asfalto molto meno caldo del calcestruzzo`);
     assert.ok(ground[0] > ground[2] + 8, `${h}: calcestruzzo caldo (rosso > blu)`);
   }
 });
 
 console.log('town-dusk: famiglie misurate sul lotto Double R');
 
-/* Terreno battuto e marciapiede: calcestruzzo del lotto. */
-check('creme del terreno -> calcestruzzo #6f6d64..#7a766c', () => {
+/* DQ3 (bf6c2c2, js/town-dusk.js @@ -53,8 +53,8: ground keep 0.44->0.88,
+ * cool 0.10->0.04) moved the ground family from the pre-DQ3 dark concrete
+ * #6f6d64..#7a766c to a warm light band. Re-pinned to the DQ3 outputs, same
+ * inBand ±12 shape. */
+check('creme del terreno -> calcestruzzo caldo #c4b17e..#d5c390', () => {
   for (const h of ['#e8d08f', '#dfcb91', '#d6bc7d', '#dbc78d', '#d4be84']) {
-    inBand(Dusk.grade(...px(h)), px('#6f6d64'), px('#7a766c'), `terreno ${h}`);
+    inBand(Dusk.grade(...px(h)), px('#c4b17e'), px('#d5c390'), `terreno ${h}`);
   }
 });
 
-check('tile di strada -> ardesia #485665 del lotto (±12 per canale)', () => {
+/* DQ3 (bf6c2c2, js/town-dusk.js @@ -43,8 +43,8: A_MID_GAIN 0.24->0.78,
+ * A_HI_GAIN 2.30->1.12) flattened the asphalt curve to a neutral grey; it is
+ * no longer the blue slate #485665. Re-pinned to the DQ3 outputs, same ±12 per
+ * channel. */
+check('tile di strada -> grigio neutro #9a9a95 (±12 per canale)', () => {
   for (const h of ['#dfcb91', '#e8d08f']) {
-    within(Dusk.grade(px(h)[0], px(h)[1], px(h)[2], true), px('#485665'), 12, `strada ${h}`);
+    within(Dusk.grade(px(h)[0], px(h)[1], px(h)[2], true), px('#9a9a95'), 12, `strada ${h}`);
   }
 });
 
-check('prato e alberi -> verde profondo, e sono la famiglia piu\' scura', () => {
+/* DQ3 (bf6c2c2, js/town-dusk.js @@ -53,8 +53,8: vegetation keep 0.80->1.00,
+ * dark 0.70->0.95, anchorMix 0.25->0.06) made the greens lighter and more
+ * chromatic, so both the bright-lawn band and the dark-green ceiling moved.
+ * Re-pinned to the DQ3 outputs, same inBand ±12 and ordering shapes. */
+check('prato e alberi -> verde, e sono la famiglia piu\' scura', () => {
   const groundL = luma(Dusk.grade(...px('#e8d08f')));
   for (const h of ['#83d3a7', '#86d5aa', '#88d5ac', '#80d1a5']) {
-    inBand(Dusk.grade(...px(h)), px('#2f4d3b'), px('#33553f'), `prato ${h}`);
+    inBand(Dusk.grade(...px(h)), px('#70b891'), px('#77bb97'), `prato ${h}`);
   }
   for (const h of ['#24382f', '#315a49', '#3e725b', '#46745e', '#5e987b', '#8fa474', '#c5c886']) {
     const o = Dusk.grade(...px(h));
     assert.ok(luma(o) < groundL - 20, `${h}: vegetazione piu' scura del terreno (${hex(o)})`);
-    assert.ok(o[0] <= 93 && o[1] <= 122 && o[2] <= 90,
-      `${h}: verde entro il tetto #5d7a5a (${hex(o)})`);
+    assert.ok(o[0] <= 171 && o[1] <= 176 && o[2] <= 118,
+      `${h}: verde entro il tetto DQ3 #abb076 (${hex(o)})`);
   }
 });
 
@@ -157,13 +171,17 @@ check('inchiostri e contorni restano scuri (nessun sollevamento del nero)', () =
   }
 });
 
-check('le alteluci restano superfici accese ma sotto #b8b4a4', () => {
+/* DQ3 (bf6c2c2, js/town-dusk.js @@ -43,8 +43,8: MID_GAIN 0.375->0.94,
+ * HI_GAIN 1.45->1.08) lifts the shoulder, so lit surfaces sit above the
+ * pre-DQ3 #b8b4a4 ceiling. Re-pinned to the DQ3 outputs; the ordering (brighter
+ * than the ground, at or under the brightest DQ3 highlight) is unchanged. */
+check('le alteluci restano superfici accese ma sotto #f2f2f3', () => {
   for (const h of ['#fff8d0', '#f3dfa8', '#ffffff']) {
     const o = Dusk.grade(...px(h));
     const ground = luma(Dusk.grade(...px('#e8d08f')));
     assert.ok(luma(o) > ground, `${h}: piu' luminoso del terreno`);
-    assert.ok(luma(o) <= luma(px('#b8b4a4')),
-      `${h}: alteluce sotto il tetto #b8b4a4 (${hex(o)}, L=${luma(o).toFixed(0)})`);
+    assert.ok(luma(o) <= luma(px('#f2f2f3')),
+      `${h}: alteluce sotto il tetto DQ3 #f2f2f3 (${hex(o)}, L=${luma(o).toFixed(0)})`);
   }
 });
 
@@ -179,11 +197,14 @@ const WALK = (() => {
   return out;
 })();
 
-check('il marciapiede atterra sullo stack di calcestruzzo del lotto', () => {
+/* DQ3 (bf6c2c2, js/town-dusk.js @@ -53,8 +53,8: ground keep 0.44->0.88,
+ * cool 0.10->0.04) lifts the WALK concrete stack to the warm DQ3 band.
+ * Re-pinned to the DQ3 outputs, same ±12 per channel and chip>slab ordering. */
+check('il marciapiede atterra sullo stack di calcestruzzo DQ3', () => {
   const stack = [
-    ['slab', WALK.slab, '#a9a38f'],
-    ['seam', WALK.seam, '#898a7a'],
-    ['kerb', WALK.kerb, '#777b70']
+    ['slab', WALK.slab, '#f1f2d2'],
+    ['seam', WALK.seam, '#dcddbe'],
+    ['kerb', WALK.kerb, '#cbd0bb']
   ];
   stack.forEach(([name, input, target]) => {
     within(Dusk.grade(...px(input)), px(target), 12, `calcestruzzo ${name}`);
@@ -323,8 +344,11 @@ check('applyGrade usa la curva asfalto solo dentro le tile di strada', () => {
   assert.strictEqual(GAME.Maps.town.rows[17].charAt(27), 'r', 'colonna 27 riga 17 e\' strada');
   Dusk.applyGrade(ctx, 26 * 16, 17 * 16, w, h);
   const at = (x, y) => [data[(y * w + x) * 4], data[(y * w + x) * 4 + 1], data[(y * w + x) * 4 + 2]];
-  inBand(at(4, 8), px('#6f6d64'), px('#7a766c'), 'pixel fuori dalla tile di strada');
-  within(at(20, 8), px('#485665'), 12, 'pixel dentro la tile di strada');
+  /* DQ3 (bf6c2c2) moved both bands (ground keep @@ -53,8, asphalt A_MID_GAIN
+   * @@ -43,8). The masking contract is unchanged; only the DQ3 outputs are
+   * pinned, same inBand ±12 and within ±12. */
+  inBand(at(4, 8), px('#c4b17e'), px('#d5c390'), 'pixel fuori dalla tile di strada');
+  within(at(20, 8), px('#9a9a95'), 12, 'pixel dentro la tile di strada');
 });
 
 console.log(`\ntown-dusk: ${checks} check ok`);

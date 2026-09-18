@@ -10,6 +10,7 @@
  *   - a world-connections-changeset (target world/connections.json), versions 1 and 2, below;
  *   - a cast-windows-changeset (target narrative/cast/windows.json, M7), see CAST below;
  *   - a scene-objects-changeset (target world/scene-objects.json, M8), see SCENE OBJECTS below;
+ *   - a props-changeset (target world/props.json, M9), see PROPS below;
  *   - { format: 'world-builder-bundle', version: 1, changesets: [...] } with at most one changeset per target.
  * Every part is validated before anything is written; the write is atomic across every file of every part.
  *
@@ -70,7 +71,9 @@
  *      field, an upsert that changes propId/sceneId, or a foreign target exits 2
  *   2. shape (propsShapeProblems, no game needed): missing definition, duplicate instance id (raw-text scan, since
  *      JSON.parse silently keeps the last one), frame outside the atlas (PNG IHDR, no image library), NaN or
- *      off-canvas tx/ty, a transform the definition does not allow, a layer that is not an integer 0..9
+ *      off-canvas tx/ty, a transform the definition does not allow, a layer that is not an integer 0..9.
+ *      M10b: the rules themselves are js/editor/core/props.js (registryErrors / sceneErrors), so the World Builder
+ *      gives the same verdicts live; only the disk reads (the atlas file, its PNG header) stay here
  *   3. world (propsWorldProblems, booted): the Roadhouse locks are hard rejects — map rows unchanged, no footprint
  *      on the south door tiles 7,9 / 8,9, none on the pay phone tile 8,5 (which stays walkable), the stage stays on
  *      row <= 2, every Cast Presence roadhouse body tile stays walkable. Footprint overlap with any other door tile,
@@ -113,6 +116,7 @@ const Cast = require(path.join(REPO, 'js', 'editor', 'core', 'cast.js'));
 const CatalogWrite = require(path.join(REPO, 'js', 'editor', 'apply', 'catalog-write.js'));
 const CastWrite = require(path.join(REPO, 'js', 'editor', 'apply', 'cast-write.js'));
 const SceneObjects = require(path.join(REPO, 'js', 'editor', 'core', 'scene-objects.js'));
+const PropsCore = require(path.join(REPO, 'js', 'editor', 'core', 'props.js'));
 
 // index.html order (test/legacy-door-inventory.js): every file must load; a skipped installer would hide doors.
 const CHAIN = ['tiles.js', 'chars.js', 'houses.js', 'maps.js', 'data.js', 'environmental-inspect.js', 'retro-font.js',
@@ -151,22 +155,6 @@ function parseArgs(argv) {
   }
   if (!out.file && !out.genProps) usage('changeset file required');
   return out;
-}
-
-// M9: js/editor/core/cast.js splitChangesets only knows the three M4b–M8 targets, and js/editor/ is outside this
-// milestone's fence, so a props changeset (alone or inside a bundle) is lifted out here before the split. M10 moves
-// the format into js/editor/core/props.js next to the other changeset cores.
-function liftProps(parsed) {
-  if (parsed && parsed.format === PROPS_FORMAT) return { props: parsed, rest: null };
-  if (parsed && parsed.format === 'world-builder-bundle' && Array.isArray(parsed.changesets)) {
-    const props = parsed.changesets.filter(function (cs) { return cs && cs.format === PROPS_FORMAT; });
-    if (props.length > 1) { console.error('world-apply: REFUSED — bundle carries a second changeset for ' + PROPS_REL); process.exit(2); }
-    if (props.length === 1) {
-      const rest = parsed.changesets.filter(function (cs) { return !cs || cs.format !== PROPS_FORMAT; });
-      return { props: props[0], rest: rest.length ? Object.assign({}, parsed, { changesets: rest }) : null };
-    }
-  }
-  return { props: null, rest: parsed };
 }
 
 // Boot <root>/js headlessly (stubs as test/legacy-door-inventory.js) and return GAME.
@@ -551,14 +539,9 @@ function planSceneObjects(args, changeset, boot, problems) {
 //     top  = round(ty * TILE) - anchor[1] + (oy || 0)
 // so tx/ty name the anchor point and survive a flip. Map rows stay authoritative for collision: nothing here
 // writes a row, and the schema has no field that could.
-const PROPS_TILE = 16;
-const PROPS_LAYER_MIN = 0;
-const PROPS_LAYER_MAX = 9;
-const DEFINITION_KEYS = ['label', 'atlas', 'frame', 'anchor', 'footprint', 'defaultLayer', 'tags', 'transforms'];
-const INSTANCE_KEYS = ['propId', 'sceneId', 'tx', 'ty', 'ox', 'oy', 'flipX', 'layer'];
-const TRANSFORMS = ['flipX'];
-const PROP_ID = /^[a-z0-9]+(\.[a-z0-9]+)+$/;
-const INSTANCE_ID = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+// The schema constants are the core's (js/editor/core/props.js), so the tool and the Builder cannot drift apart.
+const PROPS_TILE = PropsCore.TILE;
+const INSTANCE_KEYS = PropsCore.INSTANCE_KEYS;
 // Roadhouse locks (artifacts/art-pass-e/e3/prop-prototype/world-builder-prop-handoff.md, "Roadhouse locks").
 const ROADHOUSE_LOCKS = {
   scene: 'roadhouse',
@@ -569,7 +552,6 @@ const ROADHOUSE_LOCKS = {
 };
 
 function propsFail(msg) { throw new Refused('[props] ' + msg); }
-function isInt(n) { return Number.isInteger(n); }
 
 // PNG IHDR only — no image library. Returns { width, height }.
 function pngSize(file) {
@@ -614,94 +596,33 @@ function requirePropsRegistry(data) {
 }
 
 // Shape of the registry, independent of the booted game. Pushes "<RULE> ..." strings into problems.
+// M10b: every rule that needs only the registry lives in js/editor/core/props.js, so the Builder gives the same
+// verdicts live. What stays here is what needs the disk: the atlas file and its PNG header.
 function propsShapeProblems(root, data, problems) {
   const atlasSizes = {};
-  Object.keys(data.scenes).forEach(function (scene) {
-    const sc = data.scenes[scene];
-    if (!sc || typeof sc !== 'object' || Object.keys(sc).join(',') !== 'canvas') problems.push('INVALID scenes.' + scene + ' must carry exactly { canvas }');
-    else if (!Array.isArray(sc.canvas) || sc.canvas.length !== 2 || !sc.canvas.every(function (n) { return isInt(n) && n > 0 && n % PROPS_TILE === 0; })) {
-      problems.push('INVALID scenes.' + scene + '.canvas must be [w, h], positive whole tiles of ' + PROPS_TILE + 'px');
-    }
-  });
-  Object.keys(data.definitions).forEach(function (id) {
-    const d = data.definitions[id], at = 'definitions.' + id;
-    if (!PROP_ID.test(id)) problems.push('INVALID ' + at + ': definition id must be dotted lowercase (e.g. roadhouse.chair.red)');
-    if (!d || typeof d !== 'object') { problems.push('INVALID ' + at + ' is not an object'); return; }
-    Object.keys(d).forEach(function (k) { if (DEFINITION_KEYS.indexOf(k) === -1) problems.push('INVALID ' + at + ' has unknown field "' + k + '"'); });
-    DEFINITION_KEYS.forEach(function (k) { if (d[k] === undefined) problems.push('INVALID ' + at + ' is missing "' + k + '"'); });
-    if (typeof d.label !== 'string' || !d.label) problems.push('INVALID ' + at + '.label must be a non-empty string');
-    if (typeof d.atlas !== 'string' || !/^assets\/[A-Za-z0-9_./-]+\.png$/.test(d.atlas || '')) problems.push('INVALID ' + at + '.atlas must be an assets/… .png path');
-    const f = d.frame;
-    const frameOk = Array.isArray(f) && f.length === 4 && f.every(isInt) && f[0] >= 0 && f[1] >= 0 && f[2] > 0 && f[3] > 0;
-    if (!frameOk) problems.push('INVALID ' + at + '.frame must be [x, y, w, h] integers with w, h > 0');
-    const a = d.anchor;
-    if (!Array.isArray(a) || a.length !== 2 || !a.every(isInt)) problems.push('INVALID ' + at + '.anchor must be [x, y] integers');
-    else if (frameOk && (a[0] < 0 || a[0] > f[2] || a[1] < 0 || a[1] > f[3])) problems.push('INVALID ' + at + '.anchor ' + a.join(',') + ' falls outside its own frame ' + f[2] + 'x' + f[3]);
-    if (!Array.isArray(d.footprint) || !d.footprint.every(function (c) { return Array.isArray(c) && c.length === 2 && c.every(isInt); })) {
-      problems.push('INVALID ' + at + '.footprint must be an array of [dx, dy] integer pairs (empty for wall/ceiling decoration)');
-    }
-    if (!isInt(d.defaultLayer) || d.defaultLayer < PROPS_LAYER_MIN || d.defaultLayer > PROPS_LAYER_MAX) {
-      problems.push('INVALID ' + at + '.defaultLayer must be an integer ' + PROPS_LAYER_MIN + '..' + PROPS_LAYER_MAX);
-    }
-    if (!Array.isArray(d.tags) || !d.tags.length || !d.tags.every(function (t) { return typeof t === 'string' && INSTANCE_ID.test(t); })) {
-      problems.push('INVALID ' + at + '.tags must be a non-empty array of kebab-case tags');
-    }
-    if (!Array.isArray(d.transforms) || !d.transforms.every(function (t) { return TRANSFORMS.indexOf(t) !== -1; })) {
-      problems.push('INVALID ' + at + '.transforms may only list ' + TRANSFORMS.join(', '));
-    }
-    // frame outside atlas bounds — PNG IHDR, no image library
-    if (frameOk && typeof d.atlas === 'string') {
-      const file = path.join(root, d.atlas);
-      if (!fs.existsSync(file)) problems.push('INVALID ' + at + '.atlas ' + d.atlas + ' does not exist');
-      else {
-        let size = atlasSizes[d.atlas];
-        if (!size) { try { size = atlasSizes[d.atlas] = pngSize(file); } catch (e) { problems.push('INVALID ' + at + ': ' + e.message); } }
-        if (size && (f[0] + f[2] > size.width || f[1] + f[3] > size.height)) {
-          problems.push('INVALID ' + at + '.frame [' + f.join(', ') + '] falls outside atlas ' + d.atlas + ' (' + size.width + 'x' + size.height + ')');
+  const ctx = {
+    // Read once per atlas, reported once per definition: a missing file is that definition's problem, the way it
+    // was before the shape rules moved into the core.
+    atlasSize: function (atlas, at) {
+      if (!Object.prototype.hasOwnProperty.call(atlasSizes, atlas)) {
+        const file = path.join(root, atlas);
+        if (!fs.existsSync(file)) atlasSizes[atlas] = { size: null, error: '.atlas ' + atlas + ' does not exist' };
+        else {
+          try { atlasSizes[atlas] = { size: pngSize(file), error: null }; }
+          catch (e) { atlasSizes[atlas] = { size: null, error: ': ' + e.message }; }
         }
       }
+      const entry = atlasSizes[atlas];
+      if (entry.error) problems.push('INVALID ' + at + entry.error);
+      return entry.size;
     }
-  });
-  Object.keys(data.instances).forEach(function (id) {
-    const inst = data.instances[id], at = 'instances.' + id;
-    if (!INSTANCE_ID.test(id)) problems.push('INVALID ' + at + ': instance id must be kebab-case');
-    if (!inst || typeof inst !== 'object') { problems.push('INVALID ' + at + ' is not an object'); return; }
-    Object.keys(inst).forEach(function (k) { if (INSTANCE_KEYS.indexOf(k) === -1) problems.push('INVALID ' + at + ' has unknown field "' + k + '"'); });
-    const d = data.definitions[inst.propId];
-    if (!d) { problems.push('INVALID ' + at + ': missing definition "' + inst.propId + '"'); return; }
-    if (typeof inst.sceneId !== 'string' || !data.scenes[inst.sceneId]) {
-      problems.push('INVALID ' + at + ': scene "' + inst.sceneId + '" has no canvas in ' + PROPS_REL);
-      return;
-    }
-    ['tx', 'ty'].forEach(function (k) {
-      const v = inst[k];
-      if (typeof v !== 'number' || !Number.isFinite(v)) problems.push('INVALID ' + at + '.' + k + ' must be a finite number, got ' + JSON.stringify(v));
-      else if (!isInt(Math.round(v * PROPS_TILE)) || Math.abs(v * PROPS_TILE - Math.round(v * PROPS_TILE)) > 0) {
-        problems.push('INVALID ' + at + '.' + k + ' must land on a whole pixel (a multiple of 1/' + PROPS_TILE + ' tile), got ' + v);
-      }
-    });
-    ['ox', 'oy'].forEach(function (k) { if (inst[k] !== undefined && !isInt(inst[k])) problems.push('INVALID ' + at + '.' + k + ' must be an integer pixel offset'); });
-    if (inst.layer !== undefined && (!isInt(inst.layer) || inst.layer < PROPS_LAYER_MIN || inst.layer > PROPS_LAYER_MAX)) {
-      problems.push('INVALID ' + at + '.layer must be an integer ' + PROPS_LAYER_MIN + '..' + PROPS_LAYER_MAX);
-    }
-    if (inst.flipX !== undefined) {
-      if (inst.flipX !== true) problems.push('INVALID ' + at + '.flipX is present only when true');
-      else if ((d.transforms || []).indexOf('flipX') === -1) problems.push('INVALID ' + at + ': transform flipX is not allowed by ' + inst.propId + ' (transforms: ' + JSON.stringify(d.transforms) + ')');
-    }
-    const canvas = data.scenes[inst.sceneId].canvas;
-    if (Array.isArray(canvas) && Number.isFinite(inst.tx) && Number.isFinite(inst.ty)) {
-      if (inst.tx < 0 || inst.ty < 0 || inst.tx * PROPS_TILE > canvas[0] || inst.ty * PROPS_TILE > canvas[1]) {
-        problems.push('INVALID ' + at + ': tx,ty ' + inst.tx + ',' + inst.ty + ' falls outside ' + inst.sceneId + ' (' + (canvas[0] / PROPS_TILE) + 'x' + (canvas[1] / PROPS_TILE) + ' tiles)');
-      }
-    }
-  });
+  };
+  PropsCore.registryErrors(ctx, data).forEach(function (e) { problems.push('INVALID ' + e); });
 }
 
 // instanceTiles(data, id) -> the map tiles the instance's footprint claims (anchor tile + each offset)
 function instanceTiles(data, id) {
-  const inst = data.instances[id], d = data.definitions[inst.propId];
-  const ax = Math.floor(inst.tx), ay = Math.floor(inst.ty);
-  return (d.footprint || []).map(function (c) { return [ax + c[0], ay + c[1]]; });
+  return PropsCore.instanceTiles(data.definitions[data.instances[id].propId], data.instances[id]);
 }
 
 // Rules that need the booted game: the Roadhouse locks (hard) and the overlap warnings (soft).
@@ -725,13 +646,14 @@ function propsWorldProblems(args, data, G, problems, warnings) {
     (cast.windows || []).forEach(function (w) { Object.keys(w.cast || {}).forEach(function (c) { note(w.id, c, w.cast[c]); }); });
   }());
 
-  Object.keys(data.scenes).forEach(function (scene) {
+  // The canvas-against-the-map rule is the core's (js/editor/core/props.js sceneErrors) with the map sizes injected;
+  // the shape pass ran it without them.
+  const sizeCtx = { mapSize: function (scene) {
     const map = G.Maps[scene];
-    if (!map || !Number.isInteger(map.width)) { problems.push('INVALID scenes.' + scene + ' is not a map in js/maps.js'); return; }
-    const canvas = data.scenes[scene].canvas;
-    if (Array.isArray(canvas) && (canvas[0] < map.width * PROPS_TILE || canvas[1] < map.height * PROPS_TILE)) {
-      problems.push('INVALID scenes.' + scene + '.canvas ' + canvas.join('x') + ' is smaller than the map (' + (map.width * PROPS_TILE) + 'x' + (map.height * PROPS_TILE) + ')');
-    }
+    return map && Number.isInteger(map.width) ? { width: map.width, height: map.height } : null;
+  } };
+  Object.keys(data.scenes).forEach(function (scene) {
+    PropsCore.sceneErrors(sizeCtx, scene, data.scenes[scene]).forEach(function (e) { problems.push('INVALID ' + e); });
   });
 
   Object.keys(data.instances).forEach(function (id) {
@@ -926,18 +848,16 @@ function main() {
   let parsed;
   try { parsed = JSON.parse(fs.readFileSync(args.file, 'utf8')); }
   catch (e) { usage('cannot read changeset: ' + e.message); }
-  const lifted = liftProps(parsed);
   let parts = [];
-  if (lifted.rest) {
-    try { parts = Cast.splitChangesets(lifted.rest); }
-    catch (e) {
-      console.error('world-apply: REFUSED — ' + e.message.replace(/^\[cast\] /, '') + '; this tool writes nothing else');
-      process.exit(2);
-    }
+  try { parts = Cast.splitChangesets(parsed); }
+  catch (e) {
+    console.error('world-apply: REFUSED — ' + e.message.replace(/^\[cast\] /, '') + '; this tool writes nothing else');
+    process.exit(2);
   }
   const conn = parts.find(function (p) { return p.target === TARGET_REL; });
   const cast = parts.find(function (p) { return p.target === CAST_REL; });
   const objects = parts.find(function (p) { return p.target === OBJECTS_REL; });
+  const props = parts.find(function (p) { return p.target === PROPS_REL; });
 
   const problems = [];
   const planned = [];
@@ -954,7 +874,7 @@ function main() {
       planned.push(planCast(args, cast.changeset, boot(), finalConnections, problems));
     }
     if (objects) planned.push(planSceneObjects(args, objects.changeset, boot, problems));
-    if (lifted.props) planned.push(planProps(args, lifted.props, boot, problems));
+    if (props) planned.push(planProps(args, props.changeset, boot, problems));
   } catch (e) {
     if (e instanceof Refused) { console.error('world-apply: REFUSED — ' + e.message); process.exit(2); }
     throw e;
@@ -1001,7 +921,7 @@ function main() {
 module.exports = {
   PROPS_REL, PROPS_GEN_REL, PROPS_FORMAT, PROPS_TILE, ROADHOUSE_LOCKS,
   pngSize, duplicateKeys, requirePropsRegistry, propsShapeProblems, propsWorldProblems,
-  instanceTiles, applyPropsChangeset, propsGenText, regenProps, loadWorld, liftProps, Refused
+  instanceTiles, applyPropsChangeset, propsGenText, regenProps, loadWorld, Refused
 };
 
 if (require.main === module) main();

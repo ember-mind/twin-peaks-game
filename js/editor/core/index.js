@@ -27,7 +27,8 @@
      ['inspector', 'inspector'],
      ['edit', 'edit'],
      ['cast', 'cast'],
-     ['scene-objects', 'sceneObjects']
+     ['scene-objects', 'sceneObjects'],
+     ['props', 'props']
     ];
 
     // node: require each sibling so it exports its API; the core stays game-agnostic because no piece reads

@@ -1,0 +1,17 @@
+{
+  "format": "props-changeset",
+  "version": 2,
+  "target": "world/props.json",
+  "operations": [
+    {
+      "op": "upsert",
+      "id": "roadhouse-table-02",
+      "instance": {
+        "propId": "roadhouse.table.round",
+        "sceneId": "roadhouse",
+        "tx": 7.125,
+        "ty": 9.125
+      }
+    }
+  ]
+}
