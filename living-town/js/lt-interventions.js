@@ -134,7 +134,7 @@
     },
     describe: function (p, sim) {
       var c = sim.state.characters[p.toId];
-      return 'The café posted an extra shift for ' + c.name + ': ' +
+      return sim.locationName(p.locationId) + ' posted an extra shift for ' + c.name + ': ' +
              U.clock(p.startMin) + '–' + U.clock(p.endMin) + ', ' + p.pay + ' EUR.';
     },
     apply: function (p, sim, record) {
@@ -143,7 +143,7 @@
         type: 'offer_extra_work',
         interventionId: record.id,
         toId: p.toId,
-        fromLabel: W.LOCATIONS[p.locationId].name,
+        fromLabel: sim.locationName(p.locationId),
         locationId: p.locationId,
         delivery: p.delivery || 'posted',   // 'posted' = only visible on site
         summary: 'extra shift ' + U.clock(p.startMin) + '–' + U.clock(p.endMin) + ' for ' + p.pay + ' EUR',

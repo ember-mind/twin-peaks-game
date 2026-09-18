@@ -140,14 +140,14 @@
         var from = ctx.actor.location, dest = ctx.target.id;
         ctx.sim.beginTransit(ctx.actor, from, dest);
         ctx.emit('DEPARTED', { from: from, to: dest },
-          ctx.actor.name + ' set off for ' + W.LOCATIONS[dest].name + '.');
+          ctx.actor.name + ' set off for ' + ctx.sim.locationName(dest) + '.');
       },
       tick: function (ctx, m) { need(ctx, 'energy', -0.02 * m); },
       onComplete: function (ctx) {
         var to = ctx.target.id;
         ctx.sim.endTransit(ctx.actor, to);
         ctx.emit('ARRIVED', { at: to },
-          ctx.actor.name + ' arrived at ' + W.LOCATIONS[to].name + '.');
+          ctx.actor.name + ' arrived at ' + ctx.sim.locationName(to) + '.');
       },
       onInterrupt: function (ctx) {
         // A walk cannot be half-taken: the walker is returned to where they set

@@ -16,7 +16,7 @@ sim.runUntil(1, until).then(() => {
     if (!verbose && noise.has(e.type)) return;
     console.log(`${e.stamp} ${e.type.padEnd(22)} ${e.text}`);
   });
-  const m = sim.state.characters.mara, t = sim.state.characters.tomas;
+  const m = sim.state.characters.resident_a, t = sim.state.characters.resident_b;
   console.log('\n--- end of day ---');
   [m, t].forEach(c => {
     console.log(`${c.name}: at ${c.location} energy=${c.needs.energy} hunger=${c.needs.hunger} money=${c.money} savings=${c.savings}`);

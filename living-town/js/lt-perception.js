@@ -41,7 +41,7 @@
     return {
       day: state.day, minute: state.minute, clock: U.clock(state.minute),
       location: loc ? {
-        id: loc.id, name: loc.name, kind: loc.kind, indoor: !!loc.indoor,
+        id: loc.id, name: sim.locationName(loc.id), kind: loc.kind, indoor: !!loc.indoor,
         open: state.minute >= loc.opens && state.minute < loc.closes,
         opensAt: U.clock(loc.opens), closesAt: U.clock(loc.closes)
       } : null,
@@ -55,7 +55,7 @@
       })
         .map(function (id) {
           var l = W.LOCATIONS[id];
-          return { id: id, name: l.name, walkMinutes: W.travelMinutes(actor.location, id),
+          return { id: id, name: sim.locationName(id), walkMinutes: W.travelMinutes(actor.location, id),
                    opensAt: U.clock(l.opens), closesAt: U.clock(l.closes) };
         })
     };
@@ -122,7 +122,7 @@
     W.destinations().forEach(function (id) {
       if (id === actor.location) return;
       if (!W.mayEnter(id, actor.id)) return;
-      consider('travel', { id: id, name: W.LOCATIONS[id].name });
+      consider('travel', { id: id, name: sim.locationName(id) });
     });
 
     consider('wash_and_dress', null);

@@ -17,8 +17,8 @@
     right: { dx: 1, dy: 0 }
   };
 
-  /* Unknown directions resolve to 'right', matching the historical Twin Peaks
-   * fallback: callers pass a validated direction, tests pass garbage. */
+  /* An unknown direction resolves to 'right' rather than throwing: callers pass
+   * a validated direction, tests pass garbage. */
   G.vector = function (dir) {
     var v = VECTORS[dir] || VECTORS.right;
     return { dx: v.dx, dy: v.dy };

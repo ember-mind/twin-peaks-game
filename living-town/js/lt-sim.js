@@ -18,6 +18,7 @@
     if (!LT.Actions) require('./lt-actions.js');
     if (!LT.Perception) require('./lt-perception.js');
     if (!LT.Policy) require('./policy/lt-policy.js');
+    if (!LT.Names) require('./lt-names.js');
     if (!root.EMBER || !root.EMBER.Grid) require('../../engine/ember-grid.js');
   }
   var U = LT.Util, W = LT.World, A = LT.Actions, P = LT.Perception, Pol = LT.Policy;
@@ -56,14 +57,24 @@
       day: start.day, minute: start.minute,
       seed: this.seed,
       characters: {},
+      locationNames: {},
       objects: deepCopy(W.OBJECTS),
       offers: [],
       events: [],
       interventions: []
     };
     var self = this;
+    /* Names are drawn once, here, from a stream of their own so that adding a
+     * random draw elsewhere in the simulation cannot change who lives in town.
+     * From this point the name is authoritative state: nothing regenerates it,
+     * and every other system addresses people by id. */
+    var nextName = LT.Names.generator(U.rng((this.seed ^ 0x9e3779b9) >>> 0), opts.namePools);
     W.CHARACTERS.forEach(function (seed) {
       var c = deepCopy(seed);
+      var drawn = nextName();
+      c.name = drawn.name;
+      c.familyName = drawn.familyName;
+      c.fullName = drawn.fullName;
       c.activity = null;
       c.transit = null;
       c.pending = null;
@@ -74,14 +85,35 @@
       c.workedMinutes = 0;
       c.practiceMinutes = 0;
       c.policyId = self.policies[c.id] || c.policyId;
-      if (W.OFFSCREEN_HOME[c.id]) c.location = W.OFFSCREEN_HOME[c.id];
       var loc = W.LOCATIONS[c.location];
       if (loc && loc.spawn) c.pos = { x: loc.spawn.x, y: loc.spawn.y, dir: loc.spawn.dir };
       c.walkTarget = null;
       state.characters[c.id] = c;
     });
+    /* Second pass: anything worded about another person, or about whose home a
+     * place is, can only be resolved once everyone has a name. */
+    Object.keys(W.LOCATIONS).forEach(function (id) {
+      var loc = W.LOCATIONS[id];
+      if (loc.nameTemplate && loc.resident && state.characters[loc.resident]) {
+        state.locationNames[id] = loc.nameTemplate.replace('%s', state.characters[loc.resident].name);
+      } else {
+        state.locationNames[id] = loc.name || id;
+      }
+    });
+    Object.keys(state.characters).forEach(function (id) {
+      var c = state.characters[id];
+      (c.commitments || []).forEach(function (k) { k.label = resolveLabel(k, state); });
+      (c.goals || []).forEach(function (g) { g.label = resolveLabel(g, state); });
+    });
     return state;
   };
+
+  function resolveLabel(item, state) {
+    if (!item.labelTemplate) return item.label;
+    var otherId = item.withId || item.relatesTo;
+    var other = otherId ? state.characters[otherId] : null;
+    return item.labelTemplate.replace('%s', other ? other.name : 'someone');
+  }
 
   /* ---------------- clocks and identity ---------------- */
 
@@ -90,6 +122,11 @@
   Sim.prototype.stamp = function () { return U.stamp(this.state.day, this.state.minute); };
   Sim.prototype.touch = function () { this.state.version++; };
   Sim.prototype.actorIds = function () { return Object.keys(this.state.characters).sort(); };
+
+  /* Place names live in state because one of them is a person's name. */
+  Sim.prototype.locationName = function (id) {
+    return (this.state.locationNames && this.state.locationNames[id]) || id;
+  };
 
   /* ---------------- world queries ---------------- */
 
@@ -787,14 +824,23 @@
     return true;
   };
 
+  /* Advancing time is asynchronous because deciding is. Between two minutes the
+   * loop yields microtasks so a settled policy promise can be delivered, and a
+   * real macrotask now and then so timer-based policies and the host event loop
+   * are not starved. Microtasks are used for the common case because a
+   * backgrounded browser tab throttles timers to about one per second, and a
+   * town that stops when nobody is looking is not a persistent world. */
   Sim.prototype.runMinutes = function (minutes) {
     var self = this;
     var i = 0;
+    function yieldTurn() {
+      if (i % 60 === 0) return new Promise(function (r) { setTimeout(r, 0); });
+      return Promise.resolve().then(function () { return Promise.resolve(); });
+    }
     function step() {
       if (i++ >= minutes) return Promise.resolve(self.state);
       self.tick();
-      // Give any pending policy promise a turn before the next boundary.
-      return new Promise(function (r) { setTimeout(r, 0); }).then(step);
+      return yieldTurn().then(step);
     }
     return step();
   };

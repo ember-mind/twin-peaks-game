@@ -12,7 +12,7 @@ const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'tp-target-apply-'));
 const watched = ['world/scene-objects.json', 'world/narrative-targets.json', 'js/scene-objects.gen.js', 'js/world-connections.gen.js'];
 const sourceBefore = watched.map((name) => fs.readFileSync(path.join(root, name)));
 try {
-  for (const dir of ['js', 'test', 'world', 'narrative']) fs.cpSync(path.join(root, dir), path.join(temp, dir), { recursive: true });
+  for (const dir of ['engine', 'js', 'test', 'world', 'narrative']) fs.cpSync(path.join(root, dir), path.join(temp, dir), { recursive: true });
   fs.copyFileSync(path.join(root, 'index.html'), path.join(temp, 'index.html'));
   const snapshot = () => watched.map((name) => fs.readFileSync(path.join(temp, name)));
   const run = (op) => {
