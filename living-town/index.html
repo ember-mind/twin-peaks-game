@@ -100,6 +100,21 @@
     max-height: 300px; overflow: auto; white-space: pre-wrap;
   }
   .note { color: var(--dim); font-size: 12px; margin: 0 0 10px; }
+  .caption { min-height: 44px; padding: 8px 2px 0; }
+  .caption p { margin: 0; }
+  .caption-doing { font-size: 15px; }
+  .caption-why { color: var(--dim); font-size: 12.5px; margin-top: 3px !important; }
+  .lt-stake { display: grid; grid-template-columns: 8px 1fr; gap: 2px 8px; padding: 5px 0; font-size: 13px; }
+  .lt-stake i { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; background: #6d7886; }
+  .lt-stake.is-tight i, .lt-stake.is-last_day i { background: #e2c15a; }
+  .lt-stake.is-out_of_reach i, .lt-stake.is-missed i { background: #d9705f; }
+  .lt-stake.is-reached i { background: #8fc17a; }
+  .lt-stake small { grid-column: 2; color: var(--dim); font-size: 12px; }
+  .lt-tab.is-watched { outline: 1px solid #e2c15a; }
+  .lt-goal.is-missed { opacity: .6; }
+  .lt-recap-person { margin: 0 0 8px; font-size: 13px; }
+  .lt-recap-person b { display: block; }
+  .lt-recap-person ul { margin: 3px 0 0; padding-left: 16px; color: var(--dim); font-size: 12px; }
 </style>
 </head>
 <body>
@@ -116,6 +131,10 @@
       <span class="place" id="lt-place">—</span>
     </div>
     <canvas id="lt-canvas" width="256" height="192"></canvas>
+    <div class="caption" id="lt-caption" aria-live="off">
+      <p class="caption-doing" id="lt-caption-doing">—</p>
+      <p class="caption-why" id="lt-caption-why"></p>
+    </div>
     <div class="controls">
       <div><div class="label">Follow</div><div class="group" id="lt-characters"></div></div>
       <div><div class="label">Speed</div><div class="group" id="lt-speeds"></div></div>
@@ -155,13 +174,23 @@
       </div>
     </div>
 
+    <div class="card"><h2>At stake</h2><div id="lt-stakes"></div></div>
     <div class="card"><h2>Working toward</h2><div id="lt-goals"></div></div>
     <div class="card"><h2>Owes / promised</h2><div id="lt-commitments"></div></div>
+    <div class="card">
+      <h2 id="lt-recap-title">The day, looked back on</h2>
+      <div class="group" style="margin-bottom:8px">
+        <button class="lt-tab" id="lt-recap-prev">Earlier</button>
+        <button class="lt-tab" id="lt-recap-next">Later</button>
+      </div>
+      <div id="lt-recap"></div>
+    </div>
     <div class="card"><h2>What happened</h2><ul id="lt-events"></ul></div>
     <div class="card">
       <h2>Last decision</h2>
       <div class="source" id="lt-decision-source">—</div>
       <div class="source-detail" id="lt-decision-detail"></div>
+      <div class="source-detail" id="lt-decision-why"></div>
     </div>
   </aside>
 
@@ -210,6 +239,7 @@
 <script src="content/everyday-props-v01/lt-everyday-props.js"></script>
 <script src="js/lt-everyday.js"></script>
 <script src="js/lt-scenario.js"></script>
+<script src="js/lt-story.js"></script>
 <script src="js/lt-save.js"></script>
 <script src="js/lt-persistence.js"></script>
 <script src="js/lt-art.js"></script>

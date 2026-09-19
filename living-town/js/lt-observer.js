@@ -62,7 +62,8 @@
     var state = {
       sim: sim, view: view, speedIndex: 1, accumulator: 0,
       lastFrame: 0, pumping: false, inspector: false, selected: sim.actorIds()[0],
-      persistence: persistence, worlds: 1
+      persistence: persistence, worlds: 1,
+      followAction: false, recapDay: null
     };
     O.state = state;
     root.LT_OBSERVER = state;
@@ -70,6 +71,8 @@
     buildCharacterTabs(state);
     buildSpeedButtons(state);
     wireWorldControls(state, booted);
+    el('lt-recap-prev').addEventListener('click', function () { stepRecap(state, -1); });
+    el('lt-recap-next').addEventListener('click', function () { stepRecap(state, 1); });
     el('lt-inspector-toggle').addEventListener('click', function () {
       state.inspector = !state.inspector;
       el('lt-inspector').hidden = !state.inspector;
@@ -80,6 +83,7 @@
       var step = O.clockStep(now, state.lastFrame);
       state.lastFrame = now;
       pump(state, step.sim);
+      followTheAction(state);
       state.view.update(step.visual);
       state.view.draw();
       paint(state);
@@ -256,6 +260,24 @@
     setInterval(function () { pz.heartbeat(); }, 5000);
   }
 
+  /* With "The action" on, the page looks at whoever has the most going on.
+   * It changes who is looked at and nothing else; choosing a name turns it off. */
+  function followTheAction(state) {
+    if (!state.followAction) return;
+    var id = LT.Story.mostInteresting(state.sim, state.selected);
+    if (id === state.selected) return;
+    state.selected = id;
+    state.view.focus(id);
+    markTabs(state);
+  }
+
+  function markTabs(state) {
+    Array.prototype.forEach.call(el('lt-characters').children, function (n) {
+      n.classList.toggle('is-on', n.dataset.actor ? (!state.followAction && n.dataset.actor === state.selected) : state.followAction);
+      if (n.dataset.actor) n.classList.toggle('is-watched', state.followAction && n.dataset.actor === state.selected);
+    });
+  }
+
   function buildCharacterTabs(state) {
     var host = el('lt-characters');
     host.innerHTML = '';
@@ -267,14 +289,19 @@
       b.dataset.actor = id;
       b.addEventListener('click', function () {
         state.selected = id;
+        state.followAction = false;
         state.view.focus(id);
-        Array.prototype.forEach.call(host.children, function (n) {
-          n.classList.toggle('is-on', n.dataset.actor === id);
-        });
+        markTabs(state);
       });
-      if (id === state.selected) b.classList.add('is-on');
       host.appendChild(b);
     });
+    var auto = document.createElement('button');
+    auto.className = 'lt-tab';
+    auto.id = 'lt-follow-action';
+    auto.textContent = 'The action';
+    auto.addEventListener('click', function () { state.followAction = !state.followAction; markTabs(state); });
+    host.appendChild(auto);
+    markTabs(state);
     state.view.focus(state.selected);
   }
 
@@ -321,6 +348,11 @@
     text(el('lt-money'), c.money.toFixed(2) + ' EUR');
     text(el('lt-savings'), c.savings.toFixed(2) + ' EUR');
 
+    var why = LT.Story.why(c.recentDecisions[0]);
+    text(el('lt-caption-doing'), c.name + ' · ' + (act ? phaseLabel + act.label : (c.pending ? 'deciding what to do next' : 'between things')));
+    text(el('lt-caption-why'), why ? why.line : '');
+    paintStakes(sim, c);
+    paintRecap(state);
     paintGoals(c);
     paintCommitments(sim, c);
     paintEvents(sim, c);
@@ -328,12 +360,50 @@
     if (state.inspector) paintInspector(state, c);
   }
 
+  function paintStakes(sim, c) {
+    var rows = LT.Story.stakes(sim, c);
+    var html = rows.length ? rows.map(function (r) {
+      return '<div class="lt-stake is-' + r.status + '"><i></i><span>' + escape(r.label) + '</span><small>' + escape(r.line) + '</small></div>';
+    }).join('') : '<p class="note">Nothing pressing.</p>';
+    var host = el('lt-stakes');
+    if (host.__html !== html) { host.innerHTML = html; host.__html = html; }
+  }
+
+  /* The day shown is the last finished one, or today while the first is still
+   * running; Earlier and Later pin another. */
+  function recapDayOf(state) {
+    var today = state.sim.state.day;
+    if (state.recapDay !== null) return Math.max(1, Math.min(today, state.recapDay));
+    return Math.max(1, today - 1);
+  }
+  function stepRecap(state, by) {
+    var today = state.sim.state.day;
+    var next = Math.max(1, Math.min(today, recapDayOf(state) + by));
+    state.recapDay = (next === Math.max(1, today - 1)) ? null : next;
+  }
+  function paintRecap(state) {
+    var sim = state.sim, day = recapDayOf(state);
+    var key = state.worlds + ':' + day + ':' + sim.state.events.length + ':' + sim.state.day;
+    var host = el('lt-recap');
+    if (host.__key === key) return;
+    host.__key = key;
+    var r = LT.Story.recap(sim, day);
+    text(el('lt-recap-title'), 'Day ' + day + (r.complete ? ', looked back on' : ', so far'));
+    host.innerHTML = r.people.map(function (p) {
+      return '<div class="lt-recap-person"><b>' + escape(p.name) + '</b>' + escape(p.facts.join('; ')) + '.' +
+        (p.told.length ? '<ul>' + p.told.map(function (t) { return '<li>' + escape(t.stamp.replace(/^D\d+ /, '')) + ' — ' + escape(t.text) + '</li>'; }).join('') + '</ul>' : '') + '</div>';
+    }).join('') + (r.town.length ? '<div class="lt-recap-person"><b>In town</b><ul>' + r.town.map(function (t) {
+      return '<li>' + escape(t.stamp.replace(/^D\d+ /, '')) + ' — ' + escape(t.text) + '</li>'; }).join('') + '</ul></div>' : '');
+    el('lt-recap-prev').disabled = day <= 1;
+    el('lt-recap-next').disabled = day >= sim.state.day;
+  }
+
   function paintGoals(c) {
     var host = el('lt-goals');
     host.innerHTML = '';
     (c.goals || []).forEach(function (g) {
       var row = document.createElement('div');
-      row.className = 'lt-goal' + (g.reached ? ' is-done' : '');
+      row.className = 'lt-goal' + (g.reached ? ' is-done' : g.missed ? ' is-missed' : '');
       var pct = Math.max(0, Math.min(100, (g.progress / g.target) * 100));
       row.innerHTML = '<div class="lt-goal-head"><span>' + escape(g.label) + '</span>' +
         '<span class="lt-num">' + round(g.progress) + ' / ' + g.target + ' ' + escape(g.unit || '') + '</span></div>' +
@@ -386,6 +456,8 @@
     text(el('lt-decision-detail'), d
       ? (d.stamp + ' · ' + d.label + ' · ' + d.candidateCount + ' legal options')
       : 'no decision recorded yet');
+    var why = LT.Story.why(d);
+    text(el('lt-decision-why'), why ? why.line : '');
   }
 
   /* ---------------- developer inspector ---------------- */

@@ -26,7 +26,7 @@
   var EMBER = root.EMBER;
 
   var SALIENCE = {
-    COMMITMENT_BROKEN: 1.0, GOAL_REACHED: 1.0, OFFER_ACCEPTED: 0.85,
+    COMMITMENT_BROKEN: 1.0, GOAL_REACHED: 1.0, GOAL_MISSED: 1.0, OFFER_ACCEPTED: 0.85,
     TALKED: 0.8, OFFER_RECEIVED: 0.7, OFFER_DECLINED: 0.7,
     COMMITMENT_KEPT: 0.6, WORKED_EXTRA: 0.6, PRACTISED: 0.5,
     WITHDREW: 0.4, GREETED: 0.3, WORKED: 0.25, SLEPT: 0.2,
@@ -336,6 +336,24 @@
         });
       }
       if (before !== g.progress) self.touch();
+    });
+  };
+
+  /* A goal has a last day. When that day is over and the goal was not reached,
+   * it is over too: said once, remembered by the person whose goal it was, and
+   * never counted as something still to work for. Nothing else is taken from
+   * them here — what missing it costs is whatever the goal was for. */
+  Sim.prototype.closeOverdueGoals = function (actor) {
+    var self = this;
+    (actor.goals || []).forEach(function (g) {
+      if (g.reached || g.missed || g.deadlineDay === undefined || g.deadlineDay >= self.state.day) return;
+      g.missed = true;
+      g.missedStamp = self.stamp();
+      self.emit('GOAL_MISSED', {
+        actorId: actor.id, locationId: actor.location,
+        data: { goalId: g.id, target: g.target, progress: g.progress, short: Math.round((g.target - g.progress) * 100) / 100 },
+        text: actor.name + ' did not reach "' + g.label + '" in time (' + (Math.round(g.progress * 100) / 100) + ' of ' + g.target + (g.unit ? ' ' + g.unit : '') + ').'
+      });
     });
   };
 
@@ -1294,6 +1312,7 @@
       this.state.minute -= U.MINUTES_PER_DAY;
       this.state.day += 1;
       this.actorIds().forEach(function (id) { self.state.characters[id].workedMinutes = 0; });
+      this.actorIds().forEach(function (id) { self.closeOverdueGoals(self.state.characters[id]); });
     }
     this.touch();
 

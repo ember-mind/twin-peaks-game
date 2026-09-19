@@ -28,7 +28,7 @@
   function goalUrgency(req) {
     var best = 0, tracked = null;
     (req.goals || []).forEach(function (g) {
-      if (g.reached || g.kind !== 'savings') return;
+      if (g.reached || g.missed || g.kind !== 'savings') return;
       var gap = Math.max(0, g.target - g.progress);
       if (gap <= 0) return;
       var daysLeft = Math.max(1, (g.deadlineDay - req.day) + 1);
