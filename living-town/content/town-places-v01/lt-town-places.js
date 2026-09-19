@@ -739,70 +739,96 @@
     if (lamp > 0) kit.warmLight(g, sx - 8, sy - 8, W + 16, 26, lamp * 0.6);
   }
 
+  /* A table: the cloth is the lit top plane, its hem is the front face, and
+   * the legs and the shadow put it on the floor. */
   function table(g, kit, p, sx, sy) {
     var R = kit.rect;
-    kit.contactShadow(g, sx + 2, sy + 14, 12, p);
-    R(g, sx + 1, sy + 11, 14, 3, 'rgba(37,40,43,.20)');
-    R(g, sx + 3, sy + 8, 2, 6, p.woodDark);
-    R(g, sx + 11, sy + 8, 2, 6, p.woodDark);
-    R(g, sx, sy + 2, T, 9, p.ink);
-    R(g, sx + 1, sy + 3, 14, 7, p.woodHi);
-    R(g, sx + 1, sy + 3, 14, 2, p.woodLight);
-    R(g, sx + 1, sy + 9, 14, 1, p.woodDark);
-    /* A cloth in the room's accent, and something on it. */
-    R(g, sx + 1, sy + 4, 14, 5, p.redLight);
-    R(g, sx + 1, sy + 4, 14, 1, p.cream);
-    R(g, sx + 2, sy + 8, 12, 1, p.red);
-    R(g, sx + 4, sy + 5, 1, 3, p.red);
-    R(g, sx + 10, sy + 5, 1, 3, p.red);
+    kit.contactShadow(g, sx + 2, sy + 15, 12, p);
+    R(g, sx + 1, sy + 12, 14, 3, 'rgba(37,40,43,.24)');
+    R(g, sx + 2, sy + 10, 2, 5, p.woodDark);
+    R(g, sx + 12, sy + 10, 2, 5, p.woodDark);
+    R(g, sx, sy + 1, T, 11, p.ink);
+    R(g, sx + 1, sy + 2, 14, 7, p.redLight);           // the cloth, lit
+    R(g, sx + 1, sy + 2, 14, 2, p.cream);
+    R(g, sx + 1, sy + 9, 14, 2, p.red);                // its hem, the front face
+    R(g, sx + 1, sy + 11, 14, 1, p.redDark);
+    R(g, sx + 3, sy + 11, 3, 2, p.red);                // and the fall of it
+    R(g, sx + 10, sy + 11, 3, 2, p.red);
+    R(g, sx + 4, sy + 4, 1, 5, p.red);
+    R(g, sx + 11, sy + 4, 1, 5, p.red);
     kit.cup(g, sx + 8, sy + 1, p);
-    R(g, sx + 2, sy + 1, 4, 4, p.ink);              // a small bowl
-    R(g, sx + 3, sy + 1, 3, 3, p.creamShade);
-    R(g, sx + 3, sy + 1, 3, 1, p.cream);
+    R(g, sx + 2, sy + 1, 5, 5, p.ink);                 // a bowl standing on it
+    R(g, sx + 3, sy + 2, 3, 3, p.creamShade);
+    R(g, sx + 3, sy + 2, 3, 1, p.cream);
   }
 
+  /* A chair, and its cell is walkable — this is where somebody stands to sit
+   * down. Low, with floor all round it, a lit seat and a dark base. */
   function chair(g, kit, p, sx, sy, facing) {
     var R = kit.rect;
-    /* Low, and with floor all round it: this cell is one someone walks onto. */
-    kit.contactShadow(g, sx + 4, sy + 13, 8, p);
-    R(g, sx + 4, sy + 9, 2, 4, p.woodDark);
-    R(g, sx + 10, sy + 9, 2, 4, p.woodDark);
-    R(g, sx + 3, sy + 6, 10, 5, p.woodDark);
-    R(g, sx + 4, sy + 7, 8, 3, p.wood);
-    R(g, sx + 4, sy + 7, 8, 1, p.woodHi);
-    if (facing === 'down') { R(g, sx + 3, sy + 2, 10, 4, p.woodDark); R(g, sx + 4, sy + 3, 8, 2, p.woodHi); }
-    else if (facing === 'up') { R(g, sx + 3, sy + 10, 10, 3, p.woodDark); R(g, sx + 4, sy + 10, 8, 2, p.woodHi); }
-    else if (facing === 'left') { R(g, sx + 11, sy + 3, 3, 9, p.woodDark); R(g, sx + 12, sy + 4, 1, 7, p.woodHi); }
-    else { R(g, sx + 2, sy + 3, 3, 9, p.woodDark); R(g, sx + 3, sy + 4, 1, 7, p.woodHi); }
+    kit.contactShadow(g, sx + 4, sy + 14, 8, p);
+    R(g, sx + 4, sy + 11, 8, 2, 'rgba(37,40,43,.22)');
+    R(g, sx + 4, sy + 10, 2, 4, p.woodDark);
+    R(g, sx + 10, sy + 10, 2, 4, p.woodDark);
+    R(g, sx + 3, sy + 5, 10, 6, p.ink);                // the seat
+    R(g, sx + 4, sy + 6, 8, 3, p.woodLight);
+    R(g, sx + 4, sy + 6, 8, 1, p.creamShade);
+    R(g, sx + 4, sy + 9, 8, 1, p.wood);
+    R(g, sx + 4, sy + 10, 8, 1, p.woodDark);
+    if (facing === 'down') {                           // the back, standing on edge
+      R(g, sx + 3, sy + 1, 10, 5, p.ink);
+      R(g, sx + 4, sy + 2, 8, 2, p.woodHi);
+      R(g, sx + 4, sy + 2, 8, 1, p.woodLight);
+      R(g, sx + 4, sy + 4, 8, 1, p.woodDark);
+    } else if (facing === 'up') {
+      R(g, sx + 3, sy + 10, 10, 5, p.ink);
+      R(g, sx + 4, sy + 10, 8, 2, p.woodHi);
+      R(g, sx + 4, sy + 10, 8, 1, p.woodLight);
+    } else if (facing === 'left') {
+      R(g, sx + 11, sy + 2, 4, 10, p.ink);
+      R(g, sx + 12, sy + 3, 2, 8, p.woodHi);
+      R(g, sx + 12, sy + 3, 1, 8, p.woodLight);
+    } else {
+      R(g, sx + 1, sy + 2, 4, 10, p.ink);
+      R(g, sx + 2, sy + 3, 2, 8, p.woodHi);
+      R(g, sx + 2, sy + 3, 1, 8, p.woodLight);
+    }
   }
 
+  /* A guitar on a stand: a wide lower bout, a waist, a narrow upper bout and a
+   * short neck. The neck rises into the cell above, which the foreground pass
+   * repaints over whoever is standing there. */
   function guitar(g, kit, p, sx, sy) {
-    var R = kit.rect;
-    kit.contactShadow(g, sx + 2, sy + 14, 12, p);
-    R(g, sx + 3, sy + 12, 10, 2, 'rgba(37,40,43,.24)');
-    /* The neck, then a body with a waist: upper bout narrow, lower bout wide. */
-    R(g, sx + 6, sy - 11, 4, 14, p.ink);
-    R(g, sx + 7, sy - 10, 2, 13, p.woodDark);
-    R(g, sx + 5, sy - 15, 6, 5, p.ink);
-    R(g, sx + 6, sy - 14, 4, 3, p.woodHi);
-    R(g, sx + 6, sy - 14, 4, 1, p.woodLight);
+    var R = kit.rect, i;
+    kit.contactShadow(g, sx + 2, sy + 15, 12, p);
+    R(g, sx + 3, sy + 13, 10, 2, 'rgba(37,40,43,.26)');
+    /* The stand. */
+    R(g, sx + 2, sy + 12, 12, 2, p.ink);
+    R(g, sx + 3, sy + 12, 10, 1, p.metal);
+    /* The neck and the head. */
+    R(g, sx + 6, sy - 9, 4, 12, p.ink);
+    R(g, sx + 7, sy - 8, 2, 11, p.woodDark);
+    R(g, sx + 5, sy - 13, 6, 5, p.ink);
+    R(g, sx + 6, sy - 12, 4, 3, p.woodHi);
+    R(g, sx + 6, sy - 12, 4, 1, p.woodLight);
+    for (i = 0; i < 3; i++) R(g, sx + (i % 2 ? 10 : 4), sy - 11 + i * 2, 1, 1, p.metalHi);
+    /* The body: upper bout, waist, lower bout. */
     R(g, sx + 4, sy + 1, 8, 4, p.ink);
-    R(g, sx + 5, sy + 2, 6, 2, p.gold);
-    R(g, sx + 3, sy + 4, 10, 9, p.ink);
-    R(g, sx + 4, sy + 5, 8, 7, p.gold);
-    R(g, sx + 4, sy + 5, 8, 2, '#f0cd85');
-    R(g, sx + 5, sy + 11, 6, 1, p.woodDark);
-    R(g, sx + 6, sy + 5, 4, 3, p.woodDark);
-    R(g, sx + 7, sy + 6, 2, 1, p.ink);
-    R(g, sx + 5, sy + 9, 6, 2, p.woodDark);
-    R(g, sx + 7, sy - 10, 1, 19, p.creamShade);
-    R(g, sx + 8, sy - 10, 1, 19, p.cream);
+    R(g, sx + 5, sy + 2, 6, 3, p.gold);
+    R(g, sx + 5, sy + 2, 6, 1, '#f3d391');
+    R(g, sx + 5, sy + 5, 6, 2, p.ink);
+    R(g, sx + 6, sy + 5, 4, 1, p.gold);
+    R(g, sx + 2, sy + 6, 12, 8, p.ink);
+    R(g, sx + 3, sy + 7, 10, 6, p.gold);
+    R(g, sx + 3, sy + 7, 10, 2, '#f3d391');
+    R(g, sx + 3, sy + 12, 10, 1, p.woodDark);
+    R(g, sx + 6, sy + 8, 4, 3, p.woodDark);            // the sound hole
+    R(g, sx + 7, sy + 9, 2, 1, p.ink);
+    R(g, sx + 5, sy + 11, 6, 1, p.woodDark);           // the bridge
+    R(g, sx + 7, sy - 8, 1, 19, p.creamShade);         // the strings
+    R(g, sx + 8, sy - 8, 1, 19, p.cream);
   }
 
-  /* The rows put the window on a floor row, so the wall is brought down over
-   * that cell to meet it. What stops it reading as a glass tube standing on the
-   * floor is the sill: a lit top plane halfway down the cell, with the panelled
-   * front of the wall under it and a dark line where it meets the boards. */
   function windowPiece(g, kit, p, sx, sy, w, night) {
     var R = kit.rect, W = w * T;
     R(g, sx, sy - 20, W, T + 20, p.plaster);
