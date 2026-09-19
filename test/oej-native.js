@@ -402,7 +402,7 @@ function decodePng(file) {
 const luma = ([r, g, b]) => 0.299 * r + 0.587 * g + 0.114 * b;
 const isFelt = ([r, g, b]) => g > r + 15 && g > b + 10;
 
-const capture = path.join(root, '.gauntlet/oej-casino/evidence/oej-native-golden.png');
+const capture = path.join(root, 'artifacts/oej-v01/oej-native-golden.png');
 if (!fs.existsSync(capture)) {
   assert.fail('missing native capture ' + path.relative(root, capture) +
     ' — rigenerala prima di validare l\'ordine dei valori');
