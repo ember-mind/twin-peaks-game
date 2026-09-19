@@ -155,6 +155,15 @@ const snapshot = (sim) => JSON.stringify(sim.state);
   const beats = Story.beats(pw, 1);
   ok(beats.length > 5 && beats.every((b) => pw.state.events.some((e) => e.seq === b.seq && e.text === b.text && e.minute === b.minute)) && JSON.stringify(pw.state) === before2, 'beats are events of that day, verbatim, and reading them changes nothing');
 
+  console.log('# the first thing one would say about a day');
+  const hw = LT.Scenario.town({});
+  await hw.runUntil(6, 0);
+  const heads = [1, 2, 3, 4, 5].map((d) => Story.headline(hw, d));
+  console.log('    ' + heads.map((h, i) => 'D' + (i + 1) + ': ' + (h ? h.text : '—')).join('\n    '));
+  ok(heads.every((h) => h === null || hw.state.events.some((e) => e.text === h.text && e.stamp === h.stamp)), 'it is an event of that day, verbatim');
+  ok(heads.filter(Boolean).some((h) => /GOAL_MISSED|COMMITMENT_BROKEN|HELPED_OUT|WENT_HUNGRY/.test(h.type)), 'trouble and kindness come before routine');
+  ok(Story.headline(hw, 99) === null, 'a day on which nothing happened has none');
+
   console.log('# between them');
   const bw = LT.Scenario.town({});
   await bw.runUntil(1, 1200);

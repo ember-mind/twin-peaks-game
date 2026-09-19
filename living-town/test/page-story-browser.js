@@ -18,7 +18,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
   const page = await launch({ root: ROOT, width: 1280, height: 1100 });
   const js = (code, wait) => page.evaluate(code, !!wait, 120000);
   const txt = (id) => js("document.getElementById('" + id + "').textContent");
-  const runTo = (day, minute) => js("(async function(){ var st = LT_OBSERVER; st.speedIndex = 0; await st.sim.runUntil(" + day + ", " + minute + "); st.view.observe(); return true; })()", true);
+  const runTo = (day, minute) => js("(async function(){ var st = LT_OBSERVER; st.speedIndex = 0; await st.sim.runUntil(" + day + ", " + minute + "); st.view.observe(); LT.Observer.paintNow(); return true; })()", true);
   async function shot(name) {
     if (!SHOTS) return;
     fs.mkdirSync(OUT, { recursive: true });

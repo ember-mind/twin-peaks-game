@@ -586,6 +586,9 @@
 
   /* ---------------- panels ---------------- */
 
+  /* For a tool that has moved the world itself and wants the panels to say so now, not at the next frame. */
+  O.paintNow = function () { if (O.state) paint(O.state); };
+
   function paint(state) {
     var sim = shown(state), s = sim.state;
     paintTimeline(state);
@@ -667,7 +670,8 @@
     host.__key = key;
     var r = LT.Story.recap(sim, day);
     text(el('lt-recap-title'), 'Day ' + day + (r.complete ? ', looked back on' : ', so far'));
-    host.innerHTML = r.people.map(function (p) {
+    var head = LT.Story.headline(sim, day);
+    host.innerHTML = (head ? '<p class="lt-headline">' + escape(head.text) + '</p>' : '') + r.people.map(function (p) {
       return '<div class="lt-recap-person"><b>' + escape(p.name) + '</b>' + escape(p.facts.join('; ')) + '.' +
         (p.told.length ? '<ul>' + p.told.map(function (t) { return '<li>' + escape(t.stamp.replace(/^D\d+ /, '')) + ' — ' + escape(t.text) + '</li>'; }).join('') + '</ul>' : '') + '</div>';
     }).join('') + (r.town.length ? '<div class="lt-recap-person"><b>In town</b><ul>' + r.town.map(function (t) {
