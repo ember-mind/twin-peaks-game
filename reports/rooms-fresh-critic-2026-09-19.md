@@ -39,3 +39,41 @@ fence tonight.
   contrast, the southern canopy vs Cooper's feet.
 - Lobby and diner gaps (runner band, wall repeat; sign lettering, checker tint and alignment)
   are open for the next builder slot.
+
+## Pass 2 — a second fresh critic after the rounds above (same references, same camera)
+
+| room | pass 1 | pass 2 | pass-2 biggest gap |
+| --- | ---: | ---: | --- |
+| Double R diner | 7 | 7 | counter front reads as a flat red slab, no stool bases or footrail |
+| Roadhouse | 7 | 7 | dance floor between stage and tables is a flat brown void |
+| Great Northern lobby | 6 | 6 | left half is a plank wall with only the head and the fireplace |
+| Glastonbury Grove | 6 | 6 | sycamores still read as one repeated sprite at 1× (three crown variants do not survive native size) |
+| Palmer house | 5 | 5 | right third is empty floorboards with one rug and one cabinet |
+| One Eyed Jacks | 5 | 5 | four identical table rectangles at the corners, no occlusion, "wall decals on the floor" |
+
+Ranking pass 2: diner, Roadhouse, lobby, grove, Palmer, OEJ. Every room still BAR WINS.
+Priority named by pass 2: One Eyed Jacks, "its four identical unoccupied gaming tables make the
+room's whole purpose read as placeholder": occupied tables need seated patrons, which is a Cast
+Presence and map decision, not paint.
+
+### What this says
+
+Five builder rounds (OEJ 3, Palmer 3, lobby, woods 2, diner) each closed the defect the
+first critic named, and the second critic moved to the next defect at the same score. The
+new gaps are not paint gaps:
+
+1. **Empty centres.** Palmer's right third, OEJ's centre carpet, the Roadhouse dance floor,
+   the lobby's left half: the map rows put every solid cell on the perimeter, and a builder
+   under the "no row changes" fence cannot furnish a walkable centre without burying actors.
+   Filling them means map-row edits (new solid cells, collision, Cast Presence windows,
+   traversal tests), a world-design decision, not an art one.
+2. **Repetition the map dictates.** Four `t` pairs in OEJ, three tables in the Roadhouse,
+   eight ring trees: the positions are canonical, so "identical sprites in a grid" persists
+   until either the rows vary or the sprites get silhouette differences big enough to read
+   at 1× (three crown variants were not enough).
+3. **No actor contact shadow** (both critics, every room). One engine change in the actor
+   draw path plus a re-pin of every golden with a body in it.
+
+Recommendation: stop per-room paint rounds; the next lift comes from (3) as a single
+engine change, then a map-row pass per room with the World Builder (the M10b props editor
+already exists for the Roadhouse), each followed by one paint round and one fresh critic.
