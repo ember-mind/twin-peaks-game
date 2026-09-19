@@ -1,0 +1,339 @@
+{
+  "version": "activity-poses-v01",
+  "entry": "living-town/content/activity-poses-v01/lt-activity-poses.js",
+  "call": "LT.ActivityPoses.draw(g, sheetId, poseId, dir, x, y, t, opts)",
+  "light": "LT.DayLight.at(minuteOfDay) · LT.DayLight.apply(g, light, opts)",
+  "sheet": "assets/activity-poses-v01.png",
+  "looks": [
+    "look_teal_bob",
+    "look_ochre_short",
+    "look_plum_long",
+    "look_moss_neat",
+    "look_rust_bun",
+    "look_slate_short",
+    "look_teal_bob_work",
+    "look_ochre_short_work",
+    "look_plum_long_work",
+    "look_moss_neat_work",
+    "look_rust_bun_work",
+    "look_slate_short_work"
+  ],
+  "order": [
+    [
+      "seated",
+      "down",
+      0
+    ],
+    [
+      "seated",
+      "right",
+      0
+    ],
+    [
+      "reading",
+      "down",
+      0
+    ],
+    [
+      "reading",
+      "down",
+      1
+    ],
+    [
+      "work_counter",
+      "down",
+      0
+    ],
+    [
+      "work_counter",
+      "down",
+      1
+    ],
+    [
+      "work_counter",
+      "down",
+      2
+    ],
+    [
+      "unpacking",
+      "down",
+      0
+    ],
+    [
+      "unpacking",
+      "down",
+      1
+    ],
+    [
+      "sleeping",
+      "right",
+      0
+    ],
+    [
+      "talking",
+      "down",
+      0
+    ],
+    [
+      "talking",
+      "down",
+      1
+    ],
+    [
+      "talking",
+      "right",
+      0
+    ],
+    [
+      "talking",
+      "right",
+      1
+    ]
+  ],
+  "poses": [
+    {
+      "id": "seated",
+      "dirs": [
+        "down",
+        "right"
+      ],
+      "frames": 1,
+      "frameMs": 0,
+      "pivot": [
+        12,
+        24
+      ],
+      "box": [
+        16,
+        21
+      ],
+      "shadow": true,
+      "reads": "a body folded onto a seat: short, wide lap, shins straight down"
+    },
+    {
+      "id": "reading",
+      "dirs": [
+        "down"
+      ],
+      "frames": 2,
+      "frameMs": 900,
+      "pivot": [
+        12,
+        24
+      ],
+      "box": [
+        16,
+        20
+      ],
+      "shadow": true,
+      "reads": "seated, both hands holding an open book across the chest"
+    },
+    {
+      "id": "work_counter",
+      "dirs": [
+        "down"
+      ],
+      "frames": 3,
+      "frameMs": 320,
+      "pivot": [
+        12,
+        24
+      ],
+      "box": [
+        16,
+        24
+      ],
+      "shadow": true,
+      "reads": "standing, one arm working across the chest with a cloth in hand"
+    },
+    {
+      "id": "unpacking",
+      "dirs": [
+        "down"
+      ],
+      "frames": 2,
+      "frameMs": 520,
+      "pivot": [
+        12,
+        24
+      ],
+      "box": [
+        20,
+        20
+      ],
+      "shadow": true,
+      "reads": "bent at the waist, crown of the head to the viewer, hands down"
+    },
+    {
+      "id": "sleeping",
+      "dirs": [
+        "right"
+      ],
+      "frames": 1,
+      "frameMs": 0,
+      "pivot": [
+        12,
+        24
+      ],
+      "box": [
+        24,
+        12
+      ],
+      "shadow": false,
+      "reads": "lying flat, head on a pillow, blanket in the wearer own colour"
+    },
+    {
+      "id": "talking",
+      "dirs": [
+        "down",
+        "right"
+      ],
+      "frames": 2,
+      "frameMs": 430,
+      "pivot": [
+        12,
+        24
+      ],
+      "box": [
+        20,
+        24
+      ],
+      "shadow": true,
+      "reads": "standing, one forearm lifting and falling in front of the chest"
+    }
+  ],
+  "dayKeys": [
+    {
+      "at": 0,
+      "phase": "night",
+      "glass": "#1b2536",
+      "glassHi": "#2b3a50",
+      "ambient": "#2b3454",
+      "amount": 0.46,
+      "warm": "#3a2a12",
+      "glow": 0.09,
+      "lamp": 1
+    },
+    {
+      "at": 270,
+      "phase": "night",
+      "glass": "#1b2536",
+      "glassHi": "#2b3a50",
+      "ambient": "#2b3454",
+      "amount": 0.46,
+      "warm": "#3a2a12",
+      "glow": 0.09,
+      "lamp": 1
+    },
+    {
+      "at": 330,
+      "phase": "dawn",
+      "glass": "#3b3a54",
+      "glassHi": "#59526e",
+      "ambient": "#3c3c60",
+      "amount": 0.4,
+      "warm": "#3a2a12",
+      "glow": 0.09,
+      "lamp": 1
+    },
+    {
+      "at": 420,
+      "phase": "dawn",
+      "glass": "#c1846f",
+      "glassHi": "#e8b48c",
+      "ambient": "#6b5064",
+      "amount": 0.25,
+      "warm": "#39280f",
+      "glow": 0.07,
+      "lamp": 0.7
+    },
+    {
+      "at": 495,
+      "phase": "dawn",
+      "glass": "#c9a68c",
+      "glassHi": "#eed3ae",
+      "ambient": "#8a7a80",
+      "amount": 0.15,
+      "warm": "#33260f",
+      "glow": 0.04,
+      "lamp": 0.4
+    },
+    {
+      "at": 585,
+      "phase": "day",
+      "glass": "#a6c6d0",
+      "glassHi": "#d8ebe6",
+      "ambient": "#9fb0bc",
+      "amount": 0.06,
+      "warm": "#000000",
+      "glow": 0,
+      "lamp": 0
+    },
+    {
+      "at": 720,
+      "phase": "day",
+      "glass": "#9ec3cf",
+      "glassHi": "#d2e6e2",
+      "ambient": "#ffffff",
+      "amount": 0,
+      "warm": "#000000",
+      "glow": 0,
+      "lamp": 0
+    },
+    {
+      "at": 960,
+      "phase": "day",
+      "glass": "#a8c2c2",
+      "glassHi": "#dce6d8",
+      "ambient": "#e8ddc4",
+      "amount": 0.05,
+      "warm": "#000000",
+      "glow": 0,
+      "lamp": 0
+    },
+    {
+      "at": 1035,
+      "phase": "dusk",
+      "glass": "#d09464",
+      "glassHi": "#f0c98c",
+      "ambient": "#9c7a5e",
+      "amount": 0.14,
+      "warm": "#2e2008",
+      "glow": 0.03,
+      "lamp": 0.4
+    },
+    {
+      "at": 1110,
+      "phase": "dusk",
+      "glass": "#c06a4e",
+      "glassHi": "#e7a06a",
+      "ambient": "#7a5450",
+      "amount": 0.24,
+      "warm": "#3a2a10",
+      "glow": 0.06,
+      "lamp": 0.6
+    },
+    {
+      "at": 1185,
+      "phase": "dusk",
+      "glass": "#6e4c6a",
+      "glassHi": "#a06e78",
+      "ambient": "#514566",
+      "amount": 0.36,
+      "warm": "#3a2a12",
+      "glow": 0.08,
+      "lamp": 0.9
+    },
+    {
+      "at": 1290,
+      "phase": "night",
+      "glass": "#1b2536",
+      "glassHi": "#2b3a50",
+      "ambient": "#2b3454",
+      "amount": 0.46,
+      "warm": "#3a2a12",
+      "glow": 0.09,
+      "lamp": 1
+    }
+  ]
+}
