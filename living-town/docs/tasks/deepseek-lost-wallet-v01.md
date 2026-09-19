@@ -7,7 +7,7 @@ substitute, do not re-scope, do not "pre-fix" anything outside the fence.
 ## Base and fence
 
 - Repo `ember-mind/twin-peaks-game`. Create a worktree from branch `feat/living-town-foundation`
-  at commit `3ed2f2a1d38ff92f553ef3878b8000b84daaa053` (verify with `git rev-parse HEAD`).
+  at the branch's current head (it must contain commit `1287418`; verify with `git merge-base --is-ancestor 1287418 HEAD && echo ok`).
   New branch: `feat/living-town-lost-wallet`. Never push. Never touch `main`.
 - Write ONLY under `living-town/content/lost-wallet-v01/`:
   `lost-wallet.js`, `README.md`, `test/lost-wallet.js`, `test/pipeline.js`.
@@ -78,23 +78,26 @@ returned or kept wallet is not lying anywhere). `validate(object, env)` type-che
 above and refuses by name: unknown owner, unknown `heldBy`, a `status`/`heldBy`/`location`
 combination that cannot happen (e.g. `carried` with a location, `lost` with `heldBy`).
 
-## Needed from the core (NOT present at the base commit — do not add it yourself)
+## What the core already gives you (present at the base — do not add or change it)
 
-Perception offers an object's `affordances` only for objects lying in the actor's place. Nothing yet
-offers `heldAffordances` of an object the actor carries. So:
-- `test/lost-wallet.js` tests every callback directly (eligible / duration / onComplete / validate /
-  apply / visual / scores), the way the model package's 81 checks do.
-- `test/pipeline.js` runs a real `LT.Sim` with `MockPolicy`. The find half (intervention → perceive →
-  walk to the use spot → pick up) MUST run and pass at the base commit. The carried half is gated:
-  if `LT.Perception.HELD_AFFORDANCES !== true`, print exactly `PIPELINE HELD HALF NOT RUN` and
-  exit code 2. Exit 0 is allowed only when both halves ran. Never shim the core to get a pass.
+- `LT.Perception.HELD_AFFORDANCES === true`: for every object with `heldBy === actor.id`, each id in
+  `object.heldAffordances` is offered to that actor — toward each person present if the action's
+  `targetKind` is `'person'`, or on its own if `targetKind` is `null`. See `living-town/test/need.js`
+  ("a carried thing can offer actions") for a working example.
+- Anything done `beside_person` is re-checked every minute it takes: if the person leaves, or
+  `eligible` stops holding, the activity fails (`partner_left`) and `onComplete` never runs.
+- A use spot someone is busy on is refused (`spot_occupied`); an arrival never lands on an occupied tile.
+- Follow `help_out` in `living-town/js/lt-actions.js` as the model for a person-to-person transfer.
+
+So BOTH halves of `test/pipeline.js` must run and pass. There is no gated half any more: if
+`LT.Perception.HELD_AFFORDANCES !== true` your checkout is wrong — stop and say so.
 
 ## Done means these commands, with this output
 
 ```
 node living-town/content/lost-wallet-v01/test/lost-wallet.js     # last line: lost-wallet: N/N   (N >= 60), exit 0
-node living-town/content/lost-wallet-v01/test/pipeline.js        # find half all ok, then PIPELINE HELD HALF NOT RUN, exit 2
-node living-town/test/run-all.js                                 # PASS living-town/test — 569 checks total (unchanged)
+node living-town/content/lost-wallet-v01/test/pipeline.js        # find half AND carried half all ok, last line: lost-wallet pipeline: M/M (M >= 14), exit 0
+node living-town/test/run-all.js                                 # PASS living-town/test — 776 checks total (unchanged: you add nothing to it)
 git status --short                                               # only files under living-town/content/lost-wallet-v01/
 ```
 Required checks among the N (name them so they can be grepped): cash leaves the owner once and

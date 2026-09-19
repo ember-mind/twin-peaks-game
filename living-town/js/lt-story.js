@@ -219,7 +219,8 @@
     for (var i = events.length - 1; i >= 0 && now - events[i].absMinute <= 10; i--) {
       var e = events[i];
       if (e.actorId !== id) continue;
-      if (e.type === 'ACTIVITY_FAILED' || e.type === 'COMMITMENT_BROKEN' || e.type === 'GOAL_REACHED' || e.type === 'GOAL_MISSED') { score += 3; break; }
+      if (e.type === 'ACTIVITY_FAILED' || e.type === 'COMMITMENT_BROKEN' || e.type === 'GOAL_REACHED' || e.type === 'GOAL_MISSED' ||
+          e.type === 'WENT_HUNGRY' || e.type === 'HELPED_OUT' || e.type === 'TALK_DECLINED' || e.type === 'BILL_PAID' || e.type === 'MONEY_ARRIVED') { score += 3; break; }
     }
     return score;
   };
