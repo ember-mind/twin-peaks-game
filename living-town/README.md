@@ -39,7 +39,7 @@ makes it the original two-person world instead of the five-person street.
 | `js/lt-story.js` | what a watcher is told: why, what is at stake, the day looked back on, bonds, pace, beats |
 | `js/lt-view.js`, `js/lt-appearance.js` | the picture: rooms, inhabitants by look, poses by activity and phase, the hour's light |
 | `js/lt-observer.js`, `js/lt-persistence.js` | the page: speeds and Auto, save / resume / new world, make something happen, timeline and looking back |
-| `content/` | packages: everyday opportunities (book, parcel), everyday props, activity poses and daylight |
+| `content/` | packages: everyday opportunities (book, parcel), lost wallet, everyday props, activity poses and daylight, town places (park, street, homes) |
 | `docs/policy-provider-contract.md` | what is in place for a language-model provider, and what is not |
 | `docs/boredom-baseline*.json` | how watchable three days are, as numbers; gated |
 
