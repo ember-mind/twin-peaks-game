@@ -48,13 +48,14 @@
     var atDay = entry.atDay === undefined ? sim.state.day : entry.atDay;
     var atMin = entry.atMinute === undefined ? sim.state.minute : entry.atMinute;
     var record = {
-      id: 'itv_' + (sim.scheduledInterventions.length + 1),
+      id: 'itv_' + (sim.state.interventions.length + 1),
       type: entry.type, params: entry.params || {},
       source: entry.source || 'developer',
       atDay: atDay, atMinute: atMin, atAbs: U.absolute(atDay, atMin),
       status: 'scheduled', scheduledStamp: sim.stamp()
     };
-    sim.scheduledInterventions.push(record);
+    /* One register. sim.scheduledInterventions is state.interventions — the
+     * same array, fresh world or restored — so an entry is written once. */
     sim.state.interventions.push(record);
     sim.touch();
     sim.emit('INTERVENTION_SCHEDULED', {

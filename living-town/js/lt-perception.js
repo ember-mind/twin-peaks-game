@@ -63,6 +63,13 @@
 
   /* Every mechanically legal action available to this character right now, plus
    * the ones that were considered and refused. A policy sees only `legal`. */
+  function metaOf(def, ctx, extra) {
+    var meta = {}, k;
+    if (def.candidateMeta) { var own = def.candidateMeta(ctx) || {}; for (k in own) meta[k] = own[k]; }
+    for (k in (extra || {})) meta[k] = extra[k];
+    return meta;
+  }
+
   P.candidates = function (sim, actor) {
     var legal = [], rejected = [];
     var seen = {};
@@ -92,7 +99,7 @@
         label: def.label + (target && target.name ? ' — ' + target.name : (extra && extra.withName ? ' — ' + extra.withName : '')),
         durationMinutes: duration,
         interruptible: !!def.interruptible,
-        meta: extra || {}
+        meta: metaOf(def, ctx, extra)
       });
     }
 

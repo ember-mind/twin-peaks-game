@@ -20,6 +20,11 @@
  *                         have arrived. `spotObject` names the object whose
  *                         use spot it is when the target is not an object.
  *   onStart(ctx)       -> runs when the action really begins, not when chosen
+ *   exclusive          -> the target object is used by one person at a time.
+ *                         The simulation holds the claim (object.inUseBy); see
+ *                         Sim.claim. An action never sets or clears it itself.
+ *   candidateMeta(ctx) -> optional plain facts shown to a policy with the
+ *                         candidate (how much of the book is left, say)
  */
 (function () {
   var root = (typeof window !== 'undefined') ? window : global;
@@ -441,6 +446,37 @@
       eligible: function () { return true; },
       onComplete: function () { /* waiting settles nothing; it only spends time */ }
     }
+  };
+
+  /* The one way a content package adds to the catalogue. A definition is
+   * checked against the contract at the top of this file before it is let in,
+   * and an id that is already taken is refused: nothing is ever replaced by
+   * being defined twice. A.all() is for reading; writing to what it returns
+   * is not registration and is not supported. */
+  var TARGET_KINDS = [null, 'object', 'person', 'offer', 'location', 'conversation'];
+  var POSITIONS = ['use_spot', 'beside_person', 'anywhere'];
+  var HOOKS = ['tick', 'onStart', 'onComplete', 'onInterrupt', 'candidateMeta'];
+  A.define = function (def) {
+    var problems = [];
+    if (!def || typeof def !== 'object') throw new Error('an action definition must be an object');
+    if (typeof def.id !== 'string' || !/^[a-z][a-z0-9_]*$/.test(def.id)) problems.push('id must be a lower_snake_case string');
+    if (typeof def.label !== 'string' || !def.label) problems.push('label is required');
+    if (TARGET_KINDS.indexOf(def.targetKind === undefined ? 'missing' : def.targetKind) < 0) problems.push('targetKind must be one of ' + TARGET_KINDS.join('|'));
+    if (POSITIONS.indexOf(def.position) < 0) problems.push('position must be one of ' + POSITIONS.join('|'));
+    if (def.position === 'beside_person' && def.targetKind !== 'person') problems.push("position 'beside_person' needs targetKind 'person'");
+    if (typeof def.duration !== 'function') problems.push('duration(ctx) is required');
+    if (typeof def.eligible !== 'function') problems.push('eligible(ctx) is required');
+    if (typeof def.interruptible !== 'boolean') problems.push('interruptible must be true or false');
+    HOOKS.forEach(function (h) { if (def[h] !== undefined && typeof def[h] !== 'function') problems.push(h + ' must be a function when present'); });
+    if (def.exclusive !== undefined && typeof def.exclusive !== 'boolean') problems.push('exclusive must be true or false');
+    if (def.exclusive && def.targetKind !== 'object') problems.push("exclusive needs targetKind 'object'");
+    if (problems.length) throw new Error('action "' + (def && def.id) + '" refused: ' + problems.join('; '));
+    if (DEFS[def.id]) {
+      if (DEFS[def.id] === def) return def;          // the same definition, registered again: nothing to do
+      throw new Error('action "' + def.id + '" is already in the catalogue and will not be replaced');
+    }
+    DEFS[def.id] = def;
+    return def;
   };
 
   A.get = function (id) { return DEFS[id] || null; };

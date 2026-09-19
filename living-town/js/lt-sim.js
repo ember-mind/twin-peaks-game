@@ -53,6 +53,7 @@
      * not depend on how fast the host machine is. */
     this.decisionTimeoutMinutes = opts.decisionTimeoutMinutes === undefined ? 30 : opts.decisionTimeoutMinutes;
     this.state = this.freshState(opts);
+    this.scheduledInterventions = this.state.interventions;   // one register, held in state
     this.listeners = [];
   }
 
@@ -761,9 +762,26 @@
     var verdict;
     try { verdict = def.eligible(this.context(actor, target)); } catch (e) { verdict = { reason: 'error:' + (e && e.message) }; }
     if (verdict !== true) return { reason: (verdict && verdict.reason) || 'ineligible' };
+    if (def.exclusive && target && target.inUseBy && target.inUseBy !== actor.id) return { reason: 'in_use' };
     var spot = this.useSpot(actor, def, target);
     if (spot.needed && !spot.at) return { reason: spot.reason };
     return true;
+  };
+
+  /* One copy, one person. The claim on an object is taken when an exclusive
+   * activity is CHOSEN — a reservation, so two people do not both cross the
+   * room for the same book — and it lives exactly as long as that activity
+   * record does: completion, interruption and failure all end it here, and
+   * nowhere else. The claim is a field on the object, so it is saved with it;
+   * there is no separate table of bookings to fall out of step. */
+  Sim.prototype.claim = function (actor, def, target) {
+    if (def.exclusive && target) { target.inUseBy = actor.id; this.touch(); }
+  };
+  Sim.prototype.releaseClaim = function (actor, act) {
+    var def = A.get(act.actionId);
+    if (!def || !def.exclusive) return;
+    var target = this.resolveTarget({ targetKind: act.targetKind, targetId: act.targetId });
+    if (target && target.inUseBy === actor.id) { target.inUseBy = null; this.touch(); }
   };
 
   /* Choosing an activity and doing it are different moments. The record made
@@ -799,6 +817,7 @@
       source: source, requestId: requestId || null
     };
     actor.walkTarget = here ? null : spot.at;
+    this.claim(actor, def, target);
     this.touch();
     this.emit('ACTIVITY_STARTED', {
       actorId: actor.id, locationId: actor.location,
@@ -853,6 +872,7 @@
     });
     actor.recentFailures = actor.recentFailures || {};
     actor.recentFailures[act.actionId + (act.targetId ? ':' + act.targetId : '')] = this.absMinute();
+    this.releaseClaim(actor, act);
     actor.activity = null;
     actor.walkTarget = null;
     actor.lastFinishedAbs = this.absMinute();
@@ -916,6 +936,7 @@
         text: actor.name + ' finished: ' + act.label
       });
     }
+    this.releaseClaim(actor, act);
     actor.activity = null;
     actor.lastFinishedAbs = this.absMinute();
     this.refreshGoals(actor);
@@ -935,6 +956,7 @@
       data: { actionId: act.actionId, elapsed: act.elapsed, planned: act.plannedMinutes, reason: reason, phase: act.phase },
       text: actor.name + ' stopped: ' + act.label + ' (' + reason + ')'
     });
+    this.releaseClaim(actor, act);
     actor.activity = null;
     actor.walkTarget = null;
     this.touch();

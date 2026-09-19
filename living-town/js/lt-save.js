@@ -64,6 +64,7 @@
   var root = (typeof window !== 'undefined') ? window : global;
   var LT = root.LT = root.LT || {};
   if (typeof require === 'function' && !LT.Sim) require('./lt-sim.js');
+  if (typeof require === 'function' && !LT.Content) require('./lt-content.js');
   var S = LT.Save = LT.Save || {};
 
   S.FORMAT = 'living-town/save@2';
@@ -134,6 +135,9 @@
     return {
       format: S.FORMAT,
       world: LT.World.fingerprint(),
+      /* The content packages this world actually uses, by version of their
+       * definitions. What state their objects are in is not part of this. */
+      content: LT.Content.usedBy(state),
       reissue: reissue,
       savedAt: sim.stamp(),
       seed: sim.seed,
@@ -238,6 +242,37 @@
       var policyId = policies[id] || c.policyId;
       if (!LT.Policy.get(policyId)) problems.push(id + ' is decided by the policy "' + policyId + '", which is not registered');
     });
+    /* Things. The town's own furniture is known by id; everything else was
+     * brought by a content package, which says what a sound instance is. A
+     * book half read or a parcel already opened is a sound instance: state
+     * never makes a save incompatible, only a definition this build lacks. */
+    Object.keys(saved.content || {}).forEach(function (pkg) {
+      var have = LT.Content.version(pkg);
+      if (!have) problems.push('this world uses the content package "' + pkg + '" (' + saved.content[pkg] + '), which this build does not have');
+      else if (have !== saved.content[pkg]) problems.push('this world was saved with "' + pkg + '" ' + saved.content[pkg] + ' and this build has ' + have + ', with no migration between them');
+    });
+    var env = {
+      state: state,
+      reachable: function (locationId, spot) {
+        var loc = W.LOCATIONS[locationId];
+        return !!loc && LT.Sim.Sim.prototype.routeLength.call(null, loc, loc.spawn, spot) >= 0;
+      }
+    };
+    var seen = {};
+    (state.objects || []).forEach(function (o) {
+      if (seen[o.id]) problems.push('there are two things with the id "' + o.id + '"');
+      seen[o.id] = true;
+      if (!o.typeId) {
+        if (!W.OBJECTS.some(function (w) { return w.id === o.id; })) problems.push('"' + o.id + '" is neither part of this town nor of any content package');
+        return;
+      }
+      var bad = LT.Content.validateObject(o, env);
+      if (bad) problems.push('the ' + (o.name || o.typeId) + ' "' + o.id + '" ' + bad);
+    });
+    (state.interventions || []).forEach(function (r) {
+      if (r.status === 'scheduled' && !LT.Interventions.get(r.type)) problems.push('a scheduled "' + r.type + '" cannot be applied by this build');
+    });
+
     (saved.reissue || []).forEach(function (r) {
       if (!state.characters[r.actorId]) problems.push('a decision is to be re-asked for ' + r.actorId + ', who is not in the save');
     });

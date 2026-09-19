@@ -257,8 +257,21 @@
         terms.baseline = 1.2;
         break;
 
-      default:
-        terms.unscored = 0;
+      default: {
+        /* Actions from content packages. The package says what its action
+         * is worth to a person in its own terms; the arithmetic it is given —
+         * traits, needs, urgency, the cost of a broken promise — is this
+         * policy's, so a book competes with a shift on the same scale. */
+        var extra = EXTRA_SCORES[cand.actionId];
+        if (extra) {
+          var given = extra(req, cand, {
+            trait: function (k) { return trait(req, k); },
+            urgency: urgency, fatigue: fatigue(req), hunger: hunger, energy: energy, money: money,
+            conflictPenalty: function () { return conflictPenalty(req, { untilAbs: endAbs, where: here }).penalty; }
+          }) || {};
+          Object.keys(given).forEach(function (k) { if (typeof given[k] === 'number' && isFinite(given[k])) terms[k] = given[k]; });
+        } else terms.unscored = 0;
+      }
     }
 
     var total = 0;
@@ -286,6 +299,15 @@
     return (o.params.pay || 0) / span;
   }
 
+  var EXTRA_SCORES = {};
+  /* One scoring function per action id, and only for actions this file does
+   * not already score. */
+  function defineScore(actionId, fn) {
+    if (typeof fn !== 'function') throw new Error('a score needs a function');
+    if (EXTRA_SCORES[actionId] && EXTRA_SCORES[actionId] !== fn) throw new Error('"' + actionId + '" already has a score');
+    EXTRA_SCORES[actionId] = fn;
+  }
+
   var policy = {
     id: 'utility',
     label: 'UtilityPolicy',
@@ -310,5 +332,6 @@
   };
 
   Pol.register(policy);
+  policy.defineScore = defineScore;
   LT.UtilityPolicy = policy;
 })();
