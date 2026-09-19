@@ -152,14 +152,18 @@
         {x:60,y:131,w:12,h:2,depth:0}]},
     /* Chandelier: its own four lamps, the ceiling beam directly under it, and
      * three steps down the runner. The two wide runner bands of the E8 build
-     * (36x2 and 48x2) are trimmed: a receiver is a few pixels, not a stripe. */
+     * (36x2 and 48x2) are trimmed: a receiver is a few pixels, not a stripe.
+     * The two vertical edge regions moved from x138/x179 to x144/x172 when
+     * the runner was tapered: at the north end the strip is now 36px wide,
+     * not 48, and the old coordinates had fallen onto bare oak floor, where
+     * this archetype's dim is invisible. */
     {id:'lobby-chandelier',type:'LIGHT_WARM_VARIATION',x:160,y:24,depth:28,
       firstDelay:[2100,2100],delay:[2200,2200],duration:[5400,5400],intensity:.5,
       regions:[{x:141,y:13,w:5,h:6,depth:28},{x:149,y:19,w:5,h:6,depth:28},
         {x:165,y:19,w:5,h:6,depth:28},{x:173,y:13,w:5,h:6,depth:28},
         {x:144,y:59,w:14,h:2,depth:0},{x:164,y:59,w:14,h:2,depth:0},
         {x:158,y:34,w:6,h:1,depth:0},{x:146,y:47,w:16,h:2,depth:0},
-        {x:138,y:62,w:3,h:12,depth:0},{x:179,y:62,w:3,h:12,depth:0},
+        {x:144,y:64,w:3,h:12,depth:0},{x:172,y:64,w:3,h:12,depth:0},
         {x:150,y:95,w:20,h:2,depth:0},{x:150,y:123,w:20,h:2,depth:0}]},
     /* Desk lamp: its own shade, two runs of the counter top and two of the
      * counter front, and four key cubbies behind it. Regions stop at x=192

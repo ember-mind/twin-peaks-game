@@ -69,6 +69,71 @@ assert.equal(new Set(ctx.marks.map(m=>m[4])).size,Object.keys(art.palette).lengt
 assert.ok(ctx.overlayMarks.length>0,'light pools render translucent rows');
 assert.ok(ctx.overlayMarks.some(m=>m[4]===art.palette.fire),'hearth/chandelier fire tone reaches receiving surfaces');
 assert.ok(ctx.overlayMarks.some(m=>m[4]===art.palette.gold),'inner pool uses authored gold tone');
+/* A fresh PNG-only critic read the round-1 lobby as a room split by "a flat
+ * vertical band with no perspective break", behind a log wall that "repeats
+ * the same brick-like unit across the entire upper half at uniform contrast",
+ * with a stair and a left picture that "read as abstract stripes and boxes"
+ * at 1x. Lock each fix against the recorded marks of one real scene draw. */
+/* drawStructures ran with cy=.75, which the painter rounds to 1, so every
+ * recorded y is one below its authored value. Normalise once. */
+const shell=ctx.marks.map(m=>[m[0],m[1]+1,m[2],m[3],m[4]]);
+function markAt(x,y,w,h){return shell.filter(m=>m[0]===x&&m[1]===y&&m[2]===w&&m[3]===h);}
+
+/* 1. The runner tapers. Its ink bands are the widest rects that start inside
+ * x=130..145 and span the runner's height; the north band must be narrower
+ * than the south one and there must be several intermediate widths. */
+const runnerBands=shell.filter(m=>m[4]===art.palette.ink&&m[0]>=130&&m[0]<=150&&
+  m[2]>=30&&m[2]<=56&&m[3]>=10&&m[1]>=40&&m[1]<176);
+assert.ok(runnerBands.length>=6,'the runner is built from stepped bands, got '+runnerBands.length);
+const widths=runnerBands.map(m=>m[2]);
+assert.ok(new Set(widths).size>=6,'the runner taper has at least six distinct widths');
+const north=runnerBands.reduce((a,b)=>b[1]<a[1]?b:a);
+const south=runnerBands.reduce((a,b)=>b[1]>a[1]?b:a);
+assert.ok(north[2]<south[2],
+  'the runner is narrower at the wall than at the doors ('+north[2]+' vs '+south[2]+')');
+/* Fringe at both short ends, and the lounge rug reaching its west edge. */
+assert.ok(shell.filter(m=>m[4]===art.palette.cream&&m[2]===1&&m[3]<=3&&m[1]>=60&&m[1]<=66).length>=8,
+  'the runner carries a woven fringe at the wall end');
+assert.ok(shell.filter(m=>m[4]===art.palette.cream&&m[2]===1&&m[3]<=3&&m[1]>=170).length>=10,
+  'the runner carries a woven fringe at the door end');
+assert.ok(markAt(40,84,96,52).length===1,'the lounge rug reaches the runner edge at x=136');
+/* Something crosses it: the counter shadow steps onto the runner's east half. */
+const crossing=shell.filter(m=>m[1]>=130&&m[1]<=148&&m[0]<184&&m[0]+m[2]>168&&
+  (m[4]===art.palette.ink||m[4]===art.palette.redDark));
+assert.ok(crossing.length>=4,'the counter shadow crosses the runner east edge');
+
+/* 2. The log wall recedes: no lit highlight on any log face. Round 1 drew a
+ * wallLight line on every course, which is what made the wall shout. */
+const courseHighlights=shell.filter(m=>m[4]===art.palette.wallLight&&
+  m[1]>=7&&m[1]<58&&m[2]>=20&&m[3]===1);
+assert.equal(courseHighlights.length,0,
+  'no lit edge on the log courses: '+JSON.stringify(courseHighlights.slice(0,3)));
+const courseFaces=shell.filter(m=>m[1]>=7&&m[1]<51&&m[3]===10&&
+  (m[4]===art.palette.wall||m[4]===art.palette.wallDark));
+assert.ok(courseFaces.length>=12,'the log courses are still drawn');
+assert.ok(new Set(courseFaces.map(m=>m[2])).size>=3,
+  'the log run varies in length instead of repeating one unit');
+assert.ok(markAt(16,51,288,7).length===1,'a darker band falls away under the ceiling beam');
+
+/* 3. The stair reads as steps: a dark riser under a light tread with a lit
+ * nosing, twelve times, plus one newel post at the foot of the flight. */
+const risers=shell.filter(m=>m[4]===art.palette.wallDark&&m[0]>=236&&m[3]===4&&m[2]>20);
+const treads=shell.filter(m=>m[4]===art.palette.oak&&m[0]>=236&&m[3]===4&&m[2]>20);
+const nosings=shell.filter(m=>m[4]===art.palette.oakHi&&m[0]>=236&&m[3]===1&&m[2]>20);
+assert.equal(risers.length,12,'twelve risers');
+assert.equal(treads.length,12,'twelve treads');
+assert.equal(nosings.length,12,'every tread carries a lit nosing');
+assert.ok(markAt(236,128,10,26).length===1,'a newel post anchors the foot of the flight');
+
+/* 4. The framed picture hung entirely behind the fireplace stack (x24..104)
+ * in round 1, so it was paint nobody could see. It hangs clear of it now and
+ * carries a horizon line. */
+const frame=shell.filter(m=>m[4]===art.palette.gold&&m[2]===34&&m[3]===28);
+assert.equal(frame.length,1,'the framed picture is painted once');
+assert.ok(frame[0][0]>=104,'the picture hangs clear of the fireplace stack, at x='+frame[0][0]);
+assert.ok(shell.some(m=>m[4]===art.palette.ink&&m[0]===110&&m[3]===1&&m[2]===26),
+  'the picture carries a horizon line');
+
 ctx.marks=[];
 G.sprites.drawForegroundStructures(ctx,map,0,0,{forestDepthMin:80,forestDepthMax:81});
 assert.ok(ctx.marks.length>0,'foreground includes hearth at exact depth');
@@ -103,6 +168,14 @@ assert.ok(hearth.regions.some(r=>r.depth===80&&r.y<50),'fire light reaches the h
 assert.ok(hearth.regions.some(r=>r.depth===112),'fire light reaches the near chair');
 assert.ok(hearth.regions.some(r=>r.depth===0&&r.y>=82),'fire light reaches the floor in front of it');
 const chandelier=byId['lobby-chandelier'];
+/* The runner tapered, so its two vertical edge receivers moved with it: at
+ * the north end the strip is 36px wide and the old x138/x179 fell onto bare
+ * oak, where this archetype's dim paints nothing. */
+for(const edge of chandelier.regions.filter(r=>r.h>=10)){
+  assert.ok(edge.x>=142&&edge.x+edge.w<=178,
+    'runner edge region '+edge.x+','+edge.y+' stays on the tapered strip');
+  assert.ok(edge.y>=64,'runner edge region starts below the wall foot at y=64');
+}
 assert.ok(chandelier.regions.some(r=>r.y>=58&&r.y<66&&r.depth===0),'chandelier light reaches the ceiling beam under it');
 assert.ok(chandelier.regions.some(r=>r.y>=90&&r.depth===0),'chandelier light reaches the runner');
 
@@ -195,4 +268,7 @@ for(const file of ['index.html','test/retro-scene.html']){
 for(const name of ['js/retro.js','js/retro-authored.js','js/tiles.js']){
   assert.equal(fs.readFileSync(path.join(root,name),'utf8').includes('HotelGN'),false,'protected renderer contains no lobby integration');
 }
-console.log('Great Northern scene PASS: exact map/room/registry locks, no door access at install, footprints, actor routes, hooks, integer art, three ambient types, 60s fire variants, late-door lifecycle and script order.');
+console.log('Great Northern scene PASS: exact map/room/registry locks, no door access at install, '+
+  'footprints, actor routes, hooks, integer art, three ambient types, 60s fire variants, '+
+  'runner taper and crossings, receding log wall, stair tread rhythm, visible framed picture, '+
+  'late-door lifecycle and script order.');
