@@ -51,17 +51,25 @@
   }
 
   O.start = function () {
-    var sim = LT.Scenario.day1({});
+    /* What is stored in this browser decides what world the page opens on.
+     * `?world=new` in the address asks for a new one and leaves the stored
+     * save exactly as it is. */
+    var persistence = LT.Persistence.create({});
+    var fresh = /(?:^|[?&])world=new(?:&|$)/.test(String(root.location && root.location.search || ''));
+    var booted = persistence.boot({ fresh: fresh });
+    var sim = booted.sim || LT.Scenario.day1({});
     var view = LT.View.create(el('lt-canvas'), sim);
     var state = {
       sim: sim, view: view, speedIndex: 1, accumulator: 0,
-      lastFrame: 0, pumping: false, inspector: false, selected: sim.actorIds()[0]
+      lastFrame: 0, pumping: false, inspector: false, selected: sim.actorIds()[0],
+      persistence: persistence, worlds: 1
     };
     O.state = state;
     root.LT_OBSERVER = state;
 
     buildCharacterTabs(state);
     buildSpeedButtons(state);
+    wireWorldControls(state, booted);
     el('lt-inspector-toggle').addEventListener('click', function () {
       state.inspector = !state.inspector;
       el('lt-inspector').hidden = !state.inspector;
@@ -113,8 +121,139 @@
       state.sim.tick();
       state.view.observe();   // every step, so a sprite follows the route and not a chord across it
       state.accumulator -= nowMs;
+      /* Between two ticks is the one moment the world is whole: nothing half
+       * applied. The controller decides whether one is due; most ticks it is not. */
+      var auto = state.persistence.autosave(state.sim);
+      if (auto) reportSave(state, auto);
       Promise.resolve().then(function () { return Promise.resolve(); }).then(step);
     })();
+  }
+
+  /* ---------------- this world: save, resume, new ---------------- */
+
+  /* The page starts following another world. One loop, one view, one set of
+   * panels: they all read state.sim, which is replaced here, so the world that
+   * was on screen simply stops being advanced — nothing keeps ticking it. */
+  O.adopt = function (state, sim) {
+    state.retired = state.sim;
+    state.sim = sim;
+    state.view = LT.View.create(el('lt-canvas'), sim);
+    state.accumulator = 0;
+    state.worlds++;
+    if (!sim.state.characters[state.selected]) state.selected = sim.actorIds()[0];
+    buildCharacterTabs(state);
+    state.view.focus(state.selected);
+  };
+
+  function say(kind, message) {
+    var node = el('lt-save-status');
+    node.className = 'save-status' + (kind ? ' is-' + kind : '');
+    text(node, message);
+  }
+
+  function reportSave(state, result) {
+    if (result.ok) {
+      say('ok', (result.auto ? 'Autosaved' : 'Saved') + ' at ' + result.savedAt + ' (' + Math.round(result.bytes / 1024) + ' KB, this browser only).');
+    } else if (result.status === 'other_tab') {
+      say('warn', 'Not saved: another tab is saving this world. Press Save to take over from it.');
+    } else if (result.status === 'protected') {
+      say('warn', 'Not saved: ' + result.reason + '.');
+    } else {
+      say('bad', 'Save failed: ' + result.reason + '.');
+    }
+    refreshButtons(state);
+  }
+
+  function refreshButtons(state) {
+    var peek = LT.Save.peekLocal();
+    el('lt-resume').disabled = peek.status !== 'present';
+    el('lt-save').disabled = peek.status === 'unavailable';
+  }
+
+  /* An inline question, not a browser dialog: the town keeps its place while
+   * it is on screen, and Cancel changes nothing. */
+  function ask(state, question, yesLabel, onYes) {
+    var was = state.speedIndex;
+    state.speedIndex = 0; buildSpeedButtons(state);
+    text(el('lt-confirm-text'), question);
+    text(el('lt-confirm-yes'), yesLabel);
+    el('lt-confirm').hidden = false;
+    function close(run) {
+      el('lt-confirm').hidden = true;
+      el('lt-confirm-yes').onclick = null; el('lt-confirm-no').onclick = null;
+      state.speedIndex = was; buildSpeedButtons(state);
+      if (run) onYes();
+    }
+    el('lt-confirm-yes').onclick = function () { close(true); };
+    el('lt-confirm-no').onclick = function () { close(false); say('', 'Cancelled. Nothing was changed.'); };
+  }
+
+  function wireWorldControls(state, booted) {
+    var pz = state.persistence;
+    var described = {
+      loaded: function () { say('ok', 'Resumed the saved world at ' + state.sim.stamp() + '.'); },
+      none: function () { say('', 'No saved world in this browser. This is a new one; it autosaves as it goes.'); },
+      refused: function () { say('bad', 'The saved world could not be used and has been left untouched: ' + booted.reason + ' This is a new world; it will not be saved over the old one unless you say so.'); },
+      unavailable: function () { say('bad', 'Saving is unavailable: ' + booted.reason + '. This world lives only as long as this page.'); },
+      set_aside: function () { say('warn', 'New world, because the address asked for one. The saved world is untouched; saving will ask before replacing it.'); }
+    };
+    (described[booted.status] || described.none)();
+    refreshButtons(state);
+
+    el('lt-save').addEventListener('click', function () {
+      var result = pz.save(state.sim);
+      if (result.status === 'protected') {
+        return ask(state, 'Replace the stored save? ' + result.reason + '. It will be kept aside, not deleted.', 'Replace it',
+          function () { reportSave(state, pz.save(state.sim, { replaceProtected: true, takeOver: true })); });
+      }
+      if (result.status === 'other_tab') {
+        return ask(state, 'Another tab is saving this world. Save from this tab instead? The other tab will stop saving.', 'Save from here',
+          function () { reportSave(state, pz.save(state.sim, { takeOver: true })); });
+      }
+      reportSave(state, result);
+    });
+
+    el('lt-resume').addEventListener('click', function () {
+      ask(state, 'Go back to the saved world? What has happened here since the last save will be lost.', 'Resume saved', function () {
+        var read = pz.resume();
+        if (read.status === 'loaded') { O.adopt(state, read.sim); say('ok', 'Resumed the saved world at ' + read.sim.stamp() + '.'); }
+        else if (read.status === 'refused') say('bad', 'The saved world could not be used and has been left untouched: ' + read.reason);
+        else if (read.status === 'none') say('warn', 'There is no saved world in this browser.');
+        else say('bad', 'The saved world could not be read: ' + read.reason + '.');
+        refreshButtons(state);
+      });
+    });
+
+    el('lt-new-world').addEventListener('click', function () {
+      var replaces = pz.newWorldReplaces();
+      function begin() {
+        /* A different town, not the same morning again. */
+        var sim = LT.Scenario.day1({ seed: (Date.now() % 2147483647) || 1 });
+        O.adopt(state, sim);
+        var result = pz.save(sim, { replaceProtected: true, takeOver: true, setAside: true });
+        if (result.ok) say('ok', 'A new world has begun and been saved' + (replaces ? '; the previous save was kept aside.' : '.'));
+        else reportSave(state, result);
+        refreshButtons(state);
+      }
+      if (replaces) ask(state, 'Start a new world? It replaces ' + replaces + '. The old save will be kept aside, not deleted.', 'Start a new world', begin);
+      else begin();
+    });
+
+    /* Leaving: one last save if this tab is the one saving, then let go. */
+    function leave() {
+      if (!pz.protectedReason && !pz.heldElsewhere() && LT.Save.peekLocal().status !== 'unavailable') pz.save(state.sim, { auto: true });
+      pz.release();
+    }
+    root.addEventListener('pagehide', leave);
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden' && pz.autosaveDue(state.sim)) reportSave(state, pz.save(state.sim, { auto: true }));
+    });
+    /* Another tab wrote the world this tab is showing. Say so; do not fight. */
+    root.addEventListener('storage', function (ev) {
+      if (ev.key === LT.Save.DEFAULT_KEY && ev.newValue) say('warn', 'This world was just saved from another tab. This tab will not save over it unless you press Save.');
+      refreshButtons(state);
+    });
+    setInterval(function () { pz.heartbeat(); }, 5000);
   }
 
   function buildCharacterTabs(state) {
@@ -167,9 +306,12 @@
     text(el('lt-place'), sim.locationName(c.location) +
       (c.transit ? ' (on the way to ' + sim.locationName(c.transit.to) + ')' : ''));
     text(el('lt-who'), c.fullName || c.name);
-    text(el('lt-doing'), c.activity ? c.activity.label : (c.pending ? 'deciding what to do next' : 'between things'));
-    text(el('lt-doing-detail'), c.activity
-      ? (c.activity.elapsed + ' of ' + c.activity.plannedMinutes + ' min · chosen by ' + c.activity.source)
+    var act = c.activity;
+    var phaseLabel = !act ? '' : act.phase === 'approaching' ? 'On the way to: ' : act.phase === 'waiting_reply' ? 'Waiting for an answer: ' : '';
+    text(el('lt-doing'), act ? phaseLabel + act.label : (c.pending ? 'deciding what to do next' : 'between things'));
+    text(el('lt-doing-detail'), act
+      ? ((act.phase === 'executing' ? act.elapsed + ' of ' + act.plannedMinutes + ' min' : act.approachMinutes + ' min so far, not yet begun') +
+         ' · chosen by ' + act.source)
       : (c.pending ? 'request ' + c.pending.requestId : ''));
 
     bar(el('lt-energy-bar'), c.needs.energy);

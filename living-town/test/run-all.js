@@ -5,7 +5,7 @@
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
-const FILES = ['sim-core.js', 'async-safety.js', 'policies.js', 'interventions.js', 'review-regressions.js', 'cafe-scene.js', 'view-continuity.js', 'save-load.js', 'interactions.js'];
+const FILES = ['sim-core.js', 'async-safety.js', 'policies.js', 'interventions.js', 'review-regressions.js', 'cafe-scene.js', 'view-continuity.js', 'save-load.js', 'interactions.js', 'persistence.js'];
 
 let allPassed = true;
 let totalChecks = 0;

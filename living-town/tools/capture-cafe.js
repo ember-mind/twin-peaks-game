@@ -67,17 +67,17 @@ async function frames(page, tag, from, ticks, start) {
 }
 
 async function cafe(page, tag) {
-  await page.navigate('living-town/index.html');
+  await page.navigate('living-town/index.html?world=new');
   await sleep(1500);
   console.log('  renderer host: ' + await page.evaluate("JSON.stringify(window.LT && LT.ProductionHost ? { ready: LT.ProductionHost.ready, failed: LT.ProductionHost.failed } : 'absent')"));
   /* Everything below is the page's own simulation on its own clock. Nothing
    * is posed: the capture only chooses when to look. Three real moments are
-   * joined into one sequence — she comes in, she goes to work, she orders. */
-  await runTo(page, 497);
+   * joined into one sequence — in through the door, round to work, out to order. */
+  await runTo(page, 521);
   console.log('  arriving: ' + await describe(page));
-  let n = await frames(page, tag, 497, 4, 0);          // 08:17 → through the door
-  n = await frames(page, tag, 547, 16, n);             // 09:07 → she takes up the shift and goes round the counter
-  await runTo(page, 600);
+  let n = await frames(page, tag, 521, 4, 0);          // 08:41 → through the door
+  n = await frames(page, tag, 542, 16, n);             // 09:02 → the shift is chosen at the door; the walk round the counter; work begins on arrival
+  await runTo(page, 640);
   console.log('  at work: ' + await describe(page));
   save(tag + '-living-town-cafe.png', await page.evaluate(SHOT));
   n = await frames(page, tag, 1170, 11, n);            // 19:30 → extra shift ends, out to the customer side
@@ -90,17 +90,21 @@ async function cafe(page, tag) {
  * puts them there; then the page's own world saved and reloaded while they are
  * half way round the counter, and looked at again. */
 async function continuity(page) {
-  await page.navigate('living-town/index.html');
+  await page.navigate('living-town/index.html?world=new');   // never an autosave left by an earlier run
   await sleep(1500);
-  const stops = [['home', 365], ['street', 492], ['cafe', 600], ['park', 1052]];
+  /* The page's own clock runs at 1x from the moment it loads, about six town
+   * minutes before this tool can pause it. A stop earlier than that is a race:
+   * 06:05 was sometimes already 06:06 (measured: same frame at any render
+   * time, different frame when the minute differed). Every stop is later. */
+  const stops = [['home', 380], ['street', 515], ['cafe', 640], ['park', 1052]];
   for (const [name, minute] of stops) {
     await runTo(page, minute);
     console.log('  ' + name + ': ' + await describe(page) + ' ' + await page.evaluate("JSON.stringify(LT_OBSERVER.view.draw())"));
     save('05-continuity-' + name + '.png', await page.evaluate(SHOT));
   }
-  await page.navigate('living-town/index.html');
+  await page.navigate('living-town/index.html?world=new');   // never an autosave left by an earlier run
   await sleep(1500);
-  await runTo(page, 552);
+  await runTo(page, 549);   // chosen the shift at the door, half way to the counter
   console.log('  before reload: ' + await describe(page));
   console.log('  reload: ' + await page.evaluate("(async function(){ var st = LT_OBSERVER, a = st.sim.state.characters.resident_a; var was = JSON.stringify([a.name, a.appearanceId, a.pos, a.walkTarget, a.activity && a.activity.actionId, a.money]); var ok = LT.Save.writeLocal(st.sim); var r = LT.Save.readLocal(); if (r.status !== 'loaded') return 'REFUSED ' + r.reason; st.sim = r.sim; st.view.sim = r.sim; var b = r.sim.state.characters.resident_a; var now = JSON.stringify([b.name, b.appearanceId, b.pos, b.walkTarget, b.activity && b.activity.actionId, b.money]); await r.sim.runMinutes(12); for (var i=0;i<60;i++) st.view.update(33); st.view.draw(); return (ok && was === now ? 'same person, same step: ' : 'DIFFERENT: ' + was + ' vs ') + now; })()", true, 60000));
   console.log('  after reload: ' + await describe(page));
