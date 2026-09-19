@@ -130,6 +130,12 @@ shadow, no `drawImage`, so nothing is blurred, resampled or scaled and the
 pixel art stays exactly as crisp as the painter left it. At true noon it paints
 nothing at all. `opts`: `{ x, y, width, height, strength, lamps }`.
 
+It is a **per-pixel tint, not a palette swap**: multiplying a 153-colour frame
+by one colour gives a frame with several hundred colours in it. Every edge
+stays exactly where it was and nothing is resampled, but a room painted this
+way does not keep a fixed palette, and a project that needs one will have to
+grade by remapping the material instead of by covering the frame.
+
 Window light comes first and there is nothing else: no particles, no shafts,
 no bloom. Nothing in this package draws a light source; it only says what
 colour the light is.
@@ -299,14 +305,28 @@ dialogue layer, or the text goes dark with the room.
   There is no `up` for anything. A pose asked for a direction it does not have
   returns `false`, which is a fallback to standing, not a crash.
 - **No `_work` difference for three poses.** See the apron note above.
-- **Three of the six poses need their furniture to be named.** Four fresh
-  critics were shown these frames with no labels. `sleeping`, `seated` and
-  `reading` were named correctly on the strip alone. `work_counter` was read
-  as "holding out a cup" — the right job, the wrong object. `unpacking` and
-  `talking` were **not** named from the strip alone by any of them: a stoop
-  and a gesture are both relations to something that is not in the picture,
-  and they only land once the work table and the second person are there. If
-  those two matter in a room with no such furniture, they will not read.
+- **Half the vocabulary does not survive being looked at cold.** Four fresh
+  critics were shown these frames with no labels, no pose names and no list of
+  activities, and asked to name what each one is doing. Over the four rounds:
+
+  | pose | named correctly, with no label | where it stands |
+  |---|---|---|
+  | `seated` | 4 of 4 | passes |
+  | `reading` | 3 of 4 | passes; the one failure was the earlier seated version |
+  | `sleeping` | 4 of 4 named it; 3 of 4 passed | the activity always reads; the last critic failed it because a lying figure shows no arms or legs and so shares little silhouette with the standing sprite |
+  | `work_counter` | 1 of 4 | **fails**: the rag reads as "holding something", not as working |
+  | `unpacking` | 1 of 4 | **fails**: a stoop with no object in front of it reads as a person standing oddly |
+  | `talking` | 0 of 4 | **fails**: a raised forearm is "pointing, reaching, handing over or waving" to every viewer who sees it alone |
+
+  The three that fail are the three that are a relation to something outside
+  the sprite — a counter, a crate, a second person. They land on the anchor
+  stage, where those things are present, and they do not land on the strip.
+  Anyone who needs them to read in a room without that furniture should treat
+  them as unfinished.
+- **Props are two or three pixels.** At native 256×192 the rag, the cup and a
+  raised hand are small pale or dark blocks. The book survives because it is
+  nine pixels wide with a spine; nothing smaller than that survived a cold
+  viewer at native size.
 - **The light is one curve for the whole town.** There is no weather, no
   season, no per-room sky and no outdoor variant: `at()` knows the minute and
   nothing else. `apply` tints a rectangle uniformly; it does not know where the
