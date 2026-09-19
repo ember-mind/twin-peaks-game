@@ -1,0 +1,74 @@
+[
+  {
+    "actor": "cooper",
+    "tile": "7,8",
+    "foot": 144,
+    "covered": 0.06510416666666667,
+    "px": 25,
+    "underProps": 248,
+    "of": 384
+  },
+  {
+    "actor": "bobby",
+    "tile": "3,4",
+    "foot": 80,
+    "covered": 0.08854166666666667,
+    "px": 34,
+    "underProps": 96,
+    "of": 384
+  },
+  {
+    "actor": "donna",
+    "tile": "5,4",
+    "foot": 80,
+    "covered": 0,
+    "px": 0,
+    "underProps": 0,
+    "of": 384
+  },
+  {
+    "actor": "james",
+    "tile": "2,4",
+    "foot": 80,
+    "covered": 0.24739583333333334,
+    "px": 95,
+    "underProps": 384,
+    "of": 384
+  },
+  {
+    "actor": "loglady",
+    "tile": "2,6",
+    "foot": 112,
+    "covered": 0,
+    "px": 0,
+    "underProps": 2,
+    "of": 384
+  },
+  {
+    "actor": "norma",
+    "tile": "5,6",
+    "foot": 112,
+    "covered": 0.1171875,
+    "px": 45,
+    "underProps": 356,
+    "of": 384
+  },
+  {
+    "actor": "shelly",
+    "tile": "3,6",
+    "foot": 112,
+    "covered": 0.0703125,
+    "px": 27,
+    "underProps": 56,
+    "of": 384
+  },
+  {
+    "actor": "truman",
+    "tile": "4,8",
+    "foot": 144,
+    "covered": 0.013020833333333334,
+    "px": 5,
+    "underProps": 110,
+    "of": 384
+  }
+]

@@ -1,0 +1,44 @@
+{
+  "roadhouse-empty": {
+    "present": true,
+    "enabled": true,
+    "instances": 26,
+    "actorLayer": 6,
+    "drawCharHooked": false,
+    "structuresHooked": false,
+    "foregroundHooked": false,
+    "structuresOwner": "other",
+    "foregroundOwner": "other",
+    "drawCharCalls": 4,
+    "structuresSrc": "function (ctx, m, cx, cy, opt ) {\n      if (m && m.id === MAP) {\n        return GAME.TraincarArt && GAME.TraincarArt.draw(ctx, cx, cy,  ceneState());\n      }\n      return originalS",
+    "foregroundSrc": "function (ctx, m, cx, cy, opt ) {\n      opt  = opt  || {};\n      if (m && m.id === MAP) {\n        return GAME.TraincarArt && GAME.TraincarArt.foreground(\n          ctx, cx, cy, opt"
+  },
+  "roadhouse-gathering": {
+    "present": true,
+    "enabled": true,
+    "instances": 26,
+    "actorLayer": 6,
+    "drawCharHooked": false,
+    "structuresHooked": false,
+    "foregroundHooked": false,
+    "structuresOwner": "other",
+    "foregroundOwner": "other",
+    "drawCharCalls": 32,
+    "structuresSrc": "function (ctx, m, cx, cy, opt ) {\n      if (m && m.id === MAP) {\n        return GAME.TraincarArt && GAME.TraincarArt.draw(ctx, cx, cy,  ceneState());\n      }\n      return originalS",
+    "foregroundSrc": "function (ctx, m, cx, cy, opt ) {\n      opt  = opt  || {};\n      if (m && m.id === MAP) {\n        return GAME.TraincarArt && GAME.TraincarArt.foreground(\n          ctx, cx, cy, opt"
+  },
+  "roadhouse-giant-stage": {
+    "present": true,
+    "enabled": true,
+    "instances": 26,
+    "actorLayer": 6,
+    "drawCharHooked": false,
+    "structuresHooked": false,
+    "foregroundHooked": false,
+    "structuresOwner": "other",
+    "foregroundOwner": "other",
+    "drawCharCalls": 8,
+    "structuresSrc": "function (ctx, m, cx, cy, opt ) {\n      if (m && m.id === MAP) {\n        return GAME.TraincarArt && GAME.TraincarArt.draw(ctx, cx, cy,  ceneState());\n      }\n      return originalS",
+    "foregroundSrc": "function (ctx, m, cx, cy, opt ) {\n      opt  = opt  || {};\n      if (m && m.id === MAP) {\n        return GAME.TraincarArt && GAME.TraincarArt.foreground(\n          ctx, cx, cy, opt"
+  }
+}

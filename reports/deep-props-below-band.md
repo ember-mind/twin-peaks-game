@@ -36,7 +36,7 @@ difference. `test/props-render-order.js` gained the same boundary in the unit fi
 ## M11 harness before/after (override `roadhouse-stage-01:5`, so it runs without editing the registry)
 
 `PROPS_LAYER_OVERRIDE=roadhouse-stage-01:5 node test/props-production-chrome.js`
-(evidence redirected with `PROPS_M11_OUT` so the canonical `artifacts/props-m11/` is not overwritten):
+(evidence redirected with `PROPS_OUT` so the canonical `artifacts/props-m11/` is not overwritten):
 
 ```
 BEFORE (original runtime, 16/22)

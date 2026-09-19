@@ -148,7 +148,7 @@ global.GAME.PROPS_ENABLED = true;
   Props._setRegistry(global.GAME.WorldData.props);
   Props._setAtlas(global.GAME.WorldData.props.definitions['roadhouse.chair.red'].atlas, img);
   const list = Props.instancesFor('roadhouse');
-  if (!process.argv.includes('--registry-only')) ok(list.length === 19, 'the real roadhouse scene has 19 instances', String(list.length));
+  if (!process.argv.includes('--registry-only')) ok(list.length === 26, 'the real roadhouse scene has 26 instances', String(list.length));
   else ok(list.length > 0, 'the real roadhouse scene has instances', String(list.length));
   const keys = list.map((e) => e.layer + ':' + e.foot + ':' + e.id);
   ok(JSON.stringify(keys) === JSON.stringify(keys.slice().sort((a, b) => {

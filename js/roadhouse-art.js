@@ -5,6 +5,15 @@
  * pass: dark walnut, a quiet brown plank/checker floor, and small pools of
  * red stage light, amber practicals, and neon.  Integer rectangles are used
  * throughout so this remains a true pixel scene at the production scale.
+ *
+ * M12 — WHAT THIS FILE OWNS NOW. world/props.json owns the Roadhouse furniture; this file paints the SHELL it
+ * stands in. Kept here: walls, floor, wall sconces, the stage recess and its boards, the spotlight pools, the
+ * mic and speakers, the back-bar shelves and bottles, the picture frames, the jukebox, the plants, the south
+ * wall, the door opening and its jamb, and the floor pools the furniture sits in. Moved to the prop set: the
+ * neon sign, the stage curtain, the piano, the deer, the pendant lamps, the bar counter, the booths, the
+ * tables, the chairs, the candles and the door leaf. Painting those here as well was the M11 finding: the room
+ * was drawn twice. If a prop instance is removed from world/props.json, the piece is gone from the room — it
+ * does not fall back to paint.
  */
 (function () {
   'use strict';
@@ -171,29 +180,10 @@
   }
 
   function drawStage(R, p) {
-    /* Stage recess and its red curtain: stepped side and hem pixels stand in
-     * for the cone of spotlight without using a gradient. */
+    /* M12: the curtain and its folds are roadhouse-stage-01 now. What stays is the recess it hangs in (so the
+     * 6 px the 112-wide prop leaves on either side read as dark stage wall, not as a hole), the boards, the
+     * spotlight pool and the mic and speakers, which no prop carries. */
     R(62, 12, 134, 43, p.ink);
-    /* Begin with one solid burgundy/red mass; irregular slivers below provide
-     * the folds without turning the curtain into disconnected rectangles. */
-    R(66, 15, 126, 33, p.curtainDark);
-    R(69, 17, 120, 29, p.curtain);
-    R(70, 18, 118, 2, p.curtainHi);
-    var folds = [[73,3,20,43],[87,2,23,45],[100,4,19,42],[114,2,25,46],
-      [127,4,20,44],[141,2,24,43],[154,4,19,46],[169,2,23,42],[181,3,20,44]];
-    for (var i = 0; i < folds.length; i++) {
-      var fold = folds[i], x = fold[0], width = fold[1], top = fold[2], end = fold[3];
-      R(x, top, width, end - top, p.curtainDark);
-      R(x + width, top + 3, 1, Math.max(3, end - top - 7), p.curtainHi);
-      R(x - 1, end - 3, Math.min(3, width + 1), 3, p.curtainDeep);
-    }
-    /* A centered red receiving mass breaks the repeated folds and gives the
-     * microphone a localized red stage wall behind it. */
-    R(110, 39, 36, 2, p.curtain);
-    R(115, 36, 26, 3, p.curtainHi);
-    R(121, 34, 14, 4, p.redMid);
-    R(125, 32, 6, 7, p.redHi);
-    R(66, 45, 126, 4, p.curtainDeep);
     R(68, 48, 122, 10, p.walnutDeep);
     R(70, 49, 118, 2, p.walnutHi);
     R(70, 53, 118, 5, p.walnut);
@@ -214,7 +204,7 @@
     /* Board seams interrupt the receiving pool; light never fills the recess. */
     R(102, 52, 9, 1, p.amberDeep); R(143, 54, 7, 1, p.amberDeep);
     R(123, 57, 10, 1, p.ink);
-    /* Mic, stand, and two speakers. */
+    /* Mic, stand, and two speakers — no prop carries these. */
     R(126, 29, 4, 22, p.ink); R(127, 31, 2, 18, p.metalHi);
     R(124, 28, 8, 5, p.ink); R(126, 27, 4, 2, p.metalHi);
     R(120, 50, 16, 3, p.ink); R(123, 49, 10, 2, p.metal);
@@ -227,29 +217,6 @@
     R(x + 6, y + 10, 3, 3, p.metal); R(x + 4, y + 17, 7, 1, p.metal);
   }
 
-  function drawNeon(R, p, ctx, cx, cy) {
-    R(13, 10, 76, 35, p.ink); R(16, 13, 70, 28, p.walnutDeep);
-    R(18, 15, 66, 2, p.walnutMid); R(18, 40, 66, 2, p.neonDeep);
-    /* Red receiving strips sit on the walnut pilasters beside the sign; the
-     * stepped foot below it stops before the floor lamps and tables. */
-    R(10, 18, 3, 20, p.redDark); R(89, 18, 3, 20, p.redDark);
-    R(20, 43, 60, 2, p.redDark); R(28, 45, 44, 2, p.redDeep);
-    R(18, 46, 11, 2, p.redMid); R(19, 49, 8, 3, p.redDark);
-    R(67, 46, 12, 2, p.redMid); R(69, 49, 8, 3, p.redDark);
-    R(32, 46, 8, 1, p.redDark); R(56, 46, 7, 1, p.redDark);
-    /* Mountain outline and down-pointing arrow borrowed from the A plate. */
-    var mountain = [[20,29,4,2],[24,27,4,2],[28,24,4,3],[32,20,4,4],
-      [36,24,4,3],[40,27,4,2],[44,24,4,3],[48,20,4,4],[52,24,4,3],
-      [56,27,4,2],[60,29,7,2],[69,27,4,2],[73,29,9,2]];
-    for (var i = 0; i < mountain.length; i++) R(mountain[i][0], mountain[i][1], mountain[i][2], mountain[i][3], p.neonHi);
-    if (GAME.RetroFont && GAME.RetroFont.draw) {
-      GAME.RetroFont.draw(ctx, 'ROADHOUSE', 52 - cx, 31 - cy, p.neonHi, {scale: 1, align: 'center'});
-    } else {
-      /* Fallback is intentionally tiny; production has RetroFont loaded. */
-      R(22, 32, 52, 4, p.neon);
-    }
-    R(18, 41, 66, 2, p.neon); R(46, 43, 5, 2, p.neonHi);
-  }
 
   function frame(R, x, y, p) {
     R(x, y, 15, 20, p.ink); R(x + 2, y + 2, 11, 16, p.walnutMid);
@@ -259,14 +226,9 @@
   }
 
   function drawTrophies(R, p) {
-    frame(R, 16, 49, p); frame(R, 16, 75, p); frame(R, 16, 112, p);
-    /* Deer/trophy silhouettes: three tones and a pale horn line. */
-    R(20, 55, 7, 6, p.walnutDeep); R(19, 56, 9, 3, p.walnutDeep);
-    R(21, 53, 2, 3, p.walnutHi); R(25, 53, 2, 3, p.walnutHi);
-    R(21, 61, 6, 1, p.walnutHi);
+    /* M12: the picture frames are wall dressing and stay; the mounted deer is roadhouse-trophy-01. */
+    frame(R, 16, 28, p); frame(R, 16, 88, p); frame(R, 16, 112, p);
     frame(R, 230, 50, p); frame(R, 230, 76, p);
-    R(234, 56, 8, 1, p.amberHi); R(237, 55, 2, 5, p.amber);
-    R(234, 58, 8, 1, p.amber); R(236, 61, 4, 1, p.walnutHi);
   }
 
   function bottle(R, x, y, color, p, tall) {
@@ -277,11 +239,6 @@
     R(x, y + (tall ? 11 : 9), 7, 2, p.walnutGold);
   }
 
-  function pendant(R, x, y, p) {
-    R(x + 4, y, 2, 7, p.ink); R(x + 1, y + 7, 8, 5, p.amberDeep);
-    R(x, y + 10, 10, 5, p.amber); R(x + 2, y + 10, 6, 3, p.amberHi);
-    R(x + 4, y + 10, 2, 2, p.amberWhite);
-  }
 
   function pendantPool(R, x, y, p) {
     /* Broken shoulders catch the wood behind the bottles. Each pool stays
@@ -295,16 +252,6 @@
     R(x + 2, y + 33, 5, 3, p.walnutMid);
   }
 
-  function counterHighlight(R, x, p) {
-    /* Compact pools cast by each pendant: a bright centre, a warm shoulder,
-     * and a dark stop.  The eight-pixel gaps remain the counter's walnut. */
-    R(x - 7, 80, 14, 1, p.walnutMid);
-    R(x - 9, 81, 18, 2, p.walnutGold);
-    R(x - 6, 83, 12, 2, p.walnutGold);
-    R(x - 3, 83, 6, 1, p.amberHi);
-    R(x - 5, 85, 10, 1, p.walnutGold);
-    R(x - 7, 87, 14, 1, p.ink);
-  }
 
   function drawBar(R, p) {
     /* Back bar and shelves occupy the right wall, keeping the phone's tile at
@@ -320,26 +267,11 @@
     for (var i = 0; i < 10; i++) bottle(R, 169 + i * 7, 21 + (i % 2), colors[i % colors.length], p, i % 3 === 0);
     for (var j = 0; j < 10; j++) bottle(R, 169 + j * 7, 38 + (j % 3), colors[(j + 2) % colors.length], p, j % 4 === 0);
     for (var k = 0; k < 10; k++) bottle(R, 169 + k * 7, 57 + (k % 2), colors[(k + 1) % colors.length], p, k % 3 === 1);
-    pendant(R, 176, 8, p); pendant(R, 207, 8, p); pendant(R, 229, 8, p);
-    /* Counter front: a dark rim, segmented pendant pools, and a deep front
-     * fascia make the long bar read as a thick built object, not one tan
-     * plank.  All edges remain pixel-orthographic rectangles. */
-    R(158, 78, 91, 12, p.ink); R(160, 79, 87, 7, p.walnutDeep);
-    R(164, 80, 79, 4, p.walnutMid);
-    counterHighlight(R, 176, p); counterHighlight(R, 207, p); counterHighlight(R, 229, p);
-    R(160, 88, 87, 3, p.ink);
-    R(160, 90, 87, 21, p.walnutDeep); R(164, 92, 79, 15, p.walnutDark);
-    R(164, 91, 79, 2, p.walnutHi); R(164, 105, 79, 3, p.black);
-    R(160, 107, 87, 4, p.ink); R(164, 107, 79, 1, p.walnutHi);
-    R(165, 97, 18, 5, p.walnut); R(192, 97, 18, 5, p.walnut);
-    R(216, 97, 22, 5, p.walnut);
-    /* Light falls over the lip in three separate short vertical patches. */
+    /* M12: the counter is roadhouse-bar-01 and the hanging lamps are roadhouse-pendant-01/02. The back-bar wall
+     * above them — shelves, bottles, service window — is wall dressing and stays painted, as do the pools the
+     * lamps throw on the shelf and on the floor: the prop carries the fixture, not its light. */
     for (var lightX = 0; lightX < 3; lightX++) {
       var centre = [176, 207, 229][lightX];
-      R(centre - 6, 91, 12, 2, p.walnutGold);
-      R(centre - 4, 93, 8, 4, p.walnutMid);
-      R(centre - 2, 98, 4, 3, p.walnut);
-      /* The floor receives the same source after the bar's dark foot. */
       R(centre - 7, 113, 14, 2, p.floorHi);
       R(centre - 9, 116, 8, 2, p.floorMid);
       R(centre + 2, 116, 7, 2, p.floorMid);
@@ -370,97 +302,20 @@
     R(108, 70, 11, 2, p.floorMid); R(132, 71, 12, 2, p.floorMid);
   }
 
-  function drawPayPhone(R, p) {
-    /* Object target is exactly (8,5); the handset and cord stay inside the
-     * wall-side edge of this free tile so it remains readable from (8,6). */
-    R(134, 77, 13, 31, p.ink); R(136, 79, 9, 27, p.metalDeep);
-    R(137, 81, 7, 12, p.metal); R(138, 82, 5, 3, p.metalHi);
-    R(138, 87, 5, 4, p.walnut); R(139, 88, 3, 2, p.amberHi);
-    R(136, 94, 9, 3, p.walnutDark); R(138, 98, 5, 5, p.metal);
-    R(137, 104, 2, 5, p.ink); R(142, 104, 2, 5, p.ink);
-    R(132, 78, 3, 14, p.walnutHi); R(145, 78, 3, 14, p.walnutDeep);
-    R(143, 94, 5, 2, p.metalHi); R(145, 96, 2, 9, p.ink);
-  }
 
-  function booth(R, x, y, w, p) {
-    /* Walnut outer shell avoids a continuous black rim; only a short one-pixel
-     * foot shadow anchors each booth to the floor. */
-    R(x, y, w, 38, p.walnutDeep);
-    R(x + (w >> 1) - 10, y + 37, 20, 1, p.shadowDark);
-    /* Stepped red upholstery gives the upper corners a rounded cushion
-     * profile instead of a flat inset rectangle. */
-    R(x + 4, y + 2, w - 8, 1, p.redDeep);
-    R(x + 2, y + 3, w - 4, 2, p.redDark);
-    R(x + 3, y + 5, w - 6, 22, p.redDark);
-    R(x + 5, y + 7, w - 10, 18, p.redDark);
-    R(x + 7, y + 5, w - 14, 2, p.redMid);
-    R(x + 9, y + 6, 12, 1, p.redHi);
-    for (var i = x + 7; i < x + w - 7; i += 11) {
-      R(i, y + 8, 3, 15, p.redMid); R(i + 4, y + 9, 2, 14, p.redDark);
-    }
-    /* Seat lip and darker front face break the long cushion into padded
-     * sections without reintroducing black horizontal bands. */
-    R(x + 5, y + 25, w - 10, 1, p.redMid);
-    R(x + 3, y + 26, w - 6, 2, p.redDark);
-    R(x + 4, y + 28, w - 8, 6, p.redDeep);
-    for (var seatX = x + 7; seatX < x + w - 7; seatX += 14) {
-      R(seatX, y + 28, 8, 3, p.redDark);
-      R(seatX + 2, y + 28, 4, 1, p.redMid);
-      R(seatX + 8, y + 28, 2, 4, p.redDeep);
-    }
-    R(x + 5, y + 34, w - 10, 2, p.redDeep);
-    R(x + 10, y + 36, w - 20, 1, p.walnutDark);
-    R(x + 8, y + 8, 2, 10, p.redHi);
-    /* A nearby sconce (left) or jukebox (right) warms only the facing padded
-     * section. Four upholstery tones retain the unlit pleats between steps. */
-    var litX = x < 128 ? x + 5 : x + w - 20;
-    R(litX, y + 8, 12, 3, p.redMid);
-    R(litX, y + 11, 8, 5, p.redMid);
-    R(litX + 1, y + 8, 4, 5, p.redHi);
-    R(litX + 1, y + 18, 5, 3, p.redMid);
-    R(litX, y + 24, 14, 2, p.redHi);
-    R(litX + 3, y + 28, 8, 2, p.redMid);
-  }
 
-  function table(R, x, y, p) {
-    /* Dark under-rim and quiet walnut underpaint; the pedestal starts below
-     * the deeper tabletop ellipse so it cannot show through the receiving
-     * surface. */
-    R(x - 14, y, 28, 2, p.ink); R(x - 12, y + 1, 24, 2, p.walnutDark);
-    R(x - 10, y + 3, 20, 3, p.walnut);
-    R(x - 5, y + 15, 10, 2, p.ink); R(x - 4, y + 17, 8, 10, p.walnutDeep);
-    R(x - 4, y + 27, 8, 1, p.shadowDark);
-    R(x - 5, y + 28, 10, 1, p.walnutHi);
-    R(x - 7, y + 29, 14, 2, p.shadowDark);
-  }
 
-  function chair(R, x, y, p) {
-    /* Compact chair body with short local anchors; long legs previously
-     * merged with the table and booth bands at native size. */
-    R(x, y, 12, 13, p.ink); R(x + 2, y + 2, 8, 7, p.redDark);
-    R(x + 3, y + 2, 6, 2, p.redHi); R(x + 2, y + 9, 8, 2, p.ink);
-    R(x + 3, y + 10, 6, 2, p.walnutDark);
-    R(x + 2, y + 12, 2, 3, p.shadowDark); R(x + 8, y + 12, 2, 3, p.shadowDark);
-    R(x + 3, y + 15, 6, 1, p.shadowDark);
-  }
 
+  /* M12: the booths, tables, chairs and candles are prop instances (roadhouse-booth-*, -table-*, -chair-*,
+   * -candle-*). What stays here is the light they sit in — the floor pools under each table group — because the
+   * prop set carries objects, not the room's lighting, and a table with no pool floats. The pools are placed on
+   * the PROP anchors, not on the old painted positions. */
   function drawBoothsAndTables(R, p) {
-    /* Every receiving surface is laid down before furniture.  The table/chair
-     * pass then restores silhouettes over the pools; the tabletop oval is
-     * established before chairs so their flanking silhouettes stay readable. */
-    tableFloorPool(R, 97, 72, p);
-    tableFloorPool(R, 157, 94, p);
-    tableFloorPool(R, 109, 121, p);
-    candlePool(R, 97, 72, p); candlePool(R, 157, 94, p); candlePool(R, 109, 121, p);
-    booth(R, 15, 65, 59, p); booth(R, 15, 111, 59, p); booth(R, 181, 111, 59, p);
-    table(R, 97, 72, p); table(R, 157, 94, p); table(R, 109, 121, p);
-    tableTopGlow(R, 97, 72, p); tableTopGlow(R, 157, 94, p); tableTopGlow(R, 109, 121, p);
-    /* Chairs sit in the foreground of each tabletop.  The first pair now
-     * mirrors the left/right flanking arrangement of the other groups. */
-    chair(R, 80, 77, p); chair(R, 107, 77, p); 
-    chair(R, 140, 99, p); chair(R, 167, 100, p);
-    chair(R, 94, 128, p); chair(R, 126, 128, p);
-    candleSource(R, 97, 72, p); candleSource(R, 157, 94, p); candleSource(R, 109, 121, p);
+    var groups = [[105, 82], [130, 110], [70, 104]];
+    for (var i = 0; i < groups.length; i++) {
+      tableFloorPool(R, groups[i][0], groups[i][1], p);
+      candlePool(R, groups[i][0], groups[i][1], p);
+    }
   }
 
   function tableFloorPool(R, x, y, p) {
@@ -478,26 +333,6 @@
     R(x - 7, y + 22, 12, 2, p.floorMid);
   }
 
-  function tableTopGlow(R, x, y, p) {
-    /* Final tabletop: most of the 28x16 ellipse stays dark walnut; only a
-     * compact stepped amber response gathers around the candle. */
-    R(x - 14, y, 28, 2, p.ink);
-    R(x - 12, y + 2, 24, 2, p.walnutDark);
-    R(x - 10, y + 4, 20, 2, p.walnutGold);
-    R(x - 9, y + 6, 18, 2, p.walnutDark);
-    R(x - 8, y + 8, 16, 4, p.walnutGold);
-    R(x - 6, y + 12, 12, 2, p.walnutDark);
-    /* Candle contact and nearby wood form one stepped receiving cluster;
-     * short grain breaks keep the warm top from becoming a luminous stripe. */
-    R(x - 4, y + 2, 8, 2, p.walnutGold);
-    R(x - 6, y + 4, 12, 2, p.amberHi);
-    R(x - 4, y + 6, 8, 3, p.walnutGold);
-    R(x - 2, y + 6, 4, 2, p.amberHi);
-    R(x - 6, y + 9, 4, 1, p.walnutDark);
-    R(x + 3, y + 10, 4, 1, p.walnutDark);
-    R(x - 6, y + 14, 12, 1, p.walnutDark);
-    R(x - 4, y + 15, 8, 1, p.ink);
-  }
 
   function candlePool(R, x, y, p) {
     /* Pre-pass under the tabletop: this is deliberately quieter than the
@@ -508,24 +343,7 @@
     R(x - 3, y + 7, 6, 1, p.floorMid);
   }
 
-  function candleSource(R, x, y, p) {
-    /* A tiny candle sits on top of the finished tabletop; no broad gold strip
-     * is allowed to overwrite the surrounding chairs or floor. */
-    R(x - 2, y + 3, 4, 2, p.amberDeep);
-    R(x - 1, y + 1, 2, 3, p.amberHi);
-    R(x, y, 1, 2, p.amberWhite);
-  }
 
-  function drawPiano(R, p) {
-    /* Upright piano borrowed from A.  It sits below the neon plate now, so
-     * the ROADHOUSE lettering has a clean uninterrupted silhouette. */
-    R(39, 48, 25, 30, p.ink); R(42, 50, 19, 25, p.walnutDeep);
-    R(44, 52, 15, 12, p.walnut); R(45, 53, 13, 2, p.walnutHi);
-    R(44, 65, 17, 4, p.ink); R(45, 66, 15, 2, p.amberHi);
-    for (var x = 46; x < 59; x += 3) R(x, 66, 1, 2, p.walnutDeep);
-    R(42, 72, 19, 3, p.walnutMid); R(43, 75, 3, 5, p.ink); R(57, 75, 3, 5, p.ink);
-    R(37, 75, 30, 3, p.ink);
-  }
 
   function jukebox(R, p) {
     /* The jukebox is a right-perimeter landmark, away from the pay-phone
@@ -562,15 +380,9 @@
     R(114, 137, 28, 2, p.amber);
     R(108, 139, 40, 2, p.amberDeep);
     plant(R, 61, 144, p); plant(R, 177, 144, p);
+    /* M12: the leaf is roadhouse-door-01. The opening it sits in stays painted — without this recess the prop
+     * would hang on a flat wall — and drawDoorFrame still paints the jamb in the foreground pass. */
     R(104, 141, 48, 35, p.ink); R(107, 144, 42, 32, p.walnutDeep);
-    R(109, 146, 17, 28, p.redDark); R(130, 146, 17, 28, p.redDark);
-    R(111, 148, 13, 16, p.walnut); R(132, 148, 13, 16, p.walnut);
-    R(113, 150, 9, 9, p.glass); R(134, 150, 9, 9, p.glass);
-    R(114, 151, 7, 7, p.glassHi); R(135, 151, 7, 7, p.glassHi);
-    R(117, 152, 2, 5, p.amberHi); R(138, 152, 2, 5, p.amberHi);
-    R(126, 144, 4, 32, p.black); R(126, 144, 1, 32, p.walnutHi);
-    R(110, 172, 15, 3, p.walnutMid); R(131, 172, 15, 3, p.walnutMid);
-    R(108, 175, 40, 3, p.walnutHi);
   }
 
   function drawDoorFrame(R, p) {
@@ -587,108 +399,37 @@
     R(x + 4, y + 17, 8, 1, p.shadowDark);
   }
 
-  function drawShadow(R, prop, p) {
-    var s = prop.shadow, foot = prop.footY;
-    R(s[0] + 2, foot + 2, Math.max(1, s[2] - 4), 1, p.shadow);
-    R(s[0] + 1, foot + 1, Math.max(1, s[2] - 2), 1, p.shadowMid);
-    R(s[0] + 4, foot, Math.max(1, s[2] - 8), 1, p.shadowDark);
-  }
 
-  function drawProp(R, prop, p) {
-    /* Row 3 is collision scaffolding for the canonical map.  Its authored
-     * north furniture was formerly painted a second time at y=48, across the
-     * stage front and the mic floor.  The room's actual tables/chairs are
-     * placed by drawBoothsAndTables below the apron; keep the footprints for
-     * collision/depth contracts but do not duplicate their pixels. */
-    if (/^northTable/.test(prop.id) || /^northChairs/.test(prop.id)) return;
-    if (/^southTable/.test(prop.id)) {
-      var sx = prop.id === 'southTableWest' ? 63 : prop.id === 'southTableMiddle' ? 127 : 191;
-      table(R, sx, 112, p);
-    } else if (prop.id === 'northChairsWest') { chair(R, 80, 49, p); chair(R, 99, 49, p); }
-    else if (prop.id === 'northChairsMiddle') { chair(R, 144, 49, p); chair(R, 163, 49, p); }
-    else if (prop.id === 'northChairsEast') { chair(R, 208, 49, p); }
-    else if (prop.id === 'southChairsWest') { chair(R, 80, 113, p); chair(R, 99, 113, p); }
-    else if (prop.id === 'southChairsMiddle') { chair(R, 144, 113, p); chair(R, 163, 113, p); }
-    else if (prop.id === 'southChairsEast') { chair(R, 208, 113, p); }
-    else if (prop.id === 'barFurniture') { /* composite bar is architecture */ }
-    else if (prop.id === 'barStoolWest') chair(R, 163, 91, p);
-    else if (prop.id === 'barStoolEast') chair(R, 229, 91, p);
-  }
 
-  /* Detail 2 — the Roadhouse neon flickers. One function of time t: an
-   * irregular two-state schedule (bright/dim, never off) dims the authored sign
-   * colour 70% toward the wall behind it. Bounded to the sign's two mountain
-   * peaks so the room's animated-pixel budget stays small and the buzz never
-   * reads as noise. The wall is the sign's own backing (walnutDeep). */
-  function blendToward(from, to, f) {
-    function channel(hex, i) { return parseInt(hex.substr(i, 2), 16); }
-    function byte(v) { var s = Math.round(v).toString(16); return s.length < 2 ? '0' + s : s; }
-    return '#' + byte(channel(from,1)+(channel(to,1)-channel(from,1))*f)
-               + byte(channel(from,3)+(channel(to,3)-channel(from,3))*f)
-               + byte(channel(from,5)+(channel(to,5)-channel(from,5))*f);
-  }
-  var neonFlickerDim = blendToward(palette.neonHi, palette.walnutDeep, .7);
-  /* Bright 1400 / dim 90 / bright 700 / dim 60 as a loop, ordered so the long
-   * bright hold covers the production byte-compare clock (freezeMs=1000, which
-   * is bright: the sign renders exactly as it does without the detail). */
-  var NEON_FLICKER = [[0,60],[1,1400],[0,90],[1,700]];
-  var NEON_FLICKER_TARGETS = [[28,24,4,3],[32,20,4,4],[48,20,4,4],[52,24,4,3]];
-  function neonFlickerBright(t) {
-    var period = 0, i;
-    for (i = 0; i < NEON_FLICKER.length; i++) period += NEON_FLICKER[i][1];
-    var m = ((t % period) + period) % period, acc = 0;
-    for (i = 0; i < NEON_FLICKER.length; i++) {
-      acc += NEON_FLICKER[i][1];
-      if (m < acc) return NEON_FLICKER[i][0] === 1;
-    }
-    return true;
-  }
-  function neonFlicker(R, t) {
-    if (neonFlickerBright(t)) return;
-    for (var i = 0; i < NEON_FLICKER_TARGETS.length; i++) {
-      var r = NEON_FLICKER_TARGETS[i];
-      R(r[0], r[1], r[2], r[3], neonFlickerDim);
-    }
-  }
-  function nowMs() {
-    return (typeof performance !== 'undefined' && performance && typeof performance.now === 'function')
-      ? performance.now() : Date.now();
-  }
 
+  /* M12: the prop registry owns the Roadhouse furniture (world/props.json, option A). What is painted here is
+   * the SHELL — walls, floor, sconces, the stage recess and its boards, the back-bar shelves, the south wall and
+   * the door opening — plus the pieces no prop exists for: the mic, the speakers, the jukebox, the plants, the
+   * picture frames and the pay phone at its interact tile. Everything the prop set carries (neon, stage curtain,
+   * piano, deer, pendants, bar counter, booths, tables, chairs, candles, door leaf) was painted here until M12
+   * and is gone: js/props-production.js draws it now, and painting it twice was the M11 finding. */
   function draw(ctx, cx, cy) {
     var R = rectPainter(ctx, cx, cy), p = palette;
     R(0, 0, 256, 192, p.ink);
     drawWall(R, p);
     drawStage(R, p);
-    drawNeon(R, p, ctx, Math.round(cx || 0), Math.round(cy || 0));
     drawTrophies(R, p);
-    drawPiano(R, p);
     drawBar(R, p);
     drawStageApron(R, p);
-    drawPayPhone(R, p);
     drawBoothsAndTables(R, p);
     jukebox(R, p);
     drawBottomDoor(R, p);
-    for (var i = 0; i < definitions.length; i++) {
-      /* The canonical row-3 furniture cells are kept in definitions for the
-       * collision contract, but their old y=64 contact shadows were part of
-       * the stage-front clutter removed in this pass. */
-      if (/^northTable/.test(definitions[i].id) || /^northChairs/.test(definitions[i].id)) continue;
-      drawShadow(R, definitions[i], p);
-    }
+    /* M12: `definitions` stays as the room's furniture contract (cells and foot y), but nothing here paints it
+     * any more — the south tables, the chairs and the bar stools are prop instances, and their contact shadows
+     * went with them. Only the player's own contact shadow is still painted. */
     drawPlayerContact(R, p);
-    for (var j = 0; j < definitions.length; j++) drawProp(R, definitions[j], p);
-    neonFlicker(R, nowMs());
   }
 
   function foreground(ctx, cx, cy, minFoot, maxFoot) {
     minFoot = minFoot == null ? -Infinity : minFoot;
     maxFoot = maxFoot == null ? Infinity : maxFoot;
     var R = rectPainter(ctx, cx, cy), p = palette;
-    for (var i = 0; i < definitions.length; i++) {
-      var prop = definitions[i];
-      if (prop.footY >= minFoot && prop.footY < maxFoot) drawProp(R, prop, p);
-    }
+    /* The door jamb is the only painted piece left that has to sort against the actors. */
     if (160 >= minFoot && 160 < maxFoot) drawDoorFrame(R, p);
   }
 
@@ -698,10 +439,7 @@
     definitions: definitions,
     props: definitions,
     palette: palette,
-    doorFoot: 160,
-    neonFlickerDim: neonFlickerDim,
-    neonFlickerSchedule: NEON_FLICKER,
-    neonFlickerTargets: NEON_FLICKER_TARGETS
+    doorFoot: 160
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = GAME.RoadhouseArt;
 })();

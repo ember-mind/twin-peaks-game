@@ -1,0 +1,82 @@
+{
+  "actors": [
+    {
+      "id": "cooper",
+      "x": 7,
+      "y": 8
+    },
+    {
+      "id": "bobby",
+      "x": 3,
+      "y": 4
+    },
+    {
+      "id": "donna",
+      "x": 5,
+      "y": 4
+    },
+    {
+      "id": "james",
+      "x": 2,
+      "y": 4
+    },
+    {
+      "id": "loglady",
+      "x": 2,
+      "y": 6
+    },
+    {
+      "id": "norma",
+      "x": 5,
+      "y": 6
+    },
+    {
+      "id": "shelly",
+      "x": 3,
+      "y": 6
+    },
+    {
+      "id": "truman",
+      "x": 4,
+      "y": 8
+    }
+  ],
+  "pairs": [
+    {
+      "actor": "cooper",
+      "tile": "7,8",
+      "foot": 144,
+      "prop": "roadhouse-chair-03",
+      "propFoot": 144,
+      "layer": 6,
+      "band": "interleaves with the actors",
+      "expect": "actor in front",
+      "sampled": 10,
+      "changed": 0
+    },
+    {
+      "actor": "james",
+      "tile": "2,4",
+      "foot": 80,
+      "prop": "roadhouse-booth-01",
+      "propFoot": 82,
+      "layer": 5,
+      "band": "below the actors",
+      "expect": "actor in front",
+      "sampled": 30,
+      "changed": 0
+    },
+    {
+      "actor": "norma",
+      "tile": "5,6",
+      "foot": 112,
+      "prop": "roadhouse-chair-01",
+      "propFoot": 112,
+      "layer": 6,
+      "band": "interleaves with the actors",
+      "expect": "actor in front",
+      "sampled": 30,
+      "changed": 0
+    }
+  ]
+}

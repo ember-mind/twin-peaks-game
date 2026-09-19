@@ -53,6 +53,8 @@
  * WB_ONLY_M8=1 runs cases 16-19 only (M8 iteration); WB_ONLY_M10B=1 runs cases 20-22; the committed proof runs every case.
  * world/scene-objects.json is hashed before and after every M8 case: the editor never writes it.
  * Ids created here are assembled at runtime: a literal id in this file would count as a reference to world-apply.
+ * M12 note: cases 20-22 pin registry counts (26 instances) and the id the catalog suggests (-04, since -03 is
+ * a real instance now). They follow world/props.json and are expected to move when it does.
  */
 
 const fs = require('node:fs');
@@ -1042,7 +1044,7 @@ async function main() {
       check('case 20: a click on a prop selects the instance, not the tile marker', s.selectedProp === PROP_CHAIR && s.selectedId === null, { p: s.selectedProp, i: s.selectedId });
       const insp = await cdp.eval("document.getElementById('wb-inspector').innerText");
       check('case 20: the inspector names the definition, anchor, layer band and footprint',
-        (await text('wb-prop-def')).includes('roadhouse.chair.red') && (await text('wb-prop-anchor')) === '7.8125,7.25' &&
+        (await text('wb-prop-def')).includes('roadhouse.chair.red') && (await text('wb-prop-anchor')) === '7.8125,7' &&
         (await text('wb-prop-layer')) === '6 (definition default) — interleaves with the actors' && (await text('wb-prop-footprint')) === '7,7', insp);
       check('case 20: VIEW offers no MOVE', !(await cdp.eval("!!document.querySelector('[data-action=\"move-prop\"]')")));
 
@@ -1053,7 +1055,7 @@ async function main() {
       await clickTile(4, 7);
       s = await state();
       const moved = s.propItems.find((p) => p.id === PROP_CHAIR);
-      check('case 20: MOVE keeps the sub-tile fraction of the anchor', moved.tx === 4.8125 && moved.ty === 7.25, moved);
+      check('case 20: MOVE keeps the sub-tile fraction of the anchor', moved.tx === 4.8125 && moved.ty === 7, moved);
       check('case 20: one prop change, and it is an upsert', s.propChangeCount === 1 && s.propOps.length === 1 && s.propOps[0].op === 'upsert' && s.propOps[0].id === PROP_CHAIR, s.propOps);
       await clickAction('flip-prop');
       s = await state();
@@ -1070,7 +1072,7 @@ async function main() {
       fs.writeFileSync(file, exported);
       const dry = dryRun(file, 'case20-dry-run.txt', OUT10);
       check('case 20: --dry-run VALID, the tx line changes', dry.status === 0 && dry.stdout.includes('TARGET world/props.json :: ' + PROP_CHAIR) &&
-        dry.stdout.includes('VALID 19 prop instance(s)') && /-\s+"tx": 7\.8125,/.test(dry.stdout) && /\+\s+"tx": 4\.8125,/.test(dry.stdout) &&
+        dry.stdout.includes('VALID 26 prop instance(s)') && /-\s+"tx": 7\.8125,/.test(dry.stdout) && /\+\s+"tx": 4\.8125,/.test(dry.stdout) &&
         /\+\s+"flipX": true/.test(dry.stdout), dry.stdout + dry.stderr);
       await clickAction('revert-prop');
       s = await state();
@@ -1096,7 +1098,7 @@ async function main() {
       await cdp.eval("document.querySelector('[data-prop=\"roadhouse.candle.brass\"]').click()");
       await sleep(80);
       s = await state();
-      check('case 21: picking a definition suggests a free instance id', s.newProp.propId === 'roadhouse.candle.brass' && s.newProp.id === ['roadhouse', 'candle', '03'].join('-'), s.newProp);
+      check('case 21: picking a definition suggests a free instance id', s.newProp.propId === 'roadhouse.candle.brass' && s.newProp.id === ['roadhouse', 'candle', '04'].join('-'), s.newProp);
       await clickAction('new-prop-pick');
       await clickTile(1, 1);
       s = await state();
@@ -1121,7 +1123,7 @@ async function main() {
       const file = path.join(OUT10, 'case21-changeset.json');
       fs.writeFileSync(file, exported);
       const dry = dryRun(file, 'case21-dry-run.txt', OUT10);
-      check('case 21: --dry-run accepts the create', dry.status === 0 && dry.stdout.includes('CREATE world/props.json :: ') && dry.stdout.includes('VALID 20 prop instance(s)'), dry.stdout + dry.stderr);
+      check('case 21: --dry-run accepts the create', dry.status === 0 && dry.stdout.includes('CREATE world/props.json :: ') && dry.stdout.includes('VALID 27 prop instance(s)'), dry.stdout + dry.stderr);
 
       await clickAction('revert-prop');
       s = await state();
@@ -1157,7 +1159,7 @@ async function main() {
       await clickTile(7, 9);
       s = await state();
       const onDoor = s.propItems.find((p) => p.id === PROP_TABLE);
-      check('case 22: the table sits on the south door tile in the draft', onDoor.tx === 7.125 && onDoor.ty === 9.125, onDoor);
+      check('case 22: the table sits on the south door tile in the draft', onDoor.tx === 7.125 && onDoor.ty === 9, onDoor);
       check('case 22: the Builder reports no error (the lock is the tool\'s, not the schema\'s)', !s.errors['props:roadhouse'], s.errors);
       await shot('case22-on-door.png', OUT10);
       const exported = await exportText();
