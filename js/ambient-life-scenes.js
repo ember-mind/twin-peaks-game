@@ -14,7 +14,7 @@
     {id:'pendant-west',type:'LIGHT_WARM_VARIATION',duration:[1200,1600],x:37,y:5,depth:0,regions:[{x:31,y:19,w:8,h:1,depth:0},{x:42,y:47,w:12,h:1,depth:64}]},
     {id:'pendant-middle',type:'LIGHT_WARM_VARIATION',duration:[1200,1600],x:67,y:5,depth:0,regions:[{x:61,y:19,w:8,h:1,depth:0},{x:85,y:48,w:10,h:1,depth:64}]},
     {id:'pendant-east',type:'LIGHT_WARM_VARIATION',duration:[1200,1600],x:187,y:5,depth:0,regions:[{x:180,y:19,w:8,h:1,depth:0},{x:159,y:47,w:10,h:1,depth:64}]},
-    {id:'double-r-neon',type:'LIGHT_NEON',duration:[700,850],x:72,y:-13,depth:0,variants:3,tubes:tubes,segments:[{x:46,y:7,w:7,h:2},{x:7,y:10,w:4,h:2},{x:46,y:13,w:6,h:2}],regions:[{x:79,y:13,w:52,h:2,depth:0}]},
+    {id:'double-r-neon',type:'LIGHT_NEON',duration:[700,850],x:72,y:-13,depth:0,variants:3,tubes:tubes,segments:[{x:46,y:7,w:7,h:2},{x:6,y:7,w:4,h:6},{x:46,y:13,w:6,h:2}],regions:[{x:79,y:13,w:52,h:2,depth:0}]},
     {id:'coffee-machine',type:'MACHINE_IDLE_ACTIVITY',x:35,y:31,depth:64,variants:2,
       delay:[6500,12500],duration:[1100,1500],intensity:1.45,marks:[
       [{x:11,y:4,w:3,h:3,color:'#e9bd5d'},{x:5,y:7,w:2,h:3,color:'#906744'}],

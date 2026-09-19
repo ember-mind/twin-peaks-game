@@ -4260,7 +4260,13 @@
       red:'#8c2f3e', redHi:'#c45a61', redLight:'#e28b80', redDark:'#501f29',
       wood:'#5b3a28', woodHi:'#946345', woodLight:'#b88759', woodDark:'#35271f',
       green:'#223b2f', leaf:'#567345', leafHi:'#879452', metal:'#81918b',
-      metalHi:'#d9dfc9', tile:'#898b75', tileShade:'#80836e', floorLight:'#c5bc9c', floorShade:'#b9ae90' }
+      metalHi:'#d9dfc9',
+      /* Checker. The board calls for a warm cream/red floor; the round-1
+       * grey-green read cold and muddy against the wood. A lightening pass
+       * washed the floor out on 2026-09-19 and was reverted, so these move
+       * hue at matched luma: tile 136 -> 133, tileShade 128 -> 122,
+       * floorLight 188 -> 188.5, floorShade 176 -> 175.7. */
+      tile:'#b9706a', tileShade:'#ab6660', floorLight:'#cebb96', floorShade:'#c2ae89' }
   };
   function interiorContact(g,x,y,w,p) {
     // Three crisp native rows: diffuse footprint, tight occlusion, tapered edge.
@@ -4478,21 +4484,49 @@
     R(g,x-5,y+10,1,4,p.woodLight); R(g,x+5,y+10,1,4,p.woodLight);
   }
   function interiorPicture(g,x,y,w,h,p,kind) {
+    /* One image per frame, built from two or three masses. The round-1
+     * version drew a nest of four borders and a few 1px marks inside a 13x16
+     * box, which a fresh critic read at 1x as speckle down the side walls. */
     R(g,x,y,w,h,p.ink); R(g,x+1,y+1,w-2,h-2,p.woodLight);
-    R(g,x+2,y+2,w-4,h-4,p.creamShade); R(g,x+3,y+3,w-6,h-6,p.green);
+    R(g,x+2,y+2,w-4,h-4,p.woodDark);
+    var ix=x+3, iy=y+3, iw=w-6, ih=h-6;
     if(kind==='clock') {
-      R(g,x+3,y+3,w-6,h-6,p.cream); R(g,x+w/2,y+4,1,4,p.ink);
+      R(g,ix,iy,iw,ih,p.cream); R(g,x+w/2,y+4,1,4,p.ink);
       R(g,x+w/2,y+7,3,1,p.ink);
-    } else if(kind==='portrait') {
-      R(g,x+4,y+4,w-8,h-8,p.woodDark); R(g,x+5,y+5,4,5,p.creamShade);
-      R(g,x+4,y+10,6,4,p.redDark);
-    } else {
-      for(var i=4;i<w-4;i+=4) {
-        R(g,x+i,y+5,1,h-8,p.woodHi); R(g,x+i-1,y+7,3,2,p.leafHi);
-      }
-      R(g,x+4,y+h-5,w-8,1,p.gold);
+      return;
     }
+    if(kind==='portrait') {
+      /* A head and shoulders: one lit ground, one dark hair mass, one cream
+       * face, one red collar. Four values, no 1px detail. */
+      R(g,ix,iy,iw,ih,p.creamShade);
+      R(g,ix,iy,iw,2,p.cream);
+      var hw=Math.max(6,iw-2), hx=ix+((iw-hw)>>1);
+      R(g,hx,iy+3,hw,7,p.woodDark);
+      R(g,hx+1,iy+5,hw-2,5,p.cream);
+      R(g,hx+2,iy+7,2,1,p.ink);
+      R(g,hx+hw-4,iy+7,2,1,p.ink);
+      R(g,hx-1,iy+11,hw+2,ih-12,p.redDark);
+      R(g,hx+1,iy+12,hw-2,2,p.red);
+      R(g,ix,iy+ih-1,iw,1,p.woodDark);
+      return;
+    }
+    /* A landscape: a lit sky, a dark ridge with a zigzag crest, a green
+     * foreground. Three masses that survive a 1x read. */
+    var sky=Math.max(4,Math.floor(ih*0.42));
+    R(g,ix,iy,iw,sky,p.cream);
+    R(g,ix,iy+sky-2,iw,2,p.creamShade);
+    var ridge=[1,3,2,5,3,2,4,2,1];
+    for(var c=0;c<iw;c++) {
+      var lift=ridge[c%ridge.length];
+      R(g,ix+c,iy+sky-lift,1,lift,p.woodDark);
+    }
+    R(g,ix,iy+sky,iw,1,p.ink);
+    R(g,ix,iy+sky+1,iw,ih-sky-1,p.leaf);
+    R(g,ix,iy+sky+1,iw,1,p.leafHi);
+    R(g,ix+1,iy+ih-4,iw-2,2,p.green);
+    R(g,ix,iy+ih-1,iw,1,p.woodDark);
   }
+
   function interiorPlant(g,x,y,p) {
     R(g,x+3,y+12,10,2,p.ink); R(g,x+4,y+6,8,7,p.woodHi);
     R(g,x+5,y+8,6,1,p.gold); R(g,x+7,y-4,2,12,p.woodDark);
@@ -4501,22 +4535,42 @@
     });
   }
   function interiorCoffeeMachine(g,x,y,p) {
+    /* One tall chrome mass with a dark head band and two group heads, rather
+     * than a 16x16 box of 1px details that dissolves at 1x. The ambient
+     * coffee-machine marks anchor at y+4 and y+7, which stay on the body. */
     interiorContact(g,x,y+15,17,p);
-    R(g,x,y,16,16,p.ink); R(g,x+1,y+1,14,11,p.metal);
-    R(g,x+2,y+2,12,2,p.metalHi); R(g,x+3,y+5,10,5,p.ink);
-    R(g,x+4,y+6,1,3,p.metalHi); R(g,x+10,y+6,1,3,p.metalHi);
-    R(g,x+2,y+12,12,2,p.metalHi); R(g,x+3,y+15,10,1,p.woodDark);
-    interiorCup(g,x+5,y+9,p);
-    R(g,x+2,y-3,4,3,p.cream); R(g,x+8,y-2,5,2,p.creamShade);
-    R(g,x+1,y+3,1,7,p.metalHi); R(g,x+14,y+4,1,8,p.woodDark);
+    R(g,x,y-5,16,21,p.ink);
+    R(g,x+1,y-4,14,4,p.metalHi);
+    R(g,x+2,y-3,12,2,p.cream);
+    /* A dark body, so the machine silhouettes against the pale back bar
+     * instead of merging into it. */
+    R(g,x+1,y,14,12,p.woodDark);
+    R(g,x+2,y+1,12,4,p.ink);
+    R(g,x+3,y+2,4,2,p.gold);
+    R(g,x+9,y+2,4,2,p.creamShade);
+    R(g,x+2,y+6,5,6,p.ink);
+    R(g,x+9,y+6,5,6,p.ink);
+    R(g,x+3,y+7,3,3,p.metalHi);
+    R(g,x+10,y+7,3,3,p.metalHi);
+    R(g,x+1,y+12,14,2,p.metalHi);
+    R(g,x+2,y+14,12,2,p.woodDark);
+    R(g,x+1,y,1,12,p.metalHi);
+    R(g,x+14,y,1,12,p.woodDark);
   }
+
   function interiorPieCase(g,x,y,w,p) {
     interiorContact(g,x+1,y+17,w-1,p);
     R(g,x,y,w,18,p.ink); R(g,x+1,y+1,w-2,15,p.metal);
     R(g,x+2,y+2,w-4,5,'#adc0b0'); R(g,x+2,y+8,w-4,7,p.woodHi);
-    for(var row=0;row<2;row++) for(var i=4;i<w-5;i+=10) {
-      R(g,x+i-1,y+6+row*7,8,1,p.cream); R(g,x+i,y+4+row*7,6,2,'#d89345'); R(g,x+i+1,y+4+row*7,4,1,'#edb96b');
-      R(g,x+i+1,y+3+row*7,4,1,(i+row)%3===0?p.creamShade:p.gold); R(g,x+i+2,y+4+row*7,1,1,p.woodHi); R(g,x+i+4,y+4+row*7,1,1,p.woodHi);
+    /* Three whole pies per shelf instead of five slivers: at 1x a pie has to
+     * be a mass with a crust edge, not a two-pixel tick. */
+    for(var row=0;row<2;row++) for(var i=4;i<w-9;i+=14) {
+      R(g,x+i-1,y+7+row*7,11,1,p.cream);
+      R(g,x+i,y+3+row*7,9,4,p.woodDark);
+      R(g,x+i+1,y+4+row*7,7,3,'#d89345');
+      R(g,x+i+2,y+4+row*7,5,1,'#edb96b');
+      R(g,x+i+3,y+3+row*7,3,1,(i+row)%2===0?p.creamShade:p.gold);
+      R(g,x+i+1,y+6+row*7,7,1,p.woodHi);
     }
     R(g,x+1,y+8,w-2,1,p.metalHi); R(g,x+1,y+16,w-2,1,p.gold);
     R(g,x+3,y+2,2,5,'#e5e6cd'); R(g,x+w-5,y+2,1,12,p.metalHi);
@@ -4551,25 +4605,42 @@
       R(g,lx+2,ly+2,1,4,p.leaf); R(g,lx+3,ly+1,3,1,'#a4a55c');
     });
   }
+  /* DOUBLE on a 4x6 grid with one-pixel spacing. The earlier sign sheared each
+   * glyph by (6-row)/3 and then painted a +1,+1 glow pass under it, which
+   * filled the one-pixel gaps: a fresh critic read the D and B as collapsing
+   * into the board. Upright glyphs, cream on the dark board, one straight
+   * drop row below each stroke, and the big looped R left as the red accent. */
+  var NEON_FONT_4X6 = {
+    D: ['1110', '1001', '1001', '1001', '1001', '1110'],
+    O: ['0110', '1001', '1001', '1001', '1001', '0110'],
+    U: ['1001', '1001', '1001', '1001', '1001', '0110'],
+    B: ['1110', '1001', '1110', '1001', '1001', '1110'],
+    L: ['1000', '1000', '1000', '1000', '1000', '1111'],
+    E: ['1111', '1000', '1110', '1000', '1000', '1111']
+  };
   function interiorNeon(g,x,y,p) {
     R(g,x,y,68,26,p.woodDark); R(g,x+1,y+1,66,24,p.woodLight);
     R(g,x+3,y+2,62,22,p.green); R(g,x+4,y+3,60,19,'#26312b');
-    // Slanted pixel lettering and a large looped R form one custom brand mark.
-    var points=[], word='DOUBLE';
-    for(var c=0;c<word.length;c++) {
-      var glyph=TOWN_FONT_5X7[word[c]];
-      for(var row=0;row<7;row++) for(var col=0;col<5;col++) if(glyph[row][col]==='1') {
-        points.push([x+6+c*6+col+Math.floor((6-row)/3),y+8+row]);
+    var word='DOUBLE', c, row, col;
+    for(c=0;c<word.length;c++) {
+      var glyph=NEON_FONT_4X6[word[c]];
+      for(row=0;row<6;row++) for(col=0;col<4;col++) {
+        if(glyph[row][col]!=='1') continue;
+        R(g,x+6+c*5+col,y+8+row,1,1,'#713740');
       }
     }
-    // Two passes prevent one glyph's glow from erasing adjacent neon strokes.
-    points.forEach(function(a){R(g,a[0]+1,a[1]+1,1,1,'#713740');});
-    points.forEach(function(a){R(g,a[0],a[1],1,1,'#e48480');});
+    for(c=0;c<word.length;c++) {
+      var lit=NEON_FONT_4X6[word[c]];
+      for(row=0;row<6;row++) for(col=0;col<4;col++) {
+        if(lit[row][col]!=='1') continue;
+        R(g,x+6+c*5+col,y+7+row,1,1,p.cream);
+      }
+    }
     var pattern=['...RRRRRR..','..RR....RR.','..RR....RR.','..RR...RR..','..RRRRRR...','..RR.RR....','.RR...RR...','.RR....RR..','RR......RR.'];
     for(var ry=0;ry<pattern.length;ry++) for(var rx=0;rx<pattern[ry].length;rx++) if(pattern[ry][rx]==='R') {
       R(g,x+43+rx,y+5+ry*2,2,2,p.redHi); R(g,x+43+rx,y+5+ry*2,1,1,p.redLight);
     }
-    R(g,x+7,y+20,30,1,p.redHi); R(g,x+10,y+19,33,1,p.redDark);
+    R(g,x+6,y+15,29,1,p.redHi); R(g,x+8,y+16,25,1,p.redDark);
     // Reflected neon only on adjacent wood; the sign itself is unchanged.
     R(g,x+7,y+26,52,1,'rgba(196,90,97,.20)');
     R(g,x+14,y+27,38,1,'rgba(196,90,97,.12)');
@@ -4735,8 +4806,12 @@
     var model=map.interior, p=INTERIOR_MATERIALS[model.material], x=-cx, y=-cy, i;
     R(g,0,0,g.canvas ? g.canvas.width : 256,g.canvas ? g.canvas.height : 192,'#17251e');
     // Restore a continuous floor beneath furniture, with 8px checker tiles.
+    /* The checker is phased on the TILE grid, not on its own 8px run: each
+     * 16px room tile carries one complete light/dark quad, so the floor lines
+     * up with the booth fronts at y=112 and y=144 and with the counter and
+     * door tiles rather than drifting against them. */
     for(var fy=16;fy<144;fy+=8) for(var fx=16;fx<208;fx+=8) {
-      var dark=((fx+fy)/8)&1;
+      var dark=(((fx-16)/8)+((fy-16)/8))&1;
       R(g,x+fx,y+fy,8,8,dark?p.tile:p.floorLight);
       R(g,x+fx,y+fy+7,8,1,dark?p.tileShade:p.floorShade);
       // Sparse, deterministic value changes; no random dirt or per-frame noise.
@@ -4745,6 +4820,10 @@
       if(tileKey===12) R(g,x+fx+1,y+fy+2,5,4,'rgba(41,43,38,.035)');
       if(fx>=104 && fx<=120 && fy>=80 && fy%24===8)
         R(g,x+fx+2,y+fy+3,4,1,'rgba(244,230,200,.09)');
+      /* Grout on the 16px boundaries: the line the eye uses to see that the
+       * floor grid and the room grid are the same grid. */
+      if(fx%16===0) R(g,x+fx,y+fy,1,8,'rgba(41,43,38,.16)');
+      if(fy%16===0) R(g,x+fx,y+fy,8,1,'rgba(41,43,38,.16)');
     }
     // Lower-contrast floor, wall contact shadows and localized warm pools.
     R(g,x+16,y+44,192,8,'rgba(32,28,21,.20)');
@@ -4770,11 +4849,12 @@
     R(g,coatX+7,coatY,2,14,p.woodHi); R(g,coatX+3,coatY+13,10,2,p.ink);
     R(g,coatX+2,coatY+1,12,2,p.woodLight); R(g,coatX+2,coatY+3,4,7,p.redDark); R(g,coatX+11,coatY+3,3,9,p.green);
     // Hanging plants occupy side-wall trim; aisle remains truly walkable.
-    interiorPicture(g,x+1,y+30,13,18,p,'portrait');
-    // Local-history cluster on the left; one quieter portrait on the right.
-    interiorPicture(g,x+1,y+49,13,16,p,'photo');
-    interiorPicture(g,x+1,y+99,13,16,p,'photo');
-    interiorPicture(g,x+210,y+53,12,15,p,'portrait');
+    /* Two large frames on the west wall and one on the east, each clear of
+     * the lamps at y=68 and y=119. Four small ones down a strip was the
+     * speckle a fresh critic saw at 1x. */
+    interiorPicture(g,x+1,y+30,13,28,p,'photo');
+    interiorPicture(g,x+1,y+88,13,26,p,'portrait');
+    interiorPicture(g,x+210,y+40,12,26,p,'photo');
     [68,119].forEach(function(ly){
       interiorWarmLight(g,x+1,y+ly+1,30,20,ly===119?.7:.9); interiorWarmLight(g,x+193,y+ly+1,30,20,ly===119?.35:.8);
       interiorLamp(g,x+7,y+ly,p);interiorLamp(g,x+216,y+ly,p);
