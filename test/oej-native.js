@@ -242,6 +242,26 @@ assert.equal(outOfFrame.length, 0,
 const topBand = authoredPixels.calls.filter((call) => call.args[1] <= Art.viewTop);
 assert(topBand.length > 0, 'the band above the map row 0 is painted, never left black');
 
+// Il retrobanco porta CINQUE sagome di bottiglia larghe 5px, non una fila di
+// stecchini: al native le bottiglie devono essere leggibili una per una.
+const bottleBodies = authoredPixels.calls.filter((call) =>
+  call.args[2] === 5 && call.args[0] >= 96 && call.args[0] <= 164 &&
+  call.args[1] >= 44 && call.args[1] <= 58 && call.args[3] >= 5);
+assert.equal(bottleBodies.length, 5, 'the back bar carries five 5px bottle silhouettes');
+
+// La luce delle applique segue la grammatica della citta' (interiorPool in
+// js/retro-authored.js): ellissi annidate con rientro quadratico. Se le righe
+// avessero tutte la stessa lunghezza sarebbe un rettangolo, non una pozza.
+const poolTones = new Set([Art.palette.carpetMid, Art.palette.carpetHi, Art.palette.carpetGlow]);
+const poolRows = authoredPixels.calls.filter((call) =>
+  poolTones.has(call.color) && (call.args[0] === 16 || call.args[0] + call.args[2] === 240));
+assert(poolRows.length > 40, 'all four sconce pools are painted');
+const poolWidths = new Set(poolRows.map((call) => call.args[2]));
+assert(poolWidths.size >= 6,
+  'each pool falls off in steps instead of squaring into a wedge, got widths ' +
+  [...poolWidths].sort((a, b) => a - b).join(','));
+assert.equal(poolRows.every((call) => call.args[3] === 2), true, 'the pool steps are two pixels tall');
+
 function foregroundCalls(min, max) {
   const recording = newRecordingContext();
   artForeground(recording.context, 0, 0, min, max);
@@ -252,20 +272,20 @@ function hasRect(calls, x, y, width, height) {
     call.args[0] === x && call.args[1] === y && call.args[2] === width && call.args[3] === height);
 }
 const depth48 = foregroundCalls(48, 64);
-assert(hasRect(depth48, 46, 29, 36, 16), '48px interval selects the north gaming tables');
-assert(hasRect(depth48, 222, 18, 18, 30), '48px interval selects the service cabinet');
-assert(!hasRect(depth48, 49, 48, 14, 9), '48px interval excludes the north stools at 64px');
+assert(hasRect(depth48, 48, 29, 32, 16), '48px interval selects the north gaming tables');
+assert(hasRect(depth48, 224, 18, 16, 30), '48px interval selects the service cabinet');
+assert(!hasRect(depth48, 50, 47, 12, 9), '48px interval excludes the north stools at 64px');
 const depth64 = foregroundCalls(64, 80);
-assert(hasRect(depth64, 49, 48, 14, 9), '64px interval selects the north stools');
+assert(hasRect(depth64, 50, 47, 12, 9), '64px interval selects the north stools');
 assert(!hasRect(depth64, 80, 68, 96, 10), '64px interval excludes the bar at 80px');
 const depth80 = foregroundCalls(80, 112);
 assert(hasRect(depth80, 80, 68, 96, 10), '80px interval selects the bar counter front');
 assert(hasRect(depth80, 81, 58, 94, 2), 'the bar shelf plank repaints with the bar, over a body behind it');
 const depth128 = foregroundCalls(128, 176);
-assert(hasRect(depth128, 174, 109, 36, 16), '128px interval selects the south gaming tables');
-assert(!hasRect(depth128, 104, 141, 4, 35), '128px interval excludes the door jamb at 176px');
+assert(hasRect(depth128, 176, 109, 32, 16), '128px interval selects the south gaming tables');
+assert(!hasRect(depth128, 112, 144, 4, 32), '128px interval excludes the door jamb at 176px');
 const depthDoor = foregroundCalls(176, Infinity);
-assert(hasRect(depthDoor, 104, 141, 4, 35), 'the door band repaints the jamb over a body in the threshold');
+assert(hasRect(depthDoor, 112, 144, 4, 32), 'the door band repaints the jamb over a body in the threshold');
 assert(!hasRect(depthDoor, 80, 68, 96, 10), 'the door band carries no furniture');
 assert.equal(foregroundCalls(49, 63).length, 0, 'an empty depth interval paints nothing');
 
@@ -352,6 +372,47 @@ assert.deepEqual([Engine.state.mapId, Engine.state.player.tx, Engine.state.playe
   'stool collision leaves player and map unchanged');
 assert.equal(storageWrites, 0, 'native scene traversal never writes a save');
 
+// ------------------------------------------------- profondita' sul percorso
+// Il motore ordina per quota del piede. Su ogni tile del percorso 8,8 -> 7,5
+// (il tragitto che Cooper fa per raggiungere Jacques al bancone) ricontrolliamo
+// che cosa viene ridipinto SOPRA di lui: il bancone deve coprirlo solo quando
+// e' dietro, mai quando gli sta davanti.
+const BAR_FOOT = Art.definitions.find((prop) => prop.id === 'barCounter').footY;
+const barFront = (calls) => hasRect(calls, 80, 68, 96, 10);
+function repaintedOver(tx, ty) {
+  // Tutto cio' che ha footY maggiore del piede dell'attore viene ridipinto
+  // dopo di lui: e' esattamente l'intervallo [piede, +inf).
+  return foregroundCalls((ty + 1) * 16, Infinity);
+}
+const approach = [[8, 8], [8, 7], [8, 6], [7, 6]];
+for (const [tx, ty] of approach) {
+  assert.equal(isSolid(tx, ty), false, `the approach tile ${tx},${ty} is walkable`);
+  assert.equal(barFront(repaintedOver(tx, ty)), false,
+    `Cooper at ${tx},${ty} is south of the bar and is never repainted over`);
+}
+assert.equal(barFront(repaintedOver(7, 5)), false,
+  'Cooper beside Jacques at 7,5 stands in front of the bar');
+assert.equal(Scene.actors.jacques.y * 16 + 16 > BAR_FOOT, true,
+  'Jacques foot line is south of the bar foot line, so the bar never covers him');
+assert.equal(barFront(repaintedOver(7, 3)), true,
+  'a body behind the bar at 7,3 is occluded by it, never standing on it');
+assert.equal(barFront(repaintedOver(7, 4 - 1)), true, 'the north side of the bar occludes');
+
+// Nessun mobile puo' coprire un attore del cast: per ognuno, niente di cio'
+// che viene ridipinto sopra di lui interseca il suo riquadro sprite.
+function spriteBox(spot) { return [spot.x * 16, spot.y * 16 - 8, 16, 24]; }
+function overlaps(rect, box) {
+  return rect[0] < box[0] + box[2] && rect[0] + rect[2] > box[0] &&
+    rect[1] < box[1] + box[3] && rect[1] + rect[3] > box[1];
+}
+for (const [id, spot] of Object.entries(Scene.actors)) {
+  const box = spriteBox(spot);
+  const over = repaintedOver(spot.x, spot.y)
+    .filter((call) => overlaps(call.args, box));
+  assert.equal(over.length, 0,
+    id + ' is never painted over by furniture: ' + JSON.stringify(over.slice(0, 3)));
+}
+
 // ------------------------------------------- ordine dei valori sulla cattura
 function decodePng(file) {
   const buf = fs.readFileSync(file);
@@ -435,12 +496,33 @@ assert(feltPlane > carpetPlane + 15,
 assert(drapeNorth > carpetPlane,
   `the drape reads above the carpet it stands on (${drapeNorth.toFixed(1)} vs ${carpetPlane.toFixed(1)})`);
 
+// Lo sgabello ha la sua coppia di valori: al native una seduta deve leggersi
+// come una sedia, non come un tavolino. Il cuscino sta un gradino sopra il
+// bordo mogano del tavolo ed e' rosso, non marrone.
+const stoolCushion = region(51, 64, 10, 6);
+const tableRail = region(50, 46, 28, 2);
+assert(mean(stoolCushion) > mean(tableRail) + 10,
+  `the stool cushion is its own value above the table rail (${mean(stoolCushion).toFixed(1)} vs ${mean(tableRail).toFixed(1)})`);
+assert(stoolCushion.some(([r, g, b]) => r > g + 60 && r > b + 50),
+  'the stool cushion is crimson leather, not mahogany');
+
+// La roulette deve leggersi come una ruota a 1x: anello chiaro, banda di
+// caselle alternate, mozzo. Il bordo sta molto sopra le caselle e la banda
+// porta almeno due valori.
+const wheelRim = region(54, 49, 11, 1);
+const wheelPockets = region(54, 50, 11, 5);
+assert(mean(wheelRim) > mean(wheelPockets) + 60,
+  `the roulette rim ring reads above its pockets (${mean(wheelRim).toFixed(1)} vs ${mean(wheelPockets).toFixed(1)})`);
+const pocketValues = new Set(region(54, 52, 11, 1).map((px) => px.join(',')));
+assert(pocketValues.size >= 2,
+  'the pocket band alternates at least two values, so the wheel is not a flat disc');
+
 // Il verde e' solo feltro e bottiglie del retrobanco: quattro tavoli piu' la
 // mensola. Nessun verde vagante altrove nella stanza.
 const feltCells = [];
 for (let y = 0; y < 192; y++) for (let x = 0; x < 256; x++) if (isFelt(pixel(x, y))) feltCells.push(x + ',' + y);
 assert(feltCells.length > 600, 'the felt beds are actually painted');
-const feltBoxes = [[46, 42, 36, 22], [174, 42, 36, 22], [46, 122, 36, 22], [174, 122, 36, 22]];
+const feltBoxes = [[48, 42, 32, 22], [176, 42, 32, 22], [48, 122, 32, 22], [176, 122, 32, 22]];
 const greenBoxes = feltBoxes.concat([[80, 60, 96, 18]]);
 const inBox = (x, y, [bx, by, bw, bh]) => x >= bx && x < bx + bw && y >= by && y < by + bh;
 const strayGreen = feltCells.filter((cell) => {
@@ -455,4 +537,5 @@ for (const box of feltBoxes) {
 
 console.log('OEJ-NATIVE-PASS production hooks, authored geometry, footprint parity, cast cells free, ' +
   'collision and reachability, keyboard routes, integer native pixels, depth intervals and door band, ' +
-  'value order, felt confined to the four tables');
+  'value order, felt confined to the four tables, stool vs table values, roulette ring, ' +
+  'five bottle silhouettes, stepped sconce falloff, depth along the 8,8 -> 7,5 approach');
