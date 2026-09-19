@@ -22,7 +22,7 @@ const runTo = (page, day, minute) => page.evaluate("(async function(){ var st = 
 (async function () {
   const page = await launch({ root: ROOT, width: 1280, height: 900 });
   try {
-    await page.navigate('living-town/index.html?world=new');
+    await page.navigate('living-town/index.html?world=new&cast=pair');
     await sleep(1500);
     const shots = [
       ['01-book-on-the-bench-closed', 1, 875, 1], ['02-book-being-read-open', 1, 900, 1],

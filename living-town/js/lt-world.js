@@ -122,6 +122,59 @@
         ',,,,--,,,,'
       ]
     },
+    /* Three more homes on the same street. Whether anyone lives in them is up
+     * to the cast a world is made with (see W.NEIGHBOURS); an empty one keeps
+     * its plain name. */
+    flat_c: {
+      id: 'flat_c', kind: 'home', indoor: true, name: 'the flat over the bakery',
+      nameTemplate: "%s's flat", resident: 'resident_c',
+      opens: 0, closes: 1440, owner: 'resident_c',
+      spawn: { x: 5, y: 5, dir: 'up' },
+      exit: { x: 5, y: 6 },
+      rows: [
+        '##########',
+        '#K..=...B#',
+        '#K......B#',
+        '#....tc..#',
+        '#........#',
+        '#........#',
+        '####DD####',
+        ',,,,--,,,,'
+      ]
+    },
+    flat_d: {
+      id: 'flat_d', kind: 'home', indoor: true, name: 'the ground-floor rooms',
+      nameTemplate: "%s's rooms", resident: 'resident_d',
+      opens: 0, closes: 1440, owner: 'resident_d',
+      spawn: { x: 4, y: 5, dir: 'up' },
+      exit: { x: 4, y: 6 },
+      rows: [
+        '###########',
+        '#BB...=..K#',
+        '#........K#',
+        '#.ct......#',
+        '#.........#',
+        '#.........#',
+        '###DD######',
+        ',,,--,,,,,,'
+      ]
+    },
+    flat_e: {
+      id: 'flat_e', kind: 'home', indoor: true, name: 'the attic room',
+      nameTemplate: "%s's room", resident: 'resident_e',
+      opens: 0, closes: 1440, owner: 'resident_e',
+      spawn: { x: 3, y: 4, dir: 'up' },
+      exit: { x: 3, y: 5 },
+      rows: [
+        '########',
+        '#BB..=K#',
+        '#......#',
+        '#..t...#',
+        '#......#',
+        '##DD####',
+        ',,--,,,,'
+      ]
+    },
     /* Transit only. Nobody lives on the street, but travel happens in public:
      * a viewer must be able to watch someone walk between two places. */
     street: {
@@ -146,13 +199,16 @@
 
   /* Where each place meets the street, so a traveller has a path to walk. */
   W.STREET_PORTALS = {
-    flat_a: { x: 3, y: 3 }, cafe: { x: 16, y: 3 }, park: { x: 8, y: 8 }, flat_b: { x: 1, y: 6 }
+    flat_a: { x: 3, y: 3 }, cafe: { x: 16, y: 3 }, park: { x: 8, y: 8 }, flat_b: { x: 1, y: 6 },
+    flat_c: { x: 9, y: 3 }, flat_d: { x: 18, y: 6 }, flat_e: { x: 14, y: 8 }
   };
 
   /* Minutes on foot. Symmetric, and no route is instant. */
   var TRAVEL = {};
   [['flat_a', 'cafe', 12], ['flat_a', 'park', 14], ['cafe', 'park', 8],
-   ['flat_b', 'cafe', 9], ['flat_b', 'park', 11], ['flat_b', 'flat_a', 16]].forEach(function (r) {
+   ['flat_b', 'cafe', 9], ['flat_b', 'park', 11], ['flat_b', 'flat_a', 16],
+   ['flat_c', 'cafe', 7], ['flat_c', 'park', 9], ['flat_d', 'cafe', 5], ['flat_d', 'park', 10],
+   ['flat_e', 'cafe', 8], ['flat_e', 'park', 6]].forEach(function (r) {
     TRAVEL[[r[0], r[1]].sort().join('|')] = r[2];
   });
 
@@ -162,7 +218,7 @@
     return TRAVEL[key] || 0;
   };
 
-  W.destinations = function () { return ['flat_a', 'flat_b', 'cafe', 'park']; };
+  W.destinations = function () { return ['flat_a', 'flat_b', 'cafe', 'park', 'flat_c', 'flat_d', 'flat_e']; };
 
   /* A private place is only a destination for the person who lives there.
    * Nobody wanders into someone else's flat because the pathfinder allows it. */
@@ -190,7 +246,11 @@
       tags: ['work', 'food'], portable: false, owner: 'cafe',
       affordances: ['work_shift', 'buy_meal'],
       anchors: { work_shift: { x: 3, y: 2, dir: 'down' }, work_extra_shift: { x: 3, y: 2, dir: 'down' },
-                 buy_meal: { x: 4, y: 4, dir: 'up' } } },
+                 buy_meal: { x: 4, y: 4, dir: 'up' } },
+      /* Where the next person stands when the usual spot has someone on it:
+       * two people behind one counter, three in front of it, never one tile. */
+      moreAnchors: { work_shift: [{ x: 5, y: 2, dir: 'down' }], work_extra_shift: [{ x: 5, y: 2, dir: 'down' }],
+                     buy_meal: [{ x: 2, y: 4, dir: 'up' }, { x: 6, y: 4, dir: 'up' }] } },
     { id: 'obj_cafe_table', name: 'café bench', location: 'cafe', x: 3, y: 7,
       tags: ['furniture', 'seat'], portable: false, owner: 'cafe',
       affordances: ['take_break'],
@@ -203,7 +263,13 @@
       affordances: ['sleep'] },
     { id: 'obj_kitchen_b', name: 'kitchen counter', location: 'flat_b', x: 8, y: 1,
       tags: ['furniture', 'food'], portable: false, owner: 'resident_b',
-      affordances: ['eat_at_home'] }
+      affordances: ['eat_at_home'] },
+    { id: 'obj_bed_c', name: 'bed', location: 'flat_c', x: 8, y: 1, tags: ['furniture', 'rest'], portable: false, owner: 'resident_c', affordances: ['sleep'] },
+    { id: 'obj_kitchen_c', name: 'kitchen counter', location: 'flat_c', x: 1, y: 1, tags: ['furniture', 'food'], portable: false, owner: 'resident_c', affordances: ['eat_at_home'] },
+    { id: 'obj_bed_d', name: 'bed', location: 'flat_d', x: 1, y: 1, tags: ['furniture', 'rest'], portable: false, owner: 'resident_d', affordances: ['sleep'] },
+    { id: 'obj_kitchen_d', name: 'kitchen counter', location: 'flat_d', x: 9, y: 1, tags: ['furniture', 'food'], portable: false, owner: 'resident_d', affordances: ['eat_at_home'] },
+    { id: 'obj_bed_e', name: 'bed', location: 'flat_e', x: 1, y: 1, tags: ['furniture', 'rest'], portable: false, owner: 'resident_e', affordances: ['sleep'] },
+    { id: 'obj_kitchen_e', name: 'kitchen counter', location: 'flat_e', x: 6, y: 1, tags: ['furniture', 'food'], portable: false, owner: 'resident_e', affordances: ['eat_at_home'] }
   ];
 
   /* Day-one inhabitants, in draw order: the first generated inhabitant, then
@@ -266,6 +332,62 @@
     }
   ];
 
+  /* The neighbours: three more people, for a world made with the 'town' cast.
+   * Same rules as above — ids, not names; mechanics, not story. Between them
+   * they share one counter, one park and not much money: the second pair of
+   * hands at the café, someone with time and nobody to spend it with, and
+   * someone a week from an empty cupboard. */
+  W.NEIGHBOURS = [
+    {
+      id: 'resident_c', homeId: 'flat_c',
+      location: 'flat_c', pos: { x: 5, y: 5, dir: 'up' },
+      needs: { energy: 82, hunger: 25 },
+      money: 12, savings: 140, pantry: 2,
+      policyId: 'utility',
+      traits: { conscientiousness: 0.80, sociability: 0.45, ambition: 0.60, caution: 0.65 },
+      employment: { employer: 'cafe', locationId: 'cafe', shiftStart: 720, shiftEnd: 1200, wagePerHour: 9 },   // 12:00 – 20:00
+      goals: [{ id: 'goal_rent', kind: 'savings', label: 'Have the quarter\'s rent together',
+                target: 200, progress: 140, unit: 'EUR', deadlineDay: 3 }],
+      commitments: [
+        { id: 'cmt_shift', kind: 'work', strength: 'soft', withId: 'cafe', locationId: 'cafe',
+          label: 'Finish the café shift at 20:00', dueDay: 1, dueMin: 1200, status: 'open' }
+      ],
+      relationships: { resident_a: { trust: 60, closeness: 48, lastMetDay: 0 } }
+    },
+    {
+      id: 'resident_d', homeId: 'flat_d',
+      location: 'flat_d', pos: { x: 4, y: 5, dir: 'up' },
+      needs: { energy: 70, hunger: 32 },
+      money: 60, savings: 0, pantry: 4,
+      policyId: 'utility',
+      traits: { conscientiousness: 0.66, sociability: 0.90, ambition: 0.20, caution: 0.50 },
+      employment: null,
+      goals: [{ id: 'goal_company', kind: 'social', label: 'Have a proper talk with somebody',
+                target: 2, progress: 0, unit: 'talks', deadlineDay: 2 }],
+      commitments: [
+        { id: 'cmt_park_morning', kind: 'social', strength: 'soft', withId: 'resident_e', locationId: 'park',
+          labelTemplate: 'Be at the park at 11:00 for %s', dueDay: 1, dueMin: 660, graceMin: 45, status: 'open' }
+      ],
+      relationships: { resident_e: { trust: 64, closeness: 60, lastMetDay: 0 }, resident_b: { trust: 50, closeness: 35, lastMetDay: 0 } }
+    },
+    {
+      id: 'resident_e', homeId: 'flat_e',
+      location: 'flat_e', pos: { x: 3, y: 4, dir: 'up' },
+      needs: { energy: 64, hunger: 44 },
+      money: 9, savings: 0, pantry: 1,
+      policyId: 'utility',
+      traits: { conscientiousness: 0.35, sociability: 0.55, ambition: 0.30, caution: 0.70 },
+      employment: null,
+      goals: [{ id: 'goal_old_friend', kind: 'social', labelTemplate: 'Catch up with %s', relatesTo: 'resident_a',
+                target: 1, progress: 0, unit: 'talks', deadlineDay: 2 }],
+      commitments: [
+        { id: 'cmt_park_morning', kind: 'social', strength: 'soft', withId: 'resident_d', locationId: 'park',
+          labelTemplate: 'Meet %s at the park at 11:00', dueDay: 1, dueMin: 660, graceMin: 45, status: 'open' }
+      ],
+      relationships: { resident_d: { trust: 58, closeness: 60, lastMetDay: 0 }, resident_a: { trust: 55, closeness: 52, lastMetDay: 0 } }
+    }
+  ];
+
   /* What a saved world was standing on. Everything here is static content the
    * save deliberately does not carry: rooms, doors, where furniture is and where
    * people stand to use it. If any of it changes, a position or a walk target
@@ -279,7 +401,7 @@
         return [id, l.rows, l.spawn, l.exit || null, !!l.indoor];
       }),
       portals: W.STREET_PORTALS,
-      objects: W.OBJECTS.map(function (o) { return [o.id, o.location, o.x, o.y, o.anchors || null, o.affordances || null]; })
+      objects: W.OBJECTS.map(function (o) { return [o.id, o.location, o.x, o.y, o.anchors || null, o.affordances || null, o.moreAnchors || null]; })
     });
     var h = 0x811c9dc5;
     for (var i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }

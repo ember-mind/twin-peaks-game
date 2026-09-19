@@ -81,7 +81,11 @@
      * permanent. It is kept apart from the name on purpose: what someone is
      * called and what they look like are separate facts about them. */
     var nextLook = LT.Appearance.generator(U.rng((this.seed ^ 0x51ed270b) >>> 0));
-    W.CHARACTERS.forEach(function (seed) {
+    /* Who lives here is decided once, when the world is made. 'pair' is the
+     * two people the town began with; 'town' adds the neighbours. The first
+     * two draws of names and looks are the same either way. */
+    state.cast = opts.cast === 'town' ? 'town' : 'pair';
+    (state.cast === 'town' ? W.CHARACTERS.concat(W.NEIGHBOURS) : W.CHARACTERS).forEach(function (seed) {
       var c = deepCopy(seed);
       var drawn = nextName();
       c.name = drawn.name;
@@ -324,7 +328,12 @@
       var before = g.progress;
       if (g.kind === 'savings') g.progress = actor.savings;
       if (g.kind === 'social') {
-        g.progress = (actor.memories || []).filter(function (m) { return m.type === 'TALKED'; }).length;
+        /* Talks this person actually had — not ones they were in the room
+         * for — and, when the goal is about someone, talks with that someone. */
+        g.progress = (self.state.conversations || []).filter(function (v) {
+          return v.status === 'completed' && v.participants.indexOf(actor.id) >= 0 &&
+                 (!g.relatesTo || v.participants.indexOf(g.relatesTo) >= 0);
+        }).length;
       }
       if (!g.reached && g.progress >= g.target) {
         g.reached = true;
@@ -407,7 +416,7 @@
 
   /* A meeting is kept by both sides at once when the two people actually talk
    * inside the window they agreed on, in the place they agreed on. */
-  Sim.prototype.settleMeeting = function (actor, other, locationId) {
+  Sim.prototype.settleMeeting = function (actor, other, locationId, beganAbs) {
     var self = this;
     [[actor, other], [other, actor]].forEach(function (pair) {
       var who = pair[0], with_ = pair[1];
@@ -415,8 +424,13 @@
         if (c.status !== 'open' || c.kind !== 'social' || c.withId !== with_.id) return;
         if (c.locationId && c.locationId !== locationId) return;
         var due = self.abs(c.dueDay, c.dueMin);
-        var now = self.absMinute();
-        if (now >= due - 30 && now <= due + (c.graceMin || 0)) self.keepCommitment(who, c.id);
+        /* Two people who sat down together in time have met, even if the
+         * talk runs past the hour: what is judged is when it began. */
+        var now = beganAbs === undefined ? self.absMinute() : beganAbs;
+        /* Early counts from as far back as two people who have just talked
+         * cannot start again (talk_with's 90 minutes): otherwise meeting
+         * someone a little early would make the promise impossible to keep. */
+        if (now >= due - 90 && now <= due + (c.graceMin || 0)) self.keepCommitment(who, c.id);
       });
     });
   };
@@ -428,7 +442,12 @@
       (actor.commitments || []).forEach(function (c) {
         if (c.status !== 'open') return;
         var deadline = self.abs(c.dueDay, c.dueMin) + (c.graceMin || 0);
-        if (now > deadline) self.breakCommitment(actor, c, 'deadline_passed');
+        if (now <= deadline) return;
+        /* A meeting is not broken while the two are in the middle of it; the
+         * talk settles it when it ends, or it breaks then. */
+        var talk = c.kind === 'social' && c.withId ? self.openConversationOf(actor.id) : null;
+        if (talk && talk.status === 'active' && talk.participants.indexOf(c.withId) >= 0 && talk.startAbs <= deadline) return;
+        self.breakCommitment(actor, c, 'deadline_passed');
       });
     });
   };
@@ -687,7 +706,7 @@
     a.lastTalk[b.id] = now; b.lastTalk[a.id] = now;
     this.adjustRelationship(a, b.id, { trust: 3, closeness: 4 });
     this.adjustRelationship(b, a.id, { trust: 3, closeness: 4 });
-    this.settleMeeting(a, b, conv.locationId);
+    this.settleMeeting(a, b, conv.locationId, conv.startAbs);
     this.emit('TALKED', {
       actorId: a.id, locationId: conv.locationId, notify: [b.id],
       data: { conversationId: conv.id, withId: b.id, participants: conv.participants.slice(), minutes: conv.minutes },
@@ -717,10 +736,40 @@
 
   /* ---------------- activities ---------------- */
 
+  Sim.prototype.spotTaken = function (actor, spot) {
+    var self = this;
+    return this.actorIds().some(function (id) {
+      var o = self.state.characters[id];
+      if (id === actor.id || o.location !== actor.location || o.transit) return false;
+      return (o.pos.x === spot.x && o.pos.y === spot.y) || (o.walkTarget && o.walkTarget.x === spot.x && o.walkTarget.y === spot.y);
+    });
+  };
+
+  /* Somebody else is standing on this cell, not passing over it. */
+  Sim.prototype.standingOn = function (actor, cell, busyOnly) {
+    var self = this;
+    return this.actorIds().some(function (id) {
+      var o = self.state.characters[id];
+      if (id === actor.id || o.location !== actor.location || o.transit || o.walkTarget || o.pos.x !== cell.x || o.pos.y !== cell.y) return false;
+      if (!busyOnly) return true;
+      /* For a use spot only someone doing something from there holds it.
+       * A person who has finished and is merely standing about does not keep
+       * a book, a bed or a counter from everybody else. */
+      var act = o.activity, def = act && A.get(act.actionId);
+      return !!(act && act.phase === 'executing' && def && def.position && def.position !== 'anywhere');
+    });
+  };
+
   Sim.prototype.anchorFor = function (actor, def, target) {
     /* An object may say where each of its uses is done from. */
     if (target && target.location === actor.location && target.anchors && target.anchors[def.id]) {
       var declared = target.anchors[def.id];
+      /* Someone else is on that spot, or on their way to it: stand at the
+       * next one the object offers. With none free, the usual one. */
+      var spare = (target.moreAnchors && target.moreAnchors[def.id]) || [];
+      if (spare.length && this.spotTaken(actor, declared)) {
+        for (var s = 0; s < spare.length; s++) if (!this.spotTaken(actor, spare[s])) { declared = spare[s]; break; }
+      }
       return { x: declared.x, y: declared.y, dir: declared.dir };
     }
     if (target && target.location === actor.location && target.x !== undefined) {
@@ -760,6 +809,7 @@
       STEP_DIRS.forEach(function (d) {
         var cell = { x: target.pos.x + d.x, y: target.pos.y + d.y };
         if (W.isSolid(EMBER.Grid.cell(loc.rows, cell.x, cell.y, '#'))) return;
+        if (self.standingOn(actor, cell)) return;          // a third person is already standing there
         var len = self.routeLength(loc, actor.pos, cell);
         if (len >= 0 && len < bestLen) { bestLen = len; best = { x: cell.x, y: cell.y, dir: facing(cell, target.pos) }; }
       });
@@ -770,6 +820,11 @@
     if (!spot) return { needed: true, at: null, reason: 'no_use_spot' };
     if (W.isSolid(EMBER.Grid.cell(loc.rows, spot.x, spot.y, '#')) || this.routeLength(loc, actor.pos, spot) < 0) {
       return { needed: true, at: null, reason: 'use_spot_unreachable' };
+    }
+    /* One tile, one person: a spot somebody is standing on is not free, even
+     * if the thing itself is. Whoever wanted it does something else meanwhile. */
+    if ((actor.pos.x !== spot.x || actor.pos.y !== spot.y) && this.standingOn(actor, spot, true)) {
+      return { needed: true, at: null, reason: 'spot_occupied' };
     }
     return { needed: true, at: spot, reason: null };
   };

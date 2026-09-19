@@ -5,7 +5,7 @@
  * authoritative state after every minute. It reads and nothing else: a run that
  * is measured ends in the same state as one that is not (test/boredom.js).
  * No browser, no model calls, no network.
- *   node living-town/tools/measure-boredom.js [--days=3] [--json] [--write-baseline]
+ *   node living-town/tools/measure-boredom.js [--days=3] [--cast=town] [--json] [--write-baseline]
  *   require(...).measure(sim, { days }) -> Promise of the raw numbers
  */
 'use strict';
@@ -157,20 +157,23 @@ function table(r) {
   return lines.join('\n');
 }
 
-module.exports = { measure: measure, table: table, BEAT_TYPES: BEAT_TYPES, BASELINE: BASELINE };
+const BASELINE_TOWN = BASELINE.replace(/\.json$/, '-town.json');
+module.exports = { measure: measure, table: table, BEAT_TYPES: BEAT_TYPES, BASELINE: BASELINE, BASELINE_TOWN: BASELINE_TOWN };
 
 if (require.main === module) {
   const args = process.argv.slice(2);
   const daysArg = args.find((a) => /^--days=\d+$/.test(a));
   const days = daysArg ? Number(daysArg.split('=')[1]) : 3;
   if (days < 1) { console.error('--days must be at least 1'); process.exit(2); }
-  measure(LT.Scenario.day1({}), { days: days }).then((r) => {
+  const town = args.indexOf('--cast=town') >= 0;   // five people instead of two; its own baseline file
+  const FILE = town ? BASELINE_TOWN : BASELINE;
+  measure(town ? LT.Scenario.town({}) : LT.Scenario.day1({}), { days: days }).then((r) => {
     console.log(args.indexOf('--json') >= 0 ? JSON.stringify(r, null, 2) : table(r));
     if (args.indexOf('--write-baseline') >= 0) {
       const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: __dirname, encoding: 'utf8' }).trim();
-      fs.mkdirSync(path.dirname(BASELINE), { recursive: true });
-      fs.writeFileSync(BASELINE, JSON.stringify(Object.assign({ commit: commit }, r), null, 2) + '\n');
-      console.error('baseline written: ' + path.relative(process.cwd(), BASELINE));
+      fs.mkdirSync(path.dirname(FILE), { recursive: true });
+      fs.writeFileSync(FILE, JSON.stringify(Object.assign({ commit: commit }, r), null, 2) + '\n');
+      console.error('baseline written: ' + path.relative(process.cwd(), FILE));
     }
   }).catch((e) => { console.error(e); process.exit(1); });
 }

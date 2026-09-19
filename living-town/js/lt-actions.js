@@ -426,6 +426,7 @@
     sit_and_rest: {
       id: 'sit_and_rest', label: 'Sit on the bench', targetKind: 'object', interruptible: true,
       position: 'use_spot',
+      exclusive: true,   // one bench, one person: the simulation holds the claim
       yieldsToConversation: true,
       duration: function () { return 20; },
       eligible: function (ctx) {

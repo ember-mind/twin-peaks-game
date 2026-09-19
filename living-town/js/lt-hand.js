@@ -29,7 +29,10 @@
   ];   // the north-west bench is the one people sit on
   H.DOOR_SPOTS = {
     flat_a: { x: 6, y: 6, useSpot: { x: 5, y: 6, dir: 'right' } },
-    flat_b: { x: 6, y: 5, useSpot: { x: 5, y: 5, dir: 'right' } }
+    flat_b: { x: 6, y: 5, useSpot: { x: 5, y: 5, dir: 'right' } },
+    flat_c: { x: 6, y: 5, useSpot: { x: 5, y: 5, dir: 'right' } },
+    flat_d: { x: 5, y: 5, useSpot: { x: 4, y: 5, dir: 'right' } },
+    flat_e: { x: 4, y: 4, useSpot: { x: 3, y: 4, dir: 'right' } }
   };
   H.TITLES = ['The Harbour Year', 'A Winter of Small Repairs', 'Letters from the Salt Road', 'What the Orchard Kept',
               'The Ferryman\'s Almanac', 'Nine Rooms, One Stove'];

@@ -17,7 +17,7 @@ const { launch, sleep } = require('../../test/lib/chrome-cdp.js');
 const ROOT = path.resolve(__dirname, '..', '..');
 const OUT = path.join(ROOT, 'artifacts', 'living-town-interactions');
 fs.mkdirSync(OUT, { recursive: true });
-const PAGE = 'living-town/index.html';
+const PAGE = 'living-town/index.html?cast=pair';   // the two-person world this sequence was written for
 
 function write(name, dataUrl) {
   fs.writeFileSync(path.join(OUT, name), Buffer.from(String(dataUrl).replace(/^data:image\/png;base64,/, ''), 'base64'));

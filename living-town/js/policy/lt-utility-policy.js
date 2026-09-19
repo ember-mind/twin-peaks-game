@@ -173,6 +173,16 @@
         }
         var rel = req.relationships[withId];
         if (rel) terms.closeness = (rel.closeness / 100) * 9;
+        /* A talk with someone else, long enough that a meeting promised to a
+         * third person could no longer be held in time, costs that promise. */
+        var squeezed = 0;
+        openCommitments(req).forEach(function (c) {
+          if (c.kind !== 'social' || !c.withId || c.withId === withId) return;
+          var last = abs(c.dueDay, c.dueMin) + (c.graceMin || 0);
+          if (nowAbs < abs(c.dueDay, c.dueMin) - 90 || nowAbs > last) return;
+          if (endAbs + 25 > last) squeezed += commitmentWeight(req, c);
+        });
+        if (squeezed) terms.promise_elsewhere = -squeezed;
         break;
       }
 

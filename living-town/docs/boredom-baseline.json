@@ -1,5 +1,5 @@
 {
-  "commit": "a9164cc579db797eb8039e106e66d16c653cc87c",
+  "commit": "c980e9ae1d66b5d7a911f4570d11f3c51b92fa2f",
   "seed": 20260918,
   "days": 3,
   "firstDay": 1,
@@ -140,11 +140,11 @@
     },
     "3": {
       "wakingMinutes": 960,
-      "deadMinutes": 105,
-      "liveMinutes": 855,
+      "deadMinutes": 101,
+      "liveMinutes": 859,
       "longestDeadStretch": {
-        "minutes": 54,
-        "start": "D3 21:36"
+        "minutes": 52,
+        "start": "D3 21:38"
       },
       "beats": 4,
       "beatsByType": {
@@ -185,13 +185,13 @@
           "flat_b"
         ]
       },
-      "togetherMinutes": 570
+      "togetherMinutes": 568
     }
   },
   "overall": {
     "wakingMinutes": 2880,
-    "deadMinutes": 299,
-    "liveMinutes": 2581,
+    "deadMinutes": 295,
+    "liveMinutes": 2585,
     "longestDeadStretch": {
       "minutes": 58,
       "start": "D1 21:32"
@@ -250,7 +250,7 @@
         "park"
       ]
     },
-    "togetherMinutes": 1169
+    "togetherMinutes": 1167
   },
   "deadStretches": [
     {
@@ -278,8 +278,8 @@
       }
     },
     {
-      "start": "D3 21:36",
-      "minutes": 54,
+      "start": "D3 21:38",
+      "minutes": 52,
       "doing": {
         "resident_a": [
           "sleep @flat_a"
@@ -290,8 +290,8 @@
       }
     },
     {
-      "start": "D3 17:25",
-      "minutes": 37,
+      "start": "D3 17:27",
+      "minutes": 35,
       "doing": {
         "resident_a": [
           "idle @cafe",

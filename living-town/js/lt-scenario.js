@@ -48,6 +48,7 @@
     opts = opts || {};
     var sim = LT.Sim.create({
       seed: opts.seed === undefined ? 20260918 : opts.seed,
+      cast: opts.cast,
       policies: opts.policies || { resident_a: 'utility', resident_b: 'utility' },
       decisionTimeoutMinutes: opts.decisionTimeoutMinutes
     });
@@ -64,6 +65,14 @@
       });
     }
     return sim;
+  };
+
+  /* The same first day with the neighbours in it: five people, one counter. */
+  S.town = function (opts) {
+    opts = opts || {};
+    var o = {}; Object.keys(opts).forEach(function (k) { o[k] = opts[k]; });
+    o.cast = 'town';
+    return S.day1(o);
   };
 
   S.END_OF_DAY = { day: 1, minute: 1439 };

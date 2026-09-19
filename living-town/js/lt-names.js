@@ -35,10 +35,17 @@
     var first = (pools.first || N.FIRST).slice();
     var last = (pools.last || N.LAST).slice();
     if (!first.length || !last.length) throw new Error('a name pool cannot be empty');
+    var used = {};
     return function () {
       if (!first.length) first = (pools.first || N.FIRST).slice();
       var f = first.splice(Math.floor(rng() * first.length), 1)[0];
-      var l = last[Math.floor(rng() * last.length)];
+      /* A family name already on the street is passed over for the next one
+       * along, so neighbours do not read as one household by accident. The
+       * draw itself is unchanged, and so is everyone drawn before a clash. */
+      var at = Math.floor(rng() * last.length), tries = 0;
+      while (used[last[at]] && tries++ < last.length) at = (at + 1) % last.length;
+      var l = last[at];
+      used[l] = true;
       return { name: f, familyName: l, fullName: f + ' ' + l };
     };
   };

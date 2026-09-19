@@ -28,7 +28,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     console.log('  wrote artifacts/living-town-story/' + name);
   }
   try {
-    await page.navigate('living-town/index.html?world=new'); await sleep(1200);
+    await page.navigate('living-town/index.html?world=new&cast=pair'); await sleep(1200);
     console.log('# page: on the way to work');
     await runTo(1, 545); await sleep(300);
     const name = await js("LT_OBSERVER.sim.state.characters.resident_a.name");
@@ -65,7 +65,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     await js("document.getElementById('lt-recap-prev').click(); true"); await sleep(300);
     await shot('03-day-one-looked-back-on.png');
     console.log('# page: make something happen');
-    await page.navigate('living-town/index.html?world=new'); await sleep(1200);
+    await page.navigate('living-town/index.html?world=new&cast=pair'); await sleep(1200);
     await runTo(1, 480);
     const pick = (id, value) => js("(function(){ var n = document.getElementById('" + id + "'); n.value = '" + value + "'; n.dispatchEvent(new Event('change')); return n.value; })()");
     await pick('lt-hand-what', 'leave_book');
@@ -81,6 +81,15 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     ok(/happened/.test(await txt('lt-hand-asked')) && await js("LT_OBSERVER.sim.state.objects.filter(function(o){return o.typeId==='book_used'}).length") === 1, 'a few minutes on it has happened: one book in the world, listed as such');
     await js("document.querySelector('[data-actor=resident_b]').click(); true");
     await shot('04-made-something-happen.png');
+    console.log('# page: a new world is the whole street');
+    await page.navigate('living-town/index.html?world=new'); await sleep(1200);
+    ok(await js("document.querySelectorAll('#lt-characters [data-actor]').length") === 5 && await js("LT_OBSERVER.sim.state.cast") === 'town', 'five people to follow');
+    await runTo(1, 1052); await sleep(300);
+    await js("document.getElementById('lt-follow-action').click(); true"); await sleep(400);
+    const seen = JSON.parse(await js("JSON.stringify(LT_OBSERVER.view.draw())"));
+    ok(seen.entities >= 2 && seen.inhabitants === 'atlas', 'The action lands where people are: ' + seen.entities + ' in ' + seen.location + ', drawn from the atlas');
+    ok(await js("document.querySelectorAll('#lt-hand-fields option').length") >= 1, 'the hand is offered for this world\'s people');
+    await shot('05-the-street-at-half-past-five.png');
     console.log('\npage-story-browser: ' + checks + '/' + checks);
   } finally { await page.close(); }
 })().catch((e) => { console.error(e); process.exit(1); });

@@ -37,7 +37,7 @@
     food_at_home: 'food at home', meal_there: 'a meal to be had there', evening_home: 'the day being done', rest_at_home: 'a bed at home', commitments_preserved: 'the promises it leaves intact',
     rest: 'needing rest', cash_needed: 'an empty pocket', baseline: 'nothing better to do',
     money_cost: 'what it costs', energy_cost: 'how tiring it is', time_cost: 'the time it takes',
-    travel_cost: 'the walk', commitment_conflict: 'a promise it would break', wrong_hour: 'the wrong hour for it',
+    travel_cost: 'the walk', commitment_conflict: 'a promise it would break', promise_elsewhere: 'a promise to someone else', wrong_hour: 'the wrong hour for it',
     forgone_income: 'the money given up', goal_cost: 'the goal it sets back', unknown_offer: 'an offer nobody can find'
   };
   function termLabel(k) { return TERM[k] || String(k).replace(/_/g, ' '); }

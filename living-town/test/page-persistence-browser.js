@@ -49,7 +49,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     await js("LT_OBSERVER.speedIndex = 3; true"); await sleep(1500); await js("LT_OBSERVER.speedIndex = 0; true"); await sleep(100);
     const clocks = JSON.parse(await js("JSON.stringify({ now: LT_OBSERVER.sim.absMinute(), retired: LT_OBSERVER.retired.absMinute(), view: LT_OBSERVER.view.sim === LT_OBSERVER.sim, tabs: document.querySelectorAll('#lt-characters [data-actor]').length, who: document.getElementById('lt-who').textContent, names: LT_OBSERVER.sim.actorIds().map(function(id){ return LT_OBSERVER.sim.state.characters[id].fullName || LT_OBSERVER.sim.state.characters[id].name; }) })"));
     ok(clocks.now > 400 && clocks.retired === leftAt && clocks.view, 'the new world advances (' + clocks.now + '); the one it replaced is no longer being ticked (still ' + clocks.retired + '); the view follows the new one');
-    ok(clocks.tabs === 2 && clocks.names.indexOf(clocks.who) >= 0, 'tabs and panels show the new world\'s people (' + clocks.who + ')');
+    ok(clocks.tabs === clocks.names.length && clocks.names.indexOf(clocks.who) >= 0, 'tabs and panels show the new world\'s people (' + clocks.who + ')');
 
     console.log('# page: a refused save is shown, kept, and not written over');
     /* Tampered with from another page of the same origin: the town page saves
@@ -68,8 +68,8 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     ok(await stored() === refusedText, 'and Cancel leaves it exactly as it was');
 
     console.log('# page: storage that fails is reported as failing');
-    await page.navigate(PAGE + '?world=new'); await sleep(1200);
-    ok(/address asked for one/.test(await status()) && await stored() === refusedText, '?world=new starts a new world and leaves the stored one alone');
+    await page.navigate(PAGE + '?world=new&cast=pair'); await sleep(1200);
+    ok(/address asked for one/.test(await status()) && await stored() === refusedText, '?world=new&cast=pair starts a new world and leaves the stored one alone');
     await js("Storage.prototype.setItem = function () { var e = new Error('full'); e.name = 'QuotaExceededError'; throw e; }; true");
     await click('lt-save'); await click('lt-confirm-yes');
     ok(/Save failed: .*QuotaExceededError/.test(await status()), 'a write the browser refuses shows as a failure: ' + await status());

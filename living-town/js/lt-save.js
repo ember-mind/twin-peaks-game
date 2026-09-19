@@ -111,6 +111,29 @@
    * tested, never guessed. What it returns goes through verify() all the same. */
   S.WORLD_MIGRATIONS = S.WORLD_MIGRATIONS || {};
 
+  /* 6d2aa6eb -> e3450c3d: the town grew. Three homes were added on the same street,
+   * with their furniture and their doors onto it, and the café counter gained
+   * spare standing spots. No existing room, door, object or use spot moved, so
+   * every saved position and walk target is still where it was; what the save
+   * lacks is the new furniture and the new places' names. Nobody is added: who
+   * lives in a world was decided when it was made. Written against
+   * test/fixtures/save-v1-walking-to-work.json (a 6d2aa6eb save). */
+  S.WORLD_MIGRATIONS['6d2aa6eb'] = function (save) {
+    var W = LT.World, state = save.state, have = {};
+    (state.objects || []).forEach(function (o) { have[o.id] = o; });
+    W.OBJECTS.forEach(function (o) {
+      if (!have[o.id]) state.objects.push(deepCopy(o));
+      else if (o.moreAnchors && !have[o.id].moreAnchors) have[o.id].moreAnchors = deepCopy(o.moreAnchors);
+    });
+    state.locationNames = state.locationNames || {};
+    Object.keys(W.LOCATIONS).forEach(function (id) {
+      if (!state.locationNames[id]) state.locationNames[id] = W.LOCATIONS[id].name || id;
+    });
+    if (!state.cast) state.cast = 'pair';
+    save.world = 'e3450c3d';
+    return save;
+  };
+
   /* ---------------- serialise ---------------- */
 
   S.serialize = function (sim) {

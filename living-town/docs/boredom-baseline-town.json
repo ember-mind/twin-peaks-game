@@ -1,0 +1,546 @@
+{
+  "commit": "c980e9ae1d66b5d7a911f4570d11f3c51b92fa2f",
+  "seed": 20260918,
+  "days": 3,
+  "firstDay": 1,
+  "wakingHours": [
+    "06:30",
+    "22:30"
+  ],
+  "beatTypes": [
+    "GOAL_REACHED",
+    "GOAL_MISSED",
+    "COMMITMENT_KEPT",
+    "COMMITMENT_BROKEN",
+    "TALKED",
+    "TALK_DECLINED",
+    "TALK_UNANSWERED",
+    "OFFER_ACCEPTED",
+    "OFFER_DECLINED",
+    "ACTIVITY_FAILED",
+    "BOOK_READ",
+    "FOOD_PARCEL_OPENED",
+    "INTERVENTION_APPLIED"
+  ],
+  "inhabitants": {
+    "resident_a": "Nadia",
+    "resident_b": "Teodora",
+    "resident_c": "Sanne",
+    "resident_d": "Laleh",
+    "resident_e": "Mira"
+  },
+  "perDay": {
+    "1": {
+      "wakingMinutes": 960,
+      "deadMinutes": 66,
+      "liveMinutes": 894,
+      "longestDeadStretch": {
+        "minutes": 58,
+        "start": "D1 21:32"
+      },
+      "beats": 28,
+      "beatsByType": {
+        "TALKED": 9,
+        "INTERVENTION_APPLIED": 3,
+        "COMMITMENT_KEPT": 8,
+        "GOAL_REACHED": 2,
+        "BOOK_READ": 3,
+        "ACTIVITY_FAILED": 2,
+        "OFFER_ACCEPTED": 1
+      },
+      "decisions": 225,
+      "closeCalls": 46,
+      "distinctActivities": {
+        "resident_a": [
+          "accept_offer",
+          "buy_meal",
+          "eat_at_home",
+          "practise_guitar",
+          "sleep",
+          "talk_with",
+          "travel",
+          "wait",
+          "wash_and_dress",
+          "work_extra_shift",
+          "work_shift"
+        ],
+        "resident_b": [
+          "eat_at_home",
+          "greet",
+          "join_conversation",
+          "read_book",
+          "sleep",
+          "talk_with",
+          "travel",
+          "wait",
+          "wash_and_dress"
+        ],
+        "resident_c": [
+          "buy_meal",
+          "eat_at_home",
+          "greet",
+          "sleep",
+          "travel",
+          "wait",
+          "wash_and_dress",
+          "work_shift"
+        ],
+        "resident_d": [
+          "eat_at_home",
+          "greet",
+          "join_conversation",
+          "read_book",
+          "sit_and_rest",
+          "sleep",
+          "talk_with",
+          "travel",
+          "wait",
+          "wash_and_dress"
+        ],
+        "resident_e": [
+          "eat_at_home",
+          "greet",
+          "join_conversation",
+          "read_book",
+          "sit_and_rest",
+          "sleep",
+          "talk_with",
+          "travel",
+          "wait",
+          "wash_and_dress"
+        ]
+      },
+      "placesVisited": {
+        "resident_a": [
+          "cafe",
+          "flat_a",
+          "park"
+        ],
+        "resident_b": [
+          "cafe",
+          "flat_b",
+          "park"
+        ],
+        "resident_c": [
+          "cafe",
+          "flat_c"
+        ],
+        "resident_d": [
+          "flat_d",
+          "park"
+        ],
+        "resident_e": [
+          "flat_e",
+          "park"
+        ]
+      },
+      "togetherMinutes": 725
+    },
+    "2": {
+      "wakingMinutes": 960,
+      "deadMinutes": 98,
+      "liveMinutes": 862,
+      "longestDeadStretch": {
+        "minutes": 93,
+        "start": "D2 20:57"
+      },
+      "beats": 16,
+      "beatsByType": {
+        "FOOD_PARCEL_OPENED": 1,
+        "TALKED": 12,
+        "GOAL_REACHED": 3
+      },
+      "decisions": 294,
+      "closeCalls": 41,
+      "distinctActivities": {
+        "resident_a": [
+          "buy_meal",
+          "eat_at_home",
+          "greet",
+          "practise_guitar",
+          "sleep",
+          "talk_with",
+          "travel",
+          "unpack_food_parcel",
+          "wait",
+          "wash_and_dress",
+          "work_shift"
+        ],
+        "resident_b": [
+          "buy_meal",
+          "greet",
+          "join_conversation",
+          "sleep",
+          "talk_with",
+          "travel",
+          "wait",
+          "wash_and_dress"
+        ],
+        "resident_c": [
+          "buy_meal",
+          "eat_at_home",
+          "greet",
+          "join_conversation",
+          "sleep",
+          "take_break",
+          "talk_with",
+          "travel",
+          "wait",
+          "wash_and_dress",
+          "work_shift"
+        ],
+        "resident_d": [
+          "eat_at_home",
+          "sleep",
+          "wait",
+          "wash_and_dress"
+        ],
+        "resident_e": [
+          "buy_meal",
+          "greet",
+          "join_conversation",
+          "sleep",
+          "talk_with",
+          "travel",
+          "wait",
+          "wash_and_dress"
+        ]
+      },
+      "placesVisited": {
+        "resident_a": [
+          "cafe",
+          "flat_a"
+        ],
+        "resident_b": [
+          "cafe",
+          "flat_b"
+        ],
+        "resident_c": [
+          "cafe",
+          "flat_c"
+        ],
+        "resident_d": [
+          "flat_d"
+        ],
+        "resident_e": [
+          "cafe",
+          "flat_e"
+        ]
+      },
+      "togetherMinutes": 636
+    },
+    "3": {
+      "wakingMinutes": 960,
+      "deadMinutes": 97,
+      "liveMinutes": 863,
+      "longestDeadStretch": {
+        "minutes": 94,
+        "start": "D3 20:56"
+      },
+      "beats": 14,
+      "beatsByType": {
+        "TALKED": 13,
+        "ACTIVITY_FAILED": 1
+      },
+      "decisions": 294,
+      "closeCalls": 43,
+      "distinctActivities": {
+        "resident_a": [
+          "buy_meal",
+          "eat_at_home",
+          "greet",
+          "practise_guitar",
+          "sleep",
+          "talk_with",
+          "travel",
+          "wait",
+          "wash_and_dress",
+          "work_shift"
+        ],
+        "resident_b": [
+          "buy_meal",
+          "greet",
+          "join_conversation",
+          "sleep",
+          "talk_with",
+          "travel",
+          "wait",
+          "wash_and_dress"
+        ],
+        "resident_c": [
+          "buy_meal",
+          "greet",
+          "sleep",
+          "talk_with",
+          "travel",
+          "wait",
+          "wash_and_dress",
+          "work_shift"
+        ],
+        "resident_d": [
+          "buy_meal",
+          "greet",
+          "join_conversation",
+          "sleep",
+          "talk_with",
+          "travel",
+          "wait",
+          "wash_and_dress"
+        ],
+        "resident_e": [
+          "sleep",
+          "wait",
+          "wash_and_dress"
+        ]
+      },
+      "placesVisited": {
+        "resident_a": [
+          "cafe",
+          "flat_a"
+        ],
+        "resident_b": [
+          "cafe",
+          "flat_b"
+        ],
+        "resident_c": [
+          "cafe",
+          "flat_c"
+        ],
+        "resident_d": [
+          "cafe",
+          "flat_d"
+        ],
+        "resident_e": [
+          "flat_e"
+        ]
+      },
+      "togetherMinutes": 628
+    }
+  },
+  "overall": {
+    "wakingMinutes": 2880,
+    "deadMinutes": 261,
+    "liveMinutes": 2619,
+    "longestDeadStretch": {
+      "minutes": 94,
+      "start": "D3 20:56"
+    },
+    "beats": 58,
+    "beatsByType": {
+      "TALKED": 34,
+      "INTERVENTION_APPLIED": 3,
+      "COMMITMENT_KEPT": 8,
+      "GOAL_REACHED": 5,
+      "BOOK_READ": 3,
+      "ACTIVITY_FAILED": 3,
+      "OFFER_ACCEPTED": 1,
+      "FOOD_PARCEL_OPENED": 1
+    },
+    "decisions": 813,
+    "closeCalls": 130,
+    "distinctActivities": {
+      "resident_a": [
+        "accept_offer",
+        "buy_meal",
+        "eat_at_home",
+        "greet",
+        "practise_guitar",
+        "sleep",
+        "talk_with",
+        "travel",
+        "unpack_food_parcel",
+        "wait",
+        "wash_and_dress",
+        "work_extra_shift",
+        "work_shift"
+      ],
+      "resident_b": [
+        "buy_meal",
+        "eat_at_home",
+        "greet",
+        "join_conversation",
+        "read_book",
+        "sleep",
+        "talk_with",
+        "travel",
+        "wait",
+        "wash_and_dress"
+      ],
+      "resident_c": [
+        "buy_meal",
+        "eat_at_home",
+        "greet",
+        "join_conversation",
+        "sleep",
+        "take_break",
+        "talk_with",
+        "travel",
+        "wait",
+        "wash_and_dress",
+        "work_shift"
+      ],
+      "resident_d": [
+        "buy_meal",
+        "eat_at_home",
+        "greet",
+        "join_conversation",
+        "read_book",
+        "sit_and_rest",
+        "sleep",
+        "talk_with",
+        "travel",
+        "wait",
+        "wash_and_dress"
+      ],
+      "resident_e": [
+        "buy_meal",
+        "eat_at_home",
+        "greet",
+        "join_conversation",
+        "read_book",
+        "sit_and_rest",
+        "sleep",
+        "talk_with",
+        "travel",
+        "wait",
+        "wash_and_dress"
+      ]
+    },
+    "placesVisited": {
+      "resident_a": [
+        "cafe",
+        "flat_a",
+        "park"
+      ],
+      "resident_b": [
+        "cafe",
+        "flat_b",
+        "park"
+      ],
+      "resident_c": [
+        "cafe",
+        "flat_c"
+      ],
+      "resident_d": [
+        "cafe",
+        "flat_d",
+        "park"
+      ],
+      "resident_e": [
+        "cafe",
+        "flat_e",
+        "park"
+      ]
+    },
+    "togetherMinutes": 1989
+  },
+  "deadStretches": [
+    {
+      "start": "D3 20:56",
+      "minutes": 94,
+      "doing": {
+        "resident_a": [
+          "sleep @flat_a"
+        ],
+        "resident_b": [
+          "sleep @flat_b"
+        ],
+        "resident_c": [
+          "sleep @flat_c"
+        ],
+        "resident_d": [
+          "sleep @flat_d"
+        ],
+        "resident_e": [
+          "sleep @flat_e"
+        ]
+      }
+    },
+    {
+      "start": "D2 20:57",
+      "minutes": 93,
+      "doing": {
+        "resident_a": [
+          "sleep @flat_a"
+        ],
+        "resident_b": [
+          "sleep @flat_b"
+        ],
+        "resident_c": [
+          "sleep @flat_c"
+        ],
+        "resident_d": [
+          "sleep @flat_d"
+        ],
+        "resident_e": [
+          "sleep @flat_e"
+        ]
+      }
+    },
+    {
+      "start": "D1 21:32",
+      "minutes": 58,
+      "doing": {
+        "resident_a": [
+          "sleep @flat_a"
+        ],
+        "resident_b": [
+          "sleep @flat_b"
+        ],
+        "resident_c": [
+          "sleep @flat_c"
+        ],
+        "resident_d": [
+          "sleep @flat_d"
+        ],
+        "resident_e": [
+          "sleep @flat_e"
+        ]
+      }
+    },
+    {
+      "start": "D1 06:30",
+      "minutes": 6,
+      "doing": {
+        "resident_a": [
+          "sleep @flat_a"
+        ],
+        "resident_b": [
+          "wait @cafe",
+          "idle @cafe"
+        ],
+        "resident_c": [
+          "sleep @flat_c"
+        ],
+        "resident_d": [
+          "sleep @flat_d"
+        ],
+        "resident_e": [
+          "sleep @flat_e",
+          "idle @flat_e"
+        ]
+      }
+    },
+    {
+      "start": "D1 08:57",
+      "minutes": 1,
+      "doing": {
+        "resident_a": [
+          "wait @cafe"
+        ],
+        "resident_b": [
+          "wait @flat_b"
+        ],
+        "resident_c": [
+          "wait @flat_c"
+        ],
+        "resident_d": [
+          "idle @park"
+        ],
+        "resident_e": [
+          "wait @park"
+        ]
+      }
+    }
+  ]
+}

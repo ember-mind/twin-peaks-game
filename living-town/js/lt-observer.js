@@ -57,7 +57,11 @@
     var persistence = LT.Persistence.create({});
     var fresh = /(?:^|[?&])world=new(?:&|$)/.test(String(root.location && root.location.search || ''));
     var booted = persistence.boot({ fresh: fresh });
-    var sim = booted.sim || LT.Scenario.day1({});
+    /* A new world has the whole street in it. `?cast=pair` asks for the two
+     * people the town began with; a resumed world keeps whoever it was made with. */
+    var pair = /(?:^|[?&])cast=pair(?:&|$)/.test(String(root.location && root.location.search || ''));
+    O.newWorld = function (opts) { return pair ? LT.Scenario.day1(opts || {}) : LT.Scenario.town(opts || {}); };
+    var sim = booted.sim || O.newWorld({});
     var view = LT.View.create(el('lt-canvas'), sim);
     var state = {
       sim: sim, view: view, speedIndex: 1, accumulator: 0,
@@ -234,7 +238,7 @@
       var replaces = pz.newWorldReplaces();
       function begin() {
         /* A different town, not the same morning again. */
-        var sim = LT.Scenario.day1({ seed: (Date.now() % 2147483647) || 1 });
+        var sim = O.newWorld({ seed: (Date.now() % 2147483647) || 1 });
         O.adopt(state, sim);
         var result = pz.save(sim, { replaceProtected: true, takeOver: true, setAside: true });
         if (result.ok) say('ok', 'A new world has begun and been saved' + (replaces ? '; the previous save was kept aside.' : '.'));
