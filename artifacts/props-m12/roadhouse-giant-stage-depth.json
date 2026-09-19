@@ -1,0 +1,38 @@
+{
+  "actors": [
+    {
+      "id": "cooper",
+      "x": 7,
+      "y": 8
+    },
+    {
+      "id": "giant",
+      "x": 8,
+      "y": 1
+    }
+  ],
+  "pairs": [
+    {
+      "actor": "cooper",
+      "tile": "7,8",
+      "foot": 144,
+      "prop": "roadhouse-chair-03",
+      "propFoot": 144,
+      "layer": 6,
+      "expect": "actor in front",
+      "sampled": 10,
+      "changed": 0
+    },
+    {
+      "actor": "giant",
+      "tile": "8,1",
+      "foot": 32,
+      "prop": "roadhouse-stage-01",
+      "propFoot": 46,
+      "layer": 1,
+      "expect": "prop in front",
+      "sampled": 30,
+      "changed": 30
+    }
+  ]
+}

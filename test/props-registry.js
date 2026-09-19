@@ -11,7 +11,8 @@
  *   3. every reject rule fires with a NAMED error, one case each (validation matrix, see reports/opus-world-builder-m9-props.md);
  *   4. every warn rule warns, one case each, and warnings alone do not make the registry invalid;
  *   5. the Roadhouse locks are hard rejects, one case each;
- *   6. the seeded Roadhouse slice: 12 definitions, 19 instances, every instance id prefixed "roadhouse-".
+ *   6. the seeded Roadhouse slice: 12 definitions, 26 instances (M12 furnished the room from the prop set),
+ *      every instance id prefixed "roadhouse-".
  *
  *   --registry-only  skip the seeded counts of 6. tools/world-apply.js runs this mode on the repo it writes: after
  *                    a Builder create/delete the instance count legitimately differs, while 1-5 must still hold.
@@ -51,7 +52,7 @@ ok(WA.duplicateKeys(sourceText, 'instances').length === 0, 'no duplicate instanc
 // ---- 6. the seeded Roadhouse slice -----------------------------------------------------------------------
 if (!REGISTRY_ONLY) {
   ok(Object.keys(registry.definitions).length === 12, '12 definitions promoted from the prototype', String(Object.keys(registry.definitions).length));
-  ok(Object.keys(registry.instances).length === 19, '19 native-canvas instances promoted', String(Object.keys(registry.instances).length));
+  ok(Object.keys(registry.instances).length === 26, '26 native-canvas instances promoted (19 from M9 + the 7 M12 added when the props took over the furniture)', String(Object.keys(registry.instances).length));
 }
 ok(Object.keys(registry.instances).every((id) => id.startsWith('roadhouse-')), 'every instance id is prefixed "roadhouse-"');
 ok(Object.keys(registry.instances).every((id) => registry.instances[id].sceneId === 'roadhouse'), 'every instance is in the roadhouse scene');
@@ -151,8 +152,15 @@ function worldRun(mutate) {
 {
   const base = worldRun(null);
   ok(base.problems.length === 0, 'the real registry passes every hard world rule', base.problems.join(' | '));
-  // the seeded slice does overlap Cast Presence body tiles: that is a warning, by the handoff's policy
-  ok(base.warnings.length > 0 && base.warnings.every((w) => w.startsWith('WARN ')), 'the seeded slice warns without failing', String(base.warnings.length));
+  /* M12 cleared the last real overlap (roadhouse-booth-01 no longer shares tile 2,6 with the Log Lady), so the
+   * shipped registry warns about nothing. What has to keep working is the MECHANISM: a footprint put back on a
+   * body tile still warns, and still only warns. Pinning "the shipped data has a warning" would have made the
+   * fix fail the test that exists to police the fix. */
+  ok(base.warnings.length === 0, 'the shipped registry has no footprint overlaps left', base.warnings.join(' | '));
+  const onBody = worldRun((d) => { d.instances['roadhouse-booth-01'].ty = 6.125; });
+  ok(onBody.warnings.length > 0 && onBody.warnings.every((w) => w.startsWith('WARN ')) &&
+     onBody.warnings.some((w) => /loglady/.test(w)) && onBody.problems.length === 0,
+    'a footprint back on a Cast Presence body tile warns without failing', onBody.warnings.join(' | '));
 }
 const warns = (label, mutate, needle) => {
   const r = worldRun(mutate);

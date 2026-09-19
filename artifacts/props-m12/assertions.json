@@ -1,0 +1,155 @@
+[
+  {
+    "name": "index.html registers the prop layer",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "forcing the flag changes exactly the one line index.html sets it on",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "js/props-production.js still defaults the flag off when nobody sets it",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "M12: index.html ships the flag ON",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-empty: the shipped page is the flag-on page (81 px vs 72 px of reload noise)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-empty: forcing the flag off changes the room (132066 px)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-gathering: the shipped page is the flag-on page (1791 px vs 2241 px of reload noise)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-gathering: forcing the flag off changes the room (116613 px)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-giant-stage: the shipped page is the flag-on page (63 px vs 72 px of reload noise)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-giant-stage: forcing the flag off changes the room (127206 px)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "cmp confirms off and on differ on disk",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-empty: depth — every prop that must be BEHIND an actor leaves the actor's pixels alone (1 pairs)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-empty: depth — every prop that must be IN FRONT actually paints over the actor (0 pairs)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-empty: no actor loses more than half its sprite to the prop layer (cooper 27%)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-gathering: depth — every prop that must be BEHIND an actor leaves the actor's pixels alone (1 pairs)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-gathering: depth — every prop that must be IN FRONT actually paints over the actor (2 pairs)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-gathering: no actor loses more than half its sprite to the prop layer (cooper 27%, bobby 9%, donna 0%, james 34%, loglady 0%, norma 25%, shelly 0%, truman 26%)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-giant-stage: depth — every prop that must be BEHIND an actor leaves the actor's pixels alone (1 pairs)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-giant-stage: depth — every prop that must be IN FRONT actually paints over the actor (1 pairs)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-giant-stage: no actor loses more than half its sprite to the prop layer (cooper 27%, giant 55%)",
+    "pass": false,
+    "detail": [
+      {
+        "actor": "giant",
+        "tile": "8,1",
+        "foot": 32,
+        "covered": 0.5520833333333334,
+        "px": 212,
+        "underProps": 384,
+        "of": 384
+      }
+    ]
+  },
+  {
+    "name": "runtime: the flag-on page really has the prop layer enabled with the roadhouse instances",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "runtime: M10a's three depth hooks are the outermost sprite functions on the production page",
+    "pass": false,
+    "detail": {
+      "present": true,
+      "enabled": true,
+      "instances": 26,
+      "actorLayer": 6,
+      "drawCharHooked": false,
+      "structuresHooked": false,
+      "foregroundHooked": false,
+      "structuresOwner": "other",
+      "foregroundOwner": "other",
+      "drawCharCalls": 4,
+      "structuresSrc": "function (ctx, m, cx, cy, opt ) {\n      if (m && m.id === MAP) {\n        return GAME.TraincarArt && GAME.TraincarArt.draw(ctx, cx, cy,  ceneState());\n      }\n      return originalS",
+      "foregroundSrc": "function (ctx, m, cx, cy, opt ) {\n      opt  = opt  || {};\n      if (m && m.id === MAP) {\n        return GAME.TraincarArt && GAME.TraincarArt.foreground(\n          ctx, cx, cy, opt"
+    }
+  },
+  {
+    "name": "bodies: no instance footprint overlaps a body, door or interact tile (0)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "cost: 300 frames sampled with the flag off and on",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "cost: the prop layer adds under 10 % to the median frame (0.30 ms on 17.50 ms)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "sheet: artifacts/props-m12/sheet.png written, off above on for each checkpoint (980x4240)",
+    "pass": true,
+    "detail": null
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "actors": [
+    {
+      "id": "cooper",
+      "x": 7,
+      "y": 8
+    }
+  ],
+  "pairs": [
+    {
+      "actor": "cooper",
+      "tile": "7,8",
+      "foot": 144,
+      "prop": "roadhouse-chair-03",
+      "propFoot": 144,
+      "layer": 6,
+      "expect": "actor in front",
+      "sampled": 10,
+      "changed": 0
+    }
+  ]
+}

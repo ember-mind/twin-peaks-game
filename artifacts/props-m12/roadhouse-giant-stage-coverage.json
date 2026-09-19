@@ -1,0 +1,20 @@
+[
+  {
+    "actor": "cooper",
+    "tile": "7,8",
+    "foot": 144,
+    "covered": 0.2734375,
+    "px": 105,
+    "underProps": 248,
+    "of": 384
+  },
+  {
+    "actor": "giant",
+    "tile": "8,1",
+    "foot": 32,
+    "covered": 0.5520833333333334,
+    "px": 212,
+    "underProps": 384,
+    "of": 384
+  }
+]

@@ -19,12 +19,13 @@
  * Each is reached by seeding exactly the state its Cast Presence window reads (narrative/cast/windows.json) and
  * walking in through the real town door, never by teleporting a body onto a tile.
  *
- * THREE TREES, because the off shot has to prove the harness itself changes nothing:
- *   pristine   index.html untouched
- *   flagoff    index.html + an injected <script> setting GAME.PROPS_ENABLED = false
- *   flagon     index.html + the same <script> setting it true
- * pristine == flagoff, byte for byte, at every checkpoint (the injection is inert); pristine != flagon (the
- * comparison is not vacuous). The repo is never written: every tree is a temp copy.
+ * THREE TREES. M12 made the props the Roadhouse furniture and flipped the flag ON in index.html, so what the
+ * shots prove changed with it:
+ *   pristine   index.html as it ships (the flag is on)
+ *   flagon     index.html with the flag forced true   -> must MATCH pristine: the shipped default really is on
+ *   flagoff    index.html with the flag forced false  -> must DIFFER: the switch still switches
+ * Before M12 the pair to compare was pristine == flagoff, because the flag shipped off and the injection had to
+ * be inert. The repo is never written: every tree is a temp copy.
  *
  * DETERMINISM. index.html has no ?freezeMs= — that is a test/retro-scene.html harness mode. What actually moves in
  * a still Roadhouse is the neon, and js/roadhouse-art.js:618-681 flickers it as a pure function of nowMs(), so the
@@ -39,7 +40,7 @@
  *   bodies    every instance footprint against Cast Presence bodies, door tiles and interact tiles, the same list
  *             tools/world-apply.js warns about
  *   cost      median and p95 frame time on the Roadhouse over FRAME_SAMPLES frames, flag off vs on
- *   sheet     artifacts/props-m11/sheet.png, off above on for each checkpoint
+ *   sheet     artifacts/props-m12/sheet.png, off above on for each checkpoint
  */
 
 const fs = require('node:fs');
@@ -50,7 +51,8 @@ const zlib = require('node:zlib');
 const { spawn, spawnSync } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..');
-const OUT = path.join(ROOT, 'artifacts', 'props-m11');
+/* M11's evidence stays as the record of the decision; this run writes M12's. */
+const OUT = path.join(ROOT, 'artifacts', 'props-m12');
 const CHROME = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const PROBE = 'test/act-4-playthrough-probe.html';
 const SCENE = 'roadhouse';
@@ -181,8 +183,12 @@ const PAGE_DIRS = ['js', 'test', 'assets', 'world', 'narrative'];
 const INDEX = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const PROP_TAG = '<script src="js/props.gen.js"></script>';
 // The same injection test/props-depth-chrome.js:206 uses, against index.html's own script path.
-const inject = (value) => (html) => html.replace(PROP_TAG,
-  '<script>window.GAME = window.GAME || {}; window.GAME.PROPS_ENABLED = ' + value + ';</script>\n' + PROP_TAG);
+const SHIPPED_FLAG = /window\.GAME\.PROPS_ENABLED = true;/;
+const inject = (value) => (html) => {
+  // M12: index.html sets the flag itself, so forcing a value means replacing that line, not adding one before it
+  if (SHIPPED_FLAG.test(html)) return html.replace(SHIPPED_FLAG, 'window.GAME.PROPS_ENABLED = ' + value + ';');
+  return html.replace(PROP_TAG, '<script>window.GAME = window.GAME || {}; window.GAME.PROPS_ENABLED = ' + value + ';</script>\n' + PROP_TAG);
+};
 function copyTree(name, mutate) {
   const root = path.join(TMP, name);
   fs.mkdirSync(root);
@@ -482,11 +488,11 @@ async function main() {
     flagon: copyTree('flagon', inject(true))
   };
   check('index.html registers the prop layer', INDEX.indexOf(PROP_TAG) !== -1 && /props-production\.js/.test(INDEX));
-  check('the injected page differs from index.html only by the flag script',
-    inject(true)(INDEX) !== INDEX && inject(true)(INDEX).replace(/<script>window\.GAME[^<]*<\/script>\n/, '') === INDEX);
-  check('the repo default is flag off',
-    /GAME\.PROPS_ENABLED === undefined\) GAME\.PROPS_ENABLED = false/.test(fs.readFileSync(path.join(ROOT, 'js', 'props-production.js'), 'utf8')) &&
-    !/PROPS_ENABLED/.test(INDEX));
+  check('forcing the flag changes exactly the one line index.html sets it on',
+    inject(false)(INDEX) !== INDEX && inject(true)(INDEX) === INDEX);
+  check('js/props-production.js still defaults the flag off when nobody sets it',
+    /GAME\.PROPS_ENABLED === undefined\) GAME\.PROPS_ENABLED = false/.test(fs.readFileSync(path.join(ROOT, 'js', 'props-production.js'), 'utf8')));
+  check('M12: index.html ships the flag ON', /PROPS_ENABLED = true/.test(INDEX));
 
   const ports = { pristine: serve(trees.pristine), flagoff: serve(trees.flagoff), flagon: serve(trees.flagon) };
   const shots = {};       // checkpoint -> { off, on } buffers
@@ -528,14 +534,10 @@ async function main() {
         }
         pair[tree] = await captureCheckpoint(h.cdp, file);
       }
-      /* The off shot must be the shot of a tree that knows nothing about the flag. Byte-identity would be the
-       * cleanest claim, and it is not available on this page: the engine carries animation phase in state (an
-       * actor's walk frame, a lamp's flicker counter), those advance with dt rather than with the clock, and no
-       * amount of clock-pinning rewinds them across a page load. So the run measures its OWN noise floor first —
-       * two visits to the untouched tree, same checkpoint — and then requires the flag-off injection to change
-       * nothing beyond it. CONTROL is what a reload costs; anything more would be the injection painting. */
-      /* The actor sprite boxes are where the animation phase lives, so both diffs are measured OUTSIDE them: what
-       * is left is scenery, which the pinned clock does make reproducible. */
+      /* M12: the shipped page has the flag on, so the pair that must MATCH is shipped vs forced-true, and the
+       * one that must DIFFER is shipped vs forced-off. Both diffs exclude the actor sprite boxes, where the
+       * animation phase lives, and the match is judged against this page's own reload noise rather than as
+       * byte-identity — the engine carries phase in state and no clock pin rewinds it. */
       const stageNow = stageAt[cp.name], obsNow = actorsAt[cp.name];
       const toShotNow = makeMapper(stageNow);
       const actorBoxes = [obsNow.player].concat(obsNow.npcs).map((a) => {
@@ -559,20 +561,13 @@ async function main() {
         return { n: n, box: n ? [x0, y0, x1, y1] : null, sample: sample };
       };
       const control = diff(pair.pristine, pair.control);
-      const injected = diff(pair.pristine, pair.flagoff);
-      noise[cp.name] = { control: control, injected: injected };
-      if (injected.n === 0) {
-        check(cp.name + ': flag off is byte-identical to the untouched index.html (' + pair.pristine.length + ' bytes)', true);
-      } else {
-        /* Counts, not bounding boxes: the phase noise moves around the room from load to load, so a box drawn
-         * around it is not stable enough to compare. Both boxes go to capture-noise.json for the reader.
-         * The bound is twice the control plus a floor, because the control is itself one sample of a noisy
-         * quantity — the claim this can support is "indistinguishable from the untouched page to within the
-         * untouched page's own run-to-run variation", not "identical". The raw counts are in the report. */
-        check(cp.name + ': flag off changes no more than a plain reload of the same tree does (' +
-          injected.n + ' px vs ' + control.n + ' px of reload noise, actor sprites excluded)',
-          injected.n <= control.n * 2 + 16, { injected: injected, control: control });
-      }
+      const forcedOn = diff(pair.pristine, pair.flagon);
+      const forcedOff = diff(pair.pristine, pair.flagoff);
+      noise[cp.name] = { control: control, forcedOn: forcedOn, forcedOff: forcedOff };
+      check(cp.name + ': the shipped page is the flag-on page (' + forcedOn.n + ' px vs ' + control.n + ' px of reload noise)',
+        forcedOn.n <= control.n * 2 + 16, { forcedOn: forcedOn, control: control });
+      check(cp.name + ': forcing the flag off changes the room (' + forcedOff.n + ' px)', forcedOff.n > control.n * 2 + 16,
+        { forcedOff: forcedOff, control: control });
       fs.rmSync(path.join(OUT, cp.name + '-pristine.png'));   // the pair the report shows is off/on
       fs.rmSync(path.join(OUT, cp.name + '-control.png'));
       shots[cp.name] = { off: pair.flagoff, on: pair.flagon };
@@ -638,18 +633,24 @@ async function main() {
      * standing behind it draws in front of him, and if the frame is big enough it erases him. So: how much of
      * each actor's own 16x24 sprite box does the prop layer repaint? Half is the line — an actor may stand behind
      * furniture, but he has to stay recognisable. */
+    /* Only pixels a prop FRAME actually covers count. The off and on shots are two page loads, so an actor's
+     * walk phase differs between them and every pixel of its box would otherwise register as "covered" — the
+     * weakness M11 recorded in this metric, made worse here because the two shots come from different trees.
+     * Inside a prop's frame a changed pixel really is the prop painting. */
     const coverage = actors.map((a) => {
       const foot = (a.y + 1) * TILE;
       let seen = 0, hit = 0;
       for (let x = a.x * TILE; x < a.x * TILE + TILE; x++) {
         for (let y = foot - ACTOR_SPRITE_H; y < foot; y++) {
+          if (!INSTANCES.some((q) => x >= q.left && x < q.right && y >= q.top && y < q.bottom)) continue;
           const s = toShot(x, y);
           if (s[0] < 0 || s[1] < 0 || s[0] >= off.w || s[1] >= off.h) continue;
           seen++;
           if (off.at(s[0], s[1]) !== on.at(s[0], s[1])) hit++;
         }
       }
-      return { actor: a.id, tile: a.x + ',' + a.y, foot: foot, covered: seen ? hit / seen : 0, px: hit, of: seen };
+      const box = TILE * ACTOR_SPRITE_H;
+      return { actor: a.id, tile: a.x + ',' + a.y, foot: foot, covered: hit / box, px: hit, underProps: seen, of: box };
     });
     fs.writeFileSync(path.join(OUT, cp.name + '-coverage.json'), JSON.stringify(coverage, null, 2));
     const buried = coverage.filter((c) => c.covered > 0.5);
@@ -697,8 +698,10 @@ async function main() {
       if (interactAt[k]) hits.push({ instance: p.id, tile: k, kind: 'interact tile', what: interactAt[k] });
     }));
     fs.writeFileSync(path.join(OUT, 'footprint-overlaps.json'), JSON.stringify(hits, null, 2));
-    check('bodies: the footprint overlap list is the one tools/world-apply.js warns about (' + hits.length + ')',
-      hits.length === 1 && hits[0].instance === 'roadhouse-booth-01' && hits[0].tile === '2,6' && hits[0].kind === 'cast body', hits);
+    /* M11 found one: roadhouse-booth-01 shared tile 2,6 with the Log Lady. M12 moved the booth a row north, so
+     * the shipped registry now overlaps nothing at all. */
+    check('bodies: no instance footprint overlaps a body, door or interact tile (' + hits.length + ')',
+      hits.length === 0, hits);
   }
 
   /* ---- cost ---- */
@@ -732,7 +735,7 @@ async function main() {
     let y = 0;
     imgs.forEach((im) => { blit(im.off, y); y += h + GAP; blit(im.on, y); y += h + GAP; });
     fs.writeFileSync(path.join(OUT, 'sheet.png'), writePng(sheetW, sheetH, rgb));
-    check('sheet: artifacts/props-m11/sheet.png written, off above on for each checkpoint (' + sheetW + 'x' + sheetH + ')',
+    check('sheet: artifacts/props-m12/sheet.png written, off above on for each checkpoint (' + sheetW + 'x' + sheetH + ')',
       fs.statSync(path.join(OUT, 'sheet.png')).size > 0);
   }
 

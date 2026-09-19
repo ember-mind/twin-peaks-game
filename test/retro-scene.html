@@ -85,6 +85,10 @@
 <script src="../js/roadhouse-art.js"></script>
 <script src="../js/roadhouse-scene.js"></script>
 <script src="../js/roadhouse-production.js"></script>
+<!-- M12: the prop registry owns the Roadhouse furniture; js/roadhouse-art.js paints the shell only,
+     so the props are the room, not a second copy of it. Forced false by a harness to shoot the
+     shell on its own (test/props-flag-off.js). -->
+<script>window.GAME = window.GAME || {}; window.GAME.PROPS_ENABLED = true;</script>
 <script src="../js/props.gen.js"></script>
 <script src="../js/props-production.js"></script>
 <script src="../js/redroom-art.js"></script>
