@@ -26,7 +26,7 @@
     seated: {
       id: 'seated', dirs: ['down', 'right'], frames: 1, frameMs: 0,
       pivot: [12, 24], box: [16, 21], shadow: true,
-      reads: 'a body folded onto a seat: short, wide lap, shins straight down'
+      reads: 'a body folded onto a seat: narrow chest over a wide lap, toes below it'
     },
     reading: {
       id: 'reading', dirs: ['down'], frames: 2, frameMs: 900,
@@ -36,17 +36,17 @@
     work_counter: {
       id: 'work_counter', dirs: ['down'], frames: 3, frameMs: 320,
       pivot: [12, 24], box: [16, 24], shadow: true,
-      reads: 'standing, one arm working across the chest with a cloth in hand'
+      reads: 'standing, a small rag travelling across the chest under one hand'
     },
     unpacking: {
       id: 'unpacking', dirs: ['down'], frames: 2, frameMs: 520,
       pivot: [12, 24], box: [20, 20], shadow: true,
-      reads: 'bent at the waist, crown of the head to the viewer, hands down'
+      reads: 'bent at the waist, only the crown of the head showing, both arms down'
     },
     sleeping: {
       id: 'sleeping', dirs: ['right'], frames: 1, frameMs: 0,
       pivot: [12, 24], box: [24, 12], shadow: false,
-      reads: 'lying flat, head on a pillow, blanket in the wearer own colour'
+      reads: 'lying on its side, head on a pillow, blanket in the wearer own colour'
     },
     talking: {
       id: 'talking', dirs: ['down', 'right'], frames: 2, frameMs: 430,

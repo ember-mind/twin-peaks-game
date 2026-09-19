@@ -186,7 +186,7 @@
         21
       ],
       "shadow": true,
-      "reads": "a body folded onto a seat: short, wide lap, shins straight down"
+      "reads": "a body folded onto a seat: narrow chest over a wide lap, toes below it"
     },
     {
       "id": "reading",
@@ -222,7 +222,7 @@
         24
       ],
       "shadow": true,
-      "reads": "standing, one arm working across the chest with a cloth in hand"
+      "reads": "standing, a small rag travelling across the chest under one hand"
     },
     {
       "id": "unpacking",
@@ -240,7 +240,7 @@
         20
       ],
       "shadow": true,
-      "reads": "bent at the waist, crown of the head to the viewer, hands down"
+      "reads": "bent at the waist, only the crown of the head showing, both arms down"
     },
     {
       "id": "sleeping",
@@ -258,7 +258,7 @@
         12
       ],
       "shadow": false,
-      "reads": "lying flat, head on a pillow, blanket in the wearer own colour"
+      "reads": "lying on its side, head on a pillow, blanket in the wearer own colour"
     },
     {
       "id": "talking",
