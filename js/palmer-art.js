@@ -25,6 +25,8 @@
     walnutMid: '#734c33', walnutHi: '#96673f', walnutCool: '#4c4034',
     oak: '#8a5f3a',
     roseDeep: '#6d4c52', rose: '#a97c81', roseHi: '#c9a0a2',
+    wallDeep: '#5e5340', wall: '#7a6a52', wallHi: '#8e7c61',
+    mapleShade: '#8a6e46', mapleShade2: '#9c7f55',
     maple: '#b49368', mapleHi: '#c4a478', mapleDark: '#96784c', mapleSeam: '#a5875b',
     parquetDark: '#6b4526', parquet: '#8a5b31', parquetMid: '#956338',
     parquetHi: '#a5713f', parquetSeam: '#7b5029',
@@ -45,18 +47,26 @@
     dusk: '#7d93a4', duskHi: '#a9bcc6', duskPale: '#c4d2da',
     tread: '#c9a468', treadMid: '#a5814c', treadLow: '#7d5c33', treadDeep: '#553c20',
     fanUmbra: '#9a7a52', fanPenumbra: '#a8875d',
+    fanEdge: '#6f5836', fanBlade: '#8a6f45', fanBladeHi: '#a08254',
     shadow: '#4a3120', shadowMid: '#35220f', shadowDark: '#241608'
   };
 
   /* Grounded furniture only: the six solid cells the map actually carries. */
   var definitions = [
-    {id:'lauraBed', cells:[[1,1],[2,1]], bounds:[16,13,32,19], shadow:[16,28,32,4]},
+    {id:'lauraBed', cells:[[1,1],[2,1]], bounds:[16,16,32,20], shadow:[16,28,32,4]},
     {id:'lauraDresser', cells:[[6,1]], bounds:[96,10,16,23], shadow:[96,28,16,4]},
     {id:'sofa', cells:[[3,6]], bounds:[47,88,18,25], shadow:[48,108,16,4]},
     {id:'sideboard', cells:[[14,6]], bounds:[223,84,17,28], shadow:[224,108,16,4]},
     {id:'diningTable', cells:[[2,8],[3,8]], bounds:[31,109,34,35], shadow:[32,140,32,4]},
     {id:'diningChairs', cells:[[2,9],[3,9]], bounds:[33,146,30,15], shadow:[32,156,32,4]}
   ];
+
+  /* The two floor-level clusters. They are published because the contract
+   * checks that nothing in this room sits as an island: the burgundy rug has
+   * to reach the armchair's feet and the braided oval has to reach under the
+   * phonograph console. */
+  var RUG = { x: 64, y: 96, w: 112, h: 48 };
+  var WOOL = { x: 186, y: 106, w: 58, h: 42 };
 
   /* Two architectural bands that must repaint over an actor: the ceiling fan
    * hangs above the landing, the door casing frames whoever stands in it. */
@@ -81,21 +91,86 @@
   /* ------------------------------------------------------------ Laura's room */
 
   function drawLauraWall(R, p) {
-    /* Row 0 is the only wall face her room shows: cap rail, striped paper,
-     * baseboard.  Nine pixels of paper, so the stripe stays a whisper. */
-    R(0, 0, 256, 16, p.walnutDeep);
-    R(0, 0, 256, 3, p.walnutDark); R(0, 2, 256, 1, p.walnutHi);
-    R(2, 3, 252, 9, p.rose);
-    R(2, 3, 252, 1, p.roseHi);
-    for (var x = 6; x < 252; x += 8) R(x, 4, 1, 8, p.roseDeep);
-    R(0, 12, 256, 3, p.walnutDark); R(0, 12, 256, 1, p.walnutHi);
-    R(0, 15, 256, 1, p.ink);
-    /* Two small frames, the only thing hung in her room. */
-    R(150, 2, 18, 11, p.ink); R(151, 3, 16, 9, p.walnutMid);
-    R(151, 3, 16, 1, p.walnutHi); R(153, 5, 12, 5, '#7d8f96');
-    R(155, 7, 3, 2, p.roseDeep); R(160, 6, 3, 3, p.roseDeep);
-    R(176, 4, 12, 8, p.ink); R(177, 5, 10, 6, p.walnutMid);
-    R(177, 5, 10, 1, p.walnutHi); R(179, 6, 6, 3, p.rose);
+    /* Row 0 is the only wall face the upper floor shows, and at 1x it was
+     * reading as a pink ceiling stripe over a tan void.  It is now a proper
+     * wall: cornice, plaster field with battens, a dark wall foot, and the
+     * contact shadow on the boards below it that tells the eye where the
+     * wall stops and the floor begins.  The hangings overhang two rows down
+     * into the first walking row, the way a tall frame does; an actor
+     * standing there is drawn in front of them. */
+    var x;
+    R(0, 0, 256, 16, p.wallDeep);
+    R(0, 0, 256, 2, p.ink);
+    R(0, 2, 256, 2, p.walnutDark); R(0, 3, 256, 1, p.walnutHi);
+    R(0, 4, 256, 10, p.wall);
+    R(0, 4, 256, 1, p.wallHi);
+    for (x = 16; x < 256; x += 32) { R(x, 4, 1, 10, p.wallDeep); R(x + 1, 4, 1, 10, p.wallHi); }
+    R(0, 13, 256, 3, p.walnutDeep);
+    R(0, 13, 256, 1, p.walnutMid);
+    drawWallCluster(R, p);
+  }
+
+  function drawWallFootShadow(R, p) {
+    /* Where the wall meets the boards: two stepped rows on the floor itself,
+     * painted after it.  This is the strongest cue that the upper third is a
+     * room seen from above and not another wall. */
+    var x;
+    R(0, 16, 256, 3, p.walnutDeep);
+    R(0, 19, 256, 2, p.mapleShade);
+    R(0, 21, 256, 2, p.mapleShade2);
+    for (x = 6; x < 250; x += 24) R(x, 23, 5, 1, p.mapleShade2);
+  }
+
+  function framedPhoto(R, p, x, y, w, h, sitter) {
+    /* A hung frame: ink edge, brass or walnut moulding, cream mat, and inside
+     * it a figure small enough to be a photograph and large enough to read as
+     * one.  `sitter` picks the hair so the cluster is a family, not a stamp. */
+    R(x, y, w, h, p.ink);
+    R(x + 1, y + 1, w - 2, h - 2, sitter === 2 ? p.brassDark : p.walnutMid);
+    R(x + 1, y + 1, w - 2, 1, sitter === 2 ? p.brass : p.walnutHi);
+    R(x + 2, y + 2, w - 4, h - 4, p.walnutDeep);
+    R(x + 3, y + 3, w - 6, h - 6, '#cfc3a0');
+    R(x + 4, y + 4, w - 8, h - 8, '#8f9aa4');
+    var cx = x + (w >> 1);
+    var hair = sitter === 0 ? '#cdae68' : (sitter === 1 ? '#6b5140' : '#9a8f86');
+    R(cx - 2, y + 5, 4, 3, hair);
+    R(cx - 1, y + 7, 2, 2, '#e0b089');
+    R(cx - 3, y + 9, 6, h - 13, sitter === 1 ? '#5d5f80' : '#b9bfc6');
+    R(x + 1, y + h - 2, w - 2, 1, p.ink);
+  }
+
+  function wallSconce(R, p, x) {
+    /* Warm pool on the plaster first, then the shade: three hard steps, the
+     * joints repainted warm through them. */
+    var i;
+    R(x - 8, 4, 28, 10, p.warmWall);
+    R(x - 4, 4, 20, 10, p.warmWallMid);
+    R(x, 4, 12, 10, p.warmWallHi);
+    for (i = -8; i < 20; i += 32) R(x + i, 4, 1, 10, '#3a2716');
+    R(x + 2, 1, 8, 3, p.brassDark); R(x + 3, 1, 6, 1, p.brass);
+    R(x, 4, 12, 5, p.amber); R(x + 1, 4, 10, 2, p.amberHi);
+    R(x + 4, 4, 4, 5, '#fff0c4');
+    R(x, 9, 12, 1, p.brassDark);
+  }
+
+  function drawWallCluster(R, p) {
+    /* The reading matter the band was missing: a family group of four hung
+     * photographs, a wall clock, and a sconce either side of them. */
+    wallSconce(R, p, 84);
+    wallSconce(R, p, 214);
+    framedPhoto(R, p, 116, 3, 18, 17, 0);
+    framedPhoto(R, p, 136, 6, 16, 14, 1);
+    framedPhoto(R, p, 155, 2, 13, 11, 2);
+    framedPhoto(R, p, 170, 7, 14, 12, 1);
+    /* Wall clock: ink case, cream dial, two hands. */
+    R(190, 2, 16, 17, p.ink);
+    R(191, 3, 14, 15, p.walnutMid); R(191, 3, 14, 1, p.walnutHi);
+    R(193, 5, 10, 11, p.walnutDeep);
+    R(194, 6, 8, 9, '#e5dcc0');
+    R(194, 6, 8, 1, '#f3eee2');
+    R(197, 7, 1, 4, p.ink); R(198, 10, 3, 1, p.ink);
+    R(197, 13, 1, 2, p.brassDark);
+    R(191, 18, 14, 1, p.ink);
   }
 
   function drawLauraFloor(R, p) {
@@ -113,18 +188,18 @@
     for (i = 0; i < joints.length; i++) R(joints[i][0], joints[i][1], 1, 6, p.mapleSeam);
     /* A small braided rug beside her bed: three rose values a few points
      * apart, no frame, so it stays a rug and not a panel on the floor. */
-    R(160, 38, 28, 3, p.roseDeep);
-    R(156, 40, 36, 3, p.roseDeep);
-    R(152, 42, 44, 10, p.roseDeep);
-    R(156, 51, 36, 3, p.roseDeep);
-    R(160, 53, 28, 3, p.roseDeep);
-    R(162, 40, 24, 3, p.rose);
-    R(158, 42, 32, 2, p.rose);
-    R(154, 44, 40, 6, p.rose);
-    R(158, 49, 32, 2, p.rose);
-    R(162, 51, 24, 3, p.rose);
-    R(154, 45, 40, 1, p.roseHi); R(156, 48, 36, 1, p.roseHi);
-    R(158, 43, 32, 1, p.roseDeep);
+    R(40, 36, 28, 3, p.roseDeep);
+    R(36, 38, 36, 3, p.roseDeep);
+    R(32, 40, 44, 12, p.roseDeep);
+    R(36, 51, 36, 3, p.roseDeep);
+    R(40, 53, 28, 3, p.roseDeep);
+    R(42, 38, 24, 3, p.rose);
+    R(38, 40, 32, 2, p.rose);
+    R(34, 42, 40, 8, p.rose);
+    R(38, 49, 32, 2, p.rose);
+    R(42, 51, 24, 3, p.rose);
+    R(34, 43, 40, 1, p.roseHi); R(36, 48, 36, 1, p.roseHi);
+    R(38, 41, 32, 1, p.roseDeep); R(38, 46, 32, 1, p.roseDeep);
   }
 
   /* ------------------------------------------------------- stair wall, row 4 */
@@ -173,14 +248,25 @@
     R(180, 67, 12, 5, p.amber); R(181, 67, 10, 2, p.amberHi);
     R(184, 67, 4, 5, '#fff0c4');
     R(180, 72, 12, 1, p.brassDark);
+    /* A second sconce over the seating group, so the armchair, the rug under
+     * it and the light above it read as one cluster. */
+    R(30, 66, 32, 10, p.warmWall);
+    R(35, 66, 22, 10, p.warmWallMid);
+    R(40, 66, 12, 10, p.warmWallHi);
+    for (x = 32; x < 60; x += 16) { R(x, 67, 2, 8, '#3a2716'); R(x + 2, 68, 1, 6, '#b08a54'); }
+    R(30, 66, 32, 1, '#c09660');
+    R(42, 64, 8, 3, p.brassDark); R(43, 64, 6, 1, p.brass);
+    R(40, 67, 12, 5, p.amber); R(41, 67, 10, 2, p.amberHi);
+    R(44, 67, 4, 5, '#fff0c4');
+    R(40, 72, 12, 1, p.brassDark);
     /* Framed landscape west of the stairs — the room's one picture. */
-    R(30, 66, 24, 12, p.ink);
-    R(31, 67, 22, 10, p.walnutMid); R(31, 67, 22, 1, p.walnutHi);
-    R(32, 68, 20, 8, p.walnutDeep);
-    R(33, 69, 18, 6, '#6f8a74');
-    R(33, 72, 18, 3, '#3f5c4a');
-    R(36, 70, 3, 4, '#2c4335'); R(42, 69, 3, 5, '#2c4335'); R(47, 71, 2, 3, '#2c4335');
-    R(33, 69, 18, 1, '#93a992');
+    R(116, 66, 24, 12, p.ink);
+    R(117, 67, 22, 10, p.walnutMid); R(117, 67, 22, 1, p.walnutHi);
+    R(118, 68, 20, 8, p.walnutDeep);
+    R(119, 69, 18, 6, '#6f8a74');
+    R(119, 72, 18, 3, '#3f5c4a');
+    R(122, 70, 3, 4, '#2c4335'); R(128, 69, 3, 5, '#2c4335'); R(133, 71, 2, 3, '#2c4335');
+    R(119, 69, 18, 1, '#93a992');
   }
 
   /* ------------------------------------------------------------ living room */
@@ -210,6 +296,11 @@
      * away from the wall, with the plank seams repainted warm through them so
      * the light lies on the floor instead of covering it. */
     var y;
+    R(30, 80, 36, 18, p.poolFloor);
+    R(34, 80, 28, 13, p.poolFloorMid);
+    R(38, 80, 18, 8, p.poolFloorHi);
+    R(42, 80, 10, 4, '#dcae66');
+    for (y = 88; y < 98; y += 8) R(30, y, 36, 1, p.poolSeam);
     R(166, 80, 40, 20, p.poolFloor);
     R(170, 80, 32, 14, p.poolFloorMid);
     R(174, 80, 24, 8, p.poolFloorHi);
@@ -231,13 +322,16 @@
   function drawRug(R, p) {
     /* The rug is the room's quiet dark mass and the only place the cast
      * stands: the medallion stays west of Sarah's tile (9,7). */
-    R(96, 96, 80, 48, p.rugDeep);
-    R(98, 98, 76, 44, p.rugDark);
-    R(101, 101, 70, 38, p.rug);
-    R(101, 101, 70, 1, p.rugMid);
-    R(103, 103, 66, 2, p.rugCream); R(103, 135, 66, 2, p.rugCream);
-    R(103, 103, 2, 34, p.rugCream); R(167, 103, 2, 34, p.rugCream);
-    R(105, 105, 62, 1, p.rugDeep); R(105, 134, 62, 1, p.rugDeep);
+    /* The rug reaches west to the armchair's feet, so the seat, the rug and
+     * the light over it are one group instead of three islands.  It is floor
+     * level and walkable, like the runner: an actor crossing it stands on it. */
+    R(RUG.x, RUG.y, RUG.w, RUG.h, p.rugDeep);
+    R(66, 98, 108, 44, p.rugDark);
+    R(69, 101, 102, 38, p.rug);
+    R(69, 101, 102, 1, p.rugMid);
+    R(71, 103, 98, 2, p.rugCream); R(71, 135, 98, 2, p.rugCream);
+    R(71, 103, 2, 34, p.rugCream); R(167, 103, 2, 34, p.rugCream);
+    R(73, 105, 94, 1, p.rugDeep); R(73, 134, 94, 1, p.rugDeep);
     /* One stepped medallion, tip up, and four corner marks. */
     R(126, 116, 18, 6, p.rugOchre);
     R(131, 111, 8, 16, p.rugOchre);
@@ -245,12 +339,18 @@
     R(130, 117, 10, 4, p.rugCream);
     R(132, 114, 6, 10, p.rugCream);
     R(133, 117, 4, 4, p.rugDeep);
-    R(108, 108, 6, 2, p.rugOchre); R(108, 108, 2, 6, p.rugOchre);
+    R(76, 108, 6, 2, p.rugOchre); R(76, 108, 2, 6, p.rugOchre);
     R(158, 108, 6, 2, p.rugOchre); R(162, 108, 2, 6, p.rugOchre);
-    R(108, 130, 2, 6, p.rugOchre); R(108, 134, 6, 2, p.rugOchre);
+    R(76, 130, 2, 6, p.rugOchre); R(76, 134, 6, 2, p.rugOchre);
     R(162, 130, 2, 6, p.rugOchre); R(158, 134, 6, 2, p.rugOchre);
     /* Two creases, nothing else. */
-    R(112, 122, 14, 1, p.rugDeep); R(113, 123, 12, 1, p.rugMid);
+    /* Two smaller lozenges flank the medallion, so the widened field is not
+     * half an empty red slab. */
+    R(84, 116, 14, 6, p.rugOchre); R(88, 112, 6, 14, p.rugOchre);
+    R(87, 117, 8, 4, p.rugDark); R(89, 115, 4, 8, p.rugDark);
+    R(160, 116, 14, 6, p.rugOchre); R(164, 112, 6, 14, p.rugOchre);
+    R(163, 117, 8, 4, p.rugDark); R(165, 115, 4, 8, p.rugDark);
+    R(84, 130, 14, 1, p.rugDeep); R(85, 131, 12, 1, p.rugMid);
     R(146, 128, 16, 1, p.rugDeep); R(147, 129, 14, 1, p.rugMid);
   }
 
@@ -274,23 +374,23 @@
   }
 
   function drawWoolRug(R, p) {
-    /* A braided oval in the east half: the room's quiet corner needs a floor,
-     * not another piece of furniture the map has no cell for.  Concentric
-     * rings, warm wool, one step under the parquet so it never competes with
-     * the burgundy rug the cast stands on. */
+    /* The braided oval reaches north under the phonograph console, so the
+     * console, the rug it stands on and Laura's portrait above it are one
+     * group.  On its own in the corner it read as a third island. */
     var rings = [
-      [p.woolDeep, 200, 120, 20, 2, 196, 122, 28, 2, 192, 124, 36, 16, 196, 140, 28, 2, 200, 142, 20, 2],
-      [p.wool, 202, 122, 16, 2, 198, 124, 24, 2, 194, 126, 32, 12, 198, 138, 24, 2, 202, 140, 16, 2],
-      [p.woolHi, 204, 124, 12, 2, 200, 126, 20, 2, 196, 128, 28, 8, 200, 136, 20, 2, 204, 138, 12, 2],
-      [p.woolCream, 206, 126, 8, 2, 202, 128, 16, 2, 198, 130, 24, 4, 202, 134, 16, 2, 206, 136, 8, 2]
+      [p.woolDeep, 198, WOOL.y, 32, 3, 192, WOOL.y + 3, 44, 3, WOOL.x, WOOL.y + 6, WOOL.w, 30,
+        192, WOOL.y + 36, 44, 3, 198, WOOL.y + 39, 32, 3],
+      [p.wool, 200, 108, 28, 3, 194, 111, 40, 2, 188, 114, 54, 26, 194, 140, 40, 2, 200, 143, 28, 3],
+      [p.woolHi, 202, 110, 24, 3, 196, 113, 36, 2, 190, 116, 50, 22, 196, 138, 36, 2, 202, 141, 24, 3],
+      [p.woolCream, 204, 112, 20, 3, 198, 115, 32, 2, 192, 118, 46, 18, 198, 136, 32, 2, 204, 139, 20, 3]
     ];
     var i, j, ring;
     for (i = 0; i < rings.length; i++) {
       ring = rings[i];
       for (j = 1; j < ring.length; j += 4) R(ring[j], ring[j + 1], ring[j + 2], ring[j + 3], ring[0]);
     }
-    R(204, 130, 12, 4, p.wool);
-    R(206, 131, 8, 1, p.woolHi);
+    R(200, 122, 36, 10, p.wool);
+    R(204, 124, 28, 1, p.woolHi); R(204, 129, 28, 1, p.woolHi);
   }
 
   /* --------------------------------------------------------------- envelope */
@@ -463,22 +563,22 @@
   }
 
   function drawCeilingFan(R, p) {
-    /* The fan hangs at the top of the stairs, over the upper hall.  It sits
-     * high enough, and is small enough, that the only thing it repaints over
-     * an actor standing on the top step (row 3) is the south blade across the
-     * top of their head: a blade passing in front reads as depth, a hub over
-     * their chest read as a burial. */
-    R(62, 40, 14, 5, p.ink);
-    R(63, 41, 12, 3, p.walnutDark); R(63, 41, 12, 1, p.walnutMid);
-    R(85, 40, 14, 5, p.ink);
-    R(86, 41, 12, 3, p.walnutDark); R(86, 41, 12, 1, p.walnutMid);
-    R(77, 28, 7, 10, p.ink);
-    R(78, 29, 5, 8, p.walnutDark); R(78, 29, 5, 1, p.walnutMid);
-    R(77, 47, 7, 8, p.ink);
-    R(78, 48, 5, 6, p.walnutDark); R(78, 48, 5, 1, p.walnutMid);
+    /* A fixture on the ceiling, not a stain on the wall.  The blades keep no
+     * ink outline: an ink cross on pale maple was the highest contrast thing
+     * in the upper third and pulled the eye off the room.  They sit two steps
+     * under the floor instead, with the moon side of each blade one step
+     * lighter, and only the hub carries a dark edge. */
+    R(62, 40, 14, 5, p.fanEdge);
+    R(63, 41, 12, 3, p.fanBlade); R(63, 41, 12, 1, p.fanBladeHi);
+    R(85, 40, 14, 5, p.fanEdge);
+    R(86, 41, 12, 3, p.fanBlade); R(86, 41, 12, 1, p.fanBladeHi);
+    R(77, 28, 7, 10, p.fanEdge);
+    R(78, 29, 5, 8, p.fanBlade); R(78, 29, 5, 1, p.fanBladeHi);
+    R(77, 47, 7, 8, p.fanEdge);
+    R(78, 48, 5, 6, p.fanBlade); R(78, 48, 5, 1, p.fanBladeHi);
 
-    R(75, 37, 11, 11, p.ink);
-    R(76, 38, 9, 9, p.walnutDeep);
+    R(75, 37, 11, 11, p.walnutDark);
+    R(76, 38, 9, 9, p.walnutMid);
     R(78, 40, 5, 5, p.brassDark); R(78, 40, 5, 1, p.brass);
     R(79, 41, 3, 3, p.amber); R(79, 41, 3, 1, p.amberHi);
   }
@@ -504,22 +604,25 @@
   }
 
   function drawLauraBed(R, p) {
-    /* Head against the north wall: a low walnut headboard, two thirds pillow
-     * and turned-back sheet, then the quilt with its lodge stripe. */
-    R(16, 13, 32, 19, p.ink);
-    R(17, 14, 30, 3, p.walnutDark); R(18, 14, 28, 1, p.walnutHi);
-    R(17, 17, 30, 14, p.walnutDeep);
-    R(19, 18, 26, 6, p.lace); R(19, 18, 26, 1, '#f3eee2');
-    R(19, 22, 26, 1, p.laceDim);
-    R(31, 18, 1, 6, p.laceDim);
-    R(19, 24, 26, 6, p.quilt); R(19, 24, 26, 1, p.quiltHi);
-    R(19, 26, 26, 1, p.quiltDeep);
-    R(22, 27, 4, 3, p.quiltDeep); R(30, 27, 4, 3, p.quiltDeep);
-    R(38, 27, 4, 3, p.quiltDeep);
-    R(17, 17, 2, 14, p.walnutDark); R(17, 17, 1, 14, p.walnutHi);
-    R(45, 17, 2, 14, p.walnutDark); R(45, 17, 1, 14, p.walnutMid);
-    R(17, 30, 30, 2, p.walnutDark); R(18, 30, 28, 1, p.walnutHi);
-    R(17, 31, 30, 1, p.ink);
+    /* Head at the WEST and the whole bed standing BELOW the wall foot: a bed
+     * thirty-two long and sixteen deep with the pillow at one end reads as a
+     * bed from above.  Head at the north, overlapping the wall band, made a
+     * pale rectangle sitting on the wall, which at 1x read as a window. */
+    R(16, 16, 32, 18, p.ink);
+    R(17, 17, 5, 16, p.walnutDark);
+    R(18, 18, 3, 14, p.walnut); R(18, 18, 1, 14, p.walnutHi);
+    R(22, 17, 24, 16, p.walnutDeep);
+    R(23, 18, 6, 14, p.lace); R(23, 18, 6, 1, '#f3eee2');
+    R(23, 24, 6, 1, p.laceDim);
+    R(29, 18, 3, 14, p.linen); R(29, 18, 3, 1, p.lace);
+    R(32, 18, 13, 14, p.quilt); R(32, 18, 13, 1, p.quiltHi);
+    R(32, 22, 13, 1, p.quiltDeep); R(32, 28, 13, 1, p.quiltDeep);
+    R(35, 19, 2, 3, p.quiltDeep); R(40, 23, 2, 4, p.quiltDeep);
+    R(35, 29, 2, 3, p.quiltDeep);
+    R(45, 17, 2, 16, p.walnutDark); R(45, 17, 1, 16, p.walnutMid);
+    R(17, 32, 30, 2, p.walnutDark); R(18, 32, 28, 1, p.walnutHi);
+    R(17, 34, 3, 2, p.ink); R(44, 34, 3, 2, p.ink);
+    R(17, 33, 30, 1, p.ink);
   }
 
   function drawLauraDresser(R, p) {
@@ -600,9 +703,8 @@
     R(37, 121, 15, 1, p.lace); R(37, 121, 1, 6, p.lace);
     R(39, 123, 11, 1, '#8b8574'); R(39, 125, 8, 1, '#8b8574');
     R(44, 121, 1, 6, '#8b8574');
-    R(53, 126, 7, 4, p.lace); R(53, 126, 7, 1, '#f0ead9');
-    R(54, 124, 5, 4, '#f0ead9'); R(54, 124, 5, 1, '#ffffff');
-    R(54, 127, 5, 1, p.laceDim); R(59, 125, 1, 2, p.laceDim);
+    R(52, 125, 8, 4, p.lace); R(52, 125, 8, 1, '#f0ead9');
+    R(53, 126, 6, 2, p.laceDim);
     R(52, 112, 4, 7, p.ink); R(52, 113, 3, 6, '#3f5c4a'); R(52, 113, 3, 1, '#5a7c62');
     R(50, 110, 8, 3, '#a34a55'); R(52, 109, 4, 2, '#c76a70');
     R(49, 111, 2, 2, '#7d3440'); R(56, 111, 2, 2, '#7d3440');
@@ -642,6 +744,7 @@
     R(0, 0, 256, 192, p.ink);
     drawLauraWall(R, p);
     drawLauraFloor(R, p);
+    drawWallFootShadow(R, p);
     drawFanShadow(R, p);
     drawLivingFloor(R, p);
     drawFloorLight(R, p);
@@ -698,6 +801,8 @@
     definitions: definitions,
     props: definitions,
     palette: palette,
+    rug: RUG,
+    wool: WOOL,
     fanFoot: fanFoot,
     doorFoot: doorFoot
   };
