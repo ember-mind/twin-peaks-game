@@ -44,7 +44,7 @@ is usable. Until then every `draw` returns `false`.
 | `seated` | down · right (+ left) | 1 | — | 12,24 | 16×21 | yes | narrow chest over a wide lap, shins straight down |
 | `reading` | down | 2 | 900 | 12,24 | 16×24 | yes | standing, both hands holding an open book across the chest |
 | `work_counter` | down | 3 | 320 | 12,24 | 24×24 | yes | standing, a rag swinging from one hand outside the silhouette |
-| `unpacking` | down | 2 | 520 | 12,24 | 24×20 | yes | stooped, shoulders rolled forward, both arms hanging clear of the body |
+| `unpacking` | down | 1 | — | 12,24 | 24×20 | yes | stooped, both arms hanging clear of the body down to hip height |
 | `sleeping` | right (+ left) | 1 | — | 12,24 | 24×12 | no | lying flat, head on a pillow, blanket in the wearer's own colour |
 | `talking` | down · right (+ left) | 2 | 430 | 12,24 | 24×24 | yes | one forearm lifting and falling clear of the silhouette |
 
@@ -148,7 +148,7 @@ the first across midnight. The worst one-minute step anywhere in the day is
 | `tools/pose-frames.js` | the authored pose matrices, in slot letters |
 | `tools/build-poses.js` | compiles the sheet from `lt-appearance.js` + those matrices |
 | `tools/capture-gallery.js` | drives the gallery in headless Chrome and writes `images/` and the manifest |
-| `assets/activity-poses-v01.png` | the sheet: 14 pose columns × 12 looks, 24px cells, 336×336 |
+| `assets/activity-poses-v01.png` | the sheet: 13 pose columns × 12 looks, 24px cells, 336×336 |
 | `assets/activity-poses-v01.frames.json` | which column and row each cell is at |
 | `activity-poses.manifest.json` | the whole package, machine-readable, written by the capture tool |
 | `gallery.html` | the preview, drawn by the real renderer |
@@ -164,8 +164,8 @@ is the same poses in Café Meridiana as that room actually is, which is a
 harder and less flattering picture; the difference between the two is the
 integration work, not the art.
 
-The sheet is square because the production PNG writer writes squares; the
-bottom two cell rows are empty on purpose.
+The sheet is square because the production PNG writer writes squares, so its
+last column and its bottom two cell rows are empty on purpose.
 
 ## Commands
 

@@ -60,11 +60,6 @@
       0
     ],
     [
-      "unpacking",
-      "down",
-      1
-    ],
-    [
       "sleeping",
       "right",
       0
@@ -151,8 +146,8 @@
       "dirs": [
         "down"
       ],
-      "frames": 2,
-      "frameMs": 520,
+      "frames": 1,
+      "frameMs": 0,
       "pivot": [
         12,
         24

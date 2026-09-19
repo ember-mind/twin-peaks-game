@@ -160,20 +160,21 @@ function workCounterBody(body, frame) {
  * transparent column between arm and torso, dropping one row between frames.
  * The face stays visible — a figure whose head has swallowed its torso reads
  * as a broken sprite, not as a bent back. */
-function unpackingBody(body, frame) {
-  const arm = frame === 0 ? 2 : 1;
+function unpackingBody(body) {
+  /* Rows 1-5 are all full-width torso rows on purpose: an arm may only hang
+   * off a row whose next column is the body's own cloth, or the join shows,
+   * and an arm needs five rows before it reads as hanging rather than as a
+   * stub stuck on the side. */
   const rows = pad4(body === 'skirt' ? [
-    '...OsWTWTWsO...', '..OJJWWWWWJJO..', '.OJjJWwWwWJjJO.', '.OJjJWWWWWJjJO.',
-    '.OJJJwWwWwJJJO.', '.OsOPPPpPPPOsO.', '...OOSSOSSOO...', '....OBBOBBO....'
+    '...OsWTWTWsO...', '.OJjJWwWwWJjJO.', '.OJjJWWWWWJjJO.', '.OJjJWwWwWJjJO.',
+    '.OJJJwWwWwJJJO.', '.OJJPPPpPPPJJO.', '...OOSSOSSOO...', '....OBBOBBO....'
   ] : [
-    '...OsWWTWWsO...', '..OJJWWTWWJJO..', '.OJjJJWTWJJjJO.', '.OJjJJwTwJJjJO.',
-    '.OJJJJwWwJJJJO.', '..OOPPpPpPPOO..', '...OPPPOPPPO...', '...ObBOObBO....'
+    '...OsWWTWWsO...', '.OJjJJWTWJJjJO.', '.OJjJJWTWJJjJO.', '.OJjJJwTwJJjJO.',
+    '.OJJJJwWwJJJJO.', '.OJJPPpPpPPJJO.', '...OPPPOPPPO...', '...ObBOObBO....'
   ]);
   const out = rows.slice();
-  /* Both arms, overwriting the torso's own outline column so they hang FROM
-   * the body instead of beside it. */
-  ['S', 'S', 'S', 's'].forEach((skin, i) => {
-    out[arm + i] = hangRight(hangLeft(out[arm + i], skin), skin);
+  ['S', 'S', 'S', 'S', 's'].forEach((skin, i) => {
+    out[1 + i] = hangRight(hangLeft(out[1 + i], skin), skin);
   });
   return out;
 }
@@ -204,21 +205,19 @@ const SLEEPING = rect([
  * speck, and a speck is not a gesture. */
 function talkingDown(body, frame) {
   const rows = pad4(body === 'skirt' ? [
-    '...OsWTWTWsO...', '..OJJWWWWWJJO..', '.OJjJWwWwWJjJO.', '.OJjJWWWWWJjJO.',
-    '.OSJJwWwWwJJSO.', '.OsOPPPpPPPOsO.', '..OPPpPPPpPPO..', '..OPPPPPPPPPO..',
+    '...OsWTWTWsO...', '.OJjJWwWwWJjJO.', '.OJjJWwWwWJjJO.', '.OJjJWWWWWJjJO.',
+    '.OSJJwWwWwJJSO.', '.OJJPPPpPPPJJO.', '..OPPpPPPpPPO..', '..OPPPPPPPPPO..',
     '..OPPPPPPPPPO..', '...OOSSOSSOO...', '....OBBOBBO....', '....ObBObBO....'
   ] : [
-    '...OsWWTWWsO...', '..OJJWWTWWJJO..', '.OJjJJWTWJJjJO.', '.OJjJJWTWJJjJO.',
+    '...OsWWTWWsO...', '.OJjJJWTWJJjJO.', '.OJjJJWTWJJjJO.', '.OJjJJWTWJJjJO.',
     '.OJjJJwTwJJjJO.', '.OSJJJwWwJJJSO.', '.OsOJJwwwJJOsO.', '..OOPPpPpPPOO..',
     '...OPPpOpPPO...', '...OPPPOPPPO...', '...ObBOObBO....', '...OBBO.OBBO...'
   ]);
   const out = rows.slice();
   const rest = body === 'skirt' ? 4 : 5;          /* the row the resting hand is on */
   out[rest] = out[rest].replace('S', 'J');
-  const top = frame === 0 ? 0 : 3;
-  out[top] = hangLeft(out[top], 'S');
-  out[top + 1] = hangLeft(out[top + 1], 's');
-  out[top + 2] = splice(out[top + 2], 3, 'OO');
+  const top = frame === 0 ? 1 : 2;
+  ['S', 'S', 'S', 's'].forEach((skin, i) => { out[top + i] = hangLeft(out[top + i], skin); });
   return out;
 }
 
@@ -278,7 +277,7 @@ function art(poseId, dir, frame) {
         body: { jacket: workCounterBody('jacket', frame), skirt: workCounterBody('skirt', frame) } };
     case 'unpacking/down':
       return { head: 'down', overlayDir: 'down', pad: 4, blankTop: 0,
-        body: { jacket: unpackingBody('jacket', frame), skirt: unpackingBody('skirt', frame) } };
+        body: { jacket: unpackingBody('jacket'), skirt: unpackingBody('skirt') } };
     case 'sleeping/right':
       return { head: null, overlayDir: 'right', pad: 0, blankTop: 0,
         body: { jacket: SLEEPING, skirt: SLEEPING } };

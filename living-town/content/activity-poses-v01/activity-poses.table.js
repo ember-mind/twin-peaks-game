@@ -16,7 +16,7 @@
 
   AP.VERSION = 'activity-poses-v01';
   AP.CELL = 24;          /* the production 24px actor cell, unchanged */
-  AP.COLUMNS = 14;       /* cells per sheetId; must equal the frame count below */
+  AP.COLUMNS = 13;       /* cells per sheetId; must equal the frame count below */
 
   /* pivot/box are inside the 24x24 cell: `box` is what the art is allowed to
    * cover, `pivot` is the cell pixel that lands on the caller's (x, y) + the
@@ -39,7 +39,7 @@
       reads: 'standing, a rag swinging from one hand outside the silhouette'
     },
     unpacking: {
-      id: 'unpacking', dirs: ['down'], frames: 2, frameMs: 520,
+      id: 'unpacking', dirs: ['down'], frames: 1, frameMs: 0,
       pivot: [12, 24], box: [24, 20], shadow: true,
       reads: 'stooped, shoulders rolled forward, both arms hanging clear of the body'
     },
@@ -65,7 +65,6 @@
     ['work_counter', 'down', 1],
     ['work_counter', 'down', 2],
     ['unpacking', 'down', 0],
-    ['unpacking', 'down', 1],
     ['sleeping', 'right', 0],
     ['talking', 'down', 0],
     ['talking', 'down', 1],
