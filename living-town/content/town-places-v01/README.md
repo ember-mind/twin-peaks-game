@@ -215,6 +215,48 @@ package has never seen and a blank screen.
 frame, people included, and this package draws nothing that expects to be
 tinted twice.
 
+## Where it stands against the bar
+
+Four fresh critics were shown the café frame and these frames at native size
+with no labels, no list of objects and no explanation, and asked three things:
+do they belong to the same game, can you name each piece of furniture cold, and
+can you tell where a person can walk. The last round's verdict, unedited:
+
+| place | same game | nameable | walkable is clear |
+|---|---|---|---|
+| park | **fail** | **fail** | pass |
+| street | **fail** | **fail** | **fail** |
+| home | pass | **fail** | pass |
+
+What the last critic could name cold, with nothing to go on:
+
+- **park** — trees, a pond with reeds and stones, a dirt path, a stone gate
+  with iron bars, wildflowers, the hedge border.
+- **street** — a cobbled road, flagstone pavements, a kerb, two double wooden
+  doors with stone frames and wall lamps, an iron gate in stone posts, trees.
+- **home** — a bed with a white pillow and a coloured blanket, a rug, wall
+  clocks, framed pictures, a hanging ceiling lamp, a double front door, a
+  doormat, a stone step, a window with curtains and a potted plant.
+
+What it could not name, and what it guessed instead:
+
+- the four **park benches** ("a white-framed crate, or a chair seen from the
+  front, maybe a sign on a stand"). The white rim and the missing gap under the
+  seat were fixed after that round; the benches in the committed frames are not
+  the ones the critic saw, and they have not been put in front of a fresh pair
+  of eyes since.
+- the **guitar** ("a broom in a yellow bucket, or a guitar on a stand, or a
+  floor lamp"). Redrawn in wood rather than gold after that round, also unseen.
+- the **kitchen run** — named as a kitchen, but not which appliance.
+- **what the street's doors belong to.** This one is not fixable here: see the
+  limits below.
+
+The street fails all three and will keep failing all three until its rows carry
+a building. Two separate critics reached the same verdict independently and
+both proposed the same fix — a continuous façade along the north side — which
+would mean painting a solid wall across cells the rows leave walkable. That is
+a change to `lt-world.js`, not to this package.
+
 ## Limits, honestly
 
 - **Nothing is wired.** No view calls this. The gallery places people because

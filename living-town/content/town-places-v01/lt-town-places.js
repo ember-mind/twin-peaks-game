@@ -505,30 +505,30 @@
    * shadow. One cell wide, so that is all there is room for. */
   function bench(g, kit, p, sx, sy, facing) {
     var R = kit.rect, i;
-    var backTop = facing === 'down' ? 0 : 11, seatTop = facing === 'down' ? 9 : 1;
+    var backTop = facing === 'down' ? 0 : 9, seatTop = facing === 'down' ? 9 : 0;
     var frameTop = Math.min(backTop, seatTop);
     kit.contactShadow(g, sx + 1, sy + 14, 14, p);
-    R(g, sx + 2, sy + seatTop + 7, 12, 2, 'rgba(37,40,43,.30)');
+    R(g, sx + 2, sy + (facing === 'down' ? seatTop + 7 : backTop + 6), 12, 2, 'rgba(37,40,43,.30)');
     /* The backrest: a board standing on edge, a step narrower than the seat,
      * so the silhouette is not one square block. */
-    R(g, sx + 3, sy + backTop, 10, 6, p.ink);
-    R(g, sx + 4, sy + backTop + 1, 8, 2, p.redHi);
-    R(g, sx + 4, sy + backTop + 1, 8, 1, p.redLight);
-    R(g, sx + 4, sy + backTop + 3, 8, 2, p.redDark);
+    R(g, sx + 2, sy + backTop, 12, 6, p.ink);
+    R(g, sx + 3, sy + backTop + 1, 10, 2, p.red);
+    R(g, sx + 3, sy + backTop + 1, 10, 1, p.redHi);
+    R(g, sx + 3, sy + backTop + 3, 10, 2, p.redDark);
     /* The seat: a lit top plane, then the front edge of the plank. */
-    R(g, sx + 1, sy + seatTop, 14, facing === 'down' ? 7 : 11, p.ink);
-    R(g, sx + 2, sy + seatTop + 1, 12, 3, p.redLight);
-    R(g, sx + 2, sy + seatTop + 1, 12, 1, p.cream);
-    R(g, sx + 2, sy + seatTop + 4, 12, facing === 'down' ? 2 : 6, p.red);
-    R(g, sx + 2, sy + seatTop + (facing === 'down' ? 5 : 9), 12, 1, p.redDark);
+    R(g, sx, sy + seatTop, T, 7, p.ink);
+    R(g, sx + 1, sy + seatTop + 1, 14, 3, p.redHi);
+    R(g, sx + 1, sy + seatTop + 1, 14, 1, p.redLight);
+    R(g, sx + 1, sy + seatTop + 4, 14, 2, p.red);
+    R(g, sx + 1, sy + seatTop + 5, 14, 1, p.redDark);
     /* The cast-iron ends bridge the gap; the legs show under the seat. */
     [0, T - 2].forEach(function (dx) {
       R(g, sx + dx, sy + frameTop, 2, 15 - frameTop, p.ink);
-      R(g, sx + dx, sy + frameTop + 1, 1, 12 - frameTop, p.metal);
+      R(g, sx + dx, sy + frameTop + 2, 1, 10 - frameTop, p.woodDark);
     });
-    for (i = 3; i < 12; i += 6) {
+    if (facing === 'down') for (i = 3; i < 12; i += 6) {
       R(g, sx + i, sy + seatTop + 7, 2, 15 - seatTop - 7, p.ink);
-      R(g, sx + i, sy + seatTop + 7, 1, 2, p.metal);
+      R(g, sx + i, sy + seatTop + 7, 1, 2, p.woodDark);
     }
   }
 
@@ -818,13 +818,13 @@
     for (i = 0; i < 2; i++) R(g, sx + (i ? 10 : 4), sy - 8 + i * 2, 1, 1, p.metalHi);
     /* Upper bout, waist, lower bout. */
     R(g, sx + 3, sy + 1, 10, 5, p.ink);
-    R(g, sx + 4, sy + 2, 8, 4, p.gold);
-    R(g, sx + 4, sy + 2, 8, 2, '#f3d391');
+    R(g, sx + 4, sy + 2, 8, 4, p.woodHi);
+    R(g, sx + 4, sy + 2, 8, 2, p.woodLight);
     R(g, sx + 4, sy + 6, 8, 2, p.ink);
-    R(g, sx + 5, sy + 6, 6, 1, p.gold);
+    R(g, sx + 5, sy + 6, 6, 1, p.woodHi);
     R(g, sx + 1, sy + 6, 14, 8, p.ink);
-    R(g, sx + 2, sy + 7, 12, 6, p.gold);
-    R(g, sx + 2, sy + 7, 12, 2, '#f3d391');
+    R(g, sx + 2, sy + 7, 12, 6, p.woodHi);
+    R(g, sx + 2, sy + 7, 12, 2, p.woodLight);
     R(g, sx + 2, sy + 12, 12, 1, p.woodDark);
     R(g, sx + 6, sy + 8, 4, 3, p.woodDark);
     R(g, sx + 7, sy + 9, 2, 1, p.ink);
@@ -851,7 +851,8 @@
     R(g, sx + 1, sy + 3, W - 2, 4, p.woodDark);
     R(g, sx + 1, sy + 3, W - 2, 2, p.woodLight);
     R(g, sx + 1, sy + 3, W - 2, 1, p.creamShade);
-    dado(g, kit, p, sx, sy + 7, W, 7);
+    R(g, sx, sy + 7, W, 7, p.plaster);
+    R(g, sx, sy + 7, W, 1, p.plasterShade);
     R(g, sx, sy + 13, W, 3, p.woodDark);
     R(g, sx, sy + 13, W, 1, p.woodHi);
     R(g, sx + 3, sy - 1, 5, 4, p.woodDark);            // a pot on the sill
@@ -1004,10 +1005,10 @@
       R(g, x0, top + T + 9, w * T, 2, 'rgba(37,40,43,.10)');
       for (var cx = 8; cx < w * T; cx += 48) R(g, x0 + cx, top + T - 1, 20, 2, p.pavingHi);
       for (var dxp = 24; dxp < w * T; dxp += 112) {
-        R(g, x0 + dxp, top + 1, 13, 8, p.ink);
-        R(g, x0 + dxp + 1, top + 2, 11, 6, p.pavingInk);
-        for (var i = 0; i < 3; i++) R(g, x0 + dxp + 2, top + 3 + i * 2, 9, 1, p.metalHi);
-        R(g, x0 + dxp + 1, top + 2, 11, 1, p.metal);
+        R(g, x0 + dxp, top + 2, 11, 7, p.ink);
+        R(g, x0 + dxp + 1, top + 3, 9, 5, '#3c3f3c');
+        for (var i = 0; i < 2; i++) R(g, x0 + dxp + 2, top + 4 + i * 2, 7, 1, p.pavingDark);
+        R(g, x0 + dxp + 1, top + 3, 9, 1, p.pavingDark);
       }
     });
     /* Where a footpath meets the carriageway the kerb is dropped: no kerbstone,
