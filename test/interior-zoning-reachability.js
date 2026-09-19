@@ -14,7 +14,7 @@ require('../js/data.js');
 require('../js/scene-objects.gen.js'); require('../js/glue.js');
 
 const starts = {
-  sheriff: [7, 10], palmer: [7, 10], hotel_gn: [8, 10], room_315: [2, 6], hospital: [7, 10],
+  sheriff: [7, 10], palmer: [7, 10], hotel_gn: [9, 10], room_315: [2, 6], hospital: [7, 10],
   diner: [6, 8], oej: [7, 8], roadhouse: [7, 8]
 };
 const targets = {
@@ -63,7 +63,7 @@ for (const [id, start] of Object.entries(starts)) {
 
 /* Corridoi narrativi tassativi: test esplicito contro regressioni future. */
 const hotelCorridor = [];
-for (let y = 2; y <= 4; y++) for (let x = 13; x <= 16; x++) hotelCorridor.push([x, y]);
+for (let y = 2; y <= 4; y++) for (let x = 15; x <= 18; x++) hotelCorridor.push([x, y]);
 for (const [id, cells] of Object.entries({
   palmer: [[4,4],[5,4],[4,5],[5,5]],
   hotel_gn: hotelCorridor,
@@ -76,10 +76,10 @@ for (const [id, cells] of Object.entries({
   }
 }
 
-/* La porta 315 (glifo D, x14 y1) e' raggiungibile dallo spawno del corridoio. */
+/* La porta 315 (glifo D, x16 y1) e' raggiungibile dallo spawno del corridoio. */
 {
   const seenHotel = flood(GAME.Maps.hotel_gn, starts.hotel_gn);
-  assert(seenHotel.has(key(14, 1)), 'hotel_gn: door 14,1 (verso room_315) reachable from 8,10');
+  assert(seenHotel.has(key(16, 1)), 'hotel_gn: door 16,1 (verso room_315) reachable from 9,10');
   checks++;
 }
 

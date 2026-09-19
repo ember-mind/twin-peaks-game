@@ -358,7 +358,7 @@ drainDialogueAndLog('Risveglio (hotel_risveglio)');
 notesGeneral.push(
   'room_315.doors e\' {} in js/maps.js (statico): la porta verso hotel_gn e\' installata a runtime dalla ' +
   'connessione "great-northern-room-315-hall" (js/world-connections.gen.js, applicata da js/room-315-production.js). ' +
-  'Dump a runtime: room_315.doors["7,11"] -> hotel_gn(14,2,down); hotel_gn.doors["14,1"] -> room_315(7,10,up).'
+  'Dump a runtime: room_315.doors["7,11"] -> hotel_gn(16,2,down); hotel_gn.doors["16,1"] -> room_315(7,10,up).'
 );
 
 // stato del runtime narrativo M4 — bookkeeping SEPARATA dai flag classici
@@ -464,11 +464,11 @@ if (!m4State.flags.atto3) throw new Error('atteso flags.atto3 (M4) impostato al 
 // atto3, and ACT3_HAWK_BRIDGE would otherwise move Hawk to the traincar.
 // hotel_gn: Ben Horne, Audrey (variante "_ben", visitata dopo Ben Horne)
 syncCast(stateAtHotelGn);
-const benhorneApproach = approachNpcTile('hotel_gn', 'benhorne', [5, 6]);
+const benhorneApproach = approachNpcTile('hotel_gn', 'benhorne', [12, 6]);
 recordOptional('Ben Horne', 'hotel_gn', 'classico', 'benhorne_a2', hotelGnEntry, benhorneApproach, dialoguePagesInfo('benhorne_a2'));
 const audreyNpc = GAME.Maps.hotel_gn.npcs.find((n) => n.id === 'audrey');
 const audreyResolved = E.resolveDialogue(audreyNpc.dialogue, { evidence: {}, flags: { done_benhorne_a2: true }, clues: [] });
-const audreyApproach = approachNpcTile('hotel_gn', 'audrey', [12, 10]);
+const audreyApproach = approachNpcTile('hotel_gn', 'audrey', [15, 10]);
 recordOptional('Audrey (dopo Ben Horne)', 'hotel_gn', 'classico', audreyResolved, hotelGnEntry, audreyApproach, dialoguePagesInfo(audreyResolved));
 
 // sceriffo: Hawk (dal punto in cui si e' raggiunto Truman la prima volta)

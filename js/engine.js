@@ -1061,11 +1061,11 @@
     /* Nel reference dialogo e ritratto occupano il terzo inferiore: alza il
      * soggetto nel mondo visibile, invece di lasciarlo dietro la UI. */
     if (S.dialogue && !map.indoor && mh > vh) tyy = clamp(tyy + 12, 0, mh - vh);
-    /* Lobby larga: quando Cooper entra, il desk reale al x4–7 deve cadere
-     * nell'asse visivo, non restare schiacciato contro bordo sinistro. Solo
-     * camera: coordinate, pathfinding e collisioni restano intatti. */
-    if (map.id === 'hotel_gn' && p.ty >= 7 && mw > vw) {
-      txx = clamp(txx, 0, mw - vw);
+    /* Lobby 20x12: al ritorno dalla 315 il normale follow taglia quasi
+     * tutto il camino occidentale. Un tile di anticipo verso ovest tiene
+     * lounge e scala nello stesso frame senza alterare coordinate o porte. */
+    if (map.id === 'hotel_gn' && p.ty <= 4 && mw > vw) {
+      txx = clamp(txx - 16, 0, mw - vw);
     }
     /* Soggiorno Palmer: porta, tavolo, divano e camino devono condividere
      * frame. Look-ahead solo visivo; griglia e interazioni restano identiche. */

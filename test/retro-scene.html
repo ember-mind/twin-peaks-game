@@ -65,7 +65,7 @@
 <script src="../js/ambient-life.js?v=5"></script>
 <script src="../js/character-activity.js?v=1.1"></script>
 <script src="../js/environment-reactions.js?v=2"></script>
-<script src="../js/ambient-life-scenes.js?v=6-redroom"></script>
+<script src="../js/ambient-life-scenes.js?v=7-hotel-gn"></script>
 <script src="../js/location-connections.js"></script>
 <script src="../js/double-r-exterior-art.js"></script>
 <script src="../js/double-r-exterior-scene.js"></script>
@@ -94,6 +94,9 @@
 <script src="../js/redroom-art.js"></script>
 <script src="../js/redroom-scene.js"></script>
 <script src="../js/redroom-production.js"></script>
+<script src="../js/hotel-gn-art.js"></script>
+<script src="../js/hotel-gn-scene.js"></script>
+<script src="../js/hotel-gn-production.js"></script>
 <script src="../js/character-life-scenes.js"></script>
 <script src="../js/traincar-art.js"></script>
 <script src="../js/traincar-scene.js"></script>
@@ -203,6 +206,26 @@
      * Image asincrona, niente frame fallback promosso per errore. */
     document.body.setAttribute('data-cast-renderer',
       GAME.Retro2D && GAME.Retro2D.castRenderer && GAME.Retro2D.castRenderer.id || 'missing');
+    /* Optional evidence mode: sample the live production canvas while the
+     * hero stands still. No synthetic redraw or ambient-state injection. */
+    if (q.get('ambientSeries') === '1') {
+      window.__TP_SHOT_FRAMES__ = [];
+      var times = [400];
+      for (var ms = 1000; ms <= 25000; ms += 500) times.push(ms);
+      times.forEach(function (at, index) {
+        setTimeout(function () {
+          requestAnimationFrame(function () { requestAnimationFrame(function () {
+            var png = cv.toDataURL('image/png');
+            window.__TP_SHOT_FRAMES__.push(png);
+            if (index === times.length - 1) {
+              document.body.setAttribute('data-native-png', png);
+              document.title = 'TP-RETRO-READY ' + map;
+            }
+          }); });
+        }, at);
+      });
+      return;
+    }
     /* Prova temporale R101: un passo nasce dal vero loop di produzione,
      * riceve input tastiera reale e viene campionato lossless ogni 55 ms.
      * Non ricostruiamo i frame nel test: esportiamo il canvas che il giocatore

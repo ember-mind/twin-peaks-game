@@ -96,12 +96,12 @@
           "scene": "hotel_gn",
           "triggers": [
             [
-              14,
+              16,
               1
             ]
           ],
           "spawn": {
-            "tx": 14,
+            "tx": 16,
             "ty": 2,
             "dir": "down"
           }
@@ -267,16 +267,16 @@
           "scene": "hotel_gn",
           "triggers": [
             [
-              8,
+              9,
               11
             ],
             [
-              9,
+              10,
               11
             ]
           ],
           "spawn": {
-            "tx": 8,
+            "tx": 9,
             "ty": 10,
             "dir": "up"
           }

@@ -85,6 +85,45 @@
     {id:'cigarette-east',type:'STEAM_SMALL',x:193,y:133,depth:144,variants:3,
       duration:[1360,1540],intensity:.62}
   ]);
+  /* Great Northern: three authored flame silhouettes, a warm chandelier,
+   * one restrained transaction lamp, and a small glint moving only over the
+   * brass service bell. Anchors follow the 20x12 native lobby plan: hearth
+   * west, open runner centre, staffed counter east, stairs at far right.
+   *
+   * The four practicals share a deliberate three-state cadence: a long quiet
+   * hold, a 2.4--3.0s warm rise/hold, then a clean settle before the next
+   * source changes. Fixed 7.2s fire, 9.8s desk, 13.2s chandelier and 19.6s
+   * bell rests make the first 25s read as a calm handoff between sources,
+   * without turning the lobby into a flashing effect. */
+  life.register('hotel_gn',[
+    {id:'lobby-fire',type:'MACHINE_IDLE_ACTIVITY',x:52,y:50,depth:80,variants:3,
+      delay:[7200,7200],duration:[2400,2400],intensity:1.45,marks:[
+        [{x:-2,y:7,w:6,h:10,color:'#d77b37'},{x:5,y:1,w:6,h:16,color:'#e9c582'},{x:12,y:6,w:6,h:11,color:'#ffe7a6'},{x:20,y:10,w:5,h:7,color:'#d77b37'},
+          {x:-20,y:-7,w:48,h:2,color:'#b5864c'},{x:-16,y:27,w:36,h:2,color:'#d77b37'},
+          {x:14,y:39,w:9,h:3,color:'#d77b37'},{x:46,y:39,w:9,h:3,color:'#d77b37'},{x:4,y:67,w:48,h:2,color:'#b5864c'}],
+        [{x:0,y:4,w:5,h:14,color:'#d77b37'},{x:7,y:0,w:6,h:17,color:'#e9c582'},{x:15,y:7,w:5,h:10,color:'#ffe7a6'},{x:22,y:3,w:4,h:14,color:'#d77b37'},
+          {x:-19,y:-6,w:44,h:2,color:'#b5864c'},{x:-14,y:27,w:32,h:2,color:'#d77b37'},
+          {x:15,y:38,w:8,h:3,color:'#d77b37'},{x:47,y:38,w:8,h:3,color:'#d77b37'},{x:3,y:66,w:50,h:2,color:'#b5864c'}],
+        [{x:-1,y:2,w:5,h:16,color:'#e9c582'},{x:6,y:7,w:6,h:11,color:'#d77b37'},{x:14,y:1,w:6,h:17,color:'#ffe7a6'},{x:23,y:8,w:5,h:9,color:'#e9c582'},
+          {x:-21,y:-8,w:50,h:2,color:'#b5864c'},{x:-17,y:26,w:38,h:2,color:'#d77b37'},
+          {x:13,y:40,w:10,h:3,color:'#d77b37'},{x:45,y:40,w:10,h:3,color:'#d77b37'},{x:5,y:68,w:46,h:2,color:'#b5864c'}]
+      ]},
+    {id:'lobby-chandelier',type:'LIGHT_WARM_VARIATION',x:160,y:24,depth:28,variants:3,
+      delay:[13200,13200],duration:[2600,2600],intensity:1.15,
+      regions:[{x:141,y:13,w:5,h:6,depth:28},{x:149,y:19,w:5,h:6,depth:28},
+        {x:165,y:19,w:5,h:6,depth:28},{x:173,y:13,w:5,h:6,depth:28},
+        {x:158,y:34,w:6,h:1,depth:0},{x:164,y:58,w:8,h:1,depth:0},
+        {x:170,y:78,w:10,h:1,depth:0},
+        {x:142,y:46,w:36,h:2,depth:0},{x:132,y:94,w:48,h:2,depth:0}]},
+    {id:'lobby-desk-lamp',type:'LIGHT_WARM_VARIATION',x:229,y:112,depth:144,variants:3,
+      delay:[9800,9800],duration:[2800,2800],intensity:1.15,
+      regions:[{x:225,y:112,w:9,h:4,depth:128},{x:225,y:122,w:9,h:2,depth:144},
+        {x:224,y:124,w:11,h:2,depth:144},{x:218,y:130,w:12,h:1,depth:144},
+        {x:226,y:140,w:10,h:1,depth:144},{x:208,y:118,w:24,h:2,depth:144},
+        {x:208,y:132,w:30,h:2,depth:144}]},
+    {id:'lobby-bell',type:'GLASS_SUBTLE_REFLECTION',x:202,y:117,depth:144,variants:3,travel:5,
+      delay:[19600,19600],duration:[3000,3000],intensity:1.25}
+  ]);
   /* Red Room uses the existing intermittent device archetype with three
    * authored column positions. Long holds make the curtains breathe slowly.
    * RedRoomScene converts archetype alpha to opaque palette coverage. */

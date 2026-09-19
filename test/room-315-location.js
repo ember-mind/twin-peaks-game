@@ -106,9 +106,9 @@ E.start();
 /* ---------------- 1. the hall connection is compiled into real doors --- */
 
 assert.equal(G.Maps.room_315.doors['7,11'].to, 'hotel_gn');
-assert.equal(G.Maps.hotel_gn.doors['14,1'].to, 'room_315');
+assert.equal(G.Maps.hotel_gn.doors['16,1'].to, 'room_315');
 assert.strictEqual(G.Maps.room_315.doors['7,11'].connectionId, 'great-northern-room-315-hall');
-assert.strictEqual(G.Maps.hotel_gn.doors['14,1'].connectionId, 'great-northern-room-315-hall');
+assert.strictEqual(G.Maps.hotel_gn.doors['16,1'].connectionId, 'great-northern-room-315-hall');
 
 /* ---------------- 2. redroom -> room_315 wake spawn + onEnter once ------ */
 
@@ -128,8 +128,8 @@ assert.equal(E.state.dialogue, null, 'onEnter does not refire once intro_hotel i
 /* ---------------- 3. room_315 <-> hotel_gn hall, both ways -------------- */
 
 place('room_315', 7, 10, 'up');
-cross('down', 'hotel_gn', [14, 2, 'down']);
-place('hotel_gn', 14, 2, 'down');
+cross('down', 'hotel_gn', [16, 2, 'down']);
+place('hotel_gn', 16, 2, 'down');
 cross('up', 'room_315', [7, 10, 'up']);
 
 /* ---------------- 4. held-input walking through the hall does not bounce */
@@ -144,7 +144,7 @@ while (E.state.fadePhase !== 0 && guard--) frame();
 keyUp('down');
 pump(120);
 assert.equal(E.state.mapId, 'hotel_gn', 'held input carries the crossing through to hotel_gn');
-assert.deepEqual([E.state.player.tx, E.state.player.ty], [14, 2]);
+assert.deepEqual([E.state.player.tx, E.state.player.ty], [16, 2]);
 keyDown('down');
 guard = 60;
 while (E.state.player.ty !== 3 && guard--) frame();
@@ -152,11 +152,11 @@ keyUp('down');
 pump(120);
 assert(guard > 0, 'held input continues walking south from the arrival tile without bouncing back');
 assert.equal(E.state.mapId, 'hotel_gn', 'the arrival tile does not bounce back into room_315');
-assert.deepEqual([E.state.player.tx, E.state.player.ty], [14, 3]);
+assert.deepEqual([E.state.player.tx, E.state.player.ty], [16, 3]);
 
 /* ---------------- 5. hotel_gn -> town still works ------------------------ */
 
-place('hotel_gn', 8, 10, 'up');
+place('hotel_gn', 9, 10, 'up');
 cross('down', 'town', [9, 7, 'down']);
 
 /* ---------------- 6. save round-trip in room_315 -------------------------- */
@@ -165,7 +165,7 @@ place('room_315', 7, 10, 'up');
 E.state.clues = ['diario'];
 E.state.flags.sogno_fatto = true;
 const savesBefore = saveCount;
-cross('down', 'hotel_gn', [14, 2, 'down']);
+cross('down', 'hotel_gn', [16, 2, 'down']);
 assert(saveCount > savesBefore, 'crossing out of room_315 performs a coordinated save');
 const raw = global.localStorage.getItem('tp_save');
 assert(raw, 'a save snapshot exists after crossing');
