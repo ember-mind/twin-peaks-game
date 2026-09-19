@@ -71,7 +71,16 @@ simulation's own timeout (`decisionTimeoutMinutes`, town minutes) applies as bef
 - Conversations have no turns beyond opening and reply, and no topic. A
   `conversation_turn` request with `say_more` / `wind_down` candidates is the
   shape that fits the existing rules.
-- Cost control beyond `maxInFlight`: no budget per day, no cheaper policy for
-  trivial choices (sleep at night, eat when starving). `UtilityPolicy` could
-  answer those and the provider only the close calls — `Story.why(...).close`
-  already identifies them.
+- A budget per day. What exists is `maxInFlight` and the hybrid below.
+
+## Asking only when it matters
+
+`LT.HybridPolicy.create({ id, fast: 'utility', slow: '<remote id>', closeGap })`
+asks the offline policy first. A clear choice (its lead over the next different
+thing to do is more than `closeGap`) is answered there and the provider is
+never asked whether to sleep at midnight. A close call goes to the provider;
+if that fails in any way, the offline answer stands in, so a provider outage
+degrades to the offline town instead of to people standing about waiting.
+Every choice carries its source (`hybrid:utility:clear`, `hybrid:<remote>`,
+`hybrid:utility:stood_in`). In the default day about half of one person's
+choices are close at `closeGap` 15, and one in ten at 3.

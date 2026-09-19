@@ -125,6 +125,24 @@ const optionIds = (brief) => brief.user.split('\n').filter((l) => /^\s+\d+\. id 
   const st = flaky.stats();
   ok(st.asked === st.answered + st.timeouts + st.errors + st.unusable + st.inFlight + st.queued, 'every question is accounted for: ' + JSON.stringify(st));
 
+  console.log('# asked only when it is close, and never left without an answer');
+  require(path.resolve(__dirname, '..', 'js', 'policy', 'lt-hybrid-policy.js'));
+  let slowAsked = 0, failNext = false;
+  LT.RemotePolicy.create({ id: 'remote_for_hybrid', timeoutMs: 150, transport: (b) => {
+    slowAsked++;
+    if (failNext) return Promise.resolve('cannot say');
+    const ids = optionIds(b); return after(1, JSON.stringify({ choose: ids[0], reason: 'first on the list' }));
+  } });
+  const hybrid = LT.HybridPolicy.create({ id: 'hybrid_test', fast: 'utility', slow: 'remote_for_hybrid', closeGap: 15 });
+  const hsim = LT.Scenario.day1({ policies: { resident_a: hybrid.id, resident_b: 'utility' } });
+  for (let i = 0; i < 900; i++) { if (i === 300) failNext = true; hsim.tick(); await sleep(1); }
+  const hs = hybrid.stats();
+  const hsrc = {}; hsim.state.events.filter((e) => e.type === 'ACTIVITY_STARTED' && e.actorId === 'resident_a').forEach((e) => { hsrc[e.data.source] = (hsrc[e.data.source] || 0) + 1; });
+  ok(hs.clear > 0 && hs.close > 0 && slowAsked === hs.close && hs.asked === hs.clear + hs.close, 'the slow provider was asked only for the close calls: ' + JSON.stringify(hs));
+  ok(hs.slowFailed > 0 && hsrc['hybrid_test:utility:stood_in'] > 0 && !Object.keys(hsrc).some((k) => /^fallback:policy_error/.test(k)), 'when it failed, the offline answer stood in — nobody was left waiting for nothing: ' + JSON.stringify(hsrc));
+  ok(Object.keys(hsrc).every((k) => /^hybrid_test:|^fallback:/.test(k)) && hsrc['hybrid_test:utility:clear'] > 0, 'every choice says who made it');
+  ok(hybrid.remote === true && hybrid.patienceMs === 150, 'the page is told to be patient for it as for the provider inside it');
+
   console.log('\nremote-policy: ' + checks + '/' + checks);
   process.exit(0);
 })().catch((e) => { console.error(e); process.exit(1); });
