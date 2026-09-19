@@ -193,6 +193,27 @@
     return score;
   };
 
+  /* How fast the town is worth watching right now: slowly while something is
+   * going on between people or has just gone wrong, quickly while everyone is
+   * getting on with things, faster still while everybody sleeps. */
+  S.pace = function (sim) {
+    var top = 0, awake = 0;
+    sim.actorIds().forEach(function (id) {
+      var c = sim.state.characters[id];
+      if (!(c.activity && c.activity.actionId === 'sleep' && c.activity.phase === 'executing')) awake++;
+      top = Math.max(top, S.interest(sim, id));
+    });
+    if (!awake) return 'asleep';
+    return top >= 4 ? 'close' : top >= 3 ? 'steady' : 'quick';
+  };
+
+  /* The beats of one day, for a strip someone can point at: when, what, who. */
+  S.beats = function (sim, day) {
+    return sim.state.events.filter(function (e) { return e.day === day && TOLD[e.type]; })
+      .map(function (e) { return { seq: e.seq, absMinute: e.absMinute, minute: e.minute, stamp: e.stamp, type: e.type, text: e.text,
+                                   actorId: e.actorId || (e.data && e.data.toId) || null, locationId: e.locationId }; });
+  };
+
   /* The camera stays with someone until somebody else is clearly more worth
    * watching: a tie never moves it. */
   S.mostInteresting = function (sim, currentId) {

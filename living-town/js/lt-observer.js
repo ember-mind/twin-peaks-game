@@ -19,8 +19,22 @@
     { label: 'Pause', msPerMinute: 0 },
     { label: '1x', msPerMinute: 250 },
     { label: '4x', msPerMinute: 62 },
-    { label: '20x', msPerMinute: 12 }
+    { label: '20x', msPerMinute: 12 },
+    /* Auto picks one of the paces below every frame from what is going on. */
+    { label: 'Auto', msPerMinute: 62, auto: true }
   ];
+  var PACE_MS = { close: 250, steady: 90, quick: 20, asleep: 5 };
+  var SNAPSHOT_EVERY = 30, SNAPSHOT_KEEP = 240;   // sim minutes between snapshots; five days of them
+  var REPLAY_LEAD = 12, REPLAY_TAIL = 35;          // minutes shown before and after the moment asked for
+
+  function msPerMinute(state) {
+    var s = SPEEDS[state.speedIndex];
+    if (state.replay) return s.msPerMinute ? 250 : 0;      // a replay is watched at 1x, or paused
+    return s.auto ? PACE_MS[LT.Story.pace(state.sim)] : s.msPerMinute;
+  }
+  /* The world on screen: the live one, or a replay of an earlier hour of it. */
+  function shown(state) { return state.replay ? state.replay.sim : state.sim; }
+  O.shown = shown;
   var MAX_TICKS_PER_FRAME = 120;
   var VISUAL_DT_CAP = 100;      // ms; a sprite must not lurch after a long gap
   var BACKLOG_CAP = 5000;       // ms of real time the town will catch up on
@@ -68,7 +82,7 @@
       sim: sim, view: view, speedIndex: 1, accumulator: 0,
       lastFrame: 0, pumping: false, inspector: false, selected: sim.actorIds()[0],
       persistence: persistence, worlds: 1,
-      followAction: false, recapDay: null
+      followAction: false, recapDay: null, snapshots: [], replay: null
     };
     O.state = state;
     root.LT_OBSERVER = state;
@@ -77,6 +91,7 @@
     buildSpeedButtons(state);
     wireWorldControls(state, booted);
     wireHand(state);
+    el('lt-replay-back').addEventListener('click', function () { O.backToNow(state); });
     el('lt-recap-prev').addEventListener('click', function () { stepRecap(state, -1); });
     el('lt-recap-next').addEventListener('click', function () { stepRecap(state, 1); });
     el('lt-inspector-toggle').addEventListener('click', function () {
@@ -116,21 +131,32 @@
    * thirty ticks back to back inside one frame would otherwise leave every
    * character waiting on an answer that could not arrive. */
   function pump(state, dt) {
-    var ms = SPEEDS[state.speedIndex].msPerMinute;
+    var ms = msPerMinute(state);
     if (!ms) return;
     state.accumulator = Math.min(BACKLOG_CAP, state.accumulator + dt);
     if (state.pumping) return;
     var budget = O.dueTicks(state.accumulator, ms, MAX_TICKS_PER_FRAME);
     state.pumping = true;
     (function step() {
-      var nowMs = SPEEDS[state.speedIndex].msPerMinute;
+      var nowMs = msPerMinute(state);
       if (budget-- <= 0 || !nowMs || state.accumulator < nowMs) {
         state.pumping = false;
+        return;
+      }
+      if (state.replay) {
+        /* Only the replay moves. The live world waits exactly where it was,
+         * and nothing about a replay is ever saved. */
+        state.replay.sim.tick();
+        state.view.observe();
+        state.accumulator -= nowMs;
+        if (state.replay.sim.absMinute() >= state.replay.untilAbs) { state.speedIndex = 0; buildSpeedButtons(state); }
+        Promise.resolve().then(function () { return Promise.resolve(); }).then(step);
         return;
       }
       state.sim.tick();
       state.view.observe();   // every step, so a sprite follows the route and not a chord across it
       state.accumulator -= nowMs;
+      keepSnapshot(state);
       /* Between two ticks is the one moment the world is whole: nothing half
        * applied. The controller decides whether one is due; most ticks it is not. */
       var auto = state.persistence.autosave(state.sim);
@@ -139,14 +165,92 @@
     })();
   }
 
+  /* ---------------- looking back ---------------- */
+
+  /* Every half hour of town time the world is copied, exactly as a save would
+   * copy it. A moment on the timeline is shown by loading the copy before it
+   * and letting that run forward: the same people deciding again from the
+   * same state. With a policy that answers the same way twice this is what
+   * happened; with one that may not, it is what could have. */
+  function keepSnapshot(state) {
+    var abs = state.sim.absMinute();
+    if (abs % SNAPSHOT_EVERY) return;
+    try { state.snapshots.push({ abs: abs, save: LT.Save.serialize(state.sim) }); } catch (e) { return; }
+    if (state.snapshots.length > SNAPSHOT_KEEP) state.snapshots.shift();
+  }
+
+  O.canReplay = function (state, abs) {
+    return state.snapshots.some(function (s) { return s.abs <= abs - REPLAY_LEAD; });
+  };
+
+  O.replay = function (state, beat) {
+    if (state.replay) O.backToNow(state);
+    var from = null;
+    state.snapshots.forEach(function (s) { if (s.abs <= beat.absMinute - REPLAY_LEAD) from = s; });
+    if (!from) return Promise.resolve(false);
+    var sim;
+    try { sim = LT.Save.deserialize(JSON.parse(JSON.stringify(from.save))); } catch (e) { return Promise.resolve(false); }
+    var startAt = beat.absMinute - REPLAY_LEAD;
+    return sim.runMinutes(Math.max(0, startAt - sim.absMinute())).then(function () {
+      state.replay = { sim: sim, untilAbs: beat.absMinute + REPLAY_TAIL, beat: beat, resumeSpeed: state.speedIndex, liveView: state.view, liveSelected: state.selected };
+      state.view = LT.View.create(el('lt-canvas'), sim);
+      if (beat.actorId && sim.state.characters[beat.actorId]) state.selected = beat.actorId;
+      state.followAction = false;
+      state.accumulator = 0;
+      state.speedIndex = 1;
+      buildCharacterTabs(state); buildSpeedButtons(state);
+      showReplayBar(state);
+      return true;
+    });
+  };
+
+  O.backToNow = function (state) {
+    if (!state.replay) return;
+    var r = state.replay;
+    state.replay = null;
+    state.view = r.liveView;
+    state.selected = r.liveSelected;
+    state.speedIndex = r.resumeSpeed;
+    state.accumulator = 0;
+    buildCharacterTabs(state); buildSpeedButtons(state);
+    showReplayBar(state);
+  };
+
+  function showReplayBar(state) {
+    var bar = el('lt-replay');
+    bar.hidden = !state.replay;
+    if (state.replay) text(el('lt-replay-text'), 'Looking back at ' + state.replay.beat.stamp + ' — ' + state.replay.beat.text + ' The town itself is waiting at ' + state.sim.stamp() + '.');
+    ['lt-save', 'lt-new-world', 'lt-resume', 'lt-hand-do'].forEach(function (id) { el(id).disabled = !!state.replay; });
+    if (!state.replay) refreshButtons(state);
+  }
+
+  function paintTimeline(state) {
+    var sim = state.sim, day = recapDayOf(state);        // always the live world's days
+    var key = state.worlds + ':' + day + ':' + sim.state.events.length + ':' + state.snapshots.length + ':' + (state.replay ? state.replay.beat.seq : '-');
+    var host = el('lt-timeline');
+    if (host.__key === key) return;
+    host.__key = key;
+    var beats = LT.Story.beats(sim, day);
+    host.innerHTML = '<span class="lt-timeline-day">Day ' + day + '</span>' + beats.map(function (b, i) {
+      var can = O.canReplay(state, b.absMinute), on = state.replay && state.replay.beat.seq === b.seq;
+      return '<button class="lt-beat is-' + b.type.toLowerCase() + (on ? ' is-on' : '') + '" style="left:' + (b.minute / 1440 * 100).toFixed(2) + '%"' +
+        (can ? '' : ' disabled') + ' data-i="' + i + '" title="' + escape(b.stamp + ' — ' + b.text + (can ? '' : ' (too early to look back at)')) + '"></button>';
+    }).join('') + (day === sim.state.day ? '<i class="lt-now" style="left:' + (sim.state.minute / 1440 * 100).toFixed(2) + '%"></i>' : '');
+    Array.prototype.forEach.call(host.querySelectorAll('.lt-beat'), function (n) {
+      n.addEventListener('click', function () { O.replay(state, beats[Number(n.dataset.i)]); });
+    });
+  }
+
   /* ---------------- this world: save, resume, new ---------------- */
 
   /* The page starts following another world. One loop, one view, one set of
    * panels: they all read state.sim, which is replaced here, so the world that
    * was on screen simply stops being advanced — nothing keeps ticking it. */
   O.adopt = function (state, sim) {
+    if (state.replay) O.backToNow(state);
     state.retired = state.sim;
     state.sim = sim;
+    state.snapshots = [];            // another world's past is not this one's
     state.view = LT.View.create(el('lt-canvas'), sim);
     state.accumulator = 0;
     state.worlds++;
@@ -313,7 +417,7 @@
    * It changes who is looked at and nothing else; choosing a name turns it off. */
   function followTheAction(state) {
     if (!state.followAction) return;
-    var id = LT.Story.mostInteresting(state.sim, state.selected);
+    var id = LT.Story.mostInteresting(shown(state), state.selected);
     if (id === state.selected) return;
     state.selected = id;
     state.view.focus(id);
@@ -330,8 +434,8 @@
   function buildCharacterTabs(state) {
     var host = el('lt-characters');
     host.innerHTML = '';
-    state.sim.actorIds().forEach(function (id) {
-      var c = state.sim.state.characters[id];
+    shown(state).actorIds().forEach(function (id) {
+      var c = shown(state).state.characters[id];
       var b = document.createElement('button');
       b.className = 'lt-tab';
       b.textContent = c.name;
@@ -365,6 +469,7 @@
         state.speedIndex = i;
         Array.prototype.forEach.call(host.children, function (n, j) { n.classList.toggle('is-on', i === j); });
         if (s.msPerMinute) pump(state, 0);
+        if (state.replay && s.msPerMinute && state.replay.sim.absMinute() >= state.replay.untilAbs) state.replay.untilAbs += REPLAY_TAIL;   // Play again: carry on a little
       });
       if (i === state.speedIndex) b.classList.add('is-on');
       host.appendChild(b);
@@ -374,7 +479,8 @@
   /* ---------------- panels ---------------- */
 
   function paint(state) {
-    var sim = state.sim, s = sim.state;
+    var sim = shown(state), s = sim.state;
+    paintTimeline(state);
     var c = s.characters[state.selected];
     var U = LT.Util, W = LT.World;
 
@@ -513,7 +619,7 @@
   /* ---------------- developer inspector ---------------- */
 
   function paintInspector(state, c) {
-    var sim = state.sim;
+    var sim = shown(state);
     var d = c.recentDecisions[0];
     var obs = LT.Perception.observe(sim, c);
     var cand = LT.Perception.candidates(sim, c);

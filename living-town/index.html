@@ -106,6 +106,18 @@
   .hand-asked { list-style: none; margin: 8px 0; padding: 0; font-size: 12.5px; color: var(--dim); }
   .hand-asked li.is-failed { color: #d9705f; }
   .hand-asked li.is-applied { color: #8fc17a; }
+  .timeline { position: relative; height: 22px; margin: 8px 2px 0; border-bottom: 1px solid var(--edge); }
+  .lt-timeline-day { position: absolute; left: 0; top: -2px; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  .lt-beat { position: absolute; bottom: -5px; width: 9px; height: 9px; margin-left: -4px; padding: 0; border-radius: 50%; border: 1px solid #0b0d11; background: #8fb3e0; cursor: pointer; }
+  .lt-beat:disabled { opacity: .35; cursor: default; }
+  .lt-beat.is-on { outline: 2px solid #e2c15a; }
+  .lt-beat.is-commitment_broken, .lt-beat.is-goal_missed, .lt-beat.is-activity_failed, .lt-beat.is-went_hungry, .lt-beat.is-talk_declined, .lt-beat.is-talk_unanswered { background: #d9705f; }
+  .lt-beat.is-goal_reached, .lt-beat.is-commitment_kept, .lt-beat.is-helped_out { background: #8fc17a; }
+  .lt-beat.is-talked { background: #e08f9c; }
+  .lt-beat.is-intervention_applied { background: #e2c15a; }
+  .lt-now { position: absolute; bottom: -1px; width: 1px; height: 14px; background: #e2c15a; }
+  .replay { display: flex; gap: 10px; align-items: center; margin-top: 8px; padding: 7px 10px; border: 1px solid #e2c15a; border-radius: 7px; font-size: 12.5px; color: #e2c15a; }
+  .replay span { flex: 1; }
   .caption { min-height: 44px; padding: 8px 2px 0; }
   .caption p { margin: 0; }
   .caption-doing { font-size: 15px; }
@@ -137,6 +149,11 @@
       <span class="place" id="lt-place">—</span>
     </div>
     <canvas id="lt-canvas" width="256" height="192"></canvas>
+    <div class="replay" id="lt-replay" hidden>
+      <span id="lt-replay-text"></span>
+      <button class="lt-tab" id="lt-replay-back">Back to now</button>
+    </div>
+    <div class="timeline" id="lt-timeline" aria-label="The day's moments; choose one to look back at it"></div>
     <div class="caption" id="lt-caption" aria-live="off">
       <p class="caption-doing" id="lt-caption-doing">—</p>
       <p class="caption-why" id="lt-caption-why"></p>

@@ -145,5 +145,15 @@ const snapshot = (sim) => JSON.stringify(sim.state);
   const asked2 = { services: [].concat.apply([], known.map((r) => r.services)) };
   ok(known.length >= 2 && cafeKnown && asked2.services.indexOf('buy_meal') >= 0 && !asked2.services.some((x) => x === 'read_book' || x === 'unpack_food_parcel'), 'what a place is for is public; what someone left there is not');
 
+  console.log('# pace and beats');
+  const pw = LT.Scenario.town({});
+  const paces = {};
+  for (let m = 361; m < 1440; m += 7) { await pw.runUntil(1, m); const p = Story.pace(pw); paces[p] = (paces[p] || 0) + 1;
+    if (p === 'asleep') assert(pw.actorIds().every((id) => (pw.state.characters[id].activity || {}).actionId === 'sleep'), 'asleep with someone up'); }
+  ok(paces.close > 0 && paces.quick > 0 && paces.asleep > 0, 'a day has slow, quick and sleeping stretches: ' + JSON.stringify(paces));
+  const before2 = JSON.stringify(pw.state);
+  const beats = Story.beats(pw, 1);
+  ok(beats.length > 5 && beats.every((b) => pw.state.events.some((e) => e.seq === b.seq && e.text === b.text && e.minute === b.minute)) && JSON.stringify(pw.state) === before2, 'beats are events of that day, verbatim, and reading them changes nothing');
+
   console.log('\nstory: ' + checks + '/' + checks);
 })().catch((e) => { console.error(e); process.exit(1); });

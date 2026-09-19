@@ -90,6 +90,31 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     ok(seen.entities >= 2 && seen.inhabitants === 'atlas', 'The action lands where people are: ' + seen.entities + ' in ' + seen.location + ', drawn from the atlas');
     ok(await js("document.querySelectorAll('#lt-hand-fields option').length") >= 1, 'the hand is offered for this world\'s people');
     await shot('05-the-street-at-half-past-five.png');
+    console.log('# page: auto pace, the timeline, looking back');
+    await page.navigate('living-town/index.html?world=new'); await sleep(1200);
+    await js("LT_OBSERVER.speedIndex = 0; true");
+    ok(await js("Array.prototype.map.call(document.querySelectorAll('#lt-speeds button'), function(b){return b.textContent}).join()") === 'Pause,1x,4x,20x,Auto', 'Auto sits with the other speeds');
+    ok(await js("LT.Story.pace(LT_OBSERVER.sim)") !== 'asleep' , 'at six in the morning somebody is up');
+    /* the page's own loop must take the snapshots, so the page runs the day */
+    await js("(function(){ var b = document.querySelectorAll('#lt-speeds button'); b[3].click(); return true; })()");
+    for (let i = 0; i < 90 && await js("LT_OBSERVER.sim.absMinute()") < 1120; i++) await sleep(400);
+    await js("document.querySelectorAll('#lt-speeds button')[0].click(); true"); await sleep(300);
+    const snaps = await js("LT_OBSERVER.snapshots.length");
+    ok(snaps >= 20, 'the running page kept a copy of the world every half hour (' + snaps + ')');
+    const liveBefore = await js("JSON.stringify(LT_OBSERVER.sim.state)");
+    const beat = JSON.parse(await js("(function(){ var b = LT.Story.beats(LT_OBSERVER.sim, 1).filter(function(x){ return x.type === 'TALKED'; })[0]; return JSON.stringify(b); })()"));
+    ok(await js("document.querySelectorAll('#lt-timeline .lt-beat').length") >= 5 && !!beat, 'the day\'s moments are on the strip');
+    await js("(function(){ var all = LT.Story.beats(LT_OBSERVER.sim, 1); var i = all.findIndex(function(x){ return x.seq === " + beat.seq + "; }); document.querySelectorAll('#lt-timeline .lt-beat')[i].click(); return true; })()");
+    for (let i = 0; i < 40 && !(await js("!!LT_OBSERVER.replay")); i++) await sleep(250);
+    ok(await js("!!LT_OBSERVER.replay") && /^Looking back at D1/.test(await txt('lt-replay-text')), 'choosing one looks back: ' + (await txt('lt-replay-text')).slice(0, 90));
+    ok(await js("LT_OBSERVER.replay.sim.absMinute()") === beat.absMinute - 12 && await js("document.getElementById('lt-save').disabled && document.getElementById('lt-hand-do').disabled"), 'twelve minutes before it, with saving and intervening switched off');
+    await js("(async function(){ await LT_OBSERVER.replay.sim.runMinutes(14); LT_OBSERVER.view.observe(); return true; })()", true);
+    ok(await js("LT_OBSERVER.replay.sim.state.events.some(function(e){ return e.type === 'TALKED' && e.absMinute === " + beat.absMinute + "; })"), 'run forward, the same talk ends at the same minute');
+    await shot('06-looking-back.png');
+    ok(liveBefore === await js("JSON.stringify(LT_OBSERVER.sim.state)"), 'the live world has not moved a minute meanwhile');
+    await js("document.getElementById('lt-replay-back').click(); true"); await sleep(300);
+    ok(!(await js("!!LT_OBSERVER.replay")) && await js("LT_OBSERVER.view.sim === LT_OBSERVER.sim") && await js("document.getElementById('lt-replay').hidden") && !(await js("document.getElementById('lt-hand-do').disabled")), 'Back to now: the live world, its view, its controls');
+    ok(liveBefore === await js("JSON.stringify(LT_OBSERVER.sim.state)"), 'exactly as it was left');
     console.log('\npage-story-browser: ' + checks + '/' + checks);
   } finally { await page.close(); }
 })().catch((e) => { console.error(e); process.exit(1); });
