@@ -33,18 +33,18 @@
    * eased, and the last one eases back into the first across midnight, so
    * there is no minute in the day where the picture jumps. */
   D.KEYS = [
-    { at: 0,    phase: 'night', glass: '#1b2536', glassHi: '#2b3a50', ambient: '#2b3454', amount: 0.46, warm: '#3a2a12', glow: 0.09, lamp: 1 },
-    { at: 270,  phase: 'night', glass: '#1b2536', glassHi: '#2b3a50', ambient: '#2b3454', amount: 0.46, warm: '#3a2a12', glow: 0.09, lamp: 1 },
-    { at: 330,  phase: 'dawn',  glass: '#3b3a54', glassHi: '#59526e', ambient: '#3c3c60', amount: 0.40, warm: '#3a2a12', glow: 0.09, lamp: 1 },
-    { at: 420,  phase: 'dawn',  glass: '#c1846f', glassHi: '#e8b48c', ambient: '#6b5064', amount: 0.25, warm: '#39280f', glow: 0.07, lamp: 0.7 },
-    { at: 495,  phase: 'dawn',  glass: '#c9a68c', glassHi: '#eed3ae', ambient: '#8a7a80', amount: 0.15, warm: '#33260f', glow: 0.04, lamp: 0.4 },
+    { at: 0,    phase: 'night', glass: '#141d2c', glassHi: '#22304a', ambient: '#232c52', amount: 0.62, warm: '#2e2210', glow: 0.05, lamp: 1 },
+    { at: 270,  phase: 'night', glass: '#141d2c', glassHi: '#22304a', ambient: '#232c52', amount: 0.62, warm: '#2e2210', glow: 0.05, lamp: 1 },
+    { at: 330,  phase: 'dawn',  glass: '#3b3a54', glassHi: '#59526e', ambient: '#36385e', amount: 0.54, warm: '#302410', glow: 0.06, lamp: 1 },
+    { at: 420,  phase: 'dawn',  glass: '#c98a94', glassHi: '#efc4c0', ambient: '#5e5280', amount: 0.34, warm: '#392810', glow: 0.06, lamp: 0.7 },
+    { at: 495,  phase: 'dawn',  glass: '#c3aeae', glassHi: '#ecdcd2', ambient: '#8a86a0', amount: 0.19, warm: '#33260f', glow: 0.04, lamp: 0.4 },
     { at: 585,  phase: 'day',   glass: '#a6c6d0', glassHi: '#d8ebe6', ambient: '#9fb0bc', amount: 0.06, warm: '#000000', glow: 0.00, lamp: 0 },
     { at: 720,  phase: 'day',   glass: '#9ec3cf', glassHi: '#d2e6e2', ambient: '#ffffff', amount: 0.00, warm: '#000000', glow: 0.00, lamp: 0 },
     { at: 960,  phase: 'day',   glass: '#a8c2c2', glassHi: '#dce6d8', ambient: '#e8ddc4', amount: 0.05, warm: '#000000', glow: 0.00, lamp: 0 },
-    { at: 1035, phase: 'dusk',  glass: '#d09464', glassHi: '#f0c98c', ambient: '#9c7a5e', amount: 0.14, warm: '#2e2008', glow: 0.03, lamp: 0.4 },
-    { at: 1110, phase: 'dusk',  glass: '#c06a4e', glassHi: '#e7a06a', ambient: '#7a5450', amount: 0.24, warm: '#3a2a10', glow: 0.06, lamp: 0.6 },
-    { at: 1185, phase: 'dusk',  glass: '#6e4c6a', glassHi: '#a06e78', ambient: '#514566', amount: 0.36, warm: '#3a2a12', glow: 0.08, lamp: 0.9 },
-    { at: 1290, phase: 'night', glass: '#1b2536', glassHi: '#2b3a50', ambient: '#2b3454', amount: 0.46, warm: '#3a2a12', glow: 0.09, lamp: 1 }
+    { at: 1035, phase: 'dusk',  glass: '#dba463', glassHi: '#f6d698', ambient: '#a07c56', amount: 0.14, warm: '#2e2008', glow: 0.03, lamp: 0.4 },
+    { at: 1110, phase: 'dusk',  glass: '#cf6a32', glassHi: '#f5a24e', ambient: '#86583c', amount: 0.32, warm: '#3a2a10', glow: 0.05, lamp: 0.6 },
+    { at: 1185, phase: 'dusk',  glass: '#6e4c6a', glassHi: '#a06e78', ambient: '#463a5f', amount: 0.48, warm: '#342610', glow: 0.06, lamp: 0.9 },
+    { at: 1290, phase: 'night', glass: '#141d2c', glassHi: '#22304a', ambient: '#232c52', amount: 0.62, warm: '#2e2210', glow: 0.05, lamp: 1 }
   ];
 
   function rgb(hex) {
