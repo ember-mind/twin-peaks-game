@@ -67,25 +67,65 @@
     R(302, 64, 2, 112, p.ink); R(301, 64, 1, 112, p.wallLight);
     R(16, 176, 288, 2, p.ink); R(18, 176, 284, 1, p.wallLight);
 
-    /* The red runner runs from the paired doors to an open receiving point;
-     * it stops before furniture and leaves a generous east bypass. */
-    R(136, 44, 48, 132, p.ink);
-    R(138, 46, 44, 128, p.gold);
-    R(141, 48, 38, 124, p.redDark);
-    R(145, 50, 30, 120, p.red);
-    R(147, 52, 2, 116, p.redHi); R(172, 52, 2, 116, p.redDark);
-    for (var markY = 62; markY <= 158; markY += 16) {
+    /* The runner. A fresh critic read the round-1 version as "a flat vertical
+     * band with no perspective break or furniture crossing it, splitting the
+     * room into two unrelated halves". Three things fix that without moving a
+     * tile: it TAPERS toward the doors at the north end, it changes value
+     * where the chandelier hangs over it, and two things cross its edges —
+     * the counter's cast shadow on the east, the lounge rug on the west. */
+    /* walls() repaints y<64 afterwards, so the visible run is y 64..176. The
+     * taper is 1px per side per band: at seven bands the edge reads as a
+     * receding line rather than a stack of rectangles. */
+    var bands = [[44, 78, 142, 36], [78, 92, 141, 38], [92, 106, 140, 40],
+      [106, 120, 139, 42], [120, 134, 138, 44], [134, 148, 137, 46],
+      [148, 176, 136, 48]];
+    bands.forEach(function (b) {
+      var y = b[0], h = b[1] - b[0], x = b[2], w = b[3];
+      R(x, y, w, h, p.ink);
+      R(x + 2, y, w - 4, h, p.gold);
+      R(x + 5, y, w - 10, h, p.redDark);
+      R(x + 9, y, w - 18, h, p.red);
+      R(x + 11, y, 2, h, p.redHi);
+      R(x + w - 13, y, 2, h, p.redDark);
+    });
+    /* The chandelier's light falls across the middle of the run as a stepped
+     * pool, not a rectangle, so the strip is not one value door to wall. */
+    [[96, 22], [92, 20], [100, 20], [88, 16], [104, 16], [84, 10], [108, 10]]
+      .forEach(function (step) {
+        R(160 - (step[1] >> 1), step[0], step[1], 4, p.redHi);
+      });
+    R(153, 90, 14, 12, p.redHi);
+    /* Woven fringe at both short ends: what makes it read as a rug laid on
+     * the floor rather than a painted stripe. The north fringe sits at the
+     * wall foot, where the run actually becomes visible. */
+    var fx;
+    for (fx = 144; fx < 178; fx += 3) {
+      R(fx, 64, 1, 3, p.gold);
+      R(fx + 1, 64, 1, 2, p.cream);
+    }
+    for (fx = 138; fx < 182; fx += 3) {
+      R(fx, 173, 1, 3, p.gold);
+      R(fx + 1, 173, 1, 2, p.cream);
+    }
+    for (var markY = 78; markY <= 158; markY += 16) {
       diamond(R, 160, markY, 4, p.gold);
       diamond(R, 160, markY, 2, p.redDark);
       R(160, markY, 1, 1, p.wallLight);
     }
-    R(140, 166, 40, 4, p.redDark); R(143, 167, 34, 1, p.redHi);
-
+    /* The counter throws a stepped shadow west onto the runner's east edge,
+     * and the lounge rug meets its west edge at x=136. Neither half of the
+     * room ends at the strip any more. */
+    R(172, 132, 12, 2, p.red);
+    R(168, 134, 16, 2, p.redDark);
+    R(163, 136, 21, 3, p.redDark);
+    R(160, 139, 24, 3, p.ink);
+    R(165, 142, 19, 2, p.redDark);
+    R(172, 144, 12, 2, p.redDark);
     /* Bounded west lounge rug, kept separate from the public runner. */
-    R(40, 84, 88, 52, p.ink); R(42, 86, 84, 48, p.gold);
-    R(45, 89, 78, 42, p.redDark); R(48, 92, 72, 36, p.red);
-    R(50, 94, 68, 2, p.redHi); R(50, 125, 68, 2, p.redDark);
-    R(50, 94, 2, 32, p.gold); R(116, 94, 2, 32, p.gold);
+    R(40, 84, 96, 52, p.ink); R(42, 86, 92, 48, p.gold);
+    R(45, 89, 86, 42, p.redDark); R(48, 92, 80, 36, p.red);
+    R(50, 94, 76, 2, p.redHi); R(50, 125, 76, 2, p.redDark);
+    R(50, 94, 2, 32, p.gold); R(124, 94, 2, 32, p.gold);
     for (var rugX = 56; rugX < 114; rugX += 14) {
       R(rugX, 91, 5, 1, p.wallLight); R(rugX, 128, 5, 1, p.gold);
     }
@@ -108,12 +148,29 @@
     if (h > 3) { R(x + 2, y + 1, w - 4, 1, p.wallLight); R(x + 2, y + h - 2, w - 4, 1, p.wall); }
   }
   function plant(R, x, y) {
-    R(x - 6, y - 7, 12, 7, p.ink); R(x - 5, y - 6, 10, 5, p.oak);
-    R(x - 4, y - 5, 8, 1, p.gold); R(x, y - 1, 1, 2, p.ink);
-    [[-7, -22], [-5, -17], [-3, -12], [2, -25], [4, -19], [2, -13], [-1, -28]].forEach(function (v) {
-      R(x + v[0], y + v[1], 5, 3, p.green); R(x + v[0], y + v[1], 3, 1, p.greenHi);
-    });
+    /* One connected foliage mass with a lit crown. The round-1 plant was
+     * seven detached 5x3 dashes over an empty oak box, which a fresh critic
+     * read at 1x as a picture frame rather than a plant. */
+    R(x - 6, y - 7, 12, 8, p.ink);
+    R(x - 5, y - 6, 10, 6, p.oak);
+    R(x - 4, y - 5, 8, 1, p.gold);
+    R(x - 4, y - 2, 8, 1, p.wallDark);
+    R(x - 1, y - 9, 3, 3, p.ink);
+    R(x - 5, y - 20, 10, 12, p.ink);
+    R(x - 7, y - 17, 14, 7, p.ink);
+    R(x - 4, y - 19, 8, 10, p.green);
+    R(x - 6, y - 16, 12, 5, p.green);
+    R(x - 3, y - 18, 6, 4, p.greenHi);
+    R(x - 5, y - 15, 4, 2, p.greenHi);
+    R(x + 1, y - 14, 4, 2, p.green);
+    R(x - 2, y - 22, 4, 4, p.ink);
+    R(x - 1, y - 21, 2, 3, p.greenHi);
+    R(x - 6, y - 12, 3, 3, p.ink);
+    R(x - 5, y - 11, 2, 2, p.green);
+    R(x + 3, y - 12, 3, 3, p.ink);
+    R(x + 4, y - 11, 2, 2, p.green);
   }
+
   function lantern(R, x, y) {
     R(x - 2, y - 4, 5, 3, p.ink); R(x, y - 6, 1, 2, p.gold);
     R(x - 4, y, 9, 12, p.ink); R(x - 3, y, 7, 10, p.gold);
@@ -122,16 +179,42 @@
   }
 
   function walls(R) {
+    /* The log courses. A fresh critic read the round-1 wall as "the same
+     * brick-like unit across the entire upper half at uniform contrast", so
+     * the wall competed with the props. Three changes push it back: the log
+     * face drops from wallLight/wallDark to a wall/wallDark pair, the
+     * per-course seam is one soft shadow line instead of a lit top edge, and
+     * the run is varied — log lengths alternate, knots appear on a fixed
+     * pattern, and the course under the ceiling beam is a full step darker.
+     * The mounted head and the GREAT NORTHERN sign stay the two accents. */
     R(0, 0, W, 64, p.wallDark);
     for (var y = 7, row = 0; y < 60; y += 13, row++) {
+      var deep = y >= 44;
+      var face = deep ? p.wallDark : p.wall;
+      var seam = deep ? p.ink : p.wallDark;
       R(16, y, 288, 1, p.ink);
-      for (var x = 18 - (row % 2 ? 18 : 0); x < 302; x += 36) {
-        var left = Math.max(18, x), right = Math.min(302, x + 34);
-        R(left, y + 1, right - left, 10, p.wall);
-        R(left + 2, y + 2, Math.max(1, right - left - 4), 1, p.wallLight);
-        R(left + 3, y + 9, Math.max(1, right - left - 6), 1, p.wallDark);
+      var span = (row % 2) ? 44 : 36;
+      for (var x = 18 - (row % 2 ? 22 : 0); x < 302; x += span) {
+        var left = Math.max(18, x), right = Math.min(302, x + span - 2);
+        if (right - left < 4) continue;
+        R(left, y + 1, right - left, 10, face);
+        /* One shadow line under each log, and a faint one along the top.
+         * No lit edge: a highlight per course is what made the wall shout. */
+        R(left, y + 9, right - left, 2, seam);
+        R(left + 1, y + 1, Math.max(1, right - left - 2), 1, deep ? p.wallDark : p.wallDark);
+        /* A knot every third log, on the course's own rhythm. */
+        if (((row * 3 + left) % 7) === 0 && right - left > 14) {
+          R(left + 6, y + 4, 3, 3, seam);
+          R(left + 7, y + 5, 1, 1, face);
+        }
+        R(right - 1, y + 1, 1, 10, p.ink);
       }
     }
+    /* A darker band under the ceiling beam so the top of the wall falls away
+     * instead of meeting the beam at full value. */
+    R(16, 51, 288, 7, p.wallDark);
+    R(16, 51, 288, 1, p.ink);
+    for (var bx = 20; bx < 300; bx += 40) R(bx, 54, 24, 1, p.ink);
     beam(R, 16, 0, 288, 6); beam(R, 16, 58, 288, 7);
     [18, 166, 250, 306].forEach(function (x) { column(R, x, 0, 64); });
 
@@ -145,9 +228,27 @@
 
     /* Quiet wall art and practicals establish lodge scale without inventing
      * another opening or blocking the rear receiving route. */
-    R(44, 19, 34, 30, p.ink); R(46, 21, 30, 26, p.gold); R(49, 24, 24, 20, p.wallDark);
-    R(51, 27, 20, 10, p.stoneDark); R(51, 37, 20, 7, p.green);
-    R(53, 34, 3, 3, p.stoneHi); R(62, 29, 2, 8, p.stoneHi); R(67, 32, 2, 6, p.stoneHi);
+    /* Framed landscape. In the round-1 build this hung at x=44, entirely
+     * behind the fireplace stack, so it was paint nobody could see; it now
+     * hangs on the clear log wall west of the chandelier and carries one
+     * strong silhouette — a lit sky, a horizon line, a ridge and a dark
+     * foreground — instead of three abstract blocks. */
+    R(104, 12, 38, 32, p.ink); R(106, 14, 34, 28, p.gold);
+    R(107, 15, 32, 26, p.oak); R(109, 17, 28, 22, p.ink);
+    R(110, 18, 26, 12, p.stoneHi);
+    R(110, 18, 26, 4, p.cream);
+    R(110, 26, 26, 4, p.stoneDark);
+    R(110, 30, 26, 1, p.ink);
+    R(113, 22, 9, 8, p.stoneDark);
+    R(115, 20, 5, 4, p.stoneDark);
+    R(116, 20, 2, 2, p.wallLight);
+    R(124, 24, 11, 6, p.stoneDark);
+    R(127, 22, 5, 3, p.stoneDark);
+    R(110, 31, 26, 7, p.green);
+    R(110, 31, 26, 1, p.greenHi);
+    R(112, 34, 8, 1, p.greenHi);
+    R(124, 36, 9, 1, p.greenHi);
+    R(110, 38, 26, 1, p.ink);
     lantern(R, 30, 28); lantern(R, 148, 30); lantern(R, 244, 30);
     lantern(R, 8, 112); lantern(R, 312, 114);
     plant(R, 26, 111); plant(R, 300, 112); plant(R, 300, 168);
@@ -276,31 +377,64 @@
     R(275, 111, 22, 1, p.wallLight);
   }
   function stairs(R) {
-    /* Sloped flight joins the hall door; scenery, not a collision footprint. */
-    /* Start the lower landing at x=236 so the entry frame catches the stair
-     * approach at its right edge; the flight still terminates at x=256 hall
-     * door and continues to the far wall outside the narrow camera crop. */
+    /* Sloped flight joins the hall door; scenery, not a collision footprint.
+     * Only x=236..264 is inside the camera crop, which is why the round-1
+     * flight read as abstract stripes at 1x: the eye saw eight equal bands
+     * and no structure. Each step is now a dark riser under a light tread
+     * with a lit nosing, the left stringer is a continuous diagonal board,
+     * and a newel post with a ball finial anchors the bottom of the run. */
     R(236, 36, 84, 116, p.ink); R(238, 38, 78, 112, p.wallDark);
     for (var step = 0; step < 12; step++) {
       var y = 40 + step * 9, left = 238 + Math.floor(step * 1.5), right = 316 - Math.floor(step * .4);
-      R(left, y, right - left, 8, p.oak); R(left, y, right - left, 1, p.wallLight);
-      R(left + 2, y + 2, right - left - 4, 2, p.wall); R(left + 1, y + 6, right - left - 2, 2, p.wallDark);
-      var rx = left + 13, rw = Math.max(12, right - left - 25);
-      R(rx - 1, y + 1, rw + 2, 6, p.ink); R(rx, y + 1, rw, 5, p.redDark);
-      R(rx + 2, y + 2, rw - 4, 2, p.red); R(rx + 1, y + 1, 1, 5, p.gold);
-      R(rx + rw - 2, y + 1, 1, 5, p.gold);
+      /* Riser in shadow, then the tread catching the light. */
+      R(left, y, right - left, 4, p.wallDark);
+      R(left, y, right - left, 1, p.ink);
+      R(left, y + 4, right - left, 4, p.oak);
+      R(left, y + 4, right - left, 1, p.oakHi);
+      R(left, y + 8, right - left, 1, p.ink);
+      /* Stair runner: narrower than the tread, with gold edging. */
+      var rx = left + 14, rw = Math.max(10, right - left - 27);
+      R(rx - 1, y + 1, rw + 2, 7, p.ink);
+      R(rx, y + 1, rw, 3, p.redDark);
+      R(rx, y + 4, rw, 3, p.red);
+      R(rx, y + 4, rw, 1, p.redHi);
+      R(rx, y + 1, 1, 7, p.gold);
+      R(rx + rw - 1, y + 1, 1, 7, p.gold);
     }
-    for (var ry = 38; ry <= 145; ry++) {
+    /* Left stringer: one continuous diagonal board, so the flight has an
+     * edge instead of dissolving into its own treads. */
+    for (var ry = 38; ry <= 148; ry++) {
       var t = Math.max(0, Math.min(1, (ry - 40) / 100));
       var railX = 238 + Math.floor(t * 18);
-      R(railX, ry, 2, 1, p.ink); R(railX + 1, ry, 1, 1, p.gold);
+      R(railX - 2, ry, 4, 1, p.ink);
+      R(railX - 1, ry, 2, 1, p.oak);
+      R(railX - 1, ry, 1, 1, p.oakHi);
       R(314, ry, 2, 1, p.ink); R(315, ry, 1, 1, p.gold);
+      /* Handrail, one board above the stringer. */
+      if (ry > 44) {
+        R(railX + 5, ry - 16, 3, 1, p.ink);
+        R(railX + 6, ry - 16, 1, 1, p.gold);
+      }
     }
-    for (var post = 0; post < 6; post++) {
-      var py = 42 + post * 20, px = 238 + Math.floor(post * 3.6);
-      R(px, py - 6, 4, 11, p.ink); R(px + 1, py - 5, 1, 8, p.gold);
-      R(313, py - 6, 4, 11, p.ink); R(314, py - 5, 1, 8, p.gold);
+    for (var post = 0; post < 5; post++) {
+      var py = 52 + post * 20, px = 240 + Math.floor(post * 3.6);
+      R(px, py - 14, 3, 15, p.ink);
+      R(px + 1, py - 13, 1, 13, p.gold);
+      R(313, py - 6, 4, 11, p.ink);
+      R(314, py - 5, 1, 8, p.gold);
     }
+    /* Newel post at the foot of the flight: the one strong silhouette that
+     * tells a 1x reader this is a staircase. */
+    R(236, 128, 10, 26, p.ink);
+    R(237, 129, 8, 24, p.oak);
+    R(238, 130, 6, 3, p.oakHi);
+    R(238, 136, 6, 1, p.gold);
+    R(238, 145, 6, 1, p.gold);
+    R(239, 133, 4, 12, p.wallDark);
+    R(237, 122, 8, 7, p.ink);
+    R(238, 123, 6, 5, p.gold);
+    R(239, 124, 4, 3, p.cream);
+    R(240, 125, 2, 1, p.light);
     R(236, 146, 84, 7, p.ink); R(238, 147, 78, 3, p.wallLight); R(240, 150, 74, 2, p.wallDark);
     R(278, 146, 36, 5, p.redDark); R(280, 147, 32, 1, p.redHi);
   }
