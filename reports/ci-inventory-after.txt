@@ -122,6 +122,7 @@ tests.yml	node-tests	node test/hospital-native.js
 tests.yml	node-tests	node test/room-315-location.js
 tests.yml	node-tests	node test/room-315-native.js
 tests.yml	node-tests	node test/palmer-native.js
+tests.yml	node-tests	node test/oej-native.js
 tests.yml	node-tests	node test/sheriffs-station-location.js
 tests.yml	node-tests	node test/sheriffs-station-native.js
 tests.yml	node-tests	node test/sheriffs-station-door.js
