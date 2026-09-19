@@ -39,7 +39,7 @@
     grass: '#5f8a4a', grassHi: '#648f4e', grassDark: '#4c7340', grassLight: '#7aa35c',
     paving: '#a89a80', pavingHi: '#bdb094', pavingDark: '#877b65', pavingInk: '#6b6151',
     bark: '#5a4530', barkHi: '#775c3f',
-    water: '#41788c', waterHi: '#5d97a8', waterLight: '#9cc6cc', waterDark: '#2a536a',
+    water: '#3a6f85', waterHi: '#55889b', waterLight: '#9cc6cc', waterDark: '#264b60',
     mud: '#6d5b40', mudHi: '#8a7550', mudDark: '#4b3d2a',
     gravel: '#a2967c', gravelHi: '#b7ac92', gravelDark: '#847a64',
     wool: '#7d6a4c', woolHi: '#94805e', woolDark: '#54462f',
@@ -435,7 +435,7 @@
       /* Then the water: deep in the middle, pale along the shore. */
       for (py = 0; py < T; py++) for (px = 0; px < T; px++) {
         if (!inside(px, py, 0)) continue;
-        R(g, sx + px, sy + py, 1, 1, inside(px, py, -4) ? p.water : p.waterHi);
+        R(g, sx + px, sy + py, 1, 1, inside(px, py, -2) ? p.water : p.waterHi);
       }
       for (py = 0; py < T; py++) for (px = 0; px < T; px++) {
         if (inside(px, py, 0) && !inside(px, py, -1)) R(g, sx + px, sy + py, 1, 1, p.waterDark);
@@ -499,15 +499,16 @@
    * shadow. One cell wide, so that is all there is room for. */
   function bench(g, kit, p, sx, sy, facing) {
     var R = kit.rect, i;
-    var backTop = facing === 'down' ? 0 : 10, seatTop = facing === 'down' ? 8 : 1;
+    var backTop = facing === 'down' ? 0 : 11, seatTop = facing === 'down' ? 9 : 1;
     var frameTop = Math.min(backTop, seatTop);
     kit.contactShadow(g, sx + 1, sy + 14, 14, p);
     R(g, sx + 2, sy + seatTop + 7, 12, 2, 'rgba(37,40,43,.30)');
-    /* The backrest: a board standing on edge. */
-    R(g, sx + 1, sy + backTop, 14, 6, p.ink);
-    R(g, sx + 2, sy + backTop + 1, 12, 2, p.redHi);
-    R(g, sx + 2, sy + backTop + 1, 12, 1, p.redLight);
-    R(g, sx + 2, sy + backTop + 3, 12, 2, p.redDark);
+    /* The backrest: a board standing on edge, a step narrower than the seat,
+     * so the silhouette is not one square block. */
+    R(g, sx + 3, sy + backTop, 10, 6, p.ink);
+    R(g, sx + 4, sy + backTop + 1, 8, 2, p.redHi);
+    R(g, sx + 4, sy + backTop + 1, 8, 1, p.redLight);
+    R(g, sx + 4, sy + backTop + 3, 8, 2, p.redDark);
     /* The seat: a lit top plane, then the front edge of the plank. */
     R(g, sx + 1, sy + seatTop, 14, 7, p.ink);
     R(g, sx + 2, sy + seatTop + 1, 12, 3, p.redLight);
@@ -551,67 +552,61 @@
     R(g, sx + 6, sy + 13, W - 12, 1, p.paving);
   }
 
-  /* A doorway, built like the kit's furniture: a lit top plane where the porch
-   * roof catches the light, a front face of stone under it, a dark line on the
-   * ground and a contact shadow. The roof rises eight pixels into the cell
-   * above, which the rows leave walkable — see the README's limits. */
+  /* A doorway. A door shorter than the person standing beside it does not read
+   * as a door at all, so this one is 25 px tall: two stone piers and a lintel
+   * rise ten pixels into the cell above, the way the gateway's piers do. That
+   * cell is walkable in the rows, and six of its sixteen pixels stay open
+   * ground between the piers — see the README's limits. */
   function doorway(g, kit, p, sx, sy, w, lamp) {
-    var R = kit.rect, W = w * T, dw = 14, dx = sx + Math.round((W - dw) / 2), i;
+    var R = kit.rect, W = w * T, dw = W - 12, dx = sx + 6, i;
     kit.contactShadow(g, sx, sy + 15, W, p);
-    R(g, sx - 1, sy + 13, W + 2, 3, 'rgba(37,40,43,.26)');
-    /* The porch roof: its own top plane, receding away from the viewer. */
-    R(g, sx - 2, sy - 8, W + 4, 6, p.ink);
-    R(g, sx - 1, sy - 7, W + 2, 4, p.brickDark);
-    for (i = 0; i < W + 2; i += 5) R(g, sx - 1 + i, sy - 7, 3, 4, p.brick);
-    R(g, sx - 1, sy - 7, W + 2, 1, p.brickHi);
-    R(g, sx - 2, sy - 3, W + 4, 2, p.ink);
-    R(g, sx - 2, sy - 2, W + 4, 1, p.pavingHi);
-    R(g, sx, sy - 1, W, 2, 'rgba(37,40,43,.30)');        // the roof's own shadow
-    /* The stone front. */
-    R(g, sx, sy + 1, W, 15, p.ink);
-    R(g, sx + 1, sy + 1, W - 2, 14, p.pavingDark);
-    for (var by = 1; by < 15; by += 4) for (var bx = 1 + ((by / 4) % 2 ? 0 : 3); bx < W - 3; bx += 7) {
-      R(g, sx + bx, sy + by, 6, 3, hash2(bx, by) % 3 ? p.paving : p.pavingHi);
-      R(g, sx + bx, sy + by, 6, 1, p.pavingHi);
-    }
-    R(g, sx + 1, sy + 1, W - 2, 1, p.floorLight);
-    /* The opening, recessed into it. */
-    R(g, dx - 2, sy + 1, dw + 4, 15, p.ink);
-    R(g, dx - 1, sy + 2, dw + 2, 13, p.brickDark);
-    R(g, dx, sy + 3, dw, 11, p.redDark);
-    R(g, dx + 1, sy + 4, dw - 2, 9, p.red);
-    R(g, dx + Math.round(dw / 2) - 1, sy + 4, 1, 9, p.redDark);
-    [1, Math.round(dw / 2)].forEach(function (lx) {
-      R(g, dx + lx + 1, sy + 5, 4, 3, p.redHi);
-      R(g, dx + lx + 1, sy + 9, 4, 3, p.redDark);
-      R(g, dx + lx + 1, sy + 5, 4, 1, p.redLight);
+    R(g, sx - 2, sy + 13, W + 4, 4, 'rgba(37,40,43,.30)');
+    R(g, sx - 4, sy + 14, W + 8, 2, 'rgba(37,40,43,.18)');
+    /* The two piers: a lit top plane, a front face, a dark base. */
+    [0, W - 6].forEach(function (px2) {
+      R(g, sx + px2, sy - 10, 6, 26, p.ink);
+      R(g, sx + px2 + 1, sy - 9, 4, 24, p.pavingDark);
+      R(g, sx + px2 + 1, sy - 9, 2, 24, p.paving);
+      R(g, sx + px2 + 1, sy - 9, 4, 1, p.pavingHi);
+      R(g, sx + px2 + 1, sy + 2, 4, 1, p.pavingDark);
+      R(g, sx + px2 - 1, sy - 13, 8, 4, p.ink);
+      R(g, sx + px2, sy - 12, 6, 2, p.floorLight);
+      R(g, sx + px2, sy - 12, 6, 1, p.cream);
     });
-    R(g, dx + Math.round(dw / 2) - 3, sy + 9, 1, 2, p.gold);
-    R(g, dx + Math.round(dw / 2) + 2, sy + 9, 1, 2, p.gold);
-    R(g, dx, sy + 2, dw, 1, p.woodDark);
-    R(g, dx + 2, sy + 2, dw - 4, 1, p.glassHi);
-    /* The step: a lit top plane on the paving below, with a front edge. */
+    /* The lintel over the opening. */
+    R(g, sx + 5, sy - 11, W - 10, 5, p.ink);
+    R(g, sx + 6, sy - 10, W - 12, 3, p.paving);
+    R(g, sx + 6, sy - 10, W - 12, 1, p.pavingHi);
+    R(g, sx + 6, sy - 6, W - 12, 2, 'rgba(37,40,43,.34)');
+    /* The reveal, and the door standing in it. */
+    R(g, dx - 1, sy - 6, dw + 2, 22, p.ink);
+    R(g, dx, sy - 5, dw, 21, p.brickDark);
+    R(g, dx + 1, sy - 4, dw - 2, 19, p.redDark);
+    R(g, dx + 2, sy - 3, dw - 4, 17, p.red);
+    R(g, dx + Math.round(dw / 2) - 1, sy - 3, 1, 17, p.redDark);
+    for (i = 0; i < 2; i++) {
+      var px3 = dx + 3 + i * Math.round((dw - 4) / 2);
+      R(g, px3, sy - 2, Math.round(dw / 2) - 4, 7, p.redHi);
+      R(g, px3, sy - 2, Math.round(dw / 2) - 4, 1, p.redLight);
+      R(g, px3, sy + 6, Math.round(dw / 2) - 4, 7, p.redDark);
+      R(g, px3, sy + 6, Math.round(dw / 2) - 4, 1, p.red);
+    }
+    R(g, dx + Math.round(dw / 2) - 4, sy + 3, 2, 2, p.gold);
+    R(g, dx + Math.round(dw / 2) + 2, sy + 3, 2, 2, p.gold);
+    R(g, dx + 1, sy - 5, dw - 2, 2, p.woodDark);
+    R(g, dx + 2, sy - 5, dw - 4, 1, p.glassHi);           // the fanlight
+    /* The step: a lit top plane on the paving, with a front edge under it. */
     R(g, dx - 3, sy + 14, dw + 6, 2, p.floorLight);
-    R(g, dx - 3, sy + 16, dw + 6, 1, p.pavingDark);
     R(g, dx - 3, sy + 14, dw + 6, 1, p.cream);
-    /* A lantern under the porch, and the number beside the door. */
-    var lx2 = sx + 2;
-    R(g, lx2, sy + 2, 5, 7, p.ink);
-    R(g, lx2 + 1, sy + 3, 3, 5, lamp > 0 ? '#ffdc82' : p.metal);
-    R(g, lx2 + 1, sy + 3, 3, 1, p.metalHi);
-    R(g, lx2 + 1, sy + 1, 3, 1, p.ink);
-    if (lamp > 0) kit.warmLight(g, lx2 - 9, sy - 5, 23, 24, lamp);
-    var px = sx + W - 7;
-    R(g, px, sy + 3, 5, 5, p.ink);
-    R(g, px + 1, sy + 4, 3, 3, p.cream);
-    R(g, px + 2, sy + 5, 1, 1, p.ink);
-    /* A window box under the front, with a lit top edge. */
-    R(g, sx + 1, sy + 10, 5, 4, p.woodDark);
-    R(g, sx + 1, sy + 10, 5, 1, p.leafHi);
-    R(g, sx + 2, sy + 11, 3, 1, p.green);
-    R(g, sx + W - 6, sy + 10, 5, 4, p.woodDark);
-    R(g, sx + W - 6, sy + 10, 5, 1, p.leafHi);
-    R(g, sx + W - 5, sy + 11, 3, 1, p.green);
+    R(g, dx - 3, sy + 16, dw + 6, 1, p.pavingDark);
+    /* A lantern on the left pier, and the number on the right one. */
+    R(g, sx + 1, sy - 6, 5, 7, p.ink);
+    R(g, sx + 2, sy - 5, 3, 5, lamp > 0 ? '#ffdc82' : p.metal);
+    R(g, sx + 2, sy - 5, 3, 1, p.metalHi);
+    R(g, sx + 2, sy - 7, 3, 1, p.ink);
+    if (lamp > 0) kit.warmLight(g, sx - 8, sy - 13, 24, 26, lamp);
+    R(g, sx + W - 5, sy - 4, 4, 5, p.ink);
+    R(g, sx + W - 4, sy - 3, 2, 3, p.cream);
   }
 
   /* ---- the home ------------------------------------------------------- */
@@ -877,6 +872,20 @@
     }
   }
 
+  /* Past the last row and the last column, where the camera never lets anybody
+   * go: closed undergrowth, so the edge of the place reads as its edge and not
+   * as more of the same lawn. */
+  function beyond(g, R, p, sx, sy, mx, my) {
+    var h = hash2(mx * 13 + 7, my * 17 + 3), i;
+    R(g, sx, sy, T, T, '#25351f');
+    for (i = 0; i < 6; i++) {
+      var bx = bits(h, i * 4, 13), by = bits(h, i * 4 + 2, 13);
+      R(g, sx + bx, sy + by, 4, 3, bits(h, i + 20, 3) ? '#2e4326' : '#1d2b19');
+      R(g, sx + bx, sy + by, 3, 1, '#3a5230');
+    }
+    R(g, sx, sy, T, T, 'rgba(14,20,12,.34)');
+  }
+
   function backdrop(g, kit, colour) {
     var w = (g.canvas && g.canvas.width) || 256, h = (g.canvas && g.canvas.height) || 192;
     kit.rect(g, 0, 0, w, h, colour);
@@ -936,8 +945,12 @@
       var worn = outside ? 0 : (trail[x + ',' + y] || 0);
       if (worn) track(g, R, p, sx, sy, x, y, worn, worn < 1);
       else if (!outside && ch === ',') flowers(g, R, p, sx, sy, x, y, y % 2 ? p.gold : p.redLight);
-      if (outside) R(g, sx, sy, T, T, 'rgba(20,28,18,.35)');
+      if (outside) beyond(g, R, p, sx, sy, x, y);
     }
+    R(g, x0, y0 - 3, w * T, 4, 'rgba(20,30,18,.30)');
+    R(g, x0, y0 + h * T - 1, w * T, 4, 'rgba(20,30,18,.30)');
+    R(g, x0 - 3, y0, 4, h * T, 'rgba(20,30,18,.26)');
+    R(g, x0 + w * T - 1, y0, 4, h * T, 'rgba(20,30,18,.26)');
     /* Shade under the tree line, so a canopy sits on the ground. */
     plan.pieces.forEach(function (piece) {
       if (piece.kind !== 'tree') return;
@@ -970,7 +983,7 @@
       if (!outside && (ch === '-' || ch === 'D')) { paving(g, R, p, sx, sy, x, y, 'path'); continue; }
       grass(g, R, p, sx, sy, x, y);
       if (!outside && ch === ',') flowers(g, R, p, sx, sy, x, y, p.redLight);
-      if (outside) R(g, sx, sy, T, T, 'rgba(20,24,18,.38)');
+      if (outside) beyond(g, R, p, sx, sy, x, y);
     }
     /* Wheel tracks down the middle of the carriageway, and a drain at the kerb. */
     Object.keys(road).forEach(function (key) {
@@ -1099,21 +1112,12 @@
     var lampCol = bare.length ? bare[Math.floor(bare.length / 2)] : (free[0] || 1);
     if (lamp > 0) kit.warmLight(g, x0 + lampCol * T - 16, y0 + 6, 48, 38, lamp);
     kit.lamp(g, x0 + lampCol * T + 7, y0 - 15, p);
-    /* Coats on a side wall, which the rows make solid, and a mat inside the
-     * door. Nothing on the floor a person could be expected to walk round. */
-    var coatSide = (plan.door && plan.door.x > w / 2) ? 0 : w - 1;
-    var coatX = x0 + coatSide * T + 1, coatY = y0 + (front - 2) * T;
-    R(g, coatX, coatY, 14, 2, p.woodDark);
-    R(g, coatX, coatY, 14, 1, p.woodHi);
-    [2, 7, 11].forEach(function (dx, n) {
-      R(g, coatX + dx, coatY + 2, 1, 2, p.metal);
-      if (n === 1) return;
-      var body = n ? p.green : p.red, edge = n ? p.leafHi : p.redHi;
-      R(g, coatX + dx - 1, coatY + 4, 3, 2, body);           // the shoulders
-      R(g, coatX + dx - 2, coatY + 6, 5, 7, body);           // the skirt of it
-      R(g, coatX + dx - 1, coatY + 4, 3, 1, edge);
-      R(g, coatX + dx - 2, coatY + 6, 1, 7, edge);
-      R(g, coatX + dx, coatY + 7, 1, 5, p.woodDark);
+    /* On the side walls, the one thing a cold viewer names every time: a
+     * framed picture. Hanging coats were read as bottles and are gone. */
+    [0, w - 1].forEach(function (col, n) {
+      if (front < 4) return;
+      kit.picture(g, x0 + col * T + 2, y0 + (front - 3 + n % 2) * T - 2, 12, 15, p,
+        ['portrait', 'photo'][(idHash(rows.join('|')) + n) % 2]);
     });
     if (plan.door) {
       var matX = x0 + plan.door.x * T + 2, matY = y0 + (front - 1) * T + 9;
@@ -1122,14 +1126,11 @@
       for (var dxm = 2; dxm < plan.door.w * T - 5; dxm += 3) R(g, matX + dxm, matY + 1, 1, 4, p.mudHi);
     }
     plan.pieces.forEach(function (piece) { drawPiece(g, kit, p, x0, y0, piece, rows, opts); });
-    /* Daylight off the window onto the floor: a band, the width of the pane,
-     * not a pool. Only when the lamps are not the light in the room. */
+    /* Daylight off the window onto the boards: one soft pool, the kit's own,
+     * because three stacked bands read as a ladder lying on the floor. */
     if (lamp === 0) plan.pieces.forEach(function (piece) {
       if (piece.kind !== 'window') return;
-      var wx = x0 + piece.x * T, ww = piece.w * T;
-      R(g, wx - 1, y0 + T, ww + 2, 30, 'rgba(236,240,222,.10)');
-      R(g, wx + 1, y0 + T, ww - 2, 22, 'rgba(244,246,226,.10)');
-      R(g, wx + 3, y0 + T, ww - 6, 14, 'rgba(250,250,232,.09)');
+      kit.daylight(g, x0 + piece.x * T - 6, y0 + T + 2, piece.w * T + 12, 26, 0.9);
     });
     frontWall(g, kit, p, x0, y0 + front * T, W, plan.door ? x0 + plan.door.x * T : x0 + T, plan.door ? plan.door.w * T : 32);
     /* The building casts onto the surround, so it sits on the frame rather
