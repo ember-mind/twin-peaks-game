@@ -95,9 +95,37 @@
    * source changes. Fixed 7.2s fire, 9.8s desk, 13.2s chandelier and 19.6s
    * bell rests make the first 25s read as a calm handoff between sources,
    * without turning the lobby into a flashing effect. */
+  /* Great Northern lobby. Four practicals, four independent clocks.
+   *
+   * The E8 temporal unit failed its critic twice ("stone, chairs, floor,
+   * chandelier and desk receivers do not breathe enough"; "desk/counter and
+   * bell remain too static"). The cause was the duty cycle, not the regions:
+   * every item was active for ~2.5s out of every 12-20s, so at any sampled
+   * moment the room was almost always at rest. Here each source is active
+   * roughly 70% of the time at a much lower intensity, and the five-frame
+   * ramp ends at zero, so a cycle closing is a fade, never a cut. The cycle
+   * lengths (5000, 7400, 7600, 6200 ms) share no small common multiple and
+   * firstDelay offsets them, so nothing lands in lockstep.
+   *
+   * Every region also has to land on a pixel the archetype can actually
+   * change. LIGHT_WARM_VARIATION dims with #69462d, and the lobby's oak
+   * floor and counter carcass are #70482f — seven RGB apart, so a region on
+   * bare oak paints nothing visible however long it runs. That, not the
+   * region list, is why the E8 desk round showed no PNG-proven change. Every
+   * region below sits on stone, stoneHi, gold, cream, wallLight or the red
+   * runner and rug.
+   *
+   * Region depth is the depth of the SURFACE the light falls on, so light
+   * sorts exactly like the material it sits on: stone and mantel at the
+   * fireplace foot (80), the chair at the lounge foot (112), floor, rug,
+   * runner, beam and cubbies at 0 (behind every body), counter and lamp at
+   * the reception foot (148). No region overlaps Ben's cell (12,7 =
+   * x192..208) or Audrey's (15,9 = x240..256); the runner and floor regions
+   * lie under Cooper's route at depth 0, which is where a floor reflection
+   * belongs. */
   life.register('hotel_gn',[
     {id:'lobby-fire',type:'MACHINE_IDLE_ACTIVITY',x:52,y:50,depth:80,variants:3,
-      delay:[7200,7200],duration:[2400,2400],intensity:1.45,marks:[
+      firstDelay:[600,600],delay:[2600,2600],duration:[2400,2400],intensity:1.45,marks:[
         [{x:-2,y:7,w:6,h:10,color:'#d77b37'},{x:5,y:1,w:6,h:16,color:'#e9c582'},{x:12,y:6,w:6,h:11,color:'#ffe7a6'},{x:20,y:10,w:5,h:7,color:'#d77b37'},
           {x:-20,y:-7,w:48,h:2,color:'#b5864c'},{x:-16,y:27,w:36,h:2,color:'#d77b37'},
           {x:14,y:39,w:9,h:3,color:'#d77b37'},{x:46,y:39,w:9,h:3,color:'#d77b37'},{x:4,y:67,w:48,h:2,color:'#b5864c'}],
@@ -108,21 +136,48 @@
           {x:-21,y:-8,w:50,h:2,color:'#b5864c'},{x:-17,y:26,w:38,h:2,color:'#d77b37'},
           {x:13,y:40,w:10,h:3,color:'#d77b37'},{x:45,y:40,w:10,h:3,color:'#d77b37'},{x:5,y:68,w:46,h:2,color:'#b5864c'}]
       ]},
-    {id:'lobby-chandelier',type:'LIGHT_WARM_VARIATION',x:160,y:24,depth:28,variants:3,
-      delay:[13200,13200],duration:[2600,2600],intensity:1.15,
+    /* Fire light on the material around it: four stone courses, the mantel
+     * and the sill, the near chair, the bare plank under the hearth and the
+     * lounge rug. Anchor sits in the firebox, so its own dimmer reads as the
+     * fire settling. */
+    {id:'lobby-hearth-glow',type:'LIGHT_WARM_VARIATION',x:64,y:60,depth:80,
+      firstDelay:[900,900],delay:[2600,2600],duration:[4800,4800],intensity:.55,
+      regions:[{x:30,y:29,w:6,h:2,depth:80},{x:56,y:39,w:7,h:2,depth:80},
+        {x:82,y:29,w:6,h:2,depth:80},{x:34,y:49,w:6,h:2,depth:80},
+        {x:40,y:44,w:12,h:1,depth:80},{x:76,y:44,w:12,h:1,depth:80},
+        {x:44,y:78,w:12,h:2,depth:80},{x:72,y:78,w:12,h:2,depth:80},
+        {x:68,y:93,w:8,h:2,depth:112},{x:69,y:103,w:6,h:2,depth:112},
+        {x:50,y:87,w:12,h:2,depth:0},{x:90,y:87,w:12,h:2,depth:0},
+        {x:52,y:95,w:10,h:2,depth:0},{x:96,y:99,w:10,h:2,depth:0},
+        {x:60,y:131,w:12,h:2,depth:0}]},
+    /* Chandelier: its own four lamps, the ceiling beam directly under it, and
+     * three steps down the runner. The two wide runner bands of the E8 build
+     * (36x2 and 48x2) are trimmed: a receiver is a few pixels, not a stripe. */
+    {id:'lobby-chandelier',type:'LIGHT_WARM_VARIATION',x:160,y:24,depth:28,
+      firstDelay:[2100,2100],delay:[2200,2200],duration:[5400,5400],intensity:.5,
       regions:[{x:141,y:13,w:5,h:6,depth:28},{x:149,y:19,w:5,h:6,depth:28},
         {x:165,y:19,w:5,h:6,depth:28},{x:173,y:13,w:5,h:6,depth:28},
-        {x:158,y:34,w:6,h:1,depth:0},{x:164,y:58,w:8,h:1,depth:0},
-        {x:170,y:78,w:10,h:1,depth:0},
-        {x:142,y:46,w:36,h:2,depth:0},{x:132,y:94,w:48,h:2,depth:0}]},
-    {id:'lobby-desk-lamp',type:'LIGHT_WARM_VARIATION',x:229,y:112,depth:144,variants:3,
-      delay:[9800,9800],duration:[2800,2800],intensity:1.15,
-      regions:[{x:225,y:112,w:9,h:4,depth:128},{x:225,y:122,w:9,h:2,depth:144},
-        {x:224,y:124,w:11,h:2,depth:144},{x:218,y:130,w:12,h:1,depth:144},
-        {x:226,y:140,w:10,h:1,depth:144},{x:208,y:118,w:24,h:2,depth:144},
-        {x:208,y:132,w:30,h:2,depth:144}]},
-    {id:'lobby-bell',type:'GLASS_SUBTLE_REFLECTION',x:202,y:117,depth:144,variants:3,travel:5,
-      delay:[19600,19600],duration:[3000,3000],intensity:1.25}
+        {x:144,y:59,w:14,h:2,depth:0},{x:164,y:59,w:14,h:2,depth:0},
+        {x:158,y:34,w:6,h:1,depth:0},{x:146,y:47,w:16,h:2,depth:0},
+        {x:138,y:62,w:3,h:12,depth:0},{x:179,y:62,w:3,h:12,depth:0},
+        {x:150,y:95,w:20,h:2,depth:0},{x:150,y:123,w:20,h:2,depth:0}]},
+    /* Desk lamp: its own shade, two runs of the counter top and two of the
+     * counter front, and four key cubbies behind it. Regions stop at x=192
+     * and resume at x=208 so none of them lands on Ben's cell at 12,7. The
+     * bell is deliberately absent: it is painted at x197..208, inside that
+     * same cell, so no region can reach it without being repainted over
+     * Ben's body. */
+    {id:'lobby-desk-lamp',type:'LIGHT_WARM_VARIATION',x:229,y:119,depth:148,
+      firstDelay:[1100,1100],delay:[2200,2200],duration:[4000,4000],intensity:.58,
+      regions:[{x:226,y:113,w:7,h:3,depth:148},{x:225,y:122,w:9,h:2,depth:148},
+        {x:178,y:124,w:14,h:3,depth:148},
+        {x:208,y:124,w:11,h:3,depth:148},{x:219,y:124,w:11,h:3,depth:148},
+        {x:230,y:124,w:10,h:3,depth:148},
+        {x:181,y:132,w:11,h:1,depth:148},{x:219,y:132,w:15,h:1,depth:148},
+        {x:225,y:112,w:9,h:1,depth:148},{x:212,y:144,w:14,h:1,depth:148},
+        {x:228,y:144,w:10,h:1,depth:148},
+        {x:218,y:90,w:6,h:4,depth:0},{x:231,y:90,w:6,h:4,depth:0},
+        {x:218,y:100,w:6,h:4,depth:0},{x:231,y:110,w:6,h:2,depth:0}]}
   ]);
   /* Red Room uses the existing intermittent device archetype with three
    * authored column positions. Long holds make the curtains breathe slowly.

@@ -89,12 +89,59 @@ const engine=fs.readFileSync(path.join(root,'js/engine.js'),'utf8');
 assert.ok(engine.includes('drawForegroundStructures'));
 const defs=definitions.hotel_gn;
 assert.equal(defs.length,4);
-assert.deepEqual(defs.map(d=>d.type),['MACHINE_IDLE_ACTIVITY','LIGHT_WARM_VARIATION','LIGHT_WARM_VARIATION','GLASS_SUBTLE_REFLECTION']);
+assert.deepEqual(defs.map(d=>d.id),['lobby-fire','lobby-hearth-glow','lobby-chandelier','lobby-desk-lamp']);
+assert.deepEqual(defs.map(d=>d.type),['MACHINE_IDLE_ACTIVITY','LIGHT_WARM_VARIATION','LIGHT_WARM_VARIATION','LIGHT_WARM_VARIATION']);
 const fire=defs[0];assert.equal(fire.variants,3);assert.equal(fire.marks.length,3);
 assert.equal(new Set(fire.marks.map(JSON.stringify)).size,3,'three distinct flame silhouettes');
-const deskLamp=defs[2];assert.equal(deskLamp.id,'lobby-desk-lamp');
+const byId=Object.fromEntries(defs.map(d=>[d.id,d]));
+const deskLamp=byId['lobby-desk-lamp'];
 assert.ok(deskLamp.regions.some(r=>r.x===225&&r.y===122),'desk lamp reaches transaction edge');
 assert.ok(deskLamp.regions.some(r=>r.x===225&&r.y===112),'desk lamp reaches key cubbies');
+assert.ok(deskLamp.regions.some(r=>r.y===124),'desk lamp reaches the counter top');
+const hearth=byId['lobby-hearth-glow'];
+assert.ok(hearth.regions.some(r=>r.depth===80&&r.y<50),'fire light reaches the hearth stone');
+assert.ok(hearth.regions.some(r=>r.depth===112),'fire light reaches the near chair');
+assert.ok(hearth.regions.some(r=>r.depth===0&&r.y>=82),'fire light reaches the floor in front of it');
+const chandelier=byId['lobby-chandelier'];
+assert.ok(chandelier.regions.some(r=>r.y>=58&&r.y<66&&r.depth===0),'chandelier light reaches the ceiling beam under it');
+assert.ok(chandelier.regions.some(r=>r.y>=90&&r.depth===0),'chandelier light reaches the runner');
+
+/* The E8 temporal unit failed twice because each source was active for a
+ * couple of seconds out of every fifteen, so a sampled frame almost always
+ * caught the room at rest. Lock the fix: every light is lit most of the time,
+ * the room is never entirely still for long, no region is bigger than a small
+ * patch, and no two sources share a cycle length. */
+const REGION_MAX_PX=48;
+for(const def of defs){
+  for(const r of (def.regions||[])){
+    assert.ok(Number.isInteger(r.x)&&Number.isInteger(r.y)&&r.w>0&&r.h>0,def.id+': integer region');
+    assert.ok(r.w*r.h<=REGION_MAX_PX,def.id+': region '+r.x+','+r.y+' is '+(r.w*r.h)+'px, over '+REGION_MAX_PX);
+  }
+}
+const cycles=defs.map(d=>d.duration[0]+d.delay[0]);
+assert.equal(new Set(cycles).size,defs.length,'each practical runs on its own cycle length: '+cycles.join(','));
+assert.equal(new Set(defs.map(d=>d.firstDelay[0])).size,defs.length,'each practical starts on its own offset');
+for(const def of defs.slice(1)){
+  const on=def.duration[0]/(def.duration[0]+def.delay[0]);
+  assert.ok(on>=.6&&on<=.75,def.id+': duty cycle '+(on*100).toFixed(0)+'% must breathe, not blink');
+  assert.ok(def.duration[0]>=4000,def.id+': a five-frame ramp under 4s reads as a flicker');
+  assert.ok(def.intensity<=.6,def.id+': intensity '+def.intensity+' is a pulse, not a breath');
+}
+
+/* No light region may land on a Cast Presence body. Ben stands at 12,7 and
+ * Audrey at 15,9; a region at or past a body's foot line is repainted over
+ * that body by the engine's depth slices. */
+const BODIES={benhorne:{x:12,y:7},audrey:{x:15,y:9}};
+for(const [who,cell] of Object.entries(BODIES)){
+  const box={x:cell.x*16,y:cell.y*16-8,w:16,h:24},foot=(cell.y+1)*16;
+  for(const def of defs){
+    for(const r of (def.regions||[])){
+      const overlaps=r.x<box.x+box.w&&r.x+r.w>box.x&&r.y<box.y+box.h&&r.y+r.h>box.y;
+      assert.ok(!(overlaps&&r.depth>=foot),
+        def.id+': region '+r.x+','+r.y+' is painted over '+who+' at '+cell.x+','+cell.y);
+    }
+  }
+}
 G.AmbientLife.reset(7);
 let marks=0;const fireVariants=new Set();
 const ambientCtx={globalAlpha:.8,fillStyle:'original',fillRect(x,y,w,h){
