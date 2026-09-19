@@ -64,10 +64,12 @@ simulation's own timeout (`decisionTimeoutMinutes`, town minutes) applies as bef
 
 - No transport, key handling, or server. A browser page must not hold a key;
   the transport should be a call to a small relay the operator runs.
-- Looking back (the timeline replay) is switched off in a world with a remote
-  policy: it would ask again and show a second answer as if it were the first.
-  The fix is to replay from a recording (`lt-recorded-policy.js` already matches
-  answers to requests by number); the page does not record yet.
+- Looking back in a world with a provider plays recorded answers instead of
+  asking again: the page wraps every remote policy in a recorder from the
+  moment it follows a world (`O.recordRemote`), and a replay registers players
+  under the same ids until "Back to now". A replay that stops matching the
+  recording says so. The recording lives in the page: it is not saved, so
+  after a reload only moments since the reload can be looked back at.
 - Conversations have no turns beyond opening and reply, and no topic. A
   `conversation_turn` request with `say_more` / `wind_down` candidates is the
   shape that fits the existing rules.

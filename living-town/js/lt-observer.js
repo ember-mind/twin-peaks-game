@@ -82,9 +82,10 @@
       sim: sim, view: view, speedIndex: 1, accumulator: 0,
       lastFrame: 0, pumping: false, inspector: false, selected: sim.actorIds()[0],
       persistence: persistence, worlds: 1,
-      followAction: false, recapDay: null, snapshots: [], replay: null
+      followAction: false, recapDay: null, snapshots: [], replay: null, recorders: {}
     };
     O.state = state;
+    O.recordRemote(state);
     root.LT_OBSERVER = state;
 
     buildCharacterTabs(state);
@@ -216,9 +217,28 @@
     var sim = state.sim, who = null;
     sim.actorIds().forEach(function (id) {
       var p = LT.Policy.get(sim.state.characters[id].policyId);
-      if (p && p.remote && !who) who = (p.label || p.id);
+      if (p && p.remote && !state.recorders[p.id] && !who) who = (p.label || p.id);
     });
     return who;
+  };
+
+  /* A provider outside this process is recorded from the moment the page
+   * follows a world: every answer it gives is kept, by the question's number.
+   * Looking back then plays those answers instead of asking again, and says so
+   * if the replay stops matching what was recorded. */
+  O.recordRemote = function (state) {
+    state.recorders = state.recorders || {};
+    state.sim.actorIds().forEach(function (id) {
+      var pid = state.sim.state.characters[id].policyId, inner = LT.Policy.get(pid);
+      if (!inner || !inner.remote || state.recorders[pid]) return;
+      if (inner.recordingOf) inner = inner.recordingOf;      // another world's recorder: this world gets its own, around the same provider
+      var rec = LT.RecordedPolicy.buildRecorder(inner, { id: pid });
+      rec.recordingOf = inner; rec.remote = true; rec.label = inner.label || pid;
+      Object.defineProperty(rec, 'patienceMs', { get: function () { return inner.patienceMs; } });
+      if (inner.stats) rec.stats = inner.stats;
+      LT.Policy.register(rec);
+      state.recorders[pid] = rec;
+    });
   };
   O.canReplay = function (state, abs) {
     if (O.replayBlockedBy(state)) return false;
@@ -230,11 +250,20 @@
     var from = null;
     state.snapshots.forEach(function (s) { if (s.abs <= beat.absMinute - REPLAY_LEAD) from = s; });
     if (!from) return Promise.resolve(false);
+    /* While looking back, recorded providers are played, not asked. The live
+     * world is not ticking, so it misses nothing; a question it already has out
+     * is answered through the recorder it was asked through. */
+    var players = {};
+    Object.keys(state.recorders || {}).forEach(function (pid) {
+      players[pid] = LT.RecordedPolicy.buildPlayer(state.recorders[pid].toJSON(), { id: pid, keepSource: true });
+      LT.Policy.register(players[pid]);
+    });
     var sim;
-    try { sim = LT.Save.deserialize(JSON.parse(JSON.stringify(from.save))); } catch (e) { return Promise.resolve(false); }
+    try { sim = LT.Save.deserialize(JSON.parse(JSON.stringify(from.save))); }
+    catch (e) { restoreRecorders(state); return Promise.resolve(false); }
     var startAt = beat.absMinute - REPLAY_LEAD;
     return sim.runMinutes(Math.max(0, startAt - sim.absMinute())).then(function () {
-      state.replay = { sim: sim, untilAbs: beat.absMinute + REPLAY_TAIL, beat: beat, resumeSpeed: state.speedIndex, liveView: state.view, liveSelected: state.selected };
+      state.replay = { sim: sim, untilAbs: beat.absMinute + REPLAY_TAIL, beat: beat, players: players, resumeSpeed: state.speedIndex, liveView: state.view, liveSelected: state.selected };
       state.view = LT.View.create(el('lt-canvas'), sim);
       if (beat.actorId && sim.state.characters[beat.actorId]) state.selected = beat.actorId;
       state.followAction = false;
@@ -246,10 +275,15 @@
     });
   };
 
+  function restoreRecorders(state) {
+    Object.keys(state.recorders || {}).forEach(function (pid) { LT.Policy.register(state.recorders[pid]); });
+  }
+
   O.backToNow = function (state) {
     if (!state.replay) return;
     var r = state.replay;
     state.replay = null;
+    restoreRecorders(state);
     state.view = r.liveView;
     state.selected = r.liveSelected;
     state.speedIndex = r.resumeSpeed;
@@ -261,7 +295,11 @@
   function showReplayBar(state) {
     var bar = el('lt-replay');
     bar.hidden = !state.replay;
-    if (state.replay) text(el('lt-replay-text'), 'Looking back at ' + state.replay.beat.stamp + ' — ' + state.replay.beat.text + ' The town itself is waiting at ' + state.sim.stamp() + '.');
+    if (state.replay) {
+      var off = Object.keys(state.replay.players || {}).some(function (pid) { var p = state.replay.players[pid]; return p.mismatches.length || p.exhausted; });
+      text(el('lt-replay-text'), 'Looking back at ' + state.replay.beat.stamp + ' — ' + state.replay.beat.text + ' The town itself is waiting at ' + state.sim.stamp() + '.' +
+        (off ? ' This replay has stopped matching what was recorded, and from here it is not what happened.' : ''));
+    }
     ['lt-save', 'lt-new-world', 'lt-resume', 'lt-hand-do'].forEach(function (id) { el(id).disabled = !!state.replay; });
     if (!state.replay) refreshButtons(state);
   }
@@ -293,6 +331,8 @@
     state.retired = state.sim;
     state.sim = sim;
     state.snapshots = [];            // another world's past is not this one's
+    state.recorders = {};
+    O.recordRemote(state);
     state.view = LT.View.create(el('lt-canvas'), sim);
     state.accumulator = 0;
     state.worlds++;
@@ -523,6 +563,7 @@
   function paint(state) {
     var sim = shown(state), s = sim.state;
     paintTimeline(state);
+    if (state.replay) showReplayBar(state);
     var c = s.characters[state.selected];
     var U = LT.Util, W = LT.World;
 

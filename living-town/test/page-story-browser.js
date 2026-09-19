@@ -89,6 +89,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     const seen = JSON.parse(await js("JSON.stringify(LT_OBSERVER.view.draw())"));
     ok(seen.entities >= 2 && seen.inhabitants === 'atlas', 'The action lands where people are: ' + seen.entities + ' in ' + seen.location + ', drawn from the atlas');
     ok(await js("document.querySelectorAll('#lt-hand-fields option').length") >= 1, 'the hand is offered for this world\'s people');
+    ok(/friends|close|acquainted|barely know/.test(await txt('lt-bonds')) && /last seen (today|yesterday|not yet)/.test(await txt('lt-bonds')), 'Between them: ' + (await txt('lt-bonds')).replace(/\s+/g, ' ').slice(0, 100));
     await shot('05-the-street-at-half-past-five.png');
     console.log('# page: auto pace, the timeline, looking back');
     await page.navigate('living-town/index.html?world=new'); await sleep(1200);
@@ -122,7 +123,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
       window.__asked = 0;
       LT.RemotePolicy.create({ id: 'remote_page_test', label: 'a slow test provider', timeoutMs: 4000, patienceMs: 3000, maxInFlight: 1,
         transport: function (brief) { window.__asked++; return new Promise(function (r) { setTimeout(function () {
-          var m = /id "(wash_and_dress|eat_at_home[^"]*|sleep[^"]*|wait)"/.exec(brief.user); r(JSON.stringify({ choose: m ? m[1] : 'wait', reason: 'Asked by the page test.' })); }, 700); }); } });
+          var m = /id "(wash_and_dress|eat_at_home[^"]*|wait)"/.exec(brief.user); r(JSON.stringify({ choose: m ? m[1] : 'wait', reason: 'Asked by the page test.' })); }, 700); }); } });
       var sim = LT.Scenario.town({ policies: { resident_a: 'remote_page_test' } });
       LT.Observer.adopt(LT_OBSERVER, sim);
       document.querySelector('[data-actor=resident_a]').click();
@@ -138,7 +139,23 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     ok(srcs.length >= 2 && srcs.every((x) => x === 'remote_page_test'), 'its answers arrive in time and are acted on — none timed out into a fallback: ' + JSON.stringify(srcs));
     ok(ran > 15 && ran < 200, 'three seconds at 20x would be 250 town minutes; held only while a question was out, it was ' + ran);
     ok(/a slow test provider gave this reason: "Asked by the page test\."|remote_page_test gave this reason/.test(await txt('lt-decision-why')), 'the provider\'s own reason is quoted with its name on it: ' + await txt('lt-decision-why'));
-    ok(await js("!!LT.Observer.replayBlockedBy(LT_OBSERVER)") && await js("Array.prototype.every.call(document.querySelectorAll('#lt-timeline .lt-beat'), function(b){ return b.disabled; })"), 'and looking back is not offered in a world where asking again would not be what happened');
+    console.log('# page: looking back in a world with a provider plays its recorded answers');
+    ok(await js("LT.Observer.replayBlockedBy(LT_OBSERVER) === null && Object.keys(LT_OBSERVER.recorders).join() === 'remote_page_test'"), 'the page has been recording the provider since it took up this world');
+    await js("document.querySelectorAll('#lt-speeds button')[3].click(); true");
+    for (let i = 0; i < 120 && await js("LT_OBSERVER.sim.absMinute()") < 560; i++) await sleep(400);
+    await js("document.querySelectorAll('#lt-speeds button')[0].click(); true"); await sleep(1000);
+    const askedLive = await js("window.__asked");
+    const target = JSON.parse(await js("(function(){ var s = LT_OBSERVER.sim, e = s.state.events.filter(function(x){ return x.type === 'ACTIVITY_STARTED' && x.actorId === 'resident_a' && x.absMinute > 440; })[0]; return JSON.stringify({ seq: e.seq, absMinute: e.absMinute, minute: e.minute, stamp: e.stamp, type: e.type, text: e.text, actorId: 'resident_a' }); })()"));
+    await js("(function(){ window.__replayed = null; LT.Observer.replay(LT_OBSERVER, " + JSON.stringify(target) + ").then(function (v) { window.__replayed = v; }); return true; })()");
+    for (let i = 0; i < 40 && (await js("window.__replayed")) === null; i++) await sleep(250);
+    ok(await js("window.__replayed") === true, 'a moment of the provider\'s person can be looked back at');
+    await js("(async function(){ await LT_OBSERVER.replay.sim.runMinutes(16); return true; })()", true);
+    const same = await js("(function(){ var r = LT_OBSERVER.replay.sim, l = LT_OBSERVER.sim; var pick = function (s) { return JSON.stringify(s.state.events.filter(function(x){ return x.type === 'ACTIVITY_STARTED' && x.actorId === 'resident_a' && x.absMinute <= " + (target.absMinute + 2) + "; }).map(function(x){ return [x.absMinute, x.text, x.data.source]; })); }; return pick(r) === pick(l); })()");
+    ok(same, 'it shows the same choices at the same minutes, under the provider\'s name');
+    ok(await js("window.__asked") === askedLive, 'and the provider was not asked again (' + askedLive + ' questions, before and after)');
+    ok(!/stopped matching/.test(await txt('lt-replay-text')), 'the replay matches what was recorded');
+    await js("document.getElementById('lt-replay-back').click(); true"); await sleep(300);
+    ok(await js("LT.Policy.get('remote_page_test') === LT_OBSERVER.recorders.remote_page_test"), 'back to now, the live provider is the one being asked again');
     console.log('\npage-story-browser: ' + checks + '/' + checks);
   } finally { await page.close(); }
 })().catch((e) => { console.error(e); process.exit(1); });

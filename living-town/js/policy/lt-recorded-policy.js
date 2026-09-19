@@ -32,6 +32,7 @@
             candidateIds: request.candidates.map(function (c) { return c.id; }),
             status: response.status,
             selectedId: response.selectedId || null,
+            words: response.words || null,             // a provider's own words are part of what it answered
             innerSource: response.source || inner.id
           });
           return response;
@@ -81,9 +82,10 @@
           }
         }
         if (e.status !== 'selected') return Promise.resolve(Pol.unavailable(request, 'recorded', 'recorded_' + e.status));
-        return Promise.resolve(Pol.selected(request, e.selectedId, 'recorded', {
+        /* Replayed under the name of whoever answered first: the words were theirs. */
+        return Promise.resolve(Pol.selected(request, e.selectedId, options.keepSource ? e.innerSource : 'recorded', {
           replayedFrom: e.ordinal, originalSource: e.innerSource
-        }));
+        }, e.words || null));
       }
     };
     return api;
