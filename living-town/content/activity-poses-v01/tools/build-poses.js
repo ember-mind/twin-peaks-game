@@ -49,7 +49,11 @@ function cellRows(sheetId, poseId, dir, frame) {
   const body = a.body[spec.body];
   if (!body) throw new Error('no ' + spec.body + ' body for ' + poseId + '/' + dir);
   const gap = '.'.repeat(a.pad || 0);
-  const head = (a.head ? HEADS[spec.head][a.head] : []).map((row) => gap + row + gap);
+  let head = a.head ? HEADS[spec.head][a.head] : [];
+  /* A head tipped forward shows less of itself: keep the crown, drop the rows
+   * that have rotated out of sight. */
+  if (a.headRows) head = head.slice(0, a.headRows);
+  head = head.map((row) => gap + row + gap);
   const stacked = head.concat(body);
   const width = stacked.length ? stacked[0].length : 0;
   const rows = [];

@@ -291,8 +291,64 @@
 
   function cafeRows(host) {
     host.textContent = '';
+    strip(host, 'each pose at the furniture it is done at, kit pieces only', stagePaint, VW, VH, 3);
     strip(host, 'Café Meridiana, empty', cafePaint({ empty: true }), VW, VH, 3);
     strip(host, 'the same room, six people, six poses, no labels', cafePaint({}), VW, VH, 3);
+  }
+
+  /* ---- the anchor stage -------------------------------------------------- */
+  /* A pose is half a picture: the other half is the thing it is done AT. This
+   * stage is a registered interior composition like any other room — nothing
+   * but pieces of the production kit — put at heights that let each pose meet
+   * its furniture: a counter low enough to stand behind, a bench a lap lands
+   * on, a bench long enough to lie on, a work table a bent back reaches. It is
+   * a statement of what a ROOM has to provide, not a room anyone lives in.
+   *
+   * It is registered rather than painted by hand because several of the kit's
+   * pieces read module state that only a registered pass sets — the booth's
+   * table plaque among them, which otherwise falls back to the production
+   * diner's own initials. */
+  var STAGE_ID = 'lt_pose_stage';
+  var stageRows = [];
+  for (var sr = 0; sr < 12; sr++) stageRows.push('................');
+  var stageMap = { id: STAGE_ID, indoor: true, rows: stageRows, width: 16, height: 12 };
+
+  function stageBehind(g, map, x, y, p, kit) {
+    kit.plankFloor(g, x, y, 0, 0, VW, VH, p);
+    kit.rect(g, x, y, VW, 30, 'rgba(37,40,43,.16)');
+    kit.rect(g, x, y + 90, VW, 12, 'rgba(37,40,43,.09)');
+    kit.booth(g, x + 138, y + 66, 100, p, 1, null);
+    kit.booth(g, x + 8, y + 120, 64, p, 0, null);
+  }
+  function stageFront(g, map, x, y, p, kit) {
+    kit.counterSlab(g, x + 8, y + 58, 110, p, true);
+    kit.cup(g, x + 84, y + 55, p);
+    kit.counterSlab(g, x + 194, y + 166, 54, p, true);
+  }
+  GAME.Retro2D.registerInteriorScene(STAGE_ID, {
+    material: 'lt_cafe', draw: stageBehind, foreground: stageFront,
+    actorLights: [], monogram: 'LT', backdrop: '#161d1f'
+  });
+
+  function stageOpts(extra) {
+    var o = { mapId: STAGE_ID, indoor: true, viewportWidth: VW, viewportHeight: VH, t: 0 };
+    if (extra) for (var k in extra) o[k] = extra[k];
+    return o;
+  }
+
+  function stagePaint(g) {
+    GAME.sprites.drawStructures(g, stageMap, 0, 0, stageOpts());
+    /* Behind the counter and bent over the work table: painted before the
+     * pieces that must cover them. On a bench: painted after it. */
+    pose(g, 'look_rust_bun_work', 'work_counter', 'down', 44, 48, 0);
+    pose(g, 'look_teal_bob', 'seated', 'down', 158, 58, 0);
+    pose(g, 'look_plum_long', 'reading', 'down', 202, 58, 0);
+    pose(g, 'look_slate_short', 'sleeping', 'right', 40, 110, 0);
+    pose(g, 'look_moss_neat', 'talking', 'right', 114, 150, 0);
+    pose(g, 'look_ochre_short', 'talking', 'left', 148, 150, 1);
+    pose(g, 'look_slate_short_work', 'unpacking', 'down', 220, 150, 0);
+    GAME.sprites.drawForegroundStructures(g, stageMap, 0, 0,
+      stageOpts({ forestDepthMin: -Infinity, forestDepthMax: Infinity }));
   }
 
   var HOURS = [[420, '07:00'], [780, '13:00'], [1110, '18:30'], [1380, '23:00']];
@@ -377,6 +433,11 @@
     looksStrip: function (poseId, work, zoom) {
       var w = LOOKS.length * CELLW + 10, c = canvas(w, 40, 1);
       looksPaint(poseId, work)(ctx2d(c));
+      return upscale(c, zoom).toDataURL('image/png');
+    },
+    stage: function (zoom) {
+      var c = canvas(VW, VH, 1);
+      stagePaint(ctx2d(c));
       return upscale(c, zoom).toDataURL('image/png');
     },
     cafe: function (opts, zoom) {

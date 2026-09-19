@@ -142,6 +142,15 @@ the first across midnight. The worst one-minute step anywhere in the day is
 | `test/activity-poses.js` | the Node checks: table, purity, light continuity |
 | `images/` | frames captured off the renderer |
 
+`images/03-stage-anchors.png` is the anchor stage: a registered interior
+composition made of nothing but production kit pieces, put at the heights each
+pose needs. It is the package's statement of **what a room has to provide** —
+a counter low enough to stand behind, a bench a lap lands on, a bench long
+enough to lie on, a work table a bent back reaches. `images/03-cafe-posed.png`
+is the same poses in Café Meridiana as that room actually is, which is a
+harder and less flattering picture; the difference between the two is the
+integration work, not the art.
+
 The sheet is square because the production PNG writer writes squares; the
 bottom two cell rows are empty on purpose.
 
@@ -252,17 +261,22 @@ dialogue layer, or the text goes dark with the room.
   sprite with `kit.actorLight` when it stands in a pendant's pool; a posed one
   is not tinted. A person will get very slightly flatter the moment they stop
   walking under a lamp.
-- **Furniture alignment is placement, not art.** A pose keeps the standing
-  ground line, which is correct for the depth pass and only approximately
-  correct against a particular chair. In the captured café the two people at
-  the counter sit a few pixels below the stool seats: the room would have to
-  offer seat anchors, or the view would have to nudge a seated actor, and
-  neither exists.
+- **Café Meridiana cannot currently seat anybody.** This is the largest
+  honest gap and it is a room problem, not a pose problem. A pose keeps the
+  standing ground line, so a seated figure's lap lands seven or eight pixels
+  under its own feet — which is where a seat has to be. The café's stools sit
+  above that line, and its banquettes have a depth of their own tile row, so
+  an actor low enough to be drawn in front of a banquette is already past its
+  seat, and an actor on the seat is repainted over by it. Until the room
+  offers seat anchors (a piece saying "a lap goes here, at this y, with this
+  depth"), a seated inhabitant in that café reads as sitting near the stool
+  rather than on it. The anchor stage shows what the same poses look like
+  against furniture placed for them.
 - **`work_counter` is a full-height figure.** Café Meridiana's counter slab
-  and its service clusters are tall enough to hide a person standing behind
-  them entirely, so in the captured frame the worker stands in front of the
-  counter. A room that wants someone framed behind a counter has to leave a
-  gap in it.
+  plus its service clusters are taller than a person, so nobody can be framed
+  behind that counter at all; in the café capture the worker stands in front
+  of it. On the anchor stage the same pose stands behind a bare slab and the
+  gesture lands on the counter top, which is what the pose is for.
 - **`sleeping` loses the hairstyle.** Lying down, the head is authored once for
   every look; hair and blanket colour identify the sleeper, the silhouette of
   the haircut does not survive. There is also no bed: the pose is a body under
@@ -275,6 +289,11 @@ dialogue layer, or the text goes dark with the room.
   season, no per-room sky and no outdoor variant: `at()` knows the minute and
   nothing else. `apply` tints a rectangle uniformly; it does not know where the
   window is, so a room's far corner darkens exactly as much as its sill.
+- **The lamps never go out.** `lampStrength` says whether they should be on,
+  but a room's warm pools are painted by the room (`kit.warmLight` inside
+  `lt-cafe-scene.js`), unconditionally, at every hour. Nothing here can turn
+  them off, so a midday frame still carries its pendants' glow. A room that
+  wants lamps that switch has to read `light.lamps` itself.
 - **The four captured hours are a fixed set.** 07:00, 13:00, 18:30 and 23:00
   are what the gallery shows and what the capture tool checks; the curve itself
   is continuous over all 1440 minutes and the day ramp image is the evidence.

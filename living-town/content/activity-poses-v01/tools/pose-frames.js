@@ -26,6 +26,8 @@
  *                 giving an arm room to leave the silhouette.
  *   blankTop    — n blank rows above the head, with a shorter body under it:
  *                 the head drops, the feet do not. "Leaning over the counter".
+ *   headRows    — keep only the first n rows of the head matrix. A head tipped
+ *                 forward shows its crown and little else.
  */
 
 /* Paper: the open book and the wiped slab. Cool white over a grey shade, so
@@ -109,25 +111,25 @@ function readingBody(body, frame) {
 }
 
 /* ---- work_counter ------------------------------------------------------ */
-/* Behind a counter slab only the head and chest show, so the whole gesture
- * lives there: the head drops two rows (attending to the work) and a pale
- * slab travels under the hands — centre, left, right. Three frames, a true
- * loop, whole pixels only. */
+/* Full standing height — a worker is not a shorter person — with a small rag
+ * held at chest level in one hand and swept across the body, left, centre,
+ * right. Deliberately narrow: a wide pale rectangle at that height is the
+ * open book, and the two poses must not be confused. */
 function workCounterBody(body, frame) {
   const rows = body === 'skirt' ? [
     '...OsWTWTWsO...', '..OJJWWWWWJJO..', '.OJjJWwWwWJjJO.', '.OJjJWWWWWJjJO.',
-    '.OSJJwWwWwJJSO.', '.OsOPPPpPPPOsO.', '..OPPPPPPPPPO..', '...OOSSOSSOO...',
-    '....OBBOBBO....', '....ObBObBO....'
+    '.OSJJwWwWwJJSO.', '.OsOPPPpPPPOsO.', '..OPPpPPPpPPO..', '..OPPPPPPPPPO..',
+    '..OPPPPPPPPPO..', '...OOSSOSSOO...', '....OBBOBBO....', '....ObBObBO....'
   ] : [
     '...OsWWTWWsO...', '..OJJWWTWWJJO..', '.OJjJJWTWJJjJO.', '.OJjJJWTWJJjJO.',
-    '.OJjJJwTwJJjJO.', '.OsOJJwwwJJOsO.', '..OOPPpPpPPOO..', '...OPPPOPPPO...',
-    '...ObBOObBO....', '...OBBO.OBBO...'
+    '.OJjJJwTwJJjJO.', '.OSJJJwWwJJJSO.', '.OsOJJwwwJJOsO.', '..OOPPpPpPPOO..',
+    '...OPPpOpPPO...', '...OPPPOPPPO...', '...ObBOObBO....', '...OBBO.OBBO...'
   ];
-  const at = [4, 3, 5][frame];
+  const at = [3, 5, 7][frame];
   const out = rows.slice();
-  out[2] = splice(out[2], at, 'OOOOOOO');
-  out[3] = splice(out[3], at, 'ONNNnNO');
-  out[4] = splice(out[4], at, 'OSNnnSO');
+  out[2] = splice(out[2], at, 'OOOOO');
+  out[3] = splice(out[3], at, 'ONNnO');
+  out[4] = splice(out[4], at, 'OSNnO');
   return out;
 }
 
@@ -139,16 +141,20 @@ function workCounterBody(body, frame) {
  * one row between the two frames. */
 const UNPACKING = {
   jacket: [
-    ['...OJjJJJJJJJjJO...', 'OSSOJjJJJJJJJjJOSSO', 'OSSOJJJJJJJJJJJOSSO',
-     'OssO.OPPpPpPPO.OssO', '.....OPPPOPPPO.....', '.....ObBOObBO......'],
-    ['...OJjJJJJJJJjJO...', '...OJjJJJJJJJjJO...', 'OSSOJJJJJJJJJJJOSSO',
-     'OSSO.OPPpPpPPO.OSSO', 'OssO.OPPPOPPPO.OssO', '.....ObBOObBO......']
+    ['.OJjJJJJJJJJJJJjJO.', 'OSSOJjJJJJJJJjJOSSO', 'OSSOJJJJJJJJJJJOSSO',
+     'OssO.OPPpPpPPO.OssO', '.....OPPpPpPPO.....', '.....OPPPOPPPO.....',
+     '.....ObBOObBO......', '.....OBBO.OBBO.....'],
+    ['.OJjJJJJJJJJJJJjJO.', '...OJjJJJJJJJjJO...', 'OSSOJJJJJJJJJJJOSSO',
+     'OSSO.OPPpPpPPO.OSSO', 'OssO.OPPpPpPPO.OssO', '.....OPPPOPPPO.....',
+     '.....ObBOObBO......', '.....OBBO.OBBO.....']
   ],
   skirt: [
-    ['...OJjJJJJJJJjJO...', 'OSSOJjJJJJJJJjJOSSO', 'OSSOJJJJJJJJJJJOSSO',
-     'OssO.OPPPpPPPO.OssO', '.....OOSSOSSOO.....', '......OBBOBBO......'],
-    ['...OJjJJJJJJJjJO...', '...OJjJJJJJJJjJO...', 'OSSOJJJJJJJJJJJOSSO',
-     'OSSO.OPPPpPPPO.OSSO', 'OssO.OOSSOSSOO.OssO', '......OBBOBBO......']
+    ['.OJjJJJJJJJJJJJjJO.', 'OSSOJjJJJJJJJjJOSSO', 'OSSOJJJJJJJJJJJOSSO',
+     'OssO.OPPPpPPPO.OssO', '.....OPPPpPPPO.....', '.....OPPPPPPPO.....',
+     '.....OOSSOSSOO.....', '......OBBOBBO......'],
+    ['.OJjJJJJJJJJJJJjJO.', '...OJjJJJJJJJjJO...', 'OSSOJJJJJJJJJJJOSSO',
+     'OSSO.OPPPpPPPO.OSSO', 'OssO.OPPPpPPPO.OssO', '.....OPPPPPPPO.....',
+     '.....OOSSOSSOO.....', '......OBBOBBO......']
   ]
 };
 
@@ -240,7 +246,6 @@ function lap(rows, from, to) {
 const APRON = {
   'seated/down': lap([16, 17], 4, 10),
   'seated/right': lap([17, 18], 4, 8),
-  'work_counter/down': lap([19, 20], 4, 10),
   'reading/down': [],
   'unpacking/down': [],
   'sleeping/right': []
@@ -259,10 +264,10 @@ function art(poseId, dir, frame) {
       return { head: 'down', overlayDir: 'down', pad: 0, blankTop: 0,
         body: { jacket: readingBody('jacket', frame), skirt: readingBody('skirt', frame) } };
     case 'work_counter/down':
-      return { head: 'down', overlayDir: 'down', pad: 0, blankTop: 2,
+      return { head: 'down', overlayDir: 'down', pad: 0, blankTop: 0,
         body: { jacket: workCounterBody('jacket', frame), skirt: workCounterBody('skirt', frame) } };
     case 'unpacking/down':
-      return { head: 'up', overlayDir: 'up', pad: 2, blankTop: 0,
+      return { head: 'up', overlayDir: 'up', pad: 2, blankTop: 0, headRows: 8,
         body: { jacket: UNPACKING.jacket[frame], skirt: UNPACKING.skirt[frame] } };
     case 'sleeping/right':
       return { head: null, overlayDir: 'right', pad: 0, blankTop: 0,

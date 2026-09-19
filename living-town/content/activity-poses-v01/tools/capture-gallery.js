@@ -65,6 +65,8 @@ const dash = (s) => s.replace(/_/g, '-');
         fromDataUrl(await page.evaluate("GALLERY.looksStrip('" + id + "',true,4)")));
     }
 
+    put('images/03-stage-anchors.png', fromDataUrl(await page.evaluate('GALLERY.stage(1)')));
+    put('images/03-stage-anchors-x3.png', fromDataUrl(await page.evaluate('GALLERY.stage(3)')));
     put('images/03-cafe-empty.png', fromDataUrl(await page.evaluate('GALLERY.cafe({empty:true},1)')));
     put('images/03-cafe-posed.png', fromDataUrl(await page.evaluate('GALLERY.cafe({},1)')));
     put('images/03-cafe-posed-x3.png', fromDataUrl(await page.evaluate('GALLERY.cafe({},3)')));
