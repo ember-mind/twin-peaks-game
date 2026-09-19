@@ -21,7 +21,10 @@
       registry[id]=defs.map(function(d){
         if(!TYPES[d.type]||!d.id||ids[d.id])throw new Error('Invalid ambient definition: '+d.id);
         if(!Number.isInteger(d.x)||!Number.isInteger(d.y)||!Number.isFinite(d.depth))throw new Error('Ambient anchors must use integer world pixels');
-        ['delay','duration'].forEach(function(k){if(d[k]&&(!(d[k][0]>0)||d[k][1]<d[k][0]))throw new Error('Invalid ambient '+k);});
+        ['delay','duration','firstDelay'].forEach(function(k){
+          var pair=d[k];
+          if(pair&&(!Array.isArray(pair)||pair.length!==2||!Number.isFinite(pair[0])||!Number.isFinite(pair[1])||!(pair[0]>0)||pair[1]<pair[0]))throw new Error('Invalid ambient '+k);
+        });
         ids[d.id]=true;return Object.assign({},d);
       });
       delete scenes[id];
@@ -34,7 +37,7 @@
         var duration=range(rng,d.duration||t.duration),phase=d.phase===undefined?Math.floor(rng()*duration):d.phase;
         phase=((phase%duration)+duration)%duration;
         var continuous=t.kind==='continuous';
-        return {def:d,rng:rng,duration:duration,phase:phase,next:continuous?duration-phase:t.kind==='mechanical'?Infinity:range(rng,d.delay||t.delay),start:continuous?-phase:-1,end:continuous?duration-phase:-1,variant:Math.floor(rng()*(d.variants||3)),events:0,cycles:0};
+        return {def:d,rng:rng,duration:duration,phase:phase,next:continuous?duration-phase:t.kind==='mechanical'?Infinity:range(rng,d.firstDelay||d.delay||t.delay),start:continuous?-phase:-1,end:continuous?duration-phase:-1,variant:Math.floor(rng()*(d.variants||3)),events:0,cycles:0};
       })};scenes[id]=scene;return scene;
     }
     function advance(scene,dt){

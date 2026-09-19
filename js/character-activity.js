@@ -6,8 +6,12 @@
     var clock=GAME.AmbientLife.create(seed),context=null,enabled=true,paused=false,manual={},cancelled={};
     var actorMaps={},actorRuntime={},actorManual={},lastMap=null,actorTimeScale=1,runtimeTime=0;
     var dinerDefs=[
-      {id:'booth-sip',type:'ACTOR_ACTIVITY',x:183,y:80,depth:112,delay:[12000,26000],duration:[3000,3400]},
-      {id:'counter-wipe',type:'ACTOR_ACTIVITY',x:80,y:32,depth:64,delay:[18000,34000],duration:[2800,3200]}
+      // One early service action establishes a working room. The later sip is
+      // a separate social beat; independent clocks keep both from pulsing.
+      {id:'counter-wipe',type:'ACTOR_ACTIVITY',x:80,y:32,depth:64,
+        firstDelay:[5000,7000],delay:[22000,30000],duration:[3200,3600]},
+      {id:'booth-sip',type:'ACTOR_ACTIVITY',x:183,y:80,depth:112,
+        firstDelay:[16000,20000],delay:[26000,34000],duration:[3000,3400]}
     ];
     clock.register('diner',dinerDefs);
     function actorKey(mapId,actorId,behaviorId){return 'character:'+mapId+':'+actorId+':'+behaviorId;}
@@ -273,19 +277,20 @@
     return true;
   };
   api.sipLiftsCup=function(f){return f>=0&&f<7;};
-  var wrists=[89,91,93,91,89,91,93,91,89];
+  var wrists=[91,91,97,104,108,107,102,95,91];
   api.wipeFrame=function(){return api.pose('counter-wipe');};
   api.drawWipe=function(g,cx,cy){
     var f=api.wipeFrame();if(f<0)return;
     var wrist=wrists[f];
     function P(x,y,w,h,c){g.fillStyle=c;g.fillRect(x-Math.round(cx),y-Math.round(cy),w,h);}
-    // Compact bent arm: wrist stays near the torso and the cloth touches the rear counter edge.
+    // Reach, one long sweep, return. Cloth remains on the cream counter plane.
     P(90,38,3,3,'#9a5a5e');P(90,38,2,1,'#b57a7c');
-    P(90,41,3,2,'#c8a080');P(90,41,2,1,'#e8caa8');
-    var elbow=91,sign=wrist>=elbow?1:-1;
-    for(var y=43;y<46;y++){var x=elbow+sign*Math.min(Math.abs(wrist-elbow),y-42);P(x,y,3,1,'#c8a080');P(x,y,2,1,'#e8caa8');}
-    P(wrist-1,48,5,1,'#cfbc92');P(wrist-1,46,5,2,'#d9dfc9');P(wrist,46,3,1,'#f4e6c8');
-    P(wrist,45,3,2,'#e8caa8');
+    P(91,41,3,2,'#c8a080');P(91,41,2,1,'#e8caa8');
+    P(92,43,Math.max(2,wrist-91),2,'#c8a080');
+    P(92,43,Math.max(2,wrist-92),1,'#e8caa8');
+    P(wrist,44,3,2,'#c8a080');P(wrist,44,2,1,'#e8caa8');
+    P(wrist-1,46,8,2,'#81918b');P(wrist,46,6,1,'#d9dfc9');
+    P(wrist,48,6,1,'#cfbc92');
   };
   if(typeof module!=='undefined'&&module.exports)module.exports={create:create,cups:cups,arms:arms,wrists:wrists};
 })(typeof window!=='undefined'?window:globalThis);
