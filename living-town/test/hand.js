@@ -19,7 +19,7 @@ const people = (sim) => JSON.stringify(sim.actorIds().map((id) => sim.state.char
 
 (async function () {
   console.log('# the catalogue is a way into the existing register, not a second one');
-  ok(H.CATALOGUE.length === 5 && H.CATALOGUE.every((e) => e.label && e.blurb && typeof e.build === 'function'), 'three things, each with words for a person');
+  ok(H.offered().length === 5 && H.CATALOGUE.length === 6 && !H.offered().some((e) => e.id === 'lose_wallet') && H.CATALOGUE.every((e) => e.label && e.blurb && typeof e.build === 'function'), 'five things on offer, each with words for a person; one more waits for the package that defines it');
   const types = {};
   {
     const sim = quietWorld();

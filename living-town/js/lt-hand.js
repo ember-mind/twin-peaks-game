@@ -50,7 +50,7 @@
   function freeId(sim, prefix) {
     var taken = {}, n = 1;
     (sim.state.objects || []).forEach(function (o) { taken[o.id] = true; });
-    (sim.state.interventions || []).forEach(function (r) { if (r.params && r.params.instanceId) taken[r.params.instanceId] = true; });
+    (sim.state.interventions || []).forEach(function (r) { if (r.params && (r.params.instanceId || r.params.id)) taken[r.params.instanceId || r.params.id] = true; });
     while (taken[prefix + n]) n++;
     return prefix + n;
   }
@@ -115,6 +115,34 @@
     fields: function (sim) { return [{ key: 'who', label: 'For', options: people(sim) }]; },
     build: function (sim, a) { return sim.state.characters[a.who] ? { type: 'money_turn', params: { toId: a.who, amount: -15, what: 'a repair that could not wait' } } : { error: 'unknown_character' }; }
   });
+
+  /* Somewhere a wallet could slip out of a pocket, and where someone would
+   * stand to pick it up. Only offered when the package that knows what a lost
+   * wallet is has been loaded. */
+  H.WALLET_SPOTS = [
+    { id: 'park_path', label: 'on the path in the park', locationId: 'park', x: 8, y: 6, useSpot: { x: 8, y: 7, dir: 'up' } },
+    { id: 'cafe_floor', label: 'on the café floor', locationId: 'cafe', x: 8, y: 5, useSpot: { x: 8, y: 6, dir: 'up' } }
+  ];
+  H.CATALOGUE.push({
+    id: 'lose_wallet', label: 'Someone loses their wallet', needs: 'wallet_lost',
+    blurb: 'Ten euro of theirs, lying where anyone might find it. Whoever does can give it back, or not. Its owner is not told where it is.',
+    fields: function (sim) {
+      return [{ key: 'who', label: 'Whose', options: people(sim, function (c) { return c.money >= 10; }) },
+              { key: 'spot', label: 'Where', options: H.WALLET_SPOTS.map(function (s) { return { id: s.id, label: s.label }; }) }];
+    },
+    build: function (sim, a) {
+      var c = sim.state.characters[a.who], spot = H.WALLET_SPOTS.filter(function (s) { return s.id === a.spot; })[0];
+      if (!c) return { error: 'unknown_character' };
+      if (!spot) return { error: 'unknown_spot' };
+      return { type: 'wallet_lost', params: { id: freeId(sim, 'wallet_'), ownerId: c.id, cash: 10, locationId: spot.locationId, x: spot.x, y: spot.y, useSpot: spot.useSpot } };
+    }
+  });
+
+  /* What can be offered in this build: an entry that needs an intervention
+   * type no loaded package defines is left out rather than offered and refused. */
+  H.offered = function () {
+    return H.CATALOGUE.filter(function (e) { return !e.needs || !!LT.Interventions.get(e.needs); });
+  };
 
   H.entry = function (id) { return H.CATALOGUE.filter(function (e) { return e.id === id; })[0] || null; };
 

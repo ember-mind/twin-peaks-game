@@ -496,7 +496,7 @@
   }
 
   function wireHand(state) {
-    options(el('lt-hand-what'), LT.Hand.CATALOGUE);
+    options(el('lt-hand-what'), LT.Hand.offered());
     options(el('lt-hand-when'), LT.Hand.WHEN);
     buildHandFields(state);
     el('lt-hand-what').addEventListener('change', function () { buildHandFields(state); text(el('lt-hand-status'), ''); });
