@@ -295,6 +295,11 @@
         target: 120, progress: 62, unit: 'EUR', deadlineDay: 2,
         note: 'The deposit is due to the studio by the end of tomorrow.'
       }],
+      /* What comes after, in order; `more` is measured from the morning it is taken up. */
+      nextGoals: [
+        { id: 'goal_strings', kind: 'savings', label: 'Put aside for new strings and a strap', more: 75, unit: 'EUR', days: 2 },
+        { id: 'goal_cushion', kind: 'savings', label: 'Build a month\'s cushion', more: 150, unit: 'EUR', days: 4 }
+      ],
       commitments: [
         { id: 'cmt_shift', kind: 'work', strength: 'soft', withId: 'cafe', locationId: 'cafe',
           label: 'Finish the café shift at 17:00', dueDay: 1, dueMin: 1020, status: 'open' },
@@ -323,6 +328,9 @@
         target: 1, progress: 0, unit: 'meetings', deadlineDay: 1,
         note: 'He suggested the park himself.'
       }],
+      nextGoals: [
+        { id: 'goal_see_friend_again', kind: 'social', labelTemplate: 'See %s again', relatesTo: 'resident_a', more: 2, unit: 'meetings', days: 2, repeats: true }
+      ],
       commitments: [
         { id: 'cmt_be_at_park', kind: 'social', strength: 'soft', withId: 'resident_a', locationId: 'park',
           labelTemplate: 'Be at the park at 17:30 for %s', dueDay: 1, dueMin: 1050,
@@ -348,6 +356,7 @@
       employment: { employer: 'cafe', locationId: 'cafe', shiftStart: 720, shiftEnd: 1200, wagePerHour: 9 },   // 12:00 – 20:00
       goals: [{ id: 'goal_rent', kind: 'savings', label: 'Have the quarter\'s rent together',
                 target: 200, progress: 140, unit: 'EUR', deadlineDay: 3 }],
+      nextGoals: [ { id: 'goal_coat', kind: 'savings', label: 'Save for a winter coat', more: 85, unit: 'EUR', days: 2 } ],
       commitments: [
         { id: 'cmt_shift', kind: 'work', strength: 'soft', withId: 'cafe', locationId: 'cafe',
           label: 'Finish the café shift at 20:00', dueDay: 1, dueMin: 1200, status: 'open' }
@@ -364,6 +373,7 @@
       employment: null,
       goals: [{ id: 'goal_company', kind: 'social', label: 'Have a proper talk with somebody',
                 target: 2, progress: 0, unit: 'talks', deadlineDay: 2 }],
+      nextGoals: [ { id: 'goal_company_again', kind: 'social', label: 'Not let two days pass without a proper talk', more: 2, unit: 'talks', days: 2, repeats: true } ],
       commitments: [
         { id: 'cmt_park_morning', kind: 'social', strength: 'soft', withId: 'resident_e', locationId: 'park',
           labelTemplate: 'Be at the park at 11:00 for %s', dueDay: 1, dueMin: 660, graceMin: 45, status: 'open' }
@@ -380,6 +390,7 @@
       employment: null,
       goals: [{ id: 'goal_old_friend', kind: 'social', labelTemplate: 'Catch up with %s', relatesTo: 'resident_a',
                 target: 1, progress: 0, unit: 'talks', deadlineDay: 2 }],
+      nextGoals: [ { id: 'goal_keep_up', kind: 'social', labelTemplate: 'Keep up with %s', relatesTo: 'resident_d', more: 1, unit: 'talks', days: 2, repeats: true } ],
       commitments: [
         { id: 'cmt_park_morning', kind: 'social', strength: 'soft', withId: 'resident_d', locationId: 'park',
           labelTemplate: 'Meet %s at the park at 11:00', dueDay: 1, dueMin: 660, graceMin: 45, status: 'open' }

@@ -71,6 +71,24 @@ const strip = (s) => { const c = JSON.parse(JSON.stringify(s.state)); delete c.v
   ok(types('COMMITMENT_BROKEN').every((e) => { const c = T[e.actorId].commitments.find((k) => k.id === e.data.commitmentId); return !(c.kind === 'social' && convs.some((v) => v.participants.indexOf(e.actorId) >= 0 && v.participants.indexOf(c.withId) >= 0 && v.startAbs <= LT.Util.absolute(c.dueDay, c.dueMin) + (c.graceMin || 0) && v.startAbs >= LT.Util.absolute(c.dueDay, c.dueMin) - 90)); }),
      'no meeting is called broken when the two sat down together in time');
 
+  console.log('# the days after the first');
+  const week = LT.Scenario.town({});
+  await week.runUntil(7, 0);
+  const W7 = week.state.characters, ev7 = (t) => week.state.events.filter((e) => e.type === t);
+  const shifts = ev7('COMMITMENT_KEPT').filter((e) => e.data.commitmentId === 'cmt_shift');
+  ok([2, 3, 4, 5, 6].every((d) => shifts.some((e) => e.day === d && e.actorId === 'resident_a') && shifts.some((e) => e.day === d && e.actorId === 'resident_c')), 'every working day owes its shift, and it is kept or broken that day');
+  ok(W7.resident_a.commitments.filter((c) => c.id === 'cmt_shift').length === 7 && new Set(W7.resident_a.commitments.filter((c) => c.id === 'cmt_shift').map((c) => c.dueDay)).size === 7 && W7.resident_b.commitments.filter((c) => c.id === 'cmt_shift').length === 0, 'one a day, for people with a job and nobody else');
+  const set = ev7('GOAL_SET');
+  ok(set.length >= 6 && set.every((e) => e.minute === 0) && set.every((e) => !week.actorIds().some((id) => id !== e.actorId && W7[id].memories.some((m) => m.eventSeq === e.seq))), 'someone whose goal is over takes up the next on their own list the following morning, and it is theirs alone to know');
+  ok(week.actorIds().every((id) => W7[id].goals.filter((g) => !g.reached && !g.missed).length <= 1), 'one thing at a time');
+  const again = W7.resident_b.goals.filter((g) => /^goal_see_friend_again/.test(g.id));
+  ok(again.length >= 2 && again.every((g) => g.target === 2 && g.progress <= g.target + 3 && g.base >= 1), 'a goal taken up later counts from that morning, not from the beginning of time: ' + again.map((g) => g.progress + '/' + g.target).join(', '));
+  const outcomes = { reached: ev7('GOAL_REACHED').filter((e) => e.day >= 3).length, missed: ev7('GOAL_MISSED').length };
+  console.log('    ' + ev7('GOAL_MISSED').map((e) => e.stamp + ' ' + e.text).join('\n    '));
+  ok(outcomes.reached >= 4 && outcomes.missed >= 1, 'the later days have things at stake that can go either way: ' + JSON.stringify(outcomes));
+  const back = LT.Save.deserialize(JSON.parse(JSON.stringify(LT.Save.serialize(week))));
+  ok(JSON.stringify(back.state.characters.resident_a.nextGoals) === JSON.stringify(W7.resident_a.nextGoals) && JSON.stringify(back.state.characters.resident_b.goals) === JSON.stringify(W7.resident_b.goals), 'what is still to come, and what has been, survive a save');
+
   console.log('# a town saves and carries on like any world');
   const a = LT.Scenario.town({}); await a.runUntil(1, 745);
   const saved = JSON.parse(JSON.stringify(LT.Save.serialize(a)));

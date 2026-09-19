@@ -17,7 +17,8 @@ FILES.forEach((file) => {
   const r = spawnSync(process.execPath, [full], { encoding: 'utf8' });
   const out = (r.stdout || '') + (r.stderr || '');
   process.stdout.write(out);
-  const summary = /(\d+)\/\1/.exec(out); // "n/n" — the same convention every file ends on
+  const all = out.match(/(\d+)\/\1(?!\d)/g) || [];   // "n/n" — the convention every file ends on; the last one, since a test may print "2/2" about the town
+  const summary = all.length ? /(\d+)\//.exec(all[all.length - 1]) : null;
   const checks = summary ? Number(summary[1]) : 0;
   const passed = r.status === 0 && !r.error;
   if (passed) totalChecks += checks;

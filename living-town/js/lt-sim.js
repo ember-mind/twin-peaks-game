@@ -27,7 +27,7 @@
 
   var SALIENCE = {
     COMMITMENT_BROKEN: 1.0, GOAL_REACHED: 1.0, GOAL_MISSED: 1.0, OFFER_ACCEPTED: 0.85,
-    WENT_HUNGRY: 0.75, HELPED_OUT: 0.9, SAID: 0.55,
+    WENT_HUNGRY: 0.75, HELPED_OUT: 0.9, SAID: 0.55, GOAL_SET: 0.5,
     TALKED: 0.8, OFFER_RECEIVED: 0.7, OFFER_DECLINED: 0.7,
     COMMITMENT_KEPT: 0.6, WORKED_EXTRA: 0.6, PRACTISED: 0.5,
     WITHDREW: 0.4, GREETED: 0.3, WORKED: 0.25, SLEPT: 0.2,
@@ -337,7 +337,7 @@
         g.progress = (self.state.conversations || []).filter(function (v) {
           return v.status === 'completed' && v.participants.indexOf(actor.id) >= 0 &&
                  (!g.relatesTo || v.participants.indexOf(g.relatesTo) >= 0);
-        }).length;
+        }).length - (g.base || 0);   // a goal taken up later counts from the morning it was taken up
       }
       if (!g.reached && !g.missed && g.progress >= g.target) {   // a goal that was missed is over; getting there later is not reaching it
         g.reached = true;
@@ -390,10 +390,48 @@
     }
   };
 
+  /* Today's promise of that name if there is one still open, else the latest. */
   Sim.prototype.commitmentById = function (actor, id) {
-    var list = actor.commitments || [];
-    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
-    return null;
+    var list = actor.commitments || [], found = null;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id !== id) continue;
+      if (list[i].status === 'open') return list[i];
+      found = list[i];
+    }
+    return found;
+  };
+
+  /* A new day owes what every working day owes, and someone whose goal is
+   * over — reached or missed — takes up the next thing they had in mind. What
+   * that is comes from their own list (content); nothing is made up here. */
+  Sim.prototype.beginDay = function (actor) {
+    var self = this, day = this.state.day, e = actor.employment;
+    if (e && !(actor.commitments || []).some(function (c) { return c.id === 'cmt_shift' && c.dueDay === day; })) {
+      actor.commitments = actor.commitments || [];
+      actor.commitments.push({ id: 'cmt_shift', kind: 'work', strength: 'soft', withId: e.employer, locationId: e.locationId,
+        label: 'Finish the ' + this.locationName(e.locationId) + ' shift at ' + U.clock(e.shiftEnd), dueDay: day, dueMin: e.shiftEnd, status: 'open' });
+    }
+    var active = (actor.goals || []).some(function (g) { return !g.reached && !g.missed; });
+    var next = !active && (actor.nextGoals || []).length ? actor.nextGoals.shift() : null;
+    if (next) {
+      var g = { id: next.id + '_d' + day, kind: next.kind, unit: next.unit, note: next.note, relatesTo: next.relatesTo,
+                label: next.label, labelTemplate: next.labelTemplate, deadlineDay: day + (next.days || 2) - 1, progress: 0, setDay: day };
+      if (g.labelTemplate) g.label = resolveLabel(g, this.state);
+      actor.goals.push(g);
+      /* "More than now": measured from where they stand this morning. Talks
+       * are counted from zero again; savings are a sum, so the target is the
+       * sum they would then have. */
+      this.refreshGoals(actor);
+      if (g.kind === 'social') { g.base = g.progress; g.progress = 0; g.target = next.more; }
+      else g.target = Math.round((g.progress + next.more) * 100) / 100;
+      if (next.repeats) actor.nextGoals.push(next);
+      this.emit('GOAL_SET', {
+        actorId: actor.id, locationId: actor.location, private: true,
+        data: { goalId: g.id, target: g.target, deadlineDay: g.deadlineDay },
+        text: actor.name + ' has something new to work toward: ' + g.label + '.'
+      });
+    }
+    this.touch();
   };
 
   Sim.prototype.keepCommitment = function (actor, id) {
@@ -1423,6 +1461,7 @@
       this.state.minute -= U.MINUTES_PER_DAY;
       this.state.day += 1;
       this.actorIds().forEach(function (id) { self.state.characters[id].workedMinutes = 0; });
+      this.actorIds().forEach(function (id) { self.beginDay(self.state.characters[id]); });
     }
     /* Every minute, not only at midnight: a world loaded days after a goal's
      * last day closes it on its first tick instead of carrying it as open. */

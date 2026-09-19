@@ -1,5 +1,5 @@
 {
-  "commit": "2dd847a611aabbb66994e622c7fbf74bc823f9f6",
+  "commit": "fb1b9d520d6fb01f194fd89558af4afe73a1e34e",
   "seed": 20260918,
   "days": 3,
   "firstDay": 1,
@@ -87,17 +87,18 @@
     },
     "2": {
       "wakingMinutes": 960,
-      "deadMinutes": 102,
-      "liveMinutes": 858,
+      "deadMinutes": 100,
+      "liveMinutes": 860,
       "longestDeadStretch": {
         "minutes": 55,
         "start": "D2 21:35"
       },
-      "beats": 6,
+      "beats": 8,
       "beatsByType": {
         "FOOD_PARCEL_OPENED": 1,
         "TALKED": 4,
-        "GOAL_REACHED": 1
+        "GOAL_REACHED": 2,
+        "COMMITMENT_BROKEN": 1
       },
       "decisions": 99,
       "closeCalls": 11,
@@ -140,18 +141,20 @@
     },
     "3": {
       "wakingMinutes": 960,
-      "deadMinutes": 101,
-      "liveMinutes": 859,
+      "deadMinutes": 68,
+      "liveMinutes": 892,
       "longestDeadStretch": {
-        "minutes": 52,
-        "start": "D3 21:38"
+        "minutes": 51,
+        "start": "D3 21:39"
       },
       "beats": 4,
       "beatsByType": {
-        "TALKED": 4
+        "TALKED": 2,
+        "COMMITMENT_KEPT": 1,
+        "GOAL_REACHED": 1
       },
       "decisions": 99,
-      "closeCalls": 12,
+      "closeCalls": 14,
       "distinctActivities": {
         "resident_a": [
           "buy_meal",
@@ -185,29 +188,30 @@
           "flat_b"
         ]
       },
-      "togetherMinutes": 568
+      "togetherMinutes": 571
     }
   },
   "overall": {
     "wakingMinutes": 2880,
-    "deadMinutes": 295,
-    "liveMinutes": 2585,
+    "deadMinutes": 260,
+    "liveMinutes": 2620,
     "longestDeadStretch": {
       "minutes": 58,
       "start": "D1 21:32"
     },
-    "beats": 22,
+    "beats": 24,
     "beatsByType": {
       "INTERVENTION_APPLIED": 3,
       "BOOK_READ": 1,
-      "COMMITMENT_KEPT": 5,
+      "COMMITMENT_KEPT": 6,
       "OFFER_ACCEPTED": 1,
-      "TALKED": 9,
-      "GOAL_REACHED": 2,
-      "FOOD_PARCEL_OPENED": 1
+      "TALKED": 7,
+      "GOAL_REACHED": 4,
+      "FOOD_PARCEL_OPENED": 1,
+      "COMMITMENT_BROKEN": 1
     },
     "decisions": 282,
-    "closeCalls": 37,
+    "closeCalls": 39,
     "distinctActivities": {
       "resident_a": [
         "accept_offer",
@@ -250,7 +254,7 @@
         "park"
       ]
     },
-    "togetherMinutes": 1167
+    "togetherMinutes": 1170
   },
   "deadStretches": [
     {
@@ -278,28 +282,14 @@
       }
     },
     {
-      "start": "D3 21:38",
-      "minutes": 52,
+      "start": "D3 21:39",
+      "minutes": 51,
       "doing": {
         "resident_a": [
           "sleep @flat_a"
         ],
         "resident_b": [
           "sleep @flat_b"
-        ]
-      }
-    },
-    {
-      "start": "D3 17:27",
-      "minutes": 35,
-      "doing": {
-        "resident_a": [
-          "idle @cafe",
-          "wait @cafe"
-        ],
-        "resident_b": [
-          "wait @cafe",
-          "idle @cafe"
         ]
       }
     },
@@ -314,6 +304,20 @@
         "resident_b": [
           "wait @cafe",
           "idle @cafe"
+        ]
+      }
+    },
+    {
+      "start": "D1 08:42",
+      "minutes": 21,
+      "doing": {
+        "resident_a": [
+          "idle @cafe",
+          "wait @cafe"
+        ],
+        "resident_b": [
+          "idle @flat_b",
+          "wait @flat_b"
         ]
       }
     }
