@@ -220,6 +220,8 @@ jobs:
         run: node test/palmer-native.js
       - name: One Eyed Jacks native scene
         run: node test/oej-native.js
+      - name: Glastonbury Grove native scene
+        run: node test/woods-native.js
       - name: Sheriff's station location
         run: node test/sheriffs-station-location.js
       - name: Sheriff's station native scene
