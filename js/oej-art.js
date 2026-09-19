@@ -25,9 +25,13 @@
     /* Drapes: the perimeter of the room is curtain, not plaster. */
     curtainDeep: '#360f1d', curtainDark: '#4c1524', curtain: '#631d2c',
     curtainMid: '#7d2634', curtainHi: '#9a3440',
-    /* Carpet sits one step below the drapes so bodies read against it. */
-    carpetDeep: '#2c0f1a', carpetDark: '#3d1422', carpet: '#4a1a28',
-    carpetMid: '#57202e', carpetHi: '#652837', carpetGlow: '#6e2c3a',
+    /* Carpet is a full value step below the drapes and less saturated. The
+     * round-2 carpet sat within two luma of the curtain and in the same hue,
+     * so floor and wall merged and the room had no horizon. */
+    carpetDeep: '#1d0d16', carpetDark: '#28121c', carpet: '#311723',
+    carpetMid: '#3b1d29', carpetHi: '#472532', carpetGlow: '#512c3a',
+    /* The skirting that separates them. */
+    skirtDeep: '#1a0f0c', skirt: '#4a2c1c', skirtHi: '#7a4a2a',
     /* Gold is the only bright value in the room: rails, trim, lamps. */
     goldDeep: '#5e3f14', gold: '#8d6320', goldMid: '#bc8d2c',
     goldHi: '#e5bd5c', goldWhite: '#ffe9a6',
@@ -57,14 +61,14 @@
     /* Bounds never cross into a neighbouring cell: Audrey stands at 13,7,
      * immediately east of the south-east table, and a 2px rail overhang was
      * enough to repaint over the left edge of her sprite. */
-    {id: 'tableNorthWest', cells: [[3,2],[4,2]], bounds: [48,26,32,22], shadow: [48,46,32,4]},
-    {id: 'tableNorthEast', cells: [[11,2],[12,2]], bounds: [176,26,32,22], shadow: [176,46,32,4]},
-    {id: 'tableSouthWest', cells: [[3,7],[4,7]], bounds: [48,106,32,22], shadow: [48,126,32,4]},
-    {id: 'tableSouthEast', cells: [[11,7],[12,7]], bounds: [176,106,32,22], shadow: [176,126,32,4]},
-    {id: 'seatNorthWest', cells: [[3,3]], bounds: [48,46,16,20], shadow: [48,64,16,3]},
-    {id: 'seatNorthEast', cells: [[12,3]], bounds: [192,46,16,20], shadow: [192,64,16,3]},
-    {id: 'seatSouthWest', cells: [[3,6]], bounds: [48,94,16,20], shadow: [48,112,16,3]},
-    {id: 'seatSouthEast', cells: [[12,6]], bounds: [192,94,16,20], shadow: [192,112,16,3]},
+    {id: 'tableNorthWest', cells: [[3,2],[4,2]], bounds: [48,26,32,22], shadow: [48,46,32,4], game: 'roulette'},
+    {id: 'tableNorthEast', cells: [[11,2],[12,2]], bounds: [176,26,32,22], shadow: [176,46,32,4], game: 'blackjack'},
+    {id: 'tableSouthWest', cells: [[3,7],[4,7]], bounds: [48,106,32,22], shadow: [48,126,32,4], game: 'craps'},
+    {id: 'tableSouthEast', cells: [[11,7],[12,7]], bounds: [176,106,32,22], shadow: [176,126,32,4], game: 'poker'},
+    {id: 'seatNorthWest', cells: [[3,3]], bounds: [47,46,16,20], shadow: [47,64,16,3], seatVariant: 0},
+    {id: 'seatNorthEast', cells: [[12,3]], bounds: [193,47,16,20], shadow: [193,65,16,3], seatVariant: 1},
+    {id: 'seatSouthWest', cells: [[3,6]], bounds: [49,95,16,20], shadow: [49,113,16,3], seatVariant: 1},
+    {id: 'seatSouthEast', cells: [[12,6]], bounds: [192,93,16,20], shadow: [192,111,16,3], seatVariant: 0},
     {id: 'barCounter', cells: [[5,4],[6,4],[7,4],[8,4],[9,4],[10,4]],
       bounds: [80,44,96,36], shadow: [80,80,96,4]},
     {id: 'serviceCabinet', cells: [[14,2]], bounds: [224,18,16,30], shadow: [224,48,16,3]}
@@ -98,43 +102,65 @@
   /* ------------------------------------------------------------ carpet */
 
   function drawCarpet(R, p) {
-    /* Burgundy field, four close values, plus a sparse gold lattice. The
-     * field is deliberately quieter than the drapes: the carpet is the plane
-     * every body stands on and must never compete with a silhouette. */
+    /* A coarse carpet, not a tile test: 16px blocks in two close values, a
+     * wide plain border inside a gold cord, and a medallion motif every
+     * other block. The field scale is deliberately twice the tile so it
+     * never lines up with the furniture grid. */
     R(16, 22, 224, 122, p.carpetDeep);
     var row, col, x, y;
-    for (row = 0; row < 16; row++) {
-      y = 22 + row * 8;
-      if (y + 8 > 144) break;
-      for (col = 0; col < 28; col++) {
-        x = 16 + col * 8;
-        R(x, y, 8, 8, ((row + col) & 1) ? p.carpetDark : p.carpet);
-      }
-    }
-    /* A diamond of gold thread every other lattice knot. Two pixels each:
-     * enough to read as a pattern at native size, too little to flatten. */
     for (row = 0; row < 8; row++) {
-      y = 26 + row * 16;
-      if (y + 3 > 142) break;
-      for (col = 0; col < 14; col++) {
-        x = 20 + col * 16 + ((row & 1) ? 8 : 0);
-        if (x + 3 > 238) continue;
-        R(x + 1, y, 1, 1, p.goldDeep);
-        R(x, y + 1, 3, 1, p.goldDeep);
-        R(x + 1, y + 1, 1, 1, p.gold);
-        R(x + 1, y + 2, 1, 1, p.goldDeep);
+      y = 30 + row * 16;
+      if (y + 16 > 138) break;
+      for (col = 0; col < 13; col++) {
+        x = 24 + col * 16;
+        if (x + 16 > 232) break;
+        R(x, y, 16, 16, ((row + col) & 1) ? p.carpetDark : p.carpet);
       }
     }
-    /* Inset border: a dark moat, then a thin gold cord, then the field. It
-     * stops the carpet from bleeding into the drapes. */
-    R(16, 22, 224, 2, p.carpetDeep);
-    R(16, 142, 224, 2, p.carpetDeep);
-    R(16, 22, 2, 122, p.carpetDeep);
-    R(238, 22, 2, 122, p.carpetDeep);
+    /* One medallion per second block, four pixels of gold thread. */
+    for (row = 0; row < 8; row++) {
+      y = 36 + row * 32;
+      if (y + 5 > 134) break;
+      for (col = 0; col < 7; col++) {
+        x = 30 + col * 32 + ((row & 1) ? 16 : 0);
+        if (x + 5 > 230) continue;
+        R(x + 2, y, 1, 1, p.goldDeep);
+        R(x + 1, y + 1, 3, 1, p.goldDeep);
+        R(x, y + 2, 5, 1, p.goldDeep);
+        R(x + 2, y + 2, 1, 1, p.gold);
+        R(x + 1, y + 3, 3, 1, p.goldDeep);
+        R(x + 2, y + 4, 1, 1, p.goldDeep);
+      }
+    }
+    /* Plain border band, then the gold cord. */
+    R(16, 22, 224, 8, p.carpetDark);
+    R(16, 136, 224, 8, p.carpetDark);
+    R(16, 22, 8, 122, p.carpetDark);
+    R(232, 22, 8, 122, p.carpetDark);
     R(20, 26, 216, 1, p.goldDeep);
     R(20, 139, 216, 1, p.goldDeep);
     R(20, 26, 1, 114, p.goldDeep);
     R(235, 26, 1, 114, p.goldDeep);
+  }
+
+  function drawSkirting(R, p) {
+    /* The horizon. A hard three-value skirting board along the foot of every
+     * drape: without it the curtain and the carpet meet as two reds and the
+     * room reads flat. Painted after the carpet, before the furniture. */
+    R(0, 20, 256, 2, p.ink);
+    R(0, 22, 256, 3, p.skirtDeep);
+    R(0, 22, 256, 1, p.skirtHi);
+    R(0, 23, 256, 1, p.skirt);
+    R(14, 22, 4, 122, p.skirtDeep);
+    R(14, 22, 1, 122, p.skirtHi);
+    R(15, 22, 1, 122, p.skirt);
+    R(238, 22, 4, 122, p.skirtDeep);
+    R(241, 22, 1, 122, p.skirtHi);
+    R(240, 22, 1, 122, p.skirt);
+    R(0, 140, 256, 4, p.skirtDeep);
+    R(0, 140, 256, 1, p.skirtHi);
+    R(0, 141, 256, 1, p.skirt);
+    R(0, 144, 256, 1, p.ink);
   }
 
   /* -------------------------------------------------------- perimeter */
@@ -144,10 +170,40 @@
      * broken so the wall never reads as a striped ramp. */
     R(x, y, w, h, p.curtainDark);
     var i, fx;
-    for (i = 0; fx = x + i * 6, fx < x + w; i++) {
+    for (i = 0; fx = x + i * 8, fx < x + w; i++) {
       R(fx, y, 2, h, p.curtainDeep);
-      if (fx + 3 < x + w) R(fx + 3, y, 1, h, p.curtain);
-      if (fx + 4 < x + w && (i % 3) !== 2) R(fx + 4, y, 1, h, p.curtainMid);
+      if (fx + 4 < x + w) R(fx + 4, y, 1, h, p.curtain);
+      if (fx + 5 < x + w && (i % 3) === 0) R(fx + 5, y, 1, h, p.curtainMid);
+    }
+  }
+
+
+  /* 3x5 sign type. Only the letters the house name needs. */
+  var SIGN_FONT = {
+    'O': ['111','101','101','101','111'],
+    'N': ['101','111','111','101','101'],
+    'E': ['111','100','110','100','111'],
+    'Y': ['101','101','010','010','010'],
+    'D': ['110','101','101','101','110'],
+    'J': ['001','001','001','101','010'],
+    'A': ['010','101','111','101','101'],
+    'C': ['011','100','100','100','011'],
+    'K': ['101','110','100','110','101'],
+    'S': ['011','100','010','001','110'],
+    ' ': ['000','000','000','000','000']
+  };
+
+  function signWord(R, text, x, y, p) {
+    for (var i = 0; i < text.length; i++) {
+      var rows = SIGN_FONT[text.charAt(i)];
+      if (!rows) continue;
+      for (var r = 0; r < 5; r++) {
+        for (var c = 0; c < 3; c++) {
+          if (rows[r].charAt(c) !== '1') continue;
+          R(x + i * 4 + c, y + r + 1, 1, 1, p.goldDeep);
+          R(x + i * 4 + c, y + r, 1, 1, p.goldWhite);
+        }
+      }
     }
   }
 
@@ -174,19 +230,24 @@
       R(gx + 18, -3, 12, 2, p.curtain);
       R(gx + 22, -1, 8, 2, p.curtainMid);
     }
-    /* Gold-framed mirror over the entry axis; its glass is a dimmer copy of
-     * the room's own values, never a bright rectangle. */
+    /* The house sign over the entry axis. Round 2 left an empty gold frame
+     * here, which a fresh critic read as a blank panel. It carries the name
+     * now: two lines of 3x5 type in lit bulbs over a dark board, which at 1x
+     * reads as two bright bars of lettering and at 3x reads as the words. */
     R(104, -2, 48, 21, p.ink);
-    R(106, -1, 44, 18, p.goldDeep);
-    R(107, 0, 42, 16, p.gold);
-    R(108, 1, 40, 14, p.ink);
-    R(109, 2, 38, 12, p.curtainDeep);
-    R(110, 3, 36, 4, p.curtainDark);
-    R(112, 4, 14, 2, p.curtain);
-    R(131, 5, 12, 2, p.curtain);
-    R(110, 9, 36, 3, p.curtainDeep);
+    R(105, -1, 46, 19, p.goldDeep);
+    R(106, 0, 44, 17, p.gold);
     R(107, 0, 42, 1, p.goldHi);
-    R(107, 15, 42, 1, p.goldMid);
+    R(107, 16, 42, 1, p.goldMid);
+    R(108, 1, 40, 15, p.ink);
+    R(109, 2, 38, 13, p.curtainDeep);
+    signWord(R, 'ONE EYED', 112, 3, p);
+    signWord(R, 'JACKS', 118, 10, p);
+    /* Frame bulbs. */
+    for (var bx = 108; bx <= 144; bx += 8) {
+      R(bx, -1, 2, 1, p.goldWhite);
+      R(bx + 2, 17, 2, 1, p.goldWhite);
+    }
     /* Two chandeliers hang in the wall band, clear of every walkable cell. */
     chandelier(R, 48, VIEW_TOP + 1, p);
     chandelier(R, 208, VIEW_TOP + 1, p);
@@ -223,26 +284,31 @@
     R(240, 22, 2, 120, p.ink);
     R(0, 22, 1, 120, p.goldDeep);
     R(255, 22, 1, 120, p.goldDeep);
-    sconce(R, 7, 56, p); sconce(R, 7, 110, p);
-    sconce(R, 248, 56, p); sconce(R, 248, 110, p);
+    sconce(R, 7, 82, p); sconce(R, 248, 82, p);
   }
 
   function sconce(R, x, y, p) {
-    /* A narrow wash on the drape, then the bracket and the lit shade. The
-     * earlier version threw 10px horizontal bars that read as glitch dashes
-     * across the curtain at native size. */
-    R(x - 2, y - 7, 4, 1, p.curtain);
-    R(x - 3, y - 6, 6, 2, p.curtainMid);
-    R(x - 3, y + 6, 6, 2, p.curtainMid);
-    R(x - 2, y + 8, 4, 1, p.curtain);
-    R(x - 3, y - 4, 6, 2, p.ink);
-    R(x - 2, y - 3, 4, 1, p.goldDeep);
-    R(x - 3, y - 2, 6, 1, p.ink);
-    R(x - 3, y - 1, 6, 7, p.ink);
-    R(x - 2, y - 1, 4, 5, p.gold);
-    R(x - 1, y, 2, 3, p.goldHi);
-    R(x, y + 1, 1, 1, p.goldWhite);
-    R(x - 2, y + 4, 4, 1, p.goldMid);
+    /* One big bracket lamp per side wall instead of two small ones. The
+     * round-2 sconces were seven pixels of gold on a dark drape and a fresh
+     * critic read them as undifferentiated dots at 1x; this is a 13x18
+     * silhouette with a dark shade cap and a lit cone under it. */
+    R(x - 1, y - 10, 2, 4, p.ink);
+    R(x - 2, y - 9, 4, 1, p.walnutMid);
+    R(x - 6, y - 6, 12, 2, p.ink);
+    R(x - 5, y - 6, 10, 1, p.walnutMid);
+    R(x - 7, y - 4, 14, 5, p.ink);
+    R(x - 6, y - 4, 12, 4, p.goldDeep);
+    R(x - 5, y - 4, 10, 2, p.gold);
+    R(x - 4, y - 4, 8, 1, p.goldMid);
+    R(x - 6, y + 1, 12, 2, p.ink);
+    R(x - 5, y + 1, 10, 1, p.goldHi);
+    R(x - 4, y + 2, 8, 1, p.goldWhite);
+    R(x - 4, y + 3, 8, 4, p.ink);
+    R(x - 3, y + 3, 6, 3, p.goldMid);
+    R(x - 2, y + 3, 4, 2, p.goldHi);
+    R(x - 1, y + 4, 2, 1, p.goldWhite);
+    R(x - 3, y + 7, 6, 2, p.ink);
+    R(x - 2, y + 7, 4, 1, p.goldDeep);
   }
 
   function halfPool(R, west, cy, w, h, color) {
@@ -264,16 +330,14 @@
      * off the edge: the previous version drew stacked bars with a base rect
      * behind them and read as a wedge cut out of the carpet. */
     var west = wall === 'west';
-    halfPool(R, west, cy, 18, 26, p.carpetMid);
-    halfPool(R, west, cy, 13, 20, p.carpetHi);
-    halfPool(R, west, cy, 8, 12, p.carpetGlow);
+    halfPool(R, west, cy, 15, 34, p.carpet);
+    halfPool(R, west, cy, 11, 26, p.carpetMid);
+    halfPool(R, west, cy, 7, 16, p.carpetHi);
   }
 
   function drawSconcePools(R, p) {
-    sconcePool(R, 'west', 58, p);
-    sconcePool(R, 'west', 112, p);
-    sconcePool(R, 'east', 58, p);
-    sconcePool(R, 'east', 112, p);
+    sconcePool(R, 'west', 84, p);
+    sconcePool(R, 'east', 84, p);
   }
 
   /* ------------------------------------------------------- south wall */
@@ -339,51 +403,163 @@
 
   /* -------------------------------------------------------- furniture */
 
-  function feltTable(R, x, y, p, wheel) {
-    /* 32x22 oval, exactly the two cells it occupies. The rail is thin: the
-     * felt bed is the plane that has to read at native size. North pair is
-     * roulette, south pair is cards. */
-    R(x + 8, y, 16, 1, p.ink);
-    R(x + 4, y + 1, 24, 1, p.ink);
-    R(x + 1, y + 2, 30, 1, p.ink);
-    R(x, y + 3, 32, 16, p.ink);
-    R(x + 1, y + 19, 30, 1, p.ink);
-    R(x + 4, y + 20, 24, 1, p.ink);
-    R(x + 8, y + 21, 16, 1, p.ink);
-    R(x + 8, y + 1, 16, 1, p.walnutHi);
-    R(x + 4, y + 2, 24, 1, p.walnutMid);
-    R(x + 1, y + 3, 30, 1, p.walnutMid);
-    R(x + 1, y + 4, 30, 1, p.walnut);
-    R(x + 1, y + 5, 2, 11, p.walnut);
-    R(x + 29, y + 5, 2, 11, p.walnut);
-    R(x + 2, y + 16, 28, 2, p.walnutDark);
-    R(x + 4, y + 18, 24, 1, p.walnutDeep);
-    R(x + 8, y + 19, 16, 1, p.walnutDeep);
-    R(x + 3, y + 4, 26, 13, p.feltDeep);
-    R(x + 4, y + 5, 24, 11, p.feltDark);
-    R(x + 5, y + 5, 22, 8, p.felt);
-    R(x + 7, y + 6, 18, 4, p.feltMid);
-    R(x + 9, y + 6, 12, 2, p.feltHi);
-    R(x + 5, y + 14, 22, 1, p.feltDeep);
-    if (wheel) {
-      roulette(R, x + 11, y + 10, p);
-      chipStack(R, x + 21, y + 8, p.chipRed, p);
-      chipStack(R, x + 25, y + 9, p.chipWhite, p);
-      R(x + 20, y + 13, 8, 1, p.goldDeep);
+  /* Four tables, four games. They sit on the cells the map rows give them,
+   * but nothing else about them is shared: the rail profile, the felt
+   * markings, the layout's long axis and the objects on the cloth all differ,
+   * so the room stops reading as one sprite stamped four times. */
+  function feltTable(R, x, y, p, kind) {
+    var padded = kind === 'craps', oval = kind === 'poker';
+    /* Silhouette. The craps table is a squarer padded box, the poker table a
+     * rounder oval, the two card/wheel tables the standard rail. */
+    if (padded) {
+      R(x + 3, y, 26, 1, p.ink);
+      R(x, y + 1, 32, 20, p.ink);
+      R(x + 3, y + 21, 26, 1, p.ink);
+    } else if (oval) {
+      R(x + 10, y, 12, 1, p.ink);
+      R(x + 5, y + 1, 22, 1, p.ink);
+      R(x + 2, y + 2, 28, 1, p.ink);
+      R(x, y + 3, 32, 16, p.ink);
+      R(x + 2, y + 19, 28, 1, p.ink);
+      R(x + 5, y + 20, 22, 1, p.ink);
+      R(x + 10, y + 21, 12, 1, p.ink);
     } else {
-      /* Dealt hand: two face-up cards, the dealer's arc, three stacks. */
-      R(x + 5, y + 8, 5, 6, p.ink);
-      R(x + 6, y + 9, 3, 4, p.chipWhite);
-      R(x + 7, y + 10, 1, 2, p.chipRed);
-      R(x + 11, y + 8, 5, 6, p.ink);
-      R(x + 12, y + 9, 3, 4, p.chipWhite);
-      R(x + 13, y + 10, 1, 2, p.ink);
-      R(x + 5, y + 6, 22, 1, p.goldDeep);
-      R(x + 7, y + 5, 18, 1, p.gold);
-      chipStack(R, x + 19, y + 9, p.chipRed, p);
-      chipStack(R, x + 24, y + 8, p.chipBlue, p);
-      chipStack(R, x + 24, y + 12, p.chipWhite, p);
+      R(x + 8, y, 16, 1, p.ink);
+      R(x + 4, y + 1, 24, 1, p.ink);
+      R(x + 1, y + 2, 30, 1, p.ink);
+      R(x, y + 3, 32, 16, p.ink);
+      R(x + 1, y + 19, 30, 1, p.ink);
+      R(x + 4, y + 20, 24, 1, p.ink);
+      R(x + 8, y + 21, 16, 1, p.ink);
     }
+    /* Rail. Craps gets a padded leather top edge, poker a narrow armrest,
+     * the others plain mahogany. */
+    if (padded) {
+      R(x + 1, y + 1, 30, 3, p.stoolDark);
+      R(x + 2, y + 1, 28, 1, p.stool);
+      R(x + 1, y + 17, 30, 3, p.stoolDeep);
+      R(x + 2, y + 19, 28, 1, p.walnutDeep);
+      R(x + 1, y + 4, 2, 13, p.walnut);
+      R(x + 29, y + 4, 2, 13, p.walnut);
+    } else if (oval) {
+      R(x + 10, y + 1, 12, 1, p.walnutHi);
+      R(x + 5, y + 2, 22, 1, p.walnutMid);
+      R(x + 2, y + 3, 28, 2, p.walnut);
+      R(x + 1, y + 5, 2, 11, p.walnutMid);
+      R(x + 29, y + 5, 2, 11, p.walnutMid);
+      R(x + 2, y + 16, 28, 2, p.walnutDark);
+      R(x + 5, y + 18, 22, 1, p.walnutDeep);
+      R(x + 10, y + 19, 12, 1, p.walnutDeep);
+    } else {
+      R(x + 8, y + 1, 16, 1, p.walnutHi);
+      R(x + 4, y + 2, 24, 1, p.walnutMid);
+      R(x + 1, y + 3, 30, 1, p.walnutMid);
+      R(x + 1, y + 4, 30, 1, p.walnut);
+      R(x + 1, y + 5, 2, 11, p.walnut);
+      R(x + 29, y + 5, 2, 11, p.walnut);
+      R(x + 2, y + 16, 28, 2, p.walnutDark);
+      R(x + 4, y + 18, 24, 1, p.walnutDeep);
+      R(x + 8, y + 19, 16, 1, p.walnutDeep);
+    }
+    /* Felt bed. Craps is deeper and squarer, poker slightly inset. */
+    var bx = padded ? x + 3 : x + 3, by = padded ? y + 4 : y + 4;
+    var bw = padded ? 26 : 26, bh = padded ? 13 : 13;
+    R(bx, by, bw, bh, p.feltDeep);
+    R(bx + 1, by + 1, bw - 2, bh - 2, p.feltDark);
+    R(bx + 2, by + 1, bw - 4, bh - 6, p.felt);
+    if (!padded) R(bx + 4, by + 2, bw - 8, 4, p.feltMid);
+    if (oval) R(bx + 6, by + 2, bw - 12, 2, p.feltHi);
+    if (kind === 'roulette') R(bx + 6, by + 2, 12, 2, p.feltHi);
+    R(bx + 2, by + 10, bw - 4, 1, p.feltDeep);
+    if (kind === 'roulette') layoutRoulette(R, x, y, p);
+    else if (kind === 'blackjack') layoutBlackjack(R, x, y, p);
+    else if (kind === 'craps') layoutCraps(R, x, y, p);
+    else layoutPoker(R, x, y, p);
+  }
+
+  /* Roulette: the wheel sits at the WEST end, the numbered layout runs east
+   * of it as three short gold columns with a red/black column beside them. */
+  function layoutRoulette(R, x, y, p) {
+    roulette(R, x + 10, y + 10, p);
+    var col;
+    for (col = 0; col < 3; col++) {
+      R(x + 19 + col * 3, y + 6, 2, 8, p.feltDeep);
+      R(x + 19 + col * 3, y + 6, 2, 1, p.goldDeep);
+      R(x + 19 + col * 3, y + 9, 2, 1, p.goldDeep);
+      R(x + 19 + col * 3, y + 12, 2, 1, p.goldDeep);
+    }
+    R(x + 19, y + 14, 8, 1, p.gold);
+    chipStack(R, x + 25, y + 7, p.chipRed, p);
+    R(x + 24, y + 12, 2, 1, p.pocketRed);
+    R(x + 27, y + 12, 2, 1, p.pocketDark);
+  }
+
+  /* Blackjack: dealer's shoe at the EAST end, a gold bet arc swinging west,
+   * three bet circles and one dealt hand. */
+  function layoutBlackjack(R, x, y, p) {
+    R(x + 23, y + 5, 7, 7, p.ink);
+    R(x + 24, y + 6, 5, 5, p.walnutMid);
+    R(x + 24, y + 6, 5, 1, p.walnutHi);
+    R(x + 25, y + 8, 3, 2, p.chipWhite);
+    R(x + 5, y + 6, 16, 1, p.goldDeep);
+    R(x + 7, y + 5, 12, 1, p.gold);
+    R(x + 4, y + 7, 2, 3, p.goldDeep);
+    R(x + 20, y + 7, 2, 3, p.goldDeep);
+    var i;
+    for (i = 0; i < 3; i++) {
+      R(x + 6 + i * 6, y + 11, 4, 1, p.goldDeep);
+      R(x + 5 + i * 6, y + 12, 6, 1, p.goldDeep);
+      R(x + 6 + i * 6, y + 13, 4, 1, p.goldDeep);
+    }
+    R(x + 8, y + 8, 4, 5, p.ink);
+    R(x + 9, y + 9, 2, 3, p.chipWhite);
+    R(x + 12, y + 8, 4, 5, p.ink);
+    R(x + 13, y + 9, 2, 3, p.chipWhite);
+    R(x + 13, y + 10, 1, 1, p.chipRed);
+    chipStack(R, x + 17, y + 12, p.chipBlue, p);
+  }
+
+  /* Craps: a long padded box. The stick and two dice run the full length on
+   * a pass line, with numbered boxes along the top rail. */
+  function layoutCraps(R, x, y, p) {
+    var i;
+    for (i = 0; i < 6; i++) {
+      R(x + 5 + i * 4, y + 5, 3, 3, p.feltDeep);
+      R(x + 5 + i * 4, y + 5, 3, 1, p.goldDeep);
+    }
+    R(x + 4, y + 9, 24, 1, p.gold);
+    R(x + 4, y + 12, 24, 1, p.goldDeep);
+    R(x + 6, y + 10, 18, 2, p.feltDeep);
+    R(x + 7, y + 10, 16, 1, p.feltMid);
+    R(x + 8, y + 14, 14, 1, p.walnutHi);
+    R(x + 22, y + 13, 2, 3, p.walnutMid);
+    R(x + 24, y + 9, 3, 3, p.ink);
+    R(x + 24, y + 9, 3, 3, p.chipWhite);
+    R(x + 25, y + 10, 1, 1, p.ink);
+    R(x + 20, y + 6, 3, 3, p.chipWhite);
+    R(x + 21, y + 6, 1, 1, p.ink);
+    R(x + 20, y + 8, 1, 1, p.ink);
+  }
+
+  /* Poker: an oval with a chip rack sunk into the near rail, a dealer button
+   * and two face-down cards. */
+  function layoutPoker(R, x, y, p) {
+    R(x + 5, y + 13, 22, 2, p.walnutDeep);
+    R(x + 6, y + 13, 20, 1, p.walnutDark);
+    var i;
+    for (i = 0; i < 5; i++) R(x + 7 + i * 4, y + 13, 2, 1, p.goldDeep);
+    chipStack(R, x + 6, y + 7, p.chipRed, p);
+    chipStack(R, x + 11, y + 6, p.chipBlue, p);
+    chipStack(R, x + 11, y + 10, p.chipWhite, p);
+    chipStack(R, x + 16, y + 8, p.chipRed, p);
+    R(x + 21, y + 6, 5, 6, p.ink);
+    R(x + 22, y + 7, 3, 4, p.curtainDark);
+    R(x + 22, y + 7, 3, 1, p.curtain);
+    R(x + 24, y + 9, 5, 6, p.ink);
+    R(x + 25, y + 10, 3, 4, p.curtainDark);
+    R(x + 25, y + 10, 3, 1, p.curtain);
+    R(x + 17, y + 12, 4, 3, p.ink);
+    R(x + 18, y + 12, 2, 2, p.goldHi);
   }
 
   function roulette(R, cx, cy, p) {
@@ -422,7 +598,8 @@
     R(x + 1, y + 3, 2, 1, p.shadowMid);
   }
 
-  function seat(R, x, y, p) {
+  function seat(R, x, y, p, variant) {
+    variant = variant || 0;
     /* A stool, not a small table: a round leather cushion on ONE central
      * pedestal, so the silhouette has carpet showing on both sides of the
      * post. The cushion also carries its own crimson pair, a step brighter
@@ -433,34 +610,34 @@
     R(x + 3, y + 2, 10, 6, p.stoolDeep);
     R(x + 4, y + 2, 8, 4, p.stoolDark);
     R(x + 5, y + 2, 6, 2, p.stool);
-    R(x + 6, y + 2, 3, 1, p.stoolHi);
+    R(variant ? x + 8 : x + 5, y + 2, 3, 1, p.stoolHi);
     R(x + 3, y + 8, 10, 1, p.goldDeep);
-    R(x + 5, y + 8, 2, 1, p.goldMid);
-    R(x + 9, y + 8, 2, 1, p.goldMid);
+    R(variant ? x + 4 : x + 5, y + 8, 2, 1, p.goldMid);
+    R(variant ? x + 10 : x + 9, y + 8, 2, 1, p.goldMid);
     R(x + 3, y + 9, 10, 1, p.shadowDark);
     /* Pedestal and splayed brass foot. */
     R(x + 6, y + 11, 4, 5, p.ink);
     R(x + 7, y + 11, 2, 4, p.walnutMid);
-    R(x + 7, y + 11, 1, 3, p.walnutHi);
+    R(variant ? x + 8 : x + 7, y + 11, 1, 3, p.walnutHi);
     R(x + 4, y + 16, 8, 2, p.ink);
     R(x + 5, y + 16, 6, 1, p.metalHi);
     R(x + 5, y + 18, 6, 1, p.shadowDark);
   }
 
   function bottle(R, x, base, color, p, tall) {
-    /* Five pixels wide with a real neck and shoulder. The earlier row of
-     * twelve 4px bottles was noise at 1x: this is five silhouettes a body
-     * width apart, standing ON the plank at `base`. */
-    var h = tall ? 12 : 10;
+    /* Seven pixels wide with a real neck and shoulder, standing ON the plank
+     * at `base`. Five 5px bottles against a near-black recess read as noise
+     * at 1x; four wider ones against a lit back read as bottles. */
+    var h = tall ? 13 : 11;
     var y = base - h;
-    R(x + 2, y, 1, 3, p.ink);
-    R(x + 1, y + 3, 3, 1, p.ink);
-    R(x, y + 4, 5, h - 4, p.ink);
-    R(x + 1, y + 5, 3, h - 6, color);
+    R(x + 3, y, 1, 3, p.ink);
+    R(x + 2, y + 3, 3, 1, p.ink);
+    R(x, y + 4, 7, h - 4, p.ink);
+    R(x + 1, y + 5, 5, h - 6, color);
     R(x + 1, y + 5, 1, h - 7, p.glass);
-    R(x + 2, y + 1, 1, 2, color);
-    R(x, y + h - 3, 5, 1, p.goldDeep);
-    R(x + 1, y + h - 3, 3, 1, p.goldMid);
+    R(x + 3, y + 1, 1, 2, color);
+    R(x, y + h - 3, 7, 1, p.goldDeep);
+    R(x + 2, y + h - 3, 3, 1, p.goldMid);
   }
 
   function barCounter(R, p) {
@@ -470,14 +647,17 @@
      * the top edge legitimately occludes a body standing on the north side. */
     R(80, 44, 96, 2, p.ink);
     R(81, 46, 94, 1, p.goldDeep);
-    R(81, 47, 94, 11, p.walnutDeep);
-    R(83, 47, 90, 9, p.black);
+    R(81, 45, 94, 13, p.walnutDeep);
+    /* The mirrored back is LIT, not black: the bottles are dark glass and
+     * need a lighter plane to silhouette against. */
+    R(83, 46, 90, 11, p.walnut);
+    R(83, 46, 90, 3, p.walnutMid);
+    R(83, 55, 90, 2, p.walnutDark);
     var i;
-    for (i = 0; i < 7; i++) R(86 + i * 13, 47, 2, 9, p.walnutDark);
-    var colors = [p.bottleGreen, p.bottleAmber, p.bottleClear, p.bottleRed, p.bottleAmber];
-    for (i = 0; i < 5; i++) bottle(R, 102 + i * 13, 58, colors[i], p, i % 2 === 0);
-    barLamp(R, 88, 44, p);
-    barLamp(R, 168, 44, p);
+    var colors = [p.bottleGreen, p.bottleAmber, p.bottleRed, p.bottleGreen];
+    for (i = 0; i < 4; i++) bottle(R, 102 + i * 15, 58, colors[i], p, i % 2 === 0);
+    barLamp(R, 88, 44, p, false);
+    barLamp(R, 168, 44, p, true);
     R(80, 58, 96, 2, p.ink);
     R(81, 58, 94, 2, p.walnut);
     R(81, 58, 94, 1, p.walnutHi);
@@ -509,15 +689,30 @@
     R(136, 62, 3, 1, p.glassHi);
   }
 
-  function barLamp(R, x, y, p) {
-    R(x - 5, y + 1, 10, 2, p.ink);
-    R(x - 4, y + 2, 8, 2, p.goldDeep);
-    R(x - 3, y + 2, 6, 1, p.goldMid);
-    R(x - 4, y + 4, 8, 3, p.goldHi);
-    R(x - 2, y + 4, 4, 2, p.goldWhite);
-    R(x - 1, y + 7, 2, 4, p.goldDeep);
-    R(x - 3, y + 11, 6, 1, p.gold);
-    R(x - 6, y + 12, 12, 1, p.goldDeep);
+  function barLamp(R, x, y, p, dome) {
+    /* Two lamps, not one lamp twice: the west end carries a pleated cone
+     * shade on a short stem, the east end a plain dome on a taller one. */
+    if (dome) {
+      R(x - 5, y + 2, 10, 2, p.ink);
+      R(x - 4, y + 1, 8, 1, p.goldDeep);
+      R(x - 4, y + 3, 8, 3, p.goldMid);
+      R(x - 2, y + 3, 4, 2, p.goldHi);
+      R(x - 1, y + 4, 2, 1, p.goldWhite);
+      R(x - 1, y + 6, 2, 5, p.goldDeep);
+      R(x - 4, y + 11, 8, 1, p.gold);
+      R(x - 6, y + 12, 12, 1, p.goldDeep);
+    } else {
+      R(x - 6, y + 1, 12, 2, p.ink);
+      R(x - 5, y + 3, 10, 3, p.goldDeep);
+      R(x - 4, y + 3, 1, 3, p.goldMid);
+      R(x - 1, y + 3, 1, 3, p.goldMid);
+      R(x + 2, y + 3, 1, 3, p.goldMid);
+      R(x - 4, y + 6, 8, 2, p.goldHi);
+      R(x - 2, y + 6, 4, 1, p.goldWhite);
+      R(x - 1, y + 8, 2, 3, p.goldDeep);
+      R(x - 3, y + 11, 6, 1, p.gold);
+      R(x - 5, y + 12, 10, 1, p.goldDeep);
+    }
   }
 
   function serviceCabinet(R, p) {
@@ -547,8 +742,8 @@
     if (prop.id === 'barCounter') barCounter(R, p);
     else if (prop.id === 'serviceCabinet') serviceCabinet(R, p);
     else if (prop.id.indexOf('table') === 0) {
-      feltTable(R, b[0], b[1], p, prop.cells[0][1] === 2);
-    } else if (prop.id.indexOf('seat') === 0) seat(R, b[0], b[1], p);
+      feltTable(R, b[0], b[1], p, prop.game);
+    } else if (prop.id.indexOf('seat') === 0) seat(R, b[0], b[1], p, prop.seatVariant);
   }
 
   function drawShadow(R, prop, p) {
@@ -572,6 +767,7 @@
     drawCarpet(R, p);
     drawNorthWall(R, p);
     drawSideWalls(R, p);
+    drawSkirting(R, p);
     drawSconcePools(R, p);
     drawSouthWall(R, p);
     for (i = 0; i < definitions.length; i++) drawShadow(R, definitions[i], p);

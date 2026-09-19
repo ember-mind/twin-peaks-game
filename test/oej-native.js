@@ -245,22 +245,78 @@ assert(topBand.length > 0, 'the band above the map row 0 is painted, never left 
 // Il retrobanco porta CINQUE sagome di bottiglia larghe 5px, non una fila di
 // stecchini: al native le bottiglie devono essere leggibili una per una.
 const bottleBodies = authoredPixels.calls.filter((call) =>
-  call.args[2] === 5 && call.args[0] >= 96 && call.args[0] <= 164 &&
+  call.args[2] === 7 && call.args[0] >= 96 && call.args[0] <= 164 &&
   call.args[1] >= 44 && call.args[1] <= 58 && call.args[3] >= 5);
-assert.equal(bottleBodies.length, 5, 'the back bar carries five 5px bottle silhouettes');
+assert.equal(bottleBodies.length, 4, 'the back bar carries four 7px bottle silhouettes');
 
 // La luce delle applique segue la grammatica della citta' (interiorPool in
 // js/retro-authored.js): ellissi annidate con rientro quadratico. Se le righe
 // avessero tutte la stessa lunghezza sarebbe un rettangolo, non una pozza.
-const poolTones = new Set([Art.palette.carpetMid, Art.palette.carpetHi, Art.palette.carpetGlow]);
+const poolTones = new Set([Art.palette.carpet, Art.palette.carpetMid, Art.palette.carpetHi]);
 const poolRows = authoredPixels.calls.filter((call) =>
   poolTones.has(call.color) && (call.args[0] === 16 || call.args[0] + call.args[2] === 240));
-assert(poolRows.length > 40, 'all four sconce pools are painted');
+assert(poolRows.length > 60, 'both sconce pools are painted');
 const poolWidths = new Set(poolRows.map((call) => call.args[2]));
 assert(poolWidths.size >= 6,
   'each pool falls off in steps instead of squaring into a wedge, got widths ' +
   [...poolWidths].sort((a, b) => a - b).join(','));
 assert.equal(poolRows.every((call) => call.args[3] === 2), true, 'the pool steps are two pixels tall');
+
+
+/* Round 3. A fresh PNG-only critic read the room as "four identical
+ * copy-pasted sprites in a perfect symmetric grid", a floor and wall in
+ * "nearly the same value" with "no horizon", and sconces, sign and bottles
+ * that "become undifferentiated dots" at 1x. Lock each fix. */
+const games = Art.definitions.filter((d) => d.id.indexOf('table') === 0).map((d) => d.game);
+assert.deepEqual(games.slice().sort(), ['blackjack', 'craps', 'poker', 'roulette'],
+  'the four tables are four different games, not one sprite four times');
+const seatVariants = Art.definitions.filter((d) => d.id.indexOf('seat') === 0);
+assert.equal(new Set(seatVariants.map((d) => d.seatVariant)).size, 2,
+  'the stools are not all the same stool');
+assert.equal(new Set(seatVariants.map((d) => d.bounds.join(','))).size, 4,
+  'no two stools sit at the same offset inside their cell');
+function tableCalls(id) {
+  const prop = Art.definitions.find((d) => d.id === id);
+  const recording = newRecordingContext();
+  artForeground(recording.context, 0, 0, prop.footY, prop.footY + 1);
+  const origin = prop.bounds;
+  return recording.calls
+    .filter((c) => c.args[0] >= origin[0] && c.args[0] < origin[0] + 32)
+    .map((c) => [c.args[0] - origin[0], c.args[1] - origin[1], c.args[2], c.args[3], c.color].join(':'))
+    .sort().join('|');
+}
+const layouts = ['tableNorthWest', 'tableNorthEast', 'tableSouthWest', 'tableSouthEast'].map(tableCalls);
+assert.equal(new Set(layouts).size, 4,
+  'each table paints a different set of marks relative to its own origin');
+
+const lamps = authoredPixels.calls.filter((call) => call.args[1] >= 44 && call.args[1] <= 58 &&
+  (call.args[0] < 96 || call.args[0] > 160) && call.args[0] >= 80 && call.args[0] <= 176);
+assert(lamps.length > 8, 'both bar lamps are painted');
+
+/* Two large sconces, not four small ones: each silhouette is at least 12px
+ * wide so it survives a 1x read. */
+const sconceShades = authoredPixels.calls.filter((call) =>
+  call.args[2] >= 12 && call.args[3] <= 5 && (call.args[0] < 16 || call.args[0] + call.args[2] > 240));
+assert(sconceShades.length >= 4, 'each side wall carries one wide bracket lamp');
+
+/* The sign says the name. Its lettering is painted in the room's brightest
+ * value over the dark board, which is what makes it read at 1x. */
+const signLetters = authoredPixels.calls.filter((call) =>
+  call.color.toLowerCase() === Art.palette.goldWhite.toLowerCase() &&
+  call.args[0] >= 108 && call.args[0] < 148 && call.args[1] >= 2 && call.args[1] < 16 &&
+  call.args[2] === 1 && call.args[3] === 1);
+assert(signLetters.length > 40,
+  'the sign carries lit lettering, not an empty frame, got ' + signLetters.length + ' bulbs');
+
+/* The horizon: a skirting band runs the full width at the foot of the north
+ * drape and down both side walls. */
+assert(authoredPixels.calls.some((call) =>
+  call.color.toLowerCase() === Art.palette.skirtHi.toLowerCase() &&
+  call.args[0] === 0 && call.args[2] === 256),
+  'a skirting highlight runs the full width under the north drape');
+assert(authoredPixels.calls.filter((call) =>
+  call.color.toLowerCase() === Art.palette.skirtDeep.toLowerCase()).length >= 4,
+  'the skirting continues down both side walls and along the south wall');
 
 function foregroundCalls(min, max) {
   const recording = newRecordingContext();
@@ -274,9 +330,9 @@ function hasRect(calls, x, y, width, height) {
 const depth48 = foregroundCalls(48, 64);
 assert(hasRect(depth48, 48, 29, 32, 16), '48px interval selects the north gaming tables');
 assert(hasRect(depth48, 224, 18, 16, 30), '48px interval selects the service cabinet');
-assert(!hasRect(depth48, 50, 47, 12, 9), '48px interval excludes the north stools at 64px');
+assert(!hasRect(depth48, 49, 47, 12, 9), '48px interval excludes the north stools at 64px');
 const depth64 = foregroundCalls(64, 80);
-assert(hasRect(depth64, 50, 47, 12, 9), '64px interval selects the north stools');
+assert(hasRect(depth64, 49, 47, 12, 9), '64px interval selects the north stools');
 assert(!hasRect(depth64, 80, 68, 96, 10), '64px interval excludes the bar at 80px');
 const depth80 = foregroundCalls(80, 112);
 assert(hasRect(depth80, 80, 68, 96, 10), '80px interval selects the bar counter front');
@@ -493,8 +549,19 @@ assert(goldRail > feltPlane + 20,
   `the gold trim is the brightest plane (${goldRail.toFixed(1)} vs felt ${feltPlane.toFixed(1)})`);
 assert(feltPlane > carpetPlane + 15,
   `the felt beds read well above the carpet (${feltPlane.toFixed(1)} vs ${carpetPlane.toFixed(1)})`);
-assert(drapeNorth > carpetPlane,
-  `the drape reads above the carpet it stands on (${drapeNorth.toFixed(1)} vs ${carpetPlane.toFixed(1)})`);
+/* Round 3: the floor and the wall were within two luma of each other and a
+ * fresh critic saw no floor-to-wall break and no horizon. The carpet is now a
+ * clear step below both drapes, and the skirting board at the wall foot is
+ * brighter than either, which is what gives the room its horizon line. */
+const drapeSide = mean(region(2, 60, 10, 40));
+const skirtBand = mean(region(60, 38, 40, 2));
+assert(drapeNorth > carpetPlane + 6,
+  `the north drape reads above the carpet (${drapeNorth.toFixed(1)} vs ${carpetPlane.toFixed(1)})`);
+assert(drapeSide > carpetPlane + 10,
+  `the side drape reads above the carpet (${drapeSide.toFixed(1)} vs ${carpetPlane.toFixed(1)})`);
+assert(skirtBand > drapeSide + 10,
+  `the skirting is the brightest band at the wall foot, so the room has a horizon ` +
+  `(${skirtBand.toFixed(1)} vs drape ${drapeSide.toFixed(1)}, carpet ${carpetPlane.toFixed(1)})`);
 
 // Lo sgabello ha la sua coppia di valori: al native una seduta deve leggersi
 // come una sedia, non come un tavolino. Il cuscino sta un gradino sopra il
@@ -537,5 +604,6 @@ for (const box of feltBoxes) {
 
 console.log('OEJ-NATIVE-PASS production hooks, authored geometry, footprint parity, cast cells free, ' +
   'collision and reachability, keyboard routes, integer native pixels, depth intervals and door band, ' +
-  'value order, felt confined to the four tables, stool vs table values, roulette ring, ' +
-  'five bottle silhouettes, stepped sconce falloff, depth along the 8,8 -> 7,5 approach');
+  'value order, floor-to-wall break and skirting horizon, felt confined to the four tables, ' +
+  'four different games, stool vs table values, roulette ring, four bottle silhouettes, ' +
+  'two wide sconces, a lit house sign, stepped sconce falloff, depth along the 8,8 -> 7,5 approach');
