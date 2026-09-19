@@ -2,10 +2,10 @@
  *
  * These are CALLBACK tests: they drive the package's object builder, action
  * definitions and intervention lifecycle through the real Sim and its real
- * contexts. The carried half of the pipeline — perception offering the
- * affordances of a wallet a person carries — needs a core hook this base commit
- * does not have; that is exercised only in pipeline.js, and only once the hook
- * exists. Nothing here fakes it.
+ * contexts, the way the model package's own tests do. The full pipeline — a
+ * policy actually choosing pick_up_wallet / return_wallet / keep_wallet_money
+ * during a tick, including the carried half that only the core's
+ * heldAffordances offering makes reachable — is exercised in pipeline.js.
  *
  * node living-town/content/lost-wallet-v01/test/lost-wallet.js
  */
@@ -23,6 +23,13 @@ let checks = 0;
 function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + msg); }
 
 const copy = (v) => JSON.parse(JSON.stringify(v));
+
+/* The core's own closeness gain tapers as two people grow closer
+ * (Sim.prototype.adjustRelationship); a gain is never a flat add. */
+function closenessAfterGain(before, delta) {
+  const gain = delta > 0 ? delta * (1 - before / 125) : delta;
+  return Math.round((before + gain) * 100) / 100;
+}
 
 function day() { return LT.Scenario.day1({ intervention: false }); }
 function actorIds(sim) { return Object.keys(sim.state.characters).sort(); }
@@ -369,9 +376,9 @@ function returnCallbacks() {
   ok(owner.money === Math.round((ownerMoney + 8) * 100) / 100 && finder.money === finderMoney,
      'the cash lands in the owner pocket, exactly once');
   ok(owner.relationships.resident_b.trust === ownerRel.trust + 10 &&
-     owner.relationships.resident_b.closeness === ownerRel.closeness + 6,
+     owner.relationships.resident_b.closeness === closenessAfterGain(ownerRel.closeness, 6),
      'the owner trusts the finder more and feels closer');
-  ok(finder.relationships.resident_a.closeness === finderRel.closeness + 3,
+  ok(finder.relationships.resident_a.closeness === closenessAfterGain(finderRel.closeness, 3),
      'the finder feels closer to the owner');
   ok(cashInTown(sim) === total, 'the town total never moved');
   const ev = sim.state.events.filter((e) => e.type === 'WALLET_RETURNED');

@@ -11,11 +11,13 @@
  * the finder's pocket.
  *
  * The intervention is registered through the real LT.Interventions.define and
- * the three actions through the real LT.Actions.define. The package needs one
- * thing the base commit does not offer — perceiving the affordances of an
- * object a person carries (see README.md, "Needed from the core"). It never
- * adds that to the core and never shims it; the pipeline test reports the half
- * that cannot run yet rather than pretending it did.
+ * the three actions through the real LT.Actions.define. Once carried, the
+ * wallet's own `heldAffordances` are what let a carrier be offered
+ * return_wallet / keep_wallet_money at all: the core (lt-perception.js,
+ * LT.Perception.HELD_AFFORDANCES) offers them from that list, exactly as it
+ * offers pick_up_wallet from `affordances` while the wallet lies on the
+ * ground. This package sets and clears both lists; it never touches
+ * perception itself.
  */
 (function () {
   var root = (typeof window !== 'undefined') ? window : global;
@@ -94,9 +96,10 @@
       anchors: { pick_up_wallet: { x: p.useSpot.x, y: p.useSpot.y, dir: p.useSpot.dir || 'down' } },
       tags: ['wallet', 'money', 'lost'],
       portable: true,
-      /* What is available where. Read by this package's actions and by
-       * perception for the lying-down affordance; the carried affordances need
-       * a core hook (see README.md). */
+      /* What is available where. Perception offers `affordances` while lying
+       * on the ground and `heldAffordances` while carried (lt-perception.js,
+       * LT.Perception.HELD_AFFORDANCES); this package only maintains the two
+       * lists as the wallet moves between states. */
       affordances: ['pick_up_wallet'],
       heldAffordances: [],
       heldBy: null,
