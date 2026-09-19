@@ -6,9 +6,12 @@
     var clock=GAME.AmbientLife.create(seed),context=null,enabled=true,paused=false,manual={},cancelled={};
     var actorMaps={},actorRuntime={},actorManual={},lastMap=null,actorTimeScale=1,runtimeTime=0;
     var dinerDefs=[
-      // Service stays quiet between the guest's sip and Norma's counter work.
-      {id:'booth-sip',type:'ACTOR_ACTIVITY',x:183,y:80,depth:112,delay:[15000,18000],duration:[3000,3400]},
-      {id:'counter-wipe',type:'ACTOR_ACTIVITY',x:80,y:32,depth:64,delay:[25000,28000],duration:[2800,3200]}
+      // One early service action establishes a working room. The later sip is
+      // a separate social beat; independent clocks keep both from pulsing.
+      {id:'counter-wipe',type:'ACTOR_ACTIVITY',x:80,y:32,depth:64,
+        firstDelay:[5000,7000],delay:[22000,30000],duration:[3200,3600]},
+      {id:'booth-sip',type:'ACTOR_ACTIVITY',x:183,y:80,depth:112,
+        firstDelay:[16000,20000],delay:[26000,34000],duration:[3000,3400]}
     ];
     clock.register('diner',dinerDefs);
     function actorKey(mapId,actorId,behaviorId){return 'character:'+mapId+':'+actorId+':'+behaviorId;}
@@ -274,7 +277,7 @@
     return true;
   };
   api.sipLiftsCup=function(f){return f>=0&&f<7;};
-  var wrists=[91,91,95,99,102,101,97,93,91];
+  var wrists=[91,91,97,104,108,107,102,95,91];
   api.wipeFrame=function(){return api.pose('counter-wipe');};
   api.drawWipe=function(g,cx,cy){
     var f=api.wipeFrame();if(f<0)return;
@@ -286,8 +289,8 @@
     P(92,43,Math.max(2,wrist-91),2,'#c8a080');
     P(92,43,Math.max(2,wrist-92),1,'#e8caa8');
     P(wrist,44,3,2,'#c8a080');P(wrist,44,2,1,'#e8caa8');
-    P(wrist-1,46,7,2,'#81918b');P(wrist,46,5,1,'#d9dfc9');
-    P(wrist,48,5,1,'#cfbc92');
+    P(wrist-1,46,8,2,'#81918b');P(wrist,46,6,1,'#d9dfc9');
+    P(wrist,48,6,1,'#cfbc92');
   };
   if(typeof module!=='undefined'&&module.exports)module.exports={create:create,cups:cups,arms:arms,wrists:wrists};
 })(typeof window!=='undefined'?window:globalThis);

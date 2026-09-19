@@ -3,20 +3,20 @@ const assert=require('node:assert/strict');require('../js/ambient-life.js');cons
 const state=()=>({mapId:'diner',mode:'play',fadePhase:0,dialogue:null,menu:null,npcs:[{id:'norma',x:5,y:2,dir:'left',moving:false}]});
 const cadence=create(1989);cadence.update(0,state());
 const scheduled=Object.fromEntries(cadence.snapshot().items.map(item=>[item.id,item.next]));
-assert(scheduled['booth-sip']>=15000&&scheduled['booth-sip']<=18000,'guest sip starts after quiet opening');
-assert(scheduled['counter-wipe']>=25000&&scheduled['counter-wipe']<=28000,'counter service follows guest moment');
-assert(scheduled['counter-wipe']-scheduled['booth-sip']>=7000,'first two gestures do not overlap');
+assert(scheduled['counter-wipe']>=5000&&scheduled['counter-wipe']<=7000,'counter service establishes the working room early');
+assert(scheduled['booth-sip']>=16000&&scheduled['booth-sip']<=20000,'guest sip becomes a later social beat');
+assert(scheduled['booth-sip']-scheduled['counter-wipe']>=9000,'first two gestures remain distinct observations');
 const painter=global.GAME.CharacterActivity;painter.update(0,state());
 function clothXAt(time){
   painter.preview('counter-wipe',time);
   const marks=[],g={fillStyle:'',fillRect(x,y,w,h){marks.push({x,y,w,h,color:this.fillStyle});}};
   painter.drawWipe(g,0,0);
-  const cloth=marks.find(mark=>mark.color==='#81918b'&&mark.y===46&&mark.w===7&&mark.h===2);
-  assert(cloth,'seven-pixel cloth remains on the authored counter plane');
+  const cloth=marks.find(mark=>mark.color==='#81918b'&&mark.y===46&&mark.w===8&&mark.h===2);
+  assert(cloth,'eight-pixel cloth remains on the authored counter plane');
   return cloth.x;
 }
 assert.equal(clothXAt(0),90,'wipe begins near Norma');
-assert.equal(clothXAt(1500),101,'wipe reaches across the counter');
+assert.equal(clothXAt(1500),107,'wipe reaches across the clear counter patch');
 assert.equal(clothXAt(2900),90,'wipe returns, not a one-way slide');
 const a=create(1989),b=create(1989),s=state();a.update(0,s);b.update(0,state());
 assert.equal(a.pose('booth-sip'),-1);a.play('booth-sip');a.update(100,s);assert.equal(a.pose('booth-sip'),0);a.update(900,s);assert.equal(a.pose('booth-sip'),3);

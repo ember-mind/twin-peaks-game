@@ -32,7 +32,7 @@ GAME.AmbientLife.register('hotel_gn', [
 
 Coordinates and region sizes are integer **world pixels**, never screen coordinates. `depth` is the furniture's existing foot/occlusion boundary. Each affected region can specify its own depth. This lets a lamp affect both back-wall wood and a foreground countertop without painting twice or disappearing behind a redraw. Rendering is observational: it never advances time or consumes RNG.
 
-Supported options: `id`, `type`, `x`, `y`, `depth`, `enabled`, `intensity`, `variants`, optional continuous `phase` in milliseconds, `duration:[min,max]`, intermittent `delay:[min,max]`, `probability` (0–1), and affected `regions`. Neon additionally accepts small local `segments` that must align with existing lit sign pixels.
+Supported options: `id`, `type`, `x`, `y`, `depth`, `enabled`, `intensity`, `variants`, optional continuous `phase` in milliseconds, `duration:[min,max]`, intermittent `delay:[min,max]`, optional intermittent `firstDelay:[min,max]`, `probability` (0–1), and affected `regions`. `firstDelay` stages only the first observation after scene entry; recurrence still uses `delay`, and elements keep independent clocks. Neon additionally accepts small local `segments` that must align with existing lit sign pixels.
 
 ## Timing and restraint
 
@@ -77,7 +77,7 @@ Reactive behaviors must not use random timers as their primary trigger. They may
 
 ### Machine activity
 
-`MACHINE_IDLE_ACTIVITY` uses the existing per-element intermittent scheduler: 8–25 seconds idle, then 500–900 ms of activity. Its renderer knows only configured pixel marks, not appliance geometry. Double R registers two restrained status-light configurations on the existing coffee-machine fascia (one or two pixels). Other equipment can register different marks/colors at its own integer anchor. It is static for most of the time.
+`MACHINE_IDLE_ACTIVITY` uses the existing per-element intermittent scheduler: 8–25 seconds idle, then 500–900 ms of activity by default. Its renderer knows only configured pixel marks, not appliance geometry. Double R overrides those ranges with a slow, bounded percolator cycle and two compact fascia/carafe clusters large enough to survive native scale. Other equipment can register different marks/colors at its own integer anchor. It is static for most of the time.
 
 ```js
 AmbientLife.register('office', [{

@@ -1,5 +1,7 @@
 # Double R — second Intent-Driven Environment experiment
 
+> Visual implementation note: this Program experiment remains architecture history. Current room-scale art and vitality result lives in [intent-room-double-r-vitality.md](intent-room-double-r-vitality.md); older booth-only verdicts below are superseded, not current art approval.
+
 ## Research frame
 
 Question: can the existing `environment.program` and unchanged Room Critic describe and improve a socially dense diner without importing the Sheriff's Station visual recipe? This branch starts at the completed Sheriff pilot `cfdc0c7`, whose parent is current `main` `e581124`. Generic Program code is frozen during the first Double R pass. All observations below use actual production-native game captures, not concept art.

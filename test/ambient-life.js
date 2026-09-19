@@ -33,6 +33,15 @@ assert.throws(()=>custom.register('bad',[{id:'x',type:'STEAM_SMALL',x:.5,y:0,dep
 const engine=fs.readFileSync('js/engine.js','utf8');assert(engine.includes('GAME.AmbientLife.update(dt, S.mapId)'));assert(engine.includes('GAME.AmbientLife.draw(g,S.mapId,cx,cy,footY,nextFootY)'));
 console.log('AMBIENT-LIFE-PASS clocks, duty cycle,7 steam states, independent lamps, deterministic replay, read-only draw, depth, pause, disable and reuse');
 
+const staged=create(9);staged.register('room',[{id:'work',type:'ACTOR_ACTIVITY',x:0,y:0,depth:1,
+  firstDelay:[5000,5000],delay:[22000,22000],duration:[3000,3000]}]);staged.update(0,'room');
+assert.equal(staged.snapshot('room').items[0].next,5000,'firstDelay authors the opening observation');
+staged.update(5000,'room');assert.equal(staged.snapshot('room').items[0].active,true);
+staged.update(3000,'room');assert.equal(staged.snapshot('room').items[0].next,30000,'normal delay owns recurrence after opening');
+assert.throws(()=>staged.register('bad-first',[{id:'x',type:'ACTOR_ACTIVITY',x:0,y:0,depth:1,firstDelay:[0,2]}]),/firstDelay/);
+assert.throws(()=>staged.register('short-first',[{id:'x',type:'ACTOR_ACTIVITY',x:0,y:0,depth:1,firstDelay:[5000]}]),/firstDelay/);
+assert.throws(()=>staged.register('nan-delay',[{id:'x',type:'ACTOR_ACTIVITY',x:0,y:0,depth:1,delay:[5000,NaN]}]),/delay/);
+
 // v0.1.1: variant/duration changes happen only after a completed rest frame.
 const organic=create(1989);organic.register('lab',[{id:'steam',type:'STEAM_SMALL',x:0,y:0,depth:1,variants:3,duration:[1200,1360]}]);organic.update(0,'lab');
 const variants=new Set(),durations=new Set();let previous=organic.snapshot('lab').items[0];

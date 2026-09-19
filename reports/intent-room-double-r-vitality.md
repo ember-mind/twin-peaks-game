@@ -1,6 +1,6 @@
 # Double R — room beauty and vitality pass
 
-Status: implementation plan recorded before renderer changes. Final evidence and verdict will replace the provisional sections below.
+Status: implemented and verified in real native renderer. Plan checkpoint: `e9b8398`.
 
 ## Phase 1 — repo and Vault audit
 
@@ -97,6 +97,8 @@ Risk: synchronized pulses feel staged; motion must remain eligible only when act
 
 Choose **A + restrained C**. Both express one causal idea: create a believable working surface, then show someone using it. Keep B as comparison logic, not additive decoration.
 
+Implementation note: first A+C still was materially indistinguishable from baseline at native scale in blind review. One restrained part of B was then admitted: value/light differentiation of existing table states. No new booth prop or geometry was added.
+
 Proposed-direction rubric: composition 8, form 8, storytelling 8, vitality 8, playable experience 8. These are targets, not results.
 
 ## Phase 4 — implementable plan
@@ -110,6 +112,115 @@ Proposed-direction rubric: composition 8, form 8, storytelling 8, vitality 8, pl
 
 Unchanged: map rows/model, collision, doors, cast windows, narrative state, player camera, environment Program schema and global Ambient Life scheduler.
 
+Plan variance found during real capture: independent wipe/sip clocks could still overlap in opening passage. Small optional `firstDelay` support was added to existing Ambient Life scheduler, with recurrence left unchanged. This is documented, tested and reviewed below; it is not another lifecycle or activity system.
+
 ## Final evidence and verdict
 
-Pending implementation.
+### Phase 5 — implementation
+
+Static art changed at room scale, without moving geometry:
+
+- upper service wall now reads as three depth planes: wood wall, one continuous 135×31 px near-black-green work recess, public counter;
+- duplicate rails and drawer rhythm were reduced; storage masses stay left/right, leaving one quiet work patch behind Norma;
+- counter now has a deeper cream top, thin front edge, broad burgundy apron and compressed dark plinth;
+- booth construction stays shared, but existing occupied/ready/cleared states use broad surface value and local light. Occupied diagonal tables support faces and hands; cleared lower-right table recedes;
+- no decorative prop was added. Existing equipment, sign, pie case, guests, center island and circulation remain.
+
+Temporal changes use existing ownership and archetypes:
+
+- `counter-wipe` gets one early 5–7 s opening window, larger wrist travel and an 8×2 px cloth;
+- `booth-sip` becomes later 16–20 s beat;
+- recurrence remains slow and independent: wipe 22–30 s, sip 26–34 s;
+- existing `MACHINE_IDLE_ACTIVITY` percolator marks become compact native-readable clusters with a 6.5–12.5 s rest and 1.1–1.5 s action;
+- Ambient Life gains optional `firstDelay` only for initial observation. Normal `delay` still owns recurrence. It stores no narrative or actor state.
+
+An early capture exposed wipe/sip overlap. That version was rejected. In final seeded 30-second Chrome reel, relative to first stationary frame, wipe is visible around 8.6–13.8 s, room returns quiet, and sip arrives around 26.4–29.0 s. No human-action overlap.
+
+### Phase 6 — visual and playable review
+
+[Native before/after](../artifacts/intent-room-double-r-grid/vitality-pass/final/before-after-native.png) · [3× inspection](../artifacts/intent-room-double-r-grid/vitality-pass/final/before-after-3x.png) · [six-frame temporal evidence](../artifacts/intent-room-double-r-grid/vitality-pass/final/motion-sequence-native.png) · [service gesture 4×](../artifacts/intent-room-double-r-grid/vitality-pass/final/wipe-service-4x.png) · [real Chrome manifest](../artifacts/intent-room-double-r-grid/vitality-pass/final/cdp-real/manifest.json)
+
+Final still differs from baseline in 7,642 of 49,152 native pixels (15.5%). This is scale evidence, not quality proof. SHA-256: final native `28e6d02d…a52496`; temporal grid `04ab8a37…cc843`; capture manifest `958323d3…fa80`.
+
+Observed final eye flow:
+
+`neon/menu → inhabited dark service recess + Norma → pie/coffee counter → occupied diagonal booths → center island/player`
+
+Clearly improved:
+
+- counter has space behind it; staff no longer sits on same visual stripe as wall storage;
+- broad dark/light/cream/burgundy masses survive 1× and separate wood, work void, laminate and vinyl;
+- Norma's usable patch and existing tools form one service composition rather than independent props;
+- occupied and quiet booth states break repetition without destroying shared diner rhythm;
+- first 30 seconds contain two readable human beats separated by quiet time. Room life now has hierarchy, not simultaneous garnish.
+
+Improved only slightly:
+
+- overall architecture remains a wide, nearly bilateral room;
+- center island still competes somewhat with small bodies;
+- wipe is readable when observing, not guaranteed during fast traversal.
+
+Risk/regression: continuous dark recess is more spatially legible, but also a strong horizontal graphic band. Further contrast would make it theatrical; current value is accepted ceiling.
+
+### Final blind-critic rubric
+
+| Dimension | Baseline | Final | Verdict |
+| --- | ---: | ---: | --- |
+| Composition | 8.2/10 | 8.4/10 | Service depth and diagonal social emphasis now guide eye. |
+| Form/material readability | 7.8/10 | 8.4/10 | Four broad material planes survive native scale. |
+| Environmental storytelling | 8.4/10 | 8.8/10 | Existing objects now behave as work/social clusters. |
+| Vitality/temporal life | 6.6/10 | 8.3/10 | Early work beat, pause, later social beat; independent clocks. |
+| Playable experience | 7.5/10 | 8.1/10 | Real route stays clear; desire to linger still needs human playtest. |
+
+Fresh blind critic saw only supplied PNGs and judged native 1× first. Full note: [final-blind.md](../artifacts/intent-room-double-r-grid/vitality-pass/review/final-blind.md). Main judgment: **material improvement, accepted**. It changes room hierarchy and temporal reading, not only local pixels. Claim stops short of “player definitely pauses”: no human playtest supports that yet.
+
+### Phase 7 — test result
+
+All gates reran after final static v2:
+
+| Gate | Result |
+| --- | --- |
+| diner layout | PASS |
+| diner Program | PASS |
+| Ambient Life deterministic | PASS |
+| Ambient Life organic | PASS — 48 seamless cycles, 3 variants |
+| native ambient frames | PASS — diner 6 animated px / 4 frames; roadhouse 56/2; redroom 16/2 |
+| Character Activity | PASS |
+| retro production | PASS — 54/54 |
+| contact shadows | PASS — 10/10 |
+| interior reachability | PASS — 42/42; 8/8 interiors connected |
+| prop semantics | PASS — 24/24 |
+| smoke | PASS — 415 checks |
+| walkthrough | PASS — 85 acquisitions, finale reached |
+| Chrome Act 4 route C | PASS — 130/130 assertions |
+
+Chrome logged one expected test-server `favicon.ico` 404. Six tracked route/transcript artifacts regenerated by Chrome were restored to HEAD, as required; they are not part of this art pass.
+
+### Ownership review
+
+No duplicate ownership introduced. Changed production boundaries:
+
+- `js/retro-authored.js`: appearance only;
+- `js/ambient-life-scenes.js`: existing diner effect registration;
+- `js/character-activity.js`: existing diner behavior registration/drawing;
+- `js/ambient-life.js`: generic optional initial-delay scheduling, tested and documented.
+
+Unchanged: `js/maps.js`, rows, collision, doors/connections, Cast Presence, narrative state, camera, Program schema and World Catalog. `firstDelay` schedules observation; it does not assert a world event.
+
+### Review roles
+
+- Astra high: three room directions, service massing, restrained booth-state pass;
+- Luna xhigh: bounded repository/constraint audit, fresh PNG-only critics, deterministic gates, hostile final diff review;
+- lead integration: Vault synthesis, native-scale visual judgment, acceptance/rejection, ownership and final report.
+
+Bounded delegation followed cavecrew guidance: agents gathered or changed narrow surfaces; final art direction and integration stayed with lead.
+
+Hostile diff review found one valid validation bug: one-element or non-finite timing ranges could pass and later schedule `NaN`. Validation now requires exactly two finite values for `delay`, `duration` and `firstDelay`; regression tests cover malformed new ranges. Review found no geometry, collision, Cast, narrative, coordinate or ownership regression. Capture manifest's dirty-status snapshot truthfully records an intermediate evidence directory that was later excluded from final tree.
+
+After fix, Ambient Life deterministic/organic, native frame, Character Activity, diner Program and smoke 415 reran green.
+
+### Remaining weaknesses / next best follow-up
+
+1. Human five-second-entry playtest: record first/second/third read and whether gesture is noticed while moving.
+2. If center island still outranks people, reduce its local contrast—not add props.
+3. Test dark-recess value on another display; only tune tone, never reopen geometry without new evidence.

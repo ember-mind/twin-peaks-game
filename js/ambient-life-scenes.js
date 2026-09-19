@@ -15,8 +15,10 @@
     {id:'pendant-middle',type:'LIGHT_WARM_VARIATION',duration:[1200,1600],x:67,y:5,depth:0,regions:[{x:61,y:19,w:8,h:1,depth:0},{x:85,y:48,w:10,h:1,depth:64}]},
     {id:'pendant-east',type:'LIGHT_WARM_VARIATION',duration:[1200,1600],x:187,y:5,depth:0,regions:[{x:180,y:19,w:8,h:1,depth:0},{x:159,y:47,w:10,h:1,depth:64}]},
     {id:'double-r-neon',type:'LIGHT_NEON',duration:[700,850],x:72,y:-13,depth:0,variants:3,tubes:tubes,segments:[{x:46,y:7,w:7,h:2},{x:7,y:10,w:4,h:2},{x:46,y:13,w:6,h:2}],regions:[{x:79,y:13,w:52,h:2,depth:0}]},
-    {id:'coffee-machine',type:'MACHINE_IDLE_ACTIVITY',x:35,y:31,depth:64,variants:2,marks:[
-      [{x:12,y:5,color:'#e9bd5d'}],[{x:12,y:5,color:'#d9dfc9'},{x:12,y:6,color:'#e9bd5d'}]]},
+    {id:'coffee-machine',type:'MACHINE_IDLE_ACTIVITY',x:35,y:31,depth:64,variants:2,
+      delay:[6500,12500],duration:[1100,1500],intensity:1.45,marks:[
+      [{x:11,y:4,w:3,h:3,color:'#e9bd5d'},{x:5,y:7,w:2,h:3,color:'#906744'}],
+      [{x:11,y:4,w:3,h:3,color:'#d9dfc9'},{x:5,y:6,w:3,h:4,color:'#906744'},{x:6,y:6,w:1,h:3,color:'#e9bd5d'}]]},
     {id:'wall-clock',type:'CLOCK_TICK',x:195,y:-4,depth:0,startSeconds:10800,
       initialHands:[0,0,3],face:[[0,-3,1,4],[0,0,3,1]],palette:{face:'#f4e6c8',hand:'#292b26',second:'#b88759'}},
     {id:'pie-glass',type:'GLASS_SUBTLE_REFLECTION',x:133,y:35,depth:64,variants:2,travel:32}

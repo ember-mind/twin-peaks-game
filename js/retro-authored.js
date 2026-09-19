@@ -4398,6 +4398,10 @@
       R(g,x+i+2,y-2,1,1,'#aa4650');
       if((i+variant)%3===0) R(g,x+i+1,y-11,2,1,'#cf7770');
     }
+    // Shared upholstery, different lived light: the cleared table recedes;
+    // occupied seats give pale faces a quieter, broad burgundy background.
+    R(g,x+3,y-13,w-6,16,variant===3?'rgba(23,37,30,.29)':
+      guest?'rgba(35,27,29,.16)':'rgba(35,27,29,.07)');
     R(g,x+2,y-1,w-4,6,p.redDark); R(g,x+3,y,w-6,3,p.red);
     R(g,x+4,y,w-8,1,p.redHi); R(g,x+2,y+5,w-4,2,p.redDark);
     R(g,x+1,y+7,w-2,2,p.woodLight);
@@ -4413,10 +4417,17 @@
     R(g,x+3,y+1,w-6,13,p.woodDark);
     R(g,x+3,y+2,1,9,'#8a6548');
     R(g,x+4,y+1,1,1,'#8a6548');
-    R(g,x+4,y+2,w-8,8,'#e4d2a9');
+    R(g,x+4,y+2,w-8,8,variant===3?'#b9ae90':guest?'#c7b187':'#e4d2a9');
+    if(guest) {
+      // A broad lamp-side working patch places hands, cup and face together;
+      // the unoccupied half remains the same laminate in quieter light.
+      var litTableX=guest.seat==='left'?x+5:x+w-25;
+      R(g,litTableX,y+2,20,8,'#dfcca4');
+      R(g,litTableX+(guest.seat==='left'?0:6),y+2,14,6,'#e4d2a9');
+    }
     R(g,x+5,y+1,w-10,1,p.creamShade);
     R(g,x+4,y+2,1,8,p.cream); R(g,x+w-6,y+2,2,8,'#c7b187');
-    R(g,x+5,y+10,w-10,1,p.cream);
+    R(g,x+5,y+10,w-10,1,variant===3?p.creamShade:p.cream);
     R(g,x+5,y+11,w-10,1,'#b59a72');
     // Warm reflected wood in the recess keeps the base from becoming a black bar.
     R(g,x+5,y+12,w-10,1,'#76533f');
@@ -4616,10 +4627,18 @@
   }
   function interiorBackbar(g,x,y,p) {
     interiorPanel(g,x,y-14,224,58,p);
-    // A service floor and plinth separate working space from the back wall.
+    // The quiet work floor continues behind the counter; board joints belong
+    // at its exposed ends, not as stripes through the staff silhouette.
     R(g,x+16,y+30,192,18,'#67513b');
-    for(var py=32;py<48;py+=5) R(g,x+16,y+py,192,1,'#493a2d');
-    R(g,x+28,y+25,154,6,p.woodDark); R(g,x+29,y+25,152,2,p.woodLight);
+    R(g,x+16,y+40,24,1,'#493a2d'); R(g,x+179,y+40,29,1,'#493a2d');
+    // One recessed working zone connects coffee, staff and pastry service.
+    // Equipment breaks its silhouette; no decorative architectural bays.
+    R(g,x+40,y+12,139,34,p.woodDark);
+    R(g,x+42,y+14,135,31,'#17251e');
+    R(g,x+40,y+12,139,2,p.woodHi);
+    R(g,x+40,y+14,2,31,p.woodHi);
+    R(g,x+177,y+14,2,31,p.wood);
+    R(g,x+42,y+14,135,2,p.ink);
     // Side service door, clock and local coffee pledge.
     R(g,x+17,y+2,21,36,p.woodDark); R(g,x+19,y+3,17,33,p.redDark);
     R(g,x+21,y+5,13,21,p.red); R(g,x+24,y+10,7,7,p.gold);
@@ -4636,7 +4655,7 @@
     townMicroWord(g,'PIE',x+147,y+5,p.cream); townMicroWord(g,'3.50',x+164,y+11,p.gold);
     // Asymmetric clusters: family photos, stacked crockery and pantry jars.
     interiorPicture(g,x+43,y-10,14,14,p,'photo');
-    R(g,x+41,y+10,29,2,p.woodLight); R(g,x+41,y+23,29,2,p.woodLight);
+    R(g,x+41,y+10,29,2,p.woodLight);
     [43,53,64].forEach(function(dx,n) {
       R(g,x+dx,y+14-(n%2)*3,4,8+(n%2)*3,n===2?p.green:p.creamShade);
       R(g,x+dx,y+13-(n%2)*3,4,2,n===2?p.gold:p.metal);
@@ -4647,12 +4666,16 @@
       if(n===3) { R(g,x+dx,y+shelfY-4,5,8,p.green); R(g,x+dx+1,y+shelfY-6,3,2,p.gold); }
       else { R(g,x+dx,y+shelfY,5,5,p.creamShade); R(g,x+dx+1,y+shelfY,3,1,p.cream); }
     });
-    R(g,x+76,y+23,57,2,p.woodLight); R(g,x+76,y+25,57,2,'#282820');
-    // Lower cabinets, warming shelf, service tins and chrome urns form masses.
-    R(g,x+40,y+26,139,9,p.woodDark); R(g,x+41,y+26,137,2,p.woodLight);
-    for(var dx=42;dx<176;dx+=17) {
-      R(g,x+dx,y+29,15,5,p.wood); R(g,x+dx+6,y+30,4,1,p.gold);
-    }
+    // A single crockery ledge replaces the doubled horizontal rails.
+    R(g,x+76,y+23,57,1,p.woodLight);
+    // Storage stays with the two service clusters. The open middle leaves
+    // real visual room for Norma rather than drawer handles behind her body.
+    R(g,x+42,y+29,27,10,p.wood); R(g,x+44,y+29,23,1,p.woodHi);
+    R(g,x+53,y+32,5,1,p.gold);
+    R(g,x+131,y+29,45,10,p.wood); R(g,x+133,y+29,41,1,p.woodHi);
+    R(g,x+151,y+30,1,8,p.woodDark);
+    R(g,x+140,y+32,4,1,p.gold); R(g,x+162,y+32,4,1,p.gold);
+    R(g,x+70,y+39,35,6,'#17251e');
     R(g,x+106,y+24,22,12,p.ink); R(g,x+107,y+25,20,9,p.metal);
     R(g,x+109,y+27,6,5,p.woodDark); R(g,x+118,y+27,7,5,p.woodDark);
     R(g,x+109,y+27,6,1,p.gold); R(g,x+118,y+27,7,1,p.gold);
@@ -4678,15 +4701,26 @@
     var counterX=x+model.counter[0]*16, counterY=y+model.counter[1]*16, counterW=model.counter[2]*16;
     R(g,counterX+2,counterY+16,counterW-2,5,'rgba(32,26,19,.28)');
     interiorContact(g,counterX+1,counterY+18,counterW-2,p);
-    R(g,counterX,counterY,counterW,17,p.ink); R(g,counterX+1,counterY+6,counterW-2,8,p.redDark);
-    R(g,counterX+2,counterY+6,counterW-4,6,p.red); R(g,counterX+3,counterY+6,counterW-6,1,p.redHi);
-    for(i=4;i<counterW-5;i+=22) { R(g,counterX+i,counterY+8,18,3,p.redDark); R(g,counterX+i+1,counterY+8,16,1,p.redHi); }
-    R(g,counterX,counterY-2,counterW,7,p.creamShade); R(g,counterX+1,counterY-2,counterW-2,4,p.cream);
-    R(g,counterX+1,counterY+4,counterW-2,1,p.metalHi); R(g,counterX+2,counterY+15,counterW-4,1,p.metal);
-    // Broken specular strips keep polished laminate distinct from matte wood.
-    R(g,counterX+10,counterY-1,20,1,p.metalHi);
-    R(g,counterX+53,counterY,16,1,p.metalHi);
-    R(g,counterX+94,counterY-1,26,1,p.gold);
+    R(g,counterX,counterY,counterW,17,p.ink);
+    // Broad vinyl front, with quiet construction joints rather than a row
+    // of highlighted inset boxes competing with the crockery above.
+    R(g,counterX+1,counterY+6,counterW-2,8,p.redDark);
+    R(g,counterX+2,counterY+6,counterW-4,6,p.red);
+    R(g,counterX+3,counterY+6,counterW-6,1,p.redHi);
+    for(i=48;i<counterW-4;i+=48) R(g,counterX+i,counterY+8,1,4,p.redDark);
+    R(g,counterX+5,counterY+7,31,1,'#a2444e');
+    R(g,counterX+counterW-40,counterY+7,27,1,'#a2444e');
+    // The top extends rearward within the existing service footprint; its
+    // front lip and compressed plinth remain on the original depth boundary.
+    R(g,counterX,counterY-4,counterW,9,p.creamShade);
+    R(g,counterX+1,counterY-4,counterW-2,7,'#dfcca4');
+    R(g,counterX+32,counterY-3,34,5,p.cream);
+    R(g,counterX+1,counterY-4,counterW-2,1,p.creamShade);
+    R(g,counterX+1,counterY+4,counterW-2,1,p.metalHi);
+    R(g,counterX+2,counterY+14,counterW-4,1,p.metal);
+    R(g,counterX+3,counterY+15,counterW-6,1,p.woodDark);
+    // Leave a clean usable patch between coffee and the pie-service cluster.
+    R(g,counterX+34,counterY-2,28,1,p.metalHi);
     interiorServiceCluster(g,counterX+3,counterY-17,p,'coffee');
     interiorServiceCluster(g,counterX+67,counterY-14,p,'plates'); interiorPieCase(g,counterX+counterW-49,counterY-15,48,p);
     interiorCup(g,counterX+35,counterY-3,p); interiorCup(g,counterX+75,counterY-3,p);
@@ -4721,7 +4755,11 @@
     model.stools.forEach(function(a){interiorStool(g,x+a[0]*16,y+a[1]*16,p);});
     model.booths.forEach(function(a,n){
       interiorBooth(g,x+a[0]*16,y+a[1]*16,a[2]*16,p,n,model.guests[n]);
-      interiorWarmLight(g,x+a[0]*16+3,y+a[1]*16-4,42,19,[.75,1.05,.9,.5][n]);
+      var boothGuest=model.guests[n];
+      if(boothGuest) {
+        var boothLightX=x+a[0]*16+(boothGuest.seat==='left'?2:15);
+        interiorWarmLight(g,boothLightX,y+a[1]*16-15,31,30,1.05);
+      } else interiorWarmLight(g,x+a[0]*16+3,y+a[1]*16-4,42,19,n===3?.12:.6);
     });
     interiorSpecials(g,x+model.specials[0]*16,y+model.specials[1]*16,p);
     interiorFloorPlant(g,x+model.islandPlant[0]*16-4,y+model.islandPlant[1]*16,p);
