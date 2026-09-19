@@ -18,6 +18,7 @@ require(path.resolve(__dirname, '..', 'js', 'lt-save.js'));
 const LT = global.LT;
 const Save = LT.Save;
 
+const closer = (c) => Math.round((c + 4 * (1 - c / 125)) * 100) / 100;   // +4, less the closer two people already are
 let checks = 0;
 function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + msg); }
 
@@ -289,8 +290,8 @@ async function conversationSurvives() {
   ok(conv && conv.status === 'completed', 'the conversation record ends completed');
   const ra = restored.state.characters.resident_a.relationships.resident_b;
   const rb = restored.state.characters.resident_b.relationships.resident_a;
-  ok(ra.trust === relA.trust + 3 && ra.closeness === relA.closeness + 4 &&
-     rb.trust === relB.trust + 3 && rb.closeness === relB.closeness + 4,
+  ok(ra.trust === relA.trust + 3 && ra.closeness === closer(relA.closeness) &&
+     rb.trust === relB.trust + 3 && rb.closeness === closer(relB.closeness),
      'the +3 trust / +4 closeness gain is applied once per participant, not once per activity');
 }
 

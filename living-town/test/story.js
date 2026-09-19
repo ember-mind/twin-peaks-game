@@ -155,5 +155,22 @@ const snapshot = (sim) => JSON.stringify(sim.state);
   const beats = Story.beats(pw, 1);
   ok(beats.length > 5 && beats.every((b) => pw.state.events.some((e) => e.seq === b.seq && e.text === b.text && e.minute === b.minute)) && JSON.stringify(pw.state) === before2, 'beats are events of that day, verbatim, and reading them changes nothing');
 
+  console.log('# between them');
+  const bw = LT.Scenario.town({});
+  await bw.runUntil(1, 1200);
+  const BC = bw.state.characters;
+  const bonds = Story.bonds(bw, BC.resident_d);
+  ok(bonds.length >= 2 && bonds.every((b) => BC.resident_d.relationships[b.id].closeness === b.closeness && typeof b.word === 'string') && bonds[0].closeness >= bonds[bonds.length - 1].closeness, 'the people someone knows, closest first, as the state has them');
+  const stranger = Object.keys(BC.resident_d.relationships).find((id) => !LT.World.NEIGHBOURS.find((n) => n.id === 'resident_d').relationships[id]);
+  ok(stranger && BC.resident_d.relationships[stranger].closeness < 50, 'someone met today started as a stranger, not as a friend (' + (stranger && BC.resident_d.relationships[stranger].closeness) + ')');
+  const q2 = LT.Scenario.day1({ intervention: false, everyday: false }); q2.requestDecision = function () { return null; };
+  const was = q2.state.characters.resident_a.relationships.resident_b.closeness;
+  q2.actorIds().forEach((id) => { q2.state.characters[id].commitments = []; });   // nothing to break: only the drift is measured
+  q2.state.characters.resident_a.relationships.resident_b.lastMetDay = 1;
+  while (q2.state.day < 5) q2.tick();
+  const now2 = q2.state.characters.resident_a.relationships.resident_b.closeness;
+  ok(now2 < was && now2 >= was - 6 && Story.bonds(q2, q2.state.characters.resident_a)[0].seen === '4 days ago', 'not seeing someone lets them drift, slowly: ' + was + ' -> ' + now2);
+  ok(Story.lastLine(bw, BC.resident_d) === null, 'with a policy that has no words, nothing is quoted');
+
   console.log('\nstory: ' + checks + '/' + checks);
 })().catch((e) => { console.error(e); process.exit(1); });

@@ -148,6 +148,27 @@
     return out;
   };
 
+  /* ---------------- between them ---------------- */
+
+  function bondWord(v) { return v >= 80 ? 'close' : v >= 55 ? 'friends' : v >= 30 ? 'acquainted' : 'barely know each other'; }
+  S.bonds = function (sim, c) {
+    var day = sim.state.day;
+    return Object.keys(c.relationships || {}).filter(function (id) { return !!sim.state.characters[id]; }).map(function (id) {
+      var r = c.relationships[id], back = (sim.state.characters[id].relationships || {})[c.id];
+      return { id: id, name: sim.state.characters[id].name, closeness: r.closeness, trust: r.trust, word: bondWord(r.closeness),
+               theirs: back ? back.closeness : null,
+               seen: !r.lastMetDay ? 'not yet, in this town\'s days' : r.lastMetDay === day ? 'today' : r.lastMetDay === day - 1 ? 'yesterday' : (day - r.lastMetDay) + ' days ago' };
+    }).sort(function (a, b) { return b.closeness - a.closeness || (a.id < b.id ? -1 : 1); });
+  };
+
+  /* What is being said, if anyone has given words to it: the last line of the
+   * talk this person is in. Null with a policy that has no words. */
+  S.lastLine = function (sim, c) {
+    var conv = c.activity && c.activity.conversationId ? sim.state.conversations.filter(function (v) { return v.id === c.activity.conversationId; })[0] : null;
+    var line = conv && conv.lines && conv.lines.length ? conv.lines[conv.lines.length - 1] : null;
+    return line ? { name: sim.state.characters[line.actorId].name, text: line.text, source: line.source } : null;
+  };
+
   /* ---------------- the day, looked back on ---------------- */
 
   var TOLD = {   // event types worth a line of their own, most telling first

@@ -548,6 +548,9 @@
     var why = LT.Story.why(c.recentDecisions[0]);
     text(el('lt-caption-doing'), c.name + ' · ' + (act ? phaseLabel + act.label : (c.pending ? 'deciding what to do next' : 'between things')));
     text(el('lt-caption-why'), state.held && !state.replay ? 'The town is waiting for ' + state.held.source + ' to decide for ' + state.held.name + '.' : (why ? why.line : ''));
+    var line = LT.Story.lastLine(sim, c);
+    text(el('lt-caption-said'), line ? line.name + ': “' + line.text + '”  — ' + line.source : '');
+    paintBonds(sim, c);
     paintStakes(sim, c);
     paintHand(state);
     paintRecap(state);
@@ -556,6 +559,16 @@
     paintEvents(sim, c);
     paintDecision(c);
     if (state.inspector) paintInspector(state, c);
+  }
+
+  function paintBonds(sim, c) {
+    var rows = LT.Story.bonds(sim, c);
+    var html = rows.length ? rows.map(function (r) {
+      return '<div class="lt-bond"><span>' + escape(r.name) + '</span><span class="lt-meter"><i style="width:' + r.closeness.toFixed(0) + '%"></i></span>' +
+        '<small>' + escape(r.word + ' · trust ' + Math.round(r.trust) + ' · last seen ' + r.seen) + '</small></div>';
+    }).join('') : '<p class="note">Nobody yet.</p>';
+    var host = el('lt-bonds');
+    if (host.__html !== html) { host.innerHTML = html; host.__html = html; }
   }
 
   function paintStakes(sim, c) {

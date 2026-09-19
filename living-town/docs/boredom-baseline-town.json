@@ -1,5 +1,5 @@
 {
-  "commit": "fb1b9d520d6fb01f194fd89558af4afe73a1e34e",
+  "commit": "6ce0417475de12011af0daa360eb738cd79efb6a",
   "seed": 20260918,
   "days": 3,
   "firstDay": 1,
@@ -152,7 +152,7 @@
         "COMMITMENT_KEPT": 2
       },
       "decisions": 294,
-      "closeCalls": 43,
+      "closeCalls": 42,
       "distinctActivities": {
         "resident_a": [
           "buy_meal",
@@ -246,7 +246,7 @@
         "COMMITMENT_KEPT": 2
       },
       "decisions": 276,
-      "closeCalls": 38,
+      "closeCalls": 37,
       "distinctActivities": {
         "resident_a": [
           "buy_meal",
@@ -351,7 +351,7 @@
       "FOOD_PARCEL_OPENED": 1
     },
     "decisions": 795,
-    "closeCalls": 127,
+    "closeCalls": 125,
     "distinctActivities": {
       "resident_a": [
         "accept_offer",

@@ -289,9 +289,12 @@
 
   Sim.prototype.adjustRelationship = function (actor, otherId, deltas) {
     actor.relationships = actor.relationships || {};
-    var r = actor.relationships[otherId] || (actor.relationships[otherId] = { trust: 50, closeness: 50, lastMetDay: 0 });
+    /* Someone met for the first time is a stranger one is willing to talk to. */
+    var r = actor.relationships[otherId] || (actor.relationships[otherId] = { trust: 40, closeness: 25, lastMetDay: 0 });
     if (deltas.trust) r.trust = U.clamp(U.round2(r.trust + deltas.trust), 0, 100);
-    if (deltas.closeness) r.closeness = U.clamp(U.round2(r.closeness + deltas.closeness), 0, 100);
+    /* Getting closer is quick between strangers and slow between old friends. */
+    var gain = deltas.closeness > 0 ? deltas.closeness * (1 - r.closeness / 125) : deltas.closeness;
+    if (deltas.closeness) r.closeness = U.clamp(U.round2(r.closeness + gain), 0, 100);
     r.lastMetDay = this.state.day;
     this.touch();
   };
@@ -411,6 +414,11 @@
       actor.commitments.push({ id: 'cmt_shift', kind: 'work', strength: 'soft', withId: e.employer, locationId: e.locationId,
         label: 'Finish the ' + this.locationName(e.locationId) + ' shift at ' + U.clock(e.shiftEnd), dueDay: day, dueMin: e.shiftEnd, status: 'open' });
     }
+    /* People one has not seen drift a little further off each day. */
+    Object.keys(actor.relationships || {}).forEach(function (otherId) {
+      var r = actor.relationships[otherId];
+      if (r.lastMetDay && r.lastMetDay < day - 1 && r.closeness > 10) r.closeness = U.round2(Math.max(10, r.closeness - 2));
+    });
     var active = (actor.goals || []).some(function (g) { return !g.reached && !g.missed; });
     var next = !active && (actor.nextGoals || []).length ? actor.nextGoals.shift() : null;
     if (next) {

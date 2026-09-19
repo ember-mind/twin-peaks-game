@@ -15,6 +15,7 @@ require(path.resolve(__dirname, '..', 'js', 'policy', 'lt-mock-policy.js'));
 require(path.resolve(__dirname, '..', 'js', 'lt-observer.js'));
 const LT = global.LT;
 
+const closer = (c) => Math.round((c + 4 * (1 - c / 125)) * 100) / 100;   // +4, less the closer two people already are
 let checks = 0;
 function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + msg); }
 let n = 0;
@@ -77,7 +78,7 @@ function conversationIsOneSharedActivity() {
   tickN(sim, 25);
   ok(count(sim, 'TALKED') === 1, 'two people finishing the same conversation settle it once');
   const after = rel(sim, 'resident_a', 'resident_b');
-  ok(after.trust === before.trust + 3 && after.closeness === before.closeness + 4, 'the relationship gain is applied once, not once per participant');
+  ok(after.trust === before.trust + 3 && after.closeness === closer(before.closeness), 'the relationship gain is applied once, not once per participant');
   ok(sim.state.conversations.length === 1 && sim.state.conversations[0].status === 'completed', 'one conversation record, completed');
   ok(!a.activity && !b.activity, 'both are free again afterwards');
 }

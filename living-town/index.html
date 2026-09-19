@@ -121,6 +121,9 @@
   .caption { min-height: 44px; padding: 8px 2px 0; }
   .caption p { margin: 0; }
   .caption-doing { font-size: 15px; }
+  .caption-said { font-size: 14px; color: #e08f9c; margin-top: 3px !important; }
+  .lt-bond { display: grid; grid-template-columns: 70px 1fr; gap: 2px 8px; align-items: center; padding: 4px 0; font-size: 13px; }
+  .lt-bond small { grid-column: 1 / -1; color: var(--dim); font-size: 12px; }
   .caption-why { color: var(--dim); font-size: 12.5px; margin-top: 3px !important; }
   .lt-stake { display: grid; grid-template-columns: 8px 1fr; gap: 2px 8px; padding: 5px 0; font-size: 13px; }
   .lt-stake i { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; background: #6d7886; }
@@ -156,6 +159,7 @@
     <div class="timeline" id="lt-timeline" aria-label="The day's moments; choose one to look back at it"></div>
     <div class="caption" id="lt-caption" aria-live="off">
       <p class="caption-doing" id="lt-caption-doing">—</p>
+      <p class="caption-said" id="lt-caption-said"></p>
       <p class="caption-why" id="lt-caption-why"></p>
     </div>
     <div class="controls">
@@ -212,6 +216,7 @@
 
     <div class="card"><h2>At stake</h2><div id="lt-stakes"></div></div>
     <div class="card"><h2>Working toward</h2><div id="lt-goals"></div></div>
+    <div class="card"><h2>Between them</h2><div id="lt-bonds"></div></div>
     <div class="card"><h2>Owes / promised</h2><div id="lt-commitments"></div></div>
     <div class="card">
       <h2 id="lt-recap-title">The day, looked back on</h2>

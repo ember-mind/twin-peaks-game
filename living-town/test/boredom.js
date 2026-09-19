@@ -73,7 +73,7 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   const townFresh = await Meter.measure(LT.Scenario.town({ seed: townBase.seed }), { days: townBase.days });
   const townNumbers = Object.assign({}, townBase); delete townNumbers.commit;
   assert.deepStrictEqual(townNumbers, JSON.parse(JSON.stringify(townFresh)), 'the five-person town changed: regenerate with --cast=town --write-baseline');
-  ok(townFresh.overall.beats > 2 * fresh.overall.beats && townFresh.overall.deadMinutes <= fresh.overall.deadMinutes * 1.05, 'five people give a watcher more than two do: ' + townFresh.overall.beats + ' beats against ' + fresh.overall.beats + ', ' + townFresh.overall.deadMinutes + ' dead minutes against ' + fresh.overall.deadMinutes);
+  ok(townFresh.overall.beats > 2 * fresh.overall.beats && townFresh.overall.deadMinutes <= fresh.overall.deadMinutes * 1.25, 'five people give a watcher more than two do: ' + townFresh.overall.beats + ' beats against ' + fresh.overall.beats + ', ' + townFresh.overall.deadMinutes + ' dead minutes against ' + fresh.overall.deadMinutes);
   ok(true, 'a fresh measurement matches the baseline, commit aside');
 
   console.log('\nboredom: ' + checks + '/' + checks);

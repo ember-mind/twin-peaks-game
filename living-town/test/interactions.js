@@ -18,6 +18,7 @@ require(path.resolve(__dirname, '..', 'js', 'lt-save.js'));
 const { walkUpAndAsk, converse } = require('./lib-talk.js');
 const LT = global.LT, W = LT.World;
 
+const closer = (c) => Math.round((c + 4 * (1 - c / 125)) * 100) / 100;   // +4, less the closer two people already are
 let checks = 0, n = 0;
 function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + msg); }
 const events = (sim, type, actorId) => sim.state.events.filter((e) => e.type === type && (!actorId || e.actorId === actorId));
@@ -201,8 +202,8 @@ async function acceptedThroughTheirOwnPolicy() {
   const talked = events(sim, 'TALKED');
   ok(talked.length === 1 && talked[0].absMinute - conv.startAbs === 25 && conv.status === 'completed', 'twenty-five minutes after it began, it is settled once');
   const after = { ab: rel(sim, 'resident_a', 'resident_b'), ba: rel(sim, 'resident_b', 'resident_a') };
-  ok(after.ab.trust === before.ab.trust + 3 && after.ab.closeness === before.ab.closeness + 4 &&
-     after.ba.trust === before.ba.trust + 3 && after.ba.closeness === before.ba.closeness + 4, 'the relationship gain is applied once to each');
+  ok(after.ab.trust === before.ab.trust + 3 && after.ab.closeness === closer(before.ab.closeness) &&
+     after.ba.trust === before.ba.trust + 3 && after.ba.closeness === closer(before.ba.closeness), 'the relationship gain is applied once to each');
   ok(sim.commitmentById(a, 'cmt_meet_friend').status === 'kept' && events(sim, 'COMMITMENT_KEPT').filter((e) => e.data.commitmentId === 'cmt_meet_friend' || /Meet/.test(e.text)).length <= 1,
      'the promise to meet is kept, once');
 }
@@ -342,7 +343,7 @@ async function bothSetOutAtOnce() {
   ok(conv.length === 1 && conv[0].mutual === true && conv[0].status === 'completed', 'one conversation, marked mutual, completed');
   ok(events(sim, 'TALK_PROPOSED').length === 0 && events(sim, 'TALK_BEGAN').length === 1 && events(sim, 'TALKED').length === 1, 'no proposal was needed — each had chosen it; it began once and settled once');
   const after = rel(sim, 'resident_a', 'resident_b');
-  ok(after.trust === before.trust + 3 && after.closeness === before.closeness + 4, 'one gain, not two');
+  ok(after.trust === before.trust + 3 && after.closeness === closer(before.closeness), 'one gain, not two');
   void a; void b;
 }
 
