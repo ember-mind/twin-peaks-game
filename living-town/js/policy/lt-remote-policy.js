@@ -36,7 +36,7 @@
        * one whose time ran out in the queue is never sent — it would be paid
        * for, refused as late, and hold up the questions that are still live. */
       var left = timeoutMs - (now() - job.asked);
-      if (left <= 0) {
+      if (left <= timeoutMs * 0.05) {                 // nothing answers in a twentieth of its time: not worth sending
         stats.timeouts++;
         job.resolve(Pol.unavailable(job.request, opts.id, 'timeout_in_queue'));
         if (queue.length) run(queue.shift());
