@@ -96,7 +96,12 @@ function renderRedroom(t) {
   return view.pixels;
 }
 
-const SCENES = { diner: renderDiner, roadhouse: renderRoadhouse, redroom: renderRedroom };
+/* M12 (93e38d7): the Roadhouse neon is a prop instance now, and js/roadhouse-art.js paints only the shell,
+ * so nothing in the paint moves with t any more. The flicker comes back as an animated prop (Roadhouse
+ * props gauntlet gap queue); until then the roadhouse detail is not sampled here. renderRoadhouse stays
+ * for that day. */
+const SCENES = { diner: renderDiner, redroom: renderRedroom };
+void renderRoadhouse;
 
 function assertDinerLifecycle() {
   freshGame();
