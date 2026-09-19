@@ -356,13 +356,24 @@
     R(126, 184, 4, 3, p.brass); R(126, 184, 4, 1, p.brassHi);
     R(113, 190, 30, 1, '#7a6440');
     R(112, 191, 32, 1, p.ink);
+    drawDoorHeader(R, p);
     drawDoorCasing(R, p);
   }
 
   function drawDoorCasing(R, p) {
-    /* The band that must repaint over whoever stands in the doorway. */
-    R(108, 172, 5, 20, p.walnutDark); R(110, 173, 1, 18, p.walnutHi);
-    R(143, 172, 5, 20, p.walnutDark); R(144, 173, 1, 18, p.walnutMid);
+    /* The band that repaints over whoever stands in the doorway. It starts at
+     * the south wall line: above y176 the casing belongs to the ground pass,
+     * because an actor on the approach tile (7,10) stands in front of it and
+     * must not be crossed by a frame line. */
+    R(108, 176, 5, 16, p.walnutDark); R(110, 177, 1, 14, p.walnutHi);
+    R(143, 176, 5, 16, p.walnutDark); R(144, 177, 1, 14, p.walnutMid);
+    R(108, 176, 40, 1, p.ink);
+  }
+
+  function drawDoorHeader(R, p) {
+    /* Casing above the wall line: ground pass only. */
+    R(108, 172, 5, 4, p.walnutDark); R(110, 173, 1, 3, p.walnutHi);
+    R(143, 172, 5, 4, p.walnutDark); R(144, 173, 1, 3, p.walnutMid);
     R(108, 170, 40, 2, p.ink);
   }
 

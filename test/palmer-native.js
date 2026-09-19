@@ -274,11 +274,13 @@ assert(hasRect(depth144, 32, 120, 32, 10), '144px interval selects the dining ta
 assert(!hasRect(depth144, 33, 146, 14, 3), '144px interval excludes the chairs at 160px');
 const depth160 = foregroundCalls(160, 192);
 assert(hasRect(depth160, 33, 146, 14, 3), '160px interval selects the dining chairs');
-assert(!hasRect(depth160, 108, 170, 40, 2), '160px interval excludes the door casing at 192px');
+assert(!hasRect(depth160, 108, 176, 40, 1), '160px interval excludes the door casing at 192px');
 const depthDoor = foregroundCalls(192, Infinity);
-assert(hasRect(depthDoor, 108, 170, 40, 2), 'the door header repaints over whoever stands in the doorway');
-assert(hasRect(depthDoor, 108, 172, 5, 20), 'the west jamb repaints over the doorway');
-assert(hasRect(depthDoor, 143, 172, 5, 20), 'the east jamb repaints over the doorway');
+assert(hasRect(depthDoor, 108, 176, 40, 1), 'the south wall line repaints over whoever stands in the doorway');
+assert(!hasRect(depthDoor, 108, 170, 40, 2),
+  'the band never reaches above the wall line: an actor on the approach tile is never crossed');
+assert(hasRect(depthDoor, 108, 176, 5, 16), 'the west jamb repaints over the doorway');
+assert(hasRect(depthDoor, 143, 176, 5, 16), 'the east jamb repaints over the doorway');
 assert(!hasRect(depthDoor, 112, 176, 32, 16),
   'the door band never repaints the leaf: an actor in the doorway stays in front of it');
 assert.equal(foregroundCalls(33, 63).length, 0, 'empty depth interval paints nothing');
