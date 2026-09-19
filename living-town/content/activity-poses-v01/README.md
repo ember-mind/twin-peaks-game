@@ -41,7 +41,7 @@ is usable. Until then every `draw` returns `false`.
 
 | poseId | directions | frames | frame ms | pivot | box | shadow | reads as |
 |---|---|---|---|---|---|---|---|
-| `seated` | down · right (+ left) | 1 | — | 12,24 | 16×21 | yes | narrow chest over a wide lap, shins straight down |
+| `seated` | down · right (+ left) | 1 | — | 12,24 | 16×21 | yes | narrow chest over a wide lap, only the toes below it |
 | `reading` | down | 2 | 900 | 12,24 | 16×24 | yes | standing, both hands holding an open book across the chest |
 | `work_counter` | down | 3 | 320 | 12,24 | 24×24 | yes | standing, a rag swinging from one hand outside the silhouette |
 | `unpacking` | down | 1 | — | 12,24 | 24×20 | yes | stooped, both arms hanging clear of the body down to hip height |
@@ -56,10 +56,10 @@ from what the runtime draws. Four things are deliberately separate:
   so a pose lands exactly where the standing sprite stood and **a person never
   jumps when the pose changes**. `tools/capture-gallery.js` fails if any
   standing-height pose leaves that ground line.
-- **box** — what the art is allowed to cover inside the cell. `unpacking` and
-  `talking` are wider than a standing figure because an arm leaves the
-  silhouette; `sleeping` is wider still and only half as tall. Both tools fail
-  if a cell paints outside its box.
+- **box** — what the art is allowed to cover inside the cell. `unpacking`,
+  `talking` and `work_counter` are wider than a standing figure because a limb
+  or a rag leaves the silhouette; `sleeping` is as wide as the cell and only
+  half as tall. Both tools fail if a cell paints outside its box.
 - **frames / frame ms** — a loop, derived from `t` by
   `LT.ActivityPoses.frameAt(poseId, t)`. Nothing advances on its own.
 - **directions** — `left` has no cell of its own; it is `right` flipped at draw

@@ -41,7 +41,7 @@
     unpacking: {
       id: 'unpacking', dirs: ['down'], frames: 1, frameMs: 0,
       pivot: [12, 24], box: [24, 20], shadow: true,
-      reads: 'stooped, shoulders rolled forward, both arms hanging clear of the body'
+      reads: 'stooped, both arms hanging clear of the body down to hip height'
     },
     sleeping: {
       id: 'sleeping', dirs: ['right'], frames: 1, frameMs: 0,
@@ -51,7 +51,7 @@
     talking: {
       id: 'talking', dirs: ['down', 'right'], frames: 2, frameMs: 430,
       pivot: [12, 24], box: [24, 24], shadow: true,
-      reads: 'standing, one forearm lifting and falling in front of the chest'
+      reads: 'standing, one forearm lifting and falling clear of the silhouette'
     }
   };
 
