@@ -71,6 +71,7 @@
     buildCharacterTabs(state);
     buildSpeedButtons(state);
     wireWorldControls(state, booted);
+    wireHand(state);
     el('lt-recap-prev').addEventListener('click', function () { stepRecap(state, -1); });
     el('lt-recap-next').addEventListener('click', function () { stepRecap(state, 1); });
     el('lt-inspector-toggle').addEventListener('click', function () {
@@ -146,6 +147,7 @@
     state.worlds++;
     if (!sim.state.characters[state.selected]) state.selected = sim.actorIds()[0];
     buildCharacterTabs(state);
+    buildHandFields(state);
     state.view.focus(state.selected);
   };
 
@@ -260,6 +262,48 @@
     setInterval(function () { pz.heartbeat(); }, 5000);
   }
 
+  /* ---------------- make something happen ---------------- */
+
+  function options(select, list) {
+    select.innerHTML = list.map(function (o) { return '<option value="' + escape(o.id) + '">' + escape(o.label) + '</option>'; }).join('');
+  }
+
+  /* The form is rebuilt for the world on screen: its people, its places. */
+  function buildHandFields(state) {
+    var entry = LT.Hand.entry(el('lt-hand-what').value);
+    text(el('lt-hand-blurb'), entry.blurb);
+    el('lt-hand-fields').innerHTML = entry.fields(state.sim).map(function (f) {
+      return '<select data-key="' + escape(f.key) + '" aria-label="' + escape(f.label) + '">' +
+        f.options.map(function (o) { return '<option value="' + escape(o.id) + '">' + escape(f.label + ': ' + o.label) + '</option>'; }).join('') + '</select>';
+    }).join(' ');
+  }
+
+  function wireHand(state) {
+    options(el('lt-hand-what'), LT.Hand.CATALOGUE);
+    options(el('lt-hand-when'), LT.Hand.WHEN);
+    buildHandFields(state);
+    el('lt-hand-what').addEventListener('change', function () { buildHandFields(state); text(el('lt-hand-status'), ''); });
+    el('lt-hand-do').addEventListener('click', function () {
+      var answers = {};
+      Array.prototype.forEach.call(el('lt-hand-fields').querySelectorAll('select'), function (n) { answers[n.dataset.key] = n.value; });
+      /* Between two ticks, like a save: never while a minute is half applied. */
+      var r = LT.Hand.make(state.sim, el('lt-hand-what').value, answers, el('lt-hand-when').value);
+      var node = el('lt-hand-status');
+      node.className = 'save-status is-' + (r.ok ? 'ok' : 'warn');
+      text(node, r.ok ? 'Arranged for ' + LT.Util.stamp(r.record.atDay, r.record.atMinute) + '.' : 'Not done: ' + r.said + '.');
+    });
+  }
+
+  function paintHand(state) {
+    var rows = LT.Hand.asked(state.sim, 5);
+    var html = rows.map(function (r) {
+      return '<li class="is-' + r.status + '">' + escape(r.at) + ' — ' + escape(r.label) + ' · ' +
+        escape(r.status === 'failed' ? 'could not happen: ' + r.said : r.status === 'applied' ? 'happened' : 'on its way') + '</li>';
+    }).join('');
+    var host = el('lt-hand-asked');
+    if (host.__html !== html) { host.innerHTML = html; host.__html = html; }
+  }
+
   /* With "The action" on, the page looks at whoever has the most going on.
    * It changes who is looked at and nothing else; choosing a name turns it off. */
   function followTheAction(state) {
@@ -352,6 +396,7 @@
     text(el('lt-caption-doing'), c.name + ' · ' + (act ? phaseLabel + act.label : (c.pending ? 'deciding what to do next' : 'between things')));
     text(el('lt-caption-why'), why ? why.line : '');
     paintStakes(sim, c);
+    paintHand(state);
     paintRecap(state);
     paintGoals(c);
     paintCommitments(sim, c);

@@ -64,6 +64,23 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     ok(/^Day 2, so far/.test(await txt('lt-recap-title')), 'Later shows today');
     await js("document.getElementById('lt-recap-prev').click(); true"); await sleep(300);
     await shot('03-day-one-looked-back-on.png');
+    console.log('# page: make something happen');
+    await page.navigate('living-town/index.html?world=new'); await sleep(1200);
+    await runTo(1, 480);
+    const pick = (id, value) => js("(function(){ var n = document.getElementById('" + id + "'); n.value = '" + value + "'; n.dispatchEvent(new Event('change')); return n.value; })()");
+    await pick('lt-hand-what', 'leave_book');
+    await js("document.querySelector('#lt-hand-fields select').value = 'park_bench_sw'; true");
+    const registerBefore = await js("LT_OBSERVER.sim.state.interventions.length");
+    await js("document.getElementById('lt-hand-do').click(); true"); await sleep(200);
+    ok(/^Arranged for D1 08:00/.test(await txt('lt-hand-status')) && await js("LT_OBSERVER.sim.state.interventions.length") === registerBefore + 1, 'Do it: one entry in the register, and the page says when (' + await txt('lt-hand-status') + ')');
+    await js("document.getElementById('lt-hand-do').click(); true"); await sleep(200);
+    ok(/^Not done: something is already there/.test(await txt('lt-hand-status')) && await js("LT_OBSERVER.sim.state.interventions.length") === registerBefore + 1, 'the same again is refused in words and nothing is recorded: ' + await txt('lt-hand-status'));
+    await pick('lt-hand-what', 'extra_shift');
+    ok(await js("document.querySelectorAll('#lt-hand-fields option').length") === 1, 'a shift can only be offered to someone with an employer');
+    await runTo(1, 490); await sleep(300);
+    ok(/happened/.test(await txt('lt-hand-asked')) && await js("LT_OBSERVER.sim.state.objects.filter(function(o){return o.typeId==='book_used'}).length") === 1, 'a few minutes on it has happened: one book in the world, listed as such');
+    await js("document.querySelector('[data-actor=resident_b]').click(); true");
+    await shot('04-made-something-happen.png');
     console.log('\npage-story-browser: ' + checks + '/' + checks);
   } finally { await page.close(); }
 })().catch((e) => { console.error(e); process.exit(1); });

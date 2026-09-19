@@ -100,6 +100,12 @@
     max-height: 300px; overflow: auto; white-space: pre-wrap;
   }
   .note { color: var(--dim); font-size: 12px; margin: 0 0 10px; }
+  .hand { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--edge); }
+  .hand-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .hand select { background: #0b0d11; color: inherit; border: 1px solid var(--edge); border-radius: 6px; padding: 5px 6px; font: inherit; font-size: 13px; }
+  .hand-asked { list-style: none; margin: 8px 0; padding: 0; font-size: 12.5px; color: var(--dim); }
+  .hand-asked li.is-failed { color: #d9705f; }
+  .hand-asked li.is-applied { color: #8fc17a; }
   .caption { min-height: 44px; padding: 8px 2px 0; }
   .caption p { margin: 0; }
   .caption-doing { font-size: 15px; }
@@ -150,6 +156,19 @@
         </div>
       </div>
       <div class="save-status" id="lt-save-status" role="status" aria-live="polite"></div>
+    </div>
+    <div class="hand" id="lt-hand">
+      <div class="label">Make something happen</div>
+      <p class="note" id="lt-hand-blurb"></p>
+      <div class="hand-row">
+        <select id="lt-hand-what" aria-label="What"></select>
+        <span id="lt-hand-fields"></span>
+        <select id="lt-hand-when" aria-label="When"></select>
+        <button class="lt-tab" id="lt-hand-do">Do it</button>
+      </div>
+      <div class="save-status" id="lt-hand-status" role="status" aria-live="polite"></div>
+      <ul class="hand-asked" id="lt-hand-asked"></ul>
+      <p class="note">You change a circumstance. What anyone does about it is theirs to decide.</p>
     </div>
     <div class="confirm" id="lt-confirm" hidden>
       <span id="lt-confirm-text"></span>
@@ -240,6 +259,7 @@
 <script src="js/lt-everyday.js"></script>
 <script src="js/lt-scenario.js"></script>
 <script src="js/lt-story.js"></script>
+<script src="js/lt-hand.js"></script>
 <script src="js/lt-save.js"></script>
 <script src="js/lt-persistence.js"></script>
 <script src="js/lt-art.js"></script>
