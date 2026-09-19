@@ -127,3 +127,4 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-19 d5b966d main: deep props below-band (15a26be) + layer ruling in world/props.json + 5 props gates in CI (121); 14 files mirrored
 - 2026-09-19 93e38d7 main: opus M12 props are the furniture (86ff1a2) + harness camera/facing fixes + booth-01 layer 5, chairs ty 7; PROPS_ENABLED ships true; 35 files mirrored
 - 2026-09-19 7ae1500 main: Double R booths/counter/back-bar art from codex/intent-room-double-r-grid (art only, floor tint kept) + ambient-life-frames post-M12; 10 files mirrored
+- 2026-09-19 a3407ec main: qwen E8 Great Northern lobby (79cd72a) merged, 20x12 native room, hotel prop footprints re-declared; 592 files mirrored
