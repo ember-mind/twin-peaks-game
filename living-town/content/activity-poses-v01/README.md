@@ -294,10 +294,19 @@ dialogue layer, or the text goes dark with the room.
   every look; hair and blanket colour identify the sleeper, the silhouette of
   the haircut does not survive. There is also no bed: the pose is a body under
   a blanket and nothing else.
-- **`reading` and `unpacking` have one direction, `seated` and `talking` two.**
+- **`reading`, `work_counter` and `unpacking` have one direction, `seated`
+  and `talking` two, `sleeping` one.**
   There is no `up` for anything. A pose asked for a direction it does not have
   returns `false`, which is a fallback to standing, not a crash.
 - **No `_work` difference for three poses.** See the apron note above.
+- **Three of the six poses need their furniture to be named.** Four fresh
+  critics were shown these frames with no labels. `sleeping`, `seated` and
+  `reading` were named correctly on the strip alone. `work_counter` was read
+  as "holding out a cup" — the right job, the wrong object. `unpacking` and
+  `talking` were **not** named from the strip alone by any of them: a stoop
+  and a gesture are both relations to something that is not in the picture,
+  and they only land once the work table and the second person are there. If
+  those two matter in a room with no such furniture, they will not read.
 - **The light is one curve for the whole town.** There is no weather, no
   season, no per-room sky and no outdoor variant: `at()` knows the minute and
   nothing else. `apply` tints a rectangle uniformly; it does not know where the
