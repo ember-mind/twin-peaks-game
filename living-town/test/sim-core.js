@@ -169,10 +169,14 @@ async function actionDurationAndCompletion() {
   assert(started, 'eat_at_home started');
   const plannedMinutes = started.data.minutes;
 
-  await sim.runMinutes(plannedMinutes + 1);
-  const completions = sim.state.events.filter((e) => e.type === 'ACTIVITY_COMPLETED' && e.actorId === 'resident_a');
+  /* The kitchen is across the flat. Choosing to eat and eating are different
+   * moments; the twenty minutes are counted from the second. */
+  await sim.runMinutes(plannedMinutes + 15);
+  const reached = sim.state.events.find((e) => e.type === 'ACTIVITY_REACHED' && e.actorId === 'resident_a');
+  ok(started.data.phase === 'approaching' && reached && reached.absMinute > started.absMinute, 'eating was chosen away from the kitchen and began on reaching it (' + (reached.absMinute - started.absMinute) + ' min walk)');
+  const completions = sim.state.events.filter((e) => e.type === 'ACTIVITY_COMPLETED' && e.actorId === 'resident_a' && e.data.actionId === 'eat_at_home');
   ok(completions.length === 1, 'onComplete settles exactly once');
-  ok(completions[0].absMinute - started.absMinute === plannedMinutes, 'ACTIVITY_COMPLETED lands exactly plannedMinutes after ACTIVITY_STARTED');
+  ok(completions[0].absMinute - reached.absMinute === plannedMinutes, 'ACTIVITY_COMPLETED lands exactly plannedMinutes after the activity really began');
   ok(residentA.pantry === pantryBefore - 1, 'the discrete effect (pantry -1) applied exactly once');
 }
 

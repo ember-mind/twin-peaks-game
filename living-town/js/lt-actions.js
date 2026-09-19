@@ -12,7 +12,14 @@
  *   tick(ctx, minutes) -> continuous drain/recovery; survives interruption
  *   onComplete(ctx)    -> discrete settlement; the sim runs it exactly once
  *   onInterrupt(ctx)   -> optional; no discrete settlement is allowed here
- *   yieldsToConversation -> someone doing this answers when spoken to
+ *   yieldsToConversation -> someone doing this looks up when spoken to
+ *   position           -> 'use_spot' | 'beside_person' | 'anywhere'. Where the
+ *                         action is done from; see Sim.useSpot. With the first
+ *                         two the person walks there first, and duration, tick,
+ *                         onStart and onComplete only ever apply once they
+ *                         have arrived. `spotObject` names the object whose
+ *                         use spot it is when the target is not an object.
+ *   onStart(ctx)       -> runs when the action really begins, not when chosen
  */
 (function () {
   var root = (typeof window !== 'undefined') ? window : global;
@@ -54,6 +61,7 @@
 
     sleep: {
       id: 'sleep', label: 'Sleep', targetKind: 'object', interruptible: true,
+      position: 'use_spot',
       duration: function (ctx) {
         // Until 06:30, or a hard cap so a nap cannot swallow a whole day.
         var wake = 390;
@@ -75,6 +83,7 @@
 
     eat_at_home: {
       id: 'eat_at_home', label: 'Eat at home', targetKind: 'object', interruptible: false,
+      position: 'use_spot',
       duration: function () { return 20; },
       eligible: function (ctx) {
         if (!atHome(ctx)) return { reason: 'not_at_home' };
@@ -93,6 +102,7 @@
 
     wash_and_dress: {
       id: 'wash_and_dress', label: 'Wash and dress', targetKind: null, interruptible: false,
+      position: 'anywhere',
       duration: function () { return 15; },
       eligible: function (ctx) {
         if (!atHome(ctx)) return { reason: 'not_at_home' };
@@ -108,6 +118,7 @@
 
     practise_guitar: {
       id: 'practise_guitar', label: 'Practise guitar', targetKind: 'object', interruptible: true,
+      position: 'use_spot',
       duration: function () { return 60; },
       eligible: function (ctx) {
         if (!atHome(ctx)) return { reason: 'not_at_home' };
@@ -129,6 +140,7 @@
 
     travel: {
       id: 'travel', label: 'Walk to', targetKind: 'location', interruptible: false,
+      position: 'anywhere',
       duration: function (ctx) { return W.travelMinutes(ctx.actor.location, ctx.target.id); },
       eligible: function (ctx) {
         var to = ctx.target && ctx.target.id;
@@ -161,6 +173,7 @@
 
     work_shift: {
       id: 'work_shift', label: 'Work the shift', targetKind: 'object', interruptible: true,
+      position: 'use_spot',
       duration: function (ctx) {
         /* Never past the end of the shift: eligibility guarantees at least a
          * minute remains, and a last short block is paid for what it is. */
@@ -193,6 +206,7 @@
 
     work_extra_shift: {
       id: 'work_extra_shift', label: 'Work the extra shift', targetKind: 'offer', interruptible: true,
+      position: 'use_spot', spotObject: 'obj_counter',
       duration: function (ctx) {
         return Math.min(WORK_BLOCK, ctx.target.endAbs - ctx.absMinute);
       },
@@ -232,6 +246,7 @@
 
     take_break: {
       id: 'take_break', label: 'Take a break', targetKind: 'object', interruptible: true,
+      position: 'use_spot',
       yieldsToConversation: true,
       duration: function () { return 15; },
       eligible: function (ctx) {
@@ -251,6 +266,7 @@
 
     buy_meal: {
       id: 'buy_meal', label: 'Buy a meal', targetKind: 'object', interruptible: false,
+      position: 'use_spot',
       duration: function () { return 20; },
       eligible: function (ctx) {
         if (!at(ctx, 'cafe')) return { reason: 'not_at_cafe' };
@@ -269,6 +285,7 @@
 
     withdraw_savings: {
       id: 'withdraw_savings', label: 'Take money out of savings', targetKind: null, interruptible: false,
+      position: 'anywhere',
       duration: function () { return 5; },
       eligible: function (ctx) {
         if (ctx.actor.savings < 10) return { reason: 'savings_too_low' };
@@ -286,6 +303,7 @@
 
     greet: {
       id: 'greet', label: 'Greet', targetKind: 'person', interruptible: false,
+      position: 'anywhere',
       duration: function () { return 2; },
       eligible: function (ctx) {
         if (!ctx.target || ctx.target.id === ctx.actor.id) return { reason: 'no_one_to_greet' };
@@ -304,30 +322,74 @@
 
     talk_with: {
       id: 'talk_with', label: 'Talk with', targetKind: 'person', interruptible: true,
+      position: 'beside_person',
       duration: function () { return 25; },
       eligible: function (ctx) {
         if (!ctx.target || ctx.target.id === ctx.actor.id) return { reason: 'no_one_to_talk_to' };
         if (!personPresent(ctx, ctx.target.id)) return { reason: 'not_present' };
-        /* A conversation needs the other person. They join it, so they have to
-         * be free to: idle, or doing something one would look up from. */
-        if (!ctx.sim.availableToTalk(ctx.target)) return { reason: 'partner_busy' };
-        /* The same conversation does not restart the moment it ends. */
+        if (ctx.sim.openConversationOf(ctx.actor.id)) return { reason: 'already_in_conversation' };
+        /* They have to be free to answer: idle, doing something one looks up
+         * from — or on their way over to talk to this very person. Asked again
+         * at every step of the walk over, so a person who gets busy meanwhile
+         * is not walked up to and interrupted. */
+        var theirs = ctx.target.activity;
+        var comingOver = theirs && theirs.actionId === 'talk_with' && theirs.targetId === ctx.actor.id && !theirs.conversationId;
+        if (!comingOver && !ctx.sim.availableToTalk(ctx.target)) return { reason: 'partner_busy' };
+        /* The same conversation does not restart the moment it ends, and a
+         * person who said no is not asked again five minutes later. */
         var last = (ctx.actor.lastTalk || {})[ctx.target.id];
         if (last !== undefined && ctx.absMinute - last < 90) return { reason: 'just_talked' };
+        var refused = (ctx.actor.talkRefused || {})[ctx.target.id];
+        if (refused !== undefined && ctx.absMinute - refused < 60) return { reason: 'recently_refused' };
         return true;
       },
-      /* One conversation is one shared thing with two people in it. The sim
-       * owns it: whoever speaks first opens it and the other joins, and it is
-       * settled once, by whichever of them finishes first. */
-      onStart: function (ctx) { ctx.sim.openConversation(ctx.actor, ctx.target, ctx.activity); },
+      /* Reaching the other person is where this begins, and what begins is a
+       * proposal: one shared conversation record that the other person's own
+       * policy joins or declines. Its clock and its consequences start when
+       * they join (Sim.startConversation), and it is settled once. */
+      onStart: function (ctx) { ctx.sim.proposeConversation(ctx.actor, ctx.target, ctx.activity); },
       tick: function (ctx, m) { need(ctx, 'energy', -0.005 * m); },
       onComplete: function (ctx) { ctx.sim.settleConversation(ctx.activity.conversationId); }
+    },
+
+    /* What someone who has been spoken to may choose. Both are theirs to
+     * choose; neither is ever started for them. */
+    join_conversation: {
+      id: 'join_conversation', label: 'Talk with', targetKind: 'conversation', interruptible: true,
+      position: 'anywhere',   // the person asking has already come over
+      duration: function (ctx) { return ctx.target.minutes; },
+      eligible: function (ctx) {
+        var c = ctx.target;
+        if (!c || c.inviteeId !== ctx.actor.id) return { reason: 'not_asked' };
+        if (c.status !== 'proposed') return { reason: 'proposal_' + c.status };
+        return true;
+      },
+      onStart: function (ctx) {
+        ctx.activity.conversationId = ctx.target.id;
+        ctx.sim.startConversation(ctx.target);
+      },
+      tick: function (ctx, m) { need(ctx, 'energy', -0.005 * m); },
+      onComplete: function (ctx) { ctx.sim.settleConversation(ctx.activity.conversationId); }
+    },
+
+    decline_conversation: {
+      id: 'decline_conversation', label: 'Not now', targetKind: 'conversation', interruptible: false,
+      position: 'anywhere',
+      duration: function () { return 1; },
+      eligible: function (ctx) {
+        var c = ctx.target;
+        if (!c || c.inviteeId !== ctx.actor.id) return { reason: 'not_asked' };
+        if (c.status !== 'proposed') return { reason: 'proposal_' + c.status };
+        return true;
+      },
+      onStart: function (ctx) { ctx.sim.closeProposal(ctx.target, 'declined', 'declined'); }
     },
 
     /* ---------------- opportunities ---------------- */
 
     accept_offer: {
       id: 'accept_offer', label: 'Accept', targetKind: 'offer', interruptible: false,
+      position: 'anywhere',
       duration: function () { return 2; },
       eligible: function (ctx) {
         var o = ctx.target;
@@ -342,6 +404,7 @@
 
     decline_offer: {
       id: 'decline_offer', label: 'Decline', targetKind: 'offer', interruptible: false,
+      position: 'anywhere',
       duration: function () { return 1; },
       eligible: function (ctx) {
         var o = ctx.target;
@@ -357,6 +420,7 @@
 
     sit_and_rest: {
       id: 'sit_and_rest', label: 'Sit on the bench', targetKind: 'object', interruptible: true,
+      position: 'use_spot',
       yieldsToConversation: true,
       duration: function () { return 20; },
       eligible: function (ctx) {
@@ -371,6 +435,7 @@
 
     wait: {
       id: 'wait', label: 'Wait', targetKind: null, interruptible: true,
+      position: 'anywhere',
       yieldsToConversation: true,
       duration: function () { return 10; },
       eligible: function () { return true; },

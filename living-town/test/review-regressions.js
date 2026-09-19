@@ -21,6 +21,7 @@ let n = 0;
 const freshId = (p) => p + '_' + (++n);
 
 const TALK = { actionId: 'talk_with', targetKind: 'person' };
+const { converse, walkUpAndAsk } = require('./lib-talk.js');
 const count = (sim, type) => sim.state.events.filter((e) => e.type === type).length;
 const rel = (sim, a, b) => Object.assign({}, sim.state.characters[a].relationships[b]);
 
@@ -62,13 +63,17 @@ function conversationIsOneSharedActivity() {
   const sim = quiet(parkSim());
   const a = sim.state.characters.resident_a, b = sim.state.characters.resident_b;
   const before = rel(sim, 'resident_a', 'resident_b');
-  const started = sim.startActivity(a, Object.assign({ targetId: 'resident_b' }, TALK), 'test', null);
-  ok(started.ok, 'resident_a opens a conversation');
-  ok(b.activity && b.activity.actionId === 'talk_with' && b.activity.conversationId === a.activity.conversationId,
+  walkUpAndAsk(sim, a, b);
+  ok(a.activity.phase === 'waiting_reply' && !b.activity && sim.state.conversations[0].status === 'proposed',
+     'resident_a has walked up and asked; nothing has been started for resident_b');
+  const conv = sim.conversationById(a.activity.conversationId);
+  ok(sim.startActivity(b, { actionId: 'join_conversation', targetKind: 'conversation', targetId: conv.id }, 'test', null).ok, 'resident_b joins by taking their own candidate');
+  ok(b.activity.conversationId === a.activity.conversationId && sim.state.conversations.length === 1 && conv.status === 'active',
      'resident_b is in the same conversation, not a second one');
-  ok(b.activity.source.indexOf('joined:') === 0, "the joiner's activity is tagged joined, never as a policy choice");
+  ok(a.activity.elapsed === 0 && a.activity.startAbs === sim.absMinute() && conv.startAbs === sim.absMinute(),
+     'the talk and its clock start when they join, not while resident_a was walking over');
   const reciprocal = sim.startActivity(b, Object.assign({ targetId: 'resident_a' }, TALK), 'test', null);
-  ok(!reciprocal.ok && reciprocal.error === 'partner_busy', 'a reciprocal start while it is running is refused (' + reciprocal.error + ')');
+  ok(!reciprocal.ok && reciprocal.error === 'already_in_conversation', 'a reciprocal start while it is running is refused (' + reciprocal.error + ')');
   tickN(sim, 25);
   ok(count(sim, 'TALKED') === 1, 'two people finishing the same conversation settle it once');
   const after = rel(sim, 'resident_a', 'resident_b');
@@ -85,8 +90,11 @@ async function simultaneousReciprocalDecisions() {
   await sim.runMinutes(27);
   ok(sim.state.conversations.length === 1, 'one conversation record');
   ok(count(sim, 'TALKED') === 1, 'one TALKED event');
-  ok(sim.rejections.some((r) => r.actorId === 'resident_b' && r.reason === 'superseded'),
-     "the second speaker's own decision is overtaken, not executed on top");
+  const conv = sim.state.conversations[0];
+  ok(conv.mutual === true && conv.status === 'completed', 'each had chosen to talk to the other: it is one mutual conversation, and it completed');
+  const talkStarts = sim.state.events.filter((e) => e.type === 'ACTIVITY_STARTED' && e.data.actionId === 'talk_with');
+  ok(talkStarts.length === 2 && talkStarts.every((e) => e.data.source === id && e.data.requestId),
+     "both people's part in it is their own policy's decision; nobody was enrolled by the engine");
 }
 
 function leavingEndsTheConversationForBoth() {
@@ -94,7 +102,7 @@ function leavingEndsTheConversationForBoth() {
   const sim = quiet(parkSim());
   const a = sim.state.characters.resident_a, b = sim.state.characters.resident_b;
   const before = rel(sim, 'resident_a', 'resident_b');
-  sim.startActivity(a, Object.assign({ targetId: 'resident_b' }, TALK), 'test', null);
+  converse(sim, a, b);
   tickN(sim, 5);
   ok(sim.requestInterrupt('resident_b', 'called_away'), 'resident_b can be pulled out of a conversation');
   ok(!a.activity && !b.activity, 'neither is left talking to nobody');
@@ -107,7 +115,7 @@ function leavingEndsTheConversationForBoth() {
   // The partner walking out of the room, by any route, is caught the same way.
   const sim2 = quiet(parkSim());
   const a2 = sim2.state.characters.resident_a, b2 = sim2.state.characters.resident_b;
-  sim2.startActivity(a2, Object.assign({ targetId: 'resident_b' }, TALK), 'test', null);
+  converse(sim2, a2, b2);
   tickN(sim2, 3);
   b2.activity = null; sim2.placeCharacter(b2, 'cafe');   // removed from the room without ceremony
   tickN(sim2, 30);
@@ -132,7 +140,7 @@ function meetingNeedsTheAgreedPlace() {
   const a = sim.state.characters.resident_a, b = sim.state.characters.resident_b;
   sim.state.minute = 1045;
   sim.placeCharacter(a, 'cafe'); sim.placeCharacter(b, 'cafe');
-  sim.startActivity(a, Object.assign({ targetId: 'resident_b' }, TALK), 'test', null);
+  converse(sim, a, b);
   tickN(sim, 25);
   ok(count(sim, 'TALKED') === 1, 'they did talk, at the café, inside the window');
   ok(sim.commitmentById(a, 'cmt_meet_friend').status === 'open', 'the park meeting is not kept by a conversation somewhere else');
@@ -251,7 +259,7 @@ function workNeverOverrunsItsWindow() {
   const sim = quiet(LT.Scenario.day1({ intervention: false }));
   const a = sim.state.characters.resident_a;
   sim.state.minute = 1019;
-  sim.placeCharacter(a, 'cafe');
+  sim.placeCharacter(a, 'cafe', LT.World.OBJECTS.find((o) => o.id === 'obj_counter').anchors.work_shift);   // already behind the counter
   const savingsBefore = a.savings, moneyBefore = a.money;
   const started = sim.startActivity(a, { actionId: 'work_shift', targetKind: 'object', targetId: 'obj_counter' }, 'test', null);
   ok(started.ok && started.activity.plannedMinutes === 1, 'one minute remains, so one minute is planned (' + started.activity.plannedMinutes + ')');
@@ -306,6 +314,7 @@ function acceptedShiftMustMostlyBeWorked() {
   const offer = sim.state.offers[0];
   sim.acceptOffer(a, offer);
   sim.state.minute = 1150;   // turns up for the last twenty minutes of 150
+  sim.placeCharacter(a, 'cafe', LT.World.OBJECTS.find((x) => x.id === 'obj_counter').anchors.work_extra_shift);   // and is behind the counter
   sim.startActivity(a, { actionId: 'work_extra_shift', targetKind: 'offer', targetId: offer.id }, 'test', null);
   tickN(sim, 22);
   ok(offer.status === 'completed' && offer.workedMinutes === 20, 'twenty minutes were worked and paid');

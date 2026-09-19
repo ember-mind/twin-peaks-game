@@ -57,7 +57,9 @@
    * never writes anything. */
   A.sheetIdFor = function (character) {
     var act = character.activity && character.activity.actionId;
-    var working = act === 'work_shift' || act === 'work_extra_shift' || act === 'take_break';
+    /* The apron goes on at the counter, not at the door. */
+    var doing = character.activity && character.activity.phase === 'executing';
+    var working = doing && (act === 'work_shift' || act === 'work_extra_shift' || act === 'take_break');
     return character.appearanceId + (working ? '_work' : '');
   };
 

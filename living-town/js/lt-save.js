@@ -34,6 +34,19 @@
  *                      to the question as the vanished process asked it is an
  *                      unknown request here, never a second answer.
  *
+ * Re-asked, not replayed. What the save guarantees is the question: the same
+ * person, the same state, the same candidates, the same request number, and
+ * the original asking time, so the decision timeout keeps running from when
+ * the question was first put and cannot be renewed by reloading. What it does
+ * not and cannot guarantee is the answer. UtilityPolicy is a pure function of
+ * the request and will answer identically; a recorded policy answers by
+ * request number; a provider with a mind of its own (a remote model, some
+ * day) is simply asked again, may take as long as it takes, and may say
+ * something else. An answer that had already arrived but had not yet been
+ * applied is in the same position: it is not carried over, the question is.
+ * Nothing the old process sends can land here, because its answers are
+ * addressed to a request id this world never issued.
+ *
  * What a save is checked against before it is allowed to become the world:
  *   - the town it was made in (LT.World.fingerprint). Positions, walk targets
  *     and use spots are coordinates in rooms the save does not carry. If the
@@ -53,14 +66,42 @@
   if (typeof require === 'function' && !LT.Sim) require('./lt-sim.js');
   var S = LT.Save = LT.Save || {};
 
-  S.FORMAT = 'living-town/save@1';
+  S.FORMAT = 'living-town/save@2';
   S.DEFAULT_KEY = 'living-town/save';
 
   function deepCopy(v) { return JSON.parse(JSON.stringify(v)); }
 
   /* A format string maps to a function that upgrades that save one step closer
-   * to the current format. Ship it empty: there is only one format so far. */
+   * to the current format. Each step is written against a real save of the
+   * format it upgrades (living-town/test/fixtures). */
   S.MIGRATIONS = S.MIGRATIONS || {};
+
+  /* @1 -> @2. In @1 an activity was one thing from the moment it was chosen:
+   * minutes were counted while the person was still walking to where it is
+   * done. @2 tells the approach from the doing. Someone saved mid-walk comes
+   * back approaching, and the minutes @1 had counted during the walk are
+   * recorded as what they were — walking — so nothing is paid for them. A
+   * conversation in @1 was joined automatically; one already under way stays
+   * under way, and the record gains the field that says who was asked. */
+  S.MIGRATIONS['living-town/save@1'] = function (old) {
+    var save = deepCopy(old);
+    Object.keys(save.state.characters || {}).forEach(function (id) {
+      var c = save.state.characters[id], act = c.activity;
+      if (!act || act.phase) return;
+      var walking = !!c.walkTarget && !c.transit;
+      act.phase = walking ? 'approaching' : 'executing';
+      act.chosenAbs = act.startAbs;
+      act.approachMinutes = walking ? act.elapsed : 0;
+      if (walking) act.elapsed = 0;
+    });
+    (save.state.conversations || []).forEach(function (conv) {
+      if (conv.inviteeId) return;
+      conv.inviteeId = conv.participants[0] === conv.initiatorId ? conv.participants[1] : conv.participants[0];
+      conv.proposedAbs = conv.startAbs;
+    });
+    save.format = 'living-town/save@2';
+    return save;
+  };
 
   /* A town fingerprint maps to a function that takes a save made in that town
    * and returns one that fits the next: people moved off cells that are now
@@ -83,7 +124,7 @@
       var pending = state.characters[id].pending;
       if (pending) {
         var rec = sim.requests[pending.requestId];
-        reissue.push({ actorId: id, seq: pending.seq,
+        reissue.push({ actorId: id, seq: pending.seq, issuedAbs: pending.issuedAbs,
                        reason: (rec && rec.request.context && rec.request.context.reason) || 'idle' });
       }
       state.characters[id].pending = null;
@@ -252,7 +293,7 @@
      * the order they were first asked. See the note at the top of this file. */
     (saved.reissue || []).forEach(function (r) {
       var actor = sim.state.characters[r.actorId];
-      if (!actor.activity && !actor.pending) sim.requestDecision(actor, r.reason, r.seq);
+      if (!actor.activity && !actor.pending) sim.requestDecision(actor, r.reason, r.seq, r.issuedAbs);
     });
 
     return sim;
@@ -260,33 +301,49 @@
 
   S.fromJSON = function (text, opts) { return S.deserialize(JSON.parse(text), opts); };
 
-  /* ---------------- browser convenience ----------------
-   * Every storage access is guarded: a blocked, disabled or full localStorage
-   * must degrade to "no save" without breaking the page or throwing out. */
-  S.writeLocal = function (sim, key) {
+  /* ---------------- browser storage ----------------
+   * Four different answers, never folded into one another:
+   *   none         there is no save
+   *   loaded       there is one, and here is the town
+   *   refused      there is one and it cannot be used; `reason` says why, and
+   *                it is still where it was
+   *   unavailable  the storage itself could not be read — which is not the
+   *                same as there being nothing in it
+   * Nothing here starts a new world or deletes anything. */
+  function storageOf() {
+    try { return { storage: root.localStorage || null, reason: root.localStorage ? null : 'this browser offers no local storage here' }; }
+    catch (e) { return { storage: null, reason: 'local storage is blocked: ' + String(e && e.message || e) }; }
+  }
+
+  S.peekLocal = function (key) {
+    var st = storageOf();
+    if (!st.storage) return { status: 'unavailable', reason: st.reason };
     try {
-      var storage = root.localStorage;
-      if (!storage) return false;
-      storage.setItem(key || S.DEFAULT_KEY, S.toJSON(sim));
-      return true;
+      var text = st.storage.getItem(key || S.DEFAULT_KEY);
+      return text ? { status: 'present', bytes: text.length } : { status: 'none' };
+    } catch (e) { return { status: 'unavailable', reason: 'local storage could not be read: ' + String(e && e.message || e) }; }
+  };
+
+  S.writeLocal = function (sim, key) {
+    var st = storageOf();
+    if (!st.storage) return { ok: false, status: 'unavailable', reason: st.reason };
+    var text;
+    try { text = S.toJSON(sim); } catch (e) { return { ok: false, status: 'failed', reason: 'the world could not be serialised: ' + String(e && e.message || e) }; }
+    try {
+      st.storage.setItem(key || S.DEFAULT_KEY, text);
+      /* A write that did not throw is not yet a save: read it back. */
+      if (st.storage.getItem(key || S.DEFAULT_KEY) !== text) return { ok: false, status: 'failed', reason: 'the save did not read back as written' };
+      return { ok: true, status: 'saved', bytes: text.length, savedAt: sim.stamp() };
     } catch (e) {
-      return false;
+      return { ok: false, status: 'failed', reason: 'local storage refused the write: ' + String(e && (e.name || e.message) || e) };
     }
   };
 
-  /* Three different answers, never folded into one: there is no save; there is
-   * one and here is the town; there is one and it cannot be used, and why. A
-   * caller that starts a new world on 'refused' is making that choice in the
-   * open, with the reason in hand and the stored save still where it was. */
   S.readLocal = function (key, opts) {
-    var text;
-    try {
-      var storage = root.localStorage;
-      if (!storage) return { status: 'none', sim: null, reason: null };
-      text = storage.getItem(key || S.DEFAULT_KEY);
-    } catch (e) {
-      return { status: 'none', sim: null, reason: null };
-    }
+    var st = storageOf(), text;
+    if (!st.storage) return { status: 'unavailable', sim: null, reason: st.reason };
+    try { text = st.storage.getItem(key || S.DEFAULT_KEY); }
+    catch (e) { return { status: 'unavailable', sim: null, reason: 'local storage could not be read: ' + String(e && e.message || e) }; }
     if (!text) return { status: 'none', sim: null, reason: null };
     try {
       return { status: 'loaded', sim: S.fromJSON(text, opts), reason: null };

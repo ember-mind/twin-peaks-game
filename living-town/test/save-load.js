@@ -277,8 +277,8 @@ async function conversationSurvives() {
   sim.placeCharacter(b, 'park');
   const relA = copy(a.relationships.resident_b), relB = copy(b.relationships.resident_a);
 
-  const started = sim.startActivity(a, { actionId: 'talk_with', targetKind: 'person', targetId: 'resident_b' }, 'test', null);
-  ok(started.ok && a.activity.conversationId === b.activity.conversationId, 'the conversation is one shared activity across both people');
+  require('./lib-talk.js').converse(sim, a, b);
+  ok(a.activity.conversationId === b.activity.conversationId, 'the conversation is one shared activity across both people');
   for (let i = 0; i < 10; i++) sim.tick();
 
   const restored = quiet(Save.fromJSON(Save.toJSON(sim)));
@@ -462,7 +462,7 @@ function localStorageNeverResetsSilently() {
   const store = {};
   global.localStorage = { getItem: (k) => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); } };
   ok(Save.readLocal().status === 'none', 'nothing stored: none');
-  ok(Save.writeLocal(LT.Scenario.day1({})) === true && Save.readLocal().status === 'loaded' && !!Save.readLocal().sim.state, 'a good save: loaded, with the town');
+  ok(Save.writeLocal(LT.Scenario.day1({})).ok === true && Save.readLocal().status === 'loaded' && !!Save.readLocal().sim.state, 'a good save: loaded, with the town');
   const bad = JSON.parse(store[Save.DEFAULT_KEY]); bad.world = 'deadbeef'; store[Save.DEFAULT_KEY] = JSON.stringify(bad);
   const kept = store[Save.DEFAULT_KEY];
   const r = Save.readLocal();
@@ -470,7 +470,17 @@ function localStorageNeverResetsSilently() {
   ok(store[Save.DEFAULT_KEY] === kept, 'and the refused save is still in storage, untouched');
   store[Save.DEFAULT_KEY] = '{not json';
   ok(Save.readLocal().status === 'refused', 'unreadable text is refused too, never mistaken for "no save"');
+  global.localStorage = { getItem() { throw new Error('SecurityError'); }, setItem() { throw new Error('SecurityError'); } };
+  const blocked = Save.readLocal(), blockedWrite = Save.writeLocal(LT.Scenario.day1({}));
+  ok(blocked.status === 'unavailable' && /could not be read/.test(blocked.reason) && Save.peekLocal().status === 'unavailable',
+     'storage that throws is "unavailable", with the error — never "none"');
+  ok(blockedWrite.ok === false && /refused the write/.test(blockedWrite.reason), 'and a failed write says it failed');
+  global.localStorage = { getItem: () => null, setItem() { const e = new Error('full'); e.name = 'QuotaExceededError'; throw e; } };
+  ok(/QuotaExceededError/.test(Save.writeLocal(LT.Scenario.day1({})).reason), 'a full store is reported by name');
+  global.localStorage = { getItem: () => 'something else', setItem() {} };
+  ok(Save.writeLocal(LT.Scenario.day1({})).ok === false, 'a write that does not read back is not reported as a save');
   delete global.localStorage;
+  ok(Save.readLocal().status === 'unavailable' && Save.writeLocal(LT.Scenario.day1({})).status === 'unavailable', 'no storage at all: unavailable, both ways');
 }
 
 /* ---------------- 18: a recording still lines up after a reload ---------------- */
@@ -484,8 +494,20 @@ async function replaySurvivesReload() {
   await recorded.runUntil(1, 1439);
   const recording = copy(recorder.toJSON());
 
+  /* Two reload points with a question in flight and two without, found by
+   * looking rather than hard-coded: when people decide depends on how long
+   * they spend walking to things. */
+  const probe = LT.Sim.create({ seed: 20260918, policies: { resident_a: 'utility', resident_b: 'utility' } });
+  probe.scheduleIntervention(LT.Scenario.EXTRA_SHIFT);
+  const asking = [], settled = [];
+  for (let m = 420; m < 1300 && (asking.length < 2 || settled.length < 2); m++) {
+    await probe.runUntil(1, m);
+    const open = !!probe.state.characters.resident_a.pending;
+    if (open && asking.length < 2 && (!asking.length || m - asking[asking.length - 1] > 120)) asking.push(m);
+    if (!open && settled.length < 2 && m % 97 === 0) settled.push(m);
+  }
   let inFlight = 0;
-  for (const minute of [508, 900, 1055, 1170]) {
+  for (const minute of asking.concat(settled)) {
     /* first half in one "process" ... */
     const id1 = 'save-player-a-' + minute, id2 = 'save-player-b-' + minute;
     LT.RecordedPolicy.replay(recording, { id: id1 });
@@ -503,6 +525,86 @@ async function replaySurvivesReload() {
     assert.equal(eventTrace(second), eventTrace(recorded), 'reload at ' + minute + ' changed the event sequence');
   }
   ok(inFlight >= 2, 'four reload points, ' + inFlight + ' of them with a question in flight: zero replay mismatches, same savings, same event sequence');
+}
+
+/* ---------------- 19: reloading around a genuinely asynchronous answer ---------------- */
+
+async function asynchronousAnswersAcrossReload() {
+  console.log('# 19: reloading while an answer is immediate, held for several ticks, arrived-but-unapplied, or never coming');
+  const mk = (script) => { const id = 'save-async-' + (++asyncN); return { id, mock: LT.MockPolicy.create({ id, script }) }; };
+  const simFor = (id, extra) => { const sim = LT.Scenario.day1(Object.assign({ intervention: false, policies: { resident_a: id, resident_b: 'utility' } }, extra || {})); sim.state.minute = 500; return sim; };
+  const startsA = (sim) => starts(sim, 'resident_a');
+
+  /* immediate: answered within the same turn, waiting in the inbox at save time */
+  let p = mk([{ prefer: 'wait' }, { prefer: 'wait' }, { prefer: 'wait' }]);
+  let sim = simFor(p.id);
+  await sim.runMinutes(1);
+  assert(sim.inbox.length > 0 && sim.state.characters.resident_a.pending, 'precondition: the answer has arrived and has not been applied');
+  const arrived = copy(sim.inbox.filter((r) => r.requestId === sim.state.characters.resident_a.pending.requestId)[0]);
+  let restored = Save.fromJSON(Save.toJSON(sim));
+  ok(restored.inbox.length === 0 && restored.state.characters.resident_a.pending.requestId === arrived.requestId + '.1',
+     'arrived-but-unapplied: the answer is not carried over; the question is, as ' + restored.state.characters.resident_a.pending.requestId);
+  ok(restored.deliver(arrived) === false && restored.rejections.slice(-1)[0].reason === 'unknown_request', 'the old process\'s answer, delivered to the new world, is an unknown request');
+  await sim.runMinutes(1); await restored.runMinutes(1);
+  ok(startsA(restored).length === 1 && startsA(sim).length === 1 && startsA(restored)[0].absMinute === startsA(sim)[0].absMinute,
+     'the re-asked question is answered and applied once, in the same minute the uninterrupted world applied its own');
+  ok(p.mock.calls.filter((c) => c.actorId === 'resident_a').length >= 2, 'the provider really was asked again — it was not replayed from the save');
+
+  /* held for several ticks */
+  p = mk([{ delayTicks: 4, prefer: 'wait' }, { delayTicks: 2, prefer: 'wash_and_dress' }]);
+  sim = simFor(p.id);
+  await sim.runMinutes(2);
+  const firstAsk = sim.state.characters.resident_a.pending.issuedAbs;
+  restored = Save.fromJSON(Save.toJSON(sim));
+  const again = restored.state.characters.resident_a.pending;
+  ok(again.issuedAbs === firstAsk && again.seq === sim.state.characters.resident_a.pending.seq, 'held: re-asked under the same number, still dated from the first asking (' + firstAsk + ')');
+  await restored.runMinutes(3);
+  ok(startsA(restored).length === 0 && restored.state.characters.resident_a.pending, 'while the new answer is held the person waits, as before the save');
+  p.mock.releaseAll();                    // releases the old world's answer and the new world's
+  await sim.runMinutes(2); await restored.runMinutes(2);
+  ok(startsA(sim).length === 1 && startsA(sim)[0].data.actionId === 'wait', 'the old world got the old answer (wait) ...');
+  ok(startsA(restored).length === 1 && startsA(restored)[0].data.actionId === 'wash_and_dress',
+     '... and the new world got the answer to its own asking (wash_and_dress): a different one, which is allowed, and only one');
+  ok(!restored.rejections.some((r) => r.reason === 'duplicate_response'), 'nothing from the old process reached the new world at all');
+
+  /* never coming: reloading must not renew the timeout */
+  p = mk([{ silent: true }, { silent: true }, { silent: true }, { silent: true }, { silent: true }]);
+  sim = simFor(p.id);
+  await sim.runMinutes(1);
+  const asked = sim.state.characters.resident_a.pending.issuedAbs;
+  let reloads = 0;
+  while (!sim.rejections.some((r) => r.actorId === 'resident_a' && r.reason === 'policy_timeout') && sim.absMinute() < asked + 90) {
+    await sim.runMinutes(8);
+    sim = Save.fromJSON(Save.toJSON(sim)); reloads++;
+  }
+  const timedOut = sim.rejections.find((r) => r.actorId === 'resident_a' && r.reason === 'policy_timeout');
+  ok(timedOut && sim.absMinute() - asked <= 30 + 8 && reloads >= 3,
+     'never answered, reloaded every 8 minutes (' + reloads + ' times): the 30-minute timeout still fires, ' + (sim.absMinute() - asked) + ' minutes after the first asking');
+  const a = sim.state.characters.resident_a;
+  ok(starts(sim, 'resident_a').some((e) => /^fallback:policy_timeout/.test(e.data.source)), 'and the person falls back to waiting, tagged as a fallback, not as a choice');
+  void a;
+}
+let asyncN = 0;
+
+/* ---------------- 20: a real save from the previous format ---------------- */
+
+async function previousFormatIsMigrated() {
+  console.log('# 20: a save written by the previous build (save@1) is migrated, and verified');
+  const text = require('node:fs').readFileSync(path.resolve(__dirname, 'fixtures', 'save-v1-walking-to-work.json'), 'utf8');
+  const old = JSON.parse(text);
+  ok(old.format === 'living-town/save@1' && old.state.characters.resident_a.activity.phase === undefined && old.state.characters.resident_a.activity.elapsed === 3,
+     'the fixture is a genuine @1 save: 09:11, walking to the counter, with 3 "worked" minutes already counted on the way');
+  const sim = Save.fromJSON(text);
+  const a = sim.state.characters.resident_a;
+  ok(a.name === old.state.characters.resident_a.name && a.appearanceId === old.state.characters.resident_a.appearanceId, 'same person, same look');
+  ok(a.activity.phase === 'approaching' && a.activity.elapsed === 0 && a.activity.approachMinutes === 3, 'they come back approaching; the three minutes are recorded as the walk they were');
+  const before = a.money + a.savings;
+  await sim.runMinutes(140);
+  const worked = sim.state.events.filter((e) => e.type === 'WORKED');
+  const reached = sim.state.events.find((e) => e.type === 'ACTIVITY_REACHED');
+  ok(reached && worked.length === 1 && worked[0].absMinute - reached.absMinute === worked[0].data.minutes, 'work is counted from reaching the counter (' + reached.stamp + '), for ' + worked[0].data.minutes + ' minutes');
+  ok(Math.abs((a.money + a.savings - before) - worked[0].data.gross) < 0.011, 'and paid for exactly those');
+  ok(JSON.parse(text).format === 'living-town/save@1', 'the old save text is not rewritten by loading it');
 }
 
 async function main() {
@@ -525,6 +627,8 @@ async function main() {
   worldMigrationIsVerified();
   localStorageNeverResetsSilently();
   await replaySurvivesReload();
+  await asynchronousAnswersAcrossReload();
+  await previousFormatIsMigrated();
   console.log('\nsave-load: ' + checks + '/' + checks);
 }
 

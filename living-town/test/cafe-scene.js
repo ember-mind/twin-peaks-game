@@ -142,8 +142,9 @@ function looksAreStateNotIdentity() {
   ok(Object.values(byLook).some((set) => set.size > 1) || new Set(seeds.map((s) => s.split('/')[1])).size > 1, 'name and look vary independently across seeds');
   ok(LT.Appearance.ORDER.every((id) => LT.Appearance.spec(id)) && LT.Appearance.ORDER.length <= 25, 'every sheet id has a recipe and the sheet fits the atlas layout');
   const c = a1.resident_a;
-  ok(LT.Appearance.sheetIdFor(Object.assign({}, c, { activity: { actionId: 'work_shift' } })) === c.appearanceId + '_work'
-     && LT.Appearance.sheetIdFor(Object.assign({}, c, { activity: null })) === c.appearanceId, 'working a shift shows the apron; it is read from the activity and changes nothing');
+  ok(LT.Appearance.sheetIdFor(Object.assign({}, c, { activity: { actionId: 'work_shift', phase: 'executing' } })) === c.appearanceId + '_work'
+     && LT.Appearance.sheetIdFor(Object.assign({}, c, { activity: { actionId: 'work_shift', phase: 'approaching' } })) === c.appearanceId
+     && LT.Appearance.sheetIdFor(Object.assign({}, c, { activity: null })) === c.appearanceId, 'working a shift shows the apron — at the counter, not on the way to it; it is read from the activity and changes nothing');
   const r = spawnSync(process.execPath, [J('living-town', 'tools', 'build-inhabitants.js'), '--check'], { encoding: 'utf8' });
   ok(r.status === 0, 'the committed sheet is what the recipes compile to');
 }

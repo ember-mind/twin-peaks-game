@@ -148,10 +148,22 @@
         terms.social = 7 * (0.5 + trait(req, 'sociability'));
         break;
 
+      /* Being asked weighs what asking weighs: the same company, the same
+       * promises. Saying no has a small standing value of its own, so it is
+       * what gets chosen when talking is worth less than that — and when
+       * something else is worth more than either, that is chosen instead and
+       * the person asking simply gets no answer. */
+      case 'decline_conversation':
+        terms.keep_to_oneself = 4;
+        break;
+
+      case 'join_conversation':
       case 'talk_with': {
+        var withId = cand.actionId === 'talk_with' ? cand.targetId : cand.meta.withId;
         terms.social = 14 * (0.5 + trait(req, 'sociability'));
+        if (cand.actionId === 'join_conversation') terms.asked = 3;
         var meeting = openCommitments(req).filter(function (c) {
-          return c.kind === 'social' && c.withId === cand.targetId;
+          return c.kind === 'social' && c.withId === withId;
         })[0];
         if (meeting) {
           var due = abs(meeting.dueDay, meeting.dueMin);
@@ -159,7 +171,7 @@
             terms.commitment_keep = commitmentWeight(req, meeting);
           }
         }
-        var rel = req.relationships[cand.targetId];
+        var rel = req.relationships[withId];
         if (rel) terms.closeness = (rel.closeness / 100) * 9;
         break;
       }

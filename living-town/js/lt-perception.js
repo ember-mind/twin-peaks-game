@@ -75,8 +75,12 @@
       if (seen[key]) return;
       seen[key] = true;
       var ctx = sim.context(actor, target);
-      var verdict;
-      try { verdict = def.eligible(ctx); } catch (e) { verdict = { reason: 'error:' + (e && e.message) }; }
+      /* The action's own rules, and a walkable way to where it is done from. */
+      var verdict = sim.legality(actor, def, target);
+      /* Something that has just failed is not offered again at once: the
+       * reason it failed (a blocked spot, someone busy) rarely clears in a minute. */
+      var failedAt = (actor.recentFailures || {})[key];
+      if (verdict === true && failedAt !== undefined && sim.absMinute() - failedAt < 30) verdict = { reason: 'recently_failed' };
       if (verdict !== true) {
         rejected.push({ id: key, actionId: actionId, targetId: targetId,
                         reason: (verdict && verdict.reason) || 'ineligible' });
@@ -85,7 +89,7 @@
       var duration = Math.max(1, Math.round(def.duration(ctx)));
       legal.push({
         id: key, actionId: actionId, targetKind: def.targetKind, targetId: targetId,
-        label: def.label + (target && target.name ? ' — ' + target.name : ''),
+        label: def.label + (target && target.name ? ' — ' + target.name : (extra && extra.withName ? ' — ' + extra.withName : '')),
         durationMinutes: duration,
         interruptible: !!def.interruptible,
         meta: extra || {}
@@ -109,6 +113,14 @@
       if (other.location !== actor.location || other.transit) return;
       consider('greet', other);
       consider('talk_with', other);
+    });
+
+    // someone has come over and spoken: join them, or not
+    sim.state.conversations.forEach(function (c) {
+      if (c.status !== 'proposed' || c.inviteeId !== actor.id) return;
+      var asker = sim.state.characters[c.initiatorId];
+      consider('join_conversation', c, { withId: asker.id, withName: asker.name });
+      consider('decline_conversation', c, { withId: asker.id, withName: asker.name });
     });
 
     // opportunities addressed to this character

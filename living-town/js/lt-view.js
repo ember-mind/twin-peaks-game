@@ -252,13 +252,15 @@
     var state = this.sim.state, Art = LT.Art;
     var MARK = {
       work_shift: '#e2c15a', work_extra_shift: '#e2c15a',
-      practise_guitar: '#8fb3e0', talk_with: '#e08f9c', greet: '#e08f9c',
+      practise_guitar: '#8fb3e0', talk_with: '#e08f9c', join_conversation: '#e08f9c', greet: '#e08f9c',
       sleep: '#7f8bb0', eat_at_home: '#9fc16a', buy_meal: '#9fc16a',
       sit_and_rest: '#9aa39a', take_break: '#9aa39a'
     };
     ents.forEach(function (e) {
       var c = state.characters[e.id];
-      if (!c.activity) return;
+      /* The mark says what someone is doing, so it appears when they are
+       * doing it — not while they are still walking over to it. */
+      if (!c.activity || c.activity.phase !== 'executing') return;
       var colour = MARK[c.activity.actionId];
       if (!colour) return;
       var x = e.wx - cx + 6, y = e.wy - cy - (CH_H - TILE) - 6;

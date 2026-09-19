@@ -185,6 +185,7 @@
       case 'object': return this.objectById(candidate.targetId);
       case 'person': return this.state.characters[candidate.targetId] || null;
       case 'offer': return this.offerById(candidate.targetId);
+      case 'conversation': return this.conversationById(candidate.targetId);
       case 'location':
         var l = W.LOCATIONS[candidate.targetId];
         return l ? { id: l.id, name: l.name } : null;
@@ -506,37 +507,142 @@
     return null;
   };
 
-  /* Free to be drawn into a conversation: not walking somewhere, not already
-   * in one, and either idle or doing something one looks up from. */
+  /* Free to be asked: in the room, not walking out of it, not already in (or
+   * being asked into) a conversation, and either idle or doing something one
+   * looks up from. */
   Sim.prototype.availableToTalk = function (other) {
     if (!other || other.transit) return false;
+    if (this.openConversationOf(other.id)) return false;
     if (!other.activity) return true;
-    if (other.activity.conversationId) return false;
     var def = A.get(other.activity.actionId);
     return !!(def && def.yieldsToConversation);
   };
 
-  /* Whoever speaks first opens the conversation and the other person joins it.
-   * The joiner's activity is started by the sim and tagged as joined, so it is
-   * never read as a decision their policy made. */
-  Sim.prototype.openConversation = function (actor, other, activity) {
+  /* The one conversation, proposed or under way, this person is part of. */
+  Sim.prototype.openConversationOf = function (actorId) {
+    var list = this.state.conversations;
+    for (var i = list.length - 1; i >= 0; i--) {
+      var c = list[i];
+      if ((c.status === 'proposed' || c.status === 'active') && c.participants.indexOf(actorId) >= 0) return c;
+    }
+    return null;
+  };
+
+  function adjacent(a, b) {
+    return a.location === b.location && Math.abs(a.pos.x - b.pos.x) + Math.abs(a.pos.y - b.pos.y) === 1;
+  }
+  function facing(from, to) {
+    if (to.x > from.x) return 'right';
+    if (to.x < from.x) return 'left';
+    return to.y < from.y ? 'up' : 'down';
+  }
+
+  var REPLY_MINUTES = 5;   // how long someone stands there waiting to be answered
+
+  /* Somebody has walked up to somebody else and spoken. That is all that has
+   * happened: one conversation record exists, proposed, and nothing about the
+   * other person has been decided for them. They are shown the proposal as two
+   * candidates of their own — join it, or decline — and their policy chooses.
+   * Being spoken to does make someone look up from waiting or resting; that
+   * interruption is the world's and is recorded as such, not as their choice.
+   *
+   * If the other person was themselves on the way over to talk, both have
+   * already chosen, each through their own policy: it is one conversation, and
+   * it starts now. */
+  Sim.prototype.proposeConversation = function (actor, other, activity) {
+    var theirs = other.activity;
+    var mutual = theirs && theirs.actionId === 'talk_with' && theirs.targetId === actor.id && !theirs.conversationId;
+    if (!mutual && !this.availableToTalk(other)) return this.failActivity(actor, 'partner_busy');
+    if (!adjacent(actor, other)) return this.failActivity(actor, 'partner_moved');
     var conv = {
       id: 'conv_' + (this.state.conversations.length + 1),
       participants: [actor.id, other.id].sort(),
-      initiatorId: actor.id,
+      initiatorId: actor.id, inviteeId: other.id,
       locationId: actor.location,
-      startAbs: this.absMinute(), endAbs: this.absMinute() + activity.plannedMinutes,
+      proposedAbs: this.absMinute(), replyByAbs: this.absMinute() + REPLY_MINUTES,
+      startAbs: null, endAbs: null,
       minutes: activity.plannedMinutes,
-      status: 'active'
+      status: 'proposed'
     };
     this.state.conversations.push(conv);
     activity.conversationId = conv.id;
-    if (other.activity) this.interrupt(other, 'spoken_to');
-    other.pending = null;   // whatever they were about to decide is overtaken
-    this.startActivity(other, { actionId: 'talk_with', targetKind: 'person', targetId: actor.id },
-      'joined:' + conv.id, null, { joining: conv.id, minutes: activity.plannedMinutes });
+    activity.phase = 'waiting_reply';
     this.touch();
+    if (mutual) {
+      conv.mutual = true;
+      other.walkTarget = null;
+      theirs.conversationId = conv.id;
+      this.startConversation(conv);
+      return conv;
+    }
+    if (other.activity) this.interrupt(other, 'spoken_to');
+    this.emit('TALK_PROPOSED', {
+      actorId: actor.id, locationId: actor.location, notify: [other.id],
+      data: { conversationId: conv.id, toId: other.id },
+      text: actor.name + ' walked up to ' + other.name + ' to talk.'
+    });
     return conv;
+  };
+
+  /* Both are in. The talk, its clock and everything that follows from it
+   * start here, not while one of them was crossing the room. */
+  Sim.prototype.startConversation = function (conv) {
+    var self = this, now = this.absMinute();
+    conv.status = 'active';
+    conv.startAbs = now; conv.endAbs = now + conv.minutes;
+    var a = this.state.characters[conv.participants[0]], b = this.state.characters[conv.participants[1]];
+    a.pos = { x: a.pos.x, y: a.pos.y, dir: facing(a.pos, b.pos) };
+    b.pos = { x: b.pos.x, y: b.pos.y, dir: facing(b.pos, a.pos) };
+    conv.participants.forEach(function (id) {
+      var act = self.state.characters[id].activity;
+      act.phase = 'executing'; act.conversationId = conv.id;
+      act.plannedMinutes = conv.minutes; act.elapsed = 0;
+      act.startAbs = now; act.startDay = self.state.day; act.startMin = self.state.minute;
+      act.endAbs = conv.endAbs;
+    });
+    this.touch();
+    this.emit('TALK_BEGAN', {
+      actorId: conv.initiatorId, locationId: conv.locationId, notify: [conv.inviteeId],
+      data: { conversationId: conv.id, participants: conv.participants.slice(), mutual: !!conv.mutual },
+      text: a.name + ' and ' + b.name + ' started talking.'
+    });
+  };
+
+  /* A proposal that will not become a conversation. Nothing is settled; the
+   * person who asked is released with the reason, and does not ask the same
+   * person again straight away. */
+  Sim.prototype.closeProposal = function (conv, status, reason) {
+    if (!conv || conv.status !== 'proposed') return false;
+    conv.status = status;
+    conv.endedReason = reason;
+    this.touch();
+    var asker = this.state.characters[conv.initiatorId], other = this.state.characters[conv.inviteeId];
+    this.emit(status === 'declined' ? 'TALK_DECLINED' : 'TALK_UNANSWERED', {
+      actorId: status === 'declined' ? other.id : asker.id, locationId: conv.locationId,
+      notify: [asker.id, other.id],
+      data: { conversationId: conv.id, fromId: asker.id, toId: other.id, reason: reason },
+      text: status === 'declined' ? other.name + ' did not want to talk just now.'
+                                  : asker.name + ' got no answer from ' + other.name + ' (' + reason + ').'
+    });
+    asker.talkRefused = asker.talkRefused || {};
+    asker.talkRefused[other.id] = this.absMinute();
+    if (asker.activity && asker.activity.conversationId === conv.id) this.failActivity(asker, reason);
+    return true;
+  };
+
+  Sim.prototype.expireProposals = function () {
+    var self = this, now = this.absMinute();
+    this.state.conversations.forEach(function (conv) {
+      if (conv.status !== 'proposed') return;
+      var asker = self.state.characters[conv.initiatorId], other = self.state.characters[conv.inviteeId];
+      if (!asker.activity || asker.activity.conversationId !== conv.id) return self.closeProposal(conv, 'withdrawn', 'asker_left');
+      if (other.transit || other.location !== conv.locationId) return self.closeProposal(conv, 'unanswered', 'recipient_left');
+      if (!adjacent(asker, other)) return self.closeProposal(conv, 'unanswered', 'recipient_moved');
+      /* They were asked, and their policy chose to do something else. That is
+       * an answer of a kind, but it is not recorded as a refusal they made. */
+      if (other.activity) return self.closeProposal(conv, 'unanswered', 'recipient_chose_otherwise');
+      if (now >= conv.replyByAbs) return self.closeProposal(conv, 'unanswered', 'no_reply');
+    });
   };
 
   Sim.prototype.conversationIntact = function (conv) {
@@ -545,7 +651,7 @@
       var c = self.state.characters[id];
       return c && !c.transit && c.location === conv.locationId &&
              c.activity && c.activity.conversationId === conv.id;
-    });
+    }) && adjacent(this.state.characters[conv.participants[0]], this.state.characters[conv.participants[1]]);
   };
 
   /* Settlement has the conversation's identity, not an activity's: two people
@@ -614,26 +720,74 @@
     return null;
   };
 
-  Sim.prototype.startActivity = function (actor, candidate, source, requestId, opts) {
-    opts = opts || {};
+  /* ---- where an activity is done from ----
+   * Every action declares `position`:
+   *   'use_spot'      at the place an object is used from (behind the counter,
+   *                   on the bench). `spotObject` names the object when the
+   *                   target is not one (an accepted shift is worked at the
+   *                   counter).
+   *   'beside_person' on a free cell next to the person it is done with.
+   *   'anywhere'      where the actor stands — deciding, waiting, a wave
+   *                   across the room — or, for travel, along a walk that is
+   *                   itself the activity.
+   * Returns { needed, at, reason }. `at` is null when there is no such cell or
+   * no way to walk to it; nothing is ever done from afar instead. */
+  Sim.prototype.useSpot = function (actor, def, target) {
+    if (!def.position || def.position === 'anywhere') return { needed: false, at: null };
+    var loc = W.LOCATIONS[actor.location], self = this;
+    if (def.position === 'beside_person') {
+      if (!target || target.location !== actor.location || target.transit) return { needed: true, at: null, reason: 'not_present' };
+      var best = null, bestLen = Infinity;
+      STEP_DIRS.forEach(function (d) {
+        var cell = { x: target.pos.x + d.x, y: target.pos.y + d.y };
+        if (W.isSolid(EMBER.Grid.cell(loc.rows, cell.x, cell.y, '#'))) return;
+        var len = self.routeLength(loc, actor.pos, cell);
+        if (len >= 0 && len < bestLen) { bestLen = len; best = { x: cell.x, y: cell.y, dir: facing(cell, target.pos) }; }
+      });
+      return { needed: true, at: best, reason: best ? null : 'person_unreachable' };
+    }
+    var object = def.spotObject ? this.objectById(def.spotObject) : target;
+    var spot = this.anchorFor(actor, def, object);
+    if (!spot) return { needed: true, at: null, reason: 'no_use_spot' };
+    if (W.isSolid(EMBER.Grid.cell(loc.rows, spot.x, spot.y, '#')) || this.routeLength(loc, actor.pos, spot) < 0) {
+      return { needed: true, at: null, reason: 'use_spot_unreachable' };
+    }
+    return { needed: true, at: spot, reason: null };
+  };
+
+  /* An action is legal when its own rules allow it and the place it is done
+   * from can be walked to. Candidates, starts and arrivals all ask this. */
+  Sim.prototype.legality = function (actor, def, target) {
+    var verdict;
+    try { verdict = def.eligible(this.context(actor, target)); } catch (e) { verdict = { reason: 'error:' + (e && e.message) }; }
+    if (verdict !== true) return { reason: (verdict && verdict.reason) || 'ineligible' };
+    var spot = this.useSpot(actor, def, target);
+    if (spot.needed && !spot.at) return { reason: spot.reason };
+    return true;
+  };
+
+  /* Choosing an activity and doing it are different moments. The record made
+   * here says what was chosen; if it has to be done somewhere else in the room
+   * the person first walks there (`approaching`), and only on arrival does the
+   * activity begin: its clock, its per-minute effects, whatever it opens. */
+  Sim.prototype.startActivity = function (actor, candidate, source, requestId) {
     var def = A.get(candidate.actionId);
     if (!def) return { ok: false, error: 'unknown_action' };
     var target = this.resolveTarget(candidate);
+    var legal = this.legality(actor, def, target);
+    if (legal !== true) return { ok: false, error: legal.reason };
     var ctx = this.context(actor, target);
-    /* Joining a shared activity somebody else opened is the one start that is
-     * not the actor's own: its legality was the opener's eligibility check. */
-    if (!opts.joining) {
-      var verdict;
-      try { verdict = def.eligible(ctx); } catch (e) { verdict = { reason: 'error:' + (e && e.message) }; }
-      if (verdict !== true) return { ok: false, error: (verdict && verdict.reason) || 'ineligible' };
-    }
+    var spot = this.useSpot(actor, def, target);
+    var here = !spot.needed || (spot.at.x === actor.pos.x && spot.at.y === actor.pos.y);
 
-    var minutes = opts.minutes || Math.max(1, Math.round(def.duration(ctx)));
+    var minutes = Math.max(1, Math.round(def.duration(ctx)));
     actor.activity = {
       id: 'act_' + (++this.eventSeq),
       actionId: candidate.actionId,
       label: def.label + (target && target.name ? ' — ' + target.name : ''),
       targetKind: def.targetKind, targetId: candidate.targetId || null,
+      phase: here ? 'executing' : 'approaching',
+      chosenAbs: this.absMinute(), approachMinutes: 0,
       startDay: this.state.day, startMin: this.state.minute,
       startAbs: this.absMinute(),
       plannedMinutes: minutes,
@@ -641,21 +795,74 @@
       elapsed: 0,
       interruptible: !!def.interruptible,
       settled: false,
-      conversationId: opts.joining || null,
+      conversationId: null,
       source: source, requestId: requestId || null
     };
-    ctx.activity = actor.activity;
-    var anchor = this.anchorFor(actor, def, target);
-    if (anchor) actor.walkTarget = anchor;
+    actor.walkTarget = here ? null : spot.at;
     this.touch();
-    if (def.onStart && !opts.joining) def.onStart(ctx);
     this.emit('ACTIVITY_STARTED', {
       actorId: actor.id, locationId: actor.location,
       data: { actionId: candidate.actionId, targetId: candidate.targetId || null,
-              minutes: minutes, source: source, requestId: requestId || null },
-      text: actor.name + ' began: ' + actor.activity.label + ' (' + minutes + ' min)'
+              minutes: minutes, source: source, requestId: requestId || null,
+              phase: actor.activity.phase },
+      text: actor.name + (here ? ' began: ' : ' set about: ') + actor.activity.label + ' (' + minutes + ' min)'
     });
-    return { ok: true, activity: actor.activity };
+    var started = actor.activity;
+    if (here) this.beginExecution(actor);
+    return { ok: true, activity: started };
+  };
+
+  /* The activity actually starts: at the use spot, facing the right way. How
+   * long it lasts is worked out now — a shift reached at 09:06 is paid from
+   * 09:06 — and its rules are asked again, because the walk took time. */
+  Sim.prototype.beginExecution = function (actor) {
+    var act = actor.activity, def = A.get(act.actionId);
+    var target = this.resolveTarget({ targetKind: act.targetKind, targetId: act.targetId });
+    var ctx = this.context(actor, target);
+    if (act.approachMinutes > 0) {
+      var verdict;
+      try { verdict = def.eligible(ctx); } catch (e) { verdict = { reason: 'error:' + (e && e.message) }; }
+      if (verdict !== true) return this.failActivity(actor, (verdict && verdict.reason) || 'ineligible');
+      act.plannedMinutes = Math.max(1, Math.round(def.duration(ctx)));
+    }
+    act.phase = 'executing';
+    act.startDay = this.state.day; act.startMin = this.state.minute;
+    act.startAbs = this.absMinute(); act.endAbs = act.startAbs + act.plannedMinutes;
+    act.elapsed = 0;
+    this.touch();
+    if (def.onStart) def.onStart(ctx);
+    if (act.approachMinutes > 0 && actor.activity === act && act.phase === 'executing') {
+      this.emit('ACTIVITY_REACHED', {
+        actorId: actor.id, locationId: actor.location,
+        data: { actionId: act.actionId, targetId: act.targetId, approachMinutes: act.approachMinutes, minutes: act.plannedMinutes },
+        text: actor.name + ' got there and began: ' + act.label + ' (' + act.plannedMinutes + ' min)'
+      });
+    }
+  };
+
+  /* Chosen, not done. Nothing of the activity is settled; the reason is an
+   * event anyone can read, and the same thing is not tried again at once. */
+  Sim.prototype.failActivity = function (actor, reason) {
+    var act = actor.activity;
+    if (!act) return false;
+    this.emit('ACTIVITY_FAILED', {
+      actorId: actor.id, locationId: actor.location,
+      data: { actionId: act.actionId, targetId: act.targetId, phase: act.phase, reason: reason,
+              approachMinutes: act.approachMinutes },
+      text: actor.name + ' could not: ' + act.label + ' (' + reason + ')'
+    });
+    actor.recentFailures = actor.recentFailures || {};
+    actor.recentFailures[act.actionId + (act.targetId ? ':' + act.targetId : '')] = this.absMinute();
+    actor.activity = null;
+    actor.walkTarget = null;
+    actor.lastFinishedAbs = this.absMinute();
+    this.touch();
+    if (act.conversationId) {
+      var conv = this.conversationById(act.conversationId);
+      if (conv && conv.status === 'proposed') this.closeProposal(conv, 'withdrawn', reason);
+      else this.endConversation(conv, reason);
+    }
+    return false;
   };
 
   Sim.prototype.advanceActivity = function (actor, minutes) {
@@ -665,6 +872,28 @@
     var target = this.resolveTarget({ targetKind: act.targetKind, targetId: act.targetId });
     var ctx = this.context(actor, target);
     ctx.activity = act;
+
+    if (act.phase === 'approaching') {
+      /* Walking there costs what walking costs. It is not a minute of work,
+       * practice, rest or talk, and none of those are counted. */
+      var still;
+      try { still = def.eligible(ctx); } catch (e) { still = { reason: 'error:' + (e && e.message) }; }
+      if (still !== true) return this.failActivity(actor, (still && still.reason) || 'ineligible');   // the shift ended, they left: stop walking
+      var spot = this.useSpot(actor, def, target);
+      if (!spot.at) return this.failActivity(actor, spot.reason);
+      if (spot.at.x === actor.pos.x && spot.at.y === actor.pos.y) {
+        actor.pos = { x: actor.pos.x, y: actor.pos.y, dir: spot.at.dir || actor.pos.dir };
+        actor.walkTarget = null;
+        return this.beginExecution(actor);
+      }
+      actor.walkTarget = spot.at;            // a person may have moved; a counter has not
+      act.approachMinutes += minutes;
+      this.adjustNeed(actor, 'energy', -0.02 * minutes);
+      this.touch();
+      return;
+    }
+    if (act.phase === 'waiting_reply') { this.touch(); return; }   // asked; the answer is the other person's
+
     if (act.conversationId) {
       var conv = this.conversationById(act.conversationId);
       if (conv && conv.status === 'active' && !this.conversationIntact(conv)) {
@@ -700,15 +929,20 @@
     var target = this.resolveTarget({ targetKind: act.targetKind, targetId: act.targetId });
     var ctx = this.context(actor, target);
     ctx.activity = act;
-    if (def.onInterrupt) def.onInterrupt(ctx);
+    if (def.onInterrupt && act.phase === 'executing') def.onInterrupt(ctx);
     this.emit('ACTIVITY_INTERRUPTED', {
       actorId: actor.id, locationId: actor.location,
-      data: { actionId: act.actionId, elapsed: act.elapsed, planned: act.plannedMinutes, reason: reason },
+      data: { actionId: act.actionId, elapsed: act.elapsed, planned: act.plannedMinutes, reason: reason, phase: act.phase },
       text: actor.name + ' stopped: ' + act.label + ' (' + reason + ')'
     });
     actor.activity = null;
+    actor.walkTarget = null;
     this.touch();
-    if (act.conversationId) this.endConversation(this.conversationById(act.conversationId), reason);
+    if (act.conversationId) {
+      var conv = this.conversationById(act.conversationId);
+      if (conv && conv.status === 'proposed') this.closeProposal(conv, 'withdrawn', reason);
+      else this.endConversation(conv, reason);
+    }
     return true;
   };
 
@@ -763,6 +997,26 @@
     return null;
   };
 
+  /* Steps along the shortest walkable route, or -1 when there is none. */
+  Sim.prototype.routeLength = function (loc, from, to) {
+    if (from.x === to.x && from.y === to.y) return 0;
+    var rows = loc.rows, w = rows[0].length, h = rows.length;
+    var dist = {}, queue = [{ x: from.x, y: from.y }], head = 0;
+    dist[from.y * w + from.x] = 0;
+    while (head < queue.length) {
+      var cur = queue[head++], d0 = dist[cur.y * w + cur.x];
+      for (var i = 0; i < STEP_DIRS.length; i++) {
+        var nx = cur.x + STEP_DIRS[i].x, ny = cur.y + STEP_DIRS[i].y;
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h || dist[ny * w + nx] !== undefined) continue;
+        if (nx === to.x && ny === to.y) return d0 + 1;
+        if (W.isSolid(EMBER.Grid.cell(rows, nx, ny, '#'))) continue;
+        dist[ny * w + nx] = d0 + 1;
+        queue.push({ x: nx, y: ny });
+      }
+    }
+    return -1;
+  };
+
   /* ---------------- decisions ---------------- */
 
   /* What must still hold for a pending answer to be worth executing. It
@@ -777,12 +1031,16 @@
     var offers = this.offersFor(actor).map(function (o) { return o.id + ':' + o.status; }).sort().join(',');
     /* A promise being kept, broken or newly made changes what is worth doing. */
     var promises = (actor.commitments || []).map(function (c) { return c.id + ':' + c.status; }).sort().join(',');
+    /* Being asked something is a reason to think again. */
+    var asked = this.state.conversations.filter(function (c) {
+      return c.status === 'proposed' && c.inviteeId === actor.id;
+    }).map(function (c) { return c.id; }).join(',');
     return [
       actor.location,
       actor.activity ? actor.activity.actionId : '-',
       Math.round(actor.money), Math.round(actor.savings),
       Math.floor(actor.needs.energy / 5), Math.floor(actor.needs.hunger / 5),
-      here, offers, promises
+      here, offers, promises, asked
     ].join('|');
   };
 
@@ -835,13 +1093,17 @@
     return request;
   };
 
-  Sim.prototype.requestDecision = function (actor, reason, reissuedSeq) {
+  Sim.prototype.requestDecision = function (actor, reason, reissuedSeq, firstAskedAbs) {
     var policy = Pol.get(actor.policyId);
     if (!policy) throw new Error('no policy registered for ' + actor.id + ' (' + actor.policyId + ')');
     var request = this.buildRequest(actor, reason, reissuedSeq);
     actor.pending = {
       requestId: request.requestId, seq: request.seq,
-      issuedAbs: request.absMinute, relevanceKey: request.relevanceKey,
+      /* A question put again after a reload has been open since it was first
+       * asked: the timeout runs from then, or reloading often enough would
+       * let someone wait for ever. */
+      issuedAbs: firstAskedAbs === undefined ? request.absMinute : firstAskedAbs,
+      relevanceKey: request.relevanceKey,
       candidateIds: request.candidates.map(function (c) { return c.id; })
     };
     this.touch();
@@ -1029,6 +1291,7 @@
 
     this.evaluateCommitments();
     this.expireOffers();
+    this.expireProposals();
     this.expireDecisions();
 
     this.actorIds().forEach(function (id) {
