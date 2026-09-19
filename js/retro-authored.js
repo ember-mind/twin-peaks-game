@@ -4067,12 +4067,14 @@
     { id:'palmer-sofa', map:'palmer', kind:'physical', cells:[[3,6]] },
     { id:'palmer-dining', map:'palmer', kind:'physical', cells:[[2,8],[3,8],[2,9],[3,9]] },
     { id:'palmer-sideboard', map:'palmer', kind:'physical', cells:[[14,6]] },
-    { id:'hotel-reception', map:'hotel_gn', kind:'physical', cells:[[4,8],[5,8],[6,8],[7,8]] },
-    { id:'hotel-lobby-rug', map:'hotel_gn', kind:'soft', cells:[[5,6],[6,6],[7,6],[5,7],[6,7],[7,7],[8,7]] },
-    { id:'hotel-luggage', map:'hotel_gn', kind:'physical', cells:[[2,6]] },
-    { id:'hotel-seating', map:'hotel_gn', kind:'physical', cells:[[8,6],[9,6],[10,6]] },
-    { id:'hotel-hearth', map:'hotel_gn', kind:'physical', cells:[[12,2],[12,3]] },
-    { id:'hotel-staircase', map:'hotel_gn', kind:'physical', cells:[[6,4],[7,4],[8,4],[9,4]] },
+    // E8 lobby (js/hotel-gn-scene.js rows): reception counter 11..14,8; hearth 2..5,4; lounge chair/table/chair
+    // 4..6,6; luggage bay 17,6; the runner and the stair to the hall door (16,1) are walked on, so they are soft.
+    { id:'hotel-reception', map:'hotel_gn', kind:'physical', cells:[[11,8],[12,8],[13,8],[14,8]] },
+    { id:'hotel-lobby-rug', map:'hotel_gn', kind:'soft', cells:[[9,7],[10,7],[9,8],[10,8],[9,9],[10,9]] },
+    { id:'hotel-luggage', map:'hotel_gn', kind:'physical', cells:[[17,6]] },
+    { id:'hotel-seating', map:'hotel_gn', kind:'physical', cells:[[4,6],[5,6],[6,6]] },
+    { id:'hotel-hearth', map:'hotel_gn', kind:'physical', cells:[[2,4],[3,4],[4,4],[5,4]] },
+    { id:'hotel-staircase', map:'hotel_gn', kind:'soft', cells:[[16,2],[16,3]] },
     /* Reparto nativo (js/hospital-art.js): la tenda e' una struttura solida a tutta altezza. */
     { id:'hospital-curtain', map:'hospital', kind:'physical', cells:[[8,3],[8,4],[8,5]] },
     { id:'hospital-monitor', map:'hospital', kind:'physical', cells:[[1,3],[2,3]] },

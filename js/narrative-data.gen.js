@@ -9333,7 +9333,7 @@
      "baseline": {
       "status": "PLACED",
       "map_id": "hotel_gn",
-      "x": 12,
+      "x": 15,
       "y": 9,
       "dir": "down",
       "dialogue": [
@@ -9354,7 +9354,7 @@
      "baseline": {
       "status": "PLACED",
       "map_id": "hotel_gn",
-      "x": 5,
+      "x": 12,
       "y": 7,
       "dir": "down",
       "dialogue": "benhorne_a2",
