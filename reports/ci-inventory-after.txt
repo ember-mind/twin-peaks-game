@@ -118,6 +118,7 @@ tests.yml	node-tests	node test/interior-prop-semantics.js
 tests.yml	node-tests	node test/interior-zoning-reachability.js
 tests.yml	node-tests	node test/world-catalog-coverage.js
 tests.yml	node-tests	node test/diner-layout.js
+tests.yml	node-tests	node test/diner-interior.js
 tests.yml	node-tests	node test/hospital-native.js
 tests.yml	node-tests	node test/room-315-location.js
 tests.yml	node-tests	node test/room-315-native.js

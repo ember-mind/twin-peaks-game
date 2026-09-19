@@ -210,6 +210,8 @@ jobs:
         run: node test/world-catalog-coverage.js
       - name: Diner layout
         run: node test/diner-layout.js
+      - name: Double R interior contract
+        run: node test/diner-interior.js
       - name: Hospital native scene
         run: node test/hospital-native.js
       - name: Room 315 location
