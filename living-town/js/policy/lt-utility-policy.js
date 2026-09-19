@@ -186,6 +186,18 @@
         break;
       }
 
+      /* Helping costs what it costs, more so with a goal pressing; it is worth
+       * more toward someone close, and to someone who cares about people. */
+      case 'help_out': {
+        var toRel = req.relationships[cand.targetId];
+        terms.kindness = 10 * (0.4 + trait(req, 'sociability'));
+        terms.closeness = toRel ? (toRel.closeness / 100) * 16 : 2;
+        terms.money_cost = -(cand.meta.amount || 8) * (0.5 + urgency) * (0.6 + 0.6 * trait(req, 'caution'));
+        var hconf = conflictPenalty(req, { untilAbs: endAbs, where: here });
+        if (hconf.penalty) terms.commitment_conflict = -hconf.penalty;
+        break;
+      }
+
       case 'accept_offer': {
         var offer = offerById(req, cand.targetId);
         if (!offer) { terms.unknown_offer = -50; break; }
@@ -259,6 +271,13 @@
         if (place && (place.services || []).indexOf('buy_meal') >= 0 && !(req.self.pantry > 0) && money >= 6) {
           var arriveMin = req.minute + cand.durationMinutes;
           if (arriveMin >= place.opens && arriveMin + 20 <= place.closes) terms.meal_there = Math.pow(hunger / 100, 2) * 45;
+        }
+        /* Hungry, nothing at home and not the price of a meal: the only thing
+         * left is to be where other people are. */
+        var alone = !((req.observations && req.observations.present) || []).length;   // with people around, stay where they are
+        if (alone && hunger >= 85 && !(req.self.pantry > 0) && money < 6 && dest !== req.self.homeId && place &&
+            (req.minute + cand.durationMinutes) >= place.opens && (req.minute + cand.durationMinutes) < place.closes - 30) {
+          terms.find_help = 16;
         }
         var tconf = conflictPenalty(req, { untilAbs: arrival, where: dest });
         if (tconf.penalty) terms.commitment_conflict = -tconf.penalty * 0.7;

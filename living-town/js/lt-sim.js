@@ -27,6 +27,7 @@
 
   var SALIENCE = {
     COMMITMENT_BROKEN: 1.0, GOAL_REACHED: 1.0, GOAL_MISSED: 1.0, OFFER_ACCEPTED: 0.85,
+    WENT_HUNGRY: 0.75, HELPED_OUT: 0.9,
     TALKED: 0.8, OFFER_RECEIVED: 0.7, OFFER_DECLINED: 0.7,
     COMMITMENT_KEPT: 0.6, WORKED_EXTRA: 0.6, PRACTISED: 0.5,
     WITHDREW: 0.4, GREETED: 0.3, WORKED: 0.25, SLEPT: 0.2,
@@ -35,6 +36,8 @@
   var MEMORY_THRESHOLD = 0.2;
 
   function deepCopy(v) { return JSON.parse(JSON.stringify(v)); }
+
+  var HUNGRY = 88, FED_AGAIN = 60;
 
   function Sim(opts) {
     opts = opts || {};
@@ -366,6 +369,24 @@
         text: actor.name + ' did not reach "' + g.label + '" in time (' + (Math.round(g.progress * 100) / 100) + ' of ' + g.target + (g.unit ? ' ' + g.unit : '') + ').'
       });
     });
+  };
+
+  /* Someone who has gone too long without eating shows it. `unwell` is a
+   * visible condition — whoever is in the room can see it, which is the only
+   * way anyone else comes to know — set once when hunger passes HUNGRY and
+   * cleared once they have properly eaten. */
+  Sim.prototype.noticeHunger = function (actor) {
+    if (!actor.unwell && actor.needs.hunger >= HUNGRY) {
+      actor.unwell = { sinceAbs: this.absMinute(), stamp: this.stamp() };
+      this.touch();
+      this.emit('WENT_HUNGRY', {
+        actorId: actor.id, locationId: actor.location, data: { hunger: Math.round(actor.needs.hunger) },
+        text: actor.name + ' has gone too long without eating, and it shows.'
+      });
+    } else if (actor.unwell && actor.needs.hunger < FED_AGAIN) {
+      actor.unwell = null;
+      this.touch();
+    }
   };
 
   Sim.prototype.commitmentById = function (actor, id) {
@@ -1388,8 +1409,11 @@
       var asleep = actor.activity && actor.activity.actionId === 'sleep';
       if (!asleep) {
         self.adjustNeed(actor, 'hunger', A.DRIFT.hunger);
-        self.adjustNeed(actor, 'energy', A.DRIFT.energy);
+        /* Going without food costs strength: past HUNGRY the day wears someone
+         * down two and a half times as fast. */
+        self.adjustNeed(actor, 'energy', A.DRIFT.energy * (actor.needs.hunger >= HUNGRY ? 2.5 : 1));
       }
+      self.noticeHunger(actor);
       self.walkStep(actor);
       self.advanceActivity(actor, 1);
     });

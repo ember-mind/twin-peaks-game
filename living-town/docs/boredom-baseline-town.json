@@ -1,5 +1,5 @@
 {
-  "commit": "3170b8f54fb02f963c3525539c0e63a829ce0b3c",
+  "commit": "2dd847a611aabbb66994e622c7fbf74bc823f9f6",
   "seed": 20260918,
   "days": 3,
   "firstDay": 1,
@@ -237,13 +237,14 @@
         "minutes": 94,
         "start": "D3 20:56"
       },
-      "beats": 14,
+      "beats": 27,
       "beatsByType": {
-        "TALKED": 13,
-        "ACTIVITY_FAILED": 1
+        "TALKED": 22,
+        "ACTIVITY_FAILED": 4,
+        "TALK_UNANSWERED": 1
       },
-      "decisions": 294,
-      "closeCalls": 43,
+      "decisions": 277,
+      "closeCalls": 45,
       "distinctActivities": {
         "resident_a": [
           "buy_meal",
@@ -260,6 +261,7 @@
         "resident_b": [
           "buy_meal",
           "greet",
+          "help_out",
           "join_conversation",
           "sleep",
           "talk_with",
@@ -270,6 +272,7 @@
         "resident_c": [
           "buy_meal",
           "greet",
+          "join_conversation",
           "sleep",
           "talk_with",
           "travel",
@@ -288,7 +291,12 @@
           "wash_and_dress"
         ],
         "resident_e": [
+          "buy_meal",
+          "greet",
+          "join_conversation",
           "sleep",
+          "talk_with",
+          "travel",
           "wait",
           "wash_and_dress"
         ]
@@ -311,10 +319,12 @@
           "flat_d"
         ],
         "resident_e": [
-          "flat_e"
+          "cafe",
+          "flat_e",
+          "park"
         ]
       },
-      "togetherMinutes": 628
+      "togetherMinutes": 626
     }
   },
   "overall": {
@@ -325,19 +335,20 @@
       "minutes": 94,
       "start": "D3 20:56"
     },
-    "beats": 58,
+    "beats": 71,
     "beatsByType": {
-      "TALKED": 34,
+      "TALKED": 43,
       "INTERVENTION_APPLIED": 3,
       "COMMITMENT_KEPT": 8,
       "GOAL_REACHED": 5,
       "BOOK_READ": 3,
-      "ACTIVITY_FAILED": 3,
+      "ACTIVITY_FAILED": 6,
       "OFFER_ACCEPTED": 1,
-      "FOOD_PARCEL_OPENED": 1
+      "FOOD_PARCEL_OPENED": 1,
+      "TALK_UNANSWERED": 1
     },
-    "decisions": 813,
-    "closeCalls": 130,
+    "decisions": 796,
+    "closeCalls": 132,
     "distinctActivities": {
       "resident_a": [
         "accept_offer",
@@ -358,6 +369,7 @@
         "buy_meal",
         "eat_at_home",
         "greet",
+        "help_out",
         "join_conversation",
         "read_book",
         "sleep",
@@ -432,7 +444,7 @@
         "park"
       ]
     },
-    "togetherMinutes": 1989
+    "togetherMinutes": 1987
   },
   "deadStretches": [
     {

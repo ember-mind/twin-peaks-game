@@ -36,6 +36,7 @@
   /* Baseline metabolism, per simulated minute. */
   var DRIFT = { hunger: 0.055, energy: -0.045 };
   var SAVINGS_SHARE = 0.6;   // the rest is spent living
+  var HELP_AMOUNT = 8;       // a café meal is 6
   var WORK_BLOCK = 120;      // a shift is worked in blocks, so the café floor
                              // is a place where small decisions happen
 
@@ -285,6 +286,37 @@
         ctx.sim.credit(ctx.actor, { money: -6 });
         need(ctx, 'hunger', -50);
         ctx.emit('ATE', { source: 'cafe', cost: 6 }, ctx.actor.name + ' bought a meal (-6 EUR).');
+      }
+    },
+
+    /* Seeing someone who has plainly not eaten, and handing them the price of
+     * a meal. It changes what they can afford and nothing else: whether they
+     * go and eat is theirs to decide. Once per person per day. */
+    help_out: {
+      id: 'help_out', label: 'Give the price of a meal to', targetKind: 'person', interruptible: false,
+      position: 'beside_person', offeredToPresent: true,
+      duration: function () { return 3; },
+      eligible: function (ctx) {
+        if (!personPresent(ctx, ctx.target.id)) return { reason: 'not_present' };
+        if (!ctx.target.unwell) return { reason: 'they_seem_fine' };
+        if (ctx.actor.unwell) return { reason: 'in_need_oneself' };
+        if (ctx.actor.money < HELP_AMOUNT + 12) return { reason: 'cannot_spare_it' };
+        if (((ctx.actor.helpedOut || {})[ctx.target.id]) === ctx.state.day) return { reason: 'already_helped_today' };
+        if (!ctx.sim.availableToTalk(ctx.target)) return { reason: 'partner_busy' };
+        return true;
+      },
+      candidateMeta: function (ctx) { return { toId: ctx.target.id, toName: ctx.target.name, amount: HELP_AMOUNT }; },
+      tick: function () {},
+      onComplete: function (ctx) {
+        var other = ctx.target;
+        ctx.sim.credit(ctx.actor, { money: -HELP_AMOUNT });
+        ctx.sim.credit(other, { money: HELP_AMOUNT });
+        ctx.actor.helpedOut = ctx.actor.helpedOut || {};
+        ctx.actor.helpedOut[other.id] = ctx.state.day;
+        ctx.sim.adjustRelationship(other, ctx.actor.id, { trust: 9, closeness: 7 });
+        ctx.sim.adjustRelationship(ctx.actor, other.id, { closeness: 3 });
+        ctx.emit('HELPED_OUT', { toId: other.id, withId: other.id, amount: HELP_AMOUNT },
+          ctx.actor.name + ' gave ' + other.name + ' ' + HELP_AMOUNT + ' EUR for a meal.', [other.id]);
       }
     },
 

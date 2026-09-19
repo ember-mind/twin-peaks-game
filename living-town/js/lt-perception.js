@@ -12,6 +12,8 @@
   if (typeof require === 'function' && !LT.Actions) require('./lt-actions.js');
   var W = LT.World, A = LT.Actions, U = LT.Util;
   var P = LT.Perception = LT.Perception || {};
+  /* A thing someone carries can offer them actions (object.heldAffordances). */
+  P.HELD_AFFORDANCES = true;
 
   P.MEMORY_LIMIT = 40;
 
@@ -25,7 +27,8 @@
       if (c.location !== actor.location || c.transit) return;
       present.push({
         id: c.id, name: c.name,
-        doing: c.activity ? c.activity.label : 'nothing in particular'
+        doing: c.activity ? c.activity.label : 'nothing in particular',
+        looksUnwell: !!c.unwell      // visible to anyone in the room; how hungry, or why, is not
       });
     });
     var objects = sim.objectsAt(actor.location).map(function (o) {
@@ -126,6 +129,30 @@
       if (other.location !== actor.location || other.transit) return;
       consider('greet', other);
       consider('talk_with', other);
+      /* Anything else one person can do toward another who is here. An action
+       * says so itself (`offeredToPresent`), so a content package can add one
+       * without this file knowing its name. */
+      Object.keys(A.all()).forEach(function (actionId) {
+        if (A.get(actionId).offeredToPresent && A.get(actionId).targetKind === 'person') consider(actionId, other);
+      });
+      /* And what something the actor is carrying lets them do toward that
+       * person: the thing says which actions (`heldAffordances`). */
+      sim.state.objects.forEach(function (o) {
+        if (o.heldBy !== actor.id) return;
+        (o.heldAffordances || []).forEach(function (actionId) {
+          var def = A.get(actionId);
+          if (def && def.targetKind === 'person') consider(actionId, other);
+        });
+      });
+    });
+
+    /* What a carried thing lets its carrier do that needs nobody else. */
+    sim.state.objects.forEach(function (o) {
+      if (o.heldBy !== actor.id) return;
+      (o.heldAffordances || []).forEach(function (actionId) {
+        var def = A.get(actionId);
+        if (def && !def.targetKind) consider(actionId, null);
+      });
     });
 
     // someone has come over and spoken: join them, or not
