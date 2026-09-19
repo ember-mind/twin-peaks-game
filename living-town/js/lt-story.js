@@ -174,7 +174,8 @@
   var TOLD = {   // event types worth a line of their own, most telling first
     GOAL_REACHED: 1, GOAL_MISSED: 1, COMMITMENT_BROKEN: 1, COMMITMENT_KEPT: 1, TALKED: 1,
     OFFER_ACCEPTED: 1, OFFER_DECLINED: 1, OFFER_LAPSED: 1, ACTIVITY_FAILED: 1, WITHDREW: 1,
-    WENT_HUNGRY: 1, HELPED_OUT: 1, SAID: 1, GOAL_SET: 1, MONEY_ARRIVED: 1, BILL_PAID: 1, TALK_DECLINED: 1, TALK_UNANSWERED: 1, BOOK_READ: 1, FOOD_PARCEL_OPENED: 1, INTERVENTION_APPLIED: 1
+    WENT_HUNGRY: 1, HELPED_OUT: 1, SAID: 1, GOAL_SET: 1, MONEY_ARRIVED: 1, BILL_PAID: 1,
+    WALLET_LOST: 1, WALLET_FOUND: 1, WALLET_RETURNED: 1, WALLET_KEPT: 1, WALLET_RECOVERED: 1, TALK_DECLINED: 1, TALK_UNANSWERED: 1, BOOK_READ: 1, FOOD_PARCEL_OPENED: 1, INTERVENTION_APPLIED: 1
   };
 
   S.recap = function (sim, day) {
@@ -242,7 +243,7 @@
   /* The one thing about a day someone would mention first: the event of the
    * kind that matters most, the latest of that kind. An event of the town's,
    * verbatim — or null for a day on which nothing of the sort happened. */
-  var WEIGHT = { GOAL_MISSED: 9, COMMITMENT_BROKEN: 8, HELPED_OUT: 7, WENT_HUNGRY: 6, BILL_PAID: 5, GOAL_REACHED: 5, TALK_DECLINED: 4,
+  var WEIGHT = { WALLET_KEPT: 9, WALLET_RETURNED: 8, GOAL_MISSED: 9, COMMITMENT_BROKEN: 8, HELPED_OUT: 7, WENT_HUNGRY: 6, BILL_PAID: 5, GOAL_REACHED: 5, TALK_DECLINED: 4,
                  MONEY_ARRIVED: 3, OFFER_ACCEPTED: 3, FOOD_PARCEL_OPENED: 3, BOOK_READ: 2, ACTIVITY_FAILED: 2, COMMITMENT_KEPT: 1 };
   S.headline = function (sim, day) {
     var best = null;

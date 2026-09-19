@@ -325,7 +325,11 @@
        * they stood to get in. Where they are is unchanged; this is the picture. */
       if (pose && pose.poseId === 'sleeping' && !e.render.walking) {
         var bed = sim.objectById(e.character.activity.targetId);
-        if (bed && bed.location === locId) { x = bed.x * TILE; y = bed.y * TILE; }
+        if (bed && bed.location === locId) {
+          /* A bed two tiles wide is lain in the middle of, not at its head end. */
+          var rowsHere = LT.World.LOCATIONS[locId].rows, wide = rowsHere[bed.y] && rowsHere[bed.y].charAt(bed.x + 1) === 'B';
+          x = bed.x * TILE + (wide ? TILE / 2 : 0); y = bed.y * TILE;
+        }
       }
       return {
         id: e.character.id, sheetId: LT.Appearance.sheetIdFor(e.character), pose: pose,
@@ -352,6 +356,7 @@
       /* The mark says what someone is doing, so it appears when they are
        * doing it — not while they are still walking over to it. */
       if (!c.activity || c.activity.phase !== 'executing') return;
+      if (e.pose && !e.moving && LT.ActivityPoses && LT.ActivityPoses.ready) return;   // the pose already says it
       var colour = MARK[c.activity.actionId];
       if (!colour) return;
       var x = e.wx - cx + 6, y = e.wy - cy - (CH_H - TILE) - 6;
