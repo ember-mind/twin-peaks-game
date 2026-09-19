@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "slug": "e8",
+  "generatedAt": "2026-09-15T17:17:17.220Z",
+  "files": [
+    {
+      "path": "evidence/baseline.png",
+      "bytes": 8749,
+      "sha256": "3d0e261fb26a283a6a2ed4a7ddc3fe04290e12e98d9b4324f673d6adf50636fa"
+    },
+    {
+      "path": "evidence/fireplace-r4.png",
+      "bytes": 15267,
+      "sha256": "696b619b98117cb1becb708aaae5902c2b0a7b96b17e921b11f76dfd0c4ba8db"
+    },
+    {
+      "path": "evidence/light-r3.png",
+      "bytes": 16264,
+      "sha256": "1bd589265e792322bb00ffb80171cdd22f027551d0edf68fba2f7772e807fb3b"
+    },
+    {
+      "path": "evidence/reception-r4.png",
+      "bytes": 15211,
+      "sha256": "4e099484624891ae3591d7a42c0c6db31293cce0ba1362beffec052ea8026de7"
+    },
+    {
+      "path": "evidence/round-1.png",
+      "bytes": 16129,
+      "sha256": "ae81bc34fb7745c9591db2af0946e04f6fac5a6f68868eddd6b9eb850ae389b1"
+    },
+    {
+      "path": "evidence/stairs-r3.png",
+      "bytes": 15670,
+      "sha256": "7d2ac3bc54b98f2f5309dd012f83244cd7d5a425bf5dc23aeccd5722ecc1f70d"
+    },
+    {
+      "path": "evidence/walls-r3.png",
+      "bytes": 14929,
+      "sha256": "c8d95848ba21bbe6d742923928a5fe13803e8d68f86fac1b81aa03836a01aba7"
+    }
+  ],
+  "duplicateHashes": []
+}
