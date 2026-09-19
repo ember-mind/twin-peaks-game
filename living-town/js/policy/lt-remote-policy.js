@@ -32,6 +32,16 @@
     var stats = { asked: 0, answered: 0, timeouts: 0, errors: 0, unusable: 0, latencies: [] };
 
     function run(job) {
+      /* The clock started when the question was asked, not when its turn came:
+       * one whose time ran out in the queue is never sent — it would be paid
+       * for, refused as late, and hold up the questions that are still live. */
+      var left = timeoutMs - (now() - job.asked);
+      if (left <= 0) {
+        stats.timeouts++;
+        job.resolve(Pol.unavailable(job.request, opts.id, 'timeout_in_queue'));
+        if (queue.length) run(queue.shift());
+        return;
+      }
       inFlight++;
       var started = now(), settled = false, timer;
       function finish(response, kind) {
@@ -41,7 +51,7 @@
         job.resolve(response);
         if (queue.length) run(queue.shift());
       }
-      timer = setTimeout(function () { finish(Pol.unavailable(job.request, opts.id, 'timeout_' + timeoutMs + 'ms'), 'timeouts'); }, timeoutMs);
+      timer = setTimeout(function () { finish(Pol.unavailable(job.request, opts.id, 'timeout_' + timeoutMs + 'ms'), 'timeouts'); }, left);
       var sent;
       try { sent = Promise.resolve(opts.transport(Brief.render(job.request))); }
       catch (e) { finish(Pol.failed(job.request, opts.id, 'transport_threw: ' + (e && e.message)), 'errors'); return; }
@@ -57,7 +67,7 @@
       decide: function (request) {
         stats.asked++;
         return new Promise(function (resolve) {
-          var job = { request: request, resolve: resolve };
+          var job = { request: request, resolve: resolve, asked: now() };
           if (inFlight < maxInFlight) run(job); else queue.push(job);
         });
       },

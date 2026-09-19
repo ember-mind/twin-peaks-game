@@ -105,6 +105,14 @@ const optionIds = (brief) => brief.user.split('\n').filter((l) => /^\s+\d+\. id 
   ok((await broken.decide(req)).status === 'error' && (await rejecting.decide(req)).status === 'error' && (await babble.decide(req)).status === 'error' && babble.stats().unusable === 1,
      'a throw, a rejection and a reply with no choice in it are all error responses');
 
+  console.log('# found in review: time spent queueing counts');
+  let sent = 0;
+  const jam = LT.RemotePolicy.create({ id: 'remote_jam', timeoutMs: 120, maxInFlight: 2, transport: () => { sent++; return new Promise(() => {}); } });
+  const tj = Date.now();
+  const eight = await Promise.all(Array.from({ length: 8 }, () => jam.decide(req)));
+  ok(eight.every((r) => r.status === 'unavailable') && Date.now() - tj < 320, 'eight questions into a dead provider are all answered "unavailable" within about one timeout (' + (Date.now() - tj) + ' ms), not four');
+  ok(sent === 2 && eight.filter((r) => r.error === 'timeout_in_queue').length === 6 && jam.stats().inFlight === 0 && jam.stats().queued === 0, 'and the six whose time ran out in the queue were never sent at all');
+
   console.log('# in a running town');
   let asked = 0;
   const flaky = LT.RemotePolicy.create({ id: 'remote_flaky', timeoutMs: 200, maxInFlight: 2, transport: (b) => {

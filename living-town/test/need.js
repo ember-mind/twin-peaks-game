@@ -51,6 +51,19 @@ const total = (s) => s.actorIds().reduce((t, id) => t + s.state.characters[id].m
   e.needs.hunger = 40; tickN(sim, 1);
   ok(e.unwell === null, 'having eaten, they are well again');
 
+  console.log('# found in review: the person has to still be there');
+  const gone = quiet(LT.Scenario.town({ intervention: false }));
+  const G = gone.state.characters;
+  gone.placeCharacter(G.resident_e, 'park'); gone.placeCharacter(G.resident_d, 'park');
+  G.resident_e.needs.hunger = 95; tickN(gone, 1);
+  assert(gone.startActivity(G.resident_d, { actionId: 'help_out', targetKind: 'person', targetId: 'resident_e' }, 'test', null).ok);
+  while (G.resident_d.activity && G.resident_d.activity.phase !== 'executing') gone.tick();
+  const purse = [G.resident_d.money, G.resident_e.money];
+  gone.placeCharacter(G.resident_e, 'flat_e');                       // they have left before the money changed hands
+  tickN(gone, 6);
+  ok(G.resident_d.money === purse[0] && G.resident_e.money === purse[1] && !gone.state.events.some((x) => x.type === 'HELPED_OUT'), 'nothing is handed to someone who is no longer there');
+  ok(gone.state.events.some((x) => x.type === 'ACTIVITY_FAILED' && x.actorId === 'resident_d' && x.data.reason === 'partner_left'), 'and the attempt is on the record as having failed: they left');
+
   console.log('# unprompted, over four days of five people');
   const town = LT.Scenario.town({});
   await town.runUntil(5, 0);

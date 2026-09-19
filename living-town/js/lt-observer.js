@@ -24,7 +24,7 @@
     { label: 'Auto', msPerMinute: 62, auto: true }
   ];
   var PACE_MS = { close: 250, steady: 90, quick: 20, asleep: 5 };
-  var SNAPSHOT_EVERY = 30, SNAPSHOT_KEEP = 96;    // sim minutes between snapshots; two days of them, which is as far back as the full record goes
+  var SNAPSHOT_EVERY = 30, SNAPSHOT_KEEP = 72;    // sim minutes between snapshots; two days of them, which is as far back as the full record goes
   var REPLAY_LEAD = 12, REPLAY_TAIL = 35;          // minutes shown before and after the moment asked for
 
   function msPerMinute(state) {
@@ -105,6 +105,7 @@
       var step = O.clockStep(now, state.lastFrame);
       state.lastFrame = now;
       pump(state, step.sim);
+      state.held = heldFor(state);     // also while paused, so the caption never says "waiting" after the answer is in
       followTheAction(state);
       state.view.update(step.visual);
       state.view.draw();
@@ -175,6 +176,7 @@
       if (state.replay) {
         /* Only the replay moves. The live world waits exactly where it was,
          * and nothing about a replay is ever saved. */
+        askedAgain(state, state.replay.sim);
         state.replay.sim.tick();
         state.view.observe();
         state.accumulator -= nowMs;
@@ -205,7 +207,8 @@
   function keepSnapshot(state) {
     var abs = state.sim.absMinute();
     if (abs % SNAPSHOT_EVERY) return;
-    try { state.snapshots.push({ abs: abs, save: LT.Save.serialize(state.sim) }); } catch (e) { return; }
+    /* Kept as text: a quarter of the memory of the object it came from. */
+    try { state.snapshots.push({ abs: abs, save: JSON.stringify(LT.Save.serialize(state.sim)) }); } catch (e) { return; }
     if (state.snapshots.length > SNAPSHOT_KEEP) state.snapshots.shift();
   }
 
@@ -259,10 +262,10 @@
       LT.Policy.register(players[pid]);
     });
     var sim;
-    try { sim = LT.Save.deserialize(JSON.parse(JSON.stringify(from.save))); }
+    try { sim = LT.Save.deserialize(JSON.parse(from.save)); }
     catch (e) { restoreRecorders(state); return Promise.resolve(false); }
     var startAt = beat.absMinute - REPLAY_LEAD;
-    return sim.runMinutes(Math.max(0, startAt - sim.absMinute())).then(function () {
+    return replayForward(state, sim, startAt).then(function () {
       state.replay = { sim: sim, untilAbs: beat.absMinute + REPLAY_TAIL, beat: beat, players: players, resumeSpeed: state.speedIndex, liveView: state.view, liveSelected: state.selected };
       state.view = LT.View.create(el('lt-canvas'), sim);
       if (beat.actorId && sim.state.characters[beat.actorId]) state.selected = beat.actorId;
@@ -277,6 +280,22 @@
 
   function restoreRecorders(state) {
     Object.keys(state.recorders || {}).forEach(function (pid) { LT.Policy.register(state.recorders[pid]); });
+  }
+
+  /* What a watcher made happen after the copy was taken is part of what
+   * happened: it is asked for again in the replay at the very minute it was
+   * asked for in the town, through the same register. */
+  function askedAgain(state, sim) {
+    var at = sim.absMinute(), have = sim.state.interventions.length;
+    state.sim.state.interventions.forEach(function (r, i) {
+      if (i < have || r.scheduledAbs !== at) return;
+      sim.scheduleIntervention({ type: r.type, params: JSON.parse(JSON.stringify(r.params)), source: r.source, atDay: r.atDay, atMinute: r.atMinute });
+    });
+  }
+  function replayForward(state, sim, untilAbs) {
+    if (sim.absMinute() >= untilAbs) { askedAgain(state, sim); return Promise.resolve(); }
+    askedAgain(state, sim);
+    return sim.runMinutes(1).then(function () { return replayForward(state, sim, untilAbs); });
   }
 
   O.backToNow = function (state) {
@@ -362,6 +381,7 @@
   }
 
   function refreshButtons(state) {
+    if (state.replay) return;          // while looking back they stay off, whatever else happens
     var peek = LT.Save.peekLocal();
     el('lt-resume').disabled = peek.status !== 'present';
     el('lt-save').disabled = peek.status === 'unavailable';
@@ -762,8 +782,10 @@
 
   function pad(v, n) { var s = String(v); while (s.length < n) s = ' ' + s; return s; }
   function round(v) { return Math.round(v * 100) / 100; }
+  /* Safe in element content and inside a quoted attribute alike: some of this
+   * text is a provider's own words. */
   function escape(s) {
     return String(s === undefined || s === null ? '' : s)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 })();

@@ -52,7 +52,7 @@
       type: entry.type, params: entry.params || {},
       source: entry.source || 'developer',
       atDay: atDay, atMinute: atMin, atAbs: U.absolute(atDay, atMin),
-      status: 'scheduled', scheduledStamp: sim.stamp()
+      status: 'scheduled', scheduledStamp: sim.stamp(), scheduledAbs: sim.absMinute()
     };
     /* One register. sim.scheduledInterventions is state.interventions — the
      * same array, fresh world or restored — so an entry is written once. */
@@ -105,6 +105,44 @@
       });
     });
   };
+
+  /* ---------------- money_turn ---------------- */
+
+  /* Money arrives or is owed from outside the town: a refund, a repair bill.
+   * It changes what someone has, and only they know; what they do about a
+   * goal that has just come within reach, or slipped out of it, is theirs. A
+   * bill is paid from the pocket first and then from savings, and never takes
+   * more than there is. */
+  I.define({
+    type: 'money_turn',
+    label: 'Money arrives, or a bill does',
+    paramsSchema: { toId: 'character id', amount: 'EUR; positive arrives, negative is owed; 1–50 either way', what: 'a few words: "a tax refund", "a repair bill"' },
+    validate: function (p, sim) {
+      if (!p.toId || !sim.state.characters[p.toId]) return { error: 'unknown_character' };
+      if (typeof p.amount !== 'number' || !isFinite(p.amount) || p.amount === 0) return { error: 'invalid_amount' };
+      if (Math.abs(p.amount) > 50) return { error: 'amount_too_large' };
+      if (typeof p.what !== 'string' || !p.what.trim() || p.what.length > 60) return { error: 'missing_description' };
+      return true;
+    },
+    describe: function (p, sim) {
+      var c = sim.state.characters[p.toId];
+      return p.amount > 0 ? c.name + ' received ' + p.amount + ' EUR: ' + p.what + '.' : c.name + ' had to pay ' + (-p.amount) + ' EUR: ' + p.what + '.';
+    },
+    apply: function (p, sim) {
+      var c = sim.state.characters[p.toId], had = c.money + c.savings;
+      if (p.amount > 0) sim.credit(c, { money: p.amount });
+      else {
+        var owed = Math.min(-p.amount, had), fromPocket = Math.min(owed, c.money);
+        sim.credit(c, { money: -fromPocket, savings: -(owed - fromPocket) });
+      }
+      var moved = U.round2((c.money + c.savings) - had);
+      sim.emit(p.amount > 0 ? 'MONEY_ARRIVED' : 'BILL_PAID', {
+        actorId: c.id, locationId: c.location, private: true, data: { amount: moved, what: p.what },
+        text: p.amount > 0 ? c.name + ' received ' + moved + ' EUR (' + p.what + ').' : c.name + ' paid ' + (-moved) + ' EUR (' + p.what + ').'
+      });
+      return { ok: true, data: { moved: moved } };
+    }
+  });
 
   /* ---------------- offer_extra_work ---------------- */
 

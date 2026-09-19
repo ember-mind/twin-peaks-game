@@ -1121,6 +1121,15 @@
         return;
       }
     }
+    /* Something done to a person standing next to one needs them to still be
+     * there, and still be someone it can be done to, every minute it takes —
+     * not only on the walk over. (A talk keeps its own watch, above.) */
+    if (def.position === 'beside_person' && !act.conversationId && target) {
+      if (target.location !== actor.location || target.transit || !adjacent(actor, target)) return this.failActivity(actor, 'partner_left');
+      var holds;
+      try { holds = def.eligible(ctx); } catch (e2) { holds = { reason: 'error:' + (e2 && e2.message) }; }
+      if (holds !== true && holds.reason !== 'partner_busy') return this.failActivity(actor, holds.reason || 'ineligible');
+    }
     if (def.tick) def.tick(ctx, minutes);
     act.elapsed += minutes;
     this.touch();

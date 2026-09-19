@@ -19,7 +19,7 @@ const people = (sim) => JSON.stringify(sim.actorIds().map((id) => sim.state.char
 
 (async function () {
   console.log('# the catalogue is a way into the existing register, not a second one');
-  ok(H.CATALOGUE.length === 3 && H.CATALOGUE.every((e) => e.label && e.blurb && typeof e.build === 'function'), 'three things, each with words for a person');
+  ok(H.CATALOGUE.length === 5 && H.CATALOGUE.every((e) => e.label && e.blurb && typeof e.build === 'function'), 'three things, each with words for a person');
   const types = {};
   {
     const sim = quietWorld();
@@ -83,6 +83,24 @@ const people = (sim) => JSON.stringify(sim.actorIds().map((id) => sim.state.char
     ok(H.asked(loaded)[0].status === 'applied' && H.asked(loaded)[0].at === 'D1 10:20', 'and the page lists it as having happened');
     const strip = (s) => { const c = JSON.parse(JSON.stringify(s.state)); delete c.version; return JSON.stringify(c).replace(/"requestId":"req_(\d+)\.\d+"/g, '"requestId":"req_$1"'); };
     ok(strip(loaded) === strip(sim), 'the loaded world and the one that never stopped are the same world');
+  }
+
+  console.log('# money from outside the town');
+  {
+    const sim = quietWorld(); const C = sim.state.characters, a = C.resident_a, b = C.resident_b;
+    const before = { a: [a.money, a.savings], b: [b.money, b.savings] };
+    ok(H.make(sim, 'refund', { who: 'resident_a' }).ok && H.make(sim, 'bill', { who: 'resident_b' }).ok, 'a refund for one, a bill for the other');
+    sim.tick();
+    ok(a.money === before.a[0] + 15 && a.savings === before.a[1] && b.money === before.b[0] - 15, 'fifteen euro each way, applied once');
+    b.money = 4; b.savings = 5; H.make(sim, 'bill', { who: 'resident_b' }); sim.tick();
+    ok(b.money === 0 && b.savings === 0 && sim.state.events.filter((e) => e.type === 'BILL_PAID').pop().data.amount === -9, 'a bill takes the pocket, then savings, and never more than there is (9 of 15)');
+    ok(!a.memories.some((m) => m.type === 'BILL_PAID') && b.memories.some((m) => m.type === 'BILL_PAID'), 'only the person it happened to knows');
+    const sane = (p) => LT.Interventions.get('money_turn').validate(p, sim);
+    ok(sane({ toId: 'resident_a', amount: 500, what: 'x' }).error === 'amount_too_large' && sane({ toId: 'resident_a', amount: 0, what: 'x' }).error === 'invalid_amount' && sane({ toId: 'resident_a', amount: 5 }).error === 'missing_description', 'the type refuses absurd sums and unexplained money');
+    const goal = a.goals[0]; a.savings = goal.target - 10; sim.refreshGoals(a);
+    ok(!goal.reached, 'ten short of the goal');
+    LT.Interventions.schedule(sim, { type: 'money_turn', source: 'watcher', params: { toId: 'resident_a', amount: 15, what: 'a refund' } }); sim.tick();
+    ok(!goal.reached && a.money >= 15, 'a refund lands in the pocket, not in savings: whether it goes toward the goal is theirs to decide');
   }
 
   console.log('# the same request in the same world gives the same world');

@@ -104,6 +104,18 @@
     }
   ];
 
+  H.CATALOGUE.push({
+    id: 'refund', label: 'A refund arrives for someone',
+    blurb: 'Fifteen euro they were not counting on. Only they know.',
+    fields: function (sim) { return [{ key: 'who', label: 'For', options: people(sim) }]; },
+    build: function (sim, a) { return sim.state.characters[a.who] ? { type: 'money_turn', params: { toId: a.who, amount: 15, what: 'a refund they were not counting on' } } : { error: 'unknown_character' }; }
+  }, {
+    id: 'bill', label: 'A bill arrives for someone',
+    blurb: 'Fifteen euro owed, from the pocket first and then from savings. Only they know.',
+    fields: function (sim) { return [{ key: 'who', label: 'For', options: people(sim) }]; },
+    build: function (sim, a) { return sim.state.characters[a.who] ? { type: 'money_turn', params: { toId: a.who, amount: -15, what: 'a repair that could not wait' } } : { error: 'unknown_character' }; }
+  });
+
   H.entry = function (id) { return H.CATALOGUE.filter(function (e) { return e.id === id; })[0] || null; };
 
   /* A refusal, in words. An error nobody has put into words yet is shown as it is. */

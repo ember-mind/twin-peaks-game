@@ -64,7 +64,7 @@
       return r.name + ' (' + r.walkMinutes + ' min' + (r.opens === 0 && r.closes >= 1440 ? '' : ', open ' + r.opensAt + '–' + r.closesAt) + ((r.services || []).indexOf('buy_meal') >= 0 ? ', sells meals' : '') + ')';
     }).join('; ') + '.');
     var mem = (req.memories || []).slice(0, memoryCount);
-    if (mem.length) { out.push('You remember:'); mem.forEach(function (m) { out.push('  - ' + m.stamp + ': ' + m.summary + (m.firsthand ? '' : ' (you were there)')); }); }
+    if (mem.length) { out.push('You remember:'); mem.forEach(function (m) { out.push('  - ' + m.stamp + ': ' + m.summary); }); }   // a memory does not record whether it was seen or told, so the brief claims neither
     out.push('Why you are deciding now: ' + ({ idle: 'you have nothing in hand', activity_complete: 'you have just finished something', interrupted: 'you were interrupted' }[req.context && req.context.reason] || 'you have nothing in hand') + '.');
     out.push('Options:');
     req.candidates.forEach(function (c, i) {

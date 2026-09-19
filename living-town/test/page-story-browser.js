@@ -116,6 +116,42 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     await js("document.getElementById('lt-replay-back').click(); true"); await sleep(300);
     ok(!(await js("!!LT_OBSERVER.replay")) && await js("LT_OBSERVER.view.sim === LT_OBSERVER.sim") && await js("document.getElementById('lt-replay').hidden") && !(await js("document.getElementById('lt-hand-do').disabled")), 'Back to now: the live world, its view, its controls');
     ok(liveBefore === await js("JSON.stringify(LT_OBSERVER.sim.state)"), 'exactly as it was left');
+    console.log('# found in review: what the watcher did is part of what is looked back at');
+    await page.navigate('living-town/index.html?world=new'); await sleep(1200);
+    await js("LT_OBSERVER.speedIndex = 0; true");
+    await js("(function(){ document.querySelectorAll('#lt-speeds button')[3].click(); return true; })()");
+    for (let i = 0; i < 60 && await js("LT_OBSERVER.sim.absMinute()") < 455; i++) await sleep(200);
+    await js("document.querySelectorAll('#lt-speeds button')[0].click(); true"); await sleep(400);
+    await pick('lt-hand-what', 'leave_book');
+    await js("document.querySelector('#lt-hand-fields select').value = 'park_bench_ne'; document.getElementById('lt-hand-do').click(); true");
+    const askedAt = await js("LT_OBSERVER.sim.absMinute()");
+    await js("document.querySelectorAll('#lt-speeds button')[3].click(); true");
+    for (let i = 0; i < 60 && await js("LT_OBSERVER.sim.absMinute()") < askedAt + 50; i++) await sleep(200);
+    await js("document.querySelectorAll('#lt-speeds button')[0].click(); true"); await sleep(400);
+    const applied = JSON.parse(await js("JSON.stringify(LT.Story.beats(LT_OBSERVER.sim, 1).filter(function(b){ return b.type === 'INTERVENTION_APPLIED' && b.absMinute > " + askedAt + " - 1; })[0] || null)"));
+    ok(!!applied && await js("LT_OBSERVER.snapshots.every(function(s){ return typeof s.save === 'string'; })"), 'the book the watcher left is a moment on the strip (' + (applied && applied.stamp) + '), and copies are kept as text');
+    await js("(function(){ window.__r2 = null; LT.Observer.replay(LT_OBSERVER, " + JSON.stringify(applied) + ").then(function(v){ window.__r2 = v; }); return true; })()");
+    for (let i = 0; i < 40 && (await js("window.__r2")) === null; i++) await sleep(250);
+    await js("(async function(){ await LT_OBSERVER.replay.sim.runMinutes(1); return true; })()", true);
+    await js("document.querySelectorAll('#lt-speeds button')[1].click(); true");
+    for (let i = 0; i < 40 && await js("LT_OBSERVER.replay.sim.absMinute()") < applied.absMinute + 2; i++) await sleep(300);
+    ok(await js("LT_OBSERVER.replay.sim.state.events.some(function(e){ return e.type === 'INTERVENTION_APPLIED' && e.absMinute === " + (applied ? applied.absMinute : 0) + "; }) && LT_OBSERVER.replay.sim.state.objects.filter(function(o){ return o.typeId === 'book_used'; }).length === LT_OBSERVER.sim.state.objects.filter(function(o){ return o.typeId === 'book_used' && true; }).length - (LT_OBSERVER.sim.state.interventions.filter(function(r){ return r.type === 'place_shared_book' && r.status === 'applied' && r.atAbs > " + (applied ? applied.absMinute : 0) + " + 2; }).length)"),
+       'looking back at it, it happens again at the same minute — though the copy the replay started from was taken before it was asked for');
+    await js("document.getElementById('lt-replay-back').click(); true"); await sleep(300);
+
+    console.log('# found in review: a provider\'s words cannot leave the text they are in');
+    await js(`(function(){ try {
+      LT.Policy.register({ id: 'wordy_page_test', decide: function (r) {
+        var c = r.candidates.filter(function (x) { return /^(join_conversation|talk_with)/.test(x.id); })[0] || r.candidates.filter(function (x) { return x.id === 'wait'; })[0];
+        return Promise.resolve(LT.Policy.selected(r, c.id, 'wordy_page_test', null, { say: ['hi', ' onmouseover=', 'window.__pwned=1', ' x=', String.fromCharCode(39)].join(String.fromCharCode(34)) })); } });
+      var sim = LT.Scenario.day1({ intervention: false, everyday: false, policies: { resident_a: 'wordy_page_test', resident_b: 'wordy_page_test' } });
+      sim.placeCharacter(sim.state.characters.resident_a, 'park'); sim.placeCharacter(sim.state.characters.resident_b, 'park');
+      LT.Observer.adopt(LT_OBSERVER, sim); return 'ok'; } catch (e) { return String(e && e.stack || e); } })()`);
+    await js("(async function(){ await LT_OBSERVER.sim.runMinutes(40); return true; })()", true); await sleep(500);
+    const titles = JSON.parse(await js("JSON.stringify(Array.prototype.map.call(document.querySelectorAll('#lt-timeline .lt-beat.is-said'), function(b){ return { title: b.title, attrs: b.getAttributeNames() }; }))"));
+    ok(titles.length >= 1 && titles.every((t) => t.attrs.indexOf('onmouseover') < 0 && t.attrs.indexOf('x') < 0 && /onmouseover=/.test(t.title)), 'a line with quotes in it stays inside the tooltip, whole: ' + (titles[0] && titles[0].title.slice(0, 70)));
+    ok(await js("window.__pwned === undefined") && /onmouseover/.test(await txt('lt-events')), 'and is shown as the text it is everywhere else');
+
     console.log('# page: a provider that takes real seconds');
     await page.navigate('living-town/index.html?world=new'); await sleep(1200);
     await js("LT_OBSERVER.speedIndex = 0; true");
