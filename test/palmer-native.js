@@ -259,7 +259,7 @@ function hasRect(calls, x, y, width, height) {
     call.args[0] === x && call.args[1] === y && call.args[2] === width && call.args[3] === height);
 }
 const depth32 = foregroundCalls(32, 64);
-assert(hasRect(depth32, 16, 13, 32, 19), '32px interval selects Laura bed');
+assert(hasRect(depth32, 16, 16, 32, 18), '32px interval selects Laura bed');
 assert(hasRect(depth32, 97, 18, 14, 13), '32px interval selects Laura dresser');
 assert(!hasRect(depth32, 75, 37, 11, 11), 'half-open interval excludes the ceiling fan at 64px');
 const depth80 = foregroundCalls(64, 112);
@@ -302,6 +302,41 @@ for (const call of propPixels.calls) {
     'furniture never paints in the door approach column: ' + call.args.join(','));
 }
 
+// ---------------------------------------------- niente isole, niente stinte
+// Il divano, il tappeto e la luce sopra di essi devono essere UN gruppo, e
+// altrettanto la consolle con il suo tappeto e il ritratto: la critica a
+// freddo leggeva ogni oggetto come un'isola su un pavimento nudo.
+const armchair = Art.definitions.find((prop) => prop.id === 'sofa');
+const console_ = Art.definitions.find((prop) => prop.id === 'sideboard');
+assert(Art.rug.x <= armchair.bounds[0] + armchair.bounds[2],
+  'the rug reaches the armchair: its west edge ' + Art.rug.x +
+  ' is not east of the chair edge ' + (armchair.bounds[0] + armchair.bounds[2]));
+assert(Art.rug.y + Art.rug.h > armchair.footY,
+  'the armchair stands on the rug, it does not sit north of it');
+assert(Art.wool.y <= console_.footY,
+  'the braided oval reaches under the console foot (' + Art.wool.y + ' vs ' + console_.footY + ')');
+assert(Art.wool.x + Art.wool.w >= console_.bounds[0] + console_.bounds[2] - 2,
+  'the braided oval reaches the console east side');
+
+// Il ventilatore e' un corpo illuminante sul soffitto, non una macchia nera
+// sul muro: nessun pixel di contorno nero fra le pale.
+const fanOnly = newRecordingContext();
+artForeground(fanOnly.context, 0, 0, Art.fanFoot, Art.fanFoot + 1);
+assert(fanOnly.calls.length > 0, 'the fan is painted in its own band');
+const blades = fanOnly.calls.filter((call) => call.args[1] < 37 || call.args[1] > 47);
+assert(blades.length > 0, 'the fan has blades outside the hub');
+for (const call of blades) {
+  assert.notEqual(call.color.toLowerCase(), Art.palette.ink,
+    'a fan blade carries no ink outline: it is a fixture, not a stain');
+}
+
+// La fascia della porta non sale mai sopra la linea del muro sud: chi sta
+// sulla soglia o sul tile d'avvicinamento non viene tagliato.
+for (const call of foregroundCalls(Art.doorFoot, Infinity)) {
+  assert(call.args[1] >= 176,
+    'the door band paints nothing above the south wall line: ' + call.args.join(','));
+}
+
 // ------------------------------------------- ordine dei valori sul rasterizzato
 // Non serve Chrome: rigiochiamo i rettangoli dell'arte in un buffer RGB e
 // misuriamo i piani direttamente, cosi' la prova e' la stessa che il motore
@@ -342,11 +377,11 @@ assert(distinct.size > 24, 'the raster is a painted frame, not a flat fill (' + 
 const untouched = region(0, 0, W, H).filter((px) => px[0] === 0 && px[1] === 0 && px[2] === 0);
 assert.equal(untouched.length, 0, 'every pixel of the native frame is painted');
 
-const pillow = mean(region(20, 19, 24, 3));
-const lauraFloor = mean(region(120, 18, 40, 10));
+const pillow = mean(region(24, 17, 6, 10));
+const lauraFloor = mean(region(140, 40, 40, 12));
 const parquet = mean(region(196, 150, 36, 16));
 const rugField = mean(region(112, 116, 12, 12));
-const panelling = mean(region(120, 68, 40, 6));
+const panelling = mean(region(144, 68, 24, 6));
 const southWall = mean(region(60, 183, 30, 4));
 
 assert(pillow > lauraFloor + 40,
