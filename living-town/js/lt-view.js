@@ -246,8 +246,30 @@
     });
   };
 
+  /* A place with no production scene of its own. If a places package is
+   * loaded and knows this place, it paints it — ground first, then people in
+   * depth order with whatever must cover them (a tree's crown, a bed head)
+   * between the bands, exactly as the café does. If it is not loaded, or does
+   * not know the place, the plain cell painter below is what stands between a
+   * new location and a blank screen. Returns which of the two drew. */
   View.prototype.drawTemporaryPlace = function (g, loc, ents, cx, cy, how) {
-    var Art = LT.Art, self = this;
+    var Art = LT.Art, self = this, TP = LT.TownPlaces;
+    var painted = false;
+    if (TP && typeof TP.draw === 'function') {
+      var popts = { minute: this.sim.state.minute };
+      var mapId = (TP.materialFor && TP.materialFor(loc.id)) || 'lt_temporary';
+      try { painted = TP.draw(g, loc.id, loc.rows, cx, cy, popts) !== false; } catch (e) { painted = false; }
+      if (painted) {
+        EMBER.Tilemap.paintDepthBands(ents, TILE, function (e) {
+          self.drawInhabitant(g, e, cx, cy, mapId, how);
+        }, function (footY, nextFootY, afterIndex) {
+          if (afterIndex < 0 || !TP.drawForeground) return;
+          TP.drawForeground(g, loc.id, loc.rows, cx, cy, footY, nextFootY, popts);
+        });
+        this.drawActivityMarks(g, cx, cy, ents.filter(function (e) { return e.kind !== 'thing'; }));
+        return 'places';
+      }
+    }
     g.fillStyle = Art.palette.ink;
     g.fillRect(0, 0, VW, VH);
     /* One light: when the day's own light is loaded, the older stepped tint on
@@ -262,6 +284,7 @@
     /* Never a production map id: no room lighting is borrowed for a place that has none. */
     ents.forEach(function (e) { self.drawInhabitant(g, e, cx, cy, 'lt_temporary', how); });
     this.drawActivityMarks(g, cx, cy, ents.filter(function (e) { return e.kind !== 'thing'; }));
+    return 'temporary';
   };
 
   /* The light of the simulated minute; null when the package is not loaded. */
@@ -281,13 +304,14 @@
     var ents = EMBER.Tilemap.depthSort(things.concat(people));
     var how = this.inhabitantRenderer();
     var scene = this.productionScene(loc);
+    var drewAs = 'production';
     if (scene) this.drawProductionRoom(g, scene, ents, cx, cy, how);
-    else this.drawTemporaryPlace(g, loc, ents, cx, cy, how);
+    else drewAs = this.drawTemporaryPlace(g, loc, ents, cx, cy, how);
     /* Last, over room and people alike, so nobody stands in another hour's light. */
     var light = this.light();
     if (light) LT.DayLight.apply(g, light, { width: VW, height: VH });
     return { location: locId, entities: people.length, things: things.map(function (t) { return t.id + ':' + t.state; }),
-             environment: scene ? 'production' : 'temporary', inhabitants: how,
+             environment: drewAs, inhabitants: how,
              poses: people.filter(function (e) { return e.pose && !e.moving; }).map(function (e) { return e.id + ':' + e.pose.poseId; }),
              light: light ? light.phase : null };
   };
