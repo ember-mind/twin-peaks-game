@@ -129,3 +129,4 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-19 7ae1500 main: Double R booths/counter/back-bar art from codex/intent-room-double-r-grid (art only, floor tint kept) + ambient-life-frames post-M12; 10 files mirrored
 - 2026-09-19 a3407ec main: qwen E8 Great Northern lobby (79cd72a) merged, 20x12 native room, hotel prop footprints re-declared; 592 files mirrored
 - 2026-09-19 b0eb986 main: Palmer house native art (lead/palmer-house, Opus builder) + palmer-native CI gate (122); 8 files mirrored
+- 2026-09-19 828ef9f main: Palmer house round 2 (portrait, runner, wool rug, fan fixes); 2 files mirrored
