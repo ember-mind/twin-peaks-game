@@ -42,11 +42,11 @@ is usable. Until then every `draw` returns `false`.
 | poseId | directions | frames | frame ms | pivot | box | shadow | reads as |
 |---|---|---|---|---|---|---|---|
 | `seated` | down · right (+ left) | 1 | — | 12,24 | 16×21 | yes | narrow chest over a wide lap, shins straight down |
-| `reading` | down | 2 | 900 | 12,24 | 16×20 | yes | seated, both hands holding an open book across the chest |
-| `work_counter` | down | 3 | 320 | 12,24 | 16×24 | yes | standing, a small rag travelling across the chest under one hand |
-| `unpacking` | down | 2 | 520 | 12,24 | 20×20 | yes | bent at the waist, crown of the head to the viewer, both arms down |
+| `reading` | down | 2 | 900 | 12,24 | 16×24 | yes | standing, both hands holding an open book across the chest |
+| `work_counter` | down | 3 | 320 | 12,24 | 24×24 | yes | standing, a rag swinging from one hand outside the silhouette |
+| `unpacking` | down | 2 | 520 | 12,24 | 24×20 | yes | stooped, shoulders rolled forward, both arms hanging clear of the body |
 | `sleeping` | right (+ left) | 1 | — | 12,24 | 24×12 | no | lying flat, head on a pillow, blanket in the wearer's own colour |
-| `talking` | down · right (+ left) | 2 | 430 | 12,24 | 20×24 | yes | one forearm lifting and falling clear of the silhouette |
+| `talking` | down · right (+ left) | 2 | 430 | 12,24 | 24×24 | yes | one forearm lifting and falling clear of the silhouette |
 
 `LT.ActivityPoses.POSES` is that same table, read at load, so it cannot drift
 from what the runtime draws. Four things are deliberately separate:
@@ -79,22 +79,29 @@ palette the look's walk frames use and written with the same PNG writer. Three
 levers do all the work:
 
 - **fewer rows** sit lower in the cell, because rows are bottom-aligned. That
-  is `seated` (20 rows), `unpacking` (14) and `sleeping` (11). `work_counter`
-  and `talking` keep all 24, because a person who is standing must be exactly
-  as tall as the standing sprite.
+  is `seated` (20 rows), `unpacking` (20) and `sleeping` (11). `reading`,
+  `work_counter` and `talking` keep all 24, because a person who is standing
+  must be exactly as tall as the standing sprite — a figure that is shorter
+  for no readable reason is read as a broken sprite, not as a pose.
 - **padding** adds transparent columns to the head so a body can be authored
-  wider than 15 and an arm can leave the silhouette without moving the figure.
-  That is `talking`'s lifted forearm and `unpacking`'s two hanging arms.
-- **headRows** keeps only the top of the head matrix. A head tipped forward
-  shows its crown and little else, so `unpacking` carries eight head rows
-  instead of twelve — without it the hair is two thirds of the figure.
+  wider than 15 and a limb can leave the silhouette without moving the figure.
+  That is `talking`'s lifted forearm, `unpacking`'s two hanging arms and
+  `work_counter`'s rag. A limb outside the body must still **overwrite the
+  torso's own outline column**: leave one transparent column between them and
+  it reads as a rectangle floating next to a person.
+- **headRows** keeps only the top of the head matrix, for a head tipped far
+  enough forward to hide the face. Nothing uses it in v01 — the crown-first
+  `unpacking` read as a sprite whose torso had been eaten — but the lever is
+  there and the compiler honours it.
 - **blankTop** drops the head without lifting the feet. Nothing uses it in
-  v01; it is the lever for a pose that leans without crouching.
+  v01 either; it is the lever for a pose that leans without crouching.
 
 The apron overlay is re-authored per pose wherever the standing one would land
-on shins or on an open book (that is `seated` in both directions). `reading`, `unpacking` and `sleeping` show no
-apron at all — a book, a bent back and a blanket each hide one — so for those
-three a `_work` sheet id draws the same cell as the plain one.
+on shins (that is `seated`, in both directions), and moves with the padding
+everywhere else. `reading`, `unpacking` and `sleeping` show no apron at all —
+an open book covers it, a stooped body folds it out of sight and a blanket
+hides it — so for those three a `_work` sheet id draws the same cell as the
+plain one.
 
 ## The light
 

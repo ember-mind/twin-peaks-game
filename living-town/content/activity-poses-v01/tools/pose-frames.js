@@ -41,6 +41,18 @@ const splice = (row, at, text) => row.slice(0, at) + text + row.slice(at + text.
  * figure exactly where it stood. */
 const pad4 = (rows) => rows.map((row) => '....' + row + '....');
 
+/* Hang a limb off the side of a pad4 body. The body's own outline column is
+ * REPLACED by the body's own material, so the limb joins the silhouette
+ * instead of standing beside it: an outlined block with an outlined body next
+ * to it is two objects, and a viewer reads the second one as a floating
+ * rectangle rather than as an arm. */
+function hangLeft(row, skin) {
+  return '..O' + skin + skin + row[6] + row.slice(6);
+}
+function hangRight(row, skin) {
+  return row.slice(0, 17) + row[16] + skin + skin + 'O..';
+}
+
 /* Author a wide matrix by shape rather than by counting: spaces are
  * transparent and short rows are filled out to the widest one. */
 function rect(rows) {
@@ -137,9 +149,8 @@ function workCounterBody(body, frame) {
   const out = rows.slice();
   /* The rag hangs from the hand, touching the body's own outline column: one
    * transparent column between them and it reads as a floating rectangle. */
-  ['ONNNO', 'ONnnO', 'ONNnO', '.OOO.'].forEach((cloth, i) => {
-    out[top + i] = splice(out[top + i], 0, cloth);
-  });
+  ['N', 'n', 'N', 'n'].forEach((cloth, i) => { out[top + i] = hangLeft(out[top + i], cloth); });
+  out[top + 4] = splice(out[top + 4], 3, 'OO');
   return out;
 }
 
@@ -161,8 +172,8 @@ function unpackingBody(body, frame) {
   const out = rows.slice();
   /* Both arms, overwriting the torso's own outline column so they hang FROM
    * the body instead of beside it. */
-  ['OSSO', 'OSSO', 'OSSO', 'OssO'].forEach((limb, i) => {
-    out[arm + i] = splice(splice(out[arm + i], 2, limb), 17, limb);
+  ['S', 'S', 'S', 's'].forEach((skin, i) => {
+    out[arm + i] = hangRight(hangLeft(out[arm + i], skin), skin);
   });
   return out;
 }
@@ -205,9 +216,9 @@ function talkingDown(body, frame) {
   const rest = body === 'skirt' ? 4 : 5;          /* the row the resting hand is on */
   out[rest] = out[rest].replace('S', 'J');
   const top = frame === 0 ? 0 : 3;
-  out[top] = splice(out[top], 2, 'OSSO');
-  out[top + 1] = splice(out[top + 1], 2, 'OSSO');
-  out[top + 2] = splice(out[top + 2], 2, '.OO.');
+  out[top] = hangLeft(out[top], 'S');
+  out[top + 1] = hangLeft(out[top + 1], 's');
+  out[top + 2] = splice(out[top + 2], 3, 'OO');
   return out;
 }
 
