@@ -218,6 +218,8 @@ jobs:
         run: node test/room-315-native.js
       - name: Palmer house native scene
         run: node test/palmer-native.js
+      - name: Glastonbury Grove native scene
+        run: node test/woods-native.js
       - name: Sheriff's station location
         run: node test/sheriffs-station-location.js
       - name: Sheriff's station native scene
