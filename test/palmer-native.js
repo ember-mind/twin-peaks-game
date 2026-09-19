@@ -261,13 +261,13 @@ function hasRect(calls, x, y, width, height) {
 const depth32 = foregroundCalls(32, 64);
 assert(hasRect(depth32, 16, 13, 32, 19), '32px interval selects Laura bed');
 assert(hasRect(depth32, 97, 18, 14, 13), '32px interval selects Laura dresser');
-assert(!hasRect(depth32, 74, 42, 14, 14), 'half-open interval excludes the ceiling fan at 64px');
+assert(!hasRect(depth32, 75, 37, 11, 11), 'half-open interval excludes the ceiling fan at 64px');
 const depth80 = foregroundCalls(64, 112);
-assert(hasRect(depth80, 74, 42, 14, 14), '64px interval repaints the ceiling fan over the top of the stairs');
+assert(hasRect(depth80, 75, 37, 11, 11), '64px interval repaints the ceiling fan over the top of the stairs');
 assert(!hasRect(depth80, 47, 88, 18, 25), '64px interval excludes the living room furniture at 112px');
 const depth112 = foregroundCalls(112, 144);
 assert(hasRect(depth112, 47, 88, 18, 25), '112px interval selects the settee');
-assert(hasRect(depth112, 223, 80, 17, 32), '112px interval selects the phonograph console');
+assert(hasRect(depth112, 223, 84, 17, 28), '112px interval selects the phonograph console');
 assert(!hasRect(depth112, 32, 120, 32, 10), '112px interval excludes the dining table at 144px');
 const depth144 = foregroundCalls(144, 160);
 assert(hasRect(depth144, 32, 120, 32, 10), '144px interval selects the dining table');
