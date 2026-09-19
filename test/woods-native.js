@@ -223,17 +223,59 @@ assert.equal(again.calls.length, authored.calls.length, 'the same camera paints 
 assert.equal(JSON.stringify(again.calls), JSON.stringify(authored.calls),
   'the authored frame is deterministic, rect for rect');
 
-// La banda di profondita' non dipinge nulla: nessuna chioma puo' mai coprire
-// un attore, quindi Cooper resta visibile su OGNI tile del sentiero.
-const depth = newRecordingContext();
-const depthResult = Art.foreground(depth.context, CAMERA.x, CAMERA.y,
-  { forestDepthMin: 0, forestDepthMax: Infinity, mapId: MAP_ID });
-assert.equal(depthResult, undefined, 'the woods depth band returns nothing');
-assert.equal(depth.calls.length, 0,
-  'the woods depth band paints nothing: no canopy is ever repainted over an actor');
+// Profondita' per albero, la regola HeartGold: un albero il cui piede sta a
+// SUD dell'attore lo ricopre, uno a nord no. E' sicuro solo perche' ogni
+// chioma e' tagliata: il massimo che un albero puo' coprire di chi sta
+// esattamente una riga a nord sono le gambe, mai il corpo intero.
+function depthCalls(min, max) {
+  const recording = newRecordingContext();
+  Art.foreground(recording.context, 0, 0,
+    { forestDepthMin: min, forestDepthMax: max, viewportWidth: FULL_W, viewportHeight: FULL_H },
+    woods);
+  return recording.calls;
+}
+const FULL_W = woods.width * 16, FULL_H = woods.height * 16;
+const southTree = { tx: 14, ty: 15, footY: 256 };
+assert.equal(woods.rows[southTree.ty].charAt(southTree.tx), 'Y', 'the south ring tree is where we think');
+const coversFromSouth = depthCalls(240, Infinity);
+assert(coversFromSouth.length > 0,
+  'an actor at 14,14 is overlapped by the tree south of him: the band repaints it');
+// Un albero a NORD dell'attore resta nel passaggio di terreno, sotto di lui:
+// il sicomoro a 14,9 (piede 160) non compare nella banda di chi ha il piede
+// a 176, cioe' di chi gli sta una riga a sud.
+const northTreeBox = { x0: 214, x1: 250, y0: 128, y1: 154 };
+for (const call of depthCalls(176, 192)) {
+  const inside = call.args[0] < northTreeBox.x1 && call.args[0] + call.args[2] > northTreeBox.x0 &&
+    call.args[1] < northTreeBox.y1 && call.args[1] + call.args[3] > northTreeBox.y0;
+  assert.equal(inside, false,
+    'the tree north of the actor is not repainted over him: ' + call.args.join(','));
+}
+assert(depthCalls(160, 176).some((call) =>
+  call.args[0] < northTreeBox.x1 && call.args[0] + call.args[2] > northTreeBox.x0 &&
+  call.args[1] < northTreeBox.y1 && call.args[1] + call.args[3] > northTreeBox.y0),
+  'that same tree IS repainted for an actor standing north of it');
+assert.equal(depthCalls(161, 175).length, 0, 'a band with no tree foot in it paints nothing');
+
+// Il taglio della chioma e' il contratto che rende sicura la banda: nessun
+// albero dipinge piu' di MAX_CANOPY_LIFT pixel sopra la propria cella.
+let worstLift = 0;
+for (const tree of Art.treeList(woods.rows)) {
+  const recording = newRecordingContext();
+  Art.foreground(recording.context, 0, 0,
+    { forestDepthMin: tree.footY, forestDepthMax: tree.footY + 1, viewportWidth: FULL_W, viewportHeight: FULL_H },
+    woods);
+  const mine = recording.calls.filter((call) =>
+    call.args[0] >= tree.tx * 16 - 20 && call.args[0] <= tree.tx * 16 + 24);
+  if (!mine.length) continue;
+  const top = Math.min(...mine.map((call) => call.args[1]));
+  worstLift = Math.max(worstLift, tree.ty * 16 - top);
+}
+assert(worstLift <= Art.maxCanopyLift,
+  'no canopy rises more than ' + Art.maxCanopyLift + ' px above its own tile (worst ' +
+  worstLift + '): that is what keeps an actor north of a tree from being buried');
 assert.equal(G.sprites.drawForegroundStructures(canvasContext, installedMap, 0, 0,
-  { forestDepthMin: 0, forestDepthMax: Infinity }), undefined,
-  'the installed depth hook is the empty one');
+  { forestDepthMin: 161, forestDepthMax: 175 }), undefined,
+  'the installed depth hook runs the woods art and returns nothing');
 
 // Il varco: nessuna geometria, solo pixel, e la luce compare solo con i tre
 // indizi in mano.
@@ -317,8 +359,23 @@ for (let i = 1; i < ramp.length; i++) {
   assert(luma(Art.palette[ramp[i]]) > luma(Art.palette[ramp[i - 1]]) + 10,
     'ground ramp step ' + ramp[i - 1] + ' -> ' + ramp[i] + ' is a real step');
 }
-assert(luma(Art.palette.oil) < luma(Art.palette.deep),
-  'the oil is darker than the forest floor it sits in');
+assert(luma(Art.palette.oil) < luma(Art.palette.deep) - 8,
+  'the pool is the darkest plane in the frame, not just a shade under the forest floor (' +
+  luma(Art.palette.oil).toFixed(1) + ' vs ' + luma(Art.palette.deep).toFixed(1) + ')');
+assert(luma(Art.palette.shadow) - luma(Art.palette.deep) > 30,
+  'the clearing floor is two steps above the forest floor, not one (' +
+  (luma(Art.palette.shadow) - luma(Art.palette.deep)).toFixed(1) + ')');
+assert(luma(Art.palette.moon) - luma(Art.palette.ink) > 150,
+  'the frame is not four crowded blue-greys: the ramp spans a real range');
+// Il bordo illuminato della pozza esiste davvero: pixel chiari sul labbro.
+let litRimPixels = 0;
+for (let y = 170; y < 212; y++) {
+  for (let x = 182; x < 262; x++) {
+    const colour = colourAt(x, y);
+    if (colour === Art.palette.moon || colour === Art.palette.light) litRimPixels++;
+  }
+}
+assert(litRimPixels > 40, 'the pool carries a lit rim (' + litRimPixels + ' px)');
 
 // L'anello di terra battuta copre davvero la corona fra i sicomori.
 let ringPixels = 0;
@@ -352,18 +409,44 @@ for (let y = 176; y < 208; y += 2) {
 }
 assert(poolEdges.size >= 8, 'the pool outline is organic: its west edge moves row by row');
 
-// I tronchi dei sicomori sono le sole verticali chiare della radura.
+// I tronchi dei sicomori sono le sole verticali chiare della radura, e ogni
+// albero porta il suo spigolo di luna.
 let trunkPixels = 0;
 for (const [tx, ty] of Art.sycamores) {
+  let litEdge = 0;
   for (let y = ty * 16 - 4; y < ty * 16 + 16; y++) {
-    for (let x = tx * 16 - 4; x < tx * 16 + 20; x++) {
+    for (let x = tx * 16 - 6; x < tx * 16 + 22; x++) {
       const colour = colourAt(x, y);
-      if (colour === Art.palette.light || colour === Art.palette.moon) trunkPixels++;
+      if (colour === Art.palette.mid || colour === Art.palette.light ||
+        colour === Art.palette.moon) trunkPixels++;
+      if (colour === Art.palette.light || colour === Art.palette.moon) litEdge++;
     }
   }
+  assert(litEdge > 8, 'the sycamore at ' + tx + ',' + ty + ' carries its moon edge');
 }
 assert(trunkPixels > 300, 'the eight trunks carry the pale bark that makes the ring read (' +
   trunkPixels + ' px)');
+
+// Tre sagome diverse distribuite in senso orario: nessuna coppia di vicini
+// condivide la stessa chioma, ed e' questo che toglie il "timbro ripetuto".
+const clockwise = ['14,9', '16,10', '17,12', '16,14', '14,15', '12,14', '11,12', '12,10'];
+assert.equal(clockwise.length, Art.sycamores.length, 'the clockwise order names every tree');
+for (const key of clockwise) {
+  assert(Object.prototype.hasOwnProperty.call(Art.ringVariant, key),
+    'the ring assigns a variant to ' + key);
+}
+assert(Art.crowns.length >= 3, 'there are at least three sycamore silhouettes');
+for (let i = 0; i < clockwise.length; i++) {
+  const here = Art.ringVariant[clockwise[i]];
+  const next = Art.ringVariant[clockwise[(i + 1) % clockwise.length]];
+  assert.notEqual(here, next,
+    'neighbours ' + clockwise[i] + ' and ' + clockwise[(i + 1) % clockwise.length] +
+    ' do not share a crown');
+}
+const shapes = new Set(Art.crowns.map((c) => JSON.stringify(c.bands)));
+assert.equal(shapes.size, Art.crowns.length, 'every crown silhouette is a different shape');
+const leans = new Set(Art.crowns.map((c) => c.lean));
+assert(leans.size >= 2, 'the crowns do not all stand at the same lean');
 
 // La notte e' fredda ovunque tranne la soglia: nessun rosso vagante.
 const warmPixels = [];

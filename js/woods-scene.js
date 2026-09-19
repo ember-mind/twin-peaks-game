@@ -115,7 +115,7 @@
     };
     if (GAME.sprites) GAME.sprites.drawForegroundStructures = function (ctx, m, cx, cy, opts) {
       if (m && m.id === MAP) {
-        return GAME.WoodsArt && GAME.WoodsArt.foreground(ctx, cx, cy, opts);
+        return GAME.WoodsArt && GAME.WoodsArt.foreground(ctx, cx, cy, opts, m);
       }
       return originalForeground && originalForeground.apply(this, arguments);
     };
