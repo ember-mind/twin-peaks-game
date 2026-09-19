@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Everyday props v01 — Living Town</title>
+<style>
+  :root {
+    --ink: #0e1013; --panel: #161a20; --edge: #242a33;
+    --text: #d8dde4; --dim: #8a94a2; --gold: #d7b45c; --red: #c2706e;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ink); color: var(--text);
+         font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+  header { padding: 24px 26px 6px; }
+  header h1 { margin: 0; font-size: 20px; font-weight: 600; }
+  header p { margin: 5px 0 0; color: var(--dim); font-size: 14px; }
+  main { padding: 10px 26px 60px; display: grid; gap: 20px; max-width: 1180px; }
+
+  .warn { border: 1px solid var(--red); border-left-width: 4px; border-radius: 8px;
+          padding: 11px 14px; color: #e7bdbc; font-size: 14px; background: #1a1315; }
+  .warn b { color: #f0d2d1; }
+
+  section { background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 16px 18px; }
+  section > h2 { margin: 0 0 4px; font-size: 12px; font-weight: 700; letter-spacing: .1em;
+                 text-transform: uppercase; color: var(--dim); }
+  section > p.note { margin: 0 0 14px; color: var(--dim); font-size: 13px; }
+
+  canvas { image-rendering: pixelated; display: block; background: #0a0c0f; }
+
+  .specimens { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+  .spec { border: 1px solid var(--edge); border-radius: 8px; padding: 11px 12px 13px; background: #12161c; }
+  .spec h3 { margin: 0 0 2px; font: 600 13px/1.3 var(--mono); color: var(--text); }
+  .spec .meta { margin: 0 0 10px; font: 11px/1.4 var(--mono); color: var(--dim); }
+  .pair { display: flex; gap: 14px; align-items: flex-end; }
+  .pair .lab { font: 10px/1 var(--mono); color: var(--dim); display: block; margin-bottom: 5px; }
+
+  .strip + .strip { margin-top: 16px; }
+  .strip h3 { margin: 0 0 7px; font: 600 13px/1.3 var(--mono); }
+  .rows { display: grid; gap: 9px; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 9px; border-bottom: 1px solid #1c222a; vertical-align: top; }
+  th { color: var(--dim); font: 600 11px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .06em; }
+  td.k { font: 12px/1.5 var(--mono); color: var(--gold); white-space: nowrap; }
+  td.n { font: 12px/1.5 var(--mono); color: var(--dim); white-space: nowrap; }
+  #status { font: 12px/1.4 var(--mono); color: var(--dim); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Everyday props v01 — four objects, drawn by the production renderer</h1>
+  <p>Café Meridiana's own material, the production interior kit, the native 256×192 canvas.</p>
+</header>
+
+<main>
+  <div class="warn">
+    <b>This is a graphics preview, not a behaviour demo.</b> Every frame below is the renderer
+    drawing an object at a spot this page chose. Nobody picks anything up, carries it, reads it,
+    eats it, rides it or repairs it: no inhabitant in Living Town knows these objects exist.
+    Use, lending, riding and repair are <b>not implemented</b>.
+  </div>
+
+  <section>
+    <h2>Every object, every visual state</h2>
+    <p class="note">Left: native scale, one canvas pixel per game pixel. Right: the same canvas at ×6,
+      nearest-neighbour. The dotted line is the pivot row; the mark under it is the pivot column.</p>
+    <div class="specimens" id="specimens"></div>
+  </section>
+
+  <section>
+    <h2>Variants side by side, with a production inhabitant</h2>
+    <p class="note">One strip per object: every state in a row on Café Meridiana's floor, and at the
+      right an inhabitant off the production atlas (<code>living-town/assets/inhabitants-hg-24.png</code>,
+      24px, the same sheet the game draws people from) standing on the same floor line. Native above, ×3 below.</p>
+    <div id="strips"></div>
+  </section>
+
+  <section>
+    <h2>In the café</h2>
+    <p class="note">Café Meridiana as <code>lt-cafe-scene.js</code> arranges it, drawn by the production
+      painter, unmodified — then the same frame again with objects put down in it. The book is on the
+      counter, the parcel and the umbrella are on the floor. The bicycle is not shown here on purpose:
+      it belongs outside a room this size.</p>
+    <div class="rows" id="cafe"></div>
+  </section>
+
+  <section>
+    <h2>Manifest</h2>
+    <p class="note">Read out of <code>LT.EverydayProps.TYPES</code> at load: this table cannot drift from
+      what the renderer uses.</p>
+    <table id="manifest"><thead><tr>
+      <th>typeId</th><th>state</th><th>size</th><th>pivot</th><th>footprint</th><th>placement</th>
+    </tr></thead><tbody></tbody></table>
+  </section>
+
+  <section>
+    <h2>Renderer</h2>
+    <p id="status">loading…</p>
+  </section>
+</main>
+
+<!-- Ember Engine, the production renderer, and Living Town's content for it:
+     the same scripts and the same order living-town/index.html loads. -->
+<script src="../../../engine/ember-math.js"></script>
+<script src="../../../engine/ember-grid.js"></script>
+<script src="../../../engine/ember-camera.js"></script>
+<script src="../../../engine/ember-tilemap.js"></script>
+<script src="../../../engine/ember-viewport.js"></script>
+<script src="../../js/lt-util.js"></script>
+<script src="../../js/lt-names.js"></script>
+<script src="../../js/lt-appearance.js"></script>
+<script src="../../js/lt-production-host.js"></script>
+<script src="../../../js/retro-authored.js"></script>
+<script src="../../js/lt-world.js"></script>
+<script src="../../js/lt-cafe-scene.js"></script>
+<script>LT.ProductionHost.attach();</script>
+<script src="lt-everyday-props.js"></script>
+<script>
+(function () {
+  var EP = LT.EverydayProps, KIT = GAME.Retro2D.interiorKit, P = KIT.materials.lt_cafe;
+  var T = 16, VW = 256, VH = 192;
+
+  function canvas(w, h, scale) {
+    var c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    c.style.width = (w * scale) + 'px'; c.style.height = (h * scale) + 'px';
+    return c;
+  }
+  /* A zoom for a capture is real pixels, not a CSS size: nearest-neighbour
+   * onto a bigger canvas, so the file on disk is what the reader sees. */
+  function upscale(src, z) {
+    if (z === 1) return src;
+    var c = document.createElement('canvas');
+    c.width = src.width * z; c.height = src.height * z;
+    var g = c.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    g.drawImage(src, 0, 0, c.width, c.height);
+    return c;
+  }
+  function ctx2d(c) {
+    var g = c.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    return g;
+  }
+  /* The same picture at two sizes is the same pixels twice, never one bitmap
+   * stretched: a stretched one would be the renderer's output plus a resample. */
+  function twice(paint, w, h, zoom) {
+    var wrap = document.createElement('div'); wrap.className = 'pair';
+    [['1×', 1], ['×' + zoom, zoom]].forEach(function (s) {
+      var box = document.createElement('div');
+      var lab = document.createElement('span'); lab.className = 'lab'; lab.textContent = s[0];
+      var c = canvas(w, h, s[1]);
+      paint(ctx2d(c));
+      box.appendChild(lab); box.appendChild(c); wrap.appendChild(box);
+    });
+    return wrap;
+  }
+
+  /* ---- specimens ------------------------------------------------------- */
+  var PAD = 6;
+  var specimens = document.getElementById('specimens');
+  EP.ORDER.forEach(function (typeId) {
+    var t = EP.TYPES[typeId];
+    t.states.forEach(function (state) {
+      var f = t.frames[state];
+      var w = f.w + PAD * 2, h = f.h + PAD * 2 + 4;
+      var px = PAD + f.pivot[0], py = PAD + f.pivot[1];
+      var card = document.createElement('div'); card.className = 'spec';
+      var head = document.createElement('h3'); head.textContent = typeId + ' · ' + state;
+      var meta = document.createElement('p'); meta.className = 'meta';
+      meta.textContent = f.w + '×' + f.h + ' px · pivot ' + f.pivot[0] + ',' + f.pivot[1];
+      card.appendChild(head); card.appendChild(meta);
+      card.appendChild(twice(function (g) {
+        KIT.plankFloor(g, 0, 0, 0, 0, w, h, P);
+        for (var d = 0; d < w; d += 2) { g.fillStyle = P.ink; g.fillRect(d, py, 1, 1); }
+        g.fillStyle = '#d7b45c'; g.fillRect(px, py + 1, 1, 3);
+        EP.draw(g, typeId, state, px, py, { palette: P, kit: KIT });
+      }, w, h, 6));
+      specimens.appendChild(card);
+    });
+  });
+
+  /* ---- variant strips, against a person -------------------------------- */
+  var LOOK_ID = LT.Appearance.BASE_IDS[0];
+  var strips = document.getElementById('strips');
+
+  function stripSize(t) {
+    return {
+      w: Math.max(256, t.states.reduce(function (n, s) { return n + t.frames[s].w + 16; }, 38) + 34),
+      h: t.states.reduce(function (n, s) { return Math.max(n, t.frames[s].h); }, 24) + 18
+    };
+  }
+
+  function stripPaint(typeId, size) {
+    var t = EP.TYPES[typeId];
+    return function (g) {
+      var ground = size.h - 10;
+      g.fillStyle = P.woodDark; g.fillRect(0, 0, size.w, size.h);
+      KIT.plankFloor(g, 0, 0, 0, 0, size.w, size.h, P);
+      g.fillStyle = 'rgba(37,40,43,.20)'; g.fillRect(0, 0, size.w, Math.max(0, ground - 34));
+      var x = 22;
+      t.states.forEach(function (state) {
+        var f = t.frames[state];
+        EP.draw(g, typeId, state, x + f.pivot[0], ground, { palette: P, kit: KIT });
+        x += f.w + 16;
+      });
+      /* The person: drawn by the production atlas renderer, standing on the
+       * same floor line. drawChar puts the feet sixteen rows under its y.
+       * Until the sheet has decoded there is no person to draw — a half-loaded
+       * one would be a worse comparison than none. */
+      if (!LT.ProductionHost.ready) return;
+      GAME.Sprites.drawChar(g, size.w - 32, ground - 16, LT.ProductionHost.looks[LOOK_ID],
+        'right', 0, 1, false, false, 0,
+        { mapId: 'lt_cafe', wx: size.w - 32, wy: ground - 16, npcId: null, characterLife: null });
+    };
+  }
+
+  function stripRows() {
+    strips.textContent = '';
+    EP.ORDER.forEach(function (typeId) {
+      var t = EP.TYPES[typeId], size = stripSize(t);
+      var box = document.createElement('div'); box.className = 'strip';
+      var head = document.createElement('h3');
+      head.textContent = typeId + ' — ' + t.states.join(' · ') + ' · inhabitant';
+      box.appendChild(head);
+      box.appendChild(twice(stripPaint(typeId, size), size.w, size.h, 3));
+      strips.appendChild(box);
+    });
+  }
+
+  /* ---- the café -------------------------------------------------------- */
+  /* The room is 15×10 tiles: 240×160 in a 256×192 window, so it is drawn whole,
+   * centred, with the camera the production painter expects. */
+  var loc = LT.World.LOCATIONS.cafe;
+  var scene = { id: loc.visual.scene, indoor: true, rows: loc.rows,
+                width: loc.rows[0].length, height: loc.rows.length };
+  var CAM_X = -(VW - loc.rows[0].length * T) / 2, CAM_Y = -(VH - loc.rows.length * T) / 2;
+  var ORIGIN_X = -CAM_X, ORIGIN_Y = -CAM_Y;
+
+  /* Room-local pixels. A counter item sits two rows below the slab's top; a
+   * floor item stands on its own tile row. */
+  var PLACED = [
+    { type: 'book_used', state: 'closed', at: [57, 50] },      // the counter, in the gap the room leaves
+    { type: 'food_parcel', state: 'sealed', at: [190, 143] },  // the floor under the coat rack
+    { type: 'umbrella_worn', state: 'closed', at: [202, 143] }
+  ];
+
+  function cafePaint(withProps) {
+    return function (g) {
+      GAME.sprites.drawStructures(g, scene, CAM_X, CAM_Y,
+        { mapId: scene.id, indoor: true, viewportWidth: VW, viewportHeight: VH, t: 0 });
+      if (!withProps) return;
+      PLACED.forEach(function (o) {
+        EP.draw(g, o.type, o.state, ORIGIN_X + o.at[0], ORIGIN_Y + o.at[1], { palette: P, kit: KIT });
+      });
+    };
+  }
+
+  function cafeRows() {
+    var host = document.getElementById('cafe');
+    host.textContent = '';
+    [['Café Meridiana, untouched', false], ['the same frame, objects put down in it', true]].forEach(function (r) {
+      var box = document.createElement('div'); box.className = 'strip';
+      var head = document.createElement('h3'); head.textContent = r[0];
+      box.appendChild(head);
+      box.appendChild(twice(cafePaint(r[1]), VW, VH, 3));
+      host.appendChild(box);
+    });
+  }
+
+  /* ---- manifest table --------------------------------------------------- */
+  var tbody = document.querySelector('#manifest tbody');
+  EP.ORDER.forEach(function (typeId) {
+    var t = EP.TYPES[typeId];
+    t.states.forEach(function (state, n) {
+      var f = t.frames[state], tr = document.createElement('tr');
+      function cell(text, cls) {
+        var td = document.createElement('td'); td.className = cls || ''; td.textContent = text; return td;
+      }
+      tr.appendChild(cell(n === 0 ? typeId : '', 'k'));
+      tr.appendChild(cell(state, 'n'));
+      tr.appendChild(cell(f.w + '×' + f.h, 'n'));
+      tr.appendChild(cell(f.pivot.join(','), 'n'));
+      tr.appendChild(cell(n === 0 ? t.footprint.kind + ' ' + (t.footprint.cells.length ? JSON.stringify(t.footprint.cells) : '(none)') : '', 'n'));
+      tr.appendChild(cell(n === 0 ? t.placement : ''));
+      tbody.appendChild(tr);
+    });
+  });
+
+  /* The café and the person both need the production atlas decoded; the
+   * objects do not, so they are on screen before it arrives. */
+  var status = document.getElementById('status');
+  function report(state) {
+    status.textContent = 'interior kit: loaded · material lt_cafe · atlas: ' + state
+      + ' · props drawn through kit.rect and kit.contactShadow only';
+  }
+  /* ---- what the capture tool asks this page for -------------------------
+   * The tool never draws anything of its own: it asks the page for the same
+   * canvases a reader sees, and for the baked sheet, which is these same draw
+   * calls onto a transparent canvas. One source, two outputs. */
+  function sheetAt(zoom) {
+    var cells = [], x = 1, rowH = 0;
+    EP.ORDER.forEach(function (typeId) {
+      EP.TYPES[typeId].states.forEach(function (state) {
+        var f = EP.TYPES[typeId].frames[state];
+        cells.push({ typeId: typeId, state: state, f: f, x: x, y: 1 });
+        x += f.w + 1; rowH = Math.max(rowH, f.h);
+      });
+    });
+    var c = canvas(x, rowH + 2, zoom), g = ctx2d(c);
+    cells.forEach(function (cell) {
+      EP.draw(g, cell.typeId, cell.state, cell.x + cell.f.pivot[0], cell.y + cell.f.pivot[1],
+        { palette: P, kit: KIT, shadow: false });
+    });
+    return { canvas: c, cells: cells, width: x, height: rowH + 2 };
+  }
+
+  window.GALLERY = {
+    ready: function () { return !!window.GALLERY_READY; },
+    specimens: function (zoom) {
+      var cols = 0; EP.ORDER.forEach(function (t) { cols += EP.TYPES[t].states.length; });
+      var cellW = 0, cellH = 0;
+      EP.ORDER.forEach(function (t) {
+        EP.TYPES[t].states.forEach(function (s) {
+          var f = EP.TYPES[t].frames[s];
+          cellW = Math.max(cellW, f.w + 10); cellH = Math.max(cellH, f.h + 10);
+        });
+      });
+      var c = canvas(cellW * cols, cellH, 1), g = ctx2d(c), i = 0;
+      KIT.plankFloor(g, 0, 0, 0, 0, c.width, c.height, P);
+      EP.ORDER.forEach(function (t) {
+        EP.TYPES[t].states.forEach(function (s) {
+          var f = EP.TYPES[t].frames[s];
+          var px = i * cellW + Math.round((cellW - f.w) / 2) + f.pivot[0], py = cellH - 5;
+          for (var d = i * cellW; d < (i + 1) * cellW; d += 2) { g.fillStyle = P.ink; g.fillRect(d, py, 1, 1); }
+          EP.draw(g, t, s, px, py, { palette: P, kit: KIT });
+          i++;
+        });
+      });
+      return upscale(c, zoom).toDataURL('image/png');
+    },
+    strip: function (typeId, zoom) {
+      var size = stripSize(EP.TYPES[typeId]);
+      var c = canvas(size.w, size.h, 1);
+      stripPaint(typeId, size)(ctx2d(c));
+      return upscale(c, zoom).toDataURL('image/png');
+    },
+    cafe: function (withProps, zoom) {
+      var c = canvas(VW, VH, 1);
+      cafePaint(withProps)(ctx2d(c));
+      return upscale(c, zoom).toDataURL('image/png');
+    },
+    /* What the draw calls actually cover, measured off the canvas rather than
+     * declared: a frame that paints outside its own box clips against whatever
+     * is next to it in a room. */
+    bounds: function () {
+      var out = [];
+      EP.ORDER.forEach(function (typeId) {
+        EP.TYPES[typeId].states.forEach(function (state) {
+          var f = EP.TYPES[typeId].frames[state], pad = 10;
+          var c = canvas(f.w + pad * 2, f.h + pad * 2, 1), g = ctx2d(c);
+          EP.draw(g, typeId, state, pad + f.pivot[0], pad + f.pivot[1],
+            { palette: P, kit: KIT, shadow: false });
+          var d = g.getImageData(0, 0, c.width, c.height).data;
+          var minX = c.width, minY = c.height, maxX = -1, maxY = -1;
+          for (var yy = 0; yy < c.height; yy++) {
+            for (var xx = 0; xx < c.width; xx++) {
+              if (d[(yy * c.width + xx) * 4 + 3] === 0) continue;
+              if (xx < minX) minX = xx;
+              if (xx > maxX) maxX = xx;
+              if (yy < minY) minY = yy;
+              if (yy > maxY) maxY = yy;
+            }
+          }
+          out.push({ typeId: typeId, state: state, declared: [f.w, f.h],
+                     drawn: [maxX - minX + 1, maxY - minY + 1],
+                     offset: [minX - pad, minY - pad] });
+        });
+      });
+      return JSON.stringify(out);
+    },
+    bake: function () {
+      var s = sheetAt(1);
+      return JSON.stringify({
+        version: EP.VERSION,
+        note: 'Baked by living-town/content/everyday-props-v01/tools/capture-gallery.js from the same draw calls the renderer makes. Contact shadows are NOT baked: draw() lays them down through kit.contactShadow at paint time.',
+        material: 'lt_cafe',
+        width: s.width, height: s.height,
+        frames: s.cells.map(function (cell) {
+          return { typeId: cell.typeId, state: cell.state, x: cell.x, y: cell.y,
+                   w: cell.f.w, h: cell.f.h, pivot: cell.f.pivot };
+        }),
+        png: s.canvas.toDataURL('image/png')
+      });
+    },
+    manifest: function () {
+      return JSON.stringify({
+        version: EP.VERSION,
+        entry: 'living-town/content/everyday-props-v01/lt-everyday-props.js',
+        call: "LT.EverydayProps.draw(g, typeId, state, x, y, { palette, kit })",
+        types: EP.ORDER.map(function (t) {
+          var d = EP.TYPES[t];
+          return { typeId: d.typeId, states: d.states, frames: d.frames,
+                   footprint: d.footprint, placement: d.placement };
+        })
+      }, null, 2);
+    }
+  };
+
+  stripRows();
+  cafeRows();
+  report('decoding');
+  if (GAME.Sprites.castReady) {
+    GAME.Sprites.castReady.then(function () {
+      stripRows(); cafeRows(); report('decoded'); window.GALLERY_READY = true;
+    }, function (e) { report('FAILED ' + e); window.GALLERY_READY = true; });
+  } else { window.GALLERY_READY = true; }
+})();
+</script>
+</body>
+</html>
