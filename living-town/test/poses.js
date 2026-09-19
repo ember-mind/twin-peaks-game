@@ -29,7 +29,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
       seen[pose.poseId] = (seen[pose.poseId] || 0) + 1;
       const table = LT.ActivityPoses ? LT.ActivityPoses.POSES : LT.ActivityPosesTable && LT.ActivityPosesTable.POSES;
       if (!c.activity || c.activity.phase !== 'executing' || c.transit || c.walkTarget) wrong.push(id + ' posed while ' + JSON.stringify(c.activity && c.activity.phase));
-      if (pose.poseId === 'talking' && !sim.state.conversations.some((v) => v.id === c.activity.conversationId && v.status === 'active')) wrong.push(id + ' talking to nobody');
+      if (pose.poseId === 'talking' && !sim.state.conversations.some((v) => v.id === c.activity.conversationId && (v.status === 'active' || Math.abs(v.endAbs - sim.absMinute()) <= 1))) wrong.push(id + ' talking to nobody');   // the minute a talk ends, one of the two is still in it
       if (table && table[pose.poseId] && table[pose.poseId].dirs && table[pose.poseId].dirs.indexOf(pose.dir === 'left' ? 'right' : pose.dir) < 0) wrong.push(pose.poseId + ' has no ' + pose.dir);
     });
   }

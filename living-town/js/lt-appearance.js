@@ -80,6 +80,9 @@
     /* A talk has a pose once the two are actually talking, not while one waits for an answer. */
     if (poseId === 'talking' && !act.conversationId) return null;
     var dirs = POSE_DIRS[poseId], facing = character.pos && character.pos.dir;
+    /* Someone talking with their back to us keeps the ordinary back view: a
+     * front-facing gesture would turn them away from whoever they are talking to. */
+    if (poseId === 'talking' && dirs.indexOf(facing) < 0) return null;
     return { poseId: poseId, dir: dirs.indexOf(facing) >= 0 ? facing : dirs[0] };
   };
 

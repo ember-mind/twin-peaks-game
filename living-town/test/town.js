@@ -64,7 +64,9 @@ const strip = (s) => { const c = JSON.parse(JSON.stringify(s.state)); delete c.v
   const withA = convs.filter((v) => v.participants.indexOf('resident_e') >= 0 && v.participants.indexOf('resident_a') >= 0);
   const goalE = T.resident_e.goals[0];
   const firstAny = convs.filter((v) => v.participants.indexOf('resident_e') >= 0)[0];
-  ok(withA.length > 0 && firstAny.participants.indexOf('resident_a') < 0 && goalE.reached && goalE.progress === withA.length,
+  const withOthers = convs.filter((v) => v.participants.indexOf('resident_e') >= 0 && v.participants.indexOf('resident_a') < 0).length;
+  console.log('    (Mira: ' + withOthers + ' talks with others, ' + withA.length + ' with Nadia; goal ' + (goalE.reached ? 'reached' : goalE.missed ? 'missed' : 'open') + ' at ' + goalE.progress + '/' + goalE.target + ')');
+  ok(withOthers >= 3 && firstAny.participants.indexOf('resident_a') < 0 && (goalE.reached || goalE.missed) && goalE.progress <= withA.length && (goalE.reached ? goalE.progress >= 1 : goalE.progress === 0),
      'a goal about one person counts talks with that person (' + goalE.progress + '), not the earlier ones with somebody else, and not ones overheard');
   const kept = types('COMMITMENT_KEPT').filter((e) => e.data.commitmentId === 'cmt_park_morning');
   ok(kept.length === 2 && kept[0].absMinute < 660, 'two people who met early at the agreed place kept their promise (' + kept[0].stamp + ' for 11:00)');

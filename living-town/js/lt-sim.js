@@ -331,8 +331,30 @@
     this.touch();
   };
 
+  /* The nearest floor cell to `from` that nobody is standing on: the cell
+   * itself if it is free. Breadth-first, in a fixed order, so it is the same
+   * cell every time. */
+  Sim.prototype.freeCellNear = function (actor, locationId, from) {
+    var loc = W.LOCATIONS[locationId], self = this, seen = {}, queue = [{ x: from.x, y: from.y }];
+    var probe = { id: actor.id, location: locationId };
+    while (queue.length) {
+      var c = queue.shift(), key = c.x + ',' + c.y;
+      if (seen[key]) continue;
+      seen[key] = true;
+      var ch = EMBER.Grid.cell(loc.rows, c.x, c.y, '#');
+      if (W.isSolid(ch)) continue;
+      var doorway = ch === 'D' && !(c.x === from.x && c.y === from.y);   // nobody waits in a doorway
+      if (!doorway && !self.standingOn(probe, c)) return c;
+      STEP_DIRS.forEach(function (d) { queue.push({ x: c.x + d.x, y: c.y + d.y }); });
+    }
+    return { x: from.x, y: from.y };
+  };
+
   Sim.prototype.endTransit = function (actor, locationId) {
     actor.transit = null;
+    /* Coming in through a door someone is standing at, one steps past them. */
+    var spawn = W.LOCATIONS[locationId].spawn, free = this.freeCellNear(actor, locationId, spawn);
+    if (free.x !== spawn.x || free.y !== spawn.y) { this.placeCharacter(actor, locationId, { x: free.x, y: free.y, dir: spawn.dir }); return; }
     this.placeCharacter(actor, locationId);
   };
 
@@ -341,6 +363,7 @@
   Sim.prototype.refreshGoals = function (actor) {
     var self = this;
     (actor.goals || []).forEach(function (g) {
+      if (g.missed) return;                       // over: it stays where it stood when its day ran out
       var before = g.progress;
       if (g.kind === 'savings') g.progress = actor.savings;
       if (g.kind === 'social') {
@@ -750,6 +773,20 @@
     conv.status = 'active';
     conv.startAbs = now; conv.endAbs = now + conv.minutes;
     var a = this.state.characters[conv.participants[0]], b = this.state.characters[conv.participants[1]];
+    /* Two people who were walking toward each other can meet while one of
+     * them is crossing a tile a third person stands on. They do not stop
+     * there: that one takes a free place beside the other instead. */
+    [[a, b], [b, a]].forEach(function (pair) {
+      var who = pair[0], other = pair[1];
+      if (!self.standingOn(who, who.pos)) return;
+      var loc = W.LOCATIONS[who.location];
+      for (var i = 0; i < STEP_DIRS.length; i++) {
+        var cell = { x: other.pos.x + STEP_DIRS[i].x, y: other.pos.y + STEP_DIRS[i].y };
+        if (W.isSolid(EMBER.Grid.cell(loc.rows, cell.x, cell.y, '#')) || self.standingOn(who, cell)) continue;
+        who.pos = { x: cell.x, y: cell.y, dir: who.pos.dir };
+        return;
+      }
+    });
     a.pos = { x: a.pos.x, y: a.pos.y, dir: facing(a.pos, b.pos) };
     b.pos = { x: b.pos.x, y: b.pos.y, dir: facing(b.pos, a.pos) };
     conv.participants.forEach(function (id) {
@@ -873,7 +910,9 @@
     var self = this;
     return this.actorIds().some(function (id) {
       var o = self.state.characters[id];
-      if (id === actor.id || o.location !== actor.location || o.transit || o.walkTarget || o.pos.x !== cell.x || o.pos.y !== cell.y) return false;
+      if (id === actor.id || o.location !== actor.location || o.transit || o.pos.x !== cell.x || o.pos.y !== cell.y) return false;
+      /* On their way somewhere else they are only passing; on the cell they were heading for, they have arrived. */
+      if (o.walkTarget && (o.walkTarget.x !== cell.x || o.walkTarget.y !== cell.y)) return false;
       if (!busyOnly) return true;
       /* For a use spot only someone doing something from there holds it.
        * A person who has finished and is merely standing about does not keep
@@ -938,7 +977,12 @@
         if (W.isSolid(EMBER.Grid.cell(loc.rows, cell.x, cell.y, '#'))) return;
         if (self.standingOn(actor, cell)) return;          // a third person is already standing there
         var len = self.routeLength(loc, actor.pos, cell);
-        if (len >= 0 && len < bestLen) { bestLen = len; best = { x: cell.x, y: cell.y, dir: facing(cell, target.pos) }; }
+        /* Two people talking stand side by side where they can: seen from
+         * above, face to face across a tile reads as a conversation, and one
+         * behind the other reads as a queue. Worth two steps, no more. */
+        if (len < 0) return;                                // cannot be walked to
+        if (d.x !== 0) len -= 2;
+        if (len < bestLen) { bestLen = len; best = { x: cell.x, y: cell.y, dir: facing(cell, target.pos) }; }
       });
       return { needed: true, at: best, reason: best ? null : 'person_unreachable' };
     }

@@ -1,5 +1,5 @@
 {
-  "commit": "5cf68c54294511183e93359179f79d828e76bb50",
+  "commit": "29427e964cf20872b7c4b24e7e9207a970b1a562",
   "seed": 20260918,
   "days": 3,
   "firstDay": 1,
@@ -87,8 +87,8 @@
     },
     "2": {
       "wakingMinutes": 960,
-      "deadMinutes": 73,
-      "liveMinutes": 887,
+      "deadMinutes": 71,
+      "liveMinutes": 889,
       "longestDeadStretch": {
         "minutes": 51,
         "start": "D2 21:39"
@@ -100,7 +100,7 @@
         "GOAL_REACHED": 2,
         "COMMITMENT_KEPT": 1
       },
-      "decisions": 98,
+      "decisions": 97,
       "closeCalls": 12,
       "distinctActivities": {
         "resident_a": [
@@ -137,7 +137,7 @@
           "flat_b"
         ]
       },
-      "togetherMinutes": 562
+      "togetherMinutes": 558
     },
     "3": {
       "wakingMinutes": 960,
@@ -193,8 +193,8 @@
   },
   "overall": {
     "wakingMinutes": 2880,
-    "deadMinutes": 233,
-    "liveMinutes": 2647,
+    "deadMinutes": 231,
+    "liveMinutes": 2649,
     "longestDeadStretch": {
       "minutes": 58,
       "start": "D1 21:32"
@@ -209,7 +209,7 @@
       "GOAL_REACHED": 4,
       "FOOD_PARCEL_OPENED": 1
     },
-    "decisions": 281,
+    "decisions": 280,
     "closeCalls": 39,
     "distinctActivities": {
       "resident_a": [
@@ -253,7 +253,7 @@
         "park"
       ]
     },
-    "togetherMinutes": 1164
+    "togetherMinutes": 1160
   },
   "deadStretches": [
     {
