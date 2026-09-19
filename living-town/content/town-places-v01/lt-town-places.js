@@ -1181,11 +1181,15 @@
     R(g, doorX, y + 1, doorW, 1, p.woodLight);
   }
 
-  /* The widest clear rectangle of plain floor, two or three cells each way. */
+  /* The widest clear rectangle of plain floor — but never more than about half
+   * the room each way, so a small flat does not end up as a rug with a wall
+   * round it. */
   function rugRect(rows, front) {
     var w = widthOf(rows), best = null;
+    var maxW = Math.max(2, Math.min(4, Math.floor((w - 2) / 2)));
+    var maxH = Math.max(2, Math.min(3, Math.floor((front - 1) / 2)));
     for (var y = 2; y <= front - 2; y++) for (var x = 1; x <= w - 3; x++) {
-      for (var hh = 2; hh <= 3; hh++) for (var ww = 2; ww <= 4; ww++) {
+      for (var hh = 2; hh <= maxH; hh++) for (var ww = 2; ww <= maxW; ww++) {
         if (y + hh > front || x + ww > w - 1) continue;
         var clear = true;
         for (var dy = 0; dy < hh && clear; dy++) for (var dx = 0; dx < ww; dx++) {
