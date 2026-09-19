@@ -8,7 +8,7 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const { launch, sleep } = require('../../test/lib/chrome-cdp.js');
 const ROOT = path.resolve(__dirname, '..', '..');
-const PAGE = 'living-town/index.html';
+const PAGE = 'living-town/index.html?speed=1x';   // these were written against a page that opens at 1x
 
 let checks = 0;
 function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + msg); }
@@ -68,7 +68,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     ok(await stored() === refusedText, 'and Cancel leaves it exactly as it was');
 
     console.log('# page: storage that fails is reported as failing');
-    await page.navigate(PAGE + '?world=new&cast=pair'); await sleep(1200);
+    await page.navigate(PAGE + '&world=new&cast=pair'); await sleep(1200);
     ok(/address asked for one/.test(await status()) && await stored() === refusedText, '?world=new&cast=pair starts a new world and leaves the stored one alone');
     await js("Storage.prototype.setItem = function () { var e = new Error('full'); e.name = 'QuotaExceededError'; throw e; }; true");
     await click('lt-save'); await click('lt-confirm-yes');

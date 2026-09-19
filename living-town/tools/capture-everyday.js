@@ -22,7 +22,7 @@ const runTo = (page, day, minute) => page.evaluate("(async function(){ var st = 
 (async function () {
   const page = await launch({ root: ROOT, width: 1280, height: 900 });
   try {
-    await page.navigate('living-town/index.html?world=new&cast=pair');
+    await page.navigate('living-town/index.html?speed=1x&world=new&cast=pair');
     await sleep(1500);
     const shots = [
       ['01-book-on-the-bench-closed', 1, 875, 1], ['02-book-being-read-open', 1, 900, 1],
@@ -37,7 +37,7 @@ const runTo = (page, day, minute) => page.evaluate("(async function(){ var st = 
         saved = await page.evaluate(THINGS);
         await page.evaluate("document.getElementById('lt-save').click(); true"); await sleep(200);
         console.log('  Save pressed mid-reading: ' + await page.evaluate("document.getElementById('lt-save-status').textContent"));
-        await page.navigate('living-town/index.html'); await sleep(1500);
+        await page.navigate('living-town/index.html?speed=1x'); await sleep(1500);
         await page.evaluate("LT_OBSERVER.speedIndex = 0; true");
         console.log('  after reload: ' + await page.evaluate("document.getElementById('lt-save-status').textContent"));
         const back = JSON.parse(await page.evaluate(THINGS)), was = JSON.parse(saved);

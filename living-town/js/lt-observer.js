@@ -78,11 +78,17 @@
     var sim = booted.sim || O.newWorld({});
     if (LT.ActivityPoses) LT.ActivityPoses.load();
     var view = LT.View.create(el('lt-canvas'), sim);
+    /* Someone opening the page for the first time should see something happen:
+     * it opens on Auto, following the action. `?speed=1x` (or pause, 4x, 20x)
+     * opens it the plain way, which is what the capture tools and tests ask for. */
+    var asked = /(?:^|[?&])speed=([a-z0-9]+)/i.exec(String(root.location && root.location.search || ''));
+    var startSpeed = SPEEDS.length - 1, plain = false;
+    if (asked) SPEEDS.forEach(function (sp, i) { if (sp.label.toLowerCase() === asked[1].toLowerCase()) { startSpeed = i; plain = true; } });
     var state = {
-      sim: sim, view: view, speedIndex: 1, accumulator: 0,
+      sim: sim, view: view, speedIndex: startSpeed, accumulator: 0,
       lastFrame: 0, pumping: false, inspector: false, selected: sim.actorIds()[0],
       persistence: persistence, worlds: 1,
-      followAction: false, recapDay: null, snapshots: [], replay: null, recorders: {}
+      followAction: !plain, recapDay: null, snapshots: [], replay: null, recorders: {}
     };
     O.state = state;
     O.recordRemote(state);

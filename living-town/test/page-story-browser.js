@@ -28,7 +28,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     console.log('  wrote artifacts/living-town-story/' + name);
   }
   try {
-    await page.navigate('living-town/index.html?world=new&cast=pair'); await sleep(1200);
+    await page.navigate('living-town/index.html?speed=1x&world=new&cast=pair'); await sleep(1200);
     console.log('# page: on the way to work');
     await runTo(1, 545); await sleep(300);
     const name = await js("LT_OBSERVER.sim.state.characters.resident_a.name");
@@ -65,7 +65,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     await js("document.getElementById('lt-recap-prev').click(); true"); await sleep(300);
     await shot('03-day-one-looked-back-on.png');
     console.log('# page: make something happen');
-    await page.navigate('living-town/index.html?world=new&cast=pair'); await sleep(1200);
+    await page.navigate('living-town/index.html?speed=1x&world=new&cast=pair'); await sleep(1200);
     await runTo(1, 480);
     const pick = (id, value) => js("(function(){ var n = document.getElementById('" + id + "'); n.value = '" + value + "'; n.dispatchEvent(new Event('change')); return n.value; })()");
     await pick('lt-hand-what', 'leave_book');
@@ -82,7 +82,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     await js("document.querySelector('[data-actor=resident_b]').click(); true");
     await shot('04-made-something-happen.png');
     console.log('# page: a new world is the whole street');
-    await page.navigate('living-town/index.html?world=new'); await sleep(1200);
+    await page.navigate('living-town/index.html?speed=1x&world=new'); await sleep(1200);
     ok(await js("document.querySelectorAll('#lt-characters [data-actor]').length") === 5 && await js("LT_OBSERVER.sim.state.cast") === 'town', 'five people to follow');
     await runTo(1, 1052); await sleep(300);
     await js("document.getElementById('lt-follow-action').click(); true"); await sleep(400);
@@ -92,7 +92,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     ok(/friends|close|acquainted|barely know/.test(await txt('lt-bonds')) && /last seen (today|yesterday|not yet)/.test(await txt('lt-bonds')), 'Between them: ' + (await txt('lt-bonds')).replace(/\s+/g, ' ').slice(0, 100));
     await shot('05-the-street-at-half-past-five.png');
     console.log('# page: auto pace, the timeline, looking back');
-    await page.navigate('living-town/index.html?world=new'); await sleep(1200);
+    await page.navigate('living-town/index.html?speed=1x&world=new'); await sleep(1200);
     await js("LT_OBSERVER.speedIndex = 0; true");
     ok(await js("Array.prototype.map.call(document.querySelectorAll('#lt-speeds button'), function(b){return b.textContent}).join()") === 'Pause,1x,4x,20x,Auto', 'Auto sits with the other speeds');
     ok(await js("LT.Story.pace(LT_OBSERVER.sim)") !== 'asleep' , 'at six in the morning somebody is up');
@@ -116,8 +116,14 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     await js("document.getElementById('lt-replay-back').click(); true"); await sleep(300);
     ok(!(await js("!!LT_OBSERVER.replay")) && await js("LT_OBSERVER.view.sim === LT_OBSERVER.sim") && await js("document.getElementById('lt-replay').hidden") && !(await js("document.getElementById('lt-hand-do').disabled")), 'Back to now: the live world, its view, its controls');
     ok(liveBefore === await js("JSON.stringify(LT_OBSERVER.sim.state)"), 'exactly as it was left');
+    console.log('# page: how it opens for someone who just arrived');
+    await page.navigate('living-town/index.html' + '?world=new'); await sleep(1500);
+    ok(await js("document.querySelector('#lt-speeds .is-on').textContent") === 'Auto' && await js("LT_OBSERVER.followAction") === true && await js("document.getElementById('lt-follow-action').classList.contains('is-on')"), 'on Auto, following the action');
+    ok(await js("LT_OBSERVER.sim.absMinute()") > 365, 'and the town is already moving (' + await js("LT_OBSERVER.sim.stamp()") + ' after a second and a half)');
+    await js("LT_OBSERVER.speedIndex = 0; true");
+
     console.log('# found in review: what the watcher did is part of what is looked back at');
-    await page.navigate('living-town/index.html?world=new'); await sleep(1200);
+    await page.navigate('living-town/index.html?speed=1x&world=new'); await sleep(1200);
     await js("LT_OBSERVER.speedIndex = 0; true");
     await js("(function(){ document.querySelectorAll('#lt-speeds button')[3].click(); return true; })()");
     for (let i = 0; i < 60 && await js("LT_OBSERVER.sim.absMinute()") < 455; i++) await sleep(200);
@@ -153,7 +159,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     ok(await js("window.__pwned === undefined") && /onmouseover/.test(await txt('lt-events')), 'and is shown as the text it is everywhere else');
 
     console.log('# page: a provider that takes real seconds');
-    await page.navigate('living-town/index.html?world=new'); await sleep(1200);
+    await page.navigate('living-town/index.html?speed=1x&world=new'); await sleep(1200);
     await js("LT_OBSERVER.speedIndex = 0; true");
     await js(`(function(){
       window.__asked = 0;

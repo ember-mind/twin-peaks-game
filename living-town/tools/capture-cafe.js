@@ -67,7 +67,7 @@ async function frames(page, tag, from, ticks, start) {
 }
 
 async function cafe(page, tag) {
-  await page.navigate('living-town/index.html?world=new&cast=pair');
+  await page.navigate('living-town/index.html?speed=1x&world=new&cast=pair');
   await sleep(1500);
   console.log('  renderer host: ' + await page.evaluate("JSON.stringify(window.LT && LT.ProductionHost ? { ready: LT.ProductionHost.ready, failed: LT.ProductionHost.failed } : 'absent')"));
   /* Everything below is the page's own simulation on its own clock. Nothing
@@ -90,7 +90,7 @@ async function cafe(page, tag) {
  * puts them there; then the page's own world saved and reloaded while they are
  * half way round the counter, and looked at again. */
 async function continuity(page) {
-  await page.navigate('living-town/index.html?world=new&cast=pair');   // never an autosave left by an earlier run
+  await page.navigate('living-town/index.html?speed=1x&world=new&cast=pair');   // never an autosave left by an earlier run
   await sleep(1500);
   /* The page's own clock runs at 1x from the moment it loads, about six town
    * minutes before this tool can pause it. A stop earlier than that is a race:
@@ -102,7 +102,7 @@ async function continuity(page) {
     console.log('  ' + name + ': ' + await describe(page) + ' ' + await page.evaluate("JSON.stringify(LT_OBSERVER.view.draw())"));
     save('05-continuity-' + name + '.png', await page.evaluate(SHOT));
   }
-  await page.navigate('living-town/index.html?world=new&cast=pair');   // never an autosave left by an earlier run
+  await page.navigate('living-town/index.html?speed=1x&world=new&cast=pair');   // never an autosave left by an earlier run
   await sleep(1500);
   await runTo(page, 549);   // chosen the shift at the door, half way to the counter
   console.log('  before reload: ' + await describe(page));

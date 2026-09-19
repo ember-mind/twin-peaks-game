@@ -22,7 +22,7 @@ fs.mkdirSync(OUT, { recursive: true });
   };
   const look = (day, minute, who) => js("(async function(){ var st = LT_OBSERVER; st.speedIndex = 0; await st.sim.runUntil(" + day + ", " + minute + "); st.selected = '" + who + "'; st.view.focus('" + who + "'); for (var i=0;i<60;i++) st.view.update(33); return JSON.stringify(st.view.draw()); })()", true);
   try {
-    await page.navigate('living-town/index.html?world=new'); await sleep(1500);
+    await page.navigate('living-town/index.html?speed=1x&world=new'); await sleep(1500);
     console.log('  poses sheet: ' + await js("JSON.stringify({ ready: !!(LT.ActivityPoses && LT.ActivityPoses.ready), failed: LT.ActivityPoses && LT.ActivityPoses.failed || null })"));
     const stops = [['01-dawn-asleep', 1, 370, 'resident_a'], ['02-morning-park-bench-and-book', 1, 640, 'resident_d'], ['03-noon-cafe', 1, 780, 'resident_c'],
                    ['04-dusk-park-talking', 1, 1065, 'resident_a'], ['05-evening-cafe', 1, 1180, 'resident_c'], ['06-night-asleep', 1, 1400, 'resident_b']];
