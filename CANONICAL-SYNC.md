@@ -132,3 +132,4 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-19 828ef9f main: Palmer house round 2 (portrait, runner, wool rug, fan fixes); 2 files mirrored
 - 2026-09-19 ae9de89 main: One Eyed Jacks native art (lead/oej-casino, Opus builder) + oej-native CI gate (123), tracked gauntlet runs restored; 11 files mirrored; .gauntlet/oej-casino copied to vault
 - 2026-09-19 7d7fa1d main: OEJ round 2, Great Northern lobby ambient light, Glastonbury Grove native art (woods-native CI gate, 124), fresh-critic report; 15 files mirrored; .gauntlet oej-casino/round2, lobby-light, woods-grove copied to vault
+- 2026-09-19 3502cdf main: fresh-critic rounds — OEJ 3, Palmer 3, lobby, woods 2, Double R (diner-interior CI gate, 125); 17 files mirrored; .gauntlet oej-casino/round3, palmer-house/round3, lobby-critic, woods-grove/round2, diner-critic copied to vault
