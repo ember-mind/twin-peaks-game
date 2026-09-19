@@ -605,6 +605,13 @@ async function previousFormatIsMigrated() {
   ok(reached && worked.length === 1 && worked[0].absMinute - reached.absMinute === worked[0].data.minutes, 'work is counted from reaching the counter (' + reached.stamp + '), for ' + worked[0].data.minutes + ' minutes');
   ok(Math.abs((a.money + a.savings - before) - worked[0].data.gross) < 0.011, 'and paid for exactly those');
   ok(JSON.parse(text).format === 'living-town/save@1', 'the old save text is not rewritten by loading it');
+  {
+    const migrated = Save.deserialize(JSON.parse(text));
+    const freshPair = LT.Scenario.day1({});
+    const town = (sim) => JSON.stringify(sim.state.objects.filter((o) => !o.typeId).map((o) => [o.id, o.location, o.x, o.y, o.anchors || null, o.moreAnchors || null, o.affordances]).sort());
+    ok(town(migrated) === town(freshPair) && JSON.stringify(Object.keys(migrated.state.locationNames).sort()) === JSON.stringify(Object.keys(freshPair.state.locationNames).sort()) && migrated.state.cast === 'pair',
+       'migrated from 6d2aa6eb, the town\'s furniture and places are exactly this build\'s, and nobody was added');
+  }
 }
 
 async function main() {

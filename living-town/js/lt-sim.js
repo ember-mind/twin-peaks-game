@@ -335,7 +335,7 @@
                  (!g.relatesTo || v.participants.indexOf(g.relatesTo) >= 0);
         }).length;
       }
-      if (!g.reached && g.progress >= g.target) {
+      if (!g.reached && !g.missed && g.progress >= g.target) {   // a goal that was missed is over; getting there later is not reaching it
         g.reached = true;
         g.reachedStamp = self.stamp();
         self.emit('GOAL_REACHED', {
@@ -358,8 +358,10 @@
       if (g.reached || g.missed || g.deadlineDay === undefined || g.deadlineDay >= self.state.day) return;
       g.missed = true;
       g.missedStamp = self.stamp();
+      /* Nothing happens that anyone could see: it is known to the person
+       * whose goal it was, and to nobody who happens to be in the room. */
       self.emit('GOAL_MISSED', {
-        actorId: actor.id, locationId: actor.location,
+        actorId: actor.id, locationId: actor.location, private: true,
         data: { goalId: g.id, target: g.target, progress: g.progress, short: Math.round((g.target - g.progress) * 100) / 100 },
         text: actor.name + ' did not reach "' + g.label + '" in time (' + (Math.round(g.progress * 100) / 100) + ' of ' + g.target + (g.unit ? ' ' + g.unit : '') + ').'
       });
@@ -446,7 +448,8 @@
         /* A meeting is not broken while the two are in the middle of it; the
          * talk settles it when it ends, or it breaks then. */
         var talk = c.kind === 'social' && c.withId ? self.openConversationOf(actor.id) : null;
-        if (talk && talk.status === 'active' && talk.participants.indexOf(c.withId) >= 0 && talk.startAbs <= deadline) return;
+        if (talk && talk.status === 'active' && talk.participants.indexOf(c.withId) >= 0 && talk.startAbs <= deadline &&
+            (!c.locationId || c.locationId === talk.locationId)) return;   // only a talk that could settle it
         self.breakCommitment(actor, c, 'deadline_passed');
       });
     });
@@ -756,7 +759,11 @@
        * A person who has finished and is merely standing about does not keep
        * a book, a bed or a counter from everybody else. */
       var act = o.activity, def = act && A.get(act.actionId);
-      return !!(act && act.phase === 'executing' && def && def.position && def.position !== 'anywhere');
+      if (!act || act.phase !== 'executing' || !def) return false;
+      /* Someone spoken to where they sat is still sitting there: a talk keeps
+       * the tile for as long as it lasts. */
+      if (act.actionId === 'talk_with' || act.actionId === 'join_conversation') return true;
+      return !!(def.position && def.position !== 'anywhere');
     });
   };
 
@@ -1367,8 +1374,10 @@
       this.state.minute -= U.MINUTES_PER_DAY;
       this.state.day += 1;
       this.actorIds().forEach(function (id) { self.state.characters[id].workedMinutes = 0; });
-      this.actorIds().forEach(function (id) { self.closeOverdueGoals(self.state.characters[id]); });
     }
+    /* Every minute, not only at midnight: a world loaded days after a goal's
+     * last day closes it on its first tick instead of carrying it as open. */
+    this.actorIds().forEach(function (id) { self.closeOverdueGoals(self.state.characters[id]); });
     this.touch();
 
     this.applyDueInterventions();

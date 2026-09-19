@@ -114,7 +114,7 @@
       if (g.reached) { row.status = 'reached'; row.line = 'Reached' + (g.reachedStamp ? ' at ' + g.reachedStamp : '') + '.'; }
       else if (g.missed) { row.status = 'missed'; row.line = 'Not reached in time: ' + amount(gap, g.unit) + ' short.'; }
       else {
-        var left = U.absolute(g.deadlineDay + 1, 0) - now;
+        var left = Math.max(0, U.absolute(g.deadlineDay + 1, 0) - now);
         row.status = (g.deadlineDay === day) ? 'last_day' : 'open';
         row.minutesLeft = left;
         row.line = amount(gap, g.unit) + ' to go, ' +

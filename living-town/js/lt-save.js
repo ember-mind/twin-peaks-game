@@ -118,17 +118,29 @@
    * lacks is the new furniture and the new places' names. Nobody is added: who
    * lives in a world was decided when it was made. Written against
    * test/fixtures/save-v1-walking-to-work.json (a 6d2aa6eb save). */
+  /* Frozen here, not read from the running build: this step produces the
+   * e3450c3d town and nothing later, so the next migration starts from what
+   * it was written against. */
+  var TOWN_E3450C3D = {
+    objects: [
+      { id: 'obj_bed_c', name: 'bed', location: 'flat_c', x: 8, y: 1, tags: ['furniture', 'rest'], portable: false, owner: 'resident_c', affordances: ['sleep'] },
+      { id: 'obj_kitchen_c', name: 'kitchen counter', location: 'flat_c', x: 1, y: 1, tags: ['furniture', 'food'], portable: false, owner: 'resident_c', affordances: ['eat_at_home'] },
+      { id: 'obj_bed_d', name: 'bed', location: 'flat_d', x: 1, y: 1, tags: ['furniture', 'rest'], portable: false, owner: 'resident_d', affordances: ['sleep'] },
+      { id: 'obj_kitchen_d', name: 'kitchen counter', location: 'flat_d', x: 9, y: 1, tags: ['furniture', 'food'], portable: false, owner: 'resident_d', affordances: ['eat_at_home'] },
+      { id: 'obj_bed_e', name: 'bed', location: 'flat_e', x: 1, y: 1, tags: ['furniture', 'rest'], portable: false, owner: 'resident_e', affordances: ['sleep'] },
+      { id: 'obj_kitchen_e', name: 'kitchen counter', location: 'flat_e', x: 6, y: 1, tags: ['furniture', 'food'], portable: false, owner: 'resident_e', affordances: ['eat_at_home'] }
+    ],
+    counterMoreAnchors: { work_shift: [{ x: 5, y: 2, dir: 'down' }], work_extra_shift: [{ x: 5, y: 2, dir: 'down' }],
+                          buy_meal: [{ x: 2, y: 4, dir: 'up' }, { x: 6, y: 4, dir: 'up' }] },
+    names: { flat_c: 'the flat over the bakery', flat_d: 'the ground-floor rooms', flat_e: 'the attic room' }
+  };
   S.WORLD_MIGRATIONS['6d2aa6eb'] = function (save) {
-    var W = LT.World, state = save.state, have = {};
+    var state = save.state, have = {}, T = TOWN_E3450C3D;
     (state.objects || []).forEach(function (o) { have[o.id] = o; });
-    W.OBJECTS.forEach(function (o) {
-      if (!have[o.id]) state.objects.push(deepCopy(o));
-      else if (o.moreAnchors && !have[o.id].moreAnchors) have[o.id].moreAnchors = deepCopy(o.moreAnchors);
-    });
+    T.objects.forEach(function (o) { if (!have[o.id]) state.objects.push(deepCopy(o)); });
+    if (have.obj_counter && !have.obj_counter.moreAnchors) have.obj_counter.moreAnchors = deepCopy(T.counterMoreAnchors);
     state.locationNames = state.locationNames || {};
-    Object.keys(W.LOCATIONS).forEach(function (id) {
-      if (!state.locationNames[id]) state.locationNames[id] = W.LOCATIONS[id].name || id;
-    });
+    Object.keys(T.names).forEach(function (id) { if (!state.locationNames[id]) state.locationNames[id] = T.names[id]; });
     if (!state.cast) state.cast = 'pair';
     save.world = 'e3450c3d';
     return save;

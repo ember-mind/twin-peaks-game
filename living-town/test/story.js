@@ -76,6 +76,24 @@ const snapshot = (sim) => JSON.stringify(sim.state);
   for (let i = 0; i < 1500; i++) reloaded.tick();
   ok(reloaded.state.events.filter((e) => e.type === 'GOAL_MISSED').length === 2, 'and is not announced again by the loaded world');
 
+  console.log('# found in review: missed is final, private, and not tied to midnight');
+  const fin = LT.Scenario.day1({ intervention: false, everyday: false });
+  fin.requestDecision = function () { return null; };
+  const fa = fin.state.characters.resident_a, fb = fin.state.characters.resident_b;
+  fin.placeCharacter(fa, 'cafe');                                    // the two are in one room at midnight
+  fa.goals[0].deadlineDay = 1;
+  while (!(fin.state.day === 2 && fin.state.minute === 1)) fin.tick();
+  ok(fa.goals[0].missed && fa.memories.some((m) => m.type === 'GOAL_MISSED') && !fb.memories.some((m) => m.type === 'GOAL_MISSED' && /studio/.test(m.summary)),
+     'someone standing next to them at midnight learns nothing of it, and no balance');
+  fa.savings = 500; fin.refreshGoals(fa);
+  ok(fa.goals[0].missed && !fa.goals[0].reached && !fin.state.events.some((e) => e.type === 'GOAL_REACHED' && e.actorId === 'resident_a'), 'having the money a day late does not reach a goal that is over');
+  const stale = LT.Scenario.day1({ intervention: false, everyday: false });
+  stale.requestDecision = function () { return null; };
+  stale.state.day = 4; stale.state.minute = 600;                     // as an older save loaded on day 4 would be
+  ok(!/-\d/.test(Story.stakes(stale, stale.state.characters.resident_b)[0].line), 'an overdue goal never shows negative time left');
+  stale.tick();
+  ok(stale.state.characters.resident_b.goals[0].missed && stale.state.events.filter((e) => e.type === 'GOAL_MISSED').length === 2, 'and is closed on the first tick, not at the next midnight');
+
   console.log('# a missed goal stops driving the policy');
   const req = (missedFlag) => ({ day: 3, goals: [{ kind: 'savings', target: 120, progress: 60, deadlineDay: 2, missed: missedFlag }] });
   const asked = [];

@@ -42,7 +42,8 @@ const strip = (s) => { const c = JSON.parse(JSON.stringify(s.state)); delete c.v
     for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
       const a = T[ids[i]], b = T[ids[j]];
       const placed = (c) => { const d = c.activity && LT.Actions.get(c.activity.actionId); return d && d.position && d.position !== 'anywhere'; };
-      const still = (c) => c.activity && c.activity.phase === 'executing' && !c.transit && placed(c);
+      const talking = (c) => c.activity && /^(talk_with|join_conversation)$/.test(c.activity.actionId);
+      const still = (c) => c.activity && c.activity.phase === 'executing' && !c.transit && (placed(c) || talking(c));
       if (a.location === b.location && a.location !== 'street' && still(a) && still(b) && a.pos.x === b.pos.x && a.pos.y === b.pos.y) sameTile++;
     }
     const working = ids.filter((id) => T[id].activity && /^work_/.test(T[id].activity.actionId) && T[id].activity.phase === 'executing');
@@ -51,7 +52,7 @@ const strip = (s) => { const c = JSON.parse(JSON.stringify(s.state)); delete c.v
   }
   ok(trespass === 0, 'nobody is ever inside somebody else\'s home');
   ok(twoAtCounter > 10, 'two people work the counter at once (' + twoAtCounter + ' samples)…');
-  ok(sameTile === 0, '…and no two people doing something from a spot ever share the tile');
+  ok(sameTile === 0, '…and nobody doing something from a spot, or talking, ever shares their tile');
   ok(worstTogether >= 3, 'the café gets busy: ' + worstTogether + ' people at once');
   const types = (t) => town.state.events.filter((e) => e.type === t);
   ok(new Set(types('TALKED').map((e) => e.data.participants.slice().sort().join('+'))).size >= 4, 'at least four different pairs of people talk');
