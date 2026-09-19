@@ -41,7 +41,7 @@ thing it changes is whether a lantern is burning and whether a window shows a
 lit sky. Day and night colour is `LT.DayLight`'s job, applied to the finished
 frame after the people; this package never tints anything.
 
-Three more calls, all pure:
+Four more calls, all pure:
 
 | call | what it answers |
 |---|---|
@@ -97,7 +97,8 @@ Nothing in this package is placed by hand. Each shape comes off `rows`:
 | `#` | a wall | back wall with a dado, rising off the top of the map; side walls in the same plaster and dado; a cutaway front wall with the door in it |
 | `D` | a door or a gateway | paving on its south side makes it a house door; anything else makes it a gateway |
 | `-` | paving | a row that is paving edge to edge is a carriageway; anything else is a footpath |
-| `,` | grass | two greens in large patches, mown bands, tufts, the odd clump of flowers |
+| `,` | grass | two greens in large patches, mown bands, tufts, the odd clump of flowers — **except** on the street, where the row against the carriageway and the row the house doors stand on are painted as the pavement a street has |
+| `-` on the park's gateway, `,` on its approach | a gravel path | worn out of the gate, walkable, never paving |
 
 ## Depth
 
@@ -256,6 +257,12 @@ tinted twice.
   one under them and everything else has the kit's.
 - **No weather, no season, no puddles, no snow.** The grass is the same grass
   every day of the year.
+- **The street's pavement is painted on cells the rows call grass.** The row
+  on each side of the carriageway, and the row the house doors stand on, are
+  paved. Those cells are walkable in the rows and they are walkable in the art,
+  so the collision agreement is untouched — but the ground material is this
+  package's reading, not the world's legend. A road with nothing but lawn
+  either side was read by two cold viewers as a lane across a field.
 - **Past the last row the ground is closed undergrowth.** Outdoors, the cells
   the camera never lets anybody reach are painted as dark scrub so the place has
   an edge. It is a painted boundary, not a collision one: nothing about it is
