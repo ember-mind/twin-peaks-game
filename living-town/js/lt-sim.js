@@ -27,7 +27,7 @@
 
   var SALIENCE = {
     COMMITMENT_BROKEN: 1.0, GOAL_REACHED: 1.0, GOAL_MISSED: 1.0, OFFER_ACCEPTED: 0.85,
-    WENT_HUNGRY: 0.75, HELPED_OUT: 0.9,
+    WENT_HUNGRY: 0.75, HELPED_OUT: 0.9, SAID: 0.55,
     TALKED: 0.8, OFFER_RECEIVED: 0.7, OFFER_DECLINED: 0.7,
     COMMITMENT_KEPT: 0.6, WORKED_EXTRA: 0.6, PRACTISED: 0.5,
     WITHDREW: 0.4, GREETED: 0.3, WORKED: 0.25, SLEPT: 0.2,
@@ -38,6 +38,7 @@
   function deepCopy(v) { return JSON.parse(JSON.stringify(v)); }
 
   var HUNGRY = 88, FED_AGAIN = 60;
+  var SPOKEN = { talk_with: 1, join_conversation: 1, decline_conversation: 1 };
 
   function Sim(opts) {
     opts = opts || {};
@@ -611,6 +612,23 @@
    * If the other person was themselves on the way over to talk, both have
    * already chosen, each through their own policy: it is one conversation, and
    * it starts now. */
+  /* What someone says is heard by whoever is in the room, remembered like any
+   * other thing that happened, and kept with the conversation it belongs to.
+   * The words are the provider's; the simulation only carries them. */
+  Sim.prototype.speak = function (actor, conv) {
+    var line = actor.sayNext;
+    if (!line || !conv) return null;
+    actor.sayNext = null;
+    conv.lines = conv.lines || [];
+    conv.lines.push({ actorId: actor.id, text: line.text, source: line.source, absMinute: this.absMinute() });
+    this.touch();
+    return this.emit('SAID', {
+      actorId: actor.id, locationId: actor.location,
+      data: { conversationId: conv.id, text: line.text, source: line.source },
+      text: actor.name + ': "' + line.text + '"'
+    });
+  };
+
   Sim.prototype.proposeConversation = function (actor, other, activity) {
     var theirs = other.activity;
     var mutual = theirs && theirs.actionId === 'talk_with' && theirs.targetId === actor.id && !theirs.conversationId;
@@ -630,6 +648,7 @@
     activity.conversationId = conv.id;
     activity.phase = 'waiting_reply';
     this.touch();
+    this.speak(actor, conv);
     if (mutual) {
       conv.mutual = true;
       other.walkTarget = null;
@@ -657,6 +676,7 @@
     b.pos = { x: b.pos.x, y: b.pos.y, dir: facing(b.pos, a.pos) };
     conv.participants.forEach(function (id) {
       var act = self.state.characters[id].activity;
+      self.speak(self.state.characters[id], conv);
       act.phase = 'executing'; act.conversationId = conv.id;
       act.plannedMinutes = conv.minutes; act.elapsed = 0;
       act.startAbs = now; act.startDay = self.state.day; act.startMin = self.state.minute;
@@ -679,6 +699,7 @@
     conv.endedReason = reason;
     this.touch();
     var asker = this.state.characters[conv.initiatorId], other = this.state.characters[conv.inviteeId];
+    if (status === 'declined') this.speak(other, conv);
     this.emit(status === 'declined' ? 'TALK_DECLINED' : 'TALK_UNANSWERED', {
       actorId: status === 'declined' ? other.id : asker.id, locationId: conv.locationId,
       notify: [asker.id, other.id],
@@ -1352,6 +1373,12 @@
       return this.reject(request, 'candidate_no_longer_legal', { candidateId: response.selectedId });
     }
 
+    /* A provider's own words, if it gave any. What is said out loud waits on
+     * the person until the moment it would be said — walking up, joining,
+     * declining — and is dropped if that moment never comes. */
+    var words = Pol.cleanWords(response.words);
+    actor.sayNext = (words && words.say && SPOKEN[candidate.actionId])
+      ? { text: words.say, source: response.source || actor.policyId } : null;
     var started = this.startActivity(actor, candidate, response.source || actor.policyId, request.requestId);
     actor.pending = null;
     if (!started.ok) {
@@ -1366,6 +1393,7 @@
       source: response.source || actor.policyId,
       candidateCount: request.candidates.length,
       diagnostics: response.diagnostics || null,
+      words: words,
       rejectedCandidates: rec.rejectedCandidates
     });
     if (actor.recentDecisions.length > 20) actor.recentDecisions.pop();

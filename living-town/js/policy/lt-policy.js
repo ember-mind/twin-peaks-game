@@ -25,6 +25,13 @@
  *   selectedId?   must be one of request.candidates[].id
  *   source        policy identity, e.g. 'utility', 'mock', 'recorded'
  *   diagnostics?  structured factors — never narrated inner monologue
+ *   words?        { reason?, say? } — optional, a provider's own words, and
+ *                 only ever words: a short reason for the choice, and, when
+ *                 the choice is to talk, join or decline, what the person says.
+ *                 They are cleaned and length-capped (P.cleanWords), kept and
+ *                 shown with the provider's name on them, and change nothing:
+ *                 a response with unusable words is still a valid choice.
+ *                 Nothing in the simulation ever writes words for anyone.
  *   error?
  * }
  */
@@ -61,11 +68,31 @@
     return { ok: true };
   };
 
-  P.selected = function (request, candidateId, source, diagnostics) {
-    return {
+  P.selected = function (request, candidateId, source, diagnostics, words) {
+    var out = {
       requestId: request.requestId, status: 'selected', selectedId: candidateId,
       source: source, diagnostics: diagnostics || null
     };
+    if (words) out.words = words;
+    return out;
+  };
+
+  P.WORD_LIMITS = { reason: 160, say: 240 };
+
+  /* Words from a provider are text and nothing else: one line, no control
+   * characters, no markup, capped. Anything that is not a non-empty string
+   * after that is dropped, and an object with nothing left is null. */
+  P.cleanWords = function (words) {
+    if (!words || typeof words !== 'object') return null;
+    var out = {}, any = false;
+    Object.keys(P.WORD_LIMITS).forEach(function (k) {
+      if (typeof words[k] !== 'string') return;
+      var t = words[k].replace(/[\u0000-\u001f\u007f<>]/g, ' ').replace(/\s+/g, ' ').trim();
+      if (!t) return;
+      if (t.length > P.WORD_LIMITS[k]) t = t.slice(0, P.WORD_LIMITS[k] - 1).replace(/\s+\S*$/, '') + '…';
+      out[k] = t; any = true;
+    });
+    return any ? out : null;
   };
 
   P.unavailable = function (request, source, reason) {

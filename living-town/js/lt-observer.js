@@ -130,9 +130,37 @@
    * policy promise always settles before the next minute is decided. Running
    * thirty ticks back to back inside one frame would otherwise leave every
    * character waiting on an answer that could not arrive. */
+  /* A question is out with a provider that answers in real seconds. Rather than
+   * let a quarter of an hour of town time go by while it thinks, the town's
+   * clock is held — for as long as that provider says it is worth waiting,
+   * counted from when the page first saw the question, and no longer. After
+   * that time moves again and the simulation's own timeout does what it does. */
+  function heldFor(state) {
+    if (state.replay) return null;
+    var sim = state.sim, now = performance.now(), held = null;
+    state.waiting = state.waiting || {};
+    var open = {};
+    sim.actorIds().forEach(function (id) {
+      var c = sim.state.characters[id], policy = c.pending && LT.Policy.get(c.policyId);
+      if (!policy || !policy.remote) return;
+      var key = c.pending.requestId;
+      /* Once the answer is in, it is the next tick that applies it: holding
+       * any longer would be waiting for something that has already come. */
+      if ((sim.inbox || []).some(function (r) { return r.requestId === key; })) return;
+      open[key] = true;
+      if (state.waiting[key] === undefined) state.waiting[key] = now;
+      if (now - state.waiting[key] < (policy.patienceMs || 0)) held = held || { actorId: id, name: c.name, source: policy.label || policy.id };
+    });
+    Object.keys(state.waiting).forEach(function (k) { if (!open[k]) delete state.waiting[k]; });
+    return held;
+  }
+  O.heldFor = heldFor;
+
   function pump(state, dt) {
     var ms = msPerMinute(state);
     if (!ms) return;
+    state.held = heldFor(state);
+    if (state.held) { state.accumulator = 0; return; }
     state.accumulator = Math.min(BACKLOG_CAP, state.accumulator + dt);
     if (state.pumping) return;
     var budget = O.dueTicks(state.accumulator, ms, MAX_TICKS_PER_FRAME);
@@ -153,6 +181,7 @@
         Promise.resolve().then(function () { return Promise.resolve(); }).then(step);
         return;
       }
+      if (heldFor(state)) { state.accumulator = 0; state.pumping = false; return; }   // a question went out on the last tick
       state.sim.tick();
       state.view.observe();   // every step, so a sprite follows the route and not a chord across it
       state.accumulator -= nowMs;
@@ -179,7 +208,20 @@
     if (state.snapshots.length > SNAPSHOT_KEEP) state.snapshots.shift();
   }
 
+  /* Looking back asks the policies again from an earlier state. That is what
+   * happened only while every policy answers the same way twice; with a
+   * provider outside this process it would be a second, different, paid-for
+   * answer passed off as the first, so it is not offered. */
+  O.replayBlockedBy = function (state) {
+    var sim = state.sim, who = null;
+    sim.actorIds().forEach(function (id) {
+      var p = LT.Policy.get(sim.state.characters[id].policyId);
+      if (p && p.remote && !who) who = (p.label || p.id);
+    });
+    return who;
+  };
   O.canReplay = function (state, abs) {
+    if (O.replayBlockedBy(state)) return false;
     return state.snapshots.some(function (s) { return s.abs <= abs - REPLAY_LEAD; });
   };
 
@@ -230,11 +272,11 @@
     var host = el('lt-timeline');
     if (host.__key === key) return;
     host.__key = key;
-    var beats = LT.Story.beats(sim, day);
+    var beats = LT.Story.beats(sim, day), blocked = O.replayBlockedBy(state);
     host.innerHTML = '<span class="lt-timeline-day">Day ' + day + '</span>' + beats.map(function (b, i) {
       var can = O.canReplay(state, b.absMinute), on = state.replay && state.replay.beat.seq === b.seq;
       return '<button class="lt-beat is-' + b.type.toLowerCase() + (on ? ' is-on' : '') + '" style="left:' + (b.minute / 1440 * 100).toFixed(2) + '%"' +
-        (can ? '' : ' disabled') + ' data-i="' + i + '" title="' + escape(b.stamp + ' — ' + b.text + (can ? '' : ' (too early to look back at)')) + '"></button>';
+        (can ? '' : ' disabled') + ' data-i="' + i + '" title="' + escape(b.stamp + ' — ' + b.text + (can ? '' : blocked ? ' (cannot be looked back at: ' + blocked + ' would be asked again, and that would not be what happened)' : ' (too early to look back at)')) + '"></button>';
     }).join('') + (day === sim.state.day ? '<i class="lt-now" style="left:' + (sim.state.minute / 1440 * 100).toFixed(2) + '%"></i>' : '');
     Array.prototype.forEach.call(host.querySelectorAll('.lt-beat'), function (n) {
       n.addEventListener('click', function () { O.replay(state, beats[Number(n.dataset.i)]); });
@@ -505,7 +547,7 @@
 
     var why = LT.Story.why(c.recentDecisions[0]);
     text(el('lt-caption-doing'), c.name + ' · ' + (act ? phaseLabel + act.label : (c.pending ? 'deciding what to do next' : 'between things')));
-    text(el('lt-caption-why'), why ? why.line : '');
+    text(el('lt-caption-why'), state.held && !state.replay ? 'The town is waiting for ' + state.held.source + ' to decide for ' + state.held.name + '.' : (why ? why.line : ''));
     paintStakes(sim, c);
     paintHand(state);
     paintRecap(state);

@@ -53,6 +53,11 @@
   S.why = function (decision) {
     if (!decision) return null;
     var factors = decision.diagnostics && decision.diagnostics.factors;
+    /* A provider that gave its own reason is quoted, with its name on it. It
+     * is that provider's account of the choice, not the page's. */
+    if ((!factors || !factors.length) && decision.words && decision.words.reason) {
+      return { source: decision.source, known: true, quoted: true, line: decision.source + ' gave this reason: "' + decision.words.reason + '"' };
+    }
     if (!factors || !factors.length) {
       return { source: decision.source, known: false, line: 'Chosen by ' + decision.source + ', which gave no reasons.' };
     }
@@ -148,7 +153,7 @@
   var TOLD = {   // event types worth a line of their own, most telling first
     GOAL_REACHED: 1, GOAL_MISSED: 1, COMMITMENT_BROKEN: 1, COMMITMENT_KEPT: 1, TALKED: 1,
     OFFER_ACCEPTED: 1, OFFER_DECLINED: 1, OFFER_LAPSED: 1, ACTIVITY_FAILED: 1, WITHDREW: 1,
-    WENT_HUNGRY: 1, HELPED_OUT: 1, TALK_DECLINED: 1, TALK_UNANSWERED: 1, BOOK_READ: 1, FOOD_PARCEL_OPENED: 1, INTERVENTION_APPLIED: 1
+    WENT_HUNGRY: 1, HELPED_OUT: 1, SAID: 1, TALK_DECLINED: 1, TALK_UNANSWERED: 1, BOOK_READ: 1, FOOD_PARCEL_OPENED: 1, INTERVENTION_APPLIED: 1
   };
 
   S.recap = function (sim, day) {
