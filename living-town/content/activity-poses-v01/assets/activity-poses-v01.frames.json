@@ -201,10 +201,10 @@
       ],
       "box": [
         16,
-        20
+        24
       ],
       "shadow": true,
-      "reads": "seated, both hands holding an open book across the chest"
+      "reads": "standing, both hands holding an open book across the chest"
     },
     {
       "id": "work_counter",
@@ -218,11 +218,11 @@
         24
       ],
       "box": [
-        16,
+        24,
         24
       ],
       "shadow": true,
-      "reads": "standing, a small rag travelling across the chest under one hand"
+      "reads": "standing, a rag swinging from one hand outside the silhouette"
     },
     {
       "id": "unpacking",
@@ -236,11 +236,11 @@
         24
       ],
       "box": [
-        20,
+        24,
         20
       ],
       "shadow": true,
-      "reads": "bent at the waist, only the crown of the head showing, both arms down"
+      "reads": "stooped, shoulders rolled forward, both arms hanging clear of the body"
     },
     {
       "id": "sleeping",
@@ -273,7 +273,7 @@
         24
       ],
       "box": [
-        20,
+        24,
         24
       ],
       "shadow": true,

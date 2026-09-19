@@ -108,7 +108,7 @@
         21
       ],
       "shadow": true,
-      "reads": "a body folded onto a seat: short, wide lap, shins straight down"
+      "reads": "a body folded onto a seat: narrow chest over a wide lap, toes below it"
     },
     {
       "id": "reading",
@@ -123,10 +123,10 @@
       ],
       "box": [
         16,
-        20
+        24
       ],
       "shadow": true,
-      "reads": "seated, both hands holding an open book across the chest"
+      "reads": "standing, both hands holding an open book across the chest"
     },
     {
       "id": "work_counter",
@@ -140,11 +140,11 @@
         24
       ],
       "box": [
-        16,
+        24,
         24
       ],
       "shadow": true,
-      "reads": "standing, one arm working across the chest with a cloth in hand"
+      "reads": "standing, a rag swinging from one hand outside the silhouette"
     },
     {
       "id": "unpacking",
@@ -158,11 +158,11 @@
         24
       ],
       "box": [
-        20,
+        24,
         20
       ],
       "shadow": true,
-      "reads": "bent at the waist, crown of the head to the viewer, hands down"
+      "reads": "stooped, shoulders rolled forward, both arms hanging clear of the body"
     },
     {
       "id": "sleeping",
@@ -180,7 +180,7 @@
         12
       ],
       "shadow": false,
-      "reads": "lying flat, head on a pillow, blanket in the wearer own colour"
+      "reads": "lying on its side, head on a pillow, blanket in the wearer own colour"
     },
     {
       "id": "talking",
@@ -195,7 +195,7 @@
         24
       ],
       "box": [
-        20,
+        24,
         24
       ],
       "shadow": true,

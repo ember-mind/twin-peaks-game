@@ -36,6 +36,11 @@ const PAPER = { N: '#F2EFE4', n: '#93A0A2' };
 
 const splice = (row, at, text) => row.slice(0, at) + text + row.slice(at + text.length);
 
+/* Four transparent columns on each side, so an arm or a rag can leave the
+ * body's own outline. Padding by whole columns on both sides leaves the
+ * figure exactly where it stood. */
+const pad4 = (rows) => rows.map((row) => '....' + row + '....');
+
 /* Author a wide matrix by shape rather than by counting: spaces are
  * transparent and short rows are filled out to the widest one. */
 function rect(rows) {
@@ -96,27 +101,30 @@ const SEATED_RIGHT = {
 };
 
 /* ---- reading ----------------------------------------------------------- */
-/* Seated, with an open book held across the chest in both hands. The book is
- * the silhouette change that separates this from `seated`: a bright outlined
- * rectangle with a spine down the middle, where the lap would be. */
+/* STANDING, with an open book held across the chest in both hands: an
+ * outlined page block with a spine down the middle and a fold at the bottom.
+ * Standing on purpose — a shorter figure holding a rectangle asks the viewer
+ * to work out why it is shorter before it asks them to read the rectangle. */
 function readingBody(body, frame) {
-  const shoulders = body === 'skirt'
-    ? ['...OsWTWTWsO...', '..OJJWWWWWJJO..']
-    : ['...OsWWTWWsO...', '..OJJWWTWWJJO..'];
-  const feet = body === 'skirt' ? '...OBBO.OBBO...' : '...ObBO.ObBO...';
+  const top = body === 'skirt'
+    ? ['...OsWTWTWsO...', '..OJJWWWWWJJO..', '.OJjJWwWwWJjJO.']
+    : ['...OsWWTWWsO...', '..OJJWWTWWJJO..', '.OJjJJWTWJJjJO.'];
+  const legs = body === 'skirt'
+    ? ['..OPPPPPPPPPO..', '..OPPPPPPPPPO..', '...OOSSOSSOO...', '....OBBOBBO....']
+    : ['...OPPpOpPPO...', '...OPPPOPPPO...', '...ObBOObBO....', '...OBBO.OBBO...'];
   const pages = frame === 0
     ? ['.OSONNNnNNNOSO.', '.OsONNNnNNNOsO.', '..OONNNnNNNOO..']
-    : ['.OSONNNnNnNOSO.', '.OsONNNnONNOsO.', '..OONNNnONNOO..'];
-  return shoulders.concat(['.OJOOOOOOOOOJO.'], pages, ['..OOOOOOOOOOO..', feet]);
+    : ['.OSONNnOnNNOSO.', '.OsONNnOnNNOsO.', '..OONNnOnNNOO..'];
+  return top.concat(['.OJOOOOOOOOOJO.'], pages, ['..OOOOOOOOOOO..'], legs);
 }
 
 /* ---- work_counter ------------------------------------------------------ */
-/* Full standing height — a worker is not a shorter person — with a small rag
- * held at chest level in one hand and swept across the body, left, centre,
- * right. Deliberately narrow: a wide pale rectangle at that height is the
- * open book, and the two poses must not be confused. */
+/* Full standing height — a worker is not a shorter person — with a rag
+ * hanging from one hand OUTSIDE the body's own outline, swinging up and down
+ * across three frames. The silhouette has to change, or the gesture is only
+ * a rectangle painted on a chest. */
 function workCounterBody(body, frame) {
-  const rows = body === 'skirt' ? [
+  const rows = pad4(body === 'skirt' ? [
     '...OsWTWTWsO...', '..OJJWWWWWJJO..', '.OJjJWwWwWJjJO.', '.OJjJWWWWWJjJO.',
     '.OSJJwWwWwJJSO.', '.OsOPPPpPPPOsO.', '..OPPpPPPpPPO..', '..OPPPPPPPPPO..',
     '..OPPPPPPPPPO..', '...OOSSOSSOO...', '....OBBOBBO....', '....ObBObBO....'
@@ -124,39 +132,40 @@ function workCounterBody(body, frame) {
     '...OsWWTWWsO...', '..OJJWWTWWJJO..', '.OJjJJWTWJJjJO.', '.OJjJJWTWJJjJO.',
     '.OJjJJwTwJJjJO.', '.OSJJJwWwJJJSO.', '.OsOJJwwwJJOsO.', '..OOPPpPpPPOO..',
     '...OPPpOpPPO...', '...OPPPOPPPO...', '...ObBOObBO....', '...OBBO.OBBO...'
-  ];
-  const at = [3, 5, 7][frame];
+  ]);
+  const top = [4, 5, 3][frame];
   const out = rows.slice();
-  out[2] = splice(out[2], at, 'OOOOO');
-  out[3] = splice(out[3], at, 'ONNnO');
-  out[4] = splice(out[4], at, 'OSNnO');
+  /* The rag hangs from the hand, touching the body's own outline column: one
+   * transparent column between them and it reads as a floating rectangle. */
+  ['ONNNO', 'ONnnO', 'ONNnO', '.OOO.'].forEach((cloth, i) => {
+    out[top + i] = splice(out[top + i], 0, cloth);
+  });
   return out;
 }
 
 /* ---- unpacking --------------------------------------------------------- */
-/* Bent at the waist over something at waist height. Drawn with the BACK of
- * the head (the `up` head matrix) on a down-facing body: from the front, a
- * person bent forward shows you their crown, not their face. Six body rows
- * under a 12-row head; the arms leave the silhouette on both sides and drop
- * one row between the two frames. */
-const UNPACKING = {
-  jacket: [
-    ['.OJjJJJJJJJJJJJjJO.', 'OSSOJjJJJJJJJjJOSSO', 'OSSOJJJJJJJJJJJOSSO',
-     'OssO.OPPpPpPPO.OssO', '.....OPPpPpPPO.....', '.....OPPPOPPPO.....',
-     '.....ObBOObBO......', '.....OBBO.OBBO.....'],
-    ['.OJjJJJJJJJJJJJjJO.', '...OJjJJJJJJJjJO...', 'OSSOJJJJJJJJJJJOSSO',
-     'OSSO.OPPpPpPPO.OSSO', 'OssO.OPPpPpPPO.OssO', '.....OPPPOPPPO.....',
-     '.....ObBOObBO......', '.....OBBO.OBBO.....']
-  ],
-  skirt: [
-    ['.OJjJJJJJJJJJJJjJO.', 'OSSOJjJJJJJJJjJOSSO', 'OSSOJJJJJJJJJJJOSSO',
-     'OssO.OPPPpPPPO.OssO', '.....OPPPpPPPO.....', '.....OPPPPPPPO.....',
-     '.....OOSSOSSOO.....', '......OBBOBBO......'],
-    ['.OJjJJJJJJJJJJJjJO.', '...OJjJJJJJJJjJO...', 'OSSOJJJJJJJJJJJOSSO',
-     'OSSO.OPPPpPPPO.OSSO', 'OssO.OPPPpPPPO.OssO', '.....OPPPPPPPO.....',
-     '.....OOSSOSSOO.....', '......OBBOBBO......']
-  ]
-};
+/* Stooped over something at waist height: four rows shorter than standing,
+ * shoulders rolled forward, and both arms hanging clear of the body with a
+ * transparent column between arm and torso, dropping one row between frames.
+ * The face stays visible — a figure whose head has swallowed its torso reads
+ * as a broken sprite, not as a bent back. */
+function unpackingBody(body, frame) {
+  const arm = frame === 0 ? 2 : 1;
+  const rows = pad4(body === 'skirt' ? [
+    '...OsWTWTWsO...', '..OJJWWWWWJJO..', '.OJjJWwWwWJjJO.', '.OJjJWWWWWJjJO.',
+    '.OJJJwWwWwJJJO.', '.OsOPPPpPPPOsO.', '...OOSSOSSOO...', '....OBBOBBO....'
+  ] : [
+    '...OsWWTWWsO...', '..OJJWWTWWJJO..', '.OJjJJWTWJJjJO.', '.OJjJJwTwJJjJO.',
+    '.OJJJJwWwJJJJO.', '..OOPPpPpPPOO..', '...OPPPOPPPO...', '...ObBOObBO....'
+  ]);
+  const out = rows.slice();
+  /* Both arms, overwriting the torso's own outline column so they hang FROM
+   * the body instead of beside it. */
+  ['OSSO', 'OSSO', 'OSSO', 'OssO'].forEach((limb, i) => {
+    out[arm + i] = splice(splice(out[arm + i], 2, limb), 17, limb);
+  });
+  return out;
+}
 
 /* ---- sleeping ---------------------------------------------------------- */
 /* One authored matrix, no head stack: a body lying on its side, head on a
@@ -178,56 +187,46 @@ const SLEEPING = rect([
 ]);
 
 /* ---- talking ----------------------------------------------------------- */
-/* Standing, one forearm lifted clear of the silhouette: beside the ear in the
- * first frame, at the chest in the second. The hand breaking the body's own
- * outline is what makes a still frame read as speech rather than as standing. */
+/* Standing, one forearm lifted clear of the silhouette — beside the ear in
+ * the first frame, at the chest in the second. Two pixels of skin with their
+ * own outline, outside the body's edge: at this scale a one-pixel hand is a
+ * speck, and a speck is not a gesture. */
 function talkingDown(body, frame) {
-  const rows = body === 'skirt' ? [
-    '.....OsWTWTWsO.....', '....OJJWWWWWJJO....', '...OJjJWwWwWJjJO...',
-    '...OJjJWWWWWJjJO...', '...OSJJwWwWwJJSO...', '...OsOPPPpPPPOsO...',
-    '....OPPpPPPpPPO....', '....OPPPPPPPPPO....', '....OPPPPPPPPPO....',
-    '.....OOSSOSSOO.....', '......OBBOBBO......', '......ObBObBO......'
+  const rows = pad4(body === 'skirt' ? [
+    '...OsWTWTWsO...', '..OJJWWWWWJJO..', '.OJjJWwWwWJjJO.', '.OJjJWWWWWJjJO.',
+    '.OSJJwWwWwJJSO.', '.OsOPPPpPPPOsO.', '..OPPpPPPpPPO..', '..OPPPPPPPPPO..',
+    '..OPPPPPPPPPO..', '...OOSSOSSOO...', '....OBBOBBO....', '....ObBObBO....'
   ] : [
-    '.....OsWWTWWsO.....', '....OJJWWTWWJJO....', '...OJjJJWTWJJjJO...',
-    '...OJjJJWTWJJjJO...', '...OJjJJwTwJJjJO...', '...OSJJJwWwJJJSO...',
-    '...OsOJJwwwJJOsO...', '....OOPPpPpPPOO....', '.....OPPpOpPPO.....',
-    '.....OPPPOPPPO.....', '.....ObBOObBO......', '.....OBBO.OBBO.....'
-  ];
+    '...OsWWTWWsO...', '..OJJWWTWWJJO..', '.OJjJJWTWJJjJO.', '.OJjJJWTWJJjJO.',
+    '.OJjJJwTwJJjJO.', '.OSJJJwWwJJJSO.', '.OsOJJwwwJJOsO.', '..OOPPpPpPPOO..',
+    '...OPPpOpPPO...', '...OPPPOPPPO...', '...ObBOObBO....', '...OBBO.OBBO...'
+  ]);
   const out = rows.slice();
-  /* The lifted arm replaces the resting one: hand, sleeve, and the shoulder
-   * the arm now hangs from. */
-  const rest = body === 'skirt' ? 4 : 5;
-  out[rest] = rows[rest].replace('S', 'J');
-  if (frame === 0) {
-    out[0] = splice(out[0], 0, 'OSSO');
-    out[1] = splice(out[1], 0, 'OSSO');
-    out[2] = splice(out[2], 0, '.OO');
-  } else {
-    out[3] = splice(out[3], 0, 'OSS');
-    out[4] = splice(out[4], 0, 'OSS');
-    out[5] = splice(out[5], 0, '.OO');
-  }
+  const rest = body === 'skirt' ? 4 : 5;          /* the row the resting hand is on */
+  out[rest] = out[rest].replace('S', 'J');
+  const top = frame === 0 ? 0 : 3;
+  out[top] = splice(out[top], 2, 'OSSO');
+  out[top + 1] = splice(out[top + 1], 2, 'OSSO');
+  out[top + 2] = splice(out[top + 2], 2, '.OO.');
   return out;
 }
 
 function talkingRight(body, frame) {
-  const rows = body === 'skirt' ? [
-    '.....OJJWTOO.....', '....OJJjWWTJO....', '....OKJjWwTJO....',
-    '....OKJjWwSJO....', '....OKKjJJsOO....', '....OPPPpPPPO....',
-    '....OPPPpPPPO....', '....OPPPPPPPO....', '.....OOSSSOO.....',
-    '......OBBBO......', '......ObBBO......'
+  const rows = pad4(body === 'skirt' ? [
+    '...OJJWTOO...', '..OJJjWWTJO..', '..OKJjWwTJO..', '..OKJjWwSJO..',
+    '..OKKjJJsOO..', '..OPPPpPPPO..', '..OPPPpPPPO..', '..OPPPPPPPO..',
+    '...OOSSSOO...', '....OBBBO....', '....ObBBO....'
   ] : [
-    '.....OJJWTOO.....', '....OJJjJWTJO....', '....OKJjJWTJO....',
-    '....OKJjJwTJO....', '....OKJjJwSJO....', '....OKKjJJsOO....',
-    '.....OPPpPPO.....', '.....OPPpPPO.....', '.....OPPPPPO.....',
-    '.....ObBBBBO.....', '.....OBBBBBO.....'
-  ];
+    '...OJJWTOO...', '..OJJjJWTJO..', '..OKJjJWTJO..', '..OKJjJwTJO..',
+    '..OKJjJwSJO..', '..OKKjJJsOO..', '...OPPpPPO...', '...OPPpPPO...',
+    '...OPPPPPO...', '...ObBBBBO...', '...OBBBBBO...'
+  ]);
   const out = rows.slice();
-  const hand = body === 'skirt' ? 3 : 4;   /* the row the resting hand is on */
-  const top = frame === 0 ? hand - 1 : hand;
-  out[hand] = out[hand].replace('S', body === 'skirt' ? 'w' : 'J');
-  out[top] = splice(out[top], 13, 'OSO');
-  out[top + 1] = splice(out[top + 1], 13, 'OsO');
+  const hand = body === 'skirt' ? 3 : 4;
+  out[hand] = out[hand].replace('S', 'J');
+  const top = frame === 0 ? hand - 2 : hand;
+  out[top] = splice(out[top], 15, 'OSSO');
+  out[top + 1] = splice(out[top + 1], 15, 'OssO');
   return out;
 }
 
@@ -264,19 +263,19 @@ function art(poseId, dir, frame) {
       return { head: 'down', overlayDir: 'down', pad: 0, blankTop: 0,
         body: { jacket: readingBody('jacket', frame), skirt: readingBody('skirt', frame) } };
     case 'work_counter/down':
-      return { head: 'down', overlayDir: 'down', pad: 0, blankTop: 0,
+      return { head: 'down', overlayDir: 'down', pad: 4, blankTop: 0,
         body: { jacket: workCounterBody('jacket', frame), skirt: workCounterBody('skirt', frame) } };
     case 'unpacking/down':
-      return { head: 'up', overlayDir: 'up', pad: 2, blankTop: 0, headRows: 8,
-        body: { jacket: UNPACKING.jacket[frame], skirt: UNPACKING.skirt[frame] } };
+      return { head: 'down', overlayDir: 'down', pad: 4, blankTop: 0,
+        body: { jacket: unpackingBody('jacket', frame), skirt: unpackingBody('skirt', frame) } };
     case 'sleeping/right':
       return { head: null, overlayDir: 'right', pad: 0, blankTop: 0,
         body: { jacket: SLEEPING, skirt: SLEEPING } };
     case 'talking/down':
-      return { head: 'down', overlayDir: 'down', pad: 2, blankTop: 0,
+      return { head: 'down', overlayDir: 'down', pad: 4, blankTop: 0,
         body: { jacket: talkingDown('jacket', frame), skirt: talkingDown('skirt', frame) } };
     case 'talking/right':
-      return { head: 'right', overlayDir: 'right', pad: 2, blankTop: 0,
+      return { head: 'right', overlayDir: 'right', pad: 4, blankTop: 0,
         body: { jacket: talkingRight('jacket', frame), skirt: talkingRight('skirt', frame) } };
     default: return null;
   }

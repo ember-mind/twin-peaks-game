@@ -30,18 +30,18 @@
     },
     reading: {
       id: 'reading', dirs: ['down'], frames: 2, frameMs: 900,
-      pivot: [12, 24], box: [16, 20], shadow: true,
-      reads: 'seated, both hands holding an open book across the chest'
+      pivot: [12, 24], box: [16, 24], shadow: true,
+      reads: 'standing, both hands holding an open book across the chest'
     },
     work_counter: {
       id: 'work_counter', dirs: ['down'], frames: 3, frameMs: 320,
-      pivot: [12, 24], box: [16, 24], shadow: true,
-      reads: 'standing, a small rag travelling across the chest under one hand'
+      pivot: [12, 24], box: [24, 24], shadow: true,
+      reads: 'standing, a rag swinging from one hand outside the silhouette'
     },
     unpacking: {
       id: 'unpacking', dirs: ['down'], frames: 2, frameMs: 520,
-      pivot: [12, 24], box: [20, 20], shadow: true,
-      reads: 'bent at the waist, only the crown of the head showing, both arms down'
+      pivot: [12, 24], box: [24, 20], shadow: true,
+      reads: 'stooped, shoulders rolled forward, both arms hanging clear of the body'
     },
     sleeping: {
       id: 'sleeping', dirs: ['right'], frames: 1, frameMs: 0,
@@ -50,7 +50,7 @@
     },
     talking: {
       id: 'talking', dirs: ['down', 'right'], frames: 2, frameMs: 430,
-      pivot: [12, 24], box: [20, 24], shadow: true,
+      pivot: [12, 24], box: [24, 24], shadow: true,
       reads: 'standing, one forearm lifting and falling in front of the chest'
     }
   };
