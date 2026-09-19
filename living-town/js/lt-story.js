@@ -183,7 +183,11 @@
       var c = sim.state.characters[id];
       var mine = events.filter(function (e) { return e.actorId === id; });
       var worked = 0, earned = 0, saved = 0, meals = 0;
-      mine.forEach(function (e) {
+      /* A day long enough ago has been settled: its sums were written down
+       * when its routine events were let go. */
+      var settled = (sim.state.dayDigests || {})[day];
+      if (settled && settled.people[id]) { worked = settled.people[id].workedMinutes; earned = settled.people[id].earned; saved = settled.people[id].saved; meals = settled.people[id].meals; }
+      else mine.forEach(function (e) {
         if (e.type === 'WORKED' || e.type === 'WORKED_EXTRA') { worked += e.data.minutes || 0; earned += e.data.gross || 0; saved += e.data.saved || 0; }
         if (e.type === 'ATE') meals++;
       });
@@ -195,7 +199,8 @@
     });
     var town = events.filter(function (e) { return !e.actorId && TOLD[e.type]; })
                      .map(function (e) { return { stamp: e.stamp, type: e.type, text: e.text }; });
-    return { day: day, complete: sim.state.day > day, events: events.length, people: people, town: town };
+    var settledDay = (sim.state.dayDigests || {})[day];
+    return { day: day, complete: sim.state.day > day, events: settledDay ? settledDay.events : events.length, people: people, town: town };
   };
 
   /* ---------------- where to look ---------------- */

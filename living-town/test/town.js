@@ -89,6 +89,22 @@ const strip = (s) => { const c = JSON.parse(JSON.stringify(s.state)); delete c.v
   const back = LT.Save.deserialize(JSON.parse(JSON.stringify(LT.Save.serialize(week))));
   ok(JSON.stringify(back.state.characters.resident_a.nextGoals) === JSON.stringify(W7.resident_a.nextGoals) && JSON.stringify(back.state.characters.resident_b.goals) === JSON.stringify(W7.resident_b.goals), 'what is still to come, and what has been, survive a save');
 
+  console.log('# a world that does not outgrow its browser');
+  require(path.resolve(__dirname, '..', 'js', 'lt-story.js'));
+  const long = LT.Scenario.town({});
+  await long.runUntil(3, 1430);
+  const day1Before = JSON.stringify(LT.Story.recap(long, 1));
+  const size = () => JSON.stringify(LT.Save.serialize(long)).length;
+  await long.runUntil(5, 0); const at5 = size();
+  ok(JSON.stringify(LT.Story.recap(long, 1)) === day1Before, 'a day that has been settled is looked back on exactly as it was before: same sums, same things told');
+  ok(!long.state.events.some((e) => e.day === 1 && e.type === 'ACTIVITY_STARTED') && long.state.events.some((e) => e.day === 1 && e.type === 'TALKED') && long.state.events.some((e) => e.day === 4 && e.type === 'ACTIVITY_STARTED'),
+     'its routine is let go, what would still be told is kept, and the last two days are whole');
+  await long.runUntil(12, 0); const at12 = size();
+  ok(at12 < at5 * 1.25 && at12 < 1200000, 'seven more days add ' + Math.round((at12 - at5) / 1024) + ' KB to a ' + Math.round(at5 / 1024) + ' KB save — it was 200 KB a day');
+  const twin = LT.Save.deserialize(JSON.parse(JSON.stringify(LT.Save.serialize(long))));
+  await long.runUntil(13, 30); await twin.runUntil(13, 30);
+  ok(strip(long) === strip(twin), 'and a world loaded on day twelve is still the world that never stopped, across another settling');
+
   console.log('# a town saves and carries on like any world');
   const a = LT.Scenario.town({}); await a.runUntil(1, 745);
   const saved = JSON.parse(JSON.stringify(LT.Save.serialize(a)));

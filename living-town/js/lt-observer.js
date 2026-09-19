@@ -24,7 +24,7 @@
     { label: 'Auto', msPerMinute: 62, auto: true }
   ];
   var PACE_MS = { close: 250, steady: 90, quick: 20, asleep: 5 };
-  var SNAPSHOT_EVERY = 30, SNAPSHOT_KEEP = 240;   // sim minutes between snapshots; five days of them
+  var SNAPSHOT_EVERY = 30, SNAPSHOT_KEEP = 96;    // sim minutes between snapshots; two days of them, which is as far back as the full record goes
   var REPLAY_LEAD = 12, REPLAY_TAIL = 35;          // minutes shown before and after the moment asked for
 
   function msPerMinute(state) {

@@ -48,10 +48,11 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   const direct = sim.state.events.filter((e) => Meter.BEAT_TYPES.indexOf(e.type) >= 0 && e.day <= 3);
   ok(r.overall.beats === direct.length && direct.length > 0, 'beats (' + r.overall.beats + ') equal the event log filtered directly');
   ok([1, 2, 3].every((d) => r.perDay[d].beats === direct.filter((e) => e.day === d).length), 'and day by day');
-  const started = sim.state.events.filter((e) => e.type === 'ACTIVITY_STARTED' && e.data && e.data.requestId && e.day <= 3);
+  /* Day 1's routine events have been settled away by the end of day 3; the days still whole are 2 and 3. */
+  const started = sim.state.events.filter((e) => e.type === 'ACTIVITY_STARTED' && e.data && e.data.requestId && e.day >= 2 && e.day <= 3);
   const ids = {};
   started.forEach((e) => { ids[e.data.requestId] = true; });
-  ok(r.overall.decisions === Object.keys(ids).length && r.overall.decisions > 40, 'no decision is lost to the cap of 20: ' + r.overall.decisions + ' collected');
+  ok(r.perDay[2].decisions + r.perDay[3].decisions === Object.keys(ids).length && r.overall.decisions > 40, 'no decision is lost to the cap of 20: ' + r.overall.decisions + ' collected');
   ok(r.overall.closeCalls > 0 && sim.actorIds().every((id) => r.perDay[1].distinctActivities[id].length > 1 && r.perDay[1].placesVisited[id].length > 1), 'the default day has close calls, several activities and several places per person');
 
   console.log('# a town where nobody decides is more boring');

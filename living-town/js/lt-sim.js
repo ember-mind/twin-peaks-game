@@ -38,6 +38,15 @@
   function deepCopy(v) { return JSON.parse(JSON.stringify(v)); }
 
   var HUNGRY = 88, FED_AGAIN = 60;
+  /* The minute-by-minute record of a day — who started what, who arrived
+   * where — is kept in full for KEEP_DAYS days. After that the day is settled:
+   * its sums are written down once (state.dayDigests) and only what someone
+   * would still tell about it stays in the log. Without this a world grows by
+   * about 200 KB a day and outlives what a browser will store in a fortnight. */
+  var KEEP_DAYS = 2;
+  var ROUTINE = { ACTIVITY_STARTED: 1, ACTIVITY_COMPLETED: 1, ACTIVITY_REACHED: 1, ACTIVITY_INTERRUPTED: 1, ARRIVED: 1, DEPARTED: 1,
+                  GREETED: 1, RESTED: 1, BROKE: 1, PREPARED: 1, SLEPT: 1, ATE: 1, WORKED: 1, WORKED_EXTRA: 1, PRACTISED: 1,
+                  TALK_PROPOSED: 1, TALK_BEGAN: 1, INTERVENTION_SCHEDULED: 1 };
   var SPOKEN = { talk_with: 1, join_conversation: 1, decline_conversation: 1 };
 
   function Sim(opts) {
@@ -394,6 +403,29 @@
   };
 
   /* Today's promise of that name if there is one still open, else the latest. */
+  Sim.prototype.settleOldDays = function () {
+    var state = this.state, before = state.day - KEEP_DAYS, self = this;
+    state.dayDigests = state.dayDigests || {};
+    var days = {};
+    state.events.forEach(function (e) { if (e.day < before && !state.dayDigests[e.day]) days[e.day] = true; });
+    Object.keys(days).forEach(function (d) {
+      var digest = { events: 0, people: {} };
+      self.actorIds().forEach(function (id) { digest.people[id] = { workedMinutes: 0, earned: 0, saved: 0, meals: 0 }; });
+      state.events.forEach(function (e) {
+        if (String(e.day) !== d) return;
+        digest.events++;
+        var p = e.actorId && digest.people[e.actorId];
+        if (!p) return;
+        if (e.type === 'WORKED' || e.type === 'WORKED_EXTRA') { p.workedMinutes += e.data.minutes || 0; p.earned = U.round2(p.earned + (e.data.gross || 0)); p.saved = U.round2(p.saved + (e.data.saved || 0)); }
+        if (e.type === 'ATE') p.meals++;
+      });
+      state.dayDigests[d] = digest;
+    });
+    if (!Object.keys(days).length) return;
+    state.events = state.events.filter(function (e) { return e.day >= before || !ROUTINE[e.type]; });
+    this.touch();
+  };
+
   Sim.prototype.commitmentById = function (actor, id) {
     var list = actor.commitments || [], found = null;
     for (var i = 0; i < list.length; i++) {
@@ -1470,6 +1502,7 @@
       this.state.day += 1;
       this.actorIds().forEach(function (id) { self.state.characters[id].workedMinutes = 0; });
       this.actorIds().forEach(function (id) { self.beginDay(self.state.characters[id]); });
+      this.settleOldDays();
     }
     /* Every minute, not only at midnight: a world loaded days after a goal's
      * last day closes it on its first tick instead of carrying it as open. */
