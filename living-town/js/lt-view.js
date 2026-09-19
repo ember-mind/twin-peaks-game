@@ -173,7 +173,32 @@
     return (H && H.ready && GAME && GAME.Sprites && GAME.Sprites.drawChar) ? 'atlas' : 'placeholder';
   };
 
+  /* Things a content package brought into the world. What one looks like is
+   * asked of the package every frame from the instance as it is now — a
+   * parcel is drawn empty because the simulation's parcel is empty — and the
+   * painter is given a type, a state and a place, never the simulation. */
+  View.prototype.thingsAt = function (locId) {
+    var sim = this.sim, C = LT.Content;
+    if (!C) return [];
+    return sim.objectsAt(locId).map(function (o) {
+      var vis = C.visualOf(o, sim);
+      return vis ? { kind: 'thing', id: o.id, typeId: vis.typeId, state: vis.state,
+                     wx: o.x * TILE, wy: o.y * TILE, px: o.x * TILE + TILE / 2, py: o.y * TILE + TILE - 2 } : null;
+    }).filter(Boolean);
+  };
+
+  View.prototype.drawThing = function (g, e, cx, cy) {
+    var paint = LT.Content.painterFor(e.typeId);
+    if (paint && paint(g, e.state, e.px - cx, e.py - cy) !== false) return 'painted';
+    /* No painter for it here: a plain marker, so a thing that exists is never
+     * invisible, and never mistaken for finished art. */
+    g.fillStyle = LT.Art.palette.ink; g.fillRect(e.px - cx - 3, e.py - cy - 6, 6, 6);
+    g.fillStyle = '#d7b45c'; g.fillRect(e.px - cx - 2, e.py - cy - 5, 4, 4);
+    return 'marker';
+  };
+
   View.prototype.drawInhabitant = function (g, e, cx, cy, mapId, how) {
+    if (e.kind === 'thing') { this.drawThing(g, e, cx, cy); return; }
     if (how === 'atlas') {
       root.GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, LT.ProductionHost.looks[e.sheetId], e.dir,
         e.phase, 1, e.moving, false, this.clock,
@@ -215,7 +240,7 @@
     });
     /* Never a production map id: no room lighting is borrowed for a place that has none. */
     ents.forEach(function (e) { self.drawInhabitant(g, e, cx, cy, 'lt_temporary', how); });
-    this.drawActivityMarks(g, cx, cy, ents);
+    this.drawActivityMarks(g, cx, cy, ents.filter(function (e) { return e.kind !== 'thing'; }));
   };
 
   View.prototype.draw = function () {
@@ -224,12 +249,15 @@
     var locId = this.visibleLocation();
     var loc = LT.World.LOCATIONS[locId];
     var cx = Math.round(this.camX), cy = Math.round(this.camY);
-    var ents = this.entitiesAt(locId);
+    var people = this.entitiesAt(locId), things = this.thingsAt(locId);
+    /* One depth order for people and things: a book on a bench is behind the
+     * person standing in front of it. */
+    var ents = EMBER.Tilemap.depthSort(things.concat(people));
     var how = this.inhabitantRenderer();
     var scene = this.productionScene(loc);
     if (scene) this.drawProductionRoom(g, scene, ents, cx, cy, how);
     else this.drawTemporaryPlace(g, loc, ents, cx, cy, how);
-    return { location: locId, entities: ents.length,
+    return { location: locId, entities: people.length, things: things.map(function (t) { return t.id + ':' + t.state; }),
              environment: scene ? 'production' : 'temporary', inhabitants: how };
   };
 
@@ -253,7 +281,7 @@
     var MARK = {
       work_shift: '#e2c15a', work_extra_shift: '#e2c15a',
       practise_guitar: '#8fb3e0', talk_with: '#e08f9c', join_conversation: '#e08f9c', greet: '#e08f9c',
-      sleep: '#7f8bb0', eat_at_home: '#9fc16a', buy_meal: '#9fc16a',
+      sleep: '#7f8bb0', eat_at_home: '#9fc16a', buy_meal: '#9fc16a', read_book: '#c9b48a', unpack_food_parcel: '#9fc16a',
       sit_and_rest: '#9aa39a', take_break: '#9aa39a'
     };
     ents.forEach(function (e) {

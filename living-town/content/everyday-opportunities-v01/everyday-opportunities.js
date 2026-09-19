@@ -10,19 +10,20 @@
  * inventory and no reservation manager. It reads and writes sim.state, and it
  * emits events through sim.emit.
  *
- * WHAT THIS FILE CANNOT DO YET — read before wiring:
- *   LT.Actions (living-town/js/lt-actions.js) exposes get/ids/all but no entry
- *   point to add an action to the catalogue. The two actions below are
- *   therefore exported as definitions and exercised through real Sim contexts,
- *   but the simulation cannot yet offer them as candidates. Fable must add an
- *   action registration hook (see registerActions below and README.md); until
- *   then the full pipeline (a policy choosing read_book / unpack_food_parcel)
- *   is not connected. The interventions DO register and run through the real
- *   LT.Interventions.define / schedule / applyDue API.
- *
- * The approach/execution separation is Fable's work in progress. This package
- * grants consequences only while the actor is at the object's declared use
- * spot with no walk target pending (atUseSpot). It never pays for approach.
+ * INTEGRATED (foundation branch). The catalogue now has LT.Actions.define and
+ * this package registers through it at load. Three things changed from the
+ * package as delivered, all to fit the core it now runs on:
+ *   - both actions declare `position: 'use_spot'`. The core walks the person
+ *     there first and runs duration, tick, onStart and onComplete only once
+ *     they have arrived; atUseSpot below stays as this package's own check.
+ *   - the single copy of a book is claimed by the core (`exclusive: true`,
+ *     Sim.claim / Sim.releaseClaim): reserved when reading is chosen, released
+ *     when that activity ends for any reason. The package no longer sets or
+ *     clears inUseBy itself — one owner for the field.
+ *   - reading is done in sittings of at most SITTING_MINUTES. Progress is kept
+ *     between sittings; finishing is reaching the book's total, once.
+ * It also declares itself to LT.Content (version, per-type save validation and
+ * visual state) and offers UtilityPolicy a score for each action.
  */
 (function () {
   var root = (typeof window !== 'undefined') ? window : global;
@@ -31,6 +32,7 @@
     if (!LT.Util) require('../../js/lt-util.js');
     if (!LT.World) require('../../js/lt-world.js');
     if (!LT.Actions) require('../../js/lt-actions.js');
+    if (!LT.Content) require('../../js/lt-content.js');
     if (!LT.Interventions) require('../../js/lt-interventions.js');
     if (!LT.Sim) require('../../js/lt-sim.js');
   }
@@ -42,6 +44,9 @@
   /* Typed, bounded parameters. Everything a caller may spend or accumulate in
    * this package is capped here, and the caps are rejected outside, never
    * silently clamped. */
+  var SITTING_MINUTES = 45;   // how long anybody reads at a stretch
+  E.SITTING_MINUTES = SITTING_MINUTES;
+
   var LIMITS = {
     maxRequiredReadMinutes: 600,
     maxPortions: 24,
@@ -205,11 +210,16 @@
 
   ACTIONS.read_book = {
     id: 'read_book', label: 'Read', targetKind: 'object',
+    position: 'use_spot', exclusive: true,
     interruptible: true, yieldsToConversation: true,
     duration: function (ctx) {
-      /* The block that remains for THIS reader, so finishing the book is
-       * exactly reaching its target, not a fixed slot repeated. */
-      return Math.max(1, remainingRead(ctx));
+      /* One sitting: what remains for THIS reader, up to SITTING_MINUTES. The
+       * last sitting is exactly what is left, so finishing the book is
+       * reaching its total and not a fixed slot repeated. */
+      return Math.max(1, Math.min(SITTING_MINUTES, remainingRead(ctx)));
+    },
+    candidateMeta: function (ctx) {
+      return { typeId: ctx.target.typeId, remainingMinutes: remainingRead(ctx), totalMinutes: ctx.target.requiredReadMinutes };
     },
     eligible: function (ctx) {
       var book = ctx.target;
@@ -218,15 +228,7 @@
       if (ctx.actor.transit || ctx.actor.location !== book.location) return { reason: 'not_present' };
       if (readMinutes(book, ctx.actor.id) >= book.requiredReadMinutes) return { reason: 'already_read' };
       if (book.completedBy && book.completedBy[ctx.actor.id]) return { reason: 'already_read' };
-      if (book.inUseBy && book.inUseBy !== ctx.actor.id) return { reason: 'book_in_use' };
       return true;
-    },
-    /* Claim the single physical copy while it is being used. Released on
-     * completion and on interruption; nothing else may hold it. */
-    onStart: function (ctx) {
-      if (ctx.target && ctx.target.typeId === OBJECT_TYPES.book_used.typeId) {
-        ctx.target.inUseBy = ctx.actor.id;
-      }
     },
     tick: function (ctx, minutes) {
       var book = ctx.target;
@@ -235,15 +237,11 @@
       var done = readMinutes(book, ctx.actor.id);
       book.readBy[ctx.actor.id] = Math.min(book.requiredReadMinutes, done + minutes);
     },
-    onInterrupt: function (ctx) {
-      var book = ctx.target;
-      if (book && book.inUseBy === ctx.actor.id) book.inUseBy = null;
-      /* readBy keeps the minutes actually read. */
-    },
+    /* Nothing to undo on interruption: readBy keeps the minutes actually read,
+     * and the claim on the copy is the core's to release. */
     onComplete: function (ctx) {
       var book = ctx.target;
       if (!book || book.typeId !== OBJECT_TYPES.book_used.typeId) return;
-      if (book.inUseBy === ctx.actor.id) book.inUseBy = null;
       if (book.completedBy && book.completedBy[ctx.actor.id]) return;   // once per person
       if (!atUseSpot(ctx, 'read_book')) return;                          // consequence only in valid execution
       var done = readMinutes(book, ctx.actor.id);
@@ -258,7 +256,9 @@
 
   ACTIONS.unpack_food_parcel = {
     id: 'unpack_food_parcel', label: 'Open the food parcel', targetKind: 'object',
+    position: 'use_spot',
     interruptible: false,
+    candidateMeta: function (ctx) { return { typeId: ctx.target.typeId, portions: ctx.target.contentsLeft }; },
     duration: function () { return 5; },
     eligible: function (ctx) {
       var parcel = ctx.target;
@@ -352,8 +352,9 @@
       sim.emit('BOOK_PLACED', {
         locationId: p.locationId,
         data: { bookId: id, typeId: book.typeId, title: p.title,
-                requiredReadMinutes: p.requiredReadMinutes, interventionId: record.id }
-      }, 'A copy of "' + p.title + '" was placed in ' + sim.locationName(p.locationId) + '.');
+                requiredReadMinutes: p.requiredReadMinutes, interventionId: record.id },
+        text: 'A copy of "' + p.title + '" was left in ' + sim.locationName(p.locationId) + '.'
+      });
       return { ok: true, locationId: p.locationId, data: { bookId: id, typeId: book.typeId } };
     }
   });
@@ -400,15 +401,125 @@
       sim.emit('FOOD_PARCEL_DELIVERED', {
         locationId: p.locationId,
         data: { parcelId: id, typeId: parcel.typeId, toId: p.toId, portions: p.portions,
-                interventionId: record.id }
-      }, 'A food parcel was left at ' + sim.locationName(p.locationId) + '.');
+                interventionId: record.id },
+        text: 'A food parcel was left at ' + sim.locationName(p.locationId) + '.'
+      });
       return { ok: true, locationId: p.locationId, data: { parcelId: id, typeId: parcel.typeId } };
     }
   });
 
-  /* If the catalogue ever gains the entry point, join it automatically; the
-   * check is defensive, never an invented call. At this commit LT.Actions has
-   * no define, so this is a no-op and the README explains the one line Fable
-   * must add instead. */
-  if (A && typeof A.define === 'function') E.registerActions(A);
+  /* ---------------- what a saved instance must look like ----------------
+   * Checked when a save is loaded. The state of an instance is free to be
+   * anything the mechanics above can produce; it is refused when it is
+   * something they cannot. `env` gives the saved state and the town's own
+   * reachability test. */
+  function checkCommon(o, env, useId) {
+    if (!isIdString(o.id)) return 'has no usable id';
+    var loc = W.LOCATIONS[o.location];
+    if (!loc) return 'is in "' + o.location + '", which is not a place';
+    if (!inBounds(loc, o.x, o.y) || isWall(loc, o.x, o.y)) return 'rests at ' + o.x + ',' + o.y + ', which is not inside ' + o.location;
+    var spot = o.anchors && o.anchors[useId];
+    if (!spot || !isFloor(loc, spot.x, spot.y)) return 'has no walkable use spot';
+    if (!env.reachable(o.location, spot)) return 'has a use spot at ' + spot.x + ',' + spot.y + ' that cannot be walked to';
+    return null;
+  }
+
+  function validateBook(o, env) {
+    var bad = checkCommon(o, env, 'read_book');
+    if (bad) return bad;
+    if (!isPositiveInteger(o.requiredReadMinutes) || o.requiredReadMinutes > LIMITS.maxRequiredReadMinutes) return 'needs an impossible amount of reading (' + o.requiredReadMinutes + ')';
+    var people = env.state.characters, id;
+    for (id in (o.readBy || {})) {
+      if (!people[id]) return 'has reading progress for ' + id + ', who does not exist';
+      if (!isFiniteNumber(o.readBy[id]) || o.readBy[id] < 0 || o.readBy[id] > o.requiredReadMinutes) return 'has ' + o.readBy[id] + ' minutes read by ' + id + ', outside 0..' + o.requiredReadMinutes;
+    }
+    for (id in (o.completedBy || {})) {
+      if (!people[id]) return 'was finished by ' + id + ', who does not exist';
+      if (readMinutes(o, id) < o.requiredReadMinutes) return 'is marked finished by ' + id + ' after only ' + readMinutes(o, id) + ' of ' + o.requiredReadMinutes + ' minutes';
+    }
+    var readers = Object.keys(people).filter(function (pid) {
+      var act = people[pid].activity;
+      return act && act.actionId === 'read_book' && act.targetId === o.id;
+    });
+    if (readers.length > 1) return 'is being read by ' + readers.join(' and ') + ' at once';
+    if (o.inUseBy && readers[0] !== o.inUseBy) return 'is held by ' + o.inUseBy + ', who is not reading it';
+    if (!o.inUseBy && readers.length) return 'is being read by ' + readers[0] + ' without being held';
+    return null;
+  }
+
+  function validateParcel(o, env) {
+    var bad = checkCommon(o, env, 'unpack_food_parcel');
+    if (bad) return bad;
+    var to = env.state.characters[o.toId];
+    if (!to) return 'is addressed to ' + o.toId + ', who does not exist';
+    if (o.location !== to.homeId) return 'is not at the home of the person it is addressed to';
+    if (!isPositiveInteger(o.portions) || o.portions > LIMITS.maxPortions) return 'holds an impossible number of portions (' + o.portions + ')';
+    if (!isInteger(o.contentsLeft) || o.contentsLeft < 0 || o.contentsLeft > o.portions) return 'has ' + o.contentsLeft + ' portions left of ' + o.portions;
+    if (o.status === 'sealed') {
+      if (o.contentsLeft !== o.portions || o.openedBy) return 'is sealed but not full';
+    } else if (o.status === 'empty') {
+      if (o.contentsLeft !== 0) return 'is empty but still holds ' + o.contentsLeft + ' portions';
+      if (!env.state.characters[o.openedBy]) return 'is empty but was opened by nobody';
+    } else return 'is in the unknown state "' + o.status + '"';
+    return null;
+  }
+
+  /* What an instance looks like this minute. Read from the instance and from
+   * who is using it; never stored, and drawing it changes nothing. */
+  function usingNow(sim, o, actionId) {
+    var people = sim.state.characters;
+    return Object.keys(people).some(function (id) {
+      var act = people[id].activity;
+      return act && act.actionId === actionId && act.targetId === o.id && act.phase === 'executing';
+    });
+  }
+
+  LT.Content.register({
+    id: 'everyday-opportunities', version: E.VERSION,
+    interventionTypes: ['place_shared_book', 'deliver_food_parcel'],
+    objectTypes: {
+      book_used: {
+        validate: validateBook,
+        visual: function (o, sim) { return { typeId: 'book_used', state: usingNow(sim, o, 'read_book') ? 'open' : 'closed' }; }
+      },
+      food_parcel: {
+        validate: validateParcel,
+        visual: function (o, sim) {
+          return { typeId: 'food_parcel', state: o.status === 'empty' ? 'empty' : (usingNow(sim, o, 'unpack_food_parcel') ? 'open' : 'sealed') };
+        }
+      }
+    }
+  });
+
+  /* What these are worth to a person, offered to UtilityPolicy in its own
+   * arithmetic. Neither is a rule: a book is a modest pleasure that loses to a
+   * pressing goal, a promise about to be broken, hunger or a bed; a parcel
+   * matters more the emptier the cupboard is. Different people weigh them
+   * differently, and either can go unchosen all day. */
+  function offerScores(policy) {
+    if (!policy || typeof policy.defineScore !== 'function') return;
+    policy.defineScore('read_book', function (req, cand, h) {
+      var terms = {};
+      terms.interest = 4 + 7 * (1 - h.trait('ambition')) + 2 * (1 - h.trait('sociability'));
+      if (cand.meta && cand.meta.totalMinutes && cand.meta.remainingMinutes < cand.meta.totalMinutes) terms.already_begun = 2;
+      terms.sitting_down = Math.pow((100 - h.energy) / 100, 2) * 18;
+      terms.goal_pressure = -3 * h.urgency;
+      terms.time_cost = -cand.durationMinutes * 0.05;
+      var broken = h.conflictPenalty();
+      if (broken) terms.commitment_conflict = -broken;
+      return terms;
+    });
+    policy.defineScore('unpack_food_parcel', function (req, cand, h) {
+      var pantry = req.self.pantry || 0;
+      return {
+        cupboard: pantry <= 0 ? 22 : pantry <= 1 ? 15 : pantry <= 3 ? 8 : 3,
+        tidiness: 6 * h.trait('conscientiousness'),
+        hunger_ahead: Math.pow(h.hunger / 100, 2) * 20
+      };
+    });
+  }
+  offerScores(LT.UtilityPolicy);
+  E.offerScores = offerScores;
+
+  E.registerActions(A);
 })();

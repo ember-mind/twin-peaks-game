@@ -10,6 +10,7 @@
     if (!LT.Sim) require('./lt-sim.js');
     if (!LT.Interventions) require('./lt-interventions.js');
     if (!LT.UtilityPolicy) require('./policy/lt-utility-policy.js');
+    if (!LT.EverydayV01) require('../content/everyday-opportunities-v01/everyday-opportunities.js');
   }
   var S = LT.Scenario = LT.Scenario || {};
 
@@ -30,6 +31,19 @@
     }
   };
 
+  /* Two small things that turn up in town on the first day. Nobody is told
+   * to do anything about either: a used book is left on a bench in the park
+   * in the morning, and a food parcel is left inside the first inhabitant's
+   * door at midday, while they are at work. Whoever comes across them decides. */
+  S.EVERYDAY = [
+    { type: 'place_shared_book', source: 'developer', atDay: 1, atMinute: 600,       // 10:00
+      params: { instanceId: 'book_park', title: 'The Harbour Year', locationId: 'park',
+                x: 12, y: 6, useSpot: { x: 12, y: 7, dir: 'up' }, requiredReadMinutes: 120 } },
+    { type: 'deliver_food_parcel', source: 'developer', atDay: 1, atMinute: 750,     // 12:30
+      params: { instanceId: 'parcel_door', toId: 'resident_a', locationId: 'flat_a',
+                x: 6, y: 6, useSpot: { x: 5, y: 6, dir: 'right' }, portions: 4 } }
+  ];
+
   S.day1 = function (opts) {
     opts = opts || {};
     var sim = LT.Sim.create({
@@ -40,6 +54,14 @@
     if (opts.intervention !== false) {
       var scheduled = sim.scheduleIntervention(opts.intervention || S.EXTRA_SHIFT);
       if (!scheduled.ok) throw new Error('scenario intervention rejected: ' + scheduled.error);
+    }
+    /* `intervention: false` means a town nobody intervenes in at all; the
+     * everyday things can also be left out on their own. */
+    if (opts.intervention !== false && opts.everyday !== false) {
+      S.EVERYDAY.forEach(function (entry) {
+        var r = sim.scheduleIntervention(entry);
+        if (!r.ok) throw new Error('scenario intervention rejected: ' + entry.type + ' ' + r.error);
+      });
     }
     return sim;
   };

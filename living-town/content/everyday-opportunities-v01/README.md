@@ -4,6 +4,31 @@ Living Town content package v01: one shared book a person can read, and one
 food parcel delivered to a home and opened into the pantry, introduced by two
 typed interventions. Original content, no assets, no Jev, no voting.
 
+## Integration status (foundation branch)
+
+Integrated. The sections below describe the package as delivered; where they
+say the catalogue has no registration hook or that the pipeline cannot run,
+that is history. What changed on integration:
+
+- `LT.Actions.define` exists (validated, refuses an id already taken). The
+  package registers on load; `test/pipeline.js` is a gate and exits 1 if the
+  actions are not registered.
+- Both actions declare `position: 'use_spot'`; the core walks the person there
+  and only then runs duration, tick and completion.
+- The single copy of a book is claimed by the core (`exclusive: true`):
+  reserved when reading is chosen, released when that activity ends for any
+  reason. The package no longer has `onStart` / `onInterrupt`, and the
+  `book_in_use` refusal is now the core's `in_use`.
+- Reading is done in sittings of at most 45 minutes (`SITTING_MINUTES`).
+- The package registers with `LT.Content`: version `v01`, per-type validation
+  of saved instances, and the visual state of an instance (`closed`/`open`,
+  `sealed`/`open`/`empty`) for `everyday-props-v01` to draw.
+- It offers `UtilityPolicy` a score for each action (`defineScore`). The
+  priorities suggested in this README were not adopted as rules.
+- Event texts were being passed as a third argument `sim.emit` ignores; they
+  are now in the event.
+- Unit checks: 81 (were 80). World-level tests: `living-town/test/everyday.js`.
+
 ## Files
 
 - `everyday-opportunities.js` — the objects, the two actions, the two

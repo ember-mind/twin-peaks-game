@@ -1,17 +1,12 @@
 /* pipeline.js — Living Town content package v01: the FULL pipeline test.
  *
- * This is the test that requires the simulation to actually offer read_book and
- * unpack_food_parcel as candidates to a policy, start the activity, tick it and
- * settle it. That needs an action registration hook in lt-actions.js which this
- * base commit does not have, so on an unintegrated checkout this file reports
- * PIPELINE NOT RUN and exits without counting anything as passed.
- *
- * After Fable adds the hook and calls LT.EverydayV01.registerActions(LT.Actions)
- * (see the package README), run:
+ * The simulation offers read_book and unpack_food_parcel as candidates to a
+ * policy, starts the activity, ticks it and settles it. As delivered this file
+ * exited 0 with "PIPELINE NOT RUN" when the catalogue had no registration
+ * hook; on the integrated build that is a failure (exit 1), so a missing
+ * registration can never be counted as a pass.
  *
  *   node living-town/content/everyday-opportunities-v01/test/pipeline.js
- *
- * It must then print a checks summary and exit 0.
  */
 'use strict';
 const assert = require('node:assert/strict');
@@ -26,16 +21,13 @@ const E = LT.EverydayV01, A = LT.Actions, W = LT.World;
 let checks = 0;
 function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + msg); }
 
-if (A && typeof A.define === 'function' && !A.get('read_book')) {
-  E.registerActions(A);
-}
-if (!A.get('read_book') || !A.get('unpack_food_parcel')) {
-  console.log('# pipeline: PIPELINE NOT RUN');
-  console.log('  read_book / unpack_food_parcel are not in the action catalogue, because this');
-  console.log('  base commit has no action registration entry point in living-town/js/lt-actions.js.');
-  console.log('  Nothing here is counted as passed. Fable must add that hook, call');
-  console.log('  LT.EverydayV01.registerActions(LT.Actions), then run this file.');
-  process.exit(0);
+/* A gate, not a courtesy. In the integrated build the package registers
+ * itself on load; if the catalogue does not hold both actions, the pipeline
+ * cannot run, and a pipeline that did not run has not passed. */
+if (!A.get('read_book') || !A.get('unpack_food_parcel') || A.get('read_book') !== E.ACTIONS.read_book) {
+  console.error('# pipeline: PIPELINE NOT RUN — read_book / unpack_food_parcel are not registered in LT.Actions.');
+  console.error('  This is a failure: nothing was exercised.');
+  process.exit(1);
 }
 
 function findUseSpot(sim, locId) {

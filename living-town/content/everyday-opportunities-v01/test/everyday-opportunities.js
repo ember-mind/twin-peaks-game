@@ -96,10 +96,11 @@ function packageShape() {
   const read = E.ACTIONS.read_book, open = E.ACTIONS.unpack_food_parcel;
   ok(read.id === 'read_book' && read.targetKind === 'object' && typeof read.duration === 'function' &&
      typeof read.eligible === 'function' && typeof read.tick === 'function' &&
-     typeof read.onComplete === 'function' && typeof read.onInterrupt === 'function' && read.interruptible === true,
-     'read_book matches the lt-actions contract (duration/eligible/tick/onComplete/onInterrupt, interruptible)');
+     typeof read.onComplete === 'function' && read.interruptible === true &&
+     read.position === 'use_spot' && read.exclusive === true && read.onStart === undefined && read.onInterrupt === undefined,
+     'read_book matches the lt-actions contract: done at a use spot, one reader at a time, and the claim on the copy left to the core');
   ok(open.id === 'unpack_food_parcel' && typeof open.eligible === 'function' &&
-     typeof open.onComplete === 'function' && open.interruptible === false,
+     typeof open.onComplete === 'function' && open.interruptible === false && open.position === 'use_spot',
      'unpack_food_parcel matches the lt-actions contract');
 
   ok(I.get('place_shared_book') !== null && I.get('deliver_food_parcel') !== null &&
@@ -113,8 +114,10 @@ function packageShape() {
   assert.throws(() => E.registerActions({}), /everyday-opportunities v01/);
   ok(true, 'registerActions names the missing catalogue hook instead of inventing one');
   const registered = A.get('read_book');
-  ok(registered == null || registered === E.ACTIONS.read_book,
-     'the catalogue either does not know read_book yet (awaiting Fable) or uses this package definition');
+  ok(registered === E.ACTIONS.read_book && A.get('unpack_food_parcel') === E.ACTIONS.unpack_food_parcel,
+     'the catalogue holds this package\'s two definitions, registered through LT.Actions.define');
+  assert.throws(() => A.define(Object.assign({}, E.ACTIONS.read_book)), /already in the catalogue/);
+  ok(true, 'and a second definition under the same id is refused, not swapped in');
 }
 
 /* ---------------- intervention validation ---------------- */
@@ -203,7 +206,6 @@ function objectIdentity() {
   const aId = actorIds(sim)[0], bId = actorIds(sim)[1];
   stand(sim, sim.state.characters[aId], b1.location, { x: 2, y: 6 });
   const ca = ctxFor(sim, sim.state.characters[aId], b1);
-  E.ACTIONS.read_book.onStart(ca);
   E.ACTIONS.read_book.tick(ca, 3);
   ok(b1.readBy[aId] === 3 && (b2.readBy[aId] || 0) === 0,
      "reading one copy advances only that copy's progress for that person");
@@ -231,19 +233,14 @@ function readingCallbacks() {
 
   /* At the use spot: progress begins. */
   stand(sim, actor, b.location, { x: 2, y: 6 });
-  E.ACTIONS.read_book.onStart(c);
   E.ACTIONS.read_book.tick(c, 4);
   ok(b.readBy[actor.id] === 4, 'standing on the use spot advances reading by the minutes spent');
   ok(E.ACTIONS.read_book.duration(c) === 6, 'the next block is only what remains for this reader');
-  ok(b.inUseBy === actor.id, 'the single physical copy is claimed while it is read');
-
-  /* Interrupted: partial progress survives, the copy is released. */
-  E.ACTIONS.read_book.onInterrupt(c);
-  ok(b.readBy[actor.id] === 4 && b.inUseBy === null,
-     'an interruption keeps the minutes read and releases the copy');
+  /* Stopped and taken up again later: what was read stays read. (Who holds
+   * the copy meanwhile is the core's business; see readingExclusivity.) */
+  ok(b.readBy[actor.id] === 4, 'minutes read are kept on the book, per person, between sittings');
 
   /* Finish. */
-  E.ACTIONS.read_book.onStart(c);
   E.ACTIONS.read_book.tick(c, 6);
   E.ACTIONS.read_book.onComplete(c);
   ok(b.readBy[actor.id] === 10 && b.completedBy[actor.id] === sim.stamp(),
@@ -251,7 +248,6 @@ function readingCallbacks() {
   const doneVerdict = E.ACTIONS.read_book.eligible(c);
   ok(doneVerdict !== true && doneVerdict.reason === 'already_read',
      'a finished book is no longer a candidate for that person');
-  ok(b.inUseBy === null, 'completion releases the copy');
 
   const events = sim.state.events.filter((e) => e.type === 'BOOK_READ');
   ok(events.length === 1 && events[0].data.bookId === b.id && events[0].data.minutes === 10,
@@ -281,17 +277,17 @@ function readingExclusivity() {
   const a = sim.state.characters[actorIds(sim)[0]], c = sim.state.characters[actorIds(sim)[1]];
   stand(sim, a, b.location, { x: 2, y: 6 });
   stand(sim, c, b.location, { x: 2, y: 6 });
-  const ca = ctxFor(sim, a, b), cc = ctxFor(sim, c, b);
+  const READ = { actionId: 'read_book', targetKind: 'object', targetId: b.id };
+  sim.requestDecision = () => null;
 
-  E.ACTIONS.read_book.onStart(ca);
-  const verdict = E.ACTIONS.read_book.eligible(cc);
-  ok(verdict !== true && verdict.reason === 'book_in_use',
-     'while one person holds the copy, another cannot read it');
-  E.ACTIONS.read_book.onStart(ctxFor(sim, a, b));
-  ok(E.ACTIONS.read_book.eligible(ctxFor(sim, a, b)) === true,
-     'the holder remains eligible to continue');
-  E.ACTIONS.read_book.onInterrupt(ca);
-  ok(E.ACTIONS.read_book.eligible(cc) === true, 'releasing the copy lets the other person read it');
+  ok(sim.startActivity(a, READ, 'test', null).ok && b.inUseBy === a.id, 'choosing to read claims the single copy, through the simulation');
+  const second = sim.startActivity(c, READ, 'test', null);
+  ok(!second.ok && second.error === 'in_use' && !c.activity, 'while one person holds the copy, another cannot start reading it (' + second.error + ')');
+  ok(sim.legality(a, E.ACTIONS.read_book, b) === true, 'the holder remains eligible to continue');
+  sim.tick(); sim.tick(); sim.tick();
+  ok(sim.requestInterrupt(a.id, 'called_away') && b.inUseBy === null && b.readBy[a.id] === 3,
+     'an interruption releases the copy and keeps the three minutes read');
+  ok(sim.startActivity(c, READ, 'test', null).ok && b.inUseBy === c.id, 'releasing the copy lets the other person read it');
 }
 
 function readingHasNoArbitraryBonuses() {
@@ -306,7 +302,6 @@ function readingHasNoArbitraryBonuses() {
     relationships: actor.relationships, standing: actor.standing, goals: actor.goals
   });
   const c = ctxFor(sim, actor, b);
-  E.ACTIONS.read_book.onStart(c);
   E.ACTIONS.read_book.tick(c, 10);
   E.ACTIONS.read_book.onComplete(c);
   ok(actor.money === before.money && actor.savings === before.savings,
@@ -409,7 +404,6 @@ function serializableAndRoundTrip() {
   const reader = sim.state.characters[actorIds(sim)[0]];
   stand(sim, reader, book.location, { x: 2, y: 6 });
   const c = ctxFor(sim, reader, book);
-  E.ACTIONS.read_book.onStart(c);
   E.ACTIONS.read_book.tick(c, 4);   // partial, unfinished
 
   let text = null;
