@@ -23,12 +23,15 @@
   var TILE = 16;
 
   var palette = {
-    /* the six ground tones */
-    ink: '#0d1622', deep: '#1b2436', shadow: '#2c3852',
-    mid: '#43516f', light: '#6a7796', moon: '#9aa6c0',
+    /* The six ground tones. R69/R76 fix six tones for the daytime ground;
+     * this is the night ramp, respaced so the frame is not four crowded
+     * blue-greys: the steps widen as they climb, which keeps the mass dark
+     * and still gives the moon somewhere to land. */
+    ink: '#080d16', deep: '#131a27', shadow: '#35425e',
+    mid: '#4c5a7a', light: '#7684a3', moon: '#b0bcd2',
     /* accents, one place each */
-    oilCore: '#07090e', oil: '#111726', oilSheen: '#26314a', oilMoon: '#8090ae',
-    scorch: '#131320', scorchHi: '#23202c',
+    oilCore: '#03040a', oil: '#070a12', oilSheen: '#1c2740', oilMoon: '#9fb0cc',
+    scorch: '#101020', scorchHi: '#241f31',
     curtainDeep: '#3a0f18', curtain: '#5e1a24', curtainHi: '#8a2a34',
     curtainCore: '#c4515a', glow: '#3c1a26',
     signFace: '#8e90b0', signShade: '#5d5f80'
@@ -190,6 +193,26 @@
     }
   }
 
+  function litRim(R, p) {
+    /* Moonlight catches the west lip of the pool in broken runs, never as a
+     * continuous bar: a machined edge round a puddle of oil reads as a bath.
+     * The east and south lips stay in shadow, so the boundary still separates
+     * from the clearing at 1x without drawing a line round it. */
+    var i, sp;
+    for (i = 0; i < POOL_SPANS.length; i++) {
+      sp = POOL_SPANS[i];
+      if ((i * 5 + 1) % 4 !== 0) {
+        R(sp[1] - 2, sp[0], 3, 2, i < 4 ? p.moon : p.light);
+      } else {
+        R(sp[1] - 1, sp[0], 2, 2, p.mid);
+      }
+      R(sp[2] - 1, sp[0], 3, 2, p.shadow);
+    }
+    R(216, 174, 12, 2, p.moon);
+    R(232, 175, 7, 2, p.light);
+    R(208, 176, 6, 2, p.light);
+  }
+
   function drawOilPool(R, p) {
     /* Scorched ground first, widening away from the liquid, then the pool: a
      * near-black body with a darker rim, one sheen step and three flat moon
@@ -201,15 +224,16 @@
     for (k = 0; k < ring2.length; k++) pourSpans(R, -3, p.scorchHi, true, ring2[k]);
     pourSpans(R, -1, p.scorch, true, -1);
     pourSpans(R, -1, p.scorch, true, 1);
+    /* The lit rim: one bright pixel run on the north-west lip of the pool,
+     * which is what separates the boundary from the clearing at 1x.  Then the
+     * liquid, which is the darkest value in the whole frame and carries no
+     * mid-tone sheen inside it — a pool of oil at night is a hole. */
+    litRim(R, p);
     pourSpans(R, 0, p.oilCore);
     pourSpans(R, 2, p.oil);
-    pourSpans(R, 7, p.oilSheen);
-    pourSpans(R, 9, p.oil);
-    /* Reflections lie flat across the surface, each on its own row. */
-    R(214, 182, 16, 1, p.oilMoon); R(230, 183, 7, 1, p.oilSheen);
-    R(202, 190, 11, 1, p.oilSheen);
-    R(206, 196, 20, 1, p.oilMoon); R(226, 197, 6, 1, p.oilSheen);
-    R(200, 201, 9, 1, p.oilSheen);
+    /* One cold reflection, lying flat, and one dim echo of it. */
+    R(208, 192, 22, 1, p.oilMoon);
+    R(212, 194, 14, 1, p.oilSheen);
   }
 
   function hasOil(tx, ty) {
@@ -254,65 +278,98 @@
     R(cx - 1, top, 2, 2, p.shadow);
   }
 
+  /* Three crowns, not one sprite at one scale: a round one, a tall narrow one
+   * and a wind-bent one whose bands walk east while its trunk leans west.
+   * They are handed out clockwise round the ring so no two neighbours match.
+   * Every crown tops out ten pixels above its own tile, which is what lets a
+   * tree occlude an actor standing north of it without burying him. */
+  var CROWNS = [
+    { bands: [15, 24, 22, 13], step: 4, skew: 0, lean: 0, trunkW: 8, trunkH: 17 },
+    { bands: [11, 19, 24, 19, 12], step: 3, skew: 0, lean: 1, trunkW: 6, trunkH: 16 },
+    { bands: [13, 22, 22, 13], step: 4, skew: 2, lean: -2, trunkW: 7, trunkH: 18 }
+  ];
+  /* Clockwise from the north tree: 0,1,2,0,1,2,0,1. */
+  var RING_VARIANT = {
+    '14,9': 0, '16,10': 1, '17,12': 2, '16,14': 0,
+    '14,15': 1, '12,14': 2, '11,12': 0, '12,10': 1
+  };
+
+  function sycamoreVariant(tx, ty) {
+    var key = tx + ',' + ty;
+    return Object.prototype.hasOwnProperty.call(RING_VARIANT, key)
+      ? RING_VARIANT[key] : (hash(tx, ty, 71) % CROWNS.length);
+  }
+
+  /* Eight pixels above its own tile is the whole budget a canopy gets: it
+   * is what an actor standing directly north of the tree loses to it. */
+  function sycamoreCrownTop(ty) { return ty * TILE + 16 - 24; }
+
   function drawSycamore(R, p, tx, ty) {
     /* The ring trees are deciduous and much larger than the border conifers.
      * Two things separate them at a glance: a round crown instead of a cone,
      * and a pale trunk standing clear below it — they are the only light
      * verticals on the map, which is what lets eight of them read as a
-     * circle rather than as eight dark lumps.  Every measurement below comes
-     * off the tile hash, so no two of the eight are the same tree. */
+     * circle rather than as eight dark lumps. */
     var x = tx * TILE, y = ty * TILE, h = hash(tx, ty, 71);
-    var cx = x + 8 + ((h >> 18 & 3) - 1);
+    var v = CROWNS[sycamoreVariant(tx, ty)];
     var base = y + 16;
-    var trunkW = 6 + (h & 1) * 2;
-    var trunkH = 14 + ((h >> 1) & 3);
+    var cx = x + 8;
+    var trunkW = v.trunkW;
+    var trunkH = v.trunkH;
     var half = trunkW >> 1;
     var trunkTop = base - trunkH - 1;
-    var grow = (h >> 3) & 3;
-    var crownTop = trunkTop - 20 - grow;
-    var i, w, yy, hw;
+    var crownTop = sycamoreCrownTop(ty);
+    var lean = v.lean;
+    var i, w, yy, hw, bx;
     /* Root flare, then the trunk: pale bark with its own dark side. */
     R(cx - half - 2, base - 4, trunkW + 4, 4, p.ink);
     R(cx - half - 1, base - 4, trunkW + 2, 3, p.shadow);
     R(cx - half - 1, base - 3, 3, 2, p.mid); R(cx + half - 1, base - 3, 3, 2, p.mid);
-    R(cx - half - 1, trunkTop, trunkW + 2, trunkH + 2, p.ink);
-    R(cx - half, trunkTop, trunkW, trunkH + 1, p.light);
-    R(cx - half, trunkTop, 2, trunkH + 1, p.moon);
-    R(cx + half - 2, trunkTop, 2, trunkH + 1, p.mid);
-    /* Bark marks: the sycamore's peeling plates, placed by the hash. */
-    R(cx - half + 2, trunkTop + 3 + ((h >> 5) & 3), 3, 1, p.mid);
-    R(cx - half + 1, trunkTop + 9 + ((h >> 7) & 3), 2, 1, p.mid);
-    if ((h >> 9 & 1) === 0) R(cx - half + 3, trunkTop + 6, 2, 2, p.shadow);
+    R(cx - half - 1 + lean, trunkTop, trunkW + 2, trunkH + 2, p.ink);
+    R(cx - half + lean, trunkTop, trunkW, trunkH + 1, p.mid);
+    R(cx - half + lean, trunkTop, 2, trunkH + 1, p.light);
+    R(cx + half - 2 + lean, trunkTop, 2, trunkH + 1, p.shadow);
+    if (lean !== 0) {
+      R(cx - half - 1, base - 6, trunkW + 2, 3, p.ink);
+      R(cx - half, base - 6, trunkW, 2, p.mid);
+    }
+    /* Bark plates, placed by the hash so the eight trunks are not one stamp. */
+    R(cx - half + 2 + lean, trunkTop + 3 + ((h >> 5) & 3), 3, 1, p.mid);
+    R(cx - half + 1 + lean, trunkTop + 8 + ((h >> 7) & 3), 2, 1, p.mid);
     /* Two limbs lifting out of the trunk into the crown. */
-    R(cx - half - 5, trunkTop - 4, 7, 4, p.ink);
-    R(cx - half - 4, trunkTop - 4, 5, 2, p.light);
-    R(cx + half - 2, trunkTop - 6, 7, 4, p.ink);
-    R(cx + half - 1, trunkTop - 6, 5, 2, p.mid);
-    /* Crown: five stepped bands in the darkest value on the map, so the pale
-     * trunk reads against it. */
-    var bands = [12, 20, 25, 23, 16];
-    for (i = 0; i < bands.length; i++) {
-      w = bands[i] + ((h >> (i + 10)) & 3) * 2 + grow;
+    R(cx - half - 4 + lean, trunkTop - 3, 6, 3, p.ink);
+    R(cx - half - 3 + lean, trunkTop - 3, 4, 2, p.mid);
+    R(cx + half - 2 + lean, trunkTop - 5, 6, 3, p.ink);
+    R(cx + half - 1 + lean, trunkTop - 5, 4, 2, p.mid);
+    /* Crown: stepped bands in the darkest value on the map, so the pale trunk
+     * reads against it. */
+    for (i = 0; i < v.bands.length; i++) {
+      w = v.bands[i] + ((h >> (i + 10)) & 1) * 2;
       hw = w >> 1;
-      yy = crownTop + i * 5;
-      R(cx - hw - 1, yy, w + 2, 6, p.ink);
-      R(cx - hw, yy, w, 5, p.deep);
+      yy = crownTop + i * v.step;
+      bx = cx + (i - 2) * v.skew;
+      R(bx - hw - 1, yy, w + 2, v.step + 1, p.ink);
+      R(bx - hw, yy, w, v.step, p.deep);
     }
     /* Leaf clusters, then the single moon rim on the north-west shoulder. */
-    R(cx - 10, crownTop + 9, 7, 5, p.shadow);
-    R(cx + 4, crownTop + 13, 6, 5, p.shadow);
-    R(cx - 5, crownTop + 16, 9, 4, p.shadow);
-    R(cx - 2, crownTop + 4, 7, 4, p.shadow);
-    R(cx + 6, crownTop + 6, 4, 4, p.shadow);
-    R(cx - 11, crownTop + 10, 4, 2, p.mid);
-    R(cx - 8, crownTop + 5, 5, 2, p.mid);
-    R(cx - 3, crownTop + 2, 6, 2, p.mid);
-    R(cx + 3, crownTop + 4, 3, 2, p.mid);
-    R(cx - 5, crownTop + 1, 3, 1, p.light);
-    /* Two gaps in the silhouette so the crown is not an egg; which two
-     * depends on the hash. */
-    R(cx - 13 + ((h >> 14 & 1) * 2), crownTop + 13, 3, 4, p.shadow);
-    R(cx + 10 - ((h >> 15 & 1) * 2), crownTop + 8, 3, 4, p.shadow);
+    var mid = crownTop + ((v.bands.length * v.step) >> 1);
+    R(cx - 10 + v.skew, mid - 2, 7, 4, p.shadow);
+    R(cx + 4 + v.skew, mid + 2, 6, 4, p.shadow);
+    R(cx - 5, mid + 5, 9, 3, p.shadow);
+    R(cx - 2, crownTop + 3, 7, 3, p.shadow);
+    R(cx - 11, mid - 1, 4, 2, p.mid);
+    R(cx - 8, crownTop + 4, 5, 2, p.mid);
+    R(cx - 3, crownTop + 1, 6, 2, p.mid);
+    R(cx - 5, crownTop, 3, 1, p.light);
+    /* Bare twigs poking out of the outline, so the crown is a canopy and not
+     * a smooth dome on a stalk. */
+    R(cx - 13 + v.skew, crownTop + 2, 3, 1, p.deep);
+    R(cx + 10 + v.skew, crownTop + 5, 3, 1, p.deep);
+    R(cx - 2, crownTop + 1, 1, 3, p.deep);
+    R(cx + 6 + v.skew, crownTop + 2, 1, 2, p.deep);
+    /* Two gaps in the silhouette so the crown is not an egg. */
+    R(cx - 13 + ((h >> 14 & 1) * 2), mid + 1, 3, 3, p.shadow);
+    R(cx + 10 - ((h >> 15 & 1) * 2), mid - 3, 3, 3, p.shadow);
   }
 
   function drawBush(R, p, tx, ty) {
@@ -341,20 +398,23 @@
   }
 
   function drawSign(R, p) {
-    /* GLASTONBURY GROVE: two posts and a board with three text lines.  At
-     * sixteen pixels the letters are texture, the shape is the message. */
+    /* GLASTONBURY GROVE: one heavy post, a board with a dark face and three
+     * light lines of text, a cap rail and a cast shadow on the ground.  Light
+     * lines on a dark board read at 1x; dark lines on a light board turned to
+     * mush against the clearing. */
     var x = SIGN.tx * TILE, y = SIGN.ty * TILE;
-    R(x + 2, y + 9, 3, 8, p.ink); R(x + 3, y + 9, 1, 7, p.mid);
-    R(x + 12, y + 9, 3, 8, p.ink); R(x + 13, y + 9, 1, 7, p.mid);
-    R(x - 1, y - 2, 20, 13, p.ink);
-    R(x, y - 1, 18, 11, p.signShade);
-    R(x + 1, y, 16, 8, p.signFace);
-    R(x + 1, y, 16, 1, p.moon);
-    R(x + 3, y + 2, 12, 1, p.ink);
-    R(x + 2, y + 4, 14, 1, p.ink);
-    R(x + 4, y + 6, 9, 1, p.ink);
-    R(x, y + 8, 18, 2, p.ink);
-    R(x + 1, y + 10, 16, 1, p.shadow);
+    R(x + 3, y + 15, 13, 2, p.ink);
+    R(x + 6, y + 2, 5, 14, p.ink);
+    R(x + 7, y + 3, 3, 12, p.mid); R(x + 7, y + 3, 1, 12, p.light);
+    R(x - 2, y - 10, 22, 14, p.ink);
+    R(x - 1, y - 9, 20, 12, p.shadow);
+    R(x - 1, y - 9, 20, 2, p.light);
+    R(x, y - 7, 18, 9, p.deep);
+    R(x + 2, y - 5, 14, 1, p.moon);
+    R(x + 2, y - 3, 14, 1, p.moon);
+    R(x + 4, y - 1, 9, 1, p.light);
+    R(x - 1, y + 3, 20, 1, p.ink);
+    R(x, y + 4, 18, 1, p.deep);
   }
 
   function drawLodge(R, p, rows) {
@@ -418,9 +478,12 @@
     return list;
   }
 
+  var lastRows = null;
+
   function draw(ctx, cx, cy, vw, vh, map, opts) {
     var rows = (map && map.rows) || [];
     if (!rows.length) return;
+    lastRows = rows;
     var R = rectPainter(ctx, cx, cy);
     vw = vw || 256; vh = vh || 192;
     /* Same overdraw the tile pipeline uses: a canopy is taller than the cell
@@ -479,10 +542,33 @@
     }
   }
 
-  /* The woods paints no depth band on purpose.  Every canopy is taller than
-   * the actor it would cover, so repainting one over Cooper on a path tile
-   * would bury him; the trees stay in the ground pass instead. */
-  function foreground() { return undefined; }
+  /* Per-tree depth, the HeartGold rule: a tree whose foot is south of the
+   * actor's repaints over him, a tree north of him does not.  This is safe
+   * here only because every canopy is trimmed: a sycamore crown tops out ten
+   * pixels above its own tile and a conifer eight, so the most a tree can
+   * ever cover of someone standing directly north of it is his legs.  The
+   * ground pass still paints every tree, so nothing vanishes when no actor
+   * is near it. */
+  var MAX_CANOPY_LIFT = 9;
+
+  function foreground(ctx, cx, cy, opts, map) {
+    opts = opts || {};
+    var minFoot = Number.isFinite(opts.forestDepthMin) ? opts.forestDepthMin : -Infinity;
+    var maxFoot = Number.isFinite(opts.forestDepthMax) ? opts.forestDepthMax : Infinity;
+    var rows = (map && map.rows) || lastRows;
+    if (!rows || !rows.length) return;
+    var R = rectPainter(ctx, cx, cy);
+    var trees = treeList(rows), i, tree;
+    var vw = opts.viewportWidth || 256, vh = opts.viewportHeight || 192;
+    for (i = 0; i < trees.length; i++) {
+      tree = trees[i];
+      if (tree.footY < minFoot || tree.footY >= maxFoot) continue;
+      if (tree.tx * TILE < cx - 32 || tree.tx * TILE > cx + vw + 32) continue;
+      if (tree.ty * TILE < cy - 48 || tree.ty * TILE > cy + vh + 32) continue;
+      if (tree.sycamore) drawSycamore(R, palette, tree.tx, tree.ty);
+      else drawConifer(R, palette, tree.tx, tree.ty);
+    }
+  }
 
   GAME.WoodsArt = {
     draw: draw,
@@ -494,7 +580,12 @@
     sycamores: SYCAMORES,
     portal: PORTAL,
     sign: SIGN,
-    treeList: treeList
+    crowns: CROWNS,
+    ringVariant: RING_VARIANT,
+    sycamoreVariant: sycamoreVariant,
+    sycamoreCrownTop: sycamoreCrownTop,
+    treeList: treeList,
+    maxCanopyLift: MAX_CANOPY_LIFT
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = GAME.WoodsArt;
 })();
