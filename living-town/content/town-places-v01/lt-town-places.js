@@ -574,54 +574,71 @@
 
   /* ---- the home ------------------------------------------------------- */
 
+  /* A bed is the hardest thing in a flat to read: two cells is almost square,
+   * and a white rectangle in a dark frame against a wall reads as a picture.
+   * What makes it a bed is that the quilt is most of it, that the quilt hangs
+   * over the near edge, and that the head end has a board taller than the
+   * mattress with the pillow tucked under it. */
   function bed(g, kit, p, sx, sy, w, h, orient) {
     var R = kit.rect, W = w * T, H = h * T, i;
-    kit.contactShadow(g, sx + 1, sy + H - 2, W - 2, p);
-    R(g, sx, sy + H - 4, W, 4, 'rgba(37,40,43,.18)');
+    kit.contactShadow(g, sx + 1, sy + H - 1, W - 2, p);
+    R(g, sx + 2, sy + H - 3, W - 4, 3, 'rgba(37,40,43,.26)');
     if (orient === 'across') {
-      /* Head to the left, against the side wall; the headboard rises into the
-       * wall row above, which is where the rows put a wall. */
-      R(g, sx, sy - 8, 8, H + 7, p.ink);
-      R(g, sx + 1, sy - 7, 6, H + 5, p.wood);
-      R(g, sx + 1, sy - 7, 6, 2, p.woodLight);
-      R(g, sx + 1, sy - 4, 6, 1, p.woodDark);
-      R(g, sx + 3, sy - 7, 2, H + 5, p.woodHi);
-      R(g, sx + 6, sy, W - 6, H, p.ink);                       // the frame
-      R(g, sx + 7, sy + 1, W - 9, H - 3, p.cream);             // the sheet
-      R(g, sx + 7, sy + 1, W - 9, 1, '#ffffff');
-      R(g, sx + 7, sy + H - 3, W - 9, 1, p.creamShade);
-      R(g, sx + 7, sy + 2, 12, H - 5, p.ink);                  // the pillow
-      R(g, sx + 8, sy + 3, 10, H - 7, p.cream);
-      R(g, sx + 8, sy + 3, 10, 2, '#ffffff');
-      R(g, sx + 9, sy + H - 6, 8, 1, p.creamShade);
-      R(g, sx + 21, sy + 1, W - 23, H - 3, p.red);             // the quilt
-      R(g, sx + 21, sy + 1, W - 23, 2, p.redHi);
-      R(g, sx + 21, sy + 1, 2, H - 3, p.redLight);
-      for (i = 24; i < W - 4; i += 6) R(g, sx + i, sy + 3, 1, H - 7, p.redDark);
-      R(g, sx + 19, sy + 1, 3, H - 3, p.creamShade);           // the sheet turned down
-      R(g, sx + 19, sy + 1, 3, 1, '#ffffff');
-      R(g, sx + W - 3, sy - 2, 3, H + 2, p.ink);               // the foot rail
+      /* Head to the left. The board rises into the wall row above, which is
+       * where the rows put a wall. */
+      R(g, sx, sy - 9, 7, H + 8, p.woodDark);
+      R(g, sx + 1, sy - 8, 5, H + 6, p.woodHi);
+      R(g, sx + 1, sy - 8, 5, 2, p.woodLight);
+      R(g, sx + 2, sy - 5, 3, H + 2, p.wood);
+      R(g, sx + 1, sy + H - 3, 5, 2, p.woodDark);
+      /* Mattress: the frame shows as a rail at top and bottom only. */
+      R(g, sx + 6, sy, W - 6, H, p.woodDark);
+      R(g, sx + 6, sy + 1, W - 7, H - 3, p.cream);
+      /* The pillow, tucked under the board. */
+      R(g, sx + 7, sy + 2, 9, H - 5, p.creamShade);
+      R(g, sx + 7, sy + 2, 9, H - 6, '#fbf7ec');
+      R(g, sx + 8, sy + 2, 7, 1, p.creamShade);
+      R(g, sx + 7, sy + H - 4, 9, 1, p.creamShade);
+      /* The sheet turned down over the quilt. */
+      R(g, sx + 16, sy + 1, 3, H - 3, p.cream);
+      R(g, sx + 16, sy + 1, 1, H - 3, p.creamShade);
+      /* The quilt: most of the bed, with folds running across it, hanging
+       * over the near edge. */
+      R(g, sx + 19, sy + 1, W - 21, H - 3, p.red);
+      R(g, sx + 19, sy + 1, W - 21, 2, p.redHi);
+      R(g, sx + 19, sy + H - 5, W - 21, 2, p.redDark);
+      for (i = 22; i < W - 3; i += 5) {
+        R(g, sx + i, sy + 2, 1, H - 5, p.redDark);
+        R(g, sx + i + 1, sy + 2, 1, H - 5, p.redHi);
+      }
+      R(g, sx + 20, sy + H - 3, W - 23, 3, p.red);
+      R(g, sx + 20, sy + H - 3, W - 23, 1, p.redDark);
+      for (i = 21; i < W - 4; i += 5) R(g, sx + i, sy + H - 1, 3, 1, p.redDark);
+      /* The foot rail. */
+      R(g, sx + W - 2, sy - 2, 2, H + 2, p.woodDark);
       R(g, sx + W - 2, sy - 1, 1, H, p.woodHi);
     } else {
-      R(g, sx, sy - 8, W, 10, p.ink);
-      R(g, sx + 1, sy - 7, W - 2, 8, p.wood);
-      R(g, sx + 1, sy - 7, W - 2, 2, p.woodLight);
-      R(g, sx + 1, sy - 4, W - 2, 1, p.woodDark);
-      R(g, sx + 3, sy - 7, W - 6, 2, p.woodHi);
-      R(g, sx, sy + 1, W, H - 1, p.ink);
-      R(g, sx + 1, sy + 2, W - 2, H - 4, p.cream);
-      R(g, sx + 2, sy + 2, W - 4, 11, p.ink);                  // the pillow
-      R(g, sx + 3, sy + 3, W - 6, 9, p.cream);
-      R(g, sx + 3, sy + 3, W - 6, 2, '#ffffff');
-      R(g, sx + 4, sy + 10, W - 8, 1, p.creamShade);
-      R(g, sx + 1, sy + 16, W - 2, H - 18, p.red);             // the quilt
-      R(g, sx + 1, sy + 16, W - 2, 2, p.redHi);
-      R(g, sx + 1, sy + 16, 2, H - 18, p.redLight);
-      for (i = 19; i < H - 4; i += 6) R(g, sx + 3, sy + i, W - 6, 1, p.redDark);
-      R(g, sx + 1, sy + 14, W - 2, 3, p.creamShade);           // the sheet turned down
-      R(g, sx + 1, sy + 14, W - 2, 1, '#ffffff');
-      R(g, sx, sy + H - 3, W, 3, p.ink);
-      R(g, sx + 1, sy + H - 2, W - 2, 1, p.woodHi);
+      R(g, sx, sy - 9, W, 11, p.woodDark);
+      R(g, sx + 1, sy - 8, W - 2, 9, p.woodHi);
+      R(g, sx + 1, sy - 8, W - 2, 2, p.woodLight);
+      R(g, sx + 2, sy - 5, W - 4, 5, p.wood);
+      R(g, sx, sy + 1, W, H - 1, p.woodDark);
+      R(g, sx + 1, sy + 1, W - 2, H - 3, p.cream);
+      R(g, sx + 2, sy + 2, W - 4, 8, p.creamShade);
+      R(g, sx + 2, sy + 2, W - 5, 7, '#fbf7ec');
+      R(g, sx + 3, sy + 9, W - 6, 1, p.creamShade);
+      R(g, sx + 1, sy + 11, W - 2, 3, p.cream);
+      R(g, sx + 1, sy + 11, W - 2, 1, p.creamShade);
+      R(g, sx + 1, sy + 14, W - 2, H - 17, p.red);
+      R(g, sx + 1, sy + 14, W - 2, 2, p.redHi);
+      R(g, sx + 1, sy + H - 6, W - 2, 2, p.redDark);
+      for (i = 17; i < H - 5; i += 5) {
+        R(g, sx + 2, sy + i, W - 4, 1, p.redDark);
+        R(g, sx + 2, sy + i + 1, W - 4, 1, p.redHi);
+      }
+      R(g, sx + 2, sy + H - 4, W - 4, 4, p.red);
+      R(g, sx + 2, sy + H - 4, W - 4, 1, p.redDark);
+      for (i = 3; i < W - 3; i += 5) R(g, sx + i, sy + H - 1, 3, 1, p.redDark);
     }
   }
 
@@ -1001,9 +1018,12 @@
     [2, 7, 11].forEach(function (dx, n) {
       R(g, coatX + dx, coatY + 2, 1, 2, p.metal);
       if (n === 1) return;
-      R(g, coatX + dx - 2, coatY + 3, 5, 9, n ? p.green : p.red);
-      R(g, coatX + dx - 2, coatY + 3, 5, 1, n ? p.leaf : p.redHi);
-      R(g, coatX + dx - 2, coatY + 3, 1, 9, n ? p.leafHi : p.redHi);
+      var body = n ? p.green : p.red, edge = n ? p.leafHi : p.redHi;
+      R(g, coatX + dx - 1, coatY + 4, 3, 2, body);           // the shoulders
+      R(g, coatX + dx - 2, coatY + 6, 5, 7, body);           // the skirt of it
+      R(g, coatX + dx - 1, coatY + 4, 3, 1, edge);
+      R(g, coatX + dx - 2, coatY + 6, 1, 7, edge);
+      R(g, coatX + dx, coatY + 7, 1, 5, p.woodDark);
     });
     if (plan.door) {
       var matX = x0 + plan.door.x * T + 2, matY = y0 + (front - 1) * T + 9;
