@@ -63,6 +63,26 @@
     return character.appearanceId + (working ? '_work' : '');
   };
 
+  /* The shape someone is in right now, as a pose id the pose package draws, or
+   * null for the ordinary standing and walking sprite. A pose id is a shape;
+   * which activity takes which shape is decided here, by activity and phase,
+   * never by who the person is. Only while they are really doing it: someone
+   * still walking over walks. Working the counter and opening a parcel have
+   * no pose yet — the ones drawn did not read to a cold viewer. */
+  var POSE = { sleep: 'sleeping', read_book: 'reading', sit_and_rest: 'seated', take_break: 'seated',
+               talk_with: 'talking', join_conversation: 'talking' };
+  var POSE_DIRS = { sleeping: ['right', 'left'], reading: ['down'], seated: ['down', 'right', 'left'], talking: ['down', 'right', 'left'] };
+  A.poseFor = function (character) {
+    var act = character.activity;
+    if (!act || act.phase !== 'executing' || character.transit || character.walkTarget) return null;
+    var poseId = POSE[act.actionId];
+    if (!poseId) return null;
+    /* A talk has a pose once the two are actually talking, not while one waits for an answer. */
+    if (poseId === 'talking' && !act.conversationId) return null;
+    var dirs = POSE_DIRS[poseId], facing = character.pos && character.pos.dir;
+    return { poseId: poseId, dir: dirs.indexOf(facing) >= 0 ? facing : dirs[0] };
+  };
+
   /* Draws distinct looks from a stream of their own, like names. */
   A.generator = function (rng) {
     var pool = A.BASE_IDS.slice();

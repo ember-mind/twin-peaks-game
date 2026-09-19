@@ -62,6 +62,7 @@
     var pair = /(?:^|[?&])cast=pair(?:&|$)/.test(String(root.location && root.location.search || ''));
     O.newWorld = function (opts) { return pair ? LT.Scenario.day1(opts || {}) : LT.Scenario.town(opts || {}); };
     var sim = booted.sim || O.newWorld({});
+    if (LT.ActivityPoses) LT.ActivityPoses.load();
     var view = LT.View.create(el('lt-canvas'), sim);
     var state = {
       sim: sim, view: view, speedIndex: 1, accumulator: 0,

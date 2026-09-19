@@ -180,8 +180,16 @@
   View.prototype.thingsAt = function (locId) {
     var sim = this.sim, C = LT.Content;
     if (!C) return [];
+    var readingHere = !!(LT.ActivityPoses && LT.ActivityPoses.ready) && this.charactersHere(locId).some(function (e) {
+      var pose = LT.Appearance.poseFor(e.character);
+      return pose && pose.poseId === 'reading';
+    });
     return sim.objectsAt(locId).map(function (o) {
       var vis = C.visualOf(o, sim);
+      /* A book that is open is in its reader's hands — the reading pose shows
+       * it there — so it is not also drawn lying open where it is kept. Told
+       * from the type, the state and who here is in that pose; never a claim. */
+      if (vis && vis.typeId === 'book_used' && vis.state === 'open' && readingHere) return null;
       return vis ? { kind: 'thing', id: o.id, typeId: vis.typeId, state: vis.state,
                      wx: o.x * TILE, wy: o.y * TILE, px: o.x * TILE + TILE / 2, py: o.y * TILE + TILE - 2 } : null;
     }).filter(Boolean);
@@ -200,6 +208,12 @@
   View.prototype.drawInhabitant = function (g, e, cx, cy, mapId, how) {
     if (e.kind === 'thing') { this.drawThing(g, e, cx, cy); return; }
     if (how === 'atlas') {
+      /* A pose, when there is one for what they are doing and they are not
+       * moving; otherwise, in the same frame, the ordinary sprite. */
+      var kit = root.GAME.Retro2D && root.GAME.Retro2D.interiorKit;
+      if (!e.moving && e.pose && LT.ActivityPoses && kit &&
+          LT.ActivityPoses.draw(g, e.sheetId, e.pose.poseId, e.pose.dir, e.wx - cx, e.wy - cy, this.clock * 1000,
+                                { kit: kit, palette: kit.materials[mapId] || kit.materials.lt_cafe }) !== false) return;
       root.GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, LT.ProductionHost.looks[e.sheetId], e.dir,
         e.phase, 1, e.moving, false, this.clock,
         { mapId: mapId, wx: e.wx, wy: e.wy, npcId: e.id, characterLife: null });
@@ -215,7 +229,12 @@
   View.prototype.drawProductionRoom = function (g, scene, ents, cx, cy, how) {
     var GAME = root.GAME, self = this;
     var opts = { mapId: scene.id, indoor: true, viewportWidth: VW, viewportHeight: VH, t: this.clock };
-    GAME.sprites.drawStructures(g, scene, cx, cy, opts);
+    /* The window shows the town's hour: the room's material is borrowed with
+     * the minute's glass in it for this paint, and handed back. */
+    var kit = GAME.Retro2D && GAME.Retro2D.interiorKit, light = this.light(), base = kit && kit.materials[scene.id];
+    if (light && base) kit.materials[scene.id] = LT.DayLight.material(base, light);
+    try { GAME.sprites.drawStructures(g, scene, cx, cy, opts); }
+    finally { if (light && base) kit.materials[scene.id] = base; }
     EMBER.Tilemap.paintDepthBands(ents, TILE, function (e) {
       self.drawInhabitant(g, e, cx, cy, scene.id, how);
     }, function (footY, nextFootY, afterIndex) {
@@ -231,7 +250,9 @@
     var Art = LT.Art, self = this;
     g.fillStyle = Art.palette.ink;
     g.fillRect(0, 0, VW, VH);
-    var opts = { indoor: !!loc.indoor, locationId: loc.id, minute: this.sim.state.minute };
+    /* One light: when the day's own light is loaded, the older stepped tint on
+     * outdoor cells stands down rather than darkening the evening twice. */
+    var opts = { indoor: !!loc.indoor, locationId: loc.id, minute: LT.DayLight ? undefined : this.sim.state.minute };
     EMBER.Tilemap.paintWindow(g, {
       rows: loc.rows, width: loc.rows[0].length, height: loc.rows.length, tile: TILE,
       camX: cx, camY: cy, viewW: VW, viewH: VH, overdraw: 1
@@ -241,6 +262,11 @@
     /* Never a production map id: no room lighting is borrowed for a place that has none. */
     ents.forEach(function (e) { self.drawInhabitant(g, e, cx, cy, 'lt_temporary', how); });
     this.drawActivityMarks(g, cx, cy, ents.filter(function (e) { return e.kind !== 'thing'; }));
+  };
+
+  /* The light of the simulated minute; null when the package is not loaded. */
+  View.prototype.light = function () {
+    return LT.DayLight ? LT.DayLight.at(this.sim.state.minute) : null;
   };
 
   View.prototype.draw = function () {
@@ -257,16 +283,29 @@
     var scene = this.productionScene(loc);
     if (scene) this.drawProductionRoom(g, scene, ents, cx, cy, how);
     else this.drawTemporaryPlace(g, loc, ents, cx, cy, how);
+    /* Last, over room and people alike, so nobody stands in another hour's light. */
+    var light = this.light();
+    if (light) LT.DayLight.apply(g, light, { width: VW, height: VH });
     return { location: locId, entities: people.length, things: things.map(function (t) { return t.id + ':' + t.state; }),
-             environment: scene ? 'production' : 'temporary', inhabitants: how };
+             environment: scene ? 'production' : 'temporary', inhabitants: how,
+             poses: people.filter(function (e) { return e.pose && !e.moving; }).map(function (e) { return e.id + ':' + e.pose.poseId; }),
+             light: light ? light.phase : null };
   };
 
   /* Depth-sorted projections of whoever the simulation says is here. */
   View.prototype.entitiesAt = function (locId) {
+    var sim = this.sim;
     var ents = this.charactersHere(locId).map(function (e) {
+      var pose = LT.Appearance.poseFor(e.character), x = Math.round(e.render.x), y = Math.round(e.render.y);
+      /* Someone asleep is drawn in the bed, not on the floor beside it where
+       * they stood to get in. Where they are is unchanged; this is the picture. */
+      if (pose && pose.poseId === 'sleeping' && !e.render.walking) {
+        var bed = sim.objectById(e.character.activity.targetId);
+        if (bed && bed.location === locId) { x = bed.x * TILE; y = bed.y * TILE; }
+      }
       return {
-        id: e.character.id, sheetId: LT.Appearance.sheetIdFor(e.character),
-        wx: Math.round(e.render.x), wy: Math.round(e.render.y),
+        id: e.character.id, sheetId: LT.Appearance.sheetIdFor(e.character), pose: pose,
+        wx: x, wy: y,
         dir: e.render.dir, moving: e.render.walking,
         phase: EMBER.Grid.walkPhase(e.render.phaseT % 1)
       };
