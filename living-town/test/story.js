@@ -107,5 +107,25 @@ const snapshot = (sim) => JSON.stringify(sim.state);
   await x.runUntil(1, 545);
   ok(Story.interest(x, 'resident_a') > Story.interest(x, 'resident_b') && Story.mostInteresting(x, 'resident_b') === 'resident_a', 'someone on their way to work outranks someone waiting');
 
+  console.log('# found by watching: a baseline that starved with money in its pocket');
+  const three = LT.Scenario.day1({});
+  let worst = 0, lingered = 0;
+  for (let d = 2; d <= 3; d++) for (let m = 0; m < 1440; m += 10) {
+    await three.runUntil(d, m);
+    three.actorIds().forEach((id) => { worst = Math.max(worst, three.state.characters[id].needs.hunger); });
+    const n = three.state.characters.resident_a;
+    if (d === 2 && m >= 1020 + 90 && m < 1260 && n.location === 'cafe' && !n.activity) lingered++;
+  }
+  const ate = three.state.events.filter((e) => e.type === 'ATE' && e.actorId === 'resident_b' && e.day >= 2);
+  ok(ate.length >= 2 && ate.some((e) => e.data.source === 'cafe'), 'with an empty pantry and 41 EUR, Teodora walks to where a meal is sold (' + ate.length + ' meals on days 2–3)');
+  ok(worst < 90, 'nobody gets close to starving over three days (worst hunger ' + Math.round(worst) + ')');
+  ok(lingered === 0, 'nobody stands idle at work all evening once the shift is over');
+  const fromHome = LT.Scenario.day1({});
+  await fromHome.runUntil(1, 720);                                  // the book is in the park by now
+  const known = LT.Perception.observe(fromHome, fromHome.state.characters.resident_b).reachable;
+  const cafeKnown = known.find((r) => r.id === 'cafe') || known.find((r) => r.id === 'park');
+  const asked2 = { services: [].concat.apply([], known.map((r) => r.services)) };
+  ok(known.length >= 2 && cafeKnown && asked2.services.indexOf('buy_meal') >= 0 && !asked2.services.some((x) => x === 'read_book' || x === 'unpack_food_parcel'), 'what a place is for is public; what someone left there is not');
+
   console.log('\nstory: ' + checks + '/' + checks);
 })().catch((e) => { console.error(e); process.exit(1); });

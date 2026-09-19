@@ -243,6 +243,13 @@
           // Late enough that the only sensible place to be is one's own bed.
           if (req.minute >= 1260 || req.minute < 330) terms.night_home = 46;
         }
+        if (dest === req.self.homeId && req.minute >= 1080 && req.minute < 1260) terms.evening_home = 8;
+        // an empty pantry, and somewhere that sells a meal and will still be open
+        var place = ((req.observations && req.observations.reachable) || []).filter(function (r) { return r.id === dest; })[0];
+        if (place && (place.services || []).indexOf('buy_meal') >= 0 && !(req.self.pantry > 0) && money >= 6) {
+          var arriveMin = req.minute + cand.durationMinutes;
+          if (arriveMin >= place.opens && arriveMin + 20 <= place.closes) terms.meal_there = Math.pow(hunger / 100, 2) * 45;
+        }
         var tconf = conflictPenalty(req, { untilAbs: arrival, where: dest });
         if (tconf.penalty) terms.commitment_conflict = -tconf.penalty * 0.7;
         break;

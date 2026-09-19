@@ -34,7 +34,7 @@
     goal_completion: 'it would reach the goal', commitment_keep: 'a promise to keep',
     commitment_pull: 'a promise waiting there', work_pull: 'the shift', social: 'wanting company',
     closeness: 'how close the two are', asked: 'having been asked', keep_to_oneself: 'wanting to be left alone',
-    food_at_home: 'food at home', rest_at_home: 'a bed at home', commitments_preserved: 'the promises it leaves intact',
+    food_at_home: 'food at home', meal_there: 'a meal to be had there', evening_home: 'the day being done', rest_at_home: 'a bed at home', commitments_preserved: 'the promises it leaves intact',
     rest: 'needing rest', cash_needed: 'an empty pocket', baseline: 'nothing better to do',
     money_cost: 'what it costs', energy_cost: 'how tiring it is', time_cost: 'the time it takes',
     travel_cost: 'the walk', commitment_conflict: 'a promise it would break', wrong_hour: 'the wrong hour for it',

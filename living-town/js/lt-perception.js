@@ -55,8 +55,14 @@
       })
         .map(function (id) {
           var l = W.LOCATIONS[id];
+          /* What the town's own fixtures there are for — a counter that sells
+           * meals — is as public as the opening hours. Things a package or a
+           * watcher brought are not: those are found by being there. */
+          var services = {};
+          W.OBJECTS.forEach(function (o) { if (o.location === id) (o.affordances || []).forEach(function (a) { services[a] = true; }); });
           return { id: id, name: sim.locationName(id), walkMinutes: W.travelMinutes(actor.location, id),
-                   opensAt: U.clock(l.opens), closesAt: U.clock(l.closes) };
+                   opensAt: U.clock(l.opens), closesAt: U.clock(l.closes), opens: l.opens, closes: l.closes,
+                   services: Object.keys(services).sort() };
         })
     };
   };
