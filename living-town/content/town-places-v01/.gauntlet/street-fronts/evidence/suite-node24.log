@@ -1,0 +1,1288 @@
+# sim-core: one authoritative location
+  ok - resident_a carries exactly one location string
+  ok - resident_b carries exactly one location string
+# sim-core: off-screen progression
+  ok - resident_a accumulates events at more than one location over the day
+  ok - resident_b accumulates events at more than one location over the day
+  ok - resident_a and resident_b events interleave in time rather than running one after the other
+# sim-core: scene changes do not reset state
+  ok - placeCharacter to a new scene bumps state.version
+  ok - placeCharacter back keeps state.version climbing, never resetting it
+  ok - memories survive a scene change
+  ok - relationships survive a scene change
+  ok - savings survive a scene change
+  ok - commitment statuses survive a scene change
+  ok - state.version only ever increases, across ticks and across manual scene changes
+# sim-core: effects apply exactly once
+  ok - resident_a worked at least once over the day
+  ok - WORKED gross at D1 11:16 matches minutes worked at the posted wage
+  ok - WORKED gross at D1 13:16 matches minutes worked at the posted wage
+  ok - WORKED gross at D1 15:16 matches minutes worked at the posted wage
+  ok - WORKED gross at D1 17:00 matches minutes worked at the posted wage
+  ok - WORKED at D1 11:16 splits gross into saved+spent with nothing left over
+  ok - WORKED at D1 13:16 splits gross into saved+spent with nothing left over
+  ok - WORKED at D1 15:16 splits gross into saved+spent with nothing left over
+  ok - WORKED at D1 17:00 splits gross into saved+spent with nothing left over
+  ok - WORKED_EXTRA at D1 19:30 splits gross into saved+spent with nothing left over
+  ok - total money+savings gained equals gross worked minus spending, applied exactly once
+# sim-core: travel consumes time
+  ok - resident_b walking cafe -> flat_b takes exactly 9 minutes
+  ok - resident_b walking flat_b -> park takes exactly 11 minutes
+  ok - resident_b walking park -> flat_b takes exactly 11 minutes
+  ok - resident_a walking flat_a -> cafe takes exactly 12 minutes
+  ok - resident_a walking cafe -> park takes exactly 8 minutes
+  ok - resident_a walking park -> cafe takes exactly 8 minutes
+  ok - resident_a walking cafe -> flat_a takes exactly 12 minutes
+  ok - at least one DEPARTED/ARRIVED pair was observed over the day
+# sim-core: action duration and completion
+  ok - eating was chosen away from the kitchen and began on reaching it (8 min walk)
+  ok - onComplete settles exactly once
+  ok - ACTIVITY_COMPLETED lands exactly plannedMinutes after the activity really began
+  ok - the discrete effect (pantry -1) applied exactly once
+# sim-core: interruption skips settlement
+  ok - requestInterrupt succeeds on an interruptible activity
+  ok - the activity is cleared on interruption
+  ok - ACTIVITY_INTERRUPTED fires
+  ok - no ACTIVITY_COMPLETED for an interrupted shift
+  ok - no WORKED settlement for an interrupted shift
+  ok - no money changed hands for the interrupted shift
+# sim-core: memory provenance
+  ok - memory provenance checked across 80 memories
+# sim-core: bounded memory
+  ok - resident_a's memories stay within MEMORY_LIMIT
+  ok - resident_b's memories stay within MEMORY_LIMIT
+# sim-core: commitment consequences
+  ok - cmt_meet_friend ends broken when resident_a never goes to the park
+  ok - a COMMITMENT_BROKEN event exists for cmt_meet_friend
+  ok - resident_b's trust toward resident_a drops by exactly 8, breakCommitment's documented penalty
+# sim-core: determinism
+  ok - two day1 runs produce an identical event type/stamp sequence
+  ok - two day1 runs produce identical final savings
+# sim-core: names are generated once and never change
+  ok - resident_a has a generated display name
+  ok - moving resident_a between locations and running the rest of the day never changes the name drawn at creation
+  ok - the same seed draws the same two names every time
+# sim-core: Living Town does not need Twin Peaks
+  ok - loading lt-scenario.js in a fresh process leaves global.GAME undefined
+
+sim-core: 53/53
+PASS sim-core.js (53 checks)
+# async-safety: delayed response
+  ok - the actor stays idle with a pending request while the answer is held
+  ok - still nothing starts before the delay has fully elapsed
+  ok - the held answer starts the activity once fully released; nothing is lost
+# async-safety: stale response is rejected, never applied
+  ok - the sim records a stale_state rejection
+  ok - the stale decision never starts an activity
+# async-safety: an unrelated change does not invalidate a held decision
+  ok - no stale_state rejection for resident_a
+  ok - the held decision executes normally
+# async-safety: duplicate response is refused
+  ok - sim.deliver refuses the second delivery
+  ok - the refusal is recorded as duplicate_response
+  ok - only one activity started
+# async-safety: response for an unknown request
+  ok - sim.deliver refuses a requestId it never issued
+  ok - the refusal is recorded as unknown_request
+# async-safety: malformed response
+  ok - sim.deliver refuses a response with no requestId
+  ok - the refusal is recorded as malformed_response
+# async-safety: selection not offered
+  ok - a candidate never offered is rejected as selection_not_offered
+  ok - the invented action never starts; only the sim's own fallback may
+  ok - nothing the policy invented reaches the world
+# async-safety: candidate no longer legal
+  ok - buy_meal was offered while the café was open
+  ok - the now-illegal candidate is rejected as candidate_no_longer_legal, not stale_state
+  ok - buy_meal never starts
+# async-safety: policy unavailable/error never stops time
+  ok - unavailable is recorded as a rejection
+  ok - unavailable falls back to a sim-started wait activity
+  ok - a policy 'error' status is recorded under the stable reason policy_error
+  ok - the policy's own message survives as detail, not as the reason code
+  ok - 'error' falls back to a sim-started activity, so the actor is never frozen
+  ok - the clock advanced regardless — time is never stuck waiting on this policy
+# async-safety: two actors resolving out of order still apply in request-seq order
+  ok - activities start in request-seq order (resident_a, then resident_b), not resolution order
+
+async-safety: 27/27
+PASS async-safety.js (27 checks)
+# policies: LT.Policy.validateResponse contract
+  ok - accepts a well-formed response
+  ok - rejects a mismatched requestId
+  ok - rejects a response with no selectedId
+  ok - rejects an unrecognised status
+  ok - rejects a selectedId absent from request.candidates
+# policies: UtilityPolicy only ever selects an offered candidate
+  ok - the day produced selected decisions to check
+  ok - every recorded selectedId across 89 decisions was in that request's candidate list
+# policies: UtilityPolicy exposes structured, numeric factors
+  ok - no NaN/undefined found across 334 factor entries
+# policies: UtilityPolicy is deterministic
+  ok - scoring the same request twice selects the same candidate
+  ok - scoring the same request twice produces identical factors
+  ok - a tied score breaks on candidate id, never on a random draw
+# policies: UtilityPolicy is behaviourally competent in day1
+  ok - resident_a is at the café for at least 300 of its 09:00-17:00 shift minutes (480)
+  ok - resident_a ends the day home, at flat_a
+  ok - resident_a ends the day with cmt_shift kept
+# policies: RecordedPolicy round trip replays the same run
+  ok - replay executes the identical sequence of resident_a's action ids
+  ok - replay produces the identical final savings
+  ok - replay reports zero mismatches against the run it was recorded from
+# policies: RecordedPolicy refuses to improvise on divergence
+  ok - replay against a diverged sim reports mismatches instead of silently continuing
+  ok - the diverged decisions surface as policy_error rejections carrying replay_divergence detail
+
+policies: 19/19
+PASS policies.js (19 checks)
+# interventions: validation
+  ok - an unknown intervention type is rejected as unknown_intervention_type
+  ok - an unknown character is rejected as unknown_character
+  ok - a window outside the café's opening hours is rejected as outside_opening_hours
+  ok - non-positive pay is rejected as invalid_pay
+  ok - an empty window is rejected as empty_window
+# interventions: scheduling records status=scheduled and does not apply early
+  ok - a valid intervention is accepted
+  ok - the record starts as status=scheduled
+  ok - an INTERVENTION_SCHEDULED event is emitted
+  ok - the clock has not moved: nothing has been applied yet
+  ok - no offer exists before the scheduled minute arrives
+# interventions: application fires exactly at its scheduled minute
+  ok - still unapplied one minute before its time
+  ok - still no offer one minute before its time
+  ok - status becomes applied at its scheduled minute
+  ok - an INTERVENTION_APPLIED event fires
+  ok - exactly one offer is created
+# interventions: the offer is invisible until actually perceived
+  ok - offersFor(resident_a) is empty while it has not perceived the offer
+  ok - accept_offer is not a candidate yet
+  ok - OFFER_RECEIVED fires exactly once, once resident_a is actually at the café
+  ok - offersFor(resident_a) now sees it
+# interventions: the intervention does not script the response
+  ok - a policy that always declines ends the offer declined
+  ok - a policy that always accepts ends the offer accepted, same intervention, no scripting
+# interventions: an unanswered offer expires on its own
+  ok - the offer expires at its expiry minute
+  ok - an OFFER_EXPIRED event is emitted
+  ok - accept_offer is no longer a candidate once expired
+
+interventions: 24/24
+PASS interventions.js (24 checks)
+# schema: a seeded stream can be captured and resumed
+  ok - a generator restored from its state continues the same stream
+  ok - authoritative state is JSON-safe and carries its conversations
+# 1: the default day contains no remote or repeated conversation
+  ok - the two inhabitants talk once on day one, not twice (1)
+  ok - every TALKED event found both participants in the room it happened in 
+  ok - the social goal counts one conversation (1)
+# 1: a conversation is one shared activity with one settlement
+  ok - resident_a has walked up and asked; nothing has been started for resident_b
+  ok - resident_b joins by taking their own candidate
+  ok - resident_b is in the same conversation, not a second one
+  ok - the talk and its clock start when they join, not while resident_a was walking over
+  ok - a reciprocal start while it is running is refused (already_in_conversation)
+  ok - two people finishing the same conversation settle it once
+  ok - the relationship gain is applied once, not once per participant
+  ok - one conversation record, completed
+  ok - both are free again afterwards
+# 1: both policies choosing to talk in the same minute yield one conversation
+  ok - one conversation record
+  ok - one TALKED event
+  ok - each had chosen to talk to the other: it is one mutual conversation, and it completed
+  ok - both people's part in it is their own policy's decision; nobody was enrolled by the engine
+# 1: a participant leaving ends the conversation, and nothing settles
+  ok - resident_b can be pulled out of a conversation
+  ok - neither is left talking to nobody
+  ok - no TALKED event for a conversation that broke off
+  ok - one CONVERSATION_ENDED event
+  ok - no relationship change from a conversation that did not happen
+  ok - a conversation whose partner is no longer in the room cannot complete
+# 1: someone in the middle of work is not drawn into a conversation
+  ok - resident_a is working
+  ok - talk_with is withheld from the candidate list as partner_busy
+# 1: a meeting is kept in the agreed place, not merely at the agreed time
+  ok - they did talk, at the café, inside the window
+  ok - the park meeting is not kept by a conversation somewhere else
+# 2: a provider cannot smuggle an action in behind a legal candidate id
+  ok - precondition: resident_a may not enter resident_b's home
+  ok - what executes is the sim's own candidate of that id: wait
+  ok - resident_a did not set off for the private home
+  ok - the sim's record of the request is untouched by the provider
+# 2: nothing in a request aliases authoritative state
+  ok - the provider did see, and did scribble on, an offer and a memory
+  ok - the offer still pays what the world says it pays
+  ok - no memory was rewritten
+  ok - goals and needs are untouched
+# 3: a malformed answer takes its own request's fallback path
+  ok - the refusal is tied to the request that was asked
+  ok - the inhabitant falls back instead of standing frozen
+  ok - a hundred minutes later they are still being given something to do
+  ok - an answer claiming another request's id is refused as request_id_mismatch
+  ok - and it did not resolve, or act as, the request whose id it claimed
+# 3: a provider that never answers is timed out, and its late answer refused
+  ok - inside the timeout the question is still open
+  ok - past it, the request is closed as policy_timeout
+  ok - and the inhabitant falls back
+  ok - the answer that finally arrives is refused as late_response
+  ok - and starts nothing
+# 4: request order holds among answers present at a tick; an absent answer blocks nobody
+  ok - resident_b (later request) acts as soon as its own answer is in
+  ok - resident_a (earlier request, no answer yet) holds nobody else up
+# 5: a block started at 16:59 ends at 17:00
+  ok - one minute remains, so one minute is planned (1)
+  ok - nobody is still working the regular shift at 17:03
+  ok - the 17:00 commitment is kept, not broken mid-block
+  ok - one minute is paid as one minute (0.15 EUR), not fifteen
+  ok - the extra shift caps its last block the same way (5)
+# 6: an accepted extra shift belongs to its day
+  ok - the offer carries an absolute work window
+  ok - once its window has ended the accepted offer is closed (lapsed)
+  ok - and the unworked commitment is broken
+  ok - at 17:00 on day two the shift is not on offer again
+  ok - …eligibility itself checks the absolute window (shift_over)
+# 6: being there at the end is not the same as working the shift
+  ok - twenty minutes were worked and paid
+  ok - the commitment to work the shift is not kept by its last twenty minutes
+# 7: nobody remembers an offer they never saw
+  ok - the offer expired unperceived
+  ok - resident_a has no memory of it
+  ok - the log records them as the subject of the expiry, not its actor
+  ok - someone who did see the offer does learn that it lapsed
+# 8: simulated pace does not depend on how often the page is called back
+  ok - four seconds at 1x is sixteen minutes at 16 ms frames (16) and at 400 ms fallbacks (16)
+  ok - even 20x through one-second throttled timers keeps up (333)
+  ok - animation still sees a capped delta, so sprites do not lurch
+  ok - a very long suspension is forgiven, not replayed minute by minute
+
+review-regressions: 68/68
+PASS review-regressions.js (68 checks)
+# café: collision rows agree with what the scene arranges
+  ok - 21 furniture cells are solid, and no floor cell is blocked by something the scene does not draw
+  ok - rows and plan describe the same 15x10 room
+  ok - nobody can walk on the back wall the scene paints over rows 0..1
+  ok - no painted patrons: every bench is arranged empty, so anyone seen is someone the simulation owns
+  ok - the arranged door is the only door, and people arrive just inside it
+  ok - the door and the counter are both off-centre, as designed
+# café: every sign can be lettered, with nothing dropped silently
+  ok - the sign spells MERIDIANA in full — the name was not chosen to fit a font
+  ok - menu and board lettering is fully supported
+  ok - accents fold explicitly (É is lettered as E)
+  ok - a character the kit cannot letter is reported, not skipped
+  ok - and if drawn anyway it shows as a box and is counted
+# café: every interaction anchor is a place someone can actually stand
+  ok - 4 anchors are on floor, reachable from the door, and belong to real actions
+  ok - staff work the counter from behind it and customers order from the front
+  ok - and they face each other across it
+# café: the simulation walks people round furniture, never through it
+  ok - a shift starts at the door
+  ok - the worker ends up behind the counter, facing the room (3,2 down)
+  ok - having gone round the open end of the counter at 7,3 to get there
+  ok - one tile at a time, no teleporting
+# café: a look is persistent state, separate from the name
+  ok - the same seed gives the same looks
+  ok - two inhabitants do not share a look
+  ok - name and look vary independently across seeds
+  ok - every sheet id has a recipe and the sheet fits the atlas layout
+  ok - working a shift shows the apron — at the counter, not on the way to it; it is read from the activity and changes nothing
+  ok - the committed sheet is what the recipes compile to
+# café: the production renderer draws the room and the people in it
+  ok - the renderer's people table holds Living Town looks and nothing else
+  ok - no Twin Peaks map, cast, presence, narrative or engine state is loaded to get the graphics
+  ok - the host reports the character sheet ready
+  ok - the café is drawn by the production path, with both inhabitants
+  ok - drawing changed nothing in the simulation
+  ok - layering goes through the shared engine's depth-band pass, the one Twin Peaks uses
+  ok - both people come off Living Town's own sheet
+  ok - the worker is drawn from their own look, in its apron variant
+  ok - the customer from theirs, on the facing-away row
+  ok - the counter is repainted between the person behind it and the person in front (310 draws)
+  ok - the room itself is the production painter's 1667 draws, not a tile fill
+  ok - a bench is repainted over someone standing behind it
+  ok - locations without production content still draw with the temporary art, and say so
+
+cafe-scene: 37/37
+PASS cafe-scene.js (37 checks)
+# continuity: nothing about how a person is drawn is keyed by who they are
+  ok - world characters carry no fixed sprite id
+  ok - neither the temporary art nor the view mentions an inhabitant id
+# continuity: before the sheet decodes, the stand-in wears the person's own colours
+  ok - the view says it is using the stand-in, on temporary ground
+  ok - each stand-in is painted in its own look's jacket colour (#77508a, #566b45)
+  ok - the colours follow appearanceId in state, not the inhabitant's id
+# continuity: the same sheet block draws a person in the café and outside it
+  ok - the inhabitants' sheet has decoded
+  ok - café on the production room, street/park/flat on temporary ground — and one look, look_plum_long, in all four
+  ok - the other inhabitant keeps a different look of their own outside too
+# transitions: a change of place cuts, however close the coordinates are
+  ok - one tile apart across two rooms: the sprite is at the new spot at once, not sliding (80,96)
+  ok - identical coordinates in another room still register as a change of place
+  ok - a jump the view saw no steps for is a cut too; it never invents a route
+# transitions: the sprite goes round the counter at every speed
+  ok - 1x, a tick every 250 ms frame: over 400 frames the sprite never left the tiles the person walked (15), never overlapped furniture, never moved diagonally
+  ok - 1x, a tick every 250 ms frame: and it comes to rest exactly on the work spot, facing the room
+  ok - 1 tick per 16 ms frame: over 400 frames the sprite never left the tiles the person walked (15), never overlapped furniture, never moved diagonally
+  ok - 1 tick per 16 ms frame: and it comes to rest exactly on the work spot, facing the room
+  ok - 20x, two ticks in a 16 ms frame: over 400 frames the sprite never left the tiles the person walked (15), never overlapped furniture, never moved diagonally
+  ok - 20x, two ticks in a 16 ms frame: and it comes to rest exactly on the work spot, facing the room
+  ok - backlog, eight ticks in a 100 ms frame: over 400 frames the sprite never left the tiles the person walked (15), never overlapped furniture, never moved diagonally
+  ok - backlog, eight ticks in a 100 ms frame: and it comes to rest exactly on the work spot, facing the room
+# transitions: following a route is a projection
+  ok - observe/update/draw leave the simulation state byte-identical
+  ok - the view has no pathfinding or collision of its own
+  ok - the observer shows the view every tick, not every frame
+
+view-continuity: 22/22
+PASS view-continuity.js (22 checks)
+# 1: round trip mid-day
+  ok - restored state deep-equals the original with every pending normalised to null
+  ok - format is the constant and savedAt is the sim clock (D1 15:00), not wall time
+  ok - version and event sequence survive the round trip
+  ok - an activity in flight survives verbatim
+# 2: a restored world resumes identically
+  ok - both inhabitants end with the same savings, money and location as the uninterrupted run
+  ok - every commitment reaches the same status
+  ok - the full (stamp, type) event sequence is identical
+  ok - the 16:30 intervention scheduled before the save fired after the restore
+# 3: names, looks and place names survive a changed content pool
+  ok - every restored character keeps the name it was saved with, even when the pool changed
+  ok - every restored character keeps the look it was saved with, even when the sheet changed
+  ok - state.locationNames is restored verbatim (the flat named after its resident keeps its name)
+# 4: references are character ids, never display names
+  ok - every person reference resolves to a character id (none bad)
+  ok - no person reference is a display name masquerading as an id
+# 5: state.version is monotonic across a restore
+  ok - a restored sim starts from the saved version
+  ok - version only ever increases as the restored sim ticks
+# 6: a pending decision is never saved; the question is asked again
+  ok - the saved copy writes pending: null
+  ok - the live sim pending decision is untouched by serialising
+  ok - the open question is put again at load, under its own number, to the policy now answering for them
+  ok - request numbers carry on from the re-asked one, none issued twice
+  ok - an activity starts within a few ticks instead of waiting out the 30-minute timeout
+  ok - no activity was started twice
+# 7: queued answers are dropped, not replayed
+  ok - the save carries neither the inbox nor the request table
+  ok - the restored sim starts with an empty inbox
+  ok - the dropped answer is refused as an unknown request after reload
+  ok - no activity can be traced to the dropped answer
+  ok - no activity was started twice
+# 8: unknown formats and tampered saves are refused
+  ok - an unknown format throws 'unsupported save format: <x>'
+  ok - a save with no format is refused the same way
+  ok - a tampered integrity block throws 'save integrity check failed: <detail>'
+# 9: a migration chain upgrades an older format
+  ok - a save relabelled @0 is upgraded through two hops and loads
+  ok - the loader follows the whole migration chain, not just one step
+# 10: a conversation survives a save exactly once
+  ok - the conversation is one shared activity across both people
+  ok - exactly one TALKED event after the restore
+  ok - the conversation record ends completed
+  ok - the +3 trust / +4 closeness gain is applied once per participant, not once per activity
+# 11: an accepted shift keeps its absolute window
+  ok - startAbs and endAbs survive the save
+  ok - the accepted status survives
+  ok - perceivedBy survives, so nobody forgets an opportunity they had already seen
+# 12: static world content is never duplicated into a save
+  ok - the save does not contain a single map row ('#####DD#####')
+  ok - nor the café rows the painter draws from
+  ok - that geometry still lives only in lt-world.js, where it belongs
+# extra: a full simulated day serialises and reloads
+  ok - toJSON survives a full day of events and memories
+  ok - every memory back-reference still resolves against the restored event log
+# 13: saving mid-walk, mid-transit, mid-activity or mid-question changes nothing that follows
+  ok - 47 save points across the day each resume into exactly the town that was never saved
+  ok - including mid-walk (8), on the street between places (2), mid-activity (46) and with a decision in flight (5)
+# 14: no wage, purchase or completion is applied twice by a reload
+  ok - 42 reloads later, money 49.73, savings 117.84 and pantry 5 equal the uninterrupted day
+  ok - every activity completes once, at the same minute (96 completions)
+  ok - and the whole town is the same town
+# 15: a save that does not fit this build is refused, with the reason, and left alone
+  ok - a save from a differently laid-out town is refused by fingerprint, not loaded onto the new furniture
+  ok - a save that never recorded its town is refused the same way
+  ok - a look this build cannot draw is refused rather than drawn as somebody else
+  ok - a person with no name is refused rather than renamed
+  ok - someone saved inside the counter is refused
+  ok - so is a walk whose destination is furniture
+  ok - and a place that does not exist
+  ok - an unregistered policy is refused at load, not discovered as a crash on the first tick
+  ok - and naming a registered policy for them at load is the way through
+# 16: a town migration is a registered, verified step
+  ok - a migration that leaves someone inside furniture is caught by the same checks as any save
+  ok - one that moves them to the door loads, with the same name and look
+  ok - the old save itself is never rewritten by migrating it
+  ok - and one that goes nowhere is stopped
+# 17: the browser helper tells "no save" from "a save I cannot use"
+  ok - nothing stored: none
+  ok - a good save: loaded, with the town
+  ok - a save from another town: refused, with the sentence to show
+  ok - and the refused save is still in storage, untouched
+  ok - unreadable text is refused too, never mistaken for "no save"
+  ok - storage that throws is "unavailable", with the error — never "none"
+  ok - and a failed write says it failed
+  ok - a full store is reported by name
+  ok - a write that does not read back is not reported as a save
+  ok - no storage at all: unavailable, both ways
+# 18: a recorded run replays across a save, with or without a question in flight
+  ok - four reload points, 2 of them with a question in flight: zero replay mismatches, same savings, same event sequence
+# 19: reloading while an answer is immediate, held for several ticks, arrived-but-unapplied, or never coming
+  ok - arrived-but-unapplied: the answer is not carried over; the question is, as req_1.1
+  ok - the old process's answer, delivered to the new world, is an unknown request
+  ok - the re-asked question is answered and applied once, in the same minute the uninterrupted world applied its own
+  ok - the provider really was asked again — it was not replayed from the save
+  ok - held: re-asked under the same number, still dated from the first asking (501)
+  ok - while the new answer is held the person waits, as before the save
+  ok - the old world got the old answer (wait) ...
+  ok - ... and the new world got the answer to its own asking (wash_and_dress): a different one, which is allowed, and only one
+  ok - nothing from the old process reached the new world at all
+  ok - never answered, reloaded every 8 minutes (4 times): the 30-minute timeout still fires, 32 minutes after the first asking
+  ok - and the person falls back to waiting, tagged as a fallback, not as a choice
+# 20: a save written by the previous build (save@1) is migrated, and verified
+  ok - the fixture is a genuine @1 save: 09:11, walking to the counter, with 3 "worked" minutes already counted on the way
+  ok - same person, same look
+  ok - they come back approaching; the three minutes are recorded as the walk they were
+  ok - work is counted from reaching the counter (D1 09:22), for 120 minutes
+  ok - and paid for exactly those
+  ok - the old save text is not rewritten by loading it
+  ok - migrated from 6d2aa6eb, the town's furniture and places are exactly this build's, and nobody was added
+  ok - the fixture is a genuine old-street save: Teodora on the way home, heading for where her door used to meet the street
+  ok - she stands where she stood and is now heading for where the door is
+  ok - nobody has ended up inside a house front
+  ok - and she gets home
+  ok - the day goes on, people come and go through the new doors, and the old save text is untouched
+  ok - saved again, it is a save of this town
+
+save-load: 96/96
+PASS save-load.js (96 checks)
+# phases: every action declares where it is done from
+  ok - 23 actions, none left to a default ()
+  ok - done at an object's use spot: buy_meal eat_at_home practise_guitar read_book sit_and_rest sleep take_break unpack_food_parcel work_extra_shift work_shift
+  ok - done next to a person: help_out talk_with
+  ok - travel is its own walk; waiting, deciding and a greeting across the room need no spot
+# phases: the walk to the counter is not minutes of work
+  ok - choosing the shift at the door starts an approach, and says so
+  ok - 14 minutes later the work begins, behind the counter
+  ok - the walk is recorded as approach minutes; the activity's own clock starts on arrival
+  ok - the walk cost energy
+  ok - one ACTIVITY_REACHED event marks the moment
+  ok - the block is planned from the arrival time, not from the door
+  ok - exactly the minutes at the counter are worked and paid (120), none from the walk
+  ok - pay is 18 EUR for 120 minutes
+# phases: stopped on the way there, nothing of the activity happened
+  ok - an interruptible activity can be stopped during its approach, and the walk stops with it
+  ok - no pay, no worked minutes
+  ok - the event says it was stopped while approaching
+# phases: a use spot that cannot be reached is refused, and failing on the way is visible
+  ok - with the way behind the counter blocked, working is not offered: use_spot_unreachable
+  ok - and cannot be started anyway
+  ok - the approach fails with an event that says why: Nadia could not: Work the shift — café counter (use_spot_unreachable)
+  ok - they stop where they are: no teleport to the counter, no work from the floor
+  ok - and nothing is ever paid for it
+  ok - a failure frees them to decide again, that same minute
+# phases: what has just failed is not offered again the next minute
+  ok - a minute later it is withheld as recently_failed
+  ok - and offered again half an hour on
+# talk: asked across the park, answered by the other person's own policy
+  ok - one proposal, one conversation record
+  ok - when the talk began they were standing next to each other (distance 1), facing right/left
+  ok - no minute of conversation was counted while one of them was still crossing the park
+  ok - the other person joined by a decision of their own policy, recorded as theirs
+  ok - nothing in the log was started on anyone's behalf
+  ok - they were offered both joining and declining
+  ok - twenty-five minutes after it began, it is settled once
+  ok - the relationship gain is applied once to each
+  ok - the promise to meet is kept, once
+# talk: the other person may say no
+  ok - one TALK_DECLINED, by the person asked; the record ends declined
+  ok - declining is a decision their policy made
+  ok - the asker's talk ends as not done, with the reason
+  ok - no conversation took place
+  ok - no relationship gain and no promise kept for a talk that did not happen
+  ok - and they are not asked again straight away (talk withheld: recently_refused)
+# talk: asked, and the policy does something else; asked, and no answer comes
+  ok - choosing to sit down instead leaves the proposal unanswered; no refusal is attributed to them
+  ok - the asker is released with that reason
+  ok - a policy that never answers: the asker waits 5 minutes and gives up
+  ok - nobody is left standing there for ever
+# talk: an answer that arrives after the asker has gone starts nothing
+  ok - the proposal lapsed unanswered
+  ok - the late "yes" is refused (stale_state); no conversation begins
+# talk: the person becomes busy, or leaves, while being walked towards
+  ok - they started buying a meal: the walk over is abandoned as partner_busy, no proposal is made, and their meal is not interrupted
+  ok - they left the park: not_present, and nothing was proposed to an empty lawn
+# talk: someone who cannot be walked up to is not talked to
+  ok - with every cell around them taken up, talking is withheld as person_unreachable
+  ok - and cannot be started from where they stand
+# talk: being spoken to interrupts a rest; it does not answer for the person resting
+  ok - their rest ends with reason spoken_to — the world's doing, and labelled so
+  ok - the conversation is only proposed; no decision has been entered in their name
+  ok - what they do next is theirs to choose: join or decline are both on offer
+# talk: the asker is called away before an answer, or one of them steps away during it
+  ok - the proposal is withdrawn
+  ok - and can no longer be joined (proposal_withdrawn)
+  ok - a conversation whose people are no longer side by side breaks off for both
+  ok - and settles nothing
+# talk: both set out towards each other in the same minute
+  ok - one conversation, marked mutual, completed
+  ok - no proposal was needed — each had chosen it; it began once and settled once
+  ok - one gain, not two
+# save: reloading while approaching, while waiting for an answer, while talking
+  ok - the ordinary day contains each moment: {"approaching":1031,"waiting_reply":null,"talking":1039,"approaching_work":545}
+  ok - each resumes into exactly the uninterrupted town: same phase, same conversation (settled once), same paid minutes
+
+interactions: 60/60
+PASS interactions.js (60 checks)
+# start: four situations, told apart
+  ok - nothing stored: none — a new world may simply begin
+  ok - a first save succeeds
+  ok - a usable save: loaded, the same town at the same minute
+  ok - a save this build refuses: refused, with the reason
+  ok - saving over it is not allowed by default, and it is byte for byte where it was
+  ok - autosave never touches it either
+  ok - told explicitly to replace it, the refused save is moved aside, not destroyed
+  ok - unreadable storage: unavailable — not "no save"
+  ok - and a save attempt reports its failure: local storage refused the write: Error
+# start: a new world asked for by address leaves the stored save alone
+  ok - the save is not loaded and not touched
+  ok - and is protected from being written over until the person says so
+# tabs: one tab saves a world at a time
+  ok - the first tab saves and holds the lease
+  ok - the second tab does not write over it: another tab is saving this world
+  ok - nor does its autosave
+  ok - told to take over, it does, and the first tab now sees the lease elsewhere
+  ok - so the first tab stops writing instead of fighting over it
+  ok - a lease that is no longer renewed (a closed tab) lapses after 15 s
+  ok - leaving the page releases the lease
+# autosave: between ticks, by town time, never per frame
+  ok - 300 ticks in 3.6 s of real time: 1 autosave, held back by the 10 s floor
+  ok - 300 minutes at 1x (75 s): 7 autosaves — due every 30 town minutes, and never inside 10 s of the last
+  ok - and exactly that many writes of the world reached storage
+
+persistence: 21/21
+PASS persistence.js (21 checks)
+# registration: one public entry point, checked, and nothing replaced
+  ok - loading the scenario loads the package, and the package registered both actions through LT.Actions.define
+  ok - an id already taken — core or content — is refused, not overwritten
+  ok - 7 malformed definitions refused with the reason; none entered the catalogue
+  ok - the package declared its version and object types
+# A (controlled, MockPolicy-style chooser): delivered -> perceived -> chosen -> walked to -> used -> consequences -> saved and resumed
+  ok - before delivery there is no book and nobody is offered one
+  ok - both are delivered, once each
+  ok - the person in the park saw the book arrive; the addressee, at work across town, knows nothing of her parcel
+  ok - and is not offered it while she is somewhere else
+  ok - reading is chosen by their policy; the copy is reserved from that moment; they set off
+  ok - three minutes into the walk, nothing has been read
+  ok - saved and reloaded on the way there: still approaching, the copy still theirs
+  ok - reading began on reaching the use spot and has advanced one minute per minute since (43)
+  ok - saved and reloaded mid-sitting: the two worlds are identical three hours later
+  ok - the book is finished in sittings of at most 45 minutes: 120 read, one BOOK_READ, the copy free again
+  ok - sittings: 45 + 45 + 30
+  ok - a finished book is no longer offered to the person who finished it
+  ok - at home, the parcel is simply one of the things in the room, and opening it is on offer
+  ok - opened once at its use spot: four portions into the pantry (3 -> 7), the parcel empty
+  ok - opening it fed nobody: hunger moved only by the clock; eating is still eat_at_home's job
+  ok - a save was taken two minutes into opening it
+  ok - reloaded mid-opening: it finishes once, the portions arrive once
+  ok - and an empty parcel is never opened again
+# the copy: reserved when chosen, released however the reading ends
+  ok - both policies chose the book in the same minute: one person has it (resident_a), one copy, one claim
+  ok - the other's answer is refused as no longer legal, and the book is withheld from them as in_use — they did not cross the park for nothing
+  ok - released after: interrupted while approaching, interrupted while reading, route failed, sitting completed
+  ok - the minutes read before the interruption (16) were kept and built on (61)
+  ok - no claim outlives the activity that made it
+  ok - two people's progress in the same copy is kept apart
+# the parcel: for one person, opened where it lies, perceived like anything else
+  ok - a visitor standing in the flat sees the parcel and cannot open it (not_recipient)
+  ok - it is an ordinary object in what anyone in the room observes
+  ok - the addressee has to walk over to it
+  ok - nothing is transferred on the way
+  ok - the same parcel cannot be delivered twice (instance id in use)
+# saves: an intervention scheduled after a load, and one still waiting at save time
+  ok - saved at 08:20 with three interventions still waiting
+  ok - scheduled after the load: one new entry, in the one list, under an id of its own (itv_4)
+  ok - applied once: one object, one event
+  ok - and the two that were waiting in the save were each applied once as well
+  ok - another reload later, nothing is applied a second time
+# saves: instances are checked by type; their state never makes a save incompatible
+  ok - a world with a half-read book and an opened parcel has the same town fingerprint and the same content version as one where neither was touched
+  ok - and loads
+  ok - a world that uses nothing from the package does not depend on it
+  ok - 16 impossible instances refused by name: progress for someone who does not exist; more minutes read than the book has; a non-finite amount read; finished without having been read; held by someone who is not reading it; an impossible length; a use spot inside furniture; a parcel for nobody; empty yet still holding food; more left than it came with; a negative quantity; an unknown state; a type no package provides; a thing that is neither town nor content; another version of the package; a package this build does not have
+  ok - a claim with the activity that made it is sound, and loads
+  ok - the same claim without its activity is refused: no permanent inUseBy
+# drawing: what is drawn is what the instance is, and drawing changes nothing
+  ok - untouched: a closed book, a sealed parcel
+  ok - still closed while its reader is walking over
+  ok - open while it is being read
+  ok - closed again when they stop
+  ok - the parcel is open while it is being unpacked
+  ok - asking what they look like writes nothing
+  ok - and empty once the simulation's parcel is empty — the same instance, not a picture of one
+  ok - the view reads a type and a state; it never touches portions, progress or claims
+# B (autonomous, UtilityPolicy for both, the default day): what they actually chose
+      D1 10:00  A copy of "The Harbour Year" was left in Riverside park.
+      D1 12:30  A food parcel was left at Nadia's flat.
+      D1 14:39  Teodora got there and began: Read — The Harbour Year (45 min)
+      D1 16:39  Teodora finished reading "The Harbour Year".
+      D2 06:53  Nadia got there and began: Open the food parcel — food parcel (5 min)
+      D2 06:58  Nadia opened the food parcel (4 portions into the pantry).
+  ok - every reading and opening in this run was a UtilityPolicy decision
+      read: {"resident_b":120}  finished: ["resident_b"]  parcel: empty at D2 06:58
+  ok - nobody broke a day-one promise over a book or a parcel
+  ok - the one with a shift and a deadline worked the whole shift (464 min) and never opened the book
+  ok - the parcel was not opened on sight: home at D1 20:13, opened D2 06:58
+  ok - at most one completion each, one opening, and no claim left hanging
+
+everyday: 57/57
+PASS everyday.js (57 checks)
+# why: the policy's own terms, ranked, and nothing invented
+  ok - a utility decision yields named weights
+  ok - every weight shown is a positive term of the chosen candidate, with its real value
+  ok - the first weight is the largest term (income)
+  ok - what is shown against it is a negative term of the same candidate
+  ok - next best is a real, different, scored alternative
+  ok - the line is not worded as a thought: Weighed most: the money, with a goal to reach, it is the job. Against it: how tiring it is. Next best: wait.
+  ok - a policy that gave no terms gets no reasons made up for it
+  ok - no decision, no line
+  ok - a term brought by a package is shown under its own name
+# stakes: the state's own numbers
+  ok - the savings gap is target minus savings: 58.00 EUR to go, 1 d 14 h left.
+  ok - time left runs to the end of the goal's last day
+  ok - a promise more than four hours off is not yet shown
+  ok - a promise shows the minutes left: due in 20 min, already there.
+# stakes: a promise that cannot be kept from where someone stands
+  ok - too far to arrive inside the grace: 44 min late, 14 min walk away — cannot be kept from here any more.
+  ok - no reading changes the state
+# a goal whose last day passes
+  ok - the goal due on day 1 is closed at the end of day 1, and only that one
+  ok - it is marked missed, not reached
+  ok - its owner remembers it
+  ok - someone in another place does not know
+  ok - the page says so
+  ok - the day-2 goal closes a day later; the first is not announced twice
+  ok - a missed goal is still missed after save and load
+  ok - and is not announced again by the loaded world
+# found in review: missed is final, private, and not tied to midnight
+  ok - someone standing next to them at midnight learns nothing of it, and no balance
+  ok - having the money a day late does not reach a goal that is over
+  ok - an overdue goal never shows negative time left
+  ok - and is closed on the first tick, not at the next midnight
+# a missed goal stops driving the policy
+  ok - urgency 2.5 while open, 0 once missed
+# the day, looked back on
+  ok - a finished day, one entry per person
+  ok - earnings are the sum of the day's work events: worked 9 h 12 for 93.07 EUR (55.84 saved)
+  ok - every line told is an event of that person, verbatim
+  ok - what happened to the town is listed apart
+  ok - the day still running is marked as not over
+# where to look
+  ok - a tie does not move the camera
+  ok - someone asleep is the least worth watching
+  ok - someone on their way to work outranks someone waiting
+# found by watching: a baseline that starved with money in its pocket
+  ok - with an empty pantry and 41 EUR, Teodora walks to where a meal is sold (4 meals on days 2–3)
+  ok - nobody gets close to starving over three days (worst hunger 75)
+  ok - nobody stands idle at work all evening once the shift is over
+  ok - what a place is for is public; what someone left there is not
+# pace and beats
+  ok - a day has slow, quick and sleeping stretches: {"quick":74,"steady":19,"close":40,"asleep":22}
+  ok - beats are events of that day, verbatim, and reading them changes nothing
+# the first thing one would say about a day
+    D1: Teodora reached the goal "Spend time with Nadia" (1/1).
+    D2: Sanne reached the goal "Have the quarter's rent together" (203/200).
+    D3: Mira did not reach "Catch up with Nadia" in time (0 of 1 talks).
+    D4: Laleh gave Mira 8 EUR for a meal.
+    D5: Sanne did not reach "Save for a winter coat" in time (300.02 of 305.1 EUR).
+  ok - it is an event of that day, verbatim
+  ok - trouble and kindness come before routine
+  ok - a day on which nothing happened has none
+# between them
+  ok - the people someone knows, closest first, as the state has them
+  ok - someone met today started as a stranger, not as a friend (25.8)
+  ok - not seeing someone lets them drift, slowly: 71 -> 65
+  ok - with a policy that has no words, nothing is quoted
+
+story: 49/49
+PASS story.js (49 checks)
+# the catalogue is a way into the existing register, not a second one
+  ok - five things on offer, each with words for a person; one more waits for the package that defines it
+  ok - leave_book is scheduled by the watcher for half an hour on
+  ok - send_parcel is scheduled by the watcher for half an hour on
+  ok - extra_shift is scheduled by the watcher for half an hour on
+  ok - every type it schedules is one the simulation already defines: place_shared_book, deliver_food_parcel, offer_extra_work
+  ok - three entries in the one register
+  ok - asking moves nobody, pays nobody, tells nobody
+# every place on offer is a place the package accepts
+  ok - a book can be left on the south-east bench in the park
+  ok - a book can be left on the south-west bench in the park
+  ok - a book can be left on the north-east bench in the park
+  ok - a parcel can be left at resident_a's door
+  ok - a parcel can be left at resident_b's door
+# a refusal has a name, and leaves no trace
+  ok - the same bench twice: something is already there, or already on its way there
+  ok - a shift for someone with no employer: they do not work anywhere that could post a shift
+  ok - a shift past closing time is refused by the intervention's own validation: the place is not open for the whole of that shift
+  ok - an unknown thing, time or person is refused
+  ok - none of the refusals was recorded or announced
+  ok - an error nobody has put into words yet is shown as it is
+# nobody is told; they find out by being there
+  ok - Nadia is out, at cafe
+  ok - the parcel is at the door
+  ok - they neither know of it nor can choose it from where they are
+    (autonomous: Nadia opened the food parcel (4 portions into the pantry). at D2 06:46)
+  ok - if it is opened, it is by the person it was for, once, after coming home
+  ok - what the watcher did is in the day's recap, under the town
+# asked before a save, it happens once after the load
+  ok - one book, applied once, in the loaded world
+  ok - and the page lists it as having happened
+  ok - the loaded world and the one that never stopped are the same world
+# money from outside the town
+  ok - a refund for one, a bill for the other
+  ok - fifteen euro each way, applied once
+  ok - a bill takes the pocket, then savings, and never more than there is (9 of 15)
+  ok - only the person it happened to knows
+  ok - the type refuses absurd sums and unexplained money
+  ok - ten short of the goal
+  ok - a refund lands in the pocket, not in savings: whether it goes toward the goal is theirs to decide
+# the same request in the same world gives the same world
+  ok - deterministic
+
+hand: 34/34
+PASS hand.js (34 checks)
+# who lives here
+  ok - a world made the old way still has two people
+  ok - a town has five
+  ok - the first two are the same two people, by name and look, in both
+  ok - five names, five looks: Nadia Marchetti, Teodora Eberhardt, Sanne Silvestri, Laleh Vellani, Mira Lindqvist
+  ok - each has a home of their own, named after them
+  ok - in a pair world the other homes keep their plain names
+  ok - nobody is named in the world's content
+  ok - everyone starts on a floor tile
+  ok - every new bed and kitchen is furniture on the map with a reachable place to stand
+# three days of five people
+  ok - nobody is ever inside somebody else's home
+  ok - two people work the counter at once (173 samples)…
+  ok - …and nobody doing something from a spot, or talking, ever shares their tile
+  ok - the café gets busy: 5 people at once
+  ok - at least four different pairs of people talk
+  ok - everyone eats
+    (kept 12, broken 0, goals reached 6, missed 1, could-not 4)
+# found by putting five people in one park
+    (Mira: 18 talks with others, 1 with Nadia; goal missed at 0/1)
+  ok - a goal about one person counts talks with that person (0), not the earlier ones with somebody else, and not ones overheard
+  ok - two people who met early at the agreed place kept their promise (D1 10:35 for 11:00)
+  ok - no meeting is called broken when the two sat down together in time
+# the days after the first
+  ok - every working day owes its shift, and it is kept or broken that day
+  ok - one a day, for people with a job and nobody else
+  ok - someone whose goal is over takes up the next on their own list the following morning, and it is theirs alone to know
+  ok - one thing at a time
+  ok - a goal taken up later counts from that morning, not from the beginning of time: 5/2, 1/2, 0/2
+    D3 00:00 Mira did not reach "Catch up with Nadia" in time (0 of 1 talks).
+    D5 00:00 Teodora did not reach "See Nadia again" in time (1 of 2 meetings).
+    D5 00:00 Sanne did not reach "Save for a winter coat" in time (300.02 of 305.1 EUR).
+  ok - the later days have things at stake that can go either way: {"reached":7,"missed":3}
+  ok - what is still to come, and what has been, survive a save
+# a world that does not outgrow its browser
+  ok - a day that has been settled is looked back on exactly as it was before: same sums, same things told
+  ok - its routine is let go, what would still be told is kept, and the last two days are whole
+  ok - seven more days add 141 KB to a 666 KB save — it was 200 KB a day
+  ok - and a world loaded on day twelve is still the world that never stopped, across another settling
+# a town saves and carries on like any world
+  ok - five people in, five people out, the same world
+  ok - and seventeen hours later it is still the same world as the one that never stopped
+  ok - saved against this town
+# what a watcher can do reaches all five
+  ok - a parcel can be left at resident_a's door
+  ok - a parcel can be left at resident_b's door
+  ok - a parcel can be left at resident_c's door
+  ok - a parcel can be left at resident_d's door
+  ok - a parcel can be left at resident_e's door
+  ok - an extra shift can be posted for either of the two who work there
+
+town: 38/38
+PASS town.js (38 checks)
+# a pose follows what someone is really doing
+  ok - two town days show every wired pose: {"sleeping":1311,"seated":140,"talking":165,"reading":118}
+  ok - nobody is posed while walking over, waiting for an answer, or in a direction the pose lacks
+  ok - the mapping reads activity and phase, never who the person is
+  ok - the two poses no cold viewer could name are not wired
+  ok - someone on their way to bed is still walking
+# light is the simulated minute, and only that
+  ok - morning, noon, dusk and night have four different windows, and night is the darkest room
+  ok - the same minute is always the same light
+  ok - no visible step between two adjacent minutes (largest 0.0036)
+  ok - the room's material is borrowed for the paint and handed back, even if painting throws
+  ok - the tint goes on after room and people
+
+poses: 10/10
+PASS poses.js (10 checks)
+# going hungry
+  ok - past the line it shows, and is said once (D1 06:17)
+  ok - not again every minute
+  ok - it wears them down more than twice as fast as the person next to them (8.8 against 3.8)
+  ok - whoever is in the park saw it; someone at home did not
+  ok - what is visible is that they look unwell — not the number, and not their purse
+# helping out
+  ok - someone beside them with money to spare may help
+  ok - nobody is offered help they do not need
+  ok - nor by someone who cannot spare it
+  ok - eight euro change hands once; none is made or lost
+  ok - it is remembered between them
+  ok - the person helped has not been fed or sent anywhere: what they do next is theirs
+  ok - once a day
+  ok - having eaten, they are well again
+# found in review: the person has to still be there
+  ok - nothing is handed to someone who is no longer there
+  ok - and the attempt is on the record as having failed: they left
+# unprompted, over four days of five people
+    D3 07:48 Mira has gone too long without eating, and it shows.
+    D3 09:29 Laleh gave Mira 8 EUR for a meal.
+    D3 23:51 Mira has gone too long without eating, and it shows.
+    D4 09:29 Laleh gave Mira 8 EUR for a meal.
+  ok - someone runs out, goes where people are, and somebody chooses to help
+  ok - and each time they then went and ate, by their own choice
+  ok - all of it survives a save
+# a carried thing can offer actions
+  ok - with nothing in hand, nothing is offered
+  ok - carrying it offers both: toward the person here, and on one's own
+  ok - only to the one carrying it
+  ok - and a carried thing is not lying in the room
+
+need: 22/22
+PASS need.js (22 checks)
+# the day everyone knows is unchanged
+  ok - the meeting at the park still runs its twenty-five minutes to 17:40
+  ok - both were asked twice, nine and seventeen minutes in, and both carried on
+  ok - at the minutes the rule says
+# bringing it to a close
+  ok - a talk closed at the first turn lasted ten minutes, not twenty-five
+  ok - it is still a talk they had: settled once, for the minutes it lasted, and it is said who closed it
+  ok - one relationship gain, not one per turn (1.73)
+  ok - both people's part in it ended, together
+  ok - a short talk at breakfast still does not keep an evening promise
+# nothing else can be chosen mid-talk, and the two are offered at no other time
+  ok - a turn offers exactly: keep talking, or bring it to a close
+  ok - and neither is on offer to someone who is not in a talk
+  ok - the candidate says how long it has been and how long is left
+# words at each turn, in order
+  ok - opening, reply, and two exchanges: six lines, in the order they were said
+  ok - each heard in the room as it was said, from both of them
+  ok - and the other person's next turn is shown what has just been said to them
+  ok - with or without words the talk is mechanically the same talk
+# a provider that does not answer a turn, or cannot
+  ok - no answer in three minutes is no answer: the talk runs its course
+  ok - the lapsed questions are on the record, and nobody was dropped into waiting in the middle of talking
+  ok - a provider that fails is asked once per turn, not once a minute, and the talk goes on
+# saved in the middle of a turn
+  ok - a town day has a turn open at D1 08:20
+  ok - the loaded world and the one that never stopped are the same world two hours on
+# in words, for a provider
+  ok - the brief says it is a turn in a talk and lists the two options
+  ok - and a reply may carry what is said at that turn
+
+turns: 22/22
+PASS turns.js (22 checks)
+# through the watcher's hand
+  ok - with the package loaded, losing a wallet is on offer
+  ok - it goes through the one register
+  ok - an unknown person or place is refused
+  ok - ten euro of theirs is lying in the park
+  ok - and its owner has not been told where
+# unprompted
+    D1 10:01 WALLET_LOST — A wallet was lost.
+    D1 10:46 WALLET_FOUND — Mira picked up a lost wallet.
+    D1 16:26 WALLET_RETURNED — Mira returned a lost wallet to Nadia.
+  ok - lost once; settled at most once
+  ok - it is in one coherent state: returned
+  ok - whoever found it, its owner was not told by the finding
+  ok - and it survives a save as it is
+  ok - the day's recap has it
+
+wallet-in-town: 10/10
+PASS wallet-in-town.js (10 checks)
+# the brief is the request in words, and nothing more
+  ok - rendering is pure and repeatable
+  ok - every option is listed with its id, in order, and no other
+  ok - about 627 tokens
+  ok - nobody else's purse is in it
+  ok - nor anybody else's hunger as a number
+  ok - no holes in the wording
+  ok - over budget, memories go first and the options never do
+# a reply is parsed strictly
+  ok - an id
+  ok - a number, inside chatter and a code fence
+  ok - an object
+  ok - anything that does not name an option on offer is an error response, never a guess
+  ok - words are one clean capped line each; nothing else comes through
+  ok - no usable words is no words
+# words are carried, heard and kept — and change nothing
+  ok - what each said is on the conversation, with the provider's name on it
+  ok - and in the town's record, in their words: Nadia: "Have you got a minute?"
+  ok - whoever was there remembers it
+  ok - the reason is kept with the decision
+  ok - the same two without words do exactly the same things, and nothing is said for them
+  ok - lines survive a save
+  ok - the offline policy says nothing, and nothing is said on its behalf
+# a provider that is slow, broken, or too late
+  ok - one in flight at a time: three answers took three turns (94 ms)
+  ok - latency is measured, and the page is told how patient to be
+  ok - no answer in time is "unavailable", not a hang
+  ok - an answer after the timeout is dropped, not delivered twice
+  ok - a throw, a rejection and a reply with no choice in it are all error responses
+# found in review: time spent queueing counts
+  ok - eight questions into a dead provider are all answered "unavailable" within about one timeout (119 ms), not four
+  ok - and the six whose time ran out in the queue were never sent at all
+# in a running town
+  ok - good answers are acted on and bad ones fall back to waiting, each tagged with where it came from: {"remote_flaky":6,"fallback:policy_error":3,"fallback:policy_timeout":1}
+  ok - the town never stopped for it, and the neighbour on another policy carried on
+  ok - every refusal is on the record with its reason
+  ok - every question is accounted for: {"asked":10,"answered":6,"timeouts":0,"errors":0,"unusable":3,"inFlight":1,"queued":0,"p50":2,"p95":3}
+# asked only when it is close, and never left without an answer
+  ok - the slow provider was asked only for the close calls: {"asked":19,"clear":9,"close":10,"slowAnswered":3,"slowFailed":7}
+  ok - when it failed, the offline answer stood in — nobody was left waiting for nothing: {"hybrid_test:utility:clear":9,"hybrid_test:remote_for_hybrid":3,"hybrid_test:utility:stood_in":5}
+  ok - every choice says who made it
+  ok - the page is told to be patient for it as for the provider inside it
+
+remote-policy: 35/35
+PASS remote-policy.js (35 checks)
+# measuring does not change the world
+  ok - a one-day measurement stops at the start of day 2
+  ok - a day sampled every minute ends byte-identical to the same day not sampled
+# the same numbers twice
+  ok - two three-day runs give identical numbers
+  ok - day 1 of a three-day run is the one-day run
+# the numbers add up
+  ok - three days, 960 waking minutes each (06:30–22:30)
+  ok - dead + live = waking, every day
+  ok - overall is the sum of the days
+  ok - the longest dead stretch fits inside the dead minutes and carries its start
+  ok - together minutes and close calls stay inside their totals
+  ok - beats per type sum to the beats of the day
+# beats and decisions agree with the state
+  ok - beats (27) equal the event log filtered directly
+  ok - and day by day
+  ok - no decision is lost to the cap of 20: 304 collected
+  ok - the default day has close calls, several activities and several places per person
+# a town where nobody decides is more boring
+  ok - more dead minutes: 2814 > 328
+  ok - fewer beats: 13 < 27
+  ok - and no decisions at all
+# the committed baseline is the town as it is
+  ok - living-town/docs/boredom-baseline.json exists
+  ok - it names its commit, seed and days
+  ok - five people give a watcher more than two do: 83 beats against 27, 184 dead minutes against 328
+  ok - a fresh measurement matches the baseline, commit aside
+
+boredom: 21/21
+PASS boredom.js (21 checks)
+# package: objects, actions and interventions are defined
+  ok - the two object typeIds are book_used and food_parcel
+  ok - the object types advertise exactly the actions this package defines
+  ok - read_book matches the lt-actions contract: done at a use spot, one reader at a time, and the claim on the copy left to the core
+  ok - unpack_food_parcel matches the lt-actions contract
+  ok - both interventions are registered through the real LT.Interventions.define
+  ok - registerActions wires both definitions into a catalogue that offers define()
+  ok - registerActions names the missing catalogue hook instead of inventing one
+  ok - the catalogue holds this package's two definitions, registered through LT.Actions.define
+  ok - and a second definition under the same id is refused, not swapped in
+# interventions: invalid parameters and references are refused
+  ok - an empty title is refused
+  ok - zero reading is refused
+  ok - negative reading is refused
+  ok - fractional reading is refused
+  ok - non-finite reading is refused
+  ok - excessive reading is refused
+  ok - an unknown location is refused
+  ok - an out-of-bounds object cell is refused
+  ok - an object cell on a wall is refused
+  ok - a use spot in the water is refused
+  ok - an out-of-bounds use spot is refused
+  ok - a bad facing is refused
+  ok - an empty instance id is refused
+  ok - an unknown recipient is refused
+  ok - a delivery away from the recipient home is refused
+  ok - zero portions are refused
+  ok - fractional portions are refused
+  ok - negative portions are refused
+  ok - excessive portions are refused
+  ok - the café is not the recipient home
+# interventions: one instance per applied intervention, revalidated at apply time
+  ok - both records pass validation when nothing exists yet
+  ok - exactly one instance exists
+  ok - the second application is refused as instance_id_in_use
+  ok - the same instance id is refused at scheduling time afterwards
+# objects: distinct instances share a typeId but not their state
+  ok - two copies have different instance ids and the same typeId
+  ok - each copy owns its own progress record
+  ok - both copies are observable in the room
+  ok - reading one copy advances only that copy's progress for that person
+  ok - the two inhabitants are distinct ids
+# read_book: no progress for approaching, partial kept, one completion
+  ok - no reading progress exists before any execution
+  ok - the book is readable from its own room
+  ok - walking toward the book grants no reading minutes
+  ok - standing on the use spot advances reading by the minutes spent
+  ok - the next block is only what remains for this reader
+  ok - minutes read are kept on the book, per person, between sittings
+  ok - the reader completes exactly at the target
+  ok - a finished book is no longer a candidate for that person
+  ok - exactly one factual BOOK_READ event was emitted
+  ok - a second completion call is a no-op (no double completion)
+  ok - one person finishing does not mark the book read for anybody else
+  ok - progress stays per person per book
+  ok - only the person who finished is marked as having finished
+# read_book: one physical copy, one reader at a time
+  ok - choosing to read claims the single copy, through the simulation
+  ok - while one person holds the copy, another cannot start reading it (in_use)
+  ok - the holder remains eligible to continue
+  ok - an interruption releases the copy and keeps the three minutes read
+  ok - releasing the copy lets the other person read it
+# read_book: no money, trust or goal is invented
+  ok - reading moves no money and no savings
+  ok - reading changes no relationship
+  ok - reading changes no standing
+  ok - reading moves no goal
+# unpack_food_parcel: one transfer, no hunger change
+  ok - the recipient can open the sealed parcel
+  ok - the portions move into the pantry exactly once and never exceed the contents
+  ok - the parcel goes from sealed to empty, opened by the recipient
+  ok - opening the parcel does not directly reduce hunger
+  ok - opening moves no money
+  ok - a second completion transfers nothing more
+  ok - an opened parcel is no longer a candidate
+# the parcel is perceived, not announced, and only its addressee opens it
+  ok - the parcel exists in the recipient home
+  ok - a recipient who was not there has no memory of the delivery
+  ok - somebody who is not the addressee cannot open it
+  ok - the addressee cannot open it from another place
+# the existing eat_at_home becomes available once the pantry is filled
+  ok - eat_at_home is refused while the pantry is empty
+  ok - the opened parcel put food in the pantry
+  ok - eat_at_home is now a legal action; eating itself stays the existing mechanics
+# state is JSON-safe, addressed by id, and survives a save/load
+  ok - the object state is JSON-serialisable and names its affordances
+  ok - every reference in the new state is an id string or a number
+  ok - the book and the parcel survive a save/load
+  ok - partial reading progress survives a save/load
+  ok - the reading target and the availability holder survive
+  ok - the parcel contents, status and addressee id survive
+# read-only queries never write to the authoritative state
+  ok - eligible / observe / objectsAt / anchorFor leave state byte-identical
+
+everyday-opportunities: 81/81
+PASS ../content/everyday-opportunities-v01/test/everyday-opportunities.js (81 checks)
+# pipeline: a policy chooses read_book, the sim runs and settles it
+  ok - the book exists in the state before any decision
+  ok - the full reading was accumulated through the real tick
+  ok - the book was completed once for the reader
+  ok - exactly one BOOK_READ event, not one per tick
+  ok - the copy is free again after completion
+  ok - further time produces no double completion
+# pipeline: a policy chooses unpack_food_parcel into the real pantry
+  ok - the portions arrived in the pantry exactly once through the real tick
+  ok - the parcel is empty, not emptied twice
+  ok - opening the parcel created no money
+  ok - later ticks transfer nothing more
+  ok - once refilled and hungry, the existing eat_at_home is available; the package did not eat for them
+
+everyday-opportunities pipeline: 11/11
+PASS ../content/everyday-opportunities-v01/test/pipeline.js (11 checks)
+# package: object type, three actions and the intervention are defined
+  ok - the object type is wallet_lost with four states
+  ok - pick_up_wallet: object, use_spot, exclusive, 2 minutes, not interruptible
+  ok - return_wallet: person, beside_person, 3 minutes
+  ok - keep_wallet_money: no target, anywhere, 1 minute
+  ok - all three actions are in the catalogue, registered through LT.Actions.define
+  ok - the intervention is registered through the real LT.Interventions.define
+  ok - the package declares wallet_lost to LT.Content at version v01
+  ok - registerActions wires all three definitions into a catalogue that offers define()
+  ok - and a second definition under the same id is refused, not swapped in
+# visual: only a lost wallet is drawn, and only while lost
+  ok - a lost wallet shows as wallet_lost/lost
+  ok - a carried wallet is not shown lying anywhere
+  ok - a kept wallet is not shown either
+# interventions: invalid parameters and references are refused by name
+  ok - an empty id is refused
+  ok - a missing id is refused
+  ok - an unknown owner is refused
+  ok - zero cash is refused
+  ok - negative cash is refused
+  ok - a fractional amount is allowed, because money is not whole euros
+  ok - non-finite cash is refused
+  ok - NaN cash is refused
+  ok - more cash than the owner has is refused
+  ok - an unknown place is refused
+  ok - an out-of-bounds cell is refused
+  ok - a wallet dropped on a wall is refused
+  ok - a missing use spot is refused
+  ok - a fractional use spot is refused
+  ok - an out-of-bounds use spot is refused
+  ok - a use spot on the bench is refused
+  ok - a bad facing is refused
+  ok - an unreachable use spot is refused
+  ok - a first wallet can be created
+  ok - an id already in state.objects is refused
+# the loss: cash leaves the owner once, and the town is not told where
+  ok - cash leaves the owner when the wallet is lost
+  ok - cash leaves the owner once and only once across two apply calls with the same id
+  ok - and only one wallet exists
+  ok - a single WALLET_LOST names the owner as its subject
+  ok - no character, the owner included, remembers the loss
+  ok - the owner's observation does not contain the wallet before they perceive it themselves
+  ok - standing in the park, the owner perceives it themselves
+# pick_up_wallet: present, at the spot, once; the finder keeps it privately
+  ok - the wallet is not offered from another place
+  ok - in the same place, picking it up is a legal action
+  ok - walking toward it does not pick it up
+  ok - at the spot, a finder picks it up and carries it
+  ok - a carried wallet lies nowhere
+  ok - a carried wallet advertises the two carried actions, not the ground one
+  ok - and it is no longer an object of the room
+  ok - picking it up moves no cash anywhere
+  ok - a second pick-up callback settles nothing
+  ok - exactly one WALLET_FOUND event
+  ok - the find is attributed to the finder
+  ok - the owner is not notified that their wallet was found
+  ok - the finder does remember it
+# pick_up_wallet: the owner may take back their own wallet
+  ok - the owner recovers it directly to returned
+  ok - the cash comes straight back to the owner
+  ok - and the town total is unchanged
+  ok - one WALLET_RECOVERED by the owner
+  ok - a recovered wallet is no longer offered
+# pick_up_wallet: one wallet, one pair of hands
+  ok - choosing to pick it up claims the wallet through the simulation
+  ok - while one person holds it, another cannot
+# pick_up_wallet and the core's spot_occupied rule
+  ok - with the pick-up spot free, picking the wallet up is legal
+  ok - someone working the spot blocks the pick-up (the core's spot_occupied rule)
+  ok - and the pick-up cannot even be started while the spot is taken
+  ok - so the wallet stays lost and unclaimed from afar
+  ok - once the spot is free again the wallet can be picked up
+# return_wallet: beside the owner, cash once, both records moved
+  ok - it cannot be returned across town
+  ok - a person without the wallet is no target
+  ok - beside the owner, returning it is a legal action
+  ok - the candidate names the cash and the owner, once the wallet has been picked up
+  ok - the wallet goes back to returned, held by nobody, lying nowhere
+  ok - the cash lands in the owner pocket, exactly once
+  ok - the owner trusts the finder more and feels closer
+  ok - the finder feels closer to the owner
+  ok - the town total never moved
+  ok - WALLET_RETURNED notifies the owner, who remembers it
+  ok - a second return_wallet on the same wallet is refused (no double payment)
+  ok - and a returned wallet is no longer a candidate to return
+# keep_wallet_money: cash once, privately, and no relationship is invented
+  ok - carrying a wallet, keeping the money is a legal action
+  ok - the candidate names the cash and the owner
+  ok - the cash lands in the finder pocket, once
+  ok - the wallet is settled as kept
+  ok - the town total is unchanged
+  ok - WALLET_KEPT names only the keeper as its actor
+  ok - the owner is never told the money was kept
+  ok - keeping invents no trust and no closeness
+  ok - a second keep_wallet_money on the same wallet is refused (no double payment)
+  ok - and a kept wallet is no longer a candidate to keep
+# the invariant: money + lost/carried cash is constant through every path
+  ok - cash is never duplicated: the total holds after the loss
+  ok - cash is never duplicated: the total holds after it is found
+  ok - cash is never duplicated: the total holds after it is kept
+  ok - cash is never duplicated: the total holds before returning
+  ok - cash is never duplicated: the total holds after returning
+  ok - cash is never duplicated: the total holds after the owner recovers it
+# five inhabitants: the package works in the town cast too
+  ok - the town cast is the five inhabitants
+  ok - a neighbour can lose a wallet in the five-person town
+  ok - and the cash leaves that neighbour exactly once
+  ok - and the town still has its five inhabitants
+  ok - the wallet validates against the five-person state
+# persistence: a wallet round-trips in each of the four states, and corruptions are refused
+  ok - the four states are all represented
+  ok - a lost wallet survives JSON and validates
+  ok - a carried wallet survives JSON and validates
+  ok - a returned wallet survives JSON and validates
+  ok - a kept wallet survives JSON and validates
+  ok - a wallet in all four statuses is accepted
+  ok - the real save layer carries a carried wallet with its holder and its cash
+  ok - corruption 1: an unknown owner is refused by name
+  ok - corruption 2: an unknown heldBy is refused by name
+  ok - corruption 3: carried with a location is refused by name
+  ok - corruption 4: lost with a holder is refused by name
+  ok - corruption 5: a wallet with no cash is refused by name
+  ok - corruption 6: an unknown status is refused by name
+# read-only queries never write to the authoritative state
+  ok - eligible / candidateMeta / visual / observe leave state byte-identical
+# scores: suggested in the policy's own terms, never as rules
+  ok - offerScores registered every action with UtilityPolicy exactly once
+  ok - pick_up_wallet is a small positive curiosity term
+  ok - return_wallet grows with conscientiousness
+  ok - return_wallet grows with closeness to the owner
+  ok - keep_wallet_money shrinks with conscientiousness
+  ok - keep_wallet_money shrinks with caution
+  ok - keep_wallet_money grows with the cash at stake
+  ok - and it grows with how urgently the money is needed
+
+lost-wallet: 119/119
+PASS ../content/lost-wallet-v01/test/lost-wallet.js (119 checks)
+# pipeline (return ending): found, walked over, returned — cash and relationship move once
+  ok - the cash the owner just lost is already counted by the invariant, at minute 0
+  ok - the wallet exists, lost, before any decision
+  ok - the cash left the owner exactly once, at the loss
+  ok - the finder has a real walk to the use spot (13 steps), not an instant pick-up
+  ok - the sum of everyone's money plus the wallet's cash held constant at 59.5 through all 24 sampled minutes
+  ok - the wallet reached "returned" through the real tick, within 24 minutes
+  ok - and is held by nobody, lying nowhere, once returned
+  ok - pick_up_wallet was chosen once, by the finder's own policy
+  ok - return_wallet was chosen once, by the same policy — offered only because the core lists it in the carried wallet's heldAffordances
+  ok - the cash landed back in the owner's pocket exactly once, and never in the finder's
+  ok - exactly one WALLET_RETURNED event, not one per tick
+  ok - the owner's trust and closeness toward the finder moved (68->78, 71->73.59)
+  ok - the finder's own closeness to the owner moved as well
+  ok - the owner was notified: WALLET_RETURNED is in their memory
+  ok - and still never learned where it fell in the first place
+# pipeline (kept ending): found, and the money is kept — privately, once, no relationship moves
+  ok - the wallet exists, lost, before any decision
+  ok - the sum of everyone's money plus the wallet's cash held constant at 59.5 through all 17 sampled minutes
+  ok - the wallet reached "kept" through the real tick, within 17 minutes
+  ok - and is held by nobody once settled
+  ok - keep_wallet_money was chosen once, by the finder's own policy — offered on its own, needing no person present
+  ok - the cash landed in the finder's pocket exactly once
+  ok - and the owner never got it back
+  ok - exactly one WALLET_KEPT event, not one per tick
+  ok - the owner was never told: not that it was lost, not that it was found, not that the money was kept
+  ok - no relationship moved on the owner's side
+  ok - no relationship moved on the finder's side either
+# save round trip: LT.Save.serialize -> JSON -> LT.Save.deserialize, a wallet in each of the four reachable statuses
+  ok - the carried instance really does have location: null before it is saved
+  ok - all four reachable statuses exist in the world before it is saved
+  ok - a lost wallet survives the round trip with its status, cash, holder and location intact
+  ok - a carried wallet survives the round trip with its status, cash, holder and location intact
+  ok - a returned wallet survives the round trip with its status, cash, holder and location intact
+  ok - a kept wallet survives the round trip with its status, cash, holder and location intact
+  ok - the restored world still accepts the carried wallet with location: null — validate(object, env) was never asked to refuse it
+  ok - the restored world carries on: five simulated minutes actually passed
+
+lost-wallet pipeline: 34/34
+PASS ../content/lost-wallet-v01/test/pipeline.js (34 checks)
+  ok  every needed pose exists
+  ok  no pose id names a person, a character id or an action id
+  ok  the sheet order and the pose table agree
+  ok  left is the mirror of right and never a column of its own
+  ok  every look and every apron variant compiles for every cell
+  ok  draw refuses instead of drawing a hole
+  ok  a looping pose is a pure function of t
+  ok  the committed sheet is on disk and is the size the runtime expects
+  ok  at() is pure and total
+      worst one-minute step: 3.00/255
+  ok  no adjacent minute of the day jumps
+  ok  midnight is continuous with the minute before it
+  ok  the four hours of the day are plainly different
+  ok  night is darker and cooler than noon, dusk is warmer
+  ok  apply is two whole-pixel fills and touches nothing else
+  ok  material() only swaps the two glass values
+  ok  neither module reads or writes a simulation
+{"status":"pass","checks":16}
+PASS ../content/activity-poses-v01/test/activity-poses.js
+
+PASS living-town/test — 970 checks total

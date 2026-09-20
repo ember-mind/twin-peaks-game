@@ -30,13 +30,13 @@
     {
       "id": "street",
       "material": "lt_street",
-      "pieces": 11,
-      "foreground": 11,
-      "claimed": 14,
+      "pieces": 14,
+      "foreground": 7,
+      "claimed": 120,
       "kinds": [
         "door",
-        "gate",
-        "tree"
+        "front",
+        "gate"
       ]
     },
     {
@@ -154,6 +154,266 @@
       "id": "flat_e",
       "minute": 960,
       "people": 1
+    }
+  ],
+  "streetViews": [
+    {
+      "key": "street-west",
+      "minute": 600,
+      "focus": [
+        0,
+        4
+      ],
+      "people": [
+        [
+          3,
+          3,
+          "down",
+          7
+        ],
+        [
+          7,
+          5,
+          "right",
+          4
+        ]
+      ]
+    },
+    {
+      "key": "street-east",
+      "minute": 600,
+      "focus": [
+        19,
+        4
+      ],
+      "people": [
+        [
+          16,
+          3,
+          "down",
+          7
+        ],
+        [
+          12,
+          5,
+          "left",
+          4
+        ]
+      ]
+    },
+    {
+      "key": "street-door-north",
+      "minute": 600,
+      "focus": [
+        15,
+        4
+      ],
+      "people": [
+        [
+          15,
+          2,
+          "down",
+          4
+        ],
+        [
+          9,
+          3,
+          "down",
+          7
+        ]
+      ]
+    },
+    {
+      "key": "street-approach-west",
+      "minute": 600,
+      "focus": [
+        0,
+        4
+      ],
+      "people": [
+        [
+          1,
+          7,
+          "up",
+          4
+        ],
+        [
+          8,
+          7,
+          "up",
+          7
+        ]
+      ]
+    },
+    {
+      "key": "street-approach-east",
+      "minute": 600,
+      "focus": [
+        19,
+        4
+      ],
+      "people": [
+        [
+          13,
+          7,
+          "up",
+          4
+        ],
+        [
+          17,
+          7,
+          "up",
+          7
+        ]
+      ]
+    },
+    {
+      "key": "street-approach-night-west",
+      "minute": 1320,
+      "focus": [
+        0,
+        4
+      ],
+      "people": [
+        [
+          1,
+          7,
+          "up",
+          4
+        ],
+        [
+          8,
+          7,
+          "up",
+          7
+        ]
+      ]
+    },
+    {
+      "key": "street-approach-night-east",
+      "minute": 1320,
+      "focus": [
+        19,
+        4
+      ],
+      "people": [
+        [
+          13,
+          7,
+          "up",
+          4
+        ],
+        [
+          17,
+          7,
+          "up",
+          7
+        ]
+      ]
+    },
+    {
+      "key": "street-threshold-west",
+      "minute": 600,
+      "focus": [
+        0,
+        4
+      ],
+      "people": [
+        [
+          1,
+          8,
+          "up",
+          4
+        ]
+      ]
+    },
+    {
+      "key": "street-threshold-east",
+      "minute": 600,
+      "focus": [
+        19,
+        4
+      ],
+      "people": [
+        [
+          13,
+          8,
+          "up",
+          4
+        ],
+        [
+          17,
+          8,
+          "up",
+          7
+        ]
+      ]
+    },
+    {
+      "key": "street-threshold-night-west",
+      "minute": 1320,
+      "focus": [
+        0,
+        4
+      ],
+      "people": [
+        [
+          1,
+          8,
+          "up",
+          4
+        ]
+      ]
+    },
+    {
+      "key": "street-threshold-night-east",
+      "minute": 1320,
+      "focus": [
+        19,
+        4
+      ],
+      "people": [
+        [
+          13,
+          8,
+          "up",
+          4
+        ],
+        [
+          17,
+          8,
+          "up",
+          7
+        ]
+      ]
+    },
+    {
+      "key": "street-door-south",
+      "minute": 600,
+      "focus": [
+        9,
+        4
+      ],
+      "people": [
+        [
+          8,
+          8,
+          "up",
+          4
+        ],
+        [
+          13,
+          8,
+          "up",
+          7
+        ],
+        [
+          7,
+          7,
+          "right",
+          1
+        ]
+      ]
     }
   ]
 }

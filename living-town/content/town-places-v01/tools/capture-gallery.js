@@ -85,6 +85,9 @@ function dropLock() { try { fs.rmdirSync(LOCK); } catch (e) { /* not ours to dro
       put('images/05-collision-' + id.replace(/_/g, '-') + '.png',
         fromDataUrl(await page.evaluate("GALLERY.png('collision-" + id + "', 1)")));
     }
+    for (const key of await page.evaluate('GALLERY.reviewSpecs.map(s => s.key)')) {
+      put('images/06-' + key + '.png', fromDataUrl(await page.evaluate("GALLERY.png('" + key + "', 1)")));
+    }
     put('town-places.manifest.json', Buffer.from(await page.evaluate('GALLERY.manifest()') + '\n'));
 
     if (check) {

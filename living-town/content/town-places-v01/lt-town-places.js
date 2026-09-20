@@ -65,7 +65,8 @@
 
   var STREET = mix(HOME, {
     tile: '#9a8d76', tileShade: '#877b66', floorLight: '#aca08a', floorShade: '#948872',
-    red: '#7a4a3c', redHi: '#a06f5c', redLight: '#c49b86', redDark: '#452721'
+    red: '#7a4a3c', redHi: '#a06f5c', redLight: '#c49b86', redDark: '#452721',
+    roof: '#53636d', roofHi: '#7d9096', roofDark: '#303e49'
   });
 
   function mix(base, over) {
@@ -218,17 +219,38 @@
   }
 
   function streetPlan(rows) {
-    var out = [];
-    for (var y = 0; y < rows.length; y++) for (var x = 0; x < rows[y].length; x++) {
-      if (rows[y].charAt(x) === 'T') out.push(piece('tree', x, y, 1, 1));
-    }
-    /* A doorway with paving on its south side is a house door, approached off
-     * the street; one with paving on its north side is the way through to
-     * somewhere else. Both are read off the rows, never off a list of names. */
-    runs(rows, 'D').forEach(function (d) {
-      out.push(piece(at(rows, d.x, d.y + 1) === '-' ? 'door' : 'gate', d.x, d.y, d.w, 1));
+    var out = [], fronts = [], doors = runs(rows, 'D');
+    var paved = [];
+    rows.forEach(function (r, y) { if (/^-+$/.test(r)) paved.push(y); });
+    var north = paved.length ? paved[0] : 3;
+    var south = paved.length ? paved[paved.length - 1] : 7;
+    /* Geometry comes from H and D. The sequence assigns each real entrance
+     * its destination's material; it contains no positions or collision data. */
+    var destinations = { north: ['flat_a', 'flat_c', 'cafe'], south: ['flat_b', 'park', 'flat_e', 'flat_d'] };
+    ['north', 'south'].forEach(function (side) {
+      var ds = doors.filter(function (d) { return side === 'north' ? d.y < north : d.y > south; });
+      ds.forEach(function (d, i) {
+        var start = i ? Math.floor((ds[i - 1].x + ds[i - 1].w / 2 + d.x + d.w / 2) / 2) : 0;
+        var end = i + 1 < ds.length ? Math.floor((d.x + d.w / 2 + ds[i + 1].x + ds[i + 1].w / 2) / 2) : widthOf(rows);
+        var destination = destinations[side][i] || null;
+        var cells = [];
+        for (var y = 0; y < rows.length; y++) for (var x = start; x < end; x++) {
+          if (at(rows, x, y) === 'H' && (side === 'north' ? y < north : y > south)) cells.push({ x: x, y: y });
+        }
+        if (cells.length) {
+          var y0 = Math.min.apply(null, cells.map(function (c) { return c.y; }));
+          var y1 = Math.max.apply(null, cells.map(function (c) { return c.y; }));
+          var front = piece('front', start, y0, end - start, y1 - y0 + 1, {
+            cells: cells, side: side, destination: destination, doorX: d.x, doorW: d.w,
+            foreground: false
+          });
+          fronts.push(front); out.push(front);
+        }
+        out.push(piece(destination === 'park' ? 'gate' : 'door', d.x, d.y, d.w, 1,
+          { street: true, side: side, destination: destination }));
+      });
     });
-    return { kind: 'street', pieces: out, material: 'lt_street' };
+    return { kind: 'street', pieces: out, fronts: fronts, northPavement: north, southPavement: south, material: 'lt_street' };
   }
 
   /* The building is every row from the top down to the last row that still
@@ -534,7 +556,7 @@
 
   /* Two stone piers and the ironwork between them: a way through a boundary
    * that has no wall, because the rows give it none. */
-  function gate(g, kit, p, sx, sy, w) {
+  function gate(g, kit, p, sx, sy, w, wide) {
     var R = kit.rect, W = w * T;
     kit.contactShadow(g, sx + 1, sy + 14, W - 2, p);
     [0, W - 6].forEach(function (dx) {
@@ -547,12 +569,13 @@
       R(g, sx + dx, sy - 10, 6, 1, p.pavingDark);
     });
     /* Open leaves: the bars are drawn swung back against the piers. */
-    [6, W - 12].forEach(function (dx, n) {
-      R(g, sx + dx, sy - 7, 6, 21, 'rgba(37,40,43,.20)');
-      for (var i = 0; i < 6; i += 2) R(g, sx + dx + i, sy - 7, 1, 20, p.ink);
-      R(g, sx + dx, sy - 7, 6, 1, p.ink);
-      R(g, sx + dx, sy + 2, 6, 1, p.ink);
-      R(g, sx + dx + (n ? 5 : 0), sy - 9, 1, 3, p.ink);
+    [6, W - (wide ? 9 : 12)].forEach(function (dx, n) {
+      var leafWidth = wide ? 3 : 6;
+      R(g, sx + dx, sy - 7, leafWidth, 21, 'rgba(37,40,43,.20)');
+      for (var i = 0; i < leafWidth; i += 2) R(g, sx + dx + i, sy - 7, 1, 20, p.ink);
+      R(g, sx + dx, sy - 7, leafWidth, 1, p.ink);
+      R(g, sx + dx, sy + 2, leafWidth, 1, p.ink);
+      R(g, sx + dx + (n ? leafWidth - 1 : 0), sy - 9, 1, 3, p.ink);
     });
     R(g, sx + 6, sy + 13, W - 12, 3, p.pavingDark);
     R(g, sx + 6, sy + 13, W - 12, 1, p.paving);
@@ -865,13 +888,16 @@
 
   /* ---- place painters -------------------------------------------------- */
 
-  function drawPiece(g, kit, p, x0, y0, piece, rows, opts) {
+  function drawPiece(g, kit, p, x0, y0, piece, rows, opts, foreground) {
     var sx = x0 + piece.x * T, sy = y0 + piece.y * T, lamp = lampsOn(opts);
     switch (piece.kind) {
       case 'tree': tree(g, kit, p, sx, sy); break;
       case 'bench': bench(g, kit, p, sx, sy, piece.facing); break;
-      case 'gate': gate(g, kit, p, sx, sy, piece.w); break;
-      case 'door': doorway(g, kit, p, sx, sy, piece.w, lamp); break;
+      case 'gate': gate(g, kit, p, sx, sy, piece.w, piece.street); break;
+      case 'door':
+        if (piece.street) streetDoor(g, kit, p, sx, sy, piece, opts, foreground);
+        else doorway(g, kit, p, sx, sy, piece.w, lamp);
+        break;
       case 'water': water(g, kit.rect, p, x0, y0, rows, piece.cells); break;
       case 'bed': bed(g, kit, p, sx, sy, piece.w, piece.h, piece.orient); break;
       case 'kitchen': kitchen(g, kit, p, sx, sy, piece.w, piece.h, piece.side,
@@ -975,77 +1001,206 @@
     });
   }
 
-  function drawStreet(g, kit, p, rows, x0, y0, plan, opts) {
-    var R = kit.rect, w = widthOf(rows), h = rows.length, x, y;
-    backdrop(g, kit, '#242a22');
-    var road = {};
-    for (y = 0; y < h; y++) if (rows[y].split('').every(function (c) { return c === '-'; })) road[y] = true;
-    for (y = -1; y <= h; y++) for (x = -1; x <= w; x++) {
-      var mx = Math.min(Math.max(x, 0), w - 1), my = Math.min(Math.max(y, 0), h - 1);
-      var ch = rows[my].charAt(mx), sx = x0 + x * T, sy = y0 + y * T;
-      var outside = x < 0 || y < 0 || x >= w || y >= h;
-      var isRoad = road[my] && !outside;
-      if (isRoad) {
-        paving(g, R, p, sx, sy, x, y, 'road');
-        if (!road[my - 1]) kerb(g, R, p, sx, sy, 'up');
-        if (!road[my + 1]) kerb(g, R, p, sx, sy, 'down');
-        continue;
-      }
-      if (!outside && (ch === '-' || ch === 'D')) { paving(g, R, p, sx, sy, x, y, 'path'); continue; }
-      grass(g, R, p, sx, sy, x, y);
-      if (!outside && ch === ',') flowers(g, R, p, sx, sy, x, y, p.redLight);
-      if (outside) beyond(g, R, p, sx, sy, x, y);
+  function streetAccent(kit, destination, p) {
+    if (destination === 'cafe') return mix(p, kit.materials.lt_cafe || HOME);
+    return mix(p, TP.MATERIALS[TP.materialFor(destination)] || HOME);
+  }
+
+  function streetWindow(g, kit, p, x, y, w, night) {
+    if (w < 12) return;
+    var glass = night ? mix(p, { glass: '#e2b458', glassHi: '#f1ead8' }) : p;
+    kit.window(g, x, y, w, 22, glass);
+    kit.rect(g, x - 1, y + 22, w + 2, 2, p.woodLight);
+    kit.rect(g, x - 1, y + 24, w + 2, 1, p.woodDark);
+  }
+
+  function streetFront(g, kit, p, x0, y0, f, opts) {
+    var R = kit.rect, x = x0 + f.x * T, y = y0 + f.y * T, W = f.w * T, H = f.h * T;
+    var a = streetAccent(kit, f.destination, p), night = lampsOn(opts) > 0;
+    var doorLeft = x0 + f.doorX * T, doorRight = doorLeft + f.doorW * T;
+    if (f.destination === 'park') {
+      /* The gate is in a garden boundary. Dense foliage behind the boundary
+       * fills the H cells; the opening itself remains the D run. */
+      R(g, x, y, W, H, p.green);
+      /* Rounded connected canopies, with trunks visible behind the boundary.
+       * They remain inside the garden's solid H footprint. */
+      [9, W - 27].forEach(function (dx) {
+        tree(g, kit, p, x + dx, y + 34);
+      });
+      [[x, doorLeft - x], [doorRight, x + W - doorRight]].forEach(function (span) {
+        R(g, span[0], y, span[1], 16, p.ink);
+        R(g, span[0] + 1, y + 1, span[1] - 2, 13, p.paving);
+        R(g, span[0], y, span[1], 3, p.pavingHi);
+        R(g, span[0], y + 14, span[1], 2, p.pavingDark);
+        for (var j = 7; j < span[1]; j += 12) R(g, span[0] + j, y + 5, 1, 8, p.pavingDark);
+      });
+      R(g, doorLeft, y, f.doorW * T, T, p.gravel);
+      return;
     }
-    /* Wheel tracks down the middle of the carriageway, and a drain at the kerb. */
-    Object.keys(road).forEach(function (key) {
-      var ry = Number(key);
-      if (road[ry - 1]) return;
-      var top = y0 + ry * T;
-      R(g, x0, top + 13, w * T, 2, 'rgba(37,40,43,.10)');
-      R(g, x0, top + T + 9, w * T, 2, 'rgba(37,40,43,.10)');
-      for (var cx = 8; cx < w * T; cx += 48) R(g, x0 + cx, top + T - 1, 20, 2, p.pavingHi);
-      for (var dxp = 24; dxp < w * T; dxp += 112) {
-        R(g, x0 + dxp, top + 2, 11, 7, p.ink);
-        R(g, x0 + dxp + 1, top + 3, 9, 5, '#3c3f3c');
-        for (var i = 0; i < 2; i++) R(g, x0 + dxp + 2, top + 4 + i * 2, 7, 1, p.pavingDark);
-        R(g, x0 + dxp + 1, top + 3, 9, 1, p.pavingDark);
+    R(g, x, y, W, H, p.ink);
+    R(g, x + 1, y + 1, W - 2, H - 2, a.plaster || p.plaster);
+    if (f.side === 'north') {
+      /* A full 48px wall, with its eave above the top row. */
+      R(g, x + 1, y + 1, W - 2, 3, p.plasterHi);
+      R(g, x + 1, y + 4, W - 2, 2, p.plasterShade);
+      R(g, x, y - 8, W, 8, p.ink);
+      R(g, x + 1, y - 7, W - 2, 5, a.redDark);
+      R(g, x + 1, y - 7, W - 2, 1, a.redHi);
+      R(g, x, y - 2, W, 2, p.woodDark);
+      R(g, x + 1, y, W - 2, 1, p.woodLight);
+      R(g, x + 1, y + H - 8, W - 2, 6, a.redDark);
+      R(g, x + 1, y + H - 8, W - 2, 1, a.redHi);
+      R(g, x, y + H - 2, W, 2, p.woodDark);
+      R(g, x, y + H, W, 2, 'rgba(37,40,43,.30)');
+      /* Windows occupy the uninterrupted wall between the actual doors. */
+      var leftWidth = Math.min(28, doorLeft - x - 14), rightWidth = Math.min(30, x + W - doorRight - 14);
+      streetWindow(g, kit, a, x + 7, y + 11, leftWidth, night);
+      streetWindow(g, kit, a, x + W - 7 - rightWidth, y + 11, rightWidth, night);
+      R(g, x + W - 3, y + 2, 2, H - 4, p.plasterShade);
+      if (f.destination === 'cafe') {
+        /* A cup and saucer in the display glass: a pictogram, no glyphs. */
+        var cupX = x + 17, cupY = y + 18;
+        R(g, cupX - 6, cupY - 2, 19, 16, a.redDark);
+        R(g, cupX - 4, cupY, 10, 8, p.cream);
+        R(g, cupX - 3, cupY + 7, 8, 2, p.creamShade);
+        R(g, cupX + 6, cupY + 1, 4, 6, p.cream);
+        R(g, cupX + 6, cupY + 2, 2, 3, a.redDark);
+        R(g, cupX - 6, cupY + 10, 18, 2, p.cream);
+        R(g, cupX - 4, cupY + 12, 14, 1, p.creamShade);
       }
+
+    } else {
+      /* Near buildings show their street-facing eave and their roof behind
+       * it. The door pier is the only projection into the pavement. */
+      /* A hipped slate roof: diagonal rakes expose the cream gable ends.
+       * Long seams follow the roof slope, unlike the horizontal courses of
+       * the garden wall. Everything stays in this building's H footprint. */
+      R(g, x + 1, y + 1, W - 2, H - 2, p.plasterShade);
+      R(g, x + 2, y + 2, W - 4, H - 4, p.plaster);
+      for (var ry = 1; ry < H - 3; ry++) {
+        var inset = Math.max(1, 16 - Math.floor(ry / 3));
+        R(g, x + inset, y + ry, W - inset * 2, 1, p.roofDark);
+        R(g, x + inset + 1, y + ry, W - inset * 2 - 2, 1, ry < 20 ? p.roofHi : p.roof);
+        for (var rx = 24; rx < W - 18; rx += 12) {
+          var seam = rx + Math.floor((ry - 20) / 8);
+          R(g, x + seam, y + ry, 1, 1, p.roofDark);
+        }
+      }
+      R(g, x + 15, y, W - 30, 3, p.roofDark);
+      R(g, x + 16, y + 1, W - 32, 1, p.metalHi);
+      R(g, x + 1, y + H - 4, W - 2, 3, p.roofDark);
+      R(g, x + 2, y + H - 4, W - 4, 1, p.metalHi);
+      /* Chimney and glazed rooflight break the broad slope at different
+       * heights. Their feet remain entirely on the roof. */
+      if (W >= 64) {
+        var chimneyX = doorLeft - x > W / 2 ? x + 17 : x + W - 27;
+        R(g, chimneyX, y + 24, 11, 17, p.ink);
+        R(g, chimneyX + 1, y + 25, 9, 15, p.brick);
+        R(g, chimneyX + 2, y + 25, 3, 14, p.brickHi);
+        R(g, chimneyX - 1, y + 23, 13, 4, p.ink);
+        R(g, chimneyX, y + 24, 11, 2, p.pavingHi);
+        R(g, chimneyX + 3, y + 24, 5, 1, p.ink);
+        var wx = chimneyX > x + W / 2 ? x + 15 : x + W - 30;
+        R(g, wx, y + 29, 14, 12, p.ink);
+        R(g, wx + 1, y + 30, 12, 10, p.creamShade);
+        R(g, wx + 3, y + 32, 8, 6, night ? p.gold : p.glass);
+        R(g, wx + 3, y + 32, 8, 1, p.glassHi);
+      }
+
+    }
+  }
+
+  function streetDoor(g, kit, p, sx, sy, d, opts, foreground) {
+    var R = kit.rect, W = d.w * T, a = streetAccent(kit, d.destination, p);
+    var top = sy - 19, bottom = sy + T, lamp = lampsOn(opts);
+    if (d.side === 'south') {
+      /* The near houses face north: their ground threshold is the north
+       * edge of D, exactly against the pavement. The open leaves are on the
+       * sides, so somebody approaching remains a complete silhouette. */
+      top = sy - 31; bottom = sy;
+      if (!foreground) {
+        /* Cut the real walkable opening out of the roof, too: D is an
+         * entrance recess, never a slate surface under somebody's feet. */
+        R(g, sx, sy, W, T, p.woodDark);
+        R(g, sx + 2, sy + 1, W - 4, T - 2, p.wood);
+        R(g, sx + 2, sy + 1, W - 4, 2, p.woodHi);
+        R(g, sx + 2, sy + 8, W - 4, 1, p.woodDark);
+        R(g, sx + 1, top, W - 2, bottom - top, p.ink);
+        R(g, sx + 2, top + 1, W - 4, bottom - top - 1, p.creamShade);
+        R(g, sx + 4, top + 3, W - 8, bottom - top - 4, p.woodDark);
+        R(g, sx + 8, top + 4, W - 16, bottom - top - 6, p.ink);
+        /* Door leaves swung back into the recess, tall narrow panels rather
+         * than a glazed rectangle that could be mistaken for a dormer. */
+        [4, W - 8].forEach(function (dx) {
+          R(g, sx + dx, top + 3, 4, bottom - top - 5, a.redDark);
+          R(g, sx + dx + 1, top + 4, 2, bottom - top - 7, a.red);
+          R(g, sx + dx + 1, top + 5, 1, bottom - top - 10, a.redHi);
+          R(g, sx + dx + 1, top + 18, 2, 1, p.gold);
+        });
+        R(g, sx + 2, top, W - 4, 3, a.redDark);
+        R(g, sx + 3, top + 1, W - 6, 1, a.redHi);
+        R(g, sx + 1, top + 7, 5, 7, p.ink);
+        R(g, sx + 2, top + 8, 3, 5, lamp > 0 ? '#ffdc82' : p.metal);
+        R(g, sx + 2, top + 8, 3, 1, p.metalHi);
+        /* A broad flat threshold joins both cells to the pavement. */
+        R(g, sx + 4, bottom - 3, W - 8, 3, p.pavingHi);
+        R(g, sx + 4, bottom - 1, W - 8, 1, p.pavingDark);
+      }
+      /* The back-facing lintel sits behind pavement visitors. Only the
+       * outer reveals need the normal foreground depth band. */
+      [1, W - 3].forEach(function (dx) {
+        R(g, sx + dx, top + 3, 2, bottom - top - 3, p.ink);
+        R(g, sx + dx, top + 3, 1, bottom - top - 4, p.creamShade);
+      });
+      return;
+    }
+    if (!foreground) {
+      kit.contactShadow(g, sx + 2, bottom - 1, W - 4, p);
+      R(g, sx + 4, top + 3, W - 8, bottom - top - 3, p.ink);
+      R(g, sx + 6, top + 4, W - 12, bottom - top - 5, a.redDark);
+      R(g, sx + 7, top + 5, W - 14, bottom - top - 7, a.red);
+      R(g, sx + 8, top + 6, W - 16, 11, d.destination === 'cafe' ? p.glass : a.redHi);
+      R(g, sx + 8, top + 6, W - 16, 1, p.glassHi);
+      R(g, sx + 8, top + 20, W - 16, 10, a.redDark);
+      R(g, sx + 9, top + 21, W - 18, 1, a.redHi);
+      R(g, sx + W - 10, top + 18, 2, 2, p.gold);
+    }
+    [2, W - 5].forEach(function (dx) {
+      R(g, sx + dx, top + 2, 3, bottom - top - 2, p.ink);
+      R(g, sx + dx + 1, top + 3, 1, bottom - top - 4, p.creamShade);
     });
-    /* Where a footpath meets the carriageway the kerb is dropped: no kerbstone,
-     * a worn apron of road instead. The rows say where, by putting paving up
-     * against the road. */
-    var roadRows = Object.keys(road).map(Number).sort(function (a, b) { return a - b; });
-    if (roadRows.length) {
-      var first = roadRows[0], last = roadRows[roadRows.length - 1];
-      for (x = 0; x < w; x++) {
-        if (at(rows, x, first - 1) === '-') {
-          R(g, x0 + x * T, y0 + first * T, T, 4, p.floorLight);
-          R(g, x0 + x * T, y0 + first * T, T, 1, p.pavingHi);
-          R(g, x0 + x * T, y0 + first * T + 3, T, 1, 'rgba(37,40,43,.18)');
-        }
-        if (at(rows, x, last + 1) === '-') {
-          R(g, x0 + x * T, y0 + (last + 1) * T - 4, T, 4, p.floorLight);
-          R(g, x0 + x * T, y0 + (last + 1) * T - 1, T, 1, p.pavingHi);
-          R(g, x0 + x * T, y0 + (last + 1) * T - 4, T, 1, 'rgba(37,40,43,.18)');
-        }
-      }
+    R(g, sx + 1, top, W - 2, 4, p.ink);
+    R(g, sx + 2, top + 1, W - 4, 2, p.cream);
+    R(g, sx + 5, bottom - 2, W - 10, 2, p.pavingHi);
+    R(g, sx + 5, bottom - 1, W - 10, 1, p.pavingDark);
+    R(g, sx + 1, top + 7, 5, 7, p.ink);
+    R(g, sx + 2, top + 8, 3, 5, lamp > 0 ? '#ffdc82' : p.metal);
+    R(g, sx + 2, top + 8, 3, 1, p.metalHi);
+    if (d.destination === 'cafe') {
+      /* Teal canvas, cream ribs, a dark front valance. No writing. */
+      R(g, sx - 5, top - 3, W + 10, 8, p.ink);
+      R(g, sx - 4, top - 2, W + 8, 5, a.red);
+      for (var ax = 0; ax < W + 8; ax += 8) R(g, sx - 4 + ax, top - 2, 3, 5, p.creamShade);
+      R(g, sx - 4, top + 3, W + 8, 3, a.redDark);
+      R(g, sx - 4, top + 3, W + 8, 1, a.redHi);
     }
-    /* The row on each side of the carriageway is the footway. The rows call
-     * those cells grass; they are walkable either way, and a road with a
-     * pavement along it is the difference between a street and a lane across
-     * a field. The kerb between them is painted on the road's own cells. */
-    var frontage = {};
-    plan.pieces.forEach(function (piece) { if (piece.kind === 'door') frontage[piece.y] = true; });
-    for (y = 0; y < h; y++) {
-      if (road[y] || (!road[y + 1] && !road[y - 1] && !frontage[y])) continue;
-      for (x = 0; x < w; x++) {
-        if (rows[y].charAt(x) === 'D') continue;
-        paving(g, R, p, x0 + x * T, y0 + y * T, x, y, 'path');
-      }
-      if (!frontage[y]) R(g, x0, y0 + y * T + (road[y + 1] ? T - 2 : 0), w * T, 2, 'rgba(37,40,43,.12)');
-      else R(g, x0, y0 + y * T, w * T, 2, 'rgba(37,40,43,.10)');
+  }
+
+  function drawStreet(g, kit, p, rows, x0, y0, plan, opts) {
+    var R = kit.rect, w = widthOf(rows), h = rows.length;
+    backdrop(g, kit, p.ink);
+    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+      var ch = at(rows, x, y), sx = x0 + x * T, sy = y0 + y * T;
+      if (ch !== '-' && ch !== 'D') continue;
+      var road = y > plan.northPavement && y < plan.southPavement;
+      paving(g, R, p, sx, sy, x, y, road ? 'road' : 'path');
+      if (y === plan.northPavement) kerb(g, R, p, sx, sy, 'down');
+      if (y === plan.southPavement) kerb(g, R, p, sx, sy, 'up');
     }
-    plan.pieces.forEach(function (piece) { drawPiece(g, kit, p, x0, y0, piece, rows, opts); });
+    plan.fronts.forEach(function (f) { streetFront(g, kit, p, x0, y0, f, opts); });
+    plan.pieces.forEach(function (f) {
+      if (f.kind !== 'front') drawPiece(g, kit, p, x0, y0, f, rows, opts);
+    });
   }
 
   function drawHome(g, kit, p, rows, x0, y0, plan, opts) {
@@ -1269,7 +1424,7 @@
     var x0 = -Math.round(camX || 0), y0 = -Math.round(camY || 0);
     plan.pieces.forEach(function (piece) {
       if (!piece.foreground) return;
-      if (piece.depth >= footMin && piece.depth < footMax) drawPiece(g, kit, p, x0, y0, piece, rows, opts);
+      if (piece.depth >= footMin && piece.depth < footMax) drawPiece(g, kit, p, x0, y0, piece, rows, opts, true);
     });
     return true;
   };

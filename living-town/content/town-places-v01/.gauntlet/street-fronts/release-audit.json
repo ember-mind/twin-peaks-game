@@ -1,0 +1,13 @@
+{
+  "status": "fail",
+  "phase": "release",
+  "contractPath": "/Users/ebuccelli/Code/solo/projects/twin-peaks-game/.worktrees/living-town-street-fronts/living-town/content/town-places-v01/.gauntlet/street-fronts/contract.json",
+  "errors": [
+    "unit_not_passed:street",
+    "unit_floor_failed:street",
+    "critic_pass_missing:street",
+    "final_independent_pass_missing",
+    "final_floor_failed",
+    "high_gaps_unresolved"
+  ]
+}
