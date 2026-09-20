@@ -50,11 +50,13 @@
     curtainDeep: '#45151f', curtainDark: '#5c1a2b', curtain: '#762433',
     curtainMid: '#93303f', curtainHi: '#b03e4c',
     /* Carpet is now the LIT plane, a clear step ABOVE the drapes. */
-    carpetDeep: '#5b2029', carpetDark: '#833040', carpet: '#9a3b4e',
-    carpetMid: '#b04a5e', carpetHi: '#c65a70', carpetGlow: '#dc6c82',
-    /* Lamp light landing on that carpet: three warm steps, the top two of
-     * them above luma 160, so the room has real highlights on the floor. */
-    poolEdge: '#c76a66', poolMid: '#e09a76', poolCore: '#f5c497',
+    carpetDeep: '#5b2029', carpetDark: '#93384a', carpet: '#9a3b4e',
+    carpetMid: '#a8475a', carpetHi: '#b65468', carpetGlow: '#c4637a',
+    /* Lamp light landing on that carpet. Round 1 ran the pools up through
+     * the carpet's own magenta, which read as two pink stage spots; they now
+     * turn warm as they brighten, the way lamplight does, and the top two
+     * steps stay above luma 160 so the floor keeps real highlights. */
+    poolFar: '#b05a4e', poolEdge: '#c87b58', poolMid: '#e0a271', poolCore: '#f4cb9b',
     /* The skirting that separates floor from wall: the brightest band at the
      * foot of every drape, and the room's horizon line. */
     skirtDeep: '#2a180f', skirt: '#68401f', skirtHi: '#a06b3a',
@@ -118,9 +120,9 @@
      * maps.js and none of them touches Hawk at 6,8, Audrey at 13,7 or the
      * 8,8 -> 7,5 route. */
     {id: 'slotWestNorth', cells: [[1,7]], bounds: [16,106,16,22], shadow: [16,126,16,3], slotVariant: 0},
-    {id: 'stoolCocktail', cells: [[3,7]], bounds: [48,110,16,20], shadow: [48,128,16,3], seatVariant: 0},
     {id: 'slotWestSouth', cells: [[1,8]], bounds: [16,122,16,22], shadow: [16,142,16,3], slotVariant: 1},
     {id: 'cocktailTable', cells: [[3,8]], bounds: [48,125,16,19], shadow: [48,142,16,3]},
+    {id: 'stoolCocktail', cells: [[4,8]], bounds: [64,124,16,20], shadow: [64,142,16,3], seatVariant: 0},
     {id: 'ropeStand', cells: [[14,8]], bounds: [224,124,16,20], shadow: [224,142,16,3]}
   ];
 
@@ -171,14 +173,19 @@
      * other block. The field scale is deliberately twice the tile so it
      * never lines up with the furniture grid. */
     R(16, 22, 224, 122, p.carpetDeep);
-    var row, col, x, y;
+    var row, col, x, y, bh;
     for (row = 0; row < 8; row++) {
       y = 30 + row * 16;
-      if (y + 16 > 138) break;
+      /* The last row is CLIPPED, not dropped. Dropping it left ten rows of
+       * bare carpetDeep between the field and its border: a dark band right
+       * across the south of the floor that nothing in the room motivated,
+       * and the exact plane an actor's contact shadow has to land on. */
+      bh = Math.min(16, 138 - y);
+      if (bh < 2) break;
       for (col = 0; col < 13; col++) {
         x = 24 + col * 16;
         if (x + 16 > 232) break;
-        R(x, y, 16, 16, ((row + col) & 1) ? p.carpetDark : p.carpet);
+        R(x, y, 16, bh, ((row + col) & 1) ? p.carpetDark : p.carpet);
       }
     }
     /* One medallion per second block, four pixels of gold thread. */
@@ -399,7 +406,8 @@
     halfPool(R, west, cy, 15, 34, p.carpet);
     halfPool(R, west, cy, 11, 26, p.carpetMid);
     halfPool(R, west, cy, 7, 16, p.carpetHi);
-    halfPool(R, west, cy, 5, 12, p.poolMid);
+    halfPool(R, west, cy, 6, 14, p.poolEdge);
+    halfPool(R, west, cy, 4, 8, p.poolMid);
   }
 
   /* A whole pool, not a half one: the same quadratic falloff mirrored about
@@ -419,11 +427,15 @@
   }
 
   function chandelierPool(R, cx, cy, p) {
-    floorPool(R, cx, cy, 78, 44, p.carpetMid);
-    floorPool(R, cx, cy, 64, 36, p.carpetGlow);
-    floorPool(R, cx, cy, 52, 28, p.poolEdge);
-    floorPool(R, cx, cy, 40, 22, p.poolMid);
-    floorPool(R, cx, cy, 24, 12, p.poolCore);
+    /* Six steps, so the falloff is a gradient and not three rings, and the
+     * hot core sits a little north of centre: the light comes from above and
+     * in front, so its brightest patch is not the pool's geometric middle. */
+    floorPool(R, cx, cy, 74, 42, p.carpetMid);
+    floorPool(R, cx, cy, 62, 34, p.carpetHi);
+    floorPool(R, cx, cy, 52, 28, p.poolFar);
+    floorPool(R, cx, cy - 1, 42, 22, p.poolEdge);
+    floorPool(R, cx, cy - 2, 34, 18, p.poolMid);
+    floorPool(R, cx + 1, cy - 3, 18, 10, p.poolCore);
   }
 
   function drawSconcePools(R, p) {
@@ -461,9 +473,9 @@
      * carpet and stops on the carpet's dark border. */
     R(112, 132, 32, 2, p.carpetMid);
     R(106, 134, 44, 2, p.carpetHi);
-    R(102, 136, 52, 2, p.poolEdge);
-    R(106, 138, 44, 2, p.poolMid);
-    R(114, 140, 28, 2, p.poolCore);
+    R(102, 136, 52, 2, p.poolFar);
+    R(106, 138, 44, 2, p.poolEdge);
+    R(112, 140, 32, 2, p.poolMid);
     /* The recess the leaves hang in. It starts at y=144, the top of the door
      * row, and spans only the two door cells plus a 4px surround: anything
      * wider or taller repaints over a body standing north or west of the
@@ -790,9 +802,10 @@
     R(x + 2, y, 12, 1, p.ink);
     R(x + 1, y + 1, 14, 21, p.ink);
     /* Cabinet body, lit down its top-left edge and dark down the right. */
-    R(x + 2, y + 1, 12, 20, p.walnutDark);
-    R(x + 2, y + 1, 12, 1, p.walnutHi);
-    R(x + 2, y + 1, 1, 19, p.walnutMid);
+    R(x + 2, y + 1, 12, 20, p.walnut);
+    R(x + 2, y + 1, 12, 1, p.goldHi);
+    R(x + 2, y + 2, 1, 18, p.walnutHi);
+    R(x + 3, y + 2, 1, 18, p.walnutMid);
     R(x + 12, y + 2, 2, 19, p.walnutDeep);
     /* Marquee: the brightest thing on the machine, so the pair reads as two
      * lit boxes and not two dark slabs. */
@@ -860,20 +873,25 @@
   function ropeStand(R, x, y, p) {
     var i;
     for (i = 0; i < 2; i++) {
-      var px = x + 2 + i * 9;
-      R(px, y + 1, 3, 17, p.ink);
-      R(px + 1, y + 2, 2, 14, p.ropePost);
-      R(px + 1, y + 2, 1, 13, p.metalHi);
-      R(px, y, 3, 2, p.ink);
-      R(px, y, 3, 1, p.goldHi);
-      R(px, y + 16, 3, 2, p.ink);
-      R(px - 1, y + 17, 5, 2, p.ink);
-      R(px, y + 17, 3, 1, p.metal);
+      var px = x + 1 + i * 10;
+      /* Post: 4px of brass with a lit left edge, a ball finial and a splayed
+       * base. Round 1 drew it 2px wide and a fresh look could not find it. */
+      R(px, y + 2, 4, 16, p.ink);
+      R(px + 1, y + 3, 2, 14, p.ropePost);
+      R(px + 1, y + 3, 1, 14, p.metalHi);
+      R(px, y, 4, 3, p.ink);
+      R(px + 1, y, 2, 2, p.goldHi);
+      R(px + 1, y + 1, 1, 1, p.goldWhite);
+      R(px - 1, y + 17, 6, 3, p.ink);
+      R(px, y + 18, 4, 1, p.metal);
+      R(px + 1, y + 18, 2, 1, p.metalHi);
     }
     /* The rope sags between the two posts. */
+    R(x + 4, y + 4, 8, 3, p.ink);
     R(x + 4, y + 4, 8, 2, p.ropeVelvet);
-    R(x + 5, y + 5, 6, 2, p.ropeVelvet);
-    R(x + 5, y + 4, 5, 1, p.ropeVelvetHi);
+    R(x + 5, y + 6, 6, 2, p.ink);
+    R(x + 5, y + 6, 6, 1, p.ropeVelvet);
+    R(x + 5, y + 4, 6, 1, p.ropeVelvetHi);
     R(x + 6, y + 6, 4, 1, p.ropeVelvetHi);
   }
 

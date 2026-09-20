@@ -139,9 +139,9 @@ assert.equal(room.rows[9], 'iiiiiiiDDiiiiiii', 'the south double door is the onl
  * the centre carpet, and no row is the mirror of another. */
 assert.equal(room.rows[2], 'iftttfffffttffUi', 'the north row carries a long craps table and a blackjack table');
 assert.equal(room.rows[6], 'ifffKKKffffffffi', 'a three-cell roulette table stands on the centre carpet');
-assert.equal(room.rows[7], 'iUfhffffftthfffi',
-  'the poker table and its free stool sit south-east, a slot machine and a cocktail stool west');
-assert.equal(room.rows[8], 'iUftffffffffffFi',
+assert.equal(room.rows[7], 'iUffffffftthfffi',
+  'the poker table and its free stool sit south-east, a slot machine stands on the west wall');
+assert.equal(room.rows[8], 'iUfthfffffffffFi',
   'the south-west lounge and the south-east rope stand fill the two empty quadrants');
 const tableRows = Art.definitions.filter((d) => d.id.indexOf('table') === 0)
   .map((d) => Math.max(...d.cells.map((cell) => cell[1])));
@@ -635,8 +635,9 @@ const feltPixels = region(0, 40, 256, 105).filter(isFelt);
 assert(feltPixels.length > 600, 'the felt beds are painted across the table band');
 const feltPlane = mean(feltPixels);
 /* The carpet is sampled on open floor. The old patch at 24,140 now sits
- * under the south-west cocktail table, so it is read one quadrant east. */
-const carpetPlane = mean(region(66, 146, 12, 12));
+ * under the south-west lounge, so the plane is read from the clear floor in
+ * the south-east quadrant, outside every lamp pool and every prop shadow. */
+const carpetPlane = mean(region(194, 146, 12, 12));
 assert(goldRail > feltPlane + 20,
   `the gold trim is the brightest plane (${goldRail.toFixed(1)} vs felt ${feltPlane.toFixed(1)})`);
 
