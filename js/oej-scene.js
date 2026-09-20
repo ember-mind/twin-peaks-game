@@ -11,16 +11,28 @@
   var MAP = 'oej';
 
   /* Furniture cells are the room's collision silhouette: every one of these
-   * is a solid glyph in maps.js, and js/oej-art.js paints exactly these. */
+   * is a solid glyph in maps.js, and js/oej-art.js paints exactly these.
+   *
+   * The map-row pass broke the mirrored corner grid two fresh critics read as
+   * a tilemap test. The four tables now have three different footprint widths
+   * on four different rows, a roulette sits on the centre carpet, and three
+   * of the seat cells carry a painted seated patron instead of an empty
+   * stool. Every guest cell has a SOLID table cell to its north, so the head
+   * that overhangs its cell can never bury a body. */
   var footprints = {
-    tableNorthWest: [[3,2],[4,2]],
-    tableNorthEast: [[11,2],[12,2]],
-    tableSouthWest: [[3,7],[4,7]],
-    tableSouthEast: [[11,7],[12,7]],
-    seatNorthWest: [[3,3]],
-    seatNorthEast: [[12,3]],
-    seatSouthWest: [[3,6]],
-    seatSouthEast: [[12,6]],
+    tableCraps: [[2,2],[3,2],[4,2]],
+    tableBlackjack: [[10,2],[11,2]],
+    tableRoulette: [[4,6],[5,6],[6,6]],
+    tablePoker: [[9,7],[10,7]],
+    guestCraps: [[3,1]],
+    guestBlackjack: [[11,1]],
+    guestRoulette: [[5,5]],
+    stoolPoker: [[11,7]],
+    stoolCocktail: [[4,8]],
+    slotWestNorth: [[1,7]],
+    slotWestSouth: [[1,8]],
+    cocktailTable: [[3,8]],
+    ropeStand: [[14,8]],
     barCounter: [[5,4],[6,4],[7,4],[8,4],[9,4],[10,4]],
     serviceCabinet: [[14,2]]
   };
@@ -30,14 +42,14 @@
    * map authoring task, never in an art pass. */
   var rows = [
     'iiiiiiiiiiiiiiii',
+    'iffhfffffffhfffi',
+    'iftttfffffttffUi',
     'iffffffffffffffi',
-    'iffttffffffttfUi',
-    'iffhffffffffhffi',
     'iffffCCCCCCffffi',
-    'iffffffffffffffi',
-    'iffhffffffffhffi',
-    'iffttffffffttffi',
-    'iffffffffffffffi',
+    'iffffhfffffffffi',
+    'ifffKKKffffffffi',
+    'iUffffffftthfffi',
+    'iUfthfffffffffFi',
     'iiiiiiiDDiiiiiii'
   ];
 
@@ -50,12 +62,14 @@
     barBehind: {x: 7, y: 3},
     cabinet: {x: 14, y: 1},
     cabinetSide: {x: 13, y: 2},
-    tableNorthWestApproach: {x: 4, y: 3},
-    tableNorthEastApproach: {x: 11, y: 3},
-    tableSouthWestApproach: {x: 4, y: 6},
-    tableSouthEastApproach: {x: 11, y: 6},
-    seatApproachWest: {x: 2, y: 3},
-    seatApproachEast: {x: 13, y: 6},
+    crapsApproach: {x: 3, y: 3},
+    blackjackApproach: {x: 10, y: 3},
+    rouletteApproach: {x: 5, y: 7},
+    pokerApproach: {x: 9, y: 8},
+    guestApproachWest: {x: 2, y: 1},
+    guestApproachEast: {x: 12, y: 1},
+    guestApproachBar: {x: 4, y: 5},
+    stoolApproach: {x: 12, y: 7},
     audreyApproach: {x: 13, y: 7},
     landing: {x: 6, y: 8},
     center: {x: 8, y: 5}

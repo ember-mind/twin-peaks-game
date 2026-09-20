@@ -4074,9 +4074,13 @@
     { id:'diner-coffee', map:'diner', kind:'physical', cells:[[4,3],[5,3]] },
     { id:'diner-booths', map:'diner', kind:'physical', cells:[[1,6],[2,6],[3,6],[10,6],[11,6],[12,6],[1,8],[2,8],[3,8],[10,8],[11,8],[12,8],[6,6],[8,6]] },
     { id:'diner-counter-stools', map:'diner', kind:'physical', cells:[[2,4],[4,4],[6,4],[8,4],[10,4],[2,5],[12,5],[2,7],[12,7]] },
-    { id:'oej-felt-tables', map:'oej', kind:'physical', cells:[[3,2],[4,2],[11,2],[12,2],[3,7],[4,7],[11,7],[12,7]] },
+    /* Map-row pass 2026-09-20: the mirrored corner grid is retired. Craps and
+     * blackjack along the north drape, roulette on the centre carpet, poker
+     * south-east; three of the seat cells carry a painted seated patron. */
+    { id:'oej-felt-tables', map:'oej', kind:'physical', cells:[[2,2],[3,2],[4,2],[10,2],[11,2],[4,6],[5,6],[6,6],[9,7],[10,7]] },
     { id:'oej-bar-counter', map:'oej', kind:'physical', cells:[[5,4],[6,4],[7,4],[8,4],[9,4],[10,4]] },
-    { id:'oej-seating', map:'oej', kind:'physical', cells:[[3,3],[12,3],[3,6],[12,6]] },
+    { id:'oej-seating', map:'oej', kind:'physical', cells:[[3,1],[11,1],[5,5],[11,7],[4,8]] },
+    { id:'oej-lounge', map:'oej', kind:'physical', cells:[[1,7],[1,8],[3,8],[14,8]] },
     { id:'oej-service', map:'oej', kind:'physical', cells:[[14,2]] },
     { id:'roadhouse-bar-stools', map:'roadhouse', kind:'physical', cells:[[3,5],[9,5]] },
     { id:'roadhouse-stage', map:'roadhouse', kind:'physical', cells:[[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1],[9,1],[10,1],[11,1],[12,1],[13,1],[14,1]] }

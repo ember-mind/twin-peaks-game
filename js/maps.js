@@ -149,10 +149,10 @@
         'iffffffffffffffi', // 2
         'iffffffffffffffi', // 3
         'iiiiffiiiiiiiiii', // 4 corridoio c4-5
-        'iffffffffffffffi', // 5
-        'ifftffcccccfffUi', // 6 divano + credenza domestica
-        'ifffffcccccffffi', // 7 Sarah(9,7)
-        'ifttffcccccffffi', // 8 tavolo domestico; Leland(12,8)
+        'iffffffhfffffffi', // 5 poltrona alta a nord del tappeto (7,5)
+        'ifftffcccccffUUi', // 6 poltrona verde, pianoforte (13,6), consolle (14,6)
+        'ifffftcccccffffi', // 7 tavolino basso sul tappeto (5,7); Sarah(9,7)
+        'ifttffcccccfhtfi', // 8 tavolo domestico; poltrona (12,8) e tavolino del telefono (13,8)
         'ifhhfffffffffffi', // 9 sedute, corridoio porta ancora libero
         'iffffffffffffffi', // 10 (spawn 7,10)
         'iiiiiiiDDiiiiiii'  // 11
@@ -331,14 +331,14 @@
       indoor: true,
       rows: [
         'iiiiiiiiiiiiiiii', // 0
-        'iffffffffffffffi', // 1
-        'iffttffffffttfUi', // 2  tavoli da gioco + mobile servizio
-        'iffhffffffffhffi', // 3  sedute tavoli
+        'iffhfffffffhfffi', // 1  avventori seduti al drappo nord (3,1 e 11,1)
+        'iftttfffffttffUi', // 2  craps lungo (2-4), blackjack (10-11), mobile servizio
+        'iffffffffffffffi', // 3
         'iffffCCCCCCffffi', // 4  bancone del casinò
-        'iffffffffffffffi', // 5  Jacques (7,5)
-        'iffhffffffffhffi', // 6  sedute tavoli
-        'iffttffffffttffi', // 7  tavoli, Audrey (13,7)
-        'iffffffffffffffi', // 8  (spawn 8,8)
+        'iffffhfffffffffi', // 5  Jacques (7,5); avventore della roulette (5,5)
+        'ifffKKKffffffffi', // 6  roulette al centro del tappeto (4-6)
+        'iUffffffftthfffi', // 7  slot (1), poker (9-10), sgabello libero (11)
+        'iUfthfffffffffFi', // 8  slot (1), tavolino cocktail (3) e suo sgabello (4), cordone (14); corsia libera: porta -> Hawk (6,8) -> Audrey (13,7)
         'iiiiiiiDDiiiiiii'  // 9  porta sud -> vagone del treno
       ],
       doors: {}
