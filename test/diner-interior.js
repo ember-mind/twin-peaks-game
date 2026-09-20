@@ -34,7 +34,10 @@ require(path.join(ROOT, 'js/maps.js'));
 global.GAME.maps = global.GAME.maps || global.GAME.Maps;
 require(path.join(ROOT, 'js/retro-authored.js'));
 
-const source = fs.readFileSync(path.join(ROOT, 'js/retro-authored.js'), 'utf8');
+/* The Double R is composed in the renderer out of the engine's interior kit:
+ * what is asserted about its drawing is read from both. */
+const source = fs.readFileSync(path.join(ROOT, 'js/retro-authored.js'), 'utf8') + '\n' +
+  fs.readFileSync(path.join(ROOT, 'engine/ember-interior-kit.js'), 'utf8');
 
 // ------------------------------------------------------------- 1. insegna
 const fontBlock = source.slice(source.indexOf('NEON_FONT_4X6'), source.indexOf('function interiorNeon'));
