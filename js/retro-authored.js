@@ -7081,14 +7081,38 @@
     ctx.globalAlpha = oldAlpha;
   }
 
+  /* Interni: l'ellisse verde-teal e' tarata sull'erba e sui pavimenti caldi
+   * (assi, moquette, tappeti) non si legge a 1x — due critici a contesto
+   * fresco hanno scritto "nessun attore ha un'ombra di contatto" in ogni
+   * stanza (reports/rooms-fresh-critic-2026-09-19.md). Qui ombra neutra
+   * scura, stessa impronta 14x5 centrata sulla base della tile, valori
+   * alti al centro e coda rapida ai bordi: si legge come contatto, non
+   * come barra. */
+  function drawInteriorActorShadow(ctx, x, y, alpha) {
+    var oldAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = oldAlpha * (alpha == null ? 1 : alpha);
+    var ox = Math.round(x), sy = Math.round(y) + 14;
+    R(ctx, ox + 4, sy, 8, 1, 'rgba(28,22,18,.22)');
+    R(ctx, ox + 2, sy + 1, 12, 1, 'rgba(28,22,18,.40)');
+    R(ctx, ox + 1, sy + 2, 14, 1, 'rgba(28,22,18,.52)');
+    R(ctx, ox + 2, sy + 3, 12, 1, 'rgba(28,22,18,.40)');
+    R(ctx, ox + 4, sy + 4, 8, 1, 'rgba(28,22,18,.22)');
+    ctx.globalAlpha = oldAlpha;
+  }
+  function isIndoorMap(mapId) {
+    if (!mapId) return false;
+    var dict = GAME.maps && (GAME.maps.maps || GAME.maps);
+    var m = dict && dict[mapId];
+    return !!(m && m.indoor);
+  }
+
   Spr.drawChar = function (ctx, x, y, pal, dir, frame, alpha, moving, night, time, environment) {
     var p = pal || CHARS.cooper;
     var name = nameOf(p);
-    /* Ombra runtime unica: player e ogni NPC condividono ellisse 14x5. */
-    if(environment && environment.mapId==='diner') {
-      var shadowAlpha=ctx.globalAlpha; ctx.globalAlpha*=alpha==null?1:alpha;
-      interiorContact(ctx,Math.round(x)+2,Math.round(y)+15,12,INTERIOR_MATERIALS.diner);
-      ctx.globalAlpha=shadowAlpha;
+    /* Ombra runtime unica: player e ogni NPC condividono ellisse 14x5.
+     * Interni (map.indoor) usano la variante neutra scura. */
+    if (environment && (environment.indoor || isIndoorMap(environment.mapId))) {
+      drawInteriorActorShadow(ctx, x, y, alpha);
     } else drawActorContactShadow(ctx, x, y, alpha);
     if (drawCastWalkSheet(ctx, name, x, y, dir, frame, alpha, moving, environment)) return;
     /* Cadenza Gen II a quattro fasi: contatto, passo A, contatto, passo B.
