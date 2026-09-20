@@ -7328,12 +7328,15 @@
   function drawInteriorActorShadow(ctx, x, y, alpha) {
     var oldAlpha = ctx.globalAlpha;
     ctx.globalAlpha = oldAlpha * (alpha == null ? 1 : alpha);
-    var ox = Math.round(x), sy = Math.round(y) + 14;
-    R(ctx, ox + 4, sy, 8, 1, 'rgba(28,22,18,.22)');
-    R(ctx, ox + 2, sy + 1, 12, 1, 'rgba(28,22,18,.40)');
-    R(ctx, ox + 1, sy + 2, 14, 1, 'rgba(28,22,18,.52)');
-    R(ctx, ox + 2, sy + 3, 12, 1, 'rgba(28,22,18,.40)');
-    R(ctx, ox + 4, sy + 4, 8, 1, 'rgba(28,22,18,.22)');
+    /* Baseline piedi = y+15: le righe sopra restano quasi tutte dietro lo
+     * sprite, quindi la massa sta sotto (y+16..y+19), larga 16 come la tile,
+     * cosi' a 1x restano tre-quattro righe visibili ai lati e sotto i piedi. */
+    var ox = Math.round(x), sy = Math.round(y) + 15;
+    R(ctx, ox + 2, sy, 12, 1, 'rgba(28,22,18,.34)');
+    R(ctx, ox, sy + 1, 16, 1, 'rgba(28,22,18,.55)');
+    R(ctx, ox + 1, sy + 2, 14, 1, 'rgba(28,22,18,.46)');
+    R(ctx, ox + 3, sy + 3, 10, 1, 'rgba(28,22,18,.30)');
+    R(ctx, ox + 5, sy + 4, 6, 1, 'rgba(28,22,18,.14)');
     ctx.globalAlpha = oldAlpha;
   }
   function isIndoorMap(mapId) {
