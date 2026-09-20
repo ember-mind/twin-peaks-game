@@ -134,6 +134,24 @@ assert.equal(room.indoor, true);
 assert.equal(room.rows[0], 'iiiiiiiiiiiiiiii', 'the north wall row stays solid');
 assert.equal(room.rows[4], 'iffffCCCCCCffffi', 'the counter run stays six cells wide');
 assert.equal(room.rows[9], 'iiiiiiiDDiiiiiii', 'the south double door is the only opening');
+/* The map-row pass: the four tables no longer sit in a mirrored corner grid.
+ * They occupy three different widths on four different rows, one of them on
+ * the centre carpet, and no row is the mirror of another. */
+assert.equal(room.rows[2], 'iftttfffffttffUi', 'the north row carries a long craps table and a blackjack table');
+assert.equal(room.rows[6], 'ifffKKKffffffffi', 'a three-cell roulette table stands on the centre carpet');
+assert.equal(room.rows[7], 'ifffffffftthfffi', 'the poker table and its free stool sit south-east');
+const tableRows = Art.definitions.filter((d) => d.id.indexOf('table') === 0)
+  .map((d) => Math.max(...d.cells.map((cell) => cell[1])));
+assert(new Set(tableRows).size >= 3,
+  'the tables stand on at least three different rows, so the floor cannot read as a 2x2 grid');
+assert.equal(new Set(Art.definitions.filter((d) => d.id.indexOf('table') === 0)
+  .map((d) => d.cells.length)).size >= 2, true, 'the tables are not all the same size');
+const mirrored = Art.definitions.filter((d) => d.id.indexOf('table') === 0)
+  .some((a) => Art.definitions.some((b) => b !== a && b.id.indexOf('table') === 0 &&
+    b.cells[0][1] === a.cells[0][1] && b.cells[0][0] === 15 - a.cells[a.cells.length - 1][0]));
+assert.equal(mirrored, false, 'no table is the east-west mirror of another on the same row');
+
+const isSolidAt = (x, y) => G.Maps.isSolid(MAP_ID, x, y, { clues: [], flags: {} });
 
 // footprints <-> definitions: stessi id, stesse celle, stesso footY.
 const artIds = Art.definitions.map((prop) => prop.id).sort();
@@ -151,13 +169,22 @@ for (const prop of Art.definitions) {
   assert(prop.bounds.every(Number.isInteger) && prop.shadow.every(Number.isInteger),
     prop.id + ' bounds and shadow are integer rectangles');
 }
-assert.equal(Art.definitions.length, 10, 'ten grounded props: four tables, four seats, the bar and the cabinet');
+assert.equal(Art.definitions.length, 10,
+  'ten grounded props: four tables, three seated patrons, one free stool, the bar and the cabinet');
+/* Every painted patron sits on a solid cell whose NORTH neighbour is also
+ * solid, so the head that overhangs the cell can never cover a body. */
+for (const prop of Art.definitions.filter((d) => d.id.indexOf('guest') === 0)) {
+  const [gx, gy] = prop.cells[0];
+  assert.equal(isSolidAt(gx, gy), true, prop.id + ' occupies a solid cell');
+  assert.equal(isSolidAt(gx, gy - 1), true, prop.id + ' has a solid cell to the north');
+  assert(prop.bounds[1] < gy * 16, prop.id + ' rises above its own cell into that solid neighbour');
+}
 assert.equal(Scene.footprints.barCounter.length, 6, 'the bar counter covers the whole C run');
 assert.equal(Art.doorFoot, 176, 'the door jamb sorts below the south door foot line');
 
 // Ogni cella dipinta come arredo e' un glifo solido della mappa; ogni cella
 // del cast e' libera. Nessun mobile puo' seppellire un corpo.
-const isSolid = (x, y) => G.Maps.isSolid(MAP_ID, x, y, { clues: [], flags: {} });
+const isSolid = isSolidAt;
 for (const [id, cells] of Object.entries(Scene.footprints)) {
   for (const [x, y] of cells) assert.equal(isSolid(x, y), true, id + '@' + x + ',' + y + ' paints a solid tile');
 }
@@ -270,22 +297,46 @@ assert.equal(poolRows.every((call) => call.args[3] === 2), true, 'the pool steps
 const games = Art.definitions.filter((d) => d.id.indexOf('table') === 0).map((d) => d.game);
 assert.deepEqual(games.slice().sort(), ['blackjack', 'craps', 'poker', 'roulette'],
   'the four tables are four different games, not one sprite four times');
-const seatVariants = Art.definitions.filter((d) => d.id.indexOf('seat') === 0);
-assert.equal(new Set(seatVariants.map((d) => d.seatVariant)).size, 2,
-  'the stools are not all the same stool');
-assert.equal(new Set(seatVariants.map((d) => d.bounds.join(','))).size, 4,
-  'no two stools sit at the same offset inside their cell');
+/* Pass 2 of the fresh critic: "four identical UNOCCUPIED tables". Three of
+ * the four tables now carry a painted patron, each with their own head, hair
+ * and coat, and the fourth keeps an empty stool so the floor is not uniform
+ * either way. */
+const patrons = Art.definitions.filter((d) => d.id.indexOf('guest') === 0);
+assert.equal(patrons.length, 3, 'three tables are occupied by a seated patron');
+function patronCalls(id) {
+  const prop = Art.definitions.find((d) => d.id === id);
+  const recording = newRecordingContext();
+  artForeground(recording.context, 0, 0, prop.footY, prop.footY + 1);
+  const origin = prop.bounds;
+  return recording.calls
+    .filter((c) => c.args[0] >= origin[0] && c.args[0] < origin[0] + 16)
+    .map((c) => [c.args[0] - origin[0], c.args[1] - origin[1], c.args[2], c.args[3], c.color].join(':'))
+    .sort().join('|');
+}
+assert.equal(new Set(patrons.map((d) => patronCalls(d.id))).size, 3,
+  'no two patrons are the same decal: different palette or a mirrored pose');
+for (const prop of patrons) {
+  const recording = newRecordingContext();
+  artForeground(recording.context, 0, 0, prop.footY, prop.footY + 1);
+  const skinTones = recording.calls.filter((c) => {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(c.color.slice(i, i + 2), 16));
+    return r > g + 20 && g > b && r > 120;
+  });
+  assert(skinTones.length >= 4, prop.id + ' paints a face, not a coloured block');
+}
+const stools = Art.definitions.filter((d) => d.id.indexOf('stool') === 0);
+assert.equal(stools.length, 1, 'one empty stool remains, so the room is not uniformly busy');
 function tableCalls(id) {
   const prop = Art.definitions.find((d) => d.id === id);
   const recording = newRecordingContext();
   artForeground(recording.context, 0, 0, prop.footY, prop.footY + 1);
   const origin = prop.bounds;
   return recording.calls
-    .filter((c) => c.args[0] >= origin[0] && c.args[0] < origin[0] + 32)
+    .filter((c) => c.args[0] >= origin[0] && c.args[0] < origin[0] + origin[2])
     .map((c) => [c.args[0] - origin[0], c.args[1] - origin[1], c.args[2], c.args[3], c.color].join(':'))
     .sort().join('|');
 }
-const layouts = ['tableNorthWest', 'tableNorthEast', 'tableSouthWest', 'tableSouthEast'].map(tableCalls);
+const layouts = ['tableCraps', 'tableBlackjack', 'tableRoulette', 'tablePoker'].map(tableCalls);
 assert.equal(new Set(layouts).size, 4,
   'each table paints a different set of marks relative to its own origin');
 
@@ -327,23 +378,39 @@ function hasRect(calls, x, y, width, height) {
   return calls.some((call) =>
     call.args[0] === x && call.args[1] === y && call.args[2] === width && call.args[3] === height);
 }
+/* The patrons sit one row NORTH of their table, so they sort one band
+ * earlier and the cloth is repainted over their lap. */
+const depth32 = foregroundCalls(32, 48);
+assert(hasRect(depth32, 49, 12, 14, 7), '32px interval selects the two patrons at the north drape');
+assert(!hasRect(depth32, 32, 27, 48, 20), '32px interval excludes the craps table at 48px');
 const depth48 = foregroundCalls(48, 64);
-assert(hasRect(depth48, 48, 29, 32, 16), '48px interval selects the north gaming tables');
+assert(hasRect(depth48, 32, 27, 48, 20), '48px interval selects the long craps table');
+assert(hasRect(depth48, 160, 29, 32, 16), '48px interval selects the blackjack table');
 assert(hasRect(depth48, 224, 18, 16, 30), '48px interval selects the service cabinet');
-assert(!hasRect(depth48, 49, 47, 12, 9), '48px interval excludes the north stools at 64px');
-const depth64 = foregroundCalls(64, 80);
-assert(hasRect(depth64, 49, 47, 12, 9), '64px interval selects the north stools');
-assert(!hasRect(depth64, 80, 68, 96, 10), '64px interval excludes the bar at 80px');
-const depth80 = foregroundCalls(80, 112);
+const depth80 = foregroundCalls(80, 96);
 assert(hasRect(depth80, 80, 68, 96, 10), '80px interval selects the bar counter front');
 assert(hasRect(depth80, 81, 58, 94, 2), 'the bar shelf plank repaints with the bar, over a body behind it');
+const depth96 = foregroundCalls(96, 112);
+assert(hasRect(depth96, 81, 76, 14, 7), '96px interval selects the patron at the roulette');
+assert(!hasRect(depth96, 64, 93, 48, 16), '96px interval excludes the roulette table at 112px');
+const depth112 = foregroundCalls(112, 128);
+assert(hasRect(depth112, 64, 93, 48, 16), '112px interval selects the centre roulette table');
 const depth128 = foregroundCalls(128, 176);
-assert(hasRect(depth128, 176, 109, 32, 16), '128px interval selects the south gaming tables');
+assert(hasRect(depth128, 144, 109, 32, 16), '128px interval selects the poker table');
+assert(hasRect(depth128, 179, 112, 10, 6), '128px interval selects the free stool beside it');
 assert(!hasRect(depth128, 112, 144, 4, 32), '128px interval excludes the door jamb at 176px');
 const depthDoor = foregroundCalls(176, Infinity);
 assert(hasRect(depthDoor, 112, 144, 4, 32), 'the door band repaints the jamb over a body in the threshold');
 assert(!hasRect(depthDoor, 80, 68, 96, 10), 'the door band carries no furniture');
 assert.equal(foregroundCalls(49, 63).length, 0, 'an empty depth interval paints nothing');
+/* Order inside one depth band: the cloth must land on top of the lap. */
+const crapsBand = foregroundCalls(32, 64);
+const patronIndex = crapsBand.findIndex((c) =>
+  c.args[0] === 49 && c.args[1] === 12 && c.args[2] === 14 && c.args[3] === 7);
+const clothIndex = crapsBand.findIndex((c) =>
+  c.args[0] === 32 && c.args[1] === 27 && c.args[2] === 48 && c.args[3] === 20);
+assert(patronIndex >= 0 && clothIndex > patronIndex,
+  'the craps cloth is painted after its patron, cutting them below the chest');
 
 // ------------------------------------------- motore reale e tastiera
 Engine.init(canvas, null);
@@ -405,7 +472,8 @@ function walkTo(name) {
     'real engine arrives at ' + name);
 }
 
-for (const name of ['barApproach', 'barBehind', 'cabinet', 'tableNorthWestApproach', 'audreyApproach', 'landing']) {
+for (const name of ['barApproach', 'barBehind', 'cabinet', 'crapsApproach', 'rouletteApproach',
+  'pokerApproach', 'guestApproachBar', 'audreyApproach', 'landing']) {
   walkTo(name);
 }
 
@@ -415,17 +483,29 @@ assert.equal(tap('up'), false, 'the bar counter rejects movement');
 assert.deepEqual([Engine.state.mapId, Engine.state.player.tx, Engine.state.player.ty], before,
   'counter collision leaves player and map unchanged');
 
-walkTo('tableNorthWestApproach');
+walkTo('crapsApproach');
 before = [Engine.state.mapId, Engine.state.player.tx, Engine.state.player.ty];
 assert.equal(tap('up'), false, 'the gaming table rejects movement');
 assert.deepEqual([Engine.state.mapId, Engine.state.player.tx, Engine.state.player.ty], before,
   'table collision leaves player and map unchanged');
 
-walkTo('seatApproachWest');
+walkTo('rouletteApproach');
 before = [Engine.state.mapId, Engine.state.player.tx, Engine.state.player.ty];
-assert.equal(tap('right'), false, 'the velvet stool rejects movement');
+assert.equal(tap('up'), false, 'the centre roulette table rejects movement');
+assert.deepEqual([Engine.state.mapId, Engine.state.player.tx, Engine.state.player.ty], before,
+  'centre table collision leaves player and map unchanged');
+
+walkTo('stoolApproach');
+before = [Engine.state.mapId, Engine.state.player.tx, Engine.state.player.ty];
+assert.equal(tap('left'), false, 'the velvet stool rejects movement');
 assert.deepEqual([Engine.state.mapId, Engine.state.player.tx, Engine.state.player.ty], before,
   'stool collision leaves player and map unchanged');
+
+walkTo('guestApproachWest');
+before = [Engine.state.mapId, Engine.state.player.tx, Engine.state.player.ty];
+assert.equal(tap('right'), false, 'a seated patron is a solid cell');
+assert.deepEqual([Engine.state.mapId, Engine.state.player.tx, Engine.state.player.ty], before,
+  'patron collision leaves player and map unchanged');
 assert.equal(storageWrites, 0, 'native scene traversal never writes a save');
 
 // ------------------------------------------------- profondita' sul percorso
@@ -544,7 +624,7 @@ assert(distinct.size > 40, 'the capture is a painted frame, not a flat or black 
 const goldRail = mean(region(64, 10, 32, 2));
 const drapeNorth = mean(region(155, 21, 20, 8));
 const feltPlane = mean(region(52, 48, 20, 6));
-const carpetPlane = mean(region(96, 116, 40, 24));
+const carpetPlane = mean(region(24, 140, 40, 20));
 assert(goldRail > feltPlane + 20,
   `the gold trim is the brightest plane (${goldRail.toFixed(1)} vs felt ${feltPlane.toFixed(1)})`);
 assert(feltPlane > carpetPlane + 15,
@@ -554,7 +634,7 @@ assert(feltPlane > carpetPlane + 15,
  * clear step below both drapes, and the skirting board at the wall foot is
  * brighter than either, which is what gives the room its horizon line. */
 const drapeSide = mean(region(2, 60, 10, 40));
-const skirtBand = mean(region(60, 38, 40, 2));
+const skirtBand = mean(region(84, 38, 40, 2));
 assert(drapeNorth > carpetPlane + 6,
   `the north drape reads above the carpet (${drapeNorth.toFixed(1)} vs ${carpetPlane.toFixed(1)})`);
 assert(drapeSide > carpetPlane + 10,
@@ -566,8 +646,8 @@ assert(skirtBand > drapeSide + 10,
 // Lo sgabello ha la sua coppia di valori: al native una seduta deve leggersi
 // come una sedia, non come un tavolino. Il cuscino sta un gradino sopra il
 // bordo mogano del tavolo ed e' rosso, non marrone.
-const stoolCushion = region(51, 64, 10, 6);
-const tableRail = region(50, 46, 28, 2);
+const stoolCushion = region(179, 128, 10, 6);
+const tableRail = region(146, 125, 28, 2);
 assert(mean(stoolCushion) > mean(tableRail) + 10,
   `the stool cushion is its own value above the table rail (${mean(stoolCushion).toFixed(1)} vs ${mean(tableRail).toFixed(1)})`);
 assert(stoolCushion.some(([r, g, b]) => r > g + 60 && r > b + 50),
@@ -576,11 +656,11 @@ assert(stoolCushion.some(([r, g, b]) => r > g + 60 && r > b + 50),
 // La roulette deve leggersi come una ruota a 1x: anello chiaro, banda di
 // caselle alternate, mozzo. Il bordo sta molto sopra le caselle e la banda
 // porta almeno due valori.
-const wheelRim = region(54, 49, 11, 1);
-const wheelPockets = region(54, 50, 11, 5);
+const wheelRim = region(70, 113, 11, 1);
+const wheelPockets = region(70, 114, 11, 5);
 assert(mean(wheelRim) > mean(wheelPockets) + 60,
   `the roulette rim ring reads above its pockets (${mean(wheelRim).toFixed(1)} vs ${mean(wheelPockets).toFixed(1)})`);
-const pocketValues = new Set(region(54, 52, 11, 1).map((px) => px.join(',')));
+const pocketValues = new Set(region(70, 116, 11, 1).map((px) => px.join(',')));
 assert(pocketValues.size >= 2,
   'the pocket band alternates at least two values, so the wheel is not a flat disc');
 
@@ -589,7 +669,8 @@ assert(pocketValues.size >= 2,
 const feltCells = [];
 for (let y = 0; y < 192; y++) for (let x = 0; x < 256; x++) if (isFelt(pixel(x, y))) feltCells.push(x + ',' + y);
 assert(feltCells.length > 600, 'the felt beds are actually painted');
-const feltBoxes = [[48, 42, 32, 22], [176, 42, 32, 22], [48, 122, 32, 22], [176, 122, 32, 22]];
+const feltBoxes = Art.definitions.filter((d) => d.id.indexOf('table') === 0)
+  .map((d) => [d.bounds[0], d.bounds[1] + 16, d.bounds[2], d.bounds[3]]);
 const greenBoxes = feltBoxes.concat([[80, 60, 96, 18]]);
 const inBox = (x, y, [bx, by, bw, bh]) => x >= bx && x < bx + bw && y >= by && y < by + bh;
 const strayGreen = feltCells.filter((cell) => {

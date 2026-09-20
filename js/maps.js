@@ -331,14 +331,14 @@
       indoor: true,
       rows: [
         'iiiiiiiiiiiiiiii', // 0
-        'iffffffffffffffi', // 1
-        'iffttffffffttfUi', // 2  tavoli da gioco + mobile servizio
-        'iffhffffffffhffi', // 3  sedute tavoli
+        'iffhfffffffhfffi', // 1  avventori seduti al drappo nord (3,1 e 11,1)
+        'iftttfffffttffUi', // 2  craps lungo (2-4), blackjack (10-11), mobile servizio
+        'iffffffffffffffi', // 3
         'iffffCCCCCCffffi', // 4  bancone del casinò
-        'iffffffffffffffi', // 5  Jacques (7,5)
-        'iffhffffffffhffi', // 6  sedute tavoli
-        'iffttffffffttffi', // 7  tavoli, Audrey (13,7)
-        'iffffffffffffffi', // 8  (spawn 8,8)
+        'iffffhfffffffffi', // 5  Jacques (7,5); avventore della roulette (5,5)
+        'ifffKKKffffffffi', // 6  roulette al centro del tappeto (4-6)
+        'ifffffffftthfffi', // 7  poker (9-10), sgabello libero (11)
+        'iffffffffffffffi', // 8  corsia libera: porta -> Hawk (6,8) -> Audrey (13,7)
         'iiiiiiiDDiiiiiii'  // 9  porta sud -> vagone del treno
       ],
       doors: {}

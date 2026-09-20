@@ -6,12 +6,22 @@
  * wall, gold trim, a burgundy carpet, four green-felt gaming tables, the long
  * bar counter that fills the C run, and the service cabinet on the east wall.
  *
+ * The map-row pass of 2026-09-20 retired the mirrored 2x2 corner grid that two
+ * fresh critics both read as a tilemap test. The tables now differ in width as
+ * well as in game (a three-cell craps table along the north drape, a two-cell
+ * blackjack table beside it, a three-cell roulette on the centre carpet, a
+ * two-cell poker oval south-east), three of them carry a seated patron, and
+ * the south-west corner is left as walking room.
+ *
  * Division of labour follows js/hospital-art.js: the SHELL (walls, drapes,
  * sconces, carpet, light pools, south wall and the door opening) is painted
  * in draw(); every grounded piece of furniture is painted in foreground()
  * keyed by its footprint's south edge, so a body never gets buried by a
  * table it is standing in front of. Cast Presence puts Jacques at 7,5,
  * Audrey at 13,7 and Hawk at 6,8; none of those cells carries furniture.
+ * Each patron sits one cell NORTH of their table, so the cloth sorts after
+ * them and cuts them below the chest, and the cell above every patron is
+ * itself solid, so the head that overhangs it can never cover a body.
  */
 (function () {
   'use strict';
@@ -21,7 +31,7 @@
   var TILE = 16;
 
   var palette = {
-    ink: '#170e13', black: '#20131a',
+    ink: '#170e13', black: '#20131a', eye: '#342c2b',
     /* Drapes: the perimeter of the room is curtain, not plaster. */
     curtainDeep: '#360f1d', curtainDark: '#4c1524', curtain: '#631d2c',
     curtainMid: '#7d2634', curtainHi: '#9a3440',
@@ -61,18 +71,35 @@
     /* Bounds never cross into a neighbouring cell: Audrey stands at 13,7,
      * immediately east of the south-east table, and a 2px rail overhang was
      * enough to repaint over the left edge of her sprite. */
-    {id: 'tableNorthWest', cells: [[3,2],[4,2]], bounds: [48,26,32,22], shadow: [48,46,32,4], game: 'roulette'},
-    {id: 'tableNorthEast', cells: [[11,2],[12,2]], bounds: [176,26,32,22], shadow: [176,46,32,4], game: 'blackjack'},
-    {id: 'tableSouthWest', cells: [[3,7],[4,7]], bounds: [48,106,32,22], shadow: [48,126,32,4], game: 'craps'},
-    {id: 'tableSouthEast', cells: [[11,7],[12,7]], bounds: [176,106,32,22], shadow: [176,126,32,4], game: 'poker'},
-    {id: 'seatNorthWest', cells: [[3,3]], bounds: [47,46,16,20], shadow: [47,64,16,3], seatVariant: 0},
-    {id: 'seatNorthEast', cells: [[12,3]], bounds: [193,47,16,20], shadow: [193,65,16,3], seatVariant: 1},
-    {id: 'seatSouthWest', cells: [[3,6]], bounds: [49,95,16,20], shadow: [49,113,16,3], seatVariant: 1},
-    {id: 'seatSouthEast', cells: [[12,6]], bounds: [192,93,16,20], shadow: [192,111,16,3], seatVariant: 0},
+    /* Order matters: a patron is listed BEFORE the table they sit at, so
+     * within one depth band the cloth is painted over their lap exactly the
+     * way the diner's booth table cuts its guest below the chest. */
+    {id: 'guestCraps', cells: [[3,1]], bounds: [48,9,16,20], shadow: [48,27,16,3], guest: 'dealerWatcher'},
+    {id: 'guestBlackjack', cells: [[11,1]], bounds: [176,9,16,20], shadow: [176,27,16,3], guest: 'cardPlayer'},
+    {id: 'tableCraps', cells: [[2,2],[3,2],[4,2]], bounds: [32,26,48,22], shadow: [32,46,48,4], game: 'craps'},
+    {id: 'tableBlackjack', cells: [[10,2],[11,2]], bounds: [160,26,32,22], shadow: [160,46,32,4], game: 'blackjack'},
+    {id: 'serviceCabinet', cells: [[14,2]], bounds: [224,18,16,30], shadow: [224,48,16,3]},
     {id: 'barCounter', cells: [[5,4],[6,4],[7,4],[8,4],[9,4],[10,4]],
       bounds: [80,44,96,36], shadow: [80,80,96,4]},
-    {id: 'serviceCabinet', cells: [[14,2]], bounds: [224,18,16,30], shadow: [224,48,16,3]}
+    {id: 'guestRoulette', cells: [[5,5]], bounds: [80,73,16,20], shadow: [80,91,16,3], guest: 'wheelPlayer'},
+    {id: 'tableRoulette', cells: [[4,6],[5,6],[6,6]], bounds: [64,90,48,22], shadow: [64,110,48,4], game: 'roulette'},
+    {id: 'tablePoker', cells: [[9,7],[10,7]], bounds: [144,106,32,22], shadow: [144,126,32,4], game: 'poker'},
+    {id: 'stoolPoker', cells: [[11,7]], bounds: [176,110,16,20], shadow: [176,128,16,3], seatVariant: 1}
   ];
+
+  /* Three patrons, three different heads and coats. `mirror` turns the pose
+   * so two neighbours never read as the same decal. */
+  var guests = {
+    dealerWatcher: {hair: '#2b1a16', hairHi: '#4d3024', skin: '#e0b48e', skinHi: '#f0c9a1',
+      skinShadow: '#bd876c', coat: '#2d3550', coatHi: '#454f72', coatShadow: '#1b2136',
+      shirt: '#e9ddbb', bob: false, mirror: false},
+    cardPlayer: {hair: '#4a2c18', hairHi: '#89644d', skin: '#caa07c', skinHi: '#e3bd97',
+      skinShadow: '#a06f57', coat: '#57202b', coatHi: '#7a3340', coatShadow: '#37141c',
+      shirt: '#ded3ae', bob: true, mirror: true},
+    wheelPlayer: {hair: '#171314', hairHi: '#3b3033', skin: '#8f6244', skinHi: '#ab7a56',
+      skinShadow: '#6b4630', coat: '#3f3a2c', coatHi: '#5d5641', coatShadow: '#272419',
+      shirt: '#d9cfae', bob: false, mirror: true}
+  };
 
   /* The south double door (7,9 / 8,9) is walkable: its jamb has no footprint
    * and sorts on this foot line so it covers a body in the threshold. */
@@ -407,63 +434,64 @@
    * but nothing else about them is shared: the rail profile, the felt
    * markings, the layout's long axis and the objects on the cloth all differ,
    * so the room stops reading as one sprite stamped four times. */
-  function feltTable(R, x, y, p, kind) {
+  function feltTable(R, x, y, w, p, kind) {
     var padded = kind === 'craps', oval = kind === 'poker';
     /* Silhouette. The craps table is a squarer padded box, the poker table a
-     * rounder oval, the two card/wheel tables the standard rail. */
+     * rounder oval, the two card/wheel tables the standard rail. The width
+     * comes from the footprint, so a three-cell table is genuinely longer
+     * rather than the same 32px sprite moved along the row. */
     if (padded) {
-      R(x + 3, y, 26, 1, p.ink);
-      R(x, y + 1, 32, 20, p.ink);
-      R(x + 3, y + 21, 26, 1, p.ink);
+      R(x + 3, y, w - 6, 1, p.ink);
+      R(x, y + 1, w, 20, p.ink);
+      R(x + 3, y + 21, w - 6, 1, p.ink);
     } else if (oval) {
-      R(x + 10, y, 12, 1, p.ink);
-      R(x + 5, y + 1, 22, 1, p.ink);
-      R(x + 2, y + 2, 28, 1, p.ink);
-      R(x, y + 3, 32, 16, p.ink);
-      R(x + 2, y + 19, 28, 1, p.ink);
-      R(x + 5, y + 20, 22, 1, p.ink);
-      R(x + 10, y + 21, 12, 1, p.ink);
+      R(x + 10, y, w - 20, 1, p.ink);
+      R(x + 5, y + 1, w - 10, 1, p.ink);
+      R(x + 2, y + 2, w - 4, 1, p.ink);
+      R(x, y + 3, w, 16, p.ink);
+      R(x + 2, y + 19, w - 4, 1, p.ink);
+      R(x + 5, y + 20, w - 10, 1, p.ink);
+      R(x + 10, y + 21, w - 20, 1, p.ink);
     } else {
-      R(x + 8, y, 16, 1, p.ink);
-      R(x + 4, y + 1, 24, 1, p.ink);
-      R(x + 1, y + 2, 30, 1, p.ink);
-      R(x, y + 3, 32, 16, p.ink);
-      R(x + 1, y + 19, 30, 1, p.ink);
-      R(x + 4, y + 20, 24, 1, p.ink);
-      R(x + 8, y + 21, 16, 1, p.ink);
+      R(x + 8, y, w - 16, 1, p.ink);
+      R(x + 4, y + 1, w - 8, 1, p.ink);
+      R(x + 1, y + 2, w - 2, 1, p.ink);
+      R(x, y + 3, w, 16, p.ink);
+      R(x + 1, y + 19, w - 2, 1, p.ink);
+      R(x + 4, y + 20, w - 8, 1, p.ink);
+      R(x + 8, y + 21, w - 16, 1, p.ink);
     }
     /* Rail. Craps gets a padded leather top edge, poker a narrow armrest,
      * the others plain mahogany. */
     if (padded) {
-      R(x + 1, y + 1, 30, 3, p.stoolDark);
-      R(x + 2, y + 1, 28, 1, p.stool);
-      R(x + 1, y + 17, 30, 3, p.stoolDeep);
-      R(x + 2, y + 19, 28, 1, p.walnutDeep);
+      R(x + 1, y + 1, w - 2, 3, p.stoolDark);
+      R(x + 2, y + 1, w - 4, 1, p.stool);
+      R(x + 1, y + 17, w - 2, 3, p.stoolDeep);
+      R(x + 2, y + 19, w - 4, 1, p.walnutDeep);
       R(x + 1, y + 4, 2, 13, p.walnut);
-      R(x + 29, y + 4, 2, 13, p.walnut);
+      R(x + w - 3, y + 4, 2, 13, p.walnut);
     } else if (oval) {
-      R(x + 10, y + 1, 12, 1, p.walnutHi);
-      R(x + 5, y + 2, 22, 1, p.walnutMid);
-      R(x + 2, y + 3, 28, 2, p.walnut);
+      R(x + 10, y + 1, w - 20, 1, p.walnutHi);
+      R(x + 5, y + 2, w - 10, 1, p.walnutMid);
+      R(x + 2, y + 3, w - 4, 2, p.walnut);
       R(x + 1, y + 5, 2, 11, p.walnutMid);
-      R(x + 29, y + 5, 2, 11, p.walnutMid);
-      R(x + 2, y + 16, 28, 2, p.walnutDark);
-      R(x + 5, y + 18, 22, 1, p.walnutDeep);
-      R(x + 10, y + 19, 12, 1, p.walnutDeep);
+      R(x + w - 3, y + 5, 2, 11, p.walnutMid);
+      R(x + 2, y + 16, w - 4, 2, p.walnutDark);
+      R(x + 5, y + 18, w - 10, 1, p.walnutDeep);
+      R(x + 10, y + 19, w - 20, 1, p.walnutDeep);
     } else {
-      R(x + 8, y + 1, 16, 1, p.walnutHi);
-      R(x + 4, y + 2, 24, 1, p.walnutMid);
-      R(x + 1, y + 3, 30, 1, p.walnutMid);
-      R(x + 1, y + 4, 30, 1, p.walnut);
+      R(x + 8, y + 1, w - 16, 1, p.walnutHi);
+      R(x + 4, y + 2, w - 8, 1, p.walnutMid);
+      R(x + 1, y + 3, w - 2, 1, p.walnutMid);
+      R(x + 1, y + 4, w - 2, 1, p.walnut);
       R(x + 1, y + 5, 2, 11, p.walnut);
-      R(x + 29, y + 5, 2, 11, p.walnut);
-      R(x + 2, y + 16, 28, 2, p.walnutDark);
-      R(x + 4, y + 18, 24, 1, p.walnutDeep);
-      R(x + 8, y + 19, 16, 1, p.walnutDeep);
+      R(x + w - 3, y + 5, 2, 11, p.walnut);
+      R(x + 2, y + 16, w - 4, 2, p.walnutDark);
+      R(x + 4, y + 18, w - 8, 1, p.walnutDeep);
+      R(x + 8, y + 19, w - 16, 1, p.walnutDeep);
     }
-    /* Felt bed. Craps is deeper and squarer, poker slightly inset. */
-    var bx = padded ? x + 3 : x + 3, by = padded ? y + 4 : y + 4;
-    var bw = padded ? 26 : 26, bh = padded ? 13 : 13;
+    /* Felt bed. */
+    var bx = x + 3, by = y + 4, bw = w - 6, bh = 13;
     R(bx, by, bw, bh, p.feltDeep);
     R(bx + 1, by + 1, bw - 2, bh - 2, p.feltDark);
     R(bx + 2, by + 1, bw - 4, bh - 6, p.felt);
@@ -471,40 +499,42 @@
     if (oval) R(bx + 6, by + 2, bw - 12, 2, p.feltHi);
     if (kind === 'roulette') R(bx + 6, by + 2, 12, 2, p.feltHi);
     R(bx + 2, by + 10, bw - 4, 1, p.feltDeep);
-    if (kind === 'roulette') layoutRoulette(R, x, y, p);
-    else if (kind === 'blackjack') layoutBlackjack(R, x, y, p);
-    else if (kind === 'craps') layoutCraps(R, x, y, p);
-    else layoutPoker(R, x, y, p);
+    if (kind === 'roulette') layoutRoulette(R, x, y, w, p);
+    else if (kind === 'blackjack') layoutBlackjack(R, x, y, w, p);
+    else if (kind === 'craps') layoutCraps(R, x, y, w, p);
+    else layoutPoker(R, x, y, w, p);
   }
 
   /* Roulette: the wheel sits at the WEST end, the numbered layout runs east
-   * of it as three short gold columns with a red/black column beside them. */
-  function layoutRoulette(R, x, y, p) {
-    roulette(R, x + 10, y + 10, p);
-    var col;
-    for (col = 0; col < 3; col++) {
-      R(x + 19 + col * 3, y + 6, 2, 8, p.feltDeep);
-      R(x + 19 + col * 3, y + 6, 2, 1, p.goldDeep);
-      R(x + 19 + col * 3, y + 9, 2, 1, p.goldDeep);
-      R(x + 19 + col * 3, y + 12, 2, 1, p.goldDeep);
+   * of it as columns of gold boxes with a red/black column beside them. On
+   * the three-cell centre table the grid has room for six columns. */
+  function layoutRoulette(R, x, y, w, p) {
+    roulette(R, x + 11, y + 10, p);
+    var cols = Math.max(3, Math.floor((w - 26) / 3)), col;
+    for (col = 0; col < cols; col++) {
+      R(x + 20 + col * 3, y + 6, 2, 8, p.feltDeep);
+      R(x + 20 + col * 3, y + 6, 2, 1, p.goldDeep);
+      R(x + 20 + col * 3, y + 9, 2, 1, p.goldDeep);
+      R(x + 20 + col * 3, y + 12, 2, 1, p.goldDeep);
     }
-    R(x + 19, y + 14, 8, 1, p.gold);
-    chipStack(R, x + 25, y + 7, p.chipRed, p);
-    R(x + 24, y + 12, 2, 1, p.pocketRed);
-    R(x + 27, y + 12, 2, 1, p.pocketDark);
+    R(x + 20, y + 14, cols * 3 - 1, 1, p.gold);
+    chipStack(R, x + w - 9, y + 7, p.chipRed, p);
+    chipStack(R, x + w - 14, y + 11, p.chipBlue, p);
+    R(x + w - 8, y + 12, 2, 1, p.pocketRed);
+    R(x + w - 5, y + 12, 2, 1, p.pocketDark);
   }
 
   /* Blackjack: dealer's shoe at the EAST end, a gold bet arc swinging west,
    * three bet circles and one dealt hand. */
-  function layoutBlackjack(R, x, y, p) {
-    R(x + 23, y + 5, 7, 7, p.ink);
-    R(x + 24, y + 6, 5, 5, p.walnutMid);
-    R(x + 24, y + 6, 5, 1, p.walnutHi);
-    R(x + 25, y + 8, 3, 2, p.chipWhite);
-    R(x + 5, y + 6, 16, 1, p.goldDeep);
-    R(x + 7, y + 5, 12, 1, p.gold);
+  function layoutBlackjack(R, x, y, w, p) {
+    R(x + w - 9, y + 5, 7, 7, p.ink);
+    R(x + w - 8, y + 6, 5, 5, p.walnutMid);
+    R(x + w - 8, y + 6, 5, 1, p.walnutHi);
+    R(x + w - 7, y + 8, 3, 2, p.chipWhite);
+    R(x + 5, y + 6, w - 16, 1, p.goldDeep);
+    R(x + 7, y + 5, w - 20, 1, p.gold);
     R(x + 4, y + 7, 2, 3, p.goldDeep);
-    R(x + 20, y + 7, 2, 3, p.goldDeep);
+    R(x + w - 12, y + 7, 2, 3, p.goldDeep);
     var i;
     for (i = 0; i < 3; i++) {
       R(x + 6 + i * 6, y + 11, 4, 1, p.goldDeep);
@@ -521,31 +551,33 @@
 
   /* Craps: a long padded box. The stick and two dice run the full length on
    * a pass line, with numbered boxes along the top rail. */
-  function layoutCraps(R, x, y, p) {
-    var i;
-    for (i = 0; i < 6; i++) {
+  function layoutCraps(R, x, y, w, p) {
+    var boxes = Math.max(6, Math.floor((w - 12) / 4)), i;
+    for (i = 0; i < boxes; i++) {
       R(x + 5 + i * 4, y + 5, 3, 3, p.feltDeep);
       R(x + 5 + i * 4, y + 5, 3, 1, p.goldDeep);
     }
-    R(x + 4, y + 9, 24, 1, p.gold);
-    R(x + 4, y + 12, 24, 1, p.goldDeep);
-    R(x + 6, y + 10, 18, 2, p.feltDeep);
-    R(x + 7, y + 10, 16, 1, p.feltMid);
-    R(x + 8, y + 14, 14, 1, p.walnutHi);
-    R(x + 22, y + 13, 2, 3, p.walnutMid);
-    R(x + 24, y + 9, 3, 3, p.ink);
-    R(x + 24, y + 9, 3, 3, p.chipWhite);
-    R(x + 25, y + 10, 1, 1, p.ink);
-    R(x + 20, y + 6, 3, 3, p.chipWhite);
-    R(x + 21, y + 6, 1, 1, p.ink);
-    R(x + 20, y + 8, 1, 1, p.ink);
+    R(x + 4, y + 9, w - 8, 1, p.gold);
+    R(x + 4, y + 12, w - 8, 1, p.goldDeep);
+    R(x + 6, y + 10, w - 12, 2, p.feltDeep);
+    R(x + 7, y + 10, w - 14, 1, p.feltMid);
+    /* The stick: a long rake lying across the near half of the bed. */
+    R(x + 8, y + 14, w - 18, 1, p.walnutHi);
+    R(x + w - 10, y + 13, 2, 3, p.walnutMid);
+    R(x + w - 8, y + 9, 3, 3, p.ink);
+    R(x + w - 8, y + 9, 3, 3, p.chipWhite);
+    R(x + w - 7, y + 10, 1, 1, p.ink);
+    R(x + w - 12, y + 6, 3, 3, p.chipWhite);
+    R(x + w - 11, y + 6, 1, 1, p.ink);
+    R(x + w - 12, y + 8, 1, 1, p.ink);
+    chipStack(R, x + 6, y + 14, p.chipRed, p);
   }
 
   /* Poker: an oval with a chip rack sunk into the near rail, a dealer button
    * and two face-down cards. */
-  function layoutPoker(R, x, y, p) {
-    R(x + 5, y + 13, 22, 2, p.walnutDeep);
-    R(x + 6, y + 13, 20, 1, p.walnutDark);
+  function layoutPoker(R, x, y, w, p) {
+    R(x + 5, y + 13, w - 10, 2, p.walnutDeep);
+    R(x + 6, y + 13, w - 12, 1, p.walnutDark);
     var i;
     for (i = 0; i < 5; i++) R(x + 7 + i * 4, y + 13, 2, 1, p.goldDeep);
     chipStack(R, x + 6, y + 7, p.chipRed, p);
@@ -622,6 +654,50 @@
     R(x + 4, y + 16, 8, 2, p.ink);
     R(x + 5, y + 16, 6, 1, p.metalHi);
     R(x + 5, y + 18, 6, 1, p.shadowDark);
+  }
+
+  /* Seated patrons. Adapted from interiorSeatedGuest in js/retro-authored.js
+   * (the Double R booth pose) into this module's flat-rectangle grammar: the
+   * same 16x20 silhouette — head, hair, a three-quarter face, sloped
+   * shoulders, a coat and one forearm resting on the cloth. Each patron's
+   * cell sits on the FAR side of its table, so the table is painted after
+   * them and cuts them below the chest exactly like the booth tabletop. */
+  function seatedPatron(R, x, y, p, g) {
+    function P(px, py, w, h, color) {
+      R(g.mirror ? x + 16 - px - w : x + px, y + py, w, h, color);
+    }
+    /* Head: ink silhouette, hair cap, face turned toward the aisle. */
+    P(4, 0, 8, 1, p.ink); P(2, 1, 12, 2, p.ink);
+    P(1, 3, 14, 7, p.ink); P(3, 10, 10, 2, p.ink);
+    P(3, 1, 10, 4, g.hair); P(4, 1, 7, 1, g.hairHi);
+    P(2, 3, 3, 7, g.hair); P(12, 3, 2, 3, g.hair);
+    P(5, 4, 8, 6, g.skin); P(6, 4, 6, 2, g.skinHi);
+    P(4, 6, 2, 3, g.skinShadow); P(5, 6, 1, 2, g.skin);
+    P(6, 10, 6, 1, g.skinShadow);
+    P(7, 6, 1, 2, p.eye); P(11, 6, 1, 2, p.eye);
+    P(13, 7, 1, 2, g.skin); P(11, 9, 2, 1, g.skinShadow);
+    if (g.bob) {
+      P(2, 5, 2, 7, g.hair); P(3, 2, 8, 2, g.hair);
+      P(4, 2, 4, 1, g.hairHi); P(4, 9, 1, 3, g.hairHi);
+    } else {
+      P(3, 2, 8, 1, g.hairHi); P(3, 3, 6, 2, g.hair);
+      P(4, 3, 3, 1, g.hairHi);
+    }
+    P(7, 11, 4, 2, g.skinShadow); P(8, 11, 2, 2, g.skin);
+    /* Sloped shoulders and a diagonal collar follow the turned upper body. */
+    P(4, 12, 4, 1, p.ink); P(3, 13, 10, 5, p.ink);
+    P(2, 14, 12, 3, p.ink); P(4, 13, 8, 5, g.coat);
+    P(4, 13, 3, 1, g.coatHi); P(7, 13, 3, 1, g.shirt);
+    P(8, 14, 3, 1, g.shirt); P(9, 15, 2, 1, g.shirt);
+    P(5, 14, 2, 3, g.coatHi); P(11, 14, 1, 4, g.coatShadow);
+    P(3, 14, 2, 3, g.coat); P(12, 14, 2, 2, g.coat);
+    P(4, 18, 8, 2, g.coatShadow);
+    /* One elbow on the cloth, the far hand resting beside it. */
+    P(3, 16, 3, 2, g.coat); P(4, 17, 4, 2, g.coat);
+    P(4, 17, 3, 1, g.coatHi); P(7, 17, 1, 2, g.shirt);
+    P(8, 17, 3, 2, g.skinShadow); P(8, 17, 3, 1, g.skinHi);
+    P(12, 15, 2, 1, g.shirt); P(12, 16, 2, 2, g.skinShadow);
+    P(12, 16, 2, 1, g.skinHi);
   }
 
   function bottle(R, x, base, color, p, tall) {
@@ -742,8 +818,10 @@
     if (prop.id === 'barCounter') barCounter(R, p);
     else if (prop.id === 'serviceCabinet') serviceCabinet(R, p);
     else if (prop.id.indexOf('table') === 0) {
-      feltTable(R, b[0], b[1], p, prop.game);
-    } else if (prop.id.indexOf('seat') === 0) seat(R, b[0], b[1], p, prop.seatVariant);
+      feltTable(R, b[0], b[1], b[2], p, prop.game);
+    } else if (prop.id.indexOf('guest') === 0) {
+      seatedPatron(R, b[0], b[1], p, guests[prop.guest]);
+    } else if (prop.id.indexOf('stool') === 0) seat(R, b[0], b[1], p, prop.seatVariant);
   }
 
   function drawShadow(R, prop, p) {
