@@ -88,7 +88,17 @@ simulation's own timeout (`decisionTimeoutMinutes`, town minutes) applies as bef
   recording says so. The recording lives in the page: it is not saved, so
   after a reload only moments since the reload can be looked back at.
 - A talk has no topic of its own: what it is about is whatever the lines say.
-- A budget per day. What exists is `maxInFlight` and the hybrid below.
+
+## A budget
+
+`perTownDay: N` on `LT.RemotePolicy.create` caps how many questions are sent in
+one day of the town's own calendar. Past it a question is answered
+`unavailable: budget_spent` without being sent; one that expired in the queue
+is not sent either. `stats()` reports `sent`, `overBudget` and `sentByTownDay`.
+Inside a hybrid, a spent budget means the offline answer stands in for the rest
+of that day — the town goes on, more plainly. A five-person town asks about 300
+questions a day, a third of them mid-talk; with `closeGap` 3 roughly one in ten
+is close enough to go to the provider.
 
 ## Asking only when it matters
 

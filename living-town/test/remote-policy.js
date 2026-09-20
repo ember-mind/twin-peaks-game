@@ -133,6 +133,25 @@ const optionIds = (brief) => brief.user.split('\n').filter((l) => /^\s+\d+\. id 
   const st = flaky.stats();
   ok(st.asked === st.answered + st.timeouts + st.errors + st.unusable + st.inFlight + st.queued, 'every question is accounted for: ' + JSON.stringify(st));
 
+  console.log('# a budget, in the town\'s own days');
+  let paid = 0;
+  const frugal = LT.RemotePolicy.create({ id: 'remote_frugal', timeoutMs: 200, perTownDay: 3, transport: (b) => { paid++; return after(1, JSON.stringify({ choose: optionIds(b)[0] })); } });
+  const dayReq = (d) => Object.assign(JSON.parse(before), { day: d });
+  const spent = [];
+  for (let i = 0; i < 5; i++) spent.push(await frugal.decide(dayReq(1)));
+  ok(paid === 3 && spent.slice(0, 3).every((r) => r.status === 'selected') && spent.slice(3).every((r) => r.status === 'unavailable' && r.error === 'budget_spent'), 'three questions a town day: the fourth and fifth are not sent, and say why');
+  ok((await frugal.decide(dayReq(2))).status === 'selected' && paid === 4, 'the next town day starts again');
+  const fs2 = frugal.stats();
+  ok(fs2.sent === 4 && fs2.overBudget === 2 && fs2.sentByTownDay[1] === 3 && fs2.perTownDay === 3 && fs2.asked === 6, 'and the spending is on the record: ' + JSON.stringify(fs2.sentByTownDay));
+  require(path.resolve(__dirname, '..', 'js', 'policy', 'lt-hybrid-policy.js'));
+  let paidInTown = 0;
+  LT.RemotePolicy.create({ id: 'remote_capped', timeoutMs: 150, perTownDay: 4, transport: (b) => { paidInTown++; return after(1, JSON.stringify({ choose: optionIds(b)[0] })); } });
+  const capped = LT.HybridPolicy.create({ id: 'hybrid_capped', fast: 'utility', slow: 'remote_capped', closeGap: 15 });
+  const csim = LT.Scenario.day1({ policies: { resident_a: capped.id, resident_b: 'utility' } });
+  for (let i = 0; i < 900; i++) { csim.tick(); await sleep(1); }
+  const csrc = {}; csim.state.events.filter((e) => e.type === 'ACTIVITY_STARTED' && e.actorId === 'resident_a').forEach((e) => { csrc[e.data.source] = (csrc[e.data.source] || 0) + 1; });
+  ok(paidInTown === 4 && csrc['hybrid_capped:utility:stood_in'] > 0 && !Object.keys(csrc).some((k) => /^fallback:/.test(k)), 'in a running town the provider is paid for four questions and the offline answer stands in for the rest of the day: ' + JSON.stringify(csrc));
+
   console.log('# asked only when it is close, and never left without an answer');
   require(path.resolve(__dirname, '..', 'js', 'policy', 'lt-hybrid-policy.js'));
   let slowAsked = 0, failNext = false;

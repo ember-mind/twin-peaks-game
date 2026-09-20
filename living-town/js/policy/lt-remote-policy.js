@@ -10,7 +10,13 @@
  * DecisionResponse — the simulation's existing rules (stale answers, superseded
  * requests, its own timeout in town minutes, the fallback wait) do the rest.
  *
- *   LT.RemotePolicy.create({ id, label, transport, timeoutMs, maxInFlight, patienceMs })
+ *   LT.RemotePolicy.create({ id, label, transport, timeoutMs, maxInFlight, patienceMs, perTownDay })
+ *
+ * `perTownDay` is a budget: how many questions may be sent in one day of the
+ * town's own calendar (the request says which day it is). Past it, a question
+ * is answered "unavailable: budget_spent" without being sent — inside a
+ * HybridPolicy that means the offline answer stands in for the rest of the day.
+ * A question that was never sent (spent budget, expired in the queue) costs nothing.
  *
  * `remote: true` and `patienceMs` are read by the page: it holds the town's
  * clock, up to that long, rather than let twenty minutes pass while a question
@@ -29,7 +35,8 @@
     if (!opts || !opts.id || typeof opts.transport !== 'function') throw new Error('a remote policy needs an id and a transport(brief) -> Promise');
     var timeoutMs = opts.timeoutMs || 8000, maxInFlight = opts.maxInFlight || 2;
     var queue = [], inFlight = 0;
-    var stats = { asked: 0, answered: 0, timeouts: 0, errors: 0, unusable: 0, latencies: [] };
+    var perTownDay = opts.perTownDay === undefined ? Infinity : opts.perTownDay, sentOn = {};
+    var stats = { asked: 0, answered: 0, timeouts: 0, errors: 0, unusable: 0, overBudget: 0, sent: 0, latencies: [] };
 
     function run(job) {
       /* The clock started when the question was asked, not when its turn came:
@@ -42,6 +49,14 @@
         if (queue.length) run(queue.shift());
         return;
       }
+      var day = job.request.day;
+      if ((sentOn[day] || 0) >= perTownDay) {
+        stats.overBudget++;
+        job.resolve(Pol.unavailable(job.request, opts.id, 'budget_spent'));
+        if (queue.length) run(queue.shift());
+        return;
+      }
+      sentOn[day] = (sentOn[day] || 0) + 1; stats.sent++;
       inFlight++;
       var started = now(), settled = false, timer;
       function finish(response, kind) {
@@ -74,7 +89,8 @@
       stats: function () {
         var l = stats.latencies.slice().sort(function (a, b) { return a - b; });
         function pct(p) { return l.length ? l[Math.min(l.length - 1, Math.floor(p * l.length))] : null; }
-        return { asked: stats.asked, answered: stats.answered, timeouts: stats.timeouts, errors: stats.errors, unusable: stats.unusable,
+        return { asked: stats.asked, sent: stats.sent, overBudget: stats.overBudget, sentByTownDay: JSON.parse(JSON.stringify(sentOn)), perTownDay: perTownDay === Infinity ? null : perTownDay,
+                 answered: stats.answered, timeouts: stats.timeouts, errors: stats.errors, unusable: stats.unusable,
                  inFlight: inFlight, queued: queue.length, p50: pct(0.5), p95: pct(0.95) };
       }
     };
