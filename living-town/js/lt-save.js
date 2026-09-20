@@ -146,22 +146,36 @@
     return save;
   };
 
-  /* e3450c3d -> e6451950: the street got its houses. Both sides of Via del Ponte
-   * are now house fronts with a doorway for every place, and three places meet
-   * the street one cell from where they did (the second flat's room, the
-   * ground-floor rooms, the attic's stair). Every cell a walker could have been
-   * on — the pavements, the carriageway, the doorways — is still open, so
-   * positions stand; someone walking to one of the three old meeting cells is
-   * sent to the new one instead. Anyone found on a cell that is now a wall
-   * (there should be none) is refused by verification, not moved by guesswork.
-   * Written against test/fixtures/save-town-e3450c3d-walking-home.json. */
+  /* e3450c3d -> e6451950: the street got its houses. Both sides of Via del
+   * Ponte are now house fronts with a doorway for every place, and three places
+   * meet the street one cell from where they did.
+   *
+   * People on the old street walked over grass that is now wall: the way from
+   * the attic stair to the park ran along what is now the south row of fronts.
+   * So a walker is put right, by rule and not by guess: someone standing on a
+   * cell that is now a house front steps onto the pavement beside it (same
+   * column; row 7 from the south side, row 3 from the north), and everyone on
+   * the street is sent to where the place they were going to meets the street
+   * now — taken from their own record of where they were going, not matched
+   * against old coordinates. The street as it stands after this step is frozen
+   * here, so a later migration starts from what this one was written against.
+   * Written against two real saves: test/fixtures/save-town-e3450c3d-walking-home.json
+   * and save-town-e3450c3d-on-the-grass.json. */
+  var STREET_E6451950 = {
+    rows: ['HHHHHHHHHHHHHHHHHHHH', 'HHHHHHHHHHHHHHHHHHHH', 'HHHDDHHHHDDHHHHDDHHH', '--------------------', '--------------------', '--------------------',
+           '--------------------', '--------------------', 'HDDHHHHHDDHHHDDHHDDH', 'HHHHHHHHHHHHHHHHHHHH', 'HHHHHHHHHHHHHHHHHHHH'],
+    portals: { flat_a: { x: 3, y: 3 }, cafe: { x: 16, y: 3 }, park: { x: 8, y: 8 }, flat_b: { x: 1, y: 7 },
+               flat_c: { x: 9, y: 3 }, flat_d: { x: 18, y: 7 }, flat_e: { x: 14, y: 7 } }
+  };
   S.WORLD_MIGRATIONS['e3450c3d'] = function (save) {
-    var moved = { '1,6': { x: 1, y: 7 }, '18,6': { x: 18, y: 7 }, '14,8': { x: 14, y: 7 } };
+    var T = STREET_E6451950;
     Object.keys(save.state.characters || {}).forEach(function (id) {
       var c = save.state.characters[id];
-      if (c.location !== 'street' || !c.walkTarget) return;
-      var to = moved[c.walkTarget.x + ',' + c.walkTarget.y];
-      if (to) { c.walkTarget.x = to.x; c.walkTarget.y = to.y; }
+      if (c.location !== 'street') return;
+      var row = T.rows[c.pos.y] || '', ch = row.charAt(c.pos.x);
+      if (ch === 'H' || ch === '') c.pos = { x: Math.max(0, Math.min(19, c.pos.x)), y: c.pos.y >= 8 ? 7 : 3, dir: c.pos.dir };
+      var to = c.transit && T.portals[c.transit.to];
+      if (to && c.walkTarget) c.walkTarget = { x: to.x, y: to.y };
     });
     save.world = 'e6451950';
     return save;
@@ -387,7 +401,10 @@
       /* Someone with nothing in hand — or someone mid-talk who had been asked
        * whether to carry on: that question is put to a person who is busy. */
       var midTalk = r.reason === 'conversation_turn' && !!sim.openTurnOf(actor);
-      if ((!actor.activity || midTalk) && !actor.pending) sim.requestDecision(actor, r.reason, r.seq, r.issuedAbs);
+      /* A turn question whose talk is no longer going is not that question any
+       * more: the person is simply someone with nothing in hand. */
+      var reason = (r.reason === 'conversation_turn' && !midTalk) ? 'idle' : r.reason;
+      if ((!actor.activity || midTalk) && !actor.pending) sim.requestDecision(actor, reason, r.seq, r.issuedAbs);
     });
 
     return sim;

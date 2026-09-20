@@ -264,7 +264,7 @@
      * is answered through the recorder it was asked through. */
     var players = {};
     Object.keys(state.recorders || {}).forEach(function (pid) {
-      players[pid] = LT.RecordedPolicy.buildPlayer(state.recorders[pid].toJSON(), { id: pid, keepSource: true });
+      players[pid] = LT.RecordedPolicy.buildPlayer(state.recorders[pid].toJSON(), { id: pid, keepSource: true, unanswered: LT.RecordedPolicy.unansweredIn(state.sim) });
       LT.Policy.register(players[pid]);
     });
     var sim;

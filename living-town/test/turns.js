@@ -92,6 +92,42 @@ async function twoInThePark(pa, pb, minutes) {
   const down = talker(() => 'throw'), s4 = await twoInThePark(down, talker(() => 'keep'));
   ok(s4.state.conversations[0].minutes === 25 && s4.state.conversations[0].turns.every((t) => t.answers.resident_a === 'none') && down.asked.filter((a) => a.reason === 'conversation_turn').length === 2, 'a provider that fails is asked once per turn, not once a minute, and the talk goes on');
 
+  console.log('# found in review: a talk broken off with a turn open');
+  const holdA = talker(() => 'never'), holdB = talker(() => 'never');
+  const s6 = LT.Scenario.day1({ intervention: false, everyday: false, policies: { resident_a: holdA.id, resident_b: holdB.id } });
+  s6.placeCharacter(s6.state.characters.resident_a, 'park'); s6.placeCharacter(s6.state.characters.resident_b, 'park');
+  while (!(s6.state.conversations[0] && s6.state.conversations[0].turn)) await s6.runMinutes(1);
+  await s6.runMinutes(1);
+  ok(s6.requestInterrupt('resident_b', 'called_away'), 'one of the two is called away while both are being asked whether to carry on');
+  const c6 = s6.state.conversations[0], a6 = s6.state.characters.resident_a;
+  ok(c6.status === 'broken_off' && c6.turn === null && c6.turns.length === 1, 'the talk is broken off and the turn ends with it');
+  await s6.runMinutes(2);
+  const asks = holdA.asked.slice(-1)[0];
+  ok((a6.pending || a6.activity) && asks.reason !== 'conversation_turn' && asks.ids.length > 2, 'the other is not left holding a question about a talk that is over: within two minutes they are asked what to do next, with everything on offer');
+  const s7 = LT.Save.deserialize(JSON.parse(JSON.stringify((function () { const x = LT.Save.serialize(s6); x.reissue.forEach((r) => { r.reason = 'conversation_turn'; }); return x; })())));
+  ok(s7.actorIds().every((id) => { const p = s7.state.characters[id].pending; return !p || s7.requests[p.requestId].request.context.reason === 'idle'; }), 'and a save that still carried the old question re-asks it as what it now is');
+
+  console.log('# found in review: a late answer played back is still a late answer');
+  require(path.resolve(__dirname, '..', 'js', 'policy', 'lt-recorded-policy.js'));
+  let release = [];
+  const slowId = 'slow_winder_' + (++n);
+  const slow = Pol.register({ id: slowId, decide(r) {
+    if (r.context.reason !== 'conversation_turn') { const w = r.candidates.find((c) => /^(join_conversation|talk_with)/.test(c.id)) || r.candidates.find((c) => c.id === 'wait'); return Promise.resolve(Pol.selected(r, w.id, slowId)); }
+    return new Promise((resolve) => { release.push(() => resolve(Pol.selected(r, r.candidates.find((c) => c.actionId === 'wind_down').id, slowId))); });
+  } });
+  const rec = LT.RecordedPolicy.record(slow, { id: 'rec_' + slowId });
+  const s8 = LT.Scenario.day1({ intervention: false, everyday: false, policies: { resident_a: rec.id, resident_b: talker(() => 'keep').id } });
+  s8.placeCharacter(s8.state.characters.resident_a, 'park'); s8.placeCharacter(s8.state.characters.resident_b, 'park');
+  for (let i = 0; i < 45; i++) { await s8.runMinutes(1); const c = s8.state.conversations[0]; if (c && !c.turn && release.length) { release.forEach((f) => f()); release = []; } }
+  const c8 = s8.state.conversations[0];
+  ok(c8.minutes === 25 && c8.turns.every((t) => t.answers.resident_a === 'none') && s8.rejections.some((r) => r.reason === 'late_response'), 'live: "wind down" arrived after each turn had lapsed, so the talk ran its twenty-five minutes');
+  const player = LT.RecordedPolicy.replay(rec.toJSON(), { id: 'play_' + slowId, unanswered: LT.RecordedPolicy.unansweredIn(s8) });
+  const s9 = LT.Scenario.day1({ intervention: false, everyday: false, policies: { resident_a: player.id, resident_b: talker(() => 'keep').id } });
+  s9.placeCharacter(s9.state.characters.resident_a, 'park'); s9.placeCharacter(s9.state.characters.resident_b, 'park');
+  await s9.runMinutes(45);
+  const c9 = s9.state.conversations[0];
+  ok(c9.minutes === 25 && JSON.stringify(c9.turns) === JSON.stringify(c8.turns) && player.mismatches.length === 0, 'played back, it is the same twenty-five-minute talk — the late answers are not turned into timely ones');
+
   console.log('# saved in the middle of a turn');
   const live = LT.Scenario.town({});
   let midTurn = null;

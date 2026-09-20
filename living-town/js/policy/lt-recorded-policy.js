@@ -62,6 +62,10 @@
       exhausted: false,
       remaining: function () { return entries.length - used; },
       decide: function (request) {
+        /* A question whose answer came too late to count was, for the world,
+         * never answered. Played back, it still is not: the world's own
+         * waiting and lapsing then happen again exactly as they did. */
+        if (options.unanswered && options.unanswered[request.seq]) return new Promise(function () {});
         var e = bySeq[request.seq];
         if (!e) {
           api.exhausted = true;
@@ -91,7 +95,19 @@
     return api;
   }
 
+  /* The question numbers a world refused as too late: from its own record of refusals. */
+  function unansweredIn(sim) {
+    var out = {};
+    (sim.rejections || []).forEach(function (r) {
+      if (r.reason !== 'late_response' && r.reason !== 'turn_lapsed' && r.reason !== 'policy_timeout') return;
+      var m = /^req_(\d+)/.exec(r.requestId || '');
+      if (m) out[Number(m[1])] = true;
+    });
+    return out;
+  }
+
   LT.RecordedPolicy = {
+    unansweredIn: unansweredIn,
     record: function (inner, o) { return Pol.register(recorder(inner, o)); },
     replay: function (recording, o) { return Pol.register(player(recording, o)); },
     buildRecorder: recorder,

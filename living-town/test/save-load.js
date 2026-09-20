@@ -627,6 +627,15 @@ async function previousFormatIsMigrated() {
     ok(w.location === 'flat_b' && !w.transit, 'and she gets home');
     await moved.runUntil(2, 0);
     ok(moved.state.events.filter((e) => e.type === 'ARRIVED').length > 10 && JSON.parse(oldText).world === 'e3450c3d', 'the day goes on, people come and go through the new doors, and the old save text is untouched');
+    /* Found in review: the old way from the attic stair to the park ran over grass that is now a row of house fronts. */
+    const grassText = require('node:fs').readFileSync(path.resolve(__dirname, 'fixtures', 'save-town-e3450c3d-on-the-grass.json'), 'utf8');
+    const onGrass = JSON.parse(grassText).state.characters.resident_e;
+    ok(onGrass.location === 'street' && onGrass.pos.x === 12 && onGrass.pos.y === 8 && LT.World.isSolid(LT.World.LOCATIONS.street.rows[8].charAt(12)), 'a second real save: ' + onGrass.name + ' at 12,8 on the way to the park — a cell that is a house front now');
+    const lifted = Save.deserialize(JSON.parse(grassText));
+    const le = lifted.state.characters.resident_e;
+    ok(le.pos.x === 12 && le.pos.y === 7 && le.walkTarget.x === 8 && le.walkTarget.y === 8, 'she is on the pavement beside where she stood, still heading for the park gate');
+    await lifted.runMinutes(20);
+    ok(le.location === 'park', 'and gets there');
     const again = Save.deserialize(JSON.parse(JSON.stringify(Save.serialize(moved))));
     ok(again.state.day === 2 && JSON.parse(JSON.stringify(Save.serialize(moved))).world === LT.World.fingerprint(), 'saved again, it is a save of this town');
   }

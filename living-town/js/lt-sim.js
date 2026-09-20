@@ -874,7 +874,7 @@
     this.state.conversations.forEach(function (conv) {
       if (conv.status !== 'active') return;
       var elapsed = now - conv.startAbs, done = conv.turnsDone || 0;
-      if (!conv.turn && done < TURN_AT.length && elapsed >= TURN_AT[done] && elapsed < conv.minutes - 2) {
+      if (!conv.turn && done < TURN_AT.length && elapsed >= TURN_AT[done] && elapsed + TURN_MINUTES < conv.minutes) {   // never a turn the talk would end inside
         conv.turn = { index: done, openedAbs: now, answers: {} };
         self.touch();
       }
@@ -907,8 +907,13 @@
     return true;
   };
 
+  /* However a talk ends — run its course, wound down, broken off, someone
+   * called away — a turn that was open ends with it, and its questions are
+   * withdrawn, or somebody would stand there holding a question about a talk
+   * that is over. */
   Sim.prototype.closeTurn = function (conv) {
     var self = this;
+    if (!conv.turn) return;
     conv.participants.forEach(function (id) {
       var actor = self.state.characters[id];
       if (conv.turn.answers[id] === undefined) conv.turn.answers[id] = 'none';
@@ -950,6 +955,7 @@
   Sim.prototype.settleConversation = function (id) {
     var conv = this.conversationById(id);
     if (!conv || conv.status !== 'active') return null;
+    this.closeTurn(conv);
     conv.status = 'completed';
     var a = this.state.characters[conv.initiatorId];
     var bId = conv.participants[0] === a.id ? conv.participants[1] : conv.participants[0];
@@ -970,6 +976,7 @@
 
   /* A conversation one person leaves is over for both, and settles nothing. */
   Sim.prototype.endConversation = function (conv, reason) {
+    if (conv) this.closeTurn(conv);
     if (!conv || conv.status !== 'active') return false;
     conv.status = 'broken_off';
     conv.endedReason = reason;
