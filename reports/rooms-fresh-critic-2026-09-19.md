@@ -118,3 +118,36 @@ The critic's priority: the floor. A patterned carpet with a bordered pit under t
 closes the dead right zone and turns islands into one room. The contact shadow is still
 "almost none" at 1x: the ellipse's widest row sits on the feet's own row, so the sprite
 covers most of it; the next engine tweak moves the mass one row below the feet.
+
+## Pass 5 — 2026-09-20, One Eyed Jacks after the floor round
+
+lead/oej-floor (3440d07) gave the carpet a weave and a beaded border, a bordered pit under
+the tables, a standing croupier behind the blackjack, a stool, two standing lamps; the
+actor shadow moved one row below the feet (lead/actor-shadow-2). Frame numbers held at
+mean luma 70.4, 5.3% light, 0.3% black.
+
+| room | pass 4 | pass 5 | pass-5 biggest gap |
+| --- | ---: | ---: | --- |
+| One Eyed Jacks | 6 | 6 | mid floor between the bar and the lower tables an empty carpet band; tables still one stamp at 1x; "actors float, no contact shadow under any figure" |
+
+### What this says
+
+Three rounds on OEJ today (rows, values, floor) moved it 5 -> 6 -> 6 -> 6. The three
+persistent gaps are now structural to the room as designed:
+
+1. The centre band is the circulation the cast needs (door -> jacques at 7,5, -> audrey
+   at 13,7, -> hawk at 6,8). Furnishing it means moving cast cells and the act-3 route.
+2. Tables "read as one stamp" at 1x whatever their cloth marks: a 24x16 green rectangle
+   is a green rectangle at native size. Only a different silhouette per table (a round
+   roulette, a raised craps rail, a kidney blackjack) changes that, which is a sprite
+   redesign, not a paint round.
+3. The contact shadow exists (dark ellipse, rows 16-19, verified on 8x crops) and the
+   critic still writes "no contact shadow". At 1x a 16x4 ellipse under a 16 px sprite is
+   a two-pixel-high smudge; the HGSS grammar Deep measured gets its grounding from
+   lighter floors and a full-width ellipse that the sprite does not cover.
+
+Recommendation: stop OEJ rounds at 6. It is an act-3 room with short screen time. If the
+owner wants it at 7, the lift is a table silhouette redesign plus a review of the cast
+lanes, both design decisions, not builder rounds. Palmer (6), lobby (6) and grove (6) are
+in the same position: one honest engine/rows pass each moved them one point, and the
+next point costs a design call per room.
