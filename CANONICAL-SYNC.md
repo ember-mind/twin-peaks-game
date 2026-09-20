@@ -139,3 +139,4 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-20 8f20e6d main: OEJ map-row pass (lead/oej-rows, grid broken, roulette centre, seated patrons; act-3 playthrough 189/189 on main) + critic pass 3 recorded; 7 files mirrored; .gauntlet/oej-rows copied to vault
 - 2026-09-20 main: living-town PR #16 integrated (c496e55, 128 gates), critic pass 4 (a8930a9), actor shadow mass below the feet (lead/actor-shadow-2); js/retro-authored.js + report mirrored; .gauntlet/actor-shadow-2 copied to vault
 - 2026-09-20 main: OEJ floor round (lead/oej-floor: carpet weave, bordered pit, croupier, lamps, 3 solid cells) + golden re-pin; files mirrored per list; .gauntlet/oej-floor copied to vault
+- 2026-09-20 main: PR #17 engine renderer extraction integrated (62714f9), critic pass 5 recorded, OEJ rounds closed at 6; report + sync mirrored
