@@ -62,27 +62,27 @@ const PINS = JSON.parse(fs.readFileSync(path.join(REPO, 'test', 'fixtures', 'cas
 const store = Cast.createCastStore(REAL);
 const castCs = (moves) => JSON.parse(JSON.stringify(Cast.buildCastChangeset(store, moves.reduce((d, m) => Cast.placeBody(store, d, m), store.draft))));
 
-// Ben Horne's baseline (hotel_gn 5,7) is pinned on every story moment and bound by no transition.
-const BEN = castCs([{ window: 'baseline', character: 'benhorne', x: 6 }]);
-const benPins = PINS.pins.filter((p) => p.expect.benhorne === 'hotel_gn@5,7').map((p) => p.id);
-ok(benPins.length === PINS.pins.length && BEN.operations.length === 1, 'fixture premise: benhorne pinned at hotel_gn@5,7 on every moment', benPins.length);
+// Ben Horne's baseline (hotel_gn 12,7) is pinned on every story moment and bound by no transition.
+const BEN = castCs([{ window: 'baseline', character: 'benhorne', x: 13 }]);
+const benPins = PINS.pins.filter((p) => p.expect.benhorne === 'hotel_gn@12,7').map((p) => p.id);
+ok(benPins.length === PINS.pins.length && BEN.operations.length === 1, 'fixture premise: benhorne pinned at hotel_gn@12,7 on every moment', benPins.length);
 
 // ---- pins disagree: fail, exact pin lines, nothing written
 const fx = makeFixture();
 const snap0 = snapshot(fx);
 let r = run(fx, BEN, [], 'ben-move.json');
 ok(r.code === 1, 'pin disagreement exits 1', r.all);
-const pinLines = r.err.split('\n').filter((l) => /^PIN test\/fixtures\/cast-pins-acts-1-4\.json:\d+ {2}"benhorne": "hotel_gn@5,7", {2}-> {2}"hotel_gn@6,7" {2}\(/.test(l));
+const pinLines = r.err.split('\n').filter((l) => /^PIN test\/fixtures\/cast-pins-acts-1-4\.json:\d+ {2}"benhorne": "hotel_gn@12,7", {2}-> {2}"hotel_gn@13,7" {2}\(/.test(l));
 ok(pinLines.length === benPins.length, 'one PIN line per disagreeing entry with file:line, old text and new value', r.err);
 const fixtureLines = read(fx, 'test/fixtures/cast-pins-acts-1-4.json').toString('utf8').split('\n');
-ok(pinLines.every((l) => fixtureLines[Number(/:(\d+) /.exec(l)[1]) - 1].trim() === '"benhorne": "hotel_gn@5,7",'), 'every printed line number points at that pin entry');
+ok(pinLines.every((l) => fixtureLines[Number(/:(\d+) /.exec(l)[1]) - 1].trim() === '"benhorne": "hotel_gn@12,7",'), 'every printed line number points at that pin entry');
 ok(r.err.includes('PINS ' + benPins.length + ' V5 pin entries disagree with the new placement; rerun with --repin'), 'names --repin', r.err);
-ok(r.out.includes('DIFF narrative/cast/windows.json') && r.out.includes('-         "x": 5,') && r.out.includes('+         "x": 6,'), 'prints the windows.json diff', r.out);
+ok(r.out.includes('DIFF narrative/cast/windows.json') && r.out.includes('-         "x": 12,') && r.out.includes('+         "x": 13,'), 'prints the windows.json diff', r.out);
 ok(same(fx, snap0), 'pin disagreement writes nothing');
 
 // ---- dry-run --repin previews repins + audit line, writes nothing
 r = run(fx, BEN, ['--dry-run', '--repin'], 'ben-move.json');
-ok(r.code === 0 && (r.out.match(/^REPIN /gm) || []).length === benPins.length && /^AUDIT artifacts\/world-character-audit\/cast-windows-acts-1-4\.md - \d{4}-\d{2}-\d{2} · window baseline \(PERSISTENT\) · benhorne · hotel_gn@5,7 down → hotel_gn@6,7 down · pins ACT1_TOWN, .* · changeset ben-move\.json$/m.test(r.out) && r.out.includes('DRY-RUN 1 cast placement change(s), ' + benPins.length + ' repin(s); nothing written'), 'dry-run --repin previews', r.all);
+ok(r.code === 0 && (r.out.match(/^REPIN /gm) || []).length === benPins.length && /^AUDIT artifacts\/world-character-audit\/cast-windows-acts-1-4\.md - \d{4}-\d{2}-\d{2} · window baseline \(PERSISTENT\) · benhorne · hotel_gn@12,7 down → hotel_gn@13,7 down · pins ACT1_TOWN, .* · changeset ben-move\.json$/m.test(r.out) && r.out.includes('DRY-RUN 1 cast placement change(s), ' + benPins.length + ' repin(s); nothing written'), 'dry-run --repin previews', r.all);
 ok(same(fx, snap0), 'dry-run --repin writes nothing');
 
 // ---- --repin: applies, validator green, exactly those entries, audit line
@@ -91,16 +91,16 @@ ok(r.code === 0 && r.out.includes('WROTE narrative/cast/windows.json (1 placemen
   r.out.includes('WROTE artifacts/world-character-audit/cast-windows-acts-1-4.md (1 change record line(s))') && /CHECK cast-continuity-validate: V1 exactly-one PASS .*V5 world-window-pins PASS .*V6 causal-transitions PASS/.test(r.out), '--repin applies and the validator passes inside the tool', r.all);
 const castAfter = read(fx, 'narrative/cast/windows.json').toString('utf8');
 const castDiff = castAfter.split('\n').filter((l, i) => l !== snap0[0].toString('utf8').split('\n')[i]);
-ok(castDiff.length === 1 && castDiff[0].trim() === '"x": 6,', 'windows.json: exactly one line changed', castDiff);
+ok(castDiff.length === 1 && castDiff[0].trim() === '"x": 13,', 'windows.json: exactly one line changed', castDiff);
 const pinsAfter = read(fx, 'test/fixtures/cast-pins-acts-1-4.json').toString('utf8').split('\n');
 const pinsBefore = snap0[2].toString('utf8').split('\n');
 const changedPinLines = pinsAfter.filter((l, i) => l !== pinsBefore[i]);
-ok(pinsAfter.length === pinsBefore.length && changedPinLines.length === benPins.length && changedPinLines.every((l) => l.trim() === '"benhorne": "hotel_gn@6,7",'), 'pins: exactly the ' + benPins.length + ' benhorne entries changed', changedPinLines.slice(0, 3));
-ok(read(fx, 'js/narrative-data.gen.js').toString('utf8').includes('"x": 6') && !read(fx, 'js/narrative-data.gen.js').equals(snap0[1]), 'narrative-data.gen.js regenerated');
+ok(pinsAfter.length === pinsBefore.length && changedPinLines.length === benPins.length && changedPinLines.every((l) => l.trim() === '"benhorne": "hotel_gn@13,7",'), 'pins: exactly the ' + benPins.length + ' benhorne entries changed', changedPinLines.slice(0, 3));
+ok(read(fx, 'js/narrative-data.gen.js').toString('utf8').includes('"x": 13') && !read(fx, 'js/narrative-data.gen.js').equals(snap0[1]), 'narrative-data.gen.js regenerated');
 ok(read(fx, 'test/fixtures/cast-transitions-acts-1-4.json').equals(snap0[3]), 'transitions fixture untouched');
 const audit = read(fx, 'artifacts/world-character-audit/cast-windows-acts-1-4.md').toString('utf8');
 const auditAdded = audit.slice(snap0[4].toString('utf8').replace(/\n*$/, '\n').length);
-ok(audit.startsWith(snap0[4].toString('utf8').replace(/\n*$/, '\n')) && /\n## Builder change record\n\n.*\n\n- \d{4}-\d{2}-\d{2} · window baseline \(PERSISTENT\) · benhorne · hotel_gn@5,7 down → hotel_gn@6,7 down · pins ACT1_TOWN, [A-Z0-9_, ]+ · changeset ben-move\.json\n$/.test(auditAdded), 'audit: heading + one change-record line appended at the end', auditAdded);
+ok(audit.startsWith(snap0[4].toString('utf8').replace(/\n*$/, '\n')) && /\n## Builder change record\n\n.*\n\n- \d{4}-\d{2}-\d{2} · window baseline \(PERSISTENT\) · benhorne · hotel_gn@12,7 down → hotel_gn@13,7 down · pins ACT1_TOWN, [A-Z0-9_, ]+ · changeset ben-move\.json\n$/.test(auditAdded), 'audit: heading + one change-record line appended at the end', auditAdded);
 const v = nodeIn(fx, 'test/cast-continuity-validate.js');
 ok(v.status === 0, 'node test/cast-continuity-validate.js green on the copy after --repin', v.stdout.split('\n').slice(-2).join('\n'));
 ok(read(fx, 'world/connections.json').equals(snap0[5]) && read(fx, 'js/world-catalog.js').equals(snap0[7]), 'connections files untouched by a cast-only changeset');
@@ -109,10 +109,10 @@ ok(read(fx, 'world/connections.json').equals(snap0[5]) && read(fx, 'js/world-cat
 r = run(fx, BEN, ['--repin']);
 ok(r.code === 0 && r.out.includes('NO-OP narrative/cast/windows.json already matches the changeset'), 'second apply is a NO-OP', r.all);
 const storeAfter = Cast.createCastStore(JSON.parse(castAfter));
-const BACK = JSON.parse(JSON.stringify(Cast.buildCastChangeset(storeAfter, Cast.placeBody(storeAfter, storeAfter.draft, { window: 'baseline', character: 'benhorne', x: 5 }))));
+const BACK = JSON.parse(JSON.stringify(Cast.buildCastChangeset(storeAfter, Cast.placeBody(storeAfter, storeAfter.draft, { window: 'baseline', character: 'benhorne', x: 12 }))));
 r = run(fx, BACK, ['--repin'], 'ben-back.json');
 const audit2 = read(fx, 'artifacts/world-character-audit/cast-windows-acts-1-4.md').toString('utf8');
-ok(r.code === 0 && audit2.split('\n').filter((l) => l === '## Builder change record').length === 1 && /· hotel_gn@6,7 down → hotel_gn@5,7 down · pins .* · changeset ben-back\.json\n$/.test(audit2), 'moving back appends a second line under the one heading', r.all);
+ok(r.code === 0 && audit2.split('\n').filter((l) => l === '## Builder change record').length === 1 && /· hotel_gn@13,7 down → hotel_gn@12,7 down · pins .* · changeset ben-back\.json\n$/.test(audit2), 'moving back appends a second line under the one heading', r.all);
 ok(['narrative/cast/windows.json', 'js/narrative-data.gen.js', 'test/fixtures/cast-pins-acts-1-4.json'].every((rel) => read(fx, rel).equals(snap0[WATCH.indexOf(rel)])), 'moving back restores windows.json, gen and pins byte-identical');
 
 // ---- V6: a body bound by a transition fails with or without --repin
@@ -133,8 +133,8 @@ ok(['narrative/cast/windows.json', 'js/narrative-data.gen.js', 'test/fixtures/ca
     const res = run(f, cs, ['--repin']);
     ok(res.code === (code || 1) && re.test(res.err), label, res.all);
   };
-  refuse('onto another body (Audrey, hotel_gn 12,9)', castCs([{ window: 'baseline', character: 'benhorne', x: 12, y: 9 }]),
-    /INVALID benhorne \(baseline\) on hotel_gn 12,9 is occupied by audrey \[BASELINE\] at story moment ACT1_TOWN/);
+  refuse('onto another body (Audrey, hotel_gn 15,9)', castCs([{ window: 'baseline', character: 'benhorne', x: 15, y: 9 }]),
+    /INVALID benhorne \(baseline\) on hotel_gn 15,9 is occupied by audrey \[BASELINE\] at story moment ACT1_TOWN/);
   refuse('onto a door trigger tile (sheriff 7,11)', castCs([{ window: 'baseline', character: 'lucy', x: 7, y: 11 }]),
     /INVALID baseline \/ lucy: sheriff 7,11 is a door trigger tile \(trigger of sheriffs-station-front-entrance\)/);
   refuse('onto a wall (sheriff 0,0)', castCs([{ window: 'baseline', character: 'lucy', x: 0, y: 0 }]), /INVALID baseline \/ lucy: sheriff 0,0 is not walkable/);

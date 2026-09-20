@@ -65,7 +65,7 @@
 <script src="../js/ambient-life.js?v=5"></script>
 <script src="../js/character-activity.js?v=1.1"></script>
 <script src="../js/environment-reactions.js?v=2"></script>
-<script src="../js/ambient-life-scenes.js?v=6-redroom"></script>
+<script src="../js/ambient-life-scenes.js?v=7-hotel-gn"></script>
 <script src="../js/location-connections.js"></script>
 <script src="../js/double-r-exterior-art.js"></script>
 <script src="../js/double-r-exterior-scene.js"></script>
@@ -79,21 +79,37 @@
 <script src="../js/room-315-art.js"></script>
 <script src="../js/room-315-scene.js"></script>
 <script src="../js/room-315-production.js"></script>
+<script src="../js/woods-art.js"></script>
+<script src="../js/woods-scene.js"></script>
+<script src="../js/woods-production.js"></script>
+<script src="../js/palmer-art.js"></script>
+<script src="../js/palmer-scene.js"></script>
+<script src="../js/palmer-production.js"></script>
 <script src="../js/hospital-art.js"></script>
 <script src="../js/hospital-scene.js"></script>
 <script src="../js/hospital-production.js"></script>
 <script src="../js/roadhouse-art.js"></script>
 <script src="../js/roadhouse-scene.js"></script>
 <script src="../js/roadhouse-production.js"></script>
+<!-- M12: the prop registry owns the Roadhouse furniture; js/roadhouse-art.js paints the shell only,
+     so the props are the room, not a second copy of it. Forced false by a harness to shoot the
+     shell on its own (test/props-flag-off.js). -->
+<script>window.GAME = window.GAME || {}; window.GAME.PROPS_ENABLED = true;</script>
 <script src="../js/props.gen.js"></script>
 <script src="../js/props-production.js"></script>
 <script src="../js/redroom-art.js"></script>
 <script src="../js/redroom-scene.js"></script>
 <script src="../js/redroom-production.js"></script>
+<script src="../js/hotel-gn-art.js"></script>
+<script src="../js/hotel-gn-scene.js"></script>
+<script src="../js/hotel-gn-production.js"></script>
 <script src="../js/character-life-scenes.js"></script>
 <script src="../js/traincar-art.js"></script>
 <script src="../js/traincar-scene.js"></script>
 <script src="../js/traincar-production.js"></script>
+<script src="../js/oej-art.js"></script>
+<script src="../js/oej-scene.js"></script>
+<script src="../js/oej-production.js"></script>
 <script src="../js/world-connections-production.js"></script>
 <script src="../js/world-engine.js"></script>
 <script src="../js/world-catalog.js"></script>
@@ -199,6 +215,26 @@
      * Image asincrona, niente frame fallback promosso per errore. */
     document.body.setAttribute('data-cast-renderer',
       GAME.Retro2D && GAME.Retro2D.castRenderer && GAME.Retro2D.castRenderer.id || 'missing');
+    /* Optional evidence mode: sample the live production canvas while the
+     * hero stands still. No synthetic redraw or ambient-state injection. */
+    if (q.get('ambientSeries') === '1') {
+      window.__TP_SHOT_FRAMES__ = [];
+      var times = [400];
+      for (var ms = 1000; ms <= 25000; ms += 500) times.push(ms);
+      times.forEach(function (at, index) {
+        setTimeout(function () {
+          requestAnimationFrame(function () { requestAnimationFrame(function () {
+            var png = cv.toDataURL('image/png');
+            window.__TP_SHOT_FRAMES__.push(png);
+            if (index === times.length - 1) {
+              document.body.setAttribute('data-native-png', png);
+              document.title = 'TP-RETRO-READY ' + map;
+            }
+          }); });
+        }, at);
+      });
+      return;
+    }
     /* Prova temporale R101: un passo nasce dal vero loop di produzione,
      * riceve input tastiera reale e viene campionato lossless ogni 55 ms.
      * Non ricostruiamo i frame nel test: esportiamo il canvas che il giocatore

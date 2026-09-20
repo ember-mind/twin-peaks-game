@@ -21,7 +21,10 @@ globalThis.GAME = { Sprites: { CHARS: {}, drawTile() {} } };
 require(path.resolve(__dirname, '..', 'js', 'maps.js'));
 require(path.resolve(__dirname, '..', 'js', 'retro-authored.js'));
 
-const PINNED = { calls: 3536, sha1: 'de9a9c62c4fe2f7e6d7d5f17fe4d8b058c038b6f' };
+/* Re-recorded when main's restyled diner (upright neon, broad vinyl counter)
+ * was merged with the opened-up kit: the stream below is main's own renderer's,
+ * call for call — recorded from origin/main and from the merged tree, identical. */
+const PINNED = { calls: 4035, sha1: '11ef1da24cd2bb5a6203ac5a8aa098272e81cd63' };
 let checks = 0;
 function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + msg); }
 

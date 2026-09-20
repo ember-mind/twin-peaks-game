@@ -1,0 +1,190 @@
+[
+  {
+    "name": "index.html registers the prop layer",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "the injected page differs from index.html only by the flag script",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "the repo default is flag off",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-empty: flag off changes no more than a plain reload of the same tree does (72 px vs 63 px of reload noise, actor sprites excluded)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-gathering: flag off changes no more than a plain reload of the same tree does (1854 px vs 18243 px of reload noise, actor sprites excluded)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-giant-stage: flag off changes no more than a plain reload of the same tree does (45 px vs 63 px of reload noise, actor sprites excluded)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "cmp confirms off and on differ on disk",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-empty: depth — every prop that must be BEHIND an actor leaves the actor's pixels alone (2 pairs)",
+    "pass": false,
+    "detail": [
+      {
+        "actor": "cooper",
+        "tile": "7,8",
+        "foot": 144,
+        "prop": "roadhouse-table-02",
+        "propFoot": 130,
+        "layer": 5,
+        "expect": "actor in front",
+        "sampled": 3,
+        "changed": 3
+      }
+    ]
+  },
+  {
+    "name": "roadhouse-empty: depth — every prop that must be IN FRONT actually paints over the actor (0 pairs)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-empty: no actor loses more than half its sprite to the prop layer (cooper 45%)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-gathering: depth — every prop that must be BEHIND an actor leaves the actor's pixels alone (3 pairs)",
+    "pass": false,
+    "detail": [
+      {
+        "actor": "cooper",
+        "tile": "7,8",
+        "foot": 144,
+        "prop": "roadhouse-table-02",
+        "propFoot": 130,
+        "layer": 5,
+        "expect": "actor in front",
+        "sampled": 3,
+        "changed": 3
+      },
+      {
+        "actor": "loglady",
+        "tile": "2,6",
+        "foot": 112,
+        "prop": "roadhouse-booth-01",
+        "propFoot": 98,
+        "layer": 4,
+        "expect": "actor in front",
+        "sampled": 6,
+        "changed": 6
+      }
+    ]
+  },
+  {
+    "name": "roadhouse-gathering: depth — every prop that must be IN FRONT actually paints over the actor (2 pairs)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-gathering: no actor loses more than half its sprite to the prop layer (cooper 45%, bobby 11%, donna 44%, james 12%, loglady 82%, norma 34%, shelly 39%, truman 16%)",
+    "pass": false,
+    "detail": [
+      {
+        "actor": "loglady",
+        "tile": "2,6",
+        "foot": 112,
+        "covered": 0.8177083333333334,
+        "px": 314,
+        "of": 384
+      }
+    ]
+  },
+  {
+    "name": "roadhouse-giant-stage: depth — every prop that must be BEHIND an actor leaves the actor's pixels alone (2 pairs)",
+    "pass": false,
+    "detail": [
+      {
+        "actor": "cooper",
+        "tile": "7,8",
+        "foot": 144,
+        "prop": "roadhouse-table-02",
+        "propFoot": 130,
+        "layer": 5,
+        "expect": "actor in front",
+        "sampled": 3,
+        "changed": 3
+      }
+    ]
+  },
+  {
+    "name": "roadhouse-giant-stage: depth — every prop that must be IN FRONT actually paints over the actor (1 pairs)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "roadhouse-giant-stage: no actor loses more than half its sprite to the prop layer (cooper 45%, giant 55%)",
+    "pass": false,
+    "detail": [
+      {
+        "actor": "giant",
+        "tile": "8,1",
+        "foot": 32,
+        "covered": 0.5520833333333334,
+        "px": 212,
+        "of": 384
+      }
+    ]
+  },
+  {
+    "name": "runtime: the flag-on page really has the prop layer enabled with the roadhouse instances",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "runtime: M10a's three depth hooks are the outermost sprite functions on the production page",
+    "pass": false,
+    "detail": {
+      "present": true,
+      "enabled": true,
+      "instances": 19,
+      "actorLayer": 6,
+      "drawCharHooked": false,
+      "structuresHooked": false,
+      "foregroundHooked": false,
+      "structuresOwner": "other",
+      "foregroundOwner": "other",
+      "drawCharCalls": 4,
+      "structuresSrc": "function (ctx, m, cx, cy, opt ) {\n      if (m && m.id === MAP) {\n        return GAME.TraincarArt && GAME.TraincarArt.draw(ctx, cx, cy,  ceneState());\n      }\n      return originalS",
+      "foregroundSrc": "function (ctx, m, cx, cy, opt ) {\n      opt  = opt  || {};\n      if (m && m.id === MAP) {\n        return GAME.TraincarArt && GAME.TraincarArt.foreground(\n          ctx, cx, cy, opt"
+    }
+  },
+  {
+    "name": "bodies: the footprint overlap list is the one tools/world-apply.js warns about (1)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "cost: 300 frames sampled with the flag off and on",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "cost: the prop layer adds under 10 % to the median frame (0.20 ms on 28.60 ms)",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "sheet: artifacts/props-m11/sheet.png written, off above on for each checkpoint (980x4240)",
+    "pass": true,
+    "detail": null
+  }
+]

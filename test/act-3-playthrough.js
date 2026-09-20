@@ -323,9 +323,9 @@ async function playActs12(P, name) {
   // Atto 2 narrativo (M4)
   await P.travel('sheriff', 11, 4, 'left', 'viaggio: centrale');
   await useActor(P, 'sheriff', 'truman', 'truman_a2');
-  await P.travel('hotel_gn', 5, 6, 'down', 'viaggio: Great Northern');
+  await P.travel('hotel_gn', 12, 6, 'down', 'viaggio: Great Northern');
   await P.interact(); await P.drain('Ben Horne');
-  await P.travel('hotel_gn', 12, 10, 'up', 'viaggio: Audrey');
+  await P.travel('hotel_gn', 15, 10, 'up', 'viaggio: Audrey');
   await P.interact(); await P.drain('Audrey al Great Northern');
   await P.travel('hospital', 12, 4, 'left', 'viaggio: ospedale');
   await useActor(P, 'hospital', 'gerard', 'gerard_a2');

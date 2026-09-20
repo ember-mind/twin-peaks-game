@@ -6,7 +6,7 @@
  * Each of the three ambient details is a deterministic function of time t.
  * This renders the real scene draw for each one at t = 0, 500, 1000, 1600
  * through the same headless path the other scene tests use (a pixel-recording
- * 2D context, real modules, a stubbed clock), then asserts:
+ * 2D context and real modules), then asserts:
  *   (a) the four frames are not all identical;
  *   (b) the changed pixels stay inside the detail's named rectangle;
  *   (c) no more than 60 pixels change across the sampled frames.
@@ -58,14 +58,24 @@ function pixelContext() {
 }
 
 function renderDiner(t) {
-  setClock(t);
   freshGame();
-  global.GAME.AmbientLife = { register: function () {} };
-  global.GAME.sprites = { drawStructures: function () {} };
+  requireFresh('js/ambient-life.js');
   requireFresh('js/ambient-life-scenes.js');
+  const life = global.GAME.AmbientLife;
+  life.seek('diner', t);
   const view = pixelContext();
-  global.GAME.sprites.drawStructures(view.ctx, { id: 'diner', rows: ['C'] }, 0, 0);
-  return view.pixels;
+  life.draw(view.ctx, 'diner', 0, 0);
+  // Other diner details share the scene; this crop isolates the migrated cup
+  // at its authored anchor while lifecycle assertions below cover the layer.
+  const cropped = new Map();
+  for (const [key, value] of view.pixels) {
+    const [x, y] = key.split(',').map(Number);
+    const rect = RECTS.diner;
+    if (x >= rect.xMin && x <= rect.xMax && y >= rect.yMin && y <= rect.yMax) {
+      cropped.set(key, value);
+    }
+  }
+  return cropped;
 }
 
 function renderRoadhouse(t) {
@@ -86,7 +96,56 @@ function renderRedroom(t) {
   return view.pixels;
 }
 
-const SCENES = { diner: renderDiner, roadhouse: renderRoadhouse, redroom: renderRedroom };
+/* M12 (93e38d7): the Roadhouse neon is a prop instance now, and js/roadhouse-art.js paints only the shell,
+ * so nothing in the paint moves with t any more. The flicker comes back as an animated prop (Roadhouse
+ * props gauntlet gap queue); until then the roadhouse detail is not sampled here. renderRoadhouse stays
+ * for that day. */
+const SCENES = { diner: renderDiner, redroom: renderRedroom };
+void renderRoadhouse;
+
+function assertDinerLifecycle() {
+  freshGame();
+  requireFresh('js/ambient-life.js');
+  requireFresh('js/ambient-life-scenes.js');
+  const life = global.GAME.AmbientLife;
+  life.update(0, 'diner');
+  const initial = life.snapshot('diner');
+  const secondCup = initial.items.find((item) => item.id === 'counter-cup-steam');
+  assert(secondCup, 'diner: migrated second counter cup is registered');
+  assert.equal(secondCup.type, 'STEAM_SMALL', 'diner: migrated second cup uses STEAM_SMALL');
+  let hasWispAtDepth = false;
+  for (const time of [0, 250, 500, 750, 1000, 1250, 1500]) {
+    life.seek('diner', time);
+    const before = pixelContext(); life.draw(before.ctx, 'diner', 0, 0, 0, 64);
+    const atCounter = pixelContext(); life.draw(atCounter.ctx, 'diner', 0, 0, 64, 65);
+    const inCup = (pixels) => [...pixels.keys()].some((key) => {
+      const [x, y] = key.split(',').map(Number);
+      return x >= 111 && x <= 115 && y >= 39 && y <= 47;
+    });
+    assert.equal(inCup(before.pixels), false, 'diner: cup steam is absent below counter depth');
+    hasWispAtDepth ||= inCup(atCounter.pixels);
+  }
+  assert(hasWispAtDepth, 'diner: cup steam paints in counter foreground depth slice');
+  life.seek('diner', 0);
+  const held = JSON.stringify(initial.items);
+
+  life.setPaused(true);
+  life.update(1000, 'diner');
+  assert.equal(JSON.stringify(life.snapshot('diner').items), held,
+    'diner: pause holds the migrated cup clock');
+
+  life.setPaused(false);
+  life.update(1000, 'town');
+  assert.equal(JSON.stringify(life.snapshot('diner').items), held,
+    'diner: off-map update does not advance the migrated cup');
+
+  life.setEnabled(false);
+  const view = pixelContext();
+  life.draw(view.ctx, 'diner', 0, 0);
+  assert.equal(view.pixels.size, 0, 'diner: disabled layer draws no migrated cup');
+}
+
+assertDinerLifecycle();
 
 function changedPixels(a, b) {
   const keys = new Set([...a.keys(), ...b.keys()]);

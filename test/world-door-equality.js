@@ -8,10 +8,11 @@
  * After M5 this test boots the real chain (index.html order, single installer js/world-connections-production.js)
  * and asserts, for ALL maps:
  *   1. booted doors are byte-identical to the fixture's booted doors once connectionId is set aside, key by key,
+ *      except the approved E8 lobby-side migration (town 8/9 -> 9/10, hall 14 -> 16, matching spawns);
  *      and every descriptor now carries a connectionId;
  *   2. js/maps.js carries no classic door entry (source is empty everywhere);
  *   3. every fixture source entry is accounted for: migrated (its classic descriptor is now the registry
- *      descriptor on the same tile), shadowed (the tile was already registry-owned before M5), or dead conflict
+ *      descriptor on the same tile, except the approved E8 lobby shift), shadowed (the tile was already registry-owned before M5), or dead conflict
  *      (none this pass). The diff is printed explicitly.
  *   4. registry-only reproduction: installing GAME.WorldData.connections alone onto empty door bags reproduces
  *      the booted doors exactly, so the registry is the only door source.
@@ -58,6 +59,17 @@
 
   var G = global.GAME;
   var fixture = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'doors-before-m5.json'), 'utf8'));
+  /* Preserve the historical pre-M5 fixture. Only these lobby endpoints were
+   * deliberately moved with the 20x12 E8 room; every other door stays byte-
+   * equal to the snapshot. Room 315's own trigger remains 7,11. */
+  var expectedBooted = JSON.parse(JSON.stringify(fixture.booted));
+  expectedBooted.hotel_gn['9,11'] = expectedBooted.hotel_gn['8,11'];
+  expectedBooted.hotel_gn['10,11'] = JSON.parse(JSON.stringify(fixture.booted.hotel_gn['9,11']));
+  expectedBooted.hotel_gn['16,1'] = expectedBooted.hotel_gn['14,1'];
+  delete expectedBooted.hotel_gn['8,11'];
+  delete expectedBooted.hotel_gn['14,1'];
+  expectedBooted.room_315['7,11'].tx = 16;
+  expectedBooted.town['9,6'].tx = 9;
   function strip(d) { var o = {}; Object.keys(d).forEach(function (k) { if (k !== 'connectionId') o[k] = d[k]; }); return o; }
   function bytes(d) { return JSON.stringify(strip(d)); }
 
@@ -67,12 +79,12 @@
     var m = G.Maps[id];
     if (m && typeof m === 'object' && m.doors) after[id] = JSON.parse(JSON.stringify(m.doors));
   });
-  assert.deepEqual(Object.keys(after), Object.keys(fixture.booted), 'same maps carry door bags before and after M5');
+  assert.deepEqual(Object.keys(after), Object.keys(expectedBooted), 'same maps carry door bags before and after M5');
   var descriptors = 0, gainedId = [];
-  Object.keys(fixture.booted).forEach(function (id) {
-    assert.deepEqual(Object.keys(after[id]).sort(), Object.keys(fixture.booted[id]).sort(), id + ': same door tiles before and after M5');
-    Object.keys(fixture.booted[id]).forEach(function (key) {
-      var before = fixture.booted[id][key], now = after[id][key];
+  Object.keys(expectedBooted).forEach(function (id) {
+    assert.deepEqual(Object.keys(after[id]).sort(), Object.keys(expectedBooted[id]).sort(), id + ': same door tiles except approved E8 lobby shift');
+    Object.keys(expectedBooted[id]).forEach(function (key) {
+      var before = expectedBooted[id][key], now = after[id][key];
       assert.equal(bytes(now), bytes(before), id + ' ' + key + ': descriptor bytes unchanged (connectionId aside)');
       assert.ok(typeof now.connectionId === 'string' && now.connectionId, id + ' ' + key + ': descriptor carries a connectionId');
       if (!before.connectionId) gainedId.push(id + ' ' + key + ' +connectionId ' + now.connectionId);
@@ -93,13 +105,18 @@
   var diff = { migrated: [], shadowed: [], deadConflict: [] };
   Object.keys(fixture.source).forEach(function (id) {
     Object.keys(fixture.source[id]).forEach(function (key) {
-      var classic = fixture.source[id][key], bootedBefore = fixture.booted[id][key], now = after[id][key];
-      assert.ok(now, id + ' ' + key + ': classic entry has a registry descriptor on the same tile');
+      var classic = fixture.source[id][key], bootedBefore = fixture.booted[id][key];
+      var migratedKey = id === 'hotel_gn' && key === '8,11' ? '9,11'
+        : id === 'hotel_gn' && key === '9,11' ? '10,11' : key;
+      var now = after[id][migratedKey];
+      assert.ok(now, id + ' ' + key + ': classic entry has a registry descriptor on its migrated tile');
       if (bootedBefore.connectionId) {
         diff.shadowed.push('- ' + id + ' ' + key + ' ' + JSON.stringify(classic) + '  (dead before M5: ' + bootedBefore.connectionId + ')');
       } else {
-        assert.equal(bytes(now), JSON.stringify(classic), id + ' ' + key + ': migrated descriptor equals the classic entry');
-        diff.migrated.push('~ ' + id + ' ' + key + ' ' + JSON.stringify(classic) + '  -> ' + now.connectionId);
+        var expectedClassic = JSON.parse(JSON.stringify(classic));
+        if (id === 'town' && key === '9,6') expectedClassic.tx = 9;
+        assert.equal(bytes(now), JSON.stringify(expectedClassic), id + ' ' + key + ': migrated descriptor equals classic except approved E8 target shift');
+        diff.migrated.push('~ ' + id + ' ' + key + ' ' + JSON.stringify(classic) + '  -> ' + migratedKey + ' ' + now.connectionId);
       }
     });
   });
@@ -139,8 +156,12 @@
   assert.equal(te.b.spawn.dir, 'right', 'town-traincar-east b.spawn dir right (original)');
   var oe = G.WorldData.connections.find(function (r) { return r.id === 'traincar-oej-entrance'; });
   assert.deepEqual(oe.b.triggers, [[7, 9], [8, 9]], 'traincar-oej-entrance b.triggers faithful to original');
+  var hotel = G.WorldData.connections.find(function (r) { return r.id === 'town-great-northern-lobby'; });
+  var hall = G.WorldData.connections.find(function (r) { return r.id === 'great-northern-room-315-hall'; });
+  assert.deepEqual(hotel.b.triggers, [[9,11],[10,11]], 'approved E8 lobby south entrance');
+  assert.deepEqual(hall.b.triggers, [[16,1]], 'approved E8 lobby hall endpoint');
 
   console.log('WORLD-DOOR-EQUALITY-PASS ' + descriptors + ' door descriptors across ' + Object.keys(after).filter(function (id) { return Object.keys(after[id]).length; }).length +
-    ' scenes byte-identical to the pre-M5 fixture (+connectionId on ' + gainedId.length + '), registry alone reproduces ' + reproduced +
+    ' scenes byte-identical to the pre-M5 fixture except approved E8 lobby move (+connectionId on ' + gainedId.length + '), registry alone reproduces ' + reproduced +
     ', 0 classic entries left in js/maps.js');
 }());

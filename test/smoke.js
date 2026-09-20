@@ -383,11 +383,11 @@ ok(!S().dialogue, 'dialogo Truman post-sogno chiuso');
 ok(S().mode === 'play', 'il racconto del sogno non chiude la partita');
 
 // Great Northern: Ben Horne e Audrey (ora accessibile, sogno_fatto impostato)
-E.loadMap('hotel_gn', 5, 6, 'down');
+E.loadMap('hotel_gn', 12, 6, 'down');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'benhorne_a2', 'dialogo Ben Horne parte');
 drainDialogue('Ben Horne');
-E.loadMap('hotel_gn', 12, 10, 'up');
+E.loadMap('hotel_gn', 15, 10, 'up');
 key('Enter'); pump(16);
 ok(S().dialogue && S().dialogue.id === 'audrey_a2_ben', 'dialogo Audrey (Great Northern) parte');
 drainDialogue('Audrey al Great Northern');

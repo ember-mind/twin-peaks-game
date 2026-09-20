@@ -4154,12 +4154,14 @@
     { id:'palmer-sofa', map:'palmer', kind:'physical', cells:[[3,6]] },
     { id:'palmer-dining', map:'palmer', kind:'physical', cells:[[2,8],[3,8],[2,9],[3,9]] },
     { id:'palmer-sideboard', map:'palmer', kind:'physical', cells:[[14,6]] },
-    { id:'hotel-reception', map:'hotel_gn', kind:'physical', cells:[[4,8],[5,8],[6,8],[7,8]] },
-    { id:'hotel-lobby-rug', map:'hotel_gn', kind:'soft', cells:[[5,6],[6,6],[7,6],[5,7],[6,7],[7,7],[8,7]] },
-    { id:'hotel-luggage', map:'hotel_gn', kind:'physical', cells:[[2,6]] },
-    { id:'hotel-seating', map:'hotel_gn', kind:'physical', cells:[[8,6],[9,6],[10,6]] },
-    { id:'hotel-hearth', map:'hotel_gn', kind:'physical', cells:[[12,2],[12,3]] },
-    { id:'hotel-staircase', map:'hotel_gn', kind:'physical', cells:[[6,4],[7,4],[8,4],[9,4]] },
+    // E8 lobby (js/hotel-gn-scene.js rows): reception counter 11..14,8; hearth 2..5,4; lounge chair/table/chair
+    // 4..6,6; luggage bay 17,6; the runner and the stair to the hall door (16,1) are walked on, so they are soft.
+    { id:'hotel-reception', map:'hotel_gn', kind:'physical', cells:[[11,8],[12,8],[13,8],[14,8]] },
+    { id:'hotel-lobby-rug', map:'hotel_gn', kind:'soft', cells:[[9,7],[10,7],[9,8],[10,8],[9,9],[10,9]] },
+    { id:'hotel-luggage', map:'hotel_gn', kind:'physical', cells:[[17,6]] },
+    { id:'hotel-seating', map:'hotel_gn', kind:'physical', cells:[[4,6],[5,6],[6,6]] },
+    { id:'hotel-hearth', map:'hotel_gn', kind:'physical', cells:[[2,4],[3,4],[4,4],[5,4]] },
+    { id:'hotel-staircase', map:'hotel_gn', kind:'soft', cells:[[16,2],[16,3]] },
     /* Reparto nativo (js/hospital-art.js): la tenda e' una struttura solida a tutta altezza. */
     { id:'hospital-curtain', map:'hospital', kind:'physical', cells:[[8,3],[8,4],[8,5]] },
     { id:'hospital-monitor', map:'hospital', kind:'physical', cells:[[1,3],[2,3]] },
@@ -4170,7 +4172,7 @@
     { id:'diner-booths', map:'diner', kind:'physical', cells:[[1,6],[2,6],[3,6],[10,6],[11,6],[12,6],[1,8],[2,8],[3,8],[10,8],[11,8],[12,8],[6,6],[8,6]] },
     { id:'diner-counter-stools', map:'diner', kind:'physical', cells:[[2,4],[4,4],[6,4],[8,4],[10,4],[2,5],[12,5],[2,7],[12,7]] },
     { id:'oej-felt-tables', map:'oej', kind:'physical', cells:[[3,2],[4,2],[11,2],[12,2],[3,7],[4,7],[11,7],[12,7]] },
-    { id:'oej-roulette', map:'oej', kind:'physical', cells:[[6,4],[7,4],[8,4],[9,4]] },
+    { id:'oej-bar-counter', map:'oej', kind:'physical', cells:[[5,4],[6,4],[7,4],[8,4],[9,4],[10,4]] },
     { id:'oej-seating', map:'oej', kind:'physical', cells:[[3,3],[12,3],[3,6],[12,6]] },
     { id:'oej-service', map:'oej', kind:'physical', cells:[[14,2]] },
     { id:'roadhouse-bar-stools', map:'roadhouse', kind:'physical', cells:[[3,5],[9,5]] },
@@ -4345,7 +4347,13 @@
       red:'#8c2f3e', redHi:'#c45a61', redLight:'#e28b80', redDark:'#501f29',
       wood:'#5b3a28', woodHi:'#946345', woodLight:'#b88759', woodDark:'#35271f',
       green:'#223b2f', leaf:'#567345', leafHi:'#879452', metal:'#81918b',
-      metalHi:'#d9dfc9', tile:'#898b75', tileShade:'#80836e', floorLight:'#c5bc9c', floorShade:'#b9ae90' }
+      metalHi:'#d9dfc9',
+      /* Checker. The board calls for a warm cream/red floor; the round-1
+       * grey-green read cold and muddy against the wood. A lightening pass
+       * washed the floor out on 2026-09-19 and was reverted, so these move
+       * hue at matched luma: tile 136 -> 133, tileShade 128 -> 122,
+       * floorLight 188 -> 188.5, floorShade 176 -> 175.7. */
+      tile:'#b9706a', tileShade:'#ab6660', floorLight:'#cebb96', floorShade:'#c2ae89' }
   };
   function interiorContact(g,x,y,w,p) {
     // Three crisp native rows: diffuse footprint, tight occlusion, tapered edge.
@@ -4476,28 +4484,66 @@
     R(g,x,y-15,w,31,p.woodDark); R(g,x+1,y-14,w-2,28,p.redDark);
     R(g,x+2,y-15,w-4,1,p.woodLight);
     for(var i=3;i<w-3;i+=6) {
-      R(g,x+i,y-13,5,16,p.red); R(g,x+i+1,y-12,3,2,p.redHi);
-      R(g,x+i,y-11,1,10,p.redHi); R(g,x+i+4,y-10,1,13,p.redDark);
+      // Rounded vertical channels roll into shadow toward the seat pocket.
+      R(g,x+i,y-13,5,16,p.red); R(g,x+i+1,y-13,3,1,'#b35359');
+      R(g,x+i+1,y-12,3,2,p.redHi);
+      R(g,x+i,y-11,1,7,p.redHi); R(g,x+i+4,y-10,1,13,p.redDark);
+      R(g,x+i,y-4,4,3,'#762b39');
       R(g,x+i+2,y-3,1,1,p.redDark);
-      if((i+variant)%3===0) R(g,x+i+1,y-11,2,1,p.redLight);
+      R(g,x+i+2,y-2,1,1,'#aa4650');
+      if((i+variant)%3===0) R(g,x+i+1,y-11,2,1,'#cf7770');
     }
+    // Shared upholstery, different lived light: the cleared table recedes;
+    // occupied seats give pale faces a quieter, broad burgundy background.
+    R(g,x+3,y-13,w-6,16,variant===3?'rgba(23,37,30,.29)':
+      guest?'rgba(35,27,29,.16)':'rgba(35,27,29,.07)');
     R(g,x+2,y-1,w-4,6,p.redDark); R(g,x+3,y,w-6,3,p.red);
     R(g,x+4,y,w-8,1,p.redHi); R(g,x+2,y+5,w-4,2,p.redDark);
     R(g,x+1,y+7,w-2,2,p.woodLight);
     if(guest) {
       var seatX=guest.seat==='left'?x+8:x+w-25;
-      R(g,seatX+3,y-4,11,3,p.redDark);
+      // Contact follows the seated shoulders and hips, leaving the head clear.
+      R(g,seatX+2,y-5,13,4,'rgba(41,24,28,.14)');
+      R(g,seatX+4,y-1,10,2,'rgba(41,24,28,.20)');
     }
     var gesture=variant===1 && GAME.CharacterActivity ? GAME.CharacterActivity.seatedFrame() : -1;
     var seatedPose=guest ? interiorSeatedGuest(g,guest.seat==='left'?x+8:x+w-25,y-16,guest,gesture) : null;
+    // Broad horizontal laminate plane, a turned front lip, then a recessed base.
     R(g,x+3,y+1,w-6,13,p.woodDark);
-    R(g,x+4,y+1,w-8,11,p.creamShade); R(g,x+4,y+1,w-8,3,p.cream);
-    R(g,x+3,y+12,w-6,2,p.woodHi); R(g,x+5,y+14,w-10,2,p.red);
+    R(g,x+3,y+2,1,9,'#8a6548');
+    R(g,x+4,y+1,1,1,'#8a6548');
+    R(g,x+4,y+2,w-8,8,variant===3?'#b9ae90':guest?'#c7b187':'#e4d2a9');
+    if(guest) {
+      // A broad lamp-side working patch places hands, cup and face together;
+      // the unoccupied half remains the same laminate in quieter light.
+      var litTableX=guest.seat==='left'?x+5:x+w-25;
+      R(g,litTableX,y+2,20,8,'#dfcca4');
+      R(g,litTableX+(guest.seat==='left'?0:6),y+2,14,6,'#e4d2a9');
+    }
+    R(g,x+5,y+1,w-10,1,p.creamShade);
+    R(g,x+4,y+2,1,8,p.cream); R(g,x+w-6,y+2,2,8,'#c7b187');
+    R(g,x+5,y+10,w-10,1,variant===3?p.creamShade:p.cream);
+    R(g,x+5,y+11,w-10,1,'#b59a72');
+    // Warm reflected wood in the recess keeps the base from becoming a black bar.
+    R(g,x+5,y+12,w-10,1,'#76533f');
+    R(g,x+10,y+12,w-20,1,'#50392e');
+    R(g,x+6,y+13,w-12,3,'#654936');
+    R(g,x+10,y+13,w-20,1,'#533c30');
+    R(g,x+10,y+15,w-20,1,'#573e30');
+    R(g,x+7,y+13,3,3,p.woodHi); R(g,x+w-10,y+13,3,3,p.wood);
+    R(g,x+7,y+13,1,3,p.woodLight);
+    R(g,x+6,y+16,6,1,p.woodDark); R(g,x+w-11,y+16,6,1,p.woodDark);
     R(g,x+1,y-12,2,27,p.redHi); R(g,x+w-3,y-12,2,27,p.redDark);
-    R(g,x+3,y+13,w-6,1,p.woodHi); R(g,x+4,y+15,w-8,1,p.metal);
+    R(g,x+3,y+13,3,2,p.red); R(g,x+w-6,y+13,3,2,p.redDark);
     if(guest) interiorOccupiedTable(g,x,y,w,p,guest,gesture);
     else interiorTableProps(g,x+5,y,p,variant);
     if(seatedPose) {
+      // Soft, broken contact sits directly below the resting skin and cuff.
+      if(!(GAME.CharacterActivity && GAME.CharacterActivity.sipLiftsCup(gesture))) {
+        interiorPoseRect(g,seatedPose,5,19,2,1,'rgba(75,53,37,.10)');
+        interiorPoseRect(g,seatedPose,8,19,3,1,'rgba(75,53,37,.17)');
+      }
+      interiorPoseRect(g,seatedPose,12,18,2,1,'rgba(75,53,37,.12)');
       interiorSeatedHands(g,seatedPose);
       interiorPoseRect(g,seatedPose,4,1,3,1,guest.hairHi);
       interiorPoseRect(g,seatedPose,4,13,2,1,guest.coatHi);
@@ -4525,21 +4571,49 @@
     R(g,x-5,y+10,1,4,p.woodLight); R(g,x+5,y+10,1,4,p.woodLight);
   }
   function interiorPicture(g,x,y,w,h,p,kind) {
+    /* One image per frame, built from two or three masses. The round-1
+     * version drew a nest of four borders and a few 1px marks inside a 13x16
+     * box, which a fresh critic read at 1x as speckle down the side walls. */
     R(g,x,y,w,h,p.ink); R(g,x+1,y+1,w-2,h-2,p.woodLight);
-    R(g,x+2,y+2,w-4,h-4,p.creamShade); R(g,x+3,y+3,w-6,h-6,p.green);
+    R(g,x+2,y+2,w-4,h-4,p.woodDark);
+    var ix=x+3, iy=y+3, iw=w-6, ih=h-6;
     if(kind==='clock') {
-      R(g,x+3,y+3,w-6,h-6,p.cream); R(g,x+w/2,y+4,1,4,p.ink);
+      R(g,ix,iy,iw,ih,p.cream); R(g,x+w/2,y+4,1,4,p.ink);
       R(g,x+w/2,y+7,3,1,p.ink);
-    } else if(kind==='portrait') {
-      R(g,x+4,y+4,w-8,h-8,p.woodDark); R(g,x+5,y+5,4,5,p.creamShade);
-      R(g,x+4,y+10,6,4,p.redDark);
-    } else {
-      for(var i=4;i<w-4;i+=4) {
-        R(g,x+i,y+5,1,h-8,p.woodHi); R(g,x+i-1,y+7,3,2,p.leafHi);
-      }
-      R(g,x+4,y+h-5,w-8,1,p.gold);
+      return;
     }
+    if(kind==='portrait') {
+      /* A head and shoulders: one lit ground, one dark hair mass, one cream
+       * face, one red collar. Four values, no 1px detail. */
+      R(g,ix,iy,iw,ih,p.creamShade);
+      R(g,ix,iy,iw,2,p.cream);
+      var hw=Math.max(6,iw-2), hx=ix+((iw-hw)>>1);
+      R(g,hx,iy+3,hw,7,p.woodDark);
+      R(g,hx+1,iy+5,hw-2,5,p.cream);
+      R(g,hx+2,iy+7,2,1,p.ink);
+      R(g,hx+hw-4,iy+7,2,1,p.ink);
+      R(g,hx-1,iy+11,hw+2,ih-12,p.redDark);
+      R(g,hx+1,iy+12,hw-2,2,p.red);
+      R(g,ix,iy+ih-1,iw,1,p.woodDark);
+      return;
+    }
+    /* A landscape: a lit sky, a dark ridge with a zigzag crest, a green
+     * foreground. Three masses that survive a 1x read. */
+    var sky=Math.max(4,Math.floor(ih*0.42));
+    R(g,ix,iy,iw,sky,p.cream);
+    R(g,ix,iy+sky-2,iw,2,p.creamShade);
+    var ridge=[1,3,2,5,3,2,4,2,1];
+    for(var c=0;c<iw;c++) {
+      var lift=ridge[c%ridge.length];
+      R(g,ix+c,iy+sky-lift,1,lift,p.woodDark);
+    }
+    R(g,ix,iy+sky,iw,1,p.ink);
+    R(g,ix,iy+sky+1,iw,ih-sky-1,p.leaf);
+    R(g,ix,iy+sky+1,iw,1,p.leafHi);
+    R(g,ix+1,iy+ih-4,iw-2,2,p.green);
+    R(g,ix,iy+ih-1,iw,1,p.woodDark);
   }
+
   function interiorPlant(g,x,y,p) {
     R(g,x+3,y+12,10,2,p.ink); R(g,x+4,y+6,8,7,p.woodHi);
     R(g,x+5,y+8,6,1,p.gold); R(g,x+7,y-4,2,12,p.woodDark);
@@ -4548,22 +4622,42 @@
     });
   }
   function interiorCoffeeMachine(g,x,y,p) {
+    /* One tall chrome mass with a dark head band and two group heads, rather
+     * than a 16x16 box of 1px details that dissolves at 1x. The ambient
+     * coffee-machine marks anchor at y+4 and y+7, which stay on the body. */
     interiorContact(g,x,y+15,17,p);
-    R(g,x,y,16,16,p.ink); R(g,x+1,y+1,14,11,p.metal);
-    R(g,x+2,y+2,12,2,p.metalHi); R(g,x+3,y+5,10,5,p.ink);
-    R(g,x+4,y+6,1,3,p.metalHi); R(g,x+10,y+6,1,3,p.metalHi);
-    R(g,x+2,y+12,12,2,p.metalHi); R(g,x+3,y+15,10,1,p.woodDark);
-    interiorCup(g,x+5,y+9,p);
-    R(g,x+2,y-3,4,3,p.cream); R(g,x+8,y-2,5,2,p.creamShade);
-    R(g,x+1,y+3,1,7,p.metalHi); R(g,x+14,y+4,1,8,p.woodDark);
+    R(g,x,y-5,16,21,p.ink);
+    R(g,x+1,y-4,14,4,p.metalHi);
+    R(g,x+2,y-3,12,2,p.cream);
+    /* A dark body, so the machine silhouettes against the pale back bar
+     * instead of merging into it. */
+    R(g,x+1,y,14,12,p.woodDark);
+    R(g,x+2,y+1,12,4,p.ink);
+    R(g,x+3,y+2,4,2,p.gold);
+    R(g,x+9,y+2,4,2,p.creamShade);
+    R(g,x+2,y+6,5,6,p.ink);
+    R(g,x+9,y+6,5,6,p.ink);
+    R(g,x+3,y+7,3,3,p.metalHi);
+    R(g,x+10,y+7,3,3,p.metalHi);
+    R(g,x+1,y+12,14,2,p.metalHi);
+    R(g,x+2,y+14,12,2,p.woodDark);
+    R(g,x+1,y,1,12,p.metalHi);
+    R(g,x+14,y,1,12,p.woodDark);
   }
+
   function interiorPieCase(g,x,y,w,p) {
     interiorContact(g,x+1,y+17,w-1,p);
     R(g,x,y,w,18,p.ink); R(g,x+1,y+1,w-2,15,p.metal);
     R(g,x+2,y+2,w-4,5,'#adc0b0'); R(g,x+2,y+8,w-4,7,p.woodHi);
-    for(var row=0;row<2;row++) for(var i=4;i<w-5;i+=10) {
-      R(g,x+i-1,y+6+row*7,8,1,p.cream); R(g,x+i,y+4+row*7,6,2,'#d89345'); R(g,x+i+1,y+4+row*7,4,1,'#edb96b');
-      R(g,x+i+1,y+3+row*7,4,1,(i+row)%3===0?p.creamShade:p.gold); R(g,x+i+2,y+4+row*7,1,1,p.woodHi); R(g,x+i+4,y+4+row*7,1,1,p.woodHi);
+    /* Three whole pies per shelf instead of five slivers: at 1x a pie has to
+     * be a mass with a crust edge, not a two-pixel tick. */
+    for(var row=0;row<2;row++) for(var i=4;i<w-9;i+=14) {
+      R(g,x+i-1,y+7+row*7,11,1,p.cream);
+      R(g,x+i,y+3+row*7,9,4,p.woodDark);
+      R(g,x+i+1,y+4+row*7,7,3,'#d89345');
+      R(g,x+i+2,y+4+row*7,5,1,'#edb96b');
+      R(g,x+i+3,y+3+row*7,3,1,(i+row)%2===0?p.creamShade:p.gold);
+      R(g,x+i+1,y+6+row*7,7,1,p.woodHi);
     }
     R(g,x+1,y+8,w-2,1,p.metalHi); R(g,x+1,y+16,w-2,1,p.gold);
     R(g,x+3,y+2,2,5,'#e5e6cd'); R(g,x+w-5,y+2,1,12,p.metalHi);
@@ -4606,26 +4700,50 @@
    * below the model; the room painter sets it for the duration of its pass. */
   var houseMonogram = DINER_SIGNAGE.monogram;
   function signageOf(model) { return (model && model.signage) || DINER_SIGNAGE; }
+  /* DOUBLE on a 4x6 grid with one-pixel spacing. The earlier sign sheared each
+   * glyph by (6-row)/3 and then painted a +1,+1 glow pass under it, which
+   * filled the one-pixel gaps: a fresh critic read the D and B as collapsing
+   * into the board. Upright glyphs, cream on the dark board, one straight
+   * drop row below each stroke, and the big looped R left as the red accent. */
+  var NEON_FONT_4X6 = {
+    D: ['1110', '1001', '1001', '1001', '1001', '1110'],
+    O: ['0110', '1001', '1001', '1001', '1001', '0110'],
+    U: ['1001', '1001', '1001', '1001', '1001', '0110'],
+    B: ['1110', '1001', '1110', '1001', '1001', '1110'],
+    L: ['1000', '1000', '1000', '1000', '1000', '1111'],
+    E: ['1111', '1000', '1110', '1000', '1000', '1111']
+  };
   function interiorNeon(g,x,y,p,sign) {
     sign = sign || DINER_SIGNAGE;
     R(g,x,y,68,26,p.woodDark); R(g,x+1,y+1,66,24,p.woodLight);
     R(g,x+3,y+2,62,22,p.green); R(g,x+4,y+3,60,19,'#26312b');
-    // Slanted pixel lettering and a large looped R form one custom brand mark.
-    var points=[], word=sign.brand, wordX=sign.mark ? 6 : Math.max(4, Math.round((62 - word.length*6)/2));
-    for(var c=0;c<word.length;c++) {
-      var glyph=TOWN_FONT_5X7[word[c]] || kitGlyph(word[c], TOWN_FONT_5X7, TOWN_FONT_5X7_EXT, UNSUPPORTED_5X7);
-      for(var row=0;row<7;row++) for(var col=0;col<5;col++) if(glyph[row][col]==='1') {
-        points.push([x+wordX+c*6+col+Math.floor((6-row)/3),y+8+row]);
+    /* A brand with a letter the upright 4x6 face lacks takes that letter from
+     * the kit's 5x7 face — upright too, with the same straight drop row. */
+    var word=sign.brand, c, row, col, glyphs=[], width=0;
+    for(c=0;c<word.length;c++) {
+      var face=NEON_FONT_4X6[word[c]] || TOWN_FONT_5X7[word[c]] || kitGlyph(word[c], TOWN_FONT_5X7, TOWN_FONT_5X7_EXT, UNSUPPORTED_5X7);
+      glyphs.push({ rows: face, at: width }); width += face[0].length + 1;
+    }
+    var neonX=sign.mark ? 6 : Math.max(4, Math.round((62 - width)/2));
+    for(c=0;c<glyphs.length;c++) {
+      var glyph=glyphs[c].rows;
+      for(row=0;row<glyph.length;row++) for(col=0;col<glyph[row].length;col++) {
+        if(glyph[row][col]!=='1') continue;
+        R(g,x+neonX+glyphs[c].at+col,y+8+row,1,1,'#713740');
       }
     }
-    // Two passes prevent one glyph's glow from erasing adjacent neon strokes.
-    points.forEach(function(a){R(g,a[0]+1,a[1]+1,1,1,'#713740');});
-    points.forEach(function(a){R(g,a[0],a[1],1,1,'#e48480');});
+    for(c=0;c<glyphs.length;c++) {
+      var lit=glyphs[c].rows;
+      for(row=0;row<lit.length;row++) for(col=0;col<lit[row].length;col++) {
+        if(lit[row][col]!=='1') continue;
+        R(g,x+neonX+glyphs[c].at+col,y+7+row,1,1,p.cream);
+      }
+    }
     var pattern=['...RRRRRR..','..RR....RR.','..RR....RR.','..RR...RR..','..RRRRRR...','..RR.RR....','.RR...RR...','.RR....RR..','RR......RR.'];
     if(sign.mark) for(var ry=0;ry<pattern.length;ry++) for(var rx=0;rx<pattern[ry].length;rx++) if(pattern[ry][rx]==='R') {
       R(g,x+43+rx,y+5+ry*2,2,2,p.redHi); R(g,x+43+rx,y+5+ry*2,1,1,p.redLight);
     }
-    R(g,x+7,y+20,30,1,p.redHi); R(g,x+10,y+19,33,1,p.redDark);
+    R(g,x+6,y+15,29,1,p.redHi); R(g,x+8,y+16,25,1,p.redDark);
     // Reflected neon only on adjacent wood; the sign itself is unchanged.
     R(g,x+7,y+26,52,1,'rgba(196,90,97,.20)');
     R(g,x+14,y+27,38,1,'rgba(196,90,97,.12)');
@@ -4690,10 +4808,18 @@
   function interiorBackbar(g,x,y,p,sign) {
     sign = sign || DINER_SIGNAGE;
     interiorPanel(g,x,y-14,224,58,p);
-    // A service floor and plinth separate working space from the back wall.
+    // The quiet work floor continues behind the counter; board joints belong
+    // at its exposed ends, not as stripes through the staff silhouette.
     R(g,x+16,y+30,192,18,'#67513b');
-    for(var py=32;py<48;py+=5) R(g,x+16,y+py,192,1,'#493a2d');
-    R(g,x+28,y+25,154,6,p.woodDark); R(g,x+29,y+25,152,2,p.woodLight);
+    R(g,x+16,y+40,24,1,'#493a2d'); R(g,x+179,y+40,29,1,'#493a2d');
+    // One recessed working zone connects coffee, staff and pastry service.
+    // Equipment breaks its silhouette; no decorative architectural bays.
+    R(g,x+40,y+12,139,34,p.woodDark);
+    R(g,x+42,y+14,135,31,'#17251e');
+    R(g,x+40,y+12,139,2,p.woodHi);
+    R(g,x+40,y+14,2,31,p.woodHi);
+    R(g,x+177,y+14,2,31,p.wood);
+    R(g,x+42,y+14,135,2,p.ink);
     // Side service door, clock and local coffee pledge.
     R(g,x+17,y+2,21,36,p.woodDark); R(g,x+19,y+3,17,33,p.redDark);
     R(g,x+21,y+5,13,21,p.red); R(g,x+24,y+10,7,7,p.gold);
@@ -4708,7 +4834,7 @@
     interiorMenuBoard(g,x+143,y-12,p,sign.menu);
     // Asymmetric clusters: family photos, stacked crockery and pantry jars.
     interiorPicture(g,x+43,y-10,14,14,p,'photo');
-    R(g,x+41,y+10,29,2,p.woodLight); R(g,x+41,y+23,29,2,p.woodLight);
+    R(g,x+41,y+10,29,2,p.woodLight);
     [43,53,64].forEach(function(dx,n) {
       R(g,x+dx,y+14-(n%2)*3,4,8+(n%2)*3,n===2?p.green:p.creamShade);
       R(g,x+dx,y+13-(n%2)*3,4,2,n===2?p.gold:p.metal);
@@ -4719,12 +4845,16 @@
       if(n===3) { R(g,x+dx,y+shelfY-4,5,8,p.green); R(g,x+dx+1,y+shelfY-6,3,2,p.gold); }
       else { R(g,x+dx,y+shelfY,5,5,p.creamShade); R(g,x+dx+1,y+shelfY,3,1,p.cream); }
     });
-    R(g,x+76,y+23,57,2,p.woodLight); R(g,x+76,y+25,57,2,'#282820');
-    // Lower cabinets, warming shelf, service tins and chrome urns form masses.
-    R(g,x+40,y+26,139,9,p.woodDark); R(g,x+41,y+26,137,2,p.woodLight);
-    for(var dx=42;dx<176;dx+=17) {
-      R(g,x+dx,y+29,15,5,p.wood); R(g,x+dx+6,y+30,4,1,p.gold);
-    }
+    // A single crockery ledge replaces the doubled horizontal rails.
+    R(g,x+76,y+23,57,1,p.woodLight);
+    // Storage stays with the two service clusters. The open middle leaves
+    // real visual room for Norma rather than drawer handles behind her body.
+    R(g,x+42,y+29,27,10,p.wood); R(g,x+44,y+29,23,1,p.woodHi);
+    R(g,x+53,y+32,5,1,p.gold);
+    R(g,x+131,y+29,45,10,p.wood); R(g,x+133,y+29,41,1,p.woodHi);
+    R(g,x+151,y+30,1,8,p.woodDark);
+    R(g,x+140,y+32,4,1,p.gold); R(g,x+162,y+32,4,1,p.gold);
+    R(g,x+70,y+39,35,6,'#17251e');
     R(g,x+106,y+24,22,12,p.ink); R(g,x+107,y+25,20,9,p.metal);
     R(g,x+109,y+27,6,5,p.woodDark); R(g,x+118,y+27,7,5,p.woodDark);
     R(g,x+109,y+27,6,1,p.gold); R(g,x+118,y+27,7,1,p.gold);
@@ -4766,7 +4896,30 @@
     var i;
     // Furniture bases and widths come from the same generated collision model.
     var counterX=x+model.counter[0]*16, counterY=y+model.counter[1]*16, counterW=model.counter[2]*16;
-    interiorCounterSlab(g,counterX,counterY,counterW,p);
+    /* The Double R's counter is its own drawing; interiorCounterSlab above is the
+     * kit's plain slab for a room composed elsewhere. */
+    R(g,counterX+2,counterY+16,counterW-2,5,'rgba(32,26,19,.28)');
+    interiorContact(g,counterX+1,counterY+18,counterW-2,p);
+    R(g,counterX,counterY,counterW,17,p.ink);
+    // Broad vinyl front, with quiet construction joints rather than a row
+    // of highlighted inset boxes competing with the crockery above.
+    R(g,counterX+1,counterY+6,counterW-2,8,p.redDark);
+    R(g,counterX+2,counterY+6,counterW-4,6,p.red);
+    R(g,counterX+3,counterY+6,counterW-6,1,p.redHi);
+    for(i=48;i<counterW-4;i+=48) R(g,counterX+i,counterY+8,1,4,p.redDark);
+    R(g,counterX+5,counterY+7,31,1,'#a2444e');
+    R(g,counterX+counterW-40,counterY+7,27,1,'#a2444e');
+    // The top extends rearward within the existing service footprint; its
+    // front lip and compressed plinth remain on the original depth boundary.
+    R(g,counterX,counterY-4,counterW,9,p.creamShade);
+    R(g,counterX+1,counterY-4,counterW-2,7,'#dfcca4');
+    R(g,counterX+32,counterY-3,34,5,p.cream);
+    R(g,counterX+1,counterY-4,counterW-2,1,p.creamShade);
+    R(g,counterX+1,counterY+4,counterW-2,1,p.metalHi);
+    R(g,counterX+2,counterY+14,counterW-4,1,p.metal);
+    R(g,counterX+3,counterY+15,counterW-6,1,p.woodDark);
+    // Leave a clean usable patch between coffee and the pie-service cluster.
+    R(g,counterX+34,counterY-2,28,1,p.metalHi);
     interiorServiceCluster(g,counterX+3,counterY-17,p,'coffee');
     interiorServiceCluster(g,counterX+67,counterY-14,p,'plates'); interiorPieCase(g,counterX+counterW-49,counterY-15,48,p);
     interiorCup(g,counterX+35,counterY-3,p); interiorCup(g,counterX+75,counterY-3,p);
@@ -4779,6 +4932,8 @@
    * R's worn centre aisle and belongs to that room only. */
   function interiorCheckerFloor(g,x,y,x0,y0,x1,y1,p,aisleSheen) {
     for(var fy=y0;fy<y1;fy+=8) for(var fx=x0;fx<x1;fx+=8) {
+      /* Phased on the tile grid: each 16px room tile carries one complete
+       * light/dark quad, so the floor lines up with booth fronts, counter and door. */
       var dark=((fx+fy)/8)&1;
       R(g,x+fx,y+fy,8,8,dark?p.tile:p.floorLight);
       R(g,x+fx,y+fy+7,8,1,dark?p.tileShade:p.floorShade);
@@ -4788,6 +4943,10 @@
       if(tileKey===12) R(g,x+fx+1,y+fy+2,5,4,'rgba(41,43,38,.035)');
       if(aisleSheen && fx>=104 && fx<=120 && fy>=80 && fy%24===8)
         R(g,x+fx+2,y+fy+3,4,1,'rgba(244,230,200,.09)');
+      /* Grout on the 16px boundaries: the line the eye uses to see that the
+       * floor grid and the room grid are the same grid. */
+      if(fx%16===0) R(g,x+fx,y+fy,1,8,'rgba(41,43,38,.16)');
+      if(fy%16===0) R(g,x+fx,y+fy,8,1,'rgba(41,43,38,.16)');
     }
   }
   /* Long boards with staggered butt joints; same deterministic, noise-free
@@ -4878,7 +5037,27 @@
     houseMonogram = signageOf(model).monogram || '';
     R(g,0,0,g.canvas ? g.canvas.width : 256,g.canvas ? g.canvas.height : 192,'#17251e');
     // Restore a continuous floor beneath furniture, with 8px checker tiles.
-    interiorCheckerFloor(g,x,y,16,16,208,144,p,true);
+    /* The Double R's floor is its own loop, as the counter is its own drawing;
+     * interiorCheckerFloor is the kit's, for a room composed elsewhere. */
+    /* The checker is phased on the TILE grid, not on its own 8px run: each
+     * 16px room tile carries one complete light/dark quad, so the floor lines
+     * up with the booth fronts at y=112 and y=144 and with the counter and
+     * door tiles rather than drifting against them. */
+    for(var fy=16;fy<144;fy+=8) for(var fx=16;fx<208;fx+=8) {
+      var dark=(((fx-16)/8)+((fy-16)/8))&1;
+      R(g,x+fx,y+fy,8,8,dark?p.tile:p.floorLight);
+      R(g,x+fx,y+fy+7,8,1,dark?p.tileShade:p.floorShade);
+      // Sparse, deterministic value changes; no random dirt or per-frame noise.
+      var tileKey=(fx/8*7+fy/8*11)%19;
+      if(tileKey===3) R(g,x+fx+1,y+fy+1,6,5,'rgba(207,188,146,.055)');
+      if(tileKey===12) R(g,x+fx+1,y+fy+2,5,4,'rgba(41,43,38,.035)');
+      if(fx>=104 && fx<=120 && fy>=80 && fy%24===8)
+        R(g,x+fx+2,y+fy+3,4,1,'rgba(244,230,200,.09)');
+      /* Grout on the 16px boundaries: the line the eye uses to see that the
+       * floor grid and the room grid are the same grid. */
+      if(fx%16===0) R(g,x+fx,y+fy,1,8,'rgba(41,43,38,.16)');
+      if(fy%16===0) R(g,x+fx,y+fy,8,1,'rgba(41,43,38,.16)');
+    }
     // Lower-contrast floor, wall contact shadows and localized warm pools.
     R(g,x+16,y+44,192,8,'rgba(32,28,21,.20)');
     R(g,x+16,y+48,5,96,'rgba(34,29,21,.19)'); R(g,x+202,y+48,6,96,'rgba(34,29,21,.23)');
@@ -4890,18 +5069,23 @@
     model.stools.forEach(function(a){interiorStool(g,x+a[0]*16,y+a[1]*16,p);});
     model.booths.forEach(function(a,n){
       interiorBooth(g,x+a[0]*16,y+a[1]*16,a[2]*16,p,n,model.guests[n]);
-      interiorWarmLight(g,x+a[0]*16+3,y+a[1]*16-4,42,19,[.55,.85,.7,.3][n]);
+      var boothGuest=model.guests[n];
+      if(boothGuest) {
+        var boothLightX=x+a[0]*16+(boothGuest.seat==='left'?2:15);
+        interiorWarmLight(g,boothLightX,y+a[1]*16-15,31,30,1.05);
+      } else interiorWarmLight(g,x+a[0]*16+3,y+a[1]*16-4,42,19,n===3?.12:.6);
     });
     interiorSpecials(g,x+model.specials[0]*16,y+model.specials[1]*16,p,signageOf(model).specials);
     interiorFloorPlant(g,x+model.islandPlant[0]*16-4,y+model.islandPlant[1]*16,p);
     interiorPlant(g,x+model.plant[0]*16,y+model.plant[1]*16+2,p);
     interiorCoatRack(g,x+model.coatRack[0]*16,y+model.coatRack[1]*16,p);
     // Hanging plants occupy side-wall trim; aisle remains truly walkable.
-    interiorPicture(g,x+1,y+30,13,18,p,'portrait');
-    // Local-history cluster on the left; one quieter portrait on the right.
-    interiorPicture(g,x+1,y+49,13,16,p,'photo');
-    interiorPicture(g,x+1,y+99,13,16,p,'photo');
-    interiorPicture(g,x+210,y+53,12,15,p,'portrait');
+    /* Two large frames on the west wall and one on the east, each clear of
+     * the lamps at y=68 and y=119. Four small ones down a strip was the
+     * speckle a fresh critic saw at 1x. */
+    interiorPicture(g,x+1,y+30,13,28,p,'photo');
+    interiorPicture(g,x+1,y+88,13,26,p,'portrait');
+    interiorPicture(g,x+210,y+40,12,26,p,'photo');
     [68,119].forEach(function(ly){
       interiorWarmLight(g,x+1,y+ly+1,30,20,ly===119?.7:.9); interiorWarmLight(g,x+193,y+ly+1,30,20,ly===119?.35:.8);
       interiorLamp(g,x+7,y+ly,p);interiorLamp(g,x+216,y+ly,p);
@@ -7130,12 +7314,42 @@
     ctx.globalAlpha = oldAlpha;
   }
 
+  /* Interni: l'ellisse verde-teal e' tarata sull'erba e sui pavimenti caldi
+   * (assi, moquette, tappeti) non si legge a 1x — due critici a contesto
+   * fresco hanno scritto "nessun attore ha un'ombra di contatto" in ogni
+   * stanza (reports/rooms-fresh-critic-2026-09-19.md). Qui ombra neutra
+   * scura, stessa impronta 14x5 centrata sulla base della tile, valori
+   * alti al centro e coda rapida ai bordi: si legge come contatto, non
+   * come barra. */
+  function drawInteriorActorShadow(ctx, x, y, alpha) {
+    var oldAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = oldAlpha * (alpha == null ? 1 : alpha);
+    var ox = Math.round(x), sy = Math.round(y) + 14;
+    R(ctx, ox + 4, sy, 8, 1, 'rgba(28,22,18,.22)');
+    R(ctx, ox + 2, sy + 1, 12, 1, 'rgba(28,22,18,.40)');
+    R(ctx, ox + 1, sy + 2, 14, 1, 'rgba(28,22,18,.52)');
+    R(ctx, ox + 2, sy + 3, 12, 1, 'rgba(28,22,18,.40)');
+    R(ctx, ox + 4, sy + 4, 8, 1, 'rgba(28,22,18,.22)');
+    ctx.globalAlpha = oldAlpha;
+  }
+  function isIndoorMap(mapId) {
+    if (!mapId) return false;
+    var dict = GAME.maps && (GAME.maps.maps || GAME.maps);
+    var m = dict && dict[mapId];
+    return !!(m && m.indoor);
+  }
+
   Spr.drawChar = function (ctx, x, y, pal, dir, frame, alpha, moving, night, time, environment) {
     var p = pal || CHARS.cooper;
     var name = nameOf(p);
-    /* Ombra runtime unica: player e ogni NPC condividono ellisse 14x5. */
+    /* Ombra runtime unica: player e ogni NPC condividono ellisse 14x5.
+     * Interni (map.indoor) usano la variante neutra scura. A room composed
+     * elsewhere and registered as an interior scene keeps its own material's
+     * contact shadow. */
     var actorRoom = environment && interiorRoomOf(environment.mapId);
-    if(actorRoom) {
+    if (environment && (environment.indoor || isIndoorMap(environment.mapId))) {
+      drawInteriorActorShadow(ctx, x, y, alpha);
+    } else if(actorRoom) {
       var shadowAlpha=ctx.globalAlpha; ctx.globalAlpha*=alpha==null?1:alpha;
       interiorContact(ctx,Math.round(x)+2,Math.round(y)+15,12,actorRoom.material);
       ctx.globalAlpha=shadowAlpha;

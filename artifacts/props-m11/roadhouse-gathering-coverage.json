@@ -1,0 +1,66 @@
+[
+  {
+    "actor": "cooper",
+    "tile": "7,8",
+    "foot": 144,
+    "covered": 0.4453125,
+    "px": 171,
+    "of": 384
+  },
+  {
+    "actor": "bobby",
+    "tile": "3,4",
+    "foot": 80,
+    "covered": 0.11197916666666667,
+    "px": 43,
+    "of": 384
+  },
+  {
+    "actor": "donna",
+    "tile": "5,4",
+    "foot": 80,
+    "covered": 0.4427083333333333,
+    "px": 170,
+    "of": 384
+  },
+  {
+    "actor": "james",
+    "tile": "2,4",
+    "foot": 80,
+    "covered": 0.11979166666666667,
+    "px": 46,
+    "of": 384
+  },
+  {
+    "actor": "loglady",
+    "tile": "2,6",
+    "foot": 112,
+    "covered": 0.8177083333333334,
+    "px": 314,
+    "of": 384
+  },
+  {
+    "actor": "norma",
+    "tile": "5,6",
+    "foot": 112,
+    "covered": 0.34375,
+    "px": 132,
+    "of": 384
+  },
+  {
+    "actor": "shelly",
+    "tile": "3,6",
+    "foot": 112,
+    "covered": 0.3854166666666667,
+    "px": 148,
+    "of": 384
+  },
+  {
+    "actor": "truman",
+    "tile": "4,8",
+    "foot": 144,
+    "covered": 0.1640625,
+    "px": 63,
+    "of": 384
+  }
+]

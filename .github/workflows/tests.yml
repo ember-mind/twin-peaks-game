@@ -198,6 +198,16 @@ jobs:
         run: node test/town-structure-semantics.js
       - name: Town dusk grade contract (DQ3 palette)
         run: node test/town-dusk.js
+      - name: Props registry (world/props.json shape and world rules)
+        run: node test/props-registry.js
+      - name: Props changeset ops (tools/world-apply.js on temp copies)
+        run: node test/props-changeset.js
+      - name: Props render order and depth bands
+        run: node test/props-render-order.js
+      - name: Props below-actors band
+        run: node test/props-below-band.js
+      - name: Props editor core (store, drafts, validation split)
+        run: node test/props-core.js
       - name: Interior prop semantics
         run: node test/interior-prop-semantics.js
       - name: Interior zoning reachability
@@ -206,12 +216,20 @@ jobs:
         run: node test/world-catalog-coverage.js
       - name: Diner layout
         run: node test/diner-layout.js
+      - name: Double R interior contract
+        run: node test/diner-interior.js
       - name: Hospital native scene
         run: node test/hospital-native.js
       - name: Room 315 location
         run: node test/room-315-location.js
       - name: Room 315 native scene
         run: node test/room-315-native.js
+      - name: Palmer house native scene
+        run: node test/palmer-native.js
+      - name: One Eyed Jacks native scene
+        run: node test/oej-native.js
+      - name: Glastonbury Grove native scene
+        run: node test/woods-native.js
       - name: Sheriff's station location
         run: node test/sheriffs-station-location.js
       - name: Sheriff's station native scene

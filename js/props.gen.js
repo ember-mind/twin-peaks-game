@@ -65,7 +65,7 @@
             0
           ]
         ],
-        "defaultLayer": 1,
+        "defaultLayer": 5,
         "tags": [
           "roadhouse",
           "stage",
@@ -133,7 +133,7 @@
           24
         ],
         "footprint": [],
-        "defaultLayer": 5,
+        "defaultLayer": 6,
         "tags": [
           "roadhouse",
           "decor",
@@ -166,7 +166,7 @@
             0
           ]
         ],
-        "defaultLayer": 3,
+        "defaultLayer": 6,
         "tags": [
           "roadhouse",
           "furniture",
@@ -211,7 +211,7 @@
             0
           ]
         ],
-        "defaultLayer": 4,
+        "defaultLayer": 6,
         "tags": [
           "roadhouse",
           "furniture",
@@ -246,7 +246,7 @@
             0
           ]
         ],
-        "defaultLayer": 4,
+        "defaultLayer": 6,
         "tags": [
           "roadhouse",
           "furniture",
@@ -279,7 +279,7 @@
             0
           ]
         ],
-        "defaultLayer": 8,
+        "defaultLayer": 6,
         "tags": [
           "roadhouse",
           "architecture",
@@ -339,7 +339,7 @@
             0
           ]
         ],
-        "defaultLayer": 5,
+        "defaultLayer": 6,
         "tags": [
           "roadhouse",
           "furniture"
@@ -360,7 +360,7 @@
           9
         ],
         "footprint": [],
-        "defaultLayer": 7,
+        "defaultLayer": 6,
         "tags": [
           "roadhouse",
           "decor",
@@ -440,19 +440,20 @@
       "roadhouse-payphone-01": {
         "propId": "roadhouse.payphone.wall",
         "sceneId": "roadhouse",
-        "tx": 15.5,
-        "ty": 5.75
+        "tx": 8.6875,
+        "ty": 6.4375
       },
       "roadhouse-booth-01": {
         "propId": "roadhouse.booth.red",
         "sceneId": "roadhouse",
         "tx": 1.875,
-        "ty": 6.125
+        "ty": 5.125,
+        "layer": 5
       },
       "roadhouse-booth-02": {
         "propId": "roadhouse.booth.red",
         "sceneId": "roadhouse",
-        "tx": 14.125,
+        "tx": 11.875,
         "ty": 9.1875
       },
       "roadhouse-table-01": {
@@ -465,14 +466,14 @@
         "propId": "roadhouse.chair.red",
         "sceneId": "roadhouse",
         "tx": 5.3125,
-        "ty": 7.25,
+        "ty": 7,
         "flipX": true
       },
       "roadhouse-chair-02": {
         "propId": "roadhouse.chair.red",
         "sceneId": "roadhouse",
         "tx": 7.8125,
-        "ty": 7.25
+        "ty": 7
       },
       "roadhouse-candle-01": {
         "propId": "roadhouse.candle.brass",
@@ -484,7 +485,7 @@
         "propId": "roadhouse.table.round",
         "sceneId": "roadhouse",
         "tx": 8.125,
-        "ty": 8.125
+        "ty": 8
       },
       "roadhouse-chair-03": {
         "propId": "roadhouse.chair.red",
@@ -508,8 +509,52 @@
       "roadhouse-door-01": {
         "propId": "roadhouse.door.double",
         "sceneId": "roadhouse",
-        "tx": 8,
-        "ty": 11.875
+        "tx": 7.9375,
+        "ty": 10.6875
+      },
+      "roadhouse-table-03": {
+        "propId": "roadhouse.table.round",
+        "sceneId": "roadhouse",
+        "tx": 4.375,
+        "ty": 7.75
+      },
+      "roadhouse-chair-05": {
+        "propId": "roadhouse.chair.red",
+        "sceneId": "roadhouse",
+        "tx": 3.5,
+        "ty": 8.625
+      },
+      "roadhouse-chair-06": {
+        "propId": "roadhouse.chair.red",
+        "sceneId": "roadhouse",
+        "tx": 5.625,
+        "ty": 8.625,
+        "flipX": true
+      },
+      "roadhouse-candle-03": {
+        "propId": "roadhouse.candle.brass",
+        "sceneId": "roadhouse",
+        "tx": 4.375,
+        "ty": 6.8125
+      },
+      "roadhouse-booth-03": {
+        "propId": "roadhouse.booth.red",
+        "sceneId": "roadhouse",
+        "tx": 1.875,
+        "ty": 9
+      },
+      "roadhouse-stool-01": {
+        "propId": "roadhouse.chair.red",
+        "sceneId": "roadhouse",
+        "tx": 12.1875,
+        "ty": 7.25
+      },
+      "roadhouse-stool-02": {
+        "propId": "roadhouse.chair.red",
+        "sceneId": "roadhouse",
+        "tx": 14.0625,
+        "ty": 7.25,
+        "flipX": true
       }
     };
   GAME.WorldData = GAME.WorldData || {};

@@ -42,13 +42,13 @@ function capturedProfiles(relativePath) {
   return registrations[0];
 }
 
-/* Il congelamento resta sugli asset (atlas + manifest) e sul motore di
- * Character Life: i file di scena/registrazione cambiano legittimamente con
- * la migrazione del distretto sulla mappa canonica 'sheriff'. */
+/* Freeze the population atlas and Ambient Life core. CharacterActivity is a
+ * shared engine with diner-specific gesture data, so a whole-file hash would
+ * reject unrelated diner art changes. Sheriff profiles are compared below;
+ * CharacterActivity behavior has its own focused tests. */
 /* R129: 25-actor atlas (infermiera) */
 const frozen = JSON.parse(read('artifacts/station-population-v01/validation/frozen-before.json'));
 for (const relativePath of [
-  'js/character-activity.js',
   'js/ambient-life.js',
   'assets/sprites/cast-walkcycles-hg-24.png',
   'assets/sprites/character-life-v01.png',

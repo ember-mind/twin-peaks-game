@@ -39,8 +39,15 @@
   const MOVABLE = ['tx', 'ty', 'ox', 'oy', 'flipX', 'layer'];
   const TRANSFORMS = ['flipX'];
   // The layer above which an instance never interleaves with the actors (js/props-production.js ACTOR_LAYER). The
-  // inspector says so; nothing here enforces it, because the runtime owns the draw order.
+  // inspector says so; nothing here enforces it, because the runtime owns the draw order. Three bands mirror the
+  // runtime exactly: layer < ACTOR_LAYER -> below every actor, == ACTOR_LAYER -> interleaved by foot y,
+  // > ACTOR_LAYER -> above every actor.
   const ACTOR_LAYER = 6;
+  const BANDS = Object.freeze({
+    BELOW_ACTORS: 'below the actors',
+    ACTOR_BAND: 'interleaves with the actors',
+    ABOVE_ACTORS: 'above the actors'
+  });
   const PROP_ID = /^[a-z0-9]+(\.[a-z0-9]+)+$/;
   const INSTANCE_ID = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -245,6 +252,10 @@
   }
   // layerOf(def, inst) -> the effective draw layer (instance override, else the definition's default)
   function layerOf(def, inst) { return inst.layer === undefined ? def.defaultLayer : inst.layer; }
+  // bandOf(layer) -> the actor-relative draw band label for that layer (same arithmetic as the runtime)
+  function bandOf(layer) {
+    return layer < ACTOR_LAYER ? BANDS.BELOW_ACTORS : layer > ACTOR_LAYER ? BANDS.ABOVE_ACTORS : BANDS.ACTOR_BAND;
+  }
 
   // hitTest(store, draft, sceneId, px, py) -> the id of the topmost instance whose frame covers the scene pixel, or
   // null. Topmost is the reverse of the draw order js/props-production.js uses: layer, then foot y, then id.
@@ -412,11 +423,11 @@
   }
 
   R.props = Object.freeze({
-    FORMAT, TARGET, VERSION, TILE, LAYER_MIN, LAYER_MAX, ACTOR_LAYER, DEFINITION_KEYS, INSTANCE_KEYS, MOVABLE, TRANSFORMS,
+    FORMAT, TARGET, VERSION, TILE, LAYER_MIN, LAYER_MAX, ACTOR_LAYER, BANDS, DEFINITION_KEYS, INSTANCE_KEYS, MOVABLE, TRANSFORMS,
     PROP_ID, INSTANCE_ID,
     createPropStore, suggestInstanceId, placeProp, moveProp, nudgeProp, flipProp, deleteProp, revertEntry, revertScene,
     changes, buildPropsChangeset, registryWithDraft,
-    originOf, instanceTiles, layerOf, hitTest, overlaps,
+    originOf, instanceTiles, layerOf, bandOf, hitTest, overlaps,
     sceneErrors, definitionErrors, instanceErrors, registryErrors, draftErrors
   });
   globalThis.Editor = R;

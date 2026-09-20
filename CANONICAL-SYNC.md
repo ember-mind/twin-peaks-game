@@ -123,3 +123,15 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-18 afbf3cc main: opus M10b props editor UI (b39717c); CI green on 621ebf1 (tests+browser), local release 115/115; 23 files mirrored
 - 2026-09-18 9dbcdaa main: deep town-dusk readback measurement (cba7122, no render change) + town-dusk test contract after DQ3; 6 files mirrored
 - 2026-09-18 4414730 main: deep town-dusk test re-pinned to DQ3 (255bd6a), test in CI (116 gates); 4 files mirrored
+- 2026-09-18 7100c23 main: opus M11 evidence (a7e0294), verdict do not flip props; 20 files mirrored
+- 2026-09-19 d5b966d main: deep props below-band (15a26be) + layer ruling in world/props.json + 5 props gates in CI (121); 14 files mirrored
+- 2026-09-19 93e38d7 main: opus M12 props are the furniture (86ff1a2) + harness camera/facing fixes + booth-01 layer 5, chairs ty 7; PROPS_ENABLED ships true; 35 files mirrored
+- 2026-09-19 7ae1500 main: Double R booths/counter/back-bar art from codex/intent-room-double-r-grid (art only, floor tint kept) + ambient-life-frames post-M12; 10 files mirrored
+- 2026-09-19 a3407ec main: qwen E8 Great Northern lobby (79cd72a) merged, 20x12 native room, hotel prop footprints re-declared; 592 files mirrored
+- 2026-09-19 b0eb986 main: Palmer house native art (lead/palmer-house, Opus builder) + palmer-native CI gate (122); 8 files mirrored
+- 2026-09-19 828ef9f main: Palmer house round 2 (portrait, runner, wool rug, fan fixes); 2 files mirrored
+- 2026-09-19 ae9de89 main: One Eyed Jacks native art (lead/oej-casino, Opus builder) + oej-native CI gate (123), tracked gauntlet runs restored; 11 files mirrored; .gauntlet/oej-casino copied to vault
+- 2026-09-19 7d7fa1d main: OEJ round 2, Great Northern lobby ambient light, Glastonbury Grove native art (woods-native CI gate, 124), fresh-critic report; 15 files mirrored; .gauntlet oej-casino/round2, lobby-light, woods-grove copied to vault
+- 2026-09-19 3502cdf main: fresh-critic rounds — OEJ 3, Palmer 3, lobby, woods 2, Double R (diner-interior CI gate, 125); 17 files mirrored; .gauntlet oej-casino/round3, palmer-house/round3, lobby-critic, woods-grove/round2, diner-critic copied to vault
+- 2026-09-19 a572891 main: fresh-critic pass 2 recorded (scores unchanged; gaps are engine + map rows); 1 file mirrored
+- 2026-09-20 — actor contact shadow (indoor maps) merged e31238c: js/retro-authored.js, artifacts/oej-v01/oej-native-golden{,-3x}.png; evidence .gauntlet/actor-shadow (vault only)

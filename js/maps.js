@@ -185,18 +185,18 @@
       id: 'hotel_gn',
       indoor: true,
       rows: [
-        'iiiiiiiiiiiiiiiiii', // 0
-        'ifffffffffffiiDiii', // 1  corridoio verso la stanza 315
-        'ifffffffffffiffffi', // 2
-        'ifffffffffffiffffi', // 3
-        'ifffffCCCCfffffffi', // 4  scala lobby; corridoio destro verso stanza
-        'iffffffffffffffffi', // 5
-        'ifUfffffhthffffffi', // 6 deposito bagagli + salottino centrale; x13 libero
-        'iffffffffffffffffi', // 7  Ben Horne(5,7)
-        'ifffCCCCfffffffffi', // 8  bancone reception
-        'iffffffffffffffffi', // 9  Audrey(12,9)
-        'iffffffffffffffffi', // 10 (spawn 8,10)
-        'iiiiiiiiDDiiiiiiii'  // 11
+        'iiiiiiiiiiiiiiiiiiii', // 0  timber wall
+        'ifffffffffffffffDffi', // 1  hall door at 16,1
+        'iffffffffffffffffffi', // 2  rear receiving floor
+        'iffffffffffffffffffi', // 3  rear receiving floor
+        'ifCCCCfffffffffffffi', // 4  built-in hearth, west four cells (2..5)
+        'iffffffffffffffffffi', // 5  clear cross-room circulation
+        'ifffhthffffffffffUfi', // 6  chair/table/chair lounge; luggage bay at 17,6
+        'iffffffffffffffffffi', // 7  continuous staff-side aisle; Ben at 12,7
+        'iffffffffffCCCCffffi', // 8  guest-facing reception counter (11..14)
+        'iffffffffffffffffffi', // 9  public guest floor; Audrey at 15,9
+        'iffffffffffffffffffi', // 10 south threshold approach; spawn 9,10
+        'iiiiiiiiiDDiiiiiiiii'  // 11 paired south entrance (9,11),(10,11)
       ],
       doors: {}
     },

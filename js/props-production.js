@@ -4,8 +4,9 @@
  * (GAME.sprites.drawStructures) starts the frame, GAME.Sprites.drawChar releases the props each actor must draw
  * over just before that actor, and the open-ended depth band of GAME.sprites.drawForegroundStructures releases
  * whatever is left. Frames are drawn on the native scene canvas at integer scale with
- * imageSmoothingEnabled = false, sorted by layer, then by anchor foot y, then by instance id — and INTERLEAVED
- * with the actors by foot y, so Cooper and every Cast Presence body pass in front of and behind them.
+ * imageSmoothingEnabled = false, sorted by layer, then by anchor foot y, then by instance id. Against the actors
+ * they sit in one of three bands (ACTOR_LAYER, below): below every actor, interleaved by foot y, or above every
+ * actor.
  *
  * Ownership, as the handoff requires: map rows stay authoritative for collision and walkability. This module
  * NEVER writes a row, a door or an interact key; footprints are metadata the World Builder uses for selection
@@ -124,15 +125,26 @@
   }
 
   /* ---- depth ----------------------------------------------------------------------------------------------
-   * Props interleave with actors by foot y: an actor whose foot y is greater than a prop's anchor foot draws
-   * OVER that prop, a smaller one draws behind it. On a tie the prop goes first.
+   * Three bands, split on ACTOR_LAYER (6):
+   *   layer < ACTOR_LAYER   BELOW_ACTORS  drawn once, before every actor, whatever the foot y — backdrops,
+   *                                        rugs, stage frames: scenery the actors stand in front of.
+   *   layer == ACTOR_LAYER  ACTOR_BAND    interleaves with actors by foot y: a greater actor foot draws OVER
+   *                                        the prop, a smaller one behind it, and a tie draws the prop first.
+   *   layer > ACTOR_LAYER   ABOVE_ACTORS  drawn once, at the end of the frame, after every actor — ceiling and
+   *                                        wall decoration that is never a floor object.
    *
-   * ACTOR_LAYER is the escape hatch the sort order needs: an instance on a layer STRICTLY ABOVE it is not a
-   * floor object at all and always draws after every actor, whatever its foot y. Layers at or below it
-   * interleave. 6 is the highest layer the seeded Roadhouse gives a floor object (the chairs); see the report
-   * for which definitions sit above it.
+   * The seeded Roadhouse puts its chairs on ACTOR_LAYER (6), its backdrops and the velvet stage below it, and
+   * its ceiling decoration above it; see the report for the full table.
    */
   var ACTOR_LAYER = 6;
+  var BANDS = Object.freeze({
+    BELOW_ACTORS: 'below the actors',
+    ACTOR_BAND: 'interleaves with the actors',
+    ABOVE_ACTORS: 'above the actors'
+  });
+  function bandOf(layer) {
+    return layer < ACTOR_LAYER ? BANDS.BELOW_ACTORS : layer > ACTOR_LAYER ? BANDS.ABOVE_ACTORS : BANDS.ACTOR_BAND;
+  }
 
   /* The engine paints a frame as: ground (one drawStructures call) -> for each actor, sorted by foot y:
    * drawChar, then drawForegroundStructures with the band [thisFoot, nextFoot) (the last one open-ended).
@@ -141,25 +153,34 @@
    * every edit inside this file. `pending` is the frame's undrawn instances, in (layer, foot, id) order. */
   var pending = null;
   var pendingScene = null;
+  var frameScene = null;
+  var belowDrawn = false;
 
   function beginFrame(sceneId) {
     var list = instancesFor(sceneId);
     pending = list.length ? list.slice() : null;
     pendingScene = pending ? sceneId : null;
+    frameScene = sceneId;
+    belowDrawn = false;
   }
 
-  /* drawBand(ctx, sceneId, cx, cy, upToFoot) -> instances released. Draws every still-undrawn instance on a
-   * layer <= ACTOR_LAYER whose foot y is <= upToFoot, in list order, so the (layer, foot, id) order is kept
-   * among everything released together. upToFoot Infinity also releases the layers above ACTOR_LAYER: that is
-   * the end of the frame, after the last actor. */
+  /* drawBand(ctx, sceneId, cx, cy, upToFoot) -> instances released. The frame's FIRST band call draws the
+   * BELOW_ACTORS layer in one go (backdrops and stage frames sit behind every actor); after that, ACTOR_BAND
+   * instances are released in list order as their foot y comes up. upToFoot Infinity is the end of the frame:
+   * it also releases the remaining ACTOR_BAND instances and the ABOVE_ACTORS layer. */
   function drawBand(ctx, sceneId, cx, cy, upToFoot) {
     if (!GAME.PROPS_ENABLED || !pending || pendingScene !== sceneId) return 0;
     cx = Math.round(cx || 0); cy = Math.round(cy || 0);
     var last = upToFoot === Infinity;
+    var releaseBelow = !belowDrawn;
+    belowDrawn = true;
     var keep = [], drawn = 0;
     for (var i = 0; i < pending.length; i++) {
       var e = pending[i];
-      var release = e.layer > ACTOR_LAYER ? last : (last || e.foot <= upToFoot);
+      var release;
+      if (e.layer < ACTOR_LAYER) release = releaseBelow || last;
+      else if (e.layer > ACTOR_LAYER) release = last;
+      else release = last || e.foot <= upToFoot;
       if (!release) { keep.push(e); continue; }
       drawInstance(ctx, e, cx, cy);
       drawn++;
@@ -207,7 +228,9 @@
       var out = originalForeground.apply(this, arguments);
       var open = !opts || opts.forestDepthMax == null || opts.forestDepthMax === Infinity;
       if (GAME.PROPS_ENABLED && m && m.id && open) {
-        if (pendingScene !== m.id) beginFrame(m.id);
+        /* frameScene, not pendingScene: a frame that released every prop before this open band has pendingScene
+         * null, and re-beginning it here would draw the whole scene a second time. */
+        if (frameScene !== m.id) beginFrame(m.id);
         drawBand(ctx, m.id, cx, cy, Infinity);
       }
       return out;
@@ -223,7 +246,7 @@
     if (originalDrawChar) GAME.Sprites.drawChar = originalDrawChar;
     if (uninstallStructures) uninstallStructures();
     originalDrawChar = null; uninstallStructures = null;
-    pending = null; pendingScene = null;
+    pending = null; pendingScene = null; frameScene = null; belowDrawn = false;
   }
 
   GAME.Props = {
@@ -235,11 +258,13 @@
     drawBand: drawBand,
     beginFrame: beginFrame,
     ACTOR_LAYER: ACTOR_LAYER,
+    BANDS: BANDS,
+    bandOf: bandOf,
     install: install,
     uninstall: uninstall,
     /* test seam: js/props.gen.js is loaded once, so test/props-render-order.js swaps in fake instances */
     preload: preload,
-    _setRegistry: function (next) { registry = next; TILE = (next && next.tilePx) || 16; byScene = null; atlases = {}; pending = null; pendingScene = null; },
+    _setRegistry: function (next) { registry = next; TILE = (next && next.tilePx) || 16; byScene = null; atlases = {}; pending = null; pendingScene = null; frameScene = null; belowDrawn = false; },
     _setAtlas: function (src, img) { atlases[src] = img; }
   };
 

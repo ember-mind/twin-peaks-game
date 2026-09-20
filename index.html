@@ -593,7 +593,7 @@
 <script src="js/ambient-life.js?v=5"></script>
 <script src="js/character-activity.js?v=1.1"></script>
 <script src="js/environment-reactions.js?v=2"></script>
-<script src="js/ambient-life-scenes.js?v=6-redroom"></script>
+<script src="js/ambient-life-scenes.js?v=7-hotel-gn"></script>
 <script src="js/location-connections.js"></script>
 <!-- Canonical connection registry (generated from world/connections.json). Loaded before the
      production installers so they can source their records via GAME.WorldData.connectionRecordsFor. -->
@@ -609,21 +609,37 @@
 <script src="js/room-315-art.js"></script>
 <script src="js/room-315-scene.js"></script>
 <script src="js/room-315-production.js"></script>
+<script src="js/woods-art.js"></script>
+<script src="js/woods-scene.js"></script>
+<script src="js/woods-production.js"></script>
+<script src="js/palmer-art.js"></script>
+<script src="js/palmer-scene.js"></script>
+<script src="js/palmer-production.js"></script>
 <script src="js/hospital-art.js"></script>
 <script src="js/hospital-scene.js"></script>
 <script src="js/hospital-production.js"></script>
 <script src="js/roadhouse-art.js"></script>
 <script src="js/roadhouse-scene.js"></script>
 <script src="js/roadhouse-production.js"></script>
+<!-- M12: the prop registry owns the Roadhouse furniture; js/roadhouse-art.js paints the shell only,
+     so the props are the room, not a second copy of it. Forced false by a harness to shoot the
+     shell on its own (test/props-flag-off.js). -->
+<script>window.GAME = window.GAME || {}; window.GAME.PROPS_ENABLED = true;</script>
 <script src="js/props.gen.js"></script>
 <script src="js/props-production.js"></script>
 <script src="js/redroom-art.js"></script>
 <script src="js/redroom-scene.js"></script>
 <script src="js/redroom-production.js"></script>
+<script src="js/hotel-gn-art.js"></script>
+<script src="js/hotel-gn-scene.js"></script>
+<script src="js/hotel-gn-production.js"></script>
 <script src="js/character-life-scenes.js"></script>
 <script src="js/traincar-art.js"></script>
 <script src="js/traincar-scene.js"></script>
 <script src="js/traincar-production.js"></script>
+<script src="js/oej-art.js"></script>
+<script src="js/oej-scene.js"></script>
+<script src="js/oej-production.js"></script>
 <!-- Single door installer: every registry connection, after every map/scene script, before world-engine. -->
 <script src="js/world-connections-production.js"></script>
 <script src="js/world-engine.js"></script>

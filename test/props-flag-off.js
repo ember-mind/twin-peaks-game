@@ -1,19 +1,20 @@
 #!/usr/bin/env node
 'use strict';
 
-/* test/props-flag-off.js — with GAME.PROPS_ENABLED false (the default), the Roadhouse renders exactly as it did
- * before M9. Proof: headless Chrome shots of the same camera, byte-compared.
+/* test/props-flag-off.js — the prop layer is still a switch, and turning it off still leaves a coherent room.
  *
- *   A  this tree, which registers js/props.gen.js + js/props-production.js in test/retro-scene.html
- *   B  the baseline without the prop layer:
- *        - a git worktree of `main` when git and the ref are available ("a shot from main"), and
- *        - always, a copy of this tree with the two <script> tags and js/props*.js removed, so the test keeps
- *          proving something once main carries M9 too.
- *   C  this tree with the flag forced ON — it must DIFFER, otherwise A == B would pass for the wrong reason.
+ * Until M12 this test pinned "flag off renders exactly as before M9". M12 made the props the Roadhouse furniture
+ * and stripped the duplicates out of js/roadhouse-art.js, so the flag now defaults to TRUE and there is nothing
+ * pre-M9 to be identical to. What is still worth pinning, and is what this test now proves:
  *
- * Both baselines are given this branch's test/retro-scene.html (minus the two prop <script> tags), because the
- * byte-compare needs its ?freezeMs= clock: the live Roadhouse animates, and two unfrozen captures of it differ
- * from each other, let alone across trees. That page difference is the ONLY one between A and B.
+ *   A  this tree with the flag FORCED OFF — the painted shell on its own
+ *   B  a copy with the prop layer deleted outright (both <script> tags and js/props*.js gone)
+ *        A == B, byte for byte: with the flag off the prop layer contributes nothing at all
+ *   C  this tree as it ships (the flag is on) — it must DIFFER from A, or the switch does nothing
+ *   D  this tree with the flag FORCED ON — it must equal C, i.e. the shipped default really is on
+ *
+ * Every shot uses test/retro-scene.html's ?freezeMs= clock: the live Roadhouse animates, and two unfrozen
+ * captures of it differ from each other, let alone across trees.
  *
  * Chrome flags are the mandatory ones from test/shot.sh, passed through test/capture-chrome.js
  * (--headless=new --enable-unsafe-swiftshader --use-angle=swiftshader via --gpu=swiftshader); without them WebGL
@@ -92,49 +93,42 @@ function copyTree(name) {
 ok(/props\.gen\.js/.test(PAGE) && /props-production\.js/.test(PAGE), PAGE_REL + ' registers the prop layer');
 ok(/freezeMs/.test(PAGE), PAGE_REL + ' has the frozen-clock harness mode the byte-compare needs');
 ok(PAGE_NO_PROPS !== PAGE, 'the baseline page differs from this one only by the prop script tags');
+ok(/PROPS_ENABLED = true/.test(PAGE) && /PROPS_ENABLED = true/.test(fs.readFileSync(path.join(REPO, 'index.html'), 'utf8')),
+  'M12: the flag ships ON in index.html and in ' + PAGE_REL);
 
-// ---- A: this tree, flag at its default ---------------------------------------------------------------------
-const A = shot(REPO, 'a');
-ok(A.length > 0, 'shot A captured (' + A.length + ' bytes)');
+/* Forcing the flag: the page sets it true before js/props-production.js runs, so a forced value has to replace
+ * that line rather than precede it. */
+const force = (value) => PAGE.replace(/window\.GAME\.PROPS_ENABLED = true;/, 'window.GAME.PROPS_ENABLED = ' + value + ';');
+ok(force(false) !== PAGE && /PROPS_ENABLED = false/.test(force(false)), 'the harness can force the flag off');
+
+// ---- A: this tree with the flag FORCED OFF -------------------------------------------------------------------
+const OFF_ROOT = copyTree('flagoff');
+fs.writeFileSync(path.join(OFF_ROOT, PAGE_REL), force(false));
+const A = shot(OFF_ROOT, 'a');
+ok(A.length > 0, 'shot A (flag forced off) captured (' + A.length + ' bytes)');
 {
-  const again = shot(REPO, 'a2');
+  const again = shot(OFF_ROOT, 'a2');
   ok(A.equals(again), 'the frozen capture is reproducible: two runs of A are byte-identical', A.length + ' vs ' + again.length);
 }
 
-// ---- B1: a copy of this tree with the prop layer removed ---------------------------------------------------
+// ---- B: a copy of this tree with the prop layer removed outright -------------------------------------------
 {
   const root = copyTree('stripped');
-  fs.writeFileSync(path.join(root, PAGE_REL), PAGE_NO_PROPS);
+  fs.writeFileSync(path.join(root, PAGE_REL), PAGE_NO_PROPS.replace(/.*PROPS_ENABLED.*\n/, ''));
   fs.rmSync(path.join(root, 'js', 'props.gen.js'));
   fs.rmSync(path.join(root, 'js', 'props-production.js'));
   const B = shot(root, 'b1');
   ok(A.equals(B), 'flag off: byte-identical to a tree with no prop layer at all (' + A.length + ' vs ' + B.length + ' bytes)');
 }
 
-// ---- B2: a git worktree of main ------------------------------------------------------------------------------
+// ---- C: the page as it ships, and D: the same thing forced on ------------------------------------------------
 {
-  const rev = spawnSync('git', ['-C', REPO, 'rev-parse', '--verify', 'main'], { encoding: 'utf8' });
-  if (rev.status !== 0) {
-    console.log('props-flag-off: no `main` ref, skipping the worktree comparison');
-  } else {
-    const root = path.join(TMP, 'main-tree');
-    const add = spawnSync('git', ['-C', REPO, 'worktree', 'add', '--detach', root, 'main'], { encoding: 'utf8' });
-    if (add.status !== 0) throw new Error('git worktree add failed\n' + add.stdout + add.stderr);
-    WORKTREES.push(root);
-    fs.writeFileSync(path.join(root, PAGE_REL), PAGE_NO_PROPS);
-    const B = shot(root, 'b2');
-    ok(A.equals(B), 'flag off: byte-identical to a shot from main (' + rev.stdout.trim().slice(0, 7) + ', ' + A.length + ' vs ' + B.length + ' bytes)');
-  }
-}
-
-// ---- C: the comparison is not vacuous ------------------------------------------------------------------------
-{
+  const C = shot(REPO, 'c');
+  ok(!A.equals(C), 'the shipped page DIFFERS from the flag-off shell, so the switch does something (' + A.length + ' vs ' + C.length + ' bytes)');
   const root = copyTree('flagon');
-  const page = path.join(root, PAGE_REL);
-  fs.writeFileSync(page, PAGE.replace('<script src="../js/props.gen.js"></script>',
-    '<script>window.GAME = window.GAME || {}; window.GAME.PROPS_ENABLED = true;</script>\n<script src="../js/props.gen.js"></script>'));
-  const C = shot(root, 'c');
-  ok(!A.equals(C), 'flag on: the shot DIFFERS, so the byte-compare above is not vacuous (' + A.length + ' vs ' + C.length + ' bytes)');
+  fs.writeFileSync(path.join(root, PAGE_REL), force(true));
+  const D = shot(root, 'd');
+  ok(C.equals(D), 'the shipped default is the flag ON (' + C.length + ' vs ' + D.length + ' bytes)');
 }
 
 ok(fs.readFileSync(path.join(REPO, PAGE_REL), 'utf8') === PAGE, 'the repo page is untouched');

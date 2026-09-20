@@ -52,7 +52,7 @@ const NEW = { propId: 'roadhouse.candle.brass', sceneId: 'roadhouse', tx: 11.562
 /* Built from parts on purpose: tools/world-apply.js refuses a delete whose instance id is named by any file under
  * js/ test/ narrative/, and the fixture is a copy of this very file. Spelling the id here would refuse every
  * delete below for the wrong reason. */
-const NEW_ID = 'roadhouse-candle-' + '03';
+const NEW_ID = 'roadhouse-candle-' + '09';   // 03 is a real instance since M12; 09 is still free
 const CREATE = cs([{ op: 'create', id: NEW_ID, instance: NEW }]);
 
 // ---- dry-run: printed, nothing written -------------------------------------------------------------------
@@ -62,7 +62,7 @@ const CREATE = cs([{ op: 'create', id: NEW_ID, instance: NEW }]);
   ok(r.code === 0, 'dry-run exits 0', r.err);
   ok(r.out.includes('TARGET world/props.json :: roadhouse-chair-02') && r.out.includes('"tx":7.8125') && r.out.includes('"tx":8.3125'),
     'TARGET / BEFORE / AFTER printed', r.out);
-  ok(r.out.includes('VALID 19 prop instance(s)') && r.out.includes('DRY-RUN 1 prop instance change(s); nothing written'), 'VALID + DRY-RUN lines', r.out);
+  ok(r.out.includes('VALID 26 prop instance(s)') && r.out.includes('DRY-RUN 1 prop instance change(s); nothing written'), 'VALID + DRY-RUN lines', r.out);
   ok(r.out.includes('REPIN --repin does not apply to world/props.json'), '--repin reported as not applicable', r.out);
   ok(same(snap(f), s0), 'dry-run writes nothing');
 }
@@ -71,7 +71,7 @@ const CREATE = cs([{ op: 'create', id: NEW_ID, instance: NEW }]);
 {
   const f = makeFixture(), s0 = snap(f);
   let r = run(f, MOVE);
-  ok(r.code === 0 && r.out.includes('WROTE world/props.json (1 change(s))') && r.out.includes('wrote js/props.gen.js (12 definitions, 19 instances)'),
+  ok(r.code === 0 && r.out.includes('WROTE world/props.json (1 change(s))') && r.out.includes('wrote js/props.gen.js (12 definitions, 26 instances)'),
     'upsert applies and regenerates the gen file', r.out + r.err);
   ok(r.out.includes('CHECK PROPS-REGISTRY-PASS') && r.out.includes('CHECK PROPS-RENDER-ORDER-PASS'), 'the props tests run inside the tool', r.out);
   ok(readProps(f).instances['roadhouse-chair-02'].tx === 8.3125, 'the new tx is on disk');
@@ -86,7 +86,7 @@ const CREATE = cs([{ op: 'create', id: NEW_ID, instance: NEW }]);
 {
   const f = makeFixture(), s0 = snap(f);
   let r = run(f, CREATE);
-  ok(r.code === 0 && r.out.includes('CREATE world/props.json :: ' + NEW_ID) && r.out.includes('VALID 20 prop instance(s)'), 'create applies', r.out + r.err);
+  ok(r.code === 0 && r.out.includes('CREATE world/props.json :: ' + NEW_ID) && r.out.includes('VALID 27 prop instance(s)'), 'create applies', r.out + r.err);
   ok(readProps(f).instances[NEW_ID].propId === 'roadhouse.candle.brass', 'the created instance is on disk');
   ok(fs.readFileSync(path.join(f, 'js/props.gen.js'), 'utf8').includes(NEW_ID), 'the gen file carries the created instance');
   r = run(f, cs([{ op: 'delete', id: NEW_ID }]));
