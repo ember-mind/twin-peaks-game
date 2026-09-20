@@ -146,6 +146,27 @@
     return save;
   };
 
+  /* e3450c3d -> e6451950: the street got its houses. Both sides of Via del Ponte
+   * are now house fronts with a doorway for every place, and three places meet
+   * the street one cell from where they did (the second flat's room, the
+   * ground-floor rooms, the attic's stair). Every cell a walker could have been
+   * on — the pavements, the carriageway, the doorways — is still open, so
+   * positions stand; someone walking to one of the three old meeting cells is
+   * sent to the new one instead. Anyone found on a cell that is now a wall
+   * (there should be none) is refused by verification, not moved by guesswork.
+   * Written against test/fixtures/save-town-e3450c3d-walking-home.json. */
+  S.WORLD_MIGRATIONS['e3450c3d'] = function (save) {
+    var moved = { '1,6': { x: 1, y: 7 }, '18,6': { x: 18, y: 7 }, '14,8': { x: 14, y: 7 } };
+    Object.keys(save.state.characters || {}).forEach(function (id) {
+      var c = save.state.characters[id];
+      if (c.location !== 'street' || !c.walkTarget) return;
+      var to = moved[c.walkTarget.x + ',' + c.walkTarget.y];
+      if (to) { c.walkTarget.x = to.x; c.walkTarget.y = to.y; }
+    });
+    save.world = 'e6451950';
+    return save;
+  };
+
   /* ---------------- serialise ---------------- */
 
   S.serialize = function (sim) {

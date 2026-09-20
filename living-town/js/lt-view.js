@@ -258,7 +258,19 @@
     if (TP && typeof TP.draw === 'function') {
       var popts = { minute: this.sim.state.minute };
       var mapId = (TP.materialFor && TP.materialFor(loc.id)) || 'lt_temporary';
-      try { painted = TP.draw(g, loc.id, loc.rows, cx, cy, popts) !== false; } catch (e) { painted = false; }
+      /* Only if it accounts for every solid cell of the place as it is now: a
+       * package written for an older map would paint open ground over a wall
+       * people cannot walk through. Checked once per place. */
+      this.placesKnow = this.placesKnow || {};
+      if (this.placesKnow[loc.id] === undefined) {
+        var known = true;
+        try {
+          var claims = TP.claims ? TP.claims(loc.id, loc.rows) : null;
+          if (claims) known = LT.World.blockedCells(loc.id).every(function (key) { return !!claims[key]; });
+        } catch (e0) { known = false; }
+        this.placesKnow[loc.id] = known;
+      }
+      try { painted = this.placesKnow[loc.id] && TP.draw(g, loc.id, loc.rows, cx, cy, popts) !== false; } catch (e) { painted = false; }
       if (painted) {
         EMBER.Tilemap.paintDepthBands(ents, TILE, function (e) {
           self.drawInhabitant(g, e, cx, cy, mapId, how);

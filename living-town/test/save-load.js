@@ -613,6 +613,23 @@ async function previousFormatIsMigrated() {
     ok(town(migrated) === town(freshPair) && JSON.stringify(Object.keys(migrated.state.locationNames).sort()) === JSON.stringify(Object.keys(freshPair.state.locationNames).sort()) && migrated.state.cast === 'pair',
        'migrated from 6d2aa6eb, the town\'s furniture and places are exactly this build\'s, and nobody was added');
   }
+  {
+    /* The street got its houses (e3450c3d -> this town). A real save from the old street: five people, one of them walking home. */
+    const oldText = require('node:fs').readFileSync(path.resolve(__dirname, 'fixtures', 'save-town-e3450c3d-walking-home.json'), 'utf8');
+    const old = JSON.parse(oldText);
+    const walker = Object.keys(old.state.characters).map((id) => old.state.characters[id]).find((c) => c.location === 'street' && c.walkTarget);
+    ok(old.world === 'e3450c3d' && walker && walker.transit.to === 'flat_b' && walker.walkTarget.x === 1 && walker.walkTarget.y === 6, 'the fixture is a genuine old-street save: ' + walker.name + ' on the way home, heading for where her door used to meet the street');
+    const moved = Save.deserialize(JSON.parse(oldText));
+    const w = moved.state.characters[walker.id];
+    ok(w.pos.x === walker.pos.x && w.pos.y === walker.pos.y && w.walkTarget.x === 1 && w.walkTarget.y === 7, 'she stands where she stood and is now heading for where the door is');
+    ok(moved.actorIds().every((id) => { const c = moved.state.characters[id]; return !LT.World.isSolid(LT.World.LOCATIONS[c.location].rows[c.pos.y].charAt(c.pos.x)); }), 'nobody has ended up inside a house front');
+    await moved.runMinutes(30);
+    ok(w.location === 'flat_b' && !w.transit, 'and she gets home');
+    await moved.runUntil(2, 0);
+    ok(moved.state.events.filter((e) => e.type === 'ARRIVED').length > 10 && JSON.parse(oldText).world === 'e3450c3d', 'the day goes on, people come and go through the new doors, and the old save text is untouched');
+    const again = Save.deserialize(JSON.parse(JSON.stringify(Save.serialize(moved))));
+    ok(again.state.day === 2 && JSON.parse(JSON.stringify(Save.serialize(moved))).world === LT.World.fingerprint(), 'saved again, it is a save of this town');
+  }
 }
 
 async function main() {

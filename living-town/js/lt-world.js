@@ -17,10 +17,20 @@
    *   #  wall        T  tree        w  water       ,  grass      -  paving
    *   .  floor       D  doorway     B  bed         K  kitchen    G  guitar
    *   C  cafe counter  t  table     c  chair       b  bench      =  window
+   *   H  house front, seen from the street
    */
-  var SOLID = '#TwBKGCtb=';
+  var SOLID = '#TwBKGCtb=H';
 
   W.isSolid = function (ch) { return SOLID.indexOf(ch) >= 0; };
+
+  /* Every cell of a place nobody can stand on, as 'x,y'. For anything that
+   * has to show the map as it is — a painter can be asked whether it accounts
+   * for all of them. */
+  W.blockedCells = function (locationId) {
+    var out = [], loc = W.LOCATIONS[locationId];
+    (loc ? loc.rows : []).forEach(function (row, y) { for (var x = 0; x < row.length; x++) if (W.isSolid(row.charAt(x))) out.push(x + ',' + y); });
+    return out;
+  };
 
   W.LOCATIONS = {
     flat_a: {
@@ -181,26 +191,31 @@
       id: 'street', name: 'Via del Ponte', kind: 'transit', indoor: false,
       opens: 0, closes: 1440, transit: true,
       spawn: { x: 9, y: 4, dir: 'right' },
+      /* A street has houses on it. Both sides are fronts (H) with a doorway
+       * (D) for every place that opens onto it: north, left to right, the
+       * first flat, the flat over the bakery, the café; south, the second
+       * flat's room, the park gate, the attic's stair, the ground-floor rooms.
+       * A pavement runs along each side of the carriageway. */
       rows: [
-        'TT,,,,,,,,,,,,,,,,TT',
-        ',,,,,,,,,,,,,,,,,,,,',
-        ',,,DD,,,,,,,,,,DD,,,',
-        ',,,--,,,,,,,,,,--,,,',
+        'HHHHHHHHHHHHHHHHHHHH',
+        'HHHHHHHHHHHHHHHHHHHH',
+        'HHHDDHHHHDDHHHHDDHHH',
         '--------------------',
         '--------------------',
-        ',,,,,,,,--,,,,,,,,,,',
-        ',,,,,,,,--,,,,,,,,,,',
-        ',,,,,,,,DD,,,,,,,,,,',
-        ',,,,,,,,,,,,,,,,,,,,',
-        'TT,,,,,,,,,,,,,,,,TT'
+        '--------------------',
+        '--------------------',
+        '--------------------',
+        'HDDHHHHHDDHHHDDHHDDH',
+        'HHHHHHHHHHHHHHHHHHHH',
+        'HHHHHHHHHHHHHHHHHHHH'
       ]
     }
   };
 
   /* Where each place meets the street, so a traveller has a path to walk. */
   W.STREET_PORTALS = {
-    flat_a: { x: 3, y: 3 }, cafe: { x: 16, y: 3 }, park: { x: 8, y: 8 }, flat_b: { x: 1, y: 6 },
-    flat_c: { x: 9, y: 3 }, flat_d: { x: 18, y: 6 }, flat_e: { x: 14, y: 8 }
+    flat_a: { x: 3, y: 3 }, cafe: { x: 16, y: 3 }, park: { x: 8, y: 8 }, flat_b: { x: 1, y: 7 },
+    flat_c: { x: 9, y: 3 }, flat_d: { x: 18, y: 7 }, flat_e: { x: 14, y: 7 }
   };
 
   /* Minutes on foot. Symmetric, and no route is instant. */
