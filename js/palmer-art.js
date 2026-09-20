@@ -51,13 +51,22 @@
     shadow: '#4a3120', shadowMid: '#35220f', shadowDark: '#241608'
   };
 
-  /* Grounded furniture only: the six solid cells the map actually carries. */
+  /* Grounded furniture only: the solid cells the map actually carries.
+   * The living room carries two furnished groups now: the seating cluster on
+   * the west half of the rug (armchair, low table, wing chair) and the nook
+   * in the right third (piano, phonograph console, club chair, phone table),
+   * which used to be bare floorboards with one oval rug on them. */
   var definitions = [
     {id:'lauraBed', cells:[[1,1],[2,1]], bounds:[16,16,32,20], shadow:[16,28,32,4]},
     {id:'lauraDresser', cells:[[6,1]], bounds:[96,10,16,23], shadow:[96,28,16,4]},
+    {id:'wingChair', cells:[[7,5]], bounds:[111,78,18,20], shadow:[112,92,16,4]},
     {id:'sofa', cells:[[3,6]], bounds:[47,88,18,25], shadow:[48,108,16,4]},
+    {id:'piano', cells:[[13,6]], bounds:[206,84,18,28], shadow:[208,108,16,4]},
     {id:'sideboard', cells:[[14,6]], bounds:[223,84,17,28], shadow:[224,108,16,4]},
+    {id:'coffeeTable', cells:[[5,7]], bounds:[78,116,20,14], shadow:[80,124,16,4]},
     {id:'diningTable', cells:[[2,8],[3,8]], bounds:[31,109,34,35], shadow:[32,140,32,4]},
+    {id:'nookChair', cells:[[12,8]], bounds:[190,124,18,22], shadow:[192,140,16,4]},
+    {id:'phoneTable', cells:[[13,8]], bounds:[208,118,16,26], shadow:[208,140,16,4]},
     {id:'diningChairs', cells:[[2,9],[3,9]], bounds:[33,146,30,15], shadow:[32,156,32,4]}
   ];
 
@@ -731,6 +740,97 @@
     }
   }
 
+  function drawWingChair(R, p) {
+    /* A wing chair with its back to the stair wall, north of the rug: the
+     * group has a third seat, and the actor who walks the rug passes in front
+     * of it.  The wings are a value darker than the inner back and the lace
+     * antimacassar sits off centre, so the back never reads as a flat slab
+     * with a symmetric pair of marks on it. */
+    R(111, 78, 18, 20, p.ink);
+    R(111, 79, 4, 12, '#4d353a'); R(111, 79, 1, 12, '#5c3f45');
+    R(125, 79, 4, 12, '#4d353a');
+    R(115, 79, 10, 10, '#5c3f45');
+    R(116, 80, 8, 8, p.roseDeep); R(116, 80, 8, 1, p.rose);
+    R(117, 80, 5, 4, p.lace); R(117, 80, 5, 1, '#f3eee2');
+    R(117, 83, 5, 1, p.laceDim);
+    R(115, 88, 10, 6, p.roseDeep); R(115, 88, 10, 1, p.rose);
+    R(118, 90, 4, 2, '#5c3f45');
+    R(111, 88, 4, 3, '#5c3f45'); R(125, 88, 4, 3, '#4d353a');
+    R(113, 94, 3, 3, p.walnutDeep); R(124, 94, 3, 3, p.walnutDeep);
+    R(113, 97, 3, 1, p.ink); R(124, 97, 3, 1, p.ink);
+  }
+
+  function drawCoffeeTable(R, p) {
+    /* The low table on the rug in front of the armchair: the seat, the rug
+     * and the table are the conversation group the room never had.  An oak
+     * top, a cream magazine and a brass bowl, so it separates from the
+     * burgundy field instead of sinking into it. */
+    R(78, 116, 20, 10, p.ink);
+    R(79, 117, 18, 8, p.walnut); R(79, 117, 18, 1, p.walnutHi);
+    R(81, 118, 14, 6, p.oak); R(81, 118, 14, 1, p.mapleHi);
+    R(82, 119, 7, 4, p.lace); R(82, 119, 7, 1, '#f3eee2');
+    R(84, 121, 4, 1, p.laceDim);
+    R(91, 119, 4, 3, p.brassDark); R(91, 119, 4, 1, p.brass);
+    R(92, 120, 2, 1, p.brassHi);
+    R(80, 126, 3, 3, p.walnutDeep); R(93, 126, 3, 3, p.walnutDeep);
+    R(80, 129, 3, 1, p.ink); R(93, 129, 3, 1, p.ink);
+  }
+
+  function drawPiano(R, p) {
+    /* Leland's upright, beside the phonograph console: the keyboard band is
+     * the one pale horizontal in the right third, so the nook has a shape
+     * that reads at 1x instead of a second cabinet. */
+    R(206, 84, 18, 28, p.ink);
+    R(207, 85, 16, 6, p.walnutDark); R(207, 85, 16, 1, p.walnutHi);
+    R(209, 86, 12, 4, p.walnutDeep);
+    R(211, 87, 8, 2, p.brassDark); R(211, 87, 8, 1, p.brass);
+    R(207, 91, 16, 6, p.walnutDeep); R(207, 91, 16, 1, p.walnutMid);
+    R(208, 97, 14, 4, p.lace); R(208, 97, 14, 1, '#f3eee2');
+    R(210, 97, 1, 3, p.ink); R(212, 97, 1, 3, p.ink); R(215, 97, 1, 3, p.ink);
+    R(217, 97, 1, 3, p.ink); R(219, 97, 1, 3, p.ink);
+    R(207, 101, 16, 7, p.walnutDark); R(208, 102, 14, 1, p.walnutMid);
+    R(212, 104, 6, 2, p.walnut);
+    R(213, 108, 4, 2, p.brass);
+    R(207, 108, 3, 3, p.walnutDeep); R(220, 108, 3, 3, p.walnutDeep);
+    R(207, 111, 3, 1, p.ink); R(220, 111, 3, 1, p.ink);
+  }
+
+  function drawNookChair(R, p) {
+    /* Slate club chair standing on the braided oval, turned into the room:
+     * low back, rolled arms and a rose throw, so it is neither the green
+     * armchair nor the wing chair repeated. */
+    R(190, 124, 18, 22, p.ink);
+    R(192, 125, 14, 7, p.quiltDeep);
+    R(193, 126, 12, 4, p.quilt); R(193, 126, 12, 1, p.quiltHi);
+    R(199, 126, 1, 4, p.quiltDeep);
+    R(190, 129, 6, 11, p.quiltDeep);
+    R(191, 130, 4, 8, p.quilt); R(191, 130, 1, 8, p.quiltHi);
+    R(202, 129, 6, 11, p.quiltDeep);
+    R(203, 130, 4, 5, p.roseDeep); R(203, 130, 4, 1, p.rose);
+    R(203, 136, 4, 3, p.quilt); R(206, 136, 1, 3, p.quiltDeep);
+    R(196, 131, 6, 9, p.quilt); R(196, 131, 6, 1, p.quiltHi);
+    R(196, 137, 6, 1, p.quiltDeep);
+    R(191, 140, 16, 3, p.walnutDeep); R(191, 140, 16, 1, p.walnut);
+    R(191, 143, 3, 2, p.ink); R(204, 143, 3, 2, p.ink);
+    R(190, 145, 18, 1, p.ink);
+  }
+
+  function drawPhoneTable(R, p) {
+    /* The telephone table Sarah answers from: legs open to the parquet, a
+     * doily on the top and the black handset that gives the corner its one
+     * hard dark note. */
+    R(210, 118, 12, 3, p.ink); R(210, 118, 12, 1, '#4a4a4a');
+    R(211, 121, 10, 4, '#2a2a2a'); R(211, 121, 10, 1, '#4a4a4a');
+    R(214, 122, 4, 2, p.laceDim);
+    R(208, 125, 16, 4, p.walnutDark); R(208, 125, 16, 1, p.walnutHi);
+    R(211, 126, 10, 2, p.lace); R(211, 126, 10, 1, '#f0ead9');
+    R(209, 129, 14, 3, p.walnutDeep); R(209, 129, 14, 1, p.walnut);
+    R(210, 132, 3, 10, p.walnutDark); R(219, 132, 3, 10, p.walnutDark);
+    R(211, 133, 1, 8, p.walnutMid);
+    R(212, 138, 8, 1, p.walnutDeep);
+    R(210, 142, 3, 2, p.ink); R(219, 142, 3, 2, p.ink);
+  }
+
   function drawProp(R, prop, p) {
     if (prop.id === 'lauraBed') drawLauraBed(R, p);
     else if (prop.id === 'lauraDresser') drawLauraDresser(R, p);
@@ -738,6 +838,11 @@
     else if (prop.id === 'sideboard') drawSideboard(R, p);
     else if (prop.id === 'diningTable') drawDiningTable(R, p);
     else if (prop.id === 'diningChairs') drawDiningChairs(R, p);
+    else if (prop.id === 'wingChair') drawWingChair(R, p);
+    else if (prop.id === 'coffeeTable') drawCoffeeTable(R, p);
+    else if (prop.id === 'piano') drawPiano(R, p);
+    else if (prop.id === 'nookChair') drawNookChair(R, p);
+    else if (prop.id === 'phoneTable') drawPhoneTable(R, p);
   }
 
   function drawArchitecture(R, p) {
