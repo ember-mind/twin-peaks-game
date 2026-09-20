@@ -101,3 +101,20 @@ survive 1x because the whole room is a value band too dark to carry them. The ne
 round is therefore a value-range round with a number to hit (mean luma >= 60, light
 pixels >= 4%, true black under 2%) plus furniture for the two southern quadrants, not
 another furniture-only pass.
+
+## Pass 4 — 2026-09-20, One Eyed Jacks after the value-range round
+
+lead/oej-values (4ad777f) lifted the frame to mean luma 70.9, 4.9% light pixels, 0.25%
+true black (from 40.7 / 1.7% / 1.75%), inverted the value order so the carpet is the lit
+plane and the drapes stay in shadow, and furnished the south: two slot machines on the west
+drape, a cocktail table with its stool, a velvet rope at the south-east corner. The whole-
+frame numbers are now assertions in `test/oej-native.js` (`tools/frame-values.js`).
+
+| room | pass 3 | pass 4 | pass-4 biggest gap |
+| --- | ---: | ---: | --- |
+| One Eyed Jacks | 5 | 6 | right-centre floor a bare pink expanse; tables read as islands, not a pit; floor has no carpet pattern or border |
+
+The critic's priority: the floor. A patterned carpet with a bordered pit under the tables
+closes the dead right zone and turns islands into one room. The contact shadow is still
+"almost none" at 1x: the ellipse's widest row sits on the feet's own row, so the sprite
+covers most of it; the next engine tweak moves the mass one row below the feet.
