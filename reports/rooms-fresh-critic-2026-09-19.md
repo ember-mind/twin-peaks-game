@@ -77,3 +77,27 @@ new gaps are not paint gaps:
 Recommendation: stop per-room paint rounds; the next lift comes from (3) as a single
 engine change, then a map-row pass per room with the World Builder (the M10b props editor
 already exists for the Roadhouse), each followed by one paint round and one fresh critic.
+
+## Pass 3 — 2026-09-20, after the engine shadow and the first map-row passes
+
+Main e31238c switched every indoor actor to a dark neutral 14x5 contact shadow.
+Palmer (lead/palmer-rows, d791924) gained five solid cells: piano and phonograph on the
+east wall, club chair and telephone table on the braided rug, a wing chair north of the
+rug and a coffee table on it. One Eyed Jacks (lead/oej-rows) broke the mirrored grid:
+three-cell craps and two-cell blackjack on row 2, a three-cell roulette on the centre
+carpet, a poker oval with a free stool on row 7, three painted seated patrons.
+A third fresh critic (PNG only, same references) scored the two rooms:
+
+| room | pass 2 | pass 3 | pass-3 biggest gap |
+| --- | ---: | ---: | --- |
+| Palmer house | 5 | 6 | upper third a bare tan band; sofa and cross float; mid wall repeats one sconce-and-shelf unit four times |
+| One Eyed Jacks | 5 | 5 | lower half of the floor empty (SW and SE quadrants); tables read as identical stamps; "no contact shadows at all" |
+
+Measured on the critic's frames (mean luma of the native 256x192, share of pixels above
+160): Palmer 94.5 / 10.6%, One Eyed Jacks 40.7 / 1.7%. The HGSS venue references Deep
+measured for the Roadhouse gauntlet sit at mean luma 60–125 with 3.9–13.4% light pixels.
+The OEJ shadow, the patrons and the table differences exist in the frame and do not
+survive 1x because the whole room is a value band too dark to carry them. The next OEJ
+round is therefore a value-range round with a number to hit (mean luma >= 60, light
+pixels >= 4%, true black under 2%) plus furniture for the two southern quadrants, not
+another furniture-only pass.
