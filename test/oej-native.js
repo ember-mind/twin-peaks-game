@@ -139,7 +139,10 @@ assert.equal(room.rows[9], 'iiiiiiiDDiiiiiii', 'the south double door is the onl
  * the centre carpet, and no row is the mirror of another. */
 assert.equal(room.rows[2], 'iftttfffffttffUi', 'the north row carries a long craps table and a blackjack table');
 assert.equal(room.rows[6], 'ifffKKKffffffffi', 'a three-cell roulette table stands on the centre carpet');
-assert.equal(room.rows[7], 'ifffffffftthfffi', 'the poker table and its free stool sit south-east');
+assert.equal(room.rows[7], 'iUfhffffftthfffi',
+  'the poker table and its free stool sit south-east, a slot machine and a cocktail stool west');
+assert.equal(room.rows[8], 'iUftffffffffffFi',
+  'the south-west lounge and the south-east rope stand fill the two empty quadrants');
 const tableRows = Art.definitions.filter((d) => d.id.indexOf('table') === 0)
   .map((d) => Math.max(...d.cells.map((cell) => cell[1])));
 assert(new Set(tableRows).size >= 3,
@@ -169,8 +172,9 @@ for (const prop of Art.definitions) {
   assert(prop.bounds.every(Number.isInteger) && prop.shadow.every(Number.isInteger),
     prop.id + ' bounds and shadow are integer rectangles');
 }
-assert.equal(Art.definitions.length, 10,
-  'ten grounded props: four tables, three seated patrons, one free stool, the bar and the cabinet');
+assert.equal(Art.definitions.length, 15,
+  'fifteen grounded props: four gaming tables, three seated patrons, two free stools, the bar, ' +
+  'the cabinet, two slot machines, a cocktail table and a rope stand');
 /* Every painted patron sits on a solid cell whose NORTH neighbour is also
  * solid, so the head that overhangs the cell can never cover a body. */
 for (const prop of Art.definitions.filter((d) => d.id.indexOf('guest') === 0)) {
@@ -325,7 +329,8 @@ for (const prop of patrons) {
   assert(skinTones.length >= 4, prop.id + ' paints a face, not a coloured block');
 }
 const stools = Art.definitions.filter((d) => d.id.indexOf('stool') === 0);
-assert.equal(stools.length, 1, 'one empty stool remains, so the room is not uniformly busy');
+assert.equal(stools.length, 2,
+  'two empty stools remain — the poker seat and the cocktail seat — so the room is not uniformly busy');
 function tableCalls(id) {
   const prop = Art.definitions.find((d) => d.id === id);
   const recording = newRecordingContext();
@@ -629,21 +634,48 @@ const drapeNorth = mean(region(155, 21, 20, 8));
 const feltPixels = region(0, 40, 256, 105).filter(isFelt);
 assert(feltPixels.length > 600, 'the felt beds are painted across the table band');
 const feltPlane = mean(feltPixels);
-const carpetPlane = mean(region(24, 140, 40, 20));
+/* The carpet is sampled on open floor. The old patch at 24,140 now sits
+ * under the south-west cocktail table, so it is read one quadrant east. */
+const carpetPlane = mean(region(66, 146, 12, 12));
 assert(goldRail > feltPlane + 20,
   `the gold trim is the brightest plane (${goldRail.toFixed(1)} vs felt ${feltPlane.toFixed(1)})`);
-assert(feltPlane > carpetPlane + 15,
-  `the felt beds read well above the carpet (${feltPlane.toFixed(1)} vs ${carpetPlane.toFixed(1)})`);
-/* Round 3: the floor and the wall were within two luma of each other and a
- * fresh critic saw no floor-to-wall break and no horizon. The carpet is now a
- * clear step below both drapes, and the skirting board at the wall foot is
- * brighter than either, which is what gives the room its horizon line. */
+
+/* ---------------------------------------------------- the value range
+ *
+ * Round 4, the value round. A third fresh critic measured the whole frame at
+ * mean luma 40.7 with 1.7% of its pixels above 160, against venue references
+ * at 60-125 and 3.9-13.4%, and reported "no contact shadows at all" on a room
+ * that paints one under every actor. The room was simply too dark to show
+ * anything it painted. These three numbers are the round's contract, measured
+ * over the whole reviewed capture. */
+const framePixels = region(0, 0, 256, 192);
+const frameMean = mean(framePixels);
+const framePct = (predicate) =>
+  (framePixels.filter((px) => predicate(luma(px))).length / framePixels.length) * 100;
+const lightPct = framePct((l) => l > 160);
+const blackPct = framePct((l) => l < 16);
+assert(frameMean >= 60,
+  `the room sits in the venue references' value band (mean luma ${frameMean.toFixed(1)}, floor 60)`);
+assert(lightPct >= 4,
+  `the room carries real highlights (${lightPct.toFixed(2)}% above luma 160, floor 4%)`);
+assert(blackPct < 2,
+  `the room is not crushed to black (${blackPct.toFixed(2)}% below luma 16, ceiling 2%)`);
+
+/* The value ORDER the round inverted, and why. Round 3 lit the drapes and
+ * left the floor dark, so the room had a wall but no lit plane and no
+ * silhouettes. The carpet is now the lit plane: it reads above both drapes
+ * and above the felt, the tables are dark masses standing on it, and the
+ * brass skirting at the wall foot stays the brightest band of the three,
+ * which is what keeps the horizon. Margins are the ones measured on this
+ * capture, with the slack the round left. */
 const drapeSide = mean(region(2, 60, 10, 40));
 const skirtBand = mean(region(84, 38, 40, 2));
-assert(drapeNorth > carpetPlane + 6,
-  `the north drape reads above the carpet (${drapeNorth.toFixed(1)} vs ${carpetPlane.toFixed(1)})`);
-assert(drapeSide > carpetPlane + 10,
-  `the side drape reads above the carpet (${drapeSide.toFixed(1)} vs ${carpetPlane.toFixed(1)})`);
+assert(carpetPlane > drapeNorth + 8,
+  `the lit floor reads above the north drape (${carpetPlane.toFixed(1)} vs ${drapeNorth.toFixed(1)})`);
+assert(carpetPlane > drapeSide + 8,
+  `the lit floor reads above the side drape (${carpetPlane.toFixed(1)} vs ${drapeSide.toFixed(1)})`);
+assert(carpetPlane > feltPlane + 8,
+  `the felt beds are dark masses on a lit floor (${feltPlane.toFixed(1)} vs ${carpetPlane.toFixed(1)})`);
 assert(skirtBand > drapeSide + 10,
   `the skirting is the brightest band at the wall foot, so the room has a horizon ` +
   `(${skirtBand.toFixed(1)} vs drape ${drapeSide.toFixed(1)}, carpet ${carpetPlane.toFixed(1)})`);
