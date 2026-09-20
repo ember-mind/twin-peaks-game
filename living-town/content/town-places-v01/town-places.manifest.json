@@ -1,0 +1,159 @@
+{
+  "version": "town-places-v01",
+  "entry": {
+    "draw": "LT.TownPlaces.draw(g, locationId, rows, camX, camY, opts)",
+    "foreground": "LT.TownPlaces.drawForeground(g, locationId, rows, camX, camY, footMin, footMax, opts)"
+  },
+  "materials": [
+    "lt_home_a",
+    "lt_home_b",
+    "lt_home_c",
+    "lt_home_d",
+    "lt_home_e",
+    "lt_park",
+    "lt_street"
+  ],
+  "places": [
+    {
+      "id": "park",
+      "material": "lt_park",
+      "pieces": 16,
+      "foreground": 15,
+      "claimed": 24,
+      "kinds": [
+        "bench",
+        "gate",
+        "tree",
+        "water"
+      ]
+    },
+    {
+      "id": "street",
+      "material": "lt_street",
+      "pieces": 11,
+      "foreground": 11,
+      "claimed": 14,
+      "kinds": [
+        "door",
+        "gate",
+        "tree"
+      ]
+    },
+    {
+      "id": "flat_a",
+      "material": "lt_home_a",
+      "pieces": 40,
+      "foreground": 3,
+      "claimed": 42,
+      "kinds": [
+        "bed",
+        "chair",
+        "guitar",
+        "kitchen",
+        "table",
+        "wall",
+        "window"
+      ]
+    },
+    {
+      "id": "flat_b",
+      "material": "lt_home_b",
+      "pieces": 32,
+      "foreground": 2,
+      "claimed": 34,
+      "kinds": [
+        "bed",
+        "chair",
+        "kitchen",
+        "table",
+        "wall"
+      ]
+    },
+    {
+      "id": "flat_c",
+      "material": "lt_home_c",
+      "pieces": 33,
+      "foreground": 2,
+      "claimed": 35,
+      "kinds": [
+        "bed",
+        "chair",
+        "kitchen",
+        "table",
+        "wall",
+        "window"
+      ]
+    },
+    {
+      "id": "flat_d",
+      "material": "lt_home_d",
+      "pieces": 35,
+      "foreground": 2,
+      "claimed": 37,
+      "kinds": [
+        "bed",
+        "chair",
+        "kitchen",
+        "table",
+        "wall",
+        "window"
+      ]
+    },
+    {
+      "id": "flat_e",
+      "material": "lt_home_e",
+      "pieces": 26,
+      "foreground": 2,
+      "claimed": 27,
+      "kinds": [
+        "bed",
+        "kitchen",
+        "table",
+        "wall",
+        "window"
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "id": "cafe",
+      "minute": 780,
+      "people": 3
+    },
+    {
+      "id": "park",
+      "minute": 660,
+      "people": 3
+    },
+    {
+      "id": "street",
+      "minute": 600,
+      "people": 3
+    },
+    {
+      "id": "flat_a",
+      "minute": 540,
+      "people": 2
+    },
+    {
+      "id": "flat_b",
+      "minute": 480,
+      "people": 1
+    },
+    {
+      "id": "flat_c",
+      "minute": 900,
+      "people": 2
+    },
+    {
+      "id": "flat_d",
+      "minute": 1020,
+      "people": 1
+    },
+    {
+      "id": "flat_e",
+      "minute": 960,
+      "people": 1
+    }
+  ]
+}

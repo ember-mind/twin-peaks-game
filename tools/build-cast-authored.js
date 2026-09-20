@@ -38,8 +38,7 @@ function fail(message) {
   process.exit(1);
 }
 
-function assemble(key, dir, phase) {
-  const spec = CHARACTERS[key];
+function assemble(key, dir, phase, spec = CHARACTERS[key]) {
   const head = HEADS[spec.head][dir];
   const body = BODIES[spec.body][dir][phase];
   const rows = [...head, ...body].map(row => [...row]);
@@ -56,9 +55,9 @@ function assemble(key, dir, phase) {
   return rows.map(row => row.join(''));
 }
 
-function frames(key) {
+function frames(key, spec = CHARACTERS[key]) {
   const out = [];
-  for (const dir of DIRS) for (let phase = 0; phase < 3; phase += 1) out.push(assemble(key, dir, phase));
+  for (const dir of DIRS) for (let phase = 0; phase < 3; phase += 1) out.push(assemble(key, dir, phase, spec));
   return out;
 }
 
@@ -66,10 +65,10 @@ function hexToRgb(hex) {
   return [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
 }
 
-function rasterize(key) {
-  const colors = pal(CHARACTERS[key].colors);
+function rasterize(key, spec = CHARACTERS[key]) {
+  const colors = pal(spec.colors);
   const pixels = Buffer.alloc(SIZE * SIZE * 4, 0);
-  frames(key).forEach((rows, index) => {
+  frames(key, spec).forEach((rows, index) => {
     const width = rows[0].length;
     const ox = (index % 3) * FRAME + Math.floor((FRAME - width) / 2);
     const oy = Math.floor(index / 3) * FRAME + (FRAME - rows.length);
@@ -131,10 +130,10 @@ function encodePng(pixels, size) {
   ]);
 }
 
-function atlasPixels(sheets) {
+function atlasPixels(sheets, order = ORDER) {
   const atlasSize = 360;
   const pixels = Buffer.alloc(atlasSize * atlasSize * 4, 0);
-  ORDER.forEach((key, index) => {
+  order.forEach((key, index) => {
     const bx = (index % 5) * SIZE;
     const by = Math.floor(index / 5) * SIZE;
     const sheet = sheets[key];
@@ -145,10 +144,10 @@ function atlasPixels(sheets) {
   return encodePng(pixels, atlasSize);
 }
 
-function stats(key) {
-  return frames(key).map((rows, index) => {
+function stats(key, spec = CHARACTERS[key]) {
+  return frames(key, spec).map((rows, index) => {
     const opaque = rows.join('').replace(/\./g, '');
-    const colors = pal(CHARACTERS[key].colors);
+    const colors = pal(spec.colors);
     const unique = new Set([...opaque].map(ch => colors[ch]));
     const width = Math.max(...rows.map(row => row.trimEnd().length - (row.length - row.trimStart().length)));
     const cols = rows.map(row => [row.search(/[^.]/), row.length - 1 - [...row].reverse().join('').search(/[^.]/)]).filter(pair => pair[0] >= 0);
@@ -204,4 +203,9 @@ function main() {
   process.stdout.write(`${JSON.stringify({ status: 'pass', characters: ORDER.length, sheets: path.relative(ROOT, SHEET_DIR), atlas: path.relative(ROOT, ATLAS) })}\n`);
 }
 
-main();
+/* The paper-doll rasteriser is mechanism; CHARACTERS and ORDER are this game's
+ * cast. Another experience builds its own people from the same heads, bodies
+ * and overlays by passing its own specs (see living-town/tools). */
+module.exports = { rasterize, stats, atlasPixels, encodePng, SIZE, FRAME };
+
+if (require.main === module) main();

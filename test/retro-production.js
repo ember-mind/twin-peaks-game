@@ -15,6 +15,7 @@ const adapter = fs.readFileSync(path.join(root, 'js', 'narrative-engine-adapter.
 const notebook = fs.readFileSync(path.join(root, 'js', 'narrative-notebook.js'), 'utf8');
 const production = fs.readFileSync(path.join(root, 'js', 'narrative-production.js'), 'utf8');
 const engine = fs.readFileSync(path.join(root, 'js', 'engine.js'), 'utf8');
+const emberViewport = fs.readFileSync(path.join(root, 'engine', 'ember-viewport.js'), 'utf8');
 const retroFont = fs.readFileSync(path.join(root, 'js', 'retro-font.js'), 'utf8');
 const portraits = fs.readFileSync(path.join(root, 'js', 'portraits.js'), 'utf8');
 const goldTone = fs.readFileSync(path.join(root, 'js', 'gold-tone.js'), 'utf8');
@@ -23,8 +24,17 @@ const castSheet = fs.readFileSync(path.join(root, 'assets', 'sprites', 'cast-wal
 const checks = {
   heartgold_native_resolution_256x192: /width="256" height="192"/.test(index) &&
     /cv\.width = 256/.test(main) && /cv\.height = 192/.test(main),
-  engine_repairs_and_locks_native_buffer: /canvas\.width !== VW/.test(engine) &&
-    /canvas\.height !== VH/.test(engine) && /UW = VW;/.test(engine),
+  /* The repair moved into the shared Ember viewport module when the engine was
+   * extracted. The invariant is unchanged — the backing store is the logical
+   * resolution and UI never derives from device pixels — so both halves are
+   * checked: the engine must delegate, and the module must do the repair. */
+  engine_repairs_and_locks_native_buffer:
+    /EMBER\.Viewport\.attachNative\(canvas, VW, VH\)/.test(engine) &&
+    /EMBER\.Viewport\.sizeNative\(canvas, VW, VH\)/.test(engine) &&
+    /UW = VW;/.test(engine) &&
+    /canvas\.width !== width/.test(emberViewport) &&
+    /canvas\.height !== height/.test(emberViewport) &&
+    /imageSmoothingEnabled = false/.test(emberViewport),
   intro_header_uses_fitting_native_scale: /FEBBRAIO, 1989'[\s\S]*bold 8px monospace/.test(engine) &&
     /titleFits: titleWidth <= l\.boxW - 20/.test(engine),
   intro_uses_three_complete_pages: /Math\.ceil\(lines\.length \/ 7\)/.test(engine) &&

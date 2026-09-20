@@ -726,4 +726,4 @@ for (const dir of ['down', 'up', 'right']) {
   });
 }
 
-module.exports = { HEADS, BODIES, OVERLAYS, CHARACTERS, pal };
+module.exports = { HEADS, BODIES, OVERLAYS, CHARACTERS, pal, TONES: { SKIN, SKIN_DARK, SKIN_PALE, HAIR, SHOES } };
