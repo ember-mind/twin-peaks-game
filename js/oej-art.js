@@ -30,37 +30,64 @@
   var GAME = G.GAME = G.GAME || {};
   var TILE = 16;
 
+  /* The value-range pass of 2026-09-20. A third fresh critic measured this
+   * frame at mean luma 40.7 with 1.7% of its pixels above luma 160, against
+   * venue references that sit at 60-125 with 3.9-13.4%. Nothing painted here
+   * survived a 1x read because the whole room was one dark band: the contact
+   * shadows, the seated patrons and the different tables were all in the
+   * frame and none of them could be seen.
+   *
+   * The lift is deliberately NOT a global gamma. The floor plane and the
+   * lamp pools carry it, the skirting horizon is brass-bright, and the
+   * drapes and the ceiling stay in shadow. That inverts the old value order
+   * on purpose: in a lit room the carpet reads ABOVE the curtain, and every
+   * standing object keeps its 1px near-black chromatic outline so it still
+   * separates from the brighter floor. */
   var palette = {
     ink: '#170e13', black: '#20131a', eye: '#342c2b',
-    /* Drapes: the perimeter of the room is curtain, not plaster. */
-    curtainDeep: '#360f1d', curtainDark: '#4c1524', curtain: '#631d2c',
-    curtainMid: '#7d2634', curtainHi: '#9a3440',
-    /* Carpet is a full value step below the drapes and less saturated. The
-     * round-2 carpet sat within two luma of the curtain and in the same hue,
-     * so floor and wall merged and the room had no horizon. */
-    carpetDeep: '#1d0d16', carpetDark: '#28121c', carpet: '#311723',
-    carpetMid: '#3b1d29', carpetHi: '#472532', carpetGlow: '#512c3a',
-    /* The skirting that separates them. */
-    skirtDeep: '#1a0f0c', skirt: '#4a2c1c', skirtHi: '#7a4a2a',
-    /* Gold is the only bright value in the room: rails, trim, lamps. */
-    goldDeep: '#5e3f14', gold: '#8d6320', goldMid: '#bc8d2c',
-    goldHi: '#e5bd5c', goldWhite: '#ffe9a6',
-    /* Felt: the one saturated green, and only on the four tables. */
-    feltDeep: '#0e2a1a', feltDark: '#17422a', felt: '#215a34',
-    feltMid: '#2c7340', feltHi: '#3f8c4d',
+    /* Drapes: the perimeter of the room is curtain, not plaster. They stay
+     * the dark half of the room — one step up from round 3, no more. */
+    curtainDeep: '#45151f', curtainDark: '#5c1a2b', curtain: '#762433',
+    curtainMid: '#93303f', curtainHi: '#b03e4c',
+    /* Carpet is now the LIT plane, a clear step ABOVE the drapes. */
+    carpetDeep: '#5b2029', carpetDark: '#93384a', carpet: '#9a3b4e',
+    carpetMid: '#a8475a', carpetHi: '#b65468', carpetGlow: '#c4637a',
+    /* Lamp light landing on that carpet. Round 1 ran the pools up through
+     * the carpet's own magenta, which read as two pink stage spots; they now
+     * turn warm as they brighten, the way lamplight does, and the top two
+     * steps stay above luma 160 so the floor keeps real highlights. */
+    poolFar: '#b05a4e', poolEdge: '#c87b58', poolMid: '#e0a271', poolCore: '#f4cb9b',
+    /* The skirting that separates floor from wall: the brightest band at the
+     * foot of every drape, and the room's horizon line. */
+    skirtDeep: '#2a180f', skirt: '#68401f', skirtHi: '#a06b3a',
+    /* Gold: rails, trim, lamps. Lifted with the room so it stays the
+     * brightest plane in it. */
+    goldDeep: '#7d5219', gold: '#b8812e', goldMid: '#d6a238',
+    goldHi: '#f2cf72', goldWhite: '#fff2c0',
+    /* Felt: the one saturated green, and only on the four gaming tables. */
+    feltDeep: '#123320', feltDark: '#1c4e31', felt: '#276a3d',
+    feltMid: '#328247', feltHi: '#479c55',
     /* Stools carry their own crimson so a chair never reads as a small
      * table: the tables are mahogany + felt, the stools are leather + brass. */
-    stoolDeep: '#5e1626', stoolDark: '#7c2030', stool: '#9c2f3c',
-    stoolHi: '#bd4a4a',
-    walnutDeep: '#241511', walnutDark: '#3a2119', walnut: '#553122',
-    walnutMid: '#6d4029', walnutHi: '#8d5636',
-    metalDeep: '#2c2419', metal: '#6b5a39', metalHi: '#b09763',
+    stoolDeep: '#7d2434', stoolDark: '#a32f42', stool: '#c64553',
+    stoolHi: '#e5686a',
+    /* Mahogany stays BELOW the carpet: a table is a dark mass on a lit
+     * floor, which is what gives the room its silhouettes back. */
+    walnutDeep: '#33201a', walnutDark: '#4d2e22', walnut: '#5e3826',
+    walnutMid: '#8a5537', walnutHi: '#b0713f',
+    metalDeep: '#3a3122', metal: '#8a7549', metalHi: '#d4bb84',
     bottleGreen: '#1f3a2b', bottleAmber: '#7a4c1c', bottleRed: '#5f1c24',
     bottleClear: '#6d7a68',
     glass: '#c9b98d', glassHi: '#f2e6bc',
     chipWhite: '#ddd3c2', chipRed: '#a82f34', chipBlue: '#2c4f74',
     pocketDark: '#120a10', pocketRed: '#8f2630',
-    shadow: '#1b0a12', shadowMid: '#130710', shadowDark: '#0d050b'
+    /* Contact shadows. Kept above luma 16 apart from their innermost core:
+     * on a lifted floor a shadow reads by contrast, not by being black, and
+     * true black is itself a value-range defect. */
+    shadow: '#2a1320', shadowMid: '#1c0c15', shadowDark: '#150811',
+    /* Slot-machine chrome and the velvet rope of the south-east stand. */
+    chrome: '#9aa0a8', chromeHi: '#dfe4ea', chromeDark: '#4d545c',
+    ropePost: '#6b4a1c', ropeVelvet: '#8c2b3c', ropeVelvetHi: '#c04a56'
   };
 
   /* Grounded furniture. Wall-mounted pieces (drapes, sconces, the mirror,
@@ -84,7 +111,19 @@
     {id: 'guestRoulette', cells: [[5,5]], bounds: [80,73,16,20], shadow: [80,91,16,3], guest: 'wheelPlayer'},
     {id: 'tableRoulette', cells: [[4,6],[5,6],[6,6]], bounds: [64,90,48,22], shadow: [64,110,48,4], game: 'roulette'},
     {id: 'tablePoker', cells: [[9,7],[10,7]], bounds: [144,106,32,22], shadow: [144,126,32,4], game: 'poker'},
-    {id: 'stoolPoker', cells: [[11,7]], bounds: [176,110,16,20], shadow: [176,128,16,3], seatVariant: 1}
+    {id: 'stoolPoker', cells: [[11,7]], bounds: [176,110,16,20], shadow: [176,128,16,3], seatVariant: 1},
+    /* The value round also filled the two southern quadrants, which the same
+     * critic called the room's biggest gap: below the bar the floor was a
+     * bare field with nothing standing on it. Two slot machines line the west
+     * wall, a cocktail table and its stool sit beside them, and a velvet rope
+     * stand closes the south-east corner. All five cells are solid glyphs in
+     * maps.js and none of them touches Hawk at 6,8, Audrey at 13,7 or the
+     * 8,8 -> 7,5 route. */
+    {id: 'slotWestNorth', cells: [[1,7]], bounds: [16,106,16,22], shadow: [16,126,16,3], slotVariant: 0},
+    {id: 'slotWestSouth', cells: [[1,8]], bounds: [16,122,16,22], shadow: [16,142,16,3], slotVariant: 1},
+    {id: 'cocktailTable', cells: [[3,8]], bounds: [48,125,16,19], shadow: [48,142,16,3]},
+    {id: 'stoolCocktail', cells: [[4,8]], bounds: [64,124,16,20], shadow: [64,142,16,3], seatVariant: 0},
+    {id: 'ropeStand', cells: [[14,8]], bounds: [224,124,16,20], shadow: [224,142,16,3]}
   ];
 
   /* Three patrons, three different heads and coats. `mirror` turns the pose
@@ -134,14 +173,19 @@
      * other block. The field scale is deliberately twice the tile so it
      * never lines up with the furniture grid. */
     R(16, 22, 224, 122, p.carpetDeep);
-    var row, col, x, y;
+    var row, col, x, y, bh;
     for (row = 0; row < 8; row++) {
       y = 30 + row * 16;
-      if (y + 16 > 138) break;
+      /* The last row is CLIPPED, not dropped. Dropping it left ten rows of
+       * bare carpetDeep between the field and its border: a dark band right
+       * across the south of the floor that nothing in the room motivated,
+       * and the exact plane an actor's contact shadow has to land on. */
+      bh = Math.min(16, 138 - y);
+      if (bh < 2) break;
       for (col = 0; col < 13; col++) {
         x = 24 + col * 16;
         if (x + 16 > 232) break;
-        R(x, y, 16, 16, ((row + col) & 1) ? p.carpetDark : p.carpet);
+        R(x, y, 16, bh, ((row + col) & 1) ? p.carpetDark : p.carpet);
       }
     }
     /* One medallion per second block, four pixels of gold thread. */
@@ -355,16 +399,53 @@
   function sconcePool(R, wall, cy, p) {
     /* Three nested steps, each shorter and one value warmer. Nothing squares
      * off the edge: the previous version drew stacked bars with a base rect
-     * behind them and read as a wedge cut out of the carpet. */
+     * behind them and read as a wedge cut out of the carpet. The value round
+     * adds a fourth, genuinely hot step: a sconce that throws no highlight
+     * onto the floor is not a light source at 1x. */
     var west = wall === 'west';
     halfPool(R, west, cy, 15, 34, p.carpet);
     halfPool(R, west, cy, 11, 26, p.carpetMid);
     halfPool(R, west, cy, 7, 16, p.carpetHi);
+    halfPool(R, west, cy, 6, 14, p.poolEdge);
+    halfPool(R, west, cy, 4, 8, p.poolMid);
+  }
+
+  /* A whole pool, not a half one: the same quadratic falloff mirrored about
+   * its centre line, for light that comes off the chandeliers rather than
+   * off a wall bracket. */
+  function floorPool(R, cx, cy, w, h, color) {
+    for (var row = 0; row < h; row += 2) {
+      var edge = Math.abs((row + 1) / h * 2 - 1);
+      var len = Math.round(w * (1 - 0.82 * edge * edge));
+      if (len < 2) continue;
+      var x = Math.round(cx - len / 2);
+      if (x < 16) { len -= 16 - x; x = 16; }
+      if (x + len > 240) len = 240 - x;
+      if (len < 2) continue;
+      R(x, cy - (h >> 1) + row, len, 2, color);
+    }
+  }
+
+  function chandelierPool(R, cx, cy, p) {
+    /* Six steps, so the falloff is a gradient and not three rings, and the
+     * hot core sits a little north of centre: the light comes from above and
+     * in front, so its brightest patch is not the pool's geometric middle. */
+    floorPool(R, cx, cy, 74, 42, p.carpetMid);
+    floorPool(R, cx, cy, 62, 34, p.carpetHi);
+    floorPool(R, cx, cy, 52, 28, p.poolFar);
+    floorPool(R, cx, cy - 1, 42, 22, p.poolEdge);
+    floorPool(R, cx, cy - 2, 34, 18, p.poolMid);
+    floorPool(R, cx + 1, cy - 3, 18, 10, p.poolCore);
   }
 
   function drawSconcePools(R, p) {
     sconcePool(R, 'west', 84, p);
     sconcePool(R, 'east', 84, p);
+    /* The two chandeliers in the wall band finally light the floor under
+     * them. These are the room's largest bright areas and the reason the
+     * southern half stops reading as an unlit field. */
+    chandelierPool(R, 58, 112, p);
+    chandelierPool(R, 196, 104, p);
   }
 
   /* ------------------------------------------------------- south wall */
@@ -390,9 +471,11 @@
     }
     /* Threshold pool: the lamp over the door reaches three steps onto the
      * carpet and stops on the carpet's dark border. */
-    R(118, 136, 20, 2, p.carpetMid);
-    R(112, 138, 32, 2, p.carpetHi);
-    R(106, 140, 44, 2, p.carpetMid);
+    R(112, 132, 32, 2, p.carpetMid);
+    R(106, 134, 44, 2, p.carpetHi);
+    R(102, 136, 52, 2, p.poolFar);
+    R(106, 138, 44, 2, p.poolEdge);
+    R(112, 140, 32, 2, p.poolMid);
     /* The recess the leaves hang in. It starts at y=144, the top of the door
      * row, and spans only the two door cells plus a 4px surround: anything
      * wider or taller repaints over a body standing north or west of the
@@ -489,6 +572,25 @@
       R(x + 2, y + 16, w - 4, 2, p.walnutDark);
       R(x + 4, y + 18, w - 8, 1, p.walnutDeep);
       R(x + 8, y + 19, w - 16, 1, p.walnutDeep);
+    }
+    /* Lit edge. The value round gives every standing object a 1px bright rim
+     * on the top and the left, the side the chandeliers are on, so furniture
+     * reads as a solid mass catching light instead of a dark stamp on a dark
+     * floor. The rim sits inside the ink outline, never on top of it. */
+    if (padded) {
+      R(x + 2, y + 1, w - 4, 1, p.goldHi);
+      R(x + 1, y + 2, 1, 15, p.goldMid);
+    } else if (oval) {
+      /* The poker oval keeps its rim on the crown only: the value assertion
+       * on the mahogany armrest is measured two rows lower. */
+      R(x + 11, y + 1, w - 22, 1, p.goldHi);
+      R(x + 6, y + 2, 4, 1, p.goldMid);
+      R(x + 1, y + 6, 1, 9, p.goldMid);
+    } else {
+      R(x + 9, y + 1, w - 18, 1, p.goldHi);
+      R(x + 5, y + 2, 4, 1, p.goldMid);
+      R(x + 2, y + 3, 3, 1, p.goldMid);
+      R(x + 1, y + 6, 1, 9, p.goldMid);
     }
     /* Felt bed. */
     var bx = x + 3, by = y + 4, bw = w - 6, bh = 13;
@@ -692,6 +794,107 @@
    * shoulders, a coat and one forearm resting on the cloth. Each patron's
    * cell sits on the FAR side of its table, so the table is painted after
    * them and cuts them below the chest exactly like the booth tabletop. */
+  /* Slot machine: a 16x22 standing cabinet against the west drape. Two
+   * variants so the pair is not one sprite twice — a fruit machine with a
+   * three-reel window and a lit marquee, and a taller-shouldered poker
+   * machine with a screen and a side handle on the other flank. */
+  function slotMachine(R, x, y, p, variant) {
+    R(x + 2, y, 12, 1, p.ink);
+    R(x + 1, y + 1, 14, 21, p.ink);
+    /* Cabinet body, lit down its top-left edge and dark down the right. */
+    R(x + 2, y + 1, 12, 20, p.walnut);
+    R(x + 2, y + 1, 12, 1, p.goldHi);
+    R(x + 2, y + 2, 1, 18, p.walnutHi);
+    R(x + 3, y + 2, 1, 18, p.walnutMid);
+    R(x + 12, y + 2, 2, 19, p.walnutDeep);
+    /* Marquee: the brightest thing on the machine, so the pair reads as two
+     * lit boxes and not two dark slabs. */
+    R(x + 3, y + 2, 9, 4, p.ink);
+    R(x + 3, y + 2, 9, 1, p.goldHi);
+    R(x + 4, y + 3, 7, 2, variant ? p.stool : p.goldMid);
+    R(x + 5, y + 3, 2, 1, p.goldWhite);
+    R(x + 9, y + 3, 2, 1, p.goldWhite);
+    /* Reel window or screen. */
+    R(x + 3, y + 7, 9, 7, p.ink);
+    if (variant) {
+      R(x + 4, y + 8, 7, 5, p.chromeDark);
+      R(x + 4, y + 8, 7, 1, p.chrome);
+      R(x + 5, y + 9, 2, 2, p.chipBlue);
+      R(x + 8, y + 10, 2, 2, p.goldMid);
+    } else {
+      R(x + 4, y + 8, 7, 5, p.glass);
+      R(x + 4, y + 8, 7, 1, p.glassHi);
+      R(x + 6, y + 8, 1, 5, p.chromeDark);
+      R(x + 9, y + 8, 1, 5, p.chromeDark);
+      R(x + 4, y + 10, 2, 2, p.chipRed);
+      R(x + 7, y + 10, 2, 2, p.chipBlue);
+      R(x + 10, y + 10, 1, 2, p.chipRed);
+    }
+    /* Coin tray and the chrome base. */
+    R(x + 3, y + 15, 9, 3, p.chromeDark);
+    R(x + 3, y + 15, 9, 1, p.chromeHi);
+    R(x + 5, y + 16, 5, 2, p.metalDeep);
+    R(x + 2, y + 19, 12, 2, p.walnutDeep);
+    R(x + 3, y + 19, 10, 1, p.metalHi);
+    /* Handle: on the east flank of one machine, the west of the other. */
+    var hx = variant ? x + 1 : x + 14;
+    R(hx, y + 6, 1, 6, p.chromeDark);
+    R(hx, y + 5, 1, 2, p.chromeHi);
+    R(hx, y + 4, 1, 1, p.chipRed);
+  }
+
+  /* A small round cocktail table: a drinks tray on a single pedestal, half
+   * the footprint of a gaming table so the south-west corner reads as lounge
+   * seating and not as a fifth game. */
+  function cocktailTable(R, x, y, p) {
+    R(x + 3, y, 10, 1, p.ink);
+    R(x + 1, y + 1, 14, 6, p.ink);
+    R(x + 3, y + 7, 10, 1, p.ink);
+    R(x + 2, y + 1, 12, 5, p.walnutDark);
+    R(x + 3, y + 1, 10, 2, p.walnutMid);
+    R(x + 4, y + 1, 8, 1, p.goldHi);
+    R(x + 2, y + 5, 12, 1, p.walnutDeep);
+    /* Two glasses and an ashtray on the top. */
+    R(x + 4, y - 1, 2, 3, p.ink);
+    R(x + 4, y - 1, 2, 2, p.glassHi);
+    R(x + 8, y - 1, 2, 3, p.ink);
+    R(x + 8, y - 1, 2, 2, p.glass);
+    R(x + 11, y + 1, 2, 1, p.metalHi);
+    /* Pedestal and foot. */
+    R(x + 6, y + 8, 4, 7, p.ink);
+    R(x + 7, y + 8, 2, 6, p.walnut);
+    R(x + 7, y + 8, 1, 5, p.walnutMid);
+    R(x + 4, y + 15, 8, 2, p.ink);
+    R(x + 5, y + 15, 6, 1, p.metalHi);
+  }
+
+  /* Velvet rope stand: two brass posts and the rope slung between them,
+   * closing the south-east corner off the main aisle. */
+  function ropeStand(R, x, y, p) {
+    var i;
+    for (i = 0; i < 2; i++) {
+      var px = x + 1 + i * 10;
+      /* Post: 4px of brass with a lit left edge, a ball finial and a splayed
+       * base. Round 1 drew it 2px wide and a fresh look could not find it. */
+      R(px, y + 2, 4, 16, p.ink);
+      R(px + 1, y + 3, 2, 14, p.ropePost);
+      R(px + 1, y + 3, 1, 14, p.metalHi);
+      R(px, y, 4, 3, p.ink);
+      R(px + 1, y, 2, 2, p.goldHi);
+      R(px + 1, y + 1, 1, 1, p.goldWhite);
+      R(px - 1, y + 17, 6, 3, p.ink);
+      R(px, y + 18, 4, 1, p.metal);
+      R(px + 1, y + 18, 2, 1, p.metalHi);
+    }
+    /* The rope sags between the two posts. */
+    R(x + 4, y + 4, 8, 3, p.ink);
+    R(x + 4, y + 4, 8, 2, p.ropeVelvet);
+    R(x + 5, y + 6, 6, 2, p.ink);
+    R(x + 5, y + 6, 6, 1, p.ropeVelvet);
+    R(x + 5, y + 4, 6, 1, p.ropeVelvetHi);
+    R(x + 6, y + 6, 4, 1, p.ropeVelvetHi);
+  }
+
   function seatedPatron(R, x, y, p, g) {
     function P(px, py, w, h, color) {
       R(g.mirror ? x + 16 - px - w : x + px, y + py, w, h, color);
@@ -847,6 +1050,9 @@
     var b = prop.bounds;
     if (prop.id === 'barCounter') barCounter(R, p);
     else if (prop.id === 'serviceCabinet') serviceCabinet(R, p);
+    else if (prop.id === 'cocktailTable') cocktailTable(R, b[0], b[1] + 1, p);
+    else if (prop.id === 'ropeStand') ropeStand(R, b[0], b[1], p);
+    else if (prop.id.indexOf('slot') === 0) slotMachine(R, b[0], b[1], p, prop.slotVariant);
     else if (prop.id.indexOf('table') === 0) {
       feltTable(R, b[0], b[1], b[2], p, prop.game);
     } else if (prop.id.indexOf('guest') === 0) {

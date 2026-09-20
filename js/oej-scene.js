@@ -28,6 +28,11 @@
     guestBlackjack: [[11,1]],
     guestRoulette: [[5,5]],
     stoolPoker: [[11,7]],
+    stoolCocktail: [[4,8]],
+    slotWestNorth: [[1,7]],
+    slotWestSouth: [[1,8]],
+    cocktailTable: [[3,8]],
+    ropeStand: [[14,8]],
     barCounter: [[5,4],[6,4],[7,4],[8,4],[9,4],[10,4]],
     serviceCabinet: [[14,2]]
   };
@@ -43,8 +48,8 @@
     'iffffCCCCCCffffi',
     'iffffhfffffffffi',
     'ifffKKKffffffffi',
-    'ifffffffftthfffi',
-    'iffffffffffffffi',
+    'iUffffffftthfffi',
+    'iUfthfffffffffFi',
     'iiiiiiiDDiiiiiii'
   ];
 

@@ -337,8 +337,8 @@
         'iffffCCCCCCffffi', // 4  bancone del casinò
         'iffffhfffffffffi', // 5  Jacques (7,5); avventore della roulette (5,5)
         'ifffKKKffffffffi', // 6  roulette al centro del tappeto (4-6)
-        'ifffffffftthfffi', // 7  poker (9-10), sgabello libero (11)
-        'iffffffffffffffi', // 8  corsia libera: porta -> Hawk (6,8) -> Audrey (13,7)
+        'iUffffffftthfffi', // 7  slot (1), poker (9-10), sgabello libero (11)
+        'iUfthfffffffffFi', // 8  slot (1), tavolino cocktail (3) e suo sgabello (4), cordone (14); corsia libera: porta -> Hawk (6,8) -> Audrey (13,7)
         'iiiiiiiDDiiiiiii'  // 9  porta sud -> vagone del treno
       ],
       doors: {}
