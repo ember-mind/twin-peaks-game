@@ -136,3 +136,4 @@ Character gestures add `character-activity.js`; audited playable scope is now 69
 - 2026-09-19 a572891 main: fresh-critic pass 2 recorded (scores unchanged; gaps are engine + map rows); 1 file mirrored
 - 2026-09-20 — actor contact shadow (indoor maps) merged e31238c: js/retro-authored.js, artifacts/oej-v01/oej-native-golden{,-3x}.png; evidence .gauntlet/actor-shadow (vault only)
 - 2026-09-20 d791924 main: Palmer map-row pass (lead/palmer-rows, 5 new solid cells, right third + seating cluster); 4 files mirrored; .gauntlet/palmer-rows copied to vault
+- 2026-09-20 8f20e6d main: OEJ map-row pass (lead/oej-rows, grid broken, roulette centre, seated patrons; act-3 playthrough 189/189 on main) + critic pass 3 recorded; 7 files mirrored; .gauntlet/oej-rows copied to vault
