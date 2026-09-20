@@ -197,6 +197,12 @@
    * the poker oval read as two green islands adrift on a pink field, which
    * is exactly what the fourth fresh critic called them. */
   var PIT = {x: 56, y: 84, w: 144, h: 48};
+  /* The craps and blackjack tables stand against the north drape, outside the
+   * pit, and the same critic read them as two objects on bare floor. A runner
+   * of the pit's carpet ties them to the gaming zone without moving a single
+   * solid cell: it shows below the craps table, between the two tables and
+   * under the croupier's feet. */
+  var RUNNER = {x: 28, y: 28, w: 184, h: 28};
 
   /* 16px two-value block, with a stepped diamond in the middle of every one.
    * dx / w / h per 2px band, measured from the block's north-west corner. */
@@ -245,6 +251,22 @@
     R(x - 3, y + h + 2, w + 6, 1, p.walnutDeep);
     R(x - 1, y - 1, w + 2, h + 2, p.carpetDeep);
     carpetField(R, p, x, y, x + w, y + h, p.pitField, p.carpet, p.pitWeave, 'ring');
+    /* The step. A lit lip along the north edge and a shadowed one along the
+     * south turn the cord into a raised floor rather than a line drawn on a
+     * flat one, which is what makes the pit read as a place at 1x. */
+    R(x, y, w, 1, p.carpetGlow);
+    R(x, y + h - 1, w, 1, p.carpetDeep);
+  }
+
+  function drawRunner(R, p) {
+    var x = RUNNER.x, y = RUNNER.y, w = RUNNER.w, h = RUNNER.h;
+    R(x - 3, y - 3, w + 6, h + 6, p.ink);
+    R(x - 2, y - 2, w + 4, h + 4, p.goldDeep);
+    R(x - 2, y - 2, w + 4, 1, p.goldMid);
+    R(x - 1, y - 1, w + 2, h + 2, p.carpetDeep);
+    carpetField(R, p, x, y, x + w, y + h, p.pitField, p.carpet, p.pitWeave, 'ring');
+    R(x, y, w, 1, p.carpetGlow);
+    R(x, y + h - 1, w, 1, p.carpetDeep);
   }
 
   function drawCarpet(R, p) {
@@ -257,6 +279,7 @@
      * shadow under them still have to separate from the floor they stand on. */
     R(16, 22, 224, 122, p.carpetDeep);
     carpetField(R, p, 24, 30, 232, 136, p.carpet, p.carpetDark, p.carpetWeave, 'diamond');
+    drawRunner(R, p);
     drawPit(R, p);
     /* Border walk: a plain band inside a gold cord, beaded every 8px so the
      * edge of the carpet reads as trim and not as spare floor. */
