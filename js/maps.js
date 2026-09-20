@@ -332,10 +332,10 @@
       rows: [
         'iiiiiiiiiiiiiiii', // 0
         'iffhfffffffhfffi', // 1  avventori seduti al drappo nord (3,1 e 11,1)
-        'iftttfffffttffUi', // 2  craps lungo (2-4), blackjack (10-11), mobile servizio
-        'iffffffffffffffi', // 3
+        'iftttffffftthfUi', // 2  craps lungo (2-4), blackjack (10-11) col suo sgabello (12), mobile servizio
+        'iffffffffffhfffi', // 3  croupier in piedi davanti al blackjack (11,3)
         'iffffCCCCCCffffi', // 4  bancone del casinò
-        'iffffhfffffffffi', // 5  Jacques (7,5); avventore della roulette (5,5)
+        'iffffhfffffffUfi', // 5  Jacques (7,5); avventore della roulette (5,5); piantana (13,5)
         'ifffKKKffffffffi', // 6  roulette al centro del tappeto (4-6)
         'iUffffffftthfffi', // 7  slot (1), poker (9-10), sgabello libero (11)
         'iUfthfffffffffFi', // 8  slot (1), tavolino cocktail (3) e suo sgabello (4), cordone (14); corsia libera: porta -> Hawk (6,8) -> Audrey (13,7)
