@@ -285,7 +285,11 @@ assert.equal(countPixels(treeBehind, new Set([actorMarker]), [208, 88, 16, 24]),
 const paintWorldBody = functionBody(engineSource, 'paintWorld');
 assert(paintWorldBody.indexOf('GAME.Sprites.drawChar') < paintWorldBody.indexOf('GAME.sprites.drawForegroundStructures'),
   'foreground tree pass must run after actor draw');
-assert(/footY\s*=\s*e\.wy\s*\+\s*TILE/.test(paintWorldBody),
+/* The band scan moved into the shared engine: the engine hands it TILE as the
+ * foot offset, and the scan derives every threshold from wy + that offset. */
+const emberTilemapSource = fs.readFileSync(path.join(__dirname, '..', 'engine', 'ember-tilemap.js'), 'utf8');
+assert(/EMBER\.Tilemap\.paintDepthBands\(entities,\s*TILE,/.test(paintWorldBody) &&
+  /var foot = entities\[i\]\.wy \+ footOffset/.test(emberTilemapSource),
   'forest depth threshold must use actor foot position');
 console.log('ok - town trees occlude actors by foot depth without foreground shadows');
 

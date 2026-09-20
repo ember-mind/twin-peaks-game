@@ -178,7 +178,7 @@ process.on('exit', function () {
   SERVERS.forEach((p) => { try { p.kill(); } catch (e) { /* already gone */ } });
   try { fs.rmSync(TMP, { recursive: true, force: true }); } catch (e) { /* best effort */ }
 });
-const PAGE_DIRS = ['js', 'test', 'assets', 'world', 'narrative'];
+const PAGE_DIRS = ['engine', 'js', 'test', 'assets', 'world', 'narrative'];
 function copyTree(name, mutatePage) {
   const root = path.join(TMP, name);
   fs.mkdirSync(root);

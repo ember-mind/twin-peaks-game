@@ -1,0 +1,275 @@
+{
+  "version": "activity-poses-v01",
+  "note": "Compiled by living-town/content/activity-poses-v01/tools/build-poses.js from living-town/js/lt-appearance.js and tools/pose-frames.js. One row per sheetId, one column per (pose, direction, frame). Cells are the production 24px actor cell, bottom-aligned on the standing sprite ground line.",
+  "cell": 24,
+  "atlas": 336,
+  "columns": 13,
+  "rows": [
+    {
+      "sheetId": "look_teal_bob",
+      "y": 0
+    },
+    {
+      "sheetId": "look_ochre_short",
+      "y": 24
+    },
+    {
+      "sheetId": "look_plum_long",
+      "y": 48
+    },
+    {
+      "sheetId": "look_moss_neat",
+      "y": 72
+    },
+    {
+      "sheetId": "look_rust_bun",
+      "y": 96
+    },
+    {
+      "sheetId": "look_slate_short",
+      "y": 120
+    },
+    {
+      "sheetId": "look_teal_bob_work",
+      "y": 144
+    },
+    {
+      "sheetId": "look_ochre_short_work",
+      "y": 168
+    },
+    {
+      "sheetId": "look_plum_long_work",
+      "y": 192
+    },
+    {
+      "sheetId": "look_moss_neat_work",
+      "y": 216
+    },
+    {
+      "sheetId": "look_rust_bun_work",
+      "y": 240
+    },
+    {
+      "sheetId": "look_slate_short_work",
+      "y": 264
+    }
+  ],
+  "frames": [
+    {
+      "poseId": "seated",
+      "dir": "down",
+      "frame": 0,
+      "column": 0,
+      "x": 0,
+      "cell": 24
+    },
+    {
+      "poseId": "seated",
+      "dir": "right",
+      "frame": 0,
+      "column": 1,
+      "x": 24,
+      "cell": 24
+    },
+    {
+      "poseId": "reading",
+      "dir": "down",
+      "frame": 0,
+      "column": 2,
+      "x": 48,
+      "cell": 24
+    },
+    {
+      "poseId": "reading",
+      "dir": "down",
+      "frame": 1,
+      "column": 3,
+      "x": 72,
+      "cell": 24
+    },
+    {
+      "poseId": "work_counter",
+      "dir": "down",
+      "frame": 0,
+      "column": 4,
+      "x": 96,
+      "cell": 24
+    },
+    {
+      "poseId": "work_counter",
+      "dir": "down",
+      "frame": 1,
+      "column": 5,
+      "x": 120,
+      "cell": 24
+    },
+    {
+      "poseId": "work_counter",
+      "dir": "down",
+      "frame": 2,
+      "column": 6,
+      "x": 144,
+      "cell": 24
+    },
+    {
+      "poseId": "unpacking",
+      "dir": "down",
+      "frame": 0,
+      "column": 7,
+      "x": 168,
+      "cell": 24
+    },
+    {
+      "poseId": "sleeping",
+      "dir": "right",
+      "frame": 0,
+      "column": 8,
+      "x": 192,
+      "cell": 24
+    },
+    {
+      "poseId": "talking",
+      "dir": "down",
+      "frame": 0,
+      "column": 9,
+      "x": 216,
+      "cell": 24
+    },
+    {
+      "poseId": "talking",
+      "dir": "down",
+      "frame": 1,
+      "column": 10,
+      "x": 240,
+      "cell": 24
+    },
+    {
+      "poseId": "talking",
+      "dir": "right",
+      "frame": 0,
+      "column": 11,
+      "x": 264,
+      "cell": 24
+    },
+    {
+      "poseId": "talking",
+      "dir": "right",
+      "frame": 1,
+      "column": 12,
+      "x": 288,
+      "cell": 24
+    }
+  ],
+  "poses": [
+    {
+      "id": "seated",
+      "dirs": [
+        "down",
+        "right"
+      ],
+      "frames": 1,
+      "frameMs": 0,
+      "pivot": [
+        12,
+        24
+      ],
+      "box": [
+        16,
+        21
+      ],
+      "shadow": true,
+      "reads": "a body folded onto a seat: narrow chest over a wide lap, toes below it"
+    },
+    {
+      "id": "reading",
+      "dirs": [
+        "down"
+      ],
+      "frames": 2,
+      "frameMs": 900,
+      "pivot": [
+        12,
+        24
+      ],
+      "box": [
+        16,
+        24
+      ],
+      "shadow": true,
+      "reads": "standing, both hands holding an open book across the chest"
+    },
+    {
+      "id": "work_counter",
+      "dirs": [
+        "down"
+      ],
+      "frames": 3,
+      "frameMs": 320,
+      "pivot": [
+        12,
+        24
+      ],
+      "box": [
+        24,
+        24
+      ],
+      "shadow": true,
+      "reads": "standing, a rag swinging from one hand outside the silhouette"
+    },
+    {
+      "id": "unpacking",
+      "dirs": [
+        "down"
+      ],
+      "frames": 1,
+      "frameMs": 0,
+      "pivot": [
+        12,
+        24
+      ],
+      "box": [
+        24,
+        20
+      ],
+      "shadow": true,
+      "reads": "stooped, both arms hanging clear of the body down to hip height"
+    },
+    {
+      "id": "sleeping",
+      "dirs": [
+        "right"
+      ],
+      "frames": 1,
+      "frameMs": 0,
+      "pivot": [
+        12,
+        24
+      ],
+      "box": [
+        24,
+        12
+      ],
+      "shadow": false,
+      "reads": "lying on its side, head on a pillow, blanket in the wearer own colour"
+    },
+    {
+      "id": "talking",
+      "dirs": [
+        "down",
+        "right"
+      ],
+      "frames": 2,
+      "frameMs": 430,
+      "pivot": [
+        12,
+        24
+      ],
+      "box": [
+        24,
+        24
+      ],
+      "shadow": true,
+      "reads": "standing, one forearm lifting and falling clear of the silhouette"
+    }
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "version": "everyday-props-v01",
+  "entry": "living-town/content/everyday-props-v01/lt-everyday-props.js",
+  "call": "LT.EverydayProps.draw(g, typeId, state, x, y, { palette, kit })",
+  "types": [
+    {
+      "typeId": "book_used",
+      "states": [
+        "closed",
+        "open"
+      ],
+      "frames": {
+        "closed": {
+          "w": 14,
+          "h": 7,
+          "pivot": [
+            7,
+            7
+          ],
+          "shadow": [
+            1,
+            7,
+            12
+          ]
+        },
+        "open": {
+          "w": 19,
+          "h": 8,
+          "pivot": [
+            9,
+            8
+          ],
+          "shadow": [
+            1,
+            8,
+            17
+          ]
+        }
+      },
+      "footprint": {
+        "kind": "surface",
+        "cells": []
+      },
+      "placement": "Rests on a surface or is carried. On a table it goes after the table and before whoever is sitting at it."
+    },
+    {
+      "typeId": "food_parcel",
+      "states": [
+        "sealed",
+        "open",
+        "empty"
+      ],
+      "frames": {
+        "sealed": {
+          "w": 13,
+          "h": 16,
+          "pivot": [
+            6,
+            16
+          ],
+          "shadow": [
+            1,
+            16,
+            11
+          ]
+        },
+        "open": {
+          "w": 13,
+          "h": 17,
+          "pivot": [
+            6,
+            17
+          ],
+          "shadow": [
+            1,
+            17,
+            11
+          ]
+        },
+        "empty": {
+          "w": 13,
+          "h": 11,
+          "pivot": [
+            6,
+            11
+          ],
+          "shadow": [
+            1,
+            11,
+            11
+          ]
+        }
+      },
+      "footprint": {
+        "kind": "surface",
+        "cells": []
+      },
+      "placement": "Rests on a counter, a table or the floor. All three states share the pivot and the same 13px width; `open` stands a row taller because a loaf sticks out of it and `empty` five rows shorter because the bag has slumped. Nothing moves sideways between states."
+    },
+    {
+      "typeId": "umbrella_worn",
+      "states": [
+        "closed",
+        "open"
+      ],
+      "frames": {
+        "closed": {
+          "w": 5,
+          "h": 24,
+          "pivot": [
+            2,
+            24
+          ],
+          "shadow": [
+            0,
+            24,
+            5
+          ]
+        },
+        "open": {
+          "w": 24,
+          "h": 20,
+          "pivot": [
+            11,
+            20
+          ],
+          "shadow": [
+            7,
+            20,
+            9
+          ]
+        }
+      },
+      "footprint": {
+        "kind": "soft",
+        "cells": [
+          [
+            0,
+            0
+          ]
+        ]
+      },
+      "placement": "Stands against a wall or on a rack when closed, stands open on the floor to dry. Both pivots are the handle on the ground, so the handle does not jump between states. `open` is 13 columns wider to the left of the pivot than to the right of it: it leans over what is beside it and must be painted after it."
+    },
+    {
+      "typeId": "bicycle_old",
+      "states": [
+        "parked",
+        "damaged"
+      ],
+      "frames": {
+        "parked": {
+          "w": 30,
+          "h": 17,
+          "pivot": [
+            14,
+            17
+          ],
+          "shadow": [
+            0,
+            17,
+            30
+          ]
+        },
+        "damaged": {
+          "w": 30,
+          "h": 17,
+          "pivot": [
+            14,
+            17
+          ],
+          "shadow": [
+            0,
+            17,
+            30
+          ]
+        }
+      },
+      "footprint": {
+        "kind": "physical",
+        "cells": [
+          [
+            -1,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ]
+        ]
+      },
+      "placement": "Stands on the ground, both wheels on the same floor line, nobody on it. Its picture is about two tiles wide; the three solid cells are the ground it blocks, not the pixels it covers. Bars and basket lean a row above the tile above the footprint and may cross a wall: place it clear of one."
+    }
+  ]
+}

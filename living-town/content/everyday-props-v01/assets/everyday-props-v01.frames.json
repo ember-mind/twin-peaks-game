@@ -1,0 +1,117 @@
+{
+  "version": "everyday-props-v01",
+  "note": "Baked by living-town/content/everyday-props-v01/tools/capture-gallery.js from the same draw calls the renderer makes. Contact shadows are NOT baked: draw() lays them down through kit.contactShadow at paint time.",
+  "material": "lt_cafe",
+  "width": 171,
+  "height": 26,
+  "frames": [
+    {
+      "typeId": "book_used",
+      "state": "closed",
+      "x": 1,
+      "y": 1,
+      "w": 14,
+      "h": 7,
+      "pivot": [
+        7,
+        7
+      ]
+    },
+    {
+      "typeId": "book_used",
+      "state": "open",
+      "x": 16,
+      "y": 1,
+      "w": 19,
+      "h": 8,
+      "pivot": [
+        9,
+        8
+      ]
+    },
+    {
+      "typeId": "food_parcel",
+      "state": "sealed",
+      "x": 36,
+      "y": 1,
+      "w": 13,
+      "h": 16,
+      "pivot": [
+        6,
+        16
+      ]
+    },
+    {
+      "typeId": "food_parcel",
+      "state": "open",
+      "x": 50,
+      "y": 1,
+      "w": 13,
+      "h": 17,
+      "pivot": [
+        6,
+        17
+      ]
+    },
+    {
+      "typeId": "food_parcel",
+      "state": "empty",
+      "x": 64,
+      "y": 1,
+      "w": 13,
+      "h": 11,
+      "pivot": [
+        6,
+        11
+      ]
+    },
+    {
+      "typeId": "umbrella_worn",
+      "state": "closed",
+      "x": 78,
+      "y": 1,
+      "w": 5,
+      "h": 24,
+      "pivot": [
+        2,
+        24
+      ]
+    },
+    {
+      "typeId": "umbrella_worn",
+      "state": "open",
+      "x": 84,
+      "y": 1,
+      "w": 24,
+      "h": 20,
+      "pivot": [
+        11,
+        20
+      ]
+    },
+    {
+      "typeId": "bicycle_old",
+      "state": "parked",
+      "x": 109,
+      "y": 1,
+      "w": 30,
+      "h": 17,
+      "pivot": [
+        14,
+        17
+      ]
+    },
+    {
+      "typeId": "bicycle_old",
+      "state": "damaged",
+      "x": 140,
+      "y": 1,
+      "w": 30,
+      "h": 17,
+      "pivot": [
+        14,
+        17
+      ]
+    }
+  ]
+}

@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Town places v01 — Living Town</title>
+<style>
+  :root { --ink:#0e1013; --panel:#161a20; --edge:#242a33; --text:#d8dde4; --dim:#8a94a2;
+          --gold:#d7b45c; --red:#c2706e; --mono: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--ink); color:var(--text);
+         font:15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+  header { padding:24px 26px 6px; }
+  header h1 { margin:0; font-size:20px; font-weight:600; }
+  header p { margin:5px 0 0; color:var(--dim); font-size:14px; }
+  main { padding:10px 26px 60px; display:grid; gap:20px; max-width:1180px; }
+  .warn { border:1px solid var(--red); border-left-width:4px; border-radius:8px; padding:11px 14px;
+          color:#e7bdbc; font-size:14px; background:#1a1315; }
+  .warn b { color:#f0d2d1; }
+  section { background:var(--panel); border:1px solid var(--edge); border-radius:10px; padding:16px 18px; }
+  section > h2 { margin:0 0 4px; font-size:12px; font-weight:700; letter-spacing:.1em;
+                 text-transform:uppercase; color:var(--dim); }
+  section > p.note { margin:0 0 14px; color:var(--dim); font-size:13px; }
+  canvas { image-rendering:pixelated; display:block; background:#0a0c0f; }
+  .frames { display:grid; gap:16px; grid-template-columns:repeat(auto-fill, minmax(268px, 1fr)); }
+  .frame h3 { margin:0 0 6px; font:600 12px/1.3 var(--mono); color:var(--gold); }
+  .frame p { margin:6px 0 0; font:11px/1.4 var(--mono); color:var(--dim); }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th, td { text-align:left; padding:6px 9px; border-bottom:1px solid #1c222a; vertical-align:top; }
+  th { color:var(--dim); font:600 11px/1.4 var(--mono); text-transform:uppercase; letter-spacing:.06em; }
+  td.k { font:12px/1.5 var(--mono); color:var(--gold); white-space:nowrap; }
+  td.n { font:12px/1.5 var(--mono); color:var(--dim); white-space:nowrap; }
+  #status { font:12px/1.4 var(--mono); color:var(--dim); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Town places v01 — the park, the street and the homes</h1>
+  <p>Painted with the production interior kit onto the native 256×192 canvas, over the
+     collision rows in <code>lt-world.js</code>, which are not touched.</p>
+</header>
+
+<main>
+  <div class="warn">
+    <b>This is a graphics preview, not a behaviour demo.</b> Nothing here is wired into the view.
+    The people in these frames stand where this page put them; no inhabitant decided anything,
+    and no simulation is running. <b>Collision is the rows and only the rows</b> — this package
+    paints them and never changes them.
+  </div>
+
+  <section>
+    <h2>Every place, native 256×192</h2>
+    <p class="note">The same pipeline the view runs: ground layer, then people through the shared
+      depth-band pass with the foreground layer between them, then the day's light over the finished
+      frame. The café is drawn by <code>lt-cafe-scene.js</code> through the production painter, as the
+      bar these are measured against.</p>
+    <div class="frames" id="native"></div>
+  </section>
+
+  <section>
+    <h2>The same frames at ×3</h2>
+    <p class="note">Nearest-neighbour, for reading the pixels. Nothing is resampled at native size.</p>
+    <div class="frames" id="zoom"></div>
+  </section>
+
+  <section>
+    <h2>Lamps</h2>
+    <p class="note">Day and night of the same place. Day/night colour is <code>LT.DayLight</code>'s;
+      the only thing this package reads the minute for is whether a lantern is burning and whether a
+      window shows a lit sky.</p>
+    <div class="frames" id="hours"></div>
+  </section>
+
+  <section>
+    <h2>Where a person can walk</h2>
+    <p class="note">The collision rows drawn over the painted frame: red is solid, nothing is green.
+      This is the check that the art and <code>rows</code> say the same thing, in a picture.</p>
+    <div class="frames" id="collision"></div>
+  </section>
+
+  <section>
+    <h2>Plan</h2>
+    <p class="note">Read out of <code>LT.TownPlaces.plan()</code> at load, so it cannot drift from what
+      the renderer draws.</p>
+    <table id="manifest"><thead><tr>
+      <th>place</th><th>material</th><th>pieces</th><th>foreground</th><th>solid cells claimed</th>
+    </tr></thead><tbody></tbody></table>
+  </section>
+
+  <section>
+    <h2>Renderer</h2>
+    <p id="status">loading…</p>
+  </section>
+</main>
+
+<!-- The same scripts, in the same order, that living-town/index.html loads. -->
+<script src="../../../engine/ember-math.js"></script>
+<script src="../../../engine/ember-grid.js"></script>
+<script src="../../../engine/ember-camera.js"></script>
+<script src="../../../engine/ember-tilemap.js"></script>
+<script src="../../../engine/ember-viewport.js"></script>
+<script src="../../js/lt-util.js"></script>
+<script src="../../js/lt-names.js"></script>
+<script src="../../js/lt-appearance.js"></script>
+<script src="../../js/lt-production-host.js"></script>
+<script src="../../../js/retro-authored.js"></script>
+<script src="../../js/lt-world.js"></script>
+<script src="../../js/lt-cafe-scene.js"></script>
+<script src="../activity-poses-v01/lt-daylight.js"></script>
+<script>LT.ProductionHost.attach();</script>
+<script src="lt-town-places.js"></script>
+<script>
+(function () {
+  var VW = 256, VH = 192, T = 16;
+  var LOOKS = LT.Appearance.ORDER;
+
+  /* Who stands where, per frame. Tiles only, all of them walkable in the rows:
+     this page places people, nothing else does. */
+  var FRAMES = [
+    { id: 'cafe', title: 'cafe — the bar', minute: 780, focus: [7, 5],
+      people: [[3, 2, 'down', 1], [4, 4, 'up', 3], [9, 5, 'left', 5]] },
+    { id: 'park', title: 'park', minute: 660, focus: [7, 4],
+      people: [[4, 3, 'right', 2], [11, 3, 'left', 6], [7, 7, 'up', 0]] },
+    { id: 'street', title: 'street', minute: 600, focus: [9, 4],
+      people: [[9, 4, 'right', 4], [4, 3, 'down', 7], [15, 5, 'left', 1]] },
+    { id: 'flat_a', title: 'flat_a — home', minute: 540, focus: [5, 4],
+      people: [[5, 3, 'up', 0], [8, 4, 'left', 2]] },
+    { id: 'flat_b', title: 'flat_b — home', minute: 480, focus: [4, 3],
+      people: [[4, 3, 'up', 3]] },
+    { id: 'flat_c', title: 'flat_c — home', minute: 900, focus: [5, 3],
+      people: [[6, 3, 'left', 5], [3, 4, 'down', 8]] },
+    { id: 'flat_d', title: 'flat_d — home', minute: 1020, focus: [4, 4],
+      people: [[1, 3, 'right', 6]] },
+    { id: 'flat_e', title: 'flat_e — home', minute: 960, focus: [3, 3],
+      people: [[3, 3, 'down', 9]] }
+  ];
+
+  var HOURS = [
+    { id: 'street', minute: 600, label: 'street 10:00' },
+    { id: 'street', minute: 1320, label: 'street 22:00' },
+    { id: 'flat_c', minute: 720, label: 'flat_c 12:00' },
+    { id: 'flat_c', minute: 1350, label: 'flat_c 22:30' }
+  ];
+
+  function canvas(w, h) {
+    var c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    var g = c.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    return c;
+  }
+
+  function camera(loc, focus) {
+    var cam = EMBER.Camera.centerOn(focus[0] * T, focus[1] * T, {
+      anchorX: T / 2, anchorY: T / 2,
+      worldW: loc.rows[0].length * T, worldH: loc.rows.length * T, viewW: VW, viewH: VH
+    });
+    return { x: Math.round(cam.x), y: Math.round(cam.y) };
+  }
+
+  function entities(spec) {
+    return EMBER.Tilemap.depthSort((spec.people || []).map(function (p, n) {
+      return { wx: p[0] * T, wy: p[1] * T, dir: p[2], look: LOOKS[p[3] % LOOKS.length], n: n };
+    }));
+  }
+
+  function drawPerson(g, e, cx, cy, mapId) {
+    GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, LT.ProductionHost.looks[e.look], e.dir,
+      0, 1, false, false, 0, { mapId: mapId, wx: e.wx, wy: e.wy, npcId: e.look, characterLife: null });
+  }
+
+  /* Exactly the pipeline lt-view.js runs, with this package's two calls in
+     the place the placeholder painter is in today. */
+  function render(spec) {
+    var loc = LT.World.LOCATIONS[spec.id], rows = loc.rows;
+    var c = canvas(VW, VH), g = c.getContext('2d');
+    var cam = camera(loc, spec.focus || [Math.floor(rows[0].length / 2), Math.floor(rows.length / 2)]);
+    var ents = entities(spec), opts = { minute: spec.minute };
+    var light = LT.DayLight.at(spec.minute);
+    if (spec.id === 'cafe') {
+      var scene = { id: 'lt_cafe', indoor: true, rows: rows, width: rows[0].length, height: rows.length };
+      var kit = GAME.Retro2D.interiorKit, base = kit.materials.lt_cafe;
+      kit.materials.lt_cafe = LT.DayLight.material(base, light);
+      try {
+        GAME.sprites.drawStructures(g, scene, cam.x, cam.y, { mapId: 'lt_cafe', indoor: true, viewportWidth: VW, viewportHeight: VH, t: 0 });
+      } finally { kit.materials.lt_cafe = base; }
+      EMBER.Tilemap.paintDepthBands(ents, T, function (e) { drawPerson(g, e, cam.x, cam.y, 'lt_cafe'); },
+        function (footY, nextFootY, after) {
+          if (after < 0) return;
+          GAME.sprites.drawForegroundStructures(g, scene, cam.x, cam.y, {
+            mapId: 'lt_cafe', indoor: true, viewportWidth: VW, viewportHeight: VH,
+            forestDepthMin: footY, forestDepthMax: nextFootY });
+        });
+    } else {
+      var mapId = LT.TownPlaces.materialFor(spec.id);
+      if (LT.TownPlaces.draw(g, spec.id, rows, cam.x, cam.y, opts) === false) throw new Error('no painter for ' + spec.id);
+      EMBER.Tilemap.paintDepthBands(ents, T, function (e) { drawPerson(g, e, cam.x, cam.y, mapId); },
+        function (footY, nextFootY, after) {
+          if (after < 0) return;
+          LT.TownPlaces.drawForeground(g, spec.id, rows, cam.x, cam.y, footY, nextFootY, opts);
+        });
+    }
+    LT.DayLight.apply(g, light, { width: VW, height: VH });
+    return { canvas: c, cam: cam, loc: loc };
+  }
+
+  function zoom(src, k) {
+    var c = canvas(src.width * k, src.height * k), g = c.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    g.drawImage(src, 0, 0, src.width, src.height, 0, 0, c.width, c.height);
+    return c;
+  }
+
+  /* The rows, over the frame: every solid cell marked. Evidence, not art. */
+  function collisionOverlay(spec) {
+    var made = render(spec), loc = made.loc, g = made.canvas.getContext('2d');
+    for (var y = 0; y < loc.rows.length; y++) for (var x = 0; x < loc.rows[y].length; x++) {
+      if (!LT.World.isSolid(loc.rows[y].charAt(x))) continue;
+      var sx = x * T - made.cam.x, sy = y * T - made.cam.y;
+      g.fillStyle = 'rgba(224,60,60,.42)';
+      g.fillRect(sx, sy, T, T);
+      g.fillStyle = 'rgba(255,190,190,.9)';
+      g.fillRect(sx, sy, T, 1); g.fillRect(sx, sy + T - 1, T, 1);
+      g.fillRect(sx, sy, 1, T); g.fillRect(sx + T - 1, sy, 1, T);
+    }
+    return made.canvas;
+  }
+
+  function panel(host, title, c, note) {
+    var box = document.createElement('div');
+    box.className = 'frame';
+    var h = document.createElement('h3'); h.textContent = title; box.appendChild(h);
+    box.appendChild(c);
+    if (note) { var p = document.createElement('p'); p.textContent = note; box.appendChild(p); }
+    host.appendChild(box);
+    return c;
+  }
+
+  var G = window.GALLERY = { frames: {}, ready: function () { return !!LT.ProductionHost.ready; } };
+
+  G.build = function () {
+    var native = document.getElementById('native'), zoomed = document.getElementById('zoom');
+    var hours = document.getElementById('hours'), coll = document.getElementById('collision');
+    native.innerHTML = zoomed.innerHTML = hours.innerHTML = coll.innerHTML = '';
+    G.frames = {};
+    FRAMES.forEach(function (spec) {
+      var c = render(spec).canvas;
+      G.frames[spec.id] = c;
+      panel(native, spec.title, c, 'minute ' + spec.minute);
+      panel(zoomed, spec.title + ' ×3', zoom(c, 3));
+    });
+    HOURS.forEach(function (h, n) {
+      var base = FRAMES.filter(function (f) { return f.id === h.id; })[0];
+      var spec = { id: h.id, minute: h.minute, focus: base.focus, people: base.people };
+      var c = render(spec).canvas;
+      G.frames['hour-' + n] = c;
+      panel(hours, h.label, c);
+    });
+    ['park', 'street', 'flat_a'].forEach(function (id) {
+      var base = FRAMES.filter(function (f) { return f.id === id; })[0];
+      var c = collisionOverlay(base);
+      G.frames['collision-' + id] = c;
+      panel(coll, id + ' — rows over art', c);
+    });
+
+    var body = document.querySelector('#manifest tbody');
+    body.innerHTML = '';
+    G.manifestData = ['park', 'street', 'flat_a', 'flat_b', 'flat_c', 'flat_d', 'flat_e'].map(function (id) {
+      var rows = LT.World.LOCATIONS[id].rows, plan = LT.TownPlaces.plan(id, rows);
+      var claims = LT.TownPlaces.claims(id, rows);
+      var row = { id: id, material: LT.TownPlaces.materialFor(id), pieces: plan.pieces.length,
+        foreground: plan.pieces.filter(function (p) { return p.foreground; }).length,
+        claimed: Object.keys(claims).length,
+        kinds: plan.pieces.map(function (p) { return p.kind; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).sort() };
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td class="k">' + id + '</td><td class="n">' + row.material + '</td><td class="n">' +
+        row.pieces + '</td><td class="n">' + row.foreground + '</td><td class="n">' + row.claimed + '</td>';
+      body.appendChild(tr);
+      return row;
+    });
+    document.getElementById('status').textContent =
+      'production atlas ' + (LT.ProductionHost.ready ? 'decoded' : 'NOT decoded') +
+      ' · kit ' + (GAME.Retro2D && GAME.Retro2D.authored ? 'authored' : 'missing') +
+      ' · materials ' + Object.keys(LT.TownPlaces.MATERIALS).join(' ');
+    return true;
+  };
+
+  G.png = function (key, scale) {
+    var c = G.frames[key];
+    if (!c) throw new Error('no frame ' + key);
+    return (scale && scale !== 1 ? zoom(c, scale) : c).toDataURL('image/png');
+  };
+
+  G.manifest = function () {
+    return JSON.stringify({
+      version: LT.TownPlaces.VERSION,
+      entry: { draw: 'LT.TownPlaces.draw(g, locationId, rows, camX, camY, opts)',
+               foreground: 'LT.TownPlaces.drawForeground(g, locationId, rows, camX, camY, footMin, footMax, opts)' },
+      materials: Object.keys(LT.TownPlaces.MATERIALS).sort(),
+      places: G.manifestData,
+      frames: FRAMES.map(function (f) { return { id: f.id, minute: f.minute, people: f.people.length }; })
+    }, null, 2);
+  };
+
+  /* Art and rows, checked in the browser too, so the gallery cannot show a
+     frame the Node test would reject. */
+  G.agreement = function () {
+    var bad = [];
+    ['park', 'street', 'flat_a', 'flat_b', 'flat_c', 'flat_d', 'flat_e'].forEach(function (id) {
+      var rows = LT.World.LOCATIONS[id].rows, claims = LT.TownPlaces.claims(id, rows);
+      for (var y = 0; y < rows.length; y++) for (var x = 0; x < rows[y].length; x++) {
+        var solid = LT.World.isSolid(rows[y].charAt(x)), kind = claims[x + ',' + y];
+        if (solid && !kind) bad.push(id + ' ' + x + ',' + y + ' solid but unpainted');
+        if (kind && !solid && !LT.TownPlaces.WALKABLE_KINDS[kind]) {
+          bad.push(id + ' ' + x + ',' + y + ' painted as ' + kind + ' but walkable');
+        }
+      }
+    });
+    return JSON.stringify(bad);
+  };
+
+  function boot() {
+    if (!LT.ProductionHost.ready) { setTimeout(boot, 120); return; }
+    G.build();
+  }
+  boot();
+})();
+</script>
+</body>
+</html>

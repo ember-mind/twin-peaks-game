@@ -28,7 +28,7 @@ const repoBefore = WATCHED.map((rel) => fs.readFileSync(path.join(REPO, rel)));
 const FIXTURES = [];
 function makeFixture() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'tp-props-changeset-'));
-  for (const d of ['js', 'test', 'world', 'narrative', 'assets', 'tools']) fs.cpSync(path.join(REPO, d), path.join(root, d), { recursive: true });
+  for (const d of ['engine', 'js', 'test', 'world', 'narrative', 'assets', 'tools']) fs.cpSync(path.join(REPO, d), path.join(root, d), { recursive: true });
   fs.copyFileSync(path.join(REPO, 'index.html'), path.join(root, 'index.html'));
   FIXTURES.push(root);
   return root;

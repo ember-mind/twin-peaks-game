@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Activity poses v01 — Living Town</title>
+<style>
+  :root {
+    --ink: #0e1013; --panel: #161a20; --edge: #242a33;
+    --text: #d8dde4; --dim: #8a94a2; --gold: #d7b45c; --red: #c2706e;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ink); color: var(--text);
+         font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+  header { padding: 24px 26px 6px; }
+  header h1 { margin: 0; font-size: 20px; font-weight: 600; }
+  header p { margin: 5px 0 0; color: var(--dim); font-size: 14px; }
+  main { padding: 10px 26px 60px; display: grid; gap: 20px; max-width: 1240px; }
+  .warn { border: 1px solid var(--red); border-left-width: 4px; border-radius: 8px;
+          padding: 11px 14px; color: #e7bdbc; font-size: 14px; background: #1a1315; }
+  .warn b { color: #f0d2d1; }
+  section { background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 16px 18px; }
+  section > h2 { margin: 0 0 4px; font-size: 12px; font-weight: 700; letter-spacing: .1em;
+                 text-transform: uppercase; color: var(--dim); }
+  section > p.note { margin: 0 0 14px; color: var(--dim); font-size: 13px; }
+  canvas { image-rendering: pixelated; display: block; background: #0a0c0f; }
+  .rows { display: grid; gap: 14px; }
+  .strip h3 { margin: 0 0 7px; font: 600 13px/1.3 var(--mono); }
+  .pair { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+  .pair .lab { font: 10px/1 var(--mono); color: var(--dim); display: block; margin-bottom: 5px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 9px; border-bottom: 1px solid #1c222a; vertical-align: top; }
+  th { color: var(--dim); font: 600 11px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .06em; }
+  td.k { font: 12px/1.5 var(--mono); color: var(--gold); white-space: nowrap; }
+  td.n { font: 12px/1.5 var(--mono); color: var(--dim); white-space: nowrap; }
+  #status { font: 12px/1.4 var(--mono); color: var(--dim); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Activity poses v01 — what an inhabitant is doing, and what hour it is</h1>
+  <p>The production 24px actor cell, Café Meridiana's own material, the native 256×192 canvas.</p>
+</header>
+
+<main>
+  <div class="warn">
+    <b>This is a graphics preview, not a behaviour demo.</b> Every pose below is drawn because this
+    page asked for it by pose id. No inhabitant chooses a pose, no action sets one, and nothing here
+    reads or writes the simulation. Wiring a pose to an activity is <b>not implemented</b>.
+  </div>
+
+  <section>
+    <h2>Every pose, every frame, one look</h2>
+    <p class="note">Left: native scale, one canvas pixel per game pixel, on Café Meridiana's floor.
+      Right: the same canvas at ×5, nearest-neighbour. The standing walk-atlas sprite opens each row
+      for comparison — same proportions, same outline, same palette slots.</p>
+    <div class="rows" id="specimens"></div>
+  </section>
+
+  <section>
+    <h2>The same pose, all six looks and their apron variants</h2>
+    <p class="note">A pose has to work for every generated inhabitant, in that inhabitant's own
+      colours. Top row: the six base looks. Bottom row: the same six in the apron the view puts on
+      during a shift.</p>
+    <div class="rows" id="looks"></div>
+  </section>
+
+  <section>
+    <h2>In the café, at native size</h2>
+    <p class="note">Café Meridiana as <code>lt-cafe-scene.js</code> arranges it, painted by the
+      production painter through the shared depth-band pass, with people posed in it. No zoom.</p>
+    <div class="rows" id="cafe"></div>
+  </section>
+
+  <section>
+    <h2>The same room at four minutes of the day</h2>
+    <p class="note">One room, one arrangement, four minutes. The window glass comes from
+      <code>LT.DayLight.at(minute)</code> before the room is painted; the frame is then tinted by
+      <code>LT.DayLight.apply</code>. Nothing is blurred, resampled or scaled.</p>
+    <div class="rows" id="hours"></div>
+  </section>
+
+  <section>
+    <h2>The day, minute by minute</h2>
+    <p class="note">Every minute of the day as a one-pixel column: window glass on top, the ambient
+      tint under it, the lamp strength as a bar at the bottom. A jump between two adjacent minutes
+      would be a visible seam in this strip.</p>
+    <div class="rows" id="ramp"></div>
+  </section>
+
+  <section>
+    <h2>Pose table</h2>
+    <p class="note">Read out of <code>LT.ActivityPoses.POSES</code> at load: this table cannot drift
+      from what the runtime uses.</p>
+    <table id="table"><thead><tr>
+      <th>pose id</th><th>directions</th><th>frames</th><th>frame ms</th><th>pivot</th><th>box</th><th>shadow</th><th>reads as</th>
+    </tr></thead><tbody></tbody></table>
+  </section>
+
+  <section>
+    <h2>Renderer</h2>
+    <p id="status">loading…</p>
+  </section>
+</main>
+
+<!-- Ember Engine, the production renderer, and Living Town's content for it:
+     the same scripts and the same order living-town/index.html loads. -->
+<script src="../../../engine/ember-math.js"></script>
+<script src="../../../engine/ember-grid.js"></script>
+<script src="../../../engine/ember-camera.js"></script>
+<script src="../../../engine/ember-tilemap.js"></script>
+<script src="../../../engine/ember-viewport.js"></script>
+<script src="../../js/lt-util.js"></script>
+<script src="../../js/lt-names.js"></script>
+<script src="../../js/lt-appearance.js"></script>
+<script src="../../js/lt-production-host.js"></script>
+<script src="../../../js/retro-authored.js"></script>
+<script src="../../js/lt-world.js"></script>
+<script src="../../js/lt-cafe-scene.js"></script>
+<script>LT.ProductionHost.attach();</script>
+<script src="activity-poses.table.js"></script>
+<script src="lt-activity-poses.js"></script>
+<script src="lt-daylight.js"></script>
+<script>
+(function () {
+  var AP = LT.ActivityPoses, DL = LT.DayLight;
+  var KIT = GAME.Retro2D.interiorKit, P = KIT.materials.lt_cafe;
+  var T = 16, VW = 256, VH = 192;
+  var LOOKS = LT.Appearance.BASE_IDS;
+
+  function canvas(w, h, scale) {
+    var c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    c.style.width = (w * scale) + 'px'; c.style.height = (h * scale) + 'px';
+    return c;
+  }
+  function ctx2d(c) { var g = c.getContext('2d'); g.imageSmoothingEnabled = false; return g; }
+  /* A zoom for a capture is real pixels, not a CSS size: nearest-neighbour onto
+   * a bigger canvas, so the file on disk is what the reader sees. */
+  function upscale(src, z) {
+    if (z === 1) return src;
+    var c = document.createElement('canvas');
+    c.width = src.width * z; c.height = src.height * z;
+    var g = c.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    g.drawImage(src, 0, 0, c.width, c.height);
+    return c;
+  }
+  function twice(paint, w, h, zoom) {
+    var wrap = document.createElement('div'); wrap.className = 'pair';
+    [['1×', 1], ['×' + zoom, zoom]].forEach(function (s) {
+      var box = document.createElement('div');
+      var lab = document.createElement('span'); lab.className = 'lab'; lab.textContent = s[0];
+      var c = canvas(w, h, 1);
+      paint(ctx2d(c));
+      var out = upscale(c, s[1]);
+      out.style.imageRendering = 'pixelated';
+      box.appendChild(lab); box.appendChild(out); wrap.appendChild(box);
+    });
+    return wrap;
+  }
+  function strip(host, title, paint, w, h, zoom) {
+    var box = document.createElement('div'); box.className = 'strip';
+    var head = document.createElement('h3'); head.textContent = title;
+    box.appendChild(head); box.appendChild(twice(paint, w, h, zoom));
+    host.appendChild(box);
+  }
+
+  function floor(g, w, h) {
+    g.fillStyle = P.woodDark; g.fillRect(0, 0, w, h);
+    KIT.plankFloor(g, 0, 0, 0, 0, w, h, P);
+    g.fillStyle = 'rgba(37,40,43,.20)'; g.fillRect(0, 0, w, Math.max(0, h - 40));
+  }
+  /* A person standing, drawn by the production atlas renderer, for scale. */
+  function standing(g, sheetId, dir, x, y) {
+    if (!LT.ProductionHost.ready) return;
+    GAME.Sprites.drawChar(g, x, y, LT.ProductionHost.looks[sheetId], dir, 0, 1, false, false, 0,
+      { mapId: 'lt_cafe', wx: x, wy: y, npcId: null, characterLife: null });
+  }
+  function pose(g, sheetId, poseId, dir, x, y, frame) {
+    return AP.draw(g, sheetId, poseId, dir, x, y, 0,
+      { frame: frame, kit: KIT, palette: P });
+  }
+
+  /* ---- specimens: every pose, every frame, against the standing sprite ---- */
+  var CELLW = 30;
+  function poseCells(poseId) {
+    var out = [];
+    AP.POSES[poseId].dirs.forEach(function (dir) {
+      for (var f = 0; f < AP.POSES[poseId].frames; f++) out.push([dir, f]);
+    });
+    return out;
+  }
+  function specimenPaint(poseId, sheetId) {
+    var cells = poseCells(poseId);
+    return function (g) {
+      var w = (cells.length + 2) * CELLW, h = 40;
+      floor(g, w, h);
+      var ground = h - 8;
+      standing(g, sheetId, 'down', 8, ground - 16);
+      cells.forEach(function (cell, i) {
+        pose(g, sheetId, poseId, cell[0], (i + 2) * CELLW - 14, ground - 16, cell[1]);
+      });
+    };
+  }
+  function specimens(host, sheetId) {
+    host.textContent = '';
+    AP.POSE_IDS.forEach(function (poseId) {
+      var cells = poseCells(poseId);
+      strip(host, poseId + ' — standing, then ' + cells.map(function (c) { return c[0] + '/' + c[1]; }).join(' · '),
+        specimenPaint(poseId, sheetId), (cells.length + 2) * CELLW, 40, 5);
+    });
+  }
+
+  /* ---- every look ------------------------------------------------------- */
+  function looksPaint(poseId, work) {
+    return function (g) {
+      var w = LOOKS.length * CELLW + 10, h = 40;
+      floor(g, w, h);
+      LOOKS.forEach(function (id, i) {
+        pose(g, (work ? id + '_work' : id), poseId, AP.POSES[poseId].dirs[0], i * CELLW + 12, h - 24, 0);
+      });
+    };
+  }
+  function looksRows(host) {
+    host.textContent = '';
+    ['seated', 'reading', 'work_counter', 'unpacking', 'sleeping', 'talking'].forEach(function (poseId) {
+      strip(host, poseId + ' — six looks', looksPaint(poseId, false), LOOKS.length * CELLW + 10, 40, 4);
+      strip(host, poseId + ' — the same six, in an apron', looksPaint(poseId, true), LOOKS.length * CELLW + 10, 40, 4);
+    });
+  }
+
+  /* ---- the café --------------------------------------------------------- */
+  var loc = LT.World.LOCATIONS.cafe;
+  var scene = { id: loc.visual.scene, indoor: true, rows: loc.rows,
+                width: loc.rows[0].length, height: loc.rows.length };
+  var CAM_X = -(VW - loc.rows[0].length * T) / 2, CAM_Y = -(VH - loc.rows.length * T) / 2;
+  var OX = -CAM_X, OY = -CAM_Y;
+
+  /* Room-local pixels. The counter is at plan().counter, the booths along the
+   * walls; these are the seats the room already has. */
+  /* Every person is put on a seat the room already has: the plan's stools are
+   * at tile rows 4, its banquettes along the walls, and the service side of
+   * the counter is above the slab's own floor line. */
+  var CAST = [
+    { look: 'look_rust_bun_work', pose: 'work_counter', dir: 'down', at: [62, 86] },
+    { look: 'look_teal_bob', pose: 'seated', dir: 'down', at: [53, 66] },
+    { look: 'look_plum_long', pose: 'reading', dir: 'down', at: [21, 66] },
+    { look: 'look_moss_neat', pose: 'talking', dir: 'right', at: [92, 140] },
+    { look: 'look_slate_short', pose: 'talking', dir: 'left', at: [124, 140] },
+    { look: 'look_ochre_short_work', pose: 'unpacking', dir: 'down', at: [196, 122] },
+    { look: 'look_slate_short', pose: 'sleeping', dir: 'right', at: [42, 118] }
+  ];
+
+  function cafePaint(opts) {
+    opts = opts || {};
+    var light = opts.minute == null ? null : DL.at(opts.minute);
+    var material = light ? DL.material(P, light) : P;
+    return function (g) {
+      /* The room's material carries the minute's window glass, and nothing
+       * else about the room changes. */
+      var saved = KIT.materials.lt_cafe;
+      KIT.materials.lt_cafe = material;
+      try {
+        GAME.sprites.drawStructures(g, scene, CAM_X, CAM_Y,
+          { mapId: scene.id, indoor: true, viewportWidth: VW, viewportHeight: VH, t: 0 });
+        /* Room-local coordinates, exactly as lt-view.js keeps them: the depth
+         * bands are compared against the room's own furniture lines, and the
+         * camera is subtracted only when a pixel is finally put down. */
+        var ents = (opts.empty ? [] : CAST).map(function (c, i) {
+          return { i: i, c: c, wx: c.at[0], wy: c.at[1] };
+        }).sort(function (a, b) { return a.wy - b.wy; });
+        EMBER.Tilemap.paintDepthBands(ents, T, function (e) {
+          var x = e.wx - CAM_X, y = e.wy - CAM_Y;
+          var drew = AP.draw(g, e.c.look, e.c.pose, e.c.dir, x, y, opts.t || 0,
+            { kit: KIT, palette: material });
+          if (!drew) standing(g, e.c.look, e.c.dir === 'left' ? 'left' : 'down', x, y);
+        }, function (footY, nextFootY, afterIndex) {
+          if (afterIndex < 0) return;
+          GAME.sprites.drawForegroundStructures(g, scene, CAM_X, CAM_Y, {
+            mapId: scene.id, indoor: true, viewportWidth: VW, viewportHeight: VH,
+            forestDepthMin: footY, forestDepthMax: nextFootY
+          });
+        });
+      } finally { KIT.materials.lt_cafe = saved; }
+      if (light) DL.apply(g, light, { width: VW, height: VH });
+    };
+  }
+
+  function cafeRows(host) {
+    host.textContent = '';
+    strip(host, 'each pose at the furniture it is done at, kit pieces only', stagePaint, VW, VH, 3);
+    strip(host, 'Café Meridiana, empty', cafePaint({ empty: true }), VW, VH, 3);
+    strip(host, 'the same room, six people, six poses, no labels', cafePaint({}), VW, VH, 3);
+  }
+
+  /* ---- the anchor stage -------------------------------------------------- */
+  /* A pose is half a picture: the other half is the thing it is done AT. This
+   * stage is a registered interior composition like any other room — nothing
+   * but pieces of the production kit — put at heights that let each pose meet
+   * its furniture: a counter low enough to stand behind, a bench a lap lands
+   * on, a bench long enough to lie on, a work table a bent back reaches. It is
+   * a statement of what a ROOM has to provide, not a room anyone lives in.
+   *
+   * It is registered rather than painted by hand because several of the kit's
+   * pieces read module state that only a registered pass sets — the booth's
+   * table plaque among them, which otherwise falls back to the production
+   * diner's own initials. */
+  var STAGE_ID = 'lt_pose_stage';
+  var stageRows = [];
+  for (var sr = 0; sr < 12; sr++) stageRows.push('................');
+  var stageMap = { id: STAGE_ID, indoor: true, rows: stageRows, width: 16, height: 12 };
+
+  var STAGE_TOP = 26;
+  function stageBehind(g, map, x, y, p, kit) {
+    /* A floor needs a wall behind it and a wall in front of it, or the boards
+     * read as a vertical surface and everyone standing on them looks pinned
+     * to it. */
+    kit.plankFloor(g, x, y + STAGE_TOP, 0, 0, VW, VH - STAGE_TOP - 12, p);
+    kit.panel(g, x, y - 8, VW, STAGE_TOP + 8, p);
+    kit.rect(g, x, y + STAGE_TOP, VW, 7, 'rgba(32,28,21,.24)');
+    kit.rect(g, x, y + STAGE_TOP, 5, VH - STAGE_TOP, 'rgba(34,29,21,.17)');
+    kit.rect(g, x + VW - 6, y + STAGE_TOP, 6, VH - STAGE_TOP, 'rgba(34,29,21,.20)');
+    kit.booth(g, x + 138, y + 66, 100, p, 1, null);
+    kit.booth(g, x + 8, y + 120, 64, p, 0, null);
+  }
+  function stageFront(g, map, x, y, p, kit) {
+    kit.counterSlab(g, x + 8, y + 58, 110, p, true);
+    kit.cup(g, x + 84, y + 55, p);
+    kit.counterSlab(g, x + 194, y + 166, 54, p, true);
+    kit.frontWall(g, x, y + VH - 12, VW, x + 104, p);
+  }
+  GAME.Retro2D.registerInteriorScene(STAGE_ID, {
+    material: 'lt_cafe', draw: stageBehind, foreground: stageFront,
+    actorLights: [], monogram: 'LT', backdrop: '#161d1f'
+  });
+
+  function stageOpts(extra) {
+    var o = { mapId: STAGE_ID, indoor: true, viewportWidth: VW, viewportHeight: VH, t: 0 };
+    if (extra) for (var k in extra) o[k] = extra[k];
+    return o;
+  }
+
+  function stagePaint(g) {
+    GAME.sprites.drawStructures(g, stageMap, 0, 0, stageOpts());
+    /* Behind the counter and bent over the work table: painted before the
+     * pieces that must cover them. On a bench: painted after it. */
+    pose(g, 'look_rust_bun_work', 'work_counter', 'down', 44, 48, 0);
+    pose(g, 'look_teal_bob', 'seated', 'down', 160, 58, 0);
+    pose(g, 'look_moss_neat', 'seated', 'right', 202, 58, 0);
+    pose(g, 'look_plum_long', 'reading', 'down', 108, 106, 0);
+    pose(g, 'look_slate_short', 'sleeping', 'right', 40, 110, 0);
+    pose(g, 'look_rust_bun', 'talking', 'right', 114, 150, 0);
+    pose(g, 'look_ochre_short', 'talking', 'left', 148, 150, 1);
+    pose(g, 'look_slate_short_work', 'unpacking', 'down', 220, 150, 0);
+    GAME.sprites.drawForegroundStructures(g, stageMap, 0, 0,
+      stageOpts({ forestDepthMin: -Infinity, forestDepthMax: Infinity }));
+  }
+
+  var HOURS = [[420, '07:00'], [780, '13:00'], [1110, '18:30'], [1380, '23:00']];
+  function hourRows(host) {
+    host.textContent = '';
+    var box = document.createElement('div'); box.className = 'strip';
+    var head = document.createElement('h3'); head.textContent = 'the same frame at four minutes';
+    box.appendChild(head);
+    var wrap = document.createElement('div'); wrap.className = 'pair';
+    HOURS.forEach(function (h) {
+      var cell = document.createElement('div');
+      var lab = document.createElement('span'); lab.className = 'lab'; lab.textContent = h[1];
+      var c = canvas(VW, VH, 1);
+      cafePaint({ minute: h[0] })(ctx2d(c));
+      c.style.imageRendering = 'pixelated';
+      cell.appendChild(lab); cell.appendChild(c); wrap.appendChild(cell);
+    });
+    box.appendChild(wrap); host.appendChild(box);
+  }
+
+  /* ---- the day as a ramp -------------------------------------------------- */
+  function rampPaint(g) {
+    for (var m = 0; m < 1440; m++) {
+      var l = DL.at(m);
+      g.fillStyle = l.glassHi; g.fillRect(m, 0, 1, 10);
+      g.fillStyle = l.glass; g.fillRect(m, 10, 1, 14);
+      g.fillStyle = l.ambient.color; g.fillRect(m, 24, 1, 10);
+      g.globalAlpha = l.ambient.alpha; g.fillStyle = '#000'; g.fillRect(m, 34, 1, 8); g.globalAlpha = 1;
+      g.fillStyle = '#e2c15a'; g.fillRect(m, 50 - Math.round(l.lampStrength * 8), 1, Math.round(l.lampStrength * 8) + 1);
+    }
+    g.fillStyle = '#8a94a2';
+    for (var h = 0; h <= 24; h += 3) g.fillRect(Math.min(1439, h * 60), 42, 1, 3);
+  }
+  function rampRows(host) {
+    host.textContent = '';
+    strip(host, 'glass · ambient · tint strength · lamps, 00:00 → 24:00', rampPaint, 1440, 51, 1);
+  }
+
+  /* ---- the table ---------------------------------------------------------- */
+  var tbody = document.querySelector('#table tbody');
+  AP.POSE_IDS.forEach(function (id) {
+    var p = AP.POSES[id], tr = document.createElement('tr');
+    function cell(text, cls) {
+      var td = document.createElement('td'); td.className = cls || ''; td.textContent = text; return td;
+    }
+    tr.appendChild(cell(p.id, 'k'));
+    tr.appendChild(cell(p.dirs.join(' · ') + (p.dirs.indexOf('right') >= 0 ? ' (+ left, mirrored)' : ''), 'n'));
+    tr.appendChild(cell(String(p.frames), 'n'));
+    tr.appendChild(cell(p.frameMs ? p.frameMs + ' ms' : '—', 'n'));
+    tr.appendChild(cell(p.pivot.join(','), 'n'));
+    tr.appendChild(cell(p.box.join('×'), 'n'));
+    tr.appendChild(cell(p.shadow ? 'yes' : 'no', 'n'));
+    tr.appendChild(cell(p.reads));
+    tbody.appendChild(tr);
+  });
+
+  /* ---- paint, and tell the capture tool when everything is real ----------- */
+  var status = document.getElementById('status');
+  function report(state) {
+    status.textContent = 'interior kit: loaded · material lt_cafe · walk atlas: ' + state +
+      ' · pose sheet: ' + (AP.ready ? 'decoded' : (AP.failed || 'pending')) +
+      ' · poses drawn from ' + AP.SRC.split('/').pop();
+  }
+  function paintAll() {
+    specimens(document.getElementById('specimens'), LOOKS[0]);
+    looksRows(document.getElementById('looks'));
+    cafeRows(document.getElementById('cafe'));
+    hourRows(document.getElementById('hours'));
+    rampRows(document.getElementById('ramp'));
+  }
+  paintAll();
+  report('decoding');
+
+  window.GALLERY = {
+    ready: function () { return !!window.GALLERY_READY; },
+    poseStrip: function (poseId, sheetId, zoom) {
+      var cells = poseCells(poseId), w = (cells.length + 2) * CELLW;
+      var c = canvas(w, 40, 1);
+      specimenPaint(poseId, sheetId)(ctx2d(c));
+      return upscale(c, zoom).toDataURL('image/png');
+    },
+    looksStrip: function (poseId, work, zoom) {
+      var w = LOOKS.length * CELLW + 10, c = canvas(w, 40, 1);
+      looksPaint(poseId, work)(ctx2d(c));
+      return upscale(c, zoom).toDataURL('image/png');
+    },
+    stage: function (zoom) {
+      var c = canvas(VW, VH, 1);
+      stagePaint(ctx2d(c));
+      return upscale(c, zoom).toDataURL('image/png');
+    },
+    cafe: function (opts, zoom) {
+      var c = canvas(VW, VH, 1);
+      cafePaint(opts || {})(ctx2d(c));
+      return upscale(c, zoom).toDataURL('image/png');
+    },
+    ramp: function () {
+      var c = canvas(1440, 51, 1);
+      rampPaint(ctx2d(c));
+      return c.toDataURL('image/png');
+    },
+    /* What the pose cells actually cover, measured off the canvas: a cell that
+     * paints outside its declared box clips into the furniture beside it. */
+    bounds: function () {
+      var out = [];
+      AP.POSE_IDS.forEach(function (poseId) {
+        poseCells(poseId).forEach(function (cell) {
+          var c = canvas(48, 48, 1), g = ctx2d(c);
+          AP.draw(g, LOOKS[0], poseId, cell[0], 12, 16, 0, { frame: cell[1], shadow: false });
+          var d = g.getImageData(0, 0, 48, 48).data;
+          var minX = 48, minY = 48, maxX = -1, maxY = -1;
+          for (var y = 0; y < 48; y++) for (var x = 0; x < 48; x++) {
+            if (d[(y * 48 + x) * 4 + 3] === 0) continue;
+            if (x < minX) minX = x; if (x > maxX) maxX = x;
+            if (y < minY) minY = y; if (y > maxY) maxY = y;
+          }
+          out.push({ poseId: poseId, dir: cell[0], frame: cell[1],
+                     declared: AP.POSES[poseId].box, drawn: [maxX - minX + 1, maxY - minY + 1],
+                     foot: maxY - 16 });
+        });
+      });
+      return JSON.stringify(out);
+    },
+    /* Four minutes, as numbers, so the capture tool can say the light really
+     * moved rather than trusting the picture. */
+    light: function () {
+      return JSON.stringify(HOURS.map(function (h) {
+        var l = DL.at(h[0]);
+        return { minute: h[0], label: h[1], phase: l.phase, glass: l.glass, glassHi: l.glassHi,
+                 ambient: l.ambient, warm: l.warm, lamps: l.lamps };
+      }));
+    },
+    manifest: function () {
+      return JSON.stringify({
+        version: AP.VERSION,
+        entry: 'living-town/content/activity-poses-v01/lt-activity-poses.js',
+        call: 'LT.ActivityPoses.draw(g, sheetId, poseId, dir, x, y, t, opts)',
+        light: 'LT.DayLight.at(minuteOfDay) · LT.DayLight.apply(g, light, opts)',
+        sheet: 'assets/activity-poses-v01.png',
+        looks: LT.Appearance.ORDER,
+        order: AP.ORDER,
+        poses: AP.POSE_IDS.map(function (id) { return AP.POSES[id]; }),
+        dayKeys: DL.KEYS
+      }, null, 2);
+    }
+  };
+
+  function done(state) { paintAll(); report(state); window.GALLERY_READY = true; }
+  var waits = [AP.load()];
+  if (GAME.Sprites.castReady) waits.push(GAME.Sprites.castReady.catch(function () { return false; }));
+  Promise.all(waits).then(function () { done(LT.ProductionHost.ready ? 'decoded' : 'FAILED'); },
+                          function (e) { done('FAILED ' + e); });
+})();
+</script>
+</body>
+</html>

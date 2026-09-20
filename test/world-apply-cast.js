@@ -38,7 +38,7 @@ const repoBefore = WATCH.map((rel) => hash(REPO, rel));
 const FIXTURES = [];
 function makeFixture() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'tp-world-apply-cast-'));
-  for (const d of ['js', 'test', 'world', 'narrative']) fs.cpSync(path.join(REPO, d), path.join(root, d), { recursive: true });
+  for (const d of ['engine', 'js', 'test', 'world', 'narrative']) fs.cpSync(path.join(REPO, d), path.join(root, d), { recursive: true });
   fs.mkdirSync(path.join(root, 'artifacts'), { recursive: true });
   fs.cpSync(path.join(REPO, 'artifacts', 'world-character-audit'), path.join(root, 'artifacts', 'world-character-audit'), { recursive: true });
   fs.copyFileSync(path.join(REPO, 'index.html'), path.join(root, 'index.html'));

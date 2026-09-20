@@ -1,0 +1,67 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Café visual reuse — comparison</title>
+<style>
+  body { background:#14181a; color:#d8d4c8; font:14px/1.5 -apple-system, sans-serif; margin:24px; }
+  h1 { font-size:18px; } h2 { font-size:14px; color:#e2c15a; margin:28px 0 8px; }
+  .row { display:flex; gap:20px; flex-wrap:wrap; }
+  figure { margin:0; } figcaption { margin-top:6px; max-width:768px; color:#a9a596; }
+  img { width:768px; height:576px; image-rendering:pixelated; display:block; background:#000; }
+  img.native { width:256px; height:192px; }
+  .strip img { width:384px; height:288px; }
+  code { color:#9fc16a; }
+</style>
+<h1>Living Town café — reuse of the Twin Peaks production renderer</h1>
+<p>Every still is the page's own 256×192 canvas read back from real headless Chrome
+(<code>node living-town/tools/capture-cafe.js</code>), shown at exactly 3× with nearest-neighbour scaling. Nothing is retouched.</p>
+
+<h2>1 · Reference — Twin Peaks diner, production build</h2>
+<div class="row"><figure><img src="01-reference-twin-peaks-diner.png"><figcaption>index.html, map <code>diner</code>, in play.</figcaption></figure></div>
+
+<h2>2 · Before — Living Town café at 0f880d4</h2>
+<div class="row"><figure><img src="02-before-living-town-cafe.png"><figcaption>Own tile art through the shared tile-window callback.</figcaption></figure></div>
+
+<h2>3 · Current — the reuse proof (commit ccf12c5): the Double R's own arrangement with other signs</h2>
+<div class="row"><figure><img src="03-after-living-town-cafe.png"><figcaption>Proved the production renderer could be hosted. Not a design: same plan, same palette as the diner.</figcaption></figure></div>
+
+<h2>4 · Café Meridiana — Living Town's own room, arranged from the same kit</h2>
+<div class="row">
+  <figure><img src="04-original-living-town-cafe.png"><figcaption>10:00 — on shift behind the short corner counter. Door off to the left, window and bench on the right, board floor, sea-green and pale oak.</figcaption></figure>
+  <figure><img src="04-original-living-town-cafe-ordering.png"><figcaption>19:41 — off shift, ordering from the customer side, at the register.</figcaption></figure>
+</div>
+
+<h2>Activity sequence — three real moments of the simulated day, joined</h2>
+<div class="row"><figure><img src="04-original-activity-sequence.gif"><figcaption>08:17 in through the door · 09:07 takes up the shift and walks round the open end of the counter · 19:30 the extra shift ends, then out to the customer side to order. Simulation ticks; nothing is posed.</figcaption></figure></div>
+
+<h2>5 · One inhabitant, one look, every place</h2>
+<div class="row">
+  <figure><img src="05-continuity-home.png"><figcaption>06:20 — at home, asleep. Temporary ground, production sheet.</figcaption></figure>
+  <figure><img src="05-continuity-street.png"><figcaption>08:35 — on the street, walking to work.</figcaption></figure>
+  <figure><img src="05-continuity-cafe.png"><figcaption>10:40 — on shift (apron variant of the same look; it goes on at the counter, not at the door).</figcaption></figure>
+  <figure><img src="05-continuity-park.png"><figcaption>17:32 — in the park with the other inhabitant, each in their own generated look.</figcaption></figure>
+  <figure><img src="05-continuity-after-reload.png"><figcaption>Saved and reloaded at 09:09, on the way to the counter with the shift chosen but not yet begun: same name, look, step and walk target; arrived and began work.</figcaption></figure>
+</div>
+
+<h2>6 · A real meeting, then Save and a page reload</h2>
+<div class="row">
+  <figure><img src="../living-town-interactions/meeting-sequence.gif"><figcaption>17:10 one inhabitant arrives in the park and chooses to talk; the walk over is not conversation · 17:15 standing next to the other, the proposal; the other's rest ends (spoken to) and their own policy chooses to join · the 25 minutes run from there · 17:40 settled once.</figcaption></figure>
+</div>
+<div class="row">
+  <figure><img src="../living-town-interactions/page-saved.png" style="width:640px;image-rendering:auto"><figcaption>The page's Save button, pressed after the conversation.</figcaption></figure>
+  <figure><img src="../living-town-interactions/page-reloaded.png" style="width:640px;image-rendering:auto"><figcaption>After reloading the page: resumed at the saved minute, same names, looks, promises kept, goal reached, relationship gain present once.</figcaption></figure>
+</div>
+
+<h2>7 · A book and a food parcel, drawn from what they are</h2>
+<div class="row">
+  <figure><img src="../living-town-everyday/01-book-on-the-bench-closed.png"><figcaption>14:35 — a used book left on a park bench at 10:00; closed while nobody reads it.</figcaption></figure>
+  <figure><img src="../living-town-everyday/02-book-being-read-open.png"><figcaption>15:00 — open: the second inhabitant chose to read it (UtilityPolicy) while waiting in the park. Saved and reloaded here; reading carried on.</figcaption></figure>
+  <figure><img src="../living-town-everyday/03-parcel-inside-the-door-sealed.png"><figcaption>21:30 — the parcel left at 12:30, still sealed: home, tired, she went to bed instead.</figcaption></figure>
+  <figure><img src="../living-town-everyday/04-parcel-opened-empty.png"><figcaption>Day 2, 07:10 — opened that morning; the same instance, now empty, four portions in the pantry.</figcaption></figure>
+</div>
+
+<h2>Native scale, side by side (1×)</h2>
+<div class="row">
+  <img class="native" src="01-reference-twin-peaks-diner.png">
+  <img class="native" src="03-after-living-town-cafe.png">
+  <img class="native" src="04-original-living-town-cafe.png">
+</div>
