@@ -623,7 +623,12 @@ assert(distinct.size > 40, 'the capture is a painted frame, not a flat or black 
 // nel viewport da 192, quindi schermo = mappa + 16.
 const goldRail = mean(region(64, 10, 32, 2));
 const drapeNorth = mean(region(155, 21, 20, 8));
-const feltPlane = mean(region(52, 48, 20, 6));
+/* The felt plane is measured with the classifier over the whole table band,
+ * not from one rectangle: every table layout carries dark markings, so a
+ * fixed patch drifts as soon as a layout changes. */
+const feltPixels = region(0, 40, 256, 105).filter(isFelt);
+assert(feltPixels.length > 600, 'the felt beds are painted across the table band');
+const feltPlane = mean(feltPixels);
 const carpetPlane = mean(region(24, 140, 40, 20));
 assert(goldRail > feltPlane + 20,
   `the gold trim is the brightest plane (${goldRail.toFixed(1)} vs felt ${feltPlane.toFixed(1)})`);
@@ -653,14 +658,23 @@ assert(mean(stoolCushion) > mean(tableRail) + 10,
 assert(stoolCushion.some(([r, g, b]) => r > g + 60 && r > b + 50),
   'the stool cushion is crimson leather, not mahogany');
 
-// La roulette deve leggersi come una ruota a 1x: anello chiaro, banda di
-// caselle alternate, mozzo. Il bordo sta molto sopra le caselle e la banda
-// porta almeno due valori.
-const wheelRim = region(70, 113, 11, 1);
-const wheelPockets = region(70, 114, 11, 5);
+// La roulette deve leggersi come una RUOTA a 1x, non come un blocco rosso col
+// bordo dorato (difetto del round 1): silhouette ellittica, arco d'ottone
+// acceso sopra, anello di caselle alternate, mozzo al centro.
+const wheelInk = foregroundCalls(112, 113)
+  .filter((call) => call.color.toLowerCase() === Art.palette.ink.toLowerCase() &&
+    call.args[3] === 1 && call.args[1] >= 95 && call.args[1] <= 107 && call.args[2] <= 17);
+const wheelWidths = wheelInk.map((call) => call.args[2]);
+assert(wheelWidths.length >= 9, 'the wheel is built row by row, got ' + wheelWidths.length + ' rows');
+assert(new Set(wheelWidths).size >= 4,
+  'the wheel silhouette steps in at the top and bottom instead of squaring off: ' + wheelWidths.join(','));
+assert(Math.min(...wheelWidths) * 2 <= Math.max(...wheelWidths),
+  'the narrowest wheel row is at most half the widest, so the disc reads as round');
+const wheelRim = region(72, 112, 9, 1);
+const wheelPockets = region(70, 114, 13, 2);
 assert(mean(wheelRim) > mean(wheelPockets) + 60,
   `the roulette rim ring reads above its pockets (${mean(wheelRim).toFixed(1)} vs ${mean(wheelPockets).toFixed(1)})`);
-const pocketValues = new Set(region(70, 116, 11, 1).map((px) => px.join(',')));
+const pocketValues = new Set(region(71, 114, 12, 1).map((px) => px.join(',')));
 assert(pocketValues.size >= 2,
   'the pocket band alternates at least two values, so the wheel is not a flat disc');
 

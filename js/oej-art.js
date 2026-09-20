@@ -505,23 +505,27 @@
     else layoutPoker(R, x, y, w, p);
   }
 
-  /* Roulette: the wheel sits at the WEST end, the numbered layout runs east
-   * of it as columns of gold boxes with a red/black column beside them. On
-   * the three-cell centre table the grid has room for six columns. */
+  /* Roulette: the wheel sits at the WEST end and the numbered field runs east
+   * of it as a real three-row grid of red and black cells. Round 1 painted
+   * that field as nine identical gold combs, which is the same repetition
+   * defect the corner grid had, one scale down. */
   function layoutRoulette(R, x, y, w, p) {
-    roulette(R, x + 11, y + 10, p);
-    var cols = Math.max(3, Math.floor((w - 26) / 3)), col;
+    roulette(R, x + 12, y + 11, p);
+    var gx = x + 24, gy = y + 5, cols = Math.max(4, Math.floor((w - 28) / 3));
+    var col, row;
     for (col = 0; col < cols; col++) {
-      R(x + 20 + col * 3, y + 6, 2, 8, p.feltDeep);
-      R(x + 20 + col * 3, y + 6, 2, 1, p.goldDeep);
-      R(x + 20 + col * 3, y + 9, 2, 1, p.goldDeep);
-      R(x + 20 + col * 3, y + 12, 2, 1, p.goldDeep);
+      for (row = 0; row < 3; row++) {
+        R(gx + col * 3, gy + row * 3, 2, 2,
+          ((col * 3 + row) % 2) ? p.pocketRed : p.pocketDark);
+      }
     }
-    R(x + 20, y + 14, cols * 3 - 1, 1, p.gold);
-    chipStack(R, x + w - 9, y + 7, p.chipRed, p);
-    chipStack(R, x + w - 14, y + 11, p.chipBlue, p);
-    R(x + w - 8, y + 12, 2, 1, p.pocketRed);
-    R(x + w - 5, y + 12, 2, 1, p.pocketDark);
+    /* Outside bets: three boxes of unequal width along the near edge, so the
+     * bottom of the field does not repeat the pitch of the grid above it. */
+    R(gx, gy + 10, 5, 2, p.feltDeep); R(gx, gy + 10, 5, 1, p.goldDeep);
+    R(gx + 6, gy + 10, 8, 2, p.feltDeep); R(gx + 6, gy + 10, 8, 1, p.gold);
+    R(gx + 15, gy + 10, 4, 2, p.feltDeep); R(gx + 15, gy + 10, 4, 1, p.goldDeep);
+    chipStack(R, gx + 1, gy, p.chipRed, p);
+    chipStack(R, gx + 10, gy + 5, p.chipBlue, p);
   }
 
   /* Blackjack: dealer's shoe at the EAST end, a gold bet arc swinging west,
@@ -549,21 +553,28 @@
     chipStack(R, x + 17, y + 12, p.chipBlue, p);
   }
 
-  /* Craps: a long padded box. The stick and two dice run the full length on
-   * a pass line, with numbered boxes along the top rail. */
+  /* Craps: a long padded box. Point boxes of UNEQUAL width run along the top
+   * rail with two of them marked by the dealer's puck, then the pass line,
+   * the stick and the dice. */
   function layoutCraps(R, x, y, w, p) {
-    var boxes = Math.max(6, Math.floor((w - 12) / 4)), i;
-    for (i = 0; i < boxes; i++) {
-      R(x + 5 + i * 4, y + 5, 3, 3, p.feltDeep);
-      R(x + 5 + i * 4, y + 5, 3, 1, p.goldDeep);
+    var widths = [5, 4, 6, 4, 5, 4], gx = x + 5, i;
+    for (i = 0; i < widths.length && gx + widths[i] <= x + w - 6; i++) {
+      R(gx, y + 5, widths[i], 4, p.feltDeep);
+      R(gx, y + 5, widths[i], 1, p.goldDeep);
+      R(gx + 1, y + 7, widths[i] - 2, 1, p.gold);
+      if (i === 2 || i === 4) {
+        R(gx + 1, y + 6, 2, 2, p.ink);
+        R(gx + 1, y + 6, 2, 1, p.chipWhite);
+      }
+      gx += widths[i] + 2;
     }
-    R(x + 4, y + 9, w - 8, 1, p.gold);
-    R(x + 4, y + 12, w - 8, 1, p.goldDeep);
-    R(x + 6, y + 10, w - 12, 2, p.feltDeep);
-    R(x + 7, y + 10, w - 14, 1, p.feltMid);
+    R(x + 4, y + 10, w - 8, 1, p.gold);
+    R(x + 4, y + 13, w - 8, 1, p.goldDeep);
+    R(x + 6, y + 11, w - 12, 2, p.feltDeep);
+    R(x + 7, y + 11, w - 14, 1, p.feltMid);
     /* The stick: a long rake lying across the near half of the bed. */
-    R(x + 8, y + 14, w - 18, 1, p.walnutHi);
-    R(x + w - 10, y + 13, 2, 3, p.walnutMid);
+    R(x + 8, y + 15, w - 18, 1, p.walnutHi);
+    R(x + w - 10, y + 14, 2, 3, p.walnutMid);
     R(x + w - 8, y + 9, 3, 3, p.ink);
     R(x + w - 8, y + 9, 3, 3, p.chipWhite);
     R(x + w - 7, y + 10, 1, 1, p.ink);
@@ -594,32 +605,51 @@
     R(x + 18, y + 12, 2, 2, p.goldHi);
   }
 
+  /* Half-widths of the 17x13 wheel, one per row. Insetting this profile gives
+   * concentric ellipses, which is what makes the wheel a RING: round 1 drew
+   * full-width rim rows inside a 13px silhouette, so the brass swallowed the
+   * disc and at 1x it read as a gold box with red dots in it. */
+  var WHEEL = [3, 5, 6, 7, 8, 8, 8, 8, 8, 7, 6, 5, 3];
+
+  function wheelBand(R, cx, cy, inset, color, fromRow, toRow) {
+    var i, h;
+    fromRow = fromRow == null ? inset : fromRow;
+    toRow = toRow == null ? WHEEL.length - 1 - inset : toRow;
+    for (i = fromRow; i <= toRow; i++) {
+      h = WHEEL[i] - inset;
+      if (h < 0) continue;
+      R(cx - h, cy - 6 + i, h * 2 + 1, 1, color);
+    }
+  }
+
   function roulette(R, cx, cy, p) {
-    /* 15x11 wheel, built as a ring so it reads at 1x rather than as a hole
-     * punched in the felt: ink silhouette, a brass rim ring one pixel inside
-     * it, a band of alternating pockets, and a lit hub in the middle. */
-    R(cx - 3, cy - 5, 7, 1, p.ink);
-    R(cx - 5, cy - 4, 11, 1, p.ink);
-    R(cx - 7, cy - 3, 15, 7, p.ink);
-    R(cx - 5, cy + 4, 11, 1, p.ink);
-    R(cx - 3, cy + 5, 7, 1, p.ink);
-    /* Brass rim ring: one step of light on the top arc only, so the wheel
-     * never becomes the brightest thing in the room. */
-    R(cx - 3, cy - 4, 7, 1, p.gold);
-    R(cx - 5, cy - 3, 11, 1, p.goldMid);
-    R(cx - 6, cy - 2, 1, 5, p.gold);
-    R(cx + 6, cy - 2, 1, 5, p.goldDeep);
-    R(cx - 5, cy + 3, 11, 1, p.goldDeep);
-    R(cx - 3, cy + 4, 7, 1, p.goldDeep);
-    /* Pockets: two alternating values, left uncovered so the alternation is
-     * what the eye reads. The hub stays three pixels wide. */
+    /* Four concentric bands: ink silhouette, a one-pixel brass rim lit on the
+     * top arc, a near-black pocket ring carrying alternating crimson ticks,
+     * and a walnut hub with two spokes. */
+    wheelBand(R, cx, cy, 0, p.ink);
+    wheelBand(R, cx, cy, 1, p.goldMid, 1, 6);
+    wheelBand(R, cx, cy, 1, p.gold, 7, 9);
+    wheelBand(R, cx, cy, 1, p.goldDeep, 10, 11);
+    R(cx - 4, cy - 5, 9, 1, p.goldHi);
+    wheelBand(R, cx, cy, 2, p.pocketDark);
+    /* Pockets: ticks on the near and far arcs of the ring, alternating, so
+     * the eye reads a wheel turning rather than a filled disc. */
     var i;
     for (i = 0; i < 6; i++) {
-      R(cx - 5 + i * 2, cy - 2, 2, 5, (i % 2) ? p.pocketRed : p.pocketDark);
+      if (i % 2) {
+        R(cx - 5 + i * 2, cy - 4, 2, 2, p.pocketRed);
+        R(cx - 5 + i * 2, cy + 3, 2, 2, p.pocketDark);
+      } else {
+        R(cx - 5 + i * 2, cy - 4, 2, 2, p.pocketDark);
+        R(cx - 5 + i * 2, cy + 3, 2, 2, p.pocketRed);
+      }
     }
-    R(cx - 1, cy - 1, 3, 3, p.goldDeep);
+    /* Hub, spokes and the ball resting on the far track. */
+    R(cx - 5, cy, 11, 1, p.goldDeep);
+    R(cx - 3, cy - 1, 7, 3, p.walnutDeep);
+    R(cx - 2, cy - 1, 5, 1, p.walnutMid);
+    R(cx - 1, cy, 3, 1, p.goldMid);
     R(cx, cy, 1, 1, p.goldHi);
-    /* The ball, at rest on the rim. */
     R(cx + 2, cy - 3, 1, 1, p.chipWhite);
   }
 
