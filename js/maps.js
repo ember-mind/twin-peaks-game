@@ -149,10 +149,10 @@
         'iffffffffffffffi', // 2
         'iffffffffffffffi', // 3
         'iiiiffiiiiiiiiii', // 4 corridoio c4-5
-        'iffffffffffffffi', // 5
-        'ifftffcccccfffUi', // 6 divano + credenza domestica
-        'ifffffcccccffffi', // 7 Sarah(9,7)
-        'ifttffcccccffffi', // 8 tavolo domestico; Leland(12,8)
+        'iffffffhfffffffi', // 5 poltrona alta a nord del tappeto (7,5)
+        'ifftffcccccffUUi', // 6 poltrona verde, pianoforte (13,6), consolle (14,6)
+        'ifffftcccccffffi', // 7 tavolino basso sul tappeto (5,7); Sarah(9,7)
+        'ifttffcccccfhtfi', // 8 tavolo domestico; poltrona (12,8) e tavolino del telefono (13,8)
         'ifhhfffffffffffi', // 9 sedute, corridoio porta ancora libero
         'iffffffffffffffi', // 10 (spawn 7,10)
         'iiiiiiiDDiiiiiii'  // 11
