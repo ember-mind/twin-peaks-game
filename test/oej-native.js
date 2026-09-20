@@ -137,7 +137,11 @@ assert.equal(room.rows[9], 'iiiiiiiDDiiiiiii', 'the south double door is the onl
 /* The map-row pass: the four tables no longer sit in a mirrored corner grid.
  * They occupy three different widths on four different rows, one of them on
  * the centre carpet, and no row is the mirror of another. */
-assert.equal(room.rows[2], 'iftttfffffttffUi', 'the north row carries a long craps table and a blackjack table');
+assert.equal(room.rows[2], 'iftttffffftthfUi',
+  'the north row carries a long craps table, a blackjack table and the blackjack stool');
+assert.equal(room.rows[3], 'iffffffffffhfffi', 'the croupier stands south of the blackjack table');
+assert.equal(room.rows[5], 'iffffhfffffffUfi',
+  'a standing lamp holds the right-centre floor beside Audrey');
 assert.equal(room.rows[6], 'ifffKKKffffffffi', 'a three-cell roulette table stands on the centre carpet');
 assert.equal(room.rows[7], 'iUffffffftthfffi',
   'the poker table and its free stool sit south-east, a slot machine stands on the west wall');
@@ -172,9 +176,10 @@ for (const prop of Art.definitions) {
   assert(prop.bounds.every(Number.isInteger) && prop.shadow.every(Number.isInteger),
     prop.id + ' bounds and shadow are integer rectangles');
 }
-assert.equal(Art.definitions.length, 15,
-  'fifteen grounded props: four gaming tables, three seated patrons, two free stools, the bar, ' +
-  'the cabinet, two slot machines, a cocktail table and a rope stand');
+assert.equal(Art.definitions.length, 18,
+  'eighteen grounded props: four gaming tables, three seated patrons, a standing croupier, ' +
+  'three free stools, the bar, the cabinet, two slot machines, a cocktail table, ' +
+  'a standing lamp and a rope stand');
 /* Every painted patron sits on a solid cell whose NORTH neighbour is also
  * solid, so the head that overhangs the cell can never cover a body. */
 for (const prop of Art.definitions.filter((d) => d.id.indexOf('guest') === 0)) {
@@ -329,8 +334,36 @@ for (const prop of patrons) {
   assert(skinTones.length >= 4, prop.id + ' paints a face, not a coloured block');
 }
 const stools = Art.definitions.filter((d) => d.id.indexOf('stool') === 0);
-assert.equal(stools.length, 2,
-  'two empty stools remain — the poker seat and the cocktail seat — so the room is not uniformly busy');
+assert.equal(stools.length, 3,
+  'three empty stools — poker, blackjack and the cocktail seat — so the room is not uniformly busy');
+/* Round 5, the floor round. "The gaming tables read as identical green
+ * islands scattered on bare floor, no croupier side, no chairs." At least two
+ * of the four tables carry a seat on a cell that touches their footprint. */
+const tableCells = new Set();
+for (const d of Art.definitions.filter((t) => t.id.indexOf('table') === 0)) {
+  for (const [x, y] of d.cells) tableCells.add(x + ',' + y);
+}
+const seatedTables = stools.filter((d) => {
+  const [sx, sy] = d.cells[0];
+  return [[1, 0], [-1, 0], [0, 1], [0, -1]]
+    .some(([dx, dy]) => tableCells.has((sx + dx) + ',' + (sy + dy)));
+});
+assert(seatedTables.length >= 2,
+  'at least two gaming tables have a stool touching them, got ' + seatedTables.length);
+/* And one of them has a croupier working it: a standing figure on the cell
+ * SOUTH of the cloth, which is the cell the right-centre floor was missing. */
+const dealer = Art.definitions.find((d) => d.id === 'dealerBlackjack');
+assert(dealer, 'the blackjack table has a croupier side');
+assert.deepEqual(dealer.cells, [[11, 3]], 'the croupier stands in the right-centre quadrant');
+assert.equal(isSolidAt(11, 2), true, 'the croupier overhangs his own table, never a walkable cell');
+const lamp = Art.definitions.find((d) => d.id === 'floorLamp');
+assert(lamp, 'a standing lamp gives the right-centre floor a destination');
+assert.deepEqual(lamp.cells, [[13, 5]], 'the lamp stands on the right-centre floor');
+for (const prop of [dealer, lamp]) {
+  const [cx, cy] = prop.cells[0];
+  assert(cx >= 11 && cx <= 14 && cy >= 3 && cy <= 6,
+    prop.id + ' stands inside the right-centre quadrant the critic called dead');
+}
 function tableCalls(id) {
   const prop = Art.definitions.find((d) => d.id === id);
   const recording = newRecordingContext();

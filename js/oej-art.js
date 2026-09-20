@@ -52,6 +52,15 @@
     /* Carpet is now the LIT plane, a clear step ABOVE the drapes. */
     carpetDeep: '#5b2029', carpetDark: '#93384a', carpet: '#9a3b4e',
     carpetMid: '#a8475a', carpetHi: '#b65468', carpetGlow: '#c4637a',
+    /* The floor round of 2026-09-20. A fourth fresh critic read the whole
+     * floor as "flat uniform pink": the old 16px checker ran two values four
+     * luma apart, which is no pattern at all at 1x. `carpetWeave` is the
+     * darker half of a real two-value repeat (about 15 luma under the field,
+     * enough to read as woven carpet, low enough that an actor and their
+     * contact shadow still separate from it). `pitField` and `pitWeave` are
+     * the gaming pit's own inset, one step LIGHTER than the outer floor so
+     * the pit reads as the lit zone the tables belong to. */
+    carpetWeave: '#7e2f3e', pitField: '#a8475a', pitWeave: '#8c3446',
     /* Lamp light landing on that carpet. Round 1 ran the pools up through
      * the carpet's own magenta, which read as two pink stage spots; they now
      * turn warm as they brighten, the way lamplight does, and the top two
@@ -105,10 +114,24 @@
     {id: 'guestBlackjack', cells: [[11,1]], bounds: [176,9,16,20], shadow: [176,27,16,3], guest: 'cardPlayer'},
     {id: 'tableCraps', cells: [[2,2],[3,2],[4,2]], bounds: [32,26,48,22], shadow: [32,46,48,4], game: 'craps'},
     {id: 'tableBlackjack', cells: [[10,2],[11,2]], bounds: [160,26,32,22], shadow: [160,46,32,4], game: 'blackjack'},
+    /* The floor round adds the blackjack table's chair, so at least two of
+     * the four games have a seat touching them and a table stops reading as
+     * a green island nobody sits at. */
+    {id: 'stoolBlackjack', cells: [[12,2]], bounds: [192,30,16,20], shadow: [192,48,16,3], seatVariant: 1},
+    /* The dead right-centre. A fourth fresh critic read cols 11-14, rows 3-6
+     * as a bare pink expanse with a pool of light and nothing to walk
+     * toward. The croupier stands SOUTH of his own table, so the cell he
+     * overhangs is the blackjack cloth and can never hold a body. */
+    {id: 'dealerBlackjack', cells: [[11,3]], bounds: [176,42,16,22], shadow: [176,62,16,3]},
     {id: 'serviceCabinet', cells: [[14,2]], bounds: [224,18,16,30], shadow: [224,48,16,3]},
     {id: 'barCounter', cells: [[5,4],[6,4],[7,4],[8,4],[9,4],[10,4]],
       bounds: [80,44,96,36], shadow: [80,80,96,4]},
     {id: 'guestRoulette', cells: [[5,5]], bounds: [80,73,16,20], shadow: [80,91,16,3], guest: 'wheelPlayer'},
+    /* The second half of that fix: a lit standing lamp with an ashtray dish
+     * at the north-east corner of the pit, the source of the light pool the
+     * critic could already see. It clears its own cell by 2px, the same
+     * overhang the stools take. */
+    {id: 'floorLamp', cells: [[13,5]], bounds: [208,78,16,18], shadow: [208,94,16,3]},
     {id: 'tableRoulette', cells: [[4,6],[5,6],[6,6]], bounds: [64,90,48,22], shadow: [64,110,48,4], game: 'roulette'},
     {id: 'tablePoker', cells: [[9,7],[10,7]], bounds: [144,106,32,22], shadow: [144,126,32,4], game: 'poker'},
     {id: 'stoolPoker', cells: [[11,7]], bounds: [176,110,16,20], shadow: [176,128,16,3], seatVariant: 1},
@@ -167,43 +190,99 @@
 
   /* ------------------------------------------------------------ carpet */
 
+  /* The gaming pit. A bordered carpet inset under the main-floor tables,
+   * inside a brass cord, carrying its own motif one step lighter than the
+   * outer floor. It is PAINT: no cell here changes collision, and the aisle
+   * from the south door walks straight into it. Without it the roulette and
+   * the poker oval read as two green islands adrift on a pink field, which
+   * is exactly what the fourth fresh critic called them. */
+  var PIT = {x: 56, y: 84, w: 144, h: 48};
+  /* The craps and blackjack tables stand against the north drape, outside the
+   * pit, and the same critic read them as two objects on bare floor. A runner
+   * of the pit's carpet ties them to the gaming zone without moving a single
+   * solid cell: it shows below the craps table, between the two tables and
+   * under the croupier's feet. */
+  var RUNNER = {x: 28, y: 28, w: 184, h: 28};
+
+  /* 16px two-value block, with a stepped diamond in the middle of every one.
+   * dx / w / h per 2px band, measured from the block's north-west corner. */
+  var DIAMOND = [[7, 2], [5, 6], [3, 10], [5, 6], [7, 2]];
+  /* The pit's own motif: an open square ring, so the two carpets differ in
+   * drawing and not only in value. */
+  function ringBlock(R, x, y, color) {
+    R(x + 3, y + 3, 10, 2, color);
+    R(x + 3, y + 11, 10, 2, color);
+    R(x + 3, y + 5, 2, 6, color);
+    R(x + 11, y + 5, 2, 6, color);
+  }
+
+  function carpetField(R, p, x0, y0, x1, y1, base, alt, weave, motif) {
+    var row, col, x, y, w, h, i, dx, dy, dw, dh;
+    for (row = 0; (y = y0 + row * 16) < y1; row++) {
+      h = Math.min(16, y1 - y);
+      for (col = 0; (x = x0 + col * 16) < x1; col++) {
+        w = Math.min(16, x1 - x);
+        R(x, y, w, h, ((row + col) & 1) ? alt : base);
+        if (motif === 'ring') {
+          if (h >= 16 && w >= 16) ringBlock(R, x, y, weave);
+          if (((row + col) & 1) === 0) R(x + 7, y + 7, 2, 2, p.goldDeep);
+          continue;
+        }
+        for (i = 0; i < DIAMOND.length; i++) {
+          dy = y + 4 + i * 2;
+          dh = Math.min(2, y1 - dy);
+          if (dh < 1) continue;
+          dx = x + DIAMOND[i][0];
+          dw = Math.min(DIAMOND[i][1], x1 - dx);
+          if (dw < 1) continue;
+          R(dx, dy, dw, dh, weave);
+        }
+        if (((row + col) & 1) === 0 && y + 8 < y1) R(x + 7, y + 8, 1, 1, p.goldDeep);
+      }
+    }
+  }
+
+  function drawPit(R, p) {
+    var x = PIT.x, y = PIT.y, w = PIT.w, h = PIT.h;
+    R(x - 4, y - 4, w + 8, h + 8, p.ink);
+    R(x - 3, y - 3, w + 6, h + 6, p.goldDeep);
+    R(x - 3, y - 3, w + 6, 1, p.goldMid);
+    R(x - 3, y - 3, 1, h + 6, p.goldMid);
+    R(x - 3, y + h + 2, w + 6, 1, p.walnutDeep);
+    R(x - 1, y - 1, w + 2, h + 2, p.carpetDeep);
+    carpetField(R, p, x, y, x + w, y + h, p.pitField, p.carpet, p.pitWeave, 'ring');
+    /* The step. A lit lip along the north edge and a shadowed one along the
+     * south turn the cord into a raised floor rather than a line drawn on a
+     * flat one, which is what makes the pit read as a place at 1x. */
+    R(x, y, w, 1, p.carpetGlow);
+    R(x, y + h - 1, w, 1, p.carpetDeep);
+  }
+
+  function drawRunner(R, p) {
+    var x = RUNNER.x, y = RUNNER.y, w = RUNNER.w, h = RUNNER.h;
+    R(x - 3, y - 3, w + 6, h + 6, p.ink);
+    R(x - 2, y - 2, w + 4, h + 4, p.goldDeep);
+    R(x - 2, y - 2, w + 4, 1, p.goldMid);
+    R(x - 1, y - 1, w + 2, h + 2, p.carpetDeep);
+    carpetField(R, p, x, y, x + w, y + h, p.pitField, p.carpet, p.pitWeave, 'ring');
+    R(x, y, w, 1, p.carpetGlow);
+    R(x, y + h - 1, w, 1, p.carpetDeep);
+  }
+
   function drawCarpet(R, p) {
-    /* A coarse carpet, not a tile test: 16px blocks in two close values, a
-     * wide plain border inside a gold cord, and a medallion motif every
-     * other block. The field scale is deliberately twice the tile so it
-     * never lines up with the furniture grid. */
+    /* The floor round of 2026-09-20. The old field was a 16px checker in two
+     * values four luma apart, which at 1x is one flat pink plane — the gap a
+     * fourth fresh critic named first. The field now carries a real two-value
+     * diamond repeat about fifteen luma deep, the wall foot carries a beaded
+     * border trim, and the main-floor tables stand inside a bordered pit.
+     * The repeat is kept low-contrast on purpose: an actor and the contact
+     * shadow under them still have to separate from the floor they stand on. */
     R(16, 22, 224, 122, p.carpetDeep);
-    var row, col, x, y, bh;
-    for (row = 0; row < 8; row++) {
-      y = 30 + row * 16;
-      /* The last row is CLIPPED, not dropped. Dropping it left ten rows of
-       * bare carpetDeep between the field and its border: a dark band right
-       * across the south of the floor that nothing in the room motivated,
-       * and the exact plane an actor's contact shadow has to land on. */
-      bh = Math.min(16, 138 - y);
-      if (bh < 2) break;
-      for (col = 0; col < 13; col++) {
-        x = 24 + col * 16;
-        if (x + 16 > 232) break;
-        R(x, y, 16, bh, ((row + col) & 1) ? p.carpetDark : p.carpet);
-      }
-    }
-    /* One medallion per second block, four pixels of gold thread. */
-    for (row = 0; row < 8; row++) {
-      y = 36 + row * 32;
-      if (y + 5 > 134) break;
-      for (col = 0; col < 7; col++) {
-        x = 30 + col * 32 + ((row & 1) ? 16 : 0);
-        if (x + 5 > 230) continue;
-        R(x + 2, y, 1, 1, p.goldDeep);
-        R(x + 1, y + 1, 3, 1, p.goldDeep);
-        R(x, y + 2, 5, 1, p.goldDeep);
-        R(x + 2, y + 2, 1, 1, p.gold);
-        R(x + 1, y + 3, 3, 1, p.goldDeep);
-        R(x + 2, y + 4, 1, 1, p.goldDeep);
-      }
-    }
-    /* Plain border band, then the gold cord. */
+    carpetField(R, p, 24, 30, 232, 136, p.carpet, p.carpetDark, p.carpetWeave, 'diamond');
+    drawRunner(R, p);
+    drawPit(R, p);
+    /* Border walk: a plain band inside a gold cord, beaded every 8px so the
+     * edge of the carpet reads as trim and not as spare floor. */
     R(16, 22, 224, 8, p.carpetDark);
     R(16, 136, 224, 8, p.carpetDark);
     R(16, 22, 8, 122, p.carpetDark);
@@ -212,6 +291,15 @@
     R(20, 139, 216, 1, p.goldDeep);
     R(20, 26, 1, 114, p.goldDeep);
     R(235, 26, 1, 114, p.goldDeep);
+    var b;
+    for (b = 24; b <= 228; b += 8) {
+      R(b, 27, 2, 2, p.carpetDeep); R(b, 27, 2, 1, p.gold);
+      R(b, 136, 2, 2, p.carpetDeep); R(b, 136, 2, 1, p.gold);
+    }
+    for (b = 34; b <= 128; b += 8) {
+      R(19, b, 2, 2, p.carpetDeep); R(19, b, 2, 1, p.gold);
+      R(234, b, 2, 2, p.carpetDeep); R(234, b, 2, 1, p.gold);
+    }
   }
 
   function drawSkirting(R, p) {
@@ -445,7 +533,7 @@
      * them. These are the room's largest bright areas and the reason the
      * southern half stops reading as an unlit field. */
     chandelierPool(R, 58, 112, p);
-    chandelierPool(R, 196, 104, p);
+    chandelierPool(R, 204, 106, p);
   }
 
   /* ------------------------------------------------------- south wall */
@@ -1046,12 +1134,76 @@
     R(225, 46, 14, 1, p.goldDeep);
   }
 
+  /* The croupier. Casino staff in the house uniform: white shirt, dark
+   * waistcoat, a crimson bow tie and both hands on the blackjack rail. He is
+   * the destination the right-centre floor did not have — a lit vertical
+   * figure standing in front of the cloth instead of another dark stamp. */
+  function standingDealer(R, x, y, p) {
+    var skin = '#dcb08a', skinHi = '#f0c9a1', skinShadow = '#b07f60';
+    var hair = '#1d1614', hairHi = '#3d302a';
+    var shirt = '#ece2c6', shirtShade = '#c2b697', vest = '#241c26', vestHi = '#3b2f3d';
+    R(x + 5, y, 6, 1, p.ink);
+    R(x + 4, y + 1, 8, 9, p.ink);
+    R(x + 3, y + 10, 10, 12, p.ink);
+    R(x + 2, y + 12, 12, 9, p.ink);
+    R(x + 5, y + 1, 6, 3, hair);
+    R(x + 6, y + 1, 4, 1, hairHi);
+    R(x + 5, y + 4, 6, 5, skin);
+    R(x + 6, y + 4, 4, 2, skinHi);
+    R(x + 5, y + 4, 1, 4, skinShadow);
+    R(x + 6, y + 6, 1, 2, p.eye);
+    R(x + 9, y + 6, 1, 2, p.eye);
+    R(x + 6, y + 9, 4, 1, skinShadow);
+    R(x + 5, y + 10, 6, 1, shirt);
+    R(x + 6, y + 11, 4, 1, p.stool);
+    R(x + 7, y + 11, 2, 1, p.stoolHi);
+    R(x + 5, y + 12, 6, 6, shirt);
+    R(x + 5, y + 12, 2, 6, shirtShade);
+    R(x + 4, y + 12, 2, 8, vest);
+    R(x + 10, y + 12, 2, 8, vest);
+    R(x + 4, y + 12, 1, 6, vestHi);
+    R(x + 5, y + 18, 6, 3, vest);
+    R(x + 5, y + 18, 6, 1, vestHi);
+    R(x + 3, y + 13, 2, 6, shirt);
+    R(x + 11, y + 13, 2, 6, shirt);
+    R(x + 3, y + 13, 1, 5, shirtShade);
+    R(x + 2, y + 18, 3, 3, skin);
+    R(x + 11, y + 18, 3, 3, skin);
+    R(x + 2, y + 18, 3, 1, skinHi);
+    R(x + 11, y + 18, 3, 1, skinHi);
+  }
+
+  /* Standing lamp with an ashtray dish on a side bracket: a brass column, a
+   * splayed foot and a shade painted in the room's brightest values, so at 1x
+   * the fixture reads as the source of the pool it stands in. */
+  function floorLamp(R, x, y, p) {
+    R(x + 3, y, 10, 7, p.ink);
+    R(x + 4, y + 1, 8, 5, p.goldDeep);
+    R(x + 4, y + 1, 8, 2, p.goldMid);
+    R(x + 5, y + 1, 6, 1, p.goldHi);
+    R(x + 5, y + 4, 6, 2, p.goldHi);
+    R(x + 6, y + 5, 4, 1, p.goldWhite);
+    R(x + 6, y + 7, 4, 2, p.ink);
+    R(x + 7, y + 7, 2, 1, p.goldWhite);
+    R(x + 6, y + 9, 4, 6, p.ink);
+    R(x + 7, y + 9, 2, 6, p.metal);
+    R(x + 7, y + 9, 1, 6, p.metalHi);
+    R(x + 10, y + 10, 4, 3, p.ink);
+    R(x + 11, y + 11, 3, 1, p.chromeHi);
+    R(x + 11, y + 12, 2, 1, p.chromeDark);
+    R(x + 4, y + 15, 8, 3, p.ink);
+    R(x + 5, y + 15, 6, 1, p.metalHi);
+    R(x + 5, y + 16, 6, 1, p.metal);
+  }
+
   function drawProp(R, prop, p) {
     var b = prop.bounds;
     if (prop.id === 'barCounter') barCounter(R, p);
     else if (prop.id === 'serviceCabinet') serviceCabinet(R, p);
     else if (prop.id === 'cocktailTable') cocktailTable(R, b[0], b[1] + 1, p);
     else if (prop.id === 'ropeStand') ropeStand(R, b[0], b[1], p);
+    else if (prop.id === 'floorLamp') floorLamp(R, b[0], b[1], p);
+    else if (prop.id === 'dealerBlackjack') standingDealer(R, b[0], b[1], p);
     else if (prop.id.indexOf('slot') === 0) slotMachine(R, b[0], b[1], p, prop.slotVariant);
     else if (prop.id.indexOf('table') === 0) {
       feltTable(R, b[0], b[1], b[2], p, prop.game);
