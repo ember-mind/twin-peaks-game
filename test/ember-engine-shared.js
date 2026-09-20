@@ -240,6 +240,33 @@ ok(`${consumers.length} consumer files carry no private copy of an engine formul
 });
 ok('both production pages load all five engine files ahead of their consumer');
 
+/* The drawing half of the engine: the pixel rectangle with its lettering, and
+ * the interior room kit. The Twin Peaks renderer draws through them instead of
+ * carrying them, both pages load them ahead of it, and neither file knows a
+ * game: no GAME namespace, no map id, nobody's name. */
+const DRAWING = ['ember-pixel.js', 'ember-interior-kit.js'];
+['index.html', 'living-town/index.html'].forEach((host) => {
+  const html = fs.readFileSync(J(host), 'utf8');
+  const at = html.indexOf('js/retro-authored.js');
+  assert.ok(at > 0, `${host} loads the renderer`);
+  DRAWING.forEach((file) => {
+    const e = html.indexOf('engine/' + file);
+    assert.ok(e > 0 && e < at, `${host} must load engine/${file} before the renderer`);
+  });
+});
+DRAWING.forEach((file) => {
+  const code = stripComments(fs.readFileSync(J('engine/' + file), 'utf8'));
+  assert.ok(!/\bGAME\b/.test(code), `engine/${file} reaches for the GAME namespace`);
+  assert.ok(!/\bDOUBLE\b|Double R|cooper|truman|norma|shelly|twin ?peaks/i.test(code), `engine/${file} names something of Twin Peaks`);
+  assert.ok(!/mapId|map\.id === /.test(code), `engine/${file} branches on a map id`);
+});
+const renderer = stripComments(fs.readFileSync(J('js/retro-authored.js'), 'utf8'));
+['function interiorBooth', 'function interiorCheckerFloor', 'function interiorWord', 'function townMicroWord', 'var TOWN_FONT_5X7 = {', 'var INTERIOR_MATERIALS = {'].forEach((mark) => {
+  assert.ok(renderer.indexOf(mark) < 0, 'the renderer still carries its own ' + mark);
+});
+assert.ok(global.EMBER.Pixel && global.EMBER.InteriorKit || (require(J('engine/ember-interior-kit.js')), global.EMBER.InteriorKit.pieces.booth), 'the kit loads on its own in Node');
+ok('the renderer draws through engine/ember-pixel.js and engine/ember-interior-kit.js, which know no game');
+
 /* Outputs, not just calls: the values both experiences depend on. */
 const E = global.EMBER;
 assert.deepEqual([0, 0.24, 0.25, 0.5, 0.99, 1].map(E.Grid.walkPhase), [0, 0, 1, 2, 3, 3]);

@@ -14,6 +14,10 @@ context.Image = function Image() {};
 vm.createContext(context);
 vm.runInContext(fs.readFileSync(path.join(root, 'js/maps.js'), 'utf8'), context);
 context.GAME.maps = context.GAME.maps || context.GAME.Maps;
+/* The renderer draws through the engine's pixel and interior-kit modules. */
+['engine/ember-pixel.js', 'engine/ember-interior-kit.js'].forEach((file) => {
+  vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context);
+});
 vm.runInContext(fs.readFileSync(path.join(root, 'js/retro-authored.js'), 'utf8'), context);
 
 const maps = context.GAME.maps.maps;
