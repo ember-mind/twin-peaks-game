@@ -156,7 +156,7 @@ for (const prop of Art.definitions) {
   assert(prop.bounds.every(Number.isInteger) && prop.shadow.every(Number.isInteger),
     prop.id + ' bounds and shadow are integer rectangles');
 }
-assert.equal(Art.definitions.length, 6, 'six grounded props: everything else is architecture');
+assert.equal(Art.definitions.length, 11, 'eleven grounded props: everything else is architecture');
 assert.equal(Art.fanFoot, 64, 'the ceiling fan sorts at the foot of the upper hall row');
 assert.equal(Art.doorFoot, 192, 'the door casing sorts at the south wall foot line');
 
@@ -264,13 +264,18 @@ assert(hasRect(depth32, 97, 18, 14, 13), '32px interval selects Laura dresser');
 assert(!hasRect(depth32, 75, 37, 11, 11), 'half-open interval excludes the ceiling fan at 64px');
 const depth80 = foregroundCalls(64, 112);
 assert(hasRect(depth80, 75, 37, 11, 11), '64px interval repaints the ceiling fan over the top of the stairs');
+assert(hasRect(depth80, 111, 78, 18, 20), '64px interval selects the wing chair north of the rug');
 assert(!hasRect(depth80, 47, 88, 18, 25), '64px interval excludes the living room furniture at 112px');
 const depth112 = foregroundCalls(112, 144);
 assert(hasRect(depth112, 47, 88, 18, 25), '112px interval selects the settee');
 assert(hasRect(depth112, 223, 84, 17, 28), '112px interval selects the phonograph console');
+assert(hasRect(depth112, 206, 84, 18, 28), '112px interval selects the upright piano');
+assert(hasRect(depth112, 78, 116, 20, 10), '112px interval selects the low table on the rug');
 assert(!hasRect(depth112, 32, 120, 32, 10), '112px interval excludes the dining table at 144px');
 const depth144 = foregroundCalls(144, 160);
 assert(hasRect(depth144, 32, 120, 32, 10), '144px interval selects the dining table');
+assert(hasRect(depth144, 190, 124, 18, 22), '144px interval selects the club chair on the oval');
+assert(hasRect(depth144, 208, 125, 16, 4), '144px interval selects the telephone table');
 assert(!hasRect(depth144, 33, 146, 14, 3), '144px interval excludes the chairs at 160px');
 const depth160 = foregroundCalls(160, 192);
 assert(hasRect(depth160, 33, 146, 14, 3), '160px interval selects the dining chairs');
@@ -317,6 +322,29 @@ assert(Art.wool.y <= console_.footY,
   'the braided oval reaches under the console foot (' + Art.wool.y + ' vs ' + console_.footY + ')');
 assert(Art.wool.x + Art.wool.w >= console_.bounds[0] + console_.bounds[2] - 2,
   'the braided oval reaches the console east side');
+
+// Il terzo destro (colonne 11-14) deve portare arredo vero, non un tappeto
+// nudo: la critica a freddo leggeva "empty floorboards with one rug and one
+// cabinet". Almeno tre pezzi solidi, e almeno uno staccato dal muro est.
+const rightThird = Art.definitions.filter((prop) =>
+  prop.cells.every(([x, y]) => x >= 11 && x <= 14 && y >= 5 && y <= 10));
+assert(rightThird.length >= 3,
+  'the right third carries at least three grounded props (' + rightThird.length + ')');
+assert(rightThird.some((prop) => prop.cells.every(([x]) => x <= 13)),
+  'at least one right-third prop stands off the east wall');
+const nook = Art.definitions.find((prop) => prop.id === 'nookChair');
+assert(Art.wool.y <= nook.footY && Art.wool.x <= nook.bounds[0],
+  'the club chair stands on the braided oval, not beside it');
+
+// Il gruppo di seduta e' un gruppo: il tavolino basso sta sul tappeto dipinto
+// e fra la poltrona verde e la poltrona alta, non su un'isola di parquet.
+const low = Art.definitions.find((prop) => prop.id === 'coffeeTable');
+const wing = Art.definitions.find((prop) => prop.id === 'wingChair');
+assert(low.bounds[0] >= Art.rug.x && low.bounds[0] + low.bounds[2] <= Art.rug.x + Art.rug.w,
+  'the low table stands inside the painted rug');
+assert(low.bounds[0] > armchair.bounds[0] && low.bounds[0] < wing.bounds[0],
+  'the low table sits between the armchair and the wing chair');
+assert(wing.footY <= Art.rug.y, 'the wing chair stands on the north edge of the rug');
 
 // Il ventilatore e' un corpo illuminante sul soffitto, non una macchia nera
 // sul muro: nessun pixel di contorno nero fra le pale.
@@ -469,7 +497,8 @@ function walkTo(name) {
     'real engine arrives at ' + name);
 }
 
-for (const name of ['rugCenter', 'sideboard', 'sofaSide', 'diningSide', 'landing', 'lauraBedFoot', 'lauraDresser']) {
+for (const name of ['rugCenter', 'sideboard', 'sofaSide', 'coffeeSide', 'wingChairFront', 'nook',
+  'nookSouth', 'diningSide', 'landing', 'lauraBedFoot', 'lauraDresser']) {
   walkTo(name);
 }
 
@@ -481,7 +510,7 @@ assert.deepEqual([Engine.state.mapId, Engine.state.player.tx, Engine.state.playe
 
 walkTo('sideboard');
 before = [Engine.state.mapId, Engine.state.player.tx, Engine.state.player.ty];
-assert.equal(tap('right'), false, 'the phonograph console rejects movement');
+assert.equal(tap('up'), false, 'the phonograph console rejects movement');
 assert.deepEqual([Engine.state.mapId, Engine.state.player.tx, Engine.state.player.ty], before,
   'console collision leaves player and map unchanged');
 assert.equal(storageWrites, 0, 'native scene traversal never writes a save');
