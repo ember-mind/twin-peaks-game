@@ -741,31 +741,37 @@
   }
 
   function drawWingChair(R, p) {
-    /* A rose wing chair with its back to the stair wall, north of the rug:
-     * the group has a third seat, and the actor who walks the rug passes in
-     * front of it instead of crossing bare floor. */
+    /* A wing chair with its back to the stair wall, north of the rug: the
+     * group has a third seat, and the actor who walks the rug passes in front
+     * of it.  The wings are a value darker than the inner back and the lace
+     * antimacassar sits off centre, so the back never reads as a flat slab
+     * with a symmetric pair of marks on it. */
     R(111, 78, 18, 20, p.ink);
-    R(112, 79, 16, 11, p.roseDeep);
-    R(113, 80, 14, 8, p.rose); R(113, 80, 14, 1, p.roseHi);
-    R(119, 80, 1, 8, p.roseDeep);
-    R(111, 82, 3, 9, p.roseDeep); R(112, 83, 1, 7, p.rose);
-    R(126, 82, 3, 9, p.roseDeep); R(128, 83, 1, 7, p.roseDeep);
-    R(114, 88, 12, 6, p.roseDeep);
-    R(115, 89, 10, 4, p.rose); R(115, 89, 10, 1, p.roseHi);
-    R(117, 90, 6, 2, p.roseDeep);
+    R(111, 79, 4, 12, '#4d353a'); R(111, 79, 1, 12, '#5c3f45');
+    R(125, 79, 4, 12, '#4d353a');
+    R(115, 79, 10, 10, '#5c3f45');
+    R(116, 80, 8, 8, p.roseDeep); R(116, 80, 8, 1, p.rose);
+    R(117, 80, 5, 4, p.lace); R(117, 80, 5, 1, '#f3eee2');
+    R(117, 83, 5, 1, p.laceDim);
+    R(115, 88, 10, 6, p.roseDeep); R(115, 88, 10, 1, p.rose);
+    R(118, 90, 4, 2, '#5c3f45');
+    R(111, 88, 4, 3, '#5c3f45'); R(125, 88, 4, 3, '#4d353a');
     R(113, 94, 3, 3, p.walnutDeep); R(124, 94, 3, 3, p.walnutDeep);
     R(113, 97, 3, 1, p.ink); R(124, 97, 3, 1, p.ink);
   }
 
   function drawCoffeeTable(R, p) {
     /* The low table on the rug in front of the armchair: the seat, the rug
-     * and the table are the conversation group the room never had. */
+     * and the table are the conversation group the room never had.  An oak
+     * top, a cream magazine and a brass bowl, so it separates from the
+     * burgundy field instead of sinking into it. */
     R(78, 116, 20, 10, p.ink);
-    R(79, 117, 18, 8, p.walnutDark); R(79, 117, 18, 1, p.walnutHi);
-    R(81, 118, 14, 6, p.walnut);
-    R(82, 119, 7, 4, p.laceDim); R(82, 119, 7, 1, p.lace);
-    R(84, 121, 4, 1, '#8b8574');
-    R(91, 120, 4, 3, '#3c3c3c'); R(92, 120, 2, 1, '#6a6a6a');
+    R(79, 117, 18, 8, p.walnut); R(79, 117, 18, 1, p.walnutHi);
+    R(81, 118, 14, 6, p.oak); R(81, 118, 14, 1, p.mapleHi);
+    R(82, 119, 7, 4, p.lace); R(82, 119, 7, 1, '#f3eee2');
+    R(84, 121, 4, 1, p.laceDim);
+    R(91, 119, 4, 3, p.brassDark); R(91, 119, 4, 1, p.brass);
+    R(92, 120, 2, 1, p.brassHi);
     R(80, 126, 3, 3, p.walnutDeep); R(93, 126, 3, 3, p.walnutDeep);
     R(80, 129, 3, 1, p.ink); R(93, 129, 3, 1, p.ink);
   }
