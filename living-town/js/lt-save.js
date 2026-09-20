@@ -384,7 +384,10 @@
      * the order they were first asked. See the note at the top of this file. */
     (saved.reissue || []).forEach(function (r) {
       var actor = sim.state.characters[r.actorId];
-      if (!actor.activity && !actor.pending) sim.requestDecision(actor, r.reason, r.seq, r.issuedAbs);
+      /* Someone with nothing in hand — or someone mid-talk who had been asked
+       * whether to carry on: that question is put to a person who is busy. */
+      var midTalk = r.reason === 'conversation_turn' && !!sim.openTurnOf(actor);
+      if ((!actor.activity || midTalk) && !actor.pending) sim.requestDecision(actor, r.reason, r.seq, r.issuedAbs);
     });
 
     return sim;

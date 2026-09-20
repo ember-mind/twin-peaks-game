@@ -33,7 +33,7 @@
     ambition: 'ambition', income: 'the money, with a goal to reach', obligation: 'it is the job',
     goal_completion: 'it would reach the goal', commitment_keep: 'a promise to keep',
     commitment_pull: 'a promise waiting there', work_pull: 'the shift', social: 'wanting company',
-    closeness: 'how close the two are', asked: 'having been asked', keep_to_oneself: 'wanting to be left alone',
+    closeness: 'how close the two are', asked: 'having been asked', keep_to_oneself: 'wanting to be left alone', said_enough: 'having talked a while', ready_to_go: 'being ready to go',
     food_at_home: 'food at home', kindness: 'seeing someone in need', find_help: 'nowhere else to turn', meal_there: 'a meal to be had there', evening_home: 'the day being done', rest_at_home: 'a bed at home', commitments_preserved: 'the promises it leaves intact',
     rest: 'needing rest', cash_needed: 'an empty pocket', baseline: 'nothing better to do',
     money_cost: 'what it costs', energy_cost: 'how tiring it is', time_cost: 'the time it takes',
@@ -174,7 +174,7 @@
   var TOLD = {   // event types worth a line of their own, most telling first
     GOAL_REACHED: 1, GOAL_MISSED: 1, COMMITMENT_BROKEN: 1, COMMITMENT_KEPT: 1, TALKED: 1,
     OFFER_ACCEPTED: 1, OFFER_DECLINED: 1, OFFER_LAPSED: 1, ACTIVITY_FAILED: 1, WITHDREW: 1,
-    WENT_HUNGRY: 1, HELPED_OUT: 1, SAID: 1, GOAL_SET: 1, MONEY_ARRIVED: 1, BILL_PAID: 1,
+    WENT_HUNGRY: 1, HELPED_OUT: 1, SAID: 1, TALK_WOUND_DOWN: 1, GOAL_SET: 1, MONEY_ARRIVED: 1, BILL_PAID: 1,
     WALLET_LOST: 1, WALLET_FOUND: 1, WALLET_RETURNED: 1, WALLET_KEPT: 1, WALLET_RECOVERED: 1, TALK_DECLINED: 1, TALK_UNANSWERED: 1, BOOK_READ: 1, FOOD_PARCEL_OPENED: 1, INTERVENTION_APPLIED: 1
   };
 

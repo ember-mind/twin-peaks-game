@@ -56,6 +56,13 @@
     return ctx.minute >= loc.opens && ctx.minute < loc.closes;
   }
 
+  function talkMeta(ctx) {
+    var c = ctx.target, otherId = c.participants[0] === ctx.actor.id ? c.participants[1] : c.participants[0];
+    var other = ctx.state.characters[otherId];
+    return { withId: otherId, withName: other ? other.name : null, minutesSoFar: ctx.absMinute - c.startAbs, minutesLeft: Math.max(0, c.endAbs - ctx.absMinute),
+             said: (c.lines || []).slice(-4).map(function (l) { return { byId: l.actorId, text: l.text }; }) };
+  }
+
   function personPresent(ctx, id) {
     var other = ctx.state.characters[id];
     return !!(other && other.location === ctx.actor.location && !other.transit);
@@ -407,6 +414,24 @@
       },
       tick: function (ctx, m) { need(ctx, 'energy', -0.005 * m); },
       onComplete: function (ctx) { ctx.sim.settleConversation(ctx.activity.conversationId); }
+    },
+
+    /* Mid-talk: carry on, or bring it to a close. Neither starts anything —
+     * the simulation takes the answer and the talk goes on or ends (see
+     * Sim.answerTurn); the durations say what each would mean. */
+    keep_talking: {
+      id: 'keep_talking', label: 'Keep talking', targetKind: 'conversation', interruptible: false, position: 'anywhere',
+      duration: function (ctx) { return Math.max(1, ctx.target.endAbs - ctx.absMinute); },
+      eligible: function (ctx) { return ctx.sim.openTurnOf(ctx.actor) === ctx.target ? true : { reason: 'no_turn_open' }; },
+      candidateMeta: function (ctx) { return talkMeta(ctx); },
+      tick: function () {}
+    },
+    wind_down: {
+      id: 'wind_down', label: 'Bring the talk to a close', targetKind: 'conversation', interruptible: false, position: 'anywhere',
+      duration: function () { return 1; },
+      eligible: function (ctx) { return ctx.sim.openTurnOf(ctx.actor) === ctx.target ? true : { reason: 'no_turn_open' }; },
+      candidateMeta: function (ctx) { return talkMeta(ctx); },
+      tick: function () {}
     },
 
     decline_conversation: {

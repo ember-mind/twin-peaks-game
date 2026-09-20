@@ -157,6 +157,32 @@
         terms.keep_to_oneself = 4;
         break;
 
+      /* Mid-talk. Carrying on is worth what company is worth, less each time
+       * round; closing it is worth whatever is pressing — an empty stomach, a
+       * tired body, a shift that has begun, a promise that the rest of the talk
+       * would squeeze out. */
+      case 'keep_talking': {
+        var krel = req.relationships[cand.meta.withId];
+        terms.social = 10 * (0.5 + trait(req, 'sociability'));
+        if (krel) terms.closeness = (krel.closeness / 100) * 7;
+        terms.said_enough = -(cand.meta.minutesSoFar || 0) * 0.22;
+        break;
+      }
+      case 'wind_down': {
+        terms.ready_to_go = 3;
+        if (hunger >= 60) terms.hunger_relief = Math.pow(hunger / 100, 2) * 40;
+        if (energy <= 30) terms.energy_relief = Math.pow((100 - energy) / 100, 2) * 30;
+        var job = req.self.employment;
+        if (job && req.minute >= job.shiftStart && req.minute < job.shiftEnd - 15) terms.work_pull = 40 * trait(req, 'conscientiousness');
+        var pressed = 0, stayUntil = nowAbs + (cand.meta.minutesLeft || 0);
+        openCommitments(req).forEach(function (c) {
+          if (c.withId === cand.meta.withId && c.kind === 'social') return;      // the talk itself is that promise
+          if (!stillReachable(req, c, stayUntil, here) && stillReachable(req, c, nowAbs + 1, here)) pressed += commitmentWeight(req, c);
+        });
+        if (pressed) terms.commitment_pull = pressed;
+        break;
+      }
+
       case 'join_conversation':
       case 'talk_with': {
         var withId = cand.actionId === 'talk_with' ? cand.targetId : cand.meta.withId;

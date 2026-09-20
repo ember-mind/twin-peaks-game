@@ -42,8 +42,25 @@ without words do exactly the same things (`test/remote-policy.js`).
   moment never comes, the line is dropped.
 - The offline `UtilityPolicy` has no words, and nothing is ever said for it.
 
-One opening line and one reply per conversation is all there is. There are no
-further turns yet: that needs a request kind of its own (see below).
+## Turns within a talk
+
+Nine and seventeen minutes into a talk, each of the two is asked — through
+their own policy, while the talk goes on — whether to carry on. The request's
+`context.reason` is `conversation_turn` and its only candidates are
+`keep_talking:<conv>` and `wind_down:<conv>`; nothing else can be chosen
+mid-talk, and the two are offered at no other time. Each candidate's `meta`
+carries who the talk is with, the minutes so far and left, and the last lines
+said (`said: [{ byId, text }]`), so a provider answers what it was just told.
+`say` on either answer is spoken at once. So a talk is up to six lines:
+opening, reply, and two exchanges.
+
+Either person winding down ends the talk with that minute. It is still one
+talk with one settlement, for the minutes it lasted. A turn has three town
+minutes to be answered; no answer, an error or an unavailable provider all
+mean "carry on", are recorded (`turn_lapsed`), and never drop anyone into
+waiting mid-talk. The offline policy carries on for company and closes for
+hunger, tiredness, a shift that has begun, or a promise the rest of the talk
+would squeeze out. A save taken with a turn open re-asks it on load.
 
 ## Slow and unreliable
 
@@ -70,9 +87,7 @@ simulation's own timeout (`decisionTimeoutMinutes`, town minutes) applies as bef
   under the same ids until "Back to now". A replay that stops matching the
   recording says so. The recording lives in the page: it is not saved, so
   after a reload only moments since the reload can be looked back at.
-- Conversations have no turns beyond opening and reply, and no topic. A
-  `conversation_turn` request with `say_more` / `wind_down` candidates is the
-  shape that fits the existing rules.
+- A talk has no topic of its own: what it is about is whatever the lines say.
 - A budget per day. What exists is `maxInFlight` and the hybrid below.
 
 ## Asking only when it matters

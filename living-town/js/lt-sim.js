@@ -47,7 +47,13 @@
   var ROUTINE = { ACTIVITY_STARTED: 1, ACTIVITY_COMPLETED: 1, ACTIVITY_REACHED: 1, ACTIVITY_INTERRUPTED: 1, ARRIVED: 1, DEPARTED: 1,
                   GREETED: 1, RESTED: 1, BROKE: 1, PREPARED: 1, SLEPT: 1, ATE: 1, WORKED: 1, WORKED_EXTRA: 1, PRACTISED: 1,
                   TALK_PROPOSED: 1, TALK_BEGAN: 1, INTERVENTION_SCHEDULED: 1 };
-  var SPOKEN = { talk_with: 1, join_conversation: 1, decline_conversation: 1 };
+  var SPOKEN = { talk_with: 1, join_conversation: 1, decline_conversation: 1, keep_talking: 1, wind_down: 1 };
+  /* A talk has two moments at which either person may bring it to a close or
+   * carry on: nine and seventeen minutes in. Each is a question put to that
+   * person's own policy while the talk goes on around it; they have
+   * TURN_MINUTES to answer, and saying nothing means carrying on. */
+  var TURN_AT = [9, 17], TURN_MINUTES = 3;
+  var TURN_ACTIONS = { keep_talking: 'keep', wind_down: 'wind' };
 
   function Sim(opts) {
     opts = opts || {};
@@ -854,6 +860,93 @@
 
   /* Settlement has the conversation's identity, not an activity's: two people
    * finishing the same talk settle it once. */
+  /* ---------------- turns within a talk ---------------- */
+
+  Sim.prototype.openTurnOf = function (actor) {
+    var act = actor.activity;
+    if (!act || !act.conversationId || act.phase !== 'executing') return null;
+    var conv = this.conversationById(act.conversationId);
+    return (conv && conv.status === 'active' && conv.turn && conv.turn.answers[actor.id] === undefined) ? conv : null;
+  };
+
+  Sim.prototype.conversationTurns = function () {
+    var self = this, now = this.absMinute();
+    this.state.conversations.forEach(function (conv) {
+      if (conv.status !== 'active') return;
+      var elapsed = now - conv.startAbs, done = conv.turnsDone || 0;
+      if (!conv.turn && done < TURN_AT.length && elapsed >= TURN_AT[done] && elapsed < conv.minutes - 2) {
+        conv.turn = { index: done, openedAbs: now, answers: {} };
+        self.touch();
+      }
+      if (!conv.turn) return;
+      if (now - conv.turn.openedAbs >= TURN_MINUTES) return self.closeTurn(conv);
+      conv.participants.forEach(function (id) {
+        var actor = self.state.characters[id];
+        if (conv.turn.answers[id] === undefined && !actor.pending) self.requestDecision(actor, 'conversation_turn');
+      });
+    });
+  };
+
+  /* The answer to a turn is not a new activity: the talk either goes on or is
+   * brought to a close, and whatever the person said is said now. */
+  Sim.prototype.answerTurn = function (actor, conv, answer) {
+    if (!conv.turn || conv.turn.answers[actor.id] !== undefined) return false;
+    conv.turn.answers[actor.id] = answer;
+    this.touch();
+    this.speak(actor, conv);
+    if (answer === 'wind') { this.windDown(conv, actor); return true; }
+    var all = conv.participants.every(function (id) { return conv.turn.answers[id] !== undefined; });
+    if (all) this.closeTurn(conv);
+    return true;
+  };
+
+  Sim.prototype.lapseTurn = function (actor, request) {
+    if (!request.context || request.context.reason !== 'conversation_turn') return false;
+    var conv = this.openTurnOf(actor);
+    if (conv) this.answerTurn(actor, conv, 'none');
+    return true;
+  };
+
+  Sim.prototype.closeTurn = function (conv) {
+    var self = this;
+    conv.participants.forEach(function (id) {
+      var actor = self.state.characters[id];
+      if (conv.turn.answers[id] === undefined) conv.turn.answers[id] = 'none';
+      /* A question still out is withdrawn: its answer, if it ever comes, is late. */
+      var rec = actor.pending && self.requests[actor.pending.requestId];
+      if (rec && rec.request.context && rec.request.context.reason === 'conversation_turn') {
+        if (!rec.resolved) { rec.resolved = true; rec.timedOut = true; self.reject(rec.request, 'turn_lapsed'); }
+        actor.pending = null;
+      }
+    });
+    conv.turns = conv.turns || [];
+    conv.turns.push({ index: conv.turn.index, openedAbs: conv.turn.openedAbs, answers: conv.turn.answers });
+    conv.turnsDone = (conv.turnsDone || 0) + 1;
+    conv.turn = null;
+    this.touch();
+  };
+
+  /* One of the two brings it to a close. It is still a talk they had: it
+   * settles as one, for the minutes it lasted, at the end of this minute. */
+  Sim.prototype.windDown = function (conv, by) {
+    var self = this, now = this.absMinute();
+    conv.woundDownBy = by.id;
+    /* Answers are applied at the top of a minute; the talk ends with that minute. */
+    conv.minutes = (now - conv.startAbs) + 1;
+    conv.endAbs = now + 1;
+    this.closeTurn(conv);
+    conv.participants.forEach(function (id) {
+      var act = self.state.characters[id].activity;
+      if (act && act.conversationId === conv.id) { act.plannedMinutes = act.elapsed + 1; act.endAbs = now + 1; }
+    });
+    var other = this.state.characters[conv.participants[0] === by.id ? conv.participants[1] : conv.participants[0]];
+    this.emit('TALK_WOUND_DOWN', {
+      actorId: by.id, locationId: conv.locationId, notify: [other.id],
+      data: { conversationId: conv.id, withId: other.id, minutes: conv.minutes },
+      text: by.name + ' brought the talk with ' + other.name + ' to a close after ' + conv.minutes + ' minutes.'
+    });
+  };
+
   Sim.prototype.settleConversation = function (id) {
     var conv = this.conversationById(id);
     if (!conv || conv.status !== 'active') return null;
@@ -1466,6 +1559,8 @@
     if (!shape.ok) {
       actor.pending = null;
       var refused = this.reject(request, shape.error, shape.detail || null);
+      /* A turn that could not be answered is a turn not answered: the talk goes on. */
+      if (this.lapseTurn(actor, request)) return refused;
       /* The policy, not the world, is what went wrong here, so asking it again
        * this minute would spin: a policy that answers with garbage once will
        * answer with garbage again. The character waits instead, tagged as a
@@ -1476,9 +1571,29 @@
     if (shape.unavailable) {
       actor.pending = null;
       this.reject(request, 'policy_unavailable');
+      if (this.lapseTurn(actor, request)) return null;
       return this.fallback(actor, 'policy_unavailable');
     }
 
+    /* Mid-talk, the only thing someone can be asked is whether to carry on. */
+    var turnConv = this.openTurnOf(actor);
+    if (turnConv && request.context && request.context.reason === 'conversation_turn') {
+      actor.pending = null;
+      var choice = null;
+      request.candidates.forEach(function (c) { if (c.id === response.selectedId) choice = c; });
+      if (!choice || !TURN_ACTIONS[choice.actionId] || choice.targetId !== turnConv.id) return this.reject(request, 'candidate_no_longer_legal', { candidateId: response.selectedId });
+      var said = Pol.cleanWords(response.words);
+      actor.sayNext = (said && said.say) ? { text: said.say, source: response.source || actor.policyId } : null;
+      this.answerTurn(actor, turnConv, TURN_ACTIONS[choice.actionId]);
+      actor.recentDecisions.unshift({
+        requestId: request.requestId, stamp: request.clock, day: request.day,
+        selectedId: choice.id, actionId: choice.actionId, label: choice.label,
+        source: response.source || actor.policyId, candidateCount: request.candidates.length,
+        diagnostics: response.diagnostics || null, words: said, rejectedCandidates: rec.rejectedCandidates
+      });
+      if (actor.recentDecisions.length > 20) actor.recentDecisions.pop();
+      return null;
+    }
     if (actor.activity) { actor.pending = null; return this.reject(request, 'actor_already_busy'); }
 
     /* The two refusals below are different in kind: the answer was well formed
@@ -1579,6 +1694,7 @@
       self.advanceActivity(actor, 1);
     });
 
+    this.conversationTurns();
     this.evaluateCommitments();
     this.expireOffers();
     this.expireProposals();

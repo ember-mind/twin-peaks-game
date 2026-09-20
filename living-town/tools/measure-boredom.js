@@ -22,13 +22,13 @@ const WAKE_FROM = 390, WAKE_TO = 1350;          // 06:30 – 22:30, the last min
 const DEAD_AT_MOST = 1;                         // interest <= 1 for everyone: nothing to watch
 const KEPT_STRETCHES = 5;
 const BEAT_TYPES = ['GOAL_REACHED', 'GOAL_MISSED', 'COMMITMENT_KEPT', 'COMMITMENT_BROKEN', 'TALKED', 'TALK_DECLINED',
-  'TALK_UNANSWERED', 'OFFER_ACCEPTED', 'OFFER_DECLINED', 'ACTIVITY_FAILED', 'BOOK_READ', 'FOOD_PARCEL_OPENED', 'INTERVENTION_APPLIED'];
+  'TALK_UNANSWERED', 'OFFER_ACCEPTED', 'OFFER_DECLINED', 'ACTIVITY_FAILED', 'BOOK_READ', 'FOOD_PARCEL_OPENED', 'INTERVENTION_APPLIED', 'TALK_WOUND_DOWN', 'WENT_HUNGRY', 'HELPED_OUT'];
 
 function isBeat(e) { return BEAT_TYPES.indexOf(e.type) >= 0; }
 
 function emptyBucket(ids) {
   const b = { wakingMinutes: 0, deadMinutes: 0, liveMinutes: 0, longestDeadStretch: { minutes: 0, start: null },
-    beats: 0, beatsByType: {}, decisions: 0, closeCalls: 0, distinctActivities: {}, placesVisited: {}, togetherMinutes: 0 };
+    beats: 0, beatsByType: {}, decisions: 0, turnDecisions: 0, closeCalls: 0, distinctActivities: {}, placesVisited: {}, togetherMinutes: 0 };
   ids.forEach((id) => { b.distinctActivities[id] = []; b.placesVisited[id] = []; });
   return b;
 }
@@ -67,6 +67,7 @@ async function measure(sim, opts) {
         seen[d.requestId] = true;
         const bucket = perDay[d.day] || day;
         bucket.decisions++;
+        if (d.actionId === 'keep_talking' || d.actionId === 'wind_down') bucket.turnDecisions++;   // answered mid-talk: no activity begins
         const why = LT.Story.why(d);
         if (why && why.close === true) bucket.closeCalls++;
       });
@@ -108,7 +109,7 @@ async function measure(sim, opts) {
   Object.keys(perDay).forEach((k) => {
     const day = perDay[k], mine = stretches.filter((s) => s.day === Number(k)).sort(longestFirst);
     if (mine.length) day.longestDeadStretch = { minutes: mine[0].minutes, start: mine[0].start };
-    ['wakingMinutes', 'deadMinutes', 'liveMinutes', 'beats', 'decisions', 'closeCalls', 'togetherMinutes'].forEach((f) => { overall[f] += day[f]; });
+    ['wakingMinutes', 'deadMinutes', 'liveMinutes', 'beats', 'decisions', 'turnDecisions', 'closeCalls', 'togetherMinutes'].forEach((f) => { overall[f] += day[f]; });
     Object.keys(day.beatsByType).forEach((t) => { overall.beatsByType[t] = (overall.beatsByType[t] || 0) + day.beatsByType[t]; });
     ids.forEach((id) => {
       day.distinctActivities[id].sort(); day.placesVisited[id].sort();
@@ -139,6 +140,7 @@ function table(r) {
   row('beats', (b) => b.beats);
   r.beatTypes.forEach((t) => { if (r.overall.beatsByType[t]) row('  ' + t, (b) => b.beatsByType[t] || 0); });
   row('decisions', (b) => b.decisions);
+  row('  of which mid-talk', (b) => b.turnDecisions);
   row('close calls', (b) => b.closeCalls);
   ids.forEach((id) => row('activities: ' + r.inhabitants[id], (b) => b.distinctActivities[id].length));
   ids.forEach((id) => row('places: ' + r.inhabitants[id], (b) => b.placesVisited[id].length));

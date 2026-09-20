@@ -82,6 +82,7 @@
   P.candidates = function (sim, actor) {
     var legal = [], rejected = [];
     var seen = {};
+    var turn = sim.openTurnOf ? sim.openTurnOf(actor) : null;
 
     function consider(actionId, target, extra) {
       var def = A.get(actionId);
@@ -110,6 +111,14 @@
         interruptible: !!def.interruptible,
         meta: metaOf(def, ctx, extra)
       });
+    }
+
+    /* In the middle of a talk, with the question of whether to carry on put
+     * to them, that is the whole of what someone can choose between. */
+    if (turn) {
+      consider('keep_talking', turn);
+      consider('wind_down', turn);
+      return { legal: legal, rejected: rejected };
     }
 
     // things standing in the room

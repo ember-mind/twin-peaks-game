@@ -65,7 +65,7 @@
     }).join('; ') + '.');
     var mem = (req.memories || []).slice(0, memoryCount);
     if (mem.length) { out.push('You remember:'); mem.forEach(function (m) { out.push('  - ' + m.stamp + ': ' + m.summary); }); }   // a memory does not record whether it was seen or told, so the brief claims neither
-    out.push('Why you are deciding now: ' + ({ idle: 'you have nothing in hand', activity_complete: 'you have just finished something', interrupted: 'you were interrupted' }[req.context && req.context.reason] || 'you have nothing in hand') + '.');
+    out.push('Why you are deciding now: ' + ({ idle: 'you have nothing in hand', activity_complete: 'you have just finished something', interrupted: 'you were interrupted', conversation_turn: 'you are in the middle of a talk, and can carry on or bring it to a close' }[req.context && req.context.reason] || 'you have nothing in hand') + '.');
     out.push('Options:');
     req.candidates.forEach(function (c, i) {
       var meta = detail && c.meta && Object.keys(c.meta).length ? ' ' + JSON.stringify(c.meta) : '';
