@@ -202,7 +202,7 @@ function lampsReadTheClockAndNothingElse() {
   ok(JSON.stringify(day.log) === JSON.stringify(none.log), 'and a frame with no minute at all is the unlit one, not a broken one');
   const doors = TP.plan('street', rowsOf('street')).pieces.filter((p) => p.kind === 'door').length;
   const lit = night.log.filter((e) => e[5] === '#ffdc82').length;
-  ok(doors === 2 && lit === doors && day.log.filter((e) => e[5] === '#ffdc82').length === 0,
+  ok(doors === 6 && lit === doors && day.log.filter((e) => e[5] === '#ffdc82').length === 0,
      'each of the street\'s ' + doors + ' house doors carries a lantern, lit at midnight and out at midday');
 }
 
@@ -222,7 +222,38 @@ function paintStaysInsideTheFrame() {
   ok(true, 'every rectangle of every place lands within one overdraw tile of the native frame');
 }
 
+function streetFrontsAgree() {
+  console.log('# the street has seven entrances inside two continuous building bands');
+  const rows = rowsOf('street'), plan = TP.plan('street', rows), counts = {};
+  plan.pieces.forEach((p) => {
+    const cells = p.cells || Array.from({length:p.w * p.h}, (_, i) => ({x:p.x + i % p.w, y:p.y + Math.floor(i / p.w)}));
+    cells.forEach(c => { const k=c.x + ',' + c.y; counts[k]=(counts[k] || 0)+1; });
+  });
+  const blocked = W.blockedCells('street');
+  ok(blocked.length === 94 && blocked.every(c => counts[c] === 1),
+    'all 94 solid cells (house fronts, the park boundary, garden walls and fences) are claimed exactly once');
+  const doors = plan.pieces.filter(p => p.kind === 'door'), gates = plan.pieces.filter(p => p.kind === 'gate');
+  ok(doors.length === 6 && gates.length === 1 && gates[0].x === 8 && gates[0].y === 8,
+    'six house/shop doors and the park gate occupy the seven real D runs');
+  ok(doors.map(d=>d.destination).sort().join(',') === 'cafe,flat_a,flat_b,flat_c,flat_d,flat_e',
+    'each home and the cafe have their own entrance material');
+  ok(doors.concat(gates).every(d => {
+    const portal = W.STREET_PORTALS[d.destination];
+    return portal && portal.x >= d.x && portal.x < d.x + d.w && Math.abs(portal.y - d.y) === (d.kind === 'gate' ? 0 : 1);
+  }), 'every entrance accent matches the actual world destination, including the attic and ground-floor home');
+  ok(plan.fronts.filter(f=>f.side === 'north').every(f=>f.h * 16 >= 48),
+    'the north facades have at least 48 pixels of wall');
+  ok(plan.northPavement === 3 && plan.southPavement === 7,
+    'rows 3 and 7 are pavements; only rows 4 through 6 form the carriageway');
+  const front = recorder(), behind = recorder();
+  TP.drawForeground(front, 'street', rows, 0, -8, 48, 49, {minute:600});
+  TP.drawForeground(behind, 'street', rows, 0, -8, 49, 143, {minute:600});
+  ok(front.log.length > 0 && behind.log.length === 0,
+    'north lintels and the cafe awning repaint at door depth, never over pavement walkers');
+}
+
 artAndRowsAgree();
+streetFrontsAgree();
 furnitureIsWhereTheWorldSaysItIs();
 depthIsCorrect();
 itIsAProjection();

@@ -1,0 +1,238 @@
+{
+  "schemaVersion": 1,
+  "slug": "street-fronts",
+  "generatedAt": "2026-09-20T16:33:23.689Z",
+  "files": [
+    {
+      "path": "evidence/baseline-agreement.json",
+      "bytes": 3573,
+      "sha256": "766aca446c8a9eab3a162278498d44eda225d19e2b40cbfa5b881a91b171ef8d"
+    },
+    {
+      "path": "evidence/baseline-street.png",
+      "bytes": 16135,
+      "sha256": "ad4a76230525a9b1e36bbd3365fcba333cdd5fc25b3e742374459c1443cc6243"
+    },
+    {
+      "path": "evidence/capture-check.log",
+      "bytes": 200,
+      "sha256": "41d64e7f788c2b97fe98f40b625a522fad94a2ed4cb7d84e5f46f195cc1b284e"
+    },
+    {
+      "path": "evidence/package-tests.log",
+      "bytes": 3479,
+      "sha256": "1f1243ec12cfdcc409c27deceac05f6db33225815f2c92b496cd68bce0f82c8a"
+    },
+    {
+      "path": "evidence/reference-03-noon-cafe.png",
+      "bytes": 15101,
+      "sha256": "e59f1010ab5182bda75b4d26e5e0412356104414325e6bf3ba6558a592da3f7f"
+    },
+    {
+      "path": "evidence/reference-05-evening-cafe.png",
+      "bytes": 15067,
+      "sha256": "3c4f52ac772b52446f5772737e30ad9094b784f2fad042d5440ab3c5ac304d5c"
+    },
+    {
+      "path": "evidence/round1-02-street.png",
+      "bytes": 10806,
+      "sha256": "510d3f25ecd440f2db0ef436b9008e3e89c2d2681b2bdff68cc394df53f6e206"
+    },
+    {
+      "path": "evidence/round1-04-hour-1.png",
+      "bytes": 10749,
+      "sha256": "1e78050c587b8b22eeb3fef0d465a926fd20b68d867714e0eced30833959ae5c"
+    },
+    {
+      "path": "evidence/round1-06-street-door-north.png",
+      "bytes": 10460,
+      "sha256": "a0f586ee386cab7daf5eef2ee32b29ebcbc4ccf5668c421b4d08477eb034c18a"
+    },
+    {
+      "path": "evidence/round1-06-street-door-south.png",
+      "bytes": 10492,
+      "sha256": "5d60761024f5b4e20ac3837ade9de32d33df9b1aa9ef27d90bd38e71d2c3d383"
+    },
+    {
+      "path": "evidence/round1-06-street-east.png",
+      "bytes": 10456,
+      "sha256": "cfe87e18154d57cab51407ff96ebaff5986bda3b60f8a863555054c4f9e32a06"
+    },
+    {
+      "path": "evidence/round1-06-street-west.png",
+      "bytes": 10192,
+      "sha256": "f831c8de6dd4483acfde51d218936773f8b82c05d412592270ed00751fa0a605"
+    },
+    {
+      "path": "evidence/round2-02-street.png",
+      "bytes": 11387,
+      "sha256": "847c363b927f9c365cf2ae5067da5297a090cd66bb1660aa537f1aa3acd57765"
+    },
+    {
+      "path": "evidence/round2-04-hour-1.png",
+      "bytes": 11337,
+      "sha256": "d4096afd5be47f0dcd45d5d8c8d6fc4c72801fdcf0fe4d84190b8c611c5716b4"
+    },
+    {
+      "path": "evidence/round2-06-street-door-north.png",
+      "bytes": 11076,
+      "sha256": "6d9f812d41c4a6a18a2463874522cc93559d94de1bc2acd8ac592f77742ef717"
+    },
+    {
+      "path": "evidence/round2-06-street-door-south.png",
+      "bytes": 11045,
+      "sha256": "2d70ed117b70ca4c435015fc2b29aaad06aa7570cfa5a7536fb3eba0a584a660"
+    },
+    {
+      "path": "evidence/round2-06-street-east.png",
+      "bytes": 11075,
+      "sha256": "d829dc2df92abea1112bedc7b83485101cc91749c2f3d804f4c6e45934ce494f"
+    },
+    {
+      "path": "evidence/round2-06-street-west.png",
+      "bytes": 10838,
+      "sha256": "0d3fac08948a94e8fda80bfb158de625ec263f5de9d5d2bee43538edd3068ef3"
+    },
+    {
+      "path": "evidence/round2-capture.log",
+      "bytes": 2039,
+      "sha256": "71db3e77a0ec2e946746401935fb93cec33e2e98ef3ed2dd749839fe05e148dc"
+    },
+    {
+      "path": "evidence/round3-02-street.png",
+      "bytes": 11502,
+      "sha256": "e49a5552ad8e06aac62eb7740dba058813a4b28b20821173a2708ba70296dc2a"
+    },
+    {
+      "path": "evidence/round3-04-hour-1.png",
+      "bytes": 11425,
+      "sha256": "36da2c5bdacab0a8181192e91f498cbd323b79a43f79e192564596494f9379c4"
+    },
+    {
+      "path": "evidence/round3-06-street-approach-east.png",
+      "bytes": 10896,
+      "sha256": "fe02568d2c682aad7a83e7268b4a79476e3812bce559427f9ee37aa4e64d1124"
+    },
+    {
+      "path": "evidence/round3-06-street-approach-west.png",
+      "bytes": 10697,
+      "sha256": "105bedb17b4649eba8eb16118ab7b9b16759270ba3cc58b2237624e5e48170ce"
+    },
+    {
+      "path": "evidence/round3-06-street-door-north.png",
+      "bytes": 11214,
+      "sha256": "3faf236f7e23687334b7b19f780fa958fd7cdc44505f40cec3eb6cde7a476ded"
+    },
+    {
+      "path": "evidence/round3-06-street-door-south.png",
+      "bytes": 11169,
+      "sha256": "efee8b7de353bc52036ce34845a6068616088aeea6e917cdc2f90085227a4b3a"
+    },
+    {
+      "path": "evidence/round3-06-street-east.png",
+      "bytes": 11214,
+      "sha256": "c534cfd58353663aa5f805d7d292d554b2465f01231234dbbfaa5f32c4f819e2"
+    },
+    {
+      "path": "evidence/round3-06-street-west.png",
+      "bytes": 11011,
+      "sha256": "9019589499a0f55c315151e6927c39b3c5bc19847d02afe11aa32c90361b96b3"
+    },
+    {
+      "path": "evidence/round3-capture.log",
+      "bytes": 2197,
+      "sha256": "7eb0d88bd11a1ab588c2ef7e5c3e6cd88eedec51ad4719cb8bb739bc998d6cbf"
+    },
+    {
+      "path": "evidence/round4-02-street.png",
+      "bytes": 11285,
+      "sha256": "6d2917095ca3b9127a405c39461b54d0687fbaca9500d87bade5f255622f3ef0"
+    },
+    {
+      "path": "evidence/round4-04-hour-1.png",
+      "bytes": 11221,
+      "sha256": "5f387a64ba6c51ab576fb87971e22fb46da3b204af44fdb4903ec0df5b8d87d5"
+    },
+    {
+      "path": "evidence/round4-06-street-approach-east.png",
+      "bytes": 10589,
+      "sha256": "ca7a0325390753929ad82d628fa95af18f9c60a332b0ced770f8099414496bd1"
+    },
+    {
+      "path": "evidence/round4-06-street-approach-night-east.png",
+      "bytes": 10533,
+      "sha256": "99b28152fbd7412e7f8af97c5381f7cae6d4c2232b87c53d143188df096933d9"
+    },
+    {
+      "path": "evidence/round4-06-street-approach-night-west.png",
+      "bytes": 10367,
+      "sha256": "d7ecc499ed3797036e7fe25c2eed05fc10ab75f1b57756fedb8b3a51c1bb32c3"
+    },
+    {
+      "path": "evidence/round4-06-street-approach-west.png",
+      "bytes": 10449,
+      "sha256": "15a37d24414050b165b11b01125cac8dcd7df58fcd90c6565ffc545f35a52129"
+    },
+    {
+      "path": "evidence/round4-06-street-door-north.png",
+      "bytes": 10928,
+      "sha256": "2441496203afefad83f9855481df75f211e1d0f6ab3aefddc88b4216cb5a9627"
+    },
+    {
+      "path": "evidence/round4-06-street-door-south.png",
+      "bytes": 11045,
+      "sha256": "2415b316a3812020967a39754a0869febc917558e5504bca076225706a34edbd"
+    },
+    {
+      "path": "evidence/round4-06-street-east.png",
+      "bytes": 10926,
+      "sha256": "ca1057bfcc09e5fb31bcccf2db873dcb77af1d188d4a15c158af0aaffd7fde93"
+    },
+    {
+      "path": "evidence/round4-06-street-threshold-east.png",
+      "bytes": 10758,
+      "sha256": "49871fe331a03636946279e888dd0b154ededa050cc8d1f8ac03c22e515e2a7c"
+    },
+    {
+      "path": "evidence/round4-06-street-threshold-night-east.png",
+      "bytes": 10699,
+      "sha256": "889994c31c9d4aeed2b38a394810ca46354e1e441ddc5632e93028672a4f1304"
+    },
+    {
+      "path": "evidence/round4-06-street-threshold-night-west.png",
+      "bytes": 10118,
+      "sha256": "b8fc0b7e43248a13c01505b338eba864cae0418c4635cd61c04feca6c8c4ba1a"
+    },
+    {
+      "path": "evidence/round4-06-street-threshold-west.png",
+      "bytes": 10193,
+      "sha256": "296359e2d61782a24123e5ae30c9bfe2904637827fcfe1109d7cea014b53bc72"
+    },
+    {
+      "path": "evidence/round4-06-street-west.png",
+      "bytes": 10742,
+      "sha256": "6077c4d752e25f58af1b90207f6ad2afa28b3bf7a8bb94c1cde4d642825004d4"
+    },
+    {
+      "path": "evidence/round4-capture.log",
+      "bytes": 2699,
+      "sha256": "3f640b8158b053cb65a024e7cbb7f99e954891bfda4ba1a05e00ba6762b6a4f3"
+    },
+    {
+      "path": "evidence/scope-check.json",
+      "bytes": 7469,
+      "sha256": "397cb2593ef6394e44d4e06be886d0b3b1fc1ec73ac6d35a8c8b49c71ec752cd"
+    },
+    {
+      "path": "evidence/suite-baseline.log",
+      "bytes": 78679,
+      "sha256": "115ff9addda9ac26b8fcf5f6ae81d255fee227e007ff197bd44d05839feaec4e"
+    },
+    {
+      "path": "evidence/suite-node24.log",
+      "bytes": 78570,
+      "sha256": "e4162adee5685797b3499da8d425b37dfd955b327d2b15a38920f98cbd8413b7"
+    }
+  ],
+  "duplicateHashes": []
+}

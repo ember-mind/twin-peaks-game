@@ -9,10 +9,9 @@ const FILES = ['sim-core.js', 'async-safety.js', 'policies.js', 'interventions.j
   /* the content package's own tests, and its pipeline as a gate: it exits non-zero if the actions are not registered */
   '../content/everyday-opportunities-v01/test/everyday-opportunities.js', '../content/everyday-opportunities-v01/test/pipeline.js',
   '../content/lost-wallet-v01/test/lost-wallet.js', '../content/lost-wallet-v01/test/pipeline.js',
-  '../content/activity-poses-v01/test/activity-poses.js'];
-/* NOT in the list, and red on purpose: '../content/town-places-v01/test/town-places.js'. The street now has
- * house fronts (H) the package does not paint yet, so its art-and-rows agreement fails for the street and the
- * view falls back to the cell painter there. It goes back in when the façades land (docs/tasks/astra-street-fronts.md). */
+  '../content/activity-poses-v01/test/activity-poses.js',
+  /* back in the list now that the street's house fronts are painted by the package */
+  '../content/town-places-v01/test/town-places.js'];
 
 let allPassed = true;
 let totalChecks = 0;

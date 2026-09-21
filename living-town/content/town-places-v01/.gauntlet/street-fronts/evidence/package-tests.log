@@ -1,0 +1,49 @@
+# every solid cell is painted as the thing it is, and nothing else is
+  ok - 299 solid cells across 7 places are each claimed by a piece
+  ok - 20 pieces stand on a walkable cell, and every one of them is a doorway or a chair
+# the street has seven entrances inside two continuous building bands
+  ok - all 106 H cells are claimed exactly once, including the garden boundary
+  ok - six house/shop doors and the park gate occupy the seven real D runs
+  ok - each home and the cafe have their own entrance material
+  ok - every entrance accent matches the actual world destination, including the attic and ground-floor home
+  ok - the north facades have at least 48 pixels of wall
+  ok - rows 3 and 7 are pavements; only rows 4 through 6 form the carriageway
+  ok - north lintels and the cafe awning repaint at door depth, never over pavement walkers
+# the furniture the world lists is drawn at its own tile, as itself
+  ok - all 12 beds, kitchen counters, guitars and benches the world places are recognisable pieces at their own tile
+  ok - a bed lies the way its own cells lie: one piece across in flat_a, one piece down in flat_c
+# the foreground pass covers whoever is behind a piece, and nobody else
+  ok - a bed is never repainted in front of anybody: a sleeper is drawn lying on it, and would be painted over
+  ok - nor is a chair, because its cell is one a person stands on
+  ok - one band paints some of the park's pieces (252 draws) and the whole range paints all of them (534)
+# drawing reads its arguments and writes pixels, and does nothing else
+  ok - every place paints the same pixels for the same arguments, twice running
+  ok - and nothing in the world changed while it was drawn
+  ok - the source reads no clock, no randomness and no storage
+  ok - and it assigns to nothing that belongs to the simulation
+# no name, no sign, no monogram is painted anywhere
+  ok - not one glyph is drawn by any of the seven places
+  ok - and the source never reaches for the kit's lettering at all
+# every pixel goes down through the kit, in the kit's own material
+  ok - 11772 rectangles and 41 contact shadows, all of them the production kit's
+  ok - and every fill on the context came from one of them, or from a kit piece drawing itself (12730 fills for 11772 kit.rect calls)
+  ok - the source never fills, blends, scales or resamples on its own
+# a place's colour belongs to the place
+  ok - every place has a material registered on the production kit
+  ok - the five homes have five different accents: #3d5f88 #7a4a68 #6d7a3a #a35f3c #3f7a73
+  ok - and a home keeps the same one every time it is asked
+  ok - and nothing in the source knows that anybody lives anywhere
+# it says no rather than drawing a hole
+  ok - the café is not this package's room, and it says so
+  ok - the same for its foreground pass
+  ok - an unknown place and a place with no rows both fall back
+  ok - and `handles` answers before anybody draws anything
+  ok - it handles the seven places it paints and nothing else
+# the only thing the clock changes is whether a lamp is burning
+  ok - midday and midnight paint the street differently: the lanterns are lit
+  ok - and a frame with no minute at all is the unlit one, not a broken one
+  ok - each of the street's 6 house doors carries a lantern, lit at midnight and out at midday
+# nothing paints far outside the viewport it was given
+  ok - every rectangle of every place lands within one overdraw tile of the native frame
+
+town-places: 36/36

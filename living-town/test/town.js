@@ -121,5 +121,13 @@ const strip = (s) => { const c = JSON.parse(JSON.stringify(s.state)); delete c.v
   const hands = LT.Hand.entry('extra_shift').fields(town)[0].options.map((o) => o.id);
   ok(hands.join() === 'resident_a,resident_c', 'an extra shift can be posted for either of the two who work there');
 
+  console.log('# every place is painted by the places package, none by the fallback');
+  require(path.resolve(__dirname, '..', 'content', 'town-places-v01', 'lt-town-places.js'));
+  const unpainted = Object.keys(LT.World.LOCATIONS).filter((id) => id !== 'cafe').filter((id) => {
+    const claims = LT.TownPlaces.claims(id, LT.World.LOCATIONS[id].rows);
+    return !claims || !LT.World.blockedCells(id).every((key) => !!claims[key]);
+  });
+  ok(unpainted.length === 0, 'the view\'s own condition holds for every place, the street included: ' + JSON.stringify(unpainted));
+
   console.log('\ntown: ' + checks + '/' + checks);
 })().catch((e) => { console.error(e); process.exit(1); });

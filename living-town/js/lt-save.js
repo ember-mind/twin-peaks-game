@@ -181,6 +181,33 @@
     return save;
   };
 
+  /* e6451950 -> e41937ba: the near side of the street got front gardens. Behind
+   * the south pavement each home now has a low wall with a gate in it and a
+   * path over grass to the house, where there was a solid row of fronts.
+   *
+   * Nobody needs moving, and that is checked rather than assumed: every cell
+   * that was walkable still is (the gates are where the doorways were, and
+   * every place meets the street where it did), and the only cells that
+   * changed from solid to open are garden cells nobody could have been on.
+   * So the step verifies that each person on the street stands on a cell that
+   * is open in the street as frozen here, refuses the save by name if one does
+   * not, and otherwise only says which town the save now belongs to.
+   * Written against a real save: test/fixtures/save-town-e6451950-walking-to-a-south-home.json. */
+  var STREET_E41937BA = {
+    rows: ['HHHHHHHHHHHHHHHHHHHH', 'HHHHHHHHHHHHHHHHHHHH', 'HHHDDHHHHDDHHHHDDHHH', '--------------------', '--------------------', '--------------------',
+           '--------------------', '--------------------', 'fDDffHHHDDHffDDffDDf', ',--,fHHHHHH,,--,f--,', 'HHHHHHHHHHHHHHHHHHHH']
+  };
+  S.WORLD_MIGRATIONS['e6451950'] = function (save) {
+    Object.keys(save.state.characters || {}).forEach(function (id) {
+      var c = save.state.characters[id];
+      if (c.location !== 'street') return;
+      var ch = (STREET_E41937BA.rows[c.pos.y] || '').charAt(c.pos.x);
+      if (ch !== '-' && ch !== 'D' && ch !== ',') throw new Error('save e6451950: ' + id + ' stands at ' + c.pos.x + ',' + c.pos.y + ' on the street, which is not open ground');
+    });
+    save.world = 'e41937ba';
+    return save;
+  };
+
   /* ---------------- serialise ---------------- */
 
   S.serialize = function (sim) {

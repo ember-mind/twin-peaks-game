@@ -355,6 +355,7 @@
       case 'T': paintTree(ctx, sx, sy, mx, my, rows, h); break;
       case '#': paintWall(ctx, sx, sy, mx, my, rows, h); break;
       case 'H': paintWall(ctx, sx, sy, mx, my, rows, h); break;   // a house front, until a places package paints it as one
+      case 'f': paintWall(ctx, sx, sy, mx, my, rows, h); break;   // a garden wall, until a places package paints it as one
       case 'D': paintDoorway(ctx, sx, sy); break;
       case 'B': paintBed(ctx, sx, sy, mx); break;
       case 'K': paintKitchen(ctx, sx, sy); break;

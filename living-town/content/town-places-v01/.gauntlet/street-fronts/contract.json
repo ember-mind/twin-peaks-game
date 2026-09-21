@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "slug": "street-fronts",
+  "mode": "execute",
+  "status": "stopped_at_user_round_limit",
+  "createdAt": "2026-09-20T16:06:04.027Z",
+  "updatedAt": "2026-09-20T16:06:04.027Z",
+  "goal": "Seven legible entrances along a coherent street, matching the cafe",
+  "domain": "game-visuals",
+  "externalBar": "Native 256x192 cafe reference: same game; houses along a street; cafe and park identifiable; walkable ground clear",
+  "hardFloor": 9,
+  "scope": {
+    "included": [
+      "street facades and seven entrances",
+      "conditional cold review of benches, guitar, window base, kitchen"
+    ],
+    "excluded": [
+      "simulation",
+      "world map",
+      "migration",
+      "production page",
+      "other packages"
+    ],
+    "immutable": [
+      "all collision rows",
+      "production kit",
+      "native256x192",
+      "one Chrome driver",
+      "maximum four street critic rounds"
+    ],
+    "platforms": [
+      "Chrome native256x192"
+    ]
+  },
+  "referencePack": {
+    "reconstructed": true,
+    "sources": [
+      "evidence/reference-03-noon-cafe.png",
+      "evidence/reference-05-evening-cafe.png"
+    ],
+    "measurements": [
+      "Native256x192; tile16; people about22px",
+      "1px dark outlines; warm cream plaster and brown timber; teal accent",
+      "Separate lit top plane, darker face, contact line; broad quiet materials with sparse details",
+      "Street world320x176; facade48px; seven32px-wide door runs; front doors taller than22px"
+    ]
+  },
+  "evidenceProtocol": {
+    "stable": true,
+    "representativeStates": [
+      "street center/west/east daylight",
+      "street22:00",
+      "doorway depth bands",
+      "park and five homes conditional"
+    ],
+    "commands": [
+      "node living-town/content/town-places-v01/tools/capture-gallery.js",
+      "node living-town/content/town-places-v01/tools/capture-gallery.js --check"
+    ],
+    "artifactTypes": [
+      "native PNG",
+      "collision overlay",
+      "test logs"
+    ],
+    "fixedConditions": {
+      "viewport": [
+        256,
+        192
+      ],
+      "tile": 16,
+      "streetMinute": 600,
+      "nightMinute": 1320,
+      "cameras": [
+        "center",
+        "west",
+        "east"
+      ],
+      "renderer": "production interior kit",
+      "atlas": "production",
+      "people": "fixed walkable gallery tiles"
+    },
+    "hashManifest": ".gauntlet/street-fronts/evidence-manifest.json"
+  },
+  "inventory": [
+    {
+      "id": "street",
+      "unit": "Street and seven entrances",
+      "bar": "Native 256x192 cafe reference: same game; houses along a street; cafe and park identifiable; walkable ground clear",
+      "floor": 9,
+      "status": "fail",
+      "baselineEvidence": [
+        "evidence/baseline-street.png"
+      ],
+      "baselineScore": 0,
+      "currentEvidence": [
+        "evidence/round4-02-street.png",
+        "evidence/round4-06-street-west.png",
+        "evidence/round4-06-street-east.png",
+        "evidence/round4-06-street-threshold-east.png",
+        "evidence/round4-06-street-approach-night-east.png"
+      ],
+      "score": 8,
+      "criticVerdict": "BAR_WINS"
+    }
+  ],
+  "regressionGates": [
+    {
+      "id": "package",
+      "criterion": "All solids exactly once; no forbidden walkable claims; depth and purity",
+      "command": "node living-town/content/town-places-v01/test/town-places.js",
+      "status": "pass",
+      "evidence": [
+        "evidence/package-tests.log"
+      ]
+    },
+    {
+      "id": "capture",
+      "criterion": "Renderer captures match manifest",
+      "command": "node living-town/content/town-places-v01/tools/capture-gallery.js --check",
+      "status": "pass",
+      "evidence": [
+        "evidence/capture-check.log"
+      ]
+    },
+    {
+      "id": "suite",
+      "criterion": "Living Town suite unchanged count",
+      "command": "node living-town/test/run-all.js",
+      "status": "pass",
+      "evidence": [
+        "evidence/suite-node24.log"
+      ]
+    },
+    {
+      "id": "scope",
+      "criterion": "Only package changed",
+      "command": "git status --short",
+      "status": "pass",
+      "evidence": [
+        "evidence/scope-check.json"
+      ]
+    }
+  ],
+  "agents": {
+    "builderCriticSeparated": true,
+    "criticFreshContext": true
+  },
+  "gapQueue": [
+    {
+      "id": "south-entry",
+      "severity": "high",
+      "status": "open",
+      "observation": "Door, threshold and roof plane remain ambiguous in native frames."
+    },
+    {
+      "id": "night-entry",
+      "severity": "high",
+      "status": "open",
+      "observation": "People merge with dark door interiors and jambs at night."
+    }
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "verdict": "BAR_WINS",
+      "scores": [
+        9,
+        7,
+        8
+      ],
+      "record": "critic-1.md"
+    },
+    {
+      "round": 2,
+      "verdict": "BAR_WINS",
+      "scores": [
+        9,
+        8,
+        9
+      ],
+      "record": "critic-2.md"
+    },
+    {
+      "round": 3,
+      "verdict": "BAR_WINS",
+      "scores": [
+        9,
+        8,
+        8
+      ],
+      "record": "critic-3.md"
+    },
+    {
+      "round": 4,
+      "verdict": "BAR_WINS",
+      "scores": [
+        9,
+        8,
+        8
+      ],
+      "record": "critic-4.md"
+    }
+  ],
+  "finalGate": {
+    "allUnitsCovered": true,
+    "hardGatesPass": true,
+    "independentVerdict": "BAR_WINS",
+    "floor": 8,
+    "unresolvedHighGaps": [
+      "south-entry",
+      "night-entry"
+    ]
+  },
+  "progressSurface": ".gauntlet/street-fronts/progress.md",
+  "stopPolicy": "At most four critic rounds, as specified by the brief. Four completed with BAR_WINS. No conditional prop review without a street pass.",
+  "baseCommit": "e8a2c8f5261ca8b7485078087971f288fde007ea",
+  "runtime": {
+    "node": "24.16.0",
+    "reason": "Matches committed atlas compression; Node26 pixels identical but PNG bytes differ."
+  },
+  "conditionalDeliverable2": {
+    "status": "not_started",
+    "reason": "Street did not pass its critic."
+  },
+  "mapBlocker": "None established; no change to map or migration."
+}

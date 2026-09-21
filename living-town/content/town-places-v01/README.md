@@ -1,319 +1,130 @@
 # Town places v01
 
-The park, the street and the five homes, painted by the production interior kit
-in Café Meridiana's own idiom. Graphics only. Nothing in here simulates,
-decides, schedules, stores or remembers anything.
+**Street status: visual bar not passed after four independent critic rounds.**
+Technical gates pass. The conditional park/home object review was not started.
 
-**Nothing is wired.** `lt-view.js` still paints these places with the
-placeholder cell painter. What someone has to change to switch them over is at
-the bottom, and it is **not implemented**.
+Graphics for the park, Via del Ponte and five homes, drawn through the production
+interior kit at native 256×192. Geometry and collision remain owned by
+`living-town/js/lt-world.js`. This package reads rows; it never changes the world.
 
-**The collision truth is the location's `rows` in `living-town/js/lt-world.js`,
-and this package does not touch it.** Every solid cell
-(`#` `T` `w` `B` `K` `G` `C` `t` `b` `=`) is painted as the thing it is, at its
-own tile. Every walkable cell is painted as ground. `test/town-places.js` holds
-the two in agreement in both directions, the way `living-town/test/cafe-scene.js`
-does for the café.
+The production view already uses this package. It checks `LT.World.blockedCells`
+against `LT.TownPlaces.claims` and falls back to the cell painter if a place has
+an uncovered solid cell. The street painter covers all 94 solid cells of the street as it is in
+world `e41937ba`: the north fronts, the park boundary, and on the near side the
+garden walls and fences (`f`), front gardens and the eaves of the south houses.
 
-## Drawing a place
+The near side was first painted as roofs with a door portal standing on the
+pavement (world `e6451950`). Two independent fresh critics read a person at those
+doors as standing on a roof, and the same strict critic scored that version
+8 / 7 / 6 (same game / recognisability / walkability). The map was changed — the
+south houses stand behind front gardens — and the same critic, same prompt,
+scored this one 8 / 8 / 7. The bar is 9 each, so it is still not accepted. What
+remains, in the critic's words: the eave strip at the foot of the frame does not
+say "house"; the cap colours that tell the south homes apart are specks at
+native size and collapse at night; south-side figures have no contact shadow;
+the street is flat and prop-less next to the café; the park reads as a dark void.
+
+## API and construction
 
 ```js
 LT.TownPlaces.draw(g, locationId, rows, camX, camY, opts);
 LT.TownPlaces.drawForeground(g, locationId, rows, camX, camY, footMin, footMax, opts);
 ```
 
-| argument | what it is |
-|---|---|
-| `g` | a 2D context, the native 256×192 one |
-| `locationId` | `park`, `street`, or any `flat_*` |
-| `rows` | that location's `rows`, read, never written |
-| `camX`, `camY` | **exactly what the view passes `GAME.sprites.drawStructures`**: world (0,0) lands at `(-camX, -camY)`. Both are rounded to whole pixels |
-| `footMin`, `footMax` | the depth band, in world pixels, from `EMBER.Tilemap.paintDepthBands` |
-| `opts` | `{ kit, palette, minute }`, all optional |
+Both calls return `false` for an unsupported location, absent rows or absent kit.
+World `(0,0)` is drawn at `(-camX,-camY)`; camera values are rounded to pixels.
+`opts` accepts `{ kit, palette, minute }`. The default kit is
+`GAME.Retro2D.interiorKit`. Materials register on first use.
 
-**Both return `false` when they cannot draw that place** — an unknown id, no
-rows, no kit — so the caller falls back to the placeholder painter in the same
-frame instead of showing a hole. Nothing else in the API can fail.
+`handles`, `materialFor`, `plan` and `claims` are pure queries. Every planned
+solid cell must have exactly one owner. Doorways, gateways and chairs are the
+only permitted claims on walkable cells. Pixels use the kit's rectangles,
+windows, contact shadows and other existing primitives. No external images,
+resampling, second renderer, lettering, resident identifiers or random draws.
 
-`opts.kit` defaults to `GAME.Retro2D.interiorKit`; `opts.palette` overrides the
-material. `opts.minute` is the minute of the simulated day, and the **only**
-thing it changes is whether a lantern is burning and whether a window shows a
-lit sky. Day and night colour is `LT.DayLight`'s job, applied to the finished
-frame after the people; this package never tints anything.
+`minute` controls lanterns and window illumination only. `LT.DayLight` applies
+the final frame tint, after actors. This package does not alter it.
 
-Four more calls, all pure:
+## Via del Ponte
 
-| call | what it answers |
-|---|---|
-| `LT.TownPlaces.handles(locationId)` | whether `draw` would paint it |
-| `LT.TownPlaces.materialFor(locationId)` | the kit material id it paints in |
-| `LT.TownPlaces.plan(locationId, rows)` | the pieces, machine-readable |
-| `LT.TownPlaces.claims(locationId, rows)` | cell → the kind of piece painted there |
+The `H` and `D` rows determine the two building bands and their openings. The
+first and last all-paving rows are pavements (3 and 7); only the rows between
+them are carriageway (4–6). Their kerbs and different stone sizes remain visible.
+The old grate slabs are gone.
 
-The materials install themselves onto the first kit that draws with them, so
-there is no registration step and no load order to get right.
+The north side has 48px plaster walls, an eave above them, cream-framed windows,
+a darker base and a two-pixel pavement shadow. The café uses its production teal,
+a striped awning and a cup-and-saucer pictogram without lettering. The south side
+shows slate roof slopes, chimneys, rooflights and open entrances facing the pavement.
+The park entrance is an open iron gate within a stone garden boundary with trees.
 
-## The three places
-
-| place | ids | material | drawn from |
-|---|---|---|---|
-| park | `park` | `lt_park` | grass, a pond with a shore, trees, benches, a gateway |
-| street | `street` | `lt_street` | a carriageway with kerbs, footpaths, verges, house doorways, a gateway |
-| home | `flat_a` … `flat_e` | `lt_home_a` … `lt_home_e` | one painter, five rooms |
-
-**There is one home painter.** What makes a home different is its own `rows` —
-where the bed lies, which side the kitchen is on, where the window is, where the
-door is, how much floor is left — and one accent colour read off the location
-id. Nothing about a room is read from, or varies with, whoever lives in it: the
-word `resident` does not appear in the source, and a test asserts that.
-
-| id | accent |
-|---|---|
-| `flat_a` | slate blue |
-| `flat_b` | plum |
-| `flat_c` | olive |
-| `flat_d` | terracotta |
-| `flat_e` | sea green |
-
-The accent is the quilt, the rug border, the front door, the curtains and the
-crockery. Everything else — plaster, oak boards, the dado, the
-kitchen — is shared, which is what keeps five rooms one town.
-
-### What the rows are read for
-
-Nothing in this package is placed by hand. Each shape comes off `rows`:
-
-| in `rows` | painted as | how it is decided |
+| Street door run | Destination | Accent |
 |---|---|---|
-| `T` | a tree | trunk in the cell, crown above it, in the foreground pass |
-| `w` | a pond | the run of `w` cells; the waterline is inset 3–8 px from each edge that has a grass neighbour and the shore runs on past the cell, so the pond's outline is not its cells' outline |
-| `b` | a park bench | a narrow backrest, a gap the ground shows through, a lit seat; it faces the pond, which is found by taking the centroid of the `w` cells |
-| `B` | a bed | the block's shape: two cells across is a bed lying across, two cells down is a bed lying down |
-| `K` | a kitchen run | one worktop across the block, sink in the top cell, hob below; a splashback only where the cell above is really `#` |
-| `G` | a guitar | on a stand: a wide lower bout, a waist, a short neck up into the cell above |
-| `t` | a table | with a cloth and a cup on it |
-| `c` | a chair | **walkable**: drawn low, with floor all round it |
-| `=` | a window | wall brought down to meet it, curtains, a sill |
-| `#` | a wall | back wall with a dado, rising off the top of the map; side walls in the same plaster and dado; a cutaway front wall with the door in it |
-| `D` | a door or a gateway | paving on its south side makes it a house door; anything else makes it a gateway |
-| `-` | paving | a row that is paving edge to edge is a carriageway; anything else is a footpath |
-| `,` | grass | two greens in large patches, mown bands, tufts, the odd clump of flowers — **except** on the street, where the row against the carriageway and the row the house doors stand on are painted as the pavement a street has |
-| `-` on the park's gateway, `,` on its approach | a gravel path | worn out of the gate, walkable, never paving |
+| north 3–4 | `flat_a` | slate blue |
+| north 9–10 | `flat_c` | olive |
+| north 15–16 | café | production teal |
+| south 1–2 | `flat_b` | plum |
+| south 8–9 | park | stone and iron |
+| south 13–14 | `flat_e` | sea green |
+| south 17–18 | `flat_d` | terracotta |
+
+The destination sequence assigns materials only; door coordinates come from
+rows. A regression test compares every assignment with `World.STREET_PORTALS`,
+including the park portal which lies in the opening itself.
 
 ## Depth
 
-A piece carries a `depth`: its own floor line, `(y + h) * 16`. `drawForeground`
-paints the pieces whose depth falls in the band it was given, exactly the way
-`lt-cafe-scene.js` `foreground` does, so a tree crown covers whoever is standing
-behind it and not whoever is in front.
+Pieces carry their floor depth, `(y + h) * 16`. `drawForeground` paints only the
+pieces within the requested depth band, as used by `Ember.Tilemap.paintDepthBands`.
+North doors repaint piers, lintels and the café awning; they never repaint a door leaf over an actor. The near houses face north: their open door thresholds align with the pavement at the north edge of D. Their lintels and roof surfaces stay behind approaching actors; only the outer reveals use the foreground band. The D recesses are cut out of the roofs and painted as floor, including when occupied.
 
-Two kinds are deliberately **not** foreground pieces:
+Trees and gate piers use the foreground pass. Beds remain background because a
+sleeping actor lies on them. Chairs remain background because their cells are
+walkable. Home furniture and windows otherwise keep their existing painters.
 
-- **the bed**, because the sleeping pose draws a person lying on the bed's own
-  tile. A bed repainted in that band would paint over the sleeper. Nobody can
-  stand north of a bed anyway — the rows put a wall there.
-- **the chair**, because its cell is walkable and a chair is where somebody
-  stands to sit down. Repainting it would paint over the person using it.
+## Evidence and commands
 
-## Files
-
-| path | what it is |
-|---|---|
-| `lt-town-places.js` | the only source: the palettes, the plan, the painters |
-| `town-places.manifest.json` | the plan, machine-readable, written by the capture tool |
-| `gallery.html` | the preview, drawn by the real renderer |
-| `test/town-places.js` | the Node checks: rows agreement, purity, depth, lettering |
-| `tools/capture-gallery.js` | drives the gallery in headless Chrome and writes `images/` and the manifest |
-| `images/` | frames captured off the renderer |
-
-There is no sheet and no asset: every pixel is a `kit.rect` call at paint time,
-so nothing can drift out of date with the kit or the rows.
-
-## Commands
-
-Serve the checkout over HTTP, then:
-
-```
-# the gallery
-open http://localhost:<port>/living-town/content/town-places-v01/gallery.html
-
-# rows agreement, purity, depth, lettering — no browser
+```sh
 node living-town/content/town-places-v01/test/town-places.js
-
-# regenerate every captured image and the manifest
 node living-town/content/town-places-v01/tools/capture-gallery.js
-
-# verify what is on disk is what the renderer produces now (writes nothing)
 node living-town/content/town-places-v01/tools/capture-gallery.js --check
+node living-town/test/run-all.js
 ```
 
-`--check` writes nothing and exits non-zero the moment an image or the manifest
-on disk stops being what the renderer produces now. Both capture runs start
-their own Chrome and their own server, and they take `/tmp/lt-chrome.lock`
-themselves and wait for it, because **one Chrome driver at a time** on this
-machine. The capture also fails, before writing anything, if a solid cell is
-unpainted or a walkable cell is painted as furniture.
+Use Node **24.16.0** for the general suite in this checkout. The installed Node
+26.5.0 uses a different zlib and fails the existing byte-for-byte inhabitant-atlas
+check: regenerated PNG pixels and dimensions match, but compressed bytes differ.
+Node 24.16.0 passes without changing that atlas or any test outside this package.
 
-## Wiring it in — what someone else has to do
+Capture starts its own HTTP server and Chrome, acquiring `/tmp/lt-chrome.lock`
+first. `--check` writes nothing and compares all image bytes plus the manifest.
+The gallery uses the production kit, atlas, depth bands and daylight. Its actors
+are fixed preview placements, not a simulation demonstration. Every placement is
+checked against collision; the former `flat_e` preview occupant on its table was
+moved to that home's walkable spawn.
 
-Nothing below is done.
+`images/02-*` are native scenes; `03-*` are nearest-neighbour inspection views;
+`04-*` compare hours; `05-*` overlay collision. `06-*` show west/east street views,
+doorway occlusion and pavement approaches. These native views cover all seven
+entrances across the wider 320px world. The manifest records their camera focus
+and people placements.
 
-**1. Load the file.** In `living-town/index.html`, after `lt-world.js` and
-before `lt-view.js`:
+Reference: `artifacts/living-town-poses/03-noon-cafe.png` and
+`05-evening-cafe.png`. Critic records, the fixed evaluation contract, baseline,
+round captures and verification logs live in `.gauntlet/street-fronts/`.
+See `.gauntlet/street-fronts/progress.md` for the current verdict and remaining gaps.
 
-```html
-<script src="content/town-places-v01/lt-town-places.js"></script>
-```
+## Limits
 
-No init call: the materials install themselves onto the kit the first time a
-place is drawn.
-
-**2. Replace the body of `View.prototype.drawTemporaryPlace`** in
-`living-town/js/lt-view.js`. Today it is an `EMBER.Tilemap.paintWindow` over
-`LT.Art.drawCell`, and then `ents.forEach(drawInhabitant)`. It becomes the same
-two-pass shape `drawProductionRoom` already uses:
-
-```js
-View.prototype.drawTemporaryPlace = function (g, loc, ents, cx, cy, how) {
-  var self = this, TP = LT.TownPlaces;
-  var mapId = (TP && TP.materialFor(loc.id)) || 'lt_temporary';
-  var opts = { minute: this.sim.state.minute };
-  if (TP && TP.draw(g, loc.id, loc.rows, cx, cy, opts) !== false) {
-    EMBER.Tilemap.paintDepthBands(ents, TILE, function (e) {
-      self.drawInhabitant(g, e, cx, cy, mapId, how);
-    }, function (footY, nextFootY, afterIndex) {
-      if (afterIndex < 0) return;
-      TP.drawForeground(g, loc.id, loc.rows, cx, cy, footY, nextFootY, opts);
-    });
-  } else {
-    /* unchanged: the ink fill, paintWindow over LT.Art.drawCell, ents.forEach */
-  }
-  this.drawActivityMarks(g, cx, cy, ents.filter(function (e) { return e.kind !== 'thing'; }));
-};
-```
-
-Three things about that:
-
-- **`cx` and `cy` are what the view already has**: `Math.round(this.camX)` and
-  `Math.round(this.camY)`, the same pair it hands `drawStructures`.
-- **The `afterIndex < 0` guard is the same one the café uses.** The band behind
-  everybody is already painted by `draw`; repainting it would be work for
-  nothing.
-- **`mapId` changes what the people are drawn with.** Today the view passes the
-  literal `'lt_temporary'`, which is not a registered material, so
-  `GAME.Sprites.drawChar` falls back to the outdoor contact shadow and
-  `LT.ActivityPoses` falls back to the café's palette. Passing
-  `TP.materialFor(loc.id)` gives both the room's own material. It is a real
-  improvement and it is also a visible change to how people are shadowed
-  indoors, so it belongs in the same review, not smuggled in.
-
-**3. Leave the old cell painter in place.** `draw` returning `false` is the
-fallback, and it is the only thing standing between a future location this
-package has never seen and a blank screen.
-
-**4. Leave `LT.DayLight` exactly where it is.** It is applied after the whole
-frame, people included, and this package draws nothing that expects to be
-tinted twice.
-
-## Where it stands against the bar
-
-Four fresh critics were shown the café frame and these frames at native size
-with no labels, no list of objects and no explanation, and asked three things:
-do they belong to the same game, can you name each piece of furniture cold, and
-can you tell where a person can walk. The last round's verdict, unedited:
-
-| place | same game | nameable | walkable is clear |
-|---|---|---|---|
-| park | **fail** | **fail** | pass |
-| street | **fail** | **fail** | **fail** |
-| home | pass | **fail** | pass |
-
-What the last critic could name cold, with nothing to go on:
-
-- **park** — trees, a pond with reeds and stones, a dirt path, a stone gate
-  with iron bars, wildflowers, the hedge border.
-- **street** — a cobbled road, flagstone pavements, a kerb, two double wooden
-  doors with stone frames and wall lamps, an iron gate in stone posts, trees.
-- **home** — a bed with a white pillow and a coloured blanket, a rug, wall
-  clocks, framed pictures, a hanging ceiling lamp, a double front door, a
-  doormat, a stone step, a window with curtains and a potted plant.
-
-What it could not name, and what it guessed instead:
-
-- the four **park benches** ("a white-framed crate, or a chair seen from the
-  front, maybe a sign on a stand"). The white rim and the missing gap under the
-  seat were fixed after that round; the benches in the committed frames are not
-  the ones the critic saw, and they have not been put in front of a fresh pair
-  of eyes since.
-- the **guitar** ("a broom in a yellow bucket, or a guitar on a stand, or a
-  floor lamp"). Redrawn in wood rather than gold after that round, also unseen.
-- the **kitchen run** — named as a kitchen, but not which appliance.
-- **what the street's doors belong to.** This one is not fixable here: see the
-  limits below.
-
-The street fails all three and will keep failing all three until its rows carry
-a building. Two separate critics reached the same verdict independently and
-both proposed the same fix — a continuous façade along the north side — which
-would mean painting a solid wall across cells the rows leave walkable. That is
-a change to `lt-world.js`, not to this package.
-
-## Limits, honestly
-
-- **Nothing is wired.** No view calls this. The gallery places people because
-  the gallery says so.
-- **A doorway and a gateway rise eleven pixels into the cell above them, and
-  that cell is walkable.** This is the one place where the art stands on ground
-  the rows leave open, and it is deliberate: a door ten pixels high next to a
-  twenty-two pixel person was read by two cold viewers as a market kiosk, not a
-  door. The shape that rises is two five-pixel piers and a lintel, so most of
-  the cell above still shows ground between them, and a person standing there
-  is drawn behind the piers by the foreground pass. It is still an
-  encroachment, and anyone who wants it gone has to give the doorways a row of
-  wall cells in `lt-world.js`, which is a world change and not this package's
-  to make.
-- **There is no house behind a street door.** A doorway reads as a doorway; it
-  does not read as the front of a building, because the rows put walkable grass
-  everywhere a building would stand. The street reads as a road across open
-  ground with three ways off it. Cold viewers have consistently failed the
-  street on that, and the fix is in `lt-world.js`, not here.
-- **There are no street lamps.** A lamp post needs a solid cell to stand on and
-  the street's rows have none outside the four corner trees. The lanterns are on
-  the doorways, which is where the rows allow something to stand.
-- **A one-cell bench, a one-cell table and a two-cell bed are small.** A bed is
-  32×16 next to a person 16×24. Everything is legible, nothing is generous.
-- **The homes are sparsely furnished, and the rows are why.** Every solid cell
-  is already spoken for, so anything else in a room has to be on a wall (the
-  framed pictures, the shelf, the lamp) or flat on the floor (the rug, the mat,
-  the light from the window). There is no armchair and no wardrobe because
-  there is no cell for one. Hanging coats were tried on the side walls and cut:
-  a cold viewer read them as bottles.
-- **The pond is a plus sign in the rows.** The waterline is pushed 7–10 px in
-  from every shore so the outline is irregular, but it is still a small pond
-  with two narrow arms, because that is the shape the rows describe.
-- **A person is not lit by anything here.** `kit.actorLight` is only consulted
-  for a registered interior scene, and these are not registered scenes — they
-  are a painter the view calls directly. Someone standing in a doorway's lantern
-  glow is not warmed by it.
-- **Contact shadows are the kit's three flat rows.** Outdoors, in daylight,
-  nothing casts a directional shadow; the trees and the gateway have a painted
-  one under them and everything else has the kit's.
-- **No weather, no season, no puddles, no snow.** The grass is the same grass
-  every day of the year.
-- **The street's pavement is painted on cells the rows call grass.** The row
-  on each side of the carriageway, and the row the house doors stand on, are
-  paved. Those cells are walkable in the rows and they are walkable in the art,
-  so the collision agreement is untouched — but the ground material is this
-  package's reading, not the world's legend. A road with nothing but lawn
-  either side was read by two cold viewers as a lane across a field.
-- **Past the last row the ground is closed undergrowth.** Outdoors, the cells
-  the camera never lets anybody reach are painted as dark scrub so the place has
-  an edge. It is a painted boundary, not a collision one: nothing about it is
-  read by anything.
-- **`flat_e` is the weakest room.** It is eight cells by seven, and its bed,
-  window and kitchen are in one corner with a rug filling much of what is left.
-  Two cold viewers called it the worst of the five. Nothing in the art fixes
-  that; it is the size of the room.
-- **The `=` window is drawn as a window in the back wall even though the rows
-  put it on a floor row.** The wall is brought down over that cell to meet it.
-  The cell is solid in the rows, so nothing is claimed that a person could walk
-  through; but the back wall's silhouette has a notch in it where a window is.
+- Geometry, world fingerprint and save migration are unchanged.
+- Door piers and lintels project north of their door cells. This is
+  the existing doorway exception, not an extra solid collision footprint.
+- The south roofs are a compact exterior view, not enterable rooms or new map
+  cells. Park foliage stands behind its boundary, not on an added walking path.
+- House identity uses interior accents; there is no lettering or address label.
+- Night contrast is inherited from `LT.DayLight`; no private tint is added.
+- The page's main suite still omits this package's test, per the existing
+  temporary exclusion. Re-enabling that gate requires an owner change outside
+  this task's write fence. The package test runs explicitly in this delivery.
+- The original park/home scale limits remain: one-cell benches and tables,
+  two-cell beds, a compact pond, and sparse furniture constrained by their rows.
