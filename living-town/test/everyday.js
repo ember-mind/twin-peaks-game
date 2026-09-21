@@ -300,7 +300,9 @@ async function proofB() {
   console.log('      read: ' + JSON.stringify(book.readBy) + '  finished: ' + JSON.stringify(Object.keys(book.completedBy)) + '  parcel: ' + parcel.status + (parcel.openedStamp ? ' at ' + parcel.openedStamp : ''));
   /* Observations of this seed's day, pinned so a change in them is noticed —
    * not requirements on what anyone should choose. */
-  ok(a.commitments.concat(b.commitments).filter((c) => c.dueDay === 1).every((c) => c.status === 'kept'), 'nobody broke a day-one promise over a book or a parcel');
+  /* A meal someone agreed to that day is a promise of another kind, made and judged by the shared-meal package
+   * (test/meal-in-town.js); what is pinned here is that the book and the parcel cost nobody a promise they began the day with. */
+  ok(a.commitments.concat(b.commitments).filter((c) => c.dueDay === 1 && !/^cmt_meal_/.test(c.id)).every((c) => c.status === 'kept'), 'nobody broke a day-one promise over a book or a parcel');
   const day1Work = events(sim, 'WORKED', 'resident_a').filter((e) => e.day === 1).reduce((m, e) => m + e.data.minutes, 0);
   ok(day1Work === 464 && (book.readBy.resident_a || 0) === 0, 'the one with a shift and a deadline worked the whole shift (' + day1Work + ' min) and never opened the book');
   const parcelAt = events(sim, 'FOOD_PARCEL_OPENED')[0];

@@ -137,7 +137,8 @@ const snapshot = (sim) => JSON.stringify(sim.state);
   const ate = three.state.events.filter((e) => e.type === 'ATE' && e.actorId === 'resident_b' && e.day >= 2);
   ok(ate.length >= 2 && ate.some((e) => e.data.source === 'cafe'), 'with an empty pantry and 41 EUR, Teodora walks to where a meal is sold (' + ate.length + ' meals on days 2–3)');
   ok(worst < 90, 'nobody gets close to starving over three days (worst hunger ' + Math.round(worst) + ')');
-  ok(lingered === 0, 'nobody stands idle at work all evening once the shift is over');
+  /* Sampled every ten minutes: one sample may catch her between arriving and deciding (she now comes back for a dinner she agreed to). An evening of it is what was wrong. */
+  ok(lingered <= 1, 'nobody stands idle at work all evening once the shift is over (' + lingered + ' of 15 samples)');
   const fromHome = LT.Scenario.day1({});
   await fromHome.runUntil(1, 720);                                  // the book is in the park by now
   const known = LT.Perception.observe(fromHome, fromHome.state.characters.resident_b).reachable;

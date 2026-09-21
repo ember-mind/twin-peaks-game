@@ -59,7 +59,7 @@ function everyActionSaysWhereItIsDone() {
   const by = (p) => Object.keys(all).filter((id) => all[id].position === p).sort().join(' ');
   ok(by('use_spot') === 'buy_meal eat_at_home practise_guitar read_book sit_and_rest sleep take_break unpack_food_parcel work_extra_shift work_shift',
      'done at an object\'s use spot: ' + by('use_spot'));
-  ok(by('beside_person') === 'help_out talk_with', 'done next to a person: ' + by('beside_person'));
+  ok(by('beside_person') === 'help_out invite_to_meal talk_with', 'done next to a person: ' + by('beside_person'));
   ok(all.travel.position === 'anywhere' && all.wait.position === 'anywhere' && all.greet.position === 'anywhere',
      'travel is its own walk; waiting, deciding and a greeting across the room need no spot');
 }
