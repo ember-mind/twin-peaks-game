@@ -99,7 +99,9 @@ function anchorsAreStandable() {
       const a = o.anchors[action];
       assert(!solid(a.x, a.y), o.id + '/' + action + ' anchor is inside furniture');
       assert(open[a.x + ',' + a.y], o.id + '/' + action + ' anchor cannot be reached from the door');
-      assert(LT.Actions.get(action), o.id + ' anchors an action nobody implements: ' + action);
+      /* An anchor is either where an action is done from, or a seat some action carries on from (thenSit). */
+      const seatOf = LT.Actions.ids().map((id) => LT.Actions.get(id)).some((d) => d.thenSit && d.thenSit.anchor === action);
+      assert(LT.Actions.get(action) || seatOf, o.id + ' anchors an action nobody implements: ' + action);
       n++;
     });
   });

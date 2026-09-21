@@ -649,6 +649,20 @@ async function previousFormatIsMigrated() {
     const inWall = JSON.parse(gardenText); inWall.state.characters[homing.id].pos = { x: 0, y: 8, dir: 'down' };
     let refused = null; try { Save.deserialize(inWall); } catch (e) { refused = e.message; }
     ok(refused && /not open ground/.test(refused) && refused.indexOf(homing.id) >= 0, 'a save with someone inside the garden wall is refused by name, not repaired by guess');
+    /* The café's tables became seats (e41937ba -> this town). A real save: someone six minutes into a meal, standing at the counter. */
+    const mealText = require('node:fs').readFileSync(path.resolve(__dirname, 'fixtures', 'save-town-e41937ba-eating-at-the-counter.json'), 'utf8');
+    const mealOld = JSON.parse(mealText), eater = mealOld.state.characters.resident_e;
+    ok(mealOld.world === 'e41937ba' && eater.activity.actionId === 'buy_meal' && eater.pos.x === 4 && eater.pos.y === 4 && !mealOld.state.objects.some((o) => o.id === 'obj_cafe_booth_wall'),
+       'a genuine save from before the seats: ' + eater.name + ' eating on her feet at the counter, and no booths on record');
+    const seated = Save.deserialize(JSON.parse(mealText));
+    const town2 = (sim) => JSON.stringify(sim.state.objects.filter((o) => !o.typeId).map((o) => [o.id, o.location, o.x, o.y, o.anchors || null, o.moreAnchors || null, o.affordances]).sort());
+    ok(town2(seated) === town2(LT.Scenario.town({})), 'migrated, the town\'s furniture is exactly this build\'s');
+    const se = seated.state.characters.resident_e, hungerBefore = se.needs.hunger;
+    await seated.runMinutes(6);
+    ok(se.activity && se.activity.seat && se.activity.seat.state === 'seated' && (se.pos.x !== 4 || se.pos.y !== 4), 'she goes and sits down with it');
+    await seated.runMinutes(20);
+    ok(!se.activity || se.activity.actionId !== 'buy_meal', 'and finishes the meal she had begun');
+    ok(se.needs.hunger < hungerBefore, 'fed by it, once');
     const again = Save.deserialize(JSON.parse(JSON.stringify(Save.serialize(moved))));
     ok(again.state.day === 2 && JSON.parse(JSON.stringify(Save.serialize(moved))).world === LT.World.fingerprint(), 'saved again, it is a save of this town');
   }

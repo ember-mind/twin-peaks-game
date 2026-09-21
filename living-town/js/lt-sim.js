@@ -45,7 +45,7 @@
    * about 200 KB a day and outlives what a browser will store in a fortnight. */
   var KEEP_DAYS = 2;
   var ROUTINE = { ACTIVITY_STARTED: 1, ACTIVITY_COMPLETED: 1, ACTIVITY_REACHED: 1, ACTIVITY_INTERRUPTED: 1, ARRIVED: 1, DEPARTED: 1,
-                  GREETED: 1, RESTED: 1, BROKE: 1, PREPARED: 1, SLEPT: 1, ATE: 1, WORKED: 1, WORKED_EXTRA: 1, PRACTISED: 1,
+                  GREETED: 1, RESTED: 1, SAT_DOWN: 1, BROKE: 1, PREPARED: 1, SLEPT: 1, ATE: 1, WORKED: 1, WORKED_EXTRA: 1, PRACTISED: 1,
                   TALK_PROPOSED: 1, TALK_BEGAN: 1, INTERVENTION_SCHEDULED: 1 };
   var SPOKEN = { talk_with: 1, join_conversation: 1, decline_conversation: 1, keep_talking: 1, wind_down: 1 };
   /* A talk has two moments at which either person may bring it to a close or
@@ -372,7 +372,10 @@
       if (g.missed) return;                       // over: it stays where it stood when its day ran out
       var before = g.progress;
       if (g.kind === 'savings') g.progress = actor.savings;
-      if (g.kind === 'social') {
+      /* Reached, a count of talks stands where it stood: "6/2" a week later says
+       * nothing about the goal, only about the week. (Savings are an amount, not a
+       * count, and go on being what they are.) */
+      if (g.kind === 'social' && !g.reached) {
         /* Talks this person actually had — not ones they were in the room
          * for — and, when the goal is about someone, talks with that someone. */
         g.progress = (self.state.conversations || []).filter(function (v) {
@@ -1005,6 +1008,31 @@
     });
   };
 
+  /* A seat nobody is on or heading for, nearest first: any object in the room
+   * that offers the named anchor. */
+  Sim.prototype.freeSeat = function (actor, anchorName) {
+    var self = this, best = null;
+    this.state.objects.forEach(function (o) {
+      var at = o.location === actor.location && o.anchors && o.anchors[anchorName];
+      if (!at || self.spotTaken(actor, at)) return;
+      var d = Math.abs(at.x - actor.pos.x) + Math.abs(at.y - actor.pos.y);
+      if (!best || d < best.d || (d === best.d && o.id < best.objectId)) best = { objectId: o.id, at: at, d: d };
+    });
+    return best;
+  };
+
+  /* Somebody else has arrived on this cell for something they are doing or
+   * about to do. Someone merely standing about holds nothing. */
+  Sim.prototype.heldByAnother = function (actor, cell) {
+    var self = this;
+    return this.actorIds().some(function (id) {
+      var o = self.state.characters[id];
+      if (id === actor.id || o.location !== actor.location || o.transit || !o.activity) return false;
+      if (o.pos.x !== cell.x || o.pos.y !== cell.y) return false;
+      return !o.walkTarget || (o.walkTarget.x === cell.x && o.walkTarget.y === cell.y);
+    });
+  };
+
   /* Somebody else is standing on this cell, not passing over it. */
   Sim.prototype.standingOn = function (actor, cell, busyOnly) {
     var self = this;
@@ -1274,6 +1302,36 @@
       try { holds = def.eligible(ctx); } catch (e2) { holds = { reason: 'error:' + (e2 && e2.message) }; }
       if (holds !== true && holds.reason !== 'partner_busy') return this.failActivity(actor, holds.reason || 'ineligible');
     }
+    /* Something bought standing is not eaten standing, if there is anywhere to
+     * sit: an action may say that after so many minutes it carries on from a
+     * seat (def.thenSit). The person walks there like anybody walking anywhere
+     * — those minutes are not minutes of the activity — and sits. No free seat
+     * is not a failure: they stay where they are, as before. The seat is held
+     * by standing on it, the way every other spot is. */
+    if (def.thenSit && !act.seat && act.elapsed >= def.thenSit.after) {
+      var seat = this.freeSeat(actor, def.thenSit.anchor);
+      act.seat = seat ? { objectId: seat.objectId, at: seat.at, state: 'walking' } : { objectId: null, state: 'standing' };
+      if (seat) actor.walkTarget = { x: seat.at.x, y: seat.at.y, dir: seat.at.dir };
+      this.touch();
+    }
+    if (act.seat && act.seat.state === 'walking') {
+      var sat = act.seat.at;
+      if (actor.pos.x === sat.x && actor.pos.y === sat.y) {
+        actor.pos = { x: sat.x, y: sat.y, dir: sat.dir || actor.pos.dir };
+        actor.walkTarget = null;
+        act.seat.state = 'seated';
+        this.emit('SAT_DOWN', { actorId: actor.id, locationId: actor.location,
+          data: { actionId: act.actionId, objectId: act.seat.objectId },
+          text: actor.name + ' sat down with it.' });
+      } else if (!actor.walkTarget || this.heldByAnother(actor, sat)) {
+        actor.walkTarget = null;
+        act.seat = { objectId: null, state: 'standing' };      // walled off or taken on the way: carry on standing
+      } else {
+        this.adjustNeed(actor, 'energy', -0.02 * minutes);
+        this.touch();
+        return;
+      }
+    }
     if (def.tick) def.tick(ctx, minutes);
     act.elapsed += minutes;
     this.touch();
@@ -1336,6 +1394,10 @@
     }
     var n = this.nextStep(loc, p, t);
     if (!n) { actor.walkTarget = null; return; }   // walled off: stay put rather than slide through
+    /* The last step is onto the spot itself. If somebody got there first, wait
+     * beside it: two people who set out together for one spot do not end up
+     * sharing it. Whoever wanted it finds it occupied and does something else. */
+    if (n.x === t.x && n.y === t.y && this.heldByAnother(actor, n)) return;
     actor.pos = { x: n.x, y: n.y, dir: n.dir };
     this.touch();
   };

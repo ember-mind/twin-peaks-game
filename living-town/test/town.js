@@ -84,7 +84,7 @@ const strip = (s) => { const c = JSON.parse(JSON.stringify(s.state)); delete c.v
   ok(set.length >= 6 && set.every((e) => e.minute === 0) && set.every((e) => !week.actorIds().some((id) => id !== e.actorId && W7[id].memories.some((m) => m.eventSeq === e.seq))), 'someone whose goal is over takes up the next on their own list the following morning, and it is theirs alone to know');
   ok(week.actorIds().every((id) => W7[id].goals.filter((g) => !g.reached && !g.missed).length <= 1), 'one thing at a time');
   const again = W7.resident_b.goals.filter((g) => /^goal_see_friend_again/.test(g.id));
-  ok(again.length >= 2 && again.every((g) => g.target === 2 && g.progress <= g.target + 3 && g.base >= 1), 'a goal taken up later counts from that morning, not from the beginning of time: ' + again.map((g) => g.progress + '/' + g.target).join(', '));
+  ok(again.length >= 2 && again.every((g) => g.target === 2 && g.progress <= g.target && g.base >= 1), 'a goal taken up later counts from that morning, not from the beginning of time, and stops counting once reached: ' + again.map((g) => g.progress + '/' + g.target).join(', '));
   const outcomes = { reached: ev7('GOAL_REACHED').filter((e) => e.day >= 3).length, missed: ev7('GOAL_MISSED').length };
   console.log('    ' + ev7('GOAL_MISSED').map((e) => e.stamp + ' ' + e.text).join('\n    '));
   ok(outcomes.reached >= 4 && outcomes.missed >= 1, 'the later days have things at stake that can go either way: ' + JSON.stringify(outcomes));

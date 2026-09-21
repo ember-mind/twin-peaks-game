@@ -281,6 +281,8 @@
       id: 'buy_meal', label: 'Buy a meal', targetKind: 'object', interruptible: false,
       position: 'use_spot',
       duration: function () { return 20; },
+      /* Four minutes at the counter to order and pay; the rest at a table, if one is free. */
+      thenSit: { after: 4, anchor: 'eat_here' },
       eligible: function (ctx) {
         if (!at(ctx, 'cafe')) return { reason: 'not_at_cafe' };
         if (!locationOpen(ctx, 'cafe')) return { reason: 'cafe_closed' };
