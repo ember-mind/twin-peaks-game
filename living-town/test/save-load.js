@@ -636,6 +636,19 @@ async function previousFormatIsMigrated() {
     ok(le.pos.x === 12 && le.pos.y === 7 && le.walkTarget.x === 8 && le.walkTarget.y === 8, 'she is on the pavement beside where she stood, still heading for the park gate');
     await lifted.runMinutes(20);
     ok(le.location === 'park', 'and gets there');
+    /* The near side got front gardens (e6451950 -> this town). A real save from the street of house fronts. */
+    const gardenText = require('node:fs').readFileSync(path.resolve(__dirname, 'fixtures', 'save-town-e6451950-walking-to-a-south-home.json'), 'utf8');
+    const before = JSON.parse(gardenText);
+    const homing = Object.keys(before.state.characters).map((id) => before.state.characters[id]).find((c) => c.location === 'street' && c.transit);
+    ok(before.world === 'e6451950' && homing && homing.transit.to === 'flat_b', 'a genuine save from the street of house fronts: ' + homing.name + ' on the way to a south-side home');
+    const gardened = Save.deserialize(JSON.parse(gardenText));
+    const hg = gardened.state.characters[homing.id];
+    ok(hg.pos.x === homing.pos.x && hg.pos.y === homing.pos.y && hg.walkTarget.x === homing.walkTarget.x && hg.walkTarget.y === homing.walkTarget.y, 'nobody is moved and nobody is re-aimed: the gates are where the doorways were');
+    await gardened.runMinutes(30);
+    ok(hg.location === 'flat_b' && !hg.transit, 'and she gets home through the gate');
+    const inWall = JSON.parse(gardenText); inWall.state.characters[homing.id].pos = { x: 0, y: 8, dir: 'down' };
+    let refused = null; try { Save.deserialize(inWall); } catch (e) { refused = e.message; }
+    ok(refused && /not open ground/.test(refused) && refused.indexOf(homing.id) >= 0, 'a save with someone inside the garden wall is refused by name, not repaired by guess');
     const again = Save.deserialize(JSON.parse(JSON.stringify(Save.serialize(moved))));
     ok(again.state.day === 2 && JSON.parse(JSON.stringify(Save.serialize(moved))).world === LT.World.fingerprint(), 'saved again, it is a save of this town');
   }

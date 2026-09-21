@@ -250,6 +250,13 @@
           { street: true, side: side, destination: destination }));
       });
     });
+    /* Garden walls and fences (f): a run along the pavement is a wall seen
+     * from the street; a single cell between two gardens is a fence end-on. */
+    rows.forEach(function (r, y) {
+      runs([r], 'f').forEach(function (run) {
+        out.push(piece('gardenwall', run.x, y, run.w, 1, { along: y === south + 1 }));
+      });
+    });
     return { kind: 'street', pieces: out, fronts: fronts, northPavement: north, southPavement: south, material: 'lt_street' };
   }
 
@@ -894,6 +901,7 @@
       case 'tree': tree(g, kit, p, sx, sy); break;
       case 'bench': bench(g, kit, p, sx, sy, piece.facing); break;
       case 'gate': gate(g, kit, p, sx, sy, piece.w, piece.street); break;
+      case 'gardenwall': gardenWall(g, kit, p, sx, sy, piece.w, piece.along); break;
       case 'door':
         if (piece.street) streetDoor(g, kit, p, sx, sy, piece, opts, foreground);
         else doorway(g, kit, p, sx, sy, piece.w, lamp);
@@ -1072,6 +1080,23 @@
     } else {
       /* Near buildings show their street-facing eave and their roof behind
        * it. The door pier is the only projection into the pavement. */
+      if (H <= T) {
+        /* Only the eave of the house shows at the foot of the frame: slate
+         * courses under a ridge board in the home's colour, the path running
+         * up to it. No perspective of its own — flat, like the fronts opposite. */
+        R(g, x, y - 3, W, H + 3, p.ink);
+        R(g, x + 1, y - 2, W - 2, 4, a.redDark);
+        R(g, x + 1, y - 2, W - 2, 2, a.red);
+        R(g, x + 1, y - 2, W - 2, 1, a.redHi);
+        R(g, x + 1, y + 2, W - 2, H - 3, p.roof);
+        for (var cy = 5; cy < H; cy += 4) R(g, x + 1, y + cy, W - 2, 1, p.roofDark);
+        for (var cx = 6; cx < W - 2; cx += 8) R(g, x + cx, y + 2, 1, H - 3, p.roofDark);
+        R(g, x + 1, y + 2, W - 2, 1, p.roofHi);
+        /* A porch light over the hidden door, where the path arrives. */
+        R(g, doorLeft + 2, y - 2, doorRight - doorLeft - 4, 5, p.ink);
+        R(g, doorLeft + 3, y - 1, doorRight - doorLeft - 6, 3, night ? p.gold : p.cream);
+        return;
+      }
       /* A hipped slate roof: diagonal rakes expose the cream gable ends.
        * Long seams follow the roof slope, unlike the horizontal courses of
        * the garden wall. Everything stays in this building's H footprint. */
@@ -1110,48 +1135,49 @@
     }
   }
 
+  /* The park's own boundary wall, for the front gardens: along the pavement a
+   * coped stone wall with a clipped hedge showing over it; between two gardens
+   * a hedge seen end-on. */
+  function gardenWall(g, kit, p, sx, sy, w, along) {
+    var R = kit.rect, W = w * T, j;
+    if (!along) {
+      R(g, sx + 3, sy - 2, W - 6, T + 2, p.ink);
+      R(g, sx + 4, sy - 1, W - 8, T, p.grassDark);
+      R(g, sx + 4, sy - 1, W - 8, 3, p.grassLight);
+      for (j = 2; j < T - 2; j += 4) R(g, sx + 5 + (j % 3), sy + j, 2, 1, p.grassHi);
+      return;
+    }
+    R(g, sx, sy - 4, W, 6, p.ink);
+    R(g, sx + 1, sy - 3, W - 2, 4, p.grassDark);
+    R(g, sx + 1, sy - 3, W - 2, 1, p.grassLight);
+    R(g, sx, sy, W, 16, p.ink);
+    R(g, sx + 1, sy + 1, W - 2, 13, p.pavingDark);
+    R(g, sx, sy, W, 3, p.pavingHi);
+    R(g, sx + 1, sy + 3, W - 2, 1, p.pavingInk);
+    R(g, sx, sy + 14, W, 2, p.ink);
+    for (j = 7; j < W; j += 12) R(g, sx + j, sy + 5, 1, 8, p.pavingInk);
+  }
+
   function streetDoor(g, kit, p, sx, sy, d, opts, foreground) {
     var R = kit.rect, W = d.w * T, a = streetAccent(kit, d.destination, p);
     var top = sy - 19, bottom = sy + T, lamp = lampsOn(opts);
     if (d.side === 'south') {
-      /* The near houses face north: their ground threshold is the north
-       * edge of D, exactly against the pavement. The open leaves are on the
-       * sides, so somebody approaching remains a complete silhouette. */
-      top = sy - 31; bottom = sy;
-      if (!foreground) {
-        /* Cut the real walkable opening out of the roof, too: D is an
-         * entrance recess, never a slate surface under somebody's feet. */
-        R(g, sx, sy, W, T, p.woodDark);
-        R(g, sx + 2, sy + 1, W - 4, T - 2, p.wood);
-        R(g, sx + 2, sy + 1, W - 4, 2, p.woodHi);
-        R(g, sx + 2, sy + 8, W - 4, 1, p.woodDark);
-        R(g, sx + 1, top, W - 2, bottom - top, p.ink);
-        R(g, sx + 2, top + 1, W - 4, bottom - top - 1, p.creamShade);
-        R(g, sx + 4, top + 3, W - 8, bottom - top - 4, p.woodDark);
-        R(g, sx + 8, top + 4, W - 16, bottom - top - 6, p.ink);
-        /* Door leaves swung back into the recess, tall narrow panels rather
-         * than a glazed rectangle that could be mistaken for a dormer. */
-        [4, W - 8].forEach(function (dx) {
-          R(g, sx + dx, top + 3, 4, bottom - top - 5, a.redDark);
-          R(g, sx + dx + 1, top + 4, 2, bottom - top - 7, a.red);
-          R(g, sx + dx + 1, top + 5, 1, bottom - top - 10, a.redHi);
-          R(g, sx + dx + 1, top + 18, 2, 1, p.gold);
-        });
-        R(g, sx + 2, top, W - 4, 3, a.redDark);
-        R(g, sx + 3, top + 1, W - 6, 1, a.redHi);
-        R(g, sx + 1, top + 7, 5, 7, p.ink);
-        R(g, sx + 2, top + 8, 3, 5, lamp > 0 ? '#ffdc82' : p.metal);
-        R(g, sx + 2, top + 8, 3, 1, p.metalHi);
-        /* A broad flat threshold joins both cells to the pavement. */
-        R(g, sx + 4, bottom - 3, W - 8, 3, p.pavingHi);
-        R(g, sx + 4, bottom - 1, W - 8, 1, p.pavingDark);
-      }
-      /* The back-facing lintel sits behind pavement visitors. Only the
-       * outer reveals need the normal foreground depth band. */
-      [1, W - 3].forEach(function (dx) {
-        R(g, sx + dx, top + 3, 2, bottom - top - 3, p.ink);
-        R(g, sx + dx, top + 3, 1, bottom - top - 4, p.creamShade);
+      /* The near houses turn their backs to the viewer, so their street door
+       * cannot be shown. The way in is a gate in the garden wall: slim piers
+       * at the two ends of the gap, capped in the home's colour, so whoever
+       * stands in it is seen whole, on the path, between them. */
+      [-3, W - 1].forEach(function (dx) {
+        R(g, sx + dx, sy - 10, 4, 26, p.ink);
+        R(g, sx + dx + 1, sy - 9, 2, 24, p.paving);
+        R(g, sx + dx + 1, sy - 9, 1, 24, p.pavingHi);
+        R(g, sx + dx - 1, sy - 14, 6, 5, p.ink);
+        R(g, sx + dx, sy - 13, 4, 3, a.red);
+        R(g, sx + dx, sy - 13, 4, 1, a.redHi);
       });
+      R(g, sx + W + 4, sy - 9, 5, 7, p.ink);
+      R(g, sx + W + 5, sy - 8, 3, 5, lamp > 0 ? '#ffdc82' : p.metal);
+      R(g, sx + W + 5, sy - 8, 3, 1, p.metalHi);
+      if (lamp > 0 && !foreground) R(g, sx - 2, sy - 4, W + 4, T + 6, 'rgba(255,220,130,.20)');
       return;
     }
     if (!foreground) {
@@ -1191,6 +1217,7 @@
     backdrop(g, kit, p.ink);
     for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
       var ch = at(rows, x, y), sx = x0 + x * T, sy = y0 + y * T;
+      if (ch === ',') { grass(g, R, p, sx, sy, x, y); continue; }
       if (ch !== '-' && ch !== 'D') continue;
       var road = y > plan.northPavement && y < plan.southPavement;
       paving(g, R, p, sx, sy, x, y, road ? 'road' : 'path');

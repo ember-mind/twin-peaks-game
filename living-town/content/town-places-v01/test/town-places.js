@@ -230,8 +230,8 @@ function streetFrontsAgree() {
     cells.forEach(c => { const k=c.x + ',' + c.y; counts[k]=(counts[k] || 0)+1; });
   });
   const blocked = W.blockedCells('street');
-  ok(blocked.length === 106 && blocked.every(c => counts[c] === 1),
-    'all 106 H cells are claimed exactly once, including the garden boundary');
+  ok(blocked.length === 94 && blocked.every(c => counts[c] === 1),
+    'all 94 solid cells (house fronts, the park boundary, garden walls and fences) are claimed exactly once');
   const doors = plan.pieces.filter(p => p.kind === 'door'), gates = plan.pieces.filter(p => p.kind === 'gate');
   ok(doors.length === 6 && gates.length === 1 && gates[0].x === 8 && gates[0].y === 8,
     'six house/shop doors and the park gate occupy the seven real D runs');

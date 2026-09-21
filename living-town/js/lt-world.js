@@ -17,9 +17,9 @@
    *   #  wall        T  tree        w  water       ,  grass      -  paving
    *   .  floor       D  doorway     B  bed         K  kitchen    G  guitar
    *   C  cafe counter  t  table     c  chair       b  bench      =  window
-   *   H  house front, seen from the street
+   *   H  house front, seen from the street     f  garden wall or fence
    */
-  var SOLID = '#TwBKGCtb=H';
+  var SOLID = '#TwBKGCtb=Hf';
 
   W.isSolid = function (ch) { return SOLID.indexOf(ch) >= 0; };
 
@@ -195,7 +195,12 @@
        * (D) for every place that opens onto it: north, left to right, the
        * first flat, the flat over the bakery, the café; south, the second
        * flat's room, the park gate, the attic's stair, the ground-floor rooms.
-       * A pavement runs along each side of the carriageway. */
+       * A pavement runs along each side of the carriageway.
+       * The near houses turn their backs to whoever is watching, so their
+       * street doors cannot be seen: each stands behind a low garden wall (f)
+       * with a gate (D) in it, and a path across a front garden to the house,
+       * of which only the eave shows (the last row). The park keeps its wall
+       * and its gate between them. */
       rows: [
         'HHHHHHHHHHHHHHHHHHHH',
         'HHHHHHHHHHHHHHHHHHHH',
@@ -205,8 +210,8 @@
         '--------------------',
         '--------------------',
         '--------------------',
-        'HDDHHHHHDDHHHDDHHDDH',
-        'HHHHHHHHHHHHHHHHHHHH',
+        'fDDffHHHDDHffDDffDDf',
+        ',--,fHHHHHH,,--,f--,',
         'HHHHHHHHHHHHHHHHHHHH'
       ]
     }

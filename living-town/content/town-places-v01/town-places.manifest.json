@@ -30,12 +30,13 @@
     {
       "id": "street",
       "material": "lt_street",
-      "pieces": 14,
-      "foreground": 7,
-      "claimed": 120,
+      "pieces": 21,
+      "foreground": 14,
+      "claimed": 108,
       "kinds": [
         "door",
         "front",
+        "gardenwall",
         "gate"
       ]
     },

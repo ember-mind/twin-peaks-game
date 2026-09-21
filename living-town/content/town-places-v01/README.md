@@ -9,8 +9,20 @@ interior kit at native 256×192. Geometry and collision remain owned by
 
 The production view already uses this package. It checks `LT.World.blockedCells`
 against `LT.TownPlaces.claims` and falls back to the cell painter if a place has
-an uncovered solid cell. The street painter now covers the 106 `H` cells in the
-world introduced by `e1eeb66` (“Give the street its houses”).
+an uncovered solid cell. The street painter covers all 94 solid cells of the street as it is in
+world `e41937ba`: the north fronts, the park boundary, and on the near side the
+garden walls and fences (`f`), front gardens and the eaves of the south houses.
+
+The near side was first painted as roofs with a door portal standing on the
+pavement (world `e6451950`). Two independent fresh critics read a person at those
+doors as standing on a roof, and the same strict critic scored that version
+8 / 7 / 6 (same game / recognisability / walkability). The map was changed — the
+south houses stand behind front gardens — and the same critic, same prompt,
+scored this one 8 / 8 / 7. The bar is 9 each, so it is still not accepted. What
+remains, in the critic's words: the eave strip at the foot of the frame does not
+say "house"; the cap colours that tell the south homes apart are specks at
+native size and collapse at night; south-side figures have no contact shadow;
+the street is flat and prop-less next to the café; the park reads as a dark void.
 
 ## API and construction
 
