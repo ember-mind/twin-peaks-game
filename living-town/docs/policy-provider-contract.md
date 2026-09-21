@@ -1,7 +1,8 @@
 # Plugging a language-model provider into Living Town
 
-Nothing in this repository calls a model. This is what is already in place for
-one to be plugged in, and what is deliberately not.
+The town, its tests and the page call no model. One transport is shipped for
+whoever wants one — TypeSafe's Jev, below — and it is only ever run on purpose.
+This is what is in place for a provider, and what is deliberately not.
 
 ## The boundary (unchanged)
 
@@ -77,10 +78,29 @@ for at most `patienceMs` from when it first saw the question, and says whom it
 is waiting for. It stops holding the moment the answer is in. After that the
 simulation's own timeout (`decisionTimeoutMinutes`, town minutes) applies as before.
 
+## Jev
+
+`living-town/tools/jev-transport.js` (Node). Jev does not write: it returns one
+option and a probability for each. So the question is a single Choice whose
+options are exactly the request's candidates, in words (`brief.options`, with
+`brief.situation` as the state); what comes back is a candidate id plus the
+distribution, or an error. There is no `reason` and no `say`: nothing is put in
+anybody's mouth. The key is read from `TYPESAFE_API_KEY` or
+`~/.config/typesafe/.env`, goes in the Authorization header and nowhere else,
+and is never in the repository or a page. `test/jev-transport.js` covers all of
+it with a stand-in for the network.
+
+`node living-town/tools/run-with-jev.js --days=1 --budget=40 --gap=3` lives a
+town day with close calls sent to Jev and prints cost and the boredom numbers
+beside the same day offline. It makes real, billed calls. First measurement
+(2026-09-21, jev-1.13.0): 40 questions, 0 errors, p50 252 ms, p95 644 ms,
+36k tokens in / 3k out, 11 s of wall time for the day; at `closeGap` 3 the day
+is much the same as offline, because near-ties are mostly "wait or not".
+
 ## Not done, on purpose
 
-- No transport, key handling, or server. A browser page must not hold a key;
-  the transport should be a call to a small relay the operator runs.
+- No relay for the page yet. A browser page must not hold a key; the page will
+  reach Jev through a small local relay the operator runs.
 - Looking back in a world with a provider plays recorded answers instead of
   asking again: the page wraps every remote policy in a recorder from the
   moment it follows a world (`O.recordRemote`), and a replay registers players

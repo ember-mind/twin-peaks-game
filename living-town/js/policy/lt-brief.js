@@ -82,7 +82,15 @@
       if (text.length <= B.MAX_CHARS || (memoryCount === 0 && !detail)) break;
       if (memoryCount > 0) memoryCount -= 2; else detail = false;
     }
-    return { version: B.VERSION, requestId: request.requestId, system: B.SYSTEM, user: text, schema: B.SCHEMA, chars: B.SYSTEM.length + text.length };
+    /* For a provider that picks from a typed set instead of writing text: the
+     * same situation without the option list, and the options as data. Nothing
+     * here that the text does not already say. */
+    var cut = text.indexOf('\nOptions:\n');
+    var options = request.candidates.map(function (c) {
+      return { id: c.id, label: c.label, minutes: c.durationMinutes, meta: (detail && c.meta && Object.keys(c.meta).length) ? c.meta : null };
+    });
+    return { version: B.VERSION, requestId: request.requestId, system: B.SYSTEM, user: text, schema: B.SCHEMA, chars: B.SYSTEM.length + text.length,
+             situation: cut >= 0 ? text.slice(0, cut) : text, options: options, who: request.self.name };
   };
 
   function firstJson(text) {
