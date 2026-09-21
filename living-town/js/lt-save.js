@@ -208,6 +208,34 @@
     return save;
   };
 
+  /* e41937ba -> d7dfa67e: the café's tables became somewhere to sit. The bench
+   * gained a seat for someone eating and the two booths became objects with
+   * one each; nothing moved and no cell changed, so every saved position is
+   * still good. What the save lacks is the two booths and the bench's new
+   * anchor. Someone saved part-way through a meal at the counter has no seat
+   * on record, and will look for one like anybody else. Frozen here.
+   * Written against test/fixtures/save-town-e41937ba-eating-at-the-counter.json. */
+  var CAFE_D7DFA67E = {
+    booths: [
+      { id: 'obj_cafe_booth_window', name: 'window booth', location: 'cafe', x: 10, y: 2, tags: ['furniture', 'seat'], portable: false, owner: 'cafe',
+        affordances: [], anchors: { eat_here: { x: 9, y: 2, dir: 'right' } } },
+      { id: 'obj_cafe_booth_wall', name: 'wall booth', location: 'cafe', x: 11, y: 6, tags: ['furniture', 'seat'], portable: false, owner: 'cafe',
+        affordances: [], anchors: { eat_here: { x: 10, y: 6, dir: 'right' } } }
+    ],
+    benchSeat: { x: 4, y: 7, dir: 'left' }
+  };
+  S.WORLD_MIGRATIONS['e41937ba'] = function (save) {
+    var state = save.state, have = {};
+    (state.objects || []).forEach(function (o) { have[o.id] = o; });
+    CAFE_D7DFA67E.booths.forEach(function (o) { if (!have[o.id]) state.objects.push(deepCopy(o)); });
+    if (have.obj_cafe_table) {
+      have.obj_cafe_table.anchors = have.obj_cafe_table.anchors || {};
+      if (!have.obj_cafe_table.anchors.eat_here) have.obj_cafe_table.anchors.eat_here = deepCopy(CAFE_D7DFA67E.benchSeat);
+    }
+    save.world = 'd7dfa67e';
+    return save;
+  };
+
   /* ---------------- serialise ---------------- */
 
   S.serialize = function (sim) {

@@ -1,5 +1,5 @@
 {
-  "commit": "e8a2c8f5261ca8b7485078087971f288fde007ea",
+  "commit": "f0cdbd94bbe7583f2040436c1d93bd0f234e9199",
   "seed": 20260918,
   "days": 3,
   "firstDay": 1,
@@ -32,11 +32,11 @@
   "perDay": {
     "1": {
       "wakingMinutes": 960,
-      "deadMinutes": 92,
-      "liveMinutes": 868,
+      "deadMinutes": 90,
+      "liveMinutes": 870,
       "longestDeadStretch": {
-        "minutes": 58,
-        "start": "D1 21:32"
+        "minutes": 55,
+        "start": "D1 21:35"
       },
       "beats": 12,
       "beatsByType": {
@@ -91,11 +91,11 @@
     },
     "2": {
       "wakingMinutes": 960,
-      "deadMinutes": 134,
-      "liveMinutes": 826,
+      "deadMinutes": 133,
+      "liveMinutes": 827,
       "longestDeadStretch": {
-        "minutes": 102,
-        "start": "D2 20:48"
+        "minutes": 103,
+        "start": "D2 20:47"
       },
       "beats": 13,
       "beatsByType": {
@@ -144,22 +144,22 @@
           "flat_b"
         ]
       },
-      "togetherMinutes": 581
+      "togetherMinutes": 580
     },
     "3": {
       "wakingMinutes": 960,
-      "deadMinutes": 102,
-      "liveMinutes": 858,
+      "deadMinutes": 91,
+      "liveMinutes": 869,
       "longestDeadStretch": {
-        "minutes": 88,
-        "start": "D3 21:02"
+        "minutes": 78,
+        "start": "D3 21:12"
       },
       "beats": 2,
       "beatsByType": {
         "COMMITMENT_KEPT": 1,
         "TALKED": 1
       },
-      "decisions": 104,
+      "decisions": 102,
       "turnDecisions": 4,
       "closeCalls": 14,
       "distinctActivities": {
@@ -177,8 +177,8 @@
         "resident_b": [
           "buy_meal",
           "greet",
-          "join_conversation",
           "sleep",
+          "talk_with",
           "travel",
           "wait",
           "wash_and_dress"
@@ -194,16 +194,16 @@
           "flat_b"
         ]
       },
-      "togetherMinutes": 538
+      "togetherMinutes": 548
     }
   },
   "overall": {
     "wakingMinutes": 2880,
-    "deadMinutes": 328,
-    "liveMinutes": 2552,
+    "deadMinutes": 314,
+    "liveMinutes": 2566,
     "longestDeadStretch": {
-      "minutes": 102,
-      "start": "D2 20:48"
+      "minutes": 103,
+      "start": "D2 20:47"
     },
     "beats": 27,
     "beatsByType": {
@@ -216,7 +216,7 @@
       "FOOD_PARCEL_OPENED": 1,
       "TALK_WOUND_DOWN": 4
     },
-    "decisions": 304,
+    "decisions": 302,
     "turnDecisions": 18,
     "closeCalls": 41,
     "distinctActivities": {
@@ -262,12 +262,12 @@
         "park"
       ]
     },
-    "togetherMinutes": 1150
+    "togetherMinutes": 1159
   },
   "deadStretches": [
     {
-      "start": "D2 20:48",
-      "minutes": 102,
+      "start": "D2 20:47",
+      "minutes": 103,
       "doing": {
         "resident_a": [
           "sleep @flat_a"
@@ -278,8 +278,8 @@
       }
     },
     {
-      "start": "D3 21:02",
-      "minutes": 88,
+      "start": "D3 21:12",
+      "minutes": 78,
       "doing": {
         "resident_a": [
           "sleep @flat_a"
@@ -290,8 +290,8 @@
       }
     },
     {
-      "start": "D1 21:32",
-      "minutes": 58,
+      "start": "D1 21:35",
+      "minutes": 55,
       "doing": {
         "resident_a": [
           "sleep @flat_a"
@@ -316,8 +316,8 @@
       }
     },
     {
-      "start": "D2 17:33",
-      "minutes": 16,
+      "start": "D2 17:36",
+      "minutes": 14,
       "doing": {
         "resident_a": [
           "idle @cafe",

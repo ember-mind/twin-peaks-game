@@ -76,6 +76,8 @@
     var act = character.activity;
     if (!act || act.phase !== 'executing' || character.transit || character.walkTarget) return null;
     var poseId = POSE[act.actionId];
+    /* Whatever is carried on from a seat is done sitting, once they have sat down. */
+    if (act.seat && act.seat.state === 'seated') poseId = 'seated';
     if (!poseId) return null;
     /* A talk has a pose once the two are actually talking, not while one waits for an answer. */
     if (poseId === 'talking' && !act.conversationId) return null;
