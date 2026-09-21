@@ -85,10 +85,18 @@
     return withOpenSocial(a, bId) || withOpenSocial(b, aId);
   }
 
-  /* An open meal invitation between the two, in either direction. */
+  /* Nobody answered and the time to answer has gone: the invitation stays
+   * `open` on record (nothing ticks it shut), but it is a question nobody can
+   * be asked any more. Found at integration: without this, one unanswered
+   * invitation kept two people from ever inviting each other again, and an
+   * expired lunch invitation hid a live dinner one from the person holding both. */
+  function lapsed(state, o) { return o.status === 'open' && U.absolute(state.day, state.minute) > o.expiresAbs; }
+  SM.lapsed = lapsed;
+
+  /* A meal invitation between the two that can still be answered, in either direction. */
   function openInvitationBetween(state, aId, bId) {
     return state.objects.some(function (o) {
-      if (o.typeId !== TYPE_ID || o.status !== 'open') return false;
+      if (o.typeId !== TYPE_ID || o.status !== 'open' || lapsed(state, o)) return false;
       return (o.fromId === aId && o.toId === bId) || (o.fromId === bId && o.toId === aId);
     });
   }
@@ -108,6 +116,8 @@
       return o.typeId === TYPE_ID && o.status === 'open' && o.heldBy === actorId;
     });
     held.sort(function (a, b) {
+      var la = lapsed(state, a), lb = lapsed(state, b);
+      if (la !== lb) return la ? 1 : -1;               // one that can still be answered comes before one that cannot
       var da = U.absolute(a.dueDay, a.dueMin), db = U.absolute(b.dueDay, b.dueMin);
       if (da !== db) return da - db;
       return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
