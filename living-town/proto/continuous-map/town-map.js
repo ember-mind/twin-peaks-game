@@ -27,7 +27,7 @@
     steps_top: [362, 228], steps_foot: [362, 266],
     lawn_w: [200, 266], bench_w: [213, 296], lawn_e: [470, 264], bench_e: [510, 296],
     jetty_head: [360, 298], jetty_end: [360, 322],
-    bridge_mid: [722, 262], bridge_far: [748, 300]
+    bridge_mid: [700, 254], bridge_far: [722, 290]
   };
   P.EDGES = [
     ['door_a', 'gate_a'], ['gate_a', 'st_a'], ['door_b', 'gate_b'], ['gate_b', 'st_b'],
@@ -70,7 +70,7 @@
     bench_w: [[0, 0], [-11, 0], [11, 0], [-22, 2], [22, 2]],
     bench_e: [[0, 0], [11, 0], [-11, 0], [22, 2], [-22, 2]],
     jetty_end: [[0, 0], [-12, -4], [12, -4], [-6, -14], [6, -14]],
-    bridge_far: [[0, 0], [-10, -8], [10, 6], [-20, -16], [18, 12]],
+    bridge_far: [[0, 0], [-8, -10], [8, 10], [-14, -20], [4, 18]],
     lawn_w: [[0, 0], [-16, 4], [16, 2], [-30, 8], [-8, 14]]
   };
 
@@ -125,7 +125,10 @@
   };
 
   function choose(town, p) {
-    var roll = town.r();
+    var roll = town.r(), hour = Math.floor(town.minute / 60) % 24;
+    /* Evenings end at home: after ten nobody sets out anywhere else. */
+    if (hour >= 22 || hour < 6) return p.at === p.home ? null : p.home;
+    if (hour >= 20 && p.at !== p.home && roll < 0.7) return p.home;
     if (p.at !== p.home && roll < 0.35) return p.home;
     if (roll < 0.6) return 'cafe';
     if (roll < 0.9) return P.OUTDOOR_SPOTS[Math.floor(town.r() * P.OUTDOOR_SPOTS.length)];
@@ -143,7 +146,9 @@
         return;
       }
       if (town.minute < p.busyUntil) return;
-      var to = choose(town, p), route = P.route(nodeOf(p.at), nodeOf(to));
+      var to = choose(town, p);
+      if (to === null) { p.busyUntil = town.minute + 30; return; }
+      var route = P.route(nodeOf(p.at), nodeOf(to));
       if (!route || route.length === 0) { p.busyUntil = town.minute + 10; return; }
       p.walk = { from: p.at, to: to, route: route, t0: town.minute };
       p.at = null; town.walks++; town.pxWalked += route.length;

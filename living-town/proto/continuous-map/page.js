@@ -33,8 +33,48 @@
     g.drawImage(GRADES[l.a][which], sx, sy, w, h, dx, dy, w, h);
     if (l.k > 0) { g.globalAlpha = l.k; g.drawImage(GRADES[l.b][which], sx, sy, w, h, dx, dy, w, h); g.globalAlpha = 1; }
   }
+  /* The air the figure stands in, per grade: outlines melt toward it and the
+   * whole figure takes its tint. */
+  var AMBIENT = { day: [112, 108, 92], dusk: [64, 66, 78], night: [26, 34, 58] };
+  var TINT = { day: [1.0, 0.99, 0.95], dusk: [0.9, 0.86, 0.88], night: [0.52, 0.58, 0.8] };
+  function mixGrade(tbl, l) { var a = tbl[l.a], b = tbl[l.b]; return [0, 1, 2].map(function (i) { return a[i] * (1 - l.k) + b[i] * l.k; }); }
+  /* Lights a figure can catch: lamps always, the café window while open,
+   * a home's windows while someone is in. */
+  function lightsNear(fx, fy, ents) {
+    var out = P.LAMPS.map(function (L) { return [L[0], L[1] + 6, 70, 1]; });
+    out.push([362, 132, 80, 0.9]);
+    ents.forEach(function (e) { if (!e.q.outdoors && P.WINDOWS[e.p.at]) P.WINDOWS[e.p.at].forEach(function (w) { out.push([w[0] + w[2] / 2, w[1] + w[3] / 2, 46, 0.7]); }); });
+    return out.map(function (L) { var dx = L[0] - fx, dy = L[1] - (fy - 12), d = Math.sqrt(dx * dx + dy * dy); return { dx: dx, dy: dy, s: Math.max(0, 1 - d / L[2]) * L[3] }; })
+      .filter(function (L) { return L.s > 0; });
+  }
+  function lightFigure(e, l, dark, ents) {
+    var img = sb.getImageData(0, 0, 48, 48), d = img.data, amb = mixGrade(AMBIENT, l), tint = mixGrade(TINT, l);
+    var lights = dark > 0.15 ? lightsNear(e.fx, e.fy, ents) : [];
+    function opaque(x, y) { return x >= 0 && y >= 0 && x < 48 && y < 48 && d[(y * 48 + x) * 4 + 3] > 0; }
+    var rim = new Float32Array(48 * 48);
+    lights.forEach(function (L) {
+      /* The silhouette edge that faces the light catches it. */
+      var sx = Math.abs(L.dx) > Math.abs(L.dy) * 0.5 ? (L.dx > 0 ? 1 : -1) : 0, sy = L.dy < -Math.abs(L.dx) ? -1 : 0;
+      for (var y = 0; y < 48; y++) for (var x = 0; x < 48; x++) {
+        if (!opaque(x, y)) continue;
+        if ((sx && !opaque(x + sx, y)) || (sy && !opaque(x, y + sy))) rim[y * 48 + x] = Math.max(rim[y * 48 + x], L.s * dark);
+        else if ((sx && !opaque(x + 2 * sx, y))) rim[y * 48 + x] = Math.max(rim[y * 48 + x], L.s * dark * 0.45);
+      }
+    });
+    for (var i = 0; i < 48 * 48; i++) {
+      var o = i * 4;
+      if (!d[o + 3]) continue;
+      var r = d[o], gg = d[o + 1], b = d[o + 2], lum = 0.3 * r + 0.59 * gg + 0.11 * b;
+      if (lum < 48) { var m = 0.42; r = r * (1 - m) + amb[0] * m; gg = gg * (1 - m) + amb[1] * m; b = b * (1 - m) + amb[2] * m; }
+      r *= tint[0]; gg *= tint[1]; b *= tint[2];
+      var k = Math.min(0.8, rim[i]);
+      if (k > 0) { r += (255 - r) * k * 0.9; gg += (188 - gg) * k * 0.8; b += (110 - b) * k * 0.5; }
+      d[o] = r; d[o + 1] = gg; d[o + 2] = b;
+    }
+    sb.putImageData(img, 0, 0);
+  }
   var spriteBuf = document.createElement('canvas'); spriteBuf.width = 48; spriteBuf.height = 48;
-  var sb = spriteBuf.getContext('2d'); sb.imageSmoothingEnabled = false;
+  var sb = spriteBuf.getContext('2d', { willReadFrequently: true }); sb.imageSmoothingEnabled = false;
 
   function reset() {
     host = P.createTown(42, state.ppm); mirror = P.createTown(42, state.ppm);
@@ -84,6 +124,12 @@
     if (loaded < 6) return;
     var l = lightAt(state.t), dark = nightness(l);
     blit(g, 'plate', l, 0, 0, P.W, P.H, -camX, -camY);
+    /* The river moves: thin bands of open water slide a pixel either way. */
+    var tt = performance.now() / 1000;
+    for (var ry = 334; ry < 372; ry += 2) {
+      var off = Math.round(Math.sin(tt * 1.1 + ry * 0.55) * 0.9);
+      if (off) blit(g, 'plate', l, 96, ry, 500, 2, 96 + off - camX, ry - camY);
+    }
     /* Lamps at night: a stepped warm pool on the ground and a halo at the head. */
     if (dark > 0.3) {
       var a = (dark - 0.3) / 0.7;
@@ -106,12 +152,21 @@
     ents.forEach(function (e) {
       if (e.q.outdoors || !P.WINDOWS[e.p.at]) return;
       P.WINDOWS[e.p.at].forEach(function (w) {
-        g.fillStyle = 'rgba(255,196,96,' + (0.08 + 0.22 * dark).toFixed(3) + ')'; g.fillRect(w[0] - 3 - camX, w[1] - 3 - camY, w[2] + 6, w[3] + 6);
-        if (dark > 0.5) { g.fillStyle = 'rgba(255,190,90,0.10)'; g.fillRect(w[0] - 2 - camX, w[1] + w[3] - camY, w[2] + 4, 10); }
-        g.fillStyle = '#e9b458'; g.fillRect(w[0] + 1 - camX, w[1] + 1 - camY, w[2] - 2, w[3] - 2);
-        g.fillStyle = '#f6d98e'; g.fillRect(w[0] + 2 - camX, w[1] + w[3] - 5 - camY, w[2] - 4, 3);
-        g.fillStyle = '#5a3b26'; g.fillRect(w[0] + Math.floor(w[2] / 2) - camX, w[1] + 1 - camY, 1, w[3] - 2);
-        g.fillRect(w[0] + 1 - camX, w[1] + Math.floor(w[3] / 2) - camY, w[2] - 2, 1);
+        var x = w[0] - camX, y = w[1] - camY, ww = w[2], hh = w[3], glow = 0.35 + 0.65 * dark;
+        g.globalCompositeOperation = 'lighter';
+        [[8, 6, 0.035], [5, 4, 0.05], [2, 2, 0.07]].forEach(function (r) {
+          g.fillStyle = 'rgba(255,170,80,' + (r[2] * glow).toFixed(3) + ')';
+          g.fillRect(x - r[0], y - r[1], ww + r[0] * 2, hh + r[1] * 2 + r[1]);
+        });
+        /* light falls out of the window onto the sill and the ground below */
+        g.fillStyle = 'rgba(255,170,80,' + (0.05 * glow).toFixed(3) + ')'; g.fillRect(x - 2, y + hh + 2, ww + 4, 14);
+        g.globalCompositeOperation = 'source-over';
+        g.fillStyle = '#b8742f'; g.fillRect(x + 1, y + 1, ww - 2, hh - 2);
+        g.fillStyle = '#e2a24a'; g.fillRect(x + 1, y + 3, ww - 2, hh - 4);
+        g.fillStyle = '#f4c870'; g.fillRect(x + 2, y + Math.floor(hh / 2) + 1, ww - 4, Math.ceil(hh / 2) - 3);
+        g.fillStyle = '#fbe3a0'; g.fillRect(x + 2, y + hh - 4, Math.max(2, Math.floor(ww / 3)), 2);
+        g.fillStyle = '#4a3222'; g.fillRect(x + Math.floor(ww / 2), y + 1, 1, hh - 2);
+        g.fillRect(x + 1, y + Math.floor(hh / 2), ww - 2, 1);
       });
     });
     var out = ents.filter(function (e) { return e.q.outdoors; }).sort(function (a, b) { return a.fy - b.fy || a.i - b.i; });
@@ -140,11 +195,7 @@
           e.q.moving ? EMBER.Grid.walkPhase(e.q.phase % 1) : 0, 1, e.q.moving, false, performance.now() / 1000,
           { mapId: 'lt_street', wx: e.wx, wy: e.wy, npcId: e.p.id, characterLife: null });
       } else if (!drew) { sb.fillStyle = '#e2b458'; sb.fillRect(20, 10, 8, 20); }
-      if (dark > 0.05) {
-        sb.globalCompositeOperation = 'source-atop';
-        sb.fillStyle = 'rgba(22,30,58,' + (0.55 * dark).toFixed(3) + ')'; sb.fillRect(0, 0, 48, 48);
-        sb.globalCompositeOperation = 'source-over';
-      }
+      lightFigure(e, l, dark, ents);
       g.drawImage(spriteBuf, e.wx - camX - 16, e.wy - camY - 16);
     });
     if (state.debug) drawDebug(g, camX, camY);
@@ -162,16 +213,20 @@
   }
 
   function label(g, text, x, y, colour) {
-    g.font = '8px monospace'; var w = Math.ceil(g.measureText(text).width) + 4;
-    g.fillStyle = 'rgba(16,20,22,.78)'; g.fillRect(Math.round(x - w / 2), y - 8, w, 10);
-    g.fillStyle = colour; g.fillText(text, Math.round(x - w / 2) + 2, y);
+    var F = GAME.RetroFont, t = text.toUpperCase(), w = (F ? F.measure(t, 1) : t.length * 6) + 6, x0 = Math.round(x - w / 2), y0 = y - 9;
+    g.fillStyle = 'rgba(20,22,28,0.82)'; g.fillRect(x0, y0, w, 11);
+    g.fillStyle = 'rgba(233,180,88,0.55)'; g.fillRect(x0 + 1, y0 + 10, w - 2, 1);
+    if (F) F.draw(g, t, x0 + 3, y0 + 2, colour, { scale: 1 });
+    else { g.fillStyle = colour; g.font = '8px monospace'; g.fillText(t, x0 + 3, y0 + 9); }
+    g.fillStyle = 'rgba(20,22,28,0.82)'; g.fillRect(Math.round(x) - 1, y0 + 11, 3, 1); g.fillRect(Math.round(x), y0 + 12, 1, 1);
   }
 
   function frame() {
     var ents = entities();
     if (state.mode === 'overview') {
       drawWorld(gOver, 0, 0, ents);
-      if (qs.get('labels') !== '0') ents.forEach(function (e) {
+      /* Names only for whoever the viewer points at or follows: a town, not a legend. */
+      if (qs.get('labels') !== '0') ents.filter(function (e) { return e.i === state.focus || e.i === state.hover || qs.get('labels') === 'all'; }).forEach(function (e) {
         if (e.q.outdoors) label(gOver, e.p.name, e.fx, e.fy - 27, e.i === state.focus ? '#e9b458' : '#e8e2d2');
         else { var n = P.NODES[P.PLACES[e.p.at]]; label(gOver, e.p.name, n[0], n[1] - 32 - (e.p.at === 'flat_c' ? 10 : 0), '#f3d27a'); }
       });
@@ -201,6 +256,11 @@
     var x = (ev.clientX - r.left) / s, y = (ev.clientY - r.top) / s, best = -1, bd = 28 * 28;
     entities().forEach(function (e) { var dx = e.fx - x, dy = e.fy - 10 - y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = e.i; } });
     if (best >= 0) { state.focus = best; setMode('follow'); }
+  });
+  cv.overview.addEventListener('mousemove', function (ev) {
+    var r = cv.overview.getBoundingClientRect(), s = r.width / P.W, x = (ev.clientX - r.left) / s, y = (ev.clientY - r.top) / s, best = -1, bd = 28 * 28;
+    entities().forEach(function (e) { var dx = e.fx - x, dy = e.fy - 10 - y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = e.i; } });
+    state.hover = best;
   });
   cv.follow.addEventListener('click', function () { setMode('overview'); });
   window.addEventListener('keydown', function (e) {
