@@ -307,9 +307,29 @@
     if (!o.door) return;
     var places = placeOf(o), open = 0;
     places.forEach(function (pl) { open = Math.max(open, C.doorOpen(host, pl, state.t)); });
-    if (open && images[o.kit.id + ':open']) drawGraded(g, o.kit.id + ':open', l, x, y);
+    if (open && images[o.kit.id + ':open']) { drawGraded(g, o.kit.id + ':open', l, x, y); doorway(g, x, y, o.kit.door.rect, dark); }
     var home = places.some(function (pl) { return lit[pl]; });
     if (home) (o.kit.windows || []).forEach(function (wn) { litWindow(g, x + wn[0], y + wn[1], wn[2], wn[3], dark); });
+  }
+
+  /* An open door shows a lit hall: warm wall, a floor, the leaf's edge, and
+   * light falling out over the step, stronger as the evening darkens. */
+  function doorway(g, x, y, r, dark) {
+    var dx = x + r[0] + 1, dy = y + r[1] + 1, w = r[2] - 2, h = r[3] - 2, warm = 0.55 + 0.45 * dark;
+    g.fillStyle = '#6b4128'; g.fillRect(dx, dy, w, h);
+    g.fillStyle = '#9a6236'; g.fillRect(dx + 1, dy + 2, w - 3, h - 8);
+    g.fillStyle = '#c98a45'; g.fillRect(dx + 2, dy + 4, w - 6, h - 12);
+    g.fillStyle = '#e8b664'; g.fillRect(dx + 3, dy + 6, Math.max(2, w - 9), 4);
+    g.fillStyle = '#7a5134'; g.fillRect(dx + 1, dy + h - 7, w - 2, 6);
+    g.fillStyle = '#a57044'; g.fillRect(dx + 2, dy + h - 7, w - 4, 1);
+    g.fillStyle = '#3e2a1c'; g.fillRect(dx + w - 3, dy, 3, h);
+    g.fillStyle = '#d9a35a'; g.fillRect(dx + w - 3, dy + 1, 1, h - 2);
+    g.globalCompositeOperation = 'lighter';
+    [[0, 0.10], [3, 0.07], [6, 0.05]].forEach(function (st) {
+      g.fillStyle = 'rgba(255,176,90,' + (st[1] * warm).toFixed(3) + ')';
+      g.fillRect(dx - st[0], dy + h, w + st[0] * 2, 5 + st[0] * 2);
+    });
+    g.globalCompositeOperation = 'source-over';
   }
 
   function litWindow(g, x, y, ww, hh, dark) {
@@ -383,7 +403,8 @@
       var f = ents[state.focus];
       var cam = EMBER.Camera.centerOn(f.fx - 8, f.fy - 16, { anchorX: 8, anchorY: 8, worldW: world.W * world.T, worldH: world.H * world.T, viewW: VW, viewH: VH });
       drawWorld(gFol, Math.round(cam.x), Math.round(cam.y), ents);
-      label(gFol, f.p.name + (f.q.outdoors ? '' : ' · at home'), 128, 12, '#e9b458');
+      var cap = document.getElementById('caption');
+      if (cap) cap.textContent = f.p.name + (f.q.outdoors ? (f.q.moving ? ' · walking' : ' · outside') : ' · inside');
     }
     var hh = String(Math.floor(state.t / 60) % 24).padStart(2, '0'), mm = String(Math.floor(state.t) % 60).padStart(2, '0');
     document.getElementById('stats').innerHTML = hh + ':' + mm + ' · walking ' + ents.filter(function (e) { return e.q.moving; }).length +
