@@ -61,7 +61,7 @@ var map = {
 // the jetty's boards run out over the wall and the water below the steps
 [[21, 18], [22, 18], [23, 18], [21, 19], [22, 19], [23, 19], [21, 20], [22, 20], [23, 20]].forEach(function (c) { map.walkable.push(c); });
 map.spots.jetty_end = { tx: 22, ty: 20 };
-map.spots.lawn_w = { tx: 9, ty: 16 };
+map.spots.lawn_w = { tx: 7, ty: 16 };   // clear of tree-park-2's trunk
 // the bridge deck runs down to the right over the water
 map.spots.bridge = { tx: 45, ty: 17 };
 // garden fences along the pavement, with a gate gap in front of every door

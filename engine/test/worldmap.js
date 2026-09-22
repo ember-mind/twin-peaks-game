@@ -26,6 +26,7 @@ ok(G.walkable(tileSet, 'cobble') && !G.walkable(tileSet, 'water'), 'walkability 
 // world: collision from ground and footprints, every place reaches every other
 var w = WM.build(map, { tileSet: tileSet, objects: objects }), names = Object.keys(w.places);
 names.forEach(function (from) { names.forEach(function (to) { if (from !== to) ok(!!WM.route(w, from, to), 'route ' + from + ' -> ' + to); }); });
+Object.keys(w.spots).forEach(function (k) { var s = w.spots[k].tile; ok(WM.walkable(w, s[0], s[1]), 'spot ' + k + ' stands on a walkable cell'); });
 var door = w.places[names.filter(function (n) { return w.places[n].indoor; })[0]];
 ok(WM.walkable(w, door.tile[0], door.tile[1]), 'a door tile is walkable inside its building footprint');
 var wx = grid[grid.length - 1].indexOf('water');
