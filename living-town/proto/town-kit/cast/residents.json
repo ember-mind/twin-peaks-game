@@ -1,0 +1,157 @@
+{
+ "about": "Living Town residents painted in the source-plate style. Frame lookup: cell column = resident.col + frames[name] (walk: frames.walk[i]); cell row = resident.rows[dir]. Pixel rect = [col*32, row*32, 32, 32]. Draw the cell so its 'feet' pixel lands on the actor's ground point. 'seated' exists only in the 'down' row: face down, hips on a seat whose top edge is at cell row ~24 (feet still on the ground at row 30). Left rows are drawn, not mirrored (light stays upper-left); mirrorLeft is false. Built by build-cast.py; every colour is from source-plate.png.",
+ "image": "residents.png",
+ "cell": [
+  32,
+  32
+ ],
+ "feet": [
+  16,
+  30
+ ],
+ "seat": [
+  16,
+  24
+ ],
+ "mirrorLeft": false,
+ "directions": [
+  "down",
+  "up",
+  "left",
+  "right"
+ ],
+ "frames": {
+  "stand": 0,
+  "walk": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "seated": 5
+ },
+ "walkCycle": "walk[0] near/left foot planted, walk[1] passing (body up 1 px), walk[2] other foot planted, walk[3] passing; ~6-8 fps",
+ "colours": 41,
+ "residents": [
+  {
+   "id": "rust_jacket",
+   "label": "rust jacket, brown hair",
+   "build": "average",
+   "col": 0,
+   "rows": {
+    "down": 0,
+    "up": 1,
+    "left": 2,
+    "right": 3
+   }
+  },
+  {
+   "id": "teal_dress",
+   "label": "teal dress, black bob",
+   "build": "slim",
+   "col": 6,
+   "rows": {
+    "down": 0,
+    "up": 1,
+    "left": 2,
+    "right": 3
+   }
+  },
+  {
+   "id": "linen_blouse",
+   "label": "auburn hair, cream blouse",
+   "build": "average",
+   "col": 0,
+   "rows": {
+    "down": 4,
+    "up": 5,
+    "left": 6,
+    "right": 7
+   }
+  },
+  {
+   "id": "grey_coat",
+   "label": "elder, slate coat, glasses",
+   "build": "elder",
+   "col": 6,
+   "rows": {
+    "down": 4,
+    "up": 5,
+    "left": 6,
+    "right": 7
+   }
+  },
+  {
+   "id": "mauve_cardigan",
+   "label": "elder, white bun, cardigan",
+   "build": "stout",
+   "col": 0,
+   "rows": {
+    "down": 8,
+    "up": 9,
+    "left": 10,
+    "right": 11
+   }
+  },
+  {
+   "id": "mustard_knit",
+   "label": "curly hair, mustard knit",
+   "build": "stout",
+   "col": 6,
+   "rows": {
+    "down": 8,
+    "up": 9,
+    "left": 10,
+    "right": 11
+   }
+  },
+  {
+   "id": "cord_cap",
+   "label": "flat cap, corduroy work coat",
+   "build": "tall",
+   "col": 0,
+   "rows": {
+    "down": 12,
+    "up": 13,
+    "left": 14,
+    "right": 15
+   }
+  },
+  {
+   "id": "bearded_blue",
+   "label": "beard, blue shirt",
+   "build": "tall",
+   "col": 6,
+   "rows": {
+    "down": 12,
+    "up": 13,
+    "left": 14,
+    "right": 15
+   }
+  },
+  {
+   "id": "girl_pigtails",
+   "label": "child, pigtails, blue dress",
+   "build": "child",
+   "col": 0,
+   "rows": {
+    "down": 16,
+    "up": 17,
+    "left": 18,
+    "right": 19
+   }
+  },
+  {
+   "id": "boy_blonde",
+   "label": "child, blonde, moss jumper",
+   "build": "child",
+   "col": 6,
+   "rows": {
+    "down": 16,
+    "up": 17,
+    "left": 18,
+    "right": 19
+   }
+  }
+ ]
+}

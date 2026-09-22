@@ -16,6 +16,10 @@
     t: +(qs.get('start') || 8 * 60), debug: qs.get('debug') === '1'
   };
   var world, map, view, host, mirror, mismatches = 0, checked = 0, ready = false;
+  /* ?cast=painted draws residents from the painted sheet (engine/ember-cast.js);
+   * default is Twin Peaks' 24 px renderer over Living Town's resident sheet. */
+  var painted = null;
+  if (qs.get('cast') === 'painted') EMBER.Cast.load('../town-kit/cast/residents.json').then(function (c) { painted = c; });
 
   Promise.all([fetch(qs.get('map') || 'town.json', { cache: 'no-store' }).then(function (r) { return r.json(); }),
                WV.loadKit('../town-kit/')]).then(function (r) {
@@ -76,6 +80,16 @@
       if (!e.seated) { g.fillStyle = 'rgba(18,22,26,0.34)'; g.fillRect(sx - 6, sy - 1, 12, 3); g.fillRect(sx - 4, sy - 2, 8, 5); }
       sb.clearRect(0, 0, 48, 48);
       var drew = false;
+      if (painted) {
+        var pid = painted.ids[e.i % painted.ids.length];
+        painted.draw(sb, pid, { dir: e.q.dir || 'down', walking: e.q.moving, phase: (e.q.phase || 0) / 2, seated: e.seated },
+                     24, e.seated ? 47 : 44);
+        WV.relight(sb, 48, 48, l.dark, view.lightsNear(e.fx, e.fy, lit), view.mix(AMBIENT, l), view.mix(TINT, l));
+        /* seated: the sheet's seat line sits 6 px above its feet; the seat
+         * offset already put fy on the bench top */
+        g.drawImage(spriteBuf, sx - 24, sy - 44 + (e.seated ? 3 : 0));
+        return;
+      }
       if (e.seated && LT.ActivityPoses.ready) drew = LT.ActivityPoses.draw(sb, sheet, 'seated', 'down', 16, 16, 0, { shadow: false }) !== false;
       if (!drew && LT.ProductionHost.ready) {
         GAME.Sprites.drawChar(sb, 16, 16, LT.ProductionHost.looks[sheet], e.q.dir || 'down',
