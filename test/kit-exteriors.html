@@ -108,25 +108,32 @@
       return { i: i, p: p, q: q, fx: Math.round(q.x + ox), fy: Math.round(q.y + oy) };
     });
   }
-  /* Both are open all hours: their windows glow around the concepts' own
-   * painted interiors (kit.json light.windowPane false) and light the cast. */
-  function lit() { return { double_r: true, sheriff: true }; }
-  function actor(e) {
+  /* A place is lit while someone is inside it: its windows glow around the
+   * concepts' own painted interiors (kit.json light.windowPane false) and
+   * light the cast passing by; by day nothing glows. */
+  function lit(ents) {
+    var out = {};
+    if (view.lightAt(state.t).dark < 0.1) return out;       // no glow in daylight
+    ents.forEach(function (e) { if (!e.q.outdoors) out[e.q.place] = true; });
+    return out;
+  }
+  function actor(e, litNow) {
     return { sortY: e.fy, draw: function (g, camX, camY, l) {
       bg.clearRect(0, 0, 48, 48);
       if (castReady) {
         GAME.Sprites.drawChar(bg, 16, 16, CHARS[e.p.id], e.q.dir, e.q.moving ? EMBER.Grid.walkPhase(e.q.phase % 1) : 0, 1, e.q.moving, false,
           performance.now() / 1000, { mapId: 'tp_main_street', wx: e.fx, wy: e.fy, npcId: e.p.id, characterLife: null });
       }
-      WV.relight(bg, 48, 48, l.dark, view.lightsNear(e.fx, e.fy, lit()), view.mix(AMBIENT, l), view.mix(TINT, l));
+      WV.relight(bg, 48, 48, l.dark, view.lightsNear(e.fx, e.fy, litNow), view.mix(AMBIENT, l), view.mix(TINT, l));
       /* drawChar's (16,16) is the tile's top-left; feet sit at the tile bottom */
       g.drawImage(buf, e.fx - camX - 8 - 16, e.fy - camY + 3 - 32);
     } };
   }
   function drawWorld(g, camX, camY, ents) {
+    var litNow = lit(ents);
     view.draw(g, camX, camY, state.t, {
-      actors: ents.filter(function (e) { return e.q.outdoors; }).map(actor),
-      lit: lit(), doorOpen: function (place) { return WM.doorOpen(walks, place, state.t, plan.ppm); },
+      actors: ents.filter(function (e) { return e.q.outdoors; }).map(function (e) { return actor(e, litNow); }),
+      lit: litNow, doorOpen: function (place) { return WM.doorOpen(walks, place, state.t, plan.ppm); },
       debug: state.debug,
       routes: state.debug ? walks.filter(function (wk) { return state.t >= wk.t0 && state.t < wk.t0 + wk.route.length / plan.ppm; }).map(function (wk) { return wk.route; }) : []
     });

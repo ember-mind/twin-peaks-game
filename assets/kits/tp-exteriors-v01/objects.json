@@ -793,11 +793,30 @@
    ]
   ],
   "depth": 58,
-  "kind": "lamp",
-  "light": [
-   6,
-   9
-  ]
+  "kind": "streetlight",
+  "windows": [
+   [
+    1,
+    5,
+    11,
+    5
+   ]
+  ],
+  "note": "place lamp-pool on the same tile"
+ },
+ {
+  "id": "lamp-pool",
+  "file": "objects/lamp-pool.png",
+  "w": 44,
+  "h": 14,
+  "anchor": [
+   25,
+   -9
+  ],
+  "footprint": [],
+  "depth": 0,
+  "kind": "decal",
+  "note": "light under a street-lamp on the same tile; faint at dusk, full at night, none by day"
  },
  {
   "id": "wall-lamp",

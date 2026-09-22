@@ -485,7 +485,30 @@ def lamp_draw():
     return a, None
 
 
-add(id='street-lamp', kind='lamp', draw=lamp_draw, base=58, left=9, fpw=1, fph=1, light=[6, 9])
+# Not the engine's `lamp` kind: its ground pool is a soft ramp of stacked
+# translucent rects. The lens is a window the kit marks alwaysLit (so the
+# lamp still relights the cast) and the pool is the crisp lamp-pool decal.
+add(id='street-lamp', kind='streetlight', draw=lamp_draw, base=58, left=9, fpw=1, fph=1,
+    windows=[(1, 5, 11, 9)], note='place lamp-pool on the same tile')
+
+
+def pool_draw():
+    """The street light's pool on the ground: a stepped ellipse in two
+    flat tones, the diner spill's colours, half transparent."""
+    w, h = 44, 14
+    a = np.zeros((h, w, 4), np.uint8)
+    for y in range(h):
+        for x in range(w):
+            d = ((x - (w - 1) / 2) / (w / 2)) ** 2 + ((y - (h - 1) / 2) / (h / 2)) ** 2
+            if d < 0.36:
+                a[y, x] = (*C('f1b961'), 90)
+            elif d < 1:
+                a[y, x] = (*C('c0a678'), 55)
+    return a, None
+
+
+add(id='lamp-pool', kind='decal', draw=pool_draw, base=7, left=25, fpw=1, fph=0, depth=0,
+    note='light under a street-lamp on the same tile; faint at dusk, full at night, none by day')
 
 
 def wall_lamp_draw():

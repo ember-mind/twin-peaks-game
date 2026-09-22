@@ -40,7 +40,7 @@ for e in objects:
         zones = [tuple(w) for w in e.get('windows', [])]
         if 'door' in e:
             zones.append(tuple(e['door']['rect']))
-        sx, sy = e['source'][1], e['source'][2]
+        sx, sy = (e['source'][1], e['source'][2]) if 'source' in e else (0, 0)
         zones += [(x0 - sx, y0 - sy, x1 - x0 + 1, y1 - y0 + 1) for x0, y0, x1, y1 in EXTRA.get(e['id'], [])]
     else:
         continue
@@ -57,4 +57,20 @@ for e in objects:
                     continue
                 po[x, y] = fn(r, g, b, False, False) + (a,)
         out.save(path)
+
+# By day the backdrop's sky is the overcast Pacific Northwest white-grey, not
+# grade-kit's lifted dusk blue: sky pixels are the dusk plate's four sky tones.
+bd = Image.open(os.path.join(HERE, 'objects', 'backdrop.png')).convert('RGBA')
+day = Image.open(os.path.join(HERE, 'objects', 'backdrop-day.png')).convert('RGBA')
+SKY = {(0x44, 0x50, 0x5f), (0x42, 0x50, 0x60), (0x40, 0x4c, 0x5a), (0x3d, 0x4a, 0x58)}
+TOP, BOTTOM = (164, 180, 192), (196, 204, 206)
+pb, pd = bd.load(), day.load()
+for y in range(bd.height):
+    k = y / (bd.height - 1)
+    c = tuple(int(TOP[i] + (BOTTOM[i] - TOP[i]) * k) // 4 * 4 for i in range(3))   # stepped bands
+    for x in range(bd.width):
+        if pb[x, y][:3] in SKY:
+            pd[x, y] = c + (255,)
+day.save(os.path.join(HERE, 'objects', 'backdrop-day.png'))
+
 print('regraded surfaces of', sum(1 for e in objects if e['id'] in ALL_SURFACE or 'windows' in e or e['id'] in EXTRA), 'objects')

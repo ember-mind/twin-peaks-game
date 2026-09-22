@@ -35,7 +35,10 @@ Object.keys(manifest.objectMeta || {}).forEach(function (k) { ok(!!ids[k], 'obje
 ['double-r', 'sheriff-station', 'rr-sign', 'street-lamp', 'wall-lamp', 'planter-l', 'bin', 'wheel-stop', 'flagpole',
  'fence', 'bench', 'pine-s', 'pine-m', 'pine-l', 'pine-xl', 'bush-1', 'shrub-1', 'stall-line', 'backdrop']
   .forEach(function (k) { ok(!!ids[k], 'kit has ' + k); });
-ok(ids['street-lamp'].kind === 'lamp', 'the street lamp lights at night');
+ok(manifest.objectMeta['street-lamp'].alwaysLit && ids['street-lamp'].windows.length, 'the street lamp lights the cast at night');
+ok(!!ids['lamp-pool'] && map.objects.filter(function (o) { return o.kit === 'lamp-pool'; }).length ===
+   map.objects.filter(function (o) { return o.kit === 'street-lamp'; }).length, 'every street lamp has its pool');
+ok(manifest.light.windowPane === false && manifest.light.doorway.length === 7, 'painted windows kept, Twin Peaks doorway colours');
 
 // ---- ground: every cell resolves, deterministic ----------------------------
 var grid = map.ground.map(function (r) { return r.split('').map(function (c) { return map.legend[c]; }); });

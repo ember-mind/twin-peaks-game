@@ -117,6 +117,12 @@
    "ty": 8
   },
   {
+   "kit": "lamp-pool",
+   "id": "lamp-pool@18,8",
+   "tx": 18,
+   "ty": 8
+  },
+  {
    "kit": "sheriff-station",
    "id": "sheriff-station",
    "tx": 21,
@@ -477,14 +483,32 @@
    "ty": 18
   },
   {
+   "kit": "lamp-pool",
+   "id": "lamp-pool@5,18",
+   "tx": 5,
+   "ty": 18
+  },
+  {
    "kit": "street-lamp",
    "id": "lamp-far-1",
    "tx": 19,
    "ty": 18
   },
   {
+   "kit": "lamp-pool",
+   "id": "lamp-pool@19,18",
+   "tx": 19,
+   "ty": 18
+  },
+  {
    "kit": "street-lamp",
    "id": "lamp-far-2",
+   "tx": 33,
+   "ty": 18
+  },
+  {
+   "kit": "lamp-pool",
+   "id": "lamp-pool@33,18",
    "tx": 33,
    "ty": 18
   },

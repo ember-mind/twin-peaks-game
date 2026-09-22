@@ -46,7 +46,7 @@ put('bin', 1, 6, 'bin');
 put('rr-sign', 16, 6, 'rr-sign');
 put('bush-2', 16, 7); put('bush-1', 15, 5);
 put('pine-xl', 17, 5); put('pine-l', 19, 4); put('pine-m', 16, 3); put('pine-l2', 20, 2);
-put('street-lamp', 18, 8, 'lamp-verge');
+put('street-lamp', 18, 8, 'lamp-verge'); put('lamp-pool', 18, 8);
 // the station: footprint cols 21-33, rows 5-6; bench, shrubs, flagpole in front
 var SH = { tx: 21, ty: 5 };
 put('sheriff-station', SH.tx, SH.ty, 'sheriff-station');
@@ -71,7 +71,7 @@ put('asphalt-patch-4', 38, 15); put('asphalt-patch-1', 33, 15); put('asphalt-pat
 // road centre line
 for (var dx = 0; dx < W; dx += 2) put('road-dash', dx, 15);
 // far side: street lights on the verge, pines and bushes along the forest edge
-[5, 19, 33].forEach(function (x, i) { put('street-lamp', x, 18, 'lamp-far-' + i); });
+[5, 19, 33].forEach(function (x, i) { put('street-lamp', x, 18, 'lamp-far-' + i); put('lamp-pool', x, 18); });
 put('pine-l', 2, 20); put('pine-m', 8, 21); put('pine-xl', 14, 21); put('pine-l2', 21, 20); put('pine-m2', 25, 21);
 put('pine-l', 29, 20); put('pine-xl', 37, 21); put('pine-m', 41, 20); put('pine-s', 11, 19); put('pine-s', 31, 19);
 put('bush-2', 0, 19); put('bush-2', 9, 19); put('bush-1', 17, 19); put('bush-1', 23, 19); put('bush-2', 39, 19); put('bush-1', 27, 19);

@@ -68,21 +68,18 @@
   ],
   "reflection": 0.35,
   "doorway": [
-   "#462828",
-   "#6d4931",
-   "#c08151",
-   "#f1b961",
    "#583d2d",
+   "#7d553b",
+   "#926345",
+   "#c08151",
+   "#43403e",
    "#1f1b1a",
-   "#7d553b"
+   "#462828"
   ],
   "windowPane": false
  },
  "objectMeta": {
-  "double-r": {
-   "alwaysLit": true
-  },
-  "sheriff-station": {
+  "street-lamp": {
    "alwaysLit": true
   }
  }
