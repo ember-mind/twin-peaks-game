@@ -11,6 +11,8 @@
     if (!LT.Interventions) require('./lt-interventions.js');
     if (!LT.UtilityPolicy) require('./policy/lt-utility-policy.js');
     if (!LT.EverydayV01) require('../content/everyday-opportunities-v01/everyday-opportunities.js');
+    /* Inviting someone to eat is part of how this town lives, not something a watcher sets off. */
+    if (!LT.SharedMeal) require('../content/shared-meal-v01/shared-meal.js');
   }
   var S = LT.Scenario = LT.Scenario || {};
 
