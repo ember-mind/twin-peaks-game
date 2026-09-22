@@ -52,13 +52,16 @@
   .join-hero-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,16,19,0) 55%, rgba(14,16,19,.82) 100%); }
   .lt-joining .join-hero { display: block; }
   .lt-joining .stage { position: relative; padding: 0; border: 0; background: transparent; }
-  .lt-joining .controls.live { position: absolute; left: 22px; right: 22px; bottom: 22px; margin: 0; padding: 14px 16px; border-radius: 10px;
+  .lt-joining .controls.live { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(460px, 88%); margin: 0; padding: 18px 20px; border-radius: 12px; text-align: center; align-items: center;
     background: rgba(14,16,19,.72); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-  .lt-joining .live-row { font-size: 15px; }
+  .lt-joining .live-row { font-size: 16px; justify-content: center; }
+  .lt-joining .join-hero-shade { background: rgba(14,16,19,.18); }
+  .lt-joining #lt-live-join-row { justify-content: center; }
+  .lt-joining #lt-live-name { min-width: 220px; font-size: 15px; padding: 7px 10px; }
   .lt-joining .controls.live .save-status, .lt-joining .controls.live .note { flex: 0 0 auto; padding: 0; }   /* in a column, flex-basis is height: no empty 260px note */
   .lt-joining .controls.live .save-status:empty, .lt-joining .controls.live .note:empty { display: none; }
   .lt-joining main { grid-template-columns: 1fr; }
-  @media (max-width: 700px) { .lt-joining .controls.live { position: static; margin-top: 10px; } }
+  @media (max-width: 700px) { .lt-joining .controls.live { position: static; transform: none; width: auto; margin-top: 10px; } }
   .controls.live[hidden], .controls div[hidden] { display: none; }
   .live-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; font-size: 13.5px; }
   .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); align-self: center; }
