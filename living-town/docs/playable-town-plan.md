@@ -140,10 +140,11 @@ resident: watchers change the world, Jev chooses, the simulation carries it out.
 0. Owner merges PR 20 (shared meal). The Jev branch (`feat/living-town-jev`)
    goes up as a PR on `main`.
 1. **Playable skeleton.** `living-town/server/`: process, clock, save, log,
-   WebSocket; browser mirror simulation with fingerprint check; display name,
-   purse, adoption; the shared hand with costs and attribution; timeline.
-   Offline policy, today's graphics. Proof: two browsers see the same town and
-   the same book.
+   Server-Sent Events (no dependency, in place of WebSocket); browser mirror
+   simulation with fingerprint check; display name, purse, adoption; the
+   shared hand with costs and attribution; timeline. Offline policy, today's
+   graphics. Proof: two browsers see the same town and the same book.
+   *Done: `test/live-mirror.js`, `test/live-server.js`, `test/page-live-browser.js`.*
 2. **Continuous world.** Outdoor map, real walking, overview and follow camera,
    migration written against a real save, both baselines regenerated. Done
    before any public save exists.
