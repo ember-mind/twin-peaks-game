@@ -77,6 +77,9 @@ RAMPS = {
     "cord": (P(151, 123, 92), P(123, 106, 90), P(96, 87, 83), P(73, 66, 45), UMBER),
     "shoe_brown": (P(128, 85, 68), P(107, 66, 55), P(61, 38, 36), P(61, 38, 36), NAVY),
     "shoe_black": (P(67, 71, 76), P(23, 25, 37), P(23, 25, 37), P(0, 4, 11), INK),
+    "orange": (P(254, 222, 134), P(231, 161, 84), P(190, 137, 86), P(139, 81, 39), UMBER),
+    "gold": (P(254, 222, 134), P(237, 173, 50), P(200, 157, 43), P(139, 81, 39), P(73, 66, 45)),
+    "sea": (P(96, 136, 156), P(19, 121, 135), P(34, 104, 92), P(25, 55, 77), NAVY),
     "eye": (NAVY,) * 5,
     "glass": (P(143, 163, 172), P(130, 140, 149), P(112, 121, 124), P(67, 71, 76), NAVY),
 }
@@ -118,7 +121,7 @@ HEADS = {
                   ".hhhhhhsss.",
                   ".hhdrsssss.",
                   ".hhhssssess",
-                  "..hhsssss..",
+                  "..hhssssm..",
                   "....ssss..."],
     },
     "beard": {
@@ -270,7 +273,7 @@ HEADS = {
                   ".hhhhhhsss.",
                   ".hhdrsssss.",
                   ".hhhssssess",
-                  "..hhsssss..",
+                  "..hhssssm..",
                   "....ssss..."],
     },
     "curly": {
@@ -303,7 +306,7 @@ HEADS = {
                   "hhhhhhssss.",
                   ".hhdrsssss.",
                   ".hhhssssess",
-                  "..hhsssss..",
+                  "..hhssssm..",
                   "....ssss..."],
     },
     "cap": {
@@ -332,7 +335,7 @@ HEADS = {
                   ".kkkknnnnnn",
                   ".hhhrsssss.",
                   ".hhhssssess",
-                  "..hhsssss..",
+                  "..hhssssm..",
                   "....ssss..."],
     },
     "pigtails": {
@@ -365,7 +368,7 @@ HEADS = {
                   "hhhhhhhsss.",
                   "hhhhrsssss.",
                   ".hhhssssess",
-                  "..hhsssss..",
+                  "..hhssssm..",
                   "....ssss..."],
         "tail_right": ["hhh........",
                        ".hh........"],
@@ -393,9 +396,9 @@ class Doll:
         self.next_part = 1
         self.meta = {}   # part id -> {"soft": seams against it are ignored, "bias": tone shift}
 
-    def new_part(self, soft=False, bias=0, cyl=False):
+    def new_part(self, soft=False, bias=0, cyl=False, seam=3):
         self.next_part += 1
-        self.meta[self.next_part] = {"soft": soft, "bias": bias, "cyl": cyl}
+        self.meta[self.next_part] = {"soft": soft, "bias": bias, "cyl": cyl, "seam": seam}
         return self.next_part
 
     def put(self, x, y, mat, part, far=False, tone=-1):
@@ -446,35 +449,35 @@ BUILDS = {
 }
 
 RESIDENTS = [
-    dict(id="rust_jacket", label="rust jacket, brown hair", build="average", head="short",
-         skin="skin_olive", hair="hair_brown", top="rust", accent="cream", collar="shirt",
+    dict(id="rust_jacket", label="orange jacket, brown hair", build="average", head="short",
+         skin="skin_olive", hair="hair_brown", top="orange", accent="cream", collar="shirt",
          lower="trousers", bottom="charcoal", shoes="shoe_brown"),
-    dict(id="teal_dress", label="teal dress, black bob", build="slim", head="bob",
-         skin="skin_fair", hair="hair_black", top="teal", accent="cream", collar="v",
-         lower="dress", bottom="teal", legs="skin", shoes="shoe_black"),
-    dict(id="linen_blouse", label="auburn hair, cream blouse", build="average", head="long",
+    dict(id="teal_dress", label="sea-teal dress, gold scarf, black bob", build="slim", head="bob",
+         skin="skin_fair", hair="hair_black", top="sea", accent="gold", collar="scarf",
+         lower="dress", bottom="sea", legs="skin", shoes="shoe_black"),
+    dict(id="linen_blouse", label="auburn hair, cream blouse, teal skirt", build="average", head="long",
          skin="skin_fair", hair="hair_auburn", top="cream", accent="cream", collar="v",
-         lower="skirt", bottom="navy", legs="charcoal", shoes="shoe_brown"),
-    dict(id="grey_coat", label="elder, slate coat, glasses", build="elder", head="neat",
-         skin="skin_fair", hair="hair_grey", top="slate", accent="brick", collar="scarf",
+         lower="skirt", bottom="sea", legs="charcoal", shoes="shoe_brown"),
+    dict(id="grey_coat", label="elder, teal coat, orange scarf, glasses", build="elder", head="neat",
+         skin="skin_fair", hair="hair_grey", top="teal", accent="orange", collar="scarf",
          lower="coat", bottom="cord", shoes="shoe_brown"),
-    dict(id="mauve_cardigan", label="elder, white bun, cardigan", build="stout", head="bun",
-         skin="skin_olive", hair="hair_white", top="mauve", accent="cream", collar="shirt",
-         lower="skirt", bottom="brick", legs="cord", shoes="shoe_black"),
+    dict(id="mauve_cardigan", label="elder, white bun, rust cardigan, cream shawl", build="stout", head="bun",
+         skin="skin_olive", hair="hair_white", top="rust", accent="cream", collar="scarf",
+         lower="skirt", bottom="navy", legs="cord", shoes="shoe_black"),
     dict(id="mustard_knit", label="curly hair, mustard knit", build="stout", head="curly",
          skin="skin_deep", hair="hair_black", top="mustard", accent="mustard", collar="none",
          lower="trousers", bottom="denim", shoes="shoe_brown"),
-    dict(id="cord_cap", label="flat cap, corduroy work coat", build="tall", head="cap",
-         skin="skin_tan", hair="hair_brown", hat="charcoal", hatband="charcoal", top="cord",
-         accent="linen", collar="shirt", lower="trousers", bottom="navy", shoes="shoe_black"),
+    dict(id="cord_cap", label="flat cap, moss work coat, gold scarf", build="tall", head="cap",
+         skin="skin_tan", hair="hair_brown", hat="charcoal", hatband="charcoal", top="moss",
+         accent="gold", collar="scarf", lower="trousers", bottom="cord", shoes="shoe_black"),
     dict(id="bearded_blue", label="beard, blue shirt", build="tall", head="beard",
-         skin="skin_tan", hair="hair_brown", top="blue", accent="blue", collar="v",
+         skin="skin_tan", hair="hair_brown", top="blue", accent="cream", collar="shirt",
          lower="trousers", bottom="charcoal", shoes="shoe_black"),
-    dict(id="girl_pigtails", label="child, pigtails, blue dress", build="child", head="pigtails",
-         skin="skin_deep", hair="hair_black", top="blue", accent="cream", collar="shirt",
-         lower="dress", bottom="blue", legs="cream", shoes="shoe_brown"),
-    dict(id="boy_blonde", label="child, blonde, moss jumper", build="child", head="short",
-         skin="skin_fair", hair="hair_blonde", top="moss", accent="cream", collar="none",
+    dict(id="girl_pigtails", label="child, pigtails, gold dress", build="child", head="pigtails",
+         skin="skin_deep", hair="hair_black", top="gold", accent="cream", collar="shirt",
+         lower="dress", bottom="gold", legs="cream", shoes="shoe_brown"),
+    dict(id="boy_blonde", label="child, blonde, brick jumper", build="child", head="short",
+         skin="skin_fair", hair="hair_blonde", top="brick", accent="cream", collar="none",
          lower="trousers", bottom="denim", shoes="shoe_brown"),
 ]
 
@@ -491,9 +494,14 @@ def draw_rows(d, rows, x0, y0, r, part):
         for i, ch in enumerate(row):
             if ch == ".":
                 continue
-            tone = {"r": 2, "m": 2, "n": 3, "l": 0, "d": 2}.get(ch, -1)
+            tone = {"r": 2, "m": 3, "n": 3, "l": 0, "d": 2}.get(ch, -1)
             if ch == "e":
                 tone = 1
+            if ch == "s":
+                # the face is lit; its right edge and the chin/neck row sit a tone lower
+                right = row[i + 1] if i + 1 < len(row) else "."
+                last = j == len(rows) - 1
+                tone = 1 if (right not in "sme" or last) else 0
             d.put(x0 + i, y0 + j, head_mat(r, ch), part, tone=tone)
 
 
@@ -566,6 +574,8 @@ def draw_front(d, r, frame, back=False, seated=False):
             p = d.new_part()
             for y in range(hy + 2 - lift, FEET - 1 - rz):
                 d.span(y, x0, x1, legs_mat, p, far)
+                if side == "l" and x1 > x0 and y < FEET - 3 - rz:
+                    d.put(x0, y, legs_mat, p, far, tone=0)
             ps = d.new_part()
             fy = FEET - rz
             d.span(fy - 1, x0, x1, r["shoes"], ps, far)
@@ -592,6 +602,12 @@ def draw_front(d, r, frame, back=False, seated=False):
             if b.get("child"):
                 w = 2 + (i + 1) // 2
             d.span(hy + i, CX - w, CX + w, mat, ph)
+        if length >= 3 and lower != "coat":
+            # two folds fall to the hem; the hem's left end catches the light
+            for i in range(length - 2, length):
+                d.put(CX - 2, hy + i, mat, ph, tone=2)
+                d.put(CX + 1, hy + i, mat, ph, tone=2)
+            d.put(CX - 1, hy + 1, mat, ph, tone=0)
         if lower == "coat" and not back and not seated:
             # coat opening: a seam line down the middle, trousers showing below
             for i in range(1, length):
@@ -623,12 +639,28 @@ def draw_front(d, r, frame, back=False, seated=False):
             d.span(sy + 1, CX - 1, CX + 1, r["accent"], pa)
             d.put(CX + 1, sy + 2, r["accent"], pa)
             d.put(CX + 1, sy + 3, r["accent"], pa)
-        if lower == "coat":
-            for i in range(2, b["torso"]):
+        if lower == "coat" or col == "shirt":
+            # jacket / coat opening: a placket seam down the middle
+            for i in range(2, b["torso"] - (0 if lower == "coat" else 1)):
                 d.put(CX, sy + i, r["top"], pt, tone=3)
+        elif col == "v":
+            # blouse / dress: a fold falling from the left breast
+            d.put(CX - 2, sy + 3, r["top"], pt, tone=2)
+            d.put(CX - 2, sy + 4, r["top"], pt, tone=2)
+            d.put(CX - 1, sy + 5, r["top"], pt, tone=2)
     elif col == "scarf":
         pa = d.new_part()
         d.span(sy, CX - 2, CX + 2, r["accent"], pa)
+
+    # light on the left shoulder of every garment
+    for x in range(CX - tw + 1, CX - 1):
+        if d.part[sy + 1, x] == pt and d.fixed[sy + 1, x] < 0:
+            d.put(x, sy + 1, r["top"], pt, tone=0)
+    if col == "none" or back:
+        # knit rib / hem: alternating pixels on the last torso row
+        for x in range(CX - tw, CX + tw + 1, 2):
+            if d.part[sy + b["torso"] - 1, x] == pt:
+                d.put(x, sy + b["torso"] - 1, r["top"], pt, tone=2)
 
     # --- arms (sleeve + hand); in the back view left and right swap
     hl, hr = f["hand_l"], f["hand_r"]
@@ -657,6 +689,11 @@ def draw_front(d, r, frame, back=False, seated=False):
             d.span(hy2 + 1, x0 + (1 if side == "l" else 0), x0 + (1 if side == "l" else 0), r["skin"], ph2)
         if hand > 0:
             d.span(hy2 - 1, x0, x0 + arm - 1, r["top"], pa)
+        for x in range(x0, x0 + arm):          # cuff
+            d.put(x, hy2 - 1, r["top"], pa, tone=2 if side == "l" else 3)
+        if side == "l":                        # lit outer edge of the sleeve
+            for y in range(sy + 1, hy2 - 2):
+                d.put(x0, y, r["top"], pa, tone=0)
 
     # --- head
     rows = head["up" if back else "down"]
@@ -686,17 +723,20 @@ def draw_side(d, r, frame):
         back_x, front_x = CX - 2, CX + 1
     swing = f["swing"]
     alen = b["torso"] - 1
-    shoulder = (CX, sy + 1)
+    shoulder = (CX - 1, sy + 1)
+    arm = 2 if b.get("child") else 3     # the near arm reads as a limb, not a stripe
 
     def arm_draw(sw, far):
-        pa = d.new_part(cyl=not far)
+        pa = d.new_part(cyl=not far, seam=2)
         hand_x = shoulder[0] + 2 * sw
         end_y = sy + alen - (1 if sw else 0)
         d.limb(shoulder, (hand_x, end_y), arm, r["top"], pa, far)
-        d.put(shoulder[0], sy, r["top"], pa, far)
-        d.put(shoulder[0] + 1, sy, r["top"], pa, far)
+        d.span(sy, shoulder[0], shoulder[0] + arm - 1, r["top"], pa, far)
+        d.span(end_y, hand_x, hand_x + arm - 1, r["top"], pa, far, )
+        for x in range(hand_x, hand_x + arm):
+            d.put(x, end_y, r["top"], pa, far, tone=2)      # cuff
         ph = d.new_part()
-        d.span(end_y + 1, hand_x, hand_x + arm - 1, r["skin"], ph, far)
+        d.span(end_y + 1, hand_x, hand_x + 1, r["skin"], ph, far)
         if not b.get("child"):
             d.put(hand_x + (1 if sw >= 0 else 0), end_y + 2, r["skin"], ph, far)
 
@@ -704,7 +744,7 @@ def draw_side(d, r, frame):
         p = d.new_part()
         hip = (CX - 2, hy + 1 - lift)
         ax = CX - 2 + dx
-        w = 3 if not b.get("child") else 2
+        w = 4 if not b.get("child") else 2
         if rz >= 2:
             # knee comes forward, foot tucks back and up
             knee = (CX - 1 + dx + 1, hy + 3 - lift)
@@ -746,6 +786,8 @@ def draw_side(d, r, frame):
         x0, x1 = back_x, front_x
         if i == 0:
             x0, x1 = x0 + 1, x1
+        if 1 <= i <= 3 and not b.get("child"):
+            x1 += 1                      # chest
         if r["build"] == "stout" and 3 <= i <= 6:
             x1 += 1
         if b.get("stoop") and i < 3:
@@ -824,8 +866,9 @@ def shade(d):
                 t = 2
             if meta.get("cyl") and x == x0 and w >= 2:
                 t = 0
-            if t < 2 and other(x + 1, y, p) and filled[y, min(x + 1, CELL - 1)] and x + 1 < CELL:
-                t = 2   # seam against the next part
+            if t < 3 and x + 1 < CELL and filled[y, x + 1] and other(x + 1, y, p):
+                # seam against the next part; same cloth either side -> deep line
+                t = meta.get("seam", 3) if (d.mat[y, x + 1] == m and kind == "cloth") else max(t, 2)
             if kind == "cloth" and t == 1 and y + 1 < CELL and filled[y + 1, x] \
                     and d.part[y + 1, x] != p and not d.meta.get(d.part[y + 1, x], {}).get("soft") \
                     and not d.mat[y + 1, x].startswith("skin"):

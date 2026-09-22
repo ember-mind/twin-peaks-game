@@ -31,11 +31,11 @@
   "seated": 5
  },
  "walkCycle": "walk[0] near/left foot planted, walk[1] passing (body up 1 px), walk[2] other foot planted, walk[3] passing; ~6-8 fps",
- "colours": 41,
+ "colours": 42,
  "residents": [
   {
    "id": "rust_jacket",
-   "label": "rust jacket, brown hair",
+   "label": "orange jacket, brown hair",
    "build": "average",
    "col": 0,
    "rows": {
@@ -47,7 +47,7 @@
   },
   {
    "id": "teal_dress",
-   "label": "teal dress, black bob",
+   "label": "sea-teal dress, gold scarf, black bob",
    "build": "slim",
    "col": 6,
    "rows": {
@@ -59,7 +59,7 @@
   },
   {
    "id": "linen_blouse",
-   "label": "auburn hair, cream blouse",
+   "label": "auburn hair, cream blouse, teal skirt",
    "build": "average",
    "col": 0,
    "rows": {
@@ -71,7 +71,7 @@
   },
   {
    "id": "grey_coat",
-   "label": "elder, slate coat, glasses",
+   "label": "elder, teal coat, orange scarf, glasses",
    "build": "elder",
    "col": 6,
    "rows": {
@@ -83,7 +83,7 @@
   },
   {
    "id": "mauve_cardigan",
-   "label": "elder, white bun, cardigan",
+   "label": "elder, white bun, rust cardigan, cream shawl",
    "build": "stout",
    "col": 0,
    "rows": {
@@ -107,7 +107,7 @@
   },
   {
    "id": "cord_cap",
-   "label": "flat cap, corduroy work coat",
+   "label": "flat cap, moss work coat, gold scarf",
    "build": "tall",
    "col": 0,
    "rows": {
@@ -131,7 +131,7 @@
   },
   {
    "id": "girl_pigtails",
-   "label": "child, pigtails, blue dress",
+   "label": "child, pigtails, gold dress",
    "build": "child",
    "col": 0,
    "rows": {
@@ -143,7 +143,7 @@
   },
   {
    "id": "boy_blonde",
-   "label": "child, blonde, moss jumper",
+   "label": "child, blonde, brick jumper",
    "build": "child",
    "col": 6,
    "rows": {
