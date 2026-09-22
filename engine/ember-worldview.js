@@ -298,10 +298,13 @@
         else if (sx && !opaque(x + 2 * sx, y)) rim[y * w + x] = Math.max(rim[y * w + x], L.s * dark * 0.45);
       }
     });
+    /* outlines melt into the air only as far as the light is low: crisp by
+     * day, softer at dusk and night */
+    var melt = 0.12 + 0.3 * dark;
     for (var i = 0; i < w * h; i++) {
       var o = i * 4; if (!d[o + 3]) continue;
       var r = d[o], g = d[o + 1], b = d[o + 2];
-      if (0.3 * r + 0.59 * g + 0.11 * b < 48) { r = r * 0.58 + ambient[0] * 0.42; g = g * 0.58 + ambient[1] * 0.42; b = b * 0.58 + ambient[2] * 0.42; }
+      if (0.3 * r + 0.59 * g + 0.11 * b < 48) { r = r * (1 - melt) + ambient[0] * melt; g = g * (1 - melt) + ambient[1] * melt; b = b * (1 - melt) + ambient[2] * melt; }
       r *= tint[0]; g *= tint[1]; b *= tint[2];
       var k = Math.min(0.8, rim[i]);
       if (k > 0) { r += (warm[0] - r) * k * 0.9; g += (warm[1] - g) * k * 0.8; b += (warm[2] - b) * k * 0.5; }
