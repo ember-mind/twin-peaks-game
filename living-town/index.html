@@ -42,6 +42,16 @@
   .lt-tab:hover { border-color: #39424f; }
   .lt-tab.is-on { background: var(--gold); border-color: var(--gold); color: #20180a; font-weight: 600; }
   .controls.world { align-items: flex-end; }
+  .controls.live { flex-direction: column; align-items: stretch; gap: 6px; }
+  /* Served live and not yet joined: no world on screen, only the door. */
+  .lt-joining .bar, .lt-joining canvas, .lt-joining .timeline, .lt-joining .caption, .lt-joining .hand,
+  .lt-joining .controls:not(.live), .lt-joining aside { display: none; }
+  .controls.live[hidden], .controls div[hidden] { display: none; }
+  .live-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; font-size: 13.5px; }
+  .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); align-self: center; }
+  .lt-purse { color: var(--gold); letter-spacing: 2px; font-size: 12px; }
+  .lt-followers { color: var(--gold); font-size: 11px; }
+  .live input { background: #0b0d11; color: inherit; border: 1px solid var(--edge); border-radius: 6px; padding: 5px 8px; font: inherit; font-size: 13px; min-width: 180px; }
   .save-status { font-size: 13px; color: var(--dim); flex: 1 1 260px; min-width: 0; padding-bottom: 5px; }
   .save-status.is-ok { color: var(--green); }
   .save-status.is-bad { color: var(--red); }
@@ -117,6 +127,7 @@
   .lt-beat.is-intervention_applied { background: #e2c15a; }
   .lt-now { position: absolute; bottom: -1px; width: 1px; height: 14px; background: #e2c15a; }
   .replay { display: flex; gap: 10px; align-items: center; margin-top: 8px; padding: 7px 10px; border: 1px solid #e2c15a; border-radius: 7px; font-size: 12.5px; color: #e2c15a; }
+  .replay[hidden] { display: none; }
   .replay span { flex: 1; }
   .caption { min-height: 44px; padding: 8px 2px 0; }
   .caption p { margin: 0; }
@@ -167,6 +178,16 @@
       <div><div class="label">Follow</div><div class="group" id="lt-characters"></div></div>
       <div><div class="label">Speed</div><div class="group" id="lt-speeds"></div></div>
       <div><div class="label">&nbsp;</div><button class="lt-tab" id="lt-inspector-toggle">Developer inspector</button></div>
+    </div>
+    <div class="controls live" id="lt-live" hidden>
+      <div class="live-row"><span class="live-dot"></span><span id="lt-live-status">Reaching the town…</span><span id="lt-live-you"></span></div>
+      <div class="hand-row" id="lt-live-join-row" hidden>
+        <input id="lt-live-name" maxlength="24" placeholder="Your name" aria-label="Your name" autocomplete="nickname">
+        <button class="lt-tab" id="lt-live-join">Watch</button>
+      </div>
+      <div class="save-status" id="lt-live-note" role="status" aria-live="polite"></div>
+      <div class="note" id="lt-live-people"></div>
+      <div id="lt-live-dev" class="group" hidden aria-label="Developer pace (only when the server was started with --dev)"></div>
     </div>
     <div class="controls world">
       <div>
@@ -295,10 +316,12 @@
 <script src="js/lt-story.js"></script>
 <script src="js/lt-hand.js"></script>
 <script src="js/lt-save.js"></script>
+<script src="js/lt-live.js"></script>
 <script src="js/lt-persistence.js"></script>
 <script src="js/lt-art.js"></script>
 <script src="js/lt-view.js"></script>
 <script src="js/lt-observer.js"></script>
+<script src="js/lt-live-client.js"></script>
 <script>LT.Observer.start();</script>
 </body>
 </html>

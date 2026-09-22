@@ -70,7 +70,10 @@
      * save exactly as it is. */
     var persistence = LT.Persistence.create({});
     var fresh = /(?:^|[?&])world=new(?:&|$)/.test(String(root.location && root.location.search || ''));
-    var booted = persistence.boot({ fresh: fresh });
+    /* Served by a town server, the page mirrors that town instead (lt-live-client.js):
+     * the browser's own saved world is left alone and never loaded. */
+    var liveApi = LT.LiveClient ? LT.LiveClient.detect() : null;
+    var booted = liveApi ? { status: 'live', sim: null, reason: null } : persistence.boot({ fresh: fresh });
     /* A new world has the whole street in it. `?cast=pair` asks for the two
      * people the town began with; a resumed world keeps whoever it was made with. */
     var pair = /(?:^|[?&])cast=pair(?:&|$)/.test(String(root.location && root.location.search || ''));
@@ -98,6 +101,7 @@
     buildSpeedButtons(state);
     wireWorldControls(state, booted);
     wireHand(state);
+    if (liveApi) LT.LiveClient.start(state, liveApi);
     el('lt-replay-back').addEventListener('click', function () { O.backToNow(state); });
     el('lt-recap-prev').addEventListener('click', function () { stepRecap(state, -1); });
     el('lt-recap-next').addEventListener('click', function () { stepRecap(state, 1); });
@@ -165,6 +169,7 @@
   O.heldFor = heldFor;
 
   function pump(state, dt) {
+    if (state.live) return;          // a mirrored town moves when its frames arrive, not with this clock
     var ms = msPerMinute(state);
     if (!ms) return;
     state.held = heldFor(state);
@@ -414,6 +419,7 @@
   function wireWorldControls(state, booted) {
     var pz = state.persistence;
     var described = {
+      live: function () { say('', ''); },
       loaded: function () { say('ok', 'Resumed the saved world at ' + state.sim.stamp() + '.'); },
       none: function () { say('', 'No saved world in this browser. This is a new one; it autosaves as it goes.'); },
       refused: function () { say('bad', 'The saved world could not be used and has been left untouched: ' + booted.reason + ' This is a new world; it will not be saved over the old one unless you say so.'); },
@@ -464,12 +470,13 @@
 
     /* Leaving: one last save if this tab is the one saving, then let go. */
     function leave() {
+      if (state.live) return;        // not this browser's world to keep
       if (!pz.protectedReason && !pz.heldElsewhere() && LT.Save.peekLocal().status !== 'unavailable') pz.save(state.sim, { auto: true });
       pz.release();
     }
     root.addEventListener('pagehide', leave);
     document.addEventListener('visibilitychange', function () {
-      if (document.visibilityState === 'hidden' && pz.autosaveDue(state.sim)) reportSave(state, pz.save(state.sim, { auto: true }));
+      if (!state.live && document.visibilityState === 'hidden' && pz.autosaveDue(state.sim)) reportSave(state, pz.save(state.sim, { auto: true }));
     });
     /* Another tab wrote the world this tab is showing. Say so; do not fight. */
     root.addEventListener('storage', function (ev) {
@@ -495,17 +502,42 @@
     }).join(' ');
   }
 
+  /* In a live town each entry has its price on it. */
+  function handChoices(state) {
+    return LT.Hand.offered().map(function (e) {
+      return { id: e.id, label: state.live ? e.label + ' (' + LT.LiveClient.costOf(state, e.id) + ')' : e.label };
+    });
+  }
+
+  /* The page follows another world now (a mirror that just arrived, or was
+   * replaced): everything built from the world is built again. */
+  O.refresh = function (state) {
+    options(el('lt-hand-what'), handChoices(state));
+    buildHandFields(state);
+    buildCharacterTabs(state);
+    refreshButtons(state);
+  };
+
   function wireHand(state) {
-    options(el('lt-hand-what'), LT.Hand.offered());
+    options(el('lt-hand-what'), handChoices(state));
     options(el('lt-hand-when'), LT.Hand.WHEN);
     buildHandFields(state);
     el('lt-hand-what').addEventListener('change', function () { buildHandFields(state); text(el('lt-hand-status'), ''); });
     el('lt-hand-do').addEventListener('click', function () {
       var answers = {};
       Array.prototype.forEach.call(el('lt-hand-fields').querySelectorAll('select'), function (n) { answers[n.dataset.key] = n.value; });
+      var node = el('lt-hand-status');
+      if (state.live) {
+        /* The town is elsewhere: asked for, paid for, and answered by the server. */
+        node.className = 'save-status'; text(node, 'Asking the town…');
+        LT.LiveClient.hand(state, el('lt-hand-what').value, answers, el('lt-hand-when').value).then(function (r) {
+          node.className = 'save-status is-' + (r.ok ? 'ok' : 'warn');
+          text(node, r.ok ? 'Arranged for ' + r.record.at + ' (' + r.cost + ' spent, ' + r.purse + ' left).' : 'Not done: ' + (r.said || r.error) + '.');
+        });
+        return;
+      }
       /* Between two ticks, like a save: never while a minute is half applied. */
       var r = LT.Hand.make(state.sim, el('lt-hand-what').value, answers, el('lt-hand-when').value);
-      var node = el('lt-hand-status');
       node.className = 'save-status is-' + (r.ok ? 'ok' : 'warn');
       text(node, r.ok ? 'Arranged for ' + LT.Util.stamp(r.record.atDay, r.record.atMinute) + '.' : 'Not done: ' + r.said + '.');
     });
@@ -514,7 +546,8 @@
   function paintHand(state) {
     var rows = LT.Hand.asked(state.sim, 5);
     var html = rows.map(function (r) {
-      return '<li class="is-' + r.status + '">' + escape(r.at) + ' — ' + escape(r.label) + ' · ' +
+      var by = state.live ? LT.LiveClient.attributedTo(state, r.id) : '';
+      return '<li class="is-' + r.status + '">' + escape(r.at) + ' — ' + escape(r.label) + (by ? ' <b>by ' + escape(by) + '</b>' : '') + ' · ' +
         escape(r.status === 'failed' ? 'could not happen: ' + r.said : r.status === 'applied' ? 'happened' : 'on its way') + '</li>';
     }).join('');
     var host = el('lt-hand-asked');
@@ -553,6 +586,7 @@
         state.followAction = false;
         state.view.focus(id);
         markTabs(state);
+        if (state.live) LT.LiveClient.adopt(state, id);     // in a live town, following is public
       });
       host.appendChild(b);
     });

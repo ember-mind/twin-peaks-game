@@ -9,6 +9,27 @@ Serve the repository root over HTTP and open `living-town/index.html`.
 `?world=new` starts a new world without touching the stored one; `?cast=pair`
 makes it the original two-person world instead of the five-person street.
 
+## The one town
+
+```
+node living-town/server/town-server.js [--port=8787] [--data=<dir>] [--speed=6] [--seed=N] [--paused]
+```
+
+runs one simulation on a real clock (at 6x a town minute is ten seconds)
+and serves the same page at `/living-town/`, marked live. A browser that
+opens it gives a name, receives the town as an exact save and then a frame a
+minute — the policy answers by question number, the circumstances scheduled,
+a fingerprint — and mirrors it (`js/lt-live.js`, `js/lt-live-client.js`).
+Nobody can speed it up, save it or replace it from the page; the hand is paid
+for from a purse that is per address and refills with presence; following
+someone is public. The town is saved to `--data` every ten town minutes and on
+exit, every frame is logged there, and a server started on that directory
+resumes. With `LT_ADMIN_TOKEN` set, `POST /api/admin/pause|resume|save` with
+the token in `x-lt-admin`. On your own machine, `--dev` puts Pause, 1x…600x
+and One minute on the page (and `POST /api/dev/speed|step`); never start the
+public town with it. No dependencies. The plan this is the first step of:
+`docs/playable-town-plan.md`.
+
 ## The rules it is built on
 
 - **One authoritative state** (`sim.state`). The page, the view, the story
@@ -39,6 +60,7 @@ makes it the original two-person world instead of the five-person street.
 | `js/lt-story.js` | what a watcher is told: why, what is at stake, the day looked back on, bonds, pace, beats |
 | `js/lt-view.js`, `js/lt-appearance.js` | the picture: rooms, inhabitants by look, poses by activity and phase, the hour's light |
 | `js/lt-observer.js`, `js/lt-persistence.js` | the page: speeds and Auto, save / resume / new world, make something happen, timeline and looking back |
+| `js/lt-live.js`, `js/lt-live-client.js`, `server/` | the one town: host frames, browser mirror with fingerprint check, the server (clock, saves, log, spectators, purse, hand over HTTP) |
 | `content/` | packages: everyday opportunities (book, parcel), lost wallet, everyday props, activity poses and daylight, town places (park, street, homes) |
 | `docs/policy-provider-contract.md` | what is in place for a language-model provider, and what is not |
 | `docs/boredom-baseline*.json` | how watchable three days are, as numbers; gated |
@@ -50,6 +72,7 @@ node living-town/test/run-all.js                    # the Node suite, no browser
 node living-town/tools/measure-boredom.js [--cast=town] [--write-baseline]
 node living-town/test/page-story-browser.js         # real Chrome
 node living-town/test/page-persistence-browser.js   # real Chrome
+node living-town/test/page-live-browser.js          # real Chrome, against a town server started in-process
 node living-town/tools/capture-poses.js             # and capture-cafe / -everyday / -interaction
 ```
 

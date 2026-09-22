@@ -3,3 +3,6 @@
 artifacts/visual-audit/**
 .DS_Store
 .phi/
+
+# Living Town server: the one town's save, frame log and spectators, written at run time
+living-town/data/
