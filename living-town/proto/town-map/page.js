@@ -25,7 +25,7 @@
   }
   function getJSON(u) { return fetch(u).then(function (r) { return r.json(); }); }
 
-  Promise.all([getJSON('town.json'), getJSON(KIT + 'objects.json'), getJSON(KIT + 'ground/ground.json')]).then(function (r) {
+  Promise.all([getJSON(qs.get('map') || 'town.json'), getJSON(KIT + 'objects.json'), getJSON(KIT + 'ground/ground.json')]).then(function (r) {
     map = r[0]; kitObjects = r[1]; groundKit = r[2];
     if (window.setGroundTable) window.setGroundTable(groundKit);
     world = C.build(map, kitObjects);
@@ -233,8 +233,12 @@
     if (!world) return;
     var WW = world.W * world.T, HH = world.H * world.T;
     if (!gOver) { gOver = EMBER.Viewport.attachNative(cv.overview, WW, HH); gFol = EMBER.Viewport.attachNative(cv.follow, VW, VH); }
-    var aw = window.innerWidth - 32, ah = window.innerHeight - 70;
-    var so = EMBER.Viewport.integerScale(aw, ah, WW, HH), sf = EMBER.Viewport.integerScale(aw, ah, VW, VH);
+    var aw = window.innerWidth - 32, ah = window.innerHeight - 96;
+    /* Fill the window. Whole device pixels per art pixel when that is big
+     * enough; otherwise a fractional fit, still nearest-neighbour. */
+    var dpr = window.devicePixelRatio || 1;
+    function fit(w, h) { var s = Math.min(aw / w, ah / h), d = Math.floor(s * dpr) / dpr; return d >= s * 0.9 ? d : s; }
+    var so = fit(WW, HH), sf = fit(VW, VH);
     cv.overview.style.width = WW * so + 'px'; cv.overview.style.height = HH * so + 'px';
     cv.follow.style.width = VW * sf + 'px'; cv.follow.style.height = VH * sf + 'px';
   }

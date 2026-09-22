@@ -13,12 +13,15 @@ var paths = [[5, 6, 'p'], [13, 14, 'p'], [19, 27, 'p'], [31, 32, 'p'], [40, 41, 
 ground.push(row('G', paths)); ground.push(row('G', paths)); ground.push(row('G', paths)); ground.push(row('G', paths));
 ground.push(row('k'));                                   // 11 kerb
 ground.push(row('c')); ground.push(row('c')); ground.push(row('c'));   // 12-14 street
-ground.push(row('g', [[20, 24, 'p'], [39, 47, 'c']]));                 // 15 lawn, foot of the steps, street runs on to the bridge
-ground.push(row('g', [[21, 23, 'p'], [39, 47, 'w']]));
-ground.push(row('g', [[21, 23, 'p'], [38, 47, 'w']]));
-ground.push(row('t', [[37, 47, 'w']]));                                // 18 coping
-ground.push(row('f', [[37, 47, 'w']]));                                // 19 wall face
-for (y = 20; y < H; y++) ground.push(row('w'));
+// East end: the bridge's road is the street's own cobbles running down a
+// ramp to the right of its parapet; left of the parapet, water under the arch.
+// First cobble column per row follows the parapet's diagonal.
+var RAMP = { 15: 42, 16: 43, 17: 44, 18: 45, 19: 45, 20: 46, 21: 47 };
+function east(y, base) { var spans = [[41, 47, 'w']]; if (RAMP[y] != null) spans.push([RAMP[y], 47, 'c']); return row(base, base === 'g' ? [[21 + (y === 15 ? -1 : 0), 23 + (y === 15 ? 1 : 0), 'p']].concat(spans) : spans); }
+ground.push(east(15, 'g')); ground.push(east(16, 'g')); ground.push(east(17, 'g'));   // 15-17 lawn to the bridge pillar
+ground.push(east(18, 't'));                                                          // 18 coping
+ground.push(east(19, 'f'));                                                          // 19 wall face
+for (y = 20; y < H; y++) ground.push(RAMP[y] != null ? row('w', [[RAMP[y], 47, 'c']]) : row('w'));
 
 var SKIP = { backdrop: 1, 'fence-iron': 1, 'fence-wood': 1, balustrade: 1, embankment: 1, 'embankment-run-1': 1, 'embankment-run-2': 1 };
 var objects = kit.filter(function (k) { return !SKIP[k.id]; }).map(function (k) {
@@ -51,8 +54,6 @@ var map = {
 map.spots.jetty_end = { tx: 22, ty: 20 };
 map.spots.lawn_w = { tx: 9, ty: 16 };
 // the bridge deck runs down to the right over the water
-var deck = [[41, 15], [41, 16], [42, 16], [42, 17], [43, 17], [43, 18], [44, 18], [44, 19], [45, 19], [45, 20]];
-deck.forEach(function (c) { map.walkable.push(c); });
-map.spots.bridge = { tx: 42, ty: 17 };
+map.spots.bridge = { tx: 45, ty: 17 };
 fs.writeFileSync(__dirname + '/town.json', JSON.stringify(map, null, 1));
 console.log('objects', objects.length, 'places', Object.keys(map.places).length, 'spots', Object.keys(map.spots).join(','));

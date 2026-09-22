@@ -31,7 +31,7 @@
   "cccccccccccccccccccccccccccccccccccccccccccccccc",
   "ggggggggggggggggggggpppppggggggggggggggggwcccccc",
   "gggggggggggggggggggggpppgggggggggggggggggwwccccc",
-  "gggggggggggggggggggggpppgggggggggggggggggwwwcccc",
+  "gggggppppppppggggggggpppgggggggggggggggggwwwcccc",
   "tttttttttttttttttttttttttttttttttttttttttwwwwccc",
   "fffffffffffffffffffffffffffffffffffffffffwwwwccc",
   "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwcc",
@@ -56,25 +56,25 @@
   {
    "kit": "cottage-2",
    "id": "cottage-2",
-   "tx": 12,
+   "tx": 29,
    "ty": 7
   },
   {
    "kit": "cafe",
    "id": "cafe",
-   "tx": 20,
+   "tx": 36,
    "ty": 7
   },
   {
    "kit": "cottage-3",
    "id": "cottage-3",
-   "tx": 29,
+   "tx": 12,
    "ty": 7
   },
   {
    "kit": "cottage-4",
    "id": "cottage-4",
-   "tx": 37,
+   "tx": 21,
    "ty": 7
   },
   {
@@ -150,12 +150,6 @@
    "ty": 16
   },
   {
-   "kit": "tree-park-4",
-   "id": "tree-park-4",
-   "tx": 27,
-   "ty": 16
-  },
-  {
    "kit": "bush-park-2",
    "id": "bush-park-2",
    "tx": 7,
@@ -228,12 +222,6 @@
    "ty": 9
   },
   {
-   "kit": "hedge-garden-1",
-   "id": "hedge-garden-1",
-   "tx": 42,
-   "ty": 10
-  },
-  {
    "kit": "tree-garden-1",
    "id": "tree-garden-1",
    "tx": 45,
@@ -254,13 +242,13 @@
   {
    "kit": "table-set",
    "id": "table-set",
-   "tx": 21,
+   "tx": 38,
    "ty": 10
   },
   {
    "kit": "a-frame-sign",
    "id": "a-frame-sign",
-   "tx": 24,
+   "tx": 41,
    "ty": 10
   },
   {
@@ -330,12 +318,6 @@
    "ty": 10
   },
   {
-   "kit": "gate-post-2",
-   "id": "gate-post-2",
-   "tx": 7,
-   "ty": 10
-  },
-  {
    "kit": "gate-post-3",
    "id": "gate-post-3",
    "tx": 13,
@@ -345,12 +327,6 @@
    "kit": "gate-post-4",
    "id": "gate-post-4",
    "tx": 30,
-   "ty": 10
-  },
-  {
-   "kit": "gate-post-5",
-   "id": "gate-post-5",
-   "tx": 32,
    "ty": 10
   },
   {
@@ -369,12 +345,6 @@
    "kit": "gate-post-8",
    "id": "gate-post-8",
    "tx": 41,
-   "ty": 10
-  },
-  {
-   "kit": "gate-wood-1",
-   "id": "gate-wood-1",
-   "tx": 15,
    "ty": 10
   },
   {
@@ -628,6 +598,42 @@
    "id": "lilypads-8",
    "tx": 28,
    "ty": 20
+  },
+  {
+   "kit": "cottage-1",
+   "id": "cottage-new",
+   "tx": 1,
+   "ty": 15
+  },
+  {
+   "kit": "tree-park-3",
+   "id": "tree-row-0",
+   "tx": 27,
+   "ty": 16
+  },
+  {
+   "kit": "tree-park-3",
+   "id": "tree-row-1",
+   "tx": 31,
+   "ty": 16
+  },
+  {
+   "kit": "tree-park-3",
+   "id": "tree-row-2",
+   "tx": 35,
+   "ty": 16
+  },
+  {
+   "kit": "lamp-2",
+   "id": "lamp-park-0",
+   "tx": 10,
+   "ty": 15
+  },
+  {
+   "kit": "lamp-2",
+   "id": "lamp-park-1",
+   "tx": 26,
+   "ty": 15
   }
  ],
  "places": {
@@ -636,7 +642,8 @@
   "cafe": "cafe",
   "flat_c": "cafe",
   "flat_d": "cottage-3",
-  "flat_e": "cottage-4"
+  "flat_e": "cottage-4",
+  "flat_f": "cottage-new"
  },
  "spots": {
   "bench_w": {
@@ -705,6 +712,11 @@
    "id": "resident_e",
    "name": "Elsa",
    "home": "flat_e"
+  },
+  {
+   "id": "resident_f",
+   "name": "Franco",
+   "home": "flat_f"
   }
  ],
  "walkable": [
@@ -743,6 +755,54 @@
   [
    23,
    20
+  ],
+  [
+   7,
+   10
+  ],
+  [
+   7,
+   11
+  ],
+  [
+   32,
+   10
+  ],
+  [
+   32,
+   11
+  ],
+  [
+   42,
+   10
+  ],
+  [
+   42,
+   11
+  ],
+  [
+   42,
+   10
+  ],
+  [
+   42,
+   11
+  ],
+  [
+   15,
+   10
+  ],
+  [
+   15,
+   11
+  ],
+  [
+   24,
+   10
+  ],
+  [
+   24,
+   11
   ]
  ],
  "blocked": []
