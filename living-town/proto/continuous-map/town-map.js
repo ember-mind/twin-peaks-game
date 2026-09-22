@@ -1,12 +1,12 @@
 /* town-map.js — prototype: one continuous outdoor map and real walking.
  *
- * Throwaway. Answers three questions before phase 2 commits to them:
- *   1. Can the street and the park painters share one 40×24 grid?
- *   2. Is walking deterministic enough for the mirror (same seed, same
- *      fingerprint every minute, no floats in the truth)?
- *   3. What does "travel time = path length" do to the old minutes table?
+ * Throwaway. The picture is a plate (plate.png) re-pixelled from the join-page
+ * painting (reference-town.png) by build-plate.py; fg.png holds the pixels
+ * that must cover somebody standing behind them. Walking is on a graph of
+ * waypoints in native pixels: doors, garden gates, the street, the steps down
+ * to the park, the jetty and the bridge.
  *
- * Truth is integer: a walk is (path, departure minute, tiles per minute).
+ * Truth is integer: a walk is (route, departure minute, pixels per minute).
  * Where someone stands at minute m is a pure function of that, so the host
  * only has to send departures, never positions.
  */
@@ -14,73 +14,97 @@
   var root = (typeof window !== 'undefined') ? window : global;
   var P = root.ProtoMap = {};
 
-  var W = 40, STREET_H = 11, PARK_H = 13, H = STREET_H + PARK_H;
-  P.W = W; P.H = H; P.STREET_H = STREET_H; P.PARK_H = PARK_H;
+  P.W = 768; P.H = 432; P.TILE = 16;
 
-  function grid(w, h, ch) { var g = []; for (var y = 0; y < h; y++) g.push(new Array(w + 1).join(ch).split('')); return g; }
-  function set(g, x, y, ch) { g[y][x] = ch; }
-  function fill(g, x0, y0, x1, y1, ch) { for (var y = y0; y <= y1; y++) for (var x = x0; x <= x1; x++) g[y][x] = ch; }
-
-  /* ---- the street: north fronts, carriageway, south gardens and park wall */
-  var s = grid(W, STREET_H, '-');
-  fill(s, 0, 0, W - 1, 2, 'H');
-  [[5, 'flat_a'], [15, 'flat_c'], [31, 'cafe']].forEach(function (d) { set(s, d[0], 2, 'D'); set(s, d[0] + 1, 2, 'D'); });
-  fill(s, 0, 8, W - 1, 8, 'f'); fill(s, 0, 9, W - 1, 9, ','); fill(s, 0, 10, W - 1, 10, 'H');
-  /* gardens with a gate each, a path to the house behind */
-  [2, 29, 35].forEach(function (x) { set(s, x, 8, 'D'); set(s, x + 1, 8, 'D'); set(s, x, 9, '-'); set(s, x + 1, 9, '-'); });
-  [6, 27, 33].forEach(function (x) { set(s, x, 9, 'f'); });
-  /* a building block, then the park frontage: wall, gate, open to the park */
-  fill(s, 7, 8, 12, 10, 'H');
-  fill(s, 13, 9, 26, 10, ',');
-  set(s, 19, 8, 'D'); set(s, 20, 8, 'D');
-  fill(s, 19, 9, 20, 10, '-');
-  P.streetRows = s.map(function (r) { return r.join(''); });
-
-  /* ---- the park behind the south houses, reached through the gate ------- */
-  var p = grid(W, PARK_H, ',');
-  fill(p, 0, 0, 12, 0, 'T'); fill(p, 27, 0, W - 1, 0, 'T');
-  for (var x = 0; x < W; x += 3) if (x < 14 || x > 25) set(p, x, 2, 'T');
-  fill(p, 19, 0, 20, 3, '-');
-  [[17, 5, 22, 5], [16, 6, 23, 7], [17, 8, 22, 8]].forEach(function (r) { fill(p, r[0], r[1], r[2], r[3], 'w'); });
-  [[13, 5], [26, 5], [13, 9], [26, 9], [8, 7], [31, 7]].forEach(function (b) { set(p, b[0], b[1], 'b'); set(p, b[0] + 1, b[1], 'b'); });
-  fill(p, 0, PARK_H - 1, W - 1, PARK_H - 1, 'T');
-  [4, 10, 29, 35].forEach(function (x) { set(p, x, 10, 'T'); });
-  P.parkRows = p.map(function (r) { return r.join(''); });
-
-  P.rows = P.streetRows.concat(P.parkRows);
-  var SOLID = 'HfTwb#';
-  P.walkable = function (x, y) { return x >= 0 && y >= 0 && x < W && y < H && SOLID.indexOf(P.rows[y].charAt(x)) < 0; };
-
-  /* Where each place meets the map. Indoors is off the map: standing on the
-   * portal and then gone. The park is a place on the map, so it has spots. */
-  P.PORTALS = {
-    flat_a: { x: 5, y: 2 }, flat_c: { x: 15, y: 2 }, cafe: { x: 31, y: 2 },
-    flat_b: { x: 2, y: 9 }, flat_e: { x: 29, y: 9 }, flat_d: { x: 35, y: 9 }
+  /* Waypoints, native pixels, feet position. Order is the tie-break. */
+  P.NODES = {
+    door_a: [104, 155], gate_a: [105, 180], st_a: [105, 204],
+    door_b: [234, 155], gate_b: [234, 180], st_b: [234, 204],
+    door_cafe: [413, 158], terrace: [413, 180], st_cafe: [413, 204],
+    door_d: [506, 155], gate_d: [505, 180], st_d: [505, 204],
+    door_e: [649, 155], gate_e: [649, 180], st_e: [649, 204],
+    st_w: [8, 204], st_steps: [362, 204], st_bridge: [700, 212], st_east: [760, 204],
+    steps_top: [362, 228], steps_foot: [362, 266],
+    lawn_w: [200, 266], bench_w: [213, 296], lawn_e: [470, 264], bench_e: [510, 296],
+    jetty_head: [360, 298], jetty_end: [360, 322],
+    bridge_mid: [722, 262], bridge_far: [748, 300]
   };
-  P.PARK_SPOTS = [{ x: 13, y: STREET_H + 6 }, { x: 26, y: STREET_H + 6 }, { x: 13, y: STREET_H + 10 },
-                  { x: 26, y: STREET_H + 10 }, { x: 8, y: STREET_H + 8 }, { x: 31, y: STREET_H + 8 }, { x: 20, y: STREET_H + 10 }];
+  P.EDGES = [
+    ['door_a', 'gate_a'], ['gate_a', 'st_a'], ['door_b', 'gate_b'], ['gate_b', 'st_b'],
+    ['door_cafe', 'terrace'], ['terrace', 'st_cafe'], ['door_d', 'gate_d'], ['gate_d', 'st_d'],
+    ['door_e', 'gate_e'], ['gate_e', 'st_e'],
+    ['st_w', 'st_a'], ['st_a', 'st_b'], ['st_b', 'st_steps'], ['st_steps', 'st_cafe'], ['st_cafe', 'st_d'],
+    ['st_d', 'st_e'], ['st_e', 'st_bridge'], ['st_bridge', 'st_east'],
+    ['st_steps', 'steps_top'], ['steps_top', 'steps_foot'],
+    ['steps_foot', 'lawn_w'], ['lawn_w', 'bench_w'], ['steps_foot', 'lawn_e'], ['lawn_e', 'bench_e'],
+    ['steps_foot', 'jetty_head'], ['jetty_head', 'jetty_end'],
+    ['st_bridge', 'bridge_mid'], ['bridge_mid', 'bridge_far']
+  ];
 
-  /* ---- pathfinding: BFS, fixed neighbour order, so every mirror agrees --- */
-  var DIRS = [[0, -1], [1, 0], [0, 1], [-1, 0]];
-  P.path = function (a, b) {
-    var key = function (x, y) { return y * W + x; };
-    var prev = {}, q = [a], seen = {}; seen[key(a.x, a.y)] = true;
-    while (q.length) {
-      var c = q.shift();
-      if (c.x === b.x && c.y === b.y) break;
-      for (var i = 0; i < 4; i++) {
-        var nx = c.x + DIRS[i][0], ny = c.y + DIRS[i][1], k = key(nx, ny);
-        if (seen[k] || !P.walkable(nx, ny)) continue;
-        seen[k] = true; prev[k] = c; q.push({ x: nx, y: ny });
-      }
+  /* Foreground pieces from build-plate.py: drawn over anyone whose feet are
+   * above `depth`. */
+  P.FG = [
+    { id: 'tree_w', x: 0, y: 196, w: 60, h: 54, depth: 292 },
+    { id: 'tree_cw', x: 112, y: 194, w: 78, h: 56, depth: 272 },
+    { id: 'tree_c', x: 232, y: 214, w: 34, h: 36, depth: 272 },
+    { id: 'tree_ce', x: 404, y: 198, w: 82, h: 52, depth: 275 },
+    { id: 'lamp_bridge_w', x: 646, y: 200, w: 16, h: 38, depth: 240 },
+    { id: 'lamp_bridge_e', x: 744, y: 200, w: 16, h: 38, depth: 240 }
+  ];
+
+  /* Glass that lights when someone is home (native px). */
+  P.WINDOWS = {
+    flat_a: [[71, 119, 15, 14], [124, 119, 13, 14]],
+    flat_b: [[202, 118, 12, 15], [257, 118, 13, 15]],
+    flat_d: [[481, 119, 13, 14]],
+    flat_e: [[614, 118, 17, 15], [675, 118, 13, 15]]
+  };
+
+  P.PLACES = {
+    flat_a: 'door_a', flat_b: 'door_b', flat_c: 'door_cafe', cafe: 'door_cafe', flat_d: 'door_d', flat_e: 'door_e'
+  };
+  P.OUTDOOR_SPOTS = ['bench_w', 'bench_e', 'jetty_end', 'bridge_far', 'lawn_w'];
+  /* Where the n-th person at a spot stands, relative to the spot. View only:
+   * the truth is "at bench_w"; nobody stands inside anybody else. */
+  P.SLOTS = {
+    bench_w: [[0, 0], [-11, 0], [11, 0], [-22, 2], [22, 2]],
+    bench_e: [[0, 0], [11, 0], [-11, 0], [22, 2], [-22, 2]],
+    jetty_end: [[0, 0], [-12, -4], [12, -4], [-6, -14], [6, -14]],
+    bridge_far: [[0, 0], [-10, -8], [10, 6], [-20, -16], [18, 12]],
+    lawn_w: [[0, 0], [-16, 4], [16, 2], [-30, 8], [-8, 14]]
+  };
+
+  /* Lamps: [head x, head y, ground y of the pool]. */
+  P.LAMPS = [[23, 158, 186], [293, 158, 186], [587, 158, 186], [654, 208, 236], [752, 208, 236], [748, 316, 334]];
+
+  /* Bench seats, relative to the bench spot: the first two there sit. */
+  P.SEATS = { bench_w: [[-8, -12], [9, -12]], bench_e: [[-8, -12], [9, -12]] };
+  P.SLOTS.bench_w = [[0, 0], [-22, 2], [22, 2]]; P.SLOTS.bench_e = [[0, 0], [22, 2], [-22, 2]];
+
+  var ORDER = Object.keys(P.NODES), ADJ = {};
+  ORDER.forEach(function (k) { ADJ[k] = []; });
+  function dist(a, b) { var p = P.NODES[a], q = P.NODES[b]; return Math.round(Math.sqrt((p[0] - q[0]) * (p[0] - q[0]) + (p[1] - q[1]) * (p[1] - q[1]))); }
+  P.EDGES.forEach(function (e) { var d = dist(e[0], e[1]); ADJ[e[0]].push([e[1], d]); ADJ[e[1]].push([e[0], d]); });
+
+  /* Dijkstra with integer lengths and node order as tie-break. */
+  P.route = function (from, to) {
+    var best = {}, prev = {}, done = {};
+    ORDER.forEach(function (k) { best[k] = Infinity; });
+    best[from] = 0;
+    for (;;) {
+      var u = null;
+      ORDER.forEach(function (k) { if (!done[k] && best[k] < Infinity && (u === null || best[k] < best[u])) u = k; });
+      if (u === null || u === to) break;
+      done[u] = true;
+      ADJ[u].forEach(function (e) { var nd = best[u] + e[1]; if (nd < best[e[0]]) { best[e[0]] = nd; prev[e[0]] = u; } });
     }
-    if (!seen[key(b.x, b.y)]) return null;
-    var out = [b], cur = b;
-    while (cur.x !== a.x || cur.y !== a.y) { cur = prev[key(cur.x, cur.y)]; out.unshift(cur); }
-    return out;
+    if (best[to] === Infinity) return null;
+    var nodes = [to]; while (nodes[0] !== from) nodes.unshift(prev[nodes[0]]);
+    var legs = [], total = 0;
+    for (var i = 1; i < nodes.length; i++) { var d = dist(nodes[i - 1], nodes[i]); legs.push({ a: nodes[i - 1], b: nodes[i], d: d, at: total }); total += d; }
+    return { nodes: nodes, legs: legs, length: total };
   };
 
-  /* ---- a seeded day ------------------------------------------------------ */
   function rng(seed) { var s = seed >>> 0; return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
 
   P.RESIDENTS = [
@@ -89,55 +113,68 @@
     { id: 'resident_e', name: 'Elsa', home: 'flat_e' }
   ];
 
-  function spotOf(place) { return P.PORTALS[place] || place; }
+  function nodeOf(place) { return P.PLACES[place] || place; }
 
-  /* A town: `tpm` tiles per town minute. Everyone decides at integer minutes
-   * only; a walk starts at a minute and its position is derived. */
-  P.createTown = function (seed, tpm) {
+  /* `ppm`: pixels per town minute. Decisions happen at integer minutes only. */
+  P.createTown = function (seed, ppm) {
     var r = rng(seed);
     var people = P.RESIDENTS.map(function (res) {
       return { id: res.id, name: res.name, home: res.home, at: res.home, walk: null, busyUntil: 6 * 60 + Math.floor(r() * 120) };
     });
-    return { minute: 6 * 60, tpm: tpm, r: r, people: people, walks: 0, tilesWalked: 0, log: [] };
+    return { minute: 6 * 60, ppm: ppm, r: r, people: people, walks: 0, pxWalked: 0, log: [] };
   };
 
   function choose(town, p) {
     var roll = town.r();
     if (p.at !== p.home && roll < 0.35) return p.home;
     if (roll < 0.6) return 'cafe';
-    if (roll < 0.9) return P.PARK_SPOTS[Math.floor(town.r() * P.PARK_SPOTS.length)];
-    var others = Object.keys(P.PORTALS).filter(function (k) { return k !== p.at && k !== 'cafe'; });
-    return others[Math.floor(town.r() * others.length)];   // "visiting" — just a walk to a door
+    if (roll < 0.9) return P.OUTDOOR_SPOTS[Math.floor(town.r() * P.OUTDOOR_SPOTS.length)];
+    var homes = ['flat_a', 'flat_b', 'flat_d', 'flat_e'].filter(function (k) { return k !== p.at; });
+    return homes[Math.floor(town.r() * homes.length)];
   }
 
   P.stepMinute = function (town) {
     town.minute++;
     town.people.forEach(function (p) {
       if (p.walk) {
-        var done = (town.minute - p.walk.t0) * town.tpm >= p.walk.path.length - 1;
-        if (done) { p.at = p.walk.to; p.walk = null; p.busyUntil = town.minute + 20 + Math.floor(town.r() * 90); }
+        if ((town.minute - p.walk.t0) * town.ppm >= p.walk.route.length) {
+          p.at = p.walk.to; p.walk = null; p.busyUntil = town.minute + 20 + Math.floor(town.r() * 90);
+        }
         return;
       }
       if (town.minute < p.busyUntil) return;
-      var to = choose(town, p), path = P.path(spotOf(p.at), spotOf(to));
-      if (!path || path.length < 2) { p.busyUntil = town.minute + 10; return; }
-      p.walk = { from: p.at, to: to, path: path, t0: town.minute };
-      p.at = null; town.walks++; town.tilesWalked += path.length - 1;
-      town.log.push({ minute: town.minute, id: p.id, tiles: path.length - 1, minutes: Math.ceil((path.length - 1) / town.tpm) });
+      var to = choose(town, p), route = P.route(nodeOf(p.at), nodeOf(to));
+      if (!route || route.length === 0) { p.busyUntil = town.minute + 10; return; }
+      p.walk = { from: p.at, to: to, route: route, t0: town.minute };
+      p.at = null; town.walks++; town.pxWalked += route.length;
+      town.log.push({ minute: town.minute, id: p.id, px: route.length, minutes: Math.ceil(route.length / town.ppm) });
     });
   };
+
+  function point(route, s) {
+    for (var i = 0; i < route.legs.length; i++) {
+      var L = route.legs[i];
+      if (s <= L.at + L.d || i === route.legs.length - 1) {
+        var k = L.d ? Math.min(1, Math.max(0, (s - L.at) / L.d)) : 1, a = P.NODES[L.a], b = P.NODES[L.b];
+        var dx = b[0] - a[0], dy = b[1] - a[1], len = L.d || 1;
+        return { x: a[0] + dx * k, y: a[1] + dy * k, nx: -dy / len, ny: dx / len,
+                 fromEnds: Math.min(s, route.length - s),
+                 dir: Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up') };
+      }
+    }
+  }
 
   /* Where someone is at a (possibly fractional, view-only) minute. */
   P.positionAt = function (town, p, t) {
     if (!p.walk) {
-      if (typeof p.at === 'object') return { x: p.at.x, y: p.at.y, outdoors: true, moving: false };
-      var q = P.PORTALS[p.at]; return { x: q.x, y: q.y, outdoors: false, moving: false, place: p.at };
+      var place = p.at, n = P.NODES[nodeOf(place)];
+      return { x: n[0], y: n[1], outdoors: !P.PLACES[place], moving: false, place: place, dir: 'down' };
     }
-    var f = Math.max(0, (t - p.walk.t0) * town.tpm), n = p.walk.path.length - 1;
-    if (f >= n) { var e = p.walk.path[n]; return { x: e.x, y: e.y, outdoors: true, moving: false }; }
-    var i = Math.floor(f), a = p.walk.path[i], b = p.walk.path[i + 1], k = f - i;
-    return { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k, outdoors: true, moving: true,
-             dir: b.x > a.x ? 'right' : b.x < a.x ? 'left' : b.y > a.y ? 'down' : 'up', phase: f };
+    var s = Math.max(0, (t - p.walk.t0) * town.ppm);
+    if (s >= p.walk.route.length) s = p.walk.route.length;
+    var q = point(p.walk.route, s);
+    return { x: q.x, y: q.y, outdoors: true, moving: s < p.walk.route.length, dir: q.dir, phase: s / 16,
+             nx: q.nx, ny: q.ny, fromEnds: q.fromEnds, arriving: s >= p.walk.route.length ? p.walk.to : null };
   };
 
   /* Integer-only fingerprint of the truth at the current minute. */
@@ -147,22 +184,19 @@
     mix(town.minute);
     town.people.forEach(function (p) {
       mix(p.id);
-      if (p.walk) { var tile = Math.min(p.walk.path.length - 1, (town.minute - p.walk.t0) * town.tpm); var c = p.walk.path[tile]; mix('w' + c.x + ',' + c.y); }
-      else mix(typeof p.at === 'object' ? 'p' + p.at.x + ',' + p.at.y : p.at);
+      if (p.walk) mix('w' + p.walk.route.nodes.join('>') + '@' + p.walk.t0);
+      else mix(p.at);
     });
     return h.toString(16);
   };
 
-  /* Old table vs path length, for the report. */
   P.routeTable = function () {
-    var places = ['flat_a', 'flat_b', 'flat_c', 'flat_d', 'flat_e', 'cafe'];
-    var park = P.PARK_SPOTS[6], out = [];
-    places.forEach(function (a) {
-      places.concat(['park']).forEach(function (b) {
-        if (a >= b && b !== 'park') return;
-        if (a === b) return;
-        var path = P.path(spotOf(a), b === 'park' ? park : spotOf(b));
-        out.push({ from: a, to: b, tiles: path ? path.length - 1 : null });
+    var places = ['flat_a', 'flat_b', 'flat_c', 'flat_d', 'flat_e', 'cafe'], out = [];
+    places.forEach(function (a, i) {
+      places.slice(i + 1).concat(['bench_w']).forEach(function (b) {
+        if (a === b || nodeOf(a) === nodeOf(b)) return;
+        var r = P.route(nodeOf(a), nodeOf(b));
+        out.push({ from: a, to: b === 'bench_w' ? 'park' : b, px: r ? r.length : null });
       });
     });
     return out;
