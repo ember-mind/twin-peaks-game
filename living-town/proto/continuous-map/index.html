@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Continuous Map Prototype</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --bg: #14171a; --fg: #e8e2d2; --dim: #9a9484; --ok: #8fc27a; --bad: #e07a5f; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.4 system-ui, sans-serif; }
+  main { padding: 12px 16px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 10px; }
+  button, select { background: #262a2e; color: var(--fg); border: 1px solid #3a3f44; padding: 4px 10px; border-radius: 4px; font: inherit; }
+  button.on { background: #3d5f88; }
+  canvas { image-rendering: pixelated; display: block; cursor: pointer; }
+  #stats { color: var(--dim); font-variant-numeric: tabular-nums; }
+  .ok { color: var(--ok); } .bad { color: var(--bad); }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar">
+    <button id="bOverview" class="on">Overview</button>
+    <button id="bFollow">Follow</button>
+    <label>Walk speed <select id="speed">
+      <option value="4">4 tiles / town min (old table)</option>
+      <option value="20" selected>20 tiles / town min</option>
+      <option value="60">60 tiles / town min (real pace)</option>
+    </select></label>
+    <label>Clock <select id="rate">
+      <option value="0.1">6x (live: 1 min / 10 s)</option>
+      <option value="1" selected>1 town min / s</option>
+      <option value="5">5 town min / s</option>
+    </select></label>
+    <span id="stats"></span>
+  </div>
+  <canvas id="overview"></canvas>
+  <canvas id="follow" style="display:none"></canvas>
+</main>
+
+<script src="../../../engine/ember-math.js"></script>
+<script src="../../../engine/ember-grid.js"></script>
+<script src="../../../engine/ember-camera.js"></script>
+<script src="../../../engine/ember-tilemap.js"></script>
+<script src="../../../engine/ember-viewport.js"></script>
+<script src="../../js/lt-util.js"></script>
+<script src="../../js/lt-names.js"></script>
+<script src="../../js/lt-appearance.js"></script>
+<script src="../../js/lt-production-host.js"></script>
+<script src="../../../engine/ember-pixel.js"></script>
+<script src="../../../engine/ember-interior-kit.js"></script>
+<script src="../../../js/retro-authored.js"></script>
+<script src="../../js/lt-world.js"></script>
+<script src="../../content/town-places-v01/lt-town-places.js"></script>
+<script>LT.ProductionHost.attach();</script>
+<script src="../../content/activity-poses-v01/activity-poses.table.js"></script>
+<script src="../../content/activity-poses-v01/lt-daylight.js"></script>
+<script src="town-map.js"></script>
+<script>
+(function () {
+  var P = window.ProtoMap, TP = LT.TownPlaces, T = 16;
+  var PARK_Y = P.STREET_H * T;
+  var qs = new URLSearchParams(location.search);
+  var state = {
+    mode: qs.get('mode') || 'overview', focus: 0,
+    tpm: +(qs.get('tpm') || 20), rate: +(qs.get('rate') || 1),
+    t: +(qs.get('start') || 8 * 60)
+  };
+  var host, mirror, mismatches = 0, checked = 0;
+
+  function reset() {
+    host = P.createTown(42, state.tpm); mirror = P.createTown(42, state.tpm);
+    mismatches = 0; checked = 0;
+    while (host.minute < Math.floor(state.t)) advance();
+  }
+  function advance() {
+    P.stepMinute(host); P.stepMinute(mirror); checked++;
+    if (P.fingerprint(host) !== P.fingerprint(mirror)) mismatches++;
+  }
+
+  var cv = { overview: document.getElementById('overview'), follow: document.getElementById('follow') };
+  var gOver = EMBER.Viewport.attachNative(cv.overview, P.W * T, P.H * T);
+  var gFol = EMBER.Viewport.attachNative(cv.follow, 256, 192);
+  function scaleCanvases() {
+    var aw = window.innerWidth - 32, ah = window.innerHeight - 70;
+    var so = EMBER.Viewport.integerScale(aw, ah, P.W * T, P.H * T), sf = EMBER.Viewport.integerScale(aw, ah, 256, 192);
+    cv.overview.style.width = P.W * T * so + 'px'; cv.overview.style.height = P.H * T * so + 'px';
+    cv.follow.style.width = 256 * sf + 'px'; cv.follow.style.height = 192 * sf + 'px';
+  }
+  window.addEventListener('resize', scaleCanvases); scaleCanvases();
+
+  /* Two painters, one grid: each region clipped to its own rows. */
+  function region(g, camX, camY, vw, vh, y0, h, fn) {
+    g.save(); g.beginPath(); g.rect(0, y0 - camY, vw, h); g.clip(); fn(); g.restore();
+  }
+  function paintGround(g, camX, camY, vw, vh, opts) {
+    region(g, camX, camY, vw, vh, PARK_Y, P.PARK_H * T, function () { TP.draw(g, 'park', P.parkRows, camX, camY - PARK_Y, opts); });
+    region(g, camX, camY, vw, vh, 0, PARK_Y, function () { TP.draw(g, 'street', P.streetRows, camX, camY, opts); });
+  }
+  function paintForeground(g, camX, camY, vw, vh, a, b, opts) {
+    region(g, camX, camY, vw, vh, 0, PARK_Y, function () { TP.drawForeground(g, 'street', P.streetRows, camX, camY, a, b, opts); });
+    region(g, camX, camY, vw, vh, PARK_Y, P.PARK_H * T, function () { TP.drawForeground(g, 'park', P.parkRows, camX, camY - PARK_Y, a - PARK_Y, b - PARK_Y, opts); });
+  }
+
+  function entities() {
+    return host.people.map(function (p, i) {
+      var q = P.positionAt(host, p, state.t);
+      return { i: i, p: p, q: q, wx: Math.round(q.x * T), wy: Math.round(q.y * T) };
+    });
+  }
+
+  function drawPeople(g, camX, camY, vw, vh, ents, opts) {
+    var out = ents.filter(function (e) { return e.q.outdoors; }).sort(function (a, b) { return a.wy - b.wy; });
+    var how = LT.ProductionHost.ready ? 'atlas' : 'placeholder';
+    EMBER.Tilemap.paintDepthBands(out, T, function (e) {
+      var sheet = LT.Appearance.ORDER[e.i % LT.Appearance.ORDER.length];
+      if (how === 'atlas') {
+        GAME.Sprites.drawChar(g, e.wx - camX, e.wy - camY, LT.ProductionHost.looks[sheet], e.q.dir || 'down',
+          e.q.moving ? EMBER.Grid.walkPhase(e.q.phase % 1) : 0, 1, e.q.moving, false, performance.now() / 1000,
+          { mapId: e.wy >= PARK_Y ? 'lt_park' : 'lt_street', wx: e.wx, wy: e.wy, npcId: e.p.id, characterLife: null });
+      } else { g.fillStyle = '#e2b458'; g.fillRect(e.wx - camX + 4, e.wy - camY - 6, 8, 20); }
+    }, function (a, b, idx) { if (idx >= 0) paintForeground(g, camX, camY, vw, vh, a, b, opts); });
+    return out;
+  }
+
+  function label(g, text, x, y, colour) {
+    g.font = '8px monospace'; var w = Math.ceil(g.measureText(text).width) + 4;
+    g.fillStyle = 'rgba(20,23,26,.8)'; g.fillRect(Math.round(x - w / 2), y - 8, w, 10);
+    g.fillStyle = colour; g.fillText(text, Math.round(x - w / 2) + 2, y);
+  }
+
+  function frame() {
+    var opts = { minute: Math.floor(state.t) };
+    var light = LT.DayLight ? LT.DayLight.at(Math.floor(state.t)) : null;
+    var ents = entities();
+    if (state.mode === 'overview') {
+      var g = gOver, vw = P.W * T, vh = P.H * T;
+      paintGround(g, 0, 0, vw, vh, opts);
+      drawPeople(g, 0, 0, vw, vh, ents, opts);
+      if (light) LT.DayLight.apply(g, light, { width: vw, height: vh });
+      ents.forEach(function (e) {
+        if (e.q.outdoors) label(g, e.p.name, e.wx + 8, e.wy - 12, e.i === state.focus ? '#e2b458' : '#e8e2d2');
+        else label(g, e.p.name + ' ▣', e.wx + 8, e.wy + 2, '#f3d27a');   // indoors: a lit window with a name
+      });
+    } else {
+      var f = ents[state.focus], g2 = gFol;
+      var cam = EMBER.Camera.centerOn(f.wx, f.wy, { anchorX: 8, anchorY: 8, worldW: P.W * T, worldH: P.H * T, viewW: 256, viewH: 192 });
+      paintGround(g2, cam.x, cam.y, 256, 192, opts);
+      drawPeople(g2, cam.x, cam.y, 256, 192, ents, opts);
+      if (light) LT.DayLight.apply(g2, light, { width: 256, height: 192 });
+      label(g2, f.p.name + (f.q.outdoors ? '' : ' (inside ' + f.q.place + ')'), 128, 12, '#e2b458');
+    }
+    var hh = String(Math.floor(state.t / 60) % 24).padStart(2, '0'), mm = String(Math.floor(state.t) % 60).padStart(2, '0');
+    var walking = ents.filter(function (e) { return e.q.moving; }).length;
+    document.getElementById('stats').innerHTML = hh + ':' + mm + ' · walking ' + walking + ' · walks ' + host.walks +
+      ' · mirror <span class="' + (mismatches ? 'bad' : 'ok') + '">' + (checked - mismatches) + '/' + checked + ' minutes match</span>' +
+      (LT.ProductionHost.ready ? '' : ' · atlas loading');
+  }
+
+  var last = performance.now(), paused = qs.get('paused') === '1';
+  function loop(now) {
+    var dt = Math.min(0.1, (now - last) / 1000); last = now;
+    if (!paused) { state.t += dt * state.rate; while (host.minute < Math.floor(state.t)) advance(); }
+    frame();
+    requestAnimationFrame(loop);
+  }
+
+  cv.overview.addEventListener('click', function (ev) {
+    var r = cv.overview.getBoundingClientRect(), s = r.width / (P.W * T);
+    var x = (ev.clientX - r.left) / s, y = (ev.clientY - r.top) / s, best = -1, bd = 24 * 24;
+    entities().forEach(function (e) { var dx = e.wx + 8 - x, dy = e.wy - y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = e.i; } });
+    if (best >= 0) { state.focus = best; setMode('follow'); }
+  });
+  cv.follow.addEventListener('click', function () { setMode('overview'); });
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') setMode('overview');
+    if (e.key === 'Tab') { e.preventDefault(); state.focus = (state.focus + 1) % host.people.length; }
+    if (e.key === ' ') paused = !paused;
+  });
+  function setMode(m) {
+    state.mode = m;
+    cv.overview.style.display = m === 'overview' ? 'block' : 'none';
+    cv.follow.style.display = m === 'follow' ? 'block' : 'none';
+    document.getElementById('bOverview').classList.toggle('on', m === 'overview');
+    document.getElementById('bFollow').classList.toggle('on', m === 'follow');
+  }
+  document.getElementById('bOverview').onclick = function () { setMode('overview'); };
+  document.getElementById('bFollow').onclick = function () { setMode('follow'); };
+  var sp = document.getElementById('speed'); sp.value = String(state.tpm);
+  sp.onchange = function () { state.tpm = +sp.value; reset(); };
+  var rt = document.getElementById('rate'); rt.value = String(state.rate);
+  rt.onchange = function () { state.rate = +rt.value; };
+
+  reset(); setMode(state.mode);
+  if (qs.get('focus')) state.focus = +qs.get('focus');
+  window.PROTO = { state: state, host: function () { return host; }, ready: function () { return LT.ProductionHost.ready; } };
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
