@@ -273,17 +273,47 @@ WALLC = _ids((151, 135, 122), (173, 154, 109), (123, 106, 90), (151, 123, 92),
              (130, 140, 149), (112, 121, 124))
 
 
-def wall_repaint(band, donor, protect=None):
-    """Repaint the part of `band` hidden behind garden objects with wall
-    texture tiled from `donor`."""
+def masonry_fill(img, hole, sample):
+    """Fill `hole` with the house's own wall: each pixel is copied from the
+    same column a whole number of stone courses higher up, where the facade
+    is bare wall (never window, door or hole). Texture, stone size and
+    colour stay the facade's own and the courses stay in line; the last row
+    is shaded where the wall meets the ground. `sample` is unused and kept
+    for the call sites."""
+    ys, xs = np.nonzero(hole)
+    if not len(ys):
+        return
+    # clean wall only: two pixels clear of any window, frame, sill or door
+    wall = cls(WALLC) & ~dilate(~cls(WALLC), 2) & ~hole
+    base = ys.max()
+    offsets = [(dy, dx) for dy in (6, 12, 18, 24, 30, 36, 42) for dx in (0, -12, 12, -24, 24)]
+    for y, x in sorted(zip(ys, xs)):
+        for dy, dx in offsets:
+            sy, sx = y - dy, x + dx
+            if 0 <= sy < H and 0 <= sx < W and wall[sy, sx]:
+                img[y, x] = RGB[sy, sx]
+                break
+        else:
+            img[y, x] = RGB[y, x]
+        if y == base:
+            img[y, x] = (img[y, x] * 0.72).astype(img.dtype)
+
+
+def wall_repaint(band, donor, protect=None, sample=None):
+    """Repaint the part of `band` hidden behind garden objects with stone
+    courses in the wall's own palette (`sample`; `donor` is kept only as a
+    fallback sample)."""
     def run(img):
         occ = band & ~cls(WALLC)
         if protect is not None:
             occ &= ~protect
         occ = fill_holes(dilate(occ, 1) & band) & band
+        # leaf specks the class test lets through: anything greener than stone
+        g = RGB.astype(int)
+        occ |= band & (g[..., 1] > g[..., 0] + 6)
         if protect is not None:
             occ &= ~protect
-        tile_fill(img, occ, donor)
+        masonry_fill(img, occ, sample or donor)
     return run
 
 
@@ -307,7 +337,7 @@ add(id="cottage-1", kind="building",
                rect(57, 112, 149, 154), rect(94, 154, 117, 159)),
     repaint=[wall_repaint(rect(57, 141, 95, 154) | rect(116, 137, 150, 154),
                           donor=(662, 118, 671, 141),
-                          protect=rect(94, 150, 117, 159) | rect(118, 139, 127, 153))],
+                          protect=rect(94, 150, 117, 159) | rect(118, 139, 127, 153), sample=(88, 118, 97, 136))],
     base=160, left=56, fpw=6, fph=3,
     door=(99, 127, 112, 153),
     windows=[(68, 118, 86, 138), (124, 119, 136, 138)])
@@ -317,7 +347,7 @@ add(id="cottage-2", kind="building",
                rect(186, 112, 290, 155), rect(221, 152, 246, 159)),
     repaint=[wall_repaint(rect(186, 138, 222, 155) | rect(246, 148, 290, 155),
                           donor=(214, 116, 221, 137),
-                          protect=rect(221, 150, 246, 159) | rect(253, 134, 280, 148))],
+                          protect=rect(221, 150, 246, 159) | rect(253, 134, 280, 148), sample=(216, 116, 224, 138))],
     base=160, left=186, fpw=6, fph=3,
     door=(225, 124, 242, 152),
     windows=[(201, 116, 214, 134), (257, 116, 274, 136)])
@@ -328,7 +358,7 @@ add(id="cafe", kind="building",
     repaint=[wall_repaint(rect(318, 138, 330, 163) | rect(328, 148, 366, 163) |
                           rect(386, 144, 403, 163) | rect(425, 138, 437, 163),
                           donor=(366, 144, 385, 163),
-                          protect=rect(404, 118, 424, 163) | rect(336, 125, 384, 143))],
+                          protect=rect(404, 118, 424, 163) | rect(336, 125, 384, 143), sample=(366, 144, 385, 163))],
     base=164, left=318, fpw=7, fph=3,
     door=(404, 120, 424, 158),
     windows=[(336, 126, 384, 143)])
@@ -338,7 +368,7 @@ add(id="cottage-3", kind="building",
                rect(463, 112, 541, 157)),
     repaint=[wall_repaint(rect(463, 136, 500, 157) | rect(520, 124, 541, 157),
                           donor=(662, 118, 671, 141),
-                          protect=rect(500, 124, 521, 157))],
+                          protect=rect(500, 124, 521, 157), sample=(496, 116, 504, 136))],
     base=158, left=462, fpw=5, fph=3,
     door=(505, 126, 519, 156),
     windows=[(478, 116, 494, 136)])
@@ -348,7 +378,7 @@ add(id="cottage-4", kind="building",
                rect(597, 114, 702, 158)),
     repaint=[wall_repaint(rect(597, 150, 702, 158) | rect(686, 138, 702, 158),
                           donor=(662, 118, 671, 141),
-                          protect=rect(636, 120, 660, 158) | rect(607, 134, 636, 150))],
+                          protect=rect(636, 120, 660, 158) | rect(607, 134, 636, 150), sample=(662, 118, 671, 141))],
     base=159, left=598, fpw=7, fph=3,
     door=(640, 124, 658, 156),
     windows=[(613, 118, 630, 136), (674, 118, 690, 136)])
