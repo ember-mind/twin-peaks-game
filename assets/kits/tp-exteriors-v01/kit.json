@@ -6,20 +6,84 @@
  "groundImage": "ground/ground",
  "objects": "objects.json",
  "backdrop": "objects/backdrop",
- "grades": ["dusk", "day", "night"],
- "schedule": [
-  [0, 300, "night", "night"],
-  [300, 390, "night", "dusk"],
-  [390, 510, "dusk", "day"],
-  [510, 1050, "day", "day"],
-  [1050, 1170, "day", "dusk"],
-  [1170, 1290, "dusk", "night"],
-  [1290, 1440, "night", "night"]
+ "grades": [
+  "dusk",
+  "day",
+  "night"
  ],
- "darkness": { "night": 1, "dusk": 0.45, "day": 0 },
- "light": { "warm": [241, 185, 97], "reflection": 0.35 },
+ "schedule": [
+  [
+   0,
+   300,
+   "night",
+   "night"
+  ],
+  [
+   300,
+   390,
+   "night",
+   "dusk"
+  ],
+  [
+   390,
+   510,
+   "dusk",
+   "day"
+  ],
+  [
+   510,
+   1050,
+   "day",
+   "day"
+  ],
+  [
+   1050,
+   1170,
+   "day",
+   "dusk"
+  ],
+  [
+   1170,
+   1290,
+   "dusk",
+   "night"
+  ],
+  [
+   1290,
+   1440,
+   "night",
+   "night"
+  ]
+ ],
+ "darkness": {
+  "night": 1,
+  "dusk": 0.45,
+  "day": 0
+ },
+ "light": {
+  "warm": [
+   241,
+   185,
+   97
+  ],
+  "reflection": 0.35,
+  "doorway": [
+   "#462828",
+   "#6d4931",
+   "#c08151",
+   "#f1b961",
+   "#583d2d",
+   "#1f1b1a",
+   "#7d553b"
+  ],
+  "windowPane": false
+ },
  "objectMeta": {
-  "double-r": { "alwaysLit": true },
-  "sheriff-station": { "alwaysLit": true }
+  "double-r": {
+   "alwaysLit": true
+  },
+  "sheriff-station": {
+   "alwaysLit": true
+  }
  }
 }

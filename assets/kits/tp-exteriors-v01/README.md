@@ -28,7 +28,7 @@ sh evidence/shoot.sh 8793 <python>              # page captures (serve the workt
 |---|---|
 | `ground/` | `ground.json` + `ground.png` (382 cells). Materials: `asphalt`, `concrete`, `grass` and `forest` (forest is not walkable). All are coursed with L/R edge codes, and no feature crosses a horizontal edge, so any arrangement is seamless. Rules: the kerb is a `fringe` of concrete against asphalt (lip, face and shadow on the road side), plus a grass-lip `fringe` on asphalt and concrete, and grass creeping onto forest. There is no separate kerb material. |
 | `objects/` | Cut from the plates: `double-r` (door, open-door frame, windows), `sheriff-station` (same), `rr-sign`, `planter-l`/`-r`, `bin`, `bench`, `shrub-1..4`, `flagpole`, `wheel-stop`, `stall-line`, `asphalt-patch-1..4`, `light-spill`, `wall-lamp`. Drawn in the concepts' palette and manner: `pine-s/m/m2/l/l2/xl`, `street-lamp`, `fence` + `fence-post`, `bush-1/2`, `road-dash`, `backdrop` (dusk sky and three rows of dark pines). |
-| `kit.json` | Same fields as Living Town's. Both buildings are `alwaysLit`, so their windows light the cast at night. |
+| `kit.json` | Same fields as Living Town's, plus `light.doorway` (the Twin Peaks open-door colours) and `light.windowPane: false`. Both buildings are `alwaysLit`, so their windows light the cast at night. |
 | `maps/main-street.json` | 44x22 tiles: the Double R, a verge with the RR sign and pines, the station with bench, shrubs, flagpole and fence; the sidewalk and kerb, the lots, the road, the far walk, lamps and forest. Places: `double_r` and `sheriff` (the doors) and the spots `bench`, `rr_sign`, `diner_lot`, `station_lot`, `far_walk`, `fence`. `cast` lists who walks where. |
 | `maps/street-cast.js` | The cast's day as a pure function of the minute, built on engine routes. The page and the Node check both use it. |
 | `test/kit-exteriors.html` | Overview and a 256x192 follow camera. Cooper, Truman, Lucy, Andy and Hawk are drawn with `GAME.Sprites.drawChar` from the default cast sheet and relit by `EMBER.WorldView.relight`. Doors open with `EMBER.WorldMap.doorOpen`. Params: `start`, `mode`, `paused`, `debug`, `focus`, `rate`, `ppm`, `capture=<n>` and `door=<place>&dir=in\|out`, which jumps to the next time someone uses that door. |
@@ -44,8 +44,7 @@ Objects that stand against a building (planters, bench, shrubs, flagpole) are al
 
 ## Known gaps
 
-- **Open door.** The open door is lit by the engine's generic doorway (a flat warm panel in Living Town's colours) over one leaf. A Twin Peaks doorway colour would need a kit hook in `ember-worldview.js`.
-- **Windows.** `lit` is kept empty on purpose. The engine's lit-window pane would paint over the concepts' interiors. Window light for relighting comes from `alwaysLit`.
+- **Open door and windows.** Handled by the engine's kit hooks: `light.doorway` lights the open leaf in the kit's own colours, and `light.windowPane: false` keeps the concepts' painted window interiors, glowing only around them.
 - **Drawn objects.** Pines, the street lamp, the fence and the bushes are drawn, not cut, because the concepts crop every pine and show no lamp or fence run. They match the palette and manner but not the exact hand of the concept.
 - **Diner lot.** The diner concept's warm tan sidewalk and slanted stall lines give way to the shared grey walk and straight lines, so the two lots read as one street.
 - **Pixel-level artefacts.** The downscale leaves a few one-pixel artefacts, such as the diner's roof rim at top left and the handles on the diner door.
