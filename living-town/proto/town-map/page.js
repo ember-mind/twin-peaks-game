@@ -23,7 +23,7 @@
     return Promise.all(GRADES.map(function (g) { return loadImage(base + (g === 'dusk' ? '' : '-' + g) + '.png'); }))
       .then(function (ims) { images[key] = { dusk: ims[0], day: ims[1] || ims[0], night: ims[2] || ims[0] }; });
   }
-  function getJSON(u) { return fetch(u).then(function (r) { return r.json(); }); }
+  function getJSON(u) { return fetch(u, { cache: 'no-store' }).then(function (r) { return r.json(); }); }
 
   Promise.all([getJSON(qs.get('map') || 'town.json'), getJSON(KIT + 'objects.json'), getJSON(KIT + 'ground/ground.json')]).then(function (r) {
     map = r[0]; kitObjects = r[1]; groundKit = r[2];
@@ -411,7 +411,7 @@
       if (cap) cap.textContent = f.p.name + (f.q.outdoors ? (f.q.moving ? ' · walking' : ' · outside') : ' · inside');
     }
     var hh = String(Math.floor(state.t / 60) % 24).padStart(2, '0'), mm = String(Math.floor(state.t) % 60).padStart(2, '0');
-    document.getElementById('stats').innerHTML = hh + ':' + mm + ' · walking ' + ents.filter(function (e) { return e.q.moving; }).length +
+    document.getElementById('stats').innerHTML = '<b>' + (qs.get('map') || 'town.json') + '</b> · ' + hh + ':' + mm + ' · walking ' + ents.filter(function (e) { return e.q.moving; }).length +
       ' · walks ' + host.walks + ' · mirror <span class="' + (mismatches ? 'bad' : 'ok') + '">' + (checked - mismatches) + '/' + checked + ' minutes match</span>';
   }
 
