@@ -586,6 +586,22 @@ ground = dict(
     ),
     notes=NOTES,
 )
+# The same transitions, as the rule list the shared engine reads
+# (engine/ember-ground.js). The engine knows rule types, never material names.
+GRASSY = ['grass', 'garden']
+ground['rules'] = [
+    dict(type='fringe', materials=list(HARD_WITH_FRINGE), neighbours=GRASSY, tables=fringe_tables),
+    dict(type='lip', material='embankment_top', above=GRASSY, table=emb_lip),
+    dict(type='shore', material='water', aboveNot=['water'], frames=shore_frames),
+]
+for name, m in ground['materials'].items():
+    if name in ('water', 'embankment_face'):
+        m['walkable'] = False
+    if name == 'grass':
+        m['rare'] = dict(index=2, oneIn=8)     # the flower tiles
+    if m['kind'] == 'water':
+        m['kind'] = 'animated'
+        m['reflects'] = True
 with open(os.path.join(HERE, 'ground.json'), 'w') as f:
     json.dump(ground, f, indent=1)
 

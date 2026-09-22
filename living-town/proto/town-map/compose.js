@@ -65,8 +65,8 @@ map.spots.lawn_w = { tx: 9, ty: 16 };
 // the bridge deck runs down to the right over the water
 map.spots.bridge = { tx: 45, ty: 17 };
 // garden fences along the pavement, with a gate gap in front of every door
-var C = require('./town-core.js');
-var probe = C.build(map, kit), gaps = {};
+var WM = require('../../../engine/ember-worldmap.js');
+var probe = WM.build(map, { objects: kit, tileSet: JSON.parse(fs.readFileSync(__dirname + '/../town-kit/ground/ground.json', 'utf8')) }), gaps = {};
 Object.keys(probe.places).forEach(function (n) {
   var pl = probe.places[n]; if (!pl.indoor) return;
   var gx = Math.round((pl.feet[0] - 16) / 16); gaps[gx] = gaps[gx + 1] = true;

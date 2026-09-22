@@ -1,10 +1,11 @@
 // Node check: the composed map builds, every place reaches every other, and
 // host and mirror agree minute by minute.
-var fs = require('fs'), C = require('./town-core.js');
+var fs = require('fs'), C = require('./town-core.js'), WM = require('../../../engine/ember-worldmap.js');
 var map = JSON.parse(fs.readFileSync(__dirname + '/town.json', 'utf8'));
-var kit = JSON.parse(fs.readFileSync(__dirname + '/../town-kit/objects.json', 'utf8'));
-var w = C.build(map, kit), names = Object.keys(w.places), bad = [];
-names.forEach(function (a) { names.forEach(function (b) { if (a !== b && !C.route(w, a, b)) bad.push(a + '→' + b); }); });
+var kit = { objects: JSON.parse(fs.readFileSync(__dirname + '/../town-kit/objects.json', 'utf8')),
+            tileSet: JSON.parse(fs.readFileSync(__dirname + '/../town-kit/ground/ground.json', 'utf8')) };
+var w = WM.build(map, kit), names = Object.keys(w.places), bad = [];
+names.forEach(function (a) { names.forEach(function (b) { if (a !== b && !WM.route(w, a, b)) bad.push(a + '→' + b); }); });
 console.log('places', names.length, 'unreachable', bad.length ? bad.join(' ') : 'none');
 var fail = bad.length;
 [64, 320].forEach(function (ppm) {
