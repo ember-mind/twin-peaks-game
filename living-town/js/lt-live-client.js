@@ -82,7 +82,9 @@
       live.presence = data.presence;
       live.paused = !!data.paused;
       live.msPerMinute = data.msPerMinute;
+      live.dev = !!data.dev;
       live.status = 'live';
+      devControls(state);
       live.sinceFrame = performance.now();
       LT.Observer.adopt(state, mirror.sim);
       if (live.you && live.you.adopted && mirror.sim.state.characters[live.you.adopted]) {
@@ -108,12 +110,36 @@
     });
     es.addEventListener('you', function (ev) { live.you = JSON.parse(ev.data); paint(state); });
     es.addEventListener('presence', function (ev) { live.presence = JSON.parse(ev.data); paint(state); });
-    es.addEventListener('clock', function (ev) { live.paused = !!JSON.parse(ev.data).paused; paint(state); });
+    es.addEventListener('clock', function (ev) {
+      var c = JSON.parse(ev.data);
+      live.paused = !!c.paused;
+      if (c.msPerMinute) live.msPerMinute = c.msPerMinute;
+      paint(state);
+    });
     es.onerror = function () {
       /* EventSource reconnects by itself and the server greets again with a
        * fresh save, which replaces the mirror. Until then, say so. */
       if (live.status === 'live') { live.status = 'reconnecting'; paint(state); }
     };
+  }
+
+  /* A developer's own town (server started with --dev) can be paced from the
+   * page. The buttons are not built otherwise. */
+  var DEV_SPEEDS = [{ label: 'Pause', speed: 0 }, { label: '1x', speed: 1 }, { label: '6x', speed: 6 }, { label: '60x', speed: 60 }, { label: '600x', speed: 600 }];
+  function devControls(state) {
+    var live = state.live, host = el('lt-live-dev');
+    host.hidden = !live.dev;
+    if (!live.dev || host.children.length) return;
+    DEV_SPEEDS.forEach(function (s) {
+      var b = document.createElement('button');
+      b.className = 'lt-tab'; b.textContent = s.label; b.dataset.speed = s.speed;
+      b.addEventListener('click', function () { post(live.api, '/dev/speed', { speed: s.speed }).then(function () { paint(state); }); });
+      host.appendChild(b);
+    });
+    var step = document.createElement('button');
+    step.className = 'lt-tab'; step.textContent = 'One minute'; step.id = 'lt-live-step';
+    step.addEventListener('click', function () { post(live.api, '/dev/step', {}); });
+    host.appendChild(step);
   }
 
   /* The hand, over the wire. Resolves to what the server said. */
@@ -162,9 +188,15 @@
     else {
       var watching = live.presence ? live.presence.watching : 1;
       var quiet = live.sinceFrame && (performance.now() - live.sinceFrame) > (live.msPerMinute || 10000) * 3;
-      line = (live.paused ? 'Paused by the town' : quiet ? 'Waiting for the town' : 'Live') + ' · ' + watching + ' watching';
+      line = (live.paused ? 'Paused by the town' : quiet ? 'Waiting for the town' : 'Live') + ' · ' + watching + ' watching' +
+        (live.dev ? ' · dev, a minute every ' + (live.paused ? '—' : (Math.round(live.msPerMinute / 100) / 10) + ' s') : '');
     }
     text(status, line);
+    if (live.dev) Array.prototype.forEach.call(el('lt-live-dev').children, function (b) {
+      if (b.dataset.speed === undefined) return;
+      var on = live.paused ? b.dataset.speed === '0' : Math.abs(60000 / Number(b.dataset.speed) - live.msPerMinute) < 1;
+      b.classList.toggle('is-on', on);
+    });
     var youNode = el('lt-live-you');
     if (live.you && live.status === 'live') {
       var who = live.you.adopted && state.sim.state.characters[live.you.adopted];

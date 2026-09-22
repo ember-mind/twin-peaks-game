@@ -23,7 +23,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
 
 (async function () {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lt-live-page-'));
-  const town = Server.createTown({ data: dataDir, speed: 300, seed: 20260922, paused: false });   // a town minute every 200 ms
+  const town = Server.createTown({ data: dataDir, speed: 300, seed: 20260922, paused: false, dev: true });   // a town minute every 200 ms; --dev so the pace buttons can be checked
   const server = Server.createServer(town, {});
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   const base = 'http://127.0.0.1:' + server.address().port;
@@ -95,6 +95,18 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     ok(await js("document.querySelector('[data-actor=resident_b] .lt-followers') !== null"), 'the tab shows a follower');
     ok(/Here: Ada/.test(await txt('lt-live-people')), 'who is here is listed');
     await shot('04-following.png');
+
+    console.log('# --dev: the pace from the page');
+    ok(!(await hidden('#lt-live-dev')) && await js("document.querySelectorAll('#lt-live-dev button').length") === 6, 'with --dev the page shows Pause, 1x, 6x, 60x, 600x and One minute');
+    ok(/dev, a minute every 0\.2 s/.test(await txt('lt-live-status')), 'the bar says the pace: ' + await txt('lt-live-status'));
+    await js("document.querySelector('#lt-live-dev button[data-speed=\"0\"]').click(); true"); await sleep(400);
+    const held = town.sim.absMinute();
+    ok(town.clock.paused && /Paused by the town/.test(await txt('lt-live-status')), 'Pause pauses the server\'s clock');
+    await js("document.getElementById('lt-live-step').click(); true"); await sleep(400);
+    ok(town.sim.absMinute() === held + 1 && await js("LT_OBSERVER.sim.absMinute()") === held + 1, 'One minute moves the town and the page by one');
+    await js("document.querySelector('#lt-live-dev button[data-speed=\"600\"]').click(); true"); await sleep(600);
+    ok(!town.clock.paused && town.clock.msPerMinute === 100 && town.sim.absMinute() > held + 3 && /a minute every 0\.1 s/.test(await txt('lt-live-status')), '600x runs and the bar says so');
+    await js("document.querySelector('#lt-live-dev button[data-speed=\"300\"]') || document.querySelector('#lt-live-dev button[data-speed=\"60\"]').click(); true"); await sleep(200);
 
     console.log('# reload: known by the cookie, back in without a name');
     await page.send('Page.navigate', { url: base + '/living-town/' });

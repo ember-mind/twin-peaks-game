@@ -25,8 +25,10 @@ for from a purse that is per address and refills with presence; following
 someone is public. The town is saved to `--data` every ten town minutes and on
 exit, every frame is logged there, and a server started on that directory
 resumes. With `LT_ADMIN_TOKEN` set, `POST /api/admin/pause|resume|save` with
-the token in `x-lt-admin`. No dependencies. The plan this is the first step
-of: `docs/playable-town-plan.md`.
+the token in `x-lt-admin`. On your own machine, `--dev` puts Pause, 1x…600x
+and One minute on the page (and `POST /api/dev/speed|step`); never start the
+public town with it. No dependencies. The plan this is the first step of:
+`docs/playable-town-plan.md`.
 
 ## The rules it is built on
 

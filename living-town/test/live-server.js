@@ -140,7 +140,10 @@ function sse(base, p, headers) {
   await sleep(600);
   failed = null;
   s.events.filter((e) => e.event === 'frame').forEach((e) => { const r = mirror.apply(e.data); if (!r.ok) failed = failed || r; else if (!r.skipped) applied++; });
-  ok(!failed && Live.fingerprint(mirror.sim) === Live.fingerprint(town.sim) && mirror.attributions[book.json.record.id] === 'Ada',
+  /* The town may have moved a minute since the last frame arrived: the same
+   * minute is compared, and every applied frame already matched its fingerprint. */
+  const sameMinute = (m) => m.sim.absMinute() !== town.sim.absMinute() || Live.fingerprint(m.sim) === Live.fingerprint(town.sim);
+  ok(!failed && sameMinute(mirror) && mirror.attributions[book.json.record.id] === 'Ada',
      'after the book, the bill and ' + applied + ' frames the mirror is the town, and knows who left the book');
 
   console.log('# a late joiner is handed the attributions');
@@ -151,7 +154,7 @@ function sse(base, p, headers) {
   await sleep(400);
   failed = null;
   t2.events.filter((e) => e.event === 'frame').forEach((e) => { const r = mirror2.apply(e.data); if (!r.ok) failed = failed || r; });
-  ok(!failed && Live.fingerprint(mirror2.sim) === Live.fingerprint(town.sim), 'Bo\'s mirror matches too');
+  ok(!failed && mirror2.applied > 0 && sameMinute(mirror2), 'Bo\'s mirror matches too (' + mirror2.applied + ' frames)');
   t2.close();
 
   console.log('# the page, and what is not served');
@@ -177,6 +180,26 @@ function sse(base, p, headers) {
   const resumed = await request(base, 'POST', '/api/admin/resume', {}, { 'x-lt-admin': 'test-admin' });
   await sleep(300);
   ok(resumed.json.paused === false && town.sim.absMinute() > absPaused, 'and moved again after resume');
+
+  console.log('# --dev only: pace and step from outside');
+  const noDev = await request(base, 'POST', '/api/dev/speed', { speed: 60 });
+  ok(noDev.status === 404 && town.status().dev === false, 'without --dev the pace endpoints do not exist');
+  const devTown = Server.createTown({ data: fs.mkdtempSync(path.join(os.tmpdir(), 'lt-dev-')), speed: 1200, seed: 1, paused: true, dev: true });
+  const devServer = Server.createServer(devTown, {});
+  await new Promise((r) => devServer.listen(0, '127.0.0.1', r));
+  const devBase = 'http://127.0.0.1:' + devServer.address().port;
+  devTown.start();
+  const devAbs = devTown.sim.absMinute();
+  const stepped = await request(devBase, 'POST', '/api/dev/step', {});
+  ok(stepped.status === 200 && stepped.json.abs === devAbs + 1 && devTown.clock.paused, 'a step moves one minute and leaves the town paused');
+  const faster = await request(devBase, 'POST', '/api/dev/speed', { speed: 600 });
+  ok(faster.status === 200 && faster.json.msPerMinute === 100 && faster.json.paused === false, 'a speed unpauses and sets the pace');
+  await sleep(450);
+  ok(devTown.sim.absMinute() >= devAbs + 3, 'and the town moves at it');
+  const bad = await request(devBase, 'POST', '/api/dev/speed', { speed: -1 });
+  ok(bad.status === 400, 'a nonsense speed is refused');
+  devTown.stop(); await new Promise((r) => devServer.close(r));
+  fs.rmSync(devTown.dataDir, { recursive: true, force: true });
 
   console.log('# on disk');
   s.close();

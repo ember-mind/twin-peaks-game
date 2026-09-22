@@ -11,7 +11,9 @@
  *
  * Nobody can speed the town up from outside. The only commands from outside
  * are a spectator's hand (paid for from a purse) and, with LT_ADMIN_TOKEN set,
- * pause / resume / restart from the last save.
+ * pause / resume / save. `--dev` is for a developer's own machine: it adds
+ * speed, pause and single-minute step to the page and the API, for anyone
+ * who can reach it. Never start the public town with it.
  *
  * No dependencies: node:http and Server-Sent Events.
  */
@@ -43,7 +45,7 @@ const COOKIE = 'lt';
 /* ---------------- options ---------------- */
 
 function parseArgs(argv) {
-  const o = { port: 8787, data: path.join(LT_DIR, 'data'), speed: 6, seed: null, paused: false, host: '127.0.0.1' };
+  const o = { port: 8787, data: path.join(LT_DIR, 'data'), speed: 6, seed: null, paused: false, host: '127.0.0.1', dev: false };
   argv.forEach((a) => {
     const m = /^--([a-z-]+)(?:=(.*))?$/.exec(a);
     if (!m) return;
@@ -52,6 +54,7 @@ function parseArgs(argv) {
     else if (m[1] === 'speed') o.speed = Number(m[2]);
     else if (m[1] === 'seed') o.seed = Number(m[2]);
     else if (m[1] === 'paused') o.paused = true;
+    else if (m[1] === 'dev') o.dev = true;
     else if (m[1] === 'host') o.host = m[2];
   });
   if (!(o.speed > 0)) throw new Error('--speed must be a positive number of town minutes per real minute');
@@ -82,7 +85,7 @@ function createTown(opts) {
   }
 
   const msPerMinute = 60000 / opts.speed;
-  const clock = { msPerMinute, anchorReal: Date.now(), anchorAbs: sim.absMinute(), paused: !!opts.paused, behind: 0 };
+  const clock = { msPerMinute, anchorReal: Date.now(), anchorAbs: sim.absMinute(), paused: !!opts.paused, behind: 0, dev: !!opts.dev };
   const streams = new Set();   // { res, token }
   const attributions = {};     // intervention id -> spectator name, for those who join later
   let lastHandAbs = -Infinity, busy = false, lastSavedAbs = sim.absMinute(), closed = false;
@@ -161,7 +164,7 @@ function createTown(opts) {
 
   function status() {
     return { day: sim.state.day, minute: sim.state.minute, clock: U.clock(sim.state.minute), abs: sim.absMinute(), paused: clock.paused,
-      msPerMinute: clock.msPerMinute, watching: streams.size, frames: host.frames, savedAt: lastSavedAbs, origin, world: LT.World.fingerprint(), behind: clock.behind };
+      msPerMinute: clock.msPerMinute, dev: clock.dev, watching: streams.size, frames: host.frames, savedAt: lastSavedAbs, origin, world: LT.World.fingerprint(), behind: clock.behind };
   }
 
   const town = {
@@ -170,11 +173,28 @@ function createTown(opts) {
     step: () => host.stepMany(1, onFrame),
     hello(token) {
       const who = spectators.get(token);
-      return { save: host.save(), at: sim.absMinute(), msPerMinute: clock.msPerMinute, now: Date.now(), paused: clock.paused,
+      return { save: host.save(), at: sim.absMinute(), msPerMinute: clock.msPerMinute, now: Date.now(), paused: clock.paused, dev: clock.dev,
         you: who ? spectators.describe(who) : null, costs: spectators.costs, purseMax: spectators.purseMax, attributions, presence: presence() };
     },
-    pause() { if (!clock.paused) { clock.paused = true; broadcast('clock', { paused: true }); } return status(); },
-    resume() { if (clock.paused) { clock.paused = false; anchor(Date.now()); broadcast('clock', { paused: false }); } return status(); },
+    pause() { if (!clock.paused) { clock.paused = true; broadcast('clock', { paused: true, msPerMinute: clock.msPerMinute }); } return status(); },
+    resume() { if (clock.paused) { clock.paused = false; anchor(Date.now()); broadcast('clock', { paused: false, msPerMinute: clock.msPerMinute }); } return status(); },
+    /* Developer's machine only (--dev): the pace, or one minute by hand. */
+    setSpeed(speed) {
+      if (!clock.dev) return { ok: false, error: 'not_dev' };
+      if (!(speed >= 0) || speed > 3600) return { ok: false, error: 'bad_speed' };
+      if (speed === 0) return Object.assign({ ok: true }, town.pause());
+      clock.msPerMinute = 60000 / speed;
+      anchor(Date.now());
+      if (clock.paused) clock.paused = false;
+      broadcast('clock', { paused: false, msPerMinute: clock.msPerMinute });
+      return Object.assign({ ok: true }, status());
+    },
+    stepOnce() {
+      if (!clock.dev) return Promise.resolve({ ok: false, error: 'not_dev' });
+      if (busy) return Promise.resolve({ ok: false, error: 'busy' });
+      busy = true;
+      return host.stepMany(1, onFrame).then(() => { busy = false; anchor(Date.now()); return Object.assign({ ok: true }, status()); }, (e) => { busy = false; throw e; });
+    },
     start() { anchor(Date.now()); town.timer = setInterval(turn, 100); town.beat = setInterval(() => { streams.forEach((s) => { try { s.res.write(': beat\n\n'); } catch (e) { streams.delete(s); } }); }, 15000); },
     stop() { closed = true; clearInterval(town.timer); clearInterval(town.beat); const r = save('stop'); streams.forEach((s) => { try { s.res.end(); } catch (e) { /* gone */ } }); streams.clear(); return r; }
   };
@@ -277,6 +297,13 @@ function createServer(town, opts) {
       if (r.ok) { const here = town.presence(); town.streams.forEach((s) => { try { s.res.write('event: presence\ndata: ' + JSON.stringify(here) + '\n\n'); } catch (e) { town.streams.delete(s); } }); }
       return json(res, r.ok ? 200 : 401, r);
     }
+    if (req.method === 'POST' && p.startsWith('/api/dev/')) {
+      if (!town.clock.dev) return json(res, 404, { ok: false, error: 'not_dev' });
+      const cmd = p.slice('/api/dev/'.length);
+      if (cmd === 'speed') { const body = await readJSON(req); const r = town.setSpeed(Number(body && body.speed)); return json(res, r.ok ? 200 : 400, r); }
+      if (cmd === 'step') { const r = await town.stepOnce(); return json(res, r.ok ? 200 : 409, r); }
+      return json(res, 404, { ok: false, error: 'unknown_command' });
+    }
     if (req.method === 'POST' && p.startsWith('/api/admin/')) {
       if (!adminToken || req.headers['x-lt-admin'] !== adminToken) return json(res, 403, { ok: false, error: 'not_admin' });
       const cmd = p.slice('/api/admin/'.length);
@@ -296,7 +323,7 @@ function main() {
   server.listen(opts.port, opts.host, () => {
     console.log('Living Town: ' + town.origin);
     console.log('  http://' + opts.host + ':' + server.address().port + '/living-town/  (' + opts.speed + 'x: a town minute every ' + Math.round(town.clock.msPerMinute / 100) / 10 + ' s' + (opts.paused ? ', paused' : '') + ')');
-    console.log('  data in ' + town.dataDir + (process.env.LT_ADMIN_TOKEN ? '; admin enabled' : '; no LT_ADMIN_TOKEN, admin off'));
+    console.log('  data in ' + town.dataDir + (process.env.LT_ADMIN_TOKEN ? '; admin enabled' : '; no LT_ADMIN_TOKEN, admin off') + (opts.dev ? '; --dev: speed controls on the page, do not expose this' : ''));
     town.start();
   });
   function leave(signal) {
