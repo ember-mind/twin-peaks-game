@@ -159,31 +159,31 @@
    "kit": "bush-park-2",
    "id": "bush-park-2",
    "tx": 7,
-   "ty": 18
+   "ty": 17
   },
   {
    "kit": "bush-park-3",
    "id": "bush-park-3",
    "tx": 9,
-   "ty": 18
+   "ty": 17
   },
   {
    "kit": "bush-park-4",
    "id": "bush-park-4",
    "tx": 18,
-   "ty": 18
+   "ty": 17
   },
   {
    "kit": "bush-park-5",
    "id": "bush-park-5",
    "tx": 25,
-   "ty": 18
+   "ty": 17
   },
   {
    "kit": "bush-park-6",
    "id": "bush-park-6",
    "tx": 34,
-   "ty": 18
+   "ty": 17
   },
   {
    "kit": "bush-park-7",
@@ -282,111 +282,9 @@
    "ty": 15
   },
   {
-   "kit": "fence-iron-1",
-   "id": "fence-iron-1",
-   "tx": 3,
-   "ty": 10
-  },
-  {
-   "kit": "fence-iron-2",
-   "id": "fence-iron-2",
-   "tx": 8,
-   "ty": 10
-  },
-  {
-   "kit": "fence-iron-3",
-   "id": "fence-iron-3",
-   "tx": 11,
-   "ty": 10
-  },
-  {
-   "kit": "fence-iron-4",
-   "id": "fence-iron-4",
-   "tx": 28,
-   "ty": 10
-  },
-  {
-   "kit": "fence-iron-5",
-   "id": "fence-iron-5",
-   "tx": 33,
-   "ty": 10
-  },
-  {
-   "kit": "fence-iron-6",
-   "id": "fence-iron-6",
-   "tx": 38,
-   "ty": 10
-  },
-  {
-   "kit": "fence-wood-1",
-   "id": "fence-wood-1",
-   "tx": 44,
-   "ty": 10
-  },
-  {
-   "kit": "gate-post-1",
-   "id": "gate-post-1",
-   "tx": 5,
-   "ty": 10
-  },
-  {
-   "kit": "gate-post-2",
-   "id": "gate-post-2",
-   "tx": 7,
-   "ty": 10
-  },
-  {
-   "kit": "gate-post-3",
-   "id": "gate-post-3",
-   "tx": 13,
-   "ty": 10
-  },
-  {
-   "kit": "gate-post-4",
-   "id": "gate-post-4",
-   "tx": 30,
-   "ty": 10
-  },
-  {
-   "kit": "gate-post-5",
-   "id": "gate-post-5",
-   "tx": 32,
-   "ty": 10
-  },
-  {
-   "kit": "gate-post-6",
-   "id": "gate-post-6",
-   "tx": 37,
-   "ty": 10
-  },
-  {
-   "kit": "gate-post-7",
-   "id": "gate-post-7",
-   "tx": 39,
-   "ty": 10
-  },
-  {
-   "kit": "gate-post-8",
-   "id": "gate-post-8",
-   "tx": 41,
-   "ty": 10
-  },
-  {
    "kit": "gate-wood-1",
    "id": "gate-wood-1",
    "tx": 15,
-   "ty": 10
-  },
-  {
-   "kit": "wall-garden-low-1",
-   "id": "wall-garden-low-1",
-   "tx": 1,
-   "ty": 10
-  },
-  {
-   "kit": "wall-garden-low-2",
-   "id": "wall-garden-low-2",
-   "tx": 9,
    "ty": 10
   },
   {
@@ -448,30 +346,6 @@
    "id": "garden-foliage-4",
    "tx": 35,
    "ty": 8
-  },
-  {
-   "kit": "balustrade-run-1",
-   "id": "balustrade-run-1",
-   "tx": 3,
-   "ty": 15
-  },
-  {
-   "kit": "balustrade-run-2",
-   "id": "balustrade-run-2",
-   "tx": 14,
-   "ty": 15
-  },
-  {
-   "kit": "balustrade-run-3",
-   "id": "balustrade-run-3",
-   "tx": 26,
-   "ty": 15
-  },
-  {
-   "kit": "balustrade-run-4",
-   "id": "balustrade-run-4",
-   "tx": 36,
-   "ty": 15
   },
   {
    "kit": "balustrade-post-1",
@@ -628,6 +502,234 @@
    "id": "lilypads-8",
    "tx": 28,
    "ty": 20
+  },
+  {
+   "kit": "balustrade",
+   "id": "rail-w-2",
+   "tx": 2,
+   "ty": 15
+  },
+  {
+   "kit": "balustrade",
+   "id": "rail-w-4",
+   "tx": 4,
+   "ty": 15
+  },
+  {
+   "kit": "balustrade",
+   "id": "rail-w-6",
+   "tx": 6,
+   "ty": 15
+  },
+  {
+   "kit": "balustrade",
+   "id": "rail-w-8",
+   "tx": 8,
+   "ty": 15
+  },
+  {
+   "kit": "balustrade",
+   "id": "rail-w-10",
+   "tx": 10,
+   "ty": 15
+  },
+  {
+   "kit": "balustrade",
+   "id": "rail-w-12",
+   "tx": 12,
+   "ty": 15
+  },
+  {
+   "kit": "balustrade",
+   "id": "rail-w-14",
+   "tx": 14,
+   "ty": 15
+  },
+  {
+   "kit": "balustrade",
+   "id": "rail-w-16",
+   "tx": 16,
+   "ty": 15
+  },
+  {
+   "kit": "balustrade",
+   "id": "rail-w-18",
+   "tx": 18,
+   "ty": 15
+  },
+  {
+   "kit": "balustrade",
+   "id": "rail-e-26",
+   "tx": 26,
+   "ty": 15
+  },
+  {
+   "kit": "balustrade",
+   "id": "rail-e-28",
+   "tx": 28,
+   "ty": 15
+  },
+  {
+   "kit": "balustrade",
+   "id": "rail-e-30",
+   "tx": 30,
+   "ty": 15
+  },
+  {
+   "kit": "balustrade",
+   "id": "rail-e-32",
+   "tx": 32,
+   "ty": 15
+  },
+  {
+   "kit": "balustrade",
+   "id": "rail-e-34",
+   "tx": 34,
+   "ty": 15
+  },
+  {
+   "kit": "balustrade",
+   "id": "rail-e-36",
+   "tx": 36,
+   "ty": 15
+  },
+  {
+   "kit": "balustrade",
+   "id": "rail-e-38",
+   "tx": 38,
+   "ty": 15
+  },
+  {
+   "kit": "fence-iron",
+   "id": "fence-0",
+   "tx": 0,
+   "ty": 10
+  },
+  {
+   "kit": "fence-iron",
+   "id": "fence-2",
+   "tx": 2,
+   "ty": 10
+  },
+  {
+   "kit": "fence-iron",
+   "id": "fence-4",
+   "tx": 4,
+   "ty": 10
+  },
+  {
+   "kit": "fence-iron",
+   "id": "fence-8",
+   "tx": 8,
+   "ty": 10
+  },
+  {
+   "kit": "fence-iron",
+   "id": "fence-10",
+   "tx": 10,
+   "ty": 10
+  },
+  {
+   "kit": "fence-iron",
+   "id": "fence-12",
+   "tx": 12,
+   "ty": 10
+  },
+  {
+   "kit": "fence-iron",
+   "id": "fence-16",
+   "tx": 16,
+   "ty": 10
+  },
+  {
+   "kit": "gate-post-1",
+   "id": "post-6a",
+   "tx": 5,
+   "ty": 10
+  },
+  {
+   "kit": "gate-post-1",
+   "id": "post-6b",
+   "tx": 8,
+   "ty": 10
+  },
+  {
+   "kit": "gate-post-1",
+   "id": "post-14a",
+   "tx": 13,
+   "ty": 10
+  },
+  {
+   "kit": "gate-post-1",
+   "id": "post-14b",
+   "tx": 16,
+   "ty": 10
+  },
+  {
+   "kit": "fence-iron",
+   "id": "fence-28",
+   "tx": 28,
+   "ty": 10
+  },
+  {
+   "kit": "fence-iron",
+   "id": "fence-33",
+   "tx": 33,
+   "ty": 10
+  },
+  {
+   "kit": "fence-iron",
+   "id": "fence-35",
+   "tx": 35,
+   "ty": 10
+  },
+  {
+   "kit": "fence-iron",
+   "id": "fence-37",
+   "tx": 37,
+   "ty": 10
+  },
+  {
+   "kit": "gate-post-1",
+   "id": "post-31a",
+   "tx": 30,
+   "ty": 10
+  },
+  {
+   "kit": "gate-post-1",
+   "id": "post-31b",
+   "tx": 33,
+   "ty": 10
+  },
+  {
+   "kit": "gate-post-1",
+   "id": "post-39a",
+   "tx": 38,
+   "ty": 10
+  },
+  {
+   "kit": "gate-post-1",
+   "id": "post-39b",
+   "tx": 41,
+   "ty": 10
+  },
+  {
+   "kit": "fence-wood",
+   "id": "fence-42",
+   "tx": 42,
+   "ty": 10
+  },
+  {
+   "kit": "fence-wood",
+   "id": "fence-44",
+   "tx": 44,
+   "ty": 10
+  },
+  {
+   "kit": "fence-wood",
+   "id": "fence-46",
+   "tx": 46,
+   "ty": 10
   }
  ],
  "places": {
@@ -645,11 +747,11 @@
    "seats": [
     [
      -8,
-     -9
+     -23
     ],
     [
      9,
-     -9
+     -23
     ]
    ]
   },
@@ -659,11 +761,11 @@
    "seats": [
     [
      -8,
-     -9
+     -23
     ],
     [
      9,
-     -9
+     -23
     ]
    ]
   },
@@ -743,6 +845,46 @@
   [
    23,
    20
+  ],
+  [
+   6,
+   10
+  ],
+  [
+   7,
+   10
+  ],
+  [
+   14,
+   10
+  ],
+  [
+   15,
+   10
+  ],
+  [
+   25,
+   10
+  ],
+  [
+   26,
+   10
+  ],
+  [
+   31,
+   10
+  ],
+  [
+   32,
+   10
+  ],
+  [
+   39,
+   10
+  ],
+  [
+   40,
+   10
   ]
  ],
  "blocked": []

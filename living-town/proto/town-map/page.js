@@ -222,7 +222,9 @@
         else { var ring = [[0, 0], [-14, 3], [14, 3], [-7, 12], [7, 12]][(n - 1) % 5]; ox = ring[0]; oy = ring[1]; }
       }
       var fx = Math.round(q.x + ox), fy = Math.round(q.y + oy);
-      return { i: i, p: p, q: q, fx: fx, fy: fy, seated: seated };
+      /* someone on a bench is drawn at the seat but sorted where they sit
+       * from: in front of the bench, not behind its backrest */
+      return { i: i, p: p, q: q, fx: fx, fy: fy, seated: seated, sortY: seated ? Math.round(q.y) : fy };
     });
   }
 
@@ -270,7 +272,7 @@
     var lit = litPlaces(ents);
     var order = [];
     world.objects.forEach(function (o) { if (o.kit.kind !== 'backdrop') order.push({ y: o.depth, o: o }); });
-    ents.forEach(function (e) { if (e.q.outdoors) order.push({ y: e.fy, e: e }); });
+    ents.forEach(function (e) { if (e.q.outdoors) order.push({ y: e.sortY, e: e }); });
     order.sort(function (A, B) { return A.y - B.y || (A.o ? -1 : 1); });
     var how = LT.ProductionHost.ready ? 'atlas' : 'placeholder';
     order.forEach(function (it) {
