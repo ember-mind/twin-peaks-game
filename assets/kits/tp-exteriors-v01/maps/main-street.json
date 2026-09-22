@@ -1,0 +1,701 @@
+{
+ "w": 44,
+ "h": 22,
+ "tile": 16,
+ "seed": 23,
+ "legend": {
+  "a": "asphalt",
+  "c": "concrete",
+  "g": "grass",
+  "f": "forest"
+ },
+ "ground": [
+  "fffffffffffffffggggggfffffffffffffffffffffff",
+  "fffffffffffffffggggggfffffffffffffffffffffff",
+  "fffffffffffffffggggggfffffffffffffffffffffff",
+  "fffffffffffffffggggggffffffffffffffggggggggg",
+  "fffffffffffffffggggggffffffffffffffggggggggg",
+  "ffcccccccccccccggggggcccccccccccccgggggggggg",
+  "ggcccccccccccccggggggccccccccccccccggggggggg",
+  "cccccccccccccccccccccccccccccccccccccccccccc",
+  "cccccccccccccccccccccccccccccccccccccccccccc",
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "cccccccccccccccccccccccccccccccccccccccccccc",
+  "gggggggggggggggggggggggggggggggggggggggggggg",
+  "ffffffggggggffffffffffffffgggggggfffffffffff",
+  "ffffffffffffffffffffffffffffffffffffffffffff",
+  "ffffffffffffffffffffffffffffffffffffffffffff"
+ ],
+ "backdrop": {
+  "x": 0,
+  "y": 0
+ },
+ "objects": [
+  {
+   "kit": "double-r",
+   "id": "double-r",
+   "tx": 2,
+   "ty": 5
+  },
+  {
+   "kit": "planter-l",
+   "id": "planter-l@3,7",
+   "tx": 3,
+   "ty": 7
+  },
+  {
+   "kit": "planter-r",
+   "id": "planter-r@12,7",
+   "tx": 12,
+   "ty": 7
+  },
+  {
+   "kit": "light-spill",
+   "id": "diner-light",
+   "tx": 7,
+   "ty": 7
+  },
+  {
+   "kit": "bin",
+   "id": "bin",
+   "tx": 1,
+   "ty": 6
+  },
+  {
+   "kit": "rr-sign",
+   "id": "rr-sign",
+   "tx": 16,
+   "ty": 6
+  },
+  {
+   "kit": "bush-2",
+   "id": "bush-2@16,7",
+   "tx": 16,
+   "ty": 7
+  },
+  {
+   "kit": "bush-1",
+   "id": "bush-1@15,5",
+   "tx": 15,
+   "ty": 5
+  },
+  {
+   "kit": "pine-xl",
+   "id": "pine-xl@17,5",
+   "tx": 17,
+   "ty": 5
+  },
+  {
+   "kit": "pine-l",
+   "id": "pine-l@19,4",
+   "tx": 19,
+   "ty": 4
+  },
+  {
+   "kit": "pine-m",
+   "id": "pine-m@16,3",
+   "tx": 16,
+   "ty": 3
+  },
+  {
+   "kit": "pine-l2",
+   "id": "pine-l2@20,2",
+   "tx": 20,
+   "ty": 2
+  },
+  {
+   "kit": "street-lamp",
+   "id": "lamp-verge",
+   "tx": 18,
+   "ty": 8
+  },
+  {
+   "kit": "sheriff-station",
+   "id": "sheriff-station",
+   "tx": 21,
+   "ty": 5
+  },
+  {
+   "kit": "bench",
+   "id": "bench",
+   "tx": 23,
+   "ty": 7
+  },
+  {
+   "kit": "shrub-1",
+   "id": "shrub-1@21,7",
+   "tx": 21,
+   "ty": 7
+  },
+  {
+   "kit": "shrub-2",
+   "id": "shrub-2@31,7",
+   "tx": 31,
+   "ty": 7
+  },
+  {
+   "kit": "shrub-3",
+   "id": "shrub-3@32,7",
+   "tx": 32,
+   "ty": 7
+  },
+  {
+   "kit": "shrub-4",
+   "id": "shrub-4@33,7",
+   "tx": 33,
+   "ty": 7
+  },
+  {
+   "kit": "flagpole",
+   "id": "flagpole",
+   "tx": 34,
+   "ty": 7
+  },
+  {
+   "kit": "fence",
+   "id": "fence@35,6",
+   "tx": 35,
+   "ty": 6
+  },
+  {
+   "kit": "fence",
+   "id": "fence@37,6",
+   "tx": 37,
+   "ty": 6
+  },
+  {
+   "kit": "fence",
+   "id": "fence@39,6",
+   "tx": 39,
+   "ty": 6
+  },
+  {
+   "kit": "fence",
+   "id": "fence@41,6",
+   "tx": 41,
+   "ty": 6
+  },
+  {
+   "kit": "fence-post",
+   "id": "fence-post@43,6",
+   "tx": 43,
+   "ty": 6
+  },
+  {
+   "kit": "pine-xl",
+   "id": "pine-xl@36,4",
+   "tx": 36,
+   "ty": 4
+  },
+  {
+   "kit": "pine-l2",
+   "id": "pine-l2@39,3",
+   "tx": 39,
+   "ty": 3
+  },
+  {
+   "kit": "pine-l",
+   "id": "pine-l@42,5",
+   "tx": 42,
+   "ty": 5
+  },
+  {
+   "kit": "pine-m2",
+   "id": "pine-m2@38,2",
+   "tx": 38,
+   "ty": 2
+  },
+  {
+   "kit": "pine-l",
+   "id": "pine-l@0,5",
+   "tx": 0,
+   "ty": 5
+  },
+  {
+   "kit": "pine-m2",
+   "id": "pine-m2@1,3",
+   "tx": 1,
+   "ty": 3
+  },
+  {
+   "kit": "pine-xl",
+   "id": "pine-xl@0,2",
+   "tx": 0,
+   "ty": 2
+  },
+  {
+   "kit": "stall-line",
+   "id": "stall-line@3,11",
+   "tx": 3,
+   "ty": 11
+  },
+  {
+   "kit": "stall-line",
+   "id": "stall-line@6,11",
+   "tx": 6,
+   "ty": 11
+  },
+  {
+   "kit": "stall-line",
+   "id": "stall-line@12,11",
+   "tx": 12,
+   "ty": 11
+  },
+  {
+   "kit": "stall-line",
+   "id": "stall-line@15,11",
+   "tx": 15,
+   "ty": 11
+  },
+  {
+   "kit": "wheel-stop",
+   "id": "wheel-stop@4,9",
+   "tx": 4,
+   "ty": 9
+  },
+  {
+   "kit": "wheel-stop",
+   "id": "wheel-stop@13,9",
+   "tx": 13,
+   "ty": 9
+  },
+  {
+   "kit": "stall-line",
+   "id": "stall-line@22,11",
+   "tx": 22,
+   "ty": 11
+  },
+  {
+   "kit": "stall-line",
+   "id": "stall-line@25,11",
+   "tx": 25,
+   "ty": 11
+  },
+  {
+   "kit": "stall-line",
+   "id": "stall-line@31,11",
+   "tx": 31,
+   "ty": 11
+  },
+  {
+   "kit": "stall-line",
+   "id": "stall-line@34,11",
+   "tx": 34,
+   "ty": 11
+  },
+  {
+   "kit": "wheel-stop",
+   "id": "wheel-stop@23,9",
+   "tx": 23,
+   "ty": 9
+  },
+  {
+   "kit": "wheel-stop",
+   "id": "wheel-stop@32,9",
+   "tx": 32,
+   "ty": 9
+  },
+  {
+   "kit": "asphalt-patch-1",
+   "id": "asphalt-patch-1@8,13",
+   "tx": 8,
+   "ty": 13
+  },
+  {
+   "kit": "asphalt-patch-2",
+   "id": "asphalt-patch-2@29,12",
+   "tx": 29,
+   "ty": 12
+  },
+  {
+   "kit": "asphalt-patch-3",
+   "id": "asphalt-patch-3@18,14",
+   "tx": 18,
+   "ty": 14
+  },
+  {
+   "kit": "asphalt-patch-4",
+   "id": "asphalt-patch-4@38,15",
+   "tx": 38,
+   "ty": 15
+  },
+  {
+   "kit": "asphalt-patch-1",
+   "id": "asphalt-patch-1@33,15",
+   "tx": 33,
+   "ty": 15
+  },
+  {
+   "kit": "asphalt-patch-2",
+   "id": "asphalt-patch-2@2,15",
+   "tx": 2,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@0,15",
+   "tx": 0,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@2,15",
+   "tx": 2,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@4,15",
+   "tx": 4,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@6,15",
+   "tx": 6,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@8,15",
+   "tx": 8,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@10,15",
+   "tx": 10,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@12,15",
+   "tx": 12,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@14,15",
+   "tx": 14,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@16,15",
+   "tx": 16,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@18,15",
+   "tx": 18,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@20,15",
+   "tx": 20,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@22,15",
+   "tx": 22,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@24,15",
+   "tx": 24,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@26,15",
+   "tx": 26,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@28,15",
+   "tx": 28,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@30,15",
+   "tx": 30,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@32,15",
+   "tx": 32,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@34,15",
+   "tx": 34,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@36,15",
+   "tx": 36,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@38,15",
+   "tx": 38,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@40,15",
+   "tx": 40,
+   "ty": 15
+  },
+  {
+   "kit": "road-dash",
+   "id": "road-dash@42,15",
+   "tx": 42,
+   "ty": 15
+  },
+  {
+   "kit": "street-lamp",
+   "id": "lamp-far-0",
+   "tx": 5,
+   "ty": 18
+  },
+  {
+   "kit": "street-lamp",
+   "id": "lamp-far-1",
+   "tx": 19,
+   "ty": 18
+  },
+  {
+   "kit": "street-lamp",
+   "id": "lamp-far-2",
+   "tx": 33,
+   "ty": 18
+  },
+  {
+   "kit": "pine-l",
+   "id": "pine-l@2,20",
+   "tx": 2,
+   "ty": 20
+  },
+  {
+   "kit": "pine-m",
+   "id": "pine-m@8,21",
+   "tx": 8,
+   "ty": 21
+  },
+  {
+   "kit": "pine-xl",
+   "id": "pine-xl@14,21",
+   "tx": 14,
+   "ty": 21
+  },
+  {
+   "kit": "pine-l2",
+   "id": "pine-l2@21,20",
+   "tx": 21,
+   "ty": 20
+  },
+  {
+   "kit": "pine-m2",
+   "id": "pine-m2@25,21",
+   "tx": 25,
+   "ty": 21
+  },
+  {
+   "kit": "pine-l",
+   "id": "pine-l@29,20",
+   "tx": 29,
+   "ty": 20
+  },
+  {
+   "kit": "pine-xl",
+   "id": "pine-xl@37,21",
+   "tx": 37,
+   "ty": 21
+  },
+  {
+   "kit": "pine-m",
+   "id": "pine-m@41,20",
+   "tx": 41,
+   "ty": 20
+  },
+  {
+   "kit": "pine-s",
+   "id": "pine-s@11,19",
+   "tx": 11,
+   "ty": 19
+  },
+  {
+   "kit": "pine-s",
+   "id": "pine-s@31,19",
+   "tx": 31,
+   "ty": 19
+  },
+  {
+   "kit": "bush-2",
+   "id": "bush-2@0,19",
+   "tx": 0,
+   "ty": 19
+  },
+  {
+   "kit": "bush-2",
+   "id": "bush-2@9,19",
+   "tx": 9,
+   "ty": 19
+  },
+  {
+   "kit": "bush-1",
+   "id": "bush-1@17,19",
+   "tx": 17,
+   "ty": 19
+  },
+  {
+   "kit": "bush-1",
+   "id": "bush-1@23,19",
+   "tx": 23,
+   "ty": 19
+  },
+  {
+   "kit": "bush-2",
+   "id": "bush-2@39,19",
+   "tx": 39,
+   "ty": 19
+  },
+  {
+   "kit": "bush-1",
+   "id": "bush-1@27,19",
+   "tx": 27,
+   "ty": 19
+  },
+  {
+   "kit": "bush-1",
+   "id": "bush-1@6,20",
+   "tx": 6,
+   "ty": 20
+  },
+  {
+   "kit": "bush-2",
+   "id": "bush-2@33,20",
+   "tx": 33,
+   "ty": 20
+  }
+ ],
+ "places": {
+  "double_r": "double-r",
+  "sheriff": "sheriff-station"
+ },
+ "spots": {
+  "bench": {
+   "tx": 23,
+   "ty": 8,
+   "face": "up"
+  },
+  "rr_sign": {
+   "tx": 16,
+   "ty": 8,
+   "face": "up"
+  },
+  "diner_lot": {
+   "tx": 9,
+   "ty": 11,
+   "face": "up"
+  },
+  "station_lot": {
+   "tx": 27,
+   "ty": 12,
+   "face": "up"
+  },
+  "far_walk": {
+   "tx": 18,
+   "ty": 17,
+   "face": "up"
+  },
+  "fence": {
+   "tx": 38,
+   "ty": 8,
+   "face": "up"
+  }
+ },
+ "cast": [
+  {
+   "id": "cooper",
+   "name": "Cooper",
+   "home": "double_r",
+   "loop": [
+    "double_r",
+    "sheriff",
+    "rr_sign",
+    "double_r",
+    "far_walk",
+    "sheriff"
+   ]
+  },
+  {
+   "id": "truman",
+   "name": "Truman",
+   "home": "sheriff",
+   "loop": [
+    "sheriff",
+    "station_lot",
+    "double_r",
+    "sheriff",
+    "fence"
+   ]
+  },
+  {
+   "id": "lucy",
+   "name": "Lucy",
+   "home": "sheriff",
+   "loop": [
+    "sheriff",
+    "bench",
+    "sheriff",
+    "double_r"
+   ]
+  },
+  {
+   "id": "andy",
+   "name": "Andy",
+   "home": "sheriff",
+   "loop": [
+    "sheriff",
+    "diner_lot",
+    "double_r",
+    "bench",
+    "sheriff",
+    "far_walk"
+   ]
+  },
+  {
+   "id": "hawk",
+   "name": "Hawk",
+   "home": "far_walk",
+   "loop": [
+    "far_walk",
+    "fence",
+    "sheriff",
+    "double_r",
+    "rr_sign"
+   ]
+  }
+ ],
+ "walkable": [],
+ "blocked": []
+}

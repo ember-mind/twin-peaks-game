@@ -74,6 +74,11 @@
     var grades = kit.grades, schedule = m.schedule || [[0, 1440, grades[0], grades[0]]];
     var darkness = m.darkness || {}, warm = (m.light && m.light.warm) || [255, 170, 80];
     var reflectAlpha = (m.light && m.light.reflection) || 0.35;
+    /* a kit may bring its own open-door colours (wall, lit wall, bright,
+     * floor, leaf edge) and keep its painted window interiors, glowing
+     * around them instead of repainting the pane */
+    var hall = (m.light && m.light.doorway) || ['#6b4128', '#9a6236', '#c98a45', '#e8b664', '#7a5134', '#3e2a1c', '#d9a35a'];
+    var paintPane = !(m.light && m.light.windowPane === false);
     function rgba(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a.toFixed(3) + ')'; }
     var pick = EMBER.Ground.picker(kit.tileSet);
     var reflects = {}; Object.keys(kit.tileSet.materials).forEach(function (k) { if (kit.tileSet.materials[k].reflects) reflects[k] = true; });
@@ -156,6 +161,7 @@
       [[8, 6, 0.035], [5, 4, 0.05], [2, 2, 0.07]].forEach(function (r) { g.fillStyle = rgba(warm, r[2] * glow); g.fillRect(x - r[0], y - r[1], ww + r[0] * 2, hh + r[1] * 3); });
       g.fillStyle = rgba(warm, 0.05 * glow); g.fillRect(x - 2, y + hh + 2, ww + 4, 14);
       g.globalCompositeOperation = 'source-over';
+      if (!paintPane) return;
       g.fillStyle = '#b8742f'; g.fillRect(x + 1, y + 1, ww - 2, hh - 2);
       g.fillStyle = '#e2a24a'; g.fillRect(x + 1, y + 3, ww - 2, hh - 4);
       g.fillStyle = '#f4c870'; g.fillRect(x + 2, y + Math.floor(hh / 2) + 1, ww - 4, Math.ceil(hh / 2) - 3);
@@ -164,14 +170,14 @@
     }
     function drawDoorway(g, x, y, r, dark) {
       var dx = x + r[0] + 1, dy = y + r[1] + 1, w = r[2] - 2, h = r[3] - 2, glow = 0.55 + 0.45 * dark;
-      g.fillStyle = '#6b4128'; g.fillRect(dx, dy, w, h);
-      g.fillStyle = '#9a6236'; g.fillRect(dx + 1, dy + 2, w - 3, h - 8);
-      g.fillStyle = '#c98a45'; g.fillRect(dx + 2, dy + 4, w - 6, h - 12);
-      g.fillStyle = '#e8b664'; g.fillRect(dx + 3, dy + 6, Math.max(2, w - 9), 4);
-      g.fillStyle = '#7a5134'; g.fillRect(dx + 1, dy + h - 7, w - 2, 6);
-      g.fillStyle = '#a57044'; g.fillRect(dx + 2, dy + h - 7, w - 4, 1);
-      g.fillStyle = '#3e2a1c'; g.fillRect(dx + w - 3, dy, 3, h);
-      g.fillStyle = '#d9a35a'; g.fillRect(dx + w - 3, dy + 1, 1, h - 2);
+      g.fillStyle = hall[0]; g.fillRect(dx, dy, w, h);
+      g.fillStyle = hall[1]; g.fillRect(dx + 1, dy + 2, w - 3, h - 8);
+      g.fillStyle = hall[2]; g.fillRect(dx + 2, dy + 4, w - 6, h - 12);
+      g.fillStyle = hall[3]; g.fillRect(dx + 3, dy + 6, Math.max(2, w - 9), 4);
+      g.fillStyle = hall[4]; g.fillRect(dx + 1, dy + h - 7, w - 2, 6);
+      g.fillStyle = hall[1]; g.fillRect(dx + 2, dy + h - 7, w - 4, 1);
+      g.fillStyle = hall[5]; g.fillRect(dx + w - 3, dy, 3, h);
+      g.fillStyle = hall[6]; g.fillRect(dx + w - 3, dy + 1, 1, h - 2);
       g.globalCompositeOperation = 'lighter';
       [[0, 0.10], [3, 0.07], [6, 0.05]].forEach(function (s) { g.fillStyle = rgba(warm, s[1] * glow); g.fillRect(dx - s[0], dy + h, w + s[0] * 2, 5 + s[0] * 2); });
       g.globalCompositeOperation = 'source-over';

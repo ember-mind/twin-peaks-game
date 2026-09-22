@@ -1,0 +1,25 @@
+{
+ "name": "tp-exteriors-v01",
+ "about": "Twin Peaks exteriors: the Double R lot and the sheriff's station at dusk, brought to native pixels from the two approved concepts (source/build-plates.py). Ground tiles by ground/build-ground.py, objects by build-objects.py, day and night grades by engine/tools/grade-kit.py.",
+ "tile": 16,
+ "tileSet": "ground/ground.json",
+ "groundImage": "ground/ground",
+ "objects": "objects.json",
+ "backdrop": "objects/backdrop",
+ "grades": ["dusk", "day", "night"],
+ "schedule": [
+  [0, 300, "night", "night"],
+  [300, 390, "night", "dusk"],
+  [390, 510, "dusk", "day"],
+  [510, 1050, "day", "day"],
+  [1050, 1170, "day", "dusk"],
+  [1170, 1290, "dusk", "night"],
+  [1290, 1440, "night", "night"]
+ ],
+ "darkness": { "night": 1, "dusk": 0.45, "day": 0 },
+ "light": { "warm": [241, 185, 97], "reflection": 0.35 },
+ "objectMeta": {
+  "double-r": { "alwaysLit": true },
+  "sheriff-station": { "alwaysLit": true }
+ }
+}

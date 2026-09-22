@@ -15,7 +15,7 @@ a kit, drawing). Tools: `tools/kit-editor.html` (map editor for any kit),
 `tools/grade-kit.py` (day/night grades). Test: `test/worldmap.js`.
 
 Kits today: `living-town/proto/town-kit/` (riverside village),
-`assets/kits/tp-exteriors-v01/` (Twin Peaks exteriors, in progress).
+`assets/kits/tp-exteriors-v01/` (Twin Peaks exteriors: Double R and sheriff, page `test/kit-exteriors.html`).
 
 ## kit.json
 
@@ -37,6 +37,10 @@ Kits today: `living-town/proto/town-kit/` (riverside village),
   span gradeA fades into gradeB. `darkness` per grade drives lamps, window
   glow and actor relighting.
 - `objectMeta` overrides object fields the art build does not know.
+- `light.doorway` (optional): seven colours for an open door's lit hall
+  (wall, lit wall, bright, highlight, floor, leaf shadow, leaf edge).
+  `light.windowPane: false` keeps a kit's painted window interiors and
+  only glows around them.
 
 ## Tile set (ground.json)
 
