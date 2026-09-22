@@ -43,9 +43,22 @@
   .lt-tab.is-on { background: var(--gold); border-color: var(--gold); color: #20180a; font-weight: 600; }
   .controls.world { align-items: flex-end; }
   .controls.live { flex-direction: column; align-items: stretch; gap: 6px; }
-  /* Served live and not yet joined: no world on screen, only the door. */
+  /* Served live and not yet joined: no world on screen, only the door, over
+   * a picture of the town at first light. */
   .lt-joining .bar, .lt-joining canvas, .lt-joining .timeline, .lt-joining .caption, .lt-joining .hand,
   .lt-joining .controls:not(.live), .lt-joining aside { display: none; }
+  .join-hero { display: none; position: relative; border-radius: 6px; overflow: hidden; }
+  .join-hero img { display: block; width: 100%; height: auto; }
+  .join-hero-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,16,19,0) 55%, rgba(14,16,19,.82) 100%); }
+  .lt-joining .join-hero { display: block; }
+  .lt-joining .stage { position: relative; padding: 0; border: 0; background: transparent; }
+  .lt-joining .controls.live { position: absolute; left: 22px; right: 22px; bottom: 22px; margin: 0; padding: 14px 16px; border-radius: 10px;
+    background: rgba(14,16,19,.72); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .lt-joining .live-row { font-size: 15px; }
+  .lt-joining .controls.live .save-status, .lt-joining .controls.live .note { flex: 0 0 auto; padding: 0; }   /* in a column, flex-basis is height: no empty 260px note */
+  .lt-joining .controls.live .save-status:empty, .lt-joining .controls.live .note:empty { display: none; }
+  .lt-joining main { grid-template-columns: 1fr; }
+  @media (max-width: 700px) { .lt-joining .controls.live { position: static; margin-top: 10px; } }
   .controls.live[hidden], .controls div[hidden] { display: none; }
   .live-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; font-size: 13.5px; }
   .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); align-self: center; }
@@ -178,6 +191,10 @@
       <div><div class="label">Follow</div><div class="group" id="lt-characters"></div></div>
       <div><div class="label">Speed</div><div class="group" id="lt-speeds"></div></div>
       <div><div class="label">&nbsp;</div><button class="lt-tab" id="lt-inspector-toggle">Developer inspector</button></div>
+    </div>
+    <div class="join-hero" id="lt-join-hero" hidden>
+      <img src="assets/art/join-town.jpg" alt="The town at first light: five houses, a café with one lit window, the park by the river." width="1672" height="941">
+      <div class="join-hero-shade"></div>
     </div>
     <div class="controls live" id="lt-live" hidden>
       <div class="live-row"><span class="live-dot"></span><span id="lt-live-status">Reaching the town…</span><span id="lt-live-you"></span></div>

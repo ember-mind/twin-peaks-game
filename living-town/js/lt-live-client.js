@@ -40,6 +40,7 @@
     /* Until the town arrives there is nothing to show: the world the page
      * made to have something to draw is not this town and is not shown. */
     document.body.classList.add('lt-joining');
+    el('lt-join-hero').hidden = false;
     /* Nobody speeds up, saves or replaces a town that is not theirs. */
     Array.prototype.forEach.call(document.querySelectorAll('.controls'), function (n) {
       if (n.classList.contains('world')) n.hidden = true;
@@ -91,6 +92,7 @@
       live.sinceFrame = performance.now();
       LT.Observer.adopt(state, mirror.sim);
       document.body.classList.remove('lt-joining');
+      el('lt-join-hero').hidden = true;
       if (live.you && live.you.adopted && mirror.sim.state.characters[live.you.adopted]) {
         state.selected = live.you.adopted; state.followAction = false; state.view.focus(state.selected);
       }
