@@ -43,6 +43,9 @@
   .lt-tab.is-on { background: var(--gold); border-color: var(--gold); color: #20180a; font-weight: 600; }
   .controls.world { align-items: flex-end; }
   .controls.live { flex-direction: column; align-items: stretch; gap: 6px; }
+  /* Served live and not yet joined: no world on screen, only the door. */
+  .lt-joining .bar, .lt-joining canvas, .lt-joining .timeline, .lt-joining .caption, .lt-joining .hand,
+  .lt-joining .controls:not(.live), .lt-joining aside { display: none; }
   .controls.live[hidden], .controls div[hidden] { display: none; }
   .live-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; font-size: 13.5px; }
   .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); align-self: center; }

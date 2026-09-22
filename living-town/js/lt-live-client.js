@@ -37,6 +37,9 @@
   C.start = function (state, api) {
     var live = state.live = { api: api, mirror: null, you: null, presence: null, costs: {}, purseMax: 5, status: 'checking', note: '', es: null, resyncs: 0, frames: 0, paused: false, sinceFrame: 0 };
     el('lt-live').hidden = false;
+    /* Until the town arrives there is nothing to show: the world the page
+     * made to have something to draw is not this town and is not shown. */
+    document.body.classList.add('lt-joining');
     /* Nobody speeds up, saves or replaces a town that is not theirs. */
     Array.prototype.forEach.call(document.querySelectorAll('.controls'), function (n) {
       if (n.classList.contains('world')) n.hidden = true;
@@ -87,6 +90,7 @@
       devControls(state);
       live.sinceFrame = performance.now();
       LT.Observer.adopt(state, mirror.sim);
+      document.body.classList.remove('lt-joining');
       if (live.you && live.you.adopted && mirror.sim.state.characters[live.you.adopted]) {
         state.selected = live.you.adopted; state.followAction = false; state.view.focus(state.selected);
       }

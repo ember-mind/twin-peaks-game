@@ -48,7 +48,8 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     ok(await js("document.querySelector('meta[name=lt-live]').content") === '/api', 'the page carries the live marker');
     ok(await hidden('#lt-speeds') && await hidden('#lt-save') && await hidden('#lt-new-world'), 'speed, save and new world are not offered');
     ok(!(await hidden('#lt-live-join-row')) && /Give a name/.test(await txt('lt-live-status')), 'a name is asked for: ' + await txt('lt-live-status'));
-    ok(await js("LT_OBSERVER.live.status") === 'join' && await js("LT_OBSERVER.live.mirror") === null, 'no town is shown before joining');
+    ok(await js("LT_OBSERVER.live.status") === 'join' && await js("LT_OBSERVER.live.mirror") === null, 'no town is mirrored before joining');
+    ok(await js("['lt-canvas','lt-characters','lt-hand','lt-clock'].every(function (id) { return document.getElementById(id).getClientRects().length === 0; }) && document.querySelector('aside').getClientRects().length === 0"), 'and none is shown: no picture, no names, no panels, no clock');
     await shot('01-asked-for-a-name.png');
     await js("document.getElementById('lt-live-join').click(); true"); await sleep(300);
     ok(/A name, please/.test(await txt('lt-live-note')), 'Watch without a name is refused in words');
@@ -57,6 +58,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
 
     console.log('# the town arrives and moves on its own clock');
     ok(await js("LT_OBSERVER.live.status") === 'live' && /^Live · 1 watching/.test(await txt('lt-live-status')), 'live, one watching: ' + await txt('lt-live-status'));
+    ok(await js("getComputedStyle(document.getElementById('lt-canvas')).display") !== 'none' && await js("getComputedStyle(document.querySelector('aside')).display") !== 'none', 'now the town is on screen');
     ok(await js("LT_OBSERVER.sim === LT_OBSERVER.live.mirror.sim"), 'the page follows the mirror');
     ok(await js("LT_OBSERVER.sim.actorIds().every(function (id) { return LT_OBSERVER.sim.state.characters[id].policyId === 'live_fed'; })"), 'nobody on the page decides anything');
     const absA = await js("LT_OBSERVER.sim.absMinute()");
