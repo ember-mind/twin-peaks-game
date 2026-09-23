@@ -522,6 +522,12 @@
     return { x: e.wx + TILE / 2, y: e.wy - 9 };
   };
 
+  /* Whether the picture last drawn has a decision in it: a fork being
+   * shown, or someone thinking. The page slows the town for it. */
+  View.prototype.decisionOnScreen = function () {
+    return (this.lastBubbles || []).some(function (b) { return /:(fork|think)/.test(b); });
+  };
+
   /* One bubble per person: thinking, a fork, or the sign of what they do.
    * Returns what was shown, for the page and its tests. */
   View.prototype.drawBubbles = function (g, people, cx, cy, lift) {
@@ -549,6 +555,7 @@
       var act = c.activity, sign = act && act.phase === 'executing' && !e.moving ? B.signOf(act.actionId) : null;
       if (sign) { B.draw(g, 'sign', x, y, sign); shown.push(e.id + ':sign:' + sign); }
     });
+    self.lastBubbles = shown;
     return shown;
   };
 

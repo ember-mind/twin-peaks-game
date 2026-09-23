@@ -17,21 +17,30 @@
 
   var SPEEDS = [
     { label: 'Pause', msPerMinute: 0 },
-    { label: '1x', msPerMinute: 250 },
-    { label: '4x', msPerMinute: 62 },
-    { label: '20x', msPerMinute: 12 },
+    /* 1x is a town minute a second: a day takes 24 minutes, and a person can
+     * be watched deciding and walking. 20x is for getting past a night. */
+    { label: '1x', msPerMinute: 1000, slows: true },
+    { label: '4x', msPerMinute: 250, slows: true },
+    { label: '20x', msPerMinute: 50 },
     /* Auto picks one of the paces below every frame from what is going on. */
-    { label: 'Auto', msPerMinute: 62, auto: true }
+    { label: 'Auto', msPerMinute: 250, auto: true, slows: true }
   ];
-  var PACE_MS = { close: 250, steady: 90, quick: 20, asleep: 5 };
+  var PACE_MS = { close: 1000, steady: 500, quick: 200, asleep: 20 };
+  /* While a decision is over someone's head on screen, the town all but
+   * stops, long enough to read the options and see which one is taken
+   * (LT.Bubbles.FORK_MS of real time); then it goes back to its pace. */
+  var DECIDING_MS = 3000;
   var SNAPSHOT_EVERY = 30, SNAPSHOT_KEEP = 72;    // sim minutes between snapshots; two days of them, which is as far back as the full record goes
   var REPLAY_LEAD = 12, REPLAY_TAIL = 35;          // minutes shown before and after the moment asked for
 
   function msPerMinute(state) {
     var s = SPEEDS[state.speedIndex];
     if (state.replay) return s.msPerMinute ? 250 : 0;      // a replay is watched at 1x, or paused
-    return s.auto ? PACE_MS[LT.Story.pace(state.sim)] : s.msPerMinute;
+    var ms = s.auto ? PACE_MS[LT.Story.pace(state.sim)] : s.msPerMinute;
+    if (ms && s.slows && state.view && state.view.decisionOnScreen && state.view.decisionOnScreen()) ms = Math.max(ms, DECIDING_MS);
+    return ms;
   }
+  O.msPerMinute = msPerMinute;
   /* The world on screen: the live one, or a replay of an earlier hour of it. */
   function shown(state) { return state.replay ? state.replay.sim : state.sim; }
   O.shown = shown;
