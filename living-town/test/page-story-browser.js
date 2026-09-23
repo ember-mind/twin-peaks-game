@@ -91,6 +91,16 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     ok(await js("document.querySelectorAll('#lt-hand-fields option').length") >= 1, 'the hand is offered for this world\'s people');
     ok(/friends|close|acquainted|barely know/.test(await txt('lt-bonds')) && /last seen (today|yesterday|not yet)/.test(await txt('lt-bonds')), 'Between them: ' + (await txt('lt-bonds')).replace(/\s+/g, ' ').slice(0, 100));
     await shot('05-the-street-at-half-past-five.png');
+    console.log('# page: the whole town');
+    await js("document.getElementById('lt-follow-town').click(); true"); await sleep(500);
+    const whole = JSON.parse(await js("JSON.stringify(LT_OBSERVER.townDrawn)"));
+    const outside = await js("LT_OBSERVER.sim.actorIds().filter(function(id){ var c = LT_OBSERVER.sim.state.characters[id]; return LT.World.outdoorGrid(c.location); }).length");
+    ok(await js("document.getElementById('lt-canvas').hidden && !document.getElementById('lt-town').hidden") && await txt('lt-place') === 'The whole town',
+       'Whole town shows the map instead of one person\'s corner of it');
+    ok(whole && whole.people === outside && whole.people + whole.indoors === 5, 'everyone is in it: ' + whole.people + ' outside, ' + whole.indoors + ' named over their doors');
+    await shot('05b-the-whole-town.png');
+    const picked = await js("(function(){ var s = LT_OBSERVER.view.townSpots[0], cv = document.getElementById('lt-town'), r = cv.getBoundingClientRect(), k = r.width / 768; cv.dispatchEvent(new MouseEvent('click', { clientX: r.left + s.x * k, clientY: r.top + s.y * k, bubbles: true })); return s.id; })()");
+    ok(await js("LT_OBSERVER.selected") === picked && await js("!LT_OBSERVER.townView && !document.getElementById('lt-canvas').hidden"), 'choosing someone in it follows them (' + picked + ')');
     console.log('# page: auto pace, the timeline, looking back');
     await page.navigate('living-town/index.html?speed=1x&world=new'); await sleep(1200);
     await js("LT_OBSERVER.speedIndex = 0; true");

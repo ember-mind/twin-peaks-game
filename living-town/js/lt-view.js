@@ -348,6 +348,64 @@
     return 'kit';
   };
 
+  /* ---------------- the whole town ---------------- */
+
+  /* Everyone out in the town, at once, on the whole kit map; whoever is
+   * indoors is named over their door. Drawn onto a canvas of its own at the
+   * map's full size. Returns what it drew, and where, so a click can pick. */
+  View.prototype.drawTown = function (g, selectedId) {
+    var K = LT.KitTown, W = LT.World, sim = this.sim, self = this;
+    if (!g || !K || !K.ready) return null;
+    var how = this.inhabitantRenderer();
+    var people = this.entitiesAt('street'), things = this.thingsAt('street');
+    this.drawKitTown(g, people, things, 0, 0, how);
+    var spots = [];
+    people.forEach(function (e) {
+      var c = sim.state.characters[e.id], seat = K.isSeated(sim, e);
+      var x = e.wx + TILE / 2, y = seat ? (sim.objectById(c.activity.targetId).y * TILE + 6) : e.wy + TILE - 3;
+      spots.push({ id: e.id, x: x, y: y - 10, outside: true });
+      label(g, c.name, x, y - 28, e.id === selectedId ? '#e9b458' : '#e8e2d2');
+    });
+    /* Indoors: one tag per door, the names of whoever is behind it. */
+    var byDoor = {};
+    sim.actorIds().forEach(function (id) {
+      var c = sim.state.characters[id];
+      if (W.outdoorGrid(c.location) || c.transit) return;
+      var d = W.STREET_PORTALS[c.location];
+      if (!d) return;
+      var k = d.x + ',' + d.y;
+      (byDoor[k] = byDoor[k] || { x: d.x * TILE + TILE / 2, y: d.y * TILE - 20, ids: [] }).ids.push(id);
+    });
+    Object.keys(byDoor).forEach(function (k) {
+      var door = byDoor[k], names = door.ids.map(function (id) { return sim.state.characters[id].name; });
+      label(g, names.join(', '), door.x, door.y, door.ids.indexOf(selectedId) >= 0 ? '#e9b458' : '#e8e2d2');
+      door.ids.forEach(function (id) { spots.push({ id: id, x: door.x, y: door.y, outside: false }); });
+    });
+    this.townSpots = spots;
+    return { people: people.length, indoors: spots.filter(function (s) { return !s.outside; }).length };
+  };
+
+  /* Who is at a point of the whole-town picture: the nearest person drawn
+   * there or named over a door, within reach of a click. */
+  View.prototype.townPick = function (x, y) {
+    var best = null, bd = 26 * 26;
+    (this.townSpots || []).forEach(function (s) {
+      var d = (s.x - x) * (s.x - x) + (s.y - y) * (s.y - y);
+      if (d < bd) { bd = d; best = s.id; }
+    });
+    return best;
+  };
+
+  function label(g, text, x, y, colour) {
+    var F = root.GAME && root.GAME.RetroFont, t = text.toUpperCase();
+    var w = (F ? F.measure(t, 1) : t.length * 6) + 6, x0 = Math.round(x - w / 2), y0 = Math.round(y) - 9;
+    g.fillStyle = 'rgba(20,22,28,0.82)'; g.fillRect(x0, y0, w, 11);
+    g.fillStyle = 'rgba(233,180,88,0.55)'; g.fillRect(x0 + 1, y0 + 10, w - 2, 1);
+    if (F) F.draw(g, t, x0 + 3, y0 + 2, colour, { scale: 1 });
+    else { g.fillStyle = colour; g.font = '8px monospace'; g.fillText(t, x0 + 3, y0 + 8); }
+    g.fillStyle = 'rgba(20,22,28,0.82)'; g.fillRect(Math.round(x) - 1, y0 + 11, 3, 1); g.fillRect(Math.round(x), y0 + 12, 1, 1);
+  }
+
   /* The light of the simulated minute; null when the package is not loaded. */
   View.prototype.light = function () {
     return LT.DayLight ? LT.DayLight.at(this.sim.state.minute) : null;

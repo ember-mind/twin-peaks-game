@@ -30,6 +30,8 @@
     display: block; width: 100%; max-width: 768px; margin: 0 auto;
     image-rendering: pixelated; background: #000; border-radius: 4px;
   }
+  canvas[hidden] { display: none; }
+  #lt-town { max-width: none; cursor: pointer; }
   .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; margin: 0 0 12px; }
   .clock { font: 600 17px/1 var(--mono); color: var(--gold); }
   .place { color: var(--dim); font-size: 14px; }
@@ -164,6 +166,7 @@
       <span class="place" id="lt-place">—</span>
     </div>
     <canvas id="lt-canvas" width="256" height="192"></canvas>
+    <canvas id="lt-town" width="768" height="432" hidden aria-label="The whole town: choose someone to follow"></canvas>
     <div class="replay" id="lt-replay" hidden>
       <span id="lt-replay-text"></span>
       <button class="lt-tab" id="lt-replay-back">Back to now</button>
@@ -290,6 +293,7 @@
 <script src="../engine/ember-pixel.js"></script>
 <script src="../engine/ember-interior-kit.js"></script>
 <script src="../js/retro-authored.js"></script>
+<script src="../js/retro-font.js"></script>
 <script src="js/lt-town.gen.js"></script>
 <script src="js/lt-world.js"></script>
 <script src="js/lt-content.js"></script>
