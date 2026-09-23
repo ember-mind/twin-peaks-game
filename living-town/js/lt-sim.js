@@ -265,7 +265,11 @@
     Object.keys(this.state.characters).forEach(function (id) {
       var c = self.state.characters[id];
       if (isPrivate) return;   // nothing to witness: only those told will know
-      if (ev.locationId && c.location === ev.locationId && !c.transit) perceivers[id] = true;
+      if (!ev.locationId || c.transit) return;
+      /* Outside, a witness is whoever was in sight of the person it happened to. */
+      var who = ev.actorId && self.state.characters[ev.actorId];
+      if (who && W.outdoorGrid(ev.locationId) && W.samePlace(who.location, ev.locationId)) { if (together(c, who)) perceivers[id] = true; }
+      else if (c.location === ev.locationId) perceivers[id] = true;
     });
     (notify || []).forEach(function (id) { perceivers[id] = true; });
     Object.keys(perceivers).forEach(function (id) {
@@ -320,20 +324,64 @@
 
   Sim.prototype.placeCharacter = function (actor, locationId, pos) {
     var loc = W.LOCATIONS[locationId];
-    actor.location = locationId;
     actor.pos = pos ? { x: pos.x, y: pos.y, dir: pos.dir || 'down' }
                     : { x: loc.spawn.x, y: loc.spawn.y, dir: loc.spawn.dir };
+    /* Outside, which part of the town one is in is where one stands. */
+    actor.location = loc.grid ? (W.zoneAt(actor.pos.x, actor.pos.y) || locationId) : locationId;
     actor.walkTarget = null;
     this.touch();
   };
 
+  /* Where a walk to `to` starts: outside, where one stands; inside, at the
+   * door of the place one is leaving. */
+  Sim.prototype.walkStart = function (actor, from) {
+    if (W.outdoorGrid(actor.location)) return { x: actor.pos.x, y: actor.pos.y };
+    var p = W.STREET_PORTALS[from] || W.LOCATIONS.street.spawn;
+    return { x: p.x, y: p.y };
+  };
+
+  /* Minutes this person needs to walk to `to` from where they are now: the
+   * route on the map at the town's walking pace, never instant. */
+  Sim.prototype.travelMinutesFor = function (actor, to) {
+    if (!W.LOCATIONS[to] || W.samePlace(actor.location, to) && !W.outdoorGrid(to)) return 0;
+    var end = this.meetingCell(actor, to) || W.STREET_PORTALS[to] || W.LOCATIONS[to].spawn;
+    var cells = W.walkCells(W.LOCATIONS.street.rows, this.walkStart(actor, actor.location), end);
+    if (cells < 0) return 0;
+    return Math.max(1, W.minutesForCells(cells));
+  };
+
+  /* Someone going outside to meet a person who is already there walks up to
+   * them, not to the middle of the lawn: the free cell beside them nearest
+   * the way one comes. Null when there is nobody to meet there. */
+  Sim.prototype.meetingCell = function (actor, to) {
+    if (!W.outdoorGrid(to) || W.samePlace(actor.location, to) && actor.location === to) return null;
+    var self = this, now = this.absMinute(), rows = W.LOCATIONS[to].rows;
+    var c = (actor.commitments || []).filter(function (k) {
+      return k.status === 'open' && k.locationId === to && k.withId && self.abs(k.dueDay, k.dueMin) - now <= 90;
+    })[0];
+    var other = c && this.state.characters[c.withId];
+    if (!other || other.transit || other.location !== to) return null;
+    var from = this.walkStart(actor, actor.location), best = null, bestD = Infinity;
+    STEP_DIRS.forEach(function (d) {
+      var cell = { x: other.pos.x + d.x, y: other.pos.y + d.y };
+      if (W.isSolid((rows[cell.y] || '').charAt(cell.x)) || self.standingOn(actor, cell)) return;
+      var len = W.walkCells(rows, from, cell);
+      if (len >= 0 && len < bestD) { bestD = len; best = cell; }
+    });
+    if (best) best.withId = other.id;
+    return best;
+  };
+
+  /* Leaving a room puts a person on its doorstep in the town; they walk, in
+   * sight of anyone about, to the door of where they are going. */
   Sim.prototype.beginTransit = function (actor, from, to) {
-    var portalFrom = W.STREET_PORTALS[from] || W.LOCATIONS.street.spawn;
-    var portalTo = W.STREET_PORTALS[to] || W.LOCATIONS.street.spawn;
+    var start = this.walkStart(actor, from);
+    var portalTo = this.meetingCell(actor, to) || W.STREET_PORTALS[to] || W.LOCATIONS.street.spawn;
     actor.transit = { from: from, to: to };
-    actor.location = 'street';
-    actor.pos = { x: portalFrom.x, y: portalFrom.y, dir: 'down' };
+    actor.pos = { x: start.x, y: start.y, dir: actor.pos && W.outdoorGrid(actor.location) ? actor.pos.dir : 'down' };
+    actor.location = W.zoneAt(start.x, start.y) || 'street';
     actor.walkTarget = { x: portalTo.x, y: portalTo.y };
+    if (portalTo.withId) actor.transit.meeting = portalTo.withId;
     this.touch();
   };
 
@@ -358,6 +406,12 @@
 
   Sim.prototype.endTransit = function (actor, locationId) {
     actor.transit = null;
+    /* Arriving somewhere outside is standing there: no door to go through. */
+    if (W.outdoorGrid(locationId)) {
+      actor.location = W.zoneAt(actor.pos.x, actor.pos.y) || actor.location;
+      this.touch();
+      return;
+    }
     /* Coming in through a door someone is standing at, one steps past them. */
     var spawn = W.LOCATIONS[locationId].spawn, free = this.freeCellNear(actor, locationId, spawn);
     if (free.x !== spawn.x || free.y !== spawn.y) { this.placeCharacter(actor, locationId, { x: free.x, y: free.y, dir: spawn.dir }); return; }
@@ -702,13 +756,42 @@
   };
 
   function adjacent(a, b) {
-    return a.location === b.location && Math.abs(a.pos.x - b.pos.x) + Math.abs(a.pos.y - b.pos.y) === 1;
+    return W.samePlace(a.location, b.location) && Math.abs(a.pos.x - b.pos.x) + Math.abs(a.pos.y - b.pos.y) === 1;
   }
   function facing(from, to) {
     if (to.x > from.x) return 'right';
     if (to.x < from.x) return 'left';
     return to.y < from.y ? 'up' : 'down';
   }
+
+  /* Whether two people are in each other's presence. Indoors, the same room.
+   * Outside, the town is one map: within sight, near enough to be told apart
+   * (W.SIGHT_CELLS), and nothing that hides, a house or a tree, between them. */
+  function together(a, b) {
+    if (!a || !b || !W.samePlace(a.location, b.location)) return false;
+    if (!W.outdoorGrid(a.location)) return true;
+    var dx = a.pos.x - b.pos.x, dy = a.pos.y - b.pos.y;
+    if (dx * dx + dy * dy > W.SIGHT_CELLS * W.SIGHT_CELLS) return false;
+    return W.inSight(W.LOCATIONS[a.location].rows, a.pos, b.pos);
+  }
+  /* Two people who agreed to meet somewhere look for each other there: at
+   * the agreed place, from an hour and a half before the time until the
+   * grace runs out, each counts as present to the other anywhere in that
+   * part of the town, not only within sight. What they overhear is still
+   * only what is in sight (perceive, above). */
+  Sim.prototype.together = function (a, b) {
+    if (together(a, b)) return true;
+    if (!a || !b || a.location !== b.location || !W.outdoorGrid(a.location)) return false;
+    return this.expecting(a, b) || this.expecting(b, a);
+  };
+  Sim.prototype.expecting = function (a, b) {
+    var now = this.absMinute(), self = this;
+    return (a.commitments || []).some(function (c) {
+      if (c.status !== 'open' || c.withId !== b.id || c.locationId !== a.location) return false;
+      var due = self.abs(c.dueDay, c.dueMin);
+      return now >= due - 90 && now <= due + (c.graceMin || 0);
+    });
+  };
 
   var REPLY_MINUTES = 5;   // how long someone stands there waiting to be answered
 
@@ -843,11 +926,13 @@
       if (conv.status !== 'proposed') return;
       var asker = self.state.characters[conv.initiatorId], other = self.state.characters[conv.inviteeId];
       if (!asker.activity || asker.activity.conversationId !== conv.id) return self.closeProposal(conv, 'withdrawn', 'asker_left');
-      if (other.transit || other.location !== conv.locationId) return self.closeProposal(conv, 'unanswered', 'recipient_left');
-      if (!adjacent(asker, other)) return self.closeProposal(conv, 'unanswered', 'recipient_moved');
+      if (other.transit || !W.samePlace(other.location, conv.locationId)) return self.closeProposal(conv, 'unanswered', 'recipient_left');
       /* They were asked, and their policy chose to do something else. That is
-       * an answer of a kind, but it is not recorded as a refusal they made. */
+       * an answer of a kind, but it is not recorded as a refusal they made.
+       * Outside, three cells a minute, they may already be walking off to do
+       * it: that is still their choice, not a drift away. */
       if (other.activity) return self.closeProposal(conv, 'unanswered', 'recipient_chose_otherwise');
+      if (!adjacent(asker, other)) return self.closeProposal(conv, 'unanswered', 'recipient_moved');
       if (now >= conv.replyByAbs) return self.closeProposal(conv, 'unanswered', 'no_reply');
     });
   };
@@ -856,7 +941,7 @@
     var self = this;
     return conv.participants.every(function (id) {
       var c = self.state.characters[id];
-      return c && !c.transit && c.location === conv.locationId &&
+      return c && !c.transit && W.samePlace(c.location, conv.locationId) &&
              c.activity && c.activity.conversationId === conv.id;
     }) && adjacent(this.state.characters[conv.participants[0]], this.state.characters[conv.participants[1]]);
   };
@@ -1003,7 +1088,7 @@
     var self = this;
     return this.actorIds().some(function (id) {
       var o = self.state.characters[id];
-      if (id === actor.id || o.location !== actor.location || o.transit) return false;
+      if (id === actor.id || !W.samePlace(o.location, actor.location) || o.transit) return false;
       return (o.pos.x === spot.x && o.pos.y === spot.y) || (o.walkTarget && o.walkTarget.x === spot.x && o.walkTarget.y === spot.y);
     });
   };
@@ -1027,7 +1112,7 @@
     var self = this;
     return this.actorIds().some(function (id) {
       var o = self.state.characters[id];
-      if (id === actor.id || o.location !== actor.location || o.transit || !o.activity) return false;
+      if (id === actor.id || !W.samePlace(o.location, actor.location) || o.transit || !o.activity) return false;
       if (o.pos.x !== cell.x || o.pos.y !== cell.y) return false;
       return !o.walkTarget || (o.walkTarget.x === cell.x && o.walkTarget.y === cell.y);
     });
@@ -1038,7 +1123,7 @@
     var self = this;
     return this.actorIds().some(function (id) {
       var o = self.state.characters[id];
-      if (id === actor.id || o.location !== actor.location || o.transit || o.pos.x !== cell.x || o.pos.y !== cell.y) return false;
+      if (id === actor.id || !W.samePlace(o.location, actor.location) || o.transit || o.pos.x !== cell.x || o.pos.y !== cell.y) return false;
       /* On their way somewhere else they are only passing; on the cell they were heading for, they have arrived. */
       if (o.walkTarget && (o.walkTarget.x !== cell.x || o.walkTarget.y !== cell.y)) return false;
       if (!busyOnly) return true;
@@ -1098,7 +1183,7 @@
     if (!def.position || def.position === 'anywhere') return { needed: false, at: null };
     var loc = W.LOCATIONS[actor.location], self = this;
     if (def.position === 'beside_person') {
-      if (!target || target.location !== actor.location || target.transit) return { needed: true, at: null, reason: 'not_present' };
+      if (!target || !this.together(target, actor) || target.transit) return { needed: true, at: null, reason: 'not_present' };
       var best = null, bestLen = Infinity;
       STEP_DIRS.forEach(function (d) {
         var cell = { x: target.pos.x + d.x, y: target.pos.y + d.y };
@@ -1297,7 +1382,7 @@
      * there, and still be someone it can be done to, every minute it takes —
      * not only on the walk over. (A talk keeps its own watch, above.) */
     if (def.position === 'beside_person' && !act.conversationId && target) {
-      if (target.location !== actor.location || target.transit || !adjacent(actor, target)) return this.failActivity(actor, 'partner_left');
+      if (!this.together(target, actor) || target.transit || !adjacent(actor, target)) return this.failActivity(actor, 'partner_left');
       var holds;
       try { holds = def.eligible(ctx); } catch (e2) { holds = { reason: 'error:' + (e2 && e2.message) }; }
       if (holds !== true && holds.reason !== 'partner_busy') return this.failActivity(actor, holds.reason || 'ineligible');
@@ -1381,7 +1466,13 @@
 
   /* ---------------- movement inside a place ---------------- */
 
+  /* A minute of walking: one cell in a room, W.WALK_CELLS_PER_MINUTE outside. */
   Sim.prototype.walkStep = function (actor) {
+    var steps = W.outdoorGrid(actor.location) ? W.WALK_CELLS_PER_MINUTE : 1;
+    for (var i = 0; i < steps && actor.walkTarget; i++) if (!this.walkOneCell(actor)) return;
+  };
+
+  Sim.prototype.walkOneCell = function (actor) {
     var t = actor.walkTarget;
     if (!t) return;
     var loc = W.LOCATIONS[actor.location];
@@ -1397,10 +1488,17 @@
     /* The last step is onto the spot itself. If somebody got there first, wait
      * beside it: two people who set out together for one spot do not end up
      * sharing it. Whoever wanted it finds it occupied and does something else. */
-    if (n.x === t.x && n.y === t.y && this.heldByAnother(actor, n)) return;
+    if (n.x === t.x && n.y === t.y && this.heldByAnother(actor, n)) return false;
     actor.pos = { x: n.x, y: n.y, dir: n.dir };
+    if (loc.grid) actor.location = W.zoneAt(n.x, n.y) || actor.location;
+    if (this.walked) (this.walked[actor.id] = this.walked[actor.id] || []).push({ x: n.x, y: n.y });
     this.touch();
+    return true;
   };
+
+  /* The cells someone stepped onto in the last minute, in order: what a view
+   * needs to show three steps as three steps. Empty after a load. */
+  Sim.prototype.stepsWalked = function (actorId) { return ((this.walked || {})[actorId] || []).slice(); };
 
   /* One step along a shortest walkable route. Rooms have furniture people have
    * to walk round — the back of a counter is reached by its end, not through
@@ -1463,7 +1561,7 @@
     var self = this;
     var here = Object.keys(this.state.characters).filter(function (id) {
       var c = self.state.characters[id];
-      return id !== actor.id && c.location === actor.location && !c.transit;
+      return id !== actor.id && self.together(c, actor) && !c.transit;
     }).sort().join(',');
     var offers = this.offersFor(actor).map(function (o) { return o.id + ':' + o.status; }).sort().join(',');
     /* A promise being kept, broken or newly made changes what is worth doing. */
@@ -1481,7 +1579,7 @@
     ].join('|');
   };
 
-  Sim.prototype.buildRequest = function (actor, reason, reissuedSeq) {
+  Sim.prototype.buildRequest = function (actor, reason, reissuedSeq, keptKey) {
     var cand = P.candidates(this, actor);
     /* A restored world puts its open questions again under the numbers they
      * already had: it is the same question, and a recording made of the
@@ -1502,7 +1600,7 @@
       day: this.state.day, minute: this.state.minute, clock: U.clock(this.state.minute),
       absMinute: this.absMinute(),
       stateVersion: this.state.version,
-      relevanceKey: this.relevanceKey(actor),
+      relevanceKey: keptKey || this.relevanceKey(actor),
       self: {
         id: actor.id, name: actor.name, location: actor.location, homeId: actor.homeId,
         needs: deepCopy(actor.needs), money: actor.money, savings: actor.savings,
@@ -1530,10 +1628,10 @@
     return request;
   };
 
-  Sim.prototype.requestDecision = function (actor, reason, reissuedSeq, firstAskedAbs) {
+  Sim.prototype.requestDecision = function (actor, reason, reissuedSeq, firstAskedAbs, keptKey) {
     var policy = Pol.get(actor.policyId);
     if (!policy) throw new Error('no policy registered for ' + actor.id + ' (' + actor.policyId + ')');
-    var request = this.buildRequest(actor, reason, reissuedSeq);
+    var request = this.buildRequest(actor, reason, reissuedSeq, keptKey);
     actor.pending = {
       requestId: request.requestId, seq: request.seq,
       /* A question put again after a reload has been open since it was first
@@ -1732,6 +1830,7 @@
   Sim.prototype.tick = function () {
     var self = this;
     this.flushDecisions();
+    this.walked = {};   // cells each person stepped onto this minute, for whoever draws them; not state
 
     this.state.minute += 1;
     if (this.state.minute >= U.MINUTES_PER_DAY) {

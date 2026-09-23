@@ -147,7 +147,12 @@ async function travelConsumesExactTime() {
     for (let i = 0; i < events.length - 1; i++) {
       const dep = events[i], arr = events[i + 1];
       if (dep.type !== 'DEPARTED' || arr.type !== 'ARRIVED') continue;
-      const expected = W.travelMinutes(dep.data.from, dep.data.to);
+      /* From a door, the door-to-door time every place advertises; from
+       * somewhere outside, the route from where they stood. */
+      /* Going out to meet someone already there, the walk ends beside them,
+       * a few cells from where the place is entered. */
+      const expected = dep.data.minutes, advertised = W.travelMinutes(dep.data.from, dep.data.to);
+      if (!W.outdoorGrid(dep.data.from) && !dep.data.meeting) ok(expected === advertised, actorId + ' set off for ' + dep.data.to + ' expecting the advertised ' + advertised + ' minutes');
       ok(arr.absMinute - dep.absMinute === expected,
         actorId + ' walking ' + dep.data.from + ' -> ' + dep.data.to + ' takes exactly ' + expected + ' minutes');
       pairs++;

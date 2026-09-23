@@ -48,7 +48,7 @@ const turn = () => new Promise((r) => setTimeout(r, 1));
   ok(mirrorA.sim.actorIds().every((id) => mirrorA.sim.state.characters[id].policyId === Live.FED_POLICY), 'nobody in the mirror is decided locally');
 
   const frames = [];
-  const planned = { 480: ['leave_book', { spot: 'park_bench_sw' }, 'now'], 700: ['refund', { who: 'resident_b' }, 'half_hour'], 900: ['extra_shift', { who: 'resident_a' }, 'now'] };
+  const planned = { 480: ['leave_book', { spot: 'park_lawn_w' }, 'now'], 700: ['refund', { who: 'resident_b' }, 'half_hour'], 900: ['extra_shift', { who: 'resident_a' }, 'now'] };
   let mirrorB = null, joinedAt = null, joinedSave = null;
   const savedAt = {};
   for (let i = 0; i < 1440; i++) {

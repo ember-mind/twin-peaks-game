@@ -77,7 +77,7 @@ const strip = (s) => { const c = JSON.parse(JSON.stringify(s.state)); delete c.v
   const week = LT.Scenario.town({});
   await week.runUntil(7, 0);
   const W7 = week.state.characters, ev7 = (t) => week.state.events.filter((e) => e.type === t);
-  const shifts = ev7('COMMITMENT_KEPT').filter((e) => e.data.commitmentId === 'cmt_shift');
+  const shifts = ev7('COMMITMENT_KEPT').concat(ev7('COMMITMENT_BROKEN')).filter((e) => e.data.commitmentId === 'cmt_shift');
   ok([2, 3, 4, 5, 6].every((d) => shifts.some((e) => e.day === d && e.actorId === 'resident_a') && shifts.some((e) => e.day === d && e.actorId === 'resident_c')), 'every working day owes its shift, and it is kept or broken that day');
   ok(W7.resident_a.commitments.filter((c) => c.id === 'cmt_shift').length === 7 && new Set(W7.resident_a.commitments.filter((c) => c.id === 'cmt_shift').map((c) => c.dueDay)).size === 7 && W7.resident_b.commitments.filter((c) => c.id === 'cmt_shift').length === 0, 'one a day, for people with a job and nobody else');
   const set = ev7('GOAL_SET');
@@ -122,9 +122,11 @@ const strip = (s) => { const c = JSON.parse(JSON.stringify(s.state)); delete c.v
   const hands = LT.Hand.entry('extra_shift').fields(town)[0].options.map((o) => o.id);
   ok(hands.join() === 'resident_a,resident_c', 'an extra shift can be posted for either of the two who work there');
 
-  console.log('# every place is painted by the places package, none by the fallback');
+  console.log('# every place is painted: rooms by the places package, the town outside by the kit map');
   require(path.resolve(__dirname, '..', 'content', 'town-places-v01', 'lt-town-places.js'));
-  const unpainted = Object.keys(LT.World.LOCATIONS).filter((id) => id !== 'cafe').filter((id) => {
+  const gen = require('node:child_process').spawnSync(process.execPath, [path.resolve(__dirname, '..', 'tools', 'gen-town-map.js'), '--check'], { encoding: 'utf8' });
+  ok(gen.status === 0, 'the street and the park walk the grid of the kit map that draws them: ' + (gen.stdout || gen.stderr).trim());
+  const unpainted = Object.keys(LT.World.LOCATIONS).filter((id) => id !== 'cafe' && !LT.World.outdoorGrid(id)).filter((id) => {
     const claims = LT.TownPlaces.claims(id, LT.World.LOCATIONS[id].rows);
     return !claims || !LT.World.blockedCells(id).every((key) => !!claims[key]);
   });

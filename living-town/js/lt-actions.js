@@ -65,7 +65,7 @@
 
   function personPresent(ctx, id) {
     var other = ctx.state.characters[id];
-    return !!(other && other.location === ctx.actor.location && !other.transit);
+    return !!(other && ctx.sim.together(other, ctx.actor) && !other.transit);
   }
 
   var DEFS = {
@@ -154,18 +154,20 @@
     travel: {
       id: 'travel', label: 'Walk to', targetKind: 'location', interruptible: false,
       position: 'anywhere',
-      duration: function (ctx) { return W.travelMinutes(ctx.actor.location, ctx.target.id); },
+      /* The route on the map from where one stands, at the town's pace. */
+      duration: function (ctx) { return ctx.sim.travelMinutesFor(ctx.actor, ctx.target.id); },
       eligible: function (ctx) {
         var to = ctx.target && ctx.target.id;
         if (!to || !W.LOCATIONS[to]) return { reason: 'unknown_destination' };
         if (to === ctx.actor.location) return { reason: 'already_there' };
-        if (W.travelMinutes(ctx.actor.location, to) <= 0) return { reason: 'no_route' };
+        if (ctx.sim.travelMinutesFor(ctx.actor, to) <= 0) return { reason: 'no_route' };
         return true;
       },
       onStart: function (ctx) {
         var from = ctx.actor.location, dest = ctx.target.id;
+        var minutes = ctx.sim.travelMinutesFor(ctx.actor, dest);
         ctx.sim.beginTransit(ctx.actor, from, dest);
-        ctx.emit('DEPARTED', { from: from, to: dest },
+        ctx.emit('DEPARTED', { from: from, to: dest, minutes: minutes, meeting: ctx.actor.transit.meeting || null },
           ctx.actor.name + ' set off for ' + ctx.sim.locationName(dest) + '.');
       },
       tick: function (ctx, m) { need(ctx, 'energy', -0.02 * m); },
@@ -176,9 +178,10 @@
           ctx.actor.name + ' arrived at ' + ctx.sim.locationName(to) + '.');
       },
       onInterrupt: function (ctx) {
-        // A walk cannot be half-taken: the walker is returned to where they set
-        // out from rather than left standing in a place that does not exist.
-        ctx.sim.endTransit(ctx.actor, ctx.actor.transit ? ctx.actor.transit.from : ctx.actor.location);
+        // A walk stopped half way leaves the walker where they are: the town
+        // outside is a real place to stand in.
+        ctx.actor.walkTarget = null;
+        ctx.sim.endTransit(ctx.actor, 'street');
       }
     },
 

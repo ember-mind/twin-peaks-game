@@ -46,9 +46,9 @@ function chooser(prefs) {
 
 /* Temporarily put furniture on a floor cell. */
 function withBlocked(locId, cells, fn) {
-  const loc = W.LOCATIONS[locId], saved = loc.rows.slice();
+  const loc = W.LOCATIONS[locId], saved = loc.rows.slice();   // outside, the rows are the whole town's: restored in place
   cells.forEach(([x, y]) => { loc.rows[y] = loc.rows[y].slice(0, x) + 't' + loc.rows[y].slice(x + 1); });
-  try { return fn(); } finally { loc.rows = saved; }
+  try { return fn(); } finally { saved.forEach((r, i) => { loc.rows[i] = r; }); }
 }
 
 function everyActionSaysWhereItIsDone() {
@@ -170,8 +170,8 @@ function parkPair(policies, where) {
   const sim = LT.Scenario.day1({ intervention: false, policies: policies });
   sim.state.minute = 1040;
   const a = sim.state.characters.resident_a, b = sim.state.characters.resident_b;
-  sim.placeCharacter(a, 'park', (where && where.a) || { x: 4, y: 3, dir: 'down' });
-  sim.placeCharacter(b, 'park', (where && where.b) || { x: 8, y: 8, dir: 'down' });
+  sim.placeCharacter(a, 'park', (where && where.a) || { x: 12, y: 16, dir: 'down' });
+  sim.placeCharacter(b, 'park', (where && where.b) || { x: 20, y: 18, dir: 'down' });
   return { sim, a, b };
 }
 
@@ -279,7 +279,7 @@ function recipientBecomesBusyOnTheWay() {
   t = parkPair({}); quiet(t.sim);
   assert(t.sim.startActivity(t.a, { actionId: 'talk_with', targetKind: 'person', targetId: 'resident_b' }, 'test', null).ok);
   tickN(t.sim, 2);
-  t.sim.placeCharacter(t.b, 'street');
+  t.sim.placeCharacter(t.b, 'street', { x: 44, y: 12, dir: 'right' });   // up the street towards the bridge, out of sight
   tickN(t.sim, 2);
   failed = events(t.sim, 'ACTIVITY_FAILED', 'resident_a');
   ok(failed.length === 1 && failed[0].data.reason === 'not_present' && t.sim.state.conversations.length === 0, 'they left the park: not_present, and nothing was proposed to an empty lawn');
@@ -288,7 +288,7 @@ function recipientBecomesBusyOnTheWay() {
 function personWhoCannotBeReached() {
   console.log('# talk: someone who cannot be walked up to is not talked to');
   const t = parkPair({}); quiet(t.sim);
-  const ring = [[7, 8], [9, 8], [8, 7], [8, 9]].filter(([x, y]) => !W.isSolid(W.LOCATIONS.park.rows[y].charAt(x)));
+  const ring = [[19, 18], [21, 18], [20, 17], [20, 19]].filter(([x, y]) => !W.isSolid(W.LOCATIONS.park.rows[y].charAt(x)));
   withBlocked('park', ring, () => {
     const r = LT.Perception.candidates(t.sim, t.a).rejected.find((x) => x.id === 'talk_with:resident_b');
     ok(r && r.reason === 'person_unreachable', 'with every cell around them taken up, talking is withheld as ' + (r && r.reason));
@@ -357,7 +357,7 @@ function facts(sim) {
 
 async function savedAtEveryPhase() {
   console.log('# save: reloading while approaching, while waiting for an answer, while talking');
-  const want = { approaching: null, waiting_reply: null, talking: null, approaching_work: null };
+  const want = { approaching: null, waiting_reply: null, talking: null, approaching_work: null, walking_outside: null };
   const scout = LT.Scenario.day1({});
   for (let m = 361; m < 1300; m++) {
     await scout.runUntil(1, m);
@@ -367,8 +367,11 @@ async function savedAtEveryPhase() {
     if (act.actionId === 'talk_with' && act.phase === 'waiting_reply' && !want.waiting_reply) want.waiting_reply = m;
     if (act.conversationId && act.phase === 'executing' && act.elapsed > 3 && !want.talking) want.talking = m;
     if (act.actionId === 'work_shift' && act.phase === 'approaching' && act.approachMinutes > 2 && !want.approaching_work) want.approaching_work = m;
+    if (a.transit && a.walkTarget && act.elapsed > 1 && !want.walking_outside) want.walking_outside = m;
   }
-  ok(want.approaching && want.talking && want.approaching_work, 'the ordinary day contains each moment: ' + JSON.stringify(want));
+  /* Going out to meet someone ends beside them, so on day one the walk up to
+   * talk may not happen: the proposal and the walk through town must. */
+  ok((want.approaching || want.waiting_reply) && want.talking && want.approaching_work && want.walking_outside, 'the ordinary day contains each moment: ' + JSON.stringify(want));
   for (const label of Object.keys(want)) {
     const minute = want[label];
     if (!minute) continue;

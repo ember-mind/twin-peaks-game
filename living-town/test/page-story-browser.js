@@ -30,7 +30,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
   try {
     await page.navigate('living-town/index.html?speed=1x&world=new&cast=pair'); await sleep(1200);
     console.log('# page: on the way to work');
-    await runTo(1, 545); await sleep(300);
+    await runTo(1, 555); await sleep(300);   // 09:15, walking up to the counter
     const name = await js("LT_OBSERVER.sim.state.characters.resident_a.name");
     ok((await txt('lt-caption-doing')).indexOf(name + ' · On the way to: ') === 0, 'under the picture: who, and that they are still on the way (' + await txt('lt-caption-doing') + ')');
     const line = await txt('lt-caption-why');
@@ -69,7 +69,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     await runTo(1, 480);
     const pick = (id, value) => js("(function(){ var n = document.getElementById('" + id + "'); n.value = '" + value + "'; n.dispatchEvent(new Event('change')); return n.value; })()");
     await pick('lt-hand-what', 'leave_book');
-    await js("document.querySelector('#lt-hand-fields select').value = 'park_bench_sw'; true");
+    await js("document.querySelector('#lt-hand-fields select').value = 'park_lawn_w'; true");
     const registerBefore = await js("LT_OBSERVER.sim.state.interventions.length");
     await js("document.getElementById('lt-hand-do').click(); true"); await sleep(200);
     ok(/^Arranged for D1 08:00/.test(await txt('lt-hand-status')) && await js("LT_OBSERVER.sim.state.interventions.length") === registerBefore + 1, 'Do it: one entry in the register, and the page says when (' + await txt('lt-hand-status') + ')');
@@ -129,7 +129,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     for (let i = 0; i < 60 && await js("LT_OBSERVER.sim.absMinute()") < 455; i++) await sleep(200);
     await js("document.querySelectorAll('#lt-speeds button')[0].click(); true"); await sleep(400);
     await pick('lt-hand-what', 'leave_book');
-    await js("document.querySelector('#lt-hand-fields select').value = 'park_bench_ne'; document.getElementById('lt-hand-do').click(); true");
+    await js("document.querySelector('#lt-hand-fields select').value = 'park_jetty'; document.getElementById('lt-hand-do').click(); true");
     const askedAt = await js("LT_OBSERVER.sim.absMinute()");
     await js("document.querySelectorAll('#lt-speeds button')[3].click(); true");
     for (let i = 0; i < 60 && await js("LT_OBSERVER.sim.absMinute()") < askedAt + 50; i++) await sleep(200);

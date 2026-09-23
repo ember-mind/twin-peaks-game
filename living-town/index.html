@@ -278,6 +278,9 @@
 <script src="../engine/ember-camera.js"></script>
 <script src="../engine/ember-tilemap.js"></script>
 <script src="../engine/ember-viewport.js"></script>
+<script src="../engine/ember-ground.js"></script>
+<script src="../engine/ember-worldmap.js"></script>
+<script src="../engine/ember-worldview.js"></script>
 
 <script src="js/lt-util.js"></script>
 <script src="js/lt-names.js"></script>
@@ -287,6 +290,7 @@
 <script src="../engine/ember-pixel.js"></script>
 <script src="../engine/ember-interior-kit.js"></script>
 <script src="../js/retro-authored.js"></script>
+<script src="js/lt-town.gen.js"></script>
 <script src="js/lt-world.js"></script>
 <script src="js/lt-content.js"></script>
 <script src="js/lt-cafe-scene.js"></script>
@@ -319,9 +323,10 @@
 <script src="js/lt-live.js"></script>
 <script src="js/lt-persistence.js"></script>
 <script src="js/lt-art.js"></script>
+<script src="js/lt-kit-town.js"></script>
 <script src="js/lt-view.js"></script>
 <script src="js/lt-observer.js"></script>
 <script src="js/lt-live-client.js"></script>
-<script>LT.Observer.start();</script>
+<script>LT.KitTown.load(); LT.Observer.start();</script>
 </body>
 </html>

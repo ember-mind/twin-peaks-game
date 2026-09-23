@@ -122,7 +122,7 @@ const snapshot = (sim) => JSON.stringify(sim.state);
   const asleep = w.actorIds().filter((id) => (w.state.characters[id].activity || {}).actionId === 'sleep');
   ok(asleep.every((id) => Story.interest(w, id) === 0), 'someone asleep is the least worth watching');
   const x = LT.Scenario.day1({});
-  await x.runUntil(1, 545);
+  await x.runUntil(1, 555);   // 09:15, walking up to the counter
   ok(Story.interest(x, 'resident_a') > Story.interest(x, 'resident_b') && Story.mostInteresting(x, 'resident_b') === 'resident_a', 'someone on their way to work outranks someone waiting');
 
   console.log('# found by watching: a baseline that starved with money in its pocket');

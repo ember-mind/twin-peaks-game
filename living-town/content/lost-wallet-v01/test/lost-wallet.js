@@ -37,7 +37,7 @@ function actorIds(sim) { return Object.keys(sim.state.characters).sort(); }
 function walletParams(over) {
   return Object.assign({
     id: 'w_t1', ownerId: 'resident_a', cash: 7, locationId: 'park',
-    x: 2, y: 1, useSpot: { x: 2, y: 2, dir: 'up' }
+    x: 28, y: 17, useSpot: { x: 28, y: 18, dir: 'up' }
   }, over || {});
 }
 
@@ -161,7 +161,7 @@ function invalidInterventions() {
      'an unknown place is refused');
   ok(refused(sim, 'wallet_lost', of({ x: -1 }), 'object_position_out_of_bounds'),
      'an out-of-bounds cell is refused');
-  ok(refused(sim, 'wallet_lost', of({ locationId: 'flat_a', x: 0, y: 0, useSpot: { x: 5, y: 5 } }),
+  ok(refused(sim, 'wallet_lost', of({ locationId: 'flat_a', x: 0, y: 0, useSpot: { x: 25, y: 18 } }),
      'object_position_not_floor'), 'a wallet dropped on a wall is refused');
   ok(refused(sim, 'wallet_lost', of({ useSpot: undefined }), 'missing_use_spot'),
      'a missing use spot is refused');
@@ -169,9 +169,9 @@ function invalidInterventions() {
      'a fractional use spot is refused');
   ok(refused(sim, 'wallet_lost', of({ useSpot: { x: 99, y: 2 } }), 'use_spot_out_of_bounds'),
      'an out-of-bounds use spot is refused');
-  ok(refused(sim, 'wallet_lost', of({ useSpot: { x: 3, y: 2 } }), 'use_spot_not_walkable'),
+  ok(refused(sim, 'wallet_lost', of({ useSpot: { x: 12, y: 17 } }), 'use_spot_not_walkable'),
      'a use spot on the bench is refused');
-  ok(refused(sim, 'wallet_lost', of({ useSpot: { x: 2, y: 2, dir: 'sideways' } }), 'invalid_use_spot_dir'),
+  ok(refused(sim, 'wallet_lost', of({ useSpot: { x: 28, y: 18, dir: 'sideways' } }), 'invalid_use_spot_dir'),
      'a bad facing is refused');
 
   /* No room in this town has an unreachable floor cell, so the reachability
@@ -240,11 +240,11 @@ function pickUpCallbacks() {
   const away = LW.ACTIONS.pick_up_wallet.eligible(ctxFor(sim, finder, wallet));
   ok(away !== true && away.reason === 'not_present', 'the wallet is not offered from another place');
 
-  sim.placeCharacter(finder, 'park', { x: 5, y: 5 });
+  sim.placeCharacter(finder, 'park', { x: 25, y: 18 });
   ok(LW.ACTIONS.pick_up_wallet.eligible(ctxFor(sim, finder, wallet)) === true,
      'in the same place, picking it up is a legal action');
 
-  finder.walkTarget = { x: 2, y: 2 };
+  finder.walkTarget = { x: 28, y: 18 };
   LW.ACTIONS.pick_up_wallet.onComplete(ctxFor(sim, finder, wallet));
   ok(wallet.status === 'lost' && wallet.heldBy === null,
      'walking toward it does not pick it up');
@@ -315,7 +315,7 @@ function spotOccupiedRuleReachesPickUp() {
   const wallet = makeLost(sim, { id: 'w_occ' });
   const finder = sim.state.characters.resident_b;
   const other = sim.state.characters.resident_a;
-  sim.placeCharacter(finder, 'park', { x: 6, y: 6 });
+  sim.placeCharacter(finder, 'park', { x: 33, y: 18 });
 
   ok(sim.legality(finder, LW.ACTIONS.pick_up_wallet, wallet) === true,
      'with the pick-up spot free, picking the wallet up is legal');
@@ -358,8 +358,8 @@ function returnCallbacks() {
   const stranger = LW.ACTIONS.return_wallet.eligible(ctxFor(sim, finder, finder));
   ok(stranger !== true && stranger.reason === 'no_owner', 'a person without the wallet is no target');
 
-  sim.placeCharacter(finder, 'park', { x: 2, y: 2 });
-  sim.placeCharacter(owner, 'park', { x: 1, y: 2 });
+  sim.placeCharacter(finder, 'park', { x: 28, y: 18 });
+  sim.placeCharacter(owner, 'park', { x: 27, y: 18 });
   ok(LW.ACTIONS.return_wallet.eligible(ctxFor(sim, finder, owner)) === true,
      'beside the owner, returning it is a legal action');
   const meta = LW.ACTIONS.return_wallet.candidateMeta(ctxFor(sim, finder, owner));
@@ -457,8 +457,8 @@ function cashIsConserved() {
   const finder = sim.state.characters.resident_b, owner = sim.state.characters.resident_a;
   pickUp(sim, w, finder);
   ok(cashInTown(sim) === total, 'cash is never duplicated: the total holds before returning');
-  sim.placeCharacter(finder, 'park', { x: 2, y: 2 });
-  sim.placeCharacter(owner, 'park', { x: 1, y: 2 });
+  sim.placeCharacter(finder, 'park', { x: 28, y: 18 });
+  sim.placeCharacter(owner, 'park', { x: 27, y: 18 });
   LW.ACTIONS.return_wallet.onComplete(ctxFor(sim, finder, owner));
   ok(cashInTown(sim) === total, 'cash is never duplicated: the total holds after returning');
 
@@ -554,7 +554,7 @@ function readOnlyOperationsDoNotMutate() {
   const wallet = makeLost(sim, { id: 'w_ro' });
   const finder = sim.state.characters.resident_b, owner = sim.state.characters.resident_a;
   pickUp(sim, wallet, finder);
-  sim.placeCharacter(owner, 'park', { x: 1, y: 2 });
+  sim.placeCharacter(owner, 'park', { x: 27, y: 18 });
 
   const snapshot = JSON.stringify(sim.state);
   LW.ACTIONS.pick_up_wallet.eligible(ctxFor(sim, finder, wallet));

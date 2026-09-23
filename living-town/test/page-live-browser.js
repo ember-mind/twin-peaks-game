@@ -77,7 +77,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     console.log('# the hand goes to the server');
     const pick = (id, value) => js("(function(){ var n = document.getElementById('" + id + "'); n.value = '" + value + "'; n.dispatchEvent(new Event('change')); return n.value; })()");
     await pick('lt-hand-what', 'leave_book');
-    await js("document.querySelector('#lt-hand-fields select').value = 'park_bench_sw'; true");
+    await js("document.querySelector('#lt-hand-fields select').value = 'park_lawn_w'; true");
     await js("document.getElementById('lt-hand-do').click(); true"); await sleep(600);
     ok(/^Arranged for D1 \d\d:\d\d \(1 spent, 4 left\)/.test(await txt('lt-hand-status')), 'Do it: arranged, and what it cost (' + await txt('lt-hand-status') + ')');
     ok(town.sim.state.interventions.some((r) => r.source === 'watcher' && r.type === 'place_shared_book'), 'the server\'s town has the book in its register');

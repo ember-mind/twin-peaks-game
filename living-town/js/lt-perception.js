@@ -24,7 +24,7 @@
     Object.keys(state.characters).forEach(function (id) {
       if (id === actor.id) return;
       var c = state.characters[id];
-      if (c.location !== actor.location || c.transit) return;
+      if (!sim.together(c, actor) || c.transit) return;
       present.push({
         id: c.id, name: c.name,
         doing: c.activity ? c.activity.label : 'nothing in particular',
@@ -63,7 +63,7 @@
            * watcher brought are not: those are found by being there. */
           var services = {};
           W.OBJECTS.forEach(function (o) { if (o.location === id) (o.affordances || []).forEach(function (a) { services[a] = true; }); });
-          return { id: id, name: sim.locationName(id), walkMinutes: W.travelMinutes(actor.location, id),
+          return { id: id, name: sim.locationName(id), walkMinutes: sim.travelMinutesFor(actor, id),
                    opensAt: U.clock(l.opens), closesAt: U.clock(l.closes), opens: l.opens, closes: l.closes,
                    services: Object.keys(services).sort() };
         })
@@ -135,7 +135,7 @@
     Object.keys(sim.state.characters).forEach(function (id) {
       if (id === actor.id) return;
       var other = sim.state.characters[id];
-      if (other.location !== actor.location || other.transit) return;
+      if (!sim.together(other, actor) || other.transit) return;
       consider('greet', other);
       consider('talk_with', other);
       /* Anything else one person can do toward another who is here. An action

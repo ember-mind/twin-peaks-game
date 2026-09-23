@@ -46,12 +46,13 @@
     return this.focusedCharacter().location;
   };
 
+  /* Outside, the town is one map: everyone out in it is in the picture. */
   View.prototype.charactersHere = function (locationId) {
     var state = this.sim.state, out = [];
-    var self = this;
+    var self = this, W = LT.World;
     this.sim.actorIds().forEach(function (id) {
       var c = state.characters[id];
-      if (c.location !== locationId) return;
+      if (!W.samePlace(c.location, locationId)) return;
       out.push({ character: c, render: self.renderStateFor(c) });
     });
     return out;
@@ -86,14 +87,16 @@
     this.sim.actorIds().forEach(function (id) {
       var c = state.characters[id];
       var r = self.renderStateFor(c);
-      if (r.location !== c.location) { cut(r, c); return; }   // another place: a cut, however near the numbers are
+      if (!LT.World.samePlace(r.location, c.location)) { cut(r, c); return; }   // another place: a cut, however near the numbers are
+      r.location = c.location;                    // from the street onto the lawn is a step, not a cut
       if (c.pos.x === r.seenX && c.pos.y === r.seenY) return;
-      if (Math.abs(c.pos.x - r.seenX) + Math.abs(c.pos.y - r.seenY) !== 1) {
+      var steps = self.stepsBetween(c, { x: r.seenX, y: r.seenY });
+      if (!steps) {
         cut(r, c);                                // steps the view never saw: cut, do not invent a route
         return;
       }
       r.seenX = c.pos.x; r.seenY = c.pos.y;
-      r.trail.push({ x: c.pos.x, y: c.pos.y });
+      steps.forEach(function (s) { r.trail.push(s); });
       if (r.trail.length > MAX_TRAIL) {           // far behind: cut forward along the walked route
         var at = r.trail[r.trail.length - MAX_TRAIL - 1];
         r.tx = r.mx = at.x; r.ty = r.my = at.y; r.moving = false; r.moveT = 0;
@@ -101,6 +104,19 @@
         r.trail = r.trail.slice(-MAX_TRAIL);
       }
     });
+  };
+
+  /* The cells walked since the view last looked, as the simulation walked
+   * them: one a minute inside, three outside. Null when that is not how they
+   * got here (a door, a load): the view then cuts rather than invent a way. */
+  View.prototype.stepsBetween = function (c, from) {
+    if (Math.abs(c.pos.x - from.x) + Math.abs(c.pos.y - from.y) === 1) return [{ x: c.pos.x, y: c.pos.y }];
+    var walked = this.sim.stepsWalked ? this.sim.stepsWalked(c.id) : [];
+    if (!walked.length) return null;
+    var last = walked[walked.length - 1], first = walked[0];
+    if (last.x !== c.pos.x || last.y !== c.pos.y) return null;
+    if (Math.abs(first.x - from.x) + Math.abs(first.y - from.y) !== 1) return null;
+    return walked;
   };
 
   /* dt in real milliseconds. Smoothing only: each tile of the trail is one
@@ -134,7 +150,8 @@
     });
 
     var loc = LT.World.LOCATIONS[this.visibleLocation()];   // grid only; the name lives in state
-    if (this.lastLocation !== loc.id) { this.lastLocation = loc.id; this.camSnap = true; }
+    var shown = LT.World.gridOf(loc.id);                   // the street and the park are one picture
+    if (this.lastLocation !== shown) { this.lastLocation = shown; this.camSnap = true; }
     var focus = this.renderStateFor(this.focusedCharacter());
     var target = EMBER.Camera.centerOn(focus.x, focus.y, {
       anchorX: TILE / 2, anchorY: TILE / 2,
@@ -184,7 +201,10 @@
       var pose = LT.Appearance.poseFor(e.character);
       return pose && pose.poseId === 'reading';
     });
-    return sim.objectsAt(locId).map(function (o) {
+    var W = LT.World, here = W.outdoorGrid(locId)
+      ? Object.keys(W.LOCATIONS).filter(function (id) { return W.samePlace(id, locId); }).reduce(function (all, id) { return all.concat(sim.objectsAt(id)); }, [])
+      : sim.objectsAt(locId);
+    return here.map(function (o) {
       var vis = C.visualOf(o, sim);
       /* A book that is open is in its reader's hands — the reading pose shows
        * it there — so it is not also drawn lying open where it is kept. Told
@@ -299,6 +319,23 @@
     return 'temporary';
   };
 
+  /* The town outside: the engine draws the kit map and its light; the
+   * people and things are handed to it as actors in one depth order. */
+  View.prototype.drawKitTown = function (g, people, things, cx, cy, how) {
+    var self = this;
+    LT.KitTown.draw(g, cx, cy, this.sim, people, things, {
+      drawThing: function (gg, e, camX, camY) { self.drawThing(gg, e, camX, camY); },
+      drawPerson: function (gg, e, x, y, seat) {
+        var copy = {}; for (var k in e) copy[k] = e[k];
+        copy.wx = x; copy.wy = y;
+        if (seat) copy.pose = { poseId: 'seated', dir: 'down' };
+        self.drawInhabitant(gg, copy, 0, 0, 'lt_street', how);
+      }
+    });
+    this.drawActivityMarks(g, cx, cy, people.filter(function (e) { return !LT.KitTown.isSeated(self.sim, e); }));
+    return 'kit';
+  };
+
   /* The light of the simulated minute; null when the package is not loaded. */
   View.prototype.light = function () {
     return LT.DayLight ? LT.DayLight.at(this.sim.state.minute) : null;
@@ -316,12 +353,13 @@
     var ents = EMBER.Tilemap.depthSort(things.concat(people));
     var how = this.inhabitantRenderer();
     var scene = this.productionScene(loc);
-    var drewAs = 'production';
+    var drewAs = 'production', light = this.light();
     if (scene) this.drawProductionRoom(g, scene, ents, cx, cy, how);
+    else if (loc.grid && LT.KitTown && LT.KitTown.ready) drewAs = this.drawKitTown(g, people, things, cx, cy, how);
     else drewAs = this.drawTemporaryPlace(g, loc, ents, cx, cy, how);
-    /* Last, over room and people alike, so nobody stands in another hour's light. */
-    var light = this.light();
-    if (light) LT.DayLight.apply(g, light, { width: VW, height: VH });
+    /* Last, over room and people alike, so nobody stands in another hour's
+     * light. The town outside carries its own hour (the kit's graded light). */
+    if (light && drewAs !== 'kit') LT.DayLight.apply(g, light, { width: VW, height: VH });
     return { location: locId, entities: people.length, things: things.map(function (t) { return t.id + ':' + t.state; }),
              environment: drewAs, inhabitants: how,
              poses: people.filter(function (e) { return e.pose && !e.moving; }).map(function (e) { return e.id + ':' + e.pose.poseId; }),

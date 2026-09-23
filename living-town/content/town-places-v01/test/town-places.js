@@ -49,7 +49,21 @@ function recorder() {
   ctx.log = log;
   return ctx;
 }
-const rowsOf = (id) => W.LOCATIONS[id].rows;
+/* The town outside is drawn by the shared engine from the kit map now
+ * (js/lt-kit-town.js); the street and park this package paints are the
+ * two-room outside it was written for, kept here so its own checks still
+ * hold for the pieces it draws. The world's rows are used for the homes. */
+const LEGACY_OUTSIDE = {
+  park: [',,,TTT,,,,TTT,,,', ',,,,,,,,,,,,,,,,', ',,,b,,,,,,,,b,,,', ',,,,,,ww,,,,,,,,', ',,,,,wwww,,,,,,,', ',,,,,,ww,,,,,,,,',
+         ',,,b,,,,,,,,b,,,', ',,,,,,,,,,,,,,,,', 'TT,,,,,--,,,,,TT', ',,,,,,,DD,,,,,,,'],
+  street: ['HHHHHHHHHHHHHHHHHHHH', 'HHHHHHHHHHHHHHHHHHHH', 'HHHDDHHHHDDHHHHDDHHH', '--------------------', '--------------------', '--------------------',
+           '--------------------', '--------------------', 'fDDffHHHDDHffDDffDDf', ',--,fHHHHHH,,--,f--,', 'HHHHHHHHHHHHHHHHHHHH']
+};
+const LEGACY_PORTALS = { flat_a: { x: 3, y: 3 }, cafe: { x: 16, y: 3 }, park: { x: 8, y: 8 }, flat_b: { x: 1, y: 7 },
+                         flat_c: { x: 9, y: 3 }, flat_d: { x: 18, y: 7 }, flat_e: { x: 14, y: 7 } };
+const LEGACY_BENCH = { id: 'obj_bench', name: 'park bench', location: 'park', x: 3, y: 2 };
+const rowsOf = (id) => LEGACY_OUTSIDE[id] || W.LOCATIONS[id].rows;
+const blockedOf = (id) => { const out = []; rowsOf(id).forEach((r, y) => { for (let x = 0; x < r.length; x++) if (W.isSolid(r.charAt(x))) out.push(x + ',' + y); }); return out; };
 
 function artAndRowsAgree() {
   console.log('# every solid cell is painted as the thing it is, and nothing else is');
@@ -76,7 +90,7 @@ function furnitureIsWhereTheWorldSaysItIs() {
   console.log('# the furniture the world lists is drawn at its own tile, as itself');
   const WANT = { bed: 'bed', 'kitchen counter': 'kitchen', guitar: 'guitar', 'park bench': 'bench' };
   let n = 0;
-  W.OBJECTS.filter((o) => PLACES.indexOf(o.location) >= 0).forEach((o) => {
+  W.OBJECTS.filter((o) => PLACES.indexOf(o.location) >= 0).map((o) => (o.id === 'obj_bench' ? LEGACY_BENCH : o)).forEach((o) => {
     const want = WANT[o.name];
     assert(want, 'no piece kind is claimed for ' + o.name + ' (' + o.id + ')');
     const kind = TP.claims(o.location, rowsOf(o.location))[o.x + ',' + o.y];
@@ -229,7 +243,7 @@ function streetFrontsAgree() {
     const cells = p.cells || Array.from({length:p.w * p.h}, (_, i) => ({x:p.x + i % p.w, y:p.y + Math.floor(i / p.w)}));
     cells.forEach(c => { const k=c.x + ',' + c.y; counts[k]=(counts[k] || 0)+1; });
   });
-  const blocked = W.blockedCells('street');
+  const blocked = blockedOf('street');
   ok(blocked.length === 94 && blocked.every(c => counts[c] === 1),
     'all 94 solid cells (house fronts, the park boundary, garden walls and fences) are claimed exactly once');
   const doors = plan.pieces.filter(p => p.kind === 'door'), gates = plan.pieces.filter(p => p.kind === 'gate');
@@ -238,7 +252,7 @@ function streetFrontsAgree() {
   ok(doors.map(d=>d.destination).sort().join(',') === 'cafe,flat_a,flat_b,flat_c,flat_d,flat_e',
     'each home and the cafe have their own entrance material');
   ok(doors.concat(gates).every(d => {
-    const portal = W.STREET_PORTALS[d.destination];
+    const portal = LEGACY_PORTALS[d.destination];
     return portal && portal.x >= d.x && portal.x < d.x + d.w && Math.abs(portal.y - d.y) === (d.kind === 'gate' ? 0 : 1);
   }), 'every entrance accent matches the actual world destination, including the attic and ground-floor home');
   ok(plan.fronts.filter(f=>f.side === 'north').every(f=>f.h * 16 >= 48),

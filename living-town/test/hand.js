@@ -23,7 +23,7 @@ const people = (sim) => JSON.stringify(sim.actorIds().map((id) => sim.state.char
   const types = {};
   {
     const sim = quietWorld();
-    const tries = [['leave_book', { spot: 'park_bench_sw' }], ['send_parcel', { who: 'resident_b' }], ['extra_shift', { who: 'resident_a' }]];
+    const tries = [['leave_book', { spot: 'park_lawn_w' }], ['send_parcel', { who: 'resident_b' }], ['extra_shift', { who: 'resident_a' }]];
     const before = people(sim);
     tries.forEach(([id, a]) => { const r = H.make(sim, id, a, 'half_hour'); ok(r.ok && r.record.source === 'watcher' && r.record.status === 'scheduled' && r.record.atAbs === sim.absMinute() + 30, id + ' is scheduled by the watcher for half an hour on'); types[r.record.type] = true; });
     ok(Object.keys(types).every((t) => !!I.get(t)), 'every type it schedules is one the simulation already defines: ' + Object.keys(types).join(', '));
@@ -38,16 +38,16 @@ const people = (sim) => JSON.stringify(sim.actorIds().map((id) => sim.state.char
   console.log('# a refusal has a name, and leaves no trace');
   {
     const sim = quietWorld();
-    H.make(sim, 'leave_book', { spot: 'park_bench_sw' });
+    H.make(sim, 'leave_book', { spot: 'park_lawn_w' });
     const n = sim.state.interventions.length, ev = sim.state.events.length;
-    const twice = H.make(sim, 'leave_book', { spot: 'park_bench_sw' });
+    const twice = H.make(sim, 'leave_book', { spot: 'park_lawn_w' });
     ok(!twice.ok && twice.error === 'spot_taken' && /already/.test(twice.said), 'the same bench twice: ' + twice.said);
     const jobless = H.make(sim, 'extra_shift', { who: 'resident_b' });
     ok(!jobless.ok && jobless.error === 'not_employed', 'a shift for someone with no employer: ' + jobless.said);
     while (sim.state.minute < 1300) sim.tick();
     const late = H.make(sim, 'extra_shift', { who: 'resident_a' });
     ok(!late.ok && late.error === 'outside_opening_hours', 'a shift past closing time is refused by the intervention\'s own validation: ' + late.said);
-    ok(!H.make(sim, 'rain_of_frogs', {}).ok && !H.make(sim, 'leave_book', { spot: 'park_bench_ne' }, 'next_year').ok && !H.make(sim, 'send_parcel', { who: 'nobody' }).ok, 'an unknown thing, time or person is refused');
+    ok(!H.make(sim, 'rain_of_frogs', {}).ok && !H.make(sim, 'leave_book', { spot: 'park_jetty' }, 'next_year').ok && !H.make(sim, 'send_parcel', { who: 'nobody' }).ok, 'an unknown thing, time or person is refused');
     ok(sim.state.interventions.length === n && sim.state.events.filter((e) => e.type === 'INTERVENTION_SCHEDULED').length === 1, 'none of the refusals was recorded or announced');
     ok(H.say('some_new_error') === 'some new error', 'an error nobody has put into words yet is shown as it is');
   }
@@ -74,7 +74,7 @@ const people = (sim) => JSON.stringify(sim.actorIds().map((id) => sim.state.char
   {
     const sim = LT.Scenario.day1({ intervention: false });
     await sim.runUntil(1, 500);
-    H.make(sim, 'leave_book', { spot: 'park_bench_ne' }, 'two_hours');
+    H.make(sim, 'leave_book', { spot: 'park_jetty' }, 'two_hours');
     const loaded = LT.Save.deserialize(JSON.parse(JSON.stringify(LT.Save.serialize(sim))));
     await loaded.runUntil(1, 700);
     await sim.runUntil(1, 700);
@@ -105,7 +105,7 @@ const people = (sim) => JSON.stringify(sim.actorIds().map((id) => sim.state.char
 
   console.log('# the same request in the same world gives the same world');
   {
-    const run = async () => { const s = LT.Scenario.day1({}); await s.runUntil(1, 470); H.make(s, 'leave_book', { spot: 'park_bench_sw' }); H.make(s, 'send_parcel', { who: 'resident_b' }, 'half_hour'); await s.runUntil(1, 1200); return JSON.stringify(s.state); };
+    const run = async () => { const s = LT.Scenario.day1({}); await s.runUntil(1, 470); H.make(s, 'leave_book', { spot: 'park_lawn_w' }); H.make(s, 'send_parcel', { who: 'resident_b' }, 'half_hour'); await s.runUntil(1, 1200); return JSON.stringify(s.state); };
     ok(await run() === await run(), 'deterministic');
   }
 

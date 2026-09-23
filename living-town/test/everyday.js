@@ -134,8 +134,8 @@ async function oneCopyOneReader() {
   const p1 = chooser(['read_book']), p2 = chooser(['read_book']);
   const sim = LT.Scenario.day1({ intervention: false, policies: { resident_a: p1.id, resident_b: p2.id } });
   sim.state.minute = 700;
-  sim.placeCharacter(sim.state.characters.resident_a, 'park', { x: 2, y: 8, dir: 'up' });
-  sim.placeCharacter(sim.state.characters.resident_b, 'park', { x: 14, y: 1, dir: 'down' });
+  sim.placeCharacter(sim.state.characters.resident_a, 'park', { x: 24, y: 18, dir: 'up' });
+  sim.placeCharacter(sim.state.characters.resident_b, 'park', { x: 38, y: 18, dir: 'down' });
   assert(sim.scheduleIntervention({ type: BOOK.type, params: BOOK.params }).ok); sim.applyDueInterventions();
   await sim.runMinutes(4);
   const book = sim.objectById('book_park');
@@ -199,7 +199,7 @@ async function interventionScheduledAfterLoad() {
   ok(first.state.interventions.filter((r) => r.status === 'scheduled').length === 3, 'saved at 08:20 with three interventions still waiting');
   const sim = Save.fromJSON(Save.toJSON(first));
   const late = { type: 'place_shared_book', atDay: 1, atMinute: 520,
-                 params: { instanceId: 'book_late', title: 'Salt', locationId: 'park', x: 3, y: 6, useSpot: { x: 3, y: 7, dir: 'up' }, requiredReadMinutes: 30 } };
+                 params: { instanceId: 'book_late', title: 'Salt', locationId: 'park', x: 4, y: 17, useSpot: { x: 4, y: 18, dir: 'up' }, requiredReadMinutes: 30 } };
   const r = sim.scheduleIntervention(late);
   ok(r.ok && sim.state.interventions.length === 4 && sim.scheduledInterventions === sim.state.interventions &&
      new Set(sim.state.interventions.map((x) => x.id)).size === 4, 'scheduled after the load: one new entry, in the one list, under an id of its own (' + r.record.id + ')');
@@ -304,7 +304,7 @@ async function proofB() {
    * (test/meal-in-town.js); what is pinned here is that the book and the parcel cost nobody a promise they began the day with. */
   ok(a.commitments.concat(b.commitments).filter((c) => c.dueDay === 1 && !/^cmt_meal_/.test(c.id)).every((c) => c.status === 'kept'), 'nobody broke a day-one promise over a book or a parcel');
   const day1Work = events(sim, 'WORKED', 'resident_a').filter((e) => e.day === 1).reduce((m, e) => m + e.data.minutes, 0);
-  ok(day1Work === 464 && (book.readBy.resident_a || 0) === 0, 'the one with a shift and a deadline worked the whole shift (' + day1Work + ' min) and never opened the book');
+  ok(day1Work === 457 && (book.readBy.resident_a || 0) === 0, 'the one with a shift and a deadline worked the whole shift (' + day1Work + ' min) and never opened the book');
   const parcelAt = events(sim, 'FOOD_PARCEL_OPENED')[0];
   const home = sim.state.events.find((e) => e.type === 'ARRIVED' && e.actorId === 'resident_a' && e.data.at === 'flat_a' && e.absMinute > 750);
   ok(home && (!parcelAt || parcelAt.absMinute - home.absMinute > 60), 'the parcel was not opened on sight: home at ' + home.stamp + ', opened ' + (parcelAt ? parcelAt.stamp : 'not at all in two days'));
