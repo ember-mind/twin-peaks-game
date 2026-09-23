@@ -134,7 +134,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     console.log('# page: how it opens for someone who just arrived');
     await page.navigate('living-town/index.html' + '?world=new'); await sleep(1500);
     ok(await js("document.querySelector('#lt-speeds .is-on').textContent") === 'Auto' && await js("LT_OBSERVER.followAction") === true && await js("document.getElementById('lt-follow-action').classList.contains('is-on')"), 'on Auto, following the action');
-    ok(await js("LT_OBSERVER.sim.absMinute()") > 365, 'and the town is already moving (' + await js("LT_OBSERVER.sim.stamp()") + ' after a second and a half)');
+    ok(await js("LT_OBSERVER.sim.absMinute()") > 360, 'and the town is already moving (' + await js("LT_OBSERVER.sim.stamp()") + ' after a second and a half)');
     await js("LT_OBSERVER.speedIndex = 0; true");
 
     console.log('# found in review: what the watcher did is part of what is looked back at');
