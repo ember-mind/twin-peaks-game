@@ -36,7 +36,7 @@
   .clock { font: 600 17px/1 var(--mono); color: var(--gold); }
   .place { color: var(--dim); font-size: 14px; }
   .controls { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; align-items: center; }
-  .group { display: flex; gap: 6px; }
+  .group { display: flex; flex-wrap: wrap; gap: 6px; }
   .lt-tab {
     background: #1d222a; color: var(--text); border: 1px solid var(--edge);
     border-radius: 6px; padding: 5px 11px; font-size: 13px; cursor: pointer;
@@ -105,7 +105,7 @@
   .source-detail { font: 12px/1.4 var(--mono); color: var(--dim); }
 
   #lt-inspector { grid-column: 1 / -1; }
-  #lt-inspector .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
+  #lt-inspector .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 14px; }
   #lt-inspector pre {
     margin: 0; background: #0b0d11; border: 1px solid var(--edge); border-radius: 7px;
     padding: 10px; font: 11px/1.45 var(--mono); color: #b9c2cd;

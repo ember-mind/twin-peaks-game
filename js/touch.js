@@ -522,13 +522,16 @@
         compactTopButton(uiA, 50, 12, 12);
         compactTopButton(uiB, 42, 70, 16);
       }
-      buttonFace(uiA, 'A', 'CONTINUA');
-      buttonFace(uiB, 'B', 'NUOVA');
-      uiA.setAttribute('aria-label', 'Continua partita');
+      /* The title's buttons say what they do: with no save there is nothing to
+       * continue and no second button (found by audit). */
+      var saved = !GAME.hasSave || GAME.hasSave();
+      buttonFace(uiA, 'A', saved ? 'CONTINUA' : 'INIZIA');
+      buttonFace(uiB, 'B', GAME.newGameArmed && GAME.newGameArmed() ? 'CONFERMA' : 'NUOVA');
+      uiA.setAttribute('aria-label', saved ? 'Continua partita' : 'Inizia partita');
       uiB.setAttribute('aria-label', 'Nuova partita');
       showControl(uiDpad, false, 0);
       showControl(uiA, true, 0.68);
-      showControl(uiB, true, 0.58);
+      showControl(uiB, saved, 0.58);
     } else {
       showControl(uiDpad, false, 0);
       showControl(uiA, false, 0);
