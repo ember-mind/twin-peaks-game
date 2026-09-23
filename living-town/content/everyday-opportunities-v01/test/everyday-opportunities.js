@@ -45,7 +45,7 @@ function findUseSpot(sim, locId) {
 function bookParams(over) {
   return Object.assign({
     instanceId: 'book_t1', title: 'Tide Tables', locationId: 'park',
-    x: 6, y: 17, useSpot: { x: 6, y: 16, dir: 'down' }, requiredReadMinutes: 10
+    x: 10, y: 17, useSpot: { x: 10, y: 16, dir: 'down' }, requiredReadMinutes: 10
   }, over || {});
 }
 
@@ -150,7 +150,7 @@ function invalidInterventions() {
      'a use spot in the water is refused');
   ok(refused(sim, 'place_shared_book', book({ useSpot: { x: 99, y: 3 } }), 'use_spot_out_of_bounds'),
      'an out-of-bounds use spot is refused');
-  ok(refused(sim, 'place_shared_book', book({ useSpot: { x: 6, y: 16, dir: 'sideways' } }), 'invalid_use_spot_dir'),
+  ok(refused(sim, 'place_shared_book', book({ useSpot: { x: 10, y: 16, dir: 'sideways' } }), 'invalid_use_spot_dir'),
      'a bad facing is refused');
   ok(refused(sim, 'place_shared_book', book({ instanceId: '' }), 'invalid_instance_id'),
      'an empty instance id is refused');
@@ -194,8 +194,8 @@ function interventionCreatesOneInstance() {
 function objectIdentity() {
   console.log('# objects: distinct instances share a typeId but not their state');
   const sim = day();
-  place(sim, 'place_shared_book', bookParams({ instanceId: 'book_x1', x: 6, y: 17, useSpot: { x: 6, y: 16 } }));
-  place(sim, 'place_shared_book', bookParams({ instanceId: 'book_x2', x: 4, y: 17, useSpot: { x: 4, y: 18 } }));
+  place(sim, 'place_shared_book', bookParams({ instanceId: 'book_x1', x: 10, y: 17, useSpot: { x: 10, y: 16 } }));
+  place(sim, 'place_shared_book', bookParams({ instanceId: 'book_x2', x: 7, y: 17, useSpot: { x: 7, y: 16 } }));
   const b1 = sim.objectById('book_x1'), b2 = sim.objectById('book_x2');
   ok(b1 && b2 && b1.id !== b2.id && b1.typeId === b2.typeId && b1.typeId === 'book_used',
      'two copies have different instance ids and the same typeId');
@@ -205,7 +205,7 @@ function objectIdentity() {
      'both copies are observable in the room');
 
   const aId = actorIds(sim)[0], bId = actorIds(sim)[1];
-  stand(sim, sim.state.characters[aId], b1.location, { x: 6, y: 16 });
+  stand(sim, sim.state.characters[aId], b1.location, { x: 10, y: 16 });
   const ca = ctxFor(sim, sim.state.characters[aId], b1);
   E.ACTIONS.read_book.tick(ca, 3);
   ok(b1.readBy[aId] === 3 && (b2.readBy[aId] || 0) === 0,
@@ -226,14 +226,14 @@ function readingCallbacks() {
   const c = ctxFor(sim, actor, b);
 
   /* In the room but merely approaching: while walking, nothing is read. */
-  sim.placeCharacter(actor, 'park', { x: 22, y: 18 });
+  sim.placeCharacter(actor, 'park', { x: 22, y: 16 });
   ok(E.ACTIONS.read_book.eligible(c) === true, 'the book is readable from its own room');
-  actor.walkTarget = { x: 6, y: 16 };
+  actor.walkTarget = { x: 10, y: 16 };
   E.ACTIONS.read_book.tick(c, 5);
   ok((b.readBy[actor.id] || 0) === 0, 'walking toward the book grants no reading minutes');
 
   /* At the use spot: progress begins. */
-  stand(sim, actor, b.location, { x: 6, y: 16 });
+  stand(sim, actor, b.location, { x: 10, y: 16 });
   E.ACTIONS.read_book.tick(c, 4);
   ok(b.readBy[actor.id] === 4, 'standing on the use spot advances reading by the minutes spent');
   ok(E.ACTIONS.read_book.duration(c) === 6, 'the next block is only what remains for this reader');
@@ -261,7 +261,7 @@ function readingCallbacks() {
 
   /* The other person is still free to read the same copy. */
   const other = sim.state.characters[actorIds(sim)[1]];
-  stand(sim, other, b.location, { x: 6, y: 16 });
+  stand(sim, other, b.location, { x: 10, y: 16 });
   ok(E.ACTIONS.read_book.eligible(ctxFor(sim, other, b)) === true,
      'one person finishing does not mark the book read for anybody else');
   ok(b.readBy[actor.id] === 10 && (b.readBy[other.id] || 0) === 0,
@@ -276,8 +276,8 @@ function readingExclusivity() {
   place(sim, 'place_shared_book', bookParams({ instanceId: 'book_e1' }));
   const b = sim.objectById('book_e1');
   const a = sim.state.characters[actorIds(sim)[0]], c = sim.state.characters[actorIds(sim)[1]];
-  stand(sim, a, b.location, { x: 6, y: 16 });
-  stand(sim, c, b.location, { x: 6, y: 16 });
+  stand(sim, a, b.location, { x: 10, y: 16 });
+  stand(sim, c, b.location, { x: 10, y: 16 });
   const READ = { actionId: 'read_book', targetKind: 'object', targetId: b.id };
   sim.requestDecision = () => null;
 
@@ -297,7 +297,7 @@ function readingHasNoArbitraryBonuses() {
   place(sim, 'place_shared_book', bookParams({ instanceId: 'book_b1' }));
   const b = sim.objectById('book_b1');
   const actor = sim.state.characters[actorIds(sim)[0]];
-  stand(sim, actor, b.location, { x: 6, y: 16 });
+  stand(sim, actor, b.location, { x: 10, y: 16 });
   const before = copy({
     money: actor.money, savings: actor.savings,
     relationships: actor.relationships, standing: actor.standing, goals: actor.goals
@@ -403,7 +403,7 @@ function serializableAndRoundTrip() {
   const book = sim.objectById('book_p1');
   const parcel = sim.objectById('parcel_p1');
   const reader = sim.state.characters[actorIds(sim)[0]];
-  stand(sim, reader, book.location, { x: 6, y: 16 });
+  stand(sim, reader, book.location, { x: 10, y: 16 });
   const c = ctxFor(sim, reader, book);
   E.ACTIONS.read_book.tick(c, 4);   // partial, unfinished
 
@@ -435,7 +435,7 @@ function readOnlyOperationsDoNotMutate() {
   const book = sim.objectById('book_q1');
   const parcel = sim.objectById('parcel_q1');
   const actor = sim.state.characters[actorIds(sim)[0]];
-  stand(sim, actor, book.location, { x: 6, y: 16 });
+  stand(sim, actor, book.location, { x: 10, y: 16 });
 
   const snapshot = JSON.stringify(sim.state);
   E.ACTIONS.read_book.eligible(ctxFor(sim, actor, book));

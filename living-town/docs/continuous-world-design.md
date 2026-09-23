@@ -34,7 +34,7 @@ still means the lawn, and nothing that says `park` had to change.
   (`EMBER.WorldView`), relit in the kit's light, seated on kit benches; the
   sim records the cells walked each minute (`sim.stepsWalked`) so three steps
   are drawn as three steps. Rooms are drawn as before.
-- **Saves**: world migration `d7dfa67e -> baea7025` in `lt-save.js` moves
+- **Saves**: world migration `d7dfa67e -> 98626395` in `lt-save.js` moves
   everyone and everything outside by rule, written against two real saves
   (`test/fixtures/save-town-d7dfa67e-*.json`). A question open at save time is
   re-asked under the key it was first asked with (people walk while an answer

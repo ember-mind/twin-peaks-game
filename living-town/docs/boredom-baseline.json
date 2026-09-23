@@ -1,5 +1,5 @@
 {
-  "commit": "23de5e4ae1406ff06ff2d384507d4972b7d12ee6",
+  "commit": "4ff33ca78025c213c4f1440401e2589bc0c85d8a",
   "seed": 20260918,
   "days": 3,
   "firstDay": 1,
@@ -56,7 +56,7 @@
       },
       "decisions": 105,
       "turnDecisions": 4,
-      "closeCalls": 10,
+      "closeCalls": 46,
       "distinctActivities": {
         "resident_a": [
           "accept_offer",
@@ -98,30 +98,31 @@
           "park"
         ]
       },
-      "togetherMinutes": 64
+      "togetherMinutes": 65
     },
     "2": {
       "wakingMinutes": 960,
       "deadMinutes": 92,
       "liveMinutes": 868,
       "longestDeadStretch": {
-        "minutes": 58,
-        "start": "D2 21:32"
+        "minutes": 59,
+        "start": "D2 21:31"
       },
       "beats": 14,
       "beatsByType": {
         "FOOD_PARCEL_OPENED": 1,
         "GOAL_REACHED": 2,
-        "MEAL_INVITED": 2,
         "TALK_WOUND_DOWN": 2,
         "TALKED": 3,
+        "MEAL_INVITED": 1,
+        "ACTIVITY_FAILED": 1,
         "MEAL_ACCEPTED": 1,
         "COMMITMENT_KEPT": 1,
         "COMMITMENT_BROKEN": 2
       },
-      "decisions": 128,
+      "decisions": 130,
       "turnDecisions": 6,
-      "closeCalls": 34,
+      "closeCalls": 36,
       "distinctActivities": {
         "resident_a": [
           "buy_meal",
@@ -159,25 +160,26 @@
           "flat_b"
         ]
       },
-      "togetherMinutes": 482
+      "togetherMinutes": 481
     },
     "3": {
       "wakingMinutes": 960,
-      "deadMinutes": 91,
-      "liveMinutes": 869,
+      "deadMinutes": 90,
+      "liveMinutes": 870,
       "longestDeadStretch": {
         "minutes": 48,
         "start": "D3 21:42"
       },
       "beats": 9,
       "beatsByType": {
-        "MEAL_INVITED": 2,
         "COMMITMENT_KEPT": 3,
+        "MEAL_INVITED": 1,
+        "ACTIVITY_FAILED": 1,
         "TALKED": 2,
         "MEAL_ACCEPTED": 1,
         "GOAL_REACHED": 1
       },
-      "decisions": 128,
+      "decisions": 129,
       "turnDecisions": 8,
       "closeCalls": 38,
       "distinctActivities": {
@@ -217,16 +219,16 @@
           "flat_b"
         ]
       },
-      "togetherMinutes": 498
+      "togetherMinutes": 493
     }
   },
   "overall": {
     "wakingMinutes": 2880,
-    "deadMinutes": 287,
-    "liveMinutes": 2593,
+    "deadMinutes": 286,
+    "liveMinutes": 2594,
     "longestDeadStretch": {
-      "minutes": 58,
-      "start": "D1 21:32"
+      "minutes": 59,
+      "start": "D2 21:31"
     },
     "beats": 40,
     "beatsByType": {
@@ -236,16 +238,16 @@
       "OFFER_ACCEPTED": 1,
       "TALKED": 6,
       "GOAL_REACHED": 4,
-      "MEAL_INVITED": 5,
-      "ACTIVITY_FAILED": 1,
+      "MEAL_INVITED": 3,
+      "ACTIVITY_FAILED": 3,
       "MEAL_ACCEPTED": 3,
       "COMMITMENT_BROKEN": 4,
       "FOOD_PARCEL_OPENED": 1,
       "TALK_WOUND_DOWN": 2
     },
-    "decisions": 361,
+    "decisions": 364,
     "turnDecisions": 18,
-    "closeCalls": 82,
+    "closeCalls": 120,
     "distinctActivities": {
       "resident_a": [
         "accept_offer",
@@ -291,12 +293,12 @@
         "park"
       ]
     },
-    "togetherMinutes": 1044
+    "togetherMinutes": 1039
   },
   "deadStretches": [
     {
-      "start": "D1 21:32",
-      "minutes": 58,
+      "start": "D2 21:31",
+      "minutes": 59,
       "doing": {
         "resident_a": [
           "sleep @flat_a"
@@ -307,7 +309,7 @@
       }
     },
     {
-      "start": "D2 21:32",
+      "start": "D1 21:32",
       "minutes": 58,
       "doing": {
         "resident_a": [

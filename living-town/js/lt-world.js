@@ -28,6 +28,14 @@
 
   W.isSolid = function (ch) { return SOLID.indexOf(ch) >= 0; };
 
+  /* Whether this person may stop on this cell: some cells belong to the
+   * people who work in a place (behind a counter). Walking is not stopping. */
+  W.mayStand = function (locationId, x, y, actor) {
+    var loc = W.LOCATIONS[locationId];
+    if (!loc || !loc.staffOnly || loc.staffOnly.indexOf(x + ',' + y) < 0) return true;
+    return !!(actor && actor.employment && actor.employment.locationId === locationId);
+  };
+
   /* Every cell of a place nobody can stand on, as 'x,y'. For anything that
    * has to show the map as it is — a painter can be asked whether it accounts
    * for all of them. */
@@ -59,6 +67,9 @@
     cafe: {
       id: 'cafe', name: 'Café Meridiana', kind: 'workplace', indoor: true,
       opens: 480, closes: 1260,          // 08:00 – 21:00
+      /* Behind the counter is for whoever works here: nobody else stops there,
+       * not even to talk to someone serving. */
+      staffOnly: ['1,2', '2,2', '3,2', '4,2', '5,2', '6,2'],
       spawn: { x: 3, y: 8, dir: 'up' },
       exit: { x: 3, y: 8 },
       /* A small neighbourhood café, and deliberately lopsided: a short counter
@@ -312,9 +323,12 @@
     { id: 'obj_cafe_booth_wall', name: 'wall booth', location: 'cafe', x: 11, y: 6,
       tags: ['furniture', 'seat'], portable: false, owner: 'cafe',
       affordances: [], anchors: { eat_here: { x: 10, y: 6, dir: 'right' } } },
+    /* Sat on from the lawn at either end: in front of it is the river wall. */
     { id: 'obj_bench', name: 'park bench', location: 'park', x: 12, y: 17,
       tags: ['furniture', 'seat'], portable: false, owner: 'town',
-      affordances: ['sit_and_rest'] },
+      affordances: ['sit_and_rest'],
+      anchors: { sit_and_rest: { x: 11, y: 17, dir: 'right' } },
+      moreAnchors: { sit_and_rest: [{ x: 14, y: 17, dir: 'left' }] } },
     { id: 'obj_bed_b', name: 'bed', location: 'flat_b', x: 1, y: 1,
       tags: ['furniture', 'rest'], portable: false, owner: 'resident_b',
       affordances: ['sleep'] },

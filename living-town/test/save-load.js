@@ -681,7 +681,7 @@ async function previousFormatIsMigrated() {
     const open = (c) => !LT.World.isSolid(LT.World.LOCATIONS[c.location].rows[c.pos.y].charAt(c.pos.x));
     ok(wg.transit && LT.World.outdoorGrid(wg.location) && open(wg) && wg.walkTarget.x === LT.World.STREET_PORTALS.park.x && wg.walkTarget.y === LT.World.STREET_PORTALS.park.y,
        'she is on the new way from the café to the park (' + wg.pos.x + ',' + wg.pos.y + '), still heading there');
-    ok(bench.x === 12 && bench.y === 17 && ws.location === 'park' && ws.pos.x === 12 && ws.pos.y === 18, 'the bench is the kit\'s west bench, and whoever sat on it sits on it');
+    ok(bench.x === 12 && bench.y === 17 && ws.location === 'park' && ws.pos.x === 11 && ws.pos.y === 17, 'the bench is the kit\'s west bench, and whoever sat on it sits on it, from its west end');
     await walked.runUntil(1, 1030);
     ok(walked.state.events.some((e) => e.type === 'ARRIVED' && e.actorId === 'resident_a' && e.absMinute === goer.activity.endAbs), 'she arrives when her walk said she would, 17:10');
     await walked.runUntil(1, 1080);
@@ -692,10 +692,10 @@ async function previousFormatIsMigrated() {
        'a second: ' + reader.name + ' crossing the old park to the book on the south-east bench');
     const read = Save.deserialize(JSON.parse(readText));
     const rd = read.state.characters.resident_d, book = read.objectById('book_park');
-    ok(book.x === 32 && book.y === 17 && book.anchors.read_book.x === 32 && book.anchors.read_book.y === 18 && rd.walkTarget.x === 32 && rd.walkTarget.y === 18 && open(rd),
+    ok(book.x === 32 && book.y === 17 && book.anchors.read_book.x === 30 && book.anchors.read_book.y === 17 && rd.walkTarget.x === 30 && rd.walkTarget.y === 17 && open(rd),
        'the book is on the east bench, read from in front of it, and she is heading there from open ground');
     await read.runMinutes(20);
-    ok(rd.activity && rd.activity.actionId === 'read_book' && rd.activity.phase === 'executing' && rd.pos.x === 32 && rd.pos.y === 18, 'and she gets there and reads');
+    ok(rd.activity && rd.activity.actionId === 'read_book' && rd.activity.phase === 'executing' && rd.pos.x === 30 && rd.pos.y === 17, 'and she gets there and reads');
     ok(JSON.parse(walkText).world === 'd7dfa67e' && JSON.parse(readText).world === 'd7dfa67e', 'the old save texts are untouched');
     const again = Save.deserialize(JSON.parse(JSON.stringify(Save.serialize(moved))));
     ok(again.state.day === 2 && JSON.parse(JSON.stringify(Save.serialize(moved))).world === LT.World.fingerprint(), 'saved again, it is a save of this town');

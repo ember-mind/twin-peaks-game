@@ -93,9 +93,9 @@ function reach(from) {
   }
   return seen;
 }
-/* The park's own entry point: the middle of the lawn, at the foot of the path
- * from the street, where both benches are in sight (W.SIGHT_CELLS). */
-const parkEntry = { x: 22, y: 18 };
+/* The park's own entry point: the middle of the lawn, on the path down from
+ * the street, with the ends of both benches in sight (W.SIGHT_CELLS). */
+const parkEntry = { x: 22, y: 17 };
 const seen = reach(parkEntry);
 Object.keys(doors).forEach((n) => {
   if (!seen[doors[n].y * W + doors[n].x]) throw new Error('door of ' + n + ' cannot be reached from the park');

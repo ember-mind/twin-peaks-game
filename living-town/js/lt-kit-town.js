@@ -92,8 +92,10 @@
     if (!e.pose || e.pose.poseId !== 'seated' || e.moving) return null;
     var act = sim.state.characters[e.id].activity, obj = act && act.targetId && sim.objectById(act.targetId);
     if (!obj || !LT.World.outdoorGrid(obj.location)) return null;
-    var cx = Math.round(e.wx / TILE);
-    return { x: obj.x * TILE + TILE + (cx - obj.x) * 17, y: e.wy + TILE - 3 - 23 };
+    /* The kit bench's two seats, the one at the end they sat down from; sorted
+     * in front of the bench, not behind its backrest. */
+    var right = Math.round(e.wx / TILE) > obj.x;
+    return { x: obj.x * TILE + TILE + (right ? 17 : 0), y: obj.y * TILE + 6, sortY: (obj.y + 1) * TILE + TILE - 3 };
   }
 
   /* One person as an engine actor. `drawPerson(g, e, x, y)` draws them with
@@ -101,7 +103,7 @@
   function actor(sim, e, lit, drawPerson) {
     var seat = seatFor(sim, e);
     var fx = e.wx + TILE / 2, fy = e.wy + TILE - 3;
-    return { sortY: fy, draw: function (g, camX, camY, l) {
+    return { sortY: seat ? seat.sortY : fy, draw: function (g, camX, camY, l) {
       var sb = buffer(), V = EMBER.WorldView, view = K.view;
       var px = seat ? seat.x : fx, py = seat ? seat.y : fy;
       var sx = px - camX, sy = py - camY;

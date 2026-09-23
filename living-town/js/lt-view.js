@@ -256,7 +256,19 @@
     try { GAME.sprites.drawStructures(g, scene, cx, cy, opts); }
     finally { if (light && base) kit.materials[scene.id] = base; }
     EMBER.Tilemap.paintDepthBands(ents, TILE, function (e) {
-      self.drawInhabitant(g, e, cx, cy, scene.id, how);
+      if (!e.booth) { self.drawInhabitant(g, e, cx, cy, scene.id, how); return; }
+      /* On a booth: the person on its seat, then the booth's table again,
+       * clipped to the table, over their lap. */
+      var at = {}; for (var k in e) at[k] = e[k];
+      at.wy = e.booth.y;
+      self.drawInhabitant(g, at, cx, cy, scene.id, how);
+      var r = e.booth.rect;
+      g.save(); g.beginPath(); g.rect(r[0] - cx, r[1] - cy, r[2], r[3]); g.clip();
+      GAME.sprites.drawForegroundStructures(g, scene, cx, cy, {
+        mapId: scene.id, indoor: true, viewportWidth: VW, viewportHeight: VH,
+        forestDepthMin: e.booth.depth, forestDepthMax: e.booth.depth + 1
+      });
+      g.restore();
     }, function (footY, nextFootY, afterIndex) {
       if (afterIndex < 0) return;
       GAME.sprites.drawForegroundStructures(g, scene, cx, cy, {
@@ -381,15 +393,38 @@
           x = bed.x * TILE + (wide ? TILE / 2 : 0); y = bed.y * TILE;
         }
       }
+      var booth = pose && pose.poseId === 'seated' && !e.render.walking ? boothSeat(sim, e.character, locId) : null;
       return {
-        id: e.character.id, sheetId: LT.Appearance.sheetIdFor(e.character), pose: pose,
-        wx: x, wy: y,
+        id: e.character.id, sheetId: LT.Appearance.sheetIdFor(e.character), pose: booth ? { poseId: 'seated', dir: 'down' } : pose,
+        /* Someone on a booth sits on its seat, behind its table: sorted just
+         * in front of the booth's own line so the table can be drawn over
+         * their lap and anyone further forward over them. */
+        wx: booth ? booth.x : x, wy: booth ? booth.depth + 1 - TILE : y, booth: booth,
         dir: e.render.dir, moving: e.render.walking,
         phase: EMBER.Grid.walkPhase(e.render.phaseT % 1)
       };
     });
     return EMBER.Tilemap.depthSort(ents);
   };
+
+  /* The booth a seated person is on, from the room's plan: which one, which
+   * end (the one they sat down from), where the seat is and the booth's
+   * floor line. Null when they are not seated on one. */
+  function boothSeat(sim, c, locId) {
+    var loc = LT.World.LOCATIONS[locId], plan = loc && loc.visual && loc.visual.plan;
+    if (!plan || !plan.banquettes) return null;
+    var act = c.activity, id = act && ((act.seat && act.seat.state === 'seated' && act.seat.objectId) || act.targetId);
+    var obj = id && sim.objectById(id);
+    if (!obj || obj.location !== locId) return null;
+    for (var n = 0; n < plan.banquettes.length; n++) {
+      var b = plan.banquettes[n];
+      if (obj.y !== b[1] || obj.x < b[0] || obj.x >= b[0] + b[2]) continue;
+      var left = c.pos.x < b[0], w = b[2] * TILE;
+      return { n: n, side: left ? 'left' : 'right', x: b[0] * TILE + (left ? 8 : w - 25), y: b[1] * TILE - 12,
+               depth: (b[1] + 1) * TILE, rect: [b[0] * TILE, b[1] * TILE + 1, w, 17] };
+    }
+    return null;
+  }
 
   /* A viewer must be able to tell working from resting without reading a label.
    * These are modest marks over the actor, not a second UI. */

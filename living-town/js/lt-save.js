@@ -33,10 +33,11 @@
  *                      that names this load ('req_7.2'): an answer addressed
  *                      to the question as the vanished process asked it is an
  *                      unknown request here, never a second answer. The key
- *                      an answer is judged by (relevanceKey) is the one it
- *                      was first asked under: outside, people go on walking
- *                      while a question is open, so the world at the save
- *                      can differ from the world it was asked in.
+ *                      an answer is judged by (relevanceKey), its time and
+ *                      its candidates are the ones it was first asked with:
+ *                      people go on walking while a question is open, so
+ *                      the world at the save can differ from the world it
+ *                      was asked in.
  *
  * Re-asked, not replayed. What the save guarantees is the question: the same
  * person, the same state, the same candidates, the same request number, and
@@ -240,7 +241,7 @@
     return save;
   };
 
-  /* d7dfa67e -> the kit town: outside became one map. The street (20x11) and
+  /* d7dfa67e -> 98626395, the kit town: outside became one map. The street (20x11) and
    * the park (16x10) were two rooms; now both are parts of one 48x27 village
    * drawn from the kit (lt-town.gen.js), with the park on the lawn by the
    * river. Every position outside, every walk target outside and everything
@@ -258,19 +259,21 @@
    * test/fixtures/save-town-d7dfa67e-walking-to-the-park.json and
    * save-town-d7dfa67e-reading-in-the-park.json. */
   var KIT_TOWN = {
-    world: 'baea7025', w: 48, h: 27, top: 9, parkRow: 15, parkEast: 39,
+    world: '98626395', w: 48, h: 27, top: 9, parkRow: 15, parkEast: 39,
     rows: ['#######D#######D##########D#####D#######D#######', 'ffffff-,ffffff-,ffff-ff-f--ffff--ffffff,-ffff#ff',
            '-f----------------f-----------------f---------f-', '------------------------------------------------',
            '------------------------------------------------', '------------------------------------------------',
            ',,fffffffffffffffffff----fffffffffffffff,w------', ',,,,,,,,,#,,,,,#,,,,,---,,,#,,,,,,,,,,,,,ww-----',
-           ',#,,,,,ffff,ff,,,fff,---,ff,,,,ff,fff,ff,www----', ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,wwww---',
+           ',#,ffff,,,,,ff,,,fff,---ff,,,,,ff,fff,ff,www----', 'fffffffffffffffffffff,,,fffffffffffffffffwwww---',
            '#####################,,,#################wwww---', 'wwwwwwwwwwwwwwwwwwwww---wwwwwwwwwwwwwwwwwwwwww--',
            'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww-'],
     portals: { cafe: { x: 26, y: 9 }, flat_a: { x: 7, y: 9 }, flat_b: { x: 15, y: 9 }, flat_c: { x: 26, y: 9 },
-               flat_d: { x: 32, y: 9 }, flat_e: { x: 40, y: 9 }, park: { x: 22, y: 18 } },
+               flat_d: { x: 32, y: 9 }, flat_e: { x: 40, y: 9 }, park: { x: 22, y: 17 } },
+    /* the bench is sat on from the lawn at either end: in front of it is the wall */
+    bench: { anchors: { sit_and_rest: { x: 11, y: 17, dir: 'right' } }, moreAnchors: { sit_and_rest: [{ x: 14, y: 17, dir: 'left' }] } },
     /* old park cell -> new cell, for things and for the cells they are used from */
-    spots: { '3,2': [12, 17], '3,3': [12, 18], '12,6': [32, 17], '12,7': [32, 18], '3,6': [4, 17], '3,7': [4, 18],
-             '12,2': [22, 20], '12,3': [22, 19, 'down'], '8,6': [22, 17], '8,7': [22, 18] }
+    spots: { '3,2': [12, 17], '3,3': [11, 17, 'right'], '12,6': [32, 17], '12,7': [30, 17, 'right'], '3,6': [7, 17], '3,7': [7, 16, 'down'],
+             '12,2': [22, 20], '12,3': [22, 19, 'down'], '8,6': [22, 16], '8,7': [22, 17, 'up'] }
   };
   function kitCell(x, y) {
     var T = KIT_TOWN, row = T.rows[y - T.top];
@@ -311,7 +314,7 @@
   function kitPlace(x, y, from) {
     var s = KIT_TOWN.spots[x + ',' + y];
     if (from === 'park' && s) return { x: s[0], y: s[1], dir: s[2] };
-    if (from === 'park') return kitSnap(Math.round(2 + x * 2.4), 16 + Math.round(y * 2 / 9), 'park');
+    if (from === 'park') return kitSnap(Math.round(2 + x * 2.4), 16 + Math.round(y / 9), 'park');
     return kitSnap(Math.round(2 + x * 2.2), 11 + Math.max(0, Math.min(3, y - 3)), 'street');
   }
   S.WORLD_MIGRATIONS['d7dfa67e'] = function (save) {
@@ -326,6 +329,7 @@
       });
       o.x = at.x; o.y = at.y;
       o.location = kitZone(at.x, at.y);
+      if (o.id === 'obj_bench') { o.anchors = deepCopy(T.bench.anchors); o.moreAnchors = deepCopy(T.bench.moreAnchors); }
     });
     Object.keys(state.characters || {}).forEach(function (id) {
       var c = state.characters[id];
@@ -367,10 +371,14 @@
       var pending = state.characters[id].pending;
       if (pending) {
         var rec = sim.requests[pending.requestId];
-        /* The key the question was asked under: outside, people walk while an
-         * answer is awaited, so the world at the save is not the world it was
-         * asked in, and an answer must be judged the same way here as there. */
-        reissue.push({ actorId: id, seq: pending.seq, issuedAbs: pending.issuedAbs, relevanceKey: pending.relevanceKey || null,
+        /* The question as it was asked — when, what was on offer, the key an
+         * answer is judged by. A question can stay open for minutes while
+         * people walk, so the world at the save is not the world it was asked
+         * in; the same question must be put, and answered the same way. */
+        var q = rec && rec.request;
+        var asked = q ? { day: q.day, minute: q.minute, clock: q.clock, absMinute: q.absMinute,
+                          relevanceKey: q.relevanceKey, candidates: deepCopy(q.candidates) } : null;
+        reissue.push({ actorId: id, seq: pending.seq, issuedAbs: pending.issuedAbs, asked: asked,
                        reason: (rec && rec.request.context && rec.request.context.reason) || 'idle' });
       }
       state.characters[id].pending = null;
@@ -579,7 +587,7 @@
       /* A turn question whose talk is no longer going is not that question any
        * more: the person is simply someone with nothing in hand. */
       var reason = (r.reason === 'conversation_turn' && !midTalk) ? 'idle' : r.reason;
-      if ((!actor.activity || midTalk) && !actor.pending) sim.requestDecision(actor, reason, r.seq, r.issuedAbs, r.relevanceKey || undefined);
+      if ((!actor.activity || midTalk) && !actor.pending) sim.requestDecision(actor, reason, r.seq, r.issuedAbs, r.asked || undefined);
     });
 
     return sim;

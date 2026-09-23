@@ -81,8 +81,8 @@ async function proofA() {
 
   const chosen = events(sim, 'ACTIVITY_STARTED', 'resident_b').find((e) => e.data.actionId === 'read_book');
   ok(chosen && chosen.data.phase === 'approaching' && chosen.data.source === reader.id && book.inUseBy === 'resident_b', 'reading is chosen by their policy; the copy is reserved from that moment; they set off');
-  await sim.runUntil(1, chosen.minute + 3);
-  ok((book.readBy.resident_b || 0) === 0 && b.activity.phase === 'approaching', 'three minutes into the walk, nothing has been read');
+  await sim.runUntil(1, chosen.minute + 1);   // outside, three cells a minute: the lawn is crossed in a few
+  ok((book.readBy.resident_b || 0) === 0 && b.activity.phase === 'approaching', 'a minute into the walk, nothing has been read');
 
   /* saved on the way to the book */
   let restored = Save.fromJSON(Save.toJSON(sim));
@@ -134,8 +134,8 @@ async function oneCopyOneReader() {
   const p1 = chooser(['read_book']), p2 = chooser(['read_book']);
   const sim = LT.Scenario.day1({ intervention: false, policies: { resident_a: p1.id, resident_b: p2.id } });
   sim.state.minute = 700;
-  sim.placeCharacter(sim.state.characters.resident_a, 'park', { x: 24, y: 18, dir: 'up' });
-  sim.placeCharacter(sim.state.characters.resident_b, 'park', { x: 38, y: 18, dir: 'down' });
+  sim.placeCharacter(sim.state.characters.resident_a, 'park', { x: 24, y: 16, dir: 'up' });
+  sim.placeCharacter(sim.state.characters.resident_b, 'park', { x: 38, y: 16, dir: 'down' });
   assert(sim.scheduleIntervention({ type: BOOK.type, params: BOOK.params }).ok); sim.applyDueInterventions();
   await sim.runMinutes(4);
   const book = sim.objectById('book_park');
@@ -199,7 +199,7 @@ async function interventionScheduledAfterLoad() {
   ok(first.state.interventions.filter((r) => r.status === 'scheduled').length === 3, 'saved at 08:20 with three interventions still waiting');
   const sim = Save.fromJSON(Save.toJSON(first));
   const late = { type: 'place_shared_book', atDay: 1, atMinute: 520,
-                 params: { instanceId: 'book_late', title: 'Salt', locationId: 'park', x: 4, y: 17, useSpot: { x: 4, y: 18, dir: 'up' }, requiredReadMinutes: 30 } };
+                 params: { instanceId: 'book_late', title: 'Salt', locationId: 'park', x: 7, y: 17, useSpot: { x: 7, y: 16, dir: 'down' }, requiredReadMinutes: 30 } };
   const r = sim.scheduleIntervention(late);
   ok(r.ok && sim.state.interventions.length === 4 && sim.scheduledInterventions === sim.state.interventions &&
      new Set(sim.state.interventions.map((x) => x.id)).size === 4, 'scheduled after the load: one new entry, in the one list, under an id of its own (' + r.record.id + ')');

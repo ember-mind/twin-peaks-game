@@ -171,7 +171,7 @@ function parkPair(policies, where) {
   sim.state.minute = 1040;
   const a = sim.state.characters.resident_a, b = sim.state.characters.resident_b;
   sim.placeCharacter(a, 'park', (where && where.a) || { x: 12, y: 16, dir: 'down' });
-  sim.placeCharacter(b, 'park', (where && where.b) || { x: 20, y: 18, dir: 'down' });
+  sim.placeCharacter(b, 'park', (where && where.b) || { x: 20, y: 16, dir: 'down' });
   return { sim, a, b };
 }
 
@@ -288,7 +288,7 @@ function recipientBecomesBusyOnTheWay() {
 function personWhoCannotBeReached() {
   console.log('# talk: someone who cannot be walked up to is not talked to');
   const t = parkPair({}); quiet(t.sim);
-  const ring = [[19, 18], [21, 18], [20, 17], [20, 19]].filter(([x, y]) => !W.isSolid(W.LOCATIONS.park.rows[y].charAt(x)));
+  const ring = [[19, 16], [21, 16], [20, 15], [20, 17]].filter(([x, y]) => !W.isSolid(W.LOCATIONS.park.rows[y].charAt(x)));
   withBlocked('park', ring, () => {
     const r = LT.Perception.candidates(t.sim, t.a).rejected.find((x) => x.id === 'talk_with:resident_b');
     ok(r && r.reason === 'person_unreachable', 'with every cell around them taken up, talking is withheld as ' + (r && r.reason));

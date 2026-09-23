@@ -398,7 +398,7 @@
       var ch = EMBER.Grid.cell(loc.rows, c.x, c.y, '#');
       if (W.isSolid(ch)) continue;
       var doorway = ch === 'D' && !(c.x === from.x && c.y === from.y);   // nobody waits in a doorway
-      if (!doorway && !self.standingOn(probe, c)) return c;
+      if (!doorway && W.mayStand(locationId, c.x, c.y, actor) && !self.standingOn(probe, c)) return c;
       STEP_DIRS.forEach(function (d) { queue.push({ x: c.x + d.x, y: c.y + d.y }); });
     }
     return { x: from.x, y: from.y };
@@ -1188,6 +1188,7 @@
       STEP_DIRS.forEach(function (d) {
         var cell = { x: target.pos.x + d.x, y: target.pos.y + d.y };
         if (W.isSolid(EMBER.Grid.cell(loc.rows, cell.x, cell.y, '#'))) return;
+        if (!W.mayStand(actor.location, cell.x, cell.y, actor)) return;   // behind a counter they do not work at
         if (self.standingOn(actor, cell)) return;          // a third person is already standing there
         var len = self.routeLength(loc, actor.pos, cell);
         /* Two people talking stand side by side where they can: seen from
@@ -1579,8 +1580,10 @@
     ].join('|');
   };
 
-  Sim.prototype.buildRequest = function (actor, reason, reissuedSeq, keptKey) {
+  Sim.prototype.buildRequest = function (actor, reason, reissuedSeq, asked) {
     var cand = P.candidates(this, actor);
+    /* Put again after a load: the question as it was first asked. */
+    if (asked && asked.candidates) cand = { legal: asked.candidates, rejected: cand.rejected };
     /* A restored world puts its open questions again under the numbers they
      * already had: it is the same question, and a recording made of the
      * uninterrupted run must still line up with it. The id, though, says which
@@ -1597,10 +1600,11 @@
     var request = {
       requestId: 'req_' + seq + (reissuedSeq ? '.' + (this.loads || 1) : ''), seq: seq,
       actorId: actor.id,
-      day: this.state.day, minute: this.state.minute, clock: U.clock(this.state.minute),
-      absMinute: this.absMinute(),
+      day: asked ? asked.day : this.state.day, minute: asked ? asked.minute : this.state.minute,
+      clock: asked ? asked.clock : U.clock(this.state.minute),
+      absMinute: asked ? asked.absMinute : this.absMinute(),
       stateVersion: this.state.version,
-      relevanceKey: keptKey || this.relevanceKey(actor),
+      relevanceKey: (asked && asked.relevanceKey) || this.relevanceKey(actor),
       self: {
         id: actor.id, name: actor.name, location: actor.location, homeId: actor.homeId,
         needs: deepCopy(actor.needs), money: actor.money, savings: actor.savings,
@@ -1628,10 +1632,10 @@
     return request;
   };
 
-  Sim.prototype.requestDecision = function (actor, reason, reissuedSeq, firstAskedAbs, keptKey) {
+  Sim.prototype.requestDecision = function (actor, reason, reissuedSeq, firstAskedAbs, asked) {
     var policy = Pol.get(actor.policyId);
     if (!policy) throw new Error('no policy registered for ' + actor.id + ' (' + actor.policyId + ')');
-    var request = this.buildRequest(actor, reason, reissuedSeq, keptKey);
+    var request = this.buildRequest(actor, reason, reissuedSeq, asked);
     actor.pending = {
       requestId: request.requestId, seq: request.seq,
       /* A question put again after a reload has been open since it was first
