@@ -1,0 +1,76 @@
+{
+ "name": "living-town-village-v01",
+ "about": "Living Town's art: a riverside village at dusk, cut from the join-page painting. Ground tiles by ground/build-ground.py, objects by build-objects.py, day and night grades by ../town-map/grade-kit.py.",
+ "tile": 16,
+ "tileSet": "ground/ground.json",
+ "groundImage": "ground/ground",
+ "objects": "objects.json",
+ "backdrop": "objects/backdrop",
+ "grades": [
+  "dusk",
+  "day",
+  "night"
+ ],
+ "schedule": [
+  [
+   0,
+   300,
+   "night",
+   "night"
+  ],
+  [
+   300,
+   390,
+   "night",
+   "dusk"
+  ],
+  [
+   390,
+   510,
+   "dusk",
+   "day"
+  ],
+  [
+   510,
+   1050,
+   "day",
+   "day"
+  ],
+  [
+   1050,
+   1170,
+   "day",
+   "dusk"
+  ],
+  [
+   1170,
+   1290,
+   "dusk",
+   "night"
+  ],
+  [
+   1290,
+   1440,
+   "night",
+   "night"
+  ]
+ ],
+ "darkness": {
+  "night": 1,
+  "dusk": 0.45,
+  "day": 0
+ },
+ "light": {
+  "warm": [
+   255,
+   170,
+   80
+  ],
+  "reflection": 0.35
+ },
+ "objectMeta": {
+  "cafe": {
+   "alwaysLit": true
+  }
+ }
+}

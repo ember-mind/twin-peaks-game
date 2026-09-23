@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TP Exterior Kit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--
+  kit-exteriors.html — the Twin Peaks exterior kit (assets/kits/tp-exteriors-v01)
+  on the shared engine: the main street map drawn by EMBER.WorldView, the cast
+  drawn by the production renderer (js/retro-authored.js, default cast sheet)
+  and relit by the engine, walking engine routes between the places.
+
+  URL: ?mode=overview|follow  start=<town minute>  paused=1  debug=1
+       focus=<cast index>  rate=<town min per s>  ppm=<px per town min>
+       capture=<n>   bare page, canvas only at n x, for headless evidence
+-->
+<style>
+  :root { --bg: #14171a; --fg: #e8e2d2; --dim: #9a9484; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.4 system-ui, sans-serif; }
+  main { padding: 12px 16px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 10px; }
+  button { background: #262a2e; color: var(--fg); border: 1px solid #3a3f44; padding: 4px 10px; border-radius: 4px; font: inherit; }
+  button.on { background: #3d5f88; }
+  canvas { image-rendering: pixelated; display: block; }
+  #stats { color: var(--dim); font-variant-numeric: tabular-nums; }
+  body.capture main { padding: 0; } body.capture .bar, body.capture #caption { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar">
+    <button id="bOverview" class="on">Overview</button>
+    <button id="bFollow">Follow</button>
+    <button id="bNext">Next person</button>
+    <span id="stats"></span>
+  </div>
+  <canvas id="overview"></canvas>
+  <canvas id="follow" style="display:none"></canvas>
+  <p id="caption" style="margin:8px 0 0;color:#e9b458;font:600 15px/1.3 system-ui,sans-serif"></p>
+</main>
+<script>
+  /* The production renderer reads who is on its sheet from GAME.Sprites.CHARS
+   * (by identity); no RetroCastAtlas, so it keeps the default Twin Peaks sheet. */
+  window.GAME = { Sprites: { CHARS: { cooper: {}, truman: {}, lucy: {}, andy: {}, hawk: {} }, drawTile: function () {} } };
+</script>
+<script src="../engine/ember-math.js"></script>
+<script src="../engine/ember-grid.js"></script>
+<script src="../engine/ember-camera.js"></script>
+<script src="../engine/ember-tilemap.js"></script>
+<script src="../engine/ember-viewport.js"></script>
+<script src="../engine/ember-pixel.js"></script>
+<script src="../engine/ember-interior-kit.js"></script>
+<script src="../js/retro-authored.js"></script>
+<script src="../js/retro-font.js"></script>
+<script src="../engine/ember-ground.js"></script>
+<script src="../engine/ember-worldmap.js"></script>
+<script src="../engine/ember-worldview.js"></script>
+<script src="../assets/kits/tp-exteriors-v01/maps/street-cast.js"></script>
+<script>
+(function () {
+  var KIT = '../assets/kits/tp-exteriors-v01/';
+  var WM = EMBER.WorldMap, WV = EMBER.WorldView, SC = window.StreetCast, VW = 256, VH = 192;
+  var qs = new URLSearchParams(location.search);
+  var state = { mode: qs.get('mode') || 'overview', focus: +(qs.get('focus') || 0), t: +(qs.get('start') || 19 * 60 + 30),
+                rate: +(qs.get('rate') || 1), ppm: +(qs.get('ppm') || 48), debug: qs.get('debug') === '1' };
+  var capture = +(qs.get('capture') || 0);
+  if (capture) document.body.classList.add('capture');
+  var world, view, plan, walks, missing = [], ready = false, castReady = false;
+  var CHARS = GAME.Sprites.CHARS;
+  if (GAME.Sprites.castReady) GAME.Sprites.castReady.then(function () { castReady = true; }); else castReady = true;
+
+  Promise.all([fetch(KIT + 'maps/main-street.json', { cache: 'no-store' }).then(function (r) { return r.json(); }), WV.loadKit(KIT)])
+    .then(function (r) {
+      world = WM.build(r[0], r[1]);
+      view = WV.create(world, r[1]);
+      plan = SC.plan(world, r[0].cast, 1990, state.ppm);
+      walks = SC.walks(plan);
+      /* door=<place>&dir=out|in: jump to the first time after `start` that
+       * someone leaves (or reaches) that door, and follow them */
+      if (qs.get('door')) {
+        var place = qs.get('door'), out = qs.get('dir') !== 'in', best = null;
+        plan.people.forEach(function (p, i) {
+          p.legs.forEach(function (L) {
+            if (L.kind !== 'walk' || (out ? L.from : L.to) !== place) return;
+            var t = out ? L.t0 + 10 / plan.ppm : L.t1 - 12 / plan.ppm;
+            if (t >= state.t && (!best || t < best.t)) best = { t: t, i: i };
+          });
+        });
+        if (best) { state.t = best.t; state.focus = best.i; state.mode = 'follow'; }
+      }
+      missing = Object.keys(r[1].images).filter(function (k) { return !r[1].images[k]; });
+      document.title = 'TP Exterior Kit' + (missing.length ? ' (missing ' + missing.join(',') + ')' : '');
+      setMode(state.mode); ready = true;
+    });
+
+  /* ---- the cast, drawn by the production renderer into a buffer, relit by
+   * the engine to sit in the kit's light ------------------------------------ */
+  var AMBIENT = { day: [112, 110, 100], dusk: [58, 64, 80], night: [24, 32, 56] };
+  var TINT = { day: [1.0, 0.99, 0.96], dusk: [0.88, 0.86, 0.92], night: [0.55, 0.6, 0.8] };
+  var buf = document.createElement('canvas'); buf.width = 48; buf.height = 48;
+  var bg = buf.getContext('2d', { willReadFrequently: true }); bg.imageSmoothingEnabled = false;
+
+  function people() {
+    return plan.people.map(function (p, i) {
+      var q = SC.at(plan, i, state.t), ox = 0, oy = 0;
+      if (!q.moving && q.outdoors) ox = [0, -12, 12, -6, 6][i % 5];     // two at one spot stand apart
+      if (q.moving) { var lane = [-4, 4, 0, -7, 7][i % 5] * Math.min(1, q.fromEnds / 14); ox = q.nx * lane; oy = q.ny * lane; }
+      return { i: i, p: p, q: q, fx: Math.round(q.x + ox), fy: Math.round(q.y + oy) };
+    });
+  }
+  /* A place is lit while someone is inside it: its windows glow around the
+   * concepts' own painted interiors (kit.json light.windowPane false) and
+   * light the cast passing by; by day nothing glows. */
+  function lit(ents) {
+    var out = {};
+    if (view.lightAt(state.t).dark < 0.1) return out;       // no glow in daylight
+    ents.forEach(function (e) { if (!e.q.outdoors) out[e.q.place] = true; });
+    return out;
+  }
+  function actor(e, litNow) {
+    return { sortY: e.fy, draw: function (g, camX, camY, l) {
+      bg.clearRect(0, 0, 48, 48);
+      if (castReady) {
+        GAME.Sprites.drawChar(bg, 16, 16, CHARS[e.p.id], e.q.dir, e.q.moving ? EMBER.Grid.walkPhase(e.q.phase % 1) : 0, 1, e.q.moving, false,
+          performance.now() / 1000, { mapId: 'tp_main_street', wx: e.fx, wy: e.fy, npcId: e.p.id, characterLife: null });
+      }
+      WV.relight(bg, 48, 48, l.dark, view.lightsNear(e.fx, e.fy, litNow), view.mix(AMBIENT, l), view.mix(TINT, l));
+      /* drawChar's (16,16) is the tile's top-left; feet sit at the tile bottom */
+      g.drawImage(buf, e.fx - camX - 8 - 16, e.fy - camY + 3 - 32);
+    } };
+  }
+  function drawWorld(g, camX, camY, ents) {
+    var litNow = lit(ents);
+    view.draw(g, camX, camY, state.t, {
+      actors: ents.filter(function (e) { return e.q.outdoors; }).map(function (e) { return actor(e, litNow); }),
+      lit: litNow, doorOpen: function (place) { return WM.doorOpen(walks, place, state.t, plan.ppm); },
+      debug: state.debug,
+      routes: state.debug ? walks.filter(function (wk) { return state.t >= wk.t0 && state.t < wk.t0 + wk.route.length / plan.ppm; }).map(function (wk) { return wk.route; }) : []
+    });
+  }
+
+  var cv = { overview: document.getElementById('overview'), follow: document.getElementById('follow') }, gO, gF;
+  function size() {
+    var WW = world.W * world.T, HH = world.H * world.T;
+    if (!gO) { gO = EMBER.Viewport.attachNative(cv.overview, WW, HH); gF = EMBER.Viewport.attachNative(cv.follow, VW, VH); }
+    var so, sf;
+    if (capture) { so = sf = capture; }
+    else {
+      var aw = window.innerWidth - 32, ah = window.innerHeight - 110;
+      so = EMBER.Viewport.integerScale(aw, ah, WW, HH); if (so * WW > aw) so = Math.min(aw / WW, ah / HH);
+      sf = EMBER.Viewport.integerScale(aw, ah, VW, VH);
+    }
+    cv.overview.style.width = WW * so + 'px'; cv.overview.style.height = HH * so + 'px';
+    cv.follow.style.width = VW * sf + 'px'; cv.follow.style.height = VH * sf + 'px';
+  }
+  window.addEventListener('resize', function () { if (world) size(); });
+
+  function frame() {
+    var ents = people();
+    if (state.mode === 'overview') drawWorld(gO, 0, 0, ents);
+    else {
+      var f = ents[state.focus % ents.length];
+      var cam = EMBER.Camera.centerOn(f.fx, f.fy - 12, { worldW: world.W * world.T, worldH: world.H * world.T, viewW: VW, viewH: VH });
+      drawWorld(gF, Math.round(cam.x), Math.round(cam.y), ents);
+      document.getElementById('caption').textContent = f.p.name + (f.q.outdoors ? (f.q.moving ? ' · walking to ' + f.q.to : ' · at ' + f.q.place) : ' · inside ' + f.q.place);
+    }
+    var hh = String(Math.floor(state.t / 60) % 24).padStart(2, '0'), mm = String(Math.floor(state.t) % 60).padStart(2, '0');
+    var l = view.lightAt(state.t);
+    document.getElementById('stats').textContent = hh + ':' + mm + ' · light ' + l.a + (l.k ? '→' + l.b : '') +
+      ' · walking ' + ents.filter(function (e) { return e.q.moving; }).length + '/' + ents.length;
+  }
+
+  var last = performance.now(), paused = qs.get('paused') === '1';
+  function loop(now) {
+    var dt = Math.min(0.1, (now - last) / 1000); last = now;
+    if (ready) {
+      if (!gO) size();
+      if (!paused) state.t += dt * state.rate;
+      try { frame(); } catch (err) { document.getElementById('stats').textContent = 'ERROR ' + err.message; throw err; }
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  function setMode(m) {
+    state.mode = m;
+    cv.overview.style.display = m === 'overview' ? 'block' : 'none';
+    cv.follow.style.display = m === 'follow' ? 'block' : 'none';
+    document.getElementById('bOverview').classList.toggle('on', m === 'overview');
+    document.getElementById('bFollow').classList.toggle('on', m === 'follow');
+  }
+  document.getElementById('bOverview').onclick = function () { setMode('overview'); };
+  document.getElementById('bFollow').onclick = function () { setMode('follow'); };
+  document.getElementById('bNext').onclick = function () { state.focus = (state.focus + 1) % plan.people.length; setMode('follow'); };
+  window.addEventListener('keydown', function (e) {
+    if (e.key === ' ') paused = !paused;
+    if (e.key === 'd') state.debug = !state.debug;
+    if (e.key === 'Tab') { e.preventDefault(); state.focus = (state.focus + 1) % plan.people.length; }
+  });
+  window.KIT_EXTERIORS = { state: state, ready: function () { return ready && castReady; }, world: function () { return world; }, plan: function () { return plan; } };
+})();
+</script>
+</body>
+</html>

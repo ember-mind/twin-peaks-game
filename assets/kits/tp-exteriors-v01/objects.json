@@ -1,0 +1,948 @@
+[
+ {
+  "id": "double-r",
+  "file": "objects/double-r.png",
+  "w": 208,
+  "h": 94,
+  "anchor": [
+   -5,
+   62
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ],
+   [
+    3,
+    0
+   ],
+   [
+    4,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    6,
+    0
+   ],
+   [
+    7,
+    0
+   ],
+   [
+    8,
+    0
+   ],
+   [
+    9,
+    0
+   ],
+   [
+    10,
+    0
+   ],
+   [
+    11,
+    0
+   ],
+   [
+    12,
+    0
+   ],
+   [
+    0,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    2,
+    1
+   ],
+   [
+    3,
+    1
+   ],
+   [
+    4,
+    1
+   ],
+   [
+    5,
+    1
+   ],
+   [
+    8,
+    1
+   ],
+   [
+    9,
+    1
+   ],
+   [
+    10,
+    1
+   ],
+   [
+    11,
+    1
+   ],
+   [
+    12,
+    1
+   ]
+  ],
+  "depth": 94,
+  "kind": "building",
+  "source": [
+   "double-r",
+   21,
+   9
+  ],
+  "door": {
+   "dx": 6,
+   "dy": 1,
+   "w": 2,
+   "rect": [
+    108,
+    64,
+    13,
+    28
+   ],
+   "open": "objects/double-r-door-open.png"
+  },
+  "windows": [
+   [
+    16,
+    62,
+    57,
+    21
+   ],
+   [
+    142,
+    62,
+    57,
+    21
+   ]
+  ]
+ },
+ {
+  "id": "planter-l",
+  "file": "objects/planter-l.png",
+  "w": 53,
+  "h": 14,
+  "anchor": [
+   3,
+   9
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ]
+  ],
+  "depth": 14,
+  "kind": "plant",
+  "source": [
+   "double-r",
+   29,
+   94
+  ]
+ },
+ {
+  "id": "planter-r",
+  "file": "objects/planter-r.png",
+  "w": 53,
+  "h": 17,
+  "anchor": [
+   2,
+   12
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ]
+  ],
+  "depth": 17,
+  "kind": "plant",
+  "source": [
+   "double-r",
+   174,
+   91
+  ]
+ },
+ {
+  "id": "bin",
+  "file": "objects/bin.png",
+  "w": 16,
+  "h": 27,
+  "anchor": [
+   0,
+   11
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 27,
+  "kind": "prop",
+  "source": [
+   "double-r",
+   9,
+   64
+  ]
+ },
+ {
+  "id": "rr-sign",
+  "file": "objects/rr-sign.png",
+  "w": 28,
+  "h": 73,
+  "anchor": [
+   6,
+   54
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 70,
+  "kind": "prop",
+  "source": [
+   "double-r",
+   226,
+   36
+  ],
+  "note": "roadside sign; post and foot rebuilt, board from the concept"
+ },
+ {
+  "id": "light-spill",
+  "file": "objects/light-spill.png",
+  "w": 80,
+  "h": 19,
+  "anchor": [
+   8,
+   2
+  ],
+  "footprint": [],
+  "depth": 0,
+  "kind": "decal",
+  "source": [
+   "double-r",
+   88,
+   101
+  ],
+  "note": "lantern light on the walk; drawn at dusk and night, empty by day"
+ },
+ {
+  "id": "sheriff-station",
+  "file": "objects/sheriff-station.png",
+  "w": 216,
+  "h": 102,
+  "anchor": [
+   -1,
+   70
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ],
+   [
+    3,
+    0
+   ],
+   [
+    4,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    6,
+    0
+   ],
+   [
+    7,
+    0
+   ],
+   [
+    8,
+    0
+   ],
+   [
+    9,
+    0
+   ],
+   [
+    10,
+    0
+   ],
+   [
+    11,
+    0
+   ],
+   [
+    12,
+    0
+   ],
+   [
+    0,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    2,
+    1
+   ],
+   [
+    3,
+    1
+   ],
+   [
+    4,
+    1
+   ],
+   [
+    5,
+    1
+   ],
+   [
+    8,
+    1
+   ],
+   [
+    9,
+    1
+   ],
+   [
+    10,
+    1
+   ],
+   [
+    11,
+    1
+   ],
+   [
+    12,
+    1
+   ]
+  ],
+  "depth": 102,
+  "kind": "building",
+  "source": [
+   "sheriff",
+   15,
+   10
+  ],
+  "door": {
+   "dx": 6,
+   "dy": 1,
+   "w": 2,
+   "rect": [
+    112,
+    66,
+    14,
+    35
+   ],
+   "open": "objects/sheriff-station-door-open.png"
+  },
+  "windows": [
+   [
+    23,
+    60,
+    54,
+    26
+   ],
+   [
+    151,
+    60,
+    44,
+    26
+   ]
+  ]
+ },
+ {
+  "id": "bench",
+  "file": "objects/bench.png",
+  "w": 41,
+  "h": 18,
+  "anchor": [
+   2,
+   10
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 18,
+  "kind": "prop",
+  "source": [
+   "sheriff",
+   44,
+   102
+  ]
+ },
+ {
+  "id": "shrub-1",
+  "file": "objects/shrub-1.png",
+  "w": 24,
+  "h": 14,
+  "anchor": [
+   -3,
+   6
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 14,
+  "kind": "plant",
+  "source": [
+   "sheriff",
+   17,
+   106
+  ]
+ },
+ {
+  "id": "shrub-2",
+  "file": "objects/shrub-2.png",
+  "w": 24,
+  "h": 15,
+  "anchor": [
+   7,
+   7
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 15,
+  "kind": "plant",
+  "source": [
+   "sheriff",
+   167,
+   105
+  ]
+ },
+ {
+  "id": "shrub-3",
+  "file": "objects/shrub-3.png",
+  "w": 20,
+  "h": 14,
+  "anchor": [
+   1,
+   6
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 14,
+  "kind": "plant",
+  "source": [
+   "sheriff",
+   189,
+   106
+  ]
+ },
+ {
+  "id": "shrub-4",
+  "file": "objects/shrub-4.png",
+  "w": 19,
+  "h": 14,
+  "anchor": [
+   -1,
+   6
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 14,
+  "kind": "plant",
+  "source": [
+   "sheriff",
+   207,
+   106
+  ]
+ },
+ {
+  "id": "flagpole",
+  "file": "objects/flagpole.png",
+  "w": 14,
+  "h": 97,
+  "anchor": [
+   -6,
+   89
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 97,
+  "kind": "prop",
+  "source": [
+   "sheriff",
+   228,
+   23
+  ]
+ },
+ {
+  "id": "wheel-stop",
+  "file": "objects/wheel-stop.png",
+  "w": 32,
+  "h": 7,
+  "anchor": [
+   1,
+   -9
+  ],
+  "footprint": [],
+  "depth": 7,
+  "kind": "prop",
+  "source": [
+   "sheriff",
+   33,
+   137
+  ],
+  "note": "lies on the asphalt; no footprint, people step over it"
+ },
+ {
+  "id": "stall-line",
+  "file": "objects/stall-line.png",
+  "w": 4,
+  "h": 29,
+  "anchor": [
+   -6,
+   17
+  ],
+  "footprint": [],
+  "depth": 0,
+  "kind": "decal",
+  "source": [
+   "sheriff",
+   19,
+   148
+  ],
+  "note": "painted parking stall line"
+ },
+ {
+  "id": "asphalt-patch-1",
+  "file": "objects/asphalt-patch-1.png",
+  "w": 44,
+  "h": 21,
+  "anchor": [
+   0,
+   5
+  ],
+  "footprint": [],
+  "depth": 0,
+  "kind": "decal",
+  "source": [
+   "double-r",
+   187,
+   158
+  ],
+  "note": "asphalt repair"
+ },
+ {
+  "id": "asphalt-patch-2",
+  "file": "objects/asphalt-patch-2.png",
+  "w": 29,
+  "h": 17,
+  "anchor": [
+   0,
+   1
+  ],
+  "footprint": [],
+  "depth": 0,
+  "kind": "decal",
+  "source": [
+   "double-r",
+   41,
+   149
+  ],
+  "note": "asphalt repair"
+ },
+ {
+  "id": "asphalt-patch-3",
+  "file": "objects/asphalt-patch-3.png",
+  "w": 25,
+  "h": 13,
+  "anchor": [
+   0,
+   -3
+  ],
+  "footprint": [],
+  "depth": 0,
+  "kind": "decal",
+  "source": [
+   "double-r",
+   16,
+   127
+  ],
+  "note": "asphalt repair"
+ },
+ {
+  "id": "asphalt-patch-4",
+  "file": "objects/asphalt-patch-4.png",
+  "w": 14,
+  "h": 7,
+  "anchor": [
+   0,
+   -9
+  ],
+  "footprint": [],
+  "depth": 0,
+  "kind": "decal",
+  "source": [
+   "double-r",
+   2,
+   142
+  ],
+  "note": "asphalt repair"
+ },
+ {
+  "id": "pine-s",
+  "file": "objects/pine-s.png",
+  "w": 22,
+  "h": 48,
+  "anchor": [
+   3,
+   31
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 47,
+  "kind": "tree"
+ },
+ {
+  "id": "pine-m",
+  "file": "objects/pine-m.png",
+  "w": 30,
+  "h": 73,
+  "anchor": [
+   7,
+   56
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 72,
+  "kind": "tree"
+ },
+ {
+  "id": "pine-l",
+  "file": "objects/pine-l.png",
+  "w": 38,
+  "h": 99,
+  "anchor": [
+   11,
+   82
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 98,
+  "kind": "tree"
+ },
+ {
+  "id": "pine-xl",
+  "file": "objects/pine-xl.png",
+  "w": 46,
+  "h": 130,
+  "anchor": [
+   15,
+   113
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 129,
+  "kind": "tree"
+ },
+ {
+  "id": "pine-m2",
+  "file": "objects/pine-m2.png",
+  "w": 28,
+  "h": 65,
+  "anchor": [
+   6,
+   48
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 64,
+  "kind": "tree"
+ },
+ {
+  "id": "pine-l2",
+  "file": "objects/pine-l2.png",
+  "w": 40,
+  "h": 108,
+  "anchor": [
+   12,
+   91
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 107,
+  "kind": "tree"
+ },
+ {
+  "id": "street-lamp",
+  "file": "objects/street-lamp.png",
+  "w": 22,
+  "h": 58,
+  "anchor": [
+   9,
+   42
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 58,
+  "kind": "streetlight",
+  "windows": [
+   [
+    1,
+    5,
+    11,
+    5
+   ]
+  ],
+  "note": "place lamp-pool on the same tile"
+ },
+ {
+  "id": "lamp-pool",
+  "file": "objects/lamp-pool.png",
+  "w": 44,
+  "h": 14,
+  "anchor": [
+   25,
+   -9
+  ],
+  "footprint": [],
+  "depth": 0,
+  "kind": "decal",
+  "note": "light under a street-lamp on the same tile; faint at dusk, full at night, none by day"
+ },
+ {
+  "id": "wall-lamp",
+  "file": "objects/wall-lamp.png",
+  "w": 13,
+  "h": 18,
+  "anchor": [
+   0,
+   24
+  ],
+  "footprint": [],
+  "depth": 40,
+  "kind": "lamp",
+  "note": "hangs on a wall: place on the wall base row; drawn 22 px above it",
+  "light": [
+   6,
+   8
+  ]
+ },
+ {
+  "id": "fence",
+  "file": "objects/fence.png",
+  "w": 32,
+  "h": 20,
+  "anchor": [
+   0,
+   4
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 20,
+  "kind": "prop",
+  "note": "32 px split-rail run, post at its left; lay runs end to end, end with fence-post"
+ },
+ {
+  "id": "fence-post",
+  "file": "objects/fence-post.png",
+  "w": 6,
+  "h": 20,
+  "anchor": [
+   -5,
+   4
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 20,
+  "kind": "prop"
+ },
+ {
+  "id": "bush-1",
+  "file": "objects/bush-1.png",
+  "w": 26,
+  "h": 18,
+  "anchor": [
+   5,
+   2
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 18,
+  "kind": "plant"
+ },
+ {
+  "id": "bush-2",
+  "file": "objects/bush-2.png",
+  "w": 36,
+  "h": 24,
+  "anchor": [
+   2,
+   8
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 24,
+  "kind": "plant"
+ },
+ {
+  "id": "road-dash",
+  "file": "objects/road-dash.png",
+  "w": 14,
+  "h": 2,
+  "anchor": [
+   1,
+   -14
+  ],
+  "footprint": [],
+  "depth": 0,
+  "kind": "decal",
+  "note": "centre line dash of the road"
+ },
+ {
+  "id": "backdrop",
+  "file": "objects/backdrop.png",
+  "w": 720,
+  "h": 72,
+  "anchor": [
+   0,
+   56
+  ],
+  "footprint": [],
+  "depth": 0,
+  "kind": "backdrop",
+  "note": "fixed backdrop behind everything: dusk sky and three rows of dark pines"
+ }
+]

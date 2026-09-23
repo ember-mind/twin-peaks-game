@@ -1,0 +1,2965 @@
+[
+ {
+  "id": "cottage-1",
+  "file": "objects/cottage-1.png",
+  "w": 96,
+  "h": 99,
+  "anchor": [
+   2,
+   51
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ],
+   [
+    3,
+    0
+   ],
+   [
+    4,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    0,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    2,
+    1
+   ],
+   [
+    3,
+    1
+   ],
+   [
+    4,
+    1
+   ],
+   [
+    5,
+    1
+   ],
+   [
+    0,
+    2
+   ],
+   [
+    1,
+    2
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    5,
+    2
+   ]
+  ],
+  "depth": 99,
+  "source": [
+   54,
+   61
+  ],
+  "kind": "building",
+  "door": {
+   "dx": 2,
+   "dy": 2,
+   "w": 2,
+   "rect": [
+    45,
+    66,
+    14,
+    27
+   ],
+   "open": "objects/cottage-1-door-open.png"
+  },
+  "windows": [
+   [
+    14,
+    57,
+    19,
+    21
+   ],
+   [
+    70,
+    58,
+    13,
+    20
+   ]
+  ]
+ },
+ {
+  "id": "cottage-2",
+  "file": "objects/cottage-2.png",
+  "w": 111,
+  "h": 109,
+  "anchor": [
+   3,
+   61
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ],
+   [
+    3,
+    0
+   ],
+   [
+    4,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    0,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    2,
+    1
+   ],
+   [
+    3,
+    1
+   ],
+   [
+    4,
+    1
+   ],
+   [
+    5,
+    1
+   ],
+   [
+    0,
+    2
+   ],
+   [
+    1,
+    2
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    5,
+    2
+   ]
+  ],
+  "depth": 109,
+  "source": [
+   183,
+   51
+  ],
+  "kind": "building",
+  "door": {
+   "dx": 2,
+   "dy": 2,
+   "w": 2,
+   "rect": [
+    42,
+    73,
+    18,
+    29
+   ],
+   "open": "objects/cottage-2-door-open.png"
+  },
+  "windows": [
+   [
+    18,
+    65,
+    14,
+    19
+   ],
+   [
+    74,
+    65,
+    18,
+    21
+   ]
+  ]
+ },
+ {
+  "id": "cafe",
+  "file": "objects/cafe.png",
+  "w": 120,
+  "h": 114,
+  "anchor": [
+   0,
+   66
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ],
+   [
+    3,
+    0
+   ],
+   [
+    4,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    6,
+    0
+   ],
+   [
+    0,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    2,
+    1
+   ],
+   [
+    3,
+    1
+   ],
+   [
+    4,
+    1
+   ],
+   [
+    5,
+    1
+   ],
+   [
+    6,
+    1
+   ],
+   [
+    0,
+    2
+   ],
+   [
+    1,
+    2
+   ],
+   [
+    2,
+    2
+   ],
+   [
+    3,
+    2
+   ],
+   [
+    4,
+    2
+   ]
+  ],
+  "depth": 114,
+  "source": [
+   318,
+   50
+  ],
+  "kind": "building",
+  "door": {
+   "dx": 5,
+   "dy": 2,
+   "w": 2,
+   "rect": [
+    86,
+    70,
+    21,
+    39
+   ],
+   "open": "objects/cafe-door-open.png"
+  },
+  "windows": [
+   [
+    18,
+    76,
+    49,
+    18
+   ]
+  ]
+ },
+ {
+  "id": "cottage-3",
+  "file": "objects/cottage-3.png",
+  "w": 85,
+  "h": 103,
+  "anchor": [
+   3,
+   55
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ],
+   [
+    3,
+    0
+   ],
+   [
+    4,
+    0
+   ],
+   [
+    0,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    2,
+    1
+   ],
+   [
+    3,
+    1
+   ],
+   [
+    4,
+    1
+   ],
+   [
+    0,
+    2
+   ],
+   [
+    1,
+    2
+   ],
+   [
+    4,
+    2
+   ]
+  ],
+  "depth": 103,
+  "source": [
+   459,
+   55
+  ],
+  "kind": "building",
+  "door": {
+   "dx": 2,
+   "dy": 2,
+   "w": 2,
+   "rect": [
+    46,
+    71,
+    15,
+    31
+   ],
+   "open": "objects/cottage-3-door-open.png"
+  },
+  "windows": [
+   [
+    19,
+    61,
+    17,
+    21
+   ]
+  ]
+ },
+ {
+  "id": "cottage-4",
+  "file": "objects/cottage-4.png",
+  "w": 111,
+  "h": 107,
+  "anchor": [
+   3,
+   59
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ],
+   [
+    3,
+    0
+   ],
+   [
+    4,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    6,
+    0
+   ],
+   [
+    0,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    2,
+    1
+   ],
+   [
+    3,
+    1
+   ],
+   [
+    4,
+    1
+   ],
+   [
+    5,
+    1
+   ],
+   [
+    6,
+    1
+   ],
+   [
+    0,
+    2
+   ],
+   [
+    1,
+    2
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    5,
+    2
+   ],
+   [
+    6,
+    2
+   ]
+  ],
+  "depth": 107,
+  "source": [
+   595,
+   52
+  ],
+  "kind": "building",
+  "door": {
+   "dx": 2,
+   "dy": 2,
+   "w": 2,
+   "rect": [
+    45,
+    72,
+    19,
+    33
+   ],
+   "open": "objects/cottage-4-door-open.png"
+  },
+  "windows": [
+   [
+    18,
+    66,
+    18,
+    19
+   ],
+   [
+    79,
+    66,
+    17,
+    19
+   ]
+  ]
+ },
+ {
+  "id": "lamp-1",
+  "file": "objects/lamp-1.png",
+  "w": 13,
+  "h": 48,
+  "anchor": [
+   -1,
+   32
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 48,
+  "source": [
+   16,
+   144
+  ],
+  "kind": "lamp"
+ },
+ {
+  "id": "lamp-2",
+  "file": "objects/lamp-2.png",
+  "w": 13,
+  "h": 49,
+  "anchor": [
+   0,
+   33
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 49,
+  "source": [
+   285,
+   145
+  ],
+  "kind": "lamp"
+ },
+ {
+  "id": "lamp-3",
+  "file": "objects/lamp-3.png",
+  "w": 12,
+  "h": 50,
+  "anchor": [
+   -2,
+   34
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 50,
+  "source": [
+   584,
+   144
+  ],
+  "kind": "lamp"
+ },
+ {
+  "id": "lamp-bridge-1",
+  "file": "objects/lamp-bridge-1.png",
+  "w": 12,
+  "h": 36,
+  "anchor": [
+   -2,
+   20
+  ],
+  "footprint": [],
+  "depth": 36,
+  "source": [
+   648,
+   203
+  ],
+  "kind": "lamp",
+  "note": "stands on a pillar cap; no footprint of its own"
+ },
+ {
+  "id": "lamp-bridge-2",
+  "file": "objects/lamp-bridge-2.png",
+  "w": 11,
+  "h": 36,
+  "anchor": [
+   -2,
+   20
+  ],
+  "footprint": [],
+  "depth": 36,
+  "source": [
+   746,
+   203
+  ],
+  "kind": "lamp",
+  "note": "stands on a pillar cap; no footprint of its own"
+ },
+ {
+  "id": "lamp-bridge-3",
+  "file": "objects/lamp-bridge-3.png",
+  "w": 11,
+  "h": 31,
+  "anchor": [
+   -2,
+   15
+  ],
+  "footprint": [],
+  "depth": 31,
+  "source": [
+   742,
+   305
+  ],
+  "kind": "lamp",
+  "note": "stands on a pillar cap; no footprint of its own"
+ },
+ {
+  "id": "bench-1",
+  "file": "objects/bench-1.png",
+  "w": 37,
+  "h": 23,
+  "anchor": [
+   3,
+   7
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 23,
+  "source": [
+   195,
+   268
+  ],
+  "kind": "bench"
+ },
+ {
+  "id": "bench-2",
+  "file": "objects/bench-2.png",
+  "w": 36,
+  "h": 23,
+  "anchor": [
+   2,
+   7
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 23,
+  "source": [
+   493,
+   268
+  ],
+  "kind": "bench"
+ },
+ {
+  "id": "bin",
+  "file": "objects/bin.png",
+  "w": 14,
+  "h": 19,
+  "anchor": [
+   -1,
+   3
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 19,
+  "source": [
+   267,
+   269
+  ],
+  "kind": "prop"
+ },
+ {
+  "id": "tree-park-1",
+  "file": "objects/tree-park-1.png",
+  "w": 59,
+  "h": 90,
+  "anchor": [
+   14,
+   74
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 90,
+  "source": [
+   0,
+   203
+  ],
+  "kind": "tree",
+  "note": "clipped by the plate's left edge"
+ },
+ {
+  "id": "tree-park-2",
+  "file": "objects/tree-park-2.png",
+  "w": 72,
+  "h": 80,
+  "anchor": [
+   27,
+   64
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 80,
+  "source": [
+   116,
+   198
+  ],
+  "kind": "tree"
+ },
+ {
+  "id": "tree-park-3",
+  "file": "objects/tree-park-3.png",
+  "w": 42,
+  "h": 48,
+  "anchor": [
+   13,
+   32
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 48,
+  "source": [
+   232,
+   223
+  ],
+  "kind": "tree"
+ },
+ {
+  "id": "tree-park-4",
+  "file": "objects/tree-park-4.png",
+  "w": 76,
+  "h": 74,
+  "anchor": [
+   33,
+   58
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 74,
+  "source": [
+   399,
+   203
+  ],
+  "kind": "tree"
+ },
+ {
+  "id": "bush-park-2",
+  "file": "objects/bush-park-2.png",
+  "w": 32,
+  "h": 28,
+  "anchor": [
+   0,
+   12
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 28,
+  "source": [
+   111,
+   272
+  ],
+  "kind": "bush"
+ },
+ {
+  "id": "bush-park-3",
+  "file": "objects/bush-park-3.png",
+  "w": 34,
+  "h": 14,
+  "anchor": [
+   1,
+   -2
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 14,
+  "source": [
+   143,
+   286
+  ],
+  "kind": "bush"
+ },
+ {
+  "id": "bush-park-4",
+  "file": "objects/bush-park-4.png",
+  "w": 31,
+  "h": 27,
+  "anchor": [
+   0,
+   11
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 27,
+  "source": [
+   280,
+   273
+  ],
+  "kind": "bush"
+ },
+ {
+  "id": "bush-park-5",
+  "file": "objects/bush-park-5.png",
+  "w": 38,
+  "h": 26,
+  "anchor": [
+   2,
+   10
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 26,
+  "source": [
+   404,
+   274
+  ],
+  "kind": "bush"
+ },
+ {
+  "id": "bush-park-6",
+  "file": "objects/bush-park-6.png",
+  "w": 54,
+  "h": 44,
+  "anchor": [
+   7,
+   28
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ]
+  ],
+  "depth": 44,
+  "source": [
+   544,
+   256
+  ],
+  "kind": "bush"
+ },
+ {
+  "id": "bush-park-7",
+  "file": "objects/bush-park-7.png",
+  "w": 34,
+  "h": 33,
+  "anchor": [
+   8,
+   17
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 33,
+  "source": [
+   598,
+   254
+  ],
+  "kind": "bush"
+ },
+ {
+  "id": "bush-garden-1",
+  "file": "objects/bush-garden-1.png",
+  "w": 55,
+  "h": 29,
+  "anchor": [
+   4,
+   13
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ]
+  ],
+  "depth": 29,
+  "source": [
+   40,
+   137
+  ],
+  "kind": "bush"
+ },
+ {
+  "id": "bush-garden-2",
+  "file": "objects/bush-garden-2.png",
+  "w": 34,
+  "h": 33,
+  "anchor": [
+   4,
+   17
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ]
+  ],
+  "depth": 33,
+  "source": [
+   122,
+   133
+  ],
+  "kind": "bush"
+ },
+ {
+  "id": "bush-garden-3",
+  "file": "objects/bush-garden-3.png",
+  "w": 40,
+  "h": 30,
+  "anchor": [
+   1,
+   14
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 30,
+  "source": [
+   180,
+   136
+  ],
+  "kind": "bush"
+ },
+ {
+  "id": "flowers-garden-1",
+  "file": "objects/flowers-garden-1.png",
+  "w": 55,
+  "h": 32,
+  "anchor": [
+   4,
+   16
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ]
+  ],
+  "depth": 32,
+  "source": [
+   446,
+   134
+  ],
+  "kind": "bush"
+ },
+ {
+  "id": "bush-garden-4",
+  "file": "objects/bush-garden-4.png",
+  "w": 33,
+  "h": 49,
+  "anchor": [
+   8,
+   33
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 49,
+  "source": [
+   521,
+   122
+  ],
+  "kind": "bush"
+ },
+ {
+  "id": "bush-garden-5",
+  "file": "objects/bush-garden-5.png",
+  "w": 41,
+  "h": 16,
+  "anchor": [
+   0,
+   0
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ]
+  ],
+  "depth": 16,
+  "source": [
+   600,
+   150
+  ],
+  "kind": "bush"
+ },
+ {
+  "id": "hedge-garden-1",
+  "file": "objects/hedge-garden-1.png",
+  "w": 35,
+  "h": 26,
+  "anchor": [
+   1,
+   10
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 26,
+  "source": [
+   669,
+   157
+  ],
+  "kind": "bush"
+ },
+ {
+  "id": "tree-garden-1",
+  "file": "objects/tree-garden-1.png",
+  "w": 43,
+  "h": 77,
+  "anchor": [
+   16,
+   61
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 77,
+  "source": [
+   702,
+   92
+  ],
+  "kind": "tree"
+ },
+ {
+  "id": "planter-1",
+  "file": "objects/planter-1.png",
+  "w": 20,
+  "h": 35,
+  "anchor": [
+   1,
+   19
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 35,
+  "source": [
+   307,
+   136
+  ],
+  "kind": "prop"
+ },
+ {
+  "id": "planter-2",
+  "file": "objects/planter-2.png",
+  "w": 10,
+  "h": 18,
+  "anchor": [
+   -2,
+   2
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 18,
+  "source": [
+   425,
+   144
+  ],
+  "kind": "prop"
+ },
+ {
+  "id": "table-set",
+  "file": "objects/table-set.png",
+  "w": 44,
+  "h": 20,
+  "anchor": [
+   6,
+   4
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 20,
+  "source": [
+   326,
+   155
+  ],
+  "kind": "prop"
+ },
+ {
+  "id": "a-frame-sign",
+  "file": "objects/a-frame-sign.png",
+  "w": 16,
+  "h": 21,
+  "anchor": [
+   0,
+   5
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 21,
+  "source": [
+   387,
+   148
+  ],
+  "kind": "prop"
+ },
+ {
+  "id": "barrel-1",
+  "file": "objects/barrel-1.png",
+  "w": 12,
+  "h": 21,
+  "anchor": [
+   -1,
+   5
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 21,
+  "source": [
+   449,
+   127
+  ],
+  "kind": "prop"
+ },
+ {
+  "id": "barrel-2",
+  "file": "objects/barrel-2.png",
+  "w": 16,
+  "h": 20,
+  "anchor": [
+   2,
+   4
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 20,
+  "source": [
+   686,
+   141
+  ],
+  "kind": "prop"
+ },
+ {
+  "id": "fence-iron",
+  "file": "objects/fence-iron.png",
+  "w": 32,
+  "h": 13,
+  "anchor": [
+   0,
+   -3
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 13,
+  "source": [
+   50,
+   168
+  ],
+  "kind": "fence",
+  "note": "32 px repeatable segment"
+ },
+ {
+  "id": "fence-wood",
+  "file": "objects/fence-wood.png",
+  "w": 32,
+  "h": 17,
+  "anchor": [
+   0,
+   1
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 17,
+  "source": [
+   706,
+   164
+  ],
+  "kind": "fence",
+  "note": "32 px repeatable segment"
+ },
+ {
+  "id": "balustrade",
+  "file": "objects/balustrade.png",
+  "w": 32,
+  "h": 25,
+  "anchor": [
+   0,
+   9
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 25,
+  "source": [
+   509,
+   230
+  ],
+  "kind": "fence",
+  "note": "32 px repeatable segment, iron post on its left"
+ },
+ {
+  "id": "steps",
+  "file": "objects/steps.png",
+  "w": 61,
+  "h": 21,
+  "anchor": [
+   2,
+   5
+  ],
+  "footprint": [],
+  "depth": 21,
+  "source": [
+   332,
+   238
+  ],
+  "kind": "prop",
+  "note": "walkable: the way down from the street to the park"
+ },
+ {
+  "id": "fence-iron-1",
+  "file": "objects/fence-iron-1.png",
+  "w": 41,
+  "h": 13,
+  "anchor": [
+   0,
+   -3
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ]
+  ],
+  "depth": 13,
+  "source": [
+   45,
+   168
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "fence-iron-2",
+  "file": "objects/fence-iron-2.png",
+  "w": 23,
+  "h": 16,
+  "anchor": [
+   0,
+   0
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 16,
+  "source": [
+   125,
+   165
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "fence-iron-3",
+  "file": "objects/fence-iron-3.png",
+  "w": 39,
+  "h": 16,
+  "anchor": [
+   0,
+   0
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 16,
+  "source": [
+   177,
+   165
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "fence-iron-4",
+  "file": "objects/fence-iron-4.png",
+  "w": 35,
+  "h": 16,
+  "anchor": [
+   0,
+   0
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 16,
+  "source": [
+   451,
+   165
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "fence-iron-5",
+  "file": "objects/fence-iron-5.png",
+  "w": 26,
+  "h": 16,
+  "anchor": [
+   0,
+   0
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 16,
+  "source": [
+   524,
+   165
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "fence-iron-6",
+  "file": "objects/fence-iron-6.png",
+  "w": 29,
+  "h": 16,
+  "anchor": [
+   0,
+   0
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 16,
+  "source": [
+   601,
+   165
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "fence-wood-1",
+  "file": "objects/fence-wood-1.png",
+  "w": 38,
+  "h": 17,
+  "anchor": [
+   2,
+   1
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 17,
+  "source": [
+   702,
+   164
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "gate-post-1",
+  "file": "objects/gate-post-1.png",
+  "w": 8,
+  "h": 21,
+  "anchor": [
+   -4,
+   5
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 21,
+  "source": [
+   86,
+   162
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "gate-post-2",
+  "file": "objects/gate-post-2.png",
+  "w": 8,
+  "h": 21,
+  "anchor": [
+   -4,
+   5
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 21,
+  "source": [
+   117,
+   162
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "gate-post-3",
+  "file": "objects/gate-post-3.png",
+  "w": 9,
+  "h": 17,
+  "anchor": [
+   -3,
+   1
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 17,
+  "source": [
+   216,
+   165
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "gate-post-4",
+  "file": "objects/gate-post-4.png",
+  "w": 8,
+  "h": 21,
+  "anchor": [
+   -4,
+   5
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 21,
+  "source": [
+   486,
+   162
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "gate-post-5",
+  "file": "objects/gate-post-5.png",
+  "w": 8,
+  "h": 21,
+  "anchor": [
+   -4,
+   5
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 21,
+  "source": [
+   516,
+   162
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "gate-post-6",
+  "file": "objects/gate-post-6.png",
+  "w": 7,
+  "h": 21,
+  "anchor": [
+   -4,
+   5
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 21,
+  "source": [
+   594,
+   162
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "gate-post-7",
+  "file": "objects/gate-post-7.png",
+  "w": 9,
+  "h": 18,
+  "anchor": [
+   -3,
+   2
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 18,
+  "source": [
+   630,
+   164
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "gate-post-8",
+  "file": "objects/gate-post-8.png",
+  "w": 10,
+  "h": 20,
+  "anchor": [
+   -3,
+   4
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 20,
+  "source": [
+   659,
+   163
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "gate-wood-1",
+  "file": "objects/gate-wood-1.png",
+  "w": 12,
+  "h": 17,
+  "anchor": [
+   -2,
+   1
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 17,
+  "source": [
+   243,
+   165
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "wall-garden-low-1",
+  "file": "objects/wall-garden-low-1.png",
+  "w": 31,
+  "h": 16,
+  "anchor": [
+   0,
+   0
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 16,
+  "source": [
+   14,
+   166
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "wall-garden-low-2",
+  "file": "objects/wall-garden-low-2.png",
+  "w": 29,
+  "h": 18,
+  "anchor": [
+   0,
+   2
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 18,
+  "source": [
+   148,
+   165
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "planter-box-1",
+  "file": "objects/planter-box-1.png",
+  "w": 29,
+  "h": 18,
+  "anchor": [
+   6,
+   2
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 18,
+  "source": [
+   255,
+   164
+  ],
+  "kind": "prop"
+ },
+ {
+  "id": "pillar-garden-0",
+  "file": "objects/pillar-garden-0.png",
+  "w": 8,
+  "h": 58,
+  "anchor": [
+   -4,
+   42
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 58,
+  "source": [
+   14,
+   108
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "pillar-garden-1",
+  "file": "objects/pillar-garden-1.png",
+  "w": 10,
+  "h": 72,
+  "anchor": [
+   -3,
+   56
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 72,
+  "source": [
+   441,
+   110
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "pillar-garden-2",
+  "file": "objects/pillar-garden-2.png",
+  "w": 8,
+  "h": 67,
+  "anchor": [
+   -4,
+   51
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 67,
+  "source": [
+   550,
+   115
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "pillar-garden-3",
+  "file": "objects/pillar-garden-3.png",
+  "w": 11,
+  "h": 83,
+  "anchor": [
+   -2,
+   67
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 83,
+  "source": [
+   740,
+   101
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "garden-foliage-0",
+  "file": "objects/garden-foliage-0.png",
+  "w": 35,
+  "h": 55,
+  "anchor": [
+   0,
+   39
+  ],
+  "footprint": [],
+  "depth": 55,
+  "source": [
+   22,
+   112
+  ],
+  "kind": "bush",
+  "note": "gap foliage between houses; flat top at the backdrop line"
+ },
+ {
+  "id": "garden-foliage-1",
+  "file": "objects/garden-foliage-1.png",
+  "w": 37,
+  "h": 54,
+  "anchor": [
+   0,
+   38
+  ],
+  "footprint": [],
+  "depth": 54,
+  "source": [
+   150,
+   112
+  ],
+  "kind": "bush",
+  "note": "gap foliage between houses; flat top at the backdrop line"
+ },
+ {
+  "id": "garden-foliage-2",
+  "file": "objects/garden-foliage-2.png",
+  "w": 24,
+  "h": 33,
+  "anchor": [
+   0,
+   17
+  ],
+  "footprint": [],
+  "depth": 33,
+  "source": [
+   294,
+   112
+  ],
+  "kind": "bush",
+  "note": "gap foliage between houses; flat top at the backdrop line"
+ },
+ {
+  "id": "garden-foliage-3",
+  "file": "objects/garden-foliage-3.png",
+  "w": 10,
+  "h": 19,
+  "anchor": [
+   0,
+   3
+  ],
+  "footprint": [],
+  "depth": 19,
+  "source": [
+   451,
+   112
+  ],
+  "kind": "bush",
+  "note": "gap foliage between houses; flat top at the backdrop line"
+ },
+ {
+  "id": "garden-foliage-4",
+  "file": "objects/garden-foliage-4.png",
+  "w": 39,
+  "h": 30,
+  "anchor": [
+   0,
+   14
+  ],
+  "footprint": [],
+  "depth": 30,
+  "source": [
+   558,
+   112
+  ],
+  "kind": "bush",
+  "note": "gap foliage between houses; flat top at the backdrop line"
+ },
+ {
+  "id": "balustrade-run-1",
+  "file": "objects/balustrade-run-1.png",
+  "w": 152,
+  "h": 25,
+  "anchor": [
+   -2,
+   9
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ],
+   [
+    3,
+    0
+   ],
+   [
+    4,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    6,
+    0
+   ],
+   [
+    7,
+    0
+   ],
+   [
+    8,
+    0
+   ],
+   [
+    9,
+    0
+   ]
+  ],
+  "depth": 25,
+  "source": [
+   52,
+   230
+  ],
+  "kind": "fence",
+  "note": "gaps where the park trees stand in front"
+ },
+ {
+  "id": "balustrade-run-2",
+  "file": "objects/balustrade-run-2.png",
+  "w": 100,
+  "h": 25,
+  "anchor": [
+   0,
+   9
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ],
+   [
+    3,
+    0
+   ],
+   [
+    4,
+    0
+   ],
+   [
+    5,
+    0
+   ]
+  ],
+  "depth": 25,
+  "source": [
+   218,
+   230
+  ],
+  "kind": "fence",
+  "note": "gaps where the park trees stand in front"
+ },
+ {
+  "id": "balustrade-run-3",
+  "file": "objects/balustrade-run-3.png",
+  "w": 147,
+  "h": 27,
+  "anchor": [
+   0,
+   11
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ],
+   [
+    3,
+    0
+   ],
+   [
+    4,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    6,
+    0
+   ],
+   [
+    7,
+    0
+   ],
+   [
+    8,
+    0
+   ]
+  ],
+  "depth": 27,
+  "source": [
+   408,
+   228
+  ],
+  "kind": "fence",
+  "note": "gaps where the park trees stand in front"
+ },
+ {
+  "id": "balustrade-run-4",
+  "file": "objects/balustrade-run-4.png",
+  "w": 61,
+  "h": 25,
+  "anchor": [
+   0,
+   9
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ],
+   [
+    3,
+    0
+   ]
+  ],
+  "depth": 25,
+  "source": [
+   569,
+   230
+  ],
+  "kind": "fence",
+  "note": "gaps where the park trees stand in front"
+ },
+ {
+  "id": "balustrade-post-1",
+  "file": "objects/balustrade-post-1.png",
+  "w": 14,
+  "h": 28,
+  "anchor": [
+   -1,
+   12
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 28,
+  "source": [
+   204,
+   227
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "balustrade-post-2",
+  "file": "objects/balustrade-post-2.png",
+  "w": 14,
+  "h": 28,
+  "anchor": [
+   -1,
+   12
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 28,
+  "source": [
+   555,
+   227
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "balustrade-pillar-1",
+  "file": "objects/balustrade-pillar-1.png",
+  "w": 14,
+  "h": 35,
+  "anchor": [
+   -1,
+   19
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 35,
+  "source": [
+   318,
+   222
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "balustrade-pillar-2",
+  "file": "objects/balustrade-pillar-2.png",
+  "w": 15,
+  "h": 35,
+  "anchor": [
+   0,
+   19
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ]
+  ],
+  "depth": 35,
+  "source": [
+   393,
+   222
+  ],
+  "kind": "fence"
+ },
+ {
+  "id": "drain-1",
+  "file": "objects/drain-1.png",
+  "w": 19,
+  "h": 8,
+  "anchor": [
+   0,
+   -8
+  ],
+  "footprint": [],
+  "depth": 8,
+  "source": [
+   210,
+   198
+  ],
+  "kind": "prop",
+  "note": "street grate, walkable"
+ },
+ {
+  "id": "drain-2",
+  "file": "objects/drain-2.png",
+  "w": 17,
+  "h": 8,
+  "anchor": [
+   0,
+   -8
+  ],
+  "footprint": [],
+  "depth": 8,
+  "source": [
+   525,
+   198
+  ],
+  "kind": "prop",
+  "note": "street grate, walkable"
+ },
+ {
+  "id": "jetty",
+  "file": "objects/jetty.png",
+  "w": 80,
+  "h": 56,
+  "anchor": [
+   0,
+   40
+  ],
+  "footprint": [],
+  "depth": 56,
+  "source": [
+   320,
+   277
+  ],
+  "kind": "jetty",
+  "note": "walkable deck; posts at both ends"
+ },
+ {
+  "id": "embankment",
+  "file": "objects/embankment.png",
+  "w": 32,
+  "h": 19,
+  "anchor": [
+   0,
+   3
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "depth": 19,
+  "source": [
+   176,
+   301
+  ],
+  "kind": "prop",
+  "note": "32 px repeatable wall face between grass and water"
+ },
+ {
+  "id": "embankment-run-1",
+  "file": "objects/embankment-run-1.png",
+  "w": 320,
+  "h": 20,
+  "anchor": [
+   0,
+   4
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ],
+   [
+    3,
+    0
+   ],
+   [
+    4,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    6,
+    0
+   ],
+   [
+    7,
+    0
+   ],
+   [
+    8,
+    0
+   ],
+   [
+    9,
+    0
+   ],
+   [
+    10,
+    0
+   ],
+   [
+    11,
+    0
+   ],
+   [
+    12,
+    0
+   ],
+   [
+    13,
+    0
+   ],
+   [
+    14,
+    0
+   ],
+   [
+    15,
+    0
+   ],
+   [
+    16,
+    0
+   ],
+   [
+    17,
+    0
+   ],
+   [
+    18,
+    0
+   ],
+   [
+    19,
+    0
+   ]
+  ],
+  "depth": 20,
+  "source": [
+   0,
+   300
+  ],
+  "kind": "prop"
+ },
+ {
+  "id": "embankment-run-2",
+  "file": "objects/embankment-run-2.png",
+  "w": 232,
+  "h": 34,
+  "anchor": [
+   0,
+   18
+  ],
+  "footprint": [
+   [
+    0,
+    0
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    0
+   ],
+   [
+    3,
+    0
+   ],
+   [
+    4,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    6,
+    0
+   ],
+   [
+    7,
+    0
+   ],
+   [
+    8,
+    0
+   ],
+   [
+    9,
+    0
+   ],
+   [
+    10,
+    0
+   ],
+   [
+    11,
+    0
+   ],
+   [
+    12,
+    0
+   ]
+  ],
+  "depth": 34,
+  "source": [
+   400,
+   286
+  ],
+  "kind": "prop"
+ },
+ {
+  "id": "bridge",
+  "file": "objects/bridge.png",
+  "w": 138,
+  "h": 132,
+  "anchor": [
+   0,
+   116
+  ],
+  "footprint": [],
+  "depth": 132,
+  "source": [
+   630,
+   222
+  ],
+  "kind": "bridge",
+  "note": "parapets, piers and arches only; the deck is cobble ground drawn by the map; clipped by the plate's right edge"
+ },
+ {
+  "id": "foreground-left",
+  "file": "objects/foreground-left.png",
+  "w": 336,
+  "h": 99,
+  "anchor": [
+   0,
+   83
+  ],
+  "footprint": [],
+  "depth": 99,
+  "source": [
+   0,
+   333
+  ],
+  "kind": "foreground",
+  "note": "always drawn in front of actors"
+ },
+ {
+  "id": "foreground-right",
+  "file": "objects/foreground-right.png",
+  "w": 148,
+  "h": 96,
+  "anchor": [
+   0,
+   80
+  ],
+  "footprint": [],
+  "depth": 96,
+  "source": [
+   620,
+   336
+  ],
+  "kind": "foreground",
+  "note": "always drawn in front of actors"
+ },
+ {
+  "id": "flowers-park-1",
+  "file": "objects/flowers-park-1.png",
+  "w": 17,
+  "h": 8,
+  "anchor": [
+   0,
+   -8
+  ],
+  "footprint": [],
+  "depth": 8,
+  "source": [
+   55,
+   271
+  ],
+  "kind": "bush",
+  "note": "ground decoration, walkable"
+ },
+ {
+  "id": "flowers-park-2",
+  "file": "objects/flowers-park-2.png",
+  "w": 4,
+  "h": 3,
+  "anchor": [
+   1,
+   -13
+  ],
+  "footprint": [],
+  "depth": 3,
+  "source": [
+   62,
+   267
+  ],
+  "kind": "bush",
+  "note": "ground decoration, walkable"
+ },
+ {
+  "id": "flowers-park-3",
+  "file": "objects/flowers-park-3.png",
+  "w": 2,
+  "h": 3,
+  "anchor": [
+   1,
+   -13
+  ],
+  "footprint": [],
+  "depth": 3,
+  "source": [
+   71,
+   282
+  ],
+  "kind": "bush",
+  "note": "ground decoration, walkable"
+ },
+ {
+  "id": "flowers-park-4",
+  "file": "objects/flowers-park-4.png",
+  "w": 15,
+  "h": 9,
+  "anchor": [
+   1,
+   -7
+  ],
+  "footprint": [],
+  "depth": 9,
+  "source": [
+   92,
+   267
+  ],
+  "kind": "bush",
+  "note": "ground decoration, walkable"
+ },
+ {
+  "id": "flowers-park-5",
+  "file": "objects/flowers-park-5.png",
+  "w": 10,
+  "h": 3,
+  "anchor": [
+   1,
+   -13
+  ],
+  "footprint": [],
+  "depth": 3,
+  "source": [
+   243,
+   288
+  ],
+  "kind": "bush",
+  "note": "ground decoration, walkable"
+ },
+ {
+  "id": "flowers-park-6",
+  "file": "objects/flowers-park-6.png",
+  "w": 16,
+  "h": 10,
+  "anchor": [
+   1,
+   -6
+  ],
+  "footprint": [],
+  "depth": 10,
+  "source": [
+   307,
+   268
+  ],
+  "kind": "bush",
+  "note": "ground decoration, walkable"
+ },
+ {
+  "id": "flowers-park-7",
+  "file": "objects/flowers-park-7.png",
+  "w": 16,
+  "h": 3,
+  "anchor": [
+   1,
+   -13
+  ],
+  "footprint": [],
+  "depth": 3,
+  "source": [
+   445,
+   288
+  ],
+  "kind": "bush",
+  "note": "ground decoration, walkable"
+ },
+ {
+  "id": "flowers-park-8",
+  "file": "objects/flowers-park-8.png",
+  "w": 14,
+  "h": 9,
+  "anchor": [
+   1,
+   -7
+  ],
+  "footprint": [],
+  "depth": 9,
+  "source": [
+   466,
+   272
+  ],
+  "kind": "bush",
+  "note": "ground decoration, walkable"
+ },
+ {
+  "id": "lilypads-1",
+  "file": "objects/lilypads-1.png",
+  "w": 17,
+  "h": 8,
+  "anchor": [
+   0,
+   -8
+  ],
+  "footprint": [],
+  "depth": 8,
+  "source": [
+   63,
+   328
+  ],
+  "kind": "prop",
+  "note": "floats on the river"
+ },
+ {
+  "id": "lilypads-2",
+  "file": "objects/lilypads-2.png",
+  "w": 10,
+  "h": 5,
+  "anchor": [
+   0,
+   -11
+  ],
+  "footprint": [],
+  "depth": 5,
+  "source": [
+   116,
+   328
+  ],
+  "kind": "prop",
+  "note": "floats on the river"
+ },
+ {
+  "id": "lilypads-3",
+  "file": "objects/lilypads-3.png",
+  "w": 24,
+  "h": 11,
+  "anchor": [
+   0,
+   -5
+  ],
+  "footprint": [],
+  "depth": 11,
+  "source": [
+   134,
+   325
+  ],
+  "kind": "prop",
+  "note": "floats on the river"
+ },
+ {
+  "id": "lilypads-4",
+  "file": "objects/lilypads-4.png",
+  "w": 5,
+  "h": 4,
+  "anchor": [
+   0,
+   -12
+  ],
+  "footprint": [],
+  "depth": 4,
+  "source": [
+   344,
+   335
+  ],
+  "kind": "prop",
+  "note": "floats on the river"
+ },
+ {
+  "id": "lilypads-5",
+  "file": "objects/lilypads-5.png",
+  "w": 5,
+  "h": 5,
+  "anchor": [
+   0,
+   -11
+  ],
+  "footprint": [],
+  "depth": 5,
+  "source": [
+   382,
+   332
+  ],
+  "kind": "prop",
+  "note": "floats on the river"
+ },
+ {
+  "id": "lilypads-6",
+  "file": "objects/lilypads-6.png",
+  "w": 8,
+  "h": 3,
+  "anchor": [
+   0,
+   -13
+  ],
+  "footprint": [],
+  "depth": 3,
+  "source": [
+   393,
+   341
+  ],
+  "kind": "prop",
+  "note": "floats on the river"
+ },
+ {
+  "id": "lilypads-7",
+  "file": "objects/lilypads-7.png",
+  "w": 19,
+  "h": 9,
+  "anchor": [
+   0,
+   -7
+  ],
+  "footprint": [],
+  "depth": 9,
+  "source": [
+   425,
+   325
+  ],
+  "kind": "prop",
+  "note": "floats on the river"
+ },
+ {
+  "id": "lilypads-8",
+  "file": "objects/lilypads-8.png",
+  "w": 20,
+  "h": 9,
+  "anchor": [
+   0,
+   -7
+  ],
+  "footprint": [],
+  "depth": 9,
+  "source": [
+   449,
+   328
+  ],
+  "kind": "prop",
+  "note": "floats on the river"
+ },
+ {
+  "id": "backdrop",
+  "file": "objects/backdrop.png",
+  "w": 768,
+  "h": 112,
+  "anchor": [
+   0,
+   96
+  ],
+  "footprint": [],
+  "depth": 0,
+  "source": [
+   0,
+   0
+  ],
+  "kind": "backdrop",
+  "note": "fixed backdrop behind everything; buildings removed and filled from the hills and forest above them"
+ }
+]
