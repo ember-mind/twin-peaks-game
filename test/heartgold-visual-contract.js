@@ -24,9 +24,12 @@ gate('native_framebuffer_256x192', /width="256" height="192"/.test(index) &&
   /VW = 256, VH = 192/.test(engine));
 gate('native_aspect_4x3', /aspect-ratio:\s*4\s*\/\s*3/.test(index));
 gate('tile_collision_grid_unchanged', /TILE = 16/.test(engine));
-gate('extended_tiles_have_camera_overdraw', /var overdraw = 2/.test(engine) &&
-  /Math\.floor\(cx \/ TILE\) - overdraw/.test(engine) &&
-  /Math\.floor\(\(cx \+ vw - 1\) \/ TILE\) \+ overdraw/.test(engine));
+/* The overdraw moved into the shared engine (engine/ember-tilemap.js): checked
+ * by what the range does, and by the game still asking for two tiles of it. */
+const Tilemap = (global.window = global.window || global, require(path.join(root, 'engine', 'ember-tilemap.js')), global.EMBER.Tilemap);
+const range = Tilemap.visibleRange({ tile: 16, camX: 40, camY: 40, viewW: 256, viewH: 192, overdraw: 2 });
+gate('extended_tiles_have_camera_overdraw', /var overdraw = 2/.test(engine) && /overdraw: overdraw/.test(engine) &&
+  range.x0 === Math.floor(40 / 16) - 2 && range.x1 === Math.floor((40 + 255) / 16) + 2);
 gate('forest_layout_is_world_stable',
   /var minTx = 0, maxTx = map\.width - 1/.test(authored) &&
   /var minTy = 0, maxTy = map\.height - 1/.test(authored));

@@ -174,8 +174,11 @@ const snapshot = (sim) => JSON.stringify(sim.state);
   const BC = bw.state.characters;
   const bonds = Story.bonds(bw, BC.resident_d);
   ok(bonds.length >= 2 && bonds.every((b) => BC.resident_d.relationships[b.id].closeness === b.closeness && typeof b.word === 'string') && bonds[0].closeness >= bonds[bonds.length - 1].closeness, 'the people someone knows, closest first, as the state has them');
-  const stranger = Object.keys(BC.resident_d.relationships).find((id) => !LT.World.NEIGHBOURS.find((n) => n.id === 'resident_d').relationships[id]);
-  ok(stranger && BC.resident_d.relationships[stranger].closeness < 50, 'someone met today started as a stranger, not as a friend (' + (stranger && BC.resident_d.relationships[stranger].closeness) + ')');
+  /* Anyone in town who met somebody new today: that bond began as a stranger's. */
+  const content = LT.World.CHARACTERS.concat(LT.World.NEIGHBOURS);
+  const met = [];
+  bw.actorIds().forEach((id) => { const start = (content.find((c) => c.id === id) || {}).relationships || {}; Object.keys(BC[id].relationships).forEach((o) => { if (!start[o]) met.push([id, o]); }); });
+  ok(met.length > 0 && met.every(([id, o]) => BC[id].relationships[o].closeness < 50), 'someone met today started as a stranger, not as a friend (' + met.map(([id, o]) => BC[id].relationships[o].closeness).join(', ') + ')');
   const q2 = LT.Scenario.day1({ intervention: false, everyday: false }); q2.requestDecision = function () { return null; };
   const was = q2.state.characters.resident_a.relationships.resident_b.closeness;
   q2.actorIds().forEach((id) => { q2.state.characters[id].commitments = []; });   // nothing to break: only the drift is measured

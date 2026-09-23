@@ -198,9 +198,12 @@
   View.prototype.thingsAt = function (locId) {
     var sim = this.sim, C = LT.Content;
     if (!C) return [];
-    var readingHere = !!(LT.ActivityPoses && LT.ActivityPoses.ready) && this.charactersHere(locId).some(function (e) {
+    /* The books in someone's hands: each reader's own, not every open book
+     * in the place (found by audit). */
+    var inHands = {};
+    if (LT.ActivityPoses && LT.ActivityPoses.ready) this.charactersHere(locId).forEach(function (e) {
       var pose = LT.Appearance.poseFor(e.character);
-      return pose && pose.poseId === 'reading';
+      if (pose && pose.poseId === 'reading' && e.character.activity) inHands[e.character.activity.targetId] = true;
     });
     var W = LT.World, here = W.outdoorGrid(locId)
       ? Object.keys(W.LOCATIONS).filter(function (id) { return W.samePlace(id, locId); }).reduce(function (all, id) { return all.concat(sim.objectsAt(id)); }, [])
@@ -210,7 +213,7 @@
       /* A book that is open is in its reader's hands — the reading pose shows
        * it there — so it is not also drawn lying open where it is kept. Told
        * from the type, the state and who here is in that pose; never a claim. */
-      if (vis && vis.typeId === 'book_used' && vis.state === 'open' && readingHere) return null;
+      if (vis && vis.typeId === 'book_used' && vis.state === 'open' && inHands[o.id]) return null;
       return vis ? { kind: 'thing', id: o.id, typeId: vis.typeId, state: vis.state,
                      wx: o.x * TILE, wy: o.y * TILE, px: o.x * TILE + TILE / 2, py: o.y * TILE + TILE - 2 } : null;
     }).filter(Boolean);
@@ -404,9 +407,16 @@
     return best;
   };
 
+  /* The drawing surface's width in picture pixels, whatever the device scale. */
+  function logicalWidth(g) {
+    var t = g.getTransform ? g.getTransform() : null, a = t && t.a ? t.a : 1;
+    return g.canvas ? Math.round(g.canvas.width / a) : 256;
+  }
+
   function label(g, text, x, y, colour) {
     var F = root.GAME && root.GAME.RetroFont, t = text.toUpperCase();
     var w = (F ? F.measure(t, 1) : t.length * 6) + 6, x0 = Math.round(x - w / 2), y0 = Math.round(y) - 9;
+    x0 = Math.max(1, Math.min(logicalWidth(g) - w - 1, x0));   // kept inside the picture at its edges
     g.fillStyle = 'rgba(20,22,28,0.82)'; g.fillRect(x0, y0, w, 11);
     g.fillStyle = 'rgba(233,180,88,0.55)'; g.fillRect(x0 + 1, y0 + 10, w - 2, 1);
     if (F) F.draw(g, t, x0 + 3, y0 + 2, colour, { scale: 1 });

@@ -109,6 +109,9 @@
         terms.energy_relief = Math.pow((100 - energy) / 100, 2) * 140;
         terms.night = (req.minute >= 1290 || req.minute < 390) ? 45 : 0;
         if (req.minute >= 390 && req.minute < 1200 && energy > 35) terms.wrong_hour = -60;
+        /* Not in bed at half past eight with energy to spare: the evening goes
+         * on until ten unless someone is tired (found by audit). */
+        if (req.minute >= 1200 && req.minute < 1320 && energy > 40) terms.early_evening = -25;
         break;
 
       case 'sit_and_rest':
@@ -302,7 +305,9 @@
           // Late enough that the only sensible place to be is one's own bed.
           if (req.minute >= 1260 || req.minute < 330) terms.night_home = 46;
         }
-        if (dest === req.self.homeId && req.minute >= 1080 && req.minute < 1260) terms.evening_home = 8;
+        /* Home in the evening, unless hungry with nothing there to eat: going
+         * home then only means coming out again (found by audit). */
+        if (dest === req.self.homeId && req.minute >= 1080 && req.minute < 1260 && !(hunger >= 70 && !(req.self.pantry > 0))) terms.evening_home = 8;
         // an empty pantry, and somewhere that sells a meal and will still be open
         var place = ((req.observations && req.observations.reachable) || []).filter(function (r) { return r.id === dest; })[0];
         if (place && (place.services || []).indexOf('buy_meal') >= 0 && !(req.self.pantry > 0) && money >= 6) {
@@ -312,7 +317,10 @@
         /* Hungry, nothing at home and not the price of a meal: the only thing
          * left is to be where other people are. */
         var alone = !((req.observations && req.observations.present) || []).length;   // with people around, stay where they are
-        if (alone && hunger >= 85 && !(req.self.pantry > 0) && money < 6 && dest !== req.self.homeId && place &&
+        /* From home: once out in a public place, looking for help is waiting
+         * there, not walking on to the next (found by audit: pacing). */
+        var fromHome = here === req.self.homeId;
+        if (alone && fromHome && hunger >= 85 && !(req.self.pantry > 0) && money < 6 && dest !== req.self.homeId && place &&
             (req.minute + cand.durationMinutes) >= place.opens && (req.minute + cand.durationMinutes) < place.closes - 30) {
           terms.find_help = 16;
         }

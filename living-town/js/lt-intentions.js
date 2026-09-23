@@ -92,8 +92,17 @@
         if (promises.some(function (c) { return c.kind === 'work' && soon(c, 90); })) s += 10;
         return s || -5;
       }
-      case 'intent_food': return hunger >= 55 ? hunger / 3 : hunger >= 40 ? 4 : -2;
-      case 'intent_company': return 4 + 10 * trait('sociability') + (promises.some(function (c) { return c.kind === 'social' && soon(c, 90); }) ? 25 : 0);
+      /* Planning to eat only helps with something to eat: food at home or the
+       * price of a meal. Without either, the hour is for finding people
+       * (company) — planning food over and over while waiting at home was
+       * found by audit. */
+      case 'intent_food': {
+        var canEat = (req.self.pantry > 0) || (req.self.money >= 6);
+        if (!canEat) return -10;
+        return hunger >= 55 ? hunger / 3 : hunger >= 40 ? 4 : -2;
+      }
+      case 'intent_company': return 4 + 10 * trait('sociability') + (promises.some(function (c) { return c.kind === 'social' && soon(c, 90); }) ? 25 : 0) +
+                                    (hunger >= 70 && !(req.self.pantry > 0) && req.self.money < 6 ? 20 : 0);
       /* The evening draws people home (the policy's own evening_home): a plan
        * made then agrees with it rather than sending them out to come back. */
       case 'intent_home': return 3 + 6 * trait('caution') + (energy < 35 ? 15 : 0) + (req.minute >= 18 * 60 ? 10 : 0) + (req.minute >= 21 * 60 ? 12 : 0);

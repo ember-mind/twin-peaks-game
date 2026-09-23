@@ -165,6 +165,9 @@
   /* A speech-bubble box with its tail at (x, y): the point over the head. */
   function box(g, x, y, w, h) {
     var x0 = Math.round(x - w / 2), y0 = Math.round(y - h - 3);
+    /* Inside the picture: at its edges the box slides in and the tail stays over the head. */
+    var t = g.getTransform ? g.getTransform() : null, sw = g.canvas ? Math.round(g.canvas.width / (t && t.a ? t.a : 1)) : 256;
+    x0 = Math.max(1, Math.min(sw - w - 1, x0)); y0 = Math.max(1, y0);
     g.fillStyle = INK;
     g.fillRect(x0 + 1, y0, w - 2, h); g.fillRect(x0, y0 + 1, w, h - 2);
     g.fillStyle = PAPER;

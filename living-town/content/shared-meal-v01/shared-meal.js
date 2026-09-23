@@ -377,13 +377,21 @@
       if (c.status !== 'open') return;
       if (Math.abs(U.absolute(c.dueDay, c.dueMin) - sitting) <= 90) n++;
     });
+    /* A shift that covers the sitting is a clash too, whenever its promise
+     * falls due: someone serving at the counter cannot sit down to eat
+     * (found by audit: lunches accepted mid-shift lapsed with both there). */
+    var e = req.self && req.self.employment;
+    if (e && meta.dueMin >= e.shiftStart && meta.dueMin < e.shiftEnd) n += 2;
     return n;
   }
 
   var SCORES = {
     invite_to_meal: function (req, cand, h) {
-      var o = openness(req, cand.targetId);
-      return { company: o.closeness * 40 - 12 + 14 * h.trait('sociability') };
+      var o = openness(req, cand.targetId), clash = clashNear(req, cand.meta);
+      var out = { company: o.closeness * 40 - 12 + 14 * h.trait('sociability') };
+      /* Not asking someone to a sitting one cannot keep oneself (a shift, another promise). */
+      if (clash) out.clash = -clash * 22;
+      return out;
     },
     accept_meal: function (req, cand, h) {
       var meta = cand.meta || {};

@@ -212,6 +212,8 @@
     try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* ignora */ }
   }
 
+  GAME.hasSave = function () { return hasSave(); };
+  GAME.newGameArmed = function () { return S.mode === 'title' && S.newGameArmedUntil > tGlobal; };
   function hasSave() {
     if (typeof localStorage === 'undefined') return false;
     try { return !!localStorage.getItem(SAVE_KEY); } catch (e) { return false; }
@@ -509,6 +511,7 @@
   function pressA() {
     if (S.fadePhase !== 0) return;
     if (S.mode === 'title') {
+      S.newGameArmedUntil = 0;                     // continuare annulla la richiesta di nuova partita
       var save = loadSave();
       if (isLegacyOpeningSave(save)) {
         clearSave();
@@ -558,6 +561,10 @@
 
   function pressN() { // titolo: N forza una partita nuova, scartando il salvataggio
     if (S.mode !== 'title') return;
+    /* Con un salvataggio, la prima pressione chiede conferma: la seconda,
+     * entro quattro secondi, lo cancella. Mai un solo tasto per perdere la partita. */
+    if (hasSave() && !(S.newGameArmedUntil > tGlobal)) { S.newGameArmedUntil = tGlobal + 4000; return; }
+    S.newGameArmedUntil = 0;
     clearSave();
     S.mode = 'intro'; S.introPage = 0;
   }
@@ -1427,14 +1434,18 @@
     // misura 125px e resta intero nel bordo interno da 127px.
     text('Mistero di Laura Palmer', UW / 2, 69, '#31543a', '7px monospace', 'center');
     ctx.fillStyle = '#183225'; ctx.fillRect(0, VH - 40, UW, 40);
-    if (Math.floor(tGlobal / 500) % 2 === 0) {
+    var armed = S.newGameArmedUntil > tGlobal;
+    if (armed) {
+      text(touch ? 'B DI NUOVO: CANCELLA SALVATAGGIO' : 'N DI NUOVO: CANCELLA SALVATAGGIO', UW / 2, VH - 26, '#f0c060', 'bold 8px monospace', 'center');
+    } else if (Math.floor(tGlobal / 500) % 2 === 0) {
       text(save ? (touch ? 'TOCCA: CONTINUA' : 'INVIO: CONTINUA')
                 : (touch ? 'TOCCA PER INIZIARE' : 'PREMI INVIO'),
            UW / 2, VH - 26, '#f5efcf', 'bold 8px monospace', 'center');
     }
+    /* La legenda dice quello che i tasti fanno qui, sul titolo. */
     var hint;
-    if (touch) hint = 'D-PAD  A ESAMINA  B PROVE';
-    else hint = 'FRECCE MUOVI  INVIO ESAMINA';
+    if (touch) hint = save ? 'A CONTINUA  B NUOVA PARTITA' : 'A INIZIA';
+    else hint = save ? 'INVIO CONTINUA  N NUOVA PARTITA' : 'INVIO INIZIA';
     text(hint, UW / 2, VH - 10, '#9abf5a', '7px monospace', 'center');
   }
 
@@ -1540,11 +1551,13 @@
       kicker.textContent = 'CASO 1989  ·  TWIN PEAKS, WASHINGTON';
       title.textContent = '';
       body.textContent = '';
-      action.textContent = hasSave()
+      action.textContent = (S.newGameArmedUntil > tGlobal)
+        ? (touch ? 'B DI NUOVO PER CANCELLARE IL SALVATAGGIO' : 'N DI NUOVO PER CANCELLARE IL SALVATAGGIO')
+        : hasSave()
         ? (touch ? 'TOCCA PER CONTINUARE' : 'INVIO  ·  CONTINUA')
         : (touch ? 'TOCCA PER INIZIARE' : 'INVIO  ·  NUOVA PARTITA');
       meta.textContent = touch
-        ? 'D-PAD MUOVI  ·  A INTERAGISCI  ·  B INDIZI'
+        ? (hasSave() ? 'A CONTINUA  ·  B NUOVA PARTITA' : 'A INIZIA  ·  POI D-PAD MUOVI, A INTERAGISCI')
         : (hasSave()
           ? 'N: NUOVA PARTITA  ·  FRECCE: MUOVI  ·  X: FASCICOLO'
           : 'FRECCE: MUOVI  ·  INVIO: ESAMINA O PARLA  ·  X: FASCICOLO');
