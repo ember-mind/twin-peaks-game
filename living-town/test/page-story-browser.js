@@ -30,7 +30,9 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
   try {
     await page.navigate('living-town/index.html?speed=1x&world=new&cast=pair'); await sleep(1200);
     console.log('# page: on the way to work');
-    await runTo(1, 545); await sleep(300);
+    /* the morning's moment: walking up to the counter */
+    await js("(async function(){ var st = LT_OBSERVER; st.speedIndex = 0; for (var m = 480; m < 720; m++) { await st.sim.runUntil(1, m); var a = st.sim.state.characters.resident_a.activity; if (a && a.actionId === 'work_shift' && a.phase === 'approaching') break; } st.view.observe(); LT.Observer.paintNow(); return true; })()", true);
+    await sleep(300);
     const name = await js("LT_OBSERVER.sim.state.characters.resident_a.name");
     ok((await txt('lt-caption-doing')).indexOf(name + ' · On the way to: ') === 0, 'under the picture: who, and that they are still on the way (' + await txt('lt-caption-doing') + ')');
     const line = await txt('lt-caption-why');
@@ -69,7 +71,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     await runTo(1, 480);
     const pick = (id, value) => js("(function(){ var n = document.getElementById('" + id + "'); n.value = '" + value + "'; n.dispatchEvent(new Event('change')); return n.value; })()");
     await pick('lt-hand-what', 'leave_book');
-    await js("document.querySelector('#lt-hand-fields select').value = 'park_bench_sw'; true");
+    await js("document.querySelector('#lt-hand-fields select').value = 'park_lawn_w'; true");
     const registerBefore = await js("LT_OBSERVER.sim.state.interventions.length");
     await js("document.getElementById('lt-hand-do').click(); true"); await sleep(200);
     ok(/^Arranged for D1 08:00/.test(await txt('lt-hand-status')) && await js("LT_OBSERVER.sim.state.interventions.length") === registerBefore + 1, 'Do it: one entry in the register, and the page says when (' + await txt('lt-hand-status') + ')');
@@ -91,6 +93,19 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     ok(await js("document.querySelectorAll('#lt-hand-fields option').length") >= 1, 'the hand is offered for this world\'s people');
     ok(/friends|close|acquainted|barely know/.test(await txt('lt-bonds')) && /last seen (today|yesterday|not yet)/.test(await txt('lt-bonds')), 'Between them: ' + (await txt('lt-bonds')).replace(/\s+/g, ' ').slice(0, 100));
     await shot('05-the-street-at-half-past-five.png');
+    console.log('# page: the whole town');
+    await js("document.getElementById('lt-follow-town').click(); true"); await sleep(500);
+    const whole = JSON.parse(await js("JSON.stringify(LT_OBSERVER.townDrawn)"));
+    const outside = await js("LT_OBSERVER.sim.actorIds().filter(function(id){ var c = LT_OBSERVER.sim.state.characters[id]; return LT.World.outdoorGrid(c.location); }).length");
+    ok(await js("document.getElementById('lt-canvas').hidden && !document.getElementById('lt-town').hidden") && await txt('lt-place') === 'The whole town',
+       'Whole town shows the map instead of one person\'s corner of it');
+    ok(whole && whole.people === outside && whole.people + whole.indoors === 5, 'everyone is in it: ' + whole.people + ' outside, ' + whole.indoors + ' named over their doors');
+    await shot('05b-the-whole-town.png');
+    ok(/^This hour: /.test(await txt('lt-intention')), 'the hour\'s plan is shown with the person: ' + await txt('lt-intention'));
+    const signs = JSON.parse(await js("JSON.stringify(LT_OBSERVER.view.drawTown(LT_OBSERVER.townCtx, LT_OBSERVER.selected).bubbles)"));
+    ok(signs.length >= 1 && signs.every((b) => /:(sign|fork|think)/.test(b)), 'over their heads, what they are doing or deciding: ' + signs.join(', '));
+    const picked = await js("(function(){ var s = LT_OBSERVER.view.townSpots[0], cv = document.getElementById('lt-town'), r = cv.getBoundingClientRect(), k = r.width / 768; cv.dispatchEvent(new MouseEvent('click', { clientX: r.left + s.x * k, clientY: r.top + s.y * k, bubbles: true })); return s.id; })()");
+    ok(await js("LT_OBSERVER.selected") === picked && await js("!LT_OBSERVER.townView && !document.getElementById('lt-canvas').hidden"), 'choosing someone in it follows them (' + picked + ')');
     console.log('# page: auto pace, the timeline, looking back');
     await page.navigate('living-town/index.html?speed=1x&world=new'); await sleep(1200);
     await js("LT_OBSERVER.speedIndex = 0; true");
@@ -129,7 +144,7 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
     for (let i = 0; i < 60 && await js("LT_OBSERVER.sim.absMinute()") < 455; i++) await sleep(200);
     await js("document.querySelectorAll('#lt-speeds button')[0].click(); true"); await sleep(400);
     await pick('lt-hand-what', 'leave_book');
-    await js("document.querySelector('#lt-hand-fields select').value = 'park_bench_ne'; document.getElementById('lt-hand-do').click(); true");
+    await js("document.querySelector('#lt-hand-fields select').value = 'park_jetty'; document.getElementById('lt-hand-do').click(); true");
     const askedAt = await js("LT_OBSERVER.sim.absMinute()");
     await js("document.querySelectorAll('#lt-speeds button')[3].click(); true");
     for (let i = 0; i < 60 && await js("LT_OBSERVER.sim.absMinute()") < askedAt + 50; i++) await sleep(200);

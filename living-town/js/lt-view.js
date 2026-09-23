@@ -46,12 +46,13 @@
     return this.focusedCharacter().location;
   };
 
+  /* Outside, the town is one map: everyone out in it is in the picture. */
   View.prototype.charactersHere = function (locationId) {
     var state = this.sim.state, out = [];
-    var self = this;
+    var self = this, W = LT.World;
     this.sim.actorIds().forEach(function (id) {
       var c = state.characters[id];
-      if (c.location !== locationId) return;
+      if (!W.samePlace(c.location, locationId)) return;
       out.push({ character: c, render: self.renderStateFor(c) });
     });
     return out;
@@ -86,14 +87,16 @@
     this.sim.actorIds().forEach(function (id) {
       var c = state.characters[id];
       var r = self.renderStateFor(c);
-      if (r.location !== c.location) { cut(r, c); return; }   // another place: a cut, however near the numbers are
+      if (!LT.World.samePlace(r.location, c.location)) { cut(r, c); return; }   // another place: a cut, however near the numbers are
+      r.location = c.location;                    // from the street onto the lawn is a step, not a cut
       if (c.pos.x === r.seenX && c.pos.y === r.seenY) return;
-      if (Math.abs(c.pos.x - r.seenX) + Math.abs(c.pos.y - r.seenY) !== 1) {
+      var steps = self.stepsBetween(c, { x: r.seenX, y: r.seenY });
+      if (!steps) {
         cut(r, c);                                // steps the view never saw: cut, do not invent a route
         return;
       }
       r.seenX = c.pos.x; r.seenY = c.pos.y;
-      r.trail.push({ x: c.pos.x, y: c.pos.y });
+      steps.forEach(function (s) { r.trail.push(s); });
       if (r.trail.length > MAX_TRAIL) {           // far behind: cut forward along the walked route
         var at = r.trail[r.trail.length - MAX_TRAIL - 1];
         r.tx = r.mx = at.x; r.ty = r.my = at.y; r.moving = false; r.moveT = 0;
@@ -101,6 +104,19 @@
         r.trail = r.trail.slice(-MAX_TRAIL);
       }
     });
+  };
+
+  /* The cells walked since the view last looked, as the simulation walked
+   * them: one a minute inside, three outside. Null when that is not how they
+   * got here (a door, a load): the view then cuts rather than invent a way. */
+  View.prototype.stepsBetween = function (c, from) {
+    if (Math.abs(c.pos.x - from.x) + Math.abs(c.pos.y - from.y) === 1) return [{ x: c.pos.x, y: c.pos.y }];
+    var walked = this.sim.stepsWalked ? this.sim.stepsWalked(c.id) : [];
+    if (!walked.length) return null;
+    var last = walked[walked.length - 1], first = walked[0];
+    if (last.x !== c.pos.x || last.y !== c.pos.y) return null;
+    if (Math.abs(first.x - from.x) + Math.abs(first.y - from.y) !== 1) return null;
+    return walked;
   };
 
   /* dt in real milliseconds. Smoothing only: each tile of the trail is one
@@ -131,10 +147,12 @@
       r.dir = (r.walking && dir) || c.pos.dir || r.dir;
       if (r.walking) r.phaseT += dt * 0.006;
       else r.phaseT = 0;
+      self.noteDecisions(c, r);
     });
 
     var loc = LT.World.LOCATIONS[this.visibleLocation()];   // grid only; the name lives in state
-    if (this.lastLocation !== loc.id) { this.lastLocation = loc.id; this.camSnap = true; }
+    var shown = LT.World.gridOf(loc.id);                   // the street and the park are one picture
+    if (this.lastLocation !== shown) { this.lastLocation = shown; this.camSnap = true; }
     var focus = this.renderStateFor(this.focusedCharacter());
     var target = EMBER.Camera.centerOn(focus.x, focus.y, {
       anchorX: TILE / 2, anchorY: TILE / 2,
@@ -184,7 +202,10 @@
       var pose = LT.Appearance.poseFor(e.character);
       return pose && pose.poseId === 'reading';
     });
-    return sim.objectsAt(locId).map(function (o) {
+    var W = LT.World, here = W.outdoorGrid(locId)
+      ? Object.keys(W.LOCATIONS).filter(function (id) { return W.samePlace(id, locId); }).reduce(function (all, id) { return all.concat(sim.objectsAt(id)); }, [])
+      : sim.objectsAt(locId);
+    return here.map(function (o) {
       var vis = C.visualOf(o, sim);
       /* A book that is open is in its reader's hands — the reading pose shows
        * it there — so it is not also drawn lying open where it is kept. Told
@@ -236,7 +257,19 @@
     try { GAME.sprites.drawStructures(g, scene, cx, cy, opts); }
     finally { if (light && base) kit.materials[scene.id] = base; }
     EMBER.Tilemap.paintDepthBands(ents, TILE, function (e) {
-      self.drawInhabitant(g, e, cx, cy, scene.id, how);
+      if (!e.booth) { self.drawInhabitant(g, e, cx, cy, scene.id, how); return; }
+      /* On a booth: the person on its seat, then the booth's table again,
+       * clipped to the table, over their lap. */
+      var at = {}; for (var k in e) at[k] = e[k];
+      at.wy = e.booth.y;
+      self.drawInhabitant(g, at, cx, cy, scene.id, how);
+      var r = e.booth.rect;
+      g.save(); g.beginPath(); g.rect(r[0] - cx, r[1] - cy, r[2], r[3]); g.clip();
+      GAME.sprites.drawForegroundStructures(g, scene, cx, cy, {
+        mapId: scene.id, indoor: true, viewportWidth: VW, viewportHeight: VH,
+        forestDepthMin: e.booth.depth, forestDepthMax: e.booth.depth + 1
+      });
+      g.restore();
     }, function (footY, nextFootY, afterIndex) {
       if (afterIndex < 0) return;
       GAME.sprites.drawForegroundStructures(g, scene, cx, cy, {
@@ -278,7 +311,6 @@
           if (afterIndex < 0 || !TP.drawForeground) return;
           TP.drawForeground(g, loc.id, loc.rows, cx, cy, footY, nextFootY, popts);
         });
-        this.drawActivityMarks(g, cx, cy, ents.filter(function (e) { return e.kind !== 'thing'; }));
         return 'places';
       }
     }
@@ -295,9 +327,92 @@
     });
     /* Never a production map id: no room lighting is borrowed for a place that has none. */
     ents.forEach(function (e) { self.drawInhabitant(g, e, cx, cy, 'lt_temporary', how); });
-    this.drawActivityMarks(g, cx, cy, ents.filter(function (e) { return e.kind !== 'thing'; }));
     return 'temporary';
   };
+
+  /* The town outside: the engine draws the kit map and its light; the
+   * people and things are handed to it as actors in one depth order. */
+  View.prototype.drawKitTown = function (g, people, things, cx, cy, how) {
+    var self = this;
+    LT.KitTown.draw(g, cx, cy, this.sim, people, things, {
+      drawThing: function (gg, e, camX, camY) { self.drawThing(gg, e, camX, camY); },
+      drawPerson: function (gg, e, x, y, seat) {
+        var copy = {}; for (var k in e) copy[k] = e[k];
+        copy.wx = x; copy.wy = y;
+        if (seat) copy.pose = { poseId: 'seated', dir: 'down' };
+        self.drawInhabitant(gg, copy, 0, 0, 'lt_street', how);
+      }
+    });
+    return 'kit';
+  };
+
+  /* ---------------- the whole town ---------------- */
+
+  /* Everyone out in the town, at once, on the whole kit map; whoever is
+   * indoors is named over their door. Drawn onto a canvas of its own at the
+   * map's full size. Returns what it drew, and where, so a click can pick. */
+  View.prototype.drawTown = function (g, selectedId) {
+    var K = LT.KitTown, W = LT.World, sim = this.sim, self = this;
+    if (!g || !K || !K.ready) return null;
+    var how = this.inhabitantRenderer();
+    var people = this.entitiesAt('street'), things = this.thingsAt('street');
+    this.drawKitTown(g, people, things, 0, 0, how);
+    var spots = [], placed = [];
+    /* Two people side by side keep their names and bubbles apart: whoever
+     * stands to the right of someone close has theirs a row higher. */
+    people.slice().sort(function (a, b) { return a.wx - b.wx || a.wy - b.wy; }).forEach(function (e) {
+      var lift = 0, x = e.wx, y = e.wy;
+      while (placed.some(function (p) { return Math.abs(p.x - x) < 44 && Math.abs(p.y - (y - lift)) < 20; })) lift += 26;
+      e.stackLift = lift; placed.push({ x: x, y: y - lift });
+    });
+    people.forEach(function (e) {
+      var c = sim.state.characters[e.id], seat = K.isSeated(sim, e);
+      var x = e.wx + TILE / 2, y = (seat ? (sim.objectById(c.activity.targetId).y * TILE + 6) : e.wy + TILE - 3) - (e.stackLift || 0);
+      spots.push({ id: e.id, x: x, y: y - 10 + (e.stackLift || 0), outside: true });
+      var plan = c.intention && LT.Intentions && LT.Intentions.byId(c.intention.id);
+      var planned = plan && sim.absMinute() < c.intention.untilAbs;
+      label(g, c.name + (planned ? ' - ' + plan.word : ''), x, y - 28, e.id === selectedId ? '#e9b458' : '#e8e2d2');
+    });
+    /* Indoors: one tag per door, the names of whoever is behind it. */
+    var byDoor = {};
+    sim.actorIds().forEach(function (id) {
+      var c = sim.state.characters[id];
+      if (W.outdoorGrid(c.location) || c.transit) return;
+      var d = W.STREET_PORTALS[c.location];
+      if (!d) return;
+      var k = d.x + ',' + d.y;
+      (byDoor[k] = byDoor[k] || { x: d.x * TILE + TILE / 2, y: d.y * TILE - 20, ids: [] }).ids.push(id);
+    });
+    Object.keys(byDoor).forEach(function (k) {
+      var door = byDoor[k], names = door.ids.map(function (id) { return sim.state.characters[id].name; });
+      label(g, names.join(', '), door.x, door.y, door.ids.indexOf(selectedId) >= 0 ? '#e9b458' : '#e8e2d2');
+      door.ids.forEach(function (id) { spots.push({ id: id, x: door.x, y: door.y, outside: false }); });
+    });
+    this.townSpots = spots;
+    var bubbles = this.drawBubbles(g, people, 0, 0, 12);
+    return { people: people.length, indoors: spots.filter(function (s) { return !s.outside; }).length, bubbles: bubbles };
+  };
+
+  /* Who is at a point of the whole-town picture: the nearest person drawn
+   * there or named over a door, within reach of a click. */
+  View.prototype.townPick = function (x, y) {
+    var best = null, bd = 26 * 26;
+    (this.townSpots || []).forEach(function (s) {
+      var d = (s.x - x) * (s.x - x) + (s.y - y) * (s.y - y);
+      if (d < bd) { bd = d; best = s.id; }
+    });
+    return best;
+  };
+
+  function label(g, text, x, y, colour) {
+    var F = root.GAME && root.GAME.RetroFont, t = text.toUpperCase();
+    var w = (F ? F.measure(t, 1) : t.length * 6) + 6, x0 = Math.round(x - w / 2), y0 = Math.round(y) - 9;
+    g.fillStyle = 'rgba(20,22,28,0.82)'; g.fillRect(x0, y0, w, 11);
+    g.fillStyle = 'rgba(233,180,88,0.55)'; g.fillRect(x0 + 1, y0 + 10, w - 2, 1);
+    if (F) F.draw(g, t, x0 + 3, y0 + 2, colour, { scale: 1 });
+    else { g.fillStyle = colour; g.font = '8px monospace'; g.fillText(t, x0 + 3, y0 + 8); }
+    g.fillStyle = 'rgba(20,22,28,0.82)'; g.fillRect(Math.round(x) - 1, y0 + 11, 3, 1); g.fillRect(Math.round(x), y0 + 12, 1, 1);
+  }
 
   /* The light of the simulated minute; null when the package is not loaded. */
   View.prototype.light = function () {
@@ -316,15 +431,19 @@
     var ents = EMBER.Tilemap.depthSort(things.concat(people));
     var how = this.inhabitantRenderer();
     var scene = this.productionScene(loc);
-    var drewAs = 'production';
+    var drewAs = 'production', light = this.light();
     if (scene) this.drawProductionRoom(g, scene, ents, cx, cy, how);
+    else if (loc.grid && LT.KitTown && LT.KitTown.ready) drewAs = this.drawKitTown(g, people, things, cx, cy, how);
     else drewAs = this.drawTemporaryPlace(g, loc, ents, cx, cy, how);
-    /* Last, over room and people alike, so nobody stands in another hour's light. */
-    var light = this.light();
-    if (light) LT.DayLight.apply(g, light, { width: VW, height: VH });
+    /* Last, over room and people alike, so nobody stands in another hour's
+     * light. The town outside carries its own hour (the kit's graded light). */
+    if (light && drewAs !== 'kit') LT.DayLight.apply(g, light, { width: VW, height: VH });
+    /* What people are deciding, over their heads, in no hour's light. */
+    var bubbles = this.drawBubbles(g, people, cx, cy, 0);
     return { location: locId, entities: people.length, things: things.map(function (t) { return t.id + ':' + t.state; }),
              environment: drewAs, inhabitants: how,
              poses: people.filter(function (e) { return e.pose && !e.moving; }).map(function (e) { return e.id + ':' + e.pose.poseId; }),
+             bubbles: bubbles,
              light: light ? light.phase : null };
   };
 
@@ -343,14 +462,94 @@
           x = bed.x * TILE + (wide ? TILE / 2 : 0); y = bed.y * TILE;
         }
       }
+      var booth = pose && pose.poseId === 'seated' && !e.render.walking ? boothSeat(sim, e.character, locId) : null;
       return {
-        id: e.character.id, sheetId: LT.Appearance.sheetIdFor(e.character), pose: pose,
-        wx: x, wy: y,
+        id: e.character.id, sheetId: LT.Appearance.sheetIdFor(e.character), pose: booth ? { poseId: 'seated', dir: 'down' } : pose,
+        /* Someone on a booth sits on its seat, behind its table: sorted just
+         * in front of the booth's own line so the table can be drawn over
+         * their lap and anyone further forward over them. */
+        wx: booth ? booth.x : x, wy: booth ? booth.depth + 1 - TILE : y, booth: booth,
         dir: e.render.dir, moving: e.render.walking,
         phase: EMBER.Grid.walkPhase(e.render.phaseT % 1)
       };
     });
     return EMBER.Tilemap.depthSort(ents);
+  };
+
+  /* The booth a seated person is on, from the room's plan: which one, which
+   * end (the one they sat down from), where the seat is and the booth's
+   * floor line. Null when they are not seated on one. */
+  function boothSeat(sim, c, locId) {
+    var loc = LT.World.LOCATIONS[locId], plan = loc && loc.visual && loc.visual.plan;
+    if (!plan || !plan.banquettes) return null;
+    var act = c.activity, id = act && ((act.seat && act.seat.state === 'seated' && act.seat.objectId) || act.targetId);
+    var obj = id && sim.objectById(id);
+    if (!obj || obj.location !== locId) return null;
+    for (var n = 0; n < plan.banquettes.length; n++) {
+      var b = plan.banquettes[n];
+      if (obj.y !== b[1] || obj.x < b[0] || obj.x >= b[0] + b[2]) continue;
+      var left = c.pos.x < b[0], w = b[2] * TILE;
+      return { n: n, side: left ? 'left' : 'right', x: b[0] * TILE + (left ? 8 : w - 25), y: b[1] * TILE - 12,
+               depth: (b[1] + 1) * TILE, rect: [b[0] * TILE, b[1] * TILE + 1, w, 17] };
+    }
+    return null;
+  }
+
+  /* ---------------- bubbles ---------------- */
+
+  /* A new decision since the view last looked starts a fork bubble, if it
+   * changes what the person does; a new open question starts the thinking
+   * clock. The first look at someone starts nothing: what they decided before
+   * anyone was watching is not news. */
+  View.prototype.noteDecisions = function (c, r) {
+    var B = LT.Bubbles, now = this.clock * 1000, d = (c.recentDecisions || [])[0];
+    if (!B) return;
+    var id = d ? d.requestId : null;
+    if (r.lastDecisionId === undefined) r.lastDecisionId = id;
+    else if (id !== r.lastDecisionId) {
+      r.lastDecisionId = id;
+      if (B.meaningful(d, (c.recentDecisions || [])[1])) r.fork = { options: B.optionsOf(this.sim, d), t0: now, source: d.source };
+    }
+    var pid = c.pending ? c.pending.requestId : null;
+    if (pid !== r.pendingId) { r.pendingId = pid; r.pendingT0 = now; }
+  };
+
+  /* The point over someone's head, as drawn: on a booth, on a bench, or standing. */
+  View.prototype.headOf = function (e) {
+    var K = LT.KitTown, seat = K && K.ready && K.seatOf ? K.seatOf(this.sim, e) : null;
+    if (seat) return { x: seat.x, y: seat.y - 22 };
+    if (e.booth) return { x: e.booth.x + TILE / 2, y: e.booth.y - 9 };
+    return { x: e.wx + TILE / 2, y: e.wy - 9 };
+  };
+
+  /* One bubble per person: thinking, a fork, or the sign of what they do.
+   * Returns what was shown, for the page and its tests. */
+  View.prototype.drawBubbles = function (g, people, cx, cy, lift) {
+    var B = LT.Bubbles, sim = this.sim, self = this, now = this.clock * 1000, shown = [];
+    if (!B) return shown;
+    people.forEach(function (e) {
+      if (e.kind === 'thing') return;
+      var c = sim.state.characters[e.id], r = self.render[e.id];
+      if (!c || !r) return;
+      var head = self.headOf(e), x = head.x - cx, y = head.y - cy - (lift || 0) - (e.stackLift || 0);
+      var rec = c.pending && sim.requests && sim.requests[c.pending.requestId];
+      /* Thinking is a question whose answer has not come: one answered and
+       * waiting for the next minute (or a paused clock) is not. */
+      if (c.pending && !(rec && rec.resolved) && now - (r.pendingT0 || now) >= B.THINK_AFTER_MS) {
+        var opts = B.pendingOptions(sim, rec && rec.request);
+        B.draw(g, 'think', x, y, opts, now - r.pendingT0);
+        shown.push(e.id + ':think' + (opts.length ? ':' + opts.join('/') : ''));
+        return;
+      }
+      if (r.fork && now - r.fork.t0 < B.FORK_MS && r.fork.options.length) {
+        B.draw(g, 'fork', x, y, r.fork.options, now - r.fork.t0);
+        shown.push(e.id + ':fork:' + r.fork.options.map(function (o) { return o.label; }).join('/'));
+        return;
+      }
+      var act = c.activity, sign = act && act.phase === 'executing' && !e.moving ? B.signOf(act.actionId) : null;
+      if (sign) { B.draw(g, 'sign', x, y, sign); shown.push(e.id + ':sign:' + sign); }
+    });
+    return shown;
   };
 
   /* A viewer must be able to tell working from resting without reading a label.

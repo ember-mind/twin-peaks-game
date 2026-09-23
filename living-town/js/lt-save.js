@@ -32,7 +32,12 @@
  *                      the uninterrupted run still lines up, but under an id
  *                      that names this load ('req_7.2'): an answer addressed
  *                      to the question as the vanished process asked it is an
- *                      unknown request here, never a second answer.
+ *                      unknown request here, never a second answer. The key
+ *                      an answer is judged by (relevanceKey), its time and
+ *                      its candidates are the ones it was first asked with:
+ *                      people go on walking while a question is open, so
+ *                      the world at the save can differ from the world it
+ *                      was asked in.
  *
  * Re-asked, not replayed. What the save guarantees is the question: the same
  * person, the same state, the same candidates, the same request number, and
@@ -236,6 +241,122 @@
     return save;
   };
 
+  /* d7dfa67e -> 98626395, the kit town: outside became one map. The street (20x11) and
+   * the park (16x10) were two rooms; now both are parts of one 48x27 village
+   * drawn from the kit (lt-town.gen.js), with the park on the lawn by the
+   * river. Every position outside, every walk target outside and everything
+   * lying in the park is moved, by rule:
+   *   - what stood at one of the old park's named spots (the bench people sit
+   *     on, the three other benches, the path) goes to the spot that took its
+   *     place, and so does whoever was using it or walking to use it;
+   *   - anyone walking between places is put on the new route between the
+   *     same two doors, as far from the end as they could still walk in the
+   *     minutes their walk has left, so they arrive when they would have;
+   *   - anyone else outside keeps their place in proportion, moved onto the
+   *     nearest open ground of the same part of the town.
+   * The town as it stands after this step is frozen here (its rows 9-21; the
+   * rest is wall and water). Written against two real saves:
+   * test/fixtures/save-town-d7dfa67e-walking-to-the-park.json and
+   * save-town-d7dfa67e-reading-in-the-park.json. */
+  var KIT_TOWN = {
+    world: '98626395', w: 48, h: 27, top: 9, parkRow: 15, parkEast: 39,
+    rows: ['#######D#######D##########D#####D#######D#######', 'ffffff-,ffffff-,ffff-ff-f--ffff--ffffff,-ffff#ff',
+           '-f----------------f-----------------f---------f-', '------------------------------------------------',
+           '------------------------------------------------', '------------------------------------------------',
+           ',,fffffffffffffffffff----fffffffffffffff,w------', ',,,,,,,,,#,,,,,#,,,,,---,,,#,,,,,,,,,,,,,ww-----',
+           ',#,ffff,,,,,ff,,,fff,---ff,,,,,ff,fff,ff,www----', 'fffffffffffffffffffff,,,fffffffffffffffffwwww---',
+           '#####################,,,#################wwww---', 'wwwwwwwwwwwwwwwwwwwww---wwwwwwwwwwwwwwwwwwwwww--',
+           'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww-'],
+    portals: { cafe: { x: 26, y: 9 }, flat_a: { x: 7, y: 9 }, flat_b: { x: 15, y: 9 }, flat_c: { x: 26, y: 9 },
+               flat_d: { x: 32, y: 9 }, flat_e: { x: 40, y: 9 }, park: { x: 22, y: 17 } },
+    /* the bench is sat on from the lawn at either end: in front of it is the wall */
+    bench: { anchors: { sit_and_rest: { x: 11, y: 17, dir: 'right' } }, moreAnchors: { sit_and_rest: [{ x: 14, y: 17, dir: 'left' }] } },
+    /* old park cell -> new cell, for things and for the cells they are used from */
+    spots: { '3,2': [12, 17], '3,3': [11, 17, 'right'], '12,6': [32, 17], '12,7': [30, 17, 'right'], '3,6': [7, 17], '3,7': [7, 16, 'down'],
+             '12,2': [22, 20], '12,3': [22, 19, 'down'], '8,6': [22, 16], '8,7': [22, 17, 'up'] }
+  };
+  function kitCell(x, y) {
+    var T = KIT_TOWN, row = T.rows[y - T.top];
+    return row ? row.charAt(x) : (y < T.top ? '#' : 'w');
+  }
+  function kitOpen(x, y) { return x >= 0 && x < KIT_TOWN.w && '#fw'.indexOf(kitCell(x, y)) < 0 && kitCell(x, y) !== ''; }
+  function kitZone(x, y) { return y >= KIT_TOWN.parkRow && x <= KIT_TOWN.parkEast ? 'park' : 'street'; }
+  /* The nearest open cell to (x, y) in the given part of town, breadth first in a fixed order. */
+  function kitSnap(x, y, zone) {
+    var seen = {}, q = [[x, y]];
+    while (q.length) {
+      var c = q.shift(), k = c[0] + ',' + c[1];
+      if (seen[k] || c[0] < 0 || c[1] < 0 || c[0] >= KIT_TOWN.w || c[1] >= KIT_TOWN.h) continue;
+      seen[k] = true;
+      if (kitOpen(c[0], c[1]) && kitZone(c[0], c[1]) === zone) return { x: c[0], y: c[1] };
+      q.push([c[0], c[1] - 1], [c[0] + 1, c[1]], [c[0], c[1] + 1], [c[0] - 1, c[1]]);
+    }
+    return { x: KIT_TOWN.portals.park.x, y: KIT_TOWN.portals.park.y };
+  }
+  /* The shortest walk between two cells of the frozen town, as the cells in order. */
+  function kitRoute(a, b) {
+    var prev = {}, q = [a], key = function (c) { return c.x + ',' + c.y; };
+    prev[key(a)] = null;
+    while (q.length) {
+      var c = q.shift();
+      if (c.x === b.x && c.y === b.y) break;
+      [[0, -1], [1, 0], [0, 1], [-1, 0]].forEach(function (d) {
+        var n = { x: c.x + d[0], y: c.y + d[1] };
+        if (prev[key(n)] !== undefined || !kitOpen(n.x, n.y)) return;
+        prev[key(n)] = c; q.push(n);
+      });
+    }
+    if (prev[key(b)] === undefined) return [a];
+    var out = [], at = b;
+    while (at) { out.unshift(at); at = prev[key(at)]; }
+    return out;
+  }
+  function kitPlace(x, y, from) {
+    var s = KIT_TOWN.spots[x + ',' + y];
+    if (from === 'park' && s) return { x: s[0], y: s[1], dir: s[2] };
+    if (from === 'park') return kitSnap(Math.round(2 + x * 2.4), 16 + Math.round(y / 9), 'park');
+    return kitSnap(Math.round(2 + x * 2.2), 11 + Math.max(0, Math.min(3, y - 3)), 'street');
+  }
+  S.WORLD_MIGRATIONS['d7dfa67e'] = function (save) {
+    var state = save.state, T = KIT_TOWN;
+    (state.objects || []).forEach(function (o) {
+      if (o.location !== 'park' && o.location !== 'street') return;
+      var at = kitPlace(o.x, o.y, o.location);
+      if (!T.spots[o.x + ',' + o.y] && !kitOpen(at.x, at.y)) at = kitSnap(at.x, at.y, 'park');
+      Object.keys(o.anchors || {}).forEach(function (k) {
+        var a = o.anchors[k], n = kitPlace(a.x, a.y, o.location);
+        o.anchors[k] = { x: n.x, y: n.y, dir: n.dir || a.dir };
+      });
+      o.x = at.x; o.y = at.y;
+      o.location = kitZone(at.x, at.y);
+      if (o.id === 'obj_bench') { o.anchors = deepCopy(T.bench.anchors); o.moreAnchors = deepCopy(T.bench.moreAnchors); }
+    });
+    Object.keys(state.characters || {}).forEach(function (id) {
+      var c = state.characters[id];
+      if (c.location !== 'park' && c.location !== 'street') return;
+      var act = c.activity;
+      if (c.transit && act && act.actionId === 'travel') {
+        var start = c.transit.from === 'park' || !T.portals[c.transit.from] ? kitPlace(c.pos.x, c.pos.y, c.location) : T.portals[c.transit.from];
+        var end = T.portals[c.transit.to] || T.portals.park;
+        var route = kitRoute({ x: start.x, y: start.y }, { x: end.x, y: end.y });
+        var left = Math.max(0, (act.plannedMinutes || 0) - (act.elapsed || 0)) * 3;
+        var at = route[Math.max(0, route.length - 1 - left)];
+        c.pos = { x: at.x, y: at.y, dir: c.pos.dir };
+        c.walkTarget = { x: end.x, y: end.y };
+      } else {
+        var from = c.location, p = kitPlace(c.pos.x, c.pos.y, from);
+        c.pos = { x: p.x, y: p.y, dir: p.dir || c.pos.dir };
+        if (c.walkTarget) {
+          var t = kitPlace(c.walkTarget.x, c.walkTarget.y, from);
+          c.walkTarget = { x: t.x, y: t.y, dir: t.dir || c.walkTarget.dir };
+        }
+      }
+      c.location = kitZone(c.pos.x, c.pos.y);
+    });
+    save.world = T.world;
+    return save;
+  };
+
   /* ---------------- serialise ---------------- */
 
   S.serialize = function (sim) {
@@ -250,7 +371,14 @@
       var pending = state.characters[id].pending;
       if (pending) {
         var rec = sim.requests[pending.requestId];
-        reissue.push({ actorId: id, seq: pending.seq, issuedAbs: pending.issuedAbs,
+        /* The question as it was asked — when, what was on offer, the key an
+         * answer is judged by. A question can stay open for minutes while
+         * people walk, so the world at the save is not the world it was asked
+         * in; the same question must be put, and answered the same way. */
+        var q = rec && rec.request;
+        var asked = q ? { day: q.day, minute: q.minute, clock: q.clock, absMinute: q.absMinute,
+                          relevanceKey: q.relevanceKey, candidates: deepCopy(q.candidates) } : null;
+        reissue.push({ actorId: id, seq: pending.seq, issuedAbs: pending.issuedAbs, asked: asked,
                        reason: (rec && rec.request.context && rec.request.context.reason) || 'idle' });
       }
       state.characters[id].pending = null;
@@ -459,7 +587,7 @@
       /* A turn question whose talk is no longer going is not that question any
        * more: the person is simply someone with nothing in hand. */
       var reason = (r.reason === 'conversation_turn' && !midTalk) ? 'idle' : r.reason;
-      if ((!actor.activity || midTalk) && !actor.pending) sim.requestDecision(actor, reason, r.seq, r.issuedAbs);
+      if ((!actor.activity || midTalk) && !actor.pending) sim.requestDecision(actor, reason, r.seq, r.issuedAbs, r.asked || undefined);
     });
 
     return sim;

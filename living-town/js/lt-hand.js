@@ -23,10 +23,10 @@
 
   /* Where a small thing can be left, and where someone stands to use it. */
   H.BOOK_SPOTS = [
-    { id: 'park_bench_se', label: 'the south-east bench in the park', locationId: 'park', x: 12, y: 6, useSpot: { x: 12, y: 7, dir: 'up' } },
-    { id: 'park_bench_sw', label: 'the south-west bench in the park', locationId: 'park', x: 3, y: 6, useSpot: { x: 3, y: 7, dir: 'up' } },
-    { id: 'park_bench_ne', label: 'the north-east bench in the park', locationId: 'park', x: 12, y: 2, useSpot: { x: 12, y: 3, dir: 'up' } }
-  ];   // the north-west bench is the one people sit on
+    { id: 'park_bench_e', label: 'the east bench in the park', locationId: 'park', x: 32, y: 17, useSpot: { x: 30, y: 17, dir: 'right' } },
+    { id: 'park_jetty', label: 'the end of the jetty', locationId: 'park', x: 22, y: 20, useSpot: { x: 22, y: 19, dir: 'down' } },
+    { id: 'park_lawn_w', label: 'the grass at the west end of the park', locationId: 'park', x: 7, y: 17, useSpot: { x: 7, y: 16, dir: 'down' } }
+  ];   // the west bench is the one people sit on
   H.DOOR_SPOTS = {
     flat_a: { x: 6, y: 6, useSpot: { x: 5, y: 6, dir: 'right' } },
     flat_b: { x: 6, y: 5, useSpot: { x: 5, y: 5, dir: 'right' } },
@@ -120,7 +120,7 @@
    * stand to pick it up. Only offered when the package that knows what a lost
    * wallet is has been loaded. */
   H.WALLET_SPOTS = [
-    { id: 'park_path', label: 'on the path in the park', locationId: 'park', x: 8, y: 6, useSpot: { x: 8, y: 7, dir: 'up' } },
+    { id: 'park_path', label: 'on the path in the park', locationId: 'park', x: 22, y: 16, useSpot: { x: 22, y: 17, dir: 'up' } },
     { id: 'cafe_floor', label: 'on the café floor', locationId: 'cafe', x: 8, y: 5, useSpot: { x: 8, y: 6, dir: 'up' } }
   ];
   H.CATALOGUE.push({

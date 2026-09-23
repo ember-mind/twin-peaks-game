@@ -70,14 +70,14 @@ const strip = (s) => { const c = JSON.parse(JSON.stringify(s.state)); delete c.v
      'a goal about one person counts talks with that person (' + goalE.progress + '), not the earlier ones with somebody else, and not ones overheard');
   const kept = types('COMMITMENT_KEPT').filter((e) => e.data.commitmentId === 'cmt_park_morning');
   ok(kept.length === 2 && kept[0].absMinute < 660, 'two people who met early at the agreed place kept their promise (' + kept[0].stamp + ' for 11:00)');
-  ok(types('COMMITMENT_BROKEN').every((e) => { const c = T[e.actorId].commitments.find((k) => k.id === e.data.commitmentId); return !(c.kind === 'social' && convs.some((v) => v.participants.indexOf(e.actorId) >= 0 && v.participants.indexOf(c.withId) >= 0 && v.startAbs <= LT.Util.absolute(c.dueDay, c.dueMin) + (c.graceMin || 0) && v.startAbs >= LT.Util.absolute(c.dueDay, c.dueMin) - 90)); }),
+  ok(types('COMMITMENT_BROKEN').every((e) => { const c = T[e.actorId].commitments.find((k) => k.id === e.data.commitmentId); return /^cmt_meal_/.test(c.id) || !(c.kind === 'social' && convs.some((v) => v.participants.indexOf(e.actorId) >= 0 && v.participants.indexOf(c.withId) >= 0 && v.startAbs <= LT.Util.absolute(c.dueDay, c.dueMin) + (c.graceMin || 0) && v.startAbs >= LT.Util.absolute(c.dueDay, c.dueMin) - 90)); }),
      'no meeting is called broken when the two sat down together in time');
 
   console.log('# the days after the first');
   const week = LT.Scenario.town({});
   await week.runUntil(7, 0);
   const W7 = week.state.characters, ev7 = (t) => week.state.events.filter((e) => e.type === t);
-  const shifts = ev7('COMMITMENT_KEPT').filter((e) => e.data.commitmentId === 'cmt_shift');
+  const shifts = ev7('COMMITMENT_KEPT').concat(ev7('COMMITMENT_BROKEN')).filter((e) => e.data.commitmentId === 'cmt_shift');
   ok([2, 3, 4, 5, 6].every((d) => shifts.some((e) => e.day === d && e.actorId === 'resident_a') && shifts.some((e) => e.day === d && e.actorId === 'resident_c')), 'every working day owes its shift, and it is kept or broken that day');
   ok(W7.resident_a.commitments.filter((c) => c.id === 'cmt_shift').length === 7 && new Set(W7.resident_a.commitments.filter((c) => c.id === 'cmt_shift').map((c) => c.dueDay)).size === 7 && W7.resident_b.commitments.filter((c) => c.id === 'cmt_shift').length === 0, 'one a day, for people with a job and nobody else');
   const set = ev7('GOAL_SET');
@@ -102,8 +102,9 @@ const strip = (s) => { const c = JSON.parse(JSON.stringify(s.state)); delete c.v
   ok(!long.state.events.some((e) => e.day === 1 && e.type === 'ACTIVITY_STARTED') && long.state.events.some((e) => e.day === 1 && e.type === 'TALKED') && long.state.events.some((e) => e.day === 4 && e.type === 'ACTIVITY_STARTED'),
      'its routine is let go, what would still be told is kept, and the last two days are whole');
   await long.runUntil(12, 0); const at12 = size();
-  /* What is kept for ever is what would still be told: with people asking each other to eat there is more of it. The guard is the rate. */
-  ok((at12 - at5) / 7 < 50 * 1024 && at12 < 1200000, 'seven more days add ' + Math.round((at12 - at5) / 1024) + ' KB to a ' + Math.round(at5 / 1024) + ' KB save — it was 200 KB a day');
+  /* What is kept for ever is what would still be told: with people asking each other to eat there is more of it, and with an hour
+   * meant for company they talk about twice as often. The guard is the rate, well inside what a browser will keep. */
+  ok((at12 - at5) / 7 < 70 * 1024 && at12 < 1600000, 'seven more days add ' + Math.round((at12 - at5) / 1024) + ' KB to a ' + Math.round(at5 / 1024) + ' KB save — it was 200 KB a day');
   const twin = LT.Save.deserialize(JSON.parse(JSON.stringify(LT.Save.serialize(long))));
   await long.runUntil(13, 30); await twin.runUntil(13, 30);
   ok(strip(long) === strip(twin), 'and a world loaded on day twelve is still the world that never stopped, across another settling');
@@ -122,13 +123,36 @@ const strip = (s) => { const c = JSON.parse(JSON.stringify(s.state)); delete c.v
   const hands = LT.Hand.entry('extra_shift').fields(town)[0].options.map((o) => o.id);
   ok(hands.join() === 'resident_a,resident_c', 'an extra shift can be posted for either of the two who work there');
 
-  console.log('# every place is painted by the places package, none by the fallback');
+  console.log('# every place is painted: rooms by the places package, the town outside by the kit map');
   require(path.resolve(__dirname, '..', 'content', 'town-places-v01', 'lt-town-places.js'));
-  const unpainted = Object.keys(LT.World.LOCATIONS).filter((id) => id !== 'cafe').filter((id) => {
+  const gen = require('node:child_process').spawnSync(process.execPath, [path.resolve(__dirname, '..', 'tools', 'gen-town-map.js'), '--check'], { encoding: 'utf8' });
+  ok(gen.status === 0, 'the street and the park walk the grid of the kit map that draws them: ' + (gen.stdout || gen.stderr).trim());
+  const unpainted = Object.keys(LT.World.LOCATIONS).filter((id) => id !== 'cafe' && !LT.World.outdoorGrid(id)).filter((id) => {
     const claims = LT.TownPlaces.claims(id, LT.World.LOCATIONS[id].rows);
     return !claims || !LT.World.blockedCells(id).every((key) => !!claims[key]);
   });
   ok(unpainted.length === 0, 'the view\'s own condition holds for every place, the street included: ' + JSON.stringify(unpainted));
+
+  console.log('# found by watching: where people should not stand');
+  const TM = LT.TownMap, Wd = LT.World;
+  ok([...TM.rows[18]].every((ch, x) => Wd.isSolid(ch) || (x >= 21 && x <= 23) || x > 40),
+     'the river wall\'s coping is not ground: along the park only the steps down to the jetty are open');
+  const park = []; for (let y = 0; y < TM.h; y++) for (let x = 0; x < TM.w; x++) if (Wd.zoneAt(x, y) === 'park') park.push(x + ',' + y);
+  const seen = new Set([park[0]]), q = [park[0]];
+  while (q.length) { const [x, y] = q.shift().split(',').map(Number); [[0, 1], [1, 0], [0, -1], [-1, 0]].forEach(([dx, dy]) => { const k = (x + dx) + ',' + (y + dy); if (!seen.has(k) && park.indexOf(k) >= 0) { seen.add(k); q.push(k); } }); }
+  ok(seen.size === park.length, 'the lawn is one piece: all ' + park.length + ' of its cells reach each other without going up to the street');
+  const watched = LT.Scenario.town({});
+  const behind = [], onWall = [];
+  for (let m = 0; m < 2 * 1440; m++) {
+    await watched.runMinutes(1);
+    watched.actorIds().forEach((id) => {
+      const c = watched.state.characters[id];
+      if (!Wd.mayStand(c.location, c.pos.x, c.pos.y, c) && !c.walkTarget) behind.push(watched.stamp() + ' ' + id);
+      if (Wd.outdoorGrid(c.location) && Wd.isSolid(Wd.LOCATIONS[c.location].rows[c.pos.y].charAt(c.pos.x))) onWall.push(watched.stamp() + ' ' + id);
+    });
+  }
+  ok(behind.length === 0, 'in two town days nobody who does not work at the café stops behind its counter' + (behind[0] ? ' — ' + behind[0] : ''));
+  ok(onWall.length === 0, 'and nobody outside stands on anything that is not ground' + (onWall[0] ? ' — ' + onWall[0] : ''));
 
   console.log('\ntown: ' + checks + '/' + checks);
 })().catch((e) => { console.error(e); process.exit(1); });

@@ -30,6 +30,8 @@
     display: block; width: 100%; max-width: 768px; margin: 0 auto;
     image-rendering: pixelated; background: #000; border-radius: 4px;
   }
+  canvas[hidden] { display: none; }
+  #lt-town { max-width: none; cursor: pointer; }
   .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; margin: 0 0 12px; }
   .clock { font: 600 17px/1 var(--mono); color: var(--gold); }
   .place { color: var(--dim); font-size: 14px; }
@@ -164,6 +166,7 @@
       <span class="place" id="lt-place">—</span>
     </div>
     <canvas id="lt-canvas" width="256" height="192"></canvas>
+    <canvas id="lt-town" width="768" height="432" hidden aria-label="The whole town: choose someone to follow"></canvas>
     <div class="replay" id="lt-replay" hidden>
       <span id="lt-replay-text"></span>
       <button class="lt-tab" id="lt-replay-back">Back to now</button>
@@ -226,6 +229,7 @@
       <p class="who" id="lt-who">—</p>
       <p class="doing" id="lt-doing">—</p>
       <p class="doing-detail" id="lt-doing-detail"></p>
+      <p class="doing-detail" id="lt-intention"></p>
       <div class="needs" style="margin-top:14px">
         <div class="need"><span>Energy</span><span class="track"><i id="lt-energy-bar"></i></span><span class="lt-num" id="lt-energy-value">0</span></div>
         <div class="need"><span>Fed</span><span class="track warm"><i id="lt-hunger-bar"></i></span><span class="lt-num" id="lt-hunger-value">0</span></div>
@@ -278,6 +282,9 @@
 <script src="../engine/ember-camera.js"></script>
 <script src="../engine/ember-tilemap.js"></script>
 <script src="../engine/ember-viewport.js"></script>
+<script src="../engine/ember-ground.js"></script>
+<script src="../engine/ember-worldmap.js"></script>
+<script src="../engine/ember-worldview.js"></script>
 
 <script src="js/lt-util.js"></script>
 <script src="js/lt-names.js"></script>
@@ -287,11 +294,14 @@
 <script src="../engine/ember-pixel.js"></script>
 <script src="../engine/ember-interior-kit.js"></script>
 <script src="../js/retro-authored.js"></script>
+<script src="../js/retro-font.js"></script>
+<script src="js/lt-town.gen.js"></script>
 <script src="js/lt-world.js"></script>
 <script src="js/lt-content.js"></script>
 <script src="js/lt-cafe-scene.js"></script>
 <script>LT.ProductionHost.attach();</script>
 <script src="js/lt-actions.js"></script>
+<script src="js/lt-intentions.js"></script>
 <script src="js/lt-perception.js"></script>
 <script src="js/policy/lt-policy.js"></script>
 <script src="js/policy/lt-utility-policy.js"></script>
@@ -319,9 +329,11 @@
 <script src="js/lt-live.js"></script>
 <script src="js/lt-persistence.js"></script>
 <script src="js/lt-art.js"></script>
+<script src="js/lt-bubbles.js"></script>
+<script src="js/lt-kit-town.js"></script>
 <script src="js/lt-view.js"></script>
 <script src="js/lt-observer.js"></script>
 <script src="js/lt-live-client.js"></script>
-<script>LT.Observer.start();</script>
+<script>LT.KitTown.load(); LT.Observer.start();</script>
 </body>
 </html>

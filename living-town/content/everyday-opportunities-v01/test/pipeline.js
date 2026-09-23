@@ -35,6 +35,7 @@ function findUseSpot(sim, locId) {
   for (let y = 0; y < loc.rows.length; y++) {
     for (let x = 0; x < loc.rows[0].length; x++) {
       if (W.isSolid(loc.rows[y].charAt(x))) continue;
+      if (loc.grid && W.zoneAt(x, y) !== locId) continue;   // outside: in this part of the town
       if ((x === loc.spawn.x && y === loc.spawn.y) || sim.nextStep(loc, loc.spawn, { x: x, y: y }) !== null) {
         return { x: x, y: y };
       }

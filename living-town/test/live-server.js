@@ -110,11 +110,12 @@ function sse(base, p, headers) {
   ok(presence && presence.data.watching === 1 && presence.data.people[0].name === 'Ada', 'presence says one person is watching');
 
   console.log('# the hand: paid for, attributed, rate-limited');
-  const book = await request(base, 'POST', '/api/hand', { id: 'leave_book', answers: { spot: 'park_bench_sw' }, when: 'now' }, { cookie });
+  const book = await request(base, 'POST', '/api/hand', { id: 'leave_book', answers: { spot: 'park_lawn_w' }, when: 'now' }, { cookie });
   ok(book.status === 200 && book.json.ok && book.json.cost === 1 && book.json.purse === 4 && /^itv_/.test(book.json.record.id), 'a book costs 1; the purse is 4');
+  /* Straight away, before anything else: at a minute every 50 ms, waiting for a frame first can let the gap pass. */
+  const again = await request(base, 'POST', '/api/hand', { id: 'refund', answers: { who: 'resident_b' } }, { cookie });
   const carried = await s.waitFor((e) => e.event === 'frame' && e.data.itv.length > 0, 2000);
   ok(carried.data.itv[0].id === book.json.record.id && carried.data.itv[0].by === 'Ada', 'the next frame carries the book, by Ada');
-  const again = await request(base, 'POST', '/api/hand', { id: 'refund', answers: { who: 'resident_b' } }, { cookie });
   ok(again.status === 409 && again.json.error === 'town_busy' && again.json.purse === 4, 'a second circumstance right away is refused, nothing charged');
   await sleep(Server.TOWN_GAP_MINUTES * 50 + 100);
   const bill = await request(base, 'POST', '/api/hand', { id: 'bill', answers: { who: 'resident_c' } }, { cookie });
@@ -122,9 +123,9 @@ function sse(base, p, headers) {
   await sleep(Server.TOWN_GAP_MINUTES * 50 + 100);
   const short = await request(base, 'POST', '/api/hand', { id: 'bill', answers: { who: 'resident_c' } }, { cookie });
   ok(short.status === 409 && short.json.error === 'purse_short' && short.json.purse === 1, 'a purse of 1 cannot pay 3');
-  const taken = await request(base, 'POST', '/api/hand', { id: 'leave_book', answers: { spot: 'park_bench_sw' } }, { cookie });
+  const taken = await request(base, 'POST', '/api/hand', { id: 'leave_book', answers: { spot: 'park_lawn_w' } }, { cookie });
   ok(taken.status === 409 && taken.json.error === 'spot_taken' && taken.json.purse === 1, 'a refused circumstance is refunded');
-  const stranger = await request(base, 'POST', '/api/hand', { id: 'leave_book', answers: { spot: 'park_bench_ne' } });
+  const stranger = await request(base, 'POST', '/api/hand', { id: 'leave_book', answers: { spot: 'park_jetty' } });
   ok(stranger.status === 401, 'no cookie, no hand');
   const bo = await request(base, 'POST', '/api/join', { name: 'Bo' });
   const boCookie = String(bo.headers['set-cookie'][0]).split(';')[0];

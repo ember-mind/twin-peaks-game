@@ -41,7 +41,7 @@ const why = (sim, who, id) => (LT.Perception.candidates(sim, who).rejected.find(
   const sim = quiet(LT.Scenario.town({ intervention: false, everyday: false }));
   const C = sim.state.characters, a = C.resident_c, b = C.resident_d   // two with no promise between them;
   sim.state.minute = 660;                                  // 11:00, lunch is askable
-  sim.placeCharacter(a, 'park', { x: 7, y: 8, dir: 'right' }); sim.placeCharacter(b, 'park', { x: 8, y: 8, dir: 'left' });
+  sim.placeCharacter(a, 'park', { x: 21, y: 16, dir: 'right' }); sim.placeCharacter(b, 'park', { x: 22, y: 16, dir: 'left' });
   assert(sim.startActivity(a, { actionId: 'invite_to_meal', targetKind: 'person', targetId: 'resident_d' }, 'test', null).ok);
   tickN(sim, 12);
   const lunch = sim.state.objects.find((o) => o.typeId === 'meal_invitation');

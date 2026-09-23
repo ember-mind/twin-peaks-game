@@ -12,16 +12,29 @@
   var root = (typeof window !== 'undefined') ? window : global;
   var LT = root.LT = root.LT || {};
   var W = LT.World = LT.World || {};
+  if (typeof require === 'function' && !LT.TownMap) require('./lt-town.gen.js');
+  var TM = LT.TownMap;
 
   /* Grid legend
    *   #  wall        T  tree        w  water       ,  grass      -  paving
    *   .  floor       D  doorway     B  bed         K  kitchen    G  guitar
    *   C  cafe counter  t  table     c  chair       b  bench      =  window
    *   H  house front, seen from the street     f  garden wall or fence
+   * The town outside (lt-town.gen.js) uses #, f, w, ',', '-' and D: there
+   * '#' also hides what is behind it and 'f' does not.
    */
   var SOLID = '#TwBKGCtb=Hf';
+  var OPAQUE = '#H';
 
   W.isSolid = function (ch) { return SOLID.indexOf(ch) >= 0; };
+
+  /* Whether this person may stop on this cell: some cells belong to the
+   * people who work in a place (behind a counter). Walking is not stopping. */
+  W.mayStand = function (locationId, x, y, actor) {
+    var loc = W.LOCATIONS[locationId];
+    if (!loc || !loc.staffOnly || loc.staffOnly.indexOf(x + ',' + y) < 0) return true;
+    return !!(actor && actor.employment && actor.employment.locationId === locationId);
+  };
 
   /* Every cell of a place nobody can stand on, as 'x,y'. For anything that
    * has to show the map as it is — a painter can be asked whether it accounts
@@ -54,6 +67,9 @@
     cafe: {
       id: 'cafe', name: 'Café Meridiana', kind: 'workplace', indoor: true,
       opens: 480, closes: 1260,          // 08:00 – 21:00
+      /* Behind the counter is for whoever works here: nobody else stops there,
+       * not even to talk to someone serving. */
+      staffOnly: ['1,2', '2,2', '3,2', '4,2', '5,2', '6,2'],
       spawn: { x: 3, y: 8, dir: 'up' },
       exit: { x: 3, y: 8 },
       /* A small neighbourhood café, and deliberately lopsided: a short counter
@@ -97,23 +113,16 @@
         }
       }
     },
+    /* Outside is one map, the village drawn from the kit (lt-town.gen.js):
+     * the street along the houses and the park on the lawn by the river are
+     * two parts of it, not two rooms. Both share its grid (`grid: 'town'`),
+     * so people walk from one into the other; which of the two someone is in
+     * is where they stand (W.zoneAt). Content that says 'park' means the lawn. */
     park: {
       id: 'park', name: 'Riverside park', kind: 'social', indoor: false,
-      opens: 0, closes: 1440,
-      spawn: { x: 7, y: 8, dir: 'up' },
-      exit: { x: 7, y: 9 },
-      rows: [
-        ',,,TTT,,,,TTT,,,',
-        ',,,,,,,,,,,,,,,,',
-        ',,,b,,,,,,,,b,,,',
-        ',,,,,,ww,,,,,,,,',
-        ',,,,,wwww,,,,,,,',
-        ',,,,,,ww,,,,,,,,',
-        ',,,b,,,,,,,,b,,,',
-        ',,,,,,,,,,,,,,,,',
-        'TT,,,,,--,,,,,TT',
-        ',,,,,,,DD,,,,,,,'
-      ]
+      opens: 0, closes: 1440, grid: 'town', zone: 'p',
+      spawn: { x: TM.parkEntry.x, y: TM.parkEntry.y, dir: 'down' },
+      rows: TM.rows
     },
     flat_b: {
       id: 'flat_b', kind: 'home', indoor: true,
@@ -185,57 +194,89 @@
         ',,--,,,,'
       ]
     },
-    /* Transit only. Nobody lives on the street, but travel happens in public:
-     * a viewer must be able to watch someone walk between two places. */
+    /* Nobody lives on the street, but travel happens in public: whoever
+     * walks from one door to another is seen doing it. */
     street: {
       id: 'street', name: 'Via del Ponte', kind: 'transit', indoor: false,
-      opens: 0, closes: 1440, transit: true,
-      spawn: { x: 9, y: 4, dir: 'right' },
-      /* A street has houses on it. Both sides are fronts (H) with a doorway
-       * (D) for every place that opens onto it: north, left to right, the
-       * first flat, the flat over the bakery, the café; south, the second
-       * flat's room, the park gate, the attic's stair, the ground-floor rooms.
-       * A pavement runs along each side of the carriageway.
-       * The near houses turn their backs to whoever is watching, so their
-       * street doors cannot be seen: each stands behind a low garden wall (f)
-       * with a gate (D) in it, and a path across a front garden to the house,
-       * of which only the eave shows (the last row). The park keeps its wall
-       * and its gate between them. */
-      rows: [
-        'HHHHHHHHHHHHHHHHHHHH',
-        'HHHHHHHHHHHHHHHHHHHH',
-        'HHHDDHHHHDDHHHHDDHHH',
-        '--------------------',
-        '--------------------',
-        '--------------------',
-        '--------------------',
-        '--------------------',
-        'fDDffHHHDDHffDDffDDf',
-        ',--,fHHHHHH,,--,f--,',
-        'HHHHHHHHHHHHHHHHHHHH'
-      ]
+      opens: 0, closes: 1440, transit: true, grid: 'town', zone: 's',
+      spawn: { x: 24, y: 13, dir: 'right' },
+      rows: TM.rows
     }
   };
 
-  /* Where each place meets the street, so a traveller has a path to walk. */
-  W.STREET_PORTALS = {
-    flat_a: { x: 3, y: 3 }, cafe: { x: 16, y: 3 }, park: { x: 8, y: 8 }, flat_b: { x: 1, y: 7 },
-    flat_c: { x: 9, y: 3 }, flat_d: { x: 18, y: 7 }, flat_e: { x: 14, y: 7 }
+  /* Where each place meets the town outside: a building's door, the middle
+   * of the lawn for the park. A traveller walks from one to the other. */
+  W.STREET_PORTALS = {};
+  Object.keys(TM.doors).forEach(function (id) { W.STREET_PORTALS[id] = { x: TM.doors[id].x, y: TM.doors[id].y }; });
+  W.STREET_PORTALS.park = { x: TM.parkEntry.x, y: TM.parkEntry.y };
+
+  /* Outside, people walk three cells a town minute (a cell is about a stride
+   * and a half); inside a room, one. Outside, "here" is whoever is within
+   * SIGHT_CELLS and not hidden behind a house or a tree. */
+  W.WALK_CELLS_PER_MINUTE = 3;
+  W.SIGHT_CELLS = 10;
+
+  W.gridOf = function (locationId) {
+    var loc = W.LOCATIONS[locationId];
+    return loc ? (loc.grid || locationId) : null;
+  };
+  W.outdoorGrid = function (locationId) { var loc = W.LOCATIONS[locationId]; return !!(loc && loc.grid); };
+  /* Two location ids one can walk between without a door: the same room, or
+   * two parts of the town outside. */
+  W.samePlace = function (a, b) { return a === b || (!!a && W.gridOf(a) === W.gridOf(b) && W.outdoorGrid(a)); };
+
+  /* Which part of the town a cell is in: 'park', 'street', or null (nowhere to stand). */
+  W.zoneAt = function (x, y) {
+    var z = (TM.zones[y] || '').charAt(x);
+    return z === 'p' ? 'park' : (z === 's' ? 'street' : null);
   };
 
-  /* Minutes on foot. Symmetric, and no route is instant. */
-  var TRAVEL = {};
-  [['flat_a', 'cafe', 12], ['flat_a', 'park', 14], ['cafe', 'park', 8],
-   ['flat_b', 'cafe', 9], ['flat_b', 'park', 11], ['flat_b', 'flat_a', 16],
-   ['flat_c', 'cafe', 7], ['flat_c', 'park', 9], ['flat_d', 'cafe', 5], ['flat_d', 'park', 10],
-   ['flat_e', 'cafe', 8], ['flat_e', 'park', 6]].forEach(function (r) {
-    TRAVEL[[r[0], r[1]].sort().join('|')] = r[2];
-  });
+  /* Nothing that hides (a house, a tree) on the straight line between two
+   * cells, the two ends excepted. Integer steps, so both directions agree. */
+  W.inSight = function (rows, a, b) {
+    var dx = b.x - a.x, dy = b.y - a.y, n = Math.max(Math.abs(dx), Math.abs(dy));
+    for (var i = 1; i < n; i++) {
+      var x = a.x + Math.round(dx * i / n), y = a.y + Math.round(dy * i / n);
+      var ch = (rows[y] || '').charAt(x);
+      if (OPAQUE.indexOf(ch) >= 0 && !(x === a.x && y === a.y) && !(x === b.x && y === b.y)) return false;
+    }
+    return true;
+  };
 
+  /* Shortest walk between two cells of a grid, in cells; -1 when there is none. */
+  W.walkCells = function (rows, from, to) {
+    if (from.x === to.x && from.y === to.y) return 0;
+    var w = rows[0].length, h = rows.length, dist = {}, q = [from], head = 0;
+    dist[from.y * w + from.x] = 0;
+    while (head < q.length) {
+      var c = q[head++], d0 = dist[c.y * w + c.x];
+      for (var i = 0; i < 4; i++) {
+        var nx = c.x + [0, 1, 0, -1][i], ny = c.y + [-1, 0, 1, 0][i];
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h || dist[ny * w + nx] !== undefined) continue;
+        if (nx === to.x && ny === to.y) return d0 + 1;
+        if (W.isSolid(rows[ny].charAt(nx))) continue;
+        dist[ny * w + nx] = d0 + 1;
+        q.push({ x: nx, y: ny });
+      }
+    }
+    return -1;
+  };
+  W.minutesForCells = function (cells) { return cells <= 0 ? 0 : Math.max(1, Math.ceil(cells / W.WALK_CELLS_PER_MINUTE)); };
+
+  /* Minutes on foot between two places, door to door. Symmetric, never
+   * instant, and measured on the map rather than written down. */
+  var TRAVEL = {};
   W.travelMinutes = function (from, to) {
     if (from === to) return 0;
     var key = [from, to].sort().join('|');
-    return TRAVEL[key] || 0;
+    if (TRAVEL[key] === undefined) {
+      var a = W.STREET_PORTALS[from] || (W.LOCATIONS[from] && W.LOCATIONS[from].spawn);
+      var b = W.STREET_PORTALS[to] || (W.LOCATIONS[to] && W.LOCATIONS[to].spawn);
+      /* Two places behind one door (the flat over the café) are still a
+       * flight of stairs apart. */
+      TRAVEL[key] = (a && b) ? Math.max(1, W.minutesForCells(W.walkCells(TM.rows, a, b))) : 0;
+    }
+    return TRAVEL[key];
   };
 
   W.destinations = function () { return ['flat_a', 'flat_b', 'cafe', 'park', 'flat_c', 'flat_d', 'flat_e']; };
@@ -282,9 +323,12 @@
     { id: 'obj_cafe_booth_wall', name: 'wall booth', location: 'cafe', x: 11, y: 6,
       tags: ['furniture', 'seat'], portable: false, owner: 'cafe',
       affordances: [], anchors: { eat_here: { x: 10, y: 6, dir: 'right' } } },
-    { id: 'obj_bench', name: 'park bench', location: 'park', x: 3, y: 2,
+    /* Sat on from the lawn at either end: in front of it is the river wall. */
+    { id: 'obj_bench', name: 'park bench', location: 'park', x: 12, y: 17,
       tags: ['furniture', 'seat'], portable: false, owner: 'town',
-      affordances: ['sit_and_rest'] },
+      affordances: ['sit_and_rest'],
+      anchors: { sit_and_rest: { x: 11, y: 17, dir: 'right' } },
+      moreAnchors: { sit_and_rest: [{ x: 14, y: 17, dir: 'left' }] } },
     { id: 'obj_bed_b', name: 'bed', location: 'flat_b', x: 1, y: 1,
       tags: ['furniture', 'rest'], portable: false, owner: 'resident_b',
       affordances: ['sleep'] },

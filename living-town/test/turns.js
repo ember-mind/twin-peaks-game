@@ -48,7 +48,7 @@ async function twoInThePark(pa, pb, minutes) {
   const day = LT.Scenario.day1({});
   await day.runUntil(1, 1070);
   const meet = day.state.conversations.find((c) => c.status === 'completed' && c.startAbs >= 1030);
-  ok(meet && meet.minutes === 25 && ev(day, 'TALKED').some((e) => e.minute === 1060), 'the meeting at the park still runs its twenty-five minutes to 17:40');
+  ok(meet && meet.minutes === 25 && ev(day, 'TALKED').some((e) => e.absMinute === meet.startAbs + 25), 'the meeting at the park still runs its twenty-five minutes (from ' + LT.Util.clock(meet.startAbs % 1440) + ')');
   ok(meet.turns.length === 2 && meet.turns.every((t) => t.answers.resident_a === 'keep' && t.answers.resident_b === 'keep') && !meet.woundDownBy, 'both were asked twice, nine and seventeen minutes in, and both carried on');
   ok(meet.turns[0].openedAbs === meet.startAbs + 9 && meet.turns[1].openedAbs === meet.startAbs + 17, 'at the minutes the rule says');
 

@@ -100,6 +100,7 @@
     es.addEventListener('frame', function (ev) {
       if (!live.mirror) return;
       var frame = JSON.parse(ev.data);
+      if (frame.mind) live.mind = frame.mind;       // who decides, as the town says: shown, never simulated
       var r = live.mirror.apply(frame);
       live.sinceFrame = performance.now();
       if (!r.ok) {
@@ -192,7 +193,9 @@
     else {
       var watching = live.presence ? live.presence.watching : 1;
       var quiet = live.sinceFrame && (performance.now() - live.sinceFrame) > (live.msPerMinute || 10000) * 3;
-      line = (live.paused ? 'Paused by the town' : quiet ? 'Waiting for the town' : 'Live') + ' · ' + watching + ' watching' +
+      /* Never pretend: when the mind is Jev and it is not answering, say so. */
+      var mind = !live.mind || !live.mind.on ? ' · mind: offline policy' : live.mind.offline ? ' · mind offline: ' + live.mind.provider + ' is not answering, the offline policy decides' : ' · mind: ' + live.mind.provider;
+      line = (live.paused ? 'Paused by the town' : quiet ? 'Waiting for the town' : 'Live') + ' · ' + watching + ' watching' + mind +
         (live.dev ? ' · dev, a minute every ' + (live.paused ? '—' : (Math.round(live.msPerMinute / 100) / 10) + ' s') : '');
     }
     text(status, line);

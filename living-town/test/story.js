@@ -119,11 +119,14 @@ const snapshot = (sim) => JSON.stringify(sim.state);
   await w.runUntil(1, 1055);
   ok(Story.mostInteresting(w, 'resident_a') === 'resident_a', 'a tie does not move the camera');
   await w.runUntil(1, 1300);
-  const asleep = w.actorIds().filter((id) => (w.state.characters[id].activity || {}).actionId === 'sleep');
-  ok(asleep.every((id) => Story.interest(w, id) === 0), 'someone asleep is the least worth watching');
+  const asleep = w.actorIds().filter((id) => { const a = w.state.characters[id].activity || {}; return a.actionId === 'sleep' && a.phase === 'executing'; });
+  ok(asleep.length > 0 && asleep.every((id) => Story.interest(w, id) === 0), 'someone asleep (not still on the way to bed) is the least worth watching');
   const x = LT.Scenario.day1({});
-  await x.runUntil(1, 545);
-  ok(Story.interest(x, 'resident_a') > Story.interest(x, 'resident_b') && Story.mostInteresting(x, 'resident_b') === 'resident_a', 'someone on their way to work outranks someone waiting');
+  /* The morning's moment: she is walking up to the counter, the other is
+   * getting on with something quiet (waiting, or sitting in the park). */
+  const onWay = () => { const a = x.state.characters.resident_a.activity, b = x.state.characters.resident_b.activity; return a && a.actionId === 'work_shift' && a.phase === 'approaching' && b && b.phase === 'executing' && ['wait', 'sit_and_rest', 'read_book'].indexOf(b.actionId) >= 0; };
+  for (let m = 480; m < 720 && !onWay(); m++) await x.runUntil(1, m);
+  ok(onWay() && Story.interest(x, 'resident_a') > Story.interest(x, 'resident_b') && Story.mostInteresting(x, null) === 'resident_a', 'someone on their way to work outranks someone getting on with something quiet');
 
   console.log('# found by watching: a baseline that starved with money in its pocket');
   const three = LT.Scenario.day1({});

@@ -118,7 +118,7 @@
       state.held = heldFor(state);     // also while paused, so the caption never says "waiting" after the answer is in
       followTheAction(state);
       state.view.update(step.visual);
-      state.view.draw();
+      if (state.townView) drawWholeTown(state); else state.view.draw();
       paint(state);
     }
 
@@ -565,9 +565,41 @@
     markTabs(state);
   }
 
+  /* ---------------- the whole town ---------------- */
+
+  /* The whole map instead of one person's corner of it: everyone outside,
+   * and who is behind which door. Choosing someone in it follows them. It is
+   * a camera, like following: nothing in the world changes. */
+  function showTown(state, on) {
+    state.townView = !!on && !!(LT.KitTown && LT.KitTown.ready);
+    el('lt-canvas').hidden = state.townView;
+    el('lt-town').hidden = !state.townView;
+    if (state.townView && !state.townCtx) {
+      state.townCtx = EMBER.Viewport.attachNative(el('lt-town'), 768, 432);
+      el('lt-town').addEventListener('click', function (ev) {
+        var r = el('lt-town').getBoundingClientRect(), s = r.width / 768;
+        var id = state.view.townPick((ev.clientX - r.left) / s, (ev.clientY - r.top) / s);
+        if (!id) return;
+        showTown(state, false);
+        state.selected = id;
+        state.followAction = false;
+        state.view.focus(id);
+        markTabs(state);
+        if (state.live) LT.LiveClient.adopt(state, id);
+      });
+    }
+    markTabs(state);
+  }
+  O.showTown = function (on) { if (O.state) showTown(O.state, on); };
+
+  function drawWholeTown(state) {
+    state.townDrawn = state.view.drawTown(state.townCtx, state.selected);
+  }
+
   function markTabs(state) {
     Array.prototype.forEach.call(el('lt-characters').children, function (n) {
-      n.classList.toggle('is-on', n.dataset.actor ? (!state.followAction && n.dataset.actor === state.selected) : state.followAction);
+      if (n.id === 'lt-follow-town') { n.classList.toggle('is-on', !!state.townView); return; }
+      n.classList.toggle('is-on', n.dataset.actor ? (!state.townView && !state.followAction && n.dataset.actor === state.selected) : (!state.townView && state.followAction));
       if (n.dataset.actor) n.classList.toggle('is-watched', state.followAction && n.dataset.actor === state.selected);
     });
   }
@@ -582,6 +614,7 @@
       b.textContent = c.name;
       b.dataset.actor = id;
       b.addEventListener('click', function () {
+        showTown(state, false);
         state.selected = id;
         state.followAction = false;
         state.view.focus(id);
@@ -590,11 +623,17 @@
       });
       host.appendChild(b);
     });
+    var town = document.createElement('button');
+    town.className = 'lt-tab';
+    town.id = 'lt-follow-town';
+    town.textContent = 'Whole town';
+    town.addEventListener('click', function () { showTown(state, !state.townView); });
+    host.appendChild(town);
     var auto = document.createElement('button');
     auto.className = 'lt-tab';
     auto.id = 'lt-follow-action';
     auto.textContent = 'The action';
-    auto.addEventListener('click', function () { state.followAction = !state.followAction; markTabs(state); });
+    auto.addEventListener('click', function () { showTown(state, false); state.followAction = !state.followAction; markTabs(state); });
     host.appendChild(auto);
     markTabs(state);
     state.view.focus(state.selected);
@@ -631,7 +670,7 @@
     var U = LT.Util, W = LT.World;
 
     text(el('lt-clock'), 'Day ' + s.day + ' · ' + U.clock(s.minute));
-    text(el('lt-place'), sim.locationName(c.location) +
+    text(el('lt-place'), state.townView ? 'The whole town' : sim.locationName(c.location) +
       (c.transit ? ' (on the way to ' + sim.locationName(c.transit.to) + ')' : ''));
     text(el('lt-who'), c.fullName || c.name);
     var act = c.activity;
@@ -642,6 +681,11 @@
          ' · chosen by ' + act.source)
       : (c.pending ? 'request ' + c.pending.requestId : ''));
 
+    /* This hour's plan, and who made it: the second level of deciding. */
+    var plan = c.intention && LT.Intentions && LT.Intentions.byId(c.intention.id);
+    var planned = plan && sim.absMinute() < c.intention.untilAbs;
+    var planBy = planned ? (c.recentDecisions || []).filter(function (d) { return d.actionId === 'plan_hour'; })[0] : null;
+    text(el('lt-intention'), planned ? 'This hour: ' + plan.label + ' (until ' + U.clock(c.intention.untilAbs % 1440) + (planBy ? ', planned by ' + planBy.source : '') + ')' : 'This hour: no plan yet');
     bar(el('lt-energy-bar'), c.needs.energy);
     bar(el('lt-hunger-bar'), 100 - c.needs.hunger);
     text(el('lt-energy-value'), Math.round(c.needs.energy) + '');

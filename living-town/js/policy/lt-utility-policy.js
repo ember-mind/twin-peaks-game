@@ -284,6 +284,17 @@
           pull += commitmentWeight(req, c) * factor;
         });
         if (pull) terms.commitment_pull = pull;
+        /* Already where a promise is due within the hour: walking off to come
+         * back is not keeping it better, it is pacing. What leaving costs is
+         * part of what staying is worth. */
+        var promisedHere = 0;
+        openCommitments(req).forEach(function (c) {
+          if (c.locationId !== here || c.locationId === dest) return;
+          var due = abs(c.dueDay, c.dueMin), now = abs(req.day, req.minute);
+          if (due < now - (c.graceMin || 0) || due - now > 60) return;
+          promisedHere += commitmentWeight(req, c) * 0.5;
+        });
+        if (promisedHere) terms.promised_here = -promisedHere;
         // going home to eat or sleep, when that is what is actually needed
         if (dest === req.self.homeId) {
           if (req.self.pantry > 0) terms.food_at_home = Math.pow(hunger / 100, 2) * 45;
@@ -319,6 +330,13 @@
         terms.baseline = 1.2;
         break;
 
+      /* Planning the hour, when an hour is due to be planned: worth doing
+       * before anything but a promise, and which plan is its own reading. */
+      case 'plan_hour':
+        terms.plan_the_hour = 14;
+        terms.fits_the_person = LT.Intentions ? LT.Intentions.offlineScore(req, cand.targetId) * 0.4 : 0;
+        break;
+
       default: {
         /* Actions from content packages. The package says what its action
          * is worth to a person in its own terms; the arithmetic it is given —
@@ -335,6 +353,11 @@
         } else terms.unscored = 0;
       }
     }
+
+    /* What the person means to do with this hour leans the choice, gently:
+     * a promise or hunger still wins. */
+    var meant = req.self.intention;
+    if (meant && LT.Intentions && cand.actionId !== 'plan_hour' && LT.Intentions.fits(meant.id, cand, req.self)) terms.intention = 4;
 
     var total = 0;
     Object.keys(terms).forEach(function (k) { total += terms[k]; });

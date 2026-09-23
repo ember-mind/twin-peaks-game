@@ -120,6 +120,8 @@
     if (!isInteger(p.useSpot.x) || !isInteger(p.useSpot.y)) return 'invalid_use_spot';
     if (!inBounds(loc, p.useSpot.x, p.useSpot.y)) return 'use_spot_out_of_bounds';
     if (!isFloor(loc, p.useSpot.x, p.useSpot.y)) return 'use_spot_not_walkable';
+    /* Outside, the town is one map: a thing left in the park is used from the park. */
+    if (loc.grid && W.zoneAt(p.useSpot.x, p.useSpot.y) !== p.locationId) return 'use_spot_elsewhere';
     if (p.useSpot.dir !== undefined && !isDir(p.useSpot.dir)) return 'invalid_use_spot_dir';
     if (!reachableFromSpawn(sim, loc, p.useSpot.x, p.useSpot.y)) return 'use_spot_unreachable';
     return null;

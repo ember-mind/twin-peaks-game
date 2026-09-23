@@ -56,7 +56,7 @@
       var fx = Math.round(q.x + ox), fy = Math.round(q.y + oy);
       /* someone on a bench is drawn at the seat but sorted where they sit
        * from: in front of the bench, not behind its backrest */
-      return { i: i, p: p, q: q, fx: fx, fy: fy, seated: seated, sortY: seated ? Math.round(q.y) : fy };
+      return { i: i, p: p, q: q, fx: fx, fy: fy, seated: seated, sortY: seated ? fy + 23 : fy };   // seated: in front of the bench, whichever end it is sat on from
     });
   }
 

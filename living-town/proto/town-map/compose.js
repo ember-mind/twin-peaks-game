@@ -36,6 +36,10 @@ function lay(kitId, ty, x0, x1, tag) { for (var x = x0; x + 1 <= x1; x += 2) obj
 lay('balustrade', 15, 2, 19, 'rail-w'); lay('balustrade', 15, 26, 39, 'rail-e');
 // park bushes sit on the lawn, not on the river wall's coping
 objects.forEach(function (o) { if (/^bush-park-[2-6]$/.test(o.id)) o.ty -= 1; });
+/* The lawn is two rows deep in front of the wall's coping, which nobody stands
+ * on: a bush beside a tree trunk closes it. These step aside so one can
+ * walk the length of the park without going up to the street. */
+objects.forEach(function (o) { if (o.id === 'bush-park-2') o.tx = 5; if (o.id === 'bush-park-3') o.tx = 3; if (o.id === 'bush-park-5') o.tx = 24; });
 var byId = {}; objects.forEach(function (o) { byId[o.id] = o; });
 
 var map = {
@@ -56,7 +60,8 @@ var map = {
 // benches: sit on the bench, stand on the tile in front of it
 ['bench-1', 'bench-2'].forEach(function (id, i) {
   var o = byId[id];
-  map.spots['bench_' + (i ? 'e' : 'w')] = { tx: o.tx + 1, ty: o.ty + 1, seats: [[-8, -23], [9, -23]] };
+  /* used from the lawn at its west end: in front of it is the river wall's coping */
+  map.spots['bench_' + (i ? 'e' : 'w')] = { tx: o.tx - 1, ty: o.ty, seats: [[24, -7], [41, -7]] };
 });
 // the jetty's boards run out over the wall and the water below the steps
 [[21, 18], [22, 18], [23, 18], [21, 19], [22, 19], [23, 19], [21, 20], [22, 20], [23, 20]].forEach(function (c) { map.walkable.push(c); });

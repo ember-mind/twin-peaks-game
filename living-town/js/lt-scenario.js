@@ -40,7 +40,7 @@
   S.EVERYDAY = [
     { type: 'place_shared_book', source: 'developer', atDay: 1, atMinute: 600,       // 10:00
       params: { instanceId: 'book_park', title: 'The Harbour Year', locationId: 'park',
-                x: 12, y: 6, useSpot: { x: 12, y: 7, dir: 'up' }, requiredReadMinutes: 120 } },
+                x: 32, y: 17, useSpot: { x: 30, y: 17, dir: 'right' }, requiredReadMinutes: 120 } },
     { type: 'deliver_food_parcel', source: 'developer', atDay: 1, atMinute: 750,     // 12:30
       params: { instanceId: 'parcel_door', toId: 'resident_a', locationId: 'flat_a',
                 x: 6, y: 6, useSpot: { x: 5, y: 6, dir: 'right' }, portions: 4 } }

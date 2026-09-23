@@ -35,6 +35,9 @@ async function roundTripMidDay() {
   console.log('# 1: round trip mid-day');
   const sim = LT.Scenario.day1({});
   await sim.runUntil(1, 900);
+  /* A moment with no question outstanding: one that is gets asked again on
+   * restore, which is test 2's business, not this one's. */
+  while (sim.actorIds().some((id) => sim.state.characters[id].pending)) await sim.runMinutes(1);
   const saved = Save.serialize(sim);
   const restored = Save.fromJSON(Save.toJSON(sim));
 
@@ -619,9 +622,11 @@ async function previousFormatIsMigrated() {
     const old = JSON.parse(oldText);
     const walker = Object.keys(old.state.characters).map((id) => old.state.characters[id]).find((c) => c.location === 'street' && c.walkTarget);
     ok(old.world === 'e3450c3d' && walker && walker.transit.to === 'flat_b' && walker.walkTarget.x === 1 && walker.walkTarget.y === 6, 'the fixture is a genuine old-street save: ' + walker.name + ' on the way home, heading for where her door used to meet the street');
+    /* Each step is checked on what that step returns; the later steps carry the save on to this town. */
+    const stepped = Save.WORLD_MIGRATIONS.e3450c3d(JSON.parse(oldText)).state.characters[walker.id];
+    ok(stepped.pos.x === walker.pos.x && stepped.pos.y === walker.pos.y && stepped.walkTarget.x === 1 && stepped.walkTarget.y === 7, 'she stands where she stood and is now heading for where the door is');
     const moved = Save.deserialize(JSON.parse(oldText));
     const w = moved.state.characters[walker.id];
-    ok(w.pos.x === walker.pos.x && w.pos.y === walker.pos.y && w.walkTarget.x === 1 && w.walkTarget.y === 7, 'she stands where she stood and is now heading for where the door is');
     ok(moved.actorIds().every((id) => { const c = moved.state.characters[id]; return !LT.World.isSolid(LT.World.LOCATIONS[c.location].rows[c.pos.y].charAt(c.pos.x)); }), 'nobody has ended up inside a house front');
     await moved.runMinutes(30);
     ok(w.location === 'flat_b' && !w.transit, 'and she gets home');
@@ -631,9 +636,10 @@ async function previousFormatIsMigrated() {
     const grassText = require('node:fs').readFileSync(path.resolve(__dirname, 'fixtures', 'save-town-e3450c3d-on-the-grass.json'), 'utf8');
     const onGrass = JSON.parse(grassText).state.characters.resident_e;
     ok(onGrass.location === 'street' && onGrass.pos.x === 12 && onGrass.pos.y === 8 && LT.World.isSolid(LT.World.LOCATIONS.street.rows[8].charAt(12)), 'a second real save: ' + onGrass.name + ' at 12,8 on the way to the park — a cell that is a house front now');
+    const liftStep = Save.WORLD_MIGRATIONS.e3450c3d(JSON.parse(grassText)).state.characters.resident_e;
+    ok(liftStep.pos.x === 12 && liftStep.pos.y === 7 && liftStep.walkTarget.x === 8 && liftStep.walkTarget.y === 8, 'she is on the pavement beside where she stood, still heading for the park gate');
     const lifted = Save.deserialize(JSON.parse(grassText));
     const le = lifted.state.characters.resident_e;
-    ok(le.pos.x === 12 && le.pos.y === 7 && le.walkTarget.x === 8 && le.walkTarget.y === 8, 'she is on the pavement beside where she stood, still heading for the park gate');
     await lifted.runMinutes(20);
     ok(le.location === 'park', 'and gets there');
     /* The near side got front gardens (e6451950 -> this town). A real save from the street of house fronts. */
@@ -641,9 +647,10 @@ async function previousFormatIsMigrated() {
     const before = JSON.parse(gardenText);
     const homing = Object.keys(before.state.characters).map((id) => before.state.characters[id]).find((c) => c.location === 'street' && c.transit);
     ok(before.world === 'e6451950' && homing && homing.transit.to === 'flat_b', 'a genuine save from the street of house fronts: ' + homing.name + ' on the way to a south-side home');
+    const gStep = Save.WORLD_MIGRATIONS.e6451950(JSON.parse(gardenText)).state.characters[homing.id];
+    ok(gStep.pos.x === homing.pos.x && gStep.pos.y === homing.pos.y && gStep.walkTarget.x === homing.walkTarget.x && gStep.walkTarget.y === homing.walkTarget.y, 'nobody is moved and nobody is re-aimed: the gates are where the doorways were');
     const gardened = Save.deserialize(JSON.parse(gardenText));
     const hg = gardened.state.characters[homing.id];
-    ok(hg.pos.x === homing.pos.x && hg.pos.y === homing.pos.y && hg.walkTarget.x === homing.walkTarget.x && hg.walkTarget.y === homing.walkTarget.y, 'nobody is moved and nobody is re-aimed: the gates are where the doorways were');
     await gardened.runMinutes(30);
     ok(hg.location === 'flat_b' && !hg.transit, 'and she gets home through the gate');
     const inWall = JSON.parse(gardenText); inWall.state.characters[homing.id].pos = { x: 0, y: 8, dir: 'down' };
@@ -663,6 +670,34 @@ async function previousFormatIsMigrated() {
     await seated.runMinutes(20);
     ok(!se.activity || se.activity.actionId !== 'buy_meal', 'and finishes the meal she had begun');
     ok(se.needs.hunger < hungerBefore, 'fed by it, once');
+    /* Outside became one map (d7dfa67e -> this town). Two real saves from the two-room outside. */
+    const walkText = require('node:fs').readFileSync(path.resolve(__dirname, 'fixtures', 'save-town-d7dfa67e-walking-to-the-park.json'), 'utf8');
+    const walkOld = JSON.parse(walkText), goer = walkOld.state.characters.resident_a, sitter = walkOld.state.characters.resident_b;
+    ok(walkOld.world === 'd7dfa67e' && goer.location === 'street' && goer.transit.to === 'park' && goer.activity.elapsed === 3 && goer.activity.plannedMinutes === 8 &&
+       sitter.location === 'park' && sitter.activity.actionId === 'sit_and_rest',
+       'a genuine save from the two-room outside: ' + goer.name + ' three minutes into an eight-minute walk to the park, ' + sitter.name + ' on the bench');
+    const walked = Save.deserialize(JSON.parse(walkText));
+    const wg = walked.state.characters.resident_a, ws = walked.state.characters.resident_b, bench = walked.objectById('obj_bench');
+    const open = (c) => !LT.World.isSolid(LT.World.LOCATIONS[c.location].rows[c.pos.y].charAt(c.pos.x));
+    ok(wg.transit && LT.World.outdoorGrid(wg.location) && open(wg) && wg.walkTarget.x === LT.World.STREET_PORTALS.park.x && wg.walkTarget.y === LT.World.STREET_PORTALS.park.y,
+       'she is on the new way from the café to the park (' + wg.pos.x + ',' + wg.pos.y + '), still heading there');
+    ok(bench.x === 12 && bench.y === 17 && ws.location === 'park' && ws.pos.x === 11 && ws.pos.y === 17, 'the bench is the kit\'s west bench, and whoever sat on it sits on it, from its west end');
+    await walked.runUntil(1, 1030);
+    ok(walked.state.events.some((e) => e.type === 'ARRIVED' && e.actorId === 'resident_a' && e.absMinute === goer.activity.endAbs), 'she arrives when her walk said she would, 17:10');
+    await walked.runUntil(1, 1080);
+    ok(walked.state.conversations.some((c) => c.status === 'completed' && c.participants.indexOf('resident_a') >= 0 && c.participants.indexOf('resident_b') >= 0), 'and the two meet and talk, as they did in the old town');
+    const readText = require('node:fs').readFileSync(path.resolve(__dirname, 'fixtures', 'save-town-d7dfa67e-reading-in-the-park.json'), 'utf8');
+    const readOld = JSON.parse(readText), reader = readOld.state.characters.resident_d;
+    ok(readOld.world === 'd7dfa67e' && reader.activity.actionId === 'read_book' && reader.activity.phase === 'approaching' && reader.walkTarget.x === 12 && reader.walkTarget.y === 7,
+       'a second: ' + reader.name + ' crossing the old park to the book on the south-east bench');
+    const read = Save.deserialize(JSON.parse(readText));
+    const rd = read.state.characters.resident_d, book = read.objectById('book_park');
+    ok(book.x === 32 && book.y === 17 && book.anchors.read_book.x === 30 && book.anchors.read_book.y === 17 && rd.walkTarget.x === 30 && rd.walkTarget.y === 17 && open(rd),
+       'the book is on the east bench, read from in front of it, and she is heading there from open ground');
+    const readFrom = read.state.events.length;
+    await read.runMinutes(20);
+    ok(read.state.events.slice(readFrom).some((e) => e.type === 'ACTIVITY_REACHED' && e.actorId === 'resident_d' && e.data.actionId === 'read_book'), 'and she gets there and reads');
+    ok(JSON.parse(walkText).world === 'd7dfa67e' && JSON.parse(readText).world === 'd7dfa67e', 'the old save texts are untouched');
     const again = Save.deserialize(JSON.parse(JSON.stringify(Save.serialize(moved))));
     ok(again.state.day === 2 && JSON.parse(JSON.stringify(Save.serialize(moved))).world === LT.World.fingerprint(), 'saved again, it is a save of this town');
   }

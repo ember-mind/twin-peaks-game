@@ -595,8 +595,8 @@ ground['rules'] = [
     dict(type='shore', material='water', aboveNot=['water'], frames=shore_frames),
 ]
 for name, m in ground['materials'].items():
-    if name in ('water', 'embankment_face'):
-        m['walkable'] = False
+    if name in ('water', 'embankment_face', 'embankment_top'):
+        m['walkable'] = False      # the top is the wall's coping: nobody stands on it
     if name == 'grass':
         m['rare'] = dict(index=2, oneIn=8)     # the flower tiles
     if m['kind'] == 'water':

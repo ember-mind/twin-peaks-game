@@ -25,6 +25,8 @@ const optionIds = (brief) => brief.user.split('\n').filter((l) => /^\s+\d+\. id 
   const sim = LT.Scenario.town({});
   await sim.runUntil(1, 1040);
   const a = sim.state.characters.resident_a;
+  /* An ordinary moment: one where waiting is among the things on offer (not mid-talk). */
+  while (!sim.buildRequest(a, 'idle').candidates.some((c) => c.id === 'wait')) await sim.runMinutes(1);
   const req = sim.buildRequest(a, 'idle');
   const before = JSON.stringify(req);
   const brief = Brief.render(req);

@@ -86,12 +86,12 @@ function cashInTown(sim) {
 
 /* A known-walkable pair of cells in the park, reused from the package's own
  * callback tests: the wallet's own cell and its declared use spot. */
-const PARK_WALLET_CELL = { x: 2, y: 1 };
-const PARK_USE_SPOT = { x: 2, y: 2, dir: 'up' };
+const PARK_WALLET_CELL = { x: 28, y: 16 };
+const PARK_USE_SPOT = { x: 28, y: 17, dir: 'up' };
 /* Far enough from the use spot that picking the wallet up is a real walk, not
  * an instant grab from where the finder already stands. */
-const FINDER_START = { x: 14, y: 1, dir: 'down' };
-const OWNER_START = { x: 2, y: 8, dir: 'up' };
+const FINDER_START = { x: 14, y: 16, dir: 'right' };
+const OWNER_START = { x: 36, y: 16, dir: 'left' };
 
 /* Run the sim a minute at a time until `done(wallet)` is true or the run has
  * gone on unreasonably long, checking the money invariant at every single
@@ -243,18 +243,18 @@ async function saveRoundTripAcrossStatuses() {
     return sim.objectById(id);
   }
 
-  const lost = drop('wallet_save_lost', 'resident_a', 2, 1);
+  const lost = drop('wallet_save_lost', 'resident_a', 26, 16);
 
-  const carried = drop('wallet_save_carried', 'resident_a', 5, 1);
+  const carried = drop('wallet_save_carried', 'resident_a', 28, 16);
   sim.placeCharacter(b, 'park', carried.anchors.pick_up_wallet);
   LW.ACTIONS.pick_up_wallet.onComplete(sim.context(b, carried));
   ok(carried.status === 'carried' && carried.location === null, 'the carried instance really does have location: null before it is saved');
 
-  const returned = drop('wallet_save_returned', 'resident_a', 8, 1);
+  const returned = drop('wallet_save_returned', 'resident_a', 29, 16);
   sim.placeCharacter(a, 'park', returned.anchors.pick_up_wallet);
   LW.ACTIONS.pick_up_wallet.onComplete(sim.context(a, returned));   // the owner recovers their own
 
-  const kept = drop('wallet_save_kept', 'resident_b', 11, 1);
+  const kept = drop('wallet_save_kept', 'resident_b', 30, 16);
   sim.placeCharacter(a, 'park', kept.anchors.pick_up_wallet);
   LW.ACTIONS.pick_up_wallet.onComplete(sim.context(a, kept));
   LW.ACTIONS.keep_wallet_money.onComplete(sim.context(a, null));

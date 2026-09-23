@@ -336,7 +336,8 @@
     154,
     156,
     158
-   ]
+   ],
+   "walkable": false
   },
   "grass": {
    "kind": "textured",
