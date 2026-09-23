@@ -180,11 +180,20 @@
     });
 
     // going somewhere
+    /* Nobody turns straight round: a place left less than a quarter of an
+     * hour ago is not somewhere to go back to yet. */
+    var justLeft = actor.lastLeft && sim.absMinute() - actor.lastLeft.abs < 15 ? actor.lastLeft.locationId : null;
     W.destinations().forEach(function (id) {
       if (id === actor.location) return;
       if (!W.mayEnter(id, actor.id)) return;
+      if (id === justLeft) { rejected.push({ id: 'travel:' + id, actionId: 'travel', targetId: id, reason: 'just_left' }); return; }
       consider('travel', { id: id, name: sim.locationName(id) });
     });
+
+    /* Once an hour: what the next hour is for (lt-intentions.js). */
+    if (LT.Intentions && LT.Intentions.due(actor, sim.absMinute())) {
+      LT.Intentions.optionsFor(actor, sim.offersFor(actor)).forEach(function (i) { consider('plan_hour', i); });
+    }
 
     consider('wash_and_dress', null);
     consider('withdraw_savings', null);

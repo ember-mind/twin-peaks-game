@@ -681,6 +681,11 @@
          ' · chosen by ' + act.source)
       : (c.pending ? 'request ' + c.pending.requestId : ''));
 
+    /* This hour's plan, and who made it: the second level of deciding. */
+    var plan = c.intention && LT.Intentions && LT.Intentions.byId(c.intention.id);
+    var planned = plan && sim.absMinute() < c.intention.untilAbs;
+    var planBy = planned ? (c.recentDecisions || []).filter(function (d) { return d.actionId === 'plan_hour'; })[0] : null;
+    text(el('lt-intention'), planned ? 'This hour: ' + plan.label + ' (until ' + U.clock(c.intention.untilAbs % 1440) + (planBy ? ', planned by ' + planBy.source : '') + ')' : 'This hour: no plan yet');
     bar(el('lt-energy-bar'), c.needs.energy);
     bar(el('lt-hunger-bar'), 100 - c.needs.hunger);
     text(el('lt-energy-value'), Math.round(c.needs.energy) + '');

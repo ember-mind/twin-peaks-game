@@ -147,6 +147,7 @@
       r.dir = (r.walking && dir) || c.pos.dir || r.dir;
       if (r.walking) r.phaseT += dt * 0.006;
       else r.phaseT = 0;
+      self.noteDecisions(c, r);
     });
 
     var loc = LT.World.LOCATIONS[this.visibleLocation()];   // grid only; the name lives in state
@@ -310,7 +311,6 @@
           if (afterIndex < 0 || !TP.drawForeground) return;
           TP.drawForeground(g, loc.id, loc.rows, cx, cy, footY, nextFootY, popts);
         });
-        this.drawActivityMarks(g, cx, cy, ents.filter(function (e) { return e.kind !== 'thing'; }));
         return 'places';
       }
     }
@@ -327,7 +327,6 @@
     });
     /* Never a production map id: no room lighting is borrowed for a place that has none. */
     ents.forEach(function (e) { self.drawInhabitant(g, e, cx, cy, 'lt_temporary', how); });
-    this.drawActivityMarks(g, cx, cy, ents.filter(function (e) { return e.kind !== 'thing'; }));
     return 'temporary';
   };
 
@@ -344,7 +343,6 @@
         self.drawInhabitant(gg, copy, 0, 0, 'lt_street', how);
       }
     });
-    this.drawActivityMarks(g, cx, cy, people.filter(function (e) { return !LT.KitTown.isSeated(self.sim, e); }));
     return 'kit';
   };
 
@@ -359,12 +357,21 @@
     var how = this.inhabitantRenderer();
     var people = this.entitiesAt('street'), things = this.thingsAt('street');
     this.drawKitTown(g, people, things, 0, 0, how);
-    var spots = [];
+    var spots = [], placed = [];
+    /* Two people side by side keep their names and bubbles apart: whoever
+     * stands to the right of someone close has theirs a row higher. */
+    people.slice().sort(function (a, b) { return a.wx - b.wx || a.wy - b.wy; }).forEach(function (e) {
+      var lift = 0, x = e.wx, y = e.wy;
+      while (placed.some(function (p) { return Math.abs(p.x - x) < 44 && Math.abs(p.y - (y - lift)) < 20; })) lift += 26;
+      e.stackLift = lift; placed.push({ x: x, y: y - lift });
+    });
     people.forEach(function (e) {
       var c = sim.state.characters[e.id], seat = K.isSeated(sim, e);
-      var x = e.wx + TILE / 2, y = seat ? (sim.objectById(c.activity.targetId).y * TILE + 6) : e.wy + TILE - 3;
-      spots.push({ id: e.id, x: x, y: y - 10, outside: true });
-      label(g, c.name, x, y - 28, e.id === selectedId ? '#e9b458' : '#e8e2d2');
+      var x = e.wx + TILE / 2, y = (seat ? (sim.objectById(c.activity.targetId).y * TILE + 6) : e.wy + TILE - 3) - (e.stackLift || 0);
+      spots.push({ id: e.id, x: x, y: y - 10 + (e.stackLift || 0), outside: true });
+      var plan = c.intention && LT.Intentions && LT.Intentions.byId(c.intention.id);
+      var planned = plan && sim.absMinute() < c.intention.untilAbs;
+      label(g, c.name + (planned ? ' - ' + plan.word : ''), x, y - 28, e.id === selectedId ? '#e9b458' : '#e8e2d2');
     });
     /* Indoors: one tag per door, the names of whoever is behind it. */
     var byDoor = {};
@@ -382,7 +389,8 @@
       door.ids.forEach(function (id) { spots.push({ id: id, x: door.x, y: door.y, outside: false }); });
     });
     this.townSpots = spots;
-    return { people: people.length, indoors: spots.filter(function (s) { return !s.outside; }).length };
+    var bubbles = this.drawBubbles(g, people, 0, 0, 12);
+    return { people: people.length, indoors: spots.filter(function (s) { return !s.outside; }).length, bubbles: bubbles };
   };
 
   /* Who is at a point of the whole-town picture: the nearest person drawn
@@ -430,9 +438,12 @@
     /* Last, over room and people alike, so nobody stands in another hour's
      * light. The town outside carries its own hour (the kit's graded light). */
     if (light && drewAs !== 'kit') LT.DayLight.apply(g, light, { width: VW, height: VH });
+    /* What people are deciding, over their heads, in no hour's light. */
+    var bubbles = this.drawBubbles(g, people, cx, cy, 0);
     return { location: locId, entities: people.length, things: things.map(function (t) { return t.id + ':' + t.state; }),
              environment: drewAs, inhabitants: how,
              poses: people.filter(function (e) { return e.pose && !e.moving; }).map(function (e) { return e.id + ':' + e.pose.poseId; }),
+             bubbles: bubbles,
              light: light ? light.phase : null };
   };
 
@@ -483,6 +494,63 @@
     }
     return null;
   }
+
+  /* ---------------- bubbles ---------------- */
+
+  /* A new decision since the view last looked starts a fork bubble, if it
+   * changes what the person does; a new open question starts the thinking
+   * clock. The first look at someone starts nothing: what they decided before
+   * anyone was watching is not news. */
+  View.prototype.noteDecisions = function (c, r) {
+    var B = LT.Bubbles, now = this.clock * 1000, d = (c.recentDecisions || [])[0];
+    if (!B) return;
+    var id = d ? d.requestId : null;
+    if (r.lastDecisionId === undefined) r.lastDecisionId = id;
+    else if (id !== r.lastDecisionId) {
+      r.lastDecisionId = id;
+      if (B.meaningful(d, (c.recentDecisions || [])[1])) r.fork = { options: B.optionsOf(this.sim, d), t0: now, source: d.source };
+    }
+    var pid = c.pending ? c.pending.requestId : null;
+    if (pid !== r.pendingId) { r.pendingId = pid; r.pendingT0 = now; }
+  };
+
+  /* The point over someone's head, as drawn: on a booth, on a bench, or standing. */
+  View.prototype.headOf = function (e) {
+    var K = LT.KitTown, seat = K && K.ready && K.seatOf ? K.seatOf(this.sim, e) : null;
+    if (seat) return { x: seat.x, y: seat.y - 22 };
+    if (e.booth) return { x: e.booth.x + TILE / 2, y: e.booth.y - 9 };
+    return { x: e.wx + TILE / 2, y: e.wy - 9 };
+  };
+
+  /* One bubble per person: thinking, a fork, or the sign of what they do.
+   * Returns what was shown, for the page and its tests. */
+  View.prototype.drawBubbles = function (g, people, cx, cy, lift) {
+    var B = LT.Bubbles, sim = this.sim, self = this, now = this.clock * 1000, shown = [];
+    if (!B) return shown;
+    people.forEach(function (e) {
+      if (e.kind === 'thing') return;
+      var c = sim.state.characters[e.id], r = self.render[e.id];
+      if (!c || !r) return;
+      var head = self.headOf(e), x = head.x - cx, y = head.y - cy - (lift || 0) - (e.stackLift || 0);
+      var rec = c.pending && sim.requests && sim.requests[c.pending.requestId];
+      /* Thinking is a question whose answer has not come: one answered and
+       * waiting for the next minute (or a paused clock) is not. */
+      if (c.pending && !(rec && rec.resolved) && now - (r.pendingT0 || now) >= B.THINK_AFTER_MS) {
+        var opts = B.pendingOptions(sim, rec && rec.request);
+        B.draw(g, 'think', x, y, opts, now - r.pendingT0);
+        shown.push(e.id + ':think' + (opts.length ? ':' + opts.join('/') : ''));
+        return;
+      }
+      if (r.fork && now - r.fork.t0 < B.FORK_MS && r.fork.options.length) {
+        B.draw(g, 'fork', x, y, r.fork.options, now - r.fork.t0);
+        shown.push(e.id + ':fork:' + r.fork.options.map(function (o) { return o.label; }).join('/'));
+        return;
+      }
+      var act = c.activity, sign = act && act.phase === 'executing' && !e.moving ? B.signOf(act.actionId) : null;
+      if (sign) { B.draw(g, 'sign', x, y, sign); shown.push(e.id + ':sign:' + sign); }
+    });
+    return shown;
+  };
 
   /* A viewer must be able to tell working from resting without reading a label.
    * These are modest marks over the actor, not a second UI. */

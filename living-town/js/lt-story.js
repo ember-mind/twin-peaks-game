@@ -58,6 +58,14 @@
     if ((!factors || !factors.length) && decision.words && decision.words.reason) {
       return { source: decision.source, known: true, quoted: true, line: decision.source + ' gave this reason: "' + decision.words.reason + '"' };
     }
+    /* A mind that gives odds, not reasons (Jev): its odds are the account. */
+    var probs = decision.diagnostics && decision.diagnostics.probabilities;
+    if ((!factors || !factors.length) && probs && Object.keys(probs).length) {
+      var ranked = Object.keys(probs).sort(function (a, b) { return probs[b] - probs[a] || (a < b ? -1 : 1); }).slice(0, 3);
+      var name = function (id) { var i = id.indexOf(':'); return LT.Bubbles ? LT.Bubbles.short(null, i < 0 ? id : id.slice(0, i), i < 0 ? null : id.slice(i + 1)) : id; };
+      return { source: decision.source, known: true, odds: true,
+               line: 'Odds from ' + decision.source + ': ' + ranked.map(function (id) { return name(id) + ' ' + Math.round(probs[id] * 100) + '%'; }).join(', ') + '.' };
+    }
     if (!factors || !factors.length) {
       return { source: decision.source, known: false, line: 'Chosen by ' + decision.source + ', which gave no reasons.' };
     }

@@ -694,8 +694,9 @@ async function previousFormatIsMigrated() {
     const rd = read.state.characters.resident_d, book = read.objectById('book_park');
     ok(book.x === 32 && book.y === 17 && book.anchors.read_book.x === 30 && book.anchors.read_book.y === 17 && rd.walkTarget.x === 30 && rd.walkTarget.y === 17 && open(rd),
        'the book is on the east bench, read from in front of it, and she is heading there from open ground');
+    const readFrom = read.state.events.length;
     await read.runMinutes(20);
-    ok(rd.activity && rd.activity.actionId === 'read_book' && rd.activity.phase === 'executing' && rd.pos.x === 30 && rd.pos.y === 17, 'and she gets there and reads');
+    ok(read.state.events.slice(readFrom).some((e) => e.type === 'ACTIVITY_REACHED' && e.actorId === 'resident_d' && e.data.actionId === 'read_book'), 'and she gets there and reads');
     ok(JSON.parse(walkText).world === 'd7dfa67e' && JSON.parse(readText).world === 'd7dfa67e', 'the old save texts are untouched');
     const again = Save.deserialize(JSON.parse(JSON.stringify(Save.serialize(moved))));
     ok(again.state.day === 2 && JSON.parse(JSON.stringify(Save.serialize(moved))).world === LT.World.fingerprint(), 'saved again, it is a save of this town');

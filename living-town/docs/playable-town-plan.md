@@ -150,6 +150,14 @@ resident: watchers change the world, Jev chooses, the simulation carries it out.
    before any public save exists.
 3. **Jev as the mind.** Character sheets, hourly intentions, announced forks,
    predictions, transparent fallback, budget.
+   *Partly done (2026-09-23, branch `feat/lt-kit-world`):* hourly intentions
+   (`js/lt-intentions.js`: a one-minute `plan_hour` decision, a lean on the
+   offline policy); the server's `--jev` mind (`server/town-server.js`: hybrid
+   over Jev on close calls, forks and plans, `--jev-budget` per real day,
+   default 100, "mind offline" said in every frame); Jev's odds kept with each
+   decision; thought bubbles (`js/lt-bubbles.js`: thinking, the fork and its
+   odds, the sign of what someone is doing). Not yet: character sheets, the
+   three-minute announcement, predictions.
 4. **Town events**, world and spectator, with the night set. Delegated to
    DeepSeek as a content package against a written task, like the shared meal.
 5. **Paint rounds** on the new map against the Twin Peaks exteriors, by Astra

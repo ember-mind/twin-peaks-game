@@ -6,7 +6,7 @@
  * invent an action nor reach past one into the state.
  *
  * Contract per definition:
- *   id, label, targetKind: null|'object'|'person'|'offer'|'location'
+ *   id, label, targetKind: null|'object'|'person'|'offer'|'location'|'conversation'|'intention'
  *   duration(ctx)      -> whole minutes, > 0
  *   eligible(ctx)      -> true, or { reason } explaining refusal
  *   tick(ctx, minutes) -> continuous drain/recovery; survives interruption
@@ -516,7 +516,7 @@
    * and an id that is already taken is refused: nothing is ever replaced by
    * being defined twice. A.all() is for reading; writing to what it returns
    * is not registration and is not supported. */
-  var TARGET_KINDS = [null, 'object', 'person', 'offer', 'location', 'conversation'];
+  var TARGET_KINDS = [null, 'object', 'person', 'offer', 'location', 'conversation', 'intention'];
   var POSITIONS = ['use_spot', 'beside_person', 'anywhere'];
   var HOOKS = ['tick', 'onStart', 'onComplete', 'onInterrupt', 'candidateMeta'];
   A.define = function (def) {

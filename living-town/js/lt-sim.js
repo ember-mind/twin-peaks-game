@@ -16,6 +16,7 @@
     if (!LT.Util) require('./lt-util.js');
     if (!LT.World) require('./lt-world.js');
     if (!LT.Actions) require('./lt-actions.js');
+    if (!LT.Intentions) require('./lt-intentions.js');
     if (!LT.Perception) require('./lt-perception.js');
     if (!LT.Policy) require('./policy/lt-policy.js');
     if (!LT.Names) require('./lt-names.js');
@@ -26,6 +27,7 @@
   var EMBER = root.EMBER;
 
   var SALIENCE = {
+    INTENDED: 0.05,   // an hour's plan is not something one remembers
     COMMITMENT_BROKEN: 1.0, GOAL_REACHED: 1.0, GOAL_MISSED: 1.0, OFFER_ACCEPTED: 0.85,
     WENT_HUNGRY: 0.75, HELPED_OUT: 0.9, SAID: 0.55, GOAL_SET: 0.5,
     TALKED: 0.8, OFFER_RECEIVED: 0.7, OFFER_DECLINED: 0.7,
@@ -46,7 +48,7 @@
   var KEEP_DAYS = 2;
   var ROUTINE = { ACTIVITY_STARTED: 1, ACTIVITY_COMPLETED: 1, ACTIVITY_REACHED: 1, ACTIVITY_INTERRUPTED: 1, ARRIVED: 1, DEPARTED: 1,
                   GREETED: 1, RESTED: 1, SAT_DOWN: 1, BROKE: 1, PREPARED: 1, SLEPT: 1, ATE: 1, WORKED: 1, WORKED_EXTRA: 1, PRACTISED: 1,
-                  TALK_PROPOSED: 1, TALK_BEGAN: 1, INTERVENTION_SCHEDULED: 1 };
+                  TALK_PROPOSED: 1, TALK_BEGAN: 1, INTERVENTION_SCHEDULED: 1, INTENDED: 1 };
   var SPOKEN = { talk_with: 1, join_conversation: 1, decline_conversation: 1, keep_talking: 1, wind_down: 1 };
   /* A talk has two moments at which either person may bring it to a close or
    * carry on: nine and seventeen minutes in. Each is a question put to that
@@ -210,6 +212,7 @@
       case 'person': return this.state.characters[candidate.targetId] || null;
       case 'offer': return this.offerById(candidate.targetId);
       case 'conversation': return this.conversationById(candidate.targetId);
+      case 'intention': return LT.Intentions ? LT.Intentions.byId(candidate.targetId) : null;
       case 'location':
         var l = W.LOCATIONS[candidate.targetId];
         return l ? { id: l.id, name: l.name } : null;
@@ -377,6 +380,7 @@
   Sim.prototype.beginTransit = function (actor, from, to) {
     var start = this.walkStart(actor, from);
     var portalTo = this.meetingCell(actor, to) || W.STREET_PORTALS[to] || W.LOCATIONS.street.spawn;
+    actor.lastLeft = { locationId: from, abs: this.absMinute() };
     actor.transit = { from: from, to: to };
     actor.pos = { x: start.x, y: start.y, dir: actor.pos && W.outdoorGrid(actor.location) ? actor.pos.dir : 'down' };
     actor.location = W.zoneAt(start.x, start.y) || 'street';
@@ -1610,7 +1614,8 @@
         needs: deepCopy(actor.needs), money: actor.money, savings: actor.savings,
         pantry: actor.pantry, traits: deepCopy(actor.traits),
         employment: actor.employment ? deepCopy(actor.employment) : null,
-        standing: deepCopy(actor.standing)
+        standing: deepCopy(actor.standing),
+        intention: actor.intention ? deepCopy(actor.intention) : null
       },
       observations: P.observe(this, actor),
       memories: P.relevantMemories(actor, 8),

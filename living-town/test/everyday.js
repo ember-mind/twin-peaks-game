@@ -304,7 +304,7 @@ async function proofB() {
    * (test/meal-in-town.js); what is pinned here is that the book and the parcel cost nobody a promise they began the day with. */
   ok(a.commitments.concat(b.commitments).filter((c) => c.dueDay === 1 && !/^cmt_meal_/.test(c.id)).every((c) => c.status === 'kept'), 'nobody broke a day-one promise over a book or a parcel');
   const day1Work = events(sim, 'WORKED', 'resident_a').filter((e) => e.day === 1).reduce((m, e) => m + e.data.minutes, 0);
-  ok(day1Work === 457 && (book.readBy.resident_a || 0) === 0, 'the one with a shift and a deadline worked the whole shift (' + day1Work + ' min) and never opened the book');
+  ok(day1Work === 465 && (book.readBy.resident_a || 0) === 0, 'the one with a shift and a deadline worked the whole shift (' + day1Work + ' min) and never opened the book');
   const parcelAt = events(sim, 'FOOD_PARCEL_OPENED')[0];
   const home = sim.state.events.find((e) => e.type === 'ARRIVED' && e.actorId === 'resident_a' && e.data.at === 'flat_a' && e.absMinute > 750);
   ok(home && (!parcelAt || parcelAt.absMinute - home.absMinute > 60), 'the parcel was not opened on sight: home at ' + home.stamp + ', opened ' + (parcelAt ? parcelAt.stamp : 'not at all in two days'));

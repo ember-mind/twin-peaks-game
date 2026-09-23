@@ -30,7 +30,9 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
   try {
     await page.navigate('living-town/index.html?speed=1x&world=new&cast=pair'); await sleep(1200);
     console.log('# page: on the way to work');
-    await runTo(1, 555); await sleep(300);   // 09:15, walking up to the counter
+    /* the morning's moment: walking up to the counter */
+    await js("(async function(){ var st = LT_OBSERVER; st.speedIndex = 0; for (var m = 480; m < 720; m++) { await st.sim.runUntil(1, m); var a = st.sim.state.characters.resident_a.activity; if (a && a.actionId === 'work_shift' && a.phase === 'approaching') break; } st.view.observe(); LT.Observer.paintNow(); return true; })()", true);
+    await sleep(300);
     const name = await js("LT_OBSERVER.sim.state.characters.resident_a.name");
     ok((await txt('lt-caption-doing')).indexOf(name + ' · On the way to: ') === 0, 'under the picture: who, and that they are still on the way (' + await txt('lt-caption-doing') + ')');
     const line = await txt('lt-caption-why');
@@ -99,6 +101,9 @@ function ok(cond, msg) { checks++; assert(cond, msg); console.log('  ok - ' + ms
        'Whole town shows the map instead of one person\'s corner of it');
     ok(whole && whole.people === outside && whole.people + whole.indoors === 5, 'everyone is in it: ' + whole.people + ' outside, ' + whole.indoors + ' named over their doors');
     await shot('05b-the-whole-town.png');
+    ok(/^This hour: /.test(await txt('lt-intention')), 'the hour\'s plan is shown with the person: ' + await txt('lt-intention'));
+    const signs = JSON.parse(await js("JSON.stringify(LT_OBSERVER.view.drawTown(LT_OBSERVER.townCtx, LT_OBSERVER.selected).bubbles)"));
+    ok(signs.length >= 1 && signs.every((b) => /:(sign|fork|think)/.test(b)), 'over their heads, what they are doing or deciding: ' + signs.join(', '));
     const picked = await js("(function(){ var s = LT_OBSERVER.view.townSpots[0], cv = document.getElementById('lt-town'), r = cv.getBoundingClientRect(), k = r.width / 768; cv.dispatchEvent(new MouseEvent('click', { clientX: r.left + s.x * k, clientY: r.top + s.y * k, bubbles: true })); return s.id; })()");
     ok(await js("LT_OBSERVER.selected") === picked && await js("!LT_OBSERVER.townView && !document.getElementById('lt-canvas').hidden"), 'choosing someone in it follows them (' + picked + ')');
     console.log('# page: auto pace, the timeline, looking back');

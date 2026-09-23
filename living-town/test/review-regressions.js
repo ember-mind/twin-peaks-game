@@ -53,10 +53,15 @@ async function defaultDayHasNoRemoteConversation() {
     });
   });
   await sim.runUntil(1, 1439);
-  ok(count(sim, 'TALKED') === 1, 'the two inhabitants talk once on day one, not twice (' + count(sim, 'TALKED') + ')');
+  /* They may talk more than once in a day (with an hour meant for company,
+   * they do); what must hold is that each talk is settled once. */
+  const talked = sim.state.events.filter((e) => e.type === 'TALKED');
+  const convIds = talked.map((e) => e.data.conversationId);
+  ok(talked.length >= 1 && new Set(convIds).size === talked.length && talked.length === sim.state.conversations.filter((c) => c.status === 'completed').length,
+     'each conversation of day one is settled once (' + talked.length + ' talks, ' + new Set(convIds).size + ' conversations)');
   ok(apart.length === 0, 'every TALKED event found both participants in the room it happened in ' + apart.join('; '));
   const goal = sim.state.characters.resident_b.goals.find((g) => g.kind === 'social');
-  ok(goal.progress === 1, 'the social goal counts one conversation (' + goal.progress + ')');
+  ok(goal.reached && goal.progress === goal.target, 'the social goal is reached by the first, and its count stands there (' + goal.progress + '/' + goal.target + ')');
 }
 
 function conversationIsOneSharedActivity() {

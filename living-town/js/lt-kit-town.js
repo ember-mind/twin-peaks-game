@@ -135,4 +135,5 @@
   };
 
   K.isSeated = function (sim, e) { return !!seatFor(sim, e); };
+  K.seatOf = function (sim, e) { return seatFor(sim, e); };
 })();

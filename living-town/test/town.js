@@ -102,8 +102,9 @@ const strip = (s) => { const c = JSON.parse(JSON.stringify(s.state)); delete c.v
   ok(!long.state.events.some((e) => e.day === 1 && e.type === 'ACTIVITY_STARTED') && long.state.events.some((e) => e.day === 1 && e.type === 'TALKED') && long.state.events.some((e) => e.day === 4 && e.type === 'ACTIVITY_STARTED'),
      'its routine is let go, what would still be told is kept, and the last two days are whole');
   await long.runUntil(12, 0); const at12 = size();
-  /* What is kept for ever is what would still be told: with people asking each other to eat there is more of it. The guard is the rate. */
-  ok((at12 - at5) / 7 < 50 * 1024 && at12 < 1200000, 'seven more days add ' + Math.round((at12 - at5) / 1024) + ' KB to a ' + Math.round(at5 / 1024) + ' KB save — it was 200 KB a day');
+  /* What is kept for ever is what would still be told: with people asking each other to eat there is more of it, and with an hour
+   * meant for company they talk about twice as often. The guard is the rate, well inside what a browser will keep. */
+  ok((at12 - at5) / 7 < 70 * 1024 && at12 < 1600000, 'seven more days add ' + Math.round((at12 - at5) / 1024) + ' KB to a ' + Math.round(at5 / 1024) + ' KB save — it was 200 KB a day');
   const twin = LT.Save.deserialize(JSON.parse(JSON.stringify(LT.Save.serialize(long))));
   await long.runUntil(13, 30); await twin.runUntil(13, 30);
   ok(strip(long) === strip(twin), 'and a world loaded on day twelve is still the world that never stopped, across another settling');

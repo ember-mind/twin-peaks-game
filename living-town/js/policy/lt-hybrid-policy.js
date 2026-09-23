@@ -12,7 +12,12 @@
  * Every answer says where it came from (`source`), so a watcher can tell a
  * choice the provider made from one it was never asked about.
  *
- *   LT.HybridPolicy.create({ id, fast: 'utility', slow: '<remote id>', closeGap: 3 })
+ * With `forks: true` the slow one is also asked whenever the choice is one
+ * that changes the story — the fast answer or its runner-up is to speak or
+ * not, accept or refuse, keep or give back, plan the hour (H.FORKS) — however
+ * clear the arithmetic says it is.
+ *
+ *   LT.HybridPolicy.create({ id, fast: 'utility', slow: '<remote id>', closeGap: 3, forks: true })
  */
 (function () {
   var root = (typeof window !== 'undefined') ? window : global;
@@ -20,6 +25,21 @@
   if (typeof require === 'function' && !LT.Policy) require('./lt-policy.js');
   var Pol = LT.Policy;
   var H = LT.HybridPolicy = {};
+
+  H.FORKS = { talk_with: 1, join_conversation: 1, decline_conversation: 1, invite_to_meal: 1, accept_meal: 1, decline_meal: 1,
+              return_wallet: 1, keep_wallet_money: 1, pick_up_wallet: 1, help_out: 1, wind_down: 1, plan_hour: 1,
+              accept_offer: 1, decline_offer: 1 };
+
+  /* Whether the fast answer's choice, or the best different thing to do, is a fork. */
+  H.isFork = function (response) {
+    var f = response && response.diagnostics && response.diagnostics.factors;
+    if (!f || !f.length) return false;
+    var chosen = null, second = null;
+    f.forEach(function (x) { if (x.candidateId === response.selectedId) chosen = x; });
+    if (!chosen) return false;
+    f.forEach(function (x) { if (x !== chosen && x.actionId !== chosen.actionId && (!second || x.score > second.score)) second = x; });
+    return !!(H.FORKS[chosen.actionId] || (second && H.FORKS[second.actionId]));
+  };
 
   /* The lead of the chosen option over the best different thing to do. */
   H.lead = function (response) {
@@ -35,7 +55,7 @@
   H.create = function (opts) {
     if (!opts || !opts.id || !opts.fast || !opts.slow) throw new Error('a hybrid policy needs an id, a fast policy id and a slow policy id');
     var closeGap = opts.closeGap === undefined ? 3 : opts.closeGap;
-    var stats = { asked: 0, clear: 0, close: 0, slowAnswered: 0, slowFailed: 0 };
+    var stats = { asked: 0, clear: 0, close: 0, forks: 0, slowAnswered: 0, slowFailed: 0 };
     var policy = {
       id: opts.id, label: opts.label || opts.id,
       get remote() { var s = Pol.get(opts.slow); return !!(s && s.remote); },
@@ -46,9 +66,10 @@
         stats.asked++;
         return Promise.resolve(fast.decide(request)).then(function (quick) {
           var usable = quick && quick.status === 'selected';
-          if (usable && H.lead(quick) > closeGap) { stats.clear++; return tag(quick, opts.id + ':' + quick.source + ':clear'); }
+          var fork = usable && opts.forks && H.isFork(quick);
+          if (usable && !fork && H.lead(quick) > closeGap) { stats.clear++; return tag(quick, opts.id + ':' + quick.source + ':clear'); }
           if (!slow) { return usable ? tag(quick, opts.id + ':' + quick.source + ':no_slow') : quick; }
-          stats.close++;
+          if (fork) stats.forks++; else stats.close++;
           return Promise.resolve(slow.decide(request)).then(function (slowAnswer) {
             if (Pol.validateResponse(request, slowAnswer).ok && slowAnswer.status === 'selected') { stats.slowAnswered++; return tag(slowAnswer, opts.id + ':' + slowAnswer.source); }
             stats.slowFailed++;

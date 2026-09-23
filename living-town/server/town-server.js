@@ -2,6 +2,15 @@
 /* town-server.js — Living Town: the one town, and the door to it.
  *
  *   node living-town/server/town-server.js [--port=8787] [--data=<dir>] [--speed=6] [--seed=N] [--paused]
+ *                                          [--jev] [--jev-budget=100] [--jev-gap=3]
+ *
+ * With --jev the residents' mind is Jev (TypeSafe), through a hybrid: the
+ * offline policy answers what is clear, Jev is asked on close calls, on the
+ * choices that change the story (to speak or not, accept or refuse, keep or
+ * give back) and on each hour's plan. At most --jev-budget questions a real
+ * day (billed calls); past that, or when Jev is slow or down, the offline
+ * policy answers and every frame says the mind is offline. The key never
+ * leaves this process: browsers receive Jev's answers in the frames.
  *
  * One process runs one simulation on a real clock: at --speed=6 a town minute
  * is ten real seconds. It serves the page, and to every browser that opens it
@@ -29,6 +38,8 @@ require(path.join(LT_DIR, 'js', 'lt-save.js'));
 require(path.join(LT_DIR, 'js', 'lt-story.js'));
 require(path.join(LT_DIR, 'js', 'lt-hand.js'));
 require(path.join(LT_DIR, 'js', 'lt-live.js'));
+require(path.join(LT_DIR, 'js', 'policy', 'lt-remote-policy.js'));
+require(path.join(LT_DIR, 'js', 'policy', 'lt-hybrid-policy.js'));
 const Spectators = require('./spectators.js');
 const LT = global.LT, Live = LT.Live, H = LT.Hand, U = LT.Util;
 
@@ -45,7 +56,8 @@ const COOKIE = 'lt';
 /* ---------------- options ---------------- */
 
 function parseArgs(argv) {
-  const o = { port: 8787, data: path.join(LT_DIR, 'data'), speed: 6, seed: null, paused: false, host: '127.0.0.1', dev: false };
+  const o = { port: 8787, data: path.join(LT_DIR, 'data'), speed: 6, seed: null, paused: false, host: '127.0.0.1', dev: false,
+              jev: false, jevBudget: 100, jevGap: 3 };
   argv.forEach((a) => {
     const m = /^--([a-z-]+)(?:=(.*))?$/.exec(a);
     if (!m) return;
@@ -56,14 +68,52 @@ function parseArgs(argv) {
     else if (m[1] === 'paused') o.paused = true;
     else if (m[1] === 'dev') o.dev = true;
     else if (m[1] === 'host') o.host = m[2];
+    else if (m[1] === 'jev') o.jev = true;
+    else if (m[1] === 'jev-budget') o.jevBudget = Number(m[2]);
+    else if (m[1] === 'jev-gap') o.jevGap = Number(m[2]);
   });
   if (!(o.speed > 0)) throw new Error('--speed must be a positive number of town minutes per real minute');
   return o;
 }
 
+/* ---------------- the mind ---------------- */
+
+/* Who decides for the residents. Without --jev, the offline policy. With it,
+ * a hybrid over Jev, with a budget counted per real day (the town's days pass
+ * six times faster). `opts.jevTransport` replaces the network for tests. */
+function createMind(opts) {
+  if (!opts.jev) return { policyId: 'utility', status: () => ({ on: false, provider: 'offline' }) };
+  const Transport = require(path.join(LT_DIR, 'tools', 'jev-transport.js'));
+  const inner = opts.jevTransport || Transport.create();
+  const count = { day: null, used: 0, overBudget: 0, failed: 0, answered: 0, lastFailAt: 0 };
+  const today = () => new Date().toISOString().slice(0, 10);
+  const transport = async (brief) => {
+    if (count.day !== today()) { count.day = today(); count.used = 0; }
+    if (count.used >= opts.jevBudget) { count.overBudget++; count.lastFailAt = Date.now(); throw new Error('over_budget'); }
+    count.used++;
+    try { const r = await inner(brief); count.answered++; return r; }
+    catch (e) { count.failed++; count.lastFailAt = Date.now(); throw e; }
+  };
+  const jev = LT.RemotePolicy.create({ id: 'jev', label: 'Jev', transport, timeoutMs: 8000, maxInFlight: 4 });
+  const mind = LT.HybridPolicy.create({ id: 'mind', label: 'Jev', fast: 'utility', slow: 'jev', closeGap: opts.jevGap, forks: true });
+  return {
+    policyId: 'mind',
+    status: () => {
+      if (count.day !== today()) { count.day = today(); count.used = 0; }
+      /* Offline, and said so: the budget is spent, or Jev failed in the last two minutes. */
+      const offline = count.used >= opts.jevBudget || Date.now() - count.lastFailAt < 120000;
+      return { on: true, provider: 'Jev', offline, usedToday: count.used, budget: opts.jevBudget, answered: count.answered, failed: count.failed,
+               overBudget: count.overBudget, hybrid: mind.stats(), remote: jev.stats() };
+    }
+  };
+}
+
 /* ---------------- the town ---------------- */
 
 function createTown(opts) {
+  const mind = createMind(opts);
+  const policies = {};
+  Object.keys(POLICIES).forEach((id) => { policies[id] = mind.policyId; });
   const dataDir = opts.data;
   fs.mkdirSync(dataDir, { recursive: true });
   const savePath = path.join(dataDir, 'town.json');
@@ -72,10 +122,10 @@ function createTown(opts) {
 
   let sim, origin;
   if (fs.existsSync(savePath)) {
-    sim = LT.Save.fromJSON(fs.readFileSync(savePath, 'utf8'), { policies: POLICIES });
+    sim = LT.Save.fromJSON(fs.readFileSync(savePath, 'utf8'), { policies });
     origin = 'resumed from ' + savePath + ' at ' + sim.stamp();
   } else {
-    sim = LT.Scenario.town({ seed: opts.seed === null ? ((Date.now() % 2147483647) || 1) : opts.seed, policies: POLICIES });
+    sim = LT.Scenario.town({ seed: opts.seed === null ? ((Date.now() % 2147483647) || 1) : opts.seed, policies });
     origin = 'new world, seed ' + sim.state.seed;
   }
   const host = Live.host(sim);
@@ -119,6 +169,9 @@ function createTown(opts) {
 
   function onFrame(frame) {
     frame.itv.forEach((i) => { if (attributions[i.id]) i.by = attributions[i.id]; });
+    /* Who is deciding, for the page to say; not part of the world. */
+    const m = mind.status();
+    frame.mind = { provider: m.provider, on: m.on, offline: !!m.offline };
     fs.appendFileSync(logPath, JSON.stringify(frame) + '\n');
     broadcast('frame', frame);
     const credited = spectators.recharge();
@@ -164,11 +217,12 @@ function createTown(opts) {
 
   function status() {
     return { day: sim.state.day, minute: sim.state.minute, clock: U.clock(sim.state.minute), abs: sim.absMinute(), paused: clock.paused,
-      msPerMinute: clock.msPerMinute, dev: clock.dev, watching: streams.size, frames: host.frames, savedAt: lastSavedAbs, origin, world: LT.World.fingerprint(), behind: clock.behind };
+      msPerMinute: clock.msPerMinute, dev: clock.dev, watching: streams.size, frames: host.frames, savedAt: lastSavedAbs, origin, world: LT.World.fingerprint(), behind: clock.behind,
+      mind: mind.status() };
   }
 
   const town = {
-    sim, host, spectators, clock, streams, attributions, origin, dataDir,
+    sim, host, spectators, clock, streams, attributions, origin, dataDir, mind,
     hand, status, save, presence,
     step: () => host.stepMany(1, onFrame),
     hello(token) {
@@ -323,6 +377,7 @@ function main() {
   server.listen(opts.port, opts.host, () => {
     console.log('Living Town: ' + town.origin);
     console.log('  http://' + opts.host + ':' + server.address().port + '/living-town/  (' + opts.speed + 'x: a town minute every ' + Math.round(town.clock.msPerMinute / 100) / 10 + ' s' + (opts.paused ? ', paused' : '') + ')');
+    console.log('  mind: ' + (opts.jev ? 'Jev, at most ' + opts.jevBudget + ' questions a real day, the offline policy beyond that' : 'the offline policy (start with --jev to ask Jev)'));
     console.log('  data in ' + town.dataDir + (process.env.LT_ADMIN_TOKEN ? '; admin enabled' : '; no LT_ADMIN_TOKEN, admin off') + (opts.dev ? '; --dev: speed controls on the page, do not expose this' : ''));
     town.start();
   });

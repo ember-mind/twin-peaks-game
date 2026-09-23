@@ -124,6 +124,15 @@
       id = request.candidates.some(function (x) { return x.id === wanted; }) ? wanted : null;
     }
     if (!id) return Pol.failed(request, source, 'chose_nothing_on_offer');
-    return Pol.selected(request, id, source, null, Pol.cleanWords({ reason: obj.reason, say: obj.say }));
+    /* A mind that answers with how likely each option was (Jev) has that kept
+     * with the decision: it is what the page shows as the fork's odds. Only
+     * numbers for options that were on offer survive. */
+    var diag = null;
+    if (obj.jev && obj.jev.probabilities && typeof obj.jev.probabilities === 'object') {
+      var probs = {};
+      request.candidates.forEach(function (c) { var p = obj.jev.probabilities[c.id]; if (typeof p === 'number' && isFinite(p) && p >= 0 && p <= 1) probs[c.id] = Math.round(p * 1000) / 1000; });
+      diag = { probabilities: probs, confidence: typeof obj.jev.confidence === 'number' ? obj.jev.confidence : null, model: typeof obj.jev.model === 'string' ? obj.jev.model.slice(0, 40) : null };
+    }
+    return Pol.selected(request, id, source, diag, Pol.cleanWords({ reason: obj.reason, say: obj.say }));
   };
 })();

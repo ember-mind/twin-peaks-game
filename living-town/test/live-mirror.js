@@ -86,7 +86,8 @@ const turn = () => new Promise((r) => setTimeout(r, 1));
   ok(late.length > 0, 'some answers landed later than the minute after their question, as a slow provider makes them (' + late.length + ' frames)');
   const asked = H.asked(mirrorA.sim, 10);
   ok(asked.length === 3 && asked.every((a) => a.status === 'applied'), 'the mirror\'s register shows the three, applied');
-  const reasons = (s) => s.rejections.map((r) => r.reason).sort().join(',');
+  /* An answer that came too late is refused where it arrived, on the host; it never travels in a frame, so a mirror has nothing to refuse. */
+  const reasons = (s) => s.rejections.map((r) => r.reason).filter((r) => r !== 'late_response').sort().join(',');
   ok(reasons(mirrorA.sim) === reasons(hostSim), 'the mirror refused exactly what the host refused (' + (reasons(hostSim) || 'nothing') + ')');
 
   console.log('# a mirror that joins late from a save with open questions catches up');
