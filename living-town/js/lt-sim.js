@@ -215,7 +215,8 @@
       case 'intention': return LT.Intentions ? LT.Intentions.byId(candidate.targetId) : null;
       case 'location':
         var l = W.LOCATIONS[candidate.targetId];
-        return l ? { id: l.id, name: l.name } : null;
+        /* A home's name is this world's ("Nadia's flat"), not the template's. */
+        return l ? { id: l.id, name: this.locationName(l.id) } : null;
       default: return null;
     }
   };
@@ -369,6 +370,9 @@
       var cell = { x: other.pos.x + d.x, y: other.pos.y + d.y };
       if (W.isSolid((rows[cell.y] || '').charAt(cell.x)) || self.standingOn(actor, cell)) return;
       var len = W.walkCells(rows, from, cell);
+      /* Side by side, as a talk is shown: face to face across a row stacks
+       * the two into one figure (audit 2026-09-24). */
+      if (len >= 0 && d.x !== 0) len -= 2;
       if (len >= 0 && len < bestD) { bestD = len; best = cell; }
     });
     if (best) best.withId = other.id;

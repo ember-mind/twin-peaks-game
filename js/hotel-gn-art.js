@@ -24,7 +24,10 @@
     { id: 'chairEast', cells: [[6, 6]], x: 96, footY: 112 },
     { id: 'luggage', cells: [[17, 6]], x: 272, footY: 112 },
     { id: 'reception', cells: [[11, 8], [12, 8], [13, 8], [14, 8]], x: 176, footY: 148 },
-    { id: 'stairs', cells: [], x: 272, footY: 152 }
+    /* Walked on, not stood behind: whoever is on the flight or at the hall
+     * door above it is drawn over it (audit 2026-09-24: Cooper arriving from
+     * Room 315 was hidden under the landing, head only). */
+    { id: 'stairs', cells: [], x: 272, footY: 0 }
   ];
 
   function painter(ctx, cx, cy) {

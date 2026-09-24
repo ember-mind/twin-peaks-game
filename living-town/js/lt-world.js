@@ -310,7 +310,7 @@
                  buy_meal: { x: 4, y: 4, dir: 'up' } },
       /* Where the next person stands when the usual spot has someone on it:
        * two people behind one counter, three in front of it, never one tile. */
-      moreAnchors: { work_shift: [{ x: 5, y: 2, dir: 'down' }], work_extra_shift: [{ x: 5, y: 2, dir: 'down' }],
+      moreAnchors: { work_shift: [{ x: 4, y: 2, dir: 'down' }], work_extra_shift: [{ x: 4, y: 2, dir: 'down' }],
                      buy_meal: [{ x: 2, y: 4, dir: 'up' }, { x: 6, y: 4, dir: 'up' }] } },
     { id: 'obj_cafe_table', name: 'café bench', location: 'cafe', x: 3, y: 7,
       tags: ['furniture', 'seat'], portable: false, owner: 'cafe',

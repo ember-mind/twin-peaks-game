@@ -235,9 +235,10 @@
       /* A pose, when there is one for what they are doing and they are not
        * moving; otherwise, in the same frame, the ordinary sprite. */
       var kit = root.GAME.Retro2D && root.GAME.Retro2D.interiorKit;
+      var popts = { kit: kit, palette: kit && (kit.materials[mapId] || kit.materials.lt_cafe) };
+      if (!e.moving && e.pose && LT.ActivityPoses && kit && e.lying === 'down' && drawTurned(g, e, cx, cy, this.clock * 1000, popts)) return;
       if (!e.moving && e.pose && LT.ActivityPoses && kit &&
-          LT.ActivityPoses.draw(g, e.sheetId, e.pose.poseId, e.pose.dir, e.wx - cx, e.wy - cy, this.clock * 1000,
-                                { kit: kit, palette: kit.materials[mapId] || kit.materials.lt_cafe }) !== false) return;
+          LT.ActivityPoses.draw(g, e.sheetId, e.pose.poseId, e.pose.dir, e.wx - cx, e.wy - cy, this.clock * 1000, popts) !== false) return;
       root.GAME.Sprites.drawChar(g, e.wx - cx, e.wy - cy, LT.ProductionHost.looks[e.sheetId], e.dir,
         e.phase, 1, e.moving, false, this.clock,
         { mapId: mapId, wx: e.wx, wy: e.wy, npcId: e.id, characterLife: null });
@@ -246,6 +247,22 @@
     LT.Art.drawCharacter(g, LT.Appearance.spec(e.sheetId), e.wx - cx, e.wy - cy - (CH_H - TILE), e.dir,
                          e.moving ? e.phase : 0, { moving: e.moving, alpha: 1 });
   };
+
+  /* A lying pose turned a quarter, for a bed that runs down the room: drawn
+   * on its own small canvas and turned about the bed's middle. */
+  var turnBuf = null;
+  function drawTurned(g, e, cx, cy, ms, popts) {
+    if (typeof document === 'undefined') return false;
+    if (!turnBuf) { turnBuf = document.createElement('canvas'); turnBuf.width = 64; turnBuf.height = 64; }
+    var tb = turnBuf.getContext('2d'); tb.clearRect(0, 0, 64, 64); tb.imageSmoothingEnabled = false;
+    if (LT.ActivityPoses.draw(tb, e.sheetId, e.pose.poseId, 'right', 16, 24, ms, popts) === false) return false;
+    g.save();
+    g.translate(Math.round(e.wx - cx + TILE / 2), Math.round(e.wy - cy + TILE / 2));
+    g.rotate(Math.PI / 2);
+    g.drawImage(turnBuf, -32, -32);
+    g.restore();
+    return true;
+  }
 
   /* The production room: the shared interior painter, with the shared
    * depth-band pass between people so the counter covers whoever is behind it
@@ -372,9 +389,13 @@
       var c = sim.state.characters[e.id], seat = K.isSeated(sim, e);
       var x = e.wx + TILE / 2, y = (seat ? (sim.objectById(c.activity.targetId).y * TILE + 6) : e.wy + TILE - 3) - (e.stackLift || 0);
       spots.push({ id: e.id, x: x, y: y - 10 + (e.stackLift || 0), outside: true });
-      var plan = c.intention && LT.Intentions && LT.Intentions.byId(c.intention.id);
+      /* The hour's plan only for the person followed: on everyone it read as
+       * what they were doing, which it is not (audit 2026-09-24). */
+      var plan = e.id === selectedId && c.intention && LT.Intentions && LT.Intentions.byId(c.intention.id);
       var planned = plan && sim.absMinute() < c.intention.untilAbs;
       label(g, c.name + (planned ? ' - ' + plan.word : ''), x, y - 28, e.id === selectedId ? '#e9b458' : '#e8e2d2');
+      /* A name lifted clear of a neighbour's keeps a thread down to its own head. */
+      if (e.stackLift) { g.fillStyle = 'rgba(233,180,88,0.55)'; g.fillRect(Math.round(x), y - 16, 1, e.stackLift - 4); }
     });
     /* Indoors: one tag per door, the names of whoever is behind it. */
     var byDoor = {};
@@ -469,11 +490,15 @@
         if (bed && bed.location === locId) {
           /* A bed two tiles wide is lain in the middle of, not at its head end. */
           var rowsHere = LT.World.LOCATIONS[locId].rows, wide = rowsHere[bed.y] && rowsHere[bed.y].charAt(bed.x + 1) === 'B';
-          x = bed.x * TILE + (wide ? TILE / 2 : 0); y = bed.y * TILE;
+          var long = !wide && rowsHere[bed.y + 1] && rowsHere[bed.y + 1].charAt(bed.x) === 'B';
+          x = bed.x * TILE + (wide ? TILE / 2 : 0); y = bed.y * TILE + (long ? TILE / 2 : 0);
+          /* A bed that runs down the room is lain along (audit 2026-09-24). */
+          var lying = long ? 'down' : null;
         }
       }
       var booth = pose && pose.poseId === 'seated' && !e.render.walking ? boothSeat(sim, e.character, locId) : null;
       return {
+        lying: (typeof lying !== 'undefined') ? lying : null,
         id: e.character.id, sheetId: LT.Appearance.sheetIdFor(e.character), pose: booth ? { poseId: 'seated', dir: 'down' } : pose,
         /* Someone on a booth sits on its seat, behind its table: sorted just
          * in front of the booth's own line so the table can be drawn over
@@ -543,11 +568,23 @@
   View.prototype.drawBubbles = function (g, people, cx, cy, lift) {
     var B = LT.Bubbles, sim = this.sim, self = this, now = this.clock * 1000, shown = [];
     if (!B) return shown;
+    /* Neighbours' bubbles stack instead of overlapping: whoever is to the
+     * right of someone close has theirs a row higher (audit 2026-09-24). */
+    var placed = [];
+    people.slice().sort(function (a, b) { return a.wx - b.wx || a.wy - b.wy; }).forEach(function (e) {
+      if (e.kind === 'thing' || e.stackLift) return;
+      var h = self.headOf(e), up = 0;
+      while (placed.some(function (p) { return Math.abs(p.x - h.x) < 48 && Math.abs(p.y - (h.y - up)) < 12; })) up += 13;
+      e.bubbleLift = up; placed.push({ x: h.x, y: h.y - up });
+    });
     people.forEach(function (e) {
       if (e.kind === 'thing') return;
       var c = sim.state.characters[e.id], r = self.render[e.id];
       if (!c || !r) return;
-      var head = self.headOf(e), x = head.x - cx, y = head.y - cy - (lift || 0) - (e.stackLift || 0);
+      var head = self.headOf(e), x = head.x - cx, y = head.y - cy - (lift || 0) - (e.stackLift || 0) - (e.bubbleLift || 0);
+      /* Nobody under it, no bubble: someone off the picture is not pinned to its edge. */
+      var W0 = logicalWidth(g), hx = head.x - cx, hy = head.y - cy;
+      if (hx < 0 || hx > W0 || hy < 0 || hy > g.canvas.height) return;
       var rec = c.pending && sim.requests && sim.requests[c.pending.requestId];
       /* Thinking is a question whose answer has not come: one answered and
        * waiting for the next minute (or a paused clock) is not. */

@@ -1,5 +1,5 @@
 {
-  "commit": "406d39b9762f18bafb20e85b1a14b14e3fc5c1e8",
+  "commit": "583fa58ccab9befe7fae1c8e05a6a970fddcd060",
   "seed": 20260918,
   "days": 3,
   "firstDay": 1,
@@ -259,8 +259,8 @@
     },
     "3": {
       "wakingMinutes": 960,
-      "deadMinutes": 56,
-      "liveMinutes": 904,
+      "deadMinutes": 57,
+      "liveMinutes": 903,
       "longestDeadStretch": {
         "minutes": 49,
         "start": "D3 21:41"
@@ -279,9 +279,9 @@
         "COMMITMENT_KEPT": 8,
         "WENT_HUNGRY": 1
       },
-      "decisions": 441,
+      "decisions": 436,
       "turnDecisions": 86,
-      "closeCalls": 69,
+      "closeCalls": 68,
       "distinctActivities": {
         "resident_a": [
           "buy_meal",
@@ -368,13 +368,13 @@
           "park"
         ]
       },
-      "togetherMinutes": 812
+      "togetherMinutes": 813
     }
   },
   "overall": {
     "wakingMinutes": 2880,
-    "deadMinutes": 167,
-    "liveMinutes": 2713,
+    "deadMinutes": 168,
+    "liveMinutes": 2712,
     "longestDeadStretch": {
       "minutes": 49,
       "start": "D3 21:41"
@@ -397,9 +397,9 @@
       "GOAL_MISSED": 1,
       "HELPED_OUT": 1
     },
-    "decisions": 1197,
+    "decisions": 1192,
     "turnDecisions": 169,
-    "closeCalls": 370,
+    "closeCalls": 369,
     "distinctActivities": {
       "resident_a": [
         "accept_offer",
@@ -498,7 +498,7 @@
         "park"
       ]
     },
-    "togetherMinutes": 2363
+    "togetherMinutes": 2364
   },
   "deadStretches": [
     {

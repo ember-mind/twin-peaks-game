@@ -790,6 +790,9 @@
 
   function setupMuteButton() {
     muteBtn = buildMuteButton();
+    /* Su desktop in alto a destra: in basso copriva l'angolo dei dialoghi. */
+    var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+    if (!isTouch) { muteBtn.style.bottom = 'auto'; muteBtn.style.top = '12px'; }
     document.body.appendChild(muteBtn);
   }
 

@@ -146,7 +146,9 @@
       }
 
       var engineState = GAME.Engine && GAME.Engine.state;
-      var gameplay = !!(engineState && engineState.mode === 'play');
+      /* La scocca c'e' dal titolo in poi: prima il quadro restava in alto e
+       * A in un angolo, lontano dal pollice (audit 2026-09-24). */
+      var gameplay = !!(engineState && (engineState.mode === 'play' || engineState.mode === 'title' || engineState.mode === 'intro'));
       if (!gameplay) {
         hidePanel();
         if (stage.__tpPortraitDefaultTop) {
@@ -214,6 +216,13 @@
             (parseInt(compact.style.height, 10) || 50)) / 2)) + 'px');
           setStyle(compact, 'right', 'calc(24px + env(safe-area-inset-right, 0px))');
           setStyle(compact, 'bottom', 'auto');
+        }
+        // Titolo con salvataggio: B (nuova partita) accanto ad A, stessa riga.
+        if (compact === a && visible(b)) {
+          setStyle(b, 'top', (controlTop + Math.floor((PORTRAIT_CONTROL_HEIGHT -
+            (parseInt(b.style.height, 10) || 42)) / 2)) + 'px');
+          setStyle(b, 'right', 'calc(104px + env(safe-area-inset-right, 0px))');
+          setStyle(b, 'bottom', 'auto');
         }
       }
     }

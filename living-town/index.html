@@ -32,6 +32,11 @@
   }
   canvas[hidden] { display: none; }
   #lt-town { max-width: none; cursor: pointer; }
+  /* On a narrow screen the whole town keeps its native size and scrolls
+   * sideways, rather than shrinking to unreadable names (audit 2026-09-24). */
+  .lt-town-scroll { max-width: 100%; overflow-x: auto; }
+  .stage { min-width: 0; }
+  @media (max-width: 700px) { #lt-town { width: 768px; max-width: none; } }
   .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; margin: 0 0 12px; }
   .clock { font: 600 17px/1 var(--mono); color: var(--gold); }
   .place { color: var(--dim); font-size: 14px; }
@@ -166,7 +171,7 @@
       <span class="place" id="lt-place">—</span>
     </div>
     <canvas id="lt-canvas" width="256" height="192"></canvas>
-    <canvas id="lt-town" width="768" height="432" hidden aria-label="The whole town: choose someone to follow"></canvas>
+    <div class="lt-town-scroll"><canvas id="lt-town" width="768" height="432" hidden aria-label="The whole town: choose someone to follow"></canvas></div>
     <div class="replay" id="lt-replay" hidden>
       <span id="lt-replay-text"></span>
       <button class="lt-tab" id="lt-replay-back">Back to now</button>

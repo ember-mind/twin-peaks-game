@@ -64,7 +64,7 @@
         'T.www.444444..T.......5555..ppppp999.T..3333......p.n..T', // 5 Bookhouse 3-high; vicolo e forecourt leggibili
         'T.....444D44..........5D55.E...ppppp....33D3......p....T', // 6 Horne 3-high; porte storiche invariate
         'T.......ppppppppppppppppppppppppppppppVVpppp......p....T', // 7 berlina FBI sul bordo nord della corsia
-        'T.......ppppVVpppppVVppppppppppppppppppppppp......p....T', // 8 auto hotel + ambulanza ospedale
+        'T.......ppppVVpppppppppppVVppppppppppppppppp......p....T', // 8 auto hotel + ambulanza ospedale
         'T....Tn.pppppppppppppppppppppppppppppppppppp......p..,.T', // 9 bordo sud corsia e tre bocche d'accesso
         'T.....B.ppp.T..000.00.pppB.T...T........Tppp.T000.p....T', // 10 pharmacy 3x3, hardware 2x3, newsstand 3x2
         'T.......ppp.T..000.00.ppp..T..TT.......TTppp..000.p....T', // 11 masse davvero diverse, corridoi invariati
@@ -104,7 +104,7 @@
         '4,13': '=', '28,13': '=', '40,13': '=', '52,13': '=',
         '6,16': '=', '10,16': '=', '18,16': '=', '22,16': '=', '44,16': '=',
         '6,22': '.', '15,22': '=', '16,22': '=', '18,22': '.',
-        '38,22': '.', '39,22': '.', '12,8': 'p', '13,8': 'p', '19,8': 'p', '20,8': 'p',
+        '38,22': '.', '39,22': '.', '12,8': 'p', '13,8': 'p', '25,8': 'p', '26,8': 'p',
         '48,22': '.', '50,22': '.', '52,22': '.',
         '48,24': '=', '50,24': '=', '52,24': '=',
         '33,28': 'u', '35,28': '=', '24,29': '.', '34,29': 'u',

@@ -100,7 +100,7 @@ cross('palmer leaf 8,11 -> town', 'palmer', [8, 10], 'down', ['town', 42, 7, 'do
 cross('town -> roadhouse (town-roadhouse)', 'town', [47, 29], 'up', ['roadhouse', 7, 8, 'up']);
 cross('roadhouse leaf 7,9 -> town', 'roadhouse', [7, 8], 'down', ['town', 47, 29, 'down']);
 cross('roadhouse leaf 8,9 -> town', 'roadhouse', [8, 8], 'down', ['town', 47, 29, 'down']);
-cross('town -> woods through the clue gate (town-woods-north)', 'town', [50, 1], 'up', ['woods', 14, 20, 'up']);
+cross('town -> woods through the clue gate (town-woods-north)', 'town', [50, 1], 'up', ['woods', 14, 18, 'up']);   // arrival moved up 2026-09-24 (audit)
 cross('woods -> town (town-woods-north)', 'woods', [14, 20], 'down', ['town', 50, 1, 'down']);
 cross('arrival -> town (arrival-town, one-way)', 'arrival', [4, 7], 'down', ['town', 30, 33, 'up']);
 cross('woods -> redroom (woods-redroom-dream, one-way)', 'woods', [14, 5], 'up', ['redroom', 8, 9, 'up']);

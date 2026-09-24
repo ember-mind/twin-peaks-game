@@ -372,7 +372,9 @@ ok(comp.result === 'accepted' && comp.reason_code === 'SUFFICIENT_RELEVANT_SUPPO
   'ramo complete: accettato, colloquio necessario');
 ok(miss.result === 'rejected' && miss.reason_code === 'NO_CORROBORATION' && miss.retry === true, 'ramo incompleto: NO_CORROBORATION, ripresentabile');
 ok(!miss.effects || !miss.effects.length, 'un rifiuto non scrive stato (nessun atto5 senza accettazione)');
-['P7', 'P8'].forEach(p => {
+/* P7 is never formulated, so its presentation branch was cut (owner's call on the 2026-09-23 audit). */
+ok(!pres.on.P7, 'P7: nessun ramo morto (mai formulata, ramo rimosso)');
+['P8'].forEach(p => {
   ok(pres.on[p] && pres.on[p].result === 'rejected' && pres.on[p].reason_code === 'VALID_BUT_NOT_PROCEDURAL',
     p + ': orientamento, mai base procedurale');
   ok(!!pres.on[p].already_rejected_page, p + ': memoria del rifiuto (ALREADY_REJECTED) dai dati');

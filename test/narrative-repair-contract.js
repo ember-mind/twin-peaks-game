@@ -89,7 +89,7 @@ ok(!/entra e esce/i.test(corpus(D.lucy) + ' ' + M6Source) && /entra ed esce/i.te
 // classico (M8 li' possiede sul diner/roadhouse); il contratto "azione non
 // battuta" per quei nodi non e' verificabile qui (narrative/missions/*.json
 // e' fuori dal perimetro di questa pulizia).
-ok(Data.clues.anello.desc.includes('Niente qui dice di chi sia') && /Una sola occasione/.test(corpus(D.gerard_a2)), 'grammatica corretta nei due errori noti');
+ok(Data.clues.anello.desc.includes('Niente qui dice di chi sia') && /Uno canta fra due mondi/.test(corpus(D.gerard_a2)), 'grammatica corretta nei due errori noti (Gerard: la poesia canonica, una sola versione)');
 
 function checkCond(cond, state) {
   if (/^clues\d+$/.test(cond)) return state.clues.length >= Number(cond.slice(5));

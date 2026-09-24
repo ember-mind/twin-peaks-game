@@ -698,6 +698,15 @@ async function previousFormatIsMigrated() {
     await read.runMinutes(20);
     ok(read.state.events.slice(readFrom).some((e) => e.type === 'ACTIVITY_REACHED' && e.actorId === 'resident_d' && e.data.actionId === 'read_book'), 'and she gets there and reads');
     ok(JSON.parse(walkText).world === 'd7dfa67e' && JSON.parse(readText).world === 'd7dfa67e', 'the old save texts are untouched');
+    /* The second barista's spot moved off the pastry case (98626395 -> this town). A real save: Sanne working from the old spot. */
+    const baristaText = require('node:fs').readFileSync(path.resolve(__dirname, 'fixtures', 'save-town-98626395-second-barista.json'), 'utf8');
+    const baristaOld = JSON.parse(baristaText), sanneOld = baristaOld.state.characters.resident_c;
+    ok(baristaOld.world === '98626395' && sanneOld.location === 'cafe' && sanneOld.pos.x === 5 && sanneOld.pos.y === 2 && /work/.test(sanneOld.activity.actionId),
+       'a genuine save with ' + sanneOld.name + ' working from behind the pastry case');
+    const barista = Save.deserialize(JSON.parse(baristaText)), sanne = barista.state.characters.resident_c;
+    ok(sanne.pos.x === 4 && sanne.pos.y === 2 && barista.objectById('obj_counter').moreAnchors.work_shift[0].x === 4, 'she works from the new spot, and the counter offers it');
+    await barista.runMinutes(30);
+    ok(barista.state.events.some((e) => e.type === 'WORKED' && e.actorId === 'resident_c') || (sanne.activity && /work/.test(sanne.activity.actionId)), 'and goes on working');
     const again = Save.deserialize(JSON.parse(JSON.stringify(Save.serialize(moved))));
     ok(again.state.day === 2 && JSON.parse(JSON.stringify(Save.serialize(moved))).world === LT.World.fingerprint(), 'saved again, it is a save of this town');
   }
