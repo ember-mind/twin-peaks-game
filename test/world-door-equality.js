@@ -70,6 +70,8 @@
   delete expectedBooted.hotel_gn['14,1'];
   expectedBooted.room_315['7,11'].tx = 16;
   expectedBooted.town['9,6'].tx = 9;
+  // approved 2026-09-24 (audit): arriving in the woods two rows up the path, not cut off at the bottom edge
+  expectedBooted.town['50,0'].ty = 18;
   function strip(d) { var o = {}; Object.keys(d).forEach(function (k) { if (k !== 'connectionId') o[k] = d[k]; }); return o; }
   function bytes(d) { return JSON.stringify(strip(d)); }
 
@@ -115,6 +117,7 @@
       } else {
         var expectedClassic = JSON.parse(JSON.stringify(classic));
         if (id === 'town' && key === '9,6') expectedClassic.tx = 9;
+        if (id === 'town' && key === '50,0') expectedClassic.ty = 18;   // woods arrival moved up (audit 2026-09-24)
         assert.equal(bytes(now), JSON.stringify(expectedClassic), id + ' ' + key + ': migrated descriptor equals classic except approved E8 target shift');
         diff.migrated.push('~ ' + id + ' ' + key + ' ' + JSON.stringify(classic) + '  -> ' + migratedKey + ' ' + now.connectionId);
       }

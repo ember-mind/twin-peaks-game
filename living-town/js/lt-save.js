@@ -357,6 +357,28 @@
     return save;
   };
 
+  /* 98626395 -> c0e11a4d: the second place to work behind the café counter
+   * moved from 5,2, which is behind the pastry case (only a hat showed), to
+   * 4,2. The counter's spare work spots are rewritten, and whoever was
+   * working from the old spot, or walking to it, is on the new one. Nothing
+   * else moved. Written against test/fixtures/save-town-98626395-second-barista.json. */
+  var COUNTER_C0E11A4D = { work_shift: [{ x: 4, y: 2, dir: 'down' }], work_extra_shift: [{ x: 4, y: 2, dir: 'down' }] };
+  S.WORLD_MIGRATIONS['98626395'] = function (save) {
+    var state = save.state;
+    (state.objects || []).forEach(function (o) {
+      if (o.id !== 'obj_counter' || !o.moreAnchors) return;
+      Object.keys(COUNTER_C0E11A4D).forEach(function (k) { o.moreAnchors[k] = deepCopy(COUNTER_C0E11A4D[k]); });
+    });
+    Object.keys(state.characters || {}).forEach(function (id) {
+      var c = state.characters[id];
+      if (c.location !== 'cafe') return;
+      if (c.pos.x === 5 && c.pos.y === 2) c.pos = { x: 4, y: 2, dir: c.pos.dir };
+      if (c.walkTarget && c.walkTarget.x === 5 && c.walkTarget.y === 2) c.walkTarget = { x: 4, y: 2, dir: c.walkTarget.dir };
+    });
+    save.world = 'c0e11a4d';
+    return save;
+  };
+
   /* ---------------- serialise ---------------- */
 
   S.serialize = function (sim) {

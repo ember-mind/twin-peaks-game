@@ -47,9 +47,14 @@
   /* A building is lit when someone is in it. */
   K.litPlaces = function (sim) {
     var lit = {};
+    /* The café is lit while it is open, whoever is in it. */
+    var cafe = LT.World.LOCATIONS.cafe, m = sim.state.minute;
+    if (cafe && K.world.places.cafe && m >= cafe.opens && m < cafe.closes) lit.cafe = true;
     sim.actorIds().forEach(function (id) {
       var c = sim.state.characters[id];
       if (c.transit || LT.World.outdoorGrid(c.location)) return;
+      /* A window is lit by someone awake behind it (audit: every window lit at 02:00). */
+      if (c.activity && c.activity.actionId === 'sleep' && c.activity.phase === 'executing') return;
       var p = placeOfLocation(c.location);
       if (p) lit[p] = true;
       if (c.location === 'flat_c' && K.world.places.cafe) lit.cafe = true;
@@ -100,10 +105,18 @@
 
   /* One person as an engine actor. `drawPerson(g, e, x, y)` draws them with
    * the tile's top-left at (x, y) — the production renderer's convention. */
+  /* Cells the map opens over the wall and the water (the jetty and its
+   * steps): whoever stands there stands on the boards, drawn over them
+   * (audit 2026-09-24: a reader on the jetty was not drawn at all). */
+  function onBoards(e) {
+    var tx = Math.round(e.wx / TILE), ty = Math.round(e.wy / TILE);
+    return (K.map.walkable || []).some(function (c) { return c[0] === tx && c[1] === ty; });
+  }
+
   function actor(sim, e, lit, drawPerson) {
     var seat = seatFor(sim, e);
     var fx = e.wx + TILE / 2, fy = e.wy + TILE - 3;
-    return { sortY: seat ? seat.sortY : fy, draw: function (g, camX, camY, l) {
+    return { sortY: seat ? seat.sortY : fy + (onBoards(e) ? 3 * TILE : 0), draw: function (g, camX, camY, l) {
       var sb = buffer(), V = EMBER.WorldView, view = K.view;
       var px = seat ? seat.x : fx, py = seat ? seat.y : fy;
       var sx = px - camX, sy = py - camY;

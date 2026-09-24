@@ -71,8 +71,9 @@ const checks = {
   production_does_not_load_three: !/three\.min\.js/.test(index) && !/render3d\.js/.test(index),
   engine_boots_without_webgl: /GAME\.Engine\.init\(cv, null\)/.test(main),
   fixed_pixel_scaling: /image-rendering: pixelated !important/.test(index),
-  integer_viewport_scaling: /Math\.floor\(fit\)/.test(main),
-  integer_viewport_origin: /Math\.floor\(\(viewport\.width - stageWidth\) \/ 2\)/.test(main) &&
+  /* Whole device pixels per native pixel (even pixels on high-density phones too). */
+  integer_viewport_scaling: /Math\.floor\(fit \* dpr\) \/ dpr/.test(main),
+  integer_viewport_origin: /Math\.floor\(\(viewport\.width - stageWidth\) \/ 2 \* dpr\) \/ dpr/.test(main) &&
     /stage\.style\.transform = 'none'/.test(main),
   retro_overrides_tiles: /Spr\.drawTile = function/.test(retro),
   retro_overrides_characters: /Spr\.drawChar = function/.test(retro),

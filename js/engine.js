@@ -1443,10 +1443,10 @@
            UW / 2, VH - 26, '#f5efcf', 'bold 8px monospace', 'center');
     }
     /* La legenda dice quello che i tasti fanno qui, sul titolo. */
-    var hint;
-    if (touch) hint = save ? 'A CONTINUA  B NUOVA PARTITA' : 'A INIZIA';
-    else hint = save ? 'INVIO CONTINUA  N NUOVA PARTITA' : 'INVIO INIZIA';
-    text(hint, UW / 2, VH - 10, '#9abf5a', '7px monospace', 'center');
+    /* Un solo invito a iniziare (quello lampeggiante); la riga sotto dice
+     * soltanto l'altro tasto, quando c'e' una partita da sostituire. */
+    var hint = save ? (touch ? 'B NUOVA PARTITA' : 'N NUOVA PARTITA') : '';
+    if (hint) text(hint, UW / 2, VH - 10, '#9abf5a', '7px monospace', 'center');
   }
 
   function introLayout() {

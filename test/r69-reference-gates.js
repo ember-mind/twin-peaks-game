@@ -79,7 +79,7 @@ const checks = {
     return tile === 'p' && !global.GAME.maps.isSolid(tile);
   }).every(Boolean),
   bitmap_only_portraits: !/fillText|drawImage|measureText/.test(portraits),
-  integer_scale_above_one: /Math\.floor\(fit\)/.test(read('js/main.js')),
+  integer_scale_above_one: /Math\.floor\(fit \* dpr\) \/ dpr/.test(read('js/main.js')),   // whole device pixels
   hard_pixel_edges: /image-rendering: pixelated !important/.test(index),
   touch_controls_outside_canvas: /left: 'calc\(16px \+ env\(safe-area-inset-left/.test(touch) && /right: 20, bottom: 90/.test(touch)
 };

@@ -102,8 +102,10 @@
     var mine = null, second = null;
     list.forEach(function (o) { if (o.id === decision.selectedId) mine = o; });
     if (!mine) mine = { id: decision.selectedId, actionId: chosen.actionId, targetId: chosen.targetId, weight: 0, chance: null };
+    var mineLabel = B.short(sim, mine.actionId, mine.targetId);
     list.forEach(function (o) {
       if (o === mine || (o.actionId === mine.actionId && o.targetId === mine.targetId)) return;
+      if (B.short(sim, o.actionId, o.targetId) === mineLabel) return;   // "work / work" says nothing
       if (QUIET[o.actionId] && o.actionId !== 'wait') return;
       if (!second || o.weight > second.weight) second = o;
     });
