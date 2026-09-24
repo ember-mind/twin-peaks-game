@@ -474,7 +474,7 @@
         { name: 'GERARD', text: 'Salve, agente. Mi chiamo Gerard. Vendo scarpe, di porta in porta.' },
         { name: 'GERARD', text: 'Le scarpe raccontano molto di una persona, sa? Dove va, da dove viene.' },
         { name: 'GERARD', text: '...Attraverso l\'oscurità del futuro passato... il mago desidera vedere.' },
-        { name: 'GERARD', text: 'Una sola occasione tra questo mondo e l\'altro: FUOCO CAMMINA CON ME.' },
+        { name: 'GERARD', text: 'Uno canta fra due mondi... FUOCO CAMMINA CON ME.' },
         { name: 'COOPER', text: 'Signor Gerard, la poesia resta parola sua finché non trova un fatto. La ripeta lentamente.' }
       ],
       give: ['poesia_fuoco']

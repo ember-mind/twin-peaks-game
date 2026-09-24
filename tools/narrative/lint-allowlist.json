@@ -89,13 +89,5 @@
       "reason": "three mutually exclusive tactic branches (m6_interrogation_prova/pressione/falsa), each gated on a distinct m6_tactic value; only one is ever reachable per playthrough."
     }
   ],
-  "known_open": [
-    {
-      "key": "P7.formulation.status",
-      "check": "read-before-write",
-      "reason": "M9's m9_present_truman node (narrative/missions/M9.json:517) has a presentation.on.P7 branch, but no mission node anywhere formulates P7 (no {proposition: \"P7\", to: \"formulated\"} effect exists); the branch is currently dead code.",
-      "owner_milestone": "M9 pass: formulate P7 or cut the dead presentation branch",
-      "found": "2026-09-10, narrative-lint v0.1 first run"
-    }
-  ]
+  "known_open": []
 }

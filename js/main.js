@@ -247,16 +247,21 @@
         // diventare largo 2px in una colonna e 3px nella successiva.
         var gameHeight = touch && portrait ? viewport.height * 0.54 : viewport.height;
         var fit = Math.min(viewport.width / 256, gameHeight / 192);
-        var scale = fit >= 1 ? Math.max(1, Math.floor(fit)) : fit;
+        /* Whole DEVICE pixels per native pixel: on a 3x phone a native pixel
+         * can be 4 screen pixels (1.33 CSS) and stay even, instead of the
+         * game staying at 256 CSS px on a 390 px screen (audit 2026-09-23).
+         * On a 1x screen this is the whole-CSS-pixel scale it always was. */
+        var dpr = Math.max(1, window.devicePixelRatio || 1);
+        var scale = fit >= 1 ? Math.max(1, Math.floor(fit * dpr) / dpr) : fit;
         // Same native OBJ on desktop and mobile. Fractional actor transforms
         // create uneven pixel widths and make screenshots diverge by viewport.
         var actorScale = 1;
-        var stageWidth = Math.floor(256 * scale);
-        var stageHeight = Math.floor(192 * scale);
+        var stageWidth = Math.round(256 * scale * dpr) / dpr;
+        var stageHeight = Math.round(192 * scale * dpr) / dpr;
         stage.style.width = stageWidth + 'px';
         stage.style.height = stageHeight + 'px';
         stage.style.setProperty('--native-scale', scale);
-        stage.style.left = Math.floor((viewport.width - stageWidth) / 2) + 'px';
+        stage.style.left = Math.floor((viewport.width - stageWidth) / 2 * dpr) / dpr + 'px';
         stage.style.top = touch && portrait
           ? Math.max(0, Math.floor((gameHeight - stageHeight) / 2)) + 'px'
           : Math.floor((viewport.height - stageHeight) / 2) + 'px';

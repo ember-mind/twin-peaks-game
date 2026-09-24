@@ -825,7 +825,7 @@
       },
       {
        "name": "GERARD",
-       "text": "Attraverso il buio del futuro passato... il mago desidera vedere.",
+       "text": "Attraverso l'oscurità del futuro passato... il mago desidera vedere.",
        "id": "m4.b3.gerard_a2.p04",
        "mode": "dialogue",
        "speaker_id": "gerard",
@@ -6696,26 +6696,6 @@
         ],
         "already_rejected_page": {
          "id": "m9.b2.p8.already_rejected",
-         "mode": "dialogue",
-         "speaker_id": "truman",
-         "display_name": "TRUMAN",
-         "text": "Me l'hai già mostrato. Non è cambiato niente."
-        }
-       },
-       "P7": {
-        "result": "rejected",
-        "reason_code": "VALID_BUT_NOT_PROCEDURAL",
-        "pages": [
-         {
-          "id": "m9.b2.p7.p01",
-          "mode": "dialogue",
-          "speaker_id": "truman",
-          "display_name": "TRUMAN",
-          "text": "Lo tengo a mente. Ma non convoco un uomo per una teoria."
-         }
-        ],
-        "already_rejected_page": {
-         "id": "m9.b2.p7.already_rejected",
          "mode": "dialogue",
          "speaker_id": "truman",
          "display_name": "TRUMAN",

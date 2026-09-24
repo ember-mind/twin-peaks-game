@@ -245,6 +245,14 @@ const SOLID = {
   L: 1, P: 1, B: 1, F: 1, A: 1, H: 1, E: 1, n: 1, q: 1, // arredo urbano
   G: 1 // lapide del cimitero
 };
+// erba chiusa fra gli alberi, che nessun sentiero raggiunge: resta bosco,
+// non terreno calpestabile (audit 2026-09-23: celle isolate 11,20 e 17,20)
+{
+  const seen = bfs(wd, 14, 20);
+  for (let y = 0; y < WH; y++) for (let x = 0; x < wd[0].length; x++) {
+    if (!SOLID[wd[y][x]] && !seen.has(x + ',' + y)) wd[y][x] = 'T';
+  }
+}
 function bfs(g, sx, sy) {
   const h = g.length, w = g[0].length;
   const seen = new Set([sx + ',' + sy]);

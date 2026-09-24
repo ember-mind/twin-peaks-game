@@ -59,7 +59,7 @@
         'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTXTTTTT', // 0  X = sentiero bosco
         'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTpTT..T', // 1 ferrovia libera dentro il landmark
         'Twwwww.......T..............777pp...B........T....p....T', // 2 bacino reale sotto cascata
-        'T.wwww..4444......T.555555..777pp999......T.......p....T', // 3 ansa del bacino + coppia street
+        'TTwwww..4444......T.555555..777pp999......T.......p....T', // 3 ansa del bacino + coppia street
         'Twwww.444444........555555..777pp999....3333.T....p.,..T', // 4 bacino profondo, hotel 6-wide, ospedale a L
         'T.www.444444..T.......5555..ppppp999.T..3333......p.n..T', // 5 Bookhouse 3-high; vicolo e forecourt leggibili
         'T.....444D44..........5D55.E...ppppp....33D3......p....T', // 6 Horne 3-high; porte storiche invariate
@@ -270,7 +270,7 @@
         'TTTTTTTTTTTTTpppTTTTTTTTTTTT', // 17
         'TTTTTTTTTTTTgpppTTTTTTTTTTTT', // 18
         'TTTTTTTTTTTTgpppTTTTTTTTTTTT', // 19
-        'TTTTTTTTTTTgTpppngTTTTTTTTTT', // 20 (spawn 14,20), cespuglio al sentiero
+        'TTTTTTTTTTTTTpppnTTTTTTTTTTT', // 20 (spawn 14,20), cespuglio al sentiero
         'TTTTTTTTTTTTTTpTTTTTTTTTTTTT'  // 21 uscita sud -> città
       ],
       doors: {}

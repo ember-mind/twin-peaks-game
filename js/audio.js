@@ -737,18 +737,28 @@
     if (e.code === 'KeyM') toggleMute();
   });
 
-  /* ================== pulsante mute su touch (niente tasto M sul telefono) ================== */
+  /* ================== pulsante audio, su touch e su desktop ================== */
+  /* Un vero <button>: raggiungibile da tastiera e letto dagli screen reader,
+   * con lo stato premuto; su desktop ricorda il tasto M (audit 2026-09-23). */
 
   var muteBtn = null;
 
   function updateMuteButton() {
-    if (muteBtn) muteBtn.textContent = muted ? '✕' : '♪';
+    if (!muteBtn) return;
+    muteBtn.textContent = muted ? '✕' : '♪';
+    muteBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+    muteBtn.setAttribute('aria-label', muted ? 'Riattiva audio' : 'Disattiva audio');
   }
 
   function buildMuteButton() {
-    var btn = document.createElement('div');
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.title = 'Audio (M)';
     btn.textContent = muted ? '✕' : '♪';
+    btn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+    btn.setAttribute('aria-label', muted ? 'Riattiva audio' : 'Disattiva audio');
     var style = btn.style;
+    style.margin = '0'; style.padding = '0'; style.lineHeight = '1'; style.appearance = 'none'; style.cursor = 'pointer';
     style.position = 'fixed';
     style.right = '12px';
     style.bottom = '12px';
@@ -770,13 +780,15 @@
     style.webkitUserSelect = 'none';
     style.webkitTouchCallout = 'none';
     btn.addEventListener('touchstart', function (e) { e.preventDefault(); toggleMute(); }, { passive: false });
+    /* Mouse e tastiera: commuta, poi restituisce i tasti al gioco (Invio è il
+     * tasto A e non deve continuare a commutare l'audio). */
+    btn.addEventListener('click', function () { toggleMute(); btn.blur(); });
+    btn.addEventListener('keydown', function (e) { e.stopPropagation(); });
     btn.addEventListener('contextmenu', function (e) { e.preventDefault(); });
     return btn;
   }
 
   function setupMuteButton() {
-    var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-    if (!isTouch) return; // su desktop basta il tasto M
     muteBtn = buildMuteButton();
     document.body.appendChild(muteBtn);
   }
