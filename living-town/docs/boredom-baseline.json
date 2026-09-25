@@ -1,5 +1,5 @@
 {
-  "commit": "583fa58ccab9befe7fae1c8e05a6a970fddcd060",
+  "commit": "0050148f1764fcc25acf62625e406edf3d096aba",
   "seed": 20260918,
   "days": 3,
   "firstDay": 1,
@@ -35,11 +35,11 @@
   "perDay": {
     "1": {
       "wakingMinutes": 960,
-      "deadMinutes": 90,
-      "liveMinutes": 870,
+      "deadMinutes": 92,
+      "liveMinutes": 868,
       "longestDeadStretch": {
-        "minutes": 47,
-        "start": "D1 21:43"
+        "minutes": 49,
+        "start": "D1 21:41"
       },
       "beats": 12,
       "beatsByType": {
@@ -94,26 +94,27 @@
     },
     "2": {
       "wakingMinutes": 960,
-      "deadMinutes": 87,
-      "liveMinutes": 873,
+      "deadMinutes": 76,
+      "liveMinutes": 884,
       "longestDeadStretch": {
-        "minutes": 54,
-        "start": "D2 21:36"
+        "minutes": 49,
+        "start": "D2 21:41"
       },
-      "beats": 18,
+      "beats": 17,
       "beatsByType": {
         "FOOD_PARCEL_OPENED": 1,
-        "ACTIVITY_FAILED": 6,
+        "ACTIVITY_FAILED": 4,
         "TALK_WOUND_DOWN": 1,
         "TALKED": 3,
         "GOAL_REACHED": 2,
+        "TALK_UNANSWERED": 1,
         "MEAL_INVITED": 1,
         "MEAL_ACCEPTED": 1,
         "COMMITMENT_KEPT": 3
       },
-      "decisions": 148,
+      "decisions": 146,
       "turnDecisions": 11,
-      "closeCalls": 40,
+      "closeCalls": 36,
       "distinctActivities": {
         "resident_a": [
           "buy_meal",
@@ -134,7 +135,6 @@
           "buy_meal",
           "greet",
           "invite_to_meal",
-          "join_conversation",
           "sleep",
           "talk_with",
           "travel",
@@ -153,28 +153,31 @@
           "park"
         ]
       },
-      "togetherMinutes": 594
+      "togetherMinutes": 613
     },
     "3": {
       "wakingMinutes": 960,
-      "deadMinutes": 109,
-      "liveMinutes": 851,
+      "deadMinutes": 68,
+      "liveMinutes": 892,
       "longestDeadStretch": {
         "minutes": 51,
-        "start": "D3 19:05"
+        "start": "D3 21:39"
       },
-      "beats": 11,
+      "beats": 14,
       "beatsByType": {
+        "TALK_UNANSWERED": 1,
+        "ACTIVITY_FAILED": 1,
         "MEAL_INVITED": 2,
         "MEAL_DECLINED": 1,
+        "TALK_WOUND_DOWN": 1,
         "TALKED": 3,
         "COMMITMENT_KEPT": 3,
         "MEAL_ACCEPTED": 1,
         "GOAL_REACHED": 1
       },
-      "decisions": 145,
-      "turnDecisions": 12,
-      "closeCalls": 23,
+      "decisions": 143,
+      "turnDecisions": 11,
+      "closeCalls": 29,
       "distinctActivities": {
         "resident_a": [
           "buy_meal",
@@ -186,7 +189,6 @@
           "sleep",
           "talk_with",
           "travel",
-          "wait",
           "wash_and_dress",
           "work_shift"
         ],
@@ -213,18 +215,18 @@
           "park"
         ]
       },
-      "togetherMinutes": 680
+      "togetherMinutes": 608
     }
   },
   "overall": {
     "wakingMinutes": 2880,
-    "deadMinutes": 286,
-    "liveMinutes": 2594,
+    "deadMinutes": 236,
+    "liveMinutes": 2644,
     "longestDeadStretch": {
-      "minutes": 54,
-      "start": "D2 21:36"
+      "minutes": 51,
+      "start": "D3 21:39"
     },
-    "beats": 41,
+    "beats": 43,
     "beatsByType": {
       "INTERVENTION_APPLIED": 3,
       "BOOK_READ": 1,
@@ -233,15 +235,16 @@
       "TALKED": 7,
       "GOAL_REACHED": 4,
       "FOOD_PARCEL_OPENED": 1,
-      "ACTIVITY_FAILED": 6,
-      "TALK_WOUND_DOWN": 1,
+      "ACTIVITY_FAILED": 5,
+      "TALK_WOUND_DOWN": 2,
+      "TALK_UNANSWERED": 2,
       "MEAL_INVITED": 3,
       "MEAL_ACCEPTED": 2,
       "MEAL_DECLINED": 1
     },
-    "decisions": 392,
-    "turnDecisions": 27,
-    "closeCalls": 101,
+    "decisions": 388,
+    "turnDecisions": 26,
+    "closeCalls": 103,
     "distinctActivities": {
       "resident_a": [
         "accept_offer",
@@ -287,38 +290,24 @@
         "park"
       ]
     },
-    "togetherMinutes": 1310
+    "togetherMinutes": 1257
   },
   "deadStretches": [
     {
-      "start": "D2 21:36",
-      "minutes": 54,
-      "doing": {
-        "resident_a": [
-          "sleep @flat_a"
-        ],
-        "resident_b": [
-          "sleep @flat_b"
-        ]
-      }
-    },
-    {
-      "start": "D3 19:05",
+      "start": "D3 21:39",
       "minutes": 51,
       "doing": {
         "resident_a": [
-          "idle @cafe",
-          "wait @cafe"
+          "sleep @flat_a"
         ],
         "resident_b": [
-          "wait @cafe",
-          "idle @cafe"
+          "sleep @flat_b"
         ]
       }
     },
     {
-      "start": "D1 21:43",
-      "minutes": 47,
+      "start": "D1 21:41",
+      "minutes": 49,
       "doing": {
         "resident_a": [
           "sleep @flat_a"
@@ -329,8 +318,8 @@
       }
     },
     {
-      "start": "D3 21:50",
-      "minutes": 40,
+      "start": "D2 21:41",
+      "minutes": 49,
       "doing": {
         "resident_a": [
           "sleep @flat_a"
@@ -351,6 +340,19 @@
         "resident_b": [
           "wait @park",
           "idle @park"
+        ]
+      }
+    },
+    {
+      "start": "D1 06:30",
+      "minutes": 9,
+      "doing": {
+        "resident_a": [
+          "sleep @flat_a",
+          "idle @flat_a"
+        ],
+        "resident_b": [
+          "sleep @flat_b"
         ]
       }
     }

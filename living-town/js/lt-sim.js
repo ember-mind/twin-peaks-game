@@ -393,6 +393,31 @@
     this.touch();
   };
 
+  /* Where someone with nothing in hand stands in this room: the nearest of
+   * its `linger` cells nobody is on or heading for. Null when the room has
+   * none, or they already stand on one. Fixed order, so the same every time. */
+  Sim.prototype.lingerCell = function (actor) {
+    var loc = W.LOCATIONS[actor.location], self = this;
+    if (!loc || !loc.linger || !loc.linger.length) return null;
+    if (loc.linger.some(function (c) { return c[0] === actor.pos.x && c[1] === actor.pos.y; })) return null;
+    /* Only from where standing is in the way: the doorway (within a step of
+     * where one comes in) or right in front of a piece of furniture. Anyone
+     * else stays where they are, next to whoever they are with. */
+    var p = actor.pos, at = loc.spawn || loc.exit;
+    var byDoor = at && Math.abs(p.x - at.x) + Math.abs(p.y - at.y) <= 1;
+    var above = (loc.rows[p.y - 1] || '').charAt(p.x);
+    var infront = above && above !== '#' && W.isSolid(above);
+    if (!byDoor && !infront) return null;
+    var best = null, bestLen = Infinity;
+    loc.linger.forEach(function (c) {
+      var cell = { x: c[0], y: c[1] };
+      if (self.spotTaken(actor, cell) || self.standingOn(actor, cell)) return;
+      var len = self.routeLength(loc, actor.pos, cell);
+      if (len >= 0 && len < bestLen) { bestLen = len; best = cell; }
+    });
+    return best;
+  };
+
   /* The nearest floor cell to `from` that nobody is standing on: the cell
    * itself if it is free. Breadth-first, in a fixed order, so it is the same
    * cell every time. */
@@ -1283,6 +1308,9 @@
       source: source, requestId: requestId || null
     };
     actor.walkTarget = here ? null : spot.at;
+    /* Waiting is done where people wait: not in the doorway, not pressed
+     * against the furniture (a room's `linger` cells). */
+    if (candidate.actionId === 'wait') { var idle = this.lingerCell(actor); if (idle) actor.walkTarget = idle; }
     this.claim(actor, def, target);
     this.touch();
     this.emit('ACTIVITY_STARTED', {

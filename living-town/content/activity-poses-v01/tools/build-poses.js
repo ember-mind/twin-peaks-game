@@ -34,7 +34,7 @@ const JSON_OUT = path.join(DIR, 'assets', 'activity-poses-v01.frames.json');
 const CELL = AP.CELL;
 /* Square because the production PNG writer writes squares; 14 columns of
  * poses by 12 looks is 336x288, so two cell rows at the bottom stay empty. */
-const ATLAS = 336;
+const ATLAS = 360;   // 15 columns of poses by 12 looks (360x288); was 336 before the guitar
 
 const problems = [];
 function bad(message) { problems.push(message); }

@@ -32,7 +32,7 @@
 
 /* Paper: the open book and the wiped slab. Cool white over a grey shade, so
  * the object never disappears into a cream shirt the way a warm white would. */
-const PAPER = { N: '#F2EFE4', n: '#93A0A2' };
+const PAPER = { N: '#F2EFE4', n: '#93A0A2', G: '#B9763B', g: '#6A4127' };
 
 const splice = (row, at, text) => row.slice(0, at) + text + row.slice(at + text.length);
 
@@ -128,6 +128,39 @@ function readingBody(body, frame) {
     ? ['.OSONNNnNNNOSO.', '.OsONNNnNNNOsO.', '..OONNNnNNNOO..']
     : ['.OSONNnOnNNOSO.', '.OsONNnOnNNOsO.', '..OONNnOnNNOO..'];
   return top.concat(['.OJOOOOOOOOOJO.'], pages, ['..OOOOOOOOOOO..'], legs);
+}
+
+/* ---- guitar ----------------------------------------------------------- */
+/* STANDING, the reading body's shoulders and legs, a guitar held across the
+ * hips: a round wooden body with its sound hole low on the left, the neck
+ * rising to the right past the shoulder and out of the silhouette (pad 4), one
+ * hand on the neck and the strumming hand moving across the strings. */
+function guitarBody(body, frame) {
+  const top = body === 'skirt'
+    ? ['...OsWTWTWsO...', '..OJJWWWWWJJO..', '.OJjJWwWwWJjJO.', '.OJjJWWWWWJjJO.', '.OJjJWwWwWJjJO.']
+    : ['...OsWWTWWsO...', '..OJJWWTWWJJO..', '.OJjJJWTWJJjJO.', '.OJjJJWTWJJjJO.', '.OJjJJWwWJJjJO.'];
+  const hips = body === 'skirt'
+    ? ['.OSJJJWWWJJJSO.', '..OPPPPPPPPPO..', '..OPPPPPPPPPO..']
+    : ['.OSJJJWWWJJJSO.', '..OPPPPPPPPPO..', '..OPPpPPPpPPO..'];
+  const legs = body === 'skirt'
+    ? ['..OPPPPPPPPPO..', '...OOSSOSSOO...', '....OBBOBBO....']
+    : ['...OPPPOPPPO...', '...ObBOObBO....', '...OBBO.OBBO...'];
+  let rows = pad4(top.concat(hips, legs));
+  const put = (r, c, text) => { rows[r] = splice(rows[r], c, text); };
+  /* the neck, rising to the right, with the fretting hand on it */
+  put(0, 19, 'OgO'); put(1, 18, 'OgO'); put(1, 21, '.');
+  put(2, 16, 'OgO'); put(2, 19, 'S');
+  put(3, 14, 'OgO');
+  /* the body across the hips, sound hole low on the left */
+  put(3, 7, 'OGGGO');
+  put(4, 6, 'OGGGGGgO');
+  put(5, 5, 'OGGOOGGGgO');
+  put(6, 5, 'OGGOOGGGgO');
+  put(7, 6, 'OGGGGGgO');
+  put(8, 7, 'OgggO');
+  /* the strumming hand, over the strings, up and down */
+  put(frame === 0 ? 5 : 6, 12, 'S');
+  return rows;
 }
 
 /* ---- work_counter ------------------------------------------------------ */
@@ -257,7 +290,8 @@ const APRON = {
   'seated/right': lap([17, 18], 4, 8),
   'reading/down': [],
   'unpacking/down': [],
-  'sleeping/right': []
+  'sleeping/right': [],
+  'guitar/down': []
 };
 
 /* The art of one cell: the head matrix it stacks on (null = the matrix stands
@@ -284,6 +318,9 @@ function art(poseId, dir, frame) {
     case 'talking/down':
       return { head: 'down', overlayDir: 'down', pad: 4, blankTop: 0,
         body: { jacket: talkingDown('jacket', frame), skirt: talkingDown('skirt', frame) } };
+    case 'guitar/down':
+      return { head: 'down', overlayDir: 'down', pad: 4, blankTop: 0,
+        body: { jacket: guitarBody('jacket', frame), skirt: guitarBody('skirt', frame) } };
     case 'talking/right':
       return { head: 'right', overlayDir: 'right', pad: 4, blankTop: 0,
         body: { jacket: talkingRight('jacket', frame), skirt: talkingRight('skirt', frame) } };

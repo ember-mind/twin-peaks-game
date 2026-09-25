@@ -404,8 +404,12 @@
       if (W.outdoorGrid(c.location) || c.transit) return;
       var d = W.STREET_PORTALS[c.location];
       if (!d) return;
-      var k = d.x + ',' + d.y;
-      (byDoor[k] = byDoor[k] || { x: d.x * TILE + TILE / 2, y: d.y * TILE - 20, ids: [] }).ids.push(id);
+      /* The café is named over its own front, not over the flat door it
+       * shares a doorstep with (audit 2026-09-24). */
+      var front = c.location === 'cafe' && K.world.places.cafe && K.world.places.cafe.object;
+      var k = front ? 'cafe' : d.x + ',' + d.y;
+      var at = front ? { x: front.px + Math.round(front.kit.w / 2), y: d.y * TILE - 34 } : { x: d.x * TILE + TILE / 2, y: d.y * TILE - 20 };
+      (byDoor[k] = byDoor[k] || { x: at.x, y: at.y, ids: [] }).ids.push(id);
     });
     Object.keys(byDoor).forEach(function (k) {
       var door = byDoor[k], names = door.ids.map(function (id) { return sim.state.characters[id].name; });

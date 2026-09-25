@@ -70,8 +70,8 @@
    * still walking over walks. Working the counter and opening a parcel have
    * no pose yet — the ones drawn did not read to a cold viewer. */
   var POSE = { sleep: 'sleeping', read_book: 'reading', sit_and_rest: 'seated', take_break: 'seated',
-               talk_with: 'talking', join_conversation: 'talking' };
-  var POSE_DIRS = { sleeping: ['right', 'left'], reading: ['down'], seated: ['down', 'right', 'left'], talking: ['down', 'right', 'left'] };
+               talk_with: 'talking', join_conversation: 'talking', practise_guitar: 'guitar' };
+  var POSE_DIRS = { sleeping: ['right', 'left'], reading: ['down'], seated: ['down', 'right', 'left'], talking: ['down', 'right', 'left'], guitar: ['down'] };
   A.poseFor = function (character) {
     var act = character.activity;
     if (!act || act.phase !== 'executing' || character.transit || character.walkTarget) return null;

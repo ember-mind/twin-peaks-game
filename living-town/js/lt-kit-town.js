@@ -93,14 +93,28 @@
 
   /* Where someone sitting on a kit bench is drawn: on the seat above the
    * cell they sat down from, sorted where their feet are. Null when not seated. */
+  /* The kit bench at a cell, if one stands there. */
+  function benchAt(x, y) {
+    var hit = null;
+    (K.world ? K.world.objects : []).forEach(function (o) {
+      if (o.kit.kind !== 'bench') return;
+      (o.kit.footprint || []).forEach(function (f) { if (o.tx + f[0] === x && o.ty + f[1] === y) hit = o; });
+    });
+    return hit;
+  }
+
   function seatFor(sim, e) {
-    if (!e.pose || e.pose.poseId !== 'seated' || e.moving) return null;
+    if (!e.pose || e.moving || (e.pose.poseId !== 'seated' && e.pose.poseId !== 'reading')) return null;
     var act = sim.state.characters[e.id].activity, obj = act && act.targetId && sim.objectById(act.targetId);
     if (!obj || !LT.World.outdoorGrid(obj.location)) return null;
-    /* The kit bench's two seats, the one at the end they sat down from; sorted
-     * in front of the bench, not behind its backrest. */
-    var right = Math.round(e.wx / TILE) > obj.x;
-    return { x: obj.x * TILE + TILE + (right ? 17 : 0), y: obj.y * TILE + 6, sortY: (obj.y + 1) * TILE + TILE - 3 };
+    /* Whatever they are using lies on a kit bench (the bench itself, or a
+     * book left on it): they sit on it, at the end they came to, sorted in
+     * front of the bench, not behind its backrest. A reader used to stand
+     * beside the bench (audit 2026-09-24). */
+    var bench = benchAt(obj.x, obj.y);
+    if (!bench) return null;
+    var right = Math.round(e.wx / TILE) > bench.tx;
+    return { x: bench.tx * TILE + TILE + (right ? 17 : 0), y: bench.ty * TILE + 6, sortY: (bench.ty + 1) * TILE + TILE - 3 };
   }
 
   /* One person as an engine actor. `drawPerson(g, e, x, y)` draws them with

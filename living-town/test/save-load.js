@@ -707,6 +707,14 @@ async function previousFormatIsMigrated() {
     ok(sanne.pos.x === 4 && sanne.pos.y === 2 && barista.objectById('obj_counter').moreAnchors.work_shift[0].x === 4, 'she works from the new spot, and the counter offers it');
     await barista.runMinutes(30);
     ok(barista.state.events.some((e) => e.type === 'WORKED' && e.actorId === 'resident_c') || (sanne.activity && /work/.test(sanne.activity.actionId)), 'and goes on working');
+    /* The attic's kitchen is cooked at from beside it (c0e11a4d -> this town). A real save: Mira cooking in front of it. */
+    const atticText = require('node:fs').readFileSync(path.resolve(__dirname, 'fixtures', 'save-town-c0e11a4d-cooking-in-the-attic.json'), 'utf8');
+    const atticOld = JSON.parse(atticText), miraOld = atticOld.state.characters.resident_e;
+    ok(atticOld.world === 'c0e11a4d' && miraOld.pos.x === 6 && miraOld.pos.y === 2 && miraOld.activity.actionId === 'eat_at_home', 'a genuine save with ' + miraOld.name + ' cooking in front of the counter');
+    const attic = Save.deserialize(JSON.parse(atticText)), mira = attic.state.characters.resident_e;
+    ok(mira.pos.x === 5 && mira.pos.y === 2 && attic.objectById('obj_kitchen_e').anchors.eat_at_home.x === 5, 'she cooks from beside it now');
+    await attic.runMinutes(30);
+    ok(attic.state.events.some((e) => e.type === 'ATE' && e.actorId === 'resident_e'), 'and eats what she cooked');
     const again = Save.deserialize(JSON.parse(JSON.stringify(Save.serialize(moved))));
     ok(again.state.day === 2 && JSON.parse(JSON.stringify(Save.serialize(moved))).world === LT.World.fingerprint(), 'saved again, it is a save of this town');
   }
