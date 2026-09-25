@@ -102,8 +102,8 @@ ok('a looping pose is a pure function of t', () => {
 
 ok('the committed sheet is on disk and is the size the runtime expects', () => {
   const png = fs.readFileSync(path.join(DIR, 'assets', 'activity-poses-v01.png'));
-  assert.strictEqual(png.readUInt32BE(16), 336);
-  assert.strictEqual(png.readUInt32BE(20), 336);
+  assert.strictEqual(png.readUInt32BE(16), 360);   // 15 pose columns since the guitar
+  assert.strictEqual(png.readUInt32BE(20), 360);
   const index = JSON.parse(fs.readFileSync(path.join(DIR, 'assets', 'activity-poses-v01.frames.json'), 'utf8'));
   assert.strictEqual(index.frames.length, AP.ORDER.length);
   assert.strictEqual(index.rows.length, A.ORDER.length);

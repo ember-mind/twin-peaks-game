@@ -16,7 +16,7 @@
 
   AP.VERSION = 'activity-poses-v01';
   AP.CELL = 24;          /* the production 24px actor cell, unchanged */
-  AP.COLUMNS = 13;       /* cells per sheetId; must equal the frame count below */
+  AP.COLUMNS = 15;       /* cells per sheetId; must equal the frame count below */
 
   /* pivot/box are inside the 24x24 cell: `box` is what the art is allowed to
    * cover, `pivot` is the cell pixel that lands on the caller's (x, y) + the
@@ -52,6 +52,11 @@
       id: 'talking', dirs: ['down', 'right'], frames: 2, frameMs: 430,
       pivot: [12, 24], box: [24, 24], shadow: true,
       reads: 'standing, one forearm lifting and falling clear of the silhouette'
+    },
+    guitar: {
+      id: 'guitar', dirs: ['down'], frames: 2, frameMs: 380,
+      pivot: [12, 24], box: [24, 24], shadow: true,
+      reads: 'standing, a guitar across the body, its neck rising past the shoulder, the strumming hand moving'
     }
   };
 
@@ -69,7 +74,9 @@
     ['talking', 'down', 0],
     ['talking', 'down', 1],
     ['talking', 'right', 0],
-    ['talking', 'right', 1]
+    ['talking', 'right', 1],
+    ['guitar', 'down', 0],
+    ['guitar', 'down', 1]
   ];
 
   AP.POSE_IDS = Object.keys(AP.POSES);

@@ -52,6 +52,8 @@
       opens: 0, closes: 1440, owner: 'resident_a',
       spawn: { x: 5, y: 5, dir: 'up' },
       exit: { x: 5, y: 7 },
+      /* where someone with nothing in hand stands: clear of the door and the furniture */
+      linger: [[3, 4], [7, 4], [8, 6], [2, 6]],
       rows: [
         '############',
         '#BB..=....K#',
@@ -78,6 +80,8 @@
        * the right wall and one bench on the left, none of them facing another. Collision is these rows and
        * nothing else; a test holds them and `visual.plan` in agreement.
        *   C counter   b stool / plant / board / rack   t bench table   D door */
+      /* where someone with nothing in hand stands: clear of the door and the furniture */
+      linger: [[8, 4], [10, 4], [12, 4], [9, 5], [11, 5], [9, 8], [11, 8]],
       rows: [
         '###############',
         '###############',
@@ -130,6 +134,8 @@
       opens: 0, closes: 1440, owner: 'resident_b',
       spawn: { x: 4, y: 5, dir: 'up' },
       exit: { x: 4, y: 6 },
+      /* where someone with nothing in hand stands: clear of the door and the furniture */
+      linger: [[6, 4], [2, 5], [7, 5]],
       rows: [
         '##########',
         '#BB.....K#',
@@ -150,6 +156,8 @@
       opens: 0, closes: 1440, owner: 'resident_c',
       spawn: { x: 5, y: 5, dir: 'up' },
       exit: { x: 5, y: 6 },
+      /* where someone with nothing in hand stands: clear of the door and the furniture */
+      linger: [[3, 4], [2, 5], [7, 5]],
       rows: [
         '##########',
         '#K..=...B#',
@@ -167,6 +175,8 @@
       opens: 0, closes: 1440, owner: 'resident_d',
       spawn: { x: 4, y: 5, dir: 'up' },
       exit: { x: 4, y: 6 },
+      /* where someone with nothing in hand stands: clear of the door and the furniture */
+      linger: [[6, 4], [8, 5], [5, 5]],
       rows: [
         '###########',
         '#BB...=..K#',
@@ -184,6 +194,8 @@
       opens: 0, closes: 1440, owner: 'resident_e',
       spawn: { x: 3, y: 4, dir: 'up' },
       exit: { x: 3, y: 5 },
+      /* where someone with nothing in hand stands: clear of the door and the furniture */
+      linger: [[5, 4], [1, 4], [5, 2]],
       rows: [
         '########',
         '#BB..=K#',
@@ -340,7 +352,9 @@
     { id: 'obj_bed_d', name: 'bed', location: 'flat_d', x: 1, y: 1, tags: ['furniture', 'rest'], portable: false, owner: 'resident_d', affordances: ['sleep'] },
     { id: 'obj_kitchen_d', name: 'kitchen counter', location: 'flat_d', x: 9, y: 1, tags: ['furniture', 'food'], portable: false, owner: 'resident_d', affordances: ['eat_at_home'] },
     { id: 'obj_bed_e', name: 'bed', location: 'flat_e', x: 1, y: 1, tags: ['furniture', 'rest'], portable: false, owner: 'resident_e', affordances: ['sleep'] },
-    { id: 'obj_kitchen_e', name: 'kitchen counter', location: 'flat_e', x: 6, y: 1, tags: ['furniture', 'food'], portable: false, owner: 'resident_e', affordances: ['eat_at_home'] }
+    /* Cooked at from beside it: standing in front of a one-cell counter hides it. */
+    { id: 'obj_kitchen_e', name: 'kitchen counter', location: 'flat_e', x: 6, y: 1, tags: ['furniture', 'food'], portable: false, owner: 'resident_e', affordances: ['eat_at_home'],
+      anchors: { eat_at_home: { x: 5, y: 2, dir: 'right' } } }
   ];
 
   /* Day-one inhabitants, in draw order: the first generated inhabitant, then

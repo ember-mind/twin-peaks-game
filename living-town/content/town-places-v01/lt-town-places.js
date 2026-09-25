@@ -742,13 +742,25 @@
     R(g, sx + 1, lip, W - 2, 1, p.woodHi);
     R(g, sx + 3, lip + 2, W - 6, 1, p.woodDark);
     R(g, sx + Math.round(W / 2) - 3, lip + 1, 6, 1, p.metalHi);
-    /* The sink: a basin cut into the top, with a rim and a tap over it. */
-    R(g, sx + 2, sy - 1, W - 4, 9, p.ink);
-    R(g, sx + 3, sy, W - 6, 7, p.metal);
-    R(g, sx + 3, sy, W - 6, 2, p.metalHi);
-    R(g, sx + 4, sy + 5, W - 8, 1, p.metalHi);
-    R(g, sx + 2, sy + 8, W - 4, 1, p.metalHi);
-    var tapX = sx + Math.round(W / 2) - 1;
+    /* The sink: a basin cut into the top, with a rim and a tap over it. A
+     * one-cell kitchen still has somewhere to cook: the sink takes the left
+     * half and two rings the right (audit 2026-09-24: it read as a sink only). */
+    var compact = H < 2 * T, SW = compact ? Math.round(W / 2) + 1 : W;
+    R(g, sx + 2, sy - 1, SW - 4, 9, p.ink);
+    R(g, sx + 3, sy, SW - 6, 7, p.metal);
+    R(g, sx + 3, sy, SW - 6, 2, p.metalHi);
+    R(g, sx + 4, sy + 5, Math.max(1, SW - 8), 1, p.metalHi);
+    R(g, sx + 2, sy + 8, SW - 4, 1, p.metalHi);
+    if (compact) {
+      var hx = sx + SW - 1;
+      R(g, hx, sy - 1, W - SW - 1, 9, p.ink);
+      R(g, hx + 1, sy, W - SW - 3, 7, '#3b3f42');
+      [[1, 1], [1, 4]].forEach(function (a3) {
+        R(g, hx + a3[0] + 1, sy + a3[1], 2, 2, p.metal);
+        R(g, hx + a3[0], sy + a3[1] + 1, 4, 1, p.metal);
+      });
+    }
+    var tapX = sx + Math.round(SW / 2) - 1;
     R(g, tapX, sy - 8, 2, 6, p.metalHi);
     R(g, tapX, sy - 8, 4, 1, p.metalHi);
     R(g, tapX + 3, sy - 7, 1, 2, p.metal);
@@ -765,6 +777,7 @@
     }
     /* A kettle standing on the counter, where the top is clear. */
     var kx = sx + (side === 'right' ? 1 : W - 7);
+    if (compact) kx = sx + W - 6;
     R(g, kx, sy + (H >= 2 * T ? 9 : -6), 6, 6, p.ink);
     R(g, kx + 1, sy + (H >= 2 * T ? 10 : -5), 4, 4, p.metalHi);
     R(g, kx + 1, sy + (H >= 2 * T ? 10 : -5), 4, 1, p.cream);

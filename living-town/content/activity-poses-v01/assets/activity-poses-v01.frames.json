@@ -2,8 +2,8 @@
   "version": "activity-poses-v01",
   "note": "Compiled by living-town/content/activity-poses-v01/tools/build-poses.js from living-town/js/lt-appearance.js and tools/pose-frames.js. One row per sheetId, one column per (pose, direction, frame). Cells are the production 24px actor cell, bottom-aligned on the standing sprite ground line.",
   "cell": 24,
-  "atlas": 336,
-  "columns": 13,
+  "atlas": 360,
+  "columns": 15,
   "rows": [
     {
       "sheetId": "look_teal_bob",
@@ -158,6 +158,22 @@
       "column": 12,
       "x": 288,
       "cell": 24
+    },
+    {
+      "poseId": "guitar",
+      "dir": "down",
+      "frame": 0,
+      "column": 13,
+      "x": 312,
+      "cell": 24
+    },
+    {
+      "poseId": "guitar",
+      "dir": "down",
+      "frame": 1,
+      "column": 14,
+      "x": 336,
+      "cell": 24
     }
   ],
   "poses": [
@@ -270,6 +286,24 @@
       ],
       "shadow": true,
       "reads": "standing, one forearm lifting and falling clear of the silhouette"
+    },
+    {
+      "id": "guitar",
+      "dirs": [
+        "down"
+      ],
+      "frames": 2,
+      "frameMs": 380,
+      "pivot": [
+        12,
+        24
+      ],
+      "box": [
+        24,
+        24
+      ],
+      "shadow": true,
+      "reads": "standing, a guitar across the body, its neck rising past the shoulder, the strumming hand moving"
     }
   ]
 }

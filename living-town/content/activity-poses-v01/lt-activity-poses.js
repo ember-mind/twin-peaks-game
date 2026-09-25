@@ -25,7 +25,7 @@
   var AP = LT.ActivityPoses;
 
   var CELL = AP.CELL;
-  var SHEET_FILE = 'assets/activity-poses-v01.png?v=' + AP.VERSION;
+  var SHEET_FILE = 'assets/activity-poses-v01.png?v=' + AP.VERSION + '-' + AP.COLUMNS;   // a new column is a new sheet
   AP.SRC = (typeof document !== 'undefined' && document.currentScript && document.currentScript.src)
     ? new URL(SHEET_FILE, document.currentScript.src).href
     : 'living-town/content/activity-poses-v01/' + SHEET_FILE;
@@ -52,7 +52,7 @@
       img.decoding = 'sync';
       img.onload = function () {
         AP.sheet = img;
-        AP.ready = (img.naturalWidth === 336 && img.naturalHeight === 336);
+        AP.ready = (img.naturalWidth === AP.COLUMNS * CELL && img.naturalHeight === AP.COLUMNS * CELL);   // the sheet is square
         if (!AP.ready) AP.failed = 'unexpected sheet size ' + img.naturalWidth + 'x' + img.naturalHeight;
         resolve(AP.ready);
       };
@@ -96,7 +96,7 @@
     var row = AP.rowOf(sheetId);
     if (row < 0) return false;
     var sheet = opts.sheet || AP.sheet;
-    if (!sheet || !sheet.complete || sheet.naturalWidth !== 336 || !g.drawImage) return false;
+    if (!sheet || !sheet.complete || sheet.naturalWidth !== AP.COLUMNS * CELL || !g.drawImage) return false;
     var frame = (opts.frame == null) ? AP.frameAt(poseId, t) : opts.frame;
     var column = AP.column(poseId, want, frame);
     if (column < 0) return false;

@@ -379,6 +379,25 @@
     return save;
   };
 
+  /* c0e11a4d -> 20f71e57: the attic's one-cell kitchen is cooked at from
+   * beside it (5,2), not from in front of it, where the cook hid the counter.
+   * The counter gains that use spot; whoever is cooking there or walking to it
+   * moves to the new one. Written against test/fixtures/save-town-c0e11a4d-cooking-in-the-attic.json. */
+  S.WORLD_MIGRATIONS['c0e11a4d'] = function (save) {
+    var state = save.state;
+    (state.objects || []).forEach(function (o) {
+      if (o.id === 'obj_kitchen_e') o.anchors = { eat_at_home: { x: 5, y: 2, dir: 'right' } };
+    });
+    Object.keys(state.characters || {}).forEach(function (id) {
+      var c = state.characters[id], a = c.activity;
+      if (c.location !== 'flat_e' || !a || a.targetId !== 'obj_kitchen_e') return;
+      if (c.pos.x === 6 && c.pos.y === 2) c.pos = { x: 5, y: 2, dir: 'right' };
+      if (c.walkTarget && c.walkTarget.x === 6 && c.walkTarget.y === 2) c.walkTarget = { x: 5, y: 2, dir: 'right' };
+    });
+    save.world = '20f71e57';
+    return save;
+  };
+
   /* ---------------- serialise ---------------- */
 
   S.serialize = function (sim) {
