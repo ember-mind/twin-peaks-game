@@ -4,9 +4,9 @@
  * The canonical 'palmer' map is a cutaway of the whole house: Laura's room
  * occupies rows 1-3, the stair wall is row 4 (the only opening is the landing
  * at columns 4-5), and the living room runs rows 5-10 down to the front door
- * on row 11.  Two light roles carry the frame: the cold dusk plane from the
- * west window behind the dining table, and the warm tungsten pool from the
- * sconce on the stair wall that falls on the parquet below it.
+ * on row 11. Daytime window light groups the lower room; the existing Act 4
+ * flag dims that window and leaves the warm wall sconces. Upstairs remains
+ * unchanged. Composition is authored; rendering never writes story state.
  *
  * Grounded furniture lives in `definitions` and mirrors js/palmer-scene.js
  * footprints one for one.  Everything else — walls, windows, curtains, the
@@ -28,14 +28,14 @@
     wallDeep: '#5e5340', wall: '#7a6a52', wallHi: '#8e7c61',
     mapleShade: '#8a6e46', mapleShade2: '#9c7f55',
     maple: '#b49368', mapleHi: '#c4a478', mapleDark: '#96784c', mapleSeam: '#a5875b',
-    parquetDark: '#6b4526', parquet: '#8a5b31', parquetMid: '#956338',
-    parquetHi: '#a5713f', parquetSeam: '#7b5029',
+    parquetDark: '#634735', parquet: '#71513c', parquetMid: '#785740',
+    parquetHi: '#805d44', parquetSeam: '#684b39',
     poolFloor: '#a9793f', poolFloorMid: '#bb8b4b', poolFloorHi: '#cb9d59',
     poolSeam: '#8f6330', duskFloor: '#8d7052', duskFloorHi: '#9a7c58',
     duskSeam: '#6f5540', duskBar: '#7b6249',
-    rugDeep: '#3a1d21', rugDark: '#5a2a2f', rug: '#77373a', rugMid: '#8a4245',
-    rugCream: '#c6b388', rugOchre: '#a8863f',
-    woolDeep: '#4a3520', wool: '#6f512e', woolHi: '#8a6739', woolCream: '#b09261',
+    rugDeep: '#283529', rugDark: '#303e2e', rug: '#3c4c35', rugMid: '#4c5b3d',
+    rugCream: '#727950', rugOchre: '#627047',
+    woolDeep: '#45372a', wool: '#574733', woolHi: '#65523a', woolCream: '#786447',
     greenDeep: '#1f3327', green: '#2f4c37', greenMid: '#3d6146', greenHi: '#4e7a55',
     quiltDeep: '#44586a', quilt: '#5d7285', quiltHi: '#8296a6',
     linen: '#c8c2ad', lace: '#e4ded0', laceDim: '#b6b0a0',
@@ -52,15 +52,15 @@
   };
 
   /* Grounded furniture only: the solid cells the map actually carries.
-   * The living room carries two furnished groups now: the seating cluster on
-   * the west half of the rug (armchair, low table, wing chair) and the nook
+   * The living room carries two furnished groups: a wall-backed three-seat
+   * sofa, west chair and low table share the main rug, while the east nook
    * in the right third (piano, phonograph console, club chair, phone table),
    * which used to be bare floorboards with one oval rug on them. */
   var definitions = [
     {id:'lauraBed', cells:[[1,1],[2,1]], bounds:[16,16,32,20], shadow:[16,28,32,4]},
     {id:'lauraDresser', cells:[[6,1]], bounds:[96,10,16,23], shadow:[96,28,16,4]},
-    {id:'wingChair', cells:[[7,5]], bounds:[111,78,18,20], shadow:[112,92,16,4]},
-    {id:'sofa', cells:[[3,6]], bounds:[47,88,18,25], shadow:[48,108,16,4]},
+    {id:'wingChair', cells:[[3,6]], bounds:[47,88,18,25], shadow:[48,108,16,4]},
+    {id:'sofa', cells:[[7,5],[8,5],[9,5]], bounds:[111,78,50,20], shadow:[112,92,48,4]},
     {id:'piano', cells:[[13,6]], bounds:[206,84,18,28], shadow:[208,108,16,4]},
     {id:'sideboard', cells:[[14,6]], bounds:[223,84,17,28], shadow:[224,108,16,4]},
     {id:'coffeeTable', cells:[[5,7]], bounds:[78,116,20,14], shadow:[80,124,16,4]},
@@ -81,6 +81,27 @@
    * hangs above the landing, the door casing frames whoever stands in it. */
   var fanFoot = 64;
   var doorFoot = 192;
+
+  /* Read the existing story boundary. This is a rendering choice, not a new
+   * clock, state owner or room lifecycle. Upstairs art keeps its own palette. */
+  function livingPalette() {
+    if (!isEvening()) return palette;
+    return Object.assign({}, palette, {
+      parquet: '#4d392e', parquetMid: '#523d31', parquetHi: '#594234',
+      parquetDark: '#413026', parquetSeam: '#483329',
+      rug: '#2e3c2b', rugMid: '#3b4b32', rugOchre: '#4d593a',
+      rugDark: '#273326', rugDeep: '#202b22',
+      cloth: '#a39776', clothHi: '#baac87', clothDim: '#81775d',
+      dusk: '#30434c', duskHi: '#3e5660', duskPale: '#567078',
+      glass: '#26363e', glassDeep: '#1c292e',
+      wool: '#46392d', woolHi: '#514330', woolCream: '#625139'
+    });
+  }
+
+  function isEvening() {
+    var state = GAME.Engine && GAME.Engine.state;
+    return !!(state && state.flags && state.flags.atto4);
+  }
 
   function southEdge(cells) {
     var row = -1, i;
@@ -310,76 +331,65 @@
     R(38, 80, 18, 8, p.poolFloorHi);
     R(42, 80, 10, 4, '#dcae66');
     for (y = 88; y < 98; y += 8) R(30, y, 36, 1, p.poolSeam);
-    R(166, 80, 40, 20, p.poolFloor);
-    R(170, 80, 32, 14, p.poolFloorMid);
-    R(174, 80, 24, 8, p.poolFloorHi);
-    R(178, 80, 16, 4, '#dcae66');
-    for (y = 88; y < 100; y += 8) R(166, y, 40, 1, p.poolSeam);
+    /* East pool stays shallow: its sconce supports the room rather than
+     * lighting a second empty rectangle as brightly as the seating group. */
+    R(170, 80, 32, 13, p.poolFloor);
+    R(176, 80, 20, 8, p.poolFloorMid);
+    R(182, 80, 8, 4, p.poolFloorHi);
+    R(170, 88, 32, 1, p.poolSeam);
     R(96, 80, 1, 6, p.poolSeam);
-    /* Cold plane from the west window: the near step keeps the window's own
-     * brightness and carries the two bar shadows, the far step falls back to
-     * within a few luma of the parquet. */
-    R(16, 104, 30, 42, p.duskFloor);
-    R(16, 102, 20, 46, p.duskFloorHi);
-    R(16, 100, 10, 50, '#a5865f');
-    /* The sash crosses the plane: one bar for the mullion, one for the rail. */
-    R(16, 122, 30, 5, p.duskBar);
-    R(24, 100, 4, 50, p.duskBar);
-    for (y = 104; y < 148; y += 8) R(16, y, 30, 1, p.duskSeam);
+    if (isEvening()) return; // evening window supplies no daytime beam
+    /* Light enters from the actual west window and falls diagonally toward
+     * the sitting group. Four slat shadows interrupt the same hard-edged
+     * plane; these are authored scanlines, never a gradient or noise pass. */
+    for (y = 100; y < 158; y++) {
+      var left = 16 + Math.max(0, y - 121);
+      var right = 34 + Math.floor((y - 100) * 1.12);
+      if (((y - 100) % 12) >= 9) continue;
+      R(left, y, right - left, 1, (y % 8 === 0) ? p.poolSeam : p.poolFloorMid);
+      R(left, y, Math.min(12, right - left), 1, p.poolFloorHi);
+    }
+  }
+
+  function drawRugLight(R, p) {
+    if (isEvening()) return;
+    /* Continue the same beam through the rug's material, not a gold card
+     * pasted over it. Furniture is drawn later and retains a clean silhouette. */
+    for (var y = 127; y < 144; y++) {
+      var right = Math.min(94, 34 + Math.floor((y - 100) * 1.12));
+      if (right <= RUG.x || ((y - 100) % 12) >= 9) continue;
+      R(RUG.x, y, right - RUG.x, 1, p.rugOchre);
+      R(RUG.x, y, Math.min(5, right - RUG.x), 1, p.rugCream);
+    }
   }
 
   function drawRug(R, p) {
-    /* The rug is the room's quiet dark mass and the only place the cast
-     * stands: the medallion stays west of Sarah's tile (9,7). */
-    /* The rug reaches west to the armchair's feet, so the seat, the rug and
-     * the light over it are one group instead of three islands.  It is floor
-     * level and walkable, like the runner: an actor crossing it stands on it. */
+    /* Low-contrast woven field connects the chair, sofa and Sarah. A broad
+     * cream frame used to compete with people and make this look like a sign.
+     * Floor-level ornament is passable; only the furniture claims cells. */
     R(RUG.x, RUG.y, RUG.w, RUG.h, p.rugDeep);
     R(66, 98, 108, 44, p.rugDark);
-    R(69, 101, 102, 38, p.rug);
-    R(69, 101, 102, 1, p.rugMid);
-    R(71, 103, 98, 2, p.rugCream); R(71, 135, 98, 2, p.rugCream);
-    R(71, 103, 2, 34, p.rugCream); R(167, 103, 2, 34, p.rugCream);
-    R(73, 105, 94, 1, p.rugDeep); R(73, 134, 94, 1, p.rugDeep);
-    /* One stepped medallion, tip up, and four corner marks. */
-    R(126, 116, 18, 6, p.rugOchre);
-    R(131, 111, 8, 16, p.rugOchre);
-    R(133, 109, 4, 20, p.rugOchre);
-    R(130, 117, 10, 4, p.rugCream);
-    R(132, 114, 6, 10, p.rugCream);
-    R(133, 117, 4, 4, p.rugDeep);
-    R(76, 108, 6, 2, p.rugOchre); R(76, 108, 2, 6, p.rugOchre);
-    R(158, 108, 6, 2, p.rugOchre); R(162, 108, 2, 6, p.rugOchre);
-    R(76, 130, 2, 6, p.rugOchre); R(76, 134, 6, 2, p.rugOchre);
-    R(162, 130, 2, 6, p.rugOchre); R(158, 134, 6, 2, p.rugOchre);
-    /* Two creases, nothing else. */
-    /* Two smaller lozenges flank the medallion, so the widened field is not
-     * half an empty red slab. */
-    R(84, 116, 14, 6, p.rugOchre); R(88, 112, 6, 14, p.rugOchre);
-    R(87, 117, 8, 4, p.rugDark); R(89, 115, 4, 8, p.rugDark);
-    R(160, 116, 14, 6, p.rugOchre); R(164, 112, 6, 14, p.rugOchre);
-    R(163, 117, 8, 4, p.rugDark); R(165, 115, 4, 8, p.rugDark);
-    R(84, 130, 14, 1, p.rugDeep); R(85, 131, 12, 1, p.rugMid);
-    R(146, 128, 16, 1, p.rugDeep); R(147, 129, 14, 1, p.rugMid);
+    R(70, 102, 100, 36, p.rug);
+    R(70, 102, 100, 1, p.rugOchre); R(70, 137, 100, 1, p.rugOchre);
+    R(70, 102, 1, 36, p.rugOchre); R(169, 102, 1, 36, p.rugOchre);
+    R(73, 105, 94, 1, p.rugDark); R(73, 134, 94, 1, p.rugDark);
+    /* One softened motif and uneven worn threads, not three bright badges. */
+    R(119, 116, 18, 6, p.rugMid); R(124, 112, 8, 14, p.rugMid);
+    R(126, 116, 4, 6, p.rugOchre);
+    R(76, 108, 6, 1, p.rugMid); R(158, 130, 6, 1, p.rugMid);
+    R(91, 130, 12, 1, p.rugDark); R(140, 109, 10, 1, p.rugMid);
+    for (var y = 99; y < 143; y += 4) {
+      R(65, y, 2, 1, p.rugOchre); R(174, y + 1, 2, 1, p.rugOchre);
+    }
   }
 
   function drawRunner(R, p) {
-    /* A runner from the front door up to the rug: the same burgundy wool, so
-     * the two read as one set and the empty approach column has a floor
-     * people actually walk on.  Flat, walkable, painted in the ground pass —
-     * an actor crossing it stands on it, which is what a runner is for. */
-    R(106, 144, 44, 32, p.rugDeep);
-    R(108, 144, 40, 32, p.rugDark);
-    R(110, 145, 36, 31, p.rug);
-    R(112, 144, 2, 32, p.rugCream); R(142, 144, 2, 32, p.rugCream);
-    R(115, 144, 1, 32, p.rugDeep); R(140, 144, 1, 32, p.rugDeep);
-    var y;
-    for (y = 150; y < 176; y += 12) {
-      R(124, y, 8, 3, p.rugOchre);
-      R(126, y - 2, 4, 7, p.rugOchre);
-      R(126, y + 1, 4, 1, p.rugCream);
-    }
-    R(110, 172, 36, 1, p.rugDeep); R(110, 173, 36, 1, p.rugMid);
+    /* A modest arrival mat, separated from the main rug by bare floor.
+     * The gap gives the visitor somewhere to arrive, not a carpet corridor. */
+    R(108, 154, 40, 22, p.woolDeep);
+    R(110, 156, 36, 18, p.wool);
+    R(112, 158, 32, 1, p.woolHi); R(112, 172, 32, 1, p.woolHi);
+    R(114, 164, 28, 1, p.woolDeep); R(115, 167, 26, 1, p.woolHi);
   }
 
   function drawWoolRug(R, p) {
@@ -456,7 +466,7 @@
   }
 
   function drawLivingWindow(R, p) {
-    /* West window behind the dining table: cold dusk glass, a treeline low
+    /* West window behind the dining table: cool glass, a treeline low
      * in the pane, heavy forest drapes either side. */
     R(0, 98, 16, 54, p.ink);
     R(1, 99, 14, 52, p.walnutDeep); R(1, 99, 14, 1, p.walnutHi);
@@ -467,6 +477,8 @@
     pineSilhouette(R, 11, 122, 146, p.glassDeep);
     R(4, 125, 9, 1, p.duskPale);
     R(4, 113, 9, 1, p.walnutDeep); R(8, 102, 1, 46, p.walnutDeep);
+    /* Blinds tie the projected slat breaks to a visible architectural source. */
+    for (var y = 106; y < 144; y += 6) R(4, y, 9, 1, p.walnutMid);
     R(1, 100, 4, 48, p.greenDeep); R(2, 101, 2, 46, p.green); R(2, 101, 1, 46, p.greenHi);
     R(11, 100, 4, 48, p.greenDeep); R(12, 101, 2, 46, p.green); R(13, 101, 1, 46, p.greenHi);
     R(1, 99, 14, 3, p.greenDeep); R(1, 99, 14, 1, p.greenMid);
@@ -647,7 +659,7 @@
     R(97, 31, 14, 1, p.ink);
   }
 
-  function drawSofa(R, p) {
+  function drawWingChair(R, p) {
     /* One tile wide: a green armchair, not a sofa the geometry cannot hold.
      * A single seat cushion with one seam, two arms, a skirt and four feet —
      * never two panels, which would read as a cabinet. */
@@ -740,24 +752,29 @@
     }
   }
 
-  function drawWingChair(R, p) {
-    /* A wing chair with its back to the stair wall, north of the rug: the
-     * group has a third seat, and the actor who walks the rug passes in front
-     * of it.  The wings are a value darker than the inner back and the lace
-     * antimacassar sits off centre, so the back never reads as a flat slab
-     * with a symmetric pair of marks on it. */
-    R(111, 78, 18, 20, p.ink);
-    R(111, 79, 4, 12, '#4d353a'); R(111, 79, 1, 12, '#5c3f45');
-    R(125, 79, 4, 12, '#4d353a');
-    R(115, 79, 10, 10, '#5c3f45');
-    R(116, 80, 8, 8, p.roseDeep); R(116, 80, 8, 1, p.rose);
-    R(117, 80, 5, 4, p.lace); R(117, 80, 5, 1, '#f3eee2');
-    R(117, 83, 5, 1, p.laceDim);
-    R(115, 88, 10, 6, p.roseDeep); R(115, 88, 10, 1, p.rose);
-    R(118, 90, 4, 2, '#5c3f45');
-    R(111, 88, 4, 3, '#5c3f45'); R(125, 88, 4, 3, '#4d353a');
-    R(113, 94, 3, 3, p.walnutDeep); R(124, 94, 3, 3, p.walnutDeep);
-    R(113, 97, 3, 1, p.ink); R(124, 97, 3, 1, p.ink);
+  function drawSofa(R, p) {
+    /* Shared seat, backed by the stair wall: one continuous upholstered
+     * silhouette, three cushions and two arms. Its width is real collision,
+     * not a decorative sofa painted over walkable tiles. */
+    R(111, 78, 50, 18, p.walnutDeep);
+    R(113, 79, 46, 9, p.clothDim);
+    R(114, 80, 44, 6, p.cloth); R(114, 80, 44, 1, p.clothHi);
+    R(111, 84, 5, 11, p.clothDim); R(112, 84, 3, 9, p.cloth);
+    R(156, 84, 5, 11, p.clothDim); R(157, 84, 3, 9, p.cloth);
+    R(116, 87, 40, 7, p.cloth);
+    R(116, 87, 40, 1, p.clothHi);
+    R(129, 88, 1, 6, p.clothDim); R(143, 88, 1, 6, p.clothDim);
+    R(117, 93, 38, 1, p.clothDim);
+    /* Sparse floral clusters belong to the fabric, not loose props. */
+    [[120,82],[134,83],[147,81],[124,90],[148,90]].forEach(function (pt) {
+      R(pt[0], pt[1], 2, 2, p.roseDeep);
+      R(pt[0] - 2, pt[1] + 1, 2, 1, p.green);
+      R(pt[0] + 2, pt[1] - 1, 1, 2, p.green);
+    });
+    R(116, 81, 9, 5, p.greenDeep); R(117, 81, 7, 4, p.green);
+    R(149, 81, 7, 6, p.roseDeep); R(149, 81, 7, 1, p.rose);
+    R(113, 95, 46, 1, p.walnutDark);
+    R(113, 96, 3, 2, p.ink); R(156, 96, 3, 2, p.ink);
   }
 
   function drawCoffeeTable(R, p) {
@@ -845,33 +862,36 @@
     else if (prop.id === 'phoneTable') drawPhoneTable(R, p);
   }
 
-  function drawArchitecture(R, p) {
+  function drawArchitecture(R, p, living) {
     R(0, 0, 256, 192, p.ink);
     drawLauraWall(R, p);
     drawLauraFloor(R, p);
     drawWallFootShadow(R, p);
     drawFanShadow(R, p);
-    drawLivingFloor(R, p);
-    drawFloorLight(R, p);
-    drawRug(R, p);
-    drawRunner(R, p);
-    drawWoolRug(R, p);
+    drawLivingFloor(R, living);
+    drawFloorLight(R, living);
+    drawRug(R, living);
+    drawRugLight(R, living);
+    drawRunner(R, living);
+    drawWoolRug(R, living);
     drawStairWall(R, p);
     drawStairwell(R, p);
     drawStairWallDressing(R, p);
     drawSideWalls(R, p);
     drawLauraWindow(R, p);
-    drawLivingWindow(R, p);
+    drawLivingWindow(R, living);
     drawLauraPortrait(R, p);
     drawSouthWall(R, p);
   }
 
   function draw(ctx, cx, cy) {
-    var R = rectPainter(ctx, cx, cy), i;
-    drawArchitecture(R, palette);
+    var R = rectPainter(ctx, cx, cy), i, living = livingPalette();
+    drawArchitecture(R, palette, living);
     for (i = 0; i < definitions.length; i++) drawShadow(R, definitions[i], palette);
     drawPlayerContact(R, palette);
-    for (i = 0; i < definitions.length; i++) drawProp(R, definitions[i], palette);
+    for (i = 0; i < definitions.length; i++) {
+      drawProp(R, definitions[i], definitions[i].footY <= 32 ? palette : living);
+    }
     drawCeilingFan(R, palette);
   }
 
@@ -880,11 +900,11 @@
   function foreground(ctx, cx, cy, minFoot, maxFoot) {
     minFoot = minFoot == null ? -Infinity : minFoot;
     maxFoot = maxFoot == null ? Infinity : maxFoot;
-    var R = rectPainter(ctx, cx, cy), i, prop;
+    var R = rectPainter(ctx, cx, cy), i, prop, living = livingPalette();
     for (i = 0; i < definitions.length; i++) {
       prop = definitions[i];
       if (prop.footY < minFoot || prop.footY >= maxFoot) continue;
-      drawProp(R, prop, palette);
+      drawProp(R, prop, prop.footY <= 32 ? palette : living);
     }
     if (fanFoot >= minFoot && fanFoot < maxFoot) drawCeilingFan(R, palette);
     if (doorFoot >= minFoot && doorFoot < maxFoot) drawDoorCasing(R, palette);
@@ -895,7 +915,9 @@
   function paintProp(ctx, cx, cy, id) {
     var R = rectPainter(ctx, cx, cy), i;
     for (i = 0; i < definitions.length; i++) {
-      if (definitions[i].id === id) drawProp(R, definitions[i], palette);
+      if (definitions[i].id === id) {
+        drawProp(R, definitions[i], definitions[i].footY <= 32 ? palette : livingPalette());
+      }
     }
   }
 

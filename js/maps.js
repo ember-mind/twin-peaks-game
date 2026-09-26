@@ -149,8 +149,8 @@
         'iffffffffffffffi', // 2
         'iffffffffffffffi', // 3
         'iiiiffiiiiiiiiii', // 4 corridoio c4-5
-        'iffffffhfffffffi', // 5 poltrona alta a nord del tappeto (7,5)
-        'ifftffcccccffUUi', // 6 poltrona verde, pianoforte (13,6), consolle (14,6)
+        'ifffffftttfffffi', // 5 divano a tre posti contro la parete (7-9,5)
+        'iffhffcccccffUUi', // 6 poltrona verde, pianoforte (13,6), consolle (14,6)
         'ifffftcccccffffi', // 7 tavolino basso sul tappeto (5,7); Sarah(9,7)
         'ifttffcccccfhtfi', // 8 tavolo domestico; poltrona (12,8) e tavolino del telefono (13,8)
         'ifhhfffffffffffi', // 9 sedute, corridoio porta ancora libero

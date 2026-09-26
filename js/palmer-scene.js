@@ -13,9 +13,9 @@
   var footprints = {
     lauraBed: { glyph: 'K', cells: [[1, 1], [2, 1]] },
     lauraDresser: { glyph: 'U', cells: [[6, 1]] },
-    sofa: { glyph: 't', cells: [[3, 6]] },
+    sofa: { glyph: 't', cells: [[7, 5], [8, 5], [9, 5]] },
     coffeeTable: { glyph: 't', cells: [[5, 7]] },
-    wingChair: { glyph: 'h', cells: [[7, 5]] },
+    wingChair: { glyph: 'h', cells: [[3, 6]] },
     piano: { glyph: 'U', cells: [[13, 6]] },
     sideboard: { glyph: 'U', cells: [[14, 6]] },
     nookChair: { glyph: 'h', cells: [[12, 8]] },

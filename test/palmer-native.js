@@ -264,10 +264,11 @@ assert(hasRect(depth32, 97, 18, 14, 13), '32px interval selects Laura dresser');
 assert(!hasRect(depth32, 75, 37, 11, 11), 'half-open interval excludes the ceiling fan at 64px');
 const depth80 = foregroundCalls(64, 112);
 assert(hasRect(depth80, 75, 37, 11, 11), '64px interval repaints the ceiling fan over the top of the stairs');
-assert(hasRect(depth80, 111, 78, 18, 20), '64px interval selects the wing chair north of the rug');
+assert(hasRect(depth80, 111, 78, 50, 18), '64px interval selects the shared sofa against the wall');
 assert(!hasRect(depth80, 47, 88, 18, 25), '64px interval excludes the living room furniture at 112px');
 const depth112 = foregroundCalls(112, 144);
-assert(hasRect(depth112, 47, 88, 18, 25), '112px interval selects the settee');
+assert(hasRect(depth112, 47, 88, 18, 25), '112px interval selects the west chair');
+assert(!hasRect(depth112, 111, 78, 50, 18), '112px interval excludes the rear sofa at 96px');
 assert(hasRect(depth112, 223, 84, 17, 28), '112px interval selects the phonograph console');
 assert(hasRect(depth112, 206, 84, 18, 28), '112px interval selects the upright piano');
 assert(hasRect(depth112, 78, 116, 20, 10), '112px interval selects the low table on the rug');
@@ -311,7 +312,7 @@ for (const call of propPixels.calls) {
 // Il divano, il tappeto e la luce sopra di essi devono essere UN gruppo, e
 // altrettanto la consolle con il suo tappeto e il ritratto: la critica a
 // freddo leggeva ogni oggetto come un'isola su un pavimento nudo.
-const armchair = Art.definitions.find((prop) => prop.id === 'sofa');
+const armchair = Art.definitions.find((prop) => prop.id === 'wingChair');
 const console_ = Art.definitions.find((prop) => prop.id === 'sideboard');
 assert(Art.rug.x <= armchair.bounds[0] + armchair.bounds[2],
   'the rug reaches the armchair: its west edge ' + Art.rug.x +
@@ -339,12 +340,14 @@ assert(Art.wool.y <= nook.footY && Art.wool.x <= nook.bounds[0],
 // Il gruppo di seduta e' un gruppo: il tavolino basso sta sul tappeto dipinto
 // e fra la poltrona verde e la poltrona alta, non su un'isola di parquet.
 const low = Art.definitions.find((prop) => prop.id === 'coffeeTable');
-const wing = Art.definitions.find((prop) => prop.id === 'wingChair');
+const sofa = Art.definitions.find((prop) => prop.id === 'sofa');
 assert(low.bounds[0] >= Art.rug.x && low.bounds[0] + low.bounds[2] <= Art.rug.x + Art.rug.w,
   'the low table stands inside the painted rug');
-assert(low.bounds[0] > armchair.bounds[0] && low.bounds[0] < wing.bounds[0],
-  'the low table sits between the armchair and the wing chair');
-assert(wing.footY <= Art.rug.y, 'the wing chair stands on the north edge of the rug');
+assert(low.bounds[0] > armchair.bounds[0] && low.bounds[0] < sofa.bounds[0],
+  'the low table connects the west chair and the sofa');
+assert(sofa.footY <= Art.rug.y, 'the sofa stands on the north edge of the rug');
+assert.deepEqual(sofa.cells, [[7,5],[8,5],[9,5]], 'the broad sofa has a real three-cell footprint');
+assert(sofa.bounds[2] >= 48, 'shared seating is a broad silhouette, not a renamed single chair');
 
 // Il ventilatore e' un corpo illuminante sul soffitto, non una macchia nera
 // sul muro: nessun pixel di contorno nero fra le pale.
@@ -434,11 +437,44 @@ assert(lampPool > duskPlane + 20,
 
 // Il vetro e' l'unica superficie fredda: b > r. Il resto della casa e' calda.
 const glassPixels = region(5, 104, 3, 8);
-assert(glassPixels.every(([r, , b]) => b > r + 20), 'the west window glass stays cold');
+const blindRow = Art.palette.walnutMid;
+const blindRGB = [1,3,5].map((i) => parseInt(blindRow.slice(i, i + 2), 16));
+assert.equal(glassPixels.filter((px) => px.join(',') === blindRGB.join(',')).length, 3,
+  'one visible blind slat crosses the measured glass region');
+assert(glassPixels.filter((px) => px.join(',') !== blindRGB.join(','))
+  .every(([r, , b]) => b > r + 20), 'glass between the blind slats stays cold');
 assert(region(196, 150, 36, 16).every(([r, , b]) => r > b + 30), 'the parquet stays warm');
 
-// ------------------------------------------- motore reale e tastiera
+// The story flag changes only the living-room light, never geometry or the
+// upper-room investigation. Foreground must use exactly the ground palette.
 Engine.init(canvas, null);
+const dayBuffer = buffer.slice();
+const dayLower = mean(region(16, 80, 224, 96));
+const dayWindow = mean(region(5, 104, 3, 8));
+const dayRows = house.rows.slice();
+const dayDoors = JSON.stringify(house.doors);
+Engine.state.flags.atto4 = true;
+raster();
+assert(mean(region(16, 80, 224, 96)) < dayLower - 8,
+  'canonical Act 4 flag lowers the living-room background value');
+assert(mean(region(5, 104, 3, 8)) < dayWindow - 30,
+  'evening closes down the window, not just the floor');
+assert.deepEqual(buffer.slice(0, 64 * W * 3), dayBuffer.slice(0, 64 * W * 3),
+  'upstairs pixels remain identical in both living-room light states');
+assert.deepEqual(house.rows, dayRows, 'lighting never rewrites collision rows');
+assert.equal(JSON.stringify(house.doors), dayDoors, 'lighting never rewrites doors');
+const eveningSofa = newRecordingContext();
+Art.paintProp(eveningSofa.context, 0, 0, 'sofa');
+assert.deepEqual(foregroundCalls(96, 97), eveningSofa.calls,
+  'sofa foreground and ground painting use the same evening materials');
+const stateBeforeArt = JSON.stringify(Engine.state);
+artDraw(newRecordingContext().context, 0, 0);
+assert.equal(JSON.stringify(Engine.state), stateBeforeArt, 'art only reads canonical story state');
+delete Engine.state.flags.atto4;
+raster();
+assert.deepEqual(buffer, dayBuffer, 'clearing the story flag restores the exact daytime raster');
+
+// ------------------------------------------- motore reale e tastiera
 assert.deepEqual([canvas.width, canvas.height], [256, 192], 'engine restores the native canvas dimensions');
 Engine.start();
 Engine.state.mode = 'title';
@@ -518,4 +554,4 @@ assert.equal(storageWrites, 0, 'native scene traversal never writes a save');
 console.log('PALMER-NATIVE-PASS production hooks, authored geometry and canonical glyphs, footprint ' +
   'parity, walkable rug, collision and Sarah approach, keyboard routes, integer native pixels, ' +
   'prop bounds, depth intervals with fan and door casing, no furniture on the cast tile, ' +
-  'value order and the two light roles');
+  'value order, blind slats, story-owned day/evening light and unchanged upstairs pixels');
