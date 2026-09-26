@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Great Northern — room repair, lesson 1</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #151713; color: #f1eee5; font: 18px/1.6 system-ui,sans-serif; }
+  main { max-width: 1260px; margin: auto; padding: 32px 20px 64px; }
+  h1 { font-size: clamp(28px,4vw,42px); line-height: 1.2; }
+  h2 { margin-top: 44px; font-size: 25px; }
+  p { max-width: 80ch; }
+  .pair { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; }
+  figure { margin: 0; }
+  img { display: block; width: 100%; height: auto; image-rendering: pixelated; background: #111; }
+  figcaption { margin-top: 12px; }
+  small { display: block; color: #c2c6b9; }
+  a { color: #ffe1a3; }
+  .note { border-left: 3px solid #ffe1a3; padding-left: 16px; }
+  @media(max-width: 760px) { .pair { grid-template-columns: 1fr; } }
+</style>
+<main>
+  <h1>A hotel, not a pile of hotel objects</h1>
+  <p class="note">Fresh game renders of historical revisions. No new room art today; production remains untouched. Start with a real earlier failure, then explain its recorded repair.</p>
+  <p><a href="../../reports/room-method-lobby-case-01.md">Full step-by-step lesson</a> · <a href="manifest.json">Source and capture manifest</a></p>
+  <h2>1. Give arrival, waiting and service their own space</h2>
+  <div class="pair">
+    <figure><a href="00-baseline-entry.png"><img src="00-baseline-entry.png" width="256" height="192" alt="Flawed lobby: central chairs interrupt arrival and reception projects into public space"></a><figcaption>Before: objects exist, relationships fail.<small>3929eca · normal entry (8,10), up</small></figcaption></figure>
+    <figure><a href="01-layout-entry.png"><img src="01-layout-entry.png" width="256" height="192" alt="Repaired lobby: waiting left, reception right, clear arrival between"></a><figcaption>Recorded repair: lounge left, service right, clear arrival.<small>111f924 · relocated normal entry (9,10), up</small></figcaption></figure>
+  </div>
+  <p>Chairs and table now form a waiting pocket, rather than the end of the public runner. Reception groups with its clerk, storage and nearby stairs. Two extra map columns allow separation; width alone would not fix it.</p>
+  <h2>2. Check what the camera hides on return</h2>
+  <div class="pair">
+    <figure><a href="02-layout-hall.png"><img src="02-layout-hall.png" width="256" height="192" alt="Wider layout viewed from hall: the fireplace and lounge are heavily cropped at left"></a><figcaption>Layout repair still loses the left hearth on return.<small>111f924 · hall (16,2), down</small></figcaption></figure>
+    <figure><a href="03-framing-hall.png"><img src="03-framing-hall.png" width="256" height="192" alt="Same hall spawn with recorded west camera bias: more lounge visible and stairs retained"></a><figcaption>Recorded camera bias restores more of the room.<small>734215c · same hall (16,2), down</small></figcaption></figure>
+  </div>
+  <p>Map layout is not the player's view. Entrance and return can tell different stories. More hearth is visible after the framing correction; right-heavy weighting and repetitive shapes remain open questions.</p>
+  <h2>What counts as proof?</h2>
+  <p>Collision and door tests prove operation. These frames support visual critique. Only an unfamiliar player's choices can establish understanding. No beauty score or human result is claimed.</p>
+  <p>References: <a href="https://book.leveldesignbook.com/process/blockout">The Level Design Book: Blockout</a> · <a href="https://book.leveldesignbook.com/process/env-art">Environment Art</a>. Practitioner guidance, not scientific certification.</p>
+</main>
+</html>

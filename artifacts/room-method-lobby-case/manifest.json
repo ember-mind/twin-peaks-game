@@ -1,0 +1,66 @@
+{
+  "case": "Great Northern lobby: historical failure and recorded repair",
+  "assembledDateUTC": "2026-09-26",
+  "baseCommit": "7a3de3fd249cc908756a269e116c597bc82f1767",
+  "branch": "codex/room-method-lobby-case",
+  "newRuntimeOrArtChanges": false,
+  "captureType": "fresh native game-canvas exports from clean historical git archives",
+  "rendererHarness": "test/retro-scene.html invoked by each source revision's test/native-shot.js",
+  "snapshotContents": ["js", "assets", "world", "narrative", "test", "tools", "index.html"],
+  "setup": {
+    "map": "hotel_gn",
+    "narrative": true,
+    "narrativeStateOverride": null,
+    "animationClock": "live, not pinned; these captures do not compare temporal behavior",
+    "entryMethod": "harness loadMap at canonical spawn, not a human or keyboard door traversal",
+    "canvasPixels": [256, 192],
+    "gpu": "swiftshader",
+    "drivers": "sequential for this case study"
+  },
+  "captures": [
+    {
+      "file": "00-baseline-entry.png",
+      "sourceCommit": "3929eca907c0b6dff0067d0c3dea41f96f4e8c8a",
+      "spawn": [8, 10],
+      "direction": "up",
+      "sha256": "1fb5d82416c875e6372dd7dd5b7b717244807600809ffcec820c6cca92777ede",
+      "command": "node test/native-shot.js --map=hotel_gn --x=8 --y=10 --dir=up --narrative=1 --out=<absolute-output>/00-baseline-entry.png",
+      "result": "PASS after one identical retry",
+      "failedAttempt": "ready-title timeout; expected prefix TP-RETRO-READY, got TP-RETRO-LOADING; cause not established"
+    },
+    {
+      "file": "01-layout-entry.png",
+      "sourceCommit": "111f924a6380e09e43c886a212ed7c848078e2e0",
+      "spawn": [9, 10],
+      "direction": "up",
+      "sha256": "4ce4c0cf64442c1ce1ae530d9caf69f96b71d2e6cec0feb9a113ae5b8f7bae19",
+      "command": "node test/native-shot.js --map=hotel_gn --x=9 --y=10 --dir=up --narrative=1 --out=<absolute-output>/01-layout-entry.png",
+      "result": "PASS"
+    },
+    {
+      "file": "02-layout-hall.png",
+      "sourceCommit": "111f924a6380e09e43c886a212ed7c848078e2e0",
+      "spawn": [16, 2],
+      "direction": "down",
+      "sha256": "84c5e3f316170f8103934ad45a10391933d1ba06b44895fd5883c9592015f82d",
+      "command": "node test/native-shot.js --map=hotel_gn --x=16 --y=2 --dir=down --narrative=1 --out=<absolute-output>/02-layout-hall.png",
+      "result": "PASS"
+    },
+    {
+      "file": "03-framing-hall.png",
+      "sourceCommit": "734215c427cb736ff3161edab0b30b4ea92bc42c",
+      "spawn": [16, 2],
+      "direction": "down",
+      "sha256": "346f95b2fb65c3951632d86bf003cf5cc85fa1214cf18b57b2e06f81b8e8d5fb",
+      "command": "node test/native-shot.js --map=hotel_gn --x=16 --y=2 --dir=down --narrative=1 --out=<absolute-output>/03-framing-hall.png",
+      "result": "PASS"
+    }
+  ],
+  "evidenceLimits": [
+    "Historical reconstruction, not a newly authored room candidate",
+    "Layout repair changes several variables; individual causal gains are not isolated",
+    "Structural walkthrough is a simulator, not browser input acceptance",
+    "No human comprehension, eye tracking or beauty score claimed",
+    "Later current-production lobby art is not represented by these historical sources"
+  ]
+}
