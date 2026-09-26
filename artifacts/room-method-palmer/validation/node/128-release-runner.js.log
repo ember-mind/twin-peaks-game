@@ -1,0 +1,4 @@
+PASS test/pass.js
+FAIL test/fail.js
+FAIL test/hang.js
+release-runner: parser, failure, timeout, evidence, missing-file and path-isolation contracts passed

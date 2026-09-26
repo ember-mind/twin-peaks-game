@@ -1,0 +1,1167 @@
+{
+  "format": "release-node-run",
+  "version": 1,
+  "source": "7a3de3fd249cc908756a269e116c597bc82f1767",
+  "dirty": "M js/maps.js\n M js/palmer-art.js\n M js/palmer-scene.js\n M test/palmer-native.js\n?? artifacts/room-method-palmer/",
+  "node": "v26.5.0",
+  "startedAt": "2026-09-26T16:11:26.841Z",
+  "workflow": ".github/workflows/tests.yml",
+  "automatedNode": "FAIL",
+  "campaign": "NOT_RUN",
+  "human": "NOT_RUN",
+  "results": [
+    {
+      "file": "test/world-builder.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 78,
+      "log": "001-world-builder.js.log"
+    },
+    {
+      "file": "test/editor/changeset.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 44,
+      "log": "002-changeset.js.log"
+    },
+    {
+      "file": "test/editor/edit.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 45,
+      "log": "003-edit.js.log"
+    },
+    {
+      "file": "test/editor/cast.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 115,
+      "log": "004-cast.js.log"
+    },
+    {
+      "file": "test/editor/scene-objects.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 46,
+      "log": "005-scene-objects.js.log"
+    },
+    {
+      "file": "test/editor/history.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 40,
+      "log": "006-history.js.log"
+    },
+    {
+      "file": "test/editor/hit-test.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 38,
+      "log": "007-hit-test.js.log"
+    },
+    {
+      "file": "test/editor/identity.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 38,
+      "log": "008-identity.js.log"
+    },
+    {
+      "file": "test/editor/inspector.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 39,
+      "log": "009-inspector.js.log"
+    },
+    {
+      "file": "test/editor/interaction.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 40,
+      "log": "010-interaction.js.log"
+    },
+    {
+      "file": "test/editor/model.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 39,
+      "log": "011-model.js.log"
+    },
+    {
+      "file": "test/editor/world-builder-core.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 39,
+      "log": "012-world-builder-core.js.log"
+    },
+    {
+      "file": "test/world-door-equality.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 55,
+      "log": "013-world-door-equality.js.log"
+    },
+    {
+      "file": "test/legacy-door-inventory.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 52,
+      "log": "014-legacy-door-inventory.js.log"
+    },
+    {
+      "file": "test/scene-objects-inventory.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 54,
+      "log": "015-scene-objects-inventory.js.log"
+    },
+    {
+      "file": "test/scene-objects-equality.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 106,
+      "log": "016-scene-objects-equality.js.log"
+    },
+    {
+      "file": "test/location-connections.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 42,
+      "log": "017-location-connections.js.log"
+    },
+    {
+      "file": "test/migrated-door-traversal.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 499,
+      "log": "018-migrated-door-traversal.js.log"
+    },
+    {
+      "file": "test/test-world-registry.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 103,
+      "log": "019-test-world-registry.js.log"
+    },
+    {
+      "file": "test/apply-changeset.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 44,
+      "log": "020-apply-changeset.js.log"
+    },
+    {
+      "file": "test/editor-apply-preflight.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 320,
+      "log": "021-editor-apply-preflight.js.log"
+    },
+    {
+      "file": "test/editor-runtime-isolation.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 48,
+      "log": "022-editor-runtime-isolation.js.log"
+    },
+    {
+      "file": "test/world-apply.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 5256,
+      "log": "023-world-apply.js.log"
+    },
+    {
+      "file": "test/catalog-write.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 51,
+      "log": "024-catalog-write.js.log"
+    },
+    {
+      "file": "test/world-apply-cast.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 3690,
+      "log": "025-world-apply-cast.js.log"
+    },
+    {
+      "file": "test/world-apply-objects.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 20718,
+      "log": "026-world-apply-objects.js.log"
+    },
+    {
+      "file": "test/cast-continuity-validate.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 92,
+      "log": "027-cast-continuity-validate.js.log"
+    },
+    {
+      "file": "test/cast-presence-sync.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 85,
+      "log": "028-cast-presence-sync.js.log"
+    },
+    {
+      "file": "test/world-engine-v0.1-catalog.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 58,
+      "log": "029-world-engine-v0.1-catalog.js.log"
+    },
+    {
+      "file": "test/narrative-validate-m9.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 56,
+      "log": "030-narrative-validate-m9.js.log"
+    },
+    {
+      "file": "test/narrative-validate-m10.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 46,
+      "log": "031-narrative-validate-m10.js.log"
+    },
+    {
+      "file": "test/act-5-flow.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 193,
+      "log": "032-act-5-flow.js.log"
+    },
+    {
+      "file": "test/act-5-mirror-gate.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 55,
+      "log": "033-act-5-mirror-gate.js.log"
+    },
+    {
+      "file": "test/act-2-flow.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 54,
+      "log": "034-act-2-flow.js.log"
+    },
+    {
+      "file": "test/act-2-ronette-required.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 43,
+      "log": "035-act-2-ronette-required.js.log"
+    },
+    {
+      "file": "test/act-3-flow.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 66,
+      "log": "036-act-3-flow.js.log"
+    },
+    {
+      "file": "test/act-3-mirror-gate.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 51,
+      "log": "037-act-3-mirror-gate.js.log"
+    },
+    {
+      "file": "test/act-4-flow.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 66,
+      "log": "038-act-4-flow.js.log"
+    },
+    {
+      "file": "test/act-4-mirror-gate.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 55,
+      "log": "039-act-4-mirror-gate.js.log"
+    },
+    {
+      "file": "test/narrative-finale.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 391,
+      "log": "040-narrative-finale.js.log"
+    },
+    {
+      "file": "test/narrative-m9-runtime.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 51,
+      "log": "041-narrative-m9-runtime.js.log"
+    },
+    {
+      "file": "test/narrative-repair-contract.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 43,
+      "log": "042-narrative-repair-contract.js.log"
+    },
+    {
+      "file": "test/narrative-slice-01.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 55,
+      "log": "043-narrative-slice-01.js.log"
+    },
+    {
+      "file": "test/narrative-validate-m5.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 46,
+      "log": "044-narrative-validate-m5.js.log"
+    },
+    {
+      "file": "test/narrative-validate-m6.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 48,
+      "log": "045-narrative-validate-m6.js.log"
+    },
+    {
+      "file": "test/narrative-validate-m8.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 47,
+      "log": "046-narrative-validate-m8.js.log"
+    },
+    {
+      "file": "test/story-truth-lint.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 97,
+      "log": "047-story-truth-lint.js.log"
+    },
+    {
+      "file": "test/letter-chain-provenance.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 53,
+      "log": "048-letter-chain-provenance.js.log"
+    },
+    {
+      "file": "test/ronette-bob-provenance.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 51,
+      "log": "049-ronette-bob-provenance.js.log"
+    },
+    {
+      "file": "test/tracks-provenance.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 50,
+      "log": "050-tracks-provenance.js.log"
+    },
+    {
+      "file": "test/objective-resolver.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 42,
+      "log": "051-objective-resolver.js.log"
+    },
+    {
+      "file": "test/notebook-objective.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 42,
+      "log": "052-notebook-objective.js.log"
+    },
+    {
+      "file": "test/objective-notebook-visibility.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 44,
+      "log": "053-objective-notebook-visibility.js.log"
+    },
+    {
+      "file": "test/choice-prompts.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 43,
+      "log": "054-choice-prompts.js.log"
+    },
+    {
+      "file": "test/choice-prompt-dedup.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 46,
+      "log": "055-choice-prompt-dedup.js.log"
+    },
+    {
+      "file": "test/dialogue-craft-regression.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 43,
+      "log": "056-dialogue-craft-regression.js.log"
+    },
+    {
+      "file": "test/dialogue-presentation.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 56,
+      "log": "057-dialogue-presentation.js.log"
+    },
+    {
+      "file": "test/interaction-voice.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 55,
+      "log": "058-interaction-voice.js.log"
+    },
+    {
+      "file": "test/classic-object-grounding.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 59,
+      "log": "059-classic-object-grounding.js.log"
+    },
+    {
+      "file": "test/environmental-interactions.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 68,
+      "log": "060-environmental-interactions.js.log"
+    },
+    {
+      "file": "test/environment-entry.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 95,
+      "log": "061-environment-entry.js.log"
+    },
+    {
+      "file": "test/environment-life.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 51,
+      "log": "062-environment-life.js.log"
+    },
+    {
+      "file": "test/ambient-life.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 57,
+      "log": "063-ambient-life.js.log"
+    },
+    {
+      "file": "test/character-activity.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 47,
+      "log": "064-character-activity.js.log"
+    },
+    {
+      "file": "test/character-quality.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 45,
+      "log": "065-character-quality.js.log"
+    },
+    {
+      "file": "test/character-runtime-contract.js",
+      "status": "FAIL",
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 146,
+      "log": "066-character-runtime-contract.js.log"
+    },
+    {
+      "file": "test/cast-sprite-sheet.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 50,
+      "log": "067-cast-sprite-sheet.js.log"
+    },
+    {
+      "file": "test/cooper-sprite-sheet.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 41,
+      "log": "068-cooper-sprite-sheet.js.log"
+    },
+    {
+      "file": "test/gold-tone-gates.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 44,
+      "log": "069-gold-tone-gates.js.log"
+    },
+    {
+      "file": "test/portrait-gates.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 118,
+      "log": "070-portrait-gates.js.log"
+    },
+    {
+      "file": "test/r69-reference-gates.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 85,
+      "log": "071-r69-reference-gates.js.log"
+    },
+    {
+      "file": "test/graphic-pass-contract.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 105,
+      "log": "072-graphic-pass-contract.js.log"
+    },
+    {
+      "file": "test/retro-font.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 44,
+      "log": "073-retro-font.js.log"
+    },
+    {
+      "file": "test/retro-production.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 48,
+      "log": "074-retro-production.js.log"
+    },
+    {
+      "file": "test/mobile-production.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 41,
+      "log": "075-mobile-production.js.log"
+    },
+    {
+      "file": "test/touch-runtime.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 42,
+      "log": "076-touch-runtime.js.log"
+    },
+    {
+      "file": "test/movement-feel.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 112,
+      "log": "077-movement-feel.js.log"
+    },
+    {
+      "file": "test/walk-phase-contract.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 43,
+      "log": "078-walk-phase-contract.js.log"
+    },
+    {
+      "file": "test/ember-engine-shared.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 259,
+      "log": "079-ember-engine-shared.js.log"
+    },
+    {
+      "file": "test/living-town-suite.js",
+      "status": "FAIL",
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 43678,
+      "log": "080-living-town-suite.js.log"
+    },
+    {
+      "file": "test/interior-scenes-contract.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 57,
+      "log": "081-interior-scenes-contract.js.log"
+    },
+    {
+      "file": "test/initial-spawn.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 60,
+      "log": "082-initial-spawn.js.log"
+    },
+    {
+      "file": "test/location-traversal.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 111,
+      "log": "083-location-traversal.js.log"
+    },
+    {
+      "file": "test/traincar-location-traversal.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 148,
+      "log": "084-traincar-location-traversal.js.log"
+    },
+    {
+      "file": "test/town-map-coherence.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 54,
+      "log": "085-town-map-coherence.js.log"
+    },
+    {
+      "file": "test/town-structure-semantics.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 51,
+      "log": "086-town-structure-semantics.js.log"
+    },
+    {
+      "file": "test/town-dusk.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 54,
+      "log": "087-town-dusk.js.log"
+    },
+    {
+      "file": "test/props-registry.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 89,
+      "log": "088-props-registry.js.log"
+    },
+    {
+      "file": "test/props-changeset.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 6043,
+      "log": "089-props-changeset.js.log"
+    },
+    {
+      "file": "test/props-render-order.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 43,
+      "log": "090-props-render-order.js.log"
+    },
+    {
+      "file": "test/props-below-band.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 40,
+      "log": "091-props-below-band.js.log"
+    },
+    {
+      "file": "test/props-core.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 52,
+      "log": "092-props-core.js.log"
+    },
+    {
+      "file": "test/interior-prop-semantics.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 44,
+      "log": "093-interior-prop-semantics.js.log"
+    },
+    {
+      "file": "test/interior-zoning-reachability.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 47,
+      "log": "094-interior-zoning-reachability.js.log"
+    },
+    {
+      "file": "test/world-catalog-coverage.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 39,
+      "log": "095-world-catalog-coverage.js.log"
+    },
+    {
+      "file": "test/diner-layout.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 56,
+      "log": "096-diner-layout.js.log"
+    },
+    {
+      "file": "test/diner-interior.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 51,
+      "log": "097-diner-interior.js.log"
+    },
+    {
+      "file": "test/hospital-native.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 108,
+      "log": "098-hospital-native.js.log"
+    },
+    {
+      "file": "test/room-315-location.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 129,
+      "log": "099-room-315-location.js.log"
+    },
+    {
+      "file": "test/room-315-native.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 112,
+      "log": "100-room-315-native.js.log"
+    },
+    {
+      "file": "test/palmer-native.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 170,
+      "log": "101-palmer-native.js.log"
+    },
+    {
+      "file": "test/oej-native.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 463,
+      "log": "102-oej-native.js.log"
+    },
+    {
+      "file": "test/woods-native.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 650,
+      "log": "103-woods-native.js.log"
+    },
+    {
+      "file": "test/sheriffs-station-location.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 116,
+      "log": "104-sheriffs-station-location.js.log"
+    },
+    {
+      "file": "test/sheriffs-station-native.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 213,
+      "log": "105-sheriffs-station-native.js.log"
+    },
+    {
+      "file": "test/sheriffs-station-door.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 67,
+      "log": "106-sheriffs-station-door.js.log"
+    },
+    {
+      "file": "test/sheriffs-station-ambient.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 118,
+      "log": "107-sheriffs-station-ambient.js.log"
+    },
+    {
+      "file": "test/station-population.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 77,
+      "log": "108-station-population.js.log"
+    },
+    {
+      "file": "test/traincar-native.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 246,
+      "log": "109-traincar-native.js.log"
+    },
+    {
+      "file": "test/redroom-scene.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 213,
+      "log": "110-redroom-scene.js.log"
+    },
+    {
+      "file": "test/narrative-lint.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 52,
+      "log": "111-narrative-lint.js.log"
+    },
+    {
+      "file": "test/smoke.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 142,
+      "log": "112-smoke.js.log"
+    },
+    {
+      "file": "test/walkthrough.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 740,
+      "log": "113-walkthrough.js.log"
+    },
+    {
+      "file": "test/turn-in-place.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 95,
+      "log": "114-turn-in-place.js.log"
+    },
+    {
+      "file": "test/classic-evidence-bridge.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 54,
+      "log": "115-classic-evidence-bridge.js.log"
+    },
+    {
+      "file": "test/finale-completion-persistence.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 55,
+      "log": "116-finale-completion-persistence.js.log"
+    },
+    {
+      "file": "test/campaign-player.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 43,
+      "log": "117-campaign-player.js.log"
+    },
+    {
+      "file": "test/campaign-report-safety.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 526,
+      "log": "118-campaign-report-safety.js.log"
+    },
+    {
+      "file": "test/campaign-recovery.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 45,
+      "log": "119-campaign-recovery.js.log"
+    },
+    {
+      "file": "test/classic-cast-sync.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 65,
+      "log": "120-classic-cast-sync.js.log"
+    },
+    {
+      "file": "test/gen-world-data.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 45,
+      "log": "121-gen-world-data.js.log"
+    },
+    {
+      "file": "test/narrative-targets.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 44,
+      "log": "122-narrative-targets.js.log"
+    },
+    {
+      "file": "test/narrative-targets-apply.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 4426,
+      "log": "123-narrative-targets-apply.js.log"
+    },
+    {
+      "file": "test/touch-notebook-navigation.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 42,
+      "log": "124-touch-notebook-navigation.js.log"
+    },
+    {
+      "file": "test/playable-browser.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 51,
+      "log": "125-playable-browser.js.log"
+    },
+    {
+      "file": "test/touch-gesture-transport.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 41,
+      "log": "126-touch-gesture-transport.js.log"
+    },
+    {
+      "file": "test/touch-preflight.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 40,
+      "log": "127-touch-preflight.js.log"
+    },
+    {
+      "file": "test/release-runner.js",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 688,
+      "log": "128-release-runner.js.log"
+    }
+  ],
+  "finishedAt": "2026-09-26T16:13:02.926Z"
+}

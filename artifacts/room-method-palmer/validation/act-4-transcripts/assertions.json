@@ -1,0 +1,2685 @@
+{
+  "results": [
+    {
+      "name": "[A] setup: build reale in partita (testMode=false)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] setup: seme di fine Atto 3 installato (atto4, gigante1, jacques_dead, E3, E1) e M8 corrente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] setup: M8 caricata con i nodi dello split",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] HUD: all'apertura dell'Atto 4 l'obiettivo è obj_m8_0",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Lucy (prima del presagio): esattamente le pagine [\"m8.lucy.p01\",\"m8.lucy.p02\"]",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Lucy (prima del presagio): nessun widget, nessun effetto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Sarah: attiva a casa Palmer prima del diner",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Sarah: il dialogo classico rende almeno le pagine 1–2 (prima del diner)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Sarah: mai il token «BOB» nella visione (prima del diner)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Sarah: sarah_visione_ascoltata scritto (prima del diner)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] presenza (pomeriggio al diner (prima della promessa)): il registro combacia col pin ACT4_AFTERNOON",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] presenza (pomeriggio al diner (prima della promessa)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] diner: Maddy e Leland presenti al bancone prima della promessa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] diner: Maddy e Leland alle caselle del registro (10,1 / 11,1)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] diner: Leland prima della promessa rende esattamente m8.a.leland_waiting.p01 + p02",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] diner: l'attesa di Leland non scrive nulla",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] HUD: prima della promessa l'obiettivo è obj_m8_0",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] diner: la promessa apre le tre opzioni",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] diner: il feedback della promessa «accompagno» è la sua pagina",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] diner: promise_stance = accompagno",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] diner: Maddy resta al bancone dopo la promessa (lascia solo a T_LELAND_TAXI), Leland resta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] presenza (diner dopo la promessa): il registro combacia col pin ACT4_PROMISE_MADE",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] presenza (diner dopo la promessa): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] HUD: dopo la promessa l'obiettivo è obj_m8_25",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] diner: la testimonianza del taxi rende le pagine della promessa «accompagno»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] diner: T_LELAND_TAXI acquisita",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] diner: Leland e Maddy spariscono dopo la testimonianza (T_LELAND_TAXI)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] HUD: dopo il taxi l'obiettivo è obj_m8_1",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] diner: dopo la chiusura (T_LELAND_TAXI) Norma, Shelly, Log Lady e James sono al Roadhouse, non più al diner",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: la città ha una porta per il Roadhouse",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: la porta si apre con atto4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] presenza (ingresso al Roadhouse (raduno serale)): il registro combacia col pin ACT4_EVENING_GATHERING",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] presenza (ingresso al Roadhouse (raduno serale)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: Truman e la folla presenti all'arrivo, Gigante assente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: nessuna entità sul telefono o sulle caselle sopra/sotto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: la dichiarazione al tavolo rende m8.b.truman.p01…p05",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: la dichiarazione non apre il telefono nello stesso lease",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: presagio_status = active dopo la dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: m8_roadhouse_truman committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: il Gigante è sul palco (8,1) dopo la dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] HUD: dopo la dichiarazione il testo è esattamente «Il telefono del Roadhouse.»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] mondo: gigante2 classico derivato dalla dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] mondo: Sarah non è più a casa Palmer dopo la dichiarazione (nessun corpo: OFFSCREEN asleep)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] mondo: bobby e donna assenti dalla città dopo la dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] presenza (Roadhouse dopo la dichiarazione (pre-telefono)): il registro combacia col pin ACT4_ROADHOUSE_PRE_PHONE",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] presenza (Roadhouse dopo la dichiarazione (pre-telefono)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] reload prima del telefono: registro narrativo identico",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] presenza (pre-telefono: dopo il reload): il registro combacia col pin ACT4_ROADHOUSE_PRE_PHONE",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] presenza (pre-telefono: dopo il reload): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] reload prima del telefono: il registro Cast Continuity è identico prima e dopo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: il Gigante rende solo m8.b.giant.p01",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: la ripetizione del Gigante non aggiunge enunciati",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: il Gigante non scrive nulla",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: il telefono si raggiunge e apre le tre opzioni",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: il telefono rende m8.b.phone.p01 e p02",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: il feedback dell'avviso «palmer» è quello scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: warning_target = palmer",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: dopo la telefonata il Gigante non c'è più, Truman e la folla restano (fino a focus_destination)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] presenza (Roadhouse dopo il telefono (dentro la sala)): il registro combacia col pin ACT4_POST_PHONE_INSIDE_PALMER",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] presenza (Roadhouse dopo il telefono (dentro la sala)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] HUD: dopo la telefonata l'obiettivo è obj_m8_2",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: regressione di rientro — si esce a piedi prima del crocevia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: regressione di rientro — si rientra a piedi",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] presenza (Roadhouse: rientro dopo il telefono, prima del crocevia): il registro combacia col pin ACT4_POST_PHONE_INSIDE_PALMER",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] presenza (Roadhouse: rientro dopo il telefono, prima del crocevia): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: al rientro Truman e la folla ci sono ancora, il Gigante no",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] Roadhouse: il registro Cast Continuity è identico prima e dopo il rientro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] guida: il percorso arriva in fondo senza eccezioni del driver",
+      "pass": false,
+      "detail": "Error: page: Error: timeout: engine\n    at waitFor (http://127.0.0.1:22912/test/act-4-playthrough-probe.html:572:11)\n    at async loadFrame (http://127.0.0.1:22912/test/act-4-playthrough-probe.html:580:5)\n    at async A4.reload (http://127.0.0.1:22912/test/act-4-playthrough-probe.html:672:5)\n    at async <anonymous>:1:23\n    at Cdp.evaluate (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/.worktrees/room-method-palmer/test/act-4-playthrough.js:94:13)\n    at async playRoadhouse (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/.worktrees/room-method-palmer/test/act-4-playthrough.js:701:14)\n    at async runPath (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/.worktrees/room-method-palmer/test/act-4-playthrough.js:1013:3)\n    at async main (/Users/ebuccelli/Code/solo/projects/twin-peaks-game/.worktrees/room-method-palmer/test/act-4-playthrough.js:173:16)"
+    },
+    {
+      "name": "[A] trascrizione: pagine registrate",
+      "pass": false,
+      "detail": 30
+    },
+    {
+      "name": "[A] voce: lo speaker emesso coincide con quello scritto su ogni pagina",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] voce: ogni pagina emessa è una pagina scritta in una missione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] testo: nessuna deriva fra pagina scritta e pagina emessa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] testo: nessun id di risultato/nodo o metadato «[…]» a schermo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] testo: nessun «BOB», conteggio di lettere, «salvat», «troppo tardi», «se fossi», «bugia/mentito» nelle pagine M8 emesse",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] HUD: ogni testo di obiettivo osservato è un obiettivo scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] HUD: i pioli M8 si susseguono nell'ordine scritto, mai all'indietro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] mondo: nessun dialogo classico ritirato (truman_atto4, truman_atto5, lago_maddy, maddy_a4, leland_a4, leland_dove, leland_dopo, gerard_a4)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] mondo: nessun dialogo classico di Maddy/Leland/Gigante/Norma/Truman sulle mappe dell'Atto 4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] adapter: nessuna pagina adapter.no_roots, nessun rifiuto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] guida: nessun ripiego sull'API dell'adapter, tutto coi tasti",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] adapter: nessuna root ambigua",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] guida: nessun teletrasporto lungo la rotta scelta o verso la riva",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] stato: T_LELAND_TAXI scritta una sola volta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] stato: nessun nodo one-shot committato due volte",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] mondo: mai due Hawk, due Maddy, due Leland o due Giganti sulla stessa mappa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] mondo: Maddy e Leland mai a casa Palmer nell'Atto 4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[A] console: nessun errore del browser durante il percorso",
+      "pass": false,
+      "detail": [
+        "Failed to load resource: net::ERR_CONNECTION_RESET  <http://127.0.0.1:22912/engine/ember-camera.js>",
+        "exception: Error: Ember Engine missing: load engine/ember-*.js before js/engine.js\n    at http://127.0.0.1:22912/js/engine.js?v=r142-narrative-portrait:25:11\n    at http://127.0.0.1:22912/js/engine.js?v=r142-narrative-portrait:1744:3",
+        "exception: TypeError: GAME.Engine.init is not a function\n    at HTMLDocument.boot (http://127.0.0.1:22912/js/main.js?v=r111portrait-tight:288:17)"
+      ]
+    },
+    {
+      "name": "[B] setup: build reale in partita (testMode=false)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] setup: seme di fine Atto 3 installato (atto4, gigante1, jacques_dead, E3, E1) e M8 corrente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] setup: M8 caricata con i nodi dello split",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: all'apertura dell'Atto 4 l'obiettivo è obj_m8_0",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (pomeriggio al diner (prima della promessa)): il registro combacia col pin ACT4_AFTERNOON",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (pomeriggio al diner (prima della promessa)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: Maddy e Leland presenti al bancone prima della promessa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: Maddy e Leland alle caselle del registro (10,1 / 11,1)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: Leland prima della promessa rende esattamente m8.a.leland_waiting.p01 + p02",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: l'attesa di Leland non scrive nulla",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: prima della promessa l'obiettivo è obj_m8_0",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: la promessa apre le tre opzioni",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: il feedback della promessa «autonomia» è la sua pagina",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: promise_stance = autonomia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: Maddy resta al bancone dopo la promessa (lascia solo a T_LELAND_TAXI), Leland resta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (diner dopo la promessa): il registro combacia col pin ACT4_PROMISE_MADE",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (diner dopo la promessa): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: dopo la promessa l'obiettivo è obj_m8_25",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Log Lady: il ceppo indica il Roadhouse (classico loglady_a4)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Log Lady: nessuna pagina narrativa né rifiuto dell'adapter",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: la testimonianza del taxi rende le pagine della promessa «autonomia»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: T_LELAND_TAXI acquisita",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: Leland e Maddy spariscono dopo la testimonianza (T_LELAND_TAXI)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: dopo il taxi l'obiettivo è obj_m8_1",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] diner: dopo la chiusura (T_LELAND_TAXI) Norma, Shelly, Log Lady e James sono al Roadhouse, non più al diner",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Sarah: attiva a casa Palmer fra il diner e il Roadhouse",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Sarah: il dialogo classico rende almeno le pagine 1–2 (fra il diner e il Roadhouse)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Sarah: mai il token «BOB» nella visione (fra il diner e il Roadhouse)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Sarah: sarah_visione_ascoltata scritto (fra il diner e il Roadhouse)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: la città ha una porta per il Roadhouse",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: la porta si apre con atto4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (ingresso al Roadhouse (raduno serale)): il registro combacia col pin ACT4_EVENING_GATHERING",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (ingresso al Roadhouse (raduno serale)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: Truman e la folla presenti all'arrivo, Gigante assente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: nessuna entità sul telefono o sulle caselle sopra/sotto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: la dichiarazione al tavolo rende m8.b.truman.p01…p05",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: la dichiarazione non apre il telefono nello stesso lease",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: presagio_status = active dopo la dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: m8_roadhouse_truman committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: il Gigante è sul palco (8,1) dopo la dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: dopo la dichiarazione il testo è esattamente «Il telefono del Roadhouse.»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: gigante2 classico derivato dalla dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: Sarah non è più a casa Palmer dopo la dichiarazione (nessun corpo: OFFSCREEN asleep)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: bobby e donna assenti dalla città dopo la dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (Roadhouse dopo la dichiarazione (pre-telefono)): il registro combacia col pin ACT4_ROADHOUSE_PRE_PHONE",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (Roadhouse dopo la dichiarazione (pre-telefono)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: il Gigante rende solo m8.b.giant.p01",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: la ripetizione del Gigante non aggiunge enunciati",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: il Gigante non scrive nulla",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: il telefono si raggiunge e apre le tre opzioni",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: il telefono rende m8.b.phone.p01 e p02",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: il feedback dell'avviso «centrale» è quello scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: warning_target = centrale",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: dopo la telefonata il Gigante non c'è più, Truman e la folla restano (fino a focus_destination)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (Roadhouse dopo il telefono (dentro la sala)): il registro combacia col pin ACT4_POST_PHONE_INSIDE_CENTRALE",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (Roadhouse dopo il telefono (dentro la sala)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: dopo la telefonata l'obiettivo è obj_m8_2",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: regressione di rientro — si esce a piedi prima del crocevia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: regressione di rientro — si rientra a piedi",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (Roadhouse: rientro dopo il telefono, prima del crocevia): il registro combacia col pin ACT4_POST_PHONE_INSIDE_CENTRALE",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (Roadhouse: rientro dopo il telefono, prima del crocevia): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: al rientro Truman e la folla ci sono ancora, il Gigante no",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] Roadhouse: il registro Cast Continuity è identico prima e dopo il rientro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] reload dopo il telefono: promessa e avviso persistono",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] reload dopo il telefono: stato narrativo identico",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] reload dopo il telefono: obiettivo HUD identico",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] reload dopo il telefono: il Gigante NON ricompare (fuori finestra)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] reload dopo il telefono: entità identiche",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] reload dopo il telefono: il registro Cast Continuity è identico prima e dopo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] reload dopo il telefono: il salvataggio persistito non contiene chiavi di posizione (cast_source/sceneId/homeX)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] soglia: si esce dal Roadhouse in città",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] soglia: town_crossroads è a 47,30",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] soglia: si arriva sulla casella sopra il crocevia, rivolti in basso",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] soglia: un tasto in basso apre il crocevia (m8_focus_choice)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] soglia: il widget si apre a 47,29 guardando 47,30",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] soglia: le pagine del crocevia precedono la scelta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] soglia: focus_destination = lago",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (dopo la scelta di focus, al crocevia): il registro combacia col pin ACT4_ROUTE_LAKE",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (dopo la scelta di focus, al crocevia): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] rotta lago: si cammina dal crocevia alla riva e la rotta risponde",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] rotta lago: body_found_by = cooper",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: dopo la rotta l'obiettivo resta obj_m8_2 (fino al ritrovamento)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] riva: la collocazione di Hawk prima del ritrovamento è quella del registro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] riva: la riva del lago si raggiunge a piedi",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] riva: Hawk sulla riva PRIMA del ritrovamento assente (body_found_by=cooper)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] riva: il ritrovamento rende la versione «cooper»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] riva: l'eco della promessa è la versione «autonomia»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] riva: maddy_trovata, E9A/E9B, presagio verified, eco committata",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] riva: letter_o_observation_source deriva da body_found_by",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] riva: dopo il ritrovamento un solo Hawk, PLACED@town 16,27 dal registro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (riva dopo il ritrovamento): il registro combacia col pin ACT4_SHORE_COOPER_AFTER",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (riva dopo il ritrovamento): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: dopo il ritrovamento l'obiettivo è obj_m8_3",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: maddy_trovata attraversa al classico",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] taccuino: lettere R + O → m8_cmp_letters",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] taccuino: m8_cmp_letters committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] taccuino: lettera O + diario → m8_cmp_diary con tre letture",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] taccuino: le pagine del diario precedono la scelta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] taccuino: la lettura «diary_c» risponde col suo feedback e resta ritentabile",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] taccuino: P8 non formulata dopo «diary_c»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] taccuino: «diary_a» rende il suo feedback",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] taccuino: P8 formulata solo al commit di diary_a",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: con P8 formulata l'obiettivo è obj_m8_35",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] stazione: Truman risponde con m8_station (p01…p03), mai con M4/M6",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] stazione: il caso Sarah è «vice» (m8.f.station.sarah_vice)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] stazione: p_valigia assente (avviso=centrale, focus=lago)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] stazione: p_lago presente (focus=lago)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] stazione: l'aggancio dell'orario (hook p01/p02) chiude la scena",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] stazione: m8_station committato, T_LELAND_TAXI ancora una sola acquisizione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] obiettivo M8 dopo la stazione: obj_m8_4 «Porta a Truman una contraddizione che regga.»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: bobby e donna ancora assenti dalla città dopo la stazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: Sarah ancora assente da casa Palmer (prima di atto5) dopo la stazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (centrale prima dell'alba (fine giocata)): il registro combacia col pin (nessun pin adatto: solo cattura + doppioni)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] presenza (centrale prima dell'alba (fine giocata)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] trascrizione: pagine registrate",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] voce: lo speaker emesso coincide con quello scritto su ogni pagina",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] voce: ogni pagina emessa è una pagina scritta in una missione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] testo: nessuna deriva fra pagina scritta e pagina emessa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] testo: nessun id di risultato/nodo o metadato «[…]» a schermo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] testo: nessun «BOB», conteggio di lettere, «salvat», «troppo tardi», «se fossi», «bugia/mentito» nelle pagine M8 emesse",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: ogni testo di obiettivo osservato è un obiettivo scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] HUD: i pioli M8 si susseguono nell'ordine scritto, mai all'indietro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: nessun dialogo classico ritirato (truman_atto4, truman_atto5, lago_maddy, maddy_a4, leland_a4, leland_dove, leland_dopo, gerard_a4)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: nessun dialogo classico di Maddy/Leland/Gigante/Norma/Truman sulle mappe dell'Atto 4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] adapter: nessuna pagina adapter.no_roots, nessun rifiuto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] guida: nessun ripiego sull'API dell'adapter, tutto coi tasti",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] adapter: nessuna root ambigua",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] guida: nessun teletrasporto lungo la rotta scelta o verso la riva",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] stato: T_LELAND_TAXI scritta una sola volta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] stato: nessun nodo one-shot committato due volte",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: mai due Hawk, due Maddy, due Leland o due Giganti sulla stessa mappa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] mondo: Maddy e Leland mai a casa Palmer nell'Atto 4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[B] console: nessun errore del browser durante il percorso",
+      "pass": false,
+      "detail": [
+        "Failed to load resource: net::ERR_SOCKET_NOT_CONNECTED  <http://127.0.0.1:22912/js/diorama.js?v=dq3-materials-3>"
+      ]
+    },
+    {
+      "name": "[C] setup: build reale in partita (testMode=false)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] setup: seme di fine Atto 3 installato (atto4, gigante1, jacques_dead, E3, E1) e M8 corrente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] setup: M8 caricata con i nodi dello split",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] HUD: all'apertura dell'Atto 4 l'obiettivo è obj_m8_0",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] presenza (pomeriggio al diner (prima della promessa)): il registro combacia col pin ACT4_AFTERNOON",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] presenza (pomeriggio al diner (prima della promessa)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] diner: Maddy e Leland presenti al bancone prima della promessa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] diner: Maddy e Leland alle caselle del registro (10,1 / 11,1)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] diner: Leland prima della promessa rende esattamente m8.a.leland_waiting.p01 + p02",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] diner: l'attesa di Leland non scrive nulla",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] HUD: prima della promessa l'obiettivo è obj_m8_0",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] diner: la promessa apre le tre opzioni",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] diner: il feedback della promessa «prudenza» è la sua pagina",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] diner: promise_stance = prudenza",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] diner: Maddy resta al bancone dopo la promessa (lascia solo a T_LELAND_TAXI), Leland resta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] presenza (diner dopo la promessa): il registro combacia col pin ACT4_PROMISE_MADE",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] presenza (diner dopo la promessa): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] HUD: dopo la promessa l'obiettivo è obj_m8_25",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] diner: la testimonianza del taxi rende le pagine della promessa «prudenza»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] diner: T_LELAND_TAXI acquisita",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] diner: Leland e Maddy spariscono dopo la testimonianza (T_LELAND_TAXI)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] HUD: dopo il taxi l'obiettivo è obj_m8_1",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] diner: dopo la chiusura (T_LELAND_TAXI) Norma, Shelly, Log Lady e James sono al Roadhouse, non più al diner",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: la città ha una porta per il Roadhouse",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: la porta si apre con atto4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] presenza (ingresso al Roadhouse (raduno serale)): il registro combacia col pin ACT4_EVENING_GATHERING",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] presenza (ingresso al Roadhouse (raduno serale)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: Truman e la folla presenti all'arrivo, Gigante assente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: nessuna entità sul telefono o sulle caselle sopra/sotto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: la dichiarazione al tavolo rende m8.b.truman.p01…p05",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: la dichiarazione non apre il telefono nello stesso lease",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: presagio_status = active dopo la dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: m8_roadhouse_truman committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: il Gigante è sul palco (8,1) dopo la dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] HUD: dopo la dichiarazione il testo è esattamente «Il telefono del Roadhouse.»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] mondo: gigante2 classico derivato dalla dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] mondo: Sarah non è più a casa Palmer dopo la dichiarazione (nessun corpo: OFFSCREEN asleep)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] mondo: bobby e donna assenti dalla città dopo la dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] presenza (Roadhouse dopo la dichiarazione (pre-telefono)): il registro combacia col pin ACT4_ROADHOUSE_PRE_PHONE",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] presenza (Roadhouse dopo la dichiarazione (pre-telefono)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: il Gigante rende solo m8.b.giant.p01",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: la ripetizione del Gigante non aggiunge enunciati",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: il Gigante non scrive nulla",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: il telefono si raggiunge e apre le tre opzioni",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: il telefono rende m8.b.phone.p01 e p02",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: il feedback dell'avviso «nessuno» è quello scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: warning_target = nessuno",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: dopo la telefonata il Gigante non c'è più, Truman e la folla restano (fino a focus_destination)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] presenza (Roadhouse dopo il telefono (dentro la sala)): il registro combacia col pin ACT4_POST_PHONE_INSIDE_NESSUNO",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] presenza (Roadhouse dopo il telefono (dentro la sala)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] HUD: dopo la telefonata l'obiettivo è obj_m8_2",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: regressione di rientro — si esce a piedi prima del crocevia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: regressione di rientro — si rientra a piedi",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] presenza (Roadhouse: rientro dopo il telefono, prima del crocevia): il registro combacia col pin ACT4_POST_PHONE_INSIDE_NESSUNO",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] presenza (Roadhouse: rientro dopo il telefono, prima del crocevia): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: al rientro Truman e la folla ci sono ancora, il Gigante no",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] Roadhouse: il registro Cast Continuity è identico prima e dopo il rientro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] reload dopo il telefono: promessa e avviso persistono",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] reload dopo il telefono: stato narrativo identico",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] reload dopo il telefono: obiettivo HUD identico",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] reload dopo il telefono: il Gigante NON ricompare (fuori finestra)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] reload dopo il telefono: entità identiche",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] reload dopo il telefono: il registro Cast Continuity è identico prima e dopo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] reload dopo il telefono: il salvataggio persistito non contiene chiavi di posizione (cast_source/sceneId/homeX)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] soglia: si esce dal Roadhouse in città",
+      "pass": false,
+      "detail": {
+        "ok": false,
+        "map": "roadhouse",
+        "blocked": null,
+        "arrival": null,
+        "pos": {
+          "map": "roadhouse",
+          "x": 7,
+          "y": 9,
+          "dir": "down"
+        }
+      }
+    },
+    {
+      "name": "[C] soglia: town_crossroads è a 47,30",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] soglia: si arriva sulla casella sopra il crocevia, rivolti in basso",
+      "pass": false,
+      "detail": {
+        "arrival": [
+          7,
+          9,
+          "down"
+        ],
+        "pos": {
+          "map": "roadhouse",
+          "x": 7,
+          "y": 9,
+          "dir": "down"
+        },
+        "target": {
+          "x": 47,
+          "y": 30,
+          "kind": "landmark"
+        }
+      }
+    },
+    {
+      "name": "[C] soglia: un tasto in basso apre il crocevia (m8_focus_choice)",
+      "pass": false,
+      "detail": {
+        "ok": false,
+        "error": "unreachable",
+        "label": "m8_focus_choice",
+        "detail": {
+          "ok": false,
+          "error": "unreachable",
+          "target": [
+            47,
+            30
+          ],
+          "candidates": [],
+          "diag": {
+            "from": [
+              7,
+              8
+            ],
+            "to": [
+              7,
+              8
+            ],
+            "reason": "ok",
+            "steps": 0,
+            "replans": 0
+          }
+        },
+        "rows": [],
+        "choices": []
+      }
+    },
+    {
+      "name": "[C] soglia: il widget si apre a 47,29 guardando 47,30",
+      "pass": false,
+      "detail": null
+    },
+    {
+      "name": "[C] soglia: le pagine del crocevia precedono la scelta",
+      "pass": false,
+      "detail": []
+    },
+    {
+      "name": "[C] soglia: focus_destination = diner",
+      "pass": false,
+      "detail": {
+        "m5_final_theory": "degeneration",
+        "s1": "institutional",
+        "m6_tactic": "prova",
+        "promise_stance": "prudenza",
+        "presagio_status": "active",
+        "warning_target": "nessuno",
+        "maddy_action_after_warning": "none",
+        "sarah_support_state": "none"
+      }
+    },
+    {
+      "name": "[C] presenza (dopo la scelta di focus, al crocevia): il registro combacia col pin ACT4_ROUTE_DINER",
+      "pass": false,
+      "detail": [
+        {
+          "id": "truman",
+          "expect": "sheriff@10,4",
+          "actual": "PLACED@roadhouse 4,8 up [ACT4_EVENING_GATHERING]"
+        },
+        {
+          "id": "norma",
+          "expect": "diner@5,2",
+          "actual": "PLACED@roadhouse 5,6 up [ACT4_EVENING_GATHERING]"
+        },
+        {
+          "id": "shelly",
+          "expect": "OFFSCREEN:home",
+          "actual": "PLACED@roadhouse 3,6 down [ACT4_EVENING_GATHERING]"
+        },
+        {
+          "id": "loglady",
+          "expect": "OFFSCREEN:home",
+          "actual": "PLACED@roadhouse 2,6 up [ACT4_EVENING_GATHERING]"
+        },
+        {
+          "id": "james",
+          "expect": "OFFSCREEN:home",
+          "actual": "PLACED@roadhouse 2,4 down [ACT4_EVENING_GATHERING]"
+        },
+        {
+          "id": "bobby",
+          "expect": "OFFSCREEN:home",
+          "actual": "PLACED@roadhouse 3,4 down [ACT4_EVENING_GATHERING]"
+        },
+        {
+          "id": "donna",
+          "expect": "OFFSCREEN:home",
+          "actual": "PLACED@roadhouse 5,4 down [ACT4_EVENING_GATHERING]"
+        }
+      ]
+    },
+    {
+      "name": "[C] presenza (dopo la scelta di focus, al crocevia): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] rotta diner: si cammina dal crocevia al piazzale del Double R",
+      "pass": false,
+      "detail": {
+        "ok": false,
+        "error": "no_path_to_door",
+        "diag": {
+          "from": [
+            7,
+            9
+          ],
+          "to": [
+            42,
+            21
+          ],
+          "reason": "no_path",
+          "attempt": 4
+        }
+      }
+    },
+    {
+      "name": "[C] rotta diner: Norma, il locale vuoto, la chiamata",
+      "pass": false,
+      "detail": {
+        "ids": [],
+        "viaApi": false
+      }
+    },
+    {
+      "name": "[C] rotta diner: body_found_by = hawk",
+      "pass": false,
+      "detail": {
+        "m5_final_theory": "degeneration",
+        "s1": "institutional",
+        "m6_tactic": "prova",
+        "promise_stance": "prudenza",
+        "presagio_status": "active",
+        "warning_target": "nessuno",
+        "maddy_action_after_warning": "none",
+        "sarah_support_state": "none"
+      }
+    },
+    {
+      "name": "[C] rotta diner: si esce dal Double R a piedi",
+      "pass": false,
+      "detail": {
+        "ok": false,
+        "map": "roadhouse",
+        "blocked": null,
+        "arrival": null,
+        "pos": {
+          "map": "roadhouse",
+          "x": 6,
+          "y": 8,
+          "dir": "down"
+        }
+      }
+    },
+    {
+      "name": "[C] HUD: dopo la rotta l'obiettivo resta obj_m8_2 (fino al ritrovamento)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] riva: la collocazione di Hawk prima del ritrovamento è quella del registro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] riva: la riva del lago si raggiunge a piedi",
+      "pass": false,
+      "detail": {
+        "ok": false,
+        "error": "unreachable",
+        "target": [
+          15,
+          28
+        ],
+        "candidates": [],
+        "diag": {
+          "from": [
+            6,
+            6
+          ],
+          "to": [
+            6,
+            8
+          ],
+          "reason": "ok",
+          "steps": 16,
+          "replans": 0
+        }
+      }
+    },
+    {
+      "name": "[C] riva: Hawk sulla riva PRIMA del ritrovamento assente (body_found_by=undefined)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] riva: il ritrovamento rende la versione «undefined»",
+      "pass": false,
+      "detail": []
+    },
+    {
+      "name": "[C] riva: l'eco della promessa è la versione «prudenza»",
+      "pass": false,
+      "detail": []
+    },
+    {
+      "name": "[C] riva: maddy_trovata, E9A/E9B, presagio verified, eco committata",
+      "pass": false,
+      "detail": {
+        "flags": [
+          "atto3",
+          "atto4",
+          "audrey_indaga",
+          "east_route_confirmed",
+          "gigante1",
+          "jacques_admitted_presence",
+          "jacques_dead",
+          "jacques_preso",
+          "sogno_fatto",
+          "vagone_scoperto"
+        ],
+        "values": {
+          "m5_final_theory": "degeneration",
+          "s1": "institutional",
+          "m6_tactic": "prova",
+          "promise_stance": "prudenza",
+          "presagio_status": "active",
+          "warning_target": "nessuno",
+          "maddy_action_after_warning": "none",
+          "sarah_support_state": "none"
+        },
+        "evidence": [
+          "E1_DIARIO",
+          "E3_LETTERA_R",
+          "T_LELAND_TAXI"
+        ],
+        "nodes_done": [
+          "m5_bridge",
+          "m5_discovery",
+          "m5_report_close",
+          "m5_report_intro",
+          "m5_tracks_north",
+          "m6_arrest",
+          "m6_atto4_bridge",
+          "m6_ferry",
+          "m6_hospital_guard",
+          "m6_interrogation_prova",
+          "m6_return_night",
+          "m6_tactic",
+          "m8_diner",
+          "m8_giant_stage",
+          "m8_leland_taxi",
+          "m8_leland_waiting",
+          "m8_roadhouse_phone",
+          "m8_roadhouse_truman"
+        ]
+      }
+    },
+    {
+      "name": "[C] riva: letter_o_observation_source deriva da body_found_by",
+      "pass": false,
+      "detail": {
+        "m5_final_theory": "degeneration",
+        "s1": "institutional",
+        "m6_tactic": "prova",
+        "promise_stance": "prudenza",
+        "presagio_status": "active",
+        "warning_target": "nessuno",
+        "maddy_action_after_warning": "none",
+        "sarah_support_state": "none"
+      }
+    },
+    {
+      "name": "[C] riva: dopo il ritrovamento un solo Hawk, PLACED@town 16,27 dal registro",
+      "pass": false,
+      "detail": {
+        "hawksAfter": [],
+        "hawkR1": {
+          "characterId": "hawk",
+          "status": "OFFSCREEN",
+          "source": "ACT4_HAWK_PATROL",
+          "owner": "M8",
+          "label": "patrol",
+          "cause": "hawk → OFFSCREEN (patrol; D6)"
+        }
+      }
+    },
+    {
+      "name": "[C] presenza (riva dopo il ritrovamento): il registro combacia col pin (nessun pin adatto: solo cattura + doppioni)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] presenza (riva dopo il ritrovamento): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] HUD: dopo il ritrovamento l'obiettivo è obj_m8_3",
+      "pass": false,
+      "detail": {
+        "got": "Torna all’incrocio: casa Palmer, lago o diner.",
+        "want": "Rileggi le lettere e il diario di Laura."
+      }
+    },
+    {
+      "name": "[C] mondo: maddy_trovata attraversa al classico",
+      "pass": false,
+      "detail": null
+    },
+    {
+      "name": "[C] taccuino: lettere R + O → m8_cmp_letters",
+      "pass": false,
+      "detail": {
+        "ok": false,
+        "error": "evidence_absent",
+        "ids": [
+          "E3_LETTERA_R",
+          "E1_DIARIO",
+          "T_LELAND_TAXI"
+        ]
+      }
+    },
+    {
+      "name": "[C] taccuino: m8_cmp_letters committato",
+      "pass": false,
+      "detail": [
+        "m5_bridge",
+        "m5_discovery",
+        "m5_report_close",
+        "m5_report_intro",
+        "m5_tracks_north",
+        "m6_arrest",
+        "m6_atto4_bridge",
+        "m6_ferry",
+        "m6_hospital_guard",
+        "m6_interrogation_prova",
+        "m6_return_night",
+        "m6_tactic",
+        "m8_diner",
+        "m8_giant_stage",
+        "m8_leland_taxi",
+        "m8_leland_waiting",
+        "m8_roadhouse_phone",
+        "m8_roadhouse_truman"
+      ]
+    },
+    {
+      "name": "[C] taccuino: lettera O + diario → m8_cmp_diary con tre letture",
+      "pass": false,
+      "detail": {
+        "ok": false,
+        "error": "evidence_absent",
+        "ids": [
+          "E3_LETTERA_R",
+          "E1_DIARIO",
+          "T_LELAND_TAXI"
+        ]
+      }
+    },
+    {
+      "name": "[C] taccuino: le pagine del diario precedono la scelta",
+      "pass": false,
+      "detail": []
+    },
+    {
+      "name": "[C] taccuino: «diary_a» rende il suo feedback",
+      "pass": false,
+      "detail": []
+    },
+    {
+      "name": "[C] taccuino: P8 formulata solo al commit di diary_a",
+      "pass": false,
+      "detail": "unformulated"
+    },
+    {
+      "name": "[C] HUD: con P8 formulata l'obiettivo è obj_m8_35",
+      "pass": false,
+      "detail": {
+        "got": "Torna all’incrocio: casa Palmer, lago o diner.",
+        "want": "Porta il nesso a Truman, alla centrale."
+      }
+    },
+    {
+      "name": "[C] stazione: Truman risponde con m8_station (p01…p03), mai con M4/M6",
+      "pass": false,
+      "detail": {
+        "got": [],
+        "viaApi": true
+      }
+    },
+    {
+      "name": "[C] stazione: il caso Sarah è «none» (m8.f.station.sarah_truman)",
+      "pass": false,
+      "detail": []
+    },
+    {
+      "name": "[C] stazione: p_valigia assente (avviso=nessuno, focus=diner)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] stazione: p_lago assente (focus=diner)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] stazione: l'aggancio dell'orario (hook p01/p02) chiude la scena",
+      "pass": false,
+      "detail": []
+    },
+    {
+      "name": "[C] stazione: m8_station committato, T_LELAND_TAXI ancora una sola acquisizione",
+      "pass": false,
+      "detail": [
+        "m5_bridge",
+        "m5_discovery",
+        "m5_report_close",
+        "m5_report_intro",
+        "m5_tracks_north",
+        "m6_arrest",
+        "m6_atto4_bridge",
+        "m6_ferry",
+        "m6_hospital_guard",
+        "m6_interrogation_prova",
+        "m6_return_night",
+        "m6_tactic",
+        "m8_diner",
+        "m8_giant_stage",
+        "m8_leland_taxi",
+        "m8_leland_waiting",
+        "m8_roadhouse_phone",
+        "m8_roadhouse_truman"
+      ]
+    },
+    {
+      "name": "[C] obiettivo M8 dopo la stazione: obj_m8_4 «Porta a Truman una contraddizione che regga.»",
+      "pass": false,
+      "detail": {
+        "id": "obj_m8_2",
+        "text": "Torna all’incrocio: casa Palmer, lago o diner."
+      }
+    },
+    {
+      "name": "[C] mondo: bobby e donna ancora assenti dalla città dopo la stazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] mondo: Sarah ancora assente da casa Palmer (prima di atto5) dopo la stazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] presenza (centrale prima dell'alba (fine giocata)): il registro combacia col pin (nessun pin adatto: solo cattura + doppioni)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] presenza (centrale prima dell'alba (fine giocata)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] trascrizione: pagine registrate",
+      "pass": false,
+      "detail": 26
+    },
+    {
+      "name": "[C] voce: lo speaker emesso coincide con quello scritto su ogni pagina",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] voce: ogni pagina emessa è una pagina scritta in una missione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] testo: nessuna deriva fra pagina scritta e pagina emessa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] testo: nessun id di risultato/nodo o metadato «[…]» a schermo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] testo: nessun «BOB», conteggio di lettere, «salvat», «troppo tardi», «se fossi», «bugia/mentito» nelle pagine M8 emesse",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] HUD: ogni testo di obiettivo osservato è un obiettivo scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] HUD: i pioli M8 si susseguono nell'ordine scritto, mai all'indietro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] mondo: nessun dialogo classico ritirato (truman_atto4, truman_atto5, lago_maddy, maddy_a4, leland_a4, leland_dove, leland_dopo, gerard_a4)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] mondo: nessun dialogo classico di Maddy/Leland/Gigante/Norma/Truman sulle mappe dell'Atto 4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] adapter: nessuna pagina adapter.no_roots, nessun rifiuto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] guida: nessun ripiego sull'API dell'adapter, tutto coi tasti",
+      "pass": false,
+      "detail": [
+        {
+          "where": "sheriff/truman",
+          "why": "nessun NPC \"truman\" sulla mappa sheriff: impossibile guardarlo e premere A"
+        }
+      ]
+    },
+    {
+      "name": "[C] adapter: nessuna root ambigua",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] guida: nessun teletrasporto lungo la rotta scelta o verso la riva",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] stato: T_LELAND_TAXI scritta una sola volta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] stato: nessun nodo one-shot committato due volte",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] mondo: mai due Hawk, due Maddy, due Leland o due Giganti sulla stessa mappa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] mondo: Maddy e Leland mai a casa Palmer nell'Atto 4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[C] console: nessun errore del browser durante il percorso",
+      "pass": false,
+      "detail": [
+        "Failed to load resource: net::ERR_CONNECTION_RESET  <http://127.0.0.1:22912/js/world-connections-production.js>"
+      ]
+    },
+    {
+      "name": "[D] setup: build reale in partita (testMode=false)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] setup: seme di fine Atto 3 installato (atto4, gigante1, jacques_dead, E3, E1) e M8 corrente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] setup: M8 caricata con i nodi dello split",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] HUD: all'apertura dell'Atto 4 l'obiettivo è obj_m8_0",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (pomeriggio al diner (prima della promessa)): il registro combacia col pin ACT4_AFTERNOON",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (pomeriggio al diner (prima della promessa)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] diner: Maddy e Leland presenti al bancone prima della promessa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] diner: Maddy e Leland alle caselle del registro (10,1 / 11,1)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] diner: Leland prima della promessa rende esattamente m8.a.leland_waiting.p01 + p02",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] diner: l'attesa di Leland non scrive nulla",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] HUD: prima della promessa l'obiettivo è obj_m8_0",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] diner: la promessa apre le tre opzioni",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] diner: il feedback della promessa «accompagno» è la sua pagina",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] diner: promise_stance = accompagno",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] diner: Maddy resta al bancone dopo la promessa (lascia solo a T_LELAND_TAXI), Leland resta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (diner dopo la promessa): il registro combacia col pin ACT4_PROMISE_MADE",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (diner dopo la promessa): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] HUD: dopo la promessa l'obiettivo è obj_m8_25",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] diner: la testimonianza del taxi rende le pagine della promessa «accompagno»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] diner: T_LELAND_TAXI acquisita",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] diner: Leland e Maddy spariscono dopo la testimonianza (T_LELAND_TAXI)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] HUD: dopo il taxi l'obiettivo è obj_m8_1",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] diner: dopo la chiusura (T_LELAND_TAXI) Norma, Shelly, Log Lady e James sono al Roadhouse, non più al diner",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: la città ha una porta per il Roadhouse",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: la porta si apre con atto4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (ingresso al Roadhouse (raduno serale)): il registro combacia col pin ACT4_EVENING_GATHERING",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (ingresso al Roadhouse (raduno serale)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: Truman e la folla presenti all'arrivo, Gigante assente",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: nessuna entità sul telefono o sulle caselle sopra/sotto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: la dichiarazione al tavolo rende m8.b.truman.p01…p05",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: la dichiarazione non apre il telefono nello stesso lease",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: presagio_status = active dopo la dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: m8_roadhouse_truman committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: il Gigante è sul palco (8,1) dopo la dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] HUD: dopo la dichiarazione il testo è esattamente «Il telefono del Roadhouse.»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] mondo: gigante2 classico derivato dalla dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] mondo: Sarah non è più a casa Palmer dopo la dichiarazione (nessun corpo: OFFSCREEN asleep)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] mondo: bobby e donna assenti dalla città dopo la dichiarazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (Roadhouse dopo la dichiarazione (pre-telefono)): il registro combacia col pin ACT4_ROADHOUSE_PRE_PHONE",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (Roadhouse dopo la dichiarazione (pre-telefono)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: il Gigante rende solo m8.b.giant.p01",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: la ripetizione del Gigante non aggiunge enunciati",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: il Gigante non scrive nulla",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: il telefono si raggiunge e apre le tre opzioni",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: il telefono rende m8.b.phone.p01 e p02",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: il feedback dell'avviso «palmer» è quello scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: warning_target = palmer",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: dopo la telefonata il Gigante non c'è più, Truman e la folla restano (fino a focus_destination)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (Roadhouse dopo il telefono (dentro la sala)): il registro combacia col pin ACT4_POST_PHONE_INSIDE_PALMER",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (Roadhouse dopo il telefono (dentro la sala)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] HUD: dopo la telefonata l'obiettivo è obj_m8_2",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: regressione di rientro — si esce a piedi prima del crocevia",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: regressione di rientro — si rientra a piedi",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (Roadhouse: rientro dopo il telefono, prima del crocevia): il registro combacia col pin ACT4_POST_PHONE_INSIDE_PALMER",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (Roadhouse: rientro dopo il telefono, prima del crocevia): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: al rientro Truman e la folla ci sono ancora, il Gigante no",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] Roadhouse: il registro Cast Continuity è identico prima e dopo il rientro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] reload dopo il telefono: promessa e avviso persistono",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] reload dopo il telefono: stato narrativo identico",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] reload dopo il telefono: obiettivo HUD identico",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] reload dopo il telefono: il Gigante NON ricompare (fuori finestra)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] reload dopo il telefono: entità identiche",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] reload dopo il telefono: il registro Cast Continuity è identico prima e dopo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] reload dopo il telefono: il salvataggio persistito non contiene chiavi di posizione (cast_source/sceneId/homeX)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] soglia: si esce dal Roadhouse in città",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] soglia: town_crossroads è a 47,30",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] soglia: si arriva sulla casella sopra il crocevia, rivolti in basso",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] soglia: un tasto in basso apre il crocevia (m8_focus_choice)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] soglia: il widget si apre a 47,29 guardando 47,30",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] soglia: le pagine del crocevia precedono la scelta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] soglia: focus_destination = lago",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (dopo la scelta di focus, al crocevia): il registro combacia col pin (nessun pin adatto: solo cattura + doppioni)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (dopo la scelta di focus, al crocevia): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] rotta lago: si cammina dal crocevia alla riva e la rotta risponde",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] rotta lago: body_found_by = cooper",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] HUD: dopo la rotta l'obiettivo resta obj_m8_2 (fino al ritrovamento)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] riva: la collocazione di Hawk prima del ritrovamento è quella del registro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] riva: la riva del lago si raggiunge a piedi",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] riva: Hawk sulla riva PRIMA del ritrovamento assente (body_found_by=cooper)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] riva: il ritrovamento rende la versione «cooper»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] riva: l'eco della promessa è la versione «accompagno»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] riva: maddy_trovata, E9A/E9B, presagio verified, eco committata",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] riva: letter_o_observation_source deriva da body_found_by",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] riva: dopo il ritrovamento un solo Hawk, PLACED@town 16,27 dal registro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (riva dopo il ritrovamento): il registro combacia col pin (nessun pin adatto: solo cattura + doppioni)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (riva dopo il ritrovamento): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] HUD: dopo il ritrovamento l'obiettivo è obj_m8_3",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] mondo: maddy_trovata attraversa al classico",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] taccuino: lettere R + O → m8_cmp_letters",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] taccuino: m8_cmp_letters committato",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] taccuino: lettera O + diario → m8_cmp_diary con tre letture",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] taccuino: le pagine del diario precedono la scelta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] taccuino: «diary_a» rende il suo feedback",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] taccuino: P8 formulata solo al commit di diary_a",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] HUD: con P8 formulata l'obiettivo è obj_m8_35",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] stazione: Truman risponde con m8_station (p01…p03), mai con M4/M6",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] stazione: il caso Sarah è «none» (m8.f.station.sarah_truman)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] stazione: p_valigia presente (avviso=palmer, focus=lago)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] stazione: p_lago presente (focus=lago)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] stazione: l'aggancio dell'orario (hook p01/p02) chiude la scena",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] stazione: m8_station committato, T_LELAND_TAXI ancora una sola acquisizione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] obiettivo M8 dopo la stazione: obj_m8_4 «Porta a Truman una contraddizione che regga.»",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] mondo: bobby e donna ancora assenti dalla città dopo la stazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] mondo: Sarah ancora assente da casa Palmer (prima di atto5) dopo la stazione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (centrale prima dell'alba (fine giocata)): il registro combacia col pin (nessun pin adatto: solo cattura + doppioni)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] presenza (centrale prima dell'alba (fine giocata)): nessuna mappa viva ha due corpi con lo stesso id",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] trascrizione: pagine registrate",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] voce: lo speaker emesso coincide con quello scritto su ogni pagina",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] voce: ogni pagina emessa è una pagina scritta in una missione",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] testo: nessuna deriva fra pagina scritta e pagina emessa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] testo: nessun id di risultato/nodo o metadato «[…]» a schermo",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] testo: nessun «BOB», conteggio di lettere, «salvat», «troppo tardi», «se fossi», «bugia/mentito» nelle pagine M8 emesse",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] HUD: ogni testo di obiettivo osservato è un obiettivo scritto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] HUD: i pioli M8 si susseguono nell'ordine scritto, mai all'indietro",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] mondo: nessun dialogo classico ritirato (truman_atto4, truman_atto5, lago_maddy, maddy_a4, leland_a4, leland_dove, leland_dopo, gerard_a4)",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] mondo: nessun dialogo classico di Maddy/Leland/Gigante/Norma/Truman sulle mappe dell'Atto 4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] adapter: nessuna pagina adapter.no_roots, nessun rifiuto",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] guida: nessun ripiego sull'API dell'adapter, tutto coi tasti",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] adapter: nessuna root ambigua",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] guida: nessun teletrasporto lungo la rotta scelta o verso la riva",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] stato: T_LELAND_TAXI scritta una sola volta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] stato: nessun nodo one-shot committato due volte",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] mondo: mai due Hawk, due Maddy, due Leland o due Giganti sulla stessa mappa",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] mondo: Maddy e Leland mai a casa Palmer nell'Atto 4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "[D] console: nessun errore del browser durante il percorso",
+      "pass": true,
+      "detail": null
+    }
+  ],
+  "observations": [
+    {
+      "path": "A",
+      "kind": "console (harness)",
+      "text": "favicon.ico 404 dal server di prova"
+    }
+  ],
+  "console_errors": [
+    "Failed to load resource: the server responded with a status of 404 (File not found)  <http://127.0.0.1:22912/favicon.ico>",
+    "Failed to load resource: net::ERR_CONNECTION_RESET  <http://127.0.0.1:22912/engine/ember-camera.js>",
+    "exception: Error: Ember Engine missing: load engine/ember-*.js before js/engine.js\n    at http://127.0.0.1:22912/js/engine.js?v=r142-narrative-portrait:25:11\n    at http://127.0.0.1:22912/js/engine.js?v=r142-narrative-portrait:1744:3",
+    "exception: TypeError: GAME.Engine.init is not a function\n    at HTMLDocument.boot (http://127.0.0.1:22912/js/main.js?v=r111portrait-tight:288:17)",
+    "Failed to load resource: net::ERR_SOCKET_NOT_CONNECTED  <http://127.0.0.1:22912/js/diorama.js?v=dq3-materials-3>",
+    "Failed to load resource: net::ERR_CONNECTION_RESET  <http://127.0.0.1:22912/js/world-connections-production.js>"
+  ]
+}

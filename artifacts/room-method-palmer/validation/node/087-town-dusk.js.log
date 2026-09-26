@@ -1,0 +1,23 @@
+town-dusk: grade
+  ok  deterministico: stesso ingresso, stessa uscita
+  ok  memoizzato per chiave 24 bit: la seconda chiamata non aggiunge voci
+  ok  uscita intera in 0..255 e mai nero pieno
+  ok  la curva asfalto e quella terreno restano separate
+town-dusk: famiglie misurate sul lotto Double R
+  ok  creme del terreno -> calcestruzzo caldo #c4b17e..#d5c390
+  ok  tile di strada -> grigio neutro #9a9a95 (±12 per canale)
+  ok  prato e alberi -> verde, e sono la famiglia piu' scura
+  ok  bordeaux resta bordeaux e i legni restano bruni
+  ok  inchiostri e contorni restano scuri (nessun sollevamento del nero)
+  ok  le alteluci restano superfici accese ma sotto #f2f2f3
+  ok  il marciapiede atterra sullo stack di calcestruzzo DQ3
+  ok  nessun tono di calcestruzzo cade nella famiglia vegetazione
+town-dusk: practicals
+  ok  ogni rettangolo emissivo sta dentro i visualBounds del suo landmark
+  ok  le luci sono piu' chiare della parete su cui poggiano
+  ok  i lampioni nascono dal glifo L, solo sulla fascia civica, mai sotto un landmark
+town-dusk: hook
+  ok  l'hook grada e disegna solo per town, e delega per ogni altra mappa
+  ok  applyGrade usa la curva asfalto solo dentro le tile di strada
+
+town-dusk: 17 check ok

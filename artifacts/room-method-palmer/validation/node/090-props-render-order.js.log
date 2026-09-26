@@ -1,0 +1,2 @@
+PROPS-RENDER-ORDER-PASS 37 checks (order, flip, camera, flag, depth banding)
+props-production: GAME.sprites.drawForegroundStructures not found, props not installed

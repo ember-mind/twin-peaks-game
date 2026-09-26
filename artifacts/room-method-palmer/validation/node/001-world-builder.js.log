@@ -1,0 +1,114 @@
+   ok - catalog has 12 locations
+   ok - double-r exposes exterior+interior(diner)
+   ok - hospital joins town through town-hospital
+   ok - town is a single-environment location
+   ok - no helper-function keys leaked into scenes
+   ok - real core scenes present
+   ok - town door overlay count matches source
+   ok - town object overlay count matches source
+   ok - town npc overlay count matches source
+   ok - diner door overlay count matches source
+   ok - diner object overlay count matches source
+   ok - diner npc overlay count matches source
+   ok - sheriff door overlay count matches source
+   ok - sheriff object overlay count matches source
+   ok - sheriff npc overlay count matches source
+   ok - sheriff is interior 16x12 with 4 npcs
+   ok - connection double-r-front-entrance found
+   ok - its a-endpoint is the exterior with triggers on row 6
+   ok - its b-endpoint arrives in diner at spawn (6,8)/up
+   ok - tileToPixel(7,11,zoom=4) = (28,44)
+   ok - pixelToTile inverts an exact top-left corner
+   ok - sheriff has at least one exit to test
+   ok - hitTest at exit tile (e0) selects that same exit overlay
+   ok - hitTest returns null where nothing overlaps
+   ok - snapshot top-level frozen
+   ok - nested scene overlay object frozen
+   ok - mutating frozen snapshot throws in strict mode
+   ok - building the snapshot does not mutate live GAME.Maps
+   ok - town scene present for renderer
+   ok - town render-plan marker count == overlay count
+   ok - town render-plan per-kind counts match source (9/7/3)
+   ok - town planSpawns returns an array of endpoint markers
+   ok - town M3 click at exit center selects that overlay
+   ok - diner scene present for renderer
+   ok - diner render-plan marker count == overlay count
+   ok - diner render-plan per-kind counts match source (2/0/3)
+   ok - diner planSpawns returns an array of endpoint markers
+   ok - planSpawns('diner') has double-r-front-entrance B@(6,8)/up
+   ok - diner M3 click at exit center selects that overlay
+   ok - sheriff scene present for renderer
+   ok - sheriff render-plan marker count == overlay count
+   ok - sheriff render-plan per-kind counts match source (2/0/4)
+   ok - sheriff planSpawns returns an array of endpoint markers
+   ok - sheriff M3 click at exit center selects that overlay
+   ok - world-builder.js exposes NO save/edit/persist API
+   ok - planScene is inert without a scene argument
+   ok - world-builder.js has NO persistence (localStorage/writeFile absent)
+   ok - the sheriff scene actually HAS doors (guard is not vacuously true)
+   ok - planning scenes leaves source map door SET intact
+   ok - the authored connections carry triggers to exercise the clone path
+   ok - source WorldData connections ARE deep-frozen by design (immutable registry): the leak guard is the distinct-copy check immediately below
+   ok - snapshot connection trigger copy is a DIFFERENT object from the source
+   ok - a catalog location exposes a non-empty connections array
+   ok - snapshot owns its OWN copy of a location connection list (no shared-reference leak)
+   ok - base map yields per-cell coloured geometry for the town scene
+   ok - town and diner base maps DIFFER (real geometry, not an empty grid)
+   ok - planBaseMap is inert without a scene
+   ok - snapshot exposes an unresolved list for the real fixture
+   ok - the real authored fixture has NO unresolved connections
+   ok - a catalog connection id with no authored record is flagged unresolved
+   ok - adaptWorld returns a frozen {source,snapshot,model}
+   ok - adaptWorld.model is the single read-only model core builds from the snapshot
+   ok - model scene/location counts match the snapshot over the real catalog
+   ok - model.connectionsById has exactly the authored connection ids
+   ok - chained model keeps diner overlay membership
+   ok - adaptWorld fails loud when the connection registry is absent
+   ok - buildWorldModel(adapted.snapshot) reproduces model scene/location counts
+   ok - rebuild is a deterministic bijection over the same connection ids
+   ok - a scene resolves through BOTH snapshot and model layers with non-empty overlays
+   ok - module api is the original keys + adaptWorld + the M4b story/validation helpers + M7 castContext + M8 objectsContext + M10b propsContext, nothing else
+   ok - adaptWorld.source has exactly {maps,catalog,connections,tile}
+   ok - snapshot (model-independent) is frozen and has 12 locations
+   ok - adaptWorld.model is lazy (null, else the full read-only model view); tuple locked + snapshot frozen
+   ok - CHAIN: the snapshot returned IS by reference the input buildWorldModel consumes
+   ok - CHAIN: model is non-null and Object.frozen — the single read-only root every view indexes
+   ok - CHAIN: single tree — scenes/connectionsById/locationsById are frozen sub-trees of that one model
+   ok - CHAIN: single tree — model reuses the snapshot location ref by identity (no second cloned tree)
+   ok - CHAIN: a scene resolves through BOTH the snapshot layer and the model layer
+   ok - CHAIN: a real connection resolves through BOTH layers with stable endpoint ids
+   ok - M4b: diner items use identity ids, never kind:tx,ty
+   ok - M4b: diner endpoint b id
+   ok - M4b: diner trigger ids carry side + index
+   ok - M4b: diner npc ids are npc:<characterId>:diner
+   ok - M4b: diner has no legacy door (its doors belong to a connection)
+   ok - M4b: two items on one tile keep distinct ids
+   ok - M4b: topmost wins (endpoint painted above npc)
+   ok - M4b: trigger painted above npc wins its tile
+   ok - M4b: ids identical across rerenders
+   ok - M4b: selection id survives spawn move
+   ok - M4b: selection id survives trigger move
+   ok - M5: legacy inventory is empty (every door belongs to a registry connection)
+   ok - M5: no scene carries a legacy-door item
+   ok - M5: roadhouse doors are town-roadhouse endpoint b (triggers + spawn)
+   ok - M5: one-way source has a trigger item and no endpoint item
+   ok - M4b: every registry record validates clean
+   ok - M4b: spawn x=19 on diner -> "b.spawn is outside map bounds"
+   ok - M4b: trigger on diner wall -> "b.triggers[2] must be walkable"
+   ok - M4b: sheriffs exterior spawn 8,8 left + trigger 8,9 is valid
+   ok - M4b: unknown id + unknown scene reported
+   ok - M4b: paired endpoint check fires when both sides share a scene
+   ok - M4b: missing endpoint reported
+   ok - M4b: baseline diner shows norma + shelly
+   ok - M4b: ACT4_EVENING_GATHERING diner has no norma/shelly
+   ok - M4b: ACT4_EVENING_GATHERING roadhouse has norma + shelly
+   ok - M4b: castForSeed agrees with CastPresence.bodiesFor for every seed + scene
+   ok - M4b: castForSeed is read-only (frozen)
+   ok - M4b: world-builder.html loads every js/editor/core/*.js
+   ok - M4b: core + world-builder-core load before world-builder.js
+   ok - M4b: glue never reads GAME.Maps / GAME.WorldData / GAME.CastPresence directly
+   ok - M4b: glue never selects by kind:tx,ty
+
+WORLD-BUILDER: 110/110 passed
+WORLD-BUILDER-PASS 110/110
+[world-builder] data layer or editor core missing — not mounting.

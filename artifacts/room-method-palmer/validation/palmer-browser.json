@@ -1,0 +1,97 @@
+{
+  "source": "index.html via existing act-4-playthrough-probe.html",
+  "seed": "ACT4_AFTERNOON from test/fixtures/cast-pins-acts-1-4.json",
+  "setup": "One explicit placement at town door approach; subsequent indoor movement and door crossings use keyboard helpers.",
+  "results": [
+    {
+      "name": "normal production boot, not narrativeTest mode",
+      "pass": true
+    },
+    {
+      "name": "enter from town by real keyboard door",
+      "pass": true
+    },
+    {
+      "name": "production-day-entry: full native canvas",
+      "pass": true
+    },
+    {
+      "name": "production-day-entry: production sofa pixels match native art",
+      "pass": true
+    },
+    {
+      "name": "normal first visit is daytime",
+      "pass": true
+    },
+    {
+      "name": "real keyboard route: rugCenter",
+      "pass": true
+    },
+    {
+      "name": "real keyboard route: coffeeSide",
+      "pass": true
+    },
+    {
+      "name": "real keyboard route: sideboard",
+      "pass": true
+    },
+    {
+      "name": "real keyboard route: nookSouth",
+      "pass": true
+    },
+    {
+      "name": "real keyboard route: stairFoot",
+      "pass": true
+    },
+    {
+      "name": "real keyboard route: landing",
+      "pass": true
+    },
+    {
+      "name": "real keyboard route: lauraDresser",
+      "pass": true
+    },
+    {
+      "name": "Sarah can be reached from upstairs",
+      "pass": true
+    },
+    {
+      "name": "Sarah interaction uses rendered classic dialogue",
+      "pass": true
+    },
+    {
+      "name": "leave through registry door by keyboard",
+      "pass": true
+    },
+    {
+      "name": "re-enter after canonical Act 4 seed",
+      "pass": true
+    },
+    {
+      "name": "production-evening-entry: full native canvas",
+      "pass": true
+    },
+    {
+      "name": "production-evening-entry: production sofa pixels match native art",
+      "pass": true
+    },
+    {
+      "name": "production reads canonical evening flag",
+      "pass": true
+    },
+    {
+      "name": "state change does not move collision geometry",
+      "pass": true
+    },
+    {
+      "name": "evening approach to Sarah remains open",
+      "pass": true
+    },
+    {
+      "name": "evening exit remains traversable",
+      "pass": true
+    }
+  ],
+  "passed": 22,
+  "human": "NOT_RUN"
+}

@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "base": "7a3de3fd249cc908756a269e116c597bc82f1767",
+  "artCheckpoint": "559629e",
+  "map": "palmer",
+  "camera": {
+    "spawn": [
+      7,
+      10
+    ],
+    "direction": "up",
+    "native": [
+      256,
+      192
+    ],
+    "registryConnection": "town-palmer-house",
+    "crop": false
+  },
+  "reference": "assets/ref/palmer-house-sheet.png",
+  "notes": [
+    "First four images exported from test/retro-scene.html native canvas with narrative=1.",
+    "First three frames: default boot state. Fourth: existing classic atto4 flag.",
+    "Production snapshots exported from index.html during test/palmer-design-browser.js; evening uses full canonical ACT4_AFTERNOON fixture seed.",
+    "Intermediate massing capture is work-in-progress evidence, not a separately committed source revision.",
+    "artifactModifiedAt is file metadata, not a promise of exact capture time; baseline was copied into this folder.",
+    "No generated concept images or fabricated before frames."
+  ],
+  "frames": [
+    {
+      "file": "00-before-entry.png",
+      "sha256": "be16939cd48afcd6e13ec1c28e06fcb32765f285a2a1196ee62acc02a1e5a8e6",
+      "size": [
+        256,
+        192
+      ],
+      "artifactModifiedAt": "2026-09-26T16:03:05.462Z"
+    },
+    {
+      "file": "01-massing-entry.png",
+      "sha256": "033bf8f9e16688d5db315e5266b11008aff0f2eb52641825a8079ffdf82c49c7",
+      "size": [
+        256,
+        192
+      ],
+      "artifactModifiedAt": "2026-09-26T16:06:08.062Z"
+    },
+    {
+      "file": "02-light-entry.png",
+      "sha256": "ec2b60c61c3a14537a0eaa3ff88ed473c3aabd20d5081e5fed32dfa382c31c9a",
+      "size": [
+        256,
+        192
+      ],
+      "artifactModifiedAt": "2026-09-26T16:09:18.703Z"
+    },
+    {
+      "file": "03-evening-entry.png",
+      "sha256": "a01a6f38dde9862c80e270fd9f8ded13f881bb354b32744e7f45b7b4dce3629e",
+      "size": [
+        256,
+        192
+      ],
+      "artifactModifiedAt": "2026-09-26T16:14:15.597Z"
+    },
+    {
+      "file": "validation/production-day-entry.png",
+      "sha256": "3393fa0368bb66bf3df66fbb38dedc5e69550ce0103b3b2fe54c0bdf77581f45",
+      "size": [
+        256,
+        192
+      ],
+      "artifactModifiedAt": "2026-09-26T16:24:51.758Z"
+    },
+    {
+      "file": "validation/production-evening-entry.png",
+      "sha256": "0f725784d3692889708ad38e830bd1a742f84265aaea9cc77f9368836e481461",
+      "size": [
+        256,
+        192
+      ],
+      "artifactModifiedAt": "2026-09-26T16:25:17.992Z"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+  ok - 11 engine modules reference neither game in code
+  ok - engine modules load standalone, creating neither GAME nor LT
+  ok - Twin Peaks refuses to boot without the Ember Engine
+  twin peaks  : Camera.approach, Camera.centerOn, Grid.advanceStep, Grid.walkPhase, Math.clamp, Tilemap.depthSort, Tilemap.paintDepthBands, Tilemap.paintWindow, Viewport.attachNative, Viewport.sizeNative
+  living town : Camera.approach, Camera.centerOn, Grid.advanceStep, Grid.cell, Grid.walkPhase, Tilemap.depthSort, Tilemap.paintWindow, Viewport.attachNative
+  shared      : Camera.approach, Camera.centerOn, Grid.advanceStep, Grid.walkPhase, Tilemap.depthSort, Tilemap.paintWindow, Viewport.attachNative
+  ok - 7 engine functions are called directly by both experiences
+  ok - Living Town boots and runs with no Twin Peaks module loaded
+  ok - 27 consumer files carry no private copy of an engine formula
+  ok - both production pages load all five engine files ahead of their consumer
+  ok - the renderer draws through engine/ember-pixel.js and engine/ember-interior-kit.js, which know no game
+  ok - engine outputs match the values both experiences rely on
+
+EMBER-SHARED-PASS — 9 checks

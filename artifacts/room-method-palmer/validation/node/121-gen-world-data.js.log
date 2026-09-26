@@ -1,0 +1,200 @@
+[gen-world-data] wrote js/scene-objects.gen.js (13 scenes, 4 objects, 16 interact keys)
+  ✓ file has a connections[] array
+  ✓ version is numeric (1)
+  ✓ [0] record is an object
+  ✓ [0] has a non-empty id
+  ✓ [arrival-town] one_way absent or true
+  ✓ [arrival-town].a endpoint present
+  ✓ [arrival-town].a.scene names a scene
+  ✓ [arrival-town].a.triggers is an array
+  ✓ [arrival-town].a one-way source: triggers, no spawn
+  ✓ [arrival-town].b endpoint present
+  ✓ [arrival-town].b.scene names a scene
+  ✓ [arrival-town].b.triggers is an array
+  ✓ [arrival-town].b.triggers not empty (paired)
+  ✓ [arrival-town].b one-way arrival: no triggers
+  ✓ [arrival-town].b.spawn.tx numeric
+  ✓ [1] record is an object
+  ✓ [1] has a non-empty id
+  ✓ [double-r-front-entrance] one_way absent or true
+  ✓ [double-r-front-entrance].a endpoint present
+  ✓ [double-r-front-entrance].a.scene names a scene
+  ✓ [double-r-front-entrance].a.triggers is an array
+  ✓ [double-r-front-entrance].a.triggers not empty (paired)
+  ✓ [double-r-front-entrance].a.spawn.tx numeric
+  ✓ [double-r-front-entrance].b endpoint present
+  ✓ [double-r-front-entrance].b.scene names a scene
+  ✓ [double-r-front-entrance].b.triggers is an array
+  ✓ [double-r-front-entrance].b.triggers not empty (paired)
+  ✓ [double-r-front-entrance].b.spawn.tx numeric
+  ✓ [2] record is an object
+  ✓ [2] has a non-empty id
+  ✓ [great-northern-room-315-hall] one_way absent or true
+  ✓ [great-northern-room-315-hall].a endpoint present
+  ✓ [great-northern-room-315-hall].a.scene names a scene
+  ✓ [great-northern-room-315-hall].a.triggers is an array
+  ✓ [great-northern-room-315-hall].a.triggers not empty (paired)
+  ✓ [great-northern-room-315-hall].a.spawn.tx numeric
+  ✓ [great-northern-room-315-hall].b endpoint present
+  ✓ [great-northern-room-315-hall].b.scene names a scene
+  ✓ [great-northern-room-315-hall].b.triggers is an array
+  ✓ [great-northern-room-315-hall].b.triggers not empty (paired)
+  ✓ [great-northern-room-315-hall].b.spawn.tx numeric
+  ✓ [3] record is an object
+  ✓ [3] has a non-empty id
+  ✓ [redroom-room-315-wake] one_way absent or true
+  ✓ [redroom-room-315-wake].a endpoint present
+  ✓ [redroom-room-315-wake].a.scene names a scene
+  ✓ [redroom-room-315-wake].a.triggers is an array
+  ✓ [redroom-room-315-wake].a one-way source: triggers, no spawn
+  ✓ [redroom-room-315-wake].b endpoint present
+  ✓ [redroom-room-315-wake].b.scene names a scene
+  ✓ [redroom-room-315-wake].b.triggers is an array
+  ✓ [redroom-room-315-wake].b.triggers not empty (paired)
+  ✓ [redroom-room-315-wake].b one-way arrival: no triggers
+  ✓ [redroom-room-315-wake].b.spawn.tx numeric
+  ✓ [4] record is an object
+  ✓ [4] has a non-empty id
+  ✓ [sheriffs-station-front-entrance] one_way absent or true
+  ✓ [sheriffs-station-front-entrance].a endpoint present
+  ✓ [sheriffs-station-front-entrance].a.scene names a scene
+  ✓ [sheriffs-station-front-entrance].a.triggers is an array
+  ✓ [sheriffs-station-front-entrance].a.triggers not empty (paired)
+  ✓ [sheriffs-station-front-entrance].a.spawn.tx numeric
+  ✓ [sheriffs-station-front-entrance].b endpoint present
+  ✓ [sheriffs-station-front-entrance].b.scene names a scene
+  ✓ [sheriffs-station-front-entrance].b.triggers is an array
+  ✓ [sheriffs-station-front-entrance].b.triggers not empty (paired)
+  ✓ [sheriffs-station-front-entrance].b.spawn.tx numeric
+  ✓ [5] record is an object
+  ✓ [5] has a non-empty id
+  ✓ [town-double-r-lot] one_way absent or true
+  ✓ [town-double-r-lot].a endpoint present
+  ✓ [town-double-r-lot].a.scene names a scene
+  ✓ [town-double-r-lot].a.triggers is an array
+  ✓ [town-double-r-lot].a.triggers not empty (paired)
+  ✓ [town-double-r-lot].a.spawn.tx numeric
+  ✓ [town-double-r-lot].b endpoint present
+  ✓ [town-double-r-lot].b.scene names a scene
+  ✓ [town-double-r-lot].b.triggers is an array
+  ✓ [town-double-r-lot].b.triggers not empty (paired)
+  ✓ [town-double-r-lot].b.spawn.tx numeric
+  ✓ [6] record is an object
+  ✓ [6] has a non-empty id
+  ✓ [town-great-northern-lobby] one_way absent or true
+  ✓ [town-great-northern-lobby].a endpoint present
+  ✓ [town-great-northern-lobby].a.scene names a scene
+  ✓ [town-great-northern-lobby].a.triggers is an array
+  ✓ [town-great-northern-lobby].a.triggers not empty (paired)
+  ✓ [town-great-northern-lobby].a.spawn.tx numeric
+  ✓ [town-great-northern-lobby].b endpoint present
+  ✓ [town-great-northern-lobby].b.scene names a scene
+  ✓ [town-great-northern-lobby].b.triggers is an array
+  ✓ [town-great-northern-lobby].b.triggers not empty (paired)
+  ✓ [town-great-northern-lobby].b.spawn.tx numeric
+  ✓ [7] record is an object
+  ✓ [7] has a non-empty id
+  ✓ [town-hospital] one_way absent or true
+  ✓ [town-hospital].a endpoint present
+  ✓ [town-hospital].a.scene names a scene
+  ✓ [town-hospital].a.triggers is an array
+  ✓ [town-hospital].a.triggers not empty (paired)
+  ✓ [town-hospital].a.spawn.tx numeric
+  ✓ [town-hospital].b endpoint present
+  ✓ [town-hospital].b.scene names a scene
+  ✓ [town-hospital].b.triggers is an array
+  ✓ [town-hospital].b.triggers not empty (paired)
+  ✓ [town-hospital].b.spawn.tx numeric
+  ✓ [8] record is an object
+  ✓ [8] has a non-empty id
+  ✓ [town-palmer-house] one_way absent or true
+  ✓ [town-palmer-house].a endpoint present
+  ✓ [town-palmer-house].a.scene names a scene
+  ✓ [town-palmer-house].a.triggers is an array
+  ✓ [town-palmer-house].a.triggers not empty (paired)
+  ✓ [town-palmer-house].a.spawn.tx numeric
+  ✓ [town-palmer-house].b endpoint present
+  ✓ [town-palmer-house].b.scene names a scene
+  ✓ [town-palmer-house].b.triggers is an array
+  ✓ [town-palmer-house].b.triggers not empty (paired)
+  ✓ [town-palmer-house].b.spawn.tx numeric
+  ✓ [9] record is an object
+  ✓ [9] has a non-empty id
+  ✓ [town-roadhouse] one_way absent or true
+  ✓ [town-roadhouse].a endpoint present
+  ✓ [town-roadhouse].a.scene names a scene
+  ✓ [town-roadhouse].a.triggers is an array
+  ✓ [town-roadhouse].a.triggers not empty (paired)
+  ✓ [town-roadhouse].a.spawn.tx numeric
+  ✓ [town-roadhouse].b endpoint present
+  ✓ [town-roadhouse].b.scene names a scene
+  ✓ [town-roadhouse].b.triggers is an array
+  ✓ [town-roadhouse].b.triggers not empty (paired)
+  ✓ [town-roadhouse].b.spawn.tx numeric
+  ✓ [10] record is an object
+  ✓ [10] has a non-empty id
+  ✓ [town-sheriffs-station-lot] one_way absent or true
+  ✓ [town-sheriffs-station-lot].a endpoint present
+  ✓ [town-sheriffs-station-lot].a.scene names a scene
+  ✓ [town-sheriffs-station-lot].a.triggers is an array
+  ✓ [town-sheriffs-station-lot].a.triggers not empty (paired)
+  ✓ [town-sheriffs-station-lot].a.spawn.tx numeric
+  ✓ [town-sheriffs-station-lot].b endpoint present
+  ✓ [town-sheriffs-station-lot].b.scene names a scene
+  ✓ [town-sheriffs-station-lot].b.triggers is an array
+  ✓ [town-sheriffs-station-lot].b.triggers not empty (paired)
+  ✓ [town-sheriffs-station-lot].b.spawn.tx numeric
+  ✓ [11] record is an object
+  ✓ [11] has a non-empty id
+  ✓ [town-traincar-east] one_way absent or true
+  ✓ [town-traincar-east].a endpoint present
+  ✓ [town-traincar-east].a.scene names a scene
+  ✓ [town-traincar-east].a.triggers is an array
+  ✓ [town-traincar-east].a.triggers not empty (paired)
+  ✓ [town-traincar-east].a.spawn.tx numeric
+  ✓ [town-traincar-east].b endpoint present
+  ✓ [town-traincar-east].b.scene names a scene
+  ✓ [town-traincar-east].b.triggers is an array
+  ✓ [town-traincar-east].b.triggers not empty (paired)
+  ✓ [town-traincar-east].b.spawn.tx numeric
+  ✓ [12] record is an object
+  ✓ [12] has a non-empty id
+  ✓ [town-woods-north] one_way absent or true
+  ✓ [town-woods-north].a endpoint present
+  ✓ [town-woods-north].a.scene names a scene
+  ✓ [town-woods-north].a.triggers is an array
+  ✓ [town-woods-north].a.triggers not empty (paired)
+  ✓ [town-woods-north].a.spawn.tx numeric
+  ✓ [town-woods-north].b endpoint present
+  ✓ [town-woods-north].b.scene names a scene
+  ✓ [town-woods-north].b.triggers is an array
+  ✓ [town-woods-north].b.triggers not empty (paired)
+  ✓ [town-woods-north].b.spawn.tx numeric
+  ✓ [13] record is an object
+  ✓ [13] has a non-empty id
+  ✓ [traincar-oej-entrance] one_way absent or true
+  ✓ [traincar-oej-entrance].a endpoint present
+  ✓ [traincar-oej-entrance].a.scene names a scene
+  ✓ [traincar-oej-entrance].a.triggers is an array
+  ✓ [traincar-oej-entrance].a.triggers not empty (paired)
+  ✓ [traincar-oej-entrance].a.spawn.tx numeric
+  ✓ [traincar-oej-entrance].b endpoint present
+  ✓ [traincar-oej-entrance].b.scene names a scene
+  ✓ [traincar-oej-entrance].b.triggers is an array
+  ✓ [traincar-oej-entrance].b.triggers not empty (paired)
+  ✓ [traincar-oej-entrance].b.spawn.tx numeric
+  ✓ [14] record is an object
+  ✓ [14] has a non-empty id
+  ✓ [woods-redroom-dream] one_way absent or true
+  ✓ [woods-redroom-dream].a endpoint present
+  ✓ [woods-redroom-dream].a.scene names a scene
+  ✓ [woods-redroom-dream].a.triggers is an array
+  ✓ [woods-redroom-dream].a one-way source: triggers, no spawn
+  ✓ [woods-redroom-dream].b endpoint present
+  ✓ [woods-redroom-dream].b.scene names a scene
+  ✓ [woods-redroom-dream].b.triggers is an array
+  ✓ [woods-redroom-dream].b.triggers not empty (paired)
+  ✓ [woods-redroom-dream].b one-way arrival: no triggers
+  ✓ [woods-redroom-dream].b.spawn.tx numeric
+  ✓ registry has records (15)
+[gen-world-data] wrote js/world-connections.gen.js (15 records, version 1)

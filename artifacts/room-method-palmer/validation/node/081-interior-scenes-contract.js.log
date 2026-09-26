@@ -1,0 +1,7 @@
+  ok - the Double R paints the pinned 4035 draw calls, unchanged
+  ok - a registered room is drawn by its own arrangement, in its own material
+  ok - and can letter Q, Z, J, V and the digits the town font never had
+  ok - after which the Double R still paints exactly as before (monogram, lettering and material did not leak)
+  ok - nobody can register over the Double R
+
+INTERIOR-SCENES-PASS 5 checks
