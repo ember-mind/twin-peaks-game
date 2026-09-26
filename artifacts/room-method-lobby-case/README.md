@@ -2,6 +2,10 @@
 
 [ELI17 walkthrough and evidence](../../reports/room-method-lobby-case-01.md) · [Visual comparison](index.html)
 
+[Bear & Crow workshop post: Our hotel had everything](../../reports/bear-and-crow-room-repair-post.md) — reader-facing story and a practical room-repair exercise. The original evidence report remains separate.
+
+Post uses the existing studio roles: patient polar Bear builds; black Crow brings discoveries and ideas. Their exchanges are editorial fiction, not game canon or playtest quotes. `bear-crow-workshop-header.png` is an unchanged copy of the existing `bear-crow-header-x.png` studio artwork; SHA-256 `29f7e7c4521034e732faf8cec25db6c233e11fd0a0b46c62b13c4f4b96d74985`. No new raster artwork was generated.
+
 This is a reconstruction of three existing historical revisions, not a fresh art candidate. Current production and Double R remain untouched.
 
 1. `00-baseline-entry.png`: flawed arrival/reception relationships (`3929eca`).
