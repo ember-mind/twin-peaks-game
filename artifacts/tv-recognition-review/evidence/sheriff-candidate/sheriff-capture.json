@@ -1,0 +1,55 @@
+{
+  "source": "index.html via existing act-4-playthrough-probe.html",
+  "camera": "production camera; diagnostic placements, not proved entry routes",
+  "timing": "900ms settle; ambient phase is not frozen; no temporal claims",
+  "records": [
+    {
+      "id": "sheriff",
+      "label": "sheriff-candidate",
+      "seed": "ACT1_TOWN",
+      "sourceCommit": "cfdc0c7e236759e4076ad92d49d9ad3977483496",
+      "file": "sheriff-candidate/sheriff.png",
+      "sha256": "2fcdf70b75c140b41dc0277db3ee57483f45b10837f190886a2edcf320580d61",
+      "capturedAt": "2026-10-02T19:44:58.853Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "sheriff",
+      "dialogueOpen": false,
+      "player": {
+        "x": 7,
+        "y": 10,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "andy",
+          "x": 10,
+          "y": 7
+        },
+        {
+          "id": "hawk",
+          "x": 12,
+          "y": 8
+        },
+        {
+          "id": "lucy",
+          "x": 2,
+          "y": 6
+        },
+        {
+          "id": "truman",
+          "x": 10,
+          "y": 4
+        }
+      ]
+    }
+  ]
+}

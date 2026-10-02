@@ -1,0 +1,40 @@
+{
+  "source": "index.html via existing act-4-playthrough-probe.html",
+  "camera": "production camera; diagnostic placements, not proved entry routes",
+  "timing": "900ms settle; ambient phase is not frozen; no temporal claims",
+  "records": [
+    {
+      "id": "palmer-day",
+      "label": "palmer-candidate",
+      "seed": "ACT1_TOWN",
+      "sourceCommit": "9ef70a4ccb370d97765d3b02cdba324aa6880813",
+      "file": "palmer-candidate/palmer-day.png",
+      "sha256": "3393fa0368bb66bf3df66fbb38dedc5e69550ce0103b3b2fe54c0bdf77581f45",
+      "capturedAt": "2026-10-02T19:44:14.021Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "palmer",
+      "dialogueOpen": false,
+      "player": {
+        "x": 7,
+        "y": 10,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "sarah",
+          "x": 9,
+          "y": 7
+        }
+      ]
+    }
+  ]
+}

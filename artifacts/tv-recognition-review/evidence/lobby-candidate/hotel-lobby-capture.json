@@ -1,0 +1,46 @@
+{
+  "source": "index.html via existing act-4-playthrough-probe.html",
+  "camera": "production camera; diagnostic placements, not proved entry routes",
+  "timing": "900ms settle; ambient phase is not frozen; no temporal claims",
+  "records": [
+    {
+      "id": "hotel-lobby",
+      "label": "lobby-candidate",
+      "seed": "ACT2_DAY2",
+      "sourceCommit": "9ad365e2f7ce5de928f51c21e231e9c68d9d607a",
+      "file": "lobby-candidate/hotel-lobby.png",
+      "sha256": "75e207305bc60bcae7f65fc6873dacc6013a163dd20b0a20083917dde9209eef",
+      "capturedAt": "2026-10-02T19:45:17.851Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "hotel_gn",
+      "dialogueOpen": false,
+      "player": {
+        "x": 9,
+        "y": 10,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true,
+        "sogno_fatto": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "audrey",
+          "x": 15,
+          "y": 9
+        },
+        {
+          "id": "benhorne",
+          "x": 12,
+          "y": 7
+        }
+      ]
+    }
+  ]
+}

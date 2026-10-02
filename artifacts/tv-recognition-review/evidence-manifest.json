@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 1,
+  "slug": "tv-recognition",
+  "generatedAt": "2026-10-02T21:47:12.178Z",
+  "files": [
+    {
+      "path": "evidence/capture-index.json",
+      "bytes": 16753,
+      "sha256": "3f58ba997141ff4ef975ff0c8f01f2c9858574450b95afc5e1d103241ab8eaec"
+    },
+    {
+      "path": "evidence/cast-continuity.log",
+      "bytes": 10354,
+      "sha256": "1f6f583e3d0c7a0a293804d71e2f9bc6b86270c0b1840cab199454de89d74a93"
+    },
+    {
+      "path": "evidence/diner-candidate/diner-capture.json",
+      "bytes": 1228,
+      "sha256": "34ed4df926ef2c61b8caa7bf45152f42c6bda4577cd8529df06393cf6bd4a45b"
+    },
+    {
+      "path": "evidence/diner-candidate/diner.png",
+      "bytes": 23442,
+      "sha256": "fd6d06603c5f708998cf86650832a483a87886fa35ac954d659f3e20dc68bc62"
+    },
+    {
+      "path": "evidence/lobby-candidate/hotel-lobby-capture.json",
+      "bytes": 1195,
+      "sha256": "975d58c9901e8f867abb04f34ce355fb49a53a527b4578986ccd046a2e17539d"
+    },
+    {
+      "path": "evidence/lobby-candidate/hotel-lobby.png",
+      "bytes": 13510,
+      "sha256": "75e207305bc60bcae7f65fc6873dacc6013a163dd20b0a20083917dde9209eef"
+    },
+    {
+      "path": "evidence/main/all-capture.json",
+      "bytes": 12931,
+      "sha256": "f00afedff19f1fec0a498439915de0c4829cef7f6588d318b803c77076e23fa5"
+    },
+    {
+      "path": "evidence/main/diner.png",
+      "bytes": 23560,
+      "sha256": "2a8493ce91e03b1c7be2c8efd6050460af35200cd7e6dbf2701b0d277627c03e"
+    },
+    {
+      "path": "evidence/main/double-r-exterior.png",
+      "bytes": 72316,
+      "sha256": "1e136f1dc1d265d88e83d7f632f938dbac4e52c8e34e789ca944903c161d64a6"
+    },
+    {
+      "path": "evidence/main/great-northern-exterior.png",
+      "bytes": 120532,
+      "sha256": "efb2583a3f1763e9fed27104e5c8d110a275885cae0c42ebd8bf6cc4f73eb358"
+    },
+    {
+      "path": "evidence/main/grove.png",
+      "bytes": 80861,
+      "sha256": "912f0d6feb28b4dd8c847a60fe8284ae5c61ba997c5251c1e7658a2417c43d8a"
+    },
+    {
+      "path": "evidence/main/hotel-lobby.png",
+      "bytes": 12972,
+      "sha256": "a6dfe23fa7736ece60cc2884b3ae009eb561be134c4428551c5db0e1a6c10423"
+    },
+    {
+      "path": "evidence/main/oej.png",
+      "bytes": 16737,
+      "sha256": "8c17e24de05eb8ea1e07613bef67eaa22135c5ab7fe6946720c659a7413d0b2f"
+    },
+    {
+      "path": "evidence/main/palmer-day.png",
+      "bytes": 11222,
+      "sha256": "f6695bfd5653813c4dc847e7f47ba1e1e51f6d552844f0ca48d26ddf7ee6a9d5"
+    },
+    {
+      "path": "evidence/main/palmer-evening.png",
+      "bytes": 11222,
+      "sha256": "f6695bfd5653813c4dc847e7f47ba1e1e51f6d552844f0ca48d26ddf7ee6a9d5"
+    },
+    {
+      "path": "evidence/main/redroom.png",
+      "bytes": 14267,
+      "sha256": "d1dc269522a1869c58504d19b4bd0200e9edbc88e1fa1f4d402d11a06c35ba17"
+    },
+    {
+      "path": "evidence/main/roadhouse.png",
+      "bytes": 23484,
+      "sha256": "75924eff67ada7200802f0dcd1346c821dd0ffcfd61671dc72b3b493bcdbf0ae"
+    },
+    {
+      "path": "evidence/main/room-315-capture.json",
+      "bytes": 1060,
+      "sha256": "e82ab358683d28840047e67682ca667702355d7a67da88310a582951f2ab202f"
+    },
+    {
+      "path": "evidence/main/room-315.png",
+      "bytes": 6863,
+      "sha256": "ba57a088d8d067c7ccf4f91a4a94b030f9117746db065bdf43d0d9eef2e6a7fd"
+    },
+    {
+      "path": "evidence/main/sheriff-exterior.png",
+      "bytes": 71008,
+      "sha256": "832244a580c659316120cfdb1f238fab9ad84fa60ef2b819f28086ad39628996"
+    },
+    {
+      "path": "evidence/main/sheriff.png",
+      "bytes": 11105,
+      "sha256": "bf5d739dec639bbbabf2a6322aaaa679945743f87ada648e99fedeb81f611e7e"
+    },
+    {
+      "path": "evidence/no-production-diff.json",
+      "bytes": 318,
+      "sha256": "2772b9ad49fb060f9b8b3e15b2a32768ae7098973191c48fa5bafa2a13188161"
+    },
+    {
+      "path": "evidence/palmer-candidate/palmer-day-capture.json",
+      "bytes": 1077,
+      "sha256": "da0bb4ae769a3b9bec4403d0d8cca28095830a3e984c76c60b176cf6ed40edb5"
+    },
+    {
+      "path": "evidence/palmer-candidate/palmer-day.png",
+      "bytes": 11504,
+      "sha256": "3393fa0368bb66bf3df66fbb38dedc5e69550ce0103b3b2fe54c0bdf77581f45"
+    },
+    {
+      "path": "evidence/reference/double-r-pilot-exterior.jpg",
+      "bytes": 79209,
+      "sha256": "cab5b82f0633c273fc1c91d211c0e6a44952541c4e53cb793778c42c93bd56cd"
+    },
+    {
+      "path": "evidence/reference/double-r-set.jpg",
+      "bytes": 242879,
+      "sha256": "631b6c68505793f0ff5ec56827d969909f1b92cc64b39a07351c69336c99489e"
+    },
+    {
+      "path": "evidence/reference/grove-s2e22.jpg",
+      "bytes": 130670,
+      "sha256": "0b07bd7f9e3ced13a532df984df1dfdb54380b25bafb7884772a12a0d7caff78"
+    },
+    {
+      "path": "evidence/reference/hoover-original-sets.jpg",
+      "bytes": 1590717,
+      "sha256": "820e6e3f4443c84b523d7a0fbeed6acff7417246daf2117974ebcf03b02fef3f"
+    },
+    {
+      "path": "evidence/reference/hotel-fireplace.jpg",
+      "bytes": 139878,
+      "sha256": "8558b2131997b8fcfcfef2d90fed00f07b10aff1c6f2d0c10d0dc9535d4be26c"
+    },
+    {
+      "path": "evidence/reference/hotel-pilot-exterior.jpg",
+      "bytes": 93098,
+      "sha256": "7f5504d614d5f2b51b0d84ce294b7206cc0a5ca7d85e90815928a88b75605990"
+    },
+    {
+      "path": "evidence/reference/hotel-reception.jpg",
+      "bytes": 203871,
+      "sha256": "540115249b23278b5970f3a1b56e7e3682ff39e5f43778b4380a0e602633572a"
+    },
+    {
+      "path": "evidence/reference/oej-bar.jpg",
+      "bytes": 66917,
+      "sha256": "3cb2383a6b60fb3ee2111e9a443c572a6d836eee50627cac0fb2b2547e63402b"
+    },
+    {
+      "path": "evidence/reference/oej-casino.jpg",
+      "bytes": 70077,
+      "sha256": "ecc7f3acadd20ffcecf8953531b7cf3ae492de2eb0b417ca5cf61fc6d546417d"
+    },
+    {
+      "path": "evidence/reference/palmer-pilot-portrait.jpg",
+      "bytes": 47200,
+      "sha256": "8d81f8adade16f7deb4be9166a784662aaa30eb7dfbb991e2f71a40c64f27d35"
+    },
+    {
+      "path": "evidence/reference/palmer-pilot-reverse.jpg",
+      "bytes": 51413,
+      "sha256": "a6d417cb69de61fe22589aae344f0429c8fcf504440cdd63b968898fb21c5d7e"
+    },
+    {
+      "path": "evidence/reference/palmer-pilot-room.jpg",
+      "bytes": 72828,
+      "sha256": "6061faa7bb2e17cc5ebd216aa92c2fe26be4b24a416008695bce87a1ea2ee2a1"
+    },
+    {
+      "path": "evidence/reference/redroom-broadcast.jpg",
+      "bytes": 48980,
+      "sha256": "fcfd2ffafa542ef99507b17d63fabd5b5473a7ae0829c38558ad1d61823a65a7"
+    },
+    {
+      "path": "evidence/reference/roadhouse-set.jpg",
+      "bytes": 142654,
+      "sha256": "f29118705500dbce7c48383334cecb554547fee18385578c90d11d992e04054d"
+    },
+    {
+      "path": "evidence/reference/room315-broadcast.jpg",
+      "bytes": 45201,
+      "sha256": "de7b2684af82a3964687543aed42d72fa2d7ede135dd986f0a52103f5c048425"
+    },
+    {
+      "path": "evidence/reference/sheriff-pilot-exterior.jpg",
+      "bytes": 104798,
+      "sha256": "f6cc0e376f5dc8b864f2543f84bbab194245469cea7874f2438b4774ff9255ec"
+    },
+    {
+      "path": "evidence/reference/sheriff-reception.jpg",
+      "bytes": 98102,
+      "sha256": "525bcc0c1dfa71f980820ab5f26bf9e9528cfd07a794e3efa6ae8c400a7208d4"
+    },
+    {
+      "path": "evidence/reviews/final-report-review.md",
+      "bytes": 1581,
+      "sha256": "822ff9be46ac47fe04e0eea7ebc3a4bb98cb46c844ab4ed0978bf50d2e34a369"
+    },
+    {
+      "path": "evidence/reviews/r1a-interiors.md",
+      "bytes": 6471,
+      "sha256": "cf31c1523a2704c4e47c952d01e4ef2e00be6bb677c070c638900afa5509faef"
+    },
+    {
+      "path": "evidence/reviews/r1b-interiors.md",
+      "bytes": 6017,
+      "sha256": "fd4ca562007905e4222c2144847ea0a183d1fdcc0fcf16ca1f2e8a8bea546f65"
+    },
+    {
+      "path": "evidence/reviews/r2-integrated.md",
+      "bytes": 8753,
+      "sha256": "44917df7be4d4e715a1855ec8b35cdf22c928fdc350417a5884dcc7e5b8417c4"
+    },
+    {
+      "path": "evidence/sheriff-candidate/sheriff-capture.json",
+      "bytes": 1318,
+      "sha256": "1885d3f19c05be88beaf50322c1be0bd42fb5b421cb680ac255e011214947c50"
+    },
+    {
+      "path": "evidence/sheriff-candidate/sheriff.png",
+      "bytes": 10859,
+      "sha256": "2fcdf70b75c140b41dc0277db3ee57483f45b10837f190886a2edcf320580d61"
+    },
+    {
+      "path": "evidence/smoke.log",
+      "bytes": 21824,
+      "sha256": "bbe3c04914ca03f2fe7316f7e528df11f808aa2912ca2f9b490fdbe76243bafa"
+    },
+    {
+      "path": "evidence/source-correction/salish-audrey-pilot-original.jpg",
+      "bytes": 88228,
+      "sha256": "400a03b773a3299fb5ac52eef335a0df24a5682af996f5716c6338915d3124a0"
+    },
+    {
+      "path": "evidence/world-door-equality.log",
+      "bytes": 3422,
+      "sha256": "18512bc1eb79e82942f35d978b3bc82b7dc07851b700ade84fe5bf8c9673e3f9"
+    }
+  ],
+  "duplicateHashes": [
+    {
+      "sha256": "f6695bfd5653813c4dc847e7f47ba1e1e51f6d552844f0ca48d26ddf7ee6a9d5",
+      "paths": [
+        "evidence/main/palmer-day.png",
+        "evidence/main/palmer-evening.png"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "status": "fail",
+  "phase": "baseline",
+  "contractPath": "/Users/ebuccelli/Code/solo/projects/twin-peaks-game/.worktrees/tv-recognition-audit/.gauntlet/tv-recognition/contract.json",
+  "errors": [
+    "duplicate_evidence_hashes"
+  ]
+}

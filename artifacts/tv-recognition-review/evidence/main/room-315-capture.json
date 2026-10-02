@@ -1,0 +1,37 @@
+{
+  "source": "index.html via existing act-4-playthrough-probe.html",
+  "camera": "production camera; diagnostic placements, not proved entry routes",
+  "timing": "900ms settle; ambient phase is not frozen; no temporal claims",
+  "records": [
+    {
+      "id": "room-315",
+      "label": "main",
+      "seed": "ACT2_DAY2",
+      "sourceCommit": "7a3de3fd249cc908756a269e116c597bc82f1767",
+      "file": "main/room-315.png",
+      "sha256": "ba57a088d8d067c7ccf4f91a4a94b030f9117746db065bdf43d0d9eef2e6a7fd",
+      "capturedAt": "2026-10-02T19:42:09.089Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "room_315",
+      "dialogueOpen": false,
+      "player": {
+        "x": 7,
+        "y": 10,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true,
+        "sogno_fatto": true,
+        "intro_hotel": true,
+        "done_hotel_risveglio": true
+      },
+      "narrativeTest": false,
+      "actors": []
+    }
+  ]
+}

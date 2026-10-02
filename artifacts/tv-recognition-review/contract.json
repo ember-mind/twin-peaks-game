@@ -1,0 +1,536 @@
+{
+  "schemaVersion": 1,
+  "slug": "tv-recognition",
+  "mode": "audit",
+  "status": "audit_complete",
+  "createdAt": "2026-10-02T14:50:38.958Z",
+  "updatedAt": "2026-10-02T21:45:36.281Z",
+  "goal": "Audit recognizability of classic Twin Peaks locations in current game, with independent Luna reviewers and verifiable visual evidence",
+  "domain": "visual-games",
+  "externalBar": "Original television frames and Richard Hoover production-design photographs; pixel-art briefs are secondary, not television evidence",
+  "hardFloor": 8,
+  "scope": {
+    "included": [
+      "Double R interno",
+      "Sheriff interno",
+      "Palmer soggiorno",
+      "Great Northern lobby",
+      "Camera 315",
+      "Red Room",
+      "One Eyed Jacks",
+      "Roadhouse",
+      "Double R esterno",
+      "Sheriff esterno",
+      "Great Northern esterno",
+      "Glastonbury Grove"
+    ],
+    "excluded": [
+      "Portrait likeness",
+      "Animation/audio/timing",
+      "Human recognition experiment",
+      "Hospital/traincar/other generic sites without a collected reference",
+      "Uncommitted working checkout",
+      "Deployed build identity"
+    ],
+    "immutable": [
+      "All production/game art/map/cast/state files",
+      "No art fixes authorized in this review"
+    ],
+    "platforms": [
+      "Production canvas 256x192, desktop; native and integer zoom"
+    ]
+  },
+  "referencePack": {
+    "reconstructed": true,
+    "sources": [
+      {
+        "id": "hoover",
+        "url": "https://www.richardhooverdesign.com/twinpeaks",
+        "type": "Original S1/S2 production designer set photographs",
+        "local": "evidence/reference/hoover-original-sets.jpg"
+      },
+      {
+        "id": "palmer",
+        "url": "https://twinpeaksblog.com/2020/02/24/then-and-now-the-palmer-house-interiors-in-september-2019/",
+        "type": "Pilot broadcast frames; later location photos explicitly excluded"
+      },
+      {
+        "id": "redroom",
+        "url": "https://bluerosearchive.com/analysis/red-room/",
+        "type": "Published broadcast furnishing frame; exact episode not independently established"
+      },
+      {
+        "id": "room315",
+        "url": "https://talkfilmsociety.com/television/twin-peaks-rewatch-project-season-2-episode-1-to-episode-5",
+        "type": "S2 opening broadcast frame; low camera, geometry partial"
+      },
+      {
+        "id": "oej",
+        "url": "https://twinpeaksblog.com/2018/07/01/twin-peaks-location-one-eyed-jacks/",
+        "type": "Episode-attributed broadcast frame comparisons"
+      },
+      {
+        "id": "double-r-exterior",
+        "url": "https://twinpeaksblog.com/2018/04/29/setting-the-stage-double-r-diner-exterior/",
+        "type": "Pilot broadcast exterior"
+      },
+      {
+        "id": "sheriff-exterior",
+        "url": "https://twinpeaksblog.com/2018/04/20/setting-the-stage-twin-peaks-sheriffs-department-exterior-season-1/",
+        "type": "Pilot broadcast exterior"
+      },
+      {
+        "id": "great-northern-exterior",
+        "url": "https://twinpeaksblog.com/2018/06/07/setting-the-stage-the-great-northern-hotel-exteriors/",
+        "type": "Verified Pilot establishing frame"
+      },
+      {
+        "id": "grove",
+        "url": "https://twinpeaksblog.com/2020/01/13/twin-peaks-film-location-complete-guide-to-glastonbury-grove/",
+        "type": "S2E22 broadcast morning frame"
+      }
+    ],
+    "measurements": [
+      {
+        "nativeCanvas": [
+          256,
+          192
+        ],
+        "tile": 16,
+        "sourceCommit": "7a3de3fd249cc908756a269e116c597bc82f1767",
+        "referenceBrowserViewport": [
+          1280,
+          720
+        ]
+      },
+      {
+        "id": "identity-grammar",
+        "criterion": "Distinctive big shapes, materials/color relations, object relations, recognizable motifs; no penalty for honest top-down compression"
+      },
+      {
+        "id": "no-label-credit",
+        "criterion": "Review asks what remains identifiable when ignoring text labels and character identities; NOT a blind human test"
+      }
+    ]
+  },
+  "evidenceProtocol": {
+    "stable": true,
+    "representativeStates": [
+      "ACT1_TOWN",
+      "ACT2_DAY2",
+      "ACT3_OEJ",
+      "ACT4_EVENING_GATHERING",
+      "ACT4_AFTERNOON",
+      "ACT5_THRESHOLD"
+    ],
+    "commands": [
+      "node tools/capture-tv-recognition.js",
+      "node tools/capture-tv-recognition.js . main room-315"
+    ],
+    "artifactTypes": [
+      "Unmodified production-canvas PNG",
+      "Reference browser JPEG",
+      "Capture provenance JSON",
+      "Independent reviewer Markdown"
+    ],
+    "fixedConditions": {
+      "canvas": [
+        256,
+        192
+      ],
+      "seedSource": "test/fixtures/cast-pins-acts-1-4.json",
+      "camera": "Canonical entrance/spawn where defined; explicit audit setup, not walked entry",
+      "boot": "Fresh production index.html per scene via existing A4 probe",
+      "settleMs": 900,
+      "timing": "Ambient phase not frozen; only static spatial findings"
+    },
+    "hashManifest": ".gauntlet/tv-recognition/evidence-manifest.json",
+    "duplicateException": "Palmer ACT1_TOWN and ACT4_AFTERNOON PNGs byte-identical. Honest retained diagnostic finding, not independent visual evidence. Generic baseline/release duplicate heuristic fails as expected."
+  },
+  "inventory": [
+    {
+      "id": "diner",
+      "unit": "Double R interno",
+      "bar": "Recognizable classic-series environment grammar using cited real set/frame evidence, without relying solely on label",
+      "floor": 8,
+      "status": "below_floor",
+      "baselineEvidence": [
+        "evidence/main/diner.png"
+      ],
+      "baselineScore": 7,
+      "currentEvidence": [
+        "evidence/main/diner.png"
+      ],
+      "score": 7,
+      "criticVerdict": "BAR_WINS",
+      "reviewEvidence": [
+        "evidence/reviews/r2-integrated.md"
+      ],
+      "note": "Audit only, no room build iteration. Final independent R2 identity score; see report for R1 disagreement and confidence."
+    },
+    {
+      "id": "sheriff",
+      "unit": "Sheriff interno",
+      "bar": "Recognizable classic-series environment grammar using cited real set/frame evidence, without relying solely on label",
+      "floor": 8,
+      "status": "below_floor",
+      "baselineEvidence": [
+        "evidence/main/sheriff.png"
+      ],
+      "baselineScore": 5.5,
+      "currentEvidence": [
+        "evidence/main/sheriff.png"
+      ],
+      "score": 5.5,
+      "criticVerdict": "BAR_WINS",
+      "reviewEvidence": [
+        "evidence/reviews/r2-integrated.md"
+      ],
+      "note": "Audit only, no room build iteration. Final independent R2 identity score; see report for R1 disagreement and confidence."
+    },
+    {
+      "id": "palmer-day",
+      "unit": "Palmer soggiorno",
+      "bar": "Recognizable classic-series environment grammar using cited real set/frame evidence, without relying solely on label",
+      "floor": 8,
+      "status": "below_floor",
+      "baselineEvidence": [
+        "evidence/main/palmer-day.png"
+      ],
+      "baselineScore": 4.5,
+      "currentEvidence": [
+        "evidence/main/palmer-day.png"
+      ],
+      "score": 4.5,
+      "criticVerdict": "BAR_WINS",
+      "reviewEvidence": [
+        "evidence/reviews/r2-integrated.md"
+      ],
+      "note": "Audit only, no room build iteration. Final independent R2 identity score; see report for R1 disagreement and confidence."
+    },
+    {
+      "id": "hotel-lobby",
+      "unit": "Great Northern lobby",
+      "bar": "Recognizable classic-series environment grammar using cited real set/frame evidence, without relying solely on label",
+      "floor": 8,
+      "status": "below_floor",
+      "baselineEvidence": [
+        "evidence/main/hotel-lobby.png"
+      ],
+      "baselineScore": 6.5,
+      "currentEvidence": [
+        "evidence/main/hotel-lobby.png"
+      ],
+      "score": 6.5,
+      "criticVerdict": "BAR_WINS",
+      "reviewEvidence": [
+        "evidence/reviews/r2-integrated.md"
+      ],
+      "note": "Audit only, no room build iteration. Final independent R2 identity score; see report for R1 disagreement and confidence."
+    },
+    {
+      "id": "room-315",
+      "unit": "Camera 315",
+      "bar": "Recognizable classic-series environment grammar using cited real set/frame evidence, without relying solely on label",
+      "floor": 8,
+      "status": "below_floor",
+      "baselineEvidence": [
+        "evidence/main/room-315.png"
+      ],
+      "baselineScore": 3.5,
+      "currentEvidence": [
+        "evidence/main/room-315.png"
+      ],
+      "score": 3.5,
+      "criticVerdict": "BAR_WINS",
+      "reviewEvidence": [
+        "evidence/reviews/r2-integrated.md"
+      ],
+      "note": "Audit only, no room build iteration. Final independent R2 identity score; see report for R1 disagreement and confidence."
+    },
+    {
+      "id": "redroom",
+      "unit": "Red Room",
+      "bar": "Recognizable classic-series environment grammar using cited real set/frame evidence, without relying solely on label",
+      "floor": 8,
+      "status": "pass",
+      "baselineEvidence": [
+        "evidence/main/redroom.png"
+      ],
+      "baselineScore": 8.5,
+      "currentEvidence": [
+        "evidence/main/redroom.png"
+      ],
+      "score": 8.5,
+      "criticVerdict": "OURS_WINS",
+      "reviewEvidence": [
+        "evidence/reviews/r2-integrated.md"
+      ],
+      "note": "Audit only, no room build iteration. Final independent R2 identity score; see report for R1 disagreement and confidence."
+    },
+    {
+      "id": "oej",
+      "unit": "One Eyed Jacks",
+      "bar": "Recognizable classic-series environment grammar using cited real set/frame evidence, without relying solely on label",
+      "floor": 8,
+      "status": "below_floor",
+      "baselineEvidence": [
+        "evidence/main/oej.png"
+      ],
+      "baselineScore": 6.5,
+      "currentEvidence": [
+        "evidence/main/oej.png"
+      ],
+      "score": 6.5,
+      "criticVerdict": "BAR_WINS",
+      "reviewEvidence": [
+        "evidence/reviews/r2-integrated.md"
+      ],
+      "note": "Audit only, no room build iteration. Final independent R2 identity score; see report for R1 disagreement and confidence."
+    },
+    {
+      "id": "roadhouse",
+      "unit": "Roadhouse",
+      "bar": "Recognizable classic-series environment grammar using cited real set/frame evidence, without relying solely on label",
+      "floor": 8,
+      "status": "below_floor",
+      "baselineEvidence": [
+        "evidence/main/roadhouse.png"
+      ],
+      "baselineScore": 5.5,
+      "currentEvidence": [
+        "evidence/main/roadhouse.png"
+      ],
+      "score": 5.5,
+      "criticVerdict": "BAR_WINS",
+      "reviewEvidence": [
+        "evidence/reviews/r2-integrated.md"
+      ],
+      "note": "Audit only, no room build iteration. Final independent R2 identity score; see report for R1 disagreement and confidence."
+    },
+    {
+      "id": "double-r-exterior",
+      "unit": "Double R esterno",
+      "bar": "Recognizable classic-series environment grammar using cited real set/frame evidence, without relying solely on label",
+      "floor": 8,
+      "status": "below_floor",
+      "baselineEvidence": [
+        "evidence/main/double-r-exterior.png"
+      ],
+      "baselineScore": 6.5,
+      "currentEvidence": [
+        "evidence/main/double-r-exterior.png"
+      ],
+      "score": 6.5,
+      "criticVerdict": "BAR_WINS",
+      "reviewEvidence": [
+        "evidence/reviews/r2-integrated.md"
+      ],
+      "note": "Audit only, no room build iteration. Final independent R2 identity score; see report for R1 disagreement and confidence."
+    },
+    {
+      "id": "sheriff-exterior",
+      "unit": "Sheriff esterno",
+      "bar": "Recognizable classic-series environment grammar using cited real set/frame evidence, without relying solely on label",
+      "floor": 8,
+      "status": "below_floor",
+      "baselineEvidence": [
+        "evidence/main/sheriff-exterior.png"
+      ],
+      "baselineScore": 5.5,
+      "currentEvidence": [
+        "evidence/main/sheriff-exterior.png"
+      ],
+      "score": 5.5,
+      "criticVerdict": "BAR_WINS",
+      "reviewEvidence": [
+        "evidence/reviews/r2-integrated.md"
+      ],
+      "note": "Audit only, no room build iteration. Final independent R2 identity score; see report for R1 disagreement and confidence."
+    },
+    {
+      "id": "great-northern-exterior",
+      "unit": "Great Northern esterno",
+      "bar": "Recognizable classic-series environment grammar using cited real set/frame evidence, without relying solely on label",
+      "floor": 8,
+      "status": "below_floor",
+      "baselineEvidence": [
+        "evidence/main/great-northern-exterior.png"
+      ],
+      "baselineScore": 4,
+      "currentEvidence": [
+        "evidence/main/great-northern-exterior.png"
+      ],
+      "score": 4,
+      "criticVerdict": "BAR_WINS",
+      "reviewEvidence": [
+        "evidence/reviews/r2-integrated.md"
+      ],
+      "note": "Audit only, no room build iteration. Final independent R2 identity score; see report for R1 disagreement and confidence."
+    },
+    {
+      "id": "grove",
+      "unit": "Glastonbury Grove",
+      "bar": "Recognizable classic-series environment grammar using cited real set/frame evidence, without relying solely on label",
+      "floor": 8,
+      "status": "below_floor",
+      "baselineEvidence": [
+        "evidence/main/grove.png"
+      ],
+      "baselineScore": 6.5,
+      "currentEvidence": [
+        "evidence/main/grove.png"
+      ],
+      "score": 6.5,
+      "criticVerdict": "BAR_WINS",
+      "reviewEvidence": [
+        "evidence/reviews/r2-integrated.md"
+      ],
+      "note": "Audit only, no room build iteration. Final independent R2 identity score; see report for R1 disagreement and confidence."
+    }
+  ],
+  "regressionGates": [
+    {
+      "id": "no-production-diff",
+      "criterion": "No game, map, narrative, engine or environment.program edits",
+      "command": "git diff 7a3de3f -- js engine world narrative index.html",
+      "status": "pass",
+      "evidence": [
+        "evidence/no-production-diff.json"
+      ]
+    },
+    {
+      "id": "capture-truth",
+      "criterion": "Source commit, full 256x192 canvas, valid map/player, walkable setup, non-test production boot",
+      "command": "node tools/capture-tv-recognition.js",
+      "status": "pass",
+      "evidence": [
+        "evidence/main/all-capture.json",
+        "evidence/main/room-315-capture.json"
+      ]
+    },
+    {
+      "id": "smoke",
+      "criterion": "Existing core checks remain green",
+      "command": "node test/smoke.js",
+      "status": "pass",
+      "evidence": [
+        "evidence/smoke.log"
+      ]
+    },
+    {
+      "id": "doors",
+      "criterion": "Existing registry door equality",
+      "command": "node test/world-door-equality.js",
+      "status": "pass",
+      "evidence": [
+        "evidence/world-door-equality.log"
+      ]
+    },
+    {
+      "id": "cast",
+      "criterion": "Existing cast continuity checks; V7 has zero checks",
+      "command": "node test/cast-continuity-validate.js",
+      "status": "pass",
+      "evidence": [
+        "evidence/cast-continuity.log"
+      ]
+    }
+  ],
+  "agents": {
+    "builderCriticSeparated": true,
+    "criticFreshContext": true,
+    "builder": "None: audit only",
+    "criticModel": "gpt-6-luna",
+    "criticReasoning": "xhigh",
+    "lead": "main synthesis; no room art changes",
+    "finalReportReviewer": "tv_report_final_review (Luna xhigh, fresh)"
+  },
+  "gapQueue": [
+    {
+      "unit": "room-315",
+      "gap": "Cool dominant plane loses the supplied dark timber character; full geometry not established.",
+      "priority": "high",
+      "implementation": "not authorized"
+    },
+    {
+      "unit": "palmer-day",
+      "gap": "Sitting-group / Laura-portrait relationship and pale domestic material character weak.",
+      "priority": "high",
+      "implementation": "not authorized"
+    },
+    {
+      "unit": "great-northern-exterior",
+      "gap": "Lodge scale and cliff/waterfall relation absent from this entrance frame.",
+      "priority": "high",
+      "implementation": "not authorized"
+    },
+    {
+      "unit": "oej",
+      "gap": "Large pink field displaces dark timber / deep drapery identity.",
+      "priority": "high",
+      "implementation": "not authorized"
+    }
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "type": "audit",
+      "agents": [
+        "tv_interiors_critic_r1a",
+        "tv_interiors_critic_r1b"
+      ],
+      "buildChanges": 0,
+      "evidence": [
+        "evidence/reviews/r1a-interiors.md",
+        "evidence/reviews/r1b-interiors.md"
+      ],
+      "verdict": "BAR_WINS"
+    },
+    {
+      "round": 2,
+      "type": "integrated audit",
+      "agent": "tv_integrated_critic_r2",
+      "buildChanges": 0,
+      "evidence": [
+        "evidence/reviews/r2-integrated.md"
+      ],
+      "verdict": "BAR_WINS",
+      "corrections": [
+        "Room315 dialogue-free recapture",
+        "Verified hotel establishing frame and retracted false Kiana suspicion",
+        "Removed unsupported Room315 hearth inference"
+      ]
+    },
+    {
+      "round": 3,
+      "type": "hostile evidence/report review",
+      "agent": "tv_report_final_review",
+      "buildChanges": 0,
+      "scoreChanges": 0,
+      "evidence": [
+        "evidence/reviews/final-report-review.md"
+      ],
+      "corrections": [
+        "Palmer no night-lighting variant claimed",
+        "Room315 no inferred floor material or canonical exposure prescription"
+      ]
+    }
+  ],
+  "finalGate": {
+    "allUnitsCovered": true,
+    "hardGatesPass": true,
+    "independentVerdict": "BAR_WINS",
+    "floor": 3.5,
+    "unresolvedHighGaps": [
+      "room-315",
+      "palmer-day",
+      "great-northern-exterior",
+      "oej"
+    ],
+    "auditComplete": true,
+    "gameArtCertified": false
+  },
+  "progressSurface": ".gauntlet/tv-recognition/progress.md",
+  "stopPolicy": "Audit only: finish after independent findings and adversarial source/coverage review; do not repair game art to chase scores."
+}

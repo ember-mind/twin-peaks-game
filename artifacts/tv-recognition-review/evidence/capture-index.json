@@ -1,0 +1,695 @@
+{
+  "note": "Consolidated current native image records; Room315 recapture supersedes the original batch record. Candidate files remain separate from main.",
+  "records": [
+    {
+      "id": "diner",
+      "label": "main",
+      "seed": "ACT1_TOWN",
+      "sourceCommit": "7a3de3fd249cc908756a269e116c597bc82f1767",
+      "file": "main/diner.png",
+      "sha256": "2a8493ce91e03b1c7be2c8efd6050460af35200cd7e6dbf2701b0d277627c03e",
+      "capturedAt": "2026-10-02T17:33:48.056Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "diner",
+      "player": {
+        "x": 6,
+        "y": 8,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "loglady",
+          "x": 4,
+          "y": 5
+        },
+        {
+          "id": "norma",
+          "x": 5,
+          "y": 2
+        },
+        {
+          "id": "shelly",
+          "x": 9,
+          "y": 7
+        }
+      ]
+    },
+    {
+      "id": "sheriff",
+      "label": "main",
+      "seed": "ACT1_TOWN",
+      "sourceCommit": "7a3de3fd249cc908756a269e116c597bc82f1767",
+      "file": "main/sheriff.png",
+      "sha256": "bf5d739dec639bbbabf2a6322aaaa679945743f87ada648e99fedeb81f611e7e",
+      "capturedAt": "2026-10-02T17:33:58.224Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "sheriff",
+      "player": {
+        "x": 7,
+        "y": 10,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "andy",
+          "x": 10,
+          "y": 7
+        },
+        {
+          "id": "hawk",
+          "x": 12,
+          "y": 8
+        },
+        {
+          "id": "lucy",
+          "x": 2,
+          "y": 6
+        },
+        {
+          "id": "truman",
+          "x": 10,
+          "y": 4
+        }
+      ]
+    },
+    {
+      "id": "palmer-day",
+      "label": "main",
+      "seed": "ACT1_TOWN",
+      "sourceCommit": "7a3de3fd249cc908756a269e116c597bc82f1767",
+      "file": "main/palmer-day.png",
+      "sha256": "f6695bfd5653813c4dc847e7f47ba1e1e51f6d552844f0ca48d26ddf7ee6a9d5",
+      "capturedAt": "2026-10-02T17:34:08.491Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "palmer",
+      "player": {
+        "x": 7,
+        "y": 10,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "sarah",
+          "x": 9,
+          "y": 7
+        }
+      ]
+    },
+    {
+      "id": "hotel-lobby",
+      "label": "main",
+      "seed": "ACT2_DAY2",
+      "sourceCommit": "7a3de3fd249cc908756a269e116c597bc82f1767",
+      "file": "main/hotel-lobby.png",
+      "sha256": "a6dfe23fa7736ece60cc2884b3ae009eb561be134c4428551c5db0e1a6c10423",
+      "capturedAt": "2026-10-02T17:34:19.991Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "hotel_gn",
+      "player": {
+        "x": 9,
+        "y": 10,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true,
+        "sogno_fatto": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "audrey",
+          "x": 15,
+          "y": 9
+        },
+        {
+          "id": "benhorne",
+          "x": 12,
+          "y": 7
+        }
+      ]
+    },
+    {
+      "id": "room-315",
+      "label": "main",
+      "seed": "ACT2_DAY2",
+      "sourceCommit": "7a3de3fd249cc908756a269e116c597bc82f1767",
+      "file": "main/room-315.png",
+      "sha256": "ba57a088d8d067c7ccf4f91a4a94b030f9117746db065bdf43d0d9eef2e6a7fd",
+      "capturedAt": "2026-10-02T19:42:09.089Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "room_315",
+      "dialogueOpen": false,
+      "player": {
+        "x": 7,
+        "y": 10,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true,
+        "sogno_fatto": true,
+        "intro_hotel": true,
+        "done_hotel_risveglio": true
+      },
+      "narrativeTest": false,
+      "actors": []
+    },
+    {
+      "id": "redroom",
+      "label": "main",
+      "seed": "ACT1_TOWN",
+      "sourceCommit": "7a3de3fd249cc908756a269e116c597bc82f1767",
+      "file": "main/redroom.png",
+      "sha256": "d1dc269522a1869c58504d19b4bd0200e9edbc88e1fa1f4d402d11a06c35ba17",
+      "capturedAt": "2026-10-02T17:34:43.825Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "redroom",
+      "player": {
+        "x": 8,
+        "y": 9,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "laura",
+          "x": 11,
+          "y": 2
+        },
+        {
+          "id": "mfap",
+          "x": 8,
+          "y": 4
+        }
+      ]
+    },
+    {
+      "id": "oej",
+      "label": "main",
+      "seed": "ACT3_OEJ",
+      "sourceCommit": "7a3de3fd249cc908756a269e116c597bc82f1767",
+      "file": "main/oej.png",
+      "sha256": "8c17e24de05eb8ea1e07613bef67eaa22135c5ab7fe6946720c659a7413d0b2f",
+      "capturedAt": "2026-10-02T17:34:55.254Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "oej",
+      "player": {
+        "x": 8,
+        "y": 8,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true,
+        "sogno_fatto": true,
+        "atto3": true,
+        "vagone_scoperto": true,
+        "east_route_confirmed": true,
+        "audrey_indaga": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "jacques",
+          "x": 7,
+          "y": 5
+        },
+        {
+          "id": "audrey",
+          "x": 13,
+          "y": 7
+        },
+        {
+          "id": "hawk",
+          "x": 6,
+          "y": 8
+        }
+      ]
+    },
+    {
+      "id": "roadhouse",
+      "label": "main",
+      "seed": "ACT4_EVENING_GATHERING",
+      "sourceCommit": "7a3de3fd249cc908756a269e116c597bc82f1767",
+      "file": "main/roadhouse.png",
+      "sha256": "75924eff67ada7200802f0dcd1346c821dd0ffcfd61671dc72b3b493bcdbf0ae",
+      "capturedAt": "2026-10-02T17:35:06.625Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "roadhouse",
+      "player": {
+        "x": 7,
+        "y": 8,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true,
+        "sogno_fatto": true,
+        "atto3": true,
+        "vagone_scoperto": true,
+        "east_route_confirmed": true,
+        "audrey_indaga": true,
+        "jacques_preso": true,
+        "jacques_dead": true,
+        "gigante1": true,
+        "atto4": true,
+        "jacques_admitted_presence": true,
+        "jacques_morto": true,
+        "narrative_m8_owned": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "bobby",
+          "x": 3,
+          "y": 4
+        },
+        {
+          "id": "donna",
+          "x": 5,
+          "y": 4
+        },
+        {
+          "id": "james",
+          "x": 2,
+          "y": 4
+        },
+        {
+          "id": "loglady",
+          "x": 2,
+          "y": 6
+        },
+        {
+          "id": "norma",
+          "x": 5,
+          "y": 6
+        },
+        {
+          "id": "shelly",
+          "x": 3,
+          "y": 6
+        },
+        {
+          "id": "truman",
+          "x": 4,
+          "y": 8
+        }
+      ]
+    },
+    {
+      "id": "palmer-evening",
+      "label": "main",
+      "seed": "ACT4_AFTERNOON",
+      "sourceCommit": "7a3de3fd249cc908756a269e116c597bc82f1767",
+      "file": "main/palmer-evening.png",
+      "sha256": "f6695bfd5653813c4dc847e7f47ba1e1e51f6d552844f0ca48d26ddf7ee6a9d5",
+      "capturedAt": "2026-10-02T17:35:18.122Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "palmer",
+      "player": {
+        "x": 7,
+        "y": 10,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true,
+        "sogno_fatto": true,
+        "atto3": true,
+        "vagone_scoperto": true,
+        "east_route_confirmed": true,
+        "audrey_indaga": true,
+        "jacques_preso": true,
+        "jacques_dead": true,
+        "gigante1": true,
+        "atto4": true,
+        "jacques_admitted_presence": true,
+        "jacques_morto": true,
+        "narrative_m8_owned": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "sarah",
+          "x": 9,
+          "y": 7
+        }
+      ]
+    },
+    {
+      "id": "double-r-exterior",
+      "label": "main",
+      "seed": "ACT1_TOWN",
+      "sourceCommit": "7a3de3fd249cc908756a269e116c597bc82f1767",
+      "file": "main/double-r-exterior.png",
+      "sha256": "1e136f1dc1d265d88e83d7f632f938dbac4e52c8e34e789ca944903c161d64a6",
+      "capturedAt": "2026-10-02T17:35:28.371Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "double_r_exterior_prototype",
+      "player": {
+        "x": 6,
+        "y": 10,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true
+      },
+      "narrativeTest": false,
+      "actors": []
+    },
+    {
+      "id": "sheriff-exterior",
+      "label": "main",
+      "seed": "ACT1_TOWN",
+      "sourceCommit": "7a3de3fd249cc908756a269e116c597bc82f1767",
+      "file": "main/sheriff-exterior.png",
+      "sha256": "832244a580c659316120cfdb1f238fab9ad84fa60ef2b819f28086ad39628996",
+      "capturedAt": "2026-10-02T17:35:39.206Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "sheriffs_station_exterior",
+      "player": {
+        "x": 7,
+        "y": 10,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true
+      },
+      "narrativeTest": false,
+      "actors": []
+    },
+    {
+      "id": "great-northern-exterior",
+      "label": "main",
+      "seed": "ACT2_DAY2",
+      "sourceCommit": "7a3de3fd249cc908756a269e116c597bc82f1767",
+      "file": "main/great-northern-exterior.png",
+      "sha256": "efb2583a3f1763e9fed27104e5c8d110a275885cae0c42ebd8bf6cc4f73eb358",
+      "capturedAt": "2026-10-02T17:35:55.223Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "town",
+      "player": {
+        "x": 9,
+        "y": 8,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true,
+        "sogno_fatto": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "bobby",
+          "x": 31,
+          "y": 16
+        },
+        {
+          "id": "donna",
+          "x": 44,
+          "y": 10
+        },
+        {
+          "id": "jacoby",
+          "x": 16,
+          "y": 25
+        }
+      ]
+    },
+    {
+      "id": "grove",
+      "label": "main",
+      "seed": "ACT5_THRESHOLD",
+      "sourceCommit": "7a3de3fd249cc908756a269e116c597bc82f1767",
+      "file": "main/grove.png",
+      "sha256": "912f0d6feb28b4dd8c847a60fe8284ae5c61ba997c5251c1e7658a2417c43d8a",
+      "capturedAt": "2026-10-02T17:36:09.270Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "woods",
+      "player": {
+        "x": 13,
+        "y": 13,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true,
+        "sogno_fatto": true,
+        "atto3": true,
+        "vagone_scoperto": true,
+        "east_route_confirmed": true,
+        "audrey_indaga": true,
+        "jacques_preso": true,
+        "jacques_dead": true,
+        "gigante1": true,
+        "atto4": true,
+        "maddy_trovata": true,
+        "jacques_admitted_presence": true,
+        "atto5": true,
+        "jacques_morto": true,
+        "narrative_m8_owned": true,
+        "gigante2": true
+      },
+      "narrativeTest": false,
+      "actors": []
+    },
+    {
+      "id": "palmer-day",
+      "label": "palmer-candidate",
+      "seed": "ACT1_TOWN",
+      "sourceCommit": "9ef70a4ccb370d97765d3b02cdba324aa6880813",
+      "file": "palmer-candidate/palmer-day.png",
+      "sha256": "3393fa0368bb66bf3df66fbb38dedc5e69550ce0103b3b2fe54c0bdf77581f45",
+      "capturedAt": "2026-10-02T19:44:14.021Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "palmer",
+      "dialogueOpen": false,
+      "player": {
+        "x": 7,
+        "y": 10,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "sarah",
+          "x": 9,
+          "y": 7
+        }
+      ]
+    },
+    {
+      "id": "diner",
+      "label": "diner-candidate",
+      "seed": "ACT1_TOWN",
+      "sourceCommit": "33a45d750e813b1fa707e6a9b091acc26e92057e",
+      "file": "diner-candidate/diner.png",
+      "sha256": "fd6d06603c5f708998cf86650832a483a87886fa35ac954d659f3e20dc68bc62",
+      "capturedAt": "2026-10-02T19:44:42.939Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "diner",
+      "dialogueOpen": false,
+      "player": {
+        "x": 6,
+        "y": 8,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "loglady",
+          "x": 4,
+          "y": 5
+        },
+        {
+          "id": "norma",
+          "x": 5,
+          "y": 2
+        },
+        {
+          "id": "shelly",
+          "x": 9,
+          "y": 7
+        }
+      ]
+    },
+    {
+      "id": "sheriff",
+      "label": "sheriff-candidate",
+      "seed": "ACT1_TOWN",
+      "sourceCommit": "cfdc0c7e236759e4076ad92d49d9ad3977483496",
+      "file": "sheriff-candidate/sheriff.png",
+      "sha256": "2fcdf70b75c140b41dc0277db3ee57483f45b10837f190886a2edcf320580d61",
+      "capturedAt": "2026-10-02T19:44:58.853Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "sheriff",
+      "dialogueOpen": false,
+      "player": {
+        "x": 7,
+        "y": 10,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "andy",
+          "x": 10,
+          "y": 7
+        },
+        {
+          "id": "hawk",
+          "x": 12,
+          "y": 8
+        },
+        {
+          "id": "lucy",
+          "x": 2,
+          "y": 6
+        },
+        {
+          "id": "truman",
+          "x": 10,
+          "y": 4
+        }
+      ]
+    },
+    {
+      "id": "hotel-lobby",
+      "label": "lobby-candidate",
+      "seed": "ACT2_DAY2",
+      "sourceCommit": "9ad365e2f7ce5de928f51c21e231e9c68d9d607a",
+      "file": "lobby-candidate/hotel-lobby.png",
+      "sha256": "75e207305bc60bcae7f65fc6873dacc6013a163dd20b0a20083917dde9209eef",
+      "capturedAt": "2026-10-02T19:45:17.851Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "hotel_gn",
+      "dialogueOpen": false,
+      "player": {
+        "x": 9,
+        "y": 10,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true,
+        "sogno_fatto": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "audrey",
+          "x": 15,
+          "y": 9
+        },
+        {
+          "id": "benhorne",
+          "x": 12,
+          "y": 7
+        }
+      ]
+    }
+  ]
+}

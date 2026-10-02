@@ -1,0 +1,8 @@
+{
+  "base": "7a3de3fd249cc908756a269e116c597bc82f1767",
+  "command": "git diff 7a3de3f -- js engine world narrative index.html",
+  "exitCode": 0,
+  "stdout": "",
+  "status": "PASS",
+  "scope": "Only review report, evidence gallery and diagnostic capture helper added. Dirty primary checkout excluded and untouched."
+}

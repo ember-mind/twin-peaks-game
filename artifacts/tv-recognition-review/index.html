@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Twin Peaks — serie / gioco</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #151916; color: #e9e5d9; font: 17px/1.55 system-ui, sans-serif; }
+    main { max-width: 1280px; margin: auto; padding: 32px 24px 70px; }
+    h1 { font-size: clamp(28px, 4vw, 44px); line-height: 1.1; }
+    h2 { margin-bottom: 8px; }
+    p { max-width: 90ch; }
+    a { color: #dcc89b; }
+    nav { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 24px 0; }
+    section { border-top: 1px solid #4a5147; padding-top: 22px; margin-top: 30px; scroll-margin-top: 16px; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    figure { margin: 0; min-width: 0; }
+    .frame { height: 384px; display: flex; align-items: center; justify-content: center; background: #080a08; border: 1px solid #444b40; overflow: hidden; }
+    img.ref { max-width: 100%; max-height: 100%; object-fit: contain; }
+    img.game { width: 512px; height: 384px; max-width: 100%; object-fit: contain; image-rendering: pixelated; }
+    figcaption { margin: 8px 0 14px; font-size: 14px; color: #c9cfbd; }
+    .scores { font-size: 14px; color: #d8c498; }
+    .note { border-left: 3px solid #8c9c75; padding-left: 14px; }
+    details { margin: 16px 0; padding: 12px 16px; background: #232a22; }
+    summary { cursor: pointer; }
+    .candidate-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 24px; }
+    code { font-size: 0.9em; }
+    @media (max-width: 720px) {
+      main { padding: 20px 16px 50px; }
+      .pair, .candidate-grid { grid-template-columns: 1fr; }
+      .frame { height: auto; min-height: 192px; }
+      img.ref { max-height: 340px; }
+      img.game { width: 256px; height: 192px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Questo posto è Twin Peaks?</h1>
+  <p>Fotogrammi e fotografie dei set a sinistra. Render reali del gioco a destra. Il confronto riguarda l'identità dei luoghi, non il fotorealismo: stessa combinazione di masse, materiali e relazioni deve sopravvivere alla camera top-down.</p>
+  <p>Base: <code>main 7a3de3f</code>. Canvas 256×192, mostrato a zoom intero quando lo spazio lo consente. Posizioni diagnostiche walkable, non walkthrough. Nessuna modifica al gioco.</p>
+  <p><a href="../../reports/tv-recognition-review.md">Report completo</a> · <a href="sources.json">Fonti e versioni</a> · <a href="evidence-manifest.json">SHA-256</a></p>
+  <p class="note">Voti: identità visiva /10, Luna xhigh, non percentuale di riconoscimento umano. R1A e R1B coprono gli interni; R2 tutti i luoghi. Soglia aspirazionale 8. Nomi e personaggi non devono sostituire la somiglianza delle scene.</p>
+  <nav id="nav" aria-label="Luoghi"></nav>
+  <div id="pairs"></div>
+  <section id="candidates">
+    <h2>Candidate separate, non integrate</h2>
+    <p>Questi quattro branch non sono la base main. Il critic R2 ha confrontato il loro contributo alla riconoscibilità televisiva, non soltanto la qualità della composizione.</p>
+    <div class="candidate-grid" id="candidate-grid"></div>
+  </section>
+  <section>
+    <h2>Limiti utili</h2>
+    <p>Reception dello Sheriff non equivale alla pianta dell'intera stazione. Camera 315 ha un solo angolo basso. L'episodio della reference Red Room non è stabilito. Grove è mostrato nella serie di mattina: non penalizziamo automaticamente un diverso orario. I concept pixel-art di <code>assets/ref</code> non sono fotogrammi televisivi.</p>
+    <p>I due stati Palmer catturati sono pixel-identici: <code>ACT1_TOWN</code> e <code>ACT4_AFTERNOON</code>. Il file chiamato <code>palmer-evening.png</code> non dimostra una variante notturna.</p>
+    <p>Fotografie e fotogrammi mantengono i diritti dei rispettivi titolari. Raccolta per critica e confronto; non è un asset pack. Nessuna immagine generata.</p>
+  </section>
+</main>
+<script>
+  const hoover = 'https://www.richardhooverdesign.com/twinpeaks';
+  const palmer = 'https://twinpeaksblog.com/2020/02/24/then-and-now-the-palmer-house-interiors-in-september-2019/';
+  const oej = 'https://twinpeaksblog.com/2018/07/01/twin-peaks-location-one-eyed-jacks/';
+  const rows = [
+    {id:'redroom', name:'Red Room', ref:'redroom-broadcast.jpg', source:'https://bluerosearchive.com/analysis/red-room/', caption:'Frame pubblicato degli arredi; episodio non verificato.', scores:'9,5 / 9 / 8,5', note:'Tende, zigzag e statua chiara conservano una firma molto forte. Pass unanime. Non serve aggiungere decorazioni.'},
+    {id:'diner', name:'Double R — interno', ref:'double-r-set.jpg', source:hoover, caption:'Richard Hoover, fotografia del set S1/S2.', scores:'8,5 / 8,5 / 7', note:'Bancone, booth rossi e scacchiera funzionano insieme. Divergenza sul grado di specificità. Non spostare il bancone per imitare il primo piano fotografico.'},
+    {id:'room-315', name:'Camera 315', ref:'room315-broadcast.jpg', source:'https://talkfilmsociety.com/television/twin-peaks-rewatch-project-season-2-episode-1-to-episode-5', caption:'S2E1, inquadratura bassa: geometria parziale.', scores:'4 / 3,5 / 3,5', note:'Camera leggibile, ma grande superficie fredda domina. Prima recuperare il materiale caldo; ulteriori angoli necessari per la disposizione.'},
+    {id:'palmer-day', name:'Palmer — soggiorno', ref:'palmer-pilot-room.jpg', source:palmer, caption:'Pilot broadcast, non fotografie del tour 2019.', scores:'4,5 / 5,5 / 4,5', note:'Legno e tappeto prevalgono; relazione fra sedute, console e ritratto non emerge. Il reverse aiuta a verificare il linguaggio domestico.', extra:'palmer-pilot-reverse.jpg'},
+    {id:'hotel-lobby', name:'Great Northern — lobby', ref:'hotel-reception.jpg', source:hoover, caption:'Richard Hoover, set: check-in e camino.', scores:'6 / 7,5 / 6,5', note:'Lodge e scala si leggono. Camino e reception non hanno ancora la massa/carattere della fonte. La reception nel gioco è già sul bordo, non al centro.', extra:'hotel-fireplace.jpg'},
+    {id:'great-northern-exterior', name:'Great Northern — esterno', ref:'hotel-pilot-exterior.jpg', source:'https://twinpeaksblog.com/2018/06/07/setting-the-stage-the-great-northern-hotel-exteriors/', caption:'Pilot, establishing shot verificato.', scores:'— / — / 4', note:'La piccola facciata perde scala del lodge e relazione con cascata/dislivello. Un cartello non sostituisce questa identità paesaggistica.'},
+    {id:'oej', name:'One Eyed Jacks', ref:'oej-casino.jpg', source:oej, caption:'Episode 1.006; dettaglio bar da 1.002.', scores:'6,5 / 6,5 / 6,5', note:'Tavoli verdi e bar conservano la funzione. Campo rosa molto ampio perde profondità di legno scuro e tessuto.', extra:'oej-bar.jpg'},
+    {id:'sheriff', name:'Sheriff — interno', ref:'sheriff-reception.jpg', source:hoover, caption:'Richard Hoover: solo reception, non intera stazione.', scores:'3 / 5,5 / 5,5', note:'Ufficio leggibile, specificità della reception debole. Bassa fiducia su giudizi dell’intera stanza: ottenere altre viste prima di toccare la pianta.'},
+    {id:'roadhouse', name:'Roadhouse', ref:'roadhouse-set.jpg', source:hoover, caption:'Richard Hoover, fotografia del set.', scores:'8,5 / 7 / 5,5', note:'Palco e bar sono forti; reviewer divergono molto. Tutti notano la galleria alta mancante. Non dichiarare parity dal voto più favorevole.'},
+    {id:'double-r-exterior', name:'Double R — esterno', ref:'double-r-pilot-exterior.jpg', source:'https://twinpeaksblog.com/2018/04/29/setting-the-stage-double-r-diner-exterior/', caption:'Pilot broadcast: non facciata moderna ricostruita.', scores:'— / — / 6,5', note:'Vetrine e bordo rosso funzionano. Il segnale stradale può essere più riconoscibile nella sagoma, non soltanto nella scritta.'},
+    {id:'sheriff-exterior', name:'Sheriff — esterno', ref:'sheriff-pilot-exterior.jpg', source:'https://twinpeaksblog.com/2018/04/20/setting-the-stage-twin-peaks-sheriffs-department-exterior-season-1/', caption:'Pilot broadcast: ingresso del dipartimento.', scores:'— / — / 5,5', note:'Sagoma troppo vicina allo storefront Double R. Distinguere profondità del portico e ingresso; il cippo è indizio secondario, non una soluzione completa.'},
+    {id:'grove', name:'Glastonbury Grove', ref:'grove-s2e22.jpg', source:'https://twinpeaksblog.com/2020/01/13/twin-peaks-film-location-complete-guide-to-glastonbury-grove/', caption:'S2E22, mattina; 2022 è ID episodio, non anno.', scores:'— / — / 6,5', note:'La radura centrale funziona; anello duro e alberi generici sembrano più un altare costruito. Valutare forme naturali, non soltanto il colore giorno/notte.'}
+  ];
+  const candidates = [
+    {name:'Palmer', dir:'palmer-candidate', file:'palmer-day', commit:'9ef70a4', verdict:'R2: peggiore per fedeltà. Divano più leggibile non equivale a soggiorno del Pilot.'},
+    {name:'Double R', dir:'diner-candidate', file:'diner', commit:'33a45d7', verdict:'R2: peggiore per materiale/palette. Conserva la composizione diner; non bocciata da un solo frame.'},
+    {name:'Sheriff', dir:'sheriff-candidate', file:'sheriff', commit:'cfdc0c7', verdict:'R2: uguale per identità televisiva. Nessun nuovo indizio di reception.'},
+    {name:'Lobby', dir:'lobby-candidate', file:'hotel-lobby', commit:'9ad365e', verdict:'R2: uguale nel frame. Masse quasi invariate.'}
+  ];
+  const nav = document.getElementById('nav');
+  const pairs = document.getElementById('pairs');
+  function figure(src, klass, caption) {
+    const figure = document.createElement('figure');
+    const frame = document.createElement('div'); frame.className = 'frame';
+    const image = document.createElement('img'); image.className = klass; image.src = src; image.alt = caption;
+    const cap = document.createElement('figcaption'); cap.textContent = caption;
+    frame.append(image); figure.append(frame,cap); return figure;
+  }
+  for (const row of rows) {
+    const link = document.createElement('a'); link.href = '#'+row.id; link.textContent = row.name; nav.append(link);
+    const section = document.createElement('section'); section.id = row.id;
+    const title = document.createElement('h2'); title.textContent = row.name;
+    const score = document.createElement('p'); score.className = 'scores'; score.textContent = 'Identità /10 — R1A / R1B / R2: '+row.scores;
+    const pair = document.createElement('div'); pair.className = 'pair';
+    const ref = figure('evidence/reference/'+row.ref, 'ref', 'SERIE / SET — '+row.caption);
+    const cite = document.createElement('a'); cite.href = row.source; cite.textContent = 'Fonte e contesto'; ref.lastElementChild.append(' · ',cite);
+    pair.append(ref,figure('evidence/main/'+row.id+'.png','game','GIOCO — main 7a3de3f · 256×192'));
+    const note = document.createElement('p'); note.className = 'note'; note.textContent = row.note;
+    section.append(title,score,pair,note);
+    if (row.extra) {
+      const details = document.createElement('details'); const summary = document.createElement('summary'); summary.textContent = 'Secondo angolo della reference';
+      details.append(summary,figure('evidence/reference/'+row.extra,'ref','Reference aggiuntiva — stessa fonte')); section.append(details);
+    }
+    pairs.append(section);
+  }
+  for (const row of candidates) {
+    const block = document.createElement('article');
+    const title = document.createElement('h3'); title.textContent = row.name+' · '+row.commit;
+    const note = document.createElement('p'); note.textContent = row.verdict;
+    block.append(title,figure('evidence/'+row.dir+'/'+row.file+'.png','game','CANDIDATA NON INTEGRATA'),note);
+    document.getElementById('candidate-grid').append(block);
+  }
+</script>
+</body>
+</html>

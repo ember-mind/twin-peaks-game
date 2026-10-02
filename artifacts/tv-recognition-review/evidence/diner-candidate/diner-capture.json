@@ -1,0 +1,50 @@
+{
+  "source": "index.html via existing act-4-playthrough-probe.html",
+  "camera": "production camera; diagnostic placements, not proved entry routes",
+  "timing": "900ms settle; ambient phase is not frozen; no temporal claims",
+  "records": [
+    {
+      "id": "diner",
+      "label": "diner-candidate",
+      "seed": "ACT1_TOWN",
+      "sourceCommit": "33a45d750e813b1fa707e6a9b091acc26e92057e",
+      "file": "diner-candidate/diner.png",
+      "sha256": "fd6d06603c5f708998cf86650832a483a87886fa35ac954d659f3e20dc68bc62",
+      "capturedAt": "2026-10-02T19:44:42.939Z",
+      "placement": "explicit diagnostic loadMap at verified walkable cell",
+      "size": [
+        256,
+        192
+      ],
+      "map": "diner",
+      "dialogueOpen": false,
+      "player": {
+        "x": 6,
+        "y": 8,
+        "dir": "up"
+      },
+      "flags": {
+        "intro_town": true,
+        "done_town_arrivo": true
+      },
+      "narrativeTest": false,
+      "actors": [
+        {
+          "id": "loglady",
+          "x": 4,
+          "y": 5
+        },
+        {
+          "id": "norma",
+          "x": 5,
+          "y": 2
+        },
+        {
+          "id": "shelly",
+          "x": 9,
+          "y": 7
+        }
+      ]
+    }
+  ]
+}
